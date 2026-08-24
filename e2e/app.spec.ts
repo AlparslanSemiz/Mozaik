@@ -341,6 +341,49 @@ test.describe('4. Yazdırma', () => {
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
     expect(pdf.length).toBeGreaterThan(20_000);
   });
+
+  test('sayfa A4 YATAY basılıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
+
+    // 12 lesson columns do not fit portrait; the page must come out landscape.
+    const box = /MediaBox\s*\[\s*0(?:\.\d+)?\s+0(?:\.\d+)?\s+([\d.]+)\s+([\d.]+)/.exec(
+      pdf.toString('latin1'),
+    );
+    expect(box, 'PDF MediaBox okunamadı').not.toBeNull();
+    const [width, height] = [Number(box![1]), Number(box![2])];
+    expect(width).toBeGreaterThan(height);
+    // A4 landscape is 841.89 x 595.28 pt
+    expect(Math.round(width)).toBe(842);
+    expect(Math.round(height)).toBe(595);
+  });
+
+  test('baskı sütunları eşit ve eksen dönmüş', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.emulateMedia({ media: 'print' });
+
+    const table = page.locator('table.print').first();
+    // Row = day (full name), column = lesson
+    await expect(table.locator('tbody tr')).toHaveCount(6);
+    await expect(table.locator('tbody tr').first().locator('th')).toHaveText('Salı');
+    await expect(table.locator('tbody tr').first().locator('td')).toHaveCount(12);
+
+    // Equal columns: a filled cell used to widen its own column
+    const widths = await table.locator('tbody tr').first().locator('td').evaluateAll((cells) =>
+      cells.map((c) => c.getBoundingClientRect().width),
+    );
+    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1);
+
+    // The long break marks each row at its own lesson
+    const marks = await table.locator('tbody tr').evaluateAll((rows) =>
+      rows.map((r) => [...r.querySelectorAll('td')].findIndex((c) => c.classList.contains('p-break'))),
+    );
+    expect(marks).toEqual([4, 4, 4, 4, 5, 5]);
+
+    await page.emulateMedia({ media: 'screen' });
+  });
 });
 
 test.describe('5. Kurulum ve yedek', () => {

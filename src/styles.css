@@ -963,9 +963,27 @@ table.availability td.closed {
   font-size: 15px;
 }
 
+/* Fixed layout, or a full cell widens its own column: in the photo from the
+   real printout Tuesday was narrow and Wednesday huge. The label column is
+   fixed and the 12 lesson columns share what is left, EQUALLY. */
 table.print {
   border-collapse: collapse;
   width: 100%;
+  table-layout: fixed;
+}
+
+table.print .p-daycol {
+  width: 26mm;
+  text-align: left;
+  padding-left: 6px;
+  font-weight: 700;
+}
+
+/* The long break sits at a different lesson on every row, so it is an edge on
+   the cell it follows — the same technique as the availability grid. */
+table.print td.p-break,
+table.print th.p-break {
+  border-right: 3px solid var(--print-line);
 }
 
 table.print th,
@@ -1029,13 +1047,11 @@ table.bell-preview td {
   border-color: var(--line-dark);
 }
 
-.print-only {
-  display: none;
-}
-
 @media print {
   @page {
-    size: A4 portrait;
+    /* 12 lesson columns do not fit portrait (~15 mm each). Landscape gives
+       ~21 mm, which is what the subject short forms were sized for. */
+    size: A4 landscape;
     margin: 10mm;
   }
 
@@ -1094,6 +1110,25 @@ table.bell-preview td {
     page-break-after: always;
     break-inside: avoid;
     padding: 0;
+  }
+
+  /* 7 rows on a landscape page leave a lot of white: let the rows grow into it
+     so the timetable is readable from across the room. */
+  table.print tbody th,
+  table.print tbody td {
+    height: 20mm;
+  }
+
+  table.print .p-top {
+    font-size: 13px;
+  }
+
+  table.print .p-bottom {
+    font-size: 11px;
+  }
+
+  table.print .p-daycol {
+    font-size: 13px;
   }
 
   .print-page:last-child {

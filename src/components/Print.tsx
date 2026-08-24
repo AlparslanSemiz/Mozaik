@@ -1,11 +1,14 @@
 // Printing: ONE ENTITY PER PAGE.
 //
-// 7 days x 12 hours = 7 columns x 12 rows, which fits A4 portrait exactly.
-// Printing the 84-column main table is impossible (~3 mm per column), so it is
-// not attempted.
+// Row = day, column = lesson — the same way round as the availability grid, and
+// the way a timetable is read on a wall. 12 lesson columns do not fit A4
+// portrait (~15 mm each), so the page is LANDSCAPE: ~21 mm per column, which is
+// exactly what the subject short forms were made for.
+//
+// Printing the 84-column main table is still impossible and still not attempted.
 
 import { useMemo, useState } from 'react';
-import { dayPeriods } from '../bell';
+import { sharedPeriods } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
 import { subjectShort } from '../entities';
 import type { State } from '../types';
@@ -21,19 +24,37 @@ export default function Print({ state }: Props) {
   const [colored, setColored] = useState(true);
   const ix = useMemo(() => buildIndex(state), [state]);
 
-  // One printed page shows ONE day pattern per column, so the hour column is
-  // built from the first day. Days whose long break sits elsewhere still print
-  // the right lesson numbers; only the clock in the left column is the first
-  // day's. Shown as a range because that is what a wall timetable needs.
+  // A column header carries ONE time, but the 6th lesson starts at 13:30 on a
+  // weekday and 13:10 at the weekend. Printing one of them above both would be
+  // a lie on paper, so where the days disagree the column shows no clock; each
+  // row still marks its own long break.
   const clock = useMemo(
-    () =>
-      dayPeriods(
-        state.settings.bell,
-        state.settings.hours,
-        state.settings.days[0]?.longBreakAfter ?? 0,
-      ),
+    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
     [state.settings],
   );
+
+  /** The lesson-number header row, shared by both kinds of page. */
+  function head() {
+    return (
+      <thead>
+        <tr>
+          <th className="p-daycol">Gün</th>
+          {state.settings.hours.map((hour, s) => (
+            <th key={s}>
+              {hour}
+              <span className="p-clock">
+                {clock[s] === null ? '' : `${clock[s]?.start ?? ''}–${clock[s]?.end ?? ''}`}
+              </span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+    );
+  }
+
+  /** The long break falls at a different lesson on each row: a thick edge. */
+  const breakClass = (longBreakAfter: number, s: number): string =>
+    longBreakAfter === s + 1 ? 'p-break' : '';
 
   if (state.lessons.length === 0) {
     return (
@@ -55,7 +76,7 @@ export default function Print({ state }: Props) {
       <div className="panel no-print">
         <h2>Yazdır</h2>
         <p className="hint">
-          Her sınıf ve her öğretmen ayrı sayfaya basılır (A4 dikey). Yazdırma
+          Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
           penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
           açık</b> olsun, yoksa renkler çıkmaz.
         </p>
@@ -97,24 +118,14 @@ export default function Print({ state }: Props) {
                   ` — ${ix.roomById.get(group.roomId)?.name ?? ''} dersliği`}
               </h3>
               <table className="print">
-                <thead>
-                  <tr>
-                    <th style={{ width: 92 }}>Saat</th>
-                    {state.settings.days.map((day, i) => (
-                      <th key={i}>{day.name}</th>
-                    ))}
-                  </tr>
-                </thead>
+                {head()}
                 <tbody>
-                  {state.settings.hours.map((hour, s) => (
-                    <tr key={s}>
-                      <th>
-                        {hour}
-                        <span className="p-clock">
-                          {clock[s]?.start ?? ''}–{clock[s]?.end ?? ''}
-                        </span>
-                      </th>
-                      {state.settings.days.map((_, g) => {
+                  {state.settings.days.map((day, g) => (
+                    <tr key={g}>
+                      {/* The FULL day name: a printout on a wall is read from a
+                          distance, and abbreviations belong to narrow screens. */}
+                      <th className="p-daycol">{day.name}</th>
+                      {state.settings.hours.map((_, s) => {
                         const lessonId = state.placements[placementKey(group.id, g, s)];
                         const lesson =
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
@@ -122,7 +133,8 @@ export default function Print({ state }: Props) {
                           lesson === undefined ? undefined : ix.teacherById.get(lesson.teacherId);
                         return (
                           <td
-                            key={g}
+                            key={s}
+                            className={breakClass(day.longBreakAfter, s)}
                             style={
                               colored && teacher !== undefined
                                 ? { background: `var(--color-${teacher.color})` }
@@ -156,24 +168,12 @@ export default function Print({ state }: Props) {
                 programı
               </h3>
               <table className="print">
-                <thead>
-                  <tr>
-                    <th style={{ width: 92 }}>Saat</th>
-                    {state.settings.days.map((day, i) => (
-                      <th key={i}>{day.name}</th>
-                    ))}
-                  </tr>
-                </thead>
+                {head()}
                 <tbody>
-                  {state.settings.hours.map((hour, s) => (
-                    <tr key={s}>
-                      <th>
-                        {hour}
-                        <span className="p-clock">
-                          {clock[s]?.start ?? ''}–{clock[s]?.end ?? ''}
-                        </span>
-                      </th>
-                      {state.settings.days.map((_, g) => {
+                  {state.settings.days.map((day, g) => (
+                    <tr key={g}>
+                      <th className="p-daycol">{day.name}</th>
+                      {state.settings.hours.map((_, s) => {
                         const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
                         const lesson =
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
@@ -183,8 +183,13 @@ export default function Print({ state }: Props) {
                           state.unavailable[closedKey(teacher.id, g, s)] !== undefined;
                         return (
                           <td
-                            key={g}
-                            className={closed && group === undefined ? 'p-closed' : undefined}
+                            key={s}
+                            className={[
+                              closed && group === undefined ? 'p-closed' : '',
+                              breakClass(day.longBreakAfter, s),
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
                             style={
                               colored && group !== undefined
                                 ? { background: `var(--color-${teacher.color})` }
