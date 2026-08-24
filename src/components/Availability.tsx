@@ -11,7 +11,7 @@
 import { useRef, useState } from 'react';
 import { closedKey } from '../constraints';
 import type { Id, State } from '../types';
-import { setAvailability, setWholeWeek, shortDay } from '../entities';
+import { setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
 
 interface Props {
   state: State;
@@ -40,7 +40,7 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       id: t.id,
       label: `${t.short} — ${t.name} (${t.subject})`,
       short: t.short,
-      load: d.lessons.filter((x) => x.teacherId === t.id).reduce((n, x) => n + x.weeklyHours, 0),
+      load: weeklyLoad(d, 'teacher', t.id),
     }));
   }
   if (kind === 'class') {
@@ -48,18 +48,15 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       id: c.id,
       label: c.name,
       short: `${c.name} sınıfı`,
-      load: d.lessons.filter((x) => x.classId === c.id).reduce((n, x) => n + x.weeklyHours, 0),
+      load: weeklyLoad(d, 'class', c.id),
     }));
   }
-  return d.rooms.map((r) => {
-    const ids = new Set(d.classes.filter((c) => c.roomId === r.id).map((c) => c.id));
-    return {
-      id: r.id,
-      label: r.name,
-      short: `${r.name} dersliği`,
-      load: d.lessons.filter((x) => ids.has(x.classId)).reduce((n, x) => n + x.weeklyHours, 0),
-    };
-  });
+  return d.rooms.map((r) => ({
+    id: r.id,
+    label: r.name,
+    short: `${r.name} dersliği`,
+    load: weeklyLoad(d, 'room', r.id),
+  }));
 }
 
 const EMPTY_TEXT: Record<Kind, string> = {

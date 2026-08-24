@@ -4,7 +4,13 @@
 import { useState } from 'react';
 import { parseTeachers } from '../../import';
 import { COLOR_COUNT } from '../../types';
-import { addTeacher, deleteTeacher, setTeacherLimit, updateTeacher } from '../../entities';
+import {
+  addTeacher,
+  deleteTeacher,
+  setTeacherLimit,
+  updateTeacher,
+  weeklyLoad,
+} from '../../entities';
 import LimitBox from './LimitBox';
 import Paste from './Paste';
 import type { SetupProps } from './props';
@@ -152,11 +158,7 @@ export default function Teachers({ state, change }: SetupProps) {
                     onSet={(v) => change((d) => setTeacherLimit(d, t.id, 'minPerDay', v))}
                   />
                 </td>
-                <td>
-                  {state.lessons
-                    .filter((x) => x.teacherId === t.id)
-                    .reduce((sum, x) => sum + x.weeklyHours, 0)}
-                </td>
+                <td>{weeklyLoad(state, 'teacher', t.id)}</td>
                 <td>
                   <button
                     className="btn danger"

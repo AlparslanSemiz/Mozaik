@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { parseLessons } from '../../import';
-import { addLesson, deleteLesson, updateLesson } from '../../entities';
+import { addLesson, addLessonsFromRows, deleteLesson, updateLesson } from '../../entities';
 import LimitBox from './LimitBox';
 import Paste from './Paste';
 import type { SetupProps } from './props';
@@ -103,34 +103,13 @@ export default function Lessons({ state, change }: SetupProps) {
           }
           onAdd={(rows) =>
             change((d) => {
-              let result = d;
-              const notFound: string[] = [];
-              for (const x of rows) {
-                const group = result.classes.find(
-                  (c) => c.name.toLocaleLowerCase('tr') === x.className.toLocaleLowerCase('tr'),
-                );
-                const teacher = result.teachers.find(
-                  (t) =>
-                    t.short.toLocaleLowerCase('tr') === x.teacher.toLocaleLowerCase('tr') ||
-                    t.name.toLocaleLowerCase('tr') === x.teacher.toLocaleLowerCase('tr'),
-                );
-                if (group === undefined || teacher === undefined) {
-                  notFound.push(`${x.className} / ${x.teacher}`);
-                  continue;
-                }
-                result = addLesson(result, {
-                  classId: group.id,
-                  teacherId: teacher.id,
-                  weeklyHours: x.weeklyHours,
-                  blockSize: x.blockSize,
-                });
-              }
-              if (notFound.length > 0) {
+              const { state: next, missing } = addLessonsFromRows(d, rows);
+              if (missing.length > 0) {
                 window.alert(
-                  `Şu satırlar eklenemedi çünkü sınıf veya öğretmen bulunamadı:\n\n${notFound.join('\n')}\n\nÖnce onları ekleyip tekrar deneyin.`,
+                  `Şu satırlar eklenemedi çünkü sınıf veya öğretmen bulunamadı:\n\n${missing.join('\n')}\n\nÖnce onları ekleyip tekrar deneyin.`,
                 );
               }
-              return result;
+              return next;
             })
           }
         />

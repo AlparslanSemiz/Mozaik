@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { dayPeriods } from '../../bell';
 import { sampleState } from '../../sample';
 import type { Day } from '../../types';
-import { WEEK, hourNames, makeDay, updateBell, updateSettings } from '../../entities';
+import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import type { SetupProps } from './props';
 
 export default function School({ state, change }: SetupProps) {
@@ -15,15 +15,7 @@ export default function School({ state, change }: SetupProps) {
   const hourCount = state.settings.hours.length;
 
   function setHours(count: number, names?: string) {
-    const baseHours = Math.min(16, Math.max(1, count));
-    const hourList =
-      names !== undefined && names.trim() !== ''
-        ? names
-            .split(',')
-            .map((x) => x.trim())
-            .filter((x) => x !== '')
-        : hourNames(baseHours);
-    change((d) => updateSettings(d, { hours: hourList }));
+    change((d) => updateSettings(d, { hours: hourLabels(count, names) }));
   }
 
   /**

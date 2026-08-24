@@ -5,6 +5,9 @@
 // breaks the grid.
 
 import { closedKey, sanitize } from './constraints';
+// Type-only, erased at build time: import.ts knows nothing about State, so
+// there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
+import type { ClassRow, LessonRow } from './import';
 import type {
   Bell,
   ClassGroup,
@@ -346,4 +349,92 @@ export function allCells(d: State): Array<{ day: number; hour: number }> {
     for (let s = 0; s < d.settings.hours.length; s++) list.push({ day: g, hour: s });
   }
   return list;
+}
+
+// ------------------------------------------------------- pasted rows -> state
+//
+// These used to live inside Setup.tsx, untested. Matching a room or a teacher
+// by name is a decision about the data, not about the screen — and getting it
+// wrong silently drops rows my father pasted.
+
+const fold = (x: string): string => x.trim().toLocaleLowerCase('tr');
+
+/**
+ * Adds pasted classes, resolving the room by name. An unknown room name is
+ * CREATED: leaving the class roomless would silently disable the room clash
+ * check, and my father would never learn why two classes may share an hour.
+ */
+export function addClassesFromRows(d: State, rows: ClassRow[]): State {
+  return rows.reduce((acc, row) => {
+    if (row.roomName === '') return addClass(acc, row.name, null);
+
+    const room = acc.rooms.find((r) => fold(r.name) === fold(row.roomName));
+    if (room !== undefined) return addClass(acc, row.name, room.id);
+
+    const withRoom = addRoom(acc, row.roomName);
+    const created = withRoom.rooms[withRoom.rooms.length - 1];
+    return addClass(withRoom, row.name, created?.id ?? null);
+  }, d);
+}
+
+/**
+ * Adds pasted lessons. A teacher matches on the short form OR the full name,
+ * because a pasted list may hold either. Rows whose class or teacher is unknown
+ * are NOT guessed at — they come back in `missing` so the user is told.
+ */
+export function addLessonsFromRows(
+  d: State,
+  rows: LessonRow[],
+): { state: State; missing: string[] } {
+  let state = d;
+  const missing: string[] = [];
+
+  for (const row of rows) {
+    const group = state.classes.find((c) => fold(c.name) === fold(row.className));
+    const teacher = state.teachers.find(
+      (t) => fold(t.short) === fold(row.teacher) || fold(t.name) === fold(row.teacher),
+    );
+    if (group === undefined || teacher === undefined) {
+      missing.push(`${row.className} / ${row.teacher}`);
+      continue;
+    }
+    state = addLesson(state, {
+      classId: group.id,
+      teacherId: teacher.id,
+      weeklyHours: row.weeklyHours,
+      blockSize: row.blockSize,
+    });
+  }
+  return { state, missing };
+}
+
+// ----------------------------------------------------------------- counting
+
+/** Weekly hours loaded onto one teacher, class or room. */
+export function weeklyLoad(d: State, kind: 'teacher' | 'class' | 'room', id: Id): number {
+  const lessons =
+    kind === 'teacher'
+      ? d.lessons.filter((x) => x.teacherId === id)
+      : kind === 'class'
+        ? d.lessons.filter((x) => x.classId === id)
+        : (() => {
+            const ids = new Set(roomClasses(d, id).map((c) => c.id));
+            return d.lessons.filter((x) => ids.has(x.classId));
+          })();
+  return lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
+}
+
+/**
+ * Lesson labels: a comma separated list if one was typed, otherwise 1..n.
+ * `count` is clamped to 1..16 — a school day with 0 or 40 lessons is a typo.
+ */
+export function hourLabels(count: number, names?: string): string[] {
+  if (names !== undefined && names.trim() !== '') {
+    const list = names
+      .split(',')
+      .map((x) => x.trim())
+      .filter((x) => x !== '');
+    if (list.length > 0) return list;
+  }
+  return hourNames(Math.min(16, Math.max(1, count)));
 }

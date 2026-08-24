@@ -3,7 +3,13 @@
 
 import { useState } from 'react';
 import { parseClasses } from '../../import';
-import { addClass, addRoom, deleteClass, updateClass } from '../../entities';
+import {
+  addClass,
+  addClassesFromRows,
+  deleteClass,
+  updateClass,
+  weeklyLoad,
+} from '../../entities';
 import Paste from './Paste';
 import type { SetupProps } from './props';
 
@@ -48,23 +54,7 @@ export default function Classes({ state, change }: SetupProps) {
           example="Sınıf adı · Derslik adı"
           parse={parseClasses}
           rowText={(x) => `${x.name}${x.roomName ? ` → ${x.roomName} dersliği` : ''}`}
-          onAdd={(rows) =>
-            change((d) =>
-              rows.reduce((acc, x) => {
-                const room = acc.rooms.find(
-                  (r) => r.name.toLocaleLowerCase('tr') === x.roomName.toLocaleLowerCase('tr'),
-                );
-                // An unknown room name is created silently; otherwise the class
-                // would end up roomless and the clash check could not run.
-                if (x.roomName !== '' && room === undefined) {
-                  const withRoom = addRoom(acc, x.roomName);
-                  const created = withRoom.rooms[withRoom.rooms.length - 1];
-                  return addClass(withRoom, x.name, created?.id ?? null);
-                }
-                return addClass(acc, x.name, room?.id ?? null);
-              }, d),
-            )
-          }
+          onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
         />
       </div>
 
@@ -106,9 +96,7 @@ export default function Classes({ state, change }: SetupProps) {
                   </select>
                 </td>
                 <td>
-                  {state.lessons
-                    .filter((x) => x.classId === c.id)
-                    .reduce((sum, x) => sum + x.weeklyHours, 0)}
+                  {weeklyLoad(state, 'class', c.id)}
                   {' / '}
                   {dayCount * hourCount}
                 </td>

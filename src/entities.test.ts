@@ -7,6 +7,14 @@
 
 import { placementKey, teacherKey } from './constraints';
 import {
+  addClass,
+  addClassesFromRows,
+  addLesson,
+  addLessonsFromRows,
+  addRoom,
+  addTeacher,
+  hourLabels,
+  weeklyLoad,
   DEFAULT_BELL,
   DEFAULT_LIMITS,
   DEFAULT_RULES,
@@ -148,5 +156,105 @@ describe('varsayılan hafta', () => {
     expect(d.settings.days).toHaveLength(6);
     expect(d.settings.hours).toHaveLength(12);
     expect(d.settings.bell.start).toBe('09:00');
+  });
+});
+
+// The four below used to live inside Setup.tsx with no test at all. Matching a
+// room or a teacher by name decides whether a pasted row lands or is silently
+// dropped — that is data, not screen.
+
+function school(): State {
+  let d = emptyState();
+  d = addRoom(d, 'A');
+  d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+  d = addClass(d, '510', d.rooms[0]!.id);
+  return d;
+}
+
+describe('addClassesFromRows', () => {
+  it('derslik adını büyük/küçük harf ve Türkçe fark etmeden eşler', () => {
+    const next = addClassesFromRows(school(), [{ name: '511', roomName: 'a' }]);
+    expect(next.rooms).toHaveLength(1); // no second "a" room
+    expect(next.classes.find((c) => c.name === '511')!.roomId).toBe(next.rooms[0]!.id);
+  });
+
+  it('bilinmeyen dersliği YARATIR — yoksa çakışma kontrolü sessizce kapanırdı', () => {
+    const next = addClassesFromRows(school(), [{ name: '610', roomName: 'B' }]);
+    expect(next.rooms.map((r) => r.name)).toEqual(['A', 'B']);
+    expect(next.classes.find((c) => c.name === '610')!.roomId).toBe(next.rooms[1]!.id);
+  });
+
+  it('derslik adı boşsa sınıf dersliksiz eklenir', () => {
+    const next = addClassesFromRows(school(), [{ name: '710', roomName: '' }]);
+    expect(next.rooms).toHaveLength(1);
+    expect(next.classes.find((c) => c.name === '710')!.roomId).toBeNull();
+  });
+});
+
+describe('addLessonsFromRows', () => {
+  const row = (teacher: string) => ({
+    className: '510',
+    teacher,
+    weeklyHours: 4,
+    blockSize: 2,
+  });
+
+  it('öğretmeni kısaltmadan da tam addan da bulur', () => {
+    for (const name of ['MÇ', 'mç', 'Mehmet Çelik']) {
+      const { state, missing } = addLessonsFromRows(school(), [row(name)]);
+      expect(missing).toEqual([]);
+      expect(state.lessons).toHaveLength(1);
+      expect(state.lessons[0]!.weeklyHours).toBe(4);
+      expect(state.lessons[0]!.blockSize).toBe(2);
+    }
+  });
+
+  it('bulunamayan satırı TAHMİN ETMEZ, geri bildirir', () => {
+    const { state, missing } = addLessonsFromRows(school(), [
+      row('MÇ'),
+      { className: '999', teacher: 'MÇ', weeklyHours: 2, blockSize: 1 },
+      { className: '510', teacher: 'ZZ', weeklyHours: 2, blockSize: 1 },
+    ]);
+    expect(state.lessons).toHaveLength(1); // only the good row landed
+    expect(missing).toEqual(['999 / MÇ', '510 / ZZ']);
+  });
+});
+
+describe('weeklyLoad', () => {
+  it('öğretmen, sınıf ve derslik yükünü sayar', () => {
+    let d = school();
+    d = addClass(d, '511', d.rooms[0]!.id); // shares room A with 510
+    const [a, b] = d.classes;
+    const teacher = d.teachers[0]!.id;
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blockSize: 1 });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 3, blockSize: 1 });
+
+    expect(weeklyLoad(d, 'teacher', teacher)).toBe(7);
+    expect(weeklyLoad(d, 'class', a!.id)).toBe(4);
+    expect(weeklyLoad(d, 'class', b!.id)).toBe(3);
+    // the room carries both classes
+    expect(weeklyLoad(d, 'room', d.rooms[0]!.id)).toBe(7);
+  });
+
+  it('yükü olmayan varlık 0 döner', () => {
+    const d = school();
+    expect(weeklyLoad(d, 'teacher', d.teachers[0]!.id)).toBe(0);
+  });
+});
+
+describe('hourLabels', () => {
+  it('liste verilmezse 1..n üretir ve 1-16 aralığına sıkıştırır', () => {
+    expect(hourLabels(3)).toEqual(['1', '2', '3']);
+    expect(hourLabels(0)).toEqual(['1']);
+    expect(hourLabels(40)).toHaveLength(16);
+  });
+
+  it('virgüllü liste verilirse onu kullanır, boşlukları temizler', () => {
+    expect(hourLabels(2, ' Sabah , Öğle ,, Akşam ')).toEqual(['Sabah', 'Öğle', 'Akşam']);
+  });
+
+  it('liste tamamen boşsa sayıya düşer', () => {
+    expect(hourLabels(2, '   ')).toEqual(['1', '2']);
+    expect(hourLabels(2, ' , , ')).toEqual(['1', '2']);
   });
 });
