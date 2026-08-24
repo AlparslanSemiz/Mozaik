@@ -737,21 +737,45 @@ table.list tbody tr:hover {
 
 /* ------------------------------------------------------------ availability */
 
+/* Row = day, column = lesson — the same way round as aSc's "Time off" window,
+   and the way it is read aloud: "Tuesday, these hours are closed". */
 table.availability {
   border-collapse: separate;
   border-spacing: 0;
   user-select: none;
+  table-layout: fixed;
 }
 
 table.availability th,
 table.availability td {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  width: 44px;
-  height: 30px;
+  width: 46px;
+  height: 34px;
   text-align: center;
   font-size: 12px;
   padding: 0;
+}
+
+table.availability thead th {
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+table.availability .corner-head {
+  cursor: default;
+  background: var(--bg);
+}
+
+table.availability .corner-head:hover {
+  background: var(--bg);
+  color: inherit;
+}
+
+/* The long break falls at a different lesson on every row, so it cannot be a
+   column here: it is a thick edge on the cell it follows. */
+table.availability td.break-after {
+  border-right: 3px solid var(--line-dark);
 }
 
 table.availability th {

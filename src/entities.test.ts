@@ -14,7 +14,9 @@ import {
   addRoom,
   addTeacher,
   hourLabels,
+  shortDay,
   weeklyLoad,
+  WEEK,
   DEFAULT_BELL,
   DEFAULT_LIMITS,
   DEFAULT_RULES,
@@ -256,5 +258,25 @@ describe('hourLabels', () => {
   it('liste tamamen boşsa sayıya düşer', () => {
     expect(hourLabels(2, '   ')).toEqual(['1', '2']);
     expect(hourLabels(2, ' , , ')).toEqual(['1', '2']);
+  });
+});
+
+// docs/PLAN.md pitfall 15: slice(0,3) turns both "Cuma" and "Cumartesi" into
+// "Cum" and the day rows become indistinguishable. There was no test for this.
+describe('shortDay', () => {
+  it('yedi günün kısaltması benzersiz', () => {
+    const shorts = WEEK.map(shortDay);
+    expect(shorts).toEqual(['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Pzr']);
+    expect(new Set(shorts).size).toBe(7);
+  });
+
+  it('Cuma ile Cumartesi ayrışır, Pazartesi ile Pazar ayrışır', () => {
+    expect(shortDay('Cuma')).not.toBe(shortDay('Cumartesi'));
+    expect(shortDay('Pazartesi')).not.toBe(shortDay('Pazar'));
+  });
+
+  it('bilinmeyen gün adı ilk üç harfe düşer, çökmez', () => {
+    expect(shortDay('Bayram')).toBe('Bay');
+    expect(shortDay('')).toBe('');
   });
 });

@@ -5,7 +5,7 @@
 // a start time, a lesson length, a break length, and exactly ONE long break
 // whose position is the only thing that differs between weekdays and weekend.
 
-import type { Bell } from './types';
+import type { Bell, Day } from './types';
 
 export interface Period {
   label: string; // "3" — what the user typed in settings.hours
@@ -62,4 +62,29 @@ export function dayPeriods(
 export function dayEnd(bell: Bell, labels: string[], longBreakAfter: number): string {
   const periods = dayPeriods(bell, labels, longBreakAfter);
   return periods[periods.length - 1]?.end ?? '';
+}
+
+/**
+ * The clock a lesson has on EVERY printed/shown day, or null where the days
+ * disagree.
+ *
+ * A column header can only carry one time, but the long break sits after the
+ * 5th lesson on weekdays and after the 6th at the weekend — so the 6th lesson
+ * starts at 13:30 on one and 13:10 on the other. Printing one of them next to
+ * both would be a lie on paper, and my father would set his watch by it. Where
+ * the days disagree we say nothing; each row still shows its own break.
+ *
+ * With the default layout exactly one column comes back null: lessons 1-5 are
+ * identical and 7-12 line up again, which is why both patterns end at 19:10.
+ */
+export function sharedPeriods(bell: Bell, labels: string[], days: Day[]): Array<Period | null> {
+  if (days.length === 0) return labels.map(() => null);
+
+  const perDay = days.map((day) => dayPeriods(bell, labels, day.longBreakAfter));
+  return labels.map((_, i) => {
+    const first = perDay[0]?.[i];
+    if (first === undefined) return null;
+    const same = perDay.every((p) => p[i]?.start === first.start && p[i]?.end === first.end);
+    return same ? first : null;
+  });
 }

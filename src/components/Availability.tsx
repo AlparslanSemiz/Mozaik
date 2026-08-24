@@ -8,7 +8,8 @@
 // The three kinds share ONE grid and one dictionary: ids are unique across
 // teachers, classes and rooms, so only the entity list at the top changes.
 
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { sharedPeriods } from '../bell';
 import { closedKey } from '../constraints';
 import type { Id, State } from '../types';
 import { setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
@@ -150,13 +151,15 @@ export default function Availability({ state, change }: Props) {
     change((d) => setAvailability(d, entityId, cells, paintMode.current));
   }
 
-  function toggleColumn(day: number) {
+  /** Row header: the whole of one day. */
+  function toggleDay(day: number) {
     const allClosed = state.settings.hours.every((_, s) => isClosed(day, s));
     const cells = state.settings.hours.map((_, s) => ({ day, hour: s }));
     change((d) => setAvailability(d, entityId, cells, !allClosed));
   }
 
-  function toggleRow(hour: number) {
+  /** Column header: that lesson across the whole week. */
+  function toggleHour(hour: number) {
     const allClosed = state.settings.days.every((_, g) => isClosed(g, hour));
     const cells = state.settings.days.map((_, g) => ({ day: g, hour }));
     change((d) => setAvailability(d, entityId, cells, !allClosed));
@@ -168,6 +171,12 @@ export default function Availability({ state, change }: Props) {
   );
   const total = state.settings.days.length * state.settings.hours.length;
   const open = total - closedCount;
+
+  // A column header carries one time; where the days disagree it stays empty.
+  const clocks = useMemo(
+    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
+    [state.settings],
+  );
 
   return (
     <div className="main">
@@ -192,8 +201,8 @@ export default function Availability({ state, change }: Props) {
 
         <p className="hint">
           {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz.
-          Gün adına tıklayınca o günün tamamı, saat numarasına tıklayınca haftanın o
-          saati değişir.
+          Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına
+          tıklayınca haftanın o saati değişir.
         </p>
 
         <div className="form-row">
@@ -228,24 +237,32 @@ export default function Availability({ state, change }: Props) {
           <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
             <thead>
               <tr>
-                <th style={{ width: 60 }} />
-                {state.settings.days.map((day, g) => (
-                  <th key={g} onClick={() => toggleColumn(g)} title="Bütün günü değiştir">
-                    {shortDay(day.name)}
+                <th className="corner-head" />
+                {state.settings.hours.map((hour, s) => (
+                  <th key={s} onClick={() => toggleHour(s)} title="Haftanın bu saatini değiştir">
+                    {hour}
+                    <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {state.settings.hours.map((hour, s) => (
-                <tr key={s}>
-                  <th onClick={() => toggleRow(s)} title="Haftanın bu saatini değiştir">
-                    {hour}
+              {state.settings.days.map((day, g) => (
+                <tr key={g}>
+                  <th onClick={() => toggleDay(g)} title={`${day.name} — bütün günü değiştir`}>
+                    {shortDay(day.name)}
                   </th>
-                  {state.settings.days.map((_, g) => (
+                  {state.settings.hours.map((_, s) => (
                     <td
-                      key={g}
-                      className={shownClosed(g, s) ? 'closed' : ''}
+                      key={s}
+                      className={[
+                        shownClosed(g, s) ? 'closed' : '',
+                        // The break sits at a different lesson on each row, so it
+                        // cannot be a column: it is a thick edge on THIS cell.
+                        day.longBreakAfter === s + 1 ? 'break-after' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                       onPointerDown={(e) => {
                         e.preventDefault();
                         startPaint(g, s);

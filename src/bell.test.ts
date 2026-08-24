@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dayEnd, dayPeriods, formatClock, parseClock } from './bell';
+import { dayEnd, dayPeriods, formatClock, parseClock, sharedPeriods } from './bell';
 import { DEFAULT_BELL } from './entities';
 import { hourNames } from './entities';
 
@@ -65,5 +65,37 @@ describe('dayPeriods — the default school day', () => {
   it('uses the labels it is given', () => {
     const p = dayPeriods(DEFAULT_BELL, ['A', 'B'], 0);
     expect(p.map((x) => x.label)).toEqual(['A', 'B']);
+  });
+});
+
+// A column header carries ONE time, but the 6th lesson starts at 13:30 on a
+// weekday and 13:10 at the weekend. Printing one next to both would be a lie.
+describe('sharedPeriods', () => {
+  const labels = LABELS;
+
+  it('tek desende bütün saatler ortak', () => {
+    const days = ['Salı', 'Çarşamba'].map((n) => ({ name: n, longBreakAfter: 5 }));
+    const shared = sharedPeriods(DEFAULT_BELL, labels, days);
+    expect(shared.every((x) => x !== null)).toBe(true);
+    expect(shared[0]!.start).toBe('09:00');
+    expect(shared[5]!.start).toBe('13:30');
+  });
+
+  it('hafta içi + hafta sonu karışınca YALNIZCA 6. ders ayrışır', () => {
+    const days = [
+      { name: 'Salı', longBreakAfter: 5 },
+      { name: 'Cumartesi', longBreakAfter: 6 },
+    ];
+    const shared = sharedPeriods(DEFAULT_BELL, labels, days);
+    const missing = shared.flatMap((x, i) => (x === null ? [i + 1] : []));
+    // 1-5 identical, 7-12 line up again — which is why both end at 19:10
+    expect(missing).toEqual([6]);
+    expect(shared[4]!.start).toBe('12:20');
+    expect(shared[6]!.start).toBe('14:20');
+    expect(shared[11]!.end).toBe('19:10');
+  });
+
+  it('gün yoksa hiçbir saat ortak değildir', () => {
+    expect(sharedPeriods(DEFAULT_BELL, labels, [])).toEqual(labels.map(() => null));
   });
 });

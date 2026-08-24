@@ -603,6 +603,63 @@ async function hover(page: Page, day: number, hour: number) {
   return cell;
 }
 
+test.describe('10. Müsaitlik çizelgesi', () => {
+  test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+
+    const table = page.locator('table.availability');
+    // The sample teacher already has a whole day closed; start from a clean slate
+    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    // 6 day rows, 12 lesson columns
+    await expect(table.locator('tbody tr')).toHaveCount(6);
+    await expect(table.locator('tbody tr').first().locator('td')).toHaveCount(12);
+    await expect(table.locator('tbody tr').first().locator('th')).toHaveText('Sal');
+    // "Cuma" and "Cumartesi" must not both read "Cum", and Pazar is Pzr
+    const heads = await table.locator('tbody tr th').allTextContents();
+    expect(heads).toEqual(['Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Pzr']);
+
+    // Clicking the day header closes that whole day, and only that day
+    const wednesday = table.locator('tbody tr').nth(1);
+    await wednesday.locator('th').click();
+    await expect(wednesday.locator('td.closed')).toHaveCount(12);
+    await expect(table.locator('tbody tr').first().locator('td.closed')).toHaveCount(0);
+    // ...and clicking again reopens it
+    await wednesday.locator('th').click();
+    await expect(wednesday.locator('td.closed')).toHaveCount(0);
+  });
+
+  test('sütun başlığı haftanın o saatini değiştiriyor, saat uyuşmayınca boş kalıyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    const table = page.locator('table.availability');
+
+    // Lessons 1-5 are the same on every day, so they carry a clock...
+    await expect(table.locator('thead th').nth(1)).toContainText('09:00');
+    // ...but the 6th starts at 13:30 on weekdays and 13:10 at the weekend
+    await expect(table.locator('thead th').nth(6)).not.toContainText(':');
+
+    await table.locator('thead th').nth(3).click();
+    await expect(table.locator('tbody td.closed')).toHaveCount(6); // one per day
+  });
+
+  test('öğle arası her satırda kendi yerinde işaretli', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+
+    const positions = await page.evaluate(() =>
+      [...document.querySelectorAll('table.availability tbody tr')].map((row) =>
+        [...row.querySelectorAll('td')].findIndex((td) => td.classList.contains('break-after')),
+      ),
+    );
+    // 0-based index of the cell the break follows: 5th lesson / 6th lesson
+    expect(positions).toEqual([4, 4, 4, 4, 5, 5]);
+  });
+});
+
 test.describe('9. Öğle arası ayracı', () => {
   test('ayraç hafta içi 5., hafta sonu 6. dersten sonra duruyor', async ({ page }) => {
     await openWithSample(page);
@@ -667,7 +724,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
     await expect(page.getByLabel('Müsaitlik listesi')).toHaveValue('s510');
-    // row = 1st hour, column = 1st day
+    // row = 1st day, column = 1st hour (the axis was turned in v0.7)
     await page.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
 

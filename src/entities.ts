@@ -59,7 +59,7 @@ const SHORT_DAY: Record<string, string> = {
   Perşembe: 'Per',
   Cuma: 'Cum',
   Cumartesi: 'Cmt',
-  Pazar: 'Paz',
+  Pazar: 'Pzr',
 };
 
 export function shortDay(name: string): string {
