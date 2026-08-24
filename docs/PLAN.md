@@ -306,6 +306,25 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
     Yerleşmiş kartı sürüklenebilir yaparsan `dragstart`'ta kaldır, bırakılmazsa
     geri koy. v0'da buna hiç girme: tıkla-kaldır + yeniden sürükle yeterli.
 
+11. **Sürükleme hedefi ekran dışında olabilir.** *(E2E testinin yakaladığı gerçek hata.)*
+    25 satır × 84 sütun 1366×768 ekrana sığmıyor; ekranda ~13 satır ve ~35 sütun var.
+    Kullanıcı havuzdan bir kart alır ama bırakacağı satır ya da gün görünmüyorsa oraya
+    hiç ulaşamaz — fare basılıyken kaydırma yapamaz. Çözüm: (a) sürükleme başlarken
+    hedef satır `scrollIntoView({ block: 'center' })` ile ortaya alınır, (b) imleç
+    kenara yaklaşınca ızgara kendiliğinden kayar.
+
+12. **Otomatik kaydırma yalnızca imleç ızgaranın İÇİNDEYKEN çalışmalı.**
+    *(Yukarıdaki düzeltmenin kendi yan etkisi.)* Kart havuzu ızgaranın hemen altında.
+    "Alt kenara yakınsa aşağı kaydır" kuralını imlecin nerede olduğuna bakmadan
+    uygularsan, kullanıcı havuzdaki karta basar basmaz — daha kımıldamadan — ızgara
+    kendi kendine kaymaya başlar ve hedef satır kaçar. Kaydırmadan önce imlecin
+    kapsayıcının sınırları içinde olduğu kontrol edilir.
+
+13. **`CSS.escape` tırnak içindeki öznitelik değeri için değildir.** `id` rakamla
+    başlayabiliyor; `[data-x="${CSS.escape(id)}"]` sessizce eşleşmez. Kimliği seçiciye
+    gömmek yerine hedef satır DOM elemanı tutulur, içindeki hücrelere sayısal
+    `data-gun`/`data-saat` ile ulaşılır.
+
 ---
 
 ## 6. Arayüz kararları

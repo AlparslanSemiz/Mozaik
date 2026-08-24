@@ -9,13 +9,15 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "test:izle": "vitest",
-    "kontrol": "tsc --noEmit && vitest run"
+    "kontrol": "tsc --noEmit && vitest run && vite build && playwright test",
+    "test:e2e": "vite build && playwright test"
   },
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",

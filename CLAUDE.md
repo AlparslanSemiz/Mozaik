@@ -49,11 +49,30 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 ### Komutlar
 
 ```bash
-npm run dev      # geliştirme sunucusu
-npm test         # Vitest — saf mantık testleri
-npm run build    # dist/index.html tek dosya üretir
-npm run kontrol  # tsc --noEmit + vitest run
+npm run dev       # geliştirme sunucusu
+npm test          # Vitest — 65 birim testi
+npm run build     # dist/index.html tek dosya üretir
+npm run test:e2e  # Playwright — derler, sonra 18 E2E testi
+npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 ```
+
+Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
+
+### Test katmanları — hangisi neyi yakalar
+
+| Katman | Nerede | Neyi yakalar |
+|---|---|---|
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite |
+| Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
+| **E2E** | `e2e/*.spec.ts` (Playwright) | **Düzen, sürükleme, kaydırma, yazdırma, `file://`** |
+
+E2E, `dist/index.html`'i `file://` üzerinden 1366×768'de açar — yani **babanın çift
+tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,
+ekran dışı hedef ve yazdırma taşması **yalnızca burada** görünür. Nitekim tuzak 11 ve
+12 (bkz. PLAN.md) bu testlerle bulundu, başka türlü bulunamazdı.
+
+> Sürükleme, kaydırma, düzen veya yazdırma davranışını değiştiriyorsan
+> **`npm run test:e2e` çalıştırmadan bitti deme.**
 
 ---
 
