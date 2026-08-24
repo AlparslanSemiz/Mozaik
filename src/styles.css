@@ -509,6 +509,73 @@ td.drop-blocked {
   cursor: default;
 }
 
+/* ------------------------------------------------------------ setup steps */
+
+/* A strip, not a wizard: every step stays reachable. The counter is the point —
+   a step showing 0 is where something is still missing, visible at a glance. */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.step:hover {
+  border-color: var(--accent);
+}
+
+.step[aria-current="true"] {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.step[data-empty="true"]:not([aria-current="true"]) {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step[aria-current="true"] .step-no {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.step-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.step-next {
+  margin-bottom: 0;
+}
+
 /* -------------------------------------------------------------------- form */
 
 .panel {

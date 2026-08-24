@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import { emptyState } from './entities';
 import { applyTheme, readTheme, type Theme } from './theme';
-import Setup from './components/Setup';
+import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
 import Check from './components/Check';

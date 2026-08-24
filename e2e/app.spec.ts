@@ -28,6 +28,16 @@ async function openWithSample(page: Page) {
   await expect(page.locator('table.grid')).toBeVisible();
 }
 
+/**
+ * Setup is a strip of steps now, so reaching a field means naming its step.
+ * Every test that used to just click "Kurulum" goes through here.
+ */
+async function openSetup(page: Page, step: string) {
+  await page.getByRole('button', { name: 'Kurulum' }).click();
+  await page.locator('.step', { hasText: step }).click();
+  await expect(page.locator('.step[aria-current="true"]')).toContainText(step);
+}
+
 test.describe('1. Kalıcılık — file:// altında', () => {
   test('otomatik kayıt çalışıyor ve uyarı çıkmıyor', async ({ page }) => {
     await open(page);
@@ -336,17 +346,48 @@ test.describe('4. Yazdırma', () => {
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
     await open(page);
-    await page
-      .locator('.panel', { hasText: 'Öğretmenler' })
-      .getByRole('button', { name: "Excel'den yapıştır" })
-      .click();
+    await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
 
     await page.locator('textarea').fill('Ali Vural\tAV\tMatematik\nDeniz Ak\tDA\tFizik');
     await page.getByRole('button', { name: 'Önizle' }).click();
     await expect(page.getByText('2 satır okundu.')).toBeVisible();
 
     await page.getByRole('button', { name: /2 satırı ekle/ }).click();
-    await expect(page.locator('.panel', { hasText: 'Öğretmenler (2)' })).toBeVisible();
+    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('2');
+  });
+
+  test('Kurulum adımlar hâlinde: sayaçlar doğru, geçiş serbest', async ({ page }) => {
+    await open(page);
+    // An empty step is dimmed — that is the whole point of the counter
+    await expect(page.locator('.step', { hasText: 'Derslikler' })).toHaveAttribute(
+      'data-empty',
+      'true',
+    );
+
+    page.once('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+
+    await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
+    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
+    await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
+    await expect(page.locator('.step', { hasText: 'Dersler' })).toContainText('99');
+
+    // Only the current step is on screen; the 1132-line scroll is gone
+    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toHaveCount(0);
+
+    await openSetup(page, 'Öğretmenler');
+    await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
+
+    // Not a locked wizard: jumping straight to the last step works
+    await openSetup(page, 'Kurallar');
+    await expect(page.getByRole('heading', { name: 'Kurallar' })).toBeVisible();
+    // ...and "next step" is only a shortcut
+    await openSetup(page, 'Sınıflar');
+    await page.getByRole('button', { name: /Sonraki adım: Dersler/ }).click();
+    await expect(page.locator('.step[aria-current="true"]')).toContainText('Dersler');
   });
 
   test('yedek indirilebiliyor', async ({ page }) => {
@@ -393,7 +434,7 @@ test.describe('5. Kurulum ve yedek', () => {
   test('günlük saat azaltılınca taşan dersler temizleniyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await openSetup(page, 'Okul');
 
     const hourBox = page.getByLabel('Günlük ders sayısı');
     await hourBox.fill('4');
@@ -455,7 +496,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     const day = Number(placed.day);
     const hour = Number(placed.hour);
 
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await openSetup(page, 'Okul');
     await page.getByLabel('Pazartesi', { exact: true }).check();
 
     await page.getByRole('button', { name: 'Program' }).click();
@@ -481,7 +522,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await expect(header).toContainText('09:00');
     await expect(header).toContainText('09:50');
 
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await openSetup(page, 'Okul');
     const preview = page.locator('table.bell-preview');
     await expect(preview).toContainText('09:00–09:40');
     // Weekdays break after the 5th, the weekend after the 6th: 13:30 vs 13:10.
@@ -604,7 +645,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     page,
   }) => {
     await openFixture(page);
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await openSetup(page, 'Kurallar');
 
     // "at most 1 in a row": the hour beside a placed lesson breaches it.
     const rule = page.locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' });
@@ -628,7 +669,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.keyboard.press('Escape');
 
     // The same situation at "Uyar": yellow, a reason, but it can still be dropped.
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await openSetup(page, 'Kurallar');
     await page
       .locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' })
       .locator('select')
