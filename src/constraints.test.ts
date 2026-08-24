@@ -13,6 +13,7 @@ import {
 } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { RuleLevel, State } from './types';
+import { SCHEMA_VERSION } from './types';
 
 // A small, readable world: 2 days x 4 hours.
 //   room A: class 510, class 511      (shared room)
@@ -20,7 +21,7 @@ import type { RuleLevel, State } from './types';
 //   MÇ = Matematik, AV = Fizik, MB = Kimya
 function build(): State {
   return {
-    schemaVersion: 3,
+    schemaVersion: SCHEMA_VERSION,
     settings: {
       schoolName: '',
       days: [
@@ -31,6 +32,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjectShorts: {},
     },
     rooms: [
       { id: 'dA', name: 'A' },

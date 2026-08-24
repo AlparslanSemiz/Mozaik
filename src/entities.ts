@@ -123,6 +123,93 @@ export const NO_TEACHER_LIMITS = {
   minPerDay: null,
 };
 
+// ----------------------------------------------------------------- subjects
+//
+// "Matematik" does not fit a 34px cell, and on A4 landscape a column is ~21mm.
+// "Mat" fits. The full name is kept where there is room (row headings, the
+// Kurulum tables, the printed page title).
+
+/** Built in, so an empty project already reads well. Overridable, one by one. */
+export const DEFAULT_SUBJECT_SHORTS: Record<string, string> = {
+  Matematik: 'Mat',
+  Fizik: 'Fzk',
+  Geometri: 'Geo',
+  Kimya: 'Kim',
+  Biyoloji: 'Biy',
+  Türkçe: 'Trk',
+  Edebiyat: 'Edb',
+  Tarih: 'Tar',
+  Coğrafya: 'Coğ',
+  İngilizce: 'İng',
+  Felsefe: 'Fel',
+  'Din Kültürü': 'Din',
+  Almanca: 'Alm',
+  Fransızca: 'Fra',
+  Müzik: 'Müz',
+  Resim: 'Res',
+  'Beden Eğitimi': 'Bed',
+  'Sosyal Bilgiler': 'Sos',
+  'Fen Bilimleri': 'Fen',
+  Rehberlik: 'Reh',
+  'İnkılap Tarihi': 'İnk',
+};
+
+/** Lookup key: the user types "matematik" as readily as "Matematik". */
+export function subjectKey(subject: string): string {
+  return subject.trim().toLocaleLowerCase('tr');
+}
+
+const DEFAULT_BY_KEY = new Map(
+  Object.entries(DEFAULT_SUBJECT_SHORTS).map(([name, short]) => [subjectKey(name), short]),
+);
+
+/** Override -> built-in table -> first three letters. */
+export function subjectShort(settings: Settings, subject: string): string {
+  const key = subjectKey(subject);
+  if (key === '') return '';
+
+  const override = settings.subjectShorts[key];
+  if (override !== undefined && override.trim() !== '') return override.trim();
+
+  const known = DEFAULT_BY_KEY.get(key);
+  if (known !== undefined) return known;
+
+  const head = subject.trim().slice(0, 3);
+  return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
+}
+
+/** What subjectShort() would say with no override at all. */
+export function defaultSubjectShort(subject: string): string {
+  return subjectShort({ subjectShorts: {} } as Settings, subject);
+}
+
+/**
+ * Stores an override ONLY when it differs from the default; writing the default
+ * back removes it. That keeps the backup small and lets a later, better
+ * built-in table reach an old project by itself.
+ */
+export function setSubjectShort(d: State, subject: string, value: string): State {
+  const key = subjectKey(subject);
+  if (key === '') return d;
+
+  const next = { ...d.settings.subjectShorts };
+  const trimmed = value.trim();
+  if (trimmed === '' || trimmed === defaultSubjectShort(subject)) delete next[key];
+  else next[key] = trimmed;
+
+  return { ...d, settings: { ...d.settings, subjectShorts: next } };
+}
+
+/** The distinct subjects actually taught, in the order the teachers were added. */
+export function usedSubjects(d: State): string[] {
+  const seen = new Map<string, string>();
+  for (const t of d.teachers) {
+    const key = subjectKey(t.subject);
+    if (key !== '' && !seen.has(key)) seen.set(key, t.subject.trim());
+  }
+  return [...seen.values()];
+}
+
 export function hourNames(n: number): string[] {
   return Array.from({ length: n }, (_, i) => String(i + 1));
 }
@@ -135,6 +222,7 @@ export function defaultSettings(): Settings {
     bell: { ...DEFAULT_BELL },
     limits: { ...DEFAULT_LIMITS },
     rules: { ...DEFAULT_RULES },
+    subjectShorts: {},
   };
 }
 

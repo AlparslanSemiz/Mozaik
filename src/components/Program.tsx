@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type React from 'react';
 import { buildIndex, check, closedKey, removeBlock, placementKey, place } from '../constraints';
 import type { Index, Verdict } from '../constraints';
+import { subjectShort } from '../entities';
 import { useDrag } from '../drag';
 import type { State, Id } from '../types';
 import Grid from './Grid';
@@ -77,7 +78,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
         cells[i] = {
           lessonId,
           top: teacher?.short ?? '?',
-          bottom: teacher?.subject ?? '',
+          bottom: teacher === undefined ? '' : subjectShort(d.settings, teacher.subject),
           color: teacher?.color ?? 0,
           continues:
             s + 1 < hourCount && d.placements[placementKey(group.id, g, s + 1)] === lessonId,
@@ -184,7 +185,11 @@ export default function Program({ state, change }: Props) {
         },
         {
           top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
-          bottom: teacherView ? roomLetter(ix, group?.roomId) : (teacher?.subject ?? ''),
+          bottom: teacherView
+            ? roomLetter(ix, group?.roomId)
+            : teacher === undefined
+              ? ''
+              : subjectShort(state.settings, teacher.subject),
           color: teacher?.color ?? 0,
         },
       );

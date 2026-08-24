@@ -2,11 +2,12 @@ import { buildReport } from './feasibility';
 import { teacherKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { State } from './types';
+import { SCHEMA_VERSION } from './types';
 
 // 1 day x 4 hours = 4 slots. Small numbers keep the arithmetic verifiable by hand.
 function build(): State {
   return {
-    schemaVersion: 3,
+    schemaVersion: SCHEMA_VERSION,
     settings: {
       schoolName: '',
       days: [{ name: 'Pazartesi', longBreakAfter: 0 }],
@@ -14,6 +15,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjectShorts: {},
     },
     rooms: [{ id: 'dA', name: 'A' }],
     teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 0, limits: { ...NO_TEACHER_LIMITS } }],

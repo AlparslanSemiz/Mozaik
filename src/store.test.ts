@@ -115,7 +115,7 @@ describe('parseState — v2 göçü', () => {
   });
 });
 
-describe('parseState — v3', () => {
+describe('parseState — v4', () => {
   it('kendi yazdığı dosyayı aynen geri okur', () => {
     const original = sampleState();
     const back = parseState(JSON.stringify(original))!;
@@ -181,5 +181,59 @@ describe('parseState — v3', () => {
       maxPerDay: null,
       minPerDay: 2,
     });
+  });
+});
+
+/**
+ * A v3 backup: everything the current shape has EXCEPT settings.subjectShorts.
+ * Every backup my father downloads between v0.6 and v0.7 looks like this.
+ */
+function v3Backup() {
+  const d = sampleState();
+  const raw = JSON.parse(JSON.stringify(d));
+  raw.schemaVersion = 3;
+  delete raw.settings.subjectShorts;
+  return raw;
+}
+
+describe('parseState — v3 → v4 göçü', () => {
+  it('v3 yedeği açılıyor ve subjectShorts boş sözlükle geliyor', () => {
+    const d = parseState(JSON.stringify(v3Backup()))!;
+    expect(d).not.toBeNull();
+    expect(d.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d.settings.subjectShorts).toEqual({});
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v3Backup()))!;
+
+    expect(migrated.teachers).toEqual(original.teachers);
+    expect(migrated.classes).toEqual(original.classes);
+    expect(migrated.rooms).toEqual(original.rooms);
+    expect(migrated.lessons).toEqual(original.lessons);
+    expect(migrated.settings.days).toEqual(original.settings.days);
+    expect(migrated.settings.hours).toEqual(original.settings.hours);
+    expect(migrated.settings.bell).toEqual(original.settings.bell);
+    expect(migrated.settings.rules).toEqual(original.settings.rules);
+    // the keys that hold the laid-out timetable
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
+  });
+
+  it('v3 dosyasına elle yazılmış subjectShorts varsa da okunur', () => {
+    const raw = v3Backup();
+    raw.settings.subjectShorts = { matematik: 'Mtk', fizik: 42, kimya: '  ' };
+    const d = parseState(JSON.stringify(raw))!;
+    // only the usable entry survives; junk is dropped, not guessed at
+    expect(d.settings.subjectShorts).toEqual({ matematik: 'Mtk' });
+  });
+
+  it('v1 ve v2 yolları da v4 üretiyor', () => {
+    for (const raw of [legacyV1(), legacyV2()]) {
+      const d = parseState(JSON.stringify(raw))!;
+      expect(d.schemaVersion).toBe(SCHEMA_VERSION);
+      expect(d.settings.subjectShorts).toEqual({});
+    }
   });
 });

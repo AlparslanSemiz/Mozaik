@@ -15,11 +15,12 @@ import {
   teacherDayCount,
 } from './rules';
 import type { State } from './types';
+import { SCHEMA_VERSION } from './types';
 
 // 2 days x 6 hours. MÇ teaches both 510 and 511, so a long run is easy to build.
 function build(): State {
   return {
-    schemaVersion: 3,
+    schemaVersion: SCHEMA_VERSION,
     settings: {
       schoolName: '',
       days: [
@@ -30,6 +31,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjectShorts: {},
     },
     rooms: [{ id: 'dA', name: 'A' }],
     teachers: [

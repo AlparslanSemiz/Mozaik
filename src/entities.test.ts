@@ -13,8 +13,13 @@ import {
   addLessonsFromRows,
   addRoom,
   addTeacher,
+  DEFAULT_SUBJECT_SHORTS,
+  defaultSubjectShort,
   deletionSummary,
   duplicateShorts,
+  setSubjectShort,
+  subjectShort,
+  usedSubjects,
   hourLabels,
   makeShort,
   shortDay,
@@ -31,10 +36,11 @@ import {
   updateSettings,
 } from './entities';
 import type { Day, State } from './types';
+import { SCHEMA_VERSION } from './types';
 
 function build(): State {
   return {
-    schemaVersion: 3,
+    schemaVersion: SCHEMA_VERSION,
     settings: {
       schoolName: '',
       days: [makeDay('Pazartesi'), makeDay('Salı'), makeDay('Çarşamba')],
@@ -42,6 +48,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjectShorts: {},
     },
     rooms: [],
     teachers: [
@@ -403,5 +410,75 @@ describe('deletionSummary', () => {
     for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
       expect(deletionSummary(d, kind, 'yok')).toContain('Devam edilsin mi?');
     }
+  });
+});
+
+describe('subjectShort', () => {
+  const blank = emptyState();
+
+  it('gömülü tablodan gelir', () => {
+    expect(subjectShort(blank.settings, 'Matematik')).toBe('Mat');
+    expect(subjectShort(blank.settings, 'İngilizce')).toBe('İng');
+    expect(subjectShort(blank.settings, 'Beden Eğitimi')).toBe('Bed');
+  });
+
+  it('büyük/küçük harf ve boşluk fark etmez', () => {
+    expect(subjectShort(blank.settings, '  matematik ')).toBe('Mat');
+    expect(subjectShort(blank.settings, 'MATEMATİK')).toBe('Mat');
+  });
+
+  it('bilinmeyen branş ilk üç harfe düşer, Türkçe büyük harfle', () => {
+    expect(subjectShort(blank.settings, 'Astronomi')).toBe('Ast');
+    expect(subjectShort(blank.settings, 'ispanyolca')).toBe('İsp');
+    expect(subjectShort(blank.settings, 'Şu')).toBe('Şu');
+    expect(subjectShort(blank.settings, '')).toBe('');
+  });
+
+  it('override gömülü tabloyu ezer', () => {
+    const d = setSubjectShort(blank, 'Matematik', 'Mtk');
+    expect(subjectShort(d.settings, 'Matematik')).toBe('Mtk');
+    expect(subjectShort(d.settings, 'matematik')).toBe('Mtk');
+  });
+});
+
+describe('setSubjectShort', () => {
+  it('YALNIZCA değiştirileni saklar — yedek dosyası şişmesin', () => {
+    let d = emptyState();
+    d = setSubjectShort(d, 'Matematik', 'Mat'); // the default: nothing to store
+    expect(d.settings.subjectShorts).toEqual({});
+
+    d = setSubjectShort(d, 'Matematik', 'Mtk');
+    expect(d.settings.subjectShorts).toEqual({ matematik: 'Mtk' });
+  });
+
+  it('varsayılana geri yazılınca override silinir', () => {
+    let d = setSubjectShort(emptyState(), 'Fizik', 'Fiz');
+    expect(d.settings.subjectShorts).toEqual({ fizik: 'Fiz' });
+    d = setSubjectShort(d, 'Fizik', 'Fzk');
+    expect(d.settings.subjectShorts).toEqual({});
+  });
+
+  it('boş bırakmak override siler, varsayılana döner', () => {
+    let d = setSubjectShort(emptyState(), 'Kimya', 'KMY');
+    d = setSubjectShort(d, 'Kimya', '   ');
+    expect(d.settings.subjectShorts).toEqual({});
+    expect(subjectShort(d.settings, 'Kimya')).toBe('Kim');
+  });
+
+  it('gömülü tablodaki her kısaltma kendi varsayılanıdır', () => {
+    for (const [subject, short] of Object.entries(DEFAULT_SUBJECT_SHORTS)) {
+      expect(defaultSubjectShort(subject)).toBe(short);
+    }
+  });
+});
+
+describe('usedSubjects', () => {
+  it('öğretmenlerde geçen benzersiz branşları sırasıyla verir', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik' });
+    d = addTeacher(d, { name: 'C C', short: '', subject: 'matematik' });
+    d = addTeacher(d, { name: 'D D', short: '', subject: '  ' });
+    expect(usedSubjects(d)).toEqual(['Matematik', 'Fizik']);
   });
 });

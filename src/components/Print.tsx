@@ -7,6 +7,7 @@
 import { useMemo, useState } from 'react';
 import { dayPeriods } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
+import { subjectShort } from '../entities';
 import type { State } from '../types';
 
 interface Props {
@@ -130,7 +131,9 @@ export default function Print({ state }: Props) {
                           >
                             {teacher !== undefined && (
                               <>
-                                <span className="p-top">{teacher.subject}</span>
+                                <span className="p-top">
+                                  {subjectShort(state.settings, teacher.subject)}
+                                </span>
                                 <span className="p-bottom">{teacher.short}</span>
                               </>
                             )}

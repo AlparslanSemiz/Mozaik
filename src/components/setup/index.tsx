@@ -7,15 +7,17 @@
 
 import { useState } from 'react';
 import type { State } from '../../types';
+import { usedSubjects } from '../../entities';
 import School from './School';
 import Rooms from './Rooms';
 import Teachers from './Teachers';
+import Subjects from './Subjects';
 import Classes from './Classes';
 import Lessons from './Lessons';
 import Rules from './Rules';
 import type { SetupProps } from './props';
 
-type StepId = 'school' | 'rooms' | 'teachers' | 'classes' | 'lessons' | 'rules';
+type StepId = 'school' | 'rooms' | 'teachers' | 'subjects' | 'classes' | 'lessons' | 'rules';
 
 interface Step {
   id: StepId;
@@ -38,6 +40,14 @@ const STEPS: Step[] = [
     label: 'Öğretmenler',
     count: (d) => d.teachers.length,
     render: (p) => <Teachers {...p} />,
+  },
+  {
+    // Right after Teachers: the list of subjects is derived from them, so this
+    // is where it can first be filled in.
+    id: 'subjects',
+    label: 'Branşlar',
+    count: (d) => usedSubjects(d).length,
+    render: (p) => <Subjects {...p} />,
   },
   {
     id: 'classes',

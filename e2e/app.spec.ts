@@ -555,6 +555,76 @@ test.describe('5. Kurulum ve yedek', () => {
     // The bell times the migration filled in are visible in the header.
     await expect(page.locator('table.grid thead').first()).toContainText('09:00');
   });
+
+  test('v3 biçimli yedek (branş kısaltması yokken) açılıyor, blok yerinde kalıyor', async ({
+    page,
+  }) => {
+    // The v3 -> v4 migration on the REAL path. Every backup downloaded between
+    // v0.6 and v0.7 has no settings.subjectShorts at all. If this file does not
+    // open, that is data loss, not a bug.
+    await open(page);
+
+    const v3 = {
+      schemaVersion: 3,
+      settings: {
+        schoolName: 'Semiz Kurs',
+        days: [
+          { name: 'Salı', longBreakAfter: 5 },
+          { name: 'Çarşamba', longBreakAfter: 5 },
+        ],
+        hours: ['1', '2', '3', '4'],
+        bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+        limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+        rules: {
+          maxConsecutive: 'block',
+          maxPerDay: 'block',
+          minPerDay: 'warn',
+          maxSameLessonPerDay: 'block',
+        },
+        // no subjectShorts here — that is the whole point
+      },
+      rooms: [{ id: 'dA', name: 'A' }],
+      teachers: [
+        {
+          id: 'oMC',
+          name: 'Mehmet Çelik',
+          short: 'MÇ',
+          subject: 'Matematik',
+          color: 0,
+          limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+        },
+      ],
+      classes: [{ id: 's510', name: '510', roomId: 'dA' }],
+      lessons: [
+        {
+          id: 'x1',
+          classId: 's510',
+          teacherId: 'oMC',
+          weeklyHours: 2,
+          blockSize: 2,
+          maxPerDay: null,
+        },
+      ],
+      unavailable: { 'oMC|1|0': 1 },
+      placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
+    };
+
+    page.once('dialog', (d) => d.accept());
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-08-24-1500.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(v3)),
+    });
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    await expect(page.locator('.day-head').first()).toHaveText('Salı');
+    await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
+
+    // The built-in table applies straight away: the class view says "Mat"
+    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await expect(page.locator('table.grid .card').first()).toContainText('Mat');
+  });
 });
 
 test.describe('6. Gün ve ders saatleri', () => {
@@ -679,6 +749,68 @@ async function hover(page: Page, day: number, hour: number) {
   await page.waitForTimeout(80); // the highlight is applied in the rAF loop
   return cell;
 }
+
+test.describe('12. Branş kısaltmaları', () => {
+  test('ızgarada kısaltma yazıyor, tam ad yer olan yerde kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+
+    // "Matematik" does not fit a 34px cell; the short form does.
+    const shortText = (await page.locator('table.grid .card-bottom').first().textContent())!;
+    expect(shortText.length).toBeLessThanOrEqual(4);
+
+    // The teacher row heading has room, so it keeps the FULL subject
+    await page.getByRole('button', { name: 'Öğretmen görünümüne geç' }).click();
+    const full = (await page.locator('tbody .row-head .secondary').first().textContent())!;
+    expect(full.length).toBeGreaterThan(4);
+  });
+
+  test('Branşlar adımından değiştirilince ızgara ve baskı birlikte değişiyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
+
+    await openSetup(page, 'Branşlar');
+    // The box comes FILLED with the default, not with a faint placeholder
+    const target = page.locator('table.list tbody tr', {
+      has: page.locator(`input[value="${before}"]`),
+    });
+    await expect(target).toHaveCount(1);
+    const input = target.locator('input');
+    await expect(input).toHaveValue(before);
+
+    await input.fill('Zzz');
+    await input.blur();
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
+
+    // ...and the printed page uses the same short form
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-area')).toContainText('Zzz');
+  });
+
+  test('varsayılana geri yazılınca override kayboluyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Branşlar');
+
+    const row = page.locator('table.list tbody tr').first();
+    const input = row.locator('input');
+    const original = (await input.inputValue())!;
+
+    await input.fill('Zzz');
+    await input.blur();
+    await expect(row).toContainText(`varsayılanı: ${original}`);
+
+    await row.locator('input').fill(original);
+    await row.locator('input').blur();
+    await expect(row).toContainText('varsayılan');
+    await expect(row).not.toContainText('varsayılanı:');
+  });
+});
 
 test.describe('11. Görsel cila', () => {
   test('başlık altındaki sütunla aynı hizada', async ({ page }) => {

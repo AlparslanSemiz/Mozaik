@@ -92,6 +92,12 @@ export interface Settings {
   bell: Bell;
   limits: Limits;
   rules: Rules;
+  /**
+   * Subject -> short form, but ONLY where the user changed it. Everything else
+   * comes from the built-in table, so a backup does not swell with 21 defaults
+   * and an improved table later reaches an old project on its own.
+   */
+  subjectShorts: Record<string, string>;
 }
 
 export interface State {
@@ -115,8 +121,9 @@ export interface State {
  * Present from day one so old backups can be migrated.
  * v1: Turkish field names (durum/ayar/ogretmenler...). v2: English field names.
  * v3: Day objects, bell times, limits and rules.
+ * v4: settings.subjectShorts.
  */
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 /** Must match the number of --color-0 .. --color-11 variables in styles.css. */
 export const COLOR_COUNT = 12;

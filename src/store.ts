@@ -112,6 +112,15 @@ function asLevel(x: unknown, fallback: RuleLevel): RuleLevel {
   return x === 'off' || x === 'warn' || x === 'block' ? x : fallback;
 }
 
+/** subjectShorts: string -> non-empty string, anything else dropped. */
+function asShorts(x: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(asMap<unknown>(x))) {
+    if (typeof value === 'string' && value.trim() !== '') out[key] = value.trim();
+  }
+  return out;
+}
+
 /**
  * Migrates a v1 backup (Turkish field names) to the v2 shape.
  *
@@ -219,7 +228,10 @@ export function parseState(text: string): State | null {
     candidate = migrateV2toV3(migrateV1(raw as LegacyV1));
   } else if (version === 2) {
     candidate = migrateV2toV3(raw as LegacyV2);
-  } else if (version === SCHEMA_VERSION) {
+  } else if (version === 3 || version === SCHEMA_VERSION) {
+    // v3 -> v4 adds subjectShorts and touches NOTHING else, so one reader does
+    // both: a v3 file simply arrives with no overrides. Ids, day indexes and
+    // therefore `unavailable` / `placements` carry over untouched.
     const g = raw as Partial<State>;
     const limits = g.settings?.limits;
     const rules = g.settings?.rules;
@@ -253,6 +265,7 @@ export function parseState(text: string): State | null {
             blank.settings.rules.maxSameLessonPerDay,
           ),
         },
+        subjectShorts: asShorts(g.settings?.subjectShorts),
       },
       rooms: asArray(g.rooms, blank.rooms),
       teachers: asArray<Teacher>(g.teachers, blank.teachers).map((t) => ({

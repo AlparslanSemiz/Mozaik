@@ -162,6 +162,7 @@ export function sampleState(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS_SAMPLE },
       rules: { ...DEFAULT_RULES },
+      subjectShorts: {},
     },
     rooms,
     teachers,
