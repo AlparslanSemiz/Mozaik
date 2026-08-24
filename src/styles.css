@@ -458,6 +458,16 @@ td.unavailable {
   font: inherit;
 }
 
+/* A lesson sitting on an hour that has since been closed. It is NOT removed —
+   a wrong click on the availability grid must not cost a laid-out lesson — so
+   it has to be visible instead. The inset outline stays inside the 34px cell,
+   and the corner wedge shows even where two conflicting cards touch. */
+.card.conflict {
+  outline: 2px solid var(--bad);
+  outline-offset: -2px;
+  background-image: linear-gradient(135deg, transparent 62%, var(--bad) 62%);
+}
+
 .card:hover {
   outline: 2px solid var(--accent);
   outline-offset: -2px;

@@ -1992,3 +1992,84 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     expect(availSize).toBeGreaterThanOrEqual(15);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 20. A lesson on an hour that has since been closed
+//
+// Availability is edited AFTER a timetable is laid out. Closing an hour that
+// already held a lesson used to do nothing at all — and worse, it was
+// invisible: the hatch is drawn only on EMPTY cells, so the card covered the
+// closed hour and neither the grid nor Kontrol ever said a word.
+//
+// The lesson is NOT removed (principle 6). It is marked instead.
+
+test.describe('20. Kapalı saatte ders', () => {
+  /** Lays a lesson down, then closes exactly that hour for its teacher. */
+  async function conflict(page: Page) {
+    await openWithSample(page);
+    const { day, hour, row } = await dragAndDrop(page);
+    const before = await page.locator('table.grid .card').count();
+    expect(before).toBeGreaterThan(0);
+
+    await closeHour(page, row, Number(day), Number(hour));
+    return { day: Number(day), hour: Number(hour), row, before };
+  }
+
+  /** Toggles one cell of the availability grid for one entity. */
+  async function closeHour(page: Page, entityId: string, day: number, hour: number) {
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    // The row the card landed on IS the teacher: the grid row id is the id.
+    await page.getByLabel('Müsaitlik listesi').selectOption(entityId);
+    await page
+      .locator('table.availability tbody tr')
+      .nth(day)
+      .locator('td')
+      .nth(hour)
+      .click();
+  }
+
+  test('kapatınca ders SİLİNMİYOR, kırmızı işaretleniyor', async ({ page }) => {
+    const { before } = await conflict(page);
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    // Nothing was removed.
+    await expect(page.locator('table.grid .card')).toHaveCount(before);
+    // ...and the clash is visible instead of hidden under the card.
+    const marked = page.locator('table.grid .card.conflict');
+    await expect(marked.first()).toBeVisible();
+
+    const outline = await marked
+      .first()
+      .evaluate((el) => getComputedStyle(el).outlineColor);
+    const bad = await tokens(page, ['--bad']);
+    expect(outline).toBe(bad['--bad']);
+    await expect(marked.first()).toHaveAttribute('title', /müsait değil|kapalı/);
+  });
+
+  test('Kontrol sekmesi tek tek sayıyor ve sebebini yazıyor', async ({ page }) => {
+    await conflict(page);
+    await page.getByRole('button', { name: 'Kontrol' }).click();
+
+    const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
+    await expect(panel.getByRole('heading', { name: /Kapalı saatte ders/ })).toBeVisible();
+    await expect(panel.locator('tbody tr')).not.toHaveCount(0);
+    await expect(panel.locator('tbody tr').first()).toContainText(/müsait değil|kapalı/);
+  });
+
+  test('Müsaitlik ekranı olan biteni söylüyor', async ({ page }) => {
+    await conflict(page);
+    await expect(page.locator('.warn-box', { hasText: 'yerleşmiş' })).toContainText(
+      'Hiçbiri silinmedi',
+    );
+  });
+
+  test('saat yeniden açılınca işaret kalkıyor', async ({ page }) => {
+    const { day, hour, row } = await conflict(page);
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid .card.conflict').first()).toBeVisible();
+
+    await closeHour(page, row, day, hour); // toggles it back open
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid .card.conflict')).toHaveCount(0);
+  });
+});

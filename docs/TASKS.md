@@ -245,3 +245,10 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
   gecikmeyle otomatik kaydediliyor ve sekme kapanışında anında yazılıyor
   (`store.ts`), yani "kaydedilmemiş" durum pratikte oluşmuyor. Yine de babanın
   içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*
+
+
+  UI düzenlenmesi ve modernleştirilmesi lazım. her sectionda sağ taraf bomboş düzgün bir UI yapılmalı.
+
+  Otomatik kurulum önemli.
+
+  

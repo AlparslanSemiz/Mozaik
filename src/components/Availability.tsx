@@ -10,7 +10,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { sharedPeriods } from '../bell';
-import { closedKey } from '../constraints';
+import { buildIndex, closedConflicts, closedKey } from '../constraints';
 import type { Id, State } from '../types';
 import { setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
 
@@ -172,6 +172,11 @@ export default function Availability({ state, change }: Props) {
   const total = state.settings.days.length * state.settings.hours.length;
   const open = total - closedCount;
 
+  const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
+  const mine = conflicts.filter(
+    (c) => c.teacherId === entityId || c.classId === entityId,
+  ).length;
+
   // A column header carries one time; where the days disagree it stays empty.
   const clocks = useMemo(
     () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
@@ -232,6 +237,19 @@ export default function Availability({ state, change }: Props) {
           <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders yüklenmiş.
           {open < selected.load && ` ${selected.load - open} saat fazla — bu program dizilemez.`}
         </p>
+
+        {/* Closing an hour never removes what is already on it (principle 6),
+            so the only honest thing to do is say that it happened. */}
+        {conflicts.length > 0 && (
+          <div className="warn-box">
+            <b>
+              Kapattığınız saatlerde yerleşmiş {conflicts.length} ders var
+              {mine > 0 && `, ${mine} tanesi ${selected.short}'de`}.
+            </b>{' '}
+            Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{' '}
+            <b>Kontrol</b> sekmesinde tek tek listeleniyor.
+          </div>
+        )}
 
         <div className="scroll-x">
           <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>

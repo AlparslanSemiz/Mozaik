@@ -2,6 +2,7 @@
 // This is the thing aSc does not do and that hurts most at the school.
 
 import { useMemo } from 'react';
+import { buildIndex, closedConflicts } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
 import type { State } from '../types';
@@ -60,6 +61,7 @@ function Section({
 
 export default function Check({ state }: Props) {
   const report = useMemo(() => buildReport(state), [state]);
+  const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
   if (state.lessons.length === 0) {
     return (
@@ -77,7 +79,7 @@ export default function Check({ state }: Props) {
     <div className="main">
       {!report.hasProblem ? (
         <div className="panel">
-          <div className="ok-box">
+          <div className={conflicts.length > 0 ? 'warn-box' : 'ok-box'}>
             <b>Sorun görünmüyor.</b> Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri
             yüklenen ders saatlerini karşılıyor. Program dizilebilir.
           </div>
@@ -89,6 +91,35 @@ export default function Check({ state }: Props) {
             <span className="badge impossible">İmkânsız</span> yazan satırlar programın
             dizilmesini engeller — önce onları çözün.
           </div>
+        </div>
+      )}
+
+      {conflicts.length > 0 && (
+        <div className="panel">
+          <h2>Kapalı saatte ders ({conflicts.length})</h2>
+          <p className="hint">
+            Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
+            silinmedi — <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
+            yeniden açın, ya dersi başka saate taşıyın.
+          </p>
+          <table className="list">
+            <thead>
+              <tr>
+                <th style={{ width: 110 }}>Durum</th>
+                <th>Açıklama</th>
+              </tr>
+            </thead>
+            <tbody>
+              {conflicts.map((c) => (
+                <tr key={`${c.classId}|${c.day}|${c.hour}`}>
+                  <td>
+                    <span className="badge impossible">Kapalı saat</span>
+                  </td>
+                  <td>{c.reason}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

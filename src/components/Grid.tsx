@@ -16,6 +16,8 @@ export interface GridCell {
   color: number;
   /** Does the block continue into the next hour — then no separator is drawn. */
   continues: boolean;
+  /** The hour has since been closed for this teacher, class or room. */
+  conflict: string | null;
 }
 
 export interface GridRow {
@@ -69,15 +71,19 @@ const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellCl
           data-day={g}
           data-hour={s}
           className={className}
-          title={cell !== null ? `${cell.top} ${cell.bottom}` : undefined}
+          title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >
           {cell !== null ? (
             <button
               type="button"
-              className="card"
+              className={cell.conflict === null ? 'card' : 'card conflict'}
               style={{ background: paletteColor(cell.color) }}
               onClick={() => onCellClick(row.id, g, s)}
-              title="Kaldırmak için tıklayın"
+              title={
+                cell.conflict === null
+                  ? 'Kaldırmak için tıklayın'
+                  : `${cell.conflict} — kaldırmak için tıklayın`
+              }
             >
               <span className="card-top">{cell.top}</span>
               {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}

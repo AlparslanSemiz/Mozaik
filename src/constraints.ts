@@ -340,6 +340,77 @@ export function countPlacedHours(d: State, lessonId: Id): number {
   return n;
 }
 
+// --------------------------------------------------- closed-hour conflicts
+
+/** One placed lesson sitting on an hour that is now closed for somebody. */
+export interface ClosedConflict {
+  lessonId: Id;
+  classId: Id;
+  teacherId: Id;
+  day: number;
+  hour: number;
+  /** Concrete, in blocker()'s own voice: "MÇ Salı 3 saatinde müsait değil". */
+  reason: string;
+}
+
+/**
+ * Lessons already on the grid whose hour has since been closed.
+ *
+ * Availability is edited AFTER a timetable is laid out, and marking an hour
+ * closed used to do nothing to what already sat there: the lesson stayed, and
+ * it was invisible — the hatch is only drawn on EMPTY cells, so the card simply
+ * covered the closed hour. blocker() never looked at it either, because it only
+ * ever runs for a prospective drop.
+ *
+ * Nothing is deleted here, on purpose (principle 6): a wrong click on the
+ * availability grid must not silently cost a laid-out lesson. The caller paints
+ * these cells red and Kontrol lists them; my father decides.
+ */
+export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
+  const out: ClosedConflict[] = [];
+
+  for (const key in d.placements) {
+    const lessonId = d.placements[key];
+    if (lessonId === undefined) continue;
+
+    const parts = key.split('|');
+    const classId = parts[0];
+    if (classId === undefined) continue;
+    const day = Number(parts[1]);
+    const hour = Number(parts[2]);
+
+    const lesson = ix.lessonById.get(lessonId);
+    if (lesson === undefined) continue;
+    const group = ix.classById.get(classId);
+    const teacher = ix.teacherById.get(lesson.teacherId);
+    if (group === undefined || teacher === undefined) continue;
+
+    const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
+    const hourName = d.settings.hours[hour] ?? `${hour + 1}`;
+    const when = `${dayName} ${hourName} saatinde`;
+
+    let reason: string | null = null;
+    if (d.unavailable[closedKey(teacher.id, day, hour)] !== undefined) {
+      reason = `${teacher.short} ${when} müsait değil`;
+    } else if (d.unavailable[closedKey(group.id, day, hour)] !== undefined) {
+      reason = `${group.name} sınıfı ${when} kapalı`;
+    } else if (
+      group.roomId != null &&
+      d.unavailable[closedKey(group.roomId, day, hour)] !== undefined
+    ) {
+      const roomName = ix.roomById.get(group.roomId)?.name ?? '?';
+      reason = `${roomName} dersliği ${when} kapalı`;
+    }
+    if (reason === null) continue;
+
+    out.push({ lessonId, classId, teacherId: teacher.id, day, hour, reason });
+  }
+
+  // Stable order, so the Kontrol list does not reshuffle on every keystroke.
+  out.sort((a, b) => a.day - b.day || a.hour - b.hour || a.reason.localeCompare(b.reason, 'tr'));
+  return out;
+}
+
 // ------------------------------------------------------------ sanitize
 
 /**

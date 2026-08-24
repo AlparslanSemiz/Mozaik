@@ -7,7 +7,15 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type React from 'react';
-import { buildIndex, check, closedKey, removeBlock, placementKey, place } from '../constraints';
+import {
+  buildIndex,
+  check,
+  closedConflicts,
+  closedKey,
+  removeBlock,
+  placementKey,
+  place,
+} from '../constraints';
 import type { Index, Verdict } from '../constraints';
 import { subjectShort } from '../entities';
 import { useDrag } from '../drag';
@@ -71,6 +79,14 @@ const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
 ];
 
 function buildRows(d: State, ix: Index, view: View): GridRow[] {
+  // Availability is edited after the timetable is laid out, and a cell whose
+  // hour has since been closed used to look perfectly normal: the hatch is only
+  // drawn on EMPTY cells, so the card simply covered it up.
+  const conflicts = new Map<string, string>();
+  for (const c of closedConflicts(d, ix)) {
+    conflicts.set(placementKey(c.classId, c.day, c.hour), c.reason);
+  }
+
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
   const n = dayCount * hourCount;
@@ -93,6 +109,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
             top: group?.name ?? '?',
             bottom: roomLetter(ix, group?.roomId),
             color: t.color,
+            conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
             continues:
               s + 1 < hourCount && ix.teacherBusy.get(closedKey(t.id, g, s + 1)) === lessonId,
           };
@@ -121,6 +138,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
           top: teacher?.short ?? '?',
           bottom: teacher === undefined ? '' : subjectShort(d.settings, teacher.subject),
           color: teacher?.color ?? 0,
+          conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
           continues:
             s + 1 < hourCount && d.placements[placementKey(group.id, g, s + 1)] === lessonId,
         };
