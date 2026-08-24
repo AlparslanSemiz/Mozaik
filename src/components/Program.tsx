@@ -210,14 +210,14 @@ export default function Program({ state, change }: Props) {
 
   return (
     <div className="main no-overflow">
-      <div className="topbar" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+      <div className="topbar subbar">
         <button
           className="btn"
           onClick={() => setView(view === 'teacher' ? 'class' : 'teacher')}
         >
           {view === 'teacher' ? 'Sınıf görünümüne geç' : 'Öğretmen görünümüne geç'}
         </button>
-        <span className="hint" style={{ margin: 0 }}>
+        <span className="hint inline">
           {view === 'teacher'
             ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş derse tıklayınca kalkar.'
             : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş derse tıklayınca kalkar.'}

@@ -45,7 +45,7 @@ export default function Teachers({ state, change }: SetupProps) {
           aria-label="Kısaltma"
           placeholder={suggested}
           title="Boş bırakırsanız addan üretilir"
-          style={{ width: 90 }}
+          className="text-sm"
           value={newTeacher.short}
           onChange={(e) => setNewTeacher({ ...newTeacher, short: e.target.value })}
         />
@@ -93,13 +93,13 @@ export default function Teachers({ state, change }: SetupProps) {
               <th>Ad</th>
               <th style={{ width: 110 }}>Kısaltma</th>
               <th>Branş</th>
-              <th style={{ width: 70 }} title="Art arda en fazla kaç saat">
+              <th className="num" title="Art arda en fazla kaç saat">
                 Art arda
               </th>
-              <th style={{ width: 70 }} title="Bir günde en fazla kaç saat">
+              <th className="num" title="Bir günde en fazla kaç saat">
                 Günde ↑
               </th>
-              <th style={{ width: 70 }} title="Geldiği gün en az kaç saat">
+              <th className="num" title="Geldiği gün en az kaç saat">
                 Günde ↓
               </th>
               <th style={{ width: 90 }}>Ders saati</th>
@@ -137,7 +137,7 @@ export default function Teachers({ state, change }: SetupProps) {
                 <td>
                   <input
                     type="text"
-                    style={{ width: 90 }}
+                    className="text-sm"
                     defaultValue={t.short}
                     onBlur={(e) =>
                       change((d) => updateTeacher(d, t.id, { short: e.target.value.trim() }))

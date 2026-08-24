@@ -30,8 +30,8 @@ export default function Paste<T>({
   }
 
   return (
-    <div className="panel" style={{ background: 'var(--bg)' }}>
-      <h3 style={{ marginTop: 0 }}>{title}</h3>
+    <div className="panel inset">
+      <h3>{title}</h3>
       <p className="hint">
         Excel'de sütunları seçip kopyalayın, aşağıya yapıştırın. Beklenen sıra:{' '}
         <b>{example}</b>
@@ -45,7 +45,7 @@ export default function Paste<T>({
         }}
         placeholder="Buraya yapıştırın..."
       />
-      <div className="form-row" style={{ marginTop: 8 }}>
+      <div className="form-row spaced">
         <button className="btn" onClick={() => setResult(parse(text))}>
           Önizle
         </button>
@@ -77,7 +77,7 @@ export default function Paste<T>({
               <div className="ok-box">
                 <b>{result.accepted.length} satır okundu.</b> Aşağıdakiler eklenecek:
               </div>
-              <ul style={{ maxHeight: 160, overflow: 'auto', fontSize: 13 }}>
+              <ul className="paste-preview">
                 {result.accepted.map((x, i) => (
                   <li key={i}>{rowText(x)}</li>
                 ))}

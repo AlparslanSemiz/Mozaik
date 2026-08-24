@@ -6,6 +6,7 @@ import { parseLessons } from '../../import';
 import { addLesson, addLessonsFromRows, deleteLesson, updateLesson } from '../../entities';
 import LimitBox from './LimitBox';
 import Paste from './Paste';
+import Field from './Field';
 import type { SetupProps } from './props';
 
 export default function Lessons({ state, change }: SetupProps) {
@@ -55,19 +56,17 @@ export default function Lessons({ state, change }: SetupProps) {
             </option>
           ))}
         </select>
-        <label>
-          Haftalık saat{' '}
+        <Field label="Haftalık saat">
           <input
             type="number"
             min={1}
             max={40}
-            style={{ width: 70 }}
+            className="num"
             value={newLesson.hours}
             onChange={(e) => setNewLesson({ ...newLesson, hours: e.target.value })}
           />
-        </label>
-        <label>
-          Blok{' '}
+        </Field>
+        <Field label="Blok">
           <select
             value={newLesson.blockSize}
             onChange={(e) => setNewLesson({ ...newLesson, blockSize: e.target.value })}
@@ -76,7 +75,7 @@ export default function Lessons({ state, change }: SetupProps) {
             <option value="2">2 saat</option>
             <option value="3">3 saat</option>
           </select>
-        </label>
+        </Field>
         <button
           className="btn"
           disabled={newLesson.classId === '' || newLesson.teacherId === ''}
@@ -148,7 +147,7 @@ export default function Lessons({ state, change }: SetupProps) {
                       type="number"
                       min={1}
                       max={40}
-                      style={{ width: 70 }}
+                      className="num"
                       defaultValue={x.weeklyHours}
                       onBlur={(e) =>
                         change((d) =>

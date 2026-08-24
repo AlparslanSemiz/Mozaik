@@ -122,7 +122,7 @@ export default function App() {
           ref={fileInput}
           type="file"
           accept=".json,application/json"
-          style={{ display: 'none' }}
+          className="hidden"
           onChange={fileChosen}
         />
 

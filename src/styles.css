@@ -127,8 +127,8 @@ textarea {
 .topbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--paper);
   border-bottom: 1px solid var(--line);
   flex: 0 0 auto;
@@ -137,11 +137,11 @@ textarea {
 
 .tabs {
   display: flex;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .tab {
-  padding: 8px 16px;
+  padding: var(--space-3) var(--space-5);
   border: 1px solid transparent;
   border-radius: 6px 6px 0 0;
   background: none;
@@ -185,7 +185,7 @@ textarea {
 }
 
 .btn {
-  padding: 7px 12px;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line-dark);
   border-radius: 6px;
   background: var(--paper);
@@ -227,6 +227,15 @@ textarea {
   line-height: 1.2;
 }
 
+/* Four states, and only four: primary (the one thing to do here), plain
+   (everything else), danger, and pressed (a two-position toggle, see above).
+   Danger is coloured AT REST — until now it was identical to a plain button
+   until the pointer was already on it. */
+.btn.danger {
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
 .btn.danger:hover:not(:disabled) {
   background: var(--bad-bg);
   border-color: var(--bad);
@@ -235,7 +244,7 @@ textarea {
 .main {
   flex: 1 1 auto;
   overflow: auto;
-  padding: 12px;
+  padding: var(--space-4);
 }
 
 .main.no-overflow {
@@ -605,12 +614,103 @@ td.drop-blocked {
 
 /* -------------------------------------------------------------------- form */
 
+/* Control sizes come from here, not from inline style props: the same number
+   box was written with `width: 70` seven times and `width: 64` once. */
+.num {
+  width: 70px;
+}
+
+.text-sm {
+  width: 90px;
+}
+
+.time {
+  width: 120px;
+}
+
+.grow {
+  width: 100%;
+}
+
+.field-wide {
+  flex: 1;
+  min-width: 260px;
+}
+
+.hidden {
+  display: none;
+}
+
+.scroll-x {
+  overflow-x: auto;
+}
+
+/* One labelled control. The label reads as a label, not as body text. */
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.field-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field.field-wide {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-1);
+}
+
+.form-row.spaced {
+  margin-top: var(--space-3);
+}
+
+/* A panel nested inside a panel (the Excel paste box). */
+.panel.inset {
+  background: var(--bg);
+}
+
+.panel.inset > h3:first-child {
+  margin-top: 0;
+}
+
+.paste-preview {
+  max-height: 160px;
+  overflow: auto;
+  font-size: 13px;
+}
+
+table.list.narrow {
+  max-width: 520px;
+}
+
+table.list.mid {
+  max-width: 640px;
+}
+
+table.list.wide {
+  max-width: 720px;
+}
+
+/* The strip above the grid: same furniture as the top bar, no second border. */
+.topbar.subbar {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.hint.inline {
+  margin: 0;
+}
+
 .panel {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 12px 14px;
-  margin-bottom: 14px;
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
 }
 
 .panel h2 {
@@ -626,17 +726,17 @@ td.drop-blocked {
 
 .form-row {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-4);
 }
 
 input[type="text"],
 input[type="number"],
 select,
 textarea {
-  padding: 6px 8px;
+  padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line-dark);
   border-radius: 5px;
   background: var(--paper);
@@ -648,6 +748,19 @@ select:focus,
 textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
+}
+
+/* Buttons had no focus style at all: tabbing through the top bar was invisible.
+   :focus-visible, so a mouse click does not leave a ring behind. */
+.btn:focus-visible,
+.tab:focus-visible,
+.step:focus-visible,
+table.availability th:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 textarea {
@@ -673,6 +786,17 @@ table.list th {
   font-size: 12px;
   color: var(--muted);
   font-weight: 600;
+}
+
+/* The heading has to sit over the column it names. The bell preview centres its
+   cells, so its headings were left-aligned above centred times — the day names
+   looked shifted off their own column. */
+table.bell-preview th {
+  text-align: center;
+}
+
+table.bell-preview tbody th {
+  color: var(--text);
 }
 
 table.list tbody tr:hover {
@@ -735,17 +859,17 @@ table.list tbody tr:hover {
 .warn-box {
   border-left: 4px solid var(--warn);
   background: var(--warn-bg);
-  padding: 8px 12px;
+  padding: var(--space-3) var(--space-4);
   border-radius: 0 6px 6px 0;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-4);
 }
 
 .error-box {
   border-left: 4px solid var(--bad);
   background: var(--bad-bg);
-  padding: 8px 12px;
+  padding: var(--space-3) var(--space-4);
   border-radius: 0 6px 6px 0;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-4);
 }
 
 .ok-box {

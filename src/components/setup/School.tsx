@@ -8,6 +8,7 @@ import { dayPeriods } from '../../bell';
 import { sampleState } from '../../sample';
 import type { Day } from '../../types';
 import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
+import Field from './Field';
 import type { SetupProps } from './props';
 
 export default function School({ state, change }: SetupProps) {
@@ -99,11 +100,13 @@ export default function School({ state, change }: SetupProps) {
       <div className="panel">
         <h2>Okul ve günler</h2>
         <div className="form-row">
-          <label style={{ flex: 1, minWidth: 260 }}>
-            Okul adı (yazdırılan sayfaların başlığında görünür){' '}
+          <label className="field field-wide">
+            <span className="field-label">
+              Okul adı (yazdırılan sayfaların başlığında görünür)
+            </span>
             <input
               type="text"
-              style={{ width: '100%' }}
+              className="grow"
               defaultValue={state.settings.schoolName}
               placeholder="örn. Semiz Kurs"
               onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
@@ -117,7 +120,7 @@ export default function School({ state, change }: SetupProps) {
           yerleşmiş dersler silinir; kalan günlerin programı yerinde durur.
         </p>
 
-        <table className="list" style={{ maxWidth: 520 }}>
+        <table className="list narrow">
           <thead>
             <tr>
               <th style={{ width: 44 }} />
@@ -176,65 +179,60 @@ export default function School({ state, change }: SetupProps) {
           hesaplanır — tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
         </p>
         <div className="form-row">
-          <label>
-            Günlük ders sayısı{' '}
+          <Field label="Günlük ders sayısı">
             <input
               type="number"
               min={1}
               max={16}
               defaultValue={hourCount}
-              style={{ width: 70 }}
+              className="num"
               onBlur={(e) => setHours(Number(e.target.value))}
             />
-          </label>
-          <label>
-            İlk ders başlangıcı{' '}
+          </Field>
+          <Field label="İlk ders başlangıcı">
             <input
               type="time"
               defaultValue={state.settings.bell.start}
-              style={{ width: 120 }}
+              className="time"
               onBlur={(e) => change((d) => updateBell(d, { start: e.target.value }))}
             />
-          </label>
-          <label>
-            Ders (dk){' '}
+          </Field>
+          <Field label="Ders (dk)">
             <input
               type="number"
               min={5}
               max={120}
               defaultValue={state.settings.bell.lessonMinutes}
-              style={{ width: 70 }}
+              className="num"
               onBlur={(e) => change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))}
             />
-          </label>
-          <label>
-            Teneffüs (dk){' '}
+          </Field>
+          <Field label="Teneffüs (dk)">
             <input
               type="number"
               min={0}
               max={60}
               defaultValue={state.settings.bell.breakMinutes}
-              style={{ width: 70 }}
+              className="num"
               onBlur={(e) => change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))}
             />
-          </label>
-          <label>
-            Öğle arası (dk){' '}
+          </Field>
+          <Field label="Öğle arası (dk)">
             <input
               type="number"
               min={0}
               max={180}
               defaultValue={state.settings.bell.longBreakMinutes}
-              style={{ width: 70 }}
+              className="num"
               onBlur={(e) =>
                 change((d) => updateBell(d, { longBreakMinutes: Number(e.target.value) }))
               }
             />
-          </label>
+          </Field>
         </div>
 
         {patterns.length > 0 && (
-          <table className="list bell-preview" style={{ maxWidth: 640 }}>
+          <table className="list bell-preview mid">
             <thead>
               <tr>
                 <th style={{ width: 60 }}>Ders</th>
@@ -283,12 +281,12 @@ export default function School({ state, change }: SetupProps) {
           </table>
         )}
 
-        <div className="form-row" style={{ marginTop: 8 }}>
-          <label style={{ flex: 1, minWidth: 260 }}>
-            Ders adları (virgülle; boş bırakılırsa 1, 2, 3…){' '}
+        <div className="form-row spaced">
+          <label className="field field-wide">
+            <span className="field-label">Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)</span>
             <input
               type="text"
-              style={{ width: '100%' }}
+              className="grow"
               defaultValue={state.settings.hours.join(', ')}
               onBlur={(e) => setHours(hourCount, e.target.value)}
               placeholder="1, 2, 3, ..."

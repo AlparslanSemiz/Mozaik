@@ -233,7 +233,7 @@ export default function Availability({ state, change }: Props) {
           {open < selected.load && ` ${selected.load - open} saat fazla — bu program dizilemez.`}
         </p>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div className="scroll-x">
           <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
             <thead>
               <tr>

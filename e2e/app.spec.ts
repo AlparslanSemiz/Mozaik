@@ -657,6 +657,49 @@ async function hover(page: Page, day: number, hour: number) {
   return cell;
 }
 
+test.describe('11. Görsel cila', () => {
+  test('başlık altındaki sütunla aynı hizada', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Okul');
+
+    // The bell preview centres its cells; its headings used to be left-aligned,
+    // so the day names sat visibly off their own column.
+    const head = page.locator('table.bell-preview thead th').nth(1);
+    const cell = page.locator('table.bell-preview tbody tr').first().locator('td').first();
+    const [a, b] = [await head.boundingBox(), await cell.boundingBox()];
+    const centre = (box: { x: number; width: number }) => box.x + box.width / 2;
+    expect(Math.abs(centre(a!) - centre(b!))).toBeLessThanOrEqual(1);
+  });
+
+  test('klavyeyle gezerken nerede olduğun belli', async ({ page }) => {
+    await open(page);
+    await page.keyboard.press('Tab');
+
+    const focus = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (el === null) return null;
+      const s = getComputedStyle(el);
+      return { tag: el.tagName, style: s.outlineStyle, width: s.outlineWidth };
+    });
+    expect(focus).not.toBeNull();
+    expect(focus!.tag).toBe('BUTTON');
+    expect(focus!.style).not.toBe('none');
+    expect(parseFloat(focus!.width)).toBeGreaterThan(0);
+  });
+
+  test('tehlikeli düğme beklemeden tehlikeli görünüyor', async ({ page }) => {
+    await open(page);
+    const [danger, plain] = await Promise.all([
+      page.getByRole('button', { name: 'Sıfırla' }).evaluate((el) => getComputedStyle(el).color),
+      page.getByRole('button', { name: 'Dosyadan aç' }).evaluate((el) => getComputedStyle(el).color),
+    ]);
+    // Not identical to a plain button until the pointer is already on it
+    expect(danger).not.toBe(plain);
+    const bad = await tokens(page, ['--bad']);
+    expect(danger).toBe(bad['--bad']);
+  });
+});
+
 test.describe('10. Müsaitlik çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
     await openWithSample(page);

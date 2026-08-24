@@ -47,7 +47,7 @@ export default function Rules({ state, change }: SetupProps) {
         bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız
         kutu buradaki sayıyı kullanır. <b>0</b> yazmak “sınır yok” demektir.
       </p>
-      <table className="list" style={{ maxWidth: 720 }}>
+      <table className="list wide">
         <thead>
           <tr>
             <th>Kural</th>
@@ -68,7 +68,7 @@ export default function Rules({ state, change }: SetupProps) {
                   type="number"
                   min={0}
                   max={16}
-                  style={{ width: 70 }}
+                  className="num"
                   defaultValue={state.settings.limits[rule.name]}
                   onBlur={(e) =>
                     change((d) =>

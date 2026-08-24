@@ -18,7 +18,7 @@ export default function LimitBox({
       type="number"
       min={0}
       max={16}
-      style={{ width: 64 }}
+      className="num"
       title={title}
       placeholder={fallback > 0 ? String(fallback) : '—'}
       defaultValue={value ?? ''}
