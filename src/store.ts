@@ -8,7 +8,8 @@
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { sanitize } from './constraints';
-import { emptyState, makeDay, NO_TEACHER_LIMITS } from './entities';
+import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from './entities';
+import { firstFreeColor, PALETTE_SIZE } from './palette';
 import type {
   ClassGroup,
   Day,
@@ -121,6 +122,54 @@ function asShorts(x: unknown): Record<string, string> {
   return out;
 }
 
+/** A stored list of names: strings only, trimmed, no blanks, no duplicates. */
+function asNames(x: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(x)) return fallback;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of x) {
+    if (typeof value !== 'string') continue;
+    const name = value.trim();
+    const key = name.toLocaleLowerCase('tr');
+    if (name === '' || seen.has(key)) continue;
+    seen.add(key);
+    out.push(name);
+  }
+  return out.length > 0 ? out : fallback;
+}
+
+/**
+ * Gives everyone in a list a colour nobody else has.
+ *
+ * Needed on EVERY load, not only on migration: a v4 file was written when the
+ * palette had 12 entries, so with more than twelve teachers colours repeat, and
+ * a repeated colour is exactly what makes a pool card stop pointing at one row.
+ * A file whose colours are already distinct comes back untouched, so opening a
+ * backup twice cannot shuffle it.
+ */
+function spreadColors<T extends { color?: unknown }>(list: T[]): T[] {
+  const taken = new Set<number>();
+  let changed = false;
+
+  const out = list.map((item) => {
+    const raw = item.color;
+    const current =
+      typeof raw === 'number' && Number.isFinite(raw)
+        ? Math.abs(Math.round(raw)) % PALETTE_SIZE
+        : -1;
+    if (current >= 0 && !taken.has(current)) {
+      taken.add(current);
+      return current === raw ? item : { ...item, color: current };
+    }
+    const fresh = firstFreeColor(taken);
+    taken.add(fresh);
+    changed = true;
+    return { ...item, color: fresh };
+  });
+
+  return changed || out.some((x, i) => x !== list[i]) ? out : list;
+}
+
 /**
  * Migrates a v1 backup (Turkish field names) to the v2 shape.
  *
@@ -228,9 +277,10 @@ export function parseState(text: string): State | null {
     candidate = migrateV2toV3(migrateV1(raw as LegacyV1));
   } else if (version === 2) {
     candidate = migrateV2toV3(raw as LegacyV2);
-  } else if (version === 3 || version === SCHEMA_VERSION) {
-    // v3 -> v4 adds subjectShorts and touches NOTHING else, so one reader does
-    // both: a v3 file simply arrives with no overrides. Ids, day indexes and
+  } else if (version === 3 || version === 4 || version === SCHEMA_VERSION) {
+    // v3, v4 and v5 only ADD fields, so one reader does all three: a v3 file
+    // arrives with no subject overrides, a v4 file with no class colours and no
+    // subject list, and both get filled in below. Ids, day indexes and
     // therefore `unavailable` / `placements` carry over untouched.
     const g = raw as Partial<State>;
     const limits = g.settings?.limits;
@@ -265,18 +315,21 @@ export function parseState(text: string): State | null {
             blank.settings.rules.maxSameLessonPerDay,
           ),
         },
+        subjects: asNames(g.settings?.subjects, defaultSubjects()),
         subjectShorts: asShorts(g.settings?.subjectShorts),
       },
       rooms: asArray(g.rooms, blank.rooms),
-      teachers: asArray<Teacher>(g.teachers, blank.teachers).map((t) => ({
-        ...t,
-        limits: {
-          maxConsecutive: asBox(t.limits?.maxConsecutive),
-          maxPerDay: asBox(t.limits?.maxPerDay),
-          minPerDay: asBox(t.limits?.minPerDay),
-        },
-      })),
-      classes: asArray(g.classes, blank.classes),
+      teachers: spreadColors(
+        asArray<Teacher>(g.teachers, blank.teachers).map((t) => ({
+          ...t,
+          limits: {
+            maxConsecutive: asBox(t.limits?.maxConsecutive),
+            maxPerDay: asBox(t.limits?.maxPerDay),
+            minPerDay: asBox(t.limits?.minPerDay),
+          },
+        })),
+      ),
+      classes: spreadColors(asArray<ClassGroup>(g.classes, blank.classes)),
       lessons: asArray<Lesson>(g.lessons, blank.lessons).map((x) => ({
         ...x,
         maxPerDay: asBox(x.maxPerDay),

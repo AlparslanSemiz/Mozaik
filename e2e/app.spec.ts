@@ -668,6 +668,104 @@ test.describe('5. Kurulum ve yedek', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mat');
   });
+
+  test('v4 biçimli yedek (sınıf rengi ve branş listesi yokken) açılıyor', async ({ page }) => {
+    // The v4 -> v5 migration on the REAL path. A v4 file has no ClassGroup.color
+    // and no settings.subjects, and its teacher colours come from a palette that
+    // only had twelve entries — so two of these three teachers share one.
+    await open(page);
+
+    const v4 = {
+      schemaVersion: 4,
+      settings: {
+        schoolName: 'Semiz Kurs',
+        days: [
+          { name: 'Salı', longBreakAfter: 5 },
+          { name: 'Çarşamba', longBreakAfter: 5 },
+        ],
+        hours: ['1', '2', '3', '4'],
+        bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+        limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+        rules: {
+          maxConsecutive: 'block',
+          maxPerDay: 'block',
+          minPerDay: 'warn',
+          maxSameLessonPerDay: 'block',
+        },
+        subjectShorts: { matematik: 'Mtk' },
+        // no `subjects` here — that is the whole point
+      },
+      rooms: [{ id: 'dA', name: 'A' }],
+      teachers: [
+        {
+          id: 'oMC',
+          name: 'Mehmet Çelik',
+          short: 'MÇ',
+          subject: 'Matematik',
+          color: 3,
+          limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+        },
+        {
+          id: 'oAY',
+          name: 'Ayşe Yıldız',
+          short: 'AY',
+          subject: 'Fizik',
+          color: 3, // the collision an old twelve-colour file is full of
+          limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+        },
+      ],
+      // no `color` on either class
+      classes: [
+        { id: 's510', name: '510', roomId: 'dA' },
+        { id: 's511', name: '511', roomId: null },
+      ],
+      lessons: [
+        {
+          id: 'x1',
+          classId: 's510',
+          teacherId: 'oMC',
+          weeklyHours: 2,
+          blockSize: 2,
+          maxPerDay: null,
+        },
+      ],
+      unavailable: { 'oMC|1|0': 1 },
+      placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
+    };
+
+    page.once('dialog', (d) => d.accept());
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-08-24-1900.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(v4)),
+    });
+
+    // The laid-out block survived the migration untouched.
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    await expect(page.locator('table.grid .card').first()).toContainText('510');
+
+    // The two teachers no longer share a colour...
+    await openSetup(page, 'Öğretmenler');
+    const teacherColors = await page
+      .locator('table.list tbody tr select[title="Renk"]')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+    expect(teacherColors).toHaveLength(2);
+    expect(new Set(teacherColors).size).toBe(2);
+
+    // ...and the classes were given colours of their own.
+    await openSetup(page, 'Sınıflar');
+    const classColors = await page
+      .locator('table.list tbody tr select[title="Renk"]')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+    expect(classColors).toHaveLength(2);
+    expect(new Set(classColors).size).toBe(2);
+
+    // The hand-written override still wins over the built-in table.
+    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
+  });
 });
 
 test.describe('6. Gün ve ders saatleri', () => {
@@ -1372,6 +1470,45 @@ test.describe('14. Renk paleti', () => {
       }
     }
     expect(worst).toBeGreaterThanOrEqual(15);
+  });
+
+  test('her sınıfın da kendi rengi var ve satır başında görünüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    const swatches = await page
+      .locator('table.list tbody tr select[title="Renk"]')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+    expect(swatches.length).toBeGreaterThanOrEqual(15);
+    expect(new Set(swatches).size, 'iki sınıf aynı renkte').toBe(swatches.length);
+
+    // The class colour is a MARK, not the cell fill: it shows on the row head.
+    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    const dots = await page
+      .locator('tbody .row-head .row-dot')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+    expect(dots.length).toBe(swatches.length);
+    expect(new Set(dots).size).toBe(dots.length);
+  });
+
+  test('hücreler her iki görünümde de ÖĞRETMEN renginde kalıyor', async ({ page }) => {
+    // The decision behind the class colour: it marks the row, it never repaints
+    // the grid. A cell keeps saying which teacher is in it.
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const teacherViewCell = await page
+      .locator('table.grid .card')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    const classViewCell = await page
+      .locator('table.grid .card')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+    expect(classViewCell).toBe(teacherViewCell);
   });
 
   test('palet iki temada ve kâğıtta AYNI', async ({ page }) => {

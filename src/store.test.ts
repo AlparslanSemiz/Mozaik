@@ -5,6 +5,7 @@
 // plain string days). BOTH must still open, and the timetable inside them must
 // come out exactly as it went in.
 
+import { defaultSubjects } from './entities';
 import { parseState } from './store';
 import { sampleState } from './sample';
 import { SCHEMA_VERSION } from './types';
@@ -235,5 +236,73 @@ describe('parseState — v3 → v4 göçü', () => {
       expect(d.schemaVersion).toBe(SCHEMA_VERSION);
       expect(d.settings.subjectShorts).toEqual({});
     }
+  });
+});
+
+/**
+ * A v4 backup: everything the current shape has EXCEPT ClassGroup.color and
+ * settings.subjects. Colours are squeezed back into the twelve the old palette
+ * had, because that is what a real file written before this version holds.
+ */
+function v4Backup() {
+  const raw = JSON.parse(JSON.stringify(sampleState()));
+  raw.schemaVersion = 4;
+  delete raw.settings.subjects;
+  for (const c of raw.classes) delete c.color;
+  raw.teachers = raw.teachers.map((t: { color: number }, i: number) => ({ ...t, color: i % 12 }));
+  return raw;
+}
+
+describe('parseState — v4 → v5 göçü', () => {
+  it('v4 yedeği açılıyor, sınıflar renk ve okul branş listesi kazanıyor', () => {
+    const d = parseState(JSON.stringify(v4Backup()))!;
+    expect(d).not.toBeNull();
+    expect(d.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d.settings.subjects).toEqual(defaultSubjects());
+    expect(d.classes.every((c) => typeof c.color === 'number')).toBe(true);
+  });
+
+  it('12 rengin tekrar ettiği eski dosyada renkler tekilleştiriliyor', () => {
+    const raw = v4Backup();
+    expect(raw.teachers.length).toBeGreaterThan(12); // otherwise there is nothing to fix
+    const before = new Set(raw.teachers.map((t: { color: number }) => t.color));
+    expect(before.size).toBeLessThan(raw.teachers.length);
+
+    const d = parseState(JSON.stringify(raw))!;
+    expect(new Set(d.teachers.map((t) => t.color)).size).toBe(d.teachers.length);
+    expect(new Set(d.classes.map((c) => c.color)).size).toBe(d.classes.length);
+  });
+
+  it('renkleri zaten tekil olan dosya açılıp açılınca karışmıyor', () => {
+    const once = parseState(JSON.stringify(sampleState()))!;
+    const twice = parseState(JSON.stringify(once))!;
+    expect(twice.teachers.map((t) => t.color)).toEqual(once.teachers.map((t) => t.color));
+    expect(twice.classes.map((c) => c.color)).toEqual(once.classes.map((c) => c.color));
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v4Backup()))!;
+
+    expect(migrated.rooms).toEqual(original.rooms);
+    expect(migrated.lessons).toEqual(original.lessons);
+    expect(migrated.settings.days).toEqual(original.settings.days);
+    expect(migrated.settings.bell).toEqual(original.settings.bell);
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
+    // names and rooms survive; only the colour is new
+    expect(migrated.classes.map((c) => c.name)).toEqual(original.classes.map((c) => c.name));
+    expect(migrated.teachers.map((t) => t.name)).toEqual(original.teachers.map((t) => t.name));
+  });
+
+  it('bozuk branş listesi varsayılana düşüyor', () => {
+    const raw = v4Backup();
+    raw.settings.subjects = ['Matematik', '  ', 42, 'matematik', 'Robotik'];
+    const d = parseState(JSON.stringify(raw))!;
+    // junk dropped, the case-folded duplicate dropped, the rest kept in order
+    expect(d.settings.subjects).toEqual(['Matematik', 'Robotik']);
+
+    raw.settings.subjects = 'Matematik';
+    expect(parseState(JSON.stringify(raw))!.settings.subjects).toEqual(defaultSubjects());
   });
 });

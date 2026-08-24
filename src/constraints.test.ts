@@ -32,6 +32,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjects: [],
       subjectShorts: {},
     },
     rooms: [
@@ -44,9 +45,9 @@ function build(): State {
       { id: 'oMB', name: 'Murat Bey', short: 'MB', subject: 'Kimya', color: 2, limits: { ...NO_TEACHER_LIMITS } },
     ],
     classes: [
-      { id: 's510', name: '510', roomId: 'dA' },
-      { id: 's511', name: '511', roomId: 'dA' },
-      { id: 's433', name: '433', roomId: 'dB' },
+      { id: 's510', name: '510', roomId: 'dA', color: 0 },
+      { id: 's511', name: '511', roomId: 'dA', color: 1 },
+      { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 1, maxPerDay: null },

@@ -113,6 +113,9 @@ export default function Print({ state }: Props) {
           state.classes.map((group) => (
             <div className="print-page" key={group.id}>
               <h3>
+                {colored && (
+                  <span className="p-dot" style={{ background: paletteColor(group.color) }} />
+                )}
                 {state.settings.schoolName !== '' && `${state.settings.schoolName} — `}
                 {group.name} sınıfı haftalık ders programı
                 {group.roomId != null &&
@@ -164,6 +167,9 @@ export default function Print({ state }: Props) {
           state.teachers.map((teacher) => (
             <div className="print-page" key={teacher.id}>
               <h3>
+                {colored && (
+                  <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
+                )}
                 {state.settings.schoolName !== '' && `${state.settings.schoolName} — `}
                 {teacher.name} ({teacher.short}) — {teacher.subject} — haftalık ders
                 programı

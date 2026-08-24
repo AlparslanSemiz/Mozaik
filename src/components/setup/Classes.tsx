@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { parseClasses } from '../../import';
+import { PALETTE_SIZE, paletteColor } from '../../palette';
 import {
   addClass,
   addClassesFromRows,
@@ -63,6 +64,7 @@ export default function Classes({ state, change }: SetupProps) {
         <table className="list">
           <thead>
             <tr>
+              <th style={{ width: 44 }}>Renk</th>
               <th>Ad</th>
               <th style={{ width: 160 }}>Derslik</th>
               <th style={{ width: 90 }}>Ders saati</th>
@@ -72,6 +74,22 @@ export default function Classes({ state, change }: SetupProps) {
           <tbody>
             {state.classes.map((c) => (
               <tr key={c.id}>
+                <td>
+                  <select
+                    value={c.color}
+                    onChange={(e) =>
+                      change((d) => updateClass(d, c.id, { color: Number(e.target.value) }))
+                    }
+                    style={{ background: paletteColor(c.color), width: 44 }}
+                    title="Renk"
+                  >
+                    {Array.from({ length: PALETTE_SIZE }, (_, i) => (
+                      <option key={i} value={i}>
+                        {i + 1}
+                      </option>
+                    ))}
+                  </select>
+                </td>
                 <td>
                   <input
                     type="text"

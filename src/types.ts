@@ -37,6 +37,12 @@ export interface ClassGroup {
   id: Id;
   name: string; // "510"
   roomId: Id | null; // null -> room clash is not checked
+  /**
+   * Index into PALETTE, like Teacher.color and from the same 36. A cell is
+   * always painted in its TEACHER's colour, so the two never compete for the
+   * same square; the class colour marks the row head and the printed page.
+   */
+  color: number;
 }
 
 /** The weekly load one teacher gives to one class. */
@@ -93,6 +99,14 @@ export interface Settings {
   limits: Limits;
   rules: Rules;
   /**
+   * The school's subject list — what the Branş dropdown offers. Stored in FULL,
+   * unlike subjectShorts below, because it is a list the user edits: a list
+   * derived from the built-in table could never express "we do not teach
+   * Fransızca". A teacher still stores the subject NAME, not an id, so removing
+   * a subject needs no cascade and a backup stays readable.
+   */
+  subjects: string[];
+  /**
    * Subject -> short form, but ONLY where the user changed it. Everything else
    * comes from the built-in table, so a backup does not swell with 21 defaults
    * and an improved table later reaches an old project on its own.
@@ -122,5 +136,6 @@ export interface State {
  * v1: Turkish field names (durum/ayar/ogretmenler...). v2: English field names.
  * v3: Day objects, bell times, limits and rules.
  * v4: settings.subjectShorts.
+ * v5: ClassGroup.color and settings.subjects.
  */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;

@@ -31,6 +31,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjects: [],
       subjectShorts: {},
     },
     rooms: [{ id: 'dA', name: 'A' }],
@@ -45,8 +46,8 @@ function build(): State {
       },
     ],
     classes: [
-      { id: 's510', name: '510', roomId: null },
-      { id: 's511', name: '511', roomId: null },
+      { id: 's510', name: '510', roomId: null, color: 0 },
+      { id: 's511', name: '511', roomId: null, color: 1 },
     ],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blockSize: 1, maxPerDay: null },

@@ -20,7 +20,7 @@ import type {
   State,
   Teacher,
 } from './types';
-import { firstFreeColor } from './palette';
+import { firstFreeColor, PALETTE_SIZE } from './palette';
 import { SCHEMA_VERSION } from './types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1
@@ -211,6 +211,66 @@ export function usedSubjects(d: State): string[] {
   return [...seen.values()];
 }
 
+/** The built-in list, in the order it is written above. */
+export function defaultSubjects(): string[] {
+  return Object.keys(DEFAULT_SUBJECT_SHORTS);
+}
+
+/**
+ * The subjects offered by the Branş dropdown: the school's own list plus
+ * anything a teacher already carries. The second half matters — an old backup,
+ * or a pasted list, can hold a subject nobody put in the list, and a dropdown
+ * that cannot show a teacher's current subject would silently change it.
+ */
+export function subjectOptions(d: State): string[] {
+  const seen = new Map<string, string>();
+  for (const name of [...d.settings.subjects, ...usedSubjects(d)]) {
+    const key = subjectKey(name);
+    if (key !== '' && !seen.has(key)) seen.set(key, name.trim());
+  }
+  return [...seen.values()];
+}
+
+/** How many teachers carry this subject. Deleting one is refused while > 0. */
+export function subjectTeachers(d: State, subject: string): Teacher[] {
+  const key = subjectKey(subject);
+  return d.teachers.filter((t) => subjectKey(t.subject) === key);
+}
+
+/** No duplicates, no blanks — the same name twice would be two dropdown rows. */
+export function addSubject(d: State, name: string): State {
+  const clean = name.trim();
+  const key = subjectKey(clean);
+  if (key === '') return d;
+  if (d.settings.subjects.some((x) => subjectKey(x) === key)) return d;
+  return { ...d, settings: { ...d.settings, subjects: [...d.settings.subjects, clean] } };
+}
+
+/**
+ * Removes a subject from the list. The teachers' `subject` strings are NOT
+ * touched: nothing may delete a teacher's branch as a side effect. A subject
+ * still in use simply cannot be removed — the caller checks subjectTeachers()
+ * first and says who is using it.
+ */
+export function deleteSubject(d: State, name: string): State {
+  const key = subjectKey(name);
+  const subjects = d.settings.subjects.filter((x) => subjectKey(x) !== key);
+  if (subjects.length === d.settings.subjects.length) return d;
+  return { ...d, settings: { ...d.settings, subjects } };
+}
+
+/**
+ * Hands out a fresh colour to every teacher (or class) in list order. Only ever
+ * called from the button in Ayarlar: after a few deletions the used indexes are
+ * full of holes and two neighbouring rows can end up looking alike.
+ */
+export function respreadColors(d: State, kind: 'teacher' | 'class'): State {
+  if (kind === 'teacher') {
+    return { ...d, teachers: d.teachers.map((t, i) => ({ ...t, color: i % PALETTE_SIZE })) };
+  }
+  return { ...d, classes: d.classes.map((c, i) => ({ ...c, color: i % PALETTE_SIZE })) };
+}
+
 export function hourNames(n: number): string[] {
   return Array.from({ length: n }, (_, i) => String(i + 1));
 }
@@ -223,6 +283,7 @@ export function defaultSettings(): Settings {
     bell: { ...DEFAULT_BELL },
     limits: { ...DEFAULT_LIMITS },
     rules: { ...DEFAULT_RULES },
+    subjects: defaultSubjects(),
     subjectShorts: {},
   };
 }
@@ -305,7 +366,12 @@ export function deleteTeacher(d: State, id: Id): State {
 // -------------------------------------------------------------------- class
 
 export function addClass(d: State, name: string, roomId: Id | null): State {
-  const created: ClassGroup = { id: newId(), name: name.trim(), roomId };
+  const created: ClassGroup = {
+    id: newId(),
+    name: name.trim(),
+    roomId,
+    color: firstFreeColor(d.classes.map((x) => x.color)),
+  };
   return { ...d, classes: [...d.classes, created] };
 }
 

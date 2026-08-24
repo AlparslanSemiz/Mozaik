@@ -14,6 +14,7 @@ import {
   DEFAULT_BELL,
   DEFAULT_RULES,
   defaultDays,
+  defaultSubjects,
   hourNames,
   makeShort,
   NO_TEACHER_LIMITS,
@@ -85,6 +86,7 @@ export function sampleState(): State {
     id: `s${i}`,
     name,
     roomId: roomIdByLetter.get(letter) ?? null,
+    color: i % PALETTE_SIZE,
   }));
 
   const teachers: Teacher[] = NAMES.map((name, i) => ({
@@ -163,6 +165,7 @@ export function sampleState(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS_SAMPLE },
       rules: { ...DEFAULT_RULES },
+      subjects: defaultSubjects(),
       subjectShorts: {},
     },
     rooms,

@@ -88,7 +88,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
           };
         }
       }
-      return { id: t.id, name: t.short, secondary: t.subject, cells, closed };
+      return { id: t.id, name: t.short, secondary: t.subject, color: t.color, cells, closed };
     });
   }
 
@@ -121,6 +121,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
       id: group.id,
       name: group.name,
       secondary: letter === '' ? 'derslik yok' : `${letter} dersliği`,
+      color: group.color,
       cells,
       closed,
     };

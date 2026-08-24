@@ -382,6 +382,16 @@ table.grid thead tr:nth-child(2) th {
   font-size: 13px;
 }
 
+.row-head .row-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: 0;
+  border: 1px solid var(--edge);
+}
+
 .row-head .secondary {
   display: block;
   font-size: 11px;
@@ -976,6 +986,18 @@ table.availability td.closed {
 .print-page h3 {
   margin: 0 0 6px;
   font-size: 15px;
+}
+
+/* The page's own colour, so a stack of printed sheets can be sorted by eye the
+   same way the rows are on screen. */
+.print-page h3 .p-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: 0;
+  border: 1px solid var(--print-line, #8a93a0);
 }
 
 /* Fixed layout, or a full cell widens its own column: in the photo from the

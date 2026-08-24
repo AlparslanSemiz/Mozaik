@@ -8,6 +8,7 @@
 import { place, placementKey, teacherKey } from './constraints';
 import {
   addClass,
+  addSubject,
   addClassesFromRows,
   addLesson,
   addLessonsFromRows,
@@ -15,11 +16,15 @@ import {
   addTeacher,
   DEFAULT_SUBJECT_SHORTS,
   defaultSubjectShort,
+  deleteSubject,
   deleteTeacher,
   deletionSummary,
   duplicateShorts,
   setSubjectShort,
+  respreadColors,
+  subjectOptions,
   subjectShort,
+  subjectTeachers,
   usedSubjects,
   hourLabels,
   makeShort,
@@ -49,6 +54,7 @@ function build(): State {
       bell: { ...DEFAULT_BELL },
       limits: { ...DEFAULT_LIMITS },
       rules: { ...DEFAULT_RULES },
+      subjects: [],
       subjectShorts: {},
     },
     rooms: [],
@@ -62,7 +68,7 @@ function build(): State {
         limits: { ...NO_TEACHER_LIMITS },
       },
     ],
-    classes: [{ id: 's510', name: '510', roomId: null }],
+    classes: [{ id: 's510', name: '510', roomId: null, color: 0 }],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 1, maxPerDay: null },
     ],
@@ -507,5 +513,84 @@ describe('öğretmen renkleri', () => {
     d = addTeacher(d, { name: 'D D', short: '', subject: 'Tarih' });
     // The hole is filled rather than a fourth colour handed out.
     expect(d.teachers.map((t) => t.color).sort()).toEqual([0, 1, 2]);
+  });
+});
+
+describe('sınıf renkleri', () => {
+  it('her sınıf kendine ait bir renk alıyor', () => {
+    let d = emptyState();
+    for (let i = 0; i < 20; i++) d = addClass(d, `${500 + i}`, null);
+    expect(new Set(d.classes.map((c) => c.color)).size).toBe(20);
+  });
+
+  it('sınıf ve öğretmen renkleri birbirinden bağımsız sayılıyor', () => {
+    // A cell is painted in its teacher's colour and a class colour only marks
+    // the row head, so the two lists may reuse the same index.
+    let d = emptyState();
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
+    d = addClass(d, '510', null);
+    expect(d.teachers[0]!.color).toBe(0);
+    expect(d.classes[0]!.color).toBe(0);
+  });
+});
+
+describe('respreadColors', () => {
+  it('silmelerden sonra renkleri baştan sıraya diziyor', () => {
+    let d = emptyState();
+    for (let i = 0; i < 4; i++) {
+      d = addTeacher(d, { name: `Ad${i} Soyad`, short: '', subject: 'Matematik' });
+    }
+    d = deleteTeacher(d, d.teachers[1]!.id);
+    d = deleteTeacher(d, d.teachers[1]!.id); // was index 2
+    expect(d.teachers.map((t) => t.color)).toEqual([0, 3]);
+
+    d = respreadColors(d, 'teacher');
+    expect(d.teachers.map((t) => t.color)).toEqual([0, 1]);
+  });
+});
+
+describe('branş listesi', () => {
+  it('varsayılan listeyle geliyor', () => {
+    expect(emptyState().settings.subjects).toContain('Matematik');
+    expect(emptyState().settings.subjects.length).toBeGreaterThan(15);
+  });
+
+  it('yeni branş ekleniyor, aynısı iki kez eklenmiyor', () => {
+    let d = emptyState();
+    const before = d.settings.subjects.length;
+    d = addSubject(d, ' Robotik ');
+    expect(d.settings.subjects).toContain('Robotik');
+    expect(d.settings.subjects.length).toBe(before + 1);
+
+    // case-folded duplicate and blank are both refused
+    d = addSubject(d, 'robotik');
+    d = addSubject(d, '   ');
+    expect(d.settings.subjects.length).toBe(before + 1);
+  });
+
+  it('silinen branş listeden çıkıyor ama öğretmenin branşına dokunulmuyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = deleteSubject(d, 'Matematik');
+    expect(d.settings.subjects).not.toContain('Matematik');
+    expect(d.teachers[0]!.subject).toBe('Matematik'); // NEVER a side effect
+  });
+
+  it('subjectTeachers kimin kullandığını söylüyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Ayşe Yıldız', short: 'AY', subject: 'matematik' });
+    d = addTeacher(d, { name: 'Sema Kaya', short: 'SK', subject: 'Fizik' });
+    expect(subjectTeachers(d, 'Matematik').map((t) => t.short)).toEqual(['MÇ', 'AY']);
+    expect(subjectTeachers(d, 'Kimya')).toEqual([]);
+  });
+
+  it('listede olmayan bir branşı taşıyan öğretmen açılır listede yine görünüyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik' });
+    expect(d.settings.subjects).not.toContain('Robotik');
+    // otherwise the dropdown could not show his current subject and would
+    // silently change it on the first render
+    expect(subjectOptions(d)).toContain('Robotik');
   });
 });

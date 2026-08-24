@@ -22,6 +22,8 @@ export interface GridRow {
   id: string;
   name: string;
   secondary: string;
+  /** Palette index of the row's OWN entity: the teacher, or the class. */
+  color: number;
   /** Length = days x hours. Index = day * hourCount + hour. */
   cells: Array<GridCell | null>;
   /** Hours the teacher cannot come. Always false in the class view. */
@@ -91,6 +93,10 @@ const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellCl
   return (
     <tr className={dim ? '' : 'target-row'}>
       <th className="row-head" scope="row">
+        {/* The row's own colour. In the teacher view it repeats the colour of
+            the cards in that row, which is what makes a pool card findable; in
+            the class view it is the only place a class colour appears at all. */}
+        <span className="row-dot" style={{ background: paletteColor(row.color) }} />
         {row.name}
         <span className="secondary">{row.secondary}</span>
       </th>
