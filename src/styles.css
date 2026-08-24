@@ -565,11 +565,6 @@ td.drop-blocked {
   color: var(--on-color-sub);
 }
 
-.pool-card.done {
-  opacity: 0.35;
-  cursor: default;
-}
-
 /* ------------------------------------------------------------ setup steps */
 
 /* A strip, not a wizard: every step stays reachable. The counter is the point —

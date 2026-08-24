@@ -8,8 +8,10 @@ import { paletteColor } from '../palette';
 
 export interface PoolCard {
   lessonId: Id;
-  top: string; // class name
-  bottom: string; // teacher short form
+  /** What the cell will read: the class, or the teacher — whichever the view is not. */
+  top: string;
+  /** The row this card is aimed at. Cards are sorted by it. */
+  bottom: string;
   subject: string;
   color: number;
   placed: number;

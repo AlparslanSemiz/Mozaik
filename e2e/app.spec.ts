@@ -115,24 +115,36 @@ async function visibleCells(page: Page, selector: string) {
   }, selector);
 }
 
-/** Drags a card from the pool into the first valid cell of the grid. */
+/**
+ * Drags a card from the pool into the first valid cell of the grid.
+ *
+ * Tries the next card when a whole row has no droppable cell ON SCREEN: with
+ * real-scale data a teacher can be closed on every visible day, and which card
+ * sits first in the pool depends on the current view. That is a property of the
+ * sample data, not a bug, so it must not decide whether a test passes.
+ */
 async function dragAndDrop(page: Page): Promise<{ day: string; hour: string; row: string }> {
-  await startDrag(page);
+  const cardCount = await page.locator('.pool-card').count();
 
-  const cells = page.locator('tr.target-row td');
-  for (const point of await visibleCells(page, 'tr.target-row td')) {
-    await page.mouse.move(point.x, point.y, { steps: 3 });
-    await page.waitForTimeout(40); // the highlight is applied in the rAF loop
-    const cell = cells.nth(point.index);
-    if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
-      const day = (await cell.getAttribute('data-day'))!;
-      const hour = (await cell.getAttribute('data-hour'))!;
-      const row = (await cell.getAttribute('data-row'))!;
-      await page.mouse.up();
-      return { day, hour, row };
+  for (let index = 0; index < Math.min(cardCount, 8); index++) {
+    await startDrag(page, index);
+
+    const cells = page.locator('tr.target-row td');
+    for (const point of await visibleCells(page, 'tr.target-row td')) {
+      await page.mouse.move(point.x, point.y, { steps: 3 });
+      await page.waitForTimeout(40); // the highlight is applied in the rAF loop
+      const cell = cells.nth(point.index);
+      if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
+        const day = (await cell.getAttribute('data-day'))!;
+        const hour = (await cell.getAttribute('data-hour'))!;
+        const row = (await cell.getAttribute('data-row'))!;
+        await page.mouse.up();
+        return { day, hour, row };
+      }
     }
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
   }
-  await page.mouse.up();
   throw new Error('Hiçbir hücre geçerli görünmedi — sürükleme vurgusu çalışmıyor.');
 }
 
@@ -1803,5 +1815,90 @@ test.describe('17. Başlangıç saati', () => {
       expect(values).not.toContain('');
     }
     await expect(page.locator('table.bell-preview')).toContainText('09:00–09:40');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 18. The pool follows the view
+//
+// A reported bug: switching to the class view turned the grid around but left
+// the pool exactly as it was — class on top, sorted by teacher — so the cards
+// belonging to one visible row were scattered, and the ghost that lifted off a
+// card said something the card did not.
+
+test.describe('18. Havuz görünümü takip ediyor', () => {
+  test('sınıf görünümünde kartın üst satırı öğretmen oluyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const first = page.locator('.pool-card').first();
+    const teacherViewTop = await first.locator('.card-top').innerText();
+    const teacherViewBottom = await first.locator('.card-bottom').innerText();
+
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+
+    const cards = page.locator('.pool-card');
+    const tops = await cards.locator('.card-top').allInnerTexts();
+    const bottoms = await cards.locator('.card-bottom').allInnerTexts();
+
+    // Class names in the sample are numbers ("510"); teacher short forms are not.
+    expect(teacherViewTop).toMatch(/^\d+$/);
+    expect(teacherViewBottom).not.toMatch(/^\d+$/);
+    expect(tops.every((x) => !/^\d+$/.test(x))).toBe(true);
+    expect(bottoms.every((x) => /^\d+$/.test(x))).toBe(true);
+  });
+
+  test('kartlar gidecekleri satıra göre gruplanıyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const bottoms = async () =>
+      page.locator('.pool-card .card-bottom').allInnerTexts();
+
+    // The bottom line names the target row, and equal values must be adjacent:
+    // otherwise one row's cards are spread across the whole pool.
+    for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
+      await page.getByRole('button', { name: view }).click();
+      const list = await bottoms();
+      expect(list.length).toBeGreaterThan(10);
+      const seen = new Set<string>();
+      let previous = '';
+      for (const value of list) {
+        if (value !== previous) {
+          expect(seen.has(value), `${value} havuzda dağılmış`).toBe(false);
+          seen.add(value);
+          previous = value;
+        }
+      }
+    }
+  });
+
+  test('kart ile hayalet aynı şeyi söylüyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+
+    const card = page.locator('.pool-card').first();
+    const cardTop = await card.locator('.card-top').innerText();
+
+    const box = (await card.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 60, box.y - 40, { steps: 4 });
+
+    const ghostTop = await page.locator('.ghost .card-top').innerText();
+    expect(ghostTop).toBe(cardTop);
+    await page.keyboard.press('Escape');
+  });
+
+  test('kart rengi iki görünümde de öğretmen rengi', async ({ page }) => {
+    await openWithSample(page);
+    const read = () =>
+      page
+        .locator('.pool-card')
+        .evaluateAll((cards) => cards.map((el) => getComputedStyle(el).backgroundColor));
+
+    const inTeacherView = await read();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    const inClassView = await read();
+    // Same set of colours; only the order and the labels change.
+    expect(new Set(inClassView)).toEqual(new Set(inTeacherView));
   });
 });

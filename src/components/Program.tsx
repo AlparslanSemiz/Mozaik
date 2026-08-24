@@ -128,9 +128,23 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
   });
 }
 
-function buildPool(d: State, ix: Index): { cards: PoolCard[]; completed: number } {
+/**
+ * The pool follows the VIEW, and used to not: in the class view the cards still
+ * read class-on-top, teacher-below and were still sorted by teacher, so the
+ * cards belonging to one visible row were scattered across the whole pool —
+ * while the drag ghost lifting off them already said something else.
+ *
+ * One rule, no special cases:
+ *   top    = whatever the CELL will read once it lands
+ *   bottom = the ROW the card is aimed at
+ *   sorted by bottom, so one row's cards stand together
+ *
+ * In the teacher view that is exactly what it always did.
+ */
+function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; completed: number } {
   const cards: PoolCard[] = [];
   let completed = 0;
+  const teacherView = view === 'teacher';
 
   for (const lesson of d.lessons) {
     const placed = ix.placedHours.get(lesson.id) ?? 0;
@@ -140,18 +154,21 @@ function buildPool(d: State, ix: Index): { cards: PoolCard[]; completed: number 
     }
     const group = ix.classById.get(lesson.classId);
     const teacher = ix.teacherById.get(lesson.teacherId);
+    const className = group?.name ?? '?';
+    const teacherShort = teacher?.short ?? '?';
     cards.push({
       lessonId: lesson.id,
-      top: group?.name ?? '?',
-      bottom: teacher?.short ?? '?',
+      top: teacherView ? className : teacherShort,
+      bottom: teacherView ? teacherShort : className,
       subject: teacher?.subject ?? '',
+      // The card keeps the TEACHER's colour in both views: a cell is always
+      // painted by its teacher, so this is what the card will look like.
       color: teacher?.color ?? 0,
       placed,
       total: lesson.weeklyHours,
     });
   }
 
-  // Keep the same teacher's cards side by side — easier to find the matching row.
   cards.sort(
     (a, b) => a.bottom.localeCompare(b.bottom, 'tr') || a.top.localeCompare(b.top, 'tr'),
   );
@@ -172,7 +189,7 @@ export default function Program({ state, change }: Props) {
   const { start, dragging, reason } = useDrag(drop);
 
   const rows = useMemo(() => buildRows(state, ix, view), [state, ix, view]);
-  const { cards, completed } = useMemo(() => buildPool(state, ix), [state, ix]);
+  const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
 
   const cellClick = useCallback(
     (rowId: string, day: number, hour: number) => {
