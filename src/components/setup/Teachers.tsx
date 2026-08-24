@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { parseTeachers } from '../../import';
-import { COLOR_COUNT } from '../../types';
+import { PALETTE_SIZE, paletteColor } from '../../palette';
 import {
   addTeacher,
   deleteTeacher,
@@ -116,10 +116,10 @@ export default function Teachers({ state, change }: SetupProps) {
                     onChange={(e) =>
                       change((d) => updateTeacher(d, t.id, { color: Number(e.target.value) }))
                     }
-                    style={{ background: `var(--color-${t.color})`, width: 44 }}
+                    style={{ background: paletteColor(t.color), width: 44 }}
                     title="Renk"
                   >
-                    {Array.from({ length: COLOR_COUNT }, (_, i) => (
+                    {Array.from({ length: PALETTE_SIZE }, (_, i) => (
                       <option key={i} value={i}>
                         {i + 1}
                       </option>

@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { Verdict } from './constraints';
+import { paletteColor } from './palette';
 import type { Id } from './types';
 
 export interface DragData {
@@ -92,7 +93,7 @@ export function useDrag(drop: (lessonId: Id, day: number, hour: number) => void)
 
     const el = document.createElement('div');
     el.className = 'ghost';
-    el.style.background = `var(--color-${content.color})`;
+    el.style.background = paletteColor(content.color);
     const top = document.createElement('span');
     top.className = 'card-top';
     top.textContent = content.top;

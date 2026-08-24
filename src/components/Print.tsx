@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react';
 import { sharedPeriods } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
 import { subjectShort } from '../entities';
+import { paletteColor } from '../palette';
 import type { State } from '../types';
 
 interface Props {
@@ -137,7 +138,7 @@ export default function Print({ state }: Props) {
                             className={breakClass(day.longBreakAfter, s)}
                             style={
                               colored && teacher !== undefined
-                                ? { background: `var(--color-${teacher.color})` }
+                                ? { background: paletteColor(teacher.color) }
                                 : undefined
                             }
                           >
@@ -192,7 +193,7 @@ export default function Print({ state }: Props) {
                               .join(' ')}
                             style={
                               colored && group !== undefined
-                                ? { background: `var(--color-${teacher.color})` }
+                                ? { background: paletteColor(teacher.color) }
                                 : undefined
                             }
                           >

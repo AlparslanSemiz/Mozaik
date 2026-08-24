@@ -29,20 +29,10 @@
   --closed: #d5d8dd;
   --hatch: #e8eaee;
 
-  /* Teacher palette — same count as COLOR_COUNT in types.ts (12).
-     All readable with black text and distinguishable in print. */
-  --color-0: #f9b6cf;
-  --color-1: #9de3a8;
-  --color-2: #9fd8f5;
-  --color-3: #f7c98b;
-  --color-4: #c9b7f0;
-  --color-5: #f6ec93;
-  --color-6: #8fded9;
-  --color-7: #f4a9a3;
-  --color-8: #bfd98a;
-  --color-9: #d7bfa5;
-  --color-10: #b8c6f2;
-  --color-11: #ecb2ec;
+  /* The teacher/class palette is NOT here: it lives in src/palette.ts as plain
+     hex. It is the one set of colours that is identical in both themes and on
+     paper, so a CSS variable bought nothing and cost a second place to keep 36
+     values in sync. Only the ink on top of it is a token. */
 
   /* Ink on a palette background. NOT redefined in dark: the pastel underneath
      does not change either. */

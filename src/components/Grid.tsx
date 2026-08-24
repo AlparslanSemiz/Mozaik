@@ -6,6 +6,7 @@
 
 import { memo, useMemo } from 'react';
 import { dayPeriods } from '../bell';
+import { paletteColor } from '../palette';
 import type { Settings, Id } from '../types';
 
 export interface GridCell {
@@ -72,7 +73,7 @@ const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellCl
             <button
               type="button"
               className="card"
-              style={{ background: `var(--color-${cell.color})` }}
+              style={{ background: paletteColor(cell.color) }}
               onClick={() => onCellClick(row.id, g, s)}
               title="Kaldırmak için tıklayın"
             >

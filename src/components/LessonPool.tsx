@@ -4,6 +4,7 @@
 
 import type React from 'react';
 import type { Id } from '../types';
+import { paletteColor } from '../palette';
 
 export interface PoolCard {
   lessonId: Id;
@@ -42,7 +43,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
           <div
             key={c.lessonId}
             className="pool-card"
-            style={{ background: `var(--color-${c.color})` }}
+            style={{ background: paletteColor(c.color) }}
             onPointerDown={(e) => onStart(e, c.lessonId)}
             title={`${c.top} — ${c.bottom} ${c.subject} · ${c.placed}/${c.total} saat yerleşti`}
           >

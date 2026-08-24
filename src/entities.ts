@@ -20,7 +20,8 @@ import type {
   State,
   Teacher,
 } from './types';
-import { COLOR_COUNT, SCHEMA_VERSION } from './types';
+import { firstFreeColor } from './palette';
+import { SCHEMA_VERSION } from './types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1
 
@@ -269,7 +270,7 @@ export function addTeacher(
     name: fields.name.trim(),
     short: short.trim(),
     subject: fields.subject.trim(),
-    color: d.teachers.length % COLOR_COUNT,
+    color: firstFreeColor(d.teachers.map((x) => x.color)),
     limits: { ...NO_TEACHER_LIMITS },
   };
   return { ...d, teachers: [...d.teachers, created] };

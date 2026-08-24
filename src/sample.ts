@@ -8,7 +8,8 @@
 
 import { teacherKey } from './constraints';
 import type { Lesson, Room, State, Teacher, ClassGroup } from './types';
-import { COLOR_COUNT, SCHEMA_VERSION } from './types';
+import { PALETTE_SIZE } from './palette';
+import { SCHEMA_VERSION } from './types';
 import {
   DEFAULT_BELL,
   DEFAULT_RULES,
@@ -91,7 +92,7 @@ export function sampleState(): State {
     name,
     short: makeShort(name),
     subject: SUBJECTS[i % SUBJECTS.length] ?? 'Matematik',
-    color: i % COLOR_COUNT,
+    color: i % PALETTE_SIZE,
     // Every third teacher gets a personal limit so the rule engine is actually
     // exercised by the sample data, not only by the tests.
     limits: i % 3 === 0 ? { ...NO_TEACHER_LIMITS, maxConsecutive: 3 } : { ...NO_TEACHER_LIMITS },

@@ -21,7 +21,7 @@ export interface Teacher {
   name: string;
   short: string; // "MÇ" — row header in the grid
   subject: string; // "Matematik" — free text, not a separate table
-  color: number; // palette index 0..COLOR_COUNT-1, not a hex value
+  color: number; // index into PALETTE (palette.ts), not a hex value
   /** null -> use settings.limits. A number wins over the school-wide default. */
   limits: TeacherLimits;
 }
@@ -124,6 +124,3 @@ export interface State {
  * v4: settings.subjectShorts.
  */
 export const SCHEMA_VERSION = 4;
-
-/** Must match the number of --color-0 .. --color-11 variables in styles.css. */
-export const COLOR_COUNT = 12;

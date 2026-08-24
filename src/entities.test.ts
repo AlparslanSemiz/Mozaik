@@ -15,6 +15,7 @@ import {
   addTeacher,
   DEFAULT_SUBJECT_SHORTS,
   defaultSubjectShort,
+  deleteTeacher,
   deletionSummary,
   duplicateShorts,
   setSubjectShort,
@@ -480,5 +481,31 @@ describe('usedSubjects', () => {
     d = addTeacher(d, { name: 'C C', short: '', subject: 'matematik' });
     d = addTeacher(d, { name: 'D D', short: '', subject: '  ' });
     expect(usedSubjects(d)).toEqual(['Matematik', 'Fizik']);
+  });
+});
+
+describe('öğretmen renkleri', () => {
+  it('art arda eklenen öğretmenlerin hiçbiri aynı rengi almıyor', () => {
+    let d = emptyState();
+    // A real school's worth, past the twelve the old palette had.
+    for (let i = 0; i < 30; i++) {
+      d = addTeacher(d, { name: `Ad ${i} Soyad`, short: '', subject: 'Matematik' });
+    }
+    const colors = d.teachers.map((t) => t.color);
+    expect(new Set(colors).size).toBe(30);
+  });
+
+  it('silinen öğretmenin rengi yeniden kullanılıyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik' });
+    d = addTeacher(d, { name: 'C C', short: '', subject: 'Kimya' });
+    const middle = d.teachers[1]!;
+    expect(middle.color).toBe(1);
+
+    d = deleteTeacher(d, middle.id);
+    d = addTeacher(d, { name: 'D D', short: '', subject: 'Tarih' });
+    // The hole is filled rather than a fourth colour handed out.
+    expect(d.teachers.map((t) => t.color).sort()).toEqual([0, 1, 2]);
   });
 });

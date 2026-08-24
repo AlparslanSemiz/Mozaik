@@ -1306,3 +1306,89 @@ test.describe('8. Tema', () => {
     await page.emulateMedia({ media: 'screen' });
   });
 });
+
+// ---------------------------------------------------------------------------
+// 14. Colour palette
+//
+// The palette used to be twelve CSS variables and colours repeated: with 25
+// teachers, three of them shared a colour with someone else and the pool card
+// no longer pointed at one row. It is now 36 hex values in src/palette.ts and
+// every teacher gets one nobody else has. That claim is measured HERE, on the
+// real thing, because a unit test can only prove the array is fine — not that
+// the array is what the browser paints.
+
+test.describe('14. Renk paleti', () => {
+  test('25 öğretmenin hiçbiri bir başkasıyla aynı renkte değil', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+
+    // The colour select in the teacher list paints itself with that teacher's
+    // colour, so it is the one per-teacher swatch on screen.
+    const colors = await page
+      .locator('table.list tbody tr select[title="Renk"]')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+
+    expect(colors.length).toBeGreaterThanOrEqual(25);
+    expect(new Set(colors).size, `${colors.length} öğretmen, tekrar eden renk var`).toBe(
+      colors.length,
+    );
+  });
+
+  test('paletteki her renk kartın iki yazısını da AA taşıyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const samples = await page.locator('.pool-card').evaluateAll((cards) =>
+      cards.map((el) => {
+        const own = getComputedStyle(el);
+        const sub = el.querySelector('.card-bottom');
+        return {
+          background: own.backgroundColor,
+          color: own.color,
+          subColor: sub === null ? own.color : getComputedStyle(sub).color,
+        };
+      }),
+    );
+
+    expect(samples.length).toBeGreaterThan(5);
+    for (const s of samples) {
+      expect(contrast(s.color, s.background)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(s.subColor, s.background)).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  test('renkler birbirinden gerçekten ayırt ediliyor', async ({ page }) => {
+    await openWithSample(page);
+    const colors = await page
+      .locator('.pool-card')
+      .evaluateAll((cards) => cards.map((el) => getComputedStyle(el).backgroundColor));
+
+    const unique = [...new Set(colors)];
+    expect(unique.length).toBeGreaterThan(12); // the old palette's whole range
+
+    let worst = Infinity;
+    for (let i = 0; i < unique.length; i++) {
+      for (let j = i + 1; j < unique.length; j++) {
+        worst = Math.min(worst, deltaE(unique[i]!, unique[j]!));
+      }
+    }
+    expect(worst).toBeGreaterThanOrEqual(15);
+  });
+
+  test('palet iki temada ve kâğıtta AYNI', async ({ page }) => {
+    await openWithSample(page);
+    const read = () =>
+      page
+        .locator('.pool-card')
+        .evaluateAll((cards) => cards.map((el) => getComputedStyle(el).backgroundColor));
+
+    const light = await read();
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(await read()).toEqual(light);
+
+    // Still dark on screen; the paper must show the very same pastels.
+    await page.emulateMedia({ media: 'print' });
+    expect(await read()).toEqual(light);
+    await page.emulateMedia({ media: 'screen' });
+  });
+});

@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { parseLessons } from '../../import';
+import { paletteColor } from '../../palette';
 import {
   addLesson,
   addLessonsFromRows,
@@ -144,7 +145,7 @@ export default function Lessons({ state, change }: SetupProps) {
                   <td>
                     <span
                       className="color-dot"
-                      style={{ background: `var(--color-${teacher?.color ?? 0})` }}
+                      style={{ background: paletteColor(teacher?.color ?? 0) }}
                     />{' '}
                     {teacher?.short ?? '?'} — {teacher?.subject ?? ''}
                   </td>
