@@ -221,6 +221,31 @@ textarea {
   font-weight: 600;
 }
 
+/* Two icon buttons that read as one control. The selected one is dark and
+   framed; the other fades back. */
+.view-switch {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.btn.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.btn.icon[aria-pressed="true"] {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.btn.icon:hover:not(:disabled) {
+  opacity: 1;
+}
+
 .theme-toggle {
   min-width: 36px;
   font-size: 15px;

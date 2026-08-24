@@ -29,6 +29,37 @@ function roomLetter(ix: Index, roomId: string | null | undefined): string {
   return ix.roomById.get(roomId)?.name ?? '';
 }
 
+/**
+ * The two views. `aria-label` is not optional here: the buttons carry no text,
+ * so it is the only name a screen reader — or a test — can find them by.
+ */
+const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
+  {
+    id: 'teacher',
+    label: 'Öğretmen görünümü',
+    icon: (
+      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">
+        <circle cx="10" cy="6" r="3.3" fill="currentColor" />
+        <path d="M3.4 17.5c0-3.7 2.9-6.2 6.6-6.2s6.6 2.5 6.6 6.2z" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    id: 'class',
+    label: 'Sınıf görünümü',
+    icon: (
+      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">
+        <circle cx="4.6" cy="7" r="2.3" fill="currentColor" />
+        <circle cx="15.4" cy="7" r="2.3" fill="currentColor" />
+        <circle cx="10" cy="5.8" r="2.9" fill="currentColor" />
+        <path d="M0.6 16.6c0-2.6 1.8-4.2 4-4.2s4 1.6 4 4.2z" fill="currentColor" />
+        <path d="M11.4 16.6c0-2.6 1.8-4.2 4-4.2s4 1.6 4 4.2z" fill="currentColor" />
+        <path d="M5.4 17.6c0-3 2.1-5 4.6-5s4.6 2 4.6 5z" fill="currentColor" />
+      </svg>
+    ),
+  },
+];
+
 function buildRows(d: State, ix: Index, view: View): GridRow[] {
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
@@ -216,12 +247,24 @@ export default function Program({ state, change }: Props) {
   return (
     <div className="main no-overflow">
       <div className="topbar subbar">
-        <button
-          className="btn"
-          onClick={() => setView(view === 'teacher' ? 'class' : 'teacher')}
-        >
-          {view === 'teacher' ? 'Sınıf görünümüne geç' : 'Öğretmen görünümüne geç'}
-        </button>
+        {/* Two positions, not one toggle: a single button saying "switch to the
+            class view" tells you what the next click does, never where you are.
+            Icons are inline SVG (no library, offline) and use currentColor, so
+            they are right in both themes. */}
+        <div className="view-switch">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              className="btn icon"
+              aria-pressed={view === v.id}
+              aria-label={v.label}
+              title={v.label}
+              onClick={() => setView(v.id)}
+            >
+              {v.icon}
+            </button>
+          ))}
+        </div>
         <span className="hint inline">
           {view === 'teacher'
             ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş derse tıklayınca kalkar.'

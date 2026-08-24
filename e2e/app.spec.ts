@@ -303,7 +303,7 @@ test.describe('3. Izgara', () => {
 
   test('sınıf görünümüne geçilir ve sürükleme orada da çalışır', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
 
     await dragAndDrop(page);
@@ -665,7 +665,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
 
     // The built-in table applies straight away: the class view says "Mat"
-    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mat');
   });
 });
@@ -793,18 +793,42 @@ async function hover(page: Page, day: number, hour: number) {
   return cell;
 }
 
+test.describe('13. Görünüm simgeleri', () => {
+  test('seçili olan basılı, diğeri değil; tıklayınca satırlar dönüyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const teacher = page.getByRole('button', { name: 'Öğretmen görünümü' });
+    const group = page.getByRole('button', { name: 'Sınıf görünümü' });
+
+    // The old single button said what the next click does, never where you are
+    await expect(teacher).toHaveAttribute('aria-pressed', 'true');
+    await expect(group).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('table.grid .corner')).toHaveText('Öğretmen');
+    await expect(page.locator('table.grid tbody tr')).toHaveCount(25);
+
+    await group.click();
+    await expect(group).toHaveAttribute('aria-pressed', 'true');
+    await expect(teacher).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('table.grid .corner')).toHaveText('Sınıf');
+    await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
+
+    // The sentence beside the icons stays: an icon alone is a guess the first time
+    await expect(page.locator('.hint.inline')).toContainText('Satırlar sınıf');
+  });
+});
+
 test.describe('12. Branş kısaltmaları', () => {
   test('ızgarada kısaltma yazıyor, tam ad yer olan yerde kalıyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
 
     // "Matematik" does not fit a 34px cell; the short form does.
     const shortText = (await page.locator('table.grid .card-bottom').first().textContent())!;
     expect(shortText.length).toBeLessThanOrEqual(4);
 
     // The teacher row heading has room, so it keeps the FULL subject
-    await page.getByRole('button', { name: 'Öğretmen görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Öğretmen görünümü' }).click();
     const full = (await page.locator('tbody .row-head .secondary').first().textContent())!;
     expect(full.length).toBeGreaterThan(4);
   });
@@ -812,7 +836,7 @@ test.describe('12. Branş kısaltmaları', () => {
   test('Branşlar adımından değiştirilince ızgara ve baskı birlikte değişiyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
 
     await openSetup(page, 'Branşlar');
@@ -828,7 +852,7 @@ test.describe('12. Branş kısaltmaları', () => {
     await input.blur();
 
     await page.getByRole('button', { name: 'Program' }).click();
-    await page.getByRole('button', { name: 'Sınıf görünümüne geç' }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
 
     // ...and the printed page uses the same short form

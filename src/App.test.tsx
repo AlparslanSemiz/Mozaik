@@ -58,14 +58,20 @@ function render() {
   act(() => root.render(<App />));
 }
 
-/** Finds a button by its text — that is what the user sees. */
+/**
+ * Finds a button by its accessible name: the visible text, or — for the icon
+ * buttons, which deliberately carry none — the aria-label.
+ */
+function buttonName(b: HTMLButtonElement): string {
+  const text = (b.textContent ?? '').trim();
+  return text !== '' ? text : (b.getAttribute('aria-label') ?? '');
+}
+
 function button(text: string): HTMLButtonElement {
   const all = [...container.querySelectorAll('button')];
-  const found = all.find((b) => (b.textContent ?? '').includes(text));
+  const found = all.find((b) => buttonName(b).includes(text));
   if (found === undefined) {
-    throw new Error(
-      `"${text}" düğmesi yok. Olanlar: ${all.map((b) => b.textContent).join(' | ')}`,
-    );
+    throw new Error(`"${text}" düğmesi yok. Olanlar: ${all.map(buttonName).join(' | ')}`);
   }
   return found;
 }
@@ -127,10 +133,10 @@ describe('uygulama açılıyor', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
     click(button('Program'));
-    click(button('Sınıf görünümüne geç'));
+    click(button('Sınıf görünümü'));
 
     expect(container.querySelector('table.grid tbody')!.children).toHaveLength(20);
-    expect(button('Öğretmen görünümüne geç')).toBeTruthy();
+    expect(button('Öğretmen görünümü')).toBeTruthy();
   });
 
   it('yerleşmiş derse tıklayınca kalkar ve geri al onu geri getirir', () => {
