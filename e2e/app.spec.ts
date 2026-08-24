@@ -418,6 +418,29 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.warn-box', { hasText: 'Aynı kısaltma' })).toHaveCount(0);
   });
 
+  test('silmeden önce her zaman soruyor ve ne gideceğini sayıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+
+    // Deleting a room used to ask NOTHING at all
+    const before = await page.locator('table.list tbody tr').count();
+    let asked = '';
+    page.once('dialog', (d) => {
+      asked = d.message();
+      return d.dismiss(); // cancelled -> nothing may change
+    });
+    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect.poll(() => asked).toContain('dersliği silinecek');
+    expect(asked).toContain('sınıfın dersliği boşalacak');
+    expect(asked).toContain('çakışması artık kontrol edilmeyecek');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(before);
+
+    // Confirmed, it goes
+    page.once('dialog', (d) => d.accept());
+    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect(page.locator('table.list tbody tr')).toHaveCount(before - 1);
+  });
+
   test('yedek düğmeleri: adlar açık, Sıfırla ayrı, not ızgaradan yer çalmıyor', async ({
     page,
   }) => {

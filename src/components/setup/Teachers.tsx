@@ -7,6 +7,7 @@ import { COLOR_COUNT } from '../../types';
 import {
   addTeacher,
   deleteTeacher,
+  deletionSummary,
   duplicateShorts,
   makeShort,
   setTeacherLimit,
@@ -182,15 +183,7 @@ export default function Teachers({ state, change }: SetupProps) {
                   <button
                     className="btn danger"
                     onClick={() => {
-                      const n = state.lessons.filter((x) => x.teacherId === t.id).length;
-                      if (
-                        n > 0 &&
-                        !window.confirm(
-                          `${t.name} silinince ${n} dersi ve programdaki yerleşimleri de silinecek. Devam edilsin mi?`,
-                        )
-                      ) {
-                        return;
-                      }
+                      if (!window.confirm(deletionSummary(state, 'teacher', t.id))) return;
                       change((d) => deleteTeacher(d, t.id));
                     }}
                   >

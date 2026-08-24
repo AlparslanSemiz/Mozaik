@@ -4,7 +4,7 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
-import { closedKey, sanitize } from './constraints';
+import { closedKey, countPlacedHours, sanitize } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
 import type { ClassRow, LessonRow } from './import';
@@ -473,4 +473,79 @@ export function duplicateShorts(teachers: Teacher[]): Array<{ short: string; nam
   return [...byShort.entries()]
     .filter(([, names]) => names.length > 1)
     .map(([short, names]) => ({ short, names }));
+}
+
+// --------------------------------------------------------------- deleting
+//
+// All four deletions cascade, and until now two of them (room, lesson) asked
+// nothing at all while the other two only asked when a lesson hung off them —
+// a teacher with 0 lessons vanished in silence. Ctrl+Z is the second net; this
+// is the first one.
+
+export type EntityKind = 'room' | 'teacher' | 'class' | 'lesson';
+
+const plural = (n: number, word: string): string => `${n} ${word}`;
+
+/**
+ * What exactly is about to be lost, COUNTED — never guessed. The sentence is
+ * what decides whether my father presses Enter or Escape, so it names the
+ * classes that lose their room instead of saying "some classes".
+ */
+export function deletionSummary(d: State, kind: EntityKind, id: Id): string {
+  if (kind === 'room') {
+    const room = d.rooms.find((x) => x.id === id);
+    if (room === undefined) return 'Bu derslik silinecek. Devam edilsin mi?';
+    const groups = roomClasses(d, id);
+    if (groups.length === 0) {
+      return `${room.name} dersliği silinecek. Devam edilsin mi?`;
+    }
+    return (
+      `${room.name} dersliği silinecek. ` +
+      `${plural(groups.length, 'sınıfın')} dersliği boşalacak ` +
+      `(${groups.map((c) => c.name).join(', ')}) ve derslik çakışması artık ` +
+      'kontrol edilmeyecek. Devam edilsin mi?'
+    );
+  }
+
+  if (kind === 'lesson') {
+    const lesson = d.lessons.find((x) => x.id === id);
+    if (lesson === undefined) return 'Bu ders silinecek. Devam edilsin mi?';
+    const group = d.classes.find((c) => c.id === lesson.classId);
+    const teacher = d.teachers.find((t) => t.id === lesson.teacherId);
+    const who = `${group?.name ?? '?'} sınıfının ${teacher?.short ?? '?'} dersi`;
+    const placed = countPlacedHours(d, id);
+    if (placed === 0) {
+      return `${who} silinecek (${plural(lesson.weeklyHours, 'saat')}). Devam edilsin mi?`;
+    }
+    return (
+      `${who} silinecek. Programa yerleşmiş ${plural(placed, 'saati')} de kalkacak. ` +
+      'Devam edilsin mi?'
+    );
+  }
+
+  const lessons =
+    kind === 'teacher'
+      ? d.lessons.filter((x) => x.teacherId === id)
+      : d.lessons.filter((x) => x.classId === id);
+  const placed = lessons.reduce((sum, x) => sum + countPlacedHours(d, x.id), 0);
+
+  const who =
+    kind === 'teacher'
+      ? (() => {
+          const t = d.teachers.find((x) => x.id === id);
+          return t === undefined ? 'Bu öğretmen' : `${t.short} (${t.name})`;
+        })()
+      : (() => {
+          const c = d.classes.find((x) => x.id === id);
+          return c === undefined ? 'Bu sınıf' : `${c.name} sınıfı`;
+        })();
+
+  if (lessons.length === 0) return `${who} silinecek. Devam edilsin mi?`;
+  if (placed === 0) {
+    return `${who} silinecek. ${plural(lessons.length, 'dersi')} de gidecek. Devam edilsin mi?`;
+  }
+  return (
+    `${who} silinecek. ${plural(lessons.length, 'dersi')} ve programa yerleşmiş ` +
+    `${plural(placed, 'saati')} de gidecek. Devam edilsin mi?`
+  );
 }

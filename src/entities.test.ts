@@ -5,7 +5,7 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/PLAN.md 14).
 
-import { placementKey, teacherKey } from './constraints';
+import { place, placementKey, teacherKey } from './constraints';
 import {
   addClass,
   addClassesFromRows,
@@ -13,6 +13,7 @@ import {
   addLessonsFromRows,
   addRoom,
   addTeacher,
+  deletionSummary,
   duplicateShorts,
   hourLabels,
   makeShort,
@@ -325,5 +326,82 @@ describe('makeShort ve duplicateShorts', () => {
         { id: '4', name: 'D', short: '', subject: '', color: 3, limits: NO_TEACHER_LIMITS },
       ]),
     ).toEqual([{ short: 'MÇ', names: ['A', 'B'] }]);
+  });
+});
+
+// The sentence decides whether he presses Enter or Escape, so it must COUNT
+// what is lost, not guess at it.
+describe('deletionSummary', () => {
+  function loaded(): State {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    const room = d.rooms[0]!.id;
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', room);
+    d = addClass(d, '511', room);
+    const teacher = d.teachers[0]!.id;
+    const [a, b] = d.classes;
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blockSize: 2 });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 2, blockSize: 1 });
+    // put the 2-hour block of the first lesson on the grid
+    d = place(d, d.lessons[0]!.id, 0, 0);
+    return d;
+  }
+
+  it('öğretmen: ders sayısını ve yerleşmiş saati sayar', () => {
+    const d = loaded();
+    expect(deletionSummary(d, 'teacher', d.teachers[0]!.id)).toBe(
+      'MÇ (Mehmet Çelik) silinecek. 2 dersi ve programa yerleşmiş 2 saati de gidecek. ' +
+        'Devam edilsin mi?',
+    );
+  });
+
+  it('bağlısı yoksa kısa sorar — ama YİNE sorar', () => {
+    let d = emptyState();
+    d = addClass(d, '430', null);
+    expect(deletionSummary(d, 'class', d.classes[0]!.id)).toBe(
+      '430 sınıfı silinecek. Devam edilsin mi?',
+    );
+  });
+
+  it('dersi var ama hiçbiri yerleşmemişse yerleşmiş saatten söz etmez', () => {
+    const d = loaded();
+    expect(deletionSummary(d, 'class', d.classes[1]!.id)).toBe(
+      '511 sınıfı silinecek. 1 dersi de gidecek. Devam edilsin mi?',
+    );
+  });
+
+  it('derslik: hangi sınıfların dersliğinin boşalacağını ADLARIYLA söyler', () => {
+    const d = loaded();
+    expect(deletionSummary(d, 'room', d.rooms[0]!.id)).toBe(
+      'A dersliği silinecek. 2 sınıfın dersliği boşalacak (510, 511) ve derslik ' +
+        'çakışması artık kontrol edilmeyecek. Devam edilsin mi?',
+    );
+  });
+
+  it('derslik boşsa çakışma cümlesini kurmaz', () => {
+    let d = emptyState();
+    d = addRoom(d, 'B');
+    expect(deletionSummary(d, 'room', d.rooms[0]!.id)).toBe(
+      'B dersliği silinecek. Devam edilsin mi?',
+    );
+  });
+
+  it('ders: yerleşmiş saat varsa onu, yoksa haftalık saati söyler', () => {
+    const d = loaded();
+    expect(deletionSummary(d, 'lesson', d.lessons[0]!.id)).toBe(
+      '510 sınıfının MÇ dersi silinecek. Programa yerleşmiş 2 saati de kalkacak. ' +
+        'Devam edilsin mi?',
+    );
+    expect(deletionSummary(d, 'lesson', d.lessons[1]!.id)).toBe(
+      '511 sınıfının MÇ dersi silinecek (2 saat). Devam edilsin mi?',
+    );
+  });
+
+  it('olmayan kimlikte çökmez', () => {
+    const d = loaded();
+    for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
+      expect(deletionSummary(d, kind, 'yok')).toContain('Devam edilsin mi?');
+    }
   });
 });

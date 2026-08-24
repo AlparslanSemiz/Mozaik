@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { parseRooms } from '../../import';
-import { addRoom, deleteRoom, updateRoom } from '../../entities';
+import { addRoom, deletionSummary, deleteRoom, updateRoom } from '../../entities';
 import Paste from './Paste';
 import type { SetupProps } from './props';
 
@@ -72,7 +72,10 @@ export default function Rooms({ state, change }: SetupProps) {
                 <td>
                   <button
                     className="btn danger"
-                    onClick={() => change((d) => deleteRoom(d, r.id))}
+                    onClick={() => {
+                      if (!window.confirm(deletionSummary(state, 'room', r.id))) return;
+                      change((d) => deleteRoom(d, r.id));
+                    }}
                   >
                     Sil
                   </button>

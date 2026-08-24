@@ -3,7 +3,13 @@
 
 import { useState } from 'react';
 import { parseLessons } from '../../import';
-import { addLesson, addLessonsFromRows, deleteLesson, updateLesson } from '../../entities';
+import {
+  addLesson,
+  addLessonsFromRows,
+  deleteLesson,
+  deletionSummary,
+  updateLesson,
+} from '../../entities';
 import LimitBox from './LimitBox';
 import Paste from './Paste';
 import Field from './Field';
@@ -184,7 +190,10 @@ export default function Lessons({ state, change }: SetupProps) {
                   <td>
                     <button
                       className="btn danger"
-                      onClick={() => change((d) => deleteLesson(d, x.id))}
+                      onClick={() => {
+                        if (!window.confirm(deletionSummary(state, 'lesson', x.id))) return;
+                        change((d) => deleteLesson(d, x.id));
+                      }}
                     >
                       Sil
                     </button>

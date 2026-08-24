@@ -7,6 +7,7 @@ import {
   addClass,
   addClassesFromRows,
   deleteClass,
+  deletionSummary,
   updateClass,
   weeklyLoad,
 } from '../../entities';
@@ -104,15 +105,7 @@ export default function Classes({ state, change }: SetupProps) {
                   <button
                     className="btn danger"
                     onClick={() => {
-                      const n = state.lessons.filter((x) => x.classId === c.id).length;
-                      if (
-                        n > 0 &&
-                        !window.confirm(
-                          `${c.name} sınıfı silinince ${n} dersi ve programdaki yerleşimleri de silinecek. Devam edilsin mi?`,
-                        )
-                      ) {
-                        return;
-                      }
+                      if (!window.confirm(deletionSummary(state, 'class', c.id))) return;
                       change((d) => deleteClass(d, c.id));
                     }}
                   >
