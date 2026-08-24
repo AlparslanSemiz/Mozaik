@@ -16,11 +16,30 @@ import type { State } from '../types';
 
 interface Props {
   state: State;
+  /**
+   * Held by App, not here: switching to Kurulum to fix one thing and coming
+   * back would otherwise wipe the tick lists, because this component unmounts.
+   */
+  excluded: Excluded;
+  setExcluded: (next: (prev: Excluded) => Excluded) => void;
 }
 
 type Scope = 'classes' | 'teachers' | 'both';
 
-export default function Print({ state }: Props) {
+/**
+ * Which pages to print, stored as what is LEFT OUT rather than what is chosen.
+ *
+ * A class added after the last printout must come out of the printer next time
+ * without anyone remembering to tick it; with a "selected" set it would silently
+ * be missing. This lives in component state, not in State: it is a decision
+ * about one printout, not something to carry in a backup — the same reason the
+ * theme does not live there either.
+ */
+export type Excluded = { classes: Set<string>; teachers: Set<string> };
+
+export const NOTHING_EXCLUDED: Excluded = { classes: new Set(), teachers: new Set() };
+
+export default function Print({ state, excluded, setExcluded }: Props) {
   const [scope, setScope] = useState<Scope>('classes');
   const [colored, setColored] = useState(true);
   const ix = useMemo(() => buildIndex(state), [state]);
@@ -72,6 +91,66 @@ export default function Print({ state }: Props) {
   const classPages = scope !== 'teachers';
   const teacherPages = scope !== 'classes';
 
+  const chosenClasses = classPages
+    ? state.classes.filter((x) => !excluded.classes.has(x.id))
+    : [];
+  const chosenTeachers = teacherPages
+    ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
+    : [];
+  const pageCount = chosenClasses.length + chosenTeachers.length;
+
+  function toggle(kind: keyof Excluded, id: string) {
+    setExcluded((prev) => {
+      const next = new Set(prev[kind]);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return { ...prev, [kind]: next };
+    });
+  }
+
+  function setAll(kind: keyof Excluded, on: boolean) {
+    const ids = kind === 'classes' ? state.classes : state.teachers;
+    setExcluded((prev) => ({ ...prev, [kind]: on ? new Set() : new Set(ids.map((x) => x.id)) }));
+  }
+
+  /** One tick-list: which classes, or which teachers, go to the printer. */
+  function picker(kind: keyof Excluded, title: string) {
+    const items =
+      kind === 'classes'
+        ? state.classes.map((x) => ({ id: x.id, label: x.name, color: x.color }))
+        : state.teachers.map((x) => ({ id: x.id, label: x.short, color: x.color }));
+    const chosen = items.filter((x) => !excluded[kind].has(x.id)).length;
+
+    return (
+      <div className="pick-list">
+        <div className="pick-head">
+          <b>
+            {title} ({chosen}/{items.length})
+          </b>
+          <button className="btn" onClick={() => setAll(kind, true)}>
+            Tümü
+          </button>
+          <button className="btn" onClick={() => setAll(kind, false)}>
+            Hiçbiri
+          </button>
+        </div>
+        <div className="pick-items">
+          {items.map((x) => (
+            <label key={x.id} className="pick-item">
+              <input
+                type="checkbox"
+                checked={!excluded[kind].has(x.id)}
+                onChange={() => toggle(kind, x.id)}
+              />
+              <span className="row-dot" style={{ background: paletteColor(x.color) }} />
+              {x.label}
+            </label>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="main">
       <div className="panel no-print">
@@ -85,13 +164,9 @@ export default function Print({ state }: Props) {
           <label>
             Ne basılsın{' '}
             <select value={scope} onChange={(e) => setScope(e.target.value as Scope)}>
-              <option value="classes">Sınıf programları ({state.classes.length} sayfa)</option>
-              <option value="teachers">
-                Öğretmen programları ({state.teachers.length} sayfa)
-              </option>
-              <option value="both">
-                İkisi de ({state.classes.length + state.teachers.length} sayfa)
-              </option>
+              <option value="classes">Sınıf programları</option>
+              <option value="teachers">Öğretmen programları</option>
+              <option value="both">İkisi de</option>
             </select>
           </label>
           <label>
@@ -102,15 +177,26 @@ export default function Print({ state }: Props) {
             />{' '}
             Renkli bas
           </label>
-          <button className="btn primary" onClick={() => window.print()}>
-            Yazdır
+          <button className="btn primary" disabled={pageCount === 0} onClick={() => window.print()}>
+            Yazdır ({pageCount} sayfa)
           </button>
         </div>
+
+        {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
+            normal request and used to mean printing all 45 pages and throwing
+            43 away. */}
+        <div className="form-row pickers">
+          {classPages && picker('classes', 'Sınıflar')}
+          {teacherPages && picker('teachers', 'Öğretmenler')}
+        </div>
+
+        {pageCount === 0 && (
+          <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
+        )}
       </div>
 
       <div className="print-area">
-        {classPages &&
-          state.classes.map((group) => (
+        {chosenClasses.map((group) => (
             <div className="print-page" key={group.id}>
               <h3>
                 {colored && (
@@ -163,8 +249,7 @@ export default function Print({ state }: Props) {
             </div>
           ))}
 
-        {teacherPages &&
-          state.teachers.map((teacher) => (
+        {chosenTeachers.map((teacher) => (
             <div className="print-page" key={teacher.id}>
               <h3>
                 {colored && (

@@ -2073,3 +2073,79 @@ test.describe('20. Kapalı saatte ders', () => {
     await expect(page.locator('table.grid .card.conflict')).toHaveCount(0);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 21. Choosing what to print
+//
+// "Print 510 and 511 only" is a normal request and used to mean printing all 45
+// pages and throwing 43 away: the only choice was classes / teachers / both.
+
+test.describe('21. Yazdırmada seçim', () => {
+  test('yalnız seçilen sınıflar basılıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+
+    const pages = page.locator('.print-page');
+    await expect(pages).toHaveCount(20); // everything is on by default
+
+    const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await expect(pages).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /^Yazdır \(/ })).toBeDisabled();
+    await expect(page.locator('.warn-box')).toContainText('Hiçbir sayfa seçili değil');
+
+    await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
+    await list.locator('.pick-item', { hasText: '511' }).first().locator('input').check();
+    await expect(pages).toHaveCount(2);
+    await expect(page.getByRole('button', { name: 'Yazdır (2 sayfa)' })).toBeEnabled();
+    await expect(pages.first().locator('h3')).toContainText('510');
+    await expect(pages.nth(1).locator('h3')).toContainText('511');
+  });
+
+  test('öğretmen sayfaları ayrı seçiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByLabel('Ne basılsın').selectOption('teachers');
+
+    const list = page.locator('.pick-list', { hasText: 'Öğretmenler' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.locator('.pick-item').first().locator('input').check();
+    await expect(page.locator('.print-page')).toHaveCount(1);
+
+    await list.getByRole('button', { name: 'Tümü' }).click();
+    await expect(page.locator('.print-page')).toHaveCount(25);
+  });
+
+  test('sonradan eklenen sınıf kendiliğinden basılıyor', async ({ page }) => {
+    // The selection stores what is LEFT OUT: a class added after the last
+    // printout must not go silently missing on the next one.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
+    await expect(page.locator('.print-page')).toHaveCount(1);
+
+    await openSetup(page, 'Sınıflar');
+    await page.getByPlaceholder('Sınıf adı, örn. 510').fill('999');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-page')).toHaveCount(2);
+    await expect(page.locator('.print-page').nth(1).locator('h3')).toContainText('999');
+  });
+
+  test('seçim yazdırma çıktısına da yansıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
+
+    const pdf = await page.pdf({ format: 'A4', landscape: true, printBackground: true });
+    expect(pdf.byteLength).toBeGreaterThan(1000);
+    // One class = one page. 20 classes would be 20.
+    const pageCount = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+    expect(pageCount).toBe(1);
+  });
+});

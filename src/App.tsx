@@ -5,7 +5,8 @@ import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
 import Check from './components/Check';
-import Print from './components/Print';
+import Print, { NOTHING_EXCLUDED } from './components/Print';
+import type { Excluded } from './components/Print';
 import Settings from './components/settings';
 
 type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print' | 'settings';
@@ -30,6 +31,9 @@ export default function App() {
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
+  // Which pages the print tab will produce. Not in State: it is a decision
+  // about one printout, not something a backup should carry.
+  const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
 
   function toggleTheme() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
@@ -136,7 +140,9 @@ export default function App() {
       {tab === 'availability' && <Availability state={state} change={change} />}
       {tab === 'program' && <Program state={state} change={change} />}
       {tab === 'check' && <Check state={state} />}
-      {tab === 'print' && <Print state={state} />}
+      {tab === 'print' && (
+        <Print state={state} excluded={printExcluded} setExcluded={setPrintExcluded} />
+      )}
       {tab === 'settings' && (
         <Settings state={state} change={change} loadState={loadState} />
       )}
