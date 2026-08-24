@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import { emptyState } from './entities';
+import { applyTheme, readTheme, type Theme } from './theme';
 import Setup from './components/Setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
@@ -25,6 +26,13 @@ export default function App() {
   const fileInput = useRef<HTMLInputElement>(null);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
+  const [theme, setTheme] = useState<Theme>(readTheme);
+
+  function toggleTheme() {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    setTheme(next);
+  }
 
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -79,6 +87,15 @@ export default function App() {
         </button>
         <button className="btn" onClick={redo} disabled={!canRedo} title="Ctrl+Y">
           ↷ İleri al
+        </button>
+        <button
+          className="btn theme-toggle"
+          aria-pressed={theme === 'dark'}
+          aria-label="Koyu tema"
+          title={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? '☀' : '☾'}
         </button>
         <button className="btn primary" onClick={() => downloadBackup(state)}>
           Yedek indir

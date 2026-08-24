@@ -1,22 +1,33 @@
 /* The single stylesheet. No Tailwind, no web fonts (they break offline use).
    Colour is functional: green = droppable, red = blocked, grey = unavailable. */
 
+/* Two themes, one rule: only the SEMANTIC tokens below are redefined in dark.
+   The teacher palette and everything that sits on top of it never flips — those
+   colours are printed on paper. `color-scheme` matters as much as the values:
+   without it the browser darkens the light page itself and muddies
+   green/yellow/red, which is the tool's only feedback channel. */
+
 :root {
+  color-scheme: light;
+
   --bg: #f4f5f7;
   --paper: #ffffff;
   --line: #c9ced6;
   --line-dark: #8a93a0;
   --text: #1b1f24;
-  --muted: #5b6470;
+  --muted: #525b66;
   --accent: #1f5fa8;
+  --accent-hover: #17497f;
   --accent-bg: #e3eefb;
-  --ok: #1a7f37;
+  --on-accent: #ffffff;
+  --ok: #177431;
   --ok-bg: #d5f0dc;
   --warn: #8a6100;
   --warn-bg: #fdf0cf;
   --bad: #b0201c;
   --bad-bg: #fbdcda;
   --closed: #d5d8dd;
+  --hatch: #e8eaee;
 
   /* Teacher palette — same count as COLOR_COUNT in types.ts (12).
      All readable with black text and distinguishable in print. */
@@ -33,8 +44,50 @@
   --color-10: #b8c6f2;
   --color-11: #ecb2ec;
 
+  /* Ink on a palette background. NOT redefined in dark: the pastel underneath
+     does not change either. */
+  --on-color: #1b1f24;
+  --on-color-sub: #3a3f46;
+  --block-cont: rgba(0, 0, 0, 0.12);
+  --edge: rgba(0, 0, 0, 0.4);
+  --shadow: rgba(0, 0, 0, 0.35);
+  --dot-border: rgba(0, 0, 0, 0.3);
+
+  /* Paper is always paper. */
+  --print-line: #444444;
+  --print-head-bg: #eeeeee;
+
   --cell-w: 34px;
   --cell-h: 34px;
+
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #15181c;
+  --paper: #1f242a;
+  --line: #39414a;
+  --line-dark: #646e7a;
+  --text: #e8ecf1;
+  --muted: #a9b2bd;
+  --accent: #7cb8ff;
+  --accent-hover: #9ac9ff;
+  --accent-bg: #16304e;
+  --on-accent: #0a1524;
+  --ok: #74e79f;
+  --ok-bg: #123521;
+  --warn: #f3cf6d;
+  --warn-bg: #3b2d07;
+  --bad: #ff9089;
+  --bad-bg: #401614;
+  --closed: #3b434c;
+  --hatch: #2e353d;
 }
 
 * {
@@ -132,11 +185,26 @@ textarea {
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: #17497f;
+  background: var(--accent-hover);
+}
+
+/* A two-position button (theme, availability kind): it must show WHERE you are,
+   not what the next click does. */
+.btn[aria-pressed="true"] {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.theme-toggle {
+  min-width: 36px;
+  font-size: 15px;
+  line-height: 1.2;
 }
 
 .btn.danger:hover:not(:disabled) {
@@ -298,8 +366,8 @@ td.unavailable {
     45deg,
     var(--closed),
     var(--closed) 3px,
-    #e8eaee 3px,
-    #e8eaee 6px
+    var(--hatch) 3px,
+    var(--hatch) 6px
   );
   color: var(--muted);
   font-size: 11px;
@@ -307,6 +375,7 @@ td.unavailable {
 
 /* A placed lesson card */
 .card {
+  color: var(--on-color);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -332,14 +401,14 @@ td.unavailable {
 
 .card-bottom {
   font-size: 10px;
-  color: #3a3f46;
+  color: var(--on-color-sub);
 }
 
 /* Block display: rowspan is NOT used (a bug factory in a dynamic table).
    The label repeats in every cell, like the aSc screen he is used to; that the
    block is one piece is shown by the faded separator between the cells. */
 td.block-cont {
-  border-right-color: rgba(0, 0, 0, 0.12);
+  border-right-color: var(--block-cont);
 }
 
 /* Drag highlight — added straight through classList, not React state. */
@@ -367,6 +436,7 @@ td.drop-blocked {
 }
 
 .ghost {
+  color: var(--on-color);
   position: fixed;
   left: 0;
   top: 0;
@@ -379,8 +449,8 @@ td.drop-blocked {
   justify-content: center;
   align-items: center;
   line-height: 1.05;
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--edge);
+  box-shadow: 0 3px 10px var(--shadow);
   /* elementFromPoint must see the cell underneath, not the ghost */
   pointer-events: none;
 }
@@ -409,13 +479,14 @@ td.drop-blocked {
 }
 
 .pool-card {
+  color: var(--on-color);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 52px;
   padding: 3px 6px;
-  border: 1px solid rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--shadow);
   border-radius: 3px;
   cursor: grab;
   line-height: 1.1;
@@ -430,7 +501,7 @@ td.drop-blocked {
 
 .pool-card .counter {
   font-size: 10px;
-  color: #3a3f46;
+  color: var(--on-color-sub);
 }
 
 .pool-card.done {
@@ -518,7 +589,7 @@ table.list tbody tr:hover {
   display: inline-block;
   width: 14px;
   height: 14px;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--dot-border);
   border-radius: 3px;
   vertical-align: -2px;
 }
@@ -629,8 +700,8 @@ table.availability td.closed {
     45deg,
     var(--closed),
     var(--closed) 3px,
-    #e8eaee 3px,
-    #e8eaee 6px
+    var(--hatch) 3px,
+    var(--hatch) 6px
   );
   color: var(--muted);
 }
@@ -657,7 +728,7 @@ table.print {
 
 table.print th,
 table.print td {
-  border: 1px solid #444;
+  border: 1px solid var(--print-line);
   padding: 3px 4px;
   text-align: center;
   font-size: 11px;
@@ -665,7 +736,7 @@ table.print td {
 }
 
 table.print th {
-  background: #eee;
+  background: var(--print-head-bg);
   font-size: 11px;
 }
 
@@ -680,7 +751,11 @@ table.print td .p-bottom {
 }
 
 /* Start-end time under the lesson number in the printed hour column. */
-table.print th .p-clock {
+table.print th td.p-closed {
+  background: var(--closed);
+}
+
+.p-clock {
   display: block;
   font-size: 9px;
   font-weight: 400;
@@ -713,8 +788,34 @@ table.bell-preview td {
     margin: 10mm;
   }
 
+  /* Paper is always light, whatever the screen is set to. Dark ink on dark
+     paper would waste a printout my father only notices after printing it. */
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+
+    --bg: #ffffff;
+    --paper: #ffffff;
+    --line: #c9ced6;
+    --line-dark: #8a93a0;
+    --text: #1b1f24;
+    --muted: #525b66;
+    --accent: #1f5fa8;
+    --accent-hover: #17497f;
+    --accent-bg: #e3eefb;
+    --on-accent: #ffffff;
+    --ok: #177431;
+    --ok-bg: #d5f0dc;
+    --warn: #8a6100;
+    --warn-bg: #fdf0cf;
+    --bad: #b0201c;
+    --bad-bg: #fbdcda;
+    --closed: #d5d8dd;
+    --hatch: #e8eaee;
+  }
+
   body {
-    background: #fff;
+    background: var(--paper);
   }
 
   .topbar,

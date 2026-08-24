@@ -181,12 +181,11 @@ export default function Print({ state }: Props) {
                         return (
                           <td
                             key={g}
+                            className={closed && group === undefined ? 'p-closed' : undefined}
                             style={
                               colored && group !== undefined
                                 ? { background: `var(--color-${teacher.color})` }
-                                : closed
-                                  ? { background: '#e0e0e0' }
-                                  : undefined
+                                : undefined
                             }
                           >
                             {group !== undefined ? (

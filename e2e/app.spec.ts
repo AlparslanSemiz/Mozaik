@@ -650,3 +650,185 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     ).toContainText('MÇ Salı günü art arda 2 saat ders veriyor — en fazla 1 saat isteniyor.');
   });
 });
+// ---------------------------------------------------------------------------
+// 8. Theme
+//
+// The app used to have NO dark theme, yet the screenshots came out dark: the
+// browser darkens a light page with its own algorithm. For this tool that is
+// not cosmetic — colour is the only feedback channel (green = droppable,
+// yellow = warning, red = blocked), and the browser's darkening flattens the
+// three into each other. These tests measure what is actually painted.
+
+/** "rgb(18, 53, 33)" -> [18, 53, 33] */
+function rgb(value: string): [number, number, number] {
+  const parts = value.match(/\d+(\.\d+)?/g);
+  if (parts === null || parts.length < 3) throw new Error(`renk okunamadı: ${value}`);
+  return [Number(parts[0]), Number(parts[1]), Number(parts[2])];
+}
+
+function relativeLuminance(color: [number, number, number]): number {
+  const [r, g, b] = color.map((v) => {
+    const x = v / 255;
+    return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const la = relativeLuminance(rgb(a));
+  const lb = relativeLuminance(rgb(b));
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * CIE Lab distance. Contrast ratio is the WRONG measure for "are these two
+ * backgrounds tellable apart": two colours can differ wildly in hue and still
+ * have the same luminance, which is exactly the case for a dark green and a
+ * dark olive.
+ */
+function deltaE(a: string, b: string): number {
+  const toLab = (value: string) => {
+    const [r, g, bl] = rgb(value).map((v) => {
+      const x = v / 255;
+      return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+    }) as [number, number, number];
+    const x = (0.4124 * r + 0.3576 * g + 0.1805 * bl) / 0.95047;
+    const y = 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+    const z = (0.0193 * r + 0.1192 * g + 0.9505 * bl) / 1.08883;
+    const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+    return [116 * f(y) - 16, 500 * (f(x) - f(y)), 200 * (f(y) - f(z))];
+  };
+  const la = toLab(a);
+  const lb = toLab(b);
+  return Math.hypot(la[0]! - lb[0]!, la[1]! - lb[1]!, la[2]! - lb[2]!);
+}
+
+/** Resolves the theme tokens to real rgb() values, the way the page paints them. */
+async function tokens(page: Page, names: string[]): Promise<Record<string, string>> {
+  return page.evaluate((list) => {
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    const out: Record<string, string> = {};
+    for (const name of list) {
+      probe.style.color = `var(${name})`;
+      out[name] = getComputedStyle(probe).color;
+    }
+    probe.remove();
+    return out;
+  }, names);
+}
+
+test.describe('8. Tema', () => {
+  test('tema düğmesi çalışıyor ve tercih sayfa yenilenince duruyor', async ({ page }) => {
+    await open(page);
+    const toggle = page.getByRole('button', { name: 'Koyu tema' });
+
+    await toggle.click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  });
+
+  // Both themes, because the light one regressed too: --ok was 4.19:1 on its own
+  // background and the "x" on a closed cell was 4.20:1.
+  for (const theme of ['light', 'dark'] as const) {
+    test(`${theme} temada durum renkleri ayırt edilebiliyor ve metin AA geçiyor`, async ({
+      page,
+    }) => {
+      await open(page);
+      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+      const t = await tokens(page, [
+        '--ok',
+        '--ok-bg',
+        '--warn',
+        '--warn-bg',
+        '--bad',
+        '--bad-bg',
+        '--text',
+        '--paper',
+        '--muted',
+        '--closed',
+        '--accent',
+        '--accent-bg',
+      ]);
+
+      // The page must really be the theme it claims, not a browser-darkened one
+      const paperLuminance = relativeLuminance(rgb(t['--paper']!));
+      if (theme === 'dark') expect(paperLuminance).toBeLessThan(0.1);
+      else expect(paperLuminance).toBeGreaterThan(0.9);
+
+      // Tellable apart from each other, and from a closed cell
+      expect(deltaE(t['--ok-bg']!, t['--warn-bg']!)).toBeGreaterThan(14);
+      expect(deltaE(t['--warn-bg']!, t['--bad-bg']!)).toBeGreaterThan(14);
+      expect(deltaE(t['--ok-bg']!, t['--bad-bg']!)).toBeGreaterThan(14);
+      expect(deltaE(t['--closed']!, t['--paper']!)).toBeGreaterThan(12);
+
+      // Readable (WCAG AA)
+      for (const [fg, bg] of [
+        ['--ok', '--ok-bg'],
+        ['--warn', '--warn-bg'],
+        ['--bad', '--bad-bg'],
+        ['--text', '--paper'],
+        ['--muted', '--paper'],
+        ['--muted', '--closed'],
+        ['--accent', '--accent-bg'],
+      ] as const) {
+        expect(contrast(t[fg]!, t[bg]!), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+  }
+
+  test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    page.once('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+
+    // The card text sits on the teacher palette, which does NOT flip with the
+    // theme — so its ink must not flip either, or the cell becomes unreadable.
+    const card = page.locator('.pool-card').first();
+    const ink = await card.evaluate((el) => {
+      const own = getComputedStyle(el);
+      const sub = el.querySelector('.card-bottom');
+      return {
+        background: own.backgroundColor,
+        color: own.color,
+        subColor: sub === null ? own.color : getComputedStyle(sub).color,
+      };
+    });
+    expect(contrast(ink.color, ink.background)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(ink.subColor, ink.background)).toBeGreaterThanOrEqual(4.5);
+
+    const t = await tokens(page, ['--ok-bg', '--bad-bg', '--closed']);
+    expect(deltaE(t['--ok-bg']!, t['--closed']!)).toBeGreaterThan(15);
+    expect(deltaE(t['--bad-bg']!, t['--closed']!)).toBeGreaterThan(15);
+  });
+
+  test('koyu temada bile kâğıda açık basılıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+
+    await page.emulateMedia({ media: 'print' });
+    const printed = await tokens(page, ['--paper', '--text']);
+    // White paper, dark ink — regardless of what the screen is set to
+    expect(relativeLuminance(rgb(printed['--paper']!))).toBeGreaterThan(0.9);
+    expect(relativeLuminance(rgb(printed['--text']!))).toBeLessThan(0.1);
+
+    const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    expect(relativeLuminance(rgb(bodyBg))).toBeGreaterThan(0.9);
+    await page.emulateMedia({ media: 'screen' });
+  });
+});

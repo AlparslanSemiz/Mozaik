@@ -5,6 +5,8 @@ import { defineConfig } from '@playwright/test';
 // localStorage, yazdirma ve dosya indirme file:// altinda farkli davranabilir.
 export default defineConfig({
   testDir: './e2e',
+  // Screenshots, not tests: `npm run ekran` runs them with their own config.
+  testIgnore: '**/ekran.spec.ts',
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],
