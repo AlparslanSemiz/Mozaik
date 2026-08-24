@@ -1,7 +1,12 @@
 # Kurs Ders Programı — Teknik Plan
 
 Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı araç.
-Ölçek: ~20 hoca, ~10-15 grup, 6 gün × 12 slot.
+Ölçek: ~25 öğretmen, ~20 sınıf, 8 derslik, 7 gün × 12 saat. Hepsi ayarlanabilir.
+
+> **Güncelleme (2026-08-24).** Bu belgenin çerçevesi ve ilkeleri aynen geçerli.
+> Soru turu ve babamın gerçek aSc ekranının fotoğrafı (`docs/Yaklaşık ders planı
+> ölçeği.png`) sonrası bölüm 2, 3, 4 ve 6 düzeltildi — düzeltmeler yerinde işlendi,
+> verilen kararların tam listesi `docs/STATUS.md` içindeki karar tablosunda.
 
 Bu bir aSc klonu **değil**. aSc'nin yaptığı işin kursla ilgili olan %10'unu yapıp
 o %10'u aSc'den iyi yapmak hedefi.
@@ -59,44 +64,64 @@ küçük bir yüzeyde ekstra araç.
 cevaplanmalı (bkz. bölüm 8).**
 
 ```ts
-type Id = string;   // nanoid benzeri, 8 karakter. ASLA isim veya dizi indeksi.
+type Id = string;   // 8 karakter rastgele. ASLA isim veya dizi indeksi.
 
 interface Durum {
   semaSurumu: 1;              // ilk günden. göç için gerekli.
   ayar: {
-    gunler: string[];         // ["Pazartesi", ... "Cumartesi"]
-    slotlar: string[];        // ["09:00-09:45", ...] görünen ad
-    blokEngeli: number[];     // bu slot indekslerinden ÖNCE blok geçemez (öğle arası)
+    gunler: string[];         // ["Pazartesi", ... "Pazar"]
+    saatler: string[];        // ["1", ... "12"] veya "09:00-09:45" — görünen ad
   };
-  hocalar: Hoca[];
-  gruplar: Grup[];
+  derslikler: Derslik[];
+  ogretmenler: Ogretmen[];
+  siniflar: Sinif[];
   dersler: Ders[];
-  kapali: Record<string, true>;    // `${hocaId}|${gun}|${slot}` -> hoca gelemez
-  yerlesim: Record<string, Id>;    // `${grupId}|${gun}|${slot}` -> dersId
+  musaitDegil: Record<string, 1>;  // `${ogretmenId}|${gun}|${saat}` -> gelemez
+  yerlesim: Record<string, Id>;    // `${sinifId}|${gun}|${saat}` -> dersId
 }
 
-interface Hoca { id: Id; ad: string; }
-interface Grup { id: Id; ad: string; }
+interface Derslik { id: Id; ad: string; }              // "A" .. "H"
+
+interface Ogretmen {
+  id: Id;
+  ad: string;
+  kisaltma: string;   // "MÇ" — ızgarada satır başlığı
+  brans: string;      // "Matematik" — serbest metin, ayrı tablo değil
+  renk: number;       // palet indeksi (0-11), hex değil
+}
+
+interface Sinif {
+  id: Id;
+  ad: string;             // "510"
+  derslikId: Id | null;   // sabit. yerleştirirken seçilmez.
+}
+
 interface Ders {
   id: Id;
-  grupId: Id;
-  brans: string;      // "Matematik" — serbest metin, ayrı tablo değil
-  hocaId: Id;
-  saat: number;       // haftalık toplam ders saati
-  blok: number;       // arka arkaya kaç saat (1 veya 2, nadiren 3)
+  sinifId: Id;
+  ogretmenId: Id;
+  haftalikSaat: number;   // haftalık toplam ders saati
+  blok: number;           // arka arkaya kaç saat (1, 2 veya 3)
 }
 ```
 
 ### Neden bu şekilde
 
-- **Branş ayrı bir varlık değil, serbest metin.** Kursta 8-10 branş var ve hiç
-  değişmiyor. Ayrı tablo yapmak, ekleme ekranı, seçim listesi ve yönetim
-  ekranı demek. Renk üretimi için metinden hash alınır, yeter.
-- **Derslik yok.** Kursta grup = sınıf, herkesin kendi odası var. Derslik
-  eklemek üçüncü bir çakışma boyutu ve tüm UI'yı karmaşıklaştırır.
-  *Soru 1'in cevabı "gruplardan az oda var" ise bu karar değişir ve v0'a girer.*
-- **`yerlesim` düz bir sözlük, dizi değil.** Gün/slot sayısı değiştiğinde dizi
+- **Branş öğretmenin alanı, dersin değil.** Her öğretmenin tek branşı var. Branşı
+  her ders satırında tekrar yazdırmak hem gereksiz veri girişi hem tutarsızlık
+  kaynağı olurdu. Serbest metin — ayrı tablo, ekleme ekranı ve yönetim ekranı yok.
+- **Derslik var, ama sınıfın sabit alanı olarak.** Fotoğrafta ~20 sınıf 8 dersliği
+  paylaşıyor (A: 410/411/510/511, D: 414/415/530/531). Yerleştirirken oda
+  *seçilmiyor* — UI'ya hiçbir karmaşıklık eklemiyor — ama aynı dersliği paylaşan
+  iki sınıf aynı saate konamıyor. `derslikId: null` ise kontrol atlanır; derslik
+  girmemiş kullanıcı da programı dizebilir.
+- **Renk paletten indeks, hex değil.** Öğretmen rengi işlevsel: havuzdaki kartın
+  hangi satıra ait olduğunu gösterir. Elle renk seçtirmeye gerek yok.
+- **`yerlesim` düz bir sözlük, dizi değil.** Gün/saat sayısı değiştiğinde dizi
   yeniden boyutlandırmakla uğraşmak yerine taşan anahtarlar silinir.
+- **`yerlesim` sınıf anahtarlı, öğretmen değil.** Öğretmen ve derslik doluluk
+  haritaları `indeksle()` ile tek geçişte türetilir. Aynı veriyi iki yerde tutmak
+  senkronizasyon hatası demek.
 - **Bloklar ayrı bir varlık değil.** İki saatlik blok, iki ardışık anahtara aynı
   `dersId` yazılarak temsil edilir. Kaldırırken bloğun başı geriye doğru
   yürüyerek bulunur. Bu, veri modelini basit tutuyor.
@@ -115,17 +140,22 @@ tek bir dosyada (`src/kisit.ts`). **Bu dosyanın testleri yazılacak.**
 function engel(d: Durum, dersId: Id, gun: number, slot: number): string | null
 ```
 
-Sırasıyla bakılacak hard kısıtlar:
+Sırasıyla bakılacak sert kısıtlar:
 
-1. Blok gün sonuna sığıyor mu (`slot + blok <= slotlar.length`)
-2. Blok, `blokEngeli` sınırını geçiyor mu (öğle arasını bölmesin)
-3. Grubun o slotu boş mu
-4. Hoca o slotta gelebiliyor mu (`kapali` sözlüğü)
-5. Hoca o slotta başka bir grupta ders veriyor mu
+1. Blok gün sonuna sığıyor mu (`saat + blok <= saatler.length`)
+2. Sınıfın o saatleri boş mu
+3. Öğretmen o saatte gelebiliyor mu (`musaitDegil` sözlüğü)
+4. Öğretmen o saatte başka bir sınıfta ders veriyor mu
+5. Dersliği paylaşan başka bir sınıf o saatte ders yapıyor mu
+
+**Boşluk (pencere) kuralları v0'da yok.** Sınıfın veya öğretmenin gün içinde boş
+saati olması v0'da hiç kontrol edilmiyor. Sonraki sürümde her kural için
+*Kapalı / Uyar / Engelle* ayarıyla gelecek — ikisini birden sert yapmak çoğu
+programı çözümsüz bırakır.
 
 Hata mesajı **her zaman somut** olacak. "Çakışma var" değil,
-`"Ahmet Hoca o saatte TYT-B grubunda"`. Programı dizen kişinin bir sonraki
-hamlesini belirleyen şey bu cümle.
+`"MÇ o saatte 433 sınıfında"`. Programı dizen kişinin bir sonraki hamlesini
+belirleyen şey bu cümle.
 
 ### Testler (Vitest, ~12 test, bir saatlik iş)
 
@@ -133,17 +163,21 @@ Bu testleri yazmamak projenin en olası çöküş sebebi. Sürükle-bırakla ell
 etmek yavaş ve eksik.
 
 - boş ızgaraya yerleştirme geçer
-- dolu gruba yerleştirme engellenir
-- hocanın kapalı saatine yerleştirme engellenir
-- hoca başka grupta ders verirken engellenir
-- 2'li blok son slota konamaz
-- 2'li blok öğle arasını geçemez
-- blok kaldırıldığında iki slot da temizlenir
+- dolu sınıfa yerleştirme engellenir
+- öğretmenin müsait olmadığı saate yerleştirme engellenir
+- öğretmen başka sınıfta ders verirken engellenir
+- dersliği paylaşan sınıf o saatte doluyken engellenir
+- `derslikId === null` iken derslik kontrolü atlanır
+- 2'li blok son saate konamaz
+- 3'lü blok güne sığmıyorsa reddedilir
+- blok kaldırıldığında tüm saatleri temizlenir
 - ortadan tıklanan blok tamamen kalkar (baş bulma mantığı)
-- hoca silinince dersleri ve yerleşimleri de silinir
-- slot sayısı azalınca taşan yerleşimler temizlenir
-- aynı hoca aynı grupta üst üste iki derste çakışma vermez
-- fizibilite: yük > müsaitlik olan hoca tespit edilir
+- öğretmen silinince dersleri ve yerleşimleri de silinir
+- sınıf silinince dersleri ve yerleşimleri de silinir
+- saat sayısı azalınca taşan yerleşimler temizlenir
+- aynı öğretmen aynı sınıfta üst üste iki derste çakışma vermez
+- sayaç (yerleşen/toplam) doğru sayar
+- fizibilite: yük > müsaitlik olan öğretmen tespit edilir
 
 ---
 
@@ -156,16 +190,21 @@ Her sürümün bir **çıkma şartı** var. Şart sağlanmadan sonrakine geçilm
 Çıkma şartı: *babam gerçek verisiyle bir haftalık programı baştan sona dizip
 çıktısını alabiliyor.*
 
-- Kurulum: gün/slot düzeni, hoca listesi, grup listesi, ders listesi
-- Müsaitlik ızgarası: hoca seç, gelemeyeceği saatlere tıkla
-- Program ızgarası: gün sekmeleri, grup sütunları, saat satırları
+- Kurulum: gün/saat düzeni, derslik listesi, öğretmen listesi, sınıf listesi,
+  ders listesi. Ayrıca **Excel'den yapıştırarak toplu giriş** — ilk kurulumda
+  300+ satır veriyi tek tek girdirmek babamın pes edeceği yer.
+- Müsaitlik ızgarası: öğretmen seç, gelemeyeceği saatlere tıkla. Sürükleyerek
+  toplu boyama ve gün/saat başlığından toplu değiştirme (25 × 84 hücre tek tek tıklanmaz).
+- Program ızgarası: satır = öğretmen, sütun = 7 gün × 12 saat, altta yerleşmemiş
+  kart havuzu. Tek düğmeyle satır = sınıf görünümüne geçiş.
 - Sürükle-bırak: sürüklerken geçerli hücreler yeşil, engel varsa üst çubukta sebep
-- Yerleşmiş derse tıkla → kalksın
+- Yerleşmiş derse tıkla → kalksın (blok ise tamamı)
 - Sayaç: her ders için `yerleşen/toplam`
 - **Geri al (Ctrl+Z), en az 20 adım.** Sürükle-bırakta yanlış bırakma sürekli
   olur. Bu bloat değil, temel işlev.
 - Kayıt: localStorage otomatik + "Yedek indir" (.json) + "Yedek yükle"
-- Yazdırma: A4 yatay, tüm gruplar + tüm hocalar
+- Yazdırma: **sayfa başına bir sınıf / bir öğretmen** (7 sütun × 12 satır, A4 dikey).
+  84 sütunlu ana tabloyu basmak imkânsız — sütun başına 3 mm düşer, denenmeyecek.
 
 ### v0.5 — Yapılabilirlik kontrolü
 
@@ -218,36 +257,46 @@ Sadece babam "asıl derdim bu" derse. (Soru 7)
 Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
 
 1. **Sürükleme sırasında DOM'u yeniden çizmek sürüklemeyi iptal eder.**
-   `dragstart` içinde sürüklenen elemanı silen bir re-render yaparsan tarayıcı
-   işlemi iptal eder. Sürükleme sırasında sadece ızgarayı güncelle, kart havuzunu
-   dokunma. Veya `setTimeout(..., 0)` ile ertele.
+   HTML5 drag-and-drop'ta `dragstart` içinde sürüklenen elemanı silen bir re-render
+   yaparsan tarayıcı işlemi iptal eder. **Çözüm: HTML5 DnD hiç kullanılmıyor,
+   Pointer Events kullanılıyor** — bu tuzak orada hiç oluşmuyor. `pointermove`
+   sırasında React state güncellenmiyor; hayalet kart `transform` ile doğrudan
+   DOM'dan taşınıyor, ızgara hiç yeniden çizilmiyor.
 
-2. **Dokunmatik ekranda HTML5 drag-and-drop çalışmaz.** Babam tablet kullanacaksa
-   Pointer Events'e geçmek gerekir. (Soru 9) Windows masaüstüyse HTML5 yeter,
-   fazlasını yazma.
+2. **Geçerli hücreler sürükleme başında bir kez hesaplanır**, her `pointermove`'da
+   değil. Sürüklenen ders belli olduğu için sadece o öğretmenin satırı hedef
+   olabilir → 84 `engel()` çağrısı, bir kez, sonuç bir `Set`. Yavaş makinede
+   sürüklemeyi akıcı tutan şey bu. (Dokunmatik desteği de Pointer Events'le
+   bedava geliyor; hedef değil ama ileride gerekirse bozulmadan çalışır.)
 
 3. **Her tuş vuruşunda re-render odağı kaybettirir.** Metin kutularında `onInput`
    değil `onBlur`/`onChange` kullan, ya da input'ları controlled yapmayıp
    `defaultValue` + `onBlur` ile oku.
 
-4. **Silme işlemleri cascade olmalı.** Hoca silinince dersleri, ders silinince
-   yerleşimleri, grup silinince ikisi de. Yetim `dersId` kalırsa ızgara
+4. **Silme işlemleri cascade olmalı.** Öğretmen silinince dersleri, ders silinince
+   yerleşimleri, sınıf silinince ikisi de. Yetim `dersId` kalırsa ızgara
    `undefined` render eder ve çöker.
 
-5. **Slot/gün sayısı azalınca taşan yerleşimler silinmeli.** Yoksa görünmez
+5. **Saat/gün sayısı azalınca taşan yerleşimler silinmeli.** Yoksa görünmez
    hayalet dersler kalır, sayaçlar tutmaz, babam güvenini kaybeder.
+
+   *4 ve 5'in tek çaresi:* `temizle()` saf fonksiyonu **her yüklemede ve her ayar
+   değişikliğinde** çağrılır. Silme mantığı bileşenlere dağıtılmaz.
 
 6. **localStorage silinebilir.** Tarayıcı geçmişi temizlenince veri gider.
    Karşı önlem: (a) her değişiklikte otomatik kayıt, (b) son 3 durumu ayrı
    anahtarlarda tut, (c) program tamamlandığında "yedek indir" için görünür bir
    hatırlatma göster. Babama tek bir alışkanlık öğret: *değişiklik yaptın, yedek indir.*
 
-7. **Yazdırma her zaman hafife alınır.** `@page { size: A4 landscape }`,
-   `page-break-inside: avoid`, arka plan renkleri varsayılan olarak basılmaz.
-   v0'ın **sonunda değil ortasında** test et, yoksa layout'u baştan yazarsın.
+7. **Yazdırma her zaman hafife alınır.** `@page { size: A4 portrait }`,
+   `page-break-after: always`, `print-color-adjust: exact` (arka plan renkleri
+   varsayılan olarak basılmaz). v0'ın **sonunda değil ortasında** test et, yoksa
+   layout'u baştan yazarsın.
 
 8. **Türkçe karakterler.** Anahtarlarda asla isim kullanma, hep id. "Şükrü Hoca"
-   adı değişince tüm yerleşim bozulmasın.
+   adı değişince tüm yerleşim bozulmasın. Kod içinde de tanımlayıcılar ASCII:
+   `ogretmen`, `musaitDegil`, `sinif` — Türkçe karakter sadece kullanıcıya
+   görünen metinlerde.
 
 9. **Blok render'ı.** İki slotu kaplayan ders, ikinci hücrede tekrar başlık
    yazmamalı. `rowspan` yerine ikinci hücreye sade bir devam işareti koymak
@@ -262,15 +311,37 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
 ## 6. Arayüz kararları
 
 - **Sekmeler**: Kurulum · Müsaitlik · Program · Kontrol · Yazdır. Beş tane, daha fazlası değil.
-- **Gün sekmeleri**: 6 gün × 12 slot tek tabloda 72 satır eder, okunmaz.
-  Gün seçilir, o günün tablosu gösterilir (satır = slot, sütun = grup).
+- **Ana ızgara aSc'deki düzende**: satır = öğretmen, sütun = 7 gün × 12 saat, hepsi
+  tek geniş tabloda yan yana. Gün sekmesi **yok**.
+
+  ```
+              │ Pazartesi        │ Salı             │ ... 7 gün
+              │ 1  2  3 ... 12   │ 1  2  3 ... 12   │
+   ───────────┼──────────────────┼──────────────────┼──────
+   MÇ  Mat    │ ×  ×  ×  ...     │    510 510  ...  │
+   AV  Fizik  │       431  ...   │ ×  ×  ×  ...     │
+   ...  (~25 satır)
+   ────────────────────────────────────────────────────────
+   [ Yerleşmemiş kart havuzu — öğretmen renginde ]
+  ```
+
+  Gerekçe: babamın gerçek aSc ekranı bu (`docs/Yaklaşık ders planı ölçeği.png`).
+  Farklı bir düzen ona yeniden öğrenme maliyeti çıkarır. Hücrede iki satır: üstte
+  sınıf adı (`510`), altta derslik harfi (`A`).
+- **Görünüm düğmesi**: tek tıkla satır = sınıf görünümüne geçilir. Aynı veri,
+  devrik tablo — neredeyse bedava, ama "bu sınıfın günü nasıl" sorusunu cevaplatıyor.
+  aSc'den iyi olmayı hedeflediğimiz yer tam burası.
 - **Renk işlevsel, dekoratif değil.** Yeşil = bırakılabilir, kırmızı = engel,
-  gri taralı = hoca yok. Branş renkleri metinden üretilir, elle seçilmez.
+  gri taralı = öğretmen müsait değil. Öğretmen rengi paletten atanır ve havuzdaki
+  kartın hangi satıra ait olduğunu gösterir.
 - **Font**: sistem fontu. Web font indirmek offline çalışmayı bozar.
-- **Ekran**: babamın ekranı muhtemelen 1366×768. 15 grup sütunu sığmaz,
-  yatay kaydırma olacak. Saat sütunu `position: sticky` olsun.
+- **Ekran**: babamın ekranı muhtemelen 1366×768. 84 sütun sığmaz, yatay kaydırma
+  kaçınılmaz. Öğretmen sütunu `position: sticky; left: 0`, gün/saat başlıkları
+  `sticky; top: 0`.
+- **Performans**: ~2100 hücre var. Satırlar `React.memo` ile sarılır; bir
+  yerleştirme tüm tabloyu değil 1-2 satırı yeniden çizer.
 - **Boş ekranlar yönlendirsin.** "Henüz ders yok" değil,
-  "Kurulum sekmesinden hoca ve grup ekleyin, sonra ders girin."
+  "Kurulum sekmesinden öğretmen ve sınıf ekleyin, sonra ders girin."
 
 ---
 
@@ -286,41 +357,54 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
 
 ## 8. Cevaplanması gereken sorular
 
-Bunlar cevaplanmadan v0'a başlanmamalı. Çoğu veri modelini doğrudan etkiliyor.
+Veri modelini etkileyen soruların hepsi cevaplandı (2026-08-24). Kalanlar v0'ı
+bloke etmiyor çünkü ilgili ayarlar yapılandırılabilir bırakıldı.
 
-**Babama sorulacak:**
+**Cevaplananlar:**
 
-1. **Derslik durumu.** Her grubun kendi sabit odası var mı, yoksa odalar
-   gruplardan az mı ve paylaşılıyor mu?
-   *Paylaşılıyorsa derslik üçüncü bir çakışma boyutu olarak v0'a girer.*
+1. ✅ **Derslik durumu.** Sınıfların kendi odası var, çok nadir değişiyor. Ama
+   fotoğrafta ~20 sınıf 8 derslik harfini paylaşıyor — iki cevap çelişiyor.
+   *Karar:* derslik sınıfın **sabit alanı** oldu, seçim UI'sı yok, çakışma kontrolü
+   var. Odalar gerçekten paylaşılmıyorsa kontrol hiç tetiklenmez → **her iki
+   durumda da kod doğru**, bedeli sıfır. Babaya yine de teyit ettirilecek.
 
-2. **Öğrenci çakışması.** Bir öğrenci birden fazla gruba yazılabiliyor mu?
-   (mesela matematiği A grubundan, fiziği B grubundan alıyor)
-   *Evet ise gruplar birbiriyle çakışır ve model ciddi şekilde büyür.
-   Bu, cevabı en kritik soru.*
+2. ✅ **Öğrenci çakışması.** Yok. Sınıf kapalı bir öğrenci kümesi; iki sınıfın aynı
+   saatte ders yapması sorun değil. En pahalı senaryodan kurtulduk, model
+   PLAN.md'deki sadeliğinde kaldı.
+   *Ek:* **her öğretmenin tek branşı var** → branş `Ogretmen`'in alanı oldu.
 
-3. **Gün yapısı.** Her günün slot sayısı aynı mı? Cumartesi farklı mı işliyor?
+5. ✅ **Boşluk.** "Genelde olmaz" ama kesin kural değil.
+   *Karar:* v0'da hiç kontrol edilmiyor. Sonraki sürümde hem sınıf hem öğretmen
+   boşluğu için ayrı ayrı *Kapalı / Uyar / Engelle* ayarı gelecek.
 
-4. **Ara.** Sabit bir öğle/dinlenme arası var mı? Blok ders bu arayı geçebilir mi?
+6. ✅ **Hoca sayısı.** Her öğretmenin tek branşı var. Bir branş iki öğretmen
+   arasında bölünürse iki ayrı `Ders` satırı yazılır — model değişmiyor.
 
-5. **Boşluk.** Bir grubun günü içinde boş saat olabilir mi, yoksa dersler
-   arka arkaya mı gitmeli?
+9. ✅ **Cihaz.** Windows masaüstü, fare. Tablet hedef değil.
+   *Karar:* yine de **Pointer Events** kullanılıyor — HTML5 DnD'nin tuzak 1'inden
+   kurtarıyor ve dokunmatik desteği bedava geliyor.
 
-6. **Hoca sayısı.** Bir dersi her zaman tek hoca mı veriyor, yoksa aynı branş
-   iki hoca arasında bölünüyor mu?
+**Hâlâ açık — ama v0'ı bloke etmiyor:**
 
-7. **Asıl acı nerede?** Programı dönem başında bir kez mi kuruyor, yoksa dönem
-   içinde sürekli değiştirmek zorunda mı kalıyor?
-   *İkincisi ise v3 aslında v1'den önemli.*
+3. ⬜ **Gün yapısı.** Her günün saat sayısı aynı mı?
+   *Neden bloke etmiyor:* `ayar.gunler` ve `ayar.saatler` tamamen ayarlanabilir.
+   Günler farklı uzunluktaysa, kısa günün fazla saatleri tüm öğretmenler için
+   "müsait değil" işaretlenerek çözülür — kod değişikliği gerekmez.
 
-8. **Çıktı kime gidiyor?** Duvara mı asılıyor, öğrenciye/veliye mi dağıtılıyor?
-   *Dağıtılıyorsa baskı kalitesi ciddiye alınır.*
+4. ⬜ **Ara.** Sabit öğle arası var mı, blok bu arayı geçebilir mi?
+   *Karar:* `blokEngeli` alanı v0'dan çıkarıldı. Ara varsa o saat herkese kapalı
+   işaretlenir. Gerçekten gerekirse tek alan ve tek kontrolle geri eklenir.
 
-9. **Cihaz.** Hangi bilgisayar, hangi tarayıcı, ekran boyutu? Tablet kullanma
-   ihtimali var mı?
+7. ⬜ **Asıl acı nerede?** Dönem başında bir kez mi kuruyor, dönem içinde sürekli
+   mi değiştiriyor? *İkincisi ise v3, v1'den önce yapılmalı.* v0 kullanıldıktan
+   sonra cevabı kendiliğinden görülecek.
 
-10. **Müsaitlik ne sıklıkla değişiyor?** Hocaların müsait saatleri dönem boyunca
-    sabit mi, yoksa haftalık mı değişiyor?
+8. ⬜ **Çıktı kime gidiyor?** Duvara mı asılıyor, dağıtılıyor mu?
+   *Etkisi:* sadece baskı kalitesine verilecek özen. Sayfa başına bir sınıf düzeni
+   her iki durumda da doğru.
+
+10. ⬜ **Müsaitlik ne sıklıkla değişiyor?** Dönem boyunca sabit mi?
+    *Etkisi:* sabit değilse v3 (dönem içi değişiklik) öne çıkar. v0'ı etkilemiyor.
 
 **Kendime sorulacak:**
 
