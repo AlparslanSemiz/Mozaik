@@ -649,10 +649,6 @@ td.drop-blocked {
   width: 90px;
 }
 
-.time {
-  width: 120px;
-}
-
 .grow {
   width: 100%;
 }
@@ -835,6 +831,17 @@ table.list tbody tr:hover {
   border: 1px solid var(--dot-border);
   border-radius: 3px;
   vertical-align: -2px;
+}
+
+/* Hour : minute, kept on one line so the colon reads as part of a clock. */
+.clock-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clock-pick select {
+  padding-right: var(--space-2);
 }
 
 .hint {

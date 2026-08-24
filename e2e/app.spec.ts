@@ -1749,3 +1749,59 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.locator('table.list tbody tr', { hasText: 'Astronomi' })).toHaveCount(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 17. The start-time picker
+//
+// <input type="time"> renders AM/PM or 24-hour according to the BROWSER's
+// locale, which is not ours to decide, and it accepts any minute. It also had a
+// trap: emptying the box blurred to "" and the whole school day silently began
+// at 00:00.
+
+test.describe('17. Başlangıç saati', () => {
+  test('saat 24 saatlik ve dakika beşer beşer', async ({ page }) => {
+    await open(page);
+    await openSettings(page, 'Okul ve zil');
+
+    const hour = page.getByLabel('Başlangıç saati');
+    const minute = page.getByLabel('Başlangıç dakikası');
+    await expect(hour).toHaveJSProperty('tagName', 'SELECT');
+    await expect(page.locator('input[type=time]')).toHaveCount(0);
+
+    const hours = await hour.locator('option').allInnerTexts();
+    expect(hours).toHaveLength(24);
+    expect(hours[0]).toBe('00');
+    expect(hours[9]).toBe('09');
+    expect(hours[23]).toBe('23');
+    expect(hours.join(' ')).not.toContain('AM');
+    expect(hours.join(' ')).not.toContain('PM');
+
+    const minutes = await minute.locator('option').allInnerTexts();
+    expect(minutes).toEqual(['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55']);
+  });
+
+  test('seçilen saat ızgaraya ve zil önizlemesine geçiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul ve zil');
+
+    await page.getByLabel('Başlangıç saati').selectOption('14');
+    await page.getByLabel('Başlangıç dakikası').selectOption('35');
+    await expect(page.locator('table.bell-preview')).toContainText('14:35–15:15');
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid thead .hour-clock').first()).toHaveText('14:35');
+  });
+
+  test('boş bırakılıp 00:00\'a düşme tuzağı kalmadı', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul ve zil');
+    // There is no empty option to choose, in either dropdown.
+    for (const label of ['Başlangıç saati', 'Başlangıç dakikası']) {
+      const values = await page.getByLabel(label).locator('option').evaluateAll((list) =>
+        list.map((el) => (el as HTMLOptionElement).value),
+      );
+      expect(values).not.toContain('');
+    }
+    await expect(page.locator('table.bell-preview')).toContainText('09:00–09:40');
+  });
+});

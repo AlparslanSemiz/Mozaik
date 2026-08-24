@@ -4,7 +4,7 @@
 // keystroke with onChange loses focus (docs/PLAN.md pitfall 3).
 
 import { useMemo } from 'react';
-import { dayPeriods } from '../../bell';
+import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../bell';
 import type { Day } from '../../types';
 import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import Field from '../Field';
@@ -61,6 +61,12 @@ export default function School({ state, change }: PanelProps) {
       periods: dayPeriods(state.settings.bell, state.settings.hours, after),
     }));
   }, [state.settings]);
+
+  const startAt = clockParts(state.settings.bell.start);
+
+  function setStart(hour: number, minute: number) {
+    change((d) => updateBell(d, { start: formatClock(hour * 60 + minute) }));
+  }
 
   return (
     <>
@@ -156,14 +162,40 @@ export default function School({ state, change }: PanelProps) {
               onBlur={(e) => setHours(Number(e.target.value))}
             />
           </Field>
-          <Field label="İlk ders başlangıcı">
-            <input
-              type="time"
-              defaultValue={state.settings.bell.start}
-              className="time"
-              onBlur={(e) => change((d) => updateBell(d, { start: e.target.value }))}
-            />
-          </Field>
+          {/* Two dropdowns, not <input type="time">. That input renders AM/PM
+              or 24-hour depending on the BROWSER's locale — not ours to
+              decide — and it lets any minute through. It also had a trap: an
+              emptied box blurred to "" and parseClock made the school day
+              start at 00:00 with nothing to say so. There is no empty value to
+              pick here. */}
+          <div className="field">
+            <span className="field-label">İlk ders başlangıcı</span>
+            <span className="clock-pick">
+              <select
+                aria-label="Başlangıç saati"
+                value={startAt.hour}
+                onChange={(e) => setStart(Number(e.target.value), startAt.minute)}
+              >
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>
+                    {String(h).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+              <b>:</b>
+              <select
+                aria-label="Başlangıç dakikası"
+                value={startAt.minute}
+                onChange={(e) => setStart(startAt.hour, Number(e.target.value))}
+              >
+                {minuteOptions(startAt.minute).map((m) => (
+                  <option key={m} value={m}>
+                    {String(m).padStart(2, '0')}
+                  </option>
+                ))}
+              </select>
+            </span>
+          </div>
           <Field label="Ders (dk)">
             <input
               type="number"

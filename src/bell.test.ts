@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { dayEnd, dayPeriods, formatClock, parseClock, sharedPeriods } from './bell';
+import {
+  clockParts,
+  dayEnd,
+  dayPeriods,
+  formatClock,
+  minuteOptions,
+  parseClock,
+  sharedPeriods,
+} from './bell';
 import { DEFAULT_BELL } from './entities';
 import { hourNames } from './entities';
 
@@ -97,5 +105,34 @@ describe('sharedPeriods', () => {
 
   it('gün yoksa hiçbir saat ortak değildir', () => {
     expect(sharedPeriods(DEFAULT_BELL, labels, [])).toEqual(labels.map(() => null));
+  });
+});
+
+describe('clockParts / minuteOptions', () => {
+  it('saati ve dakikayı ayırıyor', () => {
+    expect(clockParts('09:00')).toEqual({ hour: 9, minute: 0 });
+    expect(clockParts('19:35')).toEqual({ hour: 19, minute: 35 });
+    expect(clockParts('9.05')).toEqual({ hour: 9, minute: 5 });
+  });
+
+  it('okunamayan değer gece yarısına düşüyor, NaN üretmiyor', () => {
+    expect(clockParts('')).toEqual({ hour: 0, minute: 0 });
+    expect(clockParts('abc')).toEqual({ hour: 0, minute: 0 });
+  });
+
+  it('dakika listesi yalnızca beşin katları', () => {
+    const list = minuteOptions(0);
+    expect(list).toHaveLength(12);
+    expect(list[0]).toBe(0);
+    expect(list[list.length - 1]).toBe(55);
+    expect(list.every((m) => m % 5 === 0)).toBe(true);
+  });
+
+  it('eski dosyadaki 09:03 sessizce kaydırılmıyor, listeye ekleniyor', () => {
+    const list = minuteOptions(3);
+    expect(list).toContain(3);
+    expect(list).toHaveLength(13);
+    // still sorted, so the dropdown reads like a clock
+    expect([...list].sort((a, b) => a - b)).toEqual(list);
   });
 });

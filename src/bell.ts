@@ -34,6 +34,32 @@ export function formatClock(minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+export const MINUTE_STEP = 5;
+
+/** "09:00" -> { hour: 9, minute: 0 }. Unreadable input lands on 00:00, never NaN. */
+export function clockParts(text: string): { hour: number; minute: number } {
+  const total = parseClock(text);
+  return { hour: Math.floor(total / 60), minute: total % 60 };
+}
+
+/**
+ * The minutes the start-time dropdown offers: 0, 5, ... 55.
+ *
+ * No school rings a bell at 09:03, and every extra option is one more thing to
+ * scroll past. A stored minute that is NOT a multiple of five is still listed,
+ * though — an old file may hold one, and silently snapping it would move the
+ * whole school day without saying so.
+ */
+export function minuteOptions(minute: number): number[] {
+  const out: number[] = [];
+  for (let m = 0; m < 60; m += MINUTE_STEP) out.push(m);
+  if (!out.includes(minute) && minute >= 0 && minute < 60) {
+    out.push(minute);
+    out.sort((a, b) => a - b);
+  }
+  return out;
+}
+
 /**
  * The clock for one day.
  *
