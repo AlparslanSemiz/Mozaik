@@ -311,10 +311,17 @@ table.grid thead tr:nth-child(2) th {
   border-left: 2px solid var(--line-dark) !important;
 }
 
-/* Where the long lunch break falls. Dashed so it cannot be mistaken for a day
-   boundary, but visible enough to find the afternoon at a glance. */
-.long-break {
-  border-left: 2px dashed var(--muted) !important;
+/* The lunch break gets a column of its own rather than a dashed border: a thin
+   line between 34px cells is simply not noticed. Different ground, so it does
+   not read as an empty hour. It carries no data-day, so a drag ignores it. */
+.break-col {
+  width: 10px;
+  min-width: 10px;
+  max-width: 10px;
+  padding: 0;
+  background: var(--bg) !important;
+  border-left: 1px solid var(--line-dark) !important;
+  border-right: 1px solid var(--line-dark) !important;
 }
 
 .row-head {
@@ -829,6 +836,15 @@ table.print th td.p-closed {
 }
 
 /* -------------------------------------------------- setup: bell preview */
+
+/* The lunch row inside the bell preview. */
+tr.break-row th,
+tr.break-row td {
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
 
 table.bell-preview td {
   text-align: center;

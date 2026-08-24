@@ -41,13 +41,18 @@ const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellCl
   const cells = [];
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
+      // The lunch break is its own narrow column. It carries NO data-day /
+      // data-hour: drag.ts finds its target with closest('[data-day]') and
+      // would otherwise treat the separator as a droppable cell.
+      if (breakAt[g] === s) {
+        cells.push(<td key={`break-${g}`} className="break-col" title="Öğle arası" />);
+      }
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
 
       const className = [
         s === 0 ? 'day-first' : '',
-        s !== 0 && breakAt[g] === s ? 'long-break' : '',
         cell !== null && cell.continues ? 'block-cont' : '',
         cell === null && closed ? 'unavailable' : '',
       ]
@@ -128,19 +133,24 @@ function GridInner({ settings, rows, firstColumnTitle, draggedRowId, onCellClick
               {firstColumnTitle}
             </th>
             {settings.days.map((day, g) => (
-              <th key={g} colSpan={hourCount} className="day-head">
+              <th
+                key={g}
+                colSpan={hourCount + ((breakAt[g] ?? -1) >= 0 ? 1 : 0)}
+                className="day-head"
+              >
                 {day.name}
               </th>
             ))}
           </tr>
           <tr>
             {settings.days.map((_, g) =>
-              settings.hours.map((hour, s) => (
+              settings.hours.flatMap((hour, s) => [
+                ...(breakAt[g] === s
+                  ? [<th key={`break-${g}`} className="break-col" title="Öğle arası" />]
+                  : []),
                 <th
                   key={`${g}-${s}`}
-                  className={[s === 0 ? 'day-first' : '', breakAt[g] === s ? 'long-break' : '']
-                    .filter(Boolean)
-                    .join(' ')}
+                  className={s === 0 ? 'day-first' : undefined}
                   title={
                     clocks[g] === undefined
                       ? undefined
@@ -149,8 +159,8 @@ function GridInner({ settings, rows, firstColumnTitle, draggedRowId, onCellClick
                 >
                   {hour}
                   <span className="hour-clock">{clocks[g]?.periods[s]?.start ?? ''}</span>
-                </th>
-              )),
+                </th>,
+              ]),
             )}
           </tr>
         </thead>

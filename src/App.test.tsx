@@ -104,12 +104,21 @@ describe('uygulama açılıyor', () => {
 
     // 25 teacher rows
     expect(grid!.querySelectorAll('tbody tr')).toHaveLength(25);
-    // 6 days x 12 hours = 72 cells (+ the row header)
-    expect(grid!.querySelectorAll('tbody tr:first-child td')).toHaveLength(72);
+    // 6 days x 12 hours = 72 cells, plus one lunch separator per day
+    const firstRow = grid!.querySelectorAll('tbody tr:first-child td');
+    expect(firstRow).toHaveLength(78);
     // Cells carry the markers the drag needs
     const cell = grid!.querySelector('tbody td')!;
     expect(cell.getAttribute('data-day')).toBe('0');
     expect(cell.getAttribute('data-row')).not.toBeNull();
+    // ...and the separator carries NONE of them: drag.ts finds its target with
+    // closest('[data-day]') and would otherwise drop a lesson into the break.
+    const breaks = grid!.querySelectorAll('tbody tr:first-child td.break-col');
+    expect(breaks).toHaveLength(6);
+    for (const b of breaks) {
+      expect(b.getAttribute('data-day')).toBeNull();
+      expect(b.getAttribute('data-hour')).toBeNull();
+    }
 
     expect(container.querySelectorAll('.pool-card').length).toBeGreaterThan(0);
   });

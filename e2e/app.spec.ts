@@ -603,6 +603,63 @@ async function hover(page: Page, day: number, hour: number) {
   return cell;
 }
 
+test.describe('9. Öğle arası ayracı', () => {
+  test('ayraç hafta içi 5., hafta sonu 6. dersten sonra duruyor', async ({ page }) => {
+    await openWithSample(page);
+
+    // One separator per day, 6 days
+    await expect(page.locator('table.grid tbody tr').first().locator('td.break-col')).toHaveCount(6);
+
+    // Its position IS the break: count the real cells before it in each day.
+    const positions = await page.evaluate(() => {
+      const row = document.querySelector('table.grid tbody tr')!;
+      const out: number[] = [];
+      let seen = 0;
+      for (const cell of row.querySelectorAll('td')) {
+        if (cell.classList.contains('break-col')) {
+          out.push(seen);
+          continue;
+        }
+        if (cell.dataset['hour'] === '0') seen = 0; // a new day starts
+        seen++;
+      }
+      return out;
+    });
+    // Tuesday..Friday break after the 5th, Saturday and Sunday after the 6th
+    expect(positions).toEqual([5, 5, 5, 5, 6, 6]);
+  });
+
+  test('ayraca ders bırakılamaz — sürükleme onu hedef saymıyor', async ({ page }) => {
+    await openWithSample(page);
+    const separator = page.locator('tr.target-row td.break-col').first();
+
+    await startDrag(page);
+    const box = await separator.boundingBox();
+    expect(box, 'ayraç görünür olmalı').not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, { steps: 3 });
+    await page.waitForTimeout(80);
+
+    // Nothing is highlighted: the separator is not a cell
+    await expect(separator).not.toHaveClass(/drop-/);
+    await page.mouse.up();
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
+  });
+
+  test('zil önizlemesinde öğle arası satırı var ve iki desende ayrı yerde', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Okul');
+
+    const rows = page.locator('table.bell-preview tr.break-row');
+    await expect(rows).toHaveCount(2); // after the 5th and after the 6th
+    await expect(rows.first()).toContainText('Öğle arası — 30 dk');
+
+    // The weekday column breaks after the 5th, the weekend column does not
+    const first = rows.first().locator('td');
+    await expect(first.nth(0)).toContainText('Öğle arası');
+    await expect(first.nth(1)).toHaveText('');
+  });
+});
+
 test.describe('7. Sınıf müsaitliği ve kurallar', () => {
   test('sınıfın kapalı saatine ders bırakılamıyor ve sebebi yazıyor', async ({ page }) => {
     await openFixture(page);

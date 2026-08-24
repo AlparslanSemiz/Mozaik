@@ -244,7 +244,7 @@ export default function School({ state, change }: SetupProps) {
               </tr>
             </thead>
             <tbody>
-              {state.settings.hours.map((label, i) => (
+              {state.settings.hours.flatMap((label, i) => [
                 <tr key={i}>
                   <th>{label}</th>
                   {patterns.map((p) => (
@@ -252,8 +252,25 @@ export default function School({ state, change }: SetupProps) {
                       {p.periods[i]?.start ?? ''}–{p.periods[i]?.end ?? ''}
                     </td>
                   ))}
-                </tr>
-              ))}
+                </tr>,
+                // A break row for every distinct break position. It shows the
+                // break ONLY in the columns that break there — weekdays and the
+                // weekend differ, and one shared row would lie about one of them.
+                ...(patterns.some((p) => p.after === i + 1)
+                  ? [
+                      <tr key={`break-${i}`} className="break-row">
+                        <th>Ara</th>
+                        {patterns.map((p) => (
+                          <td key={p.after}>
+                            {p.after === i + 1
+                              ? `Öğle arası — ${state.settings.bell.longBreakMinutes} dk`
+                              : ''}
+                          </td>
+                        ))}
+                      </tr>,
+                    ]
+                  : []),
+              ])}
               <tr>
                 <th>Bitiş</th>
                 {patterns.map((p) => (
