@@ -7,7 +7,7 @@
 import { closedKey, countPlacedHours, sanitize } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
-import type { ClassRow, LessonRow } from './import';
+import type { ClassRow, LessonRow, TeacherRow } from './import';
 import type {
   Bell,
   ClassGroup,
@@ -530,6 +530,16 @@ export function allCells(d: State): Array<{ day: number; hour: number }> {
 // wrong silently drops rows my father pasted.
 
 const fold = (x: string): string => x.trim().toLocaleLowerCase('tr');
+
+/**
+ * Adds pasted teachers, REGISTERING any subject the school's list does not have
+ * yet. A pasted list is the one way a subject can still arrive as free text —
+ * the form only offers the list — and dropping it silently would leave a
+ * teacher whose branch the dropdown cannot show.
+ */
+export function addTeachersFromRows(d: State, rows: TeacherRow[]): State {
+  return rows.reduce((acc, row) => addTeacher(addSubject(acc, row.subject), row), d);
+}
 
 /**
  * Adds pasted classes, resolving the room by name. An unknown room name is

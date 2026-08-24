@@ -453,15 +453,18 @@ test.describe('5. Kurulum ve yedek', () => {
 
     const name = page.getByPlaceholder('Ad Soyad');
     const short = page.getByLabel('Kısaltma');
+    const branch = page.getByLabel('Branş', { exact: true });
 
     // The placeholder shows what will be derived, live
     await name.fill('Ahmet Sarı');
     await expect(short).toHaveAttribute('placeholder', 'AS');
+    await branch.selectOption('Matematik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
     // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
     await name.fill('Ayşe Solmaz');
     await expect(short).toHaveAttribute('placeholder', 'AS');
+    await branch.selectOption('Fizik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
     const warning = page.locator('.warn-box', { hasText: 'Aynı kısaltma' });
@@ -1641,5 +1644,108 @@ test.describe('15. Ayarlar sekmesi', () => {
 
     await page.getByRole('button', { name: 'Program' }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(placed);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 16. Branş: yazılmaz, seçilir
+//
+// Free text let "Matemtik" become a second subject that still abbreviated to
+// "Mat", so on paper the two were indistinguishable and nothing warned about
+// it. The branch is now picked from the school's own list.
+
+test.describe('16. Branş seçimi', () => {
+  test('öğretmenin branşı açılır listeden seçiliyor, metin kutusu yok', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Öğretmenler');
+
+    const branch = page.getByLabel('Branş', { exact: true });
+    await expect(branch).toHaveJSProperty('tagName', 'SELECT');
+    await expect(page.getByPlaceholder('Branş')).toHaveCount(0);
+
+    // Branch is required: half a teacher record is not worth storing
+    await page.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
+    await expect(page.getByRole('button', { name: 'Ekle', exact: true })).toBeDisabled();
+
+    await branch.selectOption('Matematik');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+    await expect(page.getByLabel('MÇ branşı')).toHaveValue('Matematik');
+  });
+
+  test('“+ Yeni branş” hem öğretmene atanıyor hem listeye giriyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Öğretmenler');
+
+    await page.getByPlaceholder('Ad Soyad').fill('Ayşe Yıldız');
+    await page.getByLabel('Branş', { exact: true }).selectOption({ label: '+ Yeni branş…' });
+    await page.getByLabel('Yeni branşın adı').fill('Robotik');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    await expect(page.getByLabel('AY branşı')).toHaveValue('Robotik');
+
+    // ...and it is in the school's list from now on, with a short form
+    await openSettings(page, 'Branşlar');
+    const row = page.locator('table.list tbody tr', { hasText: 'Robotik' });
+    await expect(row).toHaveCount(1);
+    await expect(row.locator('input')).toHaveValue('Rob');
+  });
+
+  test('kullanılan branş silinemiyor ve kimin kullandığı yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Branşlar');
+
+    let said = '';
+    page.once('dialog', (d) => {
+      said = d.message();
+      void d.dismiss();
+    });
+    await page
+      .locator('table.list tbody tr', { hasText: 'Matematik' })
+      .getByRole('button', { name: 'Sil' })
+      .click();
+
+    expect(said).toContain('öğretmen bu branşta');
+    expect(said).toContain('Önce onların branşını değiştirin');
+    await expect(page.locator('table.list tbody tr', { hasText: 'Matematik' })).toHaveCount(1);
+  });
+
+  test('kullanılmayan branş listeden çıkarılıyor ve açılır listede kalmıyor', async ({
+    page,
+  }) => {
+    await open(page);
+    await openSettings(page, 'Branşlar');
+
+    page.once('dialog', (d) => d.accept());
+    await page
+      .locator('table.list tbody tr', { hasText: 'Fransızca' })
+      .getByRole('button', { name: 'Sil' })
+      .click();
+    await expect(page.locator('table.list tbody tr', { hasText: 'Fransızca' })).toHaveCount(0);
+
+    await openSetup(page, 'Öğretmenler');
+    const options = await page
+      .getByLabel('Branş', { exact: true })
+      .locator('option')
+      .allInnerTexts();
+    expect(options).not.toContain('Fransızca');
+    expect(options).toContain('Matematik');
+  });
+
+  test('yapıştırılan listedeki yeni branş okul listesine giriyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Öğretmenler');
+
+    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await page
+      .locator('textarea')
+      .fill('Kerem Aslan\tKA\tRobotik\nSelin Demir\tSD\tAstronomi');
+    await page.getByRole('button', { name: 'Önizle' }).click();
+    await page.getByRole('button', { name: /2 satırı ekle/ }).click();
+
+    await expect(page.getByLabel('KA branşı')).toHaveValue('Robotik');
+    await openSettings(page, 'Branşlar');
+    await expect(page.locator('table.list tbody tr', { hasText: 'Robotik' })).toHaveCount(1);
+    await expect(page.locator('table.list tbody tr', { hasText: 'Astronomi' })).toHaveCount(1);
   });
 });

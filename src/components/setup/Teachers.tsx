@@ -5,12 +5,15 @@ import { useState } from 'react';
 import { parseTeachers } from '../../import';
 import { PALETTE_SIZE, paletteColor } from '../../palette';
 import {
+  addSubject,
   addTeacher,
+  addTeachersFromRows,
   deleteTeacher,
   deletionSummary,
   duplicateShorts,
   makeShort,
   setTeacherLimit,
+  subjectOptions,
   updateTeacher,
   weeklyLoad,
 } from '../../entities';
@@ -18,19 +21,30 @@ import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 
+/** Sentinel option value: picking it opens a box instead of setting a subject. */
+const NEW = '\u0000yeni';
+
 export default function Teachers({ state, change }: PanelProps) {
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
+  const [freshSubject, setFreshSubject] = useState<string | null>(null);
+  const subjects = subjectOptions(state);
 
   // Left empty, the short form is derived — so show what it will be.
   const suggested = newTeacher.name.trim() === '' ? 'Kısaltma' : makeShort(newTeacher.name);
   const clashes = duplicateShorts(state.teachers);
 
+  /** What the Ekle button will actually store as the branch. */
+  function subjectOf(): string {
+    return (freshSubject === null ? newTeacher.subject : freshSubject).trim();
+  }
+
   return (
     <div className="panel">
       <h2>Öğretmenler ({state.teachers.length})</h2>
       <p className="hint">
-        Her öğretmenin tek branşı vardır. Kısaltma ızgarada satır başlığı olarak
-        görünür, kısa tutun (örn. MÇ). Renk otomatik atanır. Sağdaki üç kutu bu
+        Her öğretmenin tek branşı vardır ve <b>listeden seçilir</b> — listede
+        yoksa “+ Yeni branş…” ile eklenir. Kısaltma ızgarada satır başlığı olarak
+        görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu
         öğretmene özel sınırdır; <b>boş bırakılırsa Ayarlar → Kurallar'daki sayı</b>{' '}
         geçerli olur.
       </p>
@@ -50,18 +64,47 @@ export default function Teachers({ state, change }: PanelProps) {
           value={newTeacher.short}
           onChange={(e) => setNewTeacher({ ...newTeacher, short: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Branş"
-          value={newTeacher.subject}
-          onChange={(e) => setNewTeacher({ ...newTeacher, subject: e.target.value })}
-        />
+        {/* A dropdown, not free text: typed "Matemtik" used to become a second
+            subject that still printed as "Mat" and could not be told from the
+            first one on paper. New subjects are added on the spot. */}
+        <select
+          aria-label="Branş"
+          value={freshSubject === null ? newTeacher.subject : NEW}
+          onChange={(e) => {
+            if (e.target.value === NEW) {
+              setFreshSubject('');
+              return;
+            }
+            setFreshSubject(null);
+            setNewTeacher({ ...newTeacher, subject: e.target.value });
+          }}
+        >
+          <option value="">Branş seçin</option>
+          {subjects.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+          <option value={NEW}>+ Yeni branş…</option>
+        </select>
+        {freshSubject !== null && (
+          <input
+            type="text"
+            autoFocus
+            placeholder="Yeni branşın adı"
+            aria-label="Yeni branşın adı"
+            value={freshSubject}
+            onChange={(e) => setFreshSubject(e.target.value)}
+          />
+        )}
         <button
           className="btn"
-          disabled={newTeacher.name.trim() === ''}
+          disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
           onClick={() => {
-            change((d) => addTeacher(d, newTeacher));
+            const subject = subjectOf();
+            change((d) => addTeacher(addSubject(d, subject), { ...newTeacher, subject }));
             setNewTeacher({ name: '', short: '', subject: '' });
+            setFreshSubject(null);
           }}
         >
           Ekle
@@ -71,7 +114,7 @@ export default function Teachers({ state, change }: PanelProps) {
           example="Ad Soyad · Kısaltma · Branş"
           parse={parseTeachers}
           rowText={(x) => `${x.name} (${x.short}) — ${x.subject}`}
-          onAdd={(rows) => change((d) => rows.reduce((acc, x) => addTeacher(acc, x), d))}
+          onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
         />
       </div>
 
@@ -146,13 +189,22 @@ export default function Teachers({ state, change }: PanelProps) {
                   />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    defaultValue={t.subject}
-                    onBlur={(e) =>
-                      change((d) => updateTeacher(d, t.id, { subject: e.target.value.trim() }))
+                  <select
+                    aria-label={`${t.short} branşı`}
+                    value={t.subject}
+                    onChange={(e) =>
+                      change((d) => updateTeacher(d, t.id, { subject: e.target.value }))
                     }
-                  />
+                  >
+                    {/* subjectOptions already contains this teacher's subject
+                        even when the school list does not — otherwise the
+                        dropdown would silently change it on first render. */}
+                    {subjects.map((x) => (
+                      <option key={x} value={x}>
+                        {x}
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td>
                   <LimitBox

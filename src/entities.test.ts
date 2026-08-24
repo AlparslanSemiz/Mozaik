@@ -9,6 +9,7 @@ import { place, placementKey, teacherKey } from './constraints';
 import {
   addClass,
   addSubject,
+  addTeachersFromRows,
   addClassesFromRows,
   addLesson,
   addLessonsFromRows,
@@ -592,5 +593,31 @@ describe('branş listesi', () => {
     // otherwise the dropdown could not show his current subject and would
     // silently change it on the first render
     expect(subjectOptions(d)).toContain('Robotik');
+  });
+});
+
+describe('addTeachersFromRows', () => {
+  it('yapıştırılan listedeki tanımadığı branşı okul listesine ekliyor', () => {
+    let d = emptyState();
+    d = deleteSubject(d, 'Matematik'); // the school does not teach it any more
+    d = addTeachersFromRows(d, [
+      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' },
+      { name: 'Ayşe Yıldız', short: 'AY', subject: 'Robotik' },
+    ]);
+
+    expect(d.teachers.map((t) => t.subject)).toEqual(['Matematik', 'Robotik']);
+    // Both are selectable afterwards; a pasted branch is not a dead end.
+    expect(d.settings.subjects).toContain('Matematik');
+    expect(d.settings.subjects).toContain('Robotik');
+  });
+
+  it('aynı branşı iki kez yazan liste branşı iki kez eklemiyor', () => {
+    let d = emptyState();
+    const before = d.settings.subjects.length;
+    d = addTeachersFromRows(d, [
+      { name: 'A A', short: '', subject: 'Robotik' },
+      { name: 'B B', short: '', subject: 'robotik' },
+    ]);
+    expect(d.settings.subjects.length).toBe(before + 1);
   });
 });
