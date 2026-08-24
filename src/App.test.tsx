@@ -1,76 +1,76 @@
 // @vitest-environment jsdom
 
-// Duman testi: arayuz gercekten aciliyor mu?
+// Smoke test: does the UI actually come up?
 //
-// Tip kontrolu bir bilesenin calisirken patlamadigini kanitlamaz. Bu test
-// uygulamayi gercek bir DOM'a basar, bes sekmeyi de gezer, ornek veriyi yukler
-// ve programa ders yerlestirir. Babaya bozuk bir dosya gitmesin diye var.
+// Type checking does not prove a component survives running. This test mounts
+// the app into a real DOM, walks all five tabs, loads the sample data and puts
+// a lesson on the grid. It exists so a broken file never reaches my father.
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import App from './App';
-import { ornekDurum } from './ornek';
+import { sampleState } from './sample';
 
 declare global {
   // eslint-disable-next-line no-var
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
 
-let kap: HTMLDivElement;
-let kok: Root;
+let container: HTMLDivElement;
+let root: Root;
 
 /**
- * Bu ortamin kendi localStorage'i eksik geliyor, o yuzden testler kendi
- * bellek deposunu kuruyor. Yan fayda: her test tertemiz bir depoyla basliyor.
+ * This environment ships without a localStorage, so the tests set up their own
+ * in-memory store. Side benefit: every test starts with a clean store.
  */
-function bellekDepo(): Storage {
-  const harita = new Map<string, string>();
+function memoryStorage(): Storage {
+  const map = new Map<string, string>();
   return {
     get length() {
-      return harita.size;
+      return map.size;
     },
-    clear: () => harita.clear(),
-    getItem: (k: string) => harita.get(k) ?? null,
-    key: (i: number) => [...harita.keys()][i] ?? null,
-    removeItem: (k: string) => void harita.delete(k),
-    setItem: (k: string, v: string) => void harita.set(k, String(v)),
+    clear: () => map.clear(),
+    getItem: (k: string) => map.get(k) ?? null,
+    key: (i: number) => [...map.keys()][i] ?? null,
+    removeItem: (k: string) => void map.delete(k),
+    setItem: (k: string, v: string) => void map.set(k, String(v)),
   } as Storage;
 }
 
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   Object.defineProperty(globalThis, 'localStorage', {
-    value: bellekDepo(),
+    value: memoryStorage(),
     configurable: true,
     writable: true,
   });
-  kap = document.createElement('div');
-  document.body.appendChild(kap);
-  kok = createRoot(kap);
+  container = document.createElement('div');
+  document.body.appendChild(container);
+  root = createRoot(container);
 });
 
 afterEach(() => {
-  act(() => kok.unmount());
-  kap.remove();
+  act(() => root.unmount());
+  container.remove();
 });
 
-function bas() {
-  act(() => kok.render(<App />));
+function render() {
+  act(() => root.render(<App />));
 }
 
-/** Metnine gore dugme bulur — kullanicinin gordugu sey bu. */
-function dugme(metin: string): HTMLButtonElement {
-  const hepsi = [...kap.querySelectorAll('button')];
-  const bulunan = hepsi.find((b) => (b.textContent ?? '').includes(metin));
-  if (bulunan === undefined) {
+/** Finds a button by its text — that is what the user sees. */
+function button(text: string): HTMLButtonElement {
+  const all = [...container.querySelectorAll('button')];
+  const found = all.find((b) => (b.textContent ?? '').includes(text));
+  if (found === undefined) {
     throw new Error(
-      `"${metin}" düğmesi yok. Olanlar: ${hepsi.map((b) => b.textContent).join(' | ')}`,
+      `"${text}" düğmesi yok. Olanlar: ${all.map((b) => b.textContent).join(' | ')}`,
     );
   }
-  return bulunan;
+  return found;
 }
 
-function tikla(el: Element) {
+function click(el: Element) {
   act(() => {
     el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
@@ -78,93 +78,118 @@ function tikla(el: Element) {
 
 describe('uygulama açılıyor', () => {
   it('veri yokken Kurulum sekmesiyle açılır ve yol gösterir', () => {
-    bas();
-    expect(kap.textContent).toContain('Başlarken');
-    expect(kap.textContent).toContain('Derslikler');
-    expect(dugme('Örnek veriyle doldur')).toBeTruthy();
+    render();
+    expect(container.textContent).toContain('Başlarken');
+    expect(container.textContent).toContain('Derslikler');
+    expect(button('Örnek veriyle doldur')).toBeTruthy();
   });
 
   it('beş sekmenin hepsi hata vermeden çizilir', () => {
-    localStorage.setItem('ders-programi', JSON.stringify(ornekDurum()));
-    bas();
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
 
-    for (const ad of ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır']) {
-      tikla(dugme(ad));
-      expect(kap.querySelector('.govde')).not.toBeNull();
+    for (const label of ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır']) {
+      click(button(label));
+      expect(container.querySelector('.main')).not.toBeNull();
     }
   });
 
   it('Program sekmesi ızgarayı ve kart havuzunu çizer', () => {
-    localStorage.setItem('ders-programi', JSON.stringify(ornekDurum()));
-    bas();
-    tikla(dugme('Program'));
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    click(button('Program'));
 
-    const izgara = kap.querySelector('table.izgara');
-    expect(izgara).not.toBeNull();
+    const grid = container.querySelector('table.grid');
+    expect(grid).not.toBeNull();
 
-    // 25 ogretmen satiri
-    expect(izgara!.querySelectorAll('tbody tr')).toHaveLength(25);
-    // 7 gun x 12 saat = 84 hucre (+ satir basligi)
-    expect(izgara!.querySelectorAll('tbody tr:first-child td')).toHaveLength(84);
-    // Hucreler suruklemenin ihtiyac duydugu isaretleri tasiyor
-    const hucre = izgara!.querySelector('tbody td')!;
-    expect(hucre.getAttribute('data-gun')).toBe('0');
-    expect(hucre.getAttribute('data-satir')).not.toBeNull();
+    // 25 teacher rows
+    expect(grid!.querySelectorAll('tbody tr')).toHaveLength(25);
+    // 6 days x 12 hours = 72 cells (+ the row header)
+    expect(grid!.querySelectorAll('tbody tr:first-child td')).toHaveLength(72);
+    // Cells carry the markers the drag needs
+    const cell = grid!.querySelector('tbody td')!;
+    expect(cell.getAttribute('data-day')).toBe('0');
+    expect(cell.getAttribute('data-row')).not.toBeNull();
 
-    expect(kap.querySelectorAll('.havuz-kart').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.pool-card').length).toBeGreaterThan(0);
   });
 
   it('sınıf görünümüne geçilebilir', () => {
-    localStorage.setItem('ders-programi', JSON.stringify(ornekDurum()));
-    bas();
-    tikla(dugme('Program'));
-    tikla(dugme('Sınıf görünümüne geç'));
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    click(button('Program'));
+    click(button('Sınıf görünümüne geç'));
 
-    expect(kap.querySelector('table.izgara tbody')!.children).toHaveLength(20);
-    expect(dugme('Öğretmen görünümüne geç')).toBeTruthy();
+    expect(container.querySelector('table.grid tbody')!.children).toHaveLength(20);
+    expect(button('Öğretmen görünümüne geç')).toBeTruthy();
   });
 
   it('yerleşmiş derse tıklayınca kalkar ve geri al onu geri getirir', () => {
-    // Bir dersi elle yerlestirilmis bir durumla basla.
-    const d = ornekDurum();
-    const ders = d.dersler[0]!;
-    const sinif = d.siniflar.find((s) => s.id === ders.sinifId)!;
-    // Ogretmenin musait oldugu bir gun bul
-    let gun = 0;
-    while (d.musaitDegil[`${ders.ogretmenId}|${gun}|0`] !== undefined) gun++;
-    for (let i = 0; i < ders.blok; i++) d.yerlesim[`${sinif.id}|${gun}|${i}`] = ders.id;
+    // Start from a state with one lesson placed by hand.
+    const d = sampleState();
+    const lesson = d.lessons[0]!;
+    const group = d.classes.find((c) => c.id === lesson.classId)!;
+    // Find a day the teacher is available on
+    let day = 0;
+    while (d.unavailable[`${lesson.teacherId}|${day}|0`] !== undefined) day++;
+    for (let i = 0; i < lesson.blockSize; i++) {
+      d.placements[`${group.id}|${day}|${i}`] = lesson.id;
+    }
     localStorage.setItem('ders-programi', JSON.stringify(d));
 
-    bas();
-    tikla(dugme('Program'));
+    render();
+    click(button('Program'));
 
-    const kartlar = () => kap.querySelectorAll('table.izgara .kart');
-    expect(kartlar()).toHaveLength(ders.blok);
+    const cards = () => container.querySelectorAll('table.grid .card');
+    expect(cards()).toHaveLength(lesson.blockSize);
 
-    tikla(kartlar()[0]!);
-    expect(kartlar()).toHaveLength(0); // blogun tamami kalkti
+    click(cards()[0]!);
+    expect(cards()).toHaveLength(0); // the whole block went
 
-    tikla(dugme('Geri al'));
-    expect(kartlar()).toHaveLength(ders.blok);
+    click(button('Geri al'));
+    expect(cards()).toHaveLength(lesson.blockSize);
   });
 
   it('Kontrol sekmesi sorun yoksa bunu açıkça söyler', () => {
-    localStorage.setItem('ders-programi', JSON.stringify(ornekDurum()));
-    bas();
-    tikla(dugme('Kontrol'));
-    expect(kap.textContent).toContain('Sorun görünmüyor');
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    click(button('Kontrol'));
+    expect(container.textContent).toContain('Sorun görünmüyor');
   });
 
   it('Yazdır sekmesi her sınıf için bir sayfa üretir', () => {
-    localStorage.setItem('ders-programi', JSON.stringify(ornekDurum()));
-    bas();
-    tikla(dugme('Yazdır'));
-    expect(kap.querySelectorAll('.yazdir-sayfa')).toHaveLength(20);
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    click(button('Yazdır'));
+    expect(container.querySelectorAll('.print-page')).toHaveLength(20);
   });
 
   it('bozuk localStorage içeriğinde çökmez, boş projeyle açılır', () => {
     localStorage.setItem('ders-programi', '{bu json değil');
-    bas();
-    expect(kap.textContent).toContain('Başlarken');
+    render();
+    expect(container.textContent).toContain('Başlarken');
+  });
+
+  it('kayıtlı eski (v1) veri de açılır — göç kodu gerçek yolda çalışıyor', () => {
+    localStorage.setItem(
+      'ders-programi',
+      JSON.stringify({
+        semaSurumu: 1,
+        ayar: { gunler: ['Pazartesi'], saatler: ['1', '2'] },
+        derslikler: [{ id: 'dA', ad: 'A' }],
+        ogretmenler: [
+          { id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 0 },
+        ],
+        siniflar: [{ id: 's510', ad: '510', derslikId: 'dA' }],
+        dersler: [
+          { id: 'x1', sinifId: 's510', ogretmenId: 'oMC', haftalikSaat: 2, blok: 1 },
+        ],
+        musaitDegil: {},
+        yerlesim: { 's510|0|0': 'x1' },
+      }),
+    );
+    render();
+    click(button('Program'));
+    expect(container.querySelectorAll('table.grid .card')).toHaveLength(1);
   });
 });

@@ -1,12 +1,17 @@
 # Kurs Ders Programı — Teknik Plan
 
 Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı araç.
-Ölçek: ~25 öğretmen, ~20 sınıf, 8 derslik, 7 gün × 12 saat. Hepsi ayarlanabilir.
+Ölçek: ~25 öğretmen, ~20 sınıf, 8 derslik, 6 gün × 12 saat. Hepsi ayarlanabilir.
 
 > **Güncelleme (2026-08-24).** Bu belgenin çerçevesi ve ilkeleri aynen geçerli.
-> Soru turu ve babamın gerçek aSc ekranının fotoğrafı (`docs/Yaklaşık ders planı
-> ölçeği.png`) sonrası bölüm 2, 3, 4 ve 6 düzeltildi — düzeltmeler yerinde işlendi,
-> verilen kararların tam listesi `docs/STATUS.md` içindeki karar tablosunda.
+> Soru turu ve babamın gerçek aSc ekranının fotoğrafı (`docs/Örnek Fotolar/Yaklaşık
+> ders planı ölçeği.png`) sonrası bölüm 2, 3, 4 ve 6 düzeltildi — düzeltmeler yerinde
+> işlendi, verilen kararların tam listesi `docs/STATUS.md` içindeki karar tablosunda.
+>
+> **Güncelleme (2026-08-24, v0.6).** Hafta artık **6 gün (Salı–Pazar)**; aşağıdaki
+> "7 gün × 12 saat / 84 sütun" sayıları v0 tasarımının yazıldığı günden kalma. Gerekçeler
+> geçerli, sayılar değil — güncel şema ve kısıt listesi [../CLAUDE.md](../CLAUDE.md)
+> içinde, ne değiştiği [STATUS.md](STATUS.md) oturum kaydında.
 
 Bu bir aSc klonu **değil**. aSc'nin yaptığı işin kursla ilgili olan %10'unu yapıp
 o %10'u aSc'den iyi yapmak hedefi.
@@ -57,6 +62,14 @@ CSS: tek bir `styles.css`, CSS değişkenleriyle. Tailwind gerekmez, bu kadar
 küçük bir yüzeyde ekstra araç.
 
 ---
+
+> **Not (2026-08-24):** bu belge v0 planlandığı gündeki hâliyle duruyor; aşağıdaki
+> kod örneklerinde tanımlayıcılar Türkçe. Kod o zamandan beri İngilizceye çevrildi
+> (`Durum`→`State`, `yerlesim`→`placements`, `kisit.ts`→`constraints.ts`,
+> `engel()`→`blocker()`, `indeksle()`→`buildIndex()`, `temizle()`→`sanitize()`,
+> `semaSurumu` 1→`schemaVersion` 2). **Gerekçeler geçerli, adlar değil** — güncel
+> adlar için [../CLAUDE.md](../CLAUDE.md), geçişin ayrıntısı için
+> [STATUS.md](STATUS.md).
 
 ## 2. Veri modeli
 
@@ -140,7 +153,7 @@ tek bir dosyada (`src/kisit.ts`). **Bu dosyanın testleri yazılacak.**
 function engel(d: Durum, dersId: Id, gun: number, slot: number): string | null
 ```
 
-Sırasıyla bakılacak sert kısıtlar:
+Sırasıyla bakılacak sert kısıtlar (v0):
 
 1. Blok gün sonuna sığıyor mu (`saat + blok <= saatler.length`)
 2. Sınıfın o saatleri boş mu
@@ -148,10 +161,13 @@ Sırasıyla bakılacak sert kısıtlar:
 4. Öğretmen o saatte başka bir sınıfta ders veriyor mu
 5. Dersliği paylaşan başka bir sınıf o saatte ders yapıyor mu
 
-**Boşluk (pencere) kuralları v0'da yok.** Sınıfın veya öğretmenin gün içinde boş
-saati olması v0'da hiç kontrol edilmiyor. Sonraki sürümde her kural için
-*Kapalı / Uyar / Engelle* ayarıyla gelecek — ikisini birden sert yapmak çoğu
-programı çözümsüz bırakır.
+**v0.6'da eklenenler** (bkz. CLAUDE.md "Kısıtlar", güncel liste orada):
+sınıfın kapalı saati, dersliğin kapalı saati (ikisi de sert); art arda en fazla N,
+günde en fazla N, bir dersin günde en fazla N saati (üçü de *Kapalı / Uyar / Engelle*).
+
+**Boşluk (pencere) kuralları hâlâ yok.** Sınıfın veya öğretmenin gün içinde boş
+saati olması kontrol edilmiyor. İstenirse aynı üç seviyeli ayarla eklenir — ikisini
+birden sert yapmak çoğu programı çözümsüz bırakır.
 
 Hata mesajı **her zaman somut** olacak. "Çakışma var" değil,
 `"MÇ o saatte 433 sınıfında"`. Programı dizen kişinin bir sonraki hamlesini
@@ -205,6 +221,23 @@ Her sürümün bir **çıkma şartı** var. Şart sağlanmadan sonrakine geçilm
 - Kayıt: localStorage otomatik + "Yedek indir" (.json) + "Yedek yükle"
 - Yazdırma: **sayfa başına bir sınıf / bir öğretmen** (7 sütun × 12 satır, A4 dikey).
   84 sütunlu ana tabloyu basmak imkânsız — sütun başına 3 mm düşer, denenmeyecek.
+
+### v0.6 — Zil saatleri, gün seçimi, müsaitlik ve kural kutuları ✅
+
+Çıkma şartı: *babam okulunun gerçek gün/saat düzenini ve öğretmen sınırlarını araca
+tarif edebiliyor.* → sağlandı (2026-08-24, ikinci tur).
+
+Babanın aSc ekran görüntüleri (`docs/Örnek Fotolar/`) üzerine kurgulandı:
+
+- **Zil saatleri.** Başlangıç + ders/teneffüs/öğle arası dakikası; saatler hesaplanır.
+  Varsayılan 09:00 · 40 · 10 · 30, hafta içi 5. hafta sonu 6. dersten sonra ara,
+  12. ders iki desende de 19:10'da biter. Kurulum'da canlı önizleme tablosu.
+- **Gün seçimi.** 7 gün checkbox; varsayılan hafta **Pazartesisiz 6 gün**.
+  Gün eklenip çıkarılınca yerleşimler isimden eşlenerek taşınır (tuzak 14).
+- **Sınıf ve derslik müsaitliği.** Öğretmeninkiyle aynı ızgara, aynı sözlük.
+- **Kural kutuları.** Art arda en fazla · günde en fazla · günde en az · bir dersin
+  günlük sınırı. Her biri Kapalı / Uyar / Engelle; okul geneli varsayılan +
+  öğretmen/ders bazında istisna.
 
 ### v0.5 — Yapılabilirlik kontrolü
 
@@ -294,9 +327,11 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
    layout'u baştan yazarsın.
 
 8. **Türkçe karakterler.** Anahtarlarda asla isim kullanma, hep id. "Şükrü Hoca"
-   adı değişince tüm yerleşim bozulmasın. Kod içinde de tanımlayıcılar ASCII:
-   `ogretmen`, `musaitDegil`, `sinif` — Türkçe karakter sadece kullanıcıya
+   adı değişince tüm yerleşim bozulmasın. Türkçe karakter sadece kullanıcıya
    görünen metinlerde.
+   *(2026-08-24 güncellemesi: tanımlayıcılar artık ASCII-Türkçe değil, doğrudan
+   İngilizce — `teacher`, `unavailable`, `classGroup`. Kural: arayüz Türkçe, kod
+   İngilizce; bkz. CLAUDE.md.)*
 
 9. **Blok render'ı.** İki slotu kaplayan ders, ikinci hücrede tekrar başlık
    yazmamalı. `rowspan` yerine ikinci hücreye sade bir devam işareti koymak
@@ -324,6 +359,20 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
     başlayabiliyor; `[data-x="${CSS.escape(id)}"]` sessizce eşleşmez. Kimliği seçiciye
     gömmek yerine hedef satır DOM elemanı tutulur, içindeki hücrelere sayısal
     `data-gun`/`data-saat` ile ulaşılır.
+
+14. **Gün listesi değişince yerleşim anahtarları kayar.** *(v0.6'da açılan yol.)*
+    `yerlesim`/`placements` anahtarı gün **indeksi** tutuyor. v0'da gün sayısı yalnızca
+    listenin sonundan kesilerek değiştiği için bu hiç görünmedi. Gün seçimi checkbox'a
+    dönünce **Pazartesi kaldırıldığında Salı 1'den 0'a kayar ve bütün program bir gün
+    öne kayar — hiçbir uyarı vermeden.** Bu, aracın yapabileceği en kötü hata: yanlış
+    ama inandırıcı bir program. Çözüm: `remapDays()` eski→yeni eşlemeyi **gün adından**
+    kurar, listeden çıkan günün anahtarlarını siler, kalanları yeniden yazar. Her
+    `updateSettings()` çağrısı buradan geçer. Birim testi ortadan gün silmeyi, E2E testi
+    başa gün eklemeyi doğrular.
+
+15. **`Cuma` ve `Cumartesi` ilk üç harfte aynı.** Gün başlıklarını `slice(0, 3)` ile
+    kısaltmak müsaitlik ızgarasında iki sütunu birden "Cum" yapar. Kısaltmalar
+    `shortDay()` tablosundan gelir: `Pzt Sal Çar Per Cum Cmt Paz`.
 
 ---
 

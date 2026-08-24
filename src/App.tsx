@@ -1,111 +1,116 @@
 import { useRef, useState } from 'react';
-import { kayitCalisiyorMu, useDurum, yedekIndir, yedekYukle } from './durum';
-import { bosDurum } from './veri';
-import Kurulum from './bilesen/Kurulum';
-import Musaitlik from './bilesen/Musaitlik';
-import Program from './bilesen/Program';
-import Kontrol from './bilesen/Kontrol';
-import Yazdir from './bilesen/Yazdir';
+import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
+import { emptyState } from './entities';
+import Setup from './components/Setup';
+import Availability from './components/Availability';
+import Program from './components/Program';
+import Check from './components/Check';
+import Print from './components/Print';
 
-type Sekme = 'kurulum' | 'musaitlik' | 'program' | 'kontrol' | 'yazdir';
+type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print';
 
-const SEKMELER: Array<{ id: Sekme; ad: string }> = [
-  { id: 'kurulum', ad: 'Kurulum' },
-  { id: 'musaitlik', ad: 'Müsaitlik' },
-  { id: 'program', ad: 'Program' },
-  { id: 'kontrol', ad: 'Kontrol' },
-  { id: 'yazdir', ad: 'Yazdır' },
+const TABS: Array<{ id: Tab; label: string }> = [
+  { id: 'setup', label: 'Kurulum' },
+  { id: 'availability', label: 'Müsaitlik' },
+  { id: 'program', label: 'Program' },
+  { id: 'check', label: 'Kontrol' },
+  { id: 'print', label: 'Yazdır' },
 ];
 
 export default function App() {
-  const { durum, degistir, geriAl, ileriAl, yukleDurum, geriAlinabilir, ileriAlinabilir } =
-    useDurum();
+  const { state, change, undo, redo, loadState, canUndo, canRedo } = useStore();
 
-  // Veri yoksa Kurulum'la basla — bos bir Program ekrani babama ne yapacagini soylemez.
-  const [sekme, setSekme] = useState<Sekme>(durum.dersler.length > 0 ? 'program' : 'kurulum');
-  const dosyaGirisi = useRef<HTMLInputElement>(null);
-  // Acilista bir kez sinanir; durum sonradan degismez.
-  const [kayitVar] = useState(kayitCalisiyorMu);
+  // With no data, start on Setup — an empty Program screen tells him nothing.
+  const [tab, setTab] = useState<Tab>(state.lessons.length > 0 ? 'program' : 'setup');
+  const fileInput = useRef<HTMLInputElement>(null);
+  // Probed once at startup; the answer does not change afterwards.
+  const [canSave] = useState(storageWorks);
 
-  async function dosyaSecildi(e: React.ChangeEvent<HTMLInputElement>) {
-    const dosya = e.target.files?.[0];
-    e.target.value = ''; // ayni dosya tekrar secilebilsin
-    if (dosya === undefined) return;
+  async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // so the same file can be picked again
+    if (file === undefined) return;
 
-    const yeni = await yedekYukle(dosya);
-    if (yeni === null) {
-      window.alert('Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin.');
+    const loaded = await readBackupFile(file);
+    if (loaded === null) {
+      window.alert(
+        'Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+      );
       return;
     }
     if (!window.confirm('Yedek yüklenecek ve şu anki program değiştirilecek. Devam edilsin mi?')) {
       return;
     }
-    yukleDurum(yeni);
+    loadState(loaded);
   }
 
-  function sifirla() {
-    if (!window.confirm('Her şey silinecek: öğretmenler, sınıflar, dersler ve program. Emin misiniz?')) {
+  function reset() {
+    if (
+      !window.confirm(
+        'Her şey silinecek: öğretmenler, sınıflar, dersler ve program. Emin misiniz?',
+      )
+    ) {
       return;
     }
     if (!window.confirm('Son kez soruyorum — bu işlem geri alınamaz. Silinsin mi?')) return;
-    yukleDurum(bosDurum());
+    loadState(emptyState());
   }
 
   return (
-    <div className="uygulama">
-      <div className="ust">
-        <div className="sekmeler">
-          {SEKMELER.map((s) => (
+    <div className="app">
+      <div className="topbar">
+        <div className="tabs">
+          {TABS.map((t) => (
             <button
-              key={s.id}
-              className="sekme"
-              aria-current={sekme === s.id}
-              onClick={() => setSekme(s.id)}
+              key={t.id}
+              className="tab"
+              aria-current={tab === t.id}
+              onClick={() => setTab(t.id)}
             >
-              {s.ad}
+              {t.label}
             </button>
           ))}
         </div>
 
-        <span className="bosluk" />
+        <span className="spacer" />
 
-        <button className="dugme" onClick={geriAl} disabled={!geriAlinabilir} title="Ctrl+Z">
+        <button className="btn" onClick={undo} disabled={!canUndo} title="Ctrl+Z">
           ↶ Geri al
         </button>
-        <button className="dugme" onClick={ileriAl} disabled={!ileriAlinabilir} title="Ctrl+Y">
+        <button className="btn" onClick={redo} disabled={!canRedo} title="Ctrl+Y">
           ↷ İleri al
         </button>
-        <button className="dugme birincil" onClick={() => yedekIndir(durum)}>
+        <button className="btn primary" onClick={() => downloadBackup(state)}>
           Yedek indir
         </button>
-        <button className="dugme" onClick={() => dosyaGirisi.current?.click()}>
+        <button className="btn" onClick={() => fileInput.current?.click()}>
           Yedek yükle
         </button>
-        <button className="dugme tehlike" onClick={sifirla} title="Her şeyi siler">
+        <button className="btn danger" onClick={reset} title="Her şeyi siler">
           Sıfırla
         </button>
         <input
-          ref={dosyaGirisi}
+          ref={fileInput}
           type="file"
           accept=".json,application/json"
           style={{ display: 'none' }}
-          onChange={dosyaSecildi}
+          onChange={fileChosen}
         />
       </div>
 
-      {!kayitVar && (
-        <div className="kayit-uyarisi">
+      {!canSave && (
+        <div className="save-warning">
           ⚠ <b>Bu bilgisayarda otomatik kayıt çalışmıyor.</b> Program kapanınca yaptığınız
           her şey kaybolur. Çalışırken sık sık <b>Yedek indir</b> düğmesine basın ve
           bilgisayarı kapatmadan önce mutlaka bir yedek alın.
         </div>
       )}
 
-      {sekme === 'kurulum' && <Kurulum durum={durum} degistir={degistir} />}
-      {sekme === 'musaitlik' && <Musaitlik durum={durum} degistir={degistir} />}
-      {sekme === 'program' && <Program durum={durum} degistir={degistir} />}
-      {sekme === 'kontrol' && <Kontrol durum={durum} />}
-      {sekme === 'yazdir' && <Yazdir durum={durum} />}
+      {tab === 'setup' && <Setup state={state} change={change} />}
+      {tab === 'availability' && <Availability state={state} change={change} />}
+      {tab === 'program' && <Program state={state} change={change} />}
+      {tab === 'check' && <Check state={state} />}
+      {tab === 'print' && <Print state={state} />}
     </div>
   );
 }

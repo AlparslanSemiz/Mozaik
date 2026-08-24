@@ -1,40 +1,40 @@
-/* Tek stil dosyasi. Tailwind yok, web font yok (offline calismayi bozar).
-   Renk islevsel: yesil = birakilabilir, kirmizi = engel, gri = musait degil. */
+/* The single stylesheet. No Tailwind, no web fonts (they break offline use).
+   Colour is functional: green = droppable, red = blocked, grey = unavailable. */
 
 :root {
-  --zemin: #f4f5f7;
-  --kagit: #ffffff;
-  --cizgi: #c9ced6;
-  --cizgi-koyu: #8a93a0;
-  --metin: #1b1f24;
-  --soluk: #5b6470;
-  --vurgu: #1f5fa8;
-  --vurgu-zemin: #e3eefb;
-  --iyi: #1a7f37;
-  --iyi-zemin: #d5f0dc;
-  --uyari: #8a6100;
-  --uyari-zemin: #fdf0cf;
-  --kotu: #b0201c;
-  --kotu-zemin: #fbdcda;
-  --kapali: #d5d8dd;
+  --bg: #f4f5f7;
+  --paper: #ffffff;
+  --line: #c9ced6;
+  --line-dark: #8a93a0;
+  --text: #1b1f24;
+  --muted: #5b6470;
+  --accent: #1f5fa8;
+  --accent-bg: #e3eefb;
+  --ok: #1a7f37;
+  --ok-bg: #d5f0dc;
+  --warn: #8a6100;
+  --warn-bg: #fdf0cf;
+  --bad: #b0201c;
+  --bad-bg: #fbdcda;
+  --closed: #d5d8dd;
 
-  /* Ogretmen paleti — tip.ts icindeki RENK_SAYISI ile ayni sayida (12).
-     Hepsi siyah metinle okunur ve yazicida ayirt edilir. */
-  --renk-0: #f9b6cf;
-  --renk-1: #9de3a8;
-  --renk-2: #9fd8f5;
-  --renk-3: #f7c98b;
-  --renk-4: #c9b7f0;
-  --renk-5: #f6ec93;
-  --renk-6: #8fded9;
-  --renk-7: #f4a9a3;
-  --renk-8: #bfd98a;
-  --renk-9: #d7bfa5;
-  --renk-10: #b8c6f2;
-  --renk-11: #ecb2ec;
+  /* Teacher palette — same count as COLOR_COUNT in types.ts (12).
+     All readable with black text and distinguishable in print. */
+  --color-0: #f9b6cf;
+  --color-1: #9de3a8;
+  --color-2: #9fd8f5;
+  --color-3: #f7c98b;
+  --color-4: #c9b7f0;
+  --color-5: #f6ec93;
+  --color-6: #8fded9;
+  --color-7: #f4a9a3;
+  --color-8: #bfd98a;
+  --color-9: #d7bfa5;
+  --color-10: #b8c6f2;
+  --color-11: #ecb2ec;
 
-  --hucre-en: 34px;
-  --hucre-boy: 34px;
+  --cell-w: 34px;
+  --cell-h: 34px;
 }
 
 * {
@@ -43,7 +43,7 @@
 
 html,
 body,
-#kok {
+#root {
   height: 100%;
   margin: 0;
 }
@@ -51,8 +51,8 @@ body,
 body {
   font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   font-size: 14px;
-  color: var(--metin);
-  background: var(--zemin);
+  color: var(--text);
+  background: var(--bg);
 }
 
 button,
@@ -63,31 +63,31 @@ textarea {
   color: inherit;
 }
 
-/* ---------------------------------------------------------------- iskelet */
+/* ---------------------------------------------------------------- skeleton */
 
-.uygulama {
+.app {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.ust {
+.topbar {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  background: var(--kagit);
-  border-bottom: 1px solid var(--cizgi);
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
   flex: 0 0 auto;
   flex-wrap: wrap;
 }
 
-.sekmeler {
+.tabs {
   display: flex;
   gap: 2px;
 }
 
-.sekme {
+.tab {
   padding: 8px 16px;
   border: 1px solid transparent;
   border-radius: 6px 6px 0 0;
@@ -96,143 +96,165 @@ textarea {
   font-size: 15px;
 }
 
-.sekme:hover {
-  background: var(--zemin);
+.tab:hover {
+  background: var(--bg);
 }
 
-.sekme[aria-current="true"] {
-  background: var(--vurgu-zemin);
-  border-color: var(--cizgi);
-  color: var(--vurgu);
+.tab[aria-current="true"] {
+  background: var(--accent-bg);
+  border-color: var(--line);
+  color: var(--accent);
   font-weight: 600;
 }
 
-.bosluk {
+.spacer {
   flex: 1 1 auto;
 }
 
-.dugme {
+.btn {
   padding: 7px 12px;
-  border: 1px solid var(--cizgi-koyu);
+  border: 1px solid var(--line-dark);
   border-radius: 6px;
-  background: var(--kagit);
+  background: var(--paper);
   cursor: pointer;
 }
 
-.dugme:hover:not(:disabled) {
-  background: var(--vurgu-zemin);
-  border-color: var(--vurgu);
+.btn:hover:not(:disabled) {
+  background: var(--accent-bg);
+  border-color: var(--accent);
 }
 
-.dugme:disabled {
+.btn:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.dugme.birincil {
-  background: var(--vurgu);
-  border-color: var(--vurgu);
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 
-.dugme.birincil:hover:not(:disabled) {
+.btn.primary:hover:not(:disabled) {
   background: #17497f;
 }
 
-.dugme.tehlike:hover:not(:disabled) {
-  background: var(--kotu-zemin);
-  border-color: var(--kotu);
+.btn.danger:hover:not(:disabled) {
+  background: var(--bad-bg);
+  border-color: var(--bad);
 }
 
-.govde {
+.main {
   flex: 1 1 auto;
   overflow: auto;
   padding: 12px;
 }
 
-.govde.tasmasiz {
+.main.no-overflow {
   overflow: hidden;
   padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-/* Surukleme sirasinda sebebi yazan cubuk. Yer kaplamasi sabit ki
-   gorununce izgara asagi kaymasin. */
-.sebep-cubugu {
+/* The bar showing the reason during a drag. Its height is fixed so the grid
+   does not jump down when it appears. */
+.reason-bar {
   flex: 0 0 auto;
   height: 30px;
   display: flex;
   align-items: center;
   padding: 0 10px;
   font-weight: 600;
-  background: var(--kotu-zemin);
-  color: var(--kotu);
-  border-bottom: 1px solid var(--kotu);
+  background: var(--bad-bg);
+  color: var(--bad);
+  border-bottom: 1px solid var(--bad);
 }
 
-.sebep-cubugu.bos {
-  background: var(--kagit);
-  color: var(--soluk);
-  border-bottom-color: var(--cizgi);
+.reason-bar.warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-bottom-color: var(--warn);
+}
+
+.reason-bar.empty {
+  background: var(--paper);
+  color: var(--muted);
+  border-bottom-color: var(--line);
   font-weight: 400;
 }
 
-/* ----------------------------------------------------------------- izgara */
+/* -------------------------------------------------------------------- grid */
 
-.izgara-sarmal {
+.grid-wrap {
   flex: 1 1 auto;
   overflow: auto;
-  background: var(--kagit);
+  background: var(--paper);
 }
 
-table.izgara {
+table.grid {
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
 }
 
-table.izgara th,
-table.izgara td {
-  border-right: 1px solid var(--cizgi);
-  border-bottom: 1px solid var(--cizgi);
+table.grid th,
+table.grid td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   padding: 0;
   margin: 0;
 }
 
-table.izgara thead th {
+table.grid thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--zemin);
+  background: var(--bg);
   font-size: 12px;
   font-weight: 600;
   height: 22px;
   text-align: center;
 }
 
-table.izgara thead tr:first-child th {
-  border-bottom: 1px solid var(--cizgi-koyu);
+table.grid thead tr:first-child th {
+  border-bottom: 1px solid var(--line-dark);
 }
 
-table.izgara thead tr:nth-child(2) th {
+table.grid thead tr:nth-child(2) th {
   top: 22px;
+  height: 30px;
   font-weight: 400;
-  color: var(--soluk);
+  color: var(--muted);
+  line-height: 1.1;
 }
 
-/* Gun bloklari arasinda kalin ayrac — 84 sutunda gozun yolunu bulmasi icin. */
-.gun-basi,
-.gun-ilk {
-  border-left: 2px solid var(--cizgi-koyu) !important;
+/* The bell time under the lesson number. Tiny on purpose: it is a reminder,
+   the lesson number is what the eye navigates by. */
+.hour-clock {
+  display: block;
+  font-size: 9px;
+  color: var(--muted);
 }
 
-.satir-basi {
+/* A thick separator between days — so the eye can navigate 84 columns. */
+.day-head,
+.day-first {
+  border-left: 2px solid var(--line-dark) !important;
+}
+
+/* Where the long lunch break falls. Dashed so it cannot be mistaken for a day
+   boundary, but visible enough to find the afternoon at a glance. */
+.long-break {
+  border-left: 2px dashed var(--muted) !important;
+}
+
+.row-head {
   position: sticky;
   left: 0;
   z-index: 3;
-  background: var(--kagit);
-  border-right: 2px solid var(--cizgi-koyu) !important;
+  background: var(--paper);
+  border-right: 2px solid var(--line-dark) !important;
   width: 132px;
   min-width: 132px;
   text-align: left;
@@ -241,50 +263,50 @@ table.izgara thead tr:nth-child(2) th {
   font-size: 13px;
 }
 
-.satir-basi .ikincil {
+.row-head .secondary {
   display: block;
   font-size: 11px;
   font-weight: 400;
-  color: var(--soluk);
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.kose {
+.corner {
   position: sticky;
   left: 0;
   top: 0;
   z-index: 4;
-  background: var(--zemin);
-  border-right: 2px solid var(--cizgi-koyu) !important;
+  background: var(--bg);
+  border-right: 2px solid var(--line-dark) !important;
   width: 132px;
   min-width: 132px;
 }
 
-table.izgara tbody td {
-  width: var(--hucre-en);
-  min-width: var(--hucre-en);
-  height: var(--hucre-boy);
+table.grid tbody td {
+  width: var(--cell-w);
+  min-width: var(--cell-w);
+  height: var(--cell-h);
   text-align: center;
   vertical-align: middle;
-  background: var(--kagit);
+  background: var(--paper);
 }
 
-td.musait-degil {
+td.unavailable {
   background: repeating-linear-gradient(
     45deg,
-    var(--kapali),
-    var(--kapali) 3px,
+    var(--closed),
+    var(--closed) 3px,
     #e8eaee 3px,
     #e8eaee 6px
   );
-  color: var(--soluk);
+  color: var(--muted);
   font-size: 11px;
 }
 
-/* Yerlesmis ders karti */
-.kart {
+/* A placed lesson card */
+.card {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -298,53 +320,59 @@ td.musait-degil {
   font: inherit;
 }
 
-.kart:hover {
-  outline: 2px solid var(--vurgu);
+.card:hover {
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
-.kart-ust {
+.card-top {
   font-size: 12px;
   font-weight: 700;
 }
 
-.kart-alt {
+.card-bottom {
   font-size: 10px;
   color: #3a3f46;
 }
 
-/* Blok gosterimi: rowspan KULLANILMIYOR (dinamik tabloda bug fabrikasi).
-   Etiket, babanin alisik oldugu aSc'deki gibi her hucrede tekrarlanir; blogun
-   tek parca oldugunu aradaki ayracin soluklasmasi gosterir. */
-td.blok-suruyor {
+/* Block display: rowspan is NOT used (a bug factory in a dynamic table).
+   The label repeats in every cell, like the aSc screen he is used to; that the
+   block is one piece is shown by the faded separator between the cells. */
+td.block-cont {
   border-right-color: rgba(0, 0, 0, 0.12);
 }
 
-/* Surukleme vurgusu — classList ile dogrudan eklenir, React state degil. */
-td.hedef-gecerli {
-  outline: 2px solid var(--iyi);
+/* Drag highlight — added straight through classList, not React state. */
+td.drop-ok {
+  outline: 2px solid var(--ok);
   outline-offset: -2px;
-  background: var(--iyi-zemin) !important;
+  background: var(--ok-bg) !important;
 }
 
-td.hedef-engel {
-  outline: 2px solid var(--kotu);
+td.drop-warn {
+  outline: 2px solid var(--warn);
   outline-offset: -2px;
-  background: var(--kotu-zemin) !important;
+  background: var(--warn-bg) !important;
 }
 
-/* Suruklerken hedef satirin disi soluklasir: gozu dogru satira goturur. */
-.izgara.surukleniyor tbody tr:not(.hedef-satir) td {
+td.drop-blocked {
+  outline: 2px solid var(--bad);
+  outline-offset: -2px;
+  background: var(--bad-bg) !important;
+}
+
+/* While dragging, everything outside the target row dims: it leads the eye. */
+.grid.dragging tbody tr:not(.target-row) td {
   opacity: 0.4;
 }
 
-.hayalet {
+.ghost {
   position: fixed;
   left: 0;
   top: 0;
   z-index: 999;
-  width: var(--hucre-en);
-  height: var(--hucre-boy);
+  width: var(--cell-w);
+  height: var(--cell-h);
   margin: -17px 0 0 -17px;
   display: flex;
   flex-direction: column;
@@ -353,34 +381,34 @@ td.hedef-engel {
   line-height: 1.05;
   border: 1px solid rgba(0, 0, 0, 0.4);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-  /* elementFromPoint hayaleti gormemeli, altindaki hucreyi gormeli */
+  /* elementFromPoint must see the cell underneath, not the ghost */
   pointer-events: none;
 }
 
-/* ------------------------------------------------------------ kart havuzu */
+/* ------------------------------------------------------------- lesson pool */
 
-.havuz {
+.pool {
   flex: 0 0 auto;
   max-height: 30vh;
   overflow: auto;
   padding: 6px 8px;
-  background: var(--zemin);
-  border-top: 2px solid var(--cizgi-koyu);
+  background: var(--bg);
+  border-top: 2px solid var(--line-dark);
 }
 
-.havuz-baslik {
+.pool-head {
   font-size: 12px;
-  color: var(--soluk);
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
-.havuz-liste {
+.pool-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 }
 
-.havuz-kart {
+.pool-card {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -395,26 +423,26 @@ td.hedef-engel {
   user-select: none;
 }
 
-.havuz-kart:hover {
-  outline: 2px solid var(--vurgu);
+.pool-card:hover {
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
-.havuz-kart .sayac {
+.pool-card .counter {
   font-size: 10px;
   color: #3a3f46;
 }
 
-.havuz-kart.bitti {
+.pool-card.done {
   opacity: 0.35;
   cursor: default;
 }
 
-/* ------------------------------------------------------------------ form */
+/* -------------------------------------------------------------------- form */
 
 .panel {
-  background: var(--kagit);
-  border: 1px solid var(--cizgi);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 14px;
@@ -428,10 +456,10 @@ td.hedef-engel {
 .panel h3 {
   margin: 14px 0 6px;
   font-size: 14px;
-  color: var(--soluk);
+  color: var(--muted);
 }
 
-.satir-form {
+.form-row {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -444,16 +472,16 @@ input[type="number"],
 select,
 textarea {
   padding: 6px 8px;
-  border: 1px solid var(--cizgi-koyu);
+  border: 1px solid var(--line-dark);
   border-radius: 5px;
-  background: var(--kagit);
+  background: var(--paper);
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--vurgu);
+  outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
 
@@ -464,29 +492,29 @@ textarea {
   resize: vertical;
 }
 
-table.liste {
+table.list {
   border-collapse: collapse;
   width: 100%;
 }
 
-table.liste th,
-table.liste td {
-  border-bottom: 1px solid var(--cizgi);
+table.list th,
+table.list td {
+  border-bottom: 1px solid var(--line);
   padding: 5px 6px;
   text-align: left;
 }
 
-table.liste th {
+table.list th {
   font-size: 12px;
-  color: var(--soluk);
+  color: var(--muted);
   font-weight: 600;
 }
 
-table.liste tbody tr:hover {
-  background: var(--zemin);
+table.list tbody tr:hover {
+  background: var(--bg);
 }
 
-.renk-benek {
+.color-dot {
   display: inline-block;
   width: 14px;
   height: 14px;
@@ -495,28 +523,28 @@ table.liste tbody tr:hover {
   vertical-align: -2px;
 }
 
-.ipucu {
-  color: var(--soluk);
+.hint {
+  color: var(--muted);
   font-size: 13px;
   margin: 4px 0 8px;
 }
 
-.bos-ekran {
+.empty-screen {
   max-width: 560px;
   margin: 48px auto;
   text-align: center;
-  color: var(--soluk);
+  color: var(--muted);
   line-height: 1.6;
 }
 
-.bos-ekran strong {
+.empty-screen strong {
   display: block;
   font-size: 17px;
-  color: var(--metin);
+  color: var(--text);
   margin-bottom: 8px;
 }
 
-.rozet {
+.badge {
   display: inline-block;
   padding: 1px 7px;
   border-radius: 10px;
@@ -524,56 +552,56 @@ table.liste tbody tr:hover {
   font-weight: 600;
 }
 
-.rozet.iyi {
-  background: var(--iyi-zemin);
-  color: var(--iyi);
+.badge.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
 }
 
-.rozet.sikisik {
-  background: var(--uyari-zemin);
-  color: var(--uyari);
+.badge.tight {
+  background: var(--warn-bg);
+  color: var(--warn);
 }
 
-.rozet.imkansiz {
-  background: var(--kotu-zemin);
-  color: var(--kotu);
+.badge.impossible {
+  background: var(--bad-bg);
+  color: var(--bad);
 }
 
-.uyari-kutu {
-  border-left: 4px solid var(--uyari);
-  background: var(--uyari-zemin);
+.warn-box {
+  border-left: 4px solid var(--warn);
+  background: var(--warn-bg);
   padding: 8px 12px;
   border-radius: 0 6px 6px 0;
   margin-bottom: 10px;
 }
 
-.hata-kutu {
-  border-left: 4px solid var(--kotu);
-  background: var(--kotu-zemin);
+.error-box {
+  border-left: 4px solid var(--bad);
+  background: var(--bad-bg);
   padding: 8px 12px;
   border-radius: 0 6px 6px 0;
   margin-bottom: 10px;
 }
 
-.iyi-kutu {
-  border-left: 4px solid var(--iyi);
-  background: var(--iyi-zemin);
+.ok-box {
+  border-left: 4px solid var(--ok);
+  background: var(--ok-bg);
   padding: 8px 12px;
   border-radius: 0 6px 6px 0;
 }
 
-/* -------------------------------------------------------------- musaitlik */
+/* ------------------------------------------------------------ availability */
 
-table.musaitlik {
+table.availability {
   border-collapse: separate;
   border-spacing: 0;
   user-select: none;
 }
 
-table.musaitlik th,
-table.musaitlik td {
-  border-right: 1px solid var(--cizgi);
-  border-bottom: 1px solid var(--cizgi);
+table.availability th,
+table.availability td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   width: 44px;
   height: 30px;
   text-align: center;
@@ -581,54 +609,54 @@ table.musaitlik td {
   padding: 0;
 }
 
-table.musaitlik th {
-  background: var(--zemin);
+table.availability th {
+  background: var(--bg);
   cursor: pointer;
 }
 
-table.musaitlik th:hover {
-  background: var(--vurgu-zemin);
-  color: var(--vurgu);
+table.availability th:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
-table.musaitlik td {
+table.availability td {
   cursor: pointer;
-  background: var(--iyi-zemin);
+  background: var(--ok-bg);
 }
 
-table.musaitlik td.kapali {
+table.availability td.closed {
   background: repeating-linear-gradient(
     45deg,
-    var(--kapali),
-    var(--kapali) 3px,
+    var(--closed),
+    var(--closed) 3px,
     #e8eaee 3px,
     #e8eaee 6px
   );
-  color: var(--soluk);
+  color: var(--muted);
 }
 
-/* --------------------------------------------------------------- yazdirma */
+/* ----------------------------------------------------------------- printing */
 
-.yazdir-alani {
-  background: var(--kagit);
+.print-area {
+  background: var(--paper);
 }
 
-.yazdir-sayfa {
+.print-page {
   padding: 10px 0 24px;
 }
 
-.yazdir-sayfa h3 {
+.print-page h3 {
   margin: 0 0 6px;
   font-size: 15px;
 }
 
-table.yazdir {
+table.print {
   border-collapse: collapse;
   width: 100%;
 }
 
-table.yazdir th,
-table.yazdir td {
+table.print th,
+table.print td {
   border: 1px solid #444;
   padding: 3px 4px;
   text-align: center;
@@ -636,22 +664,46 @@ table.yazdir td {
   height: 30px;
 }
 
-table.yazdir th {
+table.print th {
   background: #eee;
   font-size: 11px;
 }
 
-table.yazdir td .y-ust {
+table.print td .p-top {
   display: block;
   font-weight: 700;
 }
 
-table.yazdir td .y-alt {
+table.print td .p-bottom {
   display: block;
   font-size: 10px;
 }
 
-.sadece-yazdir {
+/* Start-end time under the lesson number in the printed hour column. */
+table.print th .p-clock {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+/* -------------------------------------------------- setup: bell preview */
+
+table.bell-preview td {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Which of the three availability kinds is being edited. The :hover rule above
+   is more specific, so it has to be beaten explicitly — otherwise the button the
+   user just clicked turns white-on-pale and cannot be read. */
+.btn[aria-pressed='true'],
+.btn[aria-pressed='true']:hover:not(:disabled) {
+  background: var(--line-dark);
+  color: var(--paper);
+  border-color: var(--line-dark);
+}
+
+.print-only {
   display: none;
 }
 
@@ -665,15 +717,15 @@ table.yazdir td .y-alt {
     background: #fff;
   }
 
-  .ust,
-  .havuz,
-  .sebep-cubugu,
-  .basma {
+  .topbar,
+  .pool,
+  .reason-bar,
+  .no-print {
     display: none !important;
   }
 
-  .govde,
-  .govde.tasmasiz {
+  .main,
+  .main.no-overflow {
     overflow: visible !important;
     padding: 0 !important;
     display: block !important;
@@ -685,33 +737,33 @@ table.yazdir td .y-alt {
     margin: 0;
   }
 
-  .yazdir-sayfa {
+  .print-page {
     break-after: page;
     page-break-after: always;
     break-inside: avoid;
     padding: 0;
   }
 
-  .yazdir-sayfa:last-child {
+  .print-page:last-child {
     break-after: auto;
     page-break-after: auto;
   }
 
-  /* Arka plan renkleri varsayilan olarak BASILMAZ. Bu satir olmazsa
-     tum program siyah beyaz cikar ve ogretmenler ayirt edilemez. */
+  /* Background colours are NOT printed by default. Without this line the whole
+     timetable comes out black and white and teachers cannot be told apart. */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 }
 
-/* Otomatik kayit calismiyorsa kalici, gormezden gelinemez uyari.
-   Sessiz veri kaybi bu projede kabul edilemez. */
-.kayit-uyarisi {
+/* A permanent, unmissable warning when auto-save does not work.
+   Silent data loss is unacceptable in this project. */
+.save-warning {
   flex: 0 0 auto;
   padding: 10px 14px;
-  background: var(--kotu-zemin);
-  color: var(--kotu);
-  border-bottom: 2px solid var(--kotu);
+  background: var(--bad-bg);
+  color: var(--bad);
+  border-bottom: 2px solid var(--bad);
   line-height: 1.45;
 }
