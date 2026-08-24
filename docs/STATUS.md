@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-24 (dördüncü oturum: **v0.7 arayüz turu bitti**, `v0.7-arayuz-turu` dalında 12 commit)
+Son güncelleme: 2026-08-24 (dördüncü oturum: **v0.7 arayüz turu bitti**, `v0.7-arayuz-turu` dalında 13 commit)
 
 ## Şu anki sürüm hedefi
 
@@ -275,7 +275,7 @@ Bilinen açık hata yok.
 
 ## Oturum sonu durumu (2026-08-24, dördüncü oturum)
 
-Dal: **`v0.7-arayuz-turu`** (`main`'e birleştirilmedi). 12 commit, her biri
+Dal: **`v0.7-arayuz-turu`** (`main`'e birleştirilmedi). 13 commit, her biri
 `npm run kontrol` yeşilken atıldı. v0.6 çalışması bir önceki oturumda commit edilmişti.
 
 `npm run kontrol` yeşil: tsc temiz, 177 birim + 51 E2E geçiyor, `dist/index.html`
