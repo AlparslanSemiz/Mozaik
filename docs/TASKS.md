@@ -12,8 +12,8 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 177 birim + 51 E2E testi yeşil, arayüz turu (v0.7) bitti. Elde veri olmadan
-yazılacak her yeni özellik tahmin olur (ilke 5).
+hazır — 219 birim + 87 E2E testi yeşil, iki arayüz turu (v0.7 ve v0.8) bitti. Elde
+veri olmadan yazılacak her yeni özellik tahmin olur (ilke 5).
 
 - [ ] Gerçek öğretmen/sınıf/derslik/ders listesi alınsın (Excel'e yazdırıp yapıştırma
       kutusuna yapıştırmak en hızlısı)
@@ -29,6 +29,11 @@ yazılacak her yeni özellik tahmin olur (ilke 5).
 - [ ] Baskı gerçek kâğıda alınsın (E2E taşma olmadığını gösteriyor ama fiziksel
       çıktıya bakılmadı)
 - [ ] Derslik varsayımı teyit ettirilsin: odalar gerçekten paylaşılıyor mu?
+- [ ] **Branş listesi teyit ettirilsin**: gömülü 21 ad geliyor; okulun gerçekten
+      verdiği branşlar hangileri, listeden ne çıkarılacak (artık Ayarlar → Branşlar'dan
+      düzenlenebiliyor)
+- [ ] **36 rengi gözle sor**: dizerken iki satırı karıştırdığın oldu mu? ΔE eşiği
+      sayıyı garanti eder, gözü değil
 
 ### 2. Tauri ile `.exe`
 
@@ -229,6 +234,48 @@ boyar (2026-08-24 kararı).
 
 ---
 
+### 14. v0.8 — ikinci arayüz turu ✅ — 2026-08-25
+
+localhost'ta gerçek gözle **ikinci** denemede çıkan liste. Dal: `v0.8-arayuz-turu-2`,
+madde başına bir commit, her commit `npm run kontrol` yeşilken.
+
+- [x] **2a Palet 12 → 36 renk, CSS'ten TS'e.** Her öğretmen kendi renginde;
+      `firstFreeColor()` kullanılmayan en küçük indeksi verir, silinen rengi yeniden
+      kullanır. Renkler elle seçilmedi, **arandı** (en uzak nokta / CIE Lab, kontrast
+      kısıtı altında). Ölçülen: en yakın çift ΔE **17,5** (eski 12'lik palette 13,4),
+      art arda indeksler 23,8, kontrast 7,3:1 ve 4,7:1
+- [x] **2b Şema v4 → v5**: `ClassGroup.color` + `settings.subjects`. `spreadColors()`
+      her yüklemede çalışıyor — v4 dosyaları 12 renkle yazıldığı için çakışma kesin;
+      renkleri zaten tekil olan dosya dokunulmadan geçiyor
+- [x] **2c Ayarlar sekmesi.** Kurulum 7 → **4** adım (Derslikler · Öğretmenler ·
+      Sınıflar · Dersler); Ayarlar 4 bölüm (Okul ve zil · Kurallar · Branşlar · Veri).
+      `School`/`Rules`/`Subjects` taşındı, yeniden yazılmadı; `Field`/`LimitBox`/
+      `props` bir üst klasöre çıktı, `SetupProps` → `PanelProps`.
+      **`Sıfırla` üst çubuktan Ayarlar → Veri'ye taşındı**
+- [x] **2d Branş listeden seçiliyor.** "+ Yeni branş…" oracıkta ekliyor; yapıştırılan
+      listedeki tanınmayan branş da listeye giriyor (`addTeachersFromRows`).
+      Kullanılan branş silinemiyor, mesaj kimin kullandığını sayıyor
+- [x] **2e Başlangıç saati iki açılır liste** (00–23, beşer dakika). Yan fayda: kutuyu
+      boşaltıp günü sessizce 00:00'a alma tuzağı ortadan kalktı
+- [x] **2f Havuz görünümü takip ediyor** *(bildirilen hata)*. `buildPool` `view` almıyordu
+- [x] **2g Simgeler**: öğretmen = mezuniyet kepi, sınıf = öğrenci grubu (aSc'nin sözlüğü)
+- [x] **2h Öğle arası 10 → 6 px, çarpı 11 → 16 px.** Asıl hata boyut değildi: `.break-col`
+      genişliği `table.grid tbody td` tarafından **eziliyordu**, ayraç bir ders kadar
+      genişti. Baskıdaki `table.print th td.p-closed` seçicisi de hiç eşleşmiyordu
+- [x] **2i Kapalı saatte kalan ders kırmızı işaretleniyor, SİLİNMİYOR** (ilke 6).
+      `closedConflicts()`; Kontrol'de tek tek listeleniyor, Müsaitlik'te sayılıyor
+- [x] **2j Yazdırmada sayfa seçimi.** Dışarıda bırakılanlar tutuluyor, ki sonradan
+      eklenen sınıf kendiliğinden bassın. Seçim `App`'te — sekme değişince silinmesin
+- [x] **2k Testler**: 177 → **219 birim**, 51 → **87 E2E**. Her madde için en az bir
+      gerçek-tarayıcı iddiası; renk ayrımı, ayraç genişliği ve yazı boyu **ölçülüyor**
+- [x] **2l Belgeler**: `CLAUDE.md` (altı sekme, `palette.ts`, şema v5, tuzak 16–18),
+      `docs/STATUS.md`, `docs/TASKS.md`
+
+**Yapılmadı, bilerek:** kapalı saatteki dersleri toplu kaldıran düğme konmadı —
+kullanıcı "kaldırma, kırmızı işaretle" dedi; kararı baba veriyor (2026-08-25 kararı).
+
+---
+
 ## Sonraki sürümler — şimdi YAPILMAYACAK
 
 v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönütü**.
@@ -247,8 +294,9 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
   içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*
 
 
-  UI düzenlenmesi ve modernleştirilmesi lazım. her sectionda sağ taraf bomboş düzgün bir UI yapılmalı.
+  UI düzenlenmesi ve modernleştirilmesi lazım. her sectionda sağ taraf bomboş düzgün bir UI yapılmalı.Yani tam ekran kullanılsın en verimli şekilde.
 
   Otomatik kurulum önemli.
 
-  
+Programda üzerine tıklanınca silinmesin yine hareket ettirilebilsin sürükleyerek. Sağ tık silsin yani aşağı atsın.
+

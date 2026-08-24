@@ -1,11 +1,11 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-24 (dördüncü oturum: **v0.7 arayüz turu bitti**, `v0.7-arayuz-turu` dalında 13 commit)
+Son güncelleme: 2026-08-25 (beşinci oturum: **v0.8 ikinci arayüz turu bitti**, `v0.8-arayuz-turu-2` dalında 10 commit)
 
 ## Şu anki sürüm hedefi
 
-**v0 + v0.5 + v0.6 + v0.7** — elle dizme + yapılabilirlik kontrolü + okul düzeni ve
-kurallar + arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
+**v0 + v0.5 + v0.6 + v0.7 + v0.8** — elle dizme + yapılabilirlik kontrolü + okul düzeni
+ve kurallar + iki arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
 
 - **v0 çıkma şartı:** babam gerçek verisiyle bir haftalık programı baştan sona dizip
   çıktısını alabiliyor. → *araç çalışıyor ve gerçek tarayıcıda doğrulandı; gerçek
@@ -19,6 +19,11 @@ kurallar + arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
   renkler hâlâ işlevini görüyor. → **sağlandı** — koyu tema + `color-scheme`, ve
   kontrastı **hesaplayarak** ölçen E2E testleri. *Babanın kendi makinesinde
   görülmedi; ölçüm buradaki Chromium'da yapıldı.*
+- **v0.8 çıkma şartı:** localhost'ta gözle bakınca çıkan liste kapandı; her öğretmen
+  ve her sınıf kendi renginde, ayarlar kendi sekmesinde, branş seçiliyor, kapalı
+  saatte kalan ders görünüyor. → **sağlandı** — hepsi gerçek tarayıcıda ölçülüyor
+  (36 renk tek tek okunup karşılaştırılıyor, ayraç genişliği ve yazı boyu piksel
+  olarak alınıyor). *Yine babanın makinesinde değil, buradaki Chromium'da.*
 
 ---
 
@@ -53,12 +58,21 @@ kurallar + arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
 | **Silme onayı (dört varlık)** | ✅ 7 birim |
 | **Branş kısaltmaları + şema v4 göçü** | ✅ birim + E2E |
 | **Baskı A4 yatay, eşit sütunlu** | ✅ PDF MediaBox ölçüldü |
-| **Görünüm simgeleri** | ✅ |
+| **Görünüm simgeleri** | ✅ *(v0.8'de kep + öğrenci grubu oldu)* |
+| **v0.8: palet 12 → 36, çakışmasız renk** | ✅ 11 birim + 6 E2E |
+| **v0.8: sınıf renkleri, şema v5** | ✅ birim + E2E |
+| **v0.8: Ayarlar sekmesi** (Kurulum 7 → 4 adım) | ✅ 5 E2E |
+| **v0.8: branş listeden seçiliyor** | ✅ 5 E2E |
+| **v0.8: başlangıç saati 24 saat / 5 dk** | ✅ 4 birim + 3 E2E |
+| **v0.8: havuz görünümü takip ediyor** (hata) | ✅ 4 E2E |
+| **v0.8: ince ayraç, büyük çarpı** | ✅ 4 E2E |
+| **v0.8: kapalı saatte ders işaretleniyor** | ✅ 8 birim + 4 E2E |
+| **v0.8: yazdırmada sayfa seçimi** | ✅ 4 E2E |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 177 birim + 51 E2E = 228, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 288 KB, sıfır ağ çağrısı.**
+**Testler: 219 birim + 87 E2E = 306, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 293 KB, sıfır ağ çağrısı.**
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -112,6 +126,50 @@ tutuluyor. Üçü de [PLAN.md](PLAN.md) tuzak 11–13 olarak yazıldı.
 
 ---
 
+## v0.8 — gözle bakınca çıkanlar
+
+Hepsi localhost'ta gerçek gözle ikinci denemede bulundu. Mantık ve veri modeli yine
+sağlamdı; kusurların çoğu görünüş ve kullanım tarafındaydı. **Ama üçü gerçek hataydı**
+ve ikisi kendini yıllarca saklayabilirdi:
+
+1. **Havuz görünümü takip etmiyordu.** `buildPool` `view` almıyordu; sınıf görünümünde
+   bir sınıfa ait kartlar havuzun her yerine dağılıyordu ve kartı kaldıran hayalet
+   kartın kendisinden başka bir şey yazıyordu.
+2. **Kapalı saatte kalan ders görünmüyordu.** Tarama yalnız BOŞ hücreye çiziliyor,
+   dolayısıyla kart kapalı saati örtüyordu; `blocker()` yalnız olası bırakma için
+   çalışır, Kontrol ise yalnız toplam kapasiteye bakar. Yani hiçbir ekran söylemiyordu.
+   → **PLAN tuzak 16**
+3. **Öğle arası ayracı "dar" tanımlıyken bir ders kadar genişti.** `.break-col` (0,1,0)
+   `table.grid tbody td` (0,1,3) tarafından eziliyordu. → **PLAN tuzak 17**
+
+Ayrıca `<input type="time">` boşaltılınca okul gününü sessizce 00:00'a alıyordu ve
+baskıda `table.print th td.p-closed` seçicisi (`th` içinde `td`) hiç eşleşmiyordu.
+
+**Renk artık kimlik.** 12 renkle 25 öğretmende renk tekrar ediyordu, yani havuz kartı
+tek bir satırı göstermiyordu — kartın rengi zaten tam bunun için var. Palet 36 renge
+çıktı ve CSS'ten `src/palette.ts`'e taşındı. Renkler elle seçilmedi: kontrast (≥4,5:1,
+iki mürekkep için de) ve CIE Lab ayrımı kısıtları altında **en uzak nokta** yöntemiyle
+arandı. Ölçülen sonuç eski paletten daha iyi:
+
+| | eski 12 renk | yeni 36 renk |
+|---|---|---|
+| en yakın çift ΔE | 13,4 | **17,5** |
+| art arda indeksler ΔE | — | **23,8** |
+| ilk 25 renk (bir okul dolusu) ΔE | — | **20,0** |
+| mürekkep kontrastı | 8,7 / 5,6 | **7,3 / 4,7** |
+
+**Ayarlar ayrıldı.** Kurulum iki farklı türü bir arada tutuyordu: dönem başında
+doldurulan dört liste ve yılda bir dokunulan okul ayarları. Kurulum artık 4 sayılabilir
+adım, Ayarlar 4 bölüm. `Sıfırla` üst çubuktan Ayarlar → Veri'ye taşındı; `Dosyaya
+kaydet` / `Dosyadan aç` üst çubukta kaldı (tuzak 7).
+
+**Şema v4 → v5** (`ClassGroup.color`, `settings.subjects`). Göç `parseState` içinde,
+birim **ve** gerçek "Dosyadan aç" yolundan test edildi. `spreadColors()` her yüklemede
+çalışıyor: v4 dosyaları 12 renkle yazıldığı için çakışma kesin. Renkleri zaten tekil
+olan dosya dokunulmadan geçiyor.
+
+---
+
 ## Kod dili geçişi — ne yapıldı, ne riskliydi
 
 Arayüz Türkçe, kod İngilizce (CLAUDE.md "Kod dili ve biçim"). Davranış değişmedi:
@@ -144,10 +202,13 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Ölçüm | Değer |
 |---|---|
 | Sürükleme başlangıcı (`buildIndex` + 72 `check`) | **0,212 ms** |
-| `dist/index.html` | 288 KB, tek dosya, 0 ağ çağrısı |
-| E2E paketi | 51 test, ~25 sn |
-| Birim paketi | 177 test, ~1,5 sn |
+| `dist/index.html` | 293 KB, tek dosya, 0 ağ çağrısı |
+| E2E paketi | 87 test, ~43 sn |
+| Birim paketi | 219 test, ~1,5 sn |
 | Baskı sayfası | A4 yatay (842×595 pt), 12 eşit sütun (±1px) |
+| Palet | 36 renk, en yakın çift ΔE **17,5**, kontrast ≥ **4,7:1** |
+| Öğle arası ayracı | **6 px** (hücre 34 px) |
+| Kapalı saat "×" | **16 px**, kontrast AA |
 
 Sürükleme başlangıcı asıl önemli sayı: babanın makinesi 20 kat yavaş olsa bile 4 ms.
 `check()` artık `blocker()`'ın üstüne kural hesabı da yapıyor ama sayı yerinde durdu —
@@ -164,6 +225,11 @@ hesabı yapılmıyor.
 | Sınıflar arası çakışma | Yok. Sınıf = kapalı öğrenci kümesi. |
 | Derslik | Sınıfın **sabit** alanı. Seçim UI'sı yok, çakışma kontrolü var. |
 | Ana ekran düzeni | Satır = öğretmen, sütun = 6 gün × 12 saat. Tek düğmeyle sınıf görünümü. |
+| Renk | Her öğretmen ve her sınıf **kendi renginde**. Hücreyi daima öğretmen boyar; sınıf rengi satır başı noktası ve baskı başlığı. (2026-08-25) |
+| Branş | Serbest metin değil, **listeden seçilir**. Liste Ayarlar'da yönetilir. (2026-08-25) |
+| Sekmeler | **Altı**: Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar. (2026-08-25) |
+| Kapalı saatte kalan ders | **Silinmez, işaretlenir.** Kararı baba verir (ilke 6). (2026-08-25) |
+| Baskı sayfa seçimi | `State`'e girmez; **dışarıda bırakılanlar** tutulur. (2026-08-25) |
 | Sürükle-bırak | **Pointer Events** (HTML5 DnD değil). |
 | Cihaz | Windows masaüstü, fare. Tablet hedef değil. |
 | Veri girişi | Elle + **Excel'den yapıştırma**. |
@@ -250,6 +316,14 @@ hesabı yapılmıyor.
    "art arda en fazla kaç saat" sorusunun cevabı bilinmiyor ve tahminle sayı koymak
    ilke 5'e aykırı. Kural motoru sayı girilene kadar hiç tetiklenmiyor.
 
+7. **Branş listesi gömülü 21 adla geliyor.** Okulun gerçekten hangi branşları verdiği
+   bilinmiyor. Liste artık Ayarlar'dan düzenlenebiliyor, ama babanın listesi elde
+   olmadan hangi adların gereksiz olduğu tahminden ibaret.
+
+8. **36 rengin gözle ayırt edilebildiği ÖLÇÜLDÜ, görülmedi.** ΔE eşiği sayıyı garanti
+   eder, gözü değil — hele bir de babanın ekran ayarında. Gerçek veriyle dizerken
+   sorulacak: iki satırı karıştırdığın oldu mu?
+
 ---
 
 ## Bilinen eksikler
@@ -264,12 +338,46 @@ hesabı yapılmıyor.
    asıl iddia "tarayıcı artık kendi karartmasını yapmıyor" ve bu yalnızca onun
    makinesinde kesinleşir.
 5. `.roz` dosyası incelenmedi (aSc'den içe aktarma — düşük öncelik).
+6. **Ayarlar sekmesi 1366×768'de ölçüldü: dikey taşma 0 px**, ekran görüntüsü alındı.
+   Ama uzun bölümlerde (Branşlar, 21 satır) listenin içinde kaydırma gerekiyor;
+   babanın bunu rahat bulup bulmayacağı denenmedi.
 
 ---
 
 ## Bilinen hatalar
 
 Bilinen açık hata yok.
+
+---
+
+## Oturum sonu durumu (2026-08-25, beşinci oturum)
+
+Dal: **`v0.8-arayuz-turu-2`** (`main`'e birleştirilmedi; `v0.7-arayuz-turu` de
+birleşmemişti — ikisi de bekliyor). 10 commit, her biri `npm run kontrol` yeşilken.
+
+`npm run kontrol` yeşil: tsc temiz, **219 birim + 87 E2E** geçiyor, `dist/index.html`
+293 KB üretiliyor.
+
+### Bu oturumda ne yapıldı
+
+v0.8 turunun tamamı (2a–2l). Ayrıntı ve gerekçeler: [TASKS.md](TASKS.md) → BİTENLER 14.
+
+| Eklenen | Nerede |
+|---|---|
+| 36 renk, çakışmasız atama | **yeni** `palette.ts` + `palette.test.ts` |
+| Sınıf renkleri, branş listesi, şema v5 | `types.ts` · `entities.ts` · `store.ts` |
+| Ayarlar sekmesi | **yeni** `components/settings/` · `components/props.ts` |
+| Branş açılır listesi | `setup/Teachers.tsx` · `entities.ts` |
+| 24 saatlik / 5 dk başlangıç | `settings/School.tsx` · `bell.ts` |
+| Havuz görünümü takip ediyor | `Program.tsx` · `LessonPool.tsx` |
+| Kep + öğrenci simgeleri, ince ayraç, büyük çarpı | `Program.tsx` · `styles.css` |
+| Kapalı saatte ders işareti | `constraints.ts` · `Grid.tsx` · `Check.tsx` · `Availability.tsx` |
+| Yazdırmada sayfa seçimi | `Print.tsx` · `App.tsx` |
+
+### Sıradaki iş değişmedi
+
+**Gerçek veri.** v0'ın çıkma şartı hâlâ tek bir şeye bağlı ve iki arayüz turu bunu
+değiştirmedi. Elde veri olmadan yazılacak her yeni özellik tahmindir (ilke 5).
 
 ---
 

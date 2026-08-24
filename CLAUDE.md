@@ -57,9 +57,9 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 177 birim testi
+npm test          # Vitest — 219 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 51 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 87 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
 ```
@@ -70,9 +70,9 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, **silme özeti, branş kısaltması, şema göçü** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, **palet ayrımı, branş listesi, kapalı saat çakışması** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/app.spec.ts` (Playwright) | **Düzen, sürükleme, kaydırma, yazdırma, `file://`, renk kontrastı, tablo ekseni** |
+| **E2E** | `e2e/app.spec.ts` (Playwright) | **Düzen, sürükleme, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu** |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada beş ekran görüntüsü |
 
 E2E, `dist/index.html`'i `file://` üzerinden 1366×768'de açar — yani **babanın çift
@@ -118,6 +118,7 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 ```
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
+palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
   |
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
 rules.ts / bell.ts              Testleri zorunlu.
@@ -126,8 +127,12 @@ import.ts / entities.ts
 store.ts                        reducer + geri al yığını + localStorage + göç
 theme.ts                        tema tercihi (State'e girmez, ayrı anahtar)
   |
+components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
+components/Field.tsx            iki klasörün de kullandığı küçük parçalar
+components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
-components/setup/*.tsx          Kurulum adımları: index (kabuk) + 7 adım + Paste/Field
+components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste
+components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar · Veri
 ```
 
 `rules.ts`, `constraints.ts`'ten **yalnızca `Index` tipini** alır (`import type`,
@@ -141,8 +146,8 @@ alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
 **Kural:** iş mantığı bileşenlerin içine yazılmaz. Bir `.tsx` dosyasında çakışma
 hesabı görüyorsan yanlış yerdedir — `constraints.ts`'e taşı.
 
-**Kural:** `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`
-içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
+**Kural:** `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`palette.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
 özellik eklenmez. `store.ts` içindeki `parseState` ve `entities.ts` içindeki
 `remapDays` de test edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi
 değişince programın kaymasını engelleyen tek şeydir.
@@ -155,7 +160,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 4
+  schemaVersion: 5
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -163,6 +168,7 @@ State {
     bell:   Bell       // saatler hesaplanır, tek tek saklanmaz
     limits: Limits     // okul geneli varsayılan sınırlar
     rules:  Rules      // her sınır için Kapalı / Uyar / Engelle
+    subjects: string[] // okulun branş listesi — TAMAMI saklanır
     subjectShorts: Record<string, string>   // YALNIZCA değiştirilenler
   }
   rooms, teachers, classes, lessons
@@ -174,7 +180,8 @@ Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }  // 09:00 ·
 Limits     { maxConsecutive, maxPerDay, minPerDay, maxSameLessonPerDay }  // 0 = sınır yok
 Teacher    { name, short, subject, color, limits }  // her öğretmenin TEK branşı var
                                             // limits alanları null = okul varsayılanı
-ClassGroup { name, roomId }                 // derslik sınıfın sabit alanı, seçilmez
+                                            // color = PALETTE indeksi, kimseyle çakışmaz
+ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
 Lesson     { classId, teacherId, weeklyHours, blockSize, maxPerDay }
 ```
 
@@ -207,10 +214,21 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   tablodan gelir; `subjectShorts`'a ancak varsayılandan farklı bir şey yazılınca kayıt
   düşer, varsayılana geri yazılırsa silinir. Böylece yedek 21 varsayılanla şişmez ve
   gömülü tablo ileride iyileşirse eski proje kendiliğinden faydalanır.
+- **Renk kimliktir, süs değil.** Her öğretmenin ve her sınıfın kendine ait bir rengi
+  var; `addTeacher`/`addClass` **kullanılmayan** en küçük indeksi verir (`firstFreeColor`),
+  sıradakini değil. Palet 36 renk ve `src/palette.ts` içinde düz hex — iki temada ve
+  kâğıtta aynı olan tek renk kümesi olduğu için CSS değişkeni hiçbir şey kazandırmıyordu.
+  Renkler elle seçilmedi, **arandı**: kontrast ve CIE Lab ayrımı kısıtları altında en
+  uzak nokta yöntemiyle. `palette.test.ts` bunu her koşuda yeniden ölçer.
+- **Branş listesi TAM saklanır, kısaltmalar sapmalı.** `subjects` kullanıcının
+  düzenlediği bir liste — gömülü tablodan türetilen bir liste "Fransızca'yı kaldır"ı
+  ifade edemez. `subjectShorts` ise yalnız değiştirileni tutar. `Teacher.subject` hâlâ
+  bir **string**, id değil: branş silmek cascade gerektirmesin ve yedek okunur kalsın.
 - **`schemaVersion` ilk günden var.** v1 = Türkçe alan adları, v2 = İngilizce,
-  v3 = `Day` nesneleri + zil saatleri + kurallar, v4 = `subjectShorts`.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3 ile v4 tek okuyucudan geçer (aradaki
-  tek fark eklenen alan); `id`'ler ve gün indeksleri değişmediği için `unavailable` ve `placements`
+  v3 = `Day` nesneleri + zil saatleri + kurallar, v4 = `subjectShorts`,
+  v5 = `ClassGroup.color` + `settings.subjects`.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3, v4 ve v5 tek okuyucudan geçer (aradaki
+  tek fark eklenen alanlar); `id`'ler ve gün indeksleri değişmediği için `unavailable` ve `placements`
   anahtarları olduğu gibi geçer. **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
   hem birim hem E2E testini ekle.** Eski yedek açılmıyorsa veri kayıptır.
 
@@ -289,12 +307,33 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 15. **Palet üstündeki metin tema ile dönmemeli.** Öğretmen renkleri pastel ve iki temada
     da aynı; `color: inherit` bırakılırsa koyu temada açık metin pastel zemine düşer ve
     hücre okunmaz olur (`--on-color`).
+16. **Kapalı saat işareti yalnız BOŞ hücreye çiziliyordu.** Müsaitlik program dizildikten
+    *sonra* düzenleniyor; dolu bir saati kapatınca ders yerinde kalıyor ama tarama kartın
+    altında kaldığı için **hiçbir yerde görünmüyordu**. `blocker()` de yakalayamaz —
+    yalnız olası bir bırakma için çalışır. Çare `closedConflicts()`: ders **silinmez**
+    (ilke 6), kırmızı işaretlenir ve Kontrol'de sayılır.
+17. **Izgara hücresinin genişliğini `table.grid tbody td` belirler.** `.break-col` gibi
+    tek sınıflı bir kural (0,1,0) ondan (0,1,3) zayıf kalır: öğle arası ayracı aylarca
+    "dar" tanımlıyken bir ders kadar geniş çizildi. Yeni bir hücre genişliği
+    veriyorsan ya seçiciyi güçlendir ya `!important` kullan — ve **ölç**.
+18. **Bileşen sekme değişince sökülür.** `useState` içindeki her şey gider. Baskı sayfa
+    seçimi bu yüzden `App`'te duruyor: Kurulum'a gidip dönmek listeyi siliyordu. Aynı
+    şekilde seçimi "seçilenler" olarak tutmak yanlıştır — **dışarıda bırakılanlar**
+    tutulur, yoksa sonradan eklenen sınıf sessizce basılmaz.
 
 ---
 
 ## Arayüz
 
-Beş sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır**. Daha fazlası yok.
+Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**. Daha fazlası yok.
+
+- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum dört sayılabilir adım:
+  `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
+  kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
+  dokunulan şey aynı ekranda durmaz.
+- **`Sıfırla` üst çubukta değil.** Ayarlar → Veri altında. Üst çubukta "Dosyadan aç"a
+  bir yanlış tıklama uzaklıktaydı ve geri alınamıyor. `Dosyaya kaydet` / `Dosyadan aç`
+  üst çubukta **kalır**: tuzak 7'nin karşı önlemi görünür olmak zorunda.
 
 - Ana ekran aSc'deki gibi: **satır = öğretmen, sütun = 6 gün x 12 saat**, tek geniş
   tablo, altta yerleşmemiş kart havuzu. Saat başlığında ders numarası ve altında
@@ -302,9 +341,16 @@ Beş sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır**. Daha faz
 - **Görünüm iki yazısız simge düğmesi**: Öğretmen / Sınıf. Seçili olan vurgulu,
   diğeri soluk. `aria-label` zorunlu — metin yok, erişilebilir ad onların tek adı.
   Yanındaki açıklama cümlesi kalır: simge yalnız başına ilk seferde tahmin ettirir.
-- **Kurulum yedi numaralı adım**: `1 Okul · 2 Derslikler · 3 Öğretmenler · 4 Branşlar ·
-  5 Sınıflar · 6 Dersler · 7 Kurallar`. Sayaç 0 ise adım soluk. **Kilitli sihirbaz
-  değil** — her adıma her an atlanır.
+- Sayaç 0 ise adım soluk. **Kilitli sihirbaz değil** — her adıma her an atlanır.
+- **Branş yazılmaz, seçilir.** Serbest metin "Matemtik"i sessizce ikinci bir branş
+  yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Liste
+  Ayarlar'da yönetilir; "+ Yeni branş…" ile oracıkta eklenir. **Kullanılan branş
+  silinemez**, mesaj kimin kullandığını sayar.
+- **Başlangıç saati iki açılır liste** (00–23 ve beşer dakika), `<input type="time">`
+  değil: o girdi AM/PM'i tarayıcının yereline göre seçer ve boşaltılınca günü sessizce
+  00:00'a alırdı.
+- **Yazdırmada hangi sayfaların basılacağı tek tek seçilir.** Sınıf ve öğretmen için
+  ayrı onay listeleri, "Tümü / Hiçbiri", ve düğmede sayfa sayısı.
 - **Eksen tutarlılığı.** Program ızgarasında sütun = gün × ders (babanın alışkanlığı).
   **Müsaitlik ve Yazdır'da satır = gün, sütun = ders** — ikisi de "bir günü okuma"
   ekranı, aSc'nin Time off penceresi de öyle.
@@ -314,8 +360,13 @@ Beş sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır**. Daha faz
 - **Yazdırma A4 YATAY**, `table-layout: fixed`, sütunlar eşit. Sütun başlığındaki saat
   yalnızca bütün günler uyuşuyorsa yazılır — kâğıtta yanlış saat yazmaktansa hiç yazmamak.
 - **Renk işlevsel, dekoratif değil.** Yeşil = bırakılabilir, sarı = uyarı,
-  kırmızı = engel, gri taralı = kapalı. Öğretmen rengi havuzdaki kartla satırı
-  eşleştirmeye yarar.
+  kırmızı = engel, gri taralı = kapalı, kırmızı çerçeve = kapalı saatte kalmış ders.
+  Öğretmen rengi havuzdaki kartla satırı eşleştirmeye yarar.
+- **Hücreyi daima ÖĞRETMEN rengi boyar**, iki görünümde de. Sınıf rengi bir *işaret*:
+  satır başındaki nokta ve basılan sayfanın başlığı. İki renk aynı kareyi paylaşmaz.
+- **Havuz kartı görünümü takip eder.** Üst satır = ders yerleşince hücrenin okuyacağı
+  şey, alt satır = kartın gideceği satır; sıralama alt satıra göre, ki bir satırın
+  kartları yan yana dursun.
 - **Açık ve koyu tema, sağ üstte düğme.** Öğretmen paleti iki temada da AYNI ve
   yazdırma her zaman açık palet kullanır — o renkler kâğıda basılıyor. Palet üstündeki
   mürekkep de tema ile dönmez (`--on-color`).

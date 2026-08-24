@@ -90,11 +90,11 @@ describe('uygulama açılıyor', () => {
     expect(button('Örnek veriyle doldur')).toBeTruthy();
   });
 
-  it('beş sekmenin hepsi hata vermeden çizilir', () => {
+  it('altı sekmenin hepsi hata vermeden çizilir', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
 
-    for (const label of ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır']) {
+    for (const label of ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar']) {
       click(button(label));
       expect(container.querySelector('.main')).not.toBeNull();
     }
@@ -206,5 +206,29 @@ describe('uygulama açılıyor', () => {
     render();
     click(button('Program'));
     expect(container.querySelectorAll('table.grid .card')).toHaveLength(1);
+  });
+
+  it('Ayarlar sekmesinin dört bölümü de çiziliyor', () => {
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    click(button('Ayarlar'));
+
+    for (const [section, text] of [
+      ['Okul ve zil', 'Okul ve günler'],
+      ['Kurallar', 'Öğretmen art arda'],
+      ['Branşlar', 'listeden'],
+      ['Veri', 'Her şeyi sil'],
+    ] as const) {
+      click(button(section));
+      expect(container.textContent, section).toContain(text);
+    }
+  });
+
+  it('Sıfırla üst çubukta değil, Ayarlar altında', () => {
+    localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
+    render();
+    const topbar = container.querySelector('.topbar')!;
+    expect(topbar.textContent).not.toContain('Sıfırla');
+    expect(topbar.textContent).toContain('Dosyaya kaydet');
   });
 });
