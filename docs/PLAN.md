@@ -219,8 +219,41 @@ Her sürümün bir **çıkma şartı** var. Şart sağlanmadan sonrakine geçilm
 - **Geri al (Ctrl+Z), en az 20 adım.** Sürükle-bırakta yanlış bırakma sürekli
   olur. Bu bloat değil, temel işlev.
 - Kayıt: localStorage otomatik + "Yedek indir" (.json) + "Yedek yükle"
-- Yazdırma: **sayfa başına bir sınıf / bir öğretmen** (7 sütun × 12 satır, A4 dikey).
-  84 sütunlu ana tabloyu basmak imkânsız — sütun başına 3 mm düşer, denenmeyecek.
+- Yazdırma: **sayfa başına bir sınıf / bir öğretmen** (v0.7'de eksen döndü ve sayfa
+  **A4 yatay** oldu; bkz. aşağıda). 84 sütunlu ana tabloyu basmak imkânsız — sütun
+  başına 3 mm düşer, denenmeyecek.
+
+### v0.7 — Arayüz elden geçirme ✅
+
+Çıkma şartı: *araç babanın makinesinde, onun tarayıcısında, tasarlandığı gibi görünüyor
+ve renkler hâlâ işlevini görüyor.* → **sağlandı** (renkler burada ölçülerek;
+babanın makinesinde henüz görülmedi).
+
+localhost'ta gerçek gözle ilk deneme sonrası çıktı. Ayrıntılı madde listesi
+[TASKS.md](TASKS.md) → BİTENLER 13. Şema **v3 → v4** (branş kısaltmaları).
+
+- **Koyu tema + düğme.** Asıl bulgu: uygulama koyu görünüyor ama koyu teması yok —
+  tarayıcı açık temalı sayfayı zorla karartıyor ve yeşil/sarı/kırmızı işlevsel renkleri
+  çamurlaştırıyor. Bu bir zevk meselesi değil: aracın en temel geri bildirim kanalı
+  bozuluyor. Kontrolü almak, tarayıcıya bırakmaktan daha az karmaşa.
+- **Kurulum adımlara bölündü.** 1132 satırlık tek kaydırma → numaralı, sayaçlı **yedi**
+  adım (Branşlar 4. sırada). Kilitli sihirbaz değil; her adıma her an atlanır.
+- **Öğle arası çizelgede görünür oluyor.** Üç ekranda üç ayrı teknik, çünkü eksenler
+  farklı ve ara konumu güne göre değişiyor.
+- **Müsaitlik çizelgesi dönüyor**: satır = gün, sütun = ders (aSc "Time off" düzeni).
+- **Öğretmen kısaltması otomatik** ad-soyad baş harflerinden; çakışma uyarısıyla.
+- **Yedek düğmeleri**: "Dosyaya kaydet" / "Dosyadan aç". Dosya adı değişmez.
+- **Görsel cila**: hizalama, aralık ölçeği, düğme hiyerarşisi, odak halkası.
+  Sekmeler ve ızgara düzeni **değişmez** — baba yeniden öğrenmeyecek.
+- **Silmeden önce her zaman onay**, ve onay metni ne kaybedileceğini sayar. Bugün
+  derslik ve ders silmek hiç sormuyor.
+- **Branş kısaltmaları** (`Matematik → Mat`, `Fizik → Fzk`, `Geometri → Geo` …),
+  Kurulum'dan düzenlenebilir. **Şema v3 → v4.** Gerekçe kozmetik değil: 34px'lik
+  hücreye `Matematik` sığmıyor, baskı yatay sayfada 12 sütuna bölününce hiç sığmıyor.
+- **Baskı çizelgesi**: eşit sütun genişliği (`table-layout: fixed`) ve eksen dönüyor —
+  satır = gün, sütun = ders → **A4 yatay**.
+- **Program görünüm düğmesi** iki simgeye ayrılıyor: seçili koyu, seçilmeyen soluk.
+  Bugünkü tek düğme ne yapacağını söylüyor, nerede olunduğunu söylemiyor.
 
 ### v0.6 — Zil saatleri, gün seçimi, müsaitlik ve kural kutuları ✅
 
@@ -371,8 +404,26 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
     başa gün eklemeyi doğrular.
 
 15. **`Cuma` ve `Cumartesi` ilk üç harfte aynı.** Gün başlıklarını `slice(0, 3)` ile
-    kısaltmak müsaitlik ızgarasında iki sütunu birden "Cum" yapar. Kısaltmalar
-    `shortDay()` tablosundan gelir: `Pzt Sal Çar Per Cum Cmt Paz`.
+    kısaltmak müsaitlik ızgarasında iki satırı birden "Cum" yapar. Kısaltmalar
+    `shortDay()` tablosundan gelir: `Pzt Sal Çar Per Cum Cmt Pzr`.
+
+16. **Izgaraya eklenen her hücre sürükleme hedefi sanılır.** *(v0.7'de öğle arası
+    ayraç sütunu eklenirken çıktı.)* `drag.ts` hedefi `closest('[data-day]')` ile
+    buluyor; ayraç sütununa `data-day` konsaydı ders öğle arasına bırakılabilirdi.
+    Görsel amaçlı eklenen hücreler bu özniteliği **taşımaz**, ve bunu bir test bağlar.
+
+17. **Tarayıcı açık temalı sayfayı kendi karartır.** *(v0.7'nin çıkış sebebi.)* Renk
+    değerlerini düzeltmek yetmez; `color-scheme` iki temada da doğru kurulmazsa
+    tarayıcı üstüne kendi algoritmasını uygular ve yeşil/sarı/kırmızı çamurlaşır.
+
+18. **Palet üstündeki mürekkep tema ile dönmemeli.** Öğretmen renkleri pastel ve iki
+    temada da aynı (kâğıda basılıyor). `color: inherit` bırakılırsa koyu temada açık
+    metin pastel zemine düşer ve hücre okunmaz olur.
+
+19. **WCAG kontrast oranı "ayırt edilebilirlik" ölçüsü DEĞİLDİR.** Koyu yeşil ile koyu
+    zeytin arasındaki oran 1,00:1 çıkar ama tonları apayrıdır. "Bu iki renk birbirinden
+    ayrılıyor mu" sorusu **CIE Lab ΔE** ile ölçülür; kontrast oranı yalnızca
+    "bu metin bu zeminde okunuyor mu" sorusuna cevaptır.
 
 ---
 
@@ -403,6 +454,15 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
   gri taralı = öğretmen müsait değil. Öğretmen rengi paletten atanır ve havuzdaki
   kartın hangi satıra ait olduğunu gösterir.
 - **Font**: sistem fontu. Web font indirmek offline çalışmayı bozar.
+- **Tema** *(v0.7 kararı)*: açık ve koyu palet, sağ üstte düğme, tercih
+  `localStorage`'da — `State`'e girmez, şema değişmez. Öğretmen renk paleti iki temada
+  da aynı kalır ve **yazdırma her zaman açık palet** kullanır; o renkler kâğıda basılıyor.
+- **Eksen tutarlılığı** *(v0.7 kararı)*: Program ızgarasında sütun = gün × ders
+  (aSc düzeni, babanın alışkanlığı). Müsaitlik ve Yazdır'da ise **satır = gün,
+  sütun = ders** — ikisi de "bir günü okuma" ekranı, aSc'nin Time off penceresi de öyle.
+- **Kısaltma nerede** *(v0.7 kararı)*: dar ekran ızgaralarında kısaltma
+  (`Pzt Sal Çar Per Cum Cmt Pzr`, `Mat`, `MÇ`), yer olan her yerde tam ad. Duvara
+  asılan baskıda gün adı tam yazılır.
 - **Ekran**: babamın ekranı muhtemelen 1366×768. 84 sütun sığmaz, yatay kaydırma
   kaçınılmaz. Öğretmen sütunu `position: sticky; left: 0`, gün/saat başlıkları
   `sticky; top: 0`.

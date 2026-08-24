@@ -11,15 +11,19 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ### 1. Babanın gerçek verisiyle deneme
 
-Kod tarafında yapılacak iş kalmadı; **v0'ın çıkma şartı artık tek bir şeye bağlı:
-gerçek veri**. Elde veri olmadan yazılacak her yeni özellik tahmin olur (ilke 5).
+**v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
+hazır — 177 birim + 51 E2E testi yeşil, arayüz turu (v0.7) bitti. Elde veri olmadan
+yazılacak her yeni özellik tahmin olur (ilke 5).
 
 - [ ] Gerçek öğretmen/sınıf/derslik/ders listesi alınsın (Excel'e yazdırıp yapıştırma
       kutusuna yapıştırmak en hızlısı)
 - [ ] **Gerçek gün ve zil düzeni teyit ettirilsin**: Pazartesi gerçekten ders yok mu,
       öğle arası hafta içi 5. hafta sonu 6. dersten sonra mı, 12 ders mi
 - [ ] **Öğretmen sınırları sorulsun**: art arda en fazla kaç saat, günde en fazla/en az
-      kaç saat. Şu an hepsi 0 (sınır yok) ile geliyor — tahminle sayı konmadı
+      kaç saat. Şu an hepsi 0 (sınır yok) ile geliyor ve **öyle kalacak** (2026-08-24
+      kararı): branş kısaltmasının aksine bunun “doğru cevabı” okuldan okula değişir.
+      Yanlış bir varsayılan hücreleri sessizce kırmızıya boyar ve babanız sebebini
+      anlamaz. 0 = kural hiç tetiklenmez; sayı girilince açılır
 - [ ] Bir haftalık program baştan sona dizilsin → **v0'ın çıkma şartı**
 - [ ] Babanın bilgisayarında hız kontrolü
 - [ ] Baskı gerçek kâğıda alınsın (E2E taşma olmadığını gösteriyor ama fiziksel
@@ -109,6 +113,7 @@ WebView2 bu makinede kurulu (151.0.4129.101); Rust **kurulu değil**.
 ### 8. Yazdırma ✅
 
 - [x] Sayfa başına bir sınıf / bir öğretmen, 7 sütun × 12 satır, A4 dikey
+      *(v0.7'de eksen döndü ve sayfa A4 yatay oldu — BİTENLER 13, madde 1j)*
 - [x] `print-color-adjust: exact`, üst çubuk gizleniyor, yatay taşma yok
 
 ### 9. Kontrol sekmesi (v0.5) ✅ — 8 test
@@ -141,7 +146,7 @@ Arayüz Türkçe kaldı, tek bir kullanıcı metni değişmedi. Güvenlik ağı:
 - [x] **İstisna:** `localStorage` anahtarı ve indirilen yedeğin dosya adı Türkçe
       bırakıldı; onlar kod değil, kullanıcı verisinin kimliği
 
-### 10. Testler ✅ — 159 test
+### 10. Testler ✅ — 159 test *(v0.7 sonunda 228)*
 
 - [x] 133 birim testi (`constraints`, `feasibility`, `import`, `sample`, `store`,
       `bell`, `rules`, `entities`, `App` duman testi)
@@ -178,6 +183,52 @@ Babanın aSc ekran görüntülerinden (`docs/Örnek Fotolar/`) çıkarıldı. Ş
 
 ---
 
+### 13. v0.7 — Arayüz turu ✅ — 2026-08-24
+
+localhost'ta gerçek gözle ilk denemede çıkan liste. Mantık ve veri modeli zaten
+sağlamdı; kusurların hepsi görünüş ve kullanım tarafındaydı. Dal:
+`v0.7-arayuz-turu`, madde başına bir commit, her commit `npm run kontrol` yeşilken.
+
+- [x] **1a Koyu tema + tema düğmesi.** 16 ham renk kaçağı CSS değişkenine çekildi;
+      `:root[data-theme='dark']` yalnızca anlamsal değişkenleri yeniden tanımlıyor;
+      `color-scheme` iki temada da doğru kuruluyor. Öğretmen paleti ve üstündeki
+      mürekkep dönmüyor; `@media print` her şeyi açık palete sabitliyor. Tercih
+      `localStorage['ders-programi-tema']`'da, `State`'e girmiyor
+      → *Ölçüm sırasında AÇIK temada iki AA kusuru bulundu ve düzeltildi:
+      `--ok` kendi zemininde 4,19:1, kapalı hücredeki "×" 4,20:1 idi.*
+- [x] **1b Kurulum yedi adıma bölündü.** `Setup.tsx` 1132 satırdı →
+      `components/setup/` altında kabuk + adımlar. Sayaçlı, numaralı şerit; kilitli
+      sihirbaz değil. Aynı geçişte testsiz iş mantığı `entities.ts`'e taşındı
+      (`addClassesFromRows`, `addLessonsFromRows`, `weeklyLoad`, `hourLabels`)
+- [x] **1c Öğle arası ızgarada ayraç sütunu oldu**, zil önizlemesine ara satırı
+      eklendi (her desen kendi yerinde). Ayraç `data-day` taşımıyor
+- [x] **1d Müsaitlik döndürüldü**: satır = gün, sütun = ders. `shortDay` Pazar →
+      `Pzr`. `bell.ts` → `sharedPeriods()` (uyuşmayan saat yazılmaz)
+- [x] **1e Kısaltma otomatik**: `makeShort()` tek eve taşındı, `addTeacher` boş
+      kısaltmayı addan üretiyor, çakışma uyarısı adları sayıyor
+- [x] **1f Yedek düğmeleri** "Dosyaya kaydet / Dosyadan aç"; "Sıfırla" ayrıldı;
+      açıklama satırı Program sekmesinde gizli (ızgaradan bir satır götürüyordu)
+- [x] **1g Görsel cila**: hizalama, `:focus-visible`, dört düğme durumu, satır içi
+      stiller sınıflara, `--space-1..5` ölçeği, `Field` bileşeni
+- [x] **1h Silme onayı dört varlıkta da her zaman**, metin ne gideceğini sayıyor
+      (`deletionSummary`, 7 testli)
+- [x] **1i Branş kısaltmaları — şema v3 → v4.** Yalnızca değiştirilen saklanıyor;
+      göç birim **ve** gerçek tarayıcıda "Dosyadan aç" yolundan doğrulandı
+- [x] **1j Baskı A4 yatay, eşit sütunlu, eksen dönmüş.** PDF'in MediaBox'ı
+      ölçülüyor (842×595 pt)
+- [x] **1k Görünüm iki simge düğmesi**, seçili basılı (`aria-pressed`/`aria-label`)
+- [x] **1l Testler**: 133 → **177 birim**, 26 → **51 E2E**. Renk kontrastı ve renk
+      ayrımı hesaplanarak ölçülüyor (WCAG + CIE Lab ΔE). `npm run ekran` iki temada
+      beş ekran görüntüsü üretiyor
+- [x] **1m Belgeler**: `CLAUDE.md` (şema v4, arayüz, mimari, tuzak 13–15),
+      `docs/PLAN.md`, `docs/STATUS.md`, `docs/TASKS.md`
+
+**Yapılmadı, bilerek:** kural sayılarına varsayılan konmadı (0 = sınır yok kaldı) —
+doğru cevabı okuldan okula değişir, yanlış varsayılan hücreleri sessizce kırmızıya
+boyar (2026-08-24 kararı).
+
+---
+
 ## Sonraki sürümler — şimdi YAPILMAYACAK
 
 v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönütü**.
@@ -189,5 +240,8 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
 - **v2 Kalite** — yumuşak kısıtlar, hill-climbing ikili takas
 - **v3 Dönem içi değişiklik** — "bu hafta MÇ yok" → etkilenenleri işaretle,
   alternatif öner
-- koyu tema olsun.
-- otomatik kaydetsin her an. kaydedilmediyse de çıkmaya izin verilmesin ya da işte nasıl olması gerekiyorsa.
+- ~~koyu tema olsun~~ → **v0.7'de yapıldı** (BİTENLER 13)
+- Kapanırken kaydedilmemiş değişiklik uyarısı. *Not: şu an her değişiklik 400 ms
+  gecikmeyle otomatik kaydediliyor ve sekme kapanışında anında yazılıyor
+  (`store.ts`), yani "kaydedilmemiş" durum pratikte oluşmuyor. Yine de babanın
+  içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*

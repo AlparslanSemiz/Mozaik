@@ -1,11 +1,11 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-24 (üçüncü oturum: v0.6 — zil saatleri, gün seçimi, müsaitlik, kurallar)
+Son güncelleme: 2026-08-24 (dördüncü oturum: **v0.7 arayüz turu bitti**, `v0.7-arayuz-turu` dalında 12 commit)
 
 ## Şu anki sürüm hedefi
 
-**v0 + v0.5 + v0.6** — elle dizme + yapılabilirlik kontrolü + okul düzeni ve kurallar.
-Otomatik doldurma (v1) bu turda da **yok**.
+**v0 + v0.5 + v0.6 + v0.7** — elle dizme + yapılabilirlik kontrolü + okul düzeni ve
+kurallar + arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
 
 - **v0 çıkma şartı:** babam gerçek verisiyle bir haftalık programı baştan sona dizip
   çıktısını alabiliyor. → *araç çalışıyor ve gerçek tarayıcıda doğrulandı; gerçek
@@ -15,6 +15,10 @@ Otomatik doldurma (v1) bu turda da **yok**.
 - **v0.6 çıkma şartı:** babam okulunun gerçek gün/saat düzenini ve öğretmen sınırlarını
   araca tarif edebiliyor. → **sağlandı** (gün seçimi, zil saatleri, sınıf/derslik
   müsaitliği, dört kural kutusu)
+- **v0.7 çıkma şartı:** araç babanın tarayıcısında tasarlandığı gibi görünüyor ve
+  renkler hâlâ işlevini görüyor. → **sağlandı** — koyu tema + `color-scheme`, ve
+  kontrastı **hesaplayarak** ölçen E2E testleri. *Babanın kendi makinesinde
+  görülmedi; ölçüm buradaki Chromium'da yapıldı.*
 
 ---
 
@@ -41,12 +45,20 @@ Otomatik doldurma (v1) bu turda da **yok**.
 | **Sınıf ve derslik müsaitliği** | ✅ E2E dahil |
 | **Kural kutuları (`rules.ts`)** | ✅ 20 test |
 | **Şema v3 göçü** | ✅ birim + E2E |
+| **Koyu tema + ölçülen kontrast** | ✅ 3 birim + 5 E2E |
+| **Kurulum yedi adım** (`components/setup/`) | ✅ |
+| **Öğle arası ayracı (3 ekran, 3 teknik)** | ✅ |
+| **Müsaitlik döndürüldü** (satır = gün) | ✅ |
+| **Otomatik kısaltma + çakışma uyarısı** | ✅ |
+| **Silme onayı (dört varlık)** | ✅ 7 birim |
+| **Branş kısaltmaları + şema v4 göçü** | ✅ birim + E2E |
+| **Baskı A4 yatay, eşit sütunlu** | ✅ PDF MediaBox ölçüldü |
+| **Görünüm simgeleri** | ✅ |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 133 birim + 26 E2E = 159, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 273 KB, sıfır ağ çağrısı
-(`grep` ile doğrulandı: `fetch(` yok, dış URL yok — yalnızca XML namespace sabitleri).**
+**Testler: 177 birim + 51 E2E = 228, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 288 KB, sıfır ağ çağrısı.**
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -132,9 +144,10 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Ölçüm | Değer |
 |---|---|
 | Sürükleme başlangıcı (`buildIndex` + 72 `check`) | **0,212 ms** |
-| `dist/index.html` | 273 KB, tek dosya, 0 ağ çağrısı |
-| E2E paketi | 26 test, ~16 sn |
-| Birim paketi | 133 test, ~1,5 sn |
+| `dist/index.html` | 288 KB, tek dosya, 0 ağ çağrısı |
+| E2E paketi | 51 test, ~25 sn |
+| Birim paketi | 177 test, ~1,5 sn |
+| Baskı sayfası | A4 yatay (842×595 pt), 12 eşit sütun (±1px) |
 
 Sürükleme başlangıcı asıl önemli sayı: babanın makinesi 20 kat yavaş olsa bile 4 ms.
 `check()` artık `blocker()`'ın üstüne kural hesabı da yapıyor ama sayı yerinde durdu —
@@ -160,6 +173,13 @@ hesabı yapılmıyor.
 | **Müsaitlik** | Öğretmen + **sınıf** + **derslik**, üçü de tek `unavailable` sözlüğünde. |
 | **Kurallar** | Art arda / günde en fazla / günde en az / bir dersin günlük sınırı. Her biri **Kapalı / Uyar / Engelle**. |
 | **Sınır girişi** | **Okul geneli varsayılan + öğretmen ve ders bazında istisna** (`null` = varsayılan). |
+| **Tema** *(v0.7 ✅)* | **Koyu tema + aç/kapa düğmesi.** Yasak listesinden "karanlık mod" ve "tema seçimi" çıkarıldı — tarayıcı zaten zorla karartıyor, kontrolü almak daha az karmaşa. Tercih `localStorage`'da, `State`'e girmez. |
+| **Kurulum düzeni** *(v0.7 ✅)* | **Numaralı, sayaçlı yedi adım** (Branşlar 4. sırada). Kilitli sihirbaz değil. |
+| **Müsaitlik ekseni** *(v0.7 ✅)* | **Satır = gün, sütun = ders** (aSc "Time off" düzeni). |
+| **Baskı ekseni** *(v0.7 ✅)* | **Satır = gün, sütun = ders → A4 yatay.** Eşit sütun genişliği (`table-layout: fixed`). |
+| **Branş kısaltması** *(v0.7 ✅)* | `settings.subjectShorts` — yalnızca değiştirilen saklanır, gerisi gömülü tablodan. **Şema v3 → v4.** Kurulum → Branşlar'da kutular varsayılanla **dolu** gelir; kullanılmayan branşlar "Hazır kısaltmalar" bölümünde. |
+| **Kural limitleri varsayılanı** *(v0.7 ✅)* | **`0` = sınır yok, öyle kalır.** Branş kısaltmasının aksine "doğru cevabı" okuldan okula değişir; yanlış varsayılan hücreleri sessizce kırmızıya boyar. |
+| **Silme onayı** *(v0.7 ✅)* | Dört varlıkta da **her zaman** sorulur; metin ne kaybedileceğini sayar. |
 | Ölçek | ~25 öğretmen, ~20 sınıf, 8 derslik, 6 gün × 12 saat — hepsi ayarlanabilir. |
 | **Teslim biçimi** | **Tauri ile gerçek `.exe`.** Tek HTML dosyası ara adım olarak kalır. |
 | **Babanın işletim sistemi** | **Windows 10** — Tauri v2 destekliyor, yol açık. |
@@ -237,9 +257,13 @@ hesabı yapılmıyor.
 1. **Babanın gerçek verisi elde yok.** v0'ın çıkma şartı bu. Örnek veriyle değil
    gerçek veriyle test edilmeli.
 2. **Hız babanın bilgisayarında ölçülmedi.** Buradaki ölçümler geliştirme makinesinde.
-3. **Baskı gerçek kâğıda alınmadı.** E2E taşma olmadığını ve PDF üretildiğini
-   gösteriyor, ama fiziksel çıktıya bakılmadı.
-4. `.roz` dosyası incelenmedi (aSc'den içe aktarma — düşük öncelik).
+3. **Baskı gerçek kâğıda alınmadı.** E2E artık sayfanın A4 **yatay** çıktığını
+   (MediaBox 842×595 pt) ve sütunların eşit olduğunu ölçüyor, ama fiziksel çıktıya
+   hâlâ bakılmadı. Yatay sayfa yazıcı ayarında da yatay seçilmesini gerektirebilir.
+4. **Koyu tema babanın tarayıcısında (Brave) görülmedi.** Kontrast burada ölçüldü;
+   asıl iddia "tarayıcı artık kendi karartmasını yapmıyor" ve bu yalnızca onun
+   makinesinde kesinleşir.
+5. `.roz` dosyası incelenmedi (aSc'den içe aktarma — düşük öncelik).
 
 ---
 
@@ -249,60 +273,76 @@ Bilinen açık hata yok.
 
 ---
 
-## Oturum sonu durumu (2026-08-24, üçüncü oturum)
+## Oturum sonu durumu (2026-08-24, dördüncü oturum)
 
-**Hiçbir şey commit EDİLMEDİ.** Git ağacı iki katman kirli: (a) ikinci oturumun
-İngilizceye çevirisi, (b) bu oturumun v0.6 çalışması. Yeni dosyalar: `src/bell.ts`,
-`src/rules.ts`, `src/keys.ts` ve testleri, `src/entities.test.ts`.
+Dal: **`v0.7-arayuz-turu`** (`main`'e birleştirilmedi). 12 commit, her biri
+`npm run kontrol` yeşilken atıldı. v0.6 çalışması bir önceki oturumda commit edilmişti.
 
-**Bu yarım kalmış iş değil.** `npm run kontrol` yeşil: tsc temiz, 133 birim + 26 E2E
-geçiyor, `dist/index.html` üretiliyor. Devam etmeden önce bir kez çalıştır; yeşilse
-ağaç sağlamdır. Commit atmadan önce sor.
+`npm run kontrol` yeşil: tsc temiz, 177 birim + 51 E2E geçiyor, `dist/index.html`
+288 KB üretiliyor.
 
 ### Bu oturumda ne yapıldı
 
-Kaynak: babanın aSc ekran görüntüleri (`docs/Örnek Fotolar/`, 25 kare) ve kullanıcının
-verdiği okul düzeni taslağı.
+v0.7 arayüz turunun tamamı (1a–1m). Ayrıntı ve gerekçeler:
+[TASKS.md](TASKS.md) → BİTENLER 13.
 
 | Eklenen | Nerede |
 |---|---|
-| Zil saatleri (hesaplanır) | `src/bell.ts` · Kurulum'da canlı önizleme · ızgara başlığı · yazdırma |
-| Gün seçimi (checkbox, 7 gün) | `Setup.tsx` · varsayılan hafta Pazartesisiz 6 gün |
-| Gün taşıma (`remapDays`) | `entities.ts` — **veri bozulmasını engelleyen kritik parça** |
-| Sınıf ve derslik müsaitliği | `Availability.tsx` · `constraints.ts` kısıt 3 ve 7 |
-| Dört kural kutusu | `src/rules.ts` · `Setup.tsx` Kurallar paneli · öğretmen/ders sütunları |
-| Üçüncü sürükleme rengi (sarı) | `drag.ts` · `check()` → `{ blocked, warning }` |
-| Kural ihlalleri listesi | `Check.tsx` · `findViolations()` |
-| Şema v3 + göç | `types.ts` · `store.ts` |
-| Okul adı | yazdırılan sayfa başlığında |
+| Koyu tema, `color-scheme`, ölçülen kontrast | `styles.css` · **yeni** `theme.ts` · `App.tsx` |
+| Kurulum yedi adım | **yeni** `components/setup/` (11 dosya) |
+| Öğle arası ayracı (3 teknik) | `Grid.tsx` · `Availability.tsx` · `Print.tsx` · `School.tsx` |
+| Müsaitlik ekseni döndü | `Availability.tsx` · `bell.ts` → `sharedPeriods()` |
+| Otomatik kısaltma + çakışma | `entities.ts` → `makeShort` / `duplicateShorts` |
+| Silme özeti | `entities.ts` → `deletionSummary()` |
+| Branş kısaltmaları + **şema v4** | `types.ts` · `entities.ts` · `store.ts` · **yeni** `setup/Subjects.tsx` |
+| Baskı A4 yatay, eşit sütunlu | `Print.tsx` · `styles.css` |
+| Görünüm simgeleri | `Program.tsx` (gömülü SVG) |
+| Ekran görüntüsü betiği | **yeni** `e2e/ekran.spec.ts` + `npm run ekran` |
 
-### Neden şema v3 gerekti
+### Ölçüm sırasında bulunan gerçek kusurlar
 
-`settings.days` `string[]` → `Day[]` oldu (her günün öğle arası ayrı). Bu tek başına
-babanın elindeki her yedeği okunamaz kılardı. `parseState` artık **v1 → v2 → v3**
-zincirinden geçiriyor; `id`'ler ve gün indeksleri değişmediği için `unavailable` ve
-`placements` anahtarları olduğu gibi taşınıyor — dizilmiş program birebir korunuyor.
-İki yerde doğrulandı: `store.test.ts` (birim) **ve** gerçek Chromium'da "Yedek yükle"
-düğmesinden v1 ve v2 dosyası seçilerek (E2E).
+Bunlar planda yoktu; renkleri **hesaplayarak** ölçmeye başlayınca çıktılar.
 
-### En önemli hata: gün listesi değişince program kayması
+1. **Açık temada `--ok` kendi zemininde 4,19:1 idi** (WCAG AA sınırı 4,5). Yani
+   "bırakılabilir" yeşili, koyu tema hiç yokken bile sınırın altındaydı.
+2. **Kapalı hücredeki "×" 4,20:1 idi.** O işaret dekorasyon değil, "bu saat kapalı"
+   demek. `--muted` bir adım koyulaştırıldı.
+3. **WCAG parlaklık oranı "ayırt edilebilirlik" için yanlış ölçü.** Koyu yeşil ile koyu
+   zeytin oranı 1,00:1 çıkıyor ama tonları apayrı. Testler **CIE Lab ΔE** kullanıyor;
+   ölçülünce koyu temanın durum zeminleri (ΔE 23–39) açık temadan (16–23) daha ayrık.
 
-Gün seçimi checkbox'a dönünce sessiz bir veri bozulma yolu açıldı: `placements` anahtarı
-gün **indeksi** tuttuğu için Pazartesi kaldırılınca Salı 1'den 0'a kayacak, **bütün
-program bir gün öne kayacaktı** — hiçbir uyarı vermeden. Aracın yapabileceği en kötü
-hata bu: yanlış ama inandırıcı bir program.
+### Bilerek yapılmayan
 
-`remapDays()` eşlemeyi **gün adından** kuruyor. Birim testi ortadan gün silmeyi, E2E
-testi gerçek tarayıcıda başa gün eklemeyi doğruluyor (ders bir sağa taşınıyor,
-Pazartesi'ye düşmüyor). PLAN.md tuzak 14.
+- **Kural sayılarına varsayılan konmadı** (hepsi 0 = sınır yok). Branş kısaltmasının
+  aksine bunun doğru cevabı okuldan okula değişir; yanlış bir varsayılan hücreleri
+  sessizce kırmızıya boyar ve babam sebebini anlamaz.
+- **Boş bir "Branşlar" adımı 1b'de konmadı**; adım 1i ile birlikte, içeriğiyle geldi.
 
-### Ekran görüntüleri
+## v0.7 — neden gerekti (2026-08-24, localhost denemesi)
 
-`test-results/ekran/` (`.gitignore`'da) — zil önizleme tablosu (iki desen de 19:10'da
-bitiyor), ızgara başlığındaki saatler ve kesikli öğle arası ayracı, sınıf müsaitliği
-ızgarası, sürüklerken sarı uyarı hücresi + üst çubuktaki
-`"MÇ art arda 1 saatten fazla girmemeli — burada 2 saat olur"`, Kontrol'deki kural
-ihlali satırı. Betiği **depo kökünden** çalıştır, yoksa `node_modules` çözülmez.
+> Bu bölüm **yapılmadan önce** yazıldı ve olduğu gibi bırakıldı: v0.7'nin neden
+> gerektiğini anlatıyor. Yapılanlar için yukarıdaki oturum sonu bölümüne bakın.
+
+Araç ilk kez gerçek gözle, gerçek tarayıcıda açıldı. Mantık tarafında hata çıkmadı;
+159 test yeşil, veri modeli sağlam. Çıkan altı kusurun hepsi görünüş/kullanım tarafında.
+
+**En önemlisi ve en sinsisi:** ekran görüntüsü koyu geldi — ama uygulamada koyu tema
+yok. Tarayıcı (Brave) açık temalı sayfayı kendi algoritmasıyla karartıyor. Bu araç için
+sonucu ağır: CLAUDE.md "renk işlevsel, dekoratif değil" diyor — yeşil = bırakılabilir,
+sarı = uyarı, kırmızı = engel, gri taralı = kapalı. Tarayıcının kararması bu dört
+durumu birbirine yaklaştırıyor. Yani **sürükleme geri bildirimi sessizce bozuluyor** ve
+bunu hiçbir birim testi görmez.
+
+Karar: kontrolü almak. Gerçek koyu tema + düğme, `color-scheme` doğru kurulumu, ve
+E2E'de **hesaplanmış renkleri ve kontrast oranını ölçen** bir test. O test yazılmazsa
+koyu tema aracı sessizce işlevsizleştirebilir.
+
+İkinci bakışta dört madde daha çıktı: **silme onayı yok** (derslik ve ders silmek hiç
+sormuyor), **branş adı hücreye sığmıyor** (`Matematik` 34px'e girmiyor — kısaltma
+tablosu gerekiyor, şema v3 → v4), **baskı sütunları eşit değil** (`table-layout` yok,
+dolu hücre sütunu genişletiyor) ve **görünüm düğmesi nerede olduğunu söylemiyor**.
+
+Tümü ve karar gerekçeleri: [TASKS.md](TASKS.md) → BİTENLER 13 (1a–1m). **Hepsi yapıldı.**
 
 ---
 
@@ -315,7 +355,7 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 133 birim + derleme + 26 E2E
+npm run kontrol                   # tsc + 177 birim + derleme + 51 E2E
 npm run dev                       # geliştirme sunucusu
 ```
 
