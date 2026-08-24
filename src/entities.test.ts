@@ -13,7 +13,9 @@ import {
   addLessonsFromRows,
   addRoom,
   addTeacher,
+  duplicateShorts,
   hourLabels,
+  makeShort,
   shortDay,
   weeklyLoad,
   WEEK,
@@ -278,5 +280,50 @@ describe('shortDay', () => {
   it('bilinmeyen gün adı ilk üç harfe düşer, çökmez', () => {
     expect(shortDay('Bayram')).toBe('Bay');
     expect(shortDay('')).toBe('');
+  });
+});
+
+describe('makeShort ve duplicateShorts', () => {
+  it('boş kısaltma addan üretilir, dolu olan olduğu gibi kalır', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'İsmail Şahin', short: 'İSM', subject: 'Fizik' });
+    expect(d.teachers[0]!.short).toBe('MÇ');
+    expect(d.teachers[1]!.short).toBe('İSM');
+  });
+
+  it('Türkçe büyük harf kuralı: i -> İ', () => {
+    expect(makeShort('İsmail Şahin')).toBe('İŞ');
+    expect(makeShort('irfan yılmaz')).toBe('İY');
+  });
+
+  it('çok boşluklu veya boş ad çökertmez', () => {
+    expect(makeShort('Ali   Vural')).toBe('AV');
+    expect(makeShort('   ')).toBe('??');
+    expect(makeShort('')).toBe('??');
+    expect(makeShort('Tek')).toBe('T');
+  });
+
+  // 25 kişilik gerçek listede bu KESİN çıkar ve ızgarada iki satır ayırt edilemez.
+  it('çakışan kısaltmaları adlarıyla birlikte bildirir', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Ahmet Sarı', short: '', subject: 'Tarih' });
+    d = addTeacher(d, { name: 'Ayşe Solmaz', short: '', subject: 'Kimya' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik' });
+    expect(d.teachers.map((t) => t.short)).toEqual(['AS', 'AS', 'MÇ']);
+    expect(duplicateShorts(d.teachers)).toEqual([
+      { short: 'AS', names: ['Ahmet Sarı', 'Ayşe Solmaz'] },
+    ]);
+  });
+
+  it('büyük/küçük harf farkı çakışmayı gizlemez, boş kısaltma sayılmaz', () => {
+    expect(
+      duplicateShorts([
+        { id: '1', name: 'A', short: 'mç', subject: '', color: 0, limits: NO_TEACHER_LIMITS },
+        { id: '2', name: 'B', short: 'MÇ', subject: '', color: 1, limits: NO_TEACHER_LIMITS },
+        { id: '3', name: 'C', short: '', subject: '', color: 2, limits: NO_TEACHER_LIMITS },
+        { id: '4', name: 'D', short: '', subject: '', color: 3, limits: NO_TEACHER_LIMITS },
+      ]),
+    ).toEqual([{ short: 'MÇ', names: ['A', 'B'] }]);
   });
 });

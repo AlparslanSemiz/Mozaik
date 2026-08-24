@@ -6,6 +6,11 @@
 // The parser NEVER adds data directly: it returns {accepted, errors}, the user
 // sees a preview and only then confirms.
 
+// makeShort lives in entities.ts (one home); re-exported so callers and the
+// existing tests do not have to care where it moved.
+export { makeShort } from './entities';
+import { makeShort } from './entities';
+
 export interface ParseResult<T> {
   accepted: T[];
   errors: string[];
@@ -91,14 +96,6 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
   return { accepted, errors };
 }
 
-export function makeShort(name: string): string {
-  const parts = name.split(/\s+/).filter((x) => x.length > 0);
-  if (parts.length === 0) return '??';
-  return parts
-    .slice(0, 2)
-    .map((p) => (p[0] ?? '').toLocaleUpperCase('tr'))
-    .join('');
-}
 
 // -------------------------------------------------------------------- class
 

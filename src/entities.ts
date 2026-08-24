@@ -62,6 +62,21 @@ const SHORT_DAY: Record<string, string> = {
   Pazar: 'Pzr',
 };
 
+/**
+ * "Mehmet Çelik" -> "MÇ". Two initials, Turkish uppercase (i -> İ).
+ *
+ * ONE home: it was written twice (import.ts and sample.ts) and the second copy
+ * split on a single space, so a double space produced "" instead of "??".
+ */
+export function makeShort(name: string): string {
+  const parts = name.split(/\s+/).filter((x) => x.length > 0);
+  if (parts.length === 0) return '??';
+  return parts
+    .slice(0, 2)
+    .map((p) => (p[0] ?? '').toLocaleUpperCase('tr'))
+    .join('');
+}
+
 export function shortDay(name: string): string {
   return SHORT_DAY[name] ?? name.slice(0, 3);
 }
@@ -159,10 +174,12 @@ export function addTeacher(
   d: State,
   fields: Omit<Teacher, 'id' | 'color' | 'limits'>,
 ): State {
+  // An empty short form would leave a nameless row in the grid: derive one.
+  const short = fields.short.trim() === '' ? makeShort(fields.name) : fields.short;
   const created: Teacher = {
     id: newId(),
     name: fields.name.trim(),
-    short: fields.short.trim(),
+    short: short.trim(),
     subject: fields.subject.trim(),
     color: d.teachers.length % COLOR_COUNT,
     limits: { ...NO_TEACHER_LIMITS },
@@ -437,4 +454,23 @@ export function hourLabels(count: number, names?: string): string[] {
     if (list.length > 0) return list;
   }
   return hourNames(Math.min(16, Math.max(1, count)));
+}
+
+/**
+ * Teachers whose short form is not unique.
+ *
+ * "Ahmet Sarı" and "Ayşe Solmaz" both derive "AS" — in a real 25-person list
+ * this is not a corner case, it happens. Two identical row headings in the grid
+ * are indistinguishable, and the timetable is dragged by those headings.
+ */
+export function duplicateShorts(teachers: Teacher[]): Array<{ short: string; names: string[] }> {
+  const byShort = new Map<string, string[]>();
+  for (const t of teachers) {
+    const key = t.short.trim().toLocaleUpperCase('tr');
+    if (key === '') continue;
+    byShort.set(key, [...(byShort.get(key) ?? []), t.name]);
+  }
+  return [...byShort.entries()]
+    .filter(([, names]) => names.length > 1)
+    .map(([short, names]) => ({ short, names }));
 }

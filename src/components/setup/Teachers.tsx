@@ -7,6 +7,8 @@ import { COLOR_COUNT } from '../../types';
 import {
   addTeacher,
   deleteTeacher,
+  duplicateShorts,
+  makeShort,
   setTeacherLimit,
   updateTeacher,
   weeklyLoad,
@@ -17,6 +19,10 @@ import type { SetupProps } from './props';
 
 export default function Teachers({ state, change }: SetupProps) {
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
+
+  // Left empty, the short form is derived — so show what it will be.
+  const suggested = newTeacher.name.trim() === '' ? 'Kısaltma' : makeShort(newTeacher.name);
+  const clashes = duplicateShorts(state.teachers);
 
   return (
     <div className="panel">
@@ -36,7 +42,9 @@ export default function Teachers({ state, change }: SetupProps) {
         />
         <input
           type="text"
-          placeholder="Kısaltma"
+          aria-label="Kısaltma"
+          placeholder={suggested}
+          title="Boş bırakırsanız addan üretilir"
           style={{ width: 90 }}
           value={newTeacher.short}
           onChange={(e) => setNewTeacher({ ...newTeacher, short: e.target.value })}
@@ -65,6 +73,17 @@ export default function Teachers({ state, change }: SetupProps) {
           onAdd={(rows) => change((d) => rows.reduce((acc, x) => addTeacher(acc, x), d))}
         />
       </div>
+
+      {clashes.length > 0 && (
+        <div className="warn-box">
+          <b>Aynı kısaltma birden çok öğretmende:</b> ızgarada iki satır ayırt edilemez.
+          {clashes.map((c) => (
+            <div key={c.short}>
+              <b>{c.short}</b> — {c.names.join(', ')}
+            </div>
+          ))}
+        </div>
+      )}
 
       {state.teachers.length > 0 && (
         <table className="list">

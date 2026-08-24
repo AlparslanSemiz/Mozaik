@@ -9,7 +9,14 @@
 import { teacherKey } from './constraints';
 import type { Lesson, Room, State, Teacher, ClassGroup } from './types';
 import { COLOR_COUNT, SCHEMA_VERSION } from './types';
-import { DEFAULT_BELL, DEFAULT_RULES, defaultDays, hourNames, NO_TEACHER_LIMITS } from './entities';
+import {
+  DEFAULT_BELL,
+  DEFAULT_RULES,
+  defaultDays,
+  hourNames,
+  makeShort,
+  NO_TEACHER_LIMITS,
+} from './entities';
 
 /** The sample school runs the rules: 6 hours a day, 2 hours of one lesson. */
 const DEFAULT_LIMITS_SAMPLE = {
@@ -62,14 +69,6 @@ const CLASS_ROOM: Array<[string, string]> = [
   ['430', 'E'], ['431', 'E'],
   ['432', 'F'],
 ];
-
-function makeShort(name: string): string {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((p) => (p[0] ?? '').toLocaleUpperCase('tr'))
-    .join('');
-}
 
 export function sampleState(): State {
   const rnd = rng(20260824);

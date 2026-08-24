@@ -390,6 +390,34 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.step[aria-current="true"]')).toContainText('Dersler');
   });
 
+  test('kısaltma addan üretiliyor, çakışma uyarısı çıkıyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Öğretmenler');
+
+    const name = page.getByPlaceholder('Ad Soyad');
+    const short = page.getByLabel('Kısaltma');
+
+    // The placeholder shows what will be derived, live
+    await name.fill('Ahmet Sarı');
+    await expect(short).toHaveAttribute('placeholder', 'AS');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
+    await name.fill('Ayşe Solmaz');
+    await expect(short).toHaveAttribute('placeholder', 'AS');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    const warning = page.locator('.warn-box', { hasText: 'Aynı kısaltma' });
+    await expect(warning).toBeVisible();
+    await expect(warning).toContainText('Ahmet Sarı, Ayşe Solmaz');
+
+    // Fixing one of them clears the warning
+    const secondShort = page.locator('table.list tbody tr').nth(1).locator('input').nth(1);
+    await secondShort.fill('AYS');
+    await secondShort.blur();
+    await expect(page.locator('.warn-box', { hasText: 'Aynı kısaltma' })).toHaveCount(0);
+  });
+
   test('yedek indirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     const download = page.waitForEvent('download');
