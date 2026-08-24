@@ -96,7 +96,7 @@ export default function Check({ state }: Props) {
         <div className="panel">
           <h2>Kural ihlalleri ({report.violations.length})</h2>
           <p className="hint">
-            Dizilmiş program, <b>Kurulum → Kurallar</b> bölümünde girdiğiniz sınırları
+            Dizilmiş program, <b>Ayarlar → Kurallar</b> bölümünde girdiğiniz sınırları
             aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece
             burada listelenir.
           </p>

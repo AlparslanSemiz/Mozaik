@@ -2,7 +2,7 @@
 
 import type { RuleLevel, RuleName } from '../../types';
 import { updateLimits, updateRules } from '../../entities';
-import type { SetupProps } from './props';
+import type { PanelProps } from '../props';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -38,7 +38,7 @@ const LEVEL_LABEL: Record<RuleLevel, string> = {
   block: 'Engelle',
 };
 
-export default function Rules({ state, change }: SetupProps) {
+export default function Rules({ state, change }: PanelProps) {
   return (
     <div className="panel">
       <h2>Kurallar</h2>

@@ -1,17 +1,16 @@
-// Step 1: school name, which days are taught, and the bell times.
+// Settings section: school name, which days are taught, and the bell times.
 //
 // Text boxes use defaultValue + onBlur. Updating top level state on every
 // keystroke with onChange loses focus (docs/PLAN.md pitfall 3).
 
 import { useMemo } from 'react';
 import { dayPeriods } from '../../bell';
-import { sampleState } from '../../sample';
 import type { Day } from '../../types';
 import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
-import Field from './Field';
-import type { SetupProps } from './props';
+import Field from '../Field';
+import type { PanelProps } from '../props';
 
-export default function School({ state, change }: SetupProps) {
+export default function School({ state, change }: PanelProps) {
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
@@ -63,40 +62,8 @@ export default function School({ state, change }: SetupProps) {
     }));
   }, [state.settings]);
 
-  const emptyProject = state.teachers.length === 0 && state.classes.length === 0;
-
   return (
     <>
-      {emptyProject && (
-        <div className="panel">
-          <h2>Başlarken</h2>
-          <p className="hint">
-            Yukarıdaki adımları sırayla doldurun: önce <b>derslikler</b>, sonra{' '}
-            <b>öğretmenler</b> ve <b>sınıflar</b>, en son her sınıfın <b>dersleri</b>.
-            Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini
-            kullanın — tek tek girmekten çok daha hızlı.
-          </p>
-          <button
-            className="btn"
-            onClick={() => {
-              if (
-                window.confirm(
-                  'Aracı denemek için örnek bir okul verisi yüklenecek. Devam edilsin mi?',
-                )
-              ) {
-                change(() => sampleState());
-              }
-            }}
-          >
-            Örnek veriyle doldur (25 öğretmen, 20 sınıf)
-          </button>
-          <p className="hint">
-            Ne yaptığını görmek için. Kendi verinizi girmeden önce üstteki{' '}
-            <b>Sıfırla</b> ile temizleyin.
-          </p>
-        </div>
-      )}
-
       <div className="panel">
         <h2>Okul ve günler</h2>
         <div className="form-row">

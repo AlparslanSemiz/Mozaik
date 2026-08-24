@@ -11,12 +11,12 @@ import {
   deletionSummary,
   updateLesson,
 } from '../../entities';
-import LimitBox from './LimitBox';
+import LimitBox from '../LimitBox';
 import Paste from './Paste';
-import Field from './Field';
-import type { SetupProps } from './props';
+import Field from '../Field';
+import type { PanelProps } from '../props';
 
-export default function Lessons({ state, change }: SetupProps) {
+export default function Lessons({ state, change }: PanelProps) {
   const [newLesson, setNewLesson] = useState({
     classId: '',
     teacherId: '',
@@ -30,7 +30,7 @@ export default function Lessons({ state, change }: SetupProps) {
       <p className="hint">
         Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. <b>Blok</b>,
         o dersin arka arkaya kaç saat işleneceğidir (1, 2 veya 3). <b>Günde ↑</b> bu
-        dersin bir günde en fazla kaç saat olabileceğidir; boşsa Kurallar bölümündeki
+        dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki
         sayı geçerli olur.
       </p>
 

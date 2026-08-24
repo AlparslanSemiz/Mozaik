@@ -13,9 +13,9 @@ import {
   weeklyLoad,
 } from '../../entities';
 import Paste from './Paste';
-import type { SetupProps } from './props';
+import type { PanelProps } from '../props';
 
-export default function Classes({ state, change }: SetupProps) {
+export default function Classes({ state, change }: PanelProps) {
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;

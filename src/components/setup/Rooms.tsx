@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { parseRooms } from '../../import';
 import { addRoom, deletionSummary, deleteRoom, updateRoom } from '../../entities';
 import Paste from './Paste';
-import type { SetupProps } from './props';
+import type { PanelProps } from '../props';
 
-export default function Rooms({ state, change }: SetupProps) {
+export default function Rooms({ state, change }: PanelProps) {
   const [newRoom, setNewRoom] = useState('');
 
   return (

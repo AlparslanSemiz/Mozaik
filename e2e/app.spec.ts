@@ -38,6 +38,16 @@ async function openSetup(page: Page, step: string) {
   await expect(page.locator('.step[aria-current="true"]')).toContainText(step);
 }
 
+/**
+ * The same for Ayarlar. School days, the bell, the four rules and the subject
+ * list all live there now, not in Kurulum.
+ */
+async function openSettings(page: Page, section: string) {
+  await page.getByRole('button', { name: 'Ayarlar' }).click();
+  await page.locator('.step', { hasText: section }).click();
+  await expect(page.locator('.step[aria-current="true"]')).toContainText(section);
+}
+
 test.describe('1. Kalıcılık — file:// altında', () => {
   test('otomatik kayıt çalışıyor ve uyarı çıkmıyor', async ({ page }) => {
     await open(page);
@@ -416,17 +426,21 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
     await expect(page.locator('.step', { hasText: 'Dersler' })).toContainText('99');
 
+    // Kurulum is now FOUR steps: the school's own settings moved to Ayarlar
+    await expect(page.locator('.steps .step')).toHaveCount(4);
+    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
+
     // Only the current step is on screen; the 1132-line scroll is gone
-    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Derslikler/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
     await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: /^Derslikler/ })).toHaveCount(0);
 
     // Not a locked wizard: jumping straight to the last step works
-    await openSetup(page, 'Kurallar');
-    await expect(page.getByRole('heading', { name: 'Kurallar' })).toBeVisible();
+    await openSetup(page, 'Dersler');
+    await expect(page.getByRole('heading', { name: /^Dersler/ })).toBeVisible();
     // ...and "next step" is only a shortcut
     await openSetup(page, 'Sınıflar');
     await page.getByRole('button', { name: /Sonraki adım: Dersler/ }).click();
@@ -504,10 +518,11 @@ test.describe('5. Kurulum ve yedek', () => {
     await page.getByRole('button', { name: 'Program' }).click();
     expect((await page.locator('table.grid').boundingBox())!.y).toBe(gridTop);
 
-    // "Sıfırla" must not sit right next to "Dosyadan aç"
-    const open = (await page.getByRole('button', { name: 'Dosyadan aç' }).boundingBox())!;
-    const reset = (await page.getByRole('button', { name: 'Sıfırla' }).boundingBox())!;
-    expect(reset.x - (open.x + open.width)).toBeGreaterThan(12);
+    // "Sıfırla" is not in the top bar at all any more: it was one careless
+    // click from "Dosyadan aç" and it cannot be undone. It is in Ayarlar > Veri.
+    await expect(page.getByRole('button', { name: 'Sıfırla' })).toHaveCount(0);
+    await openSettings(page, 'Veri');
+    await expect(page.getByRole('button', { name: 'Her şeyi sil' })).toBeVisible();
   });
 
   test('yedek indirilebiliyor', async ({ page }) => {
@@ -554,7 +569,7 @@ test.describe('5. Kurulum ve yedek', () => {
   test('günlük saat azaltılınca taşan dersler temizleniyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await openSetup(page, 'Okul');
+    await openSettings(page, 'Okul ve zil');
 
     const hourBox = page.getByLabel('Günlük ders sayısı');
     await hourBox.fill('4');
@@ -784,7 +799,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     const day = Number(placed.day);
     const hour = Number(placed.hour);
 
-    await openSetup(page, 'Okul');
+    await openSettings(page, 'Okul ve zil');
     await page.getByLabel('Pazartesi', { exact: true }).check();
 
     await page.getByRole('button', { name: 'Program' }).click();
@@ -810,7 +825,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await expect(header).toContainText('09:00');
     await expect(header).toContainText('09:50');
 
-    await openSetup(page, 'Okul');
+    await openSettings(page, 'Okul ve zil');
     const preview = page.locator('table.bell-preview');
     await expect(preview).toContainText('09:00–09:40');
     // Weekdays break after the 5th, the weekend after the 6th: 13:30 vs 13:10.
@@ -937,7 +952,7 @@ test.describe('12. Branş kısaltmaları', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
 
-    await openSetup(page, 'Branşlar');
+    await openSettings(page, 'Branşlar');
     // The box comes FILLED with the default, not with a faint placeholder
     const target = page.locator('table.list tbody tr', {
       has: page.locator(`input[value="${before}"]`),
@@ -960,7 +975,7 @@ test.describe('12. Branş kısaltmaları', () => {
 
   test('varsayılana geri yazılınca override kayboluyor', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
+    await openSettings(page, 'Branşlar');
 
     const row = page.locator('table.list tbody tr').first();
     const input = row.locator('input');
@@ -980,7 +995,7 @@ test.describe('12. Branş kısaltmaları', () => {
 test.describe('11. Görsel cila', () => {
   test('başlık altındaki sütunla aynı hizada', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Okul');
+    await openSettings(page, 'Okul ve zil');
 
     // The bell preview centres its cells; its headings used to be left-aligned,
     // so the day names sat visibly off their own column.
@@ -1009,8 +1024,11 @@ test.describe('11. Görsel cila', () => {
 
   test('tehlikeli düğme beklemeden tehlikeli görünüyor', async ({ page }) => {
     await open(page);
+    await openSettings(page, 'Veri');
     const [danger, plain] = await Promise.all([
-      page.getByRole('button', { name: 'Sıfırla' }).evaluate((el) => getComputedStyle(el).color),
+      page
+        .getByRole('button', { name: 'Her şeyi sil' })
+        .evaluate((el) => getComputedStyle(el).color),
       page.getByRole('button', { name: 'Dosyadan aç' }).evaluate((el) => getComputedStyle(el).color),
     ]);
     // Not identical to a plain button until the pointer is already on it
@@ -1121,7 +1139,7 @@ test.describe('9. Öğle arası ayracı', () => {
 
   test('zil önizlemesinde öğle arası satırı var ve iki desende ayrı yerde', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Okul');
+    await openSettings(page, 'Okul ve zil');
 
     const rows = page.locator('table.bell-preview tr.break-row');
     await expect(rows).toHaveCount(2); // after the 5th and after the 6th
@@ -1176,7 +1194,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     page,
   }) => {
     await openFixture(page);
-    await openSetup(page, 'Kurallar');
+    await openSettings(page, 'Kurallar');
 
     // "at most 1 in a row": the hour beside a placed lesson breaches it.
     const rule = page.locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' });
@@ -1200,7 +1218,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.keyboard.press('Escape');
 
     // The same situation at "Uyar": yellow, a reason, but it can still be dropped.
-    await openSetup(page, 'Kurallar');
+    await openSettings(page, 'Kurallar');
     await page
       .locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' })
       .locator('select')
@@ -1527,5 +1545,101 @@ test.describe('14. Renk paleti', () => {
     await page.emulateMedia({ media: 'print' });
     expect(await read()).toEqual(light);
     await page.emulateMedia({ media: 'screen' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 15. The Ayarlar tab
+//
+// Kurulum used to hold two different kinds of thing: the four lists you build
+// up while entering a term, and the school's own settings you touch once a
+// year. Those settings now have their own tab. What is tested here is not that
+// the panels render — jsdom would do — but that the move did not break the
+// wiring: a setting changed in Ayarlar must still reach the grid, and the one
+// button that cannot be undone must no longer sit next to a button used daily.
+
+test.describe('15. Ayarlar sekmesi', () => {
+  test('altıncı sekme var ve dört bölümü açılıyor', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('.tabs .tab')).toHaveCount(6);
+    await expect(page.getByRole('button', { name: 'Ayarlar' })).toBeVisible();
+
+    for (const [section, heading] of [
+      ['Okul ve zil', 'Okul ve günler'],
+      ['Kurallar', 'Kurallar'],
+      ['Branşlar', /^Branşlar/],
+      ['Veri', 'Veri'],
+    ] as const) {
+      await openSettings(page, section);
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    }
+  });
+
+  test('Kurulum dört adıma indi, okul ayarları orada değil', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Kurulum' }).click();
+
+    const steps = await page.locator('.steps .step').allInnerTexts();
+    expect(steps).toHaveLength(4);
+    expect(steps.join(' ')).toContain('Derslikler');
+    expect(steps.join(' ')).toContain('Dersler');
+    expect(steps.join(' ')).not.toContain('Okul');
+    expect(steps.join(' ')).not.toContain('Kurallar');
+    expect(steps.join(' ')).not.toContain('Branşlar');
+  });
+
+  test('Ayarlar\'dan değişen zil saati ızgaraya geçiyor', async ({ page }) => {
+    await openWithSample(page);
+    const firstHour = page.locator('table.grid thead .hour-clock').first();
+    await expect(firstHour).toHaveText('09:00');
+
+    await openSettings(page, 'Okul ve zil');
+    const lessonMinutes = page.getByLabel('Ders (dk)');
+    await lessonMinutes.fill('45');
+    await lessonMinutes.blur();
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    // The second lesson moves: 09:00 + 45 + 10
+    await expect(page.locator('table.grid thead .hour-clock').nth(1)).toHaveText('09:55');
+  });
+
+  test('Ayarlar\'dan değişen kural sürüklemeyi hemen etkiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+    await page
+      .locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' })
+      .locator('input[type=number]')
+      .fill('1');
+    await page.getByRole('button', { name: 'Program' }).click();
+
+    await startDrag(page);
+    await hover(page, 0, 0);
+    await page.mouse.up();
+    await startDrag(page);
+    const neighbour = await hover(page, 0, 1);
+    await expect(neighbour).toHaveClass(/drop-blocked/);
+    await page.keyboard.press('Escape');
+  });
+
+  test('renkleri yeniden dağıt düğmesi programı bozmadan renkleri düzeltiyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const placed = await page.locator('table.grid .card').count();
+    expect(placed).toBeGreaterThan(0);
+
+    await openSettings(page, 'Veri');
+    await page.getByRole('button', { name: /Öğretmen renklerini yeniden dağıt/ }).click();
+
+    // The colours are still one per teacher, and the timetable is untouched.
+    await openSetup(page, 'Öğretmenler');
+    const colors = await page
+      .locator('table.list tbody tr select[title="Renk"]')
+      .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
+    expect(new Set(colors).size).toBe(colors.length);
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(placed);
   });
 });

@@ -14,11 +14,11 @@ import {
   updateTeacher,
   weeklyLoad,
 } from '../../entities';
-import LimitBox from './LimitBox';
+import LimitBox from '../LimitBox';
 import Paste from './Paste';
-import type { SetupProps } from './props';
+import type { PanelProps } from '../props';
 
-export default function Teachers({ state, change }: SetupProps) {
+export default function Teachers({ state, change }: PanelProps) {
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
 
   // Left empty, the short form is derived — so show what it will be.
@@ -31,7 +31,7 @@ export default function Teachers({ state, change }: SetupProps) {
       <p className="hint">
         Her öğretmenin tek branşı vardır. Kısaltma ızgarada satır başlığı olarak
         görünür, kısa tutun (örn. MÇ). Renk otomatik atanır. Sağdaki üç kutu bu
-        öğretmene özel sınırdır; <b>boş bırakılırsa Kurallar bölümündeki sayı</b>{' '}
+        öğretmene özel sınırdır; <b>boş bırakılırsa Ayarlar → Kurallar'daki sayı</b>{' '}
         geçerli olur.
       </p>
       <div className="form-row">

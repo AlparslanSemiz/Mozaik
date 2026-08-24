@@ -1,14 +1,14 @@
 import { useRef, useState } from 'react';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
-import { emptyState } from './entities';
 import { applyTheme, readTheme, type Theme } from './theme';
 import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
 import Check from './components/Check';
 import Print from './components/Print';
+import Settings from './components/settings';
 
-type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print';
+type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print' | 'settings';
 
 const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'setup', label: 'Kurulum' },
@@ -16,6 +16,9 @@ const TABS: Array<{ id: Tab; label: string }> = [
   { id: 'program', label: 'Program' },
   { id: 'check', label: 'Kontrol' },
   { id: 'print', label: 'Yazdır' },
+  // Last, the way a settings menu sits at the end of a toolbar: it is opened
+  // when the school changes, not while a timetable is being laid out.
+  { id: 'settings', label: 'Ayarlar' },
 ];
 
 export default function App() {
@@ -50,18 +53,6 @@ export default function App() {
       return;
     }
     loadState(loaded);
-  }
-
-  function reset() {
-    if (
-      !window.confirm(
-        'Her şey silinecek: öğretmenler, sınıflar, dersler ve program. Emin misiniz?',
-      )
-    ) {
-      return;
-    }
-    if (!window.confirm('Son kez soruyorum — bu işlem geri alınamaz. Silinsin mi?')) return;
-    loadState(emptyState());
   }
 
   return (
@@ -112,12 +103,9 @@ export default function App() {
         >
           Dosyadan aç
         </button>
-        {/* Kept well away from the two above: it was one careless click from
-            "Dosyadan aç" and it deletes everything. */}
-        <span className="topbar-sep wide" />
-        <button className="btn danger" onClick={reset} title="Her şeyi siler">
-          Sıfırla
-        </button>
+        {/* "Sıfırla" used to stand here, one careless click from "Dosyadan aç".
+            It is now in Ayarlar > Veri: the rarest button in the app, and the
+            only one that cannot be undone. */}
         <input
           ref={fileInput}
           type="file"
@@ -149,6 +137,9 @@ export default function App() {
       {tab === 'program' && <Program state={state} change={change} />}
       {tab === 'check' && <Check state={state} />}
       {tab === 'print' && <Print state={state} />}
+      {tab === 'settings' && (
+        <Settings state={state} change={change} loadState={loadState} />
+      )}
     </div>
   );
 }
