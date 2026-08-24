@@ -418,10 +418,36 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.warn-box', { hasText: 'Aynı kısaltma' })).toHaveCount(0);
   });
 
+  test('yedek düğmeleri: adlar açık, Sıfırla ayrı, not ızgaradan yer çalmıyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+
+    // The old names said what the file format was, not what the button does
+    await expect(page.getByRole('button', { name: 'Dosyaya kaydet' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dosyadan aç' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
+
+    // On the grid the note is hidden: it would cost a whole teacher row
+    await expect(page.locator('.topbar-note')).toHaveCount(0);
+    const gridTop = (await page.locator('table.grid').boundingBox())!.y;
+
+    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await expect(page.locator('.topbar-note')).toContainText('kendiliğinden saklanıyor');
+
+    await page.getByRole('button', { name: 'Program' }).click();
+    expect((await page.locator('table.grid').boundingBox())!.y).toBe(gridTop);
+
+    // "Sıfırla" must not sit right next to "Dosyadan aç"
+    const open = (await page.getByRole('button', { name: 'Dosyadan aç' }).boundingBox())!;
+    const reset = (await page.getByRole('button', { name: 'Sıfırla' }).boundingBox())!;
+    expect(reset.x - (open.x + open.width)).toBeGreaterThan(12);
+  });
+
   test('yedek indirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Yedek indir' }).click();
+    await page.getByRole('button', { name: 'Dosyaya kaydet' }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^ders-programi-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
   });

@@ -97,12 +97,24 @@ export default function App() {
         >
           {theme === 'dark' ? '☀' : '☾'}
         </button>
-        <button className="btn primary" onClick={() => downloadBackup(state)}>
-          Yedek indir
+        <span className="topbar-sep" />
+        <button
+          className="btn primary"
+          onClick={() => downloadBackup(state)}
+          title="Programı bir .json dosyasına yazar"
+        >
+          Dosyaya kaydet
         </button>
-        <button className="btn" onClick={() => fileInput.current?.click()}>
-          Yedek yükle
+        <button
+          className="btn"
+          onClick={() => fileInput.current?.click()}
+          title="Daha önce kaydedilmiş bir .json dosyasını açar"
+        >
+          Dosyadan aç
         </button>
+        {/* Kept well away from the two above: it was one careless click from
+            "Dosyadan aç" and it deletes everything. */}
+        <span className="topbar-sep wide" />
         <button className="btn danger" onClick={reset} title="Her şeyi siler">
           Sıfırla
         </button>
@@ -113,6 +125,15 @@ export default function App() {
           style={{ display: 'none' }}
           onChange={fileChosen}
         />
+
+        {/* Everywhere but the grid: on a 1366x768 screen this line costs the
+            timetable a whole row, and there it is the row that matters. */}
+        {tab !== 'program' && (
+          <p className="topbar-note">
+            Program bu bilgisayarda kendiliğinden saklanıyor. <b>Dosyaya kaydetmek</b>{' '}
+            taşımak ve yedeklemek için.
+          </p>
+        )}
       </div>
 
       {!canSave && (
