@@ -1902,3 +1902,93 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     expect(new Set(inClassView)).toEqual(new Set(inTeacherView));
   });
 });
+
+// ---------------------------------------------------------------------------
+// 19. Icons, the lunch separator and the closed-hour mark
+//
+// Three things that only exist as pixels. jsdom has no layout and no computed
+// font size, so none of this can be checked anywhere but here.
+
+test.describe('19. Simgeler, ayraç ve çarpı', () => {
+  test('iki görünüm simgesi birbirine benzemiyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const shapes = async (name: string) =>
+      page
+        .getByRole('button', { name })
+        .locator('svg *')
+        .evaluateAll((list) =>
+          list.map((el) =>
+            [
+              el.tagName,
+              el.getAttribute('d') ?? '',
+              el.getAttribute('cx') ?? '',
+              el.getAttribute('cy') ?? '',
+              el.getAttribute('r') ?? '',
+            ].join(':'),
+          ),
+        );
+
+    const teacher = await shapes('Öğretmen görünümü');
+    const student = await shapes('Sınıf görünümü');
+
+    expect(teacher.length).toBeGreaterThan(0);
+    expect(student.length).toBeGreaterThan(0);
+    // Not one variation on the other: no shape is shared between them.
+    expect(teacher.filter((x) => student.includes(x))).toEqual([]);
+
+    // Both are drawn big enough to be recognised at all.
+    for (const name of ['Öğretmen görünümü', 'Sınıf görünümü']) {
+      const box = (await page.getByRole('button', { name }).locator('svg').boundingBox())!;
+      expect(box.width).toBeGreaterThanOrEqual(16);
+    }
+  });
+
+  test('seçili simge basılı, diğeri soluk', async ({ page }) => {
+    await openWithSample(page);
+    const teacher = page.getByRole('button', { name: 'Öğretmen görünümü' });
+    const klass = page.getByRole('button', { name: 'Sınıf görünümü' });
+
+    await expect(teacher).toHaveAttribute('aria-pressed', 'true');
+    await expect(klass).toHaveAttribute('aria-pressed', 'false');
+
+    const dim = async (l: typeof teacher) => Number(await l.evaluate((el) => getComputedStyle(el).opacity));
+    expect(await dim(teacher)).toBeGreaterThan(await dim(klass));
+  });
+
+  test('öğle arası ayracı hücreden belirgin biçimde ince', async ({ page }) => {
+    await openWithSample(page);
+
+    const separator = (await page.locator('table.grid tbody .break-col').first().boundingBox())!;
+    const cell = (await page.locator('table.grid td[data-day="0"]').first().boundingBox())!;
+
+    expect(separator.width).toBeLessThanOrEqual(8);
+    expect(separator.width).toBeLessThan(cell.width / 3);
+    // Still a real column with its own edges, not a hairline that goes unseen.
+    expect(separator.width).toBeGreaterThanOrEqual(4);
+  });
+
+  test('kapalı saatin çarpısı büyüdü ve hâlâ okunuyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const mark = page.locator('table.grid td.unavailable').first();
+    await expect(mark).toContainText('×');
+    const style = await mark.evaluate((el) => {
+      const own = getComputedStyle(el);
+      return { size: parseFloat(own.fontSize), color: own.color, background: own.backgroundColor };
+    });
+    expect(style.size).toBeGreaterThanOrEqual(15);
+
+    // Bigger must not mean fainter: the hatch sits on --closed.
+    const t = await tokens(page, ['--closed']);
+    expect(contrast(style.color, t['--closed']!)).toBeGreaterThanOrEqual(4.5);
+
+    // The same mark on the availability grid grew too.
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    const availSize = await page
+      .locator('table.availability td.closed')
+      .first()
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(availSize).toBeGreaterThanOrEqual(15);
+  });
+});

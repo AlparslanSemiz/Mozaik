@@ -359,9 +359,12 @@ table.grid thead tr:nth-child(2) th {
    line between 34px cells is simply not noticed. Different ground, so it does
    not read as an empty hour. It carries no data-day, so a drag ignores it. */
 .break-col {
-  width: 10px;
-  min-width: 10px;
-  max-width: 10px;
+  /* !important for the same reason the background and borders below need it:
+     `table.grid tbody td` sets every body cell to --cell-w and outranks a bare
+     class. Without it the "narrow" separator was as wide as a lesson. */
+  width: 6px !important;
+  min-width: 6px !important;
+  max-width: 6px !important;
   padding: 0;
   background: var(--bg) !important;
   border-left: 1px solid var(--line-dark) !important;
@@ -431,7 +434,12 @@ td.unavailable {
     var(--hatch) 6px
   );
   color: var(--muted);
-  font-size: 11px;
+  /* The "x" marking a closed hour was 11px inside a 34x34 cell and read as
+     dirt on the hatch rather than as a mark. It is the only thing in the cell,
+     so it can afford to be the size of the text next to it. */
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* A placed lesson card */
@@ -973,6 +981,10 @@ table.availability td.closed {
     var(--hatch) 6px
   );
   color: var(--muted);
+  /* Same reason as td.unavailable: the mark IS the cell's content. */
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* ----------------------------------------------------------------- printing */
@@ -1049,10 +1061,16 @@ table.print td .p-bottom {
   font-size: 10px;
 }
 
-/* Start-end time under the lesson number in the printed hour column. */
-table.print th td.p-closed {
+/* A closed hour on a printed teacher page. This used to read
+   `table.print th td.p-closed` — a <td> inside a <th>, which cannot match the
+   markup — so the grey never appeared on paper. */
+table.print td.p-closed {
   background: var(--closed);
+  font-size: 13px;
+  font-weight: 600;
 }
+
+/* Start-end time under the lesson number in the printed hour column. */
 
 .p-clock {
   display: block;

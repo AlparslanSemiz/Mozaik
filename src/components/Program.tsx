@@ -35,26 +35,36 @@ function roomLetter(ix: Index, roomId: string | null | undefined): string {
  */
 const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
   {
+    // A mortarboard — the symbol aSc uses for Teachers, and the one thing on
+    // screen that cannot be mistaken for a person. The two icons used to be one
+    // head and three heads; at 17px that difference is invisible.
     id: 'teacher',
     label: 'Öğretmen görünümü',
     icon: (
-      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">
-        <circle cx="10" cy="6" r="3.3" fill="currentColor" />
-        <path d="M3.4 17.5c0-3.7 2.9-6.2 6.6-6.2s6.6 2.5 6.6 6.2z" fill="currentColor" />
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+        <path d="M10 2.4 19.2 6.6 10 10.8 0.8 6.6Z" fill="currentColor" />
+        <path
+          d="M5 8.5 10 10.8 15 8.5v3.4c0 1.5-2.2 2.5-5 2.5s-5-1-5-2.5Z"
+          fill="currentColor"
+        />
+        <path d="M17.6 7.5h1.2v5.2h-1.2Z" fill="currentColor" />
+        <circle cx="18.2" cy="13.6" r="1.5" fill="currentColor" />
       </svg>
     ),
   },
   {
     id: 'class',
+    // A group of students: three figures, the middle one nearer. A class is the
+    // only thing in this tool that is a crowd.
     label: 'Sınıf görünümü',
     icon: (
-      <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">
-        <circle cx="4.6" cy="7" r="2.3" fill="currentColor" />
-        <circle cx="15.4" cy="7" r="2.3" fill="currentColor" />
-        <circle cx="10" cy="5.8" r="2.9" fill="currentColor" />
-        <path d="M0.6 16.6c0-2.6 1.8-4.2 4-4.2s4 1.6 4 4.2z" fill="currentColor" />
-        <path d="M11.4 16.6c0-2.6 1.8-4.2 4-4.2s4 1.6 4 4.2z" fill="currentColor" />
-        <path d="M5.4 17.6c0-3 2.1-5 4.6-5s4.6 2 4.6 5z" fill="currentColor" />
+      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+        <circle cx="4.2" cy="6.4" r="2.2" fill="currentColor" />
+        <circle cx="15.8" cy="6.4" r="2.2" fill="currentColor" />
+        <path d="M0.4 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
+        <path d="M12 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
+        <circle cx="10" cy="8.2" r="3" fill="currentColor" />
+        <path d="M4.9 18c0-3.1 2.3-5.2 5.1-5.2s5.1 2.1 5.1 5.2Z" fill="currentColor" />
       </svg>
     ),
   },
