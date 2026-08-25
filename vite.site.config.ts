@@ -40,7 +40,7 @@ function siteShell(): Plugin {
       handler: () => [
         { tag: 'link', attrs: { rel: 'manifest', href: './manifest.webmanifest' }, injectTo: 'head' as const },
         { tag: 'link', attrs: { rel: 'icon', type: 'image/svg+xml', href: './icon.svg' }, injectTo: 'head' as const },
-        { tag: 'meta', attrs: { name: 'theme-color', content: '#1f5fa8' }, injectTo: 'head' as const },
+        { tag: 'meta', attrs: { name: 'theme-color', content: '#2e4ba8' }, injectTo: 'head' as const },
         { tag: 'script', children: REGISTER, injectTo: 'body' as const },
       ],
     },

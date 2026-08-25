@@ -6,6 +6,7 @@ import { buildIndex } from '../../constraints';
 import { updateLimits, updateRules } from '../../entities';
 import { findViolations } from '../../rules';
 import type { PanelProps } from '../props';
+import { paletteColor } from '../../palette';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -47,8 +48,24 @@ export default function Rules({ state, change }: PanelProps) {
   // that "Engelle" and "Uyar" mean nothing until you see what they catch.
   const violations = useMemo(() => findViolations(state, buildIndex(state)), [state]);
 
+  // How many breaches each rule is responsible for RIGHT NOW. Grouped on the
+  // `rule` code and never on the sentence: the message names a teacher and a
+  // day, so counting sentences counts days (pitfall 22).
+  const custom = state.teachers.filter(
+    (t) =>
+      t.limits.maxConsecutive !== null ||
+      t.limits.maxPerDay !== null ||
+      t.limits.minPerDay !== null,
+  );
+
+  const perRule = useMemo(() => {
+    const n: Partial<Record<RuleName, number>> = {};
+    for (const v of violations) n[v.rule] = (n[v.rule] ?? 0) + 1;
+    return n;
+  }, [violations]);
+
   return (
-    <div className="cols">
+    <div className="panel-grid">
       <div>
         <div className="panel">
           <h2>Kurallar</h2>
@@ -63,6 +80,7 @@ export default function Rules({ state, change }: PanelProps) {
                 <th>Kural</th>
                 <th className="w-col-lg">Saat</th>
                 <th className="w-col-lg">Ne yapsın</th>
+                <th className="w-col-md">Şu an</th>
               </tr>
             </thead>
             <tbody>
@@ -104,14 +122,76 @@ export default function Rules({ state, change }: PanelProps) {
                       {rule.canBlock && <option value="block">{LEVEL_LABEL.block}</option>}
                     </select>
                   </td>
+                  {/* What this number costs on the timetable as it stands. A
+                      limit is an abstraction until you can see what it catches
+                      — and this is the screen where you pick it. */}
+                  <td>
+                    {state.settings.rules[rule.name] === 'off' ? (
+                      <span className="hint">Kapalı</span>
+                    ) : (perRule[rule.name] ?? 0) === 0 ? (
+                      <span className="badge ok">Uyan yok</span>
+                    ) : (
+                      <span
+                        className={`badge ${
+                          state.settings.rules[rule.name] === 'block' ? 'impossible' : 'tight'
+                        }`}
+                      >
+                        {perRule[rule.name]} yer
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {/* The other half of "two-layer limits": these numbers are the school's
+            DEFAULT, and a teacher's own box overrides it. Which teachers have
+            done that used to be visible only by scrolling the Kurulum table
+            and looking for filled-in boxes. */}
+        <div className="panel">
+          <h2>Kendi sınırı olan öğretmenler ({custom.length})</h2>
+          {custom.length === 0 ? (
+            <p className="hint">
+              Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir
+              öğretmen için farklı bir sayı gerekiyorsa{' '}
+              <b>Kurulum → Öğretmenler</b> tablosundaki kutuya yazın; boş bıraktığınız
+              kutu buradaki sayıyı kullanır.
+            </p>
+          ) : (
+            <table className="list">
+              <thead>
+                <tr>
+                  <th>Öğretmen</th>
+                  <th className="num">Art arda</th>
+                  <th className="num">Günde ↑</th>
+                  <th className="num">Günde ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                {custom.map((t) => (
+                  <tr key={t.id}>
+                    <td>
+                      <span
+                        className="color-dot"
+                        style={{ background: paletteColor(t.color) }}
+                        aria-hidden="true"
+                      />
+                      {t.short} — {t.name}
+                    </td>
+                    <td className="num">{t.limits.maxConsecutive ?? '—'}</td>
+                    <td className="num">{t.limits.maxPerDay ?? '—'}</td>
+                    <td className="num">{t.limits.minPerDay ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
-      <aside>
+      <div>
         <div className="panel">
           <h2>Şu anki ihlaller ({violations.length})</h2>
           <p className="hint">
@@ -146,7 +226,7 @@ export default function Rules({ state, change }: PanelProps) {
             </table>
           )}
         </div>
-      </aside>
+      </div>
     </div>
   );
 }

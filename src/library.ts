@@ -300,6 +300,11 @@ export function storageReport(lib: Library): StorageReport {
     what: 'ızgara yoğunluğu tercihi',
     chars: charsAt(`${BASE_KEY}-yogunluk`),
   });
+  rows.push({
+    key: `${BASE_KEY}-havuz`,
+    what: 'havuz çekmecesi tercihi',
+    chars: charsAt(`${BASE_KEY}-havuz`),
+  });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

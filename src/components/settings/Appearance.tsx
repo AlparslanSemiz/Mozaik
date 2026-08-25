@@ -21,8 +21,12 @@
 
 import { applyDensity, applyScale, SCALE_MAX, SCALE_MIN, SCALE_STEP } from '../../theme';
 import type { Density } from '../../theme';
+import type { State } from '../../types';
+import { paletteColor } from '../../palette';
 
 interface Props {
+  /** The real school, so the preview shows the reader's own names. */
+  state: State;
   scale: number;
   setScale: (next: number) => void;
   density: Density;
@@ -34,11 +38,17 @@ const STEPS = Array.from(
   (_, i) => Number((SCALE_MIN + i * SCALE_STEP).toFixed(2)),
 );
 
-export default function Appearance({ scale, setScale, density, setDensity }: Props) {
+export default function Appearance({ state, scale, setScale, density, setDensity }: Props) {
   function choose(next: number) {
     applyScale(next);
     setScale(next);
   }
+
+  // The first eight, because the point is to SEE the size, not to scroll a
+  // list of twenty-five inside a settings panel.
+  const teachers = state.teachers.slice(0, 8);
+  const hoursOf = (id: string) =>
+    state.lessons.filter((l) => l.teacherId === id).reduce((n, l) => n + l.weeklyHours, 0);
 
   function chooseDensity(next: Density) {
     applyDensity(next);
@@ -46,7 +56,7 @@ export default function Appearance({ scale, setScale, density, setDensity }: Pro
   }
 
   return (
-    <div className="cols narrow-right">
+    <div className="cols">
       <div>
         <div className="panel">
           <h2>Yazı büyüklüğü</h2>
@@ -83,7 +93,9 @@ export default function Appearance({ scale, setScale, density, setDensity }: Pro
             kaydırıyorsunuz. <b>Sığdır</b>, haftanın tamamını bir ekranda gösterir:
             hücre ekranın genişliğinden hesaplanır ve <b>saatler gizlenir</b> —
             sütunu dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
-            renkler yerinde kalır.
+            renkler yerinde kalır. Havuz çekmecesi ızgaranın <b>altında</b>
+            durduğu için hafta iki durumda da sığar; çekmecenin boyunu Program
+            sekmesinde birleşme çizgisinden sürükleyerek ayarlarsınız.
           </p>
 
           <div className="form-row" role="group" aria-label="Izgara yoğunluğu">
@@ -109,6 +121,55 @@ export default function Appearance({ scale, setScale, density, setDensity }: Pro
           </p>
         </div>
 
+      </div>
+
+      <div>
+        <div className="panel">
+          <h2>Örnek</h2>
+          <p className="hint">
+            Seçtiğiniz büyüklük bu sayfada da geçerli — aşağıdaki satırlar{' '}
+            <b>kendi öğretmenleriniz</b>, uydurma bir örnek değil. Bir ad
+            kutusuna sığmıyorsa ölçek o makine için fazla büyük demektir.
+          </p>
+          {teachers.length === 0 ? (
+            <p className="hint">
+              Henüz öğretmen yok. <b>Kurulum → Öğretmenler</b> adımından ekleyin;
+              burası o listeyi gösterir.
+            </p>
+          ) : (
+            <table className="list">
+              <thead>
+                <tr>
+                  <th>Öğretmen</th>
+                  <th>Branş</th>
+                  <th className="num">Saat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {teachers.map((t) => (
+                  <tr key={t.id}>
+                    <td>
+                      <span
+                        className="color-dot"
+                        style={{ background: paletteColor(t.color) }}
+                        aria-hidden="true"
+                      />
+                      {t.name}
+                    </td>
+                    <td>{t.subject}</td>
+                    <td className="num">{hoursOf(t.id)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {state.teachers.length > teachers.length && (
+            <p className="hint">
+              {state.teachers.length} öğretmenin ilk {teachers.length} tanesi.
+            </p>
+          )}
+        </div>
+
         <div className="panel">
           <h2>Yazdırma bundan etkilenmez</h2>
           <p className="hint">
@@ -118,34 +179,6 @@ export default function Appearance({ scale, setScale, density, setDensity }: Pro
             sebeple olduğu gibi kalır — önizleme kâğıda benzemezse hangi sayfanın
             basılacağını seçmek tahmine döner.
           </p>
-        </div>
-      </div>
-
-      <div>
-        <div className="panel">
-          <h2>Örnek</h2>
-          <p className="hint">Seçtiğiniz büyüklük bu sayfada da geçerli.</p>
-          <table className="list">
-            <thead>
-              <tr>
-                <th>Öğretmen</th>
-                <th>Branş</th>
-                <th className="num">Saat</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Mehmet Çelik</td>
-                <td>Matematik</td>
-                <td className="num">24</td>
-              </tr>
-              <tr>
-                <td>Ayşe Varol</td>
-                <td>Fizik</td>
-                <td className="num">16</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>

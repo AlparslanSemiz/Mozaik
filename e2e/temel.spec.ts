@@ -2,6 +2,7 @@
 // my father his saved timetable, not just a wrong pixel.
 
 import { expect, test, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import {
   FIXTURE,
   open,
@@ -303,7 +304,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     // The two teachers no longer share a colour...
     await openSetup(page, 'Öğretmenler');
     const teacherColors = await page
-      .locator('table.list tbody tr select[title="Renk"]')
+      .locator('table.list tbody tr .color-pick')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(teacherColors).toHaveLength(2);
     expect(new Set(teacherColors).size).toBe(2);
@@ -311,7 +312,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     // ...and the classes were given colours of their own.
     await openSetup(page, 'Sınıflar');
     const classColors = await page
-      .locator('table.list tbody tr select[title="Renk"]')
+      .locator('table.list tbody tr .color-pick')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(classColors).toHaveLength(2);
     expect(new Set(classColors).size).toBe(2);
@@ -332,8 +333,8 @@ test.describe('5. Yedek ve şema göçü', () => {
 test.describe('28. Geri al / ileri al', () => {
   test('açılışta ikisi de kapalı', async ({ page }) => {
     await open(page);
-    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
   });
 
   test('düğmelerle üç adım geri, üç adım ileri', async ({ page }) => {
@@ -346,8 +347,8 @@ test.describe('28. Geri al / ileri al', () => {
     }
     await expect(page.locator('table.list tbody tr')).toHaveCount(3);
 
-    const back = page.getByRole('button', { name: '↶ Geri al' });
-    const forward = page.getByRole('button', { name: '↷ İleri al' });
+    const back = page.getByRole('button', { name: 'Geri al', exact: true });
+    const forward = page.getByRole('button', { name: 'İleri al', exact: true });
     for (const expected of [2, 1, 0]) {
       await back.click();
       await expect(page.locator('table.list tbody tr')).toHaveCount(expected);
@@ -370,12 +371,12 @@ test.describe('28. Geri al / ileri al', () => {
     await box.fill('B');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await page.getByRole('button', { name: '↶ Geri al' }).click();
-    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Geri al', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeEnabled();
 
     await box.fill('C');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
     await expect(page.locator('table.list tbody tr')).toHaveCount(2);
   });
 
@@ -399,7 +400,7 @@ test.describe('28. Geri al / ileri al', () => {
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeEnabled();
 
     page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles({
@@ -408,7 +409,7 @@ test.describe('28. Geri al / ileri al', () => {
       buffer: Buffer.from(JSON.stringify(FIXTURE)),
     });
 
-    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeDisabled();
   });
 });
 
@@ -508,5 +509,73 @@ test.describe('29. Hata yolları', () => {
     await expect(warning).toBeVisible();
     await expect(warning).toContainText('otomatik kayıt çalışmıyor');
     await expect(warning).toContainText('Dosyaya kaydet');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('46. Gömülü yazı tipi', () => {
+  // Principle 3 says the tool fetches nothing. A web font is the single most
+  // common way that promise breaks, and it breaks SILENTLY: on this machine
+  // the face is cached, so the page looks right while my father's copy falls
+  // back to Segoe. So the claim is checked in the built file, not in the CSS
+  // source, and the face is also checked to actually be in use — a font that
+  // is embedded but never applied is a wasted 31 KB.
+
+  test('dist/index.html içinde tek bir font ADRESİ yok, font gömülü', async () => {
+    const html = readFileSync('dist/index.html', 'utf8');
+
+    for (const needle of ['fonts.googleapis', 'fonts.gstatic', '.woff2)', ".woff2'", '.woff2"']) {
+      expect(html.includes(needle), `dist/index.html içinde "${needle}" geçiyor`).toBe(false);
+    }
+    expect(html).toContain('data:font/woff2;base64,');
+    expect(html).toContain('font-display:block');
+  });
+
+  test('IBM Plex Sans gerçekten çiziliyor, yedek fonta düşmüyor', async ({ page }) => {
+    await open(page);
+
+    const drawn = await page.evaluate(() => ({
+      ready: document.fonts.check('12px "IBM Plex Sans"'),
+      loaded: [...document.fonts].map((f) => `${f.family} ${f.weight} ${f.status}`),
+      // The advance of "0" is the whole reason the ch ladder works. Plex draws
+      // it at 0.6em by construction; the fallback does not.
+      zero: (() => {
+        const probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;font-size:100px;white-space:pre';
+        probe.style.fontFamily = getComputedStyle(document.body).fontFamily;
+        probe.textContent = '0';
+        document.body.appendChild(probe);
+        const width = probe.getBoundingClientRect().width;
+        probe.remove();
+        return width;
+      })(),
+    }));
+
+    expect(drawn.ready, `yüklü yüzler: ${drawn.loaded.join(' · ')}`).toBe(true);
+    expect(drawn.loaded).toEqual(['IBM Plex Sans 400 600 loaded']);
+    expect(drawn.zero, 'gövde Plex ile çizilmiyor').toBeCloseTo(60, 0);
+  });
+
+  test('rakamlar tablo hizalı — ızgara sayılardan ibaret', async ({ page }) => {
+    await openWithSample(page);
+
+    // Not asserted from the CSS: `font-variant-numeric` is a request, and a
+    // face without the feature ignores it. Plex needs no feature because its
+    // lining figures are already one width; this measures the RESULT.
+    const widths = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.cssText = 'position:absolute;visibility:hidden;font-size:100px;white-space:pre';
+      probe.style.fontFamily = getComputedStyle(document.body).fontFamily;
+      document.body.appendChild(probe);
+      const out = [...'0123456789'].map((digit) => {
+        probe.textContent = digit;
+        return Math.round(probe.getBoundingClientRect().width * 100) / 100;
+      });
+      probe.remove();
+      return out;
+    });
+
+    expect(new Set(widths).size, `rakam genişlikleri: ${widths.join(', ')}`).toBe(1);
   });
 });

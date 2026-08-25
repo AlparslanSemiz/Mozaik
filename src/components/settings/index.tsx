@@ -10,7 +10,6 @@
 // (`theme.ts`). It is here and not in the top bar for the same reason Sıfırla
 // is: the top bar is the row where no single click can cost an afternoon.
 
-import { useState } from 'react';
 import type { State } from '../../types';
 import School from './School';
 import Rules from './Rules';
@@ -19,8 +18,7 @@ import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
 import type { Density } from '../../theme';
-
-type SectionId = 'school' | 'rules' | 'subjects' | 'appearance' | 'data';
+import type { SectionId } from '../../toolState';
 
 interface Props extends PanelProps {
   loadState: (next: State) => void;
@@ -30,15 +28,9 @@ interface Props extends PanelProps {
   setScale: (next: number) => void;
   density: Density;
   setDensity: (next: Density) => void;
+  /** Which section. Owned by App: the tool strip above shows it. */
+  section: SectionId;
 }
-
-const SECTIONS: Array<{ id: SectionId; label: string }> = [
-  { id: 'school', label: 'Okul ve zil' },
-  { id: 'rules', label: 'Kurallar' },
-  { id: 'subjects', label: 'Branşlar' },
-  { id: 'appearance', label: 'Görünüm' },
-  { id: 'data', label: 'Veri' },
-];
 
 export default function Settings({
   state,
@@ -49,29 +41,22 @@ export default function Settings({
   setScale,
   density,
   setDensity,
+  section,
 }: Props) {
-  const [section, setSection] = useState<SectionId>('school');
 
   return (
     <>
-      <nav className="steps" aria-label="Ayar bölümleri">
-        {SECTIONS.map((s) => (
-          <button
-            key={s.id}
-            className="step"
-            aria-current={s.id === section}
-            onClick={() => setSection(s.id)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </nav>
-
       {section === 'school' && <School state={state} change={change} />}
       {section === 'rules' && <Rules state={state} change={change} />}
       {section === 'subjects' && <Subjects state={state} change={change} />}
       {section === 'appearance' && (
-        <Appearance scale={scale} setScale={setScale} density={density} setDensity={setDensity} />
+        <Appearance
+          state={state}
+          scale={scale}
+          setScale={setScale}
+          density={density}
+          setDensity={setDensity}
+        />
       )}
       {section === 'data' && (
         <Data state={state} change={change} loadState={loadState} plans={plans} />

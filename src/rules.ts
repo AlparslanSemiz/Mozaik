@@ -15,6 +15,15 @@ export interface Violation {
   key: string; // stable-ish key for React lists
   level: RuleLevel;
   message: string;
+  /**
+   * WHICH rule this came from — a code, not the sentence.
+   *
+   * Pitfall 22, in its second home: the message carries a teacher, a day and
+   * two numbers, so counting messages counts days rather than rules. Anything
+   * that groups violations groups on this. It is also already in `key`, but a
+   * caller that split that string would be parsing a React key.
+   */
+  rule: RuleName;
 }
 
 /** The limit that actually applies: the teacher's own box, else the default. */
@@ -135,6 +144,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (ruleActive(d, 'maxPerDay', maxDay) && count > maxDay) {
         out.push({
           key: `${teacher.id}|${day}|maxPerDay`,
+          rule: 'maxPerDay',
           level: ruleLevel(d, 'maxPerDay'),
           message: `${when} ${count} saat ders veriyor — en fazla ${maxDay} saat isteniyor.`,
         });
@@ -142,6 +152,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (ruleActive(d, 'minPerDay', minDay) && count < minDay) {
         out.push({
           key: `${teacher.id}|${day}|minPerDay`,
+          rule: 'minPerDay',
           level: ruleLevel(d, 'minPerDay'),
           message: `${when} sadece ${count} saat ders veriyor — en az ${minDay} saat isteniyor.`,
         });
@@ -151,6 +162,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
         if (run > maxRun) {
           out.push({
             key: `${teacher.id}|${day}|maxConsecutive`,
+            rule: 'maxConsecutive',
             level: ruleLevel(d, 'maxConsecutive'),
             message: `${when} art arda ${run} saat ders veriyor — en fazla ${maxRun} saat isteniyor.`,
           });
@@ -170,6 +182,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
       if (count <= limit) continue;
       out.push({
         key: `${lesson.id}|${day}|maxSameLessonPerDay`,
+        rule: 'maxSameLessonPerDay',
         level: ruleLevel(d, 'maxSameLessonPerDay'),
         message:
           `${group?.name ?? '?'} sınıfı ${dayInfo.name} günü ${teacher?.short ?? '?'} ` +

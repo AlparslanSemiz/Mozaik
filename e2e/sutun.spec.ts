@@ -19,9 +19,17 @@
 //      It is deliberately literal — a COMMENT carrying the pattern fails too,
 //      so the ban cannot be documented into existence next to the code that
 //      breaks it. Say "inline width" in prose instead.
-//   2. the six --w-col-* steps and the sized boxes grow by EXACTLY the scale
-//      factor between %100 and %125. A px value fails here — it is the one
-//      measurement a pixel cannot fake.
+//   2. the six --w-col-* steps and the sized boxes hold the SAME NUMBER OF
+//      ch at %100 and at %125. This used to be written as "they grow by
+//      exactly 1.25x", which was true only by luck of the old system font:
+//      `ch` is the used advance of "0", and a real face quantises it at small
+//      sizes — measured with the embedded IBM Plex Sans, 1ch is 7.00px at
+//      12px type and 9.00px at 15px, a ratio of 1.286 rather than 1.25.
+//      Counting ch is the stronger form of the same check and the one that
+//      actually explains (3): the TEXT quantises by the same advance, so a
+//      box holding N ch holds the same N characters at every scale. A px
+//      value still fails here — its ch count shrinks as the type grows, which
+//      is pitfall 33 stated as a measurement.
 //   3. nothing is clipped at either size: a box always holds the text in it,
 //      and a heading never gains a line on the way from %100 to %125.
 //
@@ -49,8 +57,8 @@ function componentFiles(dir: string): string[] {
   });
 }
 
-type Column = { label: string; klass: string; width: number; lines: number };
-type Box = { label: string; width: number; has: number; natural: number };
+type Column = { label: string; klass: string; width: number; lines: number; ch: number };
+type Box = { label: string; width: number; has: number; natural: number; ch: number };
 
 /**
  * Measures every table column and every sized control on the screen as it is
@@ -62,6 +70,22 @@ type Box = { label: string; width: number; has: number; natural: number };
  */
 async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }> {
   return page.evaluate(() => {
+    // `ch` is resolved against the ELEMENT's own font, so it has to be
+    // measured on the element itself — a heading is --fs-xs and the box in the
+    // cell below it is --fs-base, and the same declared step is a different
+    // pixel count in each (pitfall 34, now with a second reason).
+    const oneCh = (el: Element) => {
+      const style = getComputedStyle(el);
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:absolute;visibility:hidden;width:1ch';
+      probe.style.font = style.font;
+      probe.style.letterSpacing = style.letterSpacing;
+      document.body.appendChild(probe);
+      const width = probe.getBoundingClientRect().width;
+      probe.remove();
+      return width;
+    };
+
     const columns = [...document.querySelectorAll('table.list th, table.stat th')]
       .filter((th) => th.className.includes('w-col-') || th.className.includes('num'))
       .map((th, index) => {
@@ -72,6 +96,7 @@ async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }>
           klass: th.className,
           width: th.getBoundingClientRect().width,
           lines: range.getClientRects().length,
+          ch: oneCh(th),
         };
       });
 
@@ -96,6 +121,10 @@ async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }>
         clone.remove();
         return { has: el.getBoundingClientRect().width, wants: width };
       }
+      // A <button> (the colour trigger) and an <input> are asked the same
+      // question: does the box hold the text that is in it? `width: auto` on a
+      // button would give its content width, which is the answer we want to
+      // COMPARE against, not the one we want to take.
       const input = el as HTMLInputElement;
       const style = getComputedStyle(input);
       const probe = document.createElement('span');
@@ -104,7 +133,12 @@ async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }>
       probe.style.letterSpacing = style.letterSpacing;
       // An empty limit box still has to show its placeholder — that is where
       // the school-wide default is read from.
-      probe.textContent = input.value === '' ? input.placeholder : input.value;
+      probe.textContent =
+        input.tagName === 'BUTTON'
+          ? (input.textContent ?? '')
+          : input.value === ''
+            ? input.placeholder
+            : input.value;
       document.body.appendChild(probe);
       const text = probe.getBoundingClientRect().width;
       probe.remove();
@@ -113,7 +147,9 @@ async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }>
     };
 
     const boxes = [...document.querySelectorAll<HTMLElement>('.num, .text-sm, .color-pick')]
-      .filter((el) => el.tagName === 'INPUT' || el.tagName === 'SELECT')
+      .filter(
+        (el) => el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'BUTTON',
+      )
       .map((el, index) => {
         const { has, wants } = need(el);
         return {
@@ -121,6 +157,7 @@ async function measure(page: Page): Promise<{ columns: Column[]; boxes: Box[] }>
           width: el.getBoundingClientRect().width,
           has,
           natural: wants,
+          ch: oneCh(el),
         };
       });
 
@@ -174,9 +211,9 @@ test.describe('45. Tablo sütunları', () => {
         box.style.cssText = 'position:absolute;visibility:hidden;font-size:var(--fs-xs)';
         document.body.appendChild(box);
         const out: Record<string, number> = {};
-        for (const step of steps) {
+        for (const step of [...steps, 'ONE']) {
           const cell = document.createElement('div');
-          cell.style.width = `var(--w-col-${step})`;
+          cell.style.width = step === 'ONE' ? '1ch' : `var(--w-col-${step})`;
           box.appendChild(cell);
           out[step] = cell.getBoundingClientRect().width;
         }
@@ -188,17 +225,34 @@ test.describe('45. Tablo sütunları', () => {
     await chooseScale(page, 125);
     const large = await probe(page);
 
+    // 1ch itself is not proportional to the type size — the embedded face
+    // quantises the advance of "0" (measured: 7.00px at 12px, 9.00px at 15px).
+    // So the invariant is the ch COUNT, and the raw pixel growth is checked
+    // only for direction. A px width fails both: it does not grow, and its ch
+    // count shrinks as the type gets bigger.
+    expect(small['ONE'], '1ch ölçülemedi').toBeGreaterThan(0);
+    expect(large['ONE']).toBeGreaterThan(small['ONE']!);
+
     for (const [step, width] of Object.entries(small)) {
+      if (step === 'ONE') continue;
       expect(width, `--w-col-${step} tanımsız`).toBeGreaterThan(0);
       expect(
         large[step]!,
-        `--w-col-${step}: %100'de ${width.toFixed(1)}px, %125'te ${large[step]!.toFixed(1)}px`,
-      ).toBeCloseTo(width * 1.25, 1);
+        `--w-col-${step} ölçekle büyümedi: %100'de ${width.toFixed(1)}px, ` +
+          `%125'te ${large[step]!.toFixed(1)}px`,
+      ).toBeGreaterThan(width);
+      expect(
+        large[step]! / large['ONE']!,
+        `--w-col-${step}: %100'de ${(width / small['ONE']!).toFixed(2)}ch, ` +
+          `%125'te ${(large[step]! / large['ONE']!).toFixed(2)}ch — ` +
+          'basamak ch cinsinden DEĞİL',
+      ).toBeCloseTo(width / small['ONE']!, 1);
     }
 
     // The steps have to be six DIFFERENT widths — a ladder whose rungs collapse
     // onto each other is a ladder in name only.
-    expect(new Set(Object.values(small)).size).toBe(6);
+    const rungs = Object.entries(small).filter(([step]) => step !== 'ONE');
+    expect(new Set(rungs.map(([, width]) => width)).size).toBe(6);
   });
 
   for (const screen of SCREENS) {
@@ -252,7 +306,12 @@ test.describe('45. Tablo sütunları', () => {
           after.width,
           `${screen.name} · ${before.label} ölçekle büyümedi: ` +
             `${before.width.toFixed(1)} → ${after.width.toFixed(1)}`,
-        ).toBeCloseTo(before.width * 1.25, 0);
+        ).toBeGreaterThan(before.width);
+        expect(
+          after.width / after.ch,
+          `${screen.name} · ${before.label}: %100'de ${(before.width / before.ch).toFixed(2)}ch, ` +
+            `%125'te ${(after.width / after.ch).toFixed(2)}ch — kutu ch cinsinden DEĞİL`,
+        ).toBeCloseTo(before.width / before.ch, 1);
       }
     });
   }

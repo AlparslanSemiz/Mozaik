@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { parseTeachers } from '../../import';
-import { PALETTE_SIZE, paletteColor } from '../../palette';
+import ColorPick from '../ColorPick';
 import {
   addSubject,
   addTeacher,
@@ -154,22 +154,13 @@ export default function Teachers({ state, change }: PanelProps) {
             {state.teachers.map((t) => (
               <tr key={t.id}>
                 <td>
-                  <select
+                  <ColorPick
                     value={t.color}
-                    onChange={(e) =>
-                      change((d) => updateTeacher(d, t.id, { color: Number(e.target.value) }))
+                    owner={t.short}
+                    onChange={(next) =>
+                      change((d) => updateTeacher(d, t.id, { color: next }))
                     }
-                    className="color-pick"
-                    style={{ background: paletteColor(t.color) }}
-                    aria-label={`${t.short} rengi`}
-                    title="Renk"
-                  >
-                    {Array.from({ length: PALETTE_SIZE }, (_, i) => (
-                      <option key={i} value={i}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </td>
                 <td>
                   <input

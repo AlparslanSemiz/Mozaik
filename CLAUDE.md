@@ -100,7 +100,7 @@ npm run dev        # geliştirme sunucusu
 npm test           # Vitest — 409 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 251 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 265 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -136,7 +136,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 17 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, **sütun genişliği ve metnin sığması (iki ölçekte)**, **ızgara yoğunluğu (Sığdır'da yatay kaydırma 0)**, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 18 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, **sütun genişliği ve metnin sığması (iki ölçekte)**, **ızgara yoğunluğu (Sığdır'da yatay kaydırma 0)**, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu**, **gömülü fontun gerçekten çizildiği, gün bandının bir DURUM gibi okunmadığı, imleç haçının sürüklemede söndüğü, havuz çekmecesi ile Sığdır'ın takası, 36 rengin swatch ızgarasında görünüp seçilebildiği** |
 | **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
 | **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 24 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
@@ -211,11 +211,27 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
                                 Playwright ikisi de buradan beslenir.
   |
 store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
-theme.ts                        makine tercihleri (tema, kenar çubuğu, ölçek) — State'e girmez
+theme.ts                        makine tercihleri (tema, ölçek, yoğunluk, havuz
+                                açık mı + BOYU, araç şeridi) — State'e girmez
+toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
+                                kapsam durumu. App'te yaşar, çünkü sekme
+                                değişimi bileşeni söküyor (tuzak 18) ve çünkü
+                                onu gösteren şerit <main>'in ÜSTÜNDE
+gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
+                                React BİLMEZ — drag.ts'in deseni (tuzak 1)
+poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
+                                pointermove'da React'e değil, tek bir custom
+                                property'ye yazar — 2100 hücre yeniden çizilmez
 useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
   |
+components/Ribbon.tsx           araç şeridi: sekmeye göre switch. Kontrol'de
+                                null döner (şerit hiç çizilmez). İş mantığı
+                                YOK — "Otomatik diz (N)"in N'i entities.ts'teki
+                                saf pendingLessons()'tan gelir, buildPool
+                                App'e çıkarılmaz (Grid'in memo sözleşmesi)
 components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
 components/Field.tsx            iki klasörün de kullandığı küçük parçalar
+components/ColorPick.tsx        36 renklik swatch diyaloğu (Kurulum'un iki adımı)
 components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
 components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste + Summary
@@ -307,7 +323,17 @@ ders-programi-tema       -> tema tercihi
 ders-programi-kenar      -> kenar çubuğu tercihi
 ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.25)
 ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (rahat / sigdir)
+ders-programi-havuz      -> havuz çekmecesi açık mı (acik / kapali)
+ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
+ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ```
+
+Havuz boyu **rem**, px değil: `--ui-scale` %150'ye çıkınca sabit px'lik bir
+çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı bir anahtar,
+`ders-programi-havuz`'un genişletilmiş hâli değil — o anahtarın sözleşmesi
+"`kapali` değilse açık" ve içine bir sayı katlamak tek ayrıştırıcıya ikinci bir
+normalize dalı sokardı. `theme.ts` zaten ayrı anahtarlarda ayrı skalerler
+tutuyor; bunlar altıncı ve yedincisi.
 
 ### Dosya biçimleri — iki tane, karıştırılamaz
 
@@ -633,6 +659,92 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     yazılamazdı. Aritmetik payı da ölçülür: 78 sütun kenarlığının alt-piksel
     yuvarlaması, 2 px payla 1 px kaydırma bırakıyordu.
 
+38. **`font-display: swap` + `ch` cinsinden sütun merdiveni = her açılışta
+    sessizce kayan bir düzen.** Gömülü yüz `data:` URI olsa bile eşzamanlı
+    çözülmez: ilk düzen `ch`'yi YEDEK fonta çözer, yüz gelince yeniden çözer.
+    Ölçülen: `1ch` **6,86px → 9,00px** aynı puntoda. `ch`'den boylanan her
+    sütun bir kez zıplar. Çare `font-display: block` — ağdan indirme olmadığı
+    için "engelleme" bir çözümlemedir, ve yanlış metrikle **hiçbir şey
+    boyanmaz**. E2E de `document.fonts.ready`'yi bekler; bu bir gizleme değil,
+    kullanıcının ilk glifi gördüğü anın ta kendisi.
+
+39. **`ch` puntoyla ORANTILI DEĞİLDİR.** Gerçek bir yüz "0"ın ilerlemesini
+    küçük puntolarda kuantalar: Plex'te 12px'te **7,00px**, 15px'te **9,00px**
+    — oran 1,286, 1,25 değil. "Sütunlar ölçekle tam 1,25 büyür" diye yazılmış
+    bir test aslında **fontun** bir özelliğini iddia ediyordu ve sistem fontu
+    değişince kırmızıya döndü. Doğru değişmez **ch SAYISI**: kutu N ch ise
+    her ölçekte N ch kalır — ve metnin ilerlemesi de aynı kuantayla büyüdüğü
+    için sığma birebir korunur. Ham px genişlik bu iddiadan hâlâ geçemez:
+    punto büyüdükçe ch sayısı düşer.
+
+40. **Yeni bir zemin kuralı bir DURUMU ezebilir.** Gün bandı
+    (`table.grid tbody td.band`, özgüllük 0,2,3) `td.unavailable`'ı (0,1,1)
+    yendi ve **tek indeksli günlere düşen kapalı saatler taramasını sessizce
+    kaybetti**. Hiçbir sayı, hiçbir metin, hiçbir öznitelik değişmediği için
+    süit görmedi; yalnız "kapalı saat haçın altında kaybolmuyor" testi
+    yakaladı. Kural: ekrana yeni bir zemin ekliyorsan, o zeminin **hangi
+    durumları ezdiğini** tek tek yaz.
+
+41. **Boş bir ızgarada yapılan ölçüm hiçbir şey ölçmez.** Havuz çekmecesinin
+    Sığdır'a maliyeti önce boş haftada ölçüldü ve "sığıyor" çıktı; 426 kart
+    konunca aynı yapılandırma **174px taştı**, çünkü sütunun tabanını kartın
+    yazısı belirliyor. Bu tuzak 33'ün ailesinden ama kendi adı var: **bir
+    düzen ölçümü, ölçtüğü şeyi dolduran veriyle yapılır.**
+
+    Aynı oturumda ikinci hâli: "sürükleme hedefi ekran dışındaysa görünür
+    oluyor" testi, havuzun alttan 215px yemesine **yaslanıyordu**. Havuz sağa
+    taşınıp 25 satırın tamamı görününce test bir şey ölçmeden yeşil geçmeye
+    başladı. Çare koşulu **zorlamak** (kısa viewport + satırdan uzağa
+    kaydırma) ve önkoşulu iddia etmek — yoksa tuzak 23'ün ta kendisi olur.
+
+42. **Bir ölçüm, ölçtüğü şeyin altındaki mekanizma değişince sessizce yalan
+    olur.** "Sığdır havuzu kapatır" kuralı 174px'lik gerçek bir ölçüme
+    dayanıyordu. Sonra `.grid-wrap` bir **container** oldu ve hücre
+    `100cqw`'den hesaplanmaya başladı; o günden itibaren çekmece açıkken de
+    taşma **0px**'ti, ama kural CLAUDE.md'de ölçüm gerekçesiyle duruyordu ve
+    kimse yeniden ölçmedi. Ölçüm bir tarihtir, kanun değil. Bir ölçüme
+    dayanan kuralın yanına **neyin ölçüldüğü** yazılır, ve o mekanizmaya
+    dokunan her değişiklikte yeniden ölçülür.
+
+43. **`Number('')` ve `Number(null)` SIFIRDIR, ve sıfır çoğu aralıkta
+    geçerlidir.** `normalizeDockHeight`'ın ilk hâli `Number.isFinite(n)`
+    diyordu; tercihi hiç olmayan makinede `localStorage.getItem` `null`
+    döndü, `Number(null)` 0 oldu, sonlu sayıldı ve **tabana kırpıldı** — yani
+    havuz ilk açılışta ezik geliyordu. "Yok"u "sıfır"dan elle ayırmak
+    gerekir. Test önce yazıldığı için yakalandı; `readScale` de yıllardır
+    aynı hataya açıktı, orada `SCALE_MIN` tesadüfen makul olduğu için
+    görünmemişti.
+
+44. **Bir `normalize()` iki yönden çağrılıyorsa iki TİP alır.** Aynı
+    fonksiyona depodan **string**, sürükleyiciden **number** geliyordu; 43'ü
+    kapatan `typeof raw !== 'string'` guard'ı sayıyı da eledi ve her sürükleme
+    varsayılan olarak yazıldı — çekmece kıpırdıyor ama unutuyordu. Test yalnız
+    string yolunu deniyordu, o yüzden yeşil geçti. Kural: bir normalize
+    fonksiyonunun testi **her çağıranın verdiği tipi** denemeli.
+
+45. **Bir custom property'nin İKİ sahibi varsa yakın olan kazanır ve uzaktaki
+    yazma sessizce hiçbir şey yapmaz.** `--dock-h` hem `.pool`'a React inline
+    style'ıyla hem `.program-body`'ye splitter tarafından yazılıyordu. Sürükleme
+    DOM'a yazıyordu, `.pool`'daki daha yakın tanım kazanıyordu, ve ekranda
+    hiçbir şey olmuyordu — hata mesajı yok, konsol temiz. Türetilen bir
+    değişkenin **tek** bir sahibi olur.
+
+46. **`pointerup`'ta `hasPointerCapture` false olabilir.** Sürüklemenin sonunu
+    ona bağlarsan hareket biter ama **commit hiç çalışmaz**: çekmece yeni
+    boyunda durur, tercih yazılmaz, ve yenilemede eski boya döner. Jestin
+    açık/kapalı olduğunu kendi bayrağınla bil; capture'ı yalnız serbest
+    bırakırken sor.
+
+47. **`margin` ile araya sıkıştırılan bir tutamağın alt yarısını komşusu
+    yer.** Havuzun kulpu 9px'ti ama `margin-bottom: -4px` ile `.pool-head`'in
+    altına giriyordu: `elementFromPoint` üst 4px'te kulpu, alt 5px'te başlığı
+    buluyordu, yani fare tam ortasına indiğinde **hiçbir olay gelmiyordu**.
+    Görünmez bir hata: element oradaydı, `pointer-events` açıktı, testte
+    `boundingBox()` doğru kutuyu veriyordu. Bir tutamak **kendi satırını**
+    alır. İkinci yarısı: kulp görünür bir **tutamak işareti** taşımalı — iki
+    yüzey arasındaki kılcal çizgi kenarlık gibi okunur, ve kenarlıklar
+    kıpırdamaz.
+
 ---
 
 ## Tasarım sistemi
@@ -643,10 +755,81 @@ Referans: basılı ders programı. Ekran bir kâğıt yüzeyidir, dashboard değ
 Kılcal kenarlık, dolgun renk bloğu, minimum gölge, sıkı hizalama.
 Bir öğe "yüzüyor" gibi görünüyorsa yanlıştır.
 
+> ✅ **B turu 2026-08-25'te YAPILDI; yeni karakter aşağıdaki "Üç düzlem"
+> bölümünde.** Bu paragraf tarih olarak duruyor.
+>
+> ⚠️ **Bu paragraf 2026-08-25'te bağlayıcı olmaktan çıktı.** Kullanıcı tasarım
+> dilini yeniden açtı; aşağıdaki **"Tasarım dili yeniden AÇILDI"** bölümü neyin
+> açıldığını ve neyin (ilke 1–3, bağımlılık politikası, ölçülen testler,
+> işlevsel renk kanalı, kâğıt) **açılmadığını** yazar. Metin silinmedi çünkü
+> A0–A5 turunun tamamı bu karakteri hedefleyerek yazıldı — geri alınacak olan
+> şeyin ne olduğu okunabilir kalmalı.
+
+### Üç düzlem — B turu (2026-08-25)
+
+Eskiden kenar çubuğu, üst çubuk, panel ve ızgara **hepsi `--paper`**'dı; hiçbir
+şey neyin araç neyin belge olduğunu söylemiyordu. Artık ekrandaki her şey şu
+üçünden **birine** oturur:
+
+```
+--bg      masa    en alt. Doğrudan üstünde hiçbir şey okunmaz
+--chrome  kabuk   kenar çubuğu · üst çubuk · araç şeridi · sebep çubuğu · havuz
+--paper   kâğıt   panel · ızgara · kart zemini · baskı önizlemesi · diyalog
+```
+
+Ölçüldü: ΔE(chrome, paper) açıkta **5.5**, koyuda **3.5** — görünür bir düzlem
+değişimi, hiçbir işlevsel renge yaklaşmıyor. `--paper` parlaklığı **>0.9**
+kalmak zorunda (`renk.spec.ts`), yani "krem kâğıt" yönü bu projede kapalı — ve
+iyi ki: 36 pastel renk krem zeminde birbirine yaklaşır.
+
+**Accent bilerek sessiz** (`#2e4ba8`). Ekranda zaten 36 kimlik rengi + 3
+işlevsel renk var; gürültülü bir accent onlarla kavga eder. Ayırt edicilik
+ızgaradan ve tipografiden gelir, novelty bir tondan değil.
+
+### Yarıçap — ÜÇ basamak (kural değişti)
+
+`--r-sm 3px` veri (hücre, kart, swatch, nokta) · `--r-md 6px` denetim (düğme,
+girdi) · `--r-lg 10px` **düzlem** (panel, çekmece, diyalog). Dördüncüsü yok.
+Eski "üçüncü radius YOK" kuralı bilerek değiştirildi: üç düzlem varken 600px'lik
+bir panelin 6px'i "neredeyse köşeli" okunuyor, 34px'lik bir hücrenin 10px'i ise
+renk bloğunu yer.
+
+### Kot — İKİ basamak (kural değişti)
+
+`--elev-1` kâğıdın masanın üstünde durması · `--elev-2` **gerçekten** yüzen üç
+şey: sürükleme hayaleti, diyalog, ve kaydırılmış ızgaranın yapışkan başlığı.
+Düğme ve girdi gölge **almaz**. Eski "bir öğe yüzüyor gibi görünüyorsa
+yanlıştır" kuralının yerini bu iki kot aldı.
+
+### Hareket
+
+`--dur: 120ms`, `--ease: cubic-bezier(.2,0,0,1)`, ve kullanabilecek şeylerin
+listesi kapalı: denetimin hover/focus/pressed hâli, diyalog açılışı, imleç
+haçı, çekmecenin açılıp kapanması. Düzen animasyonu, skeleton, toast, sayfa
+geçişi ve kütüphane **yok**. `prefers-reduced-motion: reduce` → `--dur: 0ms`,
+yani dosyadaki her geçiş tek bir yerden kapanır.
+
+### Yazı tipi — IBM Plex Sans, gömülü
+
+Değişken yüz, **wght ekseni 400–600'e kırpılmış**, bu aracın çizebildiği 225
+glife alt kümelenmiş (Latin-1 + Türkçe + gerçekten kullanılan noktalama):
+**23 KB ham**, `assetsInlineLimit` ile `dist/index.html`'in içine `data:` URI
+olarak gömülü. `<link>` yok, CDN yok, çalışma anında tek bayt indirilmiyor —
+`temel.spec.ts` bunu derlenmiş dosyada **grep ile** doğruluyor.
+
+Neden Plex: bu ızgaranın içeriği **rakam** (411 · 09:00 · 12) ve Plex'in
+rakamları yapı gereği tablo hizalı — hepsi 600 birim, ölçüldü, `tnum`
+özelliğine gerek yok. Yedek yığın (`"Segoe UI", system-ui, …`) duruyor: yüz
+çözülemezse araç çalışmaya devam eder.
+
+**`font-display: block`, `swap` DEĞİL** — bkz. tuzak 38.
+
+Ölçülen boyut: `dist/index.html` **347 KB → 379 KB** (sınır 420 KB).
+
 ### Ölçek — tek EKRAN ekseni, kâğıt ayrı
 
 ```
---ui-scale   1.0–1.25, 0.05 adım. EKRANIN TAMAMI — ızgara dahil.
+--ui-scale   1.0–1.50, 0.05 adım (11 basamak). EKRANIN TAMAMI — ızgara dahil.
              Ayarlar → Görünüm, localStorage['ders-programi-olcek'].
 kâğıt        --ui-scale'den ETKİLENMEZ. Kendi merdiveni var (--fs-p-*, pt).
 ```
@@ -681,7 +864,18 @@ Sığdır                --cell-w kutudan TÜRETİLİR, ders saatleri gizlenir,
 Tercih `localStorage['ders-programi-yogunluk']`, `State`'e girmez; ayar
 **Ayarlar → Görünüm**'de, yazı büyüklüğünün altında.
 
-**Sığdır tam olarak BİR şeyi düşürür, ve hangisi olduğu ölçüldü:** ders
+> ⚠️ **"Sığdır havuzu KAPATIR" kuralı 2026-08-25'te ÖLÇÜMLE kaldırıldı.**
+> Eski gerekçe: dolu ızgarada çekmece açıkken 174px kaydırma geri geliyordu.
+> `.grid-wrap` bir **container** olup hücre `100cqw`'den hesaplanmaya
+> başladığından beri bu ölçüm yanlış: yeniden ölçüldü, Sığdır'da çekmece
+> **açıkken de** yatay taşma 0px (hücre 19.5px, tablo 1575/1588). Havuz alta
+> indiğinde konu tamamen kapandı — havuz artık yatay yer yemiyor, Sığdır ise
+> yalnızca yatay bir mod. `Appearance.tsx`'teki `writeDock(false)` silindi.
+> Testi silinmedi, **iddiası tersine çevrildi**.
+
+**Sığdır'ın düşürdüğü bilgi tek:** ders numarasının altındaki başlangıç saati.
+(Hücrenin 1px'lik iç boşluğu da düşer ama o bilgi değil, kenar boşluğudur.)
+Hangisi olduğu ölçüldü, seçilmedi: ders
 numarasının altındaki başlangıç saati. `--cell-w` 28, 23 ve 18 px yapıldığında
 hücre üç seferde de **33.69 px** çizildi — çünkü sütunun min-content'ini
 karttaki yazı değil, başlıktaki `"10:40"` belirliyordu. Kartın alt satırını
@@ -767,18 +961,103 @@ Geri alınamaz uyarılar `role="alertdialog"`.
 Renk asla tek başına durum taşımaz — ızgara renk bloğu bunun istisnasıdır
 ve orada kimlik taşır, durum değil.
 
+### Primitif envanteri ve dış tasarım araçları
+
+Kurallar burada, **envanter** [docs/DESIGN.md](docs/DESIGN.md)'de: hangi `.panel`,
+hangi `.btn`, hangi `--w-col-*` zaten var. Yeni bir ekran kurmadan önce oraya
+bakılır; karşılığı olan primitif **yeniden yazılmaz**.
+
+Görsel referans [docs/Örnek Fotolar](docs/Örnek%20Fotolar/) — aSc Timetables 2027'nin
+kendi ekranları. Referans "beğenilen modern siteler" değil, **yerini aldığımız
+program** ve basılı ders programıdır.
+
+### Tasarım dili yeniden AÇILDI (2026-08-25) — kullanıcı kararı
+
+`frontend-design@claude-plugins-official` kuruldu ve **"Karakter" bölümündeki
+kâğıt yüzeyi kısıtı artık bağlayıcı değil.** Kılcal kenarlık, sıfır gölge,
+"bir öğe yüzüyorsa yanlıştır" — bunlar tartışılabilir hâle geldi. Gradyan,
+katmanlı derinlik, gömülü özel font, daha uzun geçişler ve yeni bir tipografi
+karakteri artık **önerilebilir**.
+
+Bu kararı ben önermedim; **çatışmayı bildirdim, kullanıcı yeniden açmayı seçti.**
+Kayıt burada duruyor ki altı ay sonra "neden değişti" sorusunun cevabı olsun.
+
+> **Açılan şey ESTETİK. Aşağıdakiler açılmadı, çünkü hiçbiri zevk meselesi
+> değil:**
+>
+> 1. **İlke 1–3 — ürün kuralı, tasarım kuralı değil.** Tek dosya derlemesi,
+>    CDN'den sıfır bayt, ağdan çekilen font yok. Font **gömülür** (base64,
+>    2026-08-25 güncellemesi bunu zaten serbest bıraktı) — `<link>` ile
+>    çekilmez. Bunu `vite-plugin-singlefile` ve `site.spec.ts` **mekanik**
+>    olarak doğruluyor; iddiaya gerek yok.
+> 2. **Yeni runtime bağımlılığı hâlâ "önce sor".** Tailwind/shadcn/Radix
+>    *bağımlılık* gerekçesiyle reddedilmişti, zevk gerekçesiyle değil — o
+>    gerekçe bu kararla kalkmadı. Animasyonda da ayrım aynı: **süre ve kapsam
+>    açık**, **kütüphane kapalı**.
+> 3. **Ölçülen şey ölçülmeye devam eder.** Palet ΔE/kontrast
+>    (`palette.test.ts`), sütun sığması (`sutun.spec.ts`, `renk-secici.spec.ts`),
+>    kâğıt 205 mm (tuzak 31). Bir yeniden tasarım bu **sayıları değiştirebilir**
+>    — ama testi bilerek günceller. **Testi silmek bir tasarım kararı değildir**
+>    (tuzak 23 ve 33: yeşil geçen süit "bozulmadı" demek değildir).
+> 4. **İşlevsel renk kanalı.** Yeşil = bırakılabilir / sarı = uyarı /
+>    kırmızı = engel. Karanlık mod yasağı tam da bu kanal çamurlaştığı için
+>    kalkmıştı (2026-08-24); estetik değişse de kanalın kendisi aracın
+>    çalışma biçimi.
+> 5. **Kâğıt fiziksel.** A4 yatay, `table-layout: fixed`, `@page { margin: 0 }`.
+>    Ekran karakteri ne olursa olsun yazıcı aynı yazıcı.
+>
+> **Sıra:** yeniden tasarım kendiliğinden olmaz. "Görsel iş akışı"ndaki iki
+> aşama (plan → öz eleştiri → onay → kod) bu tur için **zorunlu**, çünkü
+> A0–A5'te yazılan sistemin bir kısmı geri alınacak.
+
+### Görsel iş akışı — iki aşama, sonra göz
+
+1. **Plan → öz eleştiri → onay → kod.** Arayüzü değiştiren işte önce ne
+   yapılacağı yazılır, zayıf yanı kendi ağzından söylenir, onay alınır. Kod
+   sonra. Gerekçe ilke 5'in aynısı: tahminle yazılan arayüz yanlış arayüzdür.
+2. **Her bölüm sonunda ekran görüntüsü + kendi çıktını eleştir.**
+   `npm run ekran` → `test-results/ekran/`, iki temada on bir görüntü.
+   Ölçek ya da yoğunluk değiştiyse bu **zorunlu** (tuzak 33).
+3. Görsel regresyon **yereldir**: `npm run gorsel`, 24 referans, depoda.
+   Bulut servisi (Chromatic/Percy) yok — hesap, yükleme ve ağ gerektirir.
+
+### Geliştirme araçları — üründe değil, tezgâhta
+
+`.mcp.json` üç sunucu tanımlar; hiçbiri `dist/index.html`'e girmez, ilke 1–3
+etkilenmez. Oturum başına token yerler, kullanılmayan `/mcp` ile kapatılır.
+
+| Sunucu | Ne için | Not |
+|---|---|---|
+| `playwright` | uygulamayı sürüp **bakmak** | E2E süiti bunun yerine geçmez: o iddiaları sabitler, bu keşif içindir |
+| `chrome-devtools` | konsol · ağ · **performans profili** | ilke 7'nin ("hedef makine yavaş") ölçüleceği yer |
+| `context7` | React 19 / Vite 7 sürüm dokümanı | bütçe daralırsa **ilk kapatılacak** olan budur |
+
+Tip hataları için `typescript-lsp` eklentisi (`typescript-language-server`
+global kurulu). `npm run kontrol` yine de son sözü söyler.
+
 ---
 
 ## Arayüz
 
 Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**. Daha fazlası yok.
 
-- **Sekmeler solda, dikey bir kenar çubuğunda** (92px; daraltılınca 52px, tercih
-  `localStorage['ders-programi-kenar']`'da). Karar 768px'lik ekranda alınmıştı: yatay
-  bir şerit ızgaradan bir öğretmen satırı götürüyordu. 1080px'te o baskı yok ama karar
-  duruyor, çünkü ikinci gerekçe ekrandan bağımsız: yatayda ızgara **hâlâ** taşıyor ve
-  kayıyor (1920'de 788px), yani 92px zaten kaydırılan bir yerden gidiyor. Daraltılmışken etiket gizlenir ama `aria-label`
-  kalır — erişilebilir ad kaybolmaz.
+- **Sekmeler ÜSTTE, çift bar** (2026-08-25'te rail kalktı). Satır bir: belge
+  kimliği · 6 sekme · geri/ileri al · dosya · şerit katlama · tema. Satır iki:
+  **o sekmeye ait araç şeridi** (`.ribbon`) — Word/Excel/aSc mantığı.
+  - Rail'in savı ("yatay bant ızgaradan bir satır götürür") 768px ekran için
+    yazılmıştı ve rail'in **kendi maliyeti hiç sayılmamıştı**: altı sekmenin
+    hepsinde 92px **genişlik**, ve Program dışındaki beşinin harcayacak
+    genişliği yok — her ekranın sağının boş kalmasının sebebi buydu.
+  - Bant ancak **kendi satırı** olursa bir satıra mal olur. Ölçülen baş toplamı:
+    rail'li düzende 59+50+30 = **139px**, çift barda 51+39+26 = **116px**.
+  - **Kontrol'de şerit hiç çizilmez** — okunan bir rapor, ona yapılacak bir şey
+    yok, ve boş çizilen bir şerit bunu söylemek için 39px harcar.
+  - Şerit katlanır (`ders-programi-serit`); katlanınca **tamamen** gider, 39px'i
+    ızgaraya bırakır. %100'de Program'da bir şey kazandırmaz ve bu doğru:
+    müşterisi %125/%150 kullanan baba, orada 39px bir tam satırdır. Katlama
+    düğmesi üst barda, çünkü katlanmış bir şeridin kendi düğmesine verecek
+    satırı yoktur.
+  - 1280px altında sekme etiketleri gizlenir, `aria-label` kalır.
 - **İçerik ekranın tamamını kullanır.** Tek düzen kuralı `.cols` (+ `wide-left`,
   `narrow-right`): solda asıl iş, sağda o ekranın **anlamı** — Kurulum'da kapasite
   özeti, Ayarlar → Okul'da zil önizlemesi, Ayarlar → Kurallar'da canlı ihlal listesi,
@@ -798,6 +1077,8 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   olmayan bir süreklilik uydurur ve hangisine oturduğunu gizler. İkisi de
   `State`'e girmez (`ders-programi-olcek`, `ders-programi-yogunluk`) ve ikisi de
   **yazdırmayı etkilemez** — kâğıtta saatler her iki yoğunlukta da yazar.
+  **Yoğunluğun bir kopyası Program'ın araç şeridinde**: ızgaranın ne kadarını
+  gördüğün, ızgaraya bakarken verilen bir karardır, üç tık ötede değil.
 - **Üst çubukta plan seçici, yönetim Ayarlar → Veri'de.** Seçici tek plan
   varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve
   ancak iki plan olunca beliren bir kutu planların var olduğunu hiç
@@ -826,12 +1107,35 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   yükseklikli, ızgarayı kaydırmıyor, göz zaten oraya alışkın. İlerleme **düz metin**,
   çubuk değil (yasak liste: animasyon). Bütün koşu **tek geri-al adımı**.
 - Ana ekran aSc'deki gibi: **satır = öğretmen, sütun = 6 gün x 12 saat**, tek geniş
-  tablo, altta yerleşmemiş kart havuzu. Saat başlığında ders numarası ve altında
+  tablo. **Havuz ALTTA, ve boyu SÜRÜKLENEBİLİR** (`.pool` + `.pool-split`).
+  Bir sürüm sağda durdu; sav ("ızgara yatayda zaten taşıyor") doğruydu ama
+  havuzu üç kart genişliğinde bir sütuna çeviriyordu: 99 bekleyen ders
+  kaydırılan bir liste oluyordu, görülen bir tepsi değil. Altta aynı 99 kart
+  onikişer sıralar hâlinde duruyor. Altını daha önce imkânsız kılan şey
+  **başkasının seçtiği sabit bir yükseklikti** (215px, yani 25 öğretmenin
+  altısı) — artık sabit değil: kenar bir `role="separator"`, bıraktığınız yer
+  `ders-programi-havuz-boy`'da hatırlanıyor, ve **havuz boşalınca kendiliğinden
+  kapanıyor** (boş bir tepsi 176px'i hiçbir şey için tutar).
+- **İmleç haçı.** Bir hücrenin üstüne gelince o hücrenin **satırı ve sütunu**,
+  ayrıca saat başlığı ile öğretmen adı birlikte aydınlanır. 78 sütunluk bir
+  haftada yerini kaybetmemenin tek yolu ve babanın göz sorununa doğrudan cevap.
+  Kapalı saat taramasını **örtmez** (nerede olduğunu söyler, neden
+  kullanılamadığını değil) ve sürükleme başlayınca **söner** — orada ızgaranın
+  kendi üç rengi konuşur. `src/gridChrome.ts`, saf DOM, React state'e dokunmaz
+  (tuzak 1'in deseni). Ölçülen maliyet: **0,148 ms / sütun değişimi**, 16,7 ms'lik
+  kare bütçesinin %1'inden azı.
+- **Gün bandı.** Tek indeksli günler çok hafif bir zemin alır (ΔE 2,7). Amaç
+  gruplamak; bir *durum* gibi okunmaması ölçülerek sabitlenir. Saat başlığında ders numarası ve altında
   başlangıç saati (`3` / `10:40`).
 - **Görünüm iki yazısız simge düğmesi**: Öğretmen / Sınıf. Seçili olan vurgulu,
   diğeri soluk. `aria-label` zorunlu — metin yok, erişilebilir ad onların tek adı.
   Yanındaki açıklama cümlesi kalır: simge yalnız başına ilk seferde tahmin ettirir.
 - Sayaç 0 ise adım soluk. **Kilitli sihirbaz değil** — her adıma her an atlanır.
+- **Renk sayı değil, RENK seçilir.** Satır başındaki düğme rengin kendisini
+  gösterir; tıklayınca 36 rengin tamamı 6×6 bir `<dialog>`'da açılır, seçili
+  olan çerçeveli. İndeks kaybolmadı — `State`'in sakladığı, yedeğin taşıdığı ve
+  "iki öğretmen aynı renkte mi" sorusunun sorulduğu şey o — swatch'ın üstünde
+  `--on-color` mürekkeple durur.
 - **Branş yazılmaz, seçilir.** Serbest metin "Matemtik"i sessizce ikinci bir branş
   yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Liste
   Ayarlar'da yönetilir; "+ Yeni branş…" ile oracıkta eklenir. **Kullanılan branş

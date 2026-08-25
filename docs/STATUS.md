@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (on dördüncü oturum: **A2 `ch` sütun merdiveni + A5 ızgara yoğunluğu**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-25 (on yedinci oturum: **C turu — kabuk yeniden tasarımı**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -42,6 +42,10 @@ bu turda geldi; kullanıcı istedi.
 
 | Aşama | Durum |
 |---|---|
+| **C turu: çift üst bar (rail kalktı)** | ✅ ölçüldü, E2E bekliyor |
+| **C turu: havuz ALTA + sürüklenebilir boy** | ✅ ölçüldü, E2E bekliyor |
+| **C turu: araç şeridi (ribbon), altı sekme** | ✅ ölçüldü, E2E bekliyor |
+| **C turu: boş alanlar gerçek veriyle doldu** | ✅ ölçüldü, E2E bekliyor |
 | Karar turu (sorular cevaplandı) | ✅ |
 | Belgeler (CLAUDE.md, PLAN, STATUS, TASKS) | ✅ |
 | İskele (Vite + React + TS + Vitest + singlefile) | ✅ |
@@ -100,7 +104,9 @@ bu turda geldi; kullanıcı istedi.
 | **Y0: yüzey ve çizgi ayrımı (`--hairline`)** | ✅ 11 kural + 1 kural ikiye bölündü · iki temada ekran görüntüsü |
 | Tasarım sistemi A1–A2 (tipografi merdiveni, `ch` sütun merdiveni) | ✅ JSX'te 0 inline genişlik · `e2e/sutun.spec.ts` 11 test |
 | Tasarım sistemi A5 (ızgara yoğunluğu) | ✅ Sığdır'da yatay kaydırma **788 px → 0** |
-| Tasarım sistemi A3–A4 (gömülü font, dialog) | ⬜ **sırada** |
+| Tasarım sistemi A3 (gömülü font) | ✅ IBM Plex Sans, 23 KB, `dist` 347 → **379 KB** |
+| Tasarım sistemi A4 (renk seçici) | ✅ 6×6 swatch dialog · 8 E2E. `confirm`/`alert` **kalan iş** |
+| **B turu — yeniden tasarım (üç düzlem · ızgara enstrümanı · havuz çekmecesi)** | ✅ 14 yeni E2E · ölçüldü, iddia edilmedi |
 | GitHub Pages yayını | ⬜ bekliyor (kullanıcıdan: depo adı + Pages kaynağı) |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
@@ -109,12 +115,13 @@ bu turda geldi; kullanıcı istedi.
 **bilerek eski** — tasarım turunun sonunda tek seferde yenilenecek, ara aşamalarda
 `npm run gorsel` çalıştırılmıyor.
 
-**Testler: 409 birim + 251 E2E + 6 site = 666, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 344 KB, sıfır ağ çağrısı;
-`npm run build:site` → `dist-site/`, 364 KB (aynı tek dosya + manifest + `sw.js` +
-simgeler). `npm run kontrol` toplam ~61 sn (E2E ~46 sn 4 worker, site ~3 sn).**
-Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: 22 görsel referans
-(`npm run gorsel`, 5 sn) ve 7 gerçek ölçekli çözücü testi (`npm run cozucu`, ~39 sn).
+**Testler: 409 birim + 265 E2E + 6 site = 680, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, **379 KB** (gömülü font dahil),
+sıfır ağ çağrısı; `npm run build:site` → `dist-site/` (aynı tek dosya + manifest +
+`sw.js` + simgeler). `npm run kontrol` toplam ~62 sn.**
+Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: **24** görsel referans
+(`npm run gorsel`, 5 sn — B turunda tek seferde yenilendi) ve 7 gerçek ölçekli
+çözücü testi (`npm run cozucu`, ~39 sn).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -248,6 +255,18 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Aynı okul, yalnız "art arda en fazla 2" Engelle | neredeyse boş · 15 sn → **424/426 saat · 1,6 sn** |
 | Örnek okul %95 doluluğa yüklenmiş (`gercek-olcek-sikisik`) | 3/423 blok · 15 sn → **412/423 · 3,6 sn** |
 | Kasten imkânsız dünya (`gercek-olcek-imkansiz`, %160 yük) | 22/708 blok → **159/708** (bütçe yine doluyor) |
+| **Baş toplamı — rail'li düzen** (topbar 59 + subbar 50 + sebep 30) | **139 px** |
+| **Baş toplamı — çift bar** (topbar 51 + şerit 39 + sebep 26) | **116 px** |
+| Şerit katlanınca ızgara | 789 → **827 px** (39 px geri) |
+| Havuz boşalınca (kendiliğinden kapanır) | 176 → **53 px**, ızgara 789 → **912 px** |
+| Havuz sürükleme — 100px yukarı | 176 → **280 px**, depoya `17.5` (rem), yenilemede durdu |
+| Havuz tavanı (End tuşu) | **352 px**, ızgaraya 613 px kalıyor |
+| Sığdır + havuz AÇIK — yatay taşma | **0 px** (hücre 19.5, tablo 1575/1588) — eski "174px" ölçümü geçersiz |
+| ΔE(chrome, paper) | **5.16** açık · **3.98** koyu |
+| ΔE(chrome, chrome-2) | **3.21** açık · **2.56** koyu |
+| ΔE(band, paper) | **2.67** açık · **3.00** koyu (durum eşiği 14'ün çok altında) |
+| kontrast(text, paper) · kontrast(muted, paper) | 17.98 / 6.79 açık · 13.76 / 7.61 koyu |
+| `dist/index.html` | **402 KB** (sınır 420 KB) |
 | Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
 | Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
 | `dist/index.html` | **331 KB**, tek dosya, 0 ağ çağrısı |
@@ -383,6 +402,24 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 ---
 
 ## Doğrulanmayı bekleyen varsayımlar
+
+**C turundan (2026-08-25):**
+
+- **E2E süiti bu turda hiç koşulmadı** — kullanıcı kararı. 415 birim testi ve
+  `npx tsc --noEmit` her adımda yeşil, derleme yapılıyor, ve her ekran gerçek
+  tarayıcıda ölçülüp gözle bakıldı; ama 265 E2E testinin kaçının kırmızı olduğu
+  **bilinmiyor**. En az dördünün iddiası bilerek değişti (bkz. TASKS → C10).
+  Bu, tuzak 23'ün tam olarak uyardığı durumun tersidir: burada yeşil bir süit
+  yok, **koşulmamış** bir süit var, ve ikisi aynı şey değil.
+- **Görsel referanslar (24 PNG) artık yalan.** Kabuğun tamamı değişti;
+  `--update-snapshots=all` gerekiyor (tuzak 25).
+- **Yeni tuzaklar 42–47 buradan çıktı** ve hepsi gerçek hatalardı; beşi
+  splitter'ı yazarken, biri (42) eski bir ölçümün geçersizleştiğini fark
+  ederken. Beşi de sessizdi — konsol temiz, tip güvenli, test yeşil.
+- **Baba hâlâ görmedi.** Çift bar, alt havuz ve sürüklenebilir boy onun
+  alışkanlığına uyuyor mu bilinmiyor; ilke 5 gereği bir dönem kullanılmadan
+  bunun üstüne özellik yazılmayacak.
+
 
 1. **Derslik gerçekten paylaşılıyor mu?** Önce "her sınıfın kendi odası var" dendi,
    sonra "harf = derslik" dendi — fotoğrafta 20 sınıf 8 harfi paylaşıyor.
@@ -677,6 +714,231 @@ Y0 ilk koşuda **iki test kırdı**, ikisi de aynı kök: yeni `--muted` `--clos
    Clamp'in üst ucu da bu makinede hiç ateşlenmez: 72 sütunun 34 px'ten geniş
    sığması için ekranın ~2740 px olması gerekir, babanınki 1920.
    **Karar kullanıcıya soruldu**; A2'nin ikinci yarısı bu yüzden yazılmadı.
+
+---
+
+## On altıncı oturum (2026-08-25) — B turu: yeniden tasarım
+
+Kullanıcı "hem modern hem ferah hem de kaliteli bir UI, UX'i düşünerek" dedi.
+Plan → öz eleştiri → onay → kod akışı işletildi; kullanıcı dört kararı verdi:
+**kapsam C** (düzen de değişsin), **IBM Plex Sans**, ölçek varsayılanı **%100
+kalsın / tavan %150**, UX maddelerinden yalnız **renk seçici**.
+
+### Yapılanlar
+
+| Aşama | Ne |
+|---|---|
+| B1 | **Üç düzlem** token seti (`--bg` masa / `--chrome` kabuk / `--paper` kâğıt) + `--band`, `--r-lg`, `--elev-1/2`, `--dur`/`--ease`, `--ls-*`. Gömülü değişken font |
+| B2 | Üst çubuk **üç bölge** (belge kimliği · not · geçmiş ve dosya kümeleri); `↶ ↷ ☀ ☾` **SVG'ye**; tema düğmesi **raya indi**; ray dolgulu hap |
+| B3 | **Izgara enstrümanı**: 2100 hücrelik kafes kalktı, gün bandı, imleç haçı, hücreyi 1px boşlukla dolduran nesne kartlar, büyük harf + tracking gün başlıkları |
+| B4 | **Havuz alttan sağa** (240px çekmece, kapanabilir). `ders-programi-havuz` |
+| B5 | **Renk seçici**: sayı listesi → 36 swatch `<dialog>`'u. Ölçek tavanı %150 |
+| B6 | `npm run kontrol` yeşil · 24 görsel referans yenilendi · belgeler |
+
+### Ölçülen sayılar — iddia edilmedi
+
+| Ne | Önce | Sonra |
+|---|---|---|
+| `dist/index.html` | 347 KB | **379 KB** (sınır 420) |
+| Gömülü font (ham) | — | **23 332 B**, 225 glif, wght 400–600 |
+| Program'da görünen öğretmen satırı | ~11 | **25 / 25** (her yoğunlukta, çekmece açık ya da kapalı) |
+| ΔE(chrome, paper) | — | 5.5 açık · 3.5 koyu |
+| ΔE(band, paper) | — | **2.7** (durum renkleri birbirinden 14 uzak) |
+| İmleç haçının maliyeti | — | **0,148 ms / sütun değişimi** (kare bütçesi 16,7 ms) |
+| Sığdır + çekmece AÇIK, dolu ızgara | — | 174 px kaydırma → çekmece **kapatılıyor** |
+| Sığdır + çekmece kapalı | 0 px | **0 px** (pay 8 → 12 px, Plex 0,4 px/sütun yedi) |
+
+### Bu oturumda bulunan gerçek hatalar — dördü de ölçümle çıktı
+
+1. **`font-display: swap` düzeni her açılışta kaydırıyordu.** `1ch` yedek fontta
+   6,86px, Plex'te 9,00px; `ch`'den boylanan her sütun bir kez zıplıyordu.
+   → `block` + E2E'de `document.fonts.ready`. **Tuzak 38.**
+2. **`ch` puntoyla orantılı değil** (7,00px @12px, 9,00px @15px). "Sütunlar
+   ölçekle tam 1,25 büyür" testi aslında **fontun** bir özelliğini iddia
+   ediyormuş; **ch sayısı** sayan daha güçlü bir değişmezle değiştirildi.
+   **Tuzak 39.**
+3. **Gün bandı, kapalı saatlerin taramasını sildi.** `td.band` (0,2,3),
+   `td.unavailable`'ı (0,1,1) yendi; tek indeksli günlerdeki kapalı saatler
+   sessizce boşaldı. Yalnız "kapalı saat haçın altında kaybolmuyor" testi
+   yakaladı. **Tuzak 40.**
+4. **Çekmecenin Sığdır'a maliyeti önce BOŞ ızgarada ölçüldü ve "sığıyor" çıktı.**
+   426 kart konunca aynı yapılandırma 174px taştı. **Tuzak 41.**
+
+### Bilerek geri alınan iki kural
+
+- "Üçüncü radius YOK" → **üç** (`--r-sm` veri · `--r-md` denetim · `--r-lg` düzlem)
+- "Bir öğe yüzüyorsa yanlıştır" → **iki kot** (`--elev-1` kâğıt · `--elev-2`
+  gerçekten yüzen üç şey). Düğme ve girdi gölge almaz.
+
+### Bilerek yapılmayanlar
+
+- **`confirm`/`alert` → `<dialog>` geçmedi** (A4'ün ikinci yarısı): kullanıcı
+  bu turda yalnız renk seçiciyi istedi. 12 `confirm` + 5 `alert` duruyor.
+- **Havuzda gruplama/süzme ve listelerde sıralama yapılmadı** — aynı karar.
+- **Ölçek varsayılanı %100 kaldı.** Yani "babam zor görüyor" sorunu bu turda
+  yarım kaldı: tavan %150'ye çıktı ama ayarı **bulup** büyütmesi gerekiyor.
+  Gerçek veriyle denerken sorulacak.
+
+### Doğrulanmayı bekleyen
+
+- Bütün ölçümler **bu makinedeki Chromium'da**. Babanın makinesinde görülmedi.
+- İmleç haçının 0,148 ms'i bu CPU'da; yavaş makinede birkaç katı olsa bile
+  kare bütçesinin altında kalır ama **ölçülmedi**.
+- Gün bandının ve kalkan kafesin gerçekten okunaklı olup olmadığı **göze**
+  sorulmadı — ΔE sayıyı garanti eder, gözü değil.
+
+---
+
+## On beşinci oturum (2026-08-25) — tasarım araçları ve bir yön kararı
+
+Bu oturumda **kod yazılmadı.** Kullanıcı bir araç listesi verdi ("olması gereken
+her şey": tasarım skill'leri, `tokens.css`, `DESIGN.md`, MCP sunucuları, görsel
+regresyon, iki aşamalı prompt) ve "bunları kur" dedi. Listenin bir kısmı
+kuruldu, bir kısmı projenin kendi kurallarıyla çatıştığı için önce **çatışma
+bildirildi**.
+
+### Kurulan
+
+| Ne | Nerede | Doğrulama |
+|---|---|---|
+| `typescript-language-server` | global (npm -g) | `6.0.0`, `$PATH`'te |
+| `.mcp.json` | proje kökü | `@playwright/mcp` 0.0.79 · `chrome-devtools-mcp` 1.8.0 · `@upstash/context7-mcp` 4.0.3 — üçü de `npm view` ile doğrulandı |
+| `.claude/settings.json` | proje | `enabledPlugins`: `frontend-design`, `typescript-lsp`. **Kapsam bilerek `project`** (kullanıcı kararı): depo private, ve başka bir makinede klonlanınca kurulum kendiliğinden geliyor |
+| `docs/DESIGN.md` | yeni dosya | 135 satır primitif envanteri, `styles.css`'ten çıkarıldı |
+| `CLAUDE.md` | üç yeni blok | envanter+araçlar · görsel iş akışı · tasarım dili kararı |
+
+### `chrome-devtools` sertleştirildi — iki varsayılan kapatıldı
+
+`--help` okununca çıktı: `--usageStatistics` **varsayılan `true`** (Google
+kullanım verisi topluyor) ve `--performanceCrux` **varsayılan `true`**
+(performans izlerindeki URL'leri CrUX API'ye gönderiyor). Bu projenin
+"internet gerekmez" duruşuyla bağdaşmıyor; ikisi de `false`, ayrıca
+`CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS=1`.
+
+Ayrıca bu makinede Chrome **yok** (yalnız Brave). Sunucu Playwright'ın
+kendi Chromium'una bağlandı
+(`~/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome`) — E2E süiti
+zaten o binary'de ölçüyor, yani profil sayıları test sayılarıyla
+karşılaştırılabilir kalıyor.
+
+**Ağa çıkan tek sunucu `context7`**: sorguyu Upstash'e gönderiyor. Diğer ikisi
+yerel. Hiçbiri `dist/index.html`'e girmiyor.
+
+### Eklentiler gerçekten kuruldu — 7 tane, `project` kapsamında
+
+`claude` CLI `$PATH`'te yok, **ama VSCode eklentisinin içinde gömülü bir ikili
+var**: `~/.vscode/extensions/anthropic.claude-code-2.1.245-linux-x64/resources/native-binary/claude`
+(2.1.245). `claude plugin …` alt komutları etkileşimsiz çalışıyor, yani
+kurulum bildirimsel kalmadı.
+
+Kullanıcı `anthropics/skills` marketplace'inin **tamamını** istedi:
+
+| Marketplace | Plugin | Skill sayısı |
+|---|---|---|
+| `anthropic-agent-skills` | `document-skills` | 4 (`xlsx` `docx` `pptx` `pdf`) |
+| | `example-skills` | 12 |
+| | `claude-api` · `academy-guide` · `discernment-nudge` | 1 + 1 + 1 |
+| `claude-plugins-official` | `frontend-design` · `typescript-lsp` | — |
+
+Yedisi de `Status: ✔ enabled`, `Scope: project`. Eklenti dosyaları
+`~/.claude/plugins/` altında, **81 MB**. Marketplace kayıtları
+`claude plugin marketplace add` tarafından **`~/.claude/settings.json`'a**
+yazıldı (cihaz geneli), plugin kayıtları projedeki `.claude/settings.json`'a.
+
+İlk denemede `frontend-design` ve `typescript-lsp` **başarısız oldu**:
+`claude-plugins-official`'ın yerel kopyası yoktu. Marketplace elle eklenince
+ikisi de geçti.
+
+### Budama — 7 → 3, hepsi ölçülerek
+
+`claude plugin details` her eklentinin **oturum başına sabit maliyetini**
+veriyor; karar tahminle değil o sayılarla alındı.
+
+| Eklenti | Always-on | Karar |
+|---|---|---|
+| `example-skills` (12 skill) | ~1.221 tok | **kaldı** |
+| `document-skills` (4 skill) | ~1.028 tok | **kaldı** |
+| `typescript-lsp` | ~0 tok | **kaldı** (süreç dışı, model bağlamı yok) |
+| ~~`claude-api`~~ | ~471 tok | kaldırıldı |
+| ~~`academy-guide`~~ | ~321 tok | kaldırıldı |
+| ~~`discernment-nudge`~~ | ~317 tok | kaldırıldı |
+| ~~`frontend-design@claude-plugins-official`~~ | ~78 tok | kaldırıldı |
+
+- **`frontend-design`** iki marketplace'te de vardı, `SKILL.md`'ler **birebir
+  aynı** (8260 bayt, `cmp` sessiz). `example-skills` bundle'ından tek skill
+  çıkarılamadığı için resmi olan gitti — skill'in kendisi duruyor.
+- **`claude-api`** zaten oturumda mevcuttu, bu depoda LLM/API kodu yok.
+- **`discernment-nudge`** skill dosyası okunarak elendi, tahminle değil. Kendi
+  "when not to" listesi bu projeyi üç yerden dışlıyor: *"code the user will
+  execute — running it is the verification"* (burada doğrulama `npm run
+  kontrol`), *"the user asked you to verify"* (CLAUDE.md'nin daimî kuralı
+  "çıktıyı göster, iddia etme"), ve **konuşma başına en fazla bir kez**
+  çalışıyor. Üstelik zorunlu kıldığı kapanış satırı İngilizce ve sabit
+  (*"A few things worth a second look:"*) — ilke 4 tek dil Türkçe.
+
+Kalan toplam: **~2.249 tok** oturum başına. Kullanıcının alıntıladığı
+"5 MCP sunucusu ~55k" uyarısına göre küçük; asıl yük MCP'lerde.
+
+**Hesapta hiçbir şey yok — ölçüldü:** `~/.claude.json` (hesabın bağlı olduğu
+dosya) içinde `plugin`/`marketplace`/`skill` geçen **tek bir anahtar yok**;
+yalnız `oauthAccount` (giriş bilgisi) var. Eklentiler cihazda
+(`~/.claude/plugins/`), kayıtları iki settings dosyasında.
+
+**MCP sunucuları hâlâ etkin değil:** yeniden başlatmada `.mcp.json` onaylanacak.
+
+### Kurulmayanlar ve gerekçeleri
+
+- **`tokens.css` (tek `--brand-hue`'dan OKLCH türetmesi)** — proje zaten altı
+  basamaklı token merdivenlerine sahip ve CSS **tek dosya**. Asıl sorun palet:
+  36 rengin ΔE ayrımı aranarak bulundu, tek bir hue'dan türetilen 36 renk o
+  ölçüyü geçemez. Karar `docs/DESIGN.md`'de yazılı — palet değişebilir, **test
+  sözleşmedir**.
+- **Storybook MCP** — Storybook yok; kurmak yeni bir devDependency ağacı demek.
+- **Chromatic / Percy** — hesap + yükleme + ağ. `npm run gorsel` zaten aynı işi
+  **yerelde** 24 referansla yapıyor.
+- **Lighthouse / CWV denetimi** — `file://` üzerinden açılan, ağ isteği olmayan
+  tek dosya için ölçtüğü şeylerin çoğu tanımsız.
+- **`references/` klasörü** — zaten var: `docs/Örnek Fotolar`, aSc Timetables
+  2027'nin 18 ekran görüntüsü. Yenisi açılmadı, `CLAUDE.md` oraya bağlandı.
+
+### Düzeltilen bir yanlış varsayım
+
+Kullanıcının listesinde **"Playwright MCP ✅ (sende var)"** yazıyordu. Yoktu:
+`~/.claude.json`'da tanımlı **hiçbir** MCP sunucusu yoktu, ve projedeki
+Playwright bir **devDependency** (E2E süiti) — MCP sunucusu değil. İkisi aynı
+adı taşıyor ama biri testleri koşuyor, diğeri tarayıcıyı bana sürdürüyor.
+
+### Yön kararı — tasarım dili yeniden açıldı
+
+Kullanıcıya sorulan tek soru: `frontend-design` skill'i kurulsun mu? Skill'in
+kendi tanıtımı ile `CLAUDE.md` dört maddede birbirinin tersini söylüyordu
+(sistem fontu · animasyon · gölge-derinlik · palet). Üç seçenek sunuldu;
+kullanıcı **"Kur ve tasarım dilini yeniden aç"** dedi.
+
+Yani "Karakter" paragrafı (kâğıt yüzeyi, kılcal kenarlık, sıfır gölge) artık
+bağlayıcı değil. Paragraf **silinmedi**, bağlayıcı olmadığı işaretlendi —
+A0–A5'in tamamı o karakteri hedefleyerek yazıldı, geri alınacak şeyin ne
+olduğu okunabilir kalmalı.
+
+**Açılmayanlar, ve neden hiçbiri zevk meselesi değil:** ilke 1–3 (tek dosya,
+CDN'den sıfır bayt, font gömülür — `singlefile` ve `site.spec.ts` mekanik
+doğruluyor) · yeni runtime bağımlılığı (Tailwind/shadcn *bağımlılık*
+gerekçesiyle reddedilmişti; animasyonda süre açık, **kütüphane kapalı**) ·
+ölçülen testler (`palette.test.ts`, `sutun.spec.ts`, tuzak 31'in 205 mm'si —
+sayılar değişebilir, **testi silmek tasarım kararı değildir**) · işlevsel renk
+kanalı (yeşil/sarı/kırmızı — karanlık mod yasağı tam da bu kanal çamurlaştığı
+için kalkmıştı) · kâğıt (A4 fiziksel).
+
+### Bu oturumun kendi dürüstlük şartı
+
+**Hiçbir şey tarayıcıda doğrulanmadı, çünkü kod değişmedi.** `src/` altında tek
+satır dokunulmadı; değişenler `CLAUDE.md`, `docs/DESIGN.md`, `docs/TASKS.md`,
+`docs/STATUS.md` ve iki config dosyası. Test süiti çalıştırılmadı — çalıştırmak
+bu değişiklikler hakkında hiçbir şey söylemezdi.
+
+**B turu (yeniden tasarım) HENÜZ PLANLANMADI.** Tasarım dilinin açılması,
+yeniden tasarımın yapıldığı anlamına gelmiyor. Kapsam kullanıcıda; tur
+başlamadan önce iki aşamalı akış (plan → öz eleştiri → onay → kod) zorunlu.
 
 ---
 

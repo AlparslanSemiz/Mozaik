@@ -9,7 +9,78 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-### Tasarım sistemi turu (A0–A6) — DEVAM EDİYOR
+### C turu — kabuk yeniden tasarımı (çift üst bar + alt havuz) — **KOD BİTTİ, TESTLER BEKLİYOR**
+
+Kullanıcı kararı (2026-08-25): *"UI'yı adamakıllı baştan sona en güzel hale
+getir. Modern, ferah, kolay kullanımlı, tekdüze değil albenili. Ekranda boş
+yerler kalmasın. Sol barı üste taşımalıyız, üstte çift bar olmalı. Program
+kısmındaki çekmeceyi aşağı geri getir, boyutunu ayarlama opsiyonu da olsun.
+CLAUDE.md'deki kısıtlamalar varsa yok say."*
+
+**E2E süiti bu tur boyunca bilerek koşulmadı** (kullanıcı kararı). Doğrulama
+gerçek tarayıcıda ölçüm + ekran görüntüsüyle yapıldı. Testler **silinmedi**;
+iddiası değişenler aşağıda.
+
+- [x] **C1 Araç durumu App'e çıktı** (`src/toolState.ts`). `view` · `kind` ·
+      `chosen` · `step` · `section` · `scope` · `colored`. Görsel değişiklik
+      sıfır, ama kendi başına bir düzeltme: sekme değişince Program'ın sınıf
+      görünümü, Müsaitlik'teki öğretmen ve Kurulum'un 4. adımı kayboluyordu —
+      tuzak 18'in `printExcluded`/`solver` için çözdüğü sorunun aynısı.
+- [x] **C2 Sığdır ↔ havuz takası kaldırıldı** — ölçümle. Bkz. tuzak 42.
+- [x] **C3 Havuz ALTA döndü.** Kartlar yatay akıyor; havuz **boşalınca
+      kendiliğinden kapanıyor** (176px → 53px, ızgara 789 → 912px).
+- [x] **C4 Havuz boyu sürüklenebilir** (`src/poolSplit.ts`, `role="separator"`,
+      ok tuşları, `ders-programi-havuz-boy`). Tavan CSS'te `clamp` +
+      `min(22rem, 100% - 26rem)`; JS aynı tavanı hesaplıyor ki `aria-valuemax`
+      yalan söylemesin. Ölçüldü: 176 → 280px sürüklendi, depoya 17.5 yazıldı,
+      yenilemede durdu, ok tuşları ±0.5rem, End tavana götürdü.
+      Yol boyunca beş gerçek hata: tuzak 43, 44, 45, 46, 47.
+- [x] **C5 Sol rail kalktı, üstte çift bar.** Ölçülen baş: **139 → 116px**
+      (51 üst bar + 39 şerit + 26 sebep çubuğu). Rail'in 92px'i her sekmede
+      ızgaraya/panellere geçti.
+- [x] **C6 Ribbon içeriği, altı sekme.** Kurulum'un adımları · Müsaitlik'in
+      türü · Program'ın görünüm + çözücü + **yoğunluk** · Yazdır'ın kapsam +
+      renk · Ayarlar'ın bölümleri · **Kontrol: şerit yok**.
+- [x] **C7 Şerit katlanıyor** (`ders-programi-serit`, `main.tsx`'te ilk
+      boyamadan önce). Katlanınca **tamamen** gider: 39px ızgaraya
+      (789 → 827px). Düğme üst barda.
+- [x] **C8 Token turu.** `--chrome-2` (ikinci kabuk düzlemi) · `--chrome-lit`
+      (üst barın gradyan üst durağı, koyu temada kapalı) · yarıçap 3/6/10 →
+      4/7/12 · `--elev-1` iki katmanlı · `--dur` 120 → 140ms + `--dur-fast`
+      90ms. **Ölçüldü:** ΔE(chrome,paper) 5.16 açık / 3.98 koyu,
+      ΔE(chrome,chrome-2) 3.21 / 2.56, ΔE(band,paper) 2.67 / 3.00,
+      kontrast(text,paper) 17.98 / 13.76, lum(paper) 1.000 / 0.015.
+      Koyu tema chrome'u ilk denemede ΔE 2.47 çıktı, ölçüm görünce koyultuldu.
+- [x] **C9 Boş alanlar dolduruldu — hepsi GERÇEK veriyle.**
+      - Kurulum: **Kurulum durumu** paneli (dört adım, her birinin eksiği,
+        haftalık kapasite ↔ girilen yük)
+      - Müsaitlik: **Haftanın darlığı** ısı haritası — her saatte kaç kişi
+        kapalı. Çözücünün nerede tıkanacağını önceden söyler ve bu ekranın
+        yarattığı ama göremediği bilgiydi
+      - Ayarlar → Görünüm: **sahte** "Mehmet Çelik" tablosu gitti, yerine
+        gerçek öğretmen listesi
+      - Ayarlar → Kurallar: her kuralın **kaç yeri** etkilediği (kod ile
+        gruplanıyor — `Violation.rule`, tuzak 22) + kendi sınırı olan
+        öğretmenler paneli; düzen `.cols` → `.panel-grid`
+      - Kontrol: **Programın durumu** kartı (yerleşmiş/istenen saat,
+        tamamlanan ders, haftanın doluluğu)
+      - Yazdır: **Çıktı özeti** kartı (sayfa, kâğıt, renk, boş sayfa uyarısı)
+      - `topbar-note` üst bardan Ayarlar → Veri'ye taşındı
+- [ ] **C10 E2E süitini güncelle ve koş.** `helpers.ts`'in `openSetup` ve
+      `openSettings`'i güncellendi (`.step` artık `aria-pressed`), gerisi
+      bekliyor. İddiası değişecekler:
+      - `duzen.spec.ts` — rail testleri → yatay şerit; 25-satır iddiası
+        "havuz kapalıyken" koşuluna bağlanacak
+      - `izgara.spec.ts` — Sığdır↔havuz testi **tersine çevrilecek**
+        ("Sığdır havuzu kapatmıyor ve hafta yine sığıyor")
+      - `gorunum.spec.ts` — yoğunluk artık ribbon'da da var
+      - Yeni testler: splitter (sürükle · hatırla · klavye · min/max ·
+        `aria-valuenow`), şerit katlama, ΔE(chrome,chrome-2) ve
+        ΔE(chrome,paper) eşikleri
+      - **Hiçbiri silinmeyecek** (tuzak 23: testi silmek tasarım kararı değil)
+- [ ] **C11 `npm run gorsel -- --update-snapshots=all`** — 24 referans (tuzak 25)
+
+### Tasarım sistemi turu (A0–A6 + B) — BİTTİ ✅
 
 Kullanıcının aşağıdaki numaralanmamış listesi bu tura dönüştü. Çerçeve
 `CLAUDE.md` → **"Tasarım sistemi"**; iki yasak kalktı, gerekçeleri
@@ -64,20 +135,24 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       (`--lesson-cols`/`--break-cols`) çünkü hafta her zaman 6×12 değil.
       Tercih `localStorage['ders-programi-yogunluk']`, `State`'e girmiyor,
       "Veriler nerede" tablosuna eklendi. Tuzak 37 düzeltildi.
-- [ ] **A3 Font ve görsel karakter.** IBM Plex Sans base64 gömülü (ağdan
-      çekilmez). Boyut artışı raporlanacak, **420 KB'ı aşarsa durulacak**.
-      Yan fayda: gömülü font görsel referansları makineden bağımsız yapar, yani
-      `npm run gorsel` `npm run kontrol`'e girebilir hâle gelir
-- [ ] **A4 Dialog ve renk seçici.** Tek `<dialog>` bileşeni; 12 `confirm` +
-      5 `alert` geçirilecek. Renk seçici 6×6 swatch ızgarası — **artık kırık
-      değil** (A1'de kapandı), ama swatch ızgarası hâlâ daha iyi bir kontrol.
-      Gelirse `e2e/renk-secici.spec.ts` aynen geçerli: "seçili renk okunuyor"
-      bir kontrol türü değil, bir gereksinim. `.reason-bar`'a `aria-live`
-- [ ] **A6 Doğrulama.** `npm run kontrol`; `renk.spec.ts`'in WCAG/ΔE ölçümleri
-      **yeni değerlere göre geçecek — sınır gevşetilmeyecek, tasarım
-      düzeltilecek**. En son **24** baseline tek seferde yenilenip **tek tek
-      bakılacak** (A1'de `12-ayarlar-gorunum` sahnesi eklendi: 11 → 12 sahne ×
-      2 tema). README iki satırdan kurtarılacak
+- [x] **A3 Font ve görsel karakter — B turunda yapıldı.** IBM Plex Sans,
+      **değişken** yüz (wght 400–600'e kırpılmış), 225 glife alt kümelenmiş,
+      **23 KB ham → base64 gömülü**. Ölçülen boyut: `dist/index.html`
+      **347 → 379 KB**, sınır 420 KB. `<link>` yok, derlemede ağ yok, yeni npm
+      bağımlılığı yok. `font-display: block` (tuzak 38)
+- [~] **A4 Dialog ve renk seçici — YARISI yapıldı (B turu).** Renk seçici
+      **6×6 swatch `<dialog>`'u oldu**: 36 rengin hepsi görünüyor, seçili olan
+      çerçeveli, indeks swatch'ın üstünde `--on-color` ile duruyor.
+      `e2e/renk-secici.spec.ts` **yeniden yazıldı, silinmedi** — gereksinim
+      aynı ("seçili renk okunuyor"), kontrol değişti; üstüne "36 renk GÖRÜNÜYOR
+      ve seçilebiliyor" testi eklendi (iki tema × iki ekran).
+      **Kalan:** 12 `confirm` + 5 `alert`'ün `<dialog>`'a geçmesi ve
+      `.reason-bar`'a `aria-live` — kullanıcı kararıyla B turu dışında bırakıldı
+- [x] **A6 Doğrulama — B turunda yapıldı.** `npm run kontrol` yeşil
+      (409 birim + 265 E2E + 6 site). `renk.spec.ts`'in WCAG/ΔE eşikleri
+      **gevşetilmedi**; yeni token seti onları geçmek zorunda kaldı ve geçti.
+      24 baseline `--update-snapshots=all` ile tek seferde yenilendi (tuzak 25).
+      **Kalan:** README
 - [x] **Kullanıcıya sorulan iki soru — ikisi de cevaplandı (on üçüncü oturum).**
       (a) `.btn` → `--line`, **`--hairline` değil**: düğmenin kendi yüzeyi yok
       (`--paper` üstünde `--paper`), kenarlık tek sınırı. Asıl gürültü
@@ -89,6 +164,68 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       özellik: STATUS ve commit mesajlarındaki "A5 silindi" atıfları o günün
       kaydı olarak duruyor, yanıltıcı değil.
 
+### Tasarım araçları kuruldu + tasarım dili yeniden açıldı — 2026-08-25
+
+Kullanıcının "olması gereken her şey" listesi. Listenin bir kısmı projenin
+kendi kurallarıyla çatışıyordu; **çatışma bildirildi, kullanıcı tasarım dilini
+yeniden açmayı seçti.** Karar `CLAUDE.md` → *"Tasarım dili yeniden AÇILDI"*.
+
+- [x] **`typescript-language-server` 6.0.0** global kuruldu, `$PATH`'te
+- [x] **`.mcp.json`** — `playwright` · `chrome-devtools` · `context7`.
+      Üçü de npm'de doğrulandı (0.0.79 / 1.8.0 / 4.0.3). Hiçbiri
+      `dist/index.html`'e girmez; bütçe daralırsa ilk kapatılacak `context7`
+- [x] **`.claude/settings.json`** — `enabledPlugins`:
+      `frontend-design` + `typescript-lsp` (`@claude-plugins-official`)
+- [x] **`docs/DESIGN.md`** — primitif envanteri: 70+ sınıf, hangi ekranda,
+      hangi token merdiveninden. Amaç var olan `.panel`'i yeniden icat etmemek
+- [x] **`CLAUDE.md`** — üç blok: primitif envanteri + dış araç, görsel iş akışı
+      (iki aşamalı prompt + ekran görüntüsü döngüsü), ve tasarım dili kararı.
+      "Karakter" paragrafı **silinmedi**, bağlayıcı olmadığı işaretlendi
+- [x] **Eklentiler kuruldu — 7 tane, `project` kapsamı, hepsi `enabled`.**
+      `anthropics/skills` marketplace'inin **tamamı** (kullanıcı isteği):
+      `document-skills` · `example-skills` · `claude-api` · `academy-guide` ·
+      `discernment-nudge`, artı resmi `frontend-design` + `typescript-lsp`.
+      Toplam 19 skill, `~/.claude/plugins/` altında 81 MB. VSCode eklentisinin
+      **gömülü `claude` ikilisi** kullanıldı (`$PATH`'te yok ama
+      `resources/native-binary/claude` var)
+- [ ] **MCP sunucuları onaylanacak** — Claude Code yeniden başlatılınca
+      `.mcp.json` onayı gelecek
+- [x] **Budama bitti — 7 → 3, kalan ~2.249 tok/oturum.** Kalanlar:
+      `example-skills` (12 skill) · `document-skills` (4 skill) ·
+      `typescript-lsp` (~0 tok). Kaldırılanlar ve gerekçeleri
+      [STATUS.md](STATUS.md) → *On beşinci oturum*; hepsi `claude plugin
+      details`in verdiği **ölçülen** maliyetle karara bağlandı,
+      `discernment-nudge` ise skill dosyası okunarak (kendi "when not to"
+      listesi bu projeyi dışlıyor + kapanış satırı İngilizce sabit)
+
+- [x] **B turu — yeniden tasarım. YAPILDI (2026-08-25).** Ayrıntı:
+      [STATUS.md](STATUS.md) → *On altıncı oturum*. Kullanıcının dört kararı:
+      kapsam **C** (düzen de değişti), yazı tipi **IBM Plex Sans**, ölçek
+      varsayılanı %100 kaldı / tavan **%150**, UX maddelerinden yalnız **renk
+      seçici**. Yapılanlar: üç düzlem token seti · gömülü değişken font ·
+      üç bölgeli üst çubuk + tema raya indi · **ızgara enstrümanı** (kafes
+      kalktı, gün bandı, imleç haçı, nesne olan kartlar) · **havuz sağa
+      çekmece** (25/25 satır görünüyor) · 6×6 renk seçici · ölçek tavanı %150.
+      Bilerek geri alınanlar: "üçüncü radius yok" (→ üç), "yüzüyorsa yanlıştır"
+      (→ iki kot). Yeni tuzaklar **38–41**.
+      *(Aşağıdaki asıl madde tarih olarak duruyor.)*
+
+- [x] **B turu — yeniden tasarım. (asıl madde)** Tasarım dilinin
+      açılması yeniden tasarımın *yapıldığı* anlamına gelmez. Bu tur
+      başlamadan önce `CLAUDE.md` → *"Görsel iş akışı"*ndaki iki aşama
+      **zorunlu**: plan → öz eleştiri → onay → kod. Kapsamı kullanıcı
+      belirleyecek. Bilinen etkiler:
+      - A0–A5'te yazılan sistemin bir kısmı geri alınacak
+      - 24 görsel referans yenilenecek (`--update-snapshots=all`, tuzak 25)
+      - `renk.spec.ts` WCAG/ΔE ölçümleri yeni değerlere göre geçecek —
+        **sınır gevşetilmeyecek, tasarım düzeltilecek** (A6'daki kural aynen)
+      - Açılmayanlar: ilke 1–3, yeni runtime bağımlılığı ("önce sor",
+        Tailwind/shadcn dahil), ölçülen testler, işlevsel renk kanalı, kâğıt
+
+**A3 (gömülü font) bu kararla genişledi:** artık yalnız IBM Plex Sans değil,
+tipografi karakteri de tartışmaya açık. 420 KB durma sınırı **duruyor** —
+o bir ilke 1 kısıtı, zevk kısıtı değil.
+
 ### 0. v1.0 — teslim turu (`.exe` · site · planlar) — YENİ
 
 Kullanıcının bu dosyanın sonuna yazdığı altı satır, sırayla numaralanmış hâli.
@@ -96,10 +233,14 @@ Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeş
 *(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
 bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
 
-**SIRADAKİ İŞ: A3 — gömülü font.** A2 ve (geri gelen) A5 bitti; turda A3 ve
-A4 kaldı, sonra A6'da 24 görsel referans tek seferde yenilenecek. A5 bir sahne
-değiştirdiği için (`12-ayarlar-gorunum` paneli büyüdü, Program ızgarası artık
-iki yoğunlukta çizilebiliyor) A6'da o sahnelere **tek tek** bakılacak.
+**SIRADAKİ İŞ: 4f — GitHub Pages yayını.** Tasarım turu (A0–A6 + B) bitti;
+`npm run kontrol` yeşil ve 24 görsel referans yenilendi. Teslim turunda
+4f–4i (Pages · Tauri · exe) ve 4l (Dosya Sistemi Erişimi) duruyor.
+**Kullanıcıdan bekleniyor:** depo `ders-programi` olarak yeniden adlandırılacak,
+Pages kaynağı "GitHub Actions" seçilecek, Rust toolchain onayı.
+
+Tasarım turundan devreden **iki** iş, ikisi de bilerek ertelendi:
+`<dialog>`'a geçmemiş 12 `confirm` + 5 `alert` (A4'ün yarısı) ve README.
 
 *(Aşağıdaki v1.0 turu notu olduğu gibi duruyor.)* Kullanıcının bu dosyanın
 sonuna yazdığı liste o tura dönüştü; listenin *sıralama ve süzme* maddeleri
@@ -560,11 +701,18 @@ istiyor (öğretmende cinsiyet alanı yok) ve en az biri yasak listeye bakmayı
 gerektiriyor (elle sürükleyerek sıralama).
 
 Listeleri kaydırabililelim ya da grupça filteleyebilelim. Öğretmenler, Branşlar onlar bunlar
-Ölçeklendirme büyütme küçültme
+Ölçeklendirme büyütme küçültme            → **KARŞILANDI** (A1 + B turu):
 Babam biraz zor görüyor o sebeple biraz daha büyütülmeli her şey.
+    Ayarlar → Görünüm'de %100–**%150**, 11 basamak. Varsayılan %100 kaldı
+    (kullanıcı kararı, 2026-08-25): yanlış bir varsayılan tahmindir.
 Öğretmenler listesinde sıralama erkek kadın, branşa göre, isme göre vesaire sıralamalar olsun. ayrıca biz kendimiz sıralayabilelim. drag ve koy gibi. Aynı şekilde tüm listeler öyle özelliklere sahip olsun.
 Ayrıca renk seçmede renkleri seçerken renkleri görebilelim sadece sayı olmasın.
+    → **KARŞILANDI** (B turu): 6×6 swatch `<dialog>`'u, 36 rengin hepsi görünür,
+    seçili olan çerçeveli. `src/components/ColorPick.tsx`.
 Ayrıca programramda sıfırla olmalı ki programı en baştan yapabilelim ama uyarı gelsin ona basınca.
+    → **ZATEN VAR**: Ayarlar → Veri'de "Sıfırla", onaylı. Program sekmesinde
+    ayrıca "Baştan diz" (o da onaylı) dizilmiş programı silip yeniden dizer.
 ayrıca ayarlarda ölçeklendirme de olsun. nasıl olması gerekiyorsa ya da.
+    → **KARŞILANDI**: Ayarlar → Görünüm.
 Ayarlarda müsatilikteki programda derslerin altında saatleri olsun olmasın diye ayar olsun ve default olarak kapalı olsun.
 Yazdır kısmındaki program da büyümesi lazım. 

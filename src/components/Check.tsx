@@ -63,6 +63,18 @@ export default function Check({ state }: Props) {
   const report = useMemo(() => buildReport(state), [state]);
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
+  // Where the week stands, from the same numbers the pool and the grid use.
+  const placed = Object.keys(state.placements).length;
+  const totalWanted = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
+  const ix = useMemo(() => buildIndex(state), [state]);
+  const doneLessons = state.lessons.filter(
+    (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
+  ).length;
+  const capacity =
+    state.classes.length * state.settings.days.length * state.settings.hours.length;
+  const fillPercent = capacity === 0 ? 0 : Math.round((placed / capacity) * 100);
+  const freeSlots = Math.max(0, capacity - placed);
+
   if (state.lessons.length === 0) {
     return (
       <>
@@ -100,6 +112,43 @@ export default function Check({ state }: Props) {
           the older fault — a 110px badge next to a 1200px sentence is well
           past the length a line can still be read at. */}
       <div className="panel-grid">
+        {/* Where the week stands. It is the question you come to this tab with
+            and the one it never answered: everything else here is about what
+            COULD go wrong, and this is what is actually done. */}
+        <div className="panel">
+          <h2>Programın durumu</h2>
+          <table className="stat">
+            <tbody>
+              <tr>
+                <td>Yerleşmiş saat</td>
+                <td className="num">
+                  {placed} / {totalWanted}
+                </td>
+              </tr>
+              <tr>
+                <td>Tamamlanan ders</td>
+                <td className="num">
+                  {doneLessons} / {state.lessons.length}
+                </td>
+              </tr>
+              <tr>
+                <td>Haftanın doluluğu</td>
+                <td className="num">%{fillPercent}</td>
+              </tr>
+              <tr>
+                <td>Boş kalan sınıf saati</td>
+                <td className="num">{freeSlots}</td>
+              </tr>
+            </tbody>
+          </table>
+          {placed < totalWanted && (
+            <p className="hint">
+              Kalan <b>{totalWanted - placed}</b> saat havuzda bekliyor.{' '}
+              <b>Program</b> sekmesindeki <b>Otomatik diz</b> ile yerleştirebilirsiniz.
+            </p>
+          )}
+        </div>
+
         {conflicts.length > 0 && (
           <div className="panel">
             <h2>Kapalı saatte ders ({conflicts.length})</h2>

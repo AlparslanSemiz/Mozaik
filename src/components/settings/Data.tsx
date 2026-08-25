@@ -200,6 +200,17 @@ export default function Data({ state, change, loadState, plans }: Props) {
             “tarama verilerini temizle” dediğinizde <b>silinir</b>. Taşınan ve gerçekten
             güvende olan tek şey <b>dosyaya kaydettiğinizdir</b>.
           </p>
+          {/* The one habit, spelled out. It used to be a sentence across the
+              top bar on every screen; it belongs next to the report that says
+              where the data actually lives, and the bar it left had six
+              destinations to hold instead. */}
+          <p className="hint">
+            Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor — kaydet
+            düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{' '}
+            <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
+            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu —{' '}
+            <i>değişiklik yaptın, yedek indir.</i>
+          </p>
           <table className="stat">
             <thead>
               <tr>

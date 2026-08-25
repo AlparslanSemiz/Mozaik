@@ -145,7 +145,7 @@ test.describe('14. Renk paleti', () => {
     // The colour select in the teacher list paints itself with that teacher's
     // colour, so it is the one per-teacher swatch on screen.
     const colors = await page
-      .locator('table.list tbody tr select[title="Renk"]')
+      .locator('table.list tbody tr .color-pick')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
 
     expect(colors.length).toBeGreaterThanOrEqual(25);
@@ -198,7 +198,7 @@ test.describe('14. Renk paleti', () => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
     const swatches = await page
-      .locator('table.list tbody tr select[title="Renk"]')
+      .locator('table.list tbody tr .color-pick')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(swatches.length).toBeGreaterThanOrEqual(15);
     expect(new Set(swatches).size, 'iki sınıf aynı renkte').toBe(swatches.length);

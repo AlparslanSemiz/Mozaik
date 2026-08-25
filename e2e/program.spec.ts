@@ -40,12 +40,51 @@ test.describe('2. Sürükle-bırak', () => {
   });
 
   test('hedef satır ekran dışındaysa sürükleme başlayınca görünür oluyor', async ({ page }) => {
+    // A SHORT screen, deliberately. 25 teachers now fit the 1080px monitor with
+    // the pool docked to the right, so on the real viewport there is no row
+    // below the fold to scroll to — and the condition this test exists for
+    // would never occur. It is not a hypothetical one: a school with forty
+    // teachers, or a laptop, produces it on any screen.
+    await page.setViewportSize({ width: 1920, height: 560 });
     await openWithSample(page);
     const wrap = page.locator('.grid-wrap');
+
+    // The condition this test is about has to be FORCED, not hoped for.
+    // It used to rely on the pool costing the grid 215px at the bottom of the
+    // screen, which left six of the twenty-five rows below the fold by
+    // accident. The pool is a dock down the right now and all 25 rows fit, so
+    // the same test would have gone on passing while measuring nothing —
+    // exactly the free green of pitfalls 23 and 33. So: scroll the grid to the
+    // bottom, then check that the row this card is aimed at really is out of
+    // sight BEFORE the drag starts.
+    const aimedAt = (await page.locator('.pool-card').first().locator('.card-bottom').innerText())
+      .trim();
+    const targetRow = page
+      .locator('table.grid tbody tr')
+      .filter({ has: page.locator('.row-head', { hasText: aimedAt }) })
+      .first();
+
+    // Scroll AWAY from the row, whichever way that is: the first card in the
+    // pool is aimed at whichever teacher sorts first by row label, which can be
+    // anywhere in the list. Scrolling to a fixed end left the row on screen
+    // half the time — and a precondition that only sometimes holds is a test
+    // that only sometimes tests.
+    await targetRow.evaluate((tr) => {
+      const scroller = tr.closest('.grid-wrap')!;
+      const middle = tr.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.scrollTo({ top: middle > scroller.clientHeight / 2 ? 0 : scroller.scrollHeight });
+    });
+    await page.waitForTimeout(100);
+
     const box = (await wrap.boundingBox())!;
+    const before = (await targetRow.boundingBox())!;
+    expect(
+      before.y + before.height < box.y || before.y > box.y + box.height,
+      `"${aimedAt}" satırı sürüklemeden ÖNCE de görünüyordu — test bir şey ölçmüyor`,
+    ).toBe(true);
 
     // This was the real bug the E2E suite caught: when the target row stayed
-    // below the fold the user could never reach it.
+    // outside the fold the user could never reach it.
     await startDrag(page);
     const row = (await page.locator('tr.target-row').boundingBox())!;
 

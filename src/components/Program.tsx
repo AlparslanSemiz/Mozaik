@@ -5,7 +5,7 @@
 //   - Grid is React.memo; changing the reason bar does not redraw the grid.
 //   - No state changes at all during a drag (see drag.ts).
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import type React from 'react';
 import {
   blockStart,
@@ -23,18 +23,19 @@ import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
 import type { SolverRun } from '../useSolver';
 import type { State, Id } from '../types';
+import type { View } from '../toolState';
 import Grid from './Grid';
 import type { GridCell, GridRow } from './Grid';
 import LessonPool from './LessonPool';
 import type { PoolCard } from './LessonPool';
-
-type View = 'teacher' | 'class';
 
 interface Props {
   state: State;
   change: (apply: (d: State) => State) => void;
   /** The automatic run. Owned by App so it survives a tab change. */
   solver: SolverRun;
+  /** Which axis the rows are. Owned by App: the tool strip above shows it. */
+  view: View;
 }
 
 /** "3,4" — one decimal, Turkish comma. */
@@ -50,6 +51,7 @@ function describeBar(
   reason: Reason | null,
   dragging: boolean,
   solver: SolverRun,
+  view: View,
 ): { text: string; level: string } {
   if (reason !== null) return { text: reason.text, level: reason.level === 'warn' ? 'warn' : 'bad' };
   if (dragging) return { text: 'Buraya bırakılabilir.', level: 'ok' };
@@ -63,7 +65,19 @@ function describeBar(
   }
 
   const done = solver.result;
-  if (done === null) return { text: '', level: '' };
+  // Idle, the bar says what the grid IS rather than sitting blank. It reserves
+  // 26px whatever happens, and a sentence that explains the axis you are
+  // looking at is worth more there than empty chrome. It used to live beside
+  // the view switch, which is now a row further up.
+  if (done === null) {
+    return {
+      text:
+        view === 'teacher'
+          ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'
+          : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+      level: '',
+    };
+  }
 
   if (done.stuck.length === 0) {
     return {
@@ -89,47 +103,6 @@ function roomLetter(ix: Index, roomId: string | null | undefined): string {
   if (roomId == null) return '';
   return ix.roomById.get(roomId)?.name ?? '';
 }
-
-/**
- * The two views. `aria-label` is not optional here: the buttons carry no text,
- * so it is the only name a screen reader — or a test — can find them by.
- */
-const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
-  {
-    // A mortarboard — the symbol aSc uses for Teachers, and the one thing on
-    // screen that cannot be mistaken for a person. The two icons used to be one
-    // head and three heads; at 17px that difference is invisible.
-    id: 'teacher',
-    label: 'Öğretmen görünümü',
-    icon: (
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
-        <path d="M10 2.4 19.2 6.6 10 10.8 0.8 6.6Z" fill="currentColor" />
-        <path
-          d="M5 8.5 10 10.8 15 8.5v3.4c0 1.5-2.2 2.5-5 2.5s-5-1-5-2.5Z"
-          fill="currentColor"
-        />
-        <path d="M17.6 7.5h1.2v5.2h-1.2Z" fill="currentColor" />
-        <circle cx="18.2" cy="13.6" r="1.5" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    id: 'class',
-    // A group of students: three figures, the middle one nearer. A class is the
-    // only thing in this tool that is a crowd.
-    label: 'Sınıf görünümü',
-    icon: (
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
-        <circle cx="4.2" cy="6.4" r="2.2" fill="currentColor" />
-        <circle cx="15.8" cy="6.4" r="2.2" fill="currentColor" />
-        <path d="M0.4 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
-        <path d="M12 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
-        <circle cx="10" cy="8.2" r="3" fill="currentColor" />
-        <path d="M4.9 18c0-3.1 2.3-5.2 5.1-5.2s5.1 2.1 5.1 5.2Z" fill="currentColor" />
-      </svg>
-    ),
-  },
-];
 
 function buildRows(d: State, ix: Index, view: View): GridRow[] {
   // Availability is edited after the timetable is laid out, and a cell whose
@@ -256,8 +229,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
   return { cards, completed };
 }
 
-export default function Program({ state, change, solver }: Props) {
-  const [view, setView] = useState<View>('teacher');
+export default function Program({ state, change, solver, view }: Props) {
   const ix = useMemo(() => buildIndex(state), [state]);
 
   const drop = useCallback(
@@ -279,11 +251,10 @@ export default function Program({ state, change, solver }: Props) {
 
   const rows = useMemo(() => buildRows(state, ix, view), [state, ix, view]);
   const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
-  const placedCount = Object.keys(state.placements).length;
 
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
-  const { text: barText, level: barLevel } = describeBar(reason, dragging !== null, solver);
+  const { text: barText, level: barLevel } = describeBar(reason, dragging !== null, solver, view);
 
   const cellRemove = useCallback(
     (rowId: string, day: number, hour: number) => {
@@ -408,76 +379,6 @@ export default function Program({ state, change, solver }: Props) {
 
   return (
     <>
-      <div className="topbar subbar">
-        {/* Two positions, not one toggle: a single button saying "switch to the
-            class view" tells you what the next click does, never where you are.
-            Icons are inline SVG (no library, offline) and use currentColor, so
-            they are right in both themes. */}
-        <div className="view-switch">
-          {VIEWS.map((v) => (
-            <button
-              key={v.id}
-              className="btn icon"
-              aria-pressed={view === v.id}
-              aria-label={v.label}
-              title={v.label}
-              onClick={() => setView(v.id)}
-            >
-              {v.icon}
-            </button>
-          ))}
-        </div>
-        <span className="hint inline">
-          {view === 'teacher'
-            ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'
-            : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'}
-        </span>
-
-        <span className="spacer" />
-
-        {/* Two buttons and no settings. What "spread over the week" or "prefer
-            mornings" should mean is not knowable before a term has been laid
-            out with this (principle 5); the numbers that DO belong to the
-            school are already in Ayarlar. */}
-        {solver.running ? (
-          <button className="btn danger" onClick={solver.stop}>
-            ■ Durdur
-          </button>
-        ) : (
-          <>
-            <button
-              className="btn primary"
-              disabled={cards.length === 0}
-              title={
-                cards.length === 0
-                  ? 'Havuzda bekleyen ders yok'
-                  : 'Havuzdaki dersleri kurallara uyarak yerleştirir'
-              }
-              onClick={() => solver.start(state, { keepPlaced: true })}
-            >
-              Otomatik diz ({cards.length})
-            </button>
-            <button
-              className="btn"
-              disabled={placedCount === 0}
-              title="Dizilmiş programı silip baştan dizer"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    `Dizilmiş ${placedCount} saatin tamamı silinip program baştan dizilecek. ` +
-                      'Devam edilsin mi? (Ctrl+Z ile geri alınabilir.)',
-                  )
-                ) {
-                  solver.start(state, { keepPlaced: false });
-                }
-              }}
-            >
-              Baştan diz
-            </button>
-          </>
-        )}
-      </div>
-
       {/* One bar, three jobs: the drag reason, the solver's progress and the
           solver's verdict. It has a FIXED height so the grid never jumps down
           when something appears in it, and it is the line the eye is already
@@ -497,16 +398,21 @@ export default function Program({ state, change, solver }: Props) {
         )}
       </div>
 
-      <Grid
-        settings={state.settings}
-        rows={rows}
-        firstColumnTitle={view === 'teacher' ? 'Öğretmen' : 'Sınıf'}
-        draggedRowId={dragging?.rowId ?? null}
-        onCellRemove={cellRemove}
-        onCellMoveStart={cellMoveStart}
-      />
+      {/* The instrument and the pool, side by side. The pool used to sit under
+          the grid and cost it 215px of height; down the right it takes width
+          from a table that was already scrolling. */}
+      <div className="program-body">
+        <Grid
+          settings={state.settings}
+          rows={rows}
+          firstColumnTitle={view === 'teacher' ? 'Öğretmen' : 'Sınıf'}
+          draggedRowId={dragging?.rowId ?? null}
+          onCellRemove={cellRemove}
+          onCellMoveStart={cellMoveStart}
+        />
 
-      <LessonPool cards={cards} completed={completed} onStart={cardStart} />
+        <LessonPool cards={cards} completed={completed} onStart={cardStart} />
+      </div>
     </>
   );
 }

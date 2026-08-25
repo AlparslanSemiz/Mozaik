@@ -7,12 +7,13 @@
 //
 // Printing the 84-column main table is still impossible and still not attempted.
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { sharedPeriods } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
 import { subjectShort } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
+import type { Scope } from '../toolState';
 
 interface Props {
   state: State;
@@ -22,9 +23,10 @@ interface Props {
    */
   excluded: Excluded;
   setExcluded: (next: (prev: Excluded) => Excluded) => void;
+  /** Which pages the preview builds. Owned by App; the tool strip CHANGES it. */
+  scope: Scope;
+  colored: boolean;
 }
-
-type Scope = 'classes' | 'teachers' | 'both';
 
 /**
  * Which pages to print, stored as what is LEFT OUT rather than what is chosen.
@@ -39,9 +41,13 @@ export type Excluded = { classes: Set<string>; teachers: Set<string> };
 
 export const NOTHING_EXCLUDED: Excluded = { classes: new Set(), teachers: new Set() };
 
-export default function Print({ state, excluded, setExcluded }: Props) {
-  const [scope, setScope] = useState<Scope>('classes');
-  const [colored, setColored] = useState(true);
+export default function Print({
+  state,
+  excluded,
+  setExcluded,
+  scope,
+  colored,
+}: Props) {
   const ix = useMemo(() => buildIndex(state), [state]);
 
   // A column header carries ONE time, but the 6th lesson starts at 13:30 on a
@@ -106,6 +112,27 @@ function credits(...parts: string[]): string {
     ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
     : [];
   const pageCount = chosenClasses.length + chosenTeachers.length;
+
+  // How much of the timetable the chosen pages actually carry. A page with
+  // nothing on it prints just as willingly as a full one.
+  //
+  // Both sets are built in ONE pass over the placements: asking "does this
+  // teacher have anything" per teacher would walk 1800 placements 25 times.
+  const placedHours = Object.keys(state.placements).length;
+  const { busyClasses, busyTeachers } = useMemo(() => {
+    const classes = new Set<string>();
+    const teachers = new Set<string>();
+    for (const [key, lessonId] of Object.entries(state.placements)) {
+      classes.add(key.slice(0, key.indexOf('|')));
+      const lesson = ix.lessonById.get(lessonId);
+      if (lesson !== undefined) teachers.add(lesson.teacherId);
+    }
+    return { busyClasses: classes, busyTeachers: teachers };
+  }, [state.placements, ix]);
+
+  const emptyPages =
+    chosenClasses.filter((c) => !busyClasses.has(c.id)).length +
+    chosenTeachers.filter((t) => !busyTeachers.has(t.id)).length;
 
   function toggle(kind: keyof Excluded, id: string) {
     setExcluded((prev) => {
@@ -304,24 +331,15 @@ function credits(...parts: string[]): string {
             açık</b> olsun, yoksa renkler çıkmaz. Tarih ve dosya adı kâğıda çıkmaz;
             yine de görürseniz <b>üstbilgi ve altbilgi</b> kutusunun işaretini kaldırın.
           </p>
+          {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
+              button stayed, because the page COUNT comes from the tick lists
+              right below it. */}
           <div className="form-row">
-            <label>
-              Ne basılsın{' '}
-              <select value={scope} onChange={(e) => setScope(e.target.value as Scope)}>
-                <option value="classes">Sınıf programları</option>
-                <option value="teachers">Öğretmen programları</option>
-                <option value="both">İkisi de</option>
-              </select>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={colored}
-                onChange={(e) => setColored(e.target.checked)}
-              />{' '}
-              Renkli bas
-            </label>
-            <button className="btn primary" disabled={pageCount === 0} onClick={() => window.print()}>
+            <button
+              className="btn primary"
+              disabled={pageCount === 0}
+              onClick={() => window.print()}
+            >
               Yazdır ({pageCount} sayfa)
             </button>
           </div>
@@ -336,6 +354,41 @@ function credits(...parts: string[]): string {
 
           {pageCount === 0 && (
             <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
+          )}
+        </div>
+
+        {/* What the printer is about to produce, in the numbers that matter at
+            the printer: how many sheets, and whether any of them is going to
+            come out with holes in it. An empty timetable printed for a parents'
+            evening is the mistake this catches. */}
+        <div className="panel no-print">
+          <h2>Çıktı özeti</h2>
+          <table className="stat">
+            <tbody>
+              <tr>
+                <td>Sayfa</td>
+                <td className="num">{pageCount}</td>
+              </tr>
+              <tr>
+                <td>Kâğıt</td>
+                <td className="num">A4 yatay</td>
+              </tr>
+              <tr>
+                <td>Renk</td>
+                <td className="num">{colored ? 'Renkli' : 'Siyah-beyaz'}</td>
+              </tr>
+              <tr>
+                <td>Yerleşmiş saat</td>
+                <td className="num">{placedHours}</td>
+              </tr>
+            </tbody>
+          </table>
+          {emptyPages > 0 && (
+            <div className="warn-box">
+              Seçilen sayfaların <b>{emptyPages}</b> tanesi tamamen boş — o
+              {' '}{scope === 'teachers' ? 'öğretmenlerin' : 'sınıfların'} programı
+              henüz dizilmemiş. <b>Program</b> sekmesinden dizebilirsiniz.
+            </div>
           )}
         </div>
       </aside>

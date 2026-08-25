@@ -4,9 +4,10 @@
 // redraws 1-2 rows, not the whole table. During a drag nothing re-renders at
 // all (see drag.ts).
 
-import { memo, useMemo } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import type React from 'react';
 import { dayPeriods } from '../bell';
+import { attachGridChrome } from '../gridChrome';
 import { paletteColor } from '../palette';
 import type { Settings, Id } from '../types';
 
@@ -61,17 +62,34 @@ const Row = memo(function Row({
       // The lunch break is its own narrow column. It carries NO data-day /
       // data-hour: drag.ts finds its target with closest('[data-day]') and
       // would otherwise treat the separator as a droppable cell.
+      // Alternate days get a faint ground so the eye reads SIX DAYS instead of
+      // 78 columns. It is a class rather than a `data-day` parity selector in
+      // the stylesheet because the headings need the same band and they must
+      // NOT carry data-day — drag.ts finds its target with
+      // closest('[data-day]') and a heading would answer (pitfall 13).
+      const band = g % 2 === 1 ? ' band' : '';
+
       if (breakAt[g] === s) {
-        cells.push(<td key={`break-${g}`} className="break-col" title="Öğle arası" />);
+        cells.push(
+          <td key={`break-${g}`} className={`break-col${band}`} title="Öğle arası" />,
+        );
       }
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
+      // The SECOND half of a block, i.e. the cell whose neighbour to the left
+      // said it continues. Without it only one end of a two-hour block could
+      // lose its rounded corners and the pair would read as two objects that
+      // happen to touch. A day boundary resets it: `continues` never crosses one.
+      const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
+      const inBlock = previous !== null && previous.continues;
 
       const className = [
         s === 0 ? 'day-first' : '',
         cell !== null && cell.continues ? 'block-cont' : '',
+        inBlock ? 'block-in' : '',
         cell === null && closed ? 'unavailable' : '',
+        band.trim(),
       ]
         .filter(Boolean)
         .join(' ');
@@ -179,6 +197,14 @@ function GridInner({
   );
   const breakAt = useMemo(() => clocks.map((x) => x.breakAt), [clocks]);
 
+  // Attached once to the scroll container, never re-run: the chrome reads the
+  // DOM it is pointing at, so it does not care how many times the rows redraw.
+  const wrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    return wrap === null ? undefined : attachGridChrome(wrap);
+  }, []);
+
   // Counts, not widths: the "Sığdır" density derives --cell-w from the box it
   // is in, and the week is not always 6x12 — a seven-day week is 84 columns
   // and a hard-coded 72 in the stylesheet would be wrong the day somebody adds
@@ -190,7 +216,7 @@ function GridInner({
   } as React.CSSProperties;
 
   return (
-    <div className="grid-wrap">
+    <div className="grid-wrap" ref={wrapRef}>
       <table className={`grid${draggedRowId !== null ? ' dragging' : ''}`} style={columns}>
         <thead>
           <tr>
@@ -201,7 +227,7 @@ function GridInner({
               <th
                 key={g}
                 colSpan={hourCount + ((breakAt[g] ?? -1) >= 0 ? 1 : 0)}
-                className="day-head"
+                className={g % 2 === 1 ? 'day-head band' : 'day-head'}
               >
                 {day.name}
               </th>
@@ -211,11 +237,21 @@ function GridInner({
             {settings.days.map((_, g) =>
               settings.hours.flatMap((hour, s) => [
                 ...(breakAt[g] === s
-                  ? [<th key={`break-${g}`} className="break-col" title="Öğle arası" />]
+                  ? [
+                      <th
+                        key={`break-${g}`}
+                        className={g % 2 === 1 ? 'break-col band' : 'break-col'}
+                        title="Öğle arası"
+                      />,
+                    ]
                   : []),
                 <th
                   key={`${g}-${s}`}
-                  className={s === 0 ? 'day-first' : undefined}
+                  className={
+                    [s === 0 ? 'day-first' : '', g % 2 === 1 ? 'band' : '']
+                      .filter(Boolean)
+                      .join(' ') || undefined
+                  }
                   title={
                     clocks[g] === undefined
                       ? undefined

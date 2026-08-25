@@ -3,37 +3,42 @@ import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import {
+  applyRibbon,
   applyTheme,
   readDensity,
+  readRibbon,
   readScale,
-  readSidebar,
   readTheme,
-  writeSidebar,
   type Density,
   type Theme,
 } from './theme';
 import { useSolver } from './useSolver';
+import { useToolState } from './toolState';
+import type { Tab } from './toolState';
 import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
 import Check from './components/Check';
+import Ribbon from './components/Ribbon';
 import Print, { NOTHING_EXCLUDED } from './components/Print';
 import type { Excluded } from './components/Print';
 import Settings from './components/settings';
 
-type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print' | 'settings';
 
 /**
- * The six sections, as a LEFT RAIL rather than a row of tabs on top.
+ * The six sections, along the TOP — on the same row as the document identity
+ * and the file buttons.
  *
- * Why the move: on the 768px screen this was designed against, the horizontal
- * band cost the timetable a whole row, and a row is 25 teachers' worth of
- * information. The real screen is 1080px tall and no longer that tight, but the
- * rail stays for the half of the reason that never depended on height:
- * horizontally the grid overflows and scrolls anyway, so 92px there costs
- * nothing that was not already scrolled. The rail also gives every other tab
- * back the full width — the reason the right-hand side of every screen used to
- * sit empty.
+ * They spent two versions in a left rail, on the argument that a horizontal
+ * band costs the timetable a row. That argument was written against a 768px
+ * screen and it was measured wrong for this one: the rail cost 92px of WIDTH on
+ * every tab, and the tabs that are not Program have no width to spare — that is
+ * why the right-hand side of every screen sat empty.
+ *
+ * The band costs a row only if it is a band of its own. It is not: identity,
+ * sections, history and file share one 44px row, and the tab's own tools get a
+ * second one. Measured, the whole head is SHORTER than the rail layout's was
+ * (139px -> 114px), because the rail's top bar was 59px of mostly air.
  *
  * Icons are inline SVG (no library, works offline) and drawn on currentColor so
  * they are right in both themes. They differ in SILHOUETTE, not in detail: at
@@ -192,20 +197,102 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
   },
 ];
 
+/**
+ * The four glyphs that used to sit in top-bar buttons as TEXT.
+ *
+ * They had to go for two reasons and either one alone would have been enough.
+ * A subset embedded face carries the 225 glyphs this tool draws and no more, so
+ * every one of these fell back to a different family — four buttons in four
+ * typefaces, at four optical sizes, on one bar. And "Geri al" spelled out cost
+ * the row about 120px, which is exactly why the bar wrapped its buttons onto a
+ * second line on a 1920px screen.
+ *
+ * Drawn on currentColor, like the rail's, so both themes are right for free.
+ */
+const ICON = {
+  undo: (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <path
+        d="M4 9h9.5a5 5 0 0 1 0 10H8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.5 5 4 9l3.5 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  redo: (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <path
+        d="M20 9h-9.5a5 5 0 0 0 0 10H16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M16.5 5 20 9l-3.5 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  sun: (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2" />
+      <path
+        d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  moon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <path
+        d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+};
+
 export default function App() {
   const { state, change, undo, redo, loadState, canUndo, canRedo, plans } = useStore();
 
+  // Where you are, in every tab at once. Up here because switching tabs
+  // unmounts the components that used to own these, and because the tool strip
+  // that shows them is drawn above <main>.
   // With no data, start on Setup — an empty Program screen tells him nothing.
-  const [tab, setTab] = useState<Tab>(state.lessons.length > 0 ? 'program' : 'setup');
+  const ui = useToolState(state.lessons.length > 0 ? 'program' : 'setup');
+  const { tab, setTab } = ui;
   const fileInput = useRef<HTMLInputElement>(null);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const [railNarrow, setRailNarrow] = useState<boolean>(readSidebar);
   // Already applied to the document by main.tsx before the first paint; this
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
   const [density, setDensity] = useState<Density>(readDensity);
+  // Whether the tool strip is drawn. It lives here and not in Ribbon because
+  // the button that folds it is in the top bar — a folded strip has no row to
+  // put its own chevron on, which is the whole point of folding it.
+  const [ribbon, setRibbon] = useState<boolean>(readRibbon);
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
@@ -214,17 +301,18 @@ export default function App() {
   // work with nothing to show for it (pitfall 18).
   const solver = useSolver(change);
 
+  function toggleRibbon() {
+    const next = !ribbon;
+    applyRibbon(next);
+    setRibbon(next);
+  }
+
   function toggleTheme() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
     setTheme(next);
   }
 
-  function toggleRail() {
-    const next = !railNarrow;
-    writeSidebar(next);
-    setRailNarrow(next);
-  }
 
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -255,48 +343,15 @@ export default function App() {
   }
 
   return (
-    <div className={`app${railNarrow ? ' rail-narrow' : ''}`}>
-      <nav className="sidebar" aria-label="Bölümler">
-        <div className="tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className="tab"
-              aria-current={tab === t.id}
-              aria-label={t.label}
-              title={t.label}
-              onClick={() => setTab(t.id)}
-            >
-              {t.icon}
-              <span className="tab-label">{t.label}</span>
-            </button>
-          ))}
-        </div>
-
-        <span className="spacer" />
-
-        <button
-          className="btn icon rail-toggle"
-          aria-pressed={railNarrow}
-          aria-label="Kenar çubuğunu daralt"
-          title={railNarrow ? 'Kenar çubuğunu genişlet' : 'Kenar çubuğunu daralt'}
-          onClick={toggleRail}
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-            <path
-              d={railNarrow ? 'M9 5l7 7-7 7' : 'M15 5l-7 7 7 7'}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </nav>
-
-      <div className="workspace">
-        <header className="topbar">
+    <div className="app">
+      {/* ONE row: which document, where you are, what you did, and the file.
+          They share a row because none of them needs a row of its own, and
+          three separate strips would have cost the grid a teacher. */}
+      <header className="topbar">
+        {/* Zone one: WHICH DOCUMENT is open. The school and the plan answer
+            one question between them, so they are drawn as one object rather
+            than as a heading that happens to be followed by a dropdown. */}
+        <div className="topbar-doc">
           <h1 className="app-title">{state.settings.schoolName.trim() || 'Ders Programı'}</h1>
 
           {/* Which timetable is open. It is shown even when there is only one:
@@ -318,59 +373,133 @@ export default function App() {
               </option>
             ))}
           </select>
+        </div>
 
-          {/* One line, once: my father has exactly one habit to learn — save to
-              a file. It sits INLINE now, so it no longer costs the timetable a
-              row and no longer has to be hidden on the Program tab. */}
-          <p className="topbar-note">
-            Program bu bilgisayarda kendiliğinden saklanıyor. <b>Dosyaya kaydetmek</b>{' '}
-            taşımak ve yedeklemek için.
-          </p>
+        {/* Zone two: WHERE YOU ARE. Six destinations, one lit. */}
+        <nav className="tabstrip" aria-label="Bölümler">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              className="tab"
+              aria-current={tab === t.id}
+              aria-label={t.label}
+              title={t.label}
+              onClick={() => setTab(t.id)}
+            >
+              {t.icon}
+              <span className="tab-label">{t.label}</span>
+            </button>
+          ))}
+        </nav>
 
-          <span className="spacer" />
+        <span className="spacer" />
 
-          <button className="btn" onClick={undo} disabled={!canUndo} title="Ctrl+Z">
-            ↶ Geri al
-          </button>
-          <button className="btn" onClick={redo} disabled={!canRedo} title="Ctrl+Y">
-            ↷ İleri al
+        {/* Zone three: the HISTORY of this session — two icons, because their
+            labels are the longest words on the bar and the shortcut in the
+            tooltip is what anyone actually reaches for twice. */}
+        <div className="btn-group">
+          <button
+            className="btn icon"
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="Geri al"
+            title="Geri al (Ctrl+Z)"
+          >
+            {ICON.undo}
           </button>
           <button
-            className="btn theme-toggle"
-            aria-pressed={theme === 'dark'}
-            aria-label="Koyu tema"
-            title={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
-            onClick={toggleTheme}
+            className="btn icon"
+            onClick={redo}
+            disabled={!canRedo}
+            aria-label="İleri al"
+            title="İleri al (Ctrl+Y)"
           >
-            {theme === 'dark' ? '☀' : '☾'}
+            {ICON.redo}
           </button>
-          <span className="topbar-sep" />
-          <button
-            className="btn primary"
-            onClick={() => downloadBackup(state)}
-            title="Programı bir .json dosyasına yazar"
-          >
-            Dosyaya kaydet
-          </button>
-          <button
-            className="btn"
-            onClick={() => fileInput.current?.click()}
-            title="Daha önce kaydedilmiş bir .json dosyasını açar"
-          >
-            Dosyadan aç
-          </button>
-          {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
-              aç". It is now in Ayarlar > Veri: the rarest button in the app,
-              and the only one that cannot be undone. */}
-          <input
-            ref={fileInput}
-            type="file"
-            accept=".json,application/json"
-            className="hidden"
-            onChange={fileChosen}
-          />
-        </header>
+        </div>
 
+        <span className="topbar-sep" />
+
+        {/* Zone four: the FILE. The one habit, kept the loudest thing here.
+            The sentence that used to explain it ("saklanıyor... kaydetmek
+            taşımak için") moved to Ayarlar > Veri, next to the report that
+            says where the data actually is: it was 400px of teaching on a row
+            that now has six destinations to hold. */}
+        <button
+          className="btn primary"
+          onClick={() => downloadBackup(state)}
+          title="Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için."
+        >
+          Dosyaya kaydet
+        </button>
+        <button
+          className="btn"
+          onClick={() => fileInput.current?.click()}
+          title="Daha önce kaydedilmiş bir .json dosyasını açar"
+        >
+          Dosyadan aç
+        </button>
+        {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
+            aç". It is now in Ayarlar > Veri: the rarest button in the app,
+            and the only one that cannot be undone. */}
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".json,application/json"
+          className="hidden"
+          onChange={fileChosen}
+        />
+
+        <span className="topbar-sep" />
+
+        {/* The theme is a MACHINE setting, not timetable data, and it is the
+            only one that has to be reachable from anywhere: the room gets
+            dark while you work. Scale and density live in Ayarlar. */}
+        {/* Folds the tool strip away. Beside the theme because both are
+            settings of the SCREEN, not of the timetable — and it has to be up
+            here: once folded, the strip has no row to hold its own button. */}
+        <button
+          className="btn icon"
+          aria-expanded={ribbon}
+          aria-label="Araç şeridi"
+          title={ribbon ? 'Araç şeridini gizle — ızgaraya bir satır daha' : 'Araç şeridini göster'}
+          onClick={toggleRibbon}
+          disabled={tab === 'check'}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path
+              d={ribbon ? 'M5 15l7-7 7 7' : 'M5 9l7 7 7-7'}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        <button
+          className="btn icon"
+          aria-pressed={theme === 'dark'}
+          aria-label="Koyu tema"
+          title={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+          onClick={toggleTheme}
+        >
+          {theme === 'dark' ? ICON.sun : ICON.moon}
+        </button>
+      </header>
+
+      {/* Row two: the tools of whichever section is open. */}
+      <Ribbon
+        ui={ui}
+        open={ribbon}
+        state={state}
+        solver={solver}
+        density={density}
+        setDensity={setDensity}
+      />
+
+      <div className="workspace">
         {!canSave && (
           <div className="save-warning">
             ⚠ <b>Bu bilgisayarda otomatik kayıt çalışmıyor.</b> Program kapanınca yaptığınız
@@ -391,12 +520,41 @@ export default function App() {
             tab === 'program' && state.lessons.length > 0 ? 'main no-overflow' : 'main'
           }
         >
-          {tab === 'setup' && <Setup state={state} change={change} plans={plans} />}
-          {tab === 'availability' && <Availability state={state} change={change} />}
-          {tab === 'program' && <Program state={state} change={change} solver={solver} />}
+          {tab === 'setup' && (
+            <Setup
+              state={state}
+              change={change}
+              plans={plans}
+              step={ui.step}
+              setStep={ui.setStep}
+            />
+          )}
+          {tab === 'availability' && (
+            <Availability
+              state={state}
+              change={change}
+              kind={ui.kind}
+              chosen={ui.chosen}
+              setChosen={ui.setChosen}
+            />
+          )}
+          {tab === 'program' && (
+            <Program
+              state={state}
+              change={change}
+              solver={solver}
+              view={ui.view}
+            />
+          )}
           {tab === 'check' && <Check state={state} />}
           {tab === 'print' && (
-            <Print state={state} excluded={printExcluded} setExcluded={setPrintExcluded} />
+            <Print
+              state={state}
+              excluded={printExcluded}
+              setExcluded={setPrintExcluded}
+              scope={ui.scope}
+              colored={ui.colored}
+            />
           )}
           {tab === 'settings' && (
             <Settings
@@ -408,6 +566,7 @@ export default function App() {
               setScale={setScale}
               density={density}
               setDensity={setDensity}
+              section={ui.section}
             />
           )}
         </main>

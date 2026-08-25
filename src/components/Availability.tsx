@@ -8,25 +8,30 @@
 // The three kinds share ONE grid and one dictionary: ids are unique across
 // teachers, classes and rooms, so only the entity list at the top changes.
 
-import { useMemo, useRef, useState } from 'react';
-import { sharedPeriods } from '../bell';
-import { paletteColor } from '../palette';
-import { buildIndex, closedConflicts, closedKey } from '../constraints';
-import type { Id, State } from '../types';
-import { openHours, setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
+import { useMemo, useRef, useState } from "react";
+import type React from "react";
+import { sharedPeriods } from "../bell";
+import { paletteColor } from "../palette";
+import { buildIndex, closedConflicts, closedKey } from "../constraints";
+import type { Id, State } from "../types";
+import {
+  openHours,
+  setAvailability,
+  setWholeWeek,
+  shortDay,
+  weeklyLoad,
+} from "../entities";
+import type { Kind } from "../toolState";
 
 interface Props {
   state: State;
   change: (apply: (d: State) => State) => void;
+  /** Whose closed hours. Owned by App; the tool strip above CHANGES it. */
+  kind: Kind;
+  /** Which one of them is open. */
+  chosen: Id;
+  setChosen: (next: Id) => void;
 }
-
-type Kind = 'teacher' | 'class' | 'room';
-
-const KINDS: Array<{ id: Kind; label: string }> = [
-  { id: 'teacher', label: 'Öğretmen' },
-  { id: 'class', label: 'Sınıf' },
-  { id: 'room', label: 'Derslik' },
-];
 
 interface Entity {
   id: Id;
@@ -41,22 +46,22 @@ interface Entity {
 }
 
 function entitiesOf(d: State, kind: Kind): Entity[] {
-  if (kind === 'teacher') {
+  if (kind === "teacher") {
     return d.teachers.map((t) => ({
       id: t.id,
       label: `${t.short} — ${t.name} (${t.subject})`,
       short: t.short,
-      load: weeklyLoad(d, 'teacher', t.id),
+      load: weeklyLoad(d, "teacher", t.id),
       open: openHours(d, t.id),
       color: t.color,
     }));
   }
-  if (kind === 'class') {
+  if (kind === "class") {
     return d.classes.map((c) => ({
       id: c.id,
       label: c.name,
       short: `${c.name} sınıfı`,
-      load: weeklyLoad(d, 'class', c.id),
+      load: weeklyLoad(d, "class", c.id),
       open: openHours(d, c.id),
       color: c.color,
     }));
@@ -65,27 +70,39 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
     id: r.id,
     label: r.name,
     short: `${r.name} dersliği`,
-    load: weeklyLoad(d, 'room', r.id),
+    load: weeklyLoad(d, "room", r.id),
     open: openHours(d, r.id),
     color: -1,
   }));
 }
 
+/** "kaç ÖĞRETMEN kapalı" — the word changes with the kind being edited. */
+const KIND_WORD: Record<Kind, string> = {
+  teacher: "öğretmen",
+  class: "sınıf",
+  room: "derslik",
+};
+
 const EMPTY_TEXT: Record<Kind, string> = {
-  teacher: 'öğretmen',
-  class: 'sınıf',
-  room: 'derslik',
+  teacher: "öğretmen",
+  class: "sınıf",
+  room: "derslik",
 };
 
 const HINT: Record<Kind, string> = {
-  teacher: 'Öğretmenin gelemeyeceği saatlere tıklayın.',
-  class: 'Sınıfın ders yapamayacağı saatlere tıklayın — o saatlere hiçbir ders konamaz.',
-  room: 'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
+  teacher: "Öğretmenin gelemeyeceği saatlere tıklayın.",
+  class:
+    "Sınıfın ders yapamayacağı saatlere tıklayın — o saatlere hiçbir ders konamaz.",
+  room: "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.",
 };
 
-export default function Availability({ state, change }: Props) {
-  const [kind, setKind] = useState<Kind>('teacher');
-  const [chosen, setChosen] = useState<Id>('');
+export default function Availability({
+  state,
+  change,
+  kind,
+  chosen,
+  setChosen,
+}: Props) {
   // Nothing is applied until the drag ends: painting 40 cells must not create
   // 40 separate undo steps.
   const [pending, setPending] = useState<Set<string> | null>(null);
@@ -99,24 +116,9 @@ export default function Availability({ state, change }: Props) {
       <>
         <div className="panel">
           <h2>Müsait olmayan saatler</h2>
-          <div className="form-row">
-            {KINDS.map((k) => (
-              <button
-                key={k.id}
-                className="btn"
-                aria-pressed={kind === k.id}
-                onClick={() => {
-                  setKind(k.id);
-                  setChosen('');
-                }}
-              >
-                {k.label}
-              </button>
-            ))}
-          </div>
           <div className="empty-screen">
             <strong>Önce {EMPTY_TEXT[kind]} ekleyin.</strong>
-            Müsaitlik girebilmek için <b>Kurulum</b> sekmesinden en az bir{' '}
+            Müsaitlik girebilmek için <b>Kurulum</b> sekmesinden en az bir{" "}
             {EMPTY_TEXT[kind]} eklemeniz gerekiyor.
           </div>
         </div>
@@ -156,7 +158,7 @@ export default function Availability({ state, change }: Props) {
     if (set === null || set.size === 0) return;
 
     const cells = [...set].map((k) => {
-      const [g, s] = k.split('|');
+      const [g, s] = k.split("|");
       return { day: Number(g), hour: Number(s) };
     });
     change((d) => setAvailability(d, entityId, cells, paintMode.current));
@@ -178,75 +180,159 @@ export default function Availability({ state, change }: Props) {
 
   const open = selected.open;
 
-  const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
+  const conflicts = useMemo(
+    () => closedConflicts(state, buildIndex(state)),
+    [state],
+  );
   const mine = conflicts.filter(
     (c) => c.teacherId === entityId || c.classId === entityId,
   ).length;
 
   // A column header carries one time; where the days disagree it stays empty.
   const clocks = useMemo(
-    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
+    () =>
+      sharedPeriods(
+        state.settings.bell,
+        state.settings.hours,
+        state.settings.days,
+      ),
     [state.settings],
   );
 
   return (
     <div className="cols narrow-right">
-      <div className="panel">
-        <h2>
-          {selected.short} — müsait olmayan saatler
-        </h2>
+      <div>
+        <div className="panel">
+          <h2>{selected.short} — müsait olmayan saatler</h2>
 
-        <p className="hint">
-          {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz.
-          Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına
-          tıklayınca haftanın o saati değişir.
-        </p>
+          <p className="hint">
+            {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre
+            işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı,
+            üstteki ders numarasına tıklayınca haftanın o saati değişir.
+          </p>
 
-        <div className="scroll-x">
-          <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
-            <thead>
-              <tr>
-                <th className="corner-head" />
-                {state.settings.hours.map((hour, s) => (
-                  <th key={s} onClick={() => toggleHour(s)} title="Haftanın bu saatini değiştir">
-                    {hour}
-                    <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {state.settings.days.map((day, g) => (
-                <tr key={g}>
-                  <th onClick={() => toggleDay(g)} title={`${day.name} — bütün günü değiştir`}>
-                    {shortDay(day.name)}
-                  </th>
-                  {state.settings.hours.map((_, s) => (
-                    <td
+          <div className="scroll-x">
+            <table
+              className="availability"
+              onPointerUp={endPaint}
+              onPointerLeave={endPaint}
+            >
+              <thead>
+                <tr>
+                  <th className="corner-head" />
+                  {state.settings.hours.map((hour, s) => (
+                    <th
                       key={s}
-                      className={[
-                        shownClosed(g, s) ? 'closed' : '',
-                        // The break sits at a different lesson on each row, so it
-                        // cannot be a column: it is a thick edge on THIS cell.
-                        day.longBreakAfter === s + 1 ? 'break-after' : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        startPaint(g, s);
-                      }}
-                      onPointerEnter={() => {
-                        if (pending !== null) continuePaint(g, s);
-                      }}
+                      onClick={() => toggleHour(s)}
+                      title="Haftanın bu saatini değiştir"
                     >
-                      {shownClosed(g, s) ? '×' : ''}
-                    </td>
+                      {hour}
+                      <span className="hour-clock">
+                        {clocks[s]?.start ?? ""}
+                      </span>
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {state.settings.days.map((day, g) => (
+                  <tr key={g}>
+                    <th
+                      onClick={() => toggleDay(g)}
+                      title={`${day.name} — bütün günü değiştir`}
+                    >
+                      {shortDay(day.name)}
+                    </th>
+                    {state.settings.hours.map((_, s) => (
+                      <td
+                        key={s}
+                        className={[
+                          shownClosed(g, s) ? "closed" : "",
+                          // The break sits at a different lesson on each row, so it
+                          // cannot be a column: it is a thick edge on THIS cell.
+                          day.longBreakAfter === s + 1 ? "break-after" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          startPaint(g, s);
+                        }}
+                        onPointerEnter={() => {
+                          if (pending !== null) continuePaint(g, s);
+                        }}
+                      >
+                        {shownClosed(g, s) ? "×" : ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Under the grid, the week READ ACROSS everyone: which hours the whole
+            school has closed. It is the thing this screen creates and could not
+            see — twenty-five teachers all off on Tuesday afternoon is the
+            reason the solver gets stuck, and it was only visible by clicking
+            through twenty-five people one at a time. */}
+        <div className="panel">
+          <h2>Haftanın darlığı</h2>
+          <p className="hint">
+            Her hücre, o saatte <b>kaç {KIND_WORD[kind]} kapalı</b> olduğunu
+            gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına
+            gelir — program dizilirken tıkanılan yer genellikle burasıdır.
+          </p>
+          <div className="scroll-x">
+            <table className="availability heat">
+              <thead>
+                <tr>
+                  <th className="corner-head" />
+                  {state.settings.hours.map((h, i) => (
+                    <th key={i}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {state.settings.days.map((day, g) => (
+                  <tr key={g}>
+                    <th scope="row">{shortDay(day.name)}</th>
+                    {state.settings.hours.map((_, sIdx) => {
+                      const n = list.filter(
+                        (x) =>
+                          state.unavailable[`${x.id}|${g}|${sIdx}`] !==
+                          undefined,
+                      ).length;
+                      return (
+                        <td
+                          key={sIdx}
+                          className={n === 0 ? "" : "closed"}
+                          // The GROUND carries the count, not the ink: an
+                          // opacity on the cell takes the number down with the
+                          // background and makes the darkest hour the hardest
+                          // to read — exactly backwards.
+                          style={
+                            n === 0
+                              ? undefined
+                              : ({
+                                  "--heat": (
+                                    0.2 +
+                                    (0.8 * n) / Math.max(1, list.length)
+                                  ).toFixed(2),
+                                } as React.CSSProperties)
+                          }
+                          title={`${day.name} ${sIdx + 1}. ders — ${n} / ${list.length} kapalı`}
+                        >
+                          {n === 0 ? "" : n}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -258,21 +344,6 @@ export default function Availability({ state, change }: Props) {
       <aside>
         <div className="panel">
           <h2>Kimin saatleri</h2>
-          <div className="form-row">
-            {KINDS.map((k) => (
-              <button
-                key={k.id}
-                className="btn"
-                aria-pressed={kind === k.id}
-                onClick={() => {
-                  setKind(k.id);
-                  setChosen('');
-                }}
-              >
-                {k.label}
-              </button>
-            ))}
-          </div>
 
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more
@@ -288,29 +359,40 @@ export default function Availability({ state, change }: Props) {
                 onClick={() => setChosen(x.id)}
               >
                 {x.color >= 0 && (
-                  <span className="row-dot" style={{ background: paletteColor(x.color) }} />
+                  <span
+                    className="row-dot"
+                    style={{ background: paletteColor(x.color) }}
+                  />
                 )}
                 <span className="entity-name">{x.label}</span>
                 <span className="entity-count">
                   {x.open}/{x.load}
-                  {x.open < x.load && ' ⚠'}
+                  {x.open < x.load && " ⚠"}
                 </span>
               </button>
             ))}
           </div>
 
           <div className="form-row spaced">
-            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, false))}>
+            <button
+              className="btn"
+              onClick={() => change((d) => setWholeWeek(d, entityId, false))}
+            >
               Tümünü aç
             </button>
-            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, true))}>
+            <button
+              className="btn"
+              onClick={() => change((d) => setWholeWeek(d, entityId, true))}
+            >
               Tümünü kapat
             </button>
           </div>
 
-          <p className={open < selected.load ? 'error-box' : 'hint'}>
-            <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders yüklenmiş.
-            {open < selected.load && ` ${selected.load - open} saat fazla — bu program dizilemez.`}
+          <p className={open < selected.load ? "error-box" : "hint"}>
+            <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders
+            yüklenmiş.
+            {open < selected.load &&
+              ` ${selected.load - open} saat fazla — bu program dizilemez.`}
           </p>
 
           {/* Closing an hour never removes what is already on it (principle 6),
@@ -320,8 +402,8 @@ export default function Availability({ state, change }: Props) {
               <b>
                 Kapattığınız saatlerde yerleşmiş {conflicts.length} ders var
                 {mine > 0 && `, ${mine} tanesi ${selected.short}'de`}.
-              </b>{' '}
-              Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{' '}
+              </b>{" "}
+              Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{" "}
               <b>Kontrol</b> sekmesinde tek tek listeleniyor.
             </div>
           )}

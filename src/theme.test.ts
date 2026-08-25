@@ -6,6 +6,11 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeDensity,
   normalizeScale,
+  normalizeDockHeight,
+  DOCK_H_MIN,
+  DOCK_H_MAX,
+  DOCK_H_DEFAULT,
+  DOCK_H_STEP,
   normalizeSidebar,
   normalizeTheme,
   SCALE_MAX,
@@ -50,7 +55,7 @@ describe('normalizeSidebar', () => {
 
 describe('normalizeScale', () => {
   it('yasal değerleri aynen geçirir', () => {
-    for (const value of [1, 1.05, 1.1, 1.15, 1.2, 1.25]) {
+    for (const value of [1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5]) {
       expect(normalizeScale(String(value))).toBe(value);
     }
   });
@@ -77,7 +82,11 @@ describe('normalizeScale', () => {
   // localStorage differently on every reload.
   it('gidiş dönüşte kaymaz', () => {
     let value = SCALE_MIN;
-    for (let i = 0; i < 6; i += 1) {
+    // Derived from the constants, not written out: the ladder's length is a
+    // consequence of the floor, the ceiling and the step, and a hard-coded 6
+    // silently stopped walking the ladder the day the ceiling moved to 1.5.
+    const rungs = Math.round((SCALE_MAX - SCALE_MIN) / SCALE_STEP);
+    for (let i = 0; i < rungs; i += 1) {
       expect(normalizeScale(String(value))).toBe(value);
       value = normalizeScale(String(value + SCALE_STEP));
     }
@@ -97,5 +106,50 @@ describe('normalizeDensity', () => {
     for (const junk of [null, undefined, '', 'rahat', 'Sığdır', 'SIGDIR', {}, 1, [], true]) {
       expect(normalizeDensity(junk)).toBe('rahat');
     }
+  });
+});
+
+describe('normalizeDockHeight', () => {
+  it('bir değeri olduğu gibi geri verir', () => {
+    expect(normalizeDockHeight('11')).toBe(11);
+    expect(normalizeDockHeight('7.5')).toBe(7.5);
+  });
+
+  it('aralığın dışını kırpar', () => {
+    expect(normalizeDockHeight('0')).toBe(DOCK_H_MIN);
+    expect(normalizeDockHeight('-9')).toBe(DOCK_H_MIN);
+    expect(normalizeDockHeight('999')).toBe(DOCK_H_MAX);
+  });
+
+  it('adıma yuvarlar', () => {
+    expect(normalizeDockHeight('11.1')).toBe(11);
+    expect(normalizeDockHeight('11.2')).toBe(11.25);
+  });
+
+  // The splitter commits a NUMBER and localStorage returns a STRING. The first
+  // version of this guard only admitted strings, so every drag was written back
+  // as the default and the drawer forgot its height on reload.
+  it('sayıyı da kabul eder, dizeyi de', () => {
+    expect(normalizeDockHeight(17.5)).toBe(17.5);
+    expect(normalizeDockHeight(99)).toBe(DOCK_H_MAX);
+    expect(normalizeDockHeight(0)).toBe(DOCK_H_MIN);
+    expect(normalizeDockHeight(Number.NaN)).toBe(DOCK_H_DEFAULT);
+  });
+
+  it('okunamayan her şeye varsayılanı verir', () => {
+    for (const junk of ['', 'orta', 'NaN', null, undefined, {}]) {
+      expect(normalizeDockHeight(junk)).toBe(DOCK_H_DEFAULT);
+    }
+  });
+
+  // The same round-trip guard the scale has: a value that does not survive
+  // String() -> normalizeDockHeight() would drift a step on every reload.
+  it('depoya yazılıp geri okunduğunda kaymaz', () => {
+    let value = DOCK_H_MIN;
+    while (value < DOCK_H_MAX) {
+      expect(normalizeDockHeight(String(value))).toBe(value);
+      value = normalizeDockHeight(String(value + DOCK_H_STEP));
+    }
+    expect(value).toBe(DOCK_H_MAX);
   });
 });

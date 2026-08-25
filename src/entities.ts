@@ -5,6 +5,7 @@
 // breaks the grid.
 
 import { closedKey, countPlacedHours, sanitize } from './constraints';
+import type { Index } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
 import type { ClassRow, LessonRow, TeacherRow } from './import';
@@ -732,4 +733,20 @@ export function deletionSummary(d: State, kind: EntityKind, id: Id): string {
     `${who} silinecek. ${plural(lessons.length, 'dersi')} ve programa yerleşmiş ` +
     `${plural(placed, 'saati')} de gidecek. Devam edilsin mi?`
   );
+}
+
+/**
+ * How many lessons still have hours waiting in the pool.
+ *
+ * The tool strip needs this number for "Otomatik diz (N)" but must not build
+ * the pool to get it: `buildPool` in Program.tsx is memoised beside the grid's
+ * rows and lifting it into App would put 99 cards' worth of work in the render
+ * that owns the 2100-cell table. This counts and stops.
+ */
+export function pendingLessons(d: State, ix: Index): number {
+  let n = 0;
+  for (const lesson of d.lessons) {
+    if ((ix.placedHours.get(lesson.id) ?? 0) < lesson.weeklyHours) n++;
+  }
+  return n;
 }

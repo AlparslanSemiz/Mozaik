@@ -18,6 +18,11 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 export async function open(page: Page) {
   await page.goto(FILE);
   await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
+  // The embedded face decides `ch`, and `ch` decides every column on the
+  // width ladder. `font-display: block` means nothing is painted with the
+  // fallback's metrics, so this wait is the moment the first glyph appears —
+  // measuring before it would measure a layout no user ever sees.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
 }
 
 /** Loads the sample data and switches to the Program tab. */
@@ -35,8 +40,11 @@ export async function openWithSample(page: Page) {
  */
 export async function openSetup(page: Page, step: string) {
   await page.getByRole('button', { name: 'Kurulum' }).click();
-  await page.locator('.step', { hasText: step }).click();
-  await expect(page.locator('.step[aria-current="true"]')).toContainText(step);
+  // The four steps live in the tool strip now, and they are `.btn`s there, so
+  // "you are here" is `aria-pressed` — the button state — rather than
+  // `aria-current`, which marked a navigation link.
+  await page.locator('.ribbon .step', { hasText: step }).click();
+  await expect(page.locator('.step[aria-pressed="true"]')).toContainText(step);
 }
 
 /**
@@ -45,8 +53,12 @@ export async function openSetup(page: Page, step: string) {
  */
 export async function openSettings(page: Page, section: string) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.step', { hasText: section }).click();
-  await expect(page.locator('.step[aria-current="true"]')).toContainText(section);
+  // Sections are plain `.btn`s in the strip; they never had step numbers.
+  await page
+    .locator('.ribbon .btn', { hasText: section })
+    .first()
+    .click();
+  await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(section);
 }
 
 export async function startDrag(page: Page, index = 0) {
@@ -453,4 +465,16 @@ export async function chooseScale(page: Page, percent: number) {
     'aria-pressed',
     'true',
   );
+}
+
+/** Ayarlar → Görünüm'den ızgara yoğunluğunu seçer ve Program'a döner. */
+export async function chooseDensity(page: Page, name: 'Rahat' | 'Sığdır') {
+  await openSettings(page, 'Görünüm');
+  await page.getByRole('button', { name, exact: true }).click();
+  await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await page.getByRole('button', { name: 'Program', exact: true }).click();
+  await expect(page.locator('table.grid')).toBeVisible();
 }

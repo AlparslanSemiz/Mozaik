@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--browser", "chromium"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y", "chrome-devtools-mcp@latest",
+        "--executablePath", "/home/alp/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome",
+        "--usageStatistics=false",
+        "--performanceCrux=false"
+      ],
+      "env": { "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1" }
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
+}

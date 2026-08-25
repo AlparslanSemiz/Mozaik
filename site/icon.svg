@@ -6,7 +6,7 @@
        the icon cannot drift away from what the app looks like.
        Full bleed background: the maskable variant is cropped to the middle
        80%, and everything that matters sits well inside that. -->
-  <rect width="512" height="512" rx="112" fill="#1f5fa8"/>
+  <rect width="512" height="512" rx="112" fill="#2e4ba8"/>
 
   <!-- the sheet -->
   <rect x="88" y="120" width="336" height="272" rx="20" fill="#ffffff"/>

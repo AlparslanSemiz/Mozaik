@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { parseClasses } from '../../import';
-import { PALETTE_SIZE, paletteColor } from '../../palette';
+import ColorPick from '../ColorPick';
 import {
   addClass,
   addClassesFromRows,
@@ -75,22 +75,13 @@ export default function Classes({ state, change }: PanelProps) {
             {state.classes.map((c) => (
               <tr key={c.id}>
                 <td>
-                  <select
+                  <ColorPick
                     value={c.color}
-                    onChange={(e) =>
-                      change((d) => updateClass(d, c.id, { color: Number(e.target.value) }))
+                    owner={c.name}
+                    onChange={(next) =>
+                      change((d) => updateClass(d, c.id, { color: next }))
                     }
-                    className="color-pick"
-                    style={{ background: paletteColor(c.color) }}
-                    aria-label={`${c.name} rengi`}
-                    title="Renk"
-                  >
-                    {Array.from({ length: PALETTE_SIZE }, (_, i) => (
-                      <option key={i} value={i}>
-                        {i + 1}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </td>
                 <td>
                   <input

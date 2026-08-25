@@ -10,6 +10,8 @@
 
 import { expect, test } from '@playwright/test';
 import {
+  openSetup,
+  chooseDensity,
   open,
   openWithSample,
   openSettings,
@@ -18,16 +20,6 @@ import {
   settledText,
 } from './helpers';
 
-async function chooseDensity(page: import('@playwright/test').Page, name: 'Rahat' | 'Sığdır') {
-  await openSettings(page, 'Görünüm');
-  await page.getByRole('button', { name, exact: true }).click();
-  await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await page.getByRole('button', { name: 'Program', exact: true }).click();
-  await expect(page.locator('table.grid')).toBeVisible();
-}
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
 async function gridMetrics(page: import('@playwright/test').Page) {
@@ -75,19 +67,77 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(await rootFontSize(page)).toBeCloseTo(16, 1);
   });
 
+  test('tavan %150 — merdivenin son basamağı gerçekten çiziliyor', async ({ page }) => {
+    // The ceiling moved from %125 to %150 for the reader this tool is built
+    // for. A ceiling nobody measures is a ceiling that quietly does nothing:
+    // this checks that the last rung exists, applies, and does not tear the
+    // layout — on the two screens with the most furniture per pixel.
+    await openWithSample(page);
+    await openSettings(page, 'Görünüm');
+
+    const steps = await page
+      .getByRole('group', { name: 'Yazı büyüklüğü' })
+      .getByRole('button')
+      .allInnerTexts();
+    expect(steps[0]).toBe('%100');
+    expect(steps[steps.length - 1]).toBe('%150');
+    // 1.00 to 1.50 in steps of 0.05: eleven rungs, and they are buttons rather
+    // than a slider because the ladder has exactly eleven legal values.
+    expect(steps).toHaveLength(11);
+
+    await chooseScale(page, 150);
+    expect(await rootFontSize(page)).toBeCloseTo(24, 1);
+
+    for (const [name, go] of [
+      ['Kurulum → Öğretmenler', () => openSetup(page, 'Öğretmenler')],
+      ['Ayarlar → Kurallar', () => openSettings(page, 'Kurallar')],
+    ] as const) {
+      await go();
+      const spill = await page.evaluate(() => ({
+        x: document.body.scrollWidth - document.body.clientWidth,
+        clipped: [...document.querySelectorAll('table.list th')].filter(
+          (el) => el.scrollWidth > el.clientWidth + 0.5,
+        ).length,
+      }));
+      expect(spill.x, `${name} %150'de yatay taşıyor`).toBeLessThanOrEqual(1);
+      expect(spill.clipped, `${name} %150'de ${spill.clipped} başlık kırpıldı`).toBe(0);
+    }
+
+    await chooseScale(page, 100);
+  });
+
   test('ızgara ölçekle birlikte büyüyor', async ({ page }) => {
     // The grid is on the same axis as the shell: A5 (a separate --grid-zoom)
     // was removed, and a scale setting that leaves the one screen my father
     // spends the day in untouched would miss the point of the setting.
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    const width = () => page.locator('table.grid').evaluate((e) => e.getBoundingClientRect().width);
-    const before = await width();
+    const measure = () =>
+      page.locator('table.grid').evaluate((e) => ({
+        width: e.getBoundingClientRect().width,
+        columns: e.querySelectorAll('thead tr:nth-child(2) th').length,
+      }));
+    const before = await measure();
 
     await chooseScale(page, 125);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
-    expect(await width()).toBeCloseTo(before * 1.25, 0);
+    const after = await measure();
+
+    // The tolerance is DERIVED, not chosen: --cell-w is 2.125rem, so at %125 a
+    // cell wants 42.5px, and the embedded face's min-content ("09:00" in the
+    // heading — the same thing that sets the floor in pitfall 37) rounds it up
+    // to the next whole pixel. Half a pixel per column, and the grid has 78 of
+    // them: measured 3273px against an ideal 3270px. A cell written in px
+    // would land on 2616px and miss by six hundred, not by three.
+    const slack = before.columns * 0.5 + 1;
+    expect(after.columns).toBe(before.columns);
+    expect(
+      after.width,
+      `%100'de ${before.width}px, %125'te ${after.width}px — ` +
+        `beklenen ${(before.width * 1.25).toFixed(0)}px ±${slack}`,
+    ).toBeGreaterThanOrEqual(before.width * 1.25 - slack);
+    expect(after.width).toBeLessThanOrEqual(before.width * 1.25 + slack);
   });
 
   test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({ page }) => {

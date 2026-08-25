@@ -151,7 +151,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     // The colours are still one per teacher, and the timetable is untouched.
     await openSetup(page, 'Öğretmenler');
     const colors = await page
-      .locator('table.list tbody tr select[title="Renk"]')
+      .locator('table.list tbody tr .color-pick')
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(new Set(colors).size).toBe(colors.length);
 

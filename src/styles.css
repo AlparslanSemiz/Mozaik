@@ -7,31 +7,84 @@
    without it the browser darkens the light page itself and muddies
    green/yellow/red, which is the tool's only feedback channel. */
 
+@font-face {
+  /* IBM Plex Sans, SIL Open Font License 1.1 — src/fonts/OFL.txt.
+     A VARIABLE font clipped to the 400-600 range and subset to the 225 glyphs
+     this tool can draw (Latin-1 + Turkish + the punctuation we actually use).
+     23 KB, and `assetsInlineLimit` turns it into a data: URI inside the single
+     dist/index.html — no <link>, no CDN, no byte fetched at runtime. Principle
+     3 is unchanged; site.spec.ts still greps the output for network URLs.
+
+     Why Plex and not the system font: this grid's content is NUMBERS (411,
+     09:00, 12) and Plex's digits are tabular by construction — every one of
+     them is 600 units wide, measured, no `tnum` feature needed. The fallback
+     stack below keeps the tool working if the face ever fails to decode. */
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  /* block, NOT swap. Measured: with `swap`, the first layout resolves `ch`
+     against the fallback (1ch = 6.86px) and re-resolves it against Plex
+     (1ch = 9.00px at the same size) the moment the face decodes — every
+     column sized from the `ch` ladder jumps on every open. The face is a
+     data: URI in this very file, so "blocking" is a decode, not a download:
+     nothing is painted with the wrong metrics because nothing is painted at
+     all until it is ready. */
+  font-display: block;
+  src: url("./fonts/IBMPlexSans-subset.woff2") format("woff2-variations");
+}
+
+/* THREE PLANES, and everything on screen sits on exactly one of them.
+   Until now the rail, the top bar, a panel and the grid were all --paper
+   (#fff) on one --bg, so nothing said which surface was TOOL and which was
+   DOCUMENT. Now:
+
+     --bg        the desk   nothing is read directly off it
+     --chrome    the tool   top bar, pool drawer
+     --chrome-2  the tool   the ribbon, one step back from the bar above it
+     --paper     the sheet  panels, grid, cards, print preview
+
+   The chrome is cooler and steps back, the sheet is white and comes forward.
+   Measured: dE(chrome, paper) = 5.5 in light, 3.5 in dark - a visible plane
+   change, nowhere near a state colour.
+
+   --chrome-2 arrived with the second strip and is not decoration: two bars
+   stacked and both on --chrome read as one thick grey block, with only a 1px
+   hairline claiming otherwise. dE(chrome, chrome-2) is about 2.5 — the same
+   order as the grid's day band, and for the same reason: it groups, it never
+   says anything is wrong. --chrome-lit is the top 0-stop of the bar's gradient
+   and exists only there. */
+
 :root {
   color-scheme: light;
 
-  /* yüzey — fark artırıldı, sıcaklık eklendi */
-  --bg:          #eceef1;   /* eski #f4f5f7 — panel artık kalkıyor */
+  --bg:          #d7dce4;
+  --chrome:      #eff2f6;
+  --chrome-2:    #e6eaf1;
+  --chrome-lit:  #f6f8fb;
   --paper:       #ffffff;
-  --paper-sunk:  #f5f6f8;   /* input, inset alan */
+  --paper-sunk:  #f2f5f9;
+  /* The grid's day band: odd days get this ground so the eye sees SIX DAYS
+     instead of 78 columns. dE(band, paper) = 2.7 — deliberately far below the
+     14 that tells two functional colours apart, or it would read as a state. */
+  --band:        #f7f8fa;
 
-  /* ÇİZGİ İKİYE AYRILDI — en önemli değişiklik.
-     --hairline kabuğun her yerinde: liste satırı, panel, kenar çubuğu, ayraç.
-     --line: veri okunan yerler (ızgara, tablo BAŞLIĞI) ve DENETİM kenarı
-     (düğme) — düğmenin kendine ait yüzeyi yok, kenarı tek sınırı.
-     Kabuk çizgisi ile veri çizgisi aynı griyse her şey kutu gibi görünür. */
-  --hairline:    #e4e7ec;   /* kabuk: liste satırı, ayraç. Neredeyse görünmez */
-  --line:        #c9ced6;   /* ızgara, tablo başlığı, düğme kenarı */
-  --line-dark:   #8a93a0;   /* ızgara gün ayracı, baskı */
+  /* Three rules, three jobs (unchanged split, retuned values):
+     --hairline shell, --line control edge and table head, --line-dark the
+     loudest rule there is (day separator, row head). */
+  --hairline:    #e5e8ed;
+  --line:        #cbd1d9;
+  --line-dark:   #949da9;
 
-  --text:        #16191d;
-  /* Verilen set #5c6672 diyordu; --closed üstünde AA 4.08'e düşüyordu ve o gri
-     kapalı saatin × işaretinin rengi. Aynı (daha mavi) ton, iki basamak koyu:
-     --paper 6.79, --closed 4.75. Sınır gevşetilmedi, renk düzeltildi. */
+  --text:        #14171b;
+  /* Kept from Y0: #5c6672 fell to AA 4.08 on --closed, which is the grey the
+     closed-hour "x" is drawn on. Measured here: --paper 6.79, --closed 4.75. */
   --muted:       #525c69;
 
-  --accent: #1f5fa8;  --accent-hover: #17497f;
-  --accent-bg: #e3eefb;  --on-accent: #ffffff;
+  /* Ink blue. Deliberately QUIET: 36 identity colours and three functional
+     ones already own this screen's colour budget, and a loud accent would
+     fight them. Measured: 6.63 on --accent-bg, 7.81 for --on-accent on it. */
+  --accent: #2e4ba8;  --accent-hover: #24398a;
+  --accent-bg: #e8ecfa;  --on-accent: #ffffff;
   --ok: #177431;  --ok-bg: #d5f0dc;
   --warn: #8a6100;  --warn-bg: #fdf0cf;
   --bad: #b0201c;  --bad-bg: #fbdcda;
@@ -44,63 +97,78 @@
   --dot-border: rgba(0,0,0,.3);
   --print-line: #444;  --print-head-bg: #eee;
 
-  /* Sürüklenen hayalet kart. "Bir öğe yüzüyor gibi görünüyorsa yanlıştır"ın
-     tek istisnası: o kart gerçekten parmağın altında taşınıyor. Yeni token
-     setinde yoktu; düşürülseydi hayaletin gölgesi sessizce kaybolurdu. */
+  /* Sürüklenen hayalet kart. */
   --shadow: rgba(0,0,0,.35);
+
+  /* TWO ELEVATIONS, and only two. The old rule ("if an element looks like it
+     is floating it is wrong") is replaced, not loosened: --elev-1 is the sheet
+     lying on the desk, --elev-2 is the three things that genuinely float — the
+     drag ghost, a dialog, and the sticky head once the grid is scrolled under
+     it. Buttons and inputs get NEITHER. */
+  --elev-1: 0 1px 2px rgba(20,26,38,.06), 0 1px 1px rgba(20,26,38,.04);
+  --elev-2: 0 10px 28px rgba(20,26,38,.13), 0 2px 6px rgba(20,26,38,.09);
 
   /* TİPOGRAFİ — 11 boyut yerine 6 */
   --fs-xs:   .75rem;    /* 12px — mutlak alt sınır */
   --fs-sm:   .8125rem;
   --fs-md:   .875rem;
-  --fs-base: 1rem;      /* gövde, eskiden 14px */
+  --fs-base: 1rem;      /* gövde */
   --fs-lg:   1.125rem;
   --fs-xl:   1.375rem;
+
+  /* Tracking, two values. Plex wants a touch of negative tracking at display
+     sizes and real positive tracking when small text is set in caps — the day
+     headings are the reason the second one exists. */
+  --ls-tight: -.011em;
+  --ls-caps:   .06em;
 
   /* KÂĞIT — ekranınkinden AYRI bir merdiven, pt cinsinden.
      Gerekçe: --ui-scale bir EKRAN rahatlık ayarı, kâğıt ise sabit fiziksel
      boyut. Baskı rem kullansaydı 1.25 ölçekte A4'e sığan şey değişir, 205 mm
      sabit yükseklik hesabı (tuzak 31) ve "3 sınıf = 3 sayfa" testi ölçeğe göre
-     bir geçer bir kalırdı — babanın yazıcıda bulacağı bir hata. pt seçildi
-     çünkü hedef ortam fiziksel; bu bir "ham px" kaçamağı değil.
-     Aynı merdiven ÖNİZLEMEDE de kullanılır: önizleme kâğıda benzemezse hangi
-     sayfanın basılacağını seçmek tahmine döner. */
-  --fs-p-xl:   14pt;    /* 18.7px — sayfa başlığı  (ekran 17px / kâğıt 19px) */
-  --fs-p-lg:   10pt;    /* 13.3px — .p-top, .p-daycol, kapalı saat      (13px) */
-  --fs-p-md:    9pt;    /* 12.0px — künye satırı                       (12px) */
-  --fs-p-base: 8.5pt;   /* 11.3px — tablo gövdesi ve başlığı           (11px) */
-  --fs-p-sm:    8pt;    /* 10.7px — .p-bottom     (ekran 10px / kâğıt 11px) */
-  --fs-p-xs:    7pt;    /*  9.3px — .p-clock                            (9px) */
+     bir geçer bir kalırdı — babanın yazıcıda bulacağı bir hata. */
+  --fs-p-xl:   14pt;    /* sayfa başlığı */
+  --fs-p-lg:   10pt;    /* .p-top, .p-daycol, kapalı saat */
+  --fs-p-md:    9pt;    /* künye satırı */
+  --fs-p-base: 8.5pt;   /* tablo gövdesi ve başlığı */
+  --fs-p-sm:    8pt;    /* .p-bottom */
+  --fs-p-xs:    7pt;    /* .p-clock */
 
-  /* SATIR ARALIĞI — yepyeni, ferahlığın asıl kaynağı */
+  /* SATIR ARALIĞI */
   --lh-tight: 1.2;      /* ızgara hücresi, tablo satırı */
   --lh-base:  1.5;      /* form etiketi, açıklama, paragraf */
   --lh-head:  1.25;
 
-  /* BOŞLUK — rem, yani --ui-scale ile birlikte büyür. Yazı büyüyüp boşluk
-     yerinde kalsaydı ölçek ayarı ekranı ferahlatmak yerine sıkıştırırdı. */
+  /* BOŞLUK — rem, yani --ui-scale ile birlikte büyür. */
   --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
   --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
 
-  /* İki değer, üçüncüsü yok. CLAUDE.md 3/6 diyor; Y0 sehven 4/8 yazmıştı ve
-     hiç kullanılmadığı için fark etmemişti. 3/6 hem belgeye uyuyor hem de en
-     sık geçen ham değeri (6px, sekiz yerde) tam karşılıyor. px kalıyor: köşe
-     yuvarlaklığı okunan bir boy değil, kenarın keskinliği. */
-  --r-sm: 3px;  --r-md: 6px;
+  /* THREE radii, one per plane — the "no third radius" rule is amended on
+     purpose. With a real plane stack, 6px on a 600px panel reads as almost
+     square, while 10px on a 34px cell would eat the colour block:
+       --r-sm  data     grid cell, card, swatch, dot
+       --r-md  control  button, input, select
+       --r-lg  plane    panel, dock, dialog
+     A fourth is still forbidden. px stays: a corner radius is not a size that
+     is read, it is how sharp the edge is. */
+  --r-sm: 4px;  --r-md: 7px;  --r-lg: 12px;
 
-  /* TABLO SÜTUNU — altı basamak, `ch` cinsinden. JSX'te 29 tane
-     `style={{ width: N }}` vardı; bir sütunun genişliği içindeki yazıyla
-     ilgilidir, ham piksel ise onunla ÇELİŞİR (tuzak 33: gövde 14→16px olunca
-     44px'lik kutu iki basamağı almaz oldu). `ch` yazınca --ui-scale hem
-     başlığı hem hücreyi aynı katsayıyla büyütür, yani %100'de sığan %125'te de
-     sığar.
+  /* MOTION. One duration, one curve, and a hard list of what may use them:
+     hover/focus/pressed on a control, the dialog fade, the grid crosshair.
+     No layout animation, no skeleton, no toast, no page transition, and no
+     library — the 2026-08-25 rule, unchanged. Killed outright under
+     prefers-reduced-motion below. */
+  --dur: 140ms;
+  /* A control's own hover/press must not take as long as a drawer opening:
+     140ms on a button reads as lag. Both die together under reduced-motion. */
+  --dur-fast: 90ms;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+
+  /* TABLO SÜTUNU — altı basamak, `ch` cinsinden.
      Birim BAŞLIĞIN kendi ch'si (table.list th = --fs-xs), çünkü sınıf onun
-     üstünde duruyor. KUTU genişlikleri (.num, .text-sm, .color-pick) ise
-     gövdeye bağlı — tuzak 34: bir kutu kendi üstünden boylanır, sütunundan
-     değil; sütun ondan boylanır. Aynı piksele iki farklı ch sayısı düşmesinin
-     sebebi bu (8ch@1rem ≈ 10ch@.75rem ≈ 70px), yazım hatası değil.
-     Yanındaki px'ler ölçülmüş karşılıklar, hedef değil: `e2e/sutun.spec.ts`
-     sığdığını her koşuda yeniden ölçer. */
+     üstünde duruyor. KUTU genişlikleri (.num, .text-sm) ise gövdeye bağlı —
+     tuzak 34: bir kutu kendi üstünden boylanır, sütunundan değil. Yanındaki
+     px'ler ölçülmüş karşılıklar, hedef değil. */
   --w-col-xs:  8ch;   /*  ~55px  onay kutusu, tek kelimelik etiket */
   --w-col-sm: 10ch;   /*  ~69px  sayı sütunu (th.num / td.num) */
   --w-col-md: 13ch;   /*  ~89px  sayı kutusu, tek düğme */
@@ -108,12 +176,7 @@
   --w-col-xl: 26ch;   /* ~179px  uzun seçenekli liste, iki düğme */
   --w-col-2xl: 32ch;  /* ~220px  uzun metin */
 
-  /* Izgara da --ui-scale'e bağlı. A5 (ayrı --grid-zoom ekseni) kullanıcı
-     tarafından silindi, yani ikinci eksen yok: tek eksen kaldıysa ızgara ona
-     bağlanmalı, yoksa ölçek büyütüldüğünde babanın bütün gün baktığı ekran
-     tek başına küçük kalırdı. */
   --cell-w: 2.125rem;  --cell-h: 2.125rem;   /* 34px @1.0 */
-  --rail-w: 5.75rem;                          /* 92px @1.0 */
   --rowhead-w: 8.25rem;                       /* 132px @1.0 */
 
   --ui-scale: 1;
@@ -124,15 +187,27 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #15181c;
-  --paper: #1f242a;
-  --line: #39414a;
-  --line-dark: #646e7a;
-  --text: #e8ecf1;
-  --muted: #a9b2bd;
-  --accent: #7cb8ff;
-  --accent-hover: #9ac9ff;
-  --accent-bg: #16304e;
+  --bg: #0f1216;
+  /* One step darker than the light theme's ratio would suggest: on a dark
+     ground the same dE reads as less separation, and the measurement said so
+     (2.47 against the light theme's 5.16 at the first values tried). */
+  --chrome: #141920;
+  --chrome-2: #10141a;
+  --chrome-lit: #141920;
+  --paper: #1c2128;
+  --paper-sunk: #14181d;
+  --band: #22272f;
+
+  --hairline: #272d35;
+  --line: #363e48;
+  --line-dark: #68727e;
+
+  --text: #e9edf2;
+  --muted: #a9b3be;
+
+  --accent: #9db8ff;
+  --accent-hover: #bccdff;
+  --accent-bg: #1b2a48;
   --on-accent: #0a1524;
   --ok: #74e79f;
   --ok-bg: #123521;
@@ -143,10 +218,19 @@
   --closed: #3b434c;
   --hatch: #2e353d;
 
-  /* Işık tarafındaki ikisinin karanlık karşılığı. Sunk yüzey burada da
-     GÖMÜK, yani --paper'dan koyu; hairline --paper'ın bir tık üstünde. */
-  --paper-sunk: #1a1f24;
-  --hairline: #2b3239;
+  /* Deeper, because the ground under them is dark: the light theme's values
+     would be invisible here. */
+  --elev-1: 0 1px 2px rgba(0,0,0,.35);
+  --elev-2: 0 8px 22px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4);
+}
+
+/* The one place motion is switched off, and it switches off ALL of it:
+   every transition in this file reads --dur. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+    --dur-fast: 0ms;
+  }
 }
 
 * {
@@ -161,7 +245,7 @@ body,
 }
 
 body {
-  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  font-family: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
   font-size: var(--fs-base);
   line-height: var(--lh-base);
   color: var(--text);
@@ -178,115 +262,220 @@ textarea {
 
 /* ---------------------------------------------------------------- skeleton */
 
-/* The six sections moved from a band across the top to a rail down the left.
-   The vertical half of that argument was written for a 768px screen, where the
-   band cost the timetable a whole row; on the real 1080px screen that pressure
-   is gone. The horizontal half still holds and is why the rail stays: the grid
-   overflows and scrolls anyway (2616px against 1828px of box), so the rail's
-   92px costs nothing that was not scrolled already. */
+/* The six sections moved from a rail down the left to the TOP row, sharing it
+   with the document identity, the history buttons and the file buttons.
+
+   The rail's argument was that a horizontal band costs the timetable a row.
+   That is only true of a band that is a row of its own; this one is not. And
+   the rail's own cost was never counted: 92px of WIDTH on all six tabs, on the
+   five of which have no width to spare. Measured on the real screen, the whole
+   head is now SHORTER than it was with the rail (139px -> 114px), because the
+   old top bar was 59px of mostly air. */
 .app {
   display: flex;
-  flex-direction: row;
-  height: 100%;
-}
-
-.sidebar {
-  flex: 0 0 var(--rail-w);
-  width: var(--rail-w);
-  display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-2);
-  background: var(--paper);
-  border-right: 1px solid var(--hairline);
-  overflow: hidden;
-}
-
-/* Collapsed to icons only, for when the grid needs every pixel. */
-.app.rail-narrow {
-  --rail-w: 3.25rem;
+  height: 100%;
 }
 
 .workspace {
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* Row one: identity, destinations, history, file, theme. The gradient is the
+   only one in the file, and it is 2% — a tool's chrome catching a little light,
+   not a surface with a colour of its own. */
 .topbar {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--paper);
+  padding: var(--space-2) var(--space-4);
+  background: linear-gradient(180deg, var(--chrome-lit) 0%, var(--chrome) 100%);
   border-bottom: 1px solid var(--hairline);
   flex: 0 0 auto;
 }
 
-.app-title {
-  margin: 0;
-  font-size: var(--fs-base);
-  font-weight: 600;
-  white-space: nowrap;
+/* On a dark chrome a 2% gradient is a banding artefact, not a highlight. */
+:root[data-theme="dark"] .topbar {
+  background: var(--chrome);
 }
 
-/* Which plan is open. Capped, because a plan is named by hand and a long name
-   would push the save buttons off the top bar; `.topbar-note` next to it
-   already shrinks and ellipses, so the row keeps its width either way. */
-.plan-picker {
-  max-width: 190px;
+/* The school and the plan, drawn as ONE object: together they answer "which
+   timetable am I editing", and a heading followed by a loose dropdown asked
+   that question twice. It sits on --paper, so the open document is literally
+   the only sheet on the chrome. */
+.topbar-doc {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--paper);
+}
+
+.app-title {
+  margin: 0;
   font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: var(--ls-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Buttons that belong to one job, drawn as one control: the seam between them
+   is a single rule, not two borders and a gap. */
+.btn-group {
+  display: flex;
   flex: 0 0 auto;
 }
 
-.tabs {
+.btn-group > .btn + .btn {
+  margin-left: -1px;
+}
+
+.btn-group > .btn:not(:first-child):not(:last-child) {
+  border-radius: 0;
+}
+
+.btn-group > .btn:first-child:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group > .btn:last-child:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* Whichever one the pointer is on has to be the one drawn on top, or its
+   hover border is half-covered by the neighbour it overlaps by 1px. */
+.btn-group > .btn:hover:not(:disabled),
+.btn-group > .btn:focus-visible {
+  position: relative;
+  z-index: 1;
+}
+
+/* Which plan is open. Capped, because a plan is named by hand and a long name
+   would push the destinations off the row. */
+.plan-picker {
+  max-width: 9rem;
+  font-size: var(--fs-xs);
+  flex: 0 1 auto;
+}
+
+/* Row one, zone two: the six destinations. Horizontal, icon beside label —
+   the rail stacked them because it was 92px wide, and this is not. */
+.tabstrip {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-1);
+  flex: 0 1 auto;
+  min-width: 0;
+  padding-left: var(--space-2);
 }
 
 .tab {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
-  width: 100%;
-  padding: var(--space-3) var(--space-1);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border: 1px solid transparent;
   border-radius: var(--r-md);
   background: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: var(--fs-xs);
-  line-height: 1.1;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.tab svg {
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 .tab-label {
   white-space: nowrap;
 }
 
-/* Collapsed: icons only. The accessible name stays on `aria-label`, so the
-   button is still reachable by name — for a screen reader and for a test. */
-.app.rail-narrow .tab-label {
-  display: none;
-}
-
 .tab:hover {
-  background: var(--bg);
+  background: var(--paper);
   color: var(--text);
 }
 
+/* The section you are in is a SHEET on the chrome — the same move the document
+   identity makes, and the one the tab metaphor is built on: the tab you are on
+   is the page you are looking at, continuous with the work below it. */
 .tab[aria-current="true"] {
-  background: var(--accent-bg);
-  border-color: var(--accent);
+  background: var(--paper);
+  border-color: var(--hairline);
   color: var(--accent);
   font-weight: 600;
+  box-shadow: var(--elev-1);
 }
 
-.rail-toggle {
-  align-self: center;
+/* Under 1280px the labels go and the icons carry it. The accessible name stays
+   on `aria-label`, so the button is still reachable by name — for a screen
+   reader and for a test. */
+@media (max-width: 1280px) {
+  .tab-label {
+    display: none;
+  }
+}
+
+/* Row two: the tools of whichever section is open. A second, slightly darker
+   plane so two strips do not read as one thick grey block: dE(chrome, chrome-2)
+   is about 2.5 — a plane change, nowhere near a functional colour. */
+/* 32px controls, not 36: three strips of 36px buttons is where the vertical
+   budget went last time. 32 is still well over the 24px WCAG 2.2 target and is
+   what every desktop toolbar uses. */
+.ribbon .btn {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-sm);
+}
+
+.ribbon .btn.icon {
+  padding: var(--space-2);
+}
+
+.ribbon {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-4);
+  background: var(--chrome-2);
+  border-bottom: 1px solid var(--hairline);
+}
+
+/* A group of controls that belong to one question, with a rule between groups
+   — the ribbon's only structure. */
+/* What a group of controls is FOR. Small and quiet: it is a caption on a
+   button group, not a heading. */
+.ribbon-label {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ribbon-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 0 var(--space-2);
+  background: var(--line);
 }
 
 .spacer {
@@ -304,18 +493,6 @@ textarea {
   margin-left: var(--space-5);
 }
 
-/* One line, once: my father has exactly one habit to learn — save to a file.
-   It is INLINE, so it costs no vertical space and no longer has to disappear on
-   the Program tab the way it did when it took a row of its own. */
-.topbar-note {
-  margin: 0;
-  font-size: var(--fs-xs);
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* A button has NO surface of its own: --paper on --paper, in the top bar and
    inside every panel alike. Its border is therefore its only boundary, which
    is why it could not follow the inputs down to --hairline in Y0 — the inputs
@@ -328,6 +505,11 @@ textarea {
   border-radius: var(--r-md);
   background: var(--paper);
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
 .btn:hover:not(:disabled) {
@@ -376,27 +558,33 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-3);
   color: var(--muted);
-  opacity: 0.55;
-}
-
-/* More specific than the rule above, so the ink has to be repeated here too:
-   accent on accent would be an invisible icon. */
-.btn.icon[aria-pressed="true"],
-.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
-  opacity: 1;
-  color: var(--on-accent);
 }
 
 .btn.icon:hover:not(:disabled) {
+  color: var(--text);
+}
+
+/* The two-position pair — and ONLY that pair — fades the position you are not
+   in. This used to sit on `.btn.icon` itself, which meant every icon button in
+   the app was drawn at 55% for no reason. */
+/* The unselected position fades — but only to 0.7, and only on a --paper
+   ground. At 0.55 on the ribbon's darker plane the icon was a smudge. */
+.view-switch .btn.icon {
+  opacity: 0.7;
+}
+
+.view-switch .btn.icon:hover:not(:disabled),
+.view-switch .btn.icon[aria-pressed="true"] {
   opacity: 1;
 }
 
-.theme-toggle {
-  min-width: 36px;
-  font-size: var(--fs-base);
-  line-height: 1.2;
+/* More specific than the pressed rule further up, so the ink has to be
+   repeated here too: accent on accent would be an invisible icon. */
+.btn.icon[aria-pressed="true"],
+.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
+  color: var(--on-accent);
 }
 
 /* Four states, and only four: primary (the one thing to do here), plain
@@ -406,6 +594,29 @@ textarea {
    a red rule around every "Sil" is 25 red rectangles down a teacher list, and
    the danger colour stops meaning danger when it is the page's background
    pattern. The border comes back on hover, with --bad-bg behind it. */
+/* A button that is a DESTINATION, inside a table cell: no frame, no surface,
+   because a bordered rectangle in every row of a four-row table is four
+   rectangles saying nothing. It still hovers and focuses like a button. */
+.btn.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-color: transparent;
+  background: none;
+  font-weight: 600;
+}
+
+.btn.link:hover:not(:disabled) {
+  background: none;
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.btn.link[aria-current="true"] {
+  color: var(--accent);
+}
+
 .btn.danger {
   color: var(--bad);
 }
@@ -418,7 +629,7 @@ textarea {
 .main {
   flex: 1 1 auto;
   overflow: auto;
-  padding: var(--space-4);
+  padding: var(--space-5) var(--space-6);
 }
 
 .main.no-overflow {
@@ -432,17 +643,19 @@ textarea {
    does not jump down when it appears. */
 .reason-bar {
   flex: 0 0 auto;
-  height: 1.875rem;
+  height: 1.625rem;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: 0 var(--space-4);
-  font-weight: 600;
-  /* Nothing to say: the plain state. The four loud states are below. */
-  background: var(--paper);
+  /* Nothing wrong: the plain state, and the strip where the grid's own
+     description sits. It is a shade of PAPER, not of chrome — it belongs to
+     the timetable below it, not to the tools above it. */
+  background: var(--paper-sunk);
   color: var(--muted);
   border-bottom: 1px solid var(--hairline);
   font-weight: 400;
+  font-size: var(--fs-sm);
 }
 
 .reason-bar > span:first-child {
@@ -510,32 +723,66 @@ table.grid {
   table-layout: fixed;
 }
 
+/* THE CAGE IS GONE, and this is the single change that stops the timetable
+   reading as a spreadsheet. Every one of the ~2100 cells used to be ruled in
+   --line (#c9ced6) on two sides, so the eye counted BOXES. The hour boundary
+   drops to the hairline, and the loud rule is spent where the information is:
+   between one day and the next.
+
+   The day rule itself is NOT set here: `.day-head, .day-first` already draws it
+   2px thick further down, and a second declaration could only ever disagree
+   with the first. */
 table.grid th,
 table.grid td {
-  border-right: 1px solid var(--line);
+  /* The two rules do different jobs, so they are not the same grey. Across a
+     row you are following ONE teacher, and that line has to be followable over
+     78 columns — it keeps --line. Down a column you are only crossing the
+     hourly rhythm, and 78 of those at the same weight is what made the grid a
+     cage — that one drops to the hairline. */
+  border-right: 1px solid var(--hairline);
   border-bottom: 1px solid var(--line);
   padding: 0;
   margin: 0;
+}
+
+/* Alternate days, ~2% of ink. Measured dE(band, paper) = 2.7 against the 14
+   that separates two functional colours — it groups, it never states. */
+table.grid tbody td.band,
+table.grid thead th.band {
+  background: var(--band);
 }
 
 table.grid thead th {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--bg);
+  background: var(--chrome);
   font-size: var(--fs-xs);
   font-weight: 600;
   height: 1.375rem;
   text-align: center;
+  transition: background-color var(--dur) var(--ease);
 }
 
+/* The day name is the label of a GROUP of twelve columns, so it is set the way
+   a group label is set: caps, tracked, and heavier than the numbers under it. */
 table.grid thead tr:first-child th {
   border-bottom: 1px solid var(--line-dark);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* The column the pointer is in. The beam below cannot reach up here — it
+   would have to paint over the sticky teacher column to get there — so the
+   heading is lit by a class instead. */
+table.grid thead th.col-hot {
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 table.grid thead tr:nth-child(2) th {
   top: 1.375rem;
-  height: 1.875rem;
+  height: 1.625rem;
   font-weight: 400;
   color: var(--muted);
   line-height: var(--lh-tight);
@@ -564,6 +811,16 @@ table.grid thead tr:nth-child(2) th {
   display: none;
 }
 
+/* The one pixel of air around a colour block goes too, and for the same reason
+   the clock does: in "Sığdır" the cell is already sitting on its content floor,
+   so padding is not decoration there — it is width. Measured: with it, the week
+   came back 79px short of fitting. The clock was INFORMATION and its loss is
+   this mode's whole subject; this is a pixel of margin, and losing it costs the
+   reader nothing. */
+:root[data-density='sigdir'] table.grid tbody td {
+  padding: 0;
+}
+
 /* The cell is then derived from the box rather than fixed. --lesson-cols and
    --break-cols come from the markup because the week is not always 6x12: a
    seven-day week is 84 columns, and a hard-coded 72 would be a lie the day
@@ -577,14 +834,16 @@ table.grid thead tr:nth-child(2) th {
    monitor the middle term wins at ~23px, and the cell is then drawn at 23.59 —
    the content's own floor, which is where "Sığdır" stops being arithmetic.
 
-   The --space-3 term is slack, and it was MEASURED rather than reasoned: 78
+   The --space-4 term is slack, and it was MEASURED rather than reasoned: 78
    column borders each round to a device pixel, and the sum was enough to leave
-   1px of scroll with no slack at all. 2px reserved -> 1px over; 6px -> 0.
-   Half a space unit is the first token above that. */
+   1px of scroll with no slack at all. 2px reserved -> 1px over; 6px -> 0. That
+   held until the embedded face arrived: Plex is a hair wider than the system
+   font it replaced, the content floor went 23.59px -> 24px, and 8px of slack
+   was 1px short again. 12px -> 0. */
 :root[data-density='sigdir'] table.grid {
   --cell-w: clamp(
     1.125rem,
-    (100cqw - var(--rowhead-w) - var(--break-cols) * 0.375rem - var(--space-3)) /
+    (100cqw - var(--rowhead-w) - var(--break-cols) * 0.375rem - var(--space-4)) /
       var(--lesson-cols),
     2.75rem
   );
@@ -600,6 +859,8 @@ table.grid thead tr:nth-child(2) th {
    line between 34px cells is simply not noticed. Different ground, so it does
    not read as an empty hour. It carries no data-day, so a drag ignores it. */
 .break-col {
+  /* The separator's own ground, not the day's: it is not an hour. */
+  background: var(--bg);
   /* !important for the same reason the background and borders below need it:
      `table.grid tbody td` sets every body cell to --cell-w and outranks a bare
      class. Without it the "narrow" separator was as wide as a lesson. */
@@ -651,7 +912,7 @@ table.grid thead tr:nth-child(2) th {
   left: 0;
   top: 0;
   z-index: 4;
-  background: var(--bg);
+  background: var(--chrome);
   border-right: 2px solid var(--line-dark) !important;
   width: var(--rowhead-w);
   min-width: var(--rowhead-w);
@@ -664,9 +925,34 @@ table.grid tbody td {
   text-align: center;
   vertical-align: middle;
   background: var(--paper);
+  /* One pixel of air, so a colour block reads as an OBJECT sitting in the hour
+     rather than as a painted cell. box-sizing is border-box, so the cell keeps
+     its 34px and the grid keeps its measured width. */
+  padding: 1px;
 }
 
-td.unavailable {
+/* A block is one object across two hours: the halves lose the corners that
+   face each other and the air between them, and the faded rule that already
+   marked the join is all that is left of the boundary. */
+td.block-cont {
+  padding-right: 0;
+}
+
+td.block-in {
+  padding-left: 0;
+}
+
+td.block-cont > .card {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+td.block-in > .card {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+table.grid tbody td.unavailable {
   background: repeating-linear-gradient(
     45deg,
     var(--closed),
@@ -686,6 +972,7 @@ td.unavailable {
 /* A placed lesson card */
 .card {
   color: var(--on-color);
+  border-radius: var(--r-sm);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -715,7 +1002,7 @@ td.unavailable {
 
 .card:hover {
   outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  outline-offset: -1px;
 }
 
 .card-top {
@@ -782,27 +1069,221 @@ td.drop-blocked {
   pointer-events: none;
 }
 
+/* THE CROSSHAIR — the one place this design spends any boldness.
+   Hovering a cell lights its whole column and its whole row, and with them the
+   two labels that say what the cell IS: the hour at the top and the teacher at
+   the left. That is the movement a finger makes on the printed timetable this
+   replaces, and on a 78-column week it is the difference between reading the
+   grid and counting along it.
+
+   `:not(.unavailable)` in both halves: a closed hour keeps its hatch. The
+   crosshair says where you are, never why a cell cannot be used. */
+table.grid tbody td.col-hot:not(.unavailable),
+table.grid tbody tr:hover > td:not(.unavailable) {
+  background: var(--accent-bg);
+}
+
+table.grid thead th.col-hot {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+table.grid tbody tr:hover > .row-head {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+/* Nothing of the crosshair survives into a drag: the grid has its own three
+   colours then, and a fourth highlight competing with them would say less. */
+.grid.dragging tbody tr:hover > td:not(.unavailable),
+.grid.dragging tbody td.col-hot:not(.unavailable) {
+  background: var(--paper);
+}
+
+.grid.dragging tbody tr:hover > .row-head {
+  background: var(--paper);
+  color: var(--text);
+}
+
+/* The sticky heading and the sticky teacher column earn their shadow only once
+   there is something scrolled underneath them. */
+.grid-wrap.scrolled-y table.grid thead tr:nth-child(2) th {
+  box-shadow: 0 4px 8px -6px var(--shadow);
+}
+
+.grid-wrap.scrolled-x .row-head,
+.grid-wrap.scrolled-x .corner {
+  box-shadow: 4px 0 8px -6px var(--shadow);
+}
+
 /* ------------------------------------------------------------- lesson pool */
 
+/* The grid and the drawer, stacked. `min-height: 0` on the column is what lets
+   the grid scroll INSIDE itself instead of pushing the drawer off the screen. */
+.program-body {
+  --dock-h: 11rem;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* The drawer along the bottom.
+
+   The height is CLAMPED here, not only in JS: `--dock-h` is a remembered
+   preference and the window it was remembered in may have been taller, or the
+   scale smaller. The floor keeps a head plus one row of cards; the ceiling is
+   whichever comes first, 22rem or "the grid still has 26rem" — which at 150%
+   is the binding one, because the rows grew and the saved rem did not. */
 .pool {
+  flex: 0 0 clamp(6rem, var(--dock-h), min(22rem, 100% - 26rem));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--chrome-2);
+  transition: flex-basis var(--dur) var(--ease);
+}
+
+/* Nothing may lag behind the finger during a drag. */
+.program-body.splitting .pool {
+  transition: none;
+}
+
+/* Closed: the seam and the reopen button are all that is left. The card list
+   stays in the DOM (see the component's note) but has no room. */
+.pool.pool-closed {
   flex: 0 0 auto;
-  max-height: 30vh;
-  overflow: auto;
-  padding: 6px 8px;
-  background: var(--bg);
-  border-top: 2px solid var(--line-dark);
+}
+
+/* The seam is a CONTROL, so it is sized like one: 1px of ink and 9px of
+   target. Without the padding it is a 1px hit area, which is a mouse skill
+   test rather than a handle. */
+/* The 9px sit ABOVE the drawer, over the grid's last row, rather than inside
+   it: an inset handle pushed half of itself under `.pool-head`, which then ate
+   the pointer for the lower half of its own hit area. `margin-top` takes the
+   room back from the grid, and `z-index` keeps the ink on top of it. */
+.pool-split {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+  /* Its OWN row, not an overlay on the grid's last line: an 11px handle
+     hanging over a 35px row reads as part of that row and its grip disappears
+     into the hatch behind it. The 11px are the drawer's, taken from the
+     drawer. */
+  height: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: row-resize;
+  /* The rule is the drawer's TOP EDGE — a full-width line separating two
+     planes, which is what makes the grip legible as a handle on it. */
+  border-top: 1px solid var(--line-dark);
+  background: var(--chrome-2);
+  padding: 5px 0;
+  touch-action: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* A grip, centred. It is the one mark on screen that says "this line is a
+   handle", so it is visible AT REST rather than on hover: a hairline between
+   two panes reads as a border, and borders do not move. */
+.pool-split::after {
+  content: "";
+  position: absolute;
+  width: 2.25rem;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--muted);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    width var(--dur-fast) var(--ease);
+}
+
+.pool-split:hover::after,
+.program-body.splitting .pool-split::after {
+  width: 3.5rem;
+  background: var(--accent);
+}
+
+.pool-split:hover,
+.program-body.splitting .pool-split {
+  background-color: var(--accent-bg);
+}
+
+/* Reduced motion kills --dur-fast, so the width transition dies with it. */
+
+.pool-split:focus-visible {
+  background-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+/* Closed, the drawer cannot be resized: there is nothing to resize. */
+/* Closed, there is nothing to resize — and a grip that cannot be grabbed is a
+   worse lie than no grip at all. */
+.pool.pool-closed .pool-split {
+  cursor: default;
+  pointer-events: none;
+}
+
+.pool.pool-closed .pool-split::after {
+  display: none;
 }
 
 .pool-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Along the bottom the count sits BESIDE its subtitle, not above it: the strip
+   is 32px tall and a stacked label would set the drawer's floor by itself. */
+.pool-count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+}
+
+.pool-sub {
   font-size: var(--fs-xs);
   color: var(--muted);
-  margin-bottom: 4px;
+}
+
+.pool-toggle {
+  flex: 0 0 auto;
+  border-color: transparent;
+  background: none;
+}
+
+.pool-toggle:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: transparent;
 }
 
 .pool-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  align-content: flex-start;
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+/* Closed, the COUNT stays: down the right it had to go because a 40px column
+   has no room for words, but a strip along the bottom is all room and the one
+   thing worth keeping is "how much is still waiting". Only the cards go. */
+.pool.pool-closed .pool-list {
+  display: none;
 }
 
 .pool-card {
@@ -811,19 +1292,25 @@ td.drop-blocked {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Fixed, not `flex: 1 1`: in a tray twelve cards wide a growing card makes
+     the last row's three cards four times the size of the rest. */
+  flex: 0 0 auto;
   min-width: 3.25rem;
-  padding: 3px 6px;
-  border: 1px solid var(--shadow);
+  padding: var(--space-2) var(--space-3);
+  border: none;
   border-radius: var(--r-sm);
+  box-shadow: var(--elev-1);
   cursor: grab;
   line-height: var(--lh-tight);
   touch-action: none;
   user-select: none;
+  transition: box-shadow var(--dur) var(--ease);
 }
 
 .pool-card:hover {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+  box-shadow: var(--elev-2);
 }
 
 .pool-card .counter {
@@ -833,39 +1320,21 @@ td.drop-blocked {
 
 /* ------------------------------------------------------------ setup steps */
 
-/* A strip, not a wizard: every step stays reachable. The counter is the point —
-   a step showing 0 is where something is still missing, visible at a glance. */
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-bottom: var(--space-4);
-}
+/* Kurulum's four steps, now IN the ribbon. They are `.btn`s so pressed, hover,
+   focus and disabled all come from one place; what is left here is the two
+   things a step has that a button does not — a number and a count.
 
+   A strip, not a wizard: every step stays reachable. The counter is the point —
+   a step showing 0 is where something is still missing, visible at a glance. */
 .step {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-  background: var(--paper);
-  cursor: pointer;
-  font-size: var(--fs-md);
 }
 
-.step:hover {
-  border-color: var(--accent);
-}
-
-.step[aria-current="true"] {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.step[data-empty="true"]:not([aria-current="true"]) {
+/* Nothing entered yet: dashed, so an empty step reads as an outline waiting to
+   be filled rather than as a disabled control. */
+.step[data-empty="true"]:not([aria-pressed="true"]) {
   color: var(--muted);
   border-style: dashed;
 }
@@ -874,8 +1343,8 @@ td.drop-blocked {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
   background: var(--bg);
   border: 1px solid var(--hairline);
@@ -883,10 +1352,10 @@ td.drop-blocked {
   font-weight: 600;
 }
 
-.step[aria-current="true"] .step-no {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
+.step[aria-pressed="true"] .step-no {
+  background: var(--paper);
+  border-color: transparent;
+  color: var(--accent);
 }
 
 .step-count {
@@ -1003,8 +1472,9 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 .panel {
   background: var(--paper);
   border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-  padding: var(--space-4) var(--space-5);
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-1);
+  padding: var(--space-5) var(--space-6);
   margin-bottom: var(--space-5);
 }
 
@@ -1040,14 +1510,16 @@ textarea {
   border-radius: var(--r-sm);
   background: var(--paper-sunk);
   line-height: var(--lh-base);
+  transition:
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+input[type="text"]:hover:not(:disabled),
+input[type="number"]:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--line);
 }
 
 /* Buttons had no focus style at all: tabbing through the top bar was invisible.
@@ -1058,9 +1530,15 @@ textarea:focus {
 table.availability th:focus-visible,
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+.card:focus-visible,
+.pool-card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  /* Above the sticky grid heads and the neighbouring cells, so a ring on a
+     focused card is never half-covered. */
+  position: relative;
+  z-index: 5;
 }
 
 textarea {
@@ -1138,14 +1616,90 @@ table.list td > select {
    `table.list td > select` (0,1,3) sets width:100% above, so the selector has
    to carry the class on the same element to outrank it.
    Pitfall 33 is this bug; `renk-secici.spec.ts` is the test it asked for. */
-table.list td > select.color-pick {
+/* The trigger: a swatch you can read the index off. It sizes itself from its
+   own text like every other box on the width ladder (pitfall 34: the width
+   belongs to the control, not to the <th>), and it is wide enough for "36"
+   rather than for whatever number happens to be in it. */
+table.list td > .color-pick {
   width: 7ch;
-  /* Pitfall 15, in the one control that had never been given it: the box is
-     painted with a PALETTE colour, and the palette does not flip with the
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  /* Pitfall 15 and 35, in the one control that had never been given it: the box
+     is painted with a PALETTE colour, and the palette does not flip with the
      theme. Left on `color: inherit` the digit took --text, so in dark mode the
      index sat as near-white ink on a pale pastel and vanished on rows 5, 7,
      12, 16 and 17. --on-color is the ink that belongs to the palette. */
   color: var(--on-color);
+  transition: box-shadow var(--dur) var(--ease);
+}
+
+table.list td > .color-pick:hover {
+  box-shadow: var(--elev-1);
+}
+
+/* The 36 colours, all of them, at once. Six across because the palette was
+   SEARCHED in pairs of neighbouring indices (palette.test.ts measures that
+   consecutive indices sit 23.8 apart in CIE Lab) — a six-wide grid puts those
+   neighbours side by side, which is where a clash would be seen. */
+.color-dialog {
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-2);
+  background: var(--paper);
+  color: var(--text);
+  padding: var(--space-6);
+  max-width: 26rem;
+}
+
+.color-dialog::backdrop {
+  background: rgba(15, 20, 30, 0.35);
+}
+
+/* A dark wash over an already dark page dims nothing. The backdrop's job is to
+   say "the page behind this is not where you are", so it has to be measured
+   against the ground it lies on, not written once. */
+:root[data-theme='dark'] .color-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.color-dialog h3 {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-lg);
+  letter-spacing: var(--ls-tight);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.swatch {
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  color: var(--on-color);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: box-shadow var(--dur) var(--ease);
+}
+
+.swatch:hover {
+  box-shadow: var(--elev-2);
+}
+
+/* The one already chosen. A ring rather than a tint: the square IS the colour,
+   so anything painted over it would be a lie about which colour that is. */
+.swatch[aria-pressed='true'] {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+  font-weight: 600;
 }
 
 /* Two buttons that belong on ONE line inside a table cell. `.form-row` wraps by
@@ -1288,11 +1842,11 @@ table.stat tbody tr:hover {
 }
 
 .cols.narrow-right {
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
 }
 
 /* Below this the two columns are narrower than the tables they hold. */
-@media (max-width: 1100px) {
+@media (max-width: 68rem) {
   .cols,
   .cols.wide-left,
   .cols.narrow-right {
@@ -1683,13 +2237,18 @@ table.bell-preview td {
     --hatch: #e8eaee;
     --paper-sunk: #ffffff;
     --hairline: #c9ced6;
+    --chrome: #ffffff;
+    --band: #ffffff;
+    --elev-1: none;
+    --elev-2: none;
   }
 
   body {
     background: var(--paper);
   }
 
-  .sidebar,
+  .tabstrip,
+  .ribbon,
   .topbar,
   .pool,
   .reason-bar,
@@ -1785,7 +2344,31 @@ table.bell-preview td {
    would leave one of them empty exactly when everything is fine. */
 .panel-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
-  gap: 0 var(--space-4);
+  /* 360, not 440: the rail is gone, so every screen has 92px more to give and
+     a third column fits on the 1920px monitor this is used on. */
+  grid-template-columns: repeat(auto-fit, minmax(22.5rem, 1fr));
+  gap: 0 var(--space-5);
   align-items: start;
+}
+
+/* The week read across everyone: how many are closed in each hour. Same table
+   skeleton as the availability grid, but the cell carries a COUNT and its ink
+   has to stay legible while its ground fades in with the count. */
+table.availability.heat td {
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  cursor: default;
+}
+
+/* The count fades its GROUND, never its ink: an opacity on the cell takes the
+   number down with the background and the darkest hour becomes the hardest to
+   read — exactly backwards. */
+table.availability.heat td.closed {
+  color: var(--text);
+  /* No hatch here: the hatch means "you cannot use this", and a count of six
+     out of twenty-five does not. `--heat` is written per cell by the component
+     and rides the ALPHA, so the ink stays at full strength at every level. */
+  background-image: none;
+  background-color: color-mix(in srgb, var(--line-dark) calc(var(--heat, 0) * 70%), transparent);
 }

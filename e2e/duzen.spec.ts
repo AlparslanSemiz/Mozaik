@@ -189,11 +189,16 @@ test.describe('24. Ekranın tamamı kullanılıyor', () => {
         return r.top >= box.top && r.bottom <= box.bottom;
       }).length;
     });
-    // A measurement with a floor, not a claim: 25 teachers, 34px rows. On the
-    // 1920x1080 screen 19 of them fit; the floor keeps one row of slack for a
-    // font that resolves taller. Six rows still sit below the fold, which is
-    // what keeps the "drag target is off-screen" test above honest.
-    expect(visibleRows).toBeGreaterThanOrEqual(18);
+    // The floor is now the WHOLE list, and that is the point of moving the pool
+    // from a band across the bottom to a dock down the right: it used to cost
+    // the grid 215px of a 1080px screen, i.e. six of the twenty-five teachers.
+    // Measured after the move: 25 of 25, in both densities and with the dock
+    // open or closed.
+    //
+    // The "drag target is off-screen" test in program.spec.ts used to lean on
+    // those six missing rows. It does not any more — it forces the condition
+    // itself and says so.
+    expect(visibleRows).toBe(25);
   });
 });
 

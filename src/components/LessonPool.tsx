@@ -1,10 +1,37 @@
-// The unplaced lesson cards at the bottom. The counterpart of the aSc pool in
-// the photo. Card colour = teacher colour; that is what tells you which grid
-// row it is aimed at.
+// The unplaced lesson cards. The counterpart of the aSc pool in the photo.
+// Card colour = teacher colour; that is what tells you which grid row it is
+// aimed at.
+//
+// It is a DRAWER along the BOTTOM, and it is resizable.
+//
+// The dock spent a version down the right, on the argument that the grid
+// overflows horizontally anyway. That was true and it is still true — but it
+// made the pool a narrow column that could hold three cards abreast, and 99
+// waiting lessons became a list you scroll rather than a tray you see. Along
+// the bottom the same 99 cards lie in rows of a dozen.
+//
+// What made the bottom untenable before was that its height was a constant
+// somebody else picked: 215px of a 1080px screen, six teachers out of
+// twenty-five, whether you had 99 cards left or two. It is not a constant any
+// more — the seam is a `role="separator"` you drag, and where you leave it is
+// remembered (`ders-programi-havuz-boy`).
+//
+// The card list stays MOUNTED when the drawer is closed. Rendering it away
+// would be cheaper and would quietly make `.pool-card` count zero — and
+// twenty-odd tests ask exactly that question to find out how much is left.
 
-import type React from 'react';
-import type { Id } from '../types';
-import { paletteColor } from '../palette';
+import { useEffect, useRef, useState } from "react";
+import type React from "react";
+import type { Id } from "../types";
+import { paletteColor } from "../palette";
+import {
+  DOCK_H_MIN,
+  readDock,
+  readDockHeight,
+  writeDock,
+  writeDockHeight,
+} from "../theme";
+import { attachSplitter, maxDockHeight } from "../poolSplit";
 
 export interface PoolCard {
   lessonId: Id;
@@ -25,19 +52,119 @@ interface Props {
 }
 
 export default function LessonPool({ cards, completed, onStart }: Props) {
-  const remainingHours = cards.reduce((sum, c) => sum + (c.total - c.placed), 0);
+  const remainingHours = cards.reduce(
+    (sum, c) => sum + (c.total - c.placed),
+    0,
+  );
+  // Read from storage on every mount, so the tab switch that unmounts this
+  // component cannot lose either setting (pitfall 18 does not apply to a
+  // preference that lives outside React).
+  const [open, setOpen] = useState<boolean>(readDock);
+  const [height, setHeight] = useState<number>(readDockHeight);
+  const handle = useRef<HTMLDivElement>(null);
+  const [ceiling, setCeiling] = useState<number>(DOCK_H_MIN);
+
+  // `height` is read once per gesture, not per frame, so the splitter needs a
+  // ref rather than the closed-over value — otherwise the second drag would
+  // start from wherever the first one began.
+  const latest = useRef(height);
+  latest.current = height;
+
+  useEffect(() => {
+    const el = handle.current;
+    const body = el?.closest(".program-body");
+    if (el === null || !(body instanceof HTMLElement)) return undefined;
+    // `--dock-h` has exactly ONE owner, `.program-body`, written from here on
+    // mount and from the splitter during a drag. Putting a copy on `.pool` as
+    // an inline style made the drag invisible: the closer declaration won and
+    // the DOM write went nowhere.
+    body.style.setProperty("--dock-h", `${readDockHeight()}rem`);
+    setCeiling(maxDockHeight(body.getBoundingClientRect().height));
+    return attachSplitter(el, {
+      body,
+      current: () => latest.current,
+      commit: (rem) => {
+        writeDockHeight(rem);
+        setHeight(rem);
+      },
+    });
+  }, []);
+
+  function toggle() {
+    const next = !open;
+    writeDock(next);
+    setOpen(next);
+  }
 
   return (
-    <div className="pool">
+    <aside
+      // Nothing left to place: the drawer keeps its head (which is now the
+      // sentence saying so) and gives the height back to the grid. A 176px
+      // tray of nothing is 176px that was carrying five teachers.
+      className={open && cards.length > 0 ? "pool" : "pool pool-closed"}
+      aria-label="Yerleşmeyi bekleyen dersler"
+    >
+      {/* The seam. It is a control before it is a border: 1px of ink, 9px of
+          target, and reachable from the keyboard because a drag is not. */}
+      <div
+        ref={handle}
+        className="pool-split"
+        role="separator"
+        aria-orientation="horizontal"
+        aria-label="Havuz yüksekliği"
+        aria-valuenow={height}
+        aria-valuemin={DOCK_H_MIN}
+        aria-valuemax={Math.round(ceiling * 100) / 100}
+        tabIndex={open ? 0 : -1}
+        title="Sürükleyerek havuzun boyunu ayarlayın"
+      />
+
       <div className="pool-head">
-        {cards.length === 0 ? (
-          <>Bütün dersler yerleşti. {completed} dersin tamamı programda.</>
-        ) : (
-          <>
-            Yerleşmeyi bekleyen: <strong>{cards.length}</strong> ders,{' '}
-            <strong>{remainingHours}</strong> saat. Karta basılı tutup ızgaraya sürükleyin.
-          </>
-        )}
+        <button
+          className="btn icon pool-toggle"
+          disabled={cards.length === 0}
+          aria-expanded={open && cards.length > 0}
+          aria-label="Havuz"
+          title={
+            open ? "Havuzu kapat — ızgara bütün yüksekliği alır" : "Havuzu aç"
+          }
+          onClick={toggle}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d={open ? "M5 15l7-7 7 7" : "M5 9l7 7 7-7"}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        <span className="pool-count">
+          {cards.length === 0 ? (
+            <>
+              <strong>Hepsi yerleşti</strong>
+              <span className="pool-sub">
+                {completed} dersin tamamı programda
+              </span>
+            </>
+          ) : (
+            <>
+              <strong>{cards.length} ders bekliyor</strong>
+              <span className="pool-sub">
+                {remainingHours} saat · sürükleyip bırakın
+              </span>
+            </>
+          )}
+        </span>
       </div>
 
       <div className="pool-list">
@@ -57,6 +184,6 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
           </div>
         ))}
       </div>
-    </div>
+    </aside>
   );
 }

@@ -84,10 +84,149 @@ export function writeSidebar(collapsed: boolean): void {
   }
 }
 
+// ----------------------------------------------------------- dock preference
+
+/**
+ * Whether the pool of unplaced lessons is open beside the grid.
+ *
+ * The pool moved from a band across the bottom to a column down the right, and
+ * the argument is the one that put the rail on the left: horizontally the grid
+ * OVERFLOWS anyway (2616px of table against 1828px of box), so 240px there
+ * costs nothing that was not already scrolled — while at the bottom it cost
+ * 215px of a 1080px screen, which is six teachers out of twenty-five.
+ *
+ * It closes, because the argument stops holding in "Sığdır": that mode exists
+ * to get the week inside the box, and a dock takes the room it needs. Closed,
+ * the grid gets the full width back.
+ *
+ * Same reasoning as the theme, the rail, the scale and the density for where it
+ * lives: a property of the screen, never of the timetable.
+ */
+export const DOCK_KEY = 'ders-programi-havuz';
+
+/** Anything that is not exactly 'kapali' means the dock is open. */
+export function normalizeDock(raw: unknown): boolean {
+  return raw !== 'kapali';
+}
+
+export function readDock(): boolean {
+  try {
+    return normalizeDock(localStorage.getItem(DOCK_KEY));
+  } catch {
+    return true;
+  }
+}
+
+export function writeDock(open: boolean): void {
+  try {
+    localStorage.setItem(DOCK_KEY, open ? 'acik' : 'kapali');
+  } catch {
+    // A dock that cannot be remembered is not worth an error
+  }
+}
+
+// -------------------------------------------------------- ribbon preference
+
+/**
+ * Whether the tool strip is open.
+ *
+ * At 100% it buys nothing on Program — the week already fits — and that is
+ * fine: its customer is the 125% and 150% reader, where 40px is one whole
+ * teacher row. Applied before the first paint like the other five, or the
+ * strip would draw itself and then vanish.
+ */
+export const RIBBON_KEY = 'ders-programi-serit';
+const RIBBON_ATTRIBUTE = 'data-ribbon';
+
+/** Anything that is not exactly 'kapali' means the strip is open. */
+export function normalizeRibbon(raw: unknown): boolean {
+  return raw !== 'kapali';
+}
+
+export function readRibbon(): boolean {
+  try {
+    return normalizeRibbon(localStorage.getItem(RIBBON_KEY));
+  } catch {
+    return true;
+  }
+}
+
+export function applyRibbon(open: boolean): void {
+  document.documentElement.setAttribute(RIBBON_ATTRIBUTE, open ? 'acik' : 'kapali');
+  try {
+    localStorage.setItem(RIBBON_KEY, open ? 'acik' : 'kapali');
+  } catch {
+    // A strip that cannot be remembered is not worth an error
+  }
+}
+
+// ------------------------------------------------------ dock height preference
+
+/**
+ * How tall the pool drawer is, in REM.
+ *
+ * Rem and not px because `--ui-scale` goes to 1.50: a dock fixed at 176px is
+ * a comfortable two rows of cards at 100% and a cramped one at 150%, while the
+ * cards inside it grew. Every other geometry token in this file is rem for the
+ * same reason.
+ *
+ * A SEPARATE key from `ders-programi-havuz`, not a widening of it. That key
+ * means open/closed and its contract is "anything that is not 'kapali'";
+ * folding a number into it would need a second normalizer inside one parser and
+ * would break every reader of the current value. theme.ts is five independent
+ * scalars in five keys, and this is the sixth.
+ */
+export const DOCK_H_KEY = 'ders-programi-havuz-boy';
+
+/** Head plus one row of cards. Below this the drawer shows nothing. */
+export const DOCK_H_MIN = 6;
+/** A ceiling in rem; the REAL ceiling is the grid's, and CSS clamps it. */
+export const DOCK_H_MAX = 22;
+export const DOCK_H_DEFAULT = 11;
+export const DOCK_H_STEP = 0.25;
+
+export function normalizeDockHeight(raw: unknown): number {
+  // A number arrives from the splitter, a string from localStorage, and null
+  // from a machine that has never touched it. The empty cases have to be ruled
+  // out BY HAND: `Number('')` and `Number(null)` are both 0, which is finite
+  // and would clamp to the MINIMUM — a drawer squashed shut on first run.
+  if (typeof raw === 'number') {
+    if (!Number.isFinite(raw)) return DOCK_H_DEFAULT;
+    return round(raw);
+  }
+  if (typeof raw !== 'string' || raw.trim() === '') return DOCK_H_DEFAULT;
+  const n = Number.parseFloat(raw);
+  if (!Number.isFinite(n)) return DOCK_H_DEFAULT;
+  return round(n);
+}
+
+function round(n: number): number {
+  const clamped = Math.min(DOCK_H_MAX, Math.max(DOCK_H_MIN, n));
+  // Rounded to the step and fixed to two decimals for the same reason the scale
+  // is: a float round-trip through localStorage must not drift.
+  return Number((Math.round(clamped / DOCK_H_STEP) * DOCK_H_STEP).toFixed(2));
+}
+
+export function readDockHeight(): number {
+  try {
+    return normalizeDockHeight(localStorage.getItem(DOCK_H_KEY));
+  } catch {
+    return DOCK_H_DEFAULT;
+  }
+}
+
+export function writeDockHeight(rem: number): void {
+  try {
+    localStorage.setItem(DOCK_H_KEY, String(normalizeDockHeight(rem)));
+  } catch {
+    // A drawer height that cannot be remembered is not worth an error
+  }
+}
+
 // ---------------------------------------------------------- scale preference
 
 /**
- * How big the interface is drawn: 1.0 to 1.25 in steps of 0.05. Same reasoning
+ * How big the interface is drawn: 1.0 to 1.50 in steps of 0.05. Same reasoning
  * as the theme and the rail — a property of the machine and the eyes in front
  * of it, never of the timetable, so it stays out of `State` and out of the
  * backup file. A backup taken on a 27" monitor must not resize my father's
@@ -102,7 +241,11 @@ export function writeSidebar(collapsed: boolean): void {
 export const SCALE_KEY = 'ders-programi-olcek';
 
 export const SCALE_MIN = 1;
-export const SCALE_MAX = 1.25;
+/* The ceiling was 1.25 and is 1.50. The reason is the reader, not the design:
+   my father has trouble seeing, and a ceiling is only worth having if it is
+   above what somebody actually needs. The floor stays at 1.0 — a default that
+   arrives already enlarged would be a guess about eyes nobody has measured. */
+export const SCALE_MAX = 1.5;
 export const SCALE_STEP = 0.05;
 
 /**

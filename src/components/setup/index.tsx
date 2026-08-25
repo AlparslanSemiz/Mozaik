@@ -10,7 +10,6 @@
 // the rules, the subject list — moved to the Ayarlar tab, so this screen has
 // exactly one kind of thing on it and every step can be counted.
 
-import { useState } from 'react';
 import { sampleState } from '../../sample';
 import type { State } from '../../types';
 import Rooms from './Rooms';
@@ -18,11 +17,11 @@ import Teachers from './Teachers';
 import Classes from './Classes';
 import Lessons from './Lessons';
 import Summary from './Summary';
+import Progress from './Progress';
 import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
 import type { PanelProps, PlanControls } from '../props';
-
-type StepId = 'rooms' | 'teachers' | 'classes' | 'lessons';
+import type { StepId } from '../../toolState';
 
 interface Step {
   id: StepId;
@@ -60,10 +59,12 @@ const STEPS: Step[] = [
 
 interface Props extends PanelProps {
   plans: PlanControls;
+  /** Which of the four lists. Owned by App: the tool strip above shows it. */
+  step: StepId;
+  setStep: (next: StepId) => void;
 }
 
-export default function Setup({ state, change, plans }: Props) {
-  const [step, setStep] = useState<StepId>('rooms');
+export default function Setup({ state, change, plans, step, setStep }: Props) {
   // A draft is last term's setup with the grid emptied. This screen is where an
   // empty project lands, so it is the only place where offering one is useful:
   // one click instead of retyping twenty classes.
@@ -78,25 +79,6 @@ export default function Setup({ state, change, plans }: Props) {
 
   return (
     <>
-      <nav className="steps" aria-label="Kurulum adımları">
-        {STEPS.map((s, i) => {
-          const count = s.count(state);
-          return (
-            <button
-              key={s.id}
-              className="step"
-              aria-current={s.id === current.id}
-              data-empty={count === 0}
-              onClick={() => setStep(s.id)}
-            >
-              <span className="step-no">{i + 1}</span>
-              {s.label}
-              <span className="step-count">{count}</span>
-            </button>
-          );
-        })}
-      </nav>
-
       {/* The one screen an empty project lands on, so this is where "what do I
           do first" has to be answered. */}
       {state.teachers.length === 0 && state.classes.length === 0 && (
@@ -174,6 +156,13 @@ export default function Setup({ state, change, plans }: Props) {
               </button>
             </div>
           )}
+
+          {/* What used to be several hundred pixels of empty screen below the
+              list: the four steps, what each still needs, and the one number
+              that says whether the week can hold what has been entered. It is
+              under the LIST, not in the right column, because it answers "what
+              do I do after this one" — which is a question about the work. */}
+          <Progress state={state} step={step} setStep={setStep} />
         </div>
 
         <aside>
