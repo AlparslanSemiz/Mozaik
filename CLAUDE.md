@@ -64,9 +64,9 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 379 birim testi
+npm test          # Vitest — 402 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 217 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 223 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
 npm run gorsel    # görsel regresyon — 22 referansa karşı piksel farkı
@@ -79,9 +79,9 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı ve anahtarları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 12 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi ve taslaklar** |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 12 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
 | **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 22 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
 
@@ -140,8 +140,11 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
-library.ts                      plan kitaplığı: anahtarlar + plan üstverisi.
+library.ts                      plan kitaplığı: anahtarlar + plan üstverisi +
+                                dosya adları + "veriler nerede" raporu.
                                 State'i BİLMEZ, ham string alıp verir.
+bundle.ts                       "bütün planlar tek dosyada" zarfı. library.ts'i
+                                çağırır, State'i yine BİLMEZ.
   |
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
 rules.ts / bell.ts              Testleri zorunlu.
@@ -176,6 +179,11 @@ alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
 **string** alıp verir, ayrıştırmayı `store.ts` yapar. `types.ts`'ten yalnız `Id`
 tipini alır (`import type`) — yani `store.ts` ↔ `library.ts` çalışma zamanı
 döngüsü yok, `keys.ts`'in constraints ↔ rules için yaptığının aynısı.
+
+`bundle.ts` de aynı sözleşmeyle yaşar: paketin zarfını okur, içindeki her planın
+durumunu **ham `unknown`** olarak geri verir, `parseState`'i `store.ts` çağırır.
+Bozuk girdi kurallarını (kimliksiz girdi atılır, adsız girdi yeniden adlandırılır)
+kendisi yazmaz — `normalizeLibrary()`'ye devreder, yani o kurallar tek evde durur.
 
 `solver.ts` kısıt mantığının **hiçbirini** yeniden yazmaz: her yasallık sorusu
 `blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine.
@@ -240,6 +248,20 @@ ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana a
 ders-programi-tema       -> tema tercihi
 ders-programi-kenar      -> kenar çubuğu tercihi
 ```
+
+### Dosya biçimleri — iki tane, karıştırılamaz
+
+```
+{ "schemaVersion": 5, ... }    -> TEK plan.  ders-programi-YYYY-AA-GG-SSDD.json
+{ "bundleVersion": 1, ... }    -> HER plan.  ders-programi-tumu-YYYY-AA-GG-SSDD.json
+```
+
+Üst çubuk tek planı yazar ve okur; **paket** Ayarlar → Veri'de kalır, çünkü bir
+paketi açmak bu bilgisayardaki bütün planların yerine geçmek demektir. Paket
+`bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki her
+plan hâlâ kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.
+`src/bundle.ts` zarfı bilir, `State`'in ne olduğunu **bilmez** — `library.ts`'in
+deseni birebir. Paket **depolama anahtarı değildir**: yeni anahtar açılmadı.
 
 Bir plan = bir program: kendi okulu, kendi öğretmenleri, kendi ızgarası.
 **Taslak ayrı bir varlık değil**, `PlanInfo.draft` bayrağı — yerleşimi
@@ -451,20 +473,29 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     derste ise `blocker()`'ın cümlesi zaten somuttur ("AV Salı 1 saatinde
     müsait değil"), o korunur.
 
-27. **Plan değiştirmeden önce bekleyen kayıt EŞZAMANLI boşaltılmalı.** Otomatik
+28. **Plan değiştirmeden önce bekleyen kayıt EŞZAMANLI boşaltılmalı.** Otomatik
     kayıt 400 ms gecikmeli ve efektin temizliği kutu değişince bekleyen yazımı
     **iptal eder**. Yani plan geçişinde geçişten hemen önceki düzenleme hiçbir
     yere yazılmadan buharlaşır — ekranda hata yok, çubukta uyarı yok, bir
     sonraki açılışta iş eksik. `switchPlan`/`createPlan`/`deletePlan` üçü de
     önce `park()` çağırır: timer'ı iptal eder ve giden planı **hemen** yazar.
 
-28. **İlk plan tarihsel anahtarını korur.** `planKey('1') === 'ders-programi'`.
+29. **İlk plan tarihsel anahtarını korur.** `planKey('1') === 'ders-programi'`.
     Böylece kitaplığa geçiş **tek bayt kopyalamaz** (yarım kalmış kopya = iki
     gerçek), eski bir `dist/index.html` hâlâ programı bulur, ve `ders-programi`
     okuyan yedek zinciri ile E2E yardımcıları değişmeden çalışır. `newId()`'nin
     alfabesinde `1` yok — üretilen kimlik o anahtarla çakışamaz; alfabe
     değişirse yeni bir plan 1. planın üstüne yazar. `library.test.ts` bunu 500
     kimlikle sabitler.
+
+30. **İki dosya türü aynı düğmeye düşerse biri diğerini siler.** Üst çubuktaki
+    "Dosyadan aç" bir **planı** açar; Ayarlar → Veri'deki "Tümünü dosyadan aç"
+    **bütün kitaplığın** yerine geçer. Aynı uzantı, aynı ön ek, gözle ayırt
+    edilemez — ve yanlışını seçmek geri alınamaz. Üç karşı önlem: paket adında
+    `-tumu-` var, `parseState` bir paketi okuyamaz (`schemaVersion` yok) ve
+    `parseBundle` bir planı okuyamaz (`bundleVersion` yok), üst çubuk paket
+    görünce **reddedip yolu gösterir**. Yeni bir dosya biçimi eklenirse bu üç
+    şeyin üçü de gerekir.
 
 ---
 
@@ -496,6 +527,11 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   — üst çubuk, hiçbir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak
   kalır (aynı gerekçe `Sıfırla`'yı oradan çıkarmıştı). Geçiş geri-al yığınını
   sıfırlar: bir planın hamlesi başka bir plana uygulanamaz.
+- **Ayarlar → Veri, verinin nerede olduğunu SÖYLER.** Gerçek anahtar adları,
+  gerçek boyutlar, ve tek cümlelik doğru: bu veri bu tarayıcıya ve bu bilgisayara
+  aittir, "tarama verilerini temizle" onu siler, taşınan tek şey dosyadır.
+  "Tarayıcıda saklanıyor" demek bunu söylemez. **Bütün planları tek dosyaya**
+  yazan düğme de burada — üst çubuktaki tek planı yazmaya devam eder.
 - **`Sıfırla` üst çubukta değil.** Ayarlar → Veri altında. Üst çubukta "Dosyadan aç"a
   bir yanlış tıklama uzaklıktaydı ve geri alınamıyor. `Dosyaya kaydet` / `Dosyadan aç`
   üst çubukta **kalır**: tuzak 7'nin karşı önlemi görünür olmak zorunda.

@@ -16,10 +16,12 @@ Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeş
 *(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
 bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
 
-**SIRADAKİ İŞ: 4d** — "veriler nerede" bölümü + toplu dışa/içe aktarma
-(`bundleVersion: 1`). Kitaplık geldiği için artık bir gereklilik: babanın
-"Dosyaya kaydet"i hâlâ **tek planı** yazıyor, yani üç planlı bir kurulumun
-tamamı tek dosyaya alınamıyor.
+**SIRADAKİ İŞ: 4e** — site derlemesi (`npm run build:site` → `dist-site/`) +
+PWA. `dist/index.html` (çift tıklanan tek dosya) aynen kalır. 4d'den **devreden
+bir iş var**: Dosya Sistemi Erişimi API'si (`showSaveFilePicker` tutamağı
+IndexedDB'de) 4d'de bilerek yazılmadı — `file://` altında o API hiç yok ve
+native dosya diyaloğu Playwright'la sürülemiyor, yani site olmadan yazılsa
+E2E'de tek satır kanıt üretilemezdi. Gerçek bir http kaynağı 4e ile geliyor.
 
 Verilen kararlar (2026-08-25): planlar **depo katmanında** tutulur (`State`
 şeması değişmez, göç yok) · exe ile site **ortak bir `.json` dosyası** üzerinden
@@ -41,16 +43,22 @@ adlandırılacak** (kullanıcı yapacak).
       değil. "Taslak olarak kaydet" yerleşimleri atarak kopyalıyor; yeni plan
       üç yoldan açılıyor (Boş · Bu planın kopyası · Taslaktan); Kurulum'un boş
       ekranı taslakları listeliyor
-- [ ] **4d Veriler nerede + ortak dosya** — Ayarlar → Veri'de verinin tam olarak
-      nerede durduğunu yazan bölüm (tarayıcıda anahtar, exe'de dosya yolu).
-      Tümünü dışa/içe aktarma (`bundleVersion: 1`); eski tek plan dosyaları
-      (v1–v5) okunmaya devam eder. Sitede `showSaveFilePicker` tutamağı
-      IndexedDB'de saklanıp aynı dosyaya yazılır; `file://` altında ve API'siz
-      tarayıcıda mevcut "Dosyaya kaydet" davranışına düşer
+- [x] **4d Veriler nerede + toplu dosya** — yapıldı. Ayarlar → Veri artık
+      **gerçek anahtar adlarını ve gerçek boyutları** yazıyor (`storageReport`),
+      ve `src/bundle.ts` ile **bütün planlar tek dosyaya** giriyor
+      (`bundleVersion: 1`, `ders-programi-tumu-…json`). Eski tek plan dosyaları
+      (v1–v5) aynen okunuyor; üst çubuğa paket verilirse **reddedilip yol
+      gösteriliyor** — bir paketi açmak bütün kitaplığın yerine geçmek demek.
+      Yeni depolama anahtarı yok, şema değişmedi. Ayrıntı:
+      [STATUS.md](STATUS.md) → *Onuncu oturum*
 - [ ] **4e Site derlemesi + PWA** — ikinci hedef `npm run build:site` →
       `dist-site/`. `dist/index.html` (çift tıklanan tek dosya) aynen kalır.
       Manifest ("Ders Programı", `standalone`), elle çizilen simge, `sw.js`
-      ile ilk açılıştan sonra çevrimdışı çalışma
+      ile ilk açılıştan sonra çevrimdışı çalışma. **4d'den devreden:** Dosya
+      Sistemi Erişimi API'si — `showSaveFilePicker` tutamağı IndexedDB'de
+      saklanıp aynı `-tumu-` dosyasına yazılır; `file://` altında ve API'siz
+      tarayıcıda mevcut "Dosyaya kaydet" davranışına düşer. 4d'de bilerek
+      ertelendi: sitesiz hâlde E2E'de kanıtlanamıyordu
 - [ ] **4f GitHub Pages yayını** — `.github/workflows/site.yml`. **Kullanıcıdan:**
       depo `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı
       "GitHub Actions" seçilecek
@@ -64,17 +72,18 @@ adlandırılacak** (kullanıcı yapacak).
 - [ ] **4i Windows `.exe`** — bu makine Fedora, çapraz derleme güvenilir değil:
       `.github/workflows/exe.yml` → `windows-latest` → artefakt. SmartScreen
       uyarısı için babaya tek cümlelik not
-- [~] **4j Belgeler** — yarısı 4b+4c ile birlikte yapıldı: yasak liste
-      daraltıldı ("birden çok program sürümü" → **aynı planın** sürüm ağacı,
-      gerekçesiyle), `library.ts` mimari şemaya girdi, depolama anahtarı tablosu
-      ve tuzak 27–28 yazıldı, test sayıları güncellendi. **Kalan:** ilke 2'nin
-      yeni hâli (statik yayın var, backend/veritabanı yok) — 4e/4f yapılmadan
-      yazılamaz
+- [~] **4j Belgeler** — 4b+4c ve 4d ile birlikte ilerledi: yasak liste daraltıldı
+      ("birden çok program sürümü" → **aynı planın** sürüm ağacı, gerekçesiyle),
+      `library.ts` ve `bundle.ts` mimari şemaya girdi, depolama anahtarı tablosu
+      ile **dosya biçimleri** bölümü yazıldı, tuzak 28–30 eklendi (ve iki kez 27
+      numaralanmış tuzaklar düzeltildi), test sayıları güncellendi. **Kalan:**
+      ilke 2'nin yeni hâli (statik yayın var, backend/veritabanı yok) —
+      4e/4f yapılmadan yazılamaz
 
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 338 birim + 200 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
+hazır — 402 birim + 223 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
 program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
 tahmin olur (ilke 5).
 

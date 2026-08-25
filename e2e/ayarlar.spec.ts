@@ -84,7 +84,7 @@ test.describe('15. Ayarlar sekmesi', () => {
       ['Okul ve zil', 'Okul ve günler'],
       ['Kurallar', 'Kurallar'],
       ['Branşlar', /^Branşlar/],
-      ['Veri', 'Veri'],
+      ['Veri', /^Veri$/], // 'Veri' alone now also matches 'Veriler nerede'
     ] as const) {
       await openSettings(page, section);
       await expect(page.getByRole('heading', { name: heading })).toBeVisible();

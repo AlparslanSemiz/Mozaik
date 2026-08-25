@@ -40,8 +40,8 @@ test.describe('5. Yedek ve şema göçü', () => {
     await openWithSample(page);
 
     // The old names said what the file format was, not what the button does
-    await expect(page.getByRole('button', { name: 'Dosyaya kaydet' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Dosyadan aç' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dosyadan aç', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
 
     // The note used to be hidden on the grid because it took a row of the top
@@ -68,7 +68,7 @@ test.describe('5. Yedek ve şema göçü', () => {
   test('yedek indirilebiliyor', async ({ page }) => {
     await openWithSample(page);
     const download = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Dosyaya kaydet' }).click();
+    await page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }).click();
     const file = await download;
     expect(file.suggestedFilename()).toMatch(/^ders-programi-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
   });

@@ -154,6 +154,38 @@ export function nextPlanName(lib: Library): string {
   return uniquePlanName(lib, `${lib.plans.length + 1}. plan`);
 }
 
+// ------------------------------------------------------------- file names
+//
+// Both downloaded file names live here for the same reason the keys do: they
+// are the IDENTITY of my father's data, not identifiers in the code. They are
+// built from one stamp so the two kinds can never drift apart in format.
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+function stamp(now: Date): string {
+  return (
+    `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}` +
+    `-${pad2(now.getHours())}${pad2(now.getMinutes())}`
+  );
+}
+
+/** One plan: `ders-programi-2026-08-25-1830.json`. */
+export function backupFileName(now: Date): string {
+  return `${BASE_KEY}-${stamp(now)}.json`;
+}
+
+/**
+ * Every plan: `ders-programi-tumu-2026-08-25-1830.json`.
+ *
+ * The `-tumu-` marker is not decoration: in Explorer it is the only thing that
+ * tells my father which of two .json files holds the whole library.
+ */
+export function bundleFileName(now: Date): string {
+  return `${BASE_KEY}-tumu-${stamp(now)}.json`;
+}
+
 // ------------------------------------------------------------- storage layer
 //
 // Raw strings only. Same `safely` guard as store.ts: localStorage can be
@@ -179,10 +211,85 @@ export function readPlanText(id: Id): string | null {
   return safely(() => localStorage.getItem(planKey(id))) ?? null;
 }
 
-export function writePlanText(id: Id, text: string): void {
-  safely(() => localStorage.setItem(planKey(id), text));
+/**
+ * Returns whether the write actually happened.
+ *
+ * `safely` swallows the exception, and a swallowed quota error is a SILENT
+ * loss — the one kind that matters (principle 6). One plan at a time nobody
+ * could act on the answer, but importing a whole library writes plan after
+ * plan, and there the panel has to be able to say which one did not fit.
+ */
+export function writePlanText(id: Id, text: string): boolean {
+  return (
+    safely(() => {
+      localStorage.setItem(planKey(id), text);
+      return true;
+    }) === true
+  );
 }
 
 export function dropPlanText(id: Id): void {
   safely(() => localStorage.removeItem(planKey(id)));
+}
+
+// ------------------------------------------------------- where the data is
+//
+// Ayarlar > Veri has to be able to say exactly where my father's work sits,
+// with the real key names and the real sizes. Anything vaguer than that is the
+// same as saying nothing: "it is saved in the browser" does not tell him that
+// clearing browsing data destroys it.
+
+export type StorageKind = 'file' | 'site';
+
+/**
+ * Only TWO answers today, on purpose. The .exe (task 4g/4h) will keep its data
+ * in a real file and this will grow a third branch THEN — writing that branch
+ * now would be a guess about code that does not exist (principle 5).
+ */
+export function storageKind(): StorageKind {
+  return safely(() => location.protocol) === 'file:' ? 'file' : 'site';
+}
+
+export interface StorageRow {
+  key: string;
+  what: string;
+  /** UTF-16 code units. Doubled for the byte figure: that is what the browser
+      charges against its ~5 MB quota, not the UTF-8 length. */
+  chars: number;
+}
+
+export interface StorageReport {
+  rows: StorageRow[];
+  totalChars: number;
+}
+
+function charsAt(key: string): number {
+  return (safely(() => localStorage.getItem(key)) ?? '').length;
+}
+
+/** Every key this program owns, in the order they matter. Missing keys are
+    listed too, with 0 — an absent backup chain is information as well. */
+export function storageReport(lib: Library): StorageReport {
+  const rows: StorageRow[] = lib.plans.map((plan) => ({
+    key: planKey(plan.id),
+    what: plan.draft ? `${plan.name} (taslak)` : plan.name,
+    chars: charsAt(planKey(plan.id)),
+  }));
+
+  rows.push({ key: LIBRARY_KEY, what: 'plan listesi', chars: charsAt(LIBRARY_KEY) });
+  for (let i = 0; i < 3; i++) {
+    rows.push({
+      key: `${BASE_KEY}-yedek-${i}`,
+      what: i === 0 ? 'bir önceki oturum' : `${i + 1} oturum önce`,
+      chars: charsAt(`${BASE_KEY}-yedek-${i}`),
+    });
+  }
+  rows.push({ key: `${BASE_KEY}-tema`, what: 'tema tercihi', chars: charsAt(`${BASE_KEY}-tema`) });
+  rows.push({
+    key: `${BASE_KEY}-kenar`,
+    what: 'kenar çubuğu tercihi',
+    chars: charsAt(`${BASE_KEY}-kenar`),
+  });
+
+  return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

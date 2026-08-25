@@ -1,3 +1,4 @@
+import type { Bundle } from '../bundle';
 import type { Library } from '../library';
 import type { Id, State } from '../types';
 
@@ -26,4 +27,7 @@ export interface PlanControls {
   deletePlan: (id: Id) => void;
   renamePlan: (id: Id, name: string) => void;
   markDraft: (id: Id, draft: boolean) => void;
+  /** Puts a bundle file in place of EVERY plan on this machine. Returns how
+      many landed and how many were unreadable or did not fit. */
+  replaceLibrary: (bundle: Bundle) => { ok: number; failed: number };
 }

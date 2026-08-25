@@ -8,7 +8,9 @@ import { newId } from './entities';
 import {
   activePlan,
   addPlan,
+  backupFileName,
   BASE_KEY,
+  bundleFileName,
   defaultLibrary,
   dropPlanText,
   drafts,
@@ -26,6 +28,8 @@ import {
   renamePlan,
   setActive,
   setDraft,
+  storageKind,
+  storageReport,
   uniquePlanName,
   writeLibrary,
   writePlanText,
@@ -232,6 +236,20 @@ describe('depo katmanı', () => {
     expect(readLibrary()).toEqual(defaultLibrary());
   });
 
+  it('yazım başarısını bildiriyor — kota hatası sessiz kalmıyor', () => {
+    expect(writePlanText('abcd', 'içerik')).toBe(true);
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        setItem: () => {
+          throw new Error('kota dolu');
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+    expect(writePlanText('abcd', 'içerik')).toBe(false);
+  });
+
   it('plan metni kendi anahtarına yazılıyor ve siliniyor', () => {
     writePlanText('abcd', 'içerik');
     expect(localStorage.getItem('ders-programi-plan-abcd')).toBe('içerik');
@@ -261,5 +279,70 @@ describe('depo katmanı', () => {
     expect(() => writeLibrary(two())).not.toThrow();
     expect(() => writePlanText('abcd', 'x')).not.toThrow();
     expect(() => dropPlanText('abcd')).not.toThrow();
+  });
+});
+
+describe('indirilen dosya adları', () => {
+  const t = new Date(2026, 7, 25, 18, 5); // 25 Ağustos 2026, 18:05
+
+  it('tek plan adı DEĞİŞMİYOR — babanın elindeki dosyalarla aynı biçim', () => {
+    expect(backupFileName(t)).toBe('ders-programi-2026-08-25-1805.json');
+  });
+
+  it('paket adında -tumu- işareti var', () => {
+    // The only thing that tells the two file kinds apart in Explorer.
+    expect(bundleFileName(t)).toBe('ders-programi-tumu-2026-08-25-1805.json');
+  });
+
+  it('tek haneli ay, gün ve saat sıfırla dolduruluyor', () => {
+    expect(backupFileName(new Date(2026, 0, 2, 3, 4))).toBe('ders-programi-2026-01-02-0304.json');
+  });
+});
+
+describe('veriler nerede — depo raporu', () => {
+  it('her planı kendi anahtarıyla ve BOYUTUYLA sayıyor', () => {
+    writePlanText(FIRST_PLAN_ID, 'abcde'); // 5 karakter
+    writePlanText('abcd', 'xy');
+    const { rows, totalChars } = storageReport(two());
+
+    expect(rows[0]).toEqual({ key: BASE_KEY, what: '1. plan', chars: 5 });
+    // The draft flag is part of the answer to "which key is which plan".
+    expect(rows[1]).toEqual({
+      key: 'ders-programi-plan-abcd',
+      what: 'Deneme (taslak)',
+      chars: 2,
+    });
+    expect(totalChars).toBe(7);
+  });
+
+  it('plan olmayan anahtarların hepsi listede — eksik olan 0 ile', () => {
+    const keys = storageReport(two()).rows.map((r) => r.key);
+    expect(keys).toContain(LIBRARY_KEY);
+    expect(keys).toContain('ders-programi-yedek-0');
+    expect(keys).toContain('ders-programi-yedek-2');
+    expect(keys).toContain('ders-programi-tema');
+    expect(keys).toContain('ders-programi-kenar');
+    // An absent backup chain is information too, so the row stays with 0.
+    expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
+  });
+
+  it('localStorage kapalıysa rapor boş çıkıyor, çökmüyor', () => {
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        getItem: () => {
+          throw new Error('kapalı');
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+    expect(storageReport(two()).totalChars).toBe(0);
+  });
+
+  it('http altında "site" diyor', () => {
+    // jsdom serves http://localhost, which IS the site case. The file:// branch
+    // cannot be faked honestly here, so it is asserted where it is real: the
+    // E2E suite opens dist/index.html over file:// and reads the sentence.
+    expect(storageKind()).toBe('site');
   });
 });

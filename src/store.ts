@@ -7,11 +7,14 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { type Bundle, buildBundle } from './bundle';
 import { sanitize } from './constraints';
 import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
 import {
   addPlan,
+  backupFileName,
   BASE_KEY,
+  bundleFileName,
   dropPlanText,
   findPlan,
   type Library,
@@ -423,9 +426,16 @@ export function storageWorks(): boolean {
   );
 }
 
-/** Writes ONE plan. The key is derived from the id, never from "the current". */
-export function savePlan(id: Id, d: State): void {
-  writePlanText(id, JSON.stringify(d));
+/**
+ * Writes ONE plan; the key is derived from the id, never from "the current".
+ *
+ * Returns whether it landed. Every caller but the bundle importer ignores the
+ * answer — there is nothing useful to do about a single failed autosave beyond
+ * the permanent warning the top bar already shows. Importing a library writes
+ * plan after plan, and there the panel must be able to name what did not fit.
+ */
+export function savePlan(id: Id, d: State): boolean {
+  return writePlanText(id, JSON.stringify(d));
 }
 
 export function loadPlan(id: Id): State | null {
@@ -467,17 +477,9 @@ export function listBackups(): Array<{ index: number; state: State }> {
 
 // ------------------------------------------------------------------- files
 
-function pad2(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-export function downloadBackup(d: State): void {
-  const t = new Date();
-  const name =
-    `ders-programi-${t.getFullYear()}-${pad2(t.getMonth() + 1)}-${pad2(t.getDate())}` +
-    `-${pad2(t.getHours())}${pad2(t.getMinutes())}.json`;
-
-  const blob = new Blob([JSON.stringify(d)], { type: 'application/json' });
+/** Hands the browser a file to save. Both file kinds go through here. */
+function download(name: string, text: string): void {
+  const blob = new Blob([text], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -488,9 +490,47 @@ export function downloadBackup(d: State): void {
   URL.revokeObjectURL(url);
 }
 
+export function downloadBackup(d: State): void {
+  download(backupFileName(new Date()), JSON.stringify(d));
+}
+
 export function readBackupFile(file: File): Promise<State | null> {
   return file.text().then(parseState);
 }
+
+// ------------------------------------------------------------- the bundle
+//
+// One file holding EVERY plan. The single-plan file is unchanged and still
+// what the top bar writes; this is the one that moves a whole setup between
+// two computers — and, once the .exe and the site exist, between those two.
+
+/**
+ * The state of every plan in the library.
+ *
+ * The OPEN plan comes from memory, not from its key: the autosave is debounced
+ * by 400 ms, so the key can be a few hundred milliseconds behind what is on
+ * screen, and a backup that quietly drops the last edit is worse than none.
+ * A plan whose key is gone is skipped rather than exported empty.
+ */
+export function collectStates(
+  library: Library,
+  planId: Id,
+  present: State,
+): Record<Id, State> {
+  const out: Record<Id, State> = {};
+  for (const plan of library.plans) {
+    const state = plan.id === planId ? present : loadPlan(plan.id);
+    if (state !== null) out[plan.id] = state;
+  }
+  return out;
+}
+
+export function downloadBundle(library: Library, planId: Id, present: State): number {
+  const states = collectStates(library, planId, present);
+  download(bundleFileName(new Date()), buildBundle(library, states));
+  return Object.keys(states).length;
+}
+
 
 // -------------------------------------------------------------------- hook
 
@@ -618,6 +658,63 @@ export function useStore() {
     [library, commit],
   );
 
+  /**
+   * Replaces the WHOLE library with the contents of a bundle file.
+   *
+   * The order of the steps below is the safety argument, not housekeeping:
+   *
+   *  1. cancel the pending autosave. `park()` is deliberately NOT used here —
+   *     park WRITES the outgoing plan, and its key is about to be overwritten.
+   *     But leaving the timer alive is pitfall 27 in a mirror: 400 ms later the
+   *     old state would land in the newly imported library's key.
+   *  2. parse everything BEFORE touching storage. If not one plan can be read,
+   *     nothing at all changes: a half-finished import is two truths.
+   *  3. write the data, counting what did not fit (quota).
+   *  4. drop the keys of plans the incoming library does not have.
+   *  5. write the directory LAST, once its data is really in place — the same
+   *     rule createPlan already follows.
+   */
+  const replaceLibrary = useCallback(
+    (bundle: Bundle): { ok: number; failed: number } => {
+      window.clearTimeout(timer.current);
+
+      const parsed: Array<{ id: Id; state: State }> = [];
+      for (const plan of bundle.library.plans) {
+        const raw = bundle.states[plan.id];
+        const state = raw === undefined ? null : parseState(JSON.stringify(raw));
+        if (state !== null) parsed.push({ id: plan.id, state });
+      }
+      if (parsed.length === 0) return { ok: 0, failed: bundle.library.plans.length };
+
+      const kept = new Set(parsed.map((x) => x.id));
+      let failed = bundle.library.plans.length - parsed.length;
+      let ok = 0;
+      for (const { id, state } of parsed) {
+        if (savePlan(id, state)) ok++;
+        else failed++;
+      }
+
+      for (const plan of library.plans) {
+        if (!kept.has(plan.id)) dropPlanText(plan.id);
+      }
+
+      const next: Library = {
+        plans: bundle.library.plans.filter((p) => kept.has(p.id)),
+        activeId: kept.has(bundle.library.activeId)
+          ? bundle.library.activeId
+          : parsed[0]!.id,
+      };
+      commit(next);
+      dispatch({
+        type: 'switch',
+        id: next.activeId,
+        state: parsed.find((x) => x.id === next.activeId)?.state ?? parsed[0]!.state,
+      });
+      return { ok, failed };
+    },
+    [library, commit],
+  );
+
   // Ctrl+Z / Ctrl+Y — dropping a card in the wrong place happens constantly,
   // so this is a basic function, not a nicety.
   useEffect(() => {
@@ -653,6 +750,7 @@ export function useStore() {
       deletePlan,
       renamePlan,
       markDraft,
+      replaceLibrary,
     },
   };
 }

@@ -314,7 +314,7 @@ describe('parseState — v4 → v5 göçü', () => {
 // plan's move into another plan's file — can be pinned without mounting React.
 
 import { BASE_KEY, FIRST_PLAN_ID, planKey } from './library';
-import { loadPlan, reduce, savePlan } from './store';
+import { collectStates, loadPlan, reduce, savePlan } from './store';
 import { emptyState } from './entities';
 import type { State } from './types';
 
@@ -401,5 +401,52 @@ describe('planların ayrı anahtarları', () => {
     const adopted = loadPlan(FIRST_PLAN_ID)!;
     expect(adopted.teachers).toHaveLength(sampleState().teachers.length);
     expect(adopted.placements).toEqual(sampleState().placements);
+  });
+});
+
+describe('collectStates — paket için toplanan durumlar', () => {
+  const lib = {
+    activeId: FIRST_PLAN_ID,
+    plans: [
+      { id: FIRST_PLAN_ID, name: '1. plan', draft: false },
+      { id: 'abcd', name: 'İkinci', draft: false },
+    ],
+  };
+
+  it('AÇIK plan bellekten geliyor, anahtarındaki eski hâlinden değil', () => {
+    // The autosave is debounced by 400 ms, so the key can be behind the screen.
+    // A backup that quietly drops the last edit is worse than no backup.
+    savePlan(FIRST_PLAN_ID, emptyState());
+    const onScreen = { ...emptyState(), settings: { ...emptyState().settings, schoolName: 'Yeni' } };
+    expect(collectStates(lib, FIRST_PLAN_ID, onScreen)[FIRST_PLAN_ID]!.settings.schoolName).toBe(
+      'Yeni',
+    );
+  });
+
+  it('diğer planlar anahtarlarından okunuyor', () => {
+    savePlan('abcd', sampleState());
+    const states = collectStates(lib, FIRST_PLAN_ID, emptyState());
+    expect(states['abcd']!.teachers).toHaveLength(sampleState().teachers.length);
+  });
+
+  it('verisi bulunamayan plan ATLANIYOR — boş bir plan olarak yazılmıyor', () => {
+    const states = collectStates(lib, FIRST_PLAN_ID, emptyState());
+    expect(Object.keys(states)).toEqual([FIRST_PLAN_ID]);
+  });
+});
+
+describe('savePlan kota hatasını bildiriyor', () => {
+  it('yazılamayınca false dönüyor', () => {
+    expect(savePlan('abcd', emptyState())).toBe(true);
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        setItem: () => {
+          throw new Error('kota dolu');
+        },
+      },
+      configurable: true,
+      writable: true,
+    });
+    expect(savePlan('abcd', emptyState())).toBe(false);
   });
 });

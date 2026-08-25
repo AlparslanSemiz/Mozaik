@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (dokuzuncu oturum: **plan kitaplığı ve taslaklar**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-25 (onuncu oturum: **veriler nerede + bütün planlar tek dosyada**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -27,8 +27,8 @@ bu turda geldi; kullanıcı istedi.
   olarak alınıyor). *Yine babanın makinesinde değil, buradaki Chromium'da.*
 - **v1.0 çıkma şartı:** babam aracı çift tıklanan bir `.exe` olarak açabiliyor,
   aynı veriye siteden de bakabiliyor, ve birden fazla planı yan yana tutabiliyor.
-  → **kısmen** — plan kitaplığı ve taslaklar bitti (4a–4c); ortak dosya, site,
-  PWA, Pages ve Tauri (4d–4i) duruyor.
+  → **kısmen** — plan kitaplığı, taslaklar ve **bütün planları taşıyan tek dosya**
+  bitti (4a–4d); site, PWA, Pages ve Tauri (4e–4i) duruyor.
 - **v0.9 çıkma şartı:** araç haftalık programı kendisi dizebiliyor, dizilmiş bir ders
   sürüklenerek taşınabiliyor, ve ekranın tamamı kullanılıyor. → **sağlandı** —
   örnek veride 359 bloğun 359'u 87 ms'de ve **hiç geri sarmadan** yerleşiyor;
@@ -91,12 +91,14 @@ bu turda geldi; kullanıcı istedi.
 | **v1.0: çözücü kural baskısı altında çökmüyor** | ✅ 3/359 → **241/359 blok** · 6 yeni birim testi |
 | **v1.0: plan kitaplığı (`library.ts`)** | ✅ 25 birim + 11 E2E · devralma **sıfır kopya** |
 | **v1.0: taslaklar** | ✅ 4 E2E · taslak = `PlanInfo.draft`, ayrı varlık değil |
+| **v1.0: paket dosyası (`bundle.ts`)** | ✅ 11 birim + 4 E2E · `bundleVersion: 1`, yeni anahtar YOK |
+| **v1.0: "veriler nerede" paneli** | ✅ 5 birim + 2 E2E · gerçek anahtar adları ve boyutlar |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 379 birim + 217 E2E = 596, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 333 KB, sıfır ağ çağrısı.
-`npm run kontrol` toplam ~46 sn (E2E kısmı ~45 sn, 4 worker).** Ayrıca `kontrol`'ün
+**Testler: 402 birim + 223 E2E = 625, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 331 KB, sıfır ağ çağrısı.
+`npm run kontrol` toplam ~51 sn (E2E kısmı ~44 sn, 4 worker).** Ayrıca `kontrol`'ün
 parçası OLMAYAN iki süit: 22 görsel referans (`npm run gorsel`, 5 sn) ve 7 gerçek
 ölçekli çözücü testi (`npm run cozucu`, ~39 sn).
 
@@ -234,12 +236,12 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Kasten imkânsız dünya (`gercek-olcek-imkansiz`, %160 yük) | 22/708 blok → **159/708** (bütçe yine doluyor) |
 | Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
 | Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
-| `dist/index.html` | 323 KB, tek dosya, 0 ağ çağrısı |
-| E2E paketi | **200 test, ~51 sn** (4 worker) |
-| Birim paketi | **338 test, ~2,8 sn** |
+| `dist/index.html` | **331 KB**, tek dosya, 0 ağ çağrısı |
+| E2E paketi | **223 test, ~44 sn** (4 worker) |
+| Birim paketi | **402 test, ~2,9 sn** |
 | Çözücü stres paketi | **7 test, ~2,2 dk** (`npm run cozucu`, ayrı) |
 | Müsaitlik hücresi | **~67 × 48 px** (34 px'ti; tablo 238 → 322 px) |
-| Görsel referanslar | 20 dosya, 2,4 MB |
+| Görsel referanslar | 22 dosya |
 | Ekranda görünen öğretmen satırı | **10** (üst şerit 56 px'e indi) |
 | Müsaitlik tablosu genişliği | 46px sabit hücreden **sütununu dolduran** tabloya |
 | Baskı sayfası | A4 yatay (842×595 pt), 12 eşit sütun (±1px) |
@@ -304,6 +306,10 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 | **İlk planın anahtarı** *(v1.0 ✅)* | **`ders-programi` olarak KALIR** (`planKey('1')`). Devralma tek bayt kopyalamaz; eski bir `dist/index.html` ve `ders-programi` okuyan her şey (yedek zinciri, E2E yardımcıları) çalışmaya devam eder. |
 | **Taslak** *(v1.0 ✅)* | **Ayrı varlık değil**, `PlanInfo.draft` bayrağı — yerleşimi boşaltılmış bir plan. İkinci bir depo, ikinci bir şema, ikinci bir göç gerekmiyor. |
 | **Yedek zinciri ve planlar** *(v1.0 ✅)* | Zincir **oturum başına**, plan başına değil: plan başına dört kopya 5 MB kotasını doldurur. Açılışta hangi plan açıksa ona ait; Ayarlar → Veri bunu yazıyor. |
+| **Dosya biçimi** *(v1.0 ✅)* | **İki tane:** tek plan (`schemaVersion`) ve bütün planlar (`bundleVersion: 1`, `-tumu-` adında). Paket bir dosya biçimi, ikinci bir depolama anahtarı değil. |
+| **Paket üst çubuktan açılmaz** *(v1.0 ✅)* | Üst çubuk paketi **reddedip yolu gösterir**. Bir planı açmak açık planı değiştirir; bir paketi açmak bütün kitaplığın yerine geçer ve geri alınamaz. |
+| **Kota hatası sessiz kalmaz** *(v1.0 ✅)* | `writePlanText` / `savePlan` `boolean` döner. `safely()` yutulan bir kota hatasını sessiz kayba çeviriyordu (ilke 6). |
+| **"Veriler nerede" ölçülür** *(v1.0 ✅)* | Panel gerçek anahtarları ve gerçek boyutları (UTF-16 kod birimi) yazar; E2E sayfanın gerçek anahtarlarıyla karşılaştırır. Ortam bugün iki değer: `file` / `site`. `exe` dalı 4h'de gelir. |
 | **exe ⇄ site aynı veri** *(v1.0, karar)* | **Ortak bir `.json` dosyası.** exe otomatik yazar; site Dosya Sistemi Erişimi API'siyle aynı dosyaya yazar, olmayan yerde "Dosyaya kaydet"e düşer. Sunucu ve bulut senkron **yok**. |
 | **Yayın** *(v1.0, karar)* | **GitHub Pages** (statik). Depo `ders-programi` olarak yeniden adlandırılacak. İlke 2'nin "deploy, domain yok" kısmı bilerek değişiyor; backend/veritabanı hâlâ yok. |
 | Oturum sonu | Her oturumda TASKS + STATUS güncellenir (CLAUDE.md "Çalışırken"). |
@@ -425,6 +431,18 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
     elle (`--update-snapshots=all`) yenilendi. Eşiği sıkmak yazı tipi kaynaklı
     kırmızıları getirir; bilerek dokunulmadı, ama bilinsin.
 
+12. **Paket içe aktarma GERİ ALINAMIYOR.** "Tümünü dosyadan aç" bu bilgisayardaki
+    bütün planların yerine geçiyor ve geri-al yığını zaten plan geçişinde
+    sıfırlanıyor. Korunma yalnızca onay cümlesi (kaç plan silinip kaç plan
+    açılacağını sayıyor). Bilerek: geri alınabilir yapmak silinen planların
+    kopyasını tutmak demek, o da 5 MB kotasını ikiye katlar.
+
+13. **Sitenin Dosya Sistemi Erişimi yolu YAZILMADI.** 4d'nin üçüncü parçası
+    (`showSaveFilePicker` + IndexedDB tutamağı) 4e'ye taşındı: `file://` altında
+    o API yok ve native diyalog Playwright'la sürülemiyor, yani bugün yazılsa
+    kanıtsız kalırdı. Bugün exe ile site arasında veri **elle** taşınıyor:
+    `-tumu-` dosyasını kaydet, öbür tarafta aç.
+
 ---
 
 ## Bilinen hatalar
@@ -448,6 +466,103 @@ odaların ayırabileceğinin %160'ı istenen dünyada 708 bloğun 159'u diziliyo
 isteniyor, açık saatler ve kurallar en fazla 10 saat veriyor"), ama ızgaranın
 dörtte biri dolu. Böyle bir veri zaten çözülemez; buradaki soru "ne kadarını
 doldurabiliriz" ve cevabı ölçülmedi.
+
+---
+
+## Onuncu oturum (2026-08-25) — veriler nerede + bütün planlar tek dosyada
+
+v1.0 turunun **4d** maddesi. Dal: `v1.0-teslim`.
+
+### Kapatılan iki boşluk
+
+1. **"Dosyaya kaydet" hâlâ tek planı yazıyordu.** Kitaplık 4b'de geldiğinden beri
+   üç planlı bir kurulumun tamamı hiçbir dosyaya sığmıyordu — yani "taşımak ve
+   gerçekten güvende olmak" cümlesi verinin yalnız bir kısmı için doğruydu.
+2. **Verinin nerede durduğunu söyleyen ekran yoktu.** Panel "bu bilgisayara
+   aittir" diyordu; hangi anahtar, ne kadar yer, ne zaman gider yazmıyordu.
+
+### `src/bundle.ts` — zarfı bilir, `State`'i bilmez
+
+`library.ts`'in sözleşmesi birebir tekrarlandı: paketin **zarfını** okur, içindeki
+her planın durumunu **ham `unknown`** olarak geri verir, `parseState`'i `store.ts`
+çağırır. Bozuk girdi kurallarını kendisi yazmaz — `normalizeLibrary()`'ye devreder,
+yani "kimliksiz girdi atılır, adsız girdi yeniden adlandırılır" tek evde durur.
+
+```
+{ "schemaVersion": 5, ... }   -> TEK plan   ders-programi-YYYY-AA-GG-SSDD.json
+{ "bundleVersion": 1, ... }   -> HER plan   ders-programi-tumu-YYYY-AA-GG-SSDD.json
+```
+
+**Yeni depolama anahtarı açılmadı ve `schemaVersion` 5'te kaldı.** Paket bir
+*dosya biçimi*, verinin ikinci bir evi değil; içindeki her plan hâlâ kendi
+sürümüyle gelir ve aynı `parseState` göçünden geçer — yani bir pakete konmuş v1
+yedek de açılır.
+
+### Karar: üst çubuk paketi REDDEDİYOR
+
+İki dosya türü aynı uzantıyı, aynı ön eki taşıyor ve gözle ayırt edilemiyor. Bir
+planı açmak açık planı değiştirir; bir paketi açmak **bütün kitaplığın** yerine
+geçer — ve geri alınamaz. Üst çubuk bu yüzden paket görünce açmıyor, cümleyi
+kuruyor: *"Bu dosya bütün planları içeriyor. Ayarlar → Veri bölümündeki 'Tümünü
+dosyadan aç' düğmesini kullanın."* Aynı gerekçe `Sıfırla`'yı oradan çıkarmıştı.
+Üç karşı önlem birlikte çalışıyor: adda `-tumu-`, `parseState` bir paketi
+okuyamıyor, `parseBundle` bir planı okuyamıyor. → **CLAUDE.md tuzak 30**
+
+### İçe aktarmanın SIRASI güvenlik gerekçesi
+
+`replaceLibrary` altı adımı bu sırayla yapıyor ve sıranın her adımı bir kayıp
+senaryosunu kapatıyor:
+
+1. Bekleyen otomatik kayıt **iptal edilir** — ama `park()` çağrılmaz. Park giden
+   planı *yazar*, oysa o anahtarın üstüne yazmak üzereyiz. Timer'ı canlı bırakmak
+   ise tuzak 28'in aynadaki hâli: 400 ms sonra eski durum yeni kitaplığın
+   anahtarına düşer.
+2. Her plan **depoya dokunmadan önce** ayrıştırılır. Hiçbiri okunamazsa hiçbir şey
+   değişmez — yarım bir içe aktarma iki gerçek demektir.
+3. Veriler yazılır, **yazılamayan sayılır**. Bunun için `writePlanText` artık
+   `boolean` dönüyor: `safely()` kota hatasını yutuyordu ve yutulmuş bir kota
+   hatası sessiz kayıptır (ilke 6).
+4. Gelen kitaplıkta olmayan eski planların anahtarları silinir.
+5. Dizin **en sonda** yazılır, verisi yerine oturduktan sonra.
+6. `switch` → geri-al yığını sıfırlanır.
+
+### "Veriler nerede" — iddia değil, ölçüm
+
+Panel gerçek anahtar adlarını ve gerçek boyutları listeliyor (`storageReport`),
+altında toplam ve ~5 MB notu. Boyut **UTF-16 kod birimi** üzerinden: tarayıcının
+kotaya yazdığı şey o, dosyanın UTF-8 uzunluğu değil. E2E bunu doğruluyor —
+sayfanın gerçek `localStorage` anahtarlarını okuyup tabloda hepsinin adının
+geçtiğini karşılaştırıyor. Panel yalan söylerse test kırmızı verir.
+
+Ortam iki değer döndürüyor (`file` / `site`); **`exe` dalı bilerek yazılmadı**,
+4g/4h gelmeden yazılsa ölü kod olurdu (ilke 5).
+
+### Bilerek yapılmayan — Dosya Sistemi Erişimi API'si
+
+4d'nin üçüncü parçası (`showSaveFilePicker` tutamağı IndexedDB'de, aynı dosyaya
+otomatik yazma) **yazılmadı ve 4e'ye taşındı**. Gerekçe kanıt: ortada henüz site
+yok, `file://` altında o API hiç bulunmuyor, ve native dosya diyaloğu
+Playwright'la sürülemiyor — bugün yazılsaydı E2E'de tek satır kanıt üretemezdik,
+yani "çalışıyor" demek iddia olurdu. 4e gerçek bir http kaynağı getiriyor.
+
+Ayrıca **paket başına yedek zinciri konmadı** ve **paket içe aktarma geri
+alınamıyor**: ikisi de bilerek. Zincir hâlâ oturum başına (5 MB kotası), ve içe
+aktarma onaylı + sayan bir cümleyle korunuyor.
+
+### Ölçülen
+
+| | Önce | Sonra |
+|---|---|---|
+| Birim testi | 379 | **402** |
+| E2E testi | 217 | **223** |
+| Görsel referans | 22 | 22 (**yalnız 2'si değişti**) |
+| `dist/index.html` | 332 811 B | **339 402 B** (+6,4 KB) |
+| `npm run kontrol` | ~46 sn | **~51 sn** |
+
+Görsel regresyonun cevabı tam olarak doğru çıktı: 22 referanstan **yalnız iki
+Ayarlar → Veri sahnesi** kırmızı verdi, kalan 20'si dokunulmadan yeşil geçti —
+yani değişiklik gerçekten tek ekranda kaldı. Referanslar `--update-snapshots=all`
+ile yenilendi (tuzak 25) ve sonrasında da yalnız o iki dosyanın baytları değişti.
 
 ---
 

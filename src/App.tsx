@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type React from 'react';
+import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import { applyTheme, readSidebar, readTheme, writeSidebar, type Theme } from './theme';
 import { useSolver } from './useSolver';
@@ -216,8 +217,18 @@ export default function App() {
 
     const loaded = await readBackupFile(file);
     if (loaded === null) {
+      // Three different files can land here and each deserves its own sentence.
+      // A BUNDLE is refused rather than opened: it holds every plan, so opening
+      // one means replacing the whole library — and the top bar stays the place
+      // where no click can lose an afternoon.
+      const version = bundleVersionOf(await file.text());
       window.alert(
-        'Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+        version === BUNDLE_VERSION
+          ? 'Bu dosya bütün planları içeriyor. Ayarlar → Veri bölümündeki ' +
+              '"Tümünü dosyadan aç" düğmesini kullanın.'
+          : version !== null
+            ? 'Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.'
+            : 'Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
       );
       return;
     }

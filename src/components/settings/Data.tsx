@@ -4,9 +4,20 @@
 // one careless click away from "Dosyadan aç" and it deletes everything; it is
 // also the rarest button in the app. Saving and opening a file STAY up there,
 // because that is the one habit my father has to keep (docs/PLAN.md pitfall 7).
+//
+// Two things were added in v1.0 (task 4d). The first is the BUNDLE: the top
+// bar's file holds one plan, so since the library arrived a three-plan setup
+// could not be carried anywhere in one piece. The second is the panel that
+// says, with real key names and real sizes, WHERE the work actually sits —
+// "it is saved in the browser" does not tell anyone that clearing browsing
+// data destroys it.
 
+import { useRef, useState } from 'react';
+import type React from 'react';
+import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState, respreadColors } from '../../entities';
-import { listBackups } from '../../store';
+import { storageKind, storageReport } from '../../library';
+import { downloadBundle, listBackups } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
 import Plans from './Plans';
@@ -18,8 +29,23 @@ interface Props {
   plans: PlanControls;
 }
 
+/**
+ * localStorage is charged in UTF-16 code units, so a character costs two
+ * bytes against the browser's ~5 MB — not the UTF-8 length a file would have.
+ */
+function size(chars: number): string {
+  if (chars === 0) return '—';
+  const bytes = chars * 2;
+  return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
+}
+
 export default function Data({ state, change, loadState, plans }: Props) {
   const backups = listBackups();
+  const bundleInput = useRef<HTMLInputElement>(null);
+  const [note, setNote] = useState<{ bad: boolean; text: string } | null>(null);
+
+  const report = storageReport(plans.library);
+  const planCount = plans.library.plans.length;
 
   function reset() {
     if (
@@ -33,10 +59,103 @@ export default function Data({ state, change, loadState, plans }: Props) {
     loadState(emptyState());
   }
 
+  function saveAll() {
+    const written = downloadBundle(plans.library, plans.planId, state);
+    setNote({
+      bad: written < planCount,
+      text:
+        written < planCount
+          ? `${written} plan dosyaya yazıldı; ${planCount - written} planın verisi bulunamadı.`
+          : `${written} plan tek dosyaya yazıldı.`,
+    });
+  }
+
+  async function openAll(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // so the same file can be picked again
+    if (file === undefined) return;
+
+    const text = await file.text();
+    const bundle = parseBundle(text);
+    if (bundle === null) {
+      const version = bundleVersionOf(text);
+      setNote({
+        bad: true,
+        text:
+          version !== null && version !== BUNDLE_VERSION
+            ? 'Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.'
+            : 'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst ' +
+              'çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+      });
+      return;
+    }
+
+    const incoming = bundle.library.plans.length;
+    if (
+      !window.confirm(
+        `Bu bilgisayardaki ${planCount} plan silinip dosyadaki ${incoming} plan ` +
+          'açılacak. Bu işlem geri alınamaz.',
+      )
+    ) {
+      return;
+    }
+
+    const { ok, failed } = plans.replaceLibrary(bundle);
+    if (ok === 0) {
+      setNote({ bad: true, text: 'Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.' });
+      return;
+    }
+    setNote({
+      bad: failed > 0,
+      text:
+        failed > 0
+          ? `${ok} plan açıldı, ${failed} plan yazılamadı — depolama dolmuş olabilir. ` +
+            'Dosyayı saklayın.'
+          : `${ok} plan açıldı.`,
+    });
+  }
+
   return (
     <div className="cols">
       <div>
         <Plans state={state} plans={plans} />
+
+        <div className="panel">
+          <h2>Bütün planlar tek dosyada</h2>
+          <p className="hint">
+            Üst çubuktaki <b>Dosyaya kaydet</b> yalnızca <b>açık olan planı</b> yazar.
+            Buradaki dosya <b>bütün planları</b> içerir: her planın derslikleri,
+            öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı, taslak işareti ve
+            hangisinin açık olduğu. <b>İçermediği</b> şeyler: tema ve kenar çubuğu
+            tercihi ile aşağıdaki oturum yedekleri — onlar bu bilgisayara aittir,
+            programa değil.
+          </p>
+          <div className="form-row">
+            <button className="btn primary" onClick={saveAll}>
+              Tümünü dosyaya kaydet ({planCount} plan)
+            </button>
+            <button
+              className="btn"
+              onClick={() => bundleInput.current?.click()}
+              title="Bu bilgisayardaki bütün planların yerine dosyadakiler geçer"
+            >
+              Tümünü dosyadan aç
+            </button>
+            <input
+              ref={bundleInput}
+              type="file"
+              accept=".json,application/json"
+              aria-label="Bütün planları içeren dosya"
+              className="hidden"
+              onChange={openAll}
+            />
+          </div>
+          {note !== null && (
+            <p className={note.bad ? 'hint bad' : 'hint'} role="status">
+              {note.text}
+            </p>
+          )}
+        </div>
 
         <div className="panel">
           <h2>Veri</h2>
@@ -71,6 +190,42 @@ export default function Data({ state, change, loadState, plans }: Props) {
       </div>
 
       <aside>
+        <div className="panel">
+          <h2>Veriler nerede</h2>
+          <p className="hint">
+            {storageKind() === 'file'
+              ? 'Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.'
+              : 'Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.'}{' '}
+            Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>; tarayıcıda
+            “tarama verilerini temizle” dediğinizde <b>silinir</b>. Taşınan ve gerçekten
+            güvende olan tek şey <b>dosyaya kaydettiğinizdir</b>.
+          </p>
+          <table className="stat">
+            <thead>
+              <tr>
+                <th>Anahtar</th>
+                <th>Ne</th>
+                <th className="num">Yer</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.rows.map((row) => (
+                <tr key={row.key}>
+                  <td>
+                    <code>{row.key}</code>
+                  </td>
+                  <td>{row.what}</td>
+                  <td className="num">{size(row.chars)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="hint">
+            Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için ayırdığı
+            yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
+          </p>
+        </div>
+
         <div className="panel">
           <h2>Bu bilgisayardaki otomatik yedekler</h2>
           <p className="hint">

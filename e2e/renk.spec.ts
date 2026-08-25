@@ -379,7 +379,7 @@ test.describe('11. Görsel cila', () => {
       page
         .getByRole('button', { name: 'Her şeyi sil' })
         .evaluate((el) => getComputedStyle(el).color),
-      page.getByRole('button', { name: 'Dosyadan aç' }).evaluate((el) => getComputedStyle(el).color),
+      page.getByRole('button', { name: 'Dosyadan aç', exact: true }).evaluate((el) => getComputedStyle(el).color),
     ]);
     // Not identical to a plain button until the pointer is already on it
     expect(danger).not.toBe(plain);

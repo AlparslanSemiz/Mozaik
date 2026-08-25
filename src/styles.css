@@ -995,6 +995,23 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
+/* A result line that reports a FAILURE has to leave the muted grey: an import
+   that half worked, said in the same colour as an explanatory note, reads as an
+   explanatory note. Both themes define --bad against their own paper. */
+.hint.bad {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* Storage keys, in Ayarlar > Veri. They are literal strings my father may have
+   to find in a browser's storage list, so they are set apart from prose — and
+   they must not wrap in the middle of a key. */
+.panel code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .empty-screen {
   max-width: 560px;
   margin: 48px auto;

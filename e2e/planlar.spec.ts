@@ -5,7 +5,15 @@
 // reload, and no 400 ms debounce racing a click.
 
 import { expect, test, type Page } from '@playwright/test';
-import { dragAndDrop, openSettings, openWithSample, savedText, settledText } from './helpers';
+import { readFile } from 'node:fs/promises';
+import {
+  dragAndDrop,
+  openSettings,
+  openSetup,
+  openWithSample,
+  savedText,
+  settledText,
+} from './helpers';
 
 const picker = (page: Page) => page.getByLabel('Plan', { exact: true });
 
@@ -208,7 +216,7 @@ test.describe('40. Plan kitaplığı', () => {
     const bar = (await page.locator('header.topbar').boundingBox())!;
     const box = (await page.getByLabel('Plan', { exact: true }).boundingBox())!;
     expect(box.x + box.width).toBeLessThanOrEqual(bar.x + bar.width + 1);
-    await expect(page.getByRole('button', { name: 'Dosyaya kaydet' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toBeVisible();
   });
 });
 
@@ -288,5 +296,166 @@ test.describe('41. Taslaklar', () => {
     await expect(picker(page).locator('option').nth(1)).not.toContainText('(taslak)');
     await page.reload();
     await expect(picker(page).locator('option').nth(1)).not.toContainText('(taslak)');
+  });
+});
+
+test.describe('42. Bütün planlar tek dosyada', () => {
+  /** Reads a downloaded file back off disk. */
+  async function grab(page: Page, click: () => Promise<void>) {
+    const wait = page.waitForEvent('download');
+    await click();
+    const file = await wait;
+    const path = (await file.path())!;
+    return { name: file.suggestedFilename(), text: await readFile(path, 'utf8') };
+  }
+
+  /** The sample school in one plan, plus a second, empty plan called "Boş plan". */
+  async function twoPlans(page: Page) {
+    await openWithSample(page);
+    await openPlans(page);
+    await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
+    await expect(picker(page).locator('option')).toHaveCount(2);
+    await openPlans(page);
+  }
+
+  test('indirilen dosya GERÇEKTEN bütün planları içeriyor', async ({ page }) => {
+    await twoPlans(page);
+
+    const { name, text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+    // The -tumu- marker is the only thing separating the two file kinds in
+    // Explorer, so it is asserted, not assumed.
+    expect(name).toMatch(/^ders-programi-tumu-\d{4}-\d{2}-\d{2}-\d{4}\.json$/);
+
+    const bundle = JSON.parse(text) as {
+      bundleVersion: number;
+      activeId: string;
+      plans: Array<{ id: string; name: string; state: { teachers: unknown[] } }>;
+    };
+    expect(bundle.bundleVersion).toBe(1);
+    expect(bundle.plans.map((p) => p.name)).toEqual(['1. plan', 'Boş plan']);
+    // Each plan carries its OWN school, not a shared one.
+    expect(bundle.plans[0]!.state.teachers.length).toBeGreaterThan(0);
+    expect(bundle.plans[1]!.state.teachers).toHaveLength(0);
+    expect(bundle.activeId).toBe(bundle.plans[1]!.id); // the new plan was opened
+  });
+
+  test('gidiş-dönüş: silinen plan dosyadan içeriğiyle geri geliyor', async ({ page }) => {
+    await twoPlans(page);
+
+    // Give the second plan something of its own, so "it came back" means the
+    // DATA came back and not just a row in the directory.
+    await openSettings(page, 'Okul ve zil');
+    await page.getByLabel('Okul adı').fill('İkinci Okul');
+    await page.getByLabel('Okul adı').blur();
+    await openPlans(page);
+
+    const { text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+
+    // Now destroy it: switch away and delete the plan entirely.
+    await picker(page).selectOption({ label: '1. plan' });
+    await openPlans(page);
+    page.once('dialog', (d) => d.accept());
+    await page.getByRole('button', { name: 'Sil', exact: true }).nth(1).click();
+    await expect(picker(page).locator('option')).toHaveCount(1);
+
+    page.once('dialog', (d) => d.accept());
+    await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
+      name: 'ders-programi-tumu-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(text),
+    });
+
+    await expect(page.locator('.panel .hint[role="status"]')).toHaveText('2 plan açıldı.');
+    await expect(picker(page).locator('option')).toHaveCount(2);
+
+    // The second plan's own school name survived the round trip.
+    await picker(page).selectOption({ label: 'Boş plan' });
+    await expect(page.locator('.app-title')).toHaveText('İkinci Okul');
+    // ...and so did the first plan's teachers.
+    await picker(page).selectOption({ label: '1. plan' });
+    await openSetup(page, 'Öğretmenler');
+    expect(await page.locator('table.list tbody tr').count()).toBeGreaterThan(0);
+  });
+
+  test('üst çubuğa paket verilince UYARIYOR ve hiçbir şey değişmiyor', async ({ page }) => {
+    await twoPlans(page);
+    const { text } = await grab(page, () =>
+      page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
+    );
+
+    let said = '';
+    page.once('dialog', (d) => {
+      said = d.message();
+      return d.accept();
+    });
+    // The top bar's own file input — the one next to "Dosyadan aç".
+    await page.locator('header.topbar input[type=file]').setInputFiles({
+      name: 'ders-programi-tumu-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(text),
+    });
+
+    await expect.poll(() => said).toContain('Tümünü dosyadan aç');
+    // Nothing was replaced: both plans still there, still on the same one.
+    await expect(picker(page).locator('option')).toHaveCount(2);
+    await expect(picker(page)).toHaveValue(await picker(page).inputValue());
+    await openPlans(page);
+    await expect(page.locator('table.list tbody tr')).toHaveCount(2);
+  });
+
+  test('tek plan dosyası "Tümünü dosyadan aç"a verilince reddediliyor', async ({ page }) => {
+    await openWithSample(page);
+    const single = await grab(page, () =>
+      page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }).click(),
+    );
+
+    await openPlans(page);
+    await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
+      name: single.name,
+      mimeType: 'application/json',
+      buffer: Buffer.from(single.text),
+    });
+    await expect(page.locator('.panel .hint.bad[role="status"]')).toContainText('Dosyadan aç');
+    await expect(picker(page).locator('option')).toHaveCount(1);
+  });
+});
+
+test.describe('43. Veriler nerede', () => {
+  test('tablodaki anahtarlar sayfanın GERÇEK anahtarlarıyla aynı', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+    await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
+    await openSettings(page, 'Veri');
+
+    const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
+    const shown = await panel.locator('tbody code').allInnerTexts();
+
+    // Every plan key the page really uses must be named in the table. Anything
+    // the panel invents, or leaves out, makes the panel a liar — and the whole
+    // point of it is that it can be trusted.
+    const real = await page.evaluate(() =>
+      Object.keys(localStorage).filter((k) => k.startsWith('ders-programi')),
+    );
+    for (const key of real) expect(shown).toContain(key);
+    expect(shown).toContain('ders-programi');
+    expect(shown).toContain('ders-programi-planlar');
+
+    // The open plan's row carries a real size, not a dash.
+    const row = panel.locator('tbody tr', { hasText: '1. plan' });
+    await expect(row.locator('td.num')).toHaveText(/KB|B$/);
+  });
+
+  test('file:// altında deponun TARAYICIDA olduğunu söylüyor', async ({ page }) => {
+    // The E2E suite is the only place this branch is real: jsdom serves http.
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+    const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
+    await expect(panel).toContainText('tarayıcının bu bilgisayardaki deposunda');
+    await expect(panel).toContainText('tarama verilerini temizle');
+    await expect(panel).toContainText('5 MB');
   });
 });
