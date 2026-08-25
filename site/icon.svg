@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Ders Programı">
+  <title>Ders Programı</title>
+  <!-- Drawn by hand, not fetched: principle 3 means no icon CDN either. The
+       motif is the thing the tool makes — a week grid with a few lessons put
+       in it. Colours are the app's own accent plus three palette entries, so
+       the icon cannot drift away from what the app looks like.
+       Full bleed background: the maskable variant is cropped to the middle
+       80%, and everything that matters sits well inside that. -->
+  <rect width="512" height="512" rx="112" fill="#1f5fa8"/>
+
+  <!-- the sheet -->
+  <rect x="88" y="120" width="336" height="272" rx="20" fill="#ffffff"/>
+  <!-- hour header strip -->
+  <path d="M88 140a20 20 0 0 1 20-20h296a20 20 0 0 1 20 20v40H88z" fill="#e3eefb"/>
+
+  <!-- placed lessons: three palette colours, one block of two -->
+  <rect x="164" y="188" width="60" height="44" rx="6" fill="#65b6ec"/>
+  <rect x="292" y="188" width="60" height="44" rx="6" fill="#9ff292"/>
+  <rect x="228" y="240" width="60" height="44" rx="6" fill="#c3a2cd"/>
+  <rect x="356" y="240" width="60" height="44" rx="6" fill="#65b6ec"/>
+  <rect x="100" y="292" width="60" height="44" rx="6" fill="#9ff292"/>
+  <rect x="164" y="292" width="60" height="44" rx="6" fill="#9ff292"/>
+  <rect x="292" y="344" width="60" height="44" rx="6" fill="#c3a2cd"/>
+
+  <!-- grid lines, drawn over the blocks so the week stays readable -->
+  <g stroke="#8a93a0" stroke-width="4" opacity="0.55">
+    <path d="M96 180h320M96 236h320M96 288h320M96 340h320"/>
+    <path d="M160 128v256M224 128v256M288 128v256M352 128v256"/>
+  </g>
+  <rect x="88" y="120" width="336" height="272" rx="20" fill="none" stroke="#15427a" stroke-width="8"/>
+</svg>

@@ -6,6 +6,10 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 // Cift tiklayinca, internet olmadan, sunucu olmadan calisir.
 export default defineConfig({
   base: './',
+  // The site target keeps its extra files (manifest, service worker, icons)
+  // in site/. Not one byte of them may land next to dist/index.html: that
+  // build is ONE file and the claim has to stay checkable with ls.
+  publicDir: false,
   plugins: [react(), viteSingleFile()],
   build: {
     target: 'es2020',

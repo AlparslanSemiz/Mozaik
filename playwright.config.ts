@@ -9,7 +9,14 @@ export default defineConfig({
   // a human, `npm run gorsel` compares pixels against a machine-local reference,
   // and `npm run cozucu` spends the solver's whole budget on every world. Each
   // has its own config.
-  testIgnore: ['**/ekran.spec.ts', '**/gorsel.spec.ts', '**/otomatik-stres.spec.ts'],
+  // site.spec.ts is here too: it needs an http server and dist-site/, so it
+  // runs under playwright.site.config.ts (npm run test:site).
+  testIgnore: [
+    '**/ekran.spec.ts',
+    '**/gorsel.spec.ts',
+    '**/otomatik-stres.spec.ts',
+    '**/site.spec.ts',
+  ],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
   // gecerli oldugu olculdu (bkz. docs/STATUS.md).
   fullyParallel: true,
