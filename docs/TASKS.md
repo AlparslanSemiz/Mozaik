@@ -16,12 +16,14 @@ Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeş
 *(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
 bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
 
-**SIRADAKİ İŞ: 4e** — site derlemesi (`npm run build:site` → `dist-site/`) +
-PWA. `dist/index.html` (çift tıklanan tek dosya) aynen kalır. 4d'den **devreden
-bir iş var**: Dosya Sistemi Erişimi API'si (`showSaveFilePicker` tutamağı
-IndexedDB'de) 4d'de bilerek yazılmadı — `file://` altında o API hiç yok ve
-native dosya diyaloğu Playwright'la sürülemiyor, yani site olmadan yazılsa
-E2E'de tek satır kanıt üretilemezdi. Gerçek bir http kaynağı 4e ile geliyor.
+**SIRADAKİ İŞ: 4f** — GitHub Pages yayını (`.github/workflows/site.yml`).
+Site derlemesi hazır ve çevrimdışı çalıştığı ölçüldü; eksik olan yalnız
+yayınlama adımı. **Kullanıcıdan iki şey bekleniyor:** depo `ders-programi`
+olarak yeniden adlandırılacak ve Pages kaynağı "GitHub Actions" seçilecek.
+
+4e ile birlikte gerçek bir http kaynağı doğdu, yani **4l** (Dosya Sistemi
+Erişimi API'si) artık yazılabilir — 4d'de bilerek ertelenmişti, çünkü `file://`
+altında o API hiç yok ve sitesiz hâlde E2E'de tek satır kanıt üretilemezdi.
 
 Verilen kararlar (2026-08-25): planlar **depo katmanında** tutulur (`State`
 şeması değişmez, göç yok) · exe ile site **ortak bir `.json` dosyası** üzerinden
@@ -51,14 +53,16 @@ adlandırılacak** (kullanıcı yapacak).
       gösteriliyor** — bir paketi açmak bütün kitaplığın yerine geçmek demek.
       Yeni depolama anahtarı yok, şema değişmedi. Ayrıntı:
       [STATUS.md](STATUS.md) → *Onuncu oturum*
-- [ ] **4e Site derlemesi + PWA** — ikinci hedef `npm run build:site` →
-      `dist-site/`. `dist/index.html` (çift tıklanan tek dosya) aynen kalır.
-      Manifest ("Ders Programı", `standalone`), elle çizilen simge, `sw.js`
-      ile ilk açılıştan sonra çevrimdışı çalışma. **4d'den devreden:** Dosya
-      Sistemi Erişimi API'si — `showSaveFilePicker` tutamağı IndexedDB'de
-      saklanıp aynı `-tumu-` dosyasına yazılır; `file://` altında ve API'siz
-      tarayıcıda mevcut "Dosyaya kaydet" davranışına düşer. 4d'de bilerek
-      ertelendi: sitesiz hâlde E2E'de kanıtlanamıyordu
+- [x] **4e Site derlemesi + PWA** — yapıldı. `npm run build:site` →
+      `dist-site/` (364 KB: tek dosya + manifest + `sw.js` + simgeler).
+      `dist/index.html`'e tek bayt dokunulmadı ve **dokunulamaz**:
+      `vite.config.ts`'e `publicDir: false` kondu. Site de tek dosya —
+      service worker'ın kabuğu böylece bir **sabit**, üretilen bir liste değil.
+      Manifest/simge/kayıt betiği yalnız site derlemesinde, bir
+      `transformIndexHtml` eklentisiyle ekleniyor. Ölçülen: fiş çekilince site
+      yine açılıyor, çevrimdışı girilen veri yeniden yüklemeden sonra duruyor;
+      SW kaydı silinince aynı yükleme `ERR_INTERNET_DISCONNECTED` ile düşüyor
+      (yani test boş değil). Ayrıntı: [STATUS.md](STATUS.md) → *On birinci oturum*
 - [ ] **4f GitHub Pages yayını** — `.github/workflows/site.yml`. **Kullanıcıdan:**
       depo `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı
       "GitHub Actions" seçilecek
@@ -72,18 +76,33 @@ adlandırılacak** (kullanıcı yapacak).
 - [ ] **4i Windows `.exe`** — bu makine Fedora, çapraz derleme güvenilir değil:
       `.github/workflows/exe.yml` → `windows-latest` → artefakt. SmartScreen
       uyarısı için babaya tek cümlelik not
+- [x] **4k Baskı turu** — babanın gerçek yazdırma önizlemesinde gördükleri.
+      Tarayıcının üst/alt bilgisi (sol üstte tarih, sol altta dosya yolu)
+      `@page { margin: 0 }` ile kalktı — kenar boşluğu 10 mm padding olarak
+      `.print-page`'e taşındı, sütun genişlikleri değişmedi. Başlık iki satır
+      oldu: büyük ortalı ana satır + küçük künye satırı. Satırlar 20 → 23 mm ve
+      sayfa sabit yükseklikli bir flex kutusu (`safe center`), yani plan dikey
+      ortalanıyor. E2E 223 → 228; kanıt olarak `displayHeaderFooter: true` ile
+      PDF üretilip **gözle okundu**
+- [ ] **4l Dosya Sistemi Erişimi API'si** — 4d'den devreden iş, artık
+      yazılabilir (4e ile http kaynağı var). `showSaveFilePicker` tutamağı
+      IndexedDB'de saklanıp her değişiklik aynı `-tumu-` dosyasına yazılır;
+      `file://` altında ve API'siz tarayıcıda mevcut "Dosyaya kaydet"
+      davranışına düşer. **Gerçek dosya diyaloğu Playwright'la sürülemez** —
+      API sahtelenerek (`addInitScript`) test edilir, diyalog elle denenir
 - [~] **4j Belgeler** — 4b+4c ve 4d ile birlikte ilerledi: yasak liste daraltıldı
       ("birden çok program sürümü" → **aynı planın** sürüm ağacı, gerekçesiyle),
       `library.ts` ve `bundle.ts` mimari şemaya girdi, depolama anahtarı tablosu
       ile **dosya biçimleri** bölümü yazıldı, tuzak 28–30 eklendi (ve iki kez 27
-      numaralanmış tuzaklar düzeltildi), test sayıları güncellendi. **Kalan:**
-      ilke 2'nin yeni hâli (statik yayın var, backend/veritabanı yok) —
-      4e/4f yapılmadan yazılamaz
+      numaralanmış tuzaklar düzeltildi), test sayıları güncellendi. 4e ile
+      **ilke 2'nin yeni hâli** de yazıldı (statik yayın var; backend, veritabanı,
+      hesap yok) ve tuzak 31–32 eklendi. **Kalan:** 4f–4i yapıldıkça teslim
+      yollarının anlatımı
 
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 402 birim + 223 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
+hazır — 402 birim + 228 E2E + 6 site testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
 program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
 tahmin olur (ilke 5).
 

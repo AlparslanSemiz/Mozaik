@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (onuncu oturum: **veriler nerede + bütün planlar tek dosyada**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-25 (on birinci oturum: **baskı turu + site derlemesi/PWA**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -27,8 +27,9 @@ bu turda geldi; kullanıcı istedi.
   olarak alınıyor). *Yine babanın makinesinde değil, buradaki Chromium'da.*
 - **v1.0 çıkma şartı:** babam aracı çift tıklanan bir `.exe` olarak açabiliyor,
   aynı veriye siteden de bakabiliyor, ve birden fazla planı yan yana tutabiliyor.
-  → **kısmen** — plan kitaplığı, taslaklar ve **bütün planları taşıyan tek dosya**
-  bitti (4a–4d); site, PWA, Pages ve Tauri (4e–4i) duruyor.
+  → **kısmen** — plan kitaplığı, taslaklar, **bütün planları taşıyan tek dosya**
+  ve **site/PWA** bitti (4a–4e); Pages yayını ve Tauri (4f–4i) duruyor.
+  *Site fiş çekiliyken açılıyor (ölçüldü), ama daha yayınlanmadı; `.exe` yok.*
 - **v0.9 çıkma şartı:** araç haftalık programı kendisi dizebiliyor, dizilmiş bir ders
   sürüklenerek taşınabiliyor, ve ekranın tamamı kullanılıyor. → **sağlandı** —
   örnek veride 359 bloğun 359'u 87 ms'de ve **hiç geri sarmadan** yerleşiyor;
@@ -93,14 +94,18 @@ bu turda geldi; kullanıcı istedi.
 | **v1.0: taslaklar** | ✅ 4 E2E · taslak = `PlanInfo.draft`, ayrı varlık değil |
 | **v1.0: paket dosyası (`bundle.ts`)** | ✅ 11 birim + 4 E2E · `bundleVersion: 1`, yeni anahtar YOK |
 | **v1.0: "veriler nerede" paneli** | ✅ 5 birim + 2 E2E · gerçek anahtar adları ve boyutlar |
+| **v1.0: baskı turu** (başlık, ortalama, üst/alt bilgi) | ✅ 5 E2E · PDF ile **gözle** doğrulandı |
+| **v1.0: site derlemesi + PWA** | ✅ 6 site testi · **fiş çekiliyken açılıyor** |
+| GitHub Pages yayını | ⬜ bekliyor (kullanıcıdan: depo adı + Pages kaynağı) |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 402 birim + 223 E2E = 625, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 331 KB, sıfır ağ çağrısı.
-`npm run kontrol` toplam ~51 sn (E2E kısmı ~44 sn, 4 worker).** Ayrıca `kontrol`'ün
-parçası OLMAYAN iki süit: 22 görsel referans (`npm run gorsel`, 5 sn) ve 7 gerçek
-ölçekli çözücü testi (`npm run cozucu`, ~39 sn).
+**Testler: 402 birim + 228 E2E + 6 site = 636, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 340 KB, sıfır ağ çağrısı;
+`npm run build:site` → `dist-site/`, 364 KB (aynı tek dosya + manifest + `sw.js` +
+simgeler). `npm run kontrol` toplam ~61 sn (E2E ~46 sn 4 worker, site ~3 sn).**
+Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: 22 görsel referans
+(`npm run gorsel`, 5 sn) ve 7 gerçek ölçekli çözücü testi (`npm run cozucu`, ~39 sn).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -385,6 +390,18 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
    eder, gözü değil — hele bir de babanın ekran ayarında. Gerçek veriyle dizerken
    sorulacak: iki satırı karıştırdığın oldu mu?
 
+9. **Üst/alt bilgi bastırması babanın tarayıcısında da geçerli mi?** Burada Chromium'da
+   ölçüldü: `@page { margin: 0 }` ile tarih ve dosya yolu çizilmiyor. Ama yazdırma
+   diyaloğunda **kenar boşluğu elle değiştirilirse** tarayıcı CSS'in yerine kendi
+   değerini kullanır ve üst/alt bilgi geri gelebilir. Karşı önlem yazıldı: Yazdır
+   panelindeki ipucu artık "görürseniz **üstbilgi ve altbilgi** kutusunun işaretini
+   kaldırın" diyor. **Fiziksel çıktıya hâlâ bakılmadı** (bkz. TASKS → gerçek veri).
+
+10. **PWA babanın Windows'unda kurulabiliyor mu?** Manifest, simgeler ve service
+    worker Chromium'da doğrulandı (çevrimdışı açılış dahil), ama "Uygulama olarak
+    yükle" akışı **denenmedi** — ve site henüz yayınlanmadı (4f). Asıl teslim yolu
+    yine de `.exe`; site onun yanında duruyor.
+
 ---
 
 ## Bilinen eksikler
@@ -466,6 +483,89 @@ odaların ayırabileceğinin %160'ı istenen dünyada 708 bloğun 159'u diziliyo
 isteniyor, açık saatler ve kurallar en fazla 10 saat veriyor"), ama ızgaranın
 dörtte biri dolu. Böyle bir veri zaten çözülemez; buradaki soru "ne kadarını
 doldurabiliriz" ve cevabı ölçülmedi.
+
+---
+
+## On birinci oturum (2026-08-25) — baskı turu + site derlemesi/PWA
+
+İki iş: kullanıcının gerçek yazdırma önizlemesinde gördükleri (madde **4k**),
+ve v1.0 turunun sıradaki maddesi olan site derlemesi + PWA (**4e**). Dal:
+`v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeşilken.
+
+### Baskı: dördü de kâğıtla ilgiliydi, hiçbiri veriyle değil
+
+Şikâyetler: sol üstte tarih/saat, sol altta dosya yolu, başlık küçük ve sola
+yapışık, tablo sayfanın üstüne yapışık (altta ~5 cm beyaz).
+
+İlk ikisi **bizim çizdiğimiz şey değil.** Tarayıcı onları kenar boşluğu
+kutusuna çizer; `display: none` diye bir çaresi yok. Tek yol kutuyu ortadan
+kaldırmak: `@page { margin: 0 }`, ve kaybolan 10 mm `.print-page`'e padding
+olarak geri konur. Sütun genişlikleri değişmedi (2 × 10 mm hâlâ 20 mm), yani
+"sütunlar eşit" testi olduğu gibi geçti.
+
+Diğer ikisi CSS: başlık iki satır oldu (büyük ortalı ana satır + küçük künye
+satırı), satırlar 20 → 23 mm büyüdü ve sayfa **sabit yükseklikli bir flex
+kutusu** hâline geldi. İki incelik burada:
+
+- Yükseklik **205 mm**, 210 değil. Kesirli piksel + `break-after: page` her
+  programın ardına boş bir sayfa koyardı; 5 mm pay kâğıtta görünmüyor. Bunu
+  yakalayan tek şey yeni "3 sınıf = 3 sayfa" testi.
+- `justify-content: **safe** center`. Düz `center` taşma durumunda içeriği iki
+  uçtan taşırır ve sayfanın üstü kesilir. 7 günlük hafta ölçüldü: taşma 0 px.
+
+**Kanıt gözle okundu, iddia edilmedi.** `displayHeaderFooter: true` ile — yani
+tarayıcı üst/alt bilgiyi çizmeye *çalışırken* — PDF üretildi: değişiklikten
+önce tarih ve `file:///home/.../dist/index.html` sayfada duruyordu, sonra
+ikisi de yok. Playwright'ın `page.pdf`'i varsayılan olarak zaten üst/alt bilgi
+basmaz, o yüzden bayrağı açmadan alınan bir PDF hiçbir şey kanıtlamazdı.
+
+### Site: ikinci teslim yolu, ama aynı iddialarla
+
+`npm run build:site` → `dist-site/`. Üç karar:
+
+1. **Site de tek dosya** (`viteSingleFile` korundu). Service worker'ın önbelleğe
+   alacağı kabuk böylece bir sabit; hash'li chunk'larla o liste her derlemeden
+   sonra üretilmesi ve senkron tutulması gereken bir şey olurdu.
+2. **Manifest/simge/kayıt betiği `index.html`'de durmaz.** Yalnız site
+   config'inin `transformIndexHtml` eklentisi ekler (`order: 'post'`, yoksa
+   singlefile onları gömülecek varlık sanır). Ana config'e `publicDir: false`
+   kondu: `site/` klasörünün hiçbir dosyası `dist/`'in yanına düşemez.
+3. **Simge elle çizildi** (`site/icon.svg`): haftalık ızgara motifi, uygulamanın
+   kendi vurgu rengi + paletten üç renk. PNG'ler `scripts/simge.mjs` ile
+   Chromium'da üretiliyor — yeni bağımlılık yok — ve depoya giriyor, böylece
+   `build:site` tarayıcı gerektirmiyor.
+
+### Testin kendisi test edildi (tuzak 23'ün alışkanlığı)
+
+"Fiş çekilince site açılıyor" testi, service worker olmasa da geçebilirdi:
+tarayıcının kendi disk önbelleği aynı işi yapıyor olabilirdi. Ölçüldü: SW kaydı
+silinip `caches` boşaltıldıktan sonra aynı çevrimdışı yeniden yükleme
+`net::ERR_INTERNET_DISCONNECTED` ile düşüyor. Yani test boş değil.
+
+### Ölçülen
+
+| | Önce | Sonra |
+|---|---|---|
+| Birim testi | 402 | 402 (değişmedi — mantık değişmedi) |
+| E2E testi (`file://`) | 223 | **228** |
+| Site testi (http) | — | **6** |
+| Görsel referans | 22 | 22 (**yalnız 2'si değişti**) |
+| `dist/index.html` | 339 402 B | **340 155 B** |
+| `dist-site/` | — | **364 KB** (index 340 538 B + manifest + sw + simgeler) |
+| `npm run kontrol` | ~51 sn | **~61 sn** (site süiti dahil) |
+
+Görsel regresyonda yine yalnız beklenen iki sahne (`light/dark-8-yazdir`)
+kırmızı verdi, kalan 20'si dokunulmadan geçti; referanslar
+`--update-snapshots=all` ile yenilendi (tuzak 25) ve sonrasında `git diff` de
+yalnız o iki dosyayı gösterdi.
+
+### Bilerek yapılmayan — Dosya Sistemi Erişimi API'si (yine)
+
+4d'den 4e'ye taşınmıştı, şimdi kendi maddesine (**4l**) taşındı. Gerekçe
+değişti: artık *yazılabilir* (http kaynağı var), ama kullanıcı bu oturumun
+kapsamını "baskı + site/PWA" olarak seçti. Kendi başına bir oturumluk iş:
+IndexedDB'de tutamak, izin yeniden isteme yolu, ve gerçek diyaloğun
+Playwright'la sürülemediği için API'nin sahtelenmesi.
 
 ---
 

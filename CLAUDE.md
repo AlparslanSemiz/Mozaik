@@ -35,6 +35,14 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 > Kontrolü almak, tarayıcıya bırakmaktan **daha az** karmaşa. **v0.7'de uygulandı**;
 > tercih `localStorage['ders-programi-tema']`'da, `State`'e girmez.
 >
+> **Netleştirildi (2026-08-25): ilke 2 "sunucu yok" — statik yayın hariç.**
+> v1.0'da araç ikinci bir yoldan da geliyor: GitHub Pages'te duran bir sayfa
+> (`npm run build:site` → `dist-site/`). Orada **backend, veritabanı, hesap,
+> oturum, API yok**; yayınlanan şey bir klasör dolusu statik dosya. İlke 3 de
+> bozulmadı: CDN'den tek bayt çekilmiyor, web font yok, ve sayfa ilk açılıştan
+> sonra service worker sayesinde **fiş çekiliyken** çalışıyor — ölçüldü.
+> Çift tıklanan `dist/index.html` hâlâ asıl teslim yolu, site onun yanında duruyor.
+>
 > **Daraltıldı (2026-08-25): "birden çok program sürümünü yan yana tutma" → "aynı
 > planın sürüm ağacı".** Gerekçe: yasaklanan şey *sürüm ağacı*ydı — "geçen salı
 > neye benziyordu" sorusuna cevap veren, dallanan, kimsenin bakmadığı bir geçmiş.
@@ -63,17 +71,39 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 ### Komutlar
 
 ```bash
-npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 402 birim testi
-npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 223 E2E testi
-npm run kontrol   # hepsi: tsc + birim + derleme + E2E
-npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
-npm run gorsel    # görsel regresyon — 22 referansa karşı piksel farkı
-npm run cozucu    # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
+npm run dev        # geliştirme sunucusu
+npm test           # Vitest — 402 birim testi
+npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
+npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
+npm run test:e2e   # Playwright — derler, sonra 228 E2E testi (file://)
+npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
+npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
+npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
+npm run gorsel     # görsel regresyon — 22 referansa karşı piksel farkı
+npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
+
+### İki derleme hedefi — tek kaynak
+
+```
+vite.config.ts       -> dist/index.html   TEK dosya, file://, çift tıklanır
+vite.site.config.ts  -> dist-site/        aynı tek dosya + manifest + sw.js + simge
+site/                -> manifest.webmanifest · sw.js · icon.svg · icon-192/512.png
+scripts/simge.mjs    -> SVG'den PNG üretir (Chromium ile, yeni bağımlılık yok)
+```
+
+Site **de** tek dosya (`viteSingleFile` korundu): service worker'ın önbelleğe
+alacağı kabuk böylece bir sabit, her derlemeden sonra üretilip senkron tutulması
+gereken bir hash listesi değil.
+
+Manifest bağlantısı, simge ve SW kayıt betiği `index.html`'de **yoktur** —
+yalnız site derlemesinde bir `transformIndexHtml` eklentisiyle eklenir
+(`order: 'post'`, yoksa singlefile onları gömülecek varlık sanır). Ana config'de
+`publicDir: false`: `site/` klasörünün hiçbir dosyası `dist/`'e düşemez.
+Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
+`site.spec.ts` tam olarak bunu ölçer.
 
 ### Test katmanları — hangisi neyi yakalar
 
@@ -81,7 +111,8 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 12 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 13 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
+| **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
 | **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 22 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
 
@@ -497,6 +528,27 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     görünce **reddedip yolu gösterir**. Yeni bir dosya biçimi eklenirse bu üç
     şeyin üçü de gerekir.
 
+31. **Tarayıcının üst/alt bilgisi CSS ile gizlenemez — ama çizecek yer bulamazsa
+    çizilmez.** Sol üstteki tarih ve sol alttaki dosya yolu sayfanın içeriği
+    değil, **kenar boşluğu kutusunun** içeriğidir; `display: none` diye bir
+    çaresi yoktur. Tek yol `@page { margin: 0 }` ve boşluğu `.print-page`'e
+    padding olarak geri koymak. İki yan sonuç: (a) sayfa kutusu artık **sabit
+    yükseklikli** olmalı ki içerik dikey ortalanabilsin, (b) o yükseklik tam
+    210 mm olursa kesirli piksel + `break-after: page` her programın ardına
+    **boş bir sayfa** koyar — 205 mm yazılır. Ortalarken `justify-content:
+    center` değil **`safe center`**: taşma olursa düz `center` içeriği iki
+    uçtan taşırır ve sayfanın üstü kesilir. Bunların hiçbiri Playwright'ın
+    `page.pdf`'inde varsayılan olarak görünmez; kanıt için
+    `displayHeaderFooter: true` ile PDF üretilip **gözle okunur**.
+
+32. **İki derleme hedefi varsa biri diğerine sızar.** `dist/index.html`'in tek
+    iddiası tek dosya ve ağsız olması; site hedefinin manifest'i, service
+    worker'ı ve simgeleri o iddiayı sessizce bozabilir. Üç önlem birden:
+    site'e özel etiketler `index.html`'de **durmaz** (yalnız site config'inin
+    `transformIndexHtml`'i ekler), ana config'de `publicDir: false`, ve
+    `site.spec.ts` `dist/index.html`'de `serviceWorker`/`manifest`/`sw.js`
+    geçmediğini **okuyarak** doğrular. Yeni bir hedef eklenirse üçü de gerekir.
+
 ---
 
 ## Arayüz
@@ -563,6 +615,10 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   00:00'a alırdı.
 - **Yazdırmada hangi sayfaların basılacağı tek tek seçilir.** Sınıf ve öğretmen için
   ayrı onay listeleri, "Tümü / Hiçbiri", ve düğmede sayfa sayısı.
+- **Basılan sayfanın başlığı iki satır**: büyük ve ortalı ana satır
+  (`510 sınıfı — Haftalık ders programı`), altında küçük künye satırı
+  (`Örnek Kurs · G dersliği`). Tek uzun sola yaslı satır kâğıtta başlık değil
+  altyazı gibi okunuyordu. Tarih ve dosya yolu kâğıda **çıkmaz** (tuzak 31).
 - **Eksen tutarlılığı.** Program ızgarasında sütun = gün × ders (babanın alışkanlığı).
   **Müsaitlik ve Yazdır'da satır = gün, sütun = ders** — ikisi de "bir günü okuma"
   ekranı, aSc'nin Time off penceresi de öyle.
@@ -571,6 +627,8 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   değiştiği için o satırın hücresine kalın kenarlık.
 - **Yazdırma A4 YATAY**, `table-layout: fixed`, sütunlar eşit. Sütun başlığındaki saat
   yalnızca bütün günler uyuşuyorsa yazılır — kâğıtta yanlış saat yazmaktansa hiç yazmamak.
+  Kenar boşluğu `@page`'te değil **sayfanın kendisinde** (`.print-page` padding'i);
+  satır 23 mm ve sayfa sabit yükseklikli bir flex kutusu, yani plan dikey ortalanır.
 - **Renk işlevsel, dekoratif değil.** Yeşil = bırakılabilir, sarı = uyarı,
   kırmızı = engel, gri taralı = kapalı, kırmızı çerçeve = kapalı saatte kalmış ders.
   Öğretmen rengi havuzdaki kartla satırı eşleştirmeye yarar.
