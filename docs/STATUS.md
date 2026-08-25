@@ -1,11 +1,12 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (beşinci oturum: **v0.8 ikinci arayüz turu bitti**, `v0.8-arayuz-turu-2` dalında 10 commit)
+Son güncelleme: 2026-08-25 (altıncı oturum: **v0.9 — otomatik dizme, sol kenar çubuğu, sağ tık silme, tam E2E**, `v0.9-otomatik-dizme` dalında 10 commit)
 
 ## Şu anki sürüm hedefi
 
-**v0 + v0.5 + v0.6 + v0.7 + v0.8** — elle dizme + yapılabilirlik kontrolü + okul düzeni
-ve kurallar + iki arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
+**v0 → v0.9** — elle dizme + yapılabilirlik kontrolü + okul düzeni ve kurallar +
+iki arayüz turu + **otomatik dizme**. TASKS'ta v1 olarak duran otomatik doldurma
+bu turda geldi; kullanıcı istedi.
 
 - **v0 çıkma şartı:** babam gerçek verisiyle bir haftalık programı baştan sona dizip
   çıktısını alabiliyor. → *araç çalışıyor ve gerçek tarayıcıda doğrulandı; gerçek
@@ -24,6 +25,11 @@ ve kurallar + iki arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
   saatte kalan ders görünüyor. → **sağlandı** — hepsi gerçek tarayıcıda ölçülüyor
   (36 renk tek tek okunup karşılaştırılıyor, ayraç genişliği ve yazı boyu piksel
   olarak alınıyor). *Yine babanın makinesinde değil, buradaki Chromium'da.*
+- **v0.9 çıkma şartı:** araç haftalık programı kendisi dizebiliyor, dizilmiş bir ders
+  sürüklenerek taşınabiliyor, ve ekranın tamamı kullanılıyor. → **sağlandı** —
+  örnek veride 359 bloğun 359'u 87 ms'de ve **hiç geri sarmadan** yerleşiyor;
+  altı sekmede dikey ve yatay taşma 0 px, ikinci sütunun dolu olduğu ölçülüyor.
+  *Gerçek veri hâlâ yok; ölçümler örnek veriyle.*
 
 ---
 
@@ -68,11 +74,22 @@ ve kurallar + iki arayüz turu. Otomatik doldurma (v1) bu turda da **yok**.
 | **v0.8: ince ayraç, büyük çarpı** | ✅ 4 E2E |
 | **v0.8: kapalı saatte ders işaretleniyor** | ✅ 8 birim + 4 E2E |
 | **v0.8: yazdırmada sayfa seçimi** | ✅ 4 E2E |
+| **v0.9: sol kenar çubuğu, `.main` App'te** | ✅ 13 E2E |
+| **v0.9: her sekmenin sağ sütunu dolu** (`.cols`) | ✅ ölçülüyor |
+| **v0.9: sol tık taşır, sağ tık siler** | ✅ 5 birim + 7 E2E |
+| **v0.9: otomatik dizme (`solver.ts`)** | ✅ 20 birim + 10 E2E |
+| **v0.9: `occupy`/`vacate` eşdeğerliği** | ✅ 7 birim |
+| **v0.9: sebep kodları (`blockerDetail`)** | ✅ 7 birim + 3 birim |
+| **v0.9: Kontrol sekmesi test edildi** | ✅ 12 E2E |
+| **v0.9: geri-al zinciri, hata yolları, boş ekranlar, klavye** | ✅ 28 E2E |
+| **v0.9: görsel regresyon** | ✅ 20 referans (`npm run gorsel`) |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 219 birim + 87 E2E = 306, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 293 KB, sıfır ağ çağrısı.**
+**Testler: 270 birim + 176 E2E = 446, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 323 KB, sıfır ağ çağrısı.
+`npm run kontrol` toplam 51 sn.** Ayrıca 20 görsel referans (`npm run gorsel`,
+`kontrol`'ün parçası değil — gerekçe CLAUDE.md test tablosunda).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -201,19 +218,28 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 
 | Ölçüm | Değer |
 |---|---|
-| Sürükleme başlangıcı (`buildIndex` + 72 `check`) | **0,212 ms** |
-| `dist/index.html` | 293 KB, tek dosya, 0 ağ çağrısı |
-| E2E paketi | 87 test, ~43 sn |
-| Birim paketi | 219 test, ~1,5 sn |
+| **Otomatik dizme** (99 ders, 359 blok, 426 saat) | **359/359 blok · 359 düğüm · 87 ms · hiç geri sarma yok** |
+| Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
+| Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
+| `dist/index.html` | 323 KB, tek dosya, 0 ağ çağrısı |
+| E2E paketi | **176 test, ~45 sn** (4 worker; tek worker'la ~66 sn) |
+| Birim paketi | **270 test, ~2,7 sn** |
+| Görsel referanslar | 20 dosya, 2,4 MB |
+| Ekranda görünen öğretmen satırı | **10** (üst şerit 56 px'e indi) |
+| Müsaitlik tablosu genişliği | 46px sabit hücreden **sütununu dolduran** tabloya |
 | Baskı sayfası | A4 yatay (842×595 pt), 12 eşit sütun (±1px) |
 | Palet | 36 renk, en yakın çift ΔE **17,5**, kontrast ≥ **4,7:1** |
 | Öğle arası ayracı | **6 px** (hücre 34 px) |
 | Kapalı saat "×" | **16 px**, kontrast AA |
 
-Sürükleme başlangıcı asıl önemli sayı: babanın makinesi 20 kat yavaş olsa bile 4 ms.
-`check()` artık `blocker()`'ın üstüne kural hesabı da yapıyor ama sayı yerinde durdu —
-kurallar gün başına en fazla 16 hücre tarıyor. `pointermove` sırasında zaten hiç kısıt
-hesabı yapılmıyor.
+Sürükleme başlangıcı asıl önemli sayı: babanın makinesi 20 kat yavaş olsa bile 6 ms.
+Sayı 0,212'den 0,305'e çıktı ama karşılaştırma yanıltıcı — eski ölçüm **boş** ızgarada
+alınmıştı, bu 426 saati dolu ızgarada. Taşıma (`removeBlock` + yeni `buildIndex`)
+havuzdan sürüklemekten **daha ucuz**: kaynak blok düşülünce sözlük bir hücre eksiliyor.
+
+Otomatik dizme sayısı asıl sürpriz: **359 blok için 359 düğüm**, yani hiç geri sarma
+yok — sezgi ilk denemede doğru hücreyi buluyor. 20 kat yavaş makinede 1,7 saniye.
+Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebebi tuzak 21.
 
 ---
 
@@ -251,6 +277,12 @@ hesabı yapılmıyor.
 | **Babanın işletim sistemi** | **Windows 10** — Tauri v2 destekliyor, yol açık. |
 | **Kod dili** | **Arayüz Türkçe, kod İngilizce.** Geçiş yapıldı (2026-08-24). |
 | **Depolama kimliği** | `localStorage` anahtarı ve yedek dosya adı **Türkçe kalır** — kod değil, veri kimliğidir. |
+| **Sekme yerleşimi** *(v0.9 ✅)* | **Solda dikey kenar çubuğu**, 92px (daraltılınca 52px). Tercih `localStorage`'da, `State`'e girmez. |
+| **Sağ sütun** *(v0.9 ✅)* | Her sekmede `.cols`: solda asıl iş, sağda o ekranın **anlamı**. Sağa konan hiçbir bilgi yeni değil. |
+| **Yerleşmiş derse tıklama** *(v0.9 ✅)* | **Sol tık taşır, sağ tık siler**, Delete klavye eşdeğeri. Sol tık artık silmiyor. |
+| **Otomatik dizme** *(v0.9 ✅)* | **Ana iş parçacığında, dilimli, iptal edilebilir.** Web Worker yok (tuzak 19). Kısıt mantığı `blocker()`'dan; solver kendi kuralını yazmaz. Kısmi sonuç uygulanır, tek geri-al adımı. |
+| **Çözücü ayarları** *(v0.9)* | **Yok ve olmayacak** — iki düğme. Doğru cevap bir dönem kullanılmadan bilinemez (ilke 5). |
+| **Görsel regresyon** *(v0.9 ✅)* | 20 referans, depoda, **ayrı komut**. `kontrol`'e bağlanmaz: sistem fontu makineye göre çözülüyor. |
 | Oturum sonu | Her oturumda TASKS + STATUS güncellenir (CLAUDE.md "Çalışırken"). |
 
 ---
@@ -329,24 +361,127 @@ hesabı yapılmıyor.
 ## Bilinen eksikler
 
 1. **Babanın gerçek verisi elde yok.** v0'ın çıkma şartı bu. Örnek veriyle değil
-   gerçek veriyle test edilmeli.
-2. **Hız babanın bilgisayarında ölçülmedi.** Buradaki ölçümler geliştirme makinesinde.
-3. **Baskı gerçek kâğıda alınmadı.** E2E artık sayfanın A4 **yatay** çıktığını
+   gerçek veriyle test edilmeli. **Otomatik dizme için ayrıca önemli:** `sample.ts`
+   derslikleri kasten %79 doluluğa getiriyor, yani örnek veri babanın gerçek
+   verisinden daha kolay ya da daha zor olabilir — bilinmiyor.
+2. **Görsel referanslar bu makineye ait.** Başka bir bilgisayarda `npm run gorsel`
+   ilk koşuda kırmızı verir; çare tek komut (`--update-snapshots`). Bu yüzden
+   `npm run kontrol`'ün parçası değil.
+3. **Hız babanın bilgisayarında ölçülmedi.** Buradaki ölçümler geliştirme makinesinde.
+4. **Baskı gerçek kâğıda alınmadı.** E2E artık sayfanın A4 **yatay** çıktığını
    (MediaBox 842×595 pt) ve sütunların eşit olduğunu ölçüyor, ama fiziksel çıktıya
    hâlâ bakılmadı. Yatay sayfa yazıcı ayarında da yatay seçilmesini gerektirebilir.
-4. **Koyu tema babanın tarayıcısında (Brave) görülmedi.** Kontrast burada ölçüldü;
+5. **Koyu tema babanın tarayıcısında (Brave) görülmedi.** Kontrast burada ölçüldü;
    asıl iddia "tarayıcı artık kendi karartmasını yapmıyor" ve bu yalnızca onun
    makinesinde kesinleşir.
-5. `.roz` dosyası incelenmedi (aSc'den içe aktarma — düşük öncelik).
-6. **Ayarlar sekmesi 1366×768'de ölçüldü: dikey taşma 0 px**, ekran görüntüsü alındı.
-   Ama uzun bölümlerde (Branşlar, 21 satır) listenin içinde kaydırma gerekiyor;
-   babanın bunu rahat bulup bulmayacağı denenmedi.
+6. `.roz` dosyası incelenmedi (aSc'den içe aktarma — düşük öncelik).
+7. **Otomatik dizmenin ÇIKTI KALİTESİ ölçülmedi.** "Yasal mı" ölçülüyor (her blok
+   `blocker()`'dan geçiriliyor), "iyi mi" ölçülmüyor: sınıf boşlukları (pencere),
+   öğretmenin okulda geçirdiği gün sayısı, günlerin dengesi. Boşluk kuralları zaten
+   yok (v2'nin işi). Babanın "bu programı kullanır mıydın" cevabı gerekiyor.
+8. **Çözücü zor bir veride ne yapar bilinmiyor.** Örnek veride hiç geri sarma
+   olmadı — yani backtracking kodu gerçek anlamda **hiç çalışmadı**. Sıkışık bir
+   gerçek veri onu ilk kez çalıştıracak.
 
 ---
 
 ## Bilinen hatalar
 
 Bilinen açık hata yok.
+
+---
+
+## v0.9 — bu oturumda ne yapıldı ve neden
+
+Kullanıcının [TASKS.md](TASKS.md) sonuna yazdığı dört madde:
+
+1. **"UI düzenlenmesi ve modernleştirilmesi lazım. Her sectionda sağ taraf bomboş."**
+   Ölçülen sebep: `styles.css`'te container yoktu, genişliği sınırlayan tek şey
+   `table.list.narrow/mid/wide` (520/640/720px, hepsi Ayarlar'da) ile Müsaitlik
+   tablosunun 46px **sabit** hücreleriydi — 13 sütun × 46px ≈ 620px, 1366px ekranda
+   sağda ~740px boşluk. Kurulum'da tersi kusur vardı: tablo tam genişlik ama içindeki
+   `<input>` tarayıcı varsayılanı (~170px).
+   *Yapılan:* sekmeler sol kenar çubuğuna alındı, üçü de silindi, tek düzen kuralı
+   (`.cols`) geldi ve sağ sütuna **zaten var olan ama bir sekme ötede duran** bilgi
+   kondu.
+2. **"Otomatik kurulum önemli."** → Kullanıcıya soruldu, cevap: **programı otomatik
+   dizme**. TASKS'ta v1 olarak duruyordu.
+3. **"Programda üzerine tıklanınca silinmesin, sürüklenerek taşınabilsin. Sağ tık
+   silsin."**
+4. **"E2E her şeyi test edecek şekilde yapalım."** → Kullanıcıya soruldu, cevap:
+   **tam kapsam + görsel regresyon**.
+
+### Yol boyunca bulunan gerçek hatalar
+
+Üçü de yalnız ölçerek ya da test yazarak bulunabilirdi:
+
+1. **Otomatik dizmenin sonucu sessizce atılıyordu.** `change((d) => d === base.current
+   ? sonuç : d)` yazılmıştı; React reducer geri çağırımını fonksiyon döndükten SONRA
+   çalıştırıyor ve o anda `base.current` çoktan `null`'a çekilmiş oluyordu. Çubukta
+   "Program dizildi" yazıyor, ızgara boş kalıyordu. → **tuzak 20**
+2. **Çözücü simetri kırması yüzünden neredeyse hiçbir şey dizemiyordu.** "Aynı dersin
+   blokları artan hücre indisinde" kısıtlaması, "haftaya yay" sezgisiyle çatışıyordu.
+   Ölçülen: **57718 düğümde 26 blok** → kaldırılınca **359 düğümde 359 blok**.
+   → **tuzak 21**
+3. **"En sık sebep" yanlış sebebi seçiyordu.** Mesajlar gün ve saat adı taşıdığı için
+   altmış farklı "sınıfın X saatinde Y var" satırı altmış ayrı sebep sayılıyor, altı
+   kez tekrarlanan önemsiz bir cümle kazanıyordu: hafta boyu kapalı bir öğretmen için
+   "2 saatlik blok güne sığmıyor". `blockerDetail()` artık bir **kod** döndürüyor.
+   → **tuzak 22**
+
+Ayrıca test yazarken çıkanlar: `no-overflow` sınıfı Program'ın boş ekranını
+kırpabiliyordu; renk ve derslik açılır listelerinin erişilebilir adı yoktu.
+
+### Web Worker neden kullanılmadı
+
+TASKS.md "Web Worker" diyordu. İki bağımsız sebeple bırakıldı: Vite worker'ı **ayrı
+bir chunk** olarak üretir ve `vite-plugin-singlefile` onu gömmez (tek dosya iddiası
+düşer); kalan `blob:` yolu `file://`'in opaque origin'inden çalışır ve Chromium'da
+güvenilmez, üstelik kaynak string olacağı için `tsc` hiç görmez. Yerine ana iş
+parçacığında `requestAnimationFrame` ile dilimli arama. → **tuzak 19**
+
+### Bilerek yapılmayanlar
+
+- **Çözücüye ayar konmadı.** İki düğme var, kutucuk yok. "Sabaha yay", "günleri
+  dengele" gibi tercihlerin doğru cevabı bir dönem kullanılmadan bilinemez (ilke 5).
+- **Görsel regresyon `npm run kontrol`'e konmadı.** Sistem fontu burada Cantarell'e,
+  babanın Windows'unda Segoe UI'ye çözülüyor; referans tek makine için doğru. Her
+  commit'in geçtiği kapıya bağlamak, font değişimini arkasında hata olmayan kırmızı
+  bir derlemeye çevirirdi. Ayrı komut, referanslar depoda.
+- **`ekran.spec.ts` silinmedi.** Görsel regresyon onun yerine geçmez: biri geçti/kaldı
+  der, öbürü bakılabilir bir resim verir. İkisi **aynı** `SCENES` listesini yürüyor.
+
+---
+
+## Oturum sonu durumu (2026-08-25, altıncı oturum)
+
+Dal: **`v0.9-otomatik-dizme`** (`v0.8-arayuz-turu-2` üstünden; o da, `v0.7-arayuz-turu`
+de `main`'e birleşmedi — üçü de bekliyor). 10 commit, her biri `npm run kontrol`
+yeşilken.
+
+`npm run kontrol` yeşil: tsc temiz, **270 birim + 176 E2E** geçiyor, `dist/index.html`
+323 KB üretiliyor, toplam 51 sn.
+
+| Eklenen | Nerede |
+|---|---|
+| Otomatik dizme motoru | **yeni** `solver.ts` + `solver.test.ts` |
+| rAF sürücüsü (App'te yaşar) | **yeni** `useSolver.ts` · `App.tsx` |
+| Yerinde yerleştirme, sebep kodları | `constraints.ts` (`occupy`/`vacate`, `blockerDetail`) |
+| Ortak sebep cümlesi, ucuz kapasite | `feasibility.ts` (`commonestBlock`, `buildCapacity`, `lessonName`) |
+| Sol kenar çubuğu, `.main`'in taşınması | `App.tsx` · `styles.css` · altı bileşen |
+| Kenar çubuğu tercihi | `theme.ts` (`readSidebar`/`writeSidebar`) |
+| İki sütunlu düzen, sağ paneller | `styles.css` (`.cols`, `.panel-grid`, `.entity-list`) · beş sekme |
+| Kurulum özet paneli | **yeni** `components/setup/Summary.tsx` |
+| Açık saat sayımı | `entities.ts` → `openHours` |
+| Sürükleyerek taşıma, sağ tık silme | `drag.ts` · `Grid.tsx` · `Program.tsx` |
+| E2E bölünmesi + ortak yardımcılar | **yeni** `e2e/helpers.ts` + 11 spec dosyası |
+| Görsel regresyon | **yeni** `e2e/gorsel.spec.ts` · `playwright.gorsel.config.ts` · `e2e/__gorsel__/` |
+
+### Sıradaki iş değişmedi
+
+**Gerçek veri.** v0'ın çıkma şartı hâlâ tek bir şeye bağlı. Üstelik artık iki yeni
+sorunun cevabı da ona bağlı: otomatik dizilen program *kullanılabilir* mi, ve çözücü
+sıkışık bir veride ne yapıyor (örnek veride backtracking kodu hiç çalışmadı).
 
 ---
 
@@ -463,8 +598,15 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 177 birim + derleme + 51 E2E
+npm run kontrol                   # tsc + 270 birim + derleme + 176 E2E (~51 sn)
 npm run dev                       # geliştirme sunucusu
+```
+
+**Görsel regresyon ayrı**: `npm run gorsel`. İlk koşuda büyük ihtimalle kırmızı verir,
+çünkü referanslar bir başka makinenin fontuyla alındı. Bir kez yenile:
+
+```bash
+npx playwright test --config playwright.gorsel.config.ts --update-snapshots
 ```
 
 `npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra

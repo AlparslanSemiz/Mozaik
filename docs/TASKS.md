@@ -12,8 +12,9 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 219 birim + 87 E2E testi yeşil, iki arayüz turu (v0.7 ve v0.8) bitti. Elde
-veri olmadan yazılacak her yeni özellik tahmin olur (ilke 5).
+hazır — 270 birim + 176 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
+program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
+tahmin olur (ilke 5).
 
 - [ ] Gerçek öğretmen/sınıf/derslik/ders listesi alınsın (Excel'e yazdırıp yapıştırma
       kutusuna yapıştırmak en hızlısı)
@@ -34,6 +35,15 @@ veri olmadan yazılacak her yeni özellik tahmin olur (ilke 5).
       düzenlenebiliyor)
 - [ ] **36 rengi gözle sor**: dizerken iki satırı karıştırdığın oldu mu? ΔE eşiği
       sayıyı garanti eder, gözü değil
+- [ ] **Otomatik dizmenin çıktısı KULLANILIR mı, sorulacak.** Yasal olduğu ölçülüyor
+      (her blok `blocker()`'dan geçiyor); *iyi* olduğu ölçülmüyor. Sorular: sınıfın
+      günü içinde boşluk (pencere) kalıyor mu, öğretmen okula gereksiz gün geliyor mu,
+      günler dengeli mi. Cevaba göre v2 (kalite) şekillenir
+- [ ] **Sıkışık gerçek veride çözücü ne yapıyor?** Örnek veride **hiç geri sarma
+      olmadı** — yani backtracking kodu gerçek anlamda hiç çalışmadı. İlk kez gerçek
+      veriyle çalışacak; süre ve "yerleşemedi" listesi not edilsin
+- [ ] **Kenar çubuğu dar mı geniş mi kullanılıyor?** 92px varsayılan; babanın
+      daraltıp daraltmadığı, ızgarada 92px'in eksikliğinin hissedilip hissedilmediği
 
 ### 2. Tauri ile `.exe`
 
@@ -276,15 +286,73 @@ kullanıcı "kaldırma, kırmızı işaretle" dedi; kararı baba veriyor (2026-0
 
 ---
 
+### 15. v0.9 — otomatik dizme, sol kenar çubuğu, sağ tık, tam E2E ✅ — 2026-08-25
+
+Kullanıcının TASKS sonuna yazdığı dört madde. Dal: `v0.9-otomatik-dizme`,
+madde başına bir commit, her commit `npm run kontrol` yeşilken.
+
+- [x] **3a E2E tek dosyadan yedi dosyaya.** `e2e/app.spec.ts` 2151 satırdı; ortak
+      yardımcılar `e2e/helpers.ts`'e, testler konularına dağıldı. Tek test silinmedi.
+      `fullyParallel` + `workers: 4` — `file://` altında context başına ayrı
+      `localStorage` olduğu **ölçüldü**: 66 sn → 16 sn
+- [x] **3b Sekmeler üstten sola.** 92px kenar çubuğu (daraltılınca 52px), tercih
+      `localStorage['ders-programi-kenar']`'da. Gerekçe ölçüye dayanıyor: yatay şerit
+      768px'lik ekranda ızgaradan bir öğretmen satırı götürüyordu. `.main`
+      sarmalayıcısı altı bileşenden `App`'e alındı; `.topbar-note` satır içi oldu ve
+      "Program'da gizle" özel durumu kalktı
+- [x] **3c Her sekmenin sağ tarafı dolduruldu.** `.list.narrow/mid/wide` (520/640/720px)
+      silindi, Müsaitlik hücresi 46px **sabit**ken **minimum** oldu. Tek düzen kuralı
+      `.cols`. Sağa konan hiçbir bilgi yeni değil: Kurulum'da kapasite özeti (yeni
+      `Summary.tsx`, `buildCapacity` ile — `buildReport`'un pahalı yarısı her tuş
+      vuruşunda çalışamaz, tuzak 3), Ayarlar → Okul'da zil önizlemesi, Kurallar'da
+      canlı ihlal listesi, Müsaitlik'te 25 öğretmeni birden gösteren liste,
+      Yazdır'da sayfa seçimi. Kontrol'de akan kart ızgarası (`.panel-grid`)
+- [x] **3d Basılı düğmenin iki çelişen tanımı** birleşti (özgüllük hatası:
+      `:hover:not(:disabled)` (0,3,0), `[aria-pressed]` (0,2,0)'ı yeniyordu).
+      `Field` `wide` prop'u aldı
+- [x] **3e Sol tık taşır, sağ tık siler**, Delete klavye eşdeğeri. İki tuzak kapatıldı:
+      ders kendini engelliyordu (harita artık kaynağı kaldırılmış durum üstünde) ve
+      ızgaradan kart alınınca ızgara zıplıyordu (`scrollIntoView` yalnız havuz için)
+- [x] **3f `src/solver.ts`** — MRV + forward checking + iz tabanlı geri sarma, ana iş
+      parçacığında dilimli. Kısıt mantığı **yeniden yazılmadı**: her soru `blocker()`'a
+      gidiyor. `constraints.ts`'e `occupy`/`vacate` eklendi (7 eşdeğerlik testi).
+      **Ölçülen: 359/359 blok, 359 düğüm, 87 ms, hiç geri sarma yok**
+- [x] **3g Arayüz**: iki düğme, `.reason-bar`'da ilerleme ve sonuç, tek geri-al adımı.
+      Koşu `App`'te yaşıyor (tuzak 18). Sonucun sessizce atıldığı gerçek hata
+      bulundu ve düzeltildi (tuzak 20)
+- [x] **3h Kapsam boşlukları**: 87 → **176 E2E**. Yeni `duzen.spec.ts`,
+      `kontrol.spec.ts`, `bos-ekran.spec.ts`, `otomatik.spec.ts`; Kurulum'un düzenleme
+      yolları, Ayarlar'ın her alanı (ortadan gün çıkarma dahil — tuzak 11'in ilk
+      tarayıcı kanıtı), geri-al zinciri, hata yolları, kayıt uyarısının GÖRÜNMESİ,
+      klavye gezinme
+- [x] **3i Görsel regresyon**: 20 referans, `ekran.spec.ts` ile **aynı** `SCENES`
+      listesi. Ayrı komut (`npm run gorsel`), `kontrol`'e bağlı değil — gerekçe
+      sistem fontu. Testin kendisi test edildi: 92px → 120px, 20'den 18'i kırmızı
+- [x] **3j Belgeler**: `CLAUDE.md` (tuzak 19–22, kenar çubuğu, `solver.ts`, test
+      tablosuna beşinci satır), `docs/STATUS.md`, `docs/TASKS.md`
+
+**Yapılmadı, bilerek:**
+- **Çözücüye ayar konmadı** — iki düğme, kutucuk yok. "Sabaha yay", "günleri dengele"
+  gibi tercihlerin doğru cevabı bir dönem kullanılmadan bilinemez (ilke 5)
+- **Web Worker kullanılmadı** — tek dosya + `file://` ile çalışmıyor (tuzak 19)
+- **Görsel regresyon `kontrol`'e konmadı** — referans tek makine için doğru
+- **Simetri kırma kaldırıldı** — teoride doğru, ölçüldüğünde felaket (tuzak 21)
+
+---
+
 ## Sonraki sürümler — şimdi YAPILMAYACAK
 
 v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönütü**.
 
 - **Boşluk (pencere) kuralları** — sınıf ve öğretmen için ayrı ayrı,
   Kapalı / Uyar / Engelle. v0.6'da bilerek yapılmadı (istenen o değildi)
-- **v1 Otomatik doldurma** — MRV + forward checking backtracking, Web Worker,
-  500 ms sonra pes et, tıkandığı dersi söyle
-- **v2 Kalite** — yumuşak kısıtlar, hill-climbing ikili takas
+- ~~**v1 Otomatik doldurma**~~ → **v0.9'da yapıldı** (BİTENLER 15). Plandan iki
+  sapma: **Web Worker kullanılmadı** (tuzak 19) ve bütçe 500 ms değil, ilerlemesi
+  görünen ve durdurulabilen 15 sn — çünkü UI donmuyor ve kullanıcı her an durdurabiliyor
+- **v2 Kalite** — yumuşak kısıtlar, hill-climbing ikili takas. **Artık somut bir
+  başlangıcı var**: v0.9'un çözücüsü yasal bir program üretiyor ama kalitesi
+  ölçülmedi (boşluk, öğretmenin geldiği gün sayısı, gün dengesi). Önce babanın
+  "bunu kullanır mıydın" cevabı
 - **v3 Dönem içi değişiklik** — "bu hafta MÇ yok" → etkilenenleri işaretle,
   alternatif öner
 - ~~koyu tema olsun~~ → **v0.7'de yapıldı** (BİTENLER 13)
@@ -293,10 +361,4 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
   (`store.ts`), yani "kaydedilmemiş" durum pratikte oluşmuyor. Yine de babanın
   içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*
 
-
-  UI düzenlenmesi ve modernleştirilmesi lazım. her sectionda sağ taraf bomboş düzgün bir UI yapılmalı.Yani tam ekran kullanılsın en verimli şekilde.
-
-  Otomatik kurulum önemli.
-
-Programda üzerine tıklanınca silinmesin yine hareket ettirilebilsin sürükleyerek. Sağ tık silsin yani aşağı atsın.
 

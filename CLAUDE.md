@@ -57,11 +57,12 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 219 birim testi
+npm test          # Vitest — 270 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 87 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 176 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
+npm run gorsel    # görsel regresyon — 20 referansa karşı piksel farkı
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
@@ -70,15 +71,20 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, **palet ayrımı, branş listesi, kapalı saat çakışması** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/app.spec.ts` (Playwright) | **Düzen, sürükleme, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu** |
-| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada beş ekran görüntüsü |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 11 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye** |
+| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on ekran görüntüsü |
+| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 20 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
 
 E2E, `dist/index.html`'i `file://` üzerinden 1366×768'de açar — yani **babanın çift
 tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,
 ekran dışı hedef ve yazdırma taşması **yalnızca burada** görünür. Nitekim tuzak 11 ve
 12 (bkz. PLAN.md) bu testlerle bulundu, başka türlü bulunamazdı.
+
+`fullyParallel: true, workers: 4`. Doğrulanmış varsayım: `file://` altında her
+Playwright context'inin kendi `localStorage`'ı var — 176 test paralel koşarken
+birbirinin verisini görmüyor (ölçülen: 66 sn → 45 sn).
 
 **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini gerçek
 `getComputedStyle` ile okuyup WCAG kontrast oranını ve **CIE Lab ΔE** farkını hesaplar.
@@ -123,15 +129,17 @@ palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import 
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
 rules.ts / bell.ts              Testleri zorunlu.
 import.ts / entities.ts
+solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
   |
 store.ts                        reducer + geri al yığını + localStorage + göç
-theme.ts                        tema tercihi (State'e girmez, ayrı anahtar)
+theme.ts                        makine tercihleri (tema, kenar çubuğu) — State'e girmez
+useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
   |
 components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
 components/Field.tsx            iki klasörün de kullandığı küçük parçalar
 components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
-components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste
+components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste + Summary
 components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar · Veri
 ```
 
@@ -143,11 +151,18 @@ derlemede silinir) — çalışma zamanında döngü yok. Anahtar üreten fonksi
 aynı desen, çalışma zamanında döngü yok. `import.ts` ise `makeShort`'u `entities.ts`'ten
 alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
 
+`solver.ts` kısıt mantığının **hiçbirini** yeniden yazmaz: her yasallık sorusu
+`blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine. Bir kural
+sürüklerken başka, otomatik dizerken başka anlama gelemez. Aramanın karşılayamadığı
+tek şey `place()`'in her çağrıda sözlüğü kopyalaması; onun için `constraints.ts`'te
+`occupy`/`vacate` var — `place()` + `buildIndex()` ikilisinin yerinde çalışan hâli.
+İkisinin sapmaması `constraints.test.ts`'te yedi testle sabitlenir.
+
 **Kural:** iş mantığı bileşenlerin içine yazılmaz. Bir `.tsx` dosyasında çakışma
 hesabı görüyorsan yanlış yerdedir — `constraints.ts`'e taşı.
 
 **Kural:** `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
+`palette.ts`, `solver.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
 özellik eklenmez. `store.ts` içindeki `parseState` ve `entities.ts` içindeki
 `remapDays` de test edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi
 değişince programın kaymasını engelleyen tek şeydir.
@@ -264,6 +279,12 @@ sekmesinde çıkar.
 üstüne "Uyar" seviyesindekileri `warning` olarak ekler. İkisi de **aynı**
 `limitBreaches()` fonksiyonunu kullanır, mesajlar ayrışamaz.
 
+`blocker()` aslında `blockerDetail()` üstünde ince bir sarmalayıcı: asıl fonksiyon
+mesajın yanında bir **kod** da döndürür (`teacherClosed`, `classBusy`, `roomBusy`…).
+Sebepleri sayan her yer (Kontrol'ün "yerleşemeyen dersler"i, çözücünün tıkanma
+cümlesi) koda göre gruplar — mesaj gün ve saat adı taşıdığı için cümle saymak yanlış
+cevabı veriyordu (tuzak 22).
+
 Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 
 ---
@@ -319,13 +340,48 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 18. **Bileşen sekme değişince sökülür.** `useState` içindeki her şey gider. Baskı sayfa
     seçimi bu yüzden `App`'te duruyor: Kurulum'a gidip dönmek listeyi siliyordu. Aynı
     şekilde seçimi "seçilenler" olarak tutmak yanlıştır — **dışarıda bırakılanlar**
-    tutulur, yoksa sonradan eklenen sınıf sessizce basılmaz.
+    tutulur, yoksa sonradan eklenen sınıf sessizce basılmaz. **Otomatik dizme koşusu da
+    aynı sebeple `App`'te** (`useSolver`): Kontrol'e bir göz atmak aramayı öldürürdü.
+19. **Web Worker bu projede çalışmaz.** İki bağımsız sebep: Vite worker'ı **ayrı bir
+    chunk** olarak üretir ve `vite-plugin-singlefile` onu gömmez — "tek dosya" iddiası
+    düşer; kalan yol olan `blob:` worker'ı ise `file://`'in opaque origin'inden çalışır
+    ve Chromium'da güvenilmez, üstelik kaynak string olacağı için `tsc` onu hiç görmez.
+    Çözücü bu yüzden ana iş parçacığında, `requestAnimationFrame` ile **dilim dilim**
+    çalışır. `setTimeout(0)` değil: iç içe beş çağrıdan sonra 4 ms'e kelepçelenir ve
+    boyama garantisi vermez, yani ilerleme satırı görünmez.
+20. **React reducer geri çağırımını GEÇ çalıştırır.** `change((d) => ...)` içine bir
+    `ref` okuması koyup fonksiyondan sonra o `ref`'i temizlersen, geri çağırım
+    çalıştığında `null` bulur ve **bütün iş sessizce atılır**. Otomatik dizmenin sonucu
+    tam olarak böyle kayboldu. Referansı önce yerel bir değişkene al.
+21. **Arama uzayını daraltan kısıtlama, değer sezgisini bozuyorsa kaybettirir.**
+    Çözücüde "aynı dersin blokları artan hücre indisinde" simetri kırması vardı;
+    "haftaya yay" sezgisi geç bir hücre seçince dersin kalan blokları oradan sonrasına
+    hapsoluyordu. Ölçülen fark: **57718 düğümde 26 blok** ile **359 düğümde 359 blok**.
+    Kaldırıldı. Teoride doğru olan, ölçülmeden konmaz.
+22. **Sebep cümleleri gün ve saat adı taşır, o yüzden CÜMLE sayılmaz.** "En sık sebep"
+    hesabı altmış farklı "sınıfın X saatinde Y var" satırını altmış ayrı sebep sayıyor,
+    altı kez tekrarlanan daha önemsiz bir cümle kazanıyordu — hafta boyu kapalı bir
+    öğretmen için "2 saatlik blok güne sığmıyor" yazdı. `blockerDetail()` bir **kod**
+    döndürür (`teacherClosed`, `classBusy`, …); sayım koda göre yapılır.
 
 ---
 
 ## Arayüz
 
 Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**. Daha fazlası yok.
+
+- **Sekmeler solda, dikey bir kenar çubuğunda** (92px; daraltılınca 52px, tercih
+  `localStorage['ders-programi-kenar']`'da). Yatay bir şerit 768px'lik ekranda ızgaradan
+  bir öğretmen satırı götürüyordu; yatayda ızgara zaten taşıyor ve kayıyor, yani 92px
+  zaten kaydırılan bir yerden gidiyor. Daraltılmışken etiket gizlenir ama `aria-label`
+  kalır — erişilebilir ad kaybolmaz.
+- **İçerik ekranın tamamını kullanır.** Tek düzen kuralı `.cols` (+ `wide-left`,
+  `narrow-right`): solda asıl iş, sağda o ekranın **anlamı** — Kurulum'da kapasite
+  özeti, Ayarlar → Okul'da zil önizlemesi, Ayarlar → Kurallar'da canlı ihlal listesi,
+  Müsaitlik'te varlık listesi, Yazdır'da sayfa seçimi. Sağa konan hiçbir şey yeni
+  değil; hepsi ya bir sekme öteden ya tablonun üstünden geldi. Kontrol'de sabit iki
+  sütun değil **akan kart ızgarası** (`.panel-grid`) — sorun yokken sol sütun boş
+  kalmasın.
 
 - **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum dört sayılabilir adım:
   `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
@@ -335,6 +391,17 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   bir yanlış tıklama uzaklıktaydı ve geri alınamıyor. `Dosyaya kaydet` / `Dosyadan aç`
   üst çubukta **kalır**: tuzak 7'nin karşı önlemi görünür olmak zorunda.
 
+- **Sol tık taşır, sağ tık siler.** Yerleşmiş bir derse sol tıklamak bloğu siliyordu,
+  dolayısıyla taşımanın tek yolu silip havuzdan yeniden sürüklemekti. Şimdi: sol düğme
+  + sürükle = taşı, sağ tık = havuza gönder, Delete = aynısı klavyeden. Klavyeden gelen
+  "click" `e.detail === 0` ile ayrılır, böylece odaklı kartta Enter/Space çalışır.
+  Sürükleme haritası **kaynağı kaldırılmış** bir durum üstünde hesaplanır, yoksa ders
+  kendi kendini engeller.
+- **Otomatik dizme Program sekmesinde iki düğme**: `Otomatik diz (N)` ve `Baştan diz`
+  (onaylı). Ayar yok — "sabaha yay" gibi tercihlerin doğru cevabı bir dönem
+  kullanılmadan bilinemez (ilke 5). İlerleme ve sonuç `.reason-bar`'da: sabit
+  yükseklikli, ızgarayı kaydırmıyor, göz zaten oraya alışkın. İlerleme **düz metin**,
+  çubuk değil (yasak liste: animasyon). Bütün koşu **tek geri-al adımı**.
 - Ana ekran aSc'deki gibi: **satır = öğretmen, sütun = 6 gün x 12 saat**, tek geniş
   tablo, altta yerleşmemiş kart havuzu. Saat başlığında ders numarası ve altında
   başlangıç saati (`3` / `10:40`).
