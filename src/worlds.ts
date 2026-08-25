@@ -595,6 +595,58 @@ function kuralBaskisi(): State {
  * 957k nodes in 5 s for 16 of 24 blocks — and still hands back a legal grid and
  * a sentence. Heavy on purpose; it is a measurement, not a pass/fail.
  */
+/**
+ * A lesson that asks for more than the week can ever hold, sitting next to
+ * lessons that CAN be finished.
+ *
+ * "Aynı ders günde en fazla 1 saat" at Engelle over three days means no lesson
+ * here can hold more than 3 hours; x1 asks for 6. The point of the world is not
+ * x1 — it is x2 and x3, which must come out complete anyway. Before the ceiling
+ * was worked out up front, MRV kept re-choosing x1 (its domain is the smallest),
+ * filled the three days it is allowed, found nothing for the rest and killed the
+ * branch — for every cell of every lesson above it.
+ */
+function imkansizDersYaninda(): State {
+  return makeWorld({
+    days: 3,
+    hours: 4,
+    classes: [
+      { id: 's510', name: '510', roomId: 'dA' },
+      { id: 's511', name: '511', roomId: null },
+    ],
+    teachers: [
+      { id: 'oMC', short: 'MÇ' },
+      { id: 'oAV', short: 'AV' },
+    ],
+    lessons: [
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6 },
+      { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 3 },
+      { id: 'x3', classId: 's511', teacherId: 'oMC', weeklyHours: 3 },
+    ],
+    limits: { maxSameLessonPerDay: 1 },
+    rules: { maxSameLessonPerDay: 'block' },
+  });
+}
+
+/**
+ * A 2-hour block against "aynı ders günde en fazla 1 saat": the block breaches
+ * the rule wherever it lands, so not one cell of the week is legal and the
+ * lesson is hopeless before the search takes its first step. Its neighbour is
+ * laid out all the same.
+ */
+function blokKuralaSigmiyor(): State {
+  return makeWorld({
+    days: 2,
+    hours: 4,
+    lessons: [
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 2 },
+      { id: 'x2', classId: 's510', teacherId: 'oMC', weeklyHours: 2 },
+    ],
+    limits: { maxSameLessonPerDay: 1 },
+    rules: { maxSameLessonPerDay: 'block' },
+  });
+}
+
 function parcalanmisGunler(): State {
   let d = makeWorld({
     days: 4,
@@ -791,6 +843,19 @@ export const WORLDS: SolverWorld[] = [
   },
 
   {
+    name: 'imkansiz-ders-yaninda',
+    note: 'Bir ders haftanın tutabileceğinden fazlasını istiyor; komşuları yine tam dizilmeli.',
+    state: imkansizDersYaninda(),
+    want: { solved: false, reasonLike: /en fazla 3 saat veriyor/ },
+  },
+  {
+    name: 'blok-kurala-sigmiyor',
+    note: '2 saatlik blok "aynı ders günde 1 saat" kuralına hiçbir hücrede sığmıyor.',
+    state: blokKuralaSigmiyor(),
+    want: { solved: false, reasonLike: /en fazla 1 saat/ },
+  },
+
+  {
     name: 'gercek-olcek-sikisik',
     note: 'Örnek okul, her sınıf odasının ayırabildiğinin %95’ine yüklenmiş.',
     heavy: true,
@@ -820,7 +885,9 @@ export const WORLDS: SolverWorld[] = [
     note: 'Odaların ayırabileceğinin çok üstünde yük: bütçe dolar, cümle okunur kalır.',
     heavy: true,
     state: realScale(1.6, 60),
-    want: { solved: false },
+    // The sentence a lesson gets when the week simply cannot hold it: the
+    // ceiling, not "the class is busy" — there is nothing to move out of the way.
+    want: { solved: false, reasonLike: /en fazla \d+ saat veriyor/ },
   },
 ];
 

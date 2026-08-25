@@ -208,6 +208,47 @@ describe('solve — tıkanma', () => {
     const x3 = Object.keys(result.state.placements).filter((k) => result.state.placements[k] === 'x3');
     expect(x3).toHaveLength(2);
     expect(result.stuck.find((x) => x.lessonId === 'x3')?.missing).toBe(1);
+    // Something is missing, so nothing is solved (docs/STATUS.md, bilinen hata 3).
+    expect(result.phase).toBe('stuck');
+  });
+});
+
+/**
+ * The collapse of 2026-08-25, as a test.
+ *
+ * A lesson that wants more hours than the week can hold used to cost the whole
+ * timetable: MRV chose it (smallest domain), it filled every day it was allowed,
+ * forward checking found nothing for the blocks still owed, and the branch died
+ * — over and over, for every cell of every lesson above it. Measured on the
+ * sample school with three limits at Engelle: 3 blocks of 359 placed, 33 842
+ * nodes, the entire 15-second budget gone.
+ */
+describe('solve — haftanın tutabileceğinden fazlasını isteyen ders', () => {
+  const world = SMALL_WORLDS.find((w) => w.name === 'imkansiz-ders-yaninda')!.state;
+
+  it('komşu dersleri tam yerleştiriyor', () => {
+    const result = solve(world, { budgetMs: 4_000 });
+    // x1 asks 6 hours of a week that can hold 3 of them; x2 and x3 are ordinary.
+    expect(hoursOf(result.state, 'x2')).toBe(3);
+    expect(hoursOf(result.state, 'x3')).toBe(3);
+    expect(hoursOf(result.state, 'x1')).toBe(3);
+  });
+
+  it('aramayı boğmuyor: düğüm sayısı blok sayısı kadar', () => {
+    const result = solve(world, { budgetMs: 4_000 });
+    // One node per block is what a run with no backtracking costs. The bug's
+    // signature was the opposite: thousands of nodes, almost no blocks.
+    expect(result.nodes).toBeLessThanOrEqual(result.totalBlocks + 2);
+    expect(result.elapsedMs).toBeLessThan(1_000);
+  });
+
+  it('sebep olarak tavanı söylüyor, "sınıf dolu" demiyor', () => {
+    const result = solve(world, { budgetMs: 4_000 });
+    const stuck = result.stuck.find((x) => x.lessonId === 'x1')!;
+    expect(stuck.missing).toBe(3);
+    expect(stuck.reason).toBe(
+      'haftada 6 saat isteniyor, açık saatler ve kurallar en fazla 3 saat veriyor',
+    );
   });
 });
 
@@ -381,6 +422,8 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
       }
       // What did fit is still a timetable somebody can use.
       expect(blocksOf(first.state).length).toBe(first.placedBlocks);
+      // Nothing is 'solved' while something is missing.
+      expect(first.phase).toBe('stuck');
     });
   }
 

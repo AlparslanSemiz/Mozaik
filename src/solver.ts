@@ -33,6 +33,13 @@ export interface SolverOptions {
 
 const DEFAULTS: SolverOptions = { keepPlaced: true, budgetMs: 15_000 };
 
+/**
+ * How many nodes may pass without the grid getting any better before the search
+ * gives up on one lesson (see `sinceGain`). A node count, not a stopwatch: the
+ * same input has to produce the same timetable on any machine.
+ */
+const STALL_LIMIT = 20_000;
+
 export type SolverPhase = 'solved' | 'stuck' | 'cancelled';
 
 export interface StuckLesson {
@@ -41,7 +48,12 @@ export interface StuckLesson {
   name: string;
   /** Hours still unplaced. */
   missing: number;
-  /** blocker()'s own sentence, the commonest one. */
+  /**
+   * Why. Normally blocker()'s own commonest sentence; for a lesson that asks
+   * for more hours than the week can hold, the ceiling itself — "the class is
+   * busy" would send the reader hunting for something to move, and there is
+   * nothing to move.
+   */
   reason: string;
 }
 
@@ -77,10 +89,14 @@ export interface Solver {
 interface Item {
   lesson: Lesson;
   roomId: Id | null;
-  /** Blocks still to place. */
+  /** Blocks still to place — never more than the week can hold. */
   need: number;
+  /** Blocks the lesson actually asked for, before that ceiling. */
+  askedBlocks: number;
   /** Blocks placed by THIS run. */
   done: number;
+  /** Hours this lesson already had on the starting grid. */
+  placedAtStart: number;
   /** cell -> 1 while the cell is still a candidate. */
   domain: Uint8Array;
   size: number;
@@ -149,7 +165,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // the dictionary object, so blocker() sees every assignment immediately.
   const placements: Record<string, Id> = opts.keepPlaced ? { ...base.placements } : {};
   const work: State = { ...base, placements };
-  const ix: Index = buildIndex(work);
+  let ix: Index = buildIndex(work);
 
   const wideWindow = rulesBite(base);
   const preferNoWarning = warningsPossible(base);
@@ -165,7 +181,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       lesson,
       roomId: ix.classById.get(lesson.classId)?.roomId ?? null,
       need,
+      askedBlocks: need,
       done: 0,
+      placedAtStart: already,
       domain: new Uint8Array(cellCount),
       size: 0,
       neighbours: [],
@@ -193,8 +211,10 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   const maxBlock = items.reduce((m, x) => Math.max(m, Math.max(1, x.lesson.blockSize)), 1);
 
-  // ---- initial domains -----------------------------------------------------
-  for (const item of items) {
+  /** (Re)computes one item's candidate cells against the grid as it stands. */
+  function fillDomain(item: Item): void {
+    item.domain.fill(0);
+    item.size = 0;
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
@@ -205,12 +225,72 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     }
   }
 
+  /**
+   * The most blocks this lesson could EVER place with the week to itself.
+   *
+   * Its own cells, packed greedily day by day, and then capped by "aynı ders
+   * günde en fazla N saat" where that rule blocks. Asking for more than this is
+   * not a hard search, it is an impossible one: no assignment anywhere else can
+   * raise the number.
+   */
+  function ceilingBlocks(item: Item): number {
+    const block = Math.max(1, item.lesson.blockSize);
+    const limit = lessonLimit(base, item.lesson);
+    const perDay =
+      ruleLevel(base, 'maxSameLessonPerDay') === 'block' && limit > 0
+        ? Math.floor(limit / block)
+        : Infinity;
+
+    let total = 0;
+    for (let day = 0; day < dayCount; day++) {
+      let onDay = 0;
+      // Earliest-start packing: for equal-length blocks it is exactly optimal.
+      for (let h = 0; h < hourCount; ) {
+        if (item.domain[day * hourCount + h] === 1) {
+          onDay++;
+          h += block;
+        } else {
+          h++;
+        }
+      }
+      total += Math.min(onDay, perDay);
+    }
+    return total;
+  }
+
+  // ---- initial domains -----------------------------------------------------
+  for (const item of items) {
+    fillDomain(item);
+    // Ask for no more than the week can hold. Without this the search spends
+    // its whole budget on a lesson it can never finish: MRV keeps choosing it
+    // (its domain is the smallest), it fills every day it is allowed, forward
+    // checking finds 0 cells for the blocks still owed, and the branch dies —
+    // for every cell of every lesson above it. MEASURED in
+    // `gercek-olcek-kurali`: 3 blocks of 359 placed, the rest of the budget
+    // spent re-proving that one lesson wants 8 hours and can hold 4.
+    //
+    // The blocks it CAN hold are still placed. Giving up on the lesson whole
+    // would trade a partly-taught class for a tidier number; `report()` reads
+    // what is missing off the grid, so the count stays honest either way.
+    item.need = Math.min(item.need, ceilingBlocks(item));
+    if (item.need <= 0) item.abandoned = true;
+  }
+
+  const byLesson = new Map(items.map((x) => [x.lesson.id, x]));
+
   const trail: TrailEntry[] = [];
   const stack: Frame[] = [];
 
   let placedBlocks = 0;
-  /** Blocks still considered reachable: totalBlocks minus what was given up on. */
-  let placeableBlocks = totalBlocks;
+  /**
+   * Blocks still considered reachable: every block of a live lesson, and of a
+   * lesson given up on only the ones already on the grid.
+   */
+  let placeableBlocks = 0;
+  function countPlaceable(): void {
+    placeableBlocks = items.reduce((sum, x) => sum + (x.abandoned ? x.done : x.need), 0);
+  }
+  countPlaceable();
   let nodes = 0;
   let elapsedMs = 0;
   let finished: SolverResult | null = null;
@@ -221,8 +301,30 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   let bestBlocks = 0;
   let bestPlacements: Record<string, Id> = { ...placements };
 
+  /**
+   * The lesson that most recently ran out of room. When the search exhausts,
+   * THIS is the one to give up on — not whichever lesson sits at the bottom of
+   * the stack, which is merely the one MRV opened with.
+   */
+  let culprit = -1;
+
+  /**
+   * Nodes spent since the grid last got better.
+   *
+   * Chronological backtracking can spend any number of them re-proving the same
+   * conflict two levels down, and on a school-sized grid "any number" means the
+   * whole budget. MEASURED longest fruitless stretch: 17 nodes in
+   * `kural-baskisi`, 171 in `erken-saat-tuzagi`, 8 059 in `derin-geri-sarma` —
+   * all three still solve completely. The worlds that never finish spend
+   * 91 551, 317 395 and 2 890 411. The limit below sits between the two groups
+   * with room to spare; past it, one lesson is given up on and the search
+   * carries on from the best grid instead of chasing the same wall.
+   */
+  let sinceGain = 0;
+
   function remember() {
     if (placedBlocks <= bestBlocks) return;
+    sinceGain = 0;
     bestBlocks = placedBlocks;
     bestPlacements = { ...placements };
   }
@@ -246,7 +348,10 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       }
 
       // Forward checking: each remaining block needs a start cell of its own.
-      if (other.size < other.need - other.done) return false;
+      if (other.size < other.need - other.done) {
+        culprit = n;
+        return false;
+      }
     }
     return true;
   }
@@ -365,6 +470,58 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     undoTrail(frame.trailMark);
   }
 
+  /**
+   * Gives up on ONE lesson and carries on FROM THE BEST GRID FOUND SO FAR.
+   *
+   * Starting over from the base grid instead is what turned one impossible
+   * lesson into an empty timetable: reaching an empty stack means every
+   * assignment has just been rolled back, so the next attempt began at zero and
+   * had to re-earn everything — 99 lessons, 99 full searches, and the budget
+   * gone. Freezing the best grid makes progress monotone: what was placed stays
+   * placed, and only the lessons still missing are searched for again.
+   *
+   * Completeness is traded away knowingly. This is a 15-second heuristic whose
+   * product is "a grid that is laid out, plus an honest list of what would not
+   * fit" — never a proof that no perfect timetable exists.
+   *
+   * Returns false when nothing reachable is left to search for.
+   */
+  function reseed(fallback: number): boolean {
+    const live = (i: number): boolean => {
+      const item = items[i];
+      return item !== undefined && !item.abandoned && item.done < item.need;
+    };
+    const dead = live(culprit)
+      ? culprit
+      : live(fallback)
+        ? fallback
+        : items.findIndex((_, i) => live(i));
+    if (dead < 0) return false;
+
+    items[dead]!.abandoned = true;
+    culprit = -1;
+    sinceGain = 0;
+
+    // The best grid becomes the new floor. `placements` is mutated in place
+    // because `work` shares the object with blocker() and occupy()/vacate().
+    for (const key of Object.keys(placements)) delete placements[key];
+    Object.assign(placements, bestPlacements);
+    ix = buildIndex(work);
+
+    trail.length = 0;
+    stack.length = 0;
+
+    for (const item of items) {
+      const block = Math.max(1, item.lesson.blockSize);
+      const now = ix.placedHours.get(item.lesson.id) ?? 0;
+      item.done = Math.floor((now - item.placedAtStart) / block);
+      if (!item.abandoned) fillDomain(item);
+    }
+    placedBlocks = items.reduce((sum, x) => sum + x.done, 0);
+    countPlaceable();
+    return placeableBlocks > placedBlocks;
+  }
+
   function report(phase: SolverPhase): SolverResult {
     const best = bestPlacements;
     const changed = Object.keys(best).length !== Object.keys(base.placements).length ||
@@ -378,17 +535,40 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     for (const lesson of base.lessons) {
       const missing = lesson.weeklyHours - (finalIx.placedHours.get(lesson.id) ?? 0);
       if (missing <= 0) continue;
+      // Which sentence tells the reader what to DO about it?
+      //
+      // When nothing fits at all, blocker() names the wall itself — "AV Salı 1
+      // saatinde müsait değil", "en fazla 1 saat görmeli — burada 2 saat olur" —
+      // and that is as concrete as it gets. When SOME of the lesson fits, the
+      // grid ends up full of its own blocks and blocker() then reports "the
+      // class is busy", which reads like a clash somebody could shuffle away.
+      // There is nothing to shuffle: the week cannot hold the rest.
+      const item = byLesson.get(lesson.id);
+      const fits =
+        item === undefined ? 0 : item.need * Math.max(1, lesson.blockSize) + item.placedAtStart;
+      const capped = item !== undefined && item.askedBlocks > item.need && fits > 0;
+
       stuck.push({
         lessonId: lesson.id,
         name: lessonName(finalIx, lesson.id),
         missing,
-        reason: commonestBlock(state, finalIx, lesson.id).reason,
+        reason: capped
+          ? `haftada ${lesson.weeklyHours} saat isteniyor, ` +
+            `açık saatler ve kurallar en fazla ${fits} saat veriyor`
+          : commonestBlock(state, finalIx, lesson.id).reason,
       });
     }
     stuck.sort((a, b) => b.missing - a.missing || a.name.localeCompare(b.name, 'tr'));
 
+    // `phase` used to be handed straight back, so a run that placed every BLOCK
+    // it counted said 'solved' while `stuck` listed the hours a block size could
+    // not divide (5 hours in 2-hour blocks). Nothing is solved while something
+    // is missing.
+    const truth: SolverPhase =
+      stuck.length === 0 ? 'solved' : phase === 'cancelled' ? 'cancelled' : 'stuck';
+
     return {
-      phase: stuck.length === 0 ? 'solved' : phase,
+      phase: truth,
       state,
       placedBlocks: bestBlocks,
       totalBlocks,
@@ -419,6 +599,11 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
         if (elapsedMs + (performance.now() - t0) >= opts.budgetMs) return stop('stuck');
 
         nodes++;
+        sinceGain++;
+        if (sinceGain > STALL_LIMIT) {
+          if (!reseed(stack[stack.length - 1]?.item ?? -1)) return stop('stuck');
+          continue;
+        }
 
         // Advance the top frame, or open a new one.
         let frame = stack[stack.length - 1];
@@ -455,18 +640,19 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
           // Out of candidates here: drop this frame and let the one below it
           // try its next cell.
           stack.pop();
+          remember();
           if (stack.length === 0) {
-            // Nothing left to back up into: this lesson cannot be placed at
-            // all in this world. Give up on IT, not on the timetable — the
-            // other lessons still deserve their places, and the report is only
-            // useful next to a grid that is otherwise full.
-            const dead = items[frame.item]!;
-            dead.abandoned = true;
-            placeableBlocks -= dead.need - dead.done;
-            remember();
-            if (placeableBlocks <= placedBlocks) return stop('stuck');
+            // Nothing left to back up into: the whole tree is exhausted. Give
+            // up on ONE lesson, not on the timetable — the others still deserve
+            // their places, and the report is only useful next to a grid that
+            // is otherwise full.
+            if (!reseed(frame.item)) return stop('stuck');
             continue;
           }
+          // A frame that failed INSIDE a real context is a better suspect than
+          // the root one; the root's own failure must not overwrite it, which
+          // is why this sits after the empty-stack branch.
+          culprit = frame.item;
           retract(stack[stack.length - 1]!);
         }
       }

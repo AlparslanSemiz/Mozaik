@@ -47,6 +47,9 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
         await expect(page.locator('.reason-bar')).toContainText('yerleşemedi');
         await expect(page.locator('.reason-bar')).toContainText('Ayrıntı: Kontrol sekmesi.');
       }
+      if (world.want.reasonLike !== undefined) {
+        await expect(page.locator('.reason-bar')).toContainText(world.want.reasonLike);
+      }
 
       // The page never froze: a tab click still answers.
       await page.getByRole('button', { name: 'Kontrol' }).click();
@@ -65,21 +68,23 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
   });
 
   /**
-   * BİLİNEN HATA (2026-08-25). Marked `test.fail`, so the suite stays green
-   * while the bug is open AND goes red the day somebody fixes it.
+   * The collapse of 2026-08-25, now the other way round.
    *
-   * The sample school lays out completely — 359/359 blocks in 78 ms. Change
+   * The sample school lays out completely: 359/359 blocks in 78 ms. Change
    * nothing but the three adjustable limits (art arda 4->2, günde 8->5, aynı
-   * ders 2->1) and set them to Engelle, and the same school collapses to 3
-   * blocks out of 359. It does not recover with more time: 30 s gets 58 705
-   * nodes and still 3 blocks. Kontrol reports NO capacity problem for this
-   * world, so it is not the data being impossible — the search is.
+   * ders 2->1), set them to Engelle, and it used to fall to 3 blocks of 359 and
+   * spend the whole 15-second budget getting there — 30 seconds bought 58 705
+   * nodes and still 3 blocks.
    *
-   * Why it matters here and not in theory: docs/TASKS.md has "öğretmen
-   * sınırları sorulsun" open. The moment a real number is entered for those
-   * limits, automatic timetabling stops working.
+   * The cause was not the data. 32 of the 99 lessons are 2-hour blocks, and a
+   * 2-hour block cannot obey "aynı ders günde en fazla 1 saat" anywhere, so
+   * those are genuinely impossible; but the search kept re-discovering them (and
+   * lessons like the one that wants 8 hours of a week that can hold 4) instead
+   * of settling for what they CAN hold. Now every lesson's ceiling is worked out
+   * before the search starts. MEASURED after the fix: 241 blocks, 241 nodes,
+   * 43 ms — one node per block, no backtracking at all.
    */
-  test.fail('kural sıkılaşınca gerçek ölçekte de dizebiliyor — BİLİNEN HATA', async ({ page }) => {
+  test('kural sıkılaşınca gerçek ölçekte de dizebiliyor', async ({ page }) => {
     const world = HEAVY_WORLDS.find((w) => w.name === 'gercek-olcek-kurali')!;
     await loadWorld(page, world.state);
     const before = await autoFill(page);
@@ -88,8 +93,11 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
     const asked = world.state.lessons.reduce((sum, l) => sum + l.weeklyHours, 0);
     const placed = Object.keys(saved.placements).length;
     console.log(`[ölçüm] ${world.name}: ${placed}/${asked} saat yerleşti`);
-    // Half the school would already be a usable answer. It places about 1%.
+
+    // Half the school is the promise; 241 of 426 hours is what it measures at.
+    // The number is a floor, not a target: it may only go up.
     expect(placed).toBeGreaterThan(asked / 2);
+    expect(placed).toBeGreaterThanOrEqual(241);
   });
 
   test('çözücünün kendi sayıları — ölçüm, iddia değil', async () => {

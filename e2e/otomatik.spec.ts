@@ -100,12 +100,11 @@ test.describe('22. Otomatik dizme', () => {
   });
 
   test('Engelle seviyesindeki kuralı çiğnemiyor', async ({ page }) => {
-    // Careful with what this proves: it says "no rule was broken", and an empty
-    // grid breaks no rules. Tightening the rules at this scale is exactly where
-    // the solver currently collapses (docs/STATUS.md, bilinen hata 1), so the
-    // run below places very little and the assertion passes cheaply. The test
-    // that does NOT pass cheaply is in e2e/otomatik-stres.spec.ts.
-    test.setTimeout(90_000); // the run spends the solver's whole 15 s budget
+    // "No rule was broken" is a claim an EMPTY grid also satisfies, and until
+    // 2026-08-25 that is exactly how this test passed: tightening a rule at this
+    // scale collapsed the search. So the grid is counted first, and only then
+    // asked whether it is clean.
+    test.setTimeout(90_000);
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
 
@@ -116,6 +115,11 @@ test.describe('22. Otomatik dizme', () => {
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await autoFill(page);
+
+    // The grid really is laid out: 424 of 426 hours, measured. An empty grid
+    // cannot make this assertion pass, which is the whole point of it.
+    const placed = await page.locator('table.grid td:has(.card)').count();
+    expect(placed).toBeGreaterThan(400);
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
     await page.getByRole('button', { name: 'Kontrol' }).click();
