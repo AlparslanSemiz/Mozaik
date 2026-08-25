@@ -7,8 +7,10 @@ export default defineConfig({
   testDir: './e2e',
   // Screenshots, not tests: `npm run ekran` runs them with their own config.
   testIgnore: '**/ekran.spec.ts',
-  fullyParallel: false,
-  workers: 1,
+  // Her Playwright context'inin kendi depolamasi var; file:// altinda da
+  // gecerli oldugu olculdu (bkz. docs/STATUS.md).
+  fullyParallel: true,
+  workers: 4,
   reporter: [['list']],
   use: {
     // Babanin ekrani. Sigma ve yatay kaydirma bu boyutta test edilmeli.
