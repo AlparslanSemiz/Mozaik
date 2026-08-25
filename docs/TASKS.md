@@ -13,6 +13,13 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 Kullanıcının bu dosyanın sonuna yazdığı altı satır, sırayla numaralanmış hâli.
 Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeşilken.
+*(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
+bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
+
+**SIRADAKİ İŞ: 4d** — "veriler nerede" bölümü + toplu dışa/içe aktarma
+(`bundleVersion: 1`). Kitaplık geldiği için artık bir gereklilik: babanın
+"Dosyaya kaydet"i hâlâ **tek planı** yazıyor, yani üç planlı bir kurulumun
+tamamı tek dosyaya alınamıyor.
 
 Verilen kararlar (2026-08-25): planlar **depo katmanında** tutulur (`State`
 şeması değişmez, göç yok) · exe ile site **ortak bir `.json` dosyası** üzerinden
@@ -24,14 +31,16 @@ adlandırılacak** (kullanıcı yapacak).
       kural kutularına bir sayı girdiği gün otomatik dizme çalışmaz hâle
       geliyordu. 3/359 blok → **241/359, 241 düğüm, 43 ms**. Ayrıntı:
       [STATUS.md](STATUS.md) → *Sekizinci oturum*
-- [ ] **4b Plan kitaplığı** — birden fazla ders planı, aralarında geçiş.
-      Yeni `src/library.ts`: `ders-programi-planlar` dizini + plan başına bir
-      anahtar; mevcut tek anahtar ilk açılışta "1. plan" olarak devralınır
-      (veri kaybı yok). Üst çubukta plan seçici, Ayarlar → Veri'de yönetim.
-      Plan değişince geri-al yığını sıfırlanır
-- [ ] **4c Taslaklar** — taslak = kitaplıkta işaretli bir plan. "Yeni plan"
-      üç yol sunar: Boş · Taslaktan · Bu planın kopyası. "Taslak olarak kaydet"
-      yerleşimleri atarak kopyalar. Kurulum'un boş ekranı taslakları gösterir
+- [x] **4b Plan kitaplığı** — yapıldı. `src/library.ts` (yaprak modül: `State`'i
+      bilmez, ham string alıp verir). **Devralma tek bayt kopyalamıyor**:
+      `planKey('1') === 'ders-programi'`, yani mevcut program yerinde kalıyor ve
+      `ders-programi` okuyan yedek zinciri + E2E yardımcıları değişmedi.
+      Üst çubukta seçici, Ayarlar → Veri'de yönetim, geçişte geri-al sıfırlanıyor.
+      Ayrıntı: [STATUS.md](STATUS.md) → *Dokuzuncu oturum*
+- [x] **4c Taslaklar** — yapıldı. Taslak = `PlanInfo.draft` bayrağı, ayrı varlık
+      değil. "Taslak olarak kaydet" yerleşimleri atarak kopyalıyor; yeni plan
+      üç yoldan açılıyor (Boş · Bu planın kopyası · Taslaktan); Kurulum'un boş
+      ekranı taslakları listeliyor
 - [ ] **4d Veriler nerede + ortak dosya** — Ayarlar → Veri'de verinin tam olarak
       nerede durduğunu yazan bölüm (tarayıcıda anahtar, exe'de dosya yolu).
       Tümünü dışa/içe aktarma (`bundleVersion: 1`); eski tek plan dosyaları
@@ -55,10 +64,12 @@ adlandırılacak** (kullanıcı yapacak).
 - [ ] **4i Windows `.exe`** — bu makine Fedora, çapraz derleme güvenilir değil:
       `.github/workflows/exe.yml` → `windows-latest` → artefakt. SmartScreen
       uyarısı için babaya tek cümlelik not
-- [ ] **4j Belgeler** — `CLAUDE.md`'de ilke 2'nin yeni hâli (statik yayın var,
-      backend/veritabanı yok) ve yasak listeden "birden çok program sürümünü yan
-      yana tutma" maddesinin gerekçeli çıkarılması (çoklu **plan** geliyor, aynı
-      planın sürüm ağacı değil), `library.ts` mimari şemaya, yeni tuzaklar
+- [~] **4j Belgeler** — yarısı 4b+4c ile birlikte yapıldı: yasak liste
+      daraltıldı ("birden çok program sürümü" → **aynı planın** sürüm ağacı,
+      gerekçesiyle), `library.ts` mimari şemaya girdi, depolama anahtarı tablosu
+      ve tuzak 27–28 yazıldı, test sayıları güncellendi. **Kalan:** ilke 2'nin
+      yeni hâli (statik yayın var, backend/veritabanı yok) — 4e/4f yapılmadan
+      yazılamaz
 
 ### 1. Babanın gerçek verisiyle deneme
 

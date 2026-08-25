@@ -25,8 +25,8 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
 Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama · animasyon ·
 istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
 takvim entegrasyonu · PDF kütüphanesi (tarayıcının yazdırması yeterli) ·
-birden çok program sürümünü yan yana tutma · sürükleyerek ders süresi uzatma ·
-undo/redo geçmişi ağacı (düz yığın yeterli)
+**aynı planın** sürüm ağacı (v3, v4, v5 diye yan yana tutma) ·
+sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın yeterli)
 
 > **Listeden çıkarıldı (2026-08-24): karanlık mod ve tema seçimi.** Gerekçe zevk değil:
 > tarayıcı (Brave, Chrome) açık temalı sayfayı zaten **zorla karartıyor** ve bunu kendi
@@ -34,6 +34,13 @@ undo/redo geçmişi ağacı (düz yığın yeterli)
 > renkleri çamurlaşıyor — yani aracın en temel geri bildirim kanalı bozuluyor.
 > Kontrolü almak, tarayıcıya bırakmaktan **daha az** karmaşa. **v0.7'de uygulandı**;
 > tercih `localStorage['ders-programi-tema']`'da, `State`'e girmez.
+>
+> **Daraltıldı (2026-08-25): "birden çok program sürümünü yan yana tutma" → "aynı
+> planın sürüm ağacı".** Gerekçe: yasaklanan şey *sürüm ağacı*ydı — "geçen salı
+> neye benziyordu" sorusuna cevap veren, dallanan, kimsenin bakmadığı bir geçmiş.
+> Babanın istediği o değil: **ayrı planlar**, aralarında geçilen ve teki seçilen.
+> **v1.0'da uygulandı** (`library.ts`); plan kimliği `State`'e girmez, şema
+> değişmez. Aynı planın sürüm ağacı hâlâ yasak.
 
 ---
 
@@ -57,12 +64,12 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 347 birim testi
+npm test          # Vitest — 379 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 202 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 217 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
-npm run gorsel    # görsel regresyon — 20 referansa karşı piksel farkı
+npm run gorsel    # görsel regresyon — 22 referansa karşı piksel farkı
 npm run cozucu    # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
 ```
 
@@ -72,11 +79,11 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı ve anahtarları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 11 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye** |
-| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on ekran görüntüsü |
-| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 20 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 12 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi ve taslaklar** |
+| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
+| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 22 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
 
 E2E, `dist/index.html`'i `file://` üzerinden 1366×768'de açar — yani **babanın çift
 tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,
@@ -133,6 +140,8 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
+library.ts                      plan kitaplığı: anahtarlar + plan üstverisi.
+                                State'i BİLMEZ, ham string alıp verir.
   |
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
 rules.ts / bell.ts              Testleri zorunlu.
@@ -142,7 +151,7 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
                                 Uygulama import etmez, Vite budar. Vitest ve
                                 Playwright ikisi de buradan beslenir.
   |
-store.ts                        reducer + geri al yığını + localStorage + göç
+store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
 theme.ts                        makine tercihleri (tema, kenar çubuğu) — State'e girmez
 useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
   |
@@ -152,6 +161,7 @@ components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
 components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste + Summary
 components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar · Veri
+                                Veri, Plans.tsx'i (plan kitaplığı) kendi içine alır
 ```
 
 `rules.ts`, `constraints.ts`'ten **yalnızca `Index` tipini** alır (`import type`,
@@ -161,6 +171,11 @@ derlemede silinir) — çalışma zamanında döngü yok. Anahtar üreten fonksi
 `entities.ts` `import.ts`'ten **yalnızca satır tiplerini** alır (`import type`) —
 aynı desen, çalışma zamanında döngü yok. `import.ts` ise `makeShort`'u `entities.ts`'ten
 alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
+
+`library.ts` `store.ts`'i **çağırmaz** ve `State`'in ne olduğunu bilmez: ham
+**string** alıp verir, ayrıştırmayı `store.ts` yapar. `types.ts`'ten yalnız `Id`
+tipini alır (`import type`) — yani `store.ts` ↔ `library.ts` çalışma zamanı
+döngüsü yok, `keys.ts`'in constraints ↔ rules için yaptığının aynısı.
 
 `solver.ts` kısıt mantığının **hiçbirini** yeniden yazmaz: her yasallık sorusu
 `blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine.
@@ -214,6 +229,22 @@ Teacher    { name, short, subject, color, limits }  // her öğretmenin TEK bran
 ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
 Lesson     { classId, teacherId, weeklyHours, blockSize, maxPerDay }
 ```
+
+### Depolama anahtarları
+
+```
+ders-programi            -> "1" numaralı planın State'i   (TARİHSEL anahtar)
+ders-programi-plan-<id>  -> diğer planların State'i
+ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
+ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana ait
+ders-programi-tema       -> tema tercihi
+ders-programi-kenar      -> kenar çubuğu tercihi
+```
+
+Bir plan = bir program: kendi okulu, kendi öğretmenleri, kendi ızgarası.
+**Taslak ayrı bir varlık değil**, `PlanInfo.draft` bayrağı — yerleşimi
+boşaltılmış bir plan. Plan kimliği `State`'e **girmez**, `schemaVersion`
+değişmez: yedek dosyası hâlâ tek bir plandır.
 
 Tema tercihi `State`'e **girmez**: `localStorage['ders-programi-tema']`'da durur.
 Makine tercihi, program verisi değil — koyu makinede alınmış bir yedek babanın
@@ -420,6 +451,21 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     derste ise `blocker()`'ın cümlesi zaten somuttur ("AV Salı 1 saatinde
     müsait değil"), o korunur.
 
+27. **Plan değiştirmeden önce bekleyen kayıt EŞZAMANLI boşaltılmalı.** Otomatik
+    kayıt 400 ms gecikmeli ve efektin temizliği kutu değişince bekleyen yazımı
+    **iptal eder**. Yani plan geçişinde geçişten hemen önceki düzenleme hiçbir
+    yere yazılmadan buharlaşır — ekranda hata yok, çubukta uyarı yok, bir
+    sonraki açılışta iş eksik. `switchPlan`/`createPlan`/`deletePlan` üçü de
+    önce `park()` çağırır: timer'ı iptal eder ve giden planı **hemen** yazar.
+
+28. **İlk plan tarihsel anahtarını korur.** `planKey('1') === 'ders-programi'`.
+    Böylece kitaplığa geçiş **tek bayt kopyalamaz** (yarım kalmış kopya = iki
+    gerçek), eski bir `dist/index.html` hâlâ programı bulur, ve `ders-programi`
+    okuyan yedek zinciri ile E2E yardımcıları değişmeden çalışır. `newId()`'nin
+    alfabesinde `1` yok — üretilen kimlik o anahtarla çakışamaz; alfabe
+    değişirse yeni bir plan 1. planın üstüne yazar. `library.test.ts` bunu 500
+    kimlikle sabitler.
+
 ---
 
 ## Arayüz
@@ -443,6 +489,13 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
   kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
   dokunulan şey aynı ekranda durmaz.
+- **Üst çubukta plan seçici, yönetim Ayarlar → Veri'de.** Seçici tek plan
+  varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve
+  ancak iki plan olunca beliren bir kutu planların var olduğunu hiç
+  öğretemezdi. Plan **yaratan, adlandıran ve silen** her şey Ayarlar → Veri'de
+  — üst çubuk, hiçbir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak
+  kalır (aynı gerekçe `Sıfırla`'yı oradan çıkarmıştı). Geçiş geri-al yığınını
+  sıfırlar: bir planın hamlesi başka bir plana uygulanamaz.
 - **`Sıfırla` üst çubukta değil.** Ayarlar → Veri altında. Üst çubukta "Dosyadan aç"a
   bir yanlış tıklama uzaklıktaydı ve geri alınamıyor. `Dosyaya kaydet` / `Dosyadan aç`
   üst çubukta **kalır**: tuzak 7'nin karşı önlemi görünür olmak zorunda.

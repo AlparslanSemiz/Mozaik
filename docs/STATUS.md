@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (sekizinci oturum: **çözücünün çöküşü kapandı**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-25 (dokuzuncu oturum: **plan kitaplığı ve taslaklar**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -25,6 +25,10 @@ bu turda geldi; kullanıcı istedi.
   saatte kalan ders görünüyor. → **sağlandı** — hepsi gerçek tarayıcıda ölçülüyor
   (36 renk tek tek okunup karşılaştırılıyor, ayraç genişliği ve yazı boyu piksel
   olarak alınıyor). *Yine babanın makinesinde değil, buradaki Chromium'da.*
+- **v1.0 çıkma şartı:** babam aracı çift tıklanan bir `.exe` olarak açabiliyor,
+  aynı veriye siteden de bakabiliyor, ve birden fazla planı yan yana tutabiliyor.
+  → **kısmen** — plan kitaplığı ve taslaklar bitti (4a–4c); ortak dosya, site,
+  PWA, Pages ve Tauri (4d–4i) duruyor.
 - **v0.9 çıkma şartı:** araç haftalık programı kendisi dizebiliyor, dizilmiş bir ders
   sürüklenerek taşınabiliyor, ve ekranın tamamı kullanılıyor. → **sağlandı** —
   örnek veride 359 bloğun 359'u 87 ms'de ve **hiç geri sarmadan** yerleşiyor;
@@ -85,16 +89,16 @@ bu turda geldi; kullanıcı istedi.
 | **v0.9: görsel regresyon** | ✅ 20 referans (`npm run gorsel`) |
 | **Çözücü dünya matrisi** | ✅ 21 dünya · 78 birim + 26 E2E · ağırlar `npm run cozucu` |
 | **v1.0: çözücü kural baskısı altında çökmüyor** | ✅ 3/359 → **241/359 blok** · 6 yeni birim testi |
+| **v1.0: plan kitaplığı (`library.ts`)** | ✅ 25 birim + 11 E2E · devralma **sıfır kopya** |
+| **v1.0: taslaklar** | ✅ 4 E2E · taslak = `PlanInfo.draft`, ayrı varlık değil |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 347 birim + 202 E2E = 549, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 323 KB, sıfır ağ çağrısı.
-`npm run kontrol` toplam ~41 sn (E2E kısmı ~40 sn, 4 worker).** Ayrıca `kontrol`'ün
-parçası OLMAYAN iki süit: 20 görsel referans (`npm run gorsel`, 4 sn) ve 7 gerçek
-ölçekli çözücü testi (`npm run cozucu`, ~40 sn). İki süre de düştü: çözücü artık
-bütçesini sonuna kadar harcamıyor (2,2 dk → 40 sn) ve tıkanan bir dizim ana
-süiti 14 sn tutmuyor (54 sn → 40 sn).
+**Testler: 379 birim + 217 E2E = 596, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 333 KB, sıfır ağ çağrısı.
+`npm run kontrol` toplam ~46 sn (E2E kısmı ~45 sn, 4 worker).** Ayrıca `kontrol`'ün
+parçası OLMAYAN iki süit: 22 görsel referans (`npm run gorsel`, 5 sn) ve 7 gerçek
+ölçekli çözücü testi (`npm run cozucu`, ~39 sn).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -296,7 +300,10 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 | **Görsel regresyon** *(v0.9 ✅)* | 20 referans, depoda, **ayrı komut**. `kontrol`'e bağlanmaz: sistem fontu makineye göre çözülüyor. |
 | **Çözücü tavanı** *(v1.0 ✅)* | Her dersin **tavanı** arama başlamadan hesaplanır; `need` ona kırpılır. Ders bırakılmaz, tutabildiği kadarı dizilir. |
 | **Tıkanma sayacı** *(v1.0 ✅)* | Izgara **20 000 düğüm** boyunca iyileşmezse bir dersten vazgeçilip en iyi ızgaradan devam edilir. Düğüm sayısı, saat değil: aynı girdi aynı çıktıyı vermeli. |
-| **Birden fazla plan** *(v1.0, karar)* | **Depo katmanında kitaplık.** `State` şeması ve `schemaVersion` değişmez; plan kimliği tema/kenar çubuğu gibi makine tarafında durur. Yasak listedeki "birden çok program sürümü" maddesi *plan* için kalkıyor, aynı planın sürüm ağacı için duruyor. |
+| **Birden fazla plan** *(v1.0 ✅)* | **Depo katmanında kitaplık.** `State` şeması ve `schemaVersion` değişmedi; plan kimliği tema/kenar çubuğu gibi makine tarafında duruyor. Yasak listedeki madde *plan* için kalktı, **aynı planın** sürüm ağacı için duruyor. |
+| **İlk planın anahtarı** *(v1.0 ✅)* | **`ders-programi` olarak KALIR** (`planKey('1')`). Devralma tek bayt kopyalamaz; eski bir `dist/index.html` ve `ders-programi` okuyan her şey (yedek zinciri, E2E yardımcıları) çalışmaya devam eder. |
+| **Taslak** *(v1.0 ✅)* | **Ayrı varlık değil**, `PlanInfo.draft` bayrağı — yerleşimi boşaltılmış bir plan. İkinci bir depo, ikinci bir şema, ikinci bir göç gerekmiyor. |
+| **Yedek zinciri ve planlar** *(v1.0 ✅)* | Zincir **oturum başına**, plan başına değil: plan başına dört kopya 5 MB kotasını doldurur. Açılışta hangi plan açıksa ona ait; Ayarlar → Veri bunu yazıyor. |
 | **exe ⇄ site aynı veri** *(v1.0, karar)* | **Ortak bir `.json` dosyası.** exe otomatik yazar; site Dosya Sistemi Erişimi API'siyle aynı dosyaya yazar, olmayan yerde "Dosyaya kaydet"e düşer. Sunucu ve bulut senkron **yok**. |
 | **Yayın** *(v1.0, karar)* | **GitHub Pages** (statik). Depo `ders-programi` olarak yeniden adlandırılacak. İlke 2'nin "deploy, domain yok" kısmı bilerek değişiyor; backend/veritabanı hâlâ yok. |
 | Oturum sonu | Her oturumda TASKS + STATUS güncellenir (CLAUDE.md "Çalışırken"). |
@@ -405,7 +412,13 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 9. **Çıktı KALİTESİ hâlâ ölçülmüyor** (eski madde 7 ile aynı kapı): matris "yasal mı"
    sorusunu 19 dünyada soruyor, "iyi mi" sorusunu hiçbirinde sormuyor.
 
-10. **Görsel regresyonun eşiği bir düzen değişikliğini kaçırdı.** Müsaitlik satırı
+10. **Yedek zinciri plan başına değil, oturum başına.** `ders-programi-yedek-N`
+    açılışta hangi plan açıksa onun anlık görüntüsünü tutuyor; oturum içinde
+    plan değiştirilirse zincir hâlâ eskisine ait. Bilerek: plan başına dört
+    kopya 5 MB kotasını doldurur. Ayarlar → Veri paneli bunu yazıyor, ama
+    babanın bunu okuyup okumadığı bilinmiyor — gerçek kullanımda sorulacak.
+
+11. **Görsel regresyonun eşiği bir düzen değişikliğini kaçırdı.** Müsaitlik satırı
     34 → 48 px oldu, tablo 238 → 322 px büyüdü ve `npm run gorsel` **yeşil geçti**:
     `maxDiffPixelRatio: 0.01` (~10 000 px) düz renkli hücrelerde 84 px'lik bir
     büyümeyi yutuyor, çünkü değişen piksel çoğunlukla kenarlık çizgileri. Referanslar
@@ -435,6 +448,105 @@ odaların ayırabileceğinin %160'ı istenen dünyada 708 bloğun 159'u diziliyo
 isteniyor, açık saatler ve kurallar en fazla 10 saat veriyor"), ama ızgaranın
 dörtte biri dolu. Böyle bir veri zaten çözülemez; buradaki soru "ne kadarını
 doldurabiliriz" ve cevabı ölçülmedi.
+
+---
+
+## Dokuzuncu oturum (2026-08-25) — plan kitaplığı ve taslaklar
+
+v1.0 turunun 4b ve 4c maddeleri. Dal: `v1.0-teslim`, tek commit — taslak ayrı
+bir varlık değil, aynı veri şeklindeki bir bayrak; ayırmak bir sonraki
+commit'te sökülecek geçici bir şekil yazmak olurdu.
+
+### Karar: ilk plan tarihsel anahtarında kalıyor
+
+İki düzen tartışıldı. Seçilen:
+
+```
+ders-programi            -> "1" numaralı planın State'i   (BUGÜNKÜ anahtar)
+ders-programi-plan-<id>  -> diğer planların State'i
+ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
+ders-programi-yedek-N    -> oturum yedek zinciri          (aynen)
+```
+
+Alternatif "her plan `ders-programi-plan-<id>`'de, `ders-programi` dondurulur"
+idi ve tam bakışımlıydı — ama ilk açılışta bir **kopyalama** gerektiriyordu.
+Kopyalama yarıda kalabilir, ve yarıda kalmış bir kopya iki gerçek demektir
+(ilke 6). Seçilen düzende devralma **tek bayt yazmıyor**: dizin oluşturuluyor,
+program yerinde kalıyor. Üç ek kazanç, hepsi ölçüldü:
+
+1. Eski bir `dist/index.html` hâlâ programı buluyor.
+2. `ders-programi` okuyan **202 E2E testi ve yedek zinciri değişmedi** —
+   `e2e/helpers.ts`'e dokunulmadı.
+3. `newId()` alfabesinde `1` yok, yani üretilen hiçbir kimlik o anahtarla
+   çakışamıyor. Bu bir varsayım olarak bırakılmadı: `library.test.ts` 500
+   kimlik üretip sabitliyor, alfabe değişirse test kırmızı veriyor.
+
+### `src/library.ts` — yaprak modül
+
+`State`'in ne olduğunu **bilmiyor**: ham string alıp veriyor, ayrıştırmayı
+`store.ts` yapıyor. `types.ts`'ten yalnız `Id` tipini alıyor (`import type`).
+Böylece `store.ts` ↔ `library.ts` çalışma zamanı döngüsü yok — `keys.ts`'in
+`constraints` ↔ `rules` için yaptığının aynısı.
+
+`parseLibrary` hiçbir zaman `null` dönmüyor ve hiçbir zaman atmıyor. Bir kural
+özellikle konuldu: **adı bozuk bir girdi atılmıyor, yeniden adlandırılıyor.**
+Ad süs, `id` verinin işaretçisi; adı yüzünden bir satırı atmak koca bir programı
+öksüz bırakırdı. Yalnız kimliksiz girdi atılıyor, o zaten hiçbir yeri göstermiyor.
+
+### Bulunan tuzak: gecikmeli kayıt plan geçişinde işi yutuyor
+
+Otomatik kayıt 400 ms gecikmeli, ve efektin temizliği kutu her değiştiğinde
+**bekleyen yazımı iptal ediyor**. Yani plan değiştirildiğinde: eski durumun
+timer'ı iptal ediliyor, yeni efekt yeni durumu yeni anahtara yazıyor, ve
+geçişten hemen önceki düzenleme **hiçbir yere yazılmadan** buharlaşıyor. Ekranda
+hata yok, çubukta uyarı yok; bir sonraki açılışta iş eksik.
+
+Çare `park()`: plan değiştiren üç işlem de (`switchPlan`, `createPlan`,
+`deletePlan`) önce timer'ı iptal edip giden planı **eşzamanlı** yazıyor.
+Gerçek tarayıcıda ayrı bir testle sabitlendi: okul adı değiştirilip 400 ms
+dolmadan plan değiştiriliyor, sonra geri dönülüp adın yerinde olduğu
+doğrulanıyor. → **CLAUDE.md tuzak 27**
+
+Plan kimliği reducer kutusunun **içinde** duruyor (`Box.planId`), yanında ayrı
+bir `useState`'te değil: ikisi bir renderlik bile ayrışsa otomatik kayıt bir
+planın işini başka bir planın anahtarına yazardı.
+
+### Ölçüm sırasında bulunan iki düzen kusuru
+
+İkisi de yalnız ekran görüntüsüne bakınca göründü, testler yeşilken:
+
+1. **Plan adı kutusu 40 px'e sıkışmıştı** — "1. plan" yerine "1" görünüyordu.
+   Sebep: altı sütuna sabit genişlik verilince (toplam 630 px) esnek ad sütununa
+   yer kalmıyordu. Üç sayı sütunu tek bir "İçerik" satırına indirildi
+   (`25 öğretmen · 20 sınıf · 99 ders`) — hem okunur hem yer açıyor.
+2. **`.form-row` hücre içinde sarıyordu**, "Bu plana geç" ve "Sil" alt alta
+   düşüyordu. `.form-row.nowrap` eklendi.
+
+### Ölçülen
+
+| | Önce | Sonra |
+|---|---|---|
+| Birim testi | 347 | **379** |
+| E2E testi | 202 | **217** |
+| Görsel referans | 20 | **22** (Ayarlar → Veri sahnesi eklendi) |
+| `dist/index.html` | 323 KB | **333 KB** |
+| `npm run kontrol` | ~41 sn | **~46 sn** |
+
+Görsel referansların 18'i kırmızı verdi — beklenen, üst çubuk değişti. Yalnız
+iki **baskı** sahnesi yeşil kaldı, ki bu tam olarak doğru: üst çubuk basılmıyor.
+Referanslar `--update-snapshots=all` ile yenilendi (tuzak 25).
+
+### Bilerek yapılmayan
+
+- **Plan başına yedek zinciri konmadı.** Dört kopya × plan sayısı 5 MB kotasını
+  doldurur. Zincir oturum başına kalıyor ve açılışta hangi plan açıksa ona ait;
+  Ayarlar → Veri paneli bunu açıkça yazıyor.
+- **Plan geçişinde onay sorulmadı.** İki plan da kayıtlı, geçiş kayıpsız — onay
+  sormak "bu tehlikeli" demek olurdu ve değil. Geri-al yığınının sıfırlandığı
+  seçicinin `title`'ında ve panelde yazıyor.
+- **Üst çubuğa "yeni plan" konmadı.** Plan yaratan, adlandıran ve silen her şey
+  Ayarlar → Veri'de; üst çubuk hiçbir tıklamanın bir öğleden sonrayı
+  götüremeyeceği yer olarak kalıyor (aynı gerekçe `Sıfırla`'yı oradan çıkarmıştı).
 
 ---
 
@@ -816,11 +928,11 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 347 birim + derleme + 202 E2E (~41 sn)
+npm run kontrol                   # tsc + 379 birim + derleme + 217 E2E (~46 sn)
 npm run dev                       # geliştirme sunucusu
 ```
 
-**Görsel regresyon ayrı**: `npm run gorsel`. İlk koşuda büyük ihtimalle kırmızı verir,
+**Görsel regresyon ayrı**: `npm run gorsel` (22 referans). İlk koşuda büyük ihtimalle kırmızı verir,
 çünkü referanslar bir başka makinenin fontuyla alındı. Bir kez yenile:
 
 ```bash
