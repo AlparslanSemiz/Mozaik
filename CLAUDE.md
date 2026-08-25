@@ -57,13 +57,13 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 338 birim testi
+npm test          # Vitest — 347 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 200 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 202 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
 npm run gorsel    # görsel regresyon — 20 referansa karşı piksel farkı
-npm run cozucu    # gerçek ölçekli çözücü stresi — 7 test, ~2,2 dk
+npm run cozucu    # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
@@ -72,7 +72,7 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 19 dünyalık çözücü matrisi ve denetçinin kendisi** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 11 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye** |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on ekran görüntüsü |
@@ -88,7 +88,7 @@ Playwright context'inin kendi `localStorage`'ı var — 200 test paralel koşark
 birbirinin verisini görmüyor (ölçülen: 66 sn → 51 sn).
 
 **Sahte veri tek yerde: `src/worlds.ts`.** `makeWorld()` küçük bir okul kurar,
-`illegalBlocks()` dizilmiş bir programı denetler, `WORLDS` 19 senaryoyu tutar.
+`illegalBlocks()` dizilmiş bir programı denetler, `WORLDS` 21 senaryoyu tutar.
 `e2e/` altında değil çünkü `tsconfig.json` yalnız `src`'yi kapsıyor — orada duran
 bir dünya `tsc --noEmit`'ten hiç geçmezdi. Uygulama onu import etmediği için Vite
 budar, `dist/index.html`'e girmez. Hem `solver.test.ts` hem `kontrol.spec.ts` hem
@@ -163,7 +163,11 @@ aynı desen, çalışma zamanında döngü yok. `import.ts` ise `makeShort`'u `e
 alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
 
 `solver.ts` kısıt mantığının **hiçbirini** yeniden yazmaz: her yasallık sorusu
-`blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine. Bir kural
+`blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine.
+Kendine ait iki şeyi var, ikisi de aramanın kendisiyle ilgili: her dersin
+**tavanı** (haftanın o derse verebileceği en fazla saat) arama başlamadan
+hesaplanır, ve ızgara 20 000 düğüm boyunca iyileşmezse bir dersten vazgeçilip
+o ana kadarki en iyi ızgaradan devam edilir (tuzak 26). Bir kural
 sürüklerken başka, otomatik dizerken başka anlama gelemez. Aramanın karşılayamadığı
 tek şey `place()`'in her çağrıda sözlüğü kopyalaması; onun için `constraints.ts`'te
 `occupy`/`vacate` var — `place()` + `buildIndex()` ikilisinin yerinde çalışan hâli.
@@ -396,6 +400,25 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     eski bırakır. Hepsini yazdırmak için `--update-snapshots=all`. Müsaitlik satırı
     34 → 48 px olduğunda tam bunun oldu: tablo 84 px büyüdü, `npm run gorsel` yeşil
     geçti, referanslar yalan söylemeye başladı.
+
+26. **MRV en küçük domaini seçer — tamamlanamayan ders domaini en küçük olandır.**
+    Haftada 8 saat isteyen ama kurallar yüzünden en fazla 4 saat tutabilen bir
+    ders, izin verilen her günü doldurduktan sonra "yer yok" der; arama geri
+    sarar, aynı dersi yeniden seçer, aynı duvara çarpar. Üstelik bu, üstündeki
+    her dersin her hücresi için tekrarlanır. Ölçülen: 15 saniye boyunca 2-3
+    blok. Çare iki katmanlı: her dersin **tavanı** arama başlamadan hesaplanır
+    (`ceilingBlocks`, `need` ona kırpılır) ve ızgara belli bir düğüm sayısı
+    boyunca iyileşmezse bir dersten vazgeçilir. **Vazgeçerken sıfırdan
+    başlanmaz** — o ana kadarki en iyi ızgara tabana dondurulur, yoksa her
+    vazgeçiş bütün emeği geri sarar.
+
+27. **Yerleşemeyen dersin sebebi, dersin KENDİ blokları yüzünden yanlış çıkabilir.**
+    Kısmen sığan bir ders izin verilen günleri kendi bloklarıyla doldurur;
+    `blocker()` o noktadan sonra "sınıf o saatte dolu" der ve okuyan kişi
+    kenara çekecek bir ders aramaya başlar. Çekilecek bir şey yoktur. Tavanı
+    kırpılmış her ders için sebep cümlesi tavanın kendisidir. **Hiç** sığmayan
+    derste ise `blocker()`'ın cümlesi zaten somuttur ("AV Salı 1 saatinde
+    müsait değil"), o korunur.
 
 ---
 

@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (yedinci oturum: **çözücü dünya matrisi + Müsaitlik satır yüksekliği**, `v0.9-otomatik-dizme` dalında)
+Son güncelleme: 2026-08-25 (sekizinci oturum: **çözücünün çöküşü kapandı**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -83,16 +83,18 @@ bu turda geldi; kullanıcı istedi.
 | **v0.9: Kontrol sekmesi test edildi** | ✅ 12 E2E |
 | **v0.9: geri-al zinciri, hata yolları, boş ekranlar, klavye** | ✅ 28 E2E |
 | **v0.9: görsel regresyon** | ✅ 20 referans (`npm run gorsel`) |
-| **Çözücü dünya matrisi** | ✅ 19 dünya · 68 birim + 24 E2E · ağırlar `npm run cozucu` |
+| **Çözücü dünya matrisi** | ✅ 21 dünya · 78 birim + 26 E2E · ağırlar `npm run cozucu` |
+| **v1.0: çözücü kural baskısı altında çökmüyor** | ✅ 3/359 → **241/359 blok** · 6 yeni birim testi |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 338 birim + 200 E2E = 538, hepsi geçiyor. `tsc --noEmit` temiz.
+**Testler: 347 birim + 202 E2E = 549, hepsi geçiyor. `tsc --noEmit` temiz.
 `npm run build` → tek dosya `dist/index.html`, 323 KB, sıfır ağ çağrısı.
-`npm run kontrol` toplam 51 sn (E2E kısmı ~51 sn, 4 worker).** Ayrıca `kontrol`'ün
-parçası OLMAYAN iki süit: 20 görsel referans (`npm run gorsel`) ve 7 gerçek ölçekli
-çözücü testi (`npm run cozucu`, ~2,2 dk — her dünya çözücünün 15 sn'lik bütçesini
-sonuna kadar harcıyor).
+`npm run kontrol` toplam ~41 sn (E2E kısmı ~40 sn, 4 worker).** Ayrıca `kontrol`'ün
+parçası OLMAYAN iki süit: 20 görsel referans (`npm run gorsel`, 4 sn) ve 7 gerçek
+ölçekli çözücü testi (`npm run cozucu`, ~40 sn). İki süre de düştü: çözücü artık
+bütçesini sonuna kadar harcamıyor (2,2 dk → 40 sn) ve tıkanan bir dizim ana
+süiti 14 sn tutmuyor (54 sn → 40 sn).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -222,6 +224,10 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Ölçüm | Değer |
 |---|---|
 | **Otomatik dizme** (99 ders, 359 blok, 426 saat) | **359/359 blok · 359 düğüm · 87 ms · hiç geri sarma yok** |
+| Aynı okul, üç sınır Engelle (art arda 2 · günde 5 · aynı ders 1) | 3/359 blok · 33 842 düğüm · 15 sn → **241/359 · 241 düğüm · 43 ms** |
+| Aynı okul, yalnız "art arda en fazla 2" Engelle | neredeyse boş · 15 sn → **424/426 saat · 1,6 sn** |
+| Örnek okul %95 doluluğa yüklenmiş (`gercek-olcek-sikisik`) | 3/423 blok · 15 sn → **412/423 · 3,6 sn** |
+| Kasten imkânsız dünya (`gercek-olcek-imkansiz`, %160 yük) | 22/708 blok → **159/708** (bütçe yine doluyor) |
 | Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
 | Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
 | `dist/index.html` | 323 KB, tek dosya, 0 ağ çağrısı |
@@ -288,6 +294,11 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 | **Otomatik dizme** *(v0.9 ✅)* | **Ana iş parçacığında, dilimli, iptal edilebilir.** Web Worker yok (tuzak 19). Kısıt mantığı `blocker()`'dan; solver kendi kuralını yazmaz. Kısmi sonuç uygulanır, tek geri-al adımı. |
 | **Çözücü ayarları** *(v0.9)* | **Yok ve olmayacak** — iki düğme. Doğru cevap bir dönem kullanılmadan bilinemez (ilke 5). |
 | **Görsel regresyon** *(v0.9 ✅)* | 20 referans, depoda, **ayrı komut**. `kontrol`'e bağlanmaz: sistem fontu makineye göre çözülüyor. |
+| **Çözücü tavanı** *(v1.0 ✅)* | Her dersin **tavanı** arama başlamadan hesaplanır; `need` ona kırpılır. Ders bırakılmaz, tutabildiği kadarı dizilir. |
+| **Tıkanma sayacı** *(v1.0 ✅)* | Izgara **20 000 düğüm** boyunca iyileşmezse bir dersten vazgeçilip en iyi ızgaradan devam edilir. Düğüm sayısı, saat değil: aynı girdi aynı çıktıyı vermeli. |
+| **Birden fazla plan** *(v1.0, karar)* | **Depo katmanında kitaplık.** `State` şeması ve `schemaVersion` değişmez; plan kimliği tema/kenar çubuğu gibi makine tarafında durur. Yasak listedeki "birden çok program sürümü" maddesi *plan* için kalkıyor, aynı planın sürüm ağacı için duruyor. |
+| **exe ⇄ site aynı veri** *(v1.0, karar)* | **Ortak bir `.json` dosyası.** exe otomatik yazar; site Dosya Sistemi Erişimi API'siyle aynı dosyaya yazar, olmayan yerde "Dosyaya kaydet"e düşer. Sunucu ve bulut senkron **yok**. |
+| **Yayın** *(v1.0, karar)* | **GitHub Pages** (statik). Depo `ders-programi` olarak yeniden adlandırılacak. İlke 2'nin "deploy, domain yok" kısmı bilerek değişiyor; backend/veritabanı hâlâ yok. |
 | Oturum sonu | Her oturumda TASKS + STATUS güncellenir (CLAUDE.md "Çalışırken"). |
 
 ---
@@ -405,40 +416,108 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 
 ## Bilinen hatalar
 
-1. **Kurallar sıkılaştırılınca çözücü gerçek ölçekte çöküyor.** (2026-08-25, açık.)
+**Üçü de 2026-08-25'te (sekizinci oturum) kapandı.** Ne oldukları ve nasıl
+kapandıkları aşağıdaki oturum bölümünde; testleri `solver.test.ts` ve
+`e2e/otomatik-stres.spec.ts` içinde duruyor.
 
-   Örnek okul olduğu gibi **359/359 blok, 359 düğüm, 78 ms**'de diziliyor. Aynı
-   veride yalnız üç ayarlanabilir sınır değiştirilip Engelle'ye alınınca
-   (art arda 4 → 2, günde 8 → 5, aynı ders 2 → 1) sonuç **3/359 blok** oluyor.
-   Süre vermek kurtarmıyor: 30 sn'de 58 705 düğüm, yine 3 blok. Kontrol sekmesi bu
-   dünya için **hiçbir kapasite sorunu bildirmiyor** — yani veri imkânsız değil,
-   arama tıkanıyor. Yükü artırmak da aynı sonucu veriyor (`gercek-olcek-sikisik`:
-   3/423 blok, 11 672 düğüm, 15 sn).
+1. ~~Kurallar sıkılaştırılınca çözücü gerçek ölçekte çöküyor~~ → **kapandı**,
+   3/359 blok → 241/359, 33 842 düğüm → 241 düğüm.
+2. ~~`e2e/otomatik.spec.ts` → "Engelle seviyesindeki kuralı çiğnemiyor" boşuna
+   geçiyor~~ → **kapandı**: ızgara artık 424/426 saatle diziliyor ve test önce
+   dolu hücreleri sayıyor, sonra kural soruyor.
+3. ~~`solve()` bölünmeyen haftalık saatte `phase: 'solved'` diyor ama `stuck`
+   dolu dönüyor~~ → **kapandı**: eksik bir şey varken hiçbir şey çözülmüş
+   sayılmıyor; yerleşemeyeni olan her dünya testi bunu ayrıca iddia ediyor.
 
-   Belirti tuzak 21'in imzasıyla aynı: çok düğüm, çok az blok. Şüphe, yığın tamamen
-   boşalınca çalışan **vazgeçme** yolunda (`solver.ts` içinde `stack.length === 0`
-   dalı): oraya varmak o ana kadarki bütün atamaları geri alıyor, sonra bir ders
-   "vazgeçildi" işaretlenip arama sıfırdan başlıyor. 99 ders için bu 99 tam geri
-   sarma demek. **Teşhis edilmedi, düzeltilmedi.**
+**Açık kalan zayıf nokta (hata değil, kalite):** `gercek-olcek-imkansiz` —
+odaların ayırabileceğinin %160'ı istenen dünyada 708 bloğun 159'u diziliyor ve
+15 sn'lik bütçe yine doluyor. Sonuç yasal ve cümlesi okunur ("haftada 15 saat
+isteniyor, açık saatler ve kurallar en fazla 10 saat veriyor"), ama ızgaranın
+dörtte biri dolu. Böyle bir veri zaten çözülemez; buradaki soru "ne kadarını
+doldurabiliriz" ve cevabı ölçülmedi.
 
-   Neden önemli: [TASKS.md](TASKS.md)'te "öğretmen sınırları sorulsun" maddesi açık.
-   Babanız o kutulara gerçek bir sayı girdiği gün otomatik dizme çalışmaz hâle gelir.
+---
 
-   Nerede yakalanıyor: `e2e/otomatik-stres.spec.ts`, `test.fail` ile işaretli
-   *"kural sıkılaşınca gerçek ölçekte de dizebiliyor — BİLİNEN HATA"*. Süit yeşil
-   kalır; hata düzeldiği gün **kırmızı olur** ve haber verir.
+## Sekizinci oturum (2026-08-25) — çözücünün çöküşü kapandı
 
-2. **`e2e/otomatik.spec.ts` → "Engelle seviyesindeki kuralı çiğnemiyor" boşuna
-   geçiyor.** 1'in doğrudan sonucu: test "hiç ihlal yok" diyor, ızgara ise neredeyse
-   boş — boş ızgara hiçbir kuralı çiğnemez. Testin başına bu not düşüldü; asıl
-   iddiayı yapan test stres süitinde.
+Yedinci oturumun bıraktığı iş commit edildi (7a·7b·7c), sonra kullanıcının
+TASKS sonuna yazdığı altı satır v1.0 turuna dönüştü ve turun ilk maddesi
+yapıldı. Dal: `v1.0-teslim`.
 
-3. **`solve()` bölünmeyen haftalık saatte `phase: 'solved'` diyor ama `stuck` dolu
-   dönüyor.** `weeklyHours: 5, blockSize: 2` → 2 blok (4 saat) yerleşiyor, 1 saat
-   yerleşemiyor; `placedBlocks === totalBlocks` olduğu için faz `'solved'`, oysa
-   `stuck.length === 1`. Arayüz `stuck.length`e baktığı için kullanıcı doğru cümleyi
-   görüyor — yani görünür bir etkisi yok, ama `phase` alanı bu tek durumda yalan
-   söylüyor. `dünya: bolunmeyen-saat` testinde kayıtlı.
+### Teşhis: iki ayrı şey vardı, biri belgelerde yanlış yazılıydı
+
+`gercek-olcek-kurali` dünyasında **99 dersin 32'si 2 saatlik blok**, ve 2
+saatlik bir blok "aynı ders günde en fazla 1 saat" kuralını **hiçbir hücrede**
+sağlayamaz (`constraints.ts` `lessonDayCount + block` sayıyor). Yani o dersler
+gerçekten imkânsız — STATUS'te *"veri imkânsız değil, arama tıkanıyor"*
+yazıyordu, yarısı yanlıştı.
+
+Asıl kusur yine de çözücüdeydi ve iz sürülerek bulundu. Aramaya bir kanca
+takılıp ilk 120 olay basıldığında görülen şey şuydu:
+
+```
+pick derinlik=0 d44 size=48 kalan=8      <- 8 blok istiyor
+pick derinlik=1 d44 size=36 kalan=7
+pick derinlik=2 d44 size=24 kalan=6
+pick derinlik=3 d44 size=12 kalan=5
+revise-fail d44 size=0 need=4            <- 4 blok borçlu, yer yok
+revise-fail d44 size=0 need=4            (aynısı, binlerce kez)
+```
+
+`d44` haftada 8 saat istiyor ama erişebildiği **4 gün** var ve kural günde 1
+saat diyor: tavanı 4. MRV onu her seferinde seçiyor (domaini en küçük), izin
+verilen her günü dolduruyor, ileri kontrol kalan bloklara yer bulamıyor, dal
+ölüyor — ve bu, üstündeki her dersin her hücresi için yeniden oluyor. Arama
+15 saniye boyunca 2-3 blokta çakılı kalıyordu.
+
+### Dört düzeltme
+
+1. **Tavan önceden hesaplanıyor** (`ceilingBlocks`): dersin kendi hücreleri gün
+   gün açgözlü paketlenip "aynı ders günde en fazla N saat" ile sınırlanıyor.
+   `need` tavana kırpılıyor. Ders bırakılmıyor — tutabildiği kadarı diziliyor.
+2. **Suçlu ders bırakılıyor**, kökteki değil. Yığın boşaldığında eskiden aramayı
+   açan ders elenirdi; artık yeri tükenen ders (`culprit`).
+3. **`reseed`: en iyi ızgaradan devam.** Yığının boşalması bütün atamaları geri
+   sarıyor, yani her vazgeçiş sıfırdan başlamak demekti — 99 ders için 99 tam
+   arama. Artık en iyi ızgara tabana donduruluyor, ilerleme geri gitmiyor.
+4. **Tıkanma sayacı** (`STALL_LIMIT = 20 000` düğüm). Eşik **ölçülerek** seçildi:
+
+   | | en uzun kazançsız seri |
+   |---|---|
+   | `kural-baskisi` (tam çözülüyor) | 17 |
+   | `erken-saat-tuzagi` (tam çözülüyor) | 171 |
+   | `derin-geri-sarma` (tam çözülüyor) | **8 059** |
+   | `gercek-olcek-imkansiz` | 91 551 |
+   | `gercek-olcek-sikisik` | 317 395 |
+   | `parcalanmis-gunler` | 2 890 411 |
+
+   60 000 ve 200 000 da denendi: **her eksende daha kötü** (`imkansiz` 159 → 59
+   → 22 blok). 20 000, tam çözülen en zor dünyaya 2,5 kat pay bırakıyor.
+
+Ayrıca `report()` `stuck` doluyken `'solved'` diyebiliyordu; kapandı.
+
+### Yerleşemeyen dersin cümlesi de düzeldi
+
+Kısmen sığan bir derste `blocker()` "510 sınıfının Salı 1 saatinde Matematik
+var" diyordu — okuyanı kenara çekecek bir ders aramaya gönderen, ama çekilecek
+bir şeyin olmadığı bir cümle. Artık tavanı söylüyor: *"haftada 6 saat isteniyor,
+açık saatler ve kurallar en fazla 3 saat veriyor"*. **Hiç** sığmayan derste
+`blocker()`'ın kendi cümlesi zaten somut ("AV Salı 1 saatinde müsait değil"),
+o korunuyor — bunu mevcut bir test yakaladı ve kural daraltıldı.
+
+### Ölçülen
+
+| Dünya | Önce | Sonra |
+|---|---|---|
+| `gercek-olcek-kurali` | 3/359 blok · 33 842 düğüm · 15 sn | **241/359 · 241 düğüm · 43 ms** |
+| `gercek-olcek-sikisik` | 3/423 blok · 11 672 düğüm · 15 sn | **412/423 · 43 446 düğüm · 3,6 sn** |
+| `parcalanmis-gunler` | 16/24 blok · 3 233 441 düğüm · 15 sn | **22/24 · 20 023 düğüm · 110 ms** |
+| `gercek-olcek-imkansiz` | 22/708 blok · 15 sn | **159/708** · 15 sn |
+| sample + "art arda 2" Engelle | neredeyse boş · 15 sn | **424/426 saat · 1,6 sn** |
+
+Testler 338 → **347 birim**, 200 → **202 E2E**. İki yeni dünya matrise girdi
+(`imkansiz-ders-yaninda`, `blok-kurala-sigmiyor`) ve stres süitindeki
+`test.fail` işareti kalktı: o test artık gerçekten bir şey iddia ediyor.
 
 ---
 
@@ -737,7 +816,7 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 338 birim + derleme + 200 E2E (~51 sn)
+npm run kontrol                   # tsc + 347 birim + derleme + 202 E2E (~41 sn)
 npm run dev                       # geliştirme sunucusu
 ```
 
@@ -752,9 +831,9 @@ npx playwright test --config playwright.gorsel.config.ts --update-snapshots=all
 yazdırmak için `=all` gerekiyor. Bu 2026-08-25'te öğrenildi: satır yüksekliği
 değiştiği hâlde eşik farkı yuttuğu için referanslar sessizce eski kaldı.)
 
-**Çözücü stres süiti de ayrı**: `npm run cozucu`. `kontrol`'ün parçası değil çünkü
-her dünya 15 sn'lik çözücü bütçesini sonuna kadar harcıyor; yavaş makinede günlük
-döngüyü 2 dakika uzatırdı.
+**Çözücü stres süiti de ayrı**: `npm run cozucu` (~40 sn). Çöküş düzeldikten
+sonra dünyaların çoğu bütçesini doldurmuyor, ama biri (kasten imkânsız olan)
+hâlâ 15 saniye harcıyor — o yüzden ayrı komutta duruyor.
 
 `npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra
 [TASKS.md](TASKS.md) içindeki **"ŞİMDİ SIRADA"** bölümünden devam edilir.

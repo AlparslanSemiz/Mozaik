@@ -9,19 +9,56 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-### 0. Çözücünün çökmesi teşhis edilsin — YENİ, en öncelikli kod işi
+### 0. v1.0 — teslim turu (`.exe` · site · planlar) — YENİ
 
-Ölçüm var, teşhis yok. [STATUS.md](STATUS.md) → *Bilinen hatalar 1*.
+Kullanıcının bu dosyanın sonuna yazdığı altı satır, sırayla numaralanmış hâli.
+Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeşilken.
 
-- [ ] **`solver.ts`'te `stack.length === 0` dalı incelensin.** Şüphe orada: yığın
-      tamamen boşalınca o ana kadarki BÜTÜN atamalar geri alınmış oluyor, bir ders
-      "vazgeçildi" işaretlenip arama sıfırdan başlıyor. 99 ders → 99 tam geri sarma
-- [ ] **Kısmî çözüm korunsun.** `bestPlacements` en derin atamayı hatırlıyor ama
-      vazgeçme sonrası arama onu başlangıç noktası olarak kullanmıyor; ilk bakılacak yer bu
-- [ ] Düzeltilince `e2e/otomatik-stres.spec.ts`'teki `test.fail` **kırmızı olacak** —
-      o zaman `test.fail` işareti kaldırılır ve eşik gerçek bir sayıya bağlanır
-- [ ] `gercek-olcek-kurali` dünyası ölçüt: `sampleState()` + art arda 2 · günde 5 ·
-      aynı ders 1, hepsi Engelle. Hedef: 359/359'a yakın bir sonuç, 15 sn içinde
+Verilen kararlar (2026-08-25): planlar **depo katmanında** tutulur (`State`
+şeması değişmez, göç yok) · exe ile site **ortak bir `.json` dosyası** üzerinden
+aynı veriyi gösterir, sitede Dosya Sistemi Erişimi API'siyle otomatik yazma ·
+site GitHub Pages'te yayınlanır, **depo `ders-programi` olarak yeniden
+adlandırılacak** (kullanıcı yapacak).
+
+- [x] **4a Çözücü kurallar sıkılaşınca çökmüyor.** Turun önüne alındı: babanız
+      kural kutularına bir sayı girdiği gün otomatik dizme çalışmaz hâle
+      geliyordu. 3/359 blok → **241/359, 241 düğüm, 43 ms**. Ayrıntı:
+      [STATUS.md](STATUS.md) → *Sekizinci oturum*
+- [ ] **4b Plan kitaplığı** — birden fazla ders planı, aralarında geçiş.
+      Yeni `src/library.ts`: `ders-programi-planlar` dizini + plan başına bir
+      anahtar; mevcut tek anahtar ilk açılışta "1. plan" olarak devralınır
+      (veri kaybı yok). Üst çubukta plan seçici, Ayarlar → Veri'de yönetim.
+      Plan değişince geri-al yığını sıfırlanır
+- [ ] **4c Taslaklar** — taslak = kitaplıkta işaretli bir plan. "Yeni plan"
+      üç yol sunar: Boş · Taslaktan · Bu planın kopyası. "Taslak olarak kaydet"
+      yerleşimleri atarak kopyalar. Kurulum'un boş ekranı taslakları gösterir
+- [ ] **4d Veriler nerede + ortak dosya** — Ayarlar → Veri'de verinin tam olarak
+      nerede durduğunu yazan bölüm (tarayıcıda anahtar, exe'de dosya yolu).
+      Tümünü dışa/içe aktarma (`bundleVersion: 1`); eski tek plan dosyaları
+      (v1–v5) okunmaya devam eder. Sitede `showSaveFilePicker` tutamağı
+      IndexedDB'de saklanıp aynı dosyaya yazılır; `file://` altında ve API'siz
+      tarayıcıda mevcut "Dosyaya kaydet" davranışına düşer
+- [ ] **4e Site derlemesi + PWA** — ikinci hedef `npm run build:site` →
+      `dist-site/`. `dist/index.html` (çift tıklanan tek dosya) aynen kalır.
+      Manifest ("Ders Programı", `standalone`), elle çizilen simge, `sw.js`
+      ile ilk açılıştan sonra çevrimdışı çalışma
+- [ ] **4f GitHub Pages yayını** — `.github/workflows/site.yml`. **Kullanıcıdan:**
+      depo `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı
+      "GitHub Actions" seçilecek
+- [ ] **4g Tauri kabuğu** — `src-tauri/`, pencere başlığı "Ders Programı", ikon,
+      `frontendDist: ../dist`. **Yeni runtime bağımlılığı yok**: `withGlobalTauri`
+      + `window.__TAURI__.core.invoke`, `@tauri-apps/*` npm paketi eklenmiyor
+      (tuzak 19'un chunk sorunu doğmasın). **Kullanıcıdan:** Rust toolchain onayı
+- [ ] **4h exe dosyaya yazsın** — her değişiklik `Belgelerim/Ders Programı/`
+      altına, günlük yedek (son 10 gün). Biçim sitedeki dışa aktarımla birebir
+      aynı — "aynı veri" maddesinin karşılığı bu
+- [ ] **4i Windows `.exe`** — bu makine Fedora, çapraz derleme güvenilir değil:
+      `.github/workflows/exe.yml` → `windows-latest` → artefakt. SmartScreen
+      uyarısı için babaya tek cümlelik not
+- [ ] **4j Belgeler** — `CLAUDE.md`'de ilke 2'nin yeni hâli (statik yayın var,
+      backend/veritabanı yok) ve yasak listeden "birden çok program sürümünü yan
+      yana tutma" maddesinin gerekçeli çıkarılması (çoklu **plan** geliyor, aynı
+      planın sürüm ağacı değil), `library.ts` mimari şemaya, yeni tuzaklar
 
 ### 1. Babanın gerçek verisiyle deneme
 
@@ -30,12 +67,11 @@ hazır — 338 birim + 200 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9
 program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
 tahmin olur (ilke 5).
 
-> **Ama önce açık bir hata var.** 2026-08-25'te çözücü 19 dünyalık bir matrise
-> sokuldu ve gerçek ölçekte **kurallar sıkılaştırılınca çöktüğü** ölçüldü:
-> 359/359 blok / 78 ms yerine **3/359 blok / 15 sn**. Ayrıntı ve sayılar
-> [STATUS.md](STATUS.md) → *Bilinen hatalar 1*. Aşağıdaki "öğretmen sınırları
-> sorulsun" maddesi bu hatayla doğrudan bağlı: babanız o kutulara bir sayı girdiği
-> gün otomatik dizme çalışmaz hâle gelir.
+> **O hata kapandı (2026-08-25, madde 4a).** Kurallar sıkılaştırılınca çözücü
+> 3/359 bloğa düşüyordu; artık 241/359'u 43 ms'de diziyor ve yerleşemeyene
+> somut bir cümle yazıyor. Yani aşağıdaki "öğretmen sınırları sorulsun" maddesi
+> artık güvenle sorulabilir: babanız o kutulara bir sayı girdiğinde otomatik
+> dizme çalışmaya devam eder.
 
 - [ ] Gerçek öğretmen/sınıf/derslik/ders listesi alınsın (Excel'e yazdırıp yapıştırma
       kutusuna yapıştırmak en hızlısı)
@@ -67,15 +103,12 @@ tahmin olur (ilke 5).
 - [ ] **Kenar çubuğu dar mı geniş mi kullanılıyor?** 92px varsayılan; babanın
       daraltıp daraltmadığı, ızgarada 92px'in eksikliğinin hissedilip hissedilmediği
 
-### 2. Tauri ile `.exe`
+### 2. Tauri ile `.exe` — ayrıntılar (madde 4g–4i)
 
 Babanın makinesi **Windows 10** → Tauri v2 destekliyor, yol açık.
 WebView2 bu makinede kurulu (151.0.4129.101); Rust **kurulu değil**.
 
 - [ ] Rust toolchain kurulsun
-- [ ] `src-tauri` iskelesi, pencere başlığı "Ders Programı", ikon
-- [ ] **Yedekler diske yazılsın** — Tauri'nin asıl kazancı bu: `localStorage` yanında
-      her değişiklik `Belgelerim/Ders Programı/` altına `.json` olarak yazılır
 - [ ] Otomatik günlük yedek (`program-2026-08-24.json`, son 10 gün)
 - [ ] Yazdırma Tauri penceresinde de çalışıyor mu (WebView2 yazdırma diyaloğu)
 - [ ] `npm run tauri build` → tek `.exe`, boyut ve açılış süresi ölçülsün
@@ -383,14 +416,6 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
   (`store.ts`), yani "kaydedilmemiş" durum pratikte oluşmuyor. Yine de babanın
   içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*
 
-.exe kurulmaya başlanmalı.
-
-web sitesinde de gözükmeli.
-
-localhost olmamalı kurulduğunda güzel bir simgeli ismi de güzel olan bir site şeklinde olmalı.
-
-veriler nereye kaydediliyor bu belirlenmeli ve .exe ile açılan ve websitesi ile açıldığında aynı veriler karşımıza çıkmalı.
-
-taslaklar yani önceden ayarlanmış yapılmış düzenlenmiş taslaklar kaydedilip kurulumda kolayca karşımıza çıkıyor olabilmeli.
-
-Birden fazla farklı ders planı yapılabilir olsun. Onlar arasında değişim yapılabilr olsun.
+> **Bu bölümün altına elle yazılan altı satır** (`.exe` · web sitesi · güzel
+> simge ve ad · verilerin nerede durduğu · taslaklar · birden fazla ders planı)
+> **ŞİMDİ SIRADA → 0. v1.0 turuna** taşındı ve 4b–4j maddelerine dönüştü.
