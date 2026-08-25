@@ -151,7 +151,7 @@ export default function Setup({ state, change, plans }: Props) {
                       plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
                     }}
                   >
-                    {d.name} taslağından başla
+                    {d.name} ile başla
                   </button>
                 ))}
               </div>

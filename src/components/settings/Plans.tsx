@@ -200,7 +200,7 @@ export default function Plans({ state, plans }: Props) {
                   plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
                 }}
               >
-                {d.name} taslağından yeni plan
+                {d.name} → yeni plan
               </button>
             ))}
           </div>

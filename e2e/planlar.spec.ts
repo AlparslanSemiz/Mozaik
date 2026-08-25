@@ -244,7 +244,7 @@ test.describe('41. Taslaklar', () => {
     await picker(page).selectOption('1');
     await openPlans(page);
     await page.getByRole('heading', { name: 'Taslaktan başla' }).waitFor();
-    await page.getByRole('button', { name: /taslağından yeni plan$/ }).click();
+    await page.getByRole('button', { name: /→ yeni plan$/ }).click();
 
     expect(await picker(page).inputValue()).not.toBe(draftId);
     await expect(picker(page).locator('option')).toHaveCount(3);
@@ -268,7 +268,7 @@ test.describe('41. Taslaklar', () => {
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
     await page.getByRole('button', { name: 'Kurulum' }).click();
 
-    const start = page.getByRole('button', { name: /taslağından başla$/ });
+    const start = page.getByRole('button', { name: /taslağı ile başla$/ });
     await expect(start).toBeVisible();
     await start.click();
 
