@@ -331,6 +331,62 @@ export function removeBlock(d: State, classId: Id, day: number, hour: number): S
   return { ...d, placements };
 }
 
+// ------------------------------------------------- in-place placing (solver)
+
+/**
+ * `place()` and `buildIndex()` in one, writing into the SAME objects instead of
+ * producing new ones. Only the solver uses this pair.
+ *
+ * Why it exists: backtracking touches the grid tens of thousands of times, and
+ * `place()` copies a ~430-key dictionary every call while `buildIndex()` walks
+ * the whole thing. Both are the right shape for a single user action and the
+ * wrong shape for a search.
+ *
+ * Why it is safe: `blocker()` and the rule functions only ever READ
+ * `placements` and the index, so mutating them in place reuses the constraint
+ * engine verbatim rather than re-implementing it. The one thing that could
+ * drift is this function against `place()` itself, which is exactly what
+ * `constraints.test.ts` pins down.
+ */
+export function occupy(
+  placements: Record<string, Id>,
+  ix: Index,
+  lesson: Lesson,
+  roomId: Id | null,
+  day: number,
+  hour: number,
+): void {
+  const block = Math.max(1, lesson.blockSize);
+  for (let i = 0; i < block; i++) {
+    const h = hour + i;
+    placements[placementKey(lesson.classId, day, h)] = lesson.id;
+    ix.teacherBusy.set(teacherKey(lesson.teacherId, day, h), lesson.id);
+    if (roomId != null) ix.roomBusy.set(closedKey(roomId, day, h), lesson.id);
+  }
+  ix.placedHours.set(lesson.id, (ix.placedHours.get(lesson.id) ?? 0) + block);
+}
+
+/** Undoes exactly one `occupy()`. */
+export function vacate(
+  placements: Record<string, Id>,
+  ix: Index,
+  lesson: Lesson,
+  roomId: Id | null,
+  day: number,
+  hour: number,
+): void {
+  const block = Math.max(1, lesson.blockSize);
+  for (let i = 0; i < block; i++) {
+    const h = hour + i;
+    delete placements[placementKey(lesson.classId, day, h)];
+    ix.teacherBusy.delete(teacherKey(lesson.teacherId, day, h));
+    if (roomId != null) ix.roomBusy.delete(closedKey(roomId, day, h));
+  }
+  const left = (ix.placedHours.get(lesson.id) ?? 0) - block;
+  if (left > 0) ix.placedHours.set(lesson.id, left);
+  else ix.placedHours.delete(lesson.id);
+}
+
 /** Counter: how many hours of this lesson are on the grid. */
 export function countPlacedHours(d: State, lessonId: Id): number {
   let n = 0;

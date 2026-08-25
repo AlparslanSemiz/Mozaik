@@ -5,6 +5,7 @@
 // cheaper and far more useful.
 
 import { blocker, buildIndex } from './constraints';
+import type { Index } from './constraints';
 import { findViolations } from './rules';
 import type { Violation } from './rules';
 import type { State, Id } from './types';
@@ -48,6 +49,62 @@ export interface Report extends Capacity {
   /** Limit rules broken by the timetable as it stands (rules.ts). */
   violations: Violation[];
   hasProblem: boolean;
+}
+
+/** "412 — AV Fizik": how a lesson is named wherever the user is told about it. */
+export function lessonName(ix: Index, lessonId: Id): string {
+  const lesson = ix.lessonById.get(lessonId);
+  const group = lesson && ix.classById.get(lesson.classId);
+  const teacher = lesson && ix.teacherById.get(lesson.teacherId);
+  return `${group?.name ?? '?'} — ${teacher?.short ?? '?'} ${teacher?.subject ?? ''}`.trim();
+}
+
+/**
+ * Why a lesson does not fit, in `blocker()`'s own words.
+ *
+ * The most FREQUENT reason is the explanatory one: a teacher who is away four
+ * days says more than the one cell that happens to be checked first. Shared by
+ * the Kontrol report and by the solver's "I got stuck here" message, so the two
+ * can never tell the same story differently.
+ */
+export interface BlockSummary {
+  /** The commonest blocking reason. */
+  reason: string;
+  /** Is there at least one cell it COULD go in, ignoring everything else. */
+  anyValid: boolean;
+}
+
+export function commonestBlock(
+  d: State,
+  ix: Index,
+  lessonId: Id,
+  /** Stop at the first free cell: the caller only wants to know IF it fits. */
+  stopAtFirstValid = false,
+): BlockSummary {
+  const counts = new Map<string, number>();
+  let anyValid = false;
+
+  outer: for (let g = 0; g < d.settings.days.length; g++) {
+    for (let s = 0; s < d.settings.hours.length; s++) {
+      const reason = blocker(d, ix, lessonId, g, s);
+      if (reason === null) {
+        anyValid = true;
+        if (stopAtFirstValid) break outer;
+      } else {
+        counts.set(reason, (counts.get(reason) ?? 0) + 1);
+      }
+    }
+  }
+
+  let reason = 'Boş yer kalmamış';
+  let top = 0;
+  for (const [text, count] of counts) {
+    if (count > top) {
+      top = count;
+      reason = text;
+    }
+  }
+  return { reason, anyValid };
 }
 
 function levelOf(capacity: number, load: number): Level {
@@ -127,37 +184,14 @@ export function buildReport(d: State): Report {
     const missing = lesson.weeklyHours - placed;
     if (missing <= 0) continue;
 
-    const counts = new Map<string, number>();
-    let anyValid = false;
-    for (let g = 0; g < d.settings.days.length && !anyValid; g++) {
-      for (let s = 0; s < d.settings.hours.length; s++) {
-        const reason = blocker(d, ix, lesson.id, g, s);
-        if (reason === null) {
-          anyValid = true;
-          break;
-        }
-        counts.set(reason, (counts.get(reason) ?? 0) + 1);
-      }
-    }
-    if (anyValid) continue;
+    const summary = commonestBlock(d, ix, lesson.id, true);
+    if (summary.anyValid) continue;
 
-    // The most frequent reason is the most explanatory one.
-    let topReason = 'Boş yer kalmamış';
-    let topCount = 0;
-    for (const [reason, count] of counts) {
-      if (count > topCount) {
-        topCount = count;
-        topReason = reason;
-      }
-    }
-
-    const group = ix.classById.get(lesson.classId);
-    const teacher = ix.teacherById.get(lesson.teacherId);
     unplaceable.push({
       lessonId: lesson.id,
-      name: `${group?.name ?? '?'} — ${teacher?.short ?? '?'} ${teacher?.subject ?? ''}`.trim(),
+      name: lessonName(ix, lesson.id),
       missing,
-      message: `${missing} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: ${topReason}`,
+      message: `${missing} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: ${summary.reason}`,
     });
   }
 

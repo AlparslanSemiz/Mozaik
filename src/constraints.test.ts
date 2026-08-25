@@ -1,6 +1,8 @@
 import {
   blockStart,
   blocker,
+  occupy,
+  vacate,
   check,
   buildIndex,
   closedConflicts,
@@ -558,5 +560,113 @@ describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', (
 
     const lifted = removeBlock(placed, 's510', 0, 1);
     expect(why(lifted, 'x1', 0, 2)).toBeNull();
+  });
+});
+
+// occupy/vacate are place() + buildIndex() written for a search: same effect,
+// no allocation. The one thing that can go wrong is that they drift apart from
+// the functions they mirror, and then the solver would produce a timetable that
+// the drag engine considers illegal. This is the only guard against that.
+describe('occupy / vacate — yerinde yerleştirme', () => {
+  /** Everything blocker() and the rules can read, as one comparable value. */
+  function snapshot(d: State) {
+    const ix = buildIndex(d);
+    return {
+      placements: { ...d.placements },
+      teacherBusy: [...ix.teacherBusy.entries()].sort(),
+      roomBusy: [...ix.roomBusy.entries()].sort(),
+      placedHours: [...ix.placedHours.entries()].sort(),
+    };
+  }
+
+  function mutable(d: State) {
+    const placements = { ...d.placements };
+    const work: State = { ...d, placements };
+    return { work, placements, ix: buildIndex(work) };
+  }
+
+  function live(placements: Record<string, string>, ix: ReturnType<typeof buildIndex>) {
+    return {
+      placements: { ...placements },
+      teacherBusy: [...ix.teacherBusy.entries()].sort(),
+      roomBusy: [...ix.roomBusy.entries()].sort(),
+      placedHours: [...ix.placedHours.entries()].sort(),
+    };
+  }
+
+  it('tek blok: place + buildIndex ile birebir aynı', () => {
+    const d = build();
+    const { work, placements, ix } = mutable(d);
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1);
+    expect(live(placements, ix)).toEqual(snapshot(place(d, 'x1', 0, 1)));
+    expect(work.placements).toBe(placements); // the state really shares the object
+  });
+
+  it('çok saatlik blok da aynı', () => {
+    const d = build();
+    const { placements, ix } = mutable(d);
+    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0); // x6, blockSize 3
+    expect(live(placements, ix)).toEqual(snapshot(place(d, 'x6', 1, 0)));
+  });
+
+  it('üst üste yerleştirmeler de aynı', () => {
+    const d = build();
+    const { placements, ix } = mutable(d);
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 0);
+    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1); // x3, blockSize 2
+    occupy(placements, ix, d.lessons[1]!, 'dA', 1, 3);
+
+    let expected = place(d, 'x1', 0, 0);
+    expected = place(expected, 'x3', 0, 1);
+    expected = place(expected, 'x2', 1, 3);
+    expect(live(placements, ix)).toEqual(snapshot(expected));
+  });
+
+  it('vacate her şeyi tam olarak geri alıyor', () => {
+    const d = build();
+    const before = snapshot(d);
+    const { placements, ix } = mutable(d);
+
+    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1);
+    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0);
+    vacate(placements, ix, d.lessons[5]!, 'dB', 1, 0);
+    vacate(placements, ix, d.lessons[2]!, 'dB', 0, 1);
+
+    expect(live(placements, ix)).toEqual(before);
+  });
+
+  it('yerleşmiş bir programın üstüne eklenip geri alınabiliyor', () => {
+    const d = place(build(), 'x1', 0, 0);
+    const before = snapshot(d);
+    const { placements, ix } = mutable(d);
+
+    occupy(placements, ix, d.lessons[1]!, 'dA', 0, 1);
+    expect(live(placements, ix)).toEqual(snapshot(place(d, 'x2', 0, 1)));
+
+    vacate(placements, ix, d.lessons[1]!, 'dA', 0, 1);
+    expect(live(placements, ix)).toEqual(before);
+  });
+
+  it('dersliksiz sınıfta roomBusy hiç dokunulmuyor', () => {
+    const d: State = {
+      ...build(),
+      classes: build().classes.map((c) => (c.id === 's510' ? { ...c, roomId: null } : c)),
+    };
+    const { placements, ix } = mutable(d);
+    occupy(placements, ix, d.lessons[0]!, null, 0, 0);
+    expect(live(placements, ix)).toEqual(snapshot(place(d, 'x1', 0, 0)));
+    expect(ix.roomBusy.size).toBe(0);
+  });
+
+  it('occupy sonrası blocker aynı cevabı veriyor', () => {
+    const d = build();
+    const { work, placements, ix } = mutable(d);
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1); // x1 -> 510, Monday, hour 2
+
+    // The class is busy, and so is MÇ.
+    expect(blocker(work, ix, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2 saatinde Matematik var');
+    expect(blocker(work, ix, 'x2', 0, 1)).toBe('MÇ Pazartesi 2 saatinde 510 sınıfında');
+    // The room is shared, so 511 cannot use it either.
+    expect(why(place(d, 'x1', 0, 1), 'x5', 0, 1)).toBe(blocker(work, ix, 'x5', 0, 1));
   });
 });
