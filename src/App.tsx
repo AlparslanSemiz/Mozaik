@@ -180,7 +180,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
 ];
 
 export default function App() {
-  const { state, change, undo, redo, loadState, canUndo, canRedo } = useStore();
+  const { state, change, undo, redo, loadState, canUndo, canRedo, plans } = useStore();
 
   // With no data, start on Setup — an empty Program screen tells him nothing.
   const [tab, setTab] = useState<Tab>(state.lessons.length > 0 ? 'program' : 'setup');
@@ -272,6 +272,26 @@ export default function App() {
         <header className="topbar">
           <h1 className="app-title">{state.settings.schoolName.trim() || 'Ders Programı'}</h1>
 
+          {/* Which timetable is open. It is shown even when there is only one:
+              "hangi planı düzenliyorum" is the question this answers, and a
+              picker that appears only after you already have two plans cannot
+              be how you find out that plans exist. Everything that CREATES,
+              renames or deletes one is in Ayarlar > Veri — the top bar must
+              stay a place where no click can lose an afternoon. */}
+          <select
+            className="plan-picker"
+            aria-label="Plan"
+            title="Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Veri"
+            value={plans.planId}
+            onChange={(e) => plans.switchPlan(e.target.value)}
+          >
+            {plans.library.plans.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.draft ? `${p.name} (taslak)` : p.name}
+              </option>
+            ))}
+          </select>
+
           {/* One line, once: my father has exactly one habit to learn — save to
               a file. It sits INLINE now, so it no longer costs the timetable a
               row and no longer has to be hidden on the Program tab. */}
@@ -344,7 +364,7 @@ export default function App() {
             tab === 'program' && state.lessons.length > 0 ? 'main no-overflow' : 'main'
           }
         >
-          {tab === 'setup' && <Setup state={state} change={change} />}
+          {tab === 'setup' && <Setup state={state} change={change} plans={plans} />}
           {tab === 'availability' && <Availability state={state} change={change} />}
           {tab === 'program' && <Program state={state} change={change} solver={solver} />}
           {tab === 'check' && <Check state={state} />}
@@ -352,7 +372,7 @@ export default function App() {
             <Print state={state} excluded={printExcluded} setExcluded={setPrintExcluded} />
           )}
           {tab === 'settings' && (
-            <Settings state={state} change={change} loadState={loadState} />
+            <Settings state={state} change={change} loadState={loadState} plans={plans} />
           )}
         </main>
       </div>

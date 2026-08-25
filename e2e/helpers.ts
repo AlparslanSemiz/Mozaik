@@ -412,6 +412,14 @@ export const SCENES: Scene[] = [
       await openSettings(page, 'Kurallar');
     },
   },
+  {
+    // The plan library and the backup chain: the screen that answers "where is
+    // my data" — and the one place a click can destroy a whole timetable.
+    name: '11-ayarlar-veri',
+    go: async (page) => {
+      await openSettings(page, 'Veri');
+    },
+  },
 ];
 
 /** Loads the sample data in the chosen theme, for the scene list above. */

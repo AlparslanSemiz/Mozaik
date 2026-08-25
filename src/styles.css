@@ -163,6 +163,15 @@ textarea {
   white-space: nowrap;
 }
 
+/* Which plan is open. Capped, because a plan is named by hand and a long name
+   would push the save buttons off a 1366px top bar; `.topbar-note` next to it
+   already shrinks and ellipses, so the row keeps its width either way. */
+.plan-picker {
+  max-width: 190px;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
 .tabs {
   display: flex;
   flex-direction: column;
@@ -946,6 +955,13 @@ table.bell-preview tbody th {
 table.list td > input[type='text']:not(.num):not(.text-sm),
 table.list td > select {
   width: 100%;
+}
+
+/* Two buttons that belong on ONE line inside a table cell. `.form-row` wraps by
+   design everywhere else; here wrapping doubles the row height and pushes the
+   name box into a sliver. */
+.form-row.nowrap {
+  flex-wrap: nowrap;
 }
 
 table.list tbody tr:hover,

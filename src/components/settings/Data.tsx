@@ -8,14 +8,17 @@
 import { emptyState, respreadColors } from '../../entities';
 import { listBackups } from '../../store';
 import type { State } from '../../types';
+import type { PlanControls } from '../props';
+import Plans from './Plans';
 
 interface Props {
   state: State;
   change: (apply: (d: State) => State) => void;
   loadState: (next: State) => void;
+  plans: PlanControls;
 }
 
-export default function Data({ state, change, loadState }: Props) {
+export default function Data({ state, change, loadState, plans }: Props) {
   const backups = listBackups();
 
   function reset() {
@@ -33,6 +36,8 @@ export default function Data({ state, change, loadState }: Props) {
   return (
     <div className="cols">
       <div>
+        <Plans state={state} plans={plans} />
+
         <div className="panel">
           <h2>Veri</h2>
 
@@ -53,8 +58,9 @@ export default function Data({ state, change, loadState }: Props) {
 
           <h3>Sıfırla</h3>
           <p className="hint">
-            Öğretmenler, sınıflar, derslikler, dersler ve dizilmiş programın tamamı
-            silinir. <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
+            <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri, dersleri ve
+            dizilmiş programı silinir; diğer planlara dokunulmaz.{' '}
+            <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
           </p>
           <div className="form-row">
             <button className="btn danger" onClick={reset} title="Her şeyi siler">
@@ -69,8 +75,9 @@ export default function Data({ state, change, loadState }: Props) {
           <h2>Bu bilgisayardaki otomatik yedekler</h2>
           <p className="hint">
             Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç oturumun
-            durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> aittir — taşımak ve
-            gerçekten güvende olmak için üst çubuktaki <b>Dosyaya kaydet</b>'i kullanın.
+            durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve programı açtığınızda{' '}
+            <b>hangi plan açıksa ona</b> aittir — taşımak ve gerçekten güvende olmak için
+            üst çubuktaki <b>Dosyaya kaydet</b>'i kullanın.
           </p>
           {backups.length === 0 ? (
             <p className="hint">Henüz otomatik yedek yok — bu ilk oturum.</p>

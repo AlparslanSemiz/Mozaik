@@ -12,12 +12,13 @@ import School from './School';
 import Rules from './Rules';
 import Subjects from './Subjects';
 import Data from './Data';
-import type { PanelProps } from '../props';
+import type { PanelProps, PlanControls } from '../props';
 
 type SectionId = 'school' | 'rules' | 'subjects' | 'data';
 
 interface Props extends PanelProps {
   loadState: (next: State) => void;
+  plans: PlanControls;
 }
 
 const SECTIONS: Array<{ id: SectionId; label: string }> = [
@@ -27,7 +28,7 @@ const SECTIONS: Array<{ id: SectionId; label: string }> = [
   { id: 'data', label: 'Veri' },
 ];
 
-export default function Settings({ state, change, loadState }: Props) {
+export default function Settings({ state, change, loadState, plans }: Props) {
   const [section, setSection] = useState<SectionId>('school');
 
   return (
@@ -48,7 +49,9 @@ export default function Settings({ state, change, loadState }: Props) {
       {section === 'school' && <School state={state} change={change} />}
       {section === 'rules' && <Rules state={state} change={change} />}
       {section === 'subjects' && <Subjects state={state} change={change} />}
-      {section === 'data' && <Data state={state} change={change} loadState={loadState} />}
+      {section === 'data' && (
+        <Data state={state} change={change} loadState={loadState} plans={plans} />
+      )}
     </>
   );
 }

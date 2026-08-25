@@ -18,7 +18,9 @@ import Teachers from './Teachers';
 import Classes from './Classes';
 import Lessons from './Lessons';
 import Summary from './Summary';
-import type { PanelProps } from '../props';
+import { drafts as draftsOf } from '../../library';
+import { loadPlan } from '../../store';
+import type { PanelProps, PlanControls } from '../props';
 
 type StepId = 'rooms' | 'teachers' | 'classes' | 'lessons';
 
@@ -56,8 +58,16 @@ const STEPS: Step[] = [
   },
 ];
 
-export default function Setup({ state, change }: PanelProps) {
+interface Props extends PanelProps {
+  plans: PlanControls;
+}
+
+export default function Setup({ state, change, plans }: Props) {
   const [step, setStep] = useState<StepId>('rooms');
+  // A draft is last term's setup with the grid emptied. This screen is where an
+  // empty project lands, so it is the only place where offering one is useful:
+  // one click instead of retyping twenty classes.
+  const templates = draftsOf(plans.library).filter((p) => p.id !== plans.planId);
 
   const index = Math.max(
     0,
@@ -117,6 +127,36 @@ export default function Setup({ state, change }: PanelProps) {
             Ne yaptığını görmek için. Kendi verinizi girmeden önce{' '}
             <b>Ayarlar → Veri → Her şeyi sil</b> ile temizleyin.
           </p>
+
+          {templates.length > 0 && (
+            <>
+              <h3>Taslaktan başla</h3>
+              <p className="hint">
+                Daha önce <b>taslak</b> olarak işaretlediğiniz planların kurulumu hazır
+                duruyor. Seçtiğinizden <b>yeni bir plan</b> açılır: derslikler,
+                öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir.
+                Taslağın kendisi değişmez.
+              </p>
+              <div className="form-row">
+                {templates.map((d) => (
+                  <button
+                    key={d.id}
+                    className="btn"
+                    onClick={() => {
+                      const seed = loadPlan(d.id);
+                      if (seed === null) {
+                        window.alert('Bu taslağın verisi bulunamadı.');
+                        return;
+                      }
+                      plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
+                    }}
+                  >
+                    {d.name} taslağından başla
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 

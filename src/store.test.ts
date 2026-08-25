@@ -306,3 +306,100 @@ describe('parseState — v4 → v5 göçü', () => {
     expect(parseState(JSON.stringify(raw))!.settings.subjects).toEqual(defaultSubjects());
   });
 });
+
+// ---------------------------------------------------------------------------
+// The undo stack and the plan library.
+//
+// `reduce` is pure, so the rule that matters most — undo must never carry one
+// plan's move into another plan's file — can be pinned without mounting React.
+
+import { BASE_KEY, FIRST_PLAN_ID, planKey } from './library';
+import { loadPlan, reduce, savePlan } from './store';
+import { emptyState } from './entities';
+import type { State } from './types';
+
+function memoryStorage(): Storage {
+  const map = new Map<string, string>();
+  return {
+    get length() {
+      return map.size;
+    },
+    clear: () => map.clear(),
+    getItem: (k: string) => map.get(k) ?? null,
+    key: (i: number) => [...map.keys()][i] ?? null,
+    removeItem: (k: string) => void map.delete(k),
+    setItem: (k: string, v: string) => void map.set(k, String(v)),
+  } as Storage;
+}
+
+/** Vitest runs this file under `node`, which has no localStorage of its own. */
+beforeEach(() => {
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: memoryStorage(),
+    configurable: true,
+    writable: true,
+  });
+});
+
+const box = (present: State, planId = FIRST_PLAN_ID) => ({
+  present,
+  past: [emptyState()],
+  future: [emptyState()],
+  planId,
+});
+
+describe('reduce — plan kimliği', () => {
+  it('plan değişince geri-al yığını SIFIRLANIYOR', () => {
+    const next = reduce(box(sampleState()), {
+      type: 'switch',
+      id: 'abcd',
+      state: emptyState(),
+    });
+    expect(next.planId).toBe('abcd');
+    expect(next.past).toEqual([]);
+    expect(next.future).toEqual([]);
+  });
+
+  it('düzenleme, geri al ve ileri al plan kimliğini taşıyor', () => {
+    const start = box(sampleState(), 'abcd');
+    const changed = reduce(start, { type: 'change', apply: (d) => ({ ...d, rooms: [] }) });
+    expect(changed.planId).toBe('abcd');
+    expect(reduce(changed, { type: 'undo' }).planId).toBe('abcd');
+    expect(reduce(reduce(changed, { type: 'undo' }), { type: 'redo' }).planId).toBe('abcd');
+    // A file opened with "Dosyadan aç" replaces the OPEN plan, it does not move.
+    expect(reduce(start, { type: 'load', state: emptyState() }).planId).toBe('abcd');
+  });
+
+  it('gerçek bir değişiklik yoksa geçmiş kirletilmiyor', () => {
+    const start = box(sampleState());
+    expect(reduce(start, { type: 'change', apply: (d) => d })).toBe(start);
+  });
+});
+
+describe('planların ayrı anahtarları', () => {
+  it('ilk plan tarihsel anahtara yazılıyor, ikincisi kendi anahtarına', () => {
+    savePlan(FIRST_PLAN_ID, sampleState());
+    savePlan('abcd', emptyState());
+    expect(localStorage.getItem(BASE_KEY)).not.toBeNull();
+    expect(localStorage.getItem(planKey('abcd'))).not.toBeNull();
+    expect(localStorage.getItem(BASE_KEY)).not.toBe(localStorage.getItem(planKey('abcd')));
+  });
+
+  it('yazılan plan parseState üzerinden birebir geri okunuyor', () => {
+    const original = sampleState();
+    savePlan('abcd', original);
+    expect(JSON.stringify(loadPlan('abcd'))).toBe(JSON.stringify(original));
+  });
+
+  it('hiç yazılmamış plan null dönüyor — boş duruma DÜŞMÜYOR', () => {
+    // null and "an empty school" must stay tellable apart: the caller decides.
+    expect(loadPlan('yokboyle')).toBeNull();
+  });
+
+  it('devralma: eski tek anahtar 1. plan olarak okunuyor', () => {
+    localStorage.setItem(BASE_KEY, JSON.stringify(sampleState()));
+    const adopted = loadPlan(FIRST_PLAN_ID)!;
+    expect(adopted.teachers).toHaveLength(sampleState().teachers.length);
+    expect(adopted.placements).toEqual(sampleState().placements);
+  });
+});

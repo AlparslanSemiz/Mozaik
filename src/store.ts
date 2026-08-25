@@ -6,13 +6,31 @@
 //   2. on every start the previous session's state is pushed down a backup chain (last 3)
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { sanitize } from './constraints';
-import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from './entities';
+import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
+import {
+  addPlan,
+  BASE_KEY,
+  dropPlanText,
+  findPlan,
+  type Library,
+  planKey,
+  readLibrary,
+  readPlanText,
+  removePlan,
+  renamePlan as renameInLibrary,
+  setActive,
+  setDraft,
+  uniquePlanName,
+  writeLibrary,
+  writePlanText,
+} from './library';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
 import type {
   ClassGroup,
   Day,
+  Id,
   Lesson,
   Room,
   RuleLevel,
@@ -21,9 +39,10 @@ import type {
 } from './types';
 import { SCHEMA_VERSION } from './types';
 
-// The storage key and the backup file name are USER DATA, not identifiers:
-// renaming them would orphan every saved timetable. They stay Turkish.
-const KEY = 'ders-programi';
+// The storage key lives in library.ts now: it is the key of plan "1", and which
+// key belongs to which plan is that module's job. It is still USER DATA and
+// still Turkish — renaming it would orphan every saved timetable.
+const KEY = BASE_KEY;
 const BACKUP_COUNT = 3;
 const HISTORY_LIMIT = 30;
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
@@ -34,20 +53,27 @@ interface Box {
   present: State;
   past: State[];
   future: State[];
+  /** Which plan `present` belongs to. Kept HERE so that a switch changes the
+      timetable and its key in one step: an auto-save that saw them disagree for
+      even one render would write one plan's work into another plan's key. */
+  planId: Id;
 }
 
 type Action =
   | { type: 'change'; apply: (d: State) => State }
   | { type: 'undo' }
   | { type: 'redo' }
-  | { type: 'load'; state: State };
+  | { type: 'load'; state: State }
+  | { type: 'switch'; id: Id; state: State };
 
-function reduce(box: Box, action: Action): Box {
+/** Exported so the undo/redo rules can be tested without mounting React. */
+export function reduce(box: Box, action: Action): Box {
   switch (action.type) {
     case 'change': {
       const next = action.apply(box.present);
       if (next === box.present) return box; // no real change -> do not pollute history
       return {
+        ...box,
         present: next,
         past: [...box.past, box.present].slice(-HISTORY_LIMIT),
         future: [],
@@ -56,15 +82,29 @@ function reduce(box: Box, action: Action): Box {
     case 'undo': {
       const previous = box.past[box.past.length - 1];
       if (previous === undefined) return box;
-      return { present: previous, past: box.past.slice(0, -1), future: [box.present, ...box.future] };
+      return {
+        ...box,
+        present: previous,
+        past: box.past.slice(0, -1),
+        future: [box.present, ...box.future],
+      };
     }
     case 'redo': {
       const next = box.future[0];
       if (next === undefined) return box;
-      return { present: next, past: [...box.past, box.present], future: box.future.slice(1) };
+      return {
+        ...box,
+        present: next,
+        past: [...box.past, box.present],
+        future: box.future.slice(1),
+      };
     }
     case 'load':
-      return { present: sanitize(action.state), past: [], future: [] };
+      return { ...box, present: sanitize(action.state), past: [], future: [] };
+    // Switching plans clears the history on purpose: "undo" across a plan
+    // boundary would put one plan's grid into another plan's file.
+    case 'switch':
+      return { present: sanitize(action.state), past: [], future: [], planId: action.id };
   }
 }
 
@@ -383,27 +423,32 @@ export function storageWorks(): boolean {
   );
 }
 
-export function save(d: State): void {
-  safely(() => localStorage.setItem(KEY, JSON.stringify(d)));
+/** Writes ONE plan. The key is derived from the id, never from "the current". */
+export function savePlan(id: Id, d: State): void {
+  writePlanText(id, JSON.stringify(d));
 }
 
-export function load(): State | null {
-  const text = safely(() => localStorage.getItem(KEY));
-  return text == null ? null : parseState(text);
+export function loadPlan(id: Id): State | null {
+  const text = readPlanText(id);
+  return text === null ? null : parseState(text);
 }
 
 /**
  * Once at startup: pushes the previous session's state down the backup chain.
  * Rotating on every change is expensive on a slow machine; once per session is
  * enough, and the last 3 SESSIONS are worth more than the last 3 clicks.
+ *
+ * The chain is per SESSION, not per plan: four copies of every plan would fill
+ * a 5 MB quota with a handful of plans. It therefore holds whichever plan was
+ * open when the window was opened, and the Ayarlar > Veri panel says so.
  */
-function rotateBackups(): void {
+function rotateBackups(key: string): void {
   safely(() => {
     for (let i = BACKUP_COUNT - 1; i > 0; i--) {
       const previous = localStorage.getItem(`${KEY}-yedek-${i - 1}`);
       if (previous !== null) localStorage.setItem(`${KEY}-yedek-${i}`, previous);
     }
-    const current = localStorage.getItem(KEY);
+    const current = localStorage.getItem(key);
     if (current !== null) localStorage.setItem(`${KEY}-yedek-0`, current);
   });
 }
@@ -450,8 +495,18 @@ export function readBackupFile(file: File): Promise<State | null> {
 // -------------------------------------------------------------------- hook
 
 function initialBox(): Box {
-  rotateBackups();
-  return { present: load() ?? emptyState(), past: [], future: [] };
+  // First run: the directory does not exist yet, so `readLibrary()` hands back
+  // the one-plan default whose id is "1" — and plan "1"'s key IS the key the
+  // timetable is already sitting in. Adoption therefore copies NOTHING.
+  const library = readLibrary();
+  writeLibrary(library);
+  rotateBackups(planKey(library.activeId));
+  return {
+    present: loadPlan(library.activeId) ?? emptyState(),
+    past: [],
+    future: [],
+    planId: library.activeId,
+  };
 }
 
 /** While typing in a text box let the browser handle Ctrl+Z, do not grab it. */
@@ -463,6 +518,7 @@ function isTextInput(target: EventTarget | null): boolean {
 
 export function useStore() {
   const [box, dispatch] = useReducer(reduce, undefined, initialBox);
+  const [library, setLibrary] = useState<Library>(readLibrary);
 
   const change = useCallback((apply: (d: State) => State) => {
     dispatch({ type: 'change', apply });
@@ -471,20 +527,96 @@ export function useStore() {
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
   const loadState = useCallback((state: State) => dispatch({ type: 'load', state }), []);
 
-  // Auto-save — debounced, otherwise we write JSON on every drag frame.
+  // Auto-save — debounced, otherwise we write JSON on every drag frame. The
+  // state and the key it goes to come from the SAME box, so a pending write can
+  // never land in the wrong plan.
   const timer = useRef<number | undefined>(undefined);
   useEffect(() => {
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => save(box.present), SAVE_DELAY);
+    timer.current = window.setTimeout(() => savePlan(box.planId, box.present), SAVE_DELAY);
     return () => window.clearTimeout(timer.current);
-  }, [box.present]);
+  }, [box.present, box.planId]);
 
   // Flush the pending save when the tab closes.
   useEffect(() => {
-    const flush = () => save(box.present);
+    const flush = () => savePlan(box.planId, box.present);
     window.addEventListener('beforeunload', flush);
     return () => window.removeEventListener('beforeunload', flush);
-  }, [box.present]);
+  }, [box.present, box.planId]);
+
+  // --------------------------------------------------------- the plan library
+  //
+  // Every one of these first FLUSHES the plan being left. The debounce is 400 ms
+  // and the effect's cleanup cancels a pending write whenever the box changes,
+  // so without this the last edit before a switch is simply dropped — silently,
+  // which is the only kind of data loss that matters.
+  const park = useCallback(() => {
+    window.clearTimeout(timer.current);
+    savePlan(box.planId, box.present);
+  }, [box.planId, box.present]);
+
+  const commit = useCallback((next: Library) => {
+    writeLibrary(next);
+    setLibrary(next);
+  }, []);
+
+  const switchPlan = useCallback(
+    (id: Id) => {
+      if (id === box.planId || findPlan(library, id) === undefined) return;
+      park();
+      dispatch({ type: 'switch', id, state: loadPlan(id) ?? emptyState() });
+      commit(setActive(library, id));
+    },
+    [box.planId, park, commit, library],
+  );
+
+  /**
+   * Creates a plan from `seed` and opens it.
+   *
+   * One primitive, four buttons: an empty school, a copy of this plan, a copy
+   * with the grid emptied (a draft), or a copy of a draft. The plan's DATA is
+   * written before the directory entry, so a failed write can never leave the
+   * directory pointing at a key with nothing in it.
+   */
+  const createPlan = useCallback(
+    (name: string, seed: State, draft = false): Id => {
+      park();
+      const id = newId();
+      const clean = sanitize(seed);
+      savePlan(id, clean);
+      commit(setActive(addPlan(library, { id, name: uniquePlanName(library, name), draft }), id));
+      dispatch({ type: 'switch', id, state: clean });
+      return id;
+    },
+    [park, commit, library],
+  );
+
+  const deletePlan = useCallback(
+    (id: Id) => {
+      const next = removePlan(library, id);
+      if (next === library) return; // the last plan, or an id nobody knows
+      // Flush FIRST even when the victim is the open plan: park() also cancels
+      // the pending write, which is what stops a timer from resurrecting the
+      // key one beat after it was dropped.
+      park();
+      commit(next);
+      dropPlanText(id);
+      if (id === box.planId) {
+        dispatch({ type: 'switch', id: next.activeId, state: loadPlan(next.activeId) ?? emptyState() });
+      }
+    },
+    [library, commit, park, box.planId],
+  );
+
+  const renamePlan = useCallback(
+    (id: Id, name: string) => commit(renameInLibrary(library, id, name)),
+    [library, commit],
+  );
+
+  const markDraft = useCallback(
+    (id: Id, draft: boolean) => commit(setDraft(library, id, draft)),
+    [library, commit],
+  );
 
   // Ctrl+Z / Ctrl+Y — dropping a card in the wrong place happens constantly,
   // so this is a basic function, not a nicety.
@@ -513,5 +645,14 @@ export function useStore() {
     loadState,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
+    plans: {
+      library,
+      planId: box.planId,
+      switchPlan,
+      createPlan,
+      deletePlan,
+      renamePlan,
+      markDraft,
+    },
   };
 }
