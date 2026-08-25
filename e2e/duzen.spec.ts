@@ -149,9 +149,10 @@ test.describe('24. Ekranın tamamı kullanılıyor', () => {
     expect(table.width).toBeGreaterThan(700);
 
     // The drag-paint target never shrinks below the size it was measured at.
+    // 34px made a ~67px-wide cell a 2:1 slab and ended the screen at 238px.
     const cell = (await page.locator('table.availability tbody td').first().boundingBox())!;
     expect(cell.width).toBeGreaterThanOrEqual(46);
-    expect(Math.round(cell.height)).toBe(34);
+    expect(Math.round(cell.height)).toBe(48);
   });
 
   test('Kontrol iki sütuna akıyor', async ({ page }) => {
