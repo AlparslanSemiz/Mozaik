@@ -10,54 +10,115 @@
 :root {
   color-scheme: light;
 
-  --bg: #f4f5f7;
-  --paper: #ffffff;
-  --line: #c9ced6;
-  --line-dark: #8a93a0;
-  --text: #1b1f24;
-  --muted: #525b66;
-  --accent: #1f5fa8;
-  --accent-hover: #17497f;
-  --accent-bg: #e3eefb;
-  --on-accent: #ffffff;
-  --ok: #177431;
-  --ok-bg: #d5f0dc;
-  --warn: #8a6100;
-  --warn-bg: #fdf0cf;
-  --bad: #b0201c;
-  --bad-bg: #fbdcda;
-  --closed: #d5d8dd;
-  --hatch: #e8eaee;
+  /* yüzey — fark artırıldı, sıcaklık eklendi */
+  --bg:          #eceef1;   /* eski #f4f5f7 — panel artık kalkıyor */
+  --paper:       #ffffff;
+  --paper-sunk:  #f5f6f8;   /* input, inset alan */
 
-  /* The teacher/class palette is NOT here: it lives in src/palette.ts as plain
-     hex. It is the one set of colours that is identical in both themes and on
-     paper, so a CSS variable bought nothing and cost a second place to keep 36
-     values in sync. Only the ink on top of it is a token. */
+  /* ÇİZGİ İKİYE AYRILDI — en önemli değişiklik.
+     --hairline kabuğun her yerinde: liste satırı, panel, kenar çubuğu, ayraç.
+     --line: veri okunan yerler (ızgara, tablo BAŞLIĞI) ve DENETİM kenarı
+     (düğme) — düğmenin kendine ait yüzeyi yok, kenarı tek sınırı.
+     Kabuk çizgisi ile veri çizgisi aynı griyse her şey kutu gibi görünür. */
+  --hairline:    #e4e7ec;   /* kabuk: liste satırı, ayraç. Neredeyse görünmez */
+  --line:        #c9ced6;   /* ızgara, tablo başlığı, düğme kenarı */
+  --line-dark:   #8a93a0;   /* ızgara gün ayracı, baskı */
 
-  /* Ink on a palette background. NOT redefined in dark: the pastel underneath
-     does not change either. */
-  --on-color: #1b1f24;
-  --on-color-sub: #3a3f46;
-  --block-cont: rgba(0, 0, 0, 0.12);
-  --edge: rgba(0, 0, 0, 0.4);
-  --shadow: rgba(0, 0, 0, 0.35);
-  --dot-border: rgba(0, 0, 0, 0.3);
+  --text:        #16191d;
+  /* Verilen set #5c6672 diyordu; --closed üstünde AA 4.08'e düşüyordu ve o gri
+     kapalı saatin × işaretinin rengi. Aynı (daha mavi) ton, iki basamak koyu:
+     --paper 6.79, --closed 4.75. Sınır gevşetilmedi, renk düzeltildi. */
+  --muted:       #525c69;
 
-  /* Paper is always paper. */
-  --print-line: #444444;
-  --print-head-bg: #eeeeee;
+  --accent: #1f5fa8;  --accent-hover: #17497f;
+  --accent-bg: #e3eefb;  --on-accent: #ffffff;
+  --ok: #177431;  --ok-bg: #d5f0dc;
+  --warn: #8a6100;  --warn-bg: #fdf0cf;
+  --bad: #b0201c;  --bad-bg: #fbdcda;
+  --closed: #d5d8dd;  --hatch: #e8eaee;
 
-  --cell-w: 34px;
-  --cell-h: 34px;
+  /* temayla dönmeyen mürekkep — aynen korunuyor */
+  --on-color: #1b1f24;  --on-color-sub: #3a3f46;
+  --block-cont: rgba(0,0,0,.12);
+  --edge: rgba(0,0,0,.4);
+  --dot-border: rgba(0,0,0,.3);
+  --print-line: #444;  --print-head-bg: #eee;
 
-  /* Left rail: labelled, and collapsed to icons only. */
-  --rail-w: 92px;
+  /* Sürüklenen hayalet kart. "Bir öğe yüzüyor gibi görünüyorsa yanlıştır"ın
+     tek istisnası: o kart gerçekten parmağın altında taşınıyor. Yeni token
+     setinde yoktu; düşürülseydi hayaletin gölgesi sessizce kaybolurdu. */
+  --shadow: rgba(0,0,0,.35);
 
-  --space-1: 2px;
-  --space-2: 4px;
-  --space-3: 8px;
-  --space-4: 12px;
-  --space-5: 16px;
+  /* TİPOGRAFİ — 11 boyut yerine 6 */
+  --fs-xs:   .75rem;    /* 12px — mutlak alt sınır */
+  --fs-sm:   .8125rem;
+  --fs-md:   .875rem;
+  --fs-base: 1rem;      /* gövde, eskiden 14px */
+  --fs-lg:   1.125rem;
+  --fs-xl:   1.375rem;
+
+  /* KÂĞIT — ekranınkinden AYRI bir merdiven, pt cinsinden.
+     Gerekçe: --ui-scale bir EKRAN rahatlık ayarı, kâğıt ise sabit fiziksel
+     boyut. Baskı rem kullansaydı 1.25 ölçekte A4'e sığan şey değişir, 205 mm
+     sabit yükseklik hesabı (tuzak 31) ve "3 sınıf = 3 sayfa" testi ölçeğe göre
+     bir geçer bir kalırdı — babanın yazıcıda bulacağı bir hata. pt seçildi
+     çünkü hedef ortam fiziksel; bu bir "ham px" kaçamağı değil.
+     Aynı merdiven ÖNİZLEMEDE de kullanılır: önizleme kâğıda benzemezse hangi
+     sayfanın basılacağını seçmek tahmine döner. */
+  --fs-p-xl:   14pt;    /* 18.7px — sayfa başlığı  (ekran 17px / kâğıt 19px) */
+  --fs-p-lg:   10pt;    /* 13.3px — .p-top, .p-daycol, kapalı saat      (13px) */
+  --fs-p-md:    9pt;    /* 12.0px — künye satırı                       (12px) */
+  --fs-p-base: 8.5pt;   /* 11.3px — tablo gövdesi ve başlığı           (11px) */
+  --fs-p-sm:    8pt;    /* 10.7px — .p-bottom     (ekran 10px / kâğıt 11px) */
+  --fs-p-xs:    7pt;    /*  9.3px — .p-clock                            (9px) */
+
+  /* SATIR ARALIĞI — yepyeni, ferahlığın asıl kaynağı */
+  --lh-tight: 1.2;      /* ızgara hücresi, tablo satırı */
+  --lh-base:  1.5;      /* form etiketi, açıklama, paragraf */
+  --lh-head:  1.25;
+
+  /* BOŞLUK — rem, yani --ui-scale ile birlikte büyür. Yazı büyüyüp boşluk
+     yerinde kalsaydı ölçek ayarı ekranı ferahlatmak yerine sıkıştırırdı. */
+  --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
+  --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
+
+  /* İki değer, üçüncüsü yok. CLAUDE.md 3/6 diyor; Y0 sehven 4/8 yazmıştı ve
+     hiç kullanılmadığı için fark etmemişti. 3/6 hem belgeye uyuyor hem de en
+     sık geçen ham değeri (6px, sekiz yerde) tam karşılıyor. px kalıyor: köşe
+     yuvarlaklığı okunan bir boy değil, kenarın keskinliği. */
+  --r-sm: 3px;  --r-md: 6px;
+
+  /* TABLO SÜTUNU — altı basamak, `ch` cinsinden. JSX'te 29 tane
+     `style={{ width: N }}` vardı; bir sütunun genişliği içindeki yazıyla
+     ilgilidir, ham piksel ise onunla ÇELİŞİR (tuzak 33: gövde 14→16px olunca
+     44px'lik kutu iki basamağı almaz oldu). `ch` yazınca --ui-scale hem
+     başlığı hem hücreyi aynı katsayıyla büyütür, yani %100'de sığan %125'te de
+     sığar.
+     Birim BAŞLIĞIN kendi ch'si (table.list th = --fs-xs), çünkü sınıf onun
+     üstünde duruyor. KUTU genişlikleri (.num, .text-sm, .color-pick) ise
+     gövdeye bağlı — tuzak 34: bir kutu kendi üstünden boylanır, sütunundan
+     değil; sütun ondan boylanır. Aynı piksele iki farklı ch sayısı düşmesinin
+     sebebi bu (8ch@1rem ≈ 10ch@.75rem ≈ 70px), yazım hatası değil.
+     Yanındaki px'ler ölçülmüş karşılıklar, hedef değil: `e2e/sutun.spec.ts`
+     sığdığını her koşuda yeniden ölçer. */
+  --w-col-xs:  8ch;   /*  ~55px  onay kutusu, tek kelimelik etiket */
+  --w-col-sm: 10ch;   /*  ~69px  sayı sütunu (th.num / td.num) */
+  --w-col-md: 13ch;   /*  ~89px  sayı kutusu, tek düğme */
+  --w-col-lg: 16ch;   /* ~110px  kısa metin kutusu, dar açılır liste */
+  --w-col-xl: 26ch;   /* ~179px  uzun seçenekli liste, iki düğme */
+  --w-col-2xl: 32ch;  /* ~220px  uzun metin */
+
+  /* Izgara da --ui-scale'e bağlı. A5 (ayrı --grid-zoom ekseni) kullanıcı
+     tarafından silindi, yani ikinci eksen yok: tek eksen kaldıysa ızgara ona
+     bağlanmalı, yoksa ölçek büyütüldüğünde babanın bütün gün baktığı ekran
+     tek başına küçük kalırdı. */
+  --cell-w: 2.125rem;  --cell-h: 2.125rem;   /* 34px @1.0 */
+  --rail-w: 5.75rem;                          /* 92px @1.0 */
+  --rowhead-w: 8.25rem;                       /* 132px @1.0 */
+
+  --ui-scale: 1;
+  font-size: calc(16px * var(--ui-scale));
+  line-height: var(--lh-base);
 }
 
 :root[data-theme="dark"] {
@@ -81,6 +142,11 @@
   --bad-bg: #401614;
   --closed: #3b434c;
   --hatch: #2e353d;
+
+  /* Işık tarafındaki ikisinin karanlık karşılığı. Sunk yüzey burada da
+     GÖMÜK, yani --paper'dan koyu; hairline --paper'ın bir tık üstünde. */
+  --paper-sunk: #1a1f24;
+  --hairline: #2b3239;
 }
 
 * {
@@ -96,7 +162,8 @@ body,
 
 body {
   font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-  font-size: 14px;
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
   color: var(--text);
   background: var(--bg);
 }
@@ -112,9 +179,11 @@ textarea {
 /* ---------------------------------------------------------------- skeleton */
 
 /* The six sections moved from a band across the top to a rail down the left.
-   Vertically the band cost the timetable a whole row on a 768px screen, and a
-   row is what this tool is made of; horizontally the grid already overflows and
-   scrolls, so the rail's 92px costs nothing that was not scrolled anyway. */
+   The vertical half of that argument was written for a 768px screen, where the
+   band cost the timetable a whole row; on the real 1080px screen that pressure
+   is gone. The horizontal half still holds and is why the rail stays: the grid
+   overflows and scrolls anyway (2616px against 1828px of box), so the rail's
+   92px costs nothing that was not scrolled already. */
 .app {
   display: flex;
   flex-direction: row;
@@ -129,13 +198,13 @@ textarea {
   gap: var(--space-2);
   padding: var(--space-3) var(--space-2);
   background: var(--paper);
-  border-right: 1px solid var(--line);
+  border-right: 1px solid var(--hairline);
   overflow: hidden;
 }
 
 /* Collapsed to icons only, for when the grid needs every pixel. */
 .app.rail-narrow {
-  --rail-w: 52px;
+  --rail-w: 3.25rem;
 }
 
 .workspace {
@@ -152,23 +221,23 @@ textarea {
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--paper);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--hairline);
   flex: 0 0 auto;
 }
 
 .app-title {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--fs-base);
   font-weight: 600;
   white-space: nowrap;
 }
 
 /* Which plan is open. Capped, because a plan is named by hand and a long name
-   would push the save buttons off a 1366px top bar; `.topbar-note` next to it
+   would push the save buttons off the top bar; `.topbar-note` next to it
    already shrinks and ellipses, so the row keeps its width either way. */
 .plan-picker {
   max-width: 190px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   flex: 0 0 auto;
 }
 
@@ -186,11 +255,11 @@ textarea {
   width: 100%;
   padding: var(--space-3) var(--space-1);
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   background: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.1;
 }
 
@@ -228,7 +297,7 @@ textarea {
   width: 1px;
   align-self: stretch;
   margin: 2px var(--space-2);
-  background: var(--line);
+  background: var(--hairline);
 }
 
 .topbar-sep.wide {
@@ -240,17 +309,23 @@ textarea {
    the Program tab the way it did when it took a row of its own. */
 .topbar-note {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* A button has NO surface of its own: --paper on --paper, in the top bar and
+   inside every panel alike. Its border is therefore its only boundary, which
+   is why it could not follow the inputs down to --hairline in Y0 — the inputs
+   earned that by gaining --paper-sunk to sit in. It drops one step instead,
+   from --line-dark (the grid's day separator, the loudest rule in the shell)
+   to --line. */
 .btn {
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line-dark);
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
   background: var(--paper);
   cursor: pointer;
 }
@@ -320,17 +395,19 @@ textarea {
 
 .theme-toggle {
   min-width: 36px;
-  font-size: 15px;
+  font-size: var(--fs-base);
   line-height: 1.2;
 }
 
 /* Four states, and only four: primary (the one thing to do here), plain
    (everything else), danger, and pressed (a two-position toggle, see above).
    Danger is coloured AT REST — until now it was identical to a plain button
-   until the pointer was already on it. */
+   until the pointer was already on it. The INK carries that, not the border:
+   a red rule around every "Sil" is 25 red rectangles down a teacher list, and
+   the danger colour stops meaning danger when it is the page's background
+   pattern. The border comes back on hover, with --bad-bg behind it. */
 .btn.danger {
   color: var(--bad);
-  border-color: var(--bad);
 }
 
 .btn.danger:hover:not(:disabled) {
@@ -355,7 +432,7 @@ textarea {
    does not jump down when it appears. */
 .reason-bar {
   flex: 0 0 auto;
-  height: 30px;
+  height: 1.875rem;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -364,7 +441,7 @@ textarea {
   /* Nothing to say: the plain state. The four loud states are below. */
   background: var(--paper);
   color: var(--muted);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--hairline);
   font-weight: 400;
 }
 
@@ -421,6 +498,10 @@ textarea {
   flex: 1 1 auto;
   overflow: auto;
   background: var(--paper);
+  /* So the "Sığdır" density below can size a cell from the box the grid is
+     actually in. `100vw` would have to guess the rail, the padding and the
+     vertical scrollbar; `100cqw` is the number itself. */
+  container-type: inline-size;
 }
 
 table.grid {
@@ -442,9 +523,9 @@ table.grid thead th {
   top: 0;
   z-index: 2;
   background: var(--bg);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
-  height: 22px;
+  height: 1.375rem;
   text-align: center;
 }
 
@@ -453,19 +534,60 @@ table.grid thead tr:first-child th {
 }
 
 table.grid thead tr:nth-child(2) th {
-  top: 22px;
-  height: 30px;
+  top: 1.375rem;
+  height: 1.875rem;
   font-weight: 400;
   color: var(--muted);
-  line-height: 1.1;
+  line-height: var(--lh-tight);
 }
 
 /* The bell time under the lesson number. Tiny on purpose: it is a reminder,
    the lesson number is what the eye navigates by. */
 .hour-clock {
   display: block;
-  font-size: 9px;
+  font-size: var(--fs-xs);
   color: var(--muted);
+}
+
+/* ------------------------------------------------- "Sığdır": semantic zoom
+   A5. The whole week in the box instead of 2616px of table against 1828px.
+
+   It drops exactly ONE thing, and which thing was MEASURED, not chosen:
+   `--cell-w` was set to 28, 23 and 18px in turn and the cell came out 33.69px
+   every time, because "10:40" in the heading — not the card — was setting the
+   column's min-content. Hiding the card's second line changed nothing;
+   hiding the clock took the table from 2461px to 1728px. Pitfall 37.
+
+   The lesson NUMBER stays: it is what the eye navigates by, and the times are
+   a click away in Ayarlar → Okul and printed on every sheet. */
+:root[data-density='sigdir'] .hour-clock {
+  display: none;
+}
+
+/* The cell is then derived from the box rather than fixed. --lesson-cols and
+   --break-cols come from the markup because the week is not always 6x12: a
+   seven-day week is 84 columns, and a hard-coded 72 would be a lie the day
+   somebody adds Pazartesi. They are COUNTS, not widths — the rule against
+   `style={{ width }}` is about a measurement written in the JSX, and a column
+   count is data the layout needs.
+
+   clamp, not a bare division: the lower end keeps a runaway value from
+   collapsing the grid, and the upper end (2.75rem = 44px) means a screen wider
+   than the week gets bigger cells instead of a stretched table. On the 1920px
+   monitor the middle term wins at ~23px, and the cell is then drawn at 23.59 —
+   the content's own floor, which is where "Sığdır" stops being arithmetic.
+
+   The --space-3 term is slack, and it was MEASURED rather than reasoned: 78
+   column borders each round to a device pixel, and the sum was enough to leave
+   1px of scroll with no slack at all. 2px reserved -> 1px over; 6px -> 0.
+   Half a space unit is the first token above that. */
+:root[data-density='sigdir'] table.grid {
+  --cell-w: clamp(
+    1.125rem,
+    (100cqw - var(--rowhead-w) - var(--break-cols) * 0.375rem - var(--space-3)) /
+      var(--lesson-cols),
+    2.75rem
+  );
 }
 
 /* A thick separator between days — so the eye can navigate 84 columns. */
@@ -481,9 +603,9 @@ table.grid thead tr:nth-child(2) th {
   /* !important for the same reason the background and borders below need it:
      `table.grid tbody td` sets every body cell to --cell-w and outranks a bare
      class. Without it the "narrow" separator was as wide as a lesson. */
-  width: 6px !important;
-  min-width: 6px !important;
-  max-width: 6px !important;
+  width: .375rem !important;
+  min-width: .375rem !important;
+  max-width: .375rem !important;
   padding: 0;
   background: var(--bg) !important;
   border-left: 1px solid var(--line-dark) !important;
@@ -496,19 +618,19 @@ table.grid thead tr:nth-child(2) th {
   z-index: 3;
   background: var(--paper);
   border-right: 2px solid var(--line-dark) !important;
-  width: 132px;
-  min-width: 132px;
+  width: var(--rowhead-w);
+  min-width: var(--rowhead-w);
   text-align: left;
   padding: 2px 6px !important;
-  line-height: 1.15;
-  font-size: 13px;
+  line-height: var(--lh-tight);
+  font-size: var(--fs-sm);
 }
 
 .row-head .row-dot {
   display: inline-block;
   width: 9px;
   height: 9px;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   margin-right: 5px;
   vertical-align: 0;
   border: 1px solid var(--edge);
@@ -516,7 +638,7 @@ table.grid thead tr:nth-child(2) th {
 
 .row-head .secondary {
   display: block;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 400;
   color: var(--muted);
   white-space: nowrap;
@@ -531,8 +653,8 @@ table.grid thead tr:nth-child(2) th {
   z-index: 4;
   background: var(--bg);
   border-right: 2px solid var(--line-dark) !important;
-  width: 132px;
-  min-width: 132px;
+  width: var(--rowhead-w);
+  min-width: var(--rowhead-w);
 }
 
 table.grid tbody td {
@@ -556,7 +678,7 @@ td.unavailable {
   /* The "x" marking a closed hour was 11px inside a 34x34 cell and read as
      dirt on the hatch rather than as a mark. It is the only thing in the cell,
      so it can afford to be the size of the text next to it. */
-  font-size: 16px;
+  font-size: var(--fs-base);
   font-weight: 600;
   line-height: 1;
 }
@@ -570,7 +692,7 @@ td.unavailable {
   align-items: center;
   width: 100%;
   height: 100%;
-  line-height: 1.05;
+  line-height: var(--lh-tight);
   /* A placed block is dragged, so the browser's own text/image drag and the
      touch scroll gesture must not get there first (same as .pool-card). */
   cursor: grab;
@@ -597,12 +719,12 @@ td.unavailable {
 }
 
 .card-top {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
 .card-bottom {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--on-color-sub);
 }
 
@@ -645,12 +767,15 @@ td.drop-blocked {
   z-index: 999;
   width: var(--cell-w);
   height: var(--cell-h);
-  margin: -17px 0 0 -17px;
+  /* Half a cell, so the ghost sits centred under the pointer. It was a literal
+     -17px, i.e. 34/2 written out; with --cell-* in rem that number goes stale
+     the moment the scale moves, and the card would drift off the finger. */
+  margin: calc(var(--cell-h) / -2) 0 0 calc(var(--cell-w) / -2);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  line-height: 1.05;
+  line-height: var(--lh-tight);
   border: 1px solid var(--edge);
   box-shadow: 0 3px 10px var(--shadow);
   /* elementFromPoint must see the cell underneath, not the ghost */
@@ -669,7 +794,7 @@ td.drop-blocked {
 }
 
 .pool-head {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--muted);
   margin-bottom: 4px;
 }
@@ -686,12 +811,12 @@ td.drop-blocked {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 52px;
+  min-width: 3.25rem;
   padding: 3px 6px;
   border: 1px solid var(--shadow);
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   cursor: grab;
-  line-height: 1.1;
+  line-height: var(--lh-tight);
   touch-action: none;
   user-select: none;
 }
@@ -702,7 +827,7 @@ td.drop-blocked {
 }
 
 .pool-card .counter {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   color: var(--on-color-sub);
 }
 
@@ -722,11 +847,11 @@ td.drop-blocked {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
   background: var(--paper);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 
 .step:hover {
@@ -753,8 +878,8 @@ td.drop-blocked {
   height: 20px;
   border-radius: 50%;
   background: var(--bg);
-  border: 1px solid var(--line);
-  font-size: 12px;
+  border: 1px solid var(--hairline);
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 
@@ -776,14 +901,33 @@ td.drop-blocked {
 /* -------------------------------------------------------------------- form */
 
 /* Control sizes come from here, not from inline style props: the same number
-   box was written with `width: 70` seven times and `width: 64` once. */
+   box was written with `width: 70` seven times and `width: 64` once.
+   In `ch` since A2 — a box that holds digits has to follow the type it holds,
+   and 70px stopped doing that the moment --ui-scale existed (pitfall 33). */
 .num {
-  width: 70px;
+  width: 8ch;
 }
 
 .text-sm {
-  width: 90px;
+  width: 10ch;
 }
+
+/* `.num` does double duty: on an <input> or a <td> it is at body size, on a
+   <th> it is at --fs-xs. The SAME `ch` count would make the heading a quarter
+   narrower than the digits below it, so the header gets its own number. Same
+   ~70px either way — pitfall 34 stated as a rule instead of as a bug. */
+table.list th.num,
+table.stat th.num {
+  width: var(--w-col-sm);
+}
+
+/* The column-width ladder, applied. Nothing here sets a width in the JSX. */
+table.list th.w-col-xs,  table.stat th.w-col-xs  { width: var(--w-col-xs); }
+table.list th.w-col-sm,  table.stat th.w-col-sm  { width: var(--w-col-sm); }
+table.list th.w-col-md,  table.stat th.w-col-md  { width: var(--w-col-md); }
+table.list th.w-col-lg,  table.stat th.w-col-lg  { width: var(--w-col-lg); }
+table.list th.w-col-xl,  table.stat th.w-col-xl  { width: var(--w-col-xl); }
+table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 
 .grow {
   width: 100%;
@@ -810,7 +954,7 @@ td.drop-blocked {
 }
 
 .field-label {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--muted);
 }
 
@@ -825,9 +969,15 @@ td.drop-blocked {
   margin-top: var(--space-3);
 }
 
-/* A panel nested inside a panel (the Excel paste box). */
+/* A panel nested inside a panel (the Excel paste box). A border inside a
+   border is the "kutu kutu" feeling itself, so the inner one has none: it is
+   separated by space (--space-6), which is what a printed page would do. */
 .panel.inset {
-  background: var(--bg);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  margin: var(--space-6) 0 0;
 }
 
 .panel.inset > h3:first-child {
@@ -837,7 +987,7 @@ td.drop-blocked {
 .paste-preview {
   max-height: 160px;
   overflow: auto;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 /* The strip above the grid: same furniture as the top bar, no second border. */
@@ -852,20 +1002,20 @@ td.drop-blocked {
 
 .panel {
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
   padding: var(--space-4) var(--space-5);
   margin-bottom: var(--space-5);
 }
 
 .panel h2 {
   margin: 0 0 10px;
-  font-size: 16px;
+  font-size: var(--fs-lg);
 }
 
 .panel h3 {
   margin: 14px 0 6px;
-  font-size: 14px;
+  font-size: var(--fs-md);
   color: var(--muted);
 }
 
@@ -877,14 +1027,19 @@ td.drop-blocked {
   margin-bottom: var(--space-4);
 }
 
+/* An input is a place you write INTO, so it is drawn as a recess rather than
+   as a box: a sunk surface with a hairline, not a dark rule. --line-dark here
+   was the single loudest border in the shell — 25 teacher rows x 9 fields of
+   it is what made the setup screen read as a grid of cages. */
 input[type="text"],
 input[type="number"],
 select,
 textarea {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--line-dark);
-  border-radius: 5px;
-  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  background: var(--paper-sunk);
+  line-height: var(--lh-base);
 }
 
 input[type="text"]:focus,
@@ -911,7 +1066,7 @@ textarea:focus-visible {
 textarea {
   width: 100%;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   resize: vertical;
 }
 
@@ -921,18 +1076,30 @@ table.stat {
   width: 100%;
 }
 
+/* The one place th and td part company. A column heading is where the data
+   starts, so it keeps the real line; the rows between records are shell and
+   drop to --hairline. Sharing one rule is what made every list read as a
+   stack of boxes. */
 table.list th,
 table.list td,
 table.stat th,
 table.stat td {
-  border-bottom: 1px solid var(--line);
   padding: 5px 6px;
   text-align: left;
 }
 
 table.list th,
 table.stat th {
-  font-size: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+table.list td,
+table.stat td {
+  border-bottom: 1px solid var(--hairline);
+}
+table.list th,
+table.stat th {
+  font-size: var(--fs-xs);
   color: var(--muted);
   font-weight: 600;
 }
@@ -957,6 +1124,30 @@ table.list td > select {
   width: 100%;
 }
 
+/* The colour picker: a <select> whose options are palette INDICES (1..36),
+   drawn on the palette colour itself. Its width lived in the JSX as
+   `width: 44` — and when the body went from 14px to 16px in Y0 the box stopped
+   holding two digits, so every teacher from the eleventh on read "1". A width
+   in `ch` is tied to the digits it must show, so it follows --ui-scale instead
+   of contradicting it: 7ch holds two digits, the padding and the native arrow.
+
+   It sits on the SELECT, not on the <th>: a width on the header is the
+   COLUMN's width, padding included, and the first attempt at this fix made the
+   box 29px — narrower than the 44 it replaced. The column then sizes itself
+   from the box, which is the right way round anyway.
+   `table.list td > select` (0,1,3) sets width:100% above, so the selector has
+   to carry the class on the same element to outrank it.
+   Pitfall 33 is this bug; `renk-secici.spec.ts` is the test it asked for. */
+table.list td > select.color-pick {
+  width: 7ch;
+  /* Pitfall 15, in the one control that had never been given it: the box is
+     painted with a PALETTE colour, and the palette does not flip with the
+     theme. Left on `color: inherit` the digit took --text, so in dark mode the
+     index sat as near-white ink on a pale pastel and vanished on rows 5, 7,
+     12, 16 and 17. --on-color is the ink that belongs to the palette. */
+  color: var(--on-color);
+}
+
 /* Two buttons that belong on ONE line inside a table cell. `.form-row` wraps by
    design everywhere else; here wrapping doubles the row height and pushes the
    name box into a sliver. */
@@ -974,7 +1165,7 @@ table.stat tbody tr:hover {
   width: 14px;
   height: 14px;
   border: 1px solid var(--dot-border);
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   vertical-align: -2px;
 }
 
@@ -991,7 +1182,7 @@ table.stat tbody tr:hover {
 
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   margin: 4px 0 8px;
 }
 
@@ -1008,7 +1199,7 @@ table.stat tbody tr:hover {
    they must not wrap in the middle of a key. */
 .panel code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 
@@ -1022,7 +1213,7 @@ table.stat tbody tr:hover {
 
 .empty-screen strong {
   display: block;
-  font-size: 17px;
+  font-size: var(--fs-xl);
   color: var(--text);
   margin-bottom: 8px;
 }
@@ -1030,8 +1221,8 @@ table.stat tbody tr:hover {
 .badge {
   display: inline-block;
   padding: 1px 7px;
-  border-radius: 10px;
-  font-size: 12px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 
@@ -1054,7 +1245,7 @@ table.stat tbody tr:hover {
   border-left: 4px solid var(--warn);
   background: var(--warn-bg);
   padding: var(--space-3) var(--space-4);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
   margin-bottom: var(--space-4);
 }
 
@@ -1062,7 +1253,7 @@ table.stat tbody tr:hover {
   border-left: 4px solid var(--bad);
   background: var(--bad-bg);
   padding: var(--space-3) var(--space-4);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
   margin-bottom: var(--space-4);
 }
 
@@ -1070,13 +1261,15 @@ table.stat tbody tr:hover {
   border-left: 4px solid var(--ok);
   background: var(--ok-bg);
   padding: 8px 12px;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--r-md) var(--r-md) 0;
 }
 
 /* ------------------------------------------------------------------- cols */
 
 /* Every screen but the grid used to stop at the width of its widest table and
-   leave the rest of a 1366px screen empty. One rule fixes all of them: the main
+   leave the rest of the screen empty — a complaint that only got louder when
+   the real screen turned out to be 1920px wide, not 1366. One rule fixes all
+   of them: the main
    thing takes the left column, and what used to be crammed ABOVE it — the
    controls, the counters, the sentence that explains the screen — moves to a
    second column that was doing nothing.
@@ -1123,8 +1316,8 @@ table.stat tbody tr:hover {
   gap: 1px;
   max-height: 62vh;
   overflow-y: auto;
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
   padding: var(--space-1);
 }
 
@@ -1134,12 +1327,12 @@ table.stat tbody tr:hover {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: var(--r-sm);
   background: none;
   color: inherit;
   cursor: pointer;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 
 .entity:hover {
@@ -1162,7 +1355,7 @@ table.stat tbody tr:hover {
 
 .entity .entity-count {
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
@@ -1188,20 +1381,21 @@ table.availability td {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   /* Was a hard 46px, which stopped the whole screen at ~620px and left the rest
-     of a 1366px display empty. It is a MINIMUM now: the drag-paint target never
+     of the display empty. It is a MINIMUM now: the drag-paint target never
      shrinks below the size it was measured at, but the table takes the width
      its column gives it. */
   width: auto;
-  min-width: 46px;
-  height: 34px;
+  min-width: 2.875rem;
+  height: 2.125rem;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   padding: 0;
 }
 
 /* The paintable rows are what grows; the header keeps the compact height its
-   two lines need. At 1366px a cell is ~67px wide, so 34px made it a 2:1 slab —
-   the screen ended at 238px with a third of the page empty under it. 48px puts
+   two lines need. The cell is wider than it is tall on any real screen (~67px
+   at 1366px, wider still at 1920px), so 34px made it a 2:1 slab and the screen
+   ended at 238px with a third of the page empty under it. 48px puts
    the cell near 1.4:1 and doubles nothing else.
 
    Specificity (0,1,3) beats the shared `table.availability th, td` rule (0,1,2)
@@ -1209,11 +1403,11 @@ table.availability td {
    a single-class rule that quietly lost. */
 table.availability tbody th,
 table.availability tbody td {
-  height: 48px;
+  height: 3rem;
 }
 
 table.availability thead th {
-  line-height: 1.1;
+  line-height: var(--lh-tight);
   font-weight: 600;
 }
 
@@ -1259,7 +1453,7 @@ table.availability td.closed {
   color: var(--muted);
   /* Same reason as td.unavailable: the mark IS the cell's content, so it grows
      with the cell. */
-  font-size: 18px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   line-height: 1;
 }
@@ -1284,13 +1478,13 @@ table.availability td.closed {
 
 .p-title-main {
   display: block;
-  font-size: 17px;
+  font-size: var(--fs-p-xl);
 }
 
 .p-title-sub {
   display: block;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--fs-p-md);
   font-weight: 400;
   color: var(--muted);
 }
@@ -1305,8 +1499,8 @@ table.availability td.closed {
 }
 
 .pick-list {
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
   min-width: 240px;
 }
 
@@ -1315,7 +1509,7 @@ table.availability td.closed {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .pick-head b {
@@ -1342,7 +1536,7 @@ table.availability td.closed {
   display: inline-block;
   width: 9px;
   height: 9px;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   border: 1px solid var(--edge);
 }
 
@@ -1350,7 +1544,7 @@ table.availability td.closed {
   display: inline-block;
   width: 11px;
   height: 11px;
-  border-radius: 2px;
+  border-radius: var(--r-sm);
   margin-right: 6px;
   vertical-align: 0;
   border: 1px solid var(--print-line, #8a93a0);
@@ -1369,6 +1563,7 @@ table.print .p-daycol {
   width: 26mm;
   text-align: left;
   padding-left: 6px;
+  font-size: var(--fs-p-lg);
   font-weight: 700;
 }
 
@@ -1384,23 +1579,24 @@ table.print td {
   border: 1px solid var(--print-line);
   padding: 3px 4px;
   text-align: center;
-  font-size: 11px;
+  font-size: var(--fs-p-base);
   height: 30px;
 }
 
 table.print th {
   background: var(--print-head-bg);
-  font-size: 11px;
+  font-size: var(--fs-p-base);
 }
 
 table.print td .p-top {
   display: block;
+  font-size: var(--fs-p-lg);
   font-weight: 700;
 }
 
 table.print td .p-bottom {
   display: block;
-  font-size: 10px;
+  font-size: var(--fs-p-sm);
 }
 
 /* A closed hour on a printed teacher page. This used to read
@@ -1408,7 +1604,7 @@ table.print td .p-bottom {
    markup — so the grey never appeared on paper. */
 table.print td.p-closed {
   background: var(--closed);
-  font-size: 13px;
+  font-size: var(--fs-p-lg);
   font-weight: 600;
 }
 
@@ -1416,7 +1612,7 @@ table.print td.p-closed {
 
 .p-clock {
   display: block;
-  font-size: 9px;
+  font-size: var(--fs-p-xs);
   font-weight: 400;
 }
 
@@ -1427,7 +1623,7 @@ tr.break-row th,
 tr.break-row td {
   background: var(--bg);
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 
@@ -1454,6 +1650,19 @@ table.bell-preview td {
   :root[data-theme="dark"] {
     color-scheme: light;
 
+    /* Pinned, and this is the answer to "does printing follow --ui-scale?":
+       no. Everything on paper is sized from --fs-p-* in pt or in mm, so the
+       sheet is already immune; this line is here so that anything sized in rem
+       that ever reaches the page cannot move either. A comfort setting for a
+       27" monitor must not change what fits on an A4 sheet — the 205 mm box of
+       pitfall 31 and "3 classes = 3 pages" would then pass or fail depending
+       on a slider. Bigger PRINT is a separate feature, and principle 5 says it
+       is not written before a term of use asks for it.
+       The five @media print font-size overrides that used to sit below are
+       gone with the same change: the preview and the paper now read from one
+       ladder, which is what the .print-page comment always claimed. */
+    --ui-scale: 1;
+
     --bg: #ffffff;
     --paper: #ffffff;
     --line: #c9ced6;
@@ -1472,6 +1681,8 @@ table.bell-preview td {
     --bad-bg: #fbdcda;
     --closed: #d5d8dd;
     --hatch: #e8eaee;
+    --paper-sunk: #ffffff;
+    --hairline: #c9ced6;
   }
 
   body {
@@ -1528,32 +1739,12 @@ table.bell-preview td {
     margin: 0 0 4mm;
   }
 
-  .p-title-main {
-    font-size: 19px;
-  }
-
-  .p-title-sub {
-    font-size: 12px;
-  }
-
   /* 7 rows on a landscape page leave a lot of white: let the rows grow into it
      so the timetable is readable from across the room. Whatever is still left
      over is split evenly above and below by the flex box above. */
   table.print tbody th,
   table.print tbody td {
     height: 23mm;
-  }
-
-  table.print .p-top {
-    font-size: 13px;
-  }
-
-  table.print .p-bottom {
-    font-size: 11px;
-  }
-
-  table.print .p-daycol {
-    font-size: 13px;
   }
 
   .print-page:last-child {
@@ -1584,7 +1775,7 @@ table.bell-preview td {
 .plain-list {
   margin: 0 0 var(--space-3);
   padding-left: var(--space-5);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: var(--muted);
   line-height: 1.5;
 }

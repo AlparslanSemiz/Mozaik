@@ -199,7 +199,7 @@ test.describe('40. Plan kitaplığı', () => {
     await expect(page.getByRole('button', { name: 'Sil', exact: true })).toBeDisabled();
   });
 
-  test('dört planla üst çubuk 1366px’te taşmıyor', async ({ page }) => {
+  test('dört planla üst çubuk taşmıyor', async ({ page }) => {
     await openWithSample(page);
     await openPlans(page);
     for (let i = 0; i < 3; i++) {

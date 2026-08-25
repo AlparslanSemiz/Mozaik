@@ -2,7 +2,16 @@ import { useRef, useState } from 'react';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
-import { applyTheme, readSidebar, readTheme, writeSidebar, type Theme } from './theme';
+import {
+  applyTheme,
+  readDensity,
+  readScale,
+  readSidebar,
+  readTheme,
+  writeSidebar,
+  type Density,
+  type Theme,
+} from './theme';
 import { useSolver } from './useSolver';
 import Setup from './components/setup';
 import Availability from './components/Availability';
@@ -17,11 +26,14 @@ type Tab = 'setup' | 'availability' | 'program' | 'check' | 'print' | 'settings'
 /**
  * The six sections, as a LEFT RAIL rather than a row of tabs on top.
  *
- * Why the move: on a 1366x768 screen the horizontal band cost the timetable a
- * whole row, and a row is 25 teachers' worth of information; horizontally the
- * grid already overflows and scrolls, so 92px there costs nothing that was not
- * already scrolled. The rail also gives every other tab back the full width —
- * the reason the right-hand side of every screen used to sit empty.
+ * Why the move: on the 768px screen this was designed against, the horizontal
+ * band cost the timetable a whole row, and a row is 25 teachers' worth of
+ * information. The real screen is 1080px tall and no longer that tight, but the
+ * rail stays for the half of the reason that never depended on height:
+ * horizontally the grid overflows and scrolls anyway, so 92px there costs
+ * nothing that was not already scrolled. The rail also gives every other tab
+ * back the full width — the reason the right-hand side of every screen used to
+ * sit empty.
  *
  * Icons are inline SVG (no library, works offline) and drawn on currentColor so
  * they are right in both themes. They differ in SILHOUETTE, not in detail: at
@@ -190,6 +202,10 @@ export default function App() {
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
   const [railNarrow, setRailNarrow] = useState<boolean>(readSidebar);
+  // Already applied to the document by main.tsx before the first paint; this
+  // copy exists only so Ayarlar → Görünüm can show which step is pressed.
+  const [scale, setScale] = useState<number>(readScale);
+  const [density, setDensity] = useState<Density>(readDensity);
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
@@ -383,7 +399,16 @@ export default function App() {
             <Print state={state} excluded={printExcluded} setExcluded={setPrintExcluded} />
           )}
           {tab === 'settings' && (
-            <Settings state={state} change={change} loadState={loadState} plans={plans} />
+            <Settings
+              state={state}
+              change={change}
+              loadState={loadState}
+              plans={plans}
+              scale={scale}
+              setScale={setScale}
+              density={density}
+              setDensity={setDensity}
+            />
           )}
         </main>
       </div>

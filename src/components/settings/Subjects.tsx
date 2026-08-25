@@ -92,12 +92,12 @@ export default function Subjects({ state, change }: PanelProps) {
             <thead>
               <tr>
                 <th>Branş</th>
-                <th style={{ width: 110 }}>Kısaltma</th>
-                <th style={{ width: 130 }} className="num">
+                <th className="w-col-lg">Kısaltma</th>
+                <th className="num">
                   Öğretmen
                 </th>
-                <th style={{ width: 190 }} />
-                <th style={{ width: 80 }} />
+                <th className="w-col-xl" />
+                <th className="w-col-md" />
               </tr>
             </thead>
             <tbody>

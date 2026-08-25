@@ -322,6 +322,8 @@ describe('veriler nerede — depo raporu', () => {
     expect(keys).toContain('ders-programi-yedek-2');
     expect(keys).toContain('ders-programi-tema');
     expect(keys).toContain('ders-programi-kenar');
+    expect(keys).toContain('ders-programi-olcek');
+    expect(keys).toContain('ders-programi-yogunluk');
     // An absent backup chain is information too, so the row stays with 0.
     expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
   });

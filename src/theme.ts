@@ -83,3 +83,106 @@ export function writeSidebar(collapsed: boolean): void {
     // A rail width that cannot be remembered is not worth an error
   }
 }
+
+// ---------------------------------------------------------- scale preference
+
+/**
+ * How big the interface is drawn: 1.0 to 1.25 in steps of 0.05. Same reasoning
+ * as the theme and the rail — a property of the machine and the eyes in front
+ * of it, never of the timetable, so it stays out of `State` and out of the
+ * backup file. A backup taken on a 27" monitor must not resize my father's
+ * screen, and a comfort setting must not cost a schema migration.
+ *
+ * It drives one declaration, `:root { font-size: calc(16px * var(--ui-scale)) }`,
+ * and everything on screen is sized in rem from there — type, spacing, the
+ * grid cell, the rail. PRINTING is deliberately outside it: the paper is a
+ * fixed physical size, so `--fs-p-*` is in pt and `@media print` pins the
+ * scale back to 1.
+ */
+export const SCALE_KEY = 'ders-programi-olcek';
+
+export const SCALE_MIN = 1;
+export const SCALE_MAX = 1.25;
+export const SCALE_STEP = 0.05;
+
+/**
+ * Anything unreadable, out of range or off-step becomes the nearest legal
+ * value. A hand-edited "3" would otherwise draw the shell at 48px and leave no
+ * way back to the setting that caused it.
+ */
+export function normalizeScale(raw: unknown): number {
+  const value = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
+  if (!Number.isFinite(value)) return SCALE_MIN;
+  const clamped = Math.min(SCALE_MAX, Math.max(SCALE_MIN, value));
+  const steps = Math.round((clamped - SCALE_MIN) / SCALE_STEP);
+  // Two decimals: 1.05 * 3 lands on 1.1500000000000001 in binary floating point
+  // and would come back out of the round trip as a different string every time.
+  return Number((SCALE_MIN + steps * SCALE_STEP).toFixed(2));
+}
+
+export function readScale(): number {
+  try {
+    return normalizeScale(localStorage.getItem(SCALE_KEY));
+  } catch {
+    return SCALE_MIN;
+  }
+}
+
+export function applyScale(scale: number): void {
+  document.documentElement.style.setProperty('--ui-scale', String(scale));
+  try {
+    localStorage.setItem(SCALE_KEY, String(scale));
+  } catch {
+    // A scale that cannot be remembered is still better than no scale
+  }
+}
+
+// -------------------------------------------------------- density preference
+
+/**
+ * How much of the week the grid shows at once.
+ *
+ * 'rahat' is the grid as it has always been: a 34px cell, the bell time under
+ * every lesson number, and horizontal scrolling — 2616px of table against
+ * 1828px of box at 1920x1080.
+ *
+ * 'sigdir' is A5, semantic zoom, and it drops exactly ONE thing: the start
+ * time under the hour number. That is not a guess, it is what the measurement
+ * said. `--cell-w` was set to 28, 23 and 18px in turn and the cell was drawn
+ * at 33.69px every time — the number in the CSS had stopped mattering, because
+ * "10:40" in the heading was setting the column's min-content. Hiding the card's
+ * second line changed nothing at all. Hiding the clock took the table from
+ * 2461px to 1728px, i.e. the whole week fits in the box with room to spare
+ * (pitfall 37).
+ *
+ * Same reasoning as the theme, the rail and the scale for where it lives: a
+ * property of the machine and the screen, never of the timetable, so it stays
+ * out of `State` and out of the backup file.
+ */
+export type Density = 'rahat' | 'sigdir';
+
+export const DENSITY_KEY = 'ders-programi-yogunluk';
+
+const DENSITY_ATTRIBUTE = 'data-density';
+
+/** Anything that is not exactly 'sigdir' means the roomy grid. */
+export function normalizeDensity(raw: unknown): Density {
+  return raw === 'sigdir' ? 'sigdir' : 'rahat';
+}
+
+export function readDensity(): Density {
+  try {
+    return normalizeDensity(localStorage.getItem(DENSITY_KEY));
+  } catch {
+    return 'rahat';
+  }
+}
+
+export function applyDensity(density: Density): void {
+  document.documentElement.setAttribute(DENSITY_ATTRIBUTE, density);
+  try {
+    localStorage.setItem(DENSITY_KEY, density);
+  } catch {
+    // A density that cannot be remembered is still better than no density
+  }
+}

@@ -9,8 +9,9 @@
 // move the ghost, scroll if needed, and do a single elementFromPoint.
 // React state does NOT change during the drag, the grid is not redrawn.
 //
-// Why scrolling is mandatory: 25 rows x 84 columns do not fit a 1366x768
-// screen. If the target row or the target day is off-screen the user cannot
+// Why scrolling is mandatory: 25 rows x 84 columns do not fit the screen at any
+// size we target — at 1920x1080 the grid is 2616px wide against 1828px of box,
+// and 6 of the 25 rows sit below the fold (measured). If the target row or the target day is off-screen the user cannot
 // reach it. So (a) the target row is scrolled into view when the drag starts,
 // (b) the grid scrolls by itself when the cursor nears an edge.
 

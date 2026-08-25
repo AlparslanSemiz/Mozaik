@@ -290,6 +290,16 @@ export function storageReport(lib: Library): StorageReport {
     what: 'kenar çubuğu tercihi',
     chars: charsAt(`${BASE_KEY}-kenar`),
   });
+  rows.push({
+    key: `${BASE_KEY}-olcek`,
+    what: 'yazı büyüklüğü tercihi',
+    chars: charsAt(`${BASE_KEY}-olcek`),
+  });
+  rows.push({
+    key: `${BASE_KEY}-yogunluk`,
+    what: 'ızgara yoğunluğu tercihi',
+    chars: charsAt(`${BASE_KEY}-yogunluk`),
+  });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

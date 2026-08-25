@@ -9,6 +9,86 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+### Tasarım sistemi turu (A0–A6) — DEVAM EDİYOR
+
+Kullanıcının aşağıdaki numaralanmamış listesi bu tura dönüştü. Çerçeve
+`CLAUDE.md` → **"Tasarım sistemi"**; iki yasak kalktı, gerekçeleri
+`CLAUDE.md` → **"Değişmez ilkeler — güncelleme"**. Her aşamadan sonra durulup
+onay alınıyor. **Görsel referansların hepsi bu turda kırılacak; en sonda tek
+seferde yenilenecek — ara aşamalarda `npm run gorsel` çalıştırılmıyor.**
+Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
+
+- [x] **A0 Hedef ekran 1366×768 → 1920×1080.** Baba 27" monitör kullanıyor.
+      Üç Playwright config; `ekran`/`gorsel` `...base` yaydığı için kendiliğinden
+      miras aldı. Viewport değişince 228/228 geçti — asıl risk kırmızı değil,
+      **bedava yeşil**di; ölçüldü ve üç iddiadaki yalan sayı düzeltildi
+      (`visibleRows 9→18`, `scrollLeft 1200` → sona kaydırma + `room > 200`).
+      Hiçbir test silinmedi: 1920×1080'de 6 satır hâlâ katlanın altında.
+      `STATUS.md`/`TASKS.md`'deki tarihsel rakamlara dokunulmadı.
+      Ayrıntı: [STATUS.md](STATUS.md) → *On ikinci oturum*
+- [x] **Y0 Yüzey ve çizgi ayrımı.** Yeni token seti + `--hairline` / `--line`
+      ayrımı: kabuk çizgisi 10 kuralda kıl çizgiye indi, veri çizgisi 5 yerde
+      kaldı, `table.list/stat`'ın `th`+`td` ortak kuralı ikiye bölündü. Girdiler
+      kenarlık yerine **gömük yüzey** (`--paper-sunk`). `.panel.inset`
+      kenarlıksız. Gövde `--fs-base`, ızgara `--lh-tight`.
+      **Verilen setten üç sapma** (korunan `--shadow`, koyu/baskı bloklarına iki
+      token, `--muted` AA düzeltmesi) — gerekçeleri STATUS'te
+- [x] **A1 Tipografi merdiveni.** 44 ham px `font-size` → **0** (kalan tek px
+      merdivenin çapası, `:root`). `--space-*`/`--cell-*`/`--rail-w` rem'e,
+      radius 19 bildirimden 2 değere (`3/6px` — CLAUDE.md'nin yazdığı değerler;
+      Y0 sehven 4/8 yazmıştı), ve **Ayarlar → Görünüm** açıldı: %100–%125, altı
+      düğme, `localStorage['ders-programi-olcek']`, `State`'e girmiyor.
+      Izgara `--ui-scale`'e bağlandı (A5 silindiği için ikinci eksen yok);
+      **baskı bağlanmadı** — kâğıt kendi merdivenini aldı (`--fs-p-*`, pt).
+      Ölçülen: ızgara %100'de 2616 px, yani rem'e geçiş **piksel kaymasi
+      üretmedi**. Ayrıntı: [STATUS.md](STATUS.md) → *On üçüncü oturum*
+- [x] **A2 `ch` birimi + inline genişliklerin kaldırılması.** 29 tane
+      `style={{ width: N }}` → **0**, ve CSS'teki son iki ham px genişlik
+      (`.num` 70, `.text-sm` 90) de `ch`'ye geçti. Altı basamaklı **sütun
+      merdiveni** (`--w-col-xs … --w-col-2xl`, `8/10/13/16/26/32ch`).
+      `paletteColor()` dönen dinamik `background`'a dokunulmadı.
+      **Kural netleşti:** kutu genişliği kutunun kendisine verilir (gövde ch'si),
+      sütun genişliği `<th>`'ye (başlığın ch'si) — aynı 70px için 8ch ve 10ch.
+      `e2e/sutun.spec.ts`: kaynakta inline genişlik kalmadığı, altı basamağın da
+      ölçekle **tam 1.25** büyüdüğü ve dokuz ekranda hiçbir metnin kırpılmadığı.
+      Eski px değerleri geri konup **kırmızıya döndürüldü** (6 test).
+      Ayrıntı: [STATUS.md](STATUS.md) → *On dördüncü oturum*
+- [x] **A5 GERİ GELDİ + A2b birlikte yapıldı** (kullanıcı kararı: "önce A5'i
+      geri getir"). Ayarlar → Görünüm'e ikinci bir ayar: **Rahat / Sığdır**.
+      Sığdır tam olarak **bir** şeyi düşürüyor ve hangisi olduğu **ölçülerek**
+      bulundu: ders numarasının altındaki başlangıç saati. İlk teşhis (kartın
+      alt satırı) **yanlıştı** — onu gizlemek tabloyu 1 px oynatmadı; saati
+      gizlemek 2461 → **1728 px** yaptı. Sonuç: 1920×1080'de yatay kaydırma
+      788 px → **0**, hiçbir kart kırpılmadan. `--cell-w` artık kutudan
+      türetiliyor (`clamp` + `100cqw`), sütun sayısı markup'tan geliyor
+      (`--lesson-cols`/`--break-cols`) çünkü hafta her zaman 6×12 değil.
+      Tercih `localStorage['ders-programi-yogunluk']`, `State`'e girmiyor,
+      "Veriler nerede" tablosuna eklendi. Tuzak 37 düzeltildi.
+- [ ] **A3 Font ve görsel karakter.** IBM Plex Sans base64 gömülü (ağdan
+      çekilmez). Boyut artışı raporlanacak, **420 KB'ı aşarsa durulacak**.
+      Yan fayda: gömülü font görsel referansları makineden bağımsız yapar, yani
+      `npm run gorsel` `npm run kontrol`'e girebilir hâle gelir
+- [ ] **A4 Dialog ve renk seçici.** Tek `<dialog>` bileşeni; 12 `confirm` +
+      5 `alert` geçirilecek. Renk seçici 6×6 swatch ızgarası — **artık kırık
+      değil** (A1'de kapandı), ama swatch ızgarası hâlâ daha iyi bir kontrol.
+      Gelirse `e2e/renk-secici.spec.ts` aynen geçerli: "seçili renk okunuyor"
+      bir kontrol türü değil, bir gereksinim. `.reason-bar`'a `aria-live`
+- [ ] **A6 Doğrulama.** `npm run kontrol`; `renk.spec.ts`'in WCAG/ΔE ölçümleri
+      **yeni değerlere göre geçecek — sınır gevşetilmeyecek, tasarım
+      düzeltilecek**. En son **24** baseline tek seferde yenilenip **tek tek
+      bakılacak** (A1'de `12-ayarlar-gorunum` sahnesi eklendi: 11 → 12 sahne ×
+      2 tema). README iki satırdan kurtarılacak
+- [x] **Kullanıcıya sorulan iki soru — ikisi de cevaplandı (on üçüncü oturum).**
+      (a) `.btn` → `--line`, **`--hairline` değil**: düğmenin kendi yüzeyi yok
+      (`--paper` üstünde `--paper`), kenarlık tek sınırı. Asıl gürültü
+      `.btn.danger`'ın kırmızı kenarlığıydı; o kalktı, kırmızı **mürekkep**
+      kaldı. (b) baskı `--ui-scale`'den **etkilenmiyor** — kâğıt sabit fiziksel
+      boyut; ölçüldü (%100 ve %125'te punto birebir eşit, PDF 3 ↔ 3 sayfa)
+- [x] **A5 ızgara anlamsal zoom** — bir kez silinip **geri getirildi**
+      (2026-08-25). Yukarıdaki maddede yapıldı. Numara aynı kaldı çünkü aynı
+      özellik: STATUS ve commit mesajlarındaki "A5 silindi" atıfları o günün
+      kaydı olarak duruyor, yanıltıcı değil.
+
 ### 0. v1.0 — teslim turu (`.exe` · site · planlar) — YENİ
 
 Kullanıcının bu dosyanın sonuna yazdığı altı satır, sırayla numaralanmış hâli.
@@ -16,9 +96,16 @@ Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeş
 *(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
 bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
 
-**SIRADAKİ İŞ: kullanıcının bu dosyanın sonuna yazdığı yeni liste** (ölçek/
-büyütme, liste sıralama ve süzme, renk seçici, sıfırla, saat gösterme ayarı,
-baskıyı büyütme) — henüz numaralanmadı, kararları alınmadı. Ondan sonra
+**SIRADAKİ İŞ: A3 — gömülü font.** A2 ve (geri gelen) A5 bitti; turda A3 ve
+A4 kaldı, sonra A6'da 24 görsel referans tek seferde yenilenecek. A5 bir sahne
+değiştirdiği için (`12-ayarlar-gorunum` paneli büyüdü, Program ızgarası artık
+iki yoğunlukta çizilebiliyor) A6'da o sahnelere **tek tek** bakılacak.
+
+*(Aşağıdaki v1.0 turu notu olduğu gibi duruyor.)* Kullanıcının bu dosyanın
+sonuna yazdığı liste o tura dönüştü; listenin *sıralama ve süzme* maddeleri
+henüz numaralanmadı ve **en az biri şema değişikliği istiyor** (öğretmende
+cinsiyet alanı yok), en az biri yasak listeye bakmayı gerektiriyor (elle
+sürükleyerek sıralama). Tasarım turundan sonra
 **4f**: GitHub Pages yayını (`.github/workflows/site.yml`). Site derlemesi
 hazır ve çevrimdışı çalıştığı ölçüldü; eksik olan yalnız yayınlama adımı.
 **Kullanıcıdan iki şey bekleniyor:** depo `ders-programi` olarak yeniden
@@ -106,7 +193,7 @@ adlandırılacak** (kullanıcı yapacak).
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 402 birim + 228 E2E + 6 site testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
+hazır — 407 birim + 237 E2E + 6 site testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
 program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
 tahmin olur (ilke 5).
 

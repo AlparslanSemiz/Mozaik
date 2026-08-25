@@ -94,9 +94,9 @@ export default function School({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th style={{ width: 44 }} />
+                <th className="w-col-xs" />
                 <th>Gün</th>
-                <th style={{ width: 220 }}>Öğle arası</th>
+                <th className="w-col-2xl">Öğle arası</th>
               </tr>
             </thead>
             <tbody>
@@ -259,7 +259,7 @@ export default function School({ state, change }: PanelProps) {
             <table className="list bell-preview">
               <thead>
                 <tr>
-                  <th style={{ width: 60 }}>Ders</th>
+                  <th className="w-col-xs">Ders</th>
                   {patterns.map((p) => (
                     <th key={p.after}>{p.dayNames}</th>
                   ))}

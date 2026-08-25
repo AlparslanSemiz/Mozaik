@@ -80,15 +80,15 @@ export default function Plans({ state, plans }: Props) {
         <thead>
           <tr>
             <th>Plan</th>
-            <th style={{ width: 58 }}>Taslak</th>
+            <th className="w-col-xs">Taslak</th>
             {/* One glanceable line instead of three number columns: the name
                 column was collapsing to nothing and "1. plan" did not fit in
                 its own box. */}
             <th>İçerik</th>
-            <th style={{ width: 78 }} className="num">
+            <th className="num">
               Yerleşmiş saat
             </th>
-            <th style={{ width: 172 }} />
+            <th className="w-col-xl" />
           </tr>
         </thead>
         <tbody>

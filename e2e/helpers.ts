@@ -5,7 +5,7 @@
 // tested meaningfully in jsdom:
 //   - does localStorage really work under file:// (risk of data loss)
 //   - mouse drag and drop, the ghost card, the green/red highlight
-//   - do the sticky columns really stay put at 1366x768
+//   - do the sticky columns really stay put at 1920x1080
 //   - whether the print layout overflows
 
 import { expect, type Page } from '@playwright/test';
@@ -420,6 +420,14 @@ export const SCENES: Scene[] = [
       await openSettings(page, 'Veri');
     },
   },
+  {
+    // The scale setting, at the size it sets: the one screen whose own drawing
+    // is the thing it controls.
+    name: '12-ayarlar-gorunum',
+    go: async (page) => {
+      await openSettings(page, 'Görünüm');
+    },
+  },
 ];
 
 /** Loads the sample data in the chosen theme, for the scene list above. */
@@ -429,4 +437,20 @@ export async function openWithSampleTheme(page: Page, theme: 'light' | 'dark') {
   await page.reload();
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+}
+
+/**
+ * Picks a size in Ayarlar → Görünüm and waits until the button says it took.
+ *
+ * Two files need it now (44 and 45), and a scale change that is only half
+ * applied when the next measurement runs is exactly the kind of flake that
+ * makes people loosen a threshold instead of fixing a width.
+ */
+export async function chooseScale(page: Page, percent: number) {
+  await openSettings(page, 'Görünüm');
+  await page.getByRole('button', { name: `%${percent}`, exact: true }).click();
+  await expect(page.getByRole('button', { name: `%${percent}`, exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
 }

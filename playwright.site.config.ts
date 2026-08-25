@@ -19,7 +19,7 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     baseURL: 'http://localhost:4173/',
-    viewport: { width: 1366, height: 768 },
+    viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },
   webServer: {

@@ -64,11 +64,11 @@ export default function Classes({ state, change }: PanelProps) {
         <table className="list">
           <thead>
             <tr>
-              <th style={{ width: 44 }}>Renk</th>
+              <th>Renk</th>
               <th>Ad</th>
-              <th style={{ width: 160 }}>Derslik</th>
-              <th style={{ width: 90 }}>Ders saati</th>
-              <th style={{ width: 80 }} />
+              <th className="w-col-xl">Derslik</th>
+              <th className="w-col-md">Ders saati</th>
+              <th className="w-col-md" />
             </tr>
           </thead>
           <tbody>
@@ -80,7 +80,8 @@ export default function Classes({ state, change }: PanelProps) {
                     onChange={(e) =>
                       change((d) => updateClass(d, c.id, { color: Number(e.target.value) }))
                     }
-                    style={{ background: paletteColor(c.color), width: 44 }}
+                    className="color-pick"
+                    style={{ background: paletteColor(c.color) }}
                     aria-label={`${c.name} rengi`}
                     title="Renk"
                   >

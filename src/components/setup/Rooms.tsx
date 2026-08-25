@@ -54,8 +54,8 @@ export default function Rooms({ state, change }: PanelProps) {
           <thead>
             <tr>
               <th>Ad</th>
-              <th style={{ width: 120 }}>Sınıf sayısı</th>
-              <th style={{ width: 80 }} />
+              <th className="w-col-lg">Sınıf sayısı</th>
+              <th className="w-col-md" />
             </tr>
           </thead>
           <tbody>

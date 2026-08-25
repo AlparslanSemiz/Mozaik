@@ -61,8 +61,8 @@ export default function Rules({ state, change }: PanelProps) {
             <thead>
               <tr>
                 <th>Kural</th>
-                <th style={{ width: 100 }}>Saat</th>
-                <th style={{ width: 130 }}>Ne yapsın</th>
+                <th className="w-col-lg">Saat</th>
+                <th className="w-col-lg">Ne yapsın</th>
               </tr>
             </thead>
             <tbody>
@@ -127,7 +127,7 @@ export default function Rules({ state, change }: PanelProps) {
             <table className="stat">
               <thead>
                 <tr>
-                  <th style={{ width: 90 }}>Durum</th>
+                  <th className="w-col-lg">Durum</th>
                   <th>Açıklama</th>
                 </tr>
               </thead>

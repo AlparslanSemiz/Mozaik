@@ -23,8 +23,9 @@ export default defineConfig({
   workers: 4,
   reporter: [['list']],
   use: {
-    // Babanin ekrani. Sigma ve yatay kaydirma bu boyutta test edilmeli.
-    viewport: { width: 1366, height: 768 },
+    // Babanin 27 inclik ekrani (1920x1080 CSS pikseli). Sigma ve yatay
+    // kaydirma bu boyutta test edilmeli.
+    viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],

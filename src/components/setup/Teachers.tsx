@@ -133,9 +133,9 @@ export default function Teachers({ state, change }: PanelProps) {
         <table className="list">
           <thead>
             <tr>
-              <th style={{ width: 44 }}>Renk</th>
+              <th>Renk</th>
               <th>Ad</th>
-              <th style={{ width: 110 }}>Kısaltma</th>
+              <th className="w-col-lg">Kısaltma</th>
               <th>Branş</th>
               <th className="num" title="Art arda en fazla kaç saat">
                 Art arda
@@ -146,8 +146,8 @@ export default function Teachers({ state, change }: PanelProps) {
               <th className="num" title="Geldiği gün en az kaç saat">
                 Günde ↓
               </th>
-              <th style={{ width: 90 }}>Ders saati</th>
-              <th style={{ width: 80 }} />
+              <th className="w-col-md">Ders saati</th>
+              <th className="w-col-md" />
             </tr>
           </thead>
           <tbody>
@@ -159,7 +159,8 @@ export default function Teachers({ state, change }: PanelProps) {
                     onChange={(e) =>
                       change((d) => updateTeacher(d, t.id, { color: Number(e.target.value) }))
                     }
-                    style={{ background: paletteColor(t.color), width: 44 }}
+                    className="color-pick"
+                    style={{ background: paletteColor(t.color) }}
                     aria-label={`${t.short} rengi`}
                     title="Renk"
                   >

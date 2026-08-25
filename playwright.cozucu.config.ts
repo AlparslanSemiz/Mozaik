@@ -12,7 +12,7 @@ export default defineConfig({
   timeout: 180_000,
   reporter: [['list']],
   use: {
-    viewport: { width: 1366, height: 768 },
+    viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],

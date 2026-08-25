@@ -1,8 +1,8 @@
 # CLAUDE.md — Ders Programı Aracı
 
 Babamın dershanesinde haftalık ders programını dizmek için kullanacağı araç.
-aSc Timetables'ın yerini alacak. aSc'nin yaptığı işin bu kursla ilgili %10'unu
-yapıp o %10'u aSc'den iyi yapmak hedefi.
+aSc Timetables'ın yerini alacak. aSc'nin yaptığı işin bu kursla ilgili %50'sini
+yapıp o %50'yi'u aSc'den iyi yapmak hedefi.
 
 Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](docs/STATUS.md) · Görevler: [docs/TASKS.md](docs/TASKS.md)
 
@@ -14,15 +14,17 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
 
 1. **Kurulum yok.** İndir, çift tıkla, çalışsın. Sihirbaz, hesap, şifre, güncelleme yok.
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain yok.
-3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Web font yok.
+3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Font **ağdan
+   çekilmez** — gömülü font serbest, bkz. aşağıdaki güncelleme.
 4. **Türkçe.** Tek dil. i18n altyapısı yok, string dosyası yok — doğrudan Türkçe yazılır.
 5. **Bir dönem kullanılmadan özellik eklenmez.** Tahmine dayalı özellik = yanlış özellik.
 6. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir.
-7. **Hedef makine yavaş.** Her tasarım kararı bunu varsayar.
+7. **Hedef makine yavaş** — ama bu bir **varsayım**, gerekçe değil; bkz.
+   aşağıdaki güncelleme.
 
 ## Yasak liste — bunlar bu projeye asla girmeyecek
 
-Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama · animasyon ·
+Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama ·
 istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
 takvim entegrasyonu · PDF kütüphanesi (tarayıcının yazdırması yeterli) ·
 **aynı planın** sürüm ağacı (v3, v4, v5 diye yan yana tutma) ·
@@ -52,6 +54,29 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 
 ---
 
+## Değişmez ilkeler — güncelleme (2026-08-25)
+
+7. "Hedef makine yavaş" → **ÖLÇÜLECEK.** Babanın makinesinde gerçek
+   performans görülene kadar bu bir varsayımdır, gerekçe değildir.
+
+### Kaldırılan yasaklar
+
+- **ANİMASYON yasağı kalktı**, yerine kural: yalnız CSS `transition`,
+  yalnız durum değişiminde (hover, focus, `aria-pressed`, dialog açılış,
+  bırakma onayı). Süre **≤150 ms**. Kütüphane **YOK**.
+  `prefers-reduced-motion: reduce` → hepsi kapalı.
+  Layout animasyonu, skeleton, toast, sayfa geçişi **YOK**.
+- **WEB FONT yasağı kalktı**, yerine kural: font **base64 ile tek dosyaya
+  GÖMÜLÜR**. Ağdan çekilmez. "İnternet gerekmez" ilkesi aynen geçerli.
+
+### Yürürlükte kalanlar
+
+Tailwind / shadcn / Radix / ikon kütüphanesi / animasyon kütüphanesi:
+**kaldırılmadı** — değerlendirildi ve getirisi negatif bulundu.
+Yeni runtime bağımlılığı için varsayılan cevap hâlâ **hayır**.
+
+---
+
 ## Teknoloji
 
 ```
@@ -72,14 +97,14 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 402 birim testi
+npm test           # Vitest — 409 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 228 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 251 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
-npm run gorsel     # görsel regresyon — 22 referansa karşı piksel farkı
+npm run gorsel     # görsel regresyon — 24 referansa karşı piksel farkı
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
 ```
 
@@ -111,12 +136,12 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 13 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 17 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, **sütun genişliği ve metnin sığması (iki ölçekte)**, **ızgara yoğunluğu (Sığdır'da yatay kaydırma 0)**, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu** |
 | **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
-| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 22 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
+| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 24 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
 
-E2E, `dist/index.html`'i `file://` üzerinden 1366×768'de açar — yani **babanın çift
+E2E, `dist/index.html`'i `file://` üzerinden 1920×1080'de açar — yani **babanın çift
 tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,
 ekran dışı hedef ve yazdırma taşması **yalnızca burada** görünür. Nitekim tuzak 11 ve
 12 (bkz. PLAN.md) bu testlerle bulundu, başka türlü bulunamazdı.
@@ -186,7 +211,7 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
                                 Playwright ikisi de buradan beslenir.
   |
 store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
-theme.ts                        makine tercihleri (tema, kenar çubuğu) — State'e girmez
+theme.ts                        makine tercihleri (tema, kenar çubuğu, ölçek) — State'e girmez
 useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
   |
 components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
@@ -194,8 +219,10 @@ components/Field.tsx            iki klasörün de kullandığı küçük parçal
 components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
 components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste + Summary
-components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar · Veri
-                                Veri, Plans.tsx'i (plan kitaplığı) kendi içine alır
+components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar ·
+                                Görünüm · Veri.  Veri, Plans.tsx'i (plan
+                                kitaplığı) kendi içine alır; Görünüm okulu
+                                değil MAKİNEYİ tarif eder (theme.ts)
 ```
 
 `rules.ts`, `constraints.ts`'ten **yalnızca `Index` tipini** alır (`import type`,
@@ -278,6 +305,8 @@ ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
 ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana ait
 ders-programi-tema       -> tema tercihi
 ders-programi-kenar      -> kenar çubuğu tercihi
+ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.25)
+ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (rahat / sigdir)
 ```
 
 ### Dosya biçimleri — iki tane, karıştırılamaz
@@ -549,6 +578,195 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     `site.spec.ts` `dist/index.html`'de `serviceWorker`/`manifest`/`sw.js`
     geçmediğini **okuyarak** doğrular. Yeni bir hedef eklenirse üçü de gerekir.
 
+33. **Yazı boyunu büyütmek, sabit piksel genişliğindeki sütunu sessizce kırpar
+    ve bunu hiçbir test görmez.** Y0'da gövde 14px'ten 16px'e çıktı; renk
+    sütunu JSX'te `style={{ width: 44 }}` sabitti ve 44px iki basamaklı sayıyı
+    artık alamadı — 11. öğretmenden sonra kutuda **"1" yazmaya başladı**. Süit
+    228/228 yeşil geçti, çünkü testler bir `<select>`'in *var olduğunu* ve
+    *değerini* ölçüyor, **metninin sığdığını** değil. Bu tuzak 23'ün tipografi
+    hâli: yeşil geçen bir süit "bozulmadı" demek değildir. İki sonucu var,
+    ikisi de **uygulandı**: ölçek değiştiren her adımda ekran görüntüsüne
+    bakılıyor, ve genişlik `ch` cinsinden CSS'e taşınınca yanına
+    `e2e/renk-secici.spec.ts` yazıldı. O test bir sayı uydurmaz: seçiciyi
+    `width: auto` ile klonlayıp **tarayıcının kendi istediği genişliği** ölçer
+    ve kutunun ondan dar olmadığını iddia eder. Yazıldıktan sonra eski 44px
+    geri konarak koşuldu ve dördü de kırmızıya döndü — bedava yeşil değil.
+
+34. **`<th>`'ye verilen genişlik SÜTUNUN genişliğidir, kontrolün değil.** Tuzak
+    33'ü kapatırken ilk deneme genişliği `<th>`'ye `ch` cinsinden koydu; sonuç
+    kutuyu 44px'ten **29px'e daralttı**, yani hatayı büyüttü. Sebep iki katlı:
+    `<th>` genişliği hücre dolgusunu da içerir, ve `table.list th` 12px'ken
+    `<td>` içindeki `<select>` 16px — aynı `ch` iki yerde iki farklı piksel.
+    Kural: genişlik **kontrolün kendisine** verilir, sütun ondan boylanır.
+    Seçici de aynı öğede olmalı (`table.list td > select.color-pick`), yoksa
+    `table.list td > select { width: 100% }` (0,1,3) onu yener.
+    **A2'de kuralın ikinci yarısı da yazıldı:** metin ya da `width: 100%` bir
+    liste taşıyan sütunun genişliği gerçekten sütunun meselesidir ve `<th>`'ye
+    verilir — ama o zaman birim başlığın ch'sidir. Ölçülen karşılıklar:
+    `1ch` = 6.86px başlıkta, 9.15px gövdede. Bu yüzden `.num` bir `<input>`
+    üstünde `8ch`, bir `<th>` üstünde `10ch`, ikisi de ~70px. Aynı sayıyı iki
+    yere yazmak hatadır, farklı yazmak değil.
+
+35. **`select` `color: inherit` alır — palet zemininde bu tuzak 15'in ta
+    kendisidir.** Renk seçici `background`'ını paletten alıyor ama mürekkebini
+    temadan alıyordu: koyu temada açık mürekkep pastel zemine düşüyor ve
+    36 rengin açık olanlarında indeks **hiç görünmüyordu**. Kutu darken de
+    böyleydi, sadece kırpılma yüzünden fark edilmiyordu. Palet rengi taşıyan
+    her öğeye `--on-color` verilecek — `.card`, `.pool-card` ve `.ghost`'ta
+    zaten var, unutulan tek yer bir `<select>`'ti.
+
+36. **Bir hücre boyunu `-17px` gibi ELLE hesaplanmış yarımlarla yazma.**
+    Hayalet kartın kaydırması `margin: -17px`, yani `34/2`'nin yazılmış hâliydi.
+    `--cell-*` rem'e geçince o sayı sessizce yanlış oldu: %125'te hayalet
+    parmağın altından kayardı. `calc(var(--cell-w) / -2)` yazılır — türetilen
+    her ölçü, türediği değerden hesaplanır.
+
+37. **Bir hücreyi daraltan `clamp()`, sütunun min-content'inden dar çizemez —
+    ve o min-content'i sandığın öğe belirlemiyor olabilir.** "Sığdır" modu
+    için `--cell-w` 28, 23 ve 18 px yapıldı; üçünde de hücre **33.69 px**
+    çizildi, yani CSS'teki sayı çoktan anlamını yitirmişti. İlk teşhis
+    karttaki iki satırdı (`411` + derslik harfi) — **yanlıştı**: kartın alt
+    satırını gizlemek tabloyu 1 px oynatmadı. Suçlu başlıktaki `"10:40"`
+    idi; onu gizlemek 2461 → 1728 px yaptı, yani haftanın tamamı kutuya
+    girdi. Genişlikten türeyen bir ölçü yazmadan önce alt sınırın nereden
+    geldiği **tek tek kapatılarak** ölçülür; "herhalde şudur" ile A5 hiç
+    yazılamazdı. Aritmetik payı da ölçülür: 78 sütun kenarlığının alt-piksel
+    yuvarlaması, 2 px payla 1 px kaydırma bırakıyordu.
+
+---
+
+## Tasarım sistemi
+
+### Karakter
+
+Referans: basılı ders programı. Ekran bir kâğıt yüzeyidir, dashboard değil.
+Kılcal kenarlık, dolgun renk bloğu, minimum gölge, sıkı hizalama.
+Bir öğe "yüzüyor" gibi görünüyorsa yanlıştır.
+
+### Ölçek — tek EKRAN ekseni, kâğıt ayrı
+
+```
+--ui-scale   1.0–1.25, 0.05 adım. EKRANIN TAMAMI — ızgara dahil.
+             Ayarlar → Görünüm, localStorage['ders-programi-olcek'].
+kâğıt        --ui-scale'den ETKİLENMEZ. Kendi merdiveni var (--fs-p-*, pt).
+```
+
+Kök: `:root { font-size: calc(16px * var(--ui-scale)); }` — CSS'teki tek ham
+px `font-size` budur, merdivenin çapası. Boşluk, hücre, satır başı ve kenar
+çubuğu da rem: yazı büyüyüp boşluk yerinde kalırsa ekran ferahlamaz, sıkışır.
+
+> **`--grid-zoom` YOK — A5 geri geldi ama ikinci bir zoom ekseni olarak
+> değil.** Ölçek tek eksendir ve ızgara ona bağlıdır; yoksa ölçek
+> büyütüldüğünde babanın bütün gün baktığı ekran tek başına küçük kalırdı.
+> Yoğunluk (aşağıda) bir *zoom* değil, hücrenin **ne gösterdiğini**
+> değiştiren ayrı bir ayardır.
+
+> **Kâğıt neden ayrı:** A4 sabit fiziksel boyut. Ekran rahatlık ayarının
+> kâğıda neyin sığdığını belirlemesi, tuzak 31'in 205 mm hesabını ve "3 sınıf =
+> 3 sayfa" testini bir düğmeye bağlamak olurdu — babanın *yazıcıda* bulacağı
+> bir hata. `@media print` `--ui-scale`'i 1'e sabitler. Aynı merdiven
+> **önizlemede de** kullanılır: önizleme kâğıda benzemezse hangi sayfanın
+> basılacağını seçmek tahmine döner. Daha büyük BASKI ayrı bir özelliktir ve
+> ilke 5 gereği bir dönem kullanılmadan yazılmaz.
+
+### Izgara yoğunluğu — anlamsal zoom (A5)
+
+```
+Rahat   (varsayılan)  --cell-w 2.125rem (34px @%100), saatler görünür,
+                      ızgara 2616px / kutu 1828px  -> yatay kaydırma
+Sığdır                --cell-w kutudan TÜRETİLİR, ders saatleri gizlenir,
+                      ızgara 1823px / kutu 1828px  -> yatay kaydırma YOK
+```
+
+Tercih `localStorage['ders-programi-yogunluk']`, `State`'e girmez; ayar
+**Ayarlar → Görünüm**'de, yazı büyüklüğünün altında.
+
+**Sığdır tam olarak BİR şeyi düşürür, ve hangisi olduğu ölçüldü:** ders
+numarasının altındaki başlangıç saati. `--cell-w` 28, 23 ve 18 px yapıldığında
+hücre üç seferde de **33.69 px** çizildi — çünkü sütunun min-content'ini
+karttaki yazı değil, başlıktaki `"10:40"` belirliyordu. Kartın alt satırını
+gizlemek hiçbir şeyi değiştirmedi; saati gizlemek tabloyu 2461 → 1728 px'e
+indirdi (tuzak 37). Ders **numarası** kalır: göz onunla geziniyor, ve saatler
+hem Ayarlar → Okul'daki zil önizlemesinde hem de basılan her sayfada yazıyor.
+
+Hücre genişliği `clamp(1.125rem, (100cqw − satır başı − ayraçlar − pay) /
+sütun sayısı, 2.75rem)`. Sütun sayısı CSS'e **markup'tan** gelir
+(`--lesson-cols`, `--break-cols`): hafta her zaman 6×12 değil, 7 günlük hafta
+84 sütundur ve stil dosyasına yazılmış bir `72` Pazartesi eklenen gün yalan
+olurdu. `100cqw` için `.grid-wrap` bir container'dır — `100vw` kenar çubuğunu,
+dolguyu ve dikey kaydırma çubuğunu tahmin etmek zorunda kalırdı.
+
+Renk her yoğunlukta okunan ilk kanal, o yüzden **palet ΔE/kontrast sınırları
+dokunulamaz**.
+
+### Tipografi — tek merdiven, 6 basamak
+
+```
+--fs-xs  .75rem   (12px @1.0) mutlak alt sınır, bunun altı YASAK
+--fs-sm  .8125rem (13px)
+--fs-md  .875rem  (14px)
+--fs-base 1rem    (16px) gövde
+--fs-lg  1.125rem (18px)
+--fs-xl  1.375rem (22px)
+```
+
+**Kâğıdın kendi merdiveni, pt cinsinden** — rem değil, çünkü kâğıt ölçekle
+dönmez. Hem önizleme hem baskı buradan okur:
+
+```
+--fs-p-xl   14pt    sayfa başlığı
+--fs-p-lg   10pt    .p-top · .p-daycol · kapalı saat
+--fs-p-md    9pt    künye satırı
+--fs-p-base 8.5pt   tablo gövdesi ve başlığı
+--fs-p-sm    8pt    .p-bottom
+--fs-p-xs    7pt    .p-clock
+```
+
+Ham px font-size YASAK. Yeni boyut gerekiyorsa merdiveni tartış, ekleme.
+Rakam içeren her yerde `font-variant-numeric: tabular-nums`.
+
+**12px tabanı bir EKRAN kuralıdır.** Izgarada da geçerlidir (ölçüldü: 34px
+hücre iki satır 12px'i `--lh-tight` ile alıyor, ızgara genişliği değişmedi);
+kâğıtta geçerli değildir, çünkü 300 dpi'da 7pt okunur.
+
+### Geometri
+
+--r-sm 3px · --r-md 6px. Üçüncü radius yok. İki ham değer bilerek kaldı:
+`.step-no` `50%` (bir şekil, basamak değil) ve `.panel.inset` `0`.
+--space-1..5 korunur, rem'e çevrilir. Ham px padding/margin/gap YASAK.
+Tablo sütun genişliği ch cinsinden, CSS'te. JSX'te style={{width}} YASAK.
+  (istisna: paletteColor() dönen dinamik background — bu meşru)
+
+**Sütun merdiveni — altı basamak, tipografininki gibi:**
+
+```
+--w-col-xs   8ch   ~55px   onay kutusu, tek kelimelik etiket
+--w-col-sm  10ch   ~69px   sayı sütunu (th.num)
+--w-col-md  13ch   ~89px   sayı kutusu, tek düğme
+--w-col-lg  16ch  ~110px   kısa metin kutusu, dar açılır liste
+--w-col-xl  26ch  ~179px   uzun seçenekli liste, iki düğme
+--w-col-2xl 32ch  ~220px   uzun metin
+```
+
+Basamaklar `<th>` üstünde durur, yani birim **başlığın** ch'sidir (`--fs-xs`).
+KUTU genişliği (`.num`, `.text-sm`, `.color-pick`) gövdenin ch'sindedir. Aynı
+70px'e iki farklı sayı düşer (`8ch@1rem` ≈ `10ch@.75rem`) ve bu doğrudur —
+bkz. tuzak 34. Yeni bir genişlik gerekiyorsa merdiveni tartış, ekleme.
+
+### Diyalog
+
+Native `<dialog>` + `showModal()`. window.confirm/alert/prompt YASAK.
+Geri alınamaz işlem (Sıfırla, sil, üzerine yaz) mutlaka dialog'dan geçer.
+Tek animasyon istisnası: dialog açılışında <=120ms opacity,
+`prefers-reduced-motion: reduce` ise kapalı. Başka animasyon yok.
+
+### Erişilebilirlik
+
+Çözücü ilerlemesi, sonuç satırı ve hata mesajları `aria-live="polite"`.
+Geri alınamaz uyarılar `role="alertdialog"`.
+Renk asla tek başına durum taşımaz — ızgara renk bloğu bunun istisnasıdır
+ve orada kimlik taşır, durum değil.
+
 ---
 
 ## Arayüz
@@ -556,9 +774,10 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**. Daha fazlası yok.
 
 - **Sekmeler solda, dikey bir kenar çubuğunda** (92px; daraltılınca 52px, tercih
-  `localStorage['ders-programi-kenar']`'da). Yatay bir şerit 768px'lik ekranda ızgaradan
-  bir öğretmen satırı götürüyordu; yatayda ızgara zaten taşıyor ve kayıyor, yani 92px
-  zaten kaydırılan bir yerden gidiyor. Daraltılmışken etiket gizlenir ama `aria-label`
+  `localStorage['ders-programi-kenar']`'da). Karar 768px'lik ekranda alınmıştı: yatay
+  bir şerit ızgaradan bir öğretmen satırı götürüyordu. 1080px'te o baskı yok ama karar
+  duruyor, çünkü ikinci gerekçe ekrandan bağımsız: yatayda ızgara **hâlâ** taşıyor ve
+  kayıyor (1920'de 788px), yani 92px zaten kaydırılan bir yerden gidiyor. Daraltılmışken etiket gizlenir ama `aria-label`
   kalır — erişilebilir ad kaybolmaz.
 - **İçerik ekranın tamamını kullanır.** Tek düzen kuralı `.cols` (+ `wide-left`,
   `narrow-right`): solda asıl iş, sağda o ekranın **anlamı** — Kurulum'da kapasite
@@ -572,6 +791,13 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
   kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
   dokunulan şey aynı ekranda durmaz.
+- **Ayarlar beş bölüm**: `Okul ve zil · Kurallar · Branşlar · Görünüm · Veri`.
+  Görünüm iki şey ayarlar, ikisi de makinenin: **yazı büyüklüğü**
+  (`--ui-scale`, %100–%125, altı düğme) ve **ızgara yoğunluğu** (Rahat /
+  Sığdır). **Kaydırıcı değil düğme**: ölçeğin altı yasal değeri var, kaydırıcı
+  olmayan bir süreklilik uydurur ve hangisine oturduğunu gizler. İkisi de
+  `State`'e girmez (`ders-programi-olcek`, `ders-programi-yogunluk`) ve ikisi de
+  **yazdırmayı etkilemez** — kâğıtta saatler her iki yoğunlukta da yazar.
 - **Üst çubukta plan seçici, yönetim Ayarlar → Veri'de.** Seçici tek plan
   varken de görünür: "hangi planı düzenliyorum" sorusunun cevabı orası, ve
   ancak iki plan olunca beliren bir kutu planların var olduğunu hiç
@@ -641,9 +867,19 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   yazdırma her zaman açık palet kullanır — o renkler kâğıda basılıyor. Palet üstündeki
   mürekkep de tema ile dönmez (`--on-color`).
 - **Dört düğme durumu, fazlası yok:** birincil · sade · tehlikeli · basılı. Tehlikeli
-  olan beklemeden kırmızı görünür.
+  olan beklemeden kırmızı görünür — ama **mürekkeple**, kenarlıkla değil: 25
+  öğretmenlik listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın arka
+  planı hâline gelmesi demekti. Kırmızı kenarlık hover'da geliyor.
+- **Düğme kenarlığı `--line`, `--hairline` değil.** Girdiler Y0'da kıl çizgiye
+  inebildi çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar.
+  Düğmenin öyle bir yüzeyi yok — zemini `--paper`, üstünde durduğu `.topbar` ve
+  `.panel` de `--paper` — yani **kenarlık düğmenin tek sınırı**. Bu yüzden
+  `--line`'ın tanımı "yalnız ızgara ve tablo başlığı" değil: **veri okunan
+  yerler ve denetim kenarı**.
 - Font: sistem fontu. Web font indirmek offline çalışmayı bozar.
-- Ekran 1366x768 varsayılır. Öğretmen sütunu `sticky`, yatay kaydırma olacak.
+- **Ekran 1920x1080 varsayılır** (babanın 27" monitörü; CSS pikseli, fiziksel
+  piksel değil). Öğretmen sütunu `sticky`, yatay kaydırma olacak: ızgara 2616px,
+  yani 25 satırın 19'u ve sütunların bir kısmı ekrana sığar, gerisi kaydırılır.
 - **Boş ekranlar yönlendirir.** "Henüz ders yok" değil, "Kurulum sekmesinden öğretmen
   ve sınıf ekleyin, sonra ders girin."
 - **Silmeden önce her zaman onay**, ve metin ne kaybedileceğini sayar:

@@ -336,9 +336,15 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     const head = page.locator('tbody .row-head').first();
     const before = (await head.boundingBox())!;
 
-    await page.locator('.grid-wrap').evaluate((el) => {
-      el.scrollLeft = 1200;
+    // All the way, not a fixed number of pixels: how far the grid CAN scroll
+    // depends on the screen (788px at 1920x1080, 1342px at the old 1366x768),
+    // and a constant larger than that silently becomes "scroll to the end"
+    // anyway — it just stops saying so.
+    const room = await page.locator('.grid-wrap').evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+      return el.scrollWidth - el.clientWidth;
     });
+    expect(room, 'ızgara yatay kaymıyor, test bir şey ölçmüyor').toBeGreaterThan(200);
     await page.waitForTimeout(120);
 
     const after = (await head.boundingBox())!;
@@ -355,7 +361,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await expect(page.locator('table.grid .card')).not.toHaveCount(0);
   });
 
-  test('1366x768 ekranda sayfa dikey taşmıyor', async ({ page }) => {
+  test('1920x1080 ekranda sayfa dikey taşmıyor', async ({ page }) => {
     await openWithSample(page);
     const overflow = await page.evaluate(
       () => document.body.scrollHeight - document.body.clientHeight,

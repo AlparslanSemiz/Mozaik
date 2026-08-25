@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (on birinci oturum: **baskı turu + site derlemesi/PWA**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-25 (on dördüncü oturum: **A2 `ch` sütun merdiveni + A5 ızgara yoğunluğu**, `v1.0-teslim` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -96,12 +96,21 @@ bu turda geldi; kullanıcı istedi.
 | **v1.0: "veriler nerede" paneli** | ✅ 5 birim + 2 E2E · gerçek anahtar adları ve boyutlar |
 | **v1.0: baskı turu** (başlık, ortalama, üst/alt bilgi) | ✅ 5 E2E · PDF ile **gözle** doğrulandı |
 | **v1.0: site derlemesi + PWA** | ✅ 6 site testi · **fiş çekiliyken açılıyor** |
+| **A0: hedef ekran 1366×768 → 1920×1080** | ✅ 3 config · 3 iddia düzeltildi · 20 belge/yorum |
+| **Y0: yüzey ve çizgi ayrımı (`--hairline`)** | ✅ 11 kural + 1 kural ikiye bölündü · iki temada ekran görüntüsü |
+| Tasarım sistemi A1–A2 (tipografi merdiveni, `ch` sütun merdiveni) | ✅ JSX'te 0 inline genişlik · `e2e/sutun.spec.ts` 11 test |
+| Tasarım sistemi A5 (ızgara yoğunluğu) | ✅ Sığdır'da yatay kaydırma **788 px → 0** |
+| Tasarım sistemi A3–A4 (gömülü font, dialog) | ⬜ **sırada** |
 | GitHub Pages yayını | ⬜ bekliyor (kullanıcıdan: depo adı + Pages kaynağı) |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 402 birim + 228 E2E + 6 site = 636, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, 340 KB, sıfır ağ çağrısı;
+**E2E artık 1920×1080'de koşuyor** (babanın 27" ekranı; A0). Görsel referanslar
+**bilerek eski** — tasarım turunun sonunda tek seferde yenilenecek, ara aşamalarda
+`npm run gorsel` çalıştırılmıyor.
+
+**Testler: 409 birim + 251 E2E + 6 site = 666, hepsi geçiyor. `tsc --noEmit` temiz.
+`npm run build` → tek dosya `dist/index.html`, 344 KB, sıfır ağ çağrısı;
 `npm run build:site` → `dist-site/`, 364 KB (aynı tek dosya + manifest + `sw.js` +
 simgeler). `npm run kontrol` toplam ~61 sn (E2E ~46 sn 4 worker, site ~3 sn).**
 Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: 22 görsel referans
@@ -340,6 +349,22 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
    dosyayı zorunlu tutuyordu; `parseState` de eklendi, çünkü her yedek dosyası ve her
    `localStorage` okuması oradan geçiyor. Kırılırsa kayıp sessiz olur.
 
+5. **Y0'da verilen token setinden üç sapma** *(2026-08-25)*. Set olduğu gibi
+   yapıştırılmadı; üçünün de gerekçesi `styles.css` içinde yorumda duruyor:
+
+   - **`--shadow` korundu.** Sette yoktu ama iki yerde kullanılıyor, biri
+     sürüklenen hayalet kart. "Bir öğe yüzüyor gibi görünüyorsa yanlıştır"ın tek
+     meşru istisnası o kart: gerçekten parmağın altında taşınıyor. Düşürülseydi
+     gölge sessizce kaybolurdu.
+   - **Koyu tema ve baskı bloklarına `--paper-sunk` + `--hairline` eklendi.** Set
+     yalnız `:root`'u veriyordu. İki token koyu blokta tanımsız kalsaydı koyu
+     temada bütün girdiler ve panel kenarlıkları çökerdi.
+   - **`--muted` `#5c6672` → `#525c69`.** Verilen değer `--closed` üstünde WCAG
+     AA'yı **4.08**'e düşürüyordu ve o gri, kapalı saatin `×` işaretinin rengi;
+     `renk.spec.ts` iki testle yakaladı. **Sınır gevşetilmedi, renk düzeltildi**
+     (kullanıcının A6 talimatı). En açık geçen değer `#555f6b` idi ama 4.54 ile
+     sıyırıyordu; `#525c69` `--paper` 6.79 / `--closed` 4.75 veriyor.
+
 5. **`minPerDay` "Engelle" olamaz.** Kullanıcı "her kural için ayrı seçilebilsin" dedi,
    ama günün ilk dersini koyarken "günde en az 2 saat" her zaman ihlal edilir — sert
    yapılsa hiçbir gün başlatılamazdı. Bu tek kuralın açılır kutusunda *Engelle* seçeneği
@@ -372,6 +397,18 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 
 4. **Blok en fazla 3 saat.** Fotoğrafta `311 311 311` görüldü. Gerekirse tek sayı
    sınırı gevşetilir.
+
+4b. **Düğme kenarlığı bilerek mi güçlü?** *(Y0'da açıldı, 2026-08-25.)* `.btn`
+   hâlâ `--line-dark` kullanıyor ([styles.css:272](../src/styles.css)); Y0'ın
+   talimatı `--line` çağrılarını kapsıyordu, ona dokunulmadı. Ama girdiler gömük
+   yüzeye geçince ekrandaki **en gürültülü kenarlık düğmeler oldu** — özellikle
+   "Sil". `--hairline`'a mı insin, yoksa düğme kabuktan ayrışsın diye mi kalsın:
+   **kullanıcıya soruldu, cevap bekliyor.**
+
+4c. **Görünen satır tabanı dar payla duruyor.** `duzen.spec.ts` `visibleRows >= 18`
+   diyor, 1920×1080'de ölçülen **19**. Satır yüksekliği sistem fontuna bağlı, yani
+   başka bir makinede 2px uzasa taban hâlâ geçer, 4px uzasa kırılır. A3'te font
+   gömülünce bu belirsizlik kapanır; A6'da yeniden ölçülecek.
 
 5. **Gün ve zil düzeni kullanıcının verdiği taslak.** "40 dk ders, 10 dk teneffüs, 9'da
    başlar, 12 ders, 19:10'da biter; hafta içi 5–6 arası, hafta sonu 6–7 arası 30 dk öğle
@@ -477,12 +514,431 @@ kapandıkları aşağıdaki oturum bölümünde; testleri `solver.test.ts` ve
    dolu dönüyor~~ → **kapandı**: eksik bir şey varken hiçbir şey çözülmüş
    sayılmıyor; yerleşemeyeni olan her dünya testi bunu ayrıca iddia ediyor.
 
+### KAPANDI — Y0'ın açtığı gerileme (2026-08-25, on üçüncü oturum)
+
+~~**Renk seçici iki basamaklı sayıyı kırpıyor.**~~ → **kapandı.** Genişlik
+JSX'ten CSS'e, `ch` cinsinden taşındı (`table.list td > select.color-pick`,
+7ch) ve `e2e/renk-secici.spec.ts` yazıldı. Test bedavaya yeşil geçmiyor:
+eski 44px geri konarak koşuldu, dört senaryonun dördü de
+*«"1" kutusu 44px, gereken 57px»* diyerek kırmızıya döndü.
+
+Kapatırken **ikinci bir hata** çıktı, ilkinden daha kötüsü: seçici `color:
+inherit` kullanıyordu, yani rakam **temayla dönüyordu**. Koyu temada açık
+mürekkep pastel zemine düşüyor ve 5, 7, 12, 16, 17. satırlarda indeks
+**görünmüyordu** — tuzak 15'in hiç uygulanmadığı tek kontrol. Kutu geniştiği
+için gözle bakılınca ortaya çıktı; dar hâlde de vardı, sadece görülmüyordu.
+`--on-color` verildi.
+
+Ölçülen (Chromium, 1920×1080, gövde 16px):
+
+| | eski | yeni |
+|---|---|---|
+| kutu genişliği | 44 px | 64 px |
+| tarayıcının istediği (`width:auto`) | 57 px | 57 px |
+| rakam mürekkebi | `--text` (temayla döner) | `--on-color` (dönmez) |
+
+A4 (6×6 renk ızgarası) hâlâ sırada; testi ona da geçerli, çünkü "seçili renk
+okunuyor" bir kontrol türü değil bir gereksinim.
+
 **Açık kalan zayıf nokta (hata değil, kalite):** `gercek-olcek-imkansiz` —
 odaların ayırabileceğinin %160'ı istenen dünyada 708 bloğun 159'u diziliyor ve
 15 sn'lik bütçe yine doluyor. Sonuç yasal ve cümlesi okunur ("haftada 15 saat
 isteniyor, açık saatler ve kurallar en fazla 10 saat veriyor"), ama ızgaranın
 dörtte biri dolu. Böyle bir veri zaten çözülemez; buradaki soru "ne kadarını
 doldurabiliriz" ve cevabı ölçülmedi.
+
+---
+
+## On ikinci oturum (2026-08-25) — tasarım sistemi turu: A0 + Y0
+
+CLAUDE.md'ye **"Tasarım sistemi"** ve **"Değişmez ilkeler — güncelleme"**
+bölümleri girdi. İki yasak kalktı (gerekçeleriyle): **animasyon** — yalnız CSS
+`transition`, yalnız durum değişiminde, ≤150 ms, `prefers-reduced-motion` ile
+kapanır, kütüphane yok; ve **web font** — ağdan çekilmez, base64 ile tek dosyaya
+gömülür. İlke 7 ("hedef makine yavaş") bir **varsayım** olarak yeniden
+işaretlendi: babanın makinesinde ölçülene kadar gerekçe sayılmıyor.
+
+### A0 — hedef ekran düzeltildi
+
+Baba 27" monitör kullanıyor; araç v0'dan beri **1366×768** varsayıyordu. Yeni
+hedef **1920×1080 CSS pikseli** (fiziksel değil: %150 ölçeklemeli bir 4K panel de
+CSS'te 1920–2560 arası görünür).
+
+Viewport'u değiştirir değiştirmez **228/228 test geçti** — yani hiçbir şey
+kırılmadı, ve asıl tehlike buydu: geniş ekranda "sığıyor mu" soruları bedavaya
+evet olur. Bu yüzden tahmin yerine ölçüldü:
+
+| | 1366×768 | 1920×1080 |
+|---|---|---|
+| Görünen satır (25 üzerinden) | 9 | **19** |
+| Yatay kaydırma payı | 1342 px | **788 px** |
+| Dikey kaydırma payı | 514 px | **173 px** |
+| Izgara genişliği / kutu | 2616 / 1274 | 2616 / **1828** |
+
+Sonuç beklenenden iyi: **6 satır hâlâ katlanın altında ve ızgara hâlâ 788px
+kayıyor**, yani "sürükleme hedefi ekran dışında" ve "kenara gelince kayıyor"
+testleri boşalmadı. (1440px yükseklikte boşalırlardı.) Hiçbir test silinmedi;
+üç iddiadaki yalan sayılar düzeltildi:
+
+- `duzen.spec.ts` `visibleRows >= 9` → **`>= 18`**
+- `program.spec.ts` `scrollLeft = 1200` maksimum 788'i aşıyordu, yani sessizce
+  "sona kaydır" demeye başlamıştı → artık **gerçekten sona kaydırıyor** ve
+  `room > 200` ile *kaydırmanın var olduğunu* ayrıca iddia ediyor
+- İki test adındaki çözünürlük + `helpers.ts` yorumu
+
+`playwright.ekran/gorsel.config.ts` `...base` yaydığı için **kendiliğinden**
+miras aldı. `gorsel.config.ts`'teki `maxDiffPixelRatio` gerekçesi 1366×768 piksel
+sayısına dayanıyordu; oran doğru kalıyor (bir ızgara satırı ~62 000 px, eşik
+~20 700 px) ama yorum yenilendi.
+
+**`STATUS.md` ve `TASKS.md`'deki 1366×768 rakamlarına dokunulmadı**: onlar oturum
+kaydı, o gün doğruydular. Düzeltilen yalnız güncel iddialar (`CLAUDE.md`,
+`docs/PLAN.md`, ve `styles.css`/`App.tsx`/`drag.ts` yorumları). Sol kenar
+çubuğunun gerekçesi de **silinmedi, dürüstleştirildi**: dikey yarısı ("768px'te
+şerit bir öğretmen satırı götürüyordu") artık geçersiz, yatay yarısı ekrandan
+bağımsız olduğu için karar duruyor.
+
+### Y0 — yüzey ve çizgi ayrımı
+
+Yeni token seti uygulandı. **Turun en önemli tek değişikliği `--hairline` ile
+`--line` ayrımı:** kabuk çizgisi ile veri çizgisi aynı griyse her şey kutu gibi
+okunuyor.
+
+- `--hairline`'a inen 10 kural: `.sidebar` · `.topbar` · `.topbar-sep` ·
+  `.reason-bar` · `.step` · `.step-no` · `.panel` · `.entity-list` ·
+  `.pick-list` · `.pick-head`
+- `--line`'da kalan 5 yer, hepsi veri: `table.grid td` ×2 ·
+  `table.availability td` ×2 · `table.list/stat th`
+- **Bir kural ikiye bölündü.** `table.list th, td, table.stat th, td` tek
+  kuraldı; başlık `--line`'da kaldı, satır ayraçları `--hairline`'a indi.
+  25 satırlık bir listede her satırın kendi kutusu gibi okunmasının sebebi buydu.
+- **Girdiler kenarlıkla değil gömük yüzeyle belli:** `--line-dark` kenarlık →
+  `--hairline` + `background: var(--paper-sunk)`. 25 öğretmen × 9 alan kadar
+  koyu kenarlık, kurulum ekranını kafes ızgarasına çeviren şeydi.
+- `.panel.inset` (Excel yapıştırma kutusu) kenarlığını kaybetti, `--space-6` ile
+  ayrılıyor. Kenarlık içinde kenarlık, "kutu kutu" hissinin kendisi.
+- Gövde `--fs-base` + `--lh-base`; ızgara ailesi (`.card`, `.ghost`,
+  `.pool-card`, `.row-head`, iki ızgara başlığı) `--lh-tight`.
+
+**Ara durum bilinçli:** `--fs-*` merdiveni tanımlı ama CSS'te hâlâ **44 ham px
+`font-size`** var. 45 bildirimin merdivene eşlenmesi A1'in işi; Y0'ın kapsamı
+yüzey ve çizgiydi. Yani şu an gövde 16px, geri kalanı eski px değerlerinde.
+
+### Ölçülen
+
+```
+tsc --noEmit   temiz
+vitest         402/402
+playwright     228/228  (47.5 sn, 1920x1080)
+npm run ekran  iki temada 11'er sahne -> test-results/ekran/
+npm run gorsel ÇALIŞTIRILMADI (tur sonunda, tek seferde)
+```
+
+Y0 ilk koşuda **iki test kırdı**, ikisi de aynı kök: yeni `--muted` `--closed`
+üstünde AA'yı 4.08'e düşürüyordu. Sınır gevşetilmedi, renk düzeltildi — ayrıntı
+"Plandan bilerek sapılan yerler" madde 5'te.
+
+### Sıradaki turu bloke eden iki karar
+
+1. ~~**Baskı `--ui-scale`'den etkilenecek mi?**~~ → **HAYIR, karar verildi
+   (on üçüncü oturum).** Kâğıt sabit fiziksel boyut; ekran rahatlık ayarının
+   A4'e neyin sığdığını belirlemesi, tuzak 31'in 205 mm hesabını ve "3 sınıf =
+   3 sayfa" testini bir kaydırıcıya bağlamak olurdu — babanın yazıcıda bulacağı
+   bir hata. Kâğıt kendi merdivenini aldı (`--fs-p-*`, **pt** cinsinden) ve
+   `@media print` `--ui-scale`'i 1'e sabitliyor.
+   **Ölçüldü, iddia edilmedi:** `e2e/gorunum.spec.ts` %100 ve %125'te basılan
+   beş punto değerini `getComputedStyle` ile okuyup **birebir eşit** olduğunu ve
+   PDF'in iki durumda da 3 sayfa çıktığını doğruluyor.
+
+   Yan sonuç, bedava gelen: önizleme ile kâğıt artık **aynı** merdivenden
+   okuyor. `@media print` içindeki beş `font-size` ezmesi (`.p-title-main` 19px,
+   `.p-title-sub` 12px, `.p-top` 13px, `.p-bottom` 11px, `.p-daycol` 13px)
+   silindi — `.print-page` yorumunun yıllardır iddia ettiği "önizleme kâğıda
+   benzer" ilk kez doğru.
+
+   Kullanıcının *"Yazdır kısmındaki program da büyümesi lazım"* isteği bu kararla
+   **karşılanmadı**; o ayrı bir özellik (kâğıt satır yüksekliği) ve ilke 5
+   gereği bir dönem kullanılmadan yazılmıyor.
+
+2. ~~**A2'nin clamp formülü eksik.**~~ → **ÖLÇÜLDÜ, ve formül yazılamaz
+   (on dördüncü oturum).** Verilen hâli
+   `clamp(18px, (100vw - var(--rail-w) - 2rem) / 72, 44px)`; ızgara ise
+   `72 × hücre` değil, **`132px satır başı + 72 × hücre + 6 × 6px ayraç`**
+   (ayraç 8 değil 6 px, ölçüldü: 132 + 72×34 + 6×6 = 2616). Düzeltilmiş formül
+   1920'de `(1828 − 132 − 36) / 72 = 23.06px` verir.
+
+   Asıl bulgu bu değil: **`--cell-w` 34px'in altına indirilemiyor.** 28, 23.06 ve
+   18 px denendi, üçünde de hücre **33.69 px** çizildi ve tablo 2461 px'de
+   durdu — hücrenin içeriği (`411A`, iki satır) kendi min-content genişliğini
+   dayatıyor. Yani "Sığdır" modu bir sayı meselesi değil: **hücrenin ne
+   göstereceğini değiştirmeden mümkün değil**, o da kullanıcının turdan
+   çıkardığı A5'in (ızgara anlamsal zoom) ta kendisi.
+
+   Clamp'in üst ucu da bu makinede hiç ateşlenmez: 72 sütunun 34 px'ten geniş
+   sığması için ekranın ~2740 px olması gerekir, babanınki 1920.
+   **Karar kullanıcıya soruldu**; A2'nin ikinci yarısı bu yüzden yazılmadı.
+
+---
+
+## On dördüncü oturum (2026-08-25) — A2: `ch` birimi, sütun merdiveni, ve "Sığdır"ın ölçülmesi
+
+İki iş: A2'nin yazılabilen yarısını yazmak, ve yazılamayan yarısını **tahminle
+değil ölçümle** kapatmak.
+
+### JSX'te kalan 29 `style={{ width }}` → 0
+
+Hepsi bir `<th>` üstündeydi ve altı ayrı büyüklüğe düşüyordu, o yüzden altı
+basamaklı bir **sütun merdiveni** çıkarıldı — tipografi merdiveninin aynısı,
+`ch` cinsinden:
+
+```
+--w-col-xs   8ch   ~55px   onay kutusu, tek kelimelik etiket   (44, 58, 60)
+--w-col-sm  10ch   ~69px   sayı sütunu (th.num)                (70, 78)
+--w-col-md  13ch   ~89px   sayı kutusu, tek düğme              (80, 90)
+--w-col-lg  16ch  ~110px   kısa metin kutusu, dar liste        (100, 110, 120, 130)
+--w-col-xl  26ch  ~179px   uzun seçenekli liste, iki düğme     (160, 172, 190)
+--w-col-2xl 32ch  ~220px   uzun metin                          (220)
+```
+
+**Aynı piksele iki farklı `ch` sayısı düşüyor ve bu bir yazım hatası değil.**
+`table.list th` `--fs-xs` (12px), `td` ve içindeki kutular gövde (16px): 1ch
+sırasıyla 6.86 ve 9.15 px. Bu yüzden `.num` bir `<input>` üstünde **8ch**
+(73px), bir `<th>` üstünde **10ch** (69px) — ikisi de eski 70px'in yerinde.
+Tuzak 34'ün kural hâli: kutu kendi üstünden boylanır, sütun ondan boylanır.
+
+`ch`'ye geçmenin asıl kazancı ölçekle ilgili: `--ui-scale` başlığı ve hücreyi
+aynı katsayıyla büyütür, yani %100'de sığan %125'te de sığar. Ham piksel bunu
+yapmaz — tuzak 33 tam olarak buydu.
+
+### `e2e/sutun.spec.ts` — 11 test, ve bedava yeşil değil
+
+Üç ayrı iddia, çünkü tek başına her biri kandırılabilir:
+
+1. **Kaynakta `style={{ width }}` kalmadı** — `src/components` altındaki her
+   `.tsx` okunuyor. Sahnesi olmayan bir tablo için doğru kalan tek kontrol bu.
+2. **Altı basamak da `ch`** — `--fs-xs` bağlamında bir prob çizilip %100 ve
+   %125'te ölçülüyor, oran **tam 1.25** olmalı, ve altı basamak altı **farklı**
+   genişlik vermeli. Ham piksel burada düşer.
+3. **Hiçbir şey kırpılmıyor** — dokuz ekranda: her kutu içindeki metni alıyor
+   (`<select>` için klonlanıp `width:auto` ile ölçülen doğal genişlik, `<input>`
+   için **içindeki yazının** genişliği; `width:auto` bir input'ta UA'nın
+   `size=20` varsayılanını verir, ihtiyacı değil), ve her başlık %125'te
+   **%100'dekiyle aynı satır sayısında** kalıyor.
+
+**Çizilen sütunun kendisi ölçülmüyor, merdivenin basamağı ölçülüyor**, çünkü
+`table.list` `width: 100%` + auto layout: bir sütunun kullanılan genişliği
+panelden aldığı paydır, tanımlanan değer değil. Öğretmenler tablosunda oran
+1.25 değil **1.215** çıktı ve ortada bir hata yoktu.
+
+Testin dişi olduğu **gösterildi**: altı basamak ve iki kutu genişliği eski px
+değerlerine geri konup koşuldu, 6 test kırmızıya döndü. İçlerinden biri tam
+tuzak 33'ün cümlesi: *"Kurulum → Öğretmenler · %125 · input.text-sm#0 içine
+68.0px sığıyor, gereken 80.6px"*.
+
+### "Sığdır / Rahat" — yazılmadı, çünkü ölçüm yazılamayacağını söylüyor
+
+Ayrıntı yukarıda, *Sıradaki turu bloke eden iki karar* madde 2'de. Özet:
+`--cell-w`'yi 28, 23.06 ve 18 px yapmak hücreyi **33.69 px'in altına
+indirmiyor** — içerik kendi min-content'ini dayatıyor. Sığdırmak için hücrenin
+ne gösterdiğinin değişmesi gerekir, o da silinen A5. Karar kullanıcıda.
+
+### Ölçülen
+
+```
+tsc --noEmit   temiz
+vitest         409/409                       [407 + 2 yeni]
+playwright     251/251  (42 sn, 1920x1080)   [237 + 11 sütun + 3 yoğunluk]
+site           6/6
+npm run ekran  iki temada 12'şer sahne -> test-results/ekran/
+npm run gorsel ÇALIŞTIRILMADI (A6'da, tek seferde)
+```
+
+| | Önce | Sonra |
+|---|---|---|
+| JSX'te inline genişlik | 29 | **0** |
+| CSS'te ham px sütun/kutu genişliği | 2 (`.num`, `.text-sm`) | **0** |
+| ızgara genişliği @%100 (Rahat) | 2616 px | **2616 px** (dokunulmadı) |
+| ızgarada yatay kaydırma (Sığdır) | — | **0 px** (Rahat'ta 788) |
+| birim testi | 407 | **409** |
+| E2E | 237 | **251** |
+| `dist/index.html` | 344.5 KB | 347.0 KB |
+
+### A5 geri geldi — ve teşhis ölçülünce değişti
+
+Kullanıcı "Sığdır"ı düşürmek yerine **önce A5'i geri getirmeyi** seçti. İyi ki:
+yukarıdaki "hücrenin içeriği dayatıyor" teşhisi **eksikti**, ve hangi içeriğin
+dayattığı tek tek kapatılarak ölçülünce ortaya beklenmedik bir cevap çıktı.
+
+```
+gizlenen                       hücre      tablo     kutu
+—                              33.69 px   2461 px   1828 px
+kartın alt satırı              33.69 px   2461 px   1828 px   ← hiçbir şey
+başlıktaki "10:40"             23.59 px   1728 px   1828 px   ← SIĞDI
+ikisi birden                   23.59 px   1728 px   1828 px
+```
+
+Yani sütunu geniş tutan şey karttaki ders bilgisi değil, **başlıktaki zil
+saati**ydi. İlk teşhis yanlıştı ve öyle kalsaydı A5 "kartı kırp" diye
+yazılacaktı — bilgi kaybı, üstelik gereksiz.
+
+**Sığdır bu yüzden tam olarak bir şey düşürüyor:** ders numarasının altındaki
+başlangıç saati. Numara kalıyor (göz onunla geziniyor), sınıf adı, derslik
+harfi ve renkler kalıyor. Saatler zaten Ayarlar → Okul'daki zil önizlemesinde
+ve basılan her sayfada yazıyor.
+
+`--cell-w` artık kutudan türetiliyor:
+
+```css
+clamp(1.125rem,
+      (100cqw - var(--rowhead-w) - var(--break-cols) * .375rem - var(--space-3))
+        / var(--lesson-cols),
+      2.75rem)
+```
+
+İki incelik: **`100cqw`**, çünkü `100vw` kenar çubuğunu, dolguyu ve dikey
+kaydırma çubuğunu tahmin etmek zorunda kalırdı — `.grid-wrap` bir container
+yapıldı. Ve **sütun sayısı markup'tan geliyor** (`--lesson-cols`,
+`--break-cols`): hafta her zaman 6×12 değil, 7 günlük hafta 84 sütun, ve stil
+dosyasına yazılmış bir `72` Pazartesi eklendiği gün yalan olurdu. Bunlar bir
+**sayı**, bir ölçü değil — `sutun.spec.ts`'in yasağı JSX'e yazılmış bir
+ÖLÇÜ hakkında.
+
+`--space-3` payı da ölçüldü, gerekçelendirilmedi: 78 sütun kenarlığının
+alt-piksel yuvarlaması, 2 px payla **1 px** kaydırma bırakıyordu; 6 px'te 0.
+
+Ölçülen sonuç, 1920×1080, dolu ızgara (359 blok):
+
+| | Rahat | Sığdır |
+|---|---|---|
+| hücre | 34.00 px | 23.59 px |
+| tablo | 2616 px | 1823 px |
+| yatay kaydırma | **788 px** | **0 px** |
+| kırpılan kart | 0 | 0 |
+
+`e2e/gorunum.spec.ts` üç test daha aldı ve **dişli olduğu gösterildi**: saati
+gizleyen kural `display: block` yapılıp koşuldu, ikisi kırmızıya döndü. Test
+ızgarayı önce **otomatik dizerek dolduruyor** — boş bir ızgarada hem "sığdı"
+hem "hiçbir kart kırpılmadı" bedava geçerdi (tuzak 33'ün aynısı).
+
+`ders-programi-yogunluk` anahtarı "Veriler nerede" tablosuna eklendi; eklenmese
+`planlar.spec.ts`'in "tablodaki anahtarlar sayfanın GERÇEK anahtarlarıyla aynı"
+testi zaten kırmızıya dönecekti — panelin kendi iddiasını koruyan test ikinci
+kez işe yaradı.
+
+### Bilerek yapılmayan
+
+- **Görsel referanslar yenilenmedi** — A6'nın işi, tur boyunca kasten erteleniyor.
+  A5 `12-ayarlar-gorunum` sahnesini büyüttü, A6'da ona tek tek bakılacak.
+- **Sığdır %125'te tam sığmıyor** (2144 px / 1805 px kutu) ve sığmamalı: yazı
+  %25 büyüdüğünde içeriğin kendi tabanı da büyüyor. Yine de Rahat'ın 3270
+  px'ine göre çok daha fazlası ekranda. Ayrı bir özellik değil, ölçümün
+  söylediği şey.
+- **Yoğunluk düğmesi Program sekmesinde değil.** Görünüm'de, ölçeğin yanında:
+  ikisi de makineyi tarif ediyor ve üst çubuk "hiçbir tıklamanın bir öğleden
+  sonrayı götüremeyeceği yer" olarak kalıyor. Bir dönem kullanılıp "sürekli
+  gidip geliyorum" denirse Program'a taşınır (ilke 5).
+
+---
+
+## On üçüncü oturum (2026-08-25) — A1: tipografi merdiveni, ölçek ayarı, iki gerileme kapandı
+
+Üç iş: kullanıcının açık bıraktığı iki soruyu **kararla** kapatmak, Y0'ın açtığı
+renk seçici gerilemesini kapatmak, ve A1'i yapmak.
+
+### Düğme kenarlığı — soru (a) cevaplandı, ama teşhis düzeltilerek
+
+Soru *"`.btn` `--hairline`'a insin mi"* idi. **İnemez**, ve sebebi ölçülebilir:
+`.btn`'in zemini `--paper`, üstünde durduğu `.topbar` ve `.panel` de `--paper`.
+Yani **kenarlık düğmenin tek sınırı**. Girdiler Y0'da kıl çizgiye inebildi
+çünkü karşılığında `--paper-sunk` yüzeyini kazandılar; düğmenin öyle bir yüzeyi
+yok, `--hairline` onu görünmez yapardı.
+
+Asıl gürültü zaten `--line-dark` değildi: `.btn.danger` `border-color`'ı
+`--bad` ile **eziyordu**, yani "Sil"leri kırmızı yapan şey `.btn` değildi ve
+`.btn`'e dokunmak o sütunu hiç değiştirmezdi. İki ayrı düzeltme yapıldı:
+
+- `.btn` → `--line` (bir basamak aşağı, görünür kalıyor)
+- `.btn.danger` → `border-color` kalktı, `color: var(--bad)` kaldı. Kural
+  ("tehlikeli beklemeden kırmızı görünür") **mürekkeple** karşılanıyor; 25
+  öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın
+  arka planı hâline gelmesi demekti. Hover hâlâ kırmızı kenarlık + `--bad-bg`.
+
+`--line`'ın sözlük tanımı da güncellendi: artık "ızgara + tablo başlığı" değil,
+"veri okunan yerler **ve denetim kenarı**".
+
+### A1 — 44 ham px `font-size` → 0
+
+Kalan tek `px`, merdivenin çapası: `:root { font-size: calc(16px * var(--ui-scale)) }`.
+
+Eşleme 46 bildirimin tamamını kapsadı. **10'u 12px tabanının altındaydı** ve
+dağınık değillerdi — 4'ü ızgarada, 6'sı baskıda. Karar ikiye ayrıldı:
+
+**Izgara tabanı korundu, hiçbir şey büyümedi.** `.hour-clock` 9→12, `.card-bottom`
+10→12, `.pool-card .counter` 10→12, `.row-head .secondary` 11→12. Ölçülen sonuç:
+ızgara genişliği %100'de **2616 px** — Y0 öncesiyle **birebir aynı** sayı, yani
+rem'e geçiş piksel kaymasi üretmedi. 34px hücre iki satır 12px'i `--lh-tight`
+ile zaten alıyor (12×1.2 × 2 = 28.8).
+
+**Baskı kendi merdivenini aldı** (`--fs-p-*`, pt) — gerekçesi yukarıdaki karar 1.
+
+Merdivenin **hiç kullanıcısı olmayan** basamağı vardı: `--fs-xl` (22px). İlke 5
+gereği kullanılmayan basamak tahmindir; `.empty-screen strong`'a verildi
+(17→22px), yani aracın tek "yüksek sesle konuştuğu" yere. `.panel h2` da
+16→18px: gövdeyle aynı boyda bir başlık başlık değildi.
+
+Radius 7 değerden 2'ye indi ve **CLAUDE.md'nin yazdığı değerlere** (3/6px)
+oturtuldu — Y0 sehven 4/8 yazmıştı, hiç kullanılmadığı için fark edilmemişti.
+Kalan iki ham değer bilerek: `.step-no` `50%` (bir şekil, basamak değil) ve
+`.panel.inset` `0` (bilerek kaldırılmış).
+
+`--space-*`, `--cell-*`, `--rail-w` ve satır başı genişliği rem'e geçti. Bir
+tuzak buradan çıktı: hayalet kartın `margin: -17px` değeri **34/2'nin elle
+yazılmış hâliydi**; rem'e geçince ölçek kayınca hayalet parmağın altından
+kayacaktı. `calc(var(--cell-w) / -2)` oldu.
+
+### Ayarlar → Görünüm (yeni, altıncı bölüm)
+
+`--ui-scale` artık bir ayara bağlı: %100–%125, altı basamak,
+`localStorage['ders-programi-olcek']`. **Kaydırıcı değil altı düğme**: ölçeğin
+altı yasal değeri var, kaydırıcı olmayan bir süreklilik uydurur ve hangisine
+oturduğunu gizler. `.btn[aria-pressed]` zaten var, yeni CSS yazılmadı.
+
+`State`'e **girmiyor** (tema ve kenar çubuğu ile aynı gerekçe): koyu makinede
+alınmış bir yedek babanın ekranını büyütmemeli, kozmetik ayar şema göçü
+istememeli.
+
+Izgara `--ui-scale`'e **bağlandı**. Gerekçe: A5 (ayrı `--grid-zoom` ekseni)
+kullanıcı tarafından silindi, yani ikinci eksen yok — tek eksen kaldıysa babanın
+bütün gün baktığı ekran onun dışında kalamaz. Ölçülen: 2616 px → **3270 px**
+(tam ×1.25).
+
+### Mevcut bir test yeni anahtarı yakaladı
+
+`ders-programi-olcek` eklenince `e2e/planlar.spec.ts` → *"tablodaki anahtarlar
+sayfanın GERÇEK anahtarlarıyla aynı"* kırmızıya döndü: "Veriler nerede" tablosu
+onu saymıyordu. Panel yalan söylemiş olurdu. `storageReport` güncellendi.
+Bu, panelin kendi iddiasını koruyan testin işe yaradığının kanıtı.
+
+### Ölçülen
+
+| | önce | sonra |
+|---|---|---|
+| ham px `font-size` | 44 | **0** |
+| ham `border-radius` | 19 | 2 (`50%` ve `0`, ikisi de bilerek) |
+| ızgara genişliği @%100 | 2616 px | **2616 px** (kayma yok) |
+| ızgara genişliği @%125 | — | 3270 px (tam ×1.25) |
+| basılan punto @%100 ve @%125 | — | **birebir eşit**, PDF 3 sayfa ↔ 3 sayfa |
+| birim testi | 402 | **407** |
+| E2E | 228 | **237** |
+| `dist/index.html` | 340.9 KB | 344.5 KB |
+| JSX'te kalan `style={{ width }}` | 31 | **29** (A2'nin işi) |
+
+### Bilerek yapılmayan
+
+- **Görsel referanslar yenilenmedi.** A6'nın işi ve tur boyunca kasten
+  ertelendi; 22 referans artık 24 olacak (`12-ayarlar-gorunum` sahnesi eklendi).
+- **Kâğıt satır yüksekliği ölçeklenmedi** — ayrı bir özellik, ilke 5.
+- **A2'nin clamp formülü** hâlâ eksik, aşağıdaki karar 2 duruyor.
 
 ---
 
@@ -1143,11 +1599,12 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 379 birim + derleme + 217 E2E (~46 sn)
+npm run kontrol                   # tsc + 409 birim + derleme + 251 E2E + 6 site (~45 sn)
 npm run dev                       # geliştirme sunucusu
 ```
 
-**Görsel regresyon ayrı**: `npm run gorsel` (22 referans). İlk koşuda büyük ihtimalle kırmızı verir,
+**Görsel regresyon ayrı**: `npm run gorsel` (24 referans; tasarım turu bitene
+kadar zaten kırmızı — bkz. A6). İlk koşuda büyük ihtimalle kırmızı verir,
 çünkü referanslar bir başka makinenin fontuyla alındı. Bir kez yenile:
 
 ```bash

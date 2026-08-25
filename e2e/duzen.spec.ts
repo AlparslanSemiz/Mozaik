@@ -189,8 +189,11 @@ test.describe('24. Ekranın tamamı kullanılıyor', () => {
         return r.top >= box.top && r.bottom <= box.bottom;
       }).length;
     });
-    // A measurement with a floor, not a claim: 25 teachers, 34px rows.
-    expect(visibleRows).toBeGreaterThanOrEqual(9);
+    // A measurement with a floor, not a claim: 25 teachers, 34px rows. On the
+    // 1920x1080 screen 19 of them fit; the floor keeps one row of slack for a
+    // font that resolves taller. Six rows still sit below the fold, which is
+    // what keeps the "drag target is off-screen" test above honest.
+    expect(visibleRows).toBeGreaterThanOrEqual(18);
   });
 });
 

@@ -375,7 +375,8 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
     geri koy. v0'da buna hiç girme: tıkla-kaldır + yeniden sürükle yeterli.
 
 11. **Sürükleme hedefi ekran dışında olabilir.** *(E2E testinin yakaladığı gerçek hata.)*
-    25 satır × 84 sütun 1366×768 ekrana sığmıyor; ekranda ~13 satır ve ~35 sütun var.
+    25 satır × 84 sütun ekrana sığmıyor; 1920×1080'de 19 satır görünüyor, altı satır
+    katlanın altında kalıyor (ölçüldü). *(Rakamlar v0'da 1366×768 içindi: 9 satır.)*
     Kullanıcı havuzdan bir kart alır ama bırakacağı satır ya da gün görünmüyorsa oraya
     hiç ulaşamaz — fare basılıyken kaydırma yapamaz. Çözüm: (a) sürükleme başlarken
     hedef satır `scrollIntoView({ block: 'center' })` ile ortaya alınır, (b) imleç
@@ -463,9 +464,12 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
 - **Kısaltma nerede** *(v0.7 kararı)*: dar ekran ızgaralarında kısaltma
   (`Pzt Sal Çar Per Cum Cmt Pzr`, `Mat`, `MÇ`), yer olan her yerde tam ad. Duvara
   asılan baskıda gün adı tam yazılır.
-- **Ekran**: babamın ekranı muhtemelen 1366×768. 84 sütun sığmaz, yatay kaydırma
-  kaçınılmaz. Öğretmen sütunu `position: sticky; left: 0`, gün/saat başlıkları
-  `sticky; top: 0`.
+- **Ekran**: babamın ekranı 27", **1920×1080 CSS pikseli** *(2026-08-25'te
+  düzeltildi; v0 boyunca 1366×768 varsayılmıştı)*. 84 sütun yine sığmaz, yatay
+  kaydırma kaçınılmaz — ızgara 2616px, kutu 1828px. Öğretmen sütunu
+  `position: sticky; left: 0`, gün/saat başlıkları `sticky; top: 0`.
+  *(A5'ten sonra ikinci bir seçenek var: Ayarlar → Görünüm → **Sığdır**,
+  saatleri gizleyip hücreyi kutudan türetiyor ve yatay kaydırmayı bitiriyor.)*
 - **Performans**: ~2100 hücre var. Satırlar `React.memo` ile sarılır; bir
   yerleştirme tüm tabloyu değil 1-2 satırı yeniden çizer.
 - **Boş ekranlar yönlendirsin.** "Henüz ders yok" değil,

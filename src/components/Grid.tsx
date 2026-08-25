@@ -179,9 +179,19 @@ function GridInner({
   );
   const breakAt = useMemo(() => clocks.map((x) => x.breakAt), [clocks]);
 
+  // Counts, not widths: the "Sığdır" density derives --cell-w from the box it
+  // is in, and the week is not always 6x12 — a seven-day week is 84 columns
+  // and a hard-coded 72 in the stylesheet would be wrong the day somebody adds
+  // Pazartesi. The design rule bans a MEASUREMENT written in the JSX; these are
+  // how many columns there are, which is data the stylesheet cannot know.
+  const columns = {
+    '--lesson-cols': dayCount * hourCount,
+    '--break-cols': breakAt.filter((at) => at >= 0).length,
+  } as React.CSSProperties;
+
   return (
     <div className="grid-wrap">
-      <table className={`grid${draggedRowId !== null ? ' dragging' : ''}`}>
+      <table className={`grid${draggedRowId !== null ? ' dragging' : ''}`} style={columns}>
         <thead>
           <tr>
             <th className="corner" rowSpan={2}>

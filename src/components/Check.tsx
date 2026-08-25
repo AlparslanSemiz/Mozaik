@@ -40,7 +40,7 @@ function Section({
       <table className="list">
         <thead>
           <tr>
-            <th style={{ width: 110 }}>Durum</th>
+            <th className="w-col-lg">Durum</th>
             <th>Açıklama</th>
           </tr>
         </thead>
@@ -111,7 +111,7 @@ export default function Check({ state }: Props) {
             <table className="list">
               <thead>
                 <tr>
-                  <th style={{ width: 110 }}>Durum</th>
+                  <th className="w-col-lg">Durum</th>
                   <th>Açıklama</th>
                 </tr>
               </thead>
@@ -140,7 +140,7 @@ export default function Check({ state }: Props) {
             <table className="list">
               <thead>
                 <tr>
-                  <th style={{ width: 110 }}>Durum</th>
+                  <th className="w-col-lg">Durum</th>
                   <th>Açıklama</th>
                 </tr>
               </thead>
@@ -170,7 +170,7 @@ export default function Check({ state }: Props) {
             <table className="list">
               <thead>
                 <tr>
-                  <th style={{ width: 220 }}>Ders</th>
+                  <th className="w-col-2xl">Ders</th>
                   <th>Sebep</th>
                 </tr>
               </thead>

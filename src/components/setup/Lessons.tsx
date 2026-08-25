@@ -127,12 +127,12 @@ export default function Lessons({ state, change }: PanelProps) {
             <tr>
               <th>Sınıf</th>
               <th>Öğretmen</th>
-              <th style={{ width: 110 }}>Haftalık saat</th>
-              <th style={{ width: 110 }}>Blok</th>
-              <th style={{ width: 90 }} title="Bu ders bir günde en fazla kaç saat">
+              <th className="w-col-lg">Haftalık saat</th>
+              <th className="w-col-lg">Blok</th>
+              <th className="w-col-md" title="Bu ders bir günde en fazla kaç saat">
                 Günde ↑
               </th>
-              <th style={{ width: 80 }} />
+              <th className="w-col-md" />
             </tr>
           </thead>
           <tbody>
