@@ -74,10 +74,7 @@ export default function School({ state, change }: PanelProps) {
         <div className="panel">
           <h2>Okul ve günler</h2>
           <div className="form-row">
-            <label className="field field-wide">
-              <span className="field-label">
-                Okul adı (yazdırılan sayfaların başlığında görünür)
-              </span>
+            <Field label="Okul adı (yazdırılan sayfaların başlığında görünür)" wide>
               <input
                 type="text"
                 className="grow"
@@ -85,7 +82,7 @@ export default function School({ state, change }: PanelProps) {
                 placeholder="örn. Semiz Kurs"
                 onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
               />
-            </label>
+            </Field>
           </div>
 
           <p className="hint">
@@ -232,8 +229,7 @@ export default function School({ state, change }: PanelProps) {
           </div>
 
           <div className="form-row spaced">
-            <label className="field field-wide">
-              <span className="field-label">Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)</span>
+            <Field label="Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)" wide>
               <input
                 type="text"
                 className="grow"
@@ -241,7 +237,7 @@ export default function School({ state, change }: PanelProps) {
                 onBlur={(e) => setHours(hourCount, e.target.value)}
                 placeholder="1, 2, 3, ..."
               />
-            </label>
+            </Field>
           </div>
         </div>
       </div>

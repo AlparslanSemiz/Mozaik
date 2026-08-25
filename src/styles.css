@@ -266,12 +266,18 @@ textarea {
   background: var(--accent-hover);
 }
 
-/* A two-position button (theme, availability kind): it must show WHERE you are,
-   not what the next click does. */
-.btn[aria-pressed="true"] {
-  background: var(--accent-bg);
+/* A two-position button (theme, availability kind, view switch): it must show
+   WHERE you are, not what the next click does.
+
+   `:hover:not(:disabled)` is (0,3,0) and beats `[aria-pressed]` at (0,2,0), so
+   the hover state has to be named explicitly — without it the button you just
+   pressed goes pale under the pointer that pressed it. This used to be two
+   separate rules 1000 lines apart that disagreed about the colour. */
+.btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--on-accent);
   font-weight: 600;
 }
 
@@ -291,9 +297,12 @@ textarea {
   opacity: 0.55;
 }
 
-.btn.icon[aria-pressed="true"] {
+/* More specific than the rule above, so the ink has to be repeated here too:
+   accent on accent would be an invisible icon. */
+.btn.icon[aria-pressed="true"],
+.btn.icon[aria-pressed="true"]:hover:not(:disabled) {
   opacity: 1;
-  color: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn.icon:hover:not(:disabled) {
@@ -1321,16 +1330,6 @@ tr.break-row td {
 table.bell-preview td {
   text-align: center;
   font-variant-numeric: tabular-nums;
-}
-
-/* Which of the three availability kinds is being edited. The :hover rule above
-   is more specific, so it has to be beaten explicitly — otherwise the button the
-   user just clicked turns white-on-pale and cannot be read. */
-.btn[aria-pressed='true'],
-.btn[aria-pressed='true']:hover:not(:disabled) {
-  background: var(--line-dark);
-  color: var(--paper);
-  border-color: var(--line-dark);
 }
 
 @media print {
