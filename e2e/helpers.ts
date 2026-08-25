@@ -315,9 +315,22 @@ export const SCENES: Scene[] = [
       await page.mouse.up();
     },
   },
-  { name: '6-kontrol', go: tab('Kontrol') },
   {
-    name: '7-yazdir',
+    // The whole week laid out by the tool itself: the one picture that shows
+    // whether the automatic run produced something a person would keep.
+    name: '6-otomatik',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      const run = page.getByRole('button', { name: /^Otomatik diz/ });
+      if (await run.isEnabled()) {
+        await run.click();
+        await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 30_000 });
+      }
+    },
+  },
+  { name: '7-kontrol', go: tab('Kontrol') },
+  {
+    name: '8-yazdir',
     go: async (page) => {
       await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
       await page.emulateMedia({ media: 'print' });
@@ -327,13 +340,13 @@ export const SCENES: Scene[] = [
     },
   },
   {
-    name: '8-ayarlar-okul',
+    name: '9-ayarlar-okul',
     go: async (page) => {
       await openSettings(page, 'Okul');
     },
   },
   {
-    name: '9-ayarlar-kurallar',
+    name: '10-ayarlar-kurallar',
     go: async (page) => {
       await openSettings(page, 'Kurallar');
     },

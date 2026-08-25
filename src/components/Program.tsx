@@ -20,7 +20,8 @@ import {
 import type { Index, Verdict } from '../constraints';
 import { subjectShort } from '../entities';
 import { useDrag } from '../drag';
-import type { DragData } from '../drag';
+import type { DragData, Reason } from '../drag';
+import type { SolverRun } from '../useSolver';
 import type { State, Id } from '../types';
 import Grid from './Grid';
 import type { GridCell, GridRow } from './Grid';
@@ -32,6 +33,56 @@ type View = 'teacher' | 'class';
 interface Props {
   state: State;
   change: (apply: (d: State) => State) => void;
+  /** The automatic run. Owned by App so it survives a tab change. */
+  solver: SolverRun;
+}
+
+/** "3,4" — one decimal, Turkish comma. */
+function seconds(ms: number): string {
+  return (ms / 1000).toFixed(1).replace('.', ',');
+}
+
+/**
+ * The single line under the toolbar. Returns the text and the class that
+ * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
+ */
+function describeBar(
+  reason: Reason | null,
+  dragging: boolean,
+  solver: SolverRun,
+): { text: string; level: string } {
+  if (reason !== null) return { text: reason.text, level: reason.level === 'warn' ? 'warn' : 'bad' };
+  if (dragging) return { text: 'Buraya bırakılabilir.', level: 'ok' };
+
+  const p = solver.progress;
+  if (solver.running && p !== null) {
+    return {
+      text: `Otomatik diziliyor… ${p.placedBlocks}/${p.totalBlocks} blok · ${seconds(p.elapsedMs)} sn`,
+      level: 'busy',
+    };
+  }
+
+  const done = solver.result;
+  if (done === null) return { text: '', level: '' };
+
+  if (done.stuck.length === 0) {
+    return {
+      text: `Program dizildi. ${done.placedBlocks} blok yerleşti (${seconds(done.elapsedMs)} sn). Ctrl+Z ile geri alabilirsiniz.`,
+      level: 'ok',
+    };
+  }
+
+  const worst = done.stuck[0]!;
+  const others =
+    done.stuck.length > 1 ? ` (ve ${done.stuck.length - 1} ders daha)` : '';
+  const head =
+    done.phase === 'cancelled'
+      ? `Durduruldu. ${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`
+      : `${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`;
+  return {
+    text: `${head} ${worst.name}: ${worst.missing} saat yerleşemedi — ${worst.reason}${others}.`,
+    level: done.phase === 'cancelled' ? 'warn' : 'bad',
+  };
 }
 
 function roomLetter(ix: Index, roomId: string | null | undefined): string {
@@ -205,7 +256,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
   return { cards, completed };
 }
 
-export default function Program({ state, change }: Props) {
+export default function Program({ state, change, solver }: Props) {
   const [view, setView] = useState<View>('teacher');
   const ix = useMemo(() => buildIndex(state), [state]);
 
@@ -228,6 +279,11 @@ export default function Program({ state, change }: Props) {
 
   const rows = useMemo(() => buildRows(state, ix, view), [state, ix, view]);
   const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
+  const placedCount = Object.keys(state.placements).length;
+
+  // What the bar under the toolbar says. Drag first: that answers a question
+  // the hand is asking right now.
+  const { text: barText, level: barLevel } = describeBar(reason, dragging !== null, solver);
 
   const cellRemove = useCallback(
     (rowId: string, day: number, hour: number) => {
@@ -261,6 +317,9 @@ export default function Program({ state, change }: Props) {
       lessonId: Id,
       source: { classId: Id; day: number; hour: number } | null,
     ) => {
+      // The grid is being rewritten under the cursor; a drop now would race it.
+      if (solver.running) return;
+
       const lesson = ix.lessonById.get(lessonId);
       if (lesson === undefined) return;
 
@@ -300,7 +359,7 @@ export default function Program({ state, change }: Props) {
         },
       );
     },
-    [state, ix, view, start],
+    [state, ix, view, start, solver.running],
   );
 
   const cardStart = useCallback(
@@ -373,14 +432,69 @@ export default function Program({ state, change }: Props) {
             ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'
             : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'}
         </span>
+
+        <span className="spacer" />
+
+        {/* Two buttons and no settings. What "spread over the week" or "prefer
+            mornings" should mean is not knowable before a term has been laid
+            out with this (principle 5); the numbers that DO belong to the
+            school are already in Ayarlar. */}
+        {solver.running ? (
+          <button className="btn danger" onClick={solver.stop}>
+            ■ Durdur
+          </button>
+        ) : (
+          <>
+            <button
+              className="btn primary"
+              disabled={cards.length === 0}
+              title={
+                cards.length === 0
+                  ? 'Havuzda bekleyen ders yok'
+                  : 'Havuzdaki dersleri kurallara uyarak yerleştirir'
+              }
+              onClick={() => solver.start(state, { keepPlaced: true })}
+            >
+              Otomatik diz ({cards.length})
+            </button>
+            <button
+              className="btn"
+              disabled={placedCount === 0}
+              title="Dizilmiş programı silip baştan dizer"
+              onClick={() => {
+                if (
+                  window.confirm(
+                    `Dizilmiş ${placedCount} saatin tamamı silinip program baştan dizilecek. ` +
+                      'Devam edilsin mi? (Ctrl+Z ile geri alınabilir.)',
+                  )
+                ) {
+                  solver.start(state, { keepPlaced: false });
+                }
+              }}
+            >
+              Baştan diz
+            </button>
+          </>
+        )}
       </div>
 
-      <div
-        className={`reason-bar${reason === null ? ' empty' : ''}${
-          reason?.level === 'warn' ? ' warn' : ''
-        }`}
-      >
-        {reason?.text ?? (dragging !== null ? 'Buraya bırakılabilir.' : '')}
+      {/* One bar, three jobs: the drag reason, the solver's progress and the
+          solver's verdict. It has a FIXED height so the grid never jumps down
+          when something appears in it, and it is the line the eye is already
+          trained on. The drag always wins — that one is answering a question
+          the hand is asking right now. */}
+      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
+        <span>{barText}</span>
+        {solver.result !== null && !solver.running && (
+          <span className="bar-actions">
+            {solver.result.stuck.length > 0 && (
+              <span className="hint inline">Ayrıntı: Kontrol sekmesi.</span>
+            )}
+            <button className="btn" onClick={solver.clear}>
+              Tamam
+            </button>
+          </span>
+        )}
       </div>
 
       <Grid

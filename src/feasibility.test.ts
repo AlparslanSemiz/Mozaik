@@ -1,4 +1,5 @@
-import { buildCapacity, buildReport } from './feasibility';
+import { buildCapacity, buildReport, commonestBlock } from './feasibility';
+import { buildIndex } from './constraints';
 import { teacherKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { State } from './types';
@@ -130,5 +131,33 @@ describe('buildCapacity', () => {
     d.unavailable[teacherKey('oMC', 0, 0)] = 1;
     const row = buildCapacity(d).teachers.find((x) => x.id === 'oMC')!;
     expect(row.capacity).toBe(3);
+  });
+});
+
+// The reason has to be the one that EXPLAINS, not the one that happens to be
+// most repeated as a sentence. Grouping by code is what makes that true: a full
+// class produces a different sentence per cell, an absent teacher one per cell
+// too — counting sentences would score both at 1 and let a rarer cause win.
+describe('commonestBlock', () => {
+  it('yeri olan ders için anyValid', () => {
+    const d = build();
+    expect(commonestBlock(d, buildIndex(d), 'x1').anyValid).toBe(true);
+  });
+
+  it('hafta boyu kapalı öğretmen tek cümleyle anlatılıyor', () => {
+    const d = build();
+    for (let h = 0; h < 4; h++) d.unavailable[`oMC|0|${h}`] = 1;
+
+    const found = commonestBlock(d, buildIndex(d), 'x1');
+    expect(found.anyValid).toBe(false);
+    expect(found.reason).toContain('müsait değil');
+  });
+
+  it('stopAtFirstValid erken çıkıyor ama cevabı değiştirmiyor', () => {
+    const d = build();
+    const ix = buildIndex(d);
+    expect(commonestBlock(d, ix, 'x1', true).anyValid).toBe(
+      commonestBlock(d, ix, 'x1', false).anyValid,
+    );
   });
 });

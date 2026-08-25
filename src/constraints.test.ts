@@ -1,6 +1,7 @@
 import {
   blockStart,
   blocker,
+  blockerDetail,
   occupy,
   vacate,
   check,
@@ -668,5 +669,60 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
     expect(blocker(work, ix, 'x2', 0, 1)).toBe('MÇ Pazartesi 2 saatinde 510 sınıfında');
     // The room is shared, so 511 cannot use it either.
     expect(why(place(d, 'x1', 0, 1), 'x5', 0, 1)).toBe(blocker(work, ix, 'x5', 0, 1));
+  });
+});
+
+// Every message names a day and an hour, so two cells blocked for the SAME
+// underlying reason produce two different sentences. The code is what anything
+// counting reasons has to count.
+describe('blockerDetail — sebebin kodu', () => {
+  const code = (d: State, lessonId: string, day: number, hour: number) =>
+    blockerDetail(d, buildIndex(d), lessonId, day, hour)?.code ?? null;
+
+  it('geçebilen hücre için null', () => {
+    expect(code(build(), 'x1', 0, 0)).toBeNull();
+  });
+
+  it('gün sonuna sığmayan blok', () => {
+    expect(code(build(), 'x6', 0, 2)).toBe('dayEnd'); // blockSize 3, 4 hours
+  });
+
+  it('sınıf dolu / sınıf kapalı', () => {
+    const busy = place(build(), 'x1', 0, 1);
+    expect(code(busy, 'x4', 0, 1)).toBe('classBusy');
+
+    const shut = { ...build(), unavailable: { ['s510|0|1']: 1 as const } };
+    expect(code(shut, 'x1', 0, 1)).toBe('classClosed');
+  });
+
+  it('öğretmen müsait değil / başka sınıfta', () => {
+    const away = { ...build(), unavailable: { [teacherKey('oMC', 0, 1)]: 1 as const } };
+    expect(code(away, 'x1', 0, 1)).toBe('teacherClosed');
+
+    const elsewhere = place(build(), 'x2', 0, 1); // MÇ teaching 511
+    expect(code(elsewhere, 'x1', 0, 1)).toBe('teacherBusy');
+  });
+
+  it('derslik dolu / derslik kapalı', () => {
+    const shared = place(build(), 'x5', 0, 1); // 511 in room A
+    expect(code(shared, 'x1', 0, 1)).toBe('roomBusy'); // 510 shares room A
+    // ...but only after the class and the teacher are clear, so 510's own
+    // lesson with a DIFFERENT teacher is the honest probe:
+    expect(blockerDetail(shared, buildIndex(shared), 'x1', 0, 1)?.message).toContain('dersliğinde');
+
+    const shut = { ...build(), unavailable: { ['dA|0|1']: 1 as const } };
+    expect(code(shut, 'x1', 0, 1)).toBe('roomClosed');
+  });
+
+  it('kural ihlali', () => {
+    const d = place(withRule(build(), 'maxConsecutive', 1, 'block'), 'x1', 0, 1);
+    expect(code(d, 'x1', 0, 2)).toBe('rule');
+  });
+
+  it('blocker() aynı cümleyi veriyor', () => {
+    const d = place(build(), 'x1', 0, 1);
+    expect(blocker(d, buildIndex(d), 'x4', 0, 1)).toBe(
+      blockerDetail(d, buildIndex(d), 'x4', 0, 1)?.message,
+    );
   });
 });

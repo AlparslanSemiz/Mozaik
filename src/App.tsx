@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type React from 'react';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import { applyTheme, readSidebar, readTheme, writeSidebar, type Theme } from './theme';
+import { useSolver } from './useSolver';
 import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
@@ -191,6 +192,10 @@ export default function App() {
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
+  // The run lives HERE, not in Program: switching tabs unmounts that component
+  // and a search that dies because somebody glanced at Kontrol would throw away
+  // work with nothing to show for it (pitfall 18).
+  const solver = useSolver(change);
 
   function toggleTheme() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
@@ -333,7 +338,7 @@ export default function App() {
         <main className={tab === 'program' ? 'main no-overflow' : 'main'}>
           {tab === 'setup' && <Setup state={state} change={change} />}
           {tab === 'availability' && <Availability state={state} change={change} />}
-          {tab === 'program' && <Program state={state} change={change} />}
+          {tab === 'program' && <Program state={state} change={change} solver={solver} />}
           {tab === 'check' && <Check state={state} />}
           {tab === 'print' && (
             <Print state={state} excluded={printExcluded} setExcluded={setPrintExcluded} />

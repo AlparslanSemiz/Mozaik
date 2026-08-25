@@ -77,34 +77,62 @@ export function buildIndex(d: State): Index {
 // -------------------------------------------------------------- blocker
 
 /**
- * null -> can be placed. string -> the reason for the block, in plain language.
+ * Which of the checks stopped a placement. The message names a day and an hour,
+ * so two cells blocked for the SAME underlying reason produce two different
+ * sentences; anything that wants to count reasons has to count these instead.
+ */
+export type BlockCode =
+  | 'missing'
+  | 'dayEnd'
+  | 'classBusy'
+  | 'classClosed'
+  | 'teacherClosed'
+  | 'teacherBusy'
+  | 'roomBusy'
+  | 'roomClosed'
+  | 'rule';
+
+export interface Block {
+  code: BlockCode;
+  message: string;
+}
+
+/**
+ * null -> can be placed. Otherwise the reason for the block, in plain language.
  *
  * The message is NEVER "there is a clash". This sentence decides the next move
  * of whoever builds the timetable, so it is always concrete:
  * "MÇ o saatte 433 sınıfında".
  */
-export function blocker(
+export function blockerDetail(
   d: State,
   ix: Index,
   lessonId: Id,
   day: number,
   hour: number,
-): string | null {
+): Block | null {
   const lesson = ix.lessonById.get(lessonId);
-  if (lesson === undefined) return 'Ders bulunamadı';
+  if (lesson === undefined) return { code: 'missing', message: 'Ders bulunamadı' };
 
   const group = ix.classById.get(lesson.classId);
   const teacher = ix.teacherById.get(lesson.teacherId);
-  if (group === undefined || teacher === undefined) return 'Ders eksik tanımlı';
+  if (group === undefined || teacher === undefined) {
+    return { code: 'missing', message: 'Ders eksik tanımlı' };
+  }
 
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
-  if (day < 0 || day >= dayCount || hour < 0) return 'Geçersiz hücre';
+  if (day < 0 || day >= dayCount || hour < 0) {
+    return { code: 'missing', message: 'Geçersiz hücre' };
+  }
 
   // 1. Does the block fit before the end of the day
   const block = Math.max(1, lesson.blockSize);
   if (hour + block > hourCount) {
-    return block === 1 ? 'Bu saat günün dışında' : `${block} saatlik blok güne sığmıyor`;
+    return {
+      code: 'dayEnd',
+      message: block === 1 ? 'Bu saat günün dışında' : `${block} saatlik blok güne sığmıyor`,
+    };
   }
 
   const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
@@ -118,17 +146,23 @@ export function blocker(
     if (busyLessonId !== undefined) {
       const other = ix.lessonById.get(busyLessonId);
       const otherSubject = other && ix.teacherById.get(other.teacherId)?.subject;
-      return `${group.name} sınıfının ${dayName} ${hourName} saatinde ${otherSubject ?? 'başka ders'} var`;
+      return {
+        code: 'classBusy',
+        message: `${group.name} sınıfının ${dayName} ${hourName} saatinde ${otherSubject ?? 'başka ders'} var`,
+      };
     }
 
     // 3. Is the class itself closed at that hour
     if (d.unavailable[closedKey(group.id, day, h)] !== undefined) {
-      return `${group.name} sınıfı ${dayName} ${hourName} saatinde kapalı`;
+      return { code: 'classClosed', message: `${group.name} sınıfı ${dayName} ${hourName} saatinde kapalı` };
     }
 
     // 4. Can the teacher come at that hour
     if (d.unavailable[closedKey(teacher.id, day, h)] !== undefined) {
-      return `${teacher.short} ${dayName} ${hourName} saatinde müsait değil`;
+      return {
+        code: 'teacherClosed',
+        message: `${teacher.short} ${dayName} ${hourName} saatinde müsait değil`,
+      };
     }
 
     // 5. Is the teacher in another class at that hour
@@ -136,7 +170,10 @@ export function blocker(
     if (busyForTeacher !== undefined) {
       const other = ix.lessonById.get(busyForTeacher);
       const otherClass = other && ix.classById.get(other.classId);
-      return `${teacher.short} ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka'} sınıfında`;
+      return {
+        code: 'teacherBusy',
+        message: `${teacher.short} ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka'} sınıfında`,
+      };
     }
 
     // 6. Is another class sharing the room busy at that hour
@@ -146,12 +183,18 @@ export function blocker(
       if (busyForRoom !== undefined) {
         const other = ix.lessonById.get(busyForRoom);
         const otherClass = other && ix.classById.get(other.classId);
-        return `${roomName} dersliğinde ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka sınıf'} var`;
+        return {
+          code: 'roomBusy',
+          message: `${roomName} dersliğinde ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka sınıf'} var`,
+        };
       }
 
       // 7. Is the room closed at that hour
       if (d.unavailable[closedKey(group.roomId, day, h)] !== undefined) {
-        return `${roomName} dersliği ${dayName} ${hourName} saatinde kapalı`;
+        return {
+          code: 'roomClosed',
+          message: `${roomName} dersliği ${dayName} ${hourName} saatinde kapalı`,
+        };
       }
     }
   }
@@ -159,10 +202,21 @@ export function blocker(
   // 8-10. The configurable limits, but only where the rule is set to "Engelle".
   // At "Uyar" the very same text comes back from check() as a warning instead.
   for (const rule of limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName)) {
-    if (ruleLevel(d, rule.name) === 'block') return rule.message;
+    if (ruleLevel(d, rule.name) === 'block') return { code: 'rule', message: rule.message };
   }
 
   return null;
+}
+
+/** The message alone. Everything that only needs a sentence calls this. */
+export function blocker(
+  d: State,
+  ix: Index,
+  lessonId: Id,
+  day: number,
+  hour: number,
+): string | null {
+  return blockerDetail(d, ix, lessonId, day, hour)?.message ?? null;
 }
 
 // ------------------------------------------------------------ soft rules
