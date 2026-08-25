@@ -16,10 +16,13 @@ Dal: `v1.0-teslim`, madde başına bir commit, her commit `npm run kontrol` yeş
 *(4b ve 4c tek commit'te: taslak ayrı bir varlık değil, aynı veri şeklindeki bir
 bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak olurdu.)*
 
-**SIRADAKİ İŞ: 4f** — GitHub Pages yayını (`.github/workflows/site.yml`).
-Site derlemesi hazır ve çevrimdışı çalıştığı ölçüldü; eksik olan yalnız
-yayınlama adımı. **Kullanıcıdan iki şey bekleniyor:** depo `ders-programi`
-olarak yeniden adlandırılacak ve Pages kaynağı "GitHub Actions" seçilecek.
+**SIRADAKİ İŞ: kullanıcının bu dosyanın sonuna yazdığı yeni liste** (ölçek/
+büyütme, liste sıralama ve süzme, renk seçici, sıfırla, saat gösterme ayarı,
+baskıyı büyütme) — henüz numaralanmadı, kararları alınmadı. Ondan sonra
+**4f**: GitHub Pages yayını (`.github/workflows/site.yml`). Site derlemesi
+hazır ve çevrimdışı çalıştığı ölçüldü; eksik olan yalnız yayınlama adımı.
+**Kullanıcıdan iki şey bekleniyor:** depo `ders-programi` olarak yeniden
+adlandırılacak ve Pages kaynağı "GitHub Actions" seçilecek.
 
 4e ile birlikte gerçek bir http kaynağı doğdu, yani **4l** (Dosya Sistemi
 Erişimi API'si) artık yazılabilir — 4d'de bilerek ertelenmişti, çünkü `file://`
@@ -83,7 +86,8 @@ adlandırılacak** (kullanıcı yapacak).
       oldu: büyük ortalı ana satır + küçük künye satırı. Satırlar 20 → 23 mm ve
       sayfa sabit yükseklikli bir flex kutusu (`safe center`), yani plan dikey
       ortalanıyor. E2E 223 → 228; kanıt olarak `displayHeaderFooter: true` ile
-      PDF üretilip **gözle okundu**
+      PDF üretilip **gözle okundu**. *Kullanıcı "baskıdaki program daha da
+      büyüsün" dedi — yeni listeye girdi, aşağıya bakınız*
 - [ ] **4l Dosya Sistemi Erişimi API'si** — 4d'den devreden iş, artık
       yazılabilir (4e ile http kaynağı var). `showSaveFilePicker` tutamağı
       IndexedDB'de saklanıp her değişiklik aynı `-tumu-` dosyasına yazılır;
@@ -458,3 +462,22 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
 > **Bu bölümün altına elle yazılan altı satır** (`.exe` · web sitesi · güzel
 > simge ve ad · verilerin nerede durduğu · taslaklar · birden fazla ders planı)
 > **ŞİMDİ SIRADA → 0. v1.0 turuna** taşındı ve 4b–4j maddelerine dönüştü.
+
+---
+
+## Kullanıcının yeni yazdığı liste (2026-08-25) — HENÜZ NUMARALANMADI
+
+Aşağısı kullanıcının elle yazdığı hâliyle duruyor. Numaralı maddelere
+dönüştürülmeden önce kararları sorulacak — en az biri **şema değişikliği**
+istiyor (öğretmende cinsiyet alanı yok) ve en az biri yasak listeye bakmayı
+gerektiriyor (elle sürükleyerek sıralama).
+
+Listeleri kaydırabililelim ya da grupça filteleyebilelim. Öğretmenler, Branşlar onlar bunlar
+Ölçeklendirme büyütme küçültme
+Babam biraz zor görüyor o sebeple biraz daha büyütülmeli her şey.
+Öğretmenler listesinde sıralama erkek kadın, branşa göre, isme göre vesaire sıralamalar olsun. ayrıca biz kendimiz sıralayabilelim. drag ve koy gibi. Aynı şekilde tüm listeler öyle özelliklere sahip olsun.
+Ayrıca renk seçmede renkleri seçerken renkleri görebilelim sadece sayı olmasın.
+Ayrıca programramda sıfırla olmalı ki programı en baştan yapabilelim ama uyarı gelsin ona basınca.
+ayrıca ayarlarda ölçeklendirme de olsun. nasıl olması gerekiyorsa ya da.
+Ayarlarda müsatilikteki programda derslerin altında saatleri olsun olmasın diye ayar olsun ve default olarak kapalı olsun.
+Yazdır kısmındaki program da büyümesi lazım. 
