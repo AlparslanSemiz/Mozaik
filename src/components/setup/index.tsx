@@ -17,6 +17,7 @@ import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
 import Lessons from './Lessons';
+import Summary from './Summary';
 import type { PanelProps } from '../props';
 
 type StepId = 'rooms' | 'teachers' | 'classes' | 'lessons';
@@ -119,15 +120,26 @@ export default function Setup({ state, change }: PanelProps) {
         </div>
       )}
 
-      {current.render({ state, change })}
+      {/* The list on the left, and on the right what the list MEANS: the same
+          capacity numbers Kontrol shows, but while you are typing rather than
+          one screen and one decision later. */}
+      <div className="cols wide-left">
+        <div>
+          {current.render({ state, change })}
 
-      {next !== undefined && (
-        <div className="form-row step-next">
-          <button className="btn" onClick={() => setStep(next.id)}>
-            Sonraki adım: {next.label} →
-          </button>
+          {next !== undefined && (
+            <div className="form-row step-next">
+              <button className="btn" onClick={() => setStep(next.id)}>
+                Sonraki adım: {next.label} →
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        <aside>
+          <Summary state={state} step={current.id} />
+        </aside>
+      </div>
     </>
   );
 }

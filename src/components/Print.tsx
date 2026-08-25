@@ -152,49 +152,10 @@ export default function Print({ state, excluded, setExcluded }: Props) {
   }
 
   return (
-    <>
-      <div className="panel no-print">
-        <h2>Yazdır</h2>
-        <p className="hint">
-          Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
-          penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
-          açık</b> olsun, yoksa renkler çıkmaz.
-        </p>
-        <div className="form-row">
-          <label>
-            Ne basılsın{' '}
-            <select value={scope} onChange={(e) => setScope(e.target.value as Scope)}>
-              <option value="classes">Sınıf programları</option>
-              <option value="teachers">Öğretmen programları</option>
-              <option value="both">İkisi de</option>
-            </select>
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={colored}
-              onChange={(e) => setColored(e.target.checked)}
-            />{' '}
-            Renkli bas
-          </label>
-          <button className="btn primary" disabled={pageCount === 0} onClick={() => window.print()}>
-            Yazdır ({pageCount} sayfa)
-          </button>
-        </div>
-
-        {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
-            normal request and used to mean printing all 45 pages and throwing
-            43 away. */}
-        <div className="form-row pickers">
-          {classPages && picker('classes', 'Sınıflar')}
-          {teacherPages && picker('teachers', 'Öğretmenler')}
-        </div>
-
-        {pageCount === 0 && (
-          <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
-        )}
-      </div>
-
+    // The preview takes the room it needs; the choices stand BESIDE it instead
+    // of pushing twenty pages of preview a screen down. When printing, `.cols`
+    // collapses to a block and the whole control panel is `.no-print` anyway.
+    <div className="cols narrow-right">
       <div className="print-area">
         {chosenClasses.map((group) => (
             <div className="print-page" key={group.id}>
@@ -310,6 +271,50 @@ export default function Print({ state, excluded, setExcluded }: Props) {
             </div>
           ))}
       </div>
-    </>
+
+      <aside>
+        <div className="panel no-print">
+          <h2>Yazdır</h2>
+          <p className="hint">
+            Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
+            penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
+            açık</b> olsun, yoksa renkler çıkmaz.
+          </p>
+          <div className="form-row">
+            <label>
+              Ne basılsın{' '}
+              <select value={scope} onChange={(e) => setScope(e.target.value as Scope)}>
+                <option value="classes">Sınıf programları</option>
+                <option value="teachers">Öğretmen programları</option>
+                <option value="both">İkisi de</option>
+              </select>
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={colored}
+                onChange={(e) => setColored(e.target.checked)}
+              />{' '}
+              Renkli bas
+            </label>
+            <button className="btn primary" disabled={pageCount === 0} onClick={() => window.print()}>
+              Yazdır ({pageCount} sayfa)
+            </button>
+          </div>
+
+          {/* Tick lists, not a second dropdown: "print 510 and 511 only" is a
+              normal request and used to mean printing all 45 pages and throwing
+              43 away. */}
+          <div className="form-row pickers">
+            {classPages && picker('classes', 'Sınıflar')}
+            {teacherPages && picker('teachers', 'Öğretmenler')}
+          </div>
+
+          {pageCount === 0 && (
+            <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }

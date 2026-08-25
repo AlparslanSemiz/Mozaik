@@ -222,7 +222,10 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
 
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await expect(page.getByLabel('Müsaitlik listesi')).toHaveValue('s510');
+    await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute(
+      'data-id',
+      's510',
+    );
     // row = 1st day, column = 1st hour (the axis was turned in v0.7)
     await page.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();

@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import {
   addSubject,
+  DEFAULT_SUBJECT_SHORTS,
   defaultSubjectShort,
   deleteSubject,
   subjectKey,
@@ -51,94 +52,146 @@ export default function Subjects({ state, change }: PanelProps) {
     change((d) => deleteSubject(d, subject));
   }
 
-  return (
-    <div className="panel">
-      <h2>Branşlar ({options.length})</h2>
-      <p className="hint">
-        Öğretmen eklerken branş <b>bu listeden</b> seçilir — elle yazılmaz, böylece
-        aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve
-        yazdırılan sayfada görünür; yalnızca <b>değiştirdikleriniz</b> saklanır.
-      </p>
+  // The built-in table the short forms come from. Anything already on the
+  // school's list is not on offer; what is left is one click away instead of
+  // being retyped — and typed-in names are exactly how "Matemtik" was born.
+  const ready = Object.keys(DEFAULT_SUBJECT_SHORTS).filter(
+    (name) => !options.some((x) => subjectKey(x) === subjectKey(name)),
+  );
+  const unused = options.filter((x) => subjectTeachers(state, x).length === 0);
 
-      <div className="form-row">
-        <input
-          type="text"
-          placeholder="Yeni branş (örn. Robotik)"
-          aria-label="Yeni branş"
-          value={fresh}
-          onChange={(e) => setFresh(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') add();
-          }}
-        />
-        <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>
-          Ekle
-        </button>
-        {clash && <span className="hint">Bu branş listede zaten var.</span>}
+  return (
+    <div className="cols">
+      <div>
+        <div className="panel">
+          <h2>Branşlar ({options.length})</h2>
+          <p className="hint">
+            Öğretmen eklerken branş <b>bu listeden</b> seçilir — elle yazılmaz, böylece
+            aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve
+            yazdırılan sayfada görünür; yalnızca <b>değiştirdikleriniz</b> saklanır.
+          </p>
+
+          <div className="form-row">
+            <input
+              type="text"
+              placeholder="Yeni branş (örn. Robotik)"
+              aria-label="Yeni branş"
+              value={fresh}
+              onChange={(e) => setFresh(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') add();
+              }}
+            />
+            <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>
+              Ekle
+            </button>
+            {clash && <span className="hint">Bu branş listede zaten var.</span>}
+          </div>
+
+          <table className="list">
+            <thead>
+              <tr>
+                <th>Branş</th>
+                <th style={{ width: 110 }}>Kısaltma</th>
+                <th style={{ width: 130 }} className="num">
+                  Öğretmen
+                </th>
+                <th style={{ width: 190 }} />
+                <th style={{ width: 80 }} />
+              </tr>
+            </thead>
+            <tbody>
+              {options.map((subject) => {
+                const current = subjectShort(state.settings, subject);
+                const fallback = defaultSubjectShort(subject);
+                const users = subjectTeachers(state, subject);
+                const inList = listed.has(subjectKey(subject));
+                return (
+                  <tr key={subjectKey(subject)}>
+                    <td>
+                      {subject}
+                      {!inList && (
+                        <span className="hint" title="Bir öğretmende var ama listede yok">
+                          {' '}
+                          — listede değil
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        className="text-sm"
+                        aria-label={`${subject} kısaltması`}
+                        // defaultValue + a key that changes with the value: typing
+                        // must not re-render on every keystroke (PLAN pitfall 3).
+                        key={current}
+                        defaultValue={current}
+                        onBlur={(e) => change((d) => setSubjectShort(d, subject, e.target.value))}
+                      />
+                    </td>
+                    <td className="num" title={users.map((t) => t.name).join(', ')}>
+                      {users.length}
+                    </td>
+                    <td className="hint">
+                      {current === fallback ? 'varsayılan' : `varsayılanı: ${fallback}`}
+                    </td>
+                    <td>
+                      <button
+                        className="btn danger"
+                        disabled={!inList}
+                        title={inList ? 'Listeden çıkar' : 'Bu branş zaten listede değil'}
+                        onClick={() => remove(subject)}
+                      >
+                        Sil
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <table className="list narrow">
-        <thead>
-          <tr>
-            <th>Branş</th>
-            <th style={{ width: 110 }}>Kısaltma</th>
-            <th style={{ width: 130 }} className="num">
-              Öğretmen
-            </th>
-            <th style={{ width: 190 }} />
-            <th style={{ width: 80 }} />
-          </tr>
-        </thead>
-        <tbody>
-          {options.map((subject) => {
-            const current = subjectShort(state.settings, subject);
-            const fallback = defaultSubjectShort(subject);
-            const users = subjectTeachers(state, subject);
-            const inList = listed.has(subjectKey(subject));
-            return (
-              <tr key={subjectKey(subject)}>
-                <td>
-                  {subject}
-                  {!inList && (
-                    <span className="hint" title="Bir öğretmende var ama listede yok">
-                      {' '}
-                      — listede değil
-                    </span>
-                  )}
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    className="text-sm"
-                    aria-label={`${subject} kısaltması`}
-                    // defaultValue + a key that changes with the value: typing
-                    // must not re-render on every keystroke (PLAN pitfall 3).
-                    key={current}
-                    defaultValue={current}
-                    onBlur={(e) => change((d) => setSubjectShort(d, subject, e.target.value))}
-                  />
-                </td>
-                <td className="num" title={users.map((t) => t.name).join(', ')}>
-                  {users.length}
-                </td>
-                <td className="hint">
-                  {current === fallback ? 'varsayılan' : `varsayılanı: ${fallback}`}
-                </td>
-                <td>
-                  <button
-                    className="btn danger"
-                    disabled={!inList}
-                    title={inList ? 'Listeden çıkar' : 'Bu branş zaten listede değil'}
-                    onClick={() => remove(subject)}
-                  >
-                    Sil
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <aside>
+        <div className="panel">
+          <h2>Hazır kısaltmalar ({ready.length})</h2>
+          <p className="hint">
+            Programda gömülü olan ve okulun listesinde <b>bulunmayan</b> branşlar.
+            Kısaltmaları hazır; eklemek için tıklayın.
+          </p>
+          {ready.length === 0 ? (
+            <div className="ok-box">Gömülü tablodaki branşların hepsi listenizde.</div>
+          ) : (
+            <table className="stat">
+              <tbody>
+                {ready.map((name) => (
+                  <tr key={name}>
+                    <td>{name}</td>
+                    <td className="num">{DEFAULT_SUBJECT_SHORTS[name]}</td>
+                    <td>
+                      <button
+                        className="btn"
+                        title={`${name} branşını listeye ekler`}
+                        onClick={() => change((d) => addSubject(d, name))}
+                      >
+                        Ekle
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {unused.length > 0 && (
+            <p className="hint">
+              Hiçbir öğretmende kullanılmayan {unused.length} branş var:{' '}
+              {unused.join(', ')}. Silinebilirler.
+            </p>
+          )}
+        </div>
+      </aside>
     </div>
   );
 }

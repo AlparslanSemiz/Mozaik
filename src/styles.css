@@ -781,18 +781,6 @@ td.drop-blocked {
   font-size: 13px;
 }
 
-table.list.narrow {
-  max-width: 520px;
-}
-
-table.list.mid {
-  max-width: 640px;
-}
-
-table.list.wide {
-  max-width: 720px;
-}
-
 /* The strip above the grid: same furniture as the top bar, no second border. */
 .topbar.subbar {
   border-bottom: none;
@@ -868,19 +856,23 @@ textarea {
   resize: vertical;
 }
 
-table.list {
+table.list,
+table.stat {
   border-collapse: collapse;
   width: 100%;
 }
 
 table.list th,
-table.list td {
+table.list td,
+table.stat th,
+table.stat td {
   border-bottom: 1px solid var(--line);
   padding: 5px 6px;
   text-align: left;
 }
 
-table.list th {
+table.list th,
+table.stat th {
   font-size: 12px;
   color: var(--muted);
   font-weight: 600;
@@ -897,7 +889,17 @@ table.bell-preview tbody th {
   color: var(--text);
 }
 
-table.list tbody tr:hover {
+/* An editable cell should be as wide as its cell. The name column stretches to
+   whatever the column grid gives it; the box inside it used to stay at the
+   browser's default ~170px and leave the rest of the cell blank. Sized boxes
+   (.num, .text-sm) keep their width — those are numbers, not names. */
+table.list td > input[type='text']:not(.num):not(.text-sm),
+table.list td > select {
+  width: 100%;
+}
+
+table.list tbody tr:hover,
+table.stat tbody tr:hover {
   background: var(--bg);
 }
 
@@ -988,6 +990,104 @@ table.list tbody tr:hover {
   border-radius: 0 6px 6px 0;
 }
 
+/* ------------------------------------------------------------------- cols */
+
+/* Every screen but the grid used to stop at the width of its widest table and
+   leave the rest of a 1366px screen empty. One rule fixes all of them: the main
+   thing takes the left column, and what used to be crammed ABOVE it — the
+   controls, the counters, the sentence that explains the screen — moves to a
+   second column that was doing nothing.
+
+   `minmax(0, …)` on both tracks is not decoration: without it a wide table
+   inside a grid cell pushes the whole page sideways. */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.cols.wide-left {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.cols.narrow-right {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+}
+
+/* Below this the two columns are narrower than the tables they hold. */
+@media (max-width: 1100px) {
+  .cols,
+  .cols.wide-left,
+  .cols.narrow-right {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A column's panels stack; the last one must not leave a dangling margin. */
+.cols > * > .panel:last-child {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------ entity list */
+
+/* Choosing among 25 teachers used to be a <select>: one visible row, and the
+   count of closed hours invisible until you picked one. The list shows all of
+   them at once, which is also what fills the second column. */
+.entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-height: 62vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: var(--space-1);
+}
+
+.entity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+}
+
+.entity:hover {
+  background: var(--bg);
+}
+
+.entity[aria-current="true"] {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.entity .entity-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entity .entity-count {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.entity[aria-current="true"] .entity-count {
+  color: inherit;
+}
+
 /* ------------------------------------------------------------ availability */
 
 /* Row = day, column = lesson — the same way round as aSc's "Time off" window,
@@ -997,13 +1097,19 @@ table.availability {
   border-spacing: 0;
   user-select: none;
   table-layout: fixed;
+  width: 100%;
 }
 
 table.availability th,
 table.availability td {
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  width: 46px;
+  /* Was a hard 46px, which stopped the whole screen at ~620px and left the rest
+     of a 1366px display empty. It is a MINIMUM now: the drag-paint target never
+     shrinks below the size it was measured at, but the table takes the width
+     its column gives it. */
+  width: auto;
+  min-width: 46px;
   height: 34px;
   text-align: center;
   font-size: 12px;
@@ -1273,6 +1379,9 @@ table.bell-preview td {
     display: none !important;
   }
 
+  .cols,
+  .cols.wide-left,
+  .cols.narrow-right,
   .app,
   .workspace,
   .main,
@@ -1336,4 +1445,23 @@ table.bell-preview td {
   color: var(--bad);
   border-bottom: 2px solid var(--bad);
   line-height: 1.45;
+}
+
+/* A list that reads as prose, not as bullets in a document. */
+.plain-list {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Panels that flow into as many columns as fit. Used by Kontrol, where the
+   number of panels depends on how many things are wrong: two fixed columns
+   would leave one of them empty exactly when everything is fine. */
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 0 var(--space-4);
+  align-items: start;
 }

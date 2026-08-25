@@ -10,9 +10,10 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { sharedPeriods } from '../bell';
+import { paletteColor } from '../palette';
 import { buildIndex, closedConflicts, closedKey } from '../constraints';
 import type { Id, State } from '../types';
-import { setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
+import { openHours, setAvailability, setWholeWeek, shortDay, weeklyLoad } from '../entities';
 
 interface Props {
   state: State;
@@ -33,6 +34,10 @@ interface Entity {
   short: string;
   /** Weekly lesson hours that must fit into the open cells. */
   load: number;
+  /** Cells still open this week. */
+  open: number;
+  /** Palette index, or -1 for a room (rooms have no colour of their own). */
+  color: number;
 }
 
 function entitiesOf(d: State, kind: Kind): Entity[] {
@@ -42,6 +47,8 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       label: `${t.short} — ${t.name} (${t.subject})`,
       short: t.short,
       load: weeklyLoad(d, 'teacher', t.id),
+      open: openHours(d, t.id),
+      color: t.color,
     }));
   }
   if (kind === 'class') {
@@ -50,6 +57,8 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       label: c.name,
       short: `${c.name} sınıfı`,
       load: weeklyLoad(d, 'class', c.id),
+      open: openHours(d, c.id),
+      color: c.color,
     }));
   }
   return d.rooms.map((r) => ({
@@ -57,6 +66,8 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
     label: r.name,
     short: `${r.name} dersliği`,
     load: weeklyLoad(d, 'room', r.id),
+    open: openHours(d, r.id),
+    color: -1,
   }));
 }
 
@@ -165,12 +176,7 @@ export default function Availability({ state, change }: Props) {
     change((d) => setAvailability(d, entityId, cells, !allClosed));
   }
 
-  const closedCount = state.settings.days.reduce(
-    (sum, _, g) => sum + state.settings.hours.filter((__, s) => isClosed(g, s)).length,
-    0,
-  );
-  const total = state.settings.days.length * state.settings.hours.length;
-  const open = total - closedCount;
+  const open = selected.open;
 
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
   const mine = conflicts.filter(
@@ -184,72 +190,17 @@ export default function Availability({ state, change }: Props) {
   );
 
   return (
-    <>
+    <div className="cols narrow-right">
       <div className="panel">
-        <h2>Müsait olmayan saatler</h2>
-
-        <div className="form-row">
-          {KINDS.map((k) => (
-            <button
-              key={k.id}
-              className="btn"
-              aria-pressed={kind === k.id}
-              onClick={() => {
-                setKind(k.id);
-                setChosen('');
-              }}
-            >
-              {k.label}
-            </button>
-          ))}
-        </div>
+        <h2>
+          {selected.short} — müsait olmayan saatler
+        </h2>
 
         <p className="hint">
           {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz.
           Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına
           tıklayınca haftanın o saati değişir.
         </p>
-
-        <div className="form-row">
-          <label>
-            {KINDS.find((k) => k.id === kind)?.label}{' '}
-            <select
-              value={selected.id}
-              aria-label="Müsaitlik listesi"
-              onChange={(e) => setChosen(e.target.value)}
-            >
-              {list.map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, false))}>
-            Tümünü aç
-          </button>
-          <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, true))}>
-            Tümünü kapat
-          </button>
-        </div>
-
-        <p className={open < selected.load ? 'error-box' : 'hint'}>
-          <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders yüklenmiş.
-          {open < selected.load && ` ${selected.load - open} saat fazla — bu program dizilemez.`}
-        </p>
-
-        {/* Closing an hour never removes what is already on it (principle 6),
-            so the only honest thing to do is say that it happened. */}
-        {conflicts.length > 0 && (
-          <div className="warn-box">
-            <b>
-              Kapattığınız saatlerde yerleşmiş {conflicts.length} ders var
-              {mine > 0 && `, ${mine} tanesi ${selected.short}'de`}.
-            </b>{' '}
-            Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{' '}
-            <b>Kontrol</b> sekmesinde tek tek listeleniyor.
-          </div>
-        )}
 
         <div className="scroll-x">
           <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
@@ -298,6 +249,84 @@ export default function Availability({ state, change }: Props) {
           </table>
         </div>
       </div>
-    </>
+
+      {/* Everything that used to be crammed ABOVE the grid. The list is the
+          point: choosing among 25 teachers was a <select> showing one row at a
+          time, and the number that decides whether a week is even possible —
+          open hours against loaded hours — only appeared once you had picked
+          somebody. Here every row carries it. */}
+      <aside>
+        <div className="panel">
+          <h2>Kimin saatleri</h2>
+          <div className="form-row">
+            {KINDS.map((k) => (
+              <button
+                key={k.id}
+                className="btn"
+                aria-pressed={kind === k.id}
+                onClick={() => {
+                  setKind(k.id);
+                  setChosen('');
+                }}
+              >
+                {k.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Plain buttons with `aria-current`, the way the tabs and the setup
+              steps already mark "you are here". A listbox role would be more
+              precise on paper and less predictable in practice. */}
+          <div className="entity-list" aria-label="Müsaitlik listesi">
+            {list.map((x) => (
+              <button
+                key={x.id}
+                type="button"
+                className="entity"
+                data-id={x.id}
+                aria-current={x.id === entityId}
+                onClick={() => setChosen(x.id)}
+              >
+                {x.color >= 0 && (
+                  <span className="row-dot" style={{ background: paletteColor(x.color) }} />
+                )}
+                <span className="entity-name">{x.label}</span>
+                <span className="entity-count">
+                  {x.open}/{x.load}
+                  {x.open < x.load && ' ⚠'}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="form-row spaced">
+            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, false))}>
+              Tümünü aç
+            </button>
+            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, true))}>
+              Tümünü kapat
+            </button>
+          </div>
+
+          <p className={open < selected.load ? 'error-box' : 'hint'}>
+            <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders yüklenmiş.
+            {open < selected.load && ` ${selected.load - open} saat fazla — bu program dizilemez.`}
+          </p>
+
+          {/* Closing an hour never removes what is already on it (principle 6),
+              so the only honest thing to do is say that it happened. */}
+          {conflicts.length > 0 && (
+            <div className="warn-box">
+              <b>
+                Kapattığınız saatlerde yerleşmiş {conflicts.length} ders var
+                {mine > 0 && `, ${mine} tanesi ${selected.short}'de`}.
+              </b>{' '}
+              Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{' '}
+              <b>Kontrol</b> sekmesinde tek tek listeleniyor.
+            </div>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }

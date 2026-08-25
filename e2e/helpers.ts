@@ -249,3 +249,102 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
     return out;
   }, names);
 }
+
+/**
+ * Picks a teacher, class or room in the availability panel.
+ *
+ * It used to be a <select> and one `selectOption` call; the list shows all of
+ * them at once now, with the open/loaded hours on every row. Every test goes
+ * through here so the next change to that panel is one edit, not five.
+ */
+export async function chooseEntity(page: Page, id: string) {
+  await page.locator(`.entity[data-id="${id}"]`).click();
+  await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute('data-id', id);
+}
+
+// --------------------------------------------------------------- scenes
+//
+// ONE list of what the app looks like, with two consumers: `npm run ekran`
+// writes them to PNGs for a human to look at, and `e2e/gorsel.spec.ts` asserts
+// them against a local reference. A scene added here shows up in both.
+
+export interface Scene {
+  /** File name stem; also the snapshot name. */
+  name: string;
+  /** Navigate and settle. */
+  go: (page: Page) => Promise<void>;
+  /** Undo anything the scene left running (a drag, a print media emulation). */
+  after?: (page: Page) => Promise<void>;
+}
+
+const tab = (name: string) => async (page: Page) => {
+  await page.getByRole('button', { name, exact: true }).click();
+};
+
+export const SCENES: Scene[] = [
+  { name: '1-kurulum', go: tab('Kurulum') },
+  {
+    name: '2-kurulum-ogretmenler',
+    go: async (page) => {
+      await openSetup(page, 'Öğretmenler');
+    },
+  },
+  { name: '3-musaitlik', go: tab('Müsaitlik') },
+  {
+    name: '4-program',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await page.locator('table.grid').waitFor();
+    },
+  },
+  {
+    // Mid-drag: the whole point of the colour work is what this one frame shows.
+    name: '5-suruklerken',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await page.locator('table.grid').waitFor();
+      const card = (await page.locator('.pool-card').first().boundingBox())!;
+      await page.mouse.move(card.x + card.width / 2, card.y + card.height / 2);
+      await page.mouse.down();
+      const cell = (await page.locator('tr.target-row td').nth(3).boundingBox())!;
+      await page.mouse.move(cell.x + cell.width / 2, cell.y + cell.height / 2, { steps: 4 });
+      await page.waitForTimeout(150); // the highlight lands in the rAF loop
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
+      await page.mouse.up();
+    },
+  },
+  { name: '6-kontrol', go: tab('Kontrol') },
+  {
+    name: '7-yazdir',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+      await page.emulateMedia({ media: 'print' });
+    },
+    after: async (page) => {
+      await page.emulateMedia({ media: 'screen' });
+    },
+  },
+  {
+    name: '8-ayarlar-okul',
+    go: async (page) => {
+      await openSettings(page, 'Okul');
+    },
+  },
+  {
+    name: '9-ayarlar-kurallar',
+    go: async (page) => {
+      await openSettings(page, 'Kurallar');
+    },
+  },
+];
+
+/** Loads the sample data in the chosen theme, for the scene list above. */
+export async function openWithSampleTheme(page: Page, theme: 'light' | 'dark') {
+  await page.goto(FILE);
+  await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
+  await page.reload();
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+}

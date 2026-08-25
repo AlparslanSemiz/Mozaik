@@ -69,230 +69,247 @@ export default function School({ state, change }: PanelProps) {
   }
 
   return (
-    <>
-      <div className="panel">
-        <h2>Okul ve günler</h2>
-        <div className="form-row">
-          <label className="field field-wide">
-            <span className="field-label">
-              Okul adı (yazdırılan sayfaların başlığında görünür)
-            </span>
-            <input
-              type="text"
-              className="grow"
-              defaultValue={state.settings.schoolName}
-              placeholder="örn. Semiz Kurs"
-              onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
-            />
-          </label>
-        </div>
-
-        <p className="hint">
-          Ders yapılan günleri işaretleyin. Her günün yanındaki kutu, <b>öğle arasının</b>{' '}
-          kaçıncı dersten sonra verileceğini söyler. Bir günü kaldırırsanız o güne
-          yerleşmiş dersler silinir; kalan günlerin programı yerinde durur.
-        </p>
-
-        <table className="list narrow">
-          <thead>
-            <tr>
-              <th style={{ width: 44 }} />
-              <th>Gün</th>
-              <th style={{ width: 220 }}>Öğle arası</th>
-            </tr>
-          </thead>
-          <tbody>
-            {WEEK.map((name) => {
-              const day = state.settings.days.find((x) => x.name === name);
-              return (
-                <tr key={name}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      aria-label={name}
-                      checked={day !== undefined}
-                      onChange={(e) => toggleDay(name, e.target.checked)}
-                    />
-                  </td>
-                  <td>{name}</td>
-                  <td>
-                    {day === undefined ? (
-                      <span className="hint">ders yok</span>
-                    ) : (
-                      <select
-                        value={day.longBreakAfter}
-                        aria-label={`${name} öğle arası`}
-                        onChange={(e) => setLongBreak(name, Number(e.target.value))}
-                      >
-                        <option value={0}>Uzun ara yok</option>
-                        {state.settings.hours.map((_, i) => (
-                          <option key={i} value={i + 1}>
-                            {i + 1}. dersten sonra
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        <p className="hint">
-          Şu an <b>{dayCount} gün × {hourCount} saat</b> = {dayCount * hourCount} slot.
-          {dayCount === 0 && ' En az bir gün seçmelisiniz.'}
-        </p>
-      </div>
-
-      <div className="panel">
-        <h2>Ders saatleri</h2>
-        <p className="hint">
-          Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan
-          hesaplanır — tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
-        </p>
-        <div className="form-row">
-          <Field label="Günlük ders sayısı">
-            <input
-              type="number"
-              min={1}
-              max={16}
-              defaultValue={hourCount}
-              className="num"
-              onBlur={(e) => setHours(Number(e.target.value))}
-            />
-          </Field>
-          {/* Two dropdowns, not <input type="time">. That input renders AM/PM
-              or 24-hour depending on the BROWSER's locale — not ours to
-              decide — and it lets any minute through. It also had a trap: an
-              emptied box blurred to "" and parseClock made the school day
-              start at 00:00 with nothing to say so. There is no empty value to
-              pick here. */}
-          <div className="field">
-            <span className="field-label">İlk ders başlangıcı</span>
-            <span className="clock-pick">
-              <select
-                aria-label="Başlangıç saati"
-                value={startAt.hour}
-                onChange={(e) => setStart(Number(e.target.value), startAt.minute)}
-              >
-                {Array.from({ length: 24 }, (_, h) => (
-                  <option key={h} value={h}>
-                    {String(h).padStart(2, '0')}
-                  </option>
-                ))}
-              </select>
-              <b>:</b>
-              <select
-                aria-label="Başlangıç dakikası"
-                value={startAt.minute}
-                onChange={(e) => setStart(startAt.hour, Number(e.target.value))}
-              >
-                {minuteOptions(startAt.minute).map((m) => (
-                  <option key={m} value={m}>
-                    {String(m).padStart(2, '0')}
-                  </option>
-                ))}
-              </select>
-            </span>
+    <div className="cols">
+      <div>
+        <div className="panel">
+          <h2>Okul ve günler</h2>
+          <div className="form-row">
+            <label className="field field-wide">
+              <span className="field-label">
+                Okul adı (yazdırılan sayfaların başlığında görünür)
+              </span>
+              <input
+                type="text"
+                className="grow"
+                defaultValue={state.settings.schoolName}
+                placeholder="örn. Semiz Kurs"
+                onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
+              />
+            </label>
           </div>
-          <Field label="Ders (dk)">
-            <input
-              type="number"
-              min={5}
-              max={120}
-              defaultValue={state.settings.bell.lessonMinutes}
-              className="num"
-              onBlur={(e) => change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))}
-            />
-          </Field>
-          <Field label="Teneffüs (dk)">
-            <input
-              type="number"
-              min={0}
-              max={60}
-              defaultValue={state.settings.bell.breakMinutes}
-              className="num"
-              onBlur={(e) => change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))}
-            />
-          </Field>
-          <Field label="Öğle arası (dk)">
-            <input
-              type="number"
-              min={0}
-              max={180}
-              defaultValue={state.settings.bell.longBreakMinutes}
-              className="num"
-              onBlur={(e) =>
-                change((d) => updateBell(d, { longBreakMinutes: Number(e.target.value) }))
-              }
-            />
-          </Field>
-        </div>
 
-        {patterns.length > 0 && (
-          <table className="list bell-preview mid">
+          <p className="hint">
+            Ders yapılan günleri işaretleyin. Her günün yanındaki kutu, <b>öğle arasının</b>{' '}
+            kaçıncı dersten sonra verileceğini söyler. Bir günü kaldırırsanız o güne
+            yerleşmiş dersler silinir; kalan günlerin programı yerinde durur.
+          </p>
+
+          <table className="list">
             <thead>
               <tr>
-                <th style={{ width: 60 }}>Ders</th>
-                {patterns.map((p) => (
-                  <th key={p.after}>{p.dayNames}</th>
-                ))}
+                <th style={{ width: 44 }} />
+                <th>Gün</th>
+                <th style={{ width: 220 }}>Öğle arası</th>
               </tr>
             </thead>
             <tbody>
-              {state.settings.hours.flatMap((label, i) => [
-                <tr key={i}>
-                  <th>{label}</th>
-                  {patterns.map((p) => (
-                    <td key={p.after}>
-                      {p.periods[i]?.start ?? ''}–{p.periods[i]?.end ?? ''}
+              {WEEK.map((name) => {
+                const day = state.settings.days.find((x) => x.name === name);
+                return (
+                  <tr key={name}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        aria-label={name}
+                        checked={day !== undefined}
+                        onChange={(e) => toggleDay(name, e.target.checked)}
+                      />
                     </td>
-                  ))}
-                </tr>,
-                // A break row for every distinct break position. It shows the
-                // break ONLY in the columns that break there — weekdays and the
-                // weekend differ, and one shared row would lie about one of them.
-                ...(patterns.some((p) => p.after === i + 1)
-                  ? [
-                      <tr key={`break-${i}`} className="break-row">
-                        <th>Ara</th>
-                        {patterns.map((p) => (
-                          <td key={p.after}>
-                            {p.after === i + 1
-                              ? `Öğle arası — ${state.settings.bell.longBreakMinutes} dk`
-                              : ''}
-                          </td>
-                        ))}
-                      </tr>,
-                    ]
-                  : []),
-              ])}
-              <tr>
-                <th>Bitiş</th>
-                {patterns.map((p) => (
-                  <td key={p.after}>
-                    <b>{p.periods[p.periods.length - 1]?.end ?? ''}</b>
-                  </td>
-                ))}
-              </tr>
+                    <td>{name}</td>
+                    <td>
+                      {day === undefined ? (
+                        <span className="hint">ders yok</span>
+                      ) : (
+                        <select
+                          value={day.longBreakAfter}
+                          aria-label={`${name} öğle arası`}
+                          onChange={(e) => setLongBreak(name, Number(e.target.value))}
+                        >
+                          <option value={0}>Uzun ara yok</option>
+                          {state.settings.hours.map((_, i) => (
+                            <option key={i} value={i + 1}>
+                              {i + 1}. dersten sonra
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-        )}
 
-        <div className="form-row spaced">
-          <label className="field field-wide">
-            <span className="field-label">Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)</span>
-            <input
-              type="text"
-              className="grow"
-              defaultValue={state.settings.hours.join(', ')}
-              onBlur={(e) => setHours(hourCount, e.target.value)}
-              placeholder="1, 2, 3, ..."
-            />
-          </label>
+          <p className="hint">
+            Şu an <b>{dayCount} gün × {hourCount} saat</b> = {dayCount * hourCount} slot.
+            {dayCount === 0 && ' En az bir gün seçmelisiniz.'}
+          </p>
+        </div>
+
+        <div className="panel">
+          <h2>Ders saatleri</h2>
+          <p className="hint">
+            Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan
+            hesaplanır — tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
+          </p>
+          <div className="form-row">
+            <Field label="Günlük ders sayısı">
+              <input
+                type="number"
+                min={1}
+                max={16}
+                defaultValue={hourCount}
+                className="num"
+                onBlur={(e) => setHours(Number(e.target.value))}
+              />
+            </Field>
+            {/* Two dropdowns, not <input type="time">. That input renders AM/PM
+                or 24-hour depending on the BROWSER's locale — not ours to
+                decide — and it lets any minute through. It also had a trap: an
+                emptied box blurred to "" and parseClock made the school day
+                start at 00:00 with nothing to say so. There is no empty value to
+                pick here. */}
+            <div className="field">
+              <span className="field-label">İlk ders başlangıcı</span>
+              <span className="clock-pick">
+                <select
+                  aria-label="Başlangıç saati"
+                  value={startAt.hour}
+                  onChange={(e) => setStart(Number(e.target.value), startAt.minute)}
+                >
+                  {Array.from({ length: 24 }, (_, h) => (
+                    <option key={h} value={h}>
+                      {String(h).padStart(2, '0')}
+                    </option>
+                  ))}
+                </select>
+                <b>:</b>
+                <select
+                  aria-label="Başlangıç dakikası"
+                  value={startAt.minute}
+                  onChange={(e) => setStart(startAt.hour, Number(e.target.value))}
+                >
+                  {minuteOptions(startAt.minute).map((m) => (
+                    <option key={m} value={m}>
+                      {String(m).padStart(2, '0')}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            </div>
+            <Field label="Ders (dk)">
+              <input
+                type="number"
+                min={5}
+                max={120}
+                defaultValue={state.settings.bell.lessonMinutes}
+                className="num"
+                onBlur={(e) => change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))}
+              />
+            </Field>
+            <Field label="Teneffüs (dk)">
+              <input
+                type="number"
+                min={0}
+                max={60}
+                defaultValue={state.settings.bell.breakMinutes}
+                className="num"
+                onBlur={(e) => change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))}
+              />
+            </Field>
+            <Field label="Öğle arası (dk)">
+              <input
+                type="number"
+                min={0}
+                max={180}
+                defaultValue={state.settings.bell.longBreakMinutes}
+                className="num"
+                onBlur={(e) =>
+                  change((d) => updateBell(d, { longBreakMinutes: Number(e.target.value) }))
+                }
+              />
+            </Field>
+          </div>
+
+          <div className="form-row spaced">
+            <label className="field field-wide">
+              <span className="field-label">Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)</span>
+              <input
+                type="text"
+                className="grow"
+                defaultValue={state.settings.hours.join(', ')}
+                onBlur={(e) => setHours(hourCount, e.target.value)}
+                placeholder="1, 2, 3, ..."
+              />
+            </label>
+          </div>
         </div>
       </div>
-    </>
+
+      {/* The bell times are not a second form: they are the RESULT of the one
+          on the left, a start time plus three durations. Standing beside it,
+          "what does 40 + 10 make the day end at" is answered while the numbers
+          are still being typed. */}
+      <aside>
+        <div className="panel">
+          <h2>Zil saatleri</h2>
+          <p className="hint">
+            Soldaki başlangıç saatinden ve üç süreden hesaplanır, tek tek saklanmaz. Öğle
+            arası hafta içi ve hafta sonu farklı derse denk geldiği için her desen kendi
+            sütununda.
+          </p>
+
+          {patterns.length > 0 && (
+            <table className="list bell-preview">
+              <thead>
+                <tr>
+                  <th style={{ width: 60 }}>Ders</th>
+                  {patterns.map((p) => (
+                    <th key={p.after}>{p.dayNames}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {state.settings.hours.flatMap((label, i) => [
+                  <tr key={i}>
+                    <th>{label}</th>
+                    {patterns.map((p) => (
+                      <td key={p.after}>
+                        {p.periods[i]?.start ?? ''}–{p.periods[i]?.end ?? ''}
+                      </td>
+                    ))}
+                  </tr>,
+                  // A break row for every distinct break position. It shows the
+                  // break ONLY in the columns that break there — weekdays and the
+                  // weekend differ, and one shared row would lie about one of them.
+                  ...(patterns.some((p) => p.after === i + 1)
+                    ? [
+                        <tr key={`break-${i}`} className="break-row">
+                          <th>Ara</th>
+                          {patterns.map((p) => (
+                            <td key={p.after}>
+                              {p.after === i + 1
+                                ? `Öğle arası — ${state.settings.bell.longBreakMinutes} dk`
+                                : ''}
+                            </td>
+                          ))}
+                        </tr>,
+                      ]
+                    : []),
+                ])}
+                <tr>
+                  <th>Bitiş</th>
+                  {patterns.map((p) => (
+                    <td key={p.after}>
+                      <b>{p.periods[p.periods.length - 1]?.end ?? ''}</b>
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }

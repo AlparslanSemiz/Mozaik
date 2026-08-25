@@ -1,7 +1,7 @@
 // The Müsaitlik tab: row = day, column = lesson (aSc's Time off layout).
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, dragAndDrop, tokens } from './helpers';
+import { chooseEntity, open, openWithSample, dragAndDrop, tokens } from './helpers';
 
 test.describe('10. Müsaitlik çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe('20. Kapalı saatte ders', () => {
   async function closeHour(page: Page, entityId: string, day: number, hour: number) {
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     // The row the card landed on IS the teacher: the grid row id is the id.
-    await page.getByLabel('Müsaitlik listesi').selectOption(entityId);
+    await chooseEntity(page, entityId);
     await page
       .locator('table.availability tbody tr')
       .nth(day)

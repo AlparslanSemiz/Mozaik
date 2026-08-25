@@ -94,107 +94,114 @@ export default function Check({ state }: Props) {
         </div>
       )}
 
-      {conflicts.length > 0 && (
-        <div className="panel">
-          <h2>Kapalı saatte ders ({conflicts.length})</h2>
-          <p className="hint">
-            Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
-            silinmedi — <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
-            yeniden açın, ya dersi başka saate taşıyın.
-          </p>
-          <table className="list">
-            <thead>
-              <tr>
-                <th style={{ width: 110 }}>Durum</th>
-                <th>Açıklama</th>
-              </tr>
-            </thead>
-            <tbody>
-              {conflicts.map((c) => (
-                <tr key={`${c.classId}|${c.day}|${c.hour}`}>
-                  <td>
-                    <span className="badge impossible">Kapalı saat</span>
-                  </td>
-                  <td>{c.reason}</td>
+      {/* An auto-flowing card grid, not two fixed columns: when nothing is
+          wrong the problem panels are absent, and a fixed left column would
+          then be empty while everything piled up on the right. It also fixes
+          the older fault — a 110px badge next to a 1200px sentence is well
+          past the length a line can still be read at. */}
+      <div className="panel-grid">
+        {conflicts.length > 0 && (
+          <div className="panel">
+            <h2>Kapalı saatte ders ({conflicts.length})</h2>
+            <p className="hint">
+              Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
+              silinmedi — <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
+              yeniden açın, ya dersi başka saate taşıyın.
+            </p>
+            <table className="list">
+              <thead>
+                <tr>
+                  <th style={{ width: 110 }}>Durum</th>
+                  <th>Açıklama</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {conflicts.map((c) => (
+                  <tr key={`${c.classId}|${c.day}|${c.hour}`}>
+                    <td>
+                      <span className="badge impossible">Kapalı saat</span>
+                    </td>
+                    <td>{c.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      {report.violations.length > 0 && (
-        <div className="panel">
-          <h2>Kural ihlalleri ({report.violations.length})</h2>
-          <p className="hint">
-            Dizilmiş program, <b>Ayarlar → Kurallar</b> bölümünde girdiğiniz sınırları
-            aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece
-            burada listelenir.
-          </p>
-          <table className="list">
-            <thead>
-              <tr>
-                <th style={{ width: 110 }}>Durum</th>
-                <th>Açıklama</th>
-              </tr>
-            </thead>
-            <tbody>
-              {report.violations.map((v) => (
-                <tr key={v.key}>
-                  <td>
-                    <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                      {v.level === 'block' ? 'Kural dışı' : 'Uyarı'}
-                    </span>
-                  </td>
-                  <td>{v.message}</td>
+        {report.violations.length > 0 && (
+          <div className="panel">
+            <h2>Kural ihlalleri ({report.violations.length})</h2>
+            <p className="hint">
+              Dizilmiş program, <b>Ayarlar → Kurallar</b> bölümünde girdiğiniz sınırları
+              aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece
+              burada listelenir.
+            </p>
+            <table className="list">
+              <thead>
+                <tr>
+                  <th style={{ width: 110 }}>Durum</th>
+                  <th>Açıklama</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {report.violations.map((v) => (
+                  <tr key={v.key}>
+                    <td>
+                      <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
+                        {v.level === 'block' ? 'Kural dışı' : 'Uyarı'}
+                      </span>
+                    </td>
+                    <td>{v.message}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      {report.unplaceable.length > 0 && (
-        <div className="panel">
-          <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
-          <p className="hint">
-            Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş
-            hücre bile kalmamış.
-          </p>
-          <table className="list">
-            <thead>
-              <tr>
-                <th style={{ width: 220 }}>Ders</th>
-                <th>Sebep</th>
-              </tr>
-            </thead>
-            <tbody>
-              {report.unplaceable.map((u) => (
-                <tr key={u.lessonId}>
-                  <td>{u.name}</td>
-                  <td>{u.message}</td>
+        {report.unplaceable.length > 0 && (
+          <div className="panel">
+            <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
+            <p className="hint">
+              Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş
+              hücre bile kalmamış.
+            </p>
+            <table className="list">
+              <thead>
+                <tr>
+                  <th style={{ width: 220 }}>Ders</th>
+                  <th>Sebep</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {report.unplaceable.map((u) => (
+                  <tr key={u.lessonId}>
+                    <td>{u.name}</td>
+                    <td>{u.message}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-      <Section
-        title="Öğretmenler"
-        rows={report.teachers}
-        description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
-      />
-      <Section
-        title="Sınıflar"
-        rows={report.classes}
-        description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
-      />
-      <Section
-        title="Derslikler"
-        rows={report.rooms}
-        description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
-      />
+        <Section
+          title="Öğretmenler"
+          rows={report.teachers}
+          description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
+        />
+        <Section
+          title="Sınıflar"
+          rows={report.classes}
+          description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
+        />
+        <Section
+          title="Derslikler"
+          rows={report.rooms}
+          description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
+        />
+      </div>
     </>
   );
 }

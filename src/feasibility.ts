@@ -30,10 +30,20 @@ export interface Unplaceable {
   message: string;
 }
 
-export interface Report {
+/**
+ * The cheap half of the report: capacity against load, O(lessons).
+ *
+ * Split out from `buildReport` because the setup screens show it beside the
+ * list you are typing into, and `buildReport`'s other half costs 99 x 72
+ * `blocker()` calls — a price no keystroke can pay (pitfall 3).
+ */
+export interface Capacity {
   teachers: ReportRow[];
   classes: ReportRow[];
   rooms: ReportRow[];
+}
+
+export interface Report extends Capacity {
   unplaceable: Unplaceable[];
   /** Limit rules broken by the timetable as it stands (rules.ts). */
   violations: Violation[];
@@ -46,9 +56,8 @@ function levelOf(capacity: number, load: number): Level {
   return 'ok';
 }
 
-export function buildReport(d: State): Report {
+export function buildCapacity(d: State): Capacity {
   const totalSlots = d.settings.days.length * d.settings.hours.length;
-  const ix = buildIndex(d);
 
   // Closed hours per entity — one pass over the map. It holds teachers,
   // classes and rooms alike, and each id only ever means one of them.
@@ -103,6 +112,13 @@ export function buildReport(d: State): Report {
         : `${r.name} dersliği (${names || 'sınıf yok'}): açık olan ${capacity} saatin ${load} saati dolu.`;
     return { id: r.id, name: r.name, capacity, load, level, message };
   });
+
+  return { teachers, classes, rooms };
+}
+
+export function buildReport(d: State): Report {
+  const ix = buildIndex(d);
+  const { teachers, classes, rooms } = buildCapacity(d);
 
   // Lessons that are still incomplete and have no valid slot left at all.
   const unplaceable: Unplaceable[] = [];

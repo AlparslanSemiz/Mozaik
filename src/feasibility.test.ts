@@ -1,4 +1,4 @@
-import { buildReport } from './feasibility';
+import { buildCapacity, buildReport } from './feasibility';
 import { teacherKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { State } from './types';
@@ -104,5 +104,31 @@ describe('buildReport — yerleşemeyenler', () => {
     d.placements['s510|0|0'] = 'x1';
     d.placements['s510|0|1'] = 'x1';
     expect(buildReport(d).unplaceable).toHaveLength(0);
+  });
+});
+
+// buildCapacity is the half of the report that the setup screens show next to
+// the list you are typing into: it must give the SAME rows as buildReport, and
+// it must not do buildReport's expensive half.
+describe('buildCapacity', () => {
+  it('buildReport ile birebir aynı satırları veriyor', () => {
+    const d = build();
+    const cheap = buildCapacity(d);
+    const full = buildReport(d);
+    expect(cheap.teachers).toEqual(full.teachers);
+    expect(cheap.classes).toEqual(full.classes);
+    expect(cheap.rooms).toEqual(full.rooms);
+  });
+
+  it('yerleşmeyen ders hesabını YAPMIYOR — pahalı yarısı burada yok', () => {
+    const cheap = buildCapacity(build());
+    expect(Object.keys(cheap).sort()).toEqual(['classes', 'rooms', 'teachers']);
+  });
+
+  it('kapalı saatler kapasiteden düşülüyor', () => {
+    const d = build();
+    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
+    const row = buildCapacity(d).teachers.find((x) => x.id === 'oMC')!;
+    expect(row.capacity).toBe(3);
   });
 });
