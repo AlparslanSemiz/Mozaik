@@ -1,6 +1,6 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (altıncı oturum: **v0.9 — otomatik dizme, sol kenar çubuğu, sağ tık silme, tam E2E**, `v0.9-otomatik-dizme` dalında 10 commit)
+Son güncelleme: 2026-08-25 (yedinci oturum: **çözücü dünya matrisi + Müsaitlik satır yüksekliği**, `v0.9-otomatik-dizme` dalında)
 
 ## Şu anki sürüm hedefi
 
@@ -83,13 +83,16 @@ bu turda geldi; kullanıcı istedi.
 | **v0.9: Kontrol sekmesi test edildi** | ✅ 12 E2E |
 | **v0.9: geri-al zinciri, hata yolları, boş ekranlar, klavye** | ✅ 28 E2E |
 | **v0.9: görsel regresyon** | ✅ 20 referans (`npm run gorsel`) |
+| **Çözücü dünya matrisi** | ✅ 19 dünya · 68 birim + 24 E2E · ağırlar `npm run cozucu` |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
 
-**Testler: 270 birim + 176 E2E = 446, hepsi geçiyor. `tsc --noEmit` temiz.
+**Testler: 338 birim + 200 E2E = 538, hepsi geçiyor. `tsc --noEmit` temiz.
 `npm run build` → tek dosya `dist/index.html`, 323 KB, sıfır ağ çağrısı.
-`npm run kontrol` toplam 51 sn.** Ayrıca 20 görsel referans (`npm run gorsel`,
-`kontrol`'ün parçası değil — gerekçe CLAUDE.md test tablosunda).
+`npm run kontrol` toplam 51 sn (E2E kısmı ~51 sn, 4 worker).** Ayrıca `kontrol`'ün
+parçası OLMAYAN iki süit: 20 görsel referans (`npm run gorsel`) ve 7 gerçek ölçekli
+çözücü testi (`npm run cozucu`, ~2,2 dk — her dünya çözücünün 15 sn'lik bütçesini
+sonuna kadar harcıyor).
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -222,8 +225,10 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
 | Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
 | `dist/index.html` | 323 KB, tek dosya, 0 ağ çağrısı |
-| E2E paketi | **176 test, ~45 sn** (4 worker; tek worker'la ~66 sn) |
-| Birim paketi | **270 test, ~2,7 sn** |
+| E2E paketi | **200 test, ~51 sn** (4 worker) |
+| Birim paketi | **338 test, ~2,8 sn** |
+| Çözücü stres paketi | **7 test, ~2,2 dk** (`npm run cozucu`, ayrı) |
+| Müsaitlik hücresi | **~67 × 48 px** (34 px'ti; tablo 238 → 322 px) |
 | Görsel referanslar | 20 dosya, 2,4 MB |
 | Ekranda görünen öğretmen satırı | **10** (üst şerit 56 px'e indi) |
 | Müsaitlik tablosu genişliği | 46px sabit hücreden **sütununu dolduran** tabloya |
@@ -379,15 +384,149 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
    `blocker()`'dan geçiriliyor), "iyi mi" ölçülmüyor: sınıf boşlukları (pencere),
    öğretmenin okulda geçirdiği gün sayısı, günlerin dengesi. Boşluk kuralları zaten
    yok (v2'nin işi). Babanın "bu programı kullanır mıydın" cevabı gerekiyor.
-8. **Çözücü zor bir veride ne yapar bilinmiyor.** Örnek veride hiç geri sarma
-   olmadı — yani backtracking kodu gerçek anlamda **hiç çalışmadı**. Sıkışık bir
-   gerçek veri onu ilk kez çalıştıracak.
+8. ~~**Çözücü zor bir veride ne yapar bilinmiyor.**~~ **2026-08-25'te ölçüldü.**
+   `src/worlds.ts` 19 dünyalık bir matris kuruyor; dördü geri sarmayı gerçekten
+   çalıştırıyor (`erken-saat-tuzagi` 9 blok / **201 düğüm**, `derin-geri-sarma` 12
+   blok / **8362 düğüm**, `kural-baskisi` 12 / 28, `derslik-darbogazi` 8 / **57 929**).
+   Geri sarmanın hiç çalışmadığı iddiası artık geçerli değil — ama çalıştığında ne
+   olduğu **Bilinen hatalar 1**'e taşındı: gerçek ölçekte çöküyor.
+
+9. **Çıktı KALİTESİ hâlâ ölçülmüyor** (eski madde 7 ile aynı kapı): matris "yasal mı"
+   sorusunu 19 dünyada soruyor, "iyi mi" sorusunu hiçbirinde sormuyor.
+
+10. **Görsel regresyonun eşiği bir düzen değişikliğini kaçırdı.** Müsaitlik satırı
+    34 → 48 px oldu, tablo 238 → 322 px büyüdü ve `npm run gorsel` **yeşil geçti**:
+    `maxDiffPixelRatio: 0.01` (~10 000 px) düz renkli hücrelerde 84 px'lik bir
+    büyümeyi yutuyor, çünkü değişen piksel çoğunlukla kenarlık çizgileri. Referanslar
+    elle (`--update-snapshots=all`) yenilendi. Eşiği sıkmak yazı tipi kaynaklı
+    kırmızıları getirir; bilerek dokunulmadı, ama bilinsin.
 
 ---
 
 ## Bilinen hatalar
 
-Bilinen açık hata yok.
+1. **Kurallar sıkılaştırılınca çözücü gerçek ölçekte çöküyor.** (2026-08-25, açık.)
+
+   Örnek okul olduğu gibi **359/359 blok, 359 düğüm, 78 ms**'de diziliyor. Aynı
+   veride yalnız üç ayarlanabilir sınır değiştirilip Engelle'ye alınınca
+   (art arda 4 → 2, günde 8 → 5, aynı ders 2 → 1) sonuç **3/359 blok** oluyor.
+   Süre vermek kurtarmıyor: 30 sn'de 58 705 düğüm, yine 3 blok. Kontrol sekmesi bu
+   dünya için **hiçbir kapasite sorunu bildirmiyor** — yani veri imkânsız değil,
+   arama tıkanıyor. Yükü artırmak da aynı sonucu veriyor (`gercek-olcek-sikisik`:
+   3/423 blok, 11 672 düğüm, 15 sn).
+
+   Belirti tuzak 21'in imzasıyla aynı: çok düğüm, çok az blok. Şüphe, yığın tamamen
+   boşalınca çalışan **vazgeçme** yolunda (`solver.ts` içinde `stack.length === 0`
+   dalı): oraya varmak o ana kadarki bütün atamaları geri alıyor, sonra bir ders
+   "vazgeçildi" işaretlenip arama sıfırdan başlıyor. 99 ders için bu 99 tam geri
+   sarma demek. **Teşhis edilmedi, düzeltilmedi.**
+
+   Neden önemli: [TASKS.md](TASKS.md)'te "öğretmen sınırları sorulsun" maddesi açık.
+   Babanız o kutulara gerçek bir sayı girdiği gün otomatik dizme çalışmaz hâle gelir.
+
+   Nerede yakalanıyor: `e2e/otomatik-stres.spec.ts`, `test.fail` ile işaretli
+   *"kural sıkılaşınca gerçek ölçekte de dizebiliyor — BİLİNEN HATA"*. Süit yeşil
+   kalır; hata düzeldiği gün **kırmızı olur** ve haber verir.
+
+2. **`e2e/otomatik.spec.ts` → "Engelle seviyesindeki kuralı çiğnemiyor" boşuna
+   geçiyor.** 1'in doğrudan sonucu: test "hiç ihlal yok" diyor, ızgara ise neredeyse
+   boş — boş ızgara hiçbir kuralı çiğnemez. Testin başına bu not düşüldü; asıl
+   iddiayı yapan test stres süitinde.
+
+3. **`solve()` bölünmeyen haftalık saatte `phase: 'solved'` diyor ama `stuck` dolu
+   dönüyor.** `weeklyHours: 5, blockSize: 2` → 2 blok (4 saat) yerleşiyor, 1 saat
+   yerleşemiyor; `placedBlocks === totalBlocks` olduğu için faz `'solved'`, oysa
+   `stuck.length === 1`. Arayüz `stuck.length`e baktığı için kullanıcı doğru cümleyi
+   görüyor — yani görünür bir etkisi yok, ama `phase` alanı bu tek durumda yalan
+   söylüyor. `dünya: bolunmeyen-saat` testinde kayıtlı.
+
+---
+
+## Yedinci oturum (2026-08-25) — çözücü dünya matrisi ve Müsaitlik satırı
+
+Kullanıcının iki isteği: Müsaitlik çizelgesinin satırları biraz uzasın, ve otomatik
+dizme **çok sayıda sahte veriyle** E2E'de denensin.
+
+### 1. Müsaitlik satırı 34 → 48 px
+
+Ölçülen sorun: hücre 1366 px'te ~67 px genişliğinde ama 34 px yüksekliğindeydi
+(~2:1 yassı). Tablo 238 px'te bitiyor, sağdaki varlık listesi ~665 px sürüyor,
+altta ~360 px boş kalıyordu. 48 px hücreyi ~1,4:1'e (≈ √2) getiriyor, tablo
+322 px'e çıkıyor, panel ~490 px oluyor — hâlâ 768 px'e rahat sığıyor.
+
+Uygulama tek kural: `table.availability tbody th, tbody td { height: 48px }`.
+Özgüllük (0,1,3), paylaşılan `table.availability th, td` kuralını (0,1,2) bilerek
+geçiyor — tuzak 17 bunun tersini yapmanın hikâyesiydi. Başlık satırı 34 px'te
+kaldı (iki satırlık içeriği için yeterli). `td.closed` yazı boyu 16 → 18 px:
+`×` işareti hücrenin içeriği, hücreyle büyümesi gerekiyor.
+
+Yan kazanç: sürükleyerek boyama hedefi 46×34'ten 46×48'e çıktı.
+
+### 2. `src/worlds.ts` — 19 dünyalık matris
+
+Çözücü o güne kadar yalnız iki soru görmüştü: `solver.test.ts`'teki 2 gün × 4
+saatlik küçük dünya ve `sample.ts`. İkisi de düz bir çizgide çözülüyor, o yüzden
+`solver.ts`'in geri sarma yarısı hiç çalışmamıştı.
+
+Dosya `src/`'de, `e2e/`'de değil: `tsconfig.json` yalnız `src`'yi kapsıyor, yani
+`e2e/` altındaki hiçbir şey `tsc --noEmit`'ten geçmiyor. Uygulama kodu bu modülü
+import etmediği için Vite onu budar, `dist/index.html`'e girmez.
+
+Üç şey dışa aktarıyor: `makeWorld()` (küçük okul üreteci — `kontrol.spec.ts`'in
+içinde büyümüş olan üretecin ta kendisi, oraya da geri verildi), `illegalBlocks()`
+(çerçeveden bağımsız denetçi) ve `WORLDS` (senaryo listesi).
+
+**Denetçinin kendisi test ediliyor** (`src/worlds.test.ts`, 10 test). Bu atlanamaz:
+`illegalBlocks` her zaman `[]` döndürseydi bütün çözücü testleri bedavaya yeşil
+geçerdi. Bilerek yasadışı ızgaralar veriliyor — aynı öğretmen iki sınıfta, kapalı
+saatte duran ders, gün sonunu taşan blok — ve yakaladığı doğrulanıyor.
+
+### 3. Ölçülen sayılar
+
+| Dünya | Sonuç | Düğüm | Süre |
+|---|---|---|---|
+| `tam-dolu` | 9/9 | 9 | 1 ms |
+| `derslik-darbogazi` | 8/12 (tıkandı) | **57 929** | 275 ms |
+| `erken-saat-tuzagi` | 9/9 | **201** | 2 ms |
+| `derin-geri-sarma` | 12/12 | **8 362** | 63 ms |
+| `kural-baskisi` | 12/12 | **28** | 1 ms |
+| `delik-desik` | 30/30 | 30 | 1 ms |
+| `parcalanmis-gunler` (ağır) | 16/24 | **3 233 441** | 15 sn (bütçe doldu) |
+| `gercek-olcek-kurali` (ağır) | **3/359** | 33 842 | 15 sn (bütçe doldu) |
+
+Kalın olanlar geri sarmanın çalıştığının kanıtı: geri sarmayan bir koşu blok başına
+tam bir düğüm harcıyor (örnek veri: 359 blok, 359 düğüm), yani düğüm > blok başka
+türlü olamaz.
+
+`erken-saat-tuzagi` bilerek kuruldu: AV ilk derse gelemiyor, tekil saatler değer
+sıralamasının ilk uzandığı 1. ve 2. saatlere yığılıyor, 2 saatlik blok bitişik yer
+bulamıyor. Doğru cevap tekil saatleri günün SONUNA itmek — açgözlü sıra bunu ilk
+denemede hiç denemiyor.
+
+### 4. Testler
+
+- `src/solver.test.ts`: mevcut 20 test + her küçük dünya için 3-4 iddia → **78 test**.
+  Ortak iddialar: her blok `blocker()`'a göre yasal (girişte var olan yasadışı bloklar
+  hariç — ilke 6), hiçbir ders `weeklyHours`'undan fazla yerleşmemiş, `block`
+  seviyesinde hiç ihlal yok, aynı girdi aynı çıktı, elle konmuş her blok yerinde.
+- `e2e/otomatik-dunyalar.spec.ts` (**24 test**): aynı dünyalar `dist/index.html`'e
+  gerçek "Dosyadan aç" diyaloğundan yükleniyor, gerçek düğmeye basılıyor, sonra
+  sayfanın **kendi `localStorage`'ı** okunup `src/`'deki saf fonksiyonlarla
+  denetleniyor. Birim testinden farkı: burada sonuç reducer'dan geçip diske yazılmış
+  hâliyle okunuyor — tuzak 20 (sonucun sessizce atılması) tam burada yakalanır.
+- `e2e/otomatik-stres.spec.ts` + `playwright.cozucu.config.ts` + `npm run cozucu`
+  (**7 test**): gerçek ölçekli dünyalar, ana süitin dışında.
+
+### 5. Bu oturumda bulunan üç şey
+
+1. **Kural sıkılaştırılınca çözücü çöküyor** — bkz. Bilinen hatalar 1. En önemlisi.
+2. **Mevcut bir E2E testi boşuna geçiyormuş** — bkz. Bilinen hatalar 2.
+3. **`savedState` yardımcısında yarış vardı.** İlk hâli "dizimden sonra kaydedilen
+   durumu" okurken, dünyanın yüklenmesinin kendi 400 ms'lik gecikmeli kaydını
+   "değişiklik" sanabiliyordu — o zaman denetim **dizimden önceki** ızgarayı
+   yargılardı ve her şey bedavaya geçerdi. Çare `settledText()`: tıklamadan önce
+   sayfanın gerçekten bir şey yazmış olması beklenir. Üstüne testin başına bir
+   koruma kondu: kaydedilen yerleşim sayısı girişteki sayıdan **büyük** olmalı.
 
 ---
 
@@ -598,7 +737,7 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 270 birim + derleme + 176 E2E (~51 sn)
+npm run kontrol                   # tsc + 338 birim + derleme + 200 E2E (~51 sn)
 npm run dev                       # geliştirme sunucusu
 ```
 
@@ -606,8 +745,16 @@ npm run dev                       # geliştirme sunucusu
 çünkü referanslar bir başka makinenin fontuyla alındı. Bir kez yenile:
 
 ```bash
-npx playwright test --config playwright.gorsel.config.ts --update-snapshots
+npx playwright test --config playwright.gorsel.config.ts --update-snapshots=all
 ```
+
+(`--update-snapshots` tek başına yalnız **kırmızı** referansları yeniler; hepsini
+yazdırmak için `=all` gerekiyor. Bu 2026-08-25'te öğrenildi: satır yüksekliği
+değiştiği hâlde eşik farkı yuttuğu için referanslar sessizce eski kaldı.)
+
+**Çözücü stres süiti de ayrı**: `npm run cozucu`. `kontrol`'ün parçası değil çünkü
+her dünya 15 sn'lik çözücü bütçesini sonuna kadar harcıyor; yavaş makinede günlük
+döngüyü 2 dakika uzatırdı.
 
 `npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra
 [TASKS.md](TASKS.md) içindeki **"ŞİMDİ SIRADA"** bölümünden devam edilir.

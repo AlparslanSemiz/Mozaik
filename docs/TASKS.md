@@ -9,12 +9,33 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+### 0. Çözücünün çökmesi teşhis edilsin — YENİ, en öncelikli kod işi
+
+Ölçüm var, teşhis yok. [STATUS.md](STATUS.md) → *Bilinen hatalar 1*.
+
+- [ ] **`solver.ts`'te `stack.length === 0` dalı incelensin.** Şüphe orada: yığın
+      tamamen boşalınca o ana kadarki BÜTÜN atamalar geri alınmış oluyor, bir ders
+      "vazgeçildi" işaretlenip arama sıfırdan başlıyor. 99 ders → 99 tam geri sarma
+- [ ] **Kısmî çözüm korunsun.** `bestPlacements` en derin atamayı hatırlıyor ama
+      vazgeçme sonrası arama onu başlangıç noktası olarak kullanmıyor; ilk bakılacak yer bu
+- [ ] Düzeltilince `e2e/otomatik-stres.spec.ts`'teki `test.fail` **kırmızı olacak** —
+      o zaman `test.fail` işareti kaldırılır ve eşik gerçek bir sayıya bağlanır
+- [ ] `gercek-olcek-kurali` dünyası ölçüt: `sampleState()` + art arda 2 · günde 5 ·
+      aynı ders 1, hepsi Engelle. Hedef: 359/359'a yakın bir sonuç, 15 sn içinde
+
 ### 1. Babanın gerçek verisiyle deneme
 
 **v0'ın çıkma şartı tek bir şeye bağlı: gerçek veri.** Araç artık kendi tarafında
-hazır — 270 birim + 176 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
+hazır — 338 birim + 200 E2E testi yeşil, üç arayüz turu (v0.7, v0.8, v0.9) bitti ve
 program kendi kendini dizebiliyor. Elde veri olmadan yazılacak her yeni özellik
 tahmin olur (ilke 5).
+
+> **Ama önce açık bir hata var.** 2026-08-25'te çözücü 19 dünyalık bir matrise
+> sokuldu ve gerçek ölçekte **kurallar sıkılaştırılınca çöktüğü** ölçüldü:
+> 359/359 blok / 78 ms yerine **3/359 blok / 15 sn**. Ayrıntı ve sayılar
+> [STATUS.md](STATUS.md) → *Bilinen hatalar 1*. Aşağıdaki "öğretmen sınırları
+> sorulsun" maddesi bu hatayla doğrudan bağlı: babanız o kutulara bir sayı girdiği
+> gün otomatik dizme çalışmaz hâle gelir.
 
 - [ ] Gerçek öğretmen/sınıf/derslik/ders listesi alınsın (Excel'e yazdırıp yapıştırma
       kutusuna yapıştırmak en hızlısı)
@@ -36,12 +57,13 @@ tahmin olur (ilke 5).
 - [ ] **36 rengi gözle sor**: dizerken iki satırı karıştırdığın oldu mu? ΔE eşiği
       sayıyı garanti eder, gözü değil
 - [ ] **Otomatik dizmenin çıktısı KULLANILIR mı, sorulacak.** Yasal olduğu ölçülüyor
-      (her blok `blocker()`'dan geçiyor); *iyi* olduğu ölçülmüyor. Sorular: sınıfın
-      günü içinde boşluk (pencere) kalıyor mu, öğretmen okula gereksiz gün geliyor mu,
-      günler dengeli mi. Cevaba göre v2 (kalite) şekillenir
-- [ ] **Sıkışık gerçek veride çözücü ne yapıyor?** Örnek veride **hiç geri sarma
-      olmadı** — yani backtracking kodu gerçek anlamda hiç çalışmadı. İlk kez gerçek
-      veriyle çalışacak; süre ve "yerleşemedi" listesi not edilsin
+      (19 dünyada, her blok `blocker()`'dan geçiyor); *iyi* olduğu ölçülmüyor. Sorular:
+      sınıfın günü içinde boşluk (pencere) kalıyor mu, öğretmen okula gereksiz gün
+      geliyor mu, günler dengeli mi. Cevaba göre v2 (kalite) şekillenir
+- [x] **Sıkışık veride çözücü ne yapıyor?** 2026-08-25'te ölçüldü. Geri sarma artık
+      dört dünyada gerçekten çalışıyor (`erken-saat-tuzagi` 201 düğüm / 9 blok,
+      `derin-geri-sarma` 8362 / 12, `derslik-darbogazi` 57 929 / 8). Cevap iyi değil:
+      gerçek ölçekte tıkanınca bütçeyi doldurup neredeyse hiçbir şey dizemiyor
 - [ ] **Kenar çubuğu dar mı geniş mi kullanılıyor?** 92px varsayılan; babanın
       daraltıp daraltmadığı, ızgarada 92px'in eksikliğinin hissedilip hissedilmediği
 
@@ -361,4 +383,14 @@ v0 + v0.5 bir dönem kullanılmadan başlanmaz. Öncelik **babanın geri dönüt
   (`store.ts`), yani "kaydedilmemiş" durum pratikte oluşmuyor. Yine de babanın
   içi rahat etsin diye görünür bir "kaydedildi" işareti düşünülebilir.*
 
+.exe kurulmaya başlanmalı.
 
+web sitesinde de gözükmeli.
+
+localhost olmamalı kurulduğunda güzel bir simgeli ismi de güzel olan bir site şeklinde olmalı.
+
+veriler nereye kaydediliyor bu belirlenmeli ve .exe ile açılan ve websitesi ile açıldığında aynı veriler karşımıza çıkmalı.
+
+taslaklar yani önceden ayarlanmış yapılmış düzenlenmiş taslaklar kaydedilip kurulumda kolayca karşımıza çıkıyor olabilmeli.
+
+Birden fazla farklı ders planı yapılabilir olsun. Onlar arasında değişim yapılabilr olsun.

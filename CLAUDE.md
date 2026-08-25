@@ -57,12 +57,13 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
 
 ```bash
 npm run dev       # geliştirme sunucusu
-npm test          # Vitest — 270 birim testi
+npm test          # Vitest — 338 birim testi
 npm run build     # dist/index.html tek dosya üretir
-npm run test:e2e  # Playwright — derler, sonra 176 E2E testi
+npm run test:e2e  # Playwright — derler, sonra 200 E2E testi
 npm run kontrol   # hepsi: tsc + birim + derleme + E2E
 npm run ekran     # iki temada ekran görüntüsü -> test-results/ekran/
 npm run gorsel    # görsel regresyon — 20 referansa karşı piksel farkı
+npm run cozucu    # gerçek ölçekli çözücü stresi — 7 test, ~2,2 dk
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
@@ -71,7 +72,7 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 19 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 11 dosya) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma, `file://`, renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye** |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on ekran görüntüsü |
@@ -83,8 +84,15 @@ ekran dışı hedef ve yazdırma taşması **yalnızca burada** görünür. Nite
 12 (bkz. PLAN.md) bu testlerle bulundu, başka türlü bulunamazdı.
 
 `fullyParallel: true, workers: 4`. Doğrulanmış varsayım: `file://` altında her
-Playwright context'inin kendi `localStorage`'ı var — 176 test paralel koşarken
-birbirinin verisini görmüyor (ölçülen: 66 sn → 45 sn).
+Playwright context'inin kendi `localStorage`'ı var — 200 test paralel koşarken
+birbirinin verisini görmüyor (ölçülen: 66 sn → 51 sn).
+
+**Sahte veri tek yerde: `src/worlds.ts`.** `makeWorld()` küçük bir okul kurar,
+`illegalBlocks()` dizilmiş bir programı denetler, `WORLDS` 19 senaryoyu tutar.
+`e2e/` altında değil çünkü `tsconfig.json` yalnız `src`'yi kapsıyor — orada duran
+bir dünya `tsc --noEmit`'ten hiç geçmezdi. Uygulama onu import etmediği için Vite
+budar, `dist/index.html`'e girmez. Hem `solver.test.ts` hem `kontrol.spec.ts` hem
+`otomatik-dunyalar.spec.ts` aynı üreteci kullanır.
 
 **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini gerçek
 `getComputedStyle` ile okuyup WCAG kontrast oranını ve **CIE Lab ΔE** farkını hesaplar.
@@ -130,6 +138,9 @@ constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLM
 rules.ts / bell.ts              Testleri zorunlu.
 import.ts / entities.ts
 solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
+worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks denetçisi.
+                                Uygulama import etmez, Vite budar. Vitest ve
+                                Playwright ikisi de buradan beslenir.
   |
 store.ts                        reducer + geri al yığını + localStorage + göç
 theme.ts                        makine tercihleri (tema, kenar çubuğu) — State'e girmez
@@ -363,6 +374,28 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     altı kez tekrarlanan daha önemsiz bir cümle kazanıyordu — hafta boyu kapalı bir
     öğretmen için "2 saatlik blok güne sığmıyor" yazdı. `blockerDetail()` bir **kod**
     döndürür (`teacherClosed`, `classBusy`, …); sayım koda göre yapılır.
+
+23. **Testi yargılayan denetçinin kendisi test edilmeli.** `illegalBlocks()` her
+    zaman `[]` döndürseydi çözücünün 19 dünyalık matrisi de, 24 E2E testi de
+    bedavaya yeşil geçerdi — ve hiçbiri bunu haber vermezdi. `worlds.test.ts`
+    ona bilerek bozuk ızgaralar verir (aynı öğretmen iki sınıfta, kapalı saatte
+    duran ders, gün sonunu taşan blok) ve yakaladığını doğrular. Aynı sebeple her
+    dünya testinde bir koruma var: kaydedilen yerleşim sayısı girişteki sayıdan
+    büyük olmalı, yoksa iddialar dizimden ÖNCEKİ ızgarayı yargılıyor olabilir.
+
+24. **`localStorage` kaydı 400 ms gecikmeli; "sonrasını oku" öncesini okur.**
+    E2E'de bir eylemin sonucunu depodan doğrulamak için "eylemden önceki değeri al,
+    sonra değişmesini bekle" yetmez: sayfanın *yüklenmesi* de kendi kaydını 400 ms
+    sonra yazar, ve "önceki değer" o yazımdan önce alınmışsa beklenen değişiklik
+    yüklemenin kendisi olur. Çare `settledText()`: tıklamadan önce sayfanın gerçekten
+    bir şey yazmış olmasını beklemek. "Değer sabitlenene kadar bekle" de işe yaramaz —
+    eski değer de sabittir.
+
+25. **`--update-snapshots` tek başına yalnız KIRMIZI referansları yeniler.** Eşiğin
+    (`maxDiffPixelRatio`) yuttuğu gerçek bir düzen değişikliği referansı sessizce
+    eski bırakır. Hepsini yazdırmak için `--update-snapshots=all`. Müsaitlik satırı
+    34 → 48 px olduğunda tam bunun oldu: tablo 84 px büyüdü, `npm run gorsel` yeşil
+    geçti, referanslar yalan söylemeye başladı.
 
 ---
 
