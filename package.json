@@ -12,7 +12,8 @@
     "kontrol": "tsc --noEmit && vitest run && vite build && playwright test",
     "test:e2e": "vite build && playwright test",
     "ekran": "vite build && playwright test --config playwright.ekran.config.ts",
-    "gorsel": "vite build && playwright test --config playwright.gorsel.config.ts"
+    "gorsel": "vite build && playwright test --config playwright.gorsel.config.ts",
+    "cozucu": "vite build && playwright test --config playwright.cozucu.config.ts"
   },
   "dependencies": {
     "react": "^19.2.0",

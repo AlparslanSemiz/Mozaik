@@ -11,6 +11,7 @@
 import { expect, type Page } from '@playwright/test';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import type { State } from '../src/types';
 
 export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 
@@ -167,6 +168,66 @@ export const FIXTURE = {
   unavailable: {},
   placements: {},
 };
+
+/**
+ * Loads any hand-built world through the REAL "Dosyadan aç" dialog.
+ *
+ * Writing straight into localStorage would be shorter and wrong: this path also
+ * runs parseState() and sanitize(), which is what a backup file goes through in
+ * the father's hands, and it does not race the 400 ms debounced auto-save.
+ */
+export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
+  await open(page);
+  page.once('dialog', (d) => d.accept());
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'ders-programi-2026-08-25-1200.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(state)),
+  });
+  await page.getByRole('button', { name: tab, exact: true }).click();
+}
+
+/** The raw string the page has in localStorage right now, or '' if nothing. */
+export async function savedText(page: Page): Promise<string> {
+  return (await page.evaluate(() => localStorage.getItem('ders-programi'))) ?? '';
+}
+
+/**
+ * The saved string once the page has actually written one.
+ *
+ * Loading a world writes to localStorage 400 ms later, so reading the "before"
+ * value straight after the load can catch an EMPTY box — and then the first
+ * change `savedState` sees is the load's own save, not the run's. The audit
+ * would then be judging the grid from before the button was ever pressed.
+ */
+export async function settledText(page: Page): Promise<string> {
+  await expect
+    .poll(async () => (await savedText(page)).length, {
+      timeout: 5_000,
+      message: 'sayfa açılışta hiçbir şey kaydetmedi',
+    })
+    .toBeGreaterThan(0);
+  return savedText(page);
+}
+
+/**
+ * The state the page saved AFTER something changed it.
+ *
+ * `previous` is the string read before the action, and it is not optional on
+ * purpose: the store debounces by 400 ms, so "read once when the bar appears"
+ * reliably returns the state from BEFORE the run, and "poll until it stops
+ * changing" is satisfied by that same stale value. Waiting for the string to
+ * differ is the only version that cannot pass by accident.
+ */
+export async function savedState(page: Page, previous: string): Promise<State> {
+  await expect
+    .poll(async () => await savedText(page), {
+      timeout: 10_000,
+      message: 'sayfa dizim sonrasında hiçbir şey kaydetmedi',
+    })
+    .not.toBe(previous);
+  return JSON.parse(await savedText(page)) as State;
+}
 
 export async function openFixture(page: Page) {
   await open(page);

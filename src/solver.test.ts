@@ -3,20 +3,14 @@
 // SAME engine the user's own dragging is judged by".
 
 import { describe, expect, it } from 'vitest';
-import {
-  blockStart,
-  blocker,
-  buildIndex,
-  placementKey,
-  place,
-  removeBlock,
-} from './constraints';
+import { buildIndex, placementKey, place } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import { findViolations } from './rules';
 import { sampleState } from './sample';
 import { createSolver, solve } from './solver';
 import type { RuleLevel, State } from './types';
 import { SCHEMA_VERSION } from './types';
+import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';
 
 // 2 days x 4 hours = 8 cells per class.
 //   room A: 510, 511 (shared)   room B: 433
@@ -70,35 +64,18 @@ function withRule(d: State, name: keyof State['settings']['limits'], limit: numb
   };
 }
 
-/** Every block on the grid, found the way the grid itself finds them. */
-function blocksOf(d: State): Array<{ lessonId: string; classId: string; day: number; hour: number }> {
-  const seen = new Set<string>();
-  const out: Array<{ lessonId: string; classId: string; day: number; hour: number }> = [];
-  for (const key of Object.keys(d.placements)) {
-    const [classId, dayText, hourText] = key.split('|');
-    const day = Number(dayText);
-    const hour = Number(hourText);
-    const start = blockStart(d, classId!, day, hour);
-    if (start === null) continue;
-    const mark = `${classId}|${day}|${start}`;
-    if (seen.has(mark)) continue;
-    seen.add(mark);
-    out.push({ lessonId: d.placements[placementKey(classId!, day, start)]!, classId: classId!, day, hour: start });
-  }
-  return out;
-}
-
 /**
  * The strongest single assertion in this file: lift each block back off the
  * grid and ask blocker() whether it could legally be dropped where it sits.
  * If the in-place index ever drifts from buildIndex(), it dies here.
+ *
+ * `illegalBlocks` lives in worlds.ts because the E2E suite audits the built
+ * page's own output with the very same function; worlds.test.ts feeds it a
+ * knowingly illegal grid, so an auditor that always said "all clear" would be
+ * caught rather than making this file pass for free.
  */
 function expectLegal(d: State) {
-  for (const b of blocksOf(d)) {
-    const lifted = removeBlock(d, b.classId, b.day, b.hour);
-    const reason = blocker(lifted, buildIndex(lifted), b.lessonId, b.day, b.hour);
-    expect(reason).toBeNull();
-  }
+  expect(illegalBlocks(d)).toEqual([]);
 }
 
 function placedHours(d: State): number {
@@ -327,4 +304,92 @@ describe('solve — gerçek ölçek', () => {
         `yerleşmeyen ders=${result.stuck.length}`,
     );
   }, 30_000);
+});
+
+
+// ---------------------------------------------------------------------------
+// The world matrix.
+//
+// Until this existed the solver was only ever asked two questions: the little
+// world built above, and sample.ts. Both go through in a straight line — 359
+// blocks in 359 nodes — so the backtracking half of solver.ts had never run.
+// Each world here is a different SHAPE of load: a room bottleneck, nothing but
+// blocks, a single day, a week full of holes, a greedy first choice that turns
+// out to be wrong.
+
+describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
+  const first = solve(world.state, { budgetMs: 4_000 });
+
+  it(world.note, () => {
+    // Not an assertion, a measurement — the same habit as the real-scale test.
+    console.log(
+      `[ölçüm] ${world.name}: ${first.placedBlocks}/${first.totalBlocks} blok, ` +
+        `${first.nodes} düğüm, ${Math.round(first.elapsedMs)} ms, faz=${first.phase}, ` +
+        `yerleşemeyen ders=${first.stuck.length}`,
+    );
+
+    // 1. Every block is legal by the same blocker() the dragging hand is judged
+    //    by. The pre-existing grid is the baseline: a lesson left sitting in an
+    //    hour that was closed AFTERWARDS is kept on purpose (principle 6), so
+    //    what is forbidden is ADDING an illegal block, not inheriting one.
+    const before = illegalBlocks(world.state).map((x) => `${x.classId}|${x.day}|${x.hour}`);
+    for (const bad of illegalBlocks(first.state)) {
+      expect(before, `${world.name}: ${bad.reason}`).toContain(
+        `${bad.classId}|${bad.day}|${bad.hour}`,
+      );
+    }
+
+    // 2. Never more hours than were asked for.
+    for (const lesson of world.state.lessons) {
+      expect(hoursOf(first.state, lesson.id)).toBeLessThanOrEqual(lesson.weeklyHours);
+    }
+
+    // 3. A rule at "Engelle" is a hard constraint; not one may survive.
+    expect(
+      findViolations(first.state, buildIndex(first.state)).filter((v) => v.level === 'block'),
+    ).toEqual([]);
+
+    // 4. Every hand-placed block is exactly where it was left.
+    for (const [key, lessonId] of Object.entries(world.state.placements)) {
+      expect(first.state.placements[key], `${world.name}: ${key} kaydı`).toBe(lessonId);
+    }
+  });
+
+  it('aynı girdi aynı çıktıyı veriyor', () => {
+    const second = solve(world.state, { budgetMs: 4_000 });
+    expect(second.state.placements).toEqual(first.state.placements);
+  });
+
+  if (world.want.solved) {
+    it('bütün yük yerleşiyor', () => {
+      expect(first.stuck).toEqual([]);
+      expect(first.phase).toBe('solved');
+      for (const lesson of world.state.lessons) {
+        expect(hoursOf(first.state, lesson.id)).toBe(lesson.weeklyHours);
+      }
+    });
+  } else {
+    it('yerleşemeyeni sayıyor ve sebebini somut bir cümleyle söylüyor', () => {
+      expect(first.stuck.length).toBeGreaterThan(0);
+      for (const stuck of first.stuck) {
+        expect(stuck.missing).toBeGreaterThan(0);
+        expect(stuck.reason.length).toBeGreaterThan(0);
+        expect(stuck.name.length).toBeGreaterThan(0);
+      }
+      if (world.want.reasonLike !== undefined) {
+        expect(first.stuck[0]!.reason).toMatch(world.want.reasonLike);
+      }
+      // What did fit is still a timetable somebody can use.
+      expect(blocksOf(first.state).length).toBe(first.placedBlocks);
+    });
+  }
+
+  if (world.want.backtracks === true) {
+    it('arama gerçekten geri sarıyor', () => {
+      // A run that never backs up spends exactly one node per block — measured
+      // on sample.ts: 359 blocks, 359 nodes. More nodes than blocks is the only
+      // evidence there is that the backtracking code ran at all.
+      expect(first.nodes).toBeGreaterThan(first.totalBlocks);
+    });
+  }
 });

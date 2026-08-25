@@ -100,6 +100,12 @@ test.describe('22. Otomatik dizme', () => {
   });
 
   test('Engelle seviyesindeki kuralı çiğnemiyor', async ({ page }) => {
+    // Careful with what this proves: it says "no rule was broken", and an empty
+    // grid breaks no rules. Tightening the rules at this scale is exactly where
+    // the solver currently collapses (docs/STATUS.md, bilinen hata 1), so the
+    // run below places very little and the assertion passes cheaply. The test
+    // that does NOT pass cheaply is in e2e/otomatik-stres.spec.ts.
+    test.setTimeout(90_000); // the run spends the solver's whole 15 s budget
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
 

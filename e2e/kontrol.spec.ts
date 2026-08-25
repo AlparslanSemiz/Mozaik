@@ -7,70 +7,18 @@
 // paper: 1 day x 4 hours, one room, one class.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample } from './helpers';
+import { makeWorld, type WorldSpec } from '../src/worlds';
+import { loadWorld, open, openWithSample } from './helpers';
 
-interface World {
-  hours?: number;
-  rooms?: Array<{ id: string; name: string }>;
-  teachers?: Array<{ id: string; short: string; subject?: string; color?: number }>;
-  classes?: Array<{ id: string; name: string; roomId: string | null }>;
-  lessons?: Array<{ id: string; classId: string; teacherId: string; weeklyHours: number; blockSize?: number }>;
-  unavailable?: Record<string, 1>;
-  placements?: Record<string, string>;
-  limits?: Partial<{ maxConsecutive: number; maxPerDay: number; minPerDay: number; maxSameLessonPerDay: number }>;
-  rules?: Partial<Record<string, string>>;
-}
-
-/** Loads a tiny hand-built world through the real backup dialog. */
-async function load(page: Page, world: World) {
-  const backup = {
-    schemaVersion: 5,
-    settings: {
-      schoolName: '',
-      days: [{ name: 'Salı', longBreakAfter: 0 }],
-      hours: Array.from({ length: world.hours ?? 4 }, (_, i) => String(i + 1)),
-      bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
-      limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0, ...world.limits },
-      rules: {
-        maxConsecutive: 'block',
-        maxPerDay: 'block',
-        minPerDay: 'warn',
-        maxSameLessonPerDay: 'block',
-        ...world.rules,
-      },
-      subjects: ['Matematik', 'Fizik'],
-      subjectShorts: {},
-    },
-    rooms: world.rooms ?? [{ id: 'dA', name: 'A' }],
-    teachers: (world.teachers ?? [{ id: 'oMC', short: 'MÇ' }]).map((t, i) => ({
-      id: t.id,
-      name: t.short,
-      short: t.short,
-      subject: t.subject ?? 'Matematik',
-      color: t.color ?? i,
-      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
-    })),
-    classes: (world.classes ?? [{ id: 's510', name: '510', roomId: 'dA' }]).map((c, i) => ({
-      ...c,
-      color: i,
-    })),
-    lessons: (world.lessons ?? []).map((x) => ({
-      blockSize: 1,
-      maxPerDay: null,
-      ...x,
-    })),
-    unavailable: world.unavailable ?? {},
-    placements: world.placements ?? {},
-  };
-
-  await open(page);
-  page.once('dialog', (d) => d.accept());
-  await page.locator('input[type=file]').setInputFiles({
-    name: 'ders-programi-2026-08-25-1200.json',
-    mimeType: 'application/json',
-    buffer: Buffer.from(JSON.stringify(backup)),
-  });
-  await page.getByRole('button', { name: 'Kontrol' }).click();
+/**
+ * Loads a tiny hand-built world through the real backup dialog.
+ *
+ * The world itself is built by src/worlds.ts, which the solver tests use too —
+ * one description of "a small school", type-checked by `tsc` because it lives
+ * under src/ where the e2e folder is not checked at all.
+ */
+async function load(page: Page, world: WorldSpec) {
+  await loadWorld(page, makeWorld(world), 'Kontrol');
 }
 
 test.describe('26. Kontrol — kapasite', () => {
