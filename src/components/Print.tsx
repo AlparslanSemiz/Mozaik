@@ -78,13 +78,13 @@ export default function Print({ state, excluded, setExcluded }: Props) {
 
   if (state.lessons.length === 0) {
     return (
-      <div className="main">
+      <>
         <div className="empty-screen">
           <strong>Yazdırılacak program yok.</strong>
           Önce <b>Kurulum</b> sekmesinden dersleri girip <b>Program</b> sekmesinde
           dizin.
         </div>
-      </div>
+      </>
     );
   }
 
@@ -152,7 +152,7 @@ export default function Print({ state, excluded, setExcluded }: Props) {
   }
 
   return (
-    <div className="main">
+    <>
       <div className="panel no-print">
         <h2>Yazdır</h2>
         <p className="hint">
@@ -310,6 +310,6 @@ export default function Print({ state, excluded, setExcluded }: Props) {
             </div>
           ))}
       </div>
-    </div>
+    </>
   );
 }

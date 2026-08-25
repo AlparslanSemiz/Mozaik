@@ -65,18 +65,18 @@ export default function Check({ state }: Props) {
 
   if (state.lessons.length === 0) {
     return (
-      <div className="main">
+      <>
         <div className="empty-screen">
           <strong>Kontrol edilecek bir şey yok.</strong>
           <b>Kurulum</b> sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra
           buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="main">
+    <>
       {!report.hasProblem ? (
         <div className="panel">
           <div className={conflicts.length > 0 ? 'warn-box' : 'ok-box'}>
@@ -195,6 +195,6 @@ export default function Check({ state }: Props) {
         rows={report.rooms}
         description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
       />
-    </div>
+    </>
   );
 }

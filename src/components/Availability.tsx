@@ -85,7 +85,7 @@ export default function Availability({ state, change }: Props) {
 
   if (selected === undefined) {
     return (
-      <div className="main">
+      <>
         <div className="panel">
           <h2>Müsait olmayan saatler</h2>
           <div className="form-row">
@@ -109,7 +109,7 @@ export default function Availability({ state, change }: Props) {
             {EMPTY_TEXT[kind]} eklemeniz gerekiyor.
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -184,7 +184,7 @@ export default function Availability({ state, change }: Props) {
   );
 
   return (
-    <div className="main">
+    <>
       <div className="panel">
         <h2>Müsait olmayan saatler</h2>
 
@@ -298,6 +298,6 @@ export default function Availability({ state, change }: Props) {
           </table>
         </div>
       </div>
-    </div>
+    </>
   );
 }

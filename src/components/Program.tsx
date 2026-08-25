@@ -276,7 +276,7 @@ export default function Program({ state, change }: Props) {
 
   if (state.lessons.length === 0) {
     return (
-      <div className="main">
+      <>
         <div className="empty-screen">
           <strong>Henüz dizilecek ders yok.</strong>
           Önce <b>Kurulum</b> sekmesinden derslikleri, öğretmenleri ve sınıfları girin,
@@ -286,12 +286,12 @@ export default function Program({ state, change }: Props) {
           <br />
           Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="main no-overflow">
+    <>
       <div className="topbar subbar">
         {/* Two positions, not one toggle: a single button saying "switch to the
             class view" tells you what the next click does, never where you are.
@@ -335,6 +335,6 @@ export default function Program({ state, change }: Props) {
       />
 
       <LessonPool cards={cards} completed={completed} onStart={cardStart} />
-    </div>
+    </>
   );
 }

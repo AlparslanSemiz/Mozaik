@@ -31,7 +31,7 @@ export default function Settings({ state, change, loadState }: Props) {
   const [section, setSection] = useState<SectionId>('school');
 
   return (
-    <div className="main">
+    <>
       <nav className="steps" aria-label="Ayar bölümleri">
         {SECTIONS.map((s) => (
           <button
@@ -49,6 +49,6 @@ export default function Settings({ state, change, loadState }: Props) {
       {section === 'rules' && <Rules state={state} change={change} />}
       {section === 'subjects' && <Subjects state={state} change={change} />}
       {section === 'data' && <Data state={state} change={change} loadState={loadState} />}
-    </div>
+    </>
   );
 }

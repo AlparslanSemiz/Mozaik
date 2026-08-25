@@ -37,12 +37,16 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect(page.getByRole('button', { name: 'Dosyadan aç' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
 
-    // On the grid the note is hidden: it would cost a whole teacher row
-    await expect(page.locator('.topbar-note')).toHaveCount(0);
+    // The note used to be hidden on the grid because it took a row of the top
+    // bar and that row cost the timetable a teacher. It is inline now, so it is
+    // visible EVERYWHERE and still costs the grid nothing.
+    await expect(page.locator('.topbar-note')).toContainText('kendiliğinden saklanıyor');
     const gridTop = (await page.locator('table.grid').boundingBox())!.y;
+    const barHeight = (await page.locator('header.topbar').boundingBox())!.height;
 
     await page.getByRole('button', { name: 'Kurulum' }).click();
     await expect(page.locator('.topbar-note')).toContainText('kendiliğinden saklanıyor');
+    expect((await page.locator('header.topbar').boundingBox())!.height).toBe(barHeight);
 
     await page.getByRole('button', { name: 'Program' }).click();
     expect((await page.locator('table.grid').boundingBox())!.y).toBe(gridTop);

@@ -66,7 +66,7 @@ export default function Setup({ state, change }: PanelProps) {
   const next = STEPS[index + 1];
 
   return (
-    <div className="main">
+    <>
       <nav className="steps" aria-label="Kurulum adımları">
         {STEPS.map((s, i) => {
           const count = s.count(state);
@@ -128,6 +128,6 @@ export default function Setup({ state, change }: PanelProps) {
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 }
