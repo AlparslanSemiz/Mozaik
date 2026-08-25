@@ -1274,9 +1274,25 @@ table.availability td.closed {
   padding: 10px 0 24px;
 }
 
+/* Two lines, both centred: the big one says what the sheet IS, the small one
+   whose it is. Centred on screen as well — the preview has to look like the
+   paper, or choosing what to print becomes guesswork. */
 .print-page h3 {
   margin: 0 0 6px;
-  font-size: 15px;
+  text-align: center;
+}
+
+.p-title-main {
+  display: block;
+  font-size: 17px;
+}
+
+.p-title-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
 }
 
 /* The page's own colour, so a stack of printed sheets can be sorted by eye the
@@ -1425,7 +1441,11 @@ table.bell-preview td {
     /* 12 lesson columns do not fit portrait (~15 mm each). Landscape gives
        ~21 mm, which is what the subject short forms were sized for. */
     size: A4 landscape;
-    margin: 10mm;
+    /* Zero, and the 10 mm comes back as padding on .print-page instead. The
+       browser draws its own header and footer INTO the margin box: the date
+       top left, the file path bottom left. No box, nothing drawn. There is no
+       CSS that hides them while a margin exists. */
+    margin: 0;
   }
 
   /* Paper is always light, whatever the screen is set to. Dark ink on dark
@@ -1484,18 +1504,44 @@ table.bell-preview td {
     margin: 0;
   }
 
+  /* The page box itself now, because @page has no margin: this padding IS the
+     paper margin, and 2 x 10 mm keeps the columns exactly as wide as before.
+     205 mm and not the full 210: a fractional pixel of overflow together with
+     `break-after: page` puts a BLANK sheet after every timetable, and 5 mm of
+     slack is invisible on paper.
+     `safe center` and not plain `center`: if the content ever outgrows the box
+     (a seven-day week is the worst case), plain centring overflows at BOTH
+     ends and the top of the table is cut off. */
   .print-page {
     break-after: page;
     page-break-after: always;
     break-inside: avoid;
-    padding: 0;
+    box-sizing: border-box;
+    height: 205mm;
+    padding: 8mm 10mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+  }
+
+  .print-page h3 {
+    margin: 0 0 4mm;
+  }
+
+  .p-title-main {
+    font-size: 19px;
+  }
+
+  .p-title-sub {
+    font-size: 12px;
   }
 
   /* 7 rows on a landscape page leave a lot of white: let the rows grow into it
-     so the timetable is readable from across the room. */
+     so the timetable is readable from across the room. Whatever is still left
+     over is split evenly above and below by the flex box above. */
   table.print tbody th,
   table.print tbody td {
-    height: 20mm;
+    height: 23mm;
   }
 
   table.print .p-top {

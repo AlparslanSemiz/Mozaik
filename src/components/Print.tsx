@@ -53,7 +53,15 @@ export default function Print({ state, excluded, setExcluded }: Props) {
     [state.settings],
   );
 
-  /** The lesson-number header row, shared by both kinds of page. */
+  /**
+ * The small line under the title: whose sheet this is. Empty parts are dropped,
+ * so a school with no name does not print a stray separator.
+ */
+function credits(...parts: string[]): string {
+  return parts.filter((p) => p !== '').join(' · ');
+}
+
+/** The lesson-number header row, shared by both kinds of page. */
   function head() {
     return (
       <thead>
@@ -160,13 +168,24 @@ export default function Print({ state, excluded, setExcluded }: Props) {
         {chosenClasses.map((group) => (
             <div className="print-page" key={group.id}>
               <h3>
-                {colored && (
-                  <span className="p-dot" style={{ background: paletteColor(group.color) }} />
-                )}
-                {state.settings.schoolName !== '' && `${state.settings.schoolName} — `}
-                {group.name} sınıfı haftalık ders programı
-                {group.roomId != null &&
-                  ` — ${ix.roomById.get(group.roomId)?.name ?? ''} dersliği`}
+                {/* Big line: what the sheet is. Small line: whose it is. The
+                    two used to be one long left-aligned string, which on paper
+                    read as a caption rather than a title. */}
+                <span className="p-title-main">
+                  {colored && (
+                    <span className="p-dot" style={{ background: paletteColor(group.color) }} />
+                  )}
+                  {group.name} sınıfı — Haftalık ders programı
+                </span>
+                {(() => {
+                  const room =
+                    group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
+                  const sub = credits(
+                    state.settings.schoolName,
+                    room === '' ? '' : `${room} dersliği`,
+                  );
+                  return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
+                })()}
               </h3>
               <table className="print">
                 {head()}
@@ -213,12 +232,16 @@ export default function Print({ state, excluded, setExcluded }: Props) {
         {chosenTeachers.map((teacher) => (
             <div className="print-page" key={teacher.id}>
               <h3>
-                {colored && (
-                  <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
-                )}
-                {state.settings.schoolName !== '' && `${state.settings.schoolName} — `}
-                {teacher.name} ({teacher.short}) — {teacher.subject} — haftalık ders
-                programı
+                <span className="p-title-main">
+                  {colored && (
+                    <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
+                  )}
+                  {teacher.name} ({teacher.short}) — Haftalık ders programı
+                </span>
+                {(() => {
+                  const sub = credits(state.settings.schoolName, teacher.subject);
+                  return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
+                })()}
               </h3>
               <table className="print">
                 {head()}
@@ -278,7 +301,8 @@ export default function Print({ state, excluded, setExcluded }: Props) {
           <p className="hint">
             Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
             penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
-            açık</b> olsun, yoksa renkler çıkmaz.
+            açık</b> olsun, yoksa renkler çıkmaz. Tarih ve dosya adı kâğıda çıkmaz;
+            yine de görürseniz <b>üstbilgi ve altbilgi</b> kutusunun işaretini kaldırın.
           </p>
           <div className="form-row">
             <label>
