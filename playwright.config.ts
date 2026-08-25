@@ -5,8 +5,10 @@ import { defineConfig } from '@playwright/test';
 // localStorage, yazdirma ve dosya indirme file:// altinda farkli davranabilir.
 export default defineConfig({
   testDir: './e2e',
-  // Screenshots, not tests: `npm run ekran` runs them with their own config.
-  testIgnore: '**/ekran.spec.ts',
+  // Neither of these asserts behaviour: `npm run ekran` writes pictures for a
+  // human, `npm run gorsel` compares pixels against a machine-local reference.
+  // Both have their own config.
+  testIgnore: ['**/ekran.spec.ts', '**/gorsel.spec.ts'],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
   // gecerli oldugu olculdu (bkz. docs/STATUS.md).
   fullyParallel: true,
