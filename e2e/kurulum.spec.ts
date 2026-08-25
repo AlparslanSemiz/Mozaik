@@ -275,3 +275,172 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.locator('table.list tbody tr', { hasText: 'Astronomi' })).toHaveCount(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// The editing paths. Adding and deleting were covered; CHANGING something was
+// not — and every box here is `defaultValue` + `onBlur`, a deliberate choice
+// (pitfall 3) whose wiring nothing was checking.
+
+test.describe('30. Kurulum — düzenleme', () => {
+  test('derslik adı değiştirilebiliyor ve sınıflarda görünüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+
+    const first = page.locator('table.list tbody tr').first();
+    await first.locator('input').fill('Z');
+    await first.locator('input').blur();
+    await expect(first.locator('input')).toHaveValue('Z');
+
+    await openSetup(page, 'Sınıflar');
+    await expect(page.getByLabel('410 dersliği')).toContainText('Z');
+  });
+
+  test('öğretmenin adı, kısaltması ve branşı değiştirilebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const row = page.locator('table.list tbody tr').first();
+
+    await row.locator('input[type=text]').first().fill('Yeni Ad');
+    await row.locator('input[type=text]').first().blur();
+    await row.locator('input[type=text]').nth(1).fill('YA');
+    await row.locator('input[type=text]').nth(1).blur();
+    // The label follows the short form, which the line above just changed.
+    await row.getByLabel('YA branşı').selectOption('Fizik');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.getByRole('rowheader', { name: 'YA Fizik' })).toBeVisible();
+  });
+
+  test('öğretmen sınırı: boş kutu okul varsayılanını kullanıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+    const rule = page.locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' });
+    await rule.locator('input[type=number]').fill('3');
+    await rule.locator('input[type=number]').blur();
+
+    await openSetup(page, 'Öğretmenler');
+    // Row 1, not row 0: the sample gives every third teacher a limit of their
+    // own, and an overridden box would not show the default at all.
+    const box = page.locator('table.list tbody tr').nth(1).locator('input[type=number]').first();
+    // Empty means "use the school default", and the default is shown as the
+    // placeholder so an empty box still says what it will do.
+    await expect(box).toHaveValue('');
+    await expect(box).toHaveAttribute('placeholder', '3');
+
+    await box.fill('1');
+    await box.blur();
+    await expect(box).toHaveValue('1');
+
+    await box.fill('');
+    await box.blur();
+    await expect(box).toHaveValue('');
+    await expect(box).toHaveAttribute('placeholder', '3');
+  });
+
+  test('sınıfın adı ve dersliği değiştirilebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    const row = page.locator('table.list tbody tr').first();
+
+    await row.locator('input[type=text]').fill('999');
+    await row.locator('input[type=text]').blur();
+    await page.getByLabel('999 dersliği').selectOption({ label: 'B' });
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await expect(page.locator('tbody .row-head', { hasText: '999' })).toContainText('B dersliği');
+  });
+
+  test('dersin haftalık saati ve blok boyu değiştirilebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Dersler');
+    const row = page.locator('table.list tbody tr').first();
+    const numbers = row.locator('input[type=number]');
+
+    await numbers.nth(0).fill('6');
+    await numbers.nth(0).blur();
+    await numbers.nth(1).fill('3');
+    await numbers.nth(1).blur();
+
+    await expect(numbers.nth(0)).toHaveValue('6');
+    await expect(numbers.nth(1)).toHaveValue('3');
+
+    // The pool counter reads off the same numbers.
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('.pool-card .counter').first()).toContainText('/');
+  });
+
+  test('boş adla ekleme yapılamıyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    const add = page.getByRole('button', { name: 'Ekle', exact: true });
+    await expect(add).toBeDisabled();
+
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('   ');
+    await expect(add).toBeDisabled();
+  });
+
+  test('Enter ile ekleniyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('Q');
+    await page.getByPlaceholder('Derslik adı, örn. A').press('Enter');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+  });
+
+  test('yerleşimi olan dersi silmek ne kaybedileceğini sayıyor', async ({ page }) => {
+    await openWithSample(page);
+    const { dragAndDrop } = await import('./helpers');
+    await dragAndDrop(page);
+
+    await openSetup(page, 'Dersler');
+    let asked = '';
+    page.once('dialog', (d) => {
+      asked = d.message();
+      void d.dismiss();
+    });
+    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await expect.poll(() => asked).toContain('silinecek');
+  });
+});
+
+test.describe('31. Kurulum — sağ sütun', () => {
+  test('derslik adımında derslik yükü ve hangi sınıflar yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+
+    const side = page.locator('.cols aside');
+    await expect(side).toContainText('Derslik yükü');
+    await expect(side).toContainText('Hangi sınıflar');
+    await expect(side.locator('table.stat tbody tr')).toHaveCount(8);
+  });
+
+  test('öğretmen adımında yük ve branş dağılımı yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+
+    const side = page.locator('.cols aside');
+    await expect(side).toContainText('Öğretmen yükü');
+    await expect(side).toContainText('Branşlar');
+    await expect(side.locator('table.stat tbody tr')).toHaveCount(25);
+  });
+
+  test('dersliksiz sınıf sağ sütunda uyarı çıkarıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    await page.getByLabel('410 dersliği').selectOption({ label: 'Derslik yok' });
+
+    await openSetup(page, 'Derslikler');
+    await expect(page.locator('.cols aside .warn-box')).toContainText('dersliği yok');
+  });
+
+  test('dersi olmayan sınıf ders adımında sayılıyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Sınıflar');
+    await page.getByPlaceholder(/Sınıf adı/).fill('700');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    await openSetup(page, 'Dersler');
+    await expect(page.locator('.cols aside .warn-box')).toContainText('hiç dersi yok');
+  });
+});

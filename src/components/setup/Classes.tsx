@@ -81,6 +81,7 @@ export default function Classes({ state, change }: PanelProps) {
                       change((d) => updateClass(d, c.id, { color: Number(e.target.value) }))
                     }
                     style={{ background: paletteColor(c.color), width: 44 }}
+                    aria-label={`${c.name} rengi`}
                     title="Renk"
                   >
                     {Array.from({ length: PALETTE_SIZE }, (_, i) => (
@@ -102,6 +103,7 @@ export default function Classes({ state, change }: PanelProps) {
                 <td>
                   <select
                     value={c.roomId ?? ''}
+                    aria-label={`${c.name} dersliği`}
                     onChange={(e) =>
                       change((d) => updateClass(d, c.id, { roomId: e.target.value || null }))
                     }

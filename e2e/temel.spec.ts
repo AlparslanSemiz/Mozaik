@@ -2,7 +2,14 @@
 // my father his saved timetable, not just a wrong pixel.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop } from './helpers';
+import {
+  FIXTURE,
+  open,
+  openSettings,
+  openSetup,
+  openWithSample,
+  dragAndDrop,
+} from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
   test('otomatik kayıt çalışıyor ve uyarı çıkmıyor', async ({ page }) => {
@@ -313,5 +320,193 @@ test.describe('5. Yedek ve şema göçü', () => {
     await page.getByRole('button', { name: 'Program' }).click();
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Undo / redo
+//
+// Dropping a card in the wrong place happens constantly, so this is a basic
+// function rather than a nicety — and until now exactly one Ctrl+Z was tested.
+
+test.describe('28. Geri al / ileri al', () => {
+  test('açılışta ikisi de kapalı', async ({ page }) => {
+    await open(page);
+    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeDisabled();
+  });
+
+  test('düğmelerle üç adım geri, üç adım ileri', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    const box = page.getByPlaceholder('Derslik adı, örn. A');
+    for (const name of ['A', 'B', 'C']) {
+      await box.fill(name);
+      await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    }
+    await expect(page.locator('table.list tbody tr')).toHaveCount(3);
+
+    const back = page.getByRole('button', { name: '↶ Geri al' });
+    const forward = page.getByRole('button', { name: '↷ İleri al' });
+    for (const expected of [2, 1, 0]) {
+      await back.click();
+      await expect(page.locator('table.list tbody tr')).toHaveCount(expected);
+    }
+    await expect(back).toBeDisabled();
+
+    for (const expected of [1, 2, 3]) {
+      await forward.click();
+      await expect(page.locator('table.list tbody tr')).toHaveCount(expected);
+    }
+    await expect(forward).toBeDisabled();
+  });
+
+  test('geri aldıktan sonra yeni bir değişiklik ileriyi siliyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    const box = page.getByPlaceholder('Derslik adı, örn. A');
+    await box.fill('A');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await box.fill('B');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    await page.getByRole('button', { name: '↶ Geri al' }).click();
+    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeEnabled();
+
+    await box.fill('C');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.getByRole('button', { name: '↷ İleri al' })).toBeDisabled();
+    await expect(page.locator('table.list tbody tr')).toHaveCount(2);
+  });
+
+  test('metin kutusundayken Ctrl+Z programı geri almıyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    const box = page.getByPlaceholder('Derslik adı, örn. A');
+    await box.fill('A');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+
+    // Inside a text box Ctrl+Z belongs to the box, not to the timetable.
+    await box.click();
+    await box.fill('yanlış');
+    await page.keyboard.press('Control+z');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+  });
+
+  test('yedek yüklemek geçmişi sıfırlıyor', async ({ page }) => {
+    await open(page);
+    await openSetup(page, 'Derslikler');
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeEnabled();
+
+    page.once('dialog', (d) => d.accept());
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(FIXTURE)),
+    });
+
+    await expect(page.getByRole('button', { name: '↶ Geri al' })).toBeDisabled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Failure paths. Every one of these ends in data loss if it goes wrong quietly.
+
+test.describe('29. Hata yolları', () => {
+  test('bozuk dosya açıkça reddediliyor, program bozulmuyor', async ({ page }) => {
+    await openWithSample(page);
+    const before = await page.locator('table.grid tbody tr').count();
+
+    let message = '';
+    page.once('dialog', (d) => {
+      message = d.message();
+      void d.accept();
+    });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'bozuk.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from('{ bu json değil'),
+    });
+
+    await expect.poll(() => message).toContain('Bu dosya okunamadı');
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  test('bilinmeyen (ileri) şema sürümü tahmin edilmiyor', async ({ page }) => {
+    await openWithSample(page);
+
+    let message = '';
+    page.once('dialog', (d) => {
+      message = d.message();
+      void d.accept();
+    });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'gelecek.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify({ ...FIXTURE, schemaVersion: 99 })),
+    });
+
+    await expect.poll(() => message).toContain('Bu dosya okunamadı');
+  });
+
+  test('yükleme onayı reddedilince hiçbir şey değişmiyor', async ({ page }) => {
+    await openWithSample(page);
+    const before = await page.locator('table.grid tbody tr').count();
+
+    page.once('dialog', (d) => d.dismiss());
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(FIXTURE)),
+    });
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  test('aynı dosya arka arkaya iki kez seçilebiliyor', async ({ page }) => {
+    await open(page);
+    const file = {
+      name: 'ders-programi-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(FIXTURE)),
+    };
+
+    page.once('dialog', (d) => d.accept());
+    await page.locator('input[type=file]').setInputFiles(file);
+    await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+
+    // The input clears its own value, so picking the same path fires again.
+    let asked = false;
+    page.once('dialog', (d) => {
+      asked = true;
+      void d.accept();
+    });
+    await page.locator('input[type=file]').setInputFiles(file);
+    await expect.poll(() => asked).toBe(true);
+  });
+
+  test('kayıt çalışmıyorsa kalıcı kırmızı uyarı çıkıyor', async ({ page }) => {
+    // The loudest safety net in the app, and its presence was never tested —
+    // only its absence.
+    await page.addInitScript(() => {
+      const blow = () => {
+        throw new Error('kapalı');
+      };
+      Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        value: { getItem: blow, setItem: blow, removeItem: blow, clear: blow, key: blow, length: 0 },
+      });
+    });
+    await open(page);
+
+    const warning = page.locator('.save-warning');
+    await expect(warning).toBeVisible();
+    await expect(warning).toContainText('otomatik kayıt çalışmıyor');
+    await expect(warning).toContainText('Dosyaya kaydet');
   });
 });

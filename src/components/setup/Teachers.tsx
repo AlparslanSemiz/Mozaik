@@ -160,6 +160,7 @@ export default function Teachers({ state, change }: PanelProps) {
                       change((d) => updateTeacher(d, t.id, { color: Number(e.target.value) }))
                     }
                     style={{ background: paletteColor(t.color), width: 44 }}
+                    aria-label={`${t.short} rengi`}
                     title="Renk"
                   >
                     {Array.from({ length: PALETTE_SIZE }, (_, i) => (
