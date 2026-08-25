@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type React from 'react';
 import {
+  blockStart,
   buildIndex,
   check,
   closedConflicts,
@@ -19,6 +20,7 @@ import {
 import type { Index, Verdict } from '../constraints';
 import { subjectShort } from '../entities';
 import { useDrag } from '../drag';
+import type { DragData } from '../drag';
 import type { State, Id } from '../types';
 import Grid from './Grid';
 import type { GridCell, GridRow } from './Grid';
@@ -208,8 +210,16 @@ export default function Program({ state, change }: Props) {
   const ix = useMemo(() => buildIndex(state), [state]);
 
   const drop = useCallback(
-    (lessonId: Id, day: number, hour: number) => {
-      change((d) => place(d, lessonId, day, hour));
+    (data: DragData, day: number, hour: number) => {
+      change((d) => {
+        // Lifting the old block and laying the new one down are ONE reducer
+        // call, so a move costs one undo step and Ctrl+Z puts the lesson back
+        // where it was — not into the pool.
+        if (data.source === null) return place(d, data.lessonId, day, hour);
+        const lifted = removeBlock(d, data.source.classId, data.source.day, data.source.hour);
+        if (lifted === d) return d; // the block went away mid-drag; touch nothing
+        return place(lifted, data.lessonId, day, hour);
+      });
     },
     [change],
   );
@@ -219,7 +229,7 @@ export default function Program({ state, change }: Props) {
   const rows = useMemo(() => buildRows(state, ix, view), [state, ix, view]);
   const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
 
-  const cellClick = useCallback(
+  const cellRemove = useCallback(
     (rowId: string, day: number, hour: number) => {
       change((d) => {
         // In the teacher view the row id is a teacher; removing needs the class.
@@ -235,16 +245,34 @@ export default function Program({ state, change }: Props) {
     [change, view],
   );
 
-  const cardStart = useCallback(
-    (e: React.PointerEvent, lessonId: Id) => {
+  /**
+   * One drag, two sources: a card from the pool (`source === null`) or a block
+   * already on the grid, which is being MOVED.
+   *
+   * The map is computed against a state with the source block ALREADY LIFTED.
+   * Without that a placed lesson blocks itself — hard constraints 2 (the class
+   * is busy) and 5 (the teacher is in another class) both see its own cells —
+   * and it could not even be dropped back where it came from. Nothing is
+   * removed for real here: the lift happens inside the drop's single change().
+   */
+  const beginDrag = useCallback(
+    (
+      e: React.PointerEvent,
+      lessonId: Id,
+      source: { classId: Id; day: number; hour: number } | null,
+    ) => {
       const lesson = ix.lessonById.get(lessonId);
       if (lesson === undefined) return;
 
+      const base =
+        source === null ? state : removeBlock(state, source.classId, source.day, source.hour);
+      const baseIx = source === null ? ix : buildIndex(base);
+
       // Valid cells are computed HERE, once — never again during the drag.
       const map = new Map<string, Verdict>();
-      for (let g = 0; g < state.settings.days.length; g++) {
-        for (let s = 0; s < state.settings.hours.length; s++) {
-          map.set(`${g}|${s}`, check(state, ix, lessonId, g, s));
+      for (let g = 0; g < base.settings.days.length; g++) {
+        for (let s = 0; s < base.settings.hours.length; s++) {
+          map.set(`${g}|${s}`, check(base, baseIx, lessonId, g, s));
         }
       }
 
@@ -259,6 +287,7 @@ export default function Program({ state, change }: Props) {
           rowId: teacherView ? lesson.teacherId : lesson.classId,
           blockSize: Math.max(1, lesson.blockSize),
           map,
+          source,
         },
         {
           top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
@@ -272,6 +301,34 @@ export default function Program({ state, change }: Props) {
       );
     },
     [state, ix, view, start],
+  );
+
+  const cardStart = useCallback(
+    (e: React.PointerEvent, lessonId: Id) => beginDrag(e, lessonId, null),
+    [beginDrag],
+  );
+
+  /** Left button on a placed block: pick it up and move it. */
+  const cellMoveStart = useCallback(
+    (e: React.PointerEvent, rowId: string, day: number, hour: number) => {
+      const teacherView = view === 'teacher';
+      const lessonId = teacherView
+        ? ix.teacherBusy.get(closedKey(rowId, day, hour))
+        : state.placements[placementKey(rowId, day, hour)];
+      if (lessonId === undefined) return;
+
+      const classId = teacherView
+        ? (ix.lessonById.get(lessonId)?.classId ?? null)
+        : rowId;
+      if (classId === null) return;
+
+      // The grabbed cell may be the middle of a block; the whole block moves.
+      const from = blockStart(state, classId, day, hour);
+      if (from === null) return;
+
+      beginDrag(e, lessonId, { classId, day, hour: from });
+    },
+    [state, ix, view, beginDrag],
   );
 
   if (state.lessons.length === 0) {
@@ -313,8 +370,8 @@ export default function Program({ state, change }: Props) {
         </div>
         <span className="hint inline">
           {view === 'teacher'
-            ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş derse tıklayınca kalkar.'
-            : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş derse tıklayınca kalkar.'}
+            ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'
+            : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'}
         </span>
       </div>
 
@@ -331,7 +388,8 @@ export default function Program({ state, change }: Props) {
         rows={rows}
         firstColumnTitle={view === 'teacher' ? 'Öğretmen' : 'Sınıf'}
         draggedRowId={dragging?.rowId ?? null}
-        onCellClick={cellClick}
+        onCellRemove={cellRemove}
+        onCellMoveStart={cellMoveStart}
       />
 
       <LessonPool cards={cards} completed={completed} onStart={cardStart} />

@@ -511,3 +511,52 @@ describe('closedConflicts', () => {
     ]);
   });
 });
+
+// Moving a placed lesson is `removeBlock` then `place`, in one step. The whole
+// thing rests on one claim: with the source block LIFTED, the lesson no longer
+// blocks itself. Without it, hard constraint 2 (the class is busy) and 5 (the
+// teacher is in another class) both see the lesson's own cells and it could not
+// even be dropped back where it came from.
+describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', () => {
+  it('yerinde duran ders KENDİ hücresini dolu görüyor', () => {
+    const d = place(build(), 'x1', 0, 1);
+    expect(why(d, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2 saatinde Matematik var');
+  });
+
+  it('kaldırıldıktan sonra aynı hücre serbest', () => {
+    const placed = place(build(), 'x1', 0, 1);
+    const lifted = removeBlock(placed, 's510', 0, 1);
+    expect(why(lifted, 'x1', 0, 1)).toBeNull();
+  });
+
+  it('blok ikinci hücresinden tutulsa da tamamı kalkıyor', () => {
+    const placed = place(build(), 'x4', 0, 1); // blockSize 2 -> hours 1 and 2
+    expect(blockStart(placed, 's510', 0, 2)).toBe(1);
+
+    const lifted = removeBlock(placed, 's510', 0, blockStart(placed, 's510', 0, 2)!);
+    expect(lifted.placements[placementKey('s510', 0, 1)]).toBeUndefined();
+    expect(lifted.placements[placementKey('s510', 0, 2)]).toBeUndefined();
+    expect(why(lifted, 'x4', 0, 1)).toBeNull();
+  });
+
+  it('kaldırma yalnız o dersi serbest bırakıyor, başkasını değil', () => {
+    let d = place(build(), 'x1', 0, 1); // MÇ, 510
+    d = place(d, 'x2', 0, 2); // MÇ, 511 — same teacher, next hour
+    const lifted = removeBlock(d, 's510', 0, 1);
+
+    expect(why(lifted, 'x1', 0, 1)).toBeNull();
+    // MÇ is still teaching 511 at hour 2, so that hour stays blocked for x1.
+    expect(why(lifted, 'x1', 0, 2)).toBe('MÇ Pazartesi 3 saatinde 511 sınıfında');
+  });
+
+  it('sınır kuralı da kaldırılmış hâle göre hesaplanıyor', () => {
+    // "at most 1 in a row": a lesson sitting at hour 1 must not make hour 1
+    // itself unreachable once it has been lifted.
+    const base = withRule(build(), 'maxConsecutive', 1, 'block');
+    const placed = place(base, 'x1', 0, 1);
+    expect(why(placed, 'x1', 0, 2)).toContain('art arda 1 saatten fazla');
+
+    const lifted = removeBlock(placed, 's510', 0, 1);
+    expect(why(lifted, 'x1', 0, 2)).toBeNull();
+  });
+});

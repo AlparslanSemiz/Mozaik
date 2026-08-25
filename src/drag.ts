@@ -28,6 +28,13 @@ export interface DragData {
   blockSize: number;
   /** `${day}|${hour}` -> verdict. `blocked === null` means droppable. */
   map: Map<string, Verdict>;
+  /**
+   * The block being MOVED, or null when the card came from the pool.
+   *
+   * `day`/`hour` are the block's START, not the cell that was grabbed: a two
+   * hour block picked up by its second cell still moves as one.
+   */
+  source: { classId: Id; day: number; hour: number } | null;
 }
 
 /** What the bar above the grid says, and how loudly. */
@@ -51,7 +58,7 @@ const EDGE = 56;
 /** Scroll amount per frame (px). Kept low so the user stays in control. */
 const STEP = 14;
 
-export function useDrag(drop: (lessonId: Id, day: number, hour: number) => void) {
+export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
   // Only changes when the drag starts and ends -> two re-renders, that is all.
   const [dragging, setDragging] = useState<DragData | null>(null);
   // For the reason bar at the top. The grid is React.memo, so changing this
@@ -117,9 +124,15 @@ export function useDrag(drop: (lessonId: Id, day: number, hour: number) => void)
     // 'center', not 'nearest': centring the row shows the neighbouring rows and
     // keeps the cursor out of the auto-scroll band (otherwise the grid drifts
     // while trying to drop).
-    document
-      .querySelector<HTMLElement>('tr.target-row')
-      ?.scrollIntoView({ block: 'center', inline: 'nearest' });
+    //
+    // NOT when a placed block is being moved: the cursor is already on that row,
+    // so centring it would yank the grid half a screen out from under the hand
+    // that just pressed it.
+    if (dragging.source === null) {
+      document
+        .querySelector<HTMLElement>('tr.target-row')
+        ?.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
 
     /** The grid cell under the cursor. The ghost MUST be pointer-events: none. */
     const findTarget = (x: number, y: number): { day: number; hour: number } | null => {
@@ -217,7 +230,7 @@ export function useDrag(drop: (lessonId: Id, day: number, hour: number) => void)
         target !== null &&
         d.map.get(`${target.day}|${target.hour}`)?.blocked === null
       ) {
-        drop(d.lessonId, target.day, target.hour);
+        drop(d, target.day, target.hour);
       }
       finish();
     };

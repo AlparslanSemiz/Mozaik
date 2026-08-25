@@ -5,6 +5,7 @@
 // all (see drag.ts).
 
 import { memo, useMemo } from 'react';
+import type React from 'react';
 import { dayPeriods } from '../bell';
 import { paletteColor } from '../palette';
 import type { Settings, Id } from '../types';
@@ -39,10 +40,21 @@ interface RowProps {
   /** Per day: the hour index the long break falls BEFORE. -1 = no long break. */
   breakAt: number[];
   dim: boolean;
-  onCellClick: (rowId: string, day: number, hour: number) => void;
+  /** Right click, or Delete on a focused card: send the block back to the pool. */
+  onCellRemove: (rowId: string, day: number, hour: number) => void;
+  /** Left button down on a placed card: start moving the block. */
+  onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
 }
 
-const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellClick }: RowProps) {
+const Row = memo(function Row({
+  row,
+  dayCount,
+  hourCount,
+  breakAt,
+  dim,
+  onCellRemove,
+  onCellMoveStart,
+}: RowProps) {
   const cells = [];
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
@@ -74,15 +86,37 @@ const Row = memo(function Row({ row, dayCount, hourCount, breakAt, dim, onCellCl
           title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >
           {cell !== null ? (
+            // A left click used to REMOVE the block, which made moving a lesson
+            // mean deleting it and dragging it out of the pool again. Now:
+            //   left button + drag  -> move it
+            //   right click         -> send it back to the pool
+            //   Delete / Backspace  -> the same, from the keyboard
+            // `e.detail === 0` is how a keyboard-generated click is told from a
+            // real one, which keeps Enter and Space working on a focused card.
             <button
               type="button"
               className={cell.conflict === null ? 'card' : 'card conflict'}
               style={{ background: paletteColor(cell.color) }}
-              onClick={() => onCellClick(row.id, g, s)}
+              draggable={false}
+              onPointerDown={(e) => onCellMoveStart(e, row.id, g, s)}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                onCellRemove(row.id, g, s);
+              }}
+              onClick={(e) => {
+                if (e.detail === 0) onCellRemove(row.id, g, s);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Delete' || e.key === 'Backspace') {
+                  e.preventDefault();
+                  onCellRemove(row.id, g, s);
+                }
+              }}
+              aria-label={`${cell.top} ${cell.bottom} — kaldırmak için Delete`}
               title={
                 cell.conflict === null
-                  ? 'Kaldırmak için tıklayın'
-                  : `${cell.conflict} — kaldırmak için tıklayın`
+                  ? 'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir'
+                  : `${cell.conflict} — sürükleyerek taşıyın, sağ tıkla havuza gönderin`
               }
             >
               <span className="card-top">{cell.top}</span>
@@ -117,10 +151,18 @@ interface Props {
   firstColumnTitle: string;
   /** Id of the target row while dragging; the other rows dim. */
   draggedRowId: string | null;
-  onCellClick: (rowId: string, day: number, hour: number) => void;
+  onCellRemove: (rowId: string, day: number, hour: number) => void;
+  onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
 }
 
-function GridInner({ settings, rows, firstColumnTitle, draggedRowId, onCellClick }: Props) {
+function GridInner({
+  settings,
+  rows,
+  firstColumnTitle,
+  draggedRowId,
+  onCellRemove,
+  onCellMoveStart,
+}: Props) {
   const hourCount = settings.hours.length;
   const dayCount = settings.days.length;
 
@@ -186,7 +228,8 @@ function GridInner({ settings, rows, firstColumnTitle, draggedRowId, onCellClick
               hourCount={hourCount}
               breakAt={breakAt}
               dim={draggedRowId !== null && draggedRowId !== row.id}
-              onCellClick={onCellClick}
+              onCellRemove={onCellRemove}
+              onCellMoveStart={onCellMoveStart}
             />
           ))}
         </tbody>

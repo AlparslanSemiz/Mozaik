@@ -147,8 +147,21 @@ test.describe('2. Sürükle-bırak', () => {
   });
 });
 
-test.describe('3. Izgara', () => {
-  test('yerleşmiş derse tıklayınca kalkar, Ctrl+Z geri getirir', async ({ page }) => {
+// ---------------------------------------------------------------------------
+// Moving and removing a placed lesson
+//
+// A left click used to remove the block, so the only way to move a lesson was
+// to delete it and drag it out of the pool again — and Kontrol's own advice
+// ("either reopen the hour or MOVE the lesson") had no move to point at. Now
+// the left button drags and the right button sends the block back to the pool.
+
+/** The <td> holding the first placed card. */
+function placedCell(page: Page) {
+  return page.locator('table.grid td:has(.card)').first();
+}
+
+test.describe('3. Izgara — taşıma ve kaldırma', () => {
+  test('sağ tık dersi havuza geri gönderir, Ctrl+Z geri getirir', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
@@ -156,11 +169,166 @@ test.describe('3. Izgara', () => {
     const before = await cards.count();
     expect(before).toBeGreaterThan(0);
 
-    await cards.first().click();
+    await cards.first().click({ button: 'right' });
     await expect(cards).toHaveCount(0); // if it was a block, all of it went
 
     await page.keyboard.press('Control+z');
     await expect(cards).toHaveCount(before);
+  });
+
+  test('sağ tıkta tarayıcı menüsü açılmıyor, sayfa çalışır kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    // A context menu would be a native window Playwright cannot see; what CAN
+    // be measured is that the event was cancelled and the app kept working.
+    const cancelled = await page.evaluate(async () => {
+      const card = document.querySelector('table.grid .card');
+      if (card === null) return null;
+      const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+      card.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    expect(cancelled).toBe(true);
+
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await expect(page.getByRole('button', { name: 'Program' })).toBeVisible();
+  });
+
+  test('SOL tık silmiyor — ders yerinde kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const cards = page.locator('table.grid .card');
+    const before = await cards.count();
+
+    await cards.first().click(); // a plain left click, no movement
+    await expect(cards).toHaveCount(before);
+  });
+
+  test('odaklı kartta Delete kaldırıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const cards = page.locator('table.grid .card');
+    const before = await cards.count();
+
+    await cards.first().focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(0);
+
+    await page.keyboard.press('Control+z');
+    await expect(cards).toHaveCount(before);
+  });
+
+  test('yerleşmiş ders sürüklenerek taşınıyor; havuz sayacı değişmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const poolBefore = await page.locator('.pool-card').count();
+    const cards = page.locator('table.grid .card');
+    const blockSize = await cards.count();
+
+    const from = placedCell(page);
+    const fromDay = await from.getAttribute('data-day');
+    const fromHour = await from.getAttribute('data-hour');
+    const box = (await from.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect(page.locator('tr.target-row')).toHaveCount(1);
+
+    // Find a green cell in the same row that is NOT where it already is.
+    const rowCells = page.locator('tr.target-row td');
+    let landed: { day: string; hour: string } | null = null;
+    for (const point of await visibleCells(page, 'tr.target-row td')) {
+      const cell = rowCells.nth(point.index);
+      const day = await cell.getAttribute('data-day');
+      const hour = await cell.getAttribute('data-hour');
+      if (day === fromDay && hour === fromHour) continue;
+      await page.mouse.move(point.x, point.y, { steps: 3 });
+      await page.waitForTimeout(40);
+      if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
+        landed = { day: day!, hour: hour! };
+        break;
+      }
+    }
+    expect(landed).not.toBeNull();
+    await page.mouse.up();
+
+    // It moved: same number of cards, at a different hour, and the pool is
+    // untouched — a move must not look like a removal plus a placement.
+    await expect(cards).toHaveCount(blockSize);
+    await expect(page.locator('.pool-card')).toHaveCount(poolBefore);
+    const now = placedCell(page);
+    expect(await now.getAttribute('data-hour')).toBe(landed!.hour);
+
+    // ONE undo step puts it back where it was, not into the pool.
+    await page.keyboard.press('Control+z');
+    await expect(cards).toHaveCount(blockSize);
+    await expect(placedCell(page)).toHaveAttribute('data-hour', fromHour!);
+  });
+
+  test('kaynak hücrenin KENDİSİ yeşil — ders kendini engellemiyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const from = placedCell(page);
+    const day = await from.getAttribute('data-day');
+    const hour = await from.getAttribute('data-hour');
+    const box = (await from.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 2, box.y + box.height / 2, { steps: 2 });
+    await page.waitForTimeout(120);
+
+    // Its own cells are still occupied by itself; without lifting the source
+    // block first, hard constraints 2 and 5 would paint this red.
+    const self = page.locator(`tr.target-row td[data-day="${day}"][data-hour="${hour}"]`);
+    await expect(self).toHaveClass(/drop-ok/);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
+  test('ızgaradan kart alınınca ızgara zıplamıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const wrap = page.locator('.grid-wrap');
+    const before = await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop }));
+
+    const box = (await placedCell(page).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(200); // long enough for scrollIntoView to have run
+
+    // The pool card path centres the target row on purpose. A block already on
+    // the grid is already on that row, so centring would yank the grid out from
+    // under the hand that just pressed it.
+    expect(await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop }))).toEqual(before);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
+  test('Escape ile taşıma iptal edilince ders yerinde kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const cards = page.locator('table.grid .card');
+    const count = await cards.count();
+    const hour = await placedCell(page).getAttribute('data-hour');
+
+    const box = (await placedCell(page).boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y, { steps: 4 });
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+
+    await expect(cards).toHaveCount(count);
+    await expect(placedCell(page)).toHaveAttribute('data-hour', hour!);
   });
 
   test('sağa kaydırınca öğretmen sütunu sabit kalır', async ({ page }) => {
