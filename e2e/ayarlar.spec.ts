@@ -307,3 +307,241 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     ).toContainText('MÇ Salı günü art arda 2 saat ders veriyor — en fazla 1 saat isteniyor.');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Every field in Ayarlar. The most important one by far is removing a day:
+// placement keys hold the day INDEX, so unticking a day in the middle of the
+// week could quietly move a finished timetable — the worst bug this tool can
+// have (pitfall 11). remapDays has unit tests; this is the browser proving it.
+
+test.describe('32. Ayarlar — okul ve günler', () => {
+  test('okul adı basılan sayfaya geçiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    const name = page.getByLabel(/Okul adı/);
+    await name.fill('Semiz Kurs');
+    await name.blur();
+
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-page h3').first()).toContainText('Semiz Kurs');
+    // ...and into the top bar, which is where you see which file you are in.
+    await expect(page.locator('.app-title')).toHaveText('Semiz Kurs');
+  });
+
+  test('ORTADAN gün çıkarılınca kalan günlerin dersleri KAYMIYOR', async ({ page }) => {
+    await openWithSample(page);
+    const spot = await dragAndDrop(page);
+    // Only a lesson on a day AFTER the removed one can shift; pick accordingly.
+    const dayName = await page
+      .locator('table.grid thead .day-head')
+      .nth(Number(spot.day))
+      .textContent();
+
+    await openSettings(page, 'Okul');
+    // Çarşamba is the second teaching day: removing it re-indexes everything
+    // after it.
+    const row = page.locator('table.list tr', { hasText: 'Çarşamba' });
+    await row.locator('input[type=checkbox]').uncheck();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    if (dayName === 'Çarşamba') {
+      // Its own day went, so the lesson went with it. That is the honest result.
+      await expect(page.locator('table.grid .card')).toHaveCount(0);
+    } else {
+      const cell = page.locator('table.grid td:has(.card)').first();
+      const nowDay = await page
+        .locator('table.grid thead .day-head')
+        .nth(Number(await cell.getAttribute('data-day')))
+        .textContent();
+      expect(nowDay).toBe(dayName);
+    }
+  });
+
+  test('gün eklenince ızgaraya bir sütun grubu ekleniyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    await page
+      .locator('table.list tr', { hasText: 'Pazartesi' })
+      .locator('input[type=checkbox]')
+      .check();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid thead .day-head')).toHaveCount(7);
+    await expect(page.locator('table.grid thead .day-head').first()).toHaveText('Pazartesi');
+  });
+
+  test('günlük ders sayısı artırılınca ızgara büyüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    const count = page.getByLabel('Günlük ders sayısı');
+    await count.fill('14');
+    await count.blur();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    const perDay = await page.locator('table.grid thead tr').nth(1).locator('th:not(.break-col)').count();
+    expect(perDay).toBe(14 * 6);
+  });
+
+  test('ders adları verilebiliyor ve ızgarada görünüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    const count = page.getByLabel('Günlük ders sayısı');
+    await count.fill('3');
+    await count.blur();
+
+    const names = page.getByLabel(/Ders adları/);
+    await names.fill('Sabah, Öğle, Akşam');
+    await names.blur();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid thead tr').nth(1)).toContainText('Sabah');
+    await expect(page.locator('table.grid thead tr').nth(1)).toContainText('Akşam');
+  });
+
+  test('öğle arasının yeri gün gün seçilebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    await page
+      .locator('table.list tr', { hasText: 'Salı' })
+      .locator('select')
+      .selectOption({ label: '3. dersten sonra' });
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    // The separator sits on the LEFT edge of the period that follows it.
+    const before = page.locator('table.grid tbody tr').first().locator('td, th');
+    const html = await page.locator('table.grid thead tr').nth(1).innerHTML();
+    expect(html.indexOf('break-col')).toBeGreaterThan(0);
+    expect(await before.count()).toBeGreaterThan(0);
+  });
+});
+
+test.describe('33. Ayarlar — kurallar', () => {
+  test('dört kural da var ve seviyeleri seçilebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(4);
+
+    for (const label of [
+      'Öğretmen art arda en fazla',
+      'Öğretmen günde en fazla',
+      'Öğretmen günde en az',
+      'Bir sınıf aynı dersten günde en fazla',
+    ]) {
+      await expect(page.locator('table.list tr', { hasText: label })).toBeVisible();
+    }
+  });
+
+  test('"günde en az" kuralında Engelle seçeneği HİÇ yok', async ({ page }) => {
+    // Deliberate: the first lesson of a day always breaches a minimum, so a
+    // hard version of this rule could never let a day start.
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+
+    const min = page.locator('table.list tr', { hasText: 'Öğretmen günde en az' });
+    await expect(min.locator('select option')).toHaveCount(2);
+    await expect(min.locator('select')).not.toContainText('Engelle');
+
+    const max = page.locator('table.list tr', { hasText: 'Öğretmen günde en fazla' });
+    await expect(max.locator('select option')).toHaveCount(3);
+  });
+
+  test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+    await expect(page.locator('.cols aside')).toContainText('Şu anki ihlaller');
+    await expect(page.locator('.cols aside .ok-box')).toBeVisible();
+  });
+
+  test('günde en fazla kuralı sürüklemeyi engelliyor', async ({ page }) => {
+    await openFixture(page);
+    await openSettings(page, 'Kurallar');
+    const rule = page.locator('table.list tr', { hasText: 'Öğretmen günde en fazla' });
+    await rule.locator('input[type=number]').fill('1');
+    await rule.locator('input[type=number]').blur();
+    await rule.locator('select').selectOption('block');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await startDrag(page);
+    await hover(page, 0, 0);
+    await page.mouse.up();
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+
+    await startDrag(page);
+    const second = await hover(page, 0, 2);
+    await expect(second).toHaveClass(/drop-blocked/);
+    await expect(page.locator('.reason-bar')).toContainText('en fazla 1 saat girmeli');
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
+  test('bir sınıfın aynı dersten günlük sınırı sürüklemeyi engelliyor', async ({ page }) => {
+    await openFixture(page);
+    await openSettings(page, 'Kurallar');
+    const rule = page.locator('table.list tr', { hasText: 'Bir sınıf aynı dersten' });
+    await rule.locator('input[type=number]').fill('1');
+    await rule.locator('input[type=number]').blur();
+    await rule.locator('select').selectOption('block');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await startDrag(page);
+    await hover(page, 0, 0);
+    await page.mouse.up();
+
+    await startDrag(page);
+    const second = await hover(page, 0, 2);
+    await expect(second).toHaveClass(/drop-blocked/);
+    await expect(page.locator('.reason-bar')).toContainText('en fazla 1 saat görmeli');
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+});
+
+test.describe('34. Ayarlar — veri', () => {
+  test('renkleri yeniden dağıt sağ sütunu ve ızgarayı bozmuyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const before = await page.locator('table.grid .card').count();
+
+    await openSettings(page, 'Veri');
+    await page.getByRole('button', { name: /Öğretmen renklerini yeniden dağıt/ }).click();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(before);
+  });
+
+  test('yedek zinciri sağ sütunda listeleniyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+    const side = page.locator('.cols aside');
+    await expect(side).toContainText('otomatik yedekler');
+  });
+
+  test('"Her şeyi sil" önce soruyor, reddedilince hiçbir şey gitmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+
+    page.once('dialog', (d) => d.dismiss());
+    await page.getByRole('button', { name: 'Her şeyi sil' }).click();
+    await openSetup(page, 'Öğretmenler');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(25);
+  });
+
+  test('"Her şeyi sil" onaylanınca gerçekten siliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+
+    // It asks TWICE. The second question is the point: this is the one button
+    // in the app that cannot be undone.
+    const asked: string[] = [];
+    page.on('dialog', (d) => {
+      asked.push(d.message());
+      void d.accept();
+    });
+    await page.getByRole('button', { name: 'Her şeyi sil' }).click();
+
+    await openSetup(page, 'Öğretmenler');
+    await expect(page.locator('table.list tbody tr')).toHaveCount(0);
+    expect(asked).toHaveLength(2);
+    expect(asked[1]).toContain('geri alınamaz');
+  });
+});

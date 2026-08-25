@@ -334,8 +334,16 @@ export default function App() {
 
         {/* The scroll container lives HERE, not in the six tab components: they
             all used to render their own `.main` and one of them had to opt out
-            of scrolling (the grid scrolls inside itself). */}
-        <main className={tab === 'program' ? 'main no-overflow' : 'main'}>
+            of scrolling (the grid scrolls inside itself).
+
+            `lessons.length > 0` is not decoration: with no lessons the Program
+            tab shows a paragraph of instructions instead of a grid, and
+            `no-overflow` (overflow: hidden, padding: 0) would clip it. */}
+        <main
+          className={
+            tab === 'program' && state.lessons.length > 0 ? 'main no-overflow' : 'main'
+          }
+        >
           {tab === 'setup' && <Setup state={state} change={change} />}
           {tab === 'availability' && <Availability state={state} change={change} />}
           {tab === 'program' && <Program state={state} change={change} solver={solver} />}
