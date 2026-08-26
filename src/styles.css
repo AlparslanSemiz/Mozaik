@@ -182,6 +182,18 @@
   --print-line: #444;  --print-head-bg: #eee;
   --shadow: rgba(0,0,0,.35);
 
+  /* TWO shadow inks, because they land on two different kinds of surface and
+     only one of them belongs to the block above.
+       --shadow        the drag ghost — drawn ON a palette colour, which is the
+                       same in both themes because it is printed on paper, so
+                       its shadow must not turn either (pitfall 15/35).
+       --shadow-shell  the sticky heading and the sticky teacher column, which
+                       lie on --paper and --chrome. A 35% black on the dark
+                       plane is not a shadow, it is nothing: the lip that says
+                       "the week is scrolling under this" simply was not there.
+     One token used in both places is how that went unnoticed for a version. */
+  --shadow-shell: rgba(16,24,40,.35);
+
   /* ELEVATION — five steps. The old two ("the sheet on the desk" and "the
      three things that genuinely float") could not describe a shell that has a
      raised bar, a docked drawer, a dialog and a drag ghost all on screen at
@@ -252,19 +264,40 @@
 
   /* MOTION. The <=150ms cap and the closed list of what may move are gone
      (2026-08-26). What is left is one rule and it is not taste: everything
-     below dies under prefers-reduced-motion, from a single place.
+     below dies under prefers-reduced-motion, from a single place — and since
+     2026-08-27 the reader can ask for the same thing from inside the program
+     (Ayarlar > Gorunum > Hareket, see the [data-motion] blocks below).
        --dur-fast  a control answering the pointer
        --dur       a plane changing: drawer, dialog, panel
-       --dur-slow  something crossing the screen: slide-over, view transition
-     No library: `motion` was measured at 127 KB and the one thing it gave
-     that CSS cannot — a shared-element morph — the browser gives for free
-     through document.startViewTransition(). */
+       --dur-slow  something crossing the screen: slide-over
+     No library: `motion` was measured at 127 KB, and the one thing it gave
+     that CSS cannot is a shared-element morph — which this program does not
+     have. `document.startViewTransition` was tried for the tab change and
+     given BACK: it froze hit-testing for 553 ms and drag.ts drops went
+     nowhere (pitfall 55). The tab change is a plain cross-fade. */
   --dur-fast: 110ms;
   --dur: 180ms;
   --dur-slow: 280ms;
   --ease: cubic-bezier(.2, 0, 0, 1);
   --ease-out: cubic-bezier(.16, 1, .3, 1);
   --ease-spring: cubic-bezier(.34, 1.4, .64, 1);
+
+  /* HOW FAR things move, as four tokens rather than a number written out in
+     each rule. The durations were already switchable from one place; the
+     DISTANCES were not, and "Az" is exactly the setting that wants to keep the
+     colour transitions and drop the movement. A rule that hard-codes
+     `translateY(.5rem)` cannot be reduced without being found and edited.
+       --slide  a plane arriving: <main>, a panel, the palette, a toast
+       --sweep  a sheet crossing the screen from its own edge
+       --press  the 1px a button gives under the pointer
+       --pop    the scale a dialog grows from
+     rem and not px for --slide, so a reader at 150% gets a movement in
+     proportion to what moved (pitfall 36: a derived measure is computed from
+     what it derives from). */
+  --slide: .5rem;
+  --sweep: 100%;
+  --press: 1px;
+  --pop: .97;
 
   /* Focus. Two rings, so it survives on any plane: a --paper gap first, then
      the accent. Keyboard navigation has to be visible on the grid, on a
@@ -286,6 +319,12 @@
   --cell-w: 2.125rem;  --cell-h: 2.125rem;
   --rowhead-w: 8.25rem;
 
+  /* The height of a control in the tool strip, and therefore of the strip.
+     2rem = 32px at scale 1: well over the 24px WCAG 2.2 target size and what
+     every desktop toolbar uses. Three strips of 36px buttons is where the
+     vertical budget went last time. */
+  --ribbon-h: 2rem;
+
   /* The one raw px font-size in the file: the anchor the whole rem ladder
      hangs from. Default 1.10 since 2026-08-26 — the reader has trouble
      seeing, and 1.0 was never a measurement, it was the number CSS starts at.
@@ -298,19 +337,37 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* The same hue and the same derivation, lifted. The desk is genuinely dark
-     so the sheet can come forward without a shadow doing all the work:
-     dE(bg, chrome) 5.54, dE(chrome, paper) 5.44. */
-  --bg: #05080f;
-  --chrome: #15191f;
-  --chrome-2: #0f1319;
-  --chrome-lit: #1c2128;
-  --paper: #20242a;
-  --paper-sunk: #12161b;
-  --band: #292e34;
+  /* The same hue and the same derivation, lifted — and on 2026-08-27 lowered
+     again, a full step, because the reader asked for it: "koyu temayı daha da
+     koyulaştır siyahları". Every plane moved together, so what the theme SAYS
+     is unchanged; what changed is where it says it from.
 
-  --hairline: #2c3138;
-  --line: #404750;
+     Two of the numbers below are not a preference, they are repairs the
+     darkening made room for, and both were measured before a byte moved
+     (scratch/tokens.mjs, re-measured every run by renk.spec.ts):
+
+       --band  dE from --paper was 4.67 while the light theme's was 2.45. The
+               day band's job is to GROUP; at that strength it read as a state,
+               which is exactly what pitfall 40 is about. It is 2.45 now — the
+               same load as light, to two decimals.
+       --closed  contrast of --muted on it was 4.69, under the 5.0 its light
+               twin holds. 5.71 now.
+
+     Measured, before -> after: paper luminance .0174 -> .0096 · text/paper
+     13.26 -> 14.99 · muted/paper 7.28 -> 8.23 · muted/closed 4.69 -> 5.71 ·
+     section worst 4.89 -> 5.52 · dE(bg,chrome) 4.73 · dE(chrome,chrome-2) 2.34
+     · dE(chrome,paper) 4.16 · dE(closed,paper) 13.80 (light 14.04) ·
+     dE(hatch,closed) 6.46 (light 6.44). */
+  --bg: #010204;
+  --chrome: #0c1015;
+  --chrome-2: #070a0e;
+  --chrome-lit: #151a20;
+  --paper: #16191e;
+  --paper-sunk: #0b0e12;
+  --band: #1a1e23;
+
+  --hairline: #242930;
+  --line: #39404a;
   --line-dark: #78818f;
 
   --text: #e8edf5;
@@ -322,7 +379,9 @@
      on it, 7.39 against the dark paper. */
   --accent: #8eb2ff;
   --accent-hover: #b5d5ff;
-  --accent-bg: #223267;
+  /* One step down with the planes: on the new paper the old #223267 was a
+     brighter patch than the accent needed. 6.70 for the accent on it. */
+  --accent-bg: #1b2857;
   --on-accent: #070d25;
 
   --ok: #74e79f;
@@ -331,8 +390,8 @@
   --warn-bg: #3b2d07;
   --bad: #ff9089;
   --bad-bg: #401614;
-  --closed: #3b434c;
-  --hatch: #2e353d;
+  --closed: #2f363e;
+  --hatch: #222831;
 
   /* Measured against the dark --paper: dE 41.3/48.6/41.3, >=34 apart from
      each other, and the 3px outline drawn on them clears 5.0:1. */
@@ -349,9 +408,11 @@
      forgot: the grid line stayed #444 and the header fill #eee while the ink
      above inherited --text, i.e. white on near-white, about 1.1:1. It printed
      correctly the whole time, which is why it survived. `@media print` pins
-     the paper values so this override cannot reach the printer. */
-  --print-line: #4a545f;
-  --print-head-bg: #262c34;
+     the paper values so this override cannot reach the printer.
+     The line was raised with the darkening: a table rule is non-text, so 3:1
+     is its floor, and against the old paper it measured 2.02. It is 3.01. */
+  --print-line: #5a6673;
+  --print-head-bg: #20262d;
 
   /* NOT re-searched with the light six, and that is a measurement rather than
      an omission: the dark set's worst pair is already 20.7 (the light one's
@@ -366,20 +427,73 @@
   --sec-settings: #879eb5;
 
   /* Deeper and blacker: on a dark ground the light theme's values are simply
-     not there. */
+     not there. The same is true of the sticky lip, which is why it has its own
+     ink — see --shadow-shell above. */
+  --shadow-shell: rgba(0,0,0,.85);
+
   --elev-1: 0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
   --elev-2: 0 1px 3px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.35);
   --elev-3: 0 4px 12px rgba(0,0,0,.50), 0 12px 32px rgba(0,0,0,.45);
   --elev-4: 0 6px 16px rgba(0,0,0,.55), 0 24px 56px rgba(0,0,0,.60);
 }
 
-/* The one place motion is switched off, and it switches off ALL of it:
-   every transition in this file reads --dur. */
+/* THE SETTING — Ayarlar > Gorunum > Hareket, three steps.
+   'tam' is the block above and needs no rules of its own.
+
+   'az' halves the durations and zeroes every DISTANCE: a panel fades in where
+   it will sit instead of sliding there, a dialog grows from nothing, a button
+   stops dipping. What survives is colour — a control still answers the pointer,
+   which is feedback rather than decoration.
+
+   'kapali' is the same as what the machine preference below does.
+
+   THE MACHINE PREFERENCE IS A FLOOR, NOT A DEFAULT: the @media block below is
+   written AFTER these two and at equal specificity, so it wins. A reader whose
+   system asks for less motion gets none whatever this setting says; the setting
+   can only go further than the machine asked. See src/theme.ts. */
+:root[data-motion="az"] {
+  --dur-fast: 60ms;
+  --dur: 90ms;
+  --dur-slow: 90ms;
+  --slide: 0px;
+  --sweep: 0px;
+  --press: 0px;
+  --pop: 1;
+}
+
+:root[data-motion="kapali"] {
+  --dur-fast: 0ms;
+  --dur: 0ms;
+  --dur-slow: 0ms;
+  --slide: 0px;
+  --sweep: 0px;
+  --press: 0px;
+  --pop: 1;
+}
+
+/* The toast is the one thing that runs an @keyframes rather than a transition.
+   Its animation reads --dur directly, so a 0ms duration already stops it; this
+   line is here because a zero-length animation still fires start/end events and
+   `document.getAnimations()` still reports it, and "nothing is running" is what
+   the suite measures. */
+:root[data-motion="kapali"] .toast {
+  animation: none;
+}
+
+/* The one place motion is switched off by the MACHINE, and it switches off ALL
+   of it: every transition in this file reads --dur, every movement reads one of
+   the four distance tokens. Last on purpose (see above). */
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  :root[data-motion="tam"],
+  :root[data-motion="az"] {
     --dur: 0ms;
     --dur-fast: 0ms;
     --dur-slow: 0ms;
+    --slide: 0px;
+    --sweep: 0px;
+    --press: 0px;
+    --pop: 1;
   }
 
   /* Two things do not read a duration token and so have to be named: the
@@ -394,6 +508,10 @@
   .btn:active:not(:disabled),
   .pool-card:hover {
     transform: none;
+  }
+
+  .toast {
+    animation: none;
   }
 }
 
@@ -543,8 +661,16 @@ textarea {
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
    so the wash goes the other way: the section's hue mixed INTO the chrome
    rather than a lighter stop above it. */
+/* The same two-stop wash as the light theme, not a flat fill. It was flat
+   because a flat 20% was the quickest way to make the section readable on the
+   old --chrome; against the darkened one that fill was the brightest thing on
+   the screen, and the bar stopped reading as the plane that never scrolls away
+   and started reading as a coloured banner. 14% -> 5%, top-lit like light. */
 :root[data-theme="dark"] .topbar {
-  background: color-mix(in oklab, var(--sec, var(--accent)) 20%, var(--chrome));
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) 14%, var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 5%, var(--chrome)) 100%);
 }
 
 /* The section's wash moves with you. `background-color` and not `background`:
@@ -723,10 +849,15 @@ textarea {
 /* Row two: the tools of whichever section is open. A second, slightly darker
    plane so two strips do not read as one thick grey block: dE(chrome, chrome-2)
    is about 2.5 — a plane change, nowhere near a functional colour. */
-/* 32px controls, not 36: three strips of 36px buttons is where the vertical
-   budget went last time. 32 is still well over the 24px WCAG 2.2 target and is
-   what every desktop toolbar uses. */
+/* ONE HEIGHT for every control on the strip, and it is a rem so it grows with
+   the reader's scale. Written on the control and not on the strip: a `.ribbon`
+   with a fixed height would centre whatever it was given, and a button an
+   invisible 2px taller than its neighbour would still be 2px taller — the
+   strip would just hide it (the shape of pitfall 34). With this the six strips
+   come out the same height because their CONTENTS are the same height, which
+   is the thing `e2e/serit.spec.ts` measures. */
 .ribbon .btn {
+  min-height: var(--ribbon-h);
   padding: var(--space-2) var(--space-3);
   font-size: var(--fs-sm);
 }
@@ -787,6 +918,26 @@ textarea {
   font-weight: 600;
 }
 
+/* A group that STATES rather than asks: whose hours are open in Müsaitlik, how
+   many problems there are in Kontrol. It is not a `.ribbon-label` — that is the
+   caption ABOVE a group, uppercase and quiet, and reading a name or a count in
+   that voice made a value look like a heading. Same row, full ink, sentence
+   case, and never focusable. */
+.ribbon-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ribbon-value .badge {
+  /* The strip's plane is --chrome-2, not --paper, so a badge that borrowed the
+     page's ground would read as a chip lying on the bar. */
+  background: none;
+}
+
 .ribbon-sep {
   width: 1px;
   align-self: stretch;
@@ -840,7 +991,7 @@ textarea {
 /* Pressed means pressed: 1px is the whole gesture, and it is the difference
    between a control that responds and a picture of one. */
 .btn:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(var(--press));
 }
 
 .btn:disabled {
@@ -1009,7 +1160,7 @@ textarea {
 @starting-style {
   .main {
     opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(var(--slide));
   }
 }
 
@@ -1036,7 +1187,7 @@ table.list tbody tr {
   .ok-box,
   .error-box {
     opacity: 0;
-    transform: translateY(0.5rem);
+    transform: translateY(var(--slide));
   }
 
   table.list tbody tr {
@@ -1616,12 +1767,12 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   /* --elev-2 is "raised chrome", and a heading with the week scrolling under
      it is exactly that. Clipped to one side so it reads as a lip, not a
      floating slab. */
-  box-shadow: 0 6px 12px -8px var(--shadow), 0 1px 0 var(--line);
+  box-shadow: 0 6px 12px -8px var(--shadow-shell), 0 1px 0 var(--line);
 }
 
 .grid-wrap.scrolled-x .row-head,
 .grid-wrap.scrolled-x .corner {
-  box-shadow: 4px 0 8px -6px var(--shadow);
+  box-shadow: 4px 0 8px -6px var(--shadow-shell);
 }
 
 /* ------------------------------------------------------------- lesson pool */
@@ -1822,9 +1973,11 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   outline-offset: 1px;
   box-shadow: var(--elev-2);
   /* A card in the tray is a thing you are about to pick up, so it comes to
-     meet the pointer. 2px, one frame — enough to feel, too small to shift the
-     row it sits in. */
-  transform: translateY(-2px);
+     meet the pointer. One frame — enough to feel, too small to shift the row it
+     sits in. Derived from --slide rather than written as 2px: it is a quarter
+     of the distance a plane travels, it grows with the scale, and it stops when
+     the reader asks for less motion. */
+  transform: translateY(calc(var(--slide) / -4));
 }
 
 .pool-card:active {
@@ -2270,13 +2423,13 @@ table.list td > .color-pick:hover {
 
 .color-dialog:not([open]) {
   opacity: 0;
-  transform: scale(.96);
+  transform: scale(var(--pop));
 }
 
 @starting-style {
   .color-dialog[open] {
     opacity: 0;
-    transform: scale(.96);
+    transform: scale(var(--pop));
   }
 }
 
@@ -2697,12 +2850,44 @@ table.availability td.closed {
 
 /* ----------------------------------------------------------------- printing */
 
+/* THE PREVIEW IS A STACK OF SHEETS, not a long table on a panel (2026-08-27,
+   asked for: "önizlemedeki tablo biraz daha büyük ve görünür olabilir. Satırlar
+   biraz daha uzun olabilir").
+
+   It used to be `.print-area { background: var(--paper) }` with the pages run
+   together on it, so what you were choosing to print looked like a list and not
+   like paper — and Ayarlar > Görünüm already CLAIMED the opposite ("önizleme
+   kâğıda benzemezse hangi sayfanın basılacağını seçmek tahmine döner"). The
+   tray is the desk now and each page is a sheet lying on it.
+
+   NOTHING HERE REACHES THE PRINTER. Every declaration below is undone in
+   `@media print` — that block owns the real page box (205 mm, 8/10 mm padding,
+   pitfall 31), and a screen ornament that followed the sheet into the tray
+   would be pitfall 32 in CSS. */
 .print-area {
-  background: var(--paper);
+  background: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding-bottom: var(--space-6);
 }
 
 .print-page {
-  padding: 10px 0 24px;
+  /* The same box @media print draws, in the units a screen has. `min-height`
+     and not `aspect-ratio`: a seven-day week has to be able to grow past the
+     sheet rather than be squeezed into it, and the A4 ratio is the FLOOR of
+     what a page looks like, not a cage. */
+  width: 100%;
+  max-width: 62rem;
+  min-height: calc(62rem * 210 / 297);
+  padding: 8mm 10mm;
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  box-shadow: var(--elev-2);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
 }
 
 /* Two lines, both centred: the big one says what the sheet IS, the small one
@@ -2817,7 +3002,13 @@ table.print td {
   padding: 3px 4px;
   text-align: center;
   font-size: var(--fs-p-base);
-  height: 30px;
+  /* On PAPER a row is 23 mm (see @media print); 30px was about half of that on
+     screen, so the preview's rows were squat next to the sheet they stand for.
+     3.25rem is 52px at the default scale and 78px at 150% — rem and not px
+     because a fixed pixel row inside a sheet whose type is in pt gets
+     relatively shorter every step up the scale (the shape of pitfall 36).
+     The paper is untouched: this is the preview only. */
+  height: 3.25rem;
 }
 
 table.print th {
@@ -2974,6 +3165,13 @@ table.bell-preview td {
      `safe center` and not plain `center`: if the content ever outgrows the box
      (a seven-day week is the worst case), plain centring overflows at BOTH
      ends and the top of the table is cut off. */
+  /* The tray is a screen thing: on paper the pages ARE the flow. */
+  .print-area {
+    display: block;
+    gap: 0;
+    padding-bottom: 0;
+  }
+
   .print-page {
     break-after: page;
     page-break-after: always;
@@ -2984,6 +3182,19 @@ table.bell-preview td {
     display: flex;
     flex-direction: column;
     justify-content: safe center;
+
+    /* ...and the sheet's screen ornaments are undone here, all of them. The
+       shadow, the rounded corner and the 62rem cap exist so the preview looks
+       like paper; printing them would put a grey halo and a narrow column on
+       the actual paper. `min-height` back to 0 so the 205 mm above is the one
+       number that decides the page (pitfall 31: a fractional pixel of overflow
+       plus break-after puts a BLANK sheet behind every timetable). */
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .print-page h3 {
@@ -3180,11 +3391,17 @@ table.availability.heat td.closed {
 
 @starting-style {
   .dlg-overlay { opacity: 0; }
-  .dlg { opacity: 0; transform: translate(-50%, -46%) scale(.97); }
+  .dlg {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
+  }
 }
 
 .dlg-overlay[data-state='closed'] { opacity: 0; }
-.dlg[data-state='closed'] { opacity: 0; transform: translate(-50%, -46%) scale(.97); }
+.dlg[data-state='closed'] {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% + var(--slide))) scale(var(--pop));
+}
 
 /* ------------------------------------------------------------------ toasts
    Bottom right, above everything, and never in the way of the grid: the pool
@@ -3259,12 +3476,8 @@ table.availability.heat td.closed {
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(.5rem); }
+  from { opacity: 0; transform: translateY(var(--slide)); }
   to   { opacity: 1; transform: none; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .toast { animation: none; }
 }
 
 /* A list of choices inside explanatory text — three densities, three file
@@ -3471,10 +3684,10 @@ table.availability.heat td.closed {
 }
 
 @starting-style {
-  .sheet { transform: translateX(100%); }
+  .sheet { transform: translateX(var(--sweep)); }
 }
 
-.sheet[data-state='closed'] { transform: translateX(100%); }
+.sheet[data-state='closed'] { transform: translateX(var(--sweep)); }
 
 /* A name in a list that opens the sheet. It reads as a link, not as a button:
    there are twenty-five of them down a column and twenty-five frames would be
@@ -3853,10 +4066,13 @@ kbd {
 }
 
 @starting-style {
-  .palette { opacity: 0; transform: translateX(-50%) translateY(-.75rem); }
+  .palette {
+    opacity: 0;
+    transform: translateX(-50%) translateY(calc(var(--slide) * -1.5));
+  }
 }
 
 .palette[data-state='closed'] {
   opacity: 0;
-  transform: translateX(-50%) translateY(-.75rem);
+  transform: translateX(-50%) translateY(calc(var(--slide) * -1.5));
 }

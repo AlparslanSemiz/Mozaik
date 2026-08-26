@@ -4,11 +4,13 @@ import Root from './Root';
 import {
   applyAvailClock,
   applyDensity,
+  applyMotion,
   applyRibbon,
   applyScale,
   applyTheme,
   readAvailClock,
   readDensity,
+  readMotion,
   readRibbon,
   readScale,
   readTheme,
@@ -28,6 +30,9 @@ applyRibbon(readRibbon());
 // ...and the availability heading, for the same reason: a clock that appears
 // after the first paint widens every column in the table under it.
 applyAvailClock(readAvailClock());
+// Motion LAST and before the first paint both: a reader who has asked for no
+// animation must not watch the shell fade in once before the setting lands.
+applyMotion(readMotion());
 
 const root = document.getElementById('root');
 if (root === null) throw new Error('#root bulunamadı');

@@ -132,10 +132,10 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 450 birim testi
+npm test           # Vitest — 453 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 277 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 318 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -170,9 +170,9 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 19 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**. **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
 | **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
-| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
+| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59) |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
 > + `npm run gorsel`) ve düzen testleri (`sutun.spec.ts`, `duzen.spec.ts`'in
@@ -251,10 +251,12 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
                                 Playwright ikisi de buradan beslenir.
   |
 store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
-theme.ts                        makine tercihleri (tema, ölçek, yoğunluk, havuz
-                                açık mı + BOYU, araç şeridi) — State'e girmez
+theme.ts                        makine tercihleri (tema, kenar, havuz açık mı +
+                                BOYU, araç şeridi, ölçek, yoğunluk, müsaitlik
+                                saati, HAREKET) — dokuz bağımsız skaler, dokuz
+                                anahtar, hiçbiri State'e girmez
 toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
-                                kapsam durumu. App'te yaşar, çünkü sekme
+                                kapsam/Kontrol süzgeci. App'te yaşar, çünkü sekme
                                 değişimi bileşeni söküyor (tuzak 18) ve çünkü
                                 onu gösteren şerit <main>'in ÜSTÜNDE
 gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
@@ -283,10 +285,13 @@ components/ListTools.tsx        dört listenin de üstündeki aynı şerit
 Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
                                 ağacı çizsin diye tek yerde
   |
-components/Ribbon.tsx           araç şeridi: sekmeye göre switch. Kontrol'de
-                                null döner (şerit hiç çizilmez). İş mantığı
+components/Ribbon.tsx           araç şeridi: sekmeye göre switch, ALTI sekmede
+                                de çizilir (2026-08-27; Kontrol'ünki raporu
+                                süzer). Tek iskelet: Group(başlık) + Sep +
+                                Spacer, her düğmede simge ve kelime. İş mantığı
                                 YOK — "Otomatik diz (N)"in N'i entities.ts'teki
-                                saf pendingLessons()'tan gelir, buildPool
+                                saf pendingLessons()'tan, Kontrol'ün sayıları
+                                feasibility.ts'teki health()'ten gelir; buildPool
                                 App'e çıkarılmaz (Grid'in memo sözleşmesi)
 components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
 components/Field.tsx            iki klasörün de kullandığı küçük parçalar
@@ -380,19 +385,31 @@ ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
 ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana ait
 ders-programi-tema       -> tema tercihi
 ders-programi-kenar      -> kenar çubuğu tercihi
-ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.25)
-ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (rahat / sigdir)
+ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.50)
+ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (ferah / rahat / sigdir)
 ders-programi-havuz      -> havuz çekmecesi açık mı (acik / kapali)
 ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
 ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
+ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
 ```
 
 Havuz boyu **rem**, px değil: `--ui-scale` %150'ye çıkınca sabit px'lik bir
 çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı bir anahtar,
 `ders-programi-havuz`'un genişletilmiş hâli değil — o anahtarın sözleşmesi
 "`kapali` değilse açık" ve içine bir sayı katlamak tek ayrıştırıcıya ikinci bir
-normalize dalı sokardı. `theme.ts` zaten ayrı anahtarlarda ayrı skalerler
-tutuyor; bunlar altıncı ve yedincisi.
+normalize dalı sokardı. `theme.ts` bağımsız skalerleri bağımsız anahtarlarda
+tutuyor — dokuz tane — ve bu onlardan biri.
+
+**Hareket tercihi bir MAKİNE tercihidir ve makinenin kendi tercihini EZEMEZ.**
+`ders-programi-hareket` üç değer alır (`tam` · `az` · `kapali`) ve `data-motion`
+olarak `<html>`'e yazılır. `@media (prefers-reduced-motion: reduce)` bloğu
+`styles.css`'te `[data-motion]` kurallarından **sonra** ve eşit özgüllükte
+durur, yani sıra kazanır: işletim sistemi "azalt" diyorsa seçim ne olursa olsun
+hareket kapalıdır. Ayar makinenin isteğinin **ötesine** geçebilir, gerisine
+değil — CLAUDE.md'nin tek hareket sözleşmesi (`prefers-reduced-motion: reduce`
+→ hepsi kapalı) böylece bozulmadan durur. İlk okumada kayıt yoksa tercih
+**sistemden** türetilir (`normalizeMotion(raw, prefersReduced)`), çünkü hiçbir
+şeyin kıpırdamadığı bir makinede düğmede "Tam" yazması yalandır.
 
 ### Dosya biçimleri — iki tane, karıştırılamaz
 
@@ -596,7 +613,7 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 25. **`--update-snapshots` tek başına yalnız KIRMIZI referansları yeniler.** Eşiğin
     (`maxDiffPixelRatio`) yuttuğu gerçek bir düzen değişikliği referansı sessizce
     eski bırakır. Hepsini yazdırmak için `--update-snapshots=all`. Müsaitlik satırı
-    34 → 48 px olduğunda tam bunun oldu: tablo 84 px büyüdü, `npm run gorsel` yeşil
+    34 → 48 px olduğunda tam bunun oldu: tablo 84 px büyüdü, o günkü `npm run gorsel` yeşil
     geçti, referanslar yalan söylemeye başladı.
 
 26. **MRV en küçük domaini seçer — tamamlanamayan ders domaini en küçük olandır.**
@@ -892,6 +909,34 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     "Sınıf"ı görüyordu. Bir kontrolün **adı** hakkında iki katmanın
     anlaşamaması, ikisinden birinin yanılmasından beterdir.
 
+57. **Sıfır SÜRE, sıfır MESAFE demek değildir.** "Bütün hareket tek yerden
+    kapanıyor" iki yıl boyunca doğru sanıldı ve yarısı doğruydu: her `transition`
+    `--dur`'ü okuyordu, ama her **mesafe** kendi kuralında elle yazılıydı
+    (`translateY(.5rem)`, `translateX(100%)`, `scale(.96)`, `translateY(1px)`).
+    0 ms'lik bir geçiş bir hareketi durdurmaz — öğeyi **ışınlar**. Kapatılmak
+    istenen şey tam olarak buydu. Çare mesafeleri de tokenlemek: `--slide` ·
+    `--sweep` · `--press` · `--pop`. Kural: bir kuralda hareket eden bir sayı
+    elle yazılıysa o hareketin kapatma düğmesi yoktur.
+
+58. **Bir tercihi hem makine hem kullanıcı veriyorsa hangisinin KAZANDIĞI
+    yazılır.** Hareket ayarı `prefers-reduced-motion`'ı ezseydi, işletim
+    sisteminde "azalt" demiş biri bu programda hareketi geri almış olurdu — ve
+    o kişi bunu bir daha hiç aramazdı. Karar: **makine bir TABAN.** Ayar
+    tabanın ötesine geçebilir, gerisine değil, ve bu CSS'te bir sıra meselesi:
+    `@media (prefers-reduced-motion: reduce)` bloğu `[data-motion]`
+    kurallarından **sonra** ve eşit özgüllükte durur. Öbür yarısı ilk okuma:
+    kayıt yoksa tercih **sistemden** türetilir, yoksa hiçbir şeyin kıpırdamadığı
+    bir makinede düğmede "Tam" yazar ve arayüz yalan söyler.
+
+59. **Bir görüntü ALIRKEN sayfanın hareketi bitmiş olmalı.** `npm run ekran`
+    hiçbir şey iddia etmediği için hiçbir şey de koruyamaz — tek işi bakılacak
+    bir kanıt üretmek. Her sekme ve her bölüm `@starting-style`'dan soluyor,
+    yani bir hedefe *varılır varılmaz* alınan görüntü solmanın ortasını
+    yakalıyor: `dark-12-ayarlar-gorunum.png` **bomboş** çıktı, açık ikizi yarı
+    saydam. Hiçbir test bunu söyleyemezdi. Çare `document.getAnimations()`
+    bitene kadar beklemek — sabit bir `waitForTimeout` değil, çünkü süre artık
+    bir **ayar**. Ve gerçek ders: kanıt üreten bir katmana da bakılır.
+
 ---
 
 ## Tasarım — serbest
@@ -914,10 +959,17 @@ bu belgeden izin almaz. Ne yapıldığı [docs/DESIGN.md](docs/DESIGN.md)'de
    paletinin 36 rengi bu üçüne yaklaşamaz. `palette.test.ts` ve
    `e2e/renk.spec.ts` her koşuda yeniden ölçer.
 2. **Erişilebilirlik.** Kontrast AA. Çözücü ilerlemesi, sonuç satırı ve hata
-   mesajları `aria-live="polite"`; geri alınamaz uyarılar `role="alertdialog"`.
-   Renk tek başına durum taşımaz. Klavyeyle gidilen her yerde odak görünür.
-   **Hedef kullanıcı zor görüyor** — bu, süsün değil *boyutun* tarafındaki bir
-   kısıt: 12 px ekranda mutlak alt sınır olarak kalır.
+   mesajları `aria-live="polite"` (`.reason-bar`, `role="status"` — sözleşme
+   burada yazılıydı ama satırın kendisinde **2026-08-27'ye kadar yoktu**); geri
+   alınamaz uyarılar `role="alertdialog"`. Renk tek başına durum taşımaz.
+   Klavyeyle gidilen her yerde odak görünür. **Hedef kullanıcı zor görüyor** —
+   bu, süsün değil *boyutun* tarafındaki bir kısıt: 12 px ekranda mutlak alt
+   sınır olarak kalır.
+   **Hareket bir tercihtir, ve makinenin tercihi tabandır:** `--dur-*` süreleri
+   ile `--slide` · `--sweep` · `--press` · `--pop` mesafeleri tek yerden
+   kısılır. Kural şudur: bir kuralda `translateY(.5rem)` gibi elle yazılmış bir
+   mesafe varsa o hareket kapatılamaz — **her mesafe bir tokenden okunur.**
+   0 ms'lik bir geçişin sonunda öteye taşınmış bir öğe hâlâ **ışınlanır**.
 3. **Kâğıt fiziksel.** A4 yatay, `table-layout: fixed`, `@page { margin: 0 }`,
    sayfa 205 mm sabit (tuzak 31). Ekran ne olursa olsun yazıcı aynı yazıcı, ve
    `--ui-scale` kâğıda geçmez.
@@ -993,14 +1045,43 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
     genişliği yok — her ekranın sağının boş kalmasının sebebi buydu.
   - Bant ancak **kendi satırı** olursa bir satıra mal olur. Ölçülen baş toplamı:
     rail'li düzende 59+50+30 = **139px**, çift barda 51+39+26 = **116px**.
-  - **Kontrol'de şerit hiç çizilmez** — okunan bir rapor, ona yapılacak bir şey
-    yok, ve boş çizilen bir şerit bunu söylemek için 39px harcar.
-  - Şerit katlanır (`ders-programi-serit`); katlanınca **tamamen** gider, 39px'i
+  - ~~**Kontrol'de şerit hiç çizilmez**~~ — **karar 2026-08-27'de değişti.**
+    Gerekçe "okunan bir rapor, ona yapılacak bir şey yok"tu ve içerik açısından
+    doğruydu; ekran açısından değildi. Şeridin yüksekliği sekmeyle birlikte
+    gelip gidiyordu, yani Kontrol'e her girişte altındaki her şey **45px
+    zıplıyordu** ve her çıkışta geri. Üstelik rapora sorulacak bir soru da
+    varmış: tam hâli yedi panel, üçü ancak bir şey yanlışsa var oluyor.
+    Kontrol'ün şeridi artık raporu **süzüyor** (`Hepsi · Sorunlar · Kapasite`)
+    ve sağ ucunda sayıları söylüyor. Süzgeç `toolState`'te, çünkü sekme değişimi
+    bileşeni söküyor (tuzak 18).
+  - Şerit katlanır (`ders-programi-serit`); katlanınca **tamamen** gider, 45px'i
     ızgaraya bırakır. %100'de Program'da bir şey kazandırmaz ve bu doğru:
     müşterisi %125/%150 kullanan baba, orada 39px bir tam satırdır. Katlama
     düğmesi üst barda, çünkü katlanmış bir şeridin kendi düğmesine verecek
     satırı yoktur.
   - 1280px altında sekme etiketleri gizlenir, `aria-label` kalır.
+  - **ŞERİT STANDARDI (2026-08-27) — beş madde, beşi de ölçülüyor**
+    (`e2e/serit.spec.ts`). Öncesinde beş şerit beş ayrı nesneydi: Kurulum
+    simgeliydi ama başlıksız, Yazdır ve Ayarlar salt yazıydı, Kontrol'de şerit
+    yoktu. Yanlış bir şey yoktu; **bir şekil** yoktu, ve şekli olmayan bir şeyi
+    hiçbir test koruyamaz.
+    1. Altı sekmenin altısı da `.ribbon` çizer ve **aynı yükseklikte** (±1px,
+       %100'de de %150'de de).
+    2. Her şerit bir `.ribbon-label` **başlığıyla** açılır — düğmelerin hangi
+       soruyu cevapladığı.
+    3. Gruplar `<Sep/>` ile, sağa yaslanan grup `<Spacer/>` ile ayrılır.
+    4. **Her düğmede bir simge VE bir kelime** olur, ikisinden biri değil.
+       Simge tek başına ilk seferde okunmaz ve iki test katmanında da ada
+       dönüşmez (tuzak 56); kelime tek başına %150'de göze tutunacak bir şey
+       vermez.
+    5. Şeritteki her kontrol aynı yükseklikte: `--ribbon-h` (2rem). Yükseklik
+       **şeride değil kontrole** verilir — sabit yükseklikli bir şerit kendine
+       verileni ortalar ve 2px uzun bir düğmeyi gizler (tuzak 34'ün şekli).
+    Üç varlık türünün simgesi **istisnasız** `KIND_ICON`'dan gelir (Yazdır'ın
+    "Sınıflar"/"Öğretmenler"i dahil); gerisi `lucide-react`.
+    Bir **değer** taşıyan grup `.ribbon-value` kullanır, `.ribbon-label`
+    değil: başlık büyük harfli ve soluktur, bir adı ya da sayıyı o sesle
+    okumak onu başlık gibi gösteriyordu.
 - **İçerik ekranın tamamını kullanır.** Tek düzen kuralı `.cols` (+ `wide-left`,
   `narrow-right`): solda asıl iş, sağda o ekranın **anlamı** — Kurulum'da kapasite
   özeti, Ayarlar → Okul'da zil önizlemesi, Ayarlar → Kurallar'da canlı ihlal listesi,

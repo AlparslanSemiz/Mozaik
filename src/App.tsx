@@ -10,14 +10,17 @@ import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
 import {
+  applyMotion,
   applyRibbon,
   applyTheme,
   readDensity,
+  readMotion,
   readRibbon,
   readAvailClock,
   readScale,
   readTheme,
   type Density,
+  type Motion,
   type Theme,
 } from './theme';
 import { attachScrollFade } from './scrollFade';
@@ -331,6 +334,8 @@ export default function App() {
   // Applied to the document by main.tsx before the first paint; this copy
   // exists only so Ayarlar → Görünüm can show which way the switch is.
   const [availClock, setAvailClock] = useState<boolean>(readAvailClock);
+  // Same again for how much the interface is allowed to move.
+  const [motion, setMotion] = useState<Motion>(readMotion);
   // Whether the tool strip is drawn. It lives here and not in Ribbon because
   // the button that folds it is in the top bar — a folded strip has no row to
   // put its own chevron on, which is the whole point of folding it.
@@ -405,14 +410,31 @@ export default function App() {
         label: ribbon ? 'Araç şeridini gizle' : 'Araç şeridini göster',
         run: toggleRibbon,
       },
+      {
+        id: 'motion',
+        label: motion === 'kapali' ? 'Animasyonları aç' : 'Animasyonları kapat',
+        hint: 'Ayarlar → Görünüm',
+        run: toggleMotion,
+      },
     ],
-    [state, theme, ribbon, solver, goTab, notify],
+    [state, theme, ribbon, motion, solver, goTab, notify],
   );
 
   function toggleRibbon() {
     const next = !ribbon;
     applyRibbon(next);
     setRibbon(next);
+  }
+
+  /**
+   * Two positions from the palette, three in Ayarlar. The middle step ('az') is
+   * a considered choice and the palette is a place you pass through, so what
+   * this offers is the switch: off, or back to whatever full means.
+   */
+  function toggleMotion() {
+    const next: Motion = motion === 'kapali' ? 'tam' : 'kapali';
+    applyMotion(next);
+    setMotion(next);
   }
 
   function toggleTheme() {
@@ -634,7 +656,6 @@ export default function App() {
           aria-label="Araç şeridi"
           title={ribbon ? 'Araç şeridini gizle — ızgaraya bir satır daha' : 'Araç şeridini göster'}
           onClick={toggleRibbon}
-          disabled={tab === 'check'}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
             <path
@@ -735,7 +756,7 @@ export default function App() {
               view={ui.view}
             />
           )}
-          {tab === 'check' && <Check state={state} />}
+          {tab === 'check' && <Check state={state} view={ui.checkView} />}
           {tab === 'print' && (
             <Print
               state={state}
@@ -757,6 +778,8 @@ export default function App() {
               setDensity={setDensity}
               availClock={availClock}
               setAvailClock={setAvailClock}
+              motion={motion}
+              setMotion={setMotion}
               section={ui.section}
             />
           )}

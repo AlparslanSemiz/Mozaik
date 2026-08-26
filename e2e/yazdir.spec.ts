@@ -270,3 +270,132 @@ test.describe('21. Yazdırmada seçim', () => {
     expect(pageCount).toBe(1);
   });
 });
+
+test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
+  // "Yazdır kısmında önizlemedeki tablo biraz daha büyük ve görünür olabilir.
+  // Satırlar biraz daha uzun olabilir." — and the answer had to be SCREEN ONLY:
+  // the paper is a fixed physical size and the 205 mm page of pitfall 31 is
+  // what keeps a blank sheet from landing behind every timetable.
+  //
+  // So this file gains two assertions that pull against each other, and both
+  // have to hold: the preview got bigger, AND nothing reached the printer.
+
+  /** Everything about the sheet, on whichever medium is being emulated. */
+  async function sheet(page: Page) {
+    return page.evaluate(() => {
+      const box = document.querySelector('.print-page')!;
+      const cell = document.querySelector('table.print tbody td')!;
+      const cs = getComputedStyle(box);
+      const r = box.getBoundingClientRect();
+      return {
+        width: r.width,
+        height: r.height,
+        row: cell.getBoundingClientRect().height,
+        shadow: cs.boxShadow,
+        radius: cs.borderTopLeftRadius,
+        maxWidth: cs.maxWidth,
+        overflow: box.scrollHeight - box.clientHeight,
+      };
+    });
+  }
+
+  test('ekranda bir SAYFA gibi duruyor ve satırları uzadı', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-page').first()).toBeVisible();
+
+    const screen = await sheet(page);
+
+    // The row was 30px — about half of what 23 mm is on this screen, so the
+    // preview's rows were squat next to the sheet they stand for.
+    expect(screen.row, `önizleme satırı ${screen.row}px`).toBeGreaterThan(45);
+
+    // A4 landscape is 297 x 210. The sheet is allowed to be TALLER than that
+    // (a seven-day week has to be able to grow rather than be squeezed), never
+    // narrower or shorter.
+    const ratio = screen.width / screen.height;
+    expect(ratio, `en/boy ${ratio.toFixed(3)} — A4 yatay 1.414`).toBeLessThanOrEqual(1.415);
+    expect(ratio).toBeGreaterThan(1.0);
+
+    // ...and it reads as a sheet lying on a desk, not as a table on a panel.
+    expect(screen.shadow).not.toBe('none');
+    expect(Number.parseFloat(screen.radius)).toBeGreaterThan(0);
+  });
+
+  test('EKRAN süsünün hiçbiri kâğıda geçmiyor', async ({ page }) => {
+    // Pitfall 32 in CSS: two targets means one leaks into the other. The shadow,
+    // the rounded corner and the 62rem cap exist so the preview looks like
+    // paper; printing them would put a grey halo and a narrow column on the
+    // actual paper, and nobody would find out until after printing.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-page').first()).toBeVisible();
+    const screen = await sheet(page);
+
+    await page.emulateMedia({ media: 'print' });
+    const paper = await sheet(page);
+
+    expect(paper.shadow).toBe('none');
+    expect(Number.parseFloat(paper.radius)).toBe(0);
+    expect(paper.maxWidth).toBe('none');
+    expect(screen.maxWidth).not.toBe('none');
+
+    // 23 mm at 96 dpi is 86.93 px, and that number must not have moved.
+    expect(paper.row, `kâğıt satırı ${paper.row}px, 23mm = 86.9px`).toBeCloseTo(86.93, 0);
+    expect(paper.row).toBeGreaterThan(screen.row);
+    // The page box is still the 205 mm one, and still fits what is in it.
+    expect(paper.overflow).toBeLessThanOrEqual(1);
+
+    await page.emulateMedia({ media: 'screen' });
+  });
+
+  test('büyüyen önizleme sayfa SAYISINI değiştirmedi', async ({ page }) => {
+    // The guard, and the reason the two assertions above are safe to make: a
+    // taller preview row that had leaked into the page box would push every
+    // timetable onto a second sheet, and "3 classes = 3 pages" is the cheapest
+    // way to see it.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+
+    const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    for (const n of [0, 1, 2]) await list.locator('.pick-item').nth(n).locator('input').check();
+    await expect(page.locator('.print-page')).toHaveCount(3);
+
+    const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
+    const pages = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+    expect(pages, 'üç sınıf üç sayfa olmalı — arkalarında boş sayfa var').toBe(3);
+  });
+
+  test('önizleme koyu temada da OKUNUYOR', async ({ page }) => {
+    // The sheet takes --paper, so on a dark screen it is a dark sheet — that is
+    // deliberate (the --print-line/--print-head-bg dark overrides exist for it)
+    // and `@media print` pins the paper values back so it cannot reach the
+    // printer. What must hold is that the grid line is still VISIBLE on it:
+    // a table rule is non-text, so 3:1 is its floor. Measured 2.02 before the
+    // theme was darkened, 3.01 after.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
+    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await expect(page.locator('.print-page').first()).toBeVisible();
+
+    const ratio = await page.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      const rgb = (v: string) =>
+        (v.trim().startsWith('#')
+          ? [1, 3, 5].map((i) => parseInt(v.trim().slice(i, i + 2), 16))
+          : v.match(/\d+/g)!.slice(0, 3).map(Number)) as number[];
+      const lin = (c: number) => {
+        const s = c / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      };
+      const lum = (c: number[]) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+      const [a, b] = [
+        lum(rgb(cs.getPropertyValue('--print-line'))),
+        lum(rgb(cs.getPropertyValue('--paper'))),
+      ].sort((x, y) => y - x);
+      return (a + 0.05) / (b + 0.05);
+    });
+    expect(ratio, `çizgi/kâğıt kontrastı ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+  });
+});

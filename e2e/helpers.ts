@@ -560,6 +560,25 @@ export const SCENES: Scene[] = [
     },
   },
   {
+    // The preview as the READER sees it, which is a different picture from the
+    // one above: 8-yazdir emulates print media, so it shows the paper. This is
+    // the sheet lying on the desk with the tick lists beside it — what somebody
+    // actually looks at while deciding what to print.
+    name: '8b-yazdir-onizleme',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+      await page.locator('.print-page').first().waitFor();
+    },
+  },
+  {
+    // Kontrol, which had no tool strip at all until 2026-08-27.
+    name: '8c-kontrol',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+      await page.locator('.ribbon').waitFor();
+    },
+  },
+  {
     name: '9-ayarlar-okul',
     go: async (page) => {
       await openSettings(page, 'Okul');
@@ -609,6 +628,21 @@ export async function chooseScale(page: Page, percent: number) {
   await openSettings(page, 'Görünüm');
   await page.getByRole('button', { name: `%${percent}`, exact: true }).click();
   await expect(page.getByRole('button', { name: `%${percent}`, exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+}
+
+/**
+ * Ayarlar → Görünüm'den hareket basamağını seçer.
+ *
+ * The three names are short and generic, so `exact: true` — "Az" is inside
+ * "Azalt" and every other word in the section (pitfall 49).
+ */
+export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
+  await openSettings(page, 'Görünüm');
+  await page.getByRole('button', { name, exact: true }).click();
+  await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
   );

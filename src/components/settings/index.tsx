@@ -17,7 +17,7 @@ import Subjects from './Subjects';
 import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
-import type { Density } from '../../theme';
+import type { Density, Motion } from '../../theme';
 import type { SectionId } from '../../toolState';
 
 interface Props extends PanelProps {
@@ -30,6 +30,8 @@ interface Props extends PanelProps {
   setDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
+  motion: Motion;
+  setMotion: (next: Motion) => void;
   /** Which section. Owned by App: the tool strip above shows it. */
   section: SectionId;
 }
@@ -45,6 +47,8 @@ export default function Settings({
   setDensity,
   availClock,
   setAvailClock,
+  motion,
+  setMotion,
   section,
 }: Props) {
 
@@ -62,6 +66,8 @@ export default function Settings({
           setDensity={setDensity}
           availClock={availClock}
           setAvailClock={setAvailClock}
+          motion={motion}
+          setMotion={setMotion}
         />
       )}
       {section === 'data' && (

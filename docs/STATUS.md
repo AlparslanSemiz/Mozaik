@@ -1,7 +1,109 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-26 (on sekizinci oturum: **D turu — tasarım kısıtları
-kaldırıldı, arayüz baştan kuruldu**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-27 (on dokuzuncu oturum: **hareket ayarı · şerit
+standardı · koyu tema · baskı önizlemesi**, `v1.0-teslim` dalında)
+
+---
+
+## On dokuzuncu oturum — E turu (2026-08-27)
+
+Kullanıcının listesi yedi maddeydi; dördü karar sorusu olarak soruldu ve
+cevaplandı (üç basamaklı hareket ayarı · **belirgin** koyulaştırma · Kontrol'e
+de şerit · baskı önizlemesinde **yalnız ekran** değişsin).
+
+### 1. Hareket ayarı — `tam · az · kapalı`
+
+Ayarlar → Görünüm'de dördüncü panel. Dokuzuncu makine tercihi
+(`ders-programi-hareket`, `data-motion`), `State`'e girmez.
+
+Asıl iş CSS'teydi ve **var sanılan bir şeyin yarısının olmadığı** ortaya çıktı:
+süreler tek yerden kısılabiliyordu (`--dur*`), ama **mesafeler** her kuralda
+elle yazılıydı (`translateY(.5rem)`, `translateX(100%)`, `scale(.96)`,
+`translateY(1px)`). 0 ms'lik bir geçiş hareketi durdurmaz — öğeyi **ışınlar**.
+Dört yeni token: `--slide` · `--sweep` · `--press` · `--pop`. Tuzak 57.
+
+**Makine tercihi bir TABAN, ayar onu ezemez.**
+`@media (prefers-reduced-motion: reduce)` bloğu `[data-motion]` kurallarından
+**sonra** durur. Kayıt yoksa tercih sistemden türetilir — yoksa hiçbir şeyin
+kıpırdamadığı bir makinede düğmede "Tam" yazardı. Tuzak 58.
+
+### 2. Şerit standardı — beş kural, altı sekme
+
+Beş şerit beş ayrı nesneydi; Kontrol'de şerit **yoktu**, o yüzden o sekmeye her
+girişte altındaki her şey **45px zıplıyordu**. Şimdi altısı da aynı iskelette:
+başlıkla açılır · `Sep`/`Spacer` ile bölünür · her düğmede simge VE kelime ·
+hepsi `--ribbon-h` (2rem) yüksekliğinde. `e2e/serit.spec.ts` beşini de ölçer.
+
+**Yazdır ve Ayarlar** ilk kez simge aldı; üç varlık türü **istisnasız**
+`KIND_ICON`'dan gelir (Yazdır'ın "Sınıflar"/"Öğretmenler"i dahil), gerisi
+lucide (14 yeni simge).
+
+**Kontrol'ün şeridi raporu SÜZER**: `Hepsi · Sorunlar · Kapasite`, sağ ucunda
+`N engel · N uyarı`. Süzgeç `toolState`'te (tuzak 18); `Check.tsx` yalnız hangi
+panelleri çizeceğini süzer, `buildReport` tam koşar — şeritteki sayı ile
+panellerdeki satırlar ayrışamaz.
+
+### 3. Koyu tema — ölçülerek koyulaştırıldı
+
+Kullanıcı: *"koyu temayı daha da koyulaştır siyahları"*. Bütün düzlemler bir tam
+basamak indi. Yanında **iki gerçek onarım**, ikisi de ölçüldü:
+
+```
+                       önce      sonra    sözleşme
+kâğıt parlaklığı       .0174  →  .0096    < 0.02  (eşik 0.1'den indirildi)
+metin / kâğıt          13.26  →  14.99    >= 7
+soluk / kâğıt           7.28  →   8.23    >= 4.5
+soluk / KAPALI          4.69  →   5.71    >= 5.0   <-- açık temada 5.09'du
+bölüm renkleri, en düşük 4.89  →   5.52    >= 4.5
+ΔE(band, kâğıt)         4.67  →   2.45    2.0-3.5  <-- açık temada 2.45
+ΔE(bg, chrome)          6.63  →   4.73
+ΔE(chrome, chrome-2)    2.86  →   2.34
+ΔE(chrome, kâğıt)       5.44  →   4.16
+ΔE(kapalı, kâğıt)      14.14  →  13.80    (açık 14.04)
+ΔE(hatch, kapalı)       6.23  →   6.46    (açık 6.44)
+baskı çizgisi / kâğıt    2.02  →   3.01    >= 3 (metin olmayan)
+```
+
+`--band` tuzak 40'ın diğer yüzüydü: gün bandı *gruplamak* için var, koyuda açık
+temanın iki katı güçte çiziliyor ve bir **durum** gibi okunuyordu. Artık iki
+temada da 2.45; `izgara.spec.ts` hem tavanı hem iki temanın eşitliğini ölçüyor.
+
+`--shadow` ikiye ayrıldı: hayaletin gölgesi palet renginin üstünde durduğu için
+tema ile dönmez (tuzak 15/35), ama **yapışkan başlığın** gölgesi kabuk
+düzlemindedir ve koyu zeminde %35 siyah hiçbir şeydir — yeni `--shadow-shell`
+(koyu: %85).
+
+### 4. Baskı önizlemesi — yalnız EKRAN
+
+Kâğıda tek bayt dokunulmadı (205 mm sayfa, 8/10 mm dolgu, 23 mm satır aynen).
+Ekranda `.print-page` artık masaya konmuş bir **sayfa**: A4 yatay oranında bir
+taban, gölge, yuvarlatılmış köşe, 62rem tavan; satır **30px → 3.25rem** (%110'da
+57px). `@media print` bu süslerin **hepsini** geri alır ve `yazdir.spec.ts`
+ikisini birden ölçer: önizleme büyüdü VE kâğıda hiçbir şey sızmadı.
+
+### Ölçüldü
+
+```
+dist/index.html   501 685 bayt   (489 815'ten; +11,6 KB — 14 lucide simgesi + hareket + Kontrol şeridi)
+file:// açılışı   65 ms medyan · 84 ms en kötü · 62 ms en iyi   (7 koşu, 1920×1080)
+şerit yüksekliği  altı sekmede de 44,97 px · düğmeler 35,19 px (%110)
+baskı satırı      ekran 57,2 px · kâğıt 86,9 px (= 23 mm)
+önizleme sayfası  1091,2 × 771,5 px  (en/boy 1,415 — A4 yatay 1,414)
+```
+
+### Ayrıca
+
+- `.reason-bar`'a **`role="status"` + `aria-live="polite"`**. Erişilebilirlik
+  sözleşmesi bu satırı adıyla anıyordu ve satırda **yoktu** — sözleşme bugüne
+  kadar karşılanmıyordu.
+- **README.md** yazıldı (iki satırdı).
+- `npm run ekran` artık görüntüyü almadan önce sayfanın hareketinin bitmesini
+  bekliyor. **Bakılarak bulundu**: `dark-12-ayarlar-gorunum.png` bomboş
+  çıkıyordu, açık ikizi yarı saydamdı, ve hiçbir test bunu söyleyemezdi çünkü o
+  katman hiçbir şey iddia etmiyor. Tuzak 59.
+- `e2e/otomatik-stres.spec.ts` `'■ Durdur'` adını arıyordu; düğme simge+kelimeye
+  dönünce kırıldı ve **`npm run kontrol`'ün dışında olduğu için** ancak
+  `npm run cozucu` koşulunca görüldü. Tuzak 49'un bir daha yaşanmış hâli.
 
 ---
 
@@ -190,7 +292,7 @@ bu turda geldi; kullanıcı istedi.
 | **v0.9: sebep kodları (`blockerDetail`)** | ✅ 7 birim + 3 birim |
 | **v0.9: Kontrol sekmesi test edildi** | ✅ 12 E2E |
 | **v0.9: geri-al zinciri, hata yolları, boş ekranlar, klavye** | ✅ 28 E2E |
-| **v0.9: görsel regresyon** | ✅ 20 referans (`npm run gorsel`) |
+| ~~v0.9: görsel regresyon~~ | ⬛ **2026-08-26'da SİLİNDİ** (kullanıcı kararı). `npm run gorsel` artık `package.json`'da yok; yerine `npm run ekran` **kanıt** üretiyor |
 | **Çözücü dünya matrisi** | ✅ 21 dünya · 78 birim + 26 E2E · ağırlar `npm run cozucu` |
 | **v1.0: çözücü kural baskısı altında çökmüyor** | ✅ 3/359 → **241/359 blok** · 6 yeni birim testi |
 | **v1.0: plan kitaplığı (`library.ts`)** | ✅ 25 birim + 11 E2E · devralma **sıfır kopya** |
@@ -209,18 +311,25 @@ bu turda geldi; kullanıcı istedi.
 | GitHub Pages yayını | ⬜ bekliyor (kullanıcıdan: depo adı + Pages kaynağı) |
 | Gerçek veriyle deneme | ⬜ **bekliyor** |
 | Tauri ile `.exe` paketleme | ⬜ bekliyor |
+| **E: hareket ayarı (`tam · az · kapalı`)** | ✅ 3 birim + 7 E2E · dört mesafe tokeni · makine tercihi TABAN |
+| **E: şerit standardı (altı sekme, beş kural)** | ✅ 10 E2E · Yazdır ve Ayarlar ilk kez simgeli · yükseklik ±1px |
+| **E: Kontrol'ün şeridi ve süzgeci** | ✅ 4 E2E · 45px'lik zıplama gitti |
+| **E: koyu tema koyulaştırıldı** | ✅ ölçüldü: band ΔE 4.67→**2.45**, soluk/kapalı 4.69→**5.71**, kâğıt .0174→**.0096** |
+| **E: baskı önizlemesi kâğıda benziyor** | ✅ 4 E2E · satır 30px→57px · kâğıda **hiçbir şey sızmadı** |
+| **E: `.reason-bar` `aria-live`** | ✅ sözleşme bugüne kadar karşılanmıyordu |
+| **E: README** | ✅ iki satırdı |
 
-**E2E artık 1920×1080'de koşuyor** (babanın 27" ekranı; A0). Görsel referanslar
-**bilerek eski** — tasarım turunun sonunda tek seferde yenilenecek, ara aşamalarda
-`npm run gorsel` çalıştırılmıyor.
+**E2E artık 1920×1080'de koşuyor** (babanın 27" ekranı; A0).
 
-**Testler: 409 birim + 265 E2E + 6 site = 680, hepsi geçiyor. `tsc --noEmit` temiz.
-`npm run build` → tek dosya `dist/index.html`, **379 KB** (gömülü font dahil),
-sıfır ağ çağrısı; `npm run build:site` → `dist-site/` (aynı tek dosya + manifest +
-`sw.js` + simgeler). `npm run kontrol` toplam ~62 sn.**
-Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: **24** görsel referans
-(`npm run gorsel`, 5 sn — B turunda tek seferde yenilendi) ve 7 gerçek ölçekli
-çözücü testi (`npm run cozucu`, ~39 sn).
+**Testler (2026-08-27): 453 birim + 318 E2E + 6 site = 777, hepsi geçiyor.
+`tsc --noEmit` temiz. `npm run build` → tek dosya `dist/index.html`,
+**501 685 bayt** (gömülü font dahil), sıfır ağ çağrısı; `npm run build:site` →
+`dist-site/` (aynı tek dosya + manifest + `sw.js` + simgeler). `npm run kontrol`
+toplam ~3 dk.**
+Ayrıca `kontrol`'ün parçası OLMAYAN iki süit: `npm run ekran` (iki temada 17
+görüntü — test değil, **kanıt**) ve 7 gerçek ölçekli çözücü testi
+(`npm run cozucu`, ~36 sn). İkincisi bu oturumda bir gerileme **yakaladı**:
+`kontrol`'ün dışında kalan bir süit, ancak elle koşulduğunda konuşur.
 
 Ayrıntı: [TASKS.md](TASKS.md)
 
@@ -363,17 +472,19 @@ verinin kimliği; "temizlik olsun" diye değiştirmek babanın programını gör
 | Sığdır + havuz AÇIK — yatay taşma | **0 px** (hücre 19.5, tablo 1575/1588) — eski "174px" ölçümü geçersiz |
 | ΔE(chrome, paper) | **5.16** açık · **3.98** koyu |
 | ΔE(chrome, chrome-2) | **3.21** açık · **2.56** koyu |
-| ΔE(band, paper) | **2.67** açık · **3.00** koyu (durum eşiği 14'ün çok altında) |
-| kontrast(text, paper) · kontrast(muted, paper) | 17.98 / 6.79 açık · 13.76 / 7.61 koyu |
-| `dist/index.html` | **402 KB** (sınır 420 KB) |
+| ΔE(band, paper) | ~~2.67 açık · 3.00 koyu~~ → **2.45 / 2.45** (2026-08-27; koyu 4.67'ye çıkmıştı, geri getirildi — bkz. on dokuzuncu oturum) |
+| kontrast(text, paper) · kontrast(muted, paper) | 17.98 / 6.79 açık · ~~13.76 / 7.61~~ → **14.99 / 8.23** koyu |
+| ~~`dist/index.html` **402 KB** (sınır 420 KB)~~ | **TARİHÎ.** 420 KB sınırı 2026-08-26'da kalktı; güncel değer **501 685 bayt**, bkz. on dokuzuncu oturum |
 | Sürükleme başlangıcı — havuzdan, DOLU ızgarada | **0,305 ms** |
 | Sürükleme başlangıcı — ızgaradan (taşıma: `removeBlock` + `buildIndex` + 72 `check`) | **0,266 ms** |
-| `dist/index.html` | **331 KB**, tek dosya, 0 ağ çağrısı |
-| E2E paketi | **223 test, ~44 sn** (4 worker) |
-| Birim paketi | **402 test, ~2,9 sn** |
-| Çözücü stres paketi | **7 test, ~2,2 dk** (`npm run cozucu`, ayrı) |
+| ~~`dist/index.html` **331 KB**~~ | **TARİHÎ** (gömülü fonttan önce). Güncel: **501 685 bayt**, tek dosya, 0 ağ çağrısı |
+| E2E paketi | ~~223 test, ~44 sn~~ → **318 test, ~2,4 dk** (4 worker) |
+| Birim paketi | ~~402 test, ~2,9 sn~~ → **453 test, ~3,2 sn** |
+| Çözücü stres paketi | **7 test, ~36 sn** (`npm run cozucu`, ayrı) |
+| **Araç şeridi** (2026-08-27) | altı sekmede de **44,97 px**, düğmeler **35,19 px** (%110) |
+| **Baskı önizlemesi** (2026-08-27) | sayfa **1091,2 × 771,5 px** (en/boy 1,415), satır **57,2 px**; kâğıtta satır **86,9 px** = 23 mm |
 | Müsaitlik hücresi | **~67 × 48 px** (34 px'ti; tablo 238 → 322 px) |
-| Görsel referanslar | 22 dosya |
+| ~~Görsel referanslar 22 dosya~~ | **TARİHÎ** — katman 2026-08-26'da silindi. `npm run ekran`: iki temada **17** görüntü |
 | Ekranda görünen öğretmen satırı | **10** (üst şerit 56 px'e indi) |
 | Müsaitlik tablosu genişliği | 46px sabit hücreden **sütununu dolduran** tabloya |
 | Baskı sayfası | A4 yatay (842×595 pt), 12 eşit sütun (±1px) |
@@ -583,9 +694,11 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
    gerçek veriyle test edilmeli. **Otomatik dizme için ayrıca önemli:** `sample.ts`
    derslikleri kasten %79 doluluğa getiriyor, yani örnek veri babanın gerçek
    verisinden daha kolay ya da daha zor olabilir — bilinmiyor.
-2. **Görsel referanslar bu makineye ait.** Başka bir bilgisayarda `npm run gorsel`
-   ilk koşuda kırmızı verir; çare tek komut (`--update-snapshots`). Bu yüzden
-   `npm run kontrol`'ün parçası değil.
+2. ~~**Görsel referanslar bu makineye ait.**~~ **Kapandı 2026-08-26:** görsel
+   regresyon katmanı silindi (kullanıcı kararı), `npm run gorsel` diye bir komut
+   yok. Yerine geçen `npm run ekran` bir şey iddia etmiyor — **kanıt** üretiyor,
+   ve bir insan bakmazsa hiçbir şey yakalamıyor. Bu oturumda tam da öyle bir şey
+   yakalandı, ve yakalayan şey bakmaktı (tuzak 59).
 3. **Hız babanın bilgisayarında ölçülmedi.** Buradaki ölçümler geliştirme makinesinde.
 4. **Baskı gerçek kâğıda alınmadı.** E2E artık sayfanın A4 **yatay** çıktığını
    (MediaBox 842×595 pt) ve sütunların eşit olduğunu ölçüyor, ama fiziksel çıktıya
@@ -1960,17 +2073,20 @@ git clone https://github.com/AlparslanSemiz/AscLike.git
 cd AscLike
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 409 birim + derleme + 251 E2E + 6 site (~45 sn)
+npm run kontrol                   # tsc + 453 birim + derleme + 318 E2E + 6 site (~3 dk)
 npm run dev                       # geliştirme sunucusu
 ```
 
-**Görsel regresyon ayrı**: `npm run gorsel` (24 referans; tasarım turu bitene
-kadar zaten kırmızı — bkz. A6). İlk koşuda büyük ihtimalle kırmızı verir,
-çünkü referanslar bir başka makinenin fontuyla alındı. Bir kez yenile:
-
-```bash
-npx playwright test --config playwright.gorsel.config.ts --update-snapshots=all
-```
+> Bu blok **2026-08-26'da eskidi**: görsel regresyon katmanı ve `npm run gorsel`
+> silindi. `kontrol`'ün dışında kalan iki süit şunlar:
+>
+> ```bash
+> npm run ekran    # iki temada 17 görüntü -> test-results/ekran/ (test değil, KANIT)
+> npm run cozucu   # 7 gerçek ölçekli çözücü testi, ~36 sn
+> ```
+>
+> İkincisi `kontrol`'ün parçası değil ama **gerileme yakalıyor** — 2026-08-27'de
+> yakaladı. Arayüzde bir düğmenin adı değiştiyse elle koşulur.
 
 (`--update-snapshots` tek başına yalnız **kırmızı** referansları yeniler; hepsini
 yazdırmak için `=all` gerekiyor. Bu 2026-08-25'te öğrenildi: satır yüksekliği

@@ -63,7 +63,10 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
     // If the search held the main thread this would time out instead of answering.
     await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
-    await expect(page.getByRole('button', { name: '■ Durdur' })).toBeVisible();
+    // `exact: true`, and the name is the WORD: the button carried a literal "■"
+    // in its label until the strip was standardised on symbol-plus-word, and a
+    // test naming the glyph was naming a drawing (pitfall 49).
+    await expect(page.getByRole('button', { name: 'Durdur', exact: true })).toBeVisible();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
   });
 

@@ -60,6 +60,52 @@ test.describe('47. Izgara enstrümanı', () => {
         `bant ${key} ile karışıyor`,
       ).toBeGreaterThan(10);
     }
+
+    // A CEILING, added 2026-08-27 and red the day before it was written.
+    //
+    // "far from the functional grounds" was the whole contract, and the dark
+    // theme passed it while being twice as loud as the light one — dE(band,
+    // paper) was 4.67 against light's 2.45. That is the pitfall-40 family from
+    // the other side: not a new ground burying a state, but a GROUPING drawn
+    // hard enough to be read as one. Both themes sit at 2.45 now, and 3.5 is
+    // where a reasonable person would start calling it a stripe.
+    expect(
+      separation,
+      `gün bandı bir DURUM gibi okunacak kadar güçlü (ΔE ${separation.toFixed(2)})`,
+    ).toBeLessThan(3.5);
+  });
+
+  test('gün bandı İKİ TEMADA da aynı yükte', async ({ page }) => {
+    // The measurement above runs in whatever theme the page opened in, so on
+    // its own it can only ever police one of the two. This is the pair.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+
+    const measure = async () =>
+      page.evaluate(() => {
+        const plain = document.querySelector(
+          'table.grid tbody td[data-day="0"]:not(.unavailable)',
+        )!;
+        const banded = document.querySelector('table.grid tbody td.band:not(.unavailable)')!;
+        return {
+          plain: getComputedStyle(plain).backgroundColor,
+          banded: getComputedStyle(banded).backgroundColor,
+        };
+      });
+
+    const light = await measure();
+    await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+    const dark = await measure();
+
+    const a = deltaE(light.plain, light.banded);
+    const b = deltaE(dark.plain, dark.banded);
+    expect(
+      Math.abs(a - b),
+      `açık ΔE ${a.toFixed(2)}, koyu ΔE ${b.toFixed(2)} — aynı gruplama iki güçte çiziliyor`,
+    ).toBeLessThan(0.75);
   });
 
   test('imleç haçı satırı, sütunu ve iki başlığı birden aydınlatıyor', async ({ page }) => {

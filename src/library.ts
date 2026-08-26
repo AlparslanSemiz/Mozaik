@@ -323,6 +323,11 @@ export function storageReport(lib: Library): StorageReport {
     what: 'müsaitlikte saat gösterimi',
     chars: charsAt(`${BASE_KEY}-musaitlik-saat`),
   });
+  rows.push({
+    key: `${BASE_KEY}-hareket`,
+    what: 'hareket (animasyon) tercihi',
+    chars: charsAt(`${BASE_KEY}-hareket`),
+  });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

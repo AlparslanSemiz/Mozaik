@@ -98,18 +98,30 @@ kâğıt        --fs-p-xs 8pt … --fs-p-xl 17pt         (pt, ölçekten etkilen
 tracking     --ls-tight · --ls-tighter · --ls-caps
 satır        --lh-tight 1.2 · --lh-base 1.5 · --lh-head 1.25
 boşluk       --space-1 … --space-8   (rem)
-hareket      --dur-fast 110ms · --dur 180ms · --dur-slow 280ms
+hareket      --dur-fast 110ms · --dur 180ms · --dur-slow 280ms   (SÜRE)
+             --slide .5rem · --sweep 100% · --press 1px · --pop .97  (MESAFE)
              --ease · --ease-out · --ease-spring
-             prefers-reduced-motion → üçü de 0ms, view-transition'lar da kapanır
+             [data-motion="az"]     → süreler yarı, mesafeler 0
+             [data-motion="kapali"] → hepsi 0
+             prefers-reduced-motion → hepsi 0, ve bu bir TABAN: ayar onu ezemez
+şerit        --ribbon-h 2rem   (şeritteki her kontrolün yüksekliği)
 odak         --focus-ring (iki halka: kâğıt boşluğu + accent)
 sütun        --w-col-xs 8ch … --w-col-2xl 32ch
 geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 ölçek        --ui-scale, VARSAYILAN 1.10, aralık 1.00–1.50
 ```
 
+**Süre bir tokendi, MESAFE değildi — 2026-08-27'de o da oldu.** Her `transition`
+`--dur`'ü okuyordu ama her hareket kendi kuralında elle yazılıydı
+(`translateY(.5rem)`, `translateX(100%)`, `scale(.96)`). 0 ms'lik bir geçiş bir
+öğeyi durdurmaz, **ışınlar** — yani "hepsi tek yerden kapanıyor" yarı doğruydu.
+Kural: **hareket eden hiçbir sayı bir kuralın içine yazılmaz**, dört mesafe
+tokeninden biri okunur (tuzak 57).
+
 **Hareket kütüphanesi yok, ve bu bir yasak değil bir ölçüm:** `motion` kuruldu,
 127 KB çıktı, ve CSS'in yapamadığı tek getirisi (`layoutId`) tarayıcının
-`document.startViewTransition()`'ında bedava. `@starting-style`,
+`document.startViewTransition()`'ında bedava — **ki o da kullanılmıyor**, çünkü
+ölçüldü ve hit-testing'i 553 ms dondurduğu görüldü (tuzak 55). `@starting-style`,
 `transition-behavior: allow-discrete`, `oklch()`, `color-mix()`,
 `backdrop-filter`, `position-anchor` — hepsi `file://` altında Chromium'da
 ölçülerek doğrulandı.
@@ -126,7 +138,7 @@ geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 | `.topbar` | tek satır. Üstünde 4px'lik **bölüm rengi**, içinde o rengin %10 washı |
 | `.tabstrip` `.tab` `.tab-label` | seçili sekme bölüm rengiyle **dolu**. `flex: 0 0` — asla kırpılmaz |
 | `.health` `.health-dot` `.health-text` | **durum çipi**: her sekmede, sorunu ADLANDIRIR. Yer daralınca noktasına iner |
-| `.ribbon` `.ribbon-sep` `.ribbon-label` | sekmenin araçları. Basılı kontrol `--sec` giyer |
+| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, **altı sekmede de**. Basılı kontrol `--sec` giyer. `-label` bir grubun BAŞLIĞI (büyük harf, soluk), `-value` bir grubun DEĞERİ (normal, tam mürekkep) |
 | `.topbar-doc` `.app-title` `.plan-picker` | hangi belge açık |
 | `.btn-group` `.topbar-sep` `.spacer` | bitişik düğme kümesi · ayraç · itici |
 
@@ -172,7 +184,7 @@ geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 | `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi; simge `steps.tsx`'in `KIND_ICON`'undan |
 | `table.availability` (+`.heat`) | boyanan çizelge + haftanın darlığı ısı haritası |
 | `.pickers` `.pick-list` `.pick-item` | hangi sayfalar basılacak |
-| `.print-area` `.print-page` `.p-title-main` `.p-daycol` … | kâğıt |
+| `.print-area` `.print-page` `.p-title-main` `.p-daycol` … | kâğıt. Ekranda `.print-page` masaya konmuş bir **sayfadır** (A4 yatay oranında taban, gölge, 62rem tavan); `@media print` bu süslerin hepsini geri alır |
 | `.panel` `.panel.inset` `.panel-grid` `.cols` (+`wide-left`) | yüzeyler ve düzen |
 | `.empty-screen` `.badge` `.hint` `.reason-bar` `.warn-box` … | geri bildirim |
 
@@ -200,10 +212,17 @@ Hiçbiri `State`'e girmez, hiçbiri yedeğe yazılmaz, hepsi
 1. **Sekmenin araçları ribbon'a mı?** "Şu an neye bakıyorum" ve "tek tıkla ne
    yaparım" şeride; liste, sayaç ve açıklama panelde. Aracın durumu şeride
    çıkıyorsa `src/toolState.ts`'e taşınır (tuzak 18).
+   **Şeridin şekli sabittir** ve `e2e/serit.spec.ts` beş maddesini de ölçer:
+   başlıkla açılır · gruplar `Sep`/`Spacer` ile bölünür · her düğmede simge VE
+   kelime · her kontrol `--ribbon-h` yüksekliğinde · altı sekmede de var.
+   Üç varlık türünün simgesi `KIND_ICON`'dan gelir, istisnasız.
 2. Yüzey `.panel`, düzen `.cols` ya da akan `.panel-grid`.
 3. Soru soracaksan `useDialogs()`. `window.confirm` **yok**.
 4. Bir şey olduğunu söyleyeceksen `useToast()`.
 5. Bir varlık adı yazıyorsan `.inspect` + `useInspect()` — panel bedava gelir.
 6. Uzun bir liste çiziyorsan `ListTools` + `src/listview.ts`.
 7. Izgaraya hücre eklediysen: `data-day`/`data-hour` taşıyor mu, taşımalı mı?
-8. `npm run kontrol` + `npm run ekran` — **çıktıyı göster, iddia etme.**
+8. Hareket eden bir sayı yazdıysan: dört mesafe tokeninden biri mi
+   (`--slide`/`--sweep`/`--press`/`--pop`)? Değilse kapatılamaz (tuzak 57).
+9. `npm run kontrol` + `npm run ekran` — **çıktıyı göster, iddia etme.** Ve
+   `npm run cozucu`: `kontrol`'ün dışında ve gerileme yakalıyor.

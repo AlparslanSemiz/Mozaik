@@ -55,10 +55,17 @@ test.describe('8. Tema', () => {
         '--accent-bg',
       ]);
 
-      // The page must really be the theme it claims, not a browser-darkened one
+      // The page must really be the theme it claims, not a browser-darkened one.
+      // The dark ceiling came down from 0.1 to 0.02 on 2026-08-27: the reader
+      // asked for blacker blacks, every plane moved a full step, and a
+      // threshold left at 0.1 would have let the whole change be undone
+      // without a word. Measured .0174 before, .0096 after.
       const paperLuminance = relativeLuminance(rgb(t['--paper']!));
-      if (theme === 'dark') expect(paperLuminance).toBeLessThan(0.1);
-      else expect(paperLuminance).toBeGreaterThan(0.9);
+      if (theme === 'dark') {
+        expect(paperLuminance, `koyu kâğıt parlaklığı ${paperLuminance}`).toBeLessThan(0.02);
+      } else {
+        expect(paperLuminance).toBeGreaterThan(0.9);
+      }
 
       // Tellable apart from each other, and from a closed cell
       expect(deltaE(t['--ok-bg']!, t['--warn-bg']!)).toBeGreaterThan(14);
@@ -78,6 +85,20 @@ test.describe('8. Tema', () => {
       ] as const) {
         expect(contrast(t[fg]!, t[bg]!), `${fg} on ${bg}`).toBeGreaterThanOrEqual(4.5);
       }
+
+      // A HIGHER FLOOR for the one pair that was quietly the worst, added
+      // 2026-08-27 and red in the dark theme the day before it was written.
+      //
+      // The muted ink on a closed hour is the small print of the grid: it is
+      // where "why can this not be used" is written, in the smallest type on
+      // screen, for a reader who has trouble seeing. The light theme has held
+      // 5.09 since the palette was searched; the dark theme was at 4.69 and
+      // passed because the shared floor is 4.5. It is 5.71 now.
+      expect(
+        contrast(t['--muted']!, t['--closed']!),
+        'kapalı saatteki soluk yazı — ızgaranın en küçük puntosu',
+      ).toBeGreaterThanOrEqual(5);
+
     });
   }
 

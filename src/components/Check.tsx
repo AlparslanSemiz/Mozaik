@@ -5,11 +5,21 @@ import { useMemo } from 'react';
 import { buildIndex, closedConflicts } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
+import type { CheckView } from '../toolState';
 import type { Id, State } from '../types';
 import { paletteColor } from '../palette';
 
 interface Props {
   state: State;
+  /**
+   * Which half of the report to draw. Owned by App, shown in the tool strip —
+   * a position, so it must survive a glance at another tab (pitfall 18).
+   *
+   * It filters WHAT IS DRAWN and nothing else: `buildReport` and
+   * `closedConflicts` run in full whatever is chosen, so the counts in the
+   * strip and the chip cannot disagree with the panels.
+   */
+  view: CheckView;
 }
 
 const BADGE: Record<ReportRow['level'], string> = {
@@ -71,9 +81,15 @@ function Section({
   );
 }
 
-export default function Check({ state }: Props) {
+export default function Check({ state, view }: Props) {
   const report = useMemo(() => buildReport(state), [state]);
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
+
+  // "Programın durumu" is in all three: it is the question you arrive with, and
+  // a filter that could hide how much of the week is laid out would make the
+  // other two views answerable only by leaving.
+  const showProblems = view !== 'kapasite';
+  const showLoads = view !== 'sorunlar';
 
   // Where the week stands, from the same numbers the pool and the grid use.
   const placed = Object.keys(state.placements).length;
@@ -161,7 +177,7 @@ export default function Check({ state }: Props) {
           )}
         </div>
 
-        {conflicts.length > 0 && (
+        {showProblems && conflicts.length > 0 && (
           <div className="panel">
             <h2>Kapalı saatte ders ({conflicts.length})</h2>
             <p className="hint">
@@ -190,7 +206,7 @@ export default function Check({ state }: Props) {
           </div>
         )}
 
-        {report.violations.length > 0 && (
+        {showProblems && report.violations.length > 0 && (
           <div className="panel">
             <h2>Kural ihlalleri ({report.violations.length})</h2>
             <p className="hint">
@@ -221,7 +237,7 @@ export default function Check({ state }: Props) {
           </div>
         )}
 
-        {report.unplaceable.length > 0 && (
+        {showProblems && report.unplaceable.length > 0 && (
           <div className="panel">
             <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
             <p className="hint">
@@ -250,23 +266,27 @@ export default function Check({ state }: Props) {
         {/* The colour is the same mark the grid row and the pool card carry —
             a name without it makes the reader look the person up again. Rooms
             have none, so that Section is given no lookup. */}
-        <Section
-          title="Öğretmenler"
-          rows={report.teachers}
-          colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
-          description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
-        />
-        <Section
-          title="Sınıflar"
-          rows={report.classes}
-          colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
-          description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
-        />
-        <Section
-          title="Derslikler"
-          rows={report.rooms}
-          description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
-        />
+        {showLoads && (
+          <>
+            <Section
+              title="Öğretmenler"
+              rows={report.teachers}
+              colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
+              description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
+            />
+            <Section
+              title="Sınıflar"
+              rows={report.classes}
+              colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
+              description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
+            />
+            <Section
+              title="Derslikler"
+              rows={report.rooms}
+              description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
+            />
+          </>
+        )}
       </div>
     </>
   );

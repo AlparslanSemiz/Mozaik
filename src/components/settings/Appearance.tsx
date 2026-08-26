@@ -7,11 +7,13 @@
 // migration. It lives in localStorage next to the theme and the rail
 // (`theme.ts`), which is where every other machine preference already is.
 //
-// SIX BUTTONS, NOT A SLIDER. The scale has six legal values, so a slider would
-// invent a continuum that does not exist and then hide which of the six it
+// BUTTONS, NOT A SLIDER. The scale has ELEVEN legal values (1.00 to 1.50 in
+// steps of 0.05 — it said six here while the ceiling was 1.25), so a slider
+// would invent a continuum that does not exist and then hide which rung it
 // landed on. The buttons reuse the `aria-pressed` state the tool already has
 // four of (`.btn[aria-pressed="true"]`), so there is no new control to learn
-// and no new CSS.
+// and no new CSS. The same applies to the density, the availability clock and
+// the motion setting below: four questions, one control shape.
 //
 // PRINTING IS NOT AFFECTED, and the panel says so out loud. Paper is a fixed
 // physical size: everything on the sheet is sized from `--fs-p-*` in pt and in
@@ -19,8 +21,16 @@
 // this screen would decide whether a timetable still fits on A4 — a thing my
 // father would discover at the printer.
 
-import { applyAvailClock, applyDensity, applyScale, SCALE_MAX, SCALE_MIN, SCALE_STEP } from '../../theme';
-import type { Density } from '../../theme';
+import {
+  applyAvailClock,
+  applyDensity,
+  applyMotion,
+  applyScale,
+  SCALE_MAX,
+  SCALE_MIN,
+  SCALE_STEP,
+} from '../../theme';
+import type { Density, Motion } from '../../theme';
 import type { State } from '../../types';
 import { paletteColor } from '../../palette';
 
@@ -33,7 +43,16 @@ interface Props {
   setDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
+  motion: Motion;
+  setMotion: (next: Motion) => void;
 }
+
+/** The three steps, in the order they reduce. */
+const MOTIONS: Array<{ id: Motion; label: string }> = [
+  { id: 'tam', label: 'Tam' },
+  { id: 'az', label: 'Az' },
+  { id: 'kapali', label: 'Kapalı' },
+];
 
 const STEPS = Array.from(
   { length: Math.round((SCALE_MAX - SCALE_MIN) / SCALE_STEP) + 1 },
@@ -48,6 +67,8 @@ export default function Appearance({
   setDensity,
   availClock,
   setAvailClock,
+  motion,
+  setMotion,
 }: Props) {
   function choose(next: number) {
     applyScale(next);
@@ -63,6 +84,11 @@ export default function Appearance({
   function chooseDensity(next: Density) {
     applyDensity(next);
     setDensity(next);
+  }
+
+  function chooseMotion(next: Motion) {
+    applyMotion(next);
+    setMotion(next);
   }
 
   return (
@@ -172,7 +198,6 @@ export default function Appearance({
             </button>
           </div>
         </div>
-
       </div>
 
       <div>
@@ -220,6 +245,49 @@ export default function Appearance({
               {state.teachers.length} öğretmenin ilk {teachers.length} tanesi.
             </p>
           )}
+        </div>
+
+        <div className="panel">
+          <h2>Hareket</h2>
+          <p className="hint">
+            Ekranda bir şey belirirken, bir kutu açılırken ya da bir düğmeye
+            basarken görülen kısa hareketler. Rahatsız ediyorsa <b>azaltın</b>{' '}
+            ya da <b>tamamen kapatın</b>; programın çalışmasında hiçbir şey
+            değişmez.
+          </p>
+          <ul className="hint choice-list">
+            <li>
+              <b>Tam</b> — tasarlandığı gibi.
+            </li>
+            <li>
+              <b>Az</b> — süreler yarıya iner ve <b>yer değiştiren</b> hareketler
+              kapanır: paneller kayarak değil, duracakları yerde belirir. Renk
+              geçişleri kalır, yani düğme imlece hâlâ cevap verir.
+            </li>
+            <li>
+              <b>Kapalı</b> — hiçbir şey kaymaz, hiçbir şey solmaz.
+            </li>
+          </ul>
+
+          <div className="form-row" role="group" aria-label="Hareket">
+            {MOTIONS.map((m) => (
+              <button
+                key={m.id}
+                className="btn"
+                aria-pressed={m.id === motion}
+                onClick={() => chooseMotion(m.id)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          <p className="hint">
+            Bilgisayarınız <i>“azaltılmış hareket”</i> istiyorsa (Windows’ta{' '}
+            <b>Ayarlar → Erişilebilirlik → Görsel efektler</b>), burada ne
+            seçerseniz seçin hareket <b>kapalı</b> kalır. Bu ayar makinenin
+            isteğinin <b>ötesine</b> geçebilir, gerisine değil.
+          </p>
         </div>
 
         <div className="panel">

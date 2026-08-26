@@ -5,3 +5,7 @@ dist-site/
 .DS_Store
 test-results/
 playwright-report/
+
+# Throwaway measurement scripts. Nothing here ships; see docs/STATUS.md for
+# what the measurements said.
+scratch/

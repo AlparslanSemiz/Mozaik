@@ -392,8 +392,22 @@ export default function Program({ state, change, solver, view }: Props) {
           solver's verdict. It has a FIXED height so the grid never jumps down
           when something appears in it, and it is the line the eye is already
           trained on. The drag always wins — that one is answering a question
-          the hand is asking right now. */}
-      <div className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}>
+          the hand is asking right now.
+
+          `aria-live="polite"` because two of the three jobs are announcements
+          nobody is looking at this line for: the solver runs for seconds and
+          then says what it managed, and a blocked drop says why. The
+          accessibility contract has named this line since the round that
+          removed the design constraints; until 2026-08-27 it was the one place
+          that never got it. `polite` and not `assertive`: it must not cut into
+          a dialog, and the DRAG reason updates several times a second while the
+          pointer moves — the region is on the wrapper so those coalesce into
+          one announcement per settled state rather than one per frame. */}
+      <div
+        className={`reason-bar${barLevel === '' ? '' : ` ${barLevel}`}`}
+        role="status"
+        aria-live="polite"
+      >
         <span>{barText}</span>
         {solver.result !== null && !solver.running && (
           <span className="bar-actions">

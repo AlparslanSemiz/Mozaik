@@ -4,10 +4,46 @@
 // and unguarded. A new transition that hard-codes 180ms instead of reading
 // --dur would have shipped silently.
 //
+// Since 2026-08-27 there is a SECOND switch and it is the reader's: Ayarlar →
+// Görünüm → Hareket, three steps. The two are not the same thing and the
+// relationship between them is the contract worth testing — the machine
+// preference is a FLOOR, so the setting can go further than the machine asked
+// but never less far.
+//
 // Everything here reads the real computed values off the real dist/index.html.
 
-import { expect, test } from '@playwright/test';
-import { open, openWithSample } from './helpers';
+import { expect, test, type Page } from '@playwright/test';
+import { chooseMotion, open, openSettings, openWithSample, savedText, settledText } from './helpers';
+
+/** The four levers, straight off the root element. */
+const levers = (page: Page) =>
+  page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const read = (n: string) => cs.getPropertyValue(n).trim();
+    return {
+      durs: ['--dur', '--dur-fast', '--dur-slow'].map(read),
+      slide: read('--slide'),
+      sweep: read('--sweep'),
+      press: read('--press'),
+      pop: read('--pop'),
+    };
+  });
+
+/** A distance token that is zero, however the browser chose to serialise it. */
+const isZero = (value: string) => Number.parseFloat(value) === 0;
+
+/**
+ * A duration in milliseconds, whatever unit came back.
+ *
+ * Chromium does not round-trip these: `--dur: 180ms` is serialised as "0.18s"
+ * and `--dur: 90ms` as "90ms", in the same object. A `parseFloat` comparison
+ * across the two therefore reads 90 against 0.18 and calls the shorter one
+ * longer — which is exactly what this test claimed the first time it ran.
+ */
+function ms(value: string): number {
+  const n = Number.parseFloat(value);
+  return value.trim().endsWith('ms') ? n : n * 1000;
+}
 
 test.describe('14. Hareket', () => {
   test('azaltılmış hareket isteyen makinede bütün süreler sıfırlanıyor', async ({ page }) => {
@@ -20,7 +56,7 @@ test.describe('14. Hareket', () => {
     });
     // Every transition in the stylesheet reads one of these three, so zeroing
     // them is what makes the kill switch total rather than partial.
-    expect(durations).toEqual(['0ms', '0ms', '0ms']);
+    expect(durations.map(ms)).toEqual([0, 0, 0]);
   });
 
   test('azaltılmış hareketle sekme değişince çalışan animasyon kalmıyor', async ({ page }) => {
@@ -90,6 +126,145 @@ test.describe('14. Hareket', () => {
     // One or two frames while React commits is the grid not existing yet. A
     // whole animation's worth of them is the bug.
     expect(misses).toBeLessThanOrEqual(3);
+  });
+
+  test('KAPALI seçilince süreler de mesafeler de sıfırlanıyor', async ({ page }) => {
+    await openWithSample(page);
+    await chooseMotion(page, 'Kapalı');
+
+    const off = await levers(page);
+    expect(off.durs.map(ms)).toEqual([0, 0, 0]);
+    // Durations alone are not enough and that is the whole reason these four
+    // tokens exist: every distance in the stylesheet used to be written out in
+    // the rule that used it, so "no movement" could not be asked for from one
+    // place. A 0ms transition to a translated position still TELEPORTS.
+    expect(isZero(off.slide), `--slide ${off.slide}`).toBe(true);
+    expect(isZero(off.sweep), `--sweep ${off.sweep}`).toBe(true);
+    expect(isZero(off.press), `--press ${off.press}`).toBe(true);
+    expect(off.pop).toBe('1');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+    const running = await page.evaluate(
+      () => document.getAnimations().filter((a) => a.playState === 'running').length,
+    );
+    expect(running).toBe(0);
+  });
+
+  test('AZ süreleri kısaltıyor, mesafeleri sıfırlıyor — ve hâlâ bir şey oluyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const full = await levers(page);
+    await chooseMotion(page, 'Az');
+    const some = await levers(page);
+
+    // Shorter, but not nothing: this step exists because "kapat YA DA azalt"
+    // is two asks, and a middle step that quietly equalled "off" would be one.
+    for (let i = 0; i < 3; i++) {
+      const a = ms(some.durs[i]);
+      const b = ms(full.durs[i]);
+      expect(a, `${some.durs[i]} < ${full.durs[i]} olmalı`).toBeLessThan(b);
+      expect(a, `${some.durs[i]} sıfır olmamalı — bu "Kapalı" olurdu`).toBeGreaterThan(0);
+    }
+    // What "az" drops is MOVEMENT: a panel fades in where it will sit.
+    expect(isZero(some.slide)).toBe(true);
+    expect(isZero(some.sweep)).toBe(true);
+    expect(isZero(some.press)).toBe(true);
+    expect(some.pop).toBe('1');
+
+    // ...and the colour transitions survive, which is the point of the step:
+    // a control still answers the pointer. Measured by asking whether anything
+    // is animating at all on a tab change, exactly like the 'tam' test above.
+    const moving = await page.evaluate(async () => {
+      const strip = [...document.querySelectorAll('.tab')];
+      strip.find((b) => (b.textContent ?? '').includes('Program'))?.dispatchEvent(
+        new MouseEvent('click', { bubbles: true }),
+      );
+      await new Promise((r) => requestAnimationFrame(r));
+      return document.getAnimations().some((a) => a.playState === 'running');
+    });
+    expect(moving).toBe(true);
+  });
+
+  test('MAKİNE tercihi bir TABAN — "Tam" seçili olsa bile ezemiyor', async ({ page }) => {
+    // The contract, and the one assertion here that is about an ordering rather
+    // than a value: [data-motion] is written BEFORE the @media block, at equal
+    // specificity, so the machine wins. A reader who has asked their computer
+    // for less motion must not have it handed back by a setting inside one
+    // program — the setting may only go FURTHER than the machine asked.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openWithSample(page);
+    await chooseMotion(page, 'Tam');
+
+    const still = await levers(page);
+    expect(still.durs.map(ms)).toEqual([0, 0, 0]);
+    expect(isZero(still.slide)).toBe(true);
+    expect(isZero(still.sweep)).toBe(true);
+    expect(isZero(still.press)).toBe(true);
+    expect(still.pop).toBe('1');
+
+    // ...and the button still tells the truth about what was chosen.
+    await expect(page.getByRole('button', { name: 'Tam', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  test('makine hareket istemiyorsa varsayılan KAPALI — düğme yalan söylemiyor', async ({
+    page,
+  }) => {
+    // First read follows the system, like the theme does. A button reading
+    // "Tam" on a machine where nothing moves would be a lie, and the reader
+    // would go looking for a broken program instead of a system setting.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await open(page);
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'kapali');
+    await openSettings(page, 'Görünüm');
+    await expect(page.getByRole('button', { name: 'Kapalı', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  test('tercih yenilemede duruyor ve programın kendisine GİRMİYOR', async ({ page }) => {
+    await openWithSample(page);
+    // Pitfall 24/51: the store debounces by 400 ms and the page's own load
+    // write lands inside that window, so the baseline has to be a settled one.
+    const before = await settledText(page);
+
+    await chooseMotion(page, 'Az');
+    await page.waitForTimeout(700);
+    expect(await savedText(page)).toBe(before);
+    expect(await page.evaluate(() => localStorage.getItem('ders-programi-hareket'))).toBe('az');
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'az');
+    const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
+    expect(saved!.includes('hareket')).toBe(false);
+  });
+
+  test('Ayarlar → Veri hareket anahtarını da sayıyor', async ({ page }) => {
+    // A report that leaves a key out is worse than no report: the one thing it
+    // is for is being trusted when somebody asks "is all of it in here?".
+    await openWithSample(page);
+    await chooseMotion(page, 'Kapalı');
+    await openSettings(page, 'Veri');
+    const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
+    await expect(panel.locator('tbody code', { hasText: 'ders-programi-hareket' })).toHaveCount(1);
+  });
+
+  test('komut paletinden de kapatılıp açılabiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.keyboard.press('Control+k');
+    await page.locator('.palette').waitFor();
+    await page.getByText('Animasyonları kapat', { exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'kapali');
+
+    await page.keyboard.press('Control+k');
+    await page.locator('.palette').waitFor();
+    await page.getByText('Animasyonları aç', { exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-motion', 'tam');
   });
 
   test('kayan alan üstünde ve altında ne olduğunu söylüyor', async ({ page }) => {

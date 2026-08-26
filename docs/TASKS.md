@@ -9,6 +9,72 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **SIRADAKİ İŞ: 4f — GitHub Pages yayını.** Kullanıcıdan bekleniyor: depo
+> `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı **"GitHub
+> Actions"** seçilecek, ve Tauri için Rust toolchain onayı. Bunlar gelmeden
+> teslim turunun (4f–4i) hiçbir maddesi ilerleyemez.
+>
+> Onlar beklerken yapılabilecek tek büyük iş **gerçek veriyle deneme** — o da
+> babanın listesini gerektiriyor (aşağıda "1. Babanın gerçek verisiyle deneme").
+
+### E turu — hareket ayarı · şerit standardı · koyu tema · baskı — **BİTTİ ✅** (2026-08-27)
+
+Kullanıcının listesi: *"Animasyonları kapatma ya da azaltma seçeneği olsun
+ayarlarda. Yazdır kısmında da alt şeritte simgeler olsun. Ayarlardaki alt şeritte
+de semboller olsun. Kalan taskları yap. E2E testlerini ayarla. playwright
+testlerini ayarla. Küçük düzeltmeler varsa yap. Koyu temada sıkıntı var mı bak
+varsa düzelt ve koyu temayı daha da koyulaştır siyahları. Sectionların Alt
+şeritlerini de bir standarta uygun hale getir simetrik olsun. Yazdır kısmında
+önizlemedeki tablo biraz daha büyük ve görünür olabilir. Satırlar biraz daha
+uzun olabilir."*
+
+Dört karar soruldu ve cevaplandı: hareket **üç basamak** · koyulaştırma
+**belirgin** · **Kontrol'e de şerit** · baskıda **yalnız ekran** değişsin.
+
+- [x] **E1 Hareket ayarı (`tam · az · kapalı`).** Ayarlar → Görünüm'de dördüncü
+      panel + komut paletinde bir komut. Dokuzuncu makine tercihi
+      (`ders-programi-hareket`, `data-motion`), `State`'e girmez.
+      **Asıl iş CSS'teydi:** süreler tek yerden kısılıyordu ama **mesafeler**
+      her kuralda elle yazılıydı, ve 0 ms'lik bir geçiş hareketi durdurmaz —
+      **ışınlar**. Dört yeni token: `--slide` · `--sweep` · `--press` · `--pop`
+      (tuzak 57). **Makine tercihi bir TABAN, ayar onu ezemez** (tuzak 58);
+      kayıt yoksa tercih sistemden türetilir. 3 birim + 7 E2E.
+- [x] **E2 Şerit standardı — beş kural, altı sekme.** Beş şerit beş ayrı
+      nesneydi. Şimdi: hepsi başlıkla açılır · `Sep`/`Spacer` ile bölünür · her
+      düğmede **simge VE kelime** · hepsi `--ribbon-h` yüksekliğinde. **Yazdır
+      ve Ayarlar ilk kez simge aldı**; üç varlık türü istisnasız `KIND_ICON`'dan
+      (Yazdır dahil), gerisi lucide (14 yeni simge, +11,6 KB). Yeni dosya
+      `e2e/serit.spec.ts` — 10 test, beş kuralı da ölçüyor, %100 ve %150'de.
+- [x] **E3 Kontrol'ün şeridi ve süzgeci.** Karar değişti: Kontrol'de şerit
+      **yoktu** ve o yüzden o sekmeye her girişte altındaki her şey **45px
+      zıplıyordu**. Şerit raporu süzüyor (`Hepsi · Sorunlar · Kapasite`) ve
+      sağ ucunda `N engel · N uyarı` diyor. Süzgeç `toolState`'te (tuzak 18);
+      `buildReport` tam koşuyor, yani şeritteki sayı panellerle ayrışamaz.
+- [x] **E4 Koyu tema koyulaştırıldı — ölçülerek.** Bütün düzlemler bir tam
+      basamak indi. Yanında iki gerçek onarım: `--band` ΔE 4.67 → **2.45**
+      (açık temayla aynı yük; gün bandı bir DURUM gibi okunuyordu — tuzak 40'ın
+      diğer yüzü) ve `--muted`/`--closed` kontrastı 4.69 → **5.71**. `--shadow`
+      ikiye ayrıldı (`--shadow-shell`): yapışkan başlığın gölgesi kabuk
+      düzlemindedir ve koyu zeminde %35 siyah hiçbir şeydir. Eşikler
+      `renk.spec.ts` ve `izgara.spec.ts`'te **sıkılaştırıldı**, ikisi de dün
+      kırmızı olurdu.
+- [x] **E5 Baskı önizlemesi — yalnız ekran.** Kâğıda tek bayt dokunulmadı.
+      Ekranda `.print-page` bir **sayfa**: A4 yatay oranında taban, gölge,
+      yuvarlak köşe, 62rem tavan; satır 30px → **3.25rem** (%110'da 57px).
+      `@media print` süslerin hepsini geri alır ve `yazdir.spec.ts` ikisini
+      birden ölçer.
+- [x] **E6 Küçük düzeltmeler.** `.reason-bar`'a `role="status"` +
+      `aria-live="polite"` — erişilebilirlik sözleşmesi bu satırı adıyla anıyordu
+      ve satırda **yoktu**. `README.md` yazıldı (iki satırdı). `npm run gorsel`
+      referansları belgelerde tarih olarak işaretlendi. Bayat yorumlar
+      düzeltildi (`theme.ts` "beş skaler" → dokuz, `Appearance.tsx` "altı düğme"
+      → on bir, `styles.css`'in `startViewTransition` öneren yorumu).
+- [x] **E7 Doğrulama.** 453 birim + 318 E2E + 6 site = **777, hepsi yeşil**;
+      `npm run cozucu` 7/7 (bir gerileme **yakaladı**: `'■ Durdur'` adı).
+      `npm run ekran` iki temada 17 görüntü — ve **bakıldı**, bir görüntü bomboş
+      çıkıyordu (tuzak 59). Ölçüm: `dist` **501 685 bayt**, açılış **65 ms**
+      medyan / 84 ms en kötü.
+
 ### D turu — tasarım kısıtları kaldırıldı, arayüz baştan kuruldu — **BİTTİ ✅**
 
 Kullanıcı kararı (2026-08-26, üç kez tekrarlandı): *"Claude.md ya da Design.md ya
@@ -81,7 +147,14 @@ kullanıcı **"daha cesur olsun"** dedi.
       indirmeyi gerektiriyor. Üç ağırlık hiyerarşi için yetiyor.
 - [ ] **Görsel regresyon yerine ne konacak?** 24 referans silindi (kullanıcı
       kararı). `npm run ekran` duruyor ve **kanıt** üretiyor, ama bir insan
-      bakmazsa hiçbir şey yakalamıyor. Bir dönem kullanıldıktan sonra karar.
+      bakmazsa hiçbir şey yakalamıyor. **2026-08-27'de tam olarak bu yaşandı ve
+      bakmak işe yaradı**: `dark-12-ayarlar-gorunum.png` bomboş çıkıyordu
+      (görüntü, giriş animasyonunun ortasında alınıyordu). Çare yazıldı
+      (tuzak 59) ama soru duruyor: bakan kimse yoksa bu katman ne yakalar?
+      Bir dönem kullanıldıktan sonra karar.
+- [ ] **`npm run cozucu`'yu `kontrol`'e almalı mı?** Bu oturumda bir gerileme
+      yakaladı (`'■ Durdur'`), ve `kontrol` yeşilken yakaladı — yani "hepsi"
+      diyen komut hepsini koşmuyor. Karşı gerekçe süre: 36 sn. Ölç ve karar ver.
 
 ---
 
@@ -152,12 +225,16 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       aynı ("seçili renk okunuyor"), kontrol değişti; üstüne "36 renk GÖRÜNÜYOR
       ve seçilebiliyor" testi eklendi (iki tema × iki ekran).
       **Kalan:** 12 `confirm` + 5 `alert`'ün `<dialog>`'a geçmesi ve
-      `.reason-bar`'a `aria-live` — kullanıcı kararıyla B turu dışında bırakıldı
+      `.reason-bar`'a `aria-live` — B turu dışında bırakılmıştı.
+      **`aria-live` 2026-08-27'de yapıldı** (E6): `role="status"` +
+      `aria-live="polite"`. Kalan tek iş 12 `confirm` + 5 `alert`'ün
+      `<dialog>`'a geçmesi — ki `useDialogs()` zaten var, geçirilmemiş çağrı
+      kalmadı; bu satır artık yalnız tarih.
 - [x] **A6 Doğrulama — B turunda yapıldı.** `npm run kontrol` yeşil
       (409 birim + 265 E2E + 6 site). `renk.spec.ts`'in WCAG/ΔE eşikleri
       **gevşetilmedi**; yeni token seti onları geçmek zorunda kaldı ve geçti.
       24 baseline `--update-snapshots=all` ile tek seferde yenilendi (tuzak 25).
-      **Kalan:** README
+      ~~**Kalan:** README~~ → **yazıldı 2026-08-27** (E6).
 - [x] **Kullanıcıya sorulan iki soru — ikisi de cevaplandı (on üçüncü oturum).**
       (a) `.btn` → `--line`, **`--hairline` değil**: düğmenin kendi yüzeyi yok
       (`--paper` üstünde `--paper`), kenarlık tek sınırı. Asıl gürültü
@@ -245,7 +322,8 @@ bayrak — ayırmak bir sonraki commit'te sökülecek geçici bir şekil yazmak 
 Pages kaynağı "GitHub Actions" seçilecek, Rust toolchain onayı.
 
 Tasarım turundan devreden **iki** iş, ikisi de bilerek ertelendi:
-`<dialog>`'a geçmemiş 12 `confirm` + 5 `alert` (A4'ün yarısı) ve README.
+`<dialog>`'a geçmemiş 12 `confirm` + 5 `alert` (A4'ün yarısı). README
+2026-08-27'de yazıldı.
 
 *(Aşağıdaki v1.0 turu notu olduğu gibi duruyor.)* Kullanıcının bu dosyanın
 sonuna yazdığı liste o tura dönüştü; listenin *sıralama ve süzme* maddeleri
@@ -742,9 +820,22 @@ programda öğretmen ya da sınıf toggle edip programına bakma.
 her derslik, sınıf ya da öğretmenin üzerine tıklandığında bilgileri ve programının gözükmesi
     → **KARŞILANDI** (D6): varlık paneli. Izgarada satır başından, Kurulum'un üç
     listesinden ve Ctrl+K'dan açılıyor.
-normal testler                       → **KARŞILANDI**: 450 birim testi yeşil
-E2E testleri en sonda.               → **KARŞILANDI**: 277 E2E + 6 site yeşil
+normal testler                       → **KARŞILANDI**: 453 birim testi yeşil
+E2E testleri en sonda.               → **KARŞILANDI**: 318 E2E + 6 site yeşil
 koyu modu düzeltme
+    → **KARŞILANDI** (E4): koyulaştırıldı ve iki ölçülmüş kusur onarıldı — gün
+    bandı bir DURUM gibi okunuyordu (ΔE 4.67 → 2.45) ve kapalı saatteki soluk
+    yazı 4.69 kontrastındaydı (→ 5.71). Yapışkan başlığın gölgesi koyu düzlemde
+    hiç görünmüyordu (`--shadow-shell`).
 brave'de açık modu açma
+    → **ZATEN ÇÖZÜLMÜŞTÜ, gerekçesiyle:** tuzak 14 — `color-scheme` iki temada
+    da doğru kurulu, o yüzden Brave açık temalı sayfayı kendi algoritmasıyla
+    karartmıyor. **Ama babanın Brave'inde GÖRÜLMEDİ**; hâlâ doğrulanmayı
+    bekleyen bir varsayım.
 E2E'nin yeni fotolar çekmesini sağlama.
+    → **KARŞILANDI** (E7): `npm run ekran` iki temada 17 görüntü çekiyor (üç
+    yeni sahne: baskı önizlemesi, Kontrol'ün şeridi, Görünüm'ün hareket
+    paneli) ve artık görüntüyü almadan **hareketin bitmesini bekliyor** —
+    tuzak 59, bakılarak bulundu.
 .exe
+    → **BEKLİYOR** (4g–4i): Rust toolchain onayı kullanıcıdan.

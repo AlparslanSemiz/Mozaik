@@ -32,6 +32,12 @@ export type StepId = "rooms" | "teachers" | "classes" | "lessons";
 export type SectionId = "school" | "rules" | "subjects" | "appearance" | "data";
 /** Yazdır: which pages the preview builds. */
 export type Scope = "classes" | "teachers" | "both";
+/**
+ * Kontrol: which half of the report is drawn. A full report is seven panels and
+ * three of them exist only when something is wrong, so "show me just the
+ * problems" and "show me just the loads" are two real questions.
+ */
+export type CheckView = "hepsi" | "sorunlar" | "kapasite";
 
 export interface ToolState {
   tab: Tab;
@@ -51,6 +57,8 @@ export interface ToolState {
   setScope: (next: Scope) => void;
   colored: boolean;
   setColored: (next: boolean) => void;
+  checkView: CheckView;
+  setCheckView: (next: CheckView) => void;
 }
 
 /**
@@ -67,6 +75,8 @@ export function useToolState(firstTab: Tab): ToolState {
   const [section, setSection] = useState<SectionId>("school");
   const [scope, setScope] = useState<Scope>("classes");
   const [colored, setColored] = useState(true);
+  // 'hepsi' is the report as it has always been: nothing is hidden until asked.
+  const [checkView, setCheckView] = useState<CheckView>("hepsi");
 
   return {
     tab,
@@ -85,5 +95,7 @@ export function useToolState(firstTab: Tab): ToolState {
     setScope,
     colored,
     setColored,
+    checkView,
+    setCheckView,
   };
 }

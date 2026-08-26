@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeAvailClock,
   normalizeDensity,
+  normalizeMotion,
   normalizeScale,
   normalizeDockHeight,
   DOCK_H_MIN,
@@ -175,6 +176,31 @@ describe('normalizeAvailClock', () => {
   it('okunamayan her şey KAPALI', () => {
     for (const junk of [null, undefined, '', 'kapali', 'Acik', 'ACIK', true, 1, {}, []]) {
       expect(normalizeAvailClock(junk)).toBe(false);
+    }
+  });
+});
+
+describe('normalizeMotion', () => {
+  it('kayıtlı geçerli tercih olduğu gibi kullanılır', () => {
+    expect(normalizeMotion('tam', true)).toBe('tam');
+    expect(normalizeMotion('az', false)).toBe('az');
+    expect(normalizeMotion('kapali', false)).toBe('kapali');
+  });
+
+  it('kayıt yoksa sistem tercihine düşer', () => {
+    // A button reading "Tam" on a machine where nothing moves would be a lie,
+    // so the FIRST read follows the machine — exactly like the theme.
+    expect(normalizeMotion(null, true)).toBe('kapali');
+    expect(normalizeMotion(null, false)).toBe('tam');
+  });
+
+  it('bozuk değer sistem tercihine düşer, çökmez', () => {
+    // Pitfall 43/44: `Number('')` is 0 and `null` is a value too. This
+    // normalizer is string-only, but the junk list is the same one every other
+    // reader in this file is tested against.
+    for (const junk of ['', 'TAM', 'KAPALI', 'off', 'reduce', '{}', 0, 1, undefined, {}, []]) {
+      expect(normalizeMotion(junk, true)).toBe('kapali');
+      expect(normalizeMotion(junk, false)).toBe('tam');
     }
   });
 });

@@ -1,5 +1,7 @@
-// Machine preferences: the theme and the width of the left rail. Deliberately
-// NOT part of `State`:
+// Machine preferences: the theme, the rail, the dock, the tool strip, the
+// scale, the density, the availability clock and how much the interface is
+// allowed to MOVE. Nine independent scalars in nine keys. Deliberately NOT part
+// of `State`:
 //
 // The theme is a property of the machine, not of the timetable. Putting it in
 // the saved project would mean a backup taken on a dark machine flips the theme
@@ -173,8 +175,8 @@ export function applyRibbon(open: boolean): void {
  * A SEPARATE key from `ders-programi-havuz`, not a widening of it. That key
  * means open/closed and its contract is "anything that is not 'kapali'";
  * folding a number into it would need a second normalizer inside one parser and
- * would break every reader of the current value. theme.ts is five independent
- * scalars in five keys, and this is the sixth.
+ * would break every reader of the current value. theme.ts is a set of
+ * INDEPENDENT scalars in independent keys — nine of them now — and this is one.
  */
 export const DOCK_H_KEY = 'ders-programi-havuz-boy';
 
@@ -404,6 +406,77 @@ export function applyAvailClock(on: boolean): void {
   document.documentElement.setAttribute(AVAIL_CLOCK_ATTRIBUTE, on ? 'acik' : 'kapali');
   try {
     localStorage.setItem(AVAIL_CLOCK_KEY, on ? 'acik' : 'kapali');
+  } catch {
+    // A preference that cannot be remembered is still better than no preference
+  }
+}
+
+// --------------------------------------------------------- motion preference
+//
+// "Animasyonları kapatma ya da azaltma seçeneği olsun ayarlarda."
+//
+// Until now the only switch was the MACHINE's: `prefers-reduced-motion: reduce`
+// zeroes the three duration tokens from one @media block. That covers a reader
+// who has set the preference system-wide and nobody else — and turning it on in
+// Windows changes far more than this program.
+//
+// Three steps, not two, because "kapat ya da azalt" is two different asks:
+//   'tam'     the app as designed
+//   'az'      durations roughly halved, and every motion that MOVES something
+//             switched off — a panel fades in where it will sit rather than
+//             sliding there. Colour transitions stay, so a button still answers
+//             the pointer.
+//   'kapali'  nothing moves and nothing fades.
+//
+// THE SYSTEM PREFERENCE IS A FLOOR, NOT A DEFAULT. `@media (prefers-reduced-
+// motion: reduce)` is written AFTER the [data-motion] rules in styles.css, so a
+// machine asking for less motion gets none whatever this setting says. Letting
+// 'tam' override it would break the one motion contract in CLAUDE.md. What the
+// setting can do is go further than the machine asked.
+//
+// It follows the system on FIRST read, exactly like the theme: a button reading
+// "Tam" on a machine where nothing moves would be a lie.
+//
+// A machine preference like all the others: its own key, never in `State`.
+
+export type Motion = 'tam' | 'az' | 'kapali';
+
+export const MOTION_KEY = 'ders-programi-hareket';
+
+const MOTION_ATTRIBUTE = 'data-motion';
+
+export function systemPrefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Anything that is not one of the three falls back to the system preference —
+ * the same shape as `normalizeTheme`, and for the same reason: a half-written
+ * value must never leave the page without an answer.
+ */
+export function normalizeMotion(raw: unknown, prefersReduced: boolean): Motion {
+  if (raw === 'tam' || raw === 'az' || raw === 'kapali') return raw;
+  return prefersReduced ? 'kapali' : 'tam';
+}
+
+export function readMotion(): Motion {
+  let stored: string | null = null;
+  try {
+    stored = localStorage.getItem(MOTION_KEY);
+  } catch {
+    // localStorage can be unavailable; the system preference still works
+  }
+  return normalizeMotion(stored, systemPrefersReducedMotion());
+}
+
+export function applyMotion(motion: Motion): void {
+  document.documentElement.setAttribute(MOTION_ATTRIBUTE, motion);
+  try {
+    localStorage.setItem(MOTION_KEY, motion);
   } catch {
     // A preference that cannot be remembered is still better than no preference
   }
