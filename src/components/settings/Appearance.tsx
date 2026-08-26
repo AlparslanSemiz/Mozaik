@@ -19,7 +19,7 @@
 // this screen would decide whether a timetable still fits on A4 — a thing my
 // father would discover at the printer.
 
-import { applyDensity, applyScale, SCALE_MAX, SCALE_MIN, SCALE_STEP } from '../../theme';
+import { applyAvailClock, applyDensity, applyScale, SCALE_MAX, SCALE_MIN, SCALE_STEP } from '../../theme';
 import type { Density } from '../../theme';
 import type { State } from '../../types';
 import { paletteColor } from '../../palette';
@@ -31,6 +31,8 @@ interface Props {
   setScale: (next: number) => void;
   density: Density;
   setDensity: (next: Density) => void;
+  availClock: boolean;
+  setAvailClock: (next: boolean) => void;
 }
 
 const STEPS = Array.from(
@@ -38,7 +40,15 @@ const STEPS = Array.from(
   (_, i) => Number((SCALE_MIN + i * SCALE_STEP).toFixed(2)),
 );
 
-export default function Appearance({ state, scale, setScale, density, setDensity }: Props) {
+export default function Appearance({
+  state,
+  scale,
+  setScale,
+  density,
+  setDensity,
+  availClock,
+  setAvailClock,
+}: Props) {
   function choose(next: number) {
     applyScale(next);
     setScale(next);
@@ -135,8 +145,32 @@ export default function Appearance({ state, scale, setScale, density, setDensity
 
           <p className="hint">
             Saatleri görmek için <b>Ayarlar → Okul ve zil</b>'deki zil önizlemesine
-            bakabilirsiniz; basılan sayfada saatler her iki durumda da yazar.
+            bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
           </p>
+        </div>
+
+        <div className="panel">
+          <h2>Müsaitlik çizelgesi</h2>
+          <p className="hint">
+            Müsaitlik ekranındaki ders numaralarının altında <b>başlangıç saati</b>
+            yazsın mı? Varsayılan <b>kapalı</b>. Yer kazandırdığı için değil —
+            ölçüldü, o tablo iki durumda da aynı boyda — sadece o ekranın işi
+            açık/kapalı bir ızgara ve on iki saat orada okunmuyor. Saatler
+            yukarıdaki <b>zil önizlemesinde</b> ve basılan her sayfada, iki
+            durumda da yazıyor.
+          </p>
+          <div className="form-row">
+            <button
+              className="btn"
+              aria-pressed={availClock}
+              onClick={() => {
+                applyAvailClock(!availClock);
+                setAvailClock(!availClock);
+              }}
+            >
+              {availClock ? 'Saatler görünüyor' : 'Saatler gizli'}
+            </button>
+          </div>
         </div>
 
       </div>

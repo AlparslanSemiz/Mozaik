@@ -318,6 +318,11 @@ export function storageReport(lib: Library): StorageReport {
     what: 'araç şeridi tercihi',
     chars: charsAt(`${BASE_KEY}-serit`),
   });
+  rows.push({
+    key: `${BASE_KEY}-musaitlik-saat`,
+    what: 'müsaitlikte saat gösterimi',
+    chars: charsAt(`${BASE_KEY}-musaitlik-saat`),
+  });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

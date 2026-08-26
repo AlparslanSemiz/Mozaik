@@ -72,7 +72,7 @@ test.describe('36. Site sürümü', () => {
     await context.setOffline(true);
     await page.reload();
     await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Program' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
     await context.setOffline(false);
   });
 

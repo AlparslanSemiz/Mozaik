@@ -18,6 +18,7 @@ import {
   chooseScale,
   savedText,
   settledText,
+  answerDialog,
 } from './helpers';
 
 
@@ -383,5 +384,97 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     await openSettings(page, 'Veri');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-yogunluk' })).toHaveCount(1);
+  });
+});
+
+test.describe('50. Müsaitlikte saat gösterimi', () => {
+  // "Ayarlarda müsaitlikteki programda derslerin altında saatleri olsun olmasın
+  // diye ayar olsun ve default olarak kapalı olsun." — the reader's own words,
+  // including the default. The default is the half worth testing: an option
+  // that ships turned on is not the option that was asked for.
+  test('varsayılan KAPALI, açılınca gerçek saat yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+
+    const grid = page.locator('table.availability:not(.heat)');
+    await expect(grid).toBeVisible();
+    const clock = grid.locator('thead .hour-clock').first();
+    await expect(clock).toBeHidden();
+    const before = (await grid.boundingBox())!;
+
+    await openSettings(page, 'Görünüm');
+    await page.getByRole('button', { name: 'Saatler gizli' }).click();
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    await expect(clock).toBeVisible();
+    await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
+
+    // ...and it costs the table NOTHING, which is the opposite of what I first
+    // claimed and the reason this assertion exists rather than a width one.
+    // `table-layout: fixed` at `width: 100%` makes the columns equal whatever
+    // is in them, and the 2.125rem heading already holds two lines of --fs-xs.
+    // Measured: 1341.7 x 354.2 in both states, to the pixel. So this is a
+    // choice about NOISE, not about room, and the setting says so.
+    const after = (await grid.boundingBox())!;
+    expect(after.width).toBeCloseTo(before.width, 0);
+    expect(after.height).toBeCloseTo(before.height, 0);
+  });
+
+  test('tercih yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Görünüm');
+    await page.getByRole('button', { name: 'Saatler gizli' }).click();
+    await expect(page.getByRole('button', { name: 'Saatler görünüyor' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-avail-clock', 'acik');
+
+    const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
+    expect(saved!.includes('musaitlik-saat')).toBe(false);
+    expect(
+      await page.evaluate(() => localStorage.getItem('ders-programi-musaitlik-saat')),
+    ).toBe('acik');
+  });
+
+  test('Ayarlar → Veri bu anahtarı da sayıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+    const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
+    await expect(
+      panel.locator('tbody code', { hasText: 'ders-programi-musaitlik-saat' }),
+    ).toHaveCount(1);
+  });
+});
+
+test.describe('51. Program: programı boşalt', () => {
+  test('dizilmiş programı havuza geri gönderiyor, geri alınabiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+    const placed = await page.locator('table.grid .card').count();
+    expect(placed).toBeGreaterThan(0);
+
+    await page.getByRole('button', { name: 'Programı boşalt' }).click();
+    // Not the same button as "Baştan diz": that one refills the grid. This one
+    // clears it, which is what the reader asked for by name.
+    const asked = await answerDialog(page);
+    expect(asked).toContain('havuza dönecek');
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
+
+    // The lessons themselves are untouched — they are back in the pool.
+    expect(await page.locator('.pool-card').count()).toBeGreaterThan(0);
+
+    // And it is one undo step.
+    await page.getByRole('button', { name: 'Geri al', exact: true }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(placed);
+  });
+
+  test('boş ızgarada kapalı', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Programı boşalt' })).toBeDisabled();
   });
 });

@@ -189,7 +189,7 @@ test.describe('8. Tema', () => {
     await page.getByRole('button', { name: 'Koyu tema' }).click();
     await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
     await answerDialog(page);
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 
     // The card text sits on the teacher palette, which does NOT flip with the
@@ -307,7 +307,7 @@ test.describe('14. Renk paleti', () => {
     expect(new Set(swatches).size, 'iki sınıf aynı renkte').toBe(swatches.length);
 
     // The class colour is a MARK, not the cell fill: it shows on the row head.
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     const dots = await page
       .locator('tbody .row-head .row-dot')

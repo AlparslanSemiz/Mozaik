@@ -22,7 +22,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await openSettings(page, 'Okul ve zil');
     await page.getByLabel('Pazartesi', { exact: true }).check();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.day-head')).toHaveCount(7);
     await expect(page.locator('.day-head').first()).toHaveText('Pazartesi');
 
@@ -59,7 +59,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await lengthBox.blur();
     await expect(preview).toContainText('09:00–09:45');
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid thead tr').nth(1)).toContainText('09:55');
   });
 });
@@ -114,7 +114,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     await lessonMinutes.fill('45');
     await lessonMinutes.blur();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     // The second lesson moves: 09:00 + 45 + 10
     await expect(page.locator('table.grid thead .hour-clock').nth(1)).toHaveText('09:55');
   });
@@ -126,7 +126,7 @@ test.describe('15. Ayarlar sekmesi', () => {
       .locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' })
       .locator('input[type=number]')
       .fill('1');
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     await startDrag(page);
     await hover(page, 0, 0);
@@ -155,7 +155,7 @@ test.describe('15. Ayarlar sekmesi', () => {
       .evaluateAll((list) => list.map((el) => getComputedStyle(el).backgroundColor));
     expect(new Set(colors).size).toBe(colors.length);
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(placed);
   });
 });
@@ -198,7 +198,7 @@ test.describe('17. Başlangıç saati', () => {
     await page.getByLabel('Başlangıç dakikası').selectOption('35');
     await expect(page.locator('table.bell-preview')).toContainText('14:35–15:15');
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid thead .hour-clock').first()).toHaveText('14:35');
   });
 
@@ -230,7 +230,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
 
     const closed = await hover(page, 0, 0);
@@ -250,7 +250,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await page.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
     await expect(await hover(page, 0, 0)).toHaveClass(/drop-blocked/);
     await expect(page.locator('.reason-bar')).toContainText('A dersliği Salı 1 saatinde kapalı');
@@ -269,7 +269,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await rule.locator('input[type=number]').blur();
     await rule.locator('select').selectOption('block');
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await startDrag(page);
     const first = await hover(page, 0, 0);
     await expect(first).toHaveClass(/drop-ok/);
@@ -290,7 +290,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
       .locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' })
       .locator('select')
       .selectOption('warn');
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     await startDrag(page);
     const again = await hover(page, 0, 1);

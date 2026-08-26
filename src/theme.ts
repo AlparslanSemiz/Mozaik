@@ -360,3 +360,51 @@ export function applyDensity(density: Density): void {
     // A density that cannot be remembered is still better than no density
   }
 }
+
+// --------------------------------------------- availability clock preference
+//
+// "Ayarlarda müsaitlikteki programda derslerin altında saatleri olsun olmasın
+// diye ayar olsun ve default olarak kapalı olsun." — the reader's own words,
+// and the default they asked for.
+//
+// Why it is worth an option at all — and the first answer I wrote was WRONG,
+// so it is worth writing down which one is true. I claimed the clock sets the
+// column's floor the way it does on the Program grid (pitfall 37). Measured on
+// the real screen: it does not. `table.availability` is `table-layout: fixed`
+// at `width: 100%`, so the columns are equal whatever is in them, and the
+// heading's 2.125rem already holds two lines of --fs-xs — the table came out
+// 1341.7px wide and 354.2px tall with the clock and WITHOUT it, to the pixel.
+//
+// So the reason is the one the reader actually gave: they do not want to look
+// at it. Twelve times across a heading is twelve numbers nobody is reading on
+// a screen whose whole job is a grid of open and closed. The times are in
+// Ayarlar → Okul's bell preview and on every printed sheet, in both states.
+//
+// A machine preference like all the others: its own key, never in `State`,
+// never in a backup.
+
+export const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
+
+const AVAIL_CLOCK_ATTRIBUTE = 'data-avail-clock';
+
+/** Only the exact string 'acik' turns it on. Absent means OFF, as asked. */
+export function normalizeAvailClock(raw: unknown): boolean {
+  return raw === 'acik';
+}
+
+export function readAvailClock(): boolean {
+  try {
+    return normalizeAvailClock(localStorage.getItem(AVAIL_CLOCK_KEY));
+  } catch {
+    return false;
+  }
+}
+
+export function applyAvailClock(on: boolean): void {
+  document.documentElement.setAttribute(AVAIL_CLOCK_ATTRIBUTE, on ? 'acik' : 'kapali');
+  try {
+    localStorage.setItem(AVAIL_CLOCK_KEY, on ? 'acik' : 'kapali');
+  } catch {
+    // A preference that cannot be remembered is still better than no preference
+  }
+}

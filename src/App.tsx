@@ -10,6 +10,7 @@ import {
   applyTheme,
   readDensity,
   readRibbon,
+  readAvailClock,
   readScale,
   readTheme,
   type Density,
@@ -292,6 +293,9 @@ export default function App() {
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
   const [density, setDensity] = useState<Density>(readDensity);
+  // Applied to the document by main.tsx before the first paint; this copy
+  // exists only so Ayarlar → Görünüm can show which way the switch is.
+  const [availClock, setAvailClock] = useState<boolean>(readAvailClock);
   // Whether the tool strip is drawn. It lives here and not in Ribbon because
   // the button that folds it is in the top bar — a folded strip has no row to
   // put its own chevron on, which is the whole point of folding it.
@@ -525,6 +529,7 @@ export default function App() {
         ui={ui}
         open={ribbon}
         state={state}
+        change={change}
         solver={solver}
         density={density}
         setDensity={setDensity}
@@ -598,6 +603,8 @@ export default function App() {
               setScale={setScale}
               density={density}
               setDensity={setDensity}
+              availClock={availClock}
+              setAvailClock={setAvailClock}
               section={ui.section}
             />
           )}

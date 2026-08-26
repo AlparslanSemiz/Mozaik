@@ -30,7 +30,7 @@ export async function openWithSample(page: Page) {
   await open(page);
   await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
   await answerDialog(page); // "örnek okul verisi yüklenecek"
-  await page.getByRole('button', { name: 'Program' }).click();
+  await page.getByRole('button', { name: 'Program', exact: true }).click();
   await expect(page.locator('table.grid')).toBeVisible();
 
   // ...and wait until the sample has actually been WRITTEN, not just drawn.
@@ -262,7 +262,7 @@ export async function openFixture(page: Page) {
     buffer: Buffer.from(JSON.stringify(FIXTURE)),
   });
   await answerDialog(page);
-  await expect(page.getByRole('button', { name: 'Program' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
 }
 
 /** Moves the mouse over one grid cell mid-drag and waits for the highlight. */

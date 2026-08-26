@@ -3451,3 +3451,13 @@ table.availability.heat td.closed {
   min-width: var(--w-col-xl);
   max-width: 100%;
 }
+
+/* The clock under each lesson number on the MÜSAİTLİK grid. Off by default
+   (the reader asked for that), and the reason it is worth a switch at all is
+   the same one pitfall 37 measured on the Program grid: the clock is the
+   widest thing in the heading, so it sets the column's floor — and this is a
+   screen you PAINT by dragging across, where a narrower column is a shorter
+   drag. Whoever wants the times has them in Ayarlar → Okul and on paper. */
+:root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
+  display: none;
+}

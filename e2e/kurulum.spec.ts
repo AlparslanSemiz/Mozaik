@@ -149,7 +149,7 @@ test.describe('12. Branş kısaltmaları', () => {
     await input.fill('Zzz');
     await input.blur();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
 

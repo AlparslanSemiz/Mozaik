@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  normalizeAvailClock,
   normalizeDensity,
   normalizeScale,
   normalizeDockHeight,
@@ -160,5 +161,20 @@ describe('normalizeDockHeight', () => {
       value = normalizeDockHeight(String(value + DOCK_H_STEP));
     }
     expect(value).toBe(DOCK_H_MAX);
+  });
+});
+
+describe('normalizeAvailClock', () => {
+  // The reader asked for this one to default OFF, so "absent" and "anything
+  // unreadable" both have to mean off — and only the exact stored string may
+  // turn it on.
+  it('yalnız "acik" açık demektir', () => {
+    expect(normalizeAvailClock('acik')).toBe(true);
+  });
+
+  it('okunamayan her şey KAPALI', () => {
+    for (const junk of [null, undefined, '', 'kapali', 'Acik', 'ACIK', true, 1, {}, []]) {
+      expect(normalizeAvailClock(junk)).toBe(false);
+    }
   });
 });

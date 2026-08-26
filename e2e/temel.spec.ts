@@ -30,7 +30,7 @@ test.describe('1. Kalıcılık — file:// altında', () => {
     // Auto-save is debounced by 400 ms
     await page.waitForTimeout(700);
     await page.reload();
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     await expect(page.locator('table.grid .card')).toHaveCount(before);
   });
@@ -104,7 +104,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
     // The teacher, the class and the placed 2-hour block all survived.
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
     await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
     await expect(page.locator('table.grid .card').first()).toContainText('510');
@@ -119,7 +119,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await hourBox.fill('4');
     await hourBox.blur();
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     // 12 -> 4 hours: 4 columns left per day, 6 days
     await expect(page.locator('tbody tr').first().locator('td')).toHaveCount(24);
   });
@@ -151,7 +151,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     });
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
     await expect(page.locator('.day-head').first()).toHaveText('Cuma');
     // The bell times the migration filled in are visible in the header.
@@ -218,7 +218,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     });
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
     await expect(page.locator('.day-head').first()).toHaveText('Salı');
     await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
@@ -300,7 +300,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
     // The laid-out block survived the migration untouched.
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
     await expect(page.locator('table.grid .card').first()).toContainText('510');
 
@@ -321,7 +321,7 @@ test.describe('5. Yedek ve şema göçü', () => {
     expect(new Set(classColors).size).toBe(2);
 
     // The hand-written override still wins over the built-in table.
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     await expect(page.locator('table.grid .card').first()).toContainText('Mtk');
   });

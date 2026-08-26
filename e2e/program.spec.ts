@@ -232,7 +232,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
     await expect(page.locator('table.grid .card')).toHaveCount(0);
     await page.getByRole('button', { name: 'Kontrol' }).click();
-    await expect(page.getByRole('button', { name: 'Program' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
   });
 
   test('SOL tık silmiyor — ders yerinde kalıyor', async ({ page }) => {

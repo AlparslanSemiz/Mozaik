@@ -28,6 +28,8 @@ interface Props extends PanelProps {
   setScale: (next: number) => void;
   density: Density;
   setDensity: (next: Density) => void;
+  availClock: boolean;
+  setAvailClock: (next: boolean) => void;
   /** Which section. Owned by App: the tool strip above shows it. */
   section: SectionId;
 }
@@ -41,6 +43,8 @@ export default function Settings({
   setScale,
   density,
   setDensity,
+  availClock,
+  setAvailClock,
   section,
 }: Props) {
 
@@ -56,6 +60,8 @@ export default function Settings({
           setScale={setScale}
           density={density}
           setDensity={setDensity}
+          availClock={availClock}
+          setAvailClock={setAvailClock}
         />
       )}
       {section === 'data' && (

@@ -103,7 +103,7 @@ test.describe('20. Kapalı saatte ders', () => {
   test('kapatınca ders SİLİNMİYOR, kırmızı işaretleniyor', async ({ page }) => {
     const { before } = await conflict(page);
 
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     // Nothing was removed.
     await expect(page.locator('table.grid .card')).toHaveCount(before);
     // ...and the clash is visible instead of hidden under the card.
@@ -137,11 +137,11 @@ test.describe('20. Kapalı saatte ders', () => {
 
   test('saat yeniden açılınca işaret kalkıyor', async ({ page }) => {
     const { day, hour, row } = await conflict(page);
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card.conflict').first()).toBeVisible();
 
     await closeHour(page, row, day, hour); // toggles it back open
-    await page.getByRole('button', { name: 'Program' }).click();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card.conflict')).toHaveCount(0);
   });
 });

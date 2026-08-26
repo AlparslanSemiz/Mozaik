@@ -31,6 +31,8 @@ interface Props {
   /** Whether the strip is drawn at all. Owned by App: the button is up there. */
   open: boolean;
   state: State;
+  /** Only the strip's own destructive action needs it: "Programı boşalt". */
+  change: (fn: (d: State) => State) => void;
   solver: SolverRun;
   density: Density;
   setDensity: (next: Density) => void;
@@ -65,7 +67,7 @@ function Sep() {
 }
 
 
-export default function Ribbon({ ui, open, state, solver, density, setDensity }: Props) {
+export default function Ribbon({ ui, open, state, change, solver, density, setDensity }: Props) {
   const { confirm } = useDialogs();
   const ix = useMemo(() => buildIndex(state), [state]);
 
@@ -212,6 +214,29 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
               }}
             >
               Baştan diz
+            </button>
+            {/* "Programı sıfırla" — asked for by name. It is NOT the same
+                button as "Baştan diz": that one empties the grid and then
+                fills it again, and there was no way to simply CLEAR it and
+                start placing by hand. Undoable, and the question says so. */}
+            <button
+              className="btn danger"
+              disabled={placed === 0}
+              title="Dizilmiş bütün dersleri havuza geri gönderir"
+              onClick={async () => {
+                if (
+                  await confirm({
+                    title: `Dizilmiş ${placed} saatin tamamı havuza dönecek`,
+                    body: 'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                    confirmLabel: 'Programı boşalt',
+                    danger: true,
+                  })
+                ) {
+                  change((d) => ({ ...d, placements: {} }));
+                }
+              }}
+            >
+              Programı boşalt
             </button>
           </>
         )}
