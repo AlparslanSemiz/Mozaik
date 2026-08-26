@@ -44,10 +44,24 @@ async function gridMetrics(page: import('@playwright/test').Page) {
 const rootFontSize = (page: import('@playwright/test').Page) =>
   page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize));
 
+/**
+ * What NO stored preference means. Not 1.0 and not the floor of the range:
+ * those were the same number until 2026-08-26 and the tests below were quietly
+ * written against the coincidence rather than against the constant.
+ *
+ * Duplicated here rather than imported because `tsconfig.json` covers `src`
+ * only, so an import from `../src/theme` never sees the type checker — the
+ * same reason `worlds.ts` lives under `src`. It is asserted against the real
+ * page below, so a drift shows up as a failure and not as a stale comment.
+ */
+const SCALE_DEFAULT = 1.1;
+
 test.describe('44. Görünüm — yazı büyüklüğü', () => {
   test('ölçek kökün yazı boyunu değiştiriyor ve yenilemede duruyor', async ({ page }) => {
     await open(page);
-    expect(await rootFontSize(page)).toBeCloseTo(16, 1);
+    // The first screen is already a little larger than a browser default: the
+    // reader has trouble seeing, and 1.0 was never a measurement.
+    expect(await rootFontSize(page)).toBeCloseTo(16 * SCALE_DEFAULT, 1);
 
     await chooseScale(page, 125);
     expect(await rootFontSize(page)).toBeCloseTo(20, 1);
@@ -117,6 +131,13 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
         width: e.getBoundingClientRect().width,
         columns: e.querySelectorAll('thead tr:nth-child(2) th').length,
       }));
+    // Start from a KNOWN rung rather than from whatever the default happens to
+    // be: the ratio below is the whole assertion, and reading it off an
+    // unstated starting point is how this test came to claim 1.25 while
+    // actually walking 1.10 -> 1.25.
+    await chooseScale(page, 100);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
     const before = await measure();
 
     await chooseScale(page, 125);
@@ -222,6 +243,62 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   });
 });
 
+test.describe('46. Görünüm — Ferah', () => {
+  // The third step, and the one that goes the other way: 'sigdir' trades
+  // information for the whole week, 'ferah' trades days on screen for a cell
+  // you can read without leaning in. The reader has trouble seeing, so the
+  // grid needed a direction that was not "smaller".
+  test('Ferah hücreyi büyütüyor ve kartın alt satırını geri veriyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+
+    const roomy = await gridMetrics(page);
+
+    await chooseDensity(page, 'Ferah');
+    const airy = await gridMetrics(page);
+
+    // Bigger, and bigger in BOTH directions — a wider cell with the same
+    // height would just be a stretched slab.
+    expect(airy.cell).toBeGreaterThan(roomy.cell);
+    expect(airy.clock).toBe('block');
+    // The trade is stated out loud: more scrolling, not less.
+    expect(airy.overflow).toBeGreaterThan(roomy.overflow);
+    // And it is paid for in DAYS, never in legibility.
+    expect(airy.cards).toBe(roomy.cards);
+    expect(airy.clipped, `${airy.clipped} kartın yazısı kırpıldı`).toBe(0);
+
+    // A real way back, like Sığdır.
+    await chooseDensity(page, 'Rahat');
+    expect((await gridMetrics(page)).cell).toBeCloseTo(roomy.cell, 0);
+  });
+
+  test('üç basamak da şeritten seçilebiliyor ve tercih yenilemede duruyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    // The strip is where this decision is actually taken: you are looking at
+    // the grid when you take it.
+    const strip = page.locator('.ribbon');
+    await strip.getByRole('button', { name: 'Ferah', exact: true }).click();
+    await expect(strip.getByRole('button', { name: 'Ferah', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+
+    await page.reload();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-density', 'ferah');
+
+    // A machine setting, never timetable data.
+    const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
+    expect(saved).not.toBeNull();
+    expect(saved!.includes('ferah')).toBe(false);
+    expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe('ferah');
+  });
+});
+
 test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
   // The claim this mode is built on is a measurement, not a preference:
   // --cell-w was set to 28, 23 and 18px in turn and the cell came out 33.69px
@@ -244,7 +321,23 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     const roomy = await gridMetrics(page);
     expect(roomy.cards).toBeGreaterThan(400);
     expect(roomy.clock).toBe('block');
-    expect(roomy.cell).toBeCloseTo(34, 0);
+    // --cell-w is 2.125rem and the root is 16px * the scale, so the cell is a
+    // CONSEQUENCE of the scale, not a number of its own. Written out as 34 it
+    // was really asserting "the default scale is 1.0".
+    //
+    // It is a FLOOR, not an equality, and pitfall 37 is why: `width` on a table
+    // cell is a request, and the column cannot be drawn narrower than its
+    // min-content — which here is "09:00" in the heading. At 1.0 the request
+    // (34.0) happened to sit above the floor and the two matched exactly; at
+    // 1.1 the request is 37.4 and the floor rounds it to 38. Asserting equality
+    // was asserting the coincidence.
+    const wanted = 2.125 * 16 * SCALE_DEFAULT;
+    expect(roomy.cell).toBeGreaterThanOrEqual(wanted - 0.5);
+    expect(
+      roomy.cell,
+      `hücre ${roomy.cell}px, istenen ${wanted.toFixed(1)}px — aradaki fark ` +
+        'başlığın min-content zemininden büyük olamaz',
+    ).toBeLessThan(wanted + 2);
     // The default is the grid my father already knows: it scrolls sideways.
     expect(roomy.overflow).toBeGreaterThan(500);
 

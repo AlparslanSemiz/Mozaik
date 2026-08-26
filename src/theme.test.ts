@@ -15,6 +15,7 @@ import {
   normalizeTheme,
   SCALE_MAX,
   SCALE_MIN,
+  SCALE_DEFAULT,
   SCALE_STEP,
 } from './theme';
 
@@ -71,10 +72,16 @@ describe('normalizeScale', () => {
     expect(normalizeScale('1.13')).toBe(1.15);
   });
 
-  it('okunamayan her şey 1 olur', () => {
+  it('okunamayan her şey VARSAYILAN olur, taban değil', () => {
+    // "Tercih yok" ile "biri depoya saçma bir şey yazmış" aynı cevabı verir ve
+    // o cevap tabana değil varsayılana oturur — ikisi ancak varsayılan tabana
+    // eşitken aynı görünüyordu (tuzak 43'ün akrabası).
     for (const junk of [null, undefined, '', 'büyük', {}, NaN, [], true]) {
-      expect(normalizeScale(junk)).toBe(SCALE_MIN);
+      expect(normalizeScale(junk)).toBe(SCALE_DEFAULT);
     }
+    // Ama okunabilen bir sayı hâlâ SINIRA çekilir, varsayılana değil.
+    expect(normalizeScale('0.2')).toBe(SCALE_MIN);
+    expect(normalizeScale('0')).toBe(SCALE_MIN);
   });
 
   // Binary floating point: 1 + 0.05 * 3 is 1.1500000000000001, and a value that
@@ -95,15 +102,17 @@ describe('normalizeScale', () => {
 });
 
 describe('normalizeDensity', () => {
-  it('yalnız "sigdir" sığdırma demektir', () => {
+  it('üç basamağın üçü de tanınıyor', () => {
     expect(normalizeDensity('sigdir')).toBe('sigdir');
+    expect(normalizeDensity('ferah')).toBe('ferah');
+    expect(normalizeDensity('rahat')).toBe('rahat');
   });
 
   // The default has to be the grid my father already knows. A junk value that
   // fell through to "sigdir" would hide the bell times on his screen with no
   // visible cause and no obvious way back.
   it('okunamayan her şey rahat ızgaradır', () => {
-    for (const junk of [null, undefined, '', 'rahat', 'Sığdır', 'SIGDIR', {}, 1, [], true]) {
+    for (const junk of [null, undefined, '', 'rahat', 'Sığdır', 'SIGDIR', 'Ferah', {}, 1, [], true]) {
       expect(normalizeDensity(junk)).toBe('rahat');
     }
   });

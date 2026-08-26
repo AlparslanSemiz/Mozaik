@@ -88,17 +88,35 @@ export default function Appearance({ state, scale, setScale, density, setDensity
         <div className="panel">
           <h2>Izgara yoğunluğu</h2>
           <p className="hint">
-            <b>Rahat</b>, bugüne kadarki ızgara: hücre geniş, her ders numarasının
-            altında başlangıç saati yazıyor, ve hafta ekrana sığmadığı için sağa
-            kaydırıyorsunuz. <b>Sığdır</b>, haftanın tamamını bir ekranda gösterir:
-            hücre ekranın genişliğinden hesaplanır ve <b>saatler gizlenir</b> —
-            sütunu dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
-            renkler yerinde kalır. Havuz çekmecesi ızgaranın <b>altında</b>
-            durduğu için hafta iki durumda da sığar; çekmecenin boyunu Program
-            sekmesinde birleşme çizgisinden sürükleyerek ayarlarsınız.
+            Üç basamak, ve üçü de aynı şeyi takas ediyor: <b>bir hücrenin
+            büyüklüğü</b> ile <b>ekranda görünen gün sayısı</b>.
           </p>
+          <ul className="hint choice-list">
+            <li>
+              <b>Ferah</b> — hücre en büyük, kartın alt satırı tam boyda. En kolay
+              okunan, en çok kaydırılan.
+            </li>
+            <li>
+              <b>Rahat</b> — bugüne kadarki ızgara: hücre geniş, her ders
+              numarasının altında başlangıç saati yazıyor, hafta ekrana sığmadığı
+              için sağa kaydırıyorsunuz.
+            </li>
+            <li>
+              <b>Sığdır</b> — haftanın tamamı bir ekranda: hücre ekranın
+              genişliğinden hesaplanır ve <b>saatler gizlenir</b>, çünkü sütunu
+              dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
+              renkler yerinde kalır.
+            </li>
+          </ul>
 
           <div className="form-row" role="group" aria-label="Izgara yoğunluğu">
+            <button
+              className="btn"
+              aria-pressed={density === 'ferah'}
+              onClick={() => chooseDensity('ferah')}
+            >
+              Ferah
+            </button>
             <button
               className="btn"
               aria-pressed={density === 'rahat'}

@@ -486,7 +486,7 @@ export async function chooseScale(page: Page, percent: number) {
 }
 
 /** Ayarlar → Görünüm'den ızgara yoğunluğunu seçer ve Program'a döner. */
-export async function chooseDensity(page: Page, name: 'Rahat' | 'Sığdır') {
+export async function chooseDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
   await openSettings(page, 'Görünüm');
   await page.getByRole('button', { name, exact: true }).click();
   await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(

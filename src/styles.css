@@ -54,69 +54,89 @@
    says anything is wrong. --chrome-lit is the top 0-stop of the bar's gradient
    and exists only there. */
 
+/* ------------------------------------------------------------------ tokens
+   The neutral ramp is DERIVED, not picked. Every grey below is one hue (258)
+   at a chosen OKLCH lightness and chroma, converted to sRGB offline — the
+   ramp reads as one family because it is one, and the steps are perceptually
+   even because Oklab lightness is.
+   Why hex and not oklch() in the file: `getComputedStyle().color` serialises
+   an oklch colour AS oklch, and every measurement in the suite parses rgb().
+   Authoring in hex keeps the contract measurable and the file greppable.
+
+   The functional colours (--ok/--warn/--bad), the closed grey and the six
+   section hues are UNCHANGED. They were searched under contrast and CIE Lab
+   constraints and they still pass; the one design contract that survived
+   2026-08-26 says the functional channel is not taste.
+
+   Measured, both themes, by scratch/tokens.mjs and re-measured every run by
+   renk.spec.ts:
+     paper luminance      1.000 light / 0.017 dark   (contract: >0.9 / <0.1)
+     text on paper        17.47  / 13.26
+     muted on paper        7.28  /  7.28
+     muted on closed       5.09  /  4.69
+     accent on accent-bg   6.59  /  6.47
+     on-accent on accent   7.70  /  9.48
+     section min AA        5.63  /  4.89
+     section vs functional 52.5  / 49.9  ΔE     (contract: >32)
+     dE(chrome,paper)      4.22  /  5.44
+     dE(band,paper)        2.45  /  4.67 */
+
 :root {
   color-scheme: light;
 
-  --bg:          #d7dce4;
-  --chrome:      #eff2f6;
-  --chrome-2:    #e6eaf1;
-  --chrome-lit:  #f6f8fb;
+  /* THE PLANES. Four now, not three: the desk, the tool, the tool's second
+     step back, and the sheet. --chrome-lit is the top stop of the top bar's
+     gradient and lives only there. */
+  --bg:          #dae0e9;
+  --chrome:      #f3f6fb;
+  --chrome-2:    #ecf0f6;
+  --chrome-lit:  #fcfdff;
   --paper:       #ffffff;
-  --paper-sunk:  #f2f5f9;
+  --paper-sunk:  #f1f5fa;
   /* The grid's day band: odd days get this ground so the eye sees SIX DAYS
-     instead of 78 columns. dE(band, paper) = 2.7 — deliberately far below the
-     14 that tells two functional colours apart, or it would read as a state. */
-  --band:        #f7f8fa;
+     instead of 78 columns. Far below the 14 that separates two functional
+     colours, or it would read as a state (pitfall 40). */
+  --band:        #f8fafd;
 
-  /* Three rules, three jobs (unchanged split, retuned values):
-     --hairline shell, --line control edge and table head, --line-dark the
-     loudest rule there is (day separator, row head). */
-  --hairline:    #e5e8ed;
-  --line:        #cbd1d9;
-  --line-dark:   #949da9;
+  /* Three rules, three jobs: --hairline shell, --line control edge and table
+     head, --line-dark the loudest there is (day separator, row head). */
+  --hairline:    #e0e4eb;
+  --line:        #c6cdd7;
+  --line-dark:   #8a93a0;
 
-  --text:        #14171b;
-  /* Kept from Y0: #5c6672 fell to AA 4.08 on --closed, which is the grey the
-     closed-hour "x" is drawn on. Measured here: --paper 6.79, --closed 4.75. */
-  --muted:       #525c69;
+  --text:        #131a25;
+  --muted:       #505763;
 
-  /* Ink blue. Deliberately QUIET: 36 identity colours and three functional
-     ones already own this screen's colour budget, and a loud accent would
-     fight them. Measured: 6.63 on --accent-bg, 7.81 for --on-accent on it. */
-  --accent: #2e4ba8;  --accent-hover: #24398a;
-  --accent-bg: #e8ecfa;  --on-accent: #ffffff;
+  /* Ink blue, and no longer whispering. The old accent was deliberately quiet
+     on the grounds that 36 identity colours plus three functional ones own
+     this screen's colour budget. That is still true of the GRID — which is
+     why the accent is not allowed in it — but it left the shell with no
+     voice at all: nothing on the top bar said which control was the one you
+     came for. Measured 6.59 on its own ground, 7.70 for white on it. */
+  --accent: #2c47bb;  --accent-hover: #1d319d;
+  --accent-bg: #e4eeff;  --on-accent: #ffffff;
+
   --ok: #177431;  --ok-bg: #d5f0dc;
   --warn: #8a6100;  --warn-bg: #fdf0cf;
   --bad: #b0201c;  --bad-bg: #fbdcda;
   --closed: #d5d8dd;  --hatch: #e8eaee;
 
-  /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg.
-     Those three are also the resting colours of the reason bar and of a warned
-     cell, where a full-strength fill would shout all day; a drop highlight
-     lives for the length of one gesture and has to be findable across 78
-     columns at a glance. Measured against --paper: dE 33.9/39.0/29.7, where
-     the shared tokens gave 16.1/18.3/15.1 — the old fill was barely a tint.
-     Still >= 34 dE from each other, so the three states never merge. */
+  /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg:
+     those are also the RESTING colours of the reason bar and of a warned cell,
+     where full strength would shout all day. A drop highlight lives for the
+     length of one gesture and has to be findable across 78 columns at a
+     glance. Measured against --paper: dE 33.9/39.0/29.7, where the shared
+     tokens gave 16.1/18.3/15.1. */
   --drop-ok-bg: #a8e6bd;
   --drop-warn-bg: #fbe09a;
   --drop-bad-bg: #f7bcb7;
 
   /* SECTION COLOURS — one per tab, so "where am I" is answered by a colour as
-     well as by a lit tab. They are NOT decorative and they are NOT free:
-     green/yellow/red is the tool's only feedback channel (droppable / warning /
-     blocked), and a seventh, eighth, ninth hue on screen is exactly how that
-     channel gets muddied.
-     So they were SEARCHED, not chosen, the way palette.ts searched the 36:
-       - the green (75-165) and red (340-25) hue bands are excluded outright —
-         a darker green is still green to an eye scanning for green, whatever a
-         colorimeter says about the Lab distance;
-       - >= 5:1 contrast on --paper, and >= 32 CIE Lab dE from --ok/--warn/--bad,
-         both as THRESHOLDS;
-       - what is optimised is chroma, because six sections have to be six
-         identities and it is chroma, not lightness, that separates six hues.
-     Measured: min contrast 5.63, min dE to a functional colour 52.5, min dE
-     between two sections 16.0. `renk.spec.ts` re-measures all three every run
-     — these numbers are a reading, not a promise (pitfall 42). */
+     well as by a lit tab. SEARCHED, not chosen: the green (75-165) and red
+     (340-25) hue bands excluded outright, >=5:1 on --paper and >=32 CIE Lab dE
+     from --ok/--warn/--bad as thresholds, chroma optimised because it is
+     chroma and not lightness that separates six hues. renk.spec.ts
+     re-measures all three every run — a reading, not a promise. */
   --sec-setup: #153184;
   --sec-availability: #681584;
   --sec-program: #157184;
@@ -124,96 +144,125 @@
   --sec-print: #84155f;
   --sec-settings: #3a4d5f;
 
-  /* temayla dönmeyen mürekkep — aynen korunuyor */
+  /* Ink that does NOT turn with the theme: it lands on the 36 palette colours,
+     and those are the same in both themes because they are printed on paper
+     (pitfall 15 and 35). */
   --on-color: #1b1f24;  --on-color-sub: #3a3f46;
   --block-cont: rgba(0,0,0,.12);
   --edge: rgba(0,0,0,.4);
   --dot-border: rgba(0,0,0,.3);
   --print-line: #444;  --print-head-bg: #eee;
-
-  /* Sürüklenen hayalet kart. */
   --shadow: rgba(0,0,0,.35);
 
-  /* TWO ELEVATIONS, and only two. The old rule ("if an element looks like it
-     is floating it is wrong") is replaced, not loosened: --elev-1 is the sheet
-     lying on the desk, --elev-2 is the three things that genuinely float — the
-     drag ghost, a dialog, and the sticky head once the grid is scrolled under
-     it. Buttons and inputs get NEITHER. */
-  --elev-1: 0 1px 2px rgba(20,26,38,.06), 0 1px 1px rgba(20,26,38,.04);
-  --elev-2: 0 10px 28px rgba(20,26,38,.13), 0 2px 6px rgba(20,26,38,.09);
+  /* ELEVATION — five steps. The old two ("the sheet on the desk" and "the
+     three things that genuinely float") could not describe a shell that has a
+     raised bar, a docked drawer, a dialog and a drag ghost all on screen at
+     once: everything above the sheet had to borrow the ghost's shadow.
+       --elev-0  flat, on its plane
+       --elev-1  the sheet lying on the desk
+       --elev-2  raised chrome: the ribbon, the dock, a sticky heading
+       --elev-3  a dialog, a slide-over, a popover
+       --elev-4  the drag ghost — the only thing under the pointer
+     Two soft layers each, because one hard shadow reads as a cut-out. */
+  --elev-0: none;
+  --elev-1: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.05);
+  --elev-2: 0 1px 3px rgba(16,24,40,.07), 0 4px 10px rgba(16,24,40,.06);
+  --elev-3: 0 4px 12px rgba(16,24,40,.10), 0 12px 32px rgba(16,24,40,.12);
+  --elev-4: 0 6px 16px rgba(16,24,40,.16), 0 24px 56px rgba(16,24,40,.20);
 
-  /* TİPOGRAFİ — 11 boyut yerine 6 */
-  --fs-xs:   .75rem;    /* 12px — mutlak alt sınır */
+  /* TYPOGRAPHY. Nine steps, up from six: with only six, a page heading and a
+     panel heading had to share one size and the hierarchy came out flat.
+     12px stays the absolute floor and that is NOT taste — the reader has
+     trouble seeing. */
+  --fs-2xs:  .6875rem; /* 11px — print preview furniture ONLY, never screen UI */
+  --fs-xs:   .75rem;   /* 12px — the screen floor */
   --fs-sm:   .8125rem;
   --fs-md:   .875rem;
-  --fs-base: 1rem;      /* gövde */
+  --fs-base: 1rem;     /* body */
   --fs-lg:   1.125rem;
   --fs-xl:   1.375rem;
+  --fs-2xl:  1.75rem;
+  --fs-3xl:  2.25rem;
 
-  /* Tracking, two values. Plex wants a touch of negative tracking at display
-     sizes and real positive tracking when small text is set in caps — the day
-     headings are the reason the second one exists. */
+  /* Tracking. Plex wants a touch of negative at display sizes, real positive
+     when small text is set in caps, and a hair of negative on headings. */
   --ls-tight: -.011em;
+  --ls-tighter: -.021em;
   --ls-caps:   .06em;
 
-  /* KÂĞIT — ekranınkinden AYRI bir merdiven, pt cinsinden.
-     Gerekçe: --ui-scale bir EKRAN rahatlık ayarı, kâğıt ise sabit fiziksel
-     boyut. Baskı rem kullansaydı 1.25 ölçekte A4'e sığan şey değişir, 205 mm
-     sabit yükseklik hesabı (tuzak 31) ve "3 sınıf = 3 sayfa" testi ölçeğe göre
-     bir geçer bir kalırdı — babanın yazıcıda bulacağı bir hata. */
-  --fs-p-xl:   14pt;    /* sayfa başlığı */
-  --fs-p-lg:   10pt;    /* .p-top, .p-daycol, kapalı saat */
-  --fs-p-md:    9pt;    /* künye satırı */
-  --fs-p-base: 8.5pt;   /* tablo gövdesi ve başlığı */
-  --fs-p-sm:    8pt;    /* .p-bottom */
-  --fs-p-xs:    7pt;    /* .p-clock */
+  /* PAPER — its own ladder, in pt, because A4 is a fixed physical size and
+     --ui-scale is a screen comfort setting. Raised across the board on
+     2026-08-26 (the reader asked for a bigger printout); the 205mm page and
+     the "3 classes = 3 pages" test are what hold it honest. */
+  --fs-p-xl:   17pt;   /* page title */
+  --fs-p-lg:   12pt;   /* .p-top, .p-daycol, closed hour */
+  --fs-p-md:   10.5pt; /* the credit line */
+  --fs-p-base: 10pt;   /* table body and heading */
+  --fs-p-sm:   9pt;    /* .p-bottom */
+  --fs-p-xs:   8pt;    /* .p-clock */
 
-  /* SATIR ARALIĞI */
-  --lh-tight: 1.2;      /* ızgara hücresi, tablo satırı */
-  --lh-base:  1.5;      /* form etiketi, açıklama, paragraf */
+  --lh-tight: 1.2;
+  --lh-base:  1.5;
   --lh-head:  1.25;
 
-  /* BOŞLUK — rem, yani --ui-scale ile birlikte büyür. */
   --space-1: .125rem; --space-2: .25rem; --space-3: .5rem;
   --space-4: .75rem;  --space-5: 1rem;   --space-6: 1.5rem; --space-7: 2rem;
+  --space-8: 3rem;
 
-  /* THREE radii, one per plane — the "no third radius" rule is amended on
-     purpose. With a real plane stack, 6px on a 600px panel reads as almost
-     square, while 10px on a 34px cell would eat the colour block:
-       --r-sm  data     grid cell, card, swatch, dot
-       --r-md  control  button, input, select
-       --r-lg  plane    panel, dock, dialog
-     A fourth is still forbidden. px stays: a corner radius is not a size that
-     is read, it is how sharp the edge is. */
-  --r-sm: 4px;  --r-md: 7px;  --r-lg: 12px;
+  /* RADIUS — five steps and a pill. The old three were a plane rule; with a
+     dialog, a slide-over, a chip, a swatch and a 34px cell all on screen the
+     three had to do five jobs.
+       --r-xs  a mark      swatch, dot, tag
+       --r-sm  data        grid cell, card
+       --r-md  control     button, input, select
+       --r-lg  plane       panel, dock, popover
+       --r-xl  a sheet     dialog, slide-over
+     px, not rem: a corner radius is not a size that is READ, it is how sharp
+     the edge is, and it should not grow when the type does. */
+  --r-xs: 3px;  --r-sm: 5px;  --r-md: 8px;  --r-lg: 14px;  --r-xl: 20px;
+  --r-full: 999px;
 
-  /* MOTION. One duration, one curve, and a hard list of what may use them:
-     hover/focus/pressed on a control, the dialog fade, the grid crosshair.
-     No layout animation, no skeleton, no toast, no page transition, and no
-     library — the 2026-08-25 rule, unchanged. Killed outright under
-     prefers-reduced-motion below. */
-  --dur: 140ms;
-  /* A control's own hover/press must not take as long as a drawer opening:
-     140ms on a button reads as lag. Both die together under reduced-motion. */
-  --dur-fast: 90ms;
+  /* MOTION. The <=150ms cap and the closed list of what may move are gone
+     (2026-08-26). What is left is one rule and it is not taste: everything
+     below dies under prefers-reduced-motion, from a single place.
+       --dur-fast  a control answering the pointer
+       --dur       a plane changing: drawer, dialog, panel
+       --dur-slow  something crossing the screen: slide-over, view transition
+     No library: `motion` was measured at 127 KB and the one thing it gave
+     that CSS cannot — a shared-element morph — the browser gives for free
+     through document.startViewTransition(). */
+  --dur-fast: 110ms;
+  --dur: 180ms;
+  --dur-slow: 280ms;
   --ease: cubic-bezier(.2, 0, 0, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-spring: cubic-bezier(.34, 1.4, .64, 1);
 
-  /* TABLO SÜTUNU — altı basamak, `ch` cinsinden.
-     Birim BAŞLIĞIN kendi ch'si (table.list th = --fs-xs), çünkü sınıf onun
-     üstünde duruyor. KUTU genişlikleri (.num, .text-sm) ise gövdeye bağlı —
-     tuzak 34: bir kutu kendi üstünden boylanır, sütunundan değil. Yanındaki
-     px'ler ölçülmüş karşılıklar, hedef değil. */
-  --w-col-xs:  8ch;   /*  ~55px  onay kutusu, tek kelimelik etiket */
-  --w-col-sm: 10ch;   /*  ~69px  sayı sütunu (th.num / td.num) */
-  --w-col-md: 13ch;   /*  ~89px  sayı kutusu, tek düğme */
-  --w-col-lg: 16ch;   /* ~110px  kısa metin kutusu, dar açılır liste */
-  --w-col-xl: 26ch;   /* ~179px  uzun seçenekli liste, iki düğme */
-  --w-col-2xl: 32ch;  /* ~220px  uzun metin */
+  /* Focus. Two rings, so it survives on any plane: a --paper gap first, then
+     the accent. Keyboard navigation has to be visible on the grid, on a
+     palette swatch and on the top bar alike. */
+  --focus-ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent);
+  --blur: 12px;
 
-  --cell-w: 2.125rem;  --cell-h: 2.125rem;   /* 34px @1.0 */
-  --rowhead-w: 8.25rem;                       /* 132px @1.0 */
+  /* Table column ladder. The unit is the HEADING's ch (table.list th =
+     --fs-xs); a BOX's width lives on the box and is in the body's ch. The
+     same ~70px is 10ch in one place and 8ch in the other, and that is
+     correct (pitfall 34). */
+  --w-col-xs:  8ch;
+  --w-col-sm: 10ch;
+  --w-col-md: 13ch;
+  --w-col-lg: 16ch;
+  --w-col-xl: 26ch;
+  --w-col-2xl: 32ch;
 
-  --ui-scale: 1;
+  --cell-w: 2.125rem;  --cell-h: 2.125rem;
+  --rowhead-w: 8.25rem;
+
+  /* The one raw px font-size in the file: the anchor the whole rem ladder
+     hangs from. Default 1.10 since 2026-08-26 — the reader has trouble
+     seeing, and 1.0 was never a measurement, it was the number CSS starts at.
+     Ayarlar > Gorunum still walks 1.00 to 1.50. */
+  --ui-scale: 1.1;
   font-size: calc(16px * var(--ui-scale));
   line-height: var(--lh-base);
 }
@@ -221,28 +270,29 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0f1216;
-  /* One step darker than the light theme's ratio would suggest: on a dark
-     ground the same dE reads as less separation, and the measurement said so
-     (2.47 against the light theme's 5.16 at the first values tried). */
-  --chrome: #141920;
-  --chrome-2: #10141a;
-  --chrome-lit: #141920;
-  --paper: #1c2128;
-  --paper-sunk: #14181d;
-  --band: #22272f;
+  /* The same hue and the same derivation, lifted. The desk is genuinely dark
+     so the sheet can come forward without a shadow doing all the work:
+     dE(bg, chrome) 5.54, dE(chrome, paper) 5.44. */
+  --bg: #090c12;
+  --chrome: #15191f;
+  --chrome-2: #0f1319;
+  --chrome-lit: #1c2128;
+  --paper: #20242a;
+  --paper-sunk: #12161b;
+  --band: #292e34;
 
-  --hairline: #272d35;
-  --line: #363e48;
-  --line-dark: #68727e;
+  --hairline: #2c3138;
+  --line: #404750;
+  --line-dark: #78818f;
 
-  --text: #e9edf2;
-  --muted: #a9b3be;
+  --text: #e8edf5;
+  --muted: #aab2bd;
 
-  --accent: #9db8ff;
-  --accent-hover: #bccdff;
-  --accent-bg: #1b2a48;
-  --on-accent: #0a1524;
+  --accent: #97b7ff;
+  --accent-hover: #b8d2ff;
+  --accent-bg: #233056;
+  --on-accent: #0a1023;
+
   --ok: #74e79f;
   --ok-bg: #123521;
   --warn: #f3cf6d;
@@ -252,24 +302,17 @@
   --closed: #3b434c;
   --hatch: #2e353d;
 
-  /* Same six hues, lifted off the dark paper. The HUE is what carries the
-     identity across a theme switch; only lightness and chroma move.
-     Measured: min contrast 5.07, min dE functional 49.9, min dE between
-     sections 20.7. */
-  /* Measured against the dark --paper: dE 41.3/48.6/41.3 (was 24.0/31.0/26.8),
-     >= 34 dE apart, ink over 6.7:1. */
+  /* Measured against the dark --paper: dE 41.3/48.6/41.3, >=34 apart from
+     each other, and the 3px outline drawn on them clears 5.0:1. */
   --drop-ok-bg: #1d5c39;
   --drop-warn-bg: #634c0c;
   --drop-bad-bg: #6b2622;
 
-  /* PRINT PREVIEW, on screen. These two were the one pair of tokens the dark
-     block never redefined, and nothing said whether that was deliberate: the
-     grid line stayed #444 and the header fill stayed #eee while the ink above
-     it inherited --text (#e9edf2). Result: white on near-white, about 1.1:1 —
-     the day and hour headings simply were not there. It printed correctly the
-     whole time, which is why it survived; only the preview was broken.
-     `@media print` now pins the paper values explicitly, so this override
-     cannot reach the printer. */
+  /* PRINT PREVIEW, on screen. These two are the pair the dark block once
+     forgot: the grid line stayed #444 and the header fill #eee while the ink
+     above inherited --text, i.e. white on near-white, about 1.1:1. It printed
+     correctly the whole time, which is why it survived. `@media print` pins
+     the paper values so this override cannot reach the printer. */
   --print-line: #4a545f;
   --print-head-bg: #262c34;
 
@@ -280,10 +323,12 @@
   --sec-print: #e55db7;
   --sec-settings: #879eb5;
 
-  /* Deeper, because the ground under them is dark: the light theme's values
-     would be invisible here. */
-  --elev-1: 0 1px 2px rgba(0,0,0,.35);
-  --elev-2: 0 8px 22px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4);
+  /* Deeper and blacker: on a dark ground the light theme's values are simply
+     not there. */
+  --elev-1: 0 1px 2px rgba(0,0,0,.40), 0 1px 3px rgba(0,0,0,.30);
+  --elev-2: 0 1px 3px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.35);
+  --elev-3: 0 4px 12px rgba(0,0,0,.50), 0 12px 32px rgba(0,0,0,.45);
+  --elev-4: 0 6px 16px rgba(0,0,0,.55), 0 24px 56px rgba(0,0,0,.60);
 }
 
 /* The one place motion is switched off, and it switches off ALL of it:
@@ -292,6 +337,21 @@
   :root {
     --dur: 0ms;
     --dur-fast: 0ms;
+    --dur-slow: 0ms;
+  }
+
+  /* Two things do not read a duration token and so have to be named: the
+     browser's own view transitions, and any transform a hover applies. A
+     reader who has asked for less motion should get NONE, not most of it. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .btn:active:not(:disabled),
+  .pool-card:hover {
+    transform: none;
   }
 }
 
@@ -320,6 +380,47 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Selected text should look like it belongs to this program. */
+::selection {
+  background: color-mix(in oklab, var(--accent) 28%, transparent);
+  color: var(--text);
+}
+
+/* The scrollbars are FURNITURE, and the default ones are the loudest furniture
+   on the screen: a 15px light-grey trough down the side of a grid whose whole
+   job is to be read. Thin, on the plane they scroll over, and they darken when
+   you reach for them. `scrollbar-gutter: stable` on the scrolling panes keeps
+   the layout from stepping sideways when a list crosses the overflow line. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-full);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--line-dark);
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ---------------------------------------------------------------- skeleton */
@@ -369,11 +470,39 @@ textarea {
   background: linear-gradient(180deg, var(--chrome-lit) 0%, var(--chrome) 100%);
   border-bottom: 1px solid var(--hairline);
   flex: 0 0 auto;
+
+  /* The bar is the only thing on screen that never scrolls away, so it is the
+     one surface allowed to look lit: a hairline of the SECTION's colour along
+     the very top, and the section's hue washed a few percent through the
+     chrome. Both read as "which room am I in" before any label does — and
+     `color-mix` keeps it derived from --sec rather than six more tokens. */
+  position: relative;
+  box-shadow: var(--elev-2);
+  z-index: 3;
 }
 
-/* On a dark chrome a 2% gradient is a banding artefact, not a highlight. */
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--sec, var(--accent));
+  /* The section colour changes as you move; the bar should not blink. */
+  transition: background-color var(--dur) var(--ease);
+}
+
+:root:not([data-theme='dark']) .topbar {
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) 4%, var(--chrome-lit)) 0%,
+      var(--chrome) 100%);
+}
+
+/* On a dark chrome a pale gradient is a banding artefact, not a highlight —
+   so the wash goes the other way: the section's hue mixed INTO the chrome
+   rather than a lighter stop above it. */
 :root[data-theme="dark"] .topbar {
-  background: var(--chrome);
+  background: color-mix(in oklab, var(--sec, var(--accent)) 7%, var(--chrome));
 }
 
 /* The school and the plan, drawn as ONE object: together they answer "which
@@ -484,16 +613,24 @@ textarea {
 }
 
 .tab:hover {
-  background: var(--paper);
+  background: color-mix(in oklab, var(--sec, var(--accent)) 10%, transparent);
   color: var(--text);
 }
 
 /* The section you are in is a SHEET on the chrome — the same move the document
    identity makes, and the one the tab metaphor is built on: the tab you are on
-   is the page you are looking at, continuous with the work below it. */
+   is the page you are looking at, continuous with the work below it.
+
+   It now also carries the section's colour as a WASH, not only as a rule along
+   the bottom: on a 1920px bar six equal white tabs with a 2px line under one
+   of them is a difference you have to look for. Mixed from --sec, so the six
+   identities stay one token each. */
 .tab[aria-current="true"] {
-  background: var(--paper);
-  border-color: var(--hairline);
+  background:
+    linear-gradient(180deg,
+      var(--paper) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 8%, var(--paper)) 100%);
+  border-color: color-mix(in oklab, var(--sec, var(--accent)) 25%, var(--hairline));
   color: var(--sec, var(--accent));
   font-weight: 600;
   box-shadow: var(--elev-1);
@@ -503,6 +640,12 @@ textarea {
      accent so a tab is never colourless if the attribute is missing. */
   border-bottom: 2px solid var(--sec, var(--accent));
   padding-bottom: calc(var(--space-2) - 1px);
+}
+
+/* The icon leads the eye, so it gets the identity at full strength while the
+   label stays at text weight. */
+.tab[aria-current="true"] svg {
+  color: var(--sec, var(--accent));
 }
 
 /* Under 1280px the labels go and the icons carry it. The accessible name stays
@@ -529,19 +672,41 @@ textarea {
   padding: var(--space-2);
 }
 
+/* A pressed control in the strip wears the SECTION's colour, not the app
+   accent. The strip already carries --sec down its leading edge and the tab
+   above it is drawn in it; a blue "Rahat" sitting inside a teal Program strip
+   was two identities on one row saying the same thing. Measured: white on the
+   six section colours is 5.63 at worst in light, 5.92 in dark. */
+.ribbon .btn[aria-pressed="true"],
+.ribbon .btn[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--sec, var(--accent));
+  border-color: var(--sec, var(--accent));
+  color: var(--on-accent);
+}
+
+.ribbon .btn:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--sec, var(--accent)) 12%, var(--paper));
+  border-color: color-mix(in oklab, var(--sec, var(--accent)) 45%, var(--line));
+}
+
 .ribbon {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-4);
-  background: var(--chrome-2);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--sec, var(--accent)) 3%, var(--chrome-2)) 0%,
+      var(--chrome-2) 100%);
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
      new plane, no new box. */
   border-left: 3px solid var(--sec, var(--accent));
   border-bottom: 1px solid var(--hairline);
+  position: relative;
+  z-index: 2;
 }
 
 /* A group of controls that belong to one question, with a rule between groups
@@ -552,6 +717,11 @@ textarea {
   font-size: var(--fs-xs);
   color: var(--muted);
   white-space: nowrap;
+  /* A caption on a button group, so it is set the way a caption is: small,
+     tracked out, and not competing with the buttons it names. */
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: 600;
 }
 
 .ribbon-sep {
@@ -589,15 +759,25 @@ textarea {
   background: var(--paper);
   cursor: pointer;
   white-space: nowrap;
+  /* A control answers the pointer fast: --dur is the speed of a PLANE moving,
+     and on a button it reads as lag. */
   transition:
-    background-color var(--dur) var(--ease),
-    border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease);
 }
 
 .btn:hover:not(:disabled) {
   background: var(--accent-bg);
   border-color: var(--accent);
+}
+
+/* Pressed means pressed: 1px is the whole gesture, and it is the difference
+   between a control that responds and a picture of one. */
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .btn:disabled {
@@ -606,13 +786,29 @@ textarea {
 }
 
 .btn.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(180deg,
+    color-mix(in oklab, #fff 8%, var(--accent)) 0%,
+    var(--accent) 100%);
+  border-color: color-mix(in oklab, #000 12%, var(--accent));
   color: var(--on-accent);
+  box-shadow: var(--elev-1);
+  font-weight: 600;
 }
 
 .btn.primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: linear-gradient(180deg,
+    color-mix(in oklab, #fff 6%, var(--accent-hover)) 0%,
+    var(--accent-hover) 100%);
+  border-color: var(--accent-hover);
+  box-shadow: var(--elev-2);
+}
+
+:root[data-theme='dark'] .btn.primary {
+  /* The dark accent is a LIGHT blue, so the highlight stop has to go the other
+     way or the button gets paler as it rises. */
+  background: linear-gradient(180deg,
+    var(--accent) 0%,
+    color-mix(in oklab, #000 10%, var(--accent)) 100%);
 }
 
 /* A two-position button (theme, availability kind, view switch): it must show
@@ -879,6 +1075,26 @@ table.grid thead tr:nth-child(2) th {
   color: var(--muted);
 }
 
+/* --------------------------------------------------- "Ferah": the third step
+   The reader has trouble seeing, and the two densities the grid had were
+   "the grid" and "smaller than the grid". This one goes the other way: a
+   taller, wider cell and the card's second line at full size.
+
+   It is NOT a second zoom axis — --ui-scale still moves the whole screen, and
+   this moves the CELL inside it. The trade it offers is honest and visible:
+   fewer days on screen at once, in exchange for a card you can read without
+   leaning in. Horizontal scrolling was already how the week is read at
+   "rahat"; here there is simply more of it. */
+:root[data-density='ferah'] {
+  --cell-w: 2.875rem;
+  --cell-h: 2.75rem;
+}
+
+:root[data-density='ferah'] .card-bottom {
+  font-size: var(--fs-xs);
+  opacity: 1;
+}
+
 /* ------------------------------------------------- "Sığdır": semantic zoom
    A5. The whole week in the box instead of 2616px of table against 1828px.
 
@@ -892,6 +1108,29 @@ table.grid thead tr:nth-child(2) th {
    a click away in Ayarlar → Okul and printed on every sheet. */
 :root[data-density='sigdir'] .hour-clock {
   display: none;
+}
+
+/* And the card's TOP line steps down one notch — measured, the way the clock
+   was, and only after the clock stopped being the floor.
+   With the default scale at 1.10 the clock alone was no longer enough: the
+   week came back 76px over. Each candidate was hidden in turn on a full grid,
+   under `file://`, at 1920x1080:
+
+     nothing hidden ................ table 1996 / box 1920, over 76
+     card's BOTTOM line hidden ..... 1996, over 76   (not the floor)
+     hour NUMBER hidden ............ 1996, over 76   (not the floor)
+     card's TOP line hidden ........ 1906, over  0   <- the floor
+     card text at --fs-2xs ......... 1907, over  0
+
+   So it is the class number ("411") setting the column's min-content, and one
+   step down the ladder is enough. `max(12px, ...)` and not the token alone:
+   12px is a floor for a reader who has trouble seeing, so it is written in px
+   ON PURPOSE — it must not shrink with the scale the way a rem would. At 100%
+   this max resolves to 12px and nothing changes at all, which is correct:
+   the week already fitted there. */
+:root[data-density='sigdir'] .card-top,
+:root[data-density='sigdir'] .card-bottom {
+  font-size: max(12px, var(--fs-2xs));
 }
 
 /* The one pixel of air around a colour block goes too, and for the same reason
@@ -1191,7 +1430,10 @@ table.grid tbody tr:hover > .row-head {
 /* The sticky heading and the sticky teacher column earn their shadow only once
    there is something scrolled underneath them. */
 .grid-wrap.scrolled-y table.grid thead tr:nth-child(2) th {
-  box-shadow: 0 4px 8px -6px var(--shadow);
+  /* --elev-2 is "raised chrome", and a heading with the week scrolling under
+     it is exactly that. Clipped to one side so it reads as a lip, not a
+     floating slab. */
+  box-shadow: 0 6px 12px -8px var(--shadow), 0 1px 0 var(--line);
 }
 
 .grid-wrap.scrolled-x .row-head,
@@ -1387,13 +1629,24 @@ table.grid tbody tr:hover > .row-head {
   line-height: var(--lh-tight);
   touch-action: none;
   user-select: none;
-  transition: box-shadow var(--dur) var(--ease);
+  transition:
+    box-shadow var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease-spring);
 }
 
 .pool-card:hover {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   box-shadow: var(--elev-2);
+  /* A card in the tray is a thing you are about to pick up, so it comes to
+     meet the pointer. 2px, one frame — enough to feel, too small to shift the
+     row it sits in. */
+  transform: translateY(-2px);
+}
+
+.pool-card:active {
+  transform: translateY(0);
+  cursor: grabbing;
 }
 
 .pool-card .counter {
@@ -1579,6 +1832,33 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   margin-bottom: var(--space-5);
 }
 
+/* A panel heading is the first thing read on the sheet, so it is set like one
+   and it carries the section's colour as a short rule rather than as ink —
+   coloured heading TEXT would put a seventh hue in the reading column, which
+   is exactly what the functional channel cannot afford. */
+.panel > h2:first-child,
+.panel > h3:first-child {
+  margin-top: 0;
+}
+
+.panel > h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--fs-lg);
+  letter-spacing: var(--ls-tight);
+}
+
+.panel > h2::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 3px;
+  align-self: stretch;
+  min-height: 1em;
+  border-radius: var(--r-full);
+  background: var(--sec, var(--accent));
+}
+
 .panel h2 {
   margin: 0 0 10px;
   font-size: var(--fs-lg);
@@ -1618,12 +1898,21 @@ select,
 textarea {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--hairline);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-md);
   background: var(--paper-sunk);
   line-height: var(--lh-base);
   transition:
-    border-color var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease);
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+/* Hovering a recess should say it is writable before you click it. */
+input[type="text"]:hover:not(:disabled),
+input[type="number"]:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--line);
 }
 
 input[type="text"]:hover:not(:disabled),
@@ -1644,8 +1933,14 @@ select:focus-visible,
 textarea:focus-visible,
 .card:focus-visible,
 .pool-card:focus-visible {
+  /* Two rings, not one: a --paper gap and then the accent. A single ring
+     disappears the moment the focused thing is sitting on a palette colour —
+     a lesson card, a swatch — and that is precisely where somebody navigating
+     by keyboard needs it most. `outline` still draws the outer ring so it
+     follows a non-rectangular shape; the inner gap comes from the offset. */
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--paper);
   /* Above the sticky grid heads and the neighbouring cells, so a ring on a
      focused card is never half-covered. */
   position: relative;
@@ -1758,16 +2053,60 @@ table.list td > .color-pick:hover {
    neighbours side by side, which is where a clash would be seen. */
 .color-dialog {
   border: 1px solid var(--hairline);
-  border-radius: var(--r-lg);
-  box-shadow: var(--elev-2);
+  border-radius: var(--r-xl);
+  box-shadow: var(--elev-3);
   background: var(--paper);
   color: var(--text);
   padding: var(--space-6);
   max-width: 26rem;
 }
 
+/* The dialog and its backdrop arrive. @starting-style is what makes this work
+   on a `<dialog>`: the element is `display: none` until showModal(), so there
+   is no previous computed style to transition FROM, and without a starting
+   style the browser has nothing to interpolate. `allow-discrete` is what lets
+   `display` itself take part, so the closing animation is not cut off at the
+   first frame. Both were measured as supported under file:// in Chromium. */
+.color-dialog,
+.color-dialog::backdrop {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out),
+    overlay var(--dur) allow-discrete,
+    display var(--dur) allow-discrete;
+}
+
+.color-dialog {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.color-dialog:not([open]) {
+  opacity: 0;
+  transform: scale(.96);
+}
+
+@starting-style {
+  .color-dialog[open] {
+    opacity: 0;
+    transform: scale(.96);
+  }
+}
+
 .color-dialog::backdrop {
   background: rgba(15, 20, 30, 0.35);
+  backdrop-filter: blur(2px);
+  opacity: 1;
+}
+
+.color-dialog:not([open])::backdrop {
+  opacity: 0;
+}
+
+@starting-style {
+  .color-dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 /* A dark wash over an already dark page dims nothing. The backdrop's job is to
@@ -1886,11 +2225,25 @@ table.stat tbody tr:hover {
 }
 
 .empty-screen {
-  max-width: 560px;
-  margin: 48px auto;
+  max-width: 34rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-8) var(--space-7);
   text-align: center;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: var(--lh-base);
+  background: var(--paper);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  box-shadow: var(--elev-1);
+}
+
+/* The sentence that tells you what to do next is the point of the screen, so
+   it is not set at the same weight as the explanation around it. */
+.empty-screen h2 {
+  margin-top: 0;
+  font-size: var(--fs-xl);
+  letter-spacing: var(--ls-tight);
+  color: var(--text);
 }
 
 .empty-screen strong {
@@ -1902,10 +2255,12 @@ table.stat tbody tr:hover {
 
 .badge {
   display: inline-block;
-  padding: 1px 7px;
-  border-radius: var(--r-md);
+  padding: 1px 9px;
+  border-radius: var(--r-full);
   font-size: var(--fs-xs);
   font-weight: 600;
+  /* Counts line up down a column, so the digits have to. */
+  font-variant-numeric: tabular-nums;
 }
 
 .badge.ok {

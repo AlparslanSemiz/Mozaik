@@ -218,28 +218,26 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
             grid — it spent a version three clicks away in Ayarlar → Görünüm,
             where you cannot see what it does. It is still there too. */}
         <span className="ribbon-label">Yoğunluk</span>
-        <button
-          className="btn"
-          aria-pressed={density === 'rahat'}
-          title="Hücre geniş, ders saatleri görünür"
-          onClick={() => {
-            applyDensity('rahat');
-            setDensity('rahat');
-          }}
-        >
-          Rahat
-        </button>
-        <button
-          className="btn"
-          aria-pressed={density === 'sigdir'}
-          title="Haftanın tamamı ekrana sığar, ders saatleri gizlenir"
-          onClick={() => {
-            applyDensity('sigdir');
-            setDensity('sigdir');
-          }}
-        >
-          Sığdır
-        </button>
+        {(
+          [
+            ['ferah', 'Ferah', 'Hücre en büyük, kartın alt satırı tam boyda'],
+            ['rahat', 'Rahat', 'Hücre geniş, ders saatleri görünür'],
+            ['sigdir', 'Sığdır', 'Haftanın tamamı ekrana sığar, ders saatleri gizlenir'],
+          ] as const
+        ).map(([id, label, why]) => (
+          <button
+            key={id}
+            className="btn"
+            aria-pressed={density === id}
+            title={why}
+            onClick={() => {
+              applyDensity(id);
+              setDensity(id);
+            }}
+          >
+            {label}
+          </button>
+        ))}
 
       </div>
     );

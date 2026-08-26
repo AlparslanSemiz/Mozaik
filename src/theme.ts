@@ -243,19 +243,38 @@ export const SCALE_KEY = 'ders-programi-olcek';
 export const SCALE_MIN = 1;
 /* The ceiling was 1.25 and is 1.50. The reason is the reader, not the design:
    my father has trouble seeing, and a ceiling is only worth having if it is
-   above what somebody actually needs. The floor stays at 1.0 — a default that
-   arrives already enlarged would be a guess about eyes nobody has measured. */
+   above what somebody actually needs. */
 export const SCALE_MAX = 1.5;
 export const SCALE_STEP = 0.05;
 
 /**
- * Anything unreadable, out of range or off-step becomes the nearest legal
- * value. A hand-edited "3" would otherwise draw the shell at 48px and leave no
- * way back to the setting that caused it.
+ * What NO preference means — which is a different question from what the
+ * floor of the range is, and they were the same number for the wrong reason.
+ *
+ * 1.0 was never measured; it is the number CSS starts at. The reader this is
+ * built for has trouble seeing, so the first screen he opens should already
+ * be a little larger than a browser default, and the setting should be there
+ * to walk it further. The floor stays 1.0: somebody who deliberately turns it
+ * down must be able to.
+ */
+export const SCALE_DEFAULT = 1.1;
+
+/**
+ * Anything out of range or off-step becomes the nearest legal value; anything
+ * unreadable becomes the DEFAULT, not the floor.
+ *
+ * The two used to be one branch and that hid a bug in plain sight (the same
+ * shape as pitfall 43): "no preference stored" and "somebody typed nonsense
+ * into localStorage" are different answers, and collapsing them is only
+ * invisible while the default happens to equal the floor.
  */
 export function normalizeScale(raw: unknown): number {
   const value = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
-  if (!Number.isFinite(value)) return SCALE_MIN;
+  // `Number('')` and `Number(null)` are 0, and 0 is a finite number that would
+  // clamp politely to the floor — so "absent" is tested before "out of range".
+  if (raw === null || raw === undefined || raw === '' || !Number.isFinite(value)) {
+    return SCALE_DEFAULT;
+  }
   const clamped = Math.min(SCALE_MAX, Math.max(SCALE_MIN, value));
   const steps = Math.round((clamped - SCALE_MIN) / SCALE_STEP);
   // Two decimals: 1.05 * 3 lands on 1.1500000000000001 in binary floating point
@@ -267,7 +286,7 @@ export function readScale(): number {
   try {
     return normalizeScale(localStorage.getItem(SCALE_KEY));
   } catch {
-    return SCALE_MIN;
+    return SCALE_DEFAULT;
   }
 }
 
@@ -302,15 +321,27 @@ export function applyScale(scale: number): void {
  * property of the machine and the screen, never of the timetable, so it stays
  * out of `State` and out of the backup file.
  */
-export type Density = 'rahat' | 'sigdir';
+export type Density = 'ferah' | 'rahat' | 'sigdir';
 
 export const DENSITY_KEY = 'ders-programi-yogunluk';
 
 const DENSITY_ATTRIBUTE = 'data-density';
 
-/** Anything that is not exactly 'sigdir' means the roomy grid. */
+/**
+ * Three steps since 2026-08-26, and the third one is for the reader:
+ *
+ *   'ferah'   a taller, wider cell and both card lines at full size. Fewer
+ *             days on screen at once, and that is the trade being offered.
+ *   'rahat'   the grid as it has always been: 34px, bell times, horizontal
+ *             scrolling.
+ *   'sigdir'  A5, semantic zoom, the whole week in the box.
+ *
+ * Anything unreadable is still 'rahat': the default has to be the grid my
+ * father already knows, and a junk value that fell through to 'sigdir' would
+ * hide the bell times on his screen with no visible cause and no way back.
+ */
 export function normalizeDensity(raw: unknown): Density {
-  return raw === 'sigdir' ? 'sigdir' : 'rahat';
+  return raw === 'sigdir' ? 'sigdir' : raw === 'ferah' ? 'ferah' : 'rahat';
 }
 
 export function readDensity(): Density {
