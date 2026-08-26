@@ -1,7 +1,12 @@
 // Step: the teachers. Every teacher has exactly ONE subject (docs/STATUS.md);
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import ListTools from '../ListTools';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
+import type { ListConfig, ListQuery } from '../../listview';
+import { openHours } from '../../entities';
+import type { Teacher } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -30,6 +35,28 @@ const NEW = '\u0000yeni';
 export default function Teachers({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
   const inspect = useInspect();
+  const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
+
+  // Twenty-five rows is where reading a column stops working, and the reader
+  // asked for both halves of this: "listeleri ... grupça filtreleyebilelim"
+  // and "sıralama ... branşa göre, isme göre vesaire".
+  const listCfg = useMemo<ListConfig<Teacher>>(
+    () => ({
+      haystack: (t) => `${t.name} ${t.short} ${t.subject}`,
+      facet: { label: 'Branş', of: (t) => t.subject },
+      sorts: [
+        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'brans', label: 'Branşa göre', cmp: (a, b) =>
+            compareTr(a.subject, b.subject) || compareTr(a.name, b.name) },
+        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
+            byNumberThen((t) => weeklyLoad(state, 'teacher', t.id), (t) => t.name) },
+        { id: 'acik', label: 'Açık saate göre (az → çok)', cmp:
+            byNumberThen((t) => openHours(state, t.id), (t) => t.name, 'asc') },
+      ],
+    }),
+    [state],
+  );
+  const shown = applyList(state.teachers, query, listCfg);
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
   const subjects = subjectOptions(state);
@@ -135,6 +162,21 @@ export default function Teachers({ state, change }: PanelProps) {
       )}
 
       {state.teachers.length > 0 && (
+        <ListTools
+          items={state.teachers}
+          query={query}
+          setQuery={setQuery}
+          config={listCfg}
+          shown={shown.length}
+          noun="öğretmen"
+        />
+      )}
+
+      {state.teachers.length > 0 && shown.length === 0 && (
+        <p className="hint">Bu aramaya uyan öğretmen yok.</p>
+      )}
+
+      {shown.length > 0 && (
         <table className="list">
           <thead>
             <tr>
@@ -156,7 +198,7 @@ export default function Teachers({ state, change }: PanelProps) {
             </tr>
           </thead>
           <tbody>
-            {state.teachers.map((t) => (
+            {shown.map((t) => (
               <tr key={t.id}>
                 <td>
                   <ColorPick

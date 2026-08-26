@@ -1,7 +1,12 @@
 // Step: the rooms. A room is a fixed property of a class, never picked while
 // placing a lesson — but two classes sharing one room may not clash.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import ListTools from '../ListTools';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
+import type { ListConfig, ListQuery } from '../../listview';
+import { roomClasses, weeklyLoad } from '../../entities';
+import type { Room } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -13,6 +18,22 @@ import type { PanelProps } from '../props';
 export default function Rooms({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
   const inspect = useInspect();
+  const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
+
+  const listCfg = useMemo<ListConfig<Room>>(
+    () => ({
+      haystack: (r) => `${r.name} ${roomClasses(state, r.id).map((c) => c.name).join(' ')}`,
+      sorts: [
+        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
+            byNumberThen((r) => weeklyLoad(state, 'room', r.id), (r) => r.name) },
+        { id: 'sinif', label: 'Sınıf sayısına göre (çok → az)', cmp:
+            byNumberThen((r) => roomClasses(state, r.id).length, (r) => r.name) },
+      ],
+    }),
+    [state],
+  );
+  const shown = applyList(state.rooms, query, listCfg);
   const [newRoom, setNewRoom] = useState('');
 
   return (
@@ -55,6 +76,21 @@ export default function Rooms({ state, change }: PanelProps) {
       </div>
 
       {state.rooms.length > 0 && (
+        <ListTools
+          items={state.rooms}
+          query={query}
+          setQuery={setQuery}
+          config={listCfg}
+          shown={shown.length}
+          noun="derslik"
+        />
+      )}
+
+      {state.rooms.length > 0 && shown.length === 0 && (
+        <p className="hint">Bu aramaya uyan derslik yok.</p>
+      )}
+
+      {shown.length > 0 && (
         <table className="list">
           <thead>
             <tr>
@@ -64,7 +100,7 @@ export default function Rooms({ state, change }: PanelProps) {
             </tr>
           </thead>
           <tbody>
-            {state.rooms.map((r) => (
+            {shown.map((r) => (
               <tr key={r.id}>
                 <td>
                   <input

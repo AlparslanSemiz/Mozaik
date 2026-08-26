@@ -1,7 +1,11 @@
 // Step: the lessons. One lesson = one class taking N weekly hours from one
 // teacher. A block is not a separate entity: it is `blockSize` here.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import ListTools from '../ListTools';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
+import type { ListConfig, ListQuery } from '../../listview';
+import type { Lesson } from '../../types';
 import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../import';
 import { paletteColor } from '../../palette';
@@ -19,6 +23,35 @@ import type { PanelProps } from '../props';
 
 export default function Lessons({ state, change }: PanelProps) {
   const { confirm, alert } = useDialogs();
+  const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
+
+  // Ninety-nine rows, and every one of them is a pair. Searching has to see
+  // both halves of the pair and the teacher's SHORT form, because the short
+  // form is what the grid says and therefore what gets remembered.
+  const listCfg = useMemo<ListConfig<Lesson>>(() => {
+    const cls = (x: Lesson) => state.classes.find((c) => c.id === x.classId);
+    const tch = (x: Lesson) => state.teachers.find((t) => t.id === x.teacherId);
+    return {
+      haystack: (x) => {
+        const t = tch(x);
+        return `${cls(x)?.name ?? ''} ${t?.name ?? ''} ${t?.short ?? ''} ${t?.subject ?? ''}`;
+      },
+      facet: { label: 'Branş', of: (x) => tch(x)?.subject ?? '' },
+      sorts: [
+        { id: 'sinif', label: 'Sınıfa göre', cmp: (a, b) =>
+            compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') ||
+            compareTr(tch(a)?.short ?? '', tch(b)?.short ?? '') },
+        { id: 'ogretmen', label: 'Öğretmene göre', cmp: (a, b) =>
+            compareTr(tch(a)?.name ?? '', tch(b)?.name ?? '') ||
+            compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') },
+        { id: 'saat', label: 'Haftalık saate göre (çok → az)', cmp:
+            byNumberThen((x) => x.weeklyHours, (x) => cls(x)?.name ?? '') },
+        { id: 'blok', label: 'Blok boyuna göre (büyük → küçük)', cmp:
+            byNumberThen((x) => x.blockSize, (x) => cls(x)?.name ?? '') },
+      ],
+    };
+  }, [state]);
+  const shown = applyList(state.lessons, query, listCfg);
   const [newLesson, setNewLesson] = useState({
     classId: '',
     teacherId: '',
@@ -141,6 +174,21 @@ export default function Lessons({ state, change }: PanelProps) {
       </div>
 
       {state.lessons.length > 0 && (
+        <ListTools
+          items={state.lessons}
+          query={query}
+          setQuery={setQuery}
+          config={listCfg}
+          shown={shown.length}
+          noun="ders"
+        />
+      )}
+
+      {state.lessons.length > 0 && shown.length === 0 && (
+        <p className="hint">Bu aramaya uyan ders yok.</p>
+      )}
+
+      {shown.length > 0 && (
         <table className="list">
           <thead>
             <tr>
@@ -155,7 +203,7 @@ export default function Lessons({ state, change }: PanelProps) {
             </tr>
           </thead>
           <tbody>
-            {state.lessons.map((x) => {
+            {shown.map((x) => {
               const group = state.classes.find((c) => c.id === x.classId);
               const teacher = state.teachers.find((t) => t.id === x.teacherId);
               return (

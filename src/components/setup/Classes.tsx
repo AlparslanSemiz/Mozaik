@@ -1,7 +1,12 @@
 // Step: the classes. A class is a closed set of students, so two classes never
 // clash with each other — only through a shared room.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import ListTools from '../ListTools';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
+import type { ListConfig, ListQuery } from '../../listview';
+import { roomName } from '../../entities';
+import type { ClassGroup } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -21,6 +26,27 @@ import type { PanelProps } from '../props';
 export default function Classes({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
   const inspect = useInspect();
+  const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
+
+  const listCfg = useMemo<ListConfig<ClassGroup>>(
+    () => ({
+      haystack: (c) => `${c.name} ${roomName(state, c.roomId)}`,
+      // Grouping classes by the room they share is the one grouping this
+      // screen can offer that Kontrol cannot: it is what makes a room's load
+      // legible before it becomes a clash.
+      facet: { label: 'Derslik', of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)) },
+      sorts: [
+        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'derslik', label: 'Dersliğe göre', cmp: (a, b) =>
+            compareTr(roomName(state, a.roomId), roomName(state, b.roomId)) ||
+            compareTr(a.name, b.name) },
+        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
+            byNumberThen((c) => weeklyLoad(state, 'class', c.id), (c) => c.name) },
+      ],
+    }),
+    [state],
+  );
+  const shown = applyList(state.classes, query, listCfg);
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
@@ -66,6 +92,21 @@ export default function Classes({ state, change }: PanelProps) {
       </div>
 
       {state.classes.length > 0 && (
+        <ListTools
+          items={state.classes}
+          query={query}
+          setQuery={setQuery}
+          config={listCfg}
+          shown={shown.length}
+          noun="sınıf"
+        />
+      )}
+
+      {state.classes.length > 0 && shown.length === 0 && (
+        <p className="hint">Bu aramaya uyan sınıf yok.</p>
+      )}
+
+      {shown.length > 0 && (
         <table className="list">
           <thead>
             <tr>
@@ -77,7 +118,7 @@ export default function Classes({ state, change }: PanelProps) {
             </tr>
           </thead>
           <tbody>
-            {state.classes.map((c) => (
+            {shown.map((c) => (
               <tr key={c.id}>
                 <td>
                   <ColorPick
