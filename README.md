@@ -1,3 +1,5 @@
+<img src="site/icon.svg" alt="Ders Programı" width="72">
+
 # Ders Programı
 
 Bir dershanenin haftalık ders programını dizmek için yazılmış tek dosyalık bir
@@ -38,8 +40,11 @@ API yoktur.
 > **Verileriniz bu bilgisayarda ve bu tarayıcıda durur.** Başka bir tarayıcı
 > onu görmez, ve tarayıcıda "tarama verilerini temizle" derseniz **silinir**.
 > Öğrenilecek tek alışkanlık: *değişiklik yaptın, yedek indir.* Üst çubuktaki
-> **Dosyaya kaydet** bunun içindir. Ayarlar → Veri bölümü verinin tam olarak
-> hangi anahtarda, ne kadar yer kapladığını söyler.
+> **Dosyaya kaydet** bunun içindir. Hiçbir alışkanlık istemeyen ikinci bir yol
+> daha var: Ayarlar → Veri → **Nereye kaydedilsin** ile bir klasör seçerseniz
+> bütün planlar oraya kendiliğinden yazılır ve her gün için ayrı bir yedek
+> kalır (son 10). Ayarlar → Veri bölümü ayrıca verinin tam olarak hangi
+> anahtarda, ne kadar yer kapladığını söyler.
 
 ---
 
@@ -63,6 +68,12 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
 - **Ayarlar** — okul ve zil düzeni, kurallar, branş listesi, görünüm (yazı
   büyüklüğü, ızgara yoğunluğu, hareket) ve veri.
 
+Sekmelerin dışında kalanlar üst çubukta: **birden çok plan** arasında geçiş
+(her plan kendi okulu, kendi öğretmenleri, kendi ızgarası — yeni plan, ad
+değiştirme ve silme Ayarlar → Veri'de), geri/ileri al, dosyaya kaydet, dosyadan
+aç, ve **Ctrl+K** ile *ara ve git*: bir öğretmenin, sınıfın ya da dersliğin
+adını yazarsınız, onun kendi haftası açılır.
+
 Açık ve koyu tema var. Yazı büyüklüğü %100–%150 arasında ayarlanır — bu araç
 gözü iyi görmeyen biri için yazıldı.
 
@@ -77,7 +88,7 @@ npm run dev          # geliştirme sunucusu
 npm test             # Vitest — saf mantık testleri (517)
 npm run build        # dist/index.html tek dosya (ASIL TESLİM)
 npm run build:site   # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar
+npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar (388)
 npm run test:site    # site · sunucu · klasör testleri, http üzerinde (19)
 npm run kontrol      # hepsi: tsc + birim + derleme + E2E + site + çözücü
 npm run ekran        # iki temada ekran görüntüsü -> test-results/ekran/
@@ -105,3 +116,8 @@ Vite + React + TypeScript, `vite-plugin-singlefile` ile tek bir
 `dist/index.html`'e gömülür (JS, CSS ve font dahil). Çalışma anında ağdan tek
 bayt indirilmez; bu iddia `temel.spec.ts` ve `site.spec.ts` tarafından
 **mekanik olarak** doğrulanır.
+
+Ölçülen (2026-08-26, 1920×1080, 9 koşu): `dist/index.html` **525 818 bayt**,
+`file://` üzerinden açılış **76 ms** medyan — yerel sunucudan 82 ms, yani ikinci
+yolun maliyeti 6 ms. Bunlar bir tarih, kanun değil: yeni bir paket eklenince
+yeniden ölçülür.
