@@ -179,10 +179,12 @@ describe('commonestBlock', () => {
 // that there is one.
 
 describe('health', () => {
-  it('boş projede sorun yok', () => {
+  it('boş proje "sorun yok" DEMİYOR — başlanmadı diyor', () => {
+    // "Sorun yok" on a project somebody has just opened for the first time is
+    // the chip saying nothing on the one screen where it could say something.
     const h = health(emptyState());
     expect(h.level).toBe('ok');
-    expect(h.message).toBe('Sorun yok');
+    expect(h.message).toBe('Henüz ders girilmedi');
     expect(h).toMatchObject({ blocked: 0, warnings: 0, pending: 0, stranded: 0 });
   });
 

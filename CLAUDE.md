@@ -132,10 +132,10 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 409 birim testi
+npm test           # Vitest — 450 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 265 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 277 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -168,9 +168,9 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 16 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme. **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 19 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**. **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
 | **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
 
@@ -263,6 +263,25 @@ poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇ�
                                 pointermove'da React'e değil, tek bir custom
                                 property'ye yazar — 2100 hücre yeniden çizilmez
 useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
+  |
+listview.ts                     ara / sırala / süz. SAF. fold() Türkçe katlama
+                                (İ→i, ğ→g…), compareTr() Türk alfabesi sırası.
+                                State'i BİLMEZ, herhangi bir listeyi alır.
+  |
+components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
+                                window.confirm/alert YOK — hiç kalmadı
+components/Toasts.tsx           olan biteni söyleyen satır. Radix Toast DEĞİL:
+                                eylem taşımıyorlar, o yüzden 19,6 KB'a gerek yok
+components/Inspector.tsx        varlık paneli. entityWeek/entityFacts'i ÇİZER,
+                                hesaplamaz. useInspect() her yerden çağrılır
+components/Palette.tsx          Ctrl+K kutusu — komut listesini DIŞARIDAN alır
+components/Commands.tsx         o listeyi kurar. App'te DEĞİL, çünkü komutların
+                                yarısı useInspect() çağırıyor ve o hook ancak
+                                InspectorProvider'ın içinde çalışıyor — App ise
+                                o provider'ı çizen bileşen
+components/ListTools.tsx        dört listenin de üstündeki aynı şerit
+Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
+                                ağacı çizsin diye tek yerde
   |
 components/Ribbon.tsx           araç şeridi: sekmeye göre switch. Kontrol'de
                                 null döner (şerit hiç çizilmez). İş mantığı
@@ -785,6 +804,42 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     yüzey arasındaki kılcal çizgi kenarlık gibi okunur, ve kenarlıklar
     kıpırdamaz.
 
+48. **Küçülen bir flex kutusunun içindeki öğeler küçülmüyorsa, kutudan
+    TAŞARLAR — ve taşan şey tıklanamaz olur.** Üst çubuğa durum çipi
+    eklenince `.tabstrip` (`flex: 0 1 auto`) daralmaya başladı, ama `.tab`'ler
+    `0 0`. Ölçülen: %150 ölçekte şerit 693px'te bitiyor, Ayarlar sekmesi
+    823px'te — yani çipin altında, ve yalnızca oraya denk gelen bir imleçle
+    tıklanabilir. Testte "timeout" olarak göründü, "gizli" olarak değil.
+    Kural: bir çubuğun **neyin sırayla feda edileceği** yazılır. Burada:
+    önce boşluk, sonra çipin cümlesi (noktası asla — ekran meşgulken yok olan
+    bir durum güvenilmeyen bir durumdur), sonra belge adı. Sekmeler hiç.
+
+49. **Yeni bir düğmenin adı, var olan bir sekmenin adıyla başlıyorsa süitin
+    yarısı kırılır.** "Programı boşalt" 27 yerde `getByRole('button', { name:
+    'Program' })`'ı ikiye çıkardı; durum çipinin cümlesi "…havuzda" ve
+    başlığı "Kontrol sekmesini açar" olduğu için `name: 'Havuz'` ve
+    `name: 'Kontrol'` sorgularını da. İki karşı önlem, ikisi de gerekli:
+    kısa ve genel adlar `exact: true` ile aranır, ve metni değişken olan bir
+    kontrole kendi `aria-label`'i verilir — `title` bir **ada** dönüşür, ve o
+    ad üç piksel ötedeki sekmenin adı olabilir.
+
+50. **Bir tablo için ölçülmüş bir gerekçe, başka bir tabloya TAŞINMAZ.**
+    Müsaitlikte saatleri gizleyen ayarın gerekçesini "saat sütunun genişliğini
+    belirler" diye yazdım — tuzak 37'nin Program ızgarasındaki hikâyesini
+    olduğu gibi taşıyarak. Ölçüldü: yanlış. `table.availability`
+    `table-layout: fixed` + `width: 100%`, yani sütunlar içindekinden bağımsız
+    eşit; tablo saatliyken de saatsizken de **1341,7 × 354,2 px**. Gerçek
+    gerekçe kullanıcının verdiği gerekçeydi (bakmak istemiyor), ve testin
+    ölçtüğü şey artık "hiçbir şey değişmedi".
+
+51. **`settledText()`'in ölçütü "bir şey yazıldı"dır ve BOŞ DURUM bir şeydir.**
+    `openWithSample` ızgarayı bekliyordu ama depoyu değil; arada 400 ms var ve
+    o pencerede depodaki en yeni kayıt sayfanın kendi **boş** yazımı.
+    Bir testin "önceki hâl"i böylece boş durum oluyor ve örnekle
+    karşılaştırılıyordu. Tuzak 24'ün bir üst katmanı; çare yardımcının
+    kendisinde: örnek yüklendikten sonra depoda **okulun adını** beklemek.
+    Bir "yazıldı mı" bekleyicisi, **ne** yazıldığını sormalı.
+
 ---
 
 ## Tasarım — serbest
@@ -827,10 +882,22 @@ Radix, ikon ve animasyon kütüphaneleri bu gerekçeyle reddedilmişti. Artık:
 > çıkmıyorsa serbesttir.** `devDependencies` zaten serbestti.
 
 Tek şart **ölçmek**: paket eklendikten sonra `dist/index.html` boyutu ve
-`file://` üzerinden ilk boyama süresi [docs/STATUS.md](docs/STATUS.md)'ye
-yazılır. Sabit bir KB tavanı yok — 420 KB sınırı da bir tasarım kısıtıydı ve
-kalktı. Yerine geçen soru: *babanın makinesinde açılış hâlâ hızlı mı?*
-Bu tahmin edilmez, ölçülür (ilke 7).
+`file://` üzerinden açılış süresi [docs/STATUS.md](docs/STATUS.md)'ye yazılır.
+Sabit bir KB tavanı yok — 420 KB sınırı da bir tasarım kısıtıydı ve kalktı.
+Yerine geçen soru: *babanın makinesinde açılış hâlâ hızlı mı?*
+
+**İLKE 7 ARTIK BİR VARSAYIM DEĞİL.** "Hedef makine yavaş" iki yıl boyunca
+ölçülmemiş bir cümleydi. 2026-08-26, 1920×1080, `file://`, 7 koşu:
+
+```
+dist/index.html    489 815 bayt   (tek dosya: JS + CSS + gömülü font)
+açılış             73 ms medyan · 83 ms en kötü
+imleç haçı         0,391 ms / sütun değişimi  (16,7 ms karenin %2,3'ü)
+ızgara             1950 hücre, 426 kart
+```
+
+Yani 490 KB'lik tek dosya bu makinede 73 ms'de açılıyor. Bu bir **tarih**,
+kanun değil (tuzak 42): paket eklenince yeniden ölçülür.
 
 ### Neyin nerede olduğu
 

@@ -189,3 +189,12 @@ test.describe('54. Klavye kısayolları', () => {
     expect(await page.locator('.palette-row').count()).toBeGreaterThan(6);
   });
 });
+
+test.describe('55. Durum çipi — boş proje', () => {
+  test('yeni açılışta "Sorun yok" değil, "Henüz ders girilmedi" diyor', async ({ page }) => {
+    await open(page);
+    const chip = page.locator('.health');
+    await expect(chip).toHaveClass(/ok/);
+    await expect(chip).toHaveText('Henüz ders girilmedi');
+  });
+});

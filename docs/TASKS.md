@@ -9,76 +9,81 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-### C turu — kabuk yeniden tasarımı (çift üst bar + alt havuz) — **KOD BİTTİ, TESTLER BEKLİYOR**
+### D turu — tasarım kısıtları kaldırıldı, arayüz baştan kuruldu — **BİTTİ ✅**
 
-Kullanıcı kararı (2026-08-25): *"UI'yı adamakıllı baştan sona en güzel hale
-getir. Modern, ferah, kolay kullanımlı, tekdüze değil albenili. Ekranda boş
-yerler kalmasın. Sol barı üste taşımalıyız, üstte çift bar olmalı. Program
-kısmındaki çekmeceyi aşağı geri getir, boyutunu ayarlama opsiyonu da olsun.
-CLAUDE.md'deki kısıtlamalar varsa yok say."*
+Kullanıcı kararı (2026-08-26, üç kez tekrarlandı): *"Claude.md ya da Design.md ya
+da Plan.md ya da bambaşka design noktasındaki kısıtlamaları kaldır ve sil onları.
+ardından uygulamamızı/sitemizi en güzel UX'li en güzel UI'lı hale getir."*
 
-**E2E süiti bu tur boyunca bilerek koşulmadı** (kullanıcı kararı). Doğrulama
-gerçek tarayıcıda ölçüm + ekran görüntüsüyle yapıldı. Testler **silinmedi**;
-iddiası değişenler aşağıda.
+Sorulan üç sınır ve cevapları: **estetik + bağımlılık yasağı** kalksın ·
+**kontrast/erişilebilirlik testleri kalsın, düzen testleri gitsin** · kapsam
+**her şey (akış ve gezinme dahil)**. Sonra Faz 3'ten sonra durulup gösterildi ve
+kullanıcı **"daha cesur olsun"** dedi.
 
-- [x] **C1 Araç durumu App'e çıktı** (`src/toolState.ts`). `view` · `kind` ·
-      `chosen` · `step` · `section` · `scope` · `colored`. Görsel değişiklik
-      sıfır, ama kendi başına bir düzeltme: sekme değişince Program'ın sınıf
-      görünümü, Müsaitlik'teki öğretmen ve Kurulum'un 4. adımı kayboluyordu —
-      tuzak 18'in `printExcluded`/`solver` için çözdüğü sorunun aynısı.
-- [x] **C2 Sığdır ↔ havuz takası kaldırıldı** — ölçümle. Bkz. tuzak 42.
-- [x] **C3 Havuz ALTA döndü.** Kartlar yatay akıyor; havuz **boşalınca
-      kendiliğinden kapanıyor** (176px → 53px, ızgara 789 → 912px).
-- [x] **C4 Havuz boyu sürüklenebilir** (`src/poolSplit.ts`, `role="separator"`,
-      ok tuşları, `ders-programi-havuz-boy`). Tavan CSS'te `clamp` +
-      `min(22rem, 100% - 26rem)`; JS aynı tavanı hesaplıyor ki `aria-valuemax`
-      yalan söylemesin. Ölçüldü: 176 → 280px sürüklendi, depoya 17.5 yazıldı,
-      yenilemede durdu, ok tuşları ±0.5rem, End tavana götürdü.
-      Yol boyunca beş gerçek hata: tuzak 43, 44, 45, 46, 47.
-- [x] **C5 Sol rail kalktı, üstte çift bar.** Ölçülen baş: **139 → 116px**
-      (51 üst bar + 39 şerit + 26 sebep çubuğu). Rail'in 92px'i her sekmede
-      ızgaraya/panellere geçti.
-- [x] **C6 Ribbon içeriği, altı sekme.** Kurulum'un adımları · Müsaitlik'in
-      türü · Program'ın görünüm + çözücü + **yoğunluk** · Yazdır'ın kapsam +
-      renk · Ayarlar'ın bölümleri · **Kontrol: şerit yok**.
-- [x] **C7 Şerit katlanıyor** (`ders-programi-serit`, `main.tsx`'te ilk
-      boyamadan önce). Katlanınca **tamamen** gider: 39px ızgaraya
-      (789 → 827px). Düğme üst barda.
-- [x] **C8 Token turu.** `--chrome-2` (ikinci kabuk düzlemi) · `--chrome-lit`
-      (üst barın gradyan üst durağı, koyu temada kapalı) · yarıçap 3/6/10 →
-      4/7/12 · `--elev-1` iki katmanlı · `--dur` 120 → 140ms + `--dur-fast`
-      90ms. **Ölçüldü:** ΔE(chrome,paper) 5.16 açık / 3.98 koyu,
-      ΔE(chrome,chrome-2) 3.21 / 2.56, ΔE(band,paper) 2.67 / 3.00,
-      kontrast(text,paper) 17.98 / 13.76, lum(paper) 1.000 / 0.015.
-      Koyu tema chrome'u ilk denemede ΔE 2.47 çıktı, ölçüm görünce koyultuldu.
-- [x] **C9 Boş alanlar dolduruldu — hepsi GERÇEK veriyle.**
-      - Kurulum: **Kurulum durumu** paneli (dört adım, her birinin eksiği,
-        haftalık kapasite ↔ girilen yük)
-      - Müsaitlik: **Haftanın darlığı** ısı haritası — her saatte kaç kişi
-        kapalı. Çözücünün nerede tıkanacağını önceden söyler ve bu ekranın
-        yarattığı ama göremediği bilgiydi
-      - Ayarlar → Görünüm: **sahte** "Mehmet Çelik" tablosu gitti, yerine
-        gerçek öğretmen listesi
-      - Ayarlar → Kurallar: her kuralın **kaç yeri** etkilediği (kod ile
-        gruplanıyor — `Violation.rule`, tuzak 22) + kendi sınırı olan
-        öğretmenler paneli; düzen `.cols` → `.panel-grid`
-      - Kontrol: **Programın durumu** kartı (yerleşmiş/istenen saat,
-        tamamlanan ders, haftanın doluluğu)
-      - Yazdır: **Çıktı özeti** kartı (sayfa, kâğıt, renk, boş sayfa uyarısı)
-      - `topbar-note` üst bardan Ayarlar → Veri'ye taşındı
-- [ ] **C10 E2E süitini güncelle ve koş.** `helpers.ts`'in `openSetup` ve
-      `openSettings`'i güncellendi (`.step` artık `aria-pressed`), gerisi
-      bekliyor. İddiası değişecekler:
-      - `duzen.spec.ts` — rail testleri → yatay şerit; 25-satır iddiası
-        "havuz kapalıyken" koşuluna bağlanacak
-      - `izgara.spec.ts` — Sığdır↔havuz testi **tersine çevrilecek**
-        ("Sığdır havuzu kapatmıyor ve hafta yine sığıyor")
-      - `gorunum.spec.ts` — yoğunluk artık ribbon'da da var
-      - Yeni testler: splitter (sürükle · hatırla · klavye · min/max ·
-        `aria-valuenow`), şerit katlama, ΔE(chrome,chrome-2) ve
-        ΔE(chrome,paper) eşikleri
-      - **Hiçbiri silinmeyecek** (tuzak 23: testi silmek tasarım kararı değil)
-- [ ] **C11 `npm run gorsel -- --update-snapshots=all`** — 24 referans (tuzak 25)
+- [x] **D0 Belgelerden kısıtlar silindi.** CLAUDE.md'nin ~290 satırlık "Tasarım
+      sistemi" bölümü → 68 satırlık **"Tasarım — serbest"**. Geriye dört
+      sözleşme kaldı (işlevsel renk kanalı · erişilebilirlik · kâğıt fiziksel ·
+      ilke 1–3). `docs/DESIGN.md` boşaltıldı, `docs/PLAN.md`'nin tasarım
+      ifadeleri bağlayıcı olmaktan çıkarıldı. Bağımlılık yasağı da kalktı.
+- [x] **D1 Test sözleşmesi yeniden çizildi.** Silinen: `gorsel.spec.ts` + 24 PNG
+      + `npm run gorsel`, `sutun.spec.ts`, `duzen.spec.ts`'in geometri yarısı
+      (→ `kabuk.spec.ts`), `renk-secici.spec.ts`'in sığma yarısı,
+      `izgara.spec.ts`'in Sığdır↔havuz takası. C10'un bıraktığı **24 kırmızı**
+      da kapandı; ikisi gerçek hataydı (`library.ts` iki anahtarı saymıyordu;
+      `renk.spec.ts` koyu temada DOM hakkında yanılıyordu).
+- [x] **D2 Bağımlılıklar — ölçülerek.** Alınan: `lucide-react` (+3,4 KB),
+      `@radix-ui/react-{dialog,dropdown-menu,tooltip,popover}` (+123,3 KB).
+      **Alınmayan: `motion` (+127,2 KB)** — CSS'in yapamadığı tek getirisi
+      tarayıcının `startViewTransition()`'ında bedava. **Tailwind da alınmadı.**
+- [x] **D3 Görsel dil.** OKLCH'ten türetilmiş nötr rampa (tek hue 258), kot 2→5,
+      yarıçap 3→5, tipografi 6→9 basamak, hareket 110/180/280 ms + üç eğri,
+      **üçüncü yoğunluk "Ferah"**, ölçek varsayılanı **%100 → %110**.
+      Yol boyunca bir regresyon ölçümle bulundu: %110'da Sığdır haftayı
+      sığdıramaz oldu, tabanı **kartın üst satırı** koyuyordu (tuzak 37'nin
+      yöntemiyle tek tek kapatılarak bulundu).
+- [x] **D4 Cesur tur** (kullanıcı kararı). Seçili sekme bölüm rengiyle **dolu**,
+      accent elektrik indigo (#373bdb), masa derinleşti, başlıklar büyüdü.
+      Renk sözleşmesinin tek eşiği gevşetilmedi.
+- [x] **D5 Diyaloglar.** 12 `window.confirm` + 5 `window.alert` → tek
+      `useDialogs()`. `deletionSummary` ikiye bölündü (`deletionQuestion`),
+      tek-string hâli ve testleri **aynen** duruyor. `Toasts` elde yazıldı
+      (Radix Toast 19,6 KB ve eylem taşımayan toast'a gerekmiyor).
+      `src/Root.tsx`: duman testi artık **gerçek** ağacı çiziyor.
+- [x] **D6 Varlık paneli** — kullanıcının doğrudan istediği şey. `entityWeek` +
+      `entityFacts` (saf, testli), `Inspector.tsx` çizer. Izgarada satır
+      başından ve üç listeden açılıyor. Asıl test: panelin çizdiği hafta
+      **ızgaranın çizdiği haftanın aynısı**.
+- [x] **D7 Listelerde ara · sırala · süz** — iki kez istenmişti. `listview.ts`
+      saf: `fold()` Türkçe katlama (`'İ'.toLowerCase()` bir birleşik nokta
+      üretiyor — testte önce **bug'ın kendisi** gösteriliyor), `compareTr()`,
+      `applyList()`, `facetCounts()`. Dört listenin de üstünde aynı şerit.
+- [x] **D8 Müsaitlikte saat ayarı** (varsayılan **kapalı**, istendiği gibi) +
+      **Program'da "Programı boşalt"** (adıyla istenmişti).
+- [x] **D9 Komut paleti (Ctrl+K), durum çipi ve klavye.** Palet 6 destinasyon +
+      eylemler + her varlık; bir varlığı seçmek panelini açıyor.
+      Çip her sekmede ve sorunu **adlandırıyor**. `Alt+1..6`.
+      Ölçümle bulunan hata: çip eklenince %150'de son sekmeler kendi kutusundan
+      taşıyordu (tuzak 48).
+- [x] **D10 Doğrulama ve ölçüm.** `npm run kontrol` yeşil: **450 birim +
+      277 E2E + 6 site**. Ve **ilke 7 artık varsayım değil**:
+      `dist/index.html` 489 815 bayt, `file://` açılışı **73 ms medyan**
+      (7 koşu), imleç haçı 0,391 ms/sütun.
+- [x] **D11 Belgeler.** `docs/DESIGN.md` yeni CSS'ten yeniden yazıldı (envanter,
+      kural değil). CLAUDE.md'ye dört yeni tuzak (**48–51**).
+
+### Kalanlar — bu turdan çıkan, henüz yapılmamış
+
+- [ ] **Öğretmende cinsiyet alanı ve elle sürükleyerek sıralama.** Kullanıcının
+      listesinde var; ikisi de **şema değişikliği** istiyor (`schemaVersion` 6 +
+      göç kodu + hem birim hem E2E testi). Ayrı bir turda kararı sorulacak.
+- [ ] **Fontun ağırlık ekseni 400–600 → 300–700.** Planda vardı, yapılmadı:
+      `fontTools` kurulu değil ve alt kümeyi yeniden üretmek kaynak fontu
+      indirmeyi gerektiriyor. Üç ağırlık hiyerarşi için yetiyor.
+- [ ] **Görsel regresyon yerine ne konacak?** 24 referans silindi (kullanıcı
+      kararı). `npm run ekran` duruyor ve **kanıt** üretiyor, ama bir insan
+      bakmazsa hiçbir şey yakalamıyor. Bir dönem kullanıldıktan sonra karar.
+
+---
 
 ### Tasarım sistemi turu (A0–A6 + B) — BİTTİ ✅
 
@@ -701,11 +706,16 @@ istiyor (öğretmende cinsiyet alanı yok) ve en az biri yasak listeye bakmayı
 gerektiriyor (elle sürükleyerek sıralama).
 
 Listeleri kaydırabililelim ya da grupça filteleyebilelim. Öğretmenler, Branşlar onlar bunlar
+    → **KARŞILANDI** (D7): dört listenin de üstünde ara + sırala + branş/derslik
+    çipleri. `src/listview.ts`, Türkçe katlama ve sıralama ile.
 Ölçeklendirme büyütme küçültme            → **KARŞILANDI** (A1 + B turu):
 Babam biraz zor görüyor o sebeple biraz daha büyütülmeli her şey.
     Ayarlar → Görünüm'de %100–**%150**, 11 basamak. Varsayılan %100 kaldı
     (kullanıcı kararı, 2026-08-25): yanlış bir varsayılan tahmindir.
 Öğretmenler listesinde sıralama erkek kadın, branşa göre, isme göre vesaire sıralamalar olsun. ayrıca biz kendimiz sıralayabilelim. drag ve koy gibi. Aynı şekilde tüm listeler öyle özelliklere sahip olsun.
+    → **YARISI KARŞILANDI** (D7): ada, branşa, yüke, açık saate göre sıralama —
+    dört listede de. **Erkek/kadın** ve **elle sürükleyerek sıralama** yapılmadı:
+    ikisi de `schemaVersion` 6 istiyor (cinsiyet alanı, elle sıra indeksi).
 Ayrıca renk seçmede renkleri seçerken renkleri görebilelim sadece sayı olmasın.
     → **KARŞILANDI** (B turu): 6×6 swatch `<dialog>`'u, 36 rengin hepsi görünür,
     seçili olan çerçeveli. `src/components/ColorPick.tsx`.
@@ -715,18 +725,25 @@ Ayrıca programramda sıfırla olmalı ki programı en baştan yapabilelim ama u
 ayrıca ayarlarda ölçeklendirme de olsun. nasıl olması gerekiyorsa ya da.
     → **KARŞILANDI**: Ayarlar → Görünüm.
 Ayarlarda müsatilikteki programda derslerin altında saatleri olsun olmasın diye ayar olsun ve default olarak kapalı olsun.
+    → **KARŞILANDI** (D8): Ayarlar → Görünüm, varsayılan kapalı.
 Yazdır kısmındaki program da büyümesi lazım.
+    → **KARŞILANDI** (D3): `--fs-p-*` merdiveni yükseltildi (başlık 14→17pt,
+    gövde 8,5→10pt). 205 mm sayfa ve "3 sınıf = 3 sayfa" testi korundu.
 Program kısmında programı sıfırla opsiyonu gelmeli.
+    → **KARŞILANDI** (D8): şeritte "Programı boşalt", onaylı, tek geri-al adımı.
 
 
 
-UI düzenlemeleri, simetri
+UI düzenlemeleri, simetri            → **KARŞILANDI** (D3 + D4)
 frontend skills
-UI ve desing kısıtlamaları kaldırma
+UI ve desing kısıtlamaları kaldırma  → **KARŞILANDI** (D0)
 programda öğretmen ya da sınıf toggle edip programına bakma.
+    → **ZATEN VARDI**: Program şeridindeki iki görünüm düğmesi.
 her derslik, sınıf ya da öğretmenin üzerine tıklandığında bilgileri ve programının gözükmesi
-normal testler
-E2E testleri en sonda.
+    → **KARŞILANDI** (D6): varlık paneli. Izgarada satır başından, Kurulum'un üç
+    listesinden ve Ctrl+K'dan açılıyor.
+normal testler                       → **KARŞILANDI**: 450 birim testi yeşil
+E2E testleri en sonda.               → **KARŞILANDI**: 277 E2E + 6 site yeşil
 koyu modu düzeltme
 brave'de açık modu açma
 E2E'nin yeni fotolar çekmesini sağlama.

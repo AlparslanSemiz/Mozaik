@@ -1,6 +1,105 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-25 (on yedinci oturum: **C turu — kabuk yeniden tasarımı**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-26 (on sekizinci oturum: **D turu — tasarım kısıtları
+kaldırıldı, arayüz baştan kuruldu**, `v1.0-teslim` dalında)
+
+---
+
+## On sekizinci oturum — D turu (2026-08-26)
+
+Kullanıcı üç kez tekrarlayarak istedi: *"design noktasındaki kısıtlamaları
+kaldır ve sil onları. ardından uygulamamızı/sitemizi en güzel UX'li en güzel
+UI'lı hale getir."* Üç sınır soruldu: **estetik + bağımlılık yasağı** kalksın ·
+**kontrast/erişilebilirlik ölçümleri kalsın, düzen ölçümleri gitsin** · kapsam
+**her şey**. Faz 3'ten sonra durulup gösterildi; kullanıcı **"daha cesur
+olsun"** dedi ve varsayılan ölçeğin %110 kalmasını seçti.
+
+### Ölçülen — ilke 7 artık bir VARSAYIM DEĞİL
+
+İki yıl boyunca "hedef makine yavaş" ölçülmemiş bir cümleydi. 1920×1080,
+`file://`, 7 koşu:
+
+```
+dist/index.html      489 815 bayt   (405 242'den; +84,6 KB)
+file:// açılışı      73 ms medyan · 83 ms en kötü · 51,9 ms en iyi
+imleç haçı           0,391 ms / sütun değişimi   (16,7 ms karenin %2,3'ü)
+ızgara               1950 hücre, 426 kart
+```
+
+Paket maliyetleri tek tek ölçüldü (taban 405 242 bayt):
+
+| Paket | Maliyet | Karar |
+|---|---|---|
+| `lucide-react` (12 simge) | +3,4 KB | alındı |
+| `@radix-ui/react-dialog` | +39,5 KB | alındı |
+| `+ react-toast` | +19,6 KB | **alınmadı** — eylem taşımayan toast'a gerekmiyor |
+| `+ react-dropdown-menu` | +51,0 KB | alındı (popper'ı o getiriyor) |
+| `+ react-tooltip` | +8,2 KB | alındı |
+| `+ react-popover` | +5,0 KB | alındı |
+| `motion` | +127,2 KB | **alınmadı** — `startViewTransition()` bedava |
+| Tailwind | — | **alınmadı** — token katmanı zaten olgun |
+
+Renk sözleşmesi (her koşuda `renk.spec.ts`):
+
+```
+kâğıt parlaklığı     1.000 / 0.017     (sözleşme >0,9 açık, <0,1 koyu)
+metin / kâğıt       17,47 / 13,26
+soluk / kapalı       5,09 /  4,69
+accent / accent-bg   6,59 /  6,47
+sekme en düşük AA    5,63 /  4,89
+sekme ↔ işlevsel    52,5  / 49,9  ΔE  (sözleşme >32)
+```
+
+### Yol boyunca ölçümle bulunan dört şey
+
+1. **%110'da "Sığdır" haftayı sığdıramaz oldu** (76px taşma). Taban tahmin
+   edilmedi, tuzak 37'nin yöntemiyle tek tek kapatıldı: kartın **üst** satırı
+   (sınıf numarası) koyuyordu — alt satır ve saat numarası değil. Sığdır'da
+   kart yazısı bir basamak iniyor, `max(12px, --fs-2xs)`.
+2. **Durum çipi eklenince %150'de son sekmeler tıklanamaz oldu.** `.tabstrip`
+   küçülüyor ama `.tab`'ler küçülmüyordu: şerit 693px'te bitiyor, Ayarlar
+   823px'te. Tuzak 48.
+3. **Müsaitlikteki saat ayarının gerekçesini yanlış yazdım.** "Sütunu
+   daraltıyor" dedim; ölçüldü, tablo iki durumda da **1341,7 × 354,2 px**.
+   `table-layout: fixed` + `width: 100%`. Gerekçe düzeltildi, test de. Tuzak 50.
+4. **`renk.spec.ts` koyu temada DOM hakkında yanılıyordu**: `--on-color`'ı
+   `--drop-ok-bg` üstünde ölçüyordu (2,08:1) ama `.card` kendi palet zeminini
+   taşıyan bir `button`, yani o mürekkep oraya hiç düşmüyor. O zeminde çizilen
+   şey 3px'lik dış çizgi; ölçülen 4,1 açık / 5,0 koyu.
+
+### Yapılanlar
+
+- **Belgeler:** CLAUDE.md'nin ~290 satırlık tasarım sistemi → 68 satırlık
+  "Tasarım — serbest" + dört sözleşme. `docs/DESIGN.md` yeni CSS'ten yeniden
+  yazıldı (envanter, kural değil). `docs/PLAN.md` bağlayıcı olmaktan çıkarıldı.
+- **Testler:** görsel regresyon (24 PNG) ve düzen testleri kaldırıldı;
+  erişilebilirlik ölçümleri kaldı. C10'un 24 kırmızısı kapandı.
+  **450 birim + 277 E2E + 6 site**, hepsi yeşil.
+- **Görsel dil:** OKLCH'ten türetilmiş rampa, dolu bölüm sekmeleri, elektrik
+  indigo accent, beş kot, beş yarıçap, dokuz tipografi basamağı, üç yoğunluk
+  (**Ferah** yeni), ölçek varsayılanı %110.
+- **17 native diyalog** → `useDialogs()`. Toast'lar elde yazıldı.
+- **Varlık paneli** — kullanıcının doğrudan istediği şey; `entityWeek` /
+  `entityFacts` saf ve testli.
+- **Listelerde ara/sırala/süz** — `listview.ts`, Türkçe katlama ve sıralama.
+- **Komut paleti (Ctrl+K)**, **durum çipi**, `Alt+1..6`.
+- **Müsaitlikte saat ayarı** (varsayılan kapalı) ve **"Programı boşalt"**.
+
+### Doğrulanmayı bekleyenler
+
+- Hiçbiri **babanın kendi makinesinde** görülmedi. Bütün ölçümler buradaki
+  Chromium'da, 1920×1080'de.
+- **Görsel regresyon yok artık.** `npm run ekran` kanıt üretiyor ama bir insan
+  bakmazsa hiçbir şey yakalamıyor. Bir dönem kullanıldıktan sonra karar.
+- **Fontun ağırlık ekseni 400–600'de kaldı** (plan 300–700 diyordu):
+  `fontTools` kurulu değil, alt kümeyi yeniden üretmek kaynak fontu indirmeyi
+  gerektiriyor.
+- **Cinsiyet alanı ve elle sürükleyerek sıralama yapılmadı**: ikisi de
+  `schemaVersion` 6 + göç kodu istiyor.
+
+---
+
+*(Aşağısı önceki oturumların kaydı.)*
 
 ## Şu anki sürüm hedefi
 

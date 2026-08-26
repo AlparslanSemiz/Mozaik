@@ -281,12 +281,21 @@ export function health(d: State): Health {
   if (warnings > 0) parts.push(`${warnings} uyarı`);
   if (pending > 0) parts.push(`${pending} saat havuzda`);
 
+  // An empty project is not "fine", it is NOT STARTED — and saying "Sorun yok"
+  // to somebody who has just opened the program for the first time is the chip
+  // telling them nothing on the one screen where it could tell them something.
+  const empty = d.lessons.length === 0;
+
   return {
     blocked,
     warnings,
     pending,
     stranded,
     level,
-    message: parts.length === 0 ? 'Sorun yok' : parts.join(' · '),
+    message: empty
+      ? 'Henüz ders girilmedi'
+      : parts.length === 0
+        ? 'Sorun yok'
+        : parts.join(' · '),
   };
 }
