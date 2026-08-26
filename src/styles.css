@@ -87,7 +87,7 @@
   /* THE PLANES. Four now, not three: the desk, the tool, the tool's second
      step back, and the sheet. --chrome-lit is the top stop of the top bar's
      gradient and lives only there. */
-  --bg:          #dae0e9;
+  --bg:          #cfd8e4;
   --chrome:      #f3f6fb;
   --chrome-2:    #ecf0f6;
   --chrome-lit:  #fcfdff;
@@ -107,14 +107,17 @@
   --text:        #131a25;
   --muted:       #505763;
 
-  /* Ink blue, and no longer whispering. The old accent was deliberately quiet
-     on the grounds that 36 identity colours plus three functional ones own
-     this screen's colour budget. That is still true of the GRID — which is
-     why the accent is not allowed in it — but it left the shell with no
-     voice at all: nothing on the top bar said which control was the one you
-     came for. Measured 6.59 on its own ground, 7.70 for white on it. */
-  --accent: #2c47bb;  --accent-hover: #1d319d;
-  --accent-bg: #e4eeff;  --on-accent: #ffffff;
+  /* Electric indigo, and deliberately loud. Two revisions ago this was a quiet
+     ink blue on the grounds that 36 identity colours plus three functional
+     ones own this screen's colour budget. That is still true of the GRID —
+     which is why the accent is not allowed in it — but the shell is not the
+     grid, and a whisper there meant nothing on the top bar said which control
+     was the one you came for.
+     Measured: 7.47 on --paper, 6.28 on its own ground, 7.47 for white on it,
+     and ΔE 121-144 from every functional colour — it cannot be mistaken for
+     a state, which is the only thing loudness had to buy off. */
+  --accent: #373bdb;  --accent-hover: #2a20bc;
+  --accent-bg: #e1ecff;  --on-accent: #ffffff;
 
   --ok: #177431;  --ok-bg: #d5f0dc;
   --warn: #8a6100;  --warn-bg: #fdf0cf;
@@ -273,7 +276,7 @@
   /* The same hue and the same derivation, lifted. The desk is genuinely dark
      so the sheet can come forward without a shadow doing all the work:
      dE(bg, chrome) 5.54, dE(chrome, paper) 5.44. */
-  --bg: #090c12;
+  --bg: #05080f;
   --chrome: #15191f;
   --chrome-2: #0f1319;
   --chrome-lit: #1c2128;
@@ -288,10 +291,14 @@
   --text: #e8edf5;
   --muted: #aab2bd;
 
-  --accent: #97b7ff;
-  --accent-hover: #b8d2ff;
-  --accent-bg: #233056;
-  --on-accent: #0a1023;
+  /* The same hue, as saturated as sRGB has at this lightness: hue 268 runs the
+     blue channel to 255, so the conversion clips there by a hair and the hex
+     below is the boundary colour. What matters is measured — 9.11 for the ink
+     on it, 7.39 against the dark paper. */
+  --accent: #8eb2ff;
+  --accent-hover: #b5d5ff;
+  --accent-bg: #223267;
+  --on-accent: #070d25;
 
   --ok: #74e79f;
   --ok-bg: #123521;
@@ -485,7 +492,7 @@ textarea {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
-  height: 3px;
+  height: 4px;
   background: var(--sec, var(--accent));
   /* The section colour changes as you move; the bar should not blink. */
   transition: background-color var(--dur) var(--ease);
@@ -494,15 +501,15 @@ textarea {
 :root:not([data-theme='dark']) .topbar {
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 4%, var(--chrome-lit)) 0%,
-      var(--chrome) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) 10%, var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 3%, var(--chrome)) 100%);
 }
 
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
    so the wash goes the other way: the section's hue mixed INTO the chrome
    rather than a lighter stop above it. */
 :root[data-theme="dark"] .topbar {
-  background: color-mix(in oklab, var(--sec, var(--accent)) 7%, var(--chrome));
+  background: color-mix(in oklab, var(--sec, var(--accent)) 14%, var(--chrome));
 }
 
 /* The school and the plan, drawn as ONE object: together they answer "which
@@ -626,26 +633,32 @@ textarea {
    of them is a difference you have to look for. Mixed from --sec, so the six
    identities stay one token each. */
 .tab[aria-current="true"] {
-  background:
-    linear-gradient(180deg,
-      var(--paper) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 8%, var(--paper)) 100%);
-  border-color: color-mix(in oklab, var(--sec, var(--accent)) 25%, var(--hairline));
-  color: var(--sec, var(--accent));
+  /* SOLID. Two revisions ago the lit tab was a white sheet with a 2px rule
+     under it — true to the tab metaphor and, on a 1920px bar with six of
+     them, a difference you had to go looking for. It is now filled with the
+     section's own colour, which is the loudest thing this shell says and the
+     one question it is answering: which room am I in.
+     Measured: white on the six section colours is 5.63 at worst in light and
+     5.92 in dark, so the label clears AA on every one of them. */
+  background: linear-gradient(180deg,
+    color-mix(in oklab, #fff 10%, var(--sec, var(--accent))) 0%,
+    var(--sec, var(--accent)) 100%);
+  border-color: color-mix(in oklab, #000 12%, var(--sec, var(--accent)));
+  color: var(--on-accent);
   font-weight: 600;
-  box-shadow: var(--elev-1);
-
-  /* The section's own colour as a rule along the bottom edge — the sheet's
-     spine, the thing the ribbon below it continues. `--sec` falls back to the
-     accent so a tab is never colourless if the attribute is missing. */
-  border-bottom: 2px solid var(--sec, var(--accent));
-  padding-bottom: calc(var(--space-2) - 1px);
+  box-shadow: var(--elev-2);
 }
 
-/* The icon leads the eye, so it gets the identity at full strength while the
-   label stays at text weight. */
+:root[data-theme='dark'] .tab[aria-current="true"] {
+  /* The dark section colours are LIGHT, so the highlight stop goes the other
+     way or the tab gets paler as it rises. */
+  background: linear-gradient(180deg,
+    var(--sec, var(--accent)) 0%,
+    color-mix(in oklab, #000 12%, var(--sec, var(--accent))) 100%);
+}
+
 .tab[aria-current="true"] svg {
-  color: var(--sec, var(--accent));
+  color: var(--on-accent);
 }
 
 /* Under 1280px the labels go and the icons carry it. The accessible name stays
@@ -697,13 +710,13 @@ textarea {
   padding: var(--space-2) var(--space-4);
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 3%, var(--chrome-2)) 0%,
-      var(--chrome-2) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) 7%, var(--chrome-2)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%);
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
      new plane, no new box. */
-  border-left: 3px solid var(--sec, var(--accent));
+  border-left: 4px solid var(--sec, var(--accent));
   border-bottom: 1px solid var(--hairline);
   position: relative;
   z-index: 2;
@@ -1827,8 +1840,10 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   background: var(--paper);
   border: 1px solid var(--hairline);
   border-radius: var(--r-lg);
-  box-shadow: var(--elev-1);
-  padding: var(--space-5) var(--space-6);
+  /* The desk is deep enough now that the sheet has to answer it: --elev-1 on
+     a #cfd8e4 ground reads as a printed rectangle, not as paper on a table. */
+  box-shadow: var(--elev-2);
+  padding: var(--space-6);
   margin-bottom: var(--space-5);
 }
 
@@ -1844,17 +1859,19 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 .panel > h2 {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  font-size: var(--fs-lg);
-  letter-spacing: var(--ls-tight);
+  gap: var(--space-4);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  letter-spacing: var(--ls-tighter);
+  line-height: var(--lh-head);
 }
 
 .panel > h2::before {
   content: '';
   flex: 0 0 auto;
-  width: 3px;
+  width: 4px;
   align-self: stretch;
-  min-height: 1em;
+  min-height: 1.1em;
   border-radius: var(--r-full);
   background: var(--sec, var(--accent));
 }
