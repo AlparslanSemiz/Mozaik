@@ -325,8 +325,27 @@ describe('veriler nerede — depo raporu', () => {
     expect(keys).toContain('ders-programi-olcek');
     expect(keys).toContain('ders-programi-yogunluk');
     expect(keys).toContain('ders-programi-havuz');
+    expect(keys).toContain('ders-programi-havuz-boy');
+    expect(keys).toContain('ders-programi-serit');
     // An absent backup chain is information too, so the row stays with 0.
     expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
+  });
+
+  it('gerçekten YAZILMIŞ hiçbir anahtar listeden düşmüyor', () => {
+    // The list above is kept by hand, so it falls behind by hand: -havuz-boy
+    // and -serit were written for weeks before anybody noticed the panel did
+    // not name them. This asks the storage itself instead of asking the list.
+    localStorage.setItem('ders-programi-tema', 'dark');
+    localStorage.setItem('ders-programi-olcek', '1.25');
+    localStorage.setItem('ders-programi-yogunluk', 'sigdir');
+    localStorage.setItem('ders-programi-havuz', 'kapali');
+    localStorage.setItem('ders-programi-havuz-boy', '17.5');
+    localStorage.setItem('ders-programi-serit', 'kapali');
+    writePlanText(FIRST_PLAN_ID, 'abcde');
+
+    const keys = storageReport(two()).rows.map((r) => r.key);
+    const written = Object.keys(localStorage).filter((k) => k.startsWith(BASE_KEY));
+    for (const key of written) expect(keys, `${key} raporda yok`).toContain(key);
   });
 
   it('localStorage kapalıysa rapor boş çıkıyor, çökmüyor', () => {

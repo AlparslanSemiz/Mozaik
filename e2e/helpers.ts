@@ -330,6 +330,19 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  * them at once now, with the open/loaded hours on every row. Every test goes
  * through here so the next change to that panel is one edit, not five.
  */
+/**
+ * The editable list on the left of a Kurulum step.
+ *
+ * Scoped on purpose. The C round put a SECOND `table.list` in the right-hand
+ * column ("Kurulum durumu", `setup/Progress.tsx`), so a bare
+ * `table.list tbody tr` counts both and every count in the suite came out four
+ * rows high. One definition here rather than the same `.cols > div` prefix
+ * written out in nine places.
+ */
+export function mainList(page: Page) {
+  return page.locator('.cols > div table.list');
+}
+
 export async function chooseEntity(page: Page, id: string) {
   await page.locator(`.entity[data-id="${id}"]`).click();
   await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute('data-id', id);
@@ -337,9 +350,14 @@ export async function chooseEntity(page: Page, id: string) {
 
 // --------------------------------------------------------------- scenes
 //
-// ONE list of what the app looks like, with two consumers: `npm run ekran`
-// writes them to PNGs for a human to look at, and `e2e/gorsel.spec.ts` asserts
-// them against a local reference. A scene added here shows up in both.
+// ONE list of what the app looks like. `npm run ekran` writes them to PNGs for
+// a human to look at.
+//
+// It used to have a second consumer, `e2e/gorsel.spec.ts`, which compared them
+// against 24 checked-in references. That went on 2026-08-26 with the rest of
+// the layout tests: a reference resolved against the machine's own font is
+// right on one machine, and it turned every step of a redesign red for reasons
+// that were never the redesign's fault.
 
 export interface Scene {
   /** File name stem; also the snapshot name. */

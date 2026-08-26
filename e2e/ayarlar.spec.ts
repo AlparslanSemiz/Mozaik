@@ -1,7 +1,7 @@
 // The Ayarlar tab: days, the bell, the four rules, subjects and data.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover } from './helpers';
+import { open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
 
 test.describe('6. Gün ve ders saatleri', () => {
   test('varsayılan hafta Pazartesisiz 6 gün ve Salı ile başlıyor', async ({ page }) => {
@@ -77,7 +77,7 @@ test.describe('6. Gün ve ders saatleri', () => {
 test.describe('15. Ayarlar sekmesi', () => {
   test('altıncı sekme var ve dört bölümü açılıyor', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.tabs .tab')).toHaveCount(6);
+    await expect(page.locator('.tabstrip .tab')).toHaveCount(6);
     await expect(page.getByRole('button', { name: 'Ayarlar' })).toBeVisible();
 
     for (const [section, heading] of [
@@ -95,7 +95,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Kurulum' }).click();
 
-    const steps = await page.locator('.steps .step').allInnerTexts();
+    const steps = await page.locator('.ribbon .step').allInnerTexts();
     expect(steps).toHaveLength(4);
     expect(steps.join(' ')).toContain('Derslikler');
     expect(steps.join(' ')).toContain('Dersler');
@@ -419,7 +419,9 @@ test.describe('33. Ayarlar — kurallar', () => {
   test('dört kural da var ve seviyeleri seçilebiliyor', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(4);
+    // The rules table is the first of three on this screen: C9 added "kaç yeri
+    // etkiliyor" and the teachers with limits of their own.
+    await expect(page.locator('table.list').first().locator('tbody tr')).toHaveCount(4);
 
     for (const label of [
       'Öğretmen art arda en fazla',
@@ -448,8 +450,11 @@ test.describe('33. Ayarlar — kurallar', () => {
   test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
-    await expect(page.locator('.cols aside')).toContainText('Şu anki ihlaller');
-    await expect(page.locator('.cols aside .ok-box')).toBeVisible();
+    // This screen is a flowing `.panel-grid`, not two fixed columns, so the
+    // live count is no longer "the aside" — it is the panel that says so.
+    const live = page.locator('.panel', { hasText: 'Şu anki ihlaller' });
+    await expect(live).toContainText('Şu anki ihlaller');
+    await expect(live.locator('.ok-box')).toBeVisible();
   });
 
   test('günde en fazla kuralı sürüklemeyi engelliyor', async ({ page }) => {
@@ -523,7 +528,7 @@ test.describe('34. Ayarlar — veri', () => {
     page.once('dialog', (d) => d.dismiss());
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
     await openSetup(page, 'Öğretmenler');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(25);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(25);
   });
 
   test('"Her şeyi sil" onaylanınca gerçekten siliyor', async ({ page }) => {
@@ -540,7 +545,7 @@ test.describe('34. Ayarlar — veri', () => {
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
 
     await openSetup(page, 'Öğretmenler');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(0);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
     expect(asked).toHaveLength(2);
     expect(asked[1]).toContain('geri alınamaz');
   });

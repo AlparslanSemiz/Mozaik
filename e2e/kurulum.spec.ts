@@ -2,7 +2,7 @@
 // they feed.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop } from './helpers';
+import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.step', { hasText: 'Dersler' })).toContainText('99');
 
     // Kurulum is now FOUR steps: the school's own settings moved to Ayarlar
-    await expect(page.locator('.steps .step')).toHaveCount(4);
+    await expect(page.locator('.ribbon .step')).toHaveCount(4);
     await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
 
     // Only the current step is on screen; the 1132-line scroll is gone
@@ -49,10 +49,16 @@ test.describe('5. Kurulum ve yedek', () => {
     // Not a locked wizard: jumping straight to the last step works
     await openSetup(page, 'Dersler');
     await expect(page.getByRole('heading', { name: /^Dersler/ })).toBeVisible();
-    // ...and "next step" is only a shortcut
+    // ...and the "Kurulum durumu" table is the second way to move between
+    // steps. The "Sonraki adım" button that used to be here went in C9: moving
+    // already had two homes (the four ribbon buttons and these rows) and a
+    // third that could only ever go FORWARDS was the weakest of them.
     await openSetup(page, 'Sınıflar');
-    await page.getByRole('button', { name: /Sonraki adım: Dersler/ }).click();
-    await expect(page.locator('.step[aria-current="true"]')).toContainText('Dersler');
+    await page
+      .locator('.panel', { hasText: 'Kurulum durumu' })
+      .getByRole('button', { name: /Dersler/ })
+      .click();
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Dersler');
   });
 
   test('kısaltma addan üretiliyor, çakışma uyarısı çıkıyor', async ({ page }) => {
@@ -195,7 +201,7 @@ test.describe('16. Branş seçimi', () => {
 
     await branch.selectOption('Matematik');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
     await expect(page.getByLabel('MÇ branşı')).toHaveValue('Matematik');
   });
 
@@ -385,7 +391,7 @@ test.describe('30. Kurulum — düzenleme', () => {
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Q');
     await page.getByPlaceholder('Derslik adı, örn. A').press('Enter');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
   });
 
   test('yerleşimi olan dersi silmek ne kaybedileceğini sayıyor', async ({ page }) => {

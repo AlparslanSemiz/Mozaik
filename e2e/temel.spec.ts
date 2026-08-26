@@ -10,6 +10,7 @@ import {
   openSetup,
   openWithSample,
   dragAndDrop,
+  mainList,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -45,19 +46,20 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect(page.getByRole('button', { name: 'Dosyadan aç', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
 
-    // The note used to be hidden on the grid because it took a row of the top
-    // bar and that row cost the timetable a teacher. It is inline now, so it is
-    // visible EVERYWHERE and still costs the grid nothing.
-    await expect(page.locator('.topbar-note')).toContainText('kendiliğinden saklanıyor');
-    const gridTop = (await page.locator('table.grid').boundingBox())!.y;
-    const barHeight = (await page.locator('header.topbar').boundingBox())!.height;
+    // Where the teaching went. The sentence used to be 400px of explanation on
+    // the top bar; C9 moved it to Ayarlar → Veri, beside the report that says
+    // where the data actually IS, and left a short version on the save
+    // button's own tooltip — which is where somebody about to click it looks.
+    await expect(
+      page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }),
+    ).toHaveAttribute('title', /kendiliğinden saklanıyor/);
 
-    await page.getByRole('button', { name: 'Kurulum' }).click();
-    await expect(page.locator('.topbar-note')).toContainText('kendiliğinden saklanıyor');
-    expect((await page.locator('header.topbar').boundingBox())!.height).toBe(barHeight);
-
-    await page.getByRole('button', { name: 'Program' }).click();
-    expect((await page.locator('table.grid').boundingBox())!.y).toBe(gridTop);
+    await openSettings(page, 'Veri');
+    // `.panel` nests (a panel inside the Veri panel), so two match — take the
+    // innermost, which is the one that actually holds the sentence.
+    await expect(
+      page.locator('.panel', { hasText: 'kendiliğinden saklanıyor' }).last(),
+    ).toBeVisible();
 
     // "Sıfırla" is not in the top bar at all any more: it was one careless
     // click from "Dosyadan aç" and it cannot be undone. It is in Ayarlar > Veri.
@@ -345,19 +347,19 @@ test.describe('28. Geri al / ileri al', () => {
       await box.fill(name);
       await page.getByRole('button', { name: 'Ekle', exact: true }).click();
     }
-    await expect(page.locator('table.list tbody tr')).toHaveCount(3);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(3);
 
     const back = page.getByRole('button', { name: 'Geri al', exact: true });
     const forward = page.getByRole('button', { name: 'İleri al', exact: true });
     for (const expected of [2, 1, 0]) {
       await back.click();
-      await expect(page.locator('table.list tbody tr')).toHaveCount(expected);
+      await expect(mainList(page).locator('tbody tr')).toHaveCount(expected);
     }
     await expect(back).toBeDisabled();
 
     for (const expected of [1, 2, 3]) {
       await forward.click();
-      await expect(page.locator('table.list tbody tr')).toHaveCount(expected);
+      await expect(mainList(page).locator('tbody tr')).toHaveCount(expected);
     }
     await expect(forward).toBeDisabled();
   });
@@ -377,7 +379,7 @@ test.describe('28. Geri al / ileri al', () => {
     await box.fill('C');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(page.getByRole('button', { name: 'İleri al', exact: true })).toBeDisabled();
-    await expect(page.locator('table.list tbody tr')).toHaveCount(2);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(2);
   });
 
   test('metin kutusundayken Ctrl+Z programı geri almıyor', async ({ page }) => {
@@ -386,13 +388,13 @@ test.describe('28. Geri al / ileri al', () => {
     const box = page.getByPlaceholder('Derslik adı, örn. A');
     await box.fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
 
     // Inside a text box Ctrl+Z belongs to the box, not to the timetable.
     await box.click();
     await box.fill('yanlış');
     await page.keyboard.press('Control+z');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(1);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
   });
 
   test('yedek yüklemek geçmişi sıfırlıyor', async ({ page }) => {

@@ -2,8 +2,9 @@
 // alignment or colour change is only believable when you can look at it.
 //
 // Runs OUTSIDE the normal suite (`npm run ekran`), because it asserts nothing;
-// counting it among the E2E tests would inflate the number with pictures. Its
-// pixel-comparing twin is `e2e/gorsel.spec.ts`; both walk the same SCENES.
+// counting it among the E2E tests would inflate the number with pictures.
+// It walks SCENES from helpers.ts, which is the one list of what the app looks
+// like.
 
 import { test } from '@playwright/test';
 import { openWithSampleTheme, SCENES } from './helpers';

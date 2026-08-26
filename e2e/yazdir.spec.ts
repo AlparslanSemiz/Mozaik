@@ -223,7 +223,10 @@ test.describe('21. Yazdırmada seçim', () => {
   test('öğretmen sayfaları ayrı seçiliyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Yazdır' }).click();
-    await page.getByLabel('Ne basılsın').selectOption('teachers');
+    // "Ne basılsın" moved into the tool strip and became three buttons: the
+    // strip carries what you are looking at, and a scope you switch while
+    // reading the preview should not need a dropdown opened first.
+    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Öğretmenler' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();

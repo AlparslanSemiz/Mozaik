@@ -83,12 +83,16 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
   }
 
   test('bos-dunya: ders yokken dizilecek bir şey teklif edilmiyor', async ({ page }) => {
-    // No lessons means no toolbar at all — the empty screen takes the whole tab,
-    // so there is no "Otomatik diz" button to disable.
+    // The button lives in the tool strip now, so it is drawn even when the tab
+    // itself is an empty screen. The requirement did not change with it: with
+    // no lessons there is nothing to offer, and the button says (0) and is
+    // disabled rather than starting a search that has nothing to search.
     const world = SMALL_WORLDS.find((w) => w.name === 'bos-dunya')!;
     await loadWorld(page, world.state);
     await expect(page.locator('.empty-screen')).toContainText('Henüz dizilecek ders yok');
-    await expect(page.getByRole('button', { name: /^Otomatik diz/ })).toHaveCount(0);
+    const auto = page.getByRole('button', { name: /^Otomatik diz/ });
+    await expect(auto).toContainText('(0)');
+    await expect(auto).toBeDisabled();
   });
 });
 

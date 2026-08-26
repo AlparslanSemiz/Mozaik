@@ -130,7 +130,11 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
     await autoFill(page);
     await page.getByRole('button', { name: 'Tamam' }).click();
-    await expect(page.locator('.reason-bar')).toHaveText('');
+    // The bar does not go BLANK: it falls back to what it says at rest, which
+    // is how to read the grid. What must go is the verdict and its button.
+    await expect(page.getByRole('button', { name: 'Tamam' })).toHaveCount(0);
+    await expect(page.locator('.reason-bar')).toContainText('Satırlar öğretmen');
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toHaveCount(0);
   });
 
   test('dizilen program yazdırılabiliyor', async ({ page }) => {

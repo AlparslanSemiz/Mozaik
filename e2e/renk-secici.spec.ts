@@ -9,13 +9,16 @@
 //
 // The control has since become a swatch and a dialog rather than a dropdown of
 // the numbers 1..36, because choosing a colour by its INDEX meant guessing and
-// then looking at the result. The requirement did not change with it, so
-// neither did this file's subject: what a person does with the control is
+// then looking at the result.
 //
-//   READ it   — the index has to fit its box and be legible on the palette
-//               colour that box is painted with, in both themes;
-//   CHOOSE    — and the thirty-six they are choosing between have to be
-//               visible AS colours, distinguishable, and actually applied.
+// 2026-08-26: the FIT half of this file went with the rest of the layout tests
+// (user decision — accessibility measurements stay, layout measurements go).
+// What is left is the half that is accessibility and not taste:
+//
+//   READ it   — the index has to be legible ON the palette colour its box is
+//               painted with, in both themes;
+//   CHOOSE    — and the thirty-six have to be visible AS colours,
+//               distinguishable, and actually applied.
 //
 // The palette's own contrast is not re-measured here — `palette.test.ts`
 // already proves all 36 clear 4.5:1 against --on-color on every run. What that
@@ -29,40 +32,20 @@ const STEPS = ['Öğretmenler', 'Sınıflar'] as const;
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`renk seçici — ${theme}`, () => {
     for (const step of STEPS) {
-      test(`${step}: seçili renk okunuyor`, async ({ page }) => {
+      test(`${step}: seçili rengin üstündeki mürekkep okunuyor`, async ({ page }) => {
         await openWithSampleTheme(page, theme);
         await openSetup(page, step);
 
         const picks = page.locator('table.list tbody tr .color-pick');
         await expect(picks.first()).toBeVisible();
-        // Two digits only start at the tenth row: a list that stops at nine
-        // would pass this test with the old bug still in place.
         expect(await picks.count()).toBeGreaterThan(10);
 
         const ink = (await tokens(page, ['--on-color']))['--on-color'];
         const measured = await picks.evaluateAll((nodes) =>
           nodes.map((node) => {
-            const button = node as HTMLElement;
-            const style = getComputedStyle(button);
-
-            // What the browser would give the box if we asked for nothing —
-            // and asked for the WIDEST index it could ever hold, not the one
-            // that happens to be in it. That is the requirement: any of the
-            // thirty-six must be showable. Measuring the current text would
-            // let a box that fits "1" and clips "36" pass.
-            const clone = button.cloneNode(true) as HTMLElement;
-            clone.textContent = '36';
-            clone.style.width = 'auto';
-            clone.style.position = 'absolute';
-            clone.style.visibility = 'hidden';
-            button.parentElement!.appendChild(clone);
-            const natural = clone.getBoundingClientRect().width;
-            clone.remove();
-
+            const style = getComputedStyle(node as HTMLElement);
             return {
-              label: button.textContent ?? '',
-              width: button.getBoundingClientRect().width,
-              natural,
+              label: node.textContent ?? '',
               ink: style.color,
               swatch: style.backgroundColor,
             };
@@ -70,19 +53,13 @@ for (const theme of ['light', 'dark'] as const) {
         );
 
         for (const cell of measured) {
-          expect(
-            cell.width,
-            `"${cell.label}" kutusu ${cell.width.toFixed(0)}px, gereken ${cell.natural.toFixed(0)}px`,
-          ).toBeGreaterThanOrEqual(cell.natural);
+          // Pitfall 15 and 35: a palette ground needs palette ink. `color:
+          // inherit` puts light theme ink on a pastel and the index vanishes.
           expect(cell.ink, `"${cell.label}" mürekkebi --on-color değil`).toBe(ink);
           // The swatch is a palette colour and must not have been flattened to
           // a theme surface by some later rule.
           expect(contrast(cell.ink, cell.swatch)).toBeGreaterThanOrEqual(4.5);
         }
-
-        // The two-digit rows are the ones the regression hit; name one so a
-        // failure report says which.
-        expect(measured.map((c) => c.label)).toContain('11');
       });
 
       test(`${step}: otuz altı rengin hepsi GÖRÜNÜYOR ve seçilebiliyor`, async ({ page }) => {

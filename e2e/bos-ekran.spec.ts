@@ -117,6 +117,8 @@ test.describe('36. Klavye', () => {
     await openSetup(page, 'Derslikler');
     await page.locator('.step', { hasText: 'Sınıflar' }).focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('.step[aria-current="true"]')).toContainText('Sınıflar');
+    // The steps are `.btn`s in the tool strip now, so "you are here" is the
+    // button state, not a navigation link's `aria-current`.
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
   });
 });

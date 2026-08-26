@@ -428,8 +428,9 @@ test.describe('13. Görünüm simgeleri', () => {
     await expect(page.locator('table.grid .corner')).toHaveText('Sınıf');
     await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
 
-    // The sentence beside the icons stays: an icon alone is a guess the first time
-    await expect(page.locator('.hint.inline')).toContainText('Satırlar sınıf');
+    // The sentence stays — an icon alone is a guess the first time — but it
+    // moved into the reason bar when the view switch went up into the ribbon.
+    await expect(page.locator('.reason-bar')).toContainText('Satırlar sınıf');
   });
 });
 

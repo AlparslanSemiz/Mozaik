@@ -106,7 +106,6 @@ npm run test:e2e   # Playwright — derler, sonra 265 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
-npm run gorsel     # görsel regresyon — 24 referansa karşı piksel farkı
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
 ```
 
@@ -138,10 +137,16 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 18 dosya, `file://`) | **Düzen, sürükleme, taşıma, sağ tık, kaydırma, yazdırma (başlık, dikey ortalama, sayfa sayısı), renk kontrastı ve AYRIMI, tablo ekseni, simge şekli, ayraç genişliği, yazı boyu, **sütun genişliği ve metnin sığması (iki ölçekte)**, **ızgara yoğunluğu (Sığdır'da yatay kaydırma 0)**, kenar çubuğu, sağ sütunların doluluğu, geri-al zinciri, hata yolları, klavye, plan geçişi, taslaklar, paket gidiş-dönüşü ve "veriler nerede" tablosu**, **gömülü fontun gerçekten çizildiği, gün bandının bir DURUM gibi okunmadığı, imleç haçının sürüklemede söndüğü, havuz çekmecesi ile Sığdır'ın takası, 36 rengin swatch ızgarasında görünüp seçilebildiği** |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 16 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme. **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
 | **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on bir ekran görüntüsü |
-| **Görsel regresyon** | `e2e/gorsel.spec.ts` (`npm run gorsel`) | Yerel referansa karşı piksel farkı, 24 referans. **`npm run kontrol`'ün parçası DEĞİL** — sistem fontu makineye göre çözüldüğü için referans tek makine için doğru. Referanslar depoda; yeni makinede bir kez `--update-snapshots` |
+
+> **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
+> + `npm run gorsel`) ve düzen testleri (`sutun.spec.ts`, `duzen.spec.ts`'in
+> geometri yarısı, `renk-secici.spec.ts`'in sığma yarısı, `izgara.spec.ts`'in
+> Sığdır↔havuz takası). Gerekçe kullanıcı kararı: **erişilebilirlik ölçümleri
+> kalır, düzen ölçümleri gider.** `duzen.spec.ts` → `kabuk.spec.ts` oldu ve
+> geriye gezinme, erişilebilir ad, simge ayrımı ve baskı kaldı.
 
 E2E, `dist/index.html`'i `file://` üzerinden 1920×1080'de açar — yani **babanın çift
 tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,

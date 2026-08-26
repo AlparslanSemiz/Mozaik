@@ -1,4 +1,9 @@
 // The Müsaitlik tab: row = day, column = lesson (aSc's Time off layout).
+//
+// `table.availability` is no longer unique: C9 put a second one in the right
+// column — the "haftanın darlığı" heat map, which reuses the same shape to say
+// how many people are closed at each hour. The paintable one is
+// `table.availability:not(.heat)` and every locator here says so.
 
 import { expect, test, type Page } from '@playwright/test';
 import { chooseEntity, open, openWithSample, dragAndDrop, tokens } from './helpers';
@@ -8,7 +13,7 @@ test.describe('10. Müsaitlik çizelgesi', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
 
-    const table = page.locator('table.availability');
+    const table = page.locator('table.availability:not(.heat)');
     // The sample teacher already has a whole day closed; start from a clean slate
     await page.getByRole('button', { name: 'Tümünü aç' }).click();
     // 6 day rows, 12 lesson columns
@@ -35,7 +40,7 @@ test.describe('10. Müsaitlik çizelgesi', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.getByRole('button', { name: 'Tümünü aç' }).click();
-    const table = page.locator('table.availability');
+    const table = page.locator('table.availability:not(.heat)');
 
     // Lessons 1-5 are the same on every day, so they carry a clock...
     await expect(table.locator('thead th').nth(1)).toContainText('09:00');
@@ -51,7 +56,7 @@ test.describe('10. Müsaitlik çizelgesi', () => {
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
 
     const positions = await page.evaluate(() =>
-      [...document.querySelectorAll('table.availability tbody tr')].map((row) =>
+      [...document.querySelectorAll('table.availability:not(.heat) tbody tr')].map((row) =>
         [...row.querySelectorAll('td')].findIndex((td) => td.classList.contains('break-after')),
       ),
     );
@@ -88,7 +93,7 @@ test.describe('20. Kapalı saatte ders', () => {
     // The row the card landed on IS the teacher: the grid row id is the id.
     await chooseEntity(page, entityId);
     await page
-      .locator('table.availability tbody tr')
+      .locator('table.availability:not(.heat) tbody tr')
       .nth(day)
       .locator('td')
       .nth(hour)

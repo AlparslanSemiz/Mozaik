@@ -142,14 +142,16 @@ test.describe('8. Tema', () => {
         '--ok-bg',
         '--warn-bg',
         '--bad-bg',
+        '--ok',
+        '--warn',
+        '--bad',
         '--paper',
-        '--on-color',
       ]);
 
-      for (const [drop, resting] of [
-        ['--drop-ok-bg', '--ok-bg'],
-        ['--drop-warn-bg', '--warn-bg'],
-        ['--drop-bad-bg', '--bad-bg'],
+      for (const [drop, resting, edge] of [
+        ['--drop-ok-bg', '--ok-bg', '--ok'],
+        ['--drop-warn-bg', '--warn-bg', '--warn'],
+        ['--drop-bad-bg', '--bad-bg', '--bad'],
       ] as const) {
         // Visible at a glance against the paper it sits on...
         expect(deltaE(t[drop]!, t['--paper']!), `${drop} vs --paper`).toBeGreaterThan(28);
@@ -159,8 +161,20 @@ test.describe('8. Tema', () => {
           deltaE(t[drop]!, t['--paper']!),
           `${drop} louder than ${resting}`,
         ).toBeGreaterThan(deltaE(t[resting]!, t['--paper']!));
-        // The cell may hold a lesson card, and a card writes in --on-color.
-        expect(contrast(t['--on-color']!, t[drop]!), `--on-color on ${drop}`).toBeGreaterThan(4.5);
+        // The 3px outline is the second half of the signal, and it has to
+        // survive on the ground it is drawn on. WCAG 1.4.11 asks 3:1 of a
+        // non-text indicator; measured here 4.1 light / 5.0 dark.
+        //
+        // This assertion used to read `contrast(--on-color, drop)` on the
+        // grounds that "the cell may hold a lesson card, and a card writes in
+        // --on-color". That was wrong about the DOM and went red the moment
+        // the dark drop grounds were darkened in the C round: a `.card` is a
+        // button that fills its cell and carries its OWN palette background,
+        // so --on-color never lands on --drop-*-bg. What is actually drawn on
+        // that ground is the outline, so that is what is measured. The card's
+        // own legibility is proved where it really happens — palette.test.ts,
+        // and the card test further down this file.
+        expect(contrast(t[edge]!, t[drop]!), `${edge} on ${drop}`).toBeGreaterThanOrEqual(3);
       }
 
       // Three states, three colours — still.

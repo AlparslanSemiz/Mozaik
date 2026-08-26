@@ -10,11 +10,15 @@
 //   the cross must light the row, the column and the two labels — and must
 //             switch OFF during a drag, where the grid has its own three
 //             colours and a fourth would say less
-//   the dock  must not take back what "Sığdır" bought: the whole week in the
-//             box, with nothing clipped
+//   the dock  is a machine setting and must stay out of the saved plan
+//
+// The dock's LAYOUT assertion ("Sığdır closes it, the two do not fit") went on
+// 2026-08-26. It had already been disproved by measurement (pitfall 42: once
+// .grid-wrap became a container the overflow was 0px with the dock open), and
+// layout measurements went with the rest of the layout contract.
 
 import { expect, test } from '@playwright/test';
-import { openWithSample, startDrag, deltaE, tokens, chooseDensity } from './helpers';
+import { openWithSample, startDrag, deltaE, tokens } from './helpers';
 
 test.describe('47. Izgara enstrümanı', () => {
   test('gün bandı grupluyor ama bir DURUM gibi okunmuyor', async ({ page }) => {
@@ -46,13 +50,15 @@ test.describe('47. Izgara enstrümanı', () => {
 
     // Visible at all...
     expect(separation, `bant kâğıttan ayrılmıyor (ΔE ${separation.toFixed(2)})`).toBeGreaterThan(1);
-    // ...but nowhere near loud enough to be mistaken for a state. The three
-    // functional grounds are 14 apart from each other by contract; the band is
-    // an order of magnitude quieter than that.
-    expect(separation, `bant bir durum rengi kadar yüksek sesli (ΔE ${separation.toFixed(2)})`)
-      .toBeLessThan(5);
+    // ...and far from all three functional grounds. THIS is the contract, not
+    // the band's own strength: how loud a grouping ground may be is taste and
+    // no longer asserted, but it must never be mistaken for "droppable",
+    // "warning" or "blocked".
     for (const key of ['--ok-bg', '--warn-bg', '--bad-bg'] as const) {
-      expect(deltaE(grounds.banded, t[key]!)).toBeGreaterThan(10);
+      expect(
+        deltaE(grounds.banded, t[key]!),
+        `bant ${key} ile karışıyor`,
+      ).toBeGreaterThan(10);
     }
   });
 
@@ -121,56 +127,6 @@ test.describe('47. Izgara enstrümanı', () => {
     await expect(page.locator('table.grid .col-hot')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await page.mouse.up();
-  });
-
-  test("Sığdır'a geçmek havuzu kapatıyor — ikisi aynı anda sığmıyor", async ({ page }) => {
-    await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid')).toBeVisible();
-
-    // A FULL grid, or this measures nothing: with an empty week the cards set
-    // no floor at all and both configurations "fit" (pitfall 33, and the first
-    // measurement taken during this rework fell into exactly that hole).
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('table.grid .card').first()).toBeVisible();
-
-    const dock = page.getByRole('button', { name: 'Havuz' });
-    await expect(dock).toHaveAttribute('aria-expanded', 'true');
-
-    const scroll = () =>
-      page.evaluate(() => {
-        const wrap = document.querySelector('.grid-wrap')!;
-        return {
-          over: Math.round(wrap.scrollWidth - wrap.clientWidth),
-          clipped: [...document.querySelectorAll('table.grid .card-top')].filter(
-            (el) => el.scrollWidth > el.clientWidth + 0.5,
-          ).length,
-        };
-      });
-
-    await chooseDensity(page, 'Sığdır');
-
-    // Choosing the mode closed the dock, because the two do not fit together.
-    await expect(dock).toHaveAttribute('aria-expanded', 'false');
-    const fitted = await scroll();
-    expect(fitted.over, `havuz kapalıyken ${fitted.over}px yatay kaydırma kaldı`).toBe(0);
-    expect(fitted.clipped, `${fitted.clipped} kartın yazısı kırpıldı`).toBe(0);
-
-    // Opening it again is allowed and costs exactly what it costs — the reader
-    // chooses. What must NOT happen is a card losing its text to make room.
-    await dock.click();
-    await expect(dock).toHaveAttribute('aria-expanded', 'true');
-    // The dock slides open over --dur; reading the grid's box in the same tick
-    // measures it mid-slide.
-    await page.waitForFunction(
-      () => document.querySelector('.pool')!.getBoundingClientRect().width > 200,
-    );
-    const paid = await scroll();
-    expect(paid.over).toBeGreaterThan(0);
-    expect(paid.clipped, 'havuz açılınca kart yazısı kırpıldı').toBe(0);
-
-    await chooseDensity(page, 'Rahat');
   });
 
   test('çekmece tercihi yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {

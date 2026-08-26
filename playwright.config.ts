@@ -6,14 +6,12 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   // None of these belong in the daily loop: `npm run ekran` writes pictures for
-  // a human, `npm run gorsel` compares pixels against a machine-local reference,
-  // and `npm run cozucu` spends the solver's whole budget on every world. Each
-  // has its own config.
+  // a human, and `npm run cozucu` spends the solver's whole budget on every
+  // world. Each has its own config.
   // site.spec.ts is here too: it needs an http server and dist-site/, so it
   // runs under playwright.site.config.ts (npm run test:site).
   testIgnore: [
     '**/ekran.spec.ts',
-    '**/gorsel.spec.ts',
     '**/otomatik-stres.spec.ts',
     '**/site.spec.ts',
   ],

@@ -305,6 +305,19 @@ export function storageReport(lib: Library): StorageReport {
     what: 'havuz çekmecesi tercihi',
     chars: charsAt(`${BASE_KEY}-havuz`),
   });
+  // These two arrived with the C round and the panel was never told. A report
+  // that leaves a key out is worse than no report: the one thing it is for is
+  // being trusted when somebody asks "is all of it in here?".
+  rows.push({
+    key: `${BASE_KEY}-havuz-boy`,
+    what: 'havuz çekmecesinin boyu',
+    chars: charsAt(`${BASE_KEY}-havuz-boy`),
+  });
+  rows.push({
+    key: `${BASE_KEY}-serit`,
+    what: 'araç şeridi tercihi',
+    chars: charsAt(`${BASE_KEY}-serit`),
+  });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

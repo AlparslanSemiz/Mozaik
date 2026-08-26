@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 // Cozucu stres suiti: her dunya cozucunun 15 saniyelik butcesini sonuna kadar
 // harcar. `npm run kontrol` icinde kosarsa gunluk dongu yavaslar, o yuzden
-// `npm run gorsel` gibi kendi komutunda durur.
+// `npm run ekran` gibi kendi komutunda durur.
 export default defineConfig({
   testDir: './e2e',
   testMatch: ['**/otomatik-stres.spec.ts'],
