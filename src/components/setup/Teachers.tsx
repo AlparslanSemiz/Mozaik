@@ -2,6 +2,8 @@
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
 import { useState } from 'react';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
 import { parseTeachers } from '../../import';
 import ColorPick from '../ColorPick';
@@ -27,6 +29,7 @@ const NEW = '\u0000yeni';
 
 export default function Teachers({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
+  const inspect = useInspect();
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
   const subjects = subjectOptions(state);
@@ -227,6 +230,18 @@ export default function Teachers({ state, change }: PanelProps) {
                 </td>
                 <td>{weeklyLoad(state, 'teacher', t.id)}</td>
                 <td>
+                  <div className="form-row nowrap">
+                  {/* Its whole week, its load and what it is tied to, without
+                      leaving the list. The information was always there; it
+                      was spread over four tabs. */}
+                  <button
+                    className="btn icon"
+                    aria-label={`${t.short} bilgileri`}
+                    title="Bilgileri ve haftalık programı"
+                    onClick={() => inspect('teacher', t.id)}
+                  >
+                    <PanelRight size={16} strokeWidth={2} />
+                  </button>
                   <button
                     className="btn danger"
                     onClick={async () => {
@@ -238,6 +253,7 @@ export default function Teachers({ state, change }: PanelProps) {
                   >
                     Sil
                   </button>
+                  </div>
                 </td>
               </tr>
             ))}

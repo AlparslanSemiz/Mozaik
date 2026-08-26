@@ -141,7 +141,15 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
           };
         }
       }
-      return { id: t.id, name: t.short, secondary: t.subject, color: t.color, cells, closed };
+      return {
+        id: t.id,
+        kind: 'teacher' as const,
+        name: t.short,
+        secondary: t.subject,
+        color: t.color,
+        cells,
+        closed,
+      };
     });
   }
 
@@ -173,6 +181,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
     const letter = roomLetter(ix, group.roomId);
     return {
       id: group.id,
+      kind: 'class' as const,
       name: group.name,
       secondary: letter === '' ? 'derslik yok' : `${letter} dersliği`,
       color: group.color,

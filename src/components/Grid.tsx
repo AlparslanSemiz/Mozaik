@@ -5,6 +5,7 @@
 // all (see drag.ts).
 
 import { memo, useEffect, useMemo, useRef } from 'react';
+import { useInspect } from './Inspector';
 import type React from 'react';
 import { dayPeriods } from '../bell';
 import { attachGridChrome } from '../gridChrome';
@@ -24,6 +25,8 @@ export interface GridCell {
 
 export interface GridRow {
   id: string;
+  /** Which list the row's id belongs to — the inspector needs to know. */
+  kind: 'teacher' | 'class';
   name: string;
   secondary: string;
   /** Palette index of the row's OWN entity: the teacher, or the class. */
@@ -56,6 +59,10 @@ const Row = memo(function Row({
   onCellRemove,
   onCellMoveStart,
 }: RowProps) {
+  // Read from context INSIDE the memoised row rather than passed as a prop:
+  // the provider's `open` is a `useCallback([])`, i.e. stable for the life of
+  // the app, so this cannot be what re-renders 25 rows of 84 cells (pitfall 10).
+  const inspect = useInspect();
   const cells = [];
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
@@ -155,7 +162,16 @@ const Row = memo(function Row({
             the cards in that row, which is what makes a pool card findable; in
             the class view it is the only place a class colour appears at all. */}
         <span className="row-dot" style={{ background: paletteColor(row.color) }} />
-        {row.name}
+        {/* The row head IS the entity, so it is what opens its sheet: from the
+            grid, "what does MÇ's whole week look like" used to mean reading a
+            row 78 columns long by eye. */}
+        <button
+          className="inspect"
+          onClick={() => inspect(row.kind, row.id)}
+          title={`${row.name} — bilgileri ve haftalık programı`}
+        >
+          {row.name}
+        </button>
         <span className="secondary">{row.secondary}</span>
       </th>
       {cells}

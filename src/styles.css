@@ -3094,3 +3094,229 @@ table.availability.heat td.closed {
 .choice-list li + li {
   margin-top: var(--space-2);
 }
+
+/* ------------------------------------------------------------------- sheet
+   One teacher, class or room, over whatever you were looking at. A sheet and
+   not a seventh tab: the question is always asked ABOUT something already on
+   screen, and a destination would make you leave it. */
+
+.sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 41;
+  width: min(46rem, calc(100vw - 3rem));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  overflow: auto;
+  padding: var(--space-6);
+  background: var(--paper);
+  color: var(--text);
+  border-left: 1px solid var(--hairline);
+  box-shadow: var(--elev-3);
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* The identity, at the size the grid draws it: a palette square with the short
+   form on it, or the kind's icon when there is no colour (a room has none). */
+.sheet-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--r-md);
+  background: var(--paper-sunk);
+  color: var(--on-color);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  letter-spacing: var(--ls-tight);
+}
+
+.sheet-id {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  letter-spacing: var(--ls-tighter);
+  line-height: var(--lh-head);
+}
+
+.sheet-kind {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--muted);
+}
+
+.sheet-links {
+  margin: 0;
+  padding-left: var(--space-6);
+  color: var(--muted);
+  line-height: var(--lh-base);
+}
+
+/* The counted facts, four across. A definition list because that is what it
+   is: a label and the number it names. */
+.sheet-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.sheet-facts > div {
+  padding: var(--space-4);
+  background: var(--paper-sunk);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+}
+
+/* A number that does not add up is the reason to have opened this at all, so
+   it says so where it is READ rather than only in Kontrol. */
+.sheet-facts > div.tight {
+  background: var(--warn-bg);
+  border-color: var(--warn);
+}
+
+.sheet-facts dt {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.sheet-facts > div.tight dt {
+  color: var(--warn);
+}
+
+.sheet-facts dd {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight);
+}
+
+.sheet-h {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--muted);
+}
+
+.sheet-week {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.sheet-week th {
+  padding: var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+.sheet-week tbody th {
+  width: 3.25rem;
+  text-align: right;
+  padding-right: var(--space-3);
+}
+
+.sheet-week td {
+  height: 2.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xs);
+  text-align: center;
+  line-height: 1.05;
+  color: var(--on-color);
+  overflow: hidden;
+}
+
+.sheet-cell-top {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.sheet-cell-bottom {
+  display: block;
+  font-size: var(--fs-2xs);
+  color: var(--on-color-sub);
+}
+
+/* Closed and empty: the same hatch the availability grid uses, so the two
+   screens say the same thing the same way. */
+.sheet-week td.unavailable {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--closed) 0 3px,
+    var(--hatch) 3px 6px
+  );
+}
+
+/* A lesson left sitting on an hour that was closed afterwards. It is NOT
+   removed (principle 6), so it has to be visible instead — pitfall 16, said
+   for the second time, in the panel that is now the easiest place to see it. */
+.sheet-week td.conflict {
+  outline: 2px solid var(--bad);
+  outline-offset: -2px;
+}
+
+/* It SLIDES, it does not fade. A sheet that fades in is transparent for the
+   length of the transition, and what shows through it here is 2100 grid cells
+   — measured by looking: the screenshot of the first version is unreadable.
+   Only the overlay fades. */
+.sheet {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+@starting-style {
+  .sheet { transform: translateX(100%); }
+}
+
+.sheet[data-state='closed'] { transform: translateX(100%); }
+
+/* A name in a list that opens the sheet. It reads as a link, not as a button:
+   there are twenty-five of them down a column and twenty-five frames would be
+   a cage. */
+.inspect {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--r-xs);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition:
+    color var(--dur-fast) var(--ease),
+    text-decoration-color var(--dur-fast) var(--ease);
+}
+
+.inspect:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}

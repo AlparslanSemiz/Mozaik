@@ -2,6 +2,8 @@
 // clash with each other — only through a shared room.
 
 import { useState } from 'react';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
 import { parseClasses } from '../../import';
 import ColorPick from '../ColorPick';
@@ -18,6 +20,7 @@ import type { PanelProps } from '../props';
 
 export default function Classes({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
+  const inspect = useInspect();
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
@@ -116,6 +119,18 @@ export default function Classes({ state, change }: PanelProps) {
                   {dayCount * hourCount}
                 </td>
                 <td>
+                  <div className="form-row nowrap">
+                  {/* Its whole week, its load and what it is tied to, without
+                      leaving the list. The information was always there; it
+                      was spread over four tabs. */}
+                  <button
+                    className="btn icon"
+                    aria-label={`${c.name} bilgileri`}
+                    title="Bilgileri ve haftalık programı"
+                    onClick={() => inspect('class', c.id)}
+                  >
+                    <PanelRight size={16} strokeWidth={2} />
+                  </button>
                   <button
                     className="btn danger"
                     onClick={async () => {
@@ -127,6 +142,7 @@ export default function Classes({ state, change }: PanelProps) {
                   >
                     Sil
                   </button>
+                  </div>
                 </td>
               </tr>
             ))}

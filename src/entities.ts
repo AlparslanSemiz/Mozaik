@@ -4,7 +4,7 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
-import { closedKey, countPlacedHours, sanitize } from './constraints';
+import { buildIndex, closedKey, countPlacedHours, sanitize, teacherKey } from './constraints';
 import type { Index } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
@@ -778,4 +778,173 @@ export function pendingLessons(d: State, ix: Index): number {
     if ((ix.placedHours.get(lesson.id) ?? 0) < lesson.weeklyHours) n++;
   }
   return n;
+}
+
+// -------------------------------------------------- one entity, on its own
+//
+// "Her derslik, sınıf ya da öğretmenin üzerine tıklandığında bilgileri ve
+// programının gözükmesi" — the reader's own words, and the one thing the tool
+// could not do at all. The information existed: it was spread across the
+// Program grid (one row of it), the Müsaitlik grid (one row of it), the
+// Kurulum list (one row of it) and Kontrol (one line of it), and putting them
+// together meant four tabs and remembering.
+//
+// Pure, and here rather than in the panel that shows it: a `.tsx` file that
+// walks `placements` is a `.tsx` file doing timetable logic.
+
+export type InspectKind = 'teacher' | 'class' | 'room';
+
+export interface WeekCell {
+  /** What the cell says. Two lines, like a grid card. Empty when free. */
+  top: string;
+  bottom: string;
+  /** Palette index that paints it, or null when nothing is placed. */
+  color: number | null;
+  /** This entity cannot be used at this hour. */
+  closed: boolean;
+  /** A lesson is sitting on an hour that was closed AFTERWARDS (pitfall 16). */
+  conflict: boolean;
+}
+
+/**
+ * One entity's week: rows are DAYS and columns are lessons.
+ *
+ * The same way round as Müsaitlik and the printed sheet, and deliberately not
+ * the same way round as the Program grid — this is a "read one day" screen,
+ * and that is the axis those are set on.
+ */
+export function entityWeek(d: State, kind: InspectKind, id: Id): WeekCell[][] {
+  const ix = buildIndex(d);
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+  const week: WeekCell[][] = [];
+
+  for (let day = 0; day < dayCount; day++) {
+    const row: WeekCell[] = [];
+    for (let hour = 0; hour < hourCount; hour++) {
+      const closed = d.unavailable[`${id}|${day}|${hour}`] === 1;
+      const lessonId =
+        kind === 'class'
+          ? d.placements[`${id}|${day}|${hour}`]
+          : kind === 'teacher'
+            ? ix.teacherBusy.get(teacherKey(id, day, hour))
+            : ix.roomBusy.get(`${id}|${day}|${hour}`);
+
+      const lesson = lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
+      if (lesson === undefined) {
+        row.push({ top: '', bottom: '', color: null, closed, conflict: false });
+        continue;
+      }
+
+      const group = ix.classById.get(lesson.classId);
+      const teacher = ix.teacherById.get(lesson.teacherId);
+      // A class's own week reads "who is teaching me"; everyone else's reads
+      // "which class am I with". The colour follows the same rule the grid
+      // does: the TEACHER paints, the class is a mark.
+      row.push(
+        kind === 'class'
+          ? {
+              top: teacher?.short ?? '?',
+              bottom: teacher === undefined ? '' : subjectShort(d.settings, teacher.subject),
+              color: teacher?.color ?? null,
+              closed,
+              conflict: closed,
+            }
+          : {
+              top: group?.name ?? '?',
+              bottom: kind === 'teacher' ? roomName(d, group?.roomId ?? null) : (teacher?.short ?? ''),
+              color: teacher?.color ?? null,
+              closed,
+              conflict: closed,
+            },
+      );
+    }
+    week.push(row);
+  }
+  return week;
+}
+
+export interface EntityFacts {
+  /** "MÇ" / "510" / "A" — what the grid calls it. */
+  short: string;
+  /** "Mehmet Çelik" / "510 sınıfı" / "A dersliği". */
+  name: string;
+  /** Its own palette colour, or null: a room has none. */
+  color: number | null;
+  /** Counted lines for the panel. Never estimated. */
+  rows: Array<{ label: string; value: string; tight: boolean }>;
+  /** Sentences that name the other entities it is tied to. */
+  links: string[];
+}
+
+/**
+ * The counted facts. Every number here is one somebody could otherwise only
+ * get by cross-reading two tabs, and the `tight` flag is what turns a number
+ * into a warning: a load that does not fit the open hours cannot be laid out,
+ * and that is worth saying WHERE the load is shown rather than only in Kontrol.
+ */
+export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | null {
+  const load = weeklyLoad(d, kind, id);
+  const open = openHours(d, id);
+  const week = d.settings.days.length * d.settings.hours.length;
+  const ix = buildIndex(d);
+
+  let placed = 0;
+  for (const row of entityWeek(d, kind, id)) {
+    for (const cell of row) if (cell.color !== null) placed++;
+  }
+
+  const common = (short: string, name: string, color: number | null, links: string[]) => ({
+    short,
+    name,
+    color,
+    links,
+    rows: [
+      { label: 'Haftalık ders yükü', value: `${load} saat`, tight: load > open },
+      { label: 'Açık saat', value: `${open} / ${week}`, tight: open < load },
+      { label: 'Programa yerleşmiş', value: `${placed} / ${load} saat`, tight: placed < load },
+      { label: 'Kapalı saat', value: `${week - open} saat`, tight: false },
+    ],
+  });
+
+  if (kind === 'teacher') {
+    const t = ix.teacherById.get(id);
+    if (t === undefined) return null;
+    const lessons = d.lessons.filter((x) => x.teacherId === id);
+    const classes = [...new Set(lessons.map((x) => ix.classById.get(x.classId)?.name ?? '?'))];
+    return {
+      ...common(t.short, t.name, t.color, [
+        `Branşı: ${t.subject}`,
+        lessons.length === 0
+          ? 'Henüz dersi yok'
+          : `${lessons.length} dersi var: ${classes.join(', ')}`,
+      ]),
+    };
+  }
+
+  if (kind === 'class') {
+    const c = ix.classById.get(id);
+    if (c === undefined) return null;
+    const lessons = d.lessons.filter((x) => x.classId === id);
+    const teachers = [...new Set(lessons.map((x) => ix.teacherById.get(x.teacherId)?.short ?? '?'))];
+    return {
+      ...common(c.name, `${c.name} sınıfı`, c.color, [
+        `Dersliği: ${roomName(d, c.roomId)}`,
+        lessons.length === 0
+          ? 'Henüz dersi yok'
+          : `${lessons.length} dersi var: ${teachers.join(', ')}`,
+      ]),
+    };
+  }
+
+  const r = ix.roomById.get(id);
+  if (r === undefined) return null;
+  const groups = roomClasses(d, id);
+  return {
+    ...common(r.name, `${r.name} dersliği`, null, [
+      groups.length === 0
+        ? 'Hiçbir sınıf bu dersliği kullanmıyor'
+        : `${groups.length} sınıf paylaşıyor: ${groups.map((c) => c.name).join(', ')}`,
+    ]),
+  };
 }

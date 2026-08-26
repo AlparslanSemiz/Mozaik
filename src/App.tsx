@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { InspectorProvider } from './components/Inspector';
 import { useDialogs } from './components/Dialogs';
 import { useToast } from './components/Toasts';
 import type React from 'react';
@@ -529,6 +530,7 @@ export default function App() {
         setDensity={setDensity}
       />
 
+      <InspectorProvider state={state}>
       <div className="workspace">
         {!canSave && (
           <div className="save-warning">
@@ -601,6 +603,7 @@ export default function App() {
           )}
         </main>
       </div>
+      </InspectorProvider>
     </div>
   );
 }

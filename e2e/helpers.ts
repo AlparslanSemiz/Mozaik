@@ -469,6 +469,23 @@ export const SCENES: Scene[] = [
       }
     },
   },
+  {
+    // One teacher, on their own: the panel the reader asked for in a sentence.
+    name: '6b-varlik-paneli',
+    go: async (page) => {
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await page.locator('table.grid').waitFor();
+      await page.locator('table.grid tbody tr').first().locator('.row-head .inspect').click();
+      await page.locator('.sheet').waitFor();
+      // The sheet slides in over --dur-slow; a shot taken in the same tick is
+      // a shot of the transition, not of the panel.
+      await page.waitForTimeout(400);
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
+      await page.locator('.sheet').waitFor({ state: 'hidden' });
+    },
+  },
   { name: '7-kontrol', go: tab('Kontrol') },
   {
     // The program's own question, with the cascade summary counted out. There

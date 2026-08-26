@@ -2,6 +2,8 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useState } from 'react';
+import { PanelRight } from 'lucide-react';
+import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
 import { parseRooms } from '../../import';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../entities';
@@ -10,6 +12,7 @@ import type { PanelProps } from '../props';
 
 export default function Rooms({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
+  const inspect = useInspect();
   const [newRoom, setNewRoom] = useState('');
 
   return (
@@ -72,6 +75,18 @@ export default function Rooms({ state, change }: PanelProps) {
                 </td>
                 <td>{state.classes.filter((c) => c.roomId === r.id).length}</td>
                 <td>
+                  <div className="form-row nowrap">
+                  {/* Its whole week, its load and what it is tied to, without
+                      leaving the list. The information was always there; it
+                      was spread over four tabs. */}
+                  <button
+                    className="btn icon"
+                    aria-label={`${r.name} bilgileri`}
+                    title="Bilgileri ve haftalık programı"
+                    onClick={() => inspect('room', r.id)}
+                  >
+                    <PanelRight size={16} strokeWidth={2} />
+                  </button>
                   <button
                     className="btn danger"
                     onClick={async () => {
@@ -83,6 +98,7 @@ export default function Rooms({ state, change }: PanelProps) {
                   >
                     Sil
                   </button>
+                  </div>
                 </td>
               </tr>
             ))}
