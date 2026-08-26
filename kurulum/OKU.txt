@@ -1,0 +1,87 @@
+﻿DERS PROGRAMI
+=============
+
+Haftalık ders programı dizmek için bir araç. Kurulum sihirbazı yok, hesap yok,
+şifre yok, internet gerekmez.
+
+
+NASIL KURULUR
+-------------
+
+1. Bu klasördeki  Kur.cmd  dosyasına çift tıklayın.
+2. Açılan pencerede yazanları okuyun; bitince "Bitti" yazacak.
+3. Masaüstünüzde "Ders Programı" adında bir kısayol oluşacak.
+
+Windows "bilinmeyen bir uygulama" diye bir uyarı gösterirse: "Daha fazla bilgi"
+yazısına, sonra "Yine de çalıştır" düğmesine basın. Bu uyarı, dosyanın imzalı
+olmamasından çıkıyor; içeriğiyle ilgisi yok.
+
+Yönetici hakkı istemez. Kayıt defterine (registry) hiçbir şey yazmaz.
+
+
+NASIL AÇILIR
+------------
+
+Masaüstündeki "Ders Programı" kısayoluna çift tıklayın.
+
+İki şey olur:
+  - Siyah bir pencere açılır.  BU PENCEREYİ KAPATMAYIN.  Program orada
+    çalışıyor; kapatırsanız program da kapanır.
+  - Tarayıcınızda program açılır.
+
+İşiniz bitince önce tarayıcı sekmesini, sonra siyah pencereyi kapatabilirsiniz.
+Verileriniz kaybolmaz.
+
+Adres şudur ve her zaman aynıdır:   http://dersprogrami.localhost:7654
+Bu bir internet adresi DEĞİLDİR. Kendi bilgisayarınızı gösterir; dışarıya
+hiçbir şey gitmez, dışarıdan hiçbir şey gelmez.
+
+
+VERİLERİNİZ NEREDE
+------------------
+
+Program yazdıklarınızı kendiliğinden saklar; kaydet düğmesine basmayı
+unutsanız da işiniz durur.
+
+Ama saklandığı yer TARAYICININ bu bilgisayardaki deposudur. Yani:
+  - Başka bir bilgisayar bunu görmez.
+  - Tarayıcıda "tarama verilerini temizle" derseniz SİLİNİR.
+
+Bunun iki çaresi var, ikisi de programın içinde:
+
+  1. Üst çubuktaki "Dosyaya kaydet". Öğrenilecek tek alışkanlık budur:
+     değişiklik yaptın, yedek indir.
+
+  2. Ayarlar -> Veri bölümünden bir KLASÖR seçin (örneğin Belgelerim). O
+     zaman program her değişikliği kendiliğinden oraya da yazar, ve her gün
+     için ayrı bir yedek bırakır.
+
+
+GÜNCELLEME
+----------
+
+Yeni bir sürüm aldığınızda:  Guncelle.cmd  dosyasına çift tıklayın.
+Verilerinize ve kısayollarınıza dokunmaz.
+
+
+KALDIRMA
+--------
+
+1. Masaüstündeki ve Başlat menüsündeki kısayolları silin.
+2. Şu klasörü silin:   %LOCALAPPDATA%\Ders Programı
+   (Adres çubuğuna bunu yazıp Enter'a basarsanız klasör açılır.)
+
+Program başka hiçbir yere hiçbir şey yazmaz.
+
+
+BİR ŞEY TERS GİDERSE
+--------------------
+
+"Port 7654 kullanımda" yazıyorsa: program zaten açık demektir. Görev
+çubuğunda siyah pencereyi arayın.
+
+Tarayıcı "sayfa açılamıyor" diyorsa: siyah pencere kapanmış olabilir.
+Kısayola yeniden çift tıklayın.
+
+Hiçbiri işe yaramazsa: siyah pencereyi kapatın, kısayola yeniden tıklayın.
+Verileriniz bundan etkilenmez.

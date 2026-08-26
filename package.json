@@ -9,6 +9,7 @@
     "build": "tsc --noEmit && vite build",
     "build:site": "tsc --noEmit && vite build --config vite.site.config.ts",
     "sunucu": "vite build --config vite.site.config.ts && node scripts/sunucu.mjs",
+    "paket": "npm run build:site && node scripts/paket.mjs",
     "test": "vitest run",
     "test:izle": "vitest",
     "kontrol": "tsc --noEmit && vitest run && vite build && playwright test && npm run test:site && playwright test --config playwright.cozucu.config.ts",

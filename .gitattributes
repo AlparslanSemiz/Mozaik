@@ -1,2 +1,11 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The installation folder is read by Windows tools, on Windows, always. cmd.exe
+# and Notepad both want CRLF and `* text=auto` above would hand them LF on a
+# Linux checkout — so these are pinned rather than detected. The .ps1 files
+# also carry a UTF-8 BOM: Windows PowerShell 5.1 reads a BOM-less UTF-8 script
+# as ANSI and every Turkish letter in it comes out wrong.
+kurulum/*.cmd text eol=crlf
+kurulum/*.ps1 text eol=crlf
+kurulum/*.txt text eol=crlf
