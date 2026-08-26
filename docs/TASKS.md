@@ -18,14 +18,22 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > Sayılar: 508 birim + 381 E2E + 6 site testi yeşil. Ayrıntı ve **ölçülen her
 > sayı** aşağıda, **Y turu** bölümünde.
 
-> **SIRADAKİ İŞ: B turu — yerel kurulum.** Onaylanmış planın park edilen yarısı
-> (aşağıda "PARK EDİLEN"). Logo seçildi ve yerleşti; kalan beş madde
-> `dersprogrami.localhost` sunucusu, Windows kurulum betikleri, favicon,
-> "nereye kaydedilsin" (eski 4f/4l) ve ilke 2'nin belgeye yazılması.
+> **B turu bitti (2026-08-26).** Beş maddenin beşi de yapıldı, artı kalan
+> tasklardan **4f**. Dal: `v1.1-kurulum`. Ayrıntı ve **ölçülen her sayı**
+> [STATUS.md](STATUS.md) → *Yirmi ikinci oturum*.
 >
-> Ondan sonra hâlâ kullanıcıda bekleyen iki şey var: **gerçek veriyle deneme**
-> (babanın listesi) ve **4g–4i Tauri/exe** (kullanıcı "şimdilik boş ver" dedi).
-> GitHub Pages (4f) da beklemede — bu turun istediği şey **yerel** kurulum.
+> **SIRADAKİ İŞ — ikisi de KULLANICIDA:**
+> 1. **Windows'ta bir kez denenmesi.** `npm run paket` → `dist-kurulum/` →
+>    o klasörü babanın makinesine götürüp `Kur.cmd`. Bu makinede
+>    koşturulamayan üç şey var ve üçü de orada görülecek: `Kur.cmd`, `.lnk`
+>    üretimi, ve Windows PowerShell 5.1. **Ayrıca gerçek klasör diyaloğu**
+>    (Ayarlar → Veri → "Nereye kaydedilsin") elle denenmeli.
+> 2. **GitHub Pages'in açılması.** İş akışı yazıldı; depo `ders-programi`
+>    olarak yeniden adlandırılacak ve Pages kaynağı "GitHub Actions"
+>    seçilecek.
+>
+> Ondan sonra hâlâ bekleyen: **gerçek veriyle deneme** (babanın listesi) ve
+> **4g–4i Tauri/exe** (kullanıcı "şimdilik boş ver" dedi).
 
 ### F turu — elle sıralama · baskı seçenekleri · cinsiyet — **BİTTİ ✅** (2026-08-26)
 
@@ -441,9 +449,17 @@ adlandırılacak** (kullanıcı yapacak).
       yine açılıyor, çevrimdışı girilen veri yeniden yüklemeden sonra duruyor;
       SW kaydı silinince aynı yükleme `ERR_INTERNET_DISCONNECTED` ile düşüyor
       (yani test boş değil). Ayrıntı: [STATUS.md](STATUS.md) → *On birinci oturum*
-- [ ] **4f GitHub Pages yayını** — `.github/workflows/site.yml`. **Kullanıcıdan:**
-      depo `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı
-      "GitHub Actions" seçilecek
+- [x] **4f GitHub Pages yayını — YAPILDI (2026-08-26).**
+      `.github/workflows/site.yml`: `npm ci` → `build:site` →
+      `upload-pages-artifact` → `deploy-pages`. Ayrı bir tip adımı yok
+      (`build:site` zaten `tsc --noEmit` ile başlıyor). İş akışının kendi
+      kontrolü — `dist-site/index.html` ikinci bir betik istemiyor — yerelde
+      de koşturuldu. **İş akışının kendisi burada koşturulamaz.**
+      Yan ürün, listeleyerek bulundu: `publicDir` `site/`'ın tamamını
+      kopyaladığı için üç logo adayı yayınlanan siteye giriyordu;
+      `dropStudio()` çıkarıyor.
+      **Kullanıcıda kalan iki adım:** depo `ders-programi` olarak yeniden
+      adlandırılacak, Pages kaynağı "GitHub Actions" seçilecek
 - [ ] **4g Tauri kabuğu** — `src-tauri/`, pencere başlığı "Ders Programı", ikon,
       `frontendDist: ../dist`. **Yeni runtime bağımlılığı yok**: `withGlobalTauri`
       + `window.__TAURI__.core.invoke`, `@tauri-apps/*` npm paketi eklenmiyor
@@ -463,12 +479,9 @@ adlandırılacak** (kullanıcı yapacak).
       ortalanıyor. E2E 223 → 228; kanıt olarak `displayHeaderFooter: true` ile
       PDF üretilip **gözle okundu**. *Kullanıcı "baskıdaki program daha da
       büyüsün" dedi — yeni listeye girdi, aşağıya bakınız*
-- [ ] **4l Dosya Sistemi Erişimi API'si** — 4d'den devreden iş, artık
-      yazılabilir (4e ile http kaynağı var). `showSaveFilePicker` tutamağı
-      IndexedDB'de saklanıp her değişiklik aynı `-tumu-` dosyasına yazılır;
-      `file://` altında ve API'siz tarayıcıda mevcut "Dosyaya kaydet"
-      davranışına düşer. **Gerçek dosya diyaloğu Playwright'la sürülemez** —
-      API sahtelenerek (`addInitScript`) test edilir, diyalog elle denenir
+- [x] **4l Dosya Sistemi Erişimi API'si — B4 olarak YAPILDI (2026-08-26).**
+      Dosya değil **klasör** seçiliyor (`showDirectoryPicker`): bütün planlar
+      + her gün için bir yedek, tek bir soruyla. Ayrıntı aşağıda, B4
 - [~] **4j Belgeler** — 4b+4c ve 4d ile birlikte ilerledi: yasak liste daraltıldı
       ("birden çok program sürümü" → **aynı planın** sürüm ağacı, gerekçesiyle),
       `library.ts` ve `bundle.ts` mimari şemaya girdi, depolama anahtarı tablosu
@@ -1004,33 +1017,105 @@ E2E'nin 10'u kırmızıya döndü; kalan ikisi bilerek koruma testi).
 
 ---
 
-## PARK EDİLEN: yerel kurulum turu (B) — kullanıcı kararıyla ertelendi
+## B turu — yerel kurulum — **BİTTİ ✅** (2026-08-26)
 
-Onaylanan planın B bölümü **yarıda bırakıldı** (2026-08-26, kullanıcı: "şimdi
-bu listeye geç"). Yapılan tek parçası **logo**: üç aday çizildi, 16/32/64/192
-px'te iki zeminde yan yana render edildi, kullanıcı **A — Şerit**'i seçti;
-adaylar `site/logo-adaylari/` altında **duruyor** (kullanıcı isteği).
+Onaylanan planın park edilmiş yarısı. Dal `v1.1-kurulum`, madde başına bir
+commit. Logo parçası Y turunda yapılmıştı (üç aday, kullanıcı **A — Şerit**'i
+seçti; adaylar `site/logo-adaylari/` altında duruyor ama artık yayınlanan
+siteye **girmiyor**).
 
-Kalan işler, kararlarıyla birlikte:
+Turun gerekçesini **bir kez yanlış yazdım ve ölçümle düzelttim**: "`file://`
+güvenli bağlam değildir" dedim, Chromium'da değil — orada da güvenli bağlam ve
+`showDirectoryPicker` da var. Eksik olan bir **köken** (OPFS `SecurityError`,
+service worker `TypeError`, `origin` makinedeki her yerel sayfayla ortak).
+Yerel sunucu klasör özelliğinin tek evi değil, **daha iyi** evi. Ayrıntı:
+[STATUS.md](STATUS.md) → *Turun gerekçesini düzeltmek zorunda kaldım*.
 
-- [ ] **B1 Yerel sunucu** — `scripts/sunucu.mjs` (Node, sıfır bağımlılık) +
-      `kurulum/sunucu.ps1` (Windows ikizi, **`HttpListener` değil ham
-      `TcpListener`**: `localhost` dışı bir ana bilgisayar öneki
-      `netsh http add urlacl` yani yönetici ister). Adres
-      **`http://dersprogrami.localhost:7654`** — Chrome `*.localhost`'u kendisi
-      127.0.0.1'e çözer, hosts dosyası ve yönetici gerekmez, **ve o adres
-      güvenli bağlamdır** (service worker + dosya sistemi API'si çalışır).
-- [ ] **B2 Kurulum betikleri** — `Kur.cmd` / `Guncelle.cmd` / `OKU.txt`,
-      masaüstü ve Başlat menüsü kısayolu (`WScript.Shell`, gerçek `.lnk`),
-      `icon.ico`. Hedef **Windows 10 ve 11** (kullanıcı kararı).
-- [ ] **B3b `index.html`'e `data:` URI favicon** — çift tıklanan dosyanın
-      sekmesinde de logo görünsün; ağ yok, tuzak 32'ye dokunmaz.
-- [ ] **B4 "Nereye kaydedilsin"** (= eski 4l) — `src/folder.ts`, tutamak
-      IndexedDB'de, ilk açılışta `showDirectoryPicker({ startIn: 'documents' })`,
-      her yazımda `ders-programi-tumu.json` + günlük yedek (son 10 gün).
-- [ ] **B5 İlke 2'nin ikinci daraltması belgeye yazılacak**: yerel statik
-      sunucu var; backend, veritabanı, hesap, oturum, API yok.
+- [x] **B1 Yerel sunucu.** `scripts/sunucu.mjs` (Node) + `kurulum/sunucu.ps1`
+      (Windows ikizi, babanın makinesinde **asıl koşacak** olan — Node
+      gerekmiyor). `HttpListener` değil ham `TcpListener`: `localhost` dışı
+      bir önek `netsh http add urlacl`, yani yönetici ister.
+      **İki geri döngüye birden** bağlanıyor (tuzak 66).
+      ÖLÇÜLDÜ: OPFS ve service worker burada çalışıyor, `file://`'ta
+      `SecurityError`/`TypeError`; iki sunucu da `127.0.0.1`, `[::1]`
+      ve `dersprogrami.localhost` üzerinden **baytı baytına aynı** yanıtı
+      veriyor; açılış `file://` 76 ms ↔ sunucu 82 ms (9 koşu).
+      `pwsh` 7.6.5 kuruldu ve betik burada koşturuldu.
+      `e2e/sunucu.spec.ts` — 5 test.
+- [x] **B2 Kurulum betikleri ve paket.** `Kur.cmd` · `Guncelle.cmd` ·
+      `kur.ps1` · `OKU.txt` · `icon.ico` + `scripts/{ikon,paket}.mjs`.
+      `dist-kurulum/` = **569 034 bayt**, elden ele giden tek klasör.
+      `.cmd`'ler **yalnız ASCII** (cmd.exe kod sayfası), `.ps1`'ler **UTF-8
+      BOM + CRLF** (5.1 BOM'suzu ANSI okur), `.gitattributes`'ta `eol=crlf`.
+      Pencere **gizlenmiyor** (plandan sapma, gerekçesi: gizli pencere =
+      kapatılamayan program). Güncelleme `site\`'ı **silip** yazıyor, yoksa
+      kaldırılan bir dosya orada kalır.
+      ÖLÇÜLDÜ: kopyalama yolu gerçekten koşturuldu — 9 dosya yerine gitti,
+      bilerek bırakılan eski dosya silindi, kopyalama kısayol adımından
+      **önce** bitti, kısayol argümanında boşluklu yol tırnak içinde.
+      **DENENMEDİ:** `Kur.cmd`, `.lnk` üretimi, Windows PowerShell 5.1.
+- [x] **B3b Gömülü favicon.** `index.html`'e `data:` URI. İşaret artık iki
+      yerde ve **ayrışmasını bir test yakalıyor**: URI çözülüp
+      `site/icon.svg` ile aynı 13 dikdörtgeni çizdiği karşılaştırılıyor.
+      Ölçüm: +1 451 bayt (işaretin kendisi 1 205).
+      Kendi hatam düzeltildi: ilk testim "dosyada `icon.svg` metni geçmesin"
+      diyordu ve **yorumu** yakalıyordu; doğru iddia "hiçbir href/src `data:`
+      dışına bakmıyor".
+- [x] **B4 "Nereye kaydedilsin" (eski 4l).** `src/folder.ts` (yaprak modül;
+      `dailyName` ve `prunable` **saf ve testli**, 9 birim testi) +
+      `src/useFolder.ts` (App'te, tuzak 18) + Ayarlar → Veri'de panel.
+      Yazılan şey **bütün planlar** (paket), açık plan değil. Günlük yedek
+      son 10 gün, ve **ad kalıbıyla** budanıyor — Belgelerim'de babanın kendi
+      dosyaları var, "en yeni ondan gerisini sil" onun işini silerdi.
+      Yazma hatası **sessiz kalmıyor** (tuzak 7).
+      **Şema değişmedi, yeni localStorage anahtarı yok:** tutamak
+      `IndexedDB['ders-programi-klasor']`'da, çünkü localStorage bir tutamağı
+      saklayamaz — ama hâlâ `State`'e girmiyor.
+      `e2e/klasor.spec.ts` — 8 test, **gerçek** bir `FileSystemDirectoryHandle`
+      ile (OPFS); yalnız sürülemeyen parça sahtelendi (tuzak 67).
+      Dört ayrı sabotajla kırmızıya döndürüldü.
+      **DENENMEDİ:** gerçek klasör diyaloğu — Playwright'la sürülemez.
+- [x] **B5 Belgeler.** İlke 2'nin **ikinci daraltması** (yerel statik sunucu
+      var; backend, veritabanı, hesap, oturum, API yok), üç derleme hedefi,
+      `folder.ts`/`useFolder.ts` mimari şemaya, IndexedDB'nin gerekçesi,
+      README'de üç teslim yolu, ve **tuzak 65–68**.
 
-> **Dürüst not:** bu makinede `pwsh` **yok** (kontrol edildi), yani
-> `sunucu.ps1` burada koşturulamaz. Yazıldığında "gözden geçirildi,
-> **ölçülmedi**" diye işaretlenecek.
+### Bu turda çıkan yeni tuzaklar
+
+- **Tuzak 65** — "güvenli bağlam" ile "gerçek köken" aynı şey değildir, ve
+  bu tuzağın kaydı **benim ona düşmem**: bir turun bütün gerekçesini
+  ölçmeden yazdım, yanlıştı, ve yakalayan şey bir test değil bir **ekran
+  görüntüsü** oldu.
+- **Tuzak 66** — tek geri döngüye bağlanan sunucu bazı makinelerde sessizce
+  bulunamaz.
+- **Tuzak 67** — structured clone fonksiyon klonlayamaz; elle yazılmış sahte
+  tutamak IndexedDB'ye hiç girmez ve "hatırlanıyor mu" testi hiçbir şey
+  ölçmez. Çare sahteyi **küçültmek**.
+- **Tuzak 68** — `addInitScript` her yüklemede koşar; oraya konan bir
+  "varsayılanı yaz" satırı testin reload'dan önce kurduğu durumu geri alır.
+- **Tuzak 62 üçüncü kez**: sabotaj koşusunda yama `tsc`'yi kırdı, derleme
+  düştü, test **bir önceki** `dist-site`'ı ölçüp yeşil geçti.
+- **Tuzak 49 yeniden yaşandı** ve bu kez bir gerilemeydi: yeni panelin
+  `role="status"` satırı `planlar.spec.ts`'in `.panel .hint[role="status"]`
+  sorgusunu ikiye çıkardı. Sorgu paneline daraltıldı.
+
+### Bu turda bulunan, kullanıcıya bırakılan
+
+- **16 px'te işaret çamurlaşıyor.** `.ico` üretilip 16/32/48/256'da yan yana
+  bakıldı: 48 px ve üstü temiz, 32 meşgul, 16'da altı sütun birleşip mavi bir
+  lekeye dönüyor. Marka kullanıcı tarafından **16 px'te görülerek** seçilmişti
+  (aday B daha okunaklıydı ama "saat uygulaması" gibi duruyordu), o yüzden
+  değiştirilmedi. Ucuz bir çare var: ICO ve favicon küçük boylarda
+  **sadeleştirilmiş** bir varyant taşıyabilir (üç sütun, hayalet sütunlar yok)
+  — marka kimliği aynı kalır. Karar kullanıcının.
+
+---
+
+## PARK EDİLEN: yerel kurulum turu (B)
+
+**Kapandı 2026-08-26.** Beş maddenin beşi de yapıldı — bkz. yukarıdaki
+*"B turu — yerel kurulum — BİTTİ"*. Park notunun öngördüğü dürüst sınır
+(`pwsh` bu makinede yok, betik "gözden geçirildi, ölçülmedi" diye
+işaretlenecek) **gerçekleşmedi**: kullanıcı kurulmasını istedi, `pwsh` 7.6.5
+kuruldu ve `sunucu.ps1` burada gerçekten koşturuldu. Ölçülemeyen üç şey
+kaldı ve adlarıyla yazıldı: `Kur.cmd`, `.lnk` üretimi, Windows PowerShell 5.1.

@@ -1,12 +1,13 @@
 // 73. The local server (task B1) — over http, on the address it really uses.
 //
-// This file exists for ONE assertion, and the rest of it is there to make that
-// assertion mean something: `window.isSecureContext` is true at
-// http://dersprogrami.localhost. That single boolean is the whole reason this
-// round happened. Under file:// it is false, and false means no service
-// worker and no File System Access API — so the strongest answer to principle
-// 6, the program writing every change into a folder my father picked, cannot
-// exist on the double-clicked route at all.
+// What this server buys, stated as the difference it actually makes. The
+// first version of this file asserted `isSecureContext` and called that the
+// whole reason for the round — which was WRONG, and temel.spec.ts section 75
+// now pins the correction: file:// is a secure context in Chromium too.
+//
+// The real difference is a real ORIGIN, and it has three measured halves:
+// a service worker can register, OPFS is not refused, and the origin is this
+// app's rather than the one every local .html on the machine shares.
 //
 // It runs in the SITE config, not the file:// one: a server is not something
 // you can test by opening a file.
@@ -45,23 +46,41 @@ test.afterAll(() => {
 });
 
 test.describe('73. Yerel sunucu', () => {
-  test('GÜVENLİ BAĞLAM — turun bütün gerekçesi', async ({ page }) => {
+  test('GERÇEK BİR KÖKEN — turun gerekçesi, ölçülmüş hâliyle', async ({ page }) => {
     await page.goto(AD);
     await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
 
-    const facts = await page.evaluate(() => ({
-      secure: window.isSecureContext,
-      origin: location.origin,
-      // The two things file:// cannot have. Neither is used by this test;
-      // they are what the secure context is FOR.
-      sw: 'serviceWorker' in navigator,
-      folder: 'showDirectoryPicker' in window,
-    }));
+    const facts = await page.evaluate(async () => {
+      const out: Record<string, unknown> = {
+        origin: location.origin,
+        secure: window.isSecureContext,
+        folder: 'showDirectoryPicker' in window,
+      };
+      // The two that file:// refuses. These are the difference; the secure
+      // context is NOT (file:// has one too — temel.spec.ts section 75).
+      try {
+        await navigator.storage.getDirectory();
+        out['opfs'] = true;
+      } catch (err) {
+        out['opfs'] = (err as Error).name;
+      }
+      try {
+        const reg = await navigator.serviceWorker.register('./sw.js');
+        out['sw'] = typeof reg.scope === 'string';
+      } catch (err) {
+        out['sw'] = (err as Error).name;
+      }
+      return out;
+    });
 
-    expect(facts.origin).toBe(AD);
-    expect(facts.secure, '*.localhost güvenli bağlam değil').toBe(true);
-    expect(facts.sw).toBe(true);
-    expect(facts.folder).toBe(true);
+    // A real origin, with a host in it — not the one shared by every local
+    // file on the machine.
+    expect(facts['origin']).toBe(AD);
+    expect(facts['secure']).toBe(true);
+    expect(facts['folder']).toBe(true);
+    // ...and the two things that only a real origin gets.
+    expect(facts['opfs'], 'OPFS reddedildi').toBe(true);
+    expect(facts['sw'], 'service worker kaydolmadı').toBe(true);
   });
 
   test('doğru türlerle servis ediyor, PNG baytı baytına', async ({ request }) => {

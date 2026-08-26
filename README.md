@@ -11,13 +11,26 @@ tıklarsınız, program açılır. Hesap, şifre, güncelleme, kayıt yok.
 
 ## Nasıl çalıştırılır
 
-İki yol var, ikisi de aynı programı verir.
+Üç yol var, üçü de aynı programı verir.
 
 **1. Dosya (asıl teslim yolu).** `dist/index.html`'i indirin, çift tıklayın.
 Tarayıcıda açılır ve çalışır — fiş çekiliyken de. Programınız o tarayıcının bu
 bilgisayardaki deposunda saklanır.
 
-**2. Site.** `npm run build:site` ile üretilen `dist-site/` klasörü statik bir
+**2. Windows'a kurulum.** `npm run paket` ile üretilen `dist-kurulum/`
+klasöründeki `Kur.cmd`'ye çift tıklayın. Program `%LOCALAPPDATA%`'ya kopyalanır
+ve masaüstünüze bir kısayol gelir. Yönetici hakkı, kayıt defteri, internet ve
+Node **gerekmez** — sunucu Windows'un kendi PowerShell'iyle koşar
+(`http://dersprogrami.localhost:7654`; kendi bilgisayarınız, dışarı bir şey
+gitmez).
+
+Bu yolun farkı: program **gerçek bir adrese** sahip olur. Ölçülen üç sonucu
+var — çevrimdışı da açılır (service worker), verileri makinedeki öteki yerel
+sayfalarla paylaşmaz, ve seçtiğiniz klasörün iznini tarayıcı bu siteye
+saklayabilir (Ayarlar → Veri → *Nereye kaydedilsin*). Klasör seçme özelliği
+çift tıklanan dosyada da **vardır**; orada sadece daha az güvenilir.
+
+**3. Site.** `npm run build:site` ile üretilen `dist-site/` klasörü statik bir
 sayfadır (GitHub Pages'e konabilir). İlk açılıştan sonra bir service worker
 sayesinde **çevrimdışı** da açılır. Orada da backend, veritabanı, hesap ya da
 API yoktur.
@@ -61,14 +74,16 @@ gözü iyi görmeyen biri için yazıldı.
 npm install && npx playwright install chromium   # yeni bilgisayarda bir kez
 
 npm run dev          # geliştirme sunucusu
-npm test             # Vitest — saf mantık testleri (508)
+npm test             # Vitest — saf mantık testleri (517)
 npm run build        # dist/index.html tek dosya (ASIL TESLİM)
 npm run build:site   # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
 npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar
-npm run test:site    # site testleri, http üzerinde (çevrimdışı açılış dahil)
+npm run test:site    # site · sunucu · klasör testleri, http üzerinde (19)
 npm run kontrol      # hepsi: tsc + birim + derleme + E2E + site + çözücü
 npm run ekran        # iki temada ekran görüntüsü -> test-results/ekran/
 npm run cozucu       # gerçek ölçekli çözücü stresi (34,8 sn — kontrol'ün parçası)
+npm run sunucu       # yerel sunucu — http://dersprogrami.localhost:7654
+npm run paket        # dist-kurulum/ — Windows'a giden TEK klasör
 ```
 
 E2E, dev sunucusunu değil **`dist/index.html`'i `file://` üzerinden** açar —

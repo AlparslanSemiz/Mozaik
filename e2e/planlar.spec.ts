@@ -365,7 +365,12 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     });
     await answerDialog(page);
 
-    await expect(page.locator('.panel .hint[role="status"]')).toHaveText('2 plan açıldı.');
+    // Scoped to the panel that says it. Pitfall 49's shape: `.panel .hint`
+    // was unique until Ayarlar → Veri grew a second panel with a live line in
+    // it ("Nereye kaydedilsin"), and then this query stopped naming one thing.
+    await expect(
+      page.locator('.panel', { hasText: 'Bütün planlar tek dosyada' }).locator('.hint[role="status"]'),
+    ).toHaveText('2 plan açıldı.');
     await expect(picker(page).locator('option')).toHaveCount(2);
 
     // The second plan's own school name survived the round trip.

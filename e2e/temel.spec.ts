@@ -632,3 +632,63 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
     expect(rects(embedded)).toEqual(rects(source));
   });
 });
+
+// ---------------------------------------------------------------------------
+
+test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () => {
+  // This section exists because I got it wrong, and wrote the wrong thing into
+  // four files before a screenshot caught it.
+  //
+  // I claimed file:// is not a secure context and therefore cannot have the
+  // File System Access API, and built task B1's justification on that. It is
+  // false in Chromium. The screenshot that caught it was of the panel's "the
+  // API is not here" state — which rendered the "choose a folder" button
+  // instead, because the API IS here.
+  //
+  // So the record is a test rather than a sentence: anyone who re-writes the
+  // old claim has to make these go red first. The numbers are Chromium's, and
+  // a change in them is worth knowing about either way.
+
+  test('GÜVENLİ BAĞLAM ve klasör API’si file:// altında VAR', async ({ page }) => {
+    await open(page);
+    const facts = await page.evaluate(() => ({
+      secure: window.isSecureContext,
+      picker: typeof (window as unknown as { showDirectoryPicker?: unknown }).showDirectoryPicker,
+      idb: typeof indexedDB,
+    }));
+
+    expect(facts.secure, 'file:// güvenli bağlam DEĞİL — iddia değişti').toBe(true);
+    expect(facts.picker, 'showDirectoryPicker file:// altında yok — iddia değişti').toBe(
+      'function',
+    );
+    expect(facts.idb).toBe('object');
+  });
+
+  test('...ama gerçek bir KÖKEN yok, ve fark bu', async ({ page }) => {
+    await open(page);
+    const facts = await page.evaluate(async () => {
+      const out: Record<string, unknown> = { origin: location.origin };
+      try {
+        await navigator.storage.getDirectory();
+        out['opfs'] = 'açıldı';
+      } catch (err) {
+        out['opfs'] = (err as Error).name;
+      }
+      try {
+        await navigator.serviceWorker.register('./sw.js');
+        out['sw'] = 'kaydoldu';
+      } catch (err) {
+        out['sw'] = (err as Error).name;
+      }
+      return out;
+    });
+
+    // No host: every local .html file on the machine shares this one origin,
+    // and therefore the same storage namespace.
+    expect(facts['origin']).toBe('file://');
+    expect(facts['opfs'], 'OPFS artık file:// altında açılıyor — iddia değişti').toBe(
+      'SecurityError',
+    );
+    expect(facts['sw'], 'service worker artık file:// altında kaydoluyor').toBe('TypeError');
+  });
+});

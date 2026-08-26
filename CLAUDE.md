@@ -44,6 +44,33 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 > sonra service worker sayesinde **fiş çekiliyken** çalışıyor — ölçüldü.
 > Çift tıklanan `dist/index.html` hâlâ asıl teslim yolu, site onun yanında duruyor.
 >
+> **Daraltıldı (2026-08-26, ikinci kez): ilke 2 — YEREL statik sunucu da hariç.**
+> v1.1'de üçüncü bir teslim yolu var: `dersprogrami.localhost:7654`, babanın
+> makinesinde koşan ~150 satırlık bir dosya sunucusu (`kurulum/sunucu.ps1`).
+> Orada da **backend, veritabanı, hesap, oturum, API yok**; verilen şey bir
+> klasördeki dosyalar. `*.localhost`'u Chrome kendisi çözer: hosts dosyası
+> yok, yönetici yok. Çift tıklanan `dist/index.html` **hâlâ asıl teslim
+> yolu**; ölçülen fark 76 ms ↔ 82 ms.
+>
+> **Gerekçesi bir kez YANLIŞ yazıldı ve ölçümle düzeltildi.** İlk hâli
+> "`file://` güvenli bağlam değildir, orada `showDirectoryPicker` tanımlı bile
+> değildir" diyordu. Chromium'da **ikisi de yanlış**. `file://`'ın gerçekten
+> eksik olduğu şey bir **köken**:
+>
+> ```
+> isSecureContext                    true          ← yanılmışım
+> showDirectoryPicker                function      ← yanılmışım
+> navigator.serviceWorker.register   TypeError
+> navigator.storage.getDirectory     SecurityError
+> location.origin                    "file://"     — makinedeki HER yerel
+>                                                    sayfayla ortak
+> ```
+>
+> Yani sunucu klasör özelliğinin **tek** evi değil, **daha iyi** evi: çevrimdışı
+> çalışan bir sayfa, bu programa ait bir depo, ve tarayıcının tek bir siteye
+> saklayabildiği bir izin. Bu satırlar `e2e/temel.spec.ts` **75. bölümde**
+> ölçülüyor — yanlış iddia geri yazılırsa test kırmızıya döner.
+
 > **Daraltıldı (2026-08-25): "birden çok program sürümünü yan yana tutma" → "aynı
 > planın sürüm ağacı".** Gerekçe: yasaklanan şey *sürüm ağacı*ydı — "geçen salı
 > neye benziyordu" sorusuna cevap veren, dallanan, kimsenin bakmadığı bir geçmiş.
@@ -132,26 +159,43 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 508 birim testi
+npm test           # Vitest — 517 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 381 E2E testi (file://)
-npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
+npm run test:e2e   # Playwright — derler, sonra 385 E2E testi (file://)
+npm run test:site  # site · sunucu · klasör, http üzerinde — 19 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, 34,8 sn (kontrol'ün parçası)
+npm run sunucu     # yerel sunucu: http://dersprogrami.localhost:7654
+npm run paket      # dist-kurulum/ — babaya giden TEK klasör (Windows)
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
-### İki derleme hedefi — tek kaynak
+### Üç derleme hedefi — tek kaynak
 
 ```
 vite.config.ts       -> dist/index.html   TEK dosya, file://, çift tıklanır
 vite.site.config.ts  -> dist-site/        aynı tek dosya + manifest + sw.js + simge
+scripts/paket.mjs    -> dist-kurulum/     dist-site + kurulum betikleri (WINDOWS)
 site/                -> manifest.webmanifest · sw.js · icon.svg · icon-192/512.png
+kurulum/             -> Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
 scripts/simge.mjs    -> SVG'den PNG üretir (Chromium ile, yeni bağımlılık yok)
+scripts/ikon.mjs     -> aynı SVG'den .ico (konteyner elle yazılır; ICO içinde PNG)
+scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
 ```
+
+Üçüncü hedef ikincinin **paketlenmiş** hâli, ayrı bir derleme değil: içindeki
+uygulama `dist-site/index.html`'in ta kendisi. Kurulum betiklerinin hiçbiri
+`dist/`'e ya da `dist-site/`'a düşemez.
+
+**`kurulum/*.{cmd,ps1,txt}` `.gitattributes`'ta `eol=crlf`** ve `.ps1`'ler
+**UTF-8 BOM** taşır. İkisi de gerekli: `* text=auto` bir Linux checkout'unda
+onlara LF verir ve Notepad `OKU.txt`'yi tek satır gösterir; BOM'suz UTF-8'i
+Windows PowerShell 5.1 ANSI okur ve her "ı" bozulur. `.cmd` dosyaları
+**yalnız ASCII**: cmd.exe'nin kod sayfası Türkçe harfleri bozuyor, o yüzden
+kullanıcıya görünen her cümle PowerShell'den yazılıyor.
 
 Site **de** tek dosya (`viteSingleFile` korundu): service worker'ın önbelleğe
 alacağı kabuk böylece bir sabit, her derlemeden sonra üretilip senkron tutulması
@@ -171,7 +215,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
-| **Site** | `e2e/site.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı |
+| **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59) |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
@@ -281,6 +325,14 @@ rowDrag.ts                      liste satırını sürükleme. Saf DOM, React B�
                                 orta noktayla değil (tuzak 60)
 printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
+folder.ts                       "nereye kaydedilsin": babanın seçtiği klasör.
+                                library.ts'in deseni — State'i BİLMEZ, ham metin
+                                alıp verir. İki fonksiyonu SAF ve testli
+                                (dailyName, prunable); gerisi tarayıcı tesisatı.
+                                Tutamak IndexedDB'de, çünkü localStorage bir
+                                tutamağı saklayamaz — ama hâlâ State'e GİRMEZ
+useFolder.ts                    folder.ts'i React'ten sürer. App'te yaşar
+                                (tuzak 18) ve BUNDLE yazar, açık planı değil
   |
 components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
                                 window.confirm/alert YOK — hiç kalmadı
@@ -410,6 +462,13 @@ ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
 ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
 ```
+
+**Onuncu makine tercihi localStorage'da DEĞİL:** babanın seçtiği klasörün
+tutamağı `IndexedDB['ders-programi-klasor']`'da durur. Sebep tercih değil,
+imkân: bir `FileSystemDirectoryHandle` string değildir ve JSON'dan geçmez;
+tarayıcıda onu tutabilen tek yer structured clone'dur. Kural bozulmadı —
+**`State`'e girmez, `schemaVersion` artmaz**: bu bilgisayarda alınmış bir
+yedek babanın makinesine bir klasör yolu taşımamalı.
 
 `ders-programi-baski` bilerek `theme.ts`'in dışında (`src/printOptions.ts`).
 Oradaki dokuz skaler **ilk boyamadan önce** `<html>`'e öznitelik yazan düzen
@@ -1013,6 +1072,50 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     gereken şeyi hiç görmez. Tuzak 41'in ("boş ızgarada yapılan ölçüm hiçbir
     şey ölçmez") kardeşi: **yanlış kutuya bakan ölçüm de hiçbir şey ölçmez.**
 
+65. **"Güvenli bağlam" ile "gerçek köken" aynı şey DEĞİLDİR, ve bu tuzağın
+    kaydı benim ona düşmemdir.** Bir turun bütün gerekçesini "`file://`
+    güvenli bağlam değildir, orada Dosya Sistemi Erişimi API'si yoktur" diye
+    yazdım — dört dosyaya, üç commit mesajına ve iki belgeye. Chromium'da
+    **ikisi de yanlış**: `isSecureContext` true, `showDirectoryPicker` bir
+    fonksiyon. `file://`'ın eksiği bir **köken**: OPFS `SecurityError`,
+    service worker `TypeError`, ve `location.origin` makinedeki her yerel
+    sayfayla ortak olan `"file://"`.
+    Yakalayan şey bir test değil, bir **ekran görüntüsü** oldu: "API burada
+    yok" durumunun resmini almaya çalıştım ve resimde "Klasör seç…" düğmesi
+    çıktı. Üç ders. (a) Bir platform iddiası **ölçülmeden** yazılmaz — hele
+    bir turun gerekçesiyse. (b) Özellik varlığı `in window` ile **tespit
+    edilir**, teslim yoluna göre **varsayılmaz**. (c) Düzeltme bir cümle değil
+    bir **test** olur (`temel.spec.ts` 75) — yoksa aynı yanlış altı ay sonra
+    geri yazılır.
+
+66. **Tek geri döngüye bağlanan bir sunucu, bazı makinelerde SESSİZCE
+    bulunamaz.** Chrome `*.localhost`'u kendi çözer ve `127.0.0.1` ile `::1`'in
+    **ikisine birden** çözüp yarıştırır. Bu makinede `dersprogrami.localhost`
+    → `::1` çıktı; yalnız IPv4'e bağlanmış bir sunucu burada çalışır, orada
+    çalışmaz, ve arada hiçbir log yoktur — tarayıcının hata sayfası vardır.
+    `sunucu.mjs` iki `http.Server` açıyor, `sunucu.ps1` iki `TcpListener`.
+    IPv6'sı kapalı bir makinede `::1` bağlanamaz ve bu bir hata değildir:
+    öteki ayaktaysa devam edilir.
+
+67. **Structured clone FONKSİYON klonlayamaz — yani elle yazılmış bir sahte
+    tutamak IndexedDB'ye hiç girmez.** `klasor.spec.ts`'in ilk hâli
+    `getFileHandle`/`keys`/`removeEntry`'yi düz bir nesneye koyuyordu; iki test
+    kırmızı çıktı ve sebebi asıl dersti: "klasör yeniden açılınca hatırlanıyor"
+    testi, **hatırlanması imkânsız** bir şeyi ölçüyordu. Çare sahteyi
+    büyütmek değil, **küçültmek**: gerçek bir `FileSystemDirectoryHandle`
+    alınır (OPFS, `navigator.storage.getDirectory()`) ve yalnız
+    **sürülemeyen** parça sahtelenir — `showDirectoryPicker`. Geri kalan her
+    şey tarayıcının kendisi olur: gerçek yazma, gerçek `keys()`, gerçek
+    structured clone, gerçek IndexedDB. İzin kapısı **prototipe** yamanır,
+    çünkü örneğe konan bir alan onu yeniden klonlanamaz yapardı.
+
+68. **`addInitScript` HER yüklemede koşar; oraya konan bir "varsayılanı yaz"
+    satırı, testin reload'dan önce kurduğu durumu geri alır.** İzin testi
+    `localStorage['__izin']`'i `prompt` yapıp sayfayı yeniliyordu; init betiği
+    de her yüklemede onu `granted`'a geri yazıyordu. Test, ölçmek istediği
+    durumu **kendi eliyle siliyordu** ve bunu bir zaman aşımı olarak gösterdi.
+    Kural: bir init betiği durumu **tohumlar** (yoksa yazar), **dayatmaz**.
+
 ---
 
 ## Tasarım — serbest
@@ -1186,6 +1289,18 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   — üst çubuk, hiçbir tıklamanın bir öğleden sonrayı götüremeyeceği yer olarak
   kalır (aynı gerekçe `Sıfırla`'yı oradan çıkarmıştı). Geçiş geri-al yığınını
   sıfırlar: bir planın hamlesi başka bir plana uygulanamaz.
+- **Ayarlar → Veri'de "Nereye kaydedilsin" (2026-08-26).** Babanın seçtiği bir
+  klasöre **bütün planlar** yazılır — üst çubuktaki tek plan değil — ve her gün
+  için ayrı bir yedek bırakılır (son 10). Panel "Veriler nerede"nin **üstünde**
+  değil, "Bütün planlar tek dosyada"nın üstünde: bir öğrenilecek alışkanlık
+  isteyen çareden önce, hiçbir şey istemeyen çare gelir.
+  **Yedekler ad kalıbıyla budanır, sayılarak değil.** Seçilecek klasör
+  Belgelerim olacak, yani babanın kendi dosyalarının yanı; "en yeni ondan
+  gerisini sil" onun işini silerdi ve sessizce silerdi. Kalıba uymayan hiçbir
+  dosyaya dokunulmaz — üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`)
+  dahil.
+  **Yazma hatası sessiz kalamaz** (tuzak 7): klasör silinmiş ya da izin geri
+  alınmışsa satır kırmızı olur ve ne yapılacağını yazar.
 - **Ayarlar → Veri, verinin nerede olduğunu SÖYLER.** Gerçek anahtar adları,
   gerçek boyutlar, ve tek cümlelik doğru: bu veri bu tarayıcıya ve bu bilgisayara
   aittir, "tarama verilerini temizle" onu siler, taşınan tek şey dosyadır.

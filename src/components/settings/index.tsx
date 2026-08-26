@@ -18,11 +18,14 @@ import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
 import type { Density, Motion } from '../../theme';
+import type { FolderRun } from '../../useFolder';
 import type { SectionId } from '../../toolState';
 
 interface Props extends PanelProps {
   loadState: (next: State) => void;
   plans: PlanControls;
+  /** The folder that gets a copy of everything. Owned by App (pitfall 18). */
+  folder: FolderRun;
   /** A machine preference, so it comes down from App, not out of `State`. */
   scale: number;
   setScale: (next: number) => void;
@@ -41,6 +44,7 @@ export default function Settings({
   change,
   loadState,
   plans,
+  folder,
   scale,
   setScale,
   density,
@@ -71,7 +75,7 @@ export default function Settings({
         />
       )}
       {section === 'data' && (
-        <Data state={state} change={change} loadState={loadState} plans={plans} />
+        <Data state={state} change={change} loadState={loadState} plans={plans} folder={folder} />
       )}
     </>
   );

@@ -1,7 +1,156 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-26 (yirmi birinci oturum: **Y turu — listeler ve
-kâğıt**; şema değişmedi)
+Son güncelleme: 2026-08-26 (yirmi ikinci oturum: **B turu — yerel kurulum**
++ 4f; şema değişmedi)
+
+---
+
+## Yirmi ikinci oturum — B turu: yerel kurulum (2026-08-26)
+
+Park edilmiş kurulum turunun beş maddesi ve kalan tasklardan **4f**.
+Dal: `v1.1-kurulum` (kullanıcı kararı), madde başına bir commit.
+
+Turun gerekçesi **bir kez yanlış yazıldı ve ölçümle düzeltildi** — ayrıntısı
+aşağıda, *Turun gerekçesini düzeltmek zorunda kaldım*. Kısası: yerel sunucu,
+klasör özelliğinin **tek** evi değil, **daha iyi** evi.
+
+### Ölçülen
+
+| Ne | Değer |
+|---|---|
+| `dist/index.html` — Y turu sonu | 517 360 bayt |
+| ...favicon eklendikten sonra | **518 811** (+1 451; işaretin kendisi 1 205) |
+| ...B4 (klasör) eklendikten sonra | **525 101** (+6 290) |
+| `dist-site/` toplam | 547 213 bayt |
+| `dist-kurulum/` — babaya giden TEK klasör | **569 034 bayt** |
+| `icon.ico` — 16/32/48/64/128/256 px | 12 322 bayt |
+| Açılış, `file://` (9 koşu) | **76 ms** medyan · 73 en iyi · 109 en kötü |
+| Açılış, yerel sunucu (9 koşu) | **82 ms** medyan · 77 en iyi · 92 en kötü |
+| İkinci yolun maliyeti | **6 ms (%8)** |
+| `isSecureContext` @ dersprogrami.localhost | true (ama `file://`'ta da true — aşağı bkz.) |
+| OPFS @ yerel sunucu ↔ `file://` | **açılıyor ↔ `SecurityError`** |
+| service worker @ yerel sunucu ↔ `file://` | **kaydoluyor ↔ `TypeError`** |
+| `sunucu.ps1` ↔ `sunucu.mjs` yanıtları | **baytı baytına aynı** (index.html ve PNG) |
+
+Son satır turun ikinci ölçümü: `pwsh` 7.6.5 kuruldu (sudo'suz, GitHub
+tarball → `~/.local/share/powershell`) ve PowerShell sunucusu **burada
+koşturuldu** — 127.0.0.1, `[::1]` ve `dersprogrami.localhost` üçünden de.
+
+### Sayılar
+
+```
+tsc --noEmit          temiz
+birim                 517 (18 dosya)   — önce 508 (+9: folder.test.ts)
+E2E (file://)         385              — önce 381 (+4: favicon 2, file:// ölçümü 2)
+site (http)           19               — önce 6 (+5 sunucu, +8 klasör)
+çözücü                7
+npm run kontrol       YEŞİL (çıkış kodu 0)
+```
+
+### Yapılanlar
+
+- **4f** `.github/workflows/site.yml`. İş akışının kendi kontrolü yerelde de
+  koşturuldu (`dist-site/index.html` ikinci bir betik istemiyor).
+  **Yan ürün, listeleyerek bulundu:** `publicDir` `site/` klasörünün tamamını
+  kopyaladığı için üç logo adayı yayınlanan siteye giriyordu; `dropStudio()`
+  eklentisi çıkarıyor.
+- **B3b** Gömülü favicon. İşaret artık iki yerde (`site/icon.svg` ve
+  `index.html`), ve **ayrışmasını bir test yakalıyor**: URI çözülüp aynı 13
+  dikdörtgeni çizdiği karşılaştırılıyor.
+- **B1** `scripts/sunucu.mjs` + `kurulum/sunucu.ps1`. `HttpListener` değil ham
+  `TcpListener` (localhost dışı önek yönetici ister), ve **iki geri döngüye
+  birden** bağlanıyor — tuzak 66.
+- **B2** `Kur.cmd` · `Guncelle.cmd` · `kur.ps1` · `OKU.txt` · `icon.ico` ·
+  `scripts/{ikon,paket}.mjs`.
+- **B4** `src/folder.ts` (saf ikisi testli) + `src/useFolder.ts` + Ayarlar →
+  Veri'de panel. **Şema değişmedi**, yeni localStorage anahtarı **yok**:
+  tutamak `IndexedDB['ders-programi-klasor']`'da.
+- **B5** Belgeler: ilke 2'nin ikinci daraltması, üç derleme hedefi, mimari,
+  tuzak **65–68**.
+
+### Üç hata, üçü de ölçerek bulundu
+
+1. **Sahte klasör tutamağı IndexedDB'ye hiç girmiyordu.** Structured clone
+   fonksiyon klonlayamaz, yani "yeniden açılınca hatırlanıyor" testi
+   **hatırlanması imkânsız** bir şeyi ölçüyordu. Çare sahteyi büyütmek değil
+   küçültmek: gerçek bir OPFS tutamağı alındı, yalnız sürülemeyen parça
+   (`showDirectoryPicker`) sahtelendi. **Tuzak 67.**
+2. **İzin testi ölçmek istediği durumu kendi eliyle siliyordu.**
+   `addInitScript` her yüklemede koşuyor ve varsayılanı geri yazıyordu.
+   **Tuzak 68.**
+3. **Tuzak 62 üçüncü kez yaşandı.** Bir sabotaj koşusunda yama `tsc`'yi
+   kırdı, `npm run build:site` düştü, ve test **bir önceki** `dist-site`'ı
+   ölçüp yeşil geçti. Derleme çıktısında `error TS` aranarak yakalandı.
+
+### Ölçülemeyen — dürüst liste
+
+- **`Kur.cmd`, `.lnk` üretimi (WScript.Shell COM) ve Windows PowerShell 5.1**
+  yalnız Windows'ta koşar; bu makine Fedora. Gözden geçirildi, **DENENMEDİ**.
+  Koşturulabilen yarısı koşturuldu: `kur.ps1`'in kopyalama yolu gerçekten
+  çalıştırıldı (9 dosya yerine gitti, bilerek bırakılan eski dosya silindi,
+  Türkçe metin düzgün çıktı) ve kopyalamanın kısayol adımından **önce**
+  bittiği doğrulandı.
+- **GitHub Actions koşusu** burada koşturulamaz. YAML ayrıştırıldı, iş
+  akışının kendi kontrolü yerelde koşturuldu.
+- **Gerçek klasör diyaloğu** Playwright'la sürülemez. Elle **denenmedi** —
+  kullanıcıya bırakıldı.
+- 16 px'te işaret çamurlaşıyor (aşağıda, *Bilinen kusur*).
+
+### Turun gerekçesini düzeltmek zorunda kaldım
+
+Bu turu şu cümleyle açtım: *"`file://` güvenli bağlam değildir, orada
+`showDirectoryPicker` tanımlı bile değildir."* Cümleyi dört kaynak dosyaya,
+üç commit mesajına ve iki belgeye yazdım. **Chromium'da ikisi de yanlış.**
+
+Yakalayan şey bir test değildi — bir **ekran görüntüsü**ydi. Panelin "API
+burada yok" durumunun resmini almaya çalıştım; resimde "Klasör seç…" düğmesi
+çıktı, çünkü API oradaydı.
+
+Ölçülen (Chromium, `dist/index.html`, `file://`):
+
+```
+isSecureContext                    true          ← yanılmışım
+showDirectoryPicker                function      ← yanılmışım
+indexedDB                          açılıyor
+navigator.serviceWorker.register   TypeError
+navigator.storage.getDirectory     SecurityError
+location.origin                    "file://"     — host YOK
+navigator.storage.persisted()      false
+```
+
+`file://`'ın eksiği güvenli bağlam değil, bir **köken**. Sonuçları:
+
+- **Klasör özelliği iki yolda da sunuluyor**, ve bunu belirleyen tek şey
+  `'showDirectoryPicker' in window` — teslim yolu değil. Kod zaten böyleydi
+  (özellik tespiti), yanlış olan yorumlar ve arayüz metniydi.
+- **Yerel sunucunun gerekçesi daraldı ve doğrulandı:** çevrimdışı çalışan bir
+  sayfa (service worker), bu programa ait bir depo (OPFS ve kendi IndexedDB
+  ad alanı), ve tarayıcının **tek bir siteye** saklayabildiği bir izin —
+  `file://` altında depo makinedeki her yerel sayfayla ortak.
+- Arayüzdeki "yok" metni artık **tarayıcıyı** anlatıyor (Firefox, Safari),
+  teslim yolunu değil.
+- Düzeltme bir cümle değil, bir **test**: `e2e/temel.spec.ts` **75. bölüm**
+  yukarıdaki beş satırı ölçüyor. Yanlış iddia geri yazılırsa kırmızıya döner.
+- **Tuzak 65** bu olayın kaydı olarak yeniden yazıldı.
+
+Düzeltilen dosyalar: `src/folder.ts` · `src/components/settings/Data.tsx` ·
+`scripts/sunucu.mjs` · `kurulum/sunucu.ps1` · `e2e/sunucu.spec.ts` ·
+`e2e/klasor.spec.ts` · `CLAUDE.md` · `README.md` · bu dosya.
+
+---
+
+### Bilinen kusur — 16 px'te işaret çamurlaşıyor
+
+`.ico` üretildikten sonra 16/32/48/256'da yan yana **bakıldı** (kanıt:
+`scratch/ico-bak.png`). 48 px ve üstü temiz; 32 meşgul; **16'da altı sütun
+birleşip mavi bir lekeye dönüyor** ve sekmede ayırt edilemiyor.
+
+Marka kullanıcı tarafından **16 px'te görülerek** seçilmişti — aday B (saat
+halkası) 16'da daha okunaklıydı ama "saat uygulaması" gibi duruyordu — o
+yüzden burada değiştirilmedi. Ucuz bir çare var ve karar kullanıcının: ICO ve
+favicon küçük boylarda **sadeleştirilmiş** bir varyant taşıyabilir (üç sütun,
+hayalet sütunlar yok), marka kimliği aynı kalır. Gerçek ikon setleri tam
+olarak bunu yapar.
 
 ---
 

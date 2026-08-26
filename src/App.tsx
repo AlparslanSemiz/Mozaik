@@ -25,6 +25,7 @@ import {
 } from './theme';
 import { attachScrollFade } from './scrollFade';
 import { useSolver } from './useSolver';
+import { useFolder } from './useFolder';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
 import Setup from './components/setup';
@@ -353,6 +354,11 @@ export default function App() {
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
   const solver = useSolver(change);
+  // The folder my father picked, if he picked one (task B4). Here for the
+  // same reason as the solver: a pending write must not die because a tab
+  // changed. It only does anything on the local-server route — under file://
+  // there is no secure context and the API is not defined at all.
+  const folder = useFolder(plans.library, plans.planId, state);
   const { confirm, alert } = useDialogs();
   const notify = useToast();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -783,6 +789,7 @@ export default function App() {
               change={change}
               loadState={loadState}
               plans={plans}
+              folder={folder}
               scale={scale}
               setScale={setScale}
               density={density}

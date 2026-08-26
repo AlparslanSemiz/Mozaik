@@ -8,12 +8,16 @@ export default defineConfig({
   // None of these belong in the daily loop: `npm run ekran` writes pictures for
   // a human, and `npm run cozucu` spends the solver's whole budget on every
   // world. Each has its own config.
-  // site.spec.ts is here too: it needs an http server and dist-site/, so it
-  // runs under playwright.site.config.ts (npm run test:site).
+  // Three more are here for ONE reason, and it is the same reason: they test
+  // something that does not exist under file:// — a service worker (site), a
+  // secure context (sunucu), the File System Access API (klasor). They run
+  // under playwright.site.config.ts (npm run test:site), over http.
   testIgnore: [
     '**/ekran.spec.ts',
     '**/otomatik-stres.spec.ts',
     '**/site.spec.ts',
+    '**/sunucu.spec.ts',
+    '**/klasor.spec.ts',
   ],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
   // gecerli oldugu olculdu (bkz. docs/STATUS.md).

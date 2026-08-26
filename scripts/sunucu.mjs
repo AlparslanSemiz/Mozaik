@@ -1,13 +1,26 @@
 // The local server (task B1).
 //
-// WHY THIS EXISTS. dist/index.html opened by double-click runs under file://,
-// and file:// is not a SECURE CONTEXT: no service worker, and — the reason
-// this round happened — no File System Access API. So the strongest answer to
-// principle 6 ("veri kaybı kabul edilemez"), the program writing every change
-// straight into a folder my father picked, cannot be written on that route at
-// all. http://dersprogrami.localhost:7654 IS a secure context: Chrome resolves
-// *.localhost itself, so there is no hosts file to edit and no administrator
-// to ask, and it treats the name as trustworthy.
+// WHY THIS EXISTS — the measured version, which is not the one I started with.
+//
+// I began by writing that file:// is not a secure context and therefore
+// cannot have the File System Access API. Measured in Chromium, that is
+// FALSE: file:// reports isSecureContext true and showDirectoryPicker is
+// defined. What file:// actually lacks is a real ORIGIN, and the three
+// consequences were measured one by one:
+//
+//   navigator.serviceWorker.register  ->  TypeError (protocol)
+//   navigator.storage.getDirectory    ->  SecurityError
+//   location.origin                   ->  "file://", shared by every local
+//                                          .html file on the machine
+//
+// So this server buys a real origin: an offline-capable page (the service
+// worker), storage that belongs to this app instead of to every file on the
+// disk, and a permission Chrome can keep for one site. Not "the only place
+// the folder can work" — the better place for it.
+//
+// http://dersprogrami.localhost:7654: Chrome resolves *.localhost itself, so
+// there is no hosts file to edit and no administrator to ask, and it treats
+// the name as trustworthy.
 //
 // It serves ONE folder, read-only, and it is still principle 2: no backend, no
 // database, no account, no session, no API. A static file handler in ~120

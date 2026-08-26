@@ -17,10 +17,12 @@ import { useDialogs } from '../Dialogs';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState, respreadColors } from '../../entities';
+import { KEEP_DAILY } from '../../folder';
 import { storageKind, storageReport } from '../../library';
 import { downloadBundle, listBackups } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
+import type { FolderRun } from '../../useFolder';
 import Plans from './Plans';
 
 interface Props {
@@ -28,6 +30,7 @@ interface Props {
   change: (apply: (d: State) => State) => void;
   loadState: (next: State) => void;
   plans: PlanControls;
+  folder: FolderRun;
 }
 
 /**
@@ -40,7 +43,108 @@ function size(chars: number): string {
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
 }
 
-export default function Data({ state, change, loadState, plans }: Props) {
+/**
+ * "Nereye kaydedilsin" (task B4).
+ *
+ * The panel above this one asks my father to remember something; this one
+ * asks him once and then never again. It is first for that reason.
+ *
+ * When the API is not there it says WHY instead of hiding: a feature that
+ * silently is not there is a feature nobody trusts anywhere.
+ *
+ * MEASURED, and it corrected me: Chromium DOES expose showDirectoryPicker
+ * under file://, and file:// IS a secure context there. So this branch is
+ * about the BROWSER (Firefox, Safari), not about how the app was opened —
+ * an earlier version of this text said the opposite and was wrong.
+ */
+function Folder({ folder }: { folder: FolderRun }) {
+  const s = folder.status;
+
+  return (
+    <div className="panel">
+      <h2>Nereye kaydedilsin</h2>
+
+      {s.kind === 'yok' ? (
+        <>
+          <p className="hint">
+            Bu, programın <b>her değişikliği kendiliğinden bir klasöre yazması</b>
+            demek — yedek indirmeyi hiç düşünmeden. Ama{' '}
+            <b>kullandığınız tarayıcı bunu desteklemiyor.</b> Chrome ve Edge
+            destekliyor; Firefox ve Safari desteklemiyor.
+          </p>
+          {/* The one-habit sentence is NOT repeated here: it already sits in
+              "Veriler nerede" two panels down, and saying it twice on one
+              screen makes both copies read like boilerplate (and made a test
+              ambiguous — pitfall 49). */}
+          <p className="hint">
+            O zamana kadar üst çubuktaki <b>Dosyaya kaydet</b> tek çare.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="hint">
+            Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve her gün
+            için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst çubuktaki{' '}
+            <b>Dosyaya kaydet</b> yerine geçmez, onu <b>gereksiz</b> kılar.
+          </p>
+
+          <div className="form-row">
+            <button className="btn primary" onClick={() => void folder.choose()}>
+              {s.kind === 'secilmedi' ? 'Klasör seç…' : 'Başka klasör seç…'}
+            </button>
+            {s.kind === 'izin-gerek' && (
+              <button className="btn primary" onClick={() => void folder.allow()}>
+                İzin ver
+              </button>
+            )}
+            {s.kind !== 'secilmedi' && (
+              <button className="btn" onClick={() => void folder.forget()}>
+                Vazgeç
+              </button>
+            )}
+          </div>
+
+          {/* One line, and it is the only place this feature can be seen
+              working. `role="status"` because it changes without anyone
+              looking at it — pitfall 7 says a save that stopped working has
+              to be visible, not quiet. */}
+          <p className={s.kind === 'hata' ? 'hint bad' : 'hint'} role="status">
+            {s.kind === 'secilmedi' && 'Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.'}
+            {s.kind === 'izin-gerek' && (
+              <>
+                <b>{s.name}</b> klasörü seçilmiş, ama tarayıcı izni her açılışta
+                yeniden soruyor. <b>İzin ver</b> deyin.
+              </>
+            )}
+            {s.kind === 'bekliyor' && <>
+              <b>{s.name}</b> — yazılıyor…
+            </>}
+            {s.kind === 'yazildi' && (
+              <>
+                <b>{s.name}</b> klasörüne yazıldı, saat{' '}
+                {s.at.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.{' '}
+                {s.files.map((name, i) => (
+                  <span key={name}>
+                    {i > 0 && ' · '}
+                    <code>{name}</code>
+                  </span>
+                ))}
+              </>
+            )}
+            {s.kind === 'hata' && (
+              <>
+                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin — o zamana kadar
+                işiniz yalnız tarayıcıda duruyor.
+              </>
+            )}
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Data({ state, change, loadState, plans, folder }: Props) {
   const { confirm } = useDialogs();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
@@ -137,6 +241,8 @@ export default function Data({ state, change, loadState, plans }: Props) {
     <div className="cols">
       <div>
         <Plans state={state} plans={plans} />
+
+        <Folder folder={folder} />
 
         <div className="panel">
           <h2>Bütün planlar tek dosyada</h2>

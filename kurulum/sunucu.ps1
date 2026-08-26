@@ -4,6 +4,10 @@
 # göndermez, hiçbir yerden veri almaz. Yaptığı tek şey, yanındaki "site"
 # klasöründeki dosyaları tarayıcıya vermek.
 #
+# Ne kazandırır: program böyle açıldığında çevrimdışı da çalışır, ve verileri
+# yalnız bu programa ait bir yerde tutar — dosyaya çift tıklayarak açtığınızda
+# depo makinedeki bütün yerel sayfalarla ortaktır.
+#
 # ---------------------------------------------------------------------------
 # Written in PowerShell and not in Node so that nothing has to be installed:
 # Windows PowerShell 5.1 ships with Windows 10 and 11. This is the twin of
