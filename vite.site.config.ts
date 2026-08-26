@@ -13,6 +13,8 @@
 // base: './' so it works both at the root and under a repository path
 // (kullanici.github.io/ders-programi/), which is where GitHub Pages puts it.
 
+import { rmSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
@@ -47,10 +49,26 @@ function siteShell(): Plugin {
   };
 }
 
+/**
+ * publicDir copies EVERYTHING in site/, and site/logo-adaylari/ holds the two
+ * marks the chosen one beat. They are kept (my decision was to keep them) but
+ * they are not part of the app, and the service worker's origin should not
+ * carry files nothing ever asks for. Found by listing dist-site/ rather than
+ * by assuming.
+ */
+function dropStudio(): Plugin {
+  return {
+    name: 'ders-programi-site-atolyeyi-atla',
+    closeBundle() {
+      rmSync(resolve('dist-site/logo-adaylari'), { recursive: true, force: true });
+    },
+  };
+}
+
 export default defineConfig({
   base: './',
   publicDir: 'site',
-  plugins: [react(), viteSingleFile(), siteShell()],
+  plugins: [react(), viteSingleFile(), siteShell(), dropStudio()],
   build: {
     outDir: 'dist-site',
     emptyOutDir: true,

@@ -1,0 +1,75 @@
+# Task 4f: publish dist-site/ to GitHub Pages.
+#
+# This is the SECOND delivery route, not the first. The one that matters is
+# still dist/index.html — the file my father double-clicks — and nothing here
+# builds it or touches it. What gets published is the folder produced by
+# `npm run build:site`: one HTML file plus a manifest, a service worker and
+# three icons. No backend, no database, no account, no API (principle 2).
+#
+# `npm run build:site` starts with `tsc --noEmit`, so a type error fails the
+# deploy. There is deliberately no separate type-check step: two places that
+# can disagree about whether the code compiles is one place too many.
+#
+# TWO THINGS ARE STILL ON THE REPOSITORY OWNER, and until both are done this
+# workflow runs and fails at the deploy step:
+#   1. rename the repository to `ders-programi`
+#   2. Settings -> Pages -> Source: "GitHub Actions"
+
+name: site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time. A queued run that is already out of date is thrown
+# away rather than published after the newer one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build:site
+
+      # The claim this project makes about itself, checked on the machine that
+      # publishes rather than only on the one that develops: the page carries
+      # its own code, so a browser that has it does not need us again.
+      - name: dist-site tek dosya mı
+        run: |
+          set -o pipefail
+          ls -l dist-site
+          if grep -q '<script[^>]*src=' dist-site/index.html; then
+            echo "dist-site/index.html ikinci bir betik istiyor" >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist-site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
