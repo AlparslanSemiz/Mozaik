@@ -8,6 +8,11 @@ Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı 
 > ders planı ölçeği.png`) sonrası bölüm 2, 3, 4 ve 6 düzeltildi — düzeltmeler yerinde
 > işlendi, verilen kararların tam listesi `docs/STATUS.md` içindeki karar tablosunda.
 >
+> **Güncelleme (2026-08-26).** Bu belgedeki **tasarım** ifadeleri (yasak listesi,
+> renk, font, animasyon, karanlık mod) **bağlayıcı değildir** — hepsi kaldırıldı.
+> Belge v0'ın kaydı olarak duruyor; yürürlükteki tek tasarım sözleşmesi
+> [../CLAUDE.md](../CLAUDE.md) → *"Tasarım — serbest"* bölümündeki dört maddedir.
+>
 > **Güncelleme (2026-08-24, v0.6).** Hafta artık **6 gün (Salı–Pazar)**; aşağıdaki
 > "7 gün × 12 saat / 84 sütun" sayıları v0 tasarımının yazıldığı günden kalma. Gerekçeler
 > geçerli, sayılar değil — güncel şema ve kısıt listesi [../CLAUDE.md](../CLAUDE.md)
@@ -35,11 +40,13 @@ Her özellik kararında bu listeye dönülecek. Listeyle çelişen özellik yaz�
 
 ### Yasak liste (bunlar bu projeye asla girmeyecek)
 
-Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama · karanlık mod ·
-tema seçimi · animasyon · istatistik/dashboard · yoklama · not girişi ·
-öğrenci kaydı · SMS/e-posta · takvim entegrasyonu · PDF kütüphanesi
-(tarayıcının yazdırması yeterli) · birden çok program sürümünü yan yana tutma ·
+Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama ·
+istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
+takvim entegrasyonu · **aynı planın** sürüm ağacı ·
 sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz stack yeterli)
+
+> *Bu listeden 2026-08-24'te karanlık mod ve tema seçimi, 2026-08-25'te animasyon,
+> 2026-08-26'da PDF/UI kütüphanesi yasağı çıkarıldı. Gerekçeler CLAUDE.md'de.*
 
 ---
 
@@ -129,7 +136,8 @@ interface Ders {
   iki sınıf aynı saate konamıyor. `derslikId: null` ise kontrol atlanır; derslik
   girmemiş kullanıcı da programı dizebilir.
 - **Renk paletten indeks, hex değil.** Öğretmen rengi işlevsel: havuzdaki kartın
-  hangi satıra ait olduğunu gösterir. Elle renk seçtirmeye gerek yok.
+  hangi satıra ait olduğunu gösterir. *(v1.0'da 36 renklik bir seçici geldi —
+  "elle seçtirmeye gerek yok" cümlesi geçersiz.)*
 - **`yerlesim` düz bir sözlük, dizi değil.** Gün/saat sayısı değiştiğinde dizi
   yeniden boyutlandırmakla uğraşmak yerine taşan anahtarlar silinir.
 - **`yerlesim` sınıf anahtarlı, öğretmen değil.** Öğretmen ve derslik doluluk
@@ -454,7 +462,8 @@ Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
 - **Renk işlevsel, dekoratif değil.** Yeşil = bırakılabilir, kırmızı = engel,
   gri taralı = öğretmen müsait değil. Öğretmen rengi paletten atanır ve havuzdaki
   kartın hangi satıra ait olduğunu gösterir.
-- **Font**: sistem fontu. Web font indirmek offline çalışmayı bozar.
+- **Font** *(2026-08-25'te değişti)*: gömülü IBM Plex Sans (`data:` URI, tek
+  dosyanın içinde). Ağdan **indirilmez** — offline çalışma bu yüzden bozulmuyor.
 - **Tema** *(v0.7 kararı)*: açık ve koyu palet, sağ üstte düğme, tercih
   `localStorage`'da — `State`'e girmez, şema değişmez. Öğretmen renk paleti iki temada
   da aynı kalır ve **yazdırma her zaman açık palet** kullanır; o renkler kâğıda basılıyor.

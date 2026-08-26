@@ -26,8 +26,7 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
 
 Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama ·
 istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
-takvim entegrasyonu · PDF kütüphanesi (tarayıcının yazdırması yeterli) ·
-**aynı planın** sürüm ağacı (v3, v4, v5 diye yan yana tutma) ·
+takvim entegrasyonu · **aynı planın** sürüm ağacı (v3, v4, v5 diye yan yana tutma) ·
 sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın yeterli)
 
 > **Listeden çıkarıldı (2026-08-24): karanlık mod ve tema seçimi.** Gerekçe zevk değil:
@@ -54,26 +53,25 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 
 ---
 
-## Değişmez ilkeler — güncelleme (2026-08-25)
+## Değişmez ilkeler — güncelleme (2026-08-26)
 
 7. "Hedef makine yavaş" → **ÖLÇÜLECEK.** Babanın makinesinde gerçek
    performans görülene kadar bu bir varsayımdır, gerekçe değildir.
 
 ### Kaldırılan yasaklar
 
-- **ANİMASYON yasağı kalktı**, yerine kural: yalnız CSS `transition`,
-  yalnız durum değişiminde (hover, focus, `aria-pressed`, dialog açılış,
-  bırakma onayı). Süre **≤150 ms**. Kütüphane **YOK**.
-  `prefers-reduced-motion: reduce` → hepsi kapalı.
-  Layout animasyonu, skeleton, toast, sayfa geçişi **YOK**.
-- **WEB FONT yasağı kalktı**, yerine kural: font **base64 ile tek dosyaya
-  GÖMÜLÜR**. Ağdan çekilmez. "İnternet gerekmez" ilkesi aynen geçerli.
-
-### Yürürlükte kalanlar
-
-Tailwind / shadcn / Radix / ikon kütüphanesi / animasyon kütüphanesi:
-**kaldırılmadı** — değerlendirildi ve getirisi negatif bulundu.
-Yeni runtime bağımlılığı için varsayılan cevap hâlâ **hayır**.
+- **ANİMASYON yasağı kalktı.** Yerine geçen kural yok: süre, kapsam ve
+  kütüphane serbest. Tek şart `prefers-reduced-motion: reduce` → hepsi kapalı.
+- **WEB FONT yasağı kalktı**, yerine kural: font **tek dosyaya GÖMÜLÜR**
+  (base64/`data:`). Ağdan çekilmez. "İnternet gerekmez" ilkesi aynen geçerli.
+- **BAĞIMLILIK yasağı kalktı (2026-08-26).** Tailwind / Radix / ikon
+  kütüphanesi / animasyon kütüphanesi *bağımlılık* gerekçesiyle reddedilmişti;
+  o gerekçe kalktı. Yeni ölçüt tek: paket `dist/index.html`'e gömülebiliyor ve
+  çalışma anında ağa çıkmıyorsa serbest. Bkz. **"Tasarım — serbest"** →
+  *Bağımlılık politikası*.
+- **TASARIM SİSTEMİ yasakları kalktı (2026-08-26).** Yarıçap/kot/tipografi/
+  sütun merdivenleri, "altı sekmeden fazlası yok", "dört düğme durumu",
+  "yüzüyorsa yanlıştır" — hepsi silindi.
 
 ---
 
@@ -85,13 +83,17 @@ vite-plugin-singlefile  ->  dist/index.html  (tek dosya, gömülü JS/CSS)
 Vitest                  ->  saf mantık testleri
 ```
 
-**Runtime bağımlılığı sadece React.** Tarih kütüphanesi yok, UI kütüphanesi yok,
-state yönetimi kütüphanesi yok, sürükle-bırak kütüphanesi yok.
+**Bağımlılık kuralı (2026-08-26):** bir paket `dist/index.html`'e gömülebiliyor
+ve çalışma anında ağa çıkmıyorsa serbest. Sabit bir KB tavanı yok; şart
+**ölçmek** — eklendikten sonra dosya boyutu ve `file://` ilk boyama süresi
+`docs/STATUS.md`'ye yazılır. `devDependencies` zaten serbestti.
 
-> Yeni bir `dependency` eklemek istiyorsan önce sor. Varsayılan cevap hayır.
-> `devDependencies` (test/build araçları) serbest ama gereksizini ekleme.
+Hâlâ yasak olan tek şey **ağ**: çalışma anında bayt indiren hiçbir paket
+giremez (ilke 3). Sürükle-bırak kütüphanesi de girmiyor ama gerekçesi başka —
+`src/drag.ts` Pointer Events ile yazıldı çünkü tuzak 1 bir kütüphaneyle de
+çözülmüyordu.
 
-CSS: tek bir `src/styles.css`, CSS değişkenleriyle. Tailwind yok.
+CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ### Komutlar
 
@@ -747,299 +749,83 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
 
 ---
 
-## Tasarım sistemi
+## Tasarım — serbest
 
-### Karakter
+Bu bölüm 2026-08-26'da **boşaltıldı**. Eskiden burada ~290 satırlık bir tasarım
+sistemi duruyordu: üç düzlem, üç yarıçap, iki kot, altı basamaklı tipografi,
+altı basamaklı sütun merdiveni, ≤150 ms hareket ve bir sürü "dördüncüsü yok"
+kuralı. Hepsi tek tek gerekçeliydi, ama toplamı yeni bir arayüz yazmayı
+imkânsız kılıyordu. **Kullanıcı kararı: kaldırıldı.**
 
-Referans: basılı ders programı. Ekran bir kâğıt yüzeyidir, dashboard değil.
-Kılcal kenarlık, dolgun renk bloğu, minimum gölge, sıkı hizalama.
-Bir öğe "yüzüyor" gibi görünüyorsa yanlıştır.
+Yerine geçen tek cümle: **tasarım kararları serbesttir.** Renk, tipografi,
+yarıçap, gölge, boşluk, hareket, düzen, bileşen sayısı, sekme sayısı — hiçbiri
+bu belgeden izin almaz. Ne yapıldığı [docs/DESIGN.md](docs/DESIGN.md)'de
+**anlatılır**, burada **buyrulmaz**.
 
-> ✅ **B turu 2026-08-25'te YAPILDI; yeni karakter aşağıdaki "Üç düzlem"
-> bölümünde.** Bu paragraf tarih olarak duruyor.
->
-> ⚠️ **Bu paragraf 2026-08-25'te bağlayıcı olmaktan çıktı.** Kullanıcı tasarım
-> dilini yeniden açtı; aşağıdaki **"Tasarım dili yeniden AÇILDI"** bölümü neyin
-> açıldığını ve neyin (ilke 1–3, bağımlılık politikası, ölçülen testler,
-> işlevsel renk kanalı, kâğıt) **açılmadığını** yazar. Metin silinmedi çünkü
-> A0–A5 turunun tamamı bu karakteri hedefleyerek yazıldı — geri alınacak olan
-> şeyin ne olduğu okunabilir kalmalı.
+### Kalan dört sözleşme — bunların hiçbiri zevk meselesi değil
 
-### Üç düzlem — B turu (2026-08-25)
+1. **İşlevsel renk kanalı.** Yeşil = bırakılabilir · sarı = uyarı ·
+   kırmızı = engel · gri taralı = kapalı. Bu, aracın çalışma biçimi; kimlik
+   paletinin 36 rengi bu üçüne yaklaşamaz. `palette.test.ts` ve
+   `e2e/renk.spec.ts` her koşuda yeniden ölçer.
+2. **Erişilebilirlik.** Kontrast AA. Çözücü ilerlemesi, sonuç satırı ve hata
+   mesajları `aria-live="polite"`; geri alınamaz uyarılar `role="alertdialog"`.
+   Renk tek başına durum taşımaz. Klavyeyle gidilen her yerde odak görünür.
+   **Hedef kullanıcı zor görüyor** — bu, süsün değil *boyutun* tarafındaki bir
+   kısıt: 12 px ekranda mutlak alt sınır olarak kalır.
+3. **Kâğıt fiziksel.** A4 yatay, `table-layout: fixed`, `@page { margin: 0 }`,
+   sayfa 205 mm sabit (tuzak 31). Ekran ne olursa olsun yazıcı aynı yazıcı, ve
+   `--ui-scale` kâğıda geçmez.
+4. **İlke 1–3.** Çift tıkla çalışır · sunucu yok · çalışma anında ağdan tek
+   bayt çekilmez. Bunları `vite-plugin-singlefile`, `temel.spec.ts` ve
+   `site.spec.ts` **mekanik olarak** doğrular — iddiaya gerek yok.
 
-Eskiden kenar çubuğu, üst çubuk, panel ve ızgara **hepsi `--paper`**'dı; hiçbir
-şey neyin araç neyin belge olduğunu söylemiyordu. Artık ekrandaki her şey şu
-üçünden **birine** oturur:
+### Bağımlılık politikası — 2026-08-26'da değişti
 
-```
---bg      masa    en alt. Doğrudan üstünde hiçbir şey okunmaz
---chrome  kabuk   kenar çubuğu · üst çubuk · araç şeridi · sebep çubuğu · havuz
---paper   kâğıt   panel · ızgara · kart zemini · baskı önizlemesi · diyalog
-```
+Eski kural "yeni runtime bağımlılığına varsayılan cevap hayır"dı; Tailwind,
+Radix, ikon ve animasyon kütüphaneleri bu gerekçeyle reddedilmişti. Artık:
 
-Ölçüldü: ΔE(chrome, paper) açıkta **5.5**, koyuda **3.5** — görünür bir düzlem
-değişimi, hiçbir işlevsel renge yaklaşmıyor. `--paper` parlaklığı **>0.9**
-kalmak zorunda (`renk.spec.ts`), yani "krem kâğıt" yönü bu projede kapalı — ve
-iyi ki: 36 pastel renk krem zeminde birbirine yaklaşır.
+> **Bir paket `dist/index.html`'e gömülebiliyor ve çalışma anında ağa
+> çıkmıyorsa serbesttir.** `devDependencies` zaten serbestti.
 
-**Accent bilerek sessiz** (`#2e4ba8`). Ekranda zaten 36 kimlik rengi + 3
-işlevsel renk var; gürültülü bir accent onlarla kavga eder. Ayırt edicilik
-ızgaradan ve tipografiden gelir, novelty bir tondan değil.
+Tek şart **ölçmek**: paket eklendikten sonra `dist/index.html` boyutu ve
+`file://` üzerinden ilk boyama süresi [docs/STATUS.md](docs/STATUS.md)'ye
+yazılır. Sabit bir KB tavanı yok — 420 KB sınırı da bir tasarım kısıtıydı ve
+kalktı. Yerine geçen soru: *babanın makinesinde açılış hâlâ hızlı mı?*
+Bu tahmin edilmez, ölçülür (ilke 7).
 
-### Yarıçap — ÜÇ basamak (kural değişti)
+### Neyin nerede olduğu
 
-`--r-sm 3px` veri (hücre, kart, swatch, nokta) · `--r-md 6px` denetim (düğme,
-girdi) · `--r-lg 10px` **düzlem** (panel, çekmece, diyalog). Dördüncüsü yok.
-Eski "üçüncü radius YOK" kuralı bilerek değiştirildi: üç düzlem varken 600px'lik
-bir panelin 6px'i "neredeyse köşeli" okunuyor, 34px'lik bir hücrenin 10px'i ise
-renk bloğunu yer.
+Görsel referans [docs/Örnek Fotolar](docs/Örnek%20Fotolar/) — aSc Timetables
+2027'nin kendi ekranları. **Bağlayıcı değil**, karşılaştırma içindir.
 
-### Kot — İKİ basamak (kural değişti)
-
-`--elev-1` kâğıdın masanın üstünde durması · `--elev-2` **gerçekten** yüzen üç
-şey: sürükleme hayaleti, diyalog, ve kaydırılmış ızgaranın yapışkan başlığı.
-Düğme ve girdi gölge **almaz**. Eski "bir öğe yüzüyor gibi görünüyorsa
-yanlıştır" kuralının yerini bu iki kot aldı.
-
-### Hareket
-
-`--dur: 120ms`, `--ease: cubic-bezier(.2,0,0,1)`, ve kullanabilecek şeylerin
-listesi kapalı: denetimin hover/focus/pressed hâli, diyalog açılışı, imleç
-haçı, çekmecenin açılıp kapanması. Düzen animasyonu, skeleton, toast, sayfa
-geçişi ve kütüphane **yok**. `prefers-reduced-motion: reduce` → `--dur: 0ms`,
-yani dosyadaki her geçiş tek bir yerden kapanır.
-
-### Yazı tipi — IBM Plex Sans, gömülü
-
-Değişken yüz, **wght ekseni 400–600'e kırpılmış**, bu aracın çizebildiği 225
-glife alt kümelenmiş (Latin-1 + Türkçe + gerçekten kullanılan noktalama):
-**23 KB ham**, `assetsInlineLimit` ile `dist/index.html`'in içine `data:` URI
-olarak gömülü. `<link>` yok, CDN yok, çalışma anında tek bayt indirilmiyor —
-`temel.spec.ts` bunu derlenmiş dosyada **grep ile** doğruluyor.
-
-Neden Plex: bu ızgaranın içeriği **rakam** (411 · 09:00 · 12) ve Plex'in
-rakamları yapı gereği tablo hizalı — hepsi 600 birim, ölçüldü, `tnum`
-özelliğine gerek yok. Yedek yığın (`"Segoe UI", system-ui, …`) duruyor: yüz
-çözülemezse araç çalışmaya devam eder.
-
-**`font-display: block`, `swap` DEĞİL** — bkz. tuzak 38.
-
-Ölçülen boyut: `dist/index.html` **347 KB → 379 KB** (sınır 420 KB).
-
-### Ölçek — tek EKRAN ekseni, kâğıt ayrı
-
-```
---ui-scale   1.0–1.50, 0.05 adım (11 basamak). EKRANIN TAMAMI — ızgara dahil.
-             Ayarlar → Görünüm, localStorage['ders-programi-olcek'].
-kâğıt        --ui-scale'den ETKİLENMEZ. Kendi merdiveni var (--fs-p-*, pt).
-```
-
-Kök: `:root { font-size: calc(16px * var(--ui-scale)); }` — CSS'teki tek ham
-px `font-size` budur, merdivenin çapası. Boşluk, hücre, satır başı ve kenar
-çubuğu da rem: yazı büyüyüp boşluk yerinde kalırsa ekran ferahlamaz, sıkışır.
-
-> **`--grid-zoom` YOK — A5 geri geldi ama ikinci bir zoom ekseni olarak
-> değil.** Ölçek tek eksendir ve ızgara ona bağlıdır; yoksa ölçek
-> büyütüldüğünde babanın bütün gün baktığı ekran tek başına küçük kalırdı.
-> Yoğunluk (aşağıda) bir *zoom* değil, hücrenin **ne gösterdiğini**
-> değiştiren ayrı bir ayardır.
-
-> **Kâğıt neden ayrı:** A4 sabit fiziksel boyut. Ekran rahatlık ayarının
-> kâğıda neyin sığdığını belirlemesi, tuzak 31'in 205 mm hesabını ve "3 sınıf =
-> 3 sayfa" testini bir düğmeye bağlamak olurdu — babanın *yazıcıda* bulacağı
-> bir hata. `@media print` `--ui-scale`'i 1'e sabitler. Aynı merdiven
-> **önizlemede de** kullanılır: önizleme kâğıda benzemezse hangi sayfanın
-> basılacağını seçmek tahmine döner. Daha büyük BASKI ayrı bir özelliktir ve
-> ilke 5 gereği bir dönem kullanılmadan yazılmaz.
-
-### Izgara yoğunluğu — anlamsal zoom (A5)
-
-```
-Rahat   (varsayılan)  --cell-w 2.125rem (34px @%100), saatler görünür,
-                      ızgara 2616px / kutu 1828px  -> yatay kaydırma
-Sığdır                --cell-w kutudan TÜRETİLİR, ders saatleri gizlenir,
-                      ızgara 1823px / kutu 1828px  -> yatay kaydırma YOK
-```
-
-Tercih `localStorage['ders-programi-yogunluk']`, `State`'e girmez; ayar
-**Ayarlar → Görünüm**'de, yazı büyüklüğünün altında.
-
-> ⚠️ **"Sığdır havuzu KAPATIR" kuralı 2026-08-25'te ÖLÇÜMLE kaldırıldı.**
-> Eski gerekçe: dolu ızgarada çekmece açıkken 174px kaydırma geri geliyordu.
-> `.grid-wrap` bir **container** olup hücre `100cqw`'den hesaplanmaya
-> başladığından beri bu ölçüm yanlış: yeniden ölçüldü, Sığdır'da çekmece
-> **açıkken de** yatay taşma 0px (hücre 19.5px, tablo 1575/1588). Havuz alta
-> indiğinde konu tamamen kapandı — havuz artık yatay yer yemiyor, Sığdır ise
-> yalnızca yatay bir mod. `Appearance.tsx`'teki `writeDock(false)` silindi.
-> Testi silinmedi, **iddiası tersine çevrildi**.
-
-**Sığdır'ın düşürdüğü bilgi tek:** ders numarasının altındaki başlangıç saati.
-(Hücrenin 1px'lik iç boşluğu da düşer ama o bilgi değil, kenar boşluğudur.)
-Hangisi olduğu ölçüldü, seçilmedi: ders
-numarasının altındaki başlangıç saati. `--cell-w` 28, 23 ve 18 px yapıldığında
-hücre üç seferde de **33.69 px** çizildi — çünkü sütunun min-content'ini
-karttaki yazı değil, başlıktaki `"10:40"` belirliyordu. Kartın alt satırını
-gizlemek hiçbir şeyi değiştirmedi; saati gizlemek tabloyu 2461 → 1728 px'e
-indirdi (tuzak 37). Ders **numarası** kalır: göz onunla geziniyor, ve saatler
-hem Ayarlar → Okul'daki zil önizlemesinde hem de basılan her sayfada yazıyor.
-
-Hücre genişliği `clamp(1.125rem, (100cqw − satır başı − ayraçlar − pay) /
-sütun sayısı, 2.75rem)`. Sütun sayısı CSS'e **markup'tan** gelir
-(`--lesson-cols`, `--break-cols`): hafta her zaman 6×12 değil, 7 günlük hafta
-84 sütundur ve stil dosyasına yazılmış bir `72` Pazartesi eklenen gün yalan
-olurdu. `100cqw` için `.grid-wrap` bir container'dır — `100vw` kenar çubuğunu,
-dolguyu ve dikey kaydırma çubuğunu tahmin etmek zorunda kalırdı.
-
-Renk her yoğunlukta okunan ilk kanal, o yüzden **palet ΔE/kontrast sınırları
-dokunulamaz**.
-
-### Tipografi — tek merdiven, 6 basamak
-
-```
---fs-xs  .75rem   (12px @1.0) mutlak alt sınır, bunun altı YASAK
---fs-sm  .8125rem (13px)
---fs-md  .875rem  (14px)
---fs-base 1rem    (16px) gövde
---fs-lg  1.125rem (18px)
---fs-xl  1.375rem (22px)
-```
-
-**Kâğıdın kendi merdiveni, pt cinsinden** — rem değil, çünkü kâğıt ölçekle
-dönmez. Hem önizleme hem baskı buradan okur:
-
-```
---fs-p-xl   14pt    sayfa başlığı
---fs-p-lg   10pt    .p-top · .p-daycol · kapalı saat
---fs-p-md    9pt    künye satırı
---fs-p-base 8.5pt   tablo gövdesi ve başlığı
---fs-p-sm    8pt    .p-bottom
---fs-p-xs    7pt    .p-clock
-```
-
-Ham px font-size YASAK. Yeni boyut gerekiyorsa merdiveni tartış, ekleme.
-Rakam içeren her yerde `font-variant-numeric: tabular-nums`.
-
-**12px tabanı bir EKRAN kuralıdır.** Izgarada da geçerlidir (ölçüldü: 34px
-hücre iki satır 12px'i `--lh-tight` ile alıyor, ızgara genişliği değişmedi);
-kâğıtta geçerli değildir, çünkü 300 dpi'da 7pt okunur.
-
-### Geometri
-
---r-sm 3px · --r-md 6px. Üçüncü radius yok. İki ham değer bilerek kaldı:
-`.step-no` `50%` (bir şekil, basamak değil) ve `.panel.inset` `0`.
---space-1..5 korunur, rem'e çevrilir. Ham px padding/margin/gap YASAK.
-Tablo sütun genişliği ch cinsinden, CSS'te. JSX'te style={{width}} YASAK.
-  (istisna: paletteColor() dönen dinamik background — bu meşru)
-
-**Sütun merdiveni — altı basamak, tipografininki gibi:**
-
-```
---w-col-xs   8ch   ~55px   onay kutusu, tek kelimelik etiket
---w-col-sm  10ch   ~69px   sayı sütunu (th.num)
---w-col-md  13ch   ~89px   sayı kutusu, tek düğme
---w-col-lg  16ch  ~110px   kısa metin kutusu, dar açılır liste
---w-col-xl  26ch  ~179px   uzun seçenekli liste, iki düğme
---w-col-2xl 32ch  ~220px   uzun metin
-```
-
-Basamaklar `<th>` üstünde durur, yani birim **başlığın** ch'sidir (`--fs-xs`).
-KUTU genişliği (`.num`, `.text-sm`, `.color-pick`) gövdenin ch'sindedir. Aynı
-70px'e iki farklı sayı düşer (`8ch@1rem` ≈ `10ch@.75rem`) ve bu doğrudur —
-bkz. tuzak 34. Yeni bir genişlik gerekiyorsa merdiveni tartış, ekleme.
-
-### Diyalog
-
-Native `<dialog>` + `showModal()`. window.confirm/alert/prompt YASAK.
-Geri alınamaz işlem (Sıfırla, sil, üzerine yaz) mutlaka dialog'dan geçer.
-Tek animasyon istisnası: dialog açılışında <=120ms opacity,
-`prefers-reduced-motion: reduce` ise kapalı. Başka animasyon yok.
-
-### Erişilebilirlik
-
-Çözücü ilerlemesi, sonuç satırı ve hata mesajları `aria-live="polite"`.
-Geri alınamaz uyarılar `role="alertdialog"`.
-Renk asla tek başına durum taşımaz — ızgara renk bloğu bunun istisnasıdır
-ve orada kimlik taşır, durum değil.
-
-### Primitif envanteri ve dış tasarım araçları
-
-Kurallar burada, **envanter** [docs/DESIGN.md](docs/DESIGN.md)'de: hangi `.panel`,
-hangi `.btn`, hangi `--w-col-*` zaten var. Yeni bir ekran kurmadan önce oraya
-bakılır; karşılığı olan primitif **yeniden yazılmaz**.
-
-Görsel referans [docs/Örnek Fotolar](docs/Örnek%20Fotolar/) — aSc Timetables 2027'nin
-kendi ekranları. Referans "beğenilen modern siteler" değil, **yerini aldığımız
-program** ve basılı ders programıdır.
-
-### Tasarım dili yeniden AÇILDI (2026-08-25) — kullanıcı kararı
-
-`frontend-design@claude-plugins-official` kuruldu ve **"Karakter" bölümündeki
-kâğıt yüzeyi kısıtı artık bağlayıcı değil.** Kılcal kenarlık, sıfır gölge,
-"bir öğe yüzüyorsa yanlıştır" — bunlar tartışılabilir hâle geldi. Gradyan,
-katmanlı derinlik, gömülü özel font, daha uzun geçişler ve yeni bir tipografi
-karakteri artık **önerilebilir**.
-
-Bu kararı ben önermedim; **çatışmayı bildirdim, kullanıcı yeniden açmayı seçti.**
-Kayıt burada duruyor ki altı ay sonra "neden değişti" sorusunun cevabı olsun.
-
-> **Açılan şey ESTETİK. Aşağıdakiler açılmadı, çünkü hiçbiri zevk meselesi
-> değil:**
->
-> 1. **İlke 1–3 — ürün kuralı, tasarım kuralı değil.** Tek dosya derlemesi,
->    CDN'den sıfır bayt, ağdan çekilen font yok. Font **gömülür** (base64,
->    2026-08-25 güncellemesi bunu zaten serbest bıraktı) — `<link>` ile
->    çekilmez. Bunu `vite-plugin-singlefile` ve `site.spec.ts` **mekanik**
->    olarak doğruluyor; iddiaya gerek yok.
-> 2. **Yeni runtime bağımlılığı hâlâ "önce sor".** Tailwind/shadcn/Radix
->    *bağımlılık* gerekçesiyle reddedilmişti, zevk gerekçesiyle değil — o
->    gerekçe bu kararla kalkmadı. Animasyonda da ayrım aynı: **süre ve kapsam
->    açık**, **kütüphane kapalı**.
-> 3. **Ölçülen şey ölçülmeye devam eder.** Palet ΔE/kontrast
->    (`palette.test.ts`), sütun sığması (`sutun.spec.ts`, `renk-secici.spec.ts`),
->    kâğıt 205 mm (tuzak 31). Bir yeniden tasarım bu **sayıları değiştirebilir**
->    — ama testi bilerek günceller. **Testi silmek bir tasarım kararı değildir**
->    (tuzak 23 ve 33: yeşil geçen süit "bozulmadı" demek değildir).
-> 4. **İşlevsel renk kanalı.** Yeşil = bırakılabilir / sarı = uyarı /
->    kırmızı = engel. Karanlık mod yasağı tam da bu kanal çamurlaştığı için
->    kalkmıştı (2026-08-24); estetik değişse de kanalın kendisi aracın
->    çalışma biçimi.
-> 5. **Kâğıt fiziksel.** A4 yatay, `table-layout: fixed`, `@page { margin: 0 }`.
->    Ekran karakteri ne olursa olsun yazıcı aynı yazıcı.
->
-> **Sıra:** yeniden tasarım kendiliğinden olmaz. "Görsel iş akışı"ndaki iki
-> aşama (plan → öz eleştiri → onay → kod) bu tur için **zorunlu**, çünkü
-> A0–A5'te yazılan sistemin bir kısmı geri alınacak.
-
-### Görsel iş akışı — iki aşama, sonra göz
-
-1. **Plan → öz eleştiri → onay → kod.** Arayüzü değiştiren işte önce ne
-   yapılacağı yazılır, zayıf yanı kendi ağzından söylenir, onay alınır. Kod
-   sonra. Gerekçe ilke 5'in aynısı: tahminle yazılan arayüz yanlış arayüzdür.
-2. **Her bölüm sonunda ekran görüntüsü + kendi çıktını eleştir.**
-   `npm run ekran` → `test-results/ekran/`, iki temada on bir görüntü.
-   Ölçek ya da yoğunluk değiştiyse bu **zorunlu** (tuzak 33).
-3. Görsel regresyon **yereldir**: `npm run gorsel`, 24 referans, depoda.
-   Bulut servisi (Chromatic/Percy) yok — hesap, yükleme ve ağ gerektirir.
+Primitif envanteri [docs/DESIGN.md](docs/DESIGN.md)'de: hangi sınıf var, ne
+yapıyor. Amacı yalnız **var olanı yeniden icat etmemek**; bir şeyi yasaklamaz.
 
 ### Geliştirme araçları — üründe değil, tezgâhta
 
 `.mcp.json` üç sunucu tanımlar; hiçbiri `dist/index.html`'e girmez, ilke 1–3
-etkilenmez. Oturum başına token yerler, kullanılmayan `/mcp` ile kapatılır.
+etkilenmez.
 
-| Sunucu | Ne için | Not |
-|---|---|---|
-| `playwright` | uygulamayı sürüp **bakmak** | E2E süiti bunun yerine geçmez: o iddiaları sabitler, bu keşif içindir |
-| `chrome-devtools` | konsol · ağ · **performans profili** | ilke 7'nin ("hedef makine yavaş") ölçüleceği yer |
-| `context7` | React 19 / Vite 7 sürüm dokümanı | bütçe daralırsa **ilk kapatılacak** olan budur |
+| Sunucu | Ne için |
+|---|---|
+| `playwright` | uygulamayı sürüp **bakmak** — E2E süiti bunun yerine geçmez |
+| `chrome-devtools` | konsol · ağ · **performans profili**; ilke 7 burada ölçülür |
+| `context7` | React 19 / Vite 7 sürüm dokümanı |
 
-Tip hataları için `typescript-lsp` eklentisi (`typescript-language-server`
-global kurulu). `npm run kontrol` yine de son sözü söyler.
+Tip hataları için `typescript-lsp` eklentisi. `npm run kontrol` son sözü söyler.
 
 ---
 
 ## Arayüz
 
-Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**. Daha fazlası yok.
+> ⚠️ **Bu bölüm 2026-08-26'da BAĞLAYICI OLMAKTAN ÇIKTI.** Aşağısı arayüzün o
+> tarihteki hâlinin ve *neden öyle olduğunun* kaydıdır — bir izin listesi değil.
+> "Daha fazlası yok" / "fazlası yok" biçimindeki bütün sayı kısıtları silindi.
+> Bir kararı değiştirirken buradaki gerekçeyi **okumak** işe yarar; ona
+> **uymak** zorunlu değil. Değiştirilen karar burada da güncellenir.
+
+Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**.
 
 - **Sekmeler ÜSTTE, çift bar** (2026-08-25'te rail kalktı). Satır bir: belge
   kimliği · 6 sekme · geri/ileri al · dosya · şerit katlama · tema. Satır iki:
@@ -1170,7 +956,7 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
 - **Açık ve koyu tema, sağ üstte düğme.** Öğretmen paleti iki temada da AYNI ve
   yazdırma her zaman açık palet kullanır — o renkler kâğıda basılıyor. Palet üstündeki
   mürekkep de tema ile dönmez (`--on-color`).
-- **Dört düğme durumu, fazlası yok:** birincil · sade · tehlikeli · basılı. Tehlikeli
+- **Düğme durumları:** birincil · sade · tehlikeli · basılı. Tehlikeli
   olan beklemeden kırmızı görünür — ama **mürekkeple**, kenarlıkla değil: 25
   öğretmenlik listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın arka
   planı hâline gelmesi demekti. Kırmızı kenarlık hover'da geliyor.
@@ -1180,7 +966,6 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   `.panel` de `--paper` — yani **kenarlık düğmenin tek sınırı**. Bu yüzden
   `--line`'ın tanımı "yalnız ızgara ve tablo başlığı" değil: **veri okunan
   yerler ve denetim kenarı**.
-- Font: sistem fontu. Web font indirmek offline çalışmayı bozar.
 - **Ekran 1920x1080 varsayılır** (babanın 27" monitörü; CSS pikseli, fiziksel
   piksel değil). Öğretmen sütunu `sticky`, yatay kaydırma olacak: ızgara 2616px,
   yani 25 satırın 19'u ve sütunların bir kısmı ekrana sığar, gerisi kaydırılır.
