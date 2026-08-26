@@ -8,7 +8,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import App from './App';
+import AppRoot from './Root';
 import { sampleState } from './sample';
 
 declare global {
@@ -55,7 +55,9 @@ afterEach(() => {
 });
 
 function render() {
-  act(() => root.render(<App />));
+  // The REAL tree, providers and all: a smoke test that renders a stripped-down
+  // version of the app is smoke-testing something nobody ships.
+  act(() => root.render(<AppRoot />));
 }
 
 /**

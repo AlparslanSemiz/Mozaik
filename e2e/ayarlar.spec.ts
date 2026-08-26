@@ -1,7 +1,7 @@
 // The Ayarlar tab: days, the bell, the four rules, subjects and data.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
+import { answerDialog, open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
 
 test.describe('6. Gün ve ders saatleri', () => {
   test('varsayılan hafta Pazartesisiz 6 gün ve Salı ile başlıyor', async ({ page }) => {
@@ -525,8 +525,8 @@ test.describe('34. Ayarlar — veri', () => {
     await openWithSample(page);
     await openSettings(page, 'Veri');
 
-    page.once('dialog', (d) => d.dismiss());
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
+    await answerDialog(page, 'cancel');
     await openSetup(page, 'Öğretmenler');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(25);
   });
@@ -538,11 +538,9 @@ test.describe('34. Ayarlar — veri', () => {
     // It asks TWICE. The second question is the point: this is the one button
     // in the app that cannot be undone.
     const asked: string[] = [];
-    page.on('dialog', (d) => {
-      asked.push(d.message());
-      void d.accept();
-    });
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
+    asked.push(await answerDialog(page));
+    asked.push(await answerDialog(page));
 
     await openSetup(page, 'Öğretmenler');
     await expect(mainList(page).locator('tbody tr')).toHaveCount(0);

@@ -6,7 +6,7 @@
 // says afterwards is a sentence a person can act on.
 
 import { expect, test, type Page } from '@playwright/test';
-import { chooseEntity, openSettings, openWithSample } from './helpers';
+import { answerDialog, chooseEntity, openSettings, openWithSample } from './helpers';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page) {
@@ -62,15 +62,15 @@ test.describe('22. Otomatik dizme', () => {
     await autoFill(page);
     const first = await page.locator('table.grid .card').count();
 
-    let asked = '';
-    page.once('dialog', (d) => {
-      asked = d.message();
-      void d.accept();
-    });
     await page.getByRole('button', { name: 'Baştan diz' }).click();
+    const asked = await answerDialog(page);
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
 
-    expect(asked).toContain('baştan dizilecek');
+    // The question counts what is about to go — "426 saatin tamamı", not
+    // "the timetable". That number is the whole reason it is asked.
+    expect(asked).toMatch(/Dizilmiş \d+ saatin tamamı silinecek/);
+    expect(asked).toContain('sıfırdan dizilecek');
+    expect(asked).toContain('Ctrl+Z ile geri alınabilir');
     expect(await page.locator('table.grid .card').count()).toBe(first);
   });
 

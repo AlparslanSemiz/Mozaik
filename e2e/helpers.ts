@@ -28,10 +28,23 @@ export async function open(page: Page) {
 /** Loads the sample data and switches to the Program tab. */
 export async function openWithSample(page: Page) {
   await open(page);
-  page.once('dialog', (d) => d.accept()); // the "sample data will be loaded" confirm
   await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+  await answerDialog(page); // "örnek okul verisi yüklenecek"
   await page.getByRole('button', { name: 'Program' }).click();
   await expect(page.locator('table.grid')).toBeVisible();
+
+  // ...and wait until the sample has actually been WRITTEN, not just drawn.
+  //
+  // Pitfall 24, one level up. The store debounces by 400 ms, so between "the
+  // grid is on screen" and "localStorage holds the sample" there is a window
+  // in which the page's own empty-state write is still the newest thing in
+  // storage. `settledText()` cannot see the difference — its guard is
+  // "something was written", and the empty state is something.
+  // Tests that capture a baseline right after this helper were reading that
+  // empty state and then comparing it against the sample.
+  await expect
+    .poll(async () => await savedText(page), { timeout: 5_000 })
+    .toContain('Örnek Kurs');
 }
 
 /**
@@ -190,12 +203,12 @@ export const FIXTURE = {
  */
 export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
   await open(page);
-  page.once('dialog', (d) => d.accept());
   await page.locator('input[type=file]').setInputFiles({
     name: 'ders-programi-2026-08-25-1200.json',
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(state)),
   });
+  await answerDialog(page); // "şu anki programın yerine geçecek"
   await page.getByRole('button', { name: tab, exact: true }).click();
 }
 
@@ -243,12 +256,12 @@ export async function savedState(page: Page, previous: string): Promise<State> {
 
 export async function openFixture(page: Page) {
   await open(page);
-  page.once('dialog', (d) => d.accept());
   await page.locator('input[type=file]').setInputFiles({
     name: 'ders-programi-2026-08-24-1200.json',
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(FIXTURE)),
   });
+  await answerDialog(page);
   await expect(page.getByRole('button', { name: 'Program' })).toBeVisible();
 }
 
@@ -339,6 +352,43 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  * rows high. One definition here rather than the same `.cols > div` prefix
  * written out in nine places.
  */
+/**
+ * The program's own dialog — every question it asks now goes through one.
+ *
+ * There used to be seventeen `window.confirm`/`window.alert` calls and the
+ * suite answered them with `page.once('dialog', ...)`, which had to be armed
+ * BEFORE the click. The in-page dialog is the other way round: click, then
+ * read what it asked and answer it. That ordering is also the more honest
+ * test, because it can assert the text while the dialog is on screen.
+ *
+ * Returns what the dialog said, so a test that cares can check the counting.
+ */
+export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): Promise<string> {
+  const dlg = page.locator('.dlg');
+  await expect(dlg).toBeVisible();
+  const said = (await dlg.innerText()).replace(/\s+/g, ' ').trim();
+  // Cancel is FIRST in the DOM so focus lands on the safe side; the button
+  // that does the thing is last. An alert has only one, and it is both.
+  const buttons = dlg.locator('.dlg-actions .btn');
+  await (answer === 'cancel' ? buttons.first() : buttons.last()).click();
+  // Gone — OR replaced by the NEXT question. "Her şeyi sil" asks twice, and
+  // the second dialog opens in the same tick the first one closes, so waiting
+  // for `.dlg` to be hidden would wait for something that never happens.
+  await expect(async () => {
+    if ((await dlg.count()) === 0) return;
+    const now = (await dlg.innerText()).replace(/\s+/g, ' ').trim();
+    expect(now, 'diyalog kapanmadı ve metni de değişmedi').not.toBe(said);
+  }).toPass({ timeout: 5000 });
+  return said;
+}
+
+/** What the dialog is asking, without answering it. */
+export async function dialogText(page: Page): Promise<string> {
+  const dlg = page.locator('.dlg');
+  await expect(dlg).toBeVisible();
+  return (await dlg.innerText()).replace(/\s+/g, ' ').trim();
+}
+
 export function mainList(page: Page) {
   return page.locator('.cols > div table.list');
 }
@@ -421,6 +471,19 @@ export const SCENES: Scene[] = [
   },
   { name: '7-kontrol', go: tab('Kontrol') },
   {
+    // The program's own question, with the cascade summary counted out. There
+    // used to be seventeen of these and every one was the operating system's.
+    name: '7b-diyalog',
+    go: async (page) => {
+      await openSetup(page, 'Derslikler');
+      await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+      await page.locator('.dlg').waitFor();
+    },
+    after: async (page) => {
+      await answerDialog(page, 'cancel');
+    },
+  },
+  {
     name: '8-yazdir',
     go: async (page) => {
       await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
@@ -465,8 +528,8 @@ export async function openWithSampleTheme(page: Page, theme: 'light' | 'dark') {
   await page.goto(FILE);
   await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
   await page.reload();
-  page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+  await answerDialog(page);
 }
 
 /**

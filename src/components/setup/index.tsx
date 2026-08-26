@@ -11,6 +11,8 @@
 // exactly one kind of thing on it and every step can be counted.
 
 import { sampleState } from '../../sample';
+import { useDialogs } from '../Dialogs';
+import { useToast } from '../Toasts';
 
 import Rooms from './Rooms';
 import Teachers from './Teachers';
@@ -44,6 +46,8 @@ interface Props extends PanelProps {
 }
 
 export default function Setup({ state, change, plans, step, setStep }: Props) {
+  const { confirm, alert } = useDialogs();
+  const notify = useToast();
   // A draft is last term's setup with the grid emptied. This screen is where an
   // empty project lands, so it is the only place where offering one is useful:
   // one click instead of retyping twenty classes.
@@ -71,13 +75,16 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
           </p>
           <button
             className="btn"
-            onClick={() => {
+            onClick={async () => {
               if (
-                window.confirm(
-                  'Aracı denemek için örnek bir okul verisi yüklenecek. Devam edilsin mi?',
-                )
+                await confirm({
+                  title: 'Örnek okul verisi yüklenecek',
+                  body: '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için — kendi verinizi girmeden önce Ayarlar → Veri → "Her şeyi sil" ile temizleyin.',
+                  confirmLabel: 'Yükle',
+                })
               ) {
                 change(() => sampleState());
+                notify('Örnek veri yüklendi.');
               }
             }}
           >
@@ -102,13 +109,18 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
                   <button
                     key={d.id}
                     className="btn"
-                    onClick={() => {
+                    onClick={async () => {
                       const seed = loadPlan(d.id);
                       if (seed === null) {
-                        window.alert('Bu taslağın verisi bulunamadı.');
+                        await alert({
+                          title: 'Bu taslağın verisi bulunamadı',
+                          tone: 'warn',
+                          body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Veri → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
+                        });
                         return;
                       }
                       plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
+                      notify(`"${d.name}" taslağından yeni bir plan açıldı.`);
                     }}
                   >
                     {d.name} ile başla

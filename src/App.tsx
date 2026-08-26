@@ -1,4 +1,6 @@
 import { useRef, useState } from 'react';
+import { useDialogs } from './components/Dialogs';
+import { useToast } from './components/Toasts';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
 import { storageWorks, useStore, downloadBackup, readBackupFile } from './store';
@@ -300,6 +302,8 @@ export default function App() {
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
   const solver = useSolver(change);
+  const { confirm, alert } = useDialogs();
+  const notify = useToast();
 
   function toggleRibbon() {
     const next = !ribbon;
@@ -326,20 +330,35 @@ export default function App() {
       // one means replacing the whole library — and the top bar stays the place
       // where no click can lose an afternoon.
       const version = bundleVersionOf(await file.text());
-      window.alert(
-        version === BUNDLE_VERSION
-          ? 'Bu dosya bütün planları içeriyor. Ayarlar → Veri bölümündeki ' +
-              '"Tümünü dosyadan aç" düğmesini kullanın.'
-          : version !== null
-            ? 'Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.'
-            : 'Bu dosya okunamadı. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
-      );
+      await alert({
+        title:
+          version === BUNDLE_VERSION
+            ? 'Bu dosya bütün planları içeriyor'
+            : version !== null
+              ? 'Bu dosya daha yeni bir sürümle yazılmış'
+              : 'Bu dosya okunamadı',
+        tone: 'warn',
+        body:
+          version === BUNDLE_VERSION
+            ? 'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Veri bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.'
+            : version !== null
+              ? 'Programı güncelleyin, sonra tekrar deneyin.'
+              : 'Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+      });
       return;
     }
-    if (!window.confirm('Yedek yüklenecek ve şu anki program değiştirilecek. Devam edilsin mi?')) {
+    if (
+      !(await confirm({
+        title: 'Şu anki programın yerine geçecek',
+        body: 'Ekrandaki plan dosyadakiyle değiştirilecek. Geri-al yığını da sıfırlanır — vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+        confirmLabel: 'Yedeği yükle',
+        danger: true,
+      }))
+    ) {
       return;
     }
     loadState(loaded);
+    notify('Yedek yüklendi.');
   }
 
   return (
@@ -435,7 +454,10 @@ export default function App() {
             that now has six destinations to hold. */}
         <button
           className="btn primary"
-          onClick={() => downloadBackup(state)}
+          onClick={() => {
+            downloadBackup(state);
+            notify('Yedek dosyaya yazıldı — indirilenler klasörüne bakın.');
+          }}
           title="Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için."
         >
           Dosyaya kaydet

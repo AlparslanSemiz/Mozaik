@@ -10,6 +10,7 @@
 // twenty classes.
 
 import { useMemo } from 'react';
+import { useDialogs } from '../Dialogs';
 import { emptyState } from '../../entities';
 import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
@@ -32,6 +33,7 @@ function summary(state: State) {
 }
 
 export default function Plans({ state, plans }: Props) {
+  const { confirm, alert } = useDialogs();
   const { library, planId } = plans;
 
   // Recomputed only when the directory or the open plan changes — this panel is
@@ -55,15 +57,24 @@ export default function Plans({ state, plans }: Props) {
   const active = library.plans.find((p) => p.id === planId);
   const draftList = draftsOf(library).filter((p) => p.id !== planId);
 
-  function remove(id: string, name: string) {
+  async function remove(id: string, name: string) {
     const found = rows.find((r) => r.plan.id === id);
     const c = found?.counts;
     const what =
       c === undefined
-        ? ''
-        : ` ${c.teachers} öğretmen, ${c.classes} sınıf, ${c.lessons} ders ve` +
-          ` yerleşmiş ${c.placed} saat silinecek.`;
-    if (!window.confirm(`"${name}" planı silinecek.${what} Bu işlem geri alınamaz.`)) return;
+        ? 'Bu işlem geri alınamaz.'
+        : `${c.teachers} öğretmen, ${c.classes} sınıf, ${c.lessons} ders ve ` +
+          `yerleşmiş ${c.placed} saat silinecek. Bu işlem geri alınamaz.`;
+    if (
+      !(await confirm({
+        title: `"${name}" planı silinecek`,
+        body: what,
+        confirmLabel: 'Planı sil',
+        danger: true,
+      }))
+    ) {
+      return;
+    }
     plans.deletePlan(id);
   }
 
@@ -191,10 +202,14 @@ export default function Plans({ state, plans }: Props) {
               <button
                 key={d.id}
                 className="btn"
-                onClick={() => {
+                onClick={async () => {
                   const seed = loadPlan(d.id);
                   if (seed === null) {
-                    window.alert('Bu taslağın verisi bulunamadı.');
+                    await alert({
+                      title: 'Bu taslağın verisi bulunamadı',
+                      tone: 'warn',
+                      body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Veri → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
+                    });
                     return;
                   }
                   plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });

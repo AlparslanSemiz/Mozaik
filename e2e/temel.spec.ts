@@ -11,6 +11,7 @@ import {
   openWithSample,
   dragAndDrop,
   mainList,
+  answerDialog,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -95,12 +96,12 @@ test.describe('5. Yedek ve şema göçü', () => {
       yerlesim: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     };
 
-    page.once('dialog', (d) => d.accept()); // "the backup will replace the current plan"
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-01-0900.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v1)),
     });
+    await answerDialog(page); // "şu anki programın yerine geçecek"
 
     // The teacher, the class and the placed 2-hour block all survived.
     await page.getByRole('button', { name: 'Program' }).click();
@@ -143,12 +144,12 @@ test.describe('5. Yedek ve şema göçü', () => {
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     };
 
-    page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-20-1200.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v2)),
     });
+    await answerDialog(page); // "şu anki programın yerine geçecek"
 
     await page.getByRole('button', { name: 'Program' }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
@@ -210,12 +211,12 @@ test.describe('5. Yedek ve şema göçü', () => {
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     };
 
-    page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-24-1500.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v3)),
     });
+    await answerDialog(page); // "şu anki programın yerine geçecek"
 
     await page.getByRole('button', { name: 'Program' }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(2);
@@ -291,12 +292,12 @@ test.describe('5. Yedek ve şema göçü', () => {
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     };
 
-    page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-24-1900.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(v4)),
     });
+    await answerDialog(page); // "şu anki programın yerine geçecek"
 
     // The laid-out block survived the migration untouched.
     await page.getByRole('button', { name: 'Program' }).click();
@@ -404,12 +405,12 @@ test.describe('28. Geri al / ileri al', () => {
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeEnabled();
 
-    page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-25-1200.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(FIXTURE)),
     });
+    await answerDialog(page);
 
     await expect(page.getByRole('button', { name: 'Geri al', exact: true })).toBeDisabled();
   });
@@ -423,18 +424,15 @@ test.describe('29. Hata yolları', () => {
     await openWithSample(page);
     const before = await page.locator('table.grid tbody tr').count();
 
-    let message = '';
-    page.once('dialog', (d) => {
-      message = d.message();
-      void d.accept();
-    });
     await page.locator('input[type=file]').setInputFiles({
       name: 'bozuk.json',
       mimeType: 'application/json',
       buffer: Buffer.from('{ bu json değil'),
     });
 
-    await expect.poll(() => message).toContain('Bu dosya okunamadı');
+    // Read while it is on screen, then dismiss it: the dialog is the program's
+    // own now, so the text is in the DOM rather than in a browser event.
+    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
   });
@@ -442,30 +440,25 @@ test.describe('29. Hata yolları', () => {
   test('bilinmeyen (ileri) şema sürümü tahmin edilmiyor', async ({ page }) => {
     await openWithSample(page);
 
-    let message = '';
-    page.once('dialog', (d) => {
-      message = d.message();
-      void d.accept();
-    });
     await page.locator('input[type=file]').setInputFiles({
       name: 'gelecek.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify({ ...FIXTURE, schemaVersion: 99 })),
     });
 
-    await expect.poll(() => message).toContain('Bu dosya okunamadı');
+    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
   });
 
   test('yükleme onayı reddedilince hiçbir şey değişmiyor', async ({ page }) => {
     await openWithSample(page);
     const before = await page.locator('table.grid tbody tr').count();
 
-    page.once('dialog', (d) => d.dismiss());
     await page.locator('input[type=file]').setInputFiles({
       name: 'ders-programi-2026-08-25-1200.json',
       mimeType: 'application/json',
       buffer: Buffer.from(JSON.stringify(FIXTURE)),
     });
+    await answerDialog(page, 'cancel');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
@@ -479,18 +472,13 @@ test.describe('29. Hata yolları', () => {
       buffer: Buffer.from(JSON.stringify(FIXTURE)),
     };
 
-    page.once('dialog', (d) => d.accept());
     await page.locator('input[type=file]').setInputFiles(file);
+    await answerDialog(page);
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
 
     // The input clears its own value, so picking the same path fires again.
-    let asked = false;
-    page.once('dialog', (d) => {
-      asked = true;
-      void d.accept();
-    });
     await page.locator('input[type=file]').setInputFiles(file);
-    await expect.poll(() => asked).toBe(true);
+    expect(await answerDialog(page)).toContain('Şu anki programın yerine geçecek');
   });
 
   test('kayıt çalışmıyorsa kalıcı kırmızı uyarı çıkıyor', async ({ page }) => {

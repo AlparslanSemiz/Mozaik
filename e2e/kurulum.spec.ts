@@ -2,7 +2,7 @@
 // they feed.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList } from './helpers';
+import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList, answerDialog } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -26,8 +26,8 @@ test.describe('5. Kurulum ve yedek', () => {
       'true',
     );
 
-    page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await answerDialog(page);
 
     await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
     await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
@@ -97,22 +97,20 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Derslikler');
 
     // Deleting a room used to ask NOTHING at all
-    const before = await page.locator('table.list tbody tr').count();
-    let asked = '';
-    page.once('dialog', (d) => {
-      asked = d.message();
-      return d.dismiss(); // cancelled -> nothing may change
-    });
-    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await expect.poll(() => asked).toContain('dersliği silinecek');
+    const rows = mainList(page).locator('tbody tr');
+    const before = await rows.count();
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    // Cancelled -> nothing may change, and the sentence has to have COUNTED.
+    const asked = await answerDialog(page, 'cancel');
+    expect(asked).toContain('dersliği silinecek');
     expect(asked).toContain('sınıfın dersliği boşalacak');
     expect(asked).toContain('çakışması artık kontrol edilmeyecek');
-    await expect(page.locator('table.list tbody tr')).toHaveCount(before);
+    await expect(rows).toHaveCount(before);
 
     // Confirmed, it goes
-    page.once('dialog', (d) => d.accept());
-    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await expect(page.locator('table.list tbody tr')).toHaveCount(before - 1);
+    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await answerDialog(page);
+    await expect(rows).toHaveCount(before - 1);
   });
 
 });
@@ -227,16 +225,12 @@ test.describe('16. Branş seçimi', () => {
     await openWithSample(page);
     await openSettings(page, 'Branşlar');
 
-    let said = '';
-    page.once('dialog', (d) => {
-      said = d.message();
-      void d.dismiss();
-    });
     await page
       .locator('table.list tbody tr', { hasText: 'Matematik' })
       .getByRole('button', { name: 'Sil' })
       .click();
 
+    const said = await answerDialog(page);
     expect(said).toContain('öğretmen bu branşta');
     expect(said).toContain('Önce onların branşını değiştirin');
     await expect(page.locator('table.list tbody tr', { hasText: 'Matematik' })).toHaveCount(1);
@@ -248,11 +242,11 @@ test.describe('16. Branş seçimi', () => {
     await open(page);
     await openSettings(page, 'Branşlar');
 
-    page.once('dialog', (d) => d.accept());
     await page
       .locator('table.list tbody tr', { hasText: 'Fransızca' })
       .getByRole('button', { name: 'Sil' })
       .click();
+    await answerDialog(page);
     await expect(page.locator('table.list tbody tr', { hasText: 'Fransızca' })).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
@@ -400,13 +394,8 @@ test.describe('30. Kurulum — düzenleme', () => {
     await dragAndDrop(page);
 
     await openSetup(page, 'Dersler');
-    let asked = '';
-    page.once('dialog', (d) => {
-      asked = d.message();
-      void d.dismiss();
-    });
-    await page.locator('table.list tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    await expect.poll(() => asked).toContain('silinecek');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    expect(await answerDialog(page, 'cancel')).toContain('silinecek');
   });
 });
 

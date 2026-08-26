@@ -13,6 +13,7 @@
 // data destroys it.
 
 import { useRef, useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState, respreadColors } from '../../entities';
@@ -40,6 +41,7 @@ function size(chars: number): string {
 }
 
 export default function Data({ state, change, loadState, plans }: Props) {
+  const { confirm } = useDialogs();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState<{ bad: boolean; text: string } | null>(null);
@@ -47,15 +49,29 @@ export default function Data({ state, change, loadState, plans }: Props) {
   const report = storageReport(plans.library);
   const planCount = plans.library.plans.length;
 
-  function reset() {
+  async function reset() {
+    // It asks TWICE, and the second question is the point: this is the one
+    // button in the program that cannot be undone.
     if (
-      !window.confirm(
-        'Her şey silinecek: öğretmenler, sınıflar, dersler ve program. Emin misiniz?',
-      )
+      !(await confirm({
+        title: 'Her şey silinecek',
+        body: 'Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.',
+        confirmLabel: 'Devam et',
+        danger: true,
+      }))
     ) {
       return;
     }
-    if (!window.confirm('Son kez soruyorum — bu işlem geri alınamaz. Silinsin mi?')) return;
+    if (
+      !(await confirm({
+        title: 'Son kez soruyorum',
+        body: 'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.',
+        confirmLabel: 'Sil',
+        danger: true,
+      }))
+    ) {
+      return;
+    }
     loadState(emptyState());
   }
 
@@ -92,10 +108,12 @@ export default function Data({ state, change, loadState, plans }: Props) {
 
     const incoming = bundle.library.plans.length;
     if (
-      !window.confirm(
-        `Bu bilgisayardaki ${planCount} plan silinip dosyadaki ${incoming} plan ` +
-          'açılacak. Bu işlem geri alınamaz.',
-      )
+      !(await confirm({
+        title: 'Bu bilgisayardaki bütün planların yerine geçecek',
+        body: `Buradaki ${planCount} plan silinip dosyadaki ${incoming} plan açılacak. Bu işlem geri alınamaz.`,
+        confirmLabel: 'Hepsini değiştir',
+        danger: true,
+      }))
     ) {
       return;
     }

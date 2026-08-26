@@ -2,6 +2,7 @@
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
 import { useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import { parseTeachers } from '../../import';
 import ColorPick from '../ColorPick';
 import {
@@ -9,7 +10,7 @@ import {
   addTeacher,
   addTeachersFromRows,
   deleteTeacher,
-  deletionSummary,
+  deletionQuestion,
   duplicateShorts,
   makeShort,
   setTeacherLimit,
@@ -25,6 +26,7 @@ import type { PanelProps } from '../props';
 const NEW = '\u0000yeni';
 
 export default function Teachers({ state, change }: PanelProps) {
+  const { confirm } = useDialogs();
   const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
   const subjects = subjectOptions(state);
@@ -227,8 +229,10 @@ export default function Teachers({ state, change }: PanelProps) {
                 <td>
                   <button
                     className="btn danger"
-                    onClick={() => {
-                      if (!window.confirm(deletionSummary(state, 'teacher', t.id))) return;
+                    onClick={async () => {
+                      const q = deletionQuestion(state, 'teacher', t.id);
+                      if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                        return;
                       change((d) => deleteTeacher(d, t.id));
                     }}
                   >

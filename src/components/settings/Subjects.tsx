@@ -12,6 +12,7 @@
 // value you can correct — and only what is actually changed is stored.
 
 import { useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import {
   addSubject,
   DEFAULT_SUBJECT_SHORTS,
@@ -26,6 +27,7 @@ import {
 import type { PanelProps } from '../props';
 
 export default function Subjects({ state, change }: PanelProps) {
+  const { confirm, alert } = useDialogs();
   const [fresh, setFresh] = useState('');
 
   const options = subjectOptions(state);
@@ -39,16 +41,26 @@ export default function Subjects({ state, change }: PanelProps) {
     setFresh('');
   }
 
-  function remove(subject: string) {
+  async function remove(subject: string) {
     const users = subjectTeachers(state, subject);
     if (users.length > 0) {
-      window.alert(
-        `${users.length} öğretmen bu branşta (${users.map((t) => t.short).join(', ')}). ` +
-          'Önce onların branşını değiştirin, sonra bu branşı silin.',
-      );
+      await alert({
+        title: `"${subject}" branşı kullanılıyor`,
+        tone: 'warn',
+        body: `${users.length} öğretmen bu branşta (${users.map((t) => t.short).join(', ')}). Önce onların branşını değiştirin, sonra bu branşı silin.`,
+      });
       return;
     }
-    if (!window.confirm(`"${subject}" branşı listeden çıkarılacak. Devam edilsin mi?`)) return;
+    if (
+      !(await confirm({
+        title: `"${subject}" branşı listeden çıkarılacak`,
+        body: 'Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.',
+        confirmLabel: 'Çıkar',
+        danger: true,
+      }))
+    ) {
+      return;
+    }
     change((d) => deleteSubject(d, subject));
   }
 

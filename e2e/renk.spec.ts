@@ -2,7 +2,7 @@
 // with real getComputedStyle values, WCAG contrast and CIE Lab ΔE.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
+import { answerDialog, open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
 
 // 8. Theme
 //
@@ -187,8 +187,8 @@ test.describe('8. Tema', () => {
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Koyu tema' }).click();
-    page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await answerDialog(page);
     await page.getByRole('button', { name: 'Program' }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 

@@ -13,6 +13,7 @@ import {
   openWithSample,
   savedText,
   settledText,
+  answerDialog,
 } from './helpers';
 
 const picker = (page: Page) => page.getByLabel('Plan', { exact: true });
@@ -172,21 +173,16 @@ test.describe('40. Plan kitaplığı', () => {
     await page.getByRole('button', { name: 'Bu planın kopyası', exact: true }).click();
     await expect(picker(page).locator('option')).toHaveCount(2);
 
-    const message = await new Promise<string>((resolve) => {
-      page.once('dialog', (d) => {
-        resolve(d.message());
-        void d.dismiss();
-      });
-      void openRow(page).getByRole('button', { name: 'Sil', exact: true }).click();
-    });
+    await openRow(page).getByRole('button', { name: 'Sil', exact: true }).click();
+    const message = await answerDialog(page, 'cancel');
     expect(message).toContain('öğretmen');
     expect(message).toContain('sınıf');
     expect(message).toContain('geri alınamaz');
     // Dismissed: still two plans.
     await expect(picker(page).locator('option')).toHaveCount(2);
 
-    page.once('dialog', (d) => d.accept());
     await openRow(page).getByRole('button', { name: 'Sil', exact: true }).click();
+    await answerDialog(page);
     await expect(picker(page).locator('option')).toHaveCount(1);
     // Deleting the OPEN plan lands on the survivor, not on an empty screen.
     await expect(picker(page)).toHaveValue('1');
@@ -358,16 +354,16 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     // Now destroy it: switch away and delete the plan entirely.
     await picker(page).selectOption({ label: '1. plan' });
     await openPlans(page);
-    page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'Sil', exact: true }).nth(1).click();
+    await answerDialog(page);
     await expect(picker(page).locator('option')).toHaveCount(1);
 
-    page.once('dialog', (d) => d.accept());
     await page.getByLabel('Bütün planları içeren dosya').setInputFiles({
       name: 'ders-programi-tumu-2026-08-25-1200.json',
       mimeType: 'application/json',
       buffer: Buffer.from(text),
     });
+    await answerDialog(page);
 
     await expect(page.locator('.panel .hint[role="status"]')).toHaveText('2 plan açıldı.');
     await expect(picker(page).locator('option')).toHaveCount(2);
@@ -387,17 +383,13 @@ test.describe('42. Bütün planlar tek dosyada', () => {
       page.getByRole('button', { name: /Tümünü dosyaya kaydet/ }).click(),
     );
 
-    let said = '';
-    page.once('dialog', (d) => {
-      said = d.message();
-      return d.accept();
-    });
     // The top bar's own file input — the one next to "Dosyadan aç".
     await page.locator('header.topbar input[type=file]').setInputFiles({
       name: 'ders-programi-tumu-2026-08-25-1200.json',
       mimeType: 'application/json',
       buffer: Buffer.from(text),
     });
+    const said = await answerDialog(page);
 
     await expect.poll(() => said).toContain('Tümünü dosyadan aç');
     // Nothing was replaced: both plans still there, still on the same one.

@@ -2881,3 +2881,216 @@ table.availability.heat td.closed {
   background-image: none;
   background-color: color-mix(in srgb, var(--line-dark) calc(var(--heat, 0) * 70%), transparent);
 }
+
+/* ------------------------------------------------------------------ dialog
+   Every question the program asks. Seventeen of them used to be the operating
+   system's — twelve `confirm`, five `alert` — which meant they arrived in the
+   browser's typeface, under Chromium's "This page says", with no way to say
+   which button was the dangerous one. */
+
+.dlg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 22, .45);
+  backdrop-filter: blur(3px);
+  z-index: 40;
+}
+
+.dlg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 41;
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+  padding: var(--space-6);
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  box-shadow: var(--elev-3);
+}
+
+/* The dangerous ones wear it along the top edge, where the eye lands first —
+   not as a red frame, which at this size is a box drawn around a sentence. */
+.dlg.danger {
+  border-top: 3px solid var(--bad);
+}
+
+.dlg-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.dlg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-full);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.dlg-icon.bad { background: var(--bad-bg); color: var(--bad); }
+.dlg-icon.warn { background: var(--warn-bg); color: var(--warn); }
+
+.dlg-title {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  letter-spacing: var(--ls-tight);
+  line-height: var(--lh-head);
+}
+
+.dlg-body {
+  margin: 0 0 var(--space-6);
+  padding-left: calc(2rem + var(--space-4));
+  color: var(--muted);
+  line-height: var(--lh-base);
+}
+
+.dlg-body b,
+.dlg-body strong {
+  color: var(--text);
+}
+
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* The one button in the app that both looks dangerous AND is filled. Elsewhere
+   danger is INK on a plain button, because 25 red rectangles down a teacher
+   list turn the danger colour into the page's background. Here there is
+   exactly one of them and it is the thing the dialog is about. */
+.btn.danger-solid {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--elev-1);
+}
+
+.btn.danger-solid:hover:not(:disabled) {
+  background: color-mix(in oklab, #000 14%, var(--bad));
+  border-color: color-mix(in oklab, #000 14%, var(--bad));
+  box-shadow: var(--elev-2);
+}
+
+/* The dialog and its backdrop arrive and leave. Same mechanism as the colour
+   picker's <dialog>: @starting-style supplies the "from", allow-discrete lets
+   `display` take part so the exit is not cut at the first frame. */
+.dlg-overlay,
+.dlg {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+@starting-style {
+  .dlg-overlay { opacity: 0; }
+  .dlg { opacity: 0; transform: translate(-50%, -46%) scale(.97); }
+}
+
+.dlg-overlay[data-state='closed'] { opacity: 0; }
+.dlg[data-state='closed'] { opacity: 0; transform: translate(-50%, -46%) scale(.97); }
+
+/* ------------------------------------------------------------------ toasts
+   Bottom right, above everything, and never in the way of the grid: the pool
+   drawer is along the bottom and the toast sits over its right end, which is
+   the one part of it that is never a drop target. */
+
+.toasts {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-3);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 26rem;
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--ok);
+  border-radius: var(--r-lg);
+  box-shadow: var(--elev-3);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-tight);
+  pointer-events: auto;
+  animation: toast-in var(--dur) var(--ease-out);
+}
+
+.toast.info { border-left-color: var(--accent); }
+.toast.warn { border-left-color: var(--warn); }
+
+.toast-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--ok);
+}
+
+.toast.info .toast-icon { color: var(--accent); }
+.toast.warn .toast-icon { color: var(--warn); }
+
+.toast-text {
+  flex: 1 1 auto;
+}
+
+.toast-close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.toast-close:hover {
+  background: var(--paper-sunk);
+  color: var(--text);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+}
+
+/* A list of choices inside explanatory text — three densities, three file
+   kinds. Not a `<table>`: they are prose with a hanging label. */
+.choice-list {
+  margin: var(--space-3) 0 var(--space-5);
+  padding-left: var(--space-6);
+}
+
+.choice-list li + li {
+  margin-top: var(--space-2);
+}

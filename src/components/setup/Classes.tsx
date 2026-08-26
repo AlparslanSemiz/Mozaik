@@ -2,13 +2,14 @@
 // clash with each other — only through a shared room.
 
 import { useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import { parseClasses } from '../../import';
 import ColorPick from '../ColorPick';
 import {
   addClass,
   addClassesFromRows,
   deleteClass,
-  deletionSummary,
+  deletionQuestion,
   updateClass,
   weeklyLoad,
 } from '../../entities';
@@ -16,6 +17,7 @@ import Paste from './Paste';
 import type { PanelProps } from '../props';
 
 export default function Classes({ state, change }: PanelProps) {
+  const { confirm } = useDialogs();
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
@@ -116,8 +118,10 @@ export default function Classes({ state, change }: PanelProps) {
                 <td>
                   <button
                     className="btn danger"
-                    onClick={() => {
-                      if (!window.confirm(deletionSummary(state, 'class', c.id))) return;
+                    onClick={async () => {
+                      const q = deletionQuestion(state, 'class', c.id);
+                      if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                        return;
                       change((d) => deleteClass(d, c.id));
                     }}
                   >

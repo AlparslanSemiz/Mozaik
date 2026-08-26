@@ -19,6 +19,7 @@ import {
   defaultSubjectShort,
   deleteSubject,
   deleteTeacher,
+  deletionQuestion,
   deletionSummary,
   duplicateShorts,
   setSubjectShort,
@@ -421,6 +422,42 @@ describe('deletionSummary', () => {
     for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
       expect(deletionSummary(d, kind, 'yok')).toContain('Devam edilsin mi?');
     }
+  });
+
+  // The dialog wants the two halves separately: a heading and a cost line.
+  // Splitting the sentence back apart by looking for a full stop would be
+  // pitfall 22 again, so the split is made where the halves are written — and
+  // the one-string form has to stay EXACTLY what it was, or every existing
+  // assertion above is lying about what the user reads.
+  it('iki parça, birleştirilince eski cümlenin TA KENDİSİ', () => {
+    const d = loaded();
+    for (const [kind, id] of [
+      ['teacher', d.teachers[0]!.id],
+      ['class', d.classes[0]!.id],
+      ['class', d.classes[1]!.id],
+      ['room', d.rooms[0]!.id],
+      ['lesson', d.lessons[0]!.id],
+      ['lesson', d.lessons[1]!.id],
+      ['room', 'yok'],
+    ] as const) {
+      const q = deletionQuestion(d, kind, id);
+      const joined = `${q.title}. ${q.cost === '' ? '' : `${q.cost} `}Devam edilsin mi?`;
+      expect(joined).toBe(deletionSummary(d, kind, id));
+      // A heading is a heading: no trailing stop, no question.
+      expect(q.title.endsWith('.')).toBe(false);
+      expect(q.title).not.toContain('Devam edilsin mi');
+      // ...and a cost line, when there is one, is a whole sentence.
+      if (q.cost !== '') expect(q.cost.endsWith('.')).toBe(true);
+    }
+  });
+
+  it('bedeli olmayan silmede cost BOŞ, uydurulmuş bir cümle değil', () => {
+    let d = emptyState();
+    d = addRoom(d, 'B');
+    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
+      title: 'B dersliği silinecek',
+      cost: '',
+    });
   });
 });
 

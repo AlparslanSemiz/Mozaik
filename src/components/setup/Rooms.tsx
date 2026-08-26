@@ -2,12 +2,14 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import { parseRooms } from '../../import';
-import { addRoom, deletionSummary, deleteRoom, updateRoom } from '../../entities';
+import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../entities';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 
 export default function Rooms({ state, change }: PanelProps) {
+  const { confirm } = useDialogs();
   const [newRoom, setNewRoom] = useState('');
 
   return (
@@ -72,8 +74,10 @@ export default function Rooms({ state, change }: PanelProps) {
                 <td>
                   <button
                     className="btn danger"
-                    onClick={() => {
-                      if (!window.confirm(deletionSummary(state, 'room', r.id))) return;
+                    onClick={async () => {
+                      const q = deletionQuestion(state, 'room', r.id);
+                      if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                        return;
                       change((d) => deleteRoom(d, r.id));
                     }}
                   >

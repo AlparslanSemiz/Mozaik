@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+import Root from './Root';
 import {
   applyDensity,
   applyRibbon,
@@ -27,8 +27,12 @@ applyRibbon(readRibbon());
 const root = document.getElementById('root');
 if (root === null) throw new Error('#root bulunamadı');
 
+// The providers wrap App rather than living inside it, because App itself asks
+// questions (opening a file replaces the whole timetable) and a hook cannot
+// reach a provider its own component renders. `Root` holds the composition so
+// the smoke test renders the same tree this does.
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <Root />
   </StrictMode>,
 );

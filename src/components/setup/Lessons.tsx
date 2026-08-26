@@ -2,13 +2,14 @@
 // teacher. A block is not a separate entity: it is `blockSize` here.
 
 import { useState } from 'react';
+import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../import';
 import { paletteColor } from '../../palette';
 import {
   addLesson,
   addLessonsFromRows,
   deleteLesson,
-  deletionSummary,
+  deletionQuestion,
   updateLesson,
 } from '../../entities';
 import LimitBox from '../LimitBox';
@@ -17,6 +18,7 @@ import Field from '../Field';
 import type { PanelProps } from '../props';
 
 export default function Lessons({ state, change }: PanelProps) {
+  const { confirm, alert } = useDialogs();
   const [newLesson, setNewLesson] = useState({
     classId: '',
     teacherId: '',
@@ -107,17 +109,34 @@ export default function Lessons({ state, change }: PanelProps) {
           rowText={(x) =>
             `${x.className} — ${x.teacher}: ${x.weeklyHours} saat, ${x.blockSize}'li blok`
           }
-          onAdd={(rows) =>
-            change((d) => {
-              const { state: next, missing } = addLessonsFromRows(d, rows);
-              if (missing.length > 0) {
-                window.alert(
-                  `Şu satırlar eklenemedi çünkü sınıf veya öğretmen bulunamadı:\n\n${missing.join('\n')}\n\nÖnce onları ekleyip tekrar deneyin.`,
-                );
-              }
-              return next;
-            })
-          }
+          onAdd={(rows) => {
+            // The report is computed OUTSIDE the reducer. It used to be raised
+            // from inside `change`, i.e. a side effect in a function React is
+            // free to call late, twice, or not at all (pitfall 20's family —
+            // under StrictMode it already showed the alert twice).
+            // `addLessonsFromRows` is pure, so asking it here and asking it
+            // again in the reducer costs one extra pass over the rows and buys
+            // a callback with nothing in it but the state.
+            const { missing } = addLessonsFromRows(state, rows);
+            change((d) => addLessonsFromRows(d, rows).state);
+            if (missing.length > 0) {
+              void alert({
+                title: `${missing.length} satır eklenemedi`,
+                tone: 'warn',
+                body: (
+                  <>
+                    <p>Sınıf veya öğretmen bulunamadı:</p>
+                    <ul className="choice-list">
+                      {missing.map((row) => (
+                        <li key={row}>{row}</li>
+                      ))}
+                    </ul>
+                    <p>Önce onları ekleyip tekrar deneyin.</p>
+                  </>
+                ),
+              });
+            }
+          }}
         />
       </div>
 
@@ -197,8 +216,10 @@ export default function Lessons({ state, change }: PanelProps) {
                   <td>
                     <button
                       className="btn danger"
-                      onClick={() => {
-                        if (!window.confirm(deletionSummary(state, 'lesson', x.id))) return;
+                      onClick={async () => {
+                        const q = deletionQuestion(state, 'lesson', x.id);
+                        if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                          return;
                         change((d) => deleteLesson(d, x.id));
                       }}
                     >

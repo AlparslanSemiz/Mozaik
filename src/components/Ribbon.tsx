@@ -14,6 +14,7 @@
 // effect of drawing them up here.
 
 import type React from 'react';
+import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
 import { buildIndex } from './../constraints';
 import { pendingLessons } from './../entities';
@@ -65,6 +66,7 @@ function Sep() {
 
 
 export default function Ribbon({ ui, open, state, solver, density, setDensity }: Props) {
+  const { confirm } = useDialogs();
   const ix = useMemo(() => buildIndex(state), [state]);
 
   // Kontrol is a report. Nothing on this row would be true of it.
@@ -196,12 +198,14 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
               className="btn"
               disabled={placed === 0}
               title="Dizilmiş programı silip baştan dizer"
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  window.confirm(
-                    `Dizilmiş ${placed} saatin tamamı silinip program baştan dizilecek. ` +
-                      'Devam edilsin mi? (Ctrl+Z ile geri alınabilir.)',
-                  )
+                  await confirm({
+                    title: `Dizilmiş ${placed} saatin tamamı silinecek`,
+                    body: 'Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.',
+                    confirmLabel: 'Baştan diz',
+                    danger: true,
+                  })
                 ) {
                   solver.start(state, { keepPlaced: false });
                 }

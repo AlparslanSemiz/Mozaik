@@ -675,37 +675,54 @@ const plural = (n: number, word: string): string => `${n} ${word}`;
  * What exactly is about to be lost, COUNTED — never guessed. The sentence is
  * what decides whether my father presses Enter or Escape, so it names the
  * classes that lose their room instead of saying "some classes".
+ *
+ * TWO PARTS, because the dialog that shows it has two: a heading that says
+ * what is about to happen, and a line under it that says what it costs. It
+ * used to be one string ending in "Devam edilsin mi?" — correct for
+ * `window.confirm`, which has one text field and answers with its own two
+ * buttons. Splitting it by looking for a full stop would have been pitfall 22
+ * all over again (counting sentences in a string that is built from data), so
+ * the split is made HERE, where the two halves are written.
+ *
+ * `deletionSummary` below rebuilds the old string from these two, unchanged,
+ * so nothing that reads it has to care.
  */
-export function deletionSummary(d: State, kind: EntityKind, id: Id): string {
+export interface DeletionQuestion {
+  /** "MÇ (Mehmet Çelik) silinecek" — no full stop, no question mark. */
+  title: string;
+  /** "2 dersi ve programa yerleşmiş 2 saati de gidecek." — may be empty. */
+  cost: string;
+}
+
+export function deletionQuestion(d: State, kind: EntityKind, id: Id): DeletionQuestion {
   if (kind === 'room') {
     const room = d.rooms.find((x) => x.id === id);
-    if (room === undefined) return 'Bu derslik silinecek. Devam edilsin mi?';
+    if (room === undefined) return { title: 'Bu derslik silinecek', cost: '' };
     const groups = roomClasses(d, id);
-    if (groups.length === 0) {
-      return `${room.name} dersliği silinecek. Devam edilsin mi?`;
-    }
-    return (
-      `${room.name} dersliği silinecek. ` +
-      `${plural(groups.length, 'sınıfın')} dersliği boşalacak ` +
-      `(${groups.map((c) => c.name).join(', ')}) ve derslik çakışması artık ` +
-      'kontrol edilmeyecek. Devam edilsin mi?'
-    );
+    if (groups.length === 0) return { title: `${room.name} dersliği silinecek`, cost: '' };
+    return {
+      title: `${room.name} dersliği silinecek`,
+      cost:
+        `${plural(groups.length, 'sınıfın')} dersliği boşalacak ` +
+        `(${groups.map((c) => c.name).join(', ')}) ve derslik çakışması artık ` +
+        'kontrol edilmeyecek.',
+    };
   }
 
   if (kind === 'lesson') {
     const lesson = d.lessons.find((x) => x.id === id);
-    if (lesson === undefined) return 'Bu ders silinecek. Devam edilsin mi?';
+    if (lesson === undefined) return { title: 'Bu ders silinecek', cost: '' };
     const group = d.classes.find((c) => c.id === lesson.classId);
     const teacher = d.teachers.find((t) => t.id === lesson.teacherId);
     const who = `${group?.name ?? '?'} sınıfının ${teacher?.short ?? '?'} dersi`;
     const placed = countPlacedHours(d, id);
     if (placed === 0) {
-      return `${who} silinecek (${plural(lesson.weeklyHours, 'saat')}). Devam edilsin mi?`;
+      return { title: `${who} silinecek (${plural(lesson.weeklyHours, 'saat')})`, cost: '' };
     }
-    return (
-      `${who} silinecek. Programa yerleşmiş ${plural(placed, 'saati')} de kalkacak. ` +
-      'Devam edilsin mi?'
-    );
+    return {
+      title: `${who} silinecek`,
+      cost: `Programa yerleşmiş ${plural(placed, 'saati')} de kalkacak.`,
+    };
   }
 
   const lessons =
@@ -725,14 +742,26 @@ export function deletionSummary(d: State, kind: EntityKind, id: Id): string {
           return c === undefined ? 'Bu sınıf' : `${c.name} sınıfı`;
         })();
 
-  if (lessons.length === 0) return `${who} silinecek. Devam edilsin mi?`;
+  if (lessons.length === 0) return { title: `${who} silinecek`, cost: '' };
   if (placed === 0) {
-    return `${who} silinecek. ${plural(lessons.length, 'dersi')} de gidecek. Devam edilsin mi?`;
+    return { title: `${who} silinecek`, cost: `${plural(lessons.length, 'dersi')} de gidecek.` };
   }
-  return (
-    `${who} silinecek. ${plural(lessons.length, 'dersi')} ve programa yerleşmiş ` +
-    `${plural(placed, 'saati')} de gidecek. Devam edilsin mi?`
-  );
+  return {
+    title: `${who} silinecek`,
+    cost:
+      `${plural(lessons.length, 'dersi')} ve programa yerleşmiş ` +
+      `${plural(placed, 'saati')} de gidecek.`,
+  };
+}
+
+/**
+ * The same thing as ONE sentence, ending in the question `window.confirm` had
+ * to ask for itself. Kept because it is what the tests hold and because a
+ * caller that only has one text field still exists in principle.
+ */
+export function deletionSummary(d: State, kind: EntityKind, id: Id): string {
+  const { title, cost } = deletionQuestion(d, kind, id);
+  return `${title}. ${cost === '' ? '' : `${cost} `}Devam edilsin mi?`;
 }
 
 /**
