@@ -569,3 +569,66 @@ test.describe('46. Gömülü yazı tipi', () => {
     expect(new Set(widths).size, `rakam genişlikleri: ${widths.join(', ')}`).toBe(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+
+test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
+  // Task B3b. Without it the double-clicked file gets the browser's blank
+  // page icon, which is what every other saved .html on the machine gets too.
+  //
+  // The mark now exists in two places: site/icon.svg, which the site build and
+  // the PNGs come from, and a data: URI inside index.html. Two copies of a
+  // drawing drift, and nobody notices a favicon drifting — so the second test
+  // below decodes the URI and compares the rectangles it draws with the ones
+  // in the file. That is the whole reason it is written as a test rather than
+  // as a comment saying "keep these in step".
+
+  /** Every <rect> in an SVG, as a sorted list of "x,y,w,h,rx,fill". */
+  function rects(svg: string): string[] {
+    const attr = (tag: string, name: string) =>
+      new RegExp(`${name}="([^"]*)"`).exec(tag)?.[1] ?? '';
+    return (svg.match(/<rect[^>]*>/g) ?? [])
+      .map((tag) =>
+        ['x', 'y', 'width', 'height', 'rx', 'fill']
+          .map((name) => `${name}=${attr(tag, name)}`)
+          .join(' '),
+      )
+      .sort();
+  }
+
+  test('tek dosyada favicon var ve hiçbir ağ isteği DEĞİL', async ({ page }) => {
+    const html = readFileSync('dist/index.html', 'utf8');
+    const href = /<link[^>]*rel="icon"[^>]*href="([^"]*)"/.exec(html)?.[1];
+
+    expect(href, 'dist/index.html içinde <link rel=icon> yok').toBeDefined();
+    expect(href!.startsWith('data:image/svg+xml,')).toBe(true);
+
+    // Pitfall 32's other half, said once more from this side and said about
+    // the right thing: not "the word icon.svg does not appear" — a comment may
+    // well name it — but "no attribute in this file addresses anything the
+    // browser would have to go and get".
+    const urls = [...html.matchAll(/\s(?:href|src)="([^"]*)"/g)].map((m) => m[1]!);
+    expect(urls.length, 'hiç href/src yok — regex bozulmuş olabilir').toBeGreaterThan(0);
+    for (const url of urls) {
+      expect(url.startsWith('data:'), `dist/index.html dışarı bakıyor: ${url}`).toBe(true);
+    }
+
+    await open(page);
+    const rel = await page.locator('link[rel="icon"]').getAttribute('href');
+    expect(rel!.startsWith('data:')).toBe(true);
+  });
+
+  test('gömülü işaret site/icon.svg ile AYNI şeyi çiziyor', async () => {
+    const html = readFileSync('index.html', 'utf8');
+    const href = /<link[^>]*rel="icon"[^>]*href="([^"]*)"/.exec(html)![1]!;
+    // Single quotes inside the URI, double quotes in the file it came from.
+    const embedded = decodeURIComponent(href.slice('data:image/svg+xml,'.length)).replace(
+      /'/g,
+      '"',
+    );
+    const source = readFileSync('site/icon.svg', 'utf8').replace(/#ffffff/g, '#fff');
+
+    expect(rects(embedded).length, 'gömülü işaret boş').toBe(13);
+    expect(rects(embedded)).toEqual(rects(source));
+  });
+});
