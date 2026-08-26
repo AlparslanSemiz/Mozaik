@@ -585,8 +585,12 @@ textarea {
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  flex: 0 1 auto;
-  min-width: 0;
+  /* 0 0, NOT 0 1: the strip used to shrink while the tabs inside it did not,
+     so at 150% the last two tabs simply overflowed their own box and sat under
+     the status chip — clickable by a pointer that happened to land on them and
+     by nothing else. Measured: strip 693px, last tab ending at 823px.
+     The things that give way instead are named below, in order. */
+  flex: 0 0 auto;
   padding-left: var(--space-2);
 }
 
@@ -3460,4 +3464,220 @@ table.availability.heat td.closed {
    drag. Whoever wants the times has them in Ayarlar → Okul and on paper. */
 :root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
   display: none;
+}
+
+/* ------------------------------------------------------------- health chip
+   Is the timetable in trouble — on screen in every tab.
+   The functional channel, used exactly as it is meant to be: green nothing to
+   do, amber something to look at, red something that cannot be laid out. */
+
+.health {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* First to give way when the bar runs out of room: the dot carries the
+     answer, the sentence carries the detail. It never disappears — a status
+     that vanishes when the screen is busy is a status nobody relies on. */
+  flex: 0 1 auto;
+  min-width: 2.5rem;
+  max-width: 28rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-full);
+  background: var(--paper);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.health-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.health-dot {
+  flex: 0 0 auto;
+  width: .5rem;
+  height: .5rem;
+  border-radius: var(--r-full);
+  background: var(--ok);
+}
+
+.health.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.health.tight { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+.health.impossible { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+
+.health.tight .health-dot { background: var(--warn); }
+.health.impossible .health-dot { background: var(--bad); }
+
+.health:hover { box-shadow: var(--elev-1); }
+
+/* Below this the bar has six destinations, a document name and six buttons to
+   hold: the chip keeps its colour and loses its sentence. */
+@media (max-width: 1500px) {
+  .health-text { display: none; }
+}
+
+/* --------------------------------------------------------- command palette
+   Ctrl+K. With 25 teachers, 20 classes, 8 rooms and 99 lessons, reaching one
+   means the right tab, then the right step, then scanning a column. Typing
+   three letters is easier than scanning — and the reader has trouble seeing,
+   which makes that difference larger here, not smaller. */
+
+.palette {
+  position: fixed;
+  top: 12vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 41;
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-xl);
+  box-shadow: var(--elev-4);
+  overflow: hidden;
+}
+
+.palette-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+}
+
+.palette-search input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: var(--fs-lg);
+}
+
+.palette-search input:focus {
+  outline: none;
+}
+
+kbd {
+  padding: 1px var(--space-2);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: var(--r-xs);
+  background: var(--paper-sunk);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.palette-list {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: var(--space-3);
+  scrollbar-gutter: stable;
+}
+
+.palette-group {
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--muted);
+}
+
+.palette-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border: none;
+  border-radius: var(--r-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* The highlight follows the KEYBOARD, and the mouse moves it rather than
+   owning a second one: two highlights on one list is two cursors. */
+.palette-row[data-active='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.palette-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.palette-row[data-active='true'] .palette-icon,
+.palette-row[data-active='true'] .palette-hint {
+  color: inherit;
+  opacity: .85;
+}
+
+.palette-dot {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--dot-border);
+}
+
+.palette-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.palette-hint {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.palette-enter {
+  flex: 0 0 auto;
+  opacity: .7;
+}
+
+.palette-empty {
+  margin: 0;
+  padding: var(--space-4) var(--space-3);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.palette {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+@starting-style {
+  .palette { opacity: 0; transform: translateX(-50%) translateY(-.75rem); }
+}
+
+.palette[data-state='closed'] {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-.75rem);
 }

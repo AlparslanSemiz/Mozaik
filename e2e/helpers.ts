@@ -486,6 +486,21 @@ export const SCENES: Scene[] = [
       await page.locator('.sheet').waitFor({ state: 'hidden' });
     },
   },
+  {
+    // Ctrl+K. Six destinations, the frequent actions, and every teacher, class
+    // and room by name.
+    name: '6c-palet',
+    go: async (page) => {
+      await page.keyboard.press('Control+k');
+      await page.locator('.palette').waitFor();
+      await page.getByLabel('Ara veya komut yaz').fill('ma');
+      await page.waitForTimeout(250);
+    },
+    after: async (page) => {
+      await page.keyboard.press('Escape');
+      await page.locator('.palette').waitFor({ state: 'hidden' });
+    },
+  },
   { name: '7-kontrol', go: tab('Kontrol') },
   {
     // The program's own question, with the cascade summary counted out. There

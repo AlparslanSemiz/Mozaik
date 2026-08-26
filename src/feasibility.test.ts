@@ -1,4 +1,15 @@
-import { buildCapacity, buildReport, commonestBlock } from './feasibility';
+import { describe, expect, it } from 'vitest';
+import { buildCapacity, buildReport, commonestBlock, health } from './feasibility';
+import { place } from './constraints';
+import {
+  addClass,
+  addLesson,
+  addRoom,
+  addTeacher,
+  emptyState,
+  setAvailability,
+  setWholeWeek,
+} from './entities';
 import { buildIndex } from './constraints';
 import { teacherKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
@@ -159,5 +170,97 @@ describe('commonestBlock', () => {
     expect(commonestBlock(d, ix, 'x1', true).anyValid).toBe(
       commonestBlock(d, ix, 'x1', false).anyValid,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The health chip's one line. It is on screen in every tab, so it has to be
+// right in every tab — and it has to name the problem rather than announce
+// that there is one.
+
+describe('health', () => {
+  it('boş projede sorun yok', () => {
+    const h = health(emptyState());
+    expect(h.level).toBe('ok');
+    expect(h.message).toBe('Sorun yok');
+    expect(h).toMatchObject({ blocked: 0, warnings: 0, pending: 0, stranded: 0 });
+  });
+
+  it('dizilmemiş ders "havuzda" olarak SAYILIYOR ama sorun değil', () => {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 4,
+      blockSize: 1,
+    });
+
+    const h = health(d);
+    expect(h.pending).toBe(4);
+    expect(h.message).toContain('4 saat havuzda');
+    // Nothing is WRONG with a timetable that has not been laid out yet.
+    expect(h.level).toBe('ok');
+  });
+
+  it('kapalı saatte kalmış ders sorunu KIRMIZI yapıyor ve sayıyor', () => {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blockSize: 1,
+    });
+    d = place(d, d.lessons[0]!.id, 0, 0);
+    // The hour is closed AFTERWARDS — principle 6 says the lesson stays.
+    d = setAvailability(d, d.teachers[0]!.id, [{ day: 0, hour: 0 }], true);
+
+    const h = health(d);
+    expect(h.stranded).toBe(1);
+    expect(h.level).toBe('impossible');
+    expect(h.message).toContain('1 ders kapalı saatte');
+  });
+
+  it('cümle SAYIYOR, "sorun var" demiyor', () => {
+    // The whole point: a chip that says "there is a problem" sends somebody to
+    // Kontrol to find out which one. This says which one before they go.
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 3,
+      blockSize: 1,
+    });
+    expect(health(d).message).toMatch(/^\d+ saat havuzda$/);
+  });
+
+  // Pitfall 22, in its third home: one teacher away all week produces sixty
+  // messages and is still one closed teacher. The counts here are of KINDS.
+  it('bir öğretmenin bütün haftası kapalıysa bu ONE problem gibi sayılıyor', () => {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 4,
+      blockSize: 1,
+    });
+    d = setWholeWeek(d, d.teachers[0]!.id, true);
+
+    const h = health(d);
+    expect(h.level).toBe('impossible');
+    expect(h.message).toContain('ders sığmıyor');
+    // ...and NOT sixty of anything.
+    expect(h.warnings).toBeLessThan(10);
   });
 });

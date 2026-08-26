@@ -24,14 +24,14 @@ async function load(page: Page, world: WorldSpec) {
 test.describe('26. Kontrol — kapasite', () => {
   test('veri yokken ne yapılacağını söylüyor', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
     await expect(page.locator('.empty-screen')).toContainText('Kurulum');
   });
 
   test('her şey sığıyorsa net biçimde "Sorun görünmüyor" diyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
     await expect(page.locator('table.list .badge.impossible')).toHaveCount(0);
   });

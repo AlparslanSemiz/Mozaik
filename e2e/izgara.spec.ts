@@ -133,15 +133,15 @@ test.describe('47. Izgara enstrümanı', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
-    await page.getByRole('button', { name: 'Havuz' }).click();
-    await expect(page.getByRole('button', { name: 'Havuz' })).toHaveAttribute(
+    await page.getByRole('button', { name: 'Havuz', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Havuz', exact: true })).toHaveAttribute(
       'aria-expanded',
       'false',
     );
 
     await page.reload();
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Havuz' })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: 'Havuz', exact: true })).toHaveAttribute(
       'aria-expanded',
       'false',
     );
@@ -152,6 +152,6 @@ test.describe('47. Izgara enstrümanı', () => {
     expect(saved!.includes('havuz')).toBe(false);
     expect(await page.evaluate(() => localStorage.getItem('ders-programi-havuz'))).toBe('kapali');
 
-    await page.getByRole('button', { name: 'Havuz' }).click();
+    await page.getByRole('button', { name: 'Havuz', exact: true }).click();
   });
 });

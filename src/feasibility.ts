@@ -4,7 +4,7 @@
 // timetable cannot be built. It comes before a solver because it is far
 // cheaper and far more useful.
 
-import { blockerDetail, buildIndex } from './constraints';
+import { blockerDetail, buildIndex, closedConflicts } from './constraints';
 import type { BlockCode, Index } from './constraints';
 import { findViolations } from './rules';
 import type { Violation } from './rules';
@@ -209,4 +209,84 @@ export function buildReport(d: State): Report {
     [...teachers, ...classes, ...rooms].some((x) => x.level !== 'ok');
 
   return { teachers, classes, rooms, unplaceable, violations, hasProblem };
+}
+
+// ------------------------------------------------------------------ health
+//
+// One line that says whether the timetable is in trouble, for a chip that is
+// on screen in EVERY tab.
+//
+// Kontrol has always been able to answer this, and that was the problem: it is
+// a destination, so answering "am I still all right?" meant leaving the grid,
+// reading, and coming back. On a screen you spend a day in, a question that
+// costs two navigations gets asked once at the start and then never again.
+//
+// It counts the three kinds of trouble the program already knows how to find,
+// and it counts them by KIND rather than by sentence (pitfall 22): one teacher
+// away all week produces sixty messages and is still one problem.
+
+export interface Health {
+  /** Rules broken at "Engelle" — the timetable is illegal as it stands. */
+  blocked: number;
+  /** Rules broken at "Uyar", plus capacity that will not fit. */
+  warnings: number;
+  /** Lessons still waiting in the pool. */
+  pending: number;
+  /** Lessons sitting on an hour that was closed afterwards (pitfall 16). */
+  stranded: number;
+  /** The loudest thing to say, for the chip's colour. */
+  level: Level;
+  /** The chip's own sentence. Never "there is a problem" — always which. */
+  message: string;
+}
+
+export function health(d: State): Health {
+  const ix = buildIndex(d);
+  const report = buildReport(d);
+
+  let blocked = 0;
+  let warnings = 0;
+  for (const v of report.violations) {
+    if (v.level === 'block') blocked++;
+    else warnings++;
+  }
+  // Capacity that cannot hold its load is a warning even when nothing has been
+  // laid out yet: it is the one problem that is certain BEFORE any placement.
+  // `Level` here is the capacity ladder: 'impossible' means the load cannot
+  // fit at all, 'tight' means it barely does. Only the first is a problem.
+  for (const row of [...report.teachers, ...report.classes, ...report.rooms]) {
+    if (row.level === 'impossible') warnings++;
+  }
+
+  let pending = 0;
+  for (const lesson of d.lessons) {
+    pending += Math.max(0, lesson.weeklyHours - (ix.placedHours.get(lesson.id) ?? 0));
+  }
+
+  const stranded = closedConflicts(d, ix).length;
+
+  const level: Level =
+    blocked > 0 || stranded > 0 || report.unplaceable.length > 0
+      ? 'impossible'
+      : warnings > 0
+        ? 'tight'
+        : 'ok';
+
+  // The sentence names the loudest thing and counts it. "Sorun var" would
+  // send somebody to Kontrol to find out what; this tells them before they go.
+  const parts: string[] = [];
+  if (blocked > 0) parts.push(`${blocked} kural ihlali`);
+  if (stranded > 0) parts.push(`${stranded} ders kapalı saatte`);
+  if (report.unplaceable.length > 0) parts.push(`${report.unplaceable.length} ders sığmıyor`);
+  if (warnings > 0) parts.push(`${warnings} uyarı`);
+  if (pending > 0) parts.push(`${pending} saat havuzda`);
+
+  return {
+    blocked,
+    warnings,
+    pending,
+    stranded,
+    level,
+    message: parts.length === 0 ? 'Sorun yok' : parts.join(' · '),
+  };
 }

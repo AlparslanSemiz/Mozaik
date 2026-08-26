@@ -300,7 +300,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await expect(page.locator('table.grid .card')).toHaveCount(2);
 
     // What was allowed through is listed in Kontrol.
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
     await expect(
       page.locator('.panel', { hasText: 'Kural ihlalleri' }),

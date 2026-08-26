@@ -1,4 +1,8 @@
 import { useRef, useState } from 'react';
+import { Search as SearchIcon } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import Commands from './components/Commands';
+import { health } from './feasibility';
 import { InspectorProvider } from './components/Inspector';
 import { useDialogs } from './components/Dialogs';
 import { useToast } from './components/Toasts';
@@ -309,6 +313,70 @@ export default function App() {
   const solver = useSolver(change);
   const { confirm, alert } = useDialogs();
   const notify = useToast();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+
+  // One line that says whether the timetable is in trouble, on screen in every
+  // tab. Kontrol could always answer this and that was the problem: it is a
+  // destination, so asking "am I still all right?" meant leaving the grid.
+  const status = useMemo(() => health(state), [state]);
+
+  // Ctrl/⌘+K opens the palette; Alt+1..6 go to a section.
+  //
+  // Alt and not a bare digit: a bare "5" while a lesson card has focus would
+  // jump to Yazdır, and every card on the grid is a focusable button. The
+  // modifier is what keeps a shortcut from being a trap.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+        return;
+      }
+      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-6]$/.test(e.key)) {
+        const next = TABS[Number(e.key) - 1];
+        if (next !== undefined) {
+          e.preventDefault();
+          setTab(next.id);
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setTab]);
+
+  const paletteActions = useMemo(
+    () => [
+      {
+        id: 'save',
+        label: 'Dosyaya kaydet',
+        hint: 'yedek al',
+        run: () => {
+          downloadBackup(state);
+          notify('Yedek dosyaya yazıldı — indirilenler klasörüne bakın.');
+        },
+      },
+      {
+        id: 'auto',
+        label: 'Otomatik diz',
+        hint: 'Program',
+        run: () => {
+          setTab('program');
+          solver.start(state, { keepPlaced: true });
+        },
+      },
+      {
+        id: 'theme',
+        label: theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç',
+        run: toggleTheme,
+      },
+      {
+        id: 'ribbon',
+        label: ribbon ? 'Araç şeridini gizle' : 'Araç şeridini göster',
+        run: toggleRibbon,
+      },
+    ],
+    [state, theme, ribbon, solver, setTab, notify],
+  );
 
   function toggleRibbon() {
     const next = !ribbon;
@@ -392,6 +460,25 @@ export default function App() {
             </button>
           ))}
         </nav>
+
+        {/* Zone one and a half: IS IT ALL RIGHT. Kontrol has always been able
+            to answer this, and that was the problem — it is a destination, so
+            asking cost two navigations and therefore got asked once, at the
+            start. The sentence NAMES the trouble and counts it, because "sorun
+            var" would only send somebody to Kontrol to find out which. */}
+        <button
+          className={`health ${status.level}`}
+          onClick={() => setTab('check')}
+          /* The label carries the sentence even when the bar is too narrow to
+             draw it — and it is an aria-label rather than a title so the
+             accessible name is this and not "Kontrol", which is also the name
+             of a tab three pixels away. */
+          aria-label={`Programın durumu: ${status.message}. Ayrıntı için Kontrol.`}
+          title={`${status.message} — Kontrol sekmesini açar`}
+        >
+          <span className="health-dot" aria-hidden="true" />
+          <span className="health-text">{status.message}</span>
+        </button>
 
         <span className="spacer" />
 
@@ -495,6 +582,15 @@ export default function App() {
             here: once folded, the strip has no row to hold its own button. */}
         <button
           className="btn icon"
+          aria-label="Ara ve git"
+          title="Ara ve git (Ctrl+K)"
+          onClick={() => setPaletteOpen(true)}
+        >
+          <SearchIcon size={18} strokeWidth={2} />
+        </button>
+
+        <button
+          className="btn icon"
           aria-expanded={ribbon}
           aria-label="Araç şeridi"
           title={ribbon ? 'Araç şeridini gizle — ızgaraya bir satır daha' : 'Araç şeridini göster'}
@@ -536,6 +632,14 @@ export default function App() {
       />
 
       <InspectorProvider state={state}>
+      <Commands
+        open={paletteOpen}
+        setOpen={setPaletteOpen}
+        state={state}
+        ui={ui}
+        sections={TABS}
+        actions={paletteActions}
+      />
       <div className="workspace">
         {!canSave && (
           <div className="save-warning">

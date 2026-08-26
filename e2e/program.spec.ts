@@ -231,7 +231,7 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     expect(cancelled).toBe(true);
 
     await expect(page.locator('table.grid .card')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
   });
 

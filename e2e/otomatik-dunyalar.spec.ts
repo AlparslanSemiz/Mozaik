@@ -134,7 +134,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       expect(saved.placements[cell]).toBe(lessonId);
     }
     // The one in the closed hour is still there and Kontrol counts it.
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.panel', { hasText: 'Kapalı saatte' }).first()).toBeVisible();
   });
 
@@ -143,7 +143,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
       const world = SMALL_WORLDS.find((w) => w.name === name)!;
       await loadWorld(page, world.state);
       await autoFill(page);
-      await page.getByRole('button', { name: 'Kontrol' }).click();
+      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
       await expect(page.locator('.badge', { hasText: 'Kural dışı' })).toHaveCount(0);
     }
   });
@@ -153,7 +153,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
 
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.panel', { hasText: 'Yerleşemeyen' }).first()).toContainText('511');
   });
 

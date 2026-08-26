@@ -120,7 +120,7 @@ test.describe('20. Kapalı saatte ders', () => {
 
   test('Kontrol sekmesi tek tek sayıyor ve sebebini yazıyor', async ({ page }) => {
     await conflict(page);
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
 
     const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
     await expect(panel.getByRole('heading', { name: /Kapalı saatte ders/ })).toBeVisible();

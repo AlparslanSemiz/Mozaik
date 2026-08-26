@@ -52,7 +52,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
       }
 
       // The page never froze: a tab click still answers.
-      await page.getByRole('button', { name: 'Kontrol' }).click();
+      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
       await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
     });
   }
@@ -62,7 +62,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
     await loadWorld(page, world.state);
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
     // If the search held the main thread this would time out instead of answering.
-    await expect(page.getByRole('button', { name: 'Kontrol' })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
     await expect(page.getByRole('button', { name: '■ Durdur' })).toBeVisible();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
   });

@@ -122,7 +122,7 @@ test.describe('22. Otomatik dizme', () => {
     expect(placed).toBeGreaterThan(400);
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.badge', { hasText: 'Kural dışı' })).toHaveCount(0);
   });
 
@@ -150,9 +150,9 @@ test.describe('22. Otomatik dizme', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
     // If the main thread were blocked this would time out rather than answer.
-    await expect(page.getByRole('button', { name: 'Kontrol' })).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Kontrol', exact: true })).toBeEnabled();
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
   });
 });

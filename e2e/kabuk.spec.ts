@@ -40,7 +40,7 @@ test.describe('23. Sekmeler', () => {
 
     // The accessible name survives, so a screen reader — and a test — can still
     // find a destination by what it is called.
-    await page.getByRole('button', { name: 'Kontrol' }).click();
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
       'Kontrol',
