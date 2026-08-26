@@ -81,12 +81,45 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 Vite + React + TypeScript
 vite-plugin-singlefile  ->  dist/index.html  (tek dosya, gömülü JS/CSS)
 Vitest                  ->  saf mantık testleri
+Radix UI                ->  diyalog · toast · menü · tooltip · popover
+lucide-react            ->  simgeler (ağaç budanır, simge başına ~0.3 KB)
+```
+
+**Hareket kütüphanesi YOK — ve bu bir yasak değil, bir ÖLÇÜM.** `motion`
+kuruldu, ölçüldü ve **127 KB** çıktı; karşılığında verdiği tek şey CSS'in
+yapamadığı `layoutId` paylaşımlı geçişiydi. Aynı işi tarayıcının kendisi
+bedavaya yapıyor — `file://` altında Chromium'da **ölçüldü**:
+
+```
+document.startViewTransition   var        paylaşımlı öğe geçişi
+@starting-style                var        girişte animasyon
+transition-behavior: allow-discrete  var  display'e geçiş
+oklch() · color-mix()          var        algısal renk rampası
+backdrop-filter                var        yapışkan kabuk
+position-anchor                var        popover konumlama
 ```
 
 **Bağımlılık kuralı (2026-08-26):** bir paket `dist/index.html`'e gömülebiliyor
 ve çalışma anında ağa çıkmıyorsa serbest. Sabit bir KB tavanı yok; şart
 **ölçmek** — eklendikten sonra dosya boyutu ve `file://` ilk boyama süresi
 `docs/STATUS.md`'ye yazılır. `devDependencies` zaten serbestti.
+
+Ölçülen maliyetler (2026-08-26, taban 405 242 bayt):
+
+| Paket | Maliyet |
+|---|---|
+| `lucide-react` (12 simge) | **+3,4 KB** |
+| `@radix-ui/react-dialog` | +39,5 KB |
+| `+ react-toast` | +19,6 KB |
+| `+ react-dropdown-menu` | +51,0 KB |
+| `+ react-tooltip` | +8,2 KB |
+| `+ react-popover` | +5,0 KB |
+| **Radix toplam (5 paket)** | **+123,3 KB** |
+| ~~`motion`~~ | +127,2 KB — **alınmadı** |
+
+`dropdown-menu` beşinin en pahalısı ama popper'ı da o getiriyor: tooltip ve
+popover onun üstüne 13 KB'a geliyor. **Tailwind alınmadı** — `src/styles.css`
+zaten olgun bir token katmanı, taşımanın görsel getirisi sıfır.
 
 Hâlâ yasak olan tek şey **ağ**: çalışma anında bayt indiren hiçbir paket
 giremez (ilke 3). Sürükle-bırak kütüphanesi de girmiyor ama gerekçesi başka —
