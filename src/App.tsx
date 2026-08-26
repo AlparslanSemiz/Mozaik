@@ -20,6 +20,7 @@ import {
   type Density,
   type Theme,
 } from './theme';
+import { attachScrollFade } from './scrollFade';
 import { useSolver } from './useSolver';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
@@ -290,6 +291,36 @@ export default function App() {
   const ui = useToolState(state.lessons.length > 0 ? 'program' : 'setup');
   const { tab, setTab } = ui;
   const fileInput = useRef<HTMLInputElement>(null);
+  const mainRef = useRef<HTMLElement>(null);
+
+  /**
+   * Every navigation goes through here — the six tab buttons, Alt+1..6, the
+   * command palette and the status chip.
+   *
+   * It used to wrap the change in `document.startViewTransition`, and it was
+   * MEASURED and taken back out. A view transition replaces the captured
+   * element with a snapshot for the length of the animation, and a snapshot is
+   * not hit-testable: for **553 ms** after every tab change,
+   * `document.elementFromPoint` over the grid answered `<html>` instead of a
+   * cell. Nothing looked wrong — but `drag.ts` finds its drop target with
+   * exactly that call, so a card grabbed in that window landed nowhere, with
+   * no error and no feedback. The E2E suite is what caught it.
+   *
+   * The tab change animates anyway, in CSS, from `key={tab}` on `<main>` and an
+   * `@starting-style`. The one thing `startViewTransition` uniquely offers is
+   * a shared-element morph, and there was never one here — this is a
+   * cross-fade, and the browser will do that without freezing the page. Same
+   * reasoning that left `motion` (127 KB) on the shelf: pay for what you use.
+   */
+  const goTab = setTab;
+
+  // The fade on the scrolled content, re-attached per tab: React swaps the
+  // whole child of `.main` on a tab change, and scrollFade reads that child
+  // once (see the note there).
+  useEffect(() => {
+    const box = mainRef.current;
+    return box === null ? undefined : attachScrollFade(box);
+  }, [tab]);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
@@ -336,13 +367,13 @@ export default function App() {
         const next = TABS[Number(e.key) - 1];
         if (next !== undefined) {
           e.preventDefault();
-          setTab(next.id);
+          goTab(next.id);
         }
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [setTab]);
+  }, [goTab]);
 
   const paletteActions = useMemo(
     () => [
@@ -360,7 +391,7 @@ export default function App() {
         label: 'Otomatik diz',
         hint: 'Program',
         run: () => {
-          setTab('program');
+          goTab('program');
           solver.start(state, { keepPlaced: true });
         },
       },
@@ -375,7 +406,7 @@ export default function App() {
         run: toggleRibbon,
       },
     ],
-    [state, theme, ribbon, solver, setTab, notify],
+    [state, theme, ribbon, solver, goTab, notify],
   );
 
   function toggleRibbon() {
@@ -435,7 +466,15 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    /* `data-section` belongs on the ROOT, not only on the chrome that first
+       needed it. The stylesheet resolves --sec from this attribute, and two
+       rules outside the top bar read it: the section rule on a panel heading
+       (`.panel > h2::before`) and a pressed filter chip. Both lived under
+       `.main`, which the header is not an ancestor of, so both had been
+       falling through to `--accent` since the day they were written — while
+       the comment above the first one said it carried the section's colour.
+       A custom property's SCOPE is part of its contract (pitfall 52). */
+    <div className="app" data-section={tab}>
       {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
@@ -453,7 +492,7 @@ export default function App() {
               aria-current={tab === t.id}
               aria-label={t.label}
               title={t.label}
-              onClick={() => setTab(t.id)}
+              onClick={() => goTab(t.id)}
             >
               {t.icon}
               <span className="tab-label">{t.label}</span>
@@ -468,7 +507,7 @@ export default function App() {
             var" would only send somebody to Kontrol to find out which. */}
         <button
           className={`health ${status.level}`}
-          onClick={() => setTab('check')}
+          onClick={() => goTab('check')}
           /* The label carries the sentence even when the bar is too narrow to
              draw it — and it is an aria-label rather than a title so the
              accessible name is this and not "Kontrol", which is also the name
@@ -637,6 +676,7 @@ export default function App() {
         setOpen={setPaletteOpen}
         state={state}
         ui={ui}
+        go={goTab}
         sections={TABS}
         actions={paletteActions}
       />
@@ -656,9 +696,17 @@ export default function App() {
             `lessons.length > 0` is not decoration: with no lessons the Program
             tab shows a paragraph of instructions instead of a grid, and
             `no-overflow` (overflow: hidden, padding: 0) would clip it. */}
+        {/* `key={tab}` is what makes the tab change animatable: it remounts the
+            box, and `@starting-style` needs a first paint to run from. The
+            children were being remounted anyway — every tab is a separate
+            conditional — so this costs nothing that was not already spent. */}
         <main
+          key={tab}
+          ref={mainRef}
           className={
-            tab === 'program' && state.lessons.length > 0 ? 'main no-overflow' : 'main'
+            tab === 'program' && state.lessons.length > 0
+              ? 'main no-overflow'
+              : 'main scroll-fade'
           }
         >
           {tab === 'setup' && (

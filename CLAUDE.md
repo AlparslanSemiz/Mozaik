@@ -840,6 +840,58 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     kendisinde: örnek yüklendikten sonra depoda **okulun adını** beklemek.
     Bir "yazıldı mı" bekleyicisi, **ne** yazıldığını sormalı.
 
+    **2026-08-26: aynı hata ikinci yardımcıda duruyordu.** `loadWorld` düzeltilmemişti;
+    `open()` 400 ms'i aştığı her koşuda `before` boş proje oluyor, `savedState`
+    ilk değişiklik olarak **dünyanın yüklenmesini** görüyor ve 20 dünya testi
+    dizimden ÖNCEKİ ızgarayı yargılıyordu. Bir tuzağı bir yerde kapatmak onu
+    kapatmaz — **aynı deseni kullanan her yer aranır.** Yakalayan şey tuzak
+    23'ün karşı önlemiydi: "kaydedilen yerleşim sayısı girişten büyük olmalı".
+
+52. **Bir custom property'nin KAPSAMI sözleşmesinin parçasıdır.** `--sec` yalnız
+    `.topbar` ve `.ribbon` üstünde tanımlıydı; `.panel > h2::before` ve
+    `.chip[aria-pressed]` ise `.main` içinde yaşıyor, yani ikisi de doğdukları
+    günden beri `var(--sec, var(--accent))`'in **fallback'ini** çiziyordu. Kural
+    çalışıyordu, renk yanlıştı, ve kuralın üstündeki yorum "bölüm rengini kısa
+    bir çizgi olarak taşır" diyordu. Hiçbir test görmedi çünkü bir şey çizmemek
+    değil, **yanlış şeyi** çizmekti. Tuzak 45'in aynası: orada iki sahip vardı,
+    burada hiç. `var(--x, …)` yazan her yerde soru şudur: *x buraya ulaşıyor mu?*
+
+53. **Yeni bir görsel katman, var olan bir sınıfa yeni bir DEĞER değil yeni bir
+    AD ister.** Sürüklerken hedef satırın tamamını boyayan zayıf katman
+    `drop-ok`'u yeniden kullansaydı, `program.spec.ts`'in "iki saatlik blok tam
+    2 hücre yakar" sayımı 40 bulurdu — ve test "renk yanlış" değil "sayı
+    yanlış" diye kırılırdı, yani okuyan kişiyi çözücüye yollardı. Ayrı ad
+    (`can-ok` / `can-warn` / `can-no`) hem sayımı hem ayraç testinin
+    `not.toHaveClass(/drop-/)` iddiasını olduğu gibi bırakır.
+
+54. **Bir kaydırma kutusuna verilen `mask-image` kendi `position: sticky`
+    çocuklarını kırpar.** Sündürme `.main`'e uygulanabilir çünkü yapışkan
+    çocuğu yok; `.grid-wrap`'e uygulanamaz çünkü saat başlığı ve öğretmen
+    sütunu tam da tuttukları kenarda erirdi. Izgara bu yüzden gölgeyle
+    (`scrolled-y` / `scrolled-x`) konuşur, maskeyle değil. Aynı iddia iki
+    teknikle söylenir; hangisinin nereye ait olduğu **elemanın içinde ne
+    olduğuna** bağlıdır.
+
+55. **`startViewTransition` yakaladığı öğeyi bir ANLIK GÖRÜNTÜYLE değiştirir ve
+    anlık görüntü tıklanamaz.** Sekme geçişi bununla sarılınca ölçülen:
+    `document.elementFromPoint` ızgaranın üstünde **553 ms boyunca** hücre
+    değil `<html>` döndürdü. `drag.ts` hedefini tam o çağrıyla buluyor — yani
+    geçişten sonraki yarım saniyede kapılan bir kart **hiçbir yere düşmüyordu**,
+    hata yok, uyarı yok. Ekranda her şey doğru görünüyordu. API'nin tek eşsiz
+    getirisi paylaşımlı öğe geçişidir; ortada olan şey bir çapraz geçişse
+    (`<main>`'e `key={tab}` + `@starting-style`) bedeli ödemeye gerek yok.
+    Ölçüldükten sonra: 553 ms → **68 ms**. `motion`'ı rafta bırakan aynı akıl
+    yürütme — kullanmadığın şeye ödeme.
+
+56. **Erişilebilir adı iki test katmanı iki türlü hesaplarsa ikisi ayrışır.**
+    jsdom duman testinin `buttonName()`'i önce `textContent`'e, sonra
+    `aria-label`'a bakıyordu; Playwright'ın `getByRole(name:)` ise spesifikasyona
+    uyup **`aria-label`'ı üstün** tutuyor. İkisi de doğruydu — hiçbir düğmede
+    ikisi birden olmadığı sürece. Görünüm düğmesi simgesinin yanına metin
+    alınca ayrıştılar: E2E "Sınıf görünümü"nü buluyordu, duman testi yalnız
+    "Sınıf"ı görüyordu. Bir kontrolün **adı** hakkında iki katmanın
+    anlaşamaması, ikisinden birinin yanılmasından beterdir.
+
 ---
 
 ## Tasarım — serbest

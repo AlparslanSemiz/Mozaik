@@ -50,9 +50,19 @@ export interface GhostContent {
   color: number;
 }
 
+// TWO layers, and they need SEPARATE names rather than two strengths of one
+// name. The strong one marks the block under the cursor; the weak one is the
+// whole row's answer, painted once when the drag starts. Reusing `drop-ok` for
+// both would have been the cheap way and it breaks a real assertion: the suite
+// counts `td.drop-ok` to check that a two-hour block lights exactly two cells,
+// and a 78-column preview would have made that 40 (pitfall 53).
 const HL_OK = 'drop-ok';
 const HL_WARN = 'drop-warn';
 const HL_BLOCKED = 'drop-blocked';
+
+const PV_OK = 'can-ok';
+const PV_WARN = 'can-warn';
+const PV_NO = 'can-no';
 
 /** The grid scrolls while the cursor is this close to an edge. */
 const EDGE = 56;
@@ -69,6 +79,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
   const data = useRef<DragData | null>(null);
   const ghost = useRef<HTMLDivElement | null>(null);
   const highlighted = useRef<HTMLElement[]>([]);
+  const previewed = useRef<HTMLElement[]>([]);
   const lastTarget = useRef<string>('');
   const pos = useRef({ x: 0, y: 0 });
   const loop = useRef(0);
@@ -79,16 +90,25 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     lastTarget.current = '';
   }, []);
 
+  // React will NOT undo these for us. The rows do re-render when the drag ends
+  // (`dim` flips on every one of them), but the className PROP is unchanged, so
+  // React never touches the attribute and the classes would simply stay.
+  const clearPreview = useCallback(() => {
+    for (const el of previewed.current) el.classList.remove(PV_OK, PV_WARN, PV_NO);
+    previewed.current = [];
+  }, []);
+
   const finish = useCallback(() => {
     cancelAnimationFrame(loop.current);
     loop.current = 0;
     clearHighlight();
+    clearPreview();
     ghost.current?.remove();
     ghost.current = null;
     data.current = null;
     setDragging(null);
     setReason(null);
-  }, [clearHighlight]);
+  }, [clearHighlight, clearPreview]);
 
   const start = useCallback((e: React.PointerEvent, d: DragData, content: GhostContent) => {
     if (e.button !== 0) return;
@@ -133,6 +153,36 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       document
         .querySelector<HTMLElement>('tr.target-row')
         ?.scrollIntoView({ block: 'center', inline: 'nearest' });
+    }
+
+    // THE WHOLE ROW'S ANSWER, painted once.
+    //
+    // `dragging.map` already holds a verdict for all 84 cells — Program.tsx
+    // computed them before the hand had moved a pixel. Until now only the cell
+    // under the cursor was ever painted from it, so "which hours can this
+    // lesson go to" was a question you answered by sweeping the mouse along a
+    // 78-column week. Everything else on screen said only which ROW.
+    //
+    // One pass, plain classList, no React: this is the same discipline the rAF
+    // loop below keeps (pitfall 1), and it costs nothing per frame because it
+    // never runs again.
+    //
+    // What it marks is DROP POINTS, not covered cells — the map is keyed by the
+    // block's START. For a two-hour block those genuinely differ, and the strong
+    // highlight under the cursor is the one that shows the span.
+    const targetRow = document.querySelector<HTMLElement>('tr.target-row');
+    if (targetRow !== null) {
+      for (const cell of targetRow.querySelectorAll<HTMLElement>('td[data-day]')) {
+        const verdict = dragging.map.get(`${cell.dataset['day']}|${cell.dataset['hour']}`);
+        const cls =
+          verdict === undefined || verdict.blocked !== null
+            ? PV_NO
+            : verdict.warning !== null
+              ? PV_WARN
+              : PV_OK;
+        cell.classList.add(cls);
+        previewed.current.push(cell);
+      }
     }
 
     /** The grid cell under the cursor. The ghost MUST be pointer-events: none. */
@@ -250,8 +300,9 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', finish);
       window.removeEventListener('keydown', onKey);
+      clearPreview();
     };
-  }, [dragging, drop, finish, clearHighlight]);
+  }, [dragging, drop, finish, clearHighlight, clearPreview]);
 
   return { start, dragging, reason };
 }

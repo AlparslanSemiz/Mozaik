@@ -12,6 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import type React from "react";
 import { sharedPeriods } from "../bell";
 import { paletteColor } from "../palette";
+import { KIND_ICON } from "./steps";
 import { buildIndex, closedConflicts, closedKey } from "../constraints";
 import type { Id, State } from "../types";
 import {
@@ -37,6 +38,12 @@ interface Entity {
   id: Id;
   label: string;
   short: string;
+  /**
+   * The name a HEADING can carry. `short` is what the sentences use, and for a
+   * teacher that is the raw code — the panel above a whole week of somebody's
+   * closed hours said "MÇ", which answers "whose" only if you already know.
+   */
+  full: string;
   /** Weekly lesson hours that must fit into the open cells. */
   load: number;
   /** Cells still open this week. */
@@ -51,6 +58,11 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       id: t.id,
       label: `${t.short} — ${t.name} (${t.subject})`,
       short: t.short,
+      // Name first, code in brackets: the heading already ends with an em dash
+      // ("… — müsait olmayan saatler") and "MÇ — Mehmet Çelik — müsait…" put
+      // three clauses on one rule. The code still shows, because the code is
+      // what the grid row is labelled with.
+      full: `${t.name} (${t.short})`,
       load: weeklyLoad(d, "teacher", t.id),
       open: openHours(d, t.id),
       color: t.color,
@@ -61,6 +73,7 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       id: c.id,
       label: c.name,
       short: `${c.name} sınıfı`,
+      full: `${c.name} sınıfı`,
       load: weeklyLoad(d, "class", c.id),
       open: openHours(d, c.id),
       color: c.color,
@@ -70,6 +83,7 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
     id: r.id,
     label: r.name,
     short: `${r.name} dersliği`,
+    full: `${r.name} dersliği`,
     load: weeklyLoad(d, "room", r.id),
     open: openHours(d, r.id),
     color: -1,
@@ -203,7 +217,7 @@ export default function Availability({
     <div className="cols narrow-right">
       <div>
         <div className="panel">
-          <h2>{selected.short} — müsait olmayan saatler</h2>
+          <h2>{selected.full} — müsait olmayan saatler</h2>
 
           <p className="hint">
             {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre
@@ -358,6 +372,13 @@ export default function Availability({
                 aria-current={x.id === entityId}
                 onClick={() => setChosen(x.id)}
               >
+                {/* The kind's own symbol, and for a room it is the only mark
+                    there is: rooms carry no colour, so their rows used to start
+                    with nothing at all while teachers and classes started with
+                    a dot. */}
+                <span className="entity-icon" aria-hidden="true">
+                  {KIND_ICON[kind]}
+                </span>
                 {x.color >= 0 && (
                   <span
                     className="row-dot"

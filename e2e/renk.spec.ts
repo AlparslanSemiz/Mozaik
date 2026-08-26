@@ -114,6 +114,17 @@ test.describe('8. Tema', () => {
         }
       }
 
+      // The section colour is a GROUND now, not only a rule: it fills the lit
+      // tab, and since `data-section` moved to the app root it fills a pressed
+      // filter chip too. Whatever --on-accent is, it has to survive on all six.
+      const ink = await tokens(page, ['--on-accent']);
+      for (const name of SECTIONS) {
+        expect(
+          contrast(ink['--on-accent']!, t[name]!),
+          `--on-accent on ${name}`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+
       // Six sections have to be six identities, or the colour says nothing.
       for (let i = 0; i < SECTIONS.length; i++) {
         for (let j = i + 1; j < SECTIONS.length; j++) {
@@ -181,6 +192,51 @@ test.describe('8. Tema', () => {
       expect(deltaE(t['--drop-ok-bg']!, t['--drop-warn-bg']!)).toBeGreaterThan(20);
       expect(deltaE(t['--drop-warn-bg']!, t['--drop-bad-bg']!)).toBeGreaterThan(20);
       expect(deltaE(t['--drop-ok-bg']!, t['--drop-bad-bg']!)).toBeGreaterThan(20);
+    });
+
+    test(`${theme} temada satır önizlemesi okunuyor ama imleci bastırmıyor`, async ({ page }) => {
+      await open(page);
+      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+      const t = await tokens(page, [
+        '--can-ok-bg',
+        '--can-warn-bg',
+        '--can-no-bg',
+        '--drop-ok-bg',
+        '--drop-warn-bg',
+        '--drop-bad-bg',
+        '--paper',
+        '--band',
+      ]);
+
+      const pairs = [
+        ['--can-ok-bg', '--drop-ok-bg'],
+        ['--can-warn-bg', '--drop-warn-bg'],
+        ['--can-no-bg', '--drop-bad-bg'],
+      ] as const;
+
+      for (const [weak, strong] of pairs) {
+        // Readable as a state rather than as a grouping: the day band sits at
+        // dE ~2.5 from the paper and must never be confused with this.
+        expect(deltaE(t[weak]!, t['--paper']!), `${weak} vs --paper`).toBeGreaterThan(9);
+        expect(deltaE(t[weak]!, t['--band']!), `${weak} vs --band`).toBeGreaterThan(9);
+        // ...and quieter than the cell under the cursor, or the second layer
+        // would be shouting over the first.
+        expect(
+          deltaE(t[weak]!, t['--paper']!),
+          `${weak} ${strong} kadar yüksek sesli`,
+        ).toBeLessThan(deltaE(t[strong]!, t['--paper']!));
+        // The two layers of one colour still have to be told apart.
+        expect(deltaE(t[weak]!, t[strong]!), `${weak} vs ${strong}`).toBeGreaterThan(10);
+      }
+
+      // And the row's three answers are three answers. This is the number that
+      // matters most: "buraya olur" against "buraya olmaz", read across 78
+      // columns at a glance, is the whole point of painting the row at all.
+      expect(deltaE(t['--can-ok-bg']!, t['--can-no-bg']!), 'olur/olmaz ayrımı').toBeGreaterThan(18);
+      expect(deltaE(t['--can-ok-bg']!, t['--can-warn-bg']!)).toBeGreaterThan(14);
+      expect(deltaE(t['--can-warn-bg']!, t['--can-no-bg']!)).toBeGreaterThan(14);
     });
   }
 

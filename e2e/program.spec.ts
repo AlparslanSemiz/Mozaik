@@ -171,6 +171,105 @@ test.describe('2. Sürükle-bırak', () => {
     expect(found, 'blok=2 olan bir ders iki hücre vurgulamalı').toBe(true);
   });
 
+  // THE ROW'S ANSWER. Until this existed, the only cell the grid ever painted
+  // during a drag was the one under the cursor: which HOURS a lesson could go
+  // to was a question you answered by sweeping the mouse across 78 columns,
+  // and everything else on screen said only which ROW. The verdicts were
+  // already computed — all 84 of them, before the hand had moved a pixel.
+  test('sürükleme başlar başlamaz hedef satırın TAMAMI cevaplanıyor', async ({ page }) => {
+    await openWithSample(page);
+    await startDrag(page);
+
+    const cells = page.locator('tr.target-row td[data-day]');
+    const total = await cells.count();
+    expect(total, 'hedef satırda hücre yok') .toBeGreaterThan(40);
+
+    const ok = await page.locator('tr.target-row td.can-ok').count();
+    const warn = await page.locator('tr.target-row td.can-warn').count();
+    const no = await page.locator('tr.target-row td.can-no').count();
+
+    // Every cell is answered, and both answers actually occur — a preview that
+    // painted the row one single colour would pass a count check and say
+    // nothing (the vacuous-audit trap, pitfall 23).
+    expect(ok + warn + no, 'cevaplanmayan hücre var').toBe(total);
+    expect(ok, 'hiçbir hücre bırakılabilir değil').toBeGreaterThan(0);
+    expect(no, 'hiçbir hücre engelli değil').toBeGreaterThan(0);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
+  test('sürükleme bitince önizleme ızgarada kalmıyor', async ({ page }) => {
+    await openWithSample(page);
+    await startDrag(page);
+    expect(await page.locator('td.can-ok').count()).toBeGreaterThan(0);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+
+    // React will not clean these up: the rows do re-render when the drag ends,
+    // but their className PROP is unchanged, so the attribute is never touched.
+    await expect(page.locator('td.can-ok, td.can-warn, td.can-no')).toHaveCount(0);
+  });
+
+  test('imlecin altındaki hücre satırın zemininden AYRILIYOR', async ({ page }) => {
+    await openWithSample(page);
+    await startDrag(page);
+
+    const free = page.locator('tr.target-row td.can-ok').first();
+    const box = await free.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, { steps: 3 });
+    await page.waitForTimeout(80);
+
+    const strong = await page
+      .locator('td.drop-ok')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    const weak = await page
+      .locator('td.can-ok:not(.drop-ok)')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+    // Two strengths of one colour: the row says where you MAY drop, the cursor
+    // says where you ARE. If they painted the same the second layer would be
+    // invisible and the first would be a lie about precision.
+    expect(strong).not.toBe(weak);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
+  test('kapalı saat önizlemenin altında kaybolmuyor', async ({ page }) => {
+    await openWithSample(page);
+
+    // Pitfall 16 and 40, one layer up: a closed hour already says it cannot be
+    // used, and a ground painted over it would erase the hatch that says so.
+    // The `background` shorthand would have done exactly that — it resets
+    // background-image — which is why the preview sets background-color only.
+    // Measured on the PAINT, not on the class list: drag.ts marks every cell of
+    // the row with its verdict, and the stylesheet is the single place that
+    // decides a closed hour keeps its own ground — the same `:not(.unavailable)`
+    // the crosshair uses two rules further down. Asserting the absence of the
+    // class would pin the wrong half of that pair.
+    const closed = page.locator('tr.target-row td.unavailable').first();
+    const untouched = page.locator('tbody tr:not(.target-row) td.unavailable').first();
+    await startDrag(page);
+    if ((await closed.count()) > 0 && (await untouched.count()) > 0) {
+      const paint = (l: typeof closed) =>
+        l.evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return { image: cs.backgroundImage, color: cs.backgroundColor };
+        });
+      const inRow = await paint(closed);
+      const outside = await paint(untouched);
+      expect(inRow.image, 'kapalı saatin taraması gitti').toContain('gradient');
+      expect(inRow.color, 'kapalı saat önizleme zemini aldı').toBe(outside.color);
+    }
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
   test('Escape sürüklemeyi iptal eder', async ({ page }) => {
     await openWithSample(page);
     const box = (await page.locator('.pool-card').first().boundingBox())!;

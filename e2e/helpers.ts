@@ -209,6 +209,40 @@ export async function loadWorld(page: Page, state: unknown, tab = 'Program') {
     buffer: Buffer.from(JSON.stringify(state)),
   });
   await answerDialog(page); // "şu anki programın yerine geçecek"
+
+  // ...and wait until the WORLD is in storage, not merely until something is.
+  //
+  // Pitfall 51, in the helper it was never fixed in. `settledText` guards
+  // "the page has written something", and the page's own opening write of an
+  // EMPTY project is something. When `open()` takes longer than the store's
+  // 400 ms debounce that empty write lands first, every test that later calls
+  // `savedState(page, before)` gets `before` = the empty project, and the first
+  // change it sees is THIS LOAD rather than whatever the test went on to do.
+  // It then audits the grid as it was before the button was ever pressed —
+  // which is the vacuous-audit failure the world matrix has a guard against,
+  // and that guard is exactly what caught it.
+  //
+  // Counting teachers AND lessons rather than either alone: `bos-dunya` has
+  // teachers and no lessons, an empty project has neither, and one number
+  // cannot tell those two apart.
+  const world = state as { teachers?: unknown[]; lessons?: unknown[] };
+  const shape = [world.teachers?.length ?? 0, world.lessons?.length ?? 0];
+  await expect
+    .poll(
+      async () => {
+        const raw = await savedText(page);
+        if (raw === '') return [-1, -1];
+        try {
+          const d = JSON.parse(raw) as { teachers?: unknown[]; lessons?: unknown[] };
+          return [d.teachers?.length ?? 0, d.lessons?.length ?? 0];
+        } catch {
+          return [-1, -1];
+        }
+      },
+      { timeout: 5_000, message: 'yüklenen dünya depoya yazılmadı' },
+    )
+    .toEqual(shape);
+
   await page.getByRole('button', { name: tab, exact: true }).click();
 }
 

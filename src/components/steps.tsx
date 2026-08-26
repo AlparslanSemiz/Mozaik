@@ -9,16 +9,19 @@
 // because an icon is a React element and that file is deliberately plain TS.
 // `StepId` stays there; this is the presentation of it.
 //
-// The icons are inline SVG on `currentColor`, the same contract as App's ICON
-// and Ribbon's VIEWS: no icon library (principle 3), and the subset font has
-// only 225 glyphs, so a text glyph would fall through to a different face
-// (learned in v0.8). Two of them are ALSO the ribbon's view switch — a teacher
-// is a mortarboard and a class is a crowd, in Program and in Kurulum alike —
-// so those two are exported from here and Ribbon imports them. The drawing has
-// one home even though the two places label it differently.
+// The icons are inline SVG on `currentColor`. Not because an icon library is
+// banned — that stopped being true when lucide-react was measured at 3.4 KB and
+// taken — but because these four are drawn to be told apart at 18px by
+// SILHOUETTE, which is what the eyesight this tool is built for needs, and
+// because a text glyph would fall through to another face (the subset font has
+// 225 glyphs, learned in v0.8).
+//
+// All four are exported: the ribbon's view switch, the availability picker and
+// the entity sheet all name the same three kinds, and `KIND_ICON` below is the
+// single map they read. The drawing has one home even where the labels differ.
 
 import type { State } from '../types';
-import type { StepId } from '../toolState';
+import type { Kind, StepId } from '../toolState';
 
 export interface StepDef {
   id: StepId;
@@ -28,7 +31,7 @@ export interface StepDef {
 }
 
 /** A door with its handle: the room itself, not the class inside it. */
-const roomIcon = (
+export const roomIcon = (
   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
     <path
       d="M4.4 1.8h11.2v16.4H4.4Z"
@@ -84,6 +87,22 @@ export const classIcon = (
     <path d="M4.9 18c0-3.1 2.3-5.2 5.1-5.2s5.1 2.1 5.1 5.2Z" fill="currentColor" />
   </svg>
 );
+
+/**
+ * The three THINGS this tool schedules, drawn once.
+ *
+ * There were four separate answers to "what does a teacher look like" before
+ * this: these hand-drawn shapes, lucide's GraduationCap/Users/School in the
+ * entity sheet, lucide's DoorOpen in the command palette, and nothing at all
+ * in the availability list. A symbol that means something different in each
+ * room is not a symbol, it is decoration — so every screen that names one of
+ * the three kinds reads it from here.
+ */
+export const KIND_ICON: Record<Kind, React.ReactElement> = {
+  teacher: teacherIcon,
+  class: classIcon,
+  room: roomIcon,
+};
 
 export const STEPS: StepDef[] = [
   { id: 'rooms', label: 'Derslikler', count: (d) => d.rooms.length, icon: roomIcon },

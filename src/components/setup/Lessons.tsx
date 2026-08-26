@@ -262,17 +262,26 @@ export default function Lessons({ state, change }: PanelProps) {
                     />
                   </td>
                   <td>
-                    <button
-                      className="btn danger"
-                      onClick={async () => {
-                        const q = deletionQuestion(state, 'lesson', x.id);
-                        if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
-                          return;
-                        change((d) => deleteLesson(d, x.id));
-                      }}
-                    >
-                      Sil
-                    </button>
+                    {/* The same `form-row nowrap` the other three steps end
+                        their rows with, so the action column lines up across
+                        all four. There is no inspect button beside it and that
+                        is deliberate: a lesson is not an entity, it has no week
+                        of its own, and the two things it could open — its class
+                        or its teacher — are both already one click away in the
+                        cells to the left. */}
+                    <div className="form-row nowrap">
+                      <button
+                        className="btn danger"
+                        onClick={async () => {
+                          const q = deletionQuestion(state, 'lesson', x.id);
+                          if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                            return;
+                          change((d) => deleteLesson(d, x.id));
+                        }}
+                      >
+                        Sil
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

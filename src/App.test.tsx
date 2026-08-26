@@ -16,6 +16,19 @@ declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
 
+// jsdom has no ResizeObserver, and `scrollFade.ts` uses one to notice when the
+// content of a scrolled box grows past its edge. Stubbed here rather than
+// guarded in the module: the absence is a jsdom limitation, not a browser one,
+// and a `typeof ResizeObserver` check in shipped code would be a test artefact
+// wearing the costume of defensive programming. Nothing here needs it to fire —
+// this suite asks whether the components render, and layout is not its subject.
+class NoopResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+globalThis.ResizeObserver ??= NoopResizeObserver as unknown as typeof ResizeObserver;
+
 let container: HTMLDivElement;
 let root: Root;
 
@@ -64,9 +77,20 @@ function render() {
  * Finds a button by its accessible name: the visible text, or — for the icon
  * buttons, which deliberately carry none — the aria-label.
  */
+/**
+ * The ACCESSIBLE name, in the order the spec computes it: `aria-label` wins
+ * over content, not the other way round.
+ *
+ * It used to prefer the text and fall back to the label, which agreed with
+ * Playwright's `getByRole(name:)` only for as long as no button had both. The
+ * view switch grew a visible word beside its icon and the two layers split:
+ * `aria-label="Sınıf görünümü"` still found it in the E2E suite while this one
+ * could only see "Sınıf". Two test layers disagreeing about what a control is
+ * CALLED is worse than either being wrong.
+ */
 function buttonName(b: HTMLButtonElement): string {
-  const text = (b.textContent ?? '').trim();
-  return text !== '' ? text : (b.getAttribute('aria-label') ?? '');
+  const label = (b.getAttribute('aria-label') ?? '').trim();
+  return label !== '' ? label : (b.textContent ?? '').trim();
 }
 
 function button(text: string): HTMLButtonElement {

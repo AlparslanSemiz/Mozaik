@@ -134,17 +134,42 @@
   --drop-warn-bg: #fbe09a;
   --drop-bad-bg: #f7bcb7;
 
+  /* THE WEAK LAYER of the same three, for the whole target row rather than the
+     cell under the cursor. Written as hex, not as `color-mix(... --drop-*-bg)`,
+     for the reason the whole file is hex: getComputedStyle serialises a mixed
+     colour as `oklab(...)` and every measurement in the suite parses `rgb()`.
+     They ARE the mix — 55/55/40 percent against --paper, converted offline and
+     verified against the browser's own output to the byte.
+     Measured: dE from --paper 18.6 / 20.6 / 11.8, from each other 19.3 / 18.1 /
+     23.8, and each one quieter than its strong twin. The blocked wash is the
+     faintest on purpose: most of a row is usually blocked, and at full strength
+     it paints the week red and buries the cells the answer is about. */
+  --can-ok-bg: #d0f2db;
+  --can-warn-bg: #fdeec9;
+  --can-no-bg: #fde4e2;
+
   /* SECTION COLOURS — one per tab, so "where am I" is answered by a colour as
-     well as by a lit tab. SEARCHED, not chosen: the green (75-165) and red
-     (340-25) hue bands excluded outright, >=5:1 on --paper and >=32 CIE Lab dE
-     from --ok/--warn/--bad as thresholds, chroma optimised because it is
-     chroma and not lightness that separates six hues. renk.spec.ts
-     re-measures all three every run — a reading, not a promise. */
-  --sec-setup: #153184;
-  --sec-availability: #681584;
+     well as by a lit tab. SEARCHED, not chosen: >=5:1 on --paper and >=32 CIE
+     Lab dE from --ok/--warn/--bad as thresholds. renk.spec.ts re-measures all
+     three every run — a reading, not a promise.
+
+     The green and warm hue bands are not a matter of taste: a 360-hue sweep
+     under those two thresholds returns NOTHING legal between 80 and 140
+     (every pistachio sits dE 22-29 from --ok) and nothing orange either
+     (dE 21-28 from --bad, 15-27 from --warn). A third of the wheel belongs to
+     "droppable", the warm half to "warning" and "blocked". Six sections fill
+     what is left, so the axis that was still free was SEPARATION, not hue.
+
+     Re-searched 2026-08-26: Program's turquoise and Ayarlar's slate were kept
+     as they were and the other four re-run under contrast 5.0-13.5, dE >=36
+     from the functional three and dE >=20 from the two fixed ones. The worst
+     pair was Müsaitlik/Kontrol at dE 16.0; it is 20.5 now. Nothing else moved:
+     the tightest functional distance is still Program's 52.5. */
+  --sec-setup: #1f4098;
+  --sec-availability: #9e25b6;
   --sec-program: #157184;
-  --sec-check: #361584;
-  --sec-print: #84155f;
+  --sec-check: #4e19a9;
+  --sec-print: #960862;
   --sec-settings: #3a4d5f;
 
   /* Ink that does NOT turn with the theme: it lands on the 36 palette colours,
@@ -315,6 +340,11 @@
   --drop-warn-bg: #634c0c;
   --drop-bad-bg: #6b2622;
 
+  /* dE from --paper 21.8 / 23.2 / 15.2, from each other 19.6 / 17.3 / 28.3. */
+  --can-ok-bg: #224233;
+  --can-warn-bg: #443a23;
+  --can-no-bg: #3f2728;
+
   /* PRINT PREVIEW, on screen. These two are the pair the dark block once
      forgot: the grid line stayed #444 and the header fill #eee while the ink
      above inherited --text, i.e. white on near-white, about 1.1:1. It printed
@@ -323,6 +353,11 @@
   --print-line: #4a545f;
   --print-head-bg: #262c34;
 
+  /* NOT re-searched with the light six, and that is a measurement rather than
+     an omission: the dark set's worst pair is already 20.7 (the light one's
+     was 16.0), and its hues — 225, 263, 289, 321 — land on the new light hues
+     within a couple of degrees. The family reads the same across the two
+     themes without touching a byte here. */
   --sec-setup: #6e8de7;
   --sec-availability: #c86ae7;
   --sec-program: #58cde4;
@@ -501,15 +536,26 @@ textarea {
 :root:not([data-theme='dark']) .topbar {
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 10%, var(--chrome-lit)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 3%, var(--chrome)) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) 16%, var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome)) 100%);
 }
 
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
    so the wash goes the other way: the section's hue mixed INTO the chrome
    rather than a lighter stop above it. */
 :root[data-theme="dark"] .topbar {
-  background: color-mix(in oklab, var(--sec, var(--accent)) 14%, var(--chrome));
+  background: color-mix(in oklab, var(--sec, var(--accent)) 20%, var(--chrome));
+}
+
+/* The section's wash moves with you. `background-color` and not `background`:
+   the light theme paints a gradient here and gradients do not interpolate, so
+   naming the shorthand would have transitioned nothing while looking like it
+   did. Under a gradient the colour underneath is what carries the change. */
+.topbar,
+.ribbon {
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
 }
 
 /* The school and the plan, drawn as ONE object: together they answer "which
@@ -714,8 +760,8 @@ textarea {
   padding: var(--space-2) var(--space-4);
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 7%, var(--chrome-2)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) 11%, var(--chrome-2)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 4%, var(--chrome-2)) 100%);
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
@@ -843,12 +889,27 @@ textarea {
   font-weight: 600;
 }
 
-/* Two icon buttons that read as one control. The selected one is dark and
-   framed; the other fades back. */
+/* Two buttons that read as one control. The selected one is filled and framed;
+   the other fades back.
+
+   They carry their word as well as their symbol now, which is why every rule
+   below says `.btn` and not `.btn.icon` — the class went with the text. The
+   silhouettes stay: a mortarboard and a crowd are what the eye finds first,
+   the word is what settles it the first time. */
 .view-switch {
   display: flex;
   gap: var(--space-1);
 }
+
+/* A symbol with a word beside it, wherever the strip pairs the two: the view
+   switch and the three kinds in Müsaitlik. */
+.ribbon .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ribbon .btn > svg { flex: 0 0 auto; }
 
 .btn.icon {
   display: inline-flex;
@@ -867,12 +928,12 @@ textarea {
    the app was drawn at 55% for no reason. */
 /* The unselected position fades — but only to 0.7, and only on a --paper
    ground. At 0.55 on the ribbon's darker plane the icon was a smudge. */
-.view-switch .btn.icon {
+.view-switch .btn {
   opacity: 0.7;
 }
 
-.view-switch .btn.icon:hover:not(:disabled),
-.view-switch .btn.icon[aria-pressed="true"] {
+.view-switch .btn:hover:not(:disabled),
+.view-switch .btn[aria-pressed="true"] {
   opacity: 1;
 }
 
@@ -926,6 +987,92 @@ textarea {
   flex: 1 1 auto;
   overflow: auto;
   padding: var(--space-5) var(--space-6);
+}
+
+/* THE TAB TRANSITION — CSS, not `document.startViewTransition`.
+   The API was taken and MEASURED and given back: it swaps the captured element
+   for a snapshot, a snapshot is not hit-testable, and for 553 ms after every
+   tab change `elementFromPoint` over the grid answered `<html>`. `drag.ts`
+   finds its drop target with that call, so a card grabbed in that window went
+   nowhere silently. A shared-element morph is the one thing the API uniquely
+   buys and there was never one here — this is a cross-fade.
+
+   `<main>` carries `key={tab}`, so React remounts it and `@starting-style` has
+   a first paint to animate from. Nothing is snapshotted and the page stays
+   live the whole time. */
+.main {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+@starting-style {
+  .main {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+/* ENTRY, for the things that appear WITHOUT a tab change: a panel inside a
+   section you are already in, a warning that has just become true, a row you
+   have just added. `@starting-style` is what makes a first paint animatable at
+   all; without it there is no "before" for the transition to run from.
+
+   Rows fade only. A row that also slid would make adding a teacher look like
+   the whole table moved, and the table is the thing you are reading. */
+.panel,
+.warn-box,
+.ok-box,
+.error-box,
+table.list tbody tr {
+  transition:
+    opacity var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+
+@starting-style {
+  .panel,
+  .warn-box,
+  .ok-box,
+  .error-box {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+
+  table.list tbody tr {
+    opacity: 0;
+  }
+}
+
+/* SCROLL FADE — a scrolled box says which of its edges has more behind it.
+   The classes are written by `src/scrollFade.ts` (plain DOM, no React), which
+   also refuses to turn an edge on when nothing overflows: a box fading at the
+   bottom with nothing under it is a box lying about having more to show.
+
+   Two lengths and one gradient, so the two edges are independent and either
+   can be off. Not applied to `.grid-wrap`: a mask on a scroll container clips
+   its own `position: sticky` children, and the hour heading and the teacher
+   column would dissolve at exactly the edges they exist to hold (pitfall 54).
+   The grid keeps the shadow it already had, which says the same thing. */
+.scroll-fade {
+  --fade-top: 0px;
+  --fade-bot: 0px;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bot)),
+    transparent 100%
+  );
+}
+
+.scroll-fade.faded-top { --fade-top: 1.75rem; }
+.scroll-fade.faded-bot { --fade-bot: 1.75rem; }
+
+/* Paper has no edges to run past, and a mask on the print tree would fade the
+   top of the first page and the bottom of the last one. */
+@media print {
+  .scroll-fade { mask-image: none; }
 }
 
 .main.no-overflow {
@@ -1361,6 +1508,27 @@ td.block-cont {
   border-right-color: var(--block-cont);
 }
 
+/* THE WEAK LAYER — the whole target row, painted once when the drag starts.
+   The row is answered in the same green, yellow and red the cursor uses, a
+   step quieter, so this adds no colour to the tool's vocabulary.
+
+   Four details, each of them a scar:
+     - `background-color`, never the `background` shorthand: the shorthand also
+       resets background-image, and a closed hour would lose its hatch
+       (pitfalls 16 and 40).
+     - `:not(.unavailable)` for the same reason from the other side — a closed
+       cell already says it cannot be used, and a second colour on it says
+       nothing new.
+     - the selector is `table.grid tbody td.can-*` and not the `td.can-*` it
+       wants to be, because the day band is `table.grid tbody td.band` (0,2,3)
+       and would otherwise paint straight over the preview on every odd day —
+       pitfall 40, the same rule, a second time.
+     - these rules come BEFORE td.drop-*, which carries !important and so wins
+       whatever the specificity: the cursor's cell always outranks the row. */
+table.grid tbody td.can-ok:not(.unavailable) { background-color: var(--can-ok-bg); }
+table.grid tbody td.can-warn:not(.unavailable) { background-color: var(--can-warn-bg); }
+table.grid tbody td.can-no:not(.unavailable) { background-color: var(--can-no-bg); }
+
 /* Drag highlight — added straight through classList, not React state. */
 td.drop-ok {
   outline: 3px solid var(--ok);
@@ -1417,31 +1585,29 @@ td.drop-blocked {
 
    `:not(.unavailable)` in both halves: a closed hour keeps its hatch. The
    crosshair says where you are, never why a cell cannot be used. */
-table.grid tbody td.col-hot:not(.unavailable),
-table.grid tbody tr:hover > td:not(.unavailable) {
-  background: var(--accent-bg);
-}
-
-table.grid thead th.col-hot {
-  background: var(--accent-bg);
-  color: var(--accent);
-}
-
-table.grid tbody tr:hover > .row-head {
-  background: var(--accent-bg);
-  color: var(--accent);
-}
-
 /* Nothing of the crosshair survives into a drag: the grid has its own three
-   colours then, and a fourth highlight competing with them would say less. */
-.grid.dragging tbody tr:hover > td:not(.unavailable),
-.grid.dragging tbody td.col-hot:not(.unavailable) {
-  background: var(--paper);
+   colours then, and a fourth highlight competing with them would say less.
+
+   That used to be done by painting --accent-bg here and painting --paper back
+   over it under `.grid.dragging`. The un-paint was (0,4,3) and it outranked
+   everything, which was invisible for as long as a dragging grid had nothing
+   else to say — but the row preview writes a ground on every cell of the target
+   row, and the row you are dragging over is the row under the cursor. The fix
+   is to not paint it in the first place: `:not(.dragging)` on the source rule,
+   and no override at all. */
+table.grid:not(.dragging) tbody td.col-hot:not(.unavailable),
+table.grid:not(.dragging) tbody tr:hover > td:not(.unavailable) {
+  background: var(--accent-bg);
 }
 
-.grid.dragging tbody tr:hover > .row-head {
-  background: var(--paper);
-  color: var(--text);
+table.grid:not(.dragging) thead th.col-hot {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+table.grid:not(.dragging) tbody tr:hover > .row-head {
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 /* The sticky heading and the sticky teacher column earn their shadow only once
@@ -2404,7 +2570,20 @@ table.stat tbody tr:hover {
   font-weight: 600;
 }
 
-.entity .entity-name {
+.entity /* The kind's symbol, the same drawing the strip and the entity sheet use.
+   Muted so it groups rather than competes: on a selected row it is the only
+   thing that must NOT get louder, because the row already inverted. */
+.entity-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.entity-icon svg { width: 1rem; height: 1rem; }
+
+.entity[aria-current="true"] .entity-icon { color: inherit; }
+
+.entity-name {
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;

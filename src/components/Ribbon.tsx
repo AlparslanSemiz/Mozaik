@@ -24,7 +24,7 @@ import type { Density } from '../theme';
 import { applyDensity } from '../theme';
 import { paletteColor } from '../palette';
 import type { Kind, SectionId, ToolState, View } from '../toolState';
-import { STEPS, classIcon, teacherIcon } from './steps';
+import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 
 interface Props {
   ui: ToolState;
@@ -39,12 +39,17 @@ interface Props {
 }
 
 /**
- * The two views. `aria-label` is not optional here: the buttons carry no text,
- * so it is the only name a screen reader — or a test — can find them by.
+ * The two views. `short` is what the button shows, `label` what it is called.
+ *
+ * They used to be icons alone, on the grounds that the sentence under the strip
+ * explains the axis anyway. It does — once you have read it. `aria-label` stays
+ * the full phrase because it is the name the suite and a screen reader find
+ * them by, and WCAG's Label in Name is satisfied by the visible word being
+ * contained in it ("Öğretmen" inside "Öğretmen görünümü").
  */
-export const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
-  { id: 'teacher', label: 'Öğretmen görünümü', icon: teacherIcon },
-  { id: 'class', label: 'Sınıf görünümü', icon: classIcon },
+export const VIEWS: Array<{ id: View; label: string; short: string; icon: React.ReactElement }> = [
+  { id: 'teacher', label: 'Öğretmen görünümü', short: 'Öğretmen', icon: teacherIcon },
+  { id: 'class', label: 'Sınıf görünümü', short: 'Sınıf', icon: classIcon },
 ];
 
 
@@ -124,6 +129,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               ui.setChosen('');
             }}
           >
+            {KIND_ICON[k.id]}
             {k.label}
           </button>
         ))}
@@ -162,13 +168,14 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
           {VIEWS.map((v) => (
             <button
               key={v.id}
-              className="btn icon"
+              className="btn"
               aria-pressed={ui.view === v.id}
               aria-label={v.label}
               title={v.label}
               onClick={() => ui.setView(v.id)}
             >
               {v.icon}
+              {v.short}
             </button>
           ))}
         </div>
@@ -215,33 +222,14 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             >
               Baştan diz
             </button>
-            {/* "Programı sıfırla" — asked for by name. It is NOT the same
-                button as "Baştan diz": that one empties the grid and then
-                fills it again, and there was no way to simply CLEAR it and
-                start placing by hand. Undoable, and the question says so. */}
-            <button
-              className="btn danger"
-              disabled={placed === 0}
-              title="Dizilmiş bütün dersleri havuza geri gönderir"
-              onClick={async () => {
-                if (
-                  await confirm({
-                    title: `Dizilmiş ${placed} saatin tamamı havuza dönecek`,
-                    body: 'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                    confirmLabel: 'Programı boşalt',
-                    danger: true,
-                  })
-                ) {
-                  change((d) => ({ ...d, placements: {} }));
-                }
-              }}
-            >
-              Programı boşalt
-            </button>
           </>
         )}
 
-        <Sep />
+        {/* THE RIGHT-HAND END: what you are looking at, and the way back.
+            The left of the strip builds the timetable (diz, baştan diz); this
+            end changes how it is drawn and undoes it. A spacer rather than a
+            separator, because what divides them is a job, not a hairline. */}
+        <span className="spacer" />
 
         {/* Density is a decision about the grid, taken while looking at the
             grid — it spent a version three clicks away in Ayarlar → Görünüm,
@@ -268,6 +256,38 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
           </button>
         ))}
 
+        <Sep />
+
+        {/* "Programı sıfırla" — asked for by name. It is NOT the same button as
+            "Baştan diz": that one empties the grid and then fills it again, and
+            there was no way to simply CLEAR it and start placing by hand.
+            Undoable, and the question says so.
+
+            It stands at the far end, past the spacer, and not beside the two
+            buttons that fill the grid: the only two ways to lose a placement
+            by accident are clicking it and clicking "Baştan diz", and they no
+            longer sit next to each other. It is NOT renamed to "Sıfırla" —
+            temel.spec.ts asserts no button anywhere is called that, because
+            the one thing in this program that cannot be undone is. */}
+        <button
+          className="btn danger"
+          disabled={placed === 0 || solver.running}
+          title="Dizilmiş bütün dersleri havuza geri gönderir"
+          onClick={async () => {
+            if (
+              await confirm({
+                title: `Dizilmiş ${placed} saatin tamamı havuza dönecek`,
+                body: 'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                confirmLabel: 'Programı boşalt',
+                danger: true,
+              })
+            ) {
+              change((d) => ({ ...d, placements: {} }));
+            }
+          }}
+        >
+          Programı boşalt
+        </button>
       </div>
     );
   }

@@ -20,10 +20,11 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CalendarX2, GraduationCap, School, Users, X } from 'lucide-react';
+import { CalendarX2, X } from 'lucide-react';
 import { entityFacts, entityWeek, hourLabels, shortDay } from '../entities';
 import type { InspectKind } from '../entities';
 import { paletteColor } from '../palette';
+import { KIND_ICON } from './steps';
 import type { State } from '../types';
 
 interface Target {
@@ -50,11 +51,10 @@ const KIND_LABEL: Record<InspectKind, string> = {
   room: 'Derslik',
 };
 
-const KIND_ICON: Record<InspectKind, ReactNode> = {
-  teacher: <GraduationCap size={18} strokeWidth={2} />,
-  class: <Users size={18} strokeWidth={2} />,
-  room: <School size={18} strokeWidth={2} />,
-};
+/* Read from `steps.tsx` rather than drawn again here. `InspectKind` and the
+   availability `Kind` are the same three words, and the sheet used lucide's
+   mortarboard while the strip two rows above it used the house one — the same
+   teacher with two faces on one screen. */
 
 export function InspectorProvider({
   state,

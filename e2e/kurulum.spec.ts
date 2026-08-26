@@ -439,3 +439,71 @@ test.describe('31. Kurulum — sağ sütun', () => {
     await expect(page.locator('.cols aside .warn-box')).toContainText('hiç dersi yok');
   });
 });
+
+// THE SHAPE OF A PANEL, asked for by name: "başlık, açıklama, ekleme ve
+// sonrasında liste. bu mantığı her yer için uygula."
+//
+// Four steps that hold the same kind of thing should not be laid out three
+// different ways. Before this, `Sınıflar` was the only one of the four with no
+// description at all, `Okul ve günler` was the only panel in the app that put
+// its form ABOVE its explanation, and `Planlar` was the only "list + add" that
+// put the form BELOW the list.
+//
+// This measures ORDER, not geometry: it is a rule about what a reader meets
+// first, and it survives any amount of restyling. The layout measurements
+// deleted in the D round were the other kind.
+test.describe('44. Panel simetrisi', () => {
+  /** The tag/class sequence a panel actually renders, top to bottom. */
+  async function shapeOf(page: Page, panel: string) {
+    return page.locator(panel).first().evaluate((el) =>
+      [...el.children]
+        .map((c) => {
+          if (c.tagName === 'H2') return 'baslik';
+          if (c.tagName === 'P' && c.classList.contains('hint')) return 'aciklama';
+          if (c.classList.contains('warn-box')) return 'uyari';
+          if (c.classList.contains('form-row')) return 'ekleme';
+          if (c.tagName === 'TABLE') return 'liste';
+          return '';
+        })
+        .filter(Boolean),
+    );
+  }
+
+  for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
+    test(`Kurulum → ${step}: başlık, açıklama, ekleme, liste`, async ({ page }) => {
+      await openWithSample(page);
+      await openSetup(page, step);
+      const shape = await shapeOf(page, '.panel.step-panel');
+
+      // The first three are the contract. What follows them (search strip,
+      // "no match" line, the table) is the list, and only its ORDER is fixed.
+      expect(shape.slice(0, 3), `${step} sırası`).toEqual(['baslik', 'aciklama', 'ekleme']);
+      expect(shape.indexOf('liste'), `${step}: liste eklemeden önce`).toBeGreaterThan(
+        shape.indexOf('ekleme'),
+      );
+    });
+  }
+
+  test('Ayarlar → Okul: açıklama formdan ÖNCE', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Okul');
+    const shape = await shapeOf(page, '.cols > div > .panel');
+    expect(shape.slice(0, 3)).toEqual(['baslik', 'aciklama', 'ekleme']);
+  });
+
+  test('Ayarlar → Veri: yeni plan formu listenin ÜSTÜNDE', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Veri');
+    const plans = page.locator('.panel', { hasText: 'Yeni plan' }).first();
+    const order = await plans.evaluate((el) => {
+      const kids = [...el.children];
+      return {
+        form: kids.findIndex((c) => c.classList.contains('form-row')),
+        table: kids.findIndex((c) => c.tagName === 'TABLE'),
+      };
+    });
+    expect(order.form).toBeGreaterThan(-1);
+    expect(order.table).toBeGreaterThan(-1);
+    expect(order.form, 'ekleme formu listenin altında kalmış').toBeLessThan(order.table);
+  });
+});

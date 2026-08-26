@@ -73,6 +73,19 @@ export default function School({ state, change }: PanelProps) {
       <div>
         <div className="panel">
           <h2>Okul ve günler</h2>
+          {/* The description comes before the control it describes — this panel
+              was the one place in the app where it did not, and the sentence
+              about days sat between the school-name field and the day table as
+              if it belonged to neither. Every panel now reads
+              heading, description, entry, list. */}
+          <p className="hint">
+            Okul adı yazdırılan her sayfanın başlığında görünür. Altındaki listede
+            ders yapılan günleri işaretleyin; her günün yanındaki kutu, <b>öğle
+            arasının</b> kaçıncı dersten sonra verileceğini söyler. Bir günü
+            kaldırırsanız o güne yerleşmiş dersler silinir; kalan günlerin
+            programı yerinde durur.
+          </p>
+
           <div className="form-row">
             <Field label="Okul adı (yazdırılan sayfaların başlığında görünür)" wide>
               <input
@@ -84,12 +97,6 @@ export default function School({ state, change }: PanelProps) {
               />
             </Field>
           </div>
-
-          <p className="hint">
-            Ders yapılan günleri işaretleyin. Her günün yanındaki kutu, <b>öğle arasının</b>{' '}
-            kaçıncı dersten sonra verileceğini söyler. Bir günü kaldırırsanız o güne
-            yerleşmiş dersler silinir; kalan günlerin programı yerinde durur.
-          </p>
 
           <table className="list">
             <thead>

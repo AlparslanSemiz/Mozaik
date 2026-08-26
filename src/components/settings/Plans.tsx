@@ -87,6 +87,36 @@ export default function Plans({ state, plans }: Props) {
         işaretlenen bir plan, yeni bir plana başlarken hazır kurulum olarak sunulur.
       </p>
 
+      {/* The way to ADD one comes before the list of what there is — the rule
+          every setup step already follows, and the only panel in the app that
+          had it the other way round. */}
+      <h3>Yeni plan</h3>
+      <p className="hint">
+        Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır.{' '}
+        <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır — bir planın hamlesi
+        başka bir plana uygulanamaz.
+      </p>
+      <div className="form-row">
+        <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
+          Boş plan
+        </button>
+        <button
+          className="btn"
+          onClick={() => plans.createPlan(`${active?.name ?? 'Plan'} kopyası`, state)}
+        >
+          Bu planın kopyası
+        </button>
+        <button
+          className="btn"
+          title="Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır"
+          onClick={() =>
+            plans.createPlan(`${active?.name ?? 'Plan'} taslağı`, { ...state, placements: {} }, true)
+          }
+        >
+          Taslak olarak kaydet
+        </button>
+      </div>
+
       <table className="list">
         <thead>
           <tr>
@@ -162,33 +192,6 @@ export default function Plans({ state, plans }: Props) {
           ))}
         </tbody>
       </table>
-
-      <h3>Yeni plan</h3>
-      <p className="hint">
-        Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır.{' '}
-        <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır — bir planın hamlesi
-        başka bir plana uygulanamaz.
-      </p>
-      <div className="form-row">
-        <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
-          Boş plan
-        </button>
-        <button
-          className="btn"
-          onClick={() => plans.createPlan(`${active?.name ?? 'Plan'} kopyası`, state)}
-        >
-          Bu planın kopyası
-        </button>
-        <button
-          className="btn"
-          title="Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır"
-          onClick={() =>
-            plans.createPlan(`${active?.name ?? 'Plan'} taslağı`, { ...state, placements: {} }, true)
-          }
-        >
-          Taslak olarak kaydet
-        </button>
-      </div>
 
       {draftList.length > 0 && (
         <>

@@ -40,6 +40,30 @@ sekme rengi en düşük AA     5,63 / 4,89
 sekme ↔ işlevsel en düşük  52,5 / 49,9  ΔE               (sözleşme >32)
 ```
 
+### E turu (2026-08-26) — hareket, satır önizlemesi, bölüm rengi
+
+```
+dist/index.html            492 421 bayt   (+2 606; sündürme, önizleme, simgeler)
+file:// açılışı            139 ms medyan  — TEMEL 138 ms, yani fark yok.
+                           73 ms'lik eski sayıyla karşılaştırılamaz: o başka
+                           bir yöntemle alınmıştı. Aynı betikle ölçülen tek
+                           dürüst karşılaştırma öncesi/sonrası.
+sekme geçişinden sonra     68 ms   ızgara tıklanabilir oluyor
+  (startViewTransition ile ölçülen: 553 ms — bu yüzden alınmadı, tuzak 55)
+sekme çifti en düşük ΔE     16,0 → 20,5   (açık tema; eşik >12)
+sekme ↔ işlevsel en düşük  52,5 (değişmedi)
+--on-accent / bölüm rengi   5,63 açık · 6,02 koyu       (sözleşme >=4,5)
+satır önizlemesi ↔ kâğıt   18,6 / 20,6 / 11,8  ΔE  (açık)
+                           21,8 / 23,2 / 15,2      (koyu)
+olur ↔ olmaz ayrımı        23,8 açık · 28,3 koyu   ΔE
+```
+
+**Fıstık yeşili ve turuncu ölçüldü ve ALINMADI.** 360 hue taraması: 80–140
+bandında kâğıtta 4,5:1 tutan ve `--ok`'a ΔE > 32 kalan **hiçbir renk yok**
+(en iyisi 28,6); turuncunun tamamı `--bad`/`--warn`'a 21–28. Yeşilin üçte biri
+ve sıcak yarı işlevsel kanalın; altı sekme kalan yasal alanı zaten dolduruyor.
+Turkuaz istendi ve **zaten Program'ın rengi**.
+
 **İlke 7 artık bir varsayım değil.** "Hedef makine yavaş" deniyordu ve hiç
 ölçülmemişti: 490 KB'lik tek dosya `file://` üzerinden 73 ms'de açılıyor.
 
@@ -62,6 +86,8 @@ accent       --accent #373bdb · --accent-hover · --accent-bg · --on-accent
 işlevsel     --ok/-bg · --warn/-bg · --bad/-bg · --closed · --hatch
 bırakma      --drop-ok-bg · --drop-warn-bg · --drop-bad-bg  (dinlenme
              renklerinden AYRI: biri bir jest boyu yaşar, öteki gün boyu)
+satır        --can-ok-bg · --can-warn-bg · --can-no-bg  (aynı üçünün ZAYIF
+             hâli: imlecin altındaki hücre değil, hedef satırın tamamı)
 bölüm        --sec-setup · -availability · -program · -check · -print · -settings
              ve `[data-section]` bunlardan birini --sec'e bağlar
 kot          --elev-0 … --elev-4   (düz · kâğıt · yükseltilmiş kabuk ·
@@ -95,7 +121,8 @@ geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 ### Kabuk
 | Sınıf | İş |
 |---|---|
-| `.app` `.workspace` `.main` | kök sütun · içerik alanı · kaydırma kutusu |
+| `.app` `.workspace` `.main` | kök sütun · içerik alanı · kaydırma kutusu. `data-section` **kökte** (tuzak 52); `.main`'de `key={tab}` var, geçiş `@starting-style` |
+| `.scroll-fade` + `.faded-top` `.faded-bot` | kayan kutunun üstünde/altında içerik olduğunu söyler (`scrollFade.ts`). `.grid-wrap`'e UYGULANMAZ (tuzak 54) |
 | `.topbar` | tek satır. Üstünde 4px'lik **bölüm rengi**, içinde o rengin %10 washı |
 | `.tabstrip` `.tab` `.tab-label` | seçili sekme bölüm rengiyle **dolu**. `flex: 0 0` — asla kırpılmaz |
 | `.health` `.health-dot` `.health-text` | **durum çipi**: her sekmede, sorunu ADLANDIRIR. Yer daralınca noktasına iner |
@@ -133,6 +160,8 @@ geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 | `.block-cont` `.block-in` | bloğun iki yarısı |
 | `.col-hot` · `tr:hover` | imleç haçı (`gridChrome.ts`, saf DOM) |
 | `.ghost` `.grid.dragging` | sürükleme hayaleti |
+| `.can-ok` `.can-warn` `.can-no` | hedef satırın TAMAMI, sürükleme başında bir kez (`drag.ts`) |
+| `.drop-ok` `.drop-warn` `.drop-blocked` | imlecin altındaki blok — zayıf katmanı ezer |
 | `.pool` `.pool-split` `.pool-card` … | havuz çekmecesi, boyu sürüklenir |
 | `.inspect` | bir adı varlık paneline bağlayan bağlantı |
 
@@ -140,7 +169,7 @@ geometri     --cell-w/-h · --rowhead-w · --dock-w   (rem)
 | Sınıf | İş |
 |---|---|
 | `.step` `.step-no` `.step-count` `.step-icon` | dört adım, ribbon'un içinde |
-| `.entity-list` `.entity` | müsaitlikte varlık seçimi |
+| `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi; simge `steps.tsx`'in `KIND_ICON`'undan |
 | `table.availability` (+`.heat`) | boyanan çizelge + haftanın darlığı ısı haritası |
 | `.pickers` `.pick-list` `.pick-item` | hangi sayfalar basılacak |
 | `.print-area` `.print-page` `.p-title-main` `.p-daycol` … | kâğıt |

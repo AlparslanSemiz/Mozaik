@@ -39,6 +39,10 @@ interface Props {
   setOpen: (open: boolean) => void;
   state: State;
   ui: ToolState;
+  /** Navigation, not `ui.setTab`: App wraps the tab change in a view
+      transition, and a destination reached from here has to move like one
+      reached from the strip. */
+  go: (next: Tab) => void;
   sections: Section[];
   /** The handful of things worth doing without finding the button first. */
   actions: Array<{ id: string; label: string; hint?: string; run: () => void }>;
@@ -49,7 +53,7 @@ function Dot({ color }: { color: number }) {
   return <span className="palette-dot" style={{ background: paletteColor(color) }} />;
 }
 
-export default function Commands({ open, setOpen, state, ui, sections, actions }: Props) {
+export default function Commands({ open, setOpen, state, ui, go, sections, actions }: Props) {
   const inspect = useInspect();
 
   const commands = useMemo<Command[]>(() => {
@@ -59,7 +63,7 @@ export default function Commands({ open, setOpen, state, ui, sections, actions }
       group: 'Git',
       hint: `Alt+${i + 1}`,
       icon: s.icon,
-      run: () => ui.setTab(s.id),
+      run: () => go(s.id),
     }));
 
     for (const a of actions) {
@@ -113,7 +117,7 @@ export default function Commands({ open, setOpen, state, ui, sections, actions }
     }
 
     return out;
-  }, [state, ui, sections, actions, inspect]);
+  }, [state, ui, go, sections, actions, inspect]);
 
   return <Palette open={open} onOpenChange={setOpen} commands={commands} />;
 }
