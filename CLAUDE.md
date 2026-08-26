@@ -162,7 +162,7 @@ npm run dev        # geliştirme sunucusu
 npm test           # Vitest — 517 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 385 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 388 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 19 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -179,12 +179,37 @@ Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 vite.config.ts       -> dist/index.html   TEK dosya, file://, çift tıklanır
 vite.site.config.ts  -> dist-site/        aynı tek dosya + manifest + sw.js + simge
 scripts/paket.mjs    -> dist-kurulum/     dist-site + kurulum betikleri (WINDOWS)
-site/                -> manifest.webmanifest · sw.js · icon.svg · icon-192/512.png
+site/                -> manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/             -> Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
-scripts/simge.mjs    -> SVG'den PNG üretir (Chromium ile, yeni bağımlılık yok)
-scripts/ikon.mjs     -> aynı SVG'den .ico (konteyner elle yazılır; ICO içinde PNG)
+scripts/simge.mjs    -> icon.svg'den 192/512 PNG (Chromium ile, yeni bağımlılık yok)
+scripts/ikon.mjs     -> .ico: 16/32 SADE, 48+ AYRINTILI (konteyner elle yazılır)
+scripts/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
 scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
 ```
+
+**İşaretin İKİ çizimi var, ve eşik ölçülerek bulundu.** `site/icon.svg`
+ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (üç
+sütun, hayalet yok). İkisi 16/32/48/256 px'te render edilip **bakıldı**:
+48 ve üstünde ayrıntılı temiz, 16'da altı sütun mavi bir lekeye dönüyor ve
+sekme sırasından ayırt edilemiyor. Bölüşüm:
+
+| Nerede | Hangi | Niçin |
+|---|---|---|
+| Sekme (favicon, `index.html`) | **sade** | bir sekme simgesi HER ZAMAN 16–32 px |
+| `icon.ico` 16 · 32 px | **sade** | aynı sebep |
+| `icon.ico` 48–256 px | ayrıntılı | yer var |
+| PWA 192/512 PNG | ayrıntılı | yer var |
+| Üst çubuk (`.brand-mark`) | ayrıntılı | 28 px @%100, 42 px @%150 |
+
+Çizim böylece **üç yerde** duruyor (svg dosyası · `index.html`'in data URI'si ·
+`App.tsx`'in inline SVG'si). Üçünün de ayrışması iki testle yakalanıyor:
+`temel.spec.ts` 72 (URI ↔ `icon-small.svg`) ve `kabuk.spec.ts` 76 (üst çubuk ↔
+`icon.svg`). `scripts/favicon.mjs` URI'yi yeniden üretir — elle düzenlenmez.
+
+**Site derlemesinde `<link rel="icon">` YOKTUR.** `index.html` favicon'u zaten
+`data:` URI olarak taşıyor ve o iki derlemede de geçerli; site'e ikinci bir
+bağlantı koymak `<head>` sırasında kazanır ve sekmeye **ayrıntılı** işareti
+geri getirirdi.
 
 Üçüncü hedef ikincinin **paketlenmiş** hâli, ayrı bir derleme değil: içindeki
 uygulama `dist-site/index.html`'in ta kendisi. Kurulum betiklerinin hiçbiri
@@ -1215,8 +1240,14 @@ Tip hataları için `typescript-lsp` eklentisi. `npm run kontrol` son sözü sö
 
 Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**.
 
-- **Sekmeler ÜSTTE, çift bar** (2026-08-25'te rail kalktı). Satır bir: belge
-  kimliği · 6 sekme · geri/ileri al · dosya · şerit katlama · tema. Satır iki:
+- **Üst çubuğun sol ucunda marka işareti** (2026-08-26). Ayrıntılı çizim,
+  `1.75rem` — yani `--ui-scale`'i izliyor (28 px @%100, 42 px @%150). Düğme
+  **değil** ve `aria-hidden`: programın adı zaten belge başlığı, ve bu satırın
+  neyin feda edileceği yazılı bir satır (tuzak 48) — işaret hiç feda edilmiyor,
+  onun yerine sığması ölçülüyor. `<img src>` değil **inline SVG**: bu dosya
+  kendi dışından hiçbir şey istemez (ilke 3).
+- **Sekmeler ÜSTTE, çift bar** (2026-08-25'te rail kalktı). Satır bir: marka ·
+  belge kimliği · 6 sekme · geri/ileri al · dosya · şerit katlama · tema. Satır iki:
   **o sekmeye ait araç şeridi** (`.ribbon`) — Word/Excel/aSc mantığı.
   - Rail'in savı ("yatay bant ızgaradan bir satır götürür") 768px ekran için
     yazılmıştı ve rail'in **kendi maliyeti hiç sayılmamıştı**: altı sekmenin

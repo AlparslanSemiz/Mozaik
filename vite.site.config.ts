@@ -28,7 +28,12 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 }`;
 
 /**
- * The manifest link, the icon and the registration script exist ONLY here.
+ * The manifest link and the registration script exist ONLY here.
+ *
+ * There is deliberately no <link rel="icon"> among them any more. index.html
+ * carries the favicon as a data: URI for BOTH builds, and a second link here
+ * would win in <head> order and put the DETAILED mark back in the tab — which
+ * is measured to be unreadable at 16 px. One favicon, defined in one place.
  * index.html stays as it is, so the file:// build cannot pick up a service
  * worker or a fetch of any kind — "internet gerekmez" has to stay something
  * you can prove with grep. `order: 'post'` puts these after singlefile has
@@ -41,7 +46,6 @@ function siteShell(): Plugin {
       order: 'post',
       handler: () => [
         { tag: 'link', attrs: { rel: 'manifest', href: './manifest.webmanifest' }, injectTo: 'head' as const },
-        { tag: 'link', attrs: { rel: 'icon', type: 'image/svg+xml', href: './icon.svg' }, injectTo: 'head' as const },
         { tag: 'meta', attrs: { name: 'theme-color', content: '#2e4ba8' }, injectTo: 'head' as const },
         { tag: 'script', children: REGISTER, injectTo: 'body' as const },
       ],
@@ -50,17 +54,25 @@ function siteShell(): Plugin {
 }
 
 /**
- * publicDir copies EVERYTHING in site/, and site/logo-adaylari/ holds the two
- * marks the chosen one beat. They are kept (my decision was to keep them) but
- * they are not part of the app, and the service worker's origin should not
- * carry files nothing ever asks for. Found by listing dist-site/ rather than
- * by assuming.
+ * publicDir copies EVERYTHING in site/, and some of what is in site/ is a
+ * SOURCE rather than something the site serves:
+ *
+ *   logo-adaylari/   the two marks the chosen one beat, kept on purpose
+ *   icon-small.svg   where the favicon data: URI and the .ico's 16/32 px
+ *                    entries are generated FROM — nothing fetches it
+ *
+ * The service worker's origin should not carry files nothing ever asks for.
+ * Found by listing dist-site/ rather than by assuming.
  */
-function dropStudio(): Plugin {
+const SERVIS_EDILMEYEN = ['logo-adaylari', 'icon-small.svg'];
+
+function dropUnserved(): Plugin {
   return {
-    name: 'ders-programi-site-atolyeyi-atla',
+    name: 'ders-programi-site-servis-edilmeyeni-atla',
     closeBundle() {
-      rmSync(resolve('dist-site/logo-adaylari'), { recursive: true, force: true });
+      for (const name of SERVIS_EDILMEYEN) {
+        rmSync(resolve('dist-site', name), { recursive: true, force: true });
+      }
     },
   };
 }
@@ -68,7 +80,7 @@ function dropStudio(): Plugin {
 export default defineConfig({
   base: './',
   publicDir: 'site',
-  plugins: [react(), viteSingleFile(), siteShell(), dropStudio()],
+  plugins: [react(), viteSingleFile(), siteShell(), dropUnserved()],
   build: {
     outDir: 'dist-site',
     emptyOutDir: true,

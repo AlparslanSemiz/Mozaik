@@ -18,13 +18,23 @@ import { resolve } from 'node:path';
 
 // 16 is the tab and the tree; 32 the desktop; 48 the taskbar; 256 the "extra
 // large icons" view. 64 and 128 are in between and cost 20 KB together.
+//
+// TWO SOURCES, and the threshold was measured rather than picked. The detailed
+// mark was rendered at 16/32/48/256 and looked at: at 48 and up it is clean,
+// at 32 it is busy, and at 16 its six columns merge into a blue smear that
+// cannot be told apart from its neighbours in a row of tabs. So below 48 the
+// simplified variant is used — same idea, three columns instead of six, no
+// ghost columns. This is what real icon sets do.
 const SIZES = [16, 32, 48, 64, 128, 256];
+const SADE_ALTINDA = 48;
 
-const svg = readFileSync(resolve('site/icon.svg'), 'utf8');
+const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
+const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');
 const browser = await chromium.launch();
 const images = [];
 
 for (const size of SIZES) {
+  const svg = size < SADE_ALTINDA ? sade : detay;
   const page = await browser.newPage({ viewport: { width: size, height: size } });
   await page.setContent(
     `<style>html,body{margin:0;padding:0}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
@@ -58,4 +68,5 @@ for (const [i, { size, png }] of images.entries()) {
 
 const out = resolve('kurulum/icon.ico');
 writeFileSync(out, Buffer.concat([dir, ...images.map((i) => i.png)]));
-console.log(`yazıldı: ${out} — ${SIZES.join(', ')} px, ${offset} bayt`);
+const hangi = SIZES.map((n) => `${n}${n < SADE_ALTINDA ? '·sade' : ''}`).join(', ');
+console.log(`yazıldı: ${out} — ${hangi} px, ${offset} bayt`);

@@ -1099,15 +1099,34 @@ Yerel sunucu klasör özelliğinin tek evi değil, **daha iyi** evi. Ayrıntı:
   `role="status"` satırı `planlar.spec.ts`'in `.panel .hint[role="status"]`
   sorgusunu ikiye çıkardı. Sorgu paneline daraltıldı.
 
-### Bu turda bulunan, kullanıcıya bırakılan
+### B6 İşaretin iki çizimi + üst çubuktaki marka — **BİTTİ ✅**
 
-- **16 px'te işaret çamurlaşıyor.** `.ico` üretilip 16/32/48/256'da yan yana
-  bakıldı: 48 px ve üstü temiz, 32 meşgul, 16'da altı sütun birleşip mavi bir
-  lekeye dönüyor. Marka kullanıcı tarafından **16 px'te görülerek** seçilmişti
-  (aday B daha okunaklıydı ama "saat uygulaması" gibi duruyordu), o yüzden
-  değiştirilmedi. Ucuz bir çare var: ICO ve favicon küçük boylarda
-  **sadeleştirilmiş** bir varyant taşıyabilir (üç sütun, hayalet sütunlar yok)
-  — marka kimliği aynı kalır. Karar kullanıcının.
+Kullanıcının iki isteği: *"evet logoyu öyle yap. ayrıntılı olanı da güzel bir
+şekilde websitenin üst barında en sol üste koy."*
+
+- [x] **B6a Küçük boy için sade varyant.** `site/icon-small.svg` — aynı fikir,
+      üç sütun, hayalet sütun yok, çubuklar iki kat geniş. **İkinci bir logo
+      değil**; gerçek ikon setleri bunu yapar. Eşik (`< 48 px`) uydurulmadı:
+      iki çizim 16/32/48/256'da yan yana render edilip **bakıldı**
+      (`scratch/ikon-karsilastirma.png`, `scratch/ikon-sekme.png`).
+      Sade: sekme favicon'u + `.ico` 16/32. Ayrıntılı: `.ico` 48–256, PWA
+      192/512, üst çubuk. Favicon `data:` URI'si **1 205 → 467 bayt**.
+      `scripts/favicon.mjs` URI'yi yeniden üretiyor — elle düzenlenmiyor.
+      **Site derlemesinin `<link rel="icon">`i kaldırıldı**: `<head>` sırasında
+      kazanıp sekmeye ayrıntılı işareti geri koyuyordu.
+- [x] **B6b Marka işareti üst çubukta, en sol üstte.** `.brand-mark`,
+      `1.75rem` → **ölçülen 28 px @%100, 42 px @%150** (`--ui-scale`'i
+      izliyor), sol kenardan 14/21 px. İnline SVG (ilke 3), düğme değil,
+      `aria-hidden`. Tuzak 48'in sorusu ölçülerek cevaplandı: işaret feda
+      edilmiyor, **sığıyor** — örnek okul yüklüyken (tuzak 41) iki ölçekte de
+      sekme taşması 0, çubuk taşması 0.
+      Çizim artık üç yerde; ayrışmayı iki test yakalıyor (`temel.spec.ts` 72,
+      `kabuk.spec.ts` 76). Dördü de sabotajla kırmızıya döndürüldü.
+
+**Sabotaj iki şey daha buldu:** `.brand`'in `@media print` kuralı **ölüydü**
+(`.topbar` baskıda zaten gizli) — silindi, test koruma testi olarak
+işaretlendi; ve `scripts/favicon.mjs`'i belgelerken gövdesini iki kez
+yazmışım, betik hiç koşmuyordu ve bunu ancak sabotaj gösterdi.
 
 ---
 

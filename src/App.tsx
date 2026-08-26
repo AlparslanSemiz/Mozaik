@@ -287,6 +287,37 @@ const ICON = {
   ),
 };
 
+/**
+ * The mark, drawn out. Kept beside App rather than in components/ because it
+ * is not a component anybody reuses — there is exactly one place in the
+ * program that draws it, and that is three lines below.
+ *
+ * The SOURCE of truth is site/icon.svg; e2e/kabuk.spec.ts checks this draws
+ * the same rectangles, the way temel.spec.ts already does for the favicon.
+ * Three copies of one drawing is two too many to hold in a head.
+ */
+function BrandMark() {
+  return (
+    <svg viewBox="0 0 512 512" className="brand-mark">
+      <rect width="512" height="512" rx="112" fill="#2e3ba8" />
+      <g fill="#fff" opacity=".16">
+        <rect x="104" y="120" width="48" height="272" rx="16" />
+        <rect x="164" y="120" width="48" height="272" rx="16" />
+        <rect x="224" y="120" width="48" height="272" rx="16" />
+        <rect x="284" y="120" width="48" height="272" rx="16" />
+        <rect x="344" y="120" width="48" height="272" rx="16" />
+        <rect x="404" y="120" width="48" height="272" rx="16" />
+      </g>
+      <rect x="104" y="132" width="48" height="112" rx="16" fill="#65b6ec" />
+      <rect x="164" y="200" width="48" height="60" rx="16" fill="#9ff292" />
+      <rect x="224" y="132" width="48" height="60" rx="16" fill="#f3de9b" />
+      <rect x="284" y="216" width="48" height="112" rx="16" fill="#65b6ec" />
+      <rect x="344" y="140" width="48" height="60" rx="16" fill="#c3a2cd" />
+      <rect x="404" y="268" width="48" height="112" rx="16" fill="#9ff292" />
+    </svg>
+  );
+}
+
 export default function App() {
   const { state, change, undo, redo, loadState, canUndo, canRedo, plans } = useStore();
 
@@ -513,6 +544,22 @@ export default function App() {
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
       <header className="topbar" data-section={tab}>
+        {/* Zone zero: WHAT THIS IS. The detailed mark, at the one place on
+            screen with room for it — the tab's favicon is the simplified
+            variant, because six columns at 16 px are a smear (measured).
+
+            Inline rather than <img src>: dist/index.html is ONE file and
+            fetches nothing (principle 3, pitfall 32), so an <img> would need
+            a second data: URI of the same drawing and a third copy to keep in
+            step. It is `aria-hidden` and NOT a button: the program's name is
+            already the document title, and a control here would be a seventh
+            thing in a row whose sacrifice order is written down (pitfall 48).
+            It never shrinks and never goes — it is 1.75rem, and what gives way
+            when the bar is tight is named below. */}
+        <span className="brand" aria-hidden="true">
+          <BrandMark />
+        </span>
+
         {/* Zone one: WHERE YOU ARE. Six destinations, one lit, and they come
             FIRST: they are the most-clicked thing on the row and the eye starts
             at the left edge. The document identity used to stand here, but the

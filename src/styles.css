@@ -768,6 +768,31 @@ textarea {
 
 /* Row one, zone two: the six destinations. Horizontal, icon beside label —
    the rail stacked them because it was 92px wide, and this is not. */
+/* The mark, top left. It is the one thing on this row that is never
+   sacrificed and never clicked, so it is `0 0 auto` like the tabs and carries
+   no state at all: no hover, no focus, no pressed. The rounded square is the
+   drawing's own (rx 112 of 512), so nothing here rounds it a second time.
+
+   `--ui-scale` reaches it because the size is in rem: at 150% the mark grows
+   with the tabs beside it instead of becoming a speck. */
+.brand {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding-left: var(--space-1);
+}
+
+.brand-mark {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+  /* A hairline of the ground it sits on, so the mark's own dark square does
+     not read as a hole punched in the bar. */
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+  border-radius: 0.42rem; /* 112/512 of 1.75rem — the drawing's own corner */
+}
+
+
 .tabstrip {
   display: flex;
   align-items: center;

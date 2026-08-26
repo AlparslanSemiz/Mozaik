@@ -576,12 +576,16 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
   // Task B3b. Without it the double-clicked file gets the browser's blank
   // page icon, which is what every other saved .html on the machine gets too.
   //
-  // The mark now exists in two places: site/icon.svg, which the site build and
-  // the PNGs come from, and a data: URI inside index.html. Two copies of a
-  // drawing drift, and nobody notices a favicon drifting — so the second test
-  // below decodes the URI and compares the rectangles it draws with the ones
-  // in the file. That is the whole reason it is written as a test rather than
-  // as a comment saying "keep these in step".
+  // The mark exists in two places: an .svg file and a data: URI inside
+  // index.html. Two copies of a drawing drift, and nobody notices a favicon
+  // drifting — so the second test below decodes the URI and compares the
+  // rectangles it draws with the ones in the file. (scripts/favicon.mjs
+  // regenerates the URI; this test is what makes forgetting to run it loud.)
+  //
+  // The source is the SMALL variant, not site/icon.svg. A tab icon is always
+  // drawn at 16-32 px, and the detailed mark was rendered at those sizes and
+  // LOOKED AT: its six columns merge into a blue smear. site/icon.svg is what
+  // the top bar and the 192/512 PWA icons use, where there is room for it.
 
   /** Every <rect> in an SVG, as a sorted list of "x,y,w,h,rx,fill". */
   function rects(svg: string): string[] {
@@ -618,7 +622,7 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
     expect(rel!.startsWith('data:')).toBe(true);
   });
 
-  test('gömülü işaret site/icon.svg ile AYNI şeyi çiziyor', async () => {
+  test('gömülü işaret site/icon-small.svg ile AYNI şeyi çiziyor', async () => {
     const html = readFileSync('index.html', 'utf8');
     const href = /<link[^>]*rel="icon"[^>]*href="([^"]*)"/.exec(html)![1]!;
     // Single quotes inside the URI, double quotes in the file it came from.
@@ -626,9 +630,11 @@ test.describe('72. Sekmedeki işaret — gömülü favicon', () => {
       /'/g,
       '"',
     );
-    const source = readFileSync('site/icon.svg', 'utf8').replace(/#ffffff/g, '#fff');
+    const source = readFileSync('site/icon-small.svg', 'utf8').replace(/#ffffff/g, '#fff');
 
-    expect(rects(embedded).length, 'gömülü işaret boş').toBe(13);
+    // Four: the ground plus three lessons. Thirteen would mean the detailed
+    // mark got put back here, which is the thing this section exists to stop.
+    expect(rects(embedded).length, 'gömülü işaret sade varyant değil').toBe(4);
     expect(rects(embedded)).toEqual(rects(source));
   });
 });

@@ -21,9 +21,10 @@ klasör özelliğinin **tek** evi değil, **daha iyi** evi.
 | `dist/index.html` — Y turu sonu | 517 360 bayt |
 | ...favicon eklendikten sonra | **518 811** (+1 451; işaretin kendisi 1 205) |
 | ...B4 (klasör) eklendikten sonra | **525 101** (+6 290) |
+| ...B6 (sade favicon + üst çubuk işareti) | **525 818** (+717: işaret +1 455, favicon −738) |
 | `dist-site/` toplam | 547 213 bayt |
-| `dist-kurulum/` — babaya giden TEK klasör | **569 034 bayt** |
-| `icon.ico` — 16/32/48/64/128/256 px | 12 322 bayt |
+| `dist-kurulum/` — babaya giden TEK klasör | **575 761 bayt** |
+| `icon.ico` — 16·sade, 32·sade, 48, 64, 128, 256 px | 11 858 bayt |
 | Açılış, `file://` (9 koşu) | **76 ms** medyan · 73 en iyi · 109 en kötü |
 | Açılış, yerel sunucu (9 koşu) | **82 ms** medyan · 77 en iyi · 92 en kötü |
 | İkinci yolun maliyeti | **6 ms (%8)** |
@@ -41,7 +42,8 @@ koşturuldu** — 127.0.0.1, `[::1]` ve `dersprogrami.localhost` üçünden de.
 ```
 tsc --noEmit          temiz
 birim                 517 (18 dosya)   — önce 508 (+9: folder.test.ts)
-E2E (file://)         385              — önce 381 (+4: favicon 2, file:// ölçümü 2)
+E2E (file://)         388              — önce 381 (+7: favicon 2, file:// ölçümü 2,
+                                       marka işareti 3)
 site (http)           19               — önce 6 (+5 sunucu, +8 klasör)
 çözücü                7
 npm run kontrol       YEŞİL (çıkış kodu 0)
@@ -94,7 +96,7 @@ npm run kontrol       YEŞİL (çıkış kodu 0)
   akışının kendi kontrolü yerelde koşturuldu.
 - **Gerçek klasör diyaloğu** Playwright'la sürülemez. Elle **denenmedi** —
   kullanıcıya bırakıldı.
-- 16 px'te işaret çamurlaşıyor (aşağıda, *Bilinen kusur*).
+- 16 px'te işaret çamurlaşıyordu — bulundu, soruldu, **kapatıldı** (aşağıda).
 
 ### Turun gerekçesini düzeltmek zorunda kaldım
 
@@ -139,18 +141,55 @@ Düzeltilen dosyalar: `src/folder.ts` · `src/components/settings/Data.tsx` ·
 
 ---
 
-### Bilinen kusur — 16 px'te işaret çamurlaşıyor
+### 16 px kusuru bulundu, bildirildi ve KAPATILDI
 
-`.ico` üretildikten sonra 16/32/48/256'da yan yana **bakıldı** (kanıt:
-`scratch/ico-bak.png`). 48 px ve üstü temiz; 32 meşgul; **16'da altı sütun
-birleşip mavi bir lekeye dönüyor** ve sekmede ayırt edilemiyor.
+`.ico` üretildikten sonra 16/32/48/256'da yan yana **bakıldı**: 48 px ve üstü
+temiz; 32 meşgul; **16'da altı sütun birleşip mavi bir lekeye dönüyor** ve
+sekme sırasından ayırt edilemiyor. Marka kullanıcı tarafından 16 px'te
+görülerek seçilmişti, o yüzden değiştirmeden **soruldu**; kullanıcı
+sadeleştirilmiş varyantı istedi.
 
-Marka kullanıcı tarafından **16 px'te görülerek** seçilmişti — aday B (saat
-halkası) 16'da daha okunaklıydı ama "saat uygulaması" gibi duruyordu — o
-yüzden burada değiştirilmedi. Ucuz bir çare var ve karar kullanıcının: ICO ve
-favicon küçük boylarda **sadeleştirilmiş** bir varyant taşıyabilir (üç sütun,
-hayalet sütunlar yok), marka kimliği aynı kalır. Gerçek ikon setleri tam
-olarak bunu yapar.
+`site/icon-small.svg`: aynı fikir — haftaya konmuş renkli dersler — 16 px'te
+ayakta kalanla çizilmiş. Üç sütun, hayalet sütun yok, çubuklar iki kat geniş.
+İkinci bir logo değil; gerçek ikon setleri tam olarak bunu yapar.
+
+| Nerede | Hangi |
+|---|---|
+| Sekme (favicon) · `.ico` 16/32 | **sade** |
+| `.ico` 48–256 · PWA 192/512 · üst çubuk | ayrıntılı |
+
+Eşik (`< 48 px`) uydurulmadı, o karşılaştırmadan çıktı. Kanıt:
+`scratch/ikon-karsilastirma.png` ve `scratch/ikon-sekme.png` (16 px, bir sekme
+sırasında, iki temada).
+
+**Yan ölçüm:** favicon'un `data:` URI'si **1 205 → 467 bayt**.
+
+### Marka işareti üst çubuğa girdi
+
+Kullanıcı isteği: *"ayrıntılı olanı da güzel bir şekilde websitenin üst barında
+en sol üste koy."* `.brand-mark`, `1.75rem` — **ölçülen: 28 px @%100, 42 px
+@%150**, yani `--ui-scale`'i izliyor. Sol kenardan 14 px (%150'de 21).
+`<img src>` değil inline SVG (ilke 3). Düğme değil, `aria-hidden`.
+
+Tuzak 48'in sorusu — bu satırda ne feda edilir — **ölçülerek** cevaplandı:
+işaret hiç feda edilmiyor, sığıyor. Örnek okul yüklüyken (tuzak 41), iki
+ölçekte de: sekme taşması **0**, çubuk taşması **0**.
+
+Çizim artık **üç yerde** ve üçünün ayrışmasını iki test yakalıyor
+(`temel.spec.ts` 72, `kabuk.spec.ts` 76). `scripts/favicon.mjs` URI'yi yeniden
+üretiyor — elle düzenlenmiyor.
+
+### Bu turda iki ölü/bozuk şey daha bulundu, ikisi de SABOTAJLA
+
+1. **`.brand` için yazdığım `@media print` kuralı ÖLÜYDÜ.** Sabotaj testi
+   kırmızıya döndürmedi: `.topbar` baskıda zaten `display: none`. Kural
+   silindi, test **koruma testi** olarak işaretlendi — koruduğu şey işaretin
+   bir gün üst çubuktan çıkması.
+2. **`scripts/favicon.mjs`'i belgelerken kendi gövdesini iki kez yazmışım**
+   ve bunu ancak sabotaj koşusu gösterdi (`SyntaxError: Identifier
+   'readFileSync' has already been declared`). Betik hiç koşmamıştı, yani
+   sabotaj D ölçmek istediği şeyi hiç ölçmemişti. Onarıldı ve sabotaj
+   tekrarlandı: kırmızı.
 
 ---
 
