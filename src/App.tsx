@@ -347,10 +347,35 @@ export default function App() {
       {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
-      <header className="topbar">
-        {/* Zone one: WHICH DOCUMENT is open. The school and the plan answer
+      <header className="topbar" data-section={tab}>
+        {/* Zone one: WHERE YOU ARE. Six destinations, one lit, and they come
+            FIRST: they are the most-clicked thing on the row and the eye starts
+            at the left edge. The document identity used to stand here, but the
+            name of the school does not change and is not clicked — it was
+            holding the corner the destinations wanted. */}
+        <nav className="tabstrip" aria-label="Bölümler">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              className="tab"
+              aria-current={tab === t.id}
+              aria-label={t.label}
+              title={t.label}
+              onClick={() => setTab(t.id)}
+            >
+              {t.icon}
+              <span className="tab-label">{t.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <span className="spacer" />
+
+        {/* Zone two: WHICH DOCUMENT is open. The school and the plan answer
             one question between them, so they are drawn as one object rather
-            than as a heading that happens to be followed by a dropdown. */}
+            than as a heading that happens to be followed by a dropdown. It
+            sits at the head of the right-hand group — the things you reach for
+            about this document rather than about where you are in it. */}
         <div className="topbar-doc">
           <h1 className="app-title">{state.settings.schoolName.trim() || 'Ders Programı'}</h1>
 
@@ -375,24 +400,7 @@ export default function App() {
           </select>
         </div>
 
-        {/* Zone two: WHERE YOU ARE. Six destinations, one lit. */}
-        <nav className="tabstrip" aria-label="Bölümler">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              className="tab"
-              aria-current={tab === t.id}
-              aria-label={t.label}
-              title={t.label}
-              onClick={() => setTab(t.id)}
-            >
-              {t.icon}
-              <span className="tab-label">{t.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <span className="spacer" />
+        <span className="topbar-sep" />
 
         {/* Zone three: the HISTORY of this session — two icons, because their
             labels are the longest words on the bar and the shortcut in the

@@ -11,7 +11,7 @@ export default function Rooms({ state, change }: PanelProps) {
   const [newRoom, setNewRoom] = useState('');
 
   return (
-    <div className="panel">
+    <div className="panel step-panel">
       <h2>Derslikler ({state.rooms.length})</h2>
       <p className="hint">
         Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate

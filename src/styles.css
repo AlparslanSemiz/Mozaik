@@ -90,6 +90,40 @@
   --bad: #b0201c;  --bad-bg: #fbdcda;
   --closed: #d5d8dd;  --hatch: #e8eaee;
 
+  /* DROP FEEDBACK, its own three tokens rather than --ok-bg/--warn-bg/--bad-bg.
+     Those three are also the resting colours of the reason bar and of a warned
+     cell, where a full-strength fill would shout all day; a drop highlight
+     lives for the length of one gesture and has to be findable across 78
+     columns at a glance. Measured against --paper: dE 33.9/39.0/29.7, where
+     the shared tokens gave 16.1/18.3/15.1 — the old fill was barely a tint.
+     Still >= 34 dE from each other, so the three states never merge. */
+  --drop-ok-bg: #a8e6bd;
+  --drop-warn-bg: #fbe09a;
+  --drop-bad-bg: #f7bcb7;
+
+  /* SECTION COLOURS — one per tab, so "where am I" is answered by a colour as
+     well as by a lit tab. They are NOT decorative and they are NOT free:
+     green/yellow/red is the tool's only feedback channel (droppable / warning /
+     blocked), and a seventh, eighth, ninth hue on screen is exactly how that
+     channel gets muddied.
+     So they were SEARCHED, not chosen, the way palette.ts searched the 36:
+       - the green (75-165) and red (340-25) hue bands are excluded outright —
+         a darker green is still green to an eye scanning for green, whatever a
+         colorimeter says about the Lab distance;
+       - >= 5:1 contrast on --paper, and >= 32 CIE Lab dE from --ok/--warn/--bad,
+         both as THRESHOLDS;
+       - what is optimised is chroma, because six sections have to be six
+         identities and it is chroma, not lightness, that separates six hues.
+     Measured: min contrast 5.63, min dE to a functional colour 52.5, min dE
+     between two sections 16.0. `renk.spec.ts` re-measures all three every run
+     — these numbers are a reading, not a promise (pitfall 42). */
+  --sec-setup: #153184;
+  --sec-availability: #681584;
+  --sec-program: #157184;
+  --sec-check: #361584;
+  --sec-print: #84155f;
+  --sec-settings: #3a4d5f;
+
   /* temayla dönmeyen mürekkep — aynen korunuyor */
   --on-color: #1b1f24;  --on-color-sub: #3a3f46;
   --block-cont: rgba(0,0,0,.12);
@@ -218,6 +252,34 @@
   --closed: #3b434c;
   --hatch: #2e353d;
 
+  /* Same six hues, lifted off the dark paper. The HUE is what carries the
+     identity across a theme switch; only lightness and chroma move.
+     Measured: min contrast 5.07, min dE functional 49.9, min dE between
+     sections 20.7. */
+  /* Measured against the dark --paper: dE 41.3/48.6/41.3 (was 24.0/31.0/26.8),
+     >= 34 dE apart, ink over 6.7:1. */
+  --drop-ok-bg: #1d5c39;
+  --drop-warn-bg: #634c0c;
+  --drop-bad-bg: #6b2622;
+
+  /* PRINT PREVIEW, on screen. These two were the one pair of tokens the dark
+     block never redefined, and nothing said whether that was deliberate: the
+     grid line stayed #444 and the header fill stayed #eee while the ink above
+     it inherited --text (#e9edf2). Result: white on near-white, about 1.1:1 —
+     the day and hour headings simply were not there. It printed correctly the
+     whole time, which is why it survived; only the preview was broken.
+     `@media print` now pins the paper values explicitly, so this override
+     cannot reach the printer. */
+  --print-line: #4a545f;
+  --print-head-bg: #262c34;
+
+  --sec-setup: #6e8de7;
+  --sec-availability: #c86ae7;
+  --sec-program: #58cde4;
+  --sec-check: #a080ea;
+  --sec-print: #e55db7;
+  --sec-settings: #879eb5;
+
   /* Deeper, because the ground under them is dark: the light theme's values
      would be invisible here. */
   --elev-1: 0 1px 2px rgba(0,0,0,.35);
@@ -289,6 +351,16 @@ textarea {
 /* Row one: identity, destinations, history, file, theme. The gradient is the
    only one in the file, and it is 2% — a tool's chrome catching a little light,
    not a surface with a colour of its own. */
+/* Which section's colour this chrome is drawing. One custom property resolved
+   from the attribute App writes, so nothing downstream has to know the tab
+   names and no colour is ever written in the JSX. */
+[data-section="setup"] { --sec: var(--sec-setup); }
+[data-section="availability"] { --sec: var(--sec-availability); }
+[data-section="program"] { --sec: var(--sec-program); }
+[data-section="check"] { --sec: var(--sec-check); }
+[data-section="print"] { --sec: var(--sec-print); }
+[data-section="settings"] { --sec: var(--sec-settings); }
+
 .topbar {
   display: flex;
   align-items: center;
@@ -422,9 +494,15 @@ textarea {
 .tab[aria-current="true"] {
   background: var(--paper);
   border-color: var(--hairline);
-  color: var(--accent);
+  color: var(--sec, var(--accent));
   font-weight: 600;
   box-shadow: var(--elev-1);
+
+  /* The section's own colour as a rule along the bottom edge — the sheet's
+     spine, the thing the ribbon below it continues. `--sec` falls back to the
+     accent so a tab is never colourless if the attribute is missing. */
+  border-bottom: 2px solid var(--sec, var(--accent));
+  padding-bottom: calc(var(--space-2) - 1px);
 }
 
 /* Under 1280px the labels go and the icons carry it. The accessible name stays
@@ -458,6 +536,11 @@ textarea {
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-4);
   background: var(--chrome-2);
+
+  /* The same colour as the tab above it, down the leading edge: the strip and
+     the tab are one object, and this is the cheapest way to say so — 3px, no
+     new plane, no new box. */
+  border-left: 3px solid var(--sec, var(--accent));
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -1024,26 +1107,26 @@ td.block-cont {
 
 /* Drag highlight — added straight through classList, not React state. */
 td.drop-ok {
-  outline: 2px solid var(--ok);
-  outline-offset: -2px;
-  background: var(--ok-bg) !important;
+  outline: 3px solid var(--ok);
+  outline-offset: -3px;
+  background: var(--drop-ok-bg) !important;
 }
 
 td.drop-warn {
-  outline: 2px solid var(--warn);
-  outline-offset: -2px;
-  background: var(--warn-bg) !important;
+  outline: 3px solid var(--warn);
+  outline-offset: -3px;
+  background: var(--drop-warn-bg) !important;
 }
 
 td.drop-blocked {
-  outline: 2px solid var(--bad);
-  outline-offset: -2px;
-  background: var(--bad-bg) !important;
+  outline: 3px solid var(--bad);
+  outline-offset: -3px;
+  background: var(--drop-bad-bg) !important;
 }
 
 /* While dragging, everything outside the target row dims: it leads the eye. */
 .grid.dragging tbody tr:not(.target-row) td {
-  opacity: 0.4;
+  opacity: 0.25;
 }
 
 .ghost {
@@ -1363,8 +1446,26 @@ table.grid tbody tr:hover > .row-head {
   font-weight: 600;
 }
 
-.step-next {
-  margin-bottom: 0;
+/* The symbol beside the number. It does NOT replace the badge: the steps are
+   numbered, the user says "3. adım", and a picture cannot be counted. The
+   symbol is what the eye finds first, the number is what the mouth says.
+
+   Sized off the type rather than in px so it follows --ui-scale like the badge
+   next to it. `currentColor` throughout, so a pressed step tints both. */
+.step-icon {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.step-icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* In the Progress table the row is a `.btn.link`, which has no gap of its own. */
+.btn.link .step-icon {
+  margin-right: var(--space-2);
 }
 
 /* -------------------------------------------------------------------- form */
@@ -1481,6 +1582,16 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
 .panel h2 {
   margin: 0 0 10px;
   font-size: var(--fs-lg);
+}
+
+/* The four Kurulum steps are the one screen a term begins on, and their
+   heading is the answer to "which of the four am I on". One step up the SAME
+   ladder — no new size was added for this (the ladder is six steps and stays
+   six). Only the step panels: Summary, Progress and Başlarken beside them stay
+   at --fs-lg, so the heading that grew is the one naming the work. */
+.panel.step-panel h2 {
+  font-size: var(--fs-xl);
+  letter-spacing: var(--ls-tight);
 }
 
 .panel h3 {
@@ -1712,6 +1823,23 @@ table.list td > .color-pick:hover {
 table.list tbody tr:hover,
 table.stat tbody tr:hover {
   background: var(--bg);
+}
+
+/* The identity mark beside a name. It was written three times over — in the
+   grid row head, in the print picker, in the availability list — because each
+   place grew one; the base is here now and those three keep only what differs.
+   A teacher and a class ARE their colour in this tool (the grid cell, the pool
+   card, the printed heading), so a name written without it makes the reader
+   look the person up again. */
+.row-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--edge);
+  margin-right: var(--space-2);
+  flex: 0 0 auto;
+  vertical-align: 0;
 }
 
 .color-dot {
@@ -2239,6 +2367,15 @@ table.bell-preview td {
     --hairline: #c9ced6;
     --chrome: #ffffff;
     --band: #ffffff;
+
+    /* Pinned here for the same reason as everything above, and this pair is
+       not optional: the dark theme now overrides them so the PREVIEW is
+       readable on a dark screen, and without these two lines that override
+       would follow the sheet into the printer — a grey header band and a pale
+       grid on paper. The two values are the light theme's own. */
+    --print-line: #444;
+    --print-head-bg: #eee;
+
     --elev-1: none;
     --elev-2: none;
   }

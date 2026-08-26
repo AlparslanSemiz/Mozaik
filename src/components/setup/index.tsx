@@ -11,7 +11,7 @@
 // exactly one kind of thing on it and every step can be counted.
 
 import { sampleState } from '../../sample';
-import type { State } from '../../types';
+
 import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
@@ -22,40 +22,19 @@ import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
 import type { PanelProps, PlanControls } from '../props';
 import type { StepId } from '../../toolState';
+import { STEPS } from '../steps';
 
-interface Step {
-  id: StepId;
-  label: string;
-  count: (d: State) => number;
-  render: (p: PanelProps) => React.ReactElement;
-}
-
-const STEPS: Step[] = [
-  {
-    id: 'rooms',
-    label: 'Derslikler',
-    count: (d) => d.rooms.length,
-    render: (p) => <Rooms {...p} />,
-  },
-  {
-    id: 'teachers',
-    label: 'Öğretmenler',
-    count: (d) => d.teachers.length,
-    render: (p) => <Teachers {...p} />,
-  },
-  {
-    id: 'classes',
-    label: 'Sınıflar',
-    count: (d) => d.classes.length,
-    render: (p) => <Classes {...p} />,
-  },
-  {
-    id: 'lessons',
-    label: 'Dersler',
-    count: (d) => d.lessons.length,
-    render: (p) => <Lessons {...p} />,
-  },
-];
+/**
+ * The four lists' label, count and symbol live in `components/steps.tsx` — one
+ * definition read by this shell, by the ribbon and by Progress. Only the
+ * RENDERING of a step is this file's business, so only that is here.
+ */
+const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
+  rooms: (p) => <Rooms {...p} />,
+  teachers: (p) => <Teachers {...p} />,
+  classes: (p) => <Classes {...p} />,
+  lessons: (p) => <Lessons {...p} />,
+};
 
 interface Props extends PanelProps {
   plans: PlanControls;
@@ -75,7 +54,6 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
     STEPS.findIndex((s) => s.id === step),
   );
   const current = STEPS[index] ?? STEPS[0]!;
-  const next = STEPS[index + 1];
 
   return (
     <>
@@ -144,29 +122,25 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
 
       {/* The list on the left, and on the right what the list MEANS: the same
           capacity numbers Kontrol shows, but while you are typing rather than
-          one screen and one decision later. */}
+          one screen and one decision later.
+
+          Progress ("Kurulum durumu") sits UNDER the summary in the right
+          column, not under the list. It used to be on the left, on the grounds
+          that "what do I do after this one" is a question about the work — but
+          that put every panel on this screen in one column and left the right
+          one ending halfway down. Both panels on the right answer the same kind
+          of question: not what you are typing, but where it has got you.
+
+          The "Sonraki adım" button that used to stand between them is gone.
+          Moving between steps already had two homes — the four buttons in the
+          ribbon and the rows of the Progress table — and a third one that could
+          only ever go forwards was the weakest of them. */}
       <div className="cols wide-left">
-        <div>
-          {current.render({ state, change })}
-
-          {next !== undefined && (
-            <div className="form-row step-next">
-              <button className="btn" onClick={() => setStep(next.id)}>
-                Sonraki adım: {next.label} →
-              </button>
-            </div>
-          )}
-
-          {/* What used to be several hundred pixels of empty screen below the
-              list: the four steps, what each still needs, and the one number
-              that says whether the week can hold what has been entered. It is
-              under the LIST, not in the right column, because it answers "what
-              do I do after this one" — which is a question about the work. */}
-          <Progress state={state} step={step} setStep={setStep} />
-        </div>
+        <div>{RENDER[current.id]({ state, change })}</div>
 
         <aside>
           <Summary state={state} step={current.id} />
+          <Progress state={state} step={step} setStep={setStep} />
         </aside>
       </div>
     </>

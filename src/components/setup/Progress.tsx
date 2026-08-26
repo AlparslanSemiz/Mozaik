@@ -11,6 +11,7 @@
 
 import type { State } from '../../types';
 import type { StepId } from '../../toolState';
+import { STEPS } from '../steps';
 
 interface Props {
   state: State;
@@ -18,15 +19,14 @@ interface Props {
   setStep: (next: StepId) => void;
 }
 
-interface Line {
-  id: StepId;
-  label: string;
-  count: number;
-  /** What is still missing, in the user's words. '' means this step is done. */
-  todo: string;
-}
-
-function build(d: State): Line[] {
+/**
+ * What is still missing at each step, in the user's words. '' means done.
+ *
+ * Only the SENTENCES are here; the four steps' identity, label, count and
+ * symbol come from `components/steps.tsx`, which the ribbon and the Setup shell
+ * read too.
+ */
+function todos(d: State): Record<StepId, string> {
   const noRoom = d.classes.filter((c) => c.roomId === null).length;
   const withoutLessons = d.classes.filter(
     (c) => !d.lessons.some((l) => l.classId === c.id),
@@ -35,51 +35,32 @@ function build(d: State): Line[] {
     (t) => !d.lessons.some((l) => l.teacherId === t.id),
   ).length;
 
-  return [
-    {
-      id: 'rooms',
-      label: 'Derslikler',
-      count: d.rooms.length,
-      todo: d.rooms.length === 0 ? 'Henüz derslik yok' : '',
-    },
-    {
-      id: 'teachers',
-      label: 'Öğretmenler',
-      count: d.teachers.length,
-      todo:
-        d.teachers.length === 0
-          ? 'Henüz öğretmen yok'
-          : idleTeachers > 0
-            ? `${idleTeachers} öğretmenin dersi yok`
-            : '',
-    },
-    {
-      id: 'classes',
-      label: 'Sınıflar',
-      count: d.classes.length,
-      todo:
-        d.classes.length === 0
-          ? 'Henüz sınıf yok'
-          : noRoom > 0
-            ? `${noRoom} sınıfın dersliği seçilmedi`
-            : '',
-    },
-    {
-      id: 'lessons',
-      label: 'Dersler',
-      count: d.lessons.length,
-      todo:
-        d.lessons.length === 0
-          ? 'Henüz ders yok'
-          : withoutLessons > 0
-            ? `${withoutLessons} sınıfın dersi yok`
-            : '',
-    },
-  ];
+  return {
+    rooms: d.rooms.length === 0 ? 'Henüz derslik yok' : '',
+    teachers:
+      d.teachers.length === 0
+        ? 'Henüz öğretmen yok'
+        : idleTeachers > 0
+          ? `${idleTeachers} öğretmenin dersi yok`
+          : '',
+    classes:
+      d.classes.length === 0
+        ? 'Henüz sınıf yok'
+        : noRoom > 0
+          ? `${noRoom} sınıfın dersliği seçilmedi`
+          : '',
+    lessons:
+      d.lessons.length === 0
+        ? 'Henüz ders yok'
+        : withoutLessons > 0
+          ? `${withoutLessons} sınıfın dersi yok`
+          : '',
+  };
 }
 
 export default function Progress({ state, step, setStep }: Props) {
-  const lines = build(state);
+  const todo = todos(state);
+  const lines = STEPS.map((s) => ({ ...s, count: s.count(state), todo: todo[s.id] }));
   const done = lines.filter((l) => l.count > 0 && l.todo === '').length;
   const weekly = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
   const slots = state.settings.days.length * state.settings.hours.length;
@@ -109,6 +90,9 @@ export default function Progress({ state, step, setStep }: Props) {
                   aria-current={l.id === step}
                   onClick={() => setStep(l.id)}
                 >
+                  <span className="step-icon" aria-hidden="true">
+                    {l.icon}
+                  </span>
                   <span className="step-no">{i + 1}</span>
                   {l.label}
                 </button>

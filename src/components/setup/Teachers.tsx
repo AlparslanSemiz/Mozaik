@@ -39,7 +39,7 @@ export default function Teachers({ state, change }: PanelProps) {
   }
 
   return (
-    <div className="panel">
+    <div className="panel step-panel">
       <h2>Öğretmenler ({state.teachers.length})</h2>
       <p className="hint">
         Her öğretmenin tek branşı vardır ve <b>listeden seçilir</b> — listede

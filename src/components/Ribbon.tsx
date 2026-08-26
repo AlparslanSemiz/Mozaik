@@ -21,7 +21,9 @@ import type { State } from '../types';
 import type { SolverRun } from '../useSolver';
 import type { Density } from '../theme';
 import { applyDensity } from '../theme';
-import type { Kind, SectionId, StepId, ToolState, View } from '../toolState';
+import { paletteColor } from '../palette';
+import type { Kind, SectionId, ToolState, View } from '../toolState';
+import { STEPS, classIcon, teacherIcon } from './steps';
 
 interface Props {
   ui: ToolState;
@@ -38,50 +40,10 @@ interface Props {
  * so it is the only name a screen reader — or a test — can find them by.
  */
 export const VIEWS: Array<{ id: View; label: string; icon: React.ReactElement }> = [
-  {
-    // A mortarboard — the symbol aSc uses for Teachers, and the one thing on
-    // screen that cannot be mistaken for a person. The two icons used to be one
-    // head and three heads; at 17px that difference is invisible.
-    id: 'teacher',
-    label: 'Öğretmen görünümü',
-    icon: (
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
-        <path d="M10 2.4 19.2 6.6 10 10.8 0.8 6.6Z" fill="currentColor" />
-        <path
-          d="M5 8.5 10 10.8 15 8.5v3.4c0 1.5-2.2 2.5-5 2.5s-5-1-5-2.5Z"
-          fill="currentColor"
-        />
-        <path d="M17.6 7.5h1.2v5.2h-1.2Z" fill="currentColor" />
-        <circle cx="18.2" cy="13.6" r="1.5" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    id: 'class',
-    // A group of students: three figures, the middle one nearer. A class is the
-    // only thing in this tool that is a crowd.
-    label: 'Sınıf görünümü',
-    icon: (
-      <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
-        <circle cx="4.2" cy="6.4" r="2.2" fill="currentColor" />
-        <circle cx="15.8" cy="6.4" r="2.2" fill="currentColor" />
-        <path d="M0.4 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
-        <path d="M12 15.4c0-2.5 1.7-4.2 3.8-4.2s3.8 1.7 3.8 4.2Z" fill="currentColor" />
-        <circle cx="10" cy="8.2" r="3" fill="currentColor" />
-        <path d="M4.9 18c0-3.1 2.3-5.2 5.1-5.2s5.1 2.1 5.1 5.2Z" fill="currentColor" />
-      </svg>
-    ),
-  },
+  { id: 'teacher', label: 'Öğretmen görünümü', icon: teacherIcon },
+  { id: 'class', label: 'Sınıf görünümü', icon: classIcon },
 ];
 
-
-/** Kurulum's four lists, in the order they are filled in. */
-const STEPS: Array<{ id: StepId; label: string; count: (d: State) => number }> = [
-  { id: 'rooms', label: 'Derslikler', count: (d) => d.rooms.length },
-  { id: 'teachers', label: 'Öğretmenler', count: (d) => d.teachers.length },
-  { id: 'classes', label: 'Sınıflar', count: (d) => d.classes.length },
-  { id: 'lessons', label: 'Dersler', count: (d) => d.lessons.length },
-];
 
 const KINDS: Array<{ id: Kind; label: string }> = [
   { id: 'teacher', label: 'Öğretmen' },
@@ -115,7 +77,7 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
 
   if (ui.tab === 'setup') {
     return (
-      <div className="ribbon" role="toolbar" aria-label="Kurulum adımları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kurulum adımları">
         {STEPS.map((s, i) => {
           const count = s.count(state);
           return (
@@ -126,6 +88,9 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
               data-empty={count === 0}
               onClick={() => ui.setStep(s.id)}
             >
+              <span className="step-icon" aria-hidden="true">
+                {s.icon}
+              </span>
               <span className="step-no">{i + 1}</span>
               {s.label}
               <span className="step-count">{count}</span>
@@ -137,11 +102,13 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
   }
 
   if (ui.tab === 'availability') {
-    const list =
+    // Name and colour separately: a Room has no colour of its own, so the mark
+    // beside the name is drawn only for the two kinds that carry one.
+    const list: Array<{ id: string; name: string; color?: number }> =
       ui.kind === 'teacher' ? state.teachers : ui.kind === 'class' ? state.classes : state.rooms;
     const selected = list.find((x) => x.id === ui.chosen) ?? list[0];
     return (
-      <div className="ribbon" role="toolbar" aria-label="Müsaitlik araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Müsaitlik araçları">
         <span className="ribbon-label">Kimin saatleri</span>
         {KINDS.map((k) => (
           <button
@@ -157,8 +124,24 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
           </button>
         ))}
         <Sep />
+        {/* Whose hours are open. The colour is the same mark the list on the
+            right and the grid row carry: the identity of a teacher or a class
+            is its colour everywhere it is named, not only where it is edited.
+            A room has none — `Room` carries no colour — so nothing is drawn. */}
         <span className="ribbon-label">
-          {selected === undefined ? 'Liste boş' : selected.name}
+          {selected === undefined ? (
+            'Liste boş'
+          ) : (
+            <>
+              {selected.color !== undefined && (
+                <span
+                  className="row-dot"
+                  style={{ background: paletteColor(selected.color) }}
+                />
+              )}
+              {selected.name}
+            </>
+          )}
         </span>
       </div>
     );
@@ -168,7 +151,7 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
     const pending = pendingLessons(state, ix);
     const placed = Object.keys(state.placements).length;
     return (
-      <div className="ribbon" role="toolbar" aria-label="Program araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Program araçları">
         {/* Two positions, not one toggle: a single button saying "switch to the
             class view" tells you what the next click does, never where you are. */}
         <div className="view-switch">
@@ -264,7 +247,7 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
 
   if (ui.tab === 'print') {
     return (
-      <div className="ribbon" role="toolbar" aria-label="Yazdırma araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Yazdırma araçları">
         <span className="ribbon-label">Ne basılsın</span>
         <button className="btn" aria-pressed={ui.scope === 'classes'} onClick={() => ui.setScope('classes')}>
           Sınıflar
@@ -293,7 +276,7 @@ export default function Ribbon({ ui, open, state, solver, density, setDensity }:
 
   // settings
   return (
-    <div className="ribbon" role="toolbar" aria-label="Ayar bölümleri">
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Ayar bölümleri">
       {SECTIONS.map((s) => (
         <button
           key={s.id}

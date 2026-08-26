@@ -81,6 +81,95 @@ test.describe('8. Tema', () => {
     });
   }
 
+  // The six section colours. They are the newest thing on screen that is a
+  // COLOUR and not a state, so they are the likeliest to muddy the one channel
+  // this tool cannot afford to lose: green = droppable, yellow = warning,
+  // red = blocked. Nothing here is asserted about how they look; all three
+  // constraints are measured off the real computed values.
+  for (const theme of ['light', 'dark'] as const) {
+    test(`${theme} temada sekme renkleri işlevsel renklere karışmıyor`, async ({ page }) => {
+      await open(page);
+      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+      const SECTIONS = [
+        '--sec-setup',
+        '--sec-availability',
+        '--sec-program',
+        '--sec-check',
+        '--sec-print',
+        '--sec-settings',
+      ];
+      const t = await tokens(page, [...SECTIONS, '--ok', '--warn', '--bad', '--paper']);
+
+      for (const name of SECTIONS) {
+        // Readable where it is drawn: the lit tab's label is this colour on --paper.
+        expect(contrast(t[name]!, t['--paper']!), `${name} on --paper`).toBeGreaterThanOrEqual(4.5);
+
+        // And never mistakable for a state. The threshold is 32: below it two
+        // colours of the same lightness start reading as the same hue family,
+        // which is exactly the failure this test exists to catch.
+        for (const fn of ['--ok', '--warn', '--bad'] as const) {
+          expect(deltaE(t[name]!, t[fn]!), `${name} vs ${fn}`).toBeGreaterThan(32);
+        }
+      }
+
+      // Six sections have to be six identities, or the colour says nothing.
+      for (let i = 0; i < SECTIONS.length; i++) {
+        for (let j = i + 1; j < SECTIONS.length; j++) {
+          expect(
+            deltaE(t[SECTIONS[i]!]!, t[SECTIONS[j]!]!),
+            `${SECTIONS[i]} vs ${SECTIONS[j]}`,
+          ).toBeGreaterThan(12);
+        }
+      }
+    });
+
+    // The drop highlight used to share --ok-bg/--warn-bg/--bad-bg with the
+    // reason bar and with a warned cell. Those are RESTING colours and were
+    // tinted accordingly: measured at dE 16.1 from --paper in the light theme,
+    // which across 78 columns is not a highlight, it is a rumour. Their own
+    // three tokens are stronger, and this test is what keeps them so.
+    test(`${theme} temada bırakma vurgusu kâğıttan gerçekten ayrılıyor`, async ({ page }) => {
+      await open(page);
+      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+      const t = await tokens(page, [
+        '--drop-ok-bg',
+        '--drop-warn-bg',
+        '--drop-bad-bg',
+        '--ok-bg',
+        '--warn-bg',
+        '--bad-bg',
+        '--paper',
+        '--on-color',
+      ]);
+
+      for (const [drop, resting] of [
+        ['--drop-ok-bg', '--ok-bg'],
+        ['--drop-warn-bg', '--warn-bg'],
+        ['--drop-bad-bg', '--bad-bg'],
+      ] as const) {
+        // Visible at a glance against the paper it sits on...
+        expect(deltaE(t[drop]!, t['--paper']!), `${drop} vs --paper`).toBeGreaterThan(28);
+        // ...and louder than the resting colour it replaced, which is the
+        // whole reason the extra token exists.
+        expect(
+          deltaE(t[drop]!, t['--paper']!),
+          `${drop} louder than ${resting}`,
+        ).toBeGreaterThan(deltaE(t[resting]!, t['--paper']!));
+        // The cell may hold a lesson card, and a card writes in --on-color.
+        expect(contrast(t['--on-color']!, t[drop]!), `--on-color on ${drop}`).toBeGreaterThan(4.5);
+      }
+
+      // Three states, three colours — still.
+      expect(deltaE(t['--drop-ok-bg']!, t['--drop-warn-bg']!)).toBeGreaterThan(20);
+      expect(deltaE(t['--drop-warn-bg']!, t['--drop-bad-bg']!)).toBeGreaterThan(20);
+      expect(deltaE(t['--drop-ok-bg']!, t['--drop-bad-bg']!)).toBeGreaterThan(20);
+    });
+  }
+
   test('koyu temada sürükleme geri bildirimi hâlâ üç ayrı renk', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Koyu tema' }).click();

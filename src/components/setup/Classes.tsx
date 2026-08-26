@@ -21,7 +21,7 @@ export default function Classes({ state, change }: PanelProps) {
   const hourCount = state.settings.hours.length;
 
   return (
-    <div className="panel">
+    <div className="panel step-panel">
       <h2>Sınıflar ({state.classes.length})</h2>
       <div className="form-row">
         <input

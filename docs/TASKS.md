@@ -715,4 +715,19 @@ Ayrıca programramda sıfırla olmalı ki programı en baştan yapabilelim ama u
 ayrıca ayarlarda ölçeklendirme de olsun. nasıl olması gerekiyorsa ya da.
     → **KARŞILANDI**: Ayarlar → Görünüm.
 Ayarlarda müsatilikteki programda derslerin altında saatleri olsun olmasın diye ayar olsun ve default olarak kapalı olsun.
-Yazdır kısmındaki program da büyümesi lazım. 
+Yazdır kısmındaki program da büyümesi lazım.
+Program kısmında programı sıfırla opsiyonu gelmeli.
+
+
+
+UI düzenlemeleri, simetri
+frontend skills
+UI ve desing kısıtlamaları kaldırma
+programda öğretmen ya da sınıf toggle edip programına bakma.
+her derslik, sınıf ya da öğretmenin üzerine tıklandığında bilgileri ve programının gözükmesi
+normal testler
+E2E testleri en sonda.
+koyu modu düzeltme
+brave'de açık modu açma
+E2E'nin yeni fotolar çekmesini sağlama.
+.exe

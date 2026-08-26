@@ -25,7 +25,7 @@ export default function Lessons({ state, change }: PanelProps) {
   });
 
   return (
-    <div className="panel">
+    <div className="panel step-panel">
       <h2>Dersler ({state.lessons.length})</h2>
       <p className="hint">
         Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. <b>Blok</b>,
@@ -141,7 +141,13 @@ export default function Lessons({ state, change }: PanelProps) {
               const teacher = state.teachers.find((t) => t.id === x.teacherId);
               return (
                 <tr key={x.id}>
-                  <td>{group?.name ?? '?'}</td>
+                  <td>
+                    <span
+                      className="color-dot"
+                      style={{ background: paletteColor(group?.color ?? 0) }}
+                    />{' '}
+                    {group?.name ?? '?'}
+                  </td>
                   <td>
                     <span
                       className="color-dot"

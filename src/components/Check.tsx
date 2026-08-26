@@ -5,7 +5,8 @@ import { useMemo } from 'react';
 import { buildIndex, closedConflicts } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
-import type { State } from '../types';
+import type { Id, State } from '../types';
+import { paletteColor } from '../palette';
 
 interface Props {
   state: State;
@@ -21,10 +22,13 @@ function Section({
   title,
   rows,
   description,
+  colorOf,
 }: {
   title: string;
   rows: ReportRow[];
   description: string;
+  /** Palette index for a row, or null where the kind has no colour (rooms). */
+  colorOf?: (id: Id) => number | null;
 }) {
   if (rows.length === 0) return null;
   // Problems first: his eye should land on what needs attention.
@@ -50,7 +54,15 @@ function Section({
               <td>
                 <span className={`badge ${r.level}`}>{BADGE[r.level]}</span>
               </td>
-              <td>{r.message}</td>
+              <td>
+                {colorOf !== undefined && colorOf(r.id) !== null && (
+                  <span
+                    className="row-dot"
+                    style={{ background: paletteColor(colorOf(r.id)!) }}
+                  />
+                )}
+                {r.message}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -235,14 +247,19 @@ export default function Check({ state }: Props) {
           </div>
         )}
 
+        {/* The colour is the same mark the grid row and the pool card carry —
+            a name without it makes the reader look the person up again. Rooms
+            have none, so that Section is given no lookup. */}
         <Section
           title="Öğretmenler"
           rows={report.teachers}
+          colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
           description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
         />
         <Section
           title="Sınıflar"
           rows={report.classes}
+          colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
           description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
         />
         <Section
