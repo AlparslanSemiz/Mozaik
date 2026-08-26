@@ -201,3 +201,79 @@ test.describe('47. Izgara enstrümanı', () => {
     await page.getByRole('button', { name: 'Havuz', exact: true }).click();
   });
 });
+
+// THE ROW HEAD AND THE DAY EDGE — two asks from 2026-08-26, both about a grid
+// 78 columns wide: "sol taraftaki öğretmen ya da sınıf tarafının genişliği
+// biraz daha kısaltılabilir" and "günlerin arasındaki boşluk veya fark biraz
+// daha belli olmalı".
+//
+// Both are the kind of change a suite passes over in silence — no text, no
+// count, no attribute moves — so both get a number.
+test.describe('68. Satır başı ve gün sınırı', () => {
+  test('satır başı, tuttuğu en uzun şeyden fazlasını almıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    const m = await page.locator('table.grid tbody th.row-head').first().evaluate((th) => {
+      // What the column would have to be for the longest built-in subject —
+      // the widest thing this cell ever holds, since the line above it is a
+      // short form. Asked of the browser, not guessed (pitfall 34).
+      const probe = th.cloneNode(true) as HTMLElement;
+      probe.style.cssText = 'position:absolute;visibility:hidden;width:max-content;min-width:0';
+      const sub = probe.querySelector('.secondary') as HTMLElement;
+      sub.textContent = 'Sosyal Bilgiler';
+      sub.style.overflow = 'visible';
+      sub.style.textOverflow = 'clip';
+      th.parentElement!.appendChild(probe);
+      const need = probe.getBoundingClientRect().width;
+      probe.remove();
+      return { have: th.getBoundingClientRect().width, need };
+    });
+
+    // Wide enough for the longest subject...
+    expect(m.have, `satır başı ${Math.round(m.have)} < gereken ${Math.round(m.need)}`)
+      .toBeGreaterThanOrEqual(m.need);
+    // ...and not half again as wide, which is what 8.25rem was. Every pixel
+    // here is a pixel the 72 lesson columns do not get.
+    expect(m.have, `satır başı ${Math.round(m.have)}px, gereken ${Math.round(m.need)}px`)
+      .toBeLessThan(m.need * 1.2);
+  });
+
+  test('gün sınırı ızgaradaki EN KALIN çizgi', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    const w = await page.evaluate(() => {
+      const px = (el: Element, side: 'Left' | 'Right' | 'Bottom') =>
+        Number.parseFloat(getComputedStyle(el)[`border${side}Width` as 'borderLeftWidth']);
+      const dayFirst = document.querySelector('table.grid tbody td.day-first')!;
+      const plain = document.querySelector('table.grid tbody td[data-day]:not(.day-first)')!;
+      return {
+        day: px(dayFirst, 'Left'),
+        hour: px(plain, 'Right'),
+        row: px(plain, 'Bottom'),
+      };
+    });
+
+    expect(w.day, `gün ${w.day}px, saat ${w.hour}px`).toBeGreaterThan(w.hour);
+    expect(w.day, `gün ${w.day}px, satır ${w.row}px`).toBeGreaterThan(w.row);
+    expect(w.day).toBeGreaterThanOrEqual(3);
+  });
+
+  test('gün sınırının rengi iki temada da zeminden UZAKLAŞIYOR', async ({ page }) => {
+    // A boundary is strong when it moves away from the paper, which means the
+    // light theme wants a darker line and the dark theme a lighter one. One
+    // hard-coded grey cannot do both, which is why it has its own token.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    for (const theme of ['light', 'dark'] as const) {
+      await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      const seen = await tokens(page, ['--day-edge', '--line-dark', '--paper']);
+      const near = deltaE(seen['--line-dark']!, seen['--paper']!);
+      const far = deltaE(seen['--day-edge']!, seen['--paper']!);
+      expect(far, `${theme}: gün sınırı ΔE ${far.toFixed(1)}, --line-dark ΔE ${near.toFixed(1)}`)
+        .toBeGreaterThan(near);
+    }
+  });
+});

@@ -127,9 +127,16 @@ test.describe('61. Elle sıralama', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
 
-    const note = page.locator('.list-tools .list-note').first();
+    // Count, not text. This used to read `.first()` and assert
+    // `not.toContainText`, and it passed for the wrong reason: the strip also
+    // held an always-drawn EMPTY announcement paragraph wearing the same
+    // class, so `.first()` matched that one and "does not contain" was true of
+    // something that was never the note. The announcement has moved onto the
+    // strip's own row and carries `.list-said` now (pitfall 49), so the note
+    // is either drawn or it is not — which is what the rule actually says.
+    const note = page.locator('.list-tools .list-note');
     await expect(grips(page).first()).toBeEnabled();
-    await expect(note).not.toContainText('Girildiği sıra');
+    await expect(note).toHaveCount(0);
 
     await page.getByLabel('Sırala').selectOption({ label: 'Ada göre' });
     await expect(grips(page).first()).toBeDisabled();

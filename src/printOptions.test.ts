@@ -3,6 +3,9 @@ import {
   normalizePrintOptions,
   PRINT_DEFAULTS,
   PRINT_OPTION_LABELS,
+  PER_SHEET_LABELS,
+  PER_SHEET_VALUES,
+  PRINT_SIZE_LABELS,
 } from './printOptions';
 
 describe('normalizePrintOptions', () => {
@@ -56,8 +59,35 @@ describe('normalizePrintOptions', () => {
   });
 
   it('gidiş-dönüş: yazılan JSON aynen geri okunuyor', () => {
-    const chosen = { school: false, credits: true, clock: false, stamp: true, cellBottom: false };
+    const chosen = {
+      school: false, credits: true, clock: false, stamp: true, cellBottom: false,
+      perSheet: 4 as const, size: 'kucuk' as const,
+    };
     expect(normalizePrintOptions(JSON.stringify(chosen))).toEqual(chosen);
+  });
+
+  // The two that are not switches. `Number('')` and `Number(null)` are both 0
+  // and 0 is not a legal sheet count, so membership is the guard rather than
+  // `Number.isFinite` (pitfall 43) — and a value from a FUTURE version must
+  // fall back rather than reach the layout.
+  it('sayfa başına program: yalnız 1, 2 ve 4 geçiyor', () => {
+    expect(normalizePrintOptions({ perSheet: 2 }).perSheet).toBe(2);
+    for (const junk of [0, 3, -1, '2', null, undefined, NaN, {}]) {
+      expect(normalizePrintOptions({ perSheet: junk }).perSheet, `${String(junk)}`).toBe(1);
+    }
+  });
+
+  it('yazı boyutu: yalnız üç adı geçiyor', () => {
+    expect(normalizePrintOptions({ size: 'buyuk' }).size).toBe('buyuk');
+    for (const junk of [0, 'büyük', 'BUYUK', null, undefined, {}]) {
+      expect(normalizePrintOptions({ size: junk }).size, `${String(junk)}`).toBe('normal');
+    }
+  });
+
+  it('varsayılan düzen: bir A4’e BİR program, normal punto', () => {
+    // What came out of the printer before these two existed.
+    expect(PRINT_DEFAULTS.perSheet).toBe(1);
+    expect(PRINT_DEFAULTS.size).toBe('normal');
   });
 
   // The one that never existed before. On by default would change what comes
@@ -75,9 +105,17 @@ describe('PRINT_OPTION_LABELS', () => {
   // A switch with no row in the panel is a switch nobody can reach; a row
   // with no switch behind it is a checkbox that does nothing.
   it('panelin her satırı bir ayara, her ayar bir satıra karşılık geliyor', () => {
+    // Three label lists now, one record: the five switches, the sheet counts
+    // and the three type sizes. The rule is unchanged — a setting with no row
+    // is a setting nobody can reach — so the union has to be the whole record.
     const ids = PRINT_OPTION_LABELS.map((x) => x.id).sort();
-    expect(ids).toEqual(Object.keys(PRINT_DEFAULTS).sort());
+    expect(ids).toEqual(['cellBottom', 'clock', 'credits', 'school', 'stamp']);
     expect(new Set(ids).size).toBe(ids.length);
+
+    const shown = [...ids, 'perSheet', 'size'].sort();
+    expect(shown).toEqual(Object.keys(PRINT_DEFAULTS).sort());
+    expect(PER_SHEET_LABELS.map((x) => x.value)).toEqual(PER_SHEET_VALUES);
+    expect(PRINT_SIZE_LABELS.map((x) => x.value)).toEqual(['kucuk', 'normal', 'buyuk']);
   });
 
   it('her satırın adı ve açıklaması var', () => {

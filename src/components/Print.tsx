@@ -1,5 +1,12 @@
 // Printing: ONE ENTITY PER PAGE.
 //
+// WHAT DOES NOT GO ON PAPER: closed hours. The teacher sheet used to mark
+// every unavailable hour with a x and a grey hatch. Asked for and removed
+// (2026-08-26): a sheet that goes on a wall answers "where am I at 10:40",
+// and a cross answers a question nobody is holding the paper to ask. It also
+// cost the reader a column of ink per absent teacher. The information is not
+// lost — Musaitlik is where it is edited and Kontrol is where it is counted.
+//
 // Row = day, column = lesson — the same way round as the availability grid, and
 // the way a timetable is read on a wall. 12 lesson columns do not fit A4
 // portrait (~15 mm each), so the page is LANDSCAPE: ~21 mm per column, which is
@@ -8,13 +15,13 @@
 // Printing the 84-column main table is still impossible and still not attempted.
 
 import { useMemo } from 'react';
-import { sharedPeriods } from '../bell';
+import { periodGroups } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
-import { subjectShort } from '../entities';
+import { shortDay, subjectShort } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
 import type { Scope } from '../toolState';
-import { PRINT_OPTION_LABELS } from '../printOptions';
+import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
 import type { PrintOptions } from '../printOptions';
 
 interface Props {
@@ -50,6 +57,30 @@ export type Excluded = { classes: Set<string>; teachers: Set<string> };
 
 export const NOTHING_EXCLUDED: Excluded = { classes: new Set(), teachers: new Set() };
 
+
+/**
+ * ONE SHEET OF A4 holds `per` timetables (asked for on 2026-08-26: "bir A4
+ * kağıdına 4 tane program yazılabilir olsun").
+ *
+ * `.print-sheet` is the PAPER — 297x205 mm, and the thing `break-after: page`
+ * lives on. `.print-page` is one timetable, and it stays one timetable at every
+ * setting: the tick lists count them, "3 sınıf = 3 sayfa" counts them, and
+ * renaming what a page IS would have quietly changed what all of that means.
+ * At per = 1 the two boxes are the same size and nothing about the sheet moved.
+ */
+function sheets(plans: React.ReactElement[], per: number): React.ReactElement[] {
+  const out: React.ReactElement[] = [];
+  for (let i = 0; i < plans.length; i += per) {
+    const slice = plans.slice(i, i + per);
+    out.push(
+      <div className="print-sheet" key={`s${i}`}>
+        {slice}
+      </div>,
+    );
+  }
+  return out;
+}
+
 export default function Print({
   state,
   excluded,
@@ -76,12 +107,17 @@ export default function Print({
     [],
   );
 
-  // A column header carries ONE time, but the 6th lesson starts at 13:30 on a
-  // weekday and 13:10 at the weekend. Printing one of them above both would be
-  // a lie on paper, so where the days disagree the column shows no clock; each
-  // row still marks its own long break.
+  // A column header used to carry ONE time and nothing where the days
+  // disagreed — which with the default week meant the 6th column came out
+  // blank, and that blank was read as a fault. There is no fault: the 6th
+  // lesson starts at 13:30 on a weekday and 13:10 at the weekend, because the
+  // long break sits after the 5th lesson on one and the 6th on the other.
+  //
+  // So the header prints BOTH, each with the days it belongs to. Where the
+  // week agrees — eleven of the twelve columns — there is one group and no day
+  // names, exactly as before.
   const clock = useMemo(
-    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
+    () => periodGroups(state.settings.bell, state.settings.hours, state.settings.days),
     [state.settings],
   );
 
@@ -93,22 +129,55 @@ function credits(...parts: string[]): string {
   return parts.filter((p) => p !== '').join(' · ');
 }
 
+/**
+ * [0,1,2,3] -> "Sal–Cum", [4,5] -> "Cmt–Pzr", [0,3] -> "Sal, Cum".
+ *
+ * Runs of consecutive days become a range, because that is what they are in
+ * the rows below: the reader matches a label to a block of rows by looking
+ * down the sheet rather than by reading six names.
+ */
+function dayRange(days: State['settings']['days'], indices: number[]): string {
+  const short = (i: number) => shortDay(days[i]?.name ?? '');
+  const parts: string[] = [];
+  let run = 0;
+  for (let i = 1; i <= indices.length; i++) {
+    if (i < indices.length && indices[i] === indices[i - 1]! + 1) continue;
+    const from = indices[run]!;
+    const to = indices[i - 1]!;
+    parts.push(from === to ? short(from) : `${short(from)}–${short(to)}`);
+    run = i;
+  }
+  return parts.join(', ');
+}
+
 /** The lesson-number header row, shared by both kinds of page. */
   function head() {
     return (
       <thead>
         <tr>
           <th className="p-daycol">Gün</th>
-          {state.settings.hours.map((hour, s) => (
-            <th key={s}>
-              {hour}
-              {options.clock && (
-                <span className="p-clock">
-                  {clock[s] === null ? '' : `${clock[s]?.start ?? ''}–${clock[s]?.end ?? ''}`}
-                </span>
-              )}
-            </th>
-          ))}
+          {state.settings.hours.map((hour, s) => {
+            const groups = clock[s] ?? [];
+            return (
+              <th key={s}>
+                {hour}
+                {options.clock &&
+                  groups.map((g, i) => (
+                    <span className="p-clock" key={i}>
+                      {/* Day names appear ONLY when there is more than one
+                          answer. Putting "Sal–Pzr" above all twelve columns
+                          would say nothing eleven times to explain one. */}
+                      {groups.length > 1 && (
+                        <span className="p-clock-days">
+                          {dayRange(state.settings.days, g.days)}{' '}
+                        </span>
+                      )}
+                      {g.period.start}–{g.period.end}
+                    </span>
+                  ))}
+              </th>
+            );
+          })}
         </tr>
       </thead>
     );
@@ -219,8 +288,10 @@ function credits(...parts: string[]): string {
     // of pushing twenty pages of preview a screen down. When printing, `.cols`
     // collapses to a block and the whole control panel is `.no-print` anyway.
     <div className="cols narrow-right">
-      <div className="print-area">
-        {chosenClasses.map((group) => (
+      <div className="print-area" data-per={options.perSheet} data-size={options.size}>
+        {sheets(
+          [
+        ...chosenClasses.map((group) => (
             <div className="print-page" key={group.id}>
               <h3>
                 {/* Big line: what the sheet is. Small line: whose it is. The
@@ -289,9 +360,9 @@ function credits(...parts: string[]): string {
                 <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
               )}
             </div>
-          ))}
+          )),
 
-        {chosenTeachers.map((teacher) => (
+        ...chosenTeachers.map((teacher) => (
             <div className="print-page" key={teacher.id}>
               <h3>
                 <span className="p-title-main">
@@ -320,24 +391,28 @@ function credits(...parts: string[]): string {
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
                         const group =
                           lesson === undefined ? undefined : ix.classById.get(lesson.classId);
-                        const closed =
-                          state.unavailable[closedKey(teacher.id, g, s)] !== undefined;
                         return (
                           <td
                             key={s}
-                            className={[
-                              closed && group === undefined ? 'p-closed' : '',
-                              breakClass(day.longBreakAfter, s),
-                            ]
-                              .filter(Boolean)
-                              .join(' ')}
+                            className={breakClass(day.longBreakAfter, s)}
+                            // The CLASS's colour, not the teacher's.
+                            //
+                            // On the screen grid a cell is painted by the
+                            // teacher because that is what matches the pool
+                            // card you dragged (CLAUDE.md). On a teacher's own
+                            // SHEET every filled cell is that same teacher, so
+                            // one colour over the whole week says nothing —
+                            // twelve cells of identical pastel. The class is
+                            // the thing that varies, and it is the thing the
+                            // reader is looking for. The class sheet is
+                            // unchanged: there the teacher is what varies.
                             style={
                               colored && group !== undefined
-                                ? { background: paletteColor(teacher.color) }
+                                ? { background: paletteColor(group.color) }
                                 : undefined
                             }
                           >
-                            {group !== undefined ? (
+                            {group !== undefined && (
                               <>
                                 <span className="p-top">{group.name}</span>
                                 {options.cellBottom && (
@@ -348,9 +423,7 @@ function credits(...parts: string[]): string {
                                   </span>
                                 )}
                               </>
-                            ) : closed ? (
-                              '×'
-                            ) : null}
+                            )}
                           </td>
                         );
                       })}
@@ -364,7 +437,10 @@ function credits(...parts: string[]): string {
                 <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
               )}
             </div>
-          ))}
+          )),
+          ],
+          options.perSheet,
+        )}
       </div>
 
       <aside>
@@ -385,7 +461,10 @@ function credits(...parts: string[]): string {
               disabled={pageCount === 0}
               onClick={() => window.print()}
             >
-              Yazdır ({pageCount} sayfa)
+              {/* Sheets, not timetables: at 4-up, twenty classes are five
+                  pieces of paper, and the number beside the button is the
+                  number the printer will produce. */}
+              Yazdır ({Math.ceil(pageCount / options.perSheet)} kâğıt)
             </button>
           </div>
 
@@ -400,6 +479,57 @@ function credits(...parts: string[]): string {
           {pageCount === 0 && (
             <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
           )}
+        </div>
+
+        {/* HOW THE SHEET IS LAID OUT — two questions, and they are not the
+            same question as "what is on it", so they are not in the same
+            panel. This one changes the geometry of the paper; the one below
+            changes what is written on it.
+
+            Two knobs and not one, on purpose (2026-08-26): the count picks a
+            base scale so four timetables can fit an A4 at all, and the size is
+            the reader's own adjustment on top of it. One knob would have had
+            no room for "biraz daha büyük olsun". */}
+        <div className="panel no-print">
+          <h2>Sayfa düzeni</h2>
+          <p className="hint">
+            Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar
+            büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez — bu ayrı.
+          </p>
+
+          <h3>Bir kâğıda kaç program</h3>
+          <div className="form-row">
+            {PER_SHEET_LABELS.map((x) => (
+              <button
+                key={x.value}
+                className="btn"
+                aria-pressed={options.perSheet === x.value}
+                title={x.hint}
+                onClick={() => setOptions({ ...options, perSheet: x.value })}
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
+          <p className="hint">
+            {PER_SHEET_LABELS.find((x) => x.value === options.perSheet)?.hint}
+            {' · '}
+            <b>{Math.ceil(pageCount / options.perSheet)}</b> kâğıt
+          </p>
+
+          <h3>Kâğıttaki yazı</h3>
+          <div className="form-row">
+            {PRINT_SIZE_LABELS.map((x) => (
+              <button
+                key={x.value}
+                className="btn"
+                aria-pressed={options.size === x.value}
+                onClick={() => setOptions({ ...options, size: x.value })}
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Which of the things on a sheet are wanted on THIS school's sheets.
@@ -437,11 +567,15 @@ function credits(...parts: string[]): string {
           <table className="stat">
             <tbody>
               <tr>
-                <td>Sayfa</td>
+                <td>Program</td>
                 <td className="num">{pageCount}</td>
               </tr>
               <tr>
                 <td>Kâğıt</td>
+                <td className="num">{Math.ceil(pageCount / options.perSheet)}</td>
+              </tr>
+              <tr>
+                <td>Sayfa</td>
                 <td className="num">A4 yatay</td>
               </tr>
               <tr>

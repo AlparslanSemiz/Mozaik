@@ -88,6 +88,21 @@ export default function ListTools<T>({
 
         <span className="spacer" />
 
+        {/* What the last keypress did to the order. It lives ON this row, not
+            under it: as its own line it was an EMPTY line almost always and
+            still held `min-height: 1.2em` open — most of the 44 px measured
+            between the strip and the table. Here it costs nothing when empty,
+            and it goes BEFORE the count so the count keeps its place at the
+            right edge either way.
+
+            Its class is `.list-said`, NOT `.list-note` — the note below is
+            found by `.list-tools .list-note` and this element now comes FIRST
+            in the DOM, so sharing the class would silently hand that selector
+            a different element (pitfall 49). */}
+        <span className="list-said" role="status" aria-live="polite">
+          {notice}
+        </span>
+
         <span className="list-count" aria-live="polite">
           {filtering ? (
             <>
@@ -150,10 +165,6 @@ export default function ListTools<T>({
           ve süzmeyi kaldırın.
         </p>
       )}
-
-      <p className="list-note sr-live" role="status" aria-live="polite">
-        {notice}
-      </p>
     </div>
   );
 }

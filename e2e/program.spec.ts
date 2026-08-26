@@ -1,7 +1,7 @@
 // The Program tab: the grid, the pool, dragging, moving and removing.
 
 import { expect, test, type Page } from '@playwright/test';
-import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop } from './helpers';
+import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover } from './helpers';
 
 test.describe('2. Sürükle-bırak', () => {
   test('hayalet kart oluşuyor ve imleci takip ediyor', async ({ page }) => {
@@ -672,5 +672,120 @@ test.describe('9. Öğle arası ayracı', () => {
     const first = rows.first().locator('td');
     await expect(first.nth(0)).toContainText('Öğle arası');
     await expect(first.nth(1)).toHaveText('');
+  });
+});
+
+// DROPPING ONTO AN OCCUPIED CELL (2026-08-26, asked for by name: "farklı bir
+// kart başka bir kartın üzerine gelirse o üzerine gelinen aşağı düşsün ve
+// koyduğum olsun").
+//
+// The world is built here rather than taken from the sample: eviction needs
+// ONE class with TWO lessons from DIFFERENT teachers, which the sample has
+// buried somewhere among 99 of them.
+const EVICT_WORLD = {
+  schemaVersion: 6,
+  settings: {
+    schoolName: 'Tahliye Kursu',
+    days: [
+      { name: 'Salı', longBreakAfter: 0 },
+      { name: 'Çarşamba', longBreakAfter: 0 },
+    ],
+    hours: ['1', '2', '3', '4'],
+    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+    rules: { maxConsecutive: 'block', maxPerDay: 'block', minPerDay: 'warn', maxSameLessonPerDay: 'block' },
+    subjects: ['Matematik', 'Fizik'],
+    subjectShorts: {},
+  },
+  rooms: [{ id: 'dA', name: 'A' }],
+  teachers: [
+    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+    { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+  ],
+  classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
+  lessons: [
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+    { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+  ],
+  unavailable: {},
+  // MÇ is sitting on Salı 1. AV has the whole grid free.
+  placements: { 's510|0|0': 'x1' },
+};
+
+test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
+  /** Grabs the pool card whose top or bottom line says `text`. */
+  async function grabCard(page: Page, text: string) {
+    const card = page.locator('.pool-card', { hasText: text }).first();
+    const box = (await card.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect(page.locator('.ghost')).toHaveCount(1);
+    await page.waitForTimeout(150);
+  }
+
+  test('dolu hücre artık kırmızı değil SARI — bir şey kaybedeceğini söylüyor', async ({ page }) => {
+    await loadWorld(page, EVICT_WORLD);
+    await grabCard(page, 'AV');
+    const cell = await hover(page, 0, 0);
+    // Yellow, not green: the drop is allowed but it costs a lesson. No fourth
+    // colour was invented for this — the functional channel already had one.
+    await expect(cell).toHaveClass(/drop-warn/);
+    await expect(cell).not.toHaveClass(/drop-blocked/);
+    // ...and the bar says WHAT it costs, by name.
+    await expect(page.locator('.reason-bar')).toContainText('havuza dönecek');
+    await expect(page.locator('.reason-bar')).toContainText('MÇ');
+    await page.mouse.up();
+  });
+
+  test('bırakınca eski ders havuza döner, yeni ders yerini alır', async ({ page }) => {
+    await loadWorld(page, EVICT_WORLD);
+    // The grid is in TEACHER view, so a cell is named by its row as well: the
+    // same day and hour exist once per teacher.
+    const mc = page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]');
+    const av = page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]');
+    // In teacher view a cell says which CLASS the teacher is with, so both
+    // rows would read "510" — which row it is on is the whole assertion.
+    await expect(mc).toContainText('510');
+    await expect(av).toHaveText('');
+
+    await grabCard(page, 'AV');
+    await hover(page, 0, 0);
+    await page.mouse.up();
+
+    // The lesson moved rows: AV now has that hour and MÇ does not.
+    await expect(av).toContainText('510');
+    await expect(mc).toHaveText('');
+    // ...and the old one is back in the tray, not deleted (principle 6).
+    await expect(page.locator('.pool-card', { hasText: 'MÇ' })).toHaveCount(1);
+    // .last(): "Yedek yüklendi" from loadWorld is still on screen.
+    await expect(page.locator('.toast').last()).toContainText('510 — MÇ dersi havuza döndü');
+  });
+
+  test('bütün hamle TEK geri-al adımı', async ({ page }) => {
+    await loadWorld(page, EVICT_WORLD);
+    await grabCard(page, 'AV');
+    await hover(page, 0, 0);
+    await page.mouse.up();
+    await expect(page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]')).toContainText('510');
+
+    // One Ctrl+Z puts BOTH halves back: the evicted lesson returns to the grid
+    // and the dropped one goes back to the pool. An eviction that cost two
+    // undos would leave the grid in a state the reader never made.
+    await page.keyboard.press('Control+z');
+    await expect(page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]')).toContainText('510');
+    await expect(page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]')).toHaveText('');
+  });
+
+  test('BAŞKA bir sebeple kapalı hücre tahliyeyle açılmıyor', async ({ page }) => {
+    // AV is unavailable at Salı 1. The class is busy there too, so the first
+    // refusal is "class busy" — but evicting it does not make AV available.
+    await loadWorld(page, { ...EVICT_WORLD, unavailable: { 'oAV|0|0': 1 } });
+    await grabCard(page, 'AV');
+    const cell = await hover(page, 0, 0);
+    await expect(cell).toHaveClass(/drop-blocked/);
+    await expect(page.locator('.reason-bar')).toContainText('müsait değil');
+    await page.mouse.up();
   });
 });

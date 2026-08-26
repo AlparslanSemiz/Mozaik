@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Ders Programı">
+  <title>Ders Programı</title>
+  <!-- C. THE MONOGRAM.
+       "DP", in the same face the program is set in, with one lesson block
+       standing in for the counter of the D. The most legible option at 16 px
+       and the one that says least about what the tool does. -->
+  <rect width="512" height="512" rx="112" fill="#2e3ba8"/>
+  <g fill="#ffffff">
+    <!-- D -->
+    <path d="M104 128h88c66 0 112 52 112 128s-46 128-112 128h-88a16 16 0 0 1-16-16V144a16 16 0 0 1 16-16Zm40 60v136h44c34 0 56-27 56-68s-22-68-56-68h-44Z"/>
+    <!-- P -->
+    <path d="M336 128h56c58 0 96 38 96 94s-38 94-96 94h-16v56a16 16 0 0 1-16 16h-24a16 16 0 0 1-16-16V144a16 16 0 0 1 16-16Zm40 60v68h16c26 0 42-13 42-34s-16-34-42-34h-16Z"/>
+  </g>
+  <!-- the placed lesson: the counter of the D, filled in -->
+  <rect x="144" y="188" width="44" height="136" fill="#65b6ec"/>
+</svg>

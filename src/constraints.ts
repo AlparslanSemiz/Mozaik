@@ -385,6 +385,150 @@ export function removeBlock(d: State, classId: Id, day: number, hour: number): S
   return { ...d, placements };
 }
 
+/**
+ * THE DROP MAP: what every cell on the grid would do if the lesson were let go
+ * over it. One call, one pass, computed ONCE at the start of a drag (pitfall 2)
+ * and never again while the pointer moves.
+ *
+ * It is `check()` for every cell plus the ONE refusal a drop is allowed to
+ * overrule: the class's own other lesson already sitting in the target cells.
+ * Asked for by name (2026-08-26): "farklı bir kart başka bir kartın üzerine
+ * gelirse o üzerine gelinen aşağı düşsün ve koyduğum olsun" — the one that was
+ * there goes back to the pool, which is the tray directly below the grid.
+ *
+ * Only `classBusy` is overruled, and the limit is not squeamishness: every
+ * other refusal is about somebody ELSE. A teacher standing in another class, a
+ * shared room, a closed hour — evicting the block in front of you does not
+ * make any of those true, so a cell refused for one of them stays refused.
+ *
+ * WHY THE VERDICT IS "warn" AND NOT "ok". A drop that costs you a lesson is not
+ * the same move as a drop onto empty air, and the grid already has a colour for
+ * "allowed, but look at it": yellow. No fourth colour was added — the three
+ * functional colours keep meaning exactly what CLAUDE.md says they mean.
+ *
+ * The eviction is simulated with `vacate`/`occupy` on ONE working copy rather
+ * than with `removeBlock` per cell: the latter copies a ~1800-key dictionary
+ * and rebuilds the index for each of 72 cells, and this runs on the pointer
+ * going down.
+ */
+export interface DropVerdict extends Verdict {
+  /** Lessons that would be sent back to the pool for this drop to happen. */
+  evicts: Id[];
+}
+
+export function dropMap(d: State, ix: Index, lessonId: Id): Map<string, DropVerdict> {
+  const map = new Map<string, DropVerdict>();
+  const lesson = ix.lessonById.get(lessonId);
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+
+  // One working copy for the whole pass; `vacate`/`occupy` write into it and
+  // put it back, so `d` itself is never touched. The INDEX is copied too, and
+  // not for tidiness: `ix` is the caller's memoised object, shared with every
+  // render, and a vacate that was not followed by its occupy would leave it
+  // lying about who is busy. Copying costs one pass over ~1800 entries, once —
+  // the thing being avoided is doing that 72 times.
+  const work: State = { ...d, placements: { ...d.placements } };
+  const workIx: Index = {
+    ...ix,
+    teacherBusy: new Map(ix.teacherBusy),
+    roomBusy: new Map(ix.roomBusy),
+    placedHours: new Map(ix.placedHours),
+  };
+
+  for (let g = 0; g < dayCount; g++) {
+    for (let s = 0; s < hourCount; s++) {
+      const key = `${g}|${s}`;
+      const plain = check(d, ix, lessonId, g, s);
+      if (plain.blocked === null || lesson === undefined) {
+        map.set(key, { ...plain, evicts: [] });
+        continue;
+      }
+
+      const detail = blockerDetail(d, ix, lessonId, g, s);
+      if (detail === null || detail.code !== 'classBusy') {
+        map.set(key, { ...plain, evicts: [] });
+        continue;
+      }
+
+      // Which of the class's own blocks are in the way. A block is identified
+      // by its HEAD, so two cells of the same 2-hour block count once.
+      const block = Math.max(1, lesson.blockSize);
+      const heads: Array<{ lesson: Lesson; hour: number }> = [];
+      const seen = new Set<string>();
+      for (let i = 0; i < block && s + i < hourCount; i++) {
+        const start = blockStart(work, lesson.classId, g, s + i);
+        if (start === null) continue;
+        const occupantId = work.placements[placementKey(lesson.classId, g, start)];
+        if (occupantId === undefined) continue;
+        const mark = `${occupantId}|${start}`;
+        if (seen.has(mark)) continue;
+        seen.add(mark);
+        const occupant = ix.lessonById.get(occupantId);
+        if (occupant !== undefined) heads.push({ lesson: occupant, hour: start });
+      }
+
+      if (heads.length === 0) {
+        map.set(key, { ...plain, evicts: [] });
+        continue;
+      }
+
+      for (const h of heads) {
+        vacate(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour);
+      }
+      const after = check(work, workIx, lessonId, g, s);
+      for (const h of heads) {
+        occupy(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour);
+      }
+
+      if (after.blocked !== null) {
+        // Evicting did not help: the cell is refused for its own reason, and
+        // the sentence the reader gets is that reason, not "class is busy".
+        map.set(key, { ...after, evicts: [] });
+        continue;
+      }
+
+      map.set(key, {
+        blocked: null,
+        warning: after.warning ?? evictionNotice(ix, heads.map((h) => h.lesson)),
+        evicts: heads.map((h) => h.lesson.id),
+      });
+    }
+  }
+
+  return map;
+}
+
+/** The class's room, which `occupy`/`vacate` need to keep roomBusy honest. */
+function roomOf(ix: Index, lesson: Lesson): Id | null {
+  return ix.classById.get(lesson.classId)?.roomId ?? null;
+}
+
+/** What the reader is about to lose, named. */
+export function evictionNotice(ix: Index, lessons: Lesson[]): string {
+  const names = lessons.map((x) => {
+    const group = ix.classById.get(x.classId)?.name ?? '?';
+    const teacher = ix.teacherById.get(x.teacherId)?.short ?? '?';
+    return `${group} — ${teacher}`;
+  });
+  return names.length === 1
+    ? `${names[0]} dersi havuza dönecek`
+    : `${names.join(', ')} dersleri havuza dönecek`;
+}
+
+/**
+ * The eviction itself, as a state change: lift every block that is in the way,
+ * then lay the new one down. Separate from `dropMap` because the map ANSWERS a
+ * question and this one CHANGES something, and because the reducer has to redo
+ * the lift against the state React hands it rather than the one the drag
+ * started with (pitfall 20).
+ */
+export function evict(d: State, classId: Id, day: number, hours: number[]): State {
+  let next = d;
+  for (const h of hours) next = removeBlock(next, classId, day, h);
+  return next;
+}
+
 // ------------------------------------------------- in-place placing (solver)
 
 /**

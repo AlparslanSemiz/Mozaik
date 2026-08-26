@@ -132,14 +132,14 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 453 birim testi
+npm test           # Vitest — 508 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 318 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 381 E2E testi (file://)
 npm run test:site  # site testleri, http üzerinde — 6 test, çevrimdışı açılış dahil
-npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site
+npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
-npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, ~40 sn
+npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, 34,8 sn (kontrol'ün parçası)
 ```
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
@@ -243,6 +243,8 @@ bundle.ts                       "bütün planlar tek dosyada" zarfı. library.ts
                                 çağırır, State'i yine BİLMEZ.
   |
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
+                                dropMap() de burada: 72 hücrenin yargısı bir
+                                ÇİZİM kararı değil, kısıt motorunun cevabı
 rules.ts / bell.ts              Testleri zorunlu.
 import.ts / entities.ts
 solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
@@ -990,6 +992,27 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     hiçbir şeye yaramıyor" diye okundu. İki ders: yorum koşulun **dışına**
     yazılır, ve bir derlemenin çıktısı susturuluyorsa **çıkış kodu** okunur.
 
+63. **`:root`'ta tanımlanan bir custom property'nin içindeki `var()` ORADA
+    çözülür.** Kâğıttaki yazı boyutu için `--fs-p-xl: calc(17pt *
+    var(--p-type))` yazıldı, `--p-type` de `:root`'ta 1'di, ve `.print-area`
+    üstünde `--p-fit`/`--p-zoom` ezildi. Hiçbir şey olmadı: `--fs-p-xl`
+    `:root` üstünde hesaplanırken `:root`'un çarpanını okur, ve alt öğeler
+    **bitmiş sayıyı** miras alır. Aşağıdaki yazma okunmayan bir yazmadır —
+    tuzak 52'nin aynası (orada değişken oraya *ulaşmıyordu*, burada değer
+    çoktan *pişmişti*). Görülme biçimi de öğretici: hiçbir hata yok, hiçbir
+    test kırmızı değil, yalnız dokuz farklı ayarda başlık **22,7 px**.
+    Kural: türetilmiş bir merdiven, **türediği çarpanla aynı öğede** tanımlanır.
+
+64. **Bir düzen kusurunu ölçerken hangi KUTUNUN taştığına bakılır.**
+    "Sayfada ne olsun"un satırları panelden taşıyor sanıldı; test satırın sağ
+    kenarını panelinkiyle karşılaştırdı ve **bozuk derlemede yeşil geçti**.
+    Taşan şey kapsayıcı değildi: `white-space: nowrap` bir flex öğesini
+    büyütmüyor, öğenin **kendi metnini kırpıyor**du (`scrollWidth >
+    clientWidth`). Ölçülen: `"Derslik ve branş — Ayn…"`. Bir kırpılma testi
+    öğenin kendi `scrollWidth`'ine bakar; komşusuna bakan test, bakması
+    gereken şeyi hiç görmez. Tuzak 41'in ("boş ızgarada yapılan ölçüm hiçbir
+    şey ölçmez") kardeşi: **yanlış kutuya bakan ölçüm de hiçbir şey ölçmez.**
+
 ---
 
 ## Tasarım — serbest
@@ -1172,6 +1195,14 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   bir yanlış tıklama uzaklıktaydı ve geri alınamıyor. `Dosyaya kaydet` / `Dosyadan aç`
   üst çubukta **kalır**: tuzak 7'nin karşı önlemi görünür olmak zorunda.
 
+- **Dolu bir hücreye bırakılabilir; oradaki ders HAVUZA döner (2026-08-26).**
+  `dropMap()` `check()`'in üstüne **tek** bir reddin geçersiz kılınmasını ekler:
+  sınıfın kendi başka dersi. Öteki bütün retler *başkasıyla* ilgilidir —
+  öğretmen başka sınıfta, derslik dolu, saat kapalı — ve önündeki bloğu havuza
+  atmak onların hiçbirini doğru yapmaz, o yüzden o hücreler kapalı kalır.
+  Hücre **yeşil değil sarı**: izin var ama bir şey kaybediyorsunuz, ve ızgaranın
+  üç renginde bunun karşılığı zaten vardı — dördüncü bir renk uydurulmadı.
+  Bütün hamle **tek geri-al adımı**, ve ne kaybedildiği toast'ta adıyla yazar.
 - **Sol tık taşır, sağ tık siler.** Yerleşmiş bir derse sol tıklamak bloğu siliyordu,
   dolayısıyla taşımanın tek yolu silip havuzdan yeniden sürüklemekti. Şimdi: sol düğme
   + sürükle = taşı, sağ tık = havuza gönder, Delete = aynısı klavyeden. Klavyeden gelen
@@ -1193,6 +1224,12 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   altısı) — artık sabit değil: kenar bir `role="separator"`, bıraktığınız yer
   `ders-programi-havuz-boy`'da hatırlanıyor, ve **havuz boşalınca kendiliğinden
   kapanıyor** (boş bir tepsi 176px'i hiçbir şey için tutar).
+- **Müsaitlik'te kapalı saatin çarpısı BÜYÜK ve KIRMIZI (2026-08-26).** İşlevsel
+  renk kanalını bozmuyor ve bunu koruyan şey **kapsam**: Program ızgarasında
+  kırmızı "bu bırakma reddedildi" demektir ve gri tarama "bu saat kapalı" —
+  ikisi aynı anda ekranda olabildiği için ayrı durmak zorundalar. Müsaitlik'te
+  ne bırakma var ne ret; ekranın söylediği tek şey açık/kapalı, ve çarpı onun
+  kapalı yarısı. Tarama duruyor: renk tek başına durum taşımaz.
 - **İmleç haçı.** Bir hücrenin üstüne gelince o hücrenin **satırı ve sütunu**,
   ayrıca saat başlığı ile öğretmen adı birlikte aydınlanır. 78 sütunluk bir
   haftada yerini kaybetmemenin tek yolu ve babanın göz sorununa doğrudan cevap.
@@ -1221,7 +1258,29 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   değil: o girdi AM/PM'i tarayıcının yereline göre seçer ve boşaltılınca günü sessizce
   00:00'a alırdı.
 - **Yazdırmada hangi sayfaların basılacağı tek tek seçilir.** Sınıf ve öğretmen için
-  ayrı onay listeleri, "Tümü / Hiçbiri", ve düğmede sayfa sayısı.
+  ayrı onay listeleri, "Tümü / Hiçbiri", ve düğmede **kâğıt** sayısı.
+- **Bir A4'e 1, 2 ya da 4 program (2026-08-26).** `.print-sheet` **kâğıttır**
+  (297×205 mm, `break-after` onun üstünde); `.print-page` **bir programdır** ve
+  her ayarda öyle kalır — onu sayan yarım düzine test var ve adını değiştirmek
+  hepsinin ne dediğini sessizce değiştirirdi. Kâğıttaki yazı boyutu **ayrı** bir
+  ayar: düzen bir taban ölçek dayatır (`--p-fit`), okuyan onun üstüne kendi
+  tercihini koyar (`--p-zoom`). İkisi de `.print-area`'da, `:root`'ta **değil**
+  (tuzak 63).
+- **ÖNİZLEME KÂĞIDIN KENDİSİDİR (2026-08-26).** Eskiden bir *modeliydi*: 62rem
+  genişlik, A4'e yakın bir oran, ve satırları ekran merdiveninden alırken
+  yazıcının 23 mm kullanması. Ölçülen fark önizlemede **~30 px**, kâğıtta
+  **86,93 px** — yani basılacak şeyi seçen kişi bir çizimden seçiyordu. Kutu
+  artık ikisinde de mm cinsinden **aynı kutu**; ekrana özel kalan tek şey
+  kâğıdın *üstünde olmayan* şeyler: gölge, köşe yarıçapı ve sayfaların üstünde
+  durduğu tepsi.
+- **Sütun başlığında saat: uyuşmayan sütun BOŞ BIRAKILMAZ, ikisi de yazılır.**
+  6. ders hafta içi 13:30, hafta sonu 13:10 başlar (öğle arası farklı yere
+  düşer). Eski kural "yanlış saat yazmaktansa hiç yazma"ydı ve boş sütun bir
+  **kusur** olarak okundu. `periodGroups()` her ders numarası için haftanın
+  bütün farklı saatlerini ve hangi günlere ait olduklarını verir; başlık
+  ikisini de gün aralığıyla yazar (`Sal–Cum 13:30–14:10` / `Cmt–Pzr
+  13:10–13:50`). Uyuşan sütunlarda gün adı yazılmaz — on bir kez hiçbir şey
+  söyleyip bir kez bir şey açıklamak açıklama değildir.
 - **Basılan sayfanın başlığı iki satır**: büyük ve ortalı ana satır
   (`510 sınıfı — Haftalık ders programı`), altında küçük künye satırı
   (`Örnek Kurs · G dersliği`). Tek uzun sola yaslı satır kâğıtta başlık değil
@@ -1239,8 +1298,19 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
 - **Renk işlevsel, dekoratif değil.** Yeşil = bırakılabilir, sarı = uyarı,
   kırmızı = engel, gri taralı = kapalı, kırmızı çerçeve = kapalı saatte kalmış ders.
   Öğretmen rengi havuzdaki kartla satırı eşleştirmeye yarar.
-- **Hücreyi daima ÖĞRETMEN rengi boyar**, iki görünümde de. Sınıf rengi bir *işaret*:
-  satır başındaki nokta ve basılan sayfanın başlığı. İki renk aynı kareyi paylaşmaz.
+- **Ekranda hücreyi daima ÖĞRETMEN rengi boyar**, iki görünümde de. Sınıf rengi
+  bir *işaret*: satır başındaki nokta ve basılan sayfanın başlığı. İki renk aynı
+  kareyi paylaşmaz.
+  **KÂĞITTA öğretmen sayfası bunun İSTİSNASI (2026-08-26).** Bir öğretmenin
+  kendi sayfasında her dolu hücre zaten o öğretmen: on iki hücre aynı pasteli
+  boyar ve hiçbir şey söylemez. Orada değişen şey **sınıf**tır, ve okuyan da
+  onu arar — o yüzden öğretmen sayfasının hücrelerini sınıf rengi boyar. Sınıf
+  sayfası değişmedi: orada değişen şey öğretmendir.
+- **Kapalı saat işareti KÂĞIDA ÇIKMAZ (2026-08-26).** Öğretmen sayfası her
+  müsait olmayan saati bir çarpı ve gri taramayla işaretliyordu; duvara asılan
+  bir kâğıt "saat 10:40'ta neredeyim" sorusuna cevap verir, ve çarpı kimsenin
+  kâğıdı eline alıp sormadığı bir sorunun cevabıdır. Bilgi kaybolmadı:
+  Müsaitlik'te düzenleniyor, Kontrol'de sayılıyor.
 - **Havuz kartı görünümü takip eder.** Üst satır = ders yerleşince hücrenin okuyacağı
   şey, alt satır = kartın gideceği satır; sıralama alt satıra göre, ki bir satırın
   kartları yan yana dursun.

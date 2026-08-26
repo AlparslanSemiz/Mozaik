@@ -1,7 +1,118 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-26 (yirminci oturum: **elle sıralama · baskı
-seçenekleri · öğretmende cinsiyet**, `schemaVersion` 6)
+Son güncelleme: 2026-08-26 (yirmi birinci oturum: **Y turu — listeler ve
+kâğıt**; şema değişmedi)
+
+---
+
+## Yirmi birinci oturum — Y turu (2026-08-26)
+
+Kullanıcının aynı mesajda verdiği **üç liste kusuru**, `docs/TASKS.md`'ye elle
+eklediği **on bir madde**, ve onaylanan kurulum planının **logo** parçası.
+Kurulum turunun geri kalanı kullanıcı kararıyla **park edildi** ("şimdi bu
+listeye geç").
+
+Bu oturumun karakteri: **her madde önce ölçüldü.** Üç kusurun üçü de ekrandan
+bildirilmişti ve üçü de piksele kadar ölçülebilir çıktı — ve hiçbiri bir kelime,
+bir sayı ya da bir öznitelik değiştirmediği için süit baştan sona yeşildi
+(tuzak 33'ün ailesi).
+
+### Ölçülen — önce ve sonra
+
+| Ne | Önce | Sonra |
+|---|---|---|
+| Dersler'de `Sil`in sağ kenardan uzaklığı (%100 / %150) | **42 / 73 px** | **6 / 6 px** |
+| ...öteki üç listede | 6 / 19 px | 6 / 6 px |
+| Liste satırının boyu (%110) | **70 px** | **57 px** |
+| Öğretmenler tablosunun yatay taşması (%100 / %110 / %125 / %150) | 0 / **106** / **267** / **548 px** | 0 / **0** / **0** / 322 px |
+| Kurulum'un sol sütunu (1920, %110) | 1185 px | **1381 px** |
+| ...sağdaki kenar sütunu | 620 px | 422 px |
+| Arama şeridiyle tablo arası (%100 / %150) | **44 / 59 px** | **9 / 12 px** |
+| Izgarada satır başı (%110) | 145 px | **106 px** |
+| ...içindekinin gerçekten istediği | 78 px (en uzun branş 97 px = 5,51rem) | — |
+| Gün sınırı çizgisi | 2 px `--line-dark` | **3 px `--day-edge`** |
+| Önizleme satırı ↔ kâğıt satırı | **~30 px ↔ 86,93 px** | **86,93 ↔ 86,93 px** |
+| Baskı başlığı, dokuz düzen×boyut birleşiminde | **hepsinde 22,7 px** | 9,6 – 26,7 px |
+| Kâğıttan dikey taşma, dokuz birleşimde | per=4'te 74 px | **hepsinde 0** |
+| `dist/index.html` | 512 431 bayt | **517 360 bayt** |
+
+Son satır bağımlılık kuralının istediği ölçüm: **+4,9 KB**, ve yeni npm paketi
+yok — büyüme yeni CSS ve `Print.tsx`'in sayfa düzeni.
+
+### Üç hata, üçü de yalnız ÖLÇÜLEREK bulundu
+
+1. **Kâğıttaki yazı boyutu hiç çalışmıyordu.** `--fs-p-*` `:root`'ta
+   tanımlıyken çarpanı `.print-area`'da ezmek hiçbir şey yapmaz: bir custom
+   property tanımlandığı yerde çözülür, alt öğeler **bitmiş sayıyı** miras
+   alır. Hata mesajı yok, test kırmızı değil — yalnız dokuz farklı ayarda
+   başlık aynı 22,7 px. **Tuzak 63.**
+2. **Y8'in ilk testi yanlış kutuya bakıyordu** ve bozuk derlemede yeşil geçti.
+   `white-space: nowrap` bir flex öğesini büyütmüyor, öğenin **kendi metnini
+   kırpıyor**. Gerçek kanıt: `"Derslik ve branş — Ayn…"`, %150'de iki satır.
+   **Tuzak 64.**
+3. **Tuzak 62 yeniden yaşandı.** `npm run build 2>&1 | tail -2 && npx playwright
+   test …` zincirinde çıkış kodu `tail`'inki olur. Derleme `tsc` hatasıyla
+   kırıldı, testler **bir önceki** `dist/index.html`'i ölçtü ve "sabotaj
+   testi" on iki testin on ikisini de yeşil gösterdi. `set -o pipefail`
+   konduktan sonra gerçek sonuç çıktı: **10 kırmızı, 2 yeşil** (ikisi bilerek
+   koruma testi).
+
+### Bedava yeşil değil
+
+Yeni yazılan 12 E2E'nin hepsi, kaynak tek tek bozularak koşuldu:
+
+```
+Sil hizası .................. KIRMIZI
+%110 / %125 taşma ........... KIRMIZI (ikisi de)
+%100 taşma .................. yeşil  — o ölçekte zaten taşmıyordu, dürüst
+şerit-liste boşluğu ......... KIRMIZI (iki ölçek)
+duyuru satırı ............... KIRMIZI
+kırpılan kutular ............ yeşil  — geleceğe karşı KORUMA testi
+kısaltma kutusu ............. KIRMIZI
+çarpı kırmızı/büyük ......... KIRMIZI
+ısı haritası değişmedi ...... yeşil  — koruma testi
+satır başı .................. KIRMIZI
+gün sınırı en kalın ......... KIRMIZI
+kâğıtta çarpı yok ........... KIRMIZI
+kâğıtta sınıf rengi ......... KIRMIZI
+"Sayfada ne olsun" kırpılma . KIRMIZI
+üstüne bırakma (4 test) ..... KIRMIZI (3'ü; biri renk testi ve o da kırmızı)
+```
+
+### Sayılar
+
+```
+tsc --noEmit          temiz
+birim                 508 (17 dosya)   — önce 490
+E2E                   381              — önce 356
+site                  6
+npm run kontrol       YEŞİL
+npm run ekran         34 görüntü, iki tema
+```
+
+Yeni testler: `constraints.test.ts` +10 (`dropMap`/`evict`/`evictionNotice`),
+`bell.test.ts` +5 (`periodGroups`), `printOptions.test.ts` +3,
+`kurulum.spec.ts` +8, `program.spec.ts` +4, `musaitlik.spec.ts` +2,
+`izgara.spec.ts` +3, `yazdir.spec.ts` +9.
+
+### Şema değişmedi
+
+`perSheet` ve `size` `PrintOptions`'a girdi — `State`'e değil, çünkü bir çıktı
+kararı bir öğleden sonraya aittir, yedeğe değil. Yeni depolama anahtarı **yok**:
+ikisi de mevcut `ders-programi-baski` kaydında duruyor, ve o kayıt zaten "tek
+soru, birden çok cevap" diye tasarlanmıştı.
+
+### Park edilen
+
+Yerel kurulum turunun beş maddesi (`dersprogrami.localhost` sunucusu, Windows
+kurulum betikleri, favicon, "nereye kaydedilsin", ilke 2'nin belgeye yazılması)
+`docs/TASKS.md` → **PARK EDİLEN** bölümünde, kararlarıyla birlikte duruyor.
+Logo yapıldı: üç aday çizildi, 16/32/64/192 px'te iki zeminde render edildi,
+kullanıcı **A — Şerit**'i seçti. Adaylar `site/logo-adaylari/` altında duruyor.
+
+> **Doğrulanmayı bekleyen varsayım:** `sunucu.ps1` yazılınca bu makinede
+> koşturulamayacak — `pwsh` kurulu değil (kontrol edildi). Yazıldığında
+> "gözden geçirildi, **ölçülmedi**" diye işaretlenecek.
 
 ---
 

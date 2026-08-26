@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Ders Programı">
+  <title>Ders Programı</title>
+  <!-- B. THE HOUR.
+       Not the week but the unit the week is made of: a ring of hours with two
+       of them filled. Reads as "timetable" rather than "spreadsheet", and a
+       ring survives being shrunk to 16 px better than a grid does. -->
+  <rect width="512" height="512" rx="112" fill="#2e3ba8"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#ffffff" stroke-width="26" opacity=".22"/>
+  <!-- two placed lessons, as arcs on the ring -->
+  <path d="M256 106a150 150 0 0 1 129.9 75" fill="none" stroke="#65b6ec" stroke-width="26" stroke-linecap="round"/>
+  <path d="M191 391a150 150 0 0 1-64.1-84" fill="none" stroke="#9ff292" stroke-width="26" stroke-linecap="round"/>
+  <!-- the hands: a lesson hour, not a clock time -->
+  <g stroke="#ffffff" stroke-width="24" stroke-linecap="round">
+    <path d="M256 256V162"/>
+    <path d="M256 256h70"/>
+  </g>
+  <circle cx="256" cy="256" r="18" fill="#ffffff"/>
+</svg>

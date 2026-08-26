@@ -114,3 +114,48 @@ export function sharedPeriods(bell: Bell, labels: string[], days: Day[]): Array<
     return same ? first : null;
   });
 }
+
+/**
+ * The same question, answered instead of refused: for one lesson number, every
+ * DISTINCT clock the week has for it, and which days hold it.
+ *
+ * `sharedPeriods` returns null where the days disagree and the printed header
+ * showed a blank — which is honest but useless, and it was reported as a fault
+ * ("Yazdır kısmında saatleri 6. saatte bakılması lazım"): the reader counted
+ * eleven columns with a time and one without. There is nothing wrong with the
+ * 6th lesson; there are two of them. Five days start it at 13:30 and two at
+ * 13:10, because the long break sits after the 5th lesson on a weekday and
+ * after the 6th at the weekend.
+ *
+ * So the header prints both, each with the days it belongs to. Groups come
+ * back in the order the days are listed, which is the order the rows below are
+ * in — the reader can match them by looking down rather than by reading.
+ */
+export interface PeriodGroup {
+  period: Period;
+  /** Indices into `days`, in order. */
+  days: number[];
+}
+
+export function periodGroups(
+  bell: Bell,
+  labels: string[],
+  days: Day[],
+): PeriodGroup[][] {
+  if (days.length === 0) return labels.map(() => []);
+
+  const perDay = days.map((day) => dayPeriods(bell, labels, day.longBreakAfter));
+  return labels.map((_, i) => {
+    const groups: PeriodGroup[] = [];
+    for (let g = 0; g < days.length; g++) {
+      const period = perDay[g]?.[i];
+      if (period === undefined) continue;
+      const found = groups.find(
+        (x) => x.period.start === period.start && x.period.end === period.end,
+      );
+      if (found === undefined) groups.push({ period, days: [g] });
+      else found.days.push(g);
+    }
+    return groups;
+  });
+}

@@ -17,7 +17,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type React from 'react';
-import type { Verdict } from './constraints';
+import type { DropVerdict } from './constraints';
 import { paletteColor } from './palette';
 import type { Id } from './types';
 
@@ -27,8 +27,14 @@ export interface DragData {
   rowId: string;
   /** How many cells it will cover. */
   blockSize: number;
-  /** `${day}|${hour}` -> verdict. `blocked === null` means droppable. */
-  map: Map<string, Verdict>;
+  /**
+   * `${day}|${hour}` -> verdict. `blocked === null` means droppable.
+   *
+   * A verdict also says what the drop would PUSH OUT: a cell whose only
+   * problem was the class's own other lesson is droppable, and `evicts` names
+   * what goes back to the pool if you let go there.
+   */
+  map: Map<string, DropVerdict>;
   /**
    * The block being MOVED, or null when the card came from the pool.
    *

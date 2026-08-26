@@ -236,9 +236,16 @@ export default function Teachers({ state, change }: PanelProps) {
               <th className="grip-col" />
               <th>Renk</th>
               <th>Ad</th>
-              <th className="w-col-lg">Kısaltma</th>
+              {/* --w-col-lg was 16ch — 144 px at 125 %, for a heading that
+                  asks for 78 and a box that holds "MÇ". This column alone was
+                  the last 54 px of the sideways scroll. */}
+              <th className="w-col-sm">Kısaltma</th>
               <th>Branş</th>
-              <th className="w-col-md">Cinsiyet</th>
+              {/* No width class: the <select>'s own longest option
+                  ("Belirtilmemiş") is wider than any ladder step this column
+                  deserves, so the box decides and the column follows it
+                  (pitfall 34). --w-col-md was 12 px more than that. */}
+              <th>Cinsiyet</th>
               <th className="num" title="Art arda en fazla kaç saat">
                 Art arda
               </th>
@@ -248,7 +255,7 @@ export default function Teachers({ state, change }: PanelProps) {
               <th className="num" title="Geldiği gün en az kaç saat">
                 Günde ↓
               </th>
-              <th className="w-col-md">Ders saati</th>
+              <th className="w-col-sm">Ders saati</th>
               <th className="w-col-md" />
             </tr>
           </thead>

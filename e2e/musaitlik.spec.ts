@@ -6,7 +6,7 @@
 // `table.availability:not(.heat)` and every locator here says so.
 
 import { expect, test, type Page } from '@playwright/test';
-import { chooseEntity, open, openWithSample, dragAndDrop, tokens } from './helpers';
+import { chooseEntity, open, openWithSample, dragAndDrop, tokens, rgb, contrast } from './helpers';
 
 test.describe('10. Müsaitlik çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {
@@ -143,5 +143,100 @@ test.describe('20. Kapalı saatte ders', () => {
     await closeHour(page, row, day, hour); // toggles it back open
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card.conflict')).toHaveCount(0);
+  });
+});
+
+// THE CROSS (2026-08-26, asked for: "müsaitlikte çarpılar büyük ve kırmızı
+// olabilir"). The reader has trouble seeing, and --muted at --fs-lg on a
+// hatched grey was the faintest mark in the program.
+//
+// The reason this is measured rather than eyeballed: red is a FUNCTIONAL
+// colour in this tool — it means "this drop is refused" — and grey hatching
+// means "this hour is closed". Letting the second borrow the first's colour is
+// only safe because the two can never be on screen together here. What the
+// test holds is the part that could rot: the mark is red, it is bigger than
+// the body text, it reads against its own ground, and the hatch is still there
+// so the state does not depend on the colour alone.
+test.describe('67. Kapalı saatin işareti', () => {
+  test('çarpı KIRMIZI, büyük, ve kendi zemininde okunuyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    // Clean slate: the sample's first teacher already has a whole day shut, so
+    // clicking a cell blind would OPEN one rather than close one.
+    await page.getByRole('button', { name: 'Tümünü aç' }).click();
+    const cell = page.locator('table.availability:not(.heat) tbody td').first();
+    await cell.click();
+    await expect(cell).toHaveClass(/closed/);
+
+    const seen = await cell.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const root = getComputedStyle(document.documentElement);
+      return {
+        color: cs.color,
+        bad: root.getPropertyValue('--bad').trim(),
+        size: Number.parseFloat(cs.fontSize),
+        body: Number.parseFloat(getComputedStyle(document.body).fontSize),
+        // The hatch: colour is never the only carrier of a state.
+        hatched: cs.backgroundImage.includes('gradient'),
+        text: (el.textContent ?? '').trim(),
+      };
+    });
+
+    expect(seen.text).toBe('×');
+    expect(seen.hatched, 'tarama kalkmış — renk tek başına durum taşıyamaz').toBe(true);
+    expect(seen.size, `çarpı ${seen.size}px, gövde ${seen.body}px`).toBeGreaterThan(seen.body);
+
+    // Red, and it is the app's own red rather than a second one.
+    const [r, g, b] = rgb(seen.color);
+    const [br, bg, bb] = rgb(
+      await page.evaluate((hex) => {
+        const p = document.createElement('span');
+        p.style.color = hex;
+        document.body.appendChild(p);
+        const out = getComputedStyle(p).color;
+        p.remove();
+        return out;
+      }, seen.bad),
+    );
+    expect([r, g, b]).toEqual([br, bg, bb]);
+
+    // ...and it is readable on the hatch it sits on. The hatch alternates two
+    // greys, so the darker one is the honest ground to measure against.
+    const ground = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--closed').trim(),
+    );
+    const asRgb = await page.evaluate((hex) => {
+      const p = document.createElement('span');
+      p.style.color = hex;
+      document.body.appendChild(p);
+      const out = getComputedStyle(p).color;
+      p.remove();
+      return out;
+    }, ground);
+    const ratio = contrast(seen.color, asRgb);
+    expect(ratio, `çarpı/zemin kontrastı ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(4.5);
+  });
+
+  test('ISI haritasındaki sayılar kırmızıya dönmedi', async ({ page }) => {
+    // The heat table wears the same `td.closed` class for a completely
+    // different thing — how many people are shut at that hour — and a count of
+    // six out of twenty-five is not a refusal.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    const heat = page.locator('table.availability.heat td.closed').first();
+    if ((await heat.count()) === 0) return;
+    const color = await heat.evaluate((el) => getComputedStyle(el).color);
+    const text = await page.evaluate(
+      () => getComputedStyle(document.documentElement).getPropertyValue('--text').trim(),
+    );
+    const asRgb = await page.evaluate((hex) => {
+      const p = document.createElement('span');
+      p.style.color = hex;
+      document.body.appendChild(p);
+      const out = getComputedStyle(p).color;
+      p.remove();
+      return out;
+    }, text);
+    expect(rgb(color)).toEqual(rgb(asRgb));
   });
 });

@@ -10,14 +10,17 @@ import type React from 'react';
 import {
   blockStart,
   buildIndex,
-  check,
   closedConflicts,
   closedKey,
+  dropMap,
+  evict,
+  evictionNotice,
   removeBlock,
   placementKey,
   place,
 } from '../constraints';
-import type { Index, Verdict } from '../constraints';
+import type { Index } from '../constraints';
+import { useToast } from './Toasts';
 import { subjectShort } from '../entities';
 import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
@@ -248,20 +251,53 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
 
 export default function Program({ state, change, solver, view }: Props) {
   const ix = useMemo(() => buildIndex(state), [state]);
+  const notify = useToast();
 
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
+      // Read out of the map BEFORE change(): React runs a reducer callback
+      // late, and reading a ref or a closure variable inside one is how the
+      // solver's whole result once went missing (pitfall 20).
+      const verdict = data.map.get(`${day}|${hour}`);
+      const pushedOut = verdict?.evicts ?? [];
+      const lesson = ix.lessonById.get(data.lessonId);
+      const told =
+        pushedOut.length === 0 || lesson === undefined
+          ? ''
+          : evictionNotice(
+              ix,
+              pushedOut.map((id) => ix.lessonById.get(id)).filter((x) => x !== undefined),
+            ).replace('dönecek', 'döndü');
+
       change((d) => {
         // Lifting the old block and laying the new one down are ONE reducer
         // call, so a move costs one undo step and Ctrl+Z puts the lesson back
-        // where it was — not into the pool.
-        if (data.source === null) return place(d, data.lessonId, day, hour);
-        const lifted = removeBlock(d, data.source.classId, data.source.day, data.source.hour);
-        if (lifted === d) return d; // the block went away mid-drag; touch nothing
-        return place(lifted, data.lessonId, day, hour);
+        // where it was — not into the pool. The eviction rides along in the
+        // same call for the same reason: dropping onto an occupied cell is one
+        // move, so it is one Ctrl+Z.
+        let next = d;
+        if (data.source !== null) {
+          next = removeBlock(d, data.source.classId, data.source.day, data.source.hour);
+          if (next === d) return d; // the block went away mid-drag; touch nothing
+        }
+
+        // The cells the new block will cover, cleared of whatever is in them.
+        // Re-derived from the state React just handed us rather than trusted
+        // from the drag's snapshot: between pointerdown and here, an autosave,
+        // an undo or a solver run may have moved the grid underneath.
+        if (pushedOut.length > 0 && lesson !== undefined) {
+          const span = Math.max(1, lesson.blockSize);
+          const hours: number[] = [];
+          for (let i = 0; i < span; i++) hours.push(hour + i);
+          next = evict(next, lesson.classId, day, hours);
+        }
+
+        return place(next, data.lessonId, day, hour);
       });
+
+      if (told !== '') notify(told);
     },
-    [change],
+    [change, ix, notify],
   );
 
   const { start, dragging, reason } = useDrag(drop);
@@ -316,12 +352,10 @@ export default function Program({ state, change, solver, view }: Props) {
       const baseIx = source === null ? ix : buildIndex(base);
 
       // Valid cells are computed HERE, once — never again during the drag.
-      const map = new Map<string, Verdict>();
-      for (let g = 0; g < base.settings.days.length; g++) {
-        for (let s = 0; s < base.settings.hours.length; s++) {
-          map.set(`${g}|${s}`, check(base, baseIx, lessonId, g, s));
-        }
-      }
+      // The loop moved into `dropMap`: it is not a rendering decision, it is
+      // the constraint engine answering 72 questions, and one of the answers
+      // ("occupied by this class's own lesson") now costs an eviction to say.
+      const map = dropMap(base, baseIx, lessonId);
 
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);

@@ -2,6 +2,9 @@ import {
   blockStart,
   blocker,
   blockerDetail,
+  dropMap,
+  evict,
+  evictionNotice,
   occupy,
   vacate,
   check,
@@ -724,5 +727,101 @@ describe('blockerDetail — sebebin kodu', () => {
     expect(blocker(d, buildIndex(d), 'x4', 0, 1)).toBe(
       blockerDetail(d, buildIndex(d), 'x4', 0, 1)?.message,
     );
+  });
+});
+
+
+// THE DROP MAP, and the one refusal a drop may overrule.
+//
+// Asked for on 2026-08-26: "farklı bir kart başka bir kartın üzerine gelirse o
+// üzerine gelinen aşağı düşsün ve koyduğum olsun". The line that matters is
+// which refusals it does NOT overrule: everything except the class's own other
+// lesson is about somebody else, and pushing the block in front of you into
+// the pool does not make a busy teacher free.
+describe('dropMap — üstüne bırakma', () => {
+  const at = (d: State, lessonId: string, day: number, hour: number) =>
+    dropMap(d, buildIndex(d), lessonId).get(`${day}|${hour}`)!;
+
+  it('boş hücre: engel yok, kimse havuza dönmüyor', () => {
+    const v = at(build(), 'x1', 0, 0);
+    expect(v.blocked).toBeNull();
+    expect(v.evicts).toEqual([]);
+  });
+
+  it('sınıfın KENDİ dersinin üstüne bırakılabilir ve o ders havuza döner', () => {
+    // 510 has MÇ at Monday 1; dropping 510's AV lesson on top is allowed now.
+    const d = place(build(), 'x1', 0, 0);
+    const v = at(d, 'x4', 0, 0);
+    expect(v.blocked).toBeNull();
+    expect(v.evicts).toEqual(['x1']);
+  });
+
+  it('...ama YEŞİL değil SARI: bir şey kaybedeceğini söylüyor', () => {
+    const d = place(build(), 'x1', 0, 0);
+    const v = at(d, 'x4', 0, 0);
+    expect(v.warning).toContain('havuza dönecek');
+    expect(v.warning).toContain('510');
+  });
+
+  it('öğretmen başka sınıfta: tahliye BUNU çözmez, hücre kapalı kalır', () => {
+    // MÇ teaches 511 at Monday 1. 510 also has its own lesson there, so the
+    // first refusal is "class busy" — but evicting it leaves MÇ where he is.
+    let d = place(build(), 'x2', 0, 0); // 511 - MÇ
+    d = place(d, 'x4', 0, 0); // 510 - AV  (510 is now busy too)
+    const v = at(d, 'x1', 0, 0); // try to drop 510 - MÇ on top
+    expect(v.blocked).not.toBeNull();
+    expect(v.evicts).toEqual([]);
+    expect(v.blocked).toContain('MÇ');
+  });
+
+  it('kapalı saat tahliyeyle açılmaz', () => {
+    const closed: State = { ...place(build(), 'x1', 0, 0), unavailable: { ['oAV|0|0']: 1 as const } };
+    const v = at(closed, 'x4', 0, 0);
+    expect(v.blocked).not.toBeNull();
+    expect(v.evicts).toEqual([]);
+  });
+
+  it('iki saatlik blok, üstünde iki ayrı ders varsa İKİSİNİ de çıkarır', () => {
+    let d = place(build(), 'x1', 0, 0); // 510 - MÇ, 1 hour, at 0
+    d = place(d, 'x1', 0, 1); // ...and again at 1 — two separate 1-hour blocks
+    const v = at(d, 'x4', 0, 0); // x4 is a 2-hour block
+    expect(v.blocked).toBeNull();
+    // Same lesson, two blocks: both heads are found, and the id appears once
+    // per block rather than once per cell.
+    expect(v.evicts).toEqual(['x1', 'x1']);
+  });
+
+  it('iki saatlik bloğun ikinci hücresine denk gelmek onu BİR kez sayar', () => {
+    const d = place(build(), 'x3', 0, 0); // 433 - AV, blockSize 2, covers 0 and 1
+    const v = dropMap(d, buildIndex(d), 'x6').get('0|0')!; // 433 - MB, blockSize 3
+    expect(v.evicts).toEqual(['x3']);
+  });
+
+  it('ızgarayı ve dizini BOZMUYOR — simülasyon geri sarılıyor', () => {
+    const d = place(build(), 'x1', 0, 0);
+    const ix = buildIndex(d);
+    const before = JSON.stringify(d.placements);
+    const busyBefore = new Map(ix.teacherBusy);
+    dropMap(d, ix, 'x4');
+    expect(JSON.stringify(d.placements)).toBe(before);
+    expect([...ix.teacherBusy.entries()]).toEqual([...busyBefore.entries()]);
+  });
+
+  it('evict() tam olarak hedef saatleri boşaltır', () => {
+    let d = place(build(), 'x1', 0, 0);
+    d = place(d, 'x1', 0, 2);
+    const after = evict(d, 's510', 0, [0, 1]);
+    expect(after.placements[placementKey('s510', 0, 0)]).toBeUndefined();
+    // The one outside the target hours is untouched.
+    expect(after.placements[placementKey('s510', 0, 2)]).toBe('x1');
+  });
+
+  it('evictionNotice tekil ve çoğul', () => {
+    const d = build();
+    const ix = buildIndex(d);
+    const x1 = ix.lessonById.get('x1')!;
+    const x2 = ix.lessonById.get('x2')!;
+    expect(evictionNotice(ix, [x1])).toBe('510 — MÇ dersi havuza dönecek');
+    expect(evictionNotice(ix, [x1, x2])).toContain('dersleri');
   });
 });

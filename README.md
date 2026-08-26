@@ -43,8 +43,10 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   Bir bırakma yasaksa sebebi somut yazar: *"MÇ o saatte 433 sınıfında"*.
 - **Kontrol** — program dizilebilir mi, dizilemiyorsa neden. Kapasiteler, kural
   ihlalleri, yerleşemeyen dersler.
-- **Yazdır** — her sınıf ve her öğretmen için ayrı sayfa, **A4 yatay**. Hangi
-  sayfaların basılacağı tek tek seçilir.
+- **Yazdır** — her sınıf ve her öğretmen için bir program, **A4 yatay**. Hangi
+  sayfaların basılacağı tek tek seçilir; bir kâğıda **1, 2 ya da 4** program
+  sığdırılabilir ve kâğıttaki yazı boyutu ayrıca ayarlanır. Önizleme kâğıdın
+  kendisidir — aynı ölçüler, aynı satır boyu.
 - **Ayarlar** — okul ve zil düzeni, kurallar, branş listesi, görünüm (yazı
   büyüklüğü, ızgara yoğunluğu, hareket) ve veri.
 
@@ -59,14 +61,14 @@ gözü iyi görmeyen biri için yazıldı.
 npm install && npx playwright install chromium   # yeni bilgisayarda bir kez
 
 npm run dev          # geliştirme sunucusu
-npm test             # Vitest — saf mantık testleri
+npm test             # Vitest — saf mantık testleri (508)
 npm run build        # dist/index.html tek dosya (ASIL TESLİM)
 npm run build:site   # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
 npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar
 npm run test:site    # site testleri, http üzerinde (çevrimdışı açılış dahil)
-npm run kontrol      # hepsi: tsc + birim + derleme + E2E + site
+npm run kontrol      # hepsi: tsc + birim + derleme + E2E + site + çözücü
 npm run ekran        # iki temada ekran görüntüsü -> test-results/ekran/
-npm run cozucu       # gerçek ölçekli çözücü stresi (~40 sn)
+npm run cozucu       # gerçek ölçekli çözücü stresi (34,8 sn — kontrol'ün parçası)
 ```
 
 E2E, dev sunucusunu değil **`dist/index.html`'i `file://` üzerinden** açar —

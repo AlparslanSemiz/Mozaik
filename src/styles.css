@@ -103,6 +103,9 @@
   --hairline:    #e0e4eb;
   --line:        #c6cdd7;
   --line-dark:   #8a93a0;
+  /* One step past --line-dark, and it has exactly one job: where one day ends
+     and the next begins, across 78 columns. */
+  --day-edge:    #5b6572;
 
   --text:        #131a25;
   --muted:       #505763;
@@ -234,12 +237,15 @@
      --ui-scale is a screen comfort setting. Raised across the board on
      2026-08-26 (the reader asked for a bigger printout); the 205mm page and
      the "3 classes = 3 pages" test are what hold it honest. */
-  --fs-p-xl:   17pt;   /* page title */
-  --fs-p-lg:   12pt;   /* .p-top, .p-daycol, closed hour */
-  --fs-p-md:   10.5pt; /* the credit line */
-  --fs-p-base: 10pt;   /* table body and heading */
-  --fs-p-sm:   9pt;    /* .p-bottom */
-  --fs-p-xs:   8pt;    /* .p-clock */
+  /* The paper ladder does NOT live here — see `.print-area`. It used to, and
+     the first attempt at a size setting left it here with two multipliers in
+     front of it, which does nothing at all: a custom property that references
+     another is substituted where it is DECLARED, so `--fs-p-xl` computed on
+     :root reads :root's multipliers and descendants inherit the finished
+     number. Overriding the multiplier further down is then a write nobody
+     reads (pitfall 52's family, and it was caught by MEASURING the title —
+     22.7px at every one of the nine combinations). The ladder is declared
+     where the multipliers are, which is the only place it can be. */
 
   --lh-tight: 1.2;
   --lh-base:  1.5;
@@ -317,7 +323,13 @@
   --w-col-2xl: 32ch;
 
   --cell-w: 2.125rem;  --cell-h: 2.125rem;
-  --rowhead-w: 8.25rem;
+  /* The sticky first column. 8.25rem was never measured; asked to shrink it
+     (2026-08-26, "sol taraftaki öğretmen ya da sınıf tarafının genişliği biraz
+     daha kısaltılabilir") it was, and the widest thing it ever has to hold is
+     the longest built-in subject, "Sosyal Bilgiler", at 5.51rem — the name
+     above it is a short form. 6rem leaves half a character of air and hands
+     the difference to the 72 lesson columns, which is where Sığdır spends it. */
+  --rowhead-w: 6rem;
 
   /* The height of a control in the tool strip, and therefore of the strip.
      2rem = 32px at scale 1: well over the 24px WCAG 2.2 target size and what
@@ -369,6 +381,9 @@
   --hairline: #242930;
   --line: #39404a;
   --line-dark: #78818f;
+  /* Lighter than --line-dark here for the same reason it is darker in the
+     light theme: a boundary is strong when it moves AWAY from the paper. */
+  --day-edge: #a3adbb;
 
   --text: #e8edf5;
   --muted: #aab2bd;
@@ -1486,10 +1501,20 @@ table.grid thead tr:nth-child(2) th {
   );
 }
 
-/* A thick separator between days — so the eye can navigate 84 columns. */
+/* A thick separator between days — so the eye can navigate 84 columns.
+   Asked to be clearer (2026-08-26, "günlerin arasındaki boşluk veya fark biraz
+   daha belli olmalı") and it got its OWN token rather than a bigger number on
+   a shared one. The grid has three line weights and they mean three things:
+   --hairline crosses the hour rhythm, --line follows a teacher across a row,
+   --line-dark edges the lunch column and the sticky head. A day boundary is
+   the strongest of the four and had been borrowing the third.
+
+   Deliberately NOT done by strengthening the day band: that band is measured
+   at dE 2.7 from paper on purpose, so it groups without reading as a state
+   (pitfall 40), and renk.spec.ts holds it there. A line is not a state. */
 .day-head,
 .day-first {
-  border-left: 2px solid var(--line-dark) !important;
+  border-left: 3px solid var(--day-edge) !important;
 }
 
 /* The lunch break gets a column of its own rather than a dashed border: a thin
@@ -2075,9 +2100,12 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    <th> it is at --fs-xs. The SAME `ch` count would make the heading a quarter
    narrower than the digits below it, so the header gets its own number. Same
    ~70px either way — pitfall 34 stated as a rule instead of as a bug. */
+/* Measured, at 110/125/150 %: the widest of these headings ("Günde ↓") asks
+   for 54/59/66 px, and --w-col-xs gives it 62/70/84. --w-col-sm was two steps
+   more room than the longest word in the column has ever needed. */
 table.list th.num,
 table.stat th.num {
-  width: var(--w-col-sm);
+  width: var(--w-col-xs);
 }
 
 /* The column-width ladder, applied. Nothing here sets a width in the JSX. */
@@ -2348,6 +2376,24 @@ table.list td > select {
   width: 100%;
 }
 
+/* THE SMALL BOXES, INSIDE A ROW — narrower than the ladder's default, and the
+   numbers come from asking the browser rather than from taste. Cloned at
+   `width: auto` (the renk-secici.spec.ts trick) an empty number input wants
+   72/79/92 px at 110/125/150 %; 7ch gives it 77/84/98. The short-form box
+   holds "MÇ", not a word.
+
+   Scoped to a list row on purpose. `.num` is worn by <td>s too — "A4 yatay"
+   in Yazdır, "12,3 KB" in Ayarlar → Veri — and `.text-sm` is worn by the ADD
+   form's short-form box, whose PLACEHOLDER is the whole word "Kısaltma".
+   Narrowing either of those globally is pitfall 33 with a new coat on. */
+table.list td > input.num {
+  width: 7ch;
+}
+
+table.list td > input.text-sm {
+  width: 6ch;
+}
+
 /* The colour picker: a <select> whose options are palette INDICES (1..36),
    drawn on the palette colour itself. Its width lived in the JSX as
    `width: 44` — and when the body went from 14px to 16px in Y0 the box stopped
@@ -2367,7 +2413,10 @@ table.list td > select {
    belongs to the control, not to the <th>), and it is wide enough for "36"
    rather than for whatever number happens to be in it. */
 table.list td > .color-pick {
-  width: 7ch;
+  /* Two digits. Asked at `width: auto` the button wants 31/34/40 px at
+     110/125/150 %; 5ch gives 55/60/70, and the column's real floor is the
+     "Renk" heading anyway (45/48/54 + padding). */
+  width: 5ch;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -2497,6 +2546,26 @@ table.list td > .color-pick:hover {
    name box into a sliver. */
 .form-row.nowrap {
   flex-wrap: nowrap;
+}
+
+/* THE ACTION CELL — the last column of all four Kurulum lists.
+   Two things were wrong here and both were measured.
+
+   1. It was left-aligned. Three of the four lists hold TWO buttons there
+      (inspect + Sil) so the column sized itself from them and Sil came out
+      flush with the table's edge; Dersler holds ONE, so inside the same 13ch
+      column Sil sat with dead space to its right — 42 px at 100 %, 73 px at
+      150 %, against 6-19 px in the other three. Same markup, different answer,
+      because the width came from a neighbour rather than from a rule.
+
+   2. `.form-row` carries `margin-bottom: var(--space-4)` for its real job —
+      a stack of form rows in a panel — and that margin was being applied
+      inside every one of these cells too. Measured: the teacher row was 70 px
+      tall at --ui-scale 1.1 and 57 px without it. Twenty-five rows of that is
+      a third of a screen spent on a margin nobody asked for. */
+table.list td > .form-row {
+  margin-bottom: 0;
+  justify-content: flex-end;
 }
 
 table.list tbody tr:hover,
@@ -2660,8 +2729,18 @@ table.stat tbody tr:hover {
   align-items: start;
 }
 
+/* Kurulum. `2fr 1fr` gave the right-hand column 620 px at 1920 — and the two
+   panels in it (the capacity summary, the step counters) are read at a fixed
+   width: they hold short lines and a narrow table, and every pixel past that
+   is blank. The LIST is what wanted those pixels: at the default scale the
+   teacher table needed 1287 px and had 1185, so it scrolled sideways in a
+   panel that had 200 px of white space three centimetres to its right.
+
+   So the right-hand column becomes a SIDEBAR — the shape `.narrow-right`
+   already uses — and the list takes what is left. Measured at 1920, scale 1.1:
+   left 1185 -> 1414 px, teacher table overflow 106 -> 0. */
 .cols.wide-left {
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem);
 }
 
 .cols.narrow-right {
@@ -2840,11 +2919,24 @@ table.availability td.closed {
     var(--hatch) 3px,
     var(--hatch) 6px
   );
-  color: var(--muted);
-  /* Same reason as td.unavailable: the mark IS the cell's content, so it grows
-     with the cell. */
-  font-size: var(--fs-lg);
-  font-weight: 600;
+  /* THE CROSS: red, and a step up the ladder. Asked for by name (2026-08-26,
+     "müsaitlikte çarpılar büyük ve kırmızı olabilir") and the reason is the
+     reader's eyes — --muted at --fs-lg on a hatched grey is the faintest mark
+     in the program.
+
+     Red does not cross the functional colour channel here, and the scope is
+     what keeps that true. Elsewhere red means "this drop is refused" and grey
+     hatching means "this hour is closed", and the two have to stay apart on
+     the Program grid, where both can be on screen at once. On Müsaitlik there
+     is no drop and no refusal: the ONLY thing the screen says is open or
+     closed, and the cross is the closed half of it. The hatch stays, so the
+     cell still carries the state without the colour (contrast and channel are
+     re-measured by renk.spec.ts).
+
+     The mark IS the cell's content, so it grows with the cell. */
+  color: var(--bad);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -2864,30 +2956,118 @@ table.availability td.closed {
    `@media print` — that block owns the real page box (205 mm, 8/10 mm padding,
    pitfall 31), and a screen ornament that followed the sheet into the tray
    would be pitfall 32 in CSS. */
+/* THE PAPER LADDER, and it lives HERE rather than on :root because two
+   multipliers stand in front of it and a custom property is substituted where
+   it is declared:
+
+     --p-fit   the LAYOUT's demand. Four timetables on one A4 cannot be set at
+               the size one is, whatever anybody prefers.
+     --p-zoom  the reader's own adjustment on top of that.
+
+   A chain rather than six overridden sizes per combination: 3 sizes x 3
+   layouts is 54 numbers to keep in step, and any two of them drifting is a bug
+   nobody sees until it is on paper.
+
+   pt, because A4 is a fixed physical size and --ui-scale is a screen comfort
+   setting that must never reach the printer. */
 .print-area {
+  --p-fit: 1;
+  --p-zoom: 1;
+  --p-type: calc(var(--p-fit) * var(--p-zoom));
+
+  --fs-p-xl:   calc(17pt   * var(--p-type)); /* page title */
+  --fs-p-lg:   calc(12pt   * var(--p-type)); /* .p-top, .p-daycol */
+  --fs-p-md:   calc(10.5pt * var(--p-type)); /* the credit line */
+  --fs-p-base: calc(10pt   * var(--p-type)); /* table body and heading */
+  --fs-p-sm:   calc(9pt    * var(--p-type)); /* .p-bottom */
+  --fs-p-xs:   calc(8pt    * var(--p-type)); /* .p-clock */
+
+  /* One day's row. Was written inside `@media print` alone, which is why the
+     preview's rows were 30 px against the paper's 86.93 — the thing
+     "önizlemeyle yazdırılan aynı olsun" was about. */
+  --p-row: 23mm;
+
   background: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
   padding-bottom: var(--space-6);
+  /* A sheet is 297 mm = 1122 px and does not shrink any more, so on a window
+     narrower than that the TRAY scrolls. The page itself must not (the same
+     rule the setup lists follow). */
+  overflow-x: auto;
 }
 
-.print-page {
-  /* The same box @media print draws, in the units a screen has. `min-height`
-     and not `aspect-ratio`: a seven-day week has to be able to grow past the
-     sheet rather than be squeezed into it, and the A4 ratio is the FLOOR of
-     what a page looks like, not a cage. */
-  width: 100%;
-  max-width: 62rem;
-  min-height: calc(62rem * 210 / 297);
-  padding: 8mm 10mm;
+/* THE SHEET IS THE PAPER, AND THE PREVIEW IS THE SAME PAPER.
+   ("Yazdır kısmında önizlemeyle yazdırılan aynı olsun", 2026-08-26.)
+
+   It used to be a model of the paper rather than the paper: 62rem wide, an
+   A4-ish ratio, and rows that took their height from the screen ladder while
+   the printer used 23 mm. Measured, the preview row was ~30 px and the printed
+   one 86.93 px — the same timetable, two different sheets. Anyone choosing
+   what to print was choosing from a drawing.
+
+   Now both are in mm, so both are the same box. mm is a real unit on screen
+   too (96 dpi): 297 mm comes out at 1122.5 px, which fits the preview column
+   at 1920 with either sidebar width — measured, not assumed. What is left as
+   screen-only is what is not ON the paper: the shadow, the corner and the tray
+   the sheets lie on. Those are undone in @media print, and a test reads them
+   on both media. */
+.print-sheet {
+  box-sizing: border-box;
+  width: 297mm;
+  height: 205mm;
   background: var(--paper);
   border-radius: var(--r-sm);
   box-shadow: var(--elev-2);
+  display: grid;
+  /* One timetable, unless the layout says otherwise. */
+  grid-template: 1fr / 1fr;
+}
+
+/* ONE TIMETABLE. Not renamed to `.print-plan` even though that is what it is:
+   the tick lists, "3 sınıf = 3 sayfa" and half the print suite count
+   `.print-page`, and a page IS one timetable at the setting they all run at.
+   At per = 1 this box and the sheet are the same size. */
+.print-page {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: 8mm 10mm;
   display: flex;
   flex-direction: column;
   justify-content: safe center;
+}
+
+/* TWO AND FOUR UP. The vertical is what halves in both cases, so they share a
+   row height; the type does not, because at four up the WIDTH halves as well
+   and twelve columns have to fit 138 mm instead of 277. */
+.print-area[data-per='2'] .print-sheet { grid-template: 1fr 1fr / 1fr; }
+.print-area[data-per='4'] .print-sheet { grid-template: 1fr 1fr / 1fr 1fr; }
+
+.print-area[data-per='2'],
+.print-area[data-per='4'] {
+  --p-row: 10mm;
+}
+
+.print-area[data-per='2'] { --p-fit: .72; }
+.print-area[data-per='4'] { --p-fit: .5; }
+
+.print-area[data-per='2'] .print-page,
+.print-area[data-per='4'] .print-page {
+  padding: 4mm 5mm;
+}
+
+/* The reader's own adjustment, on top of whatever the layout demanded. */
+.print-area[data-size='kucuk'] { --p-zoom: .85; }
+.print-area[data-size='buyuk'] { --p-zoom: 1.18; }
+
+/* One day's row. Here rather than in @media print, which is where it used to
+   live alone — that is what made the preview a different sheet. */
+table.print tbody th,
+table.print tbody td {
+  height: var(--p-row);
 }
 
 /* Two lines, both centred: the big one says what the sheet IS, the small one
@@ -2952,6 +3132,24 @@ table.availability td.closed {
   align-items: center;
   gap: var(--space-2);
   white-space: nowrap;
+}
+
+/* ...except when the rows are STACKED. `.pick-items` lays short names out in a
+   wrapping row, and there `nowrap` is what keeps "510" from breaking after the
+   5. `.form-col` is the other shape: one row per line, and in "Sayfada ne
+   olsun" each line carries a name AND a sentence — "Derslik ve branş — Aynı
+   satırda dersliğin harfi ya da öğretmenin branşı" — inside a sidebar 20-26rem
+   wide. `nowrap` there does not shrink the text, it pushes it out of the
+   panel. A row that owns its line is allowed to use it. */
+.form-col > .pick-item {
+  align-items: flex-start;
+  white-space: normal;
+}
+
+/* The box stays on the first line of the label it belongs to. */
+.form-col > .pick-item > input[type='checkbox'] {
+  margin-top: .2em;
+  flex: none;
 }
 
 .pick-item .row-dot {
@@ -3025,15 +3223,6 @@ table.print td .p-top {
 table.print td .p-bottom {
   display: block;
   font-size: var(--fs-p-sm);
-}
-
-/* A closed hour on a printed teacher page. This used to read
-   `table.print th td.p-closed` — a <td> inside a <th>, which cannot match the
-   markup — so the grey never appeared on paper. */
-table.print td.p-closed {
-  background: var(--closed);
-  font-size: var(--fs-p-lg);
-  font-weight: 600;
 }
 
 /* Start-end time under the lesson number in the printed hour column. */
@@ -3181,26 +3370,17 @@ table.bell-preview td {
     padding-bottom: 0;
   }
 
-  .print-page {
+  /* The sheet is already 297x205 mm on screen, so nothing about its GEOMETRY
+     is repeated here. What is undone is only what was never on the paper: the
+     shadow, the rounded corner and the tray's own background. `width: auto`
+     lets the sheet take the page box rather than insisting on 297 mm inside
+     an already-297 mm page — a rounding of a tenth of a millimetre there is
+     enough to spill and hand every timetable a blank sheet (pitfall 31). */
+  .print-sheet {
     break-after: page;
     page-break-after: always;
     break-inside: avoid;
-    box-sizing: border-box;
-    height: 205mm;
-    padding: 8mm 10mm;
-    display: flex;
-    flex-direction: column;
-    justify-content: safe center;
-
-    /* ...and the sheet's screen ornaments are undone here, all of them. The
-       shadow, the rounded corner and the 62rem cap exist so the preview looks
-       like paper; printing them would put a grey halo and a narrow column on
-       the actual paper. `min-height` back to 0 so the 205 mm above is the one
-       number that decides the page (pitfall 31: a fractional pixel of overflow
-       plus break-after puts a BLANK sheet behind every timetable). */
     width: auto;
-    max-width: none;
-    min-height: 0;
     background: none;
     border-radius: 0;
     box-shadow: none;
@@ -3210,15 +3390,7 @@ table.bell-preview td {
     margin: 0 0 4mm;
   }
 
-  /* 7 rows on a landscape page leave a lot of white: let the rows grow into it
-     so the timetable is readable from across the room. Whatever is still left
-     over is split evenly above and below by the flex box above. */
-  table.print tbody th,
-  table.print tbody td {
-    height: 23mm;
-  }
-
-  .print-page:last-child {
+  .print-sheet:last-child {
     break-after: auto;
     page-break-after: auto;
   }
@@ -3734,7 +3906,11 @@ table.availability.heat td.closed {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-bottom: var(--space-5);
+  /* --space-5 here, plus an always-drawn empty announcement line under the
+     chips, put 44 px of nothing between the strip and the table (measured at
+     --ui-scale 1.1). The announcement moved onto the row above; this is the
+     rest of it. */
+  margin-bottom: var(--space-3);
 }
 
 .list-tools-row {
@@ -4184,11 +4360,15 @@ body.row-dragging {
   color: var(--muted);
 }
 
-/* Empty until something is announced — and it must keep its box either way,
-   or the table jumps a line every time a row is moved by keyboard. */
-.list-note.sr-live {
-  min-height: 1.2em;
+/* "A 2. sıraya taşındı" — what the last keypress did, said out loud and shown.
+   It sits ON the strip's own row, after the count, so an empty one costs no
+   height at all; the version that had its own line reserved 1.2em forever and
+   was empty almost always. Not `.list-note`: that class names the note below
+   and a test finds it with `.list-tools .list-note` (pitfall 49). */
+.list-said {
+  font-size: var(--fs-sm);
   color: var(--accent);
+  font-weight: 600;
 }
 
 /* A stack of checkbox rows, where `.form-row` would lay them side by side. */
@@ -4224,16 +4404,23 @@ body.row-dragging {
 }
 
 /* ...and `max-content` only means something if the cells HAVE a content width.
-   A control at `width: 100%` contributes zero to it, so without the floors
-   below the table's max-content was the width of its HEADINGS — which is
-   exactly how a 26 px name box passed for "fitting". The floor goes on the
-   control, not on the <th> (a <th> width is the column's, padding included).
-   In ch, so it tracks the text it has to hold rather than a pixel count. */
+   These two rules shipped BROKEN — `min-width: 10ch 6ch` (two values) and
+   `min-width: ;` (none) — so the browser dropped both and the floor was never
+   there at all. Rewritten and then MEASURED, and the measurement says the
+   floor is not what saves the name box: at --ui-scale 1.1 the column comes out
+   at 256 px because an <input> contributes its own preferred size to
+   max-content, and the Branş <select> comes out at 163 px because a select's
+   preferred size is its longest OPTION. Neither is zero.
+
+   The floors stay anyway, low enough to be inert today: they are the guard for
+   the day a cell holds something with no preferred size of its own, which is
+   the case the comment above was written for. In ch, so they track the text
+   they have to hold rather than a pixel count. */
 .table-scroll table.list td > input[type='text']:not(.num):not(.text-sm) {
-  min-width: 10ch 6ch;
+  min-width: 10ch;
 }
 
 .table-scroll table.list td > input.text-sm,
 .table-scroll table.list td > select {
-  min-width: ;
+  min-width: 6ch;
 }

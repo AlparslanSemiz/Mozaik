@@ -684,3 +684,216 @@ test.describe('63. Öğretmende cinsiyet', () => {
     expect(paper).not.toMatch(/Kadın|Erkek|Belirtilmemiş/);
   });
 });
+
+// THE FOUR LISTS, MEASURED — three complaints, three numbers.
+//
+// All three were reported by the reader looking at the screen, and all three
+// turned out to be measurable to the pixel. They are here rather than in a
+// styling note because none of them can be seen by jsdom and none of them
+// changes a single word, attribute or count: the suite was green through all
+// of it (pitfall 33's family).
+test.describe('65. Kurulum listelerinin ölçüleri', () => {
+  const STEPS = ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler'];
+
+  /** How far the row's delete button ends from the table's right edge. */
+  async function deleteInset(page: Page) {
+    return mainList(page)
+      .locator('tbody tr')
+      .first()
+      .evaluate((tr) => {
+        const table = tr.closest('table')!;
+        const btn = tr.querySelector('td:last-child .btn.danger')!;
+        return Math.round(
+          table.getBoundingClientRect().right - btn.getBoundingClientRect().right,
+        );
+      });
+  }
+
+  // Dersler holds ONE button in its action cell; the other three hold two
+  // (inspect + Sil). The column was left-aligned, so in the other three the
+  // pair filled it and Sil landed on the edge, while in Dersler the single
+  // button sat with dead space after it: measured 42 px at 100 % and 73 px at
+  // 150 %, against 6 to 19 px elsewhere. Same markup, different answer,
+  // because the alignment came from a neighbour instead of from a rule.
+  test('Sil dört listede de aynı yerde — en sağda', async ({ page }) => {
+    await openWithSample(page);
+    const inset: Record<string, number> = {};
+    for (const step of STEPS) {
+      await openSetup(page, step);
+      inset[step] = await deleteInset(page);
+    }
+    const values = Object.values(inset);
+    for (const step of STEPS) {
+      expect(inset[step], `${step}: Sil sağ kenardan ${inset[step]}px içeride`).toBeLessThanOrEqual(
+        14,
+      );
+    }
+    // ...and the same distance in all four, which is the part that reads as
+    // "one program" rather than four screens that happen to look alike.
+    expect(Math.max(...values) - Math.min(...values), JSON.stringify(inset)).toBeLessThanOrEqual(4);
+  });
+
+  // The teacher list is eleven columns wide and it did not fit: 106 px of
+  // sideways scroll at the DEFAULT scale, in a panel that had 200 px of white
+  // space three centimetres to its right, because Kurulum gave its sidebar
+  // `1fr` of 1920. The sidebar is now bounded and four columns were trimmed to
+  // what the browser says they need.
+  for (const pct of [100, 110, 125]) {
+    test(`%${pct} ölçekte hiçbir liste YANA kaymıyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 110) await chooseScale(page, pct);
+      for (const step of STEPS) {
+        await openSetup(page, step);
+        const spill = await page
+          .locator('.cols > div .table-scroll')
+          .evaluate((el) => Math.round(el.scrollWidth - el.clientWidth));
+        expect(spill, `%${pct} ${step}: ${spill}px taşma`).toBe(0);
+      }
+    });
+  }
+
+  // 110 % is the default the reader actually uses; 150 % is the case the
+  // scroll box exists for, and the rule there is unchanged — the TABLE
+  // scrolls, the page never does.
+  test('%150’de taşma tabloda kalıyor, sayfada değil', async ({ page }) => {
+    await openWithSample(page);
+    await chooseScale(page, 150);
+    await openSetup(page, 'Öğretmenler');
+    const m = await page.evaluate(() => ({
+      box: (() => {
+        const el = document.querySelector('.cols > div .table-scroll') as HTMLElement;
+        return Math.round(el.scrollWidth - el.clientWidth);
+      })(),
+      page: Math.round(document.body.scrollWidth - document.body.clientWidth),
+    }));
+    expect(m.box, 'kaydırma kutusu bu ölçekte iş görmeli').toBeGreaterThan(0);
+    expect(m.page).toBeLessThanOrEqual(1);
+  });
+
+  // The strip and the table were 44 px apart at the default scale, and almost
+  // all of it was an EMPTY announcement line holding `min-height: 1.2em` open
+  // for a sentence that is there for about a second after a keypress.
+  for (const pct of [100, 150]) {
+    test(`%${pct}: arama şeridiyle liste arasında boşluk kalmıyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await openSetup(page, 'Öğretmenler');
+      const gap = await page.evaluate(() => {
+        const tools = document.querySelector('.cols > div .list-tools') as HTMLElement;
+        const table = document.querySelector('.cols > div table.list') as HTMLElement;
+        // The last child of the strip that actually PAINTS something. An empty
+        // box between the chips and the table is exactly what this measures.
+        const seen = ([...tools.children] as HTMLElement[]).filter(
+          (k) => k.getBoundingClientRect().height > 0 && (k.textContent ?? '').trim() !== '',
+        );
+        const last = seen[seen.length - 1]!;
+        return Math.round(
+          table.getBoundingClientRect().top - last.getBoundingClientRect().bottom,
+        );
+      });
+      // 44 px before, at 100 %. A strip and the table it belongs to are one
+      // thing; the gap should read as a gutter, not as a missing paragraph.
+      expect(gap, `%${pct}: ${gap}px`).toBeLessThanOrEqual(16);
+    });
+  }
+
+  // ...and it still SAYS what happened. The announcement did not go quiet, it
+  // moved onto the strip's own row, where an empty one costs no height.
+  test('duyuru satırı boşken yer kaplamıyor, doluyken okunuyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+    const said = page.locator('.list-tools .list-said');
+    expect(
+      await said.evaluate((el) => Math.round(el.getBoundingClientRect().height)),
+    ).toBe(0);
+
+    await mainList(page).locator('tbody .row-grip').first().focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(said).toHaveText(/2\. sıraya taşındı/);
+    expect(await said.evaluate((el) => el.getAttribute('role'))).toBe('status');
+  });
+
+  // THE GUARD ON THE TRIM. Four widths came down and every one of them was set
+  // from what the browser asked for, not from taste — so the assertion asks
+  // the browser the same question: clone the control at `width: auto` and
+  // compare. Written the day the widths changed, and run at the two scales
+  // where a `ch` count and a font's quantisation disagree most (pitfall 39).
+  for (const pct of [100, 150]) {
+    test(`%${pct}: kırpılan kutuların hiçbiri metnini kesmiyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await openSetup(page, 'Öğretmenler');
+
+      const boxes = await mainList(page)
+        .locator('tbody tr')
+        .first()
+        .evaluate((tr) => {
+          function want(el: HTMLElement) {
+            const c = el.cloneNode(true) as HTMLElement;
+            c.style.width = 'auto';
+            c.style.minWidth = '0';
+            c.style.position = 'absolute';
+            c.style.visibility = 'hidden';
+            el.parentElement!.appendChild(c);
+            const w = c.getBoundingClientRect().width;
+            c.remove();
+            return w;
+          }
+          const out: Array<{ ad: string; var: number; istenen: number }> = [];
+          for (const [ad, sel] of [
+            ['renk', '.color-pick'],
+            ['sayı kutusu', 'input.num'],
+            ['cinsiyet', 'select[aria-label*="cinsiyeti"]'],
+            ['eylemler', 'td:last-child > .form-row'],
+          ] as const) {
+            const el = tr.querySelector(sel) as HTMLElement | null;
+            if (el !== null)
+              out.push({ ad, var: el.getBoundingClientRect().width, istenen: want(el) });
+          }
+          return out;
+        });
+
+      expect(boxes.length, 'ölçülecek kutu bulunamadı').toBe(4);
+      for (const b of boxes) {
+        expect(
+          b.var,
+          `%${pct} ${b.ad}: kutu ${Math.round(b.var)} < istenen ${Math.round(b.istenen)}`,
+        ).toBeGreaterThanOrEqual(b.istenen - 1);
+      }
+    });
+  }
+
+  // The short-form box is the one that got narrowest, and it is narrowed ONLY
+  // inside a row: the add form's box carries the placeholder "Kısaltma", a
+  // whole word, and shrinking that one would be pitfall 33 with a new coat on.
+  test('kısaltma kutusu satırda dar, ekleme formunda geniş', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const inRow = await mainList(page)
+      .locator('tbody tr input.text-sm')
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().width);
+    const inForm = await page
+      .locator('.panel.step-panel > .form-row input.text-sm')
+      .evaluate((el) => el.getBoundingClientRect().width);
+    expect(inRow).toBeLessThan(inForm);
+    // The add box has to hold its own placeholder, whatever it happens to be.
+    const fits = await page
+      .locator('.panel.step-panel > .form-row input.text-sm')
+      .evaluate((el) => {
+        const s = el as HTMLInputElement;
+        const probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
+        probe.style.font = getComputedStyle(s).font;
+        probe.textContent = s.placeholder;
+        document.body.appendChild(probe);
+        const need = probe.getBoundingClientRect().width;
+        probe.remove();
+        return { have: s.clientWidth, need };
+      });
+    expect(
+      fits.have,
+      `ekleme kutusu ${Math.round(fits.have)} < "${'Kısaltma'}" ${Math.round(fits.need)}`,
+    ).toBeGreaterThanOrEqual(fits.need);
+  });
+});

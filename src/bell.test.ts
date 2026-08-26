@@ -1,13 +1,6 @@
+import type { Day } from './types';
 import { describe, expect, it } from 'vitest';
-import {
-  clockParts,
-  dayEnd,
-  dayPeriods,
-  formatClock,
-  minuteOptions,
-  parseClock,
-  sharedPeriods,
-} from './bell';
+import { clockParts, dayEnd, dayPeriods, formatClock, minuteOptions, parseClock, sharedPeriods, periodGroups } from './bell';
 import { DEFAULT_BELL } from './entities';
 import { hourNames } from './entities';
 
@@ -134,5 +127,59 @@ describe('clockParts / minuteOptions', () => {
     expect(list).toHaveLength(13);
     // still sorted, so the dropdown reads like a clock
     expect([...list].sort((a, b) => a - b)).toEqual(list);
+  });
+});
+
+// periodGroups — the answer the printed header needed and sharedPeriods could
+// not give. Reported as "Yazdır kısmında saatleri 6. saatte bakılması lazım":
+// eleven columns carried a time and the twelfth was blank.
+describe('periodGroups', () => {
+  const WEEK: Day[] = [
+    { name: 'Salı', longBreakAfter: 5 },
+    { name: 'Çarşamba', longBreakAfter: 5 },
+    { name: 'Perşembe', longBreakAfter: 5 },
+    { name: 'Cuma', longBreakAfter: 5 },
+    { name: 'Cumartesi', longBreakAfter: 6 },
+    { name: 'Pazar', longBreakAfter: 6 },
+  ];
+  const HOURS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+  it('günler aynıysa TEK grup gelir', () => {
+    const groups = periodGroups(DEFAULT_BELL, HOURS, WEEK);
+    expect(groups[0]).toHaveLength(1);
+    expect(groups[0]?.[0]?.period.start).toBe('09:00');
+    expect(groups[0]?.[0]?.days).toEqual([0, 1, 2, 3, 4, 5]);
+  });
+
+  it('6. ders İKİ gruba ayrılır — beş gün 13:30, iki gün 13:10', () => {
+    const groups = periodGroups(DEFAULT_BELL, HOURS, WEEK);
+    const sixth = groups[5]!;
+    expect(sixth).toHaveLength(2);
+    expect(sixth[0]?.period.start).toBe('13:30');
+    expect(sixth[0]?.days).toEqual([0, 1, 2, 3]);
+    expect(sixth[1]?.period.start).toBe('13:10');
+    expect(sixth[1]?.days).toEqual([4, 5]);
+  });
+
+  it('7. dersten sonra günler yeniden birleşir', () => {
+    const groups = periodGroups(DEFAULT_BELL, HOURS, WEEK);
+    for (let i = 6; i < HOURS.length; i++) {
+      expect(groups[i], `${i + 1}. ders`).toHaveLength(1);
+    }
+  });
+
+  it('sharedPeriods ile AYNI şeyi söylüyor: tek grup <=> null değil', () => {
+    // The two must not drift: wherever the old function says "the days agree",
+    // the new one has to come back with exactly one group, and vice versa.
+    const shared = sharedPeriods(DEFAULT_BELL, HOURS, WEEK);
+    const groups = periodGroups(DEFAULT_BELL, HOURS, WEEK);
+    for (let i = 0; i < HOURS.length; i++) {
+      expect(groups[i]!.length === 1, `${i + 1}. ders`).toBe(shared[i] !== null);
+      if (shared[i] !== null) expect(groups[i]![0]!.period).toEqual(shared[i]);
+    }
+  });
+
+  it('gün yoksa her ders boş liste döner', () => {
+    expect(periodGroups(DEFAULT_BELL, HOURS, [])).toEqual(HOURS.map(() => []));
   });
 });

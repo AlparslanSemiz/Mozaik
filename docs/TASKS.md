@@ -9,17 +9,23 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-> **F turu bitti (2026-08-26).** Kullanıcının üç maddesi karşılandı: listelerde
-> elle sürükleyerek sıralama, Yazdır'da parça parça açma/kapama, ve öğretmende
-> cinsiyet. `schemaVersion` **6**. Ayrıntı aşağıda, **F turu** bölümünde.
+> **Y turu bitti (2026-08-26).** Kullanıcının on bir maddesi + üç liste kusuru
+> karşılandı: `Sil` hizası, Öğretmenler listesinin yatay kayması, şerit-liste
+> boşluğu, Müsaitlik'in çarpıları, kartın üstüne kart bırakma, bir A4'e 1/2/4
+> program, kâğıttaki yazı boyutu, 6. saatin saatleri, sol sütun, gün sınırı,
+> "Sayfada ne olsun"un kırpılan satırı, önizleme = çıktı, kâğıtta çarpı yok,
+> ve öğretmen sayfasında sınıf renkleri. **Şema değişmedi.**
+> Sayılar: 508 birim + 381 E2E + 6 site testi yeşil. Ayrıntı ve **ölçülen her
+> sayı** aşağıda, **Y turu** bölümünde.
 
-> **SIRADAKİ İŞ: 4f — GitHub Pages yayını.** Kullanıcıdan bekleniyor: depo
-> `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı **"GitHub
-> Actions"** seçilecek, ve Tauri için Rust toolchain onayı. Bunlar gelmeden
-> teslim turunun (4f–4i) hiçbir maddesi ilerleyemez.
+> **SIRADAKİ İŞ: B turu — yerel kurulum.** Onaylanmış planın park edilen yarısı
+> (aşağıda "PARK EDİLEN"). Logo seçildi ve yerleşti; kalan beş madde
+> `dersprogrami.localhost` sunucusu, Windows kurulum betikleri, favicon,
+> "nereye kaydedilsin" (eski 4f/4l) ve ilke 2'nin belgeye yazılması.
 >
-> Onlar beklerken yapılabilecek tek büyük iş **gerçek veriyle deneme** — o da
-> babanın listesini gerektiriyor (aşağıda "1. Babanın gerçek verisiyle deneme").
+> Ondan sonra hâlâ kullanıcıda bekleyen iki şey var: **gerçek veriyle deneme**
+> (babanın listesi) ve **4g–4i Tauri/exe** (kullanıcı "şimdilik boş ver" dedi).
+> GitHub Pages (4f) da beklemede — bu turun istediği şey **yerel** kurulum.
 
 ### F turu — elle sıralama · baskı seçenekleri · cinsiyet — **BİTTİ ✅** (2026-08-26)
 
@@ -207,9 +213,12 @@ kullanıcı **"daha cesur olsun"** dedi.
       (görüntü, giriş animasyonunun ortasında alınıyordu). Çare yazıldı
       (tuzak 59) ama soru duruyor: bakan kimse yoksa bu katman ne yakalar?
       Bir dönem kullanıldıktan sonra karar.
-- [ ] **`npm run cozucu`'yu `kontrol`'e almalı mı?** Bu oturumda bir gerileme
-      yakaladı (`'■ Durdur'`), ve `kontrol` yeşilken yakaladı — yani "hepsi"
-      diyen komut hepsini koşmuyor. Karşı gerekçe süre: 36 sn. Ölç ve karar ver.
+- [x] **`npm run cozucu` `kontrol`'e ALINDI (2026-08-26).** Ölçüldü: **34,8 sn**,
+      7/7 yeşil. `kontrol` zaten ~3 dakika, yani maliyet **%19**; karşılığında
+      "hepsi" diyen komut gerçekten hepsini koşuyor. Gerekçe bu turda tazelendi:
+      Yazdır'ın düğmesi `"Yazdır (N sayfa)"` → `"N kâğıt"` oldu, ve tam olarak
+      bu tür bir ad değişikliği `cozucu`'nun daha önce yakaladığı gerilemeydi.
+      Ayrı komut olarak da duruyor (elle koşmak için).
 
 ---
 
@@ -896,3 +905,132 @@ E2E'nin yeni fotolar çekmesini sağlama.
     tuzak 59, bakılarak bulundu.
 .exe
     → **BEKLİYOR** (4g–4i): Rust toolchain onayı kullanıcıdan.
+
+
+## Y turu — listeler + kâğıt — **BİTTİ ✅** (2026-08-26)
+
+Kullanıcının bu dosyanın sonuna elle yazdığı on bir satır, artı aynı mesajda
+gelen üç liste kusuru. **Her maddenin yanındaki sayı ölçülmüş bir sayıdır**;
+hiçbiri "düzeltildi" diye işaretlenmedi, hepsi önce ölçüldü, sonra düzeltildi,
+sonra testi yazıldı ve **test kaynak bozularak kırmızıya döndürüldü** (12 yeni
+E2E'nin 10'u kırmızıya döndü; kalan ikisi bilerek koruma testi).
+
+### Listeler — Kurulum'un dört adımı
+
+- [x] **A1 `Sil` dört listede de en sağda.** Teşhis ölçüldü: Dersler'in eylem
+      sütununda **tek** düğme var, öteki üçünde iki (bilgi + Sil), o yüzden
+      13ch'lik sütun tek düğmeyle içeriğinden geniş kalıyordu. Ölçülen boşluk
+      Dersler'de **42 px (%100) / 73 px (%150)**, ötekilerde 6–19 px. Çare
+      hizalama kuralı (`table.list td > .form-row { justify-content: flex-end }`),
+      ve yanında ikinci bir kaza kapandı: `.form-row`'un `margin-bottom`'u her
+      eylem hücresinde de geçerliydi — **satır boyu 70 → 57 px**.
+      Sonuç: dördünde de **6 px**.
+- [x] **A2 Öğretmenler listesi yatay kaymıyor.** Ölçülen taşma varsayılan
+      ölçekte **106 px**, %125'te 267, %150'de 548 — ve sağda 620 px'lik bir
+      kenar sütunu boş duruyordu. İki adım, ikisi de ölçülerek:
+      (a) `.cols.wide-left` `2fr 1fr` → `1fr minmax(19rem,24rem)`, sol sütun
+      **1185 → 1381 px**; (b) dört sütun tarayıcının istediği genişliğe
+      kırpıldı (`Kısaltma` 16ch → 10ch, `.color-pick` 7ch → 5ch, satırdaki
+      `.num` 8ch → 7ch, `th.num` `--w-col-sm` → `--w-col-xs`).
+      Sonuç: **%100, %110 ve %125'te taşma 0**. %150'de `.table-scroll`
+      duruyor — on bir sütun oraya hiçbir düzenle sığmaz ve mevcut test
+      "sayfa değil TABLO kayar" iddiasını orada tutuyor.
+- [x] **A3 Arama şeridiyle liste arasındaki boşluk.** Ölçülen **44 px**, ve
+      çoğu **her zaman çizilen boş bir duyuru satırı**ydı (`min-height: 1.2em`).
+      Duyuru şeridin kendi satırına taşındı (`.list-said`, `.list-note` DEĞİL —
+      tuzak 49) ve `.list-tools` alt boşluğu `--space-5` → `--space-3`.
+      Sonuç: **9 px**.
+
+### Kâğıt ve ızgara — kullanıcının on bir maddesi
+
+- [x] **Y1 Müsaitlikte çarpılar büyük ve kırmızı.** `--muted`/`--fs-lg` →
+      `--bad`/`--fs-2xl`. Renk kanalını bozmuyor çünkü **kapsam** dar: o
+      ekranda bırakma da reddetme de yok, tek söylenen açık/kapalı. Tarama
+      duruyor (renk tek başına durum taşımaz) ve kontrast ölçülüyor.
+- [x] **Y2 Kartın üstüne kart bırakılabiliyor, eski ders havuza dönüyor.**
+      `dropMap()` (`constraints.ts`) — `check()` artı **tek** bir reddin
+      geçersiz kılınması: sınıfın kendi başka dersi. Öteki bütün retler
+      *başkasıyla* ilgili (öğretmen başka sınıfta, derslik dolu, saat kapalı)
+      ve önündeki bloğu havuza atmak onları doğru yapmaz. Hücre **yeşil değil
+      sarı**: izin var ama bir şey kaybediyorsunuz — dördüncü bir renk
+      uydurulmadı. Bütün hamle **tek geri-al adımı**, ve ne kaybedildiği
+      toast'ta adıyla yazıyor.
+- [x] **Y3 Bir A4'e 1, 2 ya da 4 program.** `.print-sheet` = kâğıt (297×205 mm,
+      `break-after` onda), `.print-page` = **bir program** — ad değişmedi çünkü
+      onu sayan yarım düzine test var. PDF ile doğrulandı: 4 program per=4'te
+      **1 PDF sayfası**, per=2'de 2, per=1'de 4.
+- [x] **Y4 6. sütunda saat var artık.** Boş değildi çünkü bozuktu: 6. ders
+      hafta içi 13:30, hafta sonu 13:10 başlıyor ve başlık ikisini de
+      söyleyemiyordu. `periodGroups()` (`bell.ts`) ikisini de veriyor, başlık
+      ikisini de gün aralığıyla yazıyor (`Sal–Cum 13:30–14:10` /
+      `Cmt–Pzr 13:10–13:50`). Uyuşan on bir sütunda gün adı **yazılmıyor**.
+      Ölçüldü: sütunlar üç düzende de eşit kalıyor (≤1 px).
+- [x] **Y5 Sol sütun daraldı.** `--rowhead-w` 8.25rem → **6rem**. Sayı
+      ölçüldü: en uzun gömülü branş ("Sosyal Bilgiler") **5.51rem** istiyor.
+- [x] **Y6 Kâğıttaki yazı boyutu.** Küçük / Normal / Büyük, ve **düzenden
+      bağımsız**. İlk deneme hiç çalışmadı ve bunu ancak ölçüm gösterdi:
+      `--fs-p-*` `:root`'ta tanımlıyken çarpanı aşağıda ezmek hiçbir şey
+      yapmıyor (tuzak 52'nin ailesi) — dokuz birleşimde de başlık **22,7 px**
+      çıkıyordu. Merdiven `.print-area`'ya taşındı.
+- [x] **Y7 Günler arası fark belli.** Kendi tokeni: `--day-edge`, 3 px, ve
+      ızgaradaki **en kalın** çizgi. Gün bandı güçlendirilmedi — o band ΔE 2,7'de
+      bilerek duruyor (tuzak 40).
+- [x] **Y8 "Sayfada ne olsun" satırları kırpılmıyor.** `.pick-item`'ın
+      `white-space: nowrap`'i çipler için doğru, cümle taşıyan yığılmış satır
+      için yanlıştı. **İlk testim yanlış şeyi ölçtü** (satırın sağ kenarını
+      panelinkiyle karşılaştırdı) ve bozuk derlemede yeşil geçti; gerçek kusur
+      satırın **kendi metnini kırpması**ydı — ölçülen: `"Derslik ve branş —
+      Ayn…"`, %150'de iki satır.
+- [x] **Y9 Önizleme ile çıktı aynı sayfa.** Değillerdi: önizleme satırı **~30 px**,
+      kâğıt satırı **86,93 px**, çünkü `height: 23mm` yalnız `@media print`
+      içindeydi. Kutu artık ikisinde de mm cinsinden aynı kutu; ekrana özel
+      kalan tek şey kâğıdın **üstünde olmayan** şeyler (gölge, köşe, tepsi).
+- [x] **Y10 Kâğıtta çarpı yok.** Öğretmen sayfasındaki kapalı saat işareti
+      (× + gri tarama) kalktı; bilgi kaybolmadı, Müsaitlik'te düzenleniyor ve
+      Kontrol'de sayılıyor.
+- [x] **Y11 Öğretmen sayfasının renkleri SINIFIN rengi.** Ekrandaki kural
+      ("hücreyi daima öğretmen rengi boyar") öğretmenin kendi kâğıdında
+      dejenere: on iki hücre aynı pastel. **Sınıf sayfası değişmedi.**
+
+### Bu turda çıkan yeni tuzaklar
+
+- **Tuzak 63** — `:root`'ta tanımlanan bir custom property'nin içindeki
+  `var()` **orada** çözülür; aşağıda çarpanı ezmek hiçbir şey yapmaz.
+- **Tuzak 64** — bir düzen kusurunu ölçerken **hangi kutunun** taştığına
+  bakılır: taşan şey kapsayıcı değil, öğenin kendi metni olabilir.
+- **Tuzak 62 yeniden yaşandı**: `npm run build | tail` zincirinde çıkış kodu
+  `tail`'inki olur. Derleme kırıldı, testler **bir önceki** `dist`'i ölçtü ve
+  hepsi yeşil geçti. `set -o pipefail` şart.
+
+---
+
+## PARK EDİLEN: yerel kurulum turu (B) — kullanıcı kararıyla ertelendi
+
+Onaylanan planın B bölümü **yarıda bırakıldı** (2026-08-26, kullanıcı: "şimdi
+bu listeye geç"). Yapılan tek parçası **logo**: üç aday çizildi, 16/32/64/192
+px'te iki zeminde yan yana render edildi, kullanıcı **A — Şerit**'i seçti;
+adaylar `site/logo-adaylari/` altında **duruyor** (kullanıcı isteği).
+
+Kalan işler, kararlarıyla birlikte:
+
+- [ ] **B1 Yerel sunucu** — `scripts/sunucu.mjs` (Node, sıfır bağımlılık) +
+      `kurulum/sunucu.ps1` (Windows ikizi, **`HttpListener` değil ham
+      `TcpListener`**: `localhost` dışı bir ana bilgisayar öneki
+      `netsh http add urlacl` yani yönetici ister). Adres
+      **`http://dersprogrami.localhost:7654`** — Chrome `*.localhost`'u kendisi
+      127.0.0.1'e çözer, hosts dosyası ve yönetici gerekmez, **ve o adres
+      güvenli bağlamdır** (service worker + dosya sistemi API'si çalışır).
+- [ ] **B2 Kurulum betikleri** — `Kur.cmd` / `Guncelle.cmd` / `OKU.txt`,
+      masaüstü ve Başlat menüsü kısayolu (`WScript.Shell`, gerçek `.lnk`),
+      `icon.ico`. Hedef **Windows 10 ve 11** (kullanıcı kararı).
+- [ ] **B3b `index.html`'e `data:` URI favicon** — çift tıklanan dosyanın
+      sekmesinde de logo görünsün; ağ yok, tuzak 32'ye dokunmaz.
+- [ ] **B4 "Nereye kaydedilsin"** (= eski 4l) — `src/folder.ts`, tutamak
+      IndexedDB'de, ilk açılışta `showDirectoryPicker({ startIn: 'documents' })`,
+      her yazımda `ders-programi-tumu.json` + günlük yedek (son 10 gün).
+- [ ] **B5 İlke 2'nin ikinci daraltması belgeye yazılacak**: yerel statik
+      sunucu var; backend, veritabanı, hesap, oturum, API yok.
+
+> **Dürüst not:** bu makinede `pwsh` **yok** (kontrol edildi), yani
+> `sunucu.ps1` burada koşturulamaz. Yazıldığında "gözden geçirildi,
+> **ölçülmedi**" diye işaretlenecek.

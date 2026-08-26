@@ -1,22 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Ders Programı">
   <title>Ders Programı</title>
-  <!-- Drawn by hand, not fetched: principle 3 means no icon CDN either.
-       CHOSEN ON 2026-08-26 out of three, looked at side by side at 16, 32, 64
-       and 192 px on both grounds. The two it beat are kept beside it in
-       site/logo-adaylari/ — a clock ring, which was the most legible at 16 px
-       but read as a clock APP, and a "DP" monogram, which was the sharpest and
-       said the least.
-
-       The one it replaced was the same idea with grid lines, a header strip,
-       an outline and seven blocks in it; at 16 px all of that turned to mud.
-       What is left is the one thing the tool does: coloured blocks sitting in
-       a week. Six columns because the school week here is six days.
-
+  <!-- A. THE WEEK, PARED DOWN.
+       The same idea as the icon it replaces — a week with lessons put into it —
+       with the grid lines, the header strip and the outline taken out. What is
+       left is the ONE thing the tool does: coloured blocks sitting in a week.
+       Six columns because the school week here is six days.
        Colours are the app's own accent plus three palette entries, so the mark
-       cannot drift away from what the program looks like. Full bleed, and
-       everything that matters sits inside the middle 80 % the maskable variant
-       is cropped to (measured: content spans 104-452 of 512, the safe box is
-       51-461). -->
+       cannot drift away from what the program looks like. -->
   <rect width="512" height="512" rx="112" fill="#2e3ba8"/>
   <g>
     <!-- Monday..Saturday, four rows of hours. Only the filled cells are drawn:

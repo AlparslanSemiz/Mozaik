@@ -2,7 +2,7 @@
 // overflow" is not enough — the columns must be equal and the page landscape.
 
 import { expect, test, type Page } from '@playwright/test';
-import { openWithSample, openSetup, openSettings } from './helpers';
+import { openWithSample, openSetup, openSettings, loadWorld } from './helpers';
 
 test.describe('4. Yazdırma', () => {
   test('her sınıf için bir sayfa ve yatay taşma yok', async ({ page }) => {
@@ -215,7 +215,10 @@ test.describe('21. Yazdırmada seçim', () => {
     await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
     await list.locator('.pick-item', { hasText: '511' }).first().locator('input').check();
     await expect(pages).toHaveCount(2);
-    await expect(page.getByRole('button', { name: 'Yazdır (2 sayfa)' })).toBeEnabled();
+    // "kâğıt", not "sayfa": once a sheet can hold four timetables the two
+    // words stop meaning the same thing, and the number beside the button is
+    // the number of pieces of paper the printer will produce.
+    await expect(page.getByRole('button', { name: 'Yazdır (2 kâğıt)' })).toBeEnabled();
     await expect(pages.first().locator('h3')).toContainText('510');
     await expect(pages.nth(1).locator('h3')).toContainText('511');
   });
@@ -283,50 +286,55 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
   /** Everything about the sheet, on whichever medium is being emulated. */
   async function sheet(page: Page) {
     return page.evaluate(() => {
+      const paper = document.querySelector('.print-sheet')!;
       const box = document.querySelector('.print-page')!;
       const cell = document.querySelector('table.print tbody td')!;
-      const cs = getComputedStyle(box);
-      const r = box.getBoundingClientRect();
+      const title = document.querySelector('.p-title-main')!;
+      const cs = getComputedStyle(paper);
+      const r = paper.getBoundingClientRect();
       return {
         width: r.width,
         height: r.height,
         row: cell.getBoundingClientRect().height,
+        title: Number.parseFloat(getComputedStyle(title).fontSize),
+        pad: getComputedStyle(box).padding,
         shadow: cs.boxShadow,
         radius: cs.borderTopLeftRadius,
-        maxWidth: cs.maxWidth,
         overflow: box.scrollHeight - box.clientHeight,
       };
     });
   }
 
-  test('ekranda bir SAYFA gibi duruyor ve satırları uzadı', async ({ page }) => {
+  test('ekranda bir SAYFA gibi duruyor — A4 yatayın kendisi', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Yazdır' }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     const screen = await sheet(page);
 
-    // The row was 30px — about half of what 23 mm is on this screen, so the
-    // preview's rows were squat next to the sheet they stand for.
-    expect(screen.row, `önizleme satırı ${screen.row}px`).toBeGreaterThan(45);
-
-    // A4 landscape is 297 x 210. The sheet is allowed to be TALLER than that
-    // (a seven-day week has to be able to grow rather than be squeezed), never
-    // narrower or shorter.
-    const ratio = screen.width / screen.height;
-    expect(ratio, `en/boy ${ratio.toFixed(3)} — A4 yatay 1.414`).toBeLessThanOrEqual(1.415);
-    expect(ratio).toBeGreaterThan(1.0);
+    // 297 x 205 mm, in the units a screen has: 96 dpi puts them at 1122.5 and
+    // 774.8 px. Not a MODEL of the sheet at some ratio — the sheet.
+    expect(screen.width, `${screen.width}px, 297mm = 1122.5px`).toBeCloseTo(1122.5, 0);
+    expect(screen.height, `${screen.height}px, 205mm = 774.8px`).toBeCloseTo(774.8, 0);
 
     // ...and it reads as a sheet lying on a desk, not as a table on a panel.
     expect(screen.shadow).not.toBe('none');
     expect(Number.parseFloat(screen.radius)).toBeGreaterThan(0);
   });
 
-  test('EKRAN süsünün hiçbiri kâğıda geçmiyor', async ({ page }) => {
-    // Pitfall 32 in CSS: two targets means one leaks into the other. The shadow,
-    // the rounded corner and the 62rem cap exist so the preview looks like
-    // paper; printing them would put a grey halo and a narrow column on the
-    // actual paper, and nobody would find out until after printing.
+  test('ÖNİZLEME ile KÂĞIT aynı sayfa — ölçüsü ölçüsüne', async ({ page }) => {
+    // "Yazdır kısmında önizlemeyle yazdırılan aynı olsun" (2026-08-26).
+    //
+    // They were not. Measured before the change: the preview's row was ~30 px
+    // and the printed one 86.93, because `height: 23mm` lived inside
+    // `@media print` alone. Anyone choosing what to print was choosing from a
+    // drawing of the sheet rather than from the sheet.
+    //
+    // What is still allowed to differ is what is not ON the paper: the shadow,
+    // the corner, and the width, which goes to `auto` in print so the sheet
+    // takes the page box instead of insisting on 297 mm inside an already
+    // 297 mm page (a tenth of a millimetre there is a blank sheet behind every
+    // timetable — pitfall 31).
     await openWithSample(page);
     await page.getByRole('button', { name: 'Yazdır' }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
@@ -335,15 +343,16 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     await page.emulateMedia({ media: 'print' });
     const paper = await sheet(page);
 
+    // The SAME sheet: same row height, same type, same margin, same height.
+    expect(paper.row, `kâğıt ${paper.row}px, ekran ${screen.row}px`).toBeCloseTo(screen.row, 1);
+    expect(paper.row, `23mm = 86.9px`).toBeCloseTo(86.93, 0);
+    expect(paper.title).toBeCloseTo(screen.title, 1);
+    expect(paper.pad).toBe(screen.pad);
+    expect(paper.height).toBeCloseTo(screen.height, 1);
+
+    // ...and the screen ornaments do not follow it into the tray (pitfall 32).
     expect(paper.shadow).toBe('none');
     expect(Number.parseFloat(paper.radius)).toBe(0);
-    expect(paper.maxWidth).toBe('none');
-    expect(screen.maxWidth).not.toBe('none');
-
-    // 23 mm at 96 dpi is 86.93 px, and that number must not have moved.
-    expect(paper.row, `kâğıt satırı ${paper.row}px, 23mm = 86.9px`).toBeCloseTo(86.93, 0);
-    expect(paper.row).toBeGreaterThan(screen.row);
-    // The page box is still the 205 mm one, and still fits what is in it.
     expect(paper.overflow).toBeLessThanOrEqual(1);
 
     await page.emulateMedia({ media: 'screen' });
@@ -397,5 +406,315 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
       return (a + 0.05) / (b + 0.05);
     });
     expect(ratio, `çizgi/kâğıt kontrastı ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(3);
+  });
+});
+
+// WHAT THE 2026-08-26 LIST CHANGED ON PAPER.
+//
+// Three asks, three measurements. All three are about the sheet a father pins
+// to a wall, and none of them can be seen in jsdom.
+
+/** Two classes with different colours, one teacher, one placed lesson, and a
+ *  day of closed hours — the four things the assertions below need to exist. */
+const PAPER_WORLD = {
+  schemaVersion: 6,
+  settings: {
+    schoolName: 'Kâğıt Kursu',
+    days: [
+      { name: 'Salı', longBreakAfter: 0 },
+      { name: 'Çarşamba', longBreakAfter: 0 },
+    ],
+    hours: ['1', '2', '3', '4'],
+    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+    rules: { maxConsecutive: 'block', maxPerDay: 'block', minPerDay: 'warn', maxSameLessonPerDay: 'block' },
+    subjects: ['Matematik'],
+    subjectShorts: {},
+  },
+  rooms: [{ id: 'dA', name: 'A' }],
+  teachers: [
+    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+  ],
+  classes: [
+    { id: 's510', name: '510', roomId: 'dA', color: 3 },
+    { id: 's511', name: '511', roomId: null, color: 9 },
+  ],
+  lessons: [
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+    { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+  ],
+  // A whole day shut, so the sheet has closed hours to NOT draw.
+  unavailable: { 'oMC|1|0': 1, 'oMC|1|1': 1, 'oMC|1|2': 1, 'oMC|1|3': 1 },
+  placements: { 's510|0|0': 'x1', 's511|0|1': 'x2' },
+};
+
+test.describe('69. Kâğıdın 2026-08-26 turu', () => {
+  test('öğretmen sayfasında ÇARPI yok — kapalı saat kâğıda çıkmıyor', async ({ page }) => {
+    // MÇ is shut all of Çarşamba in this world, so the page HAS closed hours
+    // to draw: before the change they came out as a cross and a grey hatch.
+    await loadWorld(page, PAPER_WORLD);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
+    await expect(page.locator('.print-page').first()).toBeVisible();
+
+    const paper = await page.locator('.print-area').innerText();
+    expect(paper).not.toContain('×');
+    expect(await page.locator('.print-area td.p-closed').count()).toBe(0);
+  });
+
+  test('öğretmen sayfasının renkleri SINIFIN rengi', async ({ page }) => {
+    // On a teacher's own sheet every filled cell is that same teacher, so the
+    // teacher's colour paints twelve identical pastels and says nothing. The
+    // class is what varies — and it is what the reader is looking for.
+    //
+    // A hand-built world, because the sample ships with an EMPTY grid: with no
+    // placements there is no coloured cell and the test would pass on nothing.
+    // Both kinds of page are left on screen, because the class sheet's own
+    // title dot is the honest thing to compare against — no palette index is
+    // written down twice.
+    await loadWorld(page, PAPER_WORLD);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    // The strip opens on class sheets only; this comparison needs both kinds.
+    await page.getByRole('button', { name: 'İkisi de', exact: true }).click();
+    await expect(page.locator('.print-page')).toHaveCount(3);
+
+    const seen = await page.evaluate(() => {
+      // The class sheet says what 510's colour IS (its title dot)...
+      let want = '';
+      for (const sheet of document.querySelectorAll('.print-page')) {
+        const title = (sheet.querySelector('.p-title-main')?.textContent ?? '').trim();
+        if (!title.startsWith('510 sınıfı')) continue;
+        const dot = sheet.querySelector('.p-dot');
+        if (dot !== null) want = getComputedStyle(dot).backgroundColor;
+      }
+      // ...and the teacher sheet's cell for 510 has to be painted with it.
+      let got = '';
+      let teacherDot = '';
+      for (const sheet of document.querySelectorAll('.print-page')) {
+        const title = (sheet.querySelector('.p-title-main')?.textContent ?? '').trim();
+        if (!title.includes('(MÇ)')) continue;
+        const dot = sheet.querySelector('.p-dot');
+        if (dot !== null) teacherDot = getComputedStyle(dot).backgroundColor;
+        for (const cell of sheet.querySelectorAll('table.print tbody td')) {
+          if ((cell.querySelector('.p-top')?.textContent ?? '').trim() === '510') {
+            got = getComputedStyle(cell).backgroundColor;
+          }
+        }
+      }
+      return { want, got, teacherDot };
+    });
+
+    expect(seen.want, '510 sınıfının sayfası bulunamadı').not.toBe('');
+    expect(seen.got, 'öğretmen sayfasında 510 hücresi bulunamadı').not.toBe('');
+    expect(seen.got, 'hücre sınıfın rengiyle boyanmalı').toBe(seen.want);
+    // ...and the discriminating half: it is NOT the teacher's own colour, which
+    // is what it used to be and what the title dot still is.
+    expect(seen.got).not.toBe(seen.teacherDot);
+  });
+
+  test('“Sayfada ne olsun” satırları metnini KIRPMIYOR', async ({ page }) => {
+    // `.pick-item` was `white-space: nowrap` — right for the class chips that
+    // wrap in a row, wrong for a stacked row carrying a whole sentence in a
+    // 20-26rem sidebar.
+    //
+    // The first version of this test measured the row's right edge against the
+    // panel's and passed on the broken build: the flex item does not push the
+    // panel open, the text is simply cut off inside it. Measured on the broken
+    // build, the clipped row was "Derslik ve branş — Ayn…" at 100 % and two
+    // rows at 150 % — which is exactly what was reported. So the assertion is
+    // the one the reader would make: no row hides its own words.
+    await openWithSample(page);
+    for (const pct of [100, 150]) {
+      if (pct !== 100) {
+        await openSettings(page, 'Görünüm');
+        await page.getByRole('button', { name: `%${pct}`, exact: true }).click();
+      }
+      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+
+      const clipped = await page
+        .locator('.panel', { hasText: 'Sayfada ne olsun' })
+        .evaluate((panel) => {
+          const rows = [...panel.querySelectorAll('.pick-item')] as HTMLElement[];
+          return rows
+            .filter((r) => r.scrollWidth - r.clientWidth > 1)
+            .map((r) => (r.textContent ?? '').trim().slice(0, 30));
+        });
+      expect(clipped, `%${pct}: kırpılan satır(lar)`).toEqual([]);
+    }
+  });
+});
+
+// SAYFA DÜZENİ — the 2026-08-26 asks about the shape of the paper itself:
+// "bir A4 kağıdına 4 tane program yazılabilir olsun", "Yazdır kısmında
+// yazıların boyutunu ayarlama seçeneği", and the blank 6th column.
+test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
+  const layout = (page: Page) => page.locator('.panel', { hasText: 'Sayfa düzeni' });
+
+  async function choose(page: Page, name: string) {
+    await layout(page).getByRole('button', { name, exact: true }).click();
+  }
+
+  test('bir A4’e 1, 2 ya da 4 program — ve kâğıt sayısı ona göre', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await expect(page.locator('.print-page')).toHaveCount(20);
+
+    for (const [per, sheets] of [
+      ['1', 20],
+      ['2', 10],
+      ['4', 5],
+    ] as const) {
+      await choose(page, per);
+      // A timetable is still a timetable at every setting — what changes is
+      // how many of them share a piece of paper.
+      await expect(page.locator('.print-page')).toHaveCount(20);
+      await expect(page.locator('.print-sheet')).toHaveCount(sheets);
+      // ...and the button counts PAPER, which is what comes out of the printer.
+      await expect(page.getByRole('button', { name: `Yazdır (${sheets} kâğıt)` })).toBeEnabled();
+    }
+  });
+
+  test('kâğıt 297x205mm KALIYOR — dörde bölünen sayfa değil, içindekiler', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    for (const per of ['1', '2', '4']) {
+      await choose(page, per);
+      const m = await page.locator('.print-sheet').first().evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        const plans = el.querySelectorAll('.print-page').length;
+        return { w: r.width, h: r.height, plans };
+      });
+      expect(m.w, `per=${per} genişlik`).toBeCloseTo(1122.5, 0);
+      expect(m.h, `per=${per} yükseklik`).toBeCloseTo(774.8, 0);
+      expect(m.plans, `per=${per} kâğıttaki program`).toBe(Number(per));
+    }
+  });
+
+  test('hiçbir düzen-boyut birleşiminde program kâğıttan TAŞMIYOR', async ({ page }) => {
+    // Nine combinations, and the reason each one is measured: the type ladder
+    // is a chain of two multipliers, and a wrong scope on it makes every one
+    // of them silently identical — which is exactly what happened the first
+    // time (measured: the title was 22.7px at all nine).
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    for (const per of ['1', '2', '4']) {
+      await choose(page, per);
+      for (const size of ['Küçük', 'Normal', 'Büyük']) {
+        await choose(page, size);
+        const over = await page
+          .locator('.print-page')
+          .first()
+          .evaluate((el) => Math.round(el.scrollHeight - el.clientHeight));
+        expect(over, `per=${per} ${size}: ${over}px taşma`).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  test('yazı boyutu GERÇEKTEN değişiyor, üç basamak da ayrı', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    const seen: number[] = [];
+    for (const size of ['Küçük', 'Normal', 'Büyük']) {
+      await choose(page, size);
+      seen.push(
+        await page
+          .locator('.p-title-main')
+          .first()
+          .evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize)),
+      );
+    }
+    expect(seen[0]!, `küçük ${seen[0]} < normal ${seen[1]}`).toBeLessThan(seen[1]!);
+    expect(seen[1]!, `normal ${seen[1]} < büyük ${seen[2]}`).toBeLessThan(seen[2]!);
+  });
+
+  test('düzen ve boyut BAĞIMSIZ — 4’lüde de büyütülebiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await choose(page, '4');
+    const read = () =>
+      page.locator('.p-title-main').first().evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
+    await choose(page, 'Küçük');
+    const small = await read();
+    await choose(page, 'Büyük');
+    const big = await read();
+    expect(big).toBeGreaterThan(small);
+  });
+
+  test('6. sütunda artık saat VAR — iki tane, hangi günler olduğu yazılı', async ({ page }) => {
+    // The blank column was reported as a fault. It was not one: the 6th lesson
+    // starts at 13:30 on a weekday and 13:10 at the weekend, and the header
+    // refused to say either. Now it says both, each with its own days.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+
+    const heads = await page
+      .locator('.print-page')
+      .first()
+      .evaluate((el) =>
+        [...el.querySelectorAll('thead th')]
+          .slice(1)
+          .map((th) => (th.textContent ?? '').replace(/\s+/g, ' ').trim()),
+      );
+
+    // Every lesson number carries a clock. None is blank any more.
+    for (const [i, text] of heads.entries()) {
+      expect(text, `${i + 1}. sütun`).toMatch(/\d{2}:\d{2}–\d{2}:\d{2}/);
+    }
+
+    // ...and the one where the week disagrees carries both, named.
+    const sixth = heads[5]!;
+    expect(sixth).toContain('13:30–14:10');
+    expect(sixth).toContain('13:10–13:50');
+    expect(sixth).toContain('Sal–Cum');
+    expect(sixth).toContain('Cmt–Pzr');
+
+    // The eleven that agree say nothing about days: naming them on every
+    // column would say nothing eleven times to explain one.
+    expect(heads[0]).not.toMatch(/Sal|Cmt/);
+  });
+
+  test('iki saatli başlık sütunu GENİŞLETMİYOR', async ({ page }) => {
+    // `table-layout: fixed` is what keeps the columns equal, and a header that
+    // grew its own column would break the one thing paper has to get right.
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    for (const per of ['1', '2', '4']) {
+      await choose(page, per);
+      const w = await page
+        .locator('.print-page')
+        .first()
+        .evaluate((el) =>
+          [...el.querySelectorAll('thead th')].slice(1).map((t) => t.getBoundingClientRect().width),
+        );
+      const spread = Math.max(...w) - Math.min(...w);
+      expect(spread, `per=${per}: sütunlar ${spread.toFixed(2)}px ayrışıyor`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('4’lüde 4 program = 1 KÂĞIT — PDF sayarak', async ({ page }) => {
+    // The one assertion that goes all the way to the printer. Everything else
+    // in this file measures the DOM; this counts the pages a PDF actually has,
+    // which is the only place a stray `break-after` or a fractional pixel of
+    // overflow shows up (pitfall 31 cost a blank sheet behind every timetable
+    // and no DOM measurement saw it).
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+
+    const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
+    await list.getByRole('button', { name: 'Hiçbiri' }).click();
+    for (const n of [0, 1, 2, 3]) await list.locator('.pick-item').nth(n).locator('input').check();
+    await expect(page.locator('.print-page')).toHaveCount(4);
+
+    for (const [per, sheets] of [
+      ['1', 4],
+      ['2', 2],
+      ['4', 1],
+    ] as const) {
+      await layout(page).getByRole('button', { name: per, exact: true }).click();
+      const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
+      const count = (pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+      expect(count, `per=${per}: PDF ${count} sayfa, beklenen ${sheets}`).toBe(sheets);
+    }
   });
 });
