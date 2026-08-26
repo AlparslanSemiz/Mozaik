@@ -14,6 +14,8 @@ import { subjectShort } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
 import type { Scope } from '../toolState';
+import { PRINT_OPTION_LABELS } from '../printOptions';
+import type { PrintOptions } from '../printOptions';
 
 interface Props {
   state: State;
@@ -26,6 +28,13 @@ interface Props {
   /** Which pages the preview builds. Owned by App; the tool strip CHANGES it. */
   scope: Scope;
   colored: boolean;
+  /**
+   * What each page carries. ONE prop rather than five, because they are one
+   * decision; App owns it so it survives a trip to Kurulum, and printOptions.ts
+   * remembers it so it survives the term.
+   */
+  options: PrintOptions;
+  setOptions: (next: PrintOptions) => void;
 }
 
 /**
@@ -47,8 +56,25 @@ export default function Print({
   setExcluded,
   scope,
   colored,
+  options,
+  setOptions,
 }: Props) {
   const ix = useMemo(() => buildIndex(state), [state]);
+
+  // Read once per mount, on purpose: the sheet says when it was printed, and
+  // the honest answer is "about now". Recomputing it per page would put five
+  // different minutes on five sheets that came out of the same job.
+  const stamped = useMemo(
+    () =>
+      new Date().toLocaleString('tr-TR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [],
+  );
 
   // A column header carries ONE time, but the 6th lesson starts at 13:30 on a
   // weekday and 13:10 at the weekend. Printing one of them above both would be
@@ -76,9 +102,11 @@ function credits(...parts: string[]): string {
           {state.settings.hours.map((hour, s) => (
             <th key={s}>
               {hour}
-              <span className="p-clock">
-                {clock[s] === null ? '' : `${clock[s]?.start ?? ''}–${clock[s]?.end ?? ''}`}
-              </span>
+              {options.clock && (
+                <span className="p-clock">
+                  {clock[s] === null ? '' : `${clock[s]?.start ?? ''}–${clock[s]?.end ?? ''}`}
+                </span>
+              )}
             </th>
           ))}
         </tr>
@@ -208,8 +236,8 @@ function credits(...parts: string[]): string {
                   const room =
                     group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
                   const sub = credits(
-                    state.settings.schoolName,
-                    room === '' ? '' : `${room} dersliği`,
+                    options.school ? state.settings.schoolName : '',
+                    !options.credits || room === '' ? '' : `${room} dersliği`,
                   );
                   return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
                 })()}
@@ -243,7 +271,9 @@ function credits(...parts: string[]): string {
                                 <span className="p-top">
                                   {subjectShort(state.settings, teacher.subject)}
                                 </span>
-                                <span className="p-bottom">{teacher.short}</span>
+                                {options.cellBottom && (
+                                  <span className="p-bottom">{teacher.short}</span>
+                                )}
                               </>
                             )}
                           </td>
@@ -253,6 +283,11 @@ function credits(...parts: string[]): string {
                   ))}
                 </tbody>
               </table>
+              {/* Last child of the page box, so `justify-content: safe center`
+                  centres the plan WITH it rather than around it. */}
+              {options.stamp && (
+                <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
+              )}
             </div>
           ))}
 
@@ -266,7 +301,10 @@ function credits(...parts: string[]): string {
                   {teacher.name} ({teacher.short}) — Haftalık ders programı
                 </span>
                 {(() => {
-                  const sub = credits(state.settings.schoolName, teacher.subject);
+                  const sub = credits(
+                    options.school ? state.settings.schoolName : '',
+                    options.credits ? teacher.subject : '',
+                  );
                   return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
                 })()}
               </h3>
@@ -302,11 +340,13 @@ function credits(...parts: string[]): string {
                             {group !== undefined ? (
                               <>
                                 <span className="p-top">{group.name}</span>
-                                <span className="p-bottom">
-                                  {group.roomId != null
-                                    ? (ix.roomById.get(group.roomId)?.name ?? '')
-                                    : ''}
-                                </span>
+                                {options.cellBottom && (
+                                  <span className="p-bottom">
+                                    {group.roomId != null
+                                      ? (ix.roomById.get(group.roomId)?.name ?? '')
+                                      : ''}
+                                  </span>
+                                )}
                               </>
                             ) : closed ? (
                               '×'
@@ -318,6 +358,11 @@ function credits(...parts: string[]): string {
                   ))}
                 </tbody>
               </table>
+              {/* Last child of the page box, so `justify-content: safe center`
+                  centres the plan WITH it rather than around it. */}
+              {options.stamp && (
+                <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
+              )}
             </div>
           ))}
       </div>
@@ -355,6 +400,32 @@ function credits(...parts: string[]): string {
           {pageCount === 0 && (
             <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
           )}
+        </div>
+
+        {/* Which of the things on a sheet are wanted on THIS school's sheets.
+            In the panel rather than the tool strip: five more icon+word
+            buttons do not fit a strip that is already measured for spill at
+            150%, and this is a term-long decision, not a per-glance one. */}
+        <div className="panel no-print">
+          <h2>Sayfada ne olsun</h2>
+          <p className="hint">
+            İşareti kaldırılan şey kâğıda basılmaz. Seçiminiz bu bilgisayarda
+            hatırlanır; yedeğe girmez.
+          </p>
+          <div className="form-col">
+            {PRINT_OPTION_LABELS.map((x) => (
+              <label key={x.id} className="pick-item">
+                <input
+                  type="checkbox"
+                  checked={options[x.id]}
+                  onChange={() => setOptions({ ...options, [x.id]: !options[x.id] })}
+                />
+                <span>
+                  {x.label} <span className="muted-inline">— {x.hint}</span>
+                </span>
+              </label>
+            ))}
+          </div>
         </div>
 
         {/* What the printer is about to produce, in the numbers that matter at

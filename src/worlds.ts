@@ -28,6 +28,7 @@ import { sampleState } from './sample';
 import type {
   ClassGroup,
   Day,
+  Gender,
   Id,
   Lesson,
   Limits,
@@ -87,6 +88,8 @@ export function makeWorld(spec: WorldSpec = {}): State {
     name: t.short,
     short: t.short,
     subject: t.subject ?? 'Matematik',
+    // A synthetic world has no opinion about this, and the solver never asks.
+    gender: '' as Gender,
     color: i,
     limits: t.limits ?? { ...NO_TEACHER_LIMITS },
   }));

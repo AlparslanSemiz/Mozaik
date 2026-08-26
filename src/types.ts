@@ -15,12 +15,22 @@ export interface Room {
 /** How hard a soft rule bites. `minPerDay` can never be 'block' — see rules.ts. */
 export type RuleLevel = 'off' | 'warn' | 'block';
 
+/**
+ * Who a teacher is, for the two questions the lists ask: sorting and grouping.
+ *
+ * '' is a real value, not a missing one: a staff list has blanks in it and a
+ * blank is data. That is also why this is not a boolean — a boolean would have
+ * to pick one of the two as the default and would quietly assign everybody.
+ */
+export type Gender = '' | 'k' | 'e';
+
 /** Every teacher has exactly ONE subject; subject belongs to the teacher, not the lesson. */
 export interface Teacher {
   id: Id;
   name: string;
   short: string; // "MÇ" — row header in the grid
   subject: string; // "Matematik" — free text, not a separate table
+  gender: Gender; // '' | 'k' | 'e' — never printed, only listed and grouped
   color: number; // index into PALETTE (palette.ts), not a hex value
   /** null -> use settings.limits. A number wins over the school-wide default. */
   limits: TeacherLimits;
@@ -137,5 +147,6 @@ export interface State {
  * v3: Day objects, bell times, limits and rules.
  * v4: settings.subjectShorts.
  * v5: ClassGroup.color and settings.subjects.
+ * v6: Teacher.gender.
  */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;

@@ -44,9 +44,9 @@ function build(): State {
       { id: 'dB', name: 'B' },
     ],
     teachers: [
-      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 0, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', color: 1, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oMB', name: 'Murat Bey', short: 'MB', subject: 'Kimya', color: 2, limits: { ...NO_TEACHER_LIMITS } },
+      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } },
+      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
+      { id: 'oMB', name: 'Murat Bey', short: 'MB', subject: 'Kimya', gender: '', color: 2, limits: { ...NO_TEACHER_LIMITS } },
     ],
     classes: [
       { id: 's510', name: '510', roomId: 'dA', color: 0 },

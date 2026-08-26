@@ -9,6 +9,10 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **F turu bitti (2026-08-26).** Kullanıcının üç maddesi karşılandı: listelerde
+> elle sürükleyerek sıralama, Yazdır'da parça parça açma/kapama, ve öğretmende
+> cinsiyet. `schemaVersion` **6**. Ayrıntı aşağıda, **F turu** bölümünde.
+
 > **SIRADAKİ İŞ: 4f — GitHub Pages yayını.** Kullanıcıdan bekleniyor: depo
 > `ders-programi` olarak yeniden adlandırılacak, Pages kaynağı **"GitHub
 > Actions"** seçilecek, ve Tauri için Rust toolchain onayı. Bunlar gelmeden
@@ -16,6 +20,56 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 >
 > Onlar beklerken yapılabilecek tek büyük iş **gerçek veriyle deneme** — o da
 > babanın listesini gerektiriyor (aşağıda "1. Babanın gerçek verisiyle deneme").
+
+### F turu — elle sıralama · baskı seçenekleri · cinsiyet — **BİTTİ ✅** (2026-08-26)
+
+Kullanıcının listesi: *"Listelerde kendimiz sürükleyerek sıralama özelliği.
+Yazdır kısmında açıp kapatma opsiyonları her yazılan şey için kurs yazılsın mı
+saat yazılsın mı çıktı saati yazılsın mı vb. Öğretmende cinsiyet + elle
+sıralamayı da yapalım."*
+
+Dört karar soruldu ve cevaplandı: sıralama/süzgeç açıkken tutamak **pasif** ·
+baskı seçenekleri **sağdaki panelde ve kalıcı** · cinsiyet **listede + sıralama
+ve süzme + Kurulum özetinde**, kâğıda çıkmaz.
+
+- [x] **F1 Elle sürükleyerek sıralama — dört listede de.** `src/rowDrag.ts`
+      (saf DOM pointer jesti, `poolSplit.ts` deseninin **dördüncüsü**) +
+      `reorderList()` (`entities.ts`, saf) + `useRowOrder()` (dört listenin
+      ortak kancası). Tutamak **kendi sütununu** alır (tuzak 47) ve klavyeyle
+      de çalışır (ok · Home · End), taşıma `role="status"` ile söylenir.
+      **Şema değişmedi:** dizinin kendisi sıra; `parseState` onu koruyor,
+      `sanitize` ona dokunmuyor. Payoff liste değil ızgara: Program'ın satır
+      sırası, Yazdır'ın sayfa sırası ve Müsaitlik'in seçicisi hepsi aynı diziyi
+      `map`'liyor.
+- [x] **F2 Havuz sırası ızgarayı takip ediyor.** `buildPool` kartları satır
+      etiketine göre **alfabetik** diziyordu; elle sıralanmış bir ızgarada bu
+      "kartını bulmak için yukarı doğru avlanmak" demekti. Artık satır
+      **indisine** göre. Yorumun kendi niyeti ("bir satırın kartları yan yana
+      dursun") korundu.
+- [x] **F3 Yazdır — "Sayfada ne olsun".** `src/printOptions.ts`, beş anahtar
+      (`school · credits · clock · stamp · cellBottom`), **tek** localStorage
+      anahtarı `ders-programi-baski`. `theme.ts`'e girmedi ve gerekçesi yazıldı:
+      oradaki dokuz skaler ilk boyamadan önce `<html>`'e öznitelik yazan düzen
+      değerleri; bunlar render anında React prop'u olan **tek bir karar**.
+      **Çıktı tarihi yeni bir öge** (`.p-stamp`) ve **kapalı başlıyor** — açık
+      gelseydi paneli hiç açmamış birinin çıktısı değişirdi.
+- [x] **F4 Öğretmende cinsiyet — `schemaVersion` 6.** `Gender = '' | 'k' | 'e'`,
+      alan adı **İngilizce** (`gender`). Göç: `version === 5` okuyucunun
+      koşuluna **açıkça** eklendi — eklenmeseydi bugünkü sürümün yazdığı her
+      yedek `null`'a düşerdi. Beş test bunu koruyor ve koşul kaldırılarak
+      **kırmızıya döndürüldü**, bedava yeşil değil. Yapıştırma kutusu dördüncü
+      sütunu okuyor, üç sütunlu eski yapıştırma bozulmuyor.
+- [x] **F5 `listview.ts` facet'i ÇOĞULLAŞTI.** Liste başına tek çip satırı
+      vardı; cinsiyet ikincisini gerektirdi. `facets: Facet[]` +
+      `query.facets: Record<id, value>`; iki çip satırı **birlikte daraltıyor**,
+      ve bir satırın sayıları **öteki uygulanmışken** alınıyor.
+- [x] **F6 Liste tablosu artık KENDİ kutusunda kayıyor.** F4'ün açığa
+      çıkardığı, ondan eski bir hata: `width: 100%` bir tabloda on bir sütun
+      %150 ölçekte sığmıyor ve tarayıcı odayı **küçülebilen** sütundan alıyor.
+      Ölçülen: ad kutusu 232px → **26px**, branş kutusu okunmaz. `.table-scroll`
+      + `min-width: max-content` + kontrollere `ch` cinsinden taban.
+      Ölçülen sonuç: %150'de ad **283px**, sayfa yatay taşması **0**.
+      Üç yeni E2E ölçüyor ve kaydırma kutusu kapatılarak kırmızıya döndürüldü.
 
 ### E turu — hareket ayarı · şerit standardı · koyu tema · baskı — **BİTTİ ✅** (2026-08-27)
 
@@ -139,9 +193,10 @@ kullanıcı **"daha cesur olsun"** dedi.
 
 ### Kalanlar — bu turdan çıkan, henüz yapılmamış
 
-- [ ] **Öğretmende cinsiyet alanı ve elle sürükleyerek sıralama.** Kullanıcının
-      listesinde var; ikisi de **şema değişikliği** istiyor (`schemaVersion` 6 +
-      göç kodu + hem birim hem E2E testi). Ayrı bir turda kararı sorulacak.
+- [x] **Öğretmende cinsiyet alanı ve elle sürükleyerek sıralama.** **F turunda
+      yapıldı** (2026-08-26). Cinsiyet `schemaVersion` 6 istedi ve aldı; elle
+      sıralama **istemedi** — dizinin kendisi zaten sıra, ayrı bir indeks
+      ikinci bir gerçek olurdu.
 - [ ] **Fontun ağırlık ekseni 400–600 → 300–700.** Planda vardı, yapılmadı:
       `fontTools` kurulu değil ve alt kümeyi yeniden üretmek kaynak fontu
       indirmeyi gerektiriyor. Üç ağırlık hiyerarşi için yetiyor.
@@ -791,9 +846,11 @@ Babam biraz zor görüyor o sebeple biraz daha büyütülmeli her şey.
     Ayarlar → Görünüm'de %100–**%150**, 11 basamak. Varsayılan %100 kaldı
     (kullanıcı kararı, 2026-08-25): yanlış bir varsayılan tahmindir.
 Öğretmenler listesinde sıralama erkek kadın, branşa göre, isme göre vesaire sıralamalar olsun. ayrıca biz kendimiz sıralayabilelim. drag ve koy gibi. Aynı şekilde tüm listeler öyle özelliklere sahip olsun.
-    → **YARISI KARŞILANDI** (D7): ada, branşa, yüke, açık saate göre sıralama —
-    dört listede de. **Erkek/kadın** ve **elle sürükleyerek sıralama** yapılmadı:
-    ikisi de `schemaVersion` 6 istiyor (cinsiyet alanı, elle sıra indeksi).
+    → **TAMAMEN KARŞILANDI** (D7 + F turu): ada, branşa, yüke, açık saate ve
+    **cinsiyete** göre sıralama — dört listede de — artı **elle sürükleyerek
+    sıralama** (tutamak + klavye), yine dört listede de. Cinsiyet
+    `schemaVersion` 6 istedi; elle sıralama istemedi, çünkü dizinin kendisi
+    zaten sıradır.
 Ayrıca renk seçmede renkleri seçerken renkleri görebilelim sadece sayı olmasın.
     → **KARŞILANDI** (B turu): 6×6 swatch `<dialog>`'u, 36 rengin hepsi görünür,
     seçili olan çerçeveli. `src/components/ColorPick.tsx`.

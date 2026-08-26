@@ -33,6 +33,7 @@ import { firstFreeColor, PALETTE_SIZE } from './palette';
 import type {
   ClassGroup,
   Day,
+  Gender,
   Id,
   Lesson,
   Room,
@@ -156,6 +157,11 @@ function asLevel(x: unknown, fallback: RuleLevel): RuleLevel {
   return x === 'off' || x === 'warn' || x === 'block' ? x : fallback;
 }
 
+/** Anything that is not one of the two letters means "not stated". */
+function asGender(x: unknown): Gender {
+  return x === 'k' || x === 'e' ? x : '';
+}
+
 /** subjectShorts: string -> non-empty string, anything else dropped. */
 function asShorts(x: unknown): Record<string, string> {
   const out: Record<string, string> = {};
@@ -272,8 +278,10 @@ function migrateV2toV3(raw: LegacyV2): State {
       ),
     },
     rooms: asArray<Room>(raw.rooms, []),
-    teachers: asArray<Omit<Teacher, 'limits'>>(raw.teachers, []).map((x) => ({
+    teachers: asArray<Omit<Teacher, 'limits' | 'gender'>>(raw.teachers, []).map((x) => ({
       ...x,
+      // A v1/v2 file cannot carry this and it is not guessed from the name.
+      gender: '' as Gender,
       limits: { ...NO_TEACHER_LIMITS },
     })),
     classes: asArray<ClassGroup>(raw.classes, []),
@@ -320,11 +328,18 @@ export function parseState(text: string): State | null {
     candidate = migrateV2toV3(migrateV1(raw as LegacyV1));
   } else if (version === 2) {
     candidate = migrateV2toV3(raw as LegacyV2);
-  } else if (version === 3 || version === 4 || version === SCHEMA_VERSION) {
-    // v3, v4 and v5 only ADD fields, so one reader does all three: a v3 file
-    // arrives with no subject overrides, a v4 file with no class colours and no
-    // subject list, and both get filled in below. Ids, day indexes and
-    // therefore `unavailable` / `placements` carry over untouched.
+  } else if (
+    version === 3 || version === 4 || version === 5 || version === SCHEMA_VERSION
+  ) {
+    // v3..v6 only ADD fields, so one reader does all four: a v3 file arrives
+    // with no subject overrides, a v4 with no class colours and no subject
+    // list, a v5 with no gender, and each gets filled in below. Ids, day
+    // indexes and therefore `unavailable` / `placements` carry over untouched.
+    //
+    // Every version below the current one is spelled out ON PURPOSE. Bumping
+    // SCHEMA_VERSION without adding the number it used to be makes every backup
+    // the previous release wrote fall through to `return null` below — which is
+    // the one failure this whole function exists to prevent.
     const g = raw as Partial<State>;
     const limits = g.settings?.limits;
     const rules = g.settings?.rules;
@@ -365,6 +380,7 @@ export function parseState(text: string): State | null {
       teachers: spreadColors(
         asArray<Teacher>(g.teachers, blank.teachers).map((t) => ({
           ...t,
+          gender: asGender(t.gender),
           limits: {
             maxConsecutive: asBox(t.limits?.maxConsecutive),
             maxPerDay: asBox(t.limits?.maxPerDay),

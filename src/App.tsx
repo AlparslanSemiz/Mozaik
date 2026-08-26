@@ -33,6 +33,8 @@ import Program from './components/Program';
 import Check from './components/Check';
 import Ribbon from './components/Ribbon';
 import Print, { NOTHING_EXCLUDED } from './components/Print';
+import { readPrintOptions, writePrintOptions } from './printOptions';
+import type { PrintOptions } from './printOptions';
 import type { Excluded } from './components/Print';
 import Settings from './components/settings';
 
@@ -343,6 +345,10 @@ export default function App() {
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
+  // What each of those pages carries. Up here for the same reason as the tick
+  // lists — Print unmounts on every tab change — but unlike them it is
+  // remembered between sessions: it is set once a term, not once a printout.
+  const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
@@ -764,6 +770,11 @@ export default function App() {
               setExcluded={setPrintExcluded}
               scope={ui.scope}
               colored={ui.colored}
+              options={printOptions}
+              setOptions={(next) => {
+                setPrintOptions(next);
+                writePrintOptions(next);
+              }}
             />
           )}
           {tab === 'settings' && (

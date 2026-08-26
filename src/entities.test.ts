@@ -22,6 +22,9 @@ import {
   deletionQuestion,
   entityFacts,
   entityWeek,
+  genderLabel,
+  parseGender,
+  reorderList,
   deletionSummary,
   duplicateShorts,
   setSubjectShort,
@@ -71,6 +74,7 @@ function build(): State {
         name: 'Mehmet Çelik',
         short: 'MÇ',
         subject: 'Matematik',
+        gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
       },
@@ -192,7 +196,7 @@ describe('varsayılan hafta', () => {
 function school(): State {
   let d = emptyState();
   d = addRoom(d, 'A');
-  d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+  d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
   d = addClass(d, '510', d.rooms[0]!.id);
   return d;
 }
@@ -308,8 +312,8 @@ describe('shortDay', () => {
 describe('makeShort ve duplicateShorts', () => {
   it('boş kısaltma addan üretilir, dolu olan olduğu gibi kalır', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik' });
-    d = addTeacher(d, { name: 'İsmail Şahin', short: 'İSM', subject: 'Fizik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik', gender: '' });
+    d = addTeacher(d, { name: 'İsmail Şahin', short: 'İSM', subject: 'Fizik', gender: '' });
     expect(d.teachers[0]!.short).toBe('MÇ');
     expect(d.teachers[1]!.short).toBe('İSM');
   });
@@ -329,9 +333,9 @@ describe('makeShort ve duplicateShorts', () => {
   // 25 kişilik gerçek listede bu KESİN çıkar ve ızgarada iki satır ayırt edilemez.
   it('çakışan kısaltmaları adlarıyla birlikte bildirir', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Ahmet Sarı', short: '', subject: 'Tarih' });
-    d = addTeacher(d, { name: 'Ayşe Solmaz', short: '', subject: 'Kimya' });
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Ahmet Sarı', short: '', subject: 'Tarih', gender: '' });
+    d = addTeacher(d, { name: 'Ayşe Solmaz', short: '', subject: 'Kimya', gender: '' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik', gender: '' });
     expect(d.teachers.map((t) => t.short)).toEqual(['AS', 'AS', 'MÇ']);
     expect(duplicateShorts(d.teachers)).toEqual([
       { short: 'AS', names: ['Ahmet Sarı', 'Ayşe Solmaz'] },
@@ -341,10 +345,10 @@ describe('makeShort ve duplicateShorts', () => {
   it('büyük/küçük harf farkı çakışmayı gizlemez, boş kısaltma sayılmaz', () => {
     expect(
       duplicateShorts([
-        { id: '1', name: 'A', short: 'mç', subject: '', color: 0, limits: NO_TEACHER_LIMITS },
-        { id: '2', name: 'B', short: 'MÇ', subject: '', color: 1, limits: NO_TEACHER_LIMITS },
-        { id: '3', name: 'C', short: '', subject: '', color: 2, limits: NO_TEACHER_LIMITS },
-        { id: '4', name: 'D', short: '', subject: '', color: 3, limits: NO_TEACHER_LIMITS },
+        { id: '1', name: 'A', short: 'mç', subject: '', gender: '', color: 0, limits: NO_TEACHER_LIMITS },
+        { id: '2', name: 'B', short: 'MÇ', subject: '', gender: '', color: 1, limits: NO_TEACHER_LIMITS },
+        { id: '3', name: 'C', short: '', subject: '', gender: '', color: 2, limits: NO_TEACHER_LIMITS },
+        { id: '4', name: 'D', short: '', subject: '', gender: '', color: 3, limits: NO_TEACHER_LIMITS },
       ]),
     ).toEqual([{ short: 'MÇ', names: ['A', 'B'] }]);
   });
@@ -357,7 +361,7 @@ describe('deletionSummary', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
     d = addClass(d, '510', room);
     d = addClass(d, '511', room);
     const teacher = d.teachers[0]!.id;
@@ -525,10 +529,10 @@ describe('setSubjectShort', () => {
 describe('usedSubjects', () => {
   it('öğretmenlerde geçen benzersiz branşları sırasıyla verir', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
-    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik' });
-    d = addTeacher(d, { name: 'C C', short: '', subject: 'matematik' });
-    d = addTeacher(d, { name: 'D D', short: '', subject: '  ' });
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik', gender: '' });
+    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik', gender: '' });
+    d = addTeacher(d, { name: 'C C', short: '', subject: 'matematik', gender: '' });
+    d = addTeacher(d, { name: 'D D', short: '', subject: '  ', gender: '' });
     expect(usedSubjects(d)).toEqual(['Matematik', 'Fizik']);
   });
 });
@@ -546,14 +550,14 @@ describe('öğretmen renkleri', () => {
 
   it('silinen öğretmenin rengi yeniden kullanılıyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
-    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik' });
-    d = addTeacher(d, { name: 'C C', short: '', subject: 'Kimya' });
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik', gender: '' });
+    d = addTeacher(d, { name: 'B B', short: '', subject: 'Fizik', gender: '' });
+    d = addTeacher(d, { name: 'C C', short: '', subject: 'Kimya', gender: '' });
     const middle = d.teachers[1]!;
     expect(middle.color).toBe(1);
 
     d = deleteTeacher(d, middle.id);
-    d = addTeacher(d, { name: 'D D', short: '', subject: 'Tarih' });
+    d = addTeacher(d, { name: 'D D', short: '', subject: 'Tarih', gender: '' });
     // The hole is filled rather than a fourth colour handed out.
     expect(d.teachers.map((t) => t.color).sort()).toEqual([0, 1, 2]);
   });
@@ -570,7 +574,7 @@ describe('sınıf renkleri', () => {
     // A cell is painted in its teacher's colour and a class colour only marks
     // the row head, so the two lists may reuse the same index.
     let d = emptyState();
-    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'A A', short: '', subject: 'Matematik', gender: '' });
     d = addClass(d, '510', null);
     expect(d.teachers[0]!.color).toBe(0);
     expect(d.classes[0]!.color).toBe(0);
@@ -613,7 +617,7 @@ describe('branş listesi', () => {
 
   it('silinen branş listeden çıkıyor ama öğretmenin branşına dokunulmuyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
     d = deleteSubject(d, 'Matematik');
     expect(d.settings.subjects).not.toContain('Matematik');
     expect(d.teachers[0]!.subject).toBe('Matematik'); // NEVER a side effect
@@ -621,16 +625,16 @@ describe('branş listesi', () => {
 
   it('subjectTeachers kimin kullandığını söylüyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
-    d = addTeacher(d, { name: 'Ayşe Yıldız', short: 'AY', subject: 'matematik' });
-    d = addTeacher(d, { name: 'Sema Kaya', short: 'SK', subject: 'Fizik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
+    d = addTeacher(d, { name: 'Ayşe Yıldız', short: 'AY', subject: 'matematik', gender: '' });
+    d = addTeacher(d, { name: 'Sema Kaya', short: 'SK', subject: 'Fizik', gender: '' });
     expect(subjectTeachers(d, 'Matematik').map((t) => t.short)).toEqual(['MÇ', 'AY']);
     expect(subjectTeachers(d, 'Kimya')).toEqual([]);
   });
 
   it('listede olmayan bir branşı taşıyan öğretmen açılır listede yine görünüyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik', gender: '' });
     expect(d.settings.subjects).not.toContain('Robotik');
     // otherwise the dropdown could not show his current subject and would
     // silently change it on the first render
@@ -643,8 +647,8 @@ describe('addTeachersFromRows', () => {
     let d = emptyState();
     d = deleteSubject(d, 'Matematik'); // the school does not teach it any more
     d = addTeachersFromRows(d, [
-      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' },
-      { name: 'Ayşe Yıldız', short: 'AY', subject: 'Robotik' },
+      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' },
+      { name: 'Ayşe Yıldız', short: 'AY', subject: 'Robotik', gender: '' },
     ]);
 
     expect(d.teachers.map((t) => t.subject)).toEqual(['Matematik', 'Robotik']);
@@ -657,8 +661,8 @@ describe('addTeachersFromRows', () => {
     let d = emptyState();
     const before = d.settings.subjects.length;
     d = addTeachersFromRows(d, [
-      { name: 'A A', short: '', subject: 'Robotik' },
-      { name: 'B B', short: '', subject: 'robotik' },
+      { name: 'A A', short: '', subject: 'Robotik', gender: '' },
+      { name: 'B B', short: '', subject: 'robotik', gender: '' },
     ]);
     expect(d.settings.subjects.length).toBe(before + 1);
   });
@@ -699,7 +703,7 @@ describe('entityWeek', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
     d = addClass(d, '510', room);
     const teacher = d.teachers[0]!.id;
     const group = d.classes[0]!.id;
@@ -775,7 +779,7 @@ describe('entityFacts', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' });
     d = addClass(d, '510', room);
     d = addClass(d, '511', room);
     d = addLesson(d, {
@@ -833,5 +837,104 @@ describe('entityFacts', () => {
     for (const kind of ['teacher', 'class', 'room'] as const) {
       expect(entityFacts(d, kind, 'yok')).toBeNull();
     }
+  });
+});
+
+describe('parseGender', () => {
+  it('kadını dört yazımdan da tanıyor', () => {
+    for (const raw of ['K', 'k', 'Kadın', 'kadın', 'KADIN', 'kadin', ' Kadın ', 'Bayan']) {
+      expect(parseGender(raw), raw).toBe('k');
+    }
+  });
+
+  it('erkeği de', () => {
+    for (const raw of ['E', 'e', 'Erkek', 'ERKEK', ' erkek', 'Bay']) {
+      expect(parseGender(raw), raw).toBe('e');
+    }
+  });
+
+  // Anything unrecognised is "not stated" rather than an error: a paste that
+  // half-fills the column is still a good paste, and the reader can finish it
+  // in the list. An error here would reject 25 rows over one typo.
+  it('tanımadığı her şey BELİRTİLMEMİŞ, hata değil', () => {
+    for (const raw of ['', '   ', 'x', 'kadn', 'male', '1', 'Kadın Erkek']) {
+      expect(parseGender(raw), raw).toBe('');
+    }
+  });
+
+  it('her değerin okunacak bir adı var', () => {
+    expect(genderLabel('')).toBe('Belirtilmemiş');
+    expect(genderLabel('k')).toBe('Kadın');
+    expect(genderLabel('e')).toBe('Erkek');
+  });
+});
+
+describe('reorderList', () => {
+  const named = (): State => {
+    let d = emptyState();
+    for (const name of ['A', 'B', 'C', 'D']) d = addRoom(d, name);
+    return d;
+  };
+  const names = (d: State) => d.rooms.map((r) => r.name);
+
+  it('bir satırı aşağı taşıyor', () => {
+    expect(names(reorderList(named(), 'rooms', 0, 2))).toEqual(['B', 'C', 'A', 'D']);
+  });
+
+  it('bir satırı yukarı taşıyor', () => {
+    expect(names(reorderList(named(), 'rooms', 3, 1))).toEqual(['A', 'D', 'B', 'C']);
+  });
+
+  it('uçlara taşıyor', () => {
+    expect(names(reorderList(named(), 'rooms', 2, 0))).toEqual(['C', 'A', 'B', 'D']);
+    expect(names(reorderList(named(), 'rooms', 0, 3))).toEqual(['B', 'C', 'D', 'A']);
+  });
+
+  // The reducer decides whether a change is worth an undo step by comparing
+  // identity. A drag that lands where it started must be indistinguishable
+  // from no drag at all, or every nudge costs a Ctrl+Z.
+  it('yerinde bırakılan satır AYNI nesneyi döndürüyor — geri-al harcanmıyor', () => {
+    const d = named();
+    expect(reorderList(d, 'rooms', 2, 2)).toBe(d);
+  });
+
+  it('sınır dışı indis hiçbir şey yapmıyor, çökmüyor', () => {
+    const d = named();
+    for (const [from, to] of [[-1, 1], [9, 1], [1, -1], [1, 9], [0, 4]] as const) {
+      expect(reorderList(d, 'rooms', from, to), `${from}->${to}`).toBe(d);
+    }
+  });
+
+  it('dört listenin dördü de taşınıyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Ali Vural', short: 'AV', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Deniz Ak', short: 'DA', subject: 'Fizik' });
+    d = addClass(d, '510', null);
+    d = addClass(d, '511', null);
+    expect(reorderList(d, 'teachers', 0, 1).teachers.map((t) => t.short)).toEqual(['DA', 'AV']);
+    expect(reorderList(d, 'classes', 0, 1).classes.map((c) => c.name)).toEqual(['511', '510']);
+  });
+
+  // The array IS the order, so nothing else may move. In particular the
+  // placement and closed-hour keys are built from ids, never from a position.
+  it('SIRADAN başka hiçbir şey değişmiyor', () => {
+    let d = emptyState();
+    d = addTeacher(d, { name: 'Ali Vural', short: 'AV', subject: 'Matematik' });
+    d = addTeacher(d, { name: 'Deniz Ak', short: 'DA', subject: 'Fizik' });
+    d = addClass(d, '510', null);
+    const cls = d.classes[0]!.id;
+    d = addLesson(d, { classId: cls, teacherId: d.teachers[0]!.id, weeklyHours: 2, blockSize: 1 });
+    d = setAvailability(d, d.teachers[1]!.id, [{ day: 0, hour: 0 }], true);
+    d = place(d, d.lessons[0]!.id, 0, 0);
+
+    const moved = reorderList(d, 'teachers', 0, 1);
+    expect(moved.teachers.map((t) => t.short)).toEqual(['DA', 'AV']);
+    expect(moved.placements).toEqual(d.placements);
+    expect(moved.unavailable).toEqual(d.unavailable);
+    expect(moved.lessons).toEqual(d.lessons);
+    expect(moved.classes).toEqual(d.classes);
+    expect(moved.settings).toEqual(d.settings);
+    // The teachers themselves are untouched objects, only re-ordered.
+    expect(moved.teachers).toEqual([d.teachers[1], d.teachers[0]]);
   });
 });

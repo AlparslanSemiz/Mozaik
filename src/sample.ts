@@ -7,7 +7,7 @@
 // so a bug found here can be reproduced.
 
 import { teacherKey } from './constraints';
-import type { Lesson, Room, State, Teacher, ClassGroup } from './types';
+import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
 import { PALETTE_SIZE } from './palette';
 import { SCHEMA_VERSION } from './types';
 import {
@@ -52,12 +52,19 @@ const SUBJECTS = [
   'Din Kültürü',
 ];
 
-const NAMES = [
-  'Mehmet Çelik', 'Ayşe Varol', 'Murat Bilge', 'Yasemin Mutlu', 'Kemal Yıldız',
-  'Yeliz Güneş', 'Ahmet Sarı', 'İlknur Aydın', 'Yusuf Kara', 'Hatice Ergin',
-  'Emre Doğan', 'Deniz Erdem', 'Sibel Duman', 'Rıza Yalçın', 'Gökhan Çetin',
-  'Nurten Uçar', 'Ali Öztürk', 'Aylin Gür', 'Serkan Tunç', 'Melek Şahin',
-  'Barış Koç', 'Zeynep Ak', 'Onur Polat', 'Fatma Kurt', 'Cem Aslan',
+// Written out rather than derived from the first name: a rule would have to
+// guess, and "Deniz" is genuinely both. That row keeps its '' on purpose — the
+// sample should contain the blank the real list will contain.
+const NAMES: Array<[string, Gender]> = [
+  ['Mehmet Çelik', 'e'], ['Ayşe Varol', 'k'], ['Murat Bilge', 'e'],
+  ['Yasemin Mutlu', 'k'], ['Kemal Yıldız', 'e'], ['Yeliz Güneş', 'k'],
+  ['Ahmet Sarı', 'e'], ['İlknur Aydın', 'k'], ['Yusuf Kara', 'e'],
+  ['Hatice Ergin', 'k'], ['Emre Doğan', 'e'], ['Deniz Erdem', ''],
+  ['Sibel Duman', 'k'], ['Rıza Yalçın', 'e'], ['Gökhan Çetin', 'e'],
+  ['Nurten Uçar', 'k'], ['Ali Öztürk', 'e'], ['Aylin Gür', 'k'],
+  ['Serkan Tunç', 'e'], ['Melek Şahin', 'k'], ['Barış Koç', 'e'],
+  ['Zeynep Ak', 'k'], ['Onur Polat', 'e'], ['Fatma Kurt', 'k'],
+  ['Cem Aslan', 'e'],
 ];
 
 /** As in the photo: class code -> fixed room letter. */
@@ -89,11 +96,12 @@ export function sampleState(): State {
     color: i % PALETTE_SIZE,
   }));
 
-  const teachers: Teacher[] = NAMES.map((name, i) => ({
+  const teachers: Teacher[] = NAMES.map(([name, gender], i) => ({
     id: `o${i}`,
     name,
     short: makeShort(name),
     subject: SUBJECTS[i % SUBJECTS.length] ?? 'Matematik',
+    gender,
     color: i % PALETTE_SIZE,
     // Every third teacher gets a personal limit so the rule engine is actually
     // exercised by the sample data, not only by the tests.

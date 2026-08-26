@@ -9,7 +9,8 @@
 // makeShort lives in entities.ts (one home); re-exported so callers and the
 // existing tests do not have to care where it moved.
 export { makeShort } from './entities';
-import { makeShort } from './entities';
+import { makeShort, parseGender } from './entities';
+import type { Gender } from './types';
 
 export interface ParseResult<T> {
   accepted: T[];
@@ -71,9 +72,16 @@ export interface TeacherRow {
   name: string;
   short: string;
   subject: string;
+  gender: Gender;
 }
 
-/** Columns: Ad · Kısaltma · Branş */
+/**
+ * Columns: Ad · Kısaltma · Branş · Cinsiyet
+ *
+ * The fourth column arrived after the first three and stays OPTIONAL: a list
+ * pasted from the old three-column shape reads `undefined` there, which
+ * `parseGender` turns into "not stated". Nobody has to re-paste anything.
+ */
 export function parseTeachers(text: string): ParseResult<TeacherRow> {
   const accepted: TeacherRow[] = [];
   const errors: string[] = [];
@@ -91,6 +99,7 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
       // If the short form is left empty, derive it: "Mehmet Çelik" -> "MÇ"
       short: (cells[1] ?? '') || makeShort(name),
       subject,
+      gender: parseGender(cells[3] ?? ''),
     });
   }
   return { accepted, errors };

@@ -200,14 +200,21 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
  * One rule, no special cases:
  *   top    = whatever the CELL will read once it lands
  *   bottom = the ROW the card is aimed at
- *   sorted by bottom, so one row's cards stand together
+ *   sorted by the row's POSITION, so one row's cards stand together and the
+ *     tray runs the same way down as the grid does
  *
- * In the teacher view that is exactly what it always did.
+ * That last part used to be alphabetical, which was the same thing back when
+ * the only order was the one they were typed in. Now the rows can be dragged,
+ * and an alphabetical tray under a hand-ordered grid means hunting upward for
+ * the cards of the row you are looking at.
  */
 function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; completed: number } {
   const cards: PoolCard[] = [];
   let completed = 0;
   const teacherView = view === 'teacher';
+  const rowAt = new Map<string, number>(
+    (teacherView ? d.teachers : d.classes).map((x, i) => [x.id, i]),
+  );
 
   for (const lesson of d.lessons) {
     const placed = ix.placedHours.get(lesson.id) ?? 0;
@@ -221,6 +228,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
     const teacherShort = teacher?.short ?? '?';
     cards.push({
       lessonId: lesson.id,
+      row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
       top: teacherView ? className : teacherShort,
       bottom: teacherView ? teacherShort : className,
       subject: teacher?.subject ?? '',
@@ -233,7 +241,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
   }
 
   cards.sort(
-    (a, b) => a.bottom.localeCompare(b.bottom, 'tr') || a.top.localeCompare(b.top, 'tr'),
+    (a, b) => a.row - b.row || a.top.localeCompare(b.top, 'tr'),
   );
   return { cards, completed };
 }

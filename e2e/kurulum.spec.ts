@@ -2,7 +2,7 @@
 // they feed.
 
 import { expect, test, type Page } from '@playwright/test';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList, answerDialog } from './helpers';
+import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -462,7 +462,10 @@ test.describe('44. Panel simetrisi', () => {
           if (c.tagName === 'P' && c.classList.contains('hint')) return 'aciklama';
           if (c.classList.contains('warn-box')) return 'uyari';
           if (c.classList.contains('form-row')) return 'ekleme';
+          // The list lives in a scroll box now (eleven columns do not fit a
+          // 100%-wide table at 150%), so "the list" is either shape.
           if (c.tagName === 'TABLE') return 'liste';
+          if (c.classList.contains('table-scroll')) return 'liste';
           return '';
         })
         .filter(Boolean),
@@ -505,5 +508,179 @@ test.describe('44. Panel simetrisi', () => {
     expect(order.form).toBeGreaterThan(-1);
     expect(order.table).toBeGreaterThan(-1);
     expect(order.form, 'ekleme formu listenin altında kalmış').toBeLessThan(order.table);
+  });
+});
+
+// 63. Gender on a teacher.
+//
+// Asked for in one line: "Öğretmende cinsiyet". Stored as `gender: '' | 'k' |
+// 'e'` and bumped the schema to 6 — the migration itself is unit-tested in
+// `src/store.test.ts`, so what belongs here is the round trip through a real
+// control and the two places the reader was promised it would be useful:
+// the sort menu and the chip row.
+//
+// It deliberately does NOT reach the paper. Nobody asked for a form of address
+// on a timetable, and a printed sheet is the last place to guess at one.
+test.describe('63. Öğretmende cinsiyet', () => {
+  const row = (page: Page, n: number) =>
+    mainList(page).locator('tbody tr').nth(n);
+
+  test('seçilen cinsiyet YENİLEMEDEN sonra da duruyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+
+    // Mehmet Çelik ships as "Erkek"; İlknur Aydın as "Kadın".
+    const first = row(page, 0).locator('select').nth(1);
+    await expect(first).toHaveValue('e');
+
+    await first.selectOption('k');
+    await page.reload();
+    await openSetup(page, 'Öğretmenler');
+    await expect(row(page, 0).locator('select').nth(1)).toHaveValue('k');
+  });
+
+  test('belirtilmemiş de bir DEĞER — boş bırakılabiliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const box = row(page, 0).locator('select').nth(1);
+    await box.selectOption('');
+    await expect(box).toHaveValue('');
+
+    // And it is not only reachable, it is SHIPPED: "Deniz" is genuinely both,
+    // so the sample carries the blank the real staff list will carry.
+    await page.getByLabel('öğretmen ara').fill('Deniz Erdem');
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
+    await expect(row(page, 0).locator('select[aria-label*="cinsiyeti"]')).toHaveValue('');
+  });
+
+  test('çip satırı süzüyor — Branş’ın YANINDA, yerine değil', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const rows = mainList(page).locator('tbody tr');
+    await expect(rows).toHaveCount(25);
+
+    const women = page.getByRole('button', { name: /^Kadın/ });
+    await expect(women).toBeVisible();
+    await women.click();
+    await expect(rows).toHaveCount(11);
+
+    // Both chip rows exist and NARROW together rather than replacing each other.
+    await page.getByRole('button', { name: /^Matematik/ }).first().click();
+    const both = await rows.count();
+    expect(both).toBeGreaterThan(0);
+    expect(both).toBeLessThan(11);
+
+    await page.getByRole('button', { name: 'Süzmeyi kaldır' }).click();
+    await expect(rows).toHaveCount(25);
+  });
+
+  test('cinsiyete göre sıralama gerçekten sıralıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    await page.getByLabel('Sırala').selectOption({ label: 'Cinsiyete göre' });
+
+    const values = await mainList(page)
+      .locator('tbody tr td select[aria-label*="cinsiyeti"]')
+      .evaluateAll((els) => els.map((e) => (e as HTMLSelectElement).value));
+    // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
+    expect(values).toEqual([...values].sort((a, b) => {
+      const label = (v: string) =>
+        v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın';
+      return label(a).localeCompare(label(b), 'tr');
+    }));
+  });
+
+  test('Kurulum özeti dağılımı SAYIYOR', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    const summary = page.locator('.panel', { hasText: 'Öğretmen yükü' });
+    await expect(summary).toContainText('Kadın');
+    await expect(summary).toContainText('Erkek');
+    await expect(summary).toContainText('Belirtilmemiş');
+  });
+
+  test('yapıştırma kutusu dördüncü sütunu okuyor, üç sütunluyu da kabul ediyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await expect(page.getByText('Ad Soyad · Kısaltma · Branş · Cinsiyet')).toBeVisible();
+
+    await page.locator('textarea').fill('Nazlı Er\tNE\tFizik\tKadın\nOkan Su\tOS\tKimya');
+    await page.getByRole('button', { name: 'Önizle' }).click();
+    await expect(page.getByText('2 satır okundu.')).toBeVisible();
+    // Scoped to the preview: the textarea still holds the pasted text and
+    // would match the same words.
+    const preview = page.locator('.paste-preview li');
+    await expect(preview.first()).toHaveText('Nazlı Er (NE) — Fizik · Kadın');
+    // The three-column row is not an error, and says nothing it does not know.
+    await expect(preview.nth(1)).toHaveText('Okan Su (OS) — Kimya');
+  });
+
+  // Pitfall 33's shape, and it happened again while this column was being
+  // added: the box showed "Belirtilm" in the add form and "Erke" in the row.
+  // The assertion does not invent a number — it clones the control at
+  // `width: auto` and asks the browser what IT wants (renk-secici.spec.ts).
+  for (const pct of [100, 125, 150]) {
+    test(`cinsiyet kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await openSetup(page, 'Öğretmenler');
+
+      for (const box of [
+        mainList(page).locator('select[aria-label*="cinsiyeti"]').first(),
+        // Scoped to the add form: the chip row is a `role="group"` with the
+        // same name, and both are things you can address by that label.
+        page.locator('.form-row select[aria-label="Cinsiyet"]'),
+      ]) {
+        const fit = await box.evaluate((el) => {
+          const s = el as HTMLSelectElement;
+          const clone = s.cloneNode(true) as HTMLSelectElement;
+          clone.style.width = 'auto';
+          clone.style.position = 'absolute';
+          clone.style.visibility = 'hidden';
+          s.parentElement!.appendChild(clone);
+          const want = clone.getBoundingClientRect().width;
+          clone.remove();
+          return { have: s.getBoundingClientRect().width, want };
+        });
+        expect(fit.have, `%${pct}: kutu ${fit.have} < istenen ${fit.want}`).toBeGreaterThanOrEqual(
+          fit.want - 1,
+        );
+      }
+    });
+  }
+
+  // The regression this column caused and the scroll box fixed: at 150% the
+  // name input went from 232 px to 26 px, because a `width: 100%` table takes
+  // the room it needs from whichever column can still shrink.
+  for (const pct of [100, 150]) {
+    test(`%${pct} ölçekte AD kutusu okunur kalıyor, sayfa yatay taşmıyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await openSetup(page, 'Öğretmenler');
+
+      const ad = await mainList(page)
+        .locator('tbody tr td > input[type="text"]:not(.text-sm)')
+        .first()
+        .evaluate((el) => el.getBoundingClientRect().width);
+      expect(ad, `%${pct}: ad kutusu ${ad}px`).toBeGreaterThan(120);
+
+      // The width goes somewhere: the TABLE scrolls, the page does not.
+      const spill = await page.evaluate(
+        () => document.body.scrollWidth - document.body.clientWidth,
+      );
+      expect(spill).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test('cinsiyet KÂĞIDA çıkmıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
+    await expect(page.locator('.print-page').first()).toBeVisible();
+    const paper = await page.locator('.print-area').innerText();
+    expect(paper).not.toMatch(/Kadın|Erkek|Belirtilmemiş/);
   });
 });

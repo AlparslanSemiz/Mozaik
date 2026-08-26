@@ -1,7 +1,118 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (on dokuzuncu oturum: **hareket ayarı · şerit
-standardı · koyu tema · baskı önizlemesi**, `v1.0-teslim` dalında)
+Son güncelleme: 2026-08-26 (yirminci oturum: **elle sıralama · baskı
+seçenekleri · öğretmende cinsiyet**, `schemaVersion` 6)
+
+---
+
+## Yirminci oturum — F turu (2026-08-26)
+
+Kullanıcının üç maddesi. Dördü karar sorusu olarak soruldu ve cevaplandı:
+sıralama/süzgeç açıkken tutamak **pasif** · baskı seçenekleri **sağdaki panelde
+ve kalıcı** · cinsiyet **listede + sıralama/süzme + Kurulum özetinde**, kâğıda
+çıkmaz.
+
+### 1. Listelerde elle sürükleyerek sıralama
+
+`src/rowDrag.ts` — saf DOM pointer jesti, `poolSplit.ts` deseninin
+**dördüncüsü**. `drag.ts` yeniden kullanılmadı: orası "84 hücreden hangisi ve
+bırakmak yasal mı" sorusunu cevaplıyor, buradaysa gereken tek şey bir **indis**.
+
+**Şema DEĞİŞMEDİ, ve bu bir karardı.** Dizinin kendisi zaten sıra: `parseState`
+onu koruyor, `sanitize` `teachers`/`rooms` dizilerine hiç dokunmuyor, ve
+Program'ın satırları, Yazdır'ın sayfaları, Müsaitlik'in seçicisi hepsi aynı
+diziyi `map`'liyor. Ayrı bir `order: number` ikinci bir gerçek olurdu.
+
+Tutamak **kendi sütununu** alır (tuzak 47) ve klavyeyle de çalışır
+(ok · Home · End); taşıma `role="status"` ile söylenir. Sıralama ya da süzgeç
+açıkken **pasif**, çünkü o zaman ekrandaki 3. satır dizinin 3. öğesi değil.
+
+**Ölçülen hata:** ilk hâl hedefi "hangi orta noktaları geçtim" ile buluyordu ve
+tam ortaya bırakmak satırı **bir sıra eksiğe** koyuyordu. Paralel koşuda bir
+**flake** olarak göründü. Kapsamaya çevrildi. Tuzak 60.
+
+### 2. Havuz sırası artık ızgarayı takip ediyor
+
+`buildPool` kartları satır etiketine göre alfabetik diziyordu — elle sıralanmış
+bir ızgarada "kartını yukarı doğru avlamak" demek. Artık satır **indisine**
+göre. Yorumun kendi niyeti ("bir satırın kartları yan yana dursun") korundu.
+
+### 3. Yazdır — "Sayfada ne olsun"
+
+`src/printOptions.ts`, beş anahtar, **tek** localStorage kaydı
+(`ders-programi-baski`). `theme.ts`'e girmedi: oradaki dokuz skaler ilk
+boyamadan önce `<html>`'e öznitelik yazan düzen değerleri, bunlar render anında
+React prop'u olan **tek bir karar**.
+
+Panelde, şeritte değil: Yazdır şeridinde dört düğme var ve `serit.spec.ts`
+%150'de yatay taşmayı ölçüyor — beş açma/kapama daha oraya sığmıyordu.
+
+**Çıktı tarihi yeni bir öge** (`.p-stamp`) ve **kapalı başlıyor**: açık
+gelseydi paneli hiç açmamış birinin çıktısı değişirdi. 205 mm sabit sayfada
+taşma **0 px**, PDF sayfa sayısı **değişmiyor** — ölçüldü.
+
+### 4. Öğretmende cinsiyet — `schemaVersion` 6
+
+`Gender = '' | 'k' | 'e'`; `''` bir **değer**, eksik veri değil. Alan adı
+İngilizce (`gender`), görünen metin Türkçe.
+
+**Göçün kritik satırı:** `version === 5` okuyucunun koşuluna **açıkça**
+eklendi. Eklenmeseydi bugünkü sürümün yazdığı her yedek `null`'a düşerdi. Beş
+test bunu koruyor, ve koşul geçici olarak kaldırılıp **beşi de kırmızıya
+döndürüldü** — bedava yeşil değil.
+
+Yapıştırma kutusu dördüncü sütunu okuyor (`K`/`Kadın`/`kadin`/`Bayan`…), üç
+sütunlu eski yapıştırma bozulmuyor.
+
+`listview.ts`'in facet'i **çoğullaştı**: iki çip satırı birlikte daraltıyor, ve
+bir satırın sayıları **öteki uygulanmışken** alınıyor.
+
+### 5. Ölçülen ve düzeltilen: liste tablosu %150'de kırılıyordu
+
+Cinsiyetin açığa çıkardığı, ondan **eski** bir hata. `width: 100%` bir tabloda
+on bir sütun %150 ölçekte sığmıyor ve tarayıcı odayı **küçülebilen** sütundan
+alıyor:
+
+```
+                   %100        %125        %150
+ad kutusu (önce)   232px       171px       55px    <- cinsiyet sütunu YOKKEN
+ad kutusu (sonra)  190px        98px       26px    <- sütun eklenince
+ad kutusu (şimdi)  209px       235px      283px    <- .table-scroll ile
+sayfa yatay taşması  0px         0px         0px
+```
+
+Hiçbir test görmedi: her kontrol vardı, değeri doğruydu, yalnız
+**görünmüyordu** — tuzak 33'ün ta kendisi. Çare iki yarılı: geniş içerik kendi
+kutusunda kayar, ve `min-width: max-content` ancak hücrelerin bir içerik
+genişliği varsa bir şey ifade eder — `width: 100%` bir kontrol ona **sıfır**
+katkı yapar. Tuzak 61.
+
+Ekran görüntüsüne bakılmasaydı ikisi de kaçardı: add formundaki kutu
+"Belirtilm" yazıyordu, satırdaki "Erke". Tablo hücresi için ayrı bir kısa hâl
+yazıldı (`GENDER_CELL`, `''` → `—`) — `Teacher.name`/`Teacher.short` ayrımının
+aynısı.
+
+### Sayılar
+
+```
+birim testleri     490  (öncesi 453) — 17 dosya
+E2E                350  (öncesi 318) — sira.spec 10 · baski-secenek.spec 10 ·
+                        kurulum'un 63. bölümü 12
+site testleri        6
+dist/index.html    512 431 bayt  (öncesi 489 815; +22,6 kB)
+```
+
+**İlke 7 yeniden ölçüldü** (tuzak 42: ölçüm bir tarihtir). 1920×1080, `file://`,
+7 koşu, `about:blank`'ten `.topbar` görünene ve `document.fonts.ready`
+çözülene kadar:
+
+```
+açılış   30 ms medyan · 103 ms en kötü (ilk koşu, soğuk)
+```
+
+Bir uyarı: **2026-08-26'daki 73 ms ile birebir karşılaştırılamaz** — o ölçümün
+neyi beklediği yazılı değil, bu ölçüm fontun çözülmesini de bekliyor. Söylenen
+tek şey şu: 512 kB'lik tek dosya bu makinede hâlâ 30 ms'de açılıyor.
 
 ---
 
@@ -196,8 +307,12 @@ sekme ↔ işlevsel    52,5  / 49,9  ΔE  (sözleşme >32)
 - **Fontun ağırlık ekseni 400–600'de kaldı** (plan 300–700 diyordu):
   `fontTools` kurulu değil, alt kümeyi yeniden üretmek kaynak fontu indirmeyi
   gerektiriyor.
-- **Cinsiyet alanı ve elle sürükleyerek sıralama yapılmadı**: ikisi de
-  `schemaVersion` 6 + göç kodu istiyor.
+- ~~Cinsiyet alanı ve elle sürükleyerek sıralama yapılmadı~~ — **F turunda
+  yapıldı** (2026-08-26). Cinsiyet `schemaVersion` 6 istedi ve aldı; elle
+  sıralama istemedi.
+- **`file://` açılış süresi F turundan sonra YENİDEN ÖLÇÜLMEDİ.** Dosya
+  490 kB → 512 kB büyüdü. Tuzak 42: ölçüm bir tarihtir, kanun değil — bir
+  sonraki oturumun ilk işi bunu ölçüp buraya yazmak.
 
 ---
 

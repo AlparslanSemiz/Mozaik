@@ -68,7 +68,13 @@ test.describe('49. Liste araçları', () => {
   test('sıralama gerçekten sıralıyor, ve varsayılan GİRİLDİĞİ sıra', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    const names = () => rows(page).locator('td:nth-child(2) input').all();
+    // NOT `td:nth-child(n)`: the name column has moved twice now (a drag
+    // handle went in front of it, a gender box behind it) and each time this
+    // line failed with "undefined" rather than with anything about columns.
+    // The name box is the one plain text input in the row — the short form
+    // carries `.text-sm` and the limits are number boxes.
+    const names = () =>
+      rows(page).locator('td > input[type="text"]:not(.text-sm)').all();
 
     const entered = await Promise.all((await names()).map((i) => i.inputValue()));
     expect(entered[0]).toBe('Mehmet Çelik'); // sample order, not alphabetical
@@ -80,7 +86,9 @@ test.describe('49. Liste araçları', () => {
     expect([...alpha].sort((a, b) => a.localeCompare(b, 'tr'))).toEqual(alpha);
 
     await page.getByLabel('Sırala').selectOption({ label: 'Ders yüküne göre (çok → az)' });
-    const loads = await rows(page).locator('td:nth-child(8)').allInnerTexts();
+    // Counted from the END for the same reason: "Ders saati" is always the
+    // cell before the buttons, whatever gets inserted ahead of it.
+    const loads = await rows(page).locator('td:nth-last-child(2)').allInnerTexts();
     const numbers = loads.map((t) => Number(t.trim()));
     expect([...numbers].sort((a, b) => b - a)).toEqual(numbers);
   });

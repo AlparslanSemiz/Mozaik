@@ -269,6 +269,16 @@ useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te y
 listview.ts                     ara / sırala / süz. SAF. fold() Türkçe katlama
                                 (İ→i, ğ→g…), compareTr() Türk alfabesi sırası.
                                 State'i BİLMEZ, herhangi bir listeyi alır.
+                                facet'ler ÇOĞUL: iki çip satırı birlikte daraltır,
+                                birinin sayıları öteki uygulanmışken alınır.
+                                canReorder() elle sıralamanın açık olduğu tek
+                                durumu tanımlar: görünen satırlar dizinin KENDİSİ
+rowDrag.ts                      liste satırını sürükleme. Saf DOM, React BİLMEZ —
+                                aynı desenin DÖRDÜNCÜSÜ (drag.ts, gridChrome.ts,
+                                poolSplit.ts). Hedef, satırın KAPSAMASIYLA bulunur,
+                                orta noktayla değil (tuzak 60)
+printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
+                                localStorage anahtarı. State'i de theme'i de BİLMEZ
   |
 components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
                                 window.confirm/alert YOK — hiç kalmadı
@@ -282,6 +292,9 @@ components/Commands.tsx         o listeyi kurar. App'te DEĞİL, çünkü komutl
                                 InspectorProvider'ın içinde çalışıyor — App ise
                                 o provider'ı çizen bileşen
 components/ListTools.tsx        dört listenin de üstündeki aynı şerit
+components/useRowOrder.tsx      dört listenin ortak sıralama kancası: tutamak
+                                hücresi + klavye + rowDrag.ts'i bağlama +
+                                "N. sıraya taşındı" duyurusu
 Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
                                 ağacı çizsin diye tek yerde
   |
@@ -351,7 +364,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 5
+  schemaVersion: 6
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -369,7 +382,9 @@ State {
 Day        { name, longBreakAfter }         // 5 = öğle arası 5. dersten sonra, 0 = yok
 Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }  // 09:00 · 40 · 10 · 30
 Limits     { maxConsecutive, maxPerDay, minPerDay, maxSameLessonPerDay }  // 0 = sınır yok
-Teacher    { name, short, subject, color, limits }  // her öğretmenin TEK branşı var
+Teacher    { name, short, subject, gender, color, limits }  // her öğretmenin TEK branşı var
+                                            // gender: '' | 'k' | 'e'; '' bir DEĞER,
+                                            // eksik veri değil. Kâğıda çıkmaz.
                                             // limits alanları null = okul varsayılanı
                                             // color = PALETTE indeksi, kimseyle çakışmaz
 ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
@@ -391,7 +406,14 @@ ders-programi-havuz      -> havuz çekmecesi açık mı (acik / kapali)
 ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
 ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
+ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
 ```
+
+`ders-programi-baski` bilerek `theme.ts`'in dışında (`src/printOptions.ts`).
+Oradaki dokuz skaler **ilk boyamadan önce** `<html>`'e öznitelik yazan düzen
+değerleri; bunlar render anında React prop'u olan **tek bir karar** — "kâğıtta
+ne var" — ve beş cevabı var. Beş ayrı anahtar, bir soru için beş normalize
+demekti. `theme.ts` dokuz bağımsız skaler olarak kalıyor.
 
 Havuz boyu **rem**, px değil: `--ui-scale` %150'ye çıkınca sabit px'lik bir
 çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı bir anahtar,
@@ -414,7 +436,7 @@ değil — CLAUDE.md'nin tek hareket sözleşmesi (`prefers-reduced-motion: redu
 ### Dosya biçimleri — iki tane, karıştırılamaz
 
 ```
-{ "schemaVersion": 5, ... }    -> TEK plan.  ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 6, ... }    -> TEK plan.  ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    -> HER plan.  ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 
@@ -471,8 +493,8 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   bir **string**, id değil: branş silmek cascade gerektirmesin ve yedek okunur kalsın.
 - **`schemaVersion` ilk günden var.** v1 = Türkçe alan adları, v2 = İngilizce,
   v3 = `Day` nesneleri + zil saatleri + kurallar, v4 = `subjectShorts`,
-  v5 = `ClassGroup.color` + `settings.subjects`.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3, v4 ve v5 tek okuyucudan geçer (aradaki
+  v5 = `ClassGroup.color` + `settings.subjects`, v6 = `Teacher.gender`.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v6 tek okuyucudan geçer (aradaki
   tek fark eklenen alanlar); `id`'ler ve gün indeksleri değişmediği için `unavailable` ve `placements`
   anahtarları olduğu gibi geçer. **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
   hem birim hem E2E testini ekle.** Eski yedek açılmıyorsa veri kayıptır.
@@ -936,6 +958,37 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     saydam. Hiçbir test bunu söyleyemezdi. Çare `document.getAnimations()`
     bitene kadar beklemek — sabit bir `waitForTimeout` değil, çünkü süre artık
     bir **ayar**. Ve gerçek ders: kanıt üreten bir katmana da bakılır.
+
+60. **"Orta noktayı geçtim mi" bir sürükleme hedefi seçmez — tam ortaya
+    bırakmak SIK bir koordinattır.** Satır sıralamasının ilk hâli hedefi
+    "hangi orta noktaları geçtim" ile buluyordu; `y > middle` tam eşitlikte
+    yanlış olduğu için satırın tam üstüne bırakmak onu **bir sıra eksiğe**
+    koyuyordu. Ve bu nadir bir koordinat değil: bir satırı bir başkasının
+    üstüne bırakmak bu işi yapmanın normal yolu. Paralel E2E koşusunda
+    alt-piksel farkları sınırın iki yanına düştüğü için hata bir **flake**
+    olarak göründü — bulunması iki kat pahalı. Doğrusu **kapsama**: imlecin
+    ÜSTÜNDE olduğu satırın indisi. Kural: bir jestin hedefi, eşitlikte ne
+    olacağı yazılmadan seçilmez.
+
+61. **`width: 100%` bir tablo, sığmayan sütunun odasını KÜÇÜLEBİLEN sütundan
+    alır — ve o sütun genellikle metnin kendisidir.** Öğretmen listesine iki
+    sütun (tutamak + cinsiyet) eklenince %150 ölçekte ad kutusu 232px'ten
+    **26px**'e indi, branş kutusu hiçbir şey göstermez oldu. Hiçbir test
+    görmedi: her kontrol vardı, değeri doğruydu, yalnız **görünmüyordu** —
+    tuzak 33'ün ta kendisi. İki yarısı var, ikisi de gerekli:
+    (a) geniş içerik **kendi kutusunda** kayar (`.table-scroll`), (b)
+    `min-width: max-content` ancak hücrelerin bir içerik genişliği VARSA bir
+    şey ifade eder — `width: 100%` bir kontrol max-content'e **sıfır** katkı
+    yapar, yani tabanlar kontrole `ch` cinsinden verilir (tuzak 34).
+    Ölçülen sonuç: %150'de ad **283px**, sayfa yatay taşması **0**.
+
+62. **Bir JSX yorumu `{cond && (` ile `<div>` arasına konamaz.** Oraya yazılan
+    `{/* … */}` bir yorum değil, ifadenin ilk terimi olarak okunan bir **nesne
+    literali**dir; derleme kırılır. Kırıldığı hâlde `npm run build >/dev/null
+    2>&1 && npx playwright test …` zinciri sessiz kaldı ve testler bir ÖNCEKİ
+    `dist/index.html`'i ölçmeye devam etti — üç ölçüm turu boyunca "değişiklik
+    hiçbir şeye yaramıyor" diye okundu. İki ders: yorum koşulun **dışına**
+    yazılır, ve bir derlemenin çıktısı susturuluyorsa **çıkış kodu** okunur.
 
 ---
 

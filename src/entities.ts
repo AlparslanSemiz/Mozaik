@@ -13,6 +13,7 @@ import type {
   Bell,
   ClassGroup,
   Day,
+  Gender,
   Id,
   Lesson,
   Limits,
@@ -77,6 +78,59 @@ export function makeShort(name: string): string {
     .slice(0, 2)
     .map((p) => (p[0] ?? '').toLocaleUpperCase('tr'))
     .join('');
+}
+
+/**
+ * What a gender reads as in PROSE: a chip, a count, a paste preview. ONE home,
+ * because a chip saying "k" would be a chip nobody clicks.
+ */
+export const GENDER_LABEL: Record<Gender, string> = {
+  '': 'Belirtilmemiş',
+  k: 'Kadın',
+  e: 'Erkek',
+};
+
+/**
+ * And what it reads as in a TABLE CELL — the same split this file already
+ * makes between `Teacher.name` and `Teacher.short`, and that `shortDay()`
+ * makes for a weekday.
+ *
+ * Measured, not guessed: "Belirtilmemiş" wants 106 px at 100 % and 144 px at
+ * 150 %, in a box whose inside is 71 px. Widening the column instead squeezed
+ * the NAME column from 232 px to 26 px at 150 %, because eleven columns in a
+ * `width: 100%` table are already over-subscribed there. A dash under a
+ * heading that says "Cinsiyet" says the same thing in one character.
+ */
+export const GENDER_CELL: Record<Gender, string> = {
+  '': '—',
+  k: 'Kadın',
+  e: 'Erkek',
+};
+
+export function genderLabel(gender: Gender): string {
+  return GENDER_LABEL[gender];
+}
+
+export function genderCell(gender: Gender): string {
+  return GENDER_CELL[gender];
+}
+
+/**
+ * A pasted cell -> a stored letter. Deliberately generous: a column copied out
+ * of Excel says "K", "Kadın", "kadin" or "KADIN" depending on who typed it, and
+ * refusing four of those would send the reader back to retype 25 rows.
+ *
+ * Anything unrecognised — including an absent column — is "not stated" rather
+ * than an error: a paste that half-fills this field is still a good paste.
+ */
+export function parseGender(raw: string): Gender {
+  // Not listview's `fold`: this file already has a narrower `fold` of its own
+  // for name matching, and one file with two folds is worse than one line of
+  // lowercasing. The dotless ı is spelled out below instead of flattened.
+  const text = raw.trim().toLocaleLowerCase('tr');
+  if (text === 'k' || text === 'kadın' || text === 'kadin' || text === 'bayan') return 'k';
+  if (text === 'e' || text === 'erkek' || text === 'bay') return 'e';
+  return '';
 }
 
 export function shortDay(name: string): string {
@@ -272,6 +326,38 @@ export function respreadColors(d: State, kind: 'teacher' | 'class'): State {
   return { ...d, classes: d.classes.map((c, i) => ({ ...c, color: i % PALETTE_SIZE })) };
 }
 
+/** The four lists the reader can put into an order of their own. */
+export type ListKind = 'rooms' | 'teachers' | 'classes' | 'lessons';
+
+/**
+ * Moves one row of one list to another position.
+ *
+ * There is NO order field and there will not be one: the array IS the order.
+ * It survives `parseState` (asArray -> map -> spreadColors all preserve it),
+ * `sanitize` never rebuilds `rooms` or `teachers` at all, and the grid, the
+ * printer and every picker already read the list by mapping it — so writing
+ * the array is the whole feature. A second `order: number` alongside it would
+ * be a second truth to keep in step.
+ *
+ * Returns `d` ITSELF when nothing moves. The reducer compares by identity to
+ * decide whether a change is worth an undo step, so a drag that lands where it
+ * started must be indistinguishable from no drag at all.
+ */
+export function reorderList(d: State, kind: ListKind, from: number, to: number): State {
+  const list = d[kind];
+  if (from === to) return d;
+  if (from < 0 || from >= list.length) return d;
+  if (to < 0 || to >= list.length) return d;
+
+  const next = [...list];
+  const [moved] = next.splice(from, 1);
+  if (moved === undefined) return d;
+  next.splice(to, 0, moved);
+  // No sanitize(): an order change cannot orphan a placement or a closed hour.
+  // Every key in those maps is built from ids, never from a position.
+  return { ...d, [kind]: next };
+}
+
 export function hourNames(n: number): string[] {
   return Array.from({ length: n }, (_, i) => String(i + 1));
 }
@@ -323,7 +409,11 @@ export function deleteRoom(d: State, id: Id): State {
 
 export function addTeacher(
   d: State,
-  fields: Omit<Teacher, 'id' | 'color' | 'limits'>,
+  // `gender` is OPTIONAL rather than part of the Omit: every caller that
+  // predates it — the add form, the paste rows, a dozen tests — still hands
+  // over three fields, and a required fourth would have made a listing
+  // question into a compile error everywhere.
+  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender'> & { gender?: Gender },
 ): State {
   // An empty short form would leave a nameless row in the grid: derive one.
   const short = fields.short.trim() === '' ? makeShort(fields.name) : fields.short;
@@ -332,6 +422,7 @@ export function addTeacher(
     name: fields.name.trim(),
     short: short.trim(),
     subject: fields.subject.trim(),
+    gender: fields.gender ?? '',
     color: firstFreeColor(d.teachers.map((x) => x.color)),
     limits: { ...NO_TEACHER_LIMITS },
   };

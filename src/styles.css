@@ -3038,6 +3038,15 @@ table.print td.p-closed {
 
 /* Start-end time under the lesson number in the printed hour column. */
 
+/* When the sheet came out of the printer. The LAST child of `.print-page`,
+   so `justify-content: safe center` centres the plan together with it. */
+.p-stamp {
+  margin-top: 2mm;
+  text-align: right;
+  font-size: var(--fs-p-xs);
+  color: var(--muted);
+}
+
 .p-clock {
   display: block;
   font-size: var(--fs-p-xs);
@@ -4075,4 +4084,156 @@ kbd {
 .palette[data-state='closed'] {
   opacity: 0;
   transform: translateX(-50%) translateY(calc(var(--slide) * -1.5));
+}
+
+/* ============================================================
+   PUTTING A LIST IN YOUR OWN ORDER
+   The handle, the row it lifts, and where it is about to land.
+   ============================================================ */
+
+/* Its own column, and a narrow one: the handle shares a cell with nothing,
+   because a grip squeezed against a neighbour hands half its target area
+   away and the misses are invisible — the element is there, it is just not
+   what `elementFromPoint` returns. */
+table.list th.grip-col,
+table.list td.grip-col {
+  width: 2.25rem;
+  padding-left: 0;
+  padding-right: 0;
+  text-align: center;
+}
+
+.row-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--muted);
+  cursor: grab;
+  /* The gesture is vertical and belongs to us; without this the browser
+     takes the drag as a page scroll and the row never moves. */
+  touch-action: none;
+  transition:
+    color var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.row-grip:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--paper-sunk);
+  border-color: var(--hairline);
+}
+
+.row-grip:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+/* Quiet, not gone. A handle that disappears under a sort would read as a
+   list that cannot be reordered at all; the note in the strip says why. */
+.row-grip:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* The row stays in the table while the ghost moves, so the rows below keep
+   the positions measured at the start of the gesture. */
+table.list tbody tr.row-lifted > td {
+  opacity: 0.35;
+}
+
+/* Where it lands. A thick edge on the target rather than a floating line:
+   an absolutely positioned bar would need geometry that the drop itself
+   does not need. */
+table.list tbody tr.drop-above > td {
+  box-shadow: inset 0 2px 0 0 var(--accent);
+}
+
+table.list tbody tr.drop-below > td {
+  box-shadow: inset 0 -2px 0 0 var(--accent);
+}
+
+/* The thing under the finger. A cloned <table> rather than a cloned <tr>,
+   because a detached row draws no cells at all. */
+table.list.row-ghost {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  background: var(--paper);
+  border-radius: var(--r-sm);
+  box-shadow: var(--elev-2);
+  opacity: 0.9;
+}
+
+/* No text selection anywhere while a row is in the air. */
+body.row-dragging {
+  user-select: none;
+  cursor: grabbing;
+}
+
+/* The strip's two small lines: why the handles are quiet, and what the last
+   keypress did. Both sit under the chips, out of the controls' way. */
+.list-note {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+
+/* Empty until something is announced — and it must keep its box either way,
+   or the table jumps a line every time a row is moved by keyboard. */
+.list-note.sr-live {
+  min-height: 1.2em;
+  color: var(--accent);
+}
+
+/* A stack of checkbox rows, where `.form-row` would lay them side by side. */
+.form-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* The half of a label that explains rather than names. */
+.muted-inline {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+/* A list wider than its panel scrolls SIDEWAYS rather than crushing a column.
+   Measured at --ui-scale 1.5, eleven columns wide: without this the name box
+   went from 232 px to 26 px and the subject box showed nothing at all. The
+   browser has to take the room from somewhere, and taking it from the reader's
+   own text is the one answer that cannot be right. */
+.table-scroll {
+  overflow-x: auto;
+  /* The focus ring on a control in the first or last column would otherwise be
+     clipped by the scroll box. */
+  padding: 2px;
+  margin: -2px;
+}
+
+/* Never narrower than its own contents; `width: 100%` still fills the panel
+   whenever the contents leave room to fill. */
+.table-scroll > table.list {
+  min-width: max-content;
+}
+
+/* ...and `max-content` only means something if the cells HAVE a content width.
+   A control at `width: 100%` contributes zero to it, so without the floors
+   below the table's max-content was the width of its HEADINGS — which is
+   exactly how a 26 px name box passed for "fitting". The floor goes on the
+   control, not on the <th> (a <th> width is the column's, padding included).
+   In ch, so it tracks the text it has to hold rather than a pixel count. */
+.table-scroll table.list td > input[type='text']:not(.num):not(.text-sm) {
+  min-width: 10ch 6ch;
+}
+
+.table-scroll table.list td > input.text-sm,
+.table-scroll table.list td > select {
+  min-width: ;
 }

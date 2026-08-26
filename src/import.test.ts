@@ -28,7 +28,9 @@ describe('splitGrid', () => {
 describe('parseTeachers', () => {
   it('ad, kısaltma ve branşı okur, başlık satırını atlar', () => {
     const { accepted } = parseTeachers('Ad\tKısaltma\tBranş\nMehmet Çelik\tMÇ\tMatematik');
-    expect(accepted).toEqual([{ name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' }]);
+    expect(accepted).toEqual([
+      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' },
+    ]);
   });
 
   it('kısaltma boşsa addan üretir', () => {
@@ -40,6 +42,28 @@ describe('parseTeachers', () => {
     const { accepted, errors } = parseTeachers('Mehmet Çelik\tMÇ');
     expect(accepted).toHaveLength(1);
     expect(errors[0]).toContain('branş boş');
+  });
+
+  it('dördüncü sütun cinsiyeti okuyor', () => {
+    const { accepted } = parseTeachers(
+      'Ayşe Varol\tAV\tFizik\tK\nMurat Bilge\tMB\tKimya\tErkek',
+    );
+    expect(accepted.map((x) => x.gender)).toEqual(['k', 'e']);
+  });
+
+  // The column arrived after the first three. A list pasted in the old shape
+  // must not need retyping, and a half-filled column must not be an error.
+  it('ÜÇ sütunlu eski yapıştırma hâlâ çalışıyor', () => {
+    const { accepted, errors } = parseTeachers('Mehmet Çelik\tMÇ\tMatematik');
+    expect(errors).toEqual([]);
+    expect(accepted[0]!.gender).toBe('');
+  });
+
+  it('tanınmayan cinsiyet satırı düşürmüyor', () => {
+    const { accepted, errors } = parseTeachers('Mehmet Çelik\tMÇ\tMatematik\tX');
+    expect(accepted).toHaveLength(1);
+    expect(accepted[0]!.gender).toBe('');
+    expect(errors).toEqual([]);
   });
 });
 

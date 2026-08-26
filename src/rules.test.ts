@@ -41,6 +41,7 @@ function build(): State {
         name: 'Mehmet Çelik',
         short: 'MÇ',
         subject: 'Matematik',
+        gender: '',
         color: 0,
         limits: { ...NO_TEACHER_LIMITS },
       },

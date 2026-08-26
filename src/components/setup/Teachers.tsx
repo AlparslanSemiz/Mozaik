@@ -3,10 +3,11 @@
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
+import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { openHours } from '../../entities';
-import type { Teacher } from '../../types';
+import type { Gender, Teacher } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -19,6 +20,8 @@ import {
   deleteTeacher,
   deletionQuestion,
   duplicateShorts,
+  genderCell,
+  genderLabel,
   makeShort,
   setTeacherLimit,
   subjectOptions,
@@ -32,6 +35,9 @@ import type { PanelProps } from '../props';
 /** Sentinel option value: picking it opens a box instead of setting a subject. */
 const NEW = '\u0000yeni';
 
+/** Blank first: it is the value a row starts at, and the honest default. */
+const GENDERS: Gender[] = ['', 'k', 'e'];
+
 export default function Teachers({ state, change }: PanelProps) {
   const { confirm } = useDialogs();
   const inspect = useInspect();
@@ -42,8 +48,13 @@ export default function Teachers({ state, change }: PanelProps) {
   // and "sıralama ... branşa göre, isme göre vesaire".
   const listCfg = useMemo<ListConfig<Teacher>>(
     () => ({
-      haystack: (t) => `${t.name} ${t.short} ${t.subject}`,
-      facet: { label: 'Branş', of: (t) => t.subject },
+      haystack: (t) => `${t.name} ${t.short} ${t.subject} ${genderLabel(t.gender)}`,
+      facets: [
+        { id: 'brans', label: 'Branş', of: (t) => t.subject },
+        // Blank is a group too, and it is the one worth finding: it is the
+        // list of rows still to be filled in.
+        { id: 'cinsiyet', label: 'Cinsiyet', of: (t) => genderLabel(t.gender) },
+      ],
       sorts: [
         { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
         { id: 'brans', label: 'Branşa göre', cmp: (a, b) =>
@@ -52,12 +63,24 @@ export default function Teachers({ state, change }: PanelProps) {
             byNumberThen((t) => weeklyLoad(state, 'teacher', t.id), (t) => t.name) },
         { id: 'acik', label: 'Açık saate göre (az → çok)', cmp:
             byNumberThen((t) => openHours(state, t.id), (t) => t.name, 'asc') },
+        { id: 'cinsiyet', label: 'Cinsiyete göre', cmp: (a, b) =>
+            compareTr(genderLabel(a.gender), genderLabel(b.gender)) ||
+            compareTr(a.name, b.name) },
       ],
     }),
     [state],
   );
   const shown = applyList(state.teachers, query, listCfg);
-  const [newTeacher, setNewTeacher] = useState({ name: '', short: '', subject: '' });
+  const order = useRowOrder({
+    kind: 'teachers',
+    count: state.teachers.length,
+    query,
+    change,
+  });
+  const [newTeacher, setNewTeacher] =
+    useState<{ name: string; short: string; subject: string; gender: Gender }>({
+      name: '', short: '', subject: '', gender: '',
+    });
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
   const subjects = subjectOptions(state);
 
@@ -129,13 +152,31 @@ export default function Teachers({ state, change }: PanelProps) {
             onChange={(e) => setFreshSubject(e.target.value)}
           />
         )}
+        {/* Optional on purpose: a name and a subject are what make a teacher,
+            and a required fourth box would stop the row being typed at all. */}
+        {/* No `.text-sm`: that box is 16ch and "Belirtilmemiş" came out as
+            "Belirtilm". A control that hides which value is in it is the same
+            mistake the sort menu carries a comment about. */}
+        <select
+          aria-label="Cinsiyet"
+          value={newTeacher.gender}
+          onChange={(e) =>
+            setNewTeacher({ ...newTeacher, gender: e.target.value as Gender })
+          }
+        >
+          {GENDERS.map((g) => (
+            <option key={g} value={g}>
+              {genderLabel(g)}
+            </option>
+          ))}
+        </select>
         <button
           className="btn"
           disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
           onClick={() => {
             const subject = subjectOf();
             change((d) => addTeacher(addSubject(d, subject), { ...newTeacher, subject }));
-            setNewTeacher({ name: '', short: '', subject: '' });
+            setNewTeacher({ name: '', short: '', subject: '', gender: '' });
             setFreshSubject(null);
           }}
         >
@@ -143,9 +184,12 @@ export default function Teachers({ state, change }: PanelProps) {
         </button>
         <Paste
           title="Öğretmenleri yapıştır"
-          example="Ad Soyad · Kısaltma · Branş"
+          example="Ad Soyad · Kısaltma · Branş · Cinsiyet"
           parse={parseTeachers}
-          rowText={(x) => `${x.name} (${x.short}) — ${x.subject}`}
+          rowText={(x) =>
+            `${x.name} (${x.short}) — ${x.subject}` +
+            (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
+          }
           onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
         />
       </div>
@@ -169,6 +213,7 @@ export default function Teachers({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="öğretmen"
+          notice={order.notice}
         />
       )}
 
@@ -176,14 +221,24 @@ export default function Teachers({ state, change }: PanelProps) {
         <p className="hint">Bu aramaya uyan öğretmen yok.</p>
       )}
 
+      {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
+          1.5: the browser answers by crushing whichever column can
+          still shrink, and at 150 % that was the NAME — 232 px down
+          to 26 px, measured. Wide content scrolls in its own box
+          rather than squeezing the reader's own words out. */}
       {shown.length > 0 && (
+        <div className="table-scroll">
         <table className="list">
           <thead>
             <tr>
+              {/* The handle gets a column of its own: squeezed in beside
+                  something else, half of it belongs to the neighbour. */}
+              <th className="grip-col" />
               <th>Renk</th>
               <th>Ad</th>
               <th className="w-col-lg">Kısaltma</th>
               <th>Branş</th>
+              <th className="w-col-md">Cinsiyet</th>
               <th className="num" title="Art arda en fazla kaç saat">
                 Art arda
               </th>
@@ -197,9 +252,10 @@ export default function Teachers({ state, change }: PanelProps) {
               <th className="w-col-md" />
             </tr>
           </thead>
-          <tbody>
-            {shown.map((t) => (
-              <tr key={t.id}>
+          <tbody ref={order.bodyRef}>
+            {shown.map((t, i) => (
+              <tr key={t.id} data-row-name={t.name}>
+                {order.grip(i, t.name)}
                 <td>
                   <ColorPick
                     value={t.color}
@@ -242,6 +298,25 @@ export default function Teachers({ state, change }: PanelProps) {
                     {subjects.map((x) => (
                       <option key={x} value={x}>
                         {x}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  {/* Named per row like the subject box beside it: twenty-five
+                      controls all called "Cinsiyet" name nothing. */}
+                  <select
+                    aria-label={`${t.short} cinsiyeti`}
+                    value={t.gender}
+                    onChange={(e) =>
+                      change((d) =>
+                        updateTeacher(d, t.id, { gender: e.target.value as Gender }),
+                      )
+                    }
+                  >
+                    {GENDERS.map((g) => (
+                      <option key={g} value={g}>
+                        {genderCell(g)}
                       </option>
                     ))}
                   </select>
@@ -301,6 +376,7 @@ export default function Teachers({ state, change }: PanelProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

@@ -60,6 +60,8 @@ describe('parseState — v1 göçü', () => {
         name: 'Mehmet Çelik',
         short: 'MÇ',
         subject: 'Matematik',
+        // A v1 file cannot carry this; it arrives "not stated", not guessed.
+        gender: '',
         color: 3,
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
       },
@@ -304,6 +306,82 @@ describe('parseState — v4 → v5 göçü', () => {
 
     raw.settings.subjects = 'Matematik';
     expect(parseState(JSON.stringify(raw))!.settings.subjects).toEqual(defaultSubjects());
+  });
+});
+
+/** A v5 backup: the current shape minus the one field v6 adds. */
+function v5Backup() {
+  const raw = JSON.parse(JSON.stringify(sampleState()));
+  raw.schemaVersion = 5;
+  for (const t of raw.teachers) delete t.gender;
+  return raw;
+}
+
+describe('parseState — v5 → v6 göçü', () => {
+  // The one that matters most, and the one a version bump breaks silently:
+  // every backup the previous release wrote carries `schemaVersion: 5`. If the
+  // reader's condition is not widened when the constant moves, all of them
+  // fall through to `null` and the father's saved timetable stops opening.
+  it('BUGÜNKÜ sürümün yazdığı v5 dosyası hâlâ açılıyor', () => {
+    const d = parseState(JSON.stringify(v5Backup()));
+    expect(d).not.toBeNull();
+    expect(d!.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d!.teachers).toHaveLength(sampleState().teachers.length);
+  });
+
+  it('cinsiyeti olmayan öğretmen BELİRTİLMEMİŞ geliyor — tahmin edilmiyor', () => {
+    const d = parseState(JSON.stringify(v5Backup()))!;
+    expect(d.teachers.every((t) => t.gender === '')).toBe(true);
+  });
+
+  it('tanınmayan cinsiyet değeri de belirtilmemişe düşüyor', () => {
+    const raw = v5Backup();
+    raw.teachers[0].gender = 'Kadın';   // the label, not the letter
+    raw.teachers[1].gender = 42;
+    raw.teachers[2].gender = null;
+    raw.teachers[3].gender = 'k';       // the one legal value in the batch
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.teachers.slice(0, 3).map((t) => t.gender)).toEqual(['', '', '']);
+    expect(d.teachers[3]!.gender).toBe('k');
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v5Backup()))!;
+
+    expect(migrated.rooms).toEqual(original.rooms);
+    expect(migrated.classes).toEqual(original.classes);
+    expect(migrated.lessons).toEqual(original.lessons);
+    expect(migrated.settings).toEqual(original.settings);
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
+    // Order is the feature now, so it is asserted rather than assumed.
+    expect(migrated.teachers.map((t) => t.id)).toEqual(original.teachers.map((t) => t.id));
+    expect(migrated.teachers.map((t) => t.color)).toEqual(original.teachers.map((t) => t.color));
+  });
+
+  it('v6 dosyası cinsiyeti KORUYOR, ikinci geçişte de aynı', () => {
+    const once = parseState(JSON.stringify(sampleState()))!;
+    const twice = parseState(JSON.stringify(once))!;
+    expect(once.teachers.map((t) => t.gender)).toEqual(
+      sampleState().teachers.map((t) => t.gender),
+    );
+    expect(twice.teachers.map((t) => t.gender)).toEqual(once.teachers.map((t) => t.gender));
+  });
+
+  // v3 and v4 are still on the list; widening the condition must not narrow it.
+  it('v3 ve v4 yedekleri de hâlâ açılıyor', () => {
+    expect(parseState(JSON.stringify(v3Backup()))).not.toBeNull();
+    expect(parseState(JSON.stringify(v4Backup()))).not.toBeNull();
+  });
+
+  it('elle verilen sıra dosyadan aynen geri geliyor', () => {
+    const raw = v5Backup();
+    raw.teachers.reverse();
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.teachers.map((t) => t.name)).toEqual(
+      [...sampleState().teachers].reverse().map((t) => t.name),
+    );
   });
 });
 

@@ -13,7 +13,11 @@
 import { useMemo } from 'react';
 import { buildCapacity } from '../../feasibility';
 import type { ReportRow } from '../../feasibility';
-import { roomClasses, subjectTeachers, usedSubjects } from '../../entities';
+import { genderLabel, roomClasses, subjectTeachers, usedSubjects } from '../../entities';
+import type { Gender } from '../../types';
+
+/** The three values, in the order the teacher list offers them. */
+const GENDERS: Gender[] = ['', 'k', 'e'];
 import type { State } from '../../types';
 
 export type StepId = 'rooms' | 'teachers' | 'classes' | 'lessons';
@@ -101,6 +105,12 @@ export default function Summary({ state, step }: { state: State; step: StepId })
 
   if (step === 'teachers') {
     const subjects = usedSubjects(state);
+    // Counted, not estimated — and the blank is counted too, because the
+    // number worth seeing is how many rows are still to be filled in.
+    const byGender = GENDERS.map((g) => ({
+      label: genderLabel(g),
+      count: state.teachers.filter((t) => t.gender === g).length,
+    })).filter((x) => x.count > 0);
     return (
       <div className="panel">
         <h2>Öğretmen yükü</h2>
@@ -108,6 +118,18 @@ export default function Summary({ state, step }: { state: State; step: StepId })
           Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz. Müsait saatler{' '}
           <b>Müsaitlik</b> sekmesinde daralır.
         </p>
+        {/* Above the table, not below it: under twenty-five rows this line is
+            a screen away from the heading it belongs to. */}
+        {byGender.length > 1 && (
+          <p className="hint">
+            {byGender.map((x, i) => (
+              <span key={x.label}>
+                {i > 0 && ' · '}
+                <b>{x.label}</b> {x.count}
+              </span>
+            ))}
+          </p>
+        )}
         <Rows rows={capacity.teachers} empty="Henüz öğretmen yok." />
         {subjects.length > 0 && (
           <>

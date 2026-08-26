@@ -7,7 +7,7 @@
  * this draws controls and reports what was chosen.
  */
 import { Search, X } from 'lucide-react';
-import { facetCounts } from '../listview';
+import { canReorder, facetCounts, isFiltering } from '../listview';
 import type { ListConfig, ListQuery } from '../listview';
 
 interface Props<T> {
@@ -19,6 +19,12 @@ interface Props<T> {
   shown: number;
   /** "öğretmen", "sınıf" — what the count is counting. */
   noun: string;
+  /**
+   * What just happened to the order, said out loud. Keyboard reordering moves a
+   * row somewhere the eye is not necessarily following, and the handle's own
+   * label changing is not something a screen reader reliably announces.
+   */
+  notice?: string;
 }
 
 export default function ListTools<T>({
@@ -28,9 +34,10 @@ export default function ListTools<T>({
   config,
   shown,
   noun,
+  notice = '',
 }: Props<T>) {
-  const facets = facetCounts(items, query, config);
-  const filtering = query.text.trim() !== '' || query.facet !== '';
+  const filtering = isFiltering(query);
+  const facets = config.facets ?? [];
 
   return (
     <div className="list-tools">
@@ -68,7 +75,8 @@ export default function ListTools<T>({
           >
             {/* Entry order is a real answer and the DEFAULT one: it is the
                 order they were typed in, which is the order the reader
-                remembers them in. */}
+                remembers them in — and, since the rows can be dragged, the
+                order they were last PUT in. */}
             <option value="">Girildiği sıra</option>
             {config.sorts.map((s) => (
               <option key={s.id} value={s.id}>
@@ -93,29 +101,59 @@ export default function ListTools<T>({
         </span>
 
         {filtering && (
-          <button className="btn" onClick={() => setQuery({ ...query, text: '', facet: '' })}>
+          <button
+            className="btn"
+            onClick={() => setQuery({ ...query, text: '', facets: {} })}
+          >
             Süzmeyi kaldır
           </button>
         )}
       </div>
 
-      {facets.length > 1 && config.facet !== undefined && (
-        <div className="chips" role="group" aria-label={config.facet.label}>
-          {facets.map((f) => (
-            <button
-              key={f.value}
-              className="chip"
-              aria-pressed={query.facet === f.value}
-              onClick={() =>
-                setQuery({ ...query, facet: query.facet === f.value ? '' : f.value })
-              }
-            >
-              {f.value}
-              <span className="chip-count">{f.count}</span>
-            </button>
-          ))}
-        </div>
+      {/* One chip row per axis. Each is its own `role="group"` with its own
+          name, so "Branş" and "Cinsiyet" cannot be read as one long row. */}
+      {facets.map((facet) => {
+        const counts = facetCounts(items, query, config, facet.id);
+        if (counts.length < 2) return null;
+        const chosen = query.facets[facet.id] ?? '';
+        return (
+          <div className="chips" key={facet.id} role="group" aria-label={facet.label}>
+            {counts.map((f) => (
+              <button
+                key={f.value}
+                className="chip"
+                aria-pressed={chosen === f.value}
+                onClick={() =>
+                  setQuery({
+                    ...query,
+                    facets: {
+                      ...query.facets,
+                      [facet.id]: chosen === f.value ? '' : f.value,
+                    },
+                  })
+                }
+              >
+                {f.value}
+                <span className="chip-count">{f.count}</span>
+              </button>
+            ))}
+          </div>
+        );
+      })}
+
+      {/* Why the drag handles have gone quiet. It lives here rather than in the
+          panel because it is a fact about the strip's own controls — and
+          because `.list-tools` is not one of the panel's counted children. */}
+      {!canReorder(query) && (
+        <p className="list-note">
+          Satırları elle sıralamak için <b>Sırala</b>’yı «Girildiği sıra»ya alın
+          ve süzmeyi kaldırın.
+        </p>
       )}
+
+      <p className="list-note sr-live" role="status" aria-live="polite">
+        {notice}
+      </p>
     </div>
   );
 }

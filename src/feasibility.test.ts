@@ -31,7 +31,7 @@ function build(): State {
       subjectShorts: {},
     },
     rooms: [{ id: 'dA', name: 'A' }],
-    teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 0, limits: { ...NO_TEACHER_LIMITS } }],
+    teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } }],
     classes: [
       { id: 's510', name: '510', roomId: 'dA', color: 0 },
       { id: 's511', name: '511', roomId: 'dA', color: 1 },
@@ -73,7 +73,7 @@ describe('buildReport — derslik darboğazı', () => {
   it('dersliği paylaşan sınıfların toplam yükünü kapasiteyle karşılaştırır', () => {
     const d = build();
     // Room A is shared by 510 and 511. Total 3 + 2 = 5 hours, capacity 4.
-    d.teachers.push({ id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', color: 1, limits: { ...NO_TEACHER_LIMITS } });
+    d.teachers.push({ id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } });
     d.lessons.push({ id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 3, blockSize: 1, maxPerDay: null });
 
     const room = buildReport(d).rooms[0]!;

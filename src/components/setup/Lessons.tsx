@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
+import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import type { Lesson } from '../../types';
@@ -36,7 +37,7 @@ export default function Lessons({ state, change }: PanelProps) {
         const t = tch(x);
         return `${cls(x)?.name ?? ''} ${t?.name ?? ''} ${t?.short ?? ''} ${t?.subject ?? ''}`;
       },
-      facet: { label: 'Branş', of: (x) => tch(x)?.subject ?? '' },
+      facets: [{ id: 'brans', label: 'Branş', of: (x) => tch(x)?.subject ?? '' }],
       sorts: [
         { id: 'sinif', label: 'Sınıfa göre', cmp: (a, b) =>
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') ||
@@ -52,6 +53,12 @@ export default function Lessons({ state, change }: PanelProps) {
     };
   }, [state]);
   const shown = applyList(state.lessons, query, listCfg);
+  const order = useRowOrder({
+    kind: 'lessons',
+    count: state.lessons.length,
+    query,
+    change,
+  });
   const [newLesson, setNewLesson] = useState({
     classId: '',
     teacherId: '',
@@ -181,6 +188,7 @@ export default function Lessons({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="ders"
+          notice={order.notice}
         />
       )}
 
@@ -188,10 +196,19 @@ export default function Lessons({ state, change }: PanelProps) {
         <p className="hint">Bu aramaya uyan ders yok.</p>
       )}
 
+      {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
+          1.5: the browser answers by crushing whichever column can
+          still shrink, and at 150 % that was the NAME — 232 px down
+          to 26 px, measured. Wide content scrolls in its own box
+          rather than squeezing the reader's own words out. */}
       {shown.length > 0 && (
+        <div className="table-scroll">
         <table className="list">
           <thead>
             <tr>
+              {/* The handle gets a column of its own: squeezed in beside
+                  something else, half of it belongs to the neighbour. */}
+              <th className="grip-col" />
               <th>Sınıf</th>
               <th>Öğretmen</th>
               <th className="w-col-lg">Haftalık saat</th>
@@ -202,12 +219,14 @@ export default function Lessons({ state, change }: PanelProps) {
               <th className="w-col-md" />
             </tr>
           </thead>
-          <tbody>
-            {shown.map((x) => {
+          <tbody ref={order.bodyRef}>
+            {shown.map((x, i) => {
               const group = state.classes.find((c) => c.id === x.classId);
               const teacher = state.teachers.find((t) => t.id === x.teacherId);
+              const rowName = `${group?.name ?? '?'} — ${teacher?.short ?? '?'}`;
               return (
-                <tr key={x.id}>
+                <tr key={x.id} data-row-name={rowName}>
+                  {order.grip(i, rowName)}
                   <td>
                     <span
                       className="color-dot"
@@ -288,6 +307,7 @@ export default function Lessons({ state, change }: PanelProps) {
             })}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

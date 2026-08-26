@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
+import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { roomClasses, weeklyLoad } from '../../entities';
@@ -34,6 +35,12 @@ export default function Rooms({ state, change }: PanelProps) {
     [state],
   );
   const shown = applyList(state.rooms, query, listCfg);
+  const order = useRowOrder({
+    kind: 'rooms',
+    count: state.rooms.length,
+    query,
+    change,
+  });
   const [newRoom, setNewRoom] = useState('');
 
   return (
@@ -83,6 +90,7 @@ export default function Rooms({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="derslik"
+          notice={order.notice}
         />
       )}
 
@@ -90,18 +98,28 @@ export default function Rooms({ state, change }: PanelProps) {
         <p className="hint">Bu aramaya uyan derslik yok.</p>
       )}
 
+      {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
+          1.5: the browser answers by crushing whichever column can
+          still shrink, and at 150 % that was the NAME — 232 px down
+          to 26 px, measured. Wide content scrolls in its own box
+          rather than squeezing the reader's own words out. */}
       {shown.length > 0 && (
+        <div className="table-scroll">
         <table className="list">
           <thead>
             <tr>
+              {/* The handle gets a column of its own: squeezed in beside
+                  something else, half of it belongs to the neighbour. */}
+              <th className="grip-col" />
               <th>Ad</th>
               <th className="w-col-lg">Sınıf sayısı</th>
               <th className="w-col-md" />
             </tr>
           </thead>
-          <tbody>
-            {shown.map((r) => (
-              <tr key={r.id}>
+          <tbody ref={order.bodyRef}>
+            {shown.map((r, i) => (
+              <tr key={r.id} data-row-name={r.name}>
+                {order.grip(i, r.name)}
                 <td>
                   <input
                     type="text"
@@ -140,6 +158,7 @@ export default function Rooms({ state, change }: PanelProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

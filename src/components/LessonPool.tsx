@@ -37,8 +37,11 @@ export interface PoolCard {
   lessonId: Id;
   /** What the cell will read: the class, or the teacher — whichever the view is not. */
   top: string;
-  /** The row this card is aimed at. Cards are sorted by it. */
+  /** The row this card is aimed at, as printed on the card. */
   bottom: string;
+  /** That row's POSITION in the grid. What the cards are sorted by, so the
+      tray runs the same way down as the rows the cards belong to. */
+  row: number;
   subject: string;
   color: number;
   placed: number;

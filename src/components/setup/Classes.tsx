@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
+import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { roomName } from '../../entities';
@@ -34,7 +35,7 @@ export default function Classes({ state, change }: PanelProps) {
       // Grouping classes by the room they share is the one grouping this
       // screen can offer that Kontrol cannot: it is what makes a room's load
       // legible before it becomes a clash.
-      facet: { label: 'Derslik', of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)) },
+      facets: [{ id: 'derslik', label: 'Derslik', of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)) }],
       sorts: [
         { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
         { id: 'derslik', label: 'Dersliğe göre', cmp: (a, b) =>
@@ -47,6 +48,12 @@ export default function Classes({ state, change }: PanelProps) {
     [state],
   );
   const shown = applyList(state.classes, query, listCfg);
+  const order = useRowOrder({
+    kind: 'classes',
+    count: state.classes.length,
+    query,
+    change,
+  });
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
@@ -105,6 +112,7 @@ export default function Classes({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="sınıf"
+          notice={order.notice}
         />
       )}
 
@@ -112,10 +120,19 @@ export default function Classes({ state, change }: PanelProps) {
         <p className="hint">Bu aramaya uyan sınıf yok.</p>
       )}
 
+      {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
+          1.5: the browser answers by crushing whichever column can
+          still shrink, and at 150 % that was the NAME — 232 px down
+          to 26 px, measured. Wide content scrolls in its own box
+          rather than squeezing the reader's own words out. */}
       {shown.length > 0 && (
+        <div className="table-scroll">
         <table className="list">
           <thead>
             <tr>
+              {/* The handle gets a column of its own: squeezed in beside
+                  something else, half of it belongs to the neighbour. */}
+              <th className="grip-col" />
               <th>Renk</th>
               <th>Ad</th>
               <th className="w-col-xl">Derslik</th>
@@ -123,9 +140,10 @@ export default function Classes({ state, change }: PanelProps) {
               <th className="w-col-md" />
             </tr>
           </thead>
-          <tbody>
-            {shown.map((c) => (
-              <tr key={c.id}>
+          <tbody ref={order.bodyRef}>
+            {shown.map((c, i) => (
+              <tr key={c.id} data-row-name={c.name}>
+                {order.grip(i, c.name)}
                 <td>
                   <ColorPick
                     value={c.color}
@@ -195,6 +213,7 @@ export default function Classes({ state, change }: PanelProps) {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );
