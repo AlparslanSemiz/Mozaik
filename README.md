@@ -177,11 +177,22 @@ Program başka hiçbir yere hiçbir şey yazmaz.
 
 ## 3 · Site — bir adresten açmak
 
+**https://alparslansemiz.github.io/ders-programi/**
+
 `npm run build:site` ile üretilen `dist-site/` klasörü statik bir sayfadır ve
-GitHub Pages'e konabilir. Orada da **backend, veritabanı, hesap, oturum ya da
-API yoktur** — yayınlanan şey bir klasör dolusu dosyadır.
+her push'ta GitHub Pages'e yayınlanır (`.github/workflows/site.yml`). Orada da
+**backend, veritabanı, hesap, oturum ya da API yoktur** — yayınlanan şey bir
+klasör dolusu dosyadır.
 
 İlk açılıştan sonra bir service worker sayesinde **çevrimdışı** da açılır.
+
+> ⚠️ **Bu adres şu an çalışmıyor, ve sebebi bu depoda değil.** GitHub Pages'te
+> hesabın kullanıcı sitesine (`AlparslanSemiz.github.io`) verilmiş özel alan
+> adı, o hesabın **bütün** proje sayfalarını kapsar; orada `gamemetrix.me`
+> yazılı ve o alan adı Cloudflare'da başka bir siteyi sunuyor. Sonuç: adres
+> `gamemetrix.me/ders-programi/`'ye yönleniyor ve 404 veriyor.
+> Çözüm o depoda: Settings → Pages → Custom domain'i temizlemek **ve** kökteki
+> `CNAME` dosyasını silmek. Ayrıntı: [docs/STATUS.md](docs/STATUS.md).
 
 > **Not:** her tarayıcının verisi kendine aittir. Siteyi işten açıp evden
 > açarsanız iki ayrı boş program görürsünüz. Programı taşımanın yolu üst

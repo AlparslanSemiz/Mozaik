@@ -52,13 +52,20 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 >    babaya `npm` anlatmak gerekmez. Bugün o bağlantılar 404 veriyor.
 >    Kurulum klasörü yolu **kalıyor** (kullanıcı kararı, 2026-08-27):
 >    hangisinin tuttuğuna baba kullandıktan sonra bakılır, ilke 5.
-> 3. **GitHub Pages'in açılması — YARISI YAPILDI.** Depo `ders-programi`
->    olarak yeniden adlandırıldı (2026-08-27, kullanıcı). Kalan tek adım:
->    **Settings → Pages → Source: "GitHub Actions"**.
->    `site.yml` bugüne kadar 4 kez koştu ve 4'ünde de aynı yerde düştü —
->    `build` uçtan uca geçiyor, `deploy` `Failed to create deployment
->    (status: 404) … Ensure GitHub Pages has been enabled` diyor. Yani kırmızı
->    işaret site bozuk demek değil, **anahtar açılmamış** demek.
+> 3. **GitHub Pages — açıldı, ama adres BAŞKASINA gidiyor.** Depo
+>    `ders-programi` olarak yeniden adlandırıldı ve Pages kaynağı
+>    "GitHub Actions" seçildi; `site #5` uçtan uca **geçti**. Kalan sorun
+>    kodda değil: `AlparslanSemiz.github.io` deposunda commit'li bir `CNAME`
+>    (`gamemetrix.me`) var ve GitHub Pages'te **kullanıcı sitesinin alan adı
+>    bütün proje sayfalarını kapsıyor**, o yüzden
+>    `alparslansemiz.github.io/ders-programi/` Cloudflare'daki GameMetrix'e
+>    yönleniyor ve 404 veriyor.
+>    **Kaldırmanın GameMetrix'i kırmayacağı ölçüldü** (o site `server:
+>    cloudflare`, `x-github-request-id` yok — Pages'ten bağımsız).
+>    **Kullanıcıda kalan:** `AlparslanSemiz.github.io` deposunda Settings →
+>    Pages → Custom domain'i temizle **ve** kökteki `CNAME` dosyasını sil
+>    (dosya commit'li olduğu için yalnız ayarı temizlemek geri gelmesine
+>    açık). Sonra adres `https://alparslansemiz.github.io/ders-programi/`.
 >
 > Ondan sonra hâlâ bekleyen tek büyük şey: **gerçek veriyle deneme**
 > (babanın listesi) — v0'ın çıkma şartı.

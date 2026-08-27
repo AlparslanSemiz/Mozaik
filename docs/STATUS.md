@@ -124,6 +124,44 @@ Tauri'yi gördü → `data_dir_path` döndü → `write_file` gidip geldi → di
   görünmemesi doğru — `workflow_dispatch` düğmesi ancak dosya varsayılan dalda
   olunca çıkar.
 
+### Pages açıldı, deploy geçti, ADRES başkasına gidiyor (2026-08-27)
+
+`site #5` **başarılı** — dört başarısızlıktan sonra Pages anahtarı açıldı ve
+`build` + `deploy` uçtan uca geçti. Ama yayınlanan adres bizim değil:
+
+```
+alparslansemiz.github.io/ders-programi/   301   gamemetrix.me/ders-programi/
+gamemetrix.me                             Cloudflare   "GameMetrix" uygulaması
+gamemetrix.me/ders-programi/              404   (o uygulamanın 404'ü)
+```
+
+Sebep GitHub Pages'in bir kuralı: **hesabın kullanıcı sitesi deposunda
+(`AlparslanSemiz.github.io`) tanımlı özel alan adı, o hesabın BÜTÜN proje
+sayfalarını kapsar.** O depoda `main` üstünde commit'li bir `CNAME` dosyası
+var ve içinde `gamemetrix.me` yazıyor — ama o alan adının DNS'i GitHub'a
+değil Cloudflare'a bakıyor.
+
+**Kaldırmanın GameMetrix'i kırıp kırmayacağı ÖLÇÜLDÜ**, çünkü Cloudflare
+GitHub Pages'i proxy'liyor olsaydı kaldırmak onu düşürürdü:
+
+| | `gamemetrix.me` | gerçek bir Pages sitesi |
+|---|---|---|
+| `server` | `cloudflare` | `GitHub.com` |
+| `x-github-request-id` | **yok** | var |
+| CSP `connect-src` | `https://api.gamemetrix.me` | — |
+
+Yani GameMetrix tamamen Cloudflare'da ve GitHub Pages'ten bağımsız; alan adı
+ayarını kaldırmak ona dokunmaz. İkinci kanıt zaten elimizdeydi: Pages o
+alan adını sunuyor olsaydı `/ders-programi/` yolu proje sayfasına giderdi,
+gitmedi.
+
+**Kullanıcı kararı: hesap düzeyindeki alan adı kaldırılacak.** O zaman adres
+`https://alparslansemiz.github.io/ders-programi/` olur ve sertifika GitHub'ın
+kendisinden gelir — ki bu yol için şart, çünkü site yolunun tek gerekçesi
+service worker ve klasör seçici, ikisi de güvenli bağlam istiyor. Dağıtımın
+kaydettiği adres bugün `http://` (GitHub o alan adı için sertifika
+çıkaramıyor).
+
 ### Depo tarafında ölçülenler (2026-08-27, açık depo API'si)
 
 Depo **yeniden adlandırılmış**: `AlparslanSemiz/AscLike` →
