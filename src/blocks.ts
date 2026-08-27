@@ -27,7 +27,7 @@ export function blockPlan(lesson: Pick<Lesson, 'weeklyHours' | 'pairs'>): number
 
 /** "2+2+1" — how a split is written wherever one is shown. */
 export function patternLabel(blocks: number[]): string {
-  return blocks.length === 0 ? '—' : blocks.join('+');
+  return blocks.length === 0 ? '–' : blocks.join('+');
 }
 
 /** Every way N hours can be split into 1s and 2s: fewest twos first. */

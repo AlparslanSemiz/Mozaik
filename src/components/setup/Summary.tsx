@@ -72,7 +72,7 @@ export default function Summary({ state, step }: { state: State; step: StepId })
         <h2>Derslik yükü</h2>
         <p className="hint">
           Aynı dersliği paylaşan sınıfların <b>toplam</b> ders saati de haftaya sığmalı.
-          En çok gözden kaçan darboğaz burasıdır — girerken görünsün diye burada.
+          En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu.
         </p>
         <Rows rows={capacity.rooms} empty="Henüz derslik yok." />
         {state.rooms.length > 0 && (
@@ -86,7 +86,7 @@ export default function Summary({ state, step }: { state: State; step: StepId })
                     <b>{r.name}</b>:{' '}
                     {inside.length === 0
                       ? 'sınıf yok'
-                      : `${inside.length} sınıf — ${inside.map((c) => c.name).join(', ')}`}
+                      : `${inside.length} sınıf: ${inside.map((c) => c.name).join(', ')}`}
                   </li>
                 );
               })}

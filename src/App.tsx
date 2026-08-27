@@ -321,7 +321,7 @@ function BrandMark() {
 }
 
 export default function App() {
-  const { state, change, undo, redo, loadState, canUndo, canRedo, plans } = useStore();
+  const { state, change, undo, redo, loadState, canUndo, canRedo, plans, park } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -394,10 +394,14 @@ export default function App() {
   // what file:// lacks is a real origin, so the permission is asked again on
   // each launch. The browsers it is missing in are Firefox and Safari.
   const folder = useFolder(plans.library, plans.planId, state);
-  // Whether a newer build has taken over this page. A no-op unless a service
-  // worker is in charge, i.e. everywhere except the site and the local
-  // install — file:// and the .exe fetch nothing, by design (principle 3).
-  const update = useUpdate();
+  // How this copy can be updated, if it can. Two routes and two mechanisms:
+  // a service worker on the site and the local install, three buttons in the
+  // exe. The double-clicked .html has neither and says so; it cannot replace
+  // itself, and it is the build principle 3 is checked on (temel.spec.ts).
+  //
+  // `park` goes in because the exe route ENDS by closing this window: the
+  // pending autosave has to be on disk before it does (pitfall 28).
+  const update = useUpdate(park);
   // Dismissed for THIS session only, and in sessionStorage rather than
   // localStorage on purpose: a new ders-programi-* key would owe the
   // "Veriler nerede" table a row (planlar.spec.ts checks every one of them),
@@ -444,7 +448,7 @@ export default function App() {
         hint: 'yedek al',
         run: () => {
           downloadBackup(state);
-          notify('Yedek dosyaya yazıldı — indirilenler klasörüne bakın.');
+          notify('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.');
         },
       },
       {
@@ -532,7 +536,7 @@ export default function App() {
     if (
       !(await confirm({
         title: 'Şu anki programın yerine geçecek',
-        body: 'Ekrandaki plan dosyadakiyle değiştirilecek. Geri-al yığını da sıfırlanır — vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+        body: 'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
         confirmLabel: 'Yedeği yükle',
         danger: true,
       }))
@@ -607,7 +611,7 @@ export default function App() {
              accessible name is this and not "Kontrol", which is also the name
              of a tab three pixels away. */
           aria-label={`Programın durumu: ${status.message}. Ayrıntı için Kontrol.`}
-          title={`${status.message} — Kontrol sekmesini açar`}
+          title={`${status.message}. Kontrol sekmesini açar`}
         >
           <span className="health-dot" aria-hidden="true" />
           <span className="health-text">{status.message}</span>
@@ -681,7 +685,7 @@ export default function App() {
           className="btn primary"
           onClick={() => {
             downloadBackup(state);
-            notify('Yedek dosyaya yazıldı — indirilenler klasörüne bakın.');
+            notify('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.');
           }}
           title="Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için."
         >
@@ -726,7 +730,7 @@ export default function App() {
           className="btn icon"
           aria-expanded={ribbon}
           aria-label="Araç şeridi"
-          title={ribbon ? 'Araç şeridini gizle — ızgaraya bir satır daha' : 'Araç şeridini göster'}
+          title={ribbon ? 'Araç şeridini gizle, ızgaraya bir satır daha kalsın' : 'Araç şeridini göster'}
           onClick={toggleRibbon}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">

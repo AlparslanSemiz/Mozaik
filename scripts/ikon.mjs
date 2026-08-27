@@ -16,17 +16,31 @@ import { chromium } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-// 16 is the tab and the tree; 32 the desktop; 48 the taskbar; 256 the "extra
-// large icons" view. 64 and 128 are in between and cost 20 KB together.
+// EVERY size Windows actually asks for, and that list is longer than it looks.
+// 16 is the tree and the small tab; 20 and 24 are small taskbar buttons and
+// list views; 32 is the taskbar at 100%, 40 at 125%, 48 at 150%; 256 is the
+// "extra large icons" view, with 64 and 128 in between.
 //
-// TWO SOURCES, and the threshold was measured rather than picked. The detailed
-// mark was rendered at 16/32/48/256 and looked at: at 48 and up it is clean,
-// at 32 it is busy, and at 16 its six columns merge into a blue smear that
-// cannot be told apart from its neighbours in a row of tabs. So below 48 the
-// simplified variant is used — same idea, three columns instead of six, no
-// ghost columns. This is what real icon sets do.
-const SIZES = [16, 32, 48, 64, 128, 256];
-const SADE_ALTINDA = 48;
+// 20, 24 and 40 were MISSING, and that was the visible bug: an .ico that does
+// not carry the size being asked for gets one scaled from the nearest, so a
+// taskbar at 125% was blowing 32 px up to 40 and my father saw a soft, mushy
+// mark. Nothing in the code was wrong; the file just did not have the picture.
+//
+// TWO SOURCES, and the threshold is measured, not picked. Both drawings were
+// rendered at 16/20/24/32/40/48 on light and dark strips and looked at
+// (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png):
+//
+//   16 · 20   detailed is a blue smear; its six columns merge completely
+//   24        detailed is still mushy, the ghost columns bleed into the solid
+//   32        detailed reads: six columns separate, ghosts behind them
+//   40 · 48   detailed is clean
+//
+// So the line is at 32, not the 48 it used to be. That change is the other
+// half of the same complaint: the taskbar is a 32 px slot at normal scaling,
+// and it was being handed the simplified three-column mark, which next to the
+// real logo reads as a low-detail placeholder rather than the program.
+const SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256];
+const SADE_ALTINDA = 32;
 
 const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
 const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');

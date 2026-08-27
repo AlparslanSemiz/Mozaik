@@ -17,6 +17,7 @@
     "test:site": "vite build && vite build --config vite.site.config.ts && playwright test --config playwright.site.config.ts",
     "ekran": "vite build && playwright test --config playwright.ekran.config.ts",
     "cozucu": "vite build && playwright test --config playwright.cozucu.config.ts",
+    "patrol": "vite build && playwright test --config playwright.patrol.config.ts",
     "font": "node scripts/font.mjs",
     "exe": "npm run build && cargo build --manifest-path src-tauri/Cargo.toml --release",
     "exe:test": "cargo test --manifest-path src-tauri/Cargo.toml",

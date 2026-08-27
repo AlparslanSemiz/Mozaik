@@ -89,7 +89,7 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
             Yukarıdaki adımları sırayla doldurun: önce <b>derslikler</b>, sonra{' '}
             <b>öğretmenler</b> ve <b>sınıflar</b>, en son her sınıfın <b>dersleri</b>.
             Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini
-            kullanın — tek tek girmekten çok daha hızlı. Okulun günleri, zil saatleri
+            kullanın, tek tek girmekten çok daha hızlıdır. Okulun günleri, zil saatleri
             ve kuralları <b>Ayarlar</b> sekmesinde.
           </p>
           {/* Once, on a first run, and then never here again — its home is

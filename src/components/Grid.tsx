@@ -137,11 +137,11 @@ const Row = memo(function Row({
                   onCellRemove(row.id, g, s);
                 }
               }}
-              aria-label={`${cell.top} ${cell.bottom} — kaldırmak için Delete`}
+              aria-label={`${cell.top} ${cell.bottom}, kaldırmak için Delete`}
               title={
                 cell.conflict === null
                   ? 'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir'
-                  : `${cell.conflict} — sürükleyerek taşıyın, sağ tıkla havuza gönderin`
+                  : `${cell.conflict}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin`
               }
             >
               <span className="card-top">{cell.top}</span>
@@ -168,7 +168,7 @@ const Row = memo(function Row({
         <button
           className="inspect"
           onClick={() => inspect(row.kind, row.id)}
-          title={`${row.name} — bilgileri ve haftalık programı`}
+          title={`${row.name}: bilgileri ve haftalık programı`}
         >
           {row.name}
         </button>

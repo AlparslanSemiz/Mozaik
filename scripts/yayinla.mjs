@@ -73,12 +73,41 @@ const metin = readFileSync(yol, 'utf8');
 const pkg = JSON.parse(metin);
 const onceki = pkg.version;
 
+// The SECOND copy of the number, and the only one left.
+//
+// tauri.conf.json used to hold a third; it now reads `../package.json`, which
+// Tauri resolves itself. Cargo.toml cannot do that — cargo will not read a
+// version out of another file — so it is written here instead of being left
+// to drift. Drifting mattered the day the exe learned to update itself: the
+// number it compares against a release is the number it was built with, and a
+// stale one means the program either never offers an update or offers one
+// forever. `surum.test.ts` fails if the two ever disagree.
+const cargoYol = resolve(KOK, 'src-tauri', 'Cargo.toml');
+
+function cargoSurumuYaz(hedef) {
+  const eski = readFileSync(cargoYol, 'utf8');
+  // Anchored to the line: `Cargo.toml` also carries `rust-version` and a
+  // `version` under every `[dependencies]` entry, and a loose replace would
+  // pick whichever came first.
+  const yeni = eski.replace(/^version = "\d+\.\d+\.\d+"$/m, `version = "${hedef}"`);
+  if (yeni === eski) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
+  writeFileSync(cargoYol, yeni, 'utf8');
+}
+
 // package.json ALREADY at this version is not an error, and refusing was
-// wrong. It is the normal state after a round that bumped it by hand — and
+// wrong. It is the normal state after a round that bumped it by hand, and
 // refusing then puts the TAG out of this script's reach, which is the one
 // step it exists to stop anybody forgetting.
 if (onceki === surum) {
   console.log(`\n  package.json zaten ${surum}; yalnız etiket atılıyor.\n`);
+  // ...but Cargo.toml may still be behind, because bumping package.json by
+  // hand is exactly the path that leaves it behind.
+  cargoSurumuYaz(surum);
+  if (git('status', '--porcelain') !== '') {
+    console.log('  src-tauri/Cargo.toml geride kalmıştı, eşitlendi.\n');
+    git('add', 'src-tauri/Cargo.toml');
+    git('commit', '-m', `Sürüm ${etiket}`);
+  }
 } else {
   // Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
   // reformat a file nobody asked to reformat, and the diff of a release
@@ -86,9 +115,10 @@ if (onceki === surum) {
   const yeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
   if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
   writeFileSync(yol, yeni, 'utf8');
+  cargoSurumuYaz(surum);
 
   console.log(`\n  ${onceki} → ${surum}\n`);
-  git('add', 'package.json');
+  git('add', 'package.json', 'src-tauri/Cargo.toml');
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 

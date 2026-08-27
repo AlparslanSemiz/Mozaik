@@ -1,7 +1,8 @@
 // The Kurulum tab: four countable steps, the paste box, and the subject list
 // they feed.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
@@ -613,9 +614,9 @@ test.describe('63. Öğretmende cinsiyet', () => {
     // Scoped to the preview: the textarea still holds the pasted text and
     // would match the same words.
     const preview = page.locator('.paste-preview li');
-    await expect(preview.first()).toHaveText('Nazlı Er (NE) — Fizik · Kadın');
+    await expect(preview.first()).toHaveText('Nazlı Er (NE) · Fizik · Kadın');
     // The three-column row is not an error, and says nothing it does not know.
-    await expect(preview.nth(1)).toHaveText('Okan Su (OS) — Kimya');
+    await expect(preview.nth(1)).toHaveText('Okan Su (OS) · Kimya');
   });
 
   // Pitfall 33's shape, and it happened again while this column was being
@@ -969,7 +970,7 @@ test.describe('67. Ders dağılımı', () => {
     await splitPick(page).selectOption({ label: '2+1' });
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    const mine = page.locator('.pool-card', { hasText: name.split('—')[0]!.trim() });
+    const mine = page.locator('.pool-card', { hasText: name.split('·')[0]!.trim() });
     // Two cards for one lesson: a double and a single, and they say which.
     const own = mine.filter({ hasText: '0/3' });
     await expect(own).toHaveCount(2);
@@ -1033,7 +1034,7 @@ test.describe('67. Ders dağılımı', () => {
     await hours.fill('3');
     await hours.blur();
     await splitPick(page).selectOption({ label: '2+1' });
-    const name = (await row.locator('td').nth(2).innerText()).trim().split('—')[0]!.trim();
+    const name = (await row.locator('td').nth(2).innerText()).trim().split('·')[0]!.trim();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('.pool-card', { hasText: name }).first()).toBeVisible();

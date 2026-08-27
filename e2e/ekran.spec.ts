@@ -17,7 +17,8 @@
 // asserted to be OVER at the shutter, which is the cause of that bug rather
 // than a picture of it.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSampleTheme, SCENES } from './helpers';
 
 const OUT = 'test-results/ekran';

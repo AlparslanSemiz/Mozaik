@@ -5,7 +5,8 @@
 // run is ONE undo step, that the page does not freeze, and that what the bar
 // says afterwards is a sentence a person can act on.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { answerDialog, chooseEntity, openSettings, openWithSample } from './helpers';
 
 /** Runs it and waits for the verdict line. */

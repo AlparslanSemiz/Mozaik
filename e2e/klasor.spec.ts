@@ -23,7 +23,8 @@
 // The native dialog itself is still tried by hand; that is written down in
 // docs/STATUS.md rather than implied here.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 
 const KLASOR = 'Belgelerim';
 

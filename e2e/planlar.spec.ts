@@ -4,7 +4,8 @@
 // question only the real browser can answer: jsdom has no `file://`, no page
 // reload, and no 400 ms debounce racing a click.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { readFile } from 'node:fs/promises';
 import {
   dragAndDrop,

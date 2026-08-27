@@ -301,7 +301,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                   {colored && (
                     <span className="p-dot" style={{ background: paletteColor(group.color) }} />
                   )}
-                  {group.name} sınıfı — Haftalık ders programı
+                  {group.name} sınıfı · Haftalık ders programı
                 </span>
                 {(() => {
                   const room =
@@ -369,7 +369,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                   {colored && (
                     <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
                   )}
-                  {teacher.name} ({teacher.short}) — Haftalık ders programı
+                  {teacher.name} ({teacher.short}) · Haftalık ders programı
                 </span>
                 {(() => {
                   const sub = credits(
@@ -477,7 +477,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           </div>
 
           {pageCount === 0 && (
-            <div className="warn-box">Hiçbir sayfa seçili değil — basılacak bir şey yok.</div>
+            <div className="warn-box">Hiçbir sayfa seçili değil, basılacak bir şey yok.</div>
           )}
         </div>
 
@@ -494,7 +494,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           <h2>Sayfa düzeni</h2>
           <p className="hint">
             Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar
-            büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez — bu ayrı.
+            büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez, bu ayrı bir ayardır.
           </p>
 
           <h3>Bir kâğıda kaç program</h3>
@@ -551,7 +551,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                   onChange={() => setOptions({ ...options, [x.id]: !options[x.id] })}
                 />
                 <span>
-                  {x.label} <span className="muted-inline">— {x.hint}</span>
+                  {x.label} <span className="muted-inline">· {x.hint}</span>
                 </span>
               </label>
             ))}
@@ -590,7 +590,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           </table>
           {emptyPages > 0 && (
             <div className="warn-box">
-              Seçilen sayfaların <b>{emptyPages}</b> tanesi tamamen boş — o
+              Seçilen sayfaların <b>{emptyPages}</b> tanesi tamamen boş. O
               {' '}{scope === 'teachers' ? 'öğretmenlerin' : 'sınıfların'} programı
               henüz dizilmemiş. <b>Program</b> sekmesinden dizebilirsiniz.
             </div>

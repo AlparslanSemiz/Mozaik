@@ -133,7 +133,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
           aria-expanded={open && cards.length > 0}
           aria-label="Havuz"
           title={
-            open ? "Havuzu kapat — ızgara bütün yüksekliği alır" : "Havuzu aç"
+            open ? "Havuzu kapat: ızgara bütün yüksekliği alır" : "Havuzu aç"
           }
           onClick={toggle}
         >
@@ -184,7 +184,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             data-size={c.size}
             style={{ background: paletteColor(c.color) }}
             onPointerDown={(e) => onStart(e, c.lessonId, c.size)}
-            title={`${c.top} — ${c.bottom} ${c.subject} · ${c.size} saatlik blok · dersin ${c.placed}/${c.total} saati yerleşti`}
+            title={`${c.top} · ${c.bottom} ${c.subject} · ${c.size} saatlik blok · dersin ${c.placed}/${c.total} saati yerleşti`}
           >
             <span className="card-top">{c.top}</span>
             <span className="card-bottom">{c.bottom}</span>

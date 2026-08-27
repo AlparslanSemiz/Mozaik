@@ -20,7 +20,7 @@ export default function LimitBox({
       max={16}
       className="num"
       title={title}
-      placeholder={fallback > 0 ? String(fallback) : '—'}
+      placeholder={fallback > 0 ? String(fallback) : 'yok'}
       defaultValue={value ?? ''}
       onBlur={(e) => {
         const text = e.target.value.trim();

@@ -57,7 +57,7 @@ describe('patternLabel', () => {
   // A lesson with no hours has no split, and an empty string in a dropdown
   // reads as a broken row rather than as an answer.
   it('boş liste için tire', () => {
-    expect(patternLabel([])).toBe('—');
+    expect(patternLabel([])).toBe('–');
   });
 });
 

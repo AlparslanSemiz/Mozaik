@@ -97,7 +97,7 @@ export default function Teachers({ state, change }: PanelProps) {
     <div className="panel step-panel">
       <h2>Öğretmenler ({state.teachers.length})</h2>
       <p className="hint">
-        Her öğretmenin tek branşı vardır ve <b>listeden seçilir</b> — listede
+        Her öğretmenin tek branşı vardır ve <b>listeden seçilir</b>. Listede
         yoksa “+ Yeni branş…” ile eklenir. Kısaltma ızgarada satır başlığı olarak
         görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu
         öğretmene özel sınırdır; <b>boş bırakılırsa Ayarlar → Kurallar'daki sayı</b>{' '}
@@ -187,7 +187,7 @@ export default function Teachers({ state, change }: PanelProps) {
           example="Ad Soyad · Kısaltma · Branş · Cinsiyet"
           parse={parseTeachers}
           rowText={(x) =>
-            `${x.name} (${x.short}) — ${x.subject}` +
+            `${x.name} (${x.short}) · ${x.subject}` +
             (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
           }
           onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
@@ -199,7 +199,7 @@ export default function Teachers({ state, change }: PanelProps) {
           <b>Aynı kısaltma birden çok öğretmende:</b> ızgarada iki satır ayırt edilemez.
           {clashes.map((c) => (
             <div key={c.short}>
-              <b>{c.short}</b> — {c.names.join(', ')}
+              <b>{c.short}</b> · {c.names.join(', ')}
             </div>
           ))}
         </div>

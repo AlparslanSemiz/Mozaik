@@ -178,11 +178,11 @@ export default function Rules({ state, change }: PanelProps) {
                         style={{ background: paletteColor(t.color) }}
                         aria-hidden="true"
                       />
-                      {t.short} — {t.name}
+                      {t.short} · {t.name}
                     </td>
-                    <td className="num">{t.limits.maxConsecutive ?? '—'}</td>
-                    <td className="num">{t.limits.maxPerDay ?? '—'}</td>
-                    <td className="num">{t.limits.minPerDay ?? '—'}</td>
+                    <td className="num">{t.limits.maxConsecutive ?? '–'}</td>
+                    <td className="num">{t.limits.maxPerDay ?? '–'}</td>
+                    <td className="num">{t.limits.minPerDay ?? '–'}</td>
                   </tr>
                 ))}
               </tbody>

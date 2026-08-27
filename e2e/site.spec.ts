@@ -10,7 +10,7 @@
 // two ways that can quietly stop being true — the shell not being cached, and
 // the site build leaking into the file:// build.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { cacheAdi } from '../scripts/surum.mjs';

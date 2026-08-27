@@ -56,7 +56,7 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
   if (kind === "teacher") {
     return d.teachers.map((t) => ({
       id: t.id,
-      label: `${t.short} — ${t.name} (${t.subject})`,
+      label: `${t.short} · ${t.name} (${t.subject})`,
       short: t.short,
       // Name first, code in brackets: the heading already ends with an em dash
       // ("… — müsait olmayan saatler") and "MÇ — Mehmet Çelik — müsait…" put
@@ -106,7 +106,7 @@ const EMPTY_TEXT: Record<Kind, string> = {
 const HINT: Record<Kind, string> = {
   teacher: "Öğretmenin gelemeyeceği saatlere tıklayın.",
   class:
-    "Sınıfın ders yapamayacağı saatlere tıklayın — o saatlere hiçbir ders konamaz.",
+    "Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.",
   room: "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.",
 };
 
@@ -217,7 +217,7 @@ export default function Availability({
     <div className="cols narrow-right">
       <div>
         <div className="panel">
-          <h2>{selected.full} — müsait olmayan saatler</h2>
+          <h2>{selected.full} · müsait olmayan saatler</h2>
 
           <p className="hint">
             {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre
@@ -253,7 +253,7 @@ export default function Availability({
                   <tr key={g}>
                     <th
                       onClick={() => toggleDay(g)}
-                      title={`${day.name} — bütün günü değiştir`}
+                      title={`${day.name}: bütün günü değiştir`}
                     >
                       {shortDay(day.name)}
                     </th>
@@ -296,7 +296,7 @@ export default function Availability({
           <p className="hint">
             Her hücre, o saatte <b>kaç {KIND_WORD[kind]} kapalı</b> olduğunu
             gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına
-            gelir — program dizilirken tıkanılan yer genellikle burasıdır.
+            gelir. Program dizilirken genellikle burada tıkanılır.
           </p>
           <div className="scroll-x">
             <table className="availability heat">
@@ -336,7 +336,7 @@ export default function Availability({
                                   ).toFixed(2),
                                 } as React.CSSProperties)
                           }
-                          title={`${day.name} ${sIdx + 1}. ders — ${n} / ${list.length} kapalı`}
+                          title={`${day.name} ${sIdx + 1}. ders: ${n} / ${list.length} kapalı`}
                         >
                           {n === 0 ? "" : n}
                         </td>
@@ -413,7 +413,7 @@ export default function Availability({
             <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders
             yüklenmiş.
             {open < selected.load &&
-              ` ${selected.load - open} saat fazla — bu program dizilemez.`}
+              ` ${selected.load - open} saat fazla, bu program dizilemez.`}
           </p>
 
           {/* Closing an hour never removes what is already on it (principle 6),

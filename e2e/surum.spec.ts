@@ -11,7 +11,7 @@
 // appears when a newer worker takes over) is measured in site.spec.ts, over
 // http, because none of it exists here.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import { open, openSettings } from './helpers';
 import { surumBilgisi } from '../scripts/surum.mjs';

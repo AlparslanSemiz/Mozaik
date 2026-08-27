@@ -43,7 +43,7 @@ interface Props {
  * bytes against the browser's ~5 MB — not the UTF-8 length a file would have.
  */
 function size(chars: number): string {
-  if (chars === 0) return '—';
+  if (chars === 0) return '–';
   const bytes = chars * 2;
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
 }
@@ -73,7 +73,7 @@ function Folder({ folder }: { folder: FolderRun }) {
         <>
           <p className="hint">
             Bu, programın <b>her değişikliği kendiliğinden bir klasöre yazması</b>
-            demek — yedek indirmeyi hiç düşünmeden. Ama{' '}
+            demek, yedek indirmeyi hiç düşünmeden. Ama{' '}
             <b>kullandığınız tarayıcı bunu desteklemiyor.</b> Chrome ve Edge
             destekliyor; Firefox ve Safari desteklemiyor.
           </p>
@@ -97,7 +97,7 @@ function Folder({ folder }: { folder: FolderRun }) {
               <>
                 Program <b>bütün planları</b> kendiliğinden Belgelerim'e yazıyor ve
                 her gün için ayrı bir yedek bırakıyor (son {KEEP_DAILY} gün).
-                Seçecek bir şey yok — üst çubuktaki <b>Dosyaya kaydet</b> yalnız
+                Seçecek bir şey yok. Üst çubuktaki <b>Dosyaya kaydet</b> yalnız
                 bu bilgisayarın dışına bir kopya çıkarmak için.
               </>
             ) : (
@@ -168,7 +168,7 @@ function Folder({ folder }: { folder: FolderRun }) {
               </>
             )}
             {s.kind === 'bekliyor' && <>
-              <b>{s.name}</b> — yazılıyor…
+              <b>{s.name}</b> · yazılıyor…
             </>}
             {s.kind === 'yazildi' && (
               <>
@@ -184,7 +184,7 @@ function Folder({ folder }: { folder: FolderRun }) {
             )}
             {s.kind === 'hata' && (
               <>
-                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin — o zamana kadar
+                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar
                 işiniz yalnız tarayıcıda duruyor.
               </>
             )}
@@ -247,42 +247,111 @@ function Build({ update }: { update: UpdateRun }) {
         </tbody>
       </table>
 
-      {update.supported ? (
-        <>
-          <p className="hint">
-            Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve üstte
-            bir satırla söyler. Hiçbir şey zorla değişmez — <b>Yenile</b> demeden eski
-            sürümle çalışmaya devam edersiniz.
-          </p>
-          <div className="form-row">
-            <button className="btn" onClick={update.check}>
-              Güncellemeleri denetle
-            </button>
-          </div>
-          {update.ready && (
-            <p className="hint" role="status">
-              <b>Yeni sürüm hazır.</b> Üstteki <b>Yenile</b> düğmesine basın.
-            </p>
-          )}
-        </>
-      ) : (
+      {update.kind === 'sw' && <SiteUpdate update={update} />}
+      {update.kind === 'exe' && <ExeUpdate update={update} />}
+      {update.kind === 'yok' && (
         <p className="hint">
           <b>Bu kopya kendini güncellemez</b> ve hiçbir yere bağlanmaz. Yenisi
           çıktığında en son sürüm her zaman şuradadır:{' '}
-          {/* A link under file://, plain text in the .exe. Not a fetch either
-              way — but the exe's window has nowhere to put a second page, and
-              a link that navigates the app away from itself would look like
-              the program crashing. There it is text to read, or to type. */}
-          {storageKind() === 'exe' ? (
+          <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
-          ) : (
-            <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
-              <code>{SITE_ADRESI}</code>
-            </a>
-          )}
+          </a>
         </p>
       )}
     </div>
+  );
+}
+
+/** The site and the local install: a service worker does the work. */
+function SiteUpdate({ update }: { update: UpdateRun }) {
+  return (
+    <>
+      <p className="hint">
+        Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve üstte bir
+        satırla söyler. Hiçbir şey zorla değişmez. <b>Yenile</b> demediğiniz sürece eski
+        sürümle çalışmaya devam edersiniz.
+      </p>
+      <div className="form-row">
+        <button className="btn" onClick={update.check}>
+          Güncellemeleri denetle
+        </button>
+      </div>
+      {update.ready && (
+        <p className="hint" role="status">
+          <b>Yeni sürüm hazır.</b> Üstteki <b>Yenile</b> düğmesine basın.
+        </p>
+      )}
+    </>
+  );
+}
+
+/**
+ * The .exe: three buttons, and each one is a separate decision.
+ *
+ * Look, download, restart. Splitting them is not caution for its own sake, it
+ * is principle 1: nothing about this program may change without being asked
+ * for, and "asked for" has to mean the thing that actually happened. A single
+ * button that fetched four megabytes and closed the window would be an update
+ * wizard with one step.
+ *
+ * WITH NO INTERNET nothing here goes wrong. `Denetle` comes back with one
+ * sentence, the program keeps running, and the rest of the panel is untouched.
+ * That is the whole offline story: the network is only ever entered from this
+ * button.
+ */
+function ExeUpdate({ update }: { update: UpdateRun }) {
+  const d = update.durum;
+  const mesgul = d.ad === 'bakiliyor' || d.ad === 'indiriliyor';
+
+  return (
+    <>
+      <p className="hint">
+        Bu kopya kendini güncelleyebilir, ama <b>kendi başına yapmaz</b>. Aşağıdaki
+        düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa program normal çalışmaya
+        devam eder.
+      </p>
+
+      <div className="form-row">
+        <button className="btn" onClick={update.check} disabled={mesgul}>
+          Güncellemeleri denetle
+        </button>
+        {d.ad === 'var' && (
+          <button className="btn primary" onClick={update.indir}>
+            Yeni sürümü indir
+          </button>
+        )}
+        {d.ad === 'hazir' && (
+          <button className="btn primary" onClick={update.uygula}>
+            Şimdi yeniden başlat
+          </button>
+        )}
+      </div>
+
+      {/* One line, always in the same place, so the answer is where the eye
+          already is. `role="status"` because it changes without being read
+          again (design contract 2). */}
+      {d.ad !== 'bos' && (
+        <p className={`hint${d.ad === 'hata' ? ' bad' : ''}`} role="status">
+          {d.ad === 'bakiliyor' && 'Bakılıyor…'}
+          {d.ad === 'guncel' && <b>En son sürümü kullanıyorsunuz.</b>}
+          {d.ad === 'var' && (
+            <>
+              <b>v{d.surum} çıktı{d.tarih === '' ? '' : ` (${d.tarih})`}.</b> İndirmek{' '}
+              {Math.round(d.boyut / 1024 / 1024)} MB yer kaplar. İndirdikten sonra ne
+              zaman geçeceğinize siz karar verirsiniz.
+            </>
+          )}
+          {d.ad === 'indiriliyor' && 'Yeni sürüm iniyor…'}
+          {d.ad === 'hazir' && (
+            <>
+              <b>v{d.surum} indi.</b> Yeniden başlatınca yeni sürüm açılır. Programınız
+              kayıtlı, hiçbir şey kaybolmaz.
+            </>
+          )}
+          {d.ad === 'hata' && d.mesaj}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -374,7 +443,7 @@ export default function Data({ state, change, loadState, plans, folder, update }
       bad: failed > 0,
       text:
         failed > 0
-          ? `${ok} plan açıldı, ${failed} plan yazılamadı — depolama dolmuş olabilir. ` +
+          ? `${ok} plan açıldı, ${failed} plan yazılamadı. Depolama dolmuş olabilir. ` +
             'Dosyayı saklayın.'
           : `${ok} plan açıldı.`,
     });
@@ -394,7 +463,7 @@ export default function Data({ state, change, loadState, plans, folder, update }
             Buradaki dosya <b>bütün planları</b> içerir: her planın derslikleri,
             öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı, taslak işareti ve
             hangisinin açık olduğu. <b>İçermediği</b> şeyler: tema ve kenar çubuğu
-            tercihi ile aşağıdaki oturum yedekleri — onlar bu bilgisayara aittir,
+            tercihi ile aşağıdaki oturum yedekleri. Onlar bu bilgisayara aittir,
             programa değil.
           </p>
           <div className="form-row">
@@ -531,10 +600,10 @@ export default function Data({ state, change, loadState, plans, folder, update }
               where the data actually lives, and the bar it left had six
               destinations to hold instead. */}
           <p className="hint">
-            Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor — kaydet
+            Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor, kaydet
             düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{' '}
             <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
-            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu —{' '}
+            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{' '}
             <i>değişiklik yaptın, yedek indir.</i>
           </p>
           <table className="stat">
@@ -570,7 +639,7 @@ export default function Data({ state, change, loadState, plans, folder, update }
             Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha var
             ve o listede değil, çünkü metin değil: seçtiğiniz klasörün tutamağı{' '}
             <b>IndexedDB</b>'de, <code>ders-programi-klasor</code> adıyla durur.
-            Programınız orada <b>değildir</b> — orada duran şey yalnız hangi
+            Programınız orada <b>değildir</b>. Orada duran şey yalnız hangi
             klasöre yazılacağıdır.
           </p>
         </div>
@@ -580,11 +649,11 @@ export default function Data({ state, change, loadState, plans, folder, update }
           <p className="hint">
             Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç oturumun
             durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve programı açtığınızda{' '}
-            <b>hangi plan açıksa ona</b> aittir — taşımak ve gerçekten güvende olmak için
+            <b>hangi plan açıksa ona</b> aittir. Taşımak ve gerçekten güvende olmak için
             üst çubuktaki <b>Dosyaya kaydet</b>'i kullanın.
           </p>
           {backups.length === 0 ? (
-            <p className="hint">Henüz otomatik yedek yok — bu ilk oturum.</p>
+            <p className="hint">Henüz otomatik yedek yok, bu ilk oturum.</p>
           ) : (
             <table className="stat">
               <thead>

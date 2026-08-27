@@ -15,8 +15,10 @@ Windows *"bilinmeyen yayıncı"* derse: **Daha fazla bilgi** → **Yine de çal�
 Bu uyarı dosyanın imzalı olmamasından çıkar, içeriğiyle ilgisi yoktur.
 
 **Güncelleme.** Site kendini günceller ve size söyler. Windows kurulumunda
-`Guncelle.cmd` en yeni sürümü kendisi indirir. `.html` ve `.exe` kendilerini
-güncellemez — yenisini buradan indirip eskisinin üstüne koyun.
+`Guncelle.cmd` en yeni sürümü kendisi indirir. `.exe` de kendini
+güncelleyebilir: **Ayarlar → Veri → Güncellemeleri denetle**. Kendi başına
+yapmaz, o düğmeye basmadıkça hiçbir yere bağlanmaz. `.html` kendini
+güncellemez; yenisini buradan indirip eskisinin üstüne koyun.
 
 Hangi sürümde olduğunuz **Ayarlar → Veri → "Sürüm ve güncelleme"** bölümünde
 yazar.

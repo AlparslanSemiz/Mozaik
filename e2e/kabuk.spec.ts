@@ -15,7 +15,7 @@
 //     only thing left to tell the destinations apart;
 //   - the shell does not print.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { chooseScale, open, openWithSample } from './helpers';
 

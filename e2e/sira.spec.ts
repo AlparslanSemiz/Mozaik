@@ -12,7 +12,7 @@
 // preference actually landing in localStorage, and the handles going quiet
 // when the visible rows stop being the underlying list.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import { mainList, openSettings, openSetup, openWithSample, savedState, settledText } from './helpers';
 

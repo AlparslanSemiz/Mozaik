@@ -12,7 +12,8 @@
 // It runs in the SITE config, not the file:// one: a server is not something
 // you can test by opening a file.
 
-import { expect, test, type APIRequestContext } from '@playwright/test';
+import { type APIRequestContext } from '@playwright/test';
+import { beklenenHata, expect, test } from './kapan';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -111,6 +112,32 @@ test.describe('73. Yerel sunucu', () => {
   test('bilinmeyen yol uygulamaya düşüyor, ölü bir sayfaya değil', async ({ page }) => {
     await page.goto(`${AD}/bilinmeyen/yol`);
     await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
+
+    // Derin bir yolda sayfa yanındaki `sw.js`'i istiyor ve orada öyle bir
+    // dosya YOK, yani kayıt 404 alıyor. Bu bir kusur değil, yolun bir
+    // özelliği: kısayol köke gidiyor, ve kaydı olmayan bir sayfa çevrimdışı
+    // açılmaz ama çevrimiçi çalışır.
+    //
+    // ÖNEMLİ OLAN, bunun ARTIK 404 olması. Önceden geri dönüş kuralı buna
+    // index.html veriyordu ve tarayıcı "unsupported MIME type ('text/html')"
+    // diyordu — yani sunucu yanlış bir cevabı doğru bir kodla veriyordu.
+    // Beklendiğini SÖYLEMEK, susturmak değil (kapan.ts).
+    beklenenHata(page, /fetching the script|ServiceWorker|service worker/i);
+  });
+
+  test('bir DOSYA adı isteyen çağrıya HTML verilmiyor', async ({ request }) => {
+    // Bu testin sebebi bir kusur: geri dönüş kuralı her şeye index.html
+    // veriyordu, yani `/bilinmeyen/sw.js` isteği `text/html` olarak dönüyor ve
+    // Chromium service worker kaydını "unsupported MIME type" diye
+    // reddediyordu. Sayfada hiçbir şey görünmüyordu; bulan şey hata kapanıydı.
+    const res = await request.get(`${IP}/bilinmeyen/sw.js`);
+    expect(res.status(), 'dosya adı isteyen çağrı 404 almalı').toBe(404);
+    expect(res.headers()['content-type'] ?? '').not.toContain('text/html');
+
+    // Gezinme geri dönüşü DURUYOR: kural yalnız dosya adı taşıyan yollar için.
+    const gezinme = await request.get(`${IP}/bilinmeyen/yol`);
+    expect(gezinme.status()).toBe(200);
+    expect(await gezinme.text()).toContain('Kurulum');
   });
 
   async function head(request: APIRequestContext, url: string) {

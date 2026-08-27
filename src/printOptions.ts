@@ -67,9 +67,9 @@ export const PRINT_DEFAULTS: PrintOptions = {
 export const PER_SHEET_VALUES: PerSheet[] = [1, 2, 4];
 
 export const PER_SHEET_LABELS: Array<{ value: PerSheet; label: string; hint: string }> = [
-  { value: 1, label: '1', hint: 'Bir A4’e bir program — duvara asılan boy' },
+  { value: 1, label: '1', hint: 'Bir A4’e bir program, duvara asılan boy' },
   { value: 2, label: '2', hint: 'Alt alta iki program' },
-  { value: 4, label: '4', hint: 'İki sütun, iki satır — dağıtmak için' },
+  { value: 4, label: '4', hint: 'İki sütun, iki satır, dağıtmak için' },
 ];
 
 export const PRINT_SIZE_LABELS: Array<{ value: PrintSize; label: string }> = [

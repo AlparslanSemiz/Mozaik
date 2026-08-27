@@ -450,7 +450,7 @@ describe('blocker — art arda en fazla N saat', () => {
     let d = withRule(build(), 'maxConsecutive', 2, 'block');
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 1);
-    expect(why(d, 'x1', 0, 2)).toBe('MÇ art arda 2 saatten fazla girmemeli — burada 3 saat olur');
+    expect(why(d, 'x1', 0, 2)).toBe('MÇ art arda 2 saatten fazla girmemeli, burada 3 saat olur');
   });
 
   it('BLOK, sağındaki dolu saatle birleşerek sınırı aşabilir', () => {
@@ -481,7 +481,7 @@ describe('blocker — günde en fazla N saat', () => {
     let d = withRule(build(), 'maxPerDay', 2, 'block');
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 2);
-    expect(why(d, 'x1', 0, 3)).toBe('MÇ Pazartesi günü en fazla 2 saat girmeli — burada 3 saat olur');
+    expect(why(d, 'x1', 0, 3)).toBe('MÇ Pazartesi günü en fazla 2 saat girmeli, burada 3 saat olur');
     expect(why(d, 'x1', 1, 0)).toBeNull(); // the next day is a fresh budget
   });
 });
@@ -492,7 +492,7 @@ describe('blocker — bir ders günde en fazla N saat', () => {
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x1', 0, 2);
     expect(why(d, 'x1', 0, 3)).toBe(
-      '510 sınıfı Pazartesi günü MÇ dersinden en fazla 2 saat görmeli — burada 3 saat olur',
+      '510 sınıfı Pazartesi günü MÇ dersinden en fazla 2 saat görmeli, burada 3 saat olur',
     );
   });
 
@@ -513,7 +513,7 @@ describe('check — Uyar seviyesi', () => {
     d = place(d, 'x2', 0, 1);
     const v = verdict(d, 'x1', 0, 2);
     expect(v.blocked).toBeNull();
-    expect(v.warning).toBe('MÇ art arda 2 saatten fazla girmemeli — burada 3 saat olur');
+    expect(v.warning).toBe('MÇ art arda 2 saatten fazla girmemeli, burada 3 saat olur');
   });
 
   it('Engelle iken uyarı değil engel döner', () => {
@@ -920,7 +920,7 @@ describe('dropMap — üstüne bırakma', () => {
     const ix = buildIndex(d);
     const x1 = ix.lessonById.get('x1')!;
     const x2 = ix.lessonById.get('x2')!;
-    expect(evictionNotice(ix, [x1])).toBe('510 — MÇ dersi havuza dönecek');
+    expect(evictionNotice(ix, [x1])).toBe('510 · MÇ dersi havuza dönecek');
     expect(evictionNotice(ix, [x1, x2])).toContain('dersleri');
   });
 });

@@ -9,7 +9,8 @@
 // Every assertion here is a measurement off the real dist/index.html, and every
 // one of them would have been red the day before it was written.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { chooseScale, open, openSettings, openWithSample } from './helpers';
 
 const TABS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;

@@ -93,7 +93,7 @@ export default function Plans({ state, plans }: Props) {
       <h3>Yeni plan</h3>
       <p className="hint">
         Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır.{' '}
-        <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır — bir planın hamlesi
+        <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır, çünkü bir planın hamlesi
         başka bir plana uygulanamaz.
       </p>
       <div className="form-row">
@@ -145,11 +145,11 @@ export default function Plans({ state, plans }: Props) {
                   defaultValue={plan.name}
                   onBlur={(e) => plans.renamePlan(plan.id, e.target.value)}
                 />
-                {plan.id === planId && <span className="hint"> — açık olan</span>}
+                {plan.id === planId && <span className="hint"> · açık olan</span>}
                 {missing && (
                   <span className="hint" title="Bu planın verisi bulunamadı">
                     {' '}
-                    — verisi yok
+                    · verisi yok
                   </span>
                 )}
               </td>

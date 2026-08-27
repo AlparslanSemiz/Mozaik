@@ -9,6 +9,28 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **U turu bitti (2026-08-27): exe kendini güncelliyor, görev çubuğu ikonu,
+> devriye + hata kapanı, metin turu.** Kullanıcının beş maddesinden **dördü**
+> yapıldı; kalan ikisi (dil ve yeni ad) v2.0.0'a alındı — kullanıcı kararı.
+> Ayrıntı ve **ölçülen her sayı** aşağıda, *U turu* bölümünde ve
+> [STATUS.md](STATUS.md) → *Yirmi yedinci oturum*.
+>
+> **Bir sonraki oturumun ilk işi — üçü de KULLANICIDA:**
+> 1. **`v1.3.0` yayınlansın** (`npm run yayinla -- 1.3.0`). Bu sürümle birlikte
+>    Release'e dördüncü bir varlık düşer: `surum.json`. Ondan **önceki** hiçbir
+>    exe kendini güncelleyemez, çünkü bakacağı dosya henüz yok.
+>    Not: `v1.2.0` **hiç etiketlenmedi** — `package.json` 1.2.0'da ama uzakta
+>    yalnız `v1.1.0` var, yani ders dağılımı turu babaya hiç ulaşmadı.
+> 2. **Windows'ta denensin.** Bu makinede ölçülemeyen üç şey var ve üçü de
+>    aynı koşuda görülür: exe'nin kendini gerçekten değiştirmesi, görev
+>    çubuğundaki ikonun yeni hâli, ve SmartScreen'in ne dediği.
+> 3. **GitHub Pages hâlâ başkasına gidiyor.** `AlparslanSemiz.github.io`
+>    deposunda Settings → Pages → Custom domain temizlenecek **ve** kökteki
+>    `CNAME` silinecek. Kaldırmanın GameMetrix'i kırmayacağı ölçüldü.
+>
+> Ondan sonra: **v2.0.0 — dil ve isim** (aşağıda), ve hâlâ bekleyen tek büyük
+> şey **gerçek veriyle deneme** (babanın listesi), yani v0'ın çıkma şartı.
+
 > **Z turu bitti (2026-08-27): ders dağılımı, açık tema, örnek verinin yeri,
 > branşlarda sıralama.** Kullanıcının dört maddesinin dördü de yapıldı ve
 > **şema v6 → v7'ye çıktı** — `Lesson.blockSize` yerine `Lesson.pairs`.
@@ -31,11 +53,8 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > - [x] **Ayarlar → Branşlar'da elle sıralama.** Beşinci liste; sıra
 >       Öğretmenler adımındaki Branş listesine yansıyor.
 >
-> **Bir sonraki oturumun ilk işi:** `e2e/gorunum.spec.ts:309`'un payı.
-> Test 0,15 px'lik bir farkla kırmızı ve **HEAD'de de kırmızıydı** (ayrı bir
-> worktree'de ölçüldü) — yani bu turun ürünü değil, ama açık duruyor. Karar:
-> payı yeniden **ölçülmüş** bir gerekçeyle genişletmek mi, yoksa sütunun
-> tabanını (`09:50` başlığı) değiştirmek mi.
+> *(O turun bıraktığı açık madde — `e2e/gorunum.spec.ts:309`'un payı —
+> **U6'da kapandı**: uydurma `+2` yerine ölçülen zemin kondu.)*
 
 > **Y turu bitti (2026-08-26).** Kullanıcının on bir maddesi + üç liste kusuru
 > karşılandı: `Sil` hizası, Öğretmenler listesinin yatay kayması, şerit-liste
@@ -1290,15 +1309,102 @@ kaldı ve adlarıyla yazıldı: `Kur.cmd`, `.lnk` üretimi, Windows PowerShell 5
 
 
 
-E2E ile emülatörle patrolla veya başka şekilde izleyerek tüm hataları görme test etme kontrol etme kuralım.
+---
 
-Uygulama açıkken .exe olarak alttaki png görüntüsü eksik pxli küçük logo. o büyük logo olsun.
+## U turu — güncelleme · ikon · devriye · metinler — **BİTTİ ✅** (2026-08-27)
 
-Dil seçeneği gelmeli. İngilizce Almanca İspanyolca ve Fransızca, default tabii ki cihazın diline göre olmalı. Cihazın dili o değilse ingilizce olmalı.
+Kullanıcının bu dosyanın sonuna yazdığı **beş satır**, artı aynı mesajdaki iki
+istek: *"yeni sürüm oluşsun"* ve *".exe'de de ayarlarda güncellemeye basınca
+güncellemeye baksın ve güncelleme varsa güncellensin, tabii ki exe internetsiz
+de sorunsuz çalışabiliyor olsun."*
 
-Genel anlamda her feauture hakkında yazılan infolar düzenlenmeli yenilenmeli ve uzun çizgi neredeyse hiç ya da çok az kullanılmalı.
+**İş ikiye bölündü (kullanıcı kararı, 2026-08-27).** Bu tur **v1.3.0**; dil
+desteği ve yeni ad kendi turunda, **v2.0.0**'da. Gerekçe: o ikisi kimlik
+değişikliği (ilke 4 yeniden yazılıyor, 529 E2E locator'ı Türkçe adlara asılı)
+ve babanın bekleyen düzeltmeleri onların arkasında beklememeli.
 
-Uygulamaya güzel bir isim bulunmalı.
+- [x] **U1 `.exe` kendini güncelliyor.** `src-tauri/src/update.rs` + üç köprü
+      fonksiyonu (`desktop.ts`) + `update.ts`'in üç yollu hâli (`sw` · `exe` ·
+      `yok`) + Ayarlar → Veri'de üç düğme.
+      **Sözleşme:** ağa **yalnız tıklanınca** çıkılır. Açılışta yok, arka
+      planda yok, zamanlayıcı yok. İnternet yoksa tek sonuç bir cümledir ve
+      program çalışmaya devam eder — E2E bunu örnek okulu yükleyip ızgaraya
+      ulaşarak **ölçüyor**, "sekme değişti" diyerek değil.
+      **İlke 1 korundu:** üç ayrı düğme, üç ayrı karar (`Denetle` → `İndir` →
+      `Şimdi yeniden başlat`). İkisi de sabotajla kırmızıya döndürüldü.
+      Yeniden başlatmadan önce `park()` çağrılıyor (tuzak 28).
+      `.github/workflows/surum.yml` dördüncü bir varlık üretiyor: `surum.json`,
+      ve numarası **etiketle package.json'ın aynı olduğu doğrulanmadan**
+      yazılmıyor.
+      **Tauri'nin kendi updater'ı alınmadı** ve gerekçe ilke 1: Windows'ta bir
+      `.msi`/`.nsis` kurulumu çalıştırıyor, yani tam da `--no-bundle`'ın
+      reddettiği şey.
+      **Bu makinede ölçülemeyen:** Windows'ta gerçek takas. `cargo test`
+      mantığı Linux'ta yargılıyor (rename semantiği aynı); exe'nin kendini
+      Windows'ta gerçekten değiştirdiği babanın makinesinde görülecek.
+- [x] **U2 Görev çubuğundaki işaret büyük çizim.** İki kusur birden vardı ve
+      ikisi de dosyanın içindeydi: `.ico` 20 · 24 · **40** px taşımıyordu
+      (Windows %125'te 40 istiyor ve yoksa 32'yi büyütüyor — "eksik pxl"in
+      kaynağı), ve eşik `< 48 sade` olduğu için görev çubuğunun 32 px'lik
+      yuvasına **sade** çizim düşüyordu. Eşik uydurulmadı, **bakılarak**
+      bulundu: ayrıntılı çizim 16–20'de leke, 24'te bulanık, 32'den itibaren
+      okunuyor. `.ico` 11 858 → **14 483 bayt**. Karar artık bir testte
+      (`temel.spec.ts` 79, piksel piksel), ve sabotajla kırmızıya döndü.
+- [x] **U3 Devriye + hata kapanı.** İki parça, ve asıl kazanç birincisi:
+      `e2e/kapan.ts` **bütün** E2E süitini sarıyor (`auto: true`) ve konsol
+      hatasını, `pageerror`'ı, yakalanmamış promise reddini ve `file://`
+      altında **herhangi bir ağ isteğini** kırmızıya döndürüyor. Bugüne kadar
+      415 testin **hiçbiri** bunlara bakmıyordu. İkisi de kasıtlı hatayla
+      sınandı. `npm run patrol` ise iddia etmiyor, **geziyor**: altı sekme,
+      dört adım, beş bölüm, şeritteki her düğme, artı üç tohumla rastgele
+      gezinme. `kontrol`'ün parçası değil (tuzak 79'a bakınız: ilk hâli üç
+      dakikada hiçbir sekmeye uğramadan düştü).
+      **Süit kapanla YEŞİL geçti** — yani bugün sayfa gerçekten hiçbir yerde
+      hata basmıyor.
+- [x] **U4 Metinler yenilendi, uzun çizgi kalktı.** Ekranda **265 satır** uzun
+      çizgi taşıyordu; şimdi **sıfır**. Çoğu düzyazı değil ayraçtı
+      (`MÇ — Mehmet Çelik`, `A: 4 sınıf — 410, 411`,
+      `310 sınıfı — Haftalık ders programı`). Yerine geçen kural:
+      düzyazıda **ayrı cümle**, etiket/değer çiftinde **iki nokta**,
+      eşit ağırlıkta iki şey arasında **orta nokta (`·`)**, boş tablo
+      hücresinde **kısa çizgi (`–`)**. Karar `metin.spec.ts`'te ölçülüyor ve
+      ölçtüğü şey kaynak değil `document.body.innerText`.
+      **Kod yorumlarına dokunulmadı**: onlar İngilizce ve kimseye görünmüyor.
+- [x] **U5 Sürüm numarasının tek kaynağı GERÇEKTEN tek.** CLAUDE.md iki sürüm
+      boyunca öyle diyordu ve yanlıştı: numara üç dosyadaydı ve `yayinla.mjs`
+      yalnız birini yazıyordu. Exe'nin karşılaştırdığı sayı tam da o.
+      `tauri.conf.json` → `"../package.json"`, `Cargo.toml`'u `yayinla.mjs`
+      yazıyor, ve `src/surum.test.ts` her koşuda ölçüyor (tuzak 77).
+- [x] **U6 `gorunum.spec.ts`'in payı ölçüldü.** Uydurma `+2` kalktı.
+      **Ölçülen:** sütun **39,0 px**, CSS'in istediği **37,4 px**, saat
+      başlığının kendi istediği **41,0 px**. Tavan artık ölçülen zemin:
+      sütun bu ikisinin arasında kalmalı, yani gömülü yüz değişince tavan da
+      onunla birlikte oynuyor (tuzak 42).
+
+### v2.0.0 turu — dil ve isim — **BEKLİYOR**
+
+Kullanıcının kalan iki maddesi, ve ikisi de bir **kimlik** değişikliği.
+Kararlar 2026-08-27'de soruldu ve verildi:
+
+- [ ] **Dil seçeneği: TR · EN · DE · ES · FR.** Varsayılan `navigator.language`
+      üstünden; cihaz dili bu beşten biri değilse **İngilizce**. Türkçe kaynak
+      dil kalır. Tercih `ders-programi-dil`'de, `State`'e **girmez**
+      (`schemaVersion` artmaz). `theme.ts`'in on birinci makine tercihi, ve
+      `library.ts`'teki `storageReport`'a satırı yazılacak.
+      **İLKE 4 YENİDEN YAZILACAK** — bugünkü hâli "Tek dil. i18n altyapısı
+      yok, string dosyası yok".
+      E2E'nin dili `open()` yardımcısında `tr`'ye **sabitlenecek**, yoksa 529
+      locator'ın hepsi cihaz diline göre kayar.
+- [ ] **Yeni ad: Mozaik.** Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik ·
+      Mosaico · Mosaïque) ve ekrandaki şeyi tarif ediyor.
+      **DEĞİŞMEYECEK olanlar, ve bu bir veri kararı:** `localStorage`
+      anahtarları (`ders-programi*`), yedek dosya adları
+      (`ders-programi-YYYY-AA-GG.json`) ve `Belgelerim\Ders Programı`
+      klasörü. Kimliği değişen bir anahtar, silinmiş veri demektir.
+      Değişecekler: pencere başlığı, belge başlığı, marka, exe adı, site,
+      README, `identifier`. Exe adı değişince `surum.json`'daki adres de
+      değişir — güncelleyici bunu zaten **manifestten okuyor**, yani v1.3.0
+      taşıyan bir kopya v2.0.0'a geçebilir.
 
 
 

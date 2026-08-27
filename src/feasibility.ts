@@ -56,7 +56,7 @@ export function lessonName(ix: Index, lessonId: Id): string {
   const lesson = ix.lessonById.get(lessonId);
   const group = lesson && ix.classById.get(lesson.classId);
   const teacher = lesson && ix.teacherById.get(lesson.teacherId);
-  return `${group?.name ?? '?'} — ${teacher?.short ?? '?'} ${teacher?.subject ?? ''}`.trim();
+  return `${group?.name ?? '?'} · ${teacher?.short ?? '?'} ${teacher?.subject ?? ''}`.trim();
 }
 
 /**
@@ -142,7 +142,7 @@ export function buildCapacity(d: State): Capacity {
         : level === 'tight'
           ? `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş. Zor olacak.`
           : `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş.`;
-    return { id: t.id, name: `${t.short} — ${t.name}`, capacity, load, level, message };
+    return { id: t.id, name: `${t.short} · ${t.name}`, capacity, load, level, message };
   });
 
   const classes: ReportRow[] = d.classes.map((c) => {

@@ -1,7 +1,8 @@
 // Printing. Never tested at the end, always in the middle: "it does not
 // overflow" is not enough — the columns must be equal and the page landscape.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSample, openSetup, openSettings, loadWorld } from './helpers';
 
 test.describe('4. Yazdırma', () => {

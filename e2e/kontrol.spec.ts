@@ -6,7 +6,8 @@
 // "Dosyadan aç" dialog, so the numbers in the assertions can be worked out on
 // paper: 1 day x 4 hours, one room, one class.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { makeWorld, type WorldSpec } from '../src/worlds';
 import { loadWorld, open, openWithSample } from './helpers';
 
@@ -104,7 +105,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     });
 
     const panel = page.locator('.panel', { hasText: 'Yerleşemeyen dersler' });
-    await expect(panel).toContainText('510 — MÇ Matematik');
+    await expect(panel).toContainText('510 · MÇ Matematik');
     await expect(panel).toContainText('Örnek sebep: MÇ Salı 1 saatinde müsait değil');
   });
 

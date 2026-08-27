@@ -9,7 +9,7 @@
 // under them, that the count tells the truth, and that Turkish text survives
 // the round trip through a real input.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openSetup, openWithSample, mainList } from './helpers';
 
 const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');

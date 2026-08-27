@@ -103,7 +103,7 @@ export const GENDER_LABEL: Record<Gender, string> = {
  * heading that says "Cinsiyet" says the same thing in one character.
  */
 export const GENDER_CELL: Record<Gender, string> = {
-  '': '—',
+  '': '–',
   k: 'Kadın',
   e: 'Erkek',
 };

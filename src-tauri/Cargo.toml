@@ -4,7 +4,10 @@ version = "1.2.0"
 description = "Haftalik ders programi dizme araci"
 authors = ["Alparslan"]
 edition = "2021"
-rust-version = "1.77.2"
+# Raised from 1.77.2 for reqwest 0.13, which `tauri` already pulls in. Pinning
+# the old floor would have resolved a SECOND copy of reqwest into the tree
+# rather than sharing the one that is already there.
+rust-version = "1.85.0"
 
 [lib]
 # Tauri v2 wants the app as a library so the mobile targets can link it. We
@@ -17,12 +20,32 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# No plugins. `withGlobalTauri` puts `invoke` on the page and the three
-# commands in lib.rs are the whole API surface, so tauri-plugin-fs and
-# tauri-plugin-dialog would be two dependencies for something std::fs does in
-# forty lines — and they would hand the page a general file API when what it
-# needs is one folder.
+# No plugins. `withGlobalTauri` puts `invoke` on the page and the seven
+# commands in lib.rs and update.rs are the whole API surface, so
+# tauri-plugin-fs and tauri-plugin-dialog would be two dependencies for
+# something std::fs does in forty lines, and they would hand the page a
+# general file API when what it needs is one folder. tauri-plugin-updater is
+# missing for a harder reason: its Windows path installs a .msi or .nsis
+# bundle, and principle 1 rejects exactly that (see `--no-bundle`).
 tauri = { version = "2", features = [] }
+
+# The update path, and the only thing in this program that touches the network.
+#
+# reqwest is NOT new: `tauri` already depends on it and it is already in
+# Cargo.lock. What was missing is a TLS backend -- neither rustls nor
+# native-tls was enabled -- so the cost measured in STATUS.md is the TLS stack,
+# not the client.
+#
+# `native-tls` rather than `rustls`, and the reason is the delivery target: on
+# Windows native-tls is schannel, which is the operating system, so the .exe my
+# father downloads grows by almost nothing and the Windows runner needs no
+# NASM or cmake to build it. On this Fedora machine it is the system OpenSSL,
+# so `cargo test` and `npm run exe` still work locally.
+reqwest = { version = "0.13", default-features = false, features = ["native-tls", "json"] }
+
+# For the manifest struct in update.rs. Already in the lock (tauri depends on
+# it); listed here because `derive` is used directly.
+serde = { version = "1", features = ["derive"] }
 
 [profile.release]
 # The delivery is a file my father downloads once. Size over compile time.

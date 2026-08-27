@@ -99,7 +99,7 @@ function describeBar(
       ? `Durduruldu. ${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`
       : `${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`;
   return {
-    text: `${head} ${worst.name}: ${worst.missing} saat yerleşemedi — ${worst.reason}${others}.`,
+    text: `${head} ${worst.name}: ${worst.missing} saat yerleşemedi. ${worst.reason}${others}.`,
     level: done.phase === 'cancelled' ? 'warn' : 'bad',
   };
 }

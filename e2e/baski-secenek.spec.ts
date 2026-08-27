@@ -9,7 +9,7 @@
 // one thing from the paper, and that the one NEW element — the date stamp —
 // does not push a fixed 205 mm page over the edge (pitfall 31).
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import { dragAndDrop, openWithSample } from './helpers';
 

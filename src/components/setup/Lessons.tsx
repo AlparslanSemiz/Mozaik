@@ -149,7 +149,7 @@ export default function Lessons({ state, change }: PanelProps) {
           <option value="">Öğretmen seçin</option>
           {state.teachers.map((t) => (
             <option key={t.id} value={t.id}>
-              {t.short} — {t.subject}
+              {t.short} · {t.subject}
             </option>
           ))}
         </select>
@@ -192,7 +192,7 @@ export default function Lessons({ state, change }: PanelProps) {
           example="Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 veya 2)"
           parse={parseLessons}
           rowText={(x) =>
-            `${x.className} — ${x.teacher}: ${x.weeklyHours} saat (${patternLabel(
+            `${x.className} · ${x.teacher}: ${x.weeklyHours} saat (${patternLabel(
               blockPlan(x),
             )})`
           }
@@ -270,7 +270,7 @@ export default function Lessons({ state, change }: PanelProps) {
             {shown.map((x, i) => {
               const group = state.classes.find((c) => c.id === x.classId);
               const teacher = state.teachers.find((t) => t.id === x.teacherId);
-              const rowName = `${group?.name ?? '?'} — ${teacher?.short ?? '?'}`;
+              const rowName = `${group?.name ?? '?'} · ${teacher?.short ?? '?'}`;
               return (
                 <tr key={x.id} data-row-name={rowName}>
                   {order.grip(i, rowName)}
@@ -286,7 +286,7 @@ export default function Lessons({ state, change }: PanelProps) {
                       className="color-dot"
                       style={{ background: paletteColor(teacher?.color ?? 0) }}
                     />{' '}
-                    {teacher?.short ?? '?'} — {teacher?.subject ?? ''}
+                    {teacher?.short ?? '?'} · {teacher?.subject ?? ''}
                   </td>
                   <td>
                     <input

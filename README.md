@@ -37,9 +37,9 @@ Hiçbir şey derlemeye gerek yok — üçü de hazır dosya olarak iner:
 Bu adresler her zaman **en son sürüme** gider; sürüm numarası bilmeye gerek
 yok. Giriş yapmak da gerekmez.
 
-> ⚠️ **Henüz tek bir sürüm yayınlanmadı**, yani bugün bu üç bağlantı 404
-> verir. İlk sürüm çıkana kadar aşağıdaki "kendiniz üretmek isterseniz"
-> adımları geçerli. Sürüm yayınlamak: aşağıda *Sürüm çıkarmak*.
+Yanlarında dördüncü bir dosya daha durur: **`surum.json`**. O bir program
+değil, tek satırlık bir bilgi. `.exe` "yeni sürüm var mı" diye yalnız oraya
+bakar.
 
 Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
@@ -244,6 +244,29 @@ kodlanıyor.)
 **WebView2 gerekir.** Windows 10 ve 11 bunu kendisi getirir, yani neredeyse
 her makinede zaten vardır. Yoksa program bir pencere açıp indirme bağlantısını
 gösterir.
+
+### Güncellemek
+
+`.exe` kendini güncelleyebilir, ama **kendi başına yapmaz.**
+
+**Ayarlar → Veri → Sürüm ve güncelleme → Güncellemeleri denetle**
+
+Üç ayrı düğme, üç ayrı karar:
+
+1. **Güncellemeleri denetle.** Programın internete çıktığı tek an burasıdır.
+   Yeni sürüm yoksa "En son sürümü kullanıyorsunuz." yazar ve biter.
+2. **Yeni sürümü indir.** Yeni program eskisinin yanına iner. Hiçbir şey
+   değişmez, çalışmaya devam edersiniz.
+3. **Şimdi yeniden başlat.** Program kapanır ve yeni sürümle açılır.
+   Programınız kayıtlıdır, hiçbir şey kaybolmaz.
+
+**İnternet yoksa hiçbir sorun çıkmaz.** Denetle düğmesi "İnternete
+bağlanılamadı" yazar, program normal çalışmaya devam eder. Denetle düğmesine
+basmadıkça `.exe` hiçbir yere bağlanmaz: açılışta bağlanmaz, arka planda
+bağlanmaz, kendiliğinden hiç bağlanmaz.
+
+Eski sürüm `Ders-Programi.exe.eski` adıyla bir süre yanında durur ve program
+bir sonraki açılışta onu kendisi siler.
 
 ### Verileriniz nerede
 

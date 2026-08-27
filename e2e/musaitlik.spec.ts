@@ -5,7 +5,8 @@
 // how many people are closed at each hour. The paintable one is
 // `table.availability:not(.heat)` and every locator here says so.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { chooseEntity, open, openWithSample, dragAndDrop, tokens, rgb, contrast } from './helpers';
 
 test.describe('10. Müsaitlik çizelgesi', () => {

@@ -105,5 +105,51 @@ export async function openDesktopFolder(): Promise<FileSystemDirectoryHandle | n
   return desktopFolder(invoke, label);
 }
 
+// ------------------------------------------------------------ the update path
+//
+// Three more commands, and they are the only place in this program that
+// touches the network. They live here rather than in `update.ts` for the same
+// reason `desktopFolder` does: this file is the exe seen from the page, and
+// `update.ts` should not have to know what an `invoke` is.
+//
+// None of them runs on its own. Each one is a button in Ayarlar, and with no
+// internet the only thing that happens is that `check` rejects with a sentence
+// (principle 1: nothing changes unless it is asked for; principle 3: the
+// program itself still fetches nothing).
+
+/** What `check_update` answers. Field names match src-tauri/src/update.rs. */
+export interface UpdateCevap {
+  /** Whether the published version is newer than the one that asked. */
+  yeni_var: boolean;
+  version: string;
+  date: string;
+  /** Where the new program is. Read from the manifest, never built here, so
+      renaming the delivery file in a later version cannot break an older
+      copy's updater. */
+  exe: string;
+  boyut: number;
+}
+
+function bridge(): Invoke {
+  const invoke = window.__TAURI__?.core?.invoke;
+  if (!invoke) throw new Error('Bu kopya kendini güncelleyemez.');
+  return invoke;
+}
+
+/** Asks the release manifest what the newest version is. */
+export function desktopCheck(current: string): Promise<UpdateCevap> {
+  return bridge()<UpdateCevap>('check_update', { current });
+}
+
+/** Downloads it NEXT TO the running program and stops there. */
+export function desktopDownload(url: string, boyut: number): Promise<number> {
+  return bridge()<number>('download_update', { url, boyut });
+}
+
+/** Puts the downloaded program in place and restarts onto it. */
+export function desktopApply(): Promise<void> {
+  return bridge()<void>('apply_update');
+}
+
 /** Re-exported so callers do not have to import both files to read a result. */
 export type { WriteResult };

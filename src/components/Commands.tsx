@@ -82,7 +82,7 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
     for (const t of state.teachers) {
       out.push({
         id: `t-${t.id}`,
-        label: `${t.short} — ${t.name}`,
+        label: `${t.short} · ${t.name}`,
         group: 'Öğretmenler',
         extra: t.subject,
         hint: t.subject,

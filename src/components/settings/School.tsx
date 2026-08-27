@@ -154,7 +154,7 @@ export default function School({ state, change }: PanelProps) {
           <h2>Ders saatleri</h2>
           <p className="hint">
             Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan
-            hesaplanır — tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
+            hesaplanır, tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
           </p>
           <div className="form-row">
             <Field label="Günlük ders sayısı">
@@ -292,7 +292,7 @@ export default function School({ state, change }: PanelProps) {
                           {patterns.map((p) => (
                             <td key={p.after}>
                               {p.after === i + 1
-                                ? `Öğle arası — ${state.settings.bell.longBreakMinutes} dk`
+                                ? `Öğle arası, ${state.settings.bell.longBreakMinutes} dk`
                                 : ''}
                             </td>
                           ))}

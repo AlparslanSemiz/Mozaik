@@ -1,6 +1,7 @@
 // The Ayarlar tab: days, the bell, the four rules, subjects and data.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { answerDialog, open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
 
 test.describe('6. Gün ve ders saatleri', () => {
@@ -280,7 +281,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     const neighbour = await hover(page, 0, 1);
     await expect(neighbour).toHaveClass(/drop-blocked/);
     await expect(page.locator('.reason-bar')).toContainText(
-      'MÇ art arda 1 saatten fazla girmemeli — burada 2 saat olur',
+      'MÇ art arda 1 saatten fazla girmemeli, burada 2 saat olur',
     );
     await page.keyboard.press('Escape');
 
@@ -304,7 +305,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     await expect(page.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
     await expect(
       page.locator('.panel', { hasText: 'Kural ihlalleri' }),
-    ).toContainText('MÇ Salı günü art arda 2 saat ders veriyor — en fazla 1 saat isteniyor.');
+    ).toContainText('MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.');
   });
 });
 

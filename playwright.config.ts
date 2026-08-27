@@ -6,14 +6,16 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   // None of these belong in the daily loop: `npm run ekran` writes pictures for
-  // a human, and `npm run cozucu` spends the solver's whole budget on every
-  // world. Each has its own config.
+  // a human, `npm run patrol` wanders instead of asserting, and
+  // `npm run cozucu` spends the solver's whole budget on every world. Each has
+  // its own config.
   // Three more are here for ONE reason, and it is the same reason: they test
   // something that does not exist under file:// — a service worker (site), a
   // secure context (sunucu), the File System Access API (klasor). They run
   // under playwright.site.config.ts (npm run test:site), over http.
   testIgnore: [
     '**/ekran.spec.ts',
+    '**/patrol.spec.ts',
     '**/otomatik-stres.spec.ts',
     '**/site.spec.ts',
     '**/sunucu.spec.ts',

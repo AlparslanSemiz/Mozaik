@@ -117,7 +117,7 @@ export default function Palette({ open, onOpenChange, commands }: Props) {
               autoFocus
               value={text}
               aria-label="Ara veya komut yaz"
-              placeholder="Öğretmen, sınıf, derslik ara — ya da bir komut yaz…"
+              placeholder="Öğretmen, sınıf, derslik ara ya da bir komut yaz…"
               onChange={(e) => {
                 setText(e.target.value);
                 setActive(0);

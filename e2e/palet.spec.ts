@@ -5,7 +5,7 @@
 // column of twenty-five, a status that is always on screen is one that gets
 // read, and a shortcut is a target you cannot miss.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSample, open, chooseScale } from './helpers';
 
 test.describe('52. Komut paleti', () => {

@@ -54,7 +54,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
         {!inList && (
           <span className="hint" title="Bir öğretmende var ama listede yok">
             {' '}
-            — listede değil
+            · listede değil
           </span>
         )}
       </td>
@@ -159,11 +159,11 @@ export default function Subjects({ state, change }: PanelProps) {
         <div className="panel">
           <h2>Branşlar ({options.length})</h2>
           <p className="hint">
-            Öğretmen eklerken branş <b>bu listeden</b> seçilir — elle yazılmaz, böylece
+            Öğretmen eklerken branş <b>bu listeden</b> seçilir, elle yazılmaz. Böylece
             aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve
             yazdırılan sayfada görünür; yalnızca <b>değiştirdikleriniz</b> saklanır.
             Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok
-            tuşlarıyla) sıralayabilirsiniz — öğretmen eklerken açılan liste bu
+            tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu
             sırada gelir.
           </p>
 

@@ -20,6 +20,8 @@
 //! rule that means one thing in the browser and another in the exe is the
 //! thing this project spends most of its comments avoiding.
 
+mod update;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::Manager;
@@ -133,12 +135,22 @@ fn data_dir_path(app: tauri::AppHandle) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // The version this replaced, if we are the replacement. Here rather than
+    // right after the swap, because right after the swap that file is still
+    // the process doing the asking.
+    if let Ok(exe) = std::env::current_exe() {
+        update::sweep_old(&exe);
+    }
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             write_file,
             list_files,
             remove_file,
-            data_dir_path
+            data_dir_path,
+            update::check_update,
+            update::download_update,
+            update::apply_update
         ])
         .run(tauri::generate_context!())
         .expect("Ders Programı başlatılamadı");

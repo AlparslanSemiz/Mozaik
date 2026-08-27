@@ -8,7 +8,7 @@
 // @media print pins --ui-scale back to 1 — this file is what makes that a fact
 // instead of a comment.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import {
   openSetup,
   chooseDensity,
@@ -29,8 +29,28 @@ async function gridMetrics(page: import('@playwright/test').Page) {
     const cell = document.querySelector('table.grid tbody td:not(.break-col)')!;
     const clock = document.querySelector('.hour-clock');
     const cards = [...document.querySelectorAll('table.grid .card')];
+
+    // What the hour heading asks for when nothing constrains it.
+    //
+    // This is the column's FLOOR (pitfall 37): `width` on a table cell is a
+    // request, and no column is ever drawn narrower than its own min-content.
+    // Measured rather than assumed, the way renk-secici.spec.ts measures a
+    // select: clone it, let it size itself, read what the browser wanted.
+    // A hard-coded margin here would be a number about the embedded font,
+    // and the font is a thing this project changes.
+    const head = clock?.closest('th') ?? null;
+    let headWants = 0;
+    if (head !== null) {
+      const klon = head.cloneNode(true) as HTMLElement;
+      klon.style.cssText = 'position:absolute;left:-9999px;top:0;width:max-content';
+      document.body.appendChild(klon);
+      headWants = klon.getBoundingClientRect().width;
+      klon.remove();
+    }
+
     return {
       cell: cell.getBoundingClientRect().width,
+      headWants,
       table: document.querySelector('table.grid')!.getBoundingClientRect().width,
       overflow: wrap.scrollWidth - wrap.clientWidth,
       clock: clock === null ? 'yok' : getComputedStyle(clock).display,
@@ -332,13 +352,23 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     // (34.0) happened to sit above the floor and the two matched exactly; at
     // 1.1 the request is 37.4 and the floor rounds it to 38. Asserting equality
     // was asserting the coincidence.
+    //
+    // The ceiling used to be `wanted + 2`, and 2 was a number nobody had
+    // measured. It was down to 0.4 px of headroom, which is how a test starts
+    // failing for a reason that has nothing to do with what it is testing.
+    // MEASURED 2026-08-27: the column comes out 39.0 px, the request is
+    // 37.4 px, and the heading's own min-content is 41.0 px. So the honest
+    // ceiling is the floor itself: the column may be pushed up to what the
+    // heading needs and no further. When the embedded face changes, the
+    // heading moves and this moves with it (pitfall 42).
     const wanted = 2.125 * 16 * SCALE_DEFAULT;
     expect(roomy.cell).toBeGreaterThanOrEqual(wanted - 0.5);
+    expect(roomy.headWants, 'saat başlığı ölçülemedi').toBeGreaterThan(0);
     expect(
       roomy.cell,
-      `hücre ${roomy.cell}px, istenen ${wanted.toFixed(1)}px — aradaki fark ` +
-        'başlığın min-content zemininden büyük olamaz',
-    ).toBeLessThan(wanted + 2);
+      `hücre ${roomy.cell}px, istenen ${wanted.toFixed(1)}px, başlığın istediği ` +
+        `${roomy.headWants.toFixed(1)}px — sütun bu ikisinin arasında kalmalı`,
+    ).toBeLessThanOrEqual(Math.max(wanted, roomy.headWants) + 0.5);
     // The default is the grid my father already knows: it scrolls sideways.
     expect(roomy.overflow).toBeGreaterThan(500);
 

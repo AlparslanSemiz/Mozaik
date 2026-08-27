@@ -129,7 +129,7 @@ export default function Check({ state, view }: Props) {
           <div className="warn-box">
             <b>Dikkat edilmesi gereken noktalar var.</b> Aşağıdaki listelerde{' '}
             <span className="badge impossible">İmkânsız</span> yazan satırlar programın
-            dizilmesini engeller — önce onları çözün.
+            dizilmesini engeller. Önce onları çözün.
           </div>
         </div>
       )}
@@ -182,7 +182,7 @@ export default function Check({ state, view }: Props) {
             <h2>Kapalı saatte ders ({conflicts.length})</h2>
             <p className="hint">
               Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
-              silinmedi — <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
+              silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
               yeniden açın, ya dersi başka saate taşıyın.
             </p>
             <table className="list">

@@ -1,6 +1,7 @@
 // The Program tab: the grid, the pool, dragging, moving and removing.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover } from './helpers';
 
 test.describe('2. Sürükle-bırak', () => {
@@ -682,7 +683,7 @@ test.describe('9. Öğle arası ayracı', () => {
 
     const rows = page.locator('table.bell-preview tr.break-row');
     await expect(rows).toHaveCount(2); // after the 5th and after the 6th
-    await expect(rows.first()).toContainText('Öğle arası — 30 dk');
+    await expect(rows.first()).toContainText('Öğle arası, 30 dk');
 
     // The weekday column breaks after the 5th, the weekend column does not
     const first = rows.first().locator('td');
@@ -778,7 +779,7 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     // its second single beside the one that was already waiting.
     await expect(page.locator('.pool-card', { hasText: 'MÇ' })).toHaveCount(2);
     // .last(): "Yedek yüklendi" from loadWorld is still on screen.
-    await expect(page.locator('.toast').last()).toContainText('510 — MÇ dersi havuza döndü');
+    await expect(page.locator('.toast').last()).toContainText('510 · MÇ dersi havuza döndü');
   });
 
   test('bütün hamle TEK geri-al adımı', async ({ page }) => {

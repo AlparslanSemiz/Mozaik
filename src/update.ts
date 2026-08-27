@@ -5,14 +5,24 @@
 // be visible: he gives feedback, I deploy, and until today nothing on his
 // screen changed to say the fix had arrived. So this tells him, and he decides.
 //
-// It is a NO-OP everywhere except the site route, on purpose:
+// THERE ARE TWO ROUTES THAT CAN UPDATE, and they update differently:
 //
-//   file:// and .exe   no service worker at all — and principle 3 is verified
-//                      mechanically there (temel.spec.ts), so a version check
-//                      that reached the network would break the one claim this
-//                      program can prove with grep.
-//   site / localhost   a page that is already served over http asking its own
-//                      origin whether it has changed costs nothing new.
+//   site / localhost   a service worker. The page is already served over http,
+//                      so asking its own origin whether it has changed costs
+//                      nothing new, and a new worker taking over IS the event.
+//   .exe               three commands in Rust, each behind its own button:
+//                      look, download, restart. The page still fetches nothing
+//                      itself; the network is on the far side of `invoke`.
+//   file://            nothing, and that is not an oversight. A .html file
+//                      cannot replace itself, and principle 3 is verified
+//                      mechanically on that build (temel.spec.ts) — a fetch
+//                      there would break the one claim this program can prove
+//                      with grep.
+//
+// The exe route NEVER runs on its own: no timer, no check at startup, no
+// background thread. With no internet the whole feature is one sentence on
+// screen and nothing else changes (principle 1, and the sentence kur.ps1
+// already wrote down: the program does not connect, an update does).
 //
 // The signal is `controllerchange`, not `updatefound`. sw.js calls
 // skipWaiting() + clients.claim(), so a new worker takes over immediately
@@ -21,7 +31,10 @@
 // registration, when there was no controller, and announcing "new version" to
 // somebody who just opened the site for the first time is a lie.
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';
+import { SURUM, tarihYazisi } from './version';
 
 /**
  * Where the newest build always is. Written down ONCE, because it appears on
@@ -39,15 +52,51 @@ export const SITE_ADRESI = 'https://alparslansemiz.github.io/ders-programi/';
  */
 const SORMA_ARASI = 30 * 60 * 1000;
 
+/**
+ * How this copy can be updated, if it can.
+ *
+ * A route, not a capability flag: the two that can update do it by completely
+ * different mechanisms, and the panel in Ayarlar draws different things for
+ * them. Collapsing both into a boolean is what made the exe look identical to
+ * the double-clicked .html for two versions.
+ */
+export type UpdateKind = 'sw' | 'exe' | 'yok';
+
+/** Where the .exe route is in its three steps. */
+export type ExeDurum =
+  | { ad: 'bos' }
+  | { ad: 'bakiliyor' }
+  | { ad: 'guncel' }
+  | { ad: 'var'; surum: string; tarih: string; adres: string; boyut: number }
+  | { ad: 'indiriliyor' }
+  | { ad: 'hazir'; surum: string }
+  | { ad: 'hata'; mesaj: string };
+
 export interface UpdateRun {
-  /** A newer build has taken over; this page is still running the old one. */
+  /** Which of the three routes this copy is on. */
+  kind: UpdateKind;
+  /** Whether asking is possible at all. False only on the double-clicked file. */
+  supported: boolean;
+  /** SW route: a newer build has taken over; this page is still the old one. */
   ready: boolean;
   /** From a click: reload onto the new build. */
   reload: () => void;
-  /** From a click: ask now, rather than waiting for the next interval. */
+  /** From a click: ask now. On the SW route this is also called on an interval;
+      in the exe it is ONLY ever a click. */
   check: () => void;
-  /** Whether asking is possible at all — false on file:// and in the .exe. */
-  supported: boolean;
+  /** Exe route: what to draw. Always `bos` on the other two. */
+  durum: ExeDurum;
+  /** Exe route, second button: fetch the new program next to this one. */
+  indir: () => void;
+  /** Exe route, third button: put it in place and restart onto it. */
+  uygula: () => void;
+}
+
+/** One sentence, whatever went wrong. Rust already writes Turkish for the
+    cases it can name; this is the floor under everything else. */
+function hataMetni(e: unknown): string {
+  const ham = typeof e === 'string' ? e : e instanceof Error ? e.message : '';
+  return ham.trim() === '' ? 'Güncelleme denetlenemedi.' : ham;
 }
 
 function registration(): Promise<ServiceWorkerRegistration | undefined> {
@@ -81,16 +130,86 @@ export function updateSupported(): boolean {
   }
 }
 
-export function useUpdate(): UpdateRun {
-  const [ready, setReady] = useState(false);
-  const supported = updateSupported();
+/**
+ * Which route this copy is on.
+ *
+ * The exe is asked FIRST. It is a feature test either way, but a Tauri window
+ * is still a browser window, and the day one of these builds ends up behind a
+ * worker as well, the answer that matters is the one that can actually replace
+ * the program.
+ */
+export function updateKind(): UpdateKind {
+  if (isDesktop()) return 'exe';
+  return updateSupported() ? 'sw' : 'yok';
+}
 
-  const check = useCallback(() => {
+/**
+ * @param flush Called right before the exe restarts, to write the pending
+ *   autosave synchronously. `beforeunload` covers a closing tab; a WebView2
+ *   window torn down by `app.exit(0)` is not one, and the 400 ms debounce is
+ *   long enough to eat the edit made just before the button was pressed
+ *   (pitfall 28). Only localStorage is flushed: the chosen folder is a backup
+ *   that the next launch rewrites anyway.
+ */
+export function useUpdate(flush: () => void = () => undefined): UpdateRun {
+  const [ready, setReady] = useState(false);
+  const kind = updateKind();
+  const supported = kind !== 'yok';
+
+  const [durum, setDurum] = useState<ExeDurum>({ ad: 'bos' });
+  // Read inside the callbacks rather than closed over, so `indir` does not
+  // need `durum` in its dependency list and go stale between renders.
+  const sonuc = useRef<ExeDurum>({ ad: 'bos' });
+  sonuc.current = durum;
+
+  const exeCheck = useCallback(() => {
+    setDurum({ ad: 'bakiliyor' });
+    desktopCheck(SURUM.version).then(
+      (c) => {
+        setDurum(
+          c.yeni_var
+            ? {
+                ad: 'var',
+                surum: c.version,
+                tarih: tarihYazisi(c.date),
+                adres: c.exe,
+                boyut: c.boyut,
+              }
+            : { ad: 'guncel' },
+        );
+      },
+      (e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }),
+    );
+  }, []);
+
+  const indir = useCallback(() => {
+    const su = sonuc.current;
+    if (su.ad !== 'var') return;
+    setDurum({ ad: 'indiriliyor' });
+    desktopDownload(su.adres, su.boyut).then(
+      () => setDurum({ ad: 'hazir', surum: su.surum }),
+      (e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }),
+    );
+  }, []);
+
+  const uygula = useCallback(() => {
+    if (sonuc.current.ad !== 'hazir') return;
+    // Before the window goes, not after: the swap is a rename and the restart
+    // is immediate, so anything still sitting in the debounce is gone.
+    flush();
+    desktopApply().catch((e: unknown) => setDurum({ ad: 'hata', mesaj: hataMetni(e) }));
+  }, [flush]);
+
+  const swCheck = useCallback(() => {
     void registration().then((reg) => reg?.update().catch(() => undefined));
   }, []);
 
+  const check = kind === 'exe' ? exeCheck : swCheck;
+
   useEffect(() => {
-    if (!supported) return;
+    // ONLY the service worker route polls. In the exe every request to the
+    // network is a button press, which is the whole contract of this feature.
+    if (kind !== 'sw') return;
 
     // Remembered rather than read at fire time: by the time controllerchange
     // arrives the controller is the NEW worker, so asking then always says
@@ -101,13 +220,13 @@ export function useUpdate(): UpdateRun {
     };
     navigator.serviceWorker.addEventListener('controllerchange', onChange);
 
-    check();
+    swCheck();
     let sonSoru = Date.now();
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return;
       if (Date.now() - sonSoru < SORMA_ARASI) return;
       sonSoru = Date.now();
-      check();
+      swCheck();
     };
     document.addEventListener('visibilitychange', onVisible);
 
@@ -115,11 +234,11 @@ export function useUpdate(): UpdateRun {
       navigator.serviceWorker.removeEventListener('controllerchange', onChange);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [supported, check]);
+  }, [kind, swCheck]);
 
   const reload = useCallback(() => {
     location.reload();
   }, []);
 
-  return { ready, reload, check, supported };
+  return { kind, supported, ready, reload, check, durum, indir, uygula };
 }

@@ -262,7 +262,7 @@ function limitBreaches(
     if (run > maxRun) {
       out.push({
         name: 'maxConsecutive',
-        message: `${teacher.short} art arda ${maxRun} saatten fazla girmemeli — burada ${run} saat olur`,
+        message: `${teacher.short} art arda ${maxRun} saatten fazla girmemeli, burada ${run} saat olur`,
       });
     }
   }
@@ -273,7 +273,7 @@ function limitBreaches(
     if (count > maxDay) {
       out.push({
         name: 'maxPerDay',
-        message: `${teacher.short} ${dayName} günü en fazla ${maxDay} saat girmeli — burada ${count} saat olur`,
+        message: `${teacher.short} ${dayName} günü en fazla ${maxDay} saat girmeli, burada ${count} saat olur`,
       });
     }
   }
@@ -286,7 +286,7 @@ function limitBreaches(
         name: 'maxSameLessonPerDay',
         message:
           `${group.name} sınıfı ${dayName} günü ${teacher.short} dersinden en fazla ` +
-          `${maxSame} saat görmeli — burada ${count} saat olur`,
+          `${maxSame} saat görmeli, burada ${count} saat olur`,
       });
     }
   }
@@ -628,7 +628,7 @@ export function evictionNotice(ix: Index, lessons: Lesson[]): string {
   const names = lessons.map((x) => {
     const group = ix.classById.get(x.classId)?.name ?? '?';
     const teacher = ix.teacherById.get(x.teacherId)?.short ?? '?';
-    return `${group} — ${teacher}`;
+    return `${group} · ${teacher}`;
   });
   return names.length === 1
     ? `${names[0]} dersi havuza dönecek`

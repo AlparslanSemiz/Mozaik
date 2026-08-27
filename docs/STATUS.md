@@ -1,7 +1,209 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi altıncı oturum: **ders dağılımı (şema v7)**,
-açık tema varsayılanı, örnek verinin yeri, branşlarda sıralama) — **v1.2.0**
+Son güncelleme: 2026-08-27 (yirmi yedinci oturum: **exe kendini güncelliyor**,
+görev çubuğu ikonu, devriye + hata kapanı, metin turu) — **v1.3.0 hazır,
+etiketlenmeyi bekliyor**
+
+---
+
+## Yirmi yedinci oturum — güncelleme, ikon, devriye, metinler (2026-08-27)
+
+Kullanıcının iki isteği ve TASKS'in sonunda duran beş satırı. İş **ikiye
+bölündü** (kullanıcı kararı): bu tur v1.3.0, dil ve yeni ad v2.0.0'da.
+
+> *"Yeni sürüm oluşsun. ayrıca .exe'de de ayarlarda güncellemeye basınca
+> güncellemeye baksın ve güncelleme varsa güncellensin. tabii ki exe
+> internetsiz de sorunsuz çalışabiliyor olsun."*
+
+### 1. `.exe` kendini güncelliyor
+
+**Sözleşme tek cümle: ağa yalnız TIKLANINCA çıkılır.** Açılışta yok, arka
+planda yok, zamanlayıcı yok. Üç ayrı düğme, üç ayrı karar: `Denetle` →
+`İndir` → `Şimdi yeniden başlat`. İnternet yoksa tek sonuç bir cümledir ve
+program çalışmaya devam eder.
+
+| Ne | Nerede |
+|---|---|
+| manifest `surum.json` | `.github/workflows/surum.yml` → `yayinla` işi; `releases/latest/download/surum.json` |
+| semver · doğrulama · takas | **yeni** `src-tauri/src/update.rs` (saf fonksiyonlar altta, komutlar üstte — `lib.rs`'in deseni) |
+| üç köprü fonksiyonu | `src/desktop.ts` (`desktopCheck` · `desktopDownload` · `desktopApply`) |
+| üç yollu `useUpdate` | `src/update.ts` — `kind: 'sw' \| 'exe' \| 'yok'` |
+| üç düğme + durum satırı | `src/components/settings/Data.tsx` → `ExeUpdate` |
+
+**Tauri'nin kendi updater'ı alınmadı, ve gerekçe ilke 1:** Windows'ta bir
+`.msi`/`.nsis` bundle'ı indirip **kurulum çalıştırıyor**, yani tam da
+`--no-bundle`'ın reddettiği şey. Elle yazılan yol bir kurulum sihirbazı
+istemiyor: çalışan bir `.exe` Windows'ta **silinemez ama yeniden
+adlandırılabilir**, ve self-update'in tamamı bu.
+
+**Ölçülen bağımlılık maliyeti.** `reqwest` zaten `tauri`'nin bağımlılığıydı
+(Cargo.lock'ta 0.13.4) ama **TLS özelliği kapalıydı** — kilitte ne `rustls` ne
+`native-tls` geçiyordu. Alınan: `native-tls`, çünkü teslim hedefi Windows ve
+orada native-tls **schannel**'dır, yani işletim sisteminin kendisi: exe'ye
+neredeyse hiç yük binmez ve Windows runner'ı NASM/cmake istemez. Bu Fedora'da
+sistem OpenSSL'i, yani `cargo test` ve `npm run exe` yerelde de koşuyor.
+`rust-version` 1.77.2 → 1.85.0 (reqwest 0.13 istiyor; eski taban ağaca
+**ikinci bir reqwest** koyardı).
+
+**Rust testleri 6 → 20.** Yeni olanlar: `is_newer`'ın `1.10 > 1.9` bildiği,
+bir dev sürümün de karşılaştırılabildiği, saçmaya **hayır** dediği, inen
+dosyanın `MZ` ile başlaması ve boyutunun tutması, adresin yalnız kendi
+Release'imizden olabilmesi, `.yeni` bir **klasör**se takasın hiç başlamaması,
+ve ikinci rename düşerse **eski programın yerine geri konması**.
+
+> **Bir test önce yanlış yazıldı ve ölçüm düzeltti.** Rollback testinin ilk
+> hâli `.yeni`'yi bir klasör yapıp `swap()`'ın düşmesini bekliyordu; Linux'ta
+> **boş bir yola klasör taşımak başarılı oluyor**. Mekanik (`swap_files`)
+> kapıdan (`swap`) ayrıldı ve rollback artık gerçekten kırılabilen bir yoldan
+> ölçülüyor: `.yeni` **hiç yok** — Windows'ta antivirüsün taze inen bir exe'yi
+> karantinaya alması tam olarak bu.
+
+**E2E: 5 yeni test, ikisi sabotajla kırmızıya döndürüldü.**
+
+| İddia | Sabotaj |
+|---|---|
+| hiçbir şey sorulmadan `check_update` çağrılmıyor | açılışta `exeCheck()` → **kırmızı** |
+| indirmek yeniden başlatmıyor | `indir` sonunda `desktopApply()` → **kırmızı** |
+
+**Ölçülen maliyet** (Linux, `--release`, bu makine):
+
+| | Önce | Sonra |
+|---|---|---|
+| sürüm ikilisi | 3 742 584 bayt (3,57 MB) | **4 215 832 bayt (4,02 MB)** — **+462 KB** |
+| derleme | 1 dk 38 sn | **1 dk 10 sn** |
+
+462 KB'nin tamamı TLS + güncelleme kodu; istemcinin kendisi zaten oradaydı.
+Windows'ta bu sayının **daha küçük** olması bekleniyor, çünkü orada native-tls
+schannel'a düşüyor ve OpenSSL bağlanmıyor — ama bu bir **beklenti**, ölçüm
+değil.
+
+**Bu makinede ölçülemeyen, ve öyle işaretlendi:** Windows'ta gerçek takas,
+SmartScreen'in ne dediği, WebView2 altında açılış süresi.
+
+### 2. Görev çubuğundaki işaret
+
+Şikayet tek cümleydi: *"alttaki png görüntüsü eksik pxli küçük logo."* Kodda
+hiçbir şey yanlış değildi; kusur **dosyanın içindeydi** ve iki katlıydı.
+
+| | Önce | Sonra |
+|---|---|---|
+| `.ico` boyları | 16 · 32 · 48 · 64 · 128 · 256 | **16 · 20 · 24 · 32 · 40 · 48 · 64 · 128 · 256** |
+| sade/ayrıntılı eşiği | `< 48` sade | **`< 32` sade** |
+| `kurulum/icon.ico` | 11 858 bayt | **14 483 bayt** (+2 625) |
+
+Windows %125 ölçekte **40 px** istiyor ve dosyada yoktu, yani 32'yi
+büyütüyordu: "eksik pxl" tam olarak bu. Eşik uydurulmadı, **bakılarak**
+bulundu (`scripts/ikon-karsilastir.mjs` → iki çizim, altı boy, iki zemin):
+
+```
+16 · 20   ayrıntılı: altı sütun mavi bir lekeye dönüyor
+24        ayrıntılı: hâlâ bulanık, hayalet sütunlar doluya karışıyor
+32        ayrıntılı: OKUNUYOR — altı sütun ayrı, hayaletler arkada
+40 · 48   ayrıntılı: temiz
+```
+
+Karar artık bir testte yaşıyor (`temel.spec.ts` 79): `.ico`'nun dizini
+ayrıştırılıyor ve her boy iki çizimin **taze render'ıyla piksel piksel**
+karşılaştırılıyor. Eski ayarlarla yeniden üretilince ikisi de kırmızıya döndü.
+
+### 3. Devriye + hata kapanı
+
+**Asıl kazanç devriye değil, kapan.** `e2e/kapan.ts` bütün E2E süitini sarıyor
+(`auto: true`, yani unutulamaz) ve şunları kırmızıya döndürüyor:
+`console.error` · `pageerror` · yakalanmamış promise reddi · `file://` altında
+**herhangi bir ağ isteği**.
+
+Bugüne kadar **415 testin hiçbiri** bunlara bakmıyordu. İkisi de kasıtlı
+hatayla sınandı ve ikisi de yakalandı. `file://` süiti kapanla **yeşil** geçti;
+ilke 3'ün mekanik kanıtı da bir testten (`temel.spec.ts`) **bütün süite**
+yayıldı.
+
+**Ve kapan ilk koşusunda gerçek bir kusur buldu.** `npm run test:site`'ta
+*"bilinmeyen yol uygulamaya düşüyor"* testi bir sürümdür yeşil geçiyordu;
+kapan altındaki sayfanın ne bastığını gösterdi:
+
+```
+console.error: The script has an unsupported MIME type ('text/html').
+```
+
+Yerel sunucunun geri dönüş kuralı **her şeye** `index.html` veriyordu, yani
+`/bilinmeyen/sw.js` isteği `text/html` olarak dönüyor ve Chromium service
+worker kaydını reddediyordu — derin bir yolda açılan sayfa **çevrimdışı
+çalışmıyordu** ve ekranda hiçbir şey bunu söylemiyordu. Kural daraltıldı: geri
+dönüş yalnız **gezinme** için, bir dosya adı isteyen çağrı 404 alır.
+`scripts/sunucu.mjs` ve `kurulum/sunucu.ps1`'in **ikisinde de**, ve yanına iki
+iddia yazıldı (`sunucu.spec.ts`).
+
+`npm run patrol` iddia etmiyor, geziyor: altı sekme, dört adım, beş bölüm,
+şeritteki her düğme, artı üç tohumla (1 · 42 · 1337) altmışar adımlık rastgele
+gezinme. Kendi config'inde, `kontrol`'ün parçası değil.
+
+**Ölçülen:** tur **5,7 sn / 33 durak**, gezinmeler 17,5 · 21,9 · 24,1 sn,
+toplam **41,9 sn**. İlk hâli aynı işi **üç dakikada hiçbir sekmeye uğramadan**
+yapamıyordu ve sebebi iki ayarda gizliydi (tuzak 79): Playwright'ın
+`actionTimeout`'u varsayılan olarak **sınırsız**, ve modal bir diyalog
+arkasındaki her şey `inert` — yani bir sekme tıklaması testin kendi zaman
+aşımına kadar bekliyordu. Ayrıca devriye iki diyalog türünden yalnız birini
+tanıyordu (Radix `.dlg-overlay` ve native `<dialog>`).
+
+### 4. Metin turu
+
+| | Önce | Sonra |
+|---|---|---|
+| ekranda uzun çizgi (`—`) taşıyan satır | **265** | **0** |
+| kaynakta (yorum dışı) | 155 | 0 |
+
+Çoğu düzyazı değil **ayraç**tı: `MÇ — Mehmet Çelik`, `A: 4 sınıf — 410, 411`,
+`310 sınıfı — Haftalık ders programı`, `Öğle arası — 30 dk`. Yerine geçen
+kural dört maddeli: düzyazıda **ayrı cümle**, etiket/değer çiftinde **iki
+nokta**, eşit ağırlıkta iki şey arasında **orta nokta (`·`)**, boş tablo
+hücresinde **kısa çizgi (`–`)**. `e2e/metin.spec.ts` ölçüyor, ve ölçtüğü şey
+kaynak değil `document.body.innerText` — yani İngilizce kod yorumlarına hiç
+bakmıyor, onlar da olduğu gibi duruyor.
+
+Kırılan testler tam da bu cümleleri sabitleyenlerdi: 10 birim + 7 E2E.
+
+### 5. Sürüm numarası ve `gorunum.spec.ts`'in payı
+
+CLAUDE.md iki sürüm boyunca *"sürüm numarasının TEK kaynağı `package.json`"*
+diyordu ve **yanlıştı**: numara üç dosyadaydı ve `yayinla.mjs` yalnız birini
+yazıyordu. Kozmetikti, ta ki exe kendini güncellemeyi öğrenene kadar — çünkü
+karşılaştırdığı sayı tam o. Şimdi: `tauri.conf.json` → `"../package.json"`,
+`Cargo.toml`'u `yayinla.mjs` yazıyor, `src/surum.test.ts` her koşuda ölçüyor.
+
+`gorunum.spec.ts:309`'un uydurma `+2` payı kalktı. **Ölçülen:**
+
+```
+sütun (çizilen)            39,0 px
+CSS'in istediği            37,4 px   (2.125rem × 16 × 1.1)
+saat başlığının istediği   41,0 px   (klonlanıp width:max-content ile ölçüldü)
+```
+
+Tavan artık ölçülen zemin: sütun bu ikisinin arasında kalmalı. Gömülü yüz
+değişirse başlık oynar ve tavan onunla oynar (tuzak 42).
+
+### Sayılar
+
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
+
+| | Önce | Sonra |
+|---|---|---|
+| birim testi | 566 | **569** |
+| E2E (file://) | 415 | **427** |
+| site · sunucu · klasör | 19 | **22** |
+| Rust testi | 6 | **20** |
+| spec dosyası | 31 | **33** (+`patrol`, +`metin`; artı `kapan.ts` fixture) |
+| `dist/index.html` | 542 276 bayt | **544 753 bayt** (+2 477) |
+| `kurulum/icon.ico` | 11 858 bayt | **14 483 bayt** (+2 625) |
+| exe (Linux, release) | 3 742 584 bayt | **4 215 832 bayt** (+462 KB) |
+
+### Yeni tuzaklar
+
+77 (tek kaynak ölçülmeden yazılmış bir dilekti) · 78 (`.ico`'da olmayan boy
+sessizce ölçekleniyor) · 79 (bir devriyenin maliyeti zaman aşımlarının
+toplamıdır) · 80 (karakter üstünden toplu değiştirme yorumları da bulur).
 
 ---
 
@@ -116,6 +318,10 @@ açılıyor ve dizilmiş programı yerinde kalıyor. Dört yerde birden yükselt
 `Cargo.lock`), çünkü aralarında bunu denetleyen bir şey yok.
 
 ### Sayılar
+
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
 
 **566 birim** (+45) · **417 E2E** (+23, biri hariç yeşil) · 7 çözücü stresi ·
 `npm run kontrol` yeşil değil: aşağıdaki **bilinen hata** dışında hepsi geçiyor.
@@ -371,6 +577,10 @@ fark yok (84 → 80 ms, gürültünün içinde).
 
 ### Sayılar
 
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
+
 | Katman | Önce | Sonra |
 |---|---|---|
 | Birim (Vitest) | 517 | **521** |
@@ -557,6 +767,10 @@ tarball → `~/.local/share/powershell`) ve PowerShell sunucusu **burada
 koşturuldu** — 127.0.0.1, `[::1]` ve `dersprogrami.localhost` üçünden de.
 
 ### Sayılar
+
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
 
 ```
 tsc --noEmit          temiz
@@ -788,6 +1002,10 @@ kâğıtta sınıf rengi ......... KIRMIZI
 
 ### Sayılar
 
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
+
 ```
 tsc --noEmit          temiz
 birim                 508 (17 dosya)   — önce 490
@@ -911,6 +1129,10 @@ yazıldı (`GENDER_CELL`, `''` → `—`) — `Teacher.name`/`Teacher.short` ayr
 aynısı.
 
 ### Sayılar
+
+`npm run kontrol` **çıkış kodu 0** (2026-08-27): tsc + 569 birim + derleme +
+427 E2E + 22 site + 7 çözücü. `npm run exe:test` 20 Rust testi, `npm run
+patrol` 4 devriye testi, ikisi de ayrı ve ikisi de yeşil.
 
 ```
 birim testleri     490  (öncesi 453) — 17 dosya

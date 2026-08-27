@@ -98,7 +98,7 @@ export default function Appearance({
           <h2>Yazı büyüklüğü</h2>
           <p className="hint">
             Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve program
-            ızgarasının hücrelerini. Ayrı ayrı ayar yok — biri büyüyüp öteki yerinde
+            ızgarasının hücrelerini. Ayrı ayrı ayar yok, çünkü biri büyüyüp öteki yerinde
             kalırsa ekran ferahlamaz, sıkışır.
           </p>
 
@@ -129,16 +129,16 @@ export default function Appearance({
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Ferah</b> — hücre en büyük, kartın alt satırı tam boyda. En kolay
+              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda. En kolay
               okunan, en çok kaydırılan.
             </li>
             <li>
-              <b>Rahat</b> — bugüne kadarki ızgara: hücre geniş, her ders
+              <b>Rahat.</b> Bugüne kadarki ızgara: hücre geniş, her ders
               numarasının altında başlangıç saati yazıyor, hafta ekrana sığmadığı
               için sağa kaydırıyorsunuz.
             </li>
             <li>
-              <b>Sığdır</b> — haftanın tamamı bir ekranda: hücre ekranın
+              <b>Sığdır.</b> Haftanın tamamı bir ekranda: hücre ekranın
               genişliğinden hesaplanır ve <b>saatler gizlenir</b>, çünkü sütunu
               dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
               renkler yerinde kalır.
@@ -179,11 +179,11 @@ export default function Appearance({
           <h2>Müsaitlik çizelgesi</h2>
           <p className="hint">
             Müsaitlik ekranındaki ders numaralarının altında <b>başlangıç saati</b>
-            yazsın mı? Varsayılan <b>kapalı</b>. Yer kazandırdığı için değil —
-            ölçüldü, o tablo iki durumda da aynı boyda — sadece o ekranın işi
-            açık/kapalı bir ızgara ve on iki saat orada okunmuyor. Saatler
-            yukarıdaki <b>zil önizlemesinde</b> ve basılan her sayfada, iki
-            durumda da yazıyor.
+            yazsın mı? Varsayılan <b>kapalı</b>. Sebebi yer kazanmak değil: o tablo
+            iki durumda da aynı boyda, ölçüldü. Sebep o ekranın işi. Orada
+            yapılan tek şey saatleri açıp kapatmak, ve on iki saat orada
+            okunmuyor. Saatler yukarıdaki <b>zil önizlemesinde</b> ve basılan her
+            sayfada iki durumda da yazıyor.
           </p>
           <div className="form-row">
             <button
@@ -204,7 +204,7 @@ export default function Appearance({
         <div className="panel">
           <h2>Örnek</h2>
           <p className="hint">
-            Seçtiğiniz büyüklük bu sayfada da geçerli — aşağıdaki satırlar{' '}
+            Seçtiğiniz büyüklük bu sayfada da geçerli. Aşağıdaki satırlar{' '}
             <b>kendi öğretmenleriniz</b>, uydurma bir örnek değil. Bir ad
             kutusuna sığmıyorsa ölçek o makine için fazla büyük demektir.
           </p>
@@ -257,15 +257,15 @@ export default function Appearance({
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Tam</b> — tasarlandığı gibi.
+              <b>Tam.</b> Tasarlandığı gibi.
             </li>
             <li>
-              <b>Az</b> — süreler yarıya iner ve <b>yer değiştiren</b> hareketler
+              <b>Az.</b> Süreler yarıya iner ve <b>yer değiştiren</b> hareketler
               kapanır: paneller kayarak değil, duracakları yerde belirir. Renk
               geçişleri kalır, yani düğme imlece hâlâ cevap verir.
             </li>
             <li>
-              <b>Kapalı</b> — hiçbir şey kaymaz, hiçbir şey solmaz.
+              <b>Kapalı.</b> Hiçbir şey kaymaz, hiçbir şey solmaz.
             </li>
           </ul>
 
@@ -296,7 +296,7 @@ export default function Appearance({
             Kâğıt sabit boyutta: A4 yatay. Basılan sayfanın yazı boyları ayrı bir
             ölçüde (punto) tutulur, o yüzden bu ayarı büyütmek bir programın sayfaya
             sığıp sığmadığını değiştirmez. Yazdır sekmesindeki önizleme de aynı
-            sebeple olduğu gibi kalır — önizleme kâğıda benzemezse hangi sayfanın
+            sebeple olduğu gibi kalır. Önizleme kâğıda benzemezse hangi sayfanın
             basılacağını seçmek tahmine döner.
           </p>
         </div>

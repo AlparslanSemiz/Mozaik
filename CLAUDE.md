@@ -20,7 +20,17 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
    > kapatılamayan bir bildirim, sürüm sorulan bir açılış ekranı. Söylenmeyen
    > bir güncelleme ise başka bir şeyi bozuyordu: baba bir kusur bildiriyor,
    > düzeltiliyor, ve düzeltmenin ona ulaşıp ulaşmadığını **iki taraf da**
-   > göremiyordu. Çift tıklanan dosya ve `.exe` hâlâ hiçbir yere bağlanmaz.
+   > göremiyordu. Çift tıklanan dosya hâlâ hiçbir yere bağlanmaz.
+   >
+   > **Genişletildi (2026-08-27): `.exe` kendini güncelleyebilir.** Sözleşme
+   > yine aynı: ağa **yalnız tıklanınca** çıkılır. Açılışta yok, arka planda
+   > yok, zamanlayıcı yok, ve üç ayrı düğme var (`Denetle` → `İndir` →
+   > `Şimdi yeniden başlat`) çünkü üçü üç ayrı karar. İnternet yoksa tek sonuç
+   > bir cümledir ve program çalışmaya devam eder. Yasaklanan şey hâlâ
+   > yasak: kendiliğinden değişen bir arayüz, kapatılamayan bir bildirim,
+   > sürüm sorulan bir açılış ekranı. Gerekçe `kurulum/kur.ps1`'de zaten
+   > yazılıydı: *ilke 3 programın kendisi hakkındadır; çalışan sayfa hiçbir
+   > yere bağlanmaz, bir güncelleme bağlanır, çünkü işi budur.*
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain yok.
 3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Font **ağdan
    çekilmez** — gömülü font serbest, bkz. aşağıdaki güncelleme.
@@ -169,7 +179,10 @@ giremez (ilke 3). Sürükle-bırak kütüphanesi de girmiyor ama gerekçesi baş
 
 CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
-**Sürüm numarasının TEK kaynağı `package.json` + `scripts/surum.mjs`.** İki
+**Sürüm numarasının TEK kaynağı `package.json` + `scripts/surum.mjs`, ve bu
+artık ÖLÇÜLÜYOR** (`src/surum.test.ts` — bkz. tuzak 77: aynı cümle iki sürüm
+boyunca yazılıydı ve yanlıştı). `tauri.conf.json` numarayı kopyalamaz,
+`"../package.json"` yolunu gösterir; `Cargo.toml`'u `yayinla.mjs` yazar. İki
 vite config de `define: { __SURUM__ }` ile onu derlemeye basar, yani dört
 teslim yolu da aynı numarayı taşır — `isDesktop()`'ın doktrini burada da
 geçerli: bu bir **derleme bayrağı değil**, hepsine basılan aynı damga.
@@ -182,14 +195,15 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 566 birim testi
+npm test           # Vitest — 569 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 415 E2E testi (file://)
-npm run test:site  # site · sunucu · klasör, http üzerinde — 19 test
+npm run test:e2e   # Playwright — derler, sonra 427 E2E testi (file://)
+npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, 34,8 sn (kontrol'ün parçası)
+npm run patrol     # devriye: her ekranı gezer + tohumlu rastgele gezinme (kontrol'ün parçası DEĞİL)
 npm run sunucu     # yerel sunucu: http://dersprogrami.localhost:7654
 npm run paket      # dist-kurulum/ — babaya giden TEK klasör (Windows)
 npm run font       # src/fonts/*.woff2 yeniden üretir (fontTools ister)
@@ -197,6 +211,12 @@ npm run exe        # src-tauri/target/release/ — Tauri ikilisi (Rust ister)
 npm run exe:test   # cargo test — safe_name kapısı ve dosya işleri, 6 test
 npm run yayinla -- 1.2.0   # sürüm: package.json + commit + etiket + push
 ```
+
+`patrol` de `kontrol`'ün parçası **değil**, ve sebebi hız değil huy: bir
+devriye hiçbir şey **iddia etmez**, gezer ve sayfanın kendi şikayetlerini
+dinler. Kırıldığında okunacak şey bir iddia değil bir **iz** olur, o yüzden
+kendi config'inde video ve trace açık. Yakaladığı her şey zaten `kapan.ts`
+üstünden bütün süitte de yakalanıyor.
 
 `font`, `exe` ve `exe:test` **`kontrol`'ün parçası değil** ve bilerek öyle:
 üçü de bu depoda olmayan bir araç zinciri istiyor (Python+fontTools, Rust),
@@ -215,7 +235,8 @@ src-tauri/           -> Ders Programı.exe dist/index.html'i İÇİNE alan tek i
 site/                -> manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/             -> Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
 scripts/simge.mjs    -> icon.svg'den 192/512 PNG (Chromium ile, yeni bağımlılık yok)
-scripts/ikon.mjs     -> .ico: 16/32 SADE, 48+ AYRINTILI (konteyner elle yazılır)
+scripts/ikon.mjs     -> .ico: 16/20/24 SADE, 32+ AYRINTILI (konteyner elle yazılır)
+scripts/ikon-karsilastir.mjs -> o eşiğin REÇETESİ: iki çizim × altı boy × iki zemin
 scripts/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
 scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
 scripts/font.mjs     -> gömülü yüzün REÇETESİ (kaynak scripts/font-source/)
@@ -225,15 +246,18 @@ scripts/yayinla.mjs  -> bir sürümün dört adımı, tek komutta
 
 **İşaretin İKİ çizimi var, ve eşik ölçülerek bulundu.** `site/icon.svg`
 ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (üç
-sütun, hayalet yok). İkisi 16/32/48/256 px'te render edilip **bakıldı**:
-48 ve üstünde ayrıntılı temiz, 16'da altı sütun mavi bir lekeye dönüyor ve
-sekme sırasından ayırt edilemiyor. Bölüşüm:
+sütun, hayalet yok). İkisi **Windows'un gerçekten istediği boylarda**
+(16/20/24/32/40/48, iki zeminde) render edilip **bakıldı**
+(`scripts/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı okunuyor, 24'te bulanık,
+16'da altı sütun mavi bir lekeye dönüyor. Eşik **2026-08-27'de 48'den 32'ye
+indi** ve `.ico`'ya 20 · 24 · 40 eklendi — ikisi de tek bir şikayetten çıktı,
+bkz. tuzak 78. Bölüşüm:
 
 | Nerede | Hangi | Niçin |
 |---|---|---|
 | Sekme (favicon, `index.html`) | **sade** | bir sekme simgesi HER ZAMAN 16–32 px |
-| `icon.ico` 16 · 32 px | **sade** | aynı sebep |
-| `icon.ico` 48–256 px | ayrıntılı | yer var |
+| `icon.ico` 16 · 20 · 24 px | **sade** | aynı sebep: ayrıntılı çizim orada bulanık |
+| `icon.ico` 32–256 px | ayrıntılı | **görev çubuğu 32 px'lik bir yuvadır** (tuzak 78) |
 | PWA 192/512 PNG | ayrıntılı | yer var |
 | Üst çubuk (`.brand-mark`) | ayrıntılı | 28 px @%100, 42 px @%150 |
 
@@ -302,11 +326,13 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 25 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79) |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
-| **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu** |
-| **Rust** | `src-tauri/src/lib.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
+| **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
+| **Rust** | `src-tauri/src/{lib,update}.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. Artı güncelleme: `is_newer`'ın `1.10 > 1.9` bildiği, inen dosyanın **MZ ile başladığı ve boyutunun tuttuğu**, adresin yalnız kendi Release'imizden olabildiği, ve takas yarıda kalırsa **eski programın yerine geri konduğu**. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
+| **Hata kapanı** | `e2e/kapan.ts` — **bütün** E2E süiti | Test ne ölçerse ölçsün, sayfanın kendi şikayeti: `console.error`, `pageerror`, yakalanmamış promise reddi, ve `file://` altında **herhangi bir ağ isteği**. `auto: true`, yani unutulamaz. Bir testin beklediği hata `beklenenHata()` ile adıyla serbest bırakılır — susturmak için değil, **beklendiğini söylemek** için |
+| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: altı sekme, dört adım, beş bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
@@ -354,6 +380,13 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 - **Kullanıcıya görünen her metin Türkçe** ve doğru Türkçe karakterlerle:
   `"MÇ Salı 3. saatte 433 sınıfında"`. Bu metinler `i18n` altyapısından geçmez,
   doğrudan JSX/string içinde durur (tek dil, ilke 4).
+- **Ekranda uzun çizgi (`—`) YOK** (2026-08-27, kullanıcı isteği). Yerine geçen
+  dört kural: düzyazıda **ayrı cümle**, etiket/değer çiftinde **iki nokta**,
+  eşit ağırlıkta iki şey arasında **orta nokta (`·`)**, boş tablo hücresinde
+  **kısa çizgi (`–`)**. Aralık çizgisi `–` da kalır (`Sal–Cum 13:30`), o başka
+  bir karakter. `e2e/metin.spec.ts` her sekmede ve her Ayarlar bölümünde
+  `document.body.innerText`'i okuyup sayıyor — yani **kaynağa değil ekrana**
+  bakıyor, ve bu yüzden İngilizce kod yorumları serbest kalıyor.
 - **Yorumlar İngilizce**, kısa, sadece *neden*i açıklar. *Ne* yaptığını kod söyler.
 - Depolanan JSON alan adları da İngilizce — ama **değiştirmek yedek dosyalarını
   bozar**, o yüzden şema değişirse `schemaVersion` artırılır ve göç kodu yazılır.
@@ -428,17 +461,23 @@ printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, t
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
 version.ts                      HANGİ DERLEME BU. `__SURUM__`'ü okur, yoksa
                                 `0.0.0-dev`'e düşer. Hiçbir şey import etmez
-update.ts                       yeni bir derleme devraldı mı. Service worker
-                                yoksa ya da controller yoksa TAMAMEN no-op —
-                                yani file:// ve exe'de hiçbir şey yapmaz.
-                                SITE_ADRESI de burada: en yeni sürümün adresi
-                                tek yerde yazılı, ve bir METİN, bir fetch değil
-desktop.ts                      exe'nin klasörü. folder.ts'in KURALLARINI
-                                kopyalamaz — üç Tauri komutunu bir
-                                FileSystemDirectoryHandle kılığına sokar, yani
-                                saveInto() exe'de olduğu gibi koşar. isDesktop()
-                                bir DERLEME BAYRAĞI değil, özellik tespiti:
-                                aynı dist/index.html dört yolda da aynı dosya
+update.ts                       bu kopya nasıl güncellenir. ÜÇ yol, üç
+                                mekanizma: `sw` (site ve yerel kurulum —
+                                controllerchange), `exe` (üç Tauri komutu, üç
+                                ayrı düğme), `yok` (çift tıklanan .html — bir
+                                dosya kendini değiştiremez). Exe dalı hiçbir
+                                zaman kendiliğinden çalışmaz; ağa çıkan her
+                                çağrı bir tıklamadır. SITE_ADRESI de burada
+desktop.ts                      exe'nin klasörü VE güncelleme köprüsü.
+                                folder.ts'in KURALLARINI kopyalamaz — dört
+                                Tauri komutunu bir FileSystemDirectoryHandle
+                                kılığına sokar, yani saveInto() exe'de olduğu
+                                gibi koşar. Yanında üç komut daha
+                                (check/download/apply): programın ağa çıkan tek
+                                yeri, ve üçü de bir tıklamadan doğar.
+                                isDesktop() bir DERLEME BAYRAĞI değil, özellik
+                                tespiti: aynı dist/index.html dört yolda da
+                                aynı dosya
 folder.ts                       "nereye kaydedilsin": babanın seçtiği klasör.
                                 library.ts'in deseni — State'i BİLMEZ, ham metin
                                 alıp verir. İki fonksiyonu SAF ve testli
@@ -1371,6 +1410,64 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     İstisna `occupy`/`vacate`: orada boy **zorunlu**, çünkü onlar aramanın iç
     döngüsü ve yanlış bir boy bir bırakmayı reddetmek yerine dizini sessizce
     bozar.
+
+77. **"Tek kaynak" diye YAZILMIŞ bir kural, onu doğrulayan bir test yoksa bir
+    dilektir.** Bu belge iki sürüm boyunca *"Sürüm numarasının TEK kaynağı
+    `package.json`"* diyordu ve cümle yanlıştı: numara üç dosyada duruyordu
+    (`package.json` · `src-tauri/Cargo.toml` · `src-tauri/tauri.conf.json`) ve
+    `scripts/yayinla.mjs` yalnız birincisini yazıyordu. Yani her sürümden sonra
+    öteki ikisi bir sürüm geride kalıyordu ve hiçbir yerde hiçbir şey
+    kızarmıyordu. Kozmetikti — **exe kendini güncellemeyi öğrenene kadar.**
+    Exe'nin Release'e gönderdiği numara derlendiği numaradır; geride kalmış bir
+    numara ya var olan bir güncellemeyi hiç önermez ya da kurulduktan sonra da
+    önermeye devam eder. İkisi de "güncelleme bozuk" gibi görünür ve ikisi de
+    bir derleme dosyasındaki sürüm satırını göstermez. Çare üç katlı:
+    `tauri.conf.json` artık `"version": "../package.json"` (Tauri yolu kendisi
+    çözer, üçüncü kopya yok), `yayinla.mjs` `Cargo.toml`'u da yazar, ve
+    `src/surum.test.ts` ikisinin aynı şeyi söylediğini **her koşuda** ölçer.
+    Genel kural: bir belge cümlesi "tek", "her zaman" ya da "asla" diyorsa,
+    yanında onu ölçen bir test yoksa o cümle bir niyet beyanıdır.
+
+78. **Bir `.ico`'da OLMAYAN boy sessizce ölçeklenir, ve sonuç "bozuk" değil
+    "biraz bulanık" görünür.** Görev çubuğundaki işaret için tek şikayet
+    *"eksik pxli küçük logo"* idi, ve kodda hiçbir şey yanlış değildi: dosyada
+    16·32·48·64·128·256 vardı, Windows ise %125 ölçekte **40**, küçük görev
+    çubuğu düğmelerinde **24** istiyor. İstenen boy yoksa Windows en yakınını
+    büyütür. Yani hata bir kod yolunda değil, bir **dosyanın içindekinde**ydi,
+    ve hiçbir test bir dosyanın içindekine bakmıyordu. İkinci yarısı aynı
+    ailedendi: eşik `< 48 sade` yazılıydı, yani görev çubuğunun 32 px'lik
+    yuvasına **sade** çizim düşüyordu ve o çizim gerçek logonun yanında bir
+    yer tutucu gibi okunuyor. Yeni eşik uydurulmadı, **bakılarak** bulundu
+    (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizim 16–20'de mavi bir leke, 24'te
+    hâlâ bulanık, **32'den itibaren okunuyor**. Ve karar artık bir yerde
+    yaşıyor: `temel.spec.ts` 79 `.ico`'nun dizinini ayrıştırıp her boyu iki
+    çizimin taze render'ıyla **piksel piksel** karşılaştırıyor.
+
+79. **Bir devriyenin maliyeti tıklama sayısı değil, ZAMAN AŞIMLARININ
+    TOPLAMIDIR.** İlk `npm run patrol` üç dakikada **hiçbir sekmeye
+    uğramadan** düştü. Sebep bir hata değildi: Playwright'ın varsayılan
+    tıklama zaman aşımı 5 sn, `expect` 5 sn, ve gezinme başarısız tıklamayı
+    zaten `.catch()` ile yutuyordu — yani her "olmadı" tam beş saniyeye mal
+    oluyordu ve altmış adım üç yüz saniye ediyordu. Bir devriye **hiçbir şeyi
+    beklemez**: bir kontrol 1,5 saniyede hazır değilse ya kapalıdır ya
+    örtülüdür, ve ikisi de bir cevaptır. Üç karşı önlem birden gerekti: kısa
+    tıklama süresi, `expect` süresini de kısmak (her tıklamadan sonra
+    koşuyor), ve bir **duvar saati bütçesi** — yoksa takılan tek bir kontrol
+    hiçbir şey basmadan bütün koşuyu yiyor. Yanına ikinci bir tuzak:
+    `window.print()` kendisini çağıran tıklamayı diyalog kapanana kadar
+    bloklar, ve orada kapatacak kimse yok. Devriyede o çağrı boşa alınır;
+    yazdırmanın kendisini ölçen yer `yazdir.spec.ts`.
+
+80. **Karakter üstünden yapılan bir toplu değiştirme YORUMLARI da bulur.**
+    Metin turunda `constraints.test.ts`'te ` — ` → ` · ` çalıştırıldı ve
+    dosyadaki İngilizce yorumlar da değişti — `"One rule decides · doubles
+    first"` gibi, hiçbir şey kırmadan, hiçbir testi kızartmadan, ve ancak
+    `git diff` okunduğunda görülerek. Kullanıcıya görünen metin bir
+    **karakter** değil bir **rol**: bir toplu değiştirme o rolü hedeflemeli
+    (JSX metni, string sabiti, iddia edilen cümle), gördüğü karakteri değil.
+    Bu turda çare, iddia edilen cümlelerin tam metnini tek tek yazmak oldu; ve
+    kararın kendisi bir teste taşındı (`metin.spec.ts`), çünkü ölçtüğü şey
+    kaynak değil `document.body.innerText` — yani yorumlara hiç bakmıyor.
 
 ---
 

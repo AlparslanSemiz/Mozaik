@@ -171,8 +171,17 @@ while ($true) {
         continue
       }
 
+      # Bilinmeyen bir yol uygulamanın kendisine düşer, ama YALNIZ gezinme
+      # ise. Bir dosya adı isteyen çağrıya index.html vermek tarayıcının
+      # üstüne hareket ettiği bir yalandır: derin bir yolda sayfa yanındaki
+      # sw.js'i istiyor, geri HTML geliyor ve Chromium kaydı
+      # "unsupported MIME type ('text/html')" diye reddediyor. sunucu.mjs'in
+      # Node ikizinde de aynı kural var; ikisi ayrışamaz.
       $dosya = Get-Dosya -Yol $yol
-      if ($null -eq $dosya) { $dosya = Get-Dosya -Yol '/index.html' }
+      if ($null -eq $dosya) {
+        $dosyaAdi = $yol.Split('?')[0] -match '\.[A-Za-z0-9]{1,8}$'
+        if (-not $dosyaAdi) { $dosya = Get-Dosya -Yol '/index.html' }
+      }
       if ($null -eq $dosya) {
         $govde = [System.Text.Encoding]::UTF8.GetBytes("Bulunamadı`n")
         Send-Yanit -Akis $akis -Kod 404 -Durum 'Not Found' -Tur $Turler['.txt'] -Govde $govde

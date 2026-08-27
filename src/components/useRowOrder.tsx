@@ -84,7 +84,7 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
           disabled={locked}
           // The position is IN the name: a handle that says only "taşı" gives
           // no way to tell whether the last keypress did anything.
-          aria-label={`${name} — ${index + 1}. sıra, taşımak için yukarı ve aşağı ok`}
+          aria-label={`${name}, ${index + 1}. sıra, taşımak için yukarı ve aşağı ok`}
           title={locked ? 'Elle sıralama için süzmeyi ve sıralamayı kaldırın' : 'Sürükleyerek sırala'}
           onKeyDown={(e) => {
             let next: number | null = null;

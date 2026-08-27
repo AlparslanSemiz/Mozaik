@@ -9,7 +9,7 @@
 // and a lesson left on an hour that was closed afterwards has to show up here
 // too (pitfall 16 has cost this program a placed lesson once already).
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSample, openSetup, chooseEntity, mainList } from './helpers';
 
 test.describe('48. Varlık paneli', () => {

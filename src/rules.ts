@@ -146,7 +146,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
           key: `${teacher.id}|${day}|maxPerDay`,
           rule: 'maxPerDay',
           level: ruleLevel(d, 'maxPerDay'),
-          message: `${when} ${count} saat ders veriyor — en fazla ${maxDay} saat isteniyor.`,
+          message: `${when} ${count} saat ders veriyor, en fazla ${maxDay} saat isteniyor.`,
         });
       }
       if (ruleActive(d, 'minPerDay', minDay) && count < minDay) {
@@ -154,7 +154,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
           key: `${teacher.id}|${day}|minPerDay`,
           rule: 'minPerDay',
           level: ruleLevel(d, 'minPerDay'),
-          message: `${when} sadece ${count} saat ders veriyor — en az ${minDay} saat isteniyor.`,
+          message: `${when} sadece ${count} saat ders veriyor, en az ${minDay} saat isteniyor.`,
         });
       }
       if (ruleActive(d, 'maxConsecutive', maxRun)) {
@@ -164,7 +164,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
             key: `${teacher.id}|${day}|maxConsecutive`,
             rule: 'maxConsecutive',
             level: ruleLevel(d, 'maxConsecutive'),
-            message: `${when} art arda ${run} saat ders veriyor — en fazla ${maxRun} saat isteniyor.`,
+            message: `${when} art arda ${run} saat ders veriyor, en fazla ${maxRun} saat isteniyor.`,
           });
         }
       }
@@ -186,7 +186,7 @@ export function findViolations(d: State, ix: Index): Violation[] {
         level: ruleLevel(d, 'maxSameLessonPerDay'),
         message:
           `${group?.name ?? '?'} sınıfı ${dayInfo.name} günü ${teacher?.short ?? '?'} ` +
-          `dersinden ${count} saat görüyor — en fazla ${limit} saat isteniyor.`,
+          `dersinden ${count} saat görüyor, en fazla ${limit} saat isteniyor.`,
       });
     }
   }

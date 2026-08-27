@@ -4,7 +4,7 @@
 // screens was tested: they are the first thing a new project shows, and the
 // only place that answers "what do I do first".
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { answerDialog, open, openSetup, openSettings, savedText } from './helpers';
 
 test.describe('35. Boş ekranlar yönlendiriyor', () => {

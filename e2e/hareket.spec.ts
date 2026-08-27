@@ -12,7 +12,8 @@
 //
 // Everything here reads the real computed values off the real dist/index.html.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { chooseMotion, open, openSettings, openWithSample, savedText, settledText } from './helpers';
 
 /** The four levers, straight off the root element. */

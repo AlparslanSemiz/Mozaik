@@ -17,7 +17,7 @@
 // .grid-wrap became a container the overflow was 0px with the dock open), and
 // layout measurements went with the rest of the layout contract.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openWithSample, startDrag, deltaE, tokens } from './helpers';
 
 test.describe('47. Izgara enstrümanı', () => {

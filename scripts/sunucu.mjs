@@ -96,7 +96,16 @@ function handle(req, res) {
   // Unknown paths fall back to the app itself, so a bookmark that is one
   // level deep still opens something. A "not found" page would be a second
   // page, and this program has one.
-  const file = fileFor(req.url ?? '/') ?? fileFor('/index.html');
+  //
+  // ...but ONLY for navigations. A request that names a file gets a 404
+  // instead, because handing HTML back with a `.js` content type is a lie the
+  // browser acts on: on a deep path the page asks for `sw.js` next to itself,
+  // the fallback answered with index.html, and Chromium refused it with "The
+  // script has an unsupported MIME type ('text/html')". Found by the error
+  // trap (e2e/kapan.ts) on a test that had been green for a version.
+  const istenen = fileFor(req.url ?? '/');
+  const dosyaAdi = /\.[a-z0-9]{1,8}$/i.test((req.url ?? '/').split('?')[0]);
+  const file = istenen ?? (dosyaAdi ? null : fileFor('/index.html'));
   if (file === null) {
     res.writeHead(404, { 'content-type': TYPES['.txt'] }).end('Bulunamadı\n');
     return;

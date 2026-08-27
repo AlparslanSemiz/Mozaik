@@ -24,7 +24,7 @@
 // already proves all 36 clear 4.5:1 against --on-color on every run. What that
 // unit test cannot know is whether the token reaches the element.
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './kapan';
 import { openSetup, openWithSampleTheme, contrast, deltaE, tokens } from './helpers';
 
 const STEPS = ['Öğretmenler', 'Sınıflar'] as const;

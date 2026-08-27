@@ -8,7 +8,8 @@
 // These worlds are the answer, and the numbers they print are meant to be read,
 // not just to go green.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { solve } from '../src/solver';
 import { HEAVY_WORLDS, hoursOf, illegalBlocks } from '../src/worlds';
 import { loadWorld, savedState, settledText } from './helpers';

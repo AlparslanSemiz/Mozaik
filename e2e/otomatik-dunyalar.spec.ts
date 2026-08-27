@@ -10,7 +10,8 @@
 // dragged card — and src/worlds.test.ts proves that auditor is not a rubber
 // stamp by feeding it a knowingly illegal grid.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './kapan';
 import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/worlds';
 import { loadWorld, savedState, settledText } from './helpers';
 

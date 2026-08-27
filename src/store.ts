@@ -795,6 +795,12 @@ export function useStore() {
     undo,
     redo,
     loadState,
+    // Exposed for the one caller that leaves the page without unloading it:
+    // the exe restarting onto a new version. `beforeunload` covers a closing
+    // tab, but a WebView2 window torn down by `app.exit(0)` is not a closing
+    // tab, and the 400 ms debounce is exactly long enough to eat the edit
+    // somebody made right before pressing the button (pitfall 28).
+    park,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
     plans: {

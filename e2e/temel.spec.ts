@@ -1,7 +1,8 @@
 // Persistence, backups and schema migration: the layer where a mistake costs
 // my father his saved timetable, not just a wrong pixel.
 
-import { expect, test, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { beklenenHata, expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
@@ -751,6 +752,13 @@ test.describe('77. Kaynak şablonu ile teslim edilen dosya karıştırılamaz', 
   test('kaynak index.html çift tıklanınca BOŞ değil, nereye bakılacağını yazar', async ({
     page,
   }) => {
+    // THE CONSOLE ERROR IS THE SUBJECT, not a side effect. Pitfall 72 is
+    // exactly this: `file:///…/index.html` asks for `/src/main.tsx`, CORS
+    // refuses it, and what used to be left behind was a blank white page with
+    // nothing on screen to explain it. The warning this test measures is what
+    // replaced the blank page — the error underneath it still happens, and it
+    // has to, or there would be nothing to warn about.
+    beklenenHata(page, /CORS|ERR_FAILED|main\.tsx/);
     await page.goto(KAYNAK);
 
     await expect(page.getByRole('heading', { name: /programın kendisi değil/i })).toBeVisible();
@@ -769,5 +777,79 @@ test.describe('77. Kaynak şablonu ile teslim edilen dosya karıştırılamaz', 
 
     expect(kalinti.srcli, 'singlefile artık src bırakıyor — uyarı canlanabilir').toBe(0);
     expect(kalinti.uyari, 'kaynak uyarısı derlenmiş dosyada görünüyor').toBe(false);
+  });
+});
+
+test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyor', () => {
+  // A bug my father saw and nobody could have found from the code: the icon
+  // on the taskbar looked soft and "low-pixel". Two causes, both in the FILE
+  // rather than in any code path.
+  //
+  //   1. The .ico carried 16/32/48/64/128/256 and nothing else. Windows asks
+  //      for 40 at 125% scaling and 24 for small taskbar buttons, and when a
+  //      size is missing it scales the nearest one. A 32 blown up to 40 is
+  //      exactly the mush that was reported.
+  //   2. Everything below 48 used the SIMPLIFIED drawing, so the taskbar at
+  //      normal scaling got the three-column mark, which next to the real
+  //      logo reads as a placeholder rather than as the program.
+  //
+  // Both were decided by looking (scratch/ikon-olc.mjs renders both drawings
+  // at 16/20/24/32/40/48 on light and dark). The threshold came out at 32:
+  // detailed is a smear at 16-20, still mushy at 24, and readable from 32 up.
+  //
+  // This test exists because that decision lived NOWHERE. `scripts/ikon.mjs`
+  // has a constant; the committed .ico is what actually ships, and the two
+  // could disagree for a year without a single red mark.
+
+  /** The sizes in an .ico directory, plus each entry's byte length. */
+  function icoEntries(file: Buffer): Array<{ size: number; bytes: number }> {
+    expect(file.readUInt16LE(0), 'ICONDIR reserved').toBe(0);
+    expect(file.readUInt16LE(2), 'ICONDIR type — 1 = icon').toBe(1);
+    const count = file.readUInt16LE(4);
+    return Array.from({ length: count }, (_, i) => {
+      const at = 6 + 16 * i;
+      // 0 means 256: the format stores the size in ONE byte.
+      const w = file.readUInt8(at) === 0 ? 256 : file.readUInt8(at);
+      return { size: w, bytes: file.readUInt32LE(at + 8) };
+    });
+  }
+
+  test('Windows’un istediği HER boy dosyada var', async () => {
+    const entries = icoEntries(readFileSync('kurulum/icon.ico'));
+    const sizes = entries.map((e) => e.size).sort((a, b) => a - b);
+    expect(sizes).toEqual([16, 20, 24, 32, 40, 48, 64, 128, 256]);
+    // A directory entry pointing at nothing renders as a blank square.
+    for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
+  });
+
+  test('32 ve üstü AYRINTILI çizim, altı sade — ve bu ölçülmüş bir eşik', async ({ page }) => {
+    // Compared by pixels, because the .ico holds PNGs and the .svg files hold
+    // rectangles: the only thing the two have in common is what they look
+    // like. Each entry is decoded and put next to a fresh render of both
+    // drawings at that size, and the one it matches has to be the one the
+    // threshold names.
+    const entries = icoEntries(readFileSync('kurulum/icon.ico'));
+    const file = readFileSync('kurulum/icon.ico');
+    let offset = 6 + 16 * entries.length;
+
+    const detay = readFileSync('site/icon.svg', 'utf8');
+    const sade = readFileSync('site/icon-small.svg', 'utf8');
+
+    for (const { size, bytes } of entries) {
+      const png = file.subarray(offset, offset + bytes);
+      offset += bytes;
+      if (size > 48) continue; // above the threshold on both sides; nothing to tell apart
+
+      const beklenen = size < 32 ? sade : detay;
+      await page.setViewportSize({ width: size, height: size });
+      await page.setContent(
+        `<style>html,body{margin:0;padding:0}svg{display:block;width:${size}px;height:${size}px}</style>${beklenen}`,
+      );
+      const taze = await page.locator('svg').screenshot({ omitBackground: true });
+      expect(
+        Buffer.compare(taze, png),
+        `${size} px, ${size < 32 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
+      ).toBe(0);
+    }
   });
 });

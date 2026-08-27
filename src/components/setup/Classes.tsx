@@ -63,7 +63,7 @@ export default function Classes({ state, change }: PanelProps) {
       <h2>Sınıflar ({state.classes.length})</h2>
       <p className="hint">
         Bir sınıf, aynı programı paylaşan öğrenci grubudur. <b>Derslik</b> sınıfın
-        sabit odasıdır ve yerleştirirken seçilmez — aynı dersliği paylaşan iki
+        sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki
         sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz ve
         satır başındaki nokta ile basılan sayfanın başlığında görünür.
       </p>
