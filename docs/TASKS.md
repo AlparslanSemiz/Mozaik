@@ -1606,7 +1606,7 @@ yeniden yapmak aynı hatanın iki yüzü.
       `Facet`'e isteğe bağlı bir `order` alanı geldi, sırayı **çağıran**
       veriyor. Alfabe eşitlikte hâlâ karar veriyor, yani `order` yazmayan her
       çip satırı bugünkü davranışında kaldı. 
-
+      
 ## X turu — on iki ham not (2026-08-28)
 
 Kullanıcının bıraktığı on iki satır. Üçü ölçülebilir kusur çıktı ve üçü de
@@ -1688,3 +1688,28 @@ doğrudan sonucu ve dürüst; ama bakıldığında dengesiz görünüyorsa seçe
 `.cols.wide-left`'in sol izini içeriğe göre daraltmak. **Kullanıcıya sorulacak,
 tahminle değiştirilmeyecek** (ilke 5).
 
+
+
+Kurulumda Derslikler Öğretmenler ve SInıfların yanında 1 2 3'ü kaldır.
+Tüm Listeleri de olabildiğince birbiriyle simetrik ve uyumlu yap.
+Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun. Derslikte de çok uzun. Uzun olması daha iyiyse beni ikna et ve öyle kalsın.
+Sol üstteki logonun küçüğü kullanılsın.
+İkinci barın açılıp kapanması ayarlarda bir ayar olsun.
+İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı yerde olsun ve yazı ortalansın gerekirse ona uygun bir yazı seçilsin.
+Öğretmenin tek bir branşı varsa seçme tuşu açılmasın dersler sectionu öğretmenden seçeneğinde, varsa tabii ki açılsın. Başlıkta branşı da yazsın.
+Programda blok saatlerinin yeni mantığından dolayı önizleme artısı kaymış durumda. Foto örnek fotolarda.
+Programda kartların üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın.
+Yazdırmada yazıları büyük yapınca yazdırma bozuluyor. Önizleme doğru olmasına rağmen.
+Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor buna bir çözüm bul.
+Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin.
+
+
+Branşlar kuruluma gelsin.
+Branşlarda yanda hazır eklenebilirleri ekleyelim.
+Kurulum müsaitlik falan işte üst taraftaki sectionların da isimleri daha güzel hale getirilebilir.
+Kurulum öğretmenlerde kurulum durumu dersler sekmesine gidinize gerek yok. Hatta direkt onu da silebilirsin çok fazla kaydırma olmuş gereksiz.
+Kurulum özeti ya da özet vebenziren çevrilebilir o. ya da artık ileride nasıl adlandıracaksak.
+Öğretmenler Sınıfflar dersliklerde yazdığı gibi derslerin içinde genelin yanında da toplam dersler yazsın.
+Kontrol tarafında hepsi sorunlar kapasite biraz fazla gereksizler gibi ya düzgün şekilde onları doldur ya da öyle gereksiz yapma. ayrıca çok aşağı doğru gidiyor daha mantıklı bir çözüm bulunabilir mi?
+Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular güzel de gözükmüyor.
+Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı ortalansın ve sığdırılsın.
