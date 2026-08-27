@@ -340,8 +340,13 @@ export function storageReport(lib: Library): StorageReport {
   });
   rows.push({
     key: `${BASE_KEY}-yogunluk`,
-    what: 'arayüz yoğunluğu tercihi',
+    what: 'ızgara yoğunluğu tercihi',
     chars: charsAt(`${BASE_KEY}-yogunluk`),
+  });
+  rows.push({
+    key: `${BASE_KEY}-arayuz-yogunluk`,
+    what: 'arayüz yoğunluğu tercihi',
+    chars: charsAt(`${BASE_KEY}-arayuz-yogunluk`),
   });
   rows.push({
     key: `${BASE_KEY}-havuz`,

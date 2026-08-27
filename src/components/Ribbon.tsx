@@ -13,11 +13,24 @@
 // moved it back down. The contract now, and `e2e/serit.spec.ts` measures every
 // line of it:
 //
-//   1. all six tabs draw a `.ribbon`, and they are the same height;
+//   1. all seven tabs draw a `.ribbon`, and they are the same height;
 //   2. every strip opens with a `<Group>` caption — what the buttons answer;
 //   3. groups are divided by `<Sep/>`, and a right-hand group by `<Spacer/>`;
 //   4. every button carries a SYMBOL and a WORD, never one alone;
-//   5. all the buttons are the same height.
+//   5. all the buttons are the same height;
+//   6. the first button starts at the same x on all seven, because the opening
+//      caption is padded to one width and followed by a rule (2026-08-27,
+//      "İlk baştaki yazı sonrası hepsi aynı hizadan başlasın ... arada bir
+//      çizgi olur");
+//   7. buttons in one group are the same WIDTH — `.ribbon-group` is a grid of
+//      equal columns ("Blokların simetrisi ... sadece şekilleriyle").
+//
+// And one more thing that is an ORDER rather than a shape: wherever a strip
+// offers the two kinds side by side, teacher comes first and class second. It
+// was teacher-first in Müsaitlik and Program and class-first in Dersler and
+// Yazdır — the same two icons, the same row, two orders. Kurulum's steps are
+// not this: they are a numbered sequence, and a class refers to a room, so
+// rooms have to be typed in first.
 //
 // Rule 4 is the accessibility half: the word is the accessible name in both
 // test layers (pitfall 56) and the symbol is what the eye finds first at 150%,
@@ -156,16 +169,16 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
  */
 const LESSON_MODES: Array<{ id: LessonMode; label: string; icon: React.ReactElement; why: string }> = [
   {
-    id: 'class',
-    label: 'Sınıftan',
-    icon: KIND_ICON.class,
-    why: 'Bir sınıf seçin, o sınıfın derslerini arka arkaya girin',
-  },
-  {
     id: 'teacher',
     label: 'Öğretmenden',
     icon: KIND_ICON.teacher,
     why: 'Bir öğretmen seçin, girdiği bütün sınıfları arka arkaya girin',
+  },
+  {
+    id: 'class',
+    label: 'Sınıftan',
+    icon: KIND_ICON.class,
+    why: 'Bir sınıf seçin, o sınıfın derslerini arka arkaya girin',
   },
   {
     id: 'all',
@@ -186,16 +199,29 @@ function Spacer() {
 /**
  * A caption and the controls it names — the strip's only structure.
  *
- * A fragment rather than a wrapping element on purpose: `.ribbon` is one flex
- * row and its `gap` is what spaces the buttons. Boxing each group would make
- * the gap apply between BOXES and the buttons inside would need their own,
- * which is two spacing systems saying the same thing.
+ * The caption is a DIRECT child of `.ribbon` and the controls are boxed. Both
+ * halves of that are load-bearing:
+ *
+ *   * direct, because `e2e/serit.spec.ts` reads `bar.firstElementChild` to
+ *     check that every strip opens with a caption, and because the first
+ *     caption on each of the seven strips is padded to one width so the first
+ *     BUTTON lands at the same x wherever you are;
+ *   * boxed, because buttons that belong to one question should be the same
+ *     width, and CSS has no way to say that without a box (`.ribbon-group` is
+ *     a one-row grid of equal columns).
+ *
+ * It was a fragment until 2026-08-27, on the argument that boxing would make
+ * `.ribbon`'s gap apply between boxes and force a second gap inside them. That
+ * is exactly what happens and it turns out to be the point: with one gap the
+ * caption sat as far from the buttons it names as the buttons sat from each
+ * other, so the only thing grouping them was the hairline. Now the inside gap
+ * is smaller than the outside one and the group reads as a group.
  */
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
       <span className="ribbon-label">{label}</span>
-      {children}
+      <span className="ribbon-group">{children}</span>
     </>
   );
 }
@@ -378,21 +404,19 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         {/* Two positions, not one toggle: a single button saying "switch to the
             class view" tells you what the next click does, never where you are. */}
         <Group label="Görünüm">
-          <div className="view-switch">
-            {VIEWS.map((v) => (
-              <button
-                key={v.id}
-                className="btn"
-                aria-pressed={ui.view === v.id}
-                aria-label={v.label}
-                title={v.label}
-                onClick={() => ui.setView(v.id)}
-              >
-                {v.icon}
-                {v.short}
-              </button>
-            ))}
-          </div>
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              className="btn"
+              aria-pressed={ui.view === v.id}
+              aria-label={v.label}
+              title={v.label}
+              onClick={() => ui.setView(v.id)}
+            >
+              {v.icon}
+              {v.short}
+            </button>
+          ))}
         </Group>
 
         <Sep />
@@ -563,19 +587,19 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         <Group label="Ne basılsın">
           <button
             className="btn"
-            aria-pressed={ui.scope === 'classes'}
-            onClick={() => ui.setScope('classes')}
-          >
-            {KIND_ICON.class}
-            Sınıflar
-          </button>
-          <button
-            className="btn"
             aria-pressed={ui.scope === 'teachers'}
             onClick={() => ui.setScope('teachers')}
           >
             {KIND_ICON.teacher}
             Öğretmenler
+          </button>
+          <button
+            className="btn"
+            aria-pressed={ui.scope === 'classes'}
+            onClick={() => ui.setScope('classes')}
+          >
+            {KIND_ICON.class}
+            Sınıflar
           </button>
           <button
             className="btn"

@@ -197,7 +197,19 @@ test.describe('2. Sürükle-bırak', () => {
     const singles = page.locator('.pool-card[data-size="1"]');
     expect(await doubles.count(), 'örnek okulda ikili blok yok').toBeGreaterThan(0);
     expect(await singles.count(), 'örnek okulda tek saatlik blok yok').toBeGreaterThan(0);
-    await expect(doubles.first()).toContainText('2 saat');
+    // Not in the card's TEXT since 2026-08-27 — "Programda 1 saat x5 veeya
+    // 2 saat x3 gibi gözükmesin kartlarda güzel değil." What answers "which
+    // block is this" on screen is now the width (`[data-size='2']` is twice
+    // `[data-size='1']`, asserted below) and the tooltip, which is where a
+    // number the eye does not need but a reader might still lives.
+    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik blok/);
+    await expect(singles.first()).toHaveAttribute('title', /1 saatlik blok/);
+    const widths = await page.evaluate(() => {
+      const one = document.querySelector('.pool-card[data-size="1"]');
+      const two = document.querySelector('.pool-card[data-size="2"]');
+      return { one: one.getBoundingClientRect().width, two: two.getBoundingClientRect().width };
+    });
+    expect(widths.two, 'ikili blok tekliden geniş çizilmiyor').toBeGreaterThan(widths.one * 1.5);
 
     // `startDrag` takes a position in the whole tray, so the double and the
     // single are found by their position among ALL the cards.
@@ -708,7 +720,9 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       expect(p.tops).toBe(1);
       // The counter the reader asked to keep, said once instead of six times.
       expect(p.counters).toBe(1);
-      expect(p.badge).toBe(p.count > 1 ? `×${p.count}` : null);
+      // The count alone, in the corner. It read "×6" on the line that also
+      // said "1 saat", and that whole line is gone.
+      expect(p.badge).toBe(p.count > 1 ? String(p.count) : null);
     }
 
     // Placing one block takes one card off the pile rather than emptying it.

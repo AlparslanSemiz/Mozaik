@@ -498,7 +498,7 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     }
   });
 
-  test('seçili simge basılı, diğeri soluk', async ({ page }) => {
+  test('seçili görünüm bölüm rengiyle DOLU, diğeri değil', async ({ page }) => {
     await openWithSample(page);
     const teacher = page.getByRole('button', { name: 'Öğretmen görünümü' });
     const klass = page.getByRole('button', { name: 'Sınıf görünümü' });
@@ -506,8 +506,24 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     await expect(teacher).toHaveAttribute('aria-pressed', 'true');
     await expect(klass).toHaveAttribute('aria-pressed', 'false');
 
-    const dim = async (l: typeof teacher) => Number(await l.evaluate((el) => getComputedStyle(el).opacity));
-    expect(await dim(teacher)).toBeGreaterThan(await dim(klass));
+    // It was an OPACITY difference until 2026-08-27: `.view-switch` faded the
+    // position you were not in to 0.7. That box is gone — every group on every
+    // strip is a `.ribbon-group` now, and one pair of buttons carrying a second
+    // signal that no other pair has is a thing to learn rather than a thing to
+    // read. What says which one you are on is what says it on all seven strips:
+    // the pressed control wears the section's colour.
+    const ink = async (l: typeof teacher) =>
+      l.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { bg: cs.backgroundColor, fg: cs.color, opacity: cs.opacity };
+      });
+    const on = await ink(teacher);
+    const off = await ink(klass);
+    expect(on.bg).not.toBe(off.bg);
+    expect(on.bg).not.toBe('rgba(0, 0, 0, 0)');
+    // ...and neither of them is dimmed, which is the part that changed.
+    expect(on.opacity).toBe('1');
+    expect(off.opacity).toBe('1');
   });
 
   test('öğle arası ayracı hücreden belirgin biçimde ince', async ({ page }) => {
@@ -529,9 +545,32 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     await expect(mark).toContainText('×');
     const style = await mark.evaluate((el) => {
       const own = getComputedStyle(el);
-      return { size: parseFloat(own.fontSize), color: own.color, background: own.backgroundColor };
+      // What "as big as the text beside it" measures to right now. Asked of a
+      // probe and not of a `.card`, because the grid is EMPTY here — the
+      // sample loads a school, not a timetable — and a comparison against a
+      // card that does not exist is a test that passes by accident when it
+      // does.
+      const probe = document.createElement('span');
+      probe.style.fontSize = 'var(--fs-base)';
+      el.appendChild(probe);
+      const beside = parseFloat(getComputedStyle(probe).fontSize);
+      probe.remove();
+      return {
+        size: parseFloat(own.fontSize),
+        color: own.color,
+        background: own.backgroundColor,
+        beside,
+      };
     });
-    expect(style.size).toBeGreaterThanOrEqual(15);
+    // 15 was the number when the root was 16px; it is 15.0 on a 14px root and
+    // was failing on the third decimal. The contract was never a px value — it
+    // is "the mark is the size of the text in the cell next to it, not dirt on
+    // the hatch at 11px" — so that is what is asserted, and it survives the
+    // next time the root moves.
+    expect(style.beside, 'gövde puntosu ölçülemedi').toBeGreaterThan(0);
+    expect(style.size).toBeGreaterThanOrEqual(style.beside);
+    expect(style.size, `çarpı ${style.size}px — 11px "kirlilik" eşiğine geri dönmüş`)
+      .toBeGreaterThan(13);
 
     // Bigger must not mean fainter: the hatch sits on --closed.
     const t = await tokens(page, ['--closed']);
@@ -627,11 +666,16 @@ test.describe('80. Bölüm şeridi', () => {
 
       for (const section of SECTIONS) {
         await page.getByRole('button', { name: section, exact: true }).click();
-        const m = await page.evaluate((dark) => {
+        const m = await page.evaluate(() => {
           const bar = document.querySelector('.topbar') as HTMLElement;
           const probe = document.createElement('div');
+          // The TOP stop of the bar's own wash, read from the token the
+          // stylesheet paints with. It was written out as 14%/16% here, and on
+          // the day the wash was quieted this test went on measuring against a
+          // mix nothing was painting any more — a measurement of a colour that
+          // had stopped existing (pitfall 42's shape, in a test).
           probe.style.background =
-            `color-mix(in oklab, var(--sec, var(--accent)) ${dark ? 14 : 16}%, var(--chrome-lit))`;
+            'color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit))';
           bar.appendChild(probe);
           const mixed = getComputedStyle(probe).backgroundColor;
           probe.remove();
@@ -650,7 +694,7 @@ test.describe('80. Bölüm şeridi', () => {
             height: parseFloat(before.height),
             under: `rgb(${px[0]}, ${px[1]}, ${px[2]})`,
           };
-        }, theme === 'dark');
+        });
 
         // It has to BE there before it can be visible.
         expect(m.height, `${section}: şerit çizilmiyor`).toBeGreaterThanOrEqual(3);

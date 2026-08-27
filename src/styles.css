@@ -187,19 +187,52 @@
        hue 257   indigo      Kontrol's violet, one hue family
        hue 316   orchid      Yazdır's pink, one hue family
 
-     So the seventh was taken from the one place with room left — the rose
-     between Yazdır's pink and the reds — and held DOWN to the lightness the
-     other six sit at, because the first candidate there (#ff386a) was hot
-     enough to read as --bad. Measured: contrast 8.7 light / 5.1 dark, dE 36.3
-     from --bad, and dE 23.1 from its nearest neighbour, which makes it better
-     separated than the pair that was the worst before it. */
-  --sec-setup: #1f4098;
-  --sec-availability: #9e25b6;
-  --sec-lessons: #7e304e;
-  --sec-program: #157184;
-  --sec-check: #4e19a9;
-  --sec-print: #960862;
-  --sec-settings: #3a4d5f;
+     ALL SEVEN RE-SEARCHED 2026-08-27, and this time by a script that is
+     committed: scripts/bolum-renk.mjs. The reader's complaint was "renkler çok
+     benzer", and it was right — five of the seven sat between hue 292 and 358,
+     because every sweep before this one moved HUE while holding LIGHTNESS
+     still (all seven lived in L* 27-44). Nothing was searching the axis the
+     prose kept calling free.
+
+     Three things the script had to learn, each one a wrong answer first:
+
+       * dE alone does not keep a colour off a status. At dE 36 from --bad it
+         handed Program a bright red. The warm-and-green arc is excluded by
+         HUE now, 3..177, which is what the 2026-08-26 sweep had concluded in
+         words: --bad sits at 36/28, --warn at 80/89, --ok at 145/152.
+       * dE alone does not answer "do these look alike" either — it counts
+         lightness, so it scored Kontrol at hue 325 against Yazdır at 328 as
+         dE 40: one magenta, one dimmer. Six identity colours are now at least
+         26 degrees apart, and that is a constraint, not a term in the score.
+       * a chroma FLOOR made the teal end illegal: sRGB holds no more than
+         C* 33 between hue 177 and 255 at these lightnesses. That is why
+         Program's turquoise has always been the palest of the seven, and it
+         is a gamut fact rather than a decision.
+
+     Measured, both themes, dE76 as everything else here: worst pair anywhere
+     34.6 light / 37.5 dark (it was 20.5), nearest functional colour 36.3 /
+     44.7, and the two tabs that stand SIDE BY SIDE on the strip are never
+     closer than 61.8 — the eye compares neighbours, so which colour goes to
+     which tab is part of the answer and the script permutes it. Ayarlar is
+     deliberately the quiet one and does not spend hue: near-neutral (C* 4),
+     and never the brightest thing on the strip. Kontrol may not wear the
+     reddest of the six, which is meaning rather than distance — a crimson
+     strip over a list of blockers says the whole screen is one. */
+  /* HOW LOUD the section's wash is, as two stops. Tokens rather than numbers
+     written into the gradient, because `e2e/renk.spec.ts` 80 rebuilds the mix
+     to measure the 4px line against what is under it — and while these were
+     literals, that test was reconstructing a wash the stylesheet had stopped
+     painting. One source, and a test that reads it. */
+  --wash-top: 8%;
+  --wash-bot: 3%;
+
+  --sec-setup: #0966ca;
+  --sec-availability: #05756f;
+  --sec-lessons: #760262;
+  --sec-program: #066f9e;
+  --sec-check: #802fff;
+  --sec-print: #cb0567;
+  --sec-settings: #433c3f;
 
   /* Ink that does NOT turn with the theme: it lands on the 36 palette colours,
      and those are the same in both themes because they are printed on paper
@@ -242,16 +275,36 @@
   /* TYPOGRAPHY. Nine steps, up from six: with only six, a page heading and a
      panel heading had to share one size and the hierarchy came out flat.
      12px stays the absolute floor and that is NOT taste — the reader has
-     trouble seeing. */
-  --fs-2xs:  .6875rem; /* 11px — print preview furniture ONLY, never screen UI */
-  --fs-xs:   .75rem;   /* 12px — the screen floor */
-  --fs-sm:   .8125rem;
-  --fs-md:   .875rem;
-  --fs-base: 1rem;     /* body */
-  --fs-lg:   1.125rem;
-  --fs-xl:   1.375rem;
-  --fs-2xl:  1.75rem;
-  --fs-3xl:  2.25rem;
+     trouble seeing.
+
+     RE-PINNED 2026-08-27 to a 14px root (it was 16px, and the default scale was
+     110%, so the body was really 17.6px). The reader asked for the whole screen
+     to come down: "yüzde yüzü biraz daha küçült, oransal küçült her şeyi,
+     default yüzde 100 olsun".
+
+     It cannot ALL come down by the same fraction, and that is the floor's
+     doing rather than a compromise: at a 14px root the old ladder put --fs-xs
+     at 10.5px and --fs-sm at 11.4px, which is the one thing this file is not
+     allowed to do. So the ladder is written against the new root instead of
+     scaled with it, and what shrinks is what is allowed to:
+
+       small print  -9%   (13.2 -> 12.0, and 12.0 is the floor, not a choice)
+       body        -15%   (17.6 -> 15.0)
+       headings    -22%   (39.6 -> 31.0 at the top)
+       everything in rem that is NOT type  -20%, the full amount
+
+     That last line is where the room actually comes from: spacing, cells, the
+     strip, the `ch` columns and the dock all follow the root and none of them
+     has a floor to respect. */
+  --fs-2xs:  .786rem;  /* 11px — print preview furniture ONLY, never screen UI */
+  --fs-xs:   .857rem;  /* 12px — the screen floor */
+  --fs-sm:   .929rem;  /* 13px */
+  --fs-md:   1rem;     /* 14px */
+  --fs-base: 1.071rem; /* 15px — body */
+  --fs-lg:   1.214rem; /* 17px */
+  --fs-xl:   1.429rem; /* 20px */
+  --fs-2xl:  1.786rem; /* 25px */
+  --fs-3xl:  2.214rem; /* 31px */
 
   /* Tracking. Plex wants a touch of negative at display sizes, real positive
      when small text is set in caps, and a hair of negative on headings. */
@@ -352,24 +405,67 @@
   /* The sticky first column. 8.25rem was never measured; asked to shrink it
      (2026-08-26, "sol taraftaki öğretmen ya da sınıf tarafının genişliği biraz
      daha kısaltılabilir") it was, and the widest thing it ever has to hold is
-     the longest built-in subject, "Sosyal Bilgiler", at 5.51rem — the name
-     above it is a short form. 6rem leaves half a character of air and hands
-     the difference to the 72 lesson columns, which is where Sığdır spends it. */
-  --rowhead-w: 6rem;
+     the longest built-in subject, "Sosyal Bilgiler" — the name above it is a
+     short form.
+
+     RE-MEASURED 2026-08-27 with the 14px root: 6rem became 84px and the subject
+     needs 93. This is the cost of re-pinning the type ladder rather than
+     letting it shrink — the text in here came down 9% while the root came down
+     12.5%, so anything sized in `rem` that has to HOLD text got relatively
+     tighter and has to be re-measured rather than assumed. 6.75rem is 94.5px,
+     which clears it by a pixel and a half; `izgara.spec.ts` 68 asks the browser
+     for the number every run and also refuses more than 1.2x of it, so this
+     cannot quietly drift wide either. */
+  --rowhead-w: 6.75rem;
 
   /* The height of a control in the tool strip, and therefore of the strip.
-     2rem = 32px at scale 1: well over the 24px WCAG 2.2 target size and what
-     every desktop toolbar uses. Three strips of 36px buttons is where the
-     vertical budget went last time. */
-  --ribbon-h: 2rem;
+     2.25rem = 31.5px at scale 1 on the 14px root: still over the 24px WCAG 2.2
+     target size. It was 2rem against a 16px root (32px) and is written up here
+     rather than left to shrink with everything else, because a toolbar button
+     is a TARGET and a target has a floor the way small type does. */
+  --ribbon-h: 2.25rem;
+
+  /* How much room the FIRST caption on a strip takes, so the first button lands
+     at one x on all seven. The longest of the seven is "NE GÖSTERİLSİN". The
+     rule that uses it sits beside `.ribbon-label`.
+
+     `em` and NOT `ch`, and that is a measurement rather than a preference. 15ch
+     was tried first and it aligned six strips at 150% and only four at 100%,
+     which is pitfall 39 from the other side: `ch` is the advance of "0" and a
+     real face quantises it — measured here, 7.00px at 12px and 11.00px at 18px,
+     a ratio of 1.571 where the type grew by 1.5. So a box written in `ch` grows
+     FASTER than the words in it and a `ch` count that fits at one step is not
+     the count that fits at another.
+
+     The captions themselves went 114.1px -> 162.1px over the same step, i.e.
+     9.51em -> 9.01em; 9.8em clears the wider of the two with 3px to spare and
+     costs 14px of slack at the other end. */
+  --ribbon-lead-w: 9.8em;
 
   /* The one raw px font-size in the file: the anchor the whole rem ladder
-     hangs from. Default 1.10 since 2026-08-26 — the reader has trouble
-     seeing, and 1.0 was never a measurement, it was the number CSS starts at.
-     Ayarlar > Gorunum still walks 1.00 to 1.50. */
-  --ui-scale: 1.1;
-  font-size: calc(16px * var(--ui-scale));
+     hangs from.
+
+     14px and scale 1.00 since 2026-08-27, asked for by the reader ("genel
+     anlamda yüzde yüzü biraz daha küçült ... default yüzde 100 olsun"). It was
+     16px and 1.10, so the screen has come down 20% in every rem that is not
+     type; the type ladder above is re-pinned to the new root instead, because
+     12px on screen is a floor and not a preference. Ayarlar > Görünüm still
+     walks 1.00 to 1.50 in eleven steps. */
+  --ui-scale: 1;
+  font-size: calc(14px * var(--ui-scale));
   line-height: var(--lh-base);
+
+  /* So `height: auto` can be transitioned — the tool strip slides away while
+     you read down the page (`ribbonScroll.ts`) and it must not be given a
+     hard-coded height to do it: the whole argument beside `--ribbon-h` is that
+     a `.ribbon` with a fixed height centres what it is handed and hides a
+     button two pixels taller than its neighbours (the shape of pitfall 34).
+
+     Measured under `file://` in the Chromium the suite runs (151):
+     `CSS.supports('interpolate-size', 'allow-keywords')` is true, and so is
+     `calc-size(auto, size)`. Where it is not supported the strip snaps instead
+     of sliding, which is a degradation and not a break. */
+  interpolate-size: allow-keywords;
 }
 
 :root[data-theme="dark"] {
@@ -460,13 +556,18 @@
      was 16.0), and its hues — 225, 263, 289, 321 — land on the new light hues
      within a couple of degrees. The family reads the same across the two
      themes without touching a byte here. */
-  --sec-setup: #6e8de7;
-  --sec-availability: #c86ae7;
-  --sec-lessons: #f04c8b;
-  --sec-program: #58cde4;
-  --sec-check: #a080ea;
-  --sec-print: #e55db7;
-  --sec-settings: #879eb5;
+  /* A touch quieter still on a dark chrome: a pale stop there is a banding
+     artefact rather than a highlight. */
+  --wash-top: 7%;
+  --wash-bot: 3%;
+
+  --sec-setup: #0e81fc;
+  --sec-availability: #0e938c;
+  --sec-lessons: #ff95e3;
+  --sec-program: #65c1ff;
+  --sec-check: #a25ffe;
+  --sec-print: #fe0982;
+  --sec-settings: #8c8488;
 
   /* Deeper and blacker: on a dark ground the light theme's values are simply
      not there. The same is true of the sticky lip, which is why it has its own
@@ -694,11 +795,18 @@ textarea {
   transition: background-color var(--dur) var(--ease);
 }
 
+/* QUIETER since 2026-08-27, and the reason is the seven colours above rather
+   than taste. The wash used to be the second loudest thing --sec said, and
+   when five of the seven were one purple the bar was where you noticed it —
+   a tinted plane that changed to another tinted plane. Now that the tabs
+   themselves are properly apart, the wash is doing the same job at half the
+   volume, and the two things that ANSWER "where am I" are the filled tab and
+   the 4px line, both of which stay at full strength. 16% -> 8%, 6% -> 3%. */
 :root:not([data-theme='dark']) .topbar {
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 16%, var(--chrome-lit)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome)) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
 }
 
 /* On a dark chrome a pale gradient is a banding artefact, not a highlight —
@@ -712,20 +820,22 @@ textarea {
 :root[data-theme="dark"] .topbar {
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 14%, var(--chrome-lit)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 5%, var(--chrome)) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-top), var(--chrome-lit)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) var(--wash-bot), var(--chrome)) 100%);
 }
 
 /* The section's wash moves with you. `background-color` and not `background`:
    the light theme paints a gradient here and gradients do not interpolate, so
    naming the shorthand would have transitioned nothing while looking like it
    did. Under a gradient the colour underneath is what carries the change. */
-.topbar,
-.ribbon {
+.topbar {
   transition:
     background-color var(--dur) var(--ease),
     border-color var(--dur) var(--ease);
 }
+/* `.ribbon` used to share this rule; it has its own now, further down, because
+   it also has to transition the four properties that fold it away. Both lists
+   still start with the same two. */
 
 /* The school and the plan, drawn as ONE object: together they answer "which
    timetable am I editing", and a heading followed by a loose dropdown asked
@@ -822,7 +932,14 @@ textarea {
 
 
 .tabstrip {
-  display: flex;
+  /* SEVEN EQUAL COLUMNS, not seven content-width buttons. Same request and the
+     same mechanism as `.ribbon-group`: `1fr` in a grid sized by its own content
+     is the widest tab's max-content, so "Yazdır" and "Müsaitlik" occupy the
+     same box and the strip reads as a row of seven rather than a row of seven
+     lengths. No number is written down and no type size is touched. */
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   align-items: center;
   gap: var(--space-1);
   /* 0 0, NOT 0 1: the strip used to shrink while the tabs inside it did not,
@@ -837,6 +954,10 @@ textarea {
 .tab {
   display: flex;
   align-items: center;
+  /* Centred, because the box is now wider than the label on six of the seven
+     (see `.tabstrip`) and a left-aligned label in an equal column undoes the
+     symmetry the equal column was for. */
+  justify-content: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: 1px solid transparent;
@@ -850,6 +971,7 @@ textarea {
   transition:
     background-color var(--dur-fast) var(--ease),
     color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
     border-color var(--dur-fast) var(--ease);
 }
 
@@ -863,8 +985,18 @@ textarea {
   white-space: nowrap;
 }
 
+/* Hovering a tab shows THAT tab's colour, and shows it as a glow rather than
+   only as a tint. Asked for by name: "üst barda sectionları hoverlarken o
+   hoverlanan sectionun renginde gölge olsun". The colour comes from
+   `data-section` on the button itself (see App.tsx) — before that this rule
+   read the root's `--sec` and painted the section you were leaving.
+
+   No distance is written here, so there is nothing for the motion setting to
+   have to switch off (pitfall 57): a glow appears and goes, it does not
+   travel. */
 .tab:hover {
-  background: color-mix(in oklab, var(--sec, var(--accent)) 10%, transparent);
+  background: color-mix(in oklab, var(--sec, var(--accent)) 12%, transparent);
+  box-shadow: 0 2px 12px color-mix(in oklab, var(--sec, var(--accent)) 42%, transparent);
   color: var(--text);
 }
 
@@ -959,8 +1091,8 @@ textarea {
   padding: var(--space-2) var(--space-4);
   background:
     linear-gradient(180deg,
-      color-mix(in oklab, var(--sec, var(--accent)) 11%, var(--chrome-2)) 0%,
-      color-mix(in oklab, var(--sec, var(--accent)) 4%, var(--chrome-2)) 100%);
+      color-mix(in oklab, var(--sec, var(--accent)) 6%, var(--chrome-2)) 0%,
+      color-mix(in oklab, var(--sec, var(--accent)) 2%, var(--chrome-2)) 100%);
 
   /* The same colour as the tab above it, down the leading edge: the strip and
      the tab are one object, and this is the cheapest way to say so — 3px, no
@@ -986,6 +1118,58 @@ textarea {
   font-weight: 600;
 }
 
+/* THE CONTROLS OF ONE GROUP, ALL THE SAME WIDTH.
+   "Blokların simetrisi. Üst ve alt bardaki seçeneklerin aynı genişlikte olması
+   güzel olur muydu puntolara dokunulmadan sadece şekilleriyle."
+
+   A one-row grid of equal columns, and `1fr` in a grid that is sized by its own
+   content resolves to the widest column's max-content — so "Ferah / Rahat /
+   Sığdır" come out one width without a number being written down anywhere, and
+   they keep doing it at 150% and in another language. Nothing here touches type
+   size, which is the half of the request that was explicit.
+
+   The gap is SMALLER than `.ribbon`'s, and that is the second thing the box
+   bought: with one gap for everything, a caption stood as far from the buttons
+   it names as those buttons stood from each other. */
+.ribbon-group {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* THE OPENING CAPTION IS PADDED TO ONE WIDTH, so the first button starts at the
+   same x on all seven strips — "İlk baştaki yazı sonrası hepsi aynı hizadan
+   başlasın mı güzel olur mu? arada bir çizgi olur."
+
+   The captions run from "Bölüm" to "Ne gösterilsin", so without this the strip
+   appeared to shift sideways every time you changed tab. `ch` and not px: the
+   caption is set in `--fs-xs` with `--ls-caps` tracking, so its own character
+   is the only unit that stays true when the reader walks the scale (pitfall 39
+   — `ch` is not proportional to the point size, but a width written in `ch`
+   holds the same number of characters at every step, which is the property
+   that matters).
+
+   Measured on the longest of the seven, "NE GÖSTERİLSİN". */
+.ribbon > .ribbon-label:first-child {
+  min-width: var(--ribbon-lead-w);
+}
+
+/* ...and the rule after it. Drawn here rather than by adding a `<Sep/>` to
+   every strip: it is a property of the strip's shape, not a decision each tab
+   gets to make, and `Sep` should keep meaning "these two groups are different
+   questions". Same 1px, same token, same inset as `.ribbon-sep`. */
+.ribbon > .ribbon-label:first-child::after {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  bottom: var(--space-2);
+  margin-left: var(--space-3);
+  width: 1px;
+  background: var(--line);
+}
+
 /* A group that STATES rather than asks: whose hours are open in Müsaitlik, how
    many problems there are in Kontrol. It is not a `.ribbon-label` — that is the
    caption ABOVE a group, uppercase and quiet, and reading a name or a count in
@@ -1004,6 +1188,36 @@ textarea {
   /* The strip's plane is --chrome-2, not --paper, so a badge that borrowed the
      page's ground would read as a chip lying on the bar. */
   background: none;
+}
+
+/* OUT OF THE WAY WHILE YOU READ DOWN, back the moment you look up. The
+   attribute is written by `ribbon-scroll` on `.app`; everything about WHEN is
+   over there, everything about HOW is here.
+
+   Four things go, and all four have to: `height` is the row itself, but
+   `box-sizing` is border-box so a height of 0 still leaves the padding and the
+   bottom rule standing — about 8px of coloured bar with nothing in it.
+
+   Every duration reads `--dur`, so the motion setting and
+   `prefers-reduced-motion` switch this off from the one place they switch
+   everything else off (pitfall 57). At 0ms the strip does not teleport, it is
+   simply not there — a height is not a distance. */
+.ribbon {
+  transition:
+    height var(--dur) var(--ease),
+    padding-block var(--dur) var(--ease),
+    border-bottom-width var(--dur) var(--ease),
+    opacity var(--dur) var(--ease),
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.app[data-ribbon='gizli'] .ribbon {
+  height: 0;
+  padding-block: 0;
+  border-bottom-width: 0;
+  opacity: 0;
+  overflow: hidden;
 }
 
 .ribbon-sep {
@@ -1129,23 +1343,24 @@ textarea {
   font-weight: 600;
 }
 
-/* Two buttons that read as one control. The selected one is filled and framed;
-   the other fades back.
+/* `.view-switch` is GONE (2026-08-27). It was a box around Program's two view
+   buttons that did two jobs: hold them together, and fade the position you are
+   not in to 0.7.
 
-   They carry their word as well as their symbol now, which is why every rule
-   below says `.btn` and not `.btn.icon` — the class went with the text. The
-   silhouettes stay: a mortarboard and a crowd are what the eye finds first,
-   the word is what settles it the first time. */
-.view-switch {
-  display: flex;
-  gap: var(--space-1);
-}
+   The first job is now `.ribbon-group`'s, which every group on every strip
+   has — that is the whole point of the strip having one shape. The second was
+   a signal only this one pair had; `aria-pressed` already fills the position
+   you ARE in with the section colour, on all seven strips, and a second signal
+   in one place is a thing to learn rather than a thing to read. */
 
 /* A symbol with a word beside it, wherever the strip pairs the two: the view
-   switch and the three kinds in Müsaitlik. */
+   switch and the three kinds in Müsaitlik. Centred for `.ribbon-group`'s sake:
+   in a grid of equal columns the short label in a group would otherwise sit
+   against the left edge of a box sized for the long one. */
 .ribbon .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
 }
 
@@ -1161,20 +1376,6 @@ textarea {
 
 .btn.icon:hover:not(:disabled) {
   color: var(--text);
-}
-
-/* The two-position pair — and ONLY that pair — fades the position you are not
-   in. This used to sit on `.btn.icon` itself, which meant every icon button in
-   the app was drawn at 55% for no reason. */
-/* The unselected position fades — but only to 0.7, and only on a --paper
-   ground. At 0.55 on the ribbon's darker plane the icon was a smudge. */
-.view-switch .btn {
-  opacity: 0.7;
-}
-
-.view-switch .btn:hover:not(:disabled),
-.view-switch .btn[aria-pressed="true"] {
-  opacity: 1;
 }
 
 /* More specific than the pressed rule further up, so the ink has to be
@@ -1576,13 +1777,21 @@ table.grid thead tr:nth-child(2) th {
 }
 
 
-/* ------------------------------- Density is no longer only the grid's
+/* ------------------------------- The INTERFACE's density, its own axis
    "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
    yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
 
    The switch existed and moved one table. What the reader wants from it is the
    thing it was never wired to: twenty-five teachers, twenty classes and
    ninety-nine lessons on screen without scrolling down.
+
+   `data-ui-density` and NOT `data-density` since 2026-08-27, asked for by name:
+   "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
+   farklı olsun." One attribute drove both, and they are not one decision — the
+   grid's step trades days on screen against cell size and hides the bell times
+   at the tight end; this one trades rows in a list against how far apart the
+   controls sit. Wanting the whole week in the box says nothing about wanting a
+   cramped Ayarlar.
 
    Only the BLOCK padding is touched, never the inline. `th.grip-col` and
    `td.row-no` set their own left and right to reclaim table width (see
@@ -1592,27 +1801,27 @@ table.grid thead tr:nth-child(2) th {
 
    The 12px floor on screen text is NOT crossed: nothing here changes a font
    size. What comes out is air, and air is the right thing to spend. */
-:root[data-density='ferah'] table.list th,
-:root[data-density='ferah'] table.list td,
-:root[data-density='ferah'] table.stat th,
-:root[data-density='ferah'] table.stat td {
+:root[data-ui-density='ferah'] table.list th,
+:root[data-ui-density='ferah'] table.list td,
+:root[data-ui-density='ferah'] table.stat th,
+:root[data-ui-density='ferah'] table.stat td {
   padding-block: 9px;
 }
 
-:root[data-density='sigdir'] table.list th,
-:root[data-density='sigdir'] table.list td,
-:root[data-density='sigdir'] table.stat th,
-:root[data-density='sigdir'] table.stat td {
+:root[data-ui-density='sigdir'] table.list th,
+:root[data-ui-density='sigdir'] table.list td,
+:root[data-ui-density='sigdir'] table.stat th,
+:root[data-ui-density='sigdir'] table.stat td {
   padding-block: 1px;
 }
 
 /* The row's real floor is the CONTROL in it, not the cell around it: a text box
    at .25rem top and bottom is taller than a 1px cell. Measured on the teacher
    list, and it is why trimming the cell alone bought almost nothing. */
-:root[data-density='sigdir'] .main input,
-:root[data-density='sigdir'] .main select,
-:root[data-density='sigdir'] .main textarea,
-:root[data-density='sigdir'] .main .btn {
+:root[data-ui-density='sigdir'] .main input,
+:root[data-ui-density='sigdir'] .main select,
+:root[data-ui-density='sigdir'] .main textarea,
+:root[data-ui-density='sigdir'] .main .btn {
   padding-block: var(--space-1);
   /* The leading, not the SIZE. A control's height is its line box plus its
      padding, and once the padding is at 2px the line box is what is left —
@@ -1622,25 +1831,25 @@ table.grid thead tr:nth-child(2) th {
   line-height: var(--lh-tight);
 }
 
-:root[data-density='ferah'] .main input,
-:root[data-density='ferah'] .main select,
-:root[data-density='ferah'] .main textarea {
+:root[data-ui-density='ferah'] .main input,
+:root[data-ui-density='ferah'] .main select,
+:root[data-ui-density='ferah'] .main textarea {
   padding-block: var(--space-3);
 }
 
 /* The sheet the list sits on, and the strip above it. A panel at --space-6 top
    and bottom is 48px of margin around a table whose whole complaint is that it
    does not fit. */
-:root[data-density='sigdir'] .main .panel {
+:root[data-ui-density='sigdir'] .main .panel {
   padding: var(--space-4);
   margin-bottom: var(--space-4);
 }
 
-:root[data-density='sigdir'] .main .list-tools {
+:root[data-ui-density='sigdir'] .main .list-tools {
   gap: var(--space-2);
 }
 
-:root[data-density='ferah'] .main .panel {
+:root[data-ui-density='ferah'] .main .panel {
   padding: var(--space-7);
 }
 /* A thick separator between days — so the eye can navigate 84 columns.
@@ -2209,17 +2418,34 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   z-index: 3;
 }
 
-/* How many are in the pile, riding the line that already says how long a block
-   is: "1 saat x6". Not a corner mark — the card's three lines are centred, and
-   anything pinned to a corner has to push them off centre to find room.
+/* How many are in the pile. A CORNER mark since 2026-08-27, and the note that
+   used to be here said it could not be one — "the card's three lines are
+   centred, and anything pinned to a corner has to push them off centre to find
+   room". True of an in-flow mark; this one is out of flow and costs the card
+   nothing.
+
+   It rode the block length before ("1 saat ×6") and that whole line is gone:
+   "Programda 1 saat x5 veya 2 saat x3 gibi gözükmesin kartlarda güzel değil."
+
+   It is only ever drawn on `.pool-card:first-child`, which is positioned and
+   sits above its own deck — on a static card the buried copies would paint over
+   it and it would have a box, a colour and a hit-test answer while being
+   invisible (pitfall 84).
    `--on-color` because the ground under it is a palette colour and does not
    turn with the theme (pitfall 15). */
 .stack-badge {
-  margin-left: var(--space-1);
+  position: absolute;
+  top: 1px;
+  right: 3px;
   padding: 0 var(--space-1);
   border-radius: var(--r-xs);
   background: rgba(0, 0, 0, .17);
   color: var(--on-color);
+  /* --fs-xs and not --fs-2xs: 2xs is 11px and this is on SCREEN. It was 2xs for
+     about an hour and the sweep that reads the smallest rendered text on all
+     seven tabs found it immediately — which is what that sweep is for. */
+  font-size: var(--fs-xs);
+  line-height: 1.35;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2268,26 +2494,15 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   color: var(--on-color-sub);
 }
 
-/* How many hours THIS card lands on. One lesson can leave two cards in the tray
-   — a 2+1 leaves a double and a single — and without this they are the same
-   rectangle doing two different things when dropped. `--on-color` and not the
-   theme's ink: the card's ground is a palette colour and does not turn with the
-   theme (pitfall 15). */
-.pool-card .card-size {
-  /* A row rather than a line: the pile badge sits beside the block length
-     ("1 saat x6") instead of on a fourth line of its own. */
-  display: inline-flex;
-  align-items: baseline;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  color: var(--on-color);
-  opacity: .85;
-}
-
 /* A double is drawn twice as wide as a single, because that is what it is about
    to take up. It is not decoration: the tray is where the reader chooses which
    of a lesson's blocks to place, and the width answers "which one" before the
-   words are read. Derived from the same min-width, so the two stay in step. */
+   words are read. Derived from the same min-width, so the two stay in step.
+
+   Since 2026-08-27 this is the ONLY thing on screen that says how long a block
+   is — the "2 saat" line was taken off the card by request. The card's `title`
+   still spells it out, and the choice being made in the tray is between two
+   rectangles of different width, which is what the eye was using anyway. */
 .pool-card[data-size='2'] {
   min-width: 6.5rem;
 }

@@ -135,7 +135,7 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
         const tabs = [...bar.querySelectorAll('.tab')];
         const last = tabs[tabs.length - 1]!.getBoundingClientRect();
         return {
-          width: Math.round(mark.width),
+          width: mark.width,
           left: Math.round(mark.left),
           beforeTabs: mark.right <= strip.left,
           tabOver: Math.round(last.right - strip.right),
@@ -147,8 +147,13 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
       expect(facts.beforeTabs, `%${scale}: işaret sekmelerin solunda değil`).toBe(true);
       expect(facts.left, `%${scale}: işaret sol uçta değil`).toBeLessThan(40);
       // rem, not px: at 150% it grows with the tabs instead of becoming a
-      // speck beside them.
-      expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`).toBe(scale === 100 ? 28 : 42);
+      // speck beside them. 1.75rem, and the numbers moved on 2026-08-27 with
+      // the root — 16px became 14, so 28/42 became 24.5/36.75. They are still
+      // written out rather than computed, because what this line guards is
+      // that the mark is in `rem` AT ALL: a px width would sit on 28 at both
+      // ends and the assertion would say so.
+      expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`)
+        .toBeCloseTo(scale === 100 ? 24.5 : 36.75, 0);
       // Pitfall 48: a seventh thing on this row must not push the tabs out of
       // their own box. Nothing gives way for it — it has to fit.
       expect(facts.tabOver, `%${scale}: sekmeler kutusundan taştı`).toBeLessThanOrEqual(0);

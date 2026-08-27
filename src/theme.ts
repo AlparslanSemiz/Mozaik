@@ -250,13 +250,17 @@ export const SCALE_STEP = 0.05;
  * What NO preference means — which is a different question from what the
  * floor of the range is, and they were the same number for the wrong reason.
  *
- * 1.0 was never measured; it is the number CSS starts at. The reader this is
- * built for has trouble seeing, so the first screen he opens should already
- * be a little larger than a browser default, and the setting should be there
- * to walk it further. The floor stays 1.0: somebody who deliberately turns it
- * down must be able to.
+ * It was 1.1 for a version, on the argument that the reader has trouble seeing
+ * so the first screen should already be larger than a browser default. That
+ * argument was answered by the reader himself on 2026-08-27: the screen was
+ * too big, and what he wanted was a smaller 100% AND 100% as the default. So
+ * the anchor moved instead — `:root` is 14px now, not 16 — and the default
+ * came back to the floor.
+ *
+ * The two are still not the same question, and `normalizeScale` still tells
+ * them apart (the note below): they merely agree again for the moment.
  */
-export const SCALE_DEFAULT = 1.1;
+export const SCALE_DEFAULT = 1;
 
 /**
  * Anything out of range or off-step becomes the nearest legal value; anything
@@ -357,6 +361,51 @@ export function applyDensity(density: Density): void {
     localStorage.setItem(DENSITY_KEY, density);
   } catch {
     // A density that cannot be remembered is still better than no density
+  }
+}
+
+// ----------------------------------------------------- interface density
+//
+// "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
+// farklı olsun." — the reader's own words, 2026-08-27.
+//
+// One attribute used to drive both: `data-density` sized the grid AND the
+// padding of every list, panel and control under `.main`. That was itself a
+// request ("babam tek seferde tüm listeleri görmek istiyor") and it worked,
+// but it welded two decisions together. They are not the same decision: the
+// grid's step trades DAYS ON SCREEN against cell size and hides the bell
+// times at the tight end, while the interface's step trades ROWS IN A LIST
+// against how far apart the controls sit. Wanting the whole week in the box
+// says nothing about wanting a cramped Ayarlar.
+//
+// Same shape as the grid axis in every other way: three steps, 'rahat' when
+// unreadable, out of `State`, out of the backup, and counted in Ayarlar >
+// Veri (library.ts) — a preference that is written and not listed there is a
+// preference nobody can find (the note above `storageReport`).
+
+export const UI_DENSITY_KEY = 'ders-programi-arayuz-yogunluk';
+
+const UI_DENSITY_ATTRIBUTE = 'data-ui-density';
+
+/** The same three words and the same fallback: two axes, one vocabulary. */
+export function normalizeUiDensity(raw: unknown): Density {
+  return normalizeDensity(raw);
+}
+
+export function readUiDensity(): Density {
+  try {
+    return normalizeUiDensity(localStorage.getItem(UI_DENSITY_KEY));
+  } catch {
+    return 'rahat';
+  }
+}
+
+export function applyUiDensity(density: Density): void {
+  document.documentElement.setAttribute(UI_DENSITY_ATTRIBUTE, density);
+  try {
+    localStorage.setItem(UI_DENSITY_KEY, density);
+  } catch {
+    // Same as above: an unremembered density still beats no density
   }
 }
 

@@ -55,6 +55,7 @@ export async function openWithSample(page: Page) {
  */
 export async function openSetup(page: Page, step: string) {
   await page.getByRole('button', { name: 'Kurulum' }).click();
+  await revealRibbon(page);
   // The four steps live in the tool strip now, and they are `.btn`s there, so
   // "you are here" is `aria-pressed` — the button state — rather than
   // `aria-current`, which marked a navigation link.
@@ -73,6 +74,7 @@ export async function openSetup(page: Page, step: string) {
  */
 export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' = 'all') {
   await page.getByRole('button', { name: 'Dersler', exact: true }).click();
+  await revealRibbon(page);
   const label = mode === 'class' ? 'Sınıftan' : mode === 'teacher' ? 'Öğretmenden' : 'Genel';
   await page.getByRole('button', { name: label, exact: true }).click();
   await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(label);
@@ -82,8 +84,32 @@ export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' 
  * The same for Ayarlar. School days, the bell, the four rules and the subject
  * list all live there now, not in Kurulum.
  */
+/**
+ * Brings the tool strip back before reaching for something in it.
+ *
+ * The strip hides itself while you read down the page (`src/ribbonScroll.ts`)
+ * and comes back when you scroll up — so a test that has scrolled, or that is
+ * on a long panel, has to look up first, exactly as a person would. Switching
+ * TABS restores it on its own (the effect re-attaches), which is why this is
+ * only needed for the strips that also navigate WITHIN a tab.
+ */
+export async function revealRibbon(page: Page) {
+  await page.evaluate(() => {
+    const box = document.querySelector('.main');
+    if (box === null) return;
+    // A nudge and then the top, because `scrollTop = 0` on a box already at 0
+    // fires nothing at all and the strip would stay folded on a page that has
+    // no room to scroll.
+    box.scrollTop = 1;
+    box.scrollTop = 0;
+  });
+  await expect(page.locator('.app')).not.toHaveAttribute('data-ribbon', 'gizli');
+  await expect(page.locator('.ribbon')).toBeVisible();
+}
+
 export async function openSettings(page: Page, section: string) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
+  await revealRibbon(page);
   // Sections are plain `.btn`s in the strip; they never had step numbers.
   await page
     .locator('.ribbon .btn', { hasText: section })
@@ -107,9 +133,17 @@ export async function startDrag(page: Page, index = 0) {
  *
  * Only ~35 of the 72 columns fit the screen. An off-screen cell still has a
  * boundingBox, but moving the mouse there is meaningless — in the app you reach
- * it by auto-scrolling, not by teleporting. The margins are wide enough to keep
- * out the sticky column (132px), the sticky header (~44px) and the auto-scroll
- * band (56px).
+ * it by auto-scrolling, not by teleporting.
+ *
+ * The margins are MEASURED, not written down. They used to be 140/70/70 with a
+ * comment saying "the sticky column (132px), the sticky header (~44px)". Both
+ * numbers came from a 16px root at 110%; at a 14px root the header is 49px and
+ * the column 84, and the top margin was then excluding 21px of real grid. The
+ * first teacher's row centre landed at y 175.5 against a bound of 179, so on a
+ * drag whose target row was the first one EVERY cell was filtered out and the
+ * suite reported "no cell went green" — an app failure that was not one, in
+ * fourteen tests at once. Pitfall 42: a constant that came from a measurement
+ * is only true until the thing it measured moves.
  */
 export async function visibleCells(page: Page, selector: string) {
   // Asking boundingBox() cell by cell means 72 round trips and takes seconds;
@@ -119,9 +153,20 @@ export async function visibleCells(page: Page, selector: string) {
     const wrap = document.querySelector('.grid-wrap');
     if (wrap === null) return [];
     const r = wrap.getBoundingClientRect();
-    // Margins wide enough to exclude the sticky column (132px), the sticky
-    // header (~44px) and the auto-scroll band (56px).
-    const bounds = { left: r.left + 140, right: r.right - 70, top: r.top + 70, bottom: r.bottom - 70 };
+    // What the sticky column and the sticky heading ACTUALLY take right now,
+    // plus the 56px band along each edge that drag.ts auto-scrolls in — that
+    // one is a constant in the app, so it is a constant here.
+    const BAND = 56;
+    const head = document.querySelector('table.grid thead');
+    const rowHead = document.querySelector('table.grid .row-head');
+    const headH = head === null ? 0 : head.getBoundingClientRect().height;
+    const colW = rowHead === null ? 0 : rowHead.getBoundingClientRect().width;
+    const bounds = {
+      left: r.left + colW + BAND,
+      right: r.right - BAND,
+      top: r.top + headH + 2,
+      bottom: r.bottom - BAND,
+    };
 
     const result: Array<{ x: number; y: number; index: number }> = [];
     document.querySelectorAll(sel).forEach((el, index) => {
@@ -682,16 +727,41 @@ export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
   );
 }
 
-/** Ayarlar → Görünüm'den ızgara yoğunluğunu seçer ve Program'a döner. */
-export async function chooseDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
+/**
+ * Ayarlar → Görünüm'den bir yoğunluk basamağı seçer.
+ *
+ * SCOPED TO ITS PANEL since 2026-08-27, when the one density split into two
+ * ("Izgara yoğunluğu" and "Arayüz yoğunluğu"). Both offer Ferah / Rahat /
+ * Sığdır, so an unscoped `getByRole` now matches two buttons and dies of a
+ * strict-mode violation — pitfall 74, from the direction where nothing was
+ * renamed at all: a name only has to become AMBIGUOUS, and a second panel is
+ * enough. The panel is found by its HEADING and not by its text, for the same
+ * reason that pitfall names.
+ */
+async function chooseDensityIn(
+  page: Page,
+  panel: 'Izgara yoğunluğu' | 'Arayüz yoğunluğu',
+  name: 'Ferah' | 'Rahat' | 'Sığdır',
+) {
   await openSettings(page, 'Görünüm');
-  await page.getByRole('button', { name, exact: true }).click();
-  await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute(
+  const box = page.locator('.panel', { has: page.getByRole('heading', { name: panel }) });
+  await box.getByRole('button', { name, exact: true }).click();
+  await expect(box.getByRole('button', { name, exact: true })).toHaveAttribute(
     'aria-pressed',
     'true',
   );
+}
+
+/** Ayarlar → Görünüm'den ızgara yoğunluğunu seçer ve Program'a döner. */
+export async function chooseDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
+  await chooseDensityIn(page, 'Izgara yoğunluğu', name);
   await page.getByRole('button', { name: 'Program', exact: true }).click();
   await expect(page.locator('table.grid')).toBeVisible();
+}
+
+/** ...and its twin, which moves the lists and leaves the grid alone. */
+export async function chooseUiDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığdır') {
+  await chooseDensityIn(page, 'Arayüz yoğunluğu', name);
 }
 
 /**

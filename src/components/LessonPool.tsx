@@ -185,8 +185,12 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             aria-hidden="true"
             focusable="false"
           >
+            {/* The drawer is at the BOTTOM, so the arrow points the way the
+                click sends it: down to close it, up to open it. It was the
+                other way round for a version and read as a state rather than
+                an action — "Programda havuzu aç tuşu ters gibi". */}
             <path
-              d={open ? "M5 15l7-7 7 7" : "M5 9l7 7 7-7"}
+              d={open ? "M5 9l7 7 7-7" : "M5 15l7-7 7 7"}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.2"
@@ -251,24 +255,30 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
               >
                 <span className="card-top">{c.top}</span>
                 <span className="card-bottom">{c.bottom}</span>
-                {/* Two cards of one lesson are otherwise identical, and the
-                    whole point of splitting them is that they do different
-                    things when dropped. The mark says which. */}
-                <span className="card-size">
-                  {c.size} saat
-                  {/* The deck shows at most three edges, so past three the eye
-                      would have to count what it cannot see. It rides the block
-                      length rather than a corner: "1 saat ×6" is the sentence,
-                      and a corner mark would have to push the card's own words
-                      off centre to find room. On the TOP card only — it is one
-                      fact about the pile, not a fact about a card. */}
-                  {i === 0 && s.cards.length > 1 && (
-                    <b className="stack-badge">×{s.cards.length}</b>
-                  )}
-                </span>
                 <span className="counter">
                   {c.placed}/{c.total}
                 </span>
+                {/* HOW MANY are in the pile, and nothing else. It used to read
+                    "1 saat ×6" on a line of its own, and the reader's answer to
+                    that was "Programda 1 saat x5 veya 2 saat x3 gibi gözükmesin
+                    kartlarda güzel değil."
+
+                    The block length is not lost by taking the words away: a
+                    double is drawn twice as wide as a single (`[data-size='2']`
+                    in styles.css), which is the thing the reader is choosing
+                    between and it answers before any words are read, and the
+                    card's `title` says it in full.
+
+                    A corner mark now, which the old note said it could not be —
+                    that objection was about an IN-FLOW mark pushing the card's
+                    centred lines aside. Absolutely positioned it takes no room
+                    at all. It can be seen because `.pool-stack > .pool-card
+                    :first-child` is positioned and above its own deck; on a
+                    static card it would be painted over by the copies behind
+                    it, which is pitfall 84 and cost an hour the first time. */}
+                {i === 0 && s.cards.length > 1 && (
+                  <b className="stack-badge">{s.cards.length}</b>
+                )}
               </div>
             ))}
           </div>

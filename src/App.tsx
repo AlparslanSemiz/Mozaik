@@ -19,11 +19,13 @@ import {
   readAvailClock,
   readScale,
   readTheme,
+  readUiDensity,
   type Density,
   type Motion,
   type Theme,
 } from './theme';
 import { attachScrollFade } from './scrollFade';
+import { attachRibbonScroll } from './ribbonScroll';
 import { useSolver } from './useSolver';
 import { useFolder } from './useFolder';
 import { useUpdate } from './update';
@@ -344,6 +346,10 @@ export default function App() {
   const { tab, setTab } = ui;
   const fileInput = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
+  // The shell, because that is what the auto-hiding strip's attribute goes on:
+  // the strip is a SIBLING of the scrolled box, and a rule that reaches
+  // sideways is a rule nobody finds (see ribbonScroll.ts).
+  const appRef = useRef<HTMLDivElement>(null);
 
   /**
    * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
@@ -373,6 +379,17 @@ export default function App() {
     const box = mainRef.current;
     return box === null ? undefined : attachScrollFade(box);
   }, [tab]);
+  // The strip gets out of the way while you read down and comes back when you
+  // look up. Same box, same re-attach on tab change, same reason: React swaps
+  // the whole child of `.main`. Program is left out on purpose — see the note
+  // in ribbonScroll.ts; there `.main` does not scroll at all, so attaching
+  // would simply do nothing, but saying so here is cheaper than finding out.
+  useEffect(() => {
+    const box = mainRef.current;
+    const shell = appRef.current;
+    if (box === null || shell === null || tab === 'program') return undefined;
+    return attachRibbonScroll(box, shell);
+  }, [tab]);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
@@ -380,6 +397,10 @@ export default function App() {
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
   const [density, setDensity] = useState<Density>(readDensity);
+  // Its twin, and a separate one since 2026-08-27: the grid's step and the
+  // interface's step are two decisions (see theme.ts). Only Ayarlar → Görünüm
+  // sets this one — the Program strip still speaks for the grid alone.
+  const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
   // Applied to the document by main.tsx before the first paint; this copy
   // exists only so Ayarlar → Görünüm can show which way the switch is.
   const [availClock, setAvailClock] = useState<boolean>(readAvailClock);
@@ -569,7 +590,7 @@ export default function App() {
        falling through to `--accent` since the day they were written — while
        the comment above the first one said it carried the section's colour.
        A custom property's SCOPE is part of its contract (pitfall 52). */
-    <div className="app" data-section={tab}>
+    <div className="app" ref={appRef} data-section={tab}>
       {/* ONE row: which document, where you are, what you did, and the file.
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
@@ -602,6 +623,14 @@ export default function App() {
             <button
               key={dest.id}
               className="tab"
+              /* Its OWN section, not the open one. `--sec` is written on the
+                 root (line above), so `.tab:hover` was painting whatever
+                 section you were ALREADY in — hovering Yazdır from Kurulum lit
+                 it blue. `[data-section]` in styles.css sets the variable on
+                 whatever carries the attribute, so this one line gives every
+                 tab its own colour to hover in. The lit tab is unaffected: for
+                 it the root and the button name the same section. */
+              data-section={dest.id}
               aria-current={tab === dest.id}
               aria-label={t(dest.label)}
               title={t(dest.label)}
@@ -950,6 +979,8 @@ export default function App() {
               setScale={setScale}
               density={density}
               setDensity={setDensity}
+              uiDensity={uiDensity}
+              setUiDensity={setUiDensity}
               availClock={availClock}
               setAvailClock={setAvailClock}
               motion={motion}

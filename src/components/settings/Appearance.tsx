@@ -26,6 +26,7 @@ import {
   applyDensity,
   applyMotion,
   applyScale,
+  applyUiDensity,
   SCALE_MAX,
   SCALE_MIN,
   SCALE_STEP,
@@ -43,6 +44,8 @@ interface Props {
   setScale: (next: number) => void;
   density: Density;
   setDensity: (next: Density) => void;
+  uiDensity: Density;
+  setUiDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
   motion: Motion;
@@ -67,6 +70,8 @@ export default function Appearance({
   setScale,
   density,
   setDensity,
+  uiDensity,
+  setUiDensity,
   availClock,
   setAvailClock,
   motion,
@@ -88,6 +93,11 @@ export default function Appearance({
   function chooseDensity(next: Density) {
     applyDensity(next);
     setDensity(next);
+  }
+
+  function chooseUiDensity(next: Density) {
+    applyUiDensity(next);
+    setUiDensity(next);
   }
 
   function chooseMotion(next: Motion) {
@@ -125,18 +135,22 @@ export default function Appearance({
           </p>
         </div>
 
+        {/* TWO panels since 2026-08-27, and they were one. "Program ferahlığı
+            rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından farklı
+            olsun." The two steps trade different things — days on screen
+            against cell size, versus rows in a list against how far apart the
+            controls sit — and a reader who wants the whole week in the box has
+            not thereby asked for a cramped Ayarlar. */}
         <div className="panel">
-          <h2>Arayüz yoğunluğu</h2>
+          <h2>Izgara yoğunluğu</h2>
           <p className="hint">
-            Üç basamak, ve üçü de aynı şeyi takas ediyor: <b>bir satırın
-            büyüklüğü</b> ile <b>ekranda aynı anda görünen satır sayısı</b>.
-            Program ızgarasını da, Kurulum ve Ayarlar’daki listeleri de birlikte
-            etkiler.
+            Yalnız <b>Program</b> sekmesindeki haftalık ızgarayı etkiler: bir
+            hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı.
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda, liste
-              satırları en açık. En kolay okunan, en çok kaydırılan.
+              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda. En kolay
+              okunan, en çok kaydırılan.
             </li>
             <li>
               <b>Rahat.</b> Bugüne kadarki ızgara: hücre geniş, her ders
@@ -147,12 +161,11 @@ export default function Appearance({
               <b>Sığdır.</b> Haftanın tamamı bir ekranda: hücre ekranın
               genişliğinden hesaplanır ve <b>saatler gizlenir</b>, çünkü sütunu
               dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
-              renkler yerinde kalır. Listelerde satır aralığı daralır;{' '}
-              <b>yazı boyutu küçülmez</b>, kısılan şey yalnızca boşluk.
+              renkler yerinde kalır.
             </li>
           </ul>
 
-          <div className="form-row" role="group" aria-label="Arayüz yoğunluğu">
+          <div className="form-row" role="group" aria-label="Izgara yoğunluğu">
             <button
               className="btn"
               aria-pressed={density === 'ferah'}
@@ -180,6 +193,51 @@ export default function Appearance({
             Saatleri görmek için <b>Ayarlar → Okul ve zil</b>'deki zil önizlemesine
             bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
           </p>
+        </div>
+
+        <div className="panel">
+          <h2>Arayüz yoğunluğu</h2>
+          <p className="hint">
+            Ekranın <b>geri kalanı</b>: Kurulum, Dersler, Kontrol ve Ayarlar’daki
+            listeler, panellerin kenar boşlukları, kutuların ve düğmelerin
+            yüksekliği. Program ızgarasına dokunmaz.
+          </p>
+          <ul className="hint choice-list">
+            <li>
+              <b>Ferah.</b> Satırlar en açık, paneller en geniş.
+            </li>
+            <li>
+              <b>Rahat.</b> Bugüne kadarki aralık.
+            </li>
+            <li>
+              <b>Sığdır.</b> Satır aralığı daralır, tek ekranda daha çok satır
+              görünür. <b>Yazı boyutu küçülmez</b>: kısılan şey yalnızca boşluk.
+            </li>
+          </ul>
+
+          <div className="form-row" role="group" aria-label="Arayüz yoğunluğu">
+            <button
+              className="btn"
+              aria-pressed={uiDensity === 'ferah'}
+              onClick={() => chooseUiDensity('ferah')}
+            >
+              Ferah
+            </button>
+            <button
+              className="btn"
+              aria-pressed={uiDensity === 'rahat'}
+              onClick={() => chooseUiDensity('rahat')}
+            >
+              Rahat
+            </button>
+            <button
+              className="btn"
+              aria-pressed={uiDensity === 'sigdir'}
+              onClick={() => chooseUiDensity('sigdir')}
+            >
+              Sığdır
+            </button>
+          </div>
         </div>
 
         <div className="panel">

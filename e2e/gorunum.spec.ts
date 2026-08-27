@@ -12,6 +12,7 @@ import { expect, test } from './kapan';
 import {
   openSetup,
   chooseDensity,
+  chooseUiDensity,
   open,
   openWithSample,
   openSettings,
@@ -82,22 +83,30 @@ const rootFontSize = (page: import('@playwright/test').Page) =>
  * same reason `worlds.ts` lives under `src`. It is asserted against the real
  * page below, so a drift shows up as a failure and not as a stale comment.
  */
-const SCALE_DEFAULT = 1.1;
+const SCALE_DEFAULT = 1;
+
+/**
+ * ...and the root it multiplies. 16px until 2026-08-27, 14 since: the reader
+ * asked for a smaller 100% AND 100% as the default, so the anchor moved and
+ * the default came back to the floor.
+ */
+const ROOT_PX = 14;
 
 test.describe('44. Görünüm — yazı büyüklüğü', () => {
   test('ölçek kökün yazı boyunu değiştiriyor ve yenilemede duruyor', async ({ page }) => {
     await open(page);
-    // The first screen is already a little larger than a browser default: the
-    // reader has trouble seeing, and 1.0 was never a measurement.
-    expect(await rootFontSize(page)).toBeCloseTo(16 * SCALE_DEFAULT, 1);
+    // The default is the floor again since 2026-08-27 — what got smaller is
+    // what 100% MEANS (a 14px root, not 16), which is what the reader asked
+    // for: "yüzde yüzü biraz daha küçült ... default yüzde 100 olsun".
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * SCALE_DEFAULT, 1);
 
     await chooseScale(page, 125);
-    expect(await rootFontSize(page)).toBeCloseTo(20, 1);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.25, 1);
 
     // The preference is a machine preference, so it lives in localStorage and
     // has to survive the reload that proves it is not React state.
     await page.reload();
-    expect(await rootFontSize(page)).toBeCloseTo(20, 1);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.25, 1);
     await openSettings(page, 'Görünüm');
     await expect(page.getByRole('button', { name: '%125', exact: true })).toHaveAttribute(
       'aria-pressed',
@@ -106,7 +115,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
 
     await chooseScale(page, 100);
     await page.reload();
-    expect(await rootFontSize(page)).toBeCloseTo(16, 1);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX, 1);
   });
 
   test('tavan %150 — merdivenin son basamağı gerçekten çiziliyor', async ({ page }) => {
@@ -128,7 +137,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(steps).toHaveLength(11);
 
     await chooseScale(page, 150);
-    expect(await rootFontSize(page)).toBeCloseTo(24, 1);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.5, 1);
 
     for (const [name, go] of [
       ['Kurulum → Öğretmenler', () => openSetup(page, 'Öğretmenler')],
@@ -173,13 +182,24 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     await expect(page.locator('table.grid')).toBeVisible();
     const after = await measure();
 
-    // The tolerance is DERIVED, not chosen: --cell-w is 2.125rem, so at %125 a
-    // cell wants 42.5px, and the embedded face's min-content ("09:00" in the
-    // heading — the same thing that sets the floor in pitfall 37) rounds it up
-    // to the next whole pixel. Half a pixel per column, and the grid has 78 of
-    // them: measured 3273px against an ideal 3270px. A cell written in px
-    // would land on 2616px and miss by six hundred, not by three.
-    const slack = before.columns * 0.5 + 1;
+    // The tolerance is DERIVED, not chosen, and it had to be re-derived on
+    // 2026-08-27 when the root came down to 14px.
+    //
+    // --cell-w is 2.125rem, which at 100% now asks for 29.75px — and the column
+    // is drawn at 35.0, because the heading's min-content is 35.0 and a column
+    // cannot be narrower than its content (pitfall 37). So the request has
+    // stopped deciding anything: the whole grid is now the width of its own
+    // TEXT, and text does not scale linearly. Measured at 100 / 125 / 150:
+    //
+    //   cell   35.0    44.0    54.0       (1.257x, 1.543x — not 1.25 and 1.5)
+    //   table  2437.5  3114.4  3863.3     (1.2777x, 1.5849x)
+    //
+    // That is pitfall 39 for a whole table: a real face quantises its advances,
+    // so a column sized by a glyph grows in steps. One pixel per column is the
+    // honest allowance for a step that has to land on a whole pixel 78 times;
+    // half a pixel was the allowance for a table that was still being sized by
+    // the rem request.
+    const slack = before.columns * 1 + 1;
     expect(after.columns).toBe(before.columns);
     expect(
       after.width,
@@ -349,7 +369,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     const roomy = await gridMetrics(page);
     expect(roomy.cards).toBeGreaterThan(400);
     expect(roomy.clock).toBe('block');
-    // --cell-w is 2.125rem and the root is 16px * the scale, so the cell is a
+    // --cell-w is 2.125rem and the root is ROOT_PX * the scale, so the cell is a
     // CONSEQUENCE of the scale, not a number of its own. Written out as 34 it
     // was really asserting "the default scale is 1.0".
     //
@@ -368,7 +388,12 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     // ceiling is the floor itself: the column may be pushed up to what the
     // heading needs and no further. When the embedded face changes, the
     // heading moves and this moves with it (pitfall 42).
-    const wanted = 2.125 * 16 * SCALE_DEFAULT;
+    // MEASURED AGAIN 2026-08-27, 14px root: the request is 29.75px and the
+    // column comes out 35.0px, which is exactly what the heading needs — so
+    // the cell is now entirely the heading's min-content and the request has
+    // stopped mattering. That is pitfall 37 all the way, and it is why the
+    // ceiling below is `max(wanted, headWants)` and not a number.
+    const wanted = 2.125 * ROOT_PX * SCALE_DEFAULT;
     expect(roomy.cell).toBeGreaterThanOrEqual(wanted - 0.5);
     expect(roomy.headWants, 'saat başlığı ölçülemedi').toBeGreaterThan(0);
     expect(
@@ -516,17 +541,22 @@ test.describe('51. Program: programı boşalt', () => {
   });
 });
 
-// 81. Density is no longer only the grid's.
+// 81. The INTERFACE's density — its own axis since 2026-08-27.
 //
 // "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
 //  yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
 //
-// Measured on the sample school at the default scale, Kurulum → Öğretmenler,
-// 2026-08-27:
+// ...and then: "Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı
+// rahatından farklı olsun." One attribute drove both; there are two now, and
+// the second half of this test is the one that says so — moving the interface
+// must leave `data-density` where it was, or the split is cosmetic.
 //
-//   Ferah    row 65px   9 rows above the fold
-//   Rahat    row 57px  10
-//   Sığdır   row 34px  19        (Sınıflar: 20 of 20 — the whole list)
+// Measured on the sample school at the default scale, Kurulum → Öğretmenler,
+// 2026-08-27 (14px root):
+//
+//   Ferah    row 57.5px  11 rows above the fold
+//   Rahat    row 49.5px  13
+//   Sığdır   row 31px    23
 //
 // Twenty-five teachers still do not ALL fit, and that is written down rather
 // than tuned away: what is left setting the row's height is the text box in it,
@@ -562,11 +592,17 @@ test.describe('81. Yoğunluk listelerde de', () => {
       });
     };
 
-    await chooseDensity(page, 'Ferah');
+    // The GRID's step is parked where it starts and never touched, so anything
+    // that moves below is the interface axis and nothing else.
+    const gridBefore = await page.evaluate(() =>
+      document.documentElement.getAttribute('data-density'),
+    );
+
+    await chooseUiDensity(page, 'Ferah');
     const ferah = await measure();
-    await chooseDensity(page, 'Rahat');
+    await chooseUiDensity(page, 'Rahat');
     const rahat = await measure();
-    await chooseDensity(page, 'Sığdır');
+    await chooseUiDensity(page, 'Sığdır');
     const sigdir = await measure();
 
     // Each step is tighter than the one before it — in the LIST, which is the
@@ -581,5 +617,39 @@ test.describe('81. Yoğunluk listelerde de', () => {
     for (const [name, m] of [['ferah', ferah], ['rahat', rahat], ['sigdir', sigdir]] as const) {
       expect(m.smallest, `${name}: ${m.smallest}px`).toBeGreaterThanOrEqual(12);
     }
+
+    // TWO AXES, and this is the assertion that makes them two: three moves of
+    // the interface step and the grid's step has not been touched once.
+    expect(await page.evaluate(() => document.documentElement.getAttribute('data-density'))).toBe(
+      gridBefore,
+    );
+    expect(
+      await page.evaluate(() => document.documentElement.getAttribute('data-ui-density')),
+    ).toBe('sigdir');
+    expect(
+      await page.evaluate(() => localStorage.getItem('ders-programi-arayuz-yogunluk')),
+    ).toBe('sigdir');
+  });
+
+  test('ızgara ekseni arayüz eksenini kıpırdatmıyor — ters yönde de', async ({ page }) => {
+    await openWithSample(page);
+    await chooseUiDensity(page, 'Sığdır');
+
+    // Move the GRID all the way and read the INTERFACE back.
+    await chooseDensity(page, 'Ferah');
+    const html = await page.evaluate(() => ({
+      izgara: document.documentElement.getAttribute('data-density'),
+      arayuz: document.documentElement.getAttribute('data-ui-density'),
+    }));
+    expect(html).toEqual({ izgara: 'ferah', arayuz: 'sigdir' });
+
+    // ...and it survives the reload, because two axes means two keys.
+    await page.reload();
+    expect(
+      await page.evaluate(() => ({
+        izgara: document.documentElement.getAttribute('data-density'),
+        arayuz: document.documentElement.getAttribute('data-ui-density'),
+      })),
+    ).toEqual({ izgara: 'ferah', arayuz: 'sigdir' });
   });
 });

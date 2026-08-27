@@ -142,7 +142,12 @@ export function buildCapacity(d: State): Capacity {
         : level === 'tight'
           ? `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş. Zor olacak.`
           : `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş.`;
-    return { id: t.id, name: `${t.short} · ${t.name}`, capacity, load, level, message };
+    // The NAME alone, since 2026-08-27: "Öğretmen yükü tarafında her öğretmen
+    // için çok uzun satır. kısaltmayı gösterme orada." The short is not lost —
+    // `message` still opens with it, and that is what the cell's tooltip shows
+    // and what Kontrol prints. Rows for classes and rooms were never prefixed
+    // this way, so the table is now consistent as well as shorter.
+    return { id: t.id, name: t.name, capacity, load, level, message };
   });
 
   const classes: ReportRow[] = d.classes.map((c) => {

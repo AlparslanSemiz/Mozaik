@@ -37,7 +37,9 @@ import {
   hasTwoSubjects,
   lessonSubject,
   subjectKey,
+  subjectOptions,
   subjectRank,
+  subjectTeachers,
   teacherSubjects,
   updateLesson,
   weeklyLoad,
@@ -170,15 +172,88 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   const [newLesson, setNewLesson] = useState({
     classId: '',
     teacherId: '',
+    // The subject is kept as a NAME here and nowhere else: `Lesson.second` is
+    // still a flag, and it still has to be, because a stored name would become
+    // a second truth that drifts the moment a teacher's subject is corrected
+    // (the note on `Lesson.second` in types.ts). This field lives exactly as
+    // long as the form does — it is what the two boxes agree on while they are
+    // being filled in, and `add()` turns it back into the flag.
+    subject: '',
     hours: '4',
     pairs: '0',
-    second: false,
   });
   // In a focused mode the axis comes from the ribbon, not from the form: that
   // IS the shortening the reader asked for.
   const classId = mode === 'class' ? (focused?.id ?? '') : newLesson.classId;
   const teacherId = mode === 'teacher' ? (focused?.id ?? '') : newLesson.teacherId;
   const newTeacherObj = state.teachers.find((t) => t.id === teacherId);
+
+  // BRANŞ AND ÖĞRETMEN, EACH FILLING THE OTHER IN.
+  //
+  //   "branş seçilince öğretmen seçiminin azalması, derslerde branş seçimi de
+  //    olmalı. öğretmen seçince branş kendiliğinden gelsin ama branş seçip
+  //    öğretmen de seçebilelim."
+  //
+  // Before this the form asked for the subject only when the chosen teacher
+  // held two of them, so twenty-five teachers came down one list in entry
+  // order and the subject was never a way IN — which is how a person actually
+  // thinks about a timetable ("who does Matematik for 510").
+  //
+  // Which of a teacher's subjects a name is: 0, 1, or -1 for neither. The
+  // comparison goes through `subjectKey` because a subject is free text and
+  // "matematik" and "Matematik" are one subject (subjects.ts).
+  const slotOf = (subs: string[], name: string) =>
+    subs.findIndex((x) => subjectKey(x) === subjectKey(name));
+
+  // In the teacher-focused mode the teacher is not a choice, so the only
+  // subjects worth offering are that teacher's own one or two. Everywhere else
+  // the whole school list is offered and it works as a filter.
+  const teacherSubs = newTeacherObj === undefined ? [] : teacherSubjects(newTeacherObj);
+  const subjectPool =
+    mode === 'teacher' && newTeacherObj !== undefined ? teacherSubs : subjectOptions(state);
+
+  // The subject the boxes are actually showing. Derived and not stored, because
+  // in the teacher-focused mode the teacher arrives from the RIBBON: switching
+  // to another teacher there changes nothing in this form's state, and a stored
+  // subject would then name a subject the new teacher does not hold — a
+  // controlled `<select>` whose value matches no option draws blank.
+  const subjectValue =
+    mode === 'teacher' && slotOf(subjectPool, newLesson.subject) < 0
+      ? (subjectPool[0] ?? '')
+      : newLesson.subject;
+
+  // `Lesson.second` derived from that, in ONE place. It used to be a third
+  // field in the form's state, which meant the subject box and the flag could
+  // disagree — and they did, every time the ribbon changed the focused teacher
+  // underneath them.
+  const secondFlag = slotOf(teacherSubs, subjectValue) === 1;
+
+  // The half the reader asked for by name: choosing a subject shortens this
+  // list. `subjectTeachers` already existed for the delete guard and the setup
+  // summary — it counts BOTH of a teacher's fields, so a second-subject
+  // teacher is found by either of them.
+  const teacherPool =
+    newLesson.subject === '' ? state.teachers : subjectTeachers(state, newLesson.subject);
+
+  /** Picking a teacher fills the subject in — and picks WHICH of two it is. */
+  function chooseTeacher(id: Id) {
+    const t = state.teachers.find((x) => x.id === id);
+    const subs = t === undefined ? [] : teacherSubjects(t);
+    // Keep the subject already in the box if this teacher holds it: coming in
+    // through the filter should not throw the filter away.
+    const kept = slotOf(subs, newLesson.subject);
+    const slot = kept >= 0 ? kept : 0;
+    setNewLesson({ ...newLesson, teacherId: id, subject: subs[slot] ?? '' });
+  }
+
+  /** Picking a subject narrows the teachers — and drops one that cannot hold it. */
+  function chooseSubject(name: string) {
+    // The focused mode cannot drop its teacher — the ribbon owns that axis —
+    // and it is never offered a subject that teacher does not hold anyway.
+    const drops =
+      name !== '' && newTeacherObj !== undefined && slotOf(teacherSubs, name) < 0 && mode !== 'teacher';
+    setNewLesson({ ...newLesson, subject: name, ...(drops ? { teacherId: '' } : {}) });
+  }
   // The choices depend on the hours in the box next to it, so they are rebuilt
   // as it is typed in — and the chosen one is clamped, because going from 6
   // hours to 3 has to take "2+2+2" with it.
@@ -197,7 +272,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         pairs: newPairs,
         // A teacher with one subject cannot be "second", whatever the box last
         // said before the teacher was changed.
-        second: newLesson.second && newTeacherObj !== undefined && hasTwoSubjects(newTeacherObj),
+        second: secondFlag && newTeacherObj !== undefined && hasTwoSubjects(newTeacherObj),
       }),
     );
     // Keep the axis this screen is walking, clear the one that changes from
@@ -209,8 +284,10 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
       mode === 'teacher'
         ? { ...newLesson, classId: '' }
         // `second` names one of the teacher's two subjects, so it cannot
-        // outlive the teacher it belonged to.
-        : { ...newLesson, teacherId: '', second: false },
+        // outlive the teacher it belonged to — and neither can the subject,
+        // which was filled in FROM that teacher: left standing it would narrow
+        // the teacher list to one branch for the next lesson.
+        : { ...newLesson, teacherId: '', subject: '' },
     );
   }
 
@@ -278,41 +355,48 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
               ))}
             </select>
           )}
+          {/* BEFORE the teacher, because it is also the way in: pick Matematik
+              and the twenty-five names become the four who teach it. It used to
+              appear only for a two-subject teacher, i.e. only ever as an
+              afterthought to a choice already made.
+
+              Still a NAME in the form and a FLAG in the lesson — `chooseSubject`
+              and `chooseTeacher` keep the two boxes agreeing, `add()` writes
+              `second`. */}
+          <Field label="Branş">
+            <select
+              aria-label="Branş"
+              value={subjectValue}
+              onChange={(e) => chooseSubject(e.target.value)}
+            >
+              {mode !== 'teacher' && <option value="">Tüm branşlar</option>}
+              {subjectPool.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
           {mode !== 'teacher' && (
             <select
               aria-label="Öğretmen"
               value={newLesson.teacherId}
-              onChange={(e) =>
-                setNewLesson({ ...newLesson, teacherId: e.target.value, second: false })
-              }
+              onChange={(e) => chooseTeacher(e.target.value)}
             >
-              <option value="">Öğretmen seçin</option>
-              {state.teachers.map((t) => (
+              <option value="">
+                {newLesson.subject === ''
+                  ? 'Öğretmen seçin'
+                  : `${newLesson.subject}: ${teacherPool.length} öğretmen`}
+              </option>
+              {/* BOTH subjects, not just the first. The list printed `t.subject`
+                  alone, so a teacher's second branch was invisible in the one
+                  place a lesson is given one. */}
+              {teacherPool.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.short} · {t.subject}
+                  {t.short} · {teacherSubjects(t).join(' / ')}
                 </option>
               ))}
             </select>
-          )}
-          {/* "hocayı seçtikten sonra eğer çift branşlı bir hoca varsa onun hangi
-              branşının dersi olacağını seçme özelliği de olsun." Only then: for
-              the twenty-three teachers who hold one subject there is no question
-              to ask, and a box offering one option is a box that lies about
-              having a choice. */}
-          {newTeacherObj !== undefined && hasTwoSubjects(newTeacherObj) && (
-            <Field label="Branş">
-              <select
-                aria-label="Dersin branşı"
-                value={newLesson.second ? '1' : '0'}
-                onChange={(e) => setNewLesson({ ...newLesson, second: e.target.value === '1' })}
-              >
-                {teacherSubjects(newTeacherObj).map((name, i) => (
-                  <option key={name} value={i === 0 ? '0' : '1'}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </Field>
           )}
           <Field label="Haftalık saat">
             <input

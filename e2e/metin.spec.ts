@@ -79,9 +79,14 @@ test.describe('80. Ekranda okunan metin', () => {
     // Çelik" says one, and a rule that quietly costs a separator is worse than
     // the dash it replaced.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Kurulum', exact: true }).click();
-    await page.locator('.ribbon .step', { hasText: 'Öğretmenler' }).click();
-    await expect(page.getByText('MÇ · Mehmet Çelik').first()).toBeVisible();
+    // Müsaitlik's list and not Kurulum's "Öğretmen yükü" table, which is where
+    // this witness used to stand: that table dropped the short on 2026-08-27
+    // ("Öğretmen yükü tarafında her öğretmen için çok uzun satır. kısaltmayı
+    // gösterme orada"). The separator is unaffected by that and still has to
+    // be defended, so it is asserted where it still belongs — a row that says
+    // BOTH things needs the dot between them.
+    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
+    await expect(page.getByText('MÇ · Mehmet Çelik (Matematik)').first()).toBeVisible();
 
     // And the empty cell still says "there is nothing here" rather than
     // looking like a rendering fault.

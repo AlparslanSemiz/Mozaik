@@ -1007,8 +1007,12 @@ test.describe('67. Ders dağılımı', () => {
     await expect(own.filter({ has: page.locator('[data-size="2"]') }).or(own)).not.toHaveCount(0);
     expect(await own.first().getAttribute('data-size')).toBe('2');
     expect(await own.last().getAttribute('data-size')).toBe('1');
-    await expect(own.first()).toContainText('2 saat');
-    await expect(own.last()).toContainText('1 saat');
+    // The block length left the card's TEXT on 2026-08-27 ("Programda 1 saat x5
+    // veeya 2 saat x3 gibi gözükmesin kartlarda güzel değil"). It is still in
+    // the tooltip, and on screen it is the WIDTH — which is what the reader is
+    // choosing between when two cards of one lesson sit side by side.
+    await expect(own.first()).toHaveAttribute('title', /2 saatlik blok/);
+    await expect(own.last()).toHaveAttribute('title', /1 saatlik blok/);
   });
 
   // Pitfall 33 again, and it DID happen while this box was being added: at 150 %

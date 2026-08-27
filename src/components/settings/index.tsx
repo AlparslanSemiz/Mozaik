@@ -34,6 +34,8 @@ interface Props extends PanelProps {
   setScale: (next: number) => void;
   density: Density;
   setDensity: (next: Density) => void;
+  uiDensity: Density;
+  setUiDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
   motion: Motion;
@@ -52,6 +54,8 @@ export default function Settings({
   setScale,
   density,
   setDensity,
+  uiDensity,
+  setUiDensity,
   availClock,
   setAvailClock,
   motion,
@@ -72,6 +76,8 @@ export default function Settings({
           setScale={setScale}
           density={density}
           setDensity={setDensity}
+          uiDensity={uiDensity}
+          setUiDensity={setUiDensity}
           availClock={availClock}
           setAvailClock={setAvailClock}
           motion={motion}
