@@ -8,13 +8,15 @@
 import { useCallback, useMemo } from 'react';
 import type React from 'react';
 import {
-  blockStart,
+  blockAt,
   buildIndex,
   closedConflicts,
   closedKey,
   dropMap,
   evict,
   evictionNotice,
+  pendingBlocks,
+  placedBlocks,
   removeBlock,
   placementKey,
   place,
@@ -116,6 +118,23 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
     conflicts.set(placementKey(c.classId, c.day, c.hour), c.reason);
   }
 
+  // Where every block BEGINS. `continues` used to be plain adjacency — "is the
+  // next cell the same lesson" — which was the same thing while a lesson had
+  // one block length. It is not any more: 2+1 sitting on one day is three
+  // adjacent cells of one lesson and reads as a single three-hour block unless
+  // the boundary is asked for. Same reading as everything else (see the
+  // contract in constraints.ts), so the line the eye sees is the line a
+  // right-click cuts along.
+  const heads = new Set<string>();
+  for (const lesson of d.lessons) {
+    for (const b of placedBlocks(d, lesson)) {
+      heads.add(placementKey(lesson.classId, b.day, b.hour));
+    }
+  }
+  const continuesAt = (classId: Id, day: number, hour: number, lessonId: Id): boolean =>
+    d.placements[placementKey(classId, day, hour + 1)] === lessonId &&
+    !heads.has(placementKey(classId, day, hour + 1));
+
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
   const n = dayCount * hourCount;
@@ -140,7 +159,9 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
             color: t.color,
             conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
             continues:
-              s + 1 < hourCount && ix.teacherBusy.get(closedKey(t.id, g, s + 1)) === lessonId,
+              s + 1 < hourCount &&
+              group !== undefined &&
+              continuesAt(group.id, g, s, lessonId),
           };
         }
       }
@@ -176,8 +197,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
           bottom: teacher === undefined ? '' : subjectShort(d.settings, teacher.subject),
           color: teacher?.color ?? 0,
           conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
-          continues:
-            s + 1 < hourCount && d.placements[placementKey(group.id, g, s + 1)] === lessonId,
+          continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
         };
       }
     }
@@ -220,31 +240,43 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
   );
 
   for (const lesson of d.lessons) {
-    const placed = ix.placedHours.get(lesson.id) ?? 0;
-    if (placed >= lesson.weeklyHours) {
+    // ONE CARD PER BLOCK, not per lesson. A 2+1 lesson is a two-hour card and a
+    // one-hour card, and which of them is picked up decides how many cells the
+    // drop covers — so the choice has to be a thing on the tray, not a hidden
+    // "whichever is next". Asked for by name; it is also what aSc's tray does.
+    const owed = pendingBlocks(d, lesson);
+    if (owed.length === 0) {
       completed++;
       continue;
     }
+    const placed = ix.placedHours.get(lesson.id) ?? 0;
     const group = ix.classById.get(lesson.classId);
     const teacher = ix.teacherById.get(lesson.teacherId);
     const className = group?.name ?? '?';
     const teacherShort = teacher?.short ?? '?';
-    cards.push({
-      lessonId: lesson.id,
-      row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
-      top: teacherView ? className : teacherShort,
-      bottom: teacherView ? teacherShort : className,
-      subject: teacher?.subject ?? '',
-      // The card keeps the TEACHER's colour in both views: a cell is always
-      // painted by its teacher, so this is what the card will look like.
-      color: teacher?.color ?? 0,
-      placed,
-      total: lesson.weeklyHours,
-    });
+    for (const [i, size] of owed.entries()) {
+      cards.push({
+        // Identity has to include WHICH of the lesson's cards this is, or React
+        // reuses one node for two of them and the tray stops matching the data.
+        key: `${lesson.id}#${size}#${i}`,
+        lessonId: lesson.id,
+        size,
+        row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
+        top: teacherView ? className : teacherShort,
+        bottom: teacherView ? teacherShort : className,
+        subject: teacher?.subject ?? '',
+        // The card keeps the TEACHER's colour in both views: a cell is always
+        // painted by its teacher, so this is what the card will look like.
+        color: teacher?.color ?? 0,
+        placed,
+        total: lesson.weeklyHours,
+      });
+    }
   }
 
+  // Doubles before singles inside one lesson, the way the split is written.
   cards.sort(
-    (a, b) => a.row - b.row || a.top.localeCompare(b.top, 'tr'),
+    (a, b) => a.row - b.row || a.top.localeCompare(b.top, 'tr') || b.size - a.size,
   );
   return { cards, completed };
 }
@@ -286,13 +318,13 @@ export default function Program({ state, change, solver, view }: Props) {
         // from the drag's snapshot: between pointerdown and here, an autosave,
         // an undo or a solver run may have moved the grid underneath.
         if (pushedOut.length > 0 && lesson !== undefined) {
-          const span = Math.max(1, lesson.blockSize);
+          const span = Math.max(1, data.blockSize);
           const hours: number[] = [];
           for (let i = 0; i < span; i++) hours.push(hour + i);
           next = evict(next, lesson.classId, day, hours);
         }
 
-        return place(next, data.lessonId, day, hour);
+        return place(next, data.lessonId, day, hour, data.blockSize);
       });
 
       if (told !== '') notify(told);
@@ -340,6 +372,7 @@ export default function Program({ state, change, solver, view }: Props) {
       e: React.PointerEvent,
       lessonId: Id,
       source: { classId: Id; day: number; hour: number } | null,
+      size: number,
     ) => {
       // The grid is being rewritten under the cursor; a drop now would race it.
       if (solver.running) return;
@@ -355,7 +388,7 @@ export default function Program({ state, change, solver, view }: Props) {
       // The loop moved into `dropMap`: it is not a rendering decision, it is
       // the constraint engine answering 72 questions, and one of the answers
       // ("occupied by this class's own lesson") now costs an eviction to say.
-      const map = dropMap(base, baseIx, lessonId);
+      const map = dropMap(base, baseIx, lessonId, size);
 
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
@@ -366,7 +399,7 @@ export default function Program({ state, change, solver, view }: Props) {
         {
           lessonId,
           rowId: teacherView ? lesson.teacherId : lesson.classId,
-          blockSize: Math.max(1, lesson.blockSize),
+          blockSize: Math.max(1, size),
           map,
           source,
         },
@@ -385,7 +418,7 @@ export default function Program({ state, change, solver, view }: Props) {
   );
 
   const cardStart = useCallback(
-    (e: React.PointerEvent, lessonId: Id) => beginDrag(e, lessonId, null),
+    (e: React.PointerEvent, lessonId: Id, size: number) => beginDrag(e, lessonId, null, size),
     [beginDrag],
   );
 
@@ -403,11 +436,13 @@ export default function Program({ state, change, solver, view }: Props) {
         : rowId;
       if (classId === null) return;
 
-      // The grabbed cell may be the middle of a block; the whole block moves.
-      const from = blockStart(state, classId, day, hour);
-      if (from === null) return;
+      // The grabbed cell may be the middle of a block; the whole block moves —
+      // and it carries its own length, which its lesson can no longer be asked
+      // for now that one lesson can hold blocks of two different lengths.
+      const found = blockAt(state, classId, day, hour);
+      if (found === null) return;
 
-      beginDrag(e, lessonId, { classId, day, hour: from });
+      beginDrag(e, lessonId, { classId, day, hour: found.hour }, found.size);
     },
     [state, ix, view, beginDrag],
   );

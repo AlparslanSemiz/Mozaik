@@ -14,6 +14,7 @@
 
 import { useRef, useState } from 'react';
 import { useDialogs } from '../Dialogs';
+import { useLoadSample } from '../useSample';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState, respreadColors } from '../../entities';
@@ -287,6 +288,7 @@ function Build({ update }: { update: UpdateRun }) {
 
 export default function Data({ state, change, loadState, plans, folder, update }: Props) {
   const { confirm } = useDialogs();
+  const loadSample = useLoadSample();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
   const [note, setNote] = useState<{ bad: boolean; text: string } | null>(null);
@@ -437,6 +439,27 @@ export default function Data({ state, change, loadState, plans, folder, update }
             </button>
             <button className="btn" onClick={() => change((d) => respreadColors(d, 'class'))}>
               Sınıf renklerini yeniden dağıt ({state.classes.length})
+            </button>
+          </div>
+
+          {/* The sample school's home. It used to live only on the Kurulum
+              screen, where it could only ever be reached by an EMPTY project —
+              so anyone who wanted to look at it again after starting their own
+              work had no way back to it. Kurulum still offers it once, on a
+              first run; this is where it stays. */}
+          <h3>Örnek okul verisi</h3>
+          <p className="hint">
+            25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir okul.
+            Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{' '}
+            <b>Açık olan planın yerine geçer</b>; diğer planlara dokunulmaz.
+          </p>
+          <div className="form-row">
+            <button
+              className="btn"
+              title="Bu planın yerine hazır örnek okulu koyar"
+              onClick={() => void loadSample(state, change)}
+            >
+              Örnek okulu yükle
             </button>
           </div>
 

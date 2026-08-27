@@ -5,7 +5,7 @@
 // only place that answers "what do I do first".
 
 import { expect, test } from '@playwright/test';
-import { open, openSetup, openSettings } from './helpers';
+import { answerDialog, open, openSetup, openSettings, savedText } from './helpers';
 
 test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
@@ -15,6 +15,73 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       'Kurulum',
     );
     await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
+  });
+
+  // The sample school is offered ONCE here and lives in Ayarlar → Veri. Before
+  // this it was a permanent button on the Kurulum screen — reachable only by an
+  // empty project, so anybody who had started their own work could never look
+  // at it again.
+  test.describe('örnek veri satırı', () => {
+    test('ilk açılışta duruyor, "Bir daha gösterme"den sonra yenilense de gitmiyor', async ({
+      page,
+    }) => {
+      await open(page);
+      const line = page.locator('.intro-line');
+      await expect(line).toContainText('Aracın ne yaptığını görmek');
+      await expect(line.getByRole('button', { name: 'Örnek veriyle doldur' })).toBeVisible();
+
+      await line.getByRole('button', { name: 'Bir daha gösterme' }).click();
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+      // The panel around it stays: it is the "what do I do first" answer.
+      await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
+
+      await page.reload();
+      await expect(page.locator('.panel', { hasText: 'Başlarken' })).toBeVisible();
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+    });
+
+    test('örnek veri yüklendikten sonra Kurulum’a dönünce satır yok', async ({ page }) => {
+      await open(page);
+      await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+      await answerDialog(page);
+      await expect.poll(() => savedText(page)).toContain('Örnek Kurs');
+
+      await openSetup(page, 'Derslikler');
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+      await page.reload();
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+    });
+
+    test('kendi verisini girmeye başlayan da bir daha görmüyor', async ({ page }) => {
+      await open(page);
+      await expect(page.locator('.intro-line')).toBeVisible();
+
+      await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
+      await page.getByRole('button', { name: 'Ekle', exact: true }).first().click();
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+
+      await page.reload();
+      await expect(page.locator('.intro-line')).toHaveCount(0);
+    });
+
+    test('asıl evi Ayarlar → Veri ve oradan her zaman yüklenebiliyor', async ({ page }) => {
+      await open(page);
+      // Dismiss it on Kurulum first, so this really is the other way in.
+      await page.getByRole('button', { name: 'Bir daha gösterme' }).click();
+
+      await openSettings(page, 'Veri');
+      const button = page.getByRole('button', { name: 'Örnek okulu yükle' });
+      await expect(button).toBeVisible();
+      await button.click();
+      await answerDialog(page);
+      await expect.poll(() => savedText(page)).toContain('Örnek Kurs');
+
+      // And a second time, over a project that now holds a term's work: the
+      // question has to count what it is about to replace.
+      await button.click();
+      await expect(page.locator('.dlg')).toContainText('25 öğretmen, 20 sınıf ve 99 ders');
+      await answerDialog(page, 'cancel');
+    });
   });
 
   test('Program: ne yapılacağını sırayla söylüyor', async ({ page }) => {

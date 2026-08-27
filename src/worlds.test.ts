@@ -53,21 +53,49 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     expect(illegalBlocks(d)[0]?.reason).toContain('müsait değil');
   });
 
-  it('gün sonunu taşan bloğu yakalıyor', () => {
-    const d = makeWorld({
-      days: 1,
+  // The auditor re-asks about each block with the block's OWN length. Since v7
+  // one lesson can hold blocks of two lengths, so "which block is this" is a
+  // real question and getting it wrong hides exactly this: a double whose
+  // SECOND hour is closed looks perfectly legal cell by cell.
+  it('ikinci saati kapalı olan 2’lik bloğu yakalıyor', () => {
+    let d = makeWorld({
+      days: 2,
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 }],
     });
-    d.placements[placementKey('s510', 0, 3)] = 'x1'; // 2 saatlik blok, 3'ten başlıyor
-    expect(illegalBlocks(d)).toHaveLength(1);
+    d.placements[placementKey('s510', 0, 0)] = 'x1';
+    d.placements[placementKey('s510', 0, 1)] = 'x1';
+    d = closeHours(d, 'oMC', [[0, 1]]);
+    const bad = illegalBlocks(d);
+    expect(bad).toHaveLength(1);
+    expect(bad[0]?.reason).toContain('müsait değil');
+  });
+
+  // …and the mirror image: a 2+1 lesson whose SINGLE sits on a closed hour. If
+  // the auditor read the run as one three-hour block it would ask about the
+  // wrong cells.
+  it('2+1 dersin tek saatlik bloğu kapalı saatteyse yakalıyor', () => {
+    let d = makeWorld({
+      days: 2,
+      hours: 4,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 2 }],
+    });
+    d.placements[placementKey('s510', 0, 0)] = 'x1'; // the double: 0 and 1
+    d.placements[placementKey('s510', 0, 1)] = 'x1';
+    d.placements[placementKey('s510', 1, 2)] = 'x1'; // the single, another day
+    expect(illegalBlocks(d)).toEqual([]);
+
+    d = closeHours(d, 'oMC', [[1, 2]]);
+    const bad = illegalBlocks(d);
+    expect(bad).toHaveLength(1);
+    expect(bad[0]?.hour).toBe(2);
   });
 
   it('çok saatlik bloğu TEK blok sayıyor, saat saat değil', () => {
     const d = makeWorld({
       days: 1,
       hours: 4,
-      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 3 }],
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 2 }],
     });
     d.placements[placementKey('s510', 0, 0)] = 'x1';
     d.placements[placementKey('s510', 0, 1)] = 'x1';

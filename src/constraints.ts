@@ -3,6 +3,7 @@
 //
 // Rule: business logic lives here, never inside components.
 
+import { blockPlan, clampPairs } from './blocks';
 import { closedKey, placementKey, teacherKey } from './keys';
 import {
   lessonDayCount,
@@ -110,6 +111,7 @@ export function blockerDetail(
   lessonId: Id,
   day: number,
   hour: number,
+  size?: number,
 ): Block | null {
   const lesson = ix.lessonById.get(lessonId);
   if (lesson === undefined) return { code: 'missing', message: 'Ders bulunamadı' };
@@ -127,7 +129,15 @@ export function blockerDetail(
   }
 
   // 1. Does the block fit before the end of the day
-  const block = Math.max(1, lesson.blockSize);
+  //
+  // The size is a parameter now and it is the LAST one, deliberately. A lesson
+  // no longer has one block length — 2+1 puts a two-hour card and a one-hour
+  // card in the pool at the same time — so the caller has to say which one is
+  // in the air. Squeezed in beside `day` and `hour` it would be a third number
+  // in a row and swappable in silence; left off it means "whichever block this
+  // lesson still owes first", which is what every caller that is not a drag
+  // wants anyway.
+  const block = blockSizeFor(d, lesson, size);
   if (hour + block > hourCount) {
     return {
       code: 'dayEnd',
@@ -201,7 +211,7 @@ export function blockerDetail(
 
   // 8-10. The configurable limits, but only where the rule is set to "Engelle".
   // At "Uyar" the very same text comes back from check() as a warning instead.
-  for (const rule of limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName)) {
+  for (const rule of limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName, block)) {
     if (ruleLevel(d, rule.name) === 'block') return { code: 'rule', message: rule.message };
   }
 
@@ -215,8 +225,9 @@ export function blocker(
   lessonId: Id,
   day: number,
   hour: number,
+  size?: number,
 ): string | null {
-  return blockerDetail(d, ix, lessonId, day, hour)?.message ?? null;
+  return blockerDetail(d, ix, lessonId, day, hour, size)?.message ?? null;
 }
 
 // ------------------------------------------------------------ soft rules
@@ -240,10 +251,10 @@ function limitBreaches(
   day: number,
   hour: number,
   dayName: string,
+  block: number,
 ): Breach[] {
   const out: Breach[] = [];
   const hourCount = d.settings.hours.length;
-  const block = Math.max(1, lesson.blockSize);
 
   const maxRun = limitFor(d, teacher, 'maxConsecutive');
   if (ruleActive(d, 'maxConsecutive', maxRun)) {
@@ -298,8 +309,9 @@ export function check(
   lessonId: Id,
   day: number,
   hour: number,
+  size?: number,
 ): Verdict {
-  const blocked = blocker(d, ix, lessonId, day, hour);
+  const blocked = blocker(d, ix, lessonId, day, hour, size);
   if (blocked !== null) return { blocked, warning: null };
 
   const lesson = ix.lessonById.get(lessonId);
@@ -310,7 +322,8 @@ export function check(
   }
 
   const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
-  const warnings = limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName)
+  const block = blockSizeFor(d, lesson, size);
+  const warnings = limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName, block)
     .filter((x) => ruleLevel(d, x.name) === 'warn')
     .map((x) => x.message);
 
@@ -318,49 +331,147 @@ export function check(
 }
 
 /** Every hour a lesson can go into on one day. Computed ONCE when a drag starts. */
-export function validHours(d: State, ix: Index, lessonId: Id, day: number): Set<number> {
+export function validHours(
+  d: State,
+  ix: Index,
+  lessonId: Id,
+  day: number,
+  size?: number,
+): Set<number> {
   const set = new Set<number>();
   for (let h = 0; h < d.settings.hours.length; h++) {
-    if (blocker(d, ix, lessonId, day, h) === null) set.add(h);
+    if (blocker(d, ix, lessonId, day, h, size) === null) set.add(h);
   }
   return set;
 }
 
-// ------------------------------------------------------------- placing
+// -------------------------------------------------- reading blocks off the grid
+//
+// THE CONTRACT. `placements` holds one lessonId per hour and NO block boundary
+// — a block has never been an entity here. With one block length per lesson
+// that was enough: a run of the same id split into equal chunks and the answer
+// was unique. With 2+1 it is not. Three adjacent cells of one lesson can be
+// read as [2,1] or as [1,2], and nothing on the grid can tell them apart.
+//
+// The way out is not a bigger schema, it is a rule — written once, obeyed
+// everywhere:
+//
+//   A lesson's placed blocks are read in day/hour order. Inside each run the
+//   TWO-hour blocks are taken first, while the lesson still has twos left to
+//   account for; whatever is left over is a single.
+//
+// Which reading is chosen cannot make a timetable wrong: every clash rule looks
+// at hours and at runs, never at where a boundary was drawn, so all readings of
+// the same cells are equally legal. What it decides is what a right-click takes
+// away and which cards the pool still owes — and those have to be ONE answer,
+// or the tray and the grid start disagreeing about the same lesson.
+
+export interface PlacedBlock {
+  day: number;
+  hour: number;
+  size: number;
+}
+
+/** Every placed block of one lesson, in day/hour order. See the contract above. */
+export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
+  const out: PlacedBlock[] = [];
+  let twosLeft = clampPairs(lesson.weeklyHours, lesson.pairs);
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+
+  for (let g = 0; g < dayCount; g++) {
+    let h = 0;
+    while (h < hourCount) {
+      if (d.placements[placementKey(lesson.classId, g, h)] !== lesson.id) {
+        h++;
+        continue;
+      }
+      let end = h;
+      while (
+        end < hourCount &&
+        d.placements[placementKey(lesson.classId, g, end)] === lesson.id
+      ) {
+        end++;
+      }
+      for (let cur = h; cur < end; ) {
+        const size = end - cur >= 2 && twosLeft > 0 ? 2 : 1;
+        if (size === 2) twosLeft--;
+        out.push({ day: g, hour: cur, size });
+        cur += size;
+      }
+      h = end;
+    }
+  }
+  return out;
+}
 
 /**
- * START hour of the block containing the clicked cell. null if nothing is placed.
+ * The blocks a lesson still owes, biggest first.
  *
- * Careful: the same lesson may hold several blocks on one day and those blocks
- * may be adjacent (e.g. blockSize=2 at hours 0-1 and 2-3). Walking backwards
- * looking for the same lessonId would treat both as one block. So we first find
- * the start of the consecutive run, then split the run into `blockSize` chunks
- * and pick the chunk that was clicked.
+ * A multiset difference and not an hour count, because hours cannot answer it:
+ * a 2+2+1+1 lesson with two hours down could have placed one two or two ones,
+ * and the two cases owe different cards. The reading above is what makes the
+ * question decidable at all.
  */
+export function pendingBlocks(d: State, lesson: Lesson): number[] {
+  const owed = blockPlan(lesson);
+  for (const done of placedBlocks(d, lesson)) {
+    const at = owed.indexOf(done.size);
+    // Not found: the grid holds a shape the plan does not (an old backup, or
+    // hours edited under a placed lesson). Take the biggest thing left rather
+    // than pretend nothing was placed.
+    owed.splice(at === -1 ? 0 : at, 1);
+  }
+  return owed;
+}
+
+/** The size a caller means when it does not say. See `blockerDetail`. */
+function blockSizeFor(d: State, lesson: Lesson, size?: number): number {
+  if (size !== undefined) return Math.max(1, Math.round(size));
+  return pendingBlocks(d, lesson)[0] ?? 1;
+}
+
+// ------------------------------------------------------------- placing
+
+/** START hour of the block containing the clicked cell. null if nothing is placed. */
 export function blockStart(d: State, classId: Id, day: number, hour: number): number | null {
+  const found = blockAt(d, classId, day, hour);
+  return found?.hour ?? null;
+}
+
+/** The whole block containing the clicked cell — where it starts and how long. */
+export function blockAt(
+  d: State,
+  classId: Id,
+  day: number,
+  hour: number,
+): PlacedBlock | null {
   const lessonId = d.placements[placementKey(classId, day, hour)];
   if (lessonId === undefined) return null;
+  const lesson = d.lessons.find((x) => x.id === lessonId);
+  if (lesson === undefined) return { day, hour, size: 1 };
 
-  const block = Math.max(1, d.lessons.find((x) => x.id === lessonId)?.blockSize ?? 1);
-
-  let runStart = hour;
-  while (runStart > 0 && d.placements[placementKey(classId, day, runStart - 1)] === lessonId) {
-    runStart--;
+  for (const block of placedBlocks(d, lesson)) {
+    if (block.day === day && hour >= block.hour && hour < block.hour + block.size) return block;
   }
-
-  const chunk = Math.floor((hour - runStart) / block);
-  return runStart + chunk * block;
+  return null;
 }
 
 /**
  * Writes the lesson onto the grid. Returns a new State, no mutation.
  * PRECONDITION: the caller called `blocker()` first and got null.
  */
-export function place(d: State, lessonId: Id, day: number, hour: number): State {
+export function place(
+  d: State,
+  lessonId: Id,
+  day: number,
+  hour: number,
+  size?: number,
+): State {
   const lesson = d.lessons.find((x) => x.id === lessonId);
   if (lesson === undefined) return d;
 
-  const block = Math.max(1, lesson.blockSize);
+  const block = blockSizeFor(d, lesson, size);
   const placements = { ...d.placements };
   for (let i = 0; i < block; i++) {
     placements[placementKey(lesson.classId, day, hour + i)] = lessonId;
@@ -370,16 +481,15 @@ export function place(d: State, lessonId: Id, day: number, hour: number): State 
 
 /** Removes the WHOLE block containing the clicked cell. */
 export function removeBlock(d: State, classId: Id, day: number, hour: number): State {
-  const start = blockStart(d, classId, day, hour);
-  if (start === null) return d;
+  const found = blockAt(d, classId, day, hour);
+  if (found === null) return d;
 
-  const lessonId = d.placements[placementKey(classId, day, start)];
+  const lessonId = d.placements[placementKey(classId, day, found.hour)];
   if (lessonId === undefined) return d;
 
-  const block = Math.max(1, d.lessons.find((x) => x.id === lessonId)?.blockSize ?? 1);
   const placements = { ...d.placements };
-  for (let i = 0; i < block; i++) {
-    const k = placementKey(classId, day, start + i);
+  for (let i = 0; i < found.size; i++) {
+    const k = placementKey(classId, day, found.hour + i);
     if (placements[k] === lessonId) delete placements[k];
   }
   return { ...d, placements };
@@ -416,7 +526,12 @@ export interface DropVerdict extends Verdict {
   evicts: Id[];
 }
 
-export function dropMap(d: State, ix: Index, lessonId: Id): Map<string, DropVerdict> {
+export function dropMap(
+  d: State,
+  ix: Index,
+  lessonId: Id,
+  size?: number,
+): Map<string, DropVerdict> {
   const map = new Map<string, DropVerdict>();
   const lesson = ix.lessonById.get(lessonId);
   const dayCount = d.settings.days.length;
@@ -439,33 +554,37 @@ export function dropMap(d: State, ix: Index, lessonId: Id): Map<string, DropVerd
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
       const key = `${g}|${s}`;
-      const plain = check(d, ix, lessonId, g, s);
+      const plain = check(d, ix, lessonId, g, s, size);
       if (plain.blocked === null || lesson === undefined) {
         map.set(key, { ...plain, evicts: [] });
         continue;
       }
 
-      const detail = blockerDetail(d, ix, lessonId, g, s);
+      const detail = blockerDetail(d, ix, lessonId, g, s, size);
       if (detail === null || detail.code !== 'classBusy') {
         map.set(key, { ...plain, evicts: [] });
         continue;
       }
 
       // Which of the class's own blocks are in the way. A block is identified
-      // by its HEAD, so two cells of the same 2-hour block count once.
-      const block = Math.max(1, lesson.blockSize);
-      const heads: Array<{ lesson: Lesson; hour: number }> = [];
+      // by its HEAD, so two cells of the same 2-hour block count once — and it
+      // carries its own length, because the occupant's blocks need not be the
+      // same length as each other any more.
+      const block = blockSizeFor(d, lesson, size);
+      const heads: Array<{ lesson: Lesson; hour: number; size: number }> = [];
       const seen = new Set<string>();
       for (let i = 0; i < block && s + i < hourCount; i++) {
-        const start = blockStart(work, lesson.classId, g, s + i);
-        if (start === null) continue;
-        const occupantId = work.placements[placementKey(lesson.classId, g, start)];
+        const found = blockAt(work, lesson.classId, g, s + i);
+        if (found === null) continue;
+        const occupantId = work.placements[placementKey(lesson.classId, g, found.hour)];
         if (occupantId === undefined) continue;
-        const mark = `${occupantId}|${start}`;
+        const mark = `${occupantId}|${found.hour}`;
         if (seen.has(mark)) continue;
         seen.add(mark);
         const occupant = ix.lessonById.get(occupantId);
-        if (occupant !== undefined) heads.push({ lesson: occupant, hour: start });
+        if (occupant !== undefined) {
+          heads.push({ lesson: occupant, hour: found.hour, size: found.size });
+        }
       }
 
       if (heads.length === 0) {
@@ -474,11 +593,11 @@ export function dropMap(d: State, ix: Index, lessonId: Id): Map<string, DropVerd
       }
 
       for (const h of heads) {
-        vacate(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour);
+        vacate(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
-      const after = check(work, workIx, lessonId, g, s);
+      const after = check(work, workIx, lessonId, g, s, size);
       for (const h of heads) {
-        occupy(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour);
+        occupy(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
 
       if (after.blocked !== null) {
@@ -553,8 +672,12 @@ export function occupy(
   roomId: Id | null,
   day: number,
   hour: number,
+  /** REQUIRED, unlike everywhere else: these two are the search's inner loop
+      and a wrong length here corrupts the index silently rather than refusing
+      a drop. The caller always knows which block it is moving. */
+  size: number,
 ): void {
-  const block = Math.max(1, lesson.blockSize);
+  const block = Math.max(1, Math.round(size));
   for (let i = 0; i < block; i++) {
     const h = hour + i;
     placements[placementKey(lesson.classId, day, h)] = lesson.id;
@@ -572,8 +695,12 @@ export function vacate(
   roomId: Id | null,
   day: number,
   hour: number,
+  /** REQUIRED, unlike everywhere else: these two are the search's inner loop
+      and a wrong length here corrupts the index silently rather than refusing
+      a drop. The caller always knows which block it is moving. */
+  size: number,
 ): void {
-  const block = Math.max(1, lesson.blockSize);
+  const block = Math.max(1, Math.round(size));
   for (let i = 0; i < block; i++) {
     const h = hour + i;
     delete placements[placementKey(lesson.classId, day, h)];
@@ -692,10 +819,19 @@ export function sanitize(d: State): State {
   const classIds = new Set(classes.map((x) => x.id));
 
   // Lessons whose class or teacher was deleted
-  const lessons = d.lessons.filter(
-    (x) => classIds.has(x.classId) && teacherIds.has(x.teacherId),
-  );
-  if (lessons.length !== d.lessons.length) changed = true;
+  const kept = d.lessons.filter((x) => classIds.has(x.classId) && teacherIds.has(x.teacherId));
+  if (kept.length !== d.lessons.length) changed = true;
+
+  // …and lessons whose SPLIT no longer fits their hours. Nothing else validated
+  // block geometry before v7 — `blockSize` came out of a backup file raw — and
+  // a `pairs` above the ceiling would make `blockPlan` and `placedBlocks`
+  // disagree about how many twos exist.
+  const lessons = kept.map((x) => {
+    const pairs = clampPairs(x.weeklyHours, x.pairs);
+    if (pairs === x.pairs) return x;
+    changed = true;
+    return { ...x, pairs };
+  });
   const lessonById = new Map(lessons.map((x) => [x.id, x]));
 
   // Placements: overflowing, orphan or class-mismatched records

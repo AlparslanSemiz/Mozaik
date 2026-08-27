@@ -147,28 +147,44 @@ test.describe('2. Sürükle-bırak', () => {
     expect(tried, 'görünür kapalı hücresi olan bir kart bulunamadı').toBe(true);
   });
 
+  // A card no longer stands for a whole lesson: since v7 the tray holds ONE
+  // CARD PER BLOCK, so a 2+1 lesson leaves a double and a single side by side
+  // and the card itself says which it is. That makes the double findable
+  // instead of hunted for — and the test can now also assert the other half,
+  // that a single highlights exactly one cell.
   test('2 saatlik blok sürüklenirken iki hücre birden vurgulanır', async ({ page }) => {
     await openWithSample(page);
-    // Rather than hunting for a card with counter "0/N" and blockSize=2, try all
-    // cards and take the first one that highlights two cells.
-    const cards = page.locator('.pool-card');
-    const count = Math.min(await cards.count(), 12);
-    let found = false;
+    const doubles = page.locator('.pool-card[data-size="2"]');
+    const singles = page.locator('.pool-card[data-size="1"]');
+    expect(await doubles.count(), 'örnek okulda ikili blok yok').toBeGreaterThan(0);
+    expect(await singles.count(), 'örnek okulda tek saatlik blok yok').toBeGreaterThan(0);
+    await expect(doubles.first()).toContainText('2 saat');
 
-    for (let i = 0; i < count && !found; i++) {
-      await startDrag(page, i);
+    // `startDrag` takes a position in the whole tray, so the double and the
+    // single are found by their position among ALL the cards.
+    const indexOf = (size: number) =>
+      page.evaluate(
+        (n) => [...document.querySelectorAll('.pool-card')]
+          .findIndex((el) => el.getAttribute('data-size') === String(n)),
+        size,
+      );
 
-      const free = page.locator('tr.target-row td:not(.unavailable)').first();
-      const box = await free.boundingBox();
-      if (box !== null) {
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
-        await page.waitForTimeout(60);
-        if ((await page.locator('td.drop-ok').count()) === 2) found = true;
-      }
+    const litCells = async (size: number) => {
+      await startDrag(page, await indexOf(size));
+      // A cell the drag map already says yes to: hovering a refused one would
+      // measure the refusal, not the block's length.
+      const ok = await visibleCells(page, 'tr.target-row td.can-ok');
+      const spot = ok[0]!;
+      await page.mouse.move(spot.x, spot.y, { steps: 3 });
+      await page.waitForTimeout(60);
+      const n = await page.locator('td.drop-ok').count();
       await page.keyboard.press('Escape');
       await page.mouse.up();
-    }
-    expect(found, 'blok=2 olan bir ders iki hücre vurgulamalı').toBe(true);
+      return n;
+    };
+
+    expect(await litCells(2), 'ikili blok iki hücre yakmalı').toBe(2);
+    expect(await litCells(1), 'tek saatlik blok bir hücre yakmalı').toBe(1);
   });
 
   // THE ROW'S ANSWER. Until this existed, the only cell the grid ever painted
@@ -683,7 +699,7 @@ test.describe('9. Öğle arası ayracı', () => {
 // ONE class with TWO lessons from DIFFERENT teachers, which the sample has
 // buried somewhere among 99 of them.
 const EVICT_WORLD = {
-  schemaVersion: 6,
+  schemaVersion: 7,
   settings: {
     schoolName: 'Tahliye Kursu',
     days: [
@@ -706,8 +722,8 @@ const EVICT_WORLD = {
   ],
   classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
   lessons: [
-    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
-    { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null },
+    { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 2, pairs: 0, maxPerDay: null },
   ],
   unavailable: {},
   // MÇ is sitting on Salı 1. AV has the whole grid free.
@@ -757,8 +773,10 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     // The lesson moved rows: AV now has that hour and MÇ does not.
     await expect(av).toContainText('510');
     await expect(mc).toHaveText('');
-    // ...and the old one is back in the tray, not deleted (principle 6).
-    await expect(page.locator('.pool-card', { hasText: 'MÇ' })).toHaveCount(1);
+    // ...and the old one is back in the tray, not deleted (principle 6). Two
+    // cards, not one: MÇ's lesson is 2 hours of singles, so what came back is
+    // its second single beside the one that was already waiting.
+    await expect(page.locator('.pool-card', { hasText: 'MÇ' })).toHaveCount(2);
     // .last(): "Yedek yüklendi" from loadWorld is still on screen.
     await expect(page.locator('.toast').last()).toContainText('510 — MÇ dersi havuza döndü');
   });
@@ -787,5 +805,90 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await expect(cell).toHaveClass(/drop-blocked/);
     await expect(page.locator('.reason-bar')).toContainText('müsait değil');
     await page.mouse.up();
+  });
+});
+
+// 68. Where a block ENDS, when a lesson holds blocks of two lengths.
+//
+// `placements` stores one lessonId per hour and no boundary. Three adjacent
+// cells of one lesson are readable as [2,1] or as [1,2] and the grid cannot
+// tell them apart, so one rule decides — doubles first, in day/hour order —
+// and the line the eye sees has to be the line a right-click cuts along.
+const SPLIT_WORLD = {
+  schemaVersion: 7,
+  settings: {
+    schoolName: 'Bölünmüş',
+    days: [
+      { name: 'Salı', longBreakAfter: 0 },
+      { name: 'Çarşamba', longBreakAfter: 0 },
+    ],
+    hours: ['1', '2', '3', '4'],
+    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+    rules: {
+      maxConsecutive: 'block',
+      maxPerDay: 'block',
+      minPerDay: 'warn',
+      maxSameLessonPerDay: 'block',
+    },
+    subjects: ['Matematik'],
+    subjectShorts: {},
+  },
+  rooms: [{ id: 'dA', name: 'A' }],
+  teachers: [
+    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+  ],
+  classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
+  // 3 hours as 2+1, all three sitting side by side on one day.
+  lessons: [
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 1, maxPerDay: null },
+  ],
+  unavailable: {},
+  placements: { 's510|0|0': 'x1', 's510|0|1': 'x1', 's510|0|2': 'x1' },
+};
+
+test.describe('68. 2+1 bitişikken', () => {
+  const cell = (page: Page, hour: number) =>
+    page.locator(`td[data-row="oMC"][data-day="0"][data-hour="${hour}"]`);
+
+  test('üç bitişik hücre TEK blok gibi çizilmiyor — sınır 2. saatten sonra', async ({ page }) => {
+    await loadWorld(page, SPLIT_WORLD);
+    for (const h of [0, 1, 2]) await expect(cell(page, h)).toContainText('510');
+
+    // `block-cont` is on the cell that runs INTO the next one and `block-in` on
+    // the one it runs into. The double covers hours 0-1, so hour 0 continues,
+    // hour 1 is its second half, and hour 2 begins the single on its own.
+    // Plain adjacency — what this used to be — would have said all three.
+    await expect(cell(page, 0)).toHaveClass(/block-cont/);
+    await expect(cell(page, 1)).toHaveClass(/block-in/);
+    await expect(cell(page, 1)).not.toHaveClass(/block-cont/);
+    await expect(cell(page, 2)).not.toHaveClass(/block-cont/);
+    await expect(cell(page, 2)).not.toHaveClass(/block-in/);
+  });
+
+  test('sağ tık tek saatlik bloğu alıyor, koşunun tamamını değil', async ({ page }) => {
+    await loadWorld(page, SPLIT_WORLD);
+    await cell(page, 2).click({ button: 'right' });
+
+    await expect(cell(page, 0)).toContainText('510');
+    await expect(cell(page, 1)).toContainText('510');
+    await expect(cell(page, 2)).toHaveText('');
+    // …and what came back is a ONE-hour card, not the whole lesson.
+    const back = page.locator('.pool-card');
+    await expect(back).toHaveCount(1);
+    expect(await back.getAttribute('data-size')).toBe('1');
+  });
+
+  test('sağ tık ikili bloğun ikinci saatinden de İKİ hücre alıyor', async ({ page }) => {
+    await loadWorld(page, SPLIT_WORLD);
+    await cell(page, 1).click({ button: 'right' });
+
+    await expect(cell(page, 0)).toHaveText('');
+    await expect(cell(page, 1)).toHaveText('');
+    await expect(cell(page, 2)).toContainText('510');
+    const back = page.locator('.pool-card');
+    await expect(back).toHaveCount(1);
+    expect(await back.getAttribute('data-size')).toBe('2');
   });
 });

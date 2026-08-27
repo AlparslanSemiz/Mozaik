@@ -7,6 +7,7 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { clampPairs } from './blocks';
 import { type Bundle, buildBundle } from './bundle';
 import { sanitize } from './constraints';
 import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
@@ -247,7 +248,7 @@ function migrateV1(raw: LegacyV1): LegacyV2 {
       teacherId: x.ogretmenId,
       weeklyHours: x.haftalikSaat,
       blockSize: x.blok,
-    })),
+    })) as LegacyV2['lessons'],
     unavailable: raw.musaitDegil,
     placements: raw.yerlesim,
   };
@@ -285,13 +286,49 @@ function migrateV2toV3(raw: LegacyV2): State {
       limits: { ...NO_TEACHER_LIMITS },
     })),
     classes: asArray<ClassGroup>(raw.classes, []),
-    lessons: asArray<Omit<Lesson, 'maxPerDay'>>(raw.lessons, []).map((x) => ({
-      ...x,
-      maxPerDay: null,
-    })),
+    lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
     placements: asMap<string>(raw.placements),
   };
+}
+
+/**
+ * The lessons out of a file of ANY version.
+ *
+ * v7 replaced `blockSize` (every block is this long) with `pairs` (how many of
+ * the week's hours are doubles). A v1..v6 file is read as "make the blocks that
+ * long and let the odd hour be a single": `blockSize` 2 or 3 becomes
+ * floor(hours / 2) doubles, 1 becomes none.
+ *
+ * The three-hour block is the one thing that does not survive, and it cannot:
+ * v7 has no way to write it. What DOES survive is the timetable — a 3-hour run
+ * on the grid is still three hours of the same lesson in the same class, and
+ * every placement key is untouched. Only where the boundary inside that run is
+ * read changes, and no clash rule looks at a boundary (see the contract in
+ * constraints.ts).
+ *
+ * Nothing validated `blockSize` on the way in before this, so `pairs` is
+ * clamped here as well as in `sanitize()`: a hand-edited file can say anything.
+ */
+function readLessons(raw: unknown[], version: number): Lesson[] {
+  return raw.map((item) => {
+    const x = item as Partial<Lesson> & { blockSize?: unknown };
+    const weeklyHours = asCount(x.weeklyHours, 1);
+    const pairs =
+      version >= 7
+        ? clampPairs(weeklyHours, asCount(x.pairs, 0))
+        : asCount(x.blockSize, 1) >= 2
+          ? Math.floor(weeklyHours / 2)
+          : 0;
+    return {
+      id: x.id ?? '',
+      classId: x.classId ?? '',
+      teacherId: x.teacherId ?? '',
+      weeklyHours,
+      pairs,
+      maxPerDay: asBox(x.maxPerDay),
+    };
+  });
 }
 
 function readDays(x: unknown, fallback: Day[]): Day[] {
@@ -329,12 +366,17 @@ export function parseState(text: string): State | null {
   } else if (version === 2) {
     candidate = migrateV2toV3(raw as LegacyV2);
   } else if (
-    version === 3 || version === 4 || version === 5 || version === SCHEMA_VERSION
+    version === 3 ||
+    version === 4 ||
+    version === 5 ||
+    version === 6 ||
+    version === SCHEMA_VERSION
   ) {
-    // v3..v6 only ADD fields, so one reader does all four: a v3 file arrives
+    // v3..v7 go through ONE reader: v3..v6 only ADD fields — a v3 file arrives
     // with no subject overrides, a v4 with no class colours and no subject
-    // list, a v5 with no gender, and each gets filled in below. Ids, day
-    // indexes and therefore `unavailable` / `placements` carry over untouched.
+    // list, a v5 with no gender — and v7 is the first that CHANGES one, which
+    // `readLessons` below handles on its own. Ids, day indexes and therefore
+    // `unavailable` / `placements` carry over untouched in every case.
     //
     // Every version below the current one is spelled out ON PURPOSE. Bumping
     // SCHEMA_VERSION without adding the number it used to be makes every backup
@@ -389,10 +431,7 @@ export function parseState(text: string): State | null {
         })),
       ),
       classes: spreadColors(asArray<ClassGroup>(g.classes, blank.classes)),
-      lessons: asArray<Lesson>(g.lessons, blank.lessons).map((x) => ({
-        ...x,
-        maxPerDay: asBox(x.maxPerDay),
-      })),
+      lessons: readLessons(asArray<unknown>(g.lessons, blank.lessons), Number(version)),
       unavailable: asMap<1>(g.unavailable),
       placements: asMap<string>(g.placements),
     };

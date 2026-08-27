@@ -81,7 +81,7 @@ function build(): State {
     ],
     classes: [{ id: 's510', name: '510', roomId: null, color: 0 }],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 1, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 0, maxPerDay: null },
     ],
     unavailable: { [teacherKey('oMC', 2, 3)]: 1 },
     placements: {
@@ -225,8 +225,7 @@ describe('addLessonsFromRows', () => {
   const row = (teacher: string) => ({
     className: '510',
     teacher,
-    weeklyHours: 4,
-    blockSize: 2,
+    weeklyHours: 4, pairs: 2,
   });
 
   it('öğretmeni kısaltmadan da tam addan da bulur', () => {
@@ -235,15 +234,15 @@ describe('addLessonsFromRows', () => {
       expect(missing).toEqual([]);
       expect(state.lessons).toHaveLength(1);
       expect(state.lessons[0]!.weeklyHours).toBe(4);
-      expect(state.lessons[0]!.blockSize).toBe(2);
+      expect(state.lessons[0]!.pairs).toBe(2);
     }
   });
 
   it('bulunamayan satırı TAHMİN ETMEZ, geri bildirir', () => {
     const { state, missing } = addLessonsFromRows(school(), [
       row('MÇ'),
-      { className: '999', teacher: 'MÇ', weeklyHours: 2, blockSize: 1 },
-      { className: '510', teacher: 'ZZ', weeklyHours: 2, blockSize: 1 },
+      { className: '999', teacher: 'MÇ', weeklyHours: 2, pairs: 0 },
+      { className: '510', teacher: 'ZZ', weeklyHours: 2, pairs: 0 },
     ]);
     expect(state.lessons).toHaveLength(1); // only the good row landed
     expect(missing).toEqual(['999 / MÇ', '510 / ZZ']);
@@ -256,8 +255,8 @@ describe('weeklyLoad', () => {
     d = addClass(d, '511', d.rooms[0]!.id); // shares room A with 510
     const [a, b] = d.classes;
     const teacher = d.teachers[0]!.id;
-    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blockSize: 1 });
-    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 3, blockSize: 1 });
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, pairs: 0 });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 3, pairs: 0 });
 
     expect(weeklyLoad(d, 'teacher', teacher)).toBe(7);
     expect(weeklyLoad(d, 'class', a!.id)).toBe(4);
@@ -366,8 +365,8 @@ describe('deletionSummary', () => {
     d = addClass(d, '511', room);
     const teacher = d.teachers[0]!.id;
     const [a, b] = d.classes;
-    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blockSize: 2 });
-    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 2, blockSize: 1 });
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, pairs: 2 });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 2, pairs: 0 });
     // put the 2-hour block of the first lesson on the grid
     d = place(d, d.lessons[0]!.id, 0, 0);
     return d;
@@ -707,7 +706,7 @@ describe('entityWeek', () => {
     d = addClass(d, '510', room);
     const teacher = d.teachers[0]!.id;
     const group = d.classes[0]!.id;
-    d = addLesson(d, { classId: group, teacherId: teacher, weeklyHours: 4, blockSize: 2 });
+    d = addLesson(d, { classId: group, teacherId: teacher, weeklyHours: 4, pairs: 2 });
     d = place(d, d.lessons[0]!.id, 0, 0); // Salı, 1-2. ders
     return d;
   }
@@ -785,8 +784,7 @@ describe('entityFacts', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 4,
-      blockSize: 2,
+      weeklyHours: 4, pairs: 2,
     });
     return place(d, d.lessons[0]!.id, 0, 0);
   }
@@ -915,6 +913,29 @@ describe('reorderList', () => {
     expect(reorderList(d, 'classes', 0, 1).classes.map((c) => c.name)).toEqual(['511', '510']);
   });
 
+  // The fifth list lives one level deeper, in `settings.subjects`, and what it
+  // orders is the Branş dropdown on the Öğretmenler step.
+  it('branşlar da taşınıyor — settings.subjects', () => {
+    const d = emptyState();
+    const first = d.settings.subjects[0]!;
+    const third = d.settings.subjects[2]!;
+    const moved = reorderList(d, 'subjects', 2, 0);
+    expect(moved.settings.subjects[0]).toBe(third);
+    expect(moved.settings.subjects[1]).toBe(first);
+    expect(moved.settings.subjects).toHaveLength(d.settings.subjects.length);
+    // Only the order: the rest of settings is the same object graph.
+    expect(moved.settings.subjectShorts).toBe(d.settings.subjectShorts);
+    expect(moved.rooms).toBe(d.rooms);
+  });
+
+  it('branşlarda da yerinde bırakma ve sınır dışı indis AYNI nesneyi döndürüyor', () => {
+    const d = emptyState();
+    const last = d.settings.subjects.length;
+    expect(reorderList(d, 'subjects', 1, 1)).toBe(d);
+    expect(reorderList(d, 'subjects', 0, last)).toBe(d);
+    expect(reorderList(d, 'subjects', -1, 0)).toBe(d);
+  });
+
   // The array IS the order, so nothing else may move. In particular the
   // placement and closed-hour keys are built from ids, never from a position.
   it('SIRADAN başka hiçbir şey değişmiyor', () => {
@@ -923,7 +944,7 @@ describe('reorderList', () => {
     d = addTeacher(d, { name: 'Deniz Ak', short: 'DA', subject: 'Fizik' });
     d = addClass(d, '510', null);
     const cls = d.classes[0]!.id;
-    d = addLesson(d, { classId: cls, teacherId: d.teachers[0]!.id, weeklyHours: 2, blockSize: 1 });
+    d = addLesson(d, { classId: cls, teacherId: d.teachers[0]!.id, weeklyHours: 2, pairs: 0 });
     d = setAvailability(d, d.teachers[1]!.id, [{ day: 0, hour: 0 }], true);
     d = place(d, d.lessons[0]!.id, 0, 0);
 

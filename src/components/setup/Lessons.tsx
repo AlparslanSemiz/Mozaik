@@ -1,8 +1,14 @@
 // Step: the lessons. One lesson = one class taking N weekly hours from one
-// teacher. A block is not a separate entity: it is `blockSize` here.
+// teacher.
+//
+// A block is not a separate entity: the whole shape of the week is `pairs`
+// here, and `src/blocks.ts` turns that one number into "2+2+1". The dropdown
+// beside the hours is the aSc "Lessons/week + Single" pair the reader asked
+// for by name: pick the total first, then how it falls apart.
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
+import { blockPlan, clampPairs, patternLabel, patternOptions } from '../../blocks';
 import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
@@ -21,6 +27,41 @@ import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import Field from '../Field';
 import type { PanelProps } from '../props';
+
+/**
+ * The split picker: aSc's dropdown next to "Lessons/week".
+ *
+ * No width of its own — see `.split-pick` in styles.css. The labels grow with
+ * the hours, so the browser is left to size the box from its longest option;
+ * pinned at one width it clipped ("1+1+1+1+" at 150 %), and pinned at the
+ * longest possible one it would be a very wide column for a two-hour lesson.
+ */
+function SplitPick({
+  options,
+  value,
+  title,
+  onPick,
+}: {
+  options: Array<{ pairs: number; label: string }>;
+  value: number;
+  title?: string;
+  onPick: (pairs: number) => void;
+}) {
+  return (
+    <select
+      className="split-pick"
+      value={value}
+      title={title}
+      onChange={(e) => onPick(Number(e.target.value))}
+    >
+      {options.map((o) => (
+        <option key={o.pairs} value={o.pairs}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 export default function Lessons({ state, change }: PanelProps) {
   const { confirm, alert } = useDialogs();
@@ -47,8 +88,8 @@ export default function Lessons({ state, change }: PanelProps) {
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') },
         { id: 'saat', label: 'Haftalık saate göre (çok → az)', cmp:
             byNumberThen((x) => x.weeklyHours, (x) => cls(x)?.name ?? '') },
-        { id: 'blok', label: 'Blok boyuna göre (büyük → küçük)', cmp:
-            byNumberThen((x) => x.blockSize, (x) => cls(x)?.name ?? '') },
+        { id: 'blok', label: 'İkili blok sayısına göre (çok → az)', cmp:
+            byNumberThen((x) => x.pairs, (x) => cls(x)?.name ?? '') },
       ],
     };
   }, [state]);
@@ -63,17 +104,24 @@ export default function Lessons({ state, change }: PanelProps) {
     classId: '',
     teacherId: '',
     hours: '4',
-    blockSize: '1',
+    pairs: '0',
   });
+  // The choices depend on the hours in the box next to it, so they are rebuilt
+  // as it is typed in — and the chosen one is clamped, because going from 6
+  // hours to 3 has to take "2+2+2" with it.
+  const newHours = Math.max(1, Number(newLesson.hours) || 1);
+  const newSplits = patternOptions(newHours);
+  const newPairs = clampPairs(newHours, Number(newLesson.pairs) || 0);
 
   return (
     <div className="panel step-panel">
       <h2>Dersler ({state.lessons.length})</h2>
       <p className="hint">
-        Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. <b>Blok</b>,
-        o dersin arka arkaya kaç saat işleneceğidir (1, 2 veya 3). <b>Günde ↑</b> bu
-        dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki
-        sayı geçerli olur.
+        Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat.{' '}
+        <b>Dağılım</b>, o saatlerin haftaya nasıl bölüneceğidir: <b>2+1</b> demek bir
+        gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2
+        saattir. <b>Günde ↑</b> bu dersin bir günde en fazla kaç saat olabileceğidir;
+        boşsa Ayarlar → Kurallar'daki sayı geçerli olur.
       </p>
 
       {(state.classes.length === 0 || state.teachers.length === 0) && (
@@ -115,15 +163,12 @@ export default function Lessons({ state, change }: PanelProps) {
             onChange={(e) => setNewLesson({ ...newLesson, hours: e.target.value })}
           />
         </Field>
-        <Field label="Blok">
-          <select
-            value={newLesson.blockSize}
-            onChange={(e) => setNewLesson({ ...newLesson, blockSize: e.target.value })}
-          >
-            <option value="1">1 saat</option>
-            <option value="2">2 saat</option>
-            <option value="3">3 saat</option>
-          </select>
+        <Field label="Dağılım">
+          <SplitPick
+            options={newSplits}
+            value={newPairs}
+            onPick={(pairs) => setNewLesson({ ...newLesson, pairs: String(pairs) })}
+          />
         </Field>
         <button
           className="btn"
@@ -133,8 +178,8 @@ export default function Lessons({ state, change }: PanelProps) {
               addLesson(d, {
                 classId: newLesson.classId,
                 teacherId: newLesson.teacherId,
-                weeklyHours: Number(newLesson.hours) || 1,
-                blockSize: Number(newLesson.blockSize) || 1,
+                weeklyHours: newHours,
+                pairs: newPairs,
               }),
             );
             setNewLesson({ ...newLesson, classId: '' });
@@ -144,10 +189,12 @@ export default function Lessons({ state, change }: PanelProps) {
         </button>
         <Paste
           title="Dersleri yapıştır"
-          example="Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok"
+          example="Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 veya 2)"
           parse={parseLessons}
           rowText={(x) =>
-            `${x.className} — ${x.teacher}: ${x.weeklyHours} saat, ${x.blockSize}'li blok`
+            `${x.className} — ${x.teacher}: ${x.weeklyHours} saat (${patternLabel(
+              blockPlan(x),
+            )})`
           }
           onAdd={(rows) => {
             // The report is computed OUTSIDE the reducer. It used to be raised
@@ -212,7 +259,7 @@ export default function Lessons({ state, change }: PanelProps) {
               <th>Sınıf</th>
               <th>Öğretmen</th>
               <th className="w-col-lg">Haftalık saat</th>
-              <th className="w-col-lg">Blok</th>
+              <th className="w-col-lg">Dağılım</th>
               <th className="w-col-md" title="Bu ders bir günde en fazla kaç saat">
                 Günde ↑
               </th>
@@ -258,19 +305,12 @@ export default function Lessons({ state, change }: PanelProps) {
                     />
                   </td>
                   <td>
-                    <select
-                      value={x.blockSize}
-                      onChange={(e) =>
-                        change((d) =>
-                          updateLesson(d, x.id, { blockSize: Number(e.target.value) }),
-                        )
-                      }
-                      title="Blok değiştirilirse bu dersin programdaki yerleşimleri kalkar"
-                    >
-                      <option value={1}>1 saat</option>
-                      <option value={2}>2 saat</option>
-                      <option value={3}>3 saat</option>
-                    </select>
+                    <SplitPick
+                      options={patternOptions(x.weeklyHours)}
+                      value={x.pairs}
+                      title="Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar"
+                      onPick={(pairs) => change((d) => updateLesson(d, x.id, { pairs }))}
+                    />
                   </td>
                   <td>
                     <LimitBox

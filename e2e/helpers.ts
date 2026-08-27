@@ -158,7 +158,7 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
  * below do not depend on where the sample data happens to leave a free cell.
  */
 export const FIXTURE = {
-  schemaVersion: 3,
+  schemaVersion: 7,
   settings: {
     schoolName: '',
     days: [
@@ -188,7 +188,7 @@ export const FIXTURE = {
   ],
   classes: [{ id: 's510', name: '510', roomId: 'dA' }],
   lessons: [
-    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 1, maxPerDay: null },
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 0, maxPerDay: null },
   ],
   unavailable: {},
   placements: {},

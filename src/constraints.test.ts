@@ -1,5 +1,8 @@
 import {
+  blockAt,
   blockStart,
+  pendingBlocks,
+  placedBlocks,
   blocker,
   blockerDetail,
   dropMap,
@@ -57,12 +60,12 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 1, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oAV', weeklyHours: 4, blockSize: 2, maxPerDay: null },
-      { id: 'x4', classId: 's510', teacherId: 'oAV', weeklyHours: 2, blockSize: 2, maxPerDay: null },
-      { id: 'x5', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blockSize: 1, maxPerDay: null },
-      { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, blockSize: 3, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 0, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null },
+      { id: 'x3', classId: 's433', teacherId: 'oAV', weeklyHours: 4, pairs: 2, maxPerDay: null },
+      { id: 'x4', classId: 's510', teacherId: 'oAV', weeklyHours: 2, pairs: 1, maxPerDay: null },
+      { id: 'x5', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, maxPerDay: null },
+      { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, pairs: 1, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},
@@ -70,8 +73,14 @@ function build(): State {
 }
 
 /** Shortcut for blocker(): rebuilds the index every time. */
-function why(d: State, lessonId: string, day: number, hour: number): string | null {
-  return blocker(d, buildIndex(d), lessonId, day, hour);
+function why(
+  d: State,
+  lessonId: string,
+  day: number,
+  hour: number,
+  size?: number,
+): string | null {
+  return blocker(d, buildIndex(d), lessonId, day, hour, size);
 }
 
 /** Shortcut for check(): the blocking reason plus the "Uyar" level warning. */
@@ -140,21 +149,33 @@ describe('blocker — sert kısıtlar', () => {
   });
 
   it('2 saatlik bloğu son saate koydurmaz', () => {
-    // 4 hours (0..3). blockSize=2 can start at hour 2 at the latest.
+    // 4 hours (0..3). A 2-hour block can start at hour 2 at the latest.
     expect(why(build(), 'x4', 0, 2)).toBeNull();
     expect(why(build(), 'x4', 0, 3)).toContain('sığmıyor');
   });
 
-  it('3 saatlik blok güne sığmıyorsa reddeder', () => {
-    expect(why(build(), 'x6', 0, 1)).toBeNull(); // 1,2,3 -> fits
-    expect(why(build(), 'x6', 0, 2)).toContain('sığmıyor'); // 2,3,4 -> does not
+  // The size is the LAST parameter and it is optional. Left off it means
+  // "whichever block this lesson still owes first" — x6 is 2+1, so a fresh grid
+  // owes the double — and given, it is asked about exactly.
+  it('boy verilmezse dersin SIRADAKİ bloğu sorulur', () => {
+    // x6 = 3 saat, 2+1. Nothing placed, so the question is about the double.
+    expect(why(build(), 'x6', 0, 3)).toContain('sığmıyor'); // 3,4 -> off the day
+    // Same cell, asked about the single: it fits.
+    expect(why(build(), 'x6', 0, 3, 1)).toBeNull();
+
+    // With the double down, the next thing owed is the single.
+    const half = place(build(), 'x6', 0, 0);
+    expect(why(half, 'x6', 1, 3)).toBeNull();
   });
 
   it('bloğun ikinci saatindeki çakışmayı da görür', () => {
-    // x3 has blockSize=2; placed at hour 0 it fills 0 and 1. Then x6 (blockSize=3)
-    // cannot start at hour 1.
-    const d = place(build(), 'x3', 0, 0);
-    expect(why(d, 'x6', 0, 1)).not.toBeNull();
+    // x3 is 2+2 and shares 433 with x6; placed at hour 1 it fills 1 and 2. A
+    // double of x6 starting at hour 0 is refused for its SECOND hour — cell 0
+    // itself is empty — and a single at that same cell is fine, which is what
+    // makes the refusal about the block's LENGTH rather than about the cell.
+    const d = place(build(), 'x3', 0, 1);
+    expect(why(d, 'x6', 0, 0)).not.toBeNull();
+    expect(why(d, 'x6', 0, 0, 1)).toBeNull();
   });
 
   it('aynı öğretmenin aynı sınıfta ardışık iki dersi çakışma vermez', () => {
@@ -184,7 +205,11 @@ describe('validHours', () => {
 
   it('bloklu ders için gün sonuna taşan saatleri dışarıda bırakır', () => {
     const d = build();
-    expect([...validHours(d, buildIndex(d), 'x6', 0)]).toEqual([0, 1]);
+    // x6 is 2+1 and owes its double first: 4 hours, so it can start at 0, 1
+    // or 2 — never at 3.
+    expect([...validHours(d, buildIndex(d), 'x6', 0)]).toEqual([0, 1, 2]);
+    // Its single fits everywhere, and asking for it is how the pool asks.
+    expect([...validHours(d, buildIndex(d), 'x6', 0, 1)]).toEqual([0, 1, 2, 3]);
   });
 });
 
@@ -195,23 +220,43 @@ describe('blockStart ve removeBlock', () => {
   });
 
   it('ortadan tıklanan blok tamamen kalkar', () => {
-    const d = removeBlock(place(build(), 'x6', 0, 0), 's433', 0, 2); // click the end of the 3-block
+    // x6 is 2+1, so a fresh grid places the double: hours 0 and 1.
+    const d = removeBlock(place(build(), 'x6', 0, 0), 's433', 0, 1); // click its second hour
     expect(Object.keys(d.placements)).toHaveLength(0);
   });
 
   it('bitişik iki bloğu birbirine karıştırmaz', () => {
-    // x4 has blockSize=2. First 0-1, then 2-3. Same lessonId, adjacent. Clicking
-    // hour 2 must remove only the SECOND block; naive backwards walking would
-    // delete all four.
-    let d = place(build(), 'x4', 0, 0);
-    d = place(d, 'x4', 0, 2);
-    expect(blockStart(d, 's510', 0, 2)).toBe(2);
-    expect(blockStart(d, 's510', 0, 1)).toBe(0);
+    // x3 is 2+2. First 0-1, then 2-3. Same lessonId, adjacent. Clicking hour 2
+    // must remove only the SECOND block; naive backwards walking would delete
+    // all four.
+    let d = place(build(), 'x3', 0, 0);
+    d = place(d, 'x3', 0, 2);
+    expect(blockStart(d, 's433', 0, 2)).toBe(2);
+    expect(blockStart(d, 's433', 0, 1)).toBe(0);
 
-    const after = removeBlock(d, 's510', 0, 3);
+    const after = removeBlock(d, 's433', 0, 3);
     expect(Object.keys(after.placements).sort()).toEqual([
-      placementKey('s510', 0, 0),
-      placementKey('s510', 0, 1),
+      placementKey('s433', 0, 0),
+      placementKey('s433', 0, 1),
+    ]);
+  });
+
+  // THE case v7 created. Three adjacent cells of one lesson used to be
+  // unreadable — [2,1] or [1,2]? — so the split itself decides, doubles first
+  // in day/hour order, and the whole program reads them the same way.
+  it('2+1 aynı güne bitişik konsa da İKİ blok olarak okunuyor', () => {
+    let d = place(build(), 'x6', 0, 0); // the double: hours 0 and 1
+    d = place(d, 'x6', 0, 2, 1); // the single, right beside it: hour 2
+
+    expect(blockAt(d, 's433', 0, 0)).toEqual({ day: 0, hour: 0, size: 2 });
+    expect(blockAt(d, 's433', 0, 1)).toEqual({ day: 0, hour: 0, size: 2 });
+    expect(blockAt(d, 's433', 0, 2)).toEqual({ day: 0, hour: 2, size: 1 });
+
+    // Clicking the single takes one cell, not the run.
+    const after = removeBlock(d, 's433', 0, 2);
+    expect(Object.keys(after.placements).sort()).toEqual([
+      placementKey('s433', 0, 0),
+      placementKey('s433', 0, 1),
     ]);
   });
 
@@ -219,6 +264,60 @@ describe('blockStart ve removeBlock', () => {
     const d = build();
     expect(blockStart(d, 's510', 0, 0)).toBeNull();
     expect(removeBlock(d, 's510', 0, 0)).toBe(d);
+  });
+});
+
+// THE contract v7 needed. `placements` holds one lessonId per hour and no block
+// boundary, so a run of three cells of one lesson is readable as [2,1] or as
+// [1,2] and nothing on the grid tells them apart. One rule decides — doubles
+// first, in day/hour order, while the lesson still has doubles to account for —
+// and the grid, the pool, the right-click and the auditor all obey it.
+describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
+  it('boş ızgarada yerleşmiş blok yok, bekleyen bloklar plânın kendisi', () => {
+    const d = build();
+    const x6 = d.lessons[5]!;
+    expect(placedBlocks(d, x6)).toEqual([]);
+    expect(pendingBlocks(d, x6)).toEqual([2, 1]);
+  });
+
+  it('bitişik üç hücre 2+1 okunuyor — 1+2 değil', () => {
+    let d = place(build(), 'x6', 0, 0); // the double
+    d = place(d, 'x6', 0, 2, 1); // the single, right after it
+    expect(placedBlocks(d, d.lessons[5]!)).toEqual([
+      { day: 0, hour: 0, size: 2 },
+      { day: 0, hour: 2, size: 1 },
+    ]);
+    expect(pendingBlocks(d, d.lessons[5]!)).toEqual([]);
+  });
+
+  it('ikili bütçesi bitince kalan hücreler tek saat sayılıyor', () => {
+    // x1 is 4 hours with NO doubles, so four adjacent cells are four blocks.
+    let d = build();
+    for (let h = 0; h < 4; h++) d = place(d, 'x1', 0, h, 1);
+    expect(placedBlocks(d, d.lessons[0]!).map((b) => b.size)).toEqual([1, 1, 1, 1]);
+  });
+
+  it('gün ve saat sırasıyla okunuyor', () => {
+    let d = place(build(), 'x3', 1, 2); // later day first
+    d = place(d, 'x3', 0, 0);
+    expect(placedBlocks(d, d.lessons[2]!)).toEqual([
+      { day: 0, hour: 0, size: 2 },
+      { day: 1, hour: 2, size: 2 },
+    ]);
+  });
+
+  it('yarısı yerleşmiş ders kalanını doğru söylüyor', () => {
+    const d = place(build(), 'x6', 0, 0); // the double is down
+    expect(pendingBlocks(d, d.lessons[5]!)).toEqual([1]);
+  });
+
+  // A hand-edited backup, or hours lowered under a laid-out lesson, can leave
+  // the grid holding a shape the split does not describe. It must not throw and
+  // it must not report negative work.
+  it('plânda olmayan şekil bekleyeni eksiye düşürmüyor', () => {
+    let d = build();
+    for (let h = 0; h < 4; h++) d = place(d, 'x4', 0, h, 1); // x4 only asks for 2 hours
+    expect(pendingBlocks(d, d.lessons[3]!)).toEqual([]);
   });
 });
 
@@ -601,7 +700,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
   it('tek blok: place + buildIndex ile birebir aynı', () => {
     const d = build();
     const { work, placements, ix } = mutable(d);
-    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1);
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1, 1);
     expect(live(placements, ix)).toEqual(snapshot(place(d, 'x1', 0, 1)));
     expect(work.placements).toBe(placements); // the state really shares the object
   });
@@ -609,16 +708,16 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
   it('çok saatlik blok da aynı', () => {
     const d = build();
     const { placements, ix } = mutable(d);
-    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0); // x6, blockSize 3
+    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0, 2); // x6 is 2+1; the first block is the double
     expect(live(placements, ix)).toEqual(snapshot(place(d, 'x6', 1, 0)));
   });
 
   it('üst üste yerleştirmeler de aynı', () => {
     const d = build();
     const { placements, ix } = mutable(d);
-    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 0);
-    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1); // x3, blockSize 2
-    occupy(placements, ix, d.lessons[1]!, 'dA', 1, 3);
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 0, 1);
+    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1, 2); // x3 is 2+2
+    occupy(placements, ix, d.lessons[1]!, 'dA', 1, 3, 1);
 
     let expected = place(d, 'x1', 0, 0);
     expected = place(expected, 'x3', 0, 1);
@@ -631,10 +730,10 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
     const before = snapshot(d);
     const { placements, ix } = mutable(d);
 
-    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1);
-    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0);
-    vacate(placements, ix, d.lessons[5]!, 'dB', 1, 0);
-    vacate(placements, ix, d.lessons[2]!, 'dB', 0, 1);
+    occupy(placements, ix, d.lessons[2]!, 'dB', 0, 1, 2);
+    occupy(placements, ix, d.lessons[5]!, 'dB', 1, 0, 2);
+    vacate(placements, ix, d.lessons[5]!, 'dB', 1, 0, 2);
+    vacate(placements, ix, d.lessons[2]!, 'dB', 0, 1, 2);
 
     expect(live(placements, ix)).toEqual(before);
   });
@@ -644,10 +743,10 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
     const before = snapshot(d);
     const { placements, ix } = mutable(d);
 
-    occupy(placements, ix, d.lessons[1]!, 'dA', 0, 1);
+    occupy(placements, ix, d.lessons[1]!, 'dA', 0, 1, 1);
     expect(live(placements, ix)).toEqual(snapshot(place(d, 'x2', 0, 1)));
 
-    vacate(placements, ix, d.lessons[1]!, 'dA', 0, 1);
+    vacate(placements, ix, d.lessons[1]!, 'dA', 0, 1, 1);
     expect(live(placements, ix)).toEqual(before);
   });
 
@@ -657,7 +756,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
       classes: build().classes.map((c) => (c.id === 's510' ? { ...c, roomId: null } : c)),
     };
     const { placements, ix } = mutable(d);
-    occupy(placements, ix, d.lessons[0]!, null, 0, 0);
+    occupy(placements, ix, d.lessons[0]!, null, 0, 0, 1);
     expect(live(placements, ix)).toEqual(snapshot(place(d, 'x1', 0, 0)));
     expect(ix.roomBusy.size).toBe(0);
   });
@@ -665,7 +764,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
   it('occupy sonrası blocker aynı cevabı veriyor', () => {
     const d = build();
     const { work, placements, ix } = mutable(d);
-    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1); // x1 -> 510, Monday, hour 2
+    occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1, 1); // x1 -> 510, Monday, hour 2
 
     // The class is busy, and so is MÇ.
     expect(blocker(work, ix, 'x1', 0, 1)).toBe('510 sınıfının Pazartesi 2 saatinde Matematik var');
@@ -679,15 +778,15 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
 // underlying reason produce two different sentences. The code is what anything
 // counting reasons has to count.
 describe('blockerDetail — sebebin kodu', () => {
-  const code = (d: State, lessonId: string, day: number, hour: number) =>
-    blockerDetail(d, buildIndex(d), lessonId, day, hour)?.code ?? null;
+  const code = (d: State, lessonId: string, day: number, hour: number, size?: number) =>
+    blockerDetail(d, buildIndex(d), lessonId, day, hour, size)?.code ?? null;
 
   it('geçebilen hücre için null', () => {
     expect(code(build(), 'x1', 0, 0)).toBeNull();
   });
 
   it('gün sonuna sığmayan blok', () => {
-    expect(code(build(), 'x6', 0, 2)).toBe('dayEnd'); // blockSize 3, 4 hours
+    expect(code(build(), 'x4', 0, 3)).toBe('dayEnd'); // a double at the last of 4 hours
   });
 
   it('sınıf dolu / sınıf kapalı', () => {

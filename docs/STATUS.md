@@ -1,7 +1,133 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi beşinci oturum: **sürüm, güncelleme ve
-"verilerim nerede"**; şema değişmedi)
+Son güncelleme: 2026-08-27 (yirmi altıncı oturum: **ders dağılımı (şema v7)**,
+açık tema varsayılanı, örnek verinin yeri, branşlarda sıralama) — **v1.2.0**
+
+---
+
+## Yirmi altıncı oturum — haftanın nasıl bölündüğü (2026-08-27)
+
+Kullanıcının dört maddesi, biri büyük üçü küçük:
+
+> *"En son eklenen örnek fotodaki gibi hallet. Ders saatini girdikten sonra 1
+> veya 2'nin kombinasyonları olsun. mesela 3 saat 1+1+1 veya 2+1 olarak
+> gösterilsin."* · *"default tema açık olsun"* · *"başlarken kısmındaki örnek
+> veri olayı ayarlara gitsin, sadece ilk sefer … biraz gözüksün"* ·
+> *"ayarlar branşlarda da listeyi hareket ettirme olsun"*
+
+Fotoğraf: `docs/Örnek Fotolar/Örnek saatlerin kombinasyonu göstergesi
+seçeneği.png` — aSc'nin `Lessons/week` kutusu ve **yanındaki** açılır liste.
+
+### 1. Blok dağılımı — `blockSize` → `pairs` (şema **v6 → v7**)
+
+Eski model ders başına tek bir **blok boyu** tutuyordu (1, 2 ya da 3) ve anlamı
+"bütün bloklar bu boyda"ydı. `2+1` bu modelde **yazılamıyordu**, ve daha kötüsü:
+5 saatlik bir ders 2'li bloklarla istendiğinde çözücü `floor(5/2)=2` blok koyup
+**beşinci saati kalıcı olarak yerleşemez** bırakıyordu. `src/worlds.ts` bu
+davranışı bir dünya olarak sabitlemişti (`bolunmeyen-saat`).
+
+Yeni model tek sayı: **`pairs`** — haftanın kaç saatinin **ikili** blok olarak
+ineceği. Gerisi tek saat, yani şekil belli: `5 saat + pairs 2 = 2+2+1`.
+Kombinasyonlar yalnız 1 ve 2'den kurulur; **üç saatlik blok kalktı** (kullanıcı
+kararı, ve listeyi okunur tutuyor: 12 saat 7 seçenek, üçlüyle 19 olurdu).
+
+**Asıl zorluk şemada değil, ızgaradaydı.** `placements` saat başına bir
+`lessonId` tutuyor ve blok **sınırı** diye bir kayıt hiç olmadı — tek blok boyu
+varken gerek de yoktu, koşuyu eşit parçalara bölmek tek cevabı veriyordu. `2+1`
+ile vermiyor: aynı dersin üç bitişik hücresi hem `[2,1]` hem `[1,2]`dir. Çare
+şemayı büyütmek değil, bir **sözleşme** yazıp her yeri ona uydurmak oldu
+(`constraints.ts` → `placedBlocks()`, ve **yeni tuzak 75**).
+
+| Ne | Nerede |
+|---|---|
+| `blockPlan · patternLabel · patternOptions · clampPairs` | **yeni** `src/blocks.ts` — yalnız `Lesson` tipini import eder |
+| `placedBlocks · pendingBlocks · blockAt` | `constraints.ts`; ızgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur |
+| blok boyu artık **çağrıya girer** | `blocker · blockerDetail · check · validHours · dropMap · place` → sondan isteğe bağlı `size?` (**tuzak 76**) |
+| ders başına **iki iş kalemi** | `solver.ts`: biri 2'likleri, biri 1'likleri ister |
+| v6 → v7 göçü | `store.ts` → `readLessons()`: `blockSize` 2 ya da 3 → `floor(saat/2)` ikili, 1 → sıfır |
+| Kurulum → Dersler | `Blok (1/2/3 saat)` yerine **`Dağılım`** (`1+1+1` · `2+1`) |
+| havuz | ders başına değil **blok başına kart**, boyunu yazıyor ve ikili iki kat geniş |
+
+### Ölçülen — ve düzelen şey burada görünüyor
+
+| | Önce (v6, HEAD) | Sonra (v7) |
+|---|---|---|
+| `dist/index.html` | 537 090 bayt | **542 276 bayt** (+5 186) |
+| açılış, `file://`, 1920×1080, 7 koşu | — | **65 ms medyan · 86 ms en kötü** |
+| örnek okulda havuz | 99 kart (ders başına) | **367 kart** (blok başına) |
+| ızgara | 1950 hücre | 1950 hücre |
+| `Otomatik diz` | — | **292 ms**, **367/367 blok**, havuzda **0** kaldı |
+| dizim sonrası ızgara kartı | — | 433 |
+
+Yani örnek okul artık **eksiksiz** diziliyor. Eskiden bazı saatler blok boyuna
+bölünemediği için havuzda kalıyordu; şimdi bölünecek bir şey yok.
+
+### 2. Varsayılan tema **açık** ve sistemi izlemiyor
+
+`normalizeTheme` artık `prefersDark` almıyor; `systemPrefersDark()` silindi.
+Gerekçe: işlevsel renkler (yeşil/sarı/kırmızı) açık zeminde seçildi ve orada
+**ölçüldü**. Bu, hareket ayarının **tersi** ve fark bilerek — makinesinde
+"hareketi azalt" diyen biri bir **ihtiyaç** bildiriyor (tuzak 58, taban), koyu
+tema diyen biri bir **zevk** bildiriyor. Yeni E2E: `colorScheme: 'dark'`
+altında sayfa yine açık açılıyor, ama elle seçilen koyu duruyor.
+
+### 3. Örnek verinin evi **Ayarlar → Veri**
+
+Eskiden tek ev Kurulum'daki "Başlarken" paneliydi ve orası **yalnız boş bir
+projeyle** görünüyordu: kendi verisine başlamış biri örneğe bir daha hiç
+bakamıyordu. Şimdi asıl ev Ayarlar → Veri (`Örnek okulu yükle`, proje doluysa
+soru **ne kaybedileceğini sayıyor** ve kırmızı). Kurulum'da yalnız **ilk
+kullanımda** tek satırlık bir ipucu (`.intro-line`) — örnek yüklenince, "Bir
+daha gösterme" tıklanınca ya da ilk derslik/öğretmen/sınıf girilince kalıcı
+olarak gidiyor. İşaret **onuncu makine tercihi**: `ders-programi-tanitim`,
+`State`'e girmiyor, ve `storageReport()`'a satırı eklendi.
+
+**İlk çizimde değil, EYLEMDE yazılıyor.** Okunmamış bir ipucu bir yenilemeyi
+atlatmalı — ve ilk çizimde işaretlemek, tercih yazıp sayfayı yenileyen E2E
+yardımcılarını (`openWithSampleTheme`) sessizce kırardı.
+
+### 4. Branşlarda elle sıralama
+
+Beşinci liste. `ListKind`'a `'subjects'` eklendi; `settings.subjects` bir
+seviye derinde olduğu için `reorderList`'te kendi dalı var. Ekranda **iki
+`<tbody>`**: ilkinde okulun kendi listesi (tutamaklı), ikincisinde yalnız bir
+öğretmende duran "listede değil" satırları (tutamaksız) — `rowDrag` hedefini
+gövde içindeki **indisle** buluyor, karışık tek gövdede yanlış satırı taşırdı.
+Sıranın karşılığı ölçülüyor: Öğretmenler adımındaki Branş açılır listesi bu
+sırada geliyor.
+
+### Bu turda yakalanan gerçek kusur
+
+**Dağılım kutusu %150'de kırpıldı** — ekran görüntüsüne bakılmasaydı
+görülmezdi. `1+1+1+1+1` etiketi `1+1+1+1+` olarak çizildi: değer doğru, süit
+yeşil, ve **okunamıyor** (tuzak 33'ün ta kendisi). Etiketler saatle büyüdüğü
+için sabit hiçbir genişlik doğru değil; çare `width: auto` — tarayıcının bir
+`<select>`'i en uzun seçeneğinden boylaması — ve sınıfın `table.list td >
+select { width: 100% }`'i yenmesi için **aynı öğede** durması (tuzak 34).
+Testi bedava yeşil değil: `--split-ch`'li ilk deneme 114,7 px çizdi, istenen
+261,6 idi, ve test kırmızıya döndü.
+
+### Sürüm
+
+**v1.1.0 → v1.2.0.** Minor: yeni özellikler var, ama **hiçbir yedek dosyası
+okunamaz hâle gelmedi** — v1..v6 yazılmış her dosya `readLessons()`'tan geçip
+açılıyor ve dizilmiş programı yerinde kalıyor. Dört yerde birden yükseltildi
+(`package.json` · `src-tauri/tauri.conf.json` · `src-tauri/Cargo.toml` ·
+`Cargo.lock`), çünkü aralarında bunu denetleyen bir şey yok.
+
+### Sayılar
+
+**566 birim** (+45) · **417 E2E** (+23, biri hariç yeşil) · 7 çözücü stresi ·
+`npm run kontrol` yeşil değil: aşağıdaki **bilinen hata** dışında hepsi geçiyor.
+
+> **Bu turda ÇÖZÜLMEYEN, ve bu tura ait olmayan bir kırmızı:**
+> `e2e/gorunum.spec.ts:309` — "Sığdır haftanın tamamını kutuya sokuyor".
+> Ölçülen hücre **39,547 px**, testin tavanı `2.125rem × 16 × 1.1 + 2` =
+> **39,4 px**. Fark 0,15 px. **HEAD'de de aynı sayı ölçüldü** (ayrı bir
+> `git worktree`'de derlenip koşuldu): taban başlıktaki `09:50` saatinin
+> min-content'i, ve bu turda ona dokunan hiçbir şey yok. Yani testin payı
+> sıkışmış, kod bozulmamış. Kararı — payı gerekçesiyle genişletmek mi, sütunun
+> tabanını değiştirmek mi — bu turda **verilmedi**.
 
 ---
 

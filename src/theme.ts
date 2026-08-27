@@ -1,7 +1,7 @@
 // Machine preferences: the theme, the rail, the dock, the tool strip, the
-// scale, the density, the availability clock and how much the interface is
-// allowed to MOVE. Nine independent scalars in nine keys. Deliberately NOT part
-// of `State`:
+// scale, the density, the availability clock, how much the interface is allowed
+// to MOVE, and whether the first-run line has been seen. Ten independent
+// scalars in ten keys. Deliberately NOT part of `State`:
 //
 // The theme is a property of the machine, not of the timetable. Putting it in
 // the saved project would mean a backup taken on a dark machine flips the theme
@@ -20,21 +20,18 @@ export const THEME_KEY = 'ders-programi-tema';
 const ATTRIBUTE = 'data-theme';
 
 /**
- * Anything that is not exactly 'light' or 'dark' falls back to the system
- * preference. A half-written or hand-edited value must never leave the page
- * without a theme.
+ * Anything that is not exactly 'dark' is light — including nothing at all.
+ *
+ * This deliberately does NOT follow the system, and it is the one preference
+ * here that does not. The tool's functional colours were chosen and MEASURED
+ * on the light surface (green = droppable, yellow = warning, red = blocked),
+ * so light is where the thing is known to work and dark is a choice somebody
+ * makes on purpose. Compare `normalizeMotion` below, which does follow the
+ * machine: a machine asking for less motion is stating a NEED, a machine set
+ * to dark is stating a taste, and only the first one is ours to obey.
  */
-export function normalizeTheme(raw: unknown, prefersDark: boolean): Theme {
-  if (raw === 'light' || raw === 'dark') return raw;
-  return prefersDark ? 'dark' : 'light';
-}
-
-export function systemPrefersDark(): boolean {
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  } catch {
-    return false;
-  }
+export function normalizeTheme(raw: unknown): Theme {
+  return raw === 'dark' ? 'dark' : 'light';
 }
 
 export function readTheme(): Theme {
@@ -42,9 +39,9 @@ export function readTheme(): Theme {
   try {
     stored = localStorage.getItem(THEME_KEY);
   } catch {
-    // localStorage can be unavailable; the system preference still works
+    // localStorage can be unavailable; light is still the right answer
   }
-  return normalizeTheme(stored, systemPrefersDark());
+  return normalizeTheme(stored);
 }
 
 export function applyTheme(theme: Theme): void {
@@ -454,9 +451,13 @@ export function systemPrefersReducedMotion(): boolean {
 }
 
 /**
- * Anything that is not one of the three falls back to the system preference —
- * the same shape as `normalizeTheme`, and for the same reason: a half-written
- * value must never leave the page without an answer.
+ * Anything that is not one of the three falls back to the system preference.
+ *
+ * This is where motion and the THEME part company, and on purpose: a machine
+ * asking for less motion is stating a need, so it is obeyed on the first read
+ * and it stays a floor the setting cannot go under (pitfall 58). A machine set
+ * to a dark colour scheme is stating a taste, so `normalizeTheme` above ignores
+ * it and opens light.
  */
 export function normalizeMotion(raw: unknown, prefersReduced: boolean): Motion {
   if (raw === 'tam' || raw === 'az' || raw === 'kapali') return raw;
@@ -479,5 +480,38 @@ export function applyMotion(motion: Motion): void {
     localStorage.setItem(MOTION_KEY, motion);
   } catch {
     // A preference that cannot be remembered is still better than no preference
+  }
+}
+
+// -------------------------------------------------- the first-run line
+//
+// Whether the reader has already been offered the sample school on the Kurulum
+// screen. A machine fact, not a project fact: it belongs to this browser on this
+// computer, exactly like the theme, and putting it in `State` would mean a
+// backup carries somebody else's "I have seen this" — and would cost a schema
+// migration for a hint.
+//
+// It is written when the reader ACTS (loads the sample, dismisses the line, or
+// types in a first teacher or class), never on the first paint. Marking it as
+// soon as the screen is drawn would make the line unreachable to anyone who
+// reloaded before reading it, and it would also break every test that sets a
+// preference and reloads before touching anything.
+
+export const INTRO_KEY = 'ders-programi-tanitim';
+
+export function readIntroSeen(): boolean {
+  try {
+    return localStorage.getItem(INTRO_KEY) === 'gorundu';
+  } catch {
+    // A hint that cannot be remembered is shown again; the harm is one line.
+    return false;
+  }
+}
+
+export function markIntroSeen(): void {
+  try {
+    localStorage.setItem(INTRO_KEY, 'gorundu');
+  } catch {
+    // Nothing to do: the line simply comes back next time.
   }
 }

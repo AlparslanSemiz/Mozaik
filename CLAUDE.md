@@ -44,6 +44,12 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 > Kontrolü almak, tarayıcıya bırakmaktan **daha az** karmaşa. **v0.7'de uygulandı**;
 > tercih `localStorage['ders-programi-tema']`'da, `State`'e girmez.
 >
+> **Varsayılan AÇIK (2026-08-27) ve sistemi izlemiyor.** İşlevsel renkler açık
+> zeminde seçildi ve orada **ölçüldü**; koyu, bilerek yapılan bir seçim. Bu,
+> hareket ayarının tersi ve fark bilerek: makinesinde "hareketi azalt" diyen
+> biri bir **ihtiyaç** bildiriyor (tuzak 58, taban), koyu tema diyen biri bir
+> **zevk** bildiriyor. `normalizeTheme` artık `prefersDark` almıyor.
+>
 > **Netleştirildi (2026-08-25): ilke 2 "sunucu yok" — statik yayın hariç.**
 > v1.0'da araç ikinci bir yoldan da geliyor: GitHub Pages'te duran bir sayfa
 > (`npm run build:site` → `dist-site/`). Orada **backend, veritabanı, hesap,
@@ -176,10 +182,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 521 birim testi
+npm test           # Vitest — 566 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 394 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 415 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 19 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -294,9 +300,9 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
 | **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu** |
@@ -365,6 +371,11 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
+blocks.ts                       bir haftanın NASIL bölündüğü: blockPlan ·
+                                patternLabel · patternOptions · clampPairs.
+                                Yalnız `Lesson` tipini import eder — entities.ts
+                                zaten constraints.ts'i çağırdığı için ikisinin de
+                                ihtiyacı olan şey ikisinin de ALTINDA durmalı
 library.ts                      plan kitaplığı: anahtarlar + plan üstverisi +
                                 dosya adları + "veriler nerede" raporu.
                                 State'i BİLMEZ, ham string alıp verir.
@@ -377,6 +388,10 @@ constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLM
 rules.ts / bell.ts              Testleri zorunlu.
 import.ts / entities.ts
 solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
+                                Ders başına EN ÇOK İKİ iş kalemi: biri 2'lik
+                                blokları, biri 1'likleri ister. Aramanın her
+                                sayacı (domain, MRV, ileri kontrol) elindeki
+                                blokların eşit boylu olduğunu varsayar
 worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks denetçisi.
                                 Uygulama import etmez, Vite budar. Vitest ve
                                 Playwright ikisi de buradan beslenir.
@@ -384,8 +399,9 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
 store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
 theme.ts                        makine tercihleri (tema, kenar, havuz açık mı +
                                 BOYU, araç şeridi, ölçek, yoğunluk, müsaitlik
-                                saati, HAREKET) — dokuz bağımsız skaler, dokuz
-                                anahtar, hiçbiri State'e girmez
+                                saati, HAREKET, örnek veri satırı görüldü mü) —
+                                on bağımsız skaler, on anahtar, hiçbiri State'e
+                                girmez
 toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
                                 kapsam/Kontrol süzgeci. App'te yaşar, çünkü sekme
                                 değişimi bileşeni söküyor (tuzak 18) ve çünkü
@@ -490,6 +506,13 @@ kendisi yazmaz — `normalizeLibrary()`'ye devreder, yani o kurallar tek evde du
 
 `solver.ts` kısıt mantığının **hiçbirini** yeniden yazmaz: her yasallık sorusu
 `blocker()`'a gider, yani sürüklemeyi yargılayan fonksiyonun ta kendisine.
+Bir ders **iki iş kalemine** ayrılır (2'likler ve 1'likler) çünkü aramanın
+elindeki her sayaç — aday hücre kümesi, MRV, ileri kontrolün "her bloğa bir
+başlangıç hücresi lazım" sınırı — blokların eşit boylu olduğunu varsayıyor;
+kalem içinde bu doğru kalır. İki kalem aynı sınıfı paylaştığı için `neighbours`
+onları zaten birbirinin komşusu yapar. `done` artık `placedHours`'tan
+türetilmez (iki kalem tek sayıyı paylaşamaz): yeniden başlatmada dondurulmuş
+ızgaradan `placedBlocks()` ile **boyuna göre** sayılır.
 Kendine ait iki şeyi var, ikisi de aramanın kendisiyle ilgili: her dersin
 **tavanı** (haftanın o derse verebileceği en fazla saat) arama başlamadan
 hesaplanır, ve ızgara 20 000 düğüm boyunca iyileşmezse bir dersten vazgeçilip
@@ -503,7 +526,7 @@ tek şey `place()`'in her çağrıda sözlüğü kopyalaması; onun için `const
 hesabı görüyorsan yanlış yerdedir — `constraints.ts`'e taşı.
 
 **Kural:** `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
+`palette.ts`, `solver.ts`, `blocks.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
 özellik eklenmez. `store.ts` içindeki `parseState` ve `entities.ts` içindeki
 `remapDays` de test edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi
 değişince programın kaymasını engelleyen tek şeydir.
@@ -516,7 +539,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 6
+  schemaVersion: 7
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -540,7 +563,12 @@ Teacher    { name, short, subject, gender, color, limits }  // her öğretmenin 
                                             // limits alanları null = okul varsayılanı
                                             // color = PALETTE indeksi, kimseyle çakışmaz
 ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
-Lesson     { classId, teacherId, weeklyHours, blockSize, maxPerDay }
+Lesson     { classId, teacherId, weeklyHours, pairs, maxPerDay }
+                                            // pairs = haftanın kaç saati İKİLİ
+                                            // blok olarak inecek. 0..floor(h/2).
+                                            // Gerisi tek saat, yani şekil tek
+                                            // sayıyla belli: 5 saat + pairs 2 =
+                                            // 2+2+1. blockSize'ın yerine geçti.
 ```
 
 ### Depolama anahtarları
@@ -559,6 +587,7 @@ ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
 ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
 ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
+ders-programi-tanitim    -> Kurulum'daki örnek veri satırı görüldü mü
 ```
 
 **Bu listenin tamamı Ayarlar → Veri'deki tabloda görünür ve bu bir SÖZLEŞME:**
@@ -603,7 +632,7 @@ değil — CLAUDE.md'nin tek hareket sözleşmesi (`prefers-reduced-motion: redu
 ### Dosya biçimleri — iki tane, karıştırılamaz
 
 ```
-{ "schemaVersion": 6, ... }    -> TEK plan.  ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 7, ... }    -> TEK plan.  ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    -> HER plan.  ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 
@@ -633,8 +662,16 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
 - **Derslik sınıfın sabit alanı.** Yerleştirirken oda seçilmez, ama iki sınıf aynı
   dersliği paylaşıyorsa çakışma kontrol edilir (~20 sınıf, 8 derslik).
 - **`placements` düz sözlük, dizi değil.** Gün/saat sayısı değişince taşan anahtarlar silinir.
-- **Blok ayrı varlık değil.** Ardışık anahtarlara aynı `lessonId` yazılır. Kaldırırken
-  bloğun başı geriye yürüyerek bulunur.
+- **Blok ayrı varlık değil, ve ızgara blok SINIRI saklamaz.** Ardışık anahtarlara
+  aynı `lessonId` yazılır. Bir dersin blokları eşit boylu olmadığından (2+1) bir
+  koşu birden çok türlü okunabilir; hangisi olduğuna **tek bir sözleşme** karar
+  verir — `constraints.ts`'teki `placedBlocks()`: gün/saat sırasıyla gezilir, her
+  koşuda önce **ikililer** alınır (dersin `pairs` bütçesi bitene kadar), kalan
+  hücreler tek saattir. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur.
+- **Haftalık saatin şekli tek sayıyla saklanır.** `pairs`; blok dizisi değil.
+  `weeklyHours` zaten toplam, yanına bir de dizi koymak ikinci bir gerçek olurdu.
+  Kombinasyonlar yalnız **1 ve 2**'den kurulur — üç saatlik blok v7'de kalktı,
+  gerekçe listenin okunabilirliği (12 saat 7 seçenek, üçlüyle 19 olurdu).
 - **Anahtarlarda asla isim kullanılmaz, hep `id`.** "Şükrü" adı değişince yerleşim bozulmasın.
 - **Zil saatleri hesaplanır, saklanmaz.** Başlangıç + üç süre; her günün tek farkı öğle
   arasının nereye düştüğü. Period başına satır tutmak aynı bilgiyi 12 kez saklamak olurdu.
@@ -661,9 +698,14 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
 - **`schemaVersion` ilk günden var.** v1 = Türkçe alan adları, v2 = İngilizce,
   v3 = `Day` nesneleri + zil saatleri + kurallar, v4 = `subjectShorts`,
   v5 = `ClassGroup.color` + `settings.subjects`, v6 = `Teacher.gender`.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v6 tek okuyucudan geçer (aradaki
-  tek fark eklenen alanlar); `id`'ler ve gün indeksleri değişmediği için `unavailable` ve `placements`
-  anahtarları olduğu gibi geçer. **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
+  v7 = `Lesson.pairs`, `blockSize`'ın yerine.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v7 tek okuyucudan geçer —
+  v3–v6'nın tek farkı **eklenen** alanlar, v7 ise ilkin **değişen** alanı ve onu
+  `readLessons()` kendi başına çevirir (`blockSize` 2 ya da 3 → `floor(saat/2)`
+  ikili, 1 → sıfır). `id`'ler ve gün indeksleri değişmediği için `unavailable` ve
+  `placements` anahtarları olduğu gibi geçer — **üç saatlik blok taşıyan bir
+  yedeğin de programı yerinde kalır**, yalnız o koşunun içindeki sınır yeniden
+  okunur ve hiçbir kısıt bir sınıra bakmaz (bkz. tuzak 63). **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
   hem birim hem E2E testini ekle.** Eski yedek açılmıyorsa veri kayıptır.
 
 ---
@@ -1304,6 +1346,32 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     (`has: getByRole('heading')`) kapsanır**, metniyle değil. "Ayarlar"ın
     hiçbir çekimi (`ayarlarına`, `Ayarlar →`) bir düğme adına giremez.
 
+75. **Izgara blok SINIRI saklamaz; eşit olmayan bloklarda bir koşu birden çok
+    türlü okunur.** `placements` saat başına bir `lessonId` tutuyor, blok
+    başlangıcı diye bir kayıt hiç olmadı — tek blok boyu varken gerek de yoktu:
+    koşuyu eşit parçalara bölmek tek cevabı veriyordu. `2+1` ile vermiyor. Aynı
+    dersin üç bitişik hücresi hem `[2,1]` hem `[1,2]`dir ve ızgarada ikisini
+    ayıran hiçbir işaret yok. Çare şemayı büyütmek **değil**, bir **sözleşme**
+    yazıp her yeri ona uydurmak: `placedBlocks()` gün/saat sırasıyla gezer, her
+    koşuda önce ikilileri alır (dersin `pairs` bütçesi bitene kadar), kalanı tek
+    sayar. Hangi okumanın seçildiği bir programı **yanlış yapamaz** — her kısıt
+    saate ve koşuya bakar, sınıra değil — ama sağ tıkın kaç hücre aldığına ve
+    havuzun hangi kartları borçlu olduğuna karar verir, ve o **tek** cevap
+    olmalı. Bu fonksiyonu çağırmayan her yer sessizce sapar: `continues`
+    komşulukla hesaplandığı sürece bitişik `2+1` ekranda **tek** blok gibi
+    çizilir, ve `illegalBlocks()` bloğun boyunu geçirmezse ikinci saati kapalı
+    olan bir ikiliyi hiç görmez.
+
+76. **Bir parametreyi araya sıkıştırmak, sondan eklemekten pahalıdır — hele
+    ikisi de sayıysa.** `blocker(d, ix, lessonId, day, hour)`'a blok boyu
+    gerekti; `day`'in yanına konsaydı üç sayı yan yana gelecek ve sessizce takas
+    edilebilecekti. Sondan **isteğe bağlı** eklendi (`size?`), ve verilmediğinde
+    "dersin bekleyen ilk bloğu" demek — sürükleme dışındaki her çağıranın zaten
+    istediği şey. Yüzlerce çağrı yeri (testler dâhil) olduğu gibi derlendi.
+    İstisna `occupy`/`vacate`: orada boy **zorunlu**, çünkü onlar aramanın iç
+    döngüsü ve yanlış bir boy bir bırakmayı reddetmek yerine dizini sessizce
+    bozar.
+
 ---
 
 ## Tasarım — serbest
@@ -1463,11 +1531,28 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   sütun değil **akan kart ızgarası** (`.panel-grid`) — sorun yokken sol sütun boş
   kalmasın.
 
+- **Örnek verinin evi Ayarlar → Veri.** Kurulum'da yalnız **ilk kullanımda**, tek
+  satırlık bir ipucu olarak görünür (`.intro-line`) ve işlem yapılınca bir daha
+  çıkmaz — örnek yüklendi, "Bir daha gösterme" tıklandı, ya da projeye ilk
+  derslik/öğretmen/sınıf girildi. İşareti `ders-programi-tanitim`'de, `State`'e
+  girmez. **İlk çizimde değil, EYLEMDE yazılır**: okunmamış bir ipucu bir
+  yenilemeyi atlatmalı, ve ilk çizimde işaretlemek tercih yazıp sayfayı
+  yenileyen E2E yardımcılarını sessizce kırardı. Ayarlar'daki düğme her zaman
+  orada — proje doluyken sorusu **ne kaybedileceğini sayar** ve kırmızıdır.
+  Eskiden tek ev Kurulum'du, yani ancak **boş** bir projeyle ulaşılabiliyordu:
+  kendi verisine başlamış biri örneğe bir daha hiç bakamıyordu.
 - **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum dört sayılabilir adım:
   `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
   kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
   dokunulan şey aynı ekranda durmaz.
 - **Ayarlar beş bölüm**: `Okul ve zil · Kurallar · Branşlar · Görünüm · Veri`.
+  **Branşlar da elle sıralanır** (2026-08-27) — Kurulum'un dört listesiyle aynı
+  tutamak, aynı `useRowOrder`. Sıranın karşılığı görünür: Öğretmenler adımındaki
+  Branş açılır listesi bu sırada gelir. `settings.subjects` bir seviye derinde
+  olduğu için `reorderList`'te kendi dalı var; ekranda **iki `<tbody>`** —
+  ilkinde okulun kendi listesi (tutamaklı), ikincisinde yalnız bir öğretmende
+  duran "listede değil" satırları (tutamaksız), çünkü `rowDrag` hedefini gövde
+  içindeki **indisle** buluyor ve karışık tek gövdede yanlış satırı taşırdı.
   Görünüm iki şey ayarlar, ikisi de makinenin: **yazı büyüklüğü**
   (`--ui-scale`, %100–%125, altı düğme) ve **ızgara yoğunluğu** (Rahat /
   Sığdır). **Kaydırıcı değil düğme**: ölçeğin altı yasal değeri var, kaydırıcı
@@ -1525,6 +1610,11 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   çubuk değil (yasak liste: animasyon). Bütün koşu **tek geri-al adımı**.
 - Ana ekran aSc'deki gibi: **satır = öğretmen, sütun = 6 gün x 12 saat**, tek geniş
   tablo. **Havuz ALTTA, ve boyu SÜRÜKLENEBİLİR** (`.pool` + `.pool-split`).
+  **Havuzda ders başına değil BLOK başına kart** (2026-08-27): `2+1` bir ders
+  bir ikili ve bir tekli bırakır, kart hangisi olduğunu hem yazar (`2 saat`) hem
+  genişliğiyle söyler (`[data-size='2']` iki katı). Hangi bloğu nereye koyacağı
+  tepsideki bir seçim, gizli bir "sıradaki" değil. Yan fayda: `weeklyHours`'ı
+  elle aşmak imkânsızlaştı — kart bitince sürüklenecek bir şey kalmıyor.
   Bir sürüm sağda durdu; sav ("ızgara yatayda zaten taşıyor") doğruydu ama
   havuzu üç kart genişliğinde bir sütuna çeviriyordu: 99 bekleyen ders
   kaydırılan bir liste oluyordu, görülen bir tepsi değil. Altta aynı 99 kart
@@ -1559,6 +1649,11 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   olan çerçeveli. İndeks kaybolmadı — `State`'in sakladığı, yedeğin taşıdığı ve
   "iki öğretmen aynı renkte mi" sorusunun sorulduğu şey o — swatch'ın üstünde
   `--on-color` mürekkeple durur.
+- **Haftalık saat girilir, dağılım SEÇİLİR.** aSc'nin `Lessons/week` + yanındaki
+  liste ikilisi (`docs/Örnek Fotolar/Örnek saatlerin kombinasyonu göstergesi
+  seçeneği.png`). Seçenekler saatten türer: 3 saat → `1+1+1` · `2+1`; 5 saat →
+  `1+1+1+1+1` · `2+1+1+1` · `2+2+1`. Saat düşünce seçim kırpılır, ve dağılım
+  değişince o dersin yerleşimleri kalkar (yerleşmiş blokların boyu artık yanlış).
 - **Branş yazılmaz, seçilir.** Serbest metin "Matemtik"i sessizce ikinci bir branş
   yapıyordu ve kısaltması yine "Mat" çıktığı için kâğıtta ayırt edilemiyordu. Liste
   Ayarlar'da yönetilir; "+ Yeni branş…" ile oracıkta eklenir. **Kullanılan branş

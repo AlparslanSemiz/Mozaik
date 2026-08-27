@@ -175,12 +175,15 @@ tokeninden biri okunur (tuzak 57).
 | `.can-ok` `.can-warn` `.can-no` | hedef satırın TAMAMI, sürükleme başında bir kez (`drag.ts`) |
 | `.drop-ok` `.drop-warn` `.drop-blocked` | imlecin altındaki blok — zayıf katmanı ezer |
 | `.pool` `.pool-split` `.pool-card` … | havuz çekmecesi, boyu sürüklenir |
+| `.pool-card .card-size` · `.pool-card[data-size='2']` | kartın kaç saat olduğu: yazıyla ve **iki kat genişlikle**. Bir ders birden çok kart bırakır (`2+1` → bir ikili, bir tekli), ve hangisinin sürüklendiği kaç hücrenin yanacağını belirler |
 | `.inspect` | bir adı varlık paneline bağlayan bağlantı |
 
 ### Kurulum · Müsaitlik · Baskı
 | Sınıf | İş |
 |---|---|
 | `.step` `.step-no` `.step-count` `.step-icon` | dört adım, ribbon'un içinde |
+| `.split-pick` | Dersler'deki dağılım seçicisi. **Kendi genişliği YOK** (`width: auto`): etiketleri saatle büyüyor (`2+1` üç karakter, on bir tek saat yirmi bir), sabit bir genişlik %150'de `1+1+1+1+` çizmişti. Sınıf `<select>`'in **kendi üstünde**, yoksa `table.list td > select { width: 100% }` onu yener (tuzak 34) |
+| `.intro-line` · `.btn.quiet` | Kurulum'da ilk kullanımda çıkan tek satırlık örnek veri ipucu, ve onu kapatan sessiz düğme — teklifin yanındaki eşit ağırlıkta ikinci bir düğme, bir kapatmayı bir karara çevirirdi |
 | `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi; simge `steps.tsx`'in `KIND_ICON`'undan |
 | `table.availability` (+`.heat`) | boyanan çizelge + haftanın darlığı ısı haritası |
 | `.pickers` `.pick-list` `.pick-item` | hangi sayfalar basılacak |

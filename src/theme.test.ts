@@ -23,19 +23,18 @@ import {
 
 describe('normalizeTheme', () => {
   it('kayıtlı geçerli tercih olduğu gibi kullanılır', () => {
-    expect(normalizeTheme('dark', false)).toBe('dark');
-    expect(normalizeTheme('light', true)).toBe('light');
+    expect(normalizeTheme('dark')).toBe('dark');
+    expect(normalizeTheme('light')).toBe('light');
   });
 
-  it('kayıt yoksa sistem tercihine düşer', () => {
-    expect(normalizeTheme(null, true)).toBe('dark');
-    expect(normalizeTheme(null, false)).toBe('light');
+  it('kayıt yoksa AÇIK — sistem tercihine bakılmaz', () => {
+    expect(normalizeTheme(null)).toBe('light');
+    expect(normalizeTheme(undefined)).toBe('light');
   });
 
-  it('bozuk değer sistem tercihine düşer, çökmez', () => {
+  it('bozuk değer açığa düşer, çökmez', () => {
     for (const junk of ['', 'DARK', 'koyu', '{}', 0, undefined, {}, []]) {
-      expect(normalizeTheme(junk, true)).toBe('dark');
-      expect(normalizeTheme(junk, false)).toBe('light');
+      expect(normalizeTheme(junk)).toBe('light');
     }
   });
 });

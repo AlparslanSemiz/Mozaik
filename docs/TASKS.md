@@ -9,6 +9,34 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **Z turu bitti (2026-08-27): ders dağılımı, açık tema, örnek verinin yeri,
+> branşlarda sıralama.** Kullanıcının dört maddesinin dördü de yapıldı ve
+> **şema v6 → v7'ye çıktı** — `Lesson.blockSize` yerine `Lesson.pairs`.
+> Ayrıntı ve **ölçülen her sayı** [STATUS.md](STATUS.md) → *Yirmi altıncı
+> oturum*.
+>
+> - [x] **Ders dağılımı.** Haftalık saat girilir, sonra `1+1+1` / `2+1` gibi
+>       bir dağılım **seçilir** (aSc'nin `Lessons/week` + yanındaki liste
+>       ikilisi). Üç saatlik blok kalktı. Havuzda artık **blok başına kart**.
+>       Yeni `src/blocks.ts`, yeni sözleşme `placedBlocks()`, çözücüde ders
+>       başına **iki iş kalemi**, v6 → v7 göçü ve testleri.
+>       **Ölçülen kazanç:** örnek okul artık **eksiksiz** diziliyor
+>       (367/367 blok, havuzda 0) — eskiden blok boyuna bölünemeyen saatler
+>       kalıcı olarak havuzda kalıyordu.
+> - [x] **Varsayılan tema açık**, ve sistemi izlemiyor. Gerekçe ve hareket
+>       ayarından neden farklı olduğu CLAUDE.md'de.
+> - [x] **Örnek verinin evi Ayarlar → Veri.** Kurulum'da yalnız ilk kullanımda
+>       tek satır; işlem yapılınca bir daha çıkmıyor
+>       (`ders-programi-tanitim`, onuncu makine tercihi).
+> - [x] **Ayarlar → Branşlar'da elle sıralama.** Beşinci liste; sıra
+>       Öğretmenler adımındaki Branş listesine yansıyor.
+>
+> **Bir sonraki oturumun ilk işi:** `e2e/gorunum.spec.ts:309`'un payı.
+> Test 0,15 px'lik bir farkla kırmızı ve **HEAD'de de kırmızıydı** (ayrı bir
+> worktree'de ölçüldü) — yani bu turun ürünü değil, ama açık duruyor. Karar:
+> payı yeniden **ölçülmüş** bir gerekçeyle genişletmek mi, yoksa sütunun
+> tabanını (`09:50` başlığı) değiştirmek mi.
+
 > **Y turu bitti (2026-08-26).** Kullanıcının on bir maddesi + üç liste kusuru
 > karşılandı: `Sil` hizası, Öğretmenler listesinin yatay kayması, şerit-liste
 > boşluğu, Müsaitlik'in çarpıları, kartın üstüne kart bırakma, bir A4'e 1/2/4
@@ -1263,3 +1291,15 @@ kaldı ve adlarıyla yazıldı: `Kur.cmd`, `.lnk` üretimi, Windows PowerShell 5
 
 
 E2E ile emülatörle patrolla veya başka şekilde izleyerek tüm hataları görme test etme kontrol etme kuralım.
+
+Uygulama açıkken .exe olarak alttaki png görüntüsü eksik pxli küçük logo. o büyük logo olsun.
+
+Dil seçeneği gelmeli. İngilizce Almanca İspanyolca ve Fransızca, default tabii ki cihazın diline göre olmalı. Cihazın dili o değilse ingilizce olmalı.
+
+Genel anlamda her feauture hakkında yazılan infolar düzenlenmeli yenilenmeli ve uzun çizgi neredeyse hiç ya da çok az kullanılmalı.
+
+Uygulamaya güzel bir isim bulunmalı.
+
+
+
+

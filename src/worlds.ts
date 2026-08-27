@@ -11,7 +11,7 @@
 // file:// page and audits what the real button left in localStorage.
 
 import {
-  blockStart,
+  blockAt,
   blocker,
   buildIndex,
   placementKey,
@@ -55,6 +55,12 @@ export interface WorldSpec {
     classId: Id;
     teacherId: Id;
     weeklyHours: number;
+    /**
+     * A SPEC convenience, not the model: "make this lesson's blocks N hours
+     * long". It is converted to `Lesson.pairs` below by exactly the rule the
+     * v7 migration uses, so a world written before the split still means what
+     * it meant — 2 (or the old 3) becomes floor(hours / 2) doubles, 1 none.
+     */
     blockSize?: number;
     maxPerDay?: number | null;
   }>;
@@ -99,9 +105,12 @@ export function makeWorld(spec: WorldSpec = {}): State {
   ).map((c, i) => ({ ...c, color: i }));
 
   const lessons: Lesson[] = (spec.lessons ?? []).map((x) => ({
-    blockSize: 1,
-    maxPerDay: null,
-    ...x,
+    id: x.id,
+    classId: x.classId,
+    teacherId: x.teacherId,
+    weeklyHours: x.weeklyHours,
+    pairs: (x.blockSize ?? 1) >= 2 ? Math.floor(x.weeklyHours / 2) : 0,
+    maxPerDay: x.maxPerDay ?? null,
   }));
 
   return {
@@ -157,6 +166,8 @@ interface Block {
   classId: Id;
   day: number;
   hour: number;
+  /** How long it is. A lesson can hold blocks of two lengths since v7. */
+  size: number;
 }
 
 /** Every block on the grid, found the way the grid itself finds them. */
@@ -170,15 +181,15 @@ export function blocksOf(d: State): Block[] {
     const classId = rest.slice(0, rest.lastIndexOf('|'));
     const day = Number(rest.slice(rest.lastIndexOf('|') + 1));
 
-    const start = blockStart(d, classId, day, hour);
-    if (start === null) continue;
-    const mark = `${classId}|${day}|${start}`;
+    const found = blockAt(d, classId, day, hour);
+    if (found === null) continue;
+    const mark = `${classId}|${day}|${found.hour}`;
     if (seen.has(mark)) continue;
     seen.add(mark);
 
-    const lessonId = d.placements[placementKey(classId, day, start)];
+    const lessonId = d.placements[placementKey(classId, day, found.hour)];
     if (lessonId === undefined) continue;
-    out.push({ lessonId, classId, day, hour: start });
+    out.push({ lessonId, classId, day, hour: found.hour, size: found.size });
   }
   return out;
 }
@@ -197,7 +208,10 @@ export function illegalBlocks(d: State): Illegal[] {
   const out: Illegal[] = [];
   for (const b of blocksOf(d)) {
     const lifted = removeBlock(d, b.classId, b.day, b.hour);
-    const reason = blocker(lifted, buildIndex(lifted), b.lessonId, b.day, b.hour);
+    // The size is passed EXPLICITLY: with the block lifted, "whichever block
+    // this lesson still owes first" is not necessarily the one that was there,
+    // and the auditor has to re-ask about the block it actually found.
+    const reason = blocker(lifted, buildIndex(lifted), b.lessonId, b.day, b.hour, b.size);
     if (reason !== null) out.push({ ...b, reason });
   }
   return out;
@@ -287,7 +301,14 @@ function saltBlok(): State {
   });
 }
 
-/** 5 weekly hours in 2-hour blocks: 4 go down, 1 can never be placed. */
+/**
+ * 5 weekly hours asked for as doubles.
+ *
+ * Before v7 this was the world that PROVED the remainder was lost: one block
+ * length meant floor(5 / 2) = 2 blocks and the fifth hour could never be
+ * placed. `pairs` makes the same request 2+2+1, so the world now proves the
+ * opposite — all five hours go down — and it is kept for exactly that reason.
+ */
 function bolunmeyenSaat(): State {
   return makeWorld({
     days: 3,
@@ -713,11 +734,19 @@ function realScale(ratio: number, cap: number): State {
 
     for (const [i, lesson] of list.entries()) {
       const remaining = list.length - i;
-      const block = Math.max(1, lesson.blockSize);
-      const share = Math.max(block, Math.floor(budget / remaining / block) * block);
+      // The hours no longer have to divide by the block length: whatever is
+      // left over is a single. What has to be kept is the SHAPE the world asked
+      // for — a lesson written as doubles stays doubles — so `pairs` is
+      // recomputed against the new total rather than carried over.
+      const wantsPairs = lesson.pairs > 0;
+      const share = Math.max(1, Math.floor(budget / remaining));
       const hours = Math.min(budget, share);
-      if (hours < block) continue;
-      lessons.push({ ...lesson, weeklyHours: hours });
+      if (hours < 1) continue;
+      lessons.push({
+        ...lesson,
+        weeklyHours: hours,
+        pairs: wantsPairs ? Math.floor(hours / 2) : 0,
+      });
       budget -= hours;
     }
   }
@@ -756,9 +785,9 @@ export const WORLDS: SolverWorld[] = [
   },
   {
     name: 'bolunmeyen-saat',
-    note: '5 saat / 2’lik blok → 4 saat yerleşir, 1 saat havuzda kalır.',
+    note: '5 saat, ikili istendi → 2+2+1; v7 öncesinde 1 saat havuzda kalırdı.',
     state: bolunmeyenSaat(),
-    want: { solved: false },
+    want: { solved: true },
   },
   {
     name: 'ogretmen-hafta-kapali',

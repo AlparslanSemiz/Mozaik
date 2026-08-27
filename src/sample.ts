@@ -136,16 +136,18 @@ export function sampleState(): State {
         2,
         Math.min(budget - (remainingLessons - 1) * 2, Math.ceil(budget / remainingLessons)),
       );
-      const blockSize = rnd() < 0.35 ? 2 : 1;
-      const weeklyHours = Math.max(blockSize, Math.floor(share / blockSize) * blockSize);
-      if (weeklyHours <= 0) continue;
+      // Some lessons want double periods and some do not. The hours no longer
+      // have to be rounded to a multiple of the block: a week of 5 with doubles
+      // is 2+2+1, which is exactly what v7 made expressible.
+      const weeklyHours = Math.max(1, share);
+      const pairs = rnd() < 0.35 ? Math.floor(weeklyHours / 2) : 0;
 
       lessons.push({
         id: `d${counter++}`,
         classId: group.id,
         teacherId: teacher.id,
         weeklyHours,
-        blockSize,
+        pairs,
         maxPerDay: null,
       });
       budget -= weeklyHours;

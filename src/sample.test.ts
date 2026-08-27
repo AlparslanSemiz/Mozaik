@@ -7,6 +7,7 @@
 
 import { blocker, buildIndex, sanitize, place } from './constraints';
 import { buildReport } from './feasibility';
+import { blockPlan } from './blocks';
 import { sampleState } from './sample';
 import type { State } from './types';
 
@@ -18,20 +19,20 @@ function greedyFill(start: State): { state: State; placed: number; total: number
 
   // Bigger blocks first: the lessons with the least room go in first.
   const sorted = [...d.lessons].sort(
-    (a, b) => b.blockSize - a.blockSize || b.weeklyHours - a.weeklyHours,
+    (a, b) => b.pairs - a.pairs || b.weeklyHours - a.weeklyHours,
   );
 
   for (const lesson of sorted) {
-    let remaining = lesson.weeklyHours;
-    while (remaining >= lesson.blockSize) {
+    // The split says what to place and in which order, so this walks the plan
+    // rather than dividing hours by a single block length.
+    for (const size of blockPlan(lesson)) {
       const ix = buildIndex(d);
       let done = false;
       for (let g = 0; g < d.settings.days.length && !done; g++) {
         for (let s = 0; s < d.settings.hours.length; s++) {
-          if (blocker(d, ix, lesson.id, g, s) === null) {
-            d = place(d, lesson.id, g, s);
-            remaining -= lesson.blockSize;
-            placed += lesson.blockSize;
+          if (blocker(d, ix, lesson.id, g, s, size) === null) {
+            d = place(d, lesson.id, g, s, size);
+            placed += size;
             done = true;
             break;
           }

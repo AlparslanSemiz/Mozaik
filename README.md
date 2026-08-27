@@ -309,10 +309,10 @@ ekler.
 **Yayınlamak** — iki yol:
 
 ```bash
-git tag v1.1.0 && git push origin v1.1.0     # etiket iter, sürüm çıkar
+git tag v1.2.0 && git push origin v1.2.0     # etiket iter, sürüm çıkar
 ```
 
-ya da Actions → sürüm → Run workflow → `yayinla` ✓ → `etiket`: `v1.1.0`.
+ya da Actions → sürüm → Run workflow → `yayinla` ✓ → `etiket`: `v1.2.0`.
 
 İş akışı yayınlamadan önce kurulum klasörünü **denetler**: `.ps1` ve `.txt`
 dosyaları UTF-8 BOM taşıyor mu (yoksa PowerShell 5.1 her "ı"yı bozar),

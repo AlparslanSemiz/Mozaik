@@ -17,9 +17,13 @@ import {
   buildIndex,
   check,
   occupy,
+  pendingBlocks,
+  // Aliased: `placedBlocks` is also this file's counter for how many blocks the
+  // SEARCH has put down, and the two mean different things.
+  placedBlocks as blocksOnGrid,
   vacate,
 } from './constraints';
-import type { Index } from './constraints';
+import type { Index, PlacedBlock } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import type { Id, Lesson, State } from './types';
@@ -85,17 +89,31 @@ export interface Solver {
 
 // ------------------------------------------------------------------ internals
 
-/** One lesson that still needs blocks put down. */
+/**
+ * One lesson's blocks OF ONE LENGTH that still need putting down.
+ *
+ * Not one item per lesson any more: since v7 a lesson can want 2+2+1, and the
+ * search's whole shape — a domain of legal start cells, an MRV count, a
+ * forward-checking bound — assumes every block it is holding is the same
+ * length. So a 2+2+1 lesson becomes two items, one asking for two 2s and one
+ * asking for a single. They share a class, so `neighbours` already makes each
+ * the other's neighbour and the grid keeps them apart the same way it keeps any
+ * two lessons apart.
+ */
 interface Item {
   lesson: Lesson;
   roomId: Id | null;
+  /** How long each of THIS item's blocks is: 1 or 2. */
+  block: number;
   /** Blocks still to place — never more than the week can hold. */
   need: number;
   /** Blocks the lesson actually asked for, before that ceiling. */
   askedBlocks: number;
   /** Blocks placed by THIS run. */
   done: number;
-  /** Hours this lesson already had on the starting grid. */
+  /** Blocks of this length the lesson already had on the starting grid. */
+  doneAtStart: number;
+  /** Hours this LESSON already had on the starting grid. */
   placedAtStart: number;
   /** cell -> 1 while the cell is still a candidate. */
   domain: Uint8Array;
@@ -173,22 +191,31 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // ---- the items -----------------------------------------------------------
   const items: Item[] = [];
   for (const lesson of base.lessons) {
-    const block = Math.max(1, lesson.blockSize);
     const already = ix.placedHours.get(lesson.id) ?? 0;
-    const need = Math.floor((lesson.weeklyHours - already) / block);
-    if (need <= 0) continue;
-    items.push({
-      lesson,
-      roomId: ix.classById.get(lesson.classId)?.roomId ?? null,
-      need,
-      askedBlocks: need,
-      done: 0,
-      placedAtStart: already,
-      domain: new Uint8Array(cellCount),
-      size: 0,
-      neighbours: [],
-      abandoned: false,
-    });
+    const down = blocksOnGrid(work, lesson);
+    // The blocks still owed, read off the grid rather than divided out of the
+    // hours. `Math.floor(hours / block)` was what threw away the odd hour of a
+    // 5-hour lesson in 2-hour blocks; there is no remainder to throw away now
+    // because the split says what the last block is.
+    const owed = pendingBlocks(work, lesson);
+    for (const block of [2, 1]) {
+      const need = owed.filter((x) => x === block).length;
+      if (need <= 0) continue;
+      items.push({
+        lesson,
+        roomId: ix.classById.get(lesson.classId)?.roomId ?? null,
+        block,
+        need,
+        askedBlocks: need,
+        done: 0,
+        doneAtStart: down.filter((x) => x.size === block).length,
+        placedAtStart: already,
+        domain: new Uint8Array(cellCount),
+        size: 0,
+        neighbours: [],
+        abandoned: false,
+      });
+    }
   }
 
   const totalBlocks = items.reduce((sum, x) => sum + x.need, 0);
@@ -209,7 +236,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     }
   }
 
-  const maxBlock = items.reduce((m, x) => Math.max(m, Math.max(1, x.lesson.blockSize)), 1);
+  const maxBlock = items.reduce((m, x) => Math.max(m, x.block), 1);
 
   /** (Re)computes one item's candidate cells against the grid as it stands. */
   function fillDomain(item: Item): void {
@@ -218,7 +245,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
-      if (blocker(work, ix, item.lesson.id, day, hour) === null) {
+      if (blocker(work, ix, item.lesson.id, day, hour, item.block) === null) {
         item.domain[cell] = 1;
         item.size++;
       }
@@ -226,41 +253,62 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   }
 
   /**
-   * The most blocks this lesson could EVER place with the week to itself.
+   * The most HOURS this lesson could EVER place with the week to itself.
    *
    * Its own cells, packed greedily day by day, and then capped by "aynı ders
    * günde en fazla N saat" where that rule blocks. Asking for more than this is
    * not a hard search, it is an impossible one: no assignment anywhere else can
    * raise the number.
+   *
+   * In HOURS and per LESSON rather than in blocks and per item, because a
+   * 2+2+1 lesson is two items competing for the same cells and the same daily
+   * limit: capping each of them on its own would let the pair between them
+   * claim a day twice over.
    */
-  function ceilingBlocks(item: Item): number {
-    const block = Math.max(1, item.lesson.blockSize);
-    const limit = lessonLimit(base, item.lesson);
+  function ceilingHours(two: Item | undefined, one: Item | undefined): number {
+    const lesson = (two ?? one)!.lesson;
+    const limit = lessonLimit(base, lesson);
     const perDay =
-      ruleLevel(base, 'maxSameLessonPerDay') === 'block' && limit > 0
-        ? Math.floor(limit / block)
-        : Infinity;
+      ruleLevel(base, 'maxSameLessonPerDay') === 'block' && limit > 0 ? limit : Infinity;
 
+    let twosLeft = two?.need ?? 0;
     let total = 0;
     for (let day = 0; day < dayCount; day++) {
       let onDay = 0;
-      // Earliest-start packing: for equal-length blocks it is exactly optimal.
+      // Earliest-start packing, doubles first — the same order the split itself
+      // is written in, and the one that leaves the singles the easy job.
       for (let h = 0; h < hourCount; ) {
-        if (item.domain[day * hourCount + h] === 1) {
-          onDay++;
-          h += block;
-        } else {
-          h++;
+        const cell = day * hourCount + h;
+        if (twosLeft > 0 && two !== undefined && two.domain[cell] === 1 && onDay + 2 <= perDay) {
+          twosLeft--;
+          total += 2;
+          onDay += 2;
+          h += 2;
+          continue;
         }
+        if (one !== undefined && one.domain[cell] === 1 && onDay + 1 <= perDay) {
+          total += 1;
+          onDay += 1;
+        }
+        h++;
       }
-      total += Math.min(onDay, perDay);
     }
     return total;
   }
 
   // ---- initial domains -----------------------------------------------------
+  for (const item of items) fillDomain(item);
+
+  const itemsByLesson = new Map<Id, Item[]>();
   for (const item of items) {
-    fillDomain(item);
+    const list = itemsByLesson.get(item.lesson.id);
+    if (list === undefined) itemsByLesson.set(item.lesson.id, [item]);
+    else list.push(item);
+  }
+
+  for (const list of itemsByLesson.values()) {
+    const two = list.find((x) => x.block === 2);
+    const one = list.find((x) => x.block === 1);
     // Ask for no more than the week can hold. Without this the search spends
     // its whole budget on a lesson it can never finish: MRV keeps choosing it
     // (its domain is the smallest), it fills every day it is allowed, forward
@@ -272,11 +320,21 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     // The blocks it CAN hold are still placed. Giving up on the lesson whole
     // would trade a partly-taught class for a tidier number; `report()` reads
     // what is missing off the grid, so the count stays honest either way.
-    item.need = Math.min(item.need, ceilingBlocks(item));
-    if (item.need <= 0) item.abandoned = true;
+    //
+    // The room is handed out doubles first, because that is the order the split
+    // is written in: a week that can only hold four of a five-hour lesson keeps
+    // 2+2 and drops the single, not the other way round.
+    let room = ceilingHours(two, one);
+    if (two !== undefined) {
+      two.need = Math.min(two.need, Math.floor(room / 2));
+      room -= two.need * 2;
+      if (two.need <= 0) two.abandoned = true;
+    }
+    if (one !== undefined) {
+      one.need = Math.min(one.need, room);
+      if (one.need <= 0) one.abandoned = true;
+    }
   }
-
-  const byLesson = new Map(items.map((x) => [x.lesson.id, x]));
 
   const trail: TrailEntry[] = [];
   const stack: Frame[] = [];
@@ -341,7 +399,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       for (let h = from; h <= to; h++) {
         const cell = day * hourCount + h;
         if (other.domain[cell] !== 1) continue;
-        if (blocker(work, ix, other.lesson.id, day, h) === null) continue;
+        if (blocker(work, ix, other.lesson.id, day, h, other.block) === null) continue;
         other.domain[cell] = 0;
         other.size--;
         trail.push({ item: n, cell });
@@ -377,7 +435,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       if (item.abandoned) continue;
       const left = item.need - item.done;
       if (left <= 0) continue;
-      const block = Math.max(1, item.lesson.blockSize);
+      const block = item.block;
       if (
         item.size < bestSize ||
         (item.size === bestSize && left > bestLeft) ||
@@ -443,14 +501,14 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
     // The domain was computed before earlier assignments in this branch; a
     // stale cell is simply skipped rather than trusted.
-    if (blocker(work, ix, item.lesson.id, day, hour) !== null) return false;
+    if (blocker(work, ix, item.lesson.id, day, hour, item.block) !== null) return false;
 
-    occupy(placements, ix, item.lesson, item.roomId, day, hour);
+    occupy(placements, ix, item.lesson, item.roomId, day, hour, item.block);
     item.done++;
     placedBlocks++;
     frame.applied = cell;
 
-    if (!revise(day, hour, Math.max(1, item.lesson.blockSize), item)) {
+    if (!revise(day, hour, item.block, item)) {
       retract(frame);
       return false;
     }
@@ -463,7 +521,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     const item = items[frame.item]!;
     const day = Math.floor(frame.applied / hourCount);
     const hour = frame.applied % hourCount;
-    vacate(placements, ix, item.lesson, item.roomId, day, hour);
+    vacate(placements, ix, item.lesson, item.roomId, day, hour, item.block);
     item.done--;
     placedBlocks--;
     frame.applied = -1;
@@ -511,10 +569,18 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     trail.length = 0;
     stack.length = 0;
 
+    // `done` is COUNTED off the frozen grid, not divided out of the hours: two
+    // items share one lesson's hour count, so the hours cannot say which of
+    // them put a block down. `blocksOnGrid()` reads the same blocks the grid
+    // and the pool read (see the contract in constraints.ts).
+    const downNow = new Map<Id, PlacedBlock[]>();
     for (const item of items) {
-      const block = Math.max(1, item.lesson.blockSize);
-      const now = ix.placedHours.get(item.lesson.id) ?? 0;
-      item.done = Math.floor((now - item.placedAtStart) / block);
+      let down = downNow.get(item.lesson.id);
+      if (down === undefined) {
+        down = blocksOnGrid(work, item.lesson);
+        downNow.set(item.lesson.id, down);
+      }
+      item.done = down.filter((x) => x.size === item.block).length - item.doneAtStart;
       if (!item.abandoned) fillDomain(item);
     }
     placedBlocks = items.reduce((sum, x) => sum + x.done, 0);
@@ -543,10 +609,12 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       // grid ends up full of its own blocks and blocker() then reports "the
       // class is busy", which reads like a clash somebody could shuffle away.
       // There is nothing to shuffle: the week cannot hold the rest.
-      const item = byLesson.get(lesson.id);
+      const list = itemsByLesson.get(lesson.id) ?? [];
       const fits =
-        item === undefined ? 0 : item.need * Math.max(1, lesson.blockSize) + item.placedAtStart;
-      const capped = item !== undefined && item.askedBlocks > item.need && fits > 0;
+        list.length === 0
+          ? 0
+          : list.reduce((sum, x) => sum + x.need * x.block, 0) + list[0]!.placedAtStart;
+      const capped = list.some((x) => x.askedBlocks > x.need) && fits > 0;
 
       stuck.push({
         lessonId: lesson.id,

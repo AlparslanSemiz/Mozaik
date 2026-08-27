@@ -146,6 +146,13 @@ interface Ders {
 - **Bloklar ayrı bir varlık değil.** İki saatlik blok, iki ardışık anahtara aynı
   `dersId` yazılarak temsil edilir. Kaldırırken bloğun başı geriye doğru
   yürüyerek bulunur. Bu, veri modelini basit tutuyor.
+  > **Güncelleme (2026-08-27, şema v7).** İlk yarısı aynen geçerli; ikinci
+  > yarısı artık böyle değil. `blok` alanı (ders başına tek bir boy) yerini
+  > `pairs`'e bıraktı — haftanın kaç saatinin **ikili** blok olacağı — ve
+  > eşit olmayan bloklar bir koşuyu belirsiz kılıyor: `2+1`, üç bitişik
+  > hücrede hem `[2,1]` hem `[1,2]` okunur. Bloğun başı artık "geriye
+  > yürüyerek" değil, tek bir **sözleşmeyle** bulunuyor:
+  > `constraints.ts` → `placedBlocks()`. Ayrıntı CLAUDE.md, tuzak 75.
 - **`semaSurumu` ilk günden var.** İkinci dönem modeli değiştirirsen eski
   yedekleri okuyabilmen gerekir. Sonradan eklenemez.
 
@@ -193,7 +200,7 @@ etmek yavaş ve eksik.
 - dersliği paylaşan sınıf o saatte doluyken engellenir
 - `derslikId === null` iken derslik kontrolü atlanır
 - 2'li blok son saate konamaz
-- 3'lü blok güne sığmıyorsa reddedilir
+- (v7'den beri üçlü blok yok; kombinasyonlar yalnız 1 ve 2'den kurulur)
 - blok kaldırıldığında tüm saatleri temizlenir
 - ortadan tıklanan blok tamamen kalkar (baş bulma mantığı)
 - öğretmen silinince dersleri ve yerleşimleri de silinir

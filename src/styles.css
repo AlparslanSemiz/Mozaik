@@ -2048,6 +2048,26 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   color: var(--on-color-sub);
 }
 
+/* How many hours THIS card lands on. One lesson can leave two cards in the tray
+   — a 2+1 leaves a double and a single — and without this they are the same
+   rectangle doing two different things when dropped. `--on-color` and not the
+   theme's ink: the card's ground is a palette colour and does not turn with the
+   theme (pitfall 15). */
+.pool-card .card-size {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--on-color);
+  opacity: .85;
+}
+
+/* A double is drawn twice as wide as a single, because that is what it is about
+   to take up. It is not decoration: the tray is where the reader chooses which
+   of a lesson's blocks to place, and the width answers "which one" before the
+   words are read. Derived from the same min-width, so the two stay in step. */
+.pool-card[data-size='2'] {
+  min-width: 6.5rem;
+}
+
 /* ------------------------------------------------------------ setup steps */
 
 /* Kurulum's four steps, now IN the ribbon. They are `.btn`s so pressed, hover,
@@ -2647,6 +2667,56 @@ table.stat tbody tr:hover {
   color: var(--muted);
   font-size: var(--fs-sm);
   margin: 4px 0 8px;
+}
+
+/* The split picker in Kurulum > Dersler. Unlike every other box on this screen
+   it has NO width of its own, and that is the point: its labels grow with the
+   hours — "2+1" is three characters, eleven singles are twenty-one — so any
+   single number is wrong for some lesson. Measured at 150 % with a fixed box:
+   "1+1+1+1+1" was drawn as "1+1+1+1+", the value right and unreadable
+   (pitfall 33).
+
+   `width: auto` is the browser sizing a `<select>` from its longest option,
+   which is exactly the question being asked, and it needs the class ON THE SAME
+   ELEMENT to outrank `table.list td > select { width: 100% }` (0,1,3) —
+   pitfall 34's second half. The column it widens is inside `.table-scroll`, so
+   what it costs is scrolling, not somebody else's words. */
+table.list td > select.split-pick,
+.form-row select.split-pick {
+  width: auto;
+}
+
+/* The first-run line on Kurulum: a symbol, one sentence, and the two things
+   that can be done about it, all on one row. It is a `.hint` on purpose — this
+   is an offer, not an instruction, and it reads in the same quiet grey as every
+   other note on the screen. */
+.intro-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.intro-line > svg {
+  flex: none;
+  color: var(--accent);
+}
+
+/* The way out is a real button because it does something the reader cannot
+   undo by scrolling — but it must not look like the offer standing next to it.
+   Two equally weighted buttons turn a dismissal into a decision. */
+.btn.quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn.quiet:hover:not(:disabled) {
+  background: none;
+  border-color: transparent;
+  color: var(--text);
 }
 
 /* A result line that reports a FAILURE has to leave the muted grey: an import

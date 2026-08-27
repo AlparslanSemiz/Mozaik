@@ -139,10 +139,19 @@ export interface LessonRow {
   className: string;
   teacher: string; // full name or short form
   weeklyHours: number;
-  blockSize: number;
+  /** How many 2-hour blocks the week holds. See `Lesson.pairs`. */
+  pairs: number;
 }
 
-/** Columns: Sınıf · Öğretmen · Haftalık saat · Blok (empty block = 1) */
+/**
+ * Columns: Sınıf · Öğretmen · Haftalık saat · Blok (empty block = 1)
+ *
+ * The fourth column stays a BLOCK LENGTH and not a "2+2+1" pattern: it is a
+ * column somebody copies out of a spreadsheet, and the sheets that exist say 1
+ * or 2. It is read as "make the blocks this long and let the odd hour be a
+ * single", which is `pairs = floor(hours / 2)` for 2 and 0 for 1. Anything
+ * bigger is clamped to 2 — three-hour blocks left with v7.
+ */
 export function parseLessons(text: string): ParseResult<LessonRow> {
   const accepted: LessonRow[] = [];
   const errors: string[] = [];
@@ -162,8 +171,9 @@ export function parseLessons(text: string): ParseResult<LessonRow> {
       errors.push(`${i + 1}. satır: "${className} / ${teacher}" için saat okunamadı, atlandı.`);
       continue;
     }
-    const blockSize = Math.min(3, toNumber(cells[3], 1));
-    accepted.push({ className, teacher, weeklyHours, blockSize });
+    const blockSize = Math.min(2, toNumber(cells[3], 1));
+    const pairs = blockSize >= 2 ? Math.floor(weeklyHours / 2) : 0;
+    accepted.push({ className, teacher, weeklyHours, pairs });
   }
   return { accepted, errors };
 }

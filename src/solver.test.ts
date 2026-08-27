@@ -44,9 +44,9 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 1, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blockSize: 1, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, blockSize: 2, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, maxPerDay: null },
+      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, pairs: 1, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},
@@ -128,7 +128,7 @@ describe('solve — küçük dünya', () => {
       teachers: [build().teachers[0]!],
       classes: [build().classes[0]!],
       lessons: [
-        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 1, maxPerDay: null },
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, maxPerDay: null },
       ],
       settings: {
         ...build().settings,
@@ -201,15 +201,22 @@ describe('solve — tıkanma', () => {
     expect(placedHours(result.state)).toBe(5);
   });
 
-  it('bölünmeyen haftalık saat: blok kadarını koyup kalanını bırakıyor', () => {
+  // This used to be the "bölünmeyen haftalık saat" test: one block length meant
+  // 3 hours in doubles was floor(3 / 2) = 1 block and the third hour could
+  // never be placed. `pairs` asks the same thing as 2+1, so the hour comes back
+  // — and the search has to place blocks of two different lengths for one
+  // lesson to do it, which is the whole point of splitting the items.
+  it('2+1 dersin ÜÇ saati de yerleşiyor — artık bölünmeyen saat yok', () => {
     const d = build();
-    d.lessons[2] = { ...d.lessons[2]!, weeklyHours: 3, blockSize: 2 }; // 3 hours, 2-hour blocks
+    d.lessons[2] = { ...d.lessons[2]!, weeklyHours: 3, pairs: 1 };
     const result = solve(d);
-    const x3 = Object.keys(result.state.placements).filter((k) => result.state.placements[k] === 'x3');
-    expect(x3).toHaveLength(2);
-    expect(result.stuck.find((x) => x.lessonId === 'x3')?.missing).toBe(1);
-    // Something is missing, so nothing is solved (docs/STATUS.md, bilinen hata 3).
-    expect(result.phase).toBe('stuck');
+    const x3 = Object.keys(result.state.placements).filter(
+      (k) => result.state.placements[k] === 'x3',
+    );
+    expect(x3).toHaveLength(3);
+    expect(result.stuck.find((x) => x.lessonId === 'x3')).toBeUndefined();
+    expect(result.phase).toBe('solved');
+    expectLegal(result.state);
   });
 });
 

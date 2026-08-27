@@ -330,6 +330,7 @@ describe('veriler nerede — depo raporu', () => {
     expect(keys).toContain('ders-programi-havuz-boy');
     expect(keys).toContain('ders-programi-serit');
     expect(keys).toContain('ders-programi-baski');
+    expect(keys).toContain('ders-programi-tanitim');
     // An absent backup chain is information too, so the row stays with 0.
     expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
   });
@@ -348,6 +349,7 @@ describe('veriler nerede — depo raporu', () => {
     // written when somebody changes a print option, which is why a fresh
     // profile never caught it.
     localStorage.setItem('ders-programi-baski', '{"clock":false}');
+    localStorage.setItem('ders-programi-tanitim', 'gorundu');
     writePlanText(FIRST_PLAN_ID, 'abcde');
 
     const keys = storageReport(two()).rows.map((r) => r.key);

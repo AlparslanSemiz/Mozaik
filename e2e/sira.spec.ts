@@ -14,7 +14,7 @@
 
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { mainList, openSetup, openWithSample, savedState, settledText } from './helpers';
+import { mainList, openSettings, openSetup, openWithSample, savedState, settledText } from './helpers';
 
 const rows = (page: Page) => mainList(page).locator('tbody tr');
 const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
@@ -184,12 +184,69 @@ test.describe('61. Elle sıralama', () => {
     expect(await names(page)).toEqual(before);
   });
 
-  test('dört listenin dördünde de tutamak var', async ({ page }) => {
+  test('beş listenin beşinde de tutamak var', async ({ page }) => {
     await openWithSample(page);
     for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
       await openSetup(page, step);
       expect(await grips(page).count(), step).toBeGreaterThan(1);
     }
+    // The fifth is not a Kurulum step: it is Ayarlar → Branşlar.
+    await openSettings(page, 'Branşlar');
+    expect(await grips(page).count(), 'Branşlar').toBeGreaterThan(1);
+  });
+
+  // Branşlar has its own reader: the name cell is plain text, not a box, so
+  // `names()` above finds nothing here.
+  test('branşlar taşınıyor ve Öğretmenler’deki açılır liste O SIRAYA geçiyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Branşlar');
+
+    // Only the school's OWN list can be dragged, and it is the first tbody.
+    const listedRows = mainList(page).locator('tbody').first().locator('tr');
+    // `td:nth-child(2)` and not `.locator('td').nth(1)`: the second one picks
+    // the second cell of the whole table, not the second cell of each row.
+    const subjects = async () =>
+      (await listedRows.locator('td:nth-child(2)').allInnerTexts()).map((x) => x.trim());
+
+    const before = await subjects();
+    expect(before.length).toBeGreaterThan(3);
+
+    await dragRow(page, 0, 3);
+    const after = await subjects();
+    expect(after).not.toEqual(before);
+    expect(after[3]).toBe(before[0]);
+    expect(after.slice().sort()).toEqual(before.slice().sort());
+
+    await expect(page.locator('.panel .list-said')).toHaveText(
+      new RegExp(`${before[0]} 4\\. sıraya taşındı`),
+    );
+
+    // THE point: the dropdown the reader picks a branch from is in this order.
+    await openSetup(page, 'Öğretmenler');
+    const options = await mainList(page)
+      .locator('tbody tr')
+      .first()
+      .locator('select')
+      .first()
+      .locator('option')
+      .allInnerTexts();
+    expect(options.filter((o) => after.includes(o.trim())).slice(0, 4).map((o) => o.trim()))
+      .toEqual(after.slice(0, 4));
+  });
+
+  test('branşlarda klavyeyle de taşınıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Branşlar');
+    const listedRows = mainList(page).locator('tbody').first().locator('tr');
+    const first = (await listedRows.locator('td:nth-child(2)').allInnerTexts())[0]!.trim();
+
+    await grips(page).first().focus();
+    await page.keyboard.press('ArrowDown');
+
+    const after = (await listedRows.locator('td:nth-child(2)').allInnerTexts()).map((x) => x.trim());
+    expect(after[1]).toBe(first);
   });
 
   // THE point of the feature. The list is not the destination; the grid is.

@@ -36,7 +36,7 @@ function build(): State {
       { id: 's510', name: '510', roomId: 'dA', color: 0 },
       { id: 's511', name: '511', roomId: 'dA', color: 1 },
     ],
-    lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null }],
+    lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null }],
     unavailable: {},
     placements: {},
   };
@@ -74,7 +74,7 @@ describe('buildReport — derslik darboğazı', () => {
     const d = build();
     // Room A is shared by 510 and 511. Total 3 + 2 = 5 hours, capacity 4.
     d.teachers.push({ id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } });
-    d.lessons.push({ id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 3, blockSize: 1, maxPerDay: null });
+    d.lessons.push({ id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 3, pairs: 0, maxPerDay: null });
 
     const room = buildReport(d).rooms[0]!;
     expect(room.load).toBe(5);
@@ -87,7 +87,7 @@ describe('buildReport — derslik darboğazı', () => {
 describe('buildReport — sınıf yükü', () => {
   it('sınıfa haftalık slottan fazla ders yüklenmişse söyler', () => {
     const d = build();
-    d.lessons = [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blockSize: 1, maxPerDay: null }];
+    d.lessons = [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, pairs: 0, maxPerDay: null }];
     const group = buildReport(d).classes.find((c) => c.id === 's510')!;
     expect(group.level).toBe('impossible');
     expect(group.message).toContain('2 saat fazla');
@@ -196,8 +196,7 @@ describe('health', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 4,
-      blockSize: 1,
+      weeklyHours: 4, pairs: 0,
     });
 
     const h = health(d);
@@ -215,8 +214,7 @@ describe('health', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 2,
-      blockSize: 1,
+      weeklyHours: 2, pairs: 0,
     });
     d = place(d, d.lessons[0]!.id, 0, 0);
     // The hour is closed AFTERWARDS — principle 6 says the lesson stays.
@@ -238,8 +236,7 @@ describe('health', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 3,
-      blockSize: 1,
+      weeklyHours: 3, pairs: 0,
     });
     expect(health(d).message).toMatch(/^\d+ saat havuzda$/);
   });
@@ -254,8 +251,7 @@ describe('health', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 4,
-      blockSize: 1,
+      weeklyHours: 4, pairs: 0,
     });
     d = setWholeWeek(d, d.teachers[0]!.id, true);
 

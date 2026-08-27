@@ -9,6 +9,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import AppRoot from './Root';
+import { blockPlan } from './blocks';
 import { sampleState } from './sample';
 
 declare global {
@@ -173,7 +174,10 @@ describe('uygulama açılıyor', () => {
     // Find a day the teacher is available on
     let day = 0;
     while (d.unavailable[`${lesson.teacherId}|${day}|0`] !== undefined) day++;
-    for (let i = 0; i < lesson.blockSize; i++) {
+    // Exactly ONE block, whichever the split makes the first one, so the
+    // click below is a click on a whole block and not on part of one.
+    const span = blockPlan(lesson)[0]!;
+    for (let i = 0; i < span; i++) {
       d.placements[`${group.id}|${day}|${i}`] = lesson.id;
     }
     localStorage.setItem('ders-programi', JSON.stringify(d));
@@ -182,13 +186,13 @@ describe('uygulama açılıyor', () => {
     click(button('Program'));
 
     const cards = () => container.querySelectorAll('table.grid .card');
-    expect(cards()).toHaveLength(lesson.blockSize);
+    expect(cards()).toHaveLength(span);
 
     click(cards()[0]!);
     expect(cards()).toHaveLength(0); // the whole block went
 
     click(button('Geri al'));
-    expect(cards()).toHaveLength(lesson.blockSize);
+    expect(cards()).toHaveLength(span);
   });
 
   it('Kontrol sekmesi sorun yoksa bunu açıkça söyler', () => {

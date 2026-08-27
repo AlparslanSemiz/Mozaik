@@ -4,6 +4,7 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
+import { clampPairs } from './blocks';
 import { buildIndex, closedKey, countPlacedHours, sanitize, teacherKey } from './constraints';
 import type { Index } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
@@ -326,25 +327,29 @@ export function respreadColors(d: State, kind: 'teacher' | 'class'): State {
   return { ...d, classes: d.classes.map((c, i) => ({ ...c, color: i % PALETTE_SIZE })) };
 }
 
-/** The four lists the reader can put into an order of their own. */
-export type ListKind = 'rooms' | 'teachers' | 'classes' | 'lessons';
+/** The lists the reader can put into an order of their own. */
+export type ListKind = 'rooms' | 'teachers' | 'classes' | 'lessons' | 'subjects';
 
 /**
  * Moves one row of one list to another position.
  *
  * There is NO order field and there will not be one: the array IS the order.
- * It survives `parseState` (asArray -> map -> spreadColors all preserve it),
- * `sanitize` never rebuilds `rooms` or `teachers` at all, and the grid, the
- * printer and every picker already read the list by mapping it — so writing
- * the array is the whole feature. A second `order: number` alongside it would
- * be a second truth to keep in step.
+ * It survives `parseState` (asArray -> map -> spreadColors and asNames all
+ * preserve it), `sanitize` never rebuilds `rooms` or `teachers` at all, and the
+ * grid, the printer and every picker already read the list by mapping it — so
+ * writing the array is the whole feature. A second `order: number` alongside it
+ * would be a second truth to keep in step.
+ *
+ * `subjects` is the odd one and only in WHERE it lives — `settings.subjects`
+ * rather than the top level — so it gets a branch here rather than its own
+ * function. What it orders is the Branş dropdown on the Öğretmenler step.
  *
  * Returns `d` ITSELF when nothing moves. The reducer compares by identity to
  * decide whether a change is worth an undo step, so a drag that lands where it
  * started must be indistinguishable from no drag at all.
  */
 export function reorderList(d: State, kind: ListKind, from: number, to: number): State {
-  const list = d[kind];
+  const list: readonly unknown[] = kind === 'subjects' ? d.settings.subjects : d[kind];
   if (from === to) return d;
   if (from < 0 || from >= list.length) return d;
   if (to < 0 || to >= list.length) return d;
@@ -355,7 +360,9 @@ export function reorderList(d: State, kind: ListKind, from: number, to: number):
   next.splice(to, 0, moved);
   // No sanitize(): an order change cannot orphan a placement or a closed hour.
   // Every key in those maps is built from ids, never from a position.
-  return { ...d, [kind]: next };
+  return kind === 'subjects'
+    ? { ...d, settings: { ...d.settings, subjects: next as string[] } }
+    : ({ ...d, [kind]: next } as State);
 }
 
 export function hourNames(n: number): string[] {
@@ -478,24 +485,35 @@ export function deleteClass(d: State, id: Id): State {
 // ------------------------------------------------------------------- lesson
 
 export function addLesson(d: State, fields: Omit<Lesson, 'id' | 'maxPerDay'>): State {
+  const weeklyHours = Math.max(1, Math.round(fields.weeklyHours));
   const created: Lesson = {
     id: newId(),
     classId: fields.classId,
     teacherId: fields.teacherId,
-    weeklyHours: Math.max(1, Math.round(fields.weeklyHours)),
-    blockSize: Math.min(3, Math.max(1, Math.round(fields.blockSize))),
+    weeklyHours,
+    pairs: clampPairs(weeklyHours, fields.pairs),
     maxPerDay: null,
   };
   return { ...d, lessons: [...d.lessons, created] };
 }
 
 export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
-  const lessons = d.lessons.map((x) => (x.id === id ? { ...x, ...fields, id } : x));
-  // If the block size changed the old placements have the wrong length; safest is to drop them
-  const blockChanged =
-    fields.blockSize !== undefined &&
-    d.lessons.find((x) => x.id === id)?.blockSize !== fields.blockSize;
-  if (!blockChanged) return { ...d, lessons };
+  const before = d.lessons.find((x) => x.id === id);
+  const lessons = d.lessons.map((x) => {
+    if (x.id !== id) return x;
+    const merged = { ...x, ...fields, id };
+    // Raising the hours leaves the twos alone; lowering them can force the
+    // shape to shrink, and the clamp is the one place that says by how much.
+    return { ...merged, pairs: clampPairs(merged.weeklyHours, merged.pairs) };
+  });
+
+  // If the SPLIT changed, the placed blocks are the wrong lengths and the
+  // convention that reads them off the grid would chop the same cells up
+  // differently; safest is to drop them.
+  const after = lessons.find((x) => x.id === id);
+  const splitChanged =
+    before !== undefined && after !== undefined && before.pairs !== after.pairs;
+  if (!splitChanged) return { ...d, lessons };
 
   const placements = { ...d.placements };
   for (const key in placements) {
@@ -695,7 +713,7 @@ export function addLessonsFromRows(
       classId: group.id,
       teacherId: teacher.id,
       weeklyHours: row.weeklyHours,
-      blockSize: row.blockSize,
+      pairs: row.pairs,
     });
   }
   return { state, missing };

@@ -370,6 +370,11 @@ export function storageReport(lib: Library): StorageReport {
     what: 'hareket (animasyon) tercihi',
     chars: charsAt(`${BASE_KEY}-hareket`),
   });
+  rows.push({
+    key: `${BASE_KEY}-tanitim`,
+    what: 'örnek veri satırı görüldü mü',
+    chars: charsAt(`${BASE_KEY}-tanitim`),
+  });
   // The print options were the F round's key and this report was never told.
   // It hid because the key is only WRITTEN when somebody changes a print
   // option, so a fresh profile has nothing to leave out — the panel would

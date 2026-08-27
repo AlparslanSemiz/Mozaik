@@ -10,9 +10,12 @@
 // the rules, the subject list — moved to the Ayarlar tab, so this screen has
 // exactly one kind of thing on it and every step can be counted.
 
-import { sampleState } from '../../sample';
+import { useEffect, useState } from 'react';
+import { Info } from 'lucide-react';
 import { useDialogs } from '../Dialogs';
 import { useToast } from '../Toasts';
+import { useLoadSample } from '../useSample';
+import { markIntroSeen, readIntroSeen } from '../../theme';
 
 import Rooms from './Rooms';
 import Teachers from './Teachers';
@@ -46,8 +49,24 @@ interface Props extends PanelProps {
 }
 
 export default function Setup({ state, change, plans, step, setStep }: Props) {
-  const { confirm, alert } = useDialogs();
+  const { alert } = useDialogs();
   const notify = useToast();
+  const loadSample = useLoadSample();
+  // Read once on mount: `markIntroSeen()` writes to localStorage, and a
+  // component cannot re-render on that. The local flag is what makes the line
+  // go away in the same breath as the click.
+  const [introSeen, setIntroSeen] = useState(readIntroSeen);
+
+  // Somebody who has typed in a room, a teacher or a class has answered the
+  // offer by not taking it. Writing it here rather than only on the two buttons
+  // means the line cannot come back later — emptying the project again to start
+  // over is not a request to be introduced to the program a second time.
+  useEffect(() => {
+    if (!introSeen && state.teachers.length + state.classes.length + state.rooms.length > 0) {
+      markIntroSeen();
+      setIntroSeen(true);
+    }
+  }, [introSeen, state.teachers.length, state.classes.length, state.rooms.length]);
   // A draft is last term's setup with the grid emptied. This screen is where an
   // empty project lands, so it is the only place where offering one is useful:
   // one click instead of retyping twenty classes.
@@ -73,27 +92,36 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
             kullanın — tek tek girmekten çok daha hızlı. Okulun günleri, zil saatleri
             ve kuralları <b>Ayarlar</b> sekmesinde.
           </p>
-          <button
-            className="btn"
-            onClick={async () => {
-              if (
-                await confirm({
-                  title: 'Örnek okul verisi yüklenecek',
-                  body: '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için — kendi verinizi girmeden önce Ayarlar → Veri → "Her şeyi sil" ile temizleyin.',
-                  confirmLabel: 'Yükle',
-                })
-              ) {
-                change(() => sampleState());
-                notify('Örnek veri yüklendi.');
-              }
-            }}
-          >
-            Örnek veriyle doldur (25 öğretmen, 20 sınıf)
-          </button>
-          <p className="hint">
-            Ne yaptığını görmek için. Kendi verinizi girmeden önce{' '}
-            <b>Ayarlar → Veri → Her şeyi sil</b> ile temizleyin.
-          </p>
+          {/* Once, on a first run, and then never here again — its home is
+              Ayarlar → Veri. It used to be a permanent button on this screen
+              with two paragraphs around it, which is a lot of room for
+              something the reader needs exactly one afternoon. Seen is written
+              when they ACT, not when the screen is drawn: a line nobody has
+              read yet must survive a reload. */}
+          {!introSeen && (
+            <p className="hint intro-line">
+              <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
+              Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.
+              <button
+                className="btn"
+                onClick={async () => {
+                  if (await loadSample(state, change)) setIntroSeen(true);
+                }}
+              >
+                Örnek veriyle doldur
+              </button>
+              <button
+                className="btn quiet"
+                title="Bu satır bir daha çıkmaz; örnek veri Ayarlar → Veri’de durmaya devam eder"
+                onClick={() => {
+                  markIntroSeen();
+                  setIntroSeen(true);
+                }}
+              >
+                Bir daha gösterme
+              </button>
+            </p>
+          )}
 
           {templates.length > 0 && (
             <>

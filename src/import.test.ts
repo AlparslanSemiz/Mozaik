@@ -104,16 +104,19 @@ describe('parseLessons', () => {
   it('sınıf, öğretmen, saat ve bloğu okur', () => {
     const { accepted } = parseLessons('510\tMÇ\t6\t2');
     expect(accepted).toEqual([
-      { className: '510', teacher: 'MÇ', weeklyHours: 6, blockSize: 2 },
+      { className: '510', teacher: 'MÇ', weeklyHours: 6, pairs: 3 },
     ]);
   });
 
-  it('blok boşsa 1 kabul eder', () => {
-    expect(parseLessons('510\tMÇ\t6').accepted[0]!.blockSize).toBe(1);
+  it('blok boşsa hepsi tek saat', () => {
+    expect(parseLessons('510\tMÇ\t6').accepted[0]!.pairs).toBe(0);
   });
 
-  it('bloğu en fazla 3 ile sınırlar', () => {
-    expect(parseLessons('510\tMÇ\t6\t9').accepted[0]!.blockSize).toBe(3);
+  // Three-hour blocks left with v7 and the column cannot ask for one any more;
+  // anything above 2 is read as "make them doubles".
+  it('bloğu en fazla 2 ile sınırlar', () => {
+    expect(parseLessons('510\tMÇ\t6\t9').accepted[0]!.pairs).toBe(3);
+    expect(parseLessons('510\tMÇ\t7\t3').accepted[0]!.pairs).toBe(3);
   });
 
   it('saat okunamayan satırı atlar ve sebebini yazar', () => {

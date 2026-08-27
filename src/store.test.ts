@@ -7,6 +7,7 @@
 
 import { defaultSubjects } from './entities';
 import { parseState } from './store';
+import { blockPlan } from './blocks';
 import { sampleState } from './sample';
 import { SCHEMA_VERSION } from './types';
 
@@ -36,6 +37,8 @@ function legacyV2() {
       { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 3 },
     ],
     classes: [{ id: 's510', name: '510', roomId: 'dA' }],
+    // Still `blockSize` — that is what a v2 file says, and reading it is the
+    // point of the fixture.
     lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 2 }],
     unavailable: { 'oMC|1|0': 1 } as Record<string, 1>,
     placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' } as Record<string, string>,
@@ -68,7 +71,7 @@ describe('parseState — v1 göçü', () => {
     ]);
     expect(d.classes).toEqual([{ id: 's510', name: '510', roomId: 'dA' }]);
     expect(d.lessons).toEqual([
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 2, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 2, maxPerDay: null },
     ]);
     // The ids never changed, so the keys carry over untouched.
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
@@ -191,11 +194,28 @@ describe('parseState — v4', () => {
  * A v3 backup: everything the current shape has EXCEPT settings.subjectShorts.
  * Every backup my father downloads between v0.6 and v0.7 looks like this.
  */
+/**
+ * Rewrites a backup's lessons the way every release before v7 wrote them:
+ * `blockSize` — "every block is this long" — instead of `pairs`.
+ *
+ * The round trip is exact for the sample school because `sampleState` asks for
+ * doubles as floor(hours / 2), which is precisely what the migration turns a
+ * `blockSize` of 2 back into. That is what lets the tests below still say
+ * "nothing else changed" about the lessons.
+ */
+function asPreV7Lessons(raw: { lessons: Array<Record<string, unknown>> }) {
+  for (const lesson of raw.lessons) {
+    lesson.blockSize = (lesson.pairs as number) > 0 ? 2 : 1;
+    delete lesson.pairs;
+  }
+}
+
 function v3Backup() {
   const d = sampleState();
   const raw = JSON.parse(JSON.stringify(d));
   raw.schemaVersion = 3;
   delete raw.settings.subjectShorts;
+  asPreV7Lessons(raw);
   return raw;
 }
 
@@ -252,6 +272,7 @@ function v4Backup() {
   delete raw.settings.subjects;
   for (const c of raw.classes) delete c.color;
   raw.teachers = raw.teachers.map((t: { color: number }, i: number) => ({ ...t, color: i % 12 }));
+  asPreV7Lessons(raw);
   return raw;
 }
 
@@ -314,6 +335,7 @@ function v5Backup() {
   const raw = JSON.parse(JSON.stringify(sampleState()));
   raw.schemaVersion = 5;
   for (const t of raw.teachers) delete t.gender;
+  asPreV7Lessons(raw);
   return raw;
 }
 
@@ -360,7 +382,7 @@ describe('parseState — v5 → v6 göçü', () => {
     expect(migrated.teachers.map((t) => t.color)).toEqual(original.teachers.map((t) => t.color));
   });
 
-  it('v6 dosyası cinsiyeti KORUYOR, ikinci geçişte de aynı', () => {
+  it('v7 dosyası cinsiyeti KORUYOR, ikinci geçişte de aynı', () => {
     const once = parseState(JSON.stringify(sampleState()))!;
     const twice = parseState(JSON.stringify(once))!;
     expect(once.teachers.map((t) => t.gender)).toEqual(
@@ -382,6 +404,80 @@ describe('parseState — v5 → v6 göçü', () => {
     expect(d.teachers.map((t) => t.name)).toEqual(
       [...sampleState().teachers].reverse().map((t) => t.name),
     );
+  });
+});
+
+/** A v6 backup: the shape the previous release wrote — `blockSize`, no `pairs`. */
+function v6Backup() {
+  const raw = JSON.parse(JSON.stringify(sampleState()));
+  raw.schemaVersion = 6;
+  asPreV7Lessons(raw);
+  return raw;
+}
+
+describe('parseState — v6 → v7 göçü', () => {
+  // The one a version bump breaks silently: every backup the PREVIOUS release
+  // wrote carries `schemaVersion: 6`. If the reader's condition is not widened
+  // when the constant moves, all of them fall through to `null` and the
+  // father's saved timetable stops opening.
+  it('BİR ÖNCEKİ sürümün yazdığı v6 dosyası hâlâ açılıyor', () => {
+    const d = parseState(JSON.stringify(v6Backup()));
+    expect(d).not.toBeNull();
+    expect(d!.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d!.lessons).toHaveLength(sampleState().lessons.length);
+  });
+
+  it('blockSize → pairs: 2’lik blok istenen ders ikili, 1’lik olan tek saat', () => {
+    const raw = v6Backup();
+    raw.lessons = [
+      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
+      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 1, maxPerDay: null },
+      // Three-hour blocks left with v7; they become doubles, hours untouched.
+      { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 6, blockSize: 3, maxPerDay: null },
+    ];
+    raw.placements = {};
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.lessons.map((x) => [x.weeklyHours, x.pairs])).toEqual([[5, 2], [5, 0], [6, 3]]);
+    expect(d.lessons.every((x) => !('blockSize' in x))).toBe(true);
+  });
+
+  // Five hours asked for as doubles used to mean "place four, lose one": one
+  // block length could not say 2+2+1. The migration is what gives the fifth
+  // hour back, so it is asserted rather than assumed.
+  it('2’lik blokla 5 saat artık 2+2+1 — hiçbir saat kaybolmuyor', () => {
+    const raw = v6Backup();
+    raw.lessons = [
+      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
+    ];
+    raw.placements = {};
+    const lesson = parseState(JSON.stringify(raw))!.lessons[0]!;
+    expect(blockPlan(lesson)).toEqual([2, 2, 1]);
+    expect(blockPlan(lesson).reduce((a, b) => a + b, 0)).toBe(lesson.weeklyHours);
+  });
+
+  it('bozuk pairs kırpılıyor — dosya elle yazılmış olabilir', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.placements = {};
+    raw.lessons = [
+      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: 9, maxPerDay: null },
+      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: -3, maxPerDay: null },
+      { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, maxPerDay: null },
+    ];
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.lessons.map((x) => x.pairs)).toEqual([2, 0, 0]);
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v6Backup()))!;
+
+    expect(migrated.rooms).toEqual(original.rooms);
+    expect(migrated.classes).toEqual(original.classes);
+    expect(migrated.teachers).toEqual(original.teachers);
+    expect(migrated.lessons).toEqual(original.lessons);
+    expect(migrated.settings).toEqual(original.settings);
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
   });
 });
 

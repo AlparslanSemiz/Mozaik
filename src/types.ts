@@ -61,7 +61,19 @@ export interface Lesson {
   classId: Id;
   teacherId: Id;
   weeklyHours: number; // weekly total
-  blockSize: number; // consecutive hours per placement (1, 2 or 3)
+  /**
+   * How many of those hours go down as TWO-hour blocks. The rest are singles,
+   * so `pairs` alone fixes the whole shape: 5 hours with pairs 2 is 2+2+1.
+   * Always 0..floor(weeklyHours / 2); `clampPairs` in entities.ts is the only
+   * place that decides it.
+   *
+   * It replaced a single `blockSize` (1, 2 or 3) meaning "every block is this
+   * long", which could not express 2+1 at all and made the solver drop the
+   * remainder: 5 hours in 2-hour blocks placed 4 and left 1 unplaceable
+   * forever. NOT a second truth next to `weeklyHours` — the total is still the
+   * total, this is only its shape, and it cannot contradict it.
+   */
+  pairs: number;
   /** Max hours of THIS lesson on one day. null -> settings.limits.maxSameLessonPerDay. */
   maxPerDay: number | null;
 }
@@ -148,5 +160,6 @@ export interface State {
  * v4: settings.subjectShorts.
  * v5: ClassGroup.color and settings.subjects.
  * v6: Teacher.gender.
+ * v7: Lesson.pairs replaces Lesson.blockSize.
  */
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;

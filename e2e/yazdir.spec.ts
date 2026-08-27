@@ -417,7 +417,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
 /** Two classes with different colours, one teacher, one placed lesson, and a
  *  day of closed hours — the four things the assertions below need to exist. */
 const PAPER_WORLD = {
-  schemaVersion: 6,
+  schemaVersion: 7,
   settings: {
     schoolName: 'Kâğıt Kursu',
     days: [
@@ -441,8 +441,8 @@ const PAPER_WORLD = {
     { id: 's511', name: '511', roomId: null, color: 9 },
   ],
   lessons: [
-    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
-    { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, blockSize: 1, maxPerDay: null },
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null },
+    { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null },
   ],
   // A whole day shut, so the sheet has closed hours to NOT draw.
   unavailable: { 'oMC|1|0': 1, 'oMC|1|1': 1, 'oMC|1|2': 1, 'oMC|1|3': 1 },

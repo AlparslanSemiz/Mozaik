@@ -34,7 +34,11 @@ import {
 import { attachSplitter, maxDockHeight } from "../poolSplit";
 
 export interface PoolCard {
+  /** React identity: one lesson can put several cards on the tray. */
+  key: string;
   lessonId: Id;
+  /** How many hours THIS card covers when it lands: 1 or 2. */
+  size: number;
   /** What the cell will read: the class, or the teacher — whichever the view is not. */
   top: string;
   /** The row this card is aimed at, as printed on the card. */
@@ -51,14 +55,14 @@ export interface PoolCard {
 interface Props {
   cards: PoolCard[];
   completed: number;
-  onStart: (e: React.PointerEvent, lessonId: Id) => void;
+  onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
 }
 
 export default function LessonPool({ cards, completed, onStart }: Props) {
-  const remainingHours = cards.reduce(
-    (sum, c) => sum + (c.total - c.placed),
-    0,
-  );
+  // The cards ARE the hours left now: one card per block still owed, so adding
+  // up their sizes is the answer. Summing `total - placed` per card would count
+  // one lesson's whole remainder once per card it still has out.
+  const remainingHours = cards.reduce((sum, c) => sum + c.size, 0);
   // Read from storage on every mount, so the tab switch that unmounts this
   // component cannot lose either setting (pitfall 18 does not apply to a
   // preference that lives outside React).
@@ -161,7 +165,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             </>
           ) : (
             <>
-              <strong>{cards.length} ders bekliyor</strong>
+              {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
+                  calling them two lessons would not add up against Kurulum. */}
+              <strong>{cards.length} blok bekliyor</strong>
               <span className="pool-sub">
                 {remainingHours} saat · sürükleyip bırakın
               </span>
@@ -173,14 +179,19 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
       <div className="pool-list">
         {cards.map((c) => (
           <div
-            key={c.lessonId}
+            key={c.key}
             className="pool-card"
+            data-size={c.size}
             style={{ background: paletteColor(c.color) }}
-            onPointerDown={(e) => onStart(e, c.lessonId)}
-            title={`${c.top} — ${c.bottom} ${c.subject} · ${c.placed}/${c.total} saat yerleşti`}
+            onPointerDown={(e) => onStart(e, c.lessonId, c.size)}
+            title={`${c.top} — ${c.bottom} ${c.subject} · ${c.size} saatlik blok · dersin ${c.placed}/${c.total} saati yerleşti`}
           >
             <span className="card-top">{c.top}</span>
             <span className="card-bottom">{c.bottom}</span>
+            {/* Two cards of one lesson are otherwise identical, and the whole
+                point of splitting them is that they do different things when
+                dropped. The mark says which. */}
+            <span className="card-size">{c.size} saat</span>
             <span className="counter">
               {c.placed}/{c.total}
             </span>

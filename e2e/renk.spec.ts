@@ -30,6 +30,27 @@ test.describe('8. Tema', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 
+  // The default is LIGHT and it does not follow the machine. Measured against a
+  // machine that says otherwise, because a preference the code no longer reads
+  // is exactly the kind of thing that disappears without a test noticing.
+  test.describe('sistem koyu isterken', () => {
+    test.use({ colorScheme: 'dark' });
+
+    test('kayıt yokken sayfa yine de AÇIK açılıyor', async ({ page }) => {
+      await open(page);
+      expect(
+        await page.evaluate(() => window.matchMedia('(prefers-color-scheme: dark)').matches),
+      ).toBe(true);
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+
+      // …and a deliberate choice still sticks, so "ignore the machine" has not
+      // become "ignore the reader".
+      await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await page.reload();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    });
+  });
+
   // Both themes, because the light one regressed too: --ok was 4.19:1 on its own
   // background and the "x" on a closed cell was 4.20:1.
   for (const theme of ['light', 'dark'] as const) {

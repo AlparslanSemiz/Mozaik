@@ -897,3 +897,151 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     ).toBeGreaterThanOrEqual(fits.need);
   });
 });
+
+// 67. The split: how a week's hours fall into blocks.
+//
+// Asked for by name, with aSc's own screen as the reference: the box for
+// "Lessons/week" and a dropdown beside it saying how those hours are shaped.
+// Before v7 there was one block LENGTH per lesson, so "3 saat" could only be
+// 1+1+1 or a single 3-hour block — never 2+1 — and a 5-hour lesson in doubles
+// lost its fifth hour for good.
+test.describe('67. Ders dağılımı', () => {
+  const splitPick = (page: Page) =>
+    page.locator('.cols > div table.list tbody tr').first().locator('select.split-pick');
+
+  /** The new-lesson row's own two boxes. */
+  const newHours = (page: Page) => page.locator('.form-row input[type="number"].num').first();
+  const newSplit = (page: Page) => page.locator('.form-row select.split-pick').first();
+
+  test('haftalık saat ne ise dağılım seçenekleri odur', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Dersler');
+
+    await newHours(page).fill('3');
+    await expect(newSplit(page).locator('option')).toHaveText(['1+1+1', '2+1']);
+
+    await newHours(page).fill('5');
+    await expect(newSplit(page).locator('option')).toHaveText([
+      '1+1+1+1+1',
+      '2+1+1+1',
+      '2+2+1',
+    ]);
+
+    // Three-hour blocks left with v7: every part is a 1 or a 2.
+    await newHours(page).fill('6');
+    for (const label of await newSplit(page).locator('option').allInnerTexts()) {
+      expect(label.split('+').every((x) => x === '1' || x === '2'), label).toBe(true);
+    }
+  });
+
+  test('seçilen dağılım kaydediliyor ve saat düşünce kırpılıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Dersler');
+
+    const row = page.locator('table.list tbody tr').first();
+    const hours = row.locator('input[type="number"].num').first();
+    await hours.fill('6');
+    await hours.blur();
+    await splitPick(page).selectOption({ label: '2+2+2' });
+    await expect(splitPick(page)).toHaveValue('3');
+
+    // Lower the total and the shape has to come with it — there is no room for
+    // three doubles in three hours.
+    await hours.fill('3');
+    await hours.blur();
+    await expect(splitPick(page)).toHaveValue('1');
+    await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
+
+    await page.reload();
+    await openSetup(page, 'Dersler');
+    await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
+  });
+
+  test('havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Dersler');
+
+    const row = page.locator('table.list tbody tr').first();
+    const name = (await row.locator('td').nth(2).innerText()).trim();
+    const hours = row.locator('input[type="number"].num').first();
+    await hours.fill('3');
+    await hours.blur();
+    await splitPick(page).selectOption({ label: '2+1' });
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    const mine = page.locator('.pool-card', { hasText: name.split('—')[0]!.trim() });
+    // Two cards for one lesson: a double and a single, and they say which.
+    const own = mine.filter({ hasText: '0/3' });
+    await expect(own).toHaveCount(2);
+    await expect(own.filter({ has: page.locator('[data-size="2"]') }).or(own)).not.toHaveCount(0);
+    expect(await own.first().getAttribute('data-size')).toBe('2');
+    expect(await own.last().getAttribute('data-size')).toBe('1');
+    await expect(own.first()).toContainText('2 saat');
+    await expect(own.last()).toContainText('1 saat');
+  });
+
+  // Pitfall 33 again, and it DID happen while this box was being added: at 150 %
+  // a fixed-width picker drew "1+1+1+1+" and the rest was simply gone — the
+  // value was right, every test was green, and it could not be read. The
+  // labels grow with the hours, so the box carries a character COUNT taken from
+  // the longest one it holds. The assertion invents no number: it clones the
+  // control at `width: auto` and asks the browser what IT wants.
+  for (const pct of [100, 125, 150]) {
+    test(`dağılım kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await openSetup(page, 'Dersler');
+
+      // A long week, so the longest label this box can ever hold is on screen.
+      const hours = mainList(page)
+        .locator('tbody tr')
+        .first()
+        .locator('input[type="number"].num')
+        .first();
+      await hours.fill('11');
+      await hours.blur();
+
+      for (const box of [splitPick(page), page.locator('.form-row select.split-pick')]) {
+        const fit = await box.evaluate((el) => {
+          const s = el as HTMLSelectElement;
+          const clone = s.cloneNode(true) as HTMLSelectElement;
+          clone.style.width = 'auto';
+          clone.style.position = 'absolute';
+          clone.style.visibility = 'hidden';
+          s.parentElement!.appendChild(clone);
+          const want = clone.getBoundingClientRect().width;
+          clone.remove();
+          return { have: s.getBoundingClientRect().width, want };
+        });
+        expect(fit.have, `%${pct}: kutu ${fit.have} < istenen ${fit.want}`).toBeGreaterThanOrEqual(
+          fit.want - 1,
+        );
+      }
+    });
+  }
+
+  // The hour that used to be lost. One block length meant 3 hours in doubles
+  // was floor(3 / 2) = 1 block and the third hour could never be placed;
+  // "2+1" asks for all three and the solver has to place blocks of two
+  // different lengths for one lesson to give them.
+  test('2+1 dersin ÜÇ saati de diziliyor — kaybolan saat yok', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Dersler');
+
+    const row = page.locator('table.list tbody tr').first();
+    const hours = row.locator('input[type="number"].num').first();
+    await hours.fill('3');
+    await hours.blur();
+    await splitPick(page).selectOption({ label: '2+1' });
+    const name = (await row.locator('td').nth(2).innerText()).trim().split('—')[0]!.trim();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('.pool-card', { hasText: name }).first()).toBeVisible();
+
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+
+    // Nothing of this lesson is left in the tray: both its blocks went down.
+    await expect(page.locator('.pool-card', { hasText: '/3' })).toHaveCount(0);
+  });
+});
