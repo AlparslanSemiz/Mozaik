@@ -2582,21 +2582,25 @@ table.list td > input.text-sm {
    belongs to the control, not to the <th>), and it is wide enough for "36"
    rather than for whatever number happens to be in it. */
 table.list td > .color-pick {
-  /* Two digits. Asked at `width: auto` the button wants 31/34/40 px at
-     110/125/150 %; 5ch gives 55/60/70, and the column's real floor is the
-     "Renk" heading anyway (45/48/54 + padding). */
+  /* Its width was sized for two digits and its HEIGHT came from the line box
+     those digits made. The digits went ("Renklerin üzerinde sayılar olmasın")
+     and the height went with them: the swatch collapsed into a 10px bar, which
+     is a rule under a name rather than a colour that belongs to somebody. So
+     both are stated now, and the height is `1lh` — the line box it used to
+     have, asked for directly instead of conjured by a character.
+     5ch stays: the column's real floor is the "Renk" heading anyway
+     (45/48/54px + padding at 110/125/150 %), so a narrower box would buy
+     nothing and a colour needs room to BE a colour. */
   width: 5ch;
-  padding: var(--space-2) var(--space-3);
+  height: 1lh;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   cursor: pointer;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  /* Pitfall 15 and 35, in the one control that had never been given it: the box
-     is painted with a PALETTE colour, and the palette does not flip with the
-     theme. Left on `color: inherit` the digit took --text, so in dark mode the
-     index sat as near-white ink on a pale pastel and vanished on rows 5, 7,
-     12, 16 and 17. --on-color is the ink that belongs to the palette. */
+  /* Pitfall 15 and 35 are not gone, they MOVED — see .card and .pool-card,
+     which still carry text on a palette ground. Nothing is written here any
+     more, so there is no ink to get wrong; what is left is the swatch itself.
+     `--on-color` stays as the ink for the focus ring's sake. */
   color: var(--on-color);
   transition: box-shadow var(--dur) var(--ease);
 }
