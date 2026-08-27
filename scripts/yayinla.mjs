@@ -89,9 +89,17 @@ function cargoSurumuYaz(hedef) {
   // Anchored to the line: `Cargo.toml` also carries `rust-version` and a
   // `version` under every `[dependencies]` entry, and a loose replace would
   // pick whichever came first.
-  const yeni = eski.replace(/^version = "\d+\.\d+\.\d+"$/m, `version = "${hedef}"`);
-  if (yeni === eski) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
-  writeFileSync(cargoYol, yeni, 'utf8');
+  const satir = /^version = "\d+\.\d+\.\d+"$/m;
+  // "The line is missing" and "the line already says this" are DIFFERENT
+  // answers, and collapsing them into one `yeni === eski` stopped a release
+  // dead on the very path this branch exists to serve: package.json bumped by
+  // hand, so Cargo.toml is usually already in step, so the replace changes
+  // nothing — which is CORRECT, not a missing line.
+  if (!satir.test(eski)) dur('src-tauri/Cargo.toml içindeki "version" satırı bulunamadı.');
+  const yeni = eski.replace(satir, `version = "${hedef}"`);
+  // Written only when something changed: a no-op write dirties the tree, and
+  // the gate at the top of this file refuses a dirty tree.
+  if (yeni !== eski) writeFileSync(cargoYol, yeni, 'utf8');
 }
 
 // package.json ALREADY at this version is not an error, and refusing was
