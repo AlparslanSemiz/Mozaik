@@ -9,39 +9,73 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-> **U turu bitti (2026-08-27): exe kendini güncelliyor, görev çubuğu ikonu,
-> devriye + hata kapanı, metin turu.** Kullanıcının beş maddesinden **dördü**
-> yapıldı; kalan ikisi (dil ve yeni ad) v2.0.0'a alındı — kullanıcı kararı.
-> Ayrıntı ve **ölçülen her sayı** aşağıda, *U turu* bölümünde ve
-> [STATUS.md](STATUS.md) → *Yirmi yedinci oturum*.
+> **V turu bitti (2026-08-27): dokuz maddenin dokuzu, ve `v1.3.0` YAYINDA.**
+> Ayrıntı ve **ölçülen her sayı** aşağıda, *V turu* bölümünde ve
+> [STATUS.md](STATUS.md) → *Yirmi sekizinci oturum*.
 >
-> **Bir sonraki oturumun ilk işi — üçü de KULLANICIDA:**
-> 1. **`v1.3.0` İTİLSİN — tek komut, ve tek kalan adım bu:**
+> **Bir sonraki oturumun ilk işi: v2.0.0 — DİL.** Kararlar verildi (aşağıda):
+> altyapı + Türkçe + İngilizce önce, DE · ES · FR sonraki turda, **yeni ad
+> ayrı bir tur**.
 >
->    ```
->    git push --follow-tags origin main
->    ```
->
->    `npm run yayinla -- 1.3.0` koşturuldu ve **push dışında her şeyi yaptı**:
->    `package.json` ve `Cargo.toml` 1.3.0'a çıktı, `Sürüm v1.3.0` commit'lendi,
->    **annotated** `v1.3.0` etiketi atıldı. Push, bu makinede GitHub kimliği
->    olmadığı için düştü (`could not read Username`) — yani yapılacak iş bir
->    karar değil, bir kimlik.
->    İtilince iki iş akışı birden koşar: `site.yml` (Pages) ve `surum.yml`
->    (Release). Release'e bu kez **dördüncü** bir varlık düşer: `surum.json`.
->    Ondan **önceki hiçbir exe kendini güncelleyemez**, çünkü bakacağı dosya
->    henüz yok.
->    Not: `v1.2.0` **hiç etiketlenmedi**, yani ders dağılımı turu da babaya bu
->    push'la birlikte gidecek.
-> 2. **Windows'ta denensin.** Bu makinede ölçülemeyen üç şey var ve üçü de
->    aynı koşuda görülür: exe'nin kendini gerçekten değiştirmesi, görev
->    çubuğundaki ikonun yeni hâli, ve SmartScreen'in ne dediği.
-> 3. **GitHub Pages hâlâ başkasına gidiyor.** `AlparslanSemiz.github.io`
+> **Sende kalanlar — kodda değil:**
+> 1. **Windows'ta denensin.** Artık indirilebilir:
+>    `releases/latest/download/Ders-Programi.exe`. Bu makinede ölçülemeyen
+>    dört şey aynı koşuda görülür: exe'nin kendini gerçekten değiştirmesi,
+>    görev çubuğundaki ikonun yeni hâli, SmartScreen'in ne dediği, ve
+>    WebView2'nin yazdırma diyaloğu.
+> 2. **GitHub Pages hâlâ başkasına gidiyor.** `AlparslanSemiz.github.io`
 >    deposunda Settings → Pages → Custom domain temizlenecek **ve** kökteki
->    `CNAME` silinecek. Kaldırmanın GameMetrix'i kırmayacağı ölçüldü.
->
-> Ondan sonra: **v2.0.0 — dil ve isim** (aşağıda), ve hâlâ bekleyen tek büyük
-> şey **gerçek veriyle deneme** (babanın listesi), yani v0'ın çıkma şartı.
+>    `CNAME` silinecek. Kaldırmanın GameMetrix'i kırmayacağı ölçülmüştü.
+> 3. **Babanın gerçek listesi** — hâlâ v0'ın çıkma şartı, ve hâlâ tek
+>    bekleyen büyük şey.
+
+### V turu — dokuz madde — **BİTTİ ✅** (2026-08-27)
+
+Kullanıcının TASKS'in en altına yazdığı dokuz satır. **Şema v7 → v8'e çıktı.**
+
+- [x] **V0 `v1.3.0` yayınlandı.** TASKS "tek kalan adım push" diyordu ve
+      yanlıştı: `main` çoktan itilmişti, gitmeyen şey **etiketti**. Sebep
+      `yayinla.mjs` içinde bir kusurdu — bir `replace` çağrısının hiçbir şeyi
+      değiştirmemesini "satır bulunamadı" diye okuyordu, ki bu tam da o
+      dalın hizmet ettiği normal durumdur. Düzeltildi, dört durum ölçüldü.
+      Release'in **dört** varlığı da 200: HTML · ZIP · **exe 3 664 896 bayt
+      (Windows/WebView2)** · **`surum.json`, ilk kez**.
+- [x] **V1 Çift branş — `schemaVersion` 8.** `Teacher.subject2` +
+      `Lesson.second`. **Alt branş değil çift branş**, ve gerekçe kullanıcının
+      kendi ikinci örneği: "Matematik 1/2" bir ağaçla anlatılabilir, "Türkçe
+      ve Edebiyat" anlatılamaz. Yeni yaprak modül `src/subjects.ts`
+      (`keys.ts` deseni). Ders branşın **adını değil bayrağını** tutuyor;
+      `sanitize()` yetim bayrağı temizliyor. Göç koşulu kaldırılarak
+      **kırmızıya döndürüldü**.
+- [x] **V2 İki saatlik blok TEK kart.** `colSpan={2}`, etiket bir kez ve bir
+      basamak büyük. **Öğle arasını aşan blok birleşmiyor** — ayraç sütunu
+      `data-day` taşımaz (tuzak 13). `drag.ts` `data-span` okuyor, yoksa
+      vurgunun geri kalanı sessizce boyanmıyordu.
+- [x] **V3 Renklerin üstündeki sayılar kalktı.** İndeks **erişilebilir ada**
+      taşındı; `--on-color` güvencesi metnin hâlâ olduğu yere (`.card`,
+      `.pool-card`) taşındı ve sabotajla sınandı. Yan kusur ekran
+      görüntüsüne **bakarak** bulundu: kutu yüksekliğini yazıdan alıyormuş.
+- [x] **V4 Listelerde sıra numarası.** `#` sütunu, dört listede de tek
+      kancadan (`useRowOrder`). **Görünen** sıra, dizinin indeksi değil.
+- [x] **V5 Havuz kartının kırpılması.** Ölçüldü: **5,2px** dışarıda
+      (2,2 kalkma + 2 outline + 1 offset), üst dolgu 0. Dolgu `--slide`
+      üstünden türetildi.
+- [x] **V6 Yoğunluk her yerde.** Liste satırı **57 → 34px**, katlanın
+      üstünde **10 → 19**, Sınıflar 20/20. **Hiçbir yazı küçülmedi** — 12px
+      sınırı duruyor ve test onu ölçüyor.
+- [x] **V7 Açık ↔ koyu tema renk şeridi — ÖLÇÜLDÜ, kusur YOK.** Açık tema
+      altı bölümün beşinde **daha güçlü** (5,53–7,31 ↔ 4,28–5,84). Koda
+      dokunulmadı; zemin `renk.spec.ts` 80'de sabitlendi.
+      *(İlk ölçüm yanlıştı: `contrast()` `oklab()` ayrıştıramıyor ve zemini
+      siyah okuyordu — boyayıp piksel okununca tablo tersine döndü.)*
+- [x] **V8 Sıralama yönü tuşu.** `ListQuery.desc`; karşılaştırıcı
+      **negatifleniyor**, `reverse()` değil — kararlı sıralamada `reverse()`
+      eşitleri de çevirirdi.
+- [x] **V9 Dersler'de öğretmen ve sınıf süzgeci + dağılım katlanıyor.**
+      `Facet.of` artık çok değerli. `patternLabel` 4 terimden sonra `10×1` /
+      `3×2 + 4×1` yazıyor.
+      *(Aynı turda ölçülerek reddedilen fikir: "çok değerli süzgeç açılır
+      liste olsun" — 25 çip %110'da tek satır, uçurum yok, dal silindi.)*
 
 > **Z turu bitti (2026-08-27): ders dağılımı, açık tema, örnek verinin yeri,
 > branşlarda sıralama.** Kullanıcının dört maddesinin dördü de yapıldı ve
@@ -1422,24 +1456,5 @@ Kararlar 2026-08-27'de soruldu ve verildi:
 
 
 
-Programda eğer blok2 saatlik olarak programda duruyorsa o iki farklı kart değil tek kart olarak gözükmel büyükçe kart olarak.
-
-Öğretmenlerin iki branşı olabilsin şöyle yapılsın. öğretmenleri eklerken ikinci branşı var mı diye sorulsun evetse ikincci branş seçme opsiyonu gelsin. 
-Dersleri ayarlarken de hocayı seçtikten sonra eğer çift branşlı bir hoca varsa onun hangi branşının dersi olacağını seçme özelliği de olsun.
-
-Renklerin üzerinde sayılar olmasın. Ayrıca Liste görünümünde de en solda sıralamaya göre sıra sıra sayılar olsun.
-
-Programda aşağıdaki çekmecede kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat çekmecenin altına kaçıyorlar onu düzeltmek lazım. Ayrıca Evet sayı mantığı güzel o da
-Genelde hocaların tek bir branşı var iki branşı yok ama matematik 1 ve matematik 2'ye giren tek hocalar ve türkçe ve edebiyata giren tek hocalar var. yani alt branş mı yapalım yoksa çift branş seçme şeklinde mi hangisi daha güzel ve mantıklıysa onu yapalım.
-
-Ayrıca genel anlamda görünümü biraz daha sıkı ferah sığdır şeklinde gibi yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor.
-
-Ayrıca açık tema ile koyu temanın renkleri arasında sanki biraz fark mı var yoksa bana mı öyle geliyor. mesela en üstteki şeritin üstündeki renk şeridi açık temada biraz daha az gözüküyor gibi. eğer bana öyle geldiyse boş verebilirsin.
-
-Listelerde sıralamanın yanına aşağı ya da yukarı diye ayrı bir tuş koyalım ki o filtreye göre aşağı ya da yukarı olsun.
-
-Dersler kısmında kolay seçme filtresinde sadece branş değil, öğretmene göre veya sınıfa göre de filtreleme olsun.
-
-Ders kısmında dağılım kısmı güzel olmuş ama adamın 10 saat dersi varsa 1+1+1+1+1... diye gözükmesi biraz kötü, ya onu ayrı ayrı seçelim ya da görünüş şeklinde biraz daha düzeltmeler geliştirmeler yap.
-
-
+> **Bu dokuz satırın ham hâli buradaydı; V turu olarak numaralanıp yukarı
+> taşındı (2026-08-27). Dokuzu da bitti.**

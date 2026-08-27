@@ -195,10 +195,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 569 birim testi
+npm test           # Vitest — 587 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 427 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 433 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -404,6 +404,12 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
+subjects.ts                     bir şeyin HANGİ branştan olduğu. Yaprak, çünkü
+                                entities.ts zaten constraints.ts'i çağırıyor:
+                                ikisinin de ihtiyacı olan kural ikisinin de
+                                ALTINDA durmalı (keys.ts'in deseni). sanitize()
+                                yetim bayrağı buradan yargılar, ekranlar branşı
+                                buradan okur. entities.ts yeniden dışa aktarır.
 blocks.ts                       bir haftanın NASIL bölündüğü: blockPlan ·
                                 patternLabel · patternOptions · clampPairs.
                                 Yalnız `Lesson` tipini import eder — entities.ts
@@ -578,7 +584,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 7
+  schemaVersion: 8
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -596,13 +602,19 @@ State {
 Day        { name, longBreakAfter }         // 5 = öğle arası 5. dersten sonra, 0 = yok
 Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }  // 09:00 · 40 · 10 · 30
 Limits     { maxConsecutive, maxPerDay, minPerDay, maxSameLessonPerDay }  // 0 = sınır yok
-Teacher    { name, short, subject, gender, color, limits }  // her öğretmenin TEK branşı var
+Teacher    { name, short, subject, subject2, gender, color, limits }
+                                            // subject2 = İKİNCİ branş, ya da ''
+                                            // ('' bir DEĞER, eksik veri değil)
                                             // gender: '' | 'k' | 'e'; '' bir DEĞER,
                                             // eksik veri değil. Kâğıda çıkmaz.
                                             // limits alanları null = okul varsayılanı
                                             // color = PALETTE indeksi, kimseyle çakışmaz
 ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
-Lesson     { classId, teacherId, weeklyHours, pairs, maxPerDay }
+Lesson     { classId, teacherId, weeklyHours, pairs, second, maxPerDay }
+                                            // second = hocanın İKİNCİ branşından
+                                            // mı. Branşın ADI değil BAYRAK: ad
+                                            // ikinci bir gerçek olur ve hoca
+                                            // düzeltilince sessizce sapar.
                                             // pairs = haftanın kaç saati İKİLİ
                                             // blok olarak inecek. 0..floor(h/2).
                                             // Gerisi tek saat, yani şekil tek
@@ -697,7 +709,18 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
 
 ### Neden böyle
 
-- **Branş öğretmenin alanı, dersin değil.** Her öğretmenin tek branşı var.
+- **Branş öğretmenin alanı, dersin değil — ama İKİ tane olabilir.** Karar
+  2026-08-27'de "alt branş mı çift branş mı" diye soruldu ve **çift branş**
+  seçildi; gerekçe kullanıcının kendi ikinci örneğidir. "Matematik 1 /
+  Matematik 2" bir hiyerarşiyle anlatılabilir, **"Türkçe ve Edebiyat"
+  anlatılamaz** — o ikisi birbirinin alt branşı değil. Bir ağaç istenen
+  vakaların yalnız yarısını çözer ve `settings.subjects`'e ikinci bir veri
+  şekli sokardı.
+  **Dersin hangi branştan olduğu bir BAYRAK** (`Lesson.second`), branşın adı
+  değil: ad ikinci bir gerçek olur ve öğretmenin branşı düzeltilince sessizce
+  sapardı — `Teacher.subject` zaten bilerek id değil string, tam da yeniden
+  adlandırma ucuz kalsın diye. Bayrak sapamaz: öğretmenin iki alanından birini
+  gösterir, ve öğretmenin ikinci branşı silinince `sanitize()` onu temizler.
 - **Derslik sınıfın sabit alanı.** Yerleştirirken oda seçilmez, ama iki sınıf aynı
   dersliği paylaşıyorsa çakışma kontrol edilir (~20 sınıf, 8 derslik).
 - **`placements` düz sözlük, dizi değil.** Gün/saat sayısı değişince taşan anahtarlar silinir.
@@ -738,7 +761,8 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   v3 = `Day` nesneleri + zil saatleri + kurallar, v4 = `subjectShorts`,
   v5 = `ClassGroup.color` + `settings.subjects`, v6 = `Teacher.gender`.
   v7 = `Lesson.pairs`, `blockSize`'ın yerine.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v7 tek okuyucudan geçer —
+  v8 = `Teacher.subject2` + `Lesson.second` — bir öğretmen iki branş verebilir.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v8 tek okuyucudan geçer —
   v3–v6'nın tek farkı **eklenen** alanlar, v7 ise ilkin **değişen** alanı ve onu
   `readLessons()` kendi başına çevirir (`blockSize` 2 ya da 3 → `floor(saat/2)`
   ikili, 1 → sıfır). `id`'ler ve gün indeksleri değişmediği için `unavailable` ve
@@ -1468,6 +1492,36 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     Bu turda çare, iddia edilen cümlelerin tam metnini tek tek yazmak oldu; ve
     kararın kendisi bir teste taşındı (`metin.spec.ts`), çünkü ölçtüğü şey
     kaynak değil `document.body.innerText` — yani yorumlara hiç bakmıyor.
+
+81. **Bir rengi ÖLÇMEDEN önce hangi UZAYDA yazıldığına bak.** Kullanıcı "açık
+    temada üstteki renk şeridi daha az görünüyor gibi" dedi; ölçtüm ve onu
+    doğruladığını sandım — açık 2,15–2,78, koyu 6,50–8,35. Tablo makuldü,
+    tutarlıydı, altı bölümde de aynı yöne bakıyordu, ve **tamamen yanlıştı**.
+    `contrast()` `rgb()` ayrıştırıyor; şeridin altındaki boya
+    `color-mix(in oklab, …)` ile yazılmış ve Chromium onu `oklab(0.899 …)`
+    olarak döndürüyor. Ayrıştırıcı ilk üç sayıyı kanal sanıp **her iki temada
+    da zemini siyah** okudu, yani ölçülen şey "koyu lacivert siyaha yakın mı"
+    idi. Rengi boyayıp pikseli okuyunca (1×1 canvas + `getImageData`) tablo
+    **tersine döndü**: açık 5,53–7,31, koyu 4,28–5,84 — yani şerit açık temada
+    daha güçlü ve ortada düzeltilecek bir şey yok.
+    Tuzak 65'in ailesinden ve ondan sinsi: orada bir platform iddiası
+    ölçülmeden yazılmıştı, burada **ölçüm yapıldı ve yalan söyledi**. Kural:
+    modern renk sözdizimi (`oklab`, `oklch`, `color-mix`, `color()`)
+    `getComputedStyle`'dan **o hâliyle** çıkar; sayıya çevirecek her yol önce
+    sRGB'ye getirmek zorundadır.
+
+82. **Bir metni kaldırmak, ondan yükseklik alan KUTUYU da kaldırır.** Renk
+    seçicinin genişliği CSS'te yazılıydı ama **yüksekliği** içindeki iki
+    rakamın yaptığı satır kutusundan geliyordu. Kullanıcı "renklerin üzerinde
+    sayılar olmasın" dedi, sayı kalktı, ve kutu 10 piksellik bir çubuğa
+    döndü — bir kimlik rengi değil, bir adın altına çekilmiş çizgi.
+    Hiçbir test göremezdi ve görmesi de gerekmezdi: düğme oradaydı, rengi
+    doğruydu, `aria-pressed` doğruydu, tıklanıyordu. Yalnız bir renk gibi
+    durmuyordu. Yakalayan şey `npm run ekran`'a **bakmak** oldu.
+    Kural: bir öğeden metin çıkarırken o metnin **ne taşıdığı** sorulur —
+    genişlik, yükseklik, hizalama taban çizgisi. Burada çare `height: 1lh`,
+    yani kutunun eskiden bir karakterle çağırdığı satır kutusunu doğrudan
+    istemesi.
 
 ---
 

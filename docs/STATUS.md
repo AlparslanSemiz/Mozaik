@@ -1,13 +1,196 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi yedinci oturum: **exe kendini güncelliyor**,
-görev çubuğu ikonu, devriye + hata kapanı, metin turu) — **v1.3.0
-etiketlendi, İTİLMEYİ bekliyor**
+Son güncelleme: 2026-08-27 (yirmi sekizinci oturum: **v1.3.0 YAYINDA**, çift
+branş — şema v8, tek kart blok, listelerde sıra ve yön, yoğunluk her yerde)
 
-> **Tek kalan adım:** `git push --follow-tags origin main`.
-> `npm run yayinla -- 1.3.0` push dışında her şeyi yaptı (iki dosyada sürüm,
-> commit, annotated etiket); push bu makinede GitHub kimliği olmadığı için
-> düştü. Uzak hâlâ `v1.1.0`'da.
+> **v1.3.0 çıktı ve doğrulandı.** Release'in dört varlığı da 200 veriyor,
+> ve **dördüncüsü ilk kez var**: `surum.json`. Ondan önceki hiçbir exe kendini
+> güncelleyemezdi, çünkü bakacağı dosya yoktu.
+>
+> | Varlık | Boyut |
+> |---|---|
+> | `Ders-Programi.html` | 544 753 bayt |
+> | `Ders-Programi-Windows-kurulum.zip` | 221 325 bayt |
+> | `Ders-Programi.exe` | 3 664 896 bayt — **Windows/WebView2**, Linux'ta ölçülen 3 742 584 değil |
+> | `surum.json` | 172 bayt |
+>
+> Baba artık v1.2.0'ı (ders dağılımı, şema v7) ve v1.3.0'ı birlikte alıyor;
+> ikisi de aylardır `main`'de duruyordu ama hiç yayınlanmamıştı.
+
+---
+
+## Yirmi sekizinci oturum — sürüm, çift branş, tek kart (2026-08-27)
+
+**Makine değişti: artık Windows 11**, Fedora değil. `cargo` yok (exe yalnız
+CI'da doğuyor), Playwright chromium kurulu, `npm run kontrol` bu makinede ilk
+kez koştu ve yeşil geçti.
+
+### 0. `v1.3.0` neden hiç çıkmamıştı
+
+TASKS "tek kalan adım push" diyordu ve yanlıştı: `main` çoktan itilmişti
+(`916c5c8` = `origin/main`), gitmeyen şey **etiketin kendisiydi** — uzakta
+yalnız `v1.1.0` vardı.
+
+Sebep `scripts/yayinla.mjs` içinde bir kusurdu: `cargoSurumuYaz` bir
+`replace` çağrısının **hiçbir şeyi değiştirmemesini** "version satırı
+bulunamadı" diye okuyordu. İkisi aynı şey değil, ve ayrımın düştüğü yer tam da
+o fonksiyonun var olma sebebi: `package.json` elle bumplanmış, `Cargo.toml`
+zaten aynı numarada, replace hiçbir şey değiştirmiyor — **doğru durum**.
+Artık satır önce ARANIYOR, sonra yazılıyor, ve yalnız gerçekten değiştiyse
+diske iniyor.
+
+Dört durum ölçüldü: satır yok → yakalanıyor · zaten doğru → susuyor · eski →
+yazıyor · `[dependencies]` içindeki `version` → dokunulmuyor.
+
+### 1. Çift branş — `schemaVersion` 7 → 8
+
+> *"Öğretmenlerin iki branşı olabilsin… hangisi daha güzel ve mantıklıysa
+> onu yapalım."*
+
+**Alt branş değil, iki branş** — ve gerekçe kullanıcının kendi ikinci örneği:
+"Matematik 1 / Matematik 2" bir hiyerarşiyle anlatılabilir, **"Türkçe ve
+Edebiyat" anlatılamaz**. Alt branş `settings.subjects` içine ikinci bir veri
+şekli (ağaç) sokup istenen vakaların yalnız yarısını çözerdi.
+
+| Ne | Nerede |
+|---|---|
+| `Teacher.subject2` · `Lesson.second` | `src/types.ts`, `SCHEMA_VERSION = 8` |
+| branşın türetilmesi | **yeni** `src/subjects.ts` — yaprak modül |
+| yetim bayrağın temizliği | `constraints.ts` → `sanitize()` |
+| göç | `store.ts`, `version === 7` açıkça eklendi |
+| arayüz | Öğretmenler'de "2. branş" sütunu, Dersler'de **yalnız çift branşlıda** beliren seçici |
+
+**Ders branşın ADINI saklamıyor, bir bayrak tutuyor.** Ad ikinci bir gerçek
+olurdu ve öğretmenin branşı düzeltilince sessizce saparaydı; `Teacher.subject`
+zaten bilerek id değil string, çünkü yeniden adlandırma ucuz kalsın diye.
+
+**`src/subjects.ts` neden yaprak:** `entities.ts` zaten `constraints.ts`
+modülünü çağırıyor, yani ikisinin de ihtiyacı olan bir kural ikisinin de
+**altında** durmalı — `keys.ts` dosyasının constraints ↔ rules için yaptığının
+aynısı. İlk hâlde kuralı `sanitize()` içine elle yazmıştım ve `subjectKey`
+kullanmadığı için "Matematik" ile "matematik" iki branş sayılıyordu: iki ev,
+iki gerçek.
+
+Göç koşulu **kaldırılarak kırmızıya döndürüldü** (3 test).
+
+### 2. İki saatlik blok TEK kart
+
+> *"blok 2 saatlik olarak duruyorsa o iki farklı kart değil tek kart olarak
+> gözükmeli, büyükçe kart olarak."*
+
+Blok başındaki `<td>` `colSpan={2}` alıyor, ikincisi hiç çizilmiyor, etiket
+bir kez ve bir basamak büyük yazılıyor.
+
+**Öğle arasını aşan blok BİRLEŞMİYOR**, ve bu bir incelik değil: ayraç sütunu
+bilerek `data-day` taşımıyor (tuzak 13) ve onu bir `colSpan` içine almak o
+değişmeze bir `data-day` verirdi. Orada eski iki kartlı çizim duruyor — ki
+dürüst de: ekranda gerçekten aralarında bir şey var.
+
+**`drag.ts` artık `data-span` okuyor.** Hücreyi SAATE göre buluyordu;
+birleşmiş bloğun ikinci saati hiçbir şeye çözülüyor, `if (el == null) break`
+de vurgunun **geri kalanını** boyamadan bırakıyordu.
+
+### 3. Ölçülerek REDDEDİLEN iki fikir
+
+**(a) "Çok değerli süzgeç açılır liste olsun."** `CHIP_LIMIT = 8` yazdım,
+gerekçesini de yazdım — ve ölçmemiştim. Ölçüm:
+
+```
+%110   12 branş · 25 öğretmen · 20 sınıf     hepsi TEK satır, 28px
+%150   aynı üçü                              hepsi ~2 satır, 81px
+```
+
+Çipler kısaltma taşıyor ("MÇ 4", "510 6"), yani sayı satırı neredeyse hiç
+büyütmüyor. Düşülecek bir uçurum yoktu; dalın tek gerçek etkisi kullanıcının
+zaten kullandığı süzgeci, sayılarını gizleyen bir kutuya çevirmekti.
+**Silindi.**
+
+**(b) "Açık temada renk şeridi daha az görünüyor gibi."** Ölçüldü, **tersi**
+çıktı:
+
+| Bölüm | açık | koyu |
+|---|---|---|
+| Kurulum · Müsaitlik | 6,92 · 7,26 | 4,66 · 4,65 |
+| Program | **7,31** | 4,28 |
+| Kontrol | 5,53 | 5,84 |
+| Yazdır · Ayarlar | 7,05 · 7,26 | 5,28 · 4,49 |
+
+Altı bölümün beşinde açık tema daha güçlü. Kullanıcı "bana öyle geldiyse boş
+verebilirsin" demişti; koda dokunulmadı, sayılar yazıldı, ve **zemin** bir
+testle sabitlendi (`renk.spec.ts` 80, her iki temada da en az 3,5).
+
+> **İlk ölçüm YANLIŞTI ve bunu yazmak önemli.** `contrast()` yalnız `rgb()`
+> ayrıştırıyor; `color-mix(in oklab, …)` Chromium'da `oklab()` olarak kalıyor
+> ve ayrıştırıcı parlaklığı kırmızı kanal sanıp zemini **siyah** okuyordu.
+> Tablo o hâliyle tam ters çıkmıştı (açık 2,15–2,78 · koyu 6,50–8,35) ve
+> makul görünüyordu. Doğrusu rengi **boyayıp pikseli okumak**.
+
+### 4. Genişlik — eşik gevşetilmedi
+
+İki yeni sütun (2. branş + sıra no) Öğretmenler tablosunu %125 ölçekte
+**106px** taşırdı. Ne taşıdığı tek tek kapatılarak ölçüldü (tuzak 37 yöntemi):
+sıra no 31px, 2. branş sütunu 106px'in tamamı — 67'si başlığın, 39'u düğmenin.
+
+Asıl yer başka çıktı: **kenar sütununun gerçek tabanı** `min-content` ile
+zorlanarak ölçüldü — **19,94rem**, ve tavan `24rem` idi. CSS'in kendi yorumu
+zaten "every pixel past that is blank" diyordu. Tavan `20rem` oldu, düğme "+"
+oldu, başlık "2. branş". **Taşma 0**, %100/%110/%125 üçünde de.
+
+### 5. Havuz kartı — 5,2px dışarıda
+
+> *"hover edince biraz daha yukarı çıkmaları güzel fakat çekmecenin altına
+> kaçıyorlar"*
+
+Ölçüldü: kalkma 2,2px + outline 2px + offset 1px = **5,2px**, ve `.pool-list`
+üst dolgusu **0** idi, yani ilk sıra kırpan kenara yaslıydı. Dolgu `--slide`
+üstünden **türetildi**: ölçekle büyüyor, hareket kapanınca sıfırlanıyor.
+Dördüncü piksel alt-piksel payı — 3 ile kartın boyalı kenarı 0,0125px yukarıda
+kalıyordu.
+
+### 6. Yoğunluk artık ızgaranın değil ARAYÜZÜN
+
+> *"babam tek seferde tüm listeleri görmek istiyor."*
+
+Ölçülen (örnek okul, varsayılan ölçek, Kurulum → Öğretmenler):
+
+| | satır boyu | katlanın üstünde |
+|---|---|---|
+| Ferah | 65px | 9 |
+| Rahat | 57px | 10 |
+| **Sığdır** | **34px** | **19** — Sınıflar'da 20/20, listenin tamamı |
+
+**25 öğretmenin hepsi hâlâ sığmıyor, ve bu ayarlanarak kapatılmadı:** kalan
+tabanı satırdaki **metin kutusu** koyuyor, onu indirecek tek şey daha küçük
+bir harf, ve 12px ekran sınırı bu program için geçilmiyor. Çıkan şey yalnız
+boşluk; hiçbir yazı boyutu küçülmedi ve test bunu ölçüyor.
+
+### 7. Kalan altı madde
+
+- **Renklerin üstündeki sayılar kalktı.** İndeks kaybolmadı — **erişilebilir
+  ada** taşındı (`MÇ rengi: 12`). `--on-color` güvencesi de kaybolmadı,
+  **taşındı**: metnin hâlâ palet zemininde durduğu yere, `.card` ve
+  `.pool-card` üstüne. Sabotajla kırmızıya döndürüldü.
+  Yan kusur **ekran görüntüsüne bakarak** bulundu: yazı gidince kutu
+  yüksekliğini de kaybediyor ve 10px'lik bir çubuğa dönüyordu. `height: 1lh`.
+- **Listelerde sıra numarası** (`#` sütunu) — görünen sıra, dizinin indeksi
+  değil: süzgeç altında ekrandaki üçüncü satır "3" der.
+- **Sıralama yönü tuşu.** `ListQuery.desc`; karşılaştırıcı **negatifleniyor**,
+  `reverse()` değil — kararlı sıralamada `reverse()` eşitleri de çevirir.
+- **Dersler'de öğretmen ve sınıf süzgeci.** `Facet.of` artık `string` ya da
+  `string[]`: çift branşlı hoca iki gruba birden ait, ve "Edebiyat" onu
+  bulamayan bir süzgeç yalan söylerdi.
+- **Dağılım katlanıyor:** 4 terimden sonra `10×1`, `3×2 + 4×1`.
+- **`e2e/sira.spec.ts` konum yerine `data-row-name` okuyor.** `td:nth-child(2)`
+  ad sütununu gösteriyordu; iki kez sütun eklendi ve her seferinde **boş bir
+  hücreyi** okuyup boşu boşla karşılaştırarak yanlış şeyi doğruladı.
+
+### Sayılar
+
+```
+587 birim + 433 E2E + 22 site + 7 çözücü      hepsi yeşil
+npm run patrol                                 4/4, konsol temiz
+npm run ekran                                  34 görüntü, BAKILDI
+```
 
 ---
 
