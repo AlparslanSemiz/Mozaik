@@ -59,6 +59,15 @@ export default function Classes({ state, change }: PanelProps) {
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
+  // Enter adds, the way it does in Derslikler and Branşlar. Entering twenty
+  // classes is twenty trips to a button otherwise, and the room stays picked
+  // because it is usually the same one twice in a row.
+  function addNew() {
+    if (newClass.name.trim() === '') return;
+    change((d) => addClass(d, newClass.name, newClass.roomId || null));
+    setNewClass({ name: '', roomId: newClass.roomId });
+  }
+
   return (
     <div className="panel step-panel">
       {/* The paste button rides the HEADING, not the form row: "Excel'den
@@ -83,6 +92,9 @@ export default function Classes({ state, change }: PanelProps) {
           placeholder="Sınıf adı, örn. 510"
           value={newClass.name}
           onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') addNew();
+          }}
         />
         <select
           value={newClass.roomId}
@@ -95,14 +107,7 @@ export default function Classes({ state, change }: PanelProps) {
             </option>
           ))}
         </select>
-        <button
-          className="btn"
-          disabled={newClass.name.trim() === ''}
-          onClick={() => {
-            change((d) => addClass(d, newClass.name, newClass.roomId || null));
-            setNewClass({ name: '', roomId: newClass.roomId });
-          }}
-        >
+        <button className="btn" disabled={newClass.name.trim() === ''} onClick={addNew}>
           Ekle
         </button>
       </div>
@@ -144,10 +149,16 @@ export default function Classes({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th>Renk</th>
-              <th>Ad</th>
-              <th className="w-col-xl">Derslik</th>
-              <th className="w-col-md">Ders saati</th>
+              <th className="w-col-xs">Renk</th>
+              <th className="w-col-xl">Ad</th>
+              {/* Narrower than the name beside it, and that is the point: a
+                  room is a letter, not a name. The box still has to hold its
+                  longest OPTION ("Derslik yok"), which is what --w-col-lg
+                  clears — the width is on the <th> because a <select> at
+                  `width: 100%` contributes nothing to max-content (pitfall
+                  34). */}
+              <th className="w-col-lg">Derslik</th>
+              <th className="w-col-sm">Ders saati</th>
               <th className="w-col-md" />
             </tr>
           </thead>

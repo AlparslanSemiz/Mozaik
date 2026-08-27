@@ -110,6 +110,47 @@ test.describe('69. Dersler sekmesi', () => {
     expect(await classPick.inputValue()).toBe('');
   });
 
+  // A CONTROL WITH ONE ANSWER IS NOT A QUESTION.
+  //
+  // "Öğretmenin tek bir branşı varsa seçme tuşu açılmasın dersler sectionu
+  //  öğretmenden seçeneğinde, varsa tabii ki açılsın. Başlıkta branşı da
+  //  yazsın."
+  //
+  // In Öğretmenden the branch pool is already that one teacher's own branches,
+  // so for the twenty-three of twenty-five who hold one, the box was a dropdown
+  // with a single option: it could not be answered wrongly and it could not be
+  // answered differently. Nothing about the lesson changes when it goes —
+  // `subjectValue` falls to the pool's first entry either way, and the flag
+  // written into the lesson is derived from that.
+  test('Öğretmenden: tek branşlı hocada branş kutusu YOK, iki branşlıda VAR', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page, 'teacher');
+
+    const box = page.locator('.form-row').getByLabel('Branş', { exact: true });
+    const open = page.locator('.ribbon-value').first();
+    const who = (await open.innerText()).trim();
+    await expect(box, 'tek branşlı hocada branş kutusu hâlâ çiziliyor').toHaveCount(0);
+
+    // ...and the branch is not lost, it moved to the heading.
+    const heading = await page.locator('.cols > div .panel h2').first().innerText();
+    expect(heading, `başlık branşı söylemiyor: "${heading}"`).toMatch(/ · .+ dersleri/);
+
+    // Now give that same teacher a second branch and the question becomes real.
+    await openSetup(page, 'Öğretmenler');
+    // By `data-row-name` and not by text: the name lives in an <input>'s value,
+    // which `hasText` cannot see.
+    const row = mainList(page).locator(`tbody tr[data-row-name="${who}"]`);
+    await row.getByRole('button', { name: /ikinci branş ekle/ }).click();
+    const second = row.getByLabel(/ikinci branşı/);
+    const other = await second.locator('option').nth(1).getAttribute('value');
+    await second.selectOption(other!);
+
+    await openLessons(page, 'teacher');
+    await expect(box, 'iki branşlı hocada branş kutusu açılmıyor').toHaveCount(1);
+    // Both branches are offered, and only that teacher's two.
+    await expect(box.locator('option')).toHaveCount(2);
+  });
+
   test('Enter da ekliyor', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'class');

@@ -69,7 +69,8 @@ export const lessonIcon = (
 /**
  * A mortarboard — the symbol aSc uses for Teachers, and the one thing on screen
  * that cannot be mistaken for a person. Ribbon's view switch draws the same
- * one: the teacher axis of the grid and step 2 of Kurulum are the same people.
+ * one: the teacher axis of the grid and Kurulum's teacher list are the same
+ * people.
  */
 export const teacherIcon = (
   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">

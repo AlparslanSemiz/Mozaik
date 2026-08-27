@@ -367,6 +367,11 @@ export function storageReport(lib: Library): StorageReport {
     chars: charsAt(`${BASE_KEY}-serit`),
   });
   rows.push({
+    key: `${BASE_KEY}-serit-gizle`,
+    what: 'şerit kaydırınca gizlensin mi',
+    chars: charsAt(`${BASE_KEY}-serit-gizle`),
+  });
+  rows.push({
     key: `${BASE_KEY}-musaitlik-saat`,
     what: 'müsaitlikte saat gösterimi',
     chars: charsAt(`${BASE_KEY}-musaitlik-saat`),

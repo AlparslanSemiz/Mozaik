@@ -19,18 +19,22 @@
 //   4. every button carries a SYMBOL and a WORD, never one alone;
 //   5. all the buttons are the same height;
 //   6. the first button starts at the same x on all seven, because the opening
-//      caption is padded to one width and followed by a rule (2026-08-27,
-//      "İlk baştaki yazı sonrası hepsi aynı hizadan başlasın ... arada bir
-//      çizgi olur");
+//      caption is a FIXED box with the word centred in it and the rule pinned
+//      to its right edge (2026-08-27, "İlk baştaki yazı sonrası hepsi aynı
+//      hizadan başlasın ... arada bir çizgi olur"; corrected 2026-08-28,
+//      "çizgi her sectionda aynı yerde olsun ve yazı ortalansın" — the box was
+//      padded but the rule was drawn from its STATIC position, i.e. from the
+//      end of the TEXT, so it moved with every caption). The seven captions
+//      are one word each for the same reason: a box that has to hold "NE
+//      GÖSTERİLSİN" is a box with an inch of air in front of six other tabs;
 //   7. buttons in one group are the same WIDTH — `.ribbon-group` is a grid of
 //      equal columns ("Blokların simetrisi ... sadece şekilleriyle").
 //
 // And one more thing that is an ORDER rather than a shape: wherever a strip
 // offers the two kinds side by side, teacher comes first and class second. It
 // was teacher-first in Müsaitlik and Program and class-first in Dersler and
-// Yazdır — the same two icons, the same row, two orders. Kurulum's steps are
-// not this: they are a numbered sequence, and a class refers to a room, so
-// rooms have to be typed in first.
+// Yazdır — the same two icons, the same row, two orders. Kurulum's three lists
+// are not this: a class refers to a room, so rooms have to be typed in first.
 //
 // Rule 4 is the accessibility half: the word is the accessible name in both
 // test layers (pitfall 56) and the symbol is what the eye finds first at 150%,
@@ -54,6 +58,7 @@ import {
   Eye,
   Gauge,
   Layers,
+  Library,
   LayoutList,
   List,
   Maximize2,
@@ -119,6 +124,7 @@ const SECTIONS: Array<{ id: SectionId; label: string; icon: React.ReactElement }
   { id: 'rules', label: 'Kurallar', icon: <Scale {...ICON} /> },
   { id: 'subjects', label: 'Branşlar', icon: <Tags {...ICON} /> },
   { id: 'appearance', label: 'Görünüm', icon: <Eye {...ICON} /> },
+  { id: 'plans', label: 'Planlar', icon: <Library {...ICON} /> },
   { id: 'data', label: 'Veri', icon: <Database {...ICON} /> },
 ];
 
@@ -238,9 +244,9 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
 
   if (ui.tab === 'setup') {
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kurulum adımları">
-        <Group label="Adımlar">
-          {STEPS.map((s, i) => {
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kurulum listeleri">
+        <Group label="Liste">
+          {STEPS.map((s) => {
             const count = s.count(state);
             return (
               <button
@@ -253,7 +259,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
                 <span className="step-icon" aria-hidden="true">
                   {s.icon}
                 </span>
-                <span className="step-no">{i + 1}</span>
+
                 {s.label}
                 <span className="step-count">{count}</span>
               </button>
@@ -288,7 +294,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         role="toolbar"
         aria-label="Ders girişi araçları"
       >
-        <Group label="Nasıl eklensin">
+        <Group label="Yöntem">
           {LESSON_MODES.map((m) => (
             <button
               key={m.id}
@@ -350,7 +356,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     const selected = list.find((x) => x.id === ui.chosen) ?? list[0];
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Müsaitlik araçları">
-        <Group label="Kimin saatleri">
+        <Group label="Kim">
           {KINDS.map((k) => (
             <button
               key={k.id}
@@ -545,7 +551,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     const shown = ui.checkView;
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kontrol araçları">
-        <Group label="Ne gösterilsin">
+        <Group label="Süzgeç">
           {CHECK_VIEWS.map((v) => (
             <button
               key={v.id}
@@ -584,7 +590,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Yazdırma araçları">
         {/* The two kinds of sheet are drawn with the same two symbols they carry
             in Kurulum, Müsaitlik and the entity panel — one drawing per thing. */}
-        <Group label="Ne basılsın">
+        <Group label="İçerik">
           <button
             className="btn"
             aria-pressed={ui.scope === 'teachers'}

@@ -122,7 +122,7 @@ export default function Rooms({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th>Ad</th>
+              <th className="w-col-xl">Ad</th>
               <th className="w-col-lg">Sınıf sayısı</th>
               <th className="w-col-md" />
             </tr>

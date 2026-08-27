@@ -19,9 +19,16 @@ import {
 
 const picker = (page: Page) => page.getByLabel('Plan', { exact: true });
 
-/** Opens Ayarlar > Veri, where every plan command lives. */
+/**
+ * Opens Ayarlar > Planlar, where every plan command lives.
+ *
+ * Its own section since 2026-08-28. It was one of seven panels under "Veri",
+ * which also held a folder, a key table, a backup list, a reset and a version
+ * — four questions under one name. The bundle file came with it, because "all
+ * of the plans, in one file" is the library's own noun.
+ */
 async function openPlans(page: Page) {
-  await openSettings(page, 'Veri');
+  await openSettings(page, 'Planlar');
   await expect(page.getByRole('heading', { name: /^Planlar/ })).toBeVisible();
 }
 
@@ -425,7 +432,10 @@ test.describe('42. Bütün planlar tek dosyada', () => {
 test.describe('43. Veriler nerede', () => {
   test('tablodaki anahtarlar sayfanın GERÇEK anahtarlarıyla aynı', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    // A second plan first, so the table has more than one plan row to be
+    // right about — and that button is in Ayarlar → Planlar now, while the
+    // table it is checked against stayed in Veri.
+    await openSettings(page, 'Planlar');
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
     await openSettings(page, 'Veri');
 

@@ -143,6 +143,90 @@ test.describe('47. Izgara enstrümanı', () => {
     expect(deltaE(head, t['--accent-bg']!)).toBeLessThan(2);
   });
 
+  // THE CROSSHAIR ON A GRID THAT HAS BLOCKS IN IT — and that is the whole test.
+  //
+  // "Programda blok saatlerinin yeni mantığından dolayı önizleme artısı kaymış
+  // durumda." The chrome used to find its column with `cell.cellIndex` and light
+  // the others with `:nth-child()`, which is exact for as long as every row has
+  // one <td> per hour. A two-hour block is ONE <td> with colSpan 2, so a row
+  // holding a double has fewer cells than the week has hours: the index came out
+  // short and the beam landed LEFT of the pointer, by one column per double to
+  // its left. Nothing threw, no count moved, and the suite stayed green — the
+  // test above never saw it because it runs on an EMPTY grid (pitfall 41: a
+  // layout measurement is made with the data that fills the thing it measures).
+  //
+  // What is asserted is not an index but the thing the reader sees: every lit
+  // cell has to contain the pointer's x.
+  test('haç blokların arasında da imlecin ALTINDA kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+
+    // Fill the week, so the grid really carries merged blocks.
+    const run = page.getByRole('button', { name: /^Otomatik diz/ });
+    await run.click();
+    await page.locator('.reason-bar.ok, .reason-bar.bad').waitFor({ timeout: 60_000 });
+    const doubles = await page.locator("table.grid td[data-span='2']").count();
+    expect(doubles, 'ızgarada hiç birleşmiş blok yok — test bir şey ölçmüyor').toBeGreaterThan(0);
+
+    // A cell that is REALLY on screen (only ~35 of the 78 columns are) and that
+    // has a double somewhere to its left in another row — that second half is
+    // the case the old arithmetic got wrong, and any old column would miss it.
+    const target = await page.evaluate(() => {
+      const wrap = document.querySelector('.grid-wrap');
+      const head = document.querySelector('table.grid thead');
+      const rowHead = document.querySelector('table.grid .row-head');
+      if (wrap === null || head === null || rowHead === null) return null;
+      const r = wrap.getBoundingClientRect();
+      const left = r.left + rowHead.getBoundingClientRect().width + 8;
+      const top = r.top + head.getBoundingClientRect().height + 4;
+
+      // Which columns have a merged block in SOME row.
+      const merged = new Set(
+        [...document.querySelectorAll("table.grid td[data-span='2']")].map((el) =>
+          Number((el as HTMLElement).dataset.col),
+        ),
+      );
+
+      for (const el of document.querySelectorAll('table.grid tbody td[data-col]')) {
+        const col = Number((el as HTMLElement).dataset.col);
+        // Something merged has to stand to its LEFT, or the old bug is not
+        // even reachable at this column.
+        if (![...merged].some((m) => m < col)) continue;
+        const b = el.getBoundingClientRect();
+        const x = b.left + b.width / 2;
+        const y = b.top + b.height / 2;
+        if (x < left || x > r.right - 8 || y < top || y > r.bottom - 8) continue;
+        return { col, x, y };
+      }
+      return null;
+    });
+    expect(target, 'ölçülecek sütun bulunamadı').not.toBeNull();
+
+    await page.mouse.move(target!.x, target!.y, { steps: 3 });
+    await page.waitForTimeout(80);
+
+    const beam = await page.evaluate((x: number) => {
+      const lit = [...document.querySelectorAll('table.grid .col-hot')];
+      return {
+        count: lit.length,
+        heads: lit.filter((el) => el.tagName === 'TH').length,
+        // How far each lit box is from holding the pointer. Zero for all of
+        // them is the crosshair being where the finger is.
+        astray: lit
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return Math.max(0, r.left - x, x - r.right);
+          })
+          .filter((d) => d > 0.5).length,
+      };
+    }, target!.x);
+
+    expect(beam.count, 'haç hiç yanmadı').toBeGreaterThan(1);
+    expect(beam.heads, 'saat başlığı yanmıyor').toBe(1);
+    expect(beam.astray, `${beam.astray} hücre imlecin altında değil`).toBe(0);
+  });
+
   test('kapalı saat haçın altında kaybolmuyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();

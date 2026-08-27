@@ -1,18 +1,20 @@
-// Setup, in numbered steps.
+// Setup: the three lists the school is built from.
 //
 // It used to be one 1132-line scroll: everything was on screen at once and
 // nothing said in which order to fill it in. The strip below is NOT a locked
-// wizard — every step is reachable at any time — it only shows where you are
-// and, through the counters, where something is still missing.
+// wizard — every list is reachable at any time — it only shows where you are
+// and, through the counters, where something is still missing. The ordinals
+// that used to sit in front of the names came off on 2026-08-28 for exactly
+// that reason: nobody walks these in order, so numbering them was counting
+// something the reader never counts.
 //
-// Setup now holds ONLY the four lists that describe the school's people and
+// Setup now holds ONLY the three lists that describe the school's people and
 // rooms. Everything that is a setting — the school's name, its days, the bell,
 // the rules, the subject list — moved to the Ayarlar tab, so this screen has
 // exactly one kind of thing on it and every step can be counted.
 
 import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
-import { useDialogs } from '../Dialogs';
 import { useToast } from '../Toasts';
 import { useLoadSample } from '../useSample';
 import { markIntroSeen, readIntroSeen } from '../../theme';
@@ -23,10 +25,10 @@ import Classes from './Classes';
 import Summary from './Summary';
 import Progress from './Progress';
 import { drafts as draftsOf } from '../../library';
-import { loadPlan } from '../../store';
 import type { PanelProps, PlanControls } from '../props';
 import type { StepId } from '../../toolState';
 import { STEPS } from '../steps';
+import DraftStart from '../DraftStart';
 
 /**
  * The three lists' label, count and symbol live in `components/steps.tsx` — one
@@ -49,7 +51,6 @@ interface Props extends PanelProps {
 }
 
 export default function Setup({ state, change, plans, step, setStep, goLessons }: Props) {
-  const { alert } = useDialogs();
   const notify = useToast();
   const loadSample = useLoadSample();
   // Read once on mount: `markIntroSeen()` writes to localStorage, and a
@@ -132,29 +133,11 @@ export default function Setup({ state, change, plans, step, setStep, goLessons }
                 öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir.
                 Taslağın kendisi değişmez.
               </p>
-              <div className="form-row">
-                {templates.map((d) => (
-                  <button
-                    key={d.id}
-                    className="btn"
-                    onClick={async () => {
-                      const seed = loadPlan(d.id);
-                      if (seed === null) {
-                        await alert({
-                          title: 'Bu taslağın verisi bulunamadı',
-                          tone: 'warn',
-                          body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Veri → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
-                        });
-                        return;
-                      }
-                      plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
-                      notify(`"${d.name}" taslağından yeni bir plan açıldı.`);
-                    }}
-                  >
-                    {d.name} ile başla
-                  </button>
-                ))}
-              </div>
+              <DraftStart
+                plans={plans}
+                label={(name) => `${name} ile başla`}
+                notify={notify}
+              />
             </>
           )}
         </div>

@@ -50,7 +50,13 @@ export type StepId = "rooms" | "teachers" | "classes";
  */
 export type LessonMode = "class" | "teacher" | "all";
 /** Ayarlar: which section. */
-export type SectionId = "school" | "rules" | "subjects" | "appearance" | "data";
+export type SectionId =
+  | "school"
+  | "rules"
+  | "subjects"
+  | "appearance"
+  | "plans"
+  | "data";
 /** Yazdır: which pages the preview builds. */
 export type Scope = "classes" | "teachers" | "both";
 /**

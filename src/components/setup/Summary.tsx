@@ -37,6 +37,12 @@ const BADGE_TEXT: Record<ReportRow['level'], string> = {
 function Rows({ rows, empty }: { rows: ReportRow[]; empty: string }) {
   if (rows.length === 0) return <p className="hint">{empty}</p>;
   return (
+    // A ROW PER TEACHER, so this is the one panel on the screen that grows with
+    // the school. Twenty-five of them make a side column taller than the list
+    // it is summarising — and a summary you have to scroll past to reach the
+    // next summary is not one. Bounded and scrolled in place, which is the
+    // pattern `.entity-list` already uses for the same reason.
+    <div className="stat-scroll">
     <table className="stat">
       <thead>
         <tr>
@@ -59,6 +65,7 @@ function Rows({ rows, empty }: { rows: ReportRow[]; empty: string }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 

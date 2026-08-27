@@ -16,6 +16,7 @@ import {
   readDensity,
   readMotion,
   readRibbon,
+  readRibbonAuto,
   readAvailClock,
   readScale,
   readTheme,
@@ -308,28 +309,26 @@ const ICON = {
  * is not a component anybody reuses — there is exactly one place in the
  * program that draws it, and that is three lines below.
  *
- * The SOURCE of truth is site/icon.svg; e2e/kabuk.spec.ts checks this draws
- * the same rectangles, the way temel.spec.ts already does for the favicon.
- * Three copies of one drawing is two too many to hold in a head.
+ * THE SIMPLE VARIANT, since 2026-08-28 ("sol üstteki logonun küçüğü
+ * kullanılsın"). It used to be the detailed one, and the reason it changed is
+ * the reason the two drawings exist at all: the mark is `1.75rem` here, which
+ * is 24.5 px at 100 % — and the icon comparison this project already ran
+ * (`scripts/ikon-karsilastir.mjs`) put 20-32 px in the band where the six
+ * columns are "blurry but still separable", i.e. the band where it is a
+ * judgement call. The reader made the call.
+ *
+ * The SOURCE of truth is site/icon-small.svg; e2e/kabuk.spec.ts checks this
+ * draws the same rectangles, the way temel.spec.ts already does for the
+ * favicon — which reads from the same file, so the tab and the top bar now
+ * carry one drawing instead of two.
  */
 function BrandMark() {
   return (
     <svg viewBox="0 0 512 512" className="brand-mark">
       <rect width="512" height="512" rx="112" fill="#2e3ba8" />
-      <g fill="#fff" opacity=".16">
-        <rect x="104" y="120" width="48" height="272" rx="16" />
-        <rect x="164" y="120" width="48" height="272" rx="16" />
-        <rect x="224" y="120" width="48" height="272" rx="16" />
-        <rect x="284" y="120" width="48" height="272" rx="16" />
-        <rect x="344" y="120" width="48" height="272" rx="16" />
-        <rect x="404" y="120" width="48" height="272" rx="16" />
-      </g>
-      <rect x="104" y="132" width="48" height="112" rx="16" fill="#65b6ec" />
-      <rect x="164" y="200" width="48" height="60" rx="16" fill="#9ff292" />
-      <rect x="224" y="132" width="48" height="60" rx="16" fill="#f3de9b" />
-      <rect x="284" y="216" width="48" height="112" rx="16" fill="#65b6ec" />
-      <rect x="344" y="140" width="48" height="60" rx="16" fill="#c3a2cd" />
-      <rect x="404" y="268" width="48" height="112" rx="16" fill="#9ff292" />
+      <rect x="96" y="112" width="96" height="192" rx="32" fill="#65b6ec" />
+      <rect x="208" y="208" width="96" height="192" rx="32" fill="#9ff292" />
+      <rect x="320" y="128" width="96" height="160" rx="32" fill="#f3de9b" />
     </svg>
   );
 }
@@ -350,6 +349,12 @@ export default function App() {
   // the strip is a SIBLING of the scrolled box, and a rule that reaches
   // sideways is a rule nobody finds (see ribbonScroll.ts).
   const appRef = useRef<HTMLDivElement>(null);
+
+  // Whether the strip is allowed to slide away on its own while you read down.
+  // Up here with the refs rather than beside the other preferences because the
+  // effect that reads it is a few lines below — a gesture rather than a
+  // preference, so it gets its own key (theme.ts).
+  const [ribbonAuto, setRibbonAuto] = useState<boolean>(readRibbonAuto);
 
   /**
    * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
@@ -384,12 +389,19 @@ export default function App() {
   // the whole child of `.main`. Program is left out on purpose — see the note
   // in ribbonScroll.ts; there `.main` does not scroll at all, so attaching
   // would simply do nothing, but saying so here is cheaper than finding out.
+  //
+  // ...and only if the reader wants it to. `ribbonAuto` is a preference of its
+  // own and not a widening of `ders-programi-serit`: that one says "I do not
+  // want the strip", this one says "do not move it while I read". Off, the
+  // effect is never attached and the attribute the CSS reads is cleared, so
+  // there is no path left that can hide the strip behind the reader's back.
   useEffect(() => {
     const box = mainRef.current;
     const shell = appRef.current;
-    if (box === null || shell === null || tab === 'program') return undefined;
+    if (shell !== null && !ribbonAuto) shell.removeAttribute('data-ribbon');
+    if (box === null || shell === null || tab === 'program' || !ribbonAuto) return undefined;
     return attachRibbonScroll(box, shell);
-  }, [tab]);
+  }, [tab, ribbonAuto]);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
   const [theme, setTheme] = useState<Theme>(readTheme);
@@ -983,6 +995,10 @@ export default function App() {
               setUiDensity={setUiDensity}
               availClock={availClock}
               setAvailClock={setAvailClock}
+              ribbonAuto={ribbonAuto}
+              setRibbonAuto={setRibbonAuto}
+              theme={theme}
+              setTheme={setTheme}
               motion={motion}
               setMotion={setMotion}
               section={ui.section}

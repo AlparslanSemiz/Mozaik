@@ -196,10 +196,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 587 birim testi
+npm test           # Vitest — 609 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 433 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 461 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -261,7 +261,14 @@ aynı gün 32'den **20**'ye. `.ico`'ya 20 · 24 · 40 eklendi. Üçü de tek bir
 | `icon.ico` 16 px | **sade** | ayrıntılı çizim orada daha kötü bir logo değil, **logo değil** |
 | `icon.ico` 20–256 px | ayrıntılı | **görev çubuğu %100'de 24 px ister** (tuzak 78) |
 | PWA 192/512 PNG | ayrıntılı | yer var |
-| Üst çubuk (`.brand-mark`) | ayrıntılı | 28 px @%100, 42 px @%150 |
+| Üst çubuk (`.brand-mark`) | **sade** (2026-08-28) | 24,5 px @%100 — eşiğin *içinde* kalan tek yer |
+
+**Üst çubuk 2026-08-28'de ayrıntılıdan sadeye geçti, kullanıcı isteğiyle.** Karar
+ölçümle çelişmiyor, ölçümün belirsiz bandında: `.brand-mark` `1.75rem`, yani
+%100'de **24,5 px**, ve `ikon-karsilastir.mjs` 20–32 px'i *"bulanık ama sütunları
+ayırt edilebilir"* diye kaydetmişti. O bandın hangi tarafında durulacağı bir
+ölçüm değil bir tercih. Yan kazanç: sekme ile üst çubuk artık **aynı dosyadan**
+(`site/icon-small.svg`) besleniyor, yani bir çizimin üç kopyası ikiye indi.
 
 Çizim böylece **üç yerde** duruyor (svg dosyası · `index.html`'in data URI'si ·
 `App.tsx`'in inline SVG'si). Üçünün de ayrışması iki testle yakalanıyor:
@@ -336,7 +343,7 @@ formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç
 | **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
 | **Rust** | `src-tauri/src/{lib,update}.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. Artı güncelleme: `is_newer`'ın `1.10 > 1.9` bildiği, inen dosyanın **MZ ile başladığı ve boyutunun tuttuğu**, adresin yalnız kendi Release'imizden olabildiği, ve takas yarıda kalırsa **eski programın yerine geri konduğu**. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
 | **Hata kapanı** | `e2e/kapan.ts` — **bütün** E2E süiti | Test ne ölçerse ölçsün, sayfanın kendi şikayeti: `console.error`, `pageerror`, yakalanmamış promise reddi, ve `file://` altında **herhangi bir ağ isteği**. `auto: true`, yani unutulamaz. Bir testin beklediği hata `beklenenHata()` ile adıyla serbest bırakılır — susturmak için değil, **beklendiğini söylemek** için |
-| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: yedi sekme, üç adım, beş bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
+| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: yedi sekme, üç liste, altı bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
@@ -662,6 +669,7 @@ ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (ferah / rahat / sigdir)
 ders-programi-havuz      -> havuz çekmecesi açık mı (acik / kapali)
 ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
 ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
+ders-programi-serit-gizle-> şerit kaydırınca kendiliğinden gizlensin mi
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
 ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
 ders-programi-tanitim    -> Kurulum'daki örnek veri satırı görüldü mü
@@ -1617,6 +1625,43 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     değil **boyama sırası**dır, ve `z-index` yazan her yerde ikinci soru
     *"bu kutu konumlanmış mı?"*dır.
 
+85. **`nth-child` ile sayılan bir sütun, satırlardan birine `colSpan` giren gün
+    SESSİZCE yalan olur.** İmleç haçı sütununu `cell.cellIndex` ile buluyor ve
+    öteki satırlarda `:nth-child(N)` ile arıyordu, ve bu her satırda saat başına
+    bir `<td>` olduğu sürece **kesin** doğruydu. İki saatlik blok tek bir
+    `<td colSpan={2}>` olunca doğru olmaktan çıktı: solunda birleşmiş blok olan
+    bir satırda DOM hücresi sayısı haftanın saat sayısından az, `cellIndex` kısa
+    çıkıyor, ve beam imlecin **soluna** düşüyor — solundaki her ikili için bir
+    sütun. Ölçüldü: 7 hücre imlecin altında değil. Hiçbir şey fırlatmadı, hiçbir
+    sayaç oynamadı, süit yeşil kaldı, ve kullanıcı *"önizleme artısı kaymış"*
+    diye bildirdi.
+    Bunu gören testin olmamasının sebebi de ayrı bir ders: haç testi **boş bir
+    ızgarada** koşuyordu, yani ölçtüğü dünyada birleşmiş blok yoktu (tuzak 41).
+    Çare bir sayı değil bir **kimlik**: `Grid.tsx` hem gövde hücrelerine hem
+    saat başlıklarına `data-col` yazıyor, `gridChrome.ts` onu okuyor, ve
+    birleşmiş hücre **kapsadığı** sütundan yakılıyor (tuzak 60'ın deseni).
+    Başlığa `data-day` **konmadı**: `drag.ts` hedefini `closest('[data-day]')`
+    ile buluyor ve cevap veren bir başlık tuzak 13'tür.
+    Genel kural: bir **konum** DOM'daki sıradan sayılıyorsa, o sıranın
+    değişmeyeceğine dair yazılı bir sözleşme olmalı — yoksa `colSpan`,
+    `display: contents`, koşullu bir hücre ya da bir `<template>` onu bir
+    sabahta bozar, ve kırılma bir hata değil bir **kayma** olarak görünür.
+
+86. **Bir taşmayı `scrollHeight` ile ölçmek, taşan kutu bir flex sütunuysa SIFIR
+    döndürebilir.** Dokuz baskı birleşimini gezen test iki sürüm boyunca
+    `.print-page`'in `scrollHeight - clientHeight`'ine bakıyordu ve dokuzunda da
+    0 buluyordu — oysa "Büyük"te başlık ve tablo birlikte, sayfanın 714 px'inden
+    **739 px** istiyordu. `justify-content: safe center` ile hizalanan bir flex
+    sütunu taşmasını o yoldan bildirmiyor. Yani test doğru ortamda, doğru
+    kutuda, doğru soruyu soruyordu ve **aleti bozuktu** — tuzak 64'ün en sinsi
+    hâli: orada yanlış kutuya bakılıyordu, burada doğru kutuya yanlış soru
+    soruldu. Doğrusu çocukların sınırlarını içerik kutusuyla karşılaştırmak.
+    İkinci yarısı: `emulateMedia({ media: 'print' })` **yalnız medya sorgusunu**
+    değiştirir, pencereyi değil. Kâğıtta `.print-sheet` `width: auto` ile sayfa
+    kutusunu alır; 1920 px'lik bir pencerede bu 1920 px olur, saat başlıkları
+    sarmayı bırakır, ve satır yükseklikleri gerçek A4'tekiyle **tutmaz**. Kâğıdı
+    ölçen bir test pencereyi de kâğıdın boyuna getirmeli.
+
 ---
 
 ## Tasarım — serbest
@@ -1796,11 +1841,25 @@ giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
   orada — proje doluyken sorusu **ne kaybedileceğini sayar** ve kırmızıdır.
   Eskiden tek ev Kurulum'du, yani ancak **boş** bir projeyle ulaşılabiliyordu:
   kendi verisine başlamış biri örneğe bir daha hiç bakamıyordu.
-- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum üç sayılabilir adım:
-  `1 Derslikler · 2 Öğretmenler · 3 Sınıflar`; dersler kendi sekmesinde. Okul adı, günler, zil,
+- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum üç sayılabilir
+  liste: `Derslikler · Öğretmenler · Sınıflar`; dersler kendi sekmesinde.
+  **Sıra numaraları 2026-08-28'de kalktı** (kullanıcı isteği) ve gerekçe
+  şeridin kendi savıyla aynı: bu bir sihirbaz değil, her liste her an açık, yani
+  önlerindeki 1·2·3 kimsenin saymadığı bir sırayı sayıyordu. Sayaç kalıyor —
+  **0 gösteren liste**, eksik olanın nerede olduğunu söyleyen tek şey. Okul adı, günler, zil,
   kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
   dokunulan şey aynı ekranda durmaz.
-- **Ayarlar beş bölüm**: `Okul ve zil · Kurallar · Branşlar · Görünüm · Veri`.
+- **Ayarlar ALTI bölüm** (2026-08-28): `Okul ve zil · Kurallar · Branşlar ·
+  Görünüm · Planlar · Veri`. **Planlar** Veri'den ayrıldı: orası tek başına yedi
+  paneldi ve dört ayrı soruya cevap veriyordu (hangi plandayım · dosyalar nereye
+  gidiyor · bu bilgisayarda ne duruyor · bu hangi derleme). Plan kitaplığı ile
+  "bütün planlar tek dosyada" birlikte gitti, çünkü paketin adı kitaplığın kendi
+  adı. `Data.tsx` ikisini de çiziyor (`part` prop'u) — paketi yazan işleyiciler
+  kitaplığı okuyanlarla aynı, dosyayı bölmek onları da bölerdi.
+  Görünüm'de iki yoğunluk **tek panelde iki soru** oldu (ayıran şey iki
+  `role="group"`, ki testin bulduğu da o), **tema** oraya geldi (düğmesi üst
+  çubukta kalıyor; orası kısayol, burası envanter), ve "Yazdırma bundan
+  etkilenmez" paneli yazı büyüklüğünün ipucu satırına indi.
   **Branşlar da elle sıralanır** (2026-08-27) — Kurulum'un dört listesiyle aynı
   tutamak, aynı `useRowOrder`. Sıranın karşılığı görünür: Öğretmenler adımındaki
   Branş açılır listesi bu sırada gelir. `settings.subjects` bir seviye derinde
@@ -1869,8 +1928,10 @@ giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
   bir ikili ve bir tekli bırakır, kart hangisi olduğunu hem yazar (`2 saat`) hem
   genişliğiyle söyler (`[data-size='2']` iki katı).
   **Aynı dersin aynı boydaki blokları TEK DESTE** (2026-08-27): altı saatlik
-  bir ders altı özdeş kart ve altı kez aynı `0/6` bırakıyordu. Rozet
-  (`1 saat ×6`) blok boyunun yanında durur, ve en çok iki katman görünür.
+  bir ders altı özdeş kart ve altı kez aynı `0/6` bırakıyordu. En çok iki katman
+  görünür. **Kaç tane olduğunu söyleyen rozet 2026-08-28'de kalktı**
+  (kullanıcı isteği); sayı kaybolmadı, kartta yazmıyor: `data-count`'ta,
+  kartın `title`'ında ve tepsinin başındaki "N blok bekliyor"da.
   **`.pool-card` hâlâ "bekleyen BİR blok" demek, ve bu bir SÖZLEŞME:** sekiz
   dosyada ~40 test onu sayıyor, "N blok bekliyor" ondan geliyor,
   `pendingBlocks()`'un aynası o. Deste bir **düzen**, bir gruplama değil — aynı

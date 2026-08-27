@@ -15,9 +15,10 @@
 //     only thing left to tell the destinations apart;
 //   - the shell does not print.
 
+import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
-import { chooseScale, open, openWithSample } from './helpers';
+import { chooseScale, open, openSetup, openWithSample } from './helpers';
 
 const TABS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;
 
@@ -86,10 +87,11 @@ test.describe('25. Kabuk kâğıda basılmıyor', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
-  // The mark is drawn THREE times now: site/icon.svg (the source, and where
-  // the 192/512 PWA icons come from), the simplified data: URI in index.html
-  // (the tab, always small), and the inline SVG in the top bar. The first and
-  // second are compared in temel.spec.ts section 72; this is the third.
+  // The mark is drawn three times: site/icon.svg (the detailed source, and
+  // where the 192/512 PWA icons come from), the data: URI in index.html (the
+  // tab, always small), and the inline SVG in the top bar. The last two both
+  // read site/icon-small.svg — the URI is compared in temel.spec.ts section
+  // 72, the top bar here.
   //
   // Three copies of one drawing is two too many to hold in a head, and a mark
   // that has quietly drifted in one of three places is not something anyone
@@ -108,16 +110,23 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
       .sort();
   }
 
-  test('üst çubuktaki işaret site/icon.svg ile AYNI şeyi çiziyor', async ({ page }) => {
+  test('üst çubuktaki işaret site/icon-small.svg ile AYNI şeyi çiziyor', async ({ page }) => {
     await open(page);
     const drawn = await page.locator('.brand-mark').evaluate((el) => el.outerHTML);
 
     // The DOM writes attributes back unquoted-safe and lowercases nothing we
     // read, but it does drop the shorthand: normalise the ground's fill the
     // same way both sides spell it.
-    const source = readFileSync('site/icon.svg', 'utf8').replace(/#ffffff/g, '#fff');
+    //
+    // The SIMPLE variant since 2026-08-28, asked for in one line ("sol üstteki
+    // logonun küçüğü kullanılsın"). It is the honest reading of the size: the
+    // mark is 1.75rem, i.e. 24.5 px at 100 %, and this project's own icon
+    // comparison puts 20-32 px in the band where the six columns are blurry
+    // but separable. The tab already read from this file, so what used to be
+    // three drawings of one mark is now two.
+    const source = readFileSync('site/icon-small.svg', 'utf8').replace(/#ffffff/g, '#fff');
 
-    expect(rects(drawn).length, 'üst çubuktaki işaret ayrıntılı varyant değil').toBe(13);
+    expect(rects(drawn).length, 'üst çubuktaki işaret sade varyant değil').toBe(4);
     expect(rects(drawn)).toEqual(rects(source));
   });
 
@@ -172,5 +181,83 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
     await page.emulateMedia({ media: 'print' });
     await expect(page.locator('.brand-mark')).toBeHidden();
     await page.emulateMedia({ media: 'screen' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
+  // "Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan
+  //  bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor."
+  //
+  // `.cols` is a grid, so its row is as tall as the taller of its two children.
+  // `align-items: start` only moves the content inside the track — it does not
+  // shorten the track — so a side column with no ceiling handed its height
+  // straight to `.main`'s scrollHeight. Measured before the change: on Kurulum
+  // → Derslikler the left column was 636 px and the page scrolled 1092, all of
+  // it the summary beside it; on Yazdır the four stacked panels came to 1491.
+  //
+  // Both halves are asserted, because only the pair is the fix: the side column
+  // fits the screen, AND the page is no longer longer than what is being read.
+  const SCREENS = ['Derslikler', 'Öğretmenler', 'Sınıflar'] as const;
+
+  async function boxes(page: Page) {
+    return page.evaluate(() => {
+      const main = document.querySelector('.main') as HTMLElement;
+      const left = document.querySelector('.cols > div') as HTMLElement | null;
+      const aside = document.querySelector('.cols > aside') as HTMLElement | null;
+      const cs = getComputedStyle(main);
+      return {
+        scroll: main.scrollHeight,
+        client: main.clientHeight,
+        pad: parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom),
+        left: left === null ? 0 : Math.round(left.getBoundingClientRect().height),
+        aside: aside === null ? 0 : Math.round(aside.getBoundingClientRect().height),
+        asideNeeds: aside === null ? 0 : aside.scrollHeight,
+      };
+    });
+  }
+
+  test('Kurulum: sayfa SOL sütun kadar uzun, yan sütun kadar değil', async ({ page }) => {
+    await openWithSample(page);
+    for (const step of SCREENS) {
+      await openSetup(page, step);
+      const m = await boxes(page);
+      expect(m.aside, `${step}: yan sütun yok`).toBeGreaterThan(0);
+      // It fits the box it is in...
+      expect(
+        m.aside,
+        `${step}: yan sütun ${m.aside}px, ekranda ${m.client}px yer var`,
+      ).toBeLessThanOrEqual(m.client);
+      // ...and the page is as long as the thing being read, not as long as the
+      // thing beside it. One row of slack for sub-pixel rounding.
+      expect(
+        m.scroll,
+        `${step}: sayfa ${m.scroll}px, sol sütun ${m.left}px (yan sütun ${m.asideNeeds}px istiyordu)`,
+      ).toBeLessThanOrEqual(Math.max(m.client, m.left + m.pad) + 2);
+    }
+  });
+
+  test('Yazdır: yan sütun ekranda kalıyor, kâğıtlar akıp gidiyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.locator('.print-page').first().waitFor();
+
+    const m = await boxes(page);
+    expect(m.asideNeeds, 'Yazdır yan sütunu zaten kısa — test bir şey ölçmüyor').toBeGreaterThan(
+      m.client,
+    );
+    expect(m.aside, `yan sütun ${m.aside}px, ekranda ${m.client}px yer var`).toBeLessThanOrEqual(
+      m.client,
+    );
+
+    // ...and it is STILL THERE after scrolling down a sheet or two: the print
+    // button and the tick lists are what this screen is for.
+    await page.locator('.main').evaluate((el) => el.scrollTo(0, 2000));
+    const top = await page
+      .locator('.cols > aside .panel')
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().top);
+    expect(top, `kaydırdıktan sonra yan sütun ${Math.round(top)}px'te`).toBeLessThan(m.client);
   });
 });

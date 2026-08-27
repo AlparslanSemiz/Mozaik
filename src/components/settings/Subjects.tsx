@@ -77,14 +77,20 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
         {current === fallback ? 'varsayılan' : `varsayılanı: ${fallback}`}
       </td>
       <td>
-        <button
-          className="btn danger"
-          disabled={!inList}
-          title={inList ? 'Listeden çıkar' : 'Bu branş zaten listede değil'}
-          onClick={onRemove}
-        >
-          Sil
-        </button>
+        {/* The same action cell as the other three lists. `.form-row` is what
+            puts `Sil` on the right edge (`table.list td > .form-row` justifies
+            to flex-end); without it this one list ended its row wherever the
+            word happened to stop. */}
+        <div className="form-row nowrap">
+          <button
+            className="btn danger"
+            disabled={!inList}
+            title={inList ? 'Listeden çıkar' : 'Bu branş zaten listede değil'}
+            onClick={onRemove}
+          >
+            Sil
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -156,8 +162,13 @@ export default function Subjects({ state, change }: PanelProps) {
   return (
     <div className="cols">
       <div>
-        <div className="panel">
-          <h2>Branşlar ({options.length})</h2>
+        {/* `step-panel` and `.panel-head`, like Kurulum's three: this is the
+            fourth list the reader edits and it read one size smaller than the
+            others for no reason anybody chose. */}
+        <div className="panel step-panel">
+          <div className="panel-head">
+            <h2>Branşlar ({options.length})</h2>
+          </div>
           <p className="hint">
             Öğretmen eklerken branş <b>bu listeden</b> seçilir, elle yazılmaz. Böylece
             aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve
@@ -190,16 +201,22 @@ export default function Subjects({ state, change }: PanelProps) {
             {order.notice}
           </span>
 
+          <div className="table-scroll">
           <table className="list">
             <thead>
               <tr>
                 {order.head}
-                <th>Branş</th>
-                <th className="w-col-lg">Kısaltma</th>
+                <th className="w-col-xl">Branş</th>
+                {/* --w-col-sm, the number Teachers measured for the same box:
+                    the heading asks for 78 px and the box holds "Mat". */}
+                <th className="w-col-sm">Kısaltma</th>
                 <th className="num">
                   Öğretmen
                 </th>
-                <th className="w-col-xl" />
+                {/* The "varsayılan" note. --w-col-lg and not xl: it holds
+                    "varsayılanı: Mat", and at xl it was as wide as the name
+                    column beside it and read like a second one. */}
+                <th className="w-col-lg" />
                 <th className="w-col-md" />
               </tr>
             </thead>
@@ -241,6 +258,7 @@ export default function Subjects({ state, change }: PanelProps) {
               </tbody>
             )}
           </table>
+          </div>
         </div>
       </div>
 

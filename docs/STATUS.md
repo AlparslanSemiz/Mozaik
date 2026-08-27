@@ -1,7 +1,64 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi dokuzuncu oturum: **W turu** — ders girişi
-kendi sekmesine çıktı, havuzda deste, branş sırası ayarlardaki sıra)
+Son güncelleme: 2026-08-28 (otuzuncu oturum: **X turu** — on iki ham not; üçü
+ölçülebilir kusurdu ve üçü de yeşil bir süitin altında duruyordu)
+
+---
+
+## Otuzuncu oturum — X turu: on iki madde (2026-08-28)
+
+Ayrıntı [TASKS.md](TASKS.md) → *X turu*; burada **ölçülenler**.
+
+### Üç kusur, üçü de aletin körlüğünden görünmüyordu
+
+Bu turun asıl bulgusu bir özellik değil: **üç ayrı yerde test doğru soruyu
+soruyor ama yanlış aletle ölçüyordu**, ve üçü de kullanıcı tarafından
+bildirildi.
+
+| Kusur | Alet ne diyordu | Gerçek |
+|---|---|---|
+| İmleç haçı kayıyor | haç testi **boş ızgarada** koşuyor, birleşmiş blok yok | 7 hücre imlecin altında değil |
+| Baskı "Büyük"te bozuluyor | `.print-page`'in `scrollHeight - clientHeight` = **0** | 714 px yerde **739 px** içerik |
+| Yan sütun sayfayı uzatıyor | ölçen hiçbir şey yoktu | Derslikler'de sol 636 px, sayfa **1092 px** |
+
+Üçünün de yanına ölçen bir test yazıldı ve **üçü de mutasyonla denendi**: eski
+kod geri konunca üçü de kırmızıya döndü (7 hücre · 25 px · 1092 px).
+
+### Ölçülen değerler
+
+```
+imleç haçı        data-col ile, colSpan'den bağımsız    imlecin altında 0 sapma
+hayalet kart      width = --cell-w × blockSize          ikili tam iki hücre
+ad sütunu         Derslikler · Öğretmenler · Sınıflar · Branşlar
+                  hepsinde 187 px  (öncesi: panelin tamamı, ~900 px'e kadar)
+şerit başlığı     --ribbon-lead-w  9.8em -> 6.2em       çizgi 7 sekmede ±0.5 px
+baskı             9 birleşim × 2 ortam = 18 ölçüm       taşma 0, sayfa TAM dolu
+                  (kullanılan == yer: 714/714 ve 357/357)
+yan sütun         .cols > aside  max-height 100cqh      Derslikler 1092 -> 994 px
+                  Yazdır yan sütun 1491 -> 966 px       Öğretmenler 2310 -> 1189
+dist/index.html   565 214 bayt                          (öncesi 552 759)
+```
+
+### Yazdırmanın kökü bir SAYIydı
+
+`--p-row: 23mm` iki yıl boyunca doğru bir sayıydı ve doğru olmaktan çıkışı
+sessizdi: `--p-zoom` yalnız yazıyı çarpıyor, hiçbir kutuyu çarpmıyordu. Başlık
+ve saat satırı büyüyünce 205 mm'lik sayfada yer kalmıyor, ama satır yüksekliği
+bir **taban** olduğu için hiçbir şey esnemiyordu. Çare sayıyı değiştirmek değil
+**kaldırmak** oldu: başlık ihtiyacını alır, tablo **kalanı** alır (`flex: 1`),
+satırlar onu bölüşür. Toplam artık yapısal olarak sayfanın kendisi — her
+yakınlaştırmada, her düzende, altı günlük haftada da yedi günlükte de.
+
+Yanında iki sessiz ekran↔kâğıt ayrışması kapandı: `table.print` hücrelerindeki
+`height: 3.25rem` (kâğıda ulaşan **tek rem**, ve `@media print` `--ui-scale`'i
+1'e sabitliyor) ve başlığın `6px` ↔ `4mm` payı.
+
+### Ayarlar altı bölüm, ve bir kopya silindi
+
+"Taslaktan başla" iki yerde duruyordu — Kurulum'un boş ekranında ve plan
+kitaplığında — aynı `loadPlan` + `createPlan` ve **birebir aynı hata cümlesi**.
+Tek bileşene indi (`components/DraftStart.tsx`); değişen tek şey düğmenin
+etiketiydi, o da bir prop oldu.
 
 ---
 

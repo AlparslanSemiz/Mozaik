@@ -99,6 +99,70 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     }
   });
 
+  // RULE 6, MEASURED PROPERLY THIS TIME.
+  //
+  // "İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı
+  //  yerde olsun ve yazı ortalansın."
+  //
+  // The caption box was already padded to one width, so the first BUTTON did
+  // land at one x — and that is all the old contract said, which is why nothing
+  // caught the other half. The rule after the caption is an `::after` with no
+  // `left`, so it was drawn at its STATIC position: right after the TEXT. Seven
+  // captions of seven lengths put it at seven different places on a strip whose
+  // whole claim was that it does not shift.
+  //
+  // Read at two scales, because a box in `em` and a word in `em` do not have to
+  // grow together (pitfall 39) and this is exactly the pair that has to.
+  for (const pct of [100, 150]) {
+    test(`%${pct}: başlıktan sonraki çizgi yedi şeritte de AYNI yerde`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+
+      const seen: Record<string, { rule: number; slack: number }> = {};
+      for (const tab of TABS) {
+        await go(page, tab);
+        const m = await page.evaluate(() => {
+          const bar = document.querySelector('.ribbon')!;
+          const cap = bar.firstElementChild as HTMLElement;
+          const after = getComputedStyle(cap, '::after');
+          const box = cap.getBoundingClientRect();
+          // Where the rule is painted, in the strip's own coordinates.
+          const rule = parseFloat(after.left);
+          // The word is centred when the ink left of it matches the ink right
+          // of it. Measured with a Range, since the caption's box is wider than
+          // its text by design.
+          const range = document.createRange();
+          range.selectNodeContents(cap);
+          const text = range.getBoundingClientRect();
+          return {
+            rule,
+            left: text.left - box.left,
+            right: box.right - text.right,
+            width: box.width,
+          };
+        });
+        expect(m.width, `${tab}: başlık kutusu yok`).toBeGreaterThan(0);
+        // Centred: the two margins agree. One pixel of tolerance is the
+        // sub-pixel rounding of half an odd number.
+        expect(
+          Math.abs(m.left - m.right),
+          `${tab}: başlık ortalanmamış (sol ${m.left.toFixed(1)}, sağ ${m.right.toFixed(1)})`,
+        ).toBeLessThanOrEqual(1);
+        // ...and it fits the box it is centred in, or the box is a lie.
+        expect(m.left, `${tab}: başlık kutusundan taşıyor`).toBeGreaterThanOrEqual(-0.5);
+        seen[tab] = { rule: m.rule, slack: m.left };
+      }
+
+      const rules = Object.values(seen).map((x) => x.rule);
+      expect(
+        Math.max(...rules) - Math.min(...rules),
+        `çizgi sekmeden sekmeye kayıyor: ${JSON.stringify(seen)}`,
+      ).toBeLessThanOrEqual(0.5);
+
+      if (pct !== 100) await chooseScale(page, 100);
+    });
+  }
+
   test('%150 ölçekte de yedisi aynı yükseklikte ve hiçbiri taşmıyor', async ({ page }) => {
     // Pitfall 48: a bar whose contents do not shrink pushes them out of itself,
     // and what spills is not hidden, it is UNCLICKABLE. 150% is the scale this

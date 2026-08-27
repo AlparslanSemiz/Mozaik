@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   normalizeAvailClock,
+  normalizeRibbonAuto,
   normalizeDensity,
   normalizeMotion,
   normalizeScale,
@@ -161,6 +162,33 @@ describe('normalizeDockHeight', () => {
       value = normalizeDockHeight(String(value + DOCK_H_STEP));
     }
     expect(value).toBe(DOCK_H_MAX);
+  });
+});
+
+describe('normalizeRibbonAuto', () => {
+  // The OPPOSITE default to normalizeAvailClock, and on purpose: this gesture
+  // already existed before it had a key, so a reader who has never opened the
+  // setting must keep what they have. That makes "absent" mean ON, which is
+  // the case worth pinning — `null` must not fall through the same door as
+  // `'kapali'` (pitfall 43: "not stored" and "stored as off" are two facts).
+  it('kaydı olmayan makinede AÇIK', () => {
+    expect(normalizeRibbonAuto(null)).toBe(true);
+    expect(normalizeRibbonAuto(undefined)).toBe(true);
+    expect(normalizeRibbonAuto('')).toBe(true);
+  });
+
+  it('yalnız "kapali" kapatır', () => {
+    expect(normalizeRibbonAuto('kapali')).toBe(false);
+    expect(normalizeRibbonAuto('acik')).toBe(true);
+    expect(normalizeRibbonAuto('saçma')).toBe(true);
+  });
+
+  // Called from two directions — a string out of localStorage and a boolean
+  // out of the settings button — so it has to be tried with BOTH types
+  // (pitfall 44: a guard written for one caller silently rejects the other).
+  it('boolean de kabul ediyor', () => {
+    expect(normalizeRibbonAuto(true)).toBe(true);
+    expect(normalizeRibbonAuto(false)).toBe(false);
   });
 });
 

@@ -228,8 +228,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             className="pool-stack"
             data-count={s.cards.length}
             // How many layers peek out below the top card. Capped at two, so a
-            // lesson owing eight hours is a deck and not a staircase; the badge
-            // carries the real number.
+            // lesson owing eight hours is a deck and not a staircase. The exact
+            // number is on `data-count` and in the card's title; it used to be
+            // a corner badge too, and that came off on 2026-08-28.
             style={{ "--layers": Math.min(s.cards.length - 1, 2) } as React.CSSProperties}
           >
             {s.cards.map((c, i) => (
@@ -258,27 +259,6 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
                 <span className="counter">
                   {c.placed}/{c.total}
                 </span>
-                {/* HOW MANY are in the pile, and nothing else. It used to read
-                    "1 saat ×6" on a line of its own, and the reader's answer to
-                    that was "Programda 1 saat x5 veya 2 saat x3 gibi gözükmesin
-                    kartlarda güzel değil."
-
-                    The block length is not lost by taking the words away: a
-                    double is drawn twice as wide as a single (`[data-size='2']`
-                    in styles.css), which is the thing the reader is choosing
-                    between and it answers before any words are read, and the
-                    card's `title` says it in full.
-
-                    A corner mark now, which the old note said it could not be —
-                    that objection was about an IN-FLOW mark pushing the card's
-                    centred lines aside. Absolutely positioned it takes no room
-                    at all. It can be seen because `.pool-stack > .pool-card
-                    :first-child` is positioned and above its own deck; on a
-                    static card it would be painted over by the copies behind
-                    it, which is pitfall 84 and cost an hour the first time. */}
-                {i === 0 && s.cards.length > 1 && (
-                  <b className="stack-badge">{s.cards.length}</b>
-                )}
               </div>
             ))}
           </div>

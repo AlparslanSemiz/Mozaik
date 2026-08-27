@@ -23,6 +23,8 @@
 
 import {
   applyAvailClock,
+  applyRibbonAuto,
+  applyTheme,
   applyDensity,
   applyMotion,
   applyScale,
@@ -31,7 +33,7 @@ import {
   SCALE_MIN,
   SCALE_STEP,
 } from '../../theme';
-import type { Density, Motion } from '../../theme';
+import type { Density, Motion, Theme } from '../../theme';
 import { DILLER, DIL_ADI } from '../../i18n';
 import { useLang } from '../T';
 import type { State } from '../../types';
@@ -48,9 +50,21 @@ interface Props {
   setUiDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
+  /** Whether the tool strip slides away while you read down the page. */
+  ribbonAuto: boolean;
+  setRibbonAuto: (next: boolean) => void;
+  theme: Theme;
+  setTheme: (next: Theme) => void;
   motion: Motion;
   setMotion: (next: Motion) => void;
 }
+
+/** The two grounds. Named, not toggled: a button that says "Koyu tema" and is
+    pressed cannot also be the one that says which theme you are IN. */
+const THEMES: Array<{ id: Theme; label: string }> = [
+  { id: 'light', label: 'Açık' },
+  { id: 'dark', label: 'Koyu' },
+];
 
 /** The three steps, in the order they reduce. */
 const MOTIONS: Array<{ id: Motion; label: string }> = [
@@ -74,6 +88,10 @@ export default function Appearance({
   setUiDensity,
   availClock,
   setAvailClock,
+  ribbonAuto,
+  setRibbonAuto,
+  theme,
+  setTheme,
   motion,
   setMotion,
 }: Props) {
@@ -100,6 +118,11 @@ export default function Appearance({
     setUiDensity(next);
   }
 
+  function chooseTheme(next: Theme) {
+    applyTheme(next);
+    setTheme(next);
+  }
+
   function chooseMotion(next: Motion) {
     applyMotion(next);
     setMotion(next);
@@ -108,6 +131,36 @@ export default function Appearance({
   return (
     <div className="cols">
       <div>
+        {/* THE THEME, WHERE THE OTHER MACHINE PREFERENCES ARE. Its button is
+            still in the top bar and stays there — it is reached a dozen times
+            a day. But it was the ONLY appearance preference with no line on
+            the screen that lists appearance preferences, so somebody looking
+            for it here found eight panels and no theme. Same state, two doors;
+            the one in the top bar is the shortcut, this is the inventory. */}
+        <div className="panel">
+          <h2>Tema</h2>
+          <p className="hint">
+            Varsayılan <b>açık</b>, ve bu bir seçim: ızgaranın işlevsel renkleri
+            (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık zeminde
+            seçildi ve orada ölçüldü. Koyu tema bilgisayarınızın tercihini{' '}
+            <b>izlemez</b>: burada ne seçerseniz o kalır. Yedek dosyasına
+            girmez. Yazdırılan sayfa her iki durumda da <b>açık</b> palet
+            kullanır: o renkler kâğıda basılıyor.
+          </p>
+          <div className="form-row" role="group" aria-label="Tema">
+            {THEMES.map((x) => (
+              <button
+                key={x.id}
+                className="btn"
+                aria-pressed={x.id === theme}
+                onClick={() => chooseTheme(x.id)}
+              >
+                {x.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="panel">
           <h2>Yazı büyüklüğü</h2>
           <p className="hint">
@@ -131,18 +184,29 @@ export default function Appearance({
 
           <p className="hint">
             Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve başka bir
-            bilgisayarda açılan programı etkilemez.
+            bilgisayarda açılan programı etkilemez. <b>Yazdırmayı da
+            etkilemez</b>: kâğıt sabit boyda (A4 yatay) ve basılan sayfanın
+            yazısı ayrı bir ölçüde tutulur, o yüzden burayı büyütmek bir
+            programın sayfaya sığıp sığmadığını değiştirmez. Kâğıdın kendi yazı
+            boyu <b>Yazdır</b> sekmesinde.
           </p>
         </div>
 
-        {/* TWO panels since 2026-08-27, and they were one. "Program ferahlığı
-            rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından farklı
-            olsun." The two steps trade different things — days on screen
+        {/* ONE panel, TWO questions — and they really are two. "Program
+            ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından
+            farklı olsun." The steps trade different things (days on screen
             against cell size, versus rows in a list against how far apart the
-            controls sit — and a reader who wants the whole week in the box has
-            not thereby asked for a cramped Ayarlar. */}
+            controls sit), so a reader who wants the whole week in the box has
+            not thereby asked for a cramped Ayarlar.
+
+            They were two panels for a day and that was one border, one shadow
+            and one set of margins too many for a screen that already had
+            eight. What holds them apart is what always held them apart: two
+            `role="group"`s with their own names, which is also how the test
+            helper finds them. */}
         <div className="panel">
-          <h2>Izgara yoğunluğu</h2>
+          <h2>Yoğunluk</h2>
+          <h3>Izgara</h3>
           <p className="hint">
             Yalnız <b>Program</b> sekmesindeki haftalık ızgarayı etkiler: bir
             hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı.
@@ -193,10 +257,8 @@ export default function Appearance({
             Saatleri görmek için <b>Ayarlar → Okul ve zil</b>'deki zil önizlemesine
             bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
           </p>
-        </div>
 
-        <div className="panel">
-          <h2>Arayüz yoğunluğu</h2>
+          <h3>Arayüzün geri kalanı</h3>
           <p className="hint">
             Ekranın <b>geri kalanı</b>: Kurulum, Dersler, Kontrol ve Ayarlar’daki
             listeler, panellerin kenar boşlukları, kutuların ve düğmelerin
@@ -236,6 +298,34 @@ export default function Appearance({
               onClick={() => chooseUiDensity('sigdir')}
             >
               Sığdır
+            </button>
+          </div>
+        </div>
+
+        {/* The strip's own movement, and it is the movement rather than the
+            strip: folding it is a button in the top bar and a preference of
+            its own. What is answered here is "does it get out of the way by
+            itself", which is the only thing on this screen that happens
+            without being asked for. */}
+        <div className="panel">
+          <h2>Araç şeridi</h2>
+          <p className="hint">
+            Sekmelerin altındaki ikinci bar, sayfayı <b>aşağı kaydırırken
+            kendiliğinden gizlenir</b> ve yukarı çıkınca geri gelir. Böylece uzun
+            bir listeyi okurken bir satır daha görünür. Bu hareket rahatsız
+            ediyorsa kapatın: şerit her zaman yerinde durur. Şeridi <b>tamamen</b>
+            kaldırmak ayrı bir şey; onun düğmesi üst çubukta, temanın yanında.
+          </p>
+          <div className="form-row">
+            <button
+              className="btn"
+              aria-pressed={ribbonAuto}
+              onClick={() => {
+                applyRibbonAuto(!ribbonAuto);
+                setRibbonAuto(!ribbonAuto);
+              }}
+            >
+              {ribbonAuto ? 'Kaydırınca gizlenir' : 'Her zaman durur'}
             </button>
           </div>
         </div>
@@ -380,16 +470,6 @@ export default function Appearance({
           </div>
         </div>
 
-        <div className="panel">
-          <h2>Yazdırma bundan etkilenmez</h2>
-          <p className="hint">
-            Kâğıt sabit boyutta: A4 yatay. Basılan sayfanın yazı boyları ayrı bir
-            ölçüde (punto) tutulur, o yüzden bu ayarı büyütmek bir programın sayfaya
-            sığıp sığmadığını değiştirmez. Yazdır sekmesindeki önizleme de aynı
-            sebeple olduğu gibi kalır. Önizleme kâğıda benzemezse hangi sayfanın
-            basılacağını seçmek tahmine döner.
-          </p>
-        </div>
       </div>
     </div>
   );

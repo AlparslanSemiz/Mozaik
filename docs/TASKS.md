@@ -1607,4 +1607,84 @@ yeniden yapmak aynı hatanın iki yüzü.
       veriyor. Alfabe eşitlikte hâlâ karar veriyor, yani `order` yazmayan her
       çip satırı bugünkü davranışında kaldı. 
 
-      
+## X turu — on iki ham not (2026-08-28)
+
+Kullanıcının bıraktığı on iki satır. Üçü ölçülebilir kusur çıktı ve üçü de
+**yeşil bir süitin altında** duruyordu; her birinin yanına onu gören bir test
+yazıldı ve üçü de mutasyonla denendi.
+
+- [x] **X1 Kurulum adım numaraları kalktı.** `.step-no` iki yerde `i + 1`'den
+      türüyordu (`Ribbon.tsx`, `setup/Progress.tsx`) ve gerekçesi şeridin kendi
+      savıyla çelişiyordu: bu bir sihirbaz değil, her liste her an açık. Sayaç
+      kaldı — 0 gösteren liste, eksik olanın nerede olduğunu söyleyen tek şey.
+- [x] **X2 Dört liste simetrik.** Kök neden ölçüldü, tahmin edilmedi:
+      `table.list { width: 100% }` artan alanı **genişliği yazılmamış** sütuna
+      veriyordu. Derslikler'de o sütun Ad'dı (bir harf tutan kutu panel kadar);
+      Sınıflar'da Renk **ve** Ad'dı, ve swatch sabit 5ch olduğu için Renk
+      büyüyüp içi büyümüyor, adı sağa itiyordu — bildirilen "kayma" buydu.
+      Artık `width: max-content`: her sütun ya merdivende ya kendi kontrolü
+      kadar. **Ad dördünde de 187 px**, ve listeler arasında geçerken sütunlar
+      yerinde duruyor. Branşlar da aileye katıldı (`step-panel`, `panel-head`,
+      `table-scroll`, `.form-row` eylem hücresi), Enter dört listede de ekliyor.
+- [x] **X3 Sol üstteki işaret SADE varyant.** Karar ölçümle çelişmiyor, ölçümün
+      belirsiz bandında: `.brand-mark` %100'de 24,5 px, ve `ikon-karsilastir`
+      20–32 px'i "bulanık ama ayırt edilebilir" diye kaydetmişti. Yan kazanç:
+      sekme ile üst çubuk artık aynı dosyadan besleniyor, üç kopya ikiye indi.
+- [x] **X4 Şerit başlığı ortalandı, çizgi çivilendi.** Kutu zaten
+      `min-width` ile pediliydi ama çizgi `::after`'ın **statik konumundan**
+      çiziliyordu, yani metnin bittiği yerden: yedi başlık yedi farklı x. Artık
+      sabit `width` + `text-align: center` + tokenlardan hesaplanan bir `left`.
+      Yedi başlık tek kelimeye indi (Liste · Yöntem · Kim · Görünüm · Süzgeç ·
+      İçerik · Bölüm), kutu 9.8em'den **6.2em**'e düştü.
+- [x] **X5 Tek branşlı hocada branş kutusu açılmıyor.** Öğretmenden modunda
+      havuz zaten o kişinin branşları, yani tek seçenekli bir açılır liste
+      hiçbir şey sormuyordu. Mantık değişmedi (`subjectValue` zaten havuzun
+      ilkine düşüyor); branş **başlığa** taşındı: `MÇ · Matematik dersleri (12)`.
+- [x] **X6 KAYAN ARTI — kusur (tuzak 85).** `cell.cellIndex` + `:nth-child(N)`
+      her satırda saat başına bir `<td>` olduğu sürece kesindi; iki saatlik blok
+      tek `colSpan=2` hücre olunca sayım kısa kaldı ve beam imlecin **soluna**
+      düştü — solundaki her ikili için bir sütun. Çare bir sayı değil bir
+      kimlik: `data-col`, hem gövdede hem saat başlığında, ve birleşmiş hücre
+      **kapsadığı** sütundan yakılıyor. Başlığa `data-day` konmadı (tuzak 13).
+      Yanında hayalet kart da düzeldi: `--ghost-span` ile blok kaç hücre
+      kaplayacaksa o kadar geniş.
+- [x] **X7 Havuz kartındaki sayı rozeti kalktı.** Sayı kaybolmadı:
+      `data-count`, kartın `title`'ı ve "N blok bekliyor".
+- [x] **X8 YAZDIRMA — kusur (tuzak 86).** Aleti önce düzeltmek gerekti: dokuz
+      birleşimi gezen test `scrollHeight` okuyordu ve `safe center` ile
+      hizalanan bir flex sütunu taşmasını o yoldan bildirmiyor — dokuzunda da 0
+      diyordu, oysa "Büyük"te 714 px yerde **739 px** içerik vardı. Kök neden
+      `--p-row: 23mm`: `--p-zoom` yalnız yazıyı çarpıyor, satır yüksekliği bir
+      **taban** olduğu için hiçbir şey esnemiyordu. Sayı kaldırıldı — başlık
+      ihtiyacını alır, tablo **kalanı** (`flex: 1`), satırlar bölüşür. Yanında
+      iki sessiz ekran↔kâğıt ayrışması kapandı (`3.25rem`'lik satır, `6px`↔`4mm`
+      pay). Ölçüm: 9 birleşim × 2 ortam, taşma **0**, sayfa **tam dolu**.
+- [x] **X9 Yan sütun sayfanın boyunu belirlemiyor.** `.cols` bir grid, satırı
+      `max(sol, sağ)`, ve `aside` için stylesheet'te **hiçbir kural yoktu**.
+      Artık yapışkan, `100cqh` ile tavanlı ve kendi içinde kayıyor; `.main`
+      bunun için bir `container-type: size` konteyneri oldu (ve ikisi de
+      `@media print`'te geri alınıyor — tuzak 32). Kapasite özeti de tavanlandı.
+      Ölçüm: Derslikler 1092 → 994, Yazdır 1491 → 966, Öğretmenler 2310 → 1189.
+- [x] **X10 Şeridin kendiliğinden gizlenmesi artık bir ayar.**
+      `ders-programi-serit-gizle`, Ayarlar → Görünüm. Katlama tercihinden ayrı
+      bir anahtar ve sebebi yazılı: biri "şeridi istemiyorum", öteki "okurken
+      kıpırdamasın". Varsayılan açık (bugünkü davranış), `storageReport`'a
+      satırı yazıldı, `normalize` hem string hem boolean alıyor (tuzak 44).
+- [x] **X11 Ayarlar ALTI bölüm.** `Planlar` Veri'den ayrıldı — orası yedi panel
+      ve dört ayrı soruydu. Görünüm'de iki yoğunluk tek panelde iki soru oldu,
+      **tema** oraya geldi, "Yazdırma bundan etkilenmez" paneli bir ipucu satırı
+      oldu. Ayrıca **"Taslaktan başla" iki yerde kopyalanmıştı** (birebir aynı
+      hata cümlesiyle); `components/DraftStart.tsx` oldu.
+- [x] **X12 Bir kaç yol boyu temizlik.** `npm run tipler` iki tip hatasıyla
+      kırmızıydı (`program.spec.ts`), düzeltildi. `hareket.spec.ts`'in sabit
+      200px'lik kaydırması **hesaplanan** orta noktaya çevrildi: o sabit yalnız
+      Kurulum'un sayfası yan sütun yüzünden uzunken bir ortaydı.
+
+### ŞİMDİ SIRADA
+
+Bu turun kendi bıraktığı tek borç: **Derslikler listesi artık panelin solunda
+dar bir tablo** ve sağında geniş bir boşluk kalıyor. Bu, istenen kısalmanın
+doğrudan sonucu ve dürüst; ama bakıldığında dengesiz görünüyorsa seçenek
+`.cols.wide-left`'in sol izini içeriğe göre daraltmak. **Kullanıcıya sorulacak,
+tahminle değiştirilmeyecek** (ilke 5).
+

@@ -64,6 +64,38 @@ test.describe('2. Sürükle-bırak', () => {
     await expect(page.locator('.ghost')).toHaveCount(0);
   });
 
+  // THE GHOST IS AS WIDE AS WHAT IT WILL FILL.
+  //
+  // It was one cell wide whatever the block was, while the highlight under it
+  // ran `blockSize` cells to the right — so a double sat half a cell left of
+  // the pair it was about to occupy, and a card that is drawn twice as wide in
+  // the tray (`[data-size='2']`) shrank the moment it was lifted. Same family
+  // as the crosshair drift, same cause: the drawing did not learn what the
+  // block logic already knew.
+  test('ikili bloğun hayaleti iki hücre geniş', async ({ page }) => {
+    await openWithSample(page);
+
+    const measure = async (size: string) => {
+      const card = page.locator(`.pool-card[data-size="${size}"]`).first();
+      const box = (await card.boundingBox())!;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await expect(page.locator('.ghost')).toHaveCount(1);
+      await page.mouse.move(700, 400, { steps: 3 });
+      const w = await page.locator('.ghost').evaluate((el) => el.getBoundingClientRect().width);
+      await page.keyboard.press('Escape');
+      await page.mouse.up();
+      return w;
+    };
+
+    const single = await measure('1');
+    const double = await measure('2');
+    expect(single, 'tek saatlik hayalet ölçülemedi').toBeGreaterThan(0);
+    // Two cells and one cell, and the grid's own cell is what both are made of
+    // — no pixel is written down here or in the stylesheet (pitfall 36).
+    expect(double / single, `tek ${single.toFixed(1)}px, ikili ${double.toFixed(1)}px`).toBeCloseTo(2, 1);
+  });
+
   test('geçerli hücre yeşil, ders bırakılınca yerleşiyor', async ({ page }) => {
     await openWithSample(page);
     await expect(page.locator('table.grid .card')).toHaveCount(0);
@@ -205,8 +237,8 @@ test.describe('2. Sürükle-bırak', () => {
     await expect(doubles.first()).toHaveAttribute('title', /2 saatlik blok/);
     await expect(singles.first()).toHaveAttribute('title', /1 saatlik blok/);
     const widths = await page.evaluate(() => {
-      const one = document.querySelector('.pool-card[data-size="1"]');
-      const two = document.querySelector('.pool-card[data-size="2"]');
+      const one = document.querySelector('.pool-card[data-size="1"]')!;
+      const two = document.querySelector('.pool-card[data-size="2"]')!;
       return { one: one.getBoundingClientRect().width, two: two.getBoundingClientRect().width };
     });
     expect(widths.two, 'ikili blok tekliden geniş çizilmiyor').toBeGreaterThan(widths.one * 1.5);
@@ -692,7 +724,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
   // facts that made it safe to draw them as a deck: the pile is one FLOW item,
   // and a `.pool-card` still means one waiting block — to the head count, to
   // `pendingBlocks()` and to the forty locators that ask how much is left.
-  test('aynı dersin aynı boydaki blokları TEK deste, sayı rozette', async ({ page }) => {
+  test('aynı dersin aynı boydaki blokları TEK deste, kartta rozet yok', async ({ page }) => {
     await openWithSample(page);
 
     const cards = await page.locator('.pool-card').count();
@@ -709,7 +741,6 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         cards: el.querySelectorAll('.pool-card').length,
         sizes: new Set([...el.querySelectorAll('.pool-card')].map((c) => c.getAttribute('data-size'))).size,
         tops: new Set([...el.querySelectorAll('.card-top')].map((c) => c.textContent)).size,
-        badge: el.querySelector('.stack-badge')?.textContent ?? null,
         counters: el.querySelectorAll('.pool-card:not([aria-hidden]) .counter').length,
       })),
     );
@@ -720,10 +751,13 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       expect(p.tops).toBe(1);
       // The counter the reader asked to keep, said once instead of six times.
       expect(p.counters).toBe(1);
-      // The count alone, in the corner. It read "×6" on the line that also
-      // said "1 saat", and that whole line is gone.
-      expect(p.badge).toBe(p.count > 1 ? String(p.count) : null);
     }
+
+    // ...and NOTHING else is written on the cards. The corner badge that used
+    // to say how many were in the pile came off on 2026-08-28 ("kartların
+    // üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın"); the count
+    // is still on `data-count`, in the card's title and in the head count.
+    await expect(page.locator('.stack-badge')).toHaveCount(0);
 
     // Placing one block takes one card off the pile rather than emptying it.
     const deep = page.locator('.pool-stack[data-count="5"]').first();

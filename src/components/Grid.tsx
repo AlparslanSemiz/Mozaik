@@ -124,6 +124,13 @@ const Row = memo(function Row({
           data-row={row.id}
           data-day={g}
           data-hour={s}
+          // WHICH COLUMN OF THE WEEK this cell stands at, counted in hours and
+          // ignoring the lunch separators. gridChrome.ts lights a column with
+          // it, and it has to be an attribute rather than a position: a merged
+          // block is ONE <td> with colSpan 2, so from the day that landed the
+          // n-th <td> of one row and the n-th of the next were different hours
+          // and the crosshair drifted left of the pointer (pitfall 85).
+          data-col={i}
           // How many hours this one <td> stands for. drag.ts needs it: it looks
           // a cell up BY HOUR, and without this the second hour of a merged
           // block resolves to nothing and its highlight silently never paints.
@@ -285,6 +292,12 @@ function GridInner({
                   : []),
                 <th
                   key={`${g}-${s}`}
+                  // The same column number as the body cell under it, so the
+                  // crosshair can light both. Deliberately NOT data-day/
+                  // data-hour: drag.ts finds its target with
+                  // closest('[data-day]') and a heading answering that is
+                  // pitfall 13.
+                  data-col={g * hourCount + s}
                   className={
                     [s === 0 ? 'day-first' : '', g % 2 === 1 ? 'band' : '']
                       .filter(Boolean)

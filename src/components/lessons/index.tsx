@@ -103,6 +103,15 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   const picking = mode === 'teacher' ? state.teachers : state.classes;
   const focused = picking.find((x) => x.id === focus) ?? picking[0];
 
+  // WHAT the open teacher teaches, for the heading. `teacherSubjects` is the
+  // one place that answers this (src/subjects.ts): it trims, drops the empty
+  // second slot and folds a name written twice into one, so "Türkçe / Türkçe"
+  // is not a thing the heading can say.
+  const focusedSubjects =
+    mode === 'teacher' && focused !== undefined && 'subject' in focused
+      ? teacherSubjects(focused).join(' · ')
+      : '';
+
   // Ninety-nine rows, and every one of them is a pair. Searching has to see
   // both halves of the pair and the teacher's SHORT form, because the short
   // form is what the grid says and therefore what gets remembered.
@@ -292,10 +301,21 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   }
 
   const modeNoun = mode === 'teacher' ? 'öğretmen' : 'sınıf';
+
+  // In Öğretmenden the branch box only asks something when the teacher HOLDS
+  // two. `subjectPool` is already that person's own branches there, so its
+  // length is the question.
+  const askSubject = mode !== 'teacher' || subjectPool.length > 1;
+
+  // The heading carries the branch when the box does not ("Başlıkta branşı da
+  // yazsın") — and it carries BOTH when the box is there, because then the
+  // heading is naming the teacher rather than the lesson being typed.
   const heading =
     mode === 'all' || focused === undefined
       ? `Dersler (${state.lessons.length})`
-      : `${focused.name} dersleri (${scope.length})`;
+      : mode === 'teacher' && focusedSubjects !== ''
+        ? `${focused.name} · ${focusedSubjects} dersleri (${scope.length})`
+        : `${focused.name} dersleri (${scope.length})`;
 
   const panel = (
     <div className="panel step-panel">
@@ -360,23 +380,35 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
               appear only for a two-subject teacher, i.e. only ever as an
               afterthought to a choice already made.
 
+              ...EXCEPT in Öğretmenden, where the teacher is already chosen and
+              the pool is that one person's own branches. A teacher who holds
+              one branch got a dropdown with one option in it — a control that
+              cannot be answered wrongly and cannot be answered differently, so
+              it was asking nothing ("Öğretmenin tek bir branşı varsa seçme tuşu
+              açılmasın"). Nothing about the lesson changes when it goes:
+              `subjectValue` already falls to the pool's first entry and
+              `secondFlag` is derived from it. Which branch it is, is said in
+              the heading instead.
+
               Still a NAME in the form and a FLAG in the lesson — `chooseSubject`
               and `chooseTeacher` keep the two boxes agreeing, `add()` writes
               `second`. */}
-          <Field label="Branş">
-            <select
-              aria-label="Branş"
-              value={subjectValue}
-              onChange={(e) => chooseSubject(e.target.value)}
-            >
-              {mode !== 'teacher' && <option value="">Tüm branşlar</option>}
-              {subjectPool.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          {askSubject && (
+            <Field label="Branş">
+              <select
+                aria-label="Branş"
+                value={subjectValue}
+                onChange={(e) => chooseSubject(e.target.value)}
+              >
+                {mode !== 'teacher' && <option value="">Tüm branşlar</option>}
+                {subjectPool.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           {mode !== 'teacher' && (
             <select
               aria-label="Öğretmen"

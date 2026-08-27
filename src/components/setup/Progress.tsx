@@ -79,20 +79,20 @@ export default function Progress({ state, step, setStep, goLessons }: Props) {
     <div className="panel">
       <h2>Kurulum durumu</h2>
       <p className="hint">
-        Üç adımın <b>{done}</b> tanesi tamam. Bir satıra tıklayarak o adıma
+        Üç listenin <b>{done}</b> tanesi tamam. Bir satıra tıklayarak o listeye
         gidebilirsiniz.
       </p>
 
       <table className="list">
         <thead>
           <tr>
-            <th>Adım</th>
+            <th>Liste</th>
             <th className="num">Kayıt</th>
             <th>Durum</th>
           </tr>
         </thead>
         <tbody>
-          {lines.map((l, i) => (
+          {lines.map((l) => (
             <tr key={l.id}>
               <td>
                 <button
@@ -103,7 +103,7 @@ export default function Progress({ state, step, setStep, goLessons }: Props) {
                   <span className="step-icon" aria-hidden="true">
                     {l.icon}
                   </span>
-                  <span className="step-no">{i + 1}</span>
+
                   {l.label}
                 </button>
               </td>

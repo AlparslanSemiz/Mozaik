@@ -127,6 +127,23 @@ export default function Teachers({ state, change }: PanelProps) {
     return (freshSubject === null ? newTeacher.subject : freshSubject).trim();
   }
 
+  // Enter adds, the way it does in the other three lists. It reads the same
+  // guard the button's `disabled` reads, so the keyboard cannot get past a
+  // check the mouse cannot.
+  function addNew() {
+    const subject = subjectOf();
+    if (newTeacher.name.trim() === '' || subject === '') return;
+    change((d) =>
+      addTeacher(addSubject(addSubject(d, newTeacher.subject2), subject), {
+        ...newTeacher,
+        subject,
+      }),
+    );
+    setNewTeacher({ name: '', short: '', subject: '', gender: '', subject2: '' });
+    setFreshSubject(null);
+    setAskSecond(false);
+  }
+
   return (
     <div className="panel step-panel">
       {/* The paste button rides the HEADING, not the form row: "Excel'den
@@ -155,6 +172,9 @@ export default function Teachers({ state, change }: PanelProps) {
           placeholder="Ad Soyad"
           value={newTeacher.name}
           onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') addNew();
+          }}
         />
         <input
           type="text"
@@ -164,6 +184,9 @@ export default function Teachers({ state, change }: PanelProps) {
           className="text-sm"
           value={newTeacher.short}
           onChange={(e) => setNewTeacher({ ...newTeacher, short: e.target.value })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') addNew();
+          }}
         />
         {/* A dropdown, not free text: typed "Matemtik" used to become a second
             subject that still printed as "Mat" and could not be told from the
@@ -247,18 +270,7 @@ export default function Teachers({ state, change }: PanelProps) {
         <button
           className="btn"
           disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
-          onClick={() => {
-            const subject = subjectOf();
-            change((d) =>
-              addTeacher(addSubject(addSubject(d, newTeacher.subject2), subject), {
-                ...newTeacher,
-                subject,
-              }),
-            );
-            setNewTeacher({ name: '', short: '', subject: '', gender: '', subject2: '' });
-            setFreshSubject(null);
-            setAskSecond(false);
-          }}
+          onClick={addNew}
         >
           Ekle
         </button>
@@ -316,8 +328,8 @@ export default function Teachers({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th>Renk</th>
-              <th>Ad</th>
+              <th className="w-col-xs">Renk</th>
+              <th className="w-col-xl">Ad</th>
               {/* --w-col-lg was 16ch — 144 px at 125 %, for a heading that
                   asks for 78 and a box that holds "MÇ". This column alone was
                   the last 54 px of the sideways scroll. */}

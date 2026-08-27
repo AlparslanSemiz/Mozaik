@@ -510,9 +510,10 @@ test.describe('44. Panel simetrisi', () => {
     expect(shape.slice(0, 3)).toEqual(['baslik', 'aciklama', 'ekleme']);
   });
 
-  test('Ayarlar → Veri: yeni plan formu listenin ÜSTÜNDE', async ({ page }) => {
+  test('Ayarlar → Planlar: yeni plan formu listenin ÜSTÜNDE', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    // Its own section since 2026-08-28; the panel and its shape did not move.
+    await openSettings(page, 'Planlar');
     const plans = page.locator('.panel', { hasText: 'Yeni plan' }).first();
     const order = await plans.evaluate((el) => {
       const kids = [...el.children];
@@ -754,6 +755,58 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     // ...and the same distance in all four, which is the part that reads as
     // "one program" rather than four screens that happen to look alike.
     expect(Math.max(...values) - Math.min(...values), JSON.stringify(inset)).toBeLessThanOrEqual(4);
+  });
+
+  // THE NAME COLUMN IS ONE COLUMN, IN ALL FOUR LISTS.
+  //
+  // "Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun.
+  //  Derslikte de çok uzun." Both halves were `width: 100%` on the table: a
+  // table that must fill its panel hands the slack to whichever columns have
+  // no width written down, so Ad ran the width of the panel in Derslikler, and
+  // in Sınıflar the slack was split with Renk — whose swatch is a fixed 5ch, so
+  // that column grew while its content did not and pushed the name sideways.
+  //
+  // What is asserted is the SAME width in all four, because that is the part a
+  // reader feels: stepping between the lists no longer moves the column under
+  // the cursor. A number is deliberately not written down — the ladder decides,
+  // and the test only says the four agree with each other.
+  test('ad sütunu dört listede de aynı genişlikte', async ({ page }) => {
+    await openWithSample(page);
+
+    /** The width of the column headed `label`, in the list on screen. */
+    const nameColumn = async (label: string) =>
+      mainList(page)
+        .locator('thead th')
+        .filter({ hasText: label })
+        .first()
+        .evaluate((el) => Math.round(el.getBoundingClientRect().width));
+
+    const width: Record<string, number> = {};
+    for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar']) {
+      await openSetup(page, step);
+      width[step] = await nameColumn('Ad');
+    }
+    await openSettings(page, 'Branşlar');
+    width['Branşlar'] = await nameColumn('Branş');
+
+    const values = Object.values(width);
+    expect(Math.min(...values), JSON.stringify(width)).toBeGreaterThan(0);
+    expect(
+      Math.max(...values) - Math.min(...values),
+      `ad sütunu listeden listeye değişiyor: ${JSON.stringify(width)}`,
+    ).toBeLessThanOrEqual(1);
+
+    // ...and it is a COLUMN, not the rest of the panel. The panel is ~1400 px
+    // at this window; a name box that takes half of it is the bug, whatever
+    // its neighbours do.
+    const panel = await page
+      .locator('.cols > div .panel')
+      .first()
+      .evaluate((el) => el.getBoundingClientRect().width);
+    expect(
+      Math.max(...values) / panel,
+      `ad sütunu panelin ${((Math.max(...values) / panel) * 100).toFixed(0)}%'i`,
+    ).toBeLessThan(0.35);
   });
 
   // The teacher list is eleven columns wide and it did not fit: 106 px of

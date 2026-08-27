@@ -159,6 +159,56 @@ export function applyRibbon(open: boolean): void {
   }
 }
 
+// ------------------------------------------- ribbon auto-hide preference
+
+/**
+ * Whether the tool strip GETS OUT OF THE WAY while you read down the page.
+ *
+ * A separate key from `ders-programi-serit`, and the split is the same one
+ * `ribbonScroll.ts` is written around: that one is a PREFERENCE — "I do not
+ * want the strip" — and this one is a GESTURE, "hide it while I am reading and
+ * bring it back when I look up". Folding them together would mean a reader who
+ * dislikes the movement could only stop it by giving up the strip.
+ *
+ * Asked for on 2026-08-28: "ikinci barın açılıp kapanması ayarlarda bir ayar
+ * olsun." The thing that happens by itself is the thing that has to be able to
+ * be turned off.
+ *
+ * Default ON, because that is what the program did before this key existed and
+ * a preference nobody has set must not change what they already have.
+ */
+export const RIBBON_AUTO_KEY = 'ders-programi-serit-gizle';
+
+/**
+ * Only the exact string 'kapali' turns it off.
+ *
+ * A boolean is accepted too, because this normalizer is called from two
+ * directions — the store on read, and the settings button on write — and a
+ * guard that only knows the string type silently rejects the other one
+ * (pitfall 44). "Absent" is not "off": `null` falls to the default here rather
+ * than through `Number('')`'s door (pitfall 43).
+ */
+export function normalizeRibbonAuto(raw: unknown): boolean {
+  if (typeof raw === 'boolean') return raw;
+  return raw !== 'kapali';
+}
+
+export function readRibbonAuto(): boolean {
+  try {
+    return normalizeRibbonAuto(localStorage.getItem(RIBBON_AUTO_KEY));
+  } catch {
+    return true;
+  }
+}
+
+export function applyRibbonAuto(on: boolean): void {
+  try {
+    localStorage.setItem(RIBBON_AUTO_KEY, on ? 'acik' : 'kapali');
+  } catch {
+    // A gesture that cannot be remembered is not worth an error
+  }
+}
+
 // ------------------------------------------------------ dock height preference
 
 /**

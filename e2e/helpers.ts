@@ -730,13 +730,18 @@ export async function chooseMotion(page: Page, name: 'Tam' | 'Az' | 'Kapalı') {
 /**
  * Ayarlar → Görünüm'den bir yoğunluk basamağı seçer.
  *
- * SCOPED TO ITS PANEL since 2026-08-27, when the one density split into two
+ * SCOPED TO ITS GROUP since 2026-08-27, when the one density split into two
  * ("Izgara yoğunluğu" and "Arayüz yoğunluğu"). Both offer Ferah / Rahat /
- * Sığdır, so an unscoped `getByRole` now matches two buttons and dies of a
+ * Sığdır, so an unscoped `getByRole` matches two buttons and dies of a
  * strict-mode violation — pitfall 74, from the direction where nothing was
- * renamed at all: a name only has to become AMBIGUOUS, and a second panel is
- * enough. The panel is found by its HEADING and not by its text, for the same
- * reason that pitfall names.
+ * renamed at all: a name only has to become AMBIGUOUS, and a second control
+ * is enough.
+ *
+ * The GROUP and not the panel, since 2026-08-28: the two questions share one
+ * panel now, so a `.panel` scoped by its heading would find the same box
+ * twice and be ambiguous again. `role="group"` with an `aria-label` is what
+ * actually separates them on the screen, for a screen reader as much as for
+ * this helper — so it is the honest thing to ask.
  */
 async function chooseDensityIn(
   page: Page,
@@ -744,7 +749,7 @@ async function chooseDensityIn(
   name: 'Ferah' | 'Rahat' | 'Sığdır',
 ) {
   await openSettings(page, 'Görünüm');
-  const box = page.locator('.panel', { has: page.getByRole('heading', { name: panel }) });
+  const box = page.getByRole('group', { name: panel, exact: true });
   await box.getByRole('button', { name, exact: true }).click();
   await expect(box.getByRole('button', { name, exact: true })).toHaveAttribute(
     'aria-pressed',

@@ -341,12 +341,28 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     await expect(page.locator('.print-page').first()).toBeVisible();
     const screen = await sheet(page);
 
+    // IN A WINDOW THE SIZE OF THE PAPER, and that is a fix to the instrument
+    // rather than a concession. `emulateMedia` switches the media query and
+    // nothing else — the viewport stays 1920 — while in print the sheet is
+    // `width: auto` and takes the page box. So the emulated sheet came out
+    // 1920px wide, the hour headings stopped wrapping in it, and the rows
+    // that share what is left came out taller than the ones on a real 297mm
+    // page. Measuring the paper in a window the width of the paper is the
+    // only way the two numbers mean the same thing (pitfall 41's shape: a
+    // measurement is made under the conditions it is a measurement of).
+    await page.setViewportSize({ width: 1123, height: 900 });
     await page.emulateMedia({ media: 'print' });
     const paper = await sheet(page);
 
     // The SAME sheet: same row height, same type, same margin, same height.
+    //
+    // The row is no longer a written 23mm — it is the sheet's leftover divided
+    // between the days, so that a bigger type takes its room from the rows
+    // rather than from the bottom of the paper. Which is why this asserts the
+    // two media AGREE and no longer asserts a constant: the constant was the
+    // thing that could not give.
     expect(paper.row, `kâğıt ${paper.row}px, ekran ${screen.row}px`).toBeCloseTo(screen.row, 1);
-    expect(paper.row, `23mm = 86.9px`).toBeCloseTo(86.93, 0);
+    expect(paper.row, `${paper.row}px — bir gün satırı yok`).toBeGreaterThan(40);
     expect(paper.title).toBeCloseTo(screen.title, 1);
     expect(paper.pad).toBe(screen.pad);
     expect(paper.height).toBeCloseTo(screen.height, 1);
@@ -598,19 +614,94 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     // is a chain of two multipliers, and a wrong scope on it makes every one
     // of them silently identical — which is exactly what happened the first
     // time (measured: the title was 22.7px at all nine).
+    //
+    // MEASURED AGAINST THE CONTENT BOX, not with `scrollHeight`. The first
+    // version of this test asked `.print-page` for `scrollHeight -
+    // clientHeight` and got 0 at all nine — including at "Büyük", where the
+    // title and the table together needed 739 px of the 714 the sheet has.
+    // A flex column that is centred with `safe center` does not report its
+    // overflow that way, so the instrument said "fits" about a page that did
+    // not. Pitfall 64, exactly: a layout fault is measured on the box that
+    // actually overflows, and the neighbouring box knows nothing about it.
+    //
+    // The reader's report was "yazdırmada yazıları büyük yapınca yazdırma
+    // bozuluyor" — one setting, one number, and no test could see it.
     await openWithSample(page);
     await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    const spill: Record<string, string> = {};
     for (const per of ['1', '2', '4']) {
       await choose(page, per);
       for (const size of ['Küçük', 'Normal', 'Büyük']) {
         await choose(page, size);
-        const over = await page
-          .locator('.print-page')
-          .first()
-          .evaluate((el) => Math.round(el.scrollHeight - el.clientHeight));
-        expect(over, `per=${per} ${size}: ${over}px taşma`).toBeLessThanOrEqual(1);
+        const m = await page.locator('.print-page').first().evaluate((el) => {
+          const cs = getComputedStyle(el);
+          const box = el.getBoundingClientRect();
+          const top = box.top + parseFloat(cs.paddingTop);
+          const bottom = box.bottom - parseFloat(cs.paddingBottom);
+          let lo = Infinity;
+          let hi = -Infinity;
+          for (const kid of el.children) {
+            const r = kid.getBoundingClientRect();
+            lo = Math.min(lo, r.top);
+            hi = Math.max(hi, r.bottom);
+          }
+          return {
+            over: Math.round(Math.max(0, top - lo) + Math.max(0, hi - bottom)),
+            avail: Math.round(bottom - top),
+            used: Math.round(hi - lo),
+          };
+        });
+        if (m.over > 1) spill[`per=${per} ${size}`] = `${m.over}px (yer ${m.avail}, gereken ${m.used})`;
       }
     }
+    expect(spill, `kâğıttan taşan birleşimler: ${JSON.stringify(spill)}`).toEqual({});
+  });
+
+  // THE SAME NINE, ON PAPER.
+  //
+  // "Yazdırmada yazıları büyük yapınca yazdırma bozuluyor. Önizleme doğru
+  //  olmasına rağmen."
+  //
+  // The test above measures `.print-page` on SCREEN, and that is why it never
+  // saw this. Three things are only true in `@media print`:
+  //
+  //   - the row that carries the hour headings was sized in `rem`, the one rem
+  //     that reached the paper, and print pins --ui-scale to 1 — so preview and
+  //     paper did not compute the same height at ANY zoom;
+  //   - `.print-area` is `overflow-x: auto`, which forces `overflow-y` to auto
+  //     as well, and a scroll container in paged media does not fragment, it
+  //     CLIPS;
+  //   - the sheet's own margin under the title is 6px on screen and 4mm here.
+  //
+  // And the sheet is what has to hold: `.print-page` is one timetable inside a
+  // 205mm box (pitfall 31) and it is the SHEET that meets the paper's edge.
+  // Measured in both axes, because "büyük" grows the type in both and only the
+  // vertical was ever looked at.
+  test('kâğıt ortamında da dokuz birleşimin dokuzu SIĞIYOR', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+
+    const spill: Record<string, string> = {};
+    for (const per of ['1', '2', '4']) {
+      for (const size of ['Küçük', 'Normal', 'Büyük']) {
+        // Chosen on SCREEN and measured on PAPER: the two panels that hold
+        // these buttons are `.no-print`, so in print media there is nothing to
+        // click — which is correct, and is why the switch is inside the loop.
+        await choose(page, per);
+        await choose(page, size);
+        await page.emulateMedia({ media: 'print' });
+        const m = await page
+          .locator('.print-sheet')
+          .first()
+          .evaluate((el) => ({
+            y: Math.round(el.scrollHeight - el.clientHeight),
+            x: Math.round(el.scrollWidth - el.clientWidth),
+          }));
+        await page.emulateMedia({ media: null });
+        if (m.y > 1 || m.x > 1) spill[`per=${per} ${size}`] = `${m.x}x${m.y}px`;
+      }
+    }
+    expect(spill, `kâğıttan taşan birleşimler: ${JSON.stringify(spill)}`).toEqual({});
   });
 
   test('yazı boyutu GERÇEKTEN değişiyor, üç basamak da ayrı', async ({ page }) => {

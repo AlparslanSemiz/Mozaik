@@ -9,6 +9,13 @@
 // Görünüm is the one section that describes the MACHINE rather than the school
 // (`theme.ts`). It is here and not in the top bar for the same reason Sıfırla
 // is: the top bar is the row where no single click can cost an afternoon.
+//
+// SIX sections since 2026-08-28. "Veri" was seven panels and about nine
+// hundred lines and it answered four different questions — which plan am I in,
+// where do the files go, what is stored on this computer, and which build is
+// this. The library and the bundle are their own section now; `Data.tsx` still
+// holds both because the bundle is written by the same handlers that read the
+// library, and splitting the file would have split those in two.
 
 import type { State } from '../../types';
 import School from './School';
@@ -17,7 +24,7 @@ import Subjects from './Subjects';
 import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
-import type { Density, Motion } from '../../theme';
+import type { Density, Motion, Theme } from '../../theme';
 import type { FolderRun } from '../../useFolder';
 import type { UpdateRun } from '../../update';
 import type { SectionId } from '../../toolState';
@@ -38,6 +45,10 @@ interface Props extends PanelProps {
   setUiDensity: (next: Density) => void;
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
+  ribbonAuto: boolean;
+  setRibbonAuto: (next: boolean) => void;
+  theme: Theme;
+  setTheme: (next: Theme) => void;
   motion: Motion;
   setMotion: (next: Motion) => void;
   /** Which section. Owned by App: the tool strip above shows it. */
@@ -58,6 +69,10 @@ export default function Settings({
   setUiDensity,
   availClock,
   setAvailClock,
+  ribbonAuto,
+  setRibbonAuto,
+  theme,
+  setTheme,
   motion,
   setMotion,
   section,
@@ -80,11 +95,15 @@ export default function Settings({
           setUiDensity={setUiDensity}
           availClock={availClock}
           setAvailClock={setAvailClock}
+          ribbonAuto={ribbonAuto}
+          setRibbonAuto={setRibbonAuto}
+          theme={theme}
+          setTheme={setTheme}
           motion={motion}
           setMotion={setMotion}
         />
       )}
-      {section === 'data' && (
+      {(section === 'plans' || section === 'data') && (
         <Data
           state={state}
           change={change}
@@ -92,6 +111,7 @@ export default function Settings({
           plans={plans}
           folder={folder}
           update={update}
+          part={section}
         />
       )}
     </>

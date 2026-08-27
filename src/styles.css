@@ -426,7 +426,7 @@
   --ribbon-h: 2.25rem;
 
   /* How much room the FIRST caption on a strip takes, so the first button lands
-     at one x on all seven. The longest of the seven is "NE GÖSTERİLSİN". The
+     at one x on all seven, and so the rule after it lands at one x too. The
      rule that uses it sits beside `.ribbon-label`.
 
      `em` and NOT `ch`, and that is a measurement rather than a preference. 15ch
@@ -437,10 +437,14 @@
      FASTER than the words in it and a `ch` count that fits at one step is not
      the count that fits at another.
 
-     The captions themselves went 114.1px -> 162.1px over the same step, i.e.
-     9.51em -> 9.01em; 9.8em clears the wider of the two with 3px to spare and
-     costs 14px of slack at the other end. */
-  --ribbon-lead-w: 9.8em;
+     6.2em since 2026-08-28, and the number came down because the WORDS did.
+     The seven captions were "Adımlar / Nasıl eklensin / Kimin saatleri /
+     Görünüm / Ne gösterilsin / Ne basılsın / Bölüm", so the box had to hold a
+     fourteen-character phrase and then stand mostly empty in front of the
+     other six. They are one word each now — Liste · Yöntem · Kim · Görünüm ·
+     Süzgeç · İçerik · Bölüm — and the longest, "GÖRÜNÜM", is what this clears.
+     Centring only reads as centring when the box is close to the word. */
+  --ribbon-lead-w: 6.2em;
 
   /* The one raw px font-size in the file: the anchor the whole rem ladder
      hangs from.
@@ -1139,33 +1143,47 @@ textarea {
   align-items: center;
 }
 
-/* THE OPENING CAPTION IS PADDED TO ONE WIDTH, so the first button starts at the
-   same x on all seven strips — "İlk baştaki yazı sonrası hepsi aynı hizadan
-   başlasın mı güzel olur mu? arada bir çizgi olur."
+/* THE OPENING CAPTION IS ONE FIXED BOX WITH THE WORD CENTRED IN IT, so the
+   first button starts at the same x on all seven strips — "İlk baştaki yazı
+   sonrası hepsi aynı hizadan başlasın mı güzel olur mu? arada bir çizgi olur."
 
-   The captions run from "Bölüm" to "Ne gösterilsin", so without this the strip
-   appeared to shift sideways every time you changed tab. `ch` and not px: the
-   caption is set in `--fs-xs` with `--ls-caps` tracking, so its own character
-   is the only unit that stays true when the reader walks the scale (pitfall 39
-   — `ch` is not proportional to the point size, but a width written in `ch`
-   holds the same number of characters at every step, which is the property
-   that matters).
+   `width` and not `min-width` (2026-08-28): a minimum is a floor, and a caption
+   longer than the floor pushed the strip sideways again — which is the half of
+   the request that was never actually delivered.
 
-   Measured on the longest of the seven, "NE GÖSTERİLSİN". */
+   `em` and NOT `ch`: see --ribbon-lead-w. */
 .ribbon > .ribbon-label:first-child {
-  min-width: var(--ribbon-lead-w);
+  width: var(--ribbon-lead-w);
+  text-align: center;
 }
 
-/* ...and the rule after it. Drawn here rather than by adding a `<Sep/>` to
-   every strip: it is a property of the strip's shape, not a decision each tab
-   gets to make, and `Sep` should keep meaning "these two groups are different
-   questions". Same 1px, same token, same inset as `.ribbon-sep`. */
+/* ...and the rule after it, PINNED TO THE BOX rather than trailing the word.
+   ("İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı
+    yerde olsun ve yazı ortalansın.")
+
+   This is the bug the padding hid. An absolutely positioned box with no `left`
+   or `right` is laid out at its STATIC position — where it would have sat in
+   flow — and here that is immediately after the caption's text, not after the
+   caption's box. So the rule moved with every word: "BÖLÜM" put it eight
+   characters left of where "NE GÖSTERİLSİN" put it, on a strip whose whole
+   claim was that it did not shift. Nothing was broken enough to fail: the line
+   was drawn, it was 1px, it was the right colour, it was in the wrong place.
+
+   `left` is now computed from the strip's own geometry — its padding box
+   starts inside the 4px accent border, so the sum is the padding, the caption
+   box and half the gap after it. Every term is a token; nothing here is a
+   measured pixel that can go stale (pitfall 42).
+
+   Drawn here rather than by adding a `<Sep/>` to every strip: it is a property
+   of the strip's shape, not a decision each tab gets to make, and `Sep` should
+   keep meaning "these two groups are different questions". Same 1px, same
+   token, same inset as `.ribbon-sep`. */
 .ribbon > .ribbon-label:first-child::after {
   content: '';
   position: absolute;
   top: var(--space-2);
   bottom: var(--space-2);
-  margin-left: var(--space-3);
+  left: calc(var(--space-4) + var(--ribbon-lead-w) + var(--space-3) / 2);
   width: 1px;
   background: var(--line);
 }
@@ -1428,6 +1446,14 @@ textarea {
   flex: 1 1 auto;
   overflow: auto;
   padding: var(--space-5) var(--space-6);
+
+  /* A SIZE CONTAINER, so the side column can be told how tall the screen is.
+     `.main` already had a definite size — it is the `1 1 auto` child of a
+     fixed-height column that hands it its width — so naming it a container
+     takes nothing away and adds `cqh`, the one unit that means "the height of
+     the box you are scrolling in". `100dvh` would have been the window, which
+     is the top bar and the tool strip too. See `.cols > aside`. */
+  container-type: size;
 }
 
 /* THE TAB TRANSITION — CSS, not `document.startViewTransition`.
@@ -2100,11 +2126,17 @@ td.drop-blocked {
   left: 0;
   top: 0;
   z-index: 999;
-  width: var(--cell-w);
+  /* One cell per hour the block covers — drag.ts writes --ghost-span from
+     `blockSize`. The fallback is 1 so the box is never zero-wide if the
+     property is missing. */
+  width: calc(var(--cell-w) * var(--ghost-span, 1));
   height: var(--cell-h);
-  /* Half a cell, so the ghost sits centred under the pointer. It was a literal
-     -17px, i.e. 34/2 written out; with --cell-* in rem that number goes stale
-     the moment the scale moves, and the card would drift off the finger. */
+  /* Half a cell up and half a cell left: the ghost's FIRST hour sits under the
+     pointer, and the rest of it runs right, the way the highlight does. It was
+     a literal -17px, i.e. 34/2 written out; with --cell-* in rem that number
+     goes stale the moment the scale moves, and the card would drift off the
+     finger. Note it is half of ONE cell and not half of the ghost — a double
+     centred on the pointer would straddle two cells and name neither. */
   margin: calc(var(--cell-h) / -2) 0 0 calc(var(--cell-w) / -2);
   display: flex;
   flex-direction: column;
@@ -2410,43 +2442,12 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 /* Above its own deck. `position: relative` is not decoration and cost an hour:
    `z-index` does NOTHING on a statically positioned box, so the top card kept
    `z-index: 3` and still lost — a positioned element paints above a static one
-   whatever the number says. The deck's own copies were painting over the card
-   that carries the badge, which is why the badge had a box, a computed colour
-   and a hit-test answer, and still could not be seen. */
+   whatever the number says (pitfall 84). The corner badge that taught this is
+   gone (asked for, 2026-08-28), but the rule stays: the card that TAKES THE
+   POINTER has to be the one on top, and the copies behind it are drawing. */
 .pool-stack > .pool-card:first-child {
   position: relative;
   z-index: 3;
-}
-
-/* How many are in the pile. A CORNER mark since 2026-08-27, and the note that
-   used to be here said it could not be one — "the card's three lines are
-   centred, and anything pinned to a corner has to push them off centre to find
-   room". True of an in-flow mark; this one is out of flow and costs the card
-   nothing.
-
-   It rode the block length before ("1 saat ×6") and that whole line is gone:
-   "Programda 1 saat x5 veya 2 saat x3 gibi gözükmesin kartlarda güzel değil."
-
-   It is only ever drawn on `.pool-card:first-child`, which is positioned and
-   sits above its own deck — on a static card the buried copies would paint over
-   it and it would have a box, a colour and a hit-test answer while being
-   invisible (pitfall 84).
-   `--on-color` because the ground under it is a palette colour and does not
-   turn with the theme (pitfall 15). */
-.stack-badge {
-  position: absolute;
-  top: 1px;
-  right: 3px;
-  padding: 0 var(--space-1);
-  border-radius: var(--r-xs);
-  background: rgba(0, 0, 0, .17);
-  color: var(--on-color);
-  /* --fs-xs and not --fs-2xs: 2xs is 11px and this is on SCREEN. It was 2xs for
-     about an hour and the sweep that reads the smallest rendered text on all
-     seven tabs found it immediately — which is what that sweep is for. */
-  font-size: var(--fs-xs);
-  line-height: 1.35;
-  font-variant-numeric: tabular-nums;
 }
 
 .pool-card {
@@ -2509,9 +2510,9 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 
 /* ------------------------------------------------------------ setup steps */
 
-/* Kurulum's four steps, now IN the ribbon. They are `.btn`s so pressed, hover,
-   focus and disabled all come from one place; what is left here is the two
-   things a step has that a button does not — a number and a count.
+/* Kurulum's three lists, IN the ribbon. They are `.btn`s so pressed, hover,
+   focus and disabled all come from one place; what is left here is the one
+   thing a step has that a button does not — a count.
 
    A strip, not a wizard: every step stays reachable. The counter is the point —
    a step showing 0 is where something is still missing, visible at a glance. */
@@ -2528,35 +2529,18 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   border-style: dashed;
 }
 
-.step-no {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1px solid var(--hairline);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-}
-
-.step[aria-pressed="true"] .step-no {
-  background: var(--paper);
-  border-color: transparent;
-  color: var(--accent);
-}
-
 .step-count {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
 }
 
-/* The symbol beside the number. It does NOT replace the badge: the steps are
-   numbered, the user says "3. adım", and a picture cannot be counted. The
-   symbol is what the eye finds first, the number is what the mouth says.
+/* The symbol beside the name. The ordinal badge that used to sit between them
+   is gone (asked for, 2026-08-28): the three lists are not a sequence anybody
+   walks in order — every one of them is reachable at any time, which is the
+   whole reason this is a strip and not a wizard — so a number in front of each
+   was counting something the reader never counts.
 
-   Sized off the type rather than in px so it follows --ui-scale like the badge
+   Sized off the type rather than in px so it follows --ui-scale like the count
    next to it. `currentColor` throughout, so a pressed step tints both. */
 .step-icon {
   display: inline-flex;
@@ -3362,6 +3346,46 @@ table.list td > select.split-pick,
   margin-bottom: 0;
 }
 
+/* THE SIDE COLUMN DOES NOT SET THE LENGTH OF THE PAGE.
+   ("Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan
+    bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor.")
+
+   `.cols` is a grid, so its row is as tall as the TALLER of its two children —
+   `align-items: start` moves the content inside the track and does nothing to
+   the track itself. And the side column is the one that grows without a
+   ceiling: on Yazdır it was four stacked panels against a single sheet, on
+   Kurulum's teacher step a row per teacher plus a line per subject. So the
+   scrollbar you were dragging belonged to something you were not reading.
+
+   Sticky, so it stays where the eye left it, and bounded by the box it is in,
+   so anything past that scrolls WITHIN the column. Everything about that
+   ceiling is `cqh` on `.main` — the box actually being scrolled, not the
+   window (the top bar and the tool strip are not in it).
+
+   The floor is what one panel needs to be worth showing; below it the column
+   would be a slot, not a column. */
+.cols > aside {
+  position: sticky;
+  top: 0;
+  max-height: max(18rem, 100cqh);
+  overflow-y: auto;
+  /* A focus ring on a control in the first or last row would otherwise be
+     clipped by the scroll box — the same two lines `.table-scroll` uses. */
+  padding: 2px;
+  margin: -2px;
+}
+
+/* One column, one flow: nothing is beside anything, so there is nothing to
+   keep in place and a box that scrolls inside a box that scrolls is worse
+   than a long page. */
+@media (max-width: 68rem) {
+  .cols > aside {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 /* ------------------------------------------------------------ entity list */
 
 /* Choosing among 25 teachers used to be a <select>: one visible row, and the
@@ -3586,7 +3610,6 @@ table.availability td.closed {
   /* One day's row. Was written inside `@media print` alone, which is why the
      preview's rows were 30 px against the paper's 86.93 — the thing
      "önizlemeyle yazdırılan aynı olsun" was about. */
-  --p-row: 23mm;
 
   background: none;
   display: flex;
@@ -3647,11 +3670,6 @@ table.availability td.closed {
 .print-area[data-per='2'] .print-sheet { grid-template: 1fr 1fr / 1fr; }
 .print-area[data-per='4'] .print-sheet { grid-template: 1fr 1fr / 1fr 1fr; }
 
-.print-area[data-per='2'],
-.print-area[data-per='4'] {
-  --p-row: 10mm;
-}
-
 .print-area[data-per='2'] { --p-fit: .72; }
 .print-area[data-per='4'] { --p-fit: .5; }
 
@@ -3664,19 +3682,41 @@ table.availability td.closed {
 .print-area[data-size='kucuk'] { --p-zoom: .85; }
 .print-area[data-size='buyuk'] { --p-zoom: 1.18; }
 
-/* One day's row. Here rather than in @media print, which is where it used to
-   live alone — that is what made the preview a different sheet. */
-table.print tbody th,
-table.print tbody td {
-  height: var(--p-row);
+/* ONE DAY'S ROW IS WHAT IS LEFT OVER, and that is the whole answer to
+   "yazdırmada yazıları büyük yapınca yazdırma bozuluyor".
+
+   It used to be a written number — 23 mm, or 10 mm at two and four up — and a
+   written number cannot be right, because the two things above it are not: the
+   title and the hour headings grow with `--p-zoom`, the sheet does not, and at
+   "Büyük" the pair needed 739 px of the 714 the sheet has (measured). A row
+   height is a MINIMUM on a table cell, so nothing gave: the table simply ran
+   past the bottom of the paper.
+
+   Now the title takes what it needs and the table takes the rest — `flex: 1`
+   in the column that IS the page — so the sum is the page by construction, at
+   every zoom, at every layout, and for a seven-day week as readily as a six.
+   The rows divide the table's height between them, which is what `--p-row`
+   was approximating.
+
+   The preview and the paper agree for the same reason they were made to agree
+   in the first place: both compute the same leftover from the same 205 mm box.
+   `--p-row` is gone rather than kept as a floor — a floor is exactly the thing
+   that could not give. */
+.print-page > table.print {
+  flex: 1 1 auto;
 }
 
 /* Two lines, both centred: the big one says what the sheet IS, the small one
    whose it is. Centred on screen as well — the preview has to look like the
    paper, or choosing what to print becomes guesswork. */
 .print-page h3 {
-  margin: 0 0 6px;
+  /* In mm, and the same number in both media. It was 6px here and 4mm in
+     `@media print`, i.e. every sheet was about 9 px taller on paper than the
+     preview said — a small lie in the one place this project promises there
+     is none ("önizleme kâğıdın kendisidir"). */
+  margin: 0 0 4mm;
   text-align: center;
+  flex: 0 0 auto;
 }
 
 .p-title-main {
@@ -3801,13 +3841,15 @@ table.print td {
   padding: 3px 4px;
   text-align: center;
   font-size: var(--fs-p-base);
-  /* On PAPER a row is 23 mm (see @media print); 30px was about half of that on
-     screen, so the preview's rows were squat next to the sheet they stand for.
-     3.25rem is 52px at the default scale and 78px at 150% — rem and not px
-     because a fixed pixel row inside a sheet whose type is in pt gets
-     relatively shorter every step up the scale (the shape of pitfall 36).
-     The paper is untouched: this is the preview only. */
-  height: 3.25rem;
+  /* NO `height`, and the one that stood here was the only `rem` that ever
+     reached the paper. Its comment said "the paper is untouched: this is the
+     preview only", and that stopped being true the day the row height moved
+     out of `@media print` — from then on it applied to both, and `@media
+     print` pins --ui-scale to 1, so the same 3.25rem was 56.9 px in a preview
+     at 125 % and 45.5 px on the sheet. Preview and paper computing different
+     heights for the same row is the one thing `.print-sheet` promises they
+     never do. The body rows are now the page's leftover divided up, and the
+     heading row is sized by what is written in it — in both media. */
 }
 
 table.print th {
@@ -3956,6 +3998,31 @@ table.bell-preview td {
     margin: 0;
   }
 
+  /* THE SCREEN'S SCROLLING MACHINERY IS NOT ON THE PAPER, and both halves of it
+     have to be said out loud.
+
+     `container-type: size` on `.main` is size CONTAINMENT: the box stops taking
+     its height from its contents, which is exactly what makes `100cqh` mean
+     something on screen and exactly what must not happen in paged media — a
+     contained box in print sizes itself and clips twenty timetables down to
+     one. And `.cols > aside` is sticky, bounded and scrolled, none of which a
+     sheet of paper can be.
+
+     The rule above already flattens `.cols` to a block, so what is left here is
+     only what those two declarations added. Pitfall 32: two build targets, and
+     the screen one leaks into the other unless it is undone by name. */
+  .main {
+    container-type: normal;
+  }
+
+  .cols > aside {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+
   /* The page box itself now, because @page has no margin: this padding IS the
      paper margin, and 2 x 10 mm keeps the columns exactly as wide as before.
      205 mm and not the full 210: a fractional pixel of overflow together with
@@ -3985,10 +4052,6 @@ table.bell-preview td {
     background: none;
     border-radius: 0;
     box-shadow: none;
-  }
-
-  .print-page h3 {
-    margin: 0 0 4mm;
   }
 
   .print-sheet:last-child {
@@ -5035,6 +5098,17 @@ body.row-dragging {
   font-size: var(--fs-sm);
 }
 
+/* A COUNTED SUMMARY, kept to a readable height. The capacity table in Kurulum's
+   right-hand column has a row per teacher; the panel under it is where the
+   reader goes next, and at twenty-five rows it was below the fold. 22rem is
+   about ten rows — enough to read the shape of the list and see that it
+   continues. `.entity-list` bounds itself at 62vh for the same reason; this one
+   is smaller because it is a summary, not the list itself. */
+.stat-scroll {
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
 /* A list wider than its panel scrolls SIDEWAYS rather than crushing a column.
    Measured at --ui-scale 1.5, eleven columns wide: without this the name box
    went from 232 px to 26 px and the subject box showed nothing at all. The
@@ -5048,10 +5122,29 @@ body.row-dragging {
   margin: -2px;
 }
 
-/* Never narrower than its own contents; `width: 100%` still fills the panel
-   whenever the contents leave room to fill. */
+/* AS WIDE AS ITS CONTENTS AND NO WIDER — the four lists take their width from
+   the column ladder, not from the panel they happen to be in.
+   ("Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun.
+    Derslikte de çok uzun.")
+
+   `width: 100%` was the cause and it took two forms. A table that must fill its
+   box has to hand the slack to SOME column, and it hands it to the ones with no
+   width written down: in Derslikler that was Ad alone, so a box holding "A" ran
+   the width of the panel; in Sınıflar it was Renk AND Ad, and since the swatch
+   inside Renk is a fixed 5ch, that column grew while its content did not — dead
+   space that pushed the name sideways, which is the "kayma" that was reported.
+
+   Both go away by not stretching: every column is now either on the ladder or
+   sized by the control it holds, the tables line up column for column when you
+   step between them, and the slack stays where slack belongs — outside the
+   table. The case this box was BUILT for is unchanged: at 150 % `max-content`
+   is wider than the panel and the box scrolls sideways, which is the whole
+   reason the name is not crushed to 26 px any more (pitfall 61). One property
+   now says it — `min-width: max-content` beside it would be inert, since a
+   used width is `max(min-width, min(max-width, width))` and both are the same
+   keyword. Measured after: Ad is 187 px in all four lists. */
 .table-scroll > table.list {
-  min-width: max-content;
+  width: max-content;
 }
 
 /* ...and `max-content` only means something if the cells HAVE a content width.

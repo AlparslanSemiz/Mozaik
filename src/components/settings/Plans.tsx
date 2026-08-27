@@ -16,6 +16,7 @@ import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
+import DraftStart from '../DraftStart';
 
 interface Props {
   state: State;
@@ -33,7 +34,7 @@ function summary(state: State) {
 }
 
 export default function Plans({ state, plans }: Props) {
-  const { confirm, alert } = useDialogs();
+  const { confirm } = useDialogs();
   const { library, planId } = plans;
 
   // Recomputed only when the directory or the open plan changes — this panel is
@@ -200,28 +201,7 @@ export default function Plans({ state, plans }: Props) {
             Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır;
             <b> dizilmiş program boş gelir</b>. Taslağın kendisi değişmez.
           </p>
-          <div className="form-row">
-            {draftList.map((d) => (
-              <button
-                key={d.id}
-                className="btn"
-                onClick={async () => {
-                  const seed = loadPlan(d.id);
-                  if (seed === null) {
-                    await alert({
-                      title: 'Bu taslağın verisi bulunamadı',
-                      tone: 'warn',
-                      body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Veri → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
-                    });
-                    return;
-                  }
-                  plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
-                }}
-              >
-                {d.name} → yeni plan
-              </button>
-            ))}
-          </div>
+          <DraftStart plans={plans} label={(name) => `${name} → yeni plan`} />
         </>
       )}
     </div>

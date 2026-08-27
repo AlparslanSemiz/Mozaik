@@ -286,7 +286,13 @@ test.describe('14. Hareket', () => {
     await expect(main).not.toHaveClass(/faded-top/);
     await expect(main).toHaveClass(/faded-bot/);
 
-    await main.evaluate((el) => el.scrollTo(0, 200));
+    // HALFWAY, computed rather than written. It was a flat 200px, which was a
+    // middle only while Kurulum's page was long — and it was long because the
+    // summary column beside it had no ceiling. With the side column bounded
+    // (section 83) the page is as long as the list, and 200px was already the
+    // bottom of it: the test would have started asserting that a fade at the
+    // foot of the box is missing, which is true and not what it is here for.
+    await main.evaluate((el) => el.scrollTo(0, Math.round((el.scrollHeight - el.clientHeight) / 2)));
     await expect(main).toHaveClass(/faded-top/);
     await expect(main).toHaveClass(/faded-bot/);
 

@@ -12,22 +12,27 @@
 // "it is saved in the browser" does not tell anyone that clearing browsing
 // data destroys it.
 
-import { useRef, useState } from 'react';
-import { useDialogs } from '../Dialogs';
-import { useLoadSample } from '../useSample';
-import type React from 'react';
-import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
-import { emptyState, respreadColors } from '../../entities';
-import { KEEP_DAILY, MAIN_NAME } from '../../folder';
-import { routeName, storageAddress, storageKind, storageReport } from '../../library';
-import { downloadBundle, listBackups } from '../../store';
-import type { State } from '../../types';
-import type { PlanControls } from '../props';
-import type { FolderRun } from '../../useFolder';
-import type { UpdateRun } from '../../update';
-import { SITE_ADRESI } from '../../update';
-import { surumEtiketi } from '../../version';
-import Plans from './Plans';
+import { useRef, useState } from "react";
+import { useDialogs } from "../Dialogs";
+import { useLoadSample } from "../useSample";
+import type React from "react";
+import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../bundle";
+import { emptyState, respreadColors } from "../../entities";
+import { KEEP_DAILY, MAIN_NAME } from "../../folder";
+import {
+  routeName,
+  storageAddress,
+  storageKind,
+  storageReport,
+} from "../../library";
+import { downloadBundle, listBackups } from "../../store";
+import type { State } from "../../types";
+import type { PlanControls } from "../props";
+import type { FolderRun } from "../../useFolder";
+import type { UpdateRun } from "../../update";
+import { SITE_ADRESI } from "../../update";
+import { surumEtiketi } from "../../version";
+import Plans from "./Plans";
 
 interface Props {
   state: State;
@@ -36,6 +41,17 @@ interface Props {
   plans: PlanControls;
   folder: FolderRun;
   update: UpdateRun;
+  /**
+   * WHICH HALF. Ayarlar's "Veri" was seven panels and about nine hundred
+   * lines — the plan library, a bundle file, a folder, a reset, a version, a
+   * key table and a backup list — which is four different questions wearing
+   * one name. It is two sections now, and they share this file rather than
+   * splitting it, because the bundle is written by the same machinery that
+   * reads the library: `saveAll`/`openAll` belong beside `Plans`, and
+   * `storageReport` belongs beside the folder. One file, one set of handlers,
+   * two doors.
+   */
+  part: "plans" | "data";
 }
 
 /**
@@ -43,7 +59,7 @@ interface Props {
  * bytes against the browser's ~5 MB — not the UTF-8 length a file would have.
  */
 function size(chars: number): string {
-  if (chars === 0) return '–';
+  if (chars === 0) return "–";
   const bytes = chars * 2;
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
 }
@@ -69,11 +85,12 @@ function Folder({ folder }: { folder: FolderRun }) {
     <div className="panel">
       <h2>Nereye kaydedilsin</h2>
 
-      {s.kind === 'yok' ? (
+      {s.kind === "yok" ? (
         <>
           <p className="hint">
-            Bu, programın <b>her değişikliği kendiliğinden bir klasöre yazması</b>
-            demek, yedek indirmeyi hiç düşünmeden. Ama{' '}
+            Bu, programın{" "}
+            <b>her değişikliği kendiliğinden bir klasöre yazması</b>
+            demek, yedek indirmeyi hiç düşünmeden. Ama{" "}
             <b>kullandığınız tarayıcı bunu desteklemiyor.</b> Chrome ve Edge
             destekliyor; Firefox ve Safari desteklemiyor.
           </p>
@@ -95,32 +112,38 @@ function Folder({ folder }: { folder: FolderRun }) {
           <p className="hint">
             {folder.fixed ? (
               <>
-                Program <b>bütün planları</b> kendiliğinden Belgelerim'e yazıyor ve
-                her gün için ayrı bir yedek bırakıyor (son {KEEP_DAILY} gün).
+                Program <b>bütün planları</b> kendiliğinden Belgelerim'e yazıyor
+                ve her gün için ayrı bir yedek bırakıyor (son {KEEP_DAILY} gün).
                 Seçecek bir şey yok. Üst çubuktaki <b>Dosyaya kaydet</b> yalnız
                 bu bilgisayarın dışına bir kopya çıkarmak için.
               </>
             ) : (
               <>
-                Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve her
-                gün için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst
-                çubuktaki <b>Dosyaya kaydet</b> yerine geçmez, onu <b>gereksiz</b>{' '}
-                kılar.
+                Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve
+                her gün için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst
+                çubuktaki <b>Dosyaya kaydet</b> yerine geçmez, onu{" "}
+                <b>gereksiz</b> kılar.
               </>
             )}
           </p>
 
           {!folder.fixed && (
             <div className="form-row">
-              <button className="btn primary" onClick={() => void folder.choose()}>
-                {s.kind === 'secilmedi' ? 'Klasör seç…' : 'Başka klasör seç…'}
+              <button
+                className="btn primary"
+                onClick={() => void folder.choose()}
+              >
+                {s.kind === "secilmedi" ? "Klasör seç…" : "Başka klasör seç…"}
               </button>
-              {s.kind === 'izin-gerek' && (
-                <button className="btn primary" onClick={() => void folder.allow()}>
+              {s.kind === "izin-gerek" && (
+                <button
+                  className="btn primary"
+                  onClick={() => void folder.allow()}
+                >
                   İzin ver
                 </button>
               )}
-              {s.kind !== 'secilmedi' && (
+              {s.kind !== "secilmedi" && (
                 <button className="btn" onClick={() => void folder.forget()}>
                   Vazgeç
                 </button>
@@ -133,13 +156,14 @@ function Folder({ folder }: { folder: FolderRun }) {
               and until this sentence existed nothing anywhere said which of
               the files in there was the one to open, or with which button.
               Both halves are already built; what was missing was saying so. */}
-          {s.kind !== 'secilmedi' && (
+          {s.kind !== "secilmedi" && (
             <p className="hint">
-              O klasördeki <code>{MAIN_NAME}</code> dosyası{' '}
-              <b>bütün planlarınızın tamamıdır</b>. Yeni bir bilgisayarda, yeni bir
-              tarayıcıda ya da programın yeni bir sürümünde işinizi geri getirmenin
-              yolu tek: aşağıdaki <b>Tümünü dosyadan aç</b> ile o dosyayı seçmek.
-              Yanındaki tarihli dosyalar aynı şeyin gün gün duran hâlleri.
+              O klasördeki <code>{MAIN_NAME}</code> dosyası{" "}
+              <b>bütün planlarınızın tamamıdır</b>. Yeni bir bilgisayarda, yeni
+              bir tarayıcıda ya da programın yeni bir sürümünde işinizi geri
+              getirmenin yolu tek: aşağıdaki <b>Tümünü dosyadan aç</b> ile o
+              dosyayı seçmek. Yanındaki tarihli dosyalar aynı şeyin gün gün
+              duran hâlleri.
             </p>
           )}
 
@@ -154,35 +178,43 @@ function Folder({ folder }: { folder: FolderRun }) {
               work has exactly one copy and a cleared browser takes it. */}
           <p
             className={
-              s.kind === 'hata' || (s.kind === 'secilmedi' && storageKind() === 'site')
-                ? 'hint bad'
-                : 'hint'
+              s.kind === "hata" ||
+              (s.kind === "secilmedi" && storageKind() === "site")
+                ? "hint bad"
+                : "hint"
             }
             role="status"
           >
-            {s.kind === 'secilmedi' && 'Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.'}
-            {s.kind === 'izin-gerek' && (
+            {s.kind === "secilmedi" &&
+              "Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor."}
+            {s.kind === "izin-gerek" && (
               <>
                 <b>{s.name}</b> klasörü seçilmiş, ama tarayıcı izni her açılışta
                 yeniden soruyor. <b>İzin ver</b> deyin.
               </>
             )}
-            {s.kind === 'bekliyor' && <>
-              <b>{s.name}</b> · yazılıyor…
-            </>}
-            {s.kind === 'yazildi' && (
+            {s.kind === "bekliyor" && (
               <>
-                <b>{s.name}</b> klasörüne yazıldı, saat{' '}
-                {s.at.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}.{' '}
+                <b>{s.name}</b> · yazılıyor…
+              </>
+            )}
+            {s.kind === "yazildi" && (
+              <>
+                <b>{s.name}</b> klasörüne yazıldı, saat{" "}
+                {s.at.toLocaleTimeString("tr-TR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                .{" "}
                 {s.files.map((name, i) => (
                   <span key={name}>
-                    {i > 0 && ' · '}
+                    {i > 0 && " · "}
                     <code>{name}</code>
                   </span>
                 ))}
               </>
             )}
-            {s.kind === 'hata' && (
+            {s.kind === "hata" && (
               <>
                 <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar
                 işiniz yalnız tarayıcıda duruyor.
@@ -236,7 +268,7 @@ function Build({ update }: { update: UpdateRun }) {
             <td>Nasıl açıldı</td>
             <td>{routeName()}</td>
           </tr>
-          {adres !== '' && (
+          {adres !== "" && (
             <tr>
               <td>Adres</td>
               <td>
@@ -247,12 +279,12 @@ function Build({ update }: { update: UpdateRun }) {
         </tbody>
       </table>
 
-      {update.kind === 'sw' && <SiteUpdate update={update} />}
-      {update.kind === 'exe' && <ExeUpdate update={update} />}
-      {update.kind === 'yok' && (
+      {update.kind === "sw" && <SiteUpdate update={update} />}
+      {update.kind === "exe" && <ExeUpdate update={update} />}
+      {update.kind === "yok" && (
         <p className="hint">
           <b>Bu kopya kendini güncellemez</b> ve hiçbir yere bağlanmaz. Yenisi
-          çıktığında en son sürüm her zaman şuradadır:{' '}
+          çıktığında en son sürüm her zaman şuradadır:{" "}
           <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
           </a>
@@ -267,9 +299,9 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
   return (
     <>
       <p className="hint">
-        Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve üstte bir
-        satırla söyler. Hiçbir şey zorla değişmez. <b>Yenile</b> demediğiniz sürece eski
-        sürümle çalışmaya devam edersiniz.
+        Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve
+        üstte bir satırla söyler. Hiçbir şey zorla değişmez. <b>Yenile</b>{" "}
+        demediğiniz sürece eski sürümle çalışmaya devam edersiniz.
       </p>
       <div className="form-row">
         <button className="btn" onClick={update.check}>
@@ -301,26 +333,26 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
  */
 function ExeUpdate({ update }: { update: UpdateRun }) {
   const d = update.durum;
-  const mesgul = d.ad === 'bakiliyor' || d.ad === 'indiriliyor';
+  const mesgul = d.ad === "bakiliyor" || d.ad === "indiriliyor";
 
   return (
     <>
       <p className="hint">
-        Bu kopya kendini güncelleyebilir, ama <b>kendi başına yapmaz</b>. Aşağıdaki
-        düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa program normal çalışmaya
-        devam eder.
+        Bu kopya kendini güncelleyebilir, ama <b>kendi başına yapmaz</b>.
+        Aşağıdaki düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa
+        program normal çalışmaya devam eder.
       </p>
 
       <div className="form-row">
         <button className="btn" onClick={update.check} disabled={mesgul}>
           Güncellemeleri denetle
         </button>
-        {d.ad === 'var' && (
+        {d.ad === "var" && (
           <button className="btn primary" onClick={update.indir}>
             Yeni sürümü indir
           </button>
         )}
-        {d.ad === 'hazir' && (
+        {d.ad === "hazir" && (
           <button className="btn primary" onClick={update.uygula}>
             Şimdi yeniden başlat
           </button>
@@ -330,32 +362,42 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
       {/* One line, always in the same place, so the answer is where the eye
           already is. `role="status"` because it changes without being read
           again (design contract 2). */}
-      {d.ad !== 'bos' && (
-        <p className={`hint${d.ad === 'hata' ? ' bad' : ''}`} role="status">
-          {d.ad === 'bakiliyor' && 'Bakılıyor…'}
-          {d.ad === 'guncel' && <b>En son sürümü kullanıyorsunuz.</b>}
-          {d.ad === 'var' && (
+      {d.ad !== "bos" && (
+        <p className={`hint${d.ad === "hata" ? " bad" : ""}`} role="status">
+          {d.ad === "bakiliyor" && "Bakılıyor…"}
+          {d.ad === "guncel" && <b>En son sürümü kullanıyorsunuz.</b>}
+          {d.ad === "var" && (
             <>
-              <b>v{d.surum} çıktı{d.tarih === '' ? '' : ` (${d.tarih})`}.</b> İndirmek{' '}
-              {Math.round(d.boyut / 1024 / 1024)} MB yer kaplar. İndirdikten sonra ne
-              zaman geçeceğinize siz karar verirsiniz.
+              <b>
+                v{d.surum} çıktı{d.tarih === "" ? "" : ` (${d.tarih})`}.
+              </b>{" "}
+              İndirmek {Math.round(d.boyut / 1024 / 1024)} MB yer kaplar.
+              İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz.
             </>
           )}
-          {d.ad === 'indiriliyor' && 'Yeni sürüm iniyor…'}
-          {d.ad === 'hazir' && (
+          {d.ad === "indiriliyor" && "Yeni sürüm iniyor…"}
+          {d.ad === "hazir" && (
             <>
-              <b>v{d.surum} indi.</b> Yeniden başlatınca yeni sürüm açılır. Programınız
-              kayıtlı, hiçbir şey kaybolmaz.
+              <b>v{d.surum} indi.</b> Yeniden başlatınca yeni sürüm açılır.
+              Programınız kayıtlı, hiçbir şey kaybolmaz.
             </>
           )}
-          {d.ad === 'hata' && d.mesaj}
+          {d.ad === "hata" && d.mesaj}
         </p>
       )}
     </>
   );
 }
 
-export default function Data({ state, change, loadState, plans, folder, update }: Props) {
+export default function Data({
+  state,
+  change,
+  loadState,
+  plans,
+  folder,
+  update,
+  part,
+}: Props) {
   const { confirm } = useDialogs();
   const loadSample = useLoadSample();
   const backups = listBackups();
@@ -370,9 +412,9 @@ export default function Data({ state, change, loadState, plans, folder, update }
     // button in the program that cannot be undone.
     if (
       !(await confirm({
-        title: 'Her şey silinecek',
-        body: 'Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.',
-        confirmLabel: 'Devam et',
+        title: "Her şey silinecek",
+        body: "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.",
+        confirmLabel: "Devam et",
         danger: true,
       }))
     ) {
@@ -380,9 +422,9 @@ export default function Data({ state, change, loadState, plans, folder, update }
     }
     if (
       !(await confirm({
-        title: 'Son kez soruyorum',
+        title: "Son kez soruyorum",
         body: 'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.',
-        confirmLabel: 'Sil',
+        confirmLabel: "Sil",
         danger: true,
       }))
     ) {
@@ -404,7 +446,7 @@ export default function Data({ state, change, loadState, plans, folder, update }
 
   async function openAll(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ''; // so the same file can be picked again
+    e.target.value = ""; // so the same file can be picked again
     if (file === undefined) return;
 
     const text = await file.text();
@@ -415,8 +457,8 @@ export default function Data({ state, change, loadState, plans, folder, update }
         bad: true,
         text:
           version !== null && version !== BUNDLE_VERSION
-            ? 'Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.'
-            : 'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst ' +
+            ? "Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin."
+            : "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst " +
               'çubuktaki "Dosyadan aç" ile açabilirsiniz.',
       });
       return;
@@ -425,9 +467,9 @@ export default function Data({ state, change, loadState, plans, folder, update }
     const incoming = bundle.library.plans.length;
     if (
       !(await confirm({
-        title: 'Bu bilgisayardaki bütün planların yerine geçecek',
+        title: "Bu bilgisayardaki bütün planların yerine geçecek",
         body: `Buradaki ${planCount} plan silinip dosyadaki ${incoming} plan açılacak. Bu işlem geri alınamaz.`,
-        confirmLabel: 'Hepsini değiştir',
+        confirmLabel: "Hepsini değiştir",
         danger: true,
       }))
     ) {
@@ -436,7 +478,10 @@ export default function Data({ state, change, loadState, plans, folder, update }
 
     const { ok, failed } = plans.replaceLibrary(bundle);
     if (ok === 0) {
-      setNote({ bad: true, text: 'Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.' });
+      setNote({
+        bad: true,
+        text: "Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.",
+      });
       return;
     }
     setNote({
@@ -444,69 +489,93 @@ export default function Data({ state, change, loadState, plans, folder, update }
       text:
         failed > 0
           ? `${ok} plan açıldı, ${failed} plan yazılamadı. Depolama dolmuş olabilir. ` +
-            'Dosyayı saklayın.'
+            "Dosyayı saklayın."
           : `${ok} plan açıldı.`,
     });
+  }
+
+  // "BÜTÜN PLANLAR TEK DOSYADA" — written out here so both doors can hold it.
+  // It reads the library and writes a bundle, which is `Plans`' own noun, and
+  // it is drawn in the plans section.
+  const bundlePanel = (
+    <div className="panel">
+      <h2>Bütün planlar tek dosyada</h2>
+      <p className="hint">
+        Üst çubuktaki <b>Dosyaya kaydet</b> yalnızca <b>açık olan planı</b>{" "}
+        yazar. Buradaki dosya <b>bütün planları</b> içerir: her planın
+        derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı,
+        taslak işareti ve hangisinin açık olduğu. <b>İçermediği</b> şeyler: tema
+        ve kenar çubuğu tercihi ile aşağıdaki oturum yedekleri. Onlar bu
+        bilgisayara aittir, programa değil.
+      </p>
+      <div className="form-row">
+        <button className="btn primary" onClick={saveAll}>
+          Tümünü dosyaya kaydet ({planCount} plan)
+        </button>
+        <button
+          className="btn"
+          onClick={() => bundleInput.current?.click()}
+          title="Bu bilgisayardaki bütün planların yerine dosyadakiler geçer"
+        >
+          Tümünü dosyadan aç
+        </button>
+        <input
+          ref={bundleInput}
+          type="file"
+          accept=".json,application/json"
+          aria-label="Bütün planları içeren dosya"
+          className="hidden"
+          onChange={openAll}
+        />
+      </div>
+      {note !== null && (
+        <p className={note.bad ? "hint bad" : "hint"} role="status">
+          {note.text}
+        </p>
+      )}
+    </div>
+  );
+
+  // THE PLAN LIBRARY AND THE FILE THAT HOLDS ALL OF IT — one question, one
+  // screen. The bundle sits under the library rather than under the folder
+  // because it is the same noun: every plan, in one place.
+  if (part === "plans") {
+    return (
+      <div className="cols solo">
+        <div>
+          <Plans state={state} plans={plans} />
+          {bundlePanel}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="cols">
       <div>
-        <Plans state={state} plans={plans} />
-
         <Folder folder={folder} />
-
-        <div className="panel">
-          <h2>Bütün planlar tek dosyada</h2>
-          <p className="hint">
-            Üst çubuktaki <b>Dosyaya kaydet</b> yalnızca <b>açık olan planı</b> yazar.
-            Buradaki dosya <b>bütün planları</b> içerir: her planın derslikleri,
-            öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı, taslak işareti ve
-            hangisinin açık olduğu. <b>İçermediği</b> şeyler: tema ve kenar çubuğu
-            tercihi ile aşağıdaki oturum yedekleri. Onlar bu bilgisayara aittir,
-            programa değil.
-          </p>
-          <div className="form-row">
-            <button className="btn primary" onClick={saveAll}>
-              Tümünü dosyaya kaydet ({planCount} plan)
-            </button>
-            <button
-              className="btn"
-              onClick={() => bundleInput.current?.click()}
-              title="Bu bilgisayardaki bütün planların yerine dosyadakiler geçer"
-            >
-              Tümünü dosyadan aç
-            </button>
-            <input
-              ref={bundleInput}
-              type="file"
-              accept=".json,application/json"
-              aria-label="Bütün planları içeren dosya"
-              className="hidden"
-              onChange={openAll}
-            />
-          </div>
-          {note !== null && (
-            <p className={note.bad ? 'hint bad' : 'hint'} role="status">
-              {note.text}
-            </p>
-          )}
-        </div>
 
         <div className="panel">
           <h2>Veri</h2>
 
           <h3>Renkler</h3>
           <p className="hint">
-            Her öğretmene ve her sınıfa kendi rengi verilir. Çok silme yaptıysanız
-            renkler arada delik bırakabilir; aşağıdaki düğmeler hepsini baştan sıraya
-            dizer. Program bozulmaz, yalnızca renkler değişir.
+            Her öğretmene ve her sınıfa kendi rengi verilir. Çok silme
+            yaptıysanız renkler arada delik bırakabilir; aşağıdaki düğmeler
+            hepsini baştan sıraya dizer. Program bozulmaz, yalnızca renkler
+            değişir.
           </p>
           <div className="form-row">
-            <button className="btn" onClick={() => change((d) => respreadColors(d, 'teacher'))}>
+            <button
+              className="btn"
+              onClick={() => change((d) => respreadColors(d, "teacher"))}
+            >
               Öğretmen renklerini yeniden dağıt ({state.teachers.length})
             </button>
-            <button className="btn" onClick={() => change((d) => respreadColors(d, 'class'))}>
+            <button
+              className="btn"
+              onClick={() => change((d) => respreadColors(d, "class"))}
+            >
               Sınıf renklerini yeniden dağıt ({state.classes.length})
             </button>
           </div>
@@ -518,8 +587,8 @@ export default function Data({ state, change, loadState, plans, folder, update }
               first run; this is where it stays. */}
           <h3>Örnek okul verisi</h3>
           <p className="hint">
-            25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir okul.
-            Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{' '}
+            25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir
+            okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{" "}
             <b>Açık olan planın yerine geçer</b>; diğer planlara dokunulmaz.
           </p>
           <div className="form-row">
@@ -534,12 +603,16 @@ export default function Data({ state, change, loadState, plans, folder, update }
 
           <h3>Sıfırla</h3>
           <p className="hint">
-            <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri, dersleri ve
-            dizilmiş programı silinir; diğer planlara dokunulmaz.{' '}
+            <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri,
+            dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz.{" "}
             <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
           </p>
           <div className="form-row">
-            <button className="btn danger" onClick={reset} title="Her şeyi siler">
+            <button
+              className="btn danger"
+              onClick={reset}
+              title="Her şeyi siler"
+            >
               Her şeyi sil
             </button>
           </div>
@@ -560,21 +633,21 @@ export default function Data({ state, change, loadState, plans, folder, update }
               would be a lie there, and it is the one sentence on this screen
               that a person acts on. */}
           <p className="hint">
-            {storageKind() === 'exe' ? (
+            {storageKind() === "exe" ? (
               <>
-                Aşağıdaki depo bu programın kendi deposu, ve <b>tek kopya
-                değil</b>: her değişiklikten sonra bütün planlar Belgelerim'deki{' '}
-                <b>Ders Programı</b> klasörüne de yazılıyor. Bu bilgisayarı
-                değiştiriyorsanız taşınacak şey o klasör.
+                Aşağıdaki depo bu programın kendi deposu, ve{" "}
+                <b>tek kopya değil</b>: her değişiklikten sonra bütün planlar
+                Belgelerim'deki <b>Ders Programı</b> klasörüne de yazılıyor. Bu
+                bilgisayarı değiştiriyorsanız taşınacak şey o klasör.
               </>
             ) : (
               <>
-                {storageKind() === 'file'
-                  ? 'Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.'
-                  : 'Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.'}{' '}
+                {storageKind() === "file"
+                  ? "Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor."
+                  : "Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor."}{" "}
                 Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>;
-                tarayıcıda “tarama verilerini temizle” dediğinizde <b>silinir</b>.
-                Taşınan ve gerçekten güvende olan tek şey{' '}
+                tarayıcıda “tarama verilerini temizle” dediğinizde{" "}
+                <b>silinir</b>. Taşınan ve gerçekten güvende olan tek şey{" "}
                 <b>dosyaya kaydettiğinizdir</b>.
               </>
             )}
@@ -586,13 +659,14 @@ export default function Data({ state, change, loadState, plans, folder, update }
               running two routes has two programs and no way to tell — until
               half a term is in the wrong one. The way ACROSS is named here
               because it is the same two buttons in both directions. */}
-          {storageKind() !== 'exe' && (
+          {storageKind() !== "exe" && (
             <p className="hint">
-              Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız ona:
-              çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>'nin
-              depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>.
-              Birinden ötekine taşımanın yolu şu ikisi:{' '}
-              <b>Tümünü dosyaya kaydet</b> → öbür kopyada <b>Tümünü dosyadan aç</b>.
+              Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız
+              ona: çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>
+              'nin depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>
+              . Birinden ötekine taşımanın yolu şu ikisi:{" "}
+              <b>Tümünü dosyaya kaydet</b> → öbür kopyada{" "}
+              <b>Tümünü dosyadan aç</b>.
             </p>
           )}
           {/* The one habit, spelled out. It used to be a sentence across the
@@ -601,9 +675,9 @@ export default function Data({ state, change, loadState, plans, folder, update }
               destinations to hold instead. */}
           <p className="hint">
             Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor, kaydet
-            düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{' '}
+            düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{" "}
             <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
-            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{' '}
+            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{" "}
             <i>değişiklik yaptın, yedek indir.</i>
           </p>
           <table className="stat">
@@ -627,8 +701,8 @@ export default function Data({ state, change, loadState, plans, folder, update }
             </tbody>
           </table>
           <p className="hint">
-            Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için ayırdığı
-            yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
+            Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için
+            ayırdığı yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
           </p>
           {/* A row would be a lie in the "Yer" column: the table counts
               localStorage characters, and a directory handle is not text —
@@ -636,21 +710,22 @@ export default function Data({ state, change, loadState, plans, folder, update }
               why it lives in IndexedDB. Left out entirely it would be the
               one key this report does not name. */}
           <p className="hint">
-            Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha var
-            ve o listede değil, çünkü metin değil: seçtiğiniz klasörün tutamağı{' '}
-            <b>IndexedDB</b>'de, <code>ders-programi-klasor</code> adıyla durur.
-            Programınız orada <b>değildir</b>. Orada duran şey yalnız hangi
-            klasöre yazılacağıdır.
+            Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha
+            var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün
+            tutamağı <b>IndexedDB</b>'de, <code>ders-programi-klasor</code>{" "}
+            adıyla durur. Programınız orada <b>değildir</b>. Orada duran şey
+            yalnız hangi klasöre yazılacağıdır.
           </p>
         </div>
 
         <div className="panel">
           <h2>Bu bilgisayardaki otomatik yedekler</h2>
           <p className="hint">
-            Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç oturumun
-            durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve programı açtığınızda{' '}
-            <b>hangi plan açıksa ona</b> aittir. Taşımak ve gerçekten güvende olmak için
-            üst çubuktaki <b>Dosyaya kaydet</b>'i kullanın.
+            Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç
+            oturumun durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve
+            programı açtığınızda <b>hangi plan açıksa ona</b> aittir. Taşımak ve
+            gerçekten güvende olmak için üst çubuktaki <b>Dosyaya kaydet</b>'i
+            kullanın.
           </p>
           {backups.length === 0 ? (
             <p className="hint">Henüz otomatik yedek yok, bu ilk oturum.</p>
@@ -668,7 +743,9 @@ export default function Data({ state, change, loadState, plans, folder, update }
               <tbody>
                 {backups.map(({ index, state: b }) => (
                   <tr key={index}>
-                    <td>{index === 0 ? 'bir önceki' : `${index + 1} oturum önce`}</td>
+                    <td>
+                      {index === 0 ? "bir önceki" : `${index + 1} oturum önce`}
+                    </td>
                     <td className="num">{b.teachers.length}</td>
                     <td className="num">{b.classes.length}</td>
                     <td className="num">{b.lessons.length}</td>

@@ -51,15 +51,35 @@ export function attachGridChrome(wrap: HTMLElement): () => void {
       return;
     }
 
-    // The body row carries a leading <th class="row-head">; the second heading
-    // row does not, because the corner spans both rows. Hence the two indices.
-    const column = cell.cellIndex;
+    // WHICH COLUMN, asked of the cell rather than counted off the row.
+    //
+    // This used to be `cell.cellIndex` plus two `:nth-child()` selectors, and it
+    // was right for as long as every row had one <td> per hour. It stopped being
+    // right the day a two-hour block became ONE <td> with colSpan 2: a row with
+    // a double to the left of the pointer holds fewer cells than the week has
+    // hours, so `cellIndex` came out short, `:nth-child` lit a column LEFT of
+    // the pointer in every row that had no double there, and the hour heading
+    // lit the wrong hour. Nothing threw, nothing changed a count, and the whole
+    // suite stayed green — "önizleme artısı kaymış" (pitfall 85).
+    //
+    // `data-col` is written by Grid.tsx on both the body cells and the hour
+    // headings, so the answer no longer depends on how the row is CUT UP.
+    const raw = cell.dataset.col;
+    if (raw === undefined) {
+      clear();
+      return;
+    }
+    const column = Number(raw);
     if (column === litColumn) return;
     clear();
 
+    // A merged block is lit by the column it COVERS, not by the one it starts
+    // at — the same "which cell is the pointer inside" question rowDrag.ts had
+    // to answer with containment rather than with an index (pitfall 60).
     lit = [
-      ...table.querySelectorAll(`tbody tr > :nth-child(${column + 1})`),
-      ...table.querySelectorAll(`thead tr:nth-child(2) > :nth-child(${column})`),
+      ...table.querySelectorAll(`tbody td[data-col="${column}"]`),
+      ...table.querySelectorAll(`tbody td[data-col="${column - 1}"][data-span="2"]`),
+      ...table.querySelectorAll(`thead th[data-col="${column}"]`),
     ];
     for (const el of lit) el.classList.add('col-hot');
     litColumn = column;
