@@ -613,20 +613,39 @@ tahmin olur (ilke 5).
 ### 2. Tauri ile `.exe` — ayrıntılar (madde 4g–4i)
 
 Babanın makinesi **Windows 10** → Tauri v2 destekliyor, yol açık.
-WebView2 bu makinede kurulu (151.0.4129.101); Rust **kurulu değil**.
+WebView2 bu makinede kurulu (151.0.4129.101). **4g ve 4h 2026-08-27'de bitti;
+aşağıdaki liste artık yalnız Windows'ta görülecek olanları sayıyor.**
 
 - [x] **Rust toolchain kuruldu (2026-08-27)** — rustup, `rustc 1.98.0`.
       Yanında Fedora paketleri: `webkit2gtk4.1-devel` (2.52.5) ·
       `libsoup3-devel` (3.6.6) · `gtk3-devel` (3.24.52). Bunlar **Linux**
       derlemesi için; Windows'ta hiçbirine gerek yok (WebView2 işletim
       sistemiyle geliyor)
-- [ ] Otomatik günlük yedek (`program-2026-08-24.json`, son 10 gün)
-- [ ] Yazdırma Tauri penceresinde de çalışıyor mu (WebView2 yazdırma diyaloğu)
-- [ ] `npm run tauri build` → tek `.exe`, boyut ve açılış süresi ölçülsün
-- [ ] **SmartScreen**: imzasız exe'de Windows "bilinmeyen yayıncı" der. Babaya ne
-      yapacağı tek cümleyle anlatılmalı, yoksa açamaz
-- [ ] Web sürümü (tek HTML) bozulmadan derlenmeye devam etsin — yedek teslim yolu
-- [ ] E2E testleri web sürümünde çalışmaya devam etsin
+- [x] **Otomatik günlük yedek — YAPILDI (4h).** Ad `ders-programi-YYYY-AA-GG.json`
+      (tahmin edilen `program-…` değil: `folder.ts`'in zaten kullandığı kalıp,
+      çünkü budama o kalıba göre yapılıyor ve ikinci bir kalıp ikinci bir kural
+      olurdu). Son 10 gün. Tarayıcı yolunda da aynı kod koşuyor
+- [x] **Web sürümü bozulmadan derleniyor** — `npm run kontrol` çıkış kodu 0
+      (2026-08-27). Exe hiçbir şey eklemedi: `dist/index.html`'e giren tek
+      yeni şey `desktop.ts` ve `isDesktop()` köprü yokken `false` dönüyor
+- [x] **E2E web sürümünde koşmaya devam ediyor** — 394 test yeşil. Üstüne
+      `exe.spec.ts`'in son testi bunu **açıkça** koruyor: köprü yokken aynı
+      dosya hâlâ bir tarayıcı sayfası (Klasör seç düğmesi yerinde, "Veriler
+      nerede" tarayıcı cümlesini söylüyor)
+- [~] **`.exe` boyutu ve açılışı — LINUX'ta ölçüldü, Windows'ta değil.**
+      Sürüm ikilisi 3 742 584 bayt (3,64 MB), derleme 1 dk 38 sn, açılıştan
+      diske ilk yazıma 986 · 1053 · 1149 ms. **Windows/WebView2 başka bir sayı
+      verecek** — orada yeniden ölçülecek
+- [ ] **Yazdırma Tauri penceresinde çalışıyor mu** (WebView2 yazdırma
+      diyaloğu). Linux'ta denenmedi çünkü ölçülecek olan WebKitGTK'nın
+      diyaloğu olurdu, babanın göreceği şey değil. A4 yatay ve `@page
+      { margin: 0 }` orada da tutuyor mu — Windows koşusunda bakılacak
+- [ ] **SmartScreen**: imzasız exe'de Windows "bilinmeyen yayıncı" der. README'ye
+      tek cümlelik yol yazıldı (*"Daha fazla bilgi" → "Yine de çalıştır"*), ama
+      **ekranın gerçekte ne dediği görülmedi** — görülünce cümle düzeltilecek
+- [ ] **`bundle.icon` `--no-bundle` ile ikonu gömüyor mu**, ölçülmedi. Windows
+      koşusunda exe'nin ikonuna bakılacak: sade değil **ayrıntılı** çizim
+      görünmeli (48 px ve üstü)
 
 ---
 

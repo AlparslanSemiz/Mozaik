@@ -6,45 +6,262 @@ Bir dershanenin haftalık ders programını dizmek için yazılmış tek dosyal�
 araç. aSc Timetables'ın yerini alır — onun yaptığı işin bu kursla ilgili
 yarısını yapar, o yarıyı ondan iyi yapmayı hedefler.
 
-**Kurulum yok. Sunucu yok. İnternet gerekmez.** `dist/index.html` dosyasına çift
-tıklarsınız, program açılır. Hesap, şifre, güncelleme, kayıt yok.
+**Kurulum sihirbazı yok. Sunucu yok. İnternet gerekmez.** Hesap, şifre,
+güncelleme zorlaması, kayıt yok.
 
 ---
 
-## Nasıl çalıştırılır
+## Hangi yolu seçmeliyim
 
-Üç yol var, üçü de aynı programı verir.
+Dört teslim yolu var ve **dördü de birebir aynı programı** verir — dördünün
+içindeki sayfa aynı `dist/index.html`. Fark programda değil, programın
+etrafında.
 
-**1. Dosya (asıl teslim yolu).** `dist/index.html`'i indirin, çift tıklayın.
-Tarayıcıda açılır ve çalışır — fiş çekiliyken de. Programınız o tarayıcının bu
-bilgisayardaki deposunda saklanır.
+| | Ne yapılır | Kime |
+|---|---|---|
+| **1. Dosya** | `dist/index.html`'e çift tıkla | En hızlı yol. Denemek, taşımak, USB'yle götürmek |
+| **2. Windows kurulumu** | `Kur.cmd`'ye çift tıkla | Babamın makinesi. Kısayol, gerçek adres, çevrimdışı |
+| **3. Site** | Adresi tarayıcıda aç | Başka bir bilgisayardan bakmak |
+| **4. `.exe`** | Tek dosyaya çift tıkla | Aynı iş, ama klasöre yazma hiç sorulmadan çalışır |
 
-**2. Windows'a kurulum.** `npm run paket` ile üretilen `dist-kurulum/`
-klasöründeki `Kur.cmd`'ye çift tıklayın. Program `%LOCALAPPDATA%`'ya kopyalanır
-ve masaüstünüze bir kısayol gelir. Yönetici hakkı, kayıt defteri, internet ve
-Node **gerekmez** — sunucu Windows'un kendi PowerShell'iyle koşar
-(`http://dersprogrami.localhost:7654`; kendi bilgisayarınız, dışarı bir şey
-gitmez).
+Karar veremiyorsanız: **1'i deneyin, işinize yarıyorsa 2'yi kurun.**
 
-Bu yolun farkı: program **gerçek bir adrese** sahip olur. Ölçülen üç sonucu
-var — çevrimdışı da açılır (service worker), verileri makinedeki öteki yerel
-sayfalarla paylaşmaz, ve seçtiğiniz klasörün iznini tarayıcı bu siteye
-saklayabilir (Ayarlar → Veri → *Nereye kaydedilsin*). Klasör seçme özelliği
-çift tıklanan dosyada da **vardır**; orada sadece daha az güvenilir.
+Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
-**3. Site.** `npm run build:site` ile üretilen `dist-site/` klasörü statik bir
-sayfadır (GitHub Pages'e konabilir). İlk açılıştan sonra bir service worker
-sayesinde **çevrimdışı** da açılır. Orada da backend, veritabanı, hesap ya da
-API yoktur.
+---
 
-> **Verileriniz bu bilgisayarda ve bu tarayıcıda durur.** Başka bir tarayıcı
+## 1 · Dosya — çift tıkla, çalışsın
+
+En kısa yol, ve **asıl teslim yolu** budur.
+
+1. `dist/index.html` dosyasını üretin:
+
+   ```bash
+   npm install     # yeni bilgisayarda bir kez
+   npm run build
+   ```
+
+   Bu dosya **depoda durmaz** (`.gitignore`'da): derleme çıktısıdır, kaynak
+   değil. Programı kullanacak kişi bunu kendisi üretmez — siz üretip
+   gönderirsiniz, ya da 2. yoldaki klasörü verirsiniz.
+2. Dosyayı nereye isterseniz koyun — Masaüstü, Belgelerim, USB, fark etmez.
+   Yanına başka hiçbir dosya gerekmez.
+3. **Çift tıklayın.** Varsayılan tarayıcınızda açılır.
+
+Tek bir dosyadır: JavaScript, CSS ve yazı tipi dahil her şey onun içinde
+gömülüdür. İnternet bağlantısı olmadan da açılır, çünkü açarken hiçbir yere
+bağlanmaz.
+
+**Bu yolun sınırları.** Program `file://` adresinden açılır ve `file://` bir
+*köken* sayılmaz. Pratikte şu üç sonucu var:
+
+- Verileriniz, o tarayıcıdaki **bütün yerel HTML sayfalarıyla** aynı depoyu
+  paylaşır. Bugüne kadar bir sorun çıkarmadı, ama 2. yol bunu çözer.
+- Ayarlar → Veri → *Nereye kaydedilsin* ile klasör seçmek **çalışır**, ama
+  tarayıcı verdiğiniz izni her açılışta yeniden sorabilir.
+- Çevrimdışı çalışması bir service worker'a değil, dosyanın kendisine
+  dayanır — ki bu aslında daha sağlamdır.
+
+---
+
+## 2 · Windows kurulumu — yerel site (`dersprogrami.localhost`)
+
+Program bu yolda **kendi adresine** sahip olur:
+`http://dersprogrami.localhost:7654`
+
+Bu bir internet adresi **değildir**. Kendi bilgisayarınızı gösterir; dışarıya
+hiçbir şey gitmez, dışarıdan hiçbir şey gelmez. `*.localhost` adreslerini
+Chrome ve Edge kendileri çözer, yani `hosts` dosyası düzenlemek ya da yönetici
+olmak **gerekmez**.
+
+### Kuran klasörü hazırlamak (geliştirici tarafı)
+
+```bash
+npm run paket
+```
+
+`dist-kurulum/` klasörü oluşur. **Babaya giden tek şey bu klasördür** — zip'leyip
+gönderin ya da USB'ye kopyalayın. İçinde şunlar var:
+
+```
+dist-kurulum/
+  Kur.cmd          kurulumu başlatır
+  Guncelle.cmd     yeni sürüm gelince
+  OKU.txt          kullanıcı için, Türkçe, Notepad'de düzgün açılır
+  kur.ps1          asıl kurulum betiği
+  sunucu.ps1       ~150 satırlık dosya sunucusu
+  icon.ico         kısayolun ikonu
+  site/            programın kendisi (tek HTML + manifest + sw.js + simgeler)
+```
+
+### Kurmak (kullanıcı tarafı)
+
+1. `dist-kurulum` klasörünü bilgisayara kopyalayın (zip geldiyse **önce
+   çıkarın** — zip'in içinden çalıştırmayın).
+2. **`Kur.cmd`'ye çift tıklayın.**
+3. Windows *"bilinmeyen bir uygulama"* uyarısı gösterebilir:
+   **"Daha fazla bilgi"** → **"Yine de çalıştır"**. Bu uyarı dosyanın imzalı
+   olmamasından çıkar, içeriğiyle ilgisi yoktur.
+4. Açılan pencerede yazanları okuyun. Bitince yeşil **"Bitti."** yazar.
+
+Kurulum şunları yapar, başka hiçbir şey yapmaz:
+
+- Programı `%LOCALAPPDATA%\Ders Programı` klasörüne kopyalar.
+- **Masaüstüne** ve **Başlat menüsüne** *Ders Programı* adında birer kısayol
+  koyar.
+
+Yönetici hakkı istemez. Kayıt defterine (registry) hiçbir şey yazmaz.
+Node.js **gerekmez** — sunucu Windows'un kendi PowerShell'iyle koşar.
+
+### Açmak
+
+Masaüstündeki **Ders Programı** kısayoluna çift tıklayın. İki şey olur:
+
+- **Siyah bir pencere açılır. Bu pencereyi kapatmayın.** Sunucu orada
+  çalışıyor; kapatırsanız program da kapanır. Pencere bilerek gizlenmedi:
+  gizli bir pencere, kapatılamayan bir program demektir.
+- Tarayıcıda program açılır.
+
+İşiniz bitince önce sekmeyi, sonra siyah pencereyi kapatın. Verileriniz
+kaybolmaz.
+
+### Bu yol ne kazandırır
+
+Programın gerçek bir kökeni olur, ve bunun **ölçülmüş** üç sonucu vardır:
+
+- **Çevrimdışı açılır** — bir service worker kaydolabilir (`file://`'ta
+  kaydolamaz). Fişi çekip denendi, açıldı.
+- **Verileri kimseyle paylaşmaz** — makinedeki öteki yerel sayfalarla ortak
+  depoda değildir.
+- **Klasör izni hatırlanır** — Ayarlar → Veri → *Nereye kaydedilsin* ile
+  seçtiğiniz klasörün iznini tarayıcı bu siteye saklayabilir.
+
+Ölçülen bedel: açılış `file://`'ta 76 ms, burada 82 ms. Yani **6 ms**.
+
+### Güncellemek
+
+Yeni bir `dist-kurulum` aldığınızda **`Guncelle.cmd`**'ye çift tıklayın.
+Yalnız program dosyalarını tazeler; kısayollara ve verilerinize dokunmaz.
+
+### Kaldırmak
+
+1. Masaüstündeki ve Başlat menüsündeki kısayolları silin.
+2. Şu klasörü silin: `%LOCALAPPDATA%\Ders Programı`
+   (Dosya Gezgini'nin adres çubuğuna bunu yazıp Enter'a basarsanız açılır.)
+
+Program başka hiçbir yere hiçbir şey yazmaz.
+
+### Bir şey ters giderse
+
+| Ekranda ne yazıyor | Ne yapmalı |
+|---|---|
+| *"Port 7654 kullanımda"* | Program zaten açık. Görev çubuğunda siyah pencereyi arayın |
+| Tarayıcı *"sayfa açılamıyor"* diyor | Siyah pencere kapanmış. Kısayola yeniden çift tıklayın |
+| Hiçbiri işe yaramıyor | Siyah pencereyi kapatın, kısayola yeniden tıklayın. Verileriniz etkilenmez |
+
+---
+
+## 3 · Site — bir adresten açmak
+
+`npm run build:site` ile üretilen `dist-site/` klasörü statik bir sayfadır ve
+GitHub Pages'e konabilir. Orada da **backend, veritabanı, hesap, oturum ya da
+API yoktur** — yayınlanan şey bir klasör dolusu dosyadır.
+
+İlk açılıştan sonra bir service worker sayesinde **çevrimdışı** da açılır.
+
+> **Not:** her tarayıcının verisi kendine aittir. Siteyi işten açıp evden
+> açarsanız iki ayrı boş program görürsünüz. Programı taşımanın yolu üst
+> çubuktaki **Dosyaya kaydet** ile alınan dosyadır.
+
+---
+
+## 4 · `.exe` — tek dosya, ve klasör hiç sorulmadan
+
+Bu yolun tek farkı şudur: **"nereye kaydedilsin" sorusunun cevabı zaten
+verilmiştir.** Program bütün planları `Belgelerim\Ders Programı` klasörüne
+kendiliğinden yazar — tıklama yok, izin penceresi yok, klasör seçici yok — ve
+her gün için ayrı bir yedek bırakır (son 10 gün).
+
+> ⚠️ **Bu yol henüz Windows'ta denenmedi.** Kod yazıldı, Linux'ta derlendi ve
+> çalıştı; `.exe` üreten iş akışı yazıldı ama **bir kez bile koşturulmadı**.
+> Aşağıdaki adımlar tarif edilmiştir, doğrulanmamıştır. Bugünkü sağlam yol
+> hâlâ 1 ve 2'dir.
+
+### `.exe`'yi üretmek
+
+Windows'ta derlenmesi gerekir; bu depo Fedora'da geliştiriliyor ve çapraz
+derleme güvenilir değil. Bu yüzden GitHub Actions kullanılır:
+
+1. GitHub'da depoya gidin → **Actions** sekmesi.
+2. Soldaki listeden **exe** iş akışını seçin.
+3. Sağdaki **Run workflow** düğmesine basın.
+4. Koşu bitince (birkaç dakika) sayfanın altındaki **Artifacts** bölümünden
+   `Ders-Programi-exe` dosyasını indirin. Bir `.zip` iner.
+5. Zip'i **çıkarın**. İçinde tek bir dosya vardır: `Ders Programı.exe`
+
+Kendi Windows makinenizde derlemek isterseniz — Rust ve Node kurulu olmalı:
+
+```bash
+npm ci
+npm run exe          # -> src-tauri/target/release/
+```
+
+### Çalıştırmak
+
+1. `Ders Programı.exe`'yi nereye isterseniz koyun.
+2. **Çift tıklayın.** Program kendi penceresinde açılır — tarayıcı sekmesi
+   yok, siyah pencere yok, adres çubuğu yok.
+3. Windows *"bilinmeyen yayıncı"* uyarısı gösterirse:
+   **"Daha fazla bilgi"** → **"Yine de çalıştır"**.
+
+**Kurulum yoktur.** Dosya nereye konduysa oradan çalışır; taşınabilir.
+
+**WebView2 gerekir.** Windows 10 ve 11 bunu kendisi getirir, yani neredeyse
+her makinede zaten vardır. Yoksa program bir pencere açıp indirme bağlantısını
+gösterir.
+
+### Verileriniz nerede
+
+İki yerde, ve bu **bilerek** böyle:
+
+- `Belgelerim\Ders Programı\` — bütün planlar, her değişiklikten sonra
+  kendiliğinden. Bu bilgisayarı değiştiriyorsanız **taşınacak şey bu
+  klasördür.**
+- Programın kendi deposu — `%LOCALAPPDATA%\com.dersprogrami.arac`
+  *(Linux'ta ölçüldü: `~/.local/share/com.dersprogrami.arac`; Windows yolu
+  beklenendir, doğrulanmadı.)*
+
+Bu yüzden `.exe`'de Ayarlar → Veri bölümü **başka bir şey söyler**: öteki üç
+yolda "taşınan tek şey dosyaya kaydettiğinizdir" cümlesi doğrudur, burada
+değildir.
+
+### Kaldırmak
+
+`Ders Programı.exe` dosyasını silin. Kayıt defterine hiçbir şey yazılmaz,
+kısayol oluşturulmaz.
+
+Programın deposunu da temizlemek isterseniz `%LOCALAPPDATA%\com.dersprogrami.arac`
+klasörünü silin. **`Belgelerim\Ders Programı` sizin veriniz** — onu silmek
+programı değil, çalışmanızı siler.
+
+---
+
+## Verileriniz — dört yolda da geçerli olan
+
+> Programınız **bu bilgisayarda ve bu tarayıcıda** durur. Başka bir tarayıcı
 > onu görmez, ve tarayıcıda "tarama verilerini temizle" derseniz **silinir**.
-> Öğrenilecek tek alışkanlık: *değişiklik yaptın, yedek indir.* Üst çubuktaki
-> **Dosyaya kaydet** bunun içindir. Hiçbir alışkanlık istemeyen ikinci bir yol
-> daha var: Ayarlar → Veri → **Nereye kaydedilsin** ile bir klasör seçerseniz
-> bütün planlar oraya kendiliğinden yazılır ve her gün için ayrı bir yedek
-> kalır (son 10). Ayarlar → Veri bölümü ayrıca verinin tam olarak hangi
-> anahtarda, ne kadar yer kapladığını söyler.
+> (`.exe` yolunda bir kopya zaten Belgelerim'dedir, orada bu risk yoktur.)
+
+Öğrenilecek tek alışkanlık: *değişiklik yaptın, yedek indir.* Üst çubuktaki
+**Dosyaya kaydet** bunun içindir.
+
+Hiçbir alışkanlık istemeyen ikinci bir yol daha var: **Ayarlar → Veri →
+Nereye kaydedilsin** ile bir klasör seçerseniz bütün planlar oraya
+kendiliğinden yazılır ve her gün için ayrı bir yedek kalır (son 10).
+`.exe` yolunda bu zaten açıktır.
+
+Ayarlar → Veri bölümü ayrıca verinin **tam olarak hangi anahtarda, ne kadar
+yer kapladığını** söyler — tahmin değil, gerçek sayılar.
 
 ---
 
@@ -85,10 +302,10 @@ gözü iyi görmeyen biri için yazıldı.
 npm install && npx playwright install chromium   # yeni bilgisayarda bir kez
 
 npm run dev          # geliştirme sunucusu
-npm test             # Vitest — saf mantık testleri (517)
+npm test             # Vitest — saf mantık testleri (521)
 npm run build        # dist/index.html tek dosya (ASIL TESLİM)
 npm run build:site   # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar (388)
+npm run test:e2e     # Playwright — derler, sonra file:// üzerinde koşar (394)
 npm run test:site    # site · sunucu · klasör testleri, http üzerinde (19)
 npm run kontrol      # hepsi: tsc + birim + derleme + E2E + site + çözücü
 npm run ekran        # iki temada ekran görüntüsü -> test-results/ekran/
@@ -96,6 +313,19 @@ npm run cozucu       # gerçek ölçekli çözücü stresi (34,8 sn — kontrol'
 npm run sunucu       # yerel sunucu — http://dersprogrami.localhost:7654
 npm run paket        # dist-kurulum/ — Windows'a giden TEK klasör
 ```
+
+Üstündeki listede **olmayan** iki komut daha var; `kontrol`'ün parçası
+değiller çünkü bu depoda bulunmayan araç zincirleri istiyorlar:
+
+```bash
+npm run font         # gömülü yazı tipini yeniden üretir  (Python + fontTools)
+npm run exe          # .exe / ikili derler                (Rust)
+npm run exe:test     # Rust tarafının testleri (6)        (Rust)
+```
+
+`npm run font` için bir kez: `python3 -m venv .venv && .venv/bin/pip install
+fonttools brotli`. Kaynak yazı tipi depoda durur (`scripts/font-source/`,
+OFL 1.1), yani ağ gerekmez.
 
 E2E, dev sunucusunu değil **`dist/index.html`'i `file://` üzerinden** açar —
 yani gerçekten çift tıklanacak dosyayı. Sürükle-bırak, yapışkan sütun, yazdırma
@@ -113,11 +343,15 @@ Durum ve ölçümler: [docs/STATUS.md](docs/STATUS.md) · Görevler:
 ## Teknoloji
 
 Vite + React + TypeScript, `vite-plugin-singlefile` ile tek bir
-`dist/index.html`'e gömülür (JS, CSS ve font dahil). Çalışma anında ağdan tek
-bayt indirilmez; bu iddia `temel.spec.ts` ve `site.spec.ts` tarafından
+`dist/index.html`'e gömülür (JS, CSS ve yazı tipi dahil). Çalışma anında ağdan
+tek bayt indirilmez; bu iddia `temel.spec.ts` ve `site.spec.ts` tarafından
 **mekanik olarak** doğrulanır.
 
-Ölçülen (2026-08-26, 1920×1080, 9 koşu): `dist/index.html` **525 818 bayt**,
-`file://` üzerinden açılış **76 ms** medyan — yerel sunucudan 82 ms, yani ikinci
-yolun maliyeti 6 ms. Bunlar bir tarih, kanun değil: yeni bir paket eklenince
-yeniden ölçülür.
+Dört teslim yolunun dördü de aynı `dist/index.html`'i taşır. Windows kurulumu
+onu bir dosya sunucusunun arkasına koyar, `.exe` ise Tauri ile kendi
+penceresinin içine alır — ikisinde de arayüzün ikinci bir kopyası yoktur.
+
+Ölçülen (2026-08-27, 1920×1080): `dist/index.html` **528 677 bayt**, `file://`
+üzerinden ilk boyama **80 ms** medyan. `.exe` (Linux, sürüm derlemesi)
+**3,64 MB**, açılıştan diske ilk yazıma **~1 sn** — Windows'ta ölçülmedi.
+Bunlar bir tarih, kanun değil: yeni bir paket eklenince yeniden ölçülür.
