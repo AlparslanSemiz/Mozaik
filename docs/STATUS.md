@@ -1,7 +1,125 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-26 (yirmi ikinci oturum: **B turu — yerel kurulum**
-+ 4f; şema değişmedi)
+Son güncelleme: 2026-08-27 (yirmi üçüncü oturum: **G turu — kalan üçlü ve
+`.exe`**; şema değişmedi)
+
+---
+
+## Yirmi üçüncü oturum — G turu: kalan üçlü ve `.exe` (2026-08-27)
+
+Kullanıcının isteği iki parçaydı: *"o üçlüye de son noktayı koyalım ayrıca
+.exe'ye de başlayalım."* Üçlü kapandı; `.exe` "başlamak"tan öteye gitti ve
+**gerçekten çalıştı**.
+
+### Ölçülen
+
+| Ne | Değer |
+|---|---|
+| `dist/index.html` — oturum başı (HEAD) | 525 818 bayt |
+| `dist/index.html` — oturum sonu | **528 677** (+2 859) |
+| İlk boyama, `file://` — HEAD | 84 ms medyan · 104 en kötü |
+| İlk boyama, `file://` — şimdi | **80 ms** medyan · 92 en kötü |
+| Gömülü yüz — önce (wght 400–600) | 23 332 bayt |
+| Gömülü yüz — sonra (wght **400–700**) | **24 392** (+1 060) |
+| Aynı reçeteyle `350:700` / `300:700` | 31 212 / 31 932 (+7 880 / +8 600) |
+| Kaynak yüz (depoda, OFL 1.1) | 122 084 bayt |
+| Metrik sapması, kaynak ↔ mevcut, wght 400 | **225 karakterin 225'i AYNI** |
+| `'0'` glifi, wght 600 ↔ 700 nokta farkı — eski yüz | **0.0** (kırpıyordu) |
+| ...yeni yüz | **406.5** |
+| Tarayıcıda `'Haftalık ders programı'` — eski yüz | 400=1001 · 600=1042 · **700=1042** |
+| Tauri sürüm ikilisi (Linux, `opt-level=s` + LTO) | **3 742 584 bayt (3,64 MB)** |
+| Sürüm derlemesi | 1 dk 38 sn |
+| Exe: açılıştan diske İLK YAZIMA | **986 · 1053 · 1149 ms** (3 koşu) |
+| `rustc` / `webkit2gtk-4.1` | 1.98.0 / 2.52.5 |
+
+Boyut farkının **hepsi bugünün değil**: kayıtlı 489 815 baytlık taban D
+turundan, arada E ve F turları geçti. Bugünün payını ayırmak için HEAD ayrı
+bir worktree'de derlendi — **+2 859 bayt**, ve ilk boyamada ölçülebilir bir
+fark yok (84 → 80 ms, gürültünün içinde).
+
+### Sayılar
+
+| Katman | Önce | Sonra |
+|---|---|---|
+| Birim (Vitest) | 517 | **521** |
+| E2E (`file://`) | 388 | **394** |
+| Site · sunucu · klasör | 19 | 19 |
+| Çözücü stresi | 7 | 7 |
+| **Rust (`cargo test`)** | — | **6** |
+
+`npm run kontrol` çıkış kodu **0**.
+
+### Üçlünün kapanışı
+
+**1 — Font ekseni.** Asıl engel eksen değildi, **reçetenin yokluğu**ydu
+(tuzak 69): 23 KB'lik woff2 kimsenin yeniden üretemediği bir eserdi.
+`scripts/font.mjs` + `scripts/font-source/` (kaynak yüz depoya kondu, 122 KB,
+OFL 1.1) → `npm run font`, çevrimdışı ve tekrarlanabilir.
+Reçete `lean 400:600`'ü **23 660 bayt** üretti; mevcut dosya 23 332'ydi, yani
+%1,4 içinde — tarif doğrulandı. Sonra eksen **ölçülerek** seçildi: yukarı bir
+basamak 1 060 bayt, aşağı bir basamak 7 880. `styles.css` 300'ü hiç istemiyor,
+alınmadı (ilke 5).
+Kapatılan gerçek hata: beş kural `font-weight: 700` istiyordu, yüz 600'de
+kırpılıydı, ve beşi de **sessizce 600 çiziyordu** — üçü kâğıtta (tuzak 70).
+Yeni E2E eski yüz geri konularak kırmızıya döndürüldü.
+
+**2 — Görsel regresyon sorusu.** Cevap: **geri gelmiyor**, ve yerine geçen şey
+zaten var — erişilebilirlik ölçümleri **anlam** ölçüyor (WCAG, ΔE, erişilebilir
+ad), piksel değil. Ama `npm run ekran`ın kendi deliği kapatıldı: katman artık
+**tek bir iddia** taşıyor, deklanşör anında `.main` ve her `.panel` tam opak.
+Tasarım hakkında hiçbir şey söylemiyor; "bir şeyin resmi çekildi" diyor.
+`settled()` çıkarılarak kırmızıya döndürüldü: `panel opacity=0.00`, yani
+2026-08-27'de yaşanan hatanın ta kendisi.
+
+**3 — 4j belgeler.** "Üç derleme hedefi" → **DÖRT**. Exe'nin `frontendDist`'i
+`../dist`, yani dört yolun dördü de aynı `dist/index.html`'i taşıyor ve
+arayüzün hiçbir kopyası yok.
+
+Yanında: **A4** (12 `confirm` + 5 `alert`) grep'lendi, geçirilmemiş çağrı
+kalmamış — `[x]`. **MCP** üç sunucu da oturumda kullanılabilir — `[x]`.
+
+### `.exe` — ve neden hiçbir kural kopyalanmadı
+
+`folder.ts` dosya adlarının, günlük yedeğin ve "son 10" budamasının tek evi.
+Bunları Rust'a taşımak, "hangi yedekler silinir" sorusuna **iki cevap** vermek
+olurdu ve ikisi ilk düzenlemede ayrışırdı. Onun yerine `src/desktop.ts` üç
+Tauri komutunu bir `FileSystemDirectoryHandle` **kılığına** sokuyor, ve
+`saveInto()` exe'de olduğu gibi koşuyor. Rust'ta yalnız tarayıcıda karşılığı
+olmayan iki şey var: hangi klasör, ve bir adın gerçekten ad olduğunu
+doğrulayan kapı (`safe_name`).
+
+`src/desktop.test.ts` bunu şöyle koruyor: gerçek `saveInto()`'yu adaptörün
+üstünde koşturuyor ve **hangi komutların çağrıldığını** sayıyor. Beşinci bir
+komut belirirse orası kırmızıya döner.
+
+`isDesktop()` bir **derleme bayrağı değil**, özellik tespiti (tuzak 65'in
+dersi) — aynı `dist/index.html` dört yolda da aynı dosya. `exe.spec.ts`'in
+son testi tam bunu koruyor: köprü yokken sayfa hâlâ bir tarayıcı sayfası.
+
+`storageKind()` üçüncü branch'ini aldı. `library.ts`'in kendi yorumu bu anı
+öngörmüştü ve *"o branch O ZAMAN yazılacak"* diyordu; o zaman geldi. Gerekçe
+kozmetik değil: exe normal bir köken üstünden servis edildiği için protokol
+sorusu ona "site" der — doğru ve işe yaramaz. Panelin doğru söylemesi gereken
+şey "tarama verilerini temizle işinizi alabilir mi", ve exe'de **alamaz**.
+
+**Uçtan uca kanıt.** Ekran görüntüsü alınamadı (bu kabuktan X yakalama
+çalışmıyor), ama ondan güçlü bir kanıt var: exe çalıştırıldı ve **hiçbir şeye
+tıklanmadan** `~/Documents/Ders Programı/` altında iki dosya belirdi —
+`ders-programi-tumu.json` ve `ders-programi-2026-08-27.json`, `bundleVersion 1`,
+`schemaVersion 6`, ikisi birebir aynı. Bu tek gözlem şu zincirin tamamını
+doğruluyor: pencere açıldı → sayfa yüklendi → React bağlandı → `isDesktop()`
+Tauri'yi gördü → `data_dir_path` döndü → `write_file` gidip geldi → disk yazdı.
+
+### Doğrulanmamış — ve bu bilerek yazılıyor
+
+- **Windows'ta tek satır koşmadı.** `exe.yml` yazıldı, YAML'i geçerli,
+  hiç tetiklenmedi. Ölçülen 3,64 MB ve ~1 sn açılış **Linux/WebKitGTK**;
+  Windows/WebView2 başka bir sayı verecek.
+- **SmartScreen görülmedi.** İmzasız exe'de Windows "bilinmeyen yayıncı" der;
+  babaya ne yapacağı henüz yazılmadı, çünkü ekranın ne dediği görülmedi.
+- **`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü varsayıldı**, ölçülmedi.
+  Windows koşusunda exe'nin ikonuna bakılacak.
+- `~/Documents/Ders Programı/` bu makinede **testten kaldı** — silinebilir.
 
 ---
 

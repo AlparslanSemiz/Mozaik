@@ -82,27 +82,46 @@ function Folder({ folder }: { folder: FolderRun }) {
         </>
       ) : (
         <>
+          {/* Two sentences for two routes, because the difference is real and
+              it is the ONE thing the exe adds. In a browser this is an offer
+              that costs a click and a permission; in the exe it has already
+              happened, and a "Klasör seç…" button there would be three
+              controls that cannot mean anything. */}
           <p className="hint">
-            Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve her gün
-            için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst çubuktaki{' '}
-            <b>Dosyaya kaydet</b> yerine geçmez, onu <b>gereksiz</b> kılar.
+            {folder.fixed ? (
+              <>
+                Program <b>bütün planları</b> kendiliğinden Belgelerim'e yazıyor ve
+                her gün için ayrı bir yedek bırakıyor (son {KEEP_DAILY} gün).
+                Seçecek bir şey yok — üst çubuktaki <b>Dosyaya kaydet</b> yalnız
+                bu bilgisayarın dışına bir kopya çıkarmak için.
+              </>
+            ) : (
+              <>
+                Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve her
+                gün için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst
+                çubuktaki <b>Dosyaya kaydet</b> yerine geçmez, onu <b>gereksiz</b>{' '}
+                kılar.
+              </>
+            )}
           </p>
 
-          <div className="form-row">
-            <button className="btn primary" onClick={() => void folder.choose()}>
-              {s.kind === 'secilmedi' ? 'Klasör seç…' : 'Başka klasör seç…'}
-            </button>
-            {s.kind === 'izin-gerek' && (
-              <button className="btn primary" onClick={() => void folder.allow()}>
-                İzin ver
+          {!folder.fixed && (
+            <div className="form-row">
+              <button className="btn primary" onClick={() => void folder.choose()}>
+                {s.kind === 'secilmedi' ? 'Klasör seç…' : 'Başka klasör seç…'}
               </button>
-            )}
-            {s.kind !== 'secilmedi' && (
-              <button className="btn" onClick={() => void folder.forget()}>
-                Vazgeç
-              </button>
-            )}
-          </div>
+              {s.kind === 'izin-gerek' && (
+                <button className="btn primary" onClick={() => void folder.allow()}>
+                  İzin ver
+                </button>
+              )}
+              {s.kind !== 'secilmedi' && (
+                <button className="btn" onClick={() => void folder.forget()}>
+                  Vazgeç
+                </button>
+              )}
+            </div>
+          )}
 
           {/* One line, and it is the only place this feature can be seen
               working. `role="status"` because it changes without anyone
@@ -316,13 +335,33 @@ export default function Data({ state, change, loadState, plans, folder }: Props)
       <aside>
         <div className="panel">
           <h2>Veriler nerede</h2>
+          {/* The exe changes what is TRUE here, not just the wording. On the
+              three browser routes the storage below is the only copy until
+              somebody saves a file, and "tarama verilerini temizle" can take
+              it. In the exe the same storage exists, but a copy of everything
+              is already on disk in Belgelerim after every change — so the
+              sentence that ends "taşınan tek şey dosyaya kaydettiğinizdir"
+              would be a lie there, and it is the one sentence on this screen
+              that a person acts on. */}
           <p className="hint">
-            {storageKind() === 'file'
-              ? 'Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.'
-              : 'Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.'}{' '}
-            Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>; tarayıcıda
-            “tarama verilerini temizle” dediğinizde <b>silinir</b>. Taşınan ve gerçekten
-            güvende olan tek şey <b>dosyaya kaydettiğinizdir</b>.
+            {storageKind() === 'exe' ? (
+              <>
+                Aşağıdaki depo bu programın kendi deposu, ve <b>tek kopya
+                değil</b>: her değişiklikten sonra bütün planlar Belgelerim'deki{' '}
+                <b>Ders Programı</b> klasörüne de yazılıyor. Bu bilgisayarı
+                değiştiriyorsanız taşınacak şey o klasör.
+              </>
+            ) : (
+              <>
+                {storageKind() === 'file'
+                  ? 'Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.'
+                  : 'Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.'}{' '}
+                Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>;
+                tarayıcıda “tarama verilerini temizle” dediğinizde <b>silinir</b>.
+                Taşınan ve gerçekten güvende olan tek şey{' '}
+                <b>dosyaya kaydettiğinizdir</b>.
+              </>
+            )}
           </p>
           {/* The one habit, spelled out. It used to be a sentence across the
               top bar on every screen; it belongs next to the report that says

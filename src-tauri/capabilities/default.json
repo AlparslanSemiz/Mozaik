@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Pencerenin kendisi ve uygulamanın dört komutu. Başka hiçbir şey.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

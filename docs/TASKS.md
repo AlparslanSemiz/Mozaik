@@ -21,19 +21,39 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > **B turu bitti (2026-08-26).** Beş maddenin beşi de yapıldı, artı kalan
 > tasklardan **4f**. Dal: `v1.1-kurulum`. Ayrıntı ve **ölçülen her sayı**
 > [STATUS.md](STATUS.md) → *Yirmi ikinci oturum*.
+
+> **G turu bitti (2026-08-27): kalan üçlü + `.exe`.** Ayrıntı
+> [STATUS.md](STATUS.md) → *Yirmi üçüncü oturum*.
 >
-> **SIRADAKİ İŞ — ikisi de KULLANICIDA:**
-> 1. **Windows'ta bir kez denenmesi.** `npm run paket` → `dist-kurulum/` →
->    o klasörü babanın makinesine götürüp `Kur.cmd`. Bu makinede
->    koşturulamayan üç şey var ve üçü de orada görülecek: `Kur.cmd`, `.lnk`
->    üretimi, ve Windows PowerShell 5.1. **Ayrıca gerçek klasör diyaloğu**
->    (Ayarlar → Veri → "Nereye kaydedilsin") elle denenmeli.
-> 2. **GitHub Pages'in açılması.** İş akışı yazıldı; depo `ders-programi`
+> Kalan üç kod maddesinin üçü de kapandı: **fontun ağırlık ekseni**
+> (asıl engel eksen değil reçetenin yokluğuydu — `npm run font` yazıldı,
+> `400:700` ölçülerek alındı, `300` ölçülerek reddedildi, ve beş kuralın
+> sessizce 600 çizdiği gerçek hata kapandı), **görsel regresyon sorusu**
+> (cevap: geri gelmiyor, ama `ekran`ın kendi deliği bir iddiayla kapandı) ve
+> **4j belgeler**. Yanında A4 ile MCP satırları da `[x]` oldu.
+>
+> `.exe` **ayağa kalktı ve gerçekten çalıştı**: 4g ve 4h bitti, 4i'nin iş
+> akışı yazıldı ama henüz koşmadı. Exe hiçbir kuralı kopyalamıyor —
+> `src/desktop.ts` üç Tauri komutunu bir klasör tutamağı kılığına sokuyor,
+> `saveInto()` olduğu gibi koşuyor. Kanıt: exe açıldı, **hiçbir şeye
+> tıklanmadan** `~/Documents/Ders Programı/` altına iki dosya düştü.
+> Sayılar: **521 birim + 394 E2E + 19 site + 7 çözücü + 6 Rust**, hepsi yeşil.
+>
+> **SIRADAKİ İŞ — üçü de KULLANICIDA, ve ikisi artık aynı gün yapılabilir:**
+> 1. **`exe.yml` bir kez koşturulsun** (Actions → exe → Run workflow) ve çıkan
+>    `Ders Programı.exe` babanın makinesinde **çift tıklansın**. Bu makinede
+>    ölçülemeyen her şey orada görülecek: WebView2, gerçek açılış süresi,
+>    SmartScreen'in ne dediği, ve Belgelerim'e gerçekten yazıp yazmadığı.
+> 2. **Windows kurulum klasörü de denensin** — `npm run paket` →
+>    `dist-kurulum/` → `Kur.cmd`. Exe geldi diye bu yol **kalıyor** (kullanıcı
+>    kararı, 2026-08-27): hangisinin tuttuğuna baba kullandıktan sonra
+>    bakılır, ilke 5.
+> 3. **GitHub Pages'in açılması.** İş akışı yazıldı; depo `ders-programi`
 >    olarak yeniden adlandırılacak ve Pages kaynağı "GitHub Actions"
 >    seçilecek.
 >
-> Ondan sonra hâlâ bekleyen: **gerçek veriyle deneme** (babanın listesi) ve
-> **4g–4i Tauri/exe** (kullanıcı "şimdilik boş ver" dedi).
+> Ondan sonra hâlâ bekleyen tek büyük şey: **gerçek veriyle deneme**
+> (babanın listesi) — v0'ın çıkma şartı.
 
 ### F turu — elle sıralama · baskı seçenekleri · cinsiyet — **BİTTİ ✅** (2026-08-26)
 
@@ -211,16 +231,35 @@ kullanıcı **"daha cesur olsun"** dedi.
       yapıldı** (2026-08-26). Cinsiyet `schemaVersion` 6 istedi ve aldı; elle
       sıralama **istemedi** — dizinin kendisi zaten sıra, ayrı bir indeks
       ikinci bir gerçek olurdu.
-- [ ] **Fontun ağırlık ekseni 400–600 → 300–700.** Planda vardı, yapılmadı:
-      `fontTools` kurulu değil ve alt kümeyi yeniden üretmek kaynak fontu
-      indirmeyi gerektiriyor. Üç ağırlık hiyerarşi için yetiyor.
-- [ ] **Görsel regresyon yerine ne konacak?** 24 referans silindi (kullanıcı
-      kararı). `npm run ekran` duruyor ve **kanıt** üretiyor, ama bir insan
-      bakmazsa hiçbir şey yakalamıyor. **2026-08-27'de tam olarak bu yaşandı ve
-      bakmak işe yaradı**: `dark-12-ayarlar-gorunum.png` bomboş çıkıyordu
-      (görüntü, giriş animasyonunun ortasında alınıyordu). Çare yazıldı
-      (tuzak 59) ama soru duruyor: bakan kimse yoksa bu katman ne yakalar?
-      Bir dönem kullanıldıktan sonra karar.
+- [x] **Fontun ağırlık ekseni — 400–700, ve 300 ÖLÇÜLEREK reddedildi (2026-08-27).**
+      Asıl engel eksen değil **reçetenin yokluğu**ydu: 23 KB'lik woff2 kimsenin
+      yeniden üretemediği bir eserdi, o yüzden içindeki karar donmuştu (tuzak
+      69). `scripts/font.mjs` + `scripts/font-source/` (kaynak yüz depoda, OFL
+      1.1) → `npm run font`.
+      **Kaynak değişti ama METRİK değişmedi:** 225 karakterin 225'inde de
+      ilerleme birebir aynı (`'0'` = 600/600), yani `ch` merdiveni kıpırdamadı
+      (tuzak 39 güvende).
+      **Ölçülen eksen maliyeti:** `400:700` **+1 060 bayt** · `350:700` +7 880 ·
+      `300:700` +8 600. Aşağı yarısı sekiz katı ve `styles.css` 300'ü **hiç**
+      istemiyor → ilke 5, alınmadı.
+      **Kapatılan gerçek hata:** beş kural `font-weight: 700` istiyordu ve yüz
+      600'de kırpılı olduğu için beşi de sessizce 600 çiziyordu — **üçü kâğıtta**
+      (tuzak 70). Ölçüm: `'0'` glifinde 600↔700 nokta farkı **0.0 → 406.5**;
+      tarayıcıda eski yüzde `600=1042 700=1042`. `temel.spec.ts` 46'ya yeni test,
+      eski yüz geri konularak **kırmızıya döndürüldü**.
+- [x] **Görsel regresyon yerine ne konacak? — CEVAPLANDI (2026-08-27).**
+      Cevap iki parçalı ve ikincisi yazıldı.
+      (a) **Geri gelmiyor.** 24 referans kullanıcı kararıyla silindi ve yerine
+      geçen şey zaten var: erişilebilirlik ölçümleri **anlam** ölçüyor (WCAG
+      kontrastı, CIE Lab ΔE, erişilebilir ad), piksel değil. Bir ΔE eşiği
+      yeniden düzenlenen bir panelden etkilenmez; bir PNG referansı etkilenir.
+      (b) **Ama `ekran`ın kendi deliği kapatıldı.** "Bakan kimse yoksa ne
+      yakalar" sorusunun dürüst cevabı *hiçbir şey*di, ve katmanın kendi
+      arızası tam olarak buydu: bomboş bir PNG üretip sessiz kalmak.
+      `ekran.spec.ts` artık **tek bir iddia** taşıyor — deklanşör anında
+      `.main` ve her `.panel` tam opak. Tasarım hakkında hiçbir şey söylemiyor,
+      "bir şeyin resmi çekildi" diyor. `settled()` çıkarılarak kırmızıya
+      döndürüldü: `panel opacity=0.00`, yani yaşanan hatanın ta kendisi.
 - [x] **`npm run cozucu` `kontrol`'e ALINDI (2026-08-26).** Ölçüldü: **34,8 sn**,
       7/7 yeşil. `kontrol` zaten ~3 dakika, yani maliyet **%19**; karşılığında
       "hepsi" diyen komut gerçekten hepsini koşuyor. Gerekçe bu turda tazelendi:
@@ -290,7 +329,7 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       **23 KB ham → base64 gömülü**. Ölçülen boyut: `dist/index.html`
       **347 → 379 KB**, sınır 420 KB. `<link>` yok, derlemede ağ yok, yeni npm
       bağımlılığı yok. `font-display: block` (tuzak 38)
-- [~] **A4 Dialog ve renk seçici — YARISI yapıldı (B turu).** Renk seçici
+- [x] **A4 Dialog ve renk seçici — TAMAMI yapıldı (B turu + 2026-08-27).** Renk seçici
       **6×6 swatch `<dialog>`'u oldu**: 36 rengin hepsi görünüyor, seçili olan
       çerçeveli, indeks swatch'ın üstünde `--on-color` ile duruyor.
       `e2e/renk-secici.spec.ts` **yeniden yazıldı, silinmedi** — gereksinim
@@ -299,9 +338,10 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       **Kalan:** 12 `confirm` + 5 `alert`'ün `<dialog>`'a geçmesi ve
       `.reason-bar`'a `aria-live` — B turu dışında bırakılmıştı.
       **`aria-live` 2026-08-27'de yapıldı** (E6): `role="status"` +
-      `aria-live="polite"`. Kalan tek iş 12 `confirm` + 5 `alert`'ün
-      `<dialog>`'a geçmesi — ki `useDialogs()` zaten var, geçirilmemiş çağrı
-      kalmadı; bu satır artık yalnız tarih.
+      `aria-live="polite"`.
+      **KAPANDI (2026-08-27):** `src/` grep'lendi — `window.confirm` /
+      `window.alert` çağrısı **sıfır**; her biri `useDialogs()`'un
+      `await confirm/alert`'i. Madde artık `[x]` ve yalnız tarih.
 - [x] **A6 Doğrulama — B turunda yapıldı.** `npm run kontrol` yeşil
       (409 birim + 265 E2E + 6 site). `renk.spec.ts`'in WCAG/ΔE eşikleri
       **gevşetilmedi**; yeni token seti onları geçmek zorunda kaldı ve geçti.
@@ -342,8 +382,9 @@ yeniden açmayı seçti.** Karar `CLAUDE.md` → *"Tasarım dili yeniden AÇILDI
       Toplam 19 skill, `~/.claude/plugins/` altında 81 MB. VSCode eklentisinin
       **gömülü `claude` ikilisi** kullanıldı (`$PATH`'te yok ama
       `resources/native-binary/claude` var)
-- [ ] **MCP sunucuları onaylanacak** — Claude Code yeniden başlatılınca
-      `.mcp.json` onayı gelecek
+- [x] **MCP sunucuları onaylandı** — `playwright` · `chrome-devtools` ·
+      `context7` üçü de oturumda kullanılabilir durumda (2026-08-27'de
+      doğrulandı)
 - [x] **Budama bitti — 7 → 3, kalan ~2.249 tok/oturum.** Kalanlar:
       `example-skills` (12 skill) · `document-skills` (4 skill) ·
       `typescript-lsp` (~0 tok). Kaldırılanlar ve gerekçeleri
@@ -460,16 +501,46 @@ adlandırılacak** (kullanıcı yapacak).
       `dropStudio()` çıkarıyor.
       **Kullanıcıda kalan iki adım:** depo `ders-programi` olarak yeniden
       adlandırılacak, Pages kaynağı "GitHub Actions" seçilecek
-- [ ] **4g Tauri kabuğu** — `src-tauri/`, pencere başlığı "Ders Programı", ikon,
-      `frontendDist: ../dist`. **Yeni runtime bağımlılığı yok**: `withGlobalTauri`
-      + `window.__TAURI__.core.invoke`, `@tauri-apps/*` npm paketi eklenmiyor
-      (tuzak 19'un chunk sorunu doğmasın). **Kullanıcıdan:** Rust toolchain onayı
-- [ ] **4h exe dosyaya yazsın** — her değişiklik `Belgelerim/Ders Programı/`
-      altına, günlük yedek (son 10 gün). Biçim sitedeki dışa aktarımla birebir
-      aynı — "aynı veri" maddesinin karşılığı bu
-- [ ] **4i Windows `.exe`** — bu makine Fedora, çapraz derleme güvenilir değil:
-      `.github/workflows/exe.yml` → `windows-latest` → artefakt. SmartScreen
-      uyarısı için babaya tek cümlelik not
+- [x] **4g Tauri kabuğu — YAPILDI (2026-08-27).** `src-tauri/` (Cargo.toml ·
+      build.rs · tauri.conf.json · capabilities/default.json · main.rs ·
+      lib.rs). Pencere "Ders Programı", 1600×1000, ikon `kurulum/icon.ico`'dan
+      (iki çizimli .ico yeniden kullanıldı, ikinci bir kopya yok).
+      `frontendDist: ../dist` — yani exe'nin içindeki sayfa **babanın çift
+      tıklayacağı dosyanın ta kendisi**, dört teslim yolunda tek arayüz.
+      **Yeni runtime bağımlılığı yok**: `withGlobalTauri` + `window.__TAURI__`,
+      `@tauri-apps/*` npm paketi **yok** (tuzak 19). Rust tarafında da plugin
+      yok — `tauri` ve `std::fs`, o kadar.
+      **`--no-bundle`, ve bu bir ilke kararı:** NSIS hedefi kurulum sihirbazı
+      üretir, ilke 1 tam olarak onu reddediyor. Teslim tek bir `.exe`.
+      Rust yerelde kuruldu (1.98.0) ve **gerçekten derlendi**.
+- [x] **4h exe kendiliğinden yazıyor — YAPILDI (2026-08-27).**
+      `Belgelerim/Ders Programı/`, `ders-programi-tumu.json` + günün yedeği,
+      son 10 gün. Hiçbir tıklama, hiçbir izin, hiçbir seçici yok.
+      **Kural kopyalanmadı, ADAPTÖR takıldı:** `folder.ts` hâlâ dosya
+      adlarının, günlük yedeğin ve budamanın tek evi; `src/desktop.ts` üç
+      Tauri komutunu bir `FileSystemDirectoryHandle` kılığına sokuyor ve
+      `saveInto()` exe'de **olduğu gibi** koşuyor. Rust'ta yalnız tarayıcıda
+      karşılığı olmayan şey var: hangi klasör + `safe_name` kapısı.
+      Yazım **atomik** (tmp + rename): ilke 6, yarım JSON olamaz.
+      `storageKind()` üçüncü branch'ini aldı (`'exe'`) — `library.ts`'in
+      kendi yorumu bu anı öngörmüştü — ve "Veriler nerede" artık exe'de
+      **başka bir şey** söylüyor, çünkü orada "taşınan tek şey dosyaya
+      kaydettiğinizdir" yalan olurdu.
+      **UÇTAN UCA KANITLANDI:** exe çalıştırıldı, hiçbir şeye tıklanmadan
+      `~/Documents/Ders Programı/` altında iki dosya belirdi (`bundleVersion 1`,
+      `schemaVersion 6`). Açılıştan ilk yazıma **986 · 1053 · 1149 ms**.
+      Testler: 3 birim (`desktop.test.ts` — gerçek `saveInto()` adaptör
+      üstünde) + 5 E2E (`exe.spec.ts`) + 6 Rust (`cargo test`).
+- [~] **4i Windows `.exe` — iş akışı yazıldı, HENÜZ KOŞMADI.**
+      `.github/workflows/exe.yml` → `windows-latest` → `npm ci` → `npm run
+      build` → `cargo test` → `tauri build --no-bundle` → artefakt
+      `Ders Programı.exe`. Elle tetiklenir (`workflow_dispatch`) ya da `v*`
+      etiketiyle.
+      **Bu makinede ölçülen (Linux/WebKitGTK, Windows/WebView2 DEĞİL):** sürüm
+      ikilisi **3,64 MB**, derleme 1 dk 38 sn.
+      **Kalan:** iş akışı bir kez koşturulmalı ve çıkan exe babanın
+      makinesinde denenmeli. SmartScreen notu da o zaman yazılacak — imzasız
+      exe'de Windows "bilinmeyen yayıncı" der
 - [x] **4k Baskı turu** — babanın gerçek yazdırma önizlemesinde gördükleri.
       Tarayıcının üst/alt bilgisi (sol üstte tarih, sol altta dosya yolu)
       `@page { margin: 0 }` ile kalktı — kenar boşluğu 10 mm padding olarak
@@ -482,14 +553,19 @@ adlandırılacak** (kullanıcı yapacak).
 - [x] **4l Dosya Sistemi Erişimi API'si — B4 olarak YAPILDI (2026-08-26).**
       Dosya değil **klasör** seçiliyor (`showDirectoryPicker`): bütün planlar
       + her gün için bir yedek, tek bir soruyla. Ayrıntı aşağıda, B4
-- [~] **4j Belgeler** — 4b+4c ve 4d ile birlikte ilerledi: yasak liste daraltıldı
+- [x] **4j Belgeler — KAPANDI (2026-08-27).** 4b+4c ve 4d ile birlikte ilerledi: yasak liste daraltıldı
       ("birden çok program sürümü" → **aynı planın** sürüm ağacı, gerekçesiyle),
       `library.ts` ve `bundle.ts` mimari şemaya girdi, depolama anahtarı tablosu
       ile **dosya biçimleri** bölümü yazıldı, tuzak 28–30 eklendi (ve iki kez 27
       numaralanmış tuzaklar düzeltildi), test sayıları güncellendi. 4e ile
       **ilke 2'nin yeni hâli** de yazıldı (statik yayın var; backend, veritabanı,
-      hesap yok) ve tuzak 31–32 eklendi. **Kalan:** 4f–4i yapıldıkça teslim
-      yollarının anlatımı
+      hesap yok) ve tuzak 31–32 eklendi.
+      **Son parça 2026-08-27'de yazıldı:** "Üç derleme hedefi" → **DÖRT**;
+      exe'nin `frontendDist`'inin `../dist` olduğu, `--no-bundle`'ın bir ilke
+      kararı olduğu ve exe'nin kural kopyalamayıp adaptör taktığı anlatıldı.
+      `desktop.ts` ve `scripts/font.mjs` mimari haritaya girdi, komut listesine
+      `font`/`exe`/`exe:test` eklendi (ve **neden `kontrol`'ün parçası
+      olmadıkları** yazıldı), tuzak 69–71 eklendi
 
 ### 1. Babanın gerçek verisiyle deneme
 
@@ -539,7 +615,11 @@ tahmin olur (ilke 5).
 Babanın makinesi **Windows 10** → Tauri v2 destekliyor, yol açık.
 WebView2 bu makinede kurulu (151.0.4129.101); Rust **kurulu değil**.
 
-- [ ] Rust toolchain kurulsun
+- [x] **Rust toolchain kuruldu (2026-08-27)** — rustup, `rustc 1.98.0`.
+      Yanında Fedora paketleri: `webkit2gtk4.1-devel` (2.52.5) ·
+      `libsoup3-devel` (3.6.6) · `gtk3-devel` (3.24.52). Bunlar **Linux**
+      derlemesi için; Windows'ta hiçbirine gerek yok (WebView2 işletim
+      sistemiyle geliyor)
 - [ ] Otomatik günlük yedek (`program-2026-08-24.json`, son 10 gün)
 - [ ] Yazdırma Tauri penceresinde de çalışıyor mu (WebView2 yazdırma diyaloğu)
 - [ ] `npm run tauri build` → tek `.exe`, boyut ve açılış süresi ölçülsün
@@ -1138,3 +1218,8 @@ yazmışım, betik hiç koşmuyordu ve bunu ancak sabotaj gösterdi.
 işaretlenecek) **gerçekleşmedi**: kullanıcı kurulmasını istedi, `pwsh` 7.6.5
 kuruldu ve `sunucu.ps1` burada gerçekten koşturuldu. Ölçülemeyen üç şey
 kaldı ve adlarıyla yazıldı: `Kur.cmd`, `.lnk` üretimi, Windows PowerShell 5.1.
+
+
+
+
+E2E ile emülatörle patrolla veya başka şekilde izleyerek tüm hataları görme test etme kontrol etme kuralım.

@@ -10,3 +10,10 @@ playwright-report/
 # Throwaway measurement scripts. Nothing here ships; see docs/STATUS.md for
 # what the measurements said.
 scratch/
+
+# scripts/font.mjs icin: fontTools + brotli
+.venv/
+
+# Tauri (.exe) derleme çıktısı
+src-tauri/target/
+src-tauri/gen/

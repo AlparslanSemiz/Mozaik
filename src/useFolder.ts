@@ -11,6 +11,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle } from './bundle';
+import { isDesktop, openDesktopFolder } from './desktop';
 import {
   askPermission,
   dailyName,
@@ -46,6 +47,10 @@ export type FolderStatus =
 
 export interface FolderRun {
   status: FolderStatus;
+  /** Inside the .exe there is nothing to pick and nothing to forget: the
+      folder is Belgelerim\\Ders Programı and it is already ours. The panel
+      reads this to stop offering three buttons that cannot mean anything. */
+  fixed: boolean;
   /** From a click: opens the picker, remembers the choice, writes at once. */
   choose: () => Promise<void>;
   /** From a click: re-asks for a permission the browser dropped on reload. */
@@ -58,8 +63,10 @@ export function useFolder(
   planId: Id,
   present: State,
 ): FolderRun {
+  // The exe has the folder before the first paint, so it never passes
+  // through 'yok' — and it never passes through the picker either.
   const [status, setStatus] = useState<FolderStatus>(() =>
-    folderSupported() ? { kind: 'secilmedi' } : { kind: 'yok' },
+    folderSupported() || isDesktop() ? { kind: 'secilmedi' } : { kind: 'yok' },
   );
 
   // The handle never goes through React state: it is not a value to render,
@@ -102,8 +109,24 @@ export function useFolder(
 
   // ------------------------------------------------------------- on load
   useEffect(() => {
-    if (!folderSupported()) return;
     let alive = true;
+
+    // The exe route, and it is SHORTER rather than parallel: no picker, no
+    // permission, no IndexedDB. Those three exist in the browser because a
+    // page has to be granted a folder; here the folder is the app's own.
+    if (isDesktop()) {
+      void openDesktopFolder().then((handle) => {
+        if (!alive || handle === null) return;
+        dir.current = handle;
+        setStatus({ kind: 'bekliyor', name: handle.name });
+        void write(handle);
+      });
+      return () => {
+        alive = false;
+      };
+    }
+
+    if (!folderSupported()) return;
     void readHandle().then(async (handle) => {
       if (!alive || handle === null) return;
       dir.current = handle;
@@ -151,6 +174,7 @@ export function useFolder(
   }, [write]);
 
   const choose = useCallback(async () => {
+    if (isDesktop()) return; // nothing to choose — see `fixed`
     const handle = await pickFolder();
     if (handle === null) return; // dismissed
     if (!(await askPermission(handle))) {
@@ -176,11 +200,12 @@ export function useFolder(
   }, [write]);
 
   const forget = useCallback(async () => {
+    if (isDesktop()) return;
     window.clearTimeout(timer.current);
     dir.current = null;
     await dropHandle();
     setStatus({ kind: 'secilmedi' });
   }, []);
 
-  return { status, choose, allow, forget };
+  return { status, fixed: isDesktop(), choose, allow, forget };
 }

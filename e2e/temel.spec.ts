@@ -543,8 +543,40 @@ test.describe('46. Gömülü yazı tipi', () => {
     }));
 
     expect(drawn.ready, `yüklü yüzler: ${drawn.loaded.join(' · ')}`).toBe(true);
-    expect(drawn.loaded).toEqual(['IBM Plex Sans 400 600 loaded']);
+    expect(drawn.loaded).toEqual(['IBM Plex Sans 400 700 loaded']);
     expect(drawn.zero, 'gövde Plex ile çizilmiyor').toBeCloseTo(60, 0);
+  });
+
+  test('700 ağırlığı GERÇEK — eksen 600’de kırpılmıyor', async ({ page }) => {
+    await open(page);
+
+    // A variable font CLAMPS an out-of-range weight, it does not fail. The
+    // face shipped clipped at 600 while five rules in styles.css asked for
+    // 700 — the pool card's top line, Müsaitlik's cross, and three things on
+    // PAPER — and every one of them silently drew 600. Nothing was red, and
+    // nothing could go red, because "600 was asked for" and "700 was asked
+    // for and refused" produce the same pixels.
+    //
+    // So this measures the rendered result, not the @font-face declaration:
+    // the declaration is what would be edited back.
+    const width = await page.evaluate(() => {
+      const at = (weight: number) => {
+        const probe = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;font-size:100px;white-space:pre';
+        probe.style.fontFamily = getComputedStyle(document.body).fontFamily;
+        probe.style.fontWeight = String(weight);
+        probe.textContent = 'Haftalık ders programı';
+        document.body.appendChild(probe);
+        const w = probe.getBoundingClientRect().width;
+        probe.remove();
+        return w;
+      };
+      return { w400: at(400), w600: at(600), w700: at(700) };
+    });
+
+    const seen = `400=${width.w400} 600=${width.w600} 700=${width.w700}`;
+    expect(width.w600, seen).toBeGreaterThan(width.w400);
+    expect(width.w700, `700 ile 600 aynı genişlikte — eksen kırpılı: ${seen}`).toBeGreaterThan(width.w600);
   });
 
   test('rakamlar tablo hizalı — ızgara sayılardan ibaret', async ({ page }) => {

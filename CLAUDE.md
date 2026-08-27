@@ -159,32 +159,42 @@ CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
 ```bash
 npm run dev        # geliştirme sunucusu
-npm test           # Vitest — 517 birim testi
+npm test           # Vitest — 521 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 388 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 394 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 19 test
 npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, 34,8 sn (kontrol'ün parçası)
 npm run sunucu     # yerel sunucu: http://dersprogrami.localhost:7654
 npm run paket      # dist-kurulum/ — babaya giden TEK klasör (Windows)
+npm run font       # src/fonts/*.woff2 yeniden üretir (fontTools ister)
+npm run exe        # src-tauri/target/release/ — Tauri ikilisi (Rust ister)
+npm run exe:test   # cargo test — safe_name kapısı ve dosya işleri, 6 test
 ```
+
+`font`, `exe` ve `exe:test` **`kontrol`'ün parçası değil** ve bilerek öyle:
+üçü de bu depoda olmayan bir araç zinciri istiyor (Python+fontTools, Rust),
+ve `kontrol`'ün sözleşmesi "her makinede koşar"dı. Rust'ı gerçekten derleyen
+tek yer `.github/workflows/exe.yml`; orada `cargo test` de koşuyor.
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
-### Üç derleme hedefi — tek kaynak
+### DÖRT derleme hedefi — tek kaynak
 
 ```
 vite.config.ts       -> dist/index.html   TEK dosya, file://, çift tıklanır
 vite.site.config.ts  -> dist-site/        aynı tek dosya + manifest + sw.js + simge
 scripts/paket.mjs    -> dist-kurulum/     dist-site + kurulum betikleri (WINDOWS)
+src-tauri/           -> Ders Programı.exe dist/index.html'i İÇİNE alan tek ikili
 site/                -> manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/             -> Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
 scripts/simge.mjs    -> icon.svg'den 192/512 PNG (Chromium ile, yeni bağımlılık yok)
 scripts/ikon.mjs     -> .ico: 16/32 SADE, 48+ AYRINTILI (konteyner elle yazılır)
 scripts/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
 scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
+scripts/font.mjs     -> gömülü yüzün REÇETESİ (kaynak scripts/font-source/)
 ```
 
 **İşaretin İKİ çizimi var, ve eşik ölçülerek bulundu.** `site/icon.svg`
@@ -215,6 +225,24 @@ geri getirirdi.
 uygulama `dist-site/index.html`'in ta kendisi. Kurulum betiklerinin hiçbiri
 `dist/`'e ya da `dist-site/`'a düşemez.
 
+**Dördüncü hedef de ayrı bir derleme değil**: `src-tauri/tauri.conf.json`'ın
+`frontendDist`'i `../dist`, yani exe'nin içindeki sayfa babanın çift
+tıklayacağı dosyanın ta kendisi. Bu yüzden dört yolun dördü de aynı
+`dist/index.html`'i taşıyor ve **arayüzün hiçbir kopyası yok**.
+
+**`--no-bundle`, ve bu bir ilke kararı.** Tauri'nin NSIS hedefi bir kurulum
+sihirbazı üretir; ilke 1 tam olarak onu reddediyor. Teslim edilen şey tek bir
+`Ders Programı.exe`. Çapraz derleme yok: bu makine Fedora, hedef Windows, ve
+exe `windows-latest` üstünde doğuyor (`.github/workflows/exe.yml`).
+
+**Exe hiçbir şeyi yeniden yazmaz — bir ADAPTÖR takar.** `folder.ts` dosya
+adlarının, günlük yedeğin ve "son 10" budamasının tek evi; `src/desktop.ts` üç
+Tauri komutunu bir `FileSystemDirectoryHandle` kılığına sokuyor ve `saveInto()`
+exe'de **olduğu gibi** koşuyor. Rust'ta yalnızca tarayıcıda karşılığı olmayan
+şey var: hangi klasör, ve bir adın ad olduğunu doğrulayan kapı (`safe_name`).
+`src/desktop.test.ts` gerçek `saveInto()`'yu adaptörün üstünde koşturur — dikiş
+kayarsa orası kırmızıya döner.
+
 **`kurulum/*.{cmd,ps1,txt}` `.gitattributes`'ta `eol=crlf`** ve `.ps1`'ler
 **UTF-8 BOM** taşır. İkisi de gerekli: `* text=auto` bir Linux checkout'unda
 onlara LF verir ve Notepad `OKU.txt`'yi tek satır gösterir; BOM'suz UTF-8'i
@@ -237,11 +265,13 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
+| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si |
-| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59) |
+| **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu** |
+| **Rust** | `src-tauri/src/lib.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
+| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
 > + `npm run gorsel`) ve düzen testleri (`sutun.spec.ts`, `duzen.spec.ts`'in
@@ -350,6 +380,12 @@ rowDrag.ts                      liste satırını sürükleme. Saf DOM, React B�
                                 orta noktayla değil (tuzak 60)
 printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
+desktop.ts                      exe'nin klasörü. folder.ts'in KURALLARINI
+                                kopyalamaz — üç Tauri komutunu bir
+                                FileSystemDirectoryHandle kılığına sokar, yani
+                                saveInto() exe'de olduğu gibi koşar. isDesktop()
+                                bir DERLEME BAYRAĞI değil, özellik tespiti:
+                                aynı dist/index.html dört yolda da aynı dosya
 folder.ts                       "nereye kaydedilsin": babanın seçtiği klasör.
                                 library.ts'in deseni — State'i BİLMEZ, ham metin
                                 alıp verir. İki fonksiyonu SAF ve testli
@@ -1140,6 +1176,43 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     de her yüklemede onu `granted`'a geri yazıyordu. Test, ölçmek istediği
     durumu **kendi eliyle siliyordu** ve bunu bir zaman aşımı olarak gösterdi.
     Kural: bir init betiği durumu **tohumlar** (yoksa yazar), **dayatmaz**.
+
+69. **Bir yapı ürününün REÇETESİ yoksa, içindeki her karar donar.**
+    `src/fonts/IBMPlexSans-subset.woff2` aylarca 23 KB'lik bir **eser**di:
+    kimse nasıl üretildiğini bilmiyordu, o yüzden ağırlık ekseninin 400–600'de
+    kırpılı olması TASKS'te *"fontTools kurulu değil"* gerekçesiyle bir madde
+    olarak duruyordu. Gerekçe doğruydu ve yeterliydi — yeniden üretilemeyen
+    bir dosyada değiştirilemeyen bir karar vardır. `scripts/font.mjs`
+    yazıldıktan sonra aynı iş **dört dakika** sürdü, ve yanında beklenmedik
+    bir kazanç geldi: reçete olunca eksen seçenekleri **ölçülebilir** oldu
+    (`400:700` +1 060 bayt · `350:700` +7 880 · `300:700` +8 600), ve
+    kullanılmayan yarısı ölçüyle reddedildi. Kaynak yüz depoya kondu
+    (`scripts/font-source/`, OFL 1.1): 122 KB, karşılığında reçete çevrimdışı
+    ve sonsuza kadar tekrarlanabilir. Kural: bir derleme çıktısı
+    commit'leniyorsa **onu üreten betik de commit'lenir**.
+
+70. **Değişken bir font, aralık dışı ağırlığı KIRPAR — hata vermez.**
+    `styles.css` beş kuralda `font-weight: 700` istiyordu; yüz 400–600'de
+    kırpılıydı ve beşi de sessizce **600 çiziyordu**. Üçü kâğıttaydı, yani
+    hedef kullanıcının en çok ihtiyaç duyduğu yerde. Hiçbir test göremezdi ve
+    görmesi mümkün de değildi: "600 istendi" ile "700 istendi ve reddedildi"
+    **birebir aynı pikselleri** üretir. Ölçüm şuydu — `'0'` glifinin 600 ile
+    700 arasındaki nokta farkı eski yüzde **0.0**, yenisinde **406.5**;
+    tarayıcıda `'Haftalık ders programı'` eski yüzde `600=1042 700=1042`.
+    Genel hâli tuzak 33'ün ailesinden: **bir CSS değeri yazmak, o değerin
+    karşılığının var olduğu anlamına gelmez.** Yeni bir eksen, yeni bir
+    `font-feature-settings` ya da `font-variation-settings` yazıldığında
+    sorulacak soru "yüz bunu verebiliyor mu"dur, ve cevabı **ölçülür**
+    (`temel.spec.ts` 46).
+
+71. **`toHaveProperty` noktayı YOL AYRACI okur, ve dosya adları nokta taşır.**
+    `expect(disk).toHaveProperty('ders-programi-tumu.json')` çalışan bir
+    özelliğin üstünde kırmızı verdi, çünkü `['ders-programi-tumu']['json']`
+    aradı. Hata mesajı diskin tamamını basıyordu — yani aranan dosya **ekranda
+    duruyordu** ve iddia yine de düşüyordu; bu, bir düzen hatasından daha kafa
+    karıştırıcı, çünkü kanıt "kod bozuk" değil "test yalan söylüyor" diyordu.
+    Bir anahtarın **varlığını** sormanın yolu `Object.keys(...)` +
+    `toContain`. Nokta içeren hiçbir anahtar `toHaveProperty` ile sorulamaz.
 
 ---
 

@@ -1,0 +1,33 @@
+[package]
+name = "ders-programi"
+version = "1.1.0"
+description = "Haftalik ders programi dizme araci"
+authors = ["Alparslan"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+# Tauri v2 wants the app as a library so the mobile targets can link it. We
+# only ship Windows, but keeping the layout standard means `tauri` upgrades
+# are boring, and boring is the point.
+name = "ders_programi_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# No plugins. `withGlobalTauri` puts `invoke` on the page and the three
+# commands in lib.rs are the whole API surface, so tauri-plugin-fs and
+# tauri-plugin-dialog would be two dependencies for something std::fs does in
+# forty lines — and they would hand the page a general file API when what it
+# needs is one folder.
+tauri = { version = "2", features = [] }
+
+[profile.release]
+# The delivery is a file my father downloads once. Size over compile time.
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

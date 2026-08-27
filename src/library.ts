@@ -10,6 +10,7 @@
 // that parses them. That is what keeps store.ts <-> library.ts free of a runtime
 // cycle, the same arrangement `keys.ts` has for constraints <-> rules.
 
+import { isDesktop } from './desktop';
 import type { Id } from './types';
 
 /**
@@ -239,14 +240,20 @@ export function dropPlanText(id: Id): void {
 // same as saying nothing: "it is saved in the browser" does not tell him that
 // clearing browsing data destroys it.
 
-export type StorageKind = 'file' | 'site';
+export type StorageKind = 'file' | 'site' | 'exe';
 
 /**
- * Only TWO answers today, on purpose. The .exe (task 4g/4h) will keep its data
- * in a real file and this will grow a third branch THEN — writing that branch
- * now would be a guess about code that does not exist (principle 5).
+ * THREE answers now. The third arrived with the exe (task 4g/4h) and not
+ * before: an earlier version of this comment said it would be written "then",
+ * because a branch for code that does not exist is a guess (principle 5).
+ *
+ * The exe is asked about FIRST. It is served over a normal origin, so the
+ * `file:`/site question would answer "site" about it and be true and useless:
+ * what a person reading this panel needs to know is not the protocol, it is
+ * whether "tarama verilerini temizle" can take their work away.
  */
 export function storageKind(): StorageKind {
+  if (isDesktop()) return 'exe';
   return safely(() => location.protocol) === 'file:' ? 'file' : 'site';
 }
 

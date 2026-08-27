@@ -367,4 +367,20 @@ describe('veriler nerede — depo raporu', () => {
     // E2E suite opens dist/index.html over file:// and reads the sentence.
     expect(storageKind()).toBe('site');
   });
+
+  it('exe içinde "exe" diyor — köken hâlâ http olsa BİLE', () => {
+    // The exe is served over a normal origin, so the protocol question keeps
+    // answering "site" about it: true, and useless. What the panel has to get
+    // right is whether "tarama verilerini temizle" can take the work away,
+    // and in the exe it cannot — a copy is on disk after every change.
+    const w = window as unknown as { __TAURI__?: unknown };
+    expect(storageKind()).toBe('site');
+    w.__TAURI__ = { core: { invoke: async () => undefined } };
+    try {
+      expect(storageKind()).toBe('exe');
+    } finally {
+      delete w.__TAURI__;
+    }
+    expect(storageKind()).toBe('site');
+  });
 });

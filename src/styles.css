@@ -9,11 +9,19 @@
 
 @font-face {
   /* IBM Plex Sans, SIL Open Font License 1.1 — src/fonts/OFL.txt.
-     A VARIABLE font clipped to the 400-600 range and subset to the 225 glyphs
+     A VARIABLE font clipped to the 400-700 range and subset to the 225 glyphs
      this tool can draw (Latin-1 + Turkish + the punctuation we actually use).
-     23 KB, and `assetsInlineLimit` turns it into a data: URI inside the single
+     24 KB, and `assetsInlineLimit` turns it into a data: URI inside the single
      dist/index.html — no <link>, no CDN, no byte fetched at runtime. Principle
      3 is unchanged; site.spec.ts still greps the output for network URLs.
+
+     `scripts/font.mjs` rebuilds this file from the source face committed in
+     scripts/font-source/ — it is a recipe, not an artefact. The axis used to
+     stop at 600 while five rules below asked for 700, and a variable font
+     CLAMPS rather than failing, so those five silently drew 600. Measured on
+     the digit "0": outline delta between wght 600 and 700 was 0.0 before,
+     406.5 now. Going UP to 700 cost 1 060 bytes; going DOWN to 300 would have
+     cost 8 600, and nothing here asks for 300.
 
      Why Plex and not the system font: this grid's content is NUMBERS (411,
      09:00, 12) and Plex's digits are tabular by construction — every one of
@@ -21,7 +29,7 @@
      stack below keeps the tool working if the face ever fails to decode. */
   font-family: "IBM Plex Sans";
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400 700;
   /* block, NOT swap. Measured: with `swap`, the first layout resolves `ch`
      against the fallback (1ch = 6.86px) and re-resolves it against Plex
      (1ch = 9.00px at the same size) the moment the face decodes — every
