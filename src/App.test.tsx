@@ -58,6 +58,11 @@ beforeEach(() => {
     configurable: true,
     writable: true,
   });
+  // Every assertion below reads a TURKISH sentence, and the interface follows
+  // `navigator.language` when nothing is stored — which in jsdom is en-US. The
+  // same pin `e2e/kapan.ts` puts on the browser suite, for the same reason:
+  // otherwise this file measures the dictionary rather than the components.
+  localStorage.setItem('ders-programi-dil', 'tr');
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);

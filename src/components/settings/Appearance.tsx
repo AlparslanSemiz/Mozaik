@@ -31,6 +31,8 @@ import {
   SCALE_STEP,
 } from '../../theme';
 import type { Density, Motion } from '../../theme';
+import { DILLER, DIL_ADI } from '../../i18n';
+import { useLang } from '../T';
 import type { State } from '../../types';
 import { paletteColor } from '../../palette';
 
@@ -70,6 +72,8 @@ export default function Appearance({
   motion,
   setMotion,
 }: Props) {
+  const { dil, setDil, t } = useLang();
+
   function choose(next: number) {
     applyScale(next);
     setScale(next);
@@ -291,6 +295,31 @@ export default function Appearance({
             seçerseniz seçin hareket <b>kapalı</b> kalır. Bu ayar makinenin
             isteğinin <b>ötesine</b> geçebilir, gerisine değil.
           </p>
+        </div>
+
+        <div className="panel">
+          <h2>{t('Dil')}</h2>
+          <p className="hint">
+            {t(
+              'Arayüzün dili. Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve programın kendisini değiştirmez.',
+            )}
+          </p>
+          {/* The same button shape as the four questions above it, and each
+              language NAMES ITSELF: a language menu is read by somebody who
+              does not yet speak the one the app is currently in. */}
+          <div className="form-row" role="group" aria-label={t('Dil')}>
+            {DILLER.map((d) => (
+              <button
+                key={d}
+                className="btn"
+                lang={d}
+                aria-pressed={d === dil}
+                onClick={() => setDil(d)}
+              >
+                {DIL_ADI[d]}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="panel">

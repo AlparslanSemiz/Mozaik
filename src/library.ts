@@ -327,6 +327,7 @@ export function storageReport(lib: Library): StorageReport {
     });
   }
   rows.push({ key: `${BASE_KEY}-tema`, what: 'tema tercihi', chars: charsAt(`${BASE_KEY}-tema`) });
+  rows.push({ key: `${BASE_KEY}-dil`, what: 'dil tercihi', chars: charsAt(`${BASE_KEY}-dil`) });
   rows.push({
     key: `${BASE_KEY}-kenar`,
     what: 'kenar çubuğu tercihi',
@@ -339,7 +340,7 @@ export function storageReport(lib: Library): StorageReport {
   });
   rows.push({
     key: `${BASE_KEY}-yogunluk`,
-    what: 'ızgara yoğunluğu tercihi',
+    what: 'arayüz yoğunluğu tercihi',
     chars: charsAt(`${BASE_KEY}-yogunluk`),
   });
   rows.push({

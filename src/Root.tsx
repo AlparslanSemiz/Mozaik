@@ -12,14 +12,21 @@
  */
 import App from './App';
 import { DialogProvider } from './components/Dialogs';
+import { LangProvider } from './components/T';
 import { ToastProvider } from './components/Toasts';
+import './lang/en';
 
 export default function Root() {
+  // The language is OUTERMOST: every provider below it puts words on the
+  // screen — a dialog's question, a toast's sentence — and none of them can be
+  // translated by something that lives further in.
   return (
-    <DialogProvider>
-      <ToastProvider>
-        <App />
-      </ToastProvider>
-    </DialogProvider>
+    <LangProvider>
+      <DialogProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </DialogProvider>
+    </LangProvider>
   );
 }

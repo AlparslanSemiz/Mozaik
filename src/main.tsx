@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import Root from './Root';
+import { applyDil, readDil } from './i18n';
 import {
   applyAvailClock,
   applyDensity,
@@ -19,6 +20,9 @@ import './styles.css';
 
 // Before the first paint, otherwise the page flashes light and then flips.
 applyTheme(readTheme());
+// Same reason and the same place: <html lang> is what a screen reader picks a
+// voice from, and it was hard-coded to "tr" in index.html.
+applyDil(readDil());
 // Same reason, and it matters more here: --ui-scale drives the root font-size,
 // so applying it after the first paint would reflow the whole shell.
 applyScale(readScale());

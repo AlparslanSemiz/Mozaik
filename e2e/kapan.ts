@@ -53,6 +53,30 @@ export const test = base.extend<{ kapan: void }>({
       const kapan: Kapan = { beklenen: [], hatalar: [], istekler: [] };
       kapanlar.set(page, kapan);
 
+      // THE LANGUAGE, pinned before anything loads.
+      //
+      // Every locator in this suite is a Turkish sentence, and since the
+      // language round the interface follows `navigator.language` when nothing
+      // is stored. On a machine set to English that moves roughly five hundred
+      // locators at once, and it looks like five hundred separate bugs.
+      //
+      // Here rather than in `helpers.open()` for the same reason the error trap
+      // is here: `auto: true` cannot be forgotten, and three of these spec
+      // files navigate with `page.goto('/')` against the local server without
+      // going through any helper at all.
+      //
+      // It SEEDS rather than dictates (pitfall 68): a test that deliberately
+      // chooses another language and reloads keeps its choice.
+      await page.addInitScript(() => {
+        try {
+          if (localStorage.getItem('ders-programi-dil') === null) {
+            localStorage.setItem('ders-programi-dil', 'tr');
+          }
+        } catch {
+          // A language that cannot be stored still defaults sensibly.
+        }
+      });
+
       page.on('console', (m) => {
         if (m.type() === 'error') kapan.hatalar.push(`console.error: ${m.text()}`);
       });

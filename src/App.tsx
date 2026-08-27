@@ -33,6 +33,7 @@ import type { Tab } from './toolState';
 import Setup from './components/setup';
 import Availability from './components/Availability';
 import Program from './components/Program';
+import { useT } from './components/T';
 import Check from './components/Check';
 import Ribbon from './components/Ribbon';
 import Print, { NOTHING_EXCLUDED } from './components/Print';
@@ -321,6 +322,7 @@ function BrandMark() {
 }
 
 export default function App() {
+  const t = useT();
   const { state, change, undo, redo, loadState, canUndo, canRedo, plans, park } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -582,18 +584,20 @@ export default function App() {
             at the left edge. The document identity used to stand here, but the
             name of the school does not change and is not clicked — it was
             holding the corner the destinations wanted. */}
-        <nav className="tabstrip" aria-label="Bölümler">
-          {TABS.map((t) => (
+        {/* `dest` and not `t`: `t` is the translator now, and the map variable
+            was shadowing it. */}
+        <nav className="tabstrip" aria-label={t('Bölümler')}>
+          {TABS.map((dest) => (
             <button
-              key={t.id}
+              key={dest.id}
               className="tab"
-              aria-current={tab === t.id}
-              aria-label={t.label}
-              title={t.label}
-              onClick={() => goTab(t.id)}
+              aria-current={tab === dest.id}
+              aria-label={t(dest.label)}
+              title={t(dest.label)}
+              onClick={() => goTab(dest.id)}
             >
-              {t.icon}
-              <span className="tab-label">{t.label}</span>
+              {dest.icon}
+              <span className="tab-label">{t(dest.label)}</span>
             </button>
           ))}
         </nav>

@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import {
+  FILE,
   FIXTURE,
   open,
   openSettings,
@@ -520,7 +521,15 @@ test.describe('29. Hata yolları', () => {
         value: { getItem: blow, setItem: blow, removeItem: blow, clear: blow, key: blow, length: 0 },
       });
     });
-    await open(page);
+    // NOT `open()`, and the reason is the behaviour under test itself: with
+    // storage gone the language preference cannot be read either, so the app
+    // falls back to `navigator.language` — which in this browser is en-US.
+    // That is correct (a reader whose storage is broken should still get their
+    // own language), but it means the Turkish tab name `open()` waits for is
+    // not on screen. The warning below is what this test is about, and it is
+    // found by class rather than by wording.
+    await page.goto(FILE);
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
     const warning = page.locator('.save-warning');
     await expect(warning).toBeVisible();

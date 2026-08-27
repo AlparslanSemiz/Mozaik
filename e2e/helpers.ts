@@ -15,6 +15,8 @@ import type { State } from '../src/types';
 
 export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 
+// The language is pinned in `kapan.ts`, for every test in every config at
+// once — see the note there.
 export async function open(page: Page) {
   await page.goto(FILE);
   await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();

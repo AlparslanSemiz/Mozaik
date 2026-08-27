@@ -9,3 +9,14 @@ declare module '*?raw' {
   const text: string;
   export default text;
 }
+
+// ...and the same reasoning for the one other thing Vite lends us: `i18n.test.ts`
+// reads every source file to find dictionary entries nothing asks for any more,
+// and it does that through Vite rather than `node:fs` for exactly the reason
+// above. Only the shape this project actually calls is declared.
+interface ImportMeta {
+  glob(
+    pattern: string,
+    options: { query: string; import: string; eager: true },
+  ): Record<string, unknown>;
+}
