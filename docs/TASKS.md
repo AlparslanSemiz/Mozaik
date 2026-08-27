@@ -1606,3 +1606,18 @@ yeniden yapmak aynı hatanın iki yüzü.
       `Facet`'e isteğe bağlı bir `order` alanı geldi, sırayı **çağıran**
       veriyor. Alfabe eşitlikte hâlâ karar veriyor, yani `order` yazmayan her
       çip satırı bugünkü davranışında kaldı. 
+
+      Renklere bakılmalı.
+      ikinci barın açılıp kapanması
+      branş seçilince öğretmen seçiminin azalması
+      Öğretmeni seçince direkt branşı belirmesi.
+      Eğer öğretmenin iki branşı varsa seçenekle değiştirilmesi
+      Blokların simetrisi
+      Biraz daha küçülme sığdır
+      İkinci barın simetrisi
+      üst barda sectionları hoverlarken o hoverlanın renginde gölge olsun
+      Programda 1 saat x5 veeya 2 saat x3 gibi gözükmesin güzel değil.
+      Programda havuzu aç tuşu ters gibi.
+      Program ferahlığı rahatı sığdırı genel arayüz ferahlığı sığdırı rahatından farklı olsun.
+      Öğretmen yükü tarafında her öğretmen için çok uzun satır. kısaltmayı gösterme orada.
+      
