@@ -1421,3 +1421,25 @@ Kararlar 2026-08-27'de soruldu ve verildi:
 
 
 
+
+Programda eğer blok2 saatlik olarak programda duruyorsa o iki farklı kart değil tek kart olarak gözükmel büyükçe kart olarak.
+
+Öğretmenlerin iki branşı olabilsin şöyle yapılsın. öğretmenleri eklerken ikinci branşı var mı diye sorulsun evetse ikincci branş seçme opsiyonu gelsin. 
+Dersleri ayarlarken de hocayı seçtikten sonra eğer çift branşlı bir hoca varsa onun hangi branşının dersi olacağını seçme özelliği de olsun.
+
+Renklerin üzerinde sayılar olmasın. Ayrıca Liste görünümünde de en solda sıralamaya göre sıra sıra sayılar olsun.
+
+Programda aşağıdaki çekmecede kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat çekmecenin altına kaçıyorlar onu düzeltmek lazım. Ayrıca Evet sayı mantığı güzel o da
+Genelde hocaların tek bir branşı var iki branşı yok ama matematik 1 ve matematik 2'ye giren tek hocalar ve türkçe ve edebiyata giren tek hocalar var. yani alt branş mı yapalım yoksa çift branş seçme şeklinde mi hangisi daha güzel ve mantıklıysa onu yapalım.
+
+Ayrıca genel anlamda görünümü biraz daha sıkı ferah sığdır şeklinde gibi yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor.
+
+Ayrıca açık tema ile koyu temanın renkleri arasında sanki biraz fark mı var yoksa bana mı öyle geliyor. mesela en üstteki şeritin üstündeki renk şeridi açık temada biraz daha az gözüküyor gibi. eğer bana öyle geldiyse boş verebilirsin.
+
+Listelerde sıralamanın yanına aşağı ya da yukarı diye ayrı bir tuş koyalım ki o filtreye göre aşağı ya da yukarı olsun.
+
+Dersler kısmında kolay seçme filtresinde sadece branş değil, öğretmene göre veya sınıfa göre de filtreleme olsun.
+
+Ders kısmında dağılım kısmı güzel olmuş ama adamın 10 saat dersi varsa 1+1+1+1+1... diye gözükmesi biraz kötü, ya onu ayrı ayrı seçelim ya da görünüş şeklinde biraz daha düzeltmeler geliştirmeler yap.
+
+
