@@ -671,6 +671,54 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // Same set of colours; only the order and the labels change.
     expect(new Set(inClassView)).toEqual(new Set(inTeacherView));
   });
+
+  // "aynı dersten aynı şeyden birden fazlaysa ... kartlar stacklenmiş gibi
+  // altta da olsun ve alttaki stacklenenler de gözüksün."
+  //
+  // A lesson wanting six single hours laid six identical rectangles side by
+  // side and said `0/6` on every one of them. What this locks is the pair of
+  // facts that made it safe to draw them as a deck: the pile is one FLOW item,
+  // and a `.pool-card` still means one waiting block — to the head count, to
+  // `pendingBlocks()` and to the forty locators that ask how much is left.
+  test('aynı dersin aynı boydaki blokları TEK deste, sayı rozette', async ({ page }) => {
+    await openWithSample(page);
+
+    const cards = await page.locator('.pool-card').count();
+    const stacks = await page.locator('.pool-stack').count();
+    expect(cards, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
+    expect(stacks, 'hiçbir kart yığılmamış').toBeLessThan(cards);
+    await expect(page.locator('.pool-count strong')).toContainText(`${cards} blok`);
+
+    // Every card lives in exactly one pile, and a pile is one lesson at one
+    // block length — the two things that make its cards interchangeable.
+    const piles = await page.locator('.pool-stack').evaluateAll((nodes) =>
+      nodes.map((el) => ({
+        count: Number(el.getAttribute('data-count')),
+        cards: el.querySelectorAll('.pool-card').length,
+        sizes: new Set([...el.querySelectorAll('.pool-card')].map((c) => c.getAttribute('data-size'))).size,
+        tops: new Set([...el.querySelectorAll('.card-top')].map((c) => c.textContent)).size,
+        badge: el.querySelector('.stack-badge')?.textContent ?? null,
+        counters: el.querySelectorAll('.pool-card:not([aria-hidden]) .counter').length,
+      })),
+    );
+    expect(piles.reduce((n, p) => n + p.cards, 0)).toBe(cards);
+    for (const p of piles) {
+      expect(p.cards).toBe(p.count);
+      expect(p.sizes).toBe(1);
+      expect(p.tops).toBe(1);
+      // The counter the reader asked to keep, said once instead of six times.
+      expect(p.counters).toBe(1);
+      expect(p.badge).toBe(p.count > 1 ? `×${p.count}` : null);
+    }
+
+    // Placing one block takes one card off the pile rather than emptying it.
+    const deep = page.locator('.pool-stack[data-count="5"]').first();
+    const before = await deep.locator('.card-top').first().innerText();
+    await dragAndDrop(page);
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator('.pool-card')).toHaveCount(cards - 1);
+    expect(before).not.toBe('');
+  });
 });
 
 test.describe('9. Öğle arası ayracı', () => {

@@ -9,6 +9,18 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **W turu bitti (2026-08-27): yedi maddenin yedisi.** Ders girişi kendi
+> sekmesine çıktı (yedinci sekme, Müsaitlik ile Program arasında), havuzda
+> aynı dersin blokları tek deste, branş sırası artık Ayarlar'daki sıra.
+> **Şema değişmedi, yeni depolama anahtarı açılmadı.** İki maddenin karşılığı
+> sıfır satır kod oldu ve bu bir sonuç: ikisi de ölçüldü, zaten çözülmüş
+> çıktı. Ayrıntı aşağıda, *W turu* bölümünde.
+>
+> **BİR SÜRÜM BEKLİYOR.** Görev çubuğu ikonu kodda düzeltilmiş durumda ama
+> babanın makinesindeki **v1.3.0 exe'si hâlâ eski `.ico`'yu taşıyor**; o madde
+> ancak `npm run yayinla -- 1.4.0` ile ulaşır. Aynı sürüm `kur.ps1`'in
+> kısayol tazeleme düzeltmesini de götürür.
+>
 > **V turu bitti (2026-08-27): dokuz maddenin dokuzu, ve `v1.3.0` YAYINDA.**
 > Ayrıntı ve **ölçülen her sayı** aşağıda, *V turu* bölümünde ve
 > [STATUS.md](STATUS.md) → *Yirmi sekizinci oturum*.
@@ -1397,11 +1409,19 @@ ve babanın bekleyen düzeltmeleri onların arkasında beklememeli.
 - [x] **U2 Görev çubuğundaki işaret büyük çizim.** İki kusur birden vardı ve
       ikisi de dosyanın içindeydi: `.ico` 20 · 24 · **40** px taşımıyordu
       (Windows %125'te 40 istiyor ve yoksa 32'yi büyütüyor — "eksik pxl"in
-      kaynağı), ve eşik `< 48 sade` olduğu için görev çubuğunun 32 px'lik
-      yuvasına **sade** çizim düşüyordu. Eşik uydurulmadı, **bakılarak**
-      bulundu: ayrıntılı çizim 16–20'de leke, 24'te bulanık, 32'den itibaren
-      okunuyor. `.ico` 11 858 → **14 483 bayt**. Karar artık bir testte
-      (`temel.spec.ts` 79, piksel piksel), ve sabotajla kırmızıya döndü.
+      kaynağı), ve eşik `< 48 sade` olduğu için görev çubuğunun yuvasına
+      **sade** çizim düşüyordu. Eşik uydurulmadı, **bakılarak** bulundu.
+      Karar bir testte (`temel.spec.ts` 79, piksel piksel), ve sabotajla
+      kırmızıya döndü.
+      **EŞİK AYNI GÜN İKİNCİ KEZ İNDİ: 32 → 20**, çünkü şikayet geri geldi.
+      İlk düzeltme pikselleri doğru okumuştu ama yanında ölçülmemiş bir cümle
+      taşıyordu — *"görev çubuğu 32 px'lik bir yuvadır"*. Windows 11 %100'de
+      **24** istiyor, yani düzeltmenin kendisi düzeltmeye çalıştığı boyu
+      eşiğin bir basamak altında bırakmıştı. Artık yalnız **16** sade;
+      20/24/32/40/48+ ayrıntılı, yani bir görev çubuğunun isteyebileceği
+      hiçbir boy sade tarafta değil ve cevap "Windows hangi boyu seçiyor"
+      tahminine dayanmıyor. `.ico` 11 858 → 14 483 → **14 859 bayt**.
+      Bkz. tuzak 78'in ikinci yarısı.
 - [x] **U3 Devriye + hata kapanı.** İki parça, ve asıl kazanç birincisi:
       `e2e/kapan.ts` **bütün** E2E süitini sarıyor (`auto: true`) ve konsol
       hatasını, `pageerror`'ı, yakalanmamış promise reddini ve `file://`
@@ -1501,14 +1521,88 @@ Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
 > **Bu dokuz satırın ham hâli buradaydı; V turu olarak numaralanıp yukarı
 > taşındı (2026-08-27). Dokuzu da bitti.**
 
-Görev çubuğundaki işaret büyük çizim değil küçük çizim olmalı, benim bahsettiğim windowsta alttaki barda uygulamanın logosu küçük çizim onun büyük çizim olması lazım.
+### W turu — yedi madde — **BİTTİ ✅** (2026-08-27)
 
-Programda da eğer bloksa blok olarak gözükmeli, hatalı foto örnek fotolarda.
+Kullanıcının TASKS'in en altına yazdığı yedi satır. **Şema DEĞİŞMEDİ** (v8
+kaldı) ve **hiçbir depolama anahtarı açılmadı** — yedi maddenin hiçbiri
+program verisine dokunmadı.
 
-Ders eklenirken en sonki seçilen sınıfa ders eklendikten sonra sınıf seçeneği hatırlansın varsayılana dönülmesin.
+**İkisinin karşılığı sıfır satır kod oldu, ve bu bir sonuçtur:** ikisi de
+ölçüldü ve zaten çözülmüş çıktı. Ölçmeden "yapıldı" demek ile ölçmeden
+yeniden yapmak aynı hatanın iki yüzü.
 
-Eğer mümkünse tek bir sınıf için ders eklemeyi çok daha kısa hale ya da pratik hale getirelim.
-
-Ders ekleme tarafı çok daha pratik hale getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama ders en önemli kısım. Hatta Ders kısmının kendine özgü bir alanı bile olabilir en üstteki ilk bara bile çıkabilir. ikinci şeritte de artık sınıftan mı eklemek istiyorsun? öğretmenden mi eklemek istiyorsun genel bakmak mı istiyorsun gibi olabilir.
-
-Excelden yapıştır o bloğun en sağında hatta en sağ üstünde bil olabilir.
+- [x] **W1 Görev çubuğundaki işaret — ZATEN ÇÖZÜLMÜŞ.** `scripts/ikon.mjs`'in
+      eşiği `SADE_ALTINDA = 20`, yani yalnız 16 px sade. Commit'lenmiş
+      `kurulum/icon.ico` çözülüp doğrulandı: dokuz giriş, ve 24 px girişinde
+      ayrıntılı çizimin hayalet sütunları ile mor bloğu **var**.
+      `tauri.conf.json`'ın `bundle.icon`'u aynı dosyayı gösteriyor, yani exe
+      de onu taşıyor. Şikayet aynı gün `dc47a62`'de düzeltilmiş, notu
+      silinmemişti.
+      **Kalan gerçek boşluk kodda değil, teslimdeydi ve kapatıldı:**
+      `kurulum/kur.ps1` kısayolu yalnız ilk kurulumda yazıyordu, yani
+      `Guncelle.cmd` yeni `icon.ico`'yu kopyalasa da `.lnk`'nin
+      `IconLocation`'ına dokunmuyor ve Windows eski işareti göstermeye devam
+      ediyordu — **düzeltilmiş bir ikonun düzeltilmiş olduğu hâlde
+      görünmemesi**. Artık güncellemede DURAN kısayol tazeleniyor; olmayan
+      **yaratılmıyor** (babanın onu silmiş ya da taşımış olma ihtimali).
+      Babanın makinesindeki v1.3.0 exe'si hâlâ eski `.ico`'yu taşıyor: bu
+      madde ancak bir **sürümle** ulaşır.
+- [x] **W2 Izgarada blok çizimi — ZATEN ÇÖZÜLMÜŞ, foto eski derlemeden.**
+      `docs/Örnek Fotolar/Programda da eğer bloksa blok olarak gözükmeli.png`
+      piksel piksel ölçüldü: iki kart arasında **3 px zemin** var, yani ne
+      `block-wide` ne `block-cont` — düpedüz iki bağımsız kart. İki bağımsız
+      sebep: (a) `dist/index.html` diskte 14:55'ten, "tek kart blok"u getiren
+      `5c84f49` ise 18:37'den, ve `grep -c block-wide dist/index.html` → **0**;
+      (b) fotodaki kartlar zaten **iki ayrı 1 saatlik blok** (`sample.ts:144`
+      derslerin %65'ini `pairs = 0` üretiyor), yani bugünkü kodda da iki kart
+      çizilirdi ve doğru olan bu. Kullanıcı onayladı: *"her şey yolundaymış
+      orada bunun için bir şey yapmana gerek yok"*.
+- [x] **W3 Havuzda DESTE + adet rozeti.** W2'nin yerine gelen istek:
+      *"aynı dersten aynı şeyden birden fazlaysa 0/4 1/7 gibi gözüküyor ya o
+      kalsın ama onun yanında kartlar stacklenmiş gibi altta da olsun."*
+      Altı saatlik bir ders tepsiye altı özdeş kart ve altı kez aynı `0/6`
+      bırakıyordu. Ölçülen: örnek okulda **367 kart → 114 deste**, en
+      kalabalığı 8. Rozet `1 saat ×6` biçiminde, blok boyunun yanında —
+      köşeye iliştirilen bir işaret kartın ortalanmış üç satırını yana
+      itiyordu.
+      **`.pool-card` hâlâ "bekleyen BİR blok" demek**, ve bu bir sözleşme:
+      sekiz dosyada ~40 test onu sayıyor, "N blok bekliyor" ondan geliyor.
+      Deste bir **düzen**, bir gruplama değil.
+      **Bir saat bir z-index'e gitti ve dersi CLAUDE.md'ye yazıldı (tuzak
+      84):** üstteki kartın `z-index: 3`'ü *statik konumlu bir kutuda hiçbir
+      şey yapmıyordu*, gömülü kopyalar onun üstüne boyanıyordu, ve rozetin
+      kutusu · hesaplanmış rengi · `elementFromPoint` cevabı **vardı** ama
+      kendisi görünmüyordu.
+- [x] **W4 Ders girişi KENDİ SEKMESİNE çıktı.** *"Ders ekleme tarafı çok daha
+      pratik hale getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama
+      DERS EN ÖNEMLİ KISIM."* Yedinci sekme, **Müsaitlik ile Program
+      arasında** (kullanıcı seçimi). Kurulum dört adımdan **üçe** indi;
+      "Kurulum durumu" panelinin ayağında ders sayısı, eksik uyarısı ve
+      sekmeye giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek
+      riskiydi. `Alt+1..7`. Şerit standardının beş maddesi yedi sekmede de
+      ölçülüyor.
+- [x] **W5 Şeritte üç mod: `Sınıftan · Öğretmenden · Genel`.** Kullanıcının
+      kendi cümlesi. İskelet **Müsaitlik şeridinin birebir aynısı** — soruyu
+      soran bir grup, hangisinin açık olduğunu *söyleyen* bir grup — ve seçici
+      sağ sütunda, çünkü iki sekme aynı iki soruyu iki ayrı şekille sormamalı.
+      Odaklanmış modda form o ekseni **hiç sormuyor**: asıl kısalma bu.
+      Elle sıralama orada kilitli ve sebebi yazılı (alt küme ≠ dizi).
+- [x] **W6 Sınıf artık HATIRLANIYOR.** Eski form tam olarak korunması gereken
+      alanı sıfırlıyordu (`setNewLesson({ ...newLesson, classId: '' })`), yani
+      bir sınıfa sekiz ders girmek sınıfı sekiz kez seçmek demekti. Artık
+      yürünen eksen kalıyor, değişen eksen sıfırlanıyor; `second` bayrağı
+      öğretmeniyle birlikte gidiyor, çünkü onun iki branşından birini
+      gösteriyor. **Enter da ekliyor** (`Rooms.tsx`'in deseni).
+- [x] **W7 "Excel'den yapıştır" panelin SAĞ ÜSTÜNDE.** Dört panelde birden,
+      aynı köşede (`.panel-head`). Form satırında altı kontrolün altıncısıydı
+      ve açılınca o satırı ikiye bölüyordu; artık kutu formun **altında**
+      açılıyor. `Paste` kontrollü hâle geldi (`open`/`close`), yani düğme
+      panelin, kutu bileşenin.
+- [x] **W8 Branş sırası AYARLARDAKİ sıra, alfabe değil.** Dört yerde birden
+      istendi, dördü de yapıldı: Öğretmenler'in "Branşa göre" sıralaması,
+      **branş çipleri**, çift branşlı hocanın **ikinci** branşı, ve Kurulum
+      özetindeki "Branşlar" listesi. Tek ev `entities.ts`'teki
+      `subjectRank()`; `listview.ts` `State`'i bilmemeye devam ediyor —
+      `Facet`'e isteğe bağlı bir `order` alanı geldi, sırayı **çağıran**
+      veriyor. Alfabe eşitlikte hâlâ karar veriyor, yani `order` yazmayan her
+      çip satırı bugünkü davranışında kaldı. 

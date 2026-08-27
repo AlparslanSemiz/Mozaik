@@ -105,7 +105,9 @@ async function diyalogKapat(page: Page): Promise<boolean> {
   return true;
 }
 
-const SEKMELER = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'];
+const SEKMELER = [
+  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+];
 
 test.describe('Devriye', () => {
   test('sistematik tur — her sekme, her adım, her bölüm, her şerit düğmesi', async ({ page }) => {

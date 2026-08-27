@@ -1,8 +1,86 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi sekizinci oturum: **v1.3.0 YAYINDA**, çift
-branş — şema v8, tek kart blok, listelerde sıra ve yön, yoğunluk her yerde,
-ve **dil turunun makinesi**)
+Son güncelleme: 2026-08-27 (yirmi dokuzuncu oturum: **W turu** — ders girişi
+kendi sekmesine çıktı, havuzda deste, branş sırası ayarlardaki sıra)
+
+---
+
+## Yirmi dokuzuncu oturum — W turu: yedi madde (2026-08-27)
+
+Kullanıcının TASKS'in altına bıraktığı yedi ham not. Ayrıntı
+[TASKS.md](TASKS.md) → *W turu*; burada **ölçülenler** ve plandan sapmalar.
+
+### İkisinin karşılığı sıfır satır kod oldu
+
+Ve bu bir sonuç, bir atlama değil. **Görev çubuğu ikonu** zaten
+çözülmüştü — `SADE_ALTINDA = 20`, ve commit'lenmiş `.ico` çözülüp 24 px
+girişinde ayrıntılı çizimin hayalet sütunları görüldü. **Blok çizimi** de
+öyle: şikayet fotosu piksel piksel ölçüldü (iki kart arasında **3 px zemin**),
+ve iki bağımsız sebebi vardı — foto `block-wide`'ı hiç taşımayan bir
+derlemeden (`dist` 14:55, düzeltme 18:37), ve o kartlar zaten iki ayrı
+1 saatlik blok. Kullanıcı ikincisini onayladı.
+
+**Kalan gerçek boşluk teslimdeydi:** `kur.ps1` kısayolu yalnız ilk kurulumda
+yazıyordu, yani yeni `icon.ico` kopyalansa bile `.lnk` eskisini gösteriyordu.
+Düzeltilmiş bir ikonun düzeltilmiş olduğu hâlde görünmemesi — ilke 1'in
+"söylenmeyen güncelleme" gerekçesinin ta kendisi. Artık duran kısayol
+tazeleniyor, olmayan yaratılmıyor.
+
+### Yedinci sekme yedinci RENK istedi, ve tekerlek doluydu
+
+Plana yazılmamıştı ve bir kusur olarak çıktı: `[data-section]` altı bölüm
+tanıyordu, yani yeni sekme `var(--sec, var(--accent))`'in **fallback'ini**
+çiziyordu — tuzak 52'nin tam olarak tarif ettiği sessiz durum. Renk uydurulmadı,
+2026-08-26'daki aramanın **aynı kısıtlarıyla** arandı (kontrast 5,0–13,5 · ΔE
+≥36 işlevsel üçlüden · ΔE ≥20 öteki bölümlerden, iki temada birden), ve
+tekerleğin dolu olduğu ölçülerek görüldü:
+
+| Yay | Ne oluyor |
+|---|---|
+| 19 turuncu | `--warn`/`--bad`'in kendi yarısı |
+| 70 limon | `--ok`'un üçte biri |
+| 257 çivit | Kontrol'ün moru, aynı ton ailesi |
+| 316 orkide | Yazdır'ın pembesi, aynı ton ailesi |
+
+Kalan tek yer Yazdır'ın pembesiyle kırmızılar arasındaki gül. Oradaki ilk aday
+(`#ff386a`) `--bad` gibi okunacak kadar sıcaktı, o yüzden açıklık öteki altının
+bandına çekildi. Sonuç `#7e304e` / `#f04c8b`: kontrast **8,7 / 5,1**, `--bad`'e
+**ΔE 36,3**, en yakın bölüme **ΔE 23,1** — yani önceki en dar çift olan 20,5'ten
+**daha iyi** ayrılmış. `renk.spec.ts` artık yedi bölümü ölçüyor.
+
+### Ölçülenler
+
+```
+dist/index.html    559 849 bayt   (öncesi 542 276 — yeni sekme, deste, panel başlığı)
+açılış             86 ms medyan · 147 ms en kötü   (7 koşu, file://, 1920×1080)
+havuz              367 kart → 114 deste, en kalabalığı 8
+```
+
+Açılış ölçümü **86 ms**; 2026-08-26'daki 73 ms'lik ölçüm 489 815 baytlıktı.
+70 KB büyüdü, 13 ms yavaşladı — ve bu bir tarih, kanun değil (tuzak 42):
+paket eklenince yeniden ölçülür.
+
+### Sapmalar ve bir saat
+
+- **Sekmenin yeri kullanıcı kararı:** Müsaitlik ile Program arasında. Plan
+  "Kurulum'dan hemen sonra"yı öneriyordu.
+- **Bir saat bir z-index'e gitti**, ve dersi CLAUDE.md'de **tuzak 84**:
+  `z-index` statik konumlu bir kutuda hiçbir şey yapmaz. Rozetin kutusu,
+  hesaplanmış rengi ve `elementFromPoint` cevabı vardı; kendisi
+  görünmüyordu, çünkü destenin gömülü kopyaları onun ÜSTÜNE boyanıyordu.
+  Ölçüm plumbing'i de yanılttı: `elementScreenshot` kaydırma yapıyor ve
+  ondan önce alınmış `getBoundingClientRect` ile uyuşmuyor — kesin cevap
+  kırpmasız tam ekran görüntüsünden geldi.
+- **Kendi yazdığım bir ad, yazdığım tuzağa düştü:** şeridin `aria-label`'ı
+  `"Ders araçları"` idi ve `getByLabel('ders ara')` — aynı ekrandaki arama
+  kutusu — ona da cevap verdi. Tuzak 74, düğmeler tarafından değil bir
+  **bölge adı** tarafından. `"Ders girişi araçları"` oldu.
+- **`@types/node` package.json'da vardı, `node_modules`'da yoktu**, yani
+  `npm run tipler` bu makinede hiç koşmamıştı. `npm install` yeterliydi.
+
+---
+
+## Yirmi sekizinci oturum — sürüm, çift branş, tek kart (2026-08-27)
 
 > **v1.3.0 çıktı ve doğrulandı.** Release'in dört varlığı da 200 veriyor,
 > ve **dördüncüsü ilk kez var**: `surum.json`. Ondan önceki hiçbir exe kendini
@@ -17,10 +95,6 @@ ve **dil turunun makinesi**)
 >
 > Baba artık v1.2.0'ı (ders dağılımı, şema v7) ve v1.3.0'ı birlikte alıyor;
 > ikisi de aylardır `main`'de duruyordu ama hiç yayınlanmamıştı.
-
----
-
-## Yirmi sekizinci oturum — sürüm, çift branş, tek kart (2026-08-27)
 
 **Makine değişti: artık Windows 11**, Fedora değil. `cargo` yok (exe yalnız
 CI'da doğuyor), Playwright chromium kurulu, `npm run kontrol` bu makinede ilk

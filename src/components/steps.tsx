@@ -1,4 +1,4 @@
-// Kurulum's four lists — ONE definition, three readers.
+// Kurulum's three lists — ONE definition, three readers.
 //
 // The list used to be written out three times (setup/index.tsx, Ribbon.tsx and
 // setup/Progress.tsx), which was survivable while a step was a label and a
@@ -44,17 +44,25 @@ export const roomIcon = (
   </svg>
 );
 
-/** An open book: the one thing here that is neither a person nor a place. */
-const lessonIcon = (
-  <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
+/**
+ * An open book: the one thing here that is neither a person nor a place.
+ *
+ * Drawn at 22px on a 0..24 box rather than the 18px of the three beside it,
+ * because its reader changed: Dersler stopped being step four of Kurulum and
+ * became a destination in the top bar, where the tab icons are 22. It is still
+ * ONE drawing — a second open book kept at another size is the thing
+ * `steps.tsx` exists to prevent.
+ */
+export const lessonIcon = (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
     <path
-      d="M10 5.4C8.4 4 6.4 3.4 2.6 3.4v11.6c3.8 0 5.8.6 7.4 2 1.6-1.4 3.6-2 7.4-2V3.4c-3.8 0-5.8.6-7.4 2Z"
+      d="M12 6.5C10.1 4.8 7.7 4.1 3.1 4.1v13.9c4.6 0 7 .7 8.9 2.4 1.9-1.7 4.3-2.4 8.9-2.4V4.1c-4.6 0-7 .7-8.9 2.4Z"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.7"
+      strokeWidth="1.8"
       strokeLinejoin="round"
     />
-    <path d="M10 5.4v11.6" fill="none" stroke="currentColor" strokeWidth="1.7" />
+    <path d="M12 6.5v13.9" fill="none" stroke="currentColor" strokeWidth="1.8" />
   </svg>
 );
 
@@ -104,9 +112,14 @@ export const KIND_ICON: Record<Kind, React.ReactElement> = {
   room: roomIcon,
 };
 
+/**
+ * THREE, since Dersler moved out. "Ders ekleme tarafı çok daha pratik hale
+ * getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama DERS EN ÖNEMLİ
+ * KISIM." Step four of a wizard is not where the most-used screen belongs, and
+ * as a step it could only ever be reached by way of Kurulum.
+ */
 export const STEPS: StepDef[] = [
   { id: 'rooms', label: 'Derslikler', count: (d) => d.rooms.length, icon: roomIcon },
   { id: 'teachers', label: 'Öğretmenler', count: (d) => d.teachers.length, icon: teacherIcon },
   { id: 'classes', label: 'Sınıflar', count: (d) => d.classes.length, icon: classIcon },
-  { id: 'lessons', label: 'Dersler', count: (d) => d.lessons.length, icon: lessonIcon },
 ];

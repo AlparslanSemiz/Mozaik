@@ -120,33 +120,42 @@ $boyut = (Get-ChildItem -LiteralPath $Hedef -Recurse -File | Measure-Object -Pro
 Yaz ("  Kopyalandı: {0}  ({1:N0} KB)" -f $Hedef, [math]::Round($boyut / 1KB))
 
 # ------------------------------------------------------------------ kısayollar
-# Güncellemede kısayollara DOKUNULMAZ: babam onları taşımış ya da
-# yeniden adlandırmış olabilir ve bir güncelleme onu geri almamalı.
-if (-not $Guncelle) {
-  $ps    = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
-  $sunucu = Join-Path $Hedef 'sunucu.ps1'
-  $ikon   = Join-Path $Hedef 'icon.ico'
+# Güncellemede kısayol YARATILMAZ: babam onları taşımış, yeniden adlandırmış
+# ya da silmiş olabilir ve bir güncelleme o kararı geri almamalı.
+#
+# Ama DURAN bir kısayol tazelenir, ve bunun sebebi bir kusurdu: Guncelle.cmd
+# yeni icon.ico'yu kopyalıyordu, kısayolun IconLocation'ına hiç dokunmuyordu,
+# ve Windows ikonu yol+indeks üstünden önbelleğe aldığı için görev çubuğunda
+# ESKİ işaret durmaya devam ediyordu. Yani düzeltilmiş bir ikon, düzeltilmiş
+# olduğu hâlde görünmüyordu — bir kusur bildirilip düzeltildiğinde ikisinin de
+# göremediği şeyin ta kendisi. Kısayolu yeniden yazmak dosyanın kendisini
+# değiştirir, Explorer da onu yeniden okur.
+$ps     = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+$sunucu = Join-Path $Hedef 'sunucu.ps1'
+$ikon   = Join-Path $Hedef 'icon.ico'
 
-  # Pencere GİZLENMİYOR. Sunucu bu pencerede yaşıyor ve programı kapatmanın
-  # tek yolu onu kapatmak; gizli bir pencere, kapatılamayan bir program
-  # demektir. sunucu.ps1 pencerede bunu zaten yazıyor.
-  $arg = '-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $sunucu
+# Pencere GİZLENMİYOR. Sunucu bu pencerede yaşıyor ve programı kapatmanın
+# tek yolu onu kapatmak; gizli bir pencere, kapatılamayan bir program
+# demektir. sunucu.ps1 pencerede bunu zaten yazıyor.
+$arg = '-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $sunucu
 
-  $kabuk = New-Object -ComObject WScript.Shell
-  $hedefler = @(
-    (Join-Path ([Environment]::GetFolderPath('Desktop')) "$Ad.lnk"),
-    (Join-Path ([Environment]::GetFolderPath('Programs')) "$Ad.lnk")
-  )
-  foreach ($lnk in $hedefler) {
-    $k = $kabuk.CreateShortcut($lnk)
-    $k.TargetPath       = $ps
-    $k.Arguments        = $arg
-    $k.WorkingDirectory = $Hedef
-    $k.IconLocation     = "$ikon,0"
-    $k.Description      = 'Haftalık ders programı dizme aracı'
-    $k.Save()
-    Yaz "  Kısayol: $lnk"
-  }
+$kabuk = New-Object -ComObject WScript.Shell
+$hedefler = @(
+  (Join-Path ([Environment]::GetFolderPath('Desktop')) "$Ad.lnk"),
+  (Join-Path ([Environment]::GetFolderPath('Programs')) "$Ad.lnk")
+)
+foreach ($lnk in $hedefler) {
+  $vardi = Test-Path -LiteralPath $lnk
+  if ($Guncelle -and -not $vardi) { continue }
+
+  $k = $kabuk.CreateShortcut($lnk)
+  $k.TargetPath       = $ps
+  $k.Arguments        = $arg
+  $k.WorkingDirectory = $Hedef
+  $k.IconLocation     = "$ikon,0"
+  $k.Description      = 'Haftalık ders programı dizme aracı'
+  $k.Save()
+  if ($Guncelle) { Yaz "  Kısayol tazelendi: $lnk" } else { Yaz "  Kısayol: $lnk" }
 }
 
 # İndirilen paket kopyalandı; Temp'te bırakmanın bir sebebi yok.

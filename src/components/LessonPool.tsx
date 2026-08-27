@@ -58,11 +58,52 @@ interface Props {
   onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
 }
 
+/** One pile on the tray: identical blocks of one lesson, drawn as a deck. */
+interface CardStack {
+  /** React identity — the top card's, which is stable while the deck shrinks. */
+  key: string;
+  cards: PoolCard[];
+}
+
+/**
+ * Identical cards become ONE pile.
+ *
+ * A lesson asking for six single hours put six identical rectangles on the
+ * tray, six times the same `0/6`, and ate half the drawer to say one thing.
+ * "aynı dersten aynı şeyden birden fazlaysa ... kartlar stacklenmiş gibi altta
+ * da olsun ve alttaki stacklenenler de gözüksün."
+ *
+ * What is NOT happening here: nothing is being merged away. Every block keeps
+ * its own `.pool-card`, so the count in the head, `pendingBlocks()` and the
+ * forty tests that ask how much is left all keep meaning the same thing. The
+ * deck is a LAYOUT of the same elements (see `.pool-stack` in styles.css).
+ *
+ * Consecutive runs and not a `Map`: the tray is already sorted row -> top ->
+ * size (see `buildPool` in Program.tsx), so identical cards are already
+ * neighbours, and grouping in place is what keeps the tray running the same
+ * way down as the grid rows the cards are aimed at. Same shape as the run
+ * reading in `placedBlocks()`.
+ */
+function stackCards(cards: PoolCard[]): CardStack[] {
+  const piles: CardStack[] = [];
+  for (const c of cards) {
+    const last = piles[piles.length - 1];
+    const head = last?.cards[0];
+    if (last !== undefined && head !== undefined && head.lessonId === c.lessonId && head.size === c.size) {
+      last.cards.push(c);
+    } else {
+      piles.push({ key: c.key, cards: [c] });
+    }
+  }
+  return piles;
+}
+
 export default function LessonPool({ cards, completed, onStart }: Props) {
   // The cards ARE the hours left now: one card per block still owed, so adding
   // up their sizes is the answer. Summing `total - placed` per card would count
   // one lesson's whole remainder once per card it still has out.
   const remainingHours = cards.reduce((sum, c) => sum + c.size, 0);
+  const stacks = stackCards(cards);
   // Read from storage on every mount, so the tab switch that unmounts this
   // component cannot lose either setting (pitfall 18 does not apply to a
   // preference that lives outside React).
@@ -177,24 +218,59 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
       </div>
 
       <div className="pool-list">
-        {cards.map((c) => (
+        {stacks.map((s) => (
           <div
-            key={c.key}
-            className="pool-card"
-            data-size={c.size}
-            style={{ background: paletteColor(c.color) }}
-            onPointerDown={(e) => onStart(e, c.lessonId, c.size)}
-            title={`${c.top} · ${c.bottom} ${c.subject} · ${c.size} saatlik blok · dersin ${c.placed}/${c.total} saati yerleşti`}
+            key={s.key}
+            className="pool-stack"
+            data-count={s.cards.length}
+            // How many layers peek out below the top card. Capped at two, so a
+            // lesson owing eight hours is a deck and not a staircase; the badge
+            // carries the real number.
+            style={{ "--layers": Math.min(s.cards.length - 1, 2) } as React.CSSProperties}
           >
-            <span className="card-top">{c.top}</span>
-            <span className="card-bottom">{c.bottom}</span>
-            {/* Two cards of one lesson are otherwise identical, and the whole
-                point of splitting them is that they do different things when
-                dropped. The mark says which. */}
-            <span className="card-size">{c.size} saat</span>
-            <span className="counter">
-              {c.placed}/{c.total}
-            </span>
+            {s.cards.map((c, i) => (
+              <div
+                key={c.key}
+                className="pool-card"
+                data-size={c.size}
+                // Everything under the top card is DRAWING. It is the same
+                // block and would do the same thing if dropped, so it takes no
+                // pointer and says nothing to a screen reader. It still carries
+                // its full text: `.pool-card` counts one WAITING BLOCK, here
+                // and in the forty tests that ask how much is left.
+                aria-hidden={i > 0 ? true : undefined}
+                style={{ background: paletteColor(c.color) }}
+                onPointerDown={i === 0 ? (e) => onStart(e, c.lessonId, c.size) : undefined}
+                title={
+                  i > 0
+                    ? undefined
+                    : `${c.top} · ${c.bottom} ${c.subject} · ${c.size} saatlik blok` +
+                      (s.cards.length > 1 ? ` · ${s.cards.length} tane bekliyor` : "") +
+                      ` · dersin ${c.placed}/${c.total} saati yerleşti`
+                }
+              >
+                <span className="card-top">{c.top}</span>
+                <span className="card-bottom">{c.bottom}</span>
+                {/* Two cards of one lesson are otherwise identical, and the
+                    whole point of splitting them is that they do different
+                    things when dropped. The mark says which. */}
+                <span className="card-size">
+                  {c.size} saat
+                  {/* The deck shows at most three edges, so past three the eye
+                      would have to count what it cannot see. It rides the block
+                      length rather than a corner: "1 saat ×6" is the sentence,
+                      and a corner mark would have to push the card's own words
+                      off centre to find room. On the TOP card only — it is one
+                      fact about the pile, not a fact about a card. */}
+                  {i === 0 && s.cards.length > 1 && (
+                    <b className="stack-badge">×{s.cards.length}</b>
+                  )}
+                </span>
+                <span className="counter">
+                  {c.placed}/{c.total}
+                </span>
+              </div>
+            ))}
           </div>
         ))}
       </div>

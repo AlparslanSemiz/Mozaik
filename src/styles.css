@@ -175,9 +175,27 @@
      as they were and the other four re-run under contrast 5.0-13.5, dE >=36
      from the functional three and dE >=20 from the two fixed ones. The worst
      pair was Müsaitlik/Kontrol at dE 16.0; it is 20.5 now. Nothing else moved:
-     the tightest functional distance is still Program's 52.5. */
+     the tightest functional distance is still Program's 52.5.
+
+     A SEVENTH was searched on 2026-08-27, when Dersler became a tab, and the
+     line above turned out to be literally true: six sections DO fill what is
+     left. The whole wheel was swept under the same constraints in BOTH themes
+     at once, and every arc that cleared them landed inside something:
+
+       hue  19   orange      --warn / --bad's own half
+       hue  70   chartreuse  --ok's third
+       hue 257   indigo      Kontrol's violet, one hue family
+       hue 316   orchid      Yazdır's pink, one hue family
+
+     So the seventh was taken from the one place with room left — the rose
+     between Yazdır's pink and the reds — and held DOWN to the lightness the
+     other six sit at, because the first candidate there (#ff386a) was hot
+     enough to read as --bad. Measured: contrast 8.7 light / 5.1 dark, dE 36.3
+     from --bad, and dE 23.1 from its nearest neighbour, which makes it better
+     separated than the pair that was the worst before it. */
   --sec-setup: #1f4098;
   --sec-availability: #9e25b6;
+  --sec-lessons: #7e304e;
   --sec-program: #157184;
   --sec-check: #4e19a9;
   --sec-print: #960862;
@@ -444,6 +462,7 @@
      themes without touching a byte here. */
   --sec-setup: #6e8de7;
   --sec-availability: #c86ae7;
+  --sec-lessons: #f04c8b;
   --sec-program: #58cde4;
   --sec-check: #a080ea;
   --sec-print: #e55db7;
@@ -640,6 +659,7 @@ textarea {
    names and no colour is ever written in the JSX. */
 [data-section="setup"] { --sec: var(--sec-setup); }
 [data-section="availability"] { --sec: var(--sec-availability); }
+[data-section="lessons"] { --sec: var(--sec-lessons); }
 [data-section="program"] { --sec: var(--sec-program); }
 [data-section="check"] { --sec: var(--sec-check); }
 [data-section="print"] { --sec: var(--sec-print); }
@@ -2119,6 +2139,90 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   display: none;
 }
 
+/* ONE PILE. Six identical cards used to lie side by side saying `0/6` six
+   times; now they are a deck and the tray gets the room back.
+
+   Every block still has its own `.pool-card` — the merge is a LAYOUT, not a
+   grouping, because `.pool-card` means "one waiting block" in the head count,
+   in `pendingBlocks()` and in forty tests. What changes is where they sit.
+
+   The step is in rem so the deck follows --ui-scale like everything the reader
+   can make bigger; the padding is what the peeking layers stand in, so the
+   stack's box grows with them rather than letting them hang out over the row
+   below. `--layers` is written by React and capped at two: past three edges
+   the eye cannot count anyway, and the badge is there for the real number. */
+.pool-stack {
+  --stack-step: .3rem;
+  position: relative;
+  flex: 0 0 auto;
+  padding-bottom: calc(var(--layers, 0) * var(--stack-step));
+}
+
+/* The buried cards. Same box as the top one — `bottom` gives back exactly the
+   padding above — shifted down and put behind. `pointer-events: none` is what
+   keeps a drag honest: whatever the pointer lands on, it lands on the card that
+   carries the handler, and every card in a pile is the same block anyway. */
+.pool-stack > .pool-card:not(:first-child) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: calc(var(--layers, 0) * var(--stack-step));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* A buried card is an EDGE, not a card: its own words sit 5px lower than the
+   ones on top, so the tail of a second `0/4` was poking out under the pile.
+
+   Transparent INK and not `visibility: hidden`, which was tried and measured:
+   `innerText` is empty for a hidden element, so `allInnerTexts()` came back
+   with a blank between every pair of cards and two pool tests read the tray as
+   scattered. The contract is that a `.pool-card` is one waiting block wherever
+   it is in the pile — to a counter, to `hasText`, and to a screen reader by way
+   of the `aria-hidden` on the card itself. Colour is the only thing it gives
+   up. */
+.pool-stack > .pool-card:not(:first-child),
+.pool-stack > .pool-card:not(:first-child) * {
+  color: transparent;
+}
+
+.pool-stack > .pool-card:nth-child(2) {
+  transform: translateY(var(--stack-step));
+  z-index: 2;
+}
+
+/* The third edge and everything past it share one place: a deck of eight is
+   drawn as a deck of three, and `data-count` / the badge carry the rest. */
+.pool-stack > .pool-card:nth-child(n + 3) {
+  transform: translateY(calc(var(--stack-step) * 2));
+}
+
+/* Above its own deck. `position: relative` is not decoration and cost an hour:
+   `z-index` does NOTHING on a statically positioned box, so the top card kept
+   `z-index: 3` and still lost — a positioned element paints above a static one
+   whatever the number says. The deck's own copies were painting over the card
+   that carries the badge, which is why the badge had a box, a computed colour
+   and a hit-test answer, and still could not be seen. */
+.pool-stack > .pool-card:first-child {
+  position: relative;
+  z-index: 3;
+}
+
+/* How many are in the pile, riding the line that already says how long a block
+   is: "1 saat x6". Not a corner mark — the card's three lines are centred, and
+   anything pinned to a corner has to push them off centre to find room.
+   `--on-color` because the ground under it is a palette colour and does not
+   turn with the theme (pitfall 15). */
+.stack-badge {
+  margin-left: var(--space-1);
+  padding: 0 var(--space-1);
+  border-radius: var(--r-xs);
+  background: rgba(0, 0, 0, .17);
+  color: var(--on-color);
+  font-variant-numeric: tabular-nums;
+}
+
 .pool-card {
   color: var(--on-color);
   display: flex;
@@ -2170,6 +2274,10 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
    theme's ink: the card's ground is a palette colour and does not turn with the
    theme (pitfall 15). */
 .pool-card .card-size {
+  /* A row rather than a line: the pile badge sits beside the block length
+     ("1 saat x6") instead of on a fourth line of its own. */
+  display: inline-flex;
+  align-items: baseline;
   font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--on-color);
@@ -2367,16 +2475,52 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   margin-bottom: var(--space-5);
 }
 
+/* A heading with ONE control on the far side of it. "Excel'den yapıştır o
+   bloğun en sağında hatta en sağ üstünde bile olabilir." — the paste button
+   used to be the sixth control in the row of five that get filled in every
+   time, and opening it broke that row in half.
+
+   `baseline` and not `center`: the button's words and the heading's words sit
+   on one line, which is what makes the pair read as a heading with something
+   pinned to it rather than as two things. `flex-wrap` because at 150 % on a
+   narrow panel the two do not fit, and a clipped button is pitfall 64. */
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* The heading inside it keeps its rule and its margin collapse. */
+.panel-head > h2 {
+  margin-top: 0;
+}
+
+/* Kurulum's door to Dersler. A row, not a table line: it stopped being step
+   four this round, and drawing it as one would say it is still in there. */
+.lesson-jump {
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+}
+
 /* A panel heading is the first thing read on the sheet, so it is set like one
    and it carries the section's colour as a short rule rather than as ink —
    coloured heading TEXT would put a seventh hue in the reading column, which
    is exactly what the functional channel cannot afford. */
 .panel > h2:first-child,
+.panel > .panel-head:first-child > h2,
 .panel > h3:first-child {
   margin-top: 0;
 }
 
-.panel > h2 {
+/* `.panel-head > h2` alongside `.panel > h2` and not instead of it: the button
+   beside a heading puts a wrapper between the two, and without this line the
+   section-colour rule and the type size would quietly leave the four panels
+   that grew one. */
+.panel > h2,
+.panel > .panel-head > h2 {
   display: flex;
   align-items: center;
   gap: var(--space-4);
@@ -2386,7 +2530,8 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   line-height: var(--lh-head);
 }
 
-.panel > h2::before {
+.panel > h2::before,
+.panel > .panel-head > h2::before {
   content: '';
   flex: 0 0 auto;
   width: 4px;
@@ -2973,6 +3118,15 @@ table.list td > select.split-pick,
    a new constraint. */
 .cols.wide-left {
   grid-template-columns: minmax(0, 1fr) minmax(19rem, 20rem);
+}
+
+/* One column, still `.cols`. The Dersler tab's general list has nothing to put
+   beside it, but every list screen in this program is `.cols > div > .panel` —
+   in the stylesheet, in the panel-shape test and in the E2E helper that finds
+   "the list on this screen". A screen that stepped out of that shape for one
+   of its three modes would be the only one its own helpers could not find. */
+.cols.solo {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .cols.narrow-right {

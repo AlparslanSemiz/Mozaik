@@ -13,7 +13,7 @@
 import { useMemo } from 'react';
 import { buildCapacity } from '../../feasibility';
 import type { ReportRow } from '../../feasibility';
-import { genderLabel, roomClasses, subjectTeachers, usedSubjects } from '../../entities';
+import { genderLabel, roomClasses, subjectOptions, subjectTeachers } from '../../entities';
 import type { Gender } from '../../types';
 
 /** The three values, in the order the teacher list offers them. */
@@ -104,7 +104,11 @@ export default function Summary({ state, step }: { state: State; step: StepId })
   }
 
   if (step === 'teachers') {
-    const subjects = usedSubjects(state);
+    // In the school's own order (Ayarlar > Branşlar), then whatever a teacher
+    // carries that the list does not — `subjectOptions` already answers exactly
+    // that. It used to be `usedSubjects`, i.e. the order the teachers happened
+    // to be typed in, which is an order nobody chose and nobody can change.
+    const subjects = subjectOptions(state).filter((name) => subjectTeachers(state, name).length > 0);
     // Counted, not estimated — and the blank is counted too, because the
     // number worth seeing is how many rows are still to be filled in.
     const byGender = GENDERS.map((g) => ({

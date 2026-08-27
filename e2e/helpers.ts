@@ -63,6 +63,22 @@ export async function openSetup(page: Page, step: string) {
 }
 
 /**
+ * Dersler, which is a TAB now rather than step four of Kurulum.
+ *
+ * `exact: true` is not optional here: `getByRole(name:)` matches on substring
+ * and ignores case (pitfalls 49 and 74), and "Dersler" appears inside
+ * "Dersleri yapıştır", "Ders araçları" and Kurulum's own "Dersler sekmesi"
+ * button. `mode` picks which way round the entry runs; 'all' is the general
+ * list, which is the shape this screen had before it moved.
+ */
+export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' = 'all') {
+  await page.getByRole('button', { name: 'Dersler', exact: true }).click();
+  const label = mode === 'class' ? 'Sınıftan' : mode === 'teacher' ? 'Öğretmenden' : 'Genel';
+  await page.getByRole('button', { name: label, exact: true }).click();
+  await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(label);
+}
+
+/**
  * The same for Ayarlar. School days, the bell, the four rules and the subject
  * list all live there now, not in Kurulum.
  */
@@ -467,6 +483,22 @@ export const SCENES: Scene[] = [
     },
   },
   { name: '3-musaitlik', go: tab('Müsaitlik') },
+  {
+    // The tab this round created, in the mode it opens in. The picture worth
+    // having is the shortening: the form has no class box, and the strip and
+    // the right-hand column together say which class it is filling in.
+    name: '3b-dersler-siniftan',
+    go: async (page) => {
+      await openLessons(page, 'class');
+    },
+  },
+  {
+    // ...and the tray with its decks, which is the other thing that changed.
+    name: '3c-dersler-genel',
+    go: async (page) => {
+      await openLessons(page, 'all');
+    },
+  },
   {
     name: '4-program',
     go: async (page) => {

@@ -10,7 +10,7 @@
 // the round trip through a real input.
 
 import { expect, test } from './kapan';
-import { openSetup, openWithSample, mainList } from './helpers';
+import { openSetup, openLessons, openWithSample, mainList } from './helpers';
 
 const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');
 
@@ -95,7 +95,7 @@ test.describe('49. Liste araçları', () => {
 
   test('dersler listesi de aranıyor — 99 satırın olduğu tek yer', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
     await expect(rows(page)).toHaveCount(99);
 
     // The teacher's SHORT form is what the grid says, so it is what gets

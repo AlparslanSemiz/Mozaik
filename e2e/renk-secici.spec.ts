@@ -70,7 +70,11 @@ for (const theme of ['light', 'dark'] as const) {
 
     const ink = (await tokens(page, ['--on-color']))['--on-color'];
 
-    for (const sel of ['table.grid .card', '.pool-card']) {
+    // `:not([aria-hidden])` is the TOP of each pile. Identical blocks of one
+    // lesson are drawn as a deck now, and the cards under the top one paint no
+    // words at all (transparent ink, see `.pool-stack` in styles.css) — asking
+    // whether ink nobody can see is readable would be asking nothing.
+    for (const sel of ['table.grid .card', '.pool-card:not([aria-hidden])']) {
       const cards = page.locator(sel);
       expect(await cards.count(), `${sel} hiç çizilmemiş`).toBeGreaterThan(0);
       const measured = await cards.evaluateAll((nodes) =>

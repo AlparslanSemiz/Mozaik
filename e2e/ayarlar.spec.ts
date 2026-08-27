@@ -75,9 +75,9 @@ test.describe('6. Gün ve ders saatleri', () => {
 // button that cannot be undone must no longer sit next to a button used daily.
 
 test.describe('15. Ayarlar sekmesi', () => {
-  test('altıncı sekme var ve dört bölümü açılıyor', async ({ page }) => {
+  test('kendi sekmesi var ve dört bölümü açılıyor', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.tabstrip .tab')).toHaveCount(6);
+    await expect(page.locator('.tabstrip .tab')).toHaveCount(7);
     await expect(page.getByRole('button', { name: 'Ayarlar' })).toBeVisible();
 
     for (const [section, heading] of [
@@ -91,14 +91,17 @@ test.describe('15. Ayarlar sekmesi', () => {
     }
   });
 
-  test('Kurulum dört adıma indi, okul ayarları orada değil', async ({ page }) => {
+  // Three, not four: Dersler left for a tab of its own this round, and it left
+  // for the reason the reader gave — "ders en önemli kısım", which is not a
+  // thing you reach through step four of a wizard.
+  test('Kurulum ÜÇ adıma indi, okul ayarları da dersler de orada değil', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Kurulum' }).click();
 
     const steps = await page.locator('.ribbon .step').allInnerTexts();
-    expect(steps).toHaveLength(4);
+    expect(steps).toHaveLength(3);
     expect(steps.join(' ')).toContain('Derslikler');
-    expect(steps.join(' ')).toContain('Dersler');
+    expect(steps.join(' ')).not.toContain('Dersler');
     expect(steps.join(' ')).not.toContain('Okul');
     expect(steps.join(' ')).not.toContain('Kurallar');
     expect(steps.join(' ')).not.toContain('Branşlar');

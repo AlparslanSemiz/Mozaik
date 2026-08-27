@@ -70,6 +70,19 @@ export interface Facet<T> {
   of: (item: T) => string | string[];
   /** What the chip row is called. */
   label: string;
+  /**
+   * Where a group stands, when the chips have an order of their own.
+   *
+   * Optional, and the default stays the Turkish alphabet — for gender, for
+   * rooms, for anything whose groups have no order but their names. Subjects
+   * DO have one: Ayarlar > Branşlar is a hand-sorted list, and a chip row that
+   * ignored it would put the school's own order next to an alphabet nobody
+   * asked for.
+   *
+   * A callback rather than a list, because this file must not learn what a
+   * `State` is: the caller knows the order, this only knows to ask.
+   */
+  order?: (value: string) => number;
 }
 
 /** One facet's answer for one row, always as a list and never with blanks. */
@@ -207,7 +220,11 @@ export function facetCounts<T>(
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
   }
+  // The facet's own order first, the alphabet as the tie-break AND as the
+  // default: `order` missing means every group ranks the same and the second
+  // term decides, which is exactly what this line did before it took a rank.
+  const rank = facet.order ?? (() => 0);
   return [...counts.entries()]
     .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => compareTr(a.value, b.value));
+    .sort((a, b) => rank(a.value) - rank(b.value) || compareTr(a.value, b.value));
 }

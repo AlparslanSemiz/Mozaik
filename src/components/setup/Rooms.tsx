@@ -42,10 +42,20 @@ export default function Rooms({ state, change }: PanelProps) {
     change,
   });
   const [newRoom, setNewRoom] = useState('');
+  const [pasteOpen, setPasteOpen] = useState(false);
 
   return (
     <div className="panel step-panel">
-      <h2>Derslikler ({state.rooms.length})</h2>
+      {/* The paste button rides the HEADING, not the form row: "Excel'den
+          yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
+          All four panels put it in the same corner, so the shape of a panel
+          stays one shape. */}
+      <div className="panel-head">
+        <h2>Derslikler ({state.rooms.length})</h2>
+        <button className="btn" onClick={() => setPasteOpen(true)}>
+          Excel'den yapıştır
+        </button>
+      </div>
       <p className="hint">
         Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate
         konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.
@@ -73,14 +83,17 @@ export default function Rooms({ state, change }: PanelProps) {
         >
           Ekle
         </button>
-        <Paste
-          title="Derslikleri yapıştır"
-          example="Derslik adı (her satırda bir tane)"
-          parse={parseRooms}
-          rowText={(x) => x.name}
-          onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
-        />
       </div>
+
+      <Paste
+        open={pasteOpen}
+        close={() => setPasteOpen(false)}
+        title="Derslikleri yapıştır"
+        example="Derslik adı (her satırda bir tane)"
+        parse={parseRooms}
+        rowText={(x) => x.name}
+        onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
+      />
 
       {state.rooms.length > 0 && (
         <ListTools

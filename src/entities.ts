@@ -296,6 +296,48 @@ export function subjectOptions(d: State): string[] {
 }
 
 /**
+ * WHERE a subject stands in the school's own order.
+ *
+ * "Branşa göre sıralandığında ayarlardaki branş sırasına göre olması gerek.
+ * alfabetik olarak değil." Ayarlar > Branşlar is a hand-ordered list — the
+ * same grip and the same `useRowOrder` as Kurulum's three — and until now that
+ * order reached exactly one place, the Branş dropdown. Sorting a teacher list
+ * by subject answered in the Turkish alphabet instead, which is an order
+ * nobody chose.
+ *
+ * Built from `subjectOptions` and not from `settings.subjects`, so the two
+ * always agree: a subject only a teacher carries sits after the school's list
+ * in the dropdown, and it sorts there too. Keyed by `subjectKey`, because
+ * "Matematik" and "matematik" are one subject everywhere else in this file.
+ *
+ * A Map and not a comparator: the callers need a NUMBER — `listview.ts` sorts
+ * chips by one and `byNumberThen`-style sorters read one — and it knows nothing
+ * about `State` by design.
+ */
+export function subjectRank(d: State): Map<string, number> {
+  const rank = new Map<string, number>();
+  for (const [i, name] of subjectOptions(d).entries()) rank.set(subjectKey(name), i);
+  return rank;
+}
+
+/**
+ * The rank of the FIRST of a teacher's subjects to appear in the school's list.
+ *
+ * A teacher holding two belongs under either chip already (see the `brans`
+ * facet), so sorting them by their first subject alone put "Türkçe ve Edebiyat"
+ * wherever Türkçe happened to fall and never where Edebiyat did. Unknown or
+ * blank sorts LAST rather than first: an empty subject is a row still to be
+ * filled in, and the top of the list is where the eye starts.
+ */
+export function teacherRank(rank: Map<string, number>, t: Teacher): number {
+  let best = Number.MAX_SAFE_INTEGER;
+  for (const name of teacherSubjects(t)) {
+    best = Math.min(best, rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER);
+  }
+  return best;
+}
+
+/**
  * How many teachers carry this subject. Deleting one is refused while > 0.
  *
  * A SECOND subject counts exactly as much as a first: leaving it out would let

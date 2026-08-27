@@ -167,6 +167,28 @@ describe('facetCounts', () => {
     const all = facetCounts(ROWS, EMPTY_QUERY, CFG, 'brans').reduce((n, f) => n + f.count, 0);
     expect(all).toBe(ROWS.length - 1); // Çetin Gül'ün branşı yok
   });
+
+  // A facet may carry an order of its own — subjects do, because Ayarlar >
+  // Branşlar is a hand-sorted list and the chip row has to read the same way.
+  it('kendi sırası olan bir süzgeç ALFABEYİ değil o sırayı kullanıyor', () => {
+    const ordered = {
+      ...CFG,
+      facets: [
+        { ...CFG.facets![0]!, order: (v: string) => (v === 'Matematik' ? 0 : 1) },
+        CFG.facets![1]!,
+      ],
+    };
+    expect(facetCounts(ROWS, EMPTY_QUERY, ordered, 'brans').map((f) => f.value)).toEqual([
+      'Matematik',
+      'Fizik',
+    ]);
+    // ...and the alphabet is still what decides between equals, which is what
+    // the row did before it took a rank at all.
+    expect(facetCounts(ROWS, EMPTY_QUERY, CFG, 'brans').map((f) => f.value)).toEqual([
+      'Fizik',
+      'Matematik',
+    ]);
+  });
 });
 
 describe('isFiltering ve canReorder', () => {

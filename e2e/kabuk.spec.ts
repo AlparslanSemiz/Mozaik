@@ -48,13 +48,13 @@ test.describe('23. Sekmeler', () => {
     );
   });
 
-  test('altı simge birbirine benzemiyor', async ({ page }) => {
+  test('yedi simge birbirine benzemiyor', async ({ page }) => {
     await open(page);
     const paths = await page
       .locator('.tabstrip .tab svg')
       .evaluateAll((nodes) => nodes.map((n) => n.innerHTML.replace(/\s+/g, '')));
-    expect(paths).toHaveLength(6);
-    expect(new Set(paths).size).toBe(6);
+    expect(paths).toHaveLength(7);
+    expect(new Set(paths).size).toBe(7);
   });
 });
 

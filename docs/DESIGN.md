@@ -61,7 +61,13 @@ olur ↔ olmaz ayrımı        23,8 açık · 28,3 koyu   ΔE
 **Fıstık yeşili ve turuncu ölçüldü ve ALINMADI.** 360 hue taraması: 80–140
 bandında kâğıtta 4,5:1 tutan ve `--ok`'a ΔE > 32 kalan **hiçbir renk yok**
 (en iyisi 28,6); turuncunun tamamı `--bad`/`--warn`'a 21–28. Yeşilin üçte biri
-ve sıcak yarı işlevsel kanalın; altı sekme kalan yasal alanı zaten dolduruyor.
+ve sıcak yarı işlevsel kanalın; **altı sekme kalan yasal alanı zaten
+dolduruyordu** ve 2026-08-27'de yedinci arandığında bu cümle harfiyen doğru
+çıktı: taranan her serbest yay ya işlevsel bir rengin ailesine (turuncu 19 →
+`--warn`/`--bad`, limon 70 → `--ok`) ya komşu bir sekmenin ailesine düşüyordu
+(çivit 257 → Kontrol, orkide 316 → Yazdır). Yedincisi Yazdır'ın pembesiyle
+kırmızılar arasındaki gülden alındı ve öteki altının açıklığına **çekildi**:
+oradaki ilk aday (`#ff386a`) `--bad` gibi okunacak kadar sıcaktı.
 Turkuaz istendi ve **zaten Program'ın rengi**.
 
 **İlke 7 artık bir varsayım değil.** "Hedef makine yavaş" deniyordu ve hiç
@@ -138,7 +144,8 @@ tokeninden biri okunur (tuzak 57).
 | `.topbar` | tek satır. Üstünde 4px'lik **bölüm rengi**, içinde o rengin %10 washı |
 | `.tabstrip` `.tab` `.tab-label` | seçili sekme bölüm rengiyle **dolu**. `flex: 0 0` — asla kırpılmaz |
 | `.health` `.health-dot` `.health-text` | **durum çipi**: her sekmede, sorunu ADLANDIRIR. Yer daralınca noktasına iner |
-| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, **altı sekmede de**. Basılı kontrol `--sec` giyer. `-label` bir grubun BAŞLIĞI (büyük harf, soluk), `-value` bir grubun DEĞERİ (normal, tam mürekkep) |
+| `.panel-head` | başlık + tek bir kontrol (üç Kurulum panelinde ve Dersler'de "Excel'den yapıştır"). `baseline` hizalı, sarabilir |
+| `.ribbon` `.ribbon-sep` `.ribbon-label` `.ribbon-value` | sekmenin araçları, **yedi sekmede de**. Basılı kontrol `--sec` giyer. `-label` bir grubun BAŞLIĞI (büyük harf, soluk), `-value` bir grubun DEĞERİ (normal, tam mürekkep) |
 | `.topbar-doc` `.app-title` `.plan-picker` | hangi belge açık |
 | `.btn-group` `.topbar-sep` `.spacer` | bitişik düğme kümesi · ayraç · itici |
 
@@ -175,13 +182,14 @@ tokeninden biri okunur (tuzak 57).
 | `.can-ok` `.can-warn` `.can-no` | hedef satırın TAMAMI, sürükleme başında bir kez (`drag.ts`) |
 | `.drop-ok` `.drop-warn` `.drop-blocked` | imlecin altındaki blok — zayıf katmanı ezer |
 | `.pool` `.pool-split` `.pool-card` … | havuz çekmecesi, boyu sürüklenir |
+| `.pool-stack` · `.stack-badge` | aynı dersin aynı boydaki blokları TEK deste; en çok iki katman görünür, gerisini rozet söyler (`1 saat ×6`). `.pool-card` sayısı DEĞİŞMEZ — deste bir düzen, bir gruplama değil |
 | `.pool-card .card-size` · `.pool-card[data-size='2']` | kartın kaç saat olduğu: yazıyla ve **iki kat genişlikle**. Bir ders birden çok kart bırakır (`2+1` → bir ikili, bir tekli), ve hangisinin sürüklendiği kaç hücrenin yanacağını belirler |
 | `.inspect` | bir adı varlık paneline bağlayan bağlantı |
 
 ### Kurulum · Müsaitlik · Baskı
 | Sınıf | İş |
 |---|---|
-| `.step` `.step-no` `.step-count` `.step-icon` | dört adım, ribbon'un içinde |
+| `.step` `.step-no` `.step-count` `.step-icon` | üç adım, ribbon'un içinde. Dersler 2026-08-27'de kendi sekmesine çıktı |
 | `.split-pick` | Dersler'deki dağılım seçicisi. **Kendi genişliği YOK** (`width: auto`): etiketleri saatle büyüyor (`2+1` üç karakter, on bir tek saat yirmi bir), sabit bir genişlik %150'de `1+1+1+1+` çizmişti. Sınıf `<select>`'in **kendi üstünde**, yoksa `table.list td > select { width: 100% }` onu yener (tuzak 34) |
 | `.intro-line` · `.btn.quiet` | Kurulum'da ilk kullanımda çıkan tek satırlık örnek veri ipucu, ve onu kapatan sessiz düğme — teklifin yanındaki eşit ağırlıkta ikinci bir düğme, bir kapatmayı bir karara çevirirdi |
 | `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi; simge `steps.tsx`'in `KIND_ICON`'undan |
@@ -217,7 +225,7 @@ Hiçbiri `State`'e girmez, hiçbiri yedeğe yazılmaz, hepsi
    çıkıyorsa `src/toolState.ts`'e taşınır (tuzak 18).
    **Şeridin şekli sabittir** ve `e2e/serit.spec.ts` beş maddesini de ölçer:
    başlıkla açılır · gruplar `Sep`/`Spacer` ile bölünür · her düğmede simge VE
-   kelime · her kontrol `--ribbon-h` yüksekliğinde · altı sekmede de var.
+   kelime · her kontrol `--ribbon-h` yüksekliğinde · yedi sekmede de var.
    Üç varlık türünün simgesi `KIND_ICON`'dan gelir, istisnasız.
 2. Yüzey `.panel`, düzen `.cols` ya da akan `.panel-grid`.
 3. Soru soracaksan `useDialogs()`. `window.confirm` **yok**.

@@ -29,7 +29,10 @@ import {
   duplicateShorts,
   setSubjectShort,
   respreadColors,
+  subjectKey,
   subjectOptions,
+  subjectRank,
+  teacherRank,
   subjectShort,
   subjectTeachers,
   usedSubjects,
@@ -639,6 +642,54 @@ describe('branş listesi', () => {
     // otherwise the dropdown could not show his current subject and would
     // silently change it on the first render
     expect(subjectOptions(d)).toContain('Robotik');
+  });
+});
+
+describe('subjectRank ve teacherRank', () => {
+  const teacher = (subject: string, subject2 = '') => ({
+    id: 't', name: 'Ad Soyad', short: 'AS', subject, subject2,
+    gender: '' as const, color: 0,
+    limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+  });
+
+  it('sıra AYARLARDAKİ listeden geliyor, alfabeden değil', () => {
+    let d = emptyState();
+    d = { ...d, settings: { ...d.settings, subjects: ['Zooloji', 'Almanca', 'Matematik'] } };
+    const rank = subjectRank(d);
+    expect(rank.get('zooloji')).toBe(0);
+    expect(rank.get('almanca')).toBe(1);
+    expect(rank.get('matematik')).toBe(2);
+  });
+
+  it('büyük/küçük harf aynı branştır', () => {
+    let d = emptyState();
+    d = { ...d, settings: { ...d.settings, subjects: ['Matematik'] } };
+    expect(subjectRank(d).get(subjectKey('MATEMATİK'))).toBe(0);
+  });
+
+  it('listede olmayan branş listenin ARDINDAN geliyor', () => {
+    let d = emptyState();
+    d = { ...d, settings: { ...d.settings, subjects: ['Matematik'] } };
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik', subject2: '', gender: '' });
+    const rank = subjectRank(d);
+    expect(rank.get('matematik')).toBe(0);
+    expect(rank.get('robotik')).toBe(1);
+  });
+
+  it('çift branşlı hoca İKİ branşının ÖNDE olanına göre sıralanıyor', () => {
+    let d = emptyState();
+    d = { ...d, settings: { ...d.settings, subjects: ['Edebiyat', 'Matematik', 'Türkçe'] } };
+    const rank = subjectRank(d);
+    // Türkçe is last in the list, Edebiyat first: the pair ranks with Edebiyat.
+    expect(teacherRank(rank, teacher('Türkçe', 'Edebiyat'))).toBe(0);
+    expect(teacherRank(rank, teacher('Türkçe'))).toBe(2);
+  });
+
+  it('branşsız öğretmen SONA düşüyor', () => {
+    let d = emptyState();
+    d = { ...d, settings: { ...d.settings, subjects: ['Matematik'] } };
+    const rank = subjectRank(d);
+    expect(teacherRank(rank, teacher(''))).toBeGreaterThan(teacherRank(rank, teacher('Matematik')));
   });
 });
 

@@ -23,8 +23,12 @@
 import { expect, test } from './kapan';
 import { openWithSample } from './helpers';
 
-const SEKMELER = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'];
-const ADIMLAR = ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler'];
+const SEKMELER = [
+  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+];
+const ADIMLAR = ['Derslikler', 'Öğretmenler', 'Sınıflar'];
+// Dersler is a tab now, and its three modes draw three different screens.
+const DERS_MODLARI = ['Sınıftan', 'Öğretmenden', 'Genel'];
 const BOLUMLER = ['Okul', 'Kurallar', 'Branşlar', 'Görünüm', 'Veri'];
 
 test.describe('80. Ekranda okunan metin', () => {
@@ -49,6 +53,12 @@ test.describe('80. Ekranda okunan metin', () => {
         for (const adim of ADIMLAR) {
           await page.locator('.ribbon .step', { hasText: adim }).click();
           await bak(`Kurulum → ${adim}`);
+        }
+      }
+      if (sekme === 'Dersler') {
+        for (const mod of DERS_MODLARI) {
+          await page.getByRole('button', { name: mod, exact: true }).click();
+          await bak(`Dersler → ${mod}`);
         }
       }
       if (sekme === 'Ayarlar') {

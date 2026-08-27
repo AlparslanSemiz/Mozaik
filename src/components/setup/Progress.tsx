@@ -6,17 +6,19 @@
 // done, and if not, what is left?
 //
 // Nothing here is new information: every number is already on this screen or
-// one tab away. It is arranged as the four steps, in order, with the one thing
-// each of them is for.
+// one tab away. It is arranged as the three steps, in order, with the one thing
+// each of them is for — and then the door to Dersler, which used to be step
+// four and is a tab of its own now.
 
 import type { State } from '../../types';
 import type { StepId } from '../../toolState';
-import { STEPS } from '../steps';
+import { STEPS, lessonIcon } from '../steps';
 
 interface Props {
   state: State;
   step: StepId;
   setStep: (next: StepId) => void;
+  goLessons: () => void;
 }
 
 /**
@@ -28,9 +30,6 @@ interface Props {
  */
 function todos(d: State): Record<StepId, string> {
   const noRoom = d.classes.filter((c) => c.roomId === null).length;
-  const withoutLessons = d.classes.filter(
-    (c) => !d.lessons.some((l) => l.classId === c.id),
-  ).length;
   const idleTeachers = d.teachers.filter(
     (t) => !d.lessons.some((l) => l.teacherId === t.id),
   ).length;
@@ -49,17 +48,28 @@ function todos(d: State): Record<StepId, string> {
         : noRoom > 0
           ? `${noRoom} sınıfın dersliği seçilmedi`
           : '',
-    lessons:
-      d.lessons.length === 0
-        ? 'Henüz ders yok'
-        : withoutLessons > 0
-          ? `${withoutLessons} sınıfın dersi yok`
-          : '',
   };
 }
 
-export default function Progress({ state, step, setStep }: Props) {
+/**
+ * The one line about lessons, now that they are not a step here.
+ *
+ * It stays on this screen because this is where "am I done?" is asked, and
+ * "four classes have no lessons" is the answer nobody would go looking for. It
+ * is a POINTER, not a step: the row it used to be could only be reached
+ * through Kurulum, which is exactly what moving it out was for.
+ */
+function lessonTodo(d: State): string {
+  const withoutLessons = d.classes.filter(
+    (c) => !d.lessons.some((l) => l.classId === c.id),
+  ).length;
+  if (d.lessons.length === 0) return 'Henüz ders yok';
+  return withoutLessons > 0 ? `${withoutLessons} sınıfın dersi yok` : '';
+}
+
+export default function Progress({ state, step, setStep, goLessons }: Props) {
   const todo = todos(state);
+  const lessons = lessonTodo(state);
   const lines = STEPS.map((s) => ({ ...s, count: s.count(state), todo: todo[s.id] }));
   const done = lines.filter((l) => l.count > 0 && l.todo === '').length;
   const weekly = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
@@ -69,7 +79,7 @@ export default function Progress({ state, step, setStep }: Props) {
     <div className="panel">
       <h2>Kurulum durumu</h2>
       <p className="hint">
-        Dört adımın <b>{done}</b> tanesi tamam. Bir satıra tıklayarak o adıma
+        Üç adımın <b>{done}</b> tanesi tamam. Bir satıra tıklayarak o adıma
         gidebilirsiniz.
       </p>
 
@@ -111,6 +121,29 @@ export default function Progress({ state, step, setStep }: Props) {
           ))}
         </tbody>
       </table>
+
+      {/* Step four's row, as a door rather than a step. Dersler is a tab now
+          ("ders en önemli kısım"), so what is left here is the count and the
+          one thing that is still missing. */}
+      <div className="form-row spaced lesson-jump">
+        <span>
+          <b>{state.lessons.length}</b> ders
+          {lessons !== '' && (
+            <>
+              {' · '}
+              <span className={`badge ${state.lessons.length === 0 ? 'impossible' : 'tight'}`}>
+                {lessons}
+              </span>
+            </>
+          )}
+        </span>
+        <button className="btn" onClick={goLessons}>
+          <span className="step-icon" aria-hidden="true">
+            {lessonIcon}
+          </span>
+          Dersler sekmesi
+        </button>
+      </div>
 
       {/* The one number that decides whether any of this can be laid out at
           all, and it belongs at the END of setup: a week is `days x hours` per

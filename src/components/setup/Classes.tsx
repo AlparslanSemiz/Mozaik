@@ -55,12 +55,22 @@ export default function Classes({ state, change }: PanelProps) {
     change,
   });
   const [newClass, setNewClass] = useState({ name: '', roomId: '' });
+  const [pasteOpen, setPasteOpen] = useState(false);
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
   return (
     <div className="panel step-panel">
-      <h2>Sınıflar ({state.classes.length})</h2>
+      {/* The paste button rides the HEADING, not the form row: "Excel'den
+          yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
+          All four panels put it in the same corner, so the shape of a panel
+          stays one shape. */}
+      <div className="panel-head">
+        <h2>Sınıflar ({state.classes.length})</h2>
+        <button className="btn" onClick={() => setPasteOpen(true)}>
+          Excel'den yapıştır
+        </button>
+      </div>
       <p className="hint">
         Bir sınıf, aynı programı paylaşan öğrenci grubudur. <b>Derslik</b> sınıfın
         sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki
@@ -95,14 +105,17 @@ export default function Classes({ state, change }: PanelProps) {
         >
           Ekle
         </button>
-        <Paste
-          title="Sınıfları yapıştır"
-          example="Sınıf adı · Derslik adı"
-          parse={parseClasses}
-          rowText={(x) => `${x.name}${x.roomName ? ` → ${x.roomName} dersliği` : ''}`}
-          onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
-        />
       </div>
+
+      <Paste
+        open={pasteOpen}
+        close={() => setPasteOpen(false)}
+        title="Sınıfları yapıştır"
+        example="Sınıf adı · Derslik adı"
+        parse={parseClasses}
+        rowText={(x) => `${x.name}${x.roomName ? ` → ${x.roomName} dersliği` : ''}`}
+        onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
+      />
 
       {state.classes.length > 0 && (
         <ListTools

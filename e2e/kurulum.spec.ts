@@ -3,7 +3,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open, openWithSample, openSetup, openSettings, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
+import { open, openWithSample, openSetup, openLessons, openSettings, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -33,10 +33,12 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
     await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
     await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
-    await expect(page.locator('.step', { hasText: 'Dersler' })).toContainText('99');
 
-    // Kurulum is now FOUR steps: the school's own settings moved to Ayarlar
-    await expect(page.locator('.ribbon .step')).toHaveCount(4);
+    // THREE steps: the school's own settings moved to Ayarlar, and Dersler to a
+    // tab of its own — the counter for it is the pointer at the foot of
+    // "Kurulum durumu" now.
+    await expect(page.locator('.ribbon .step')).toHaveCount(3);
+    await expect(page.locator('.lesson-jump')).toContainText('99 ders');
     await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
 
     // Only the current step is on screen; the 1132-line scroll is gone
@@ -47,19 +49,17 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /^Derslikler/ })).toHaveCount(0);
 
-    // Not a locked wizard: jumping straight to the last step works
-    await openSetup(page, 'Dersler');
-    await expect(page.getByRole('heading', { name: /^Dersler/ })).toBeVisible();
-    // ...and the "Kurulum durumu" table is the second way to move between
-    // steps. The "Sonraki adım" button that used to be here went in C9: moving
-    // already had two homes (the four ribbon buttons and these rows) and a
-    // third that could only ever go FORWARDS was the weakest of them.
+    // Not a locked wizard: jumping straight to the last step works.
     await openSetup(page, 'Sınıflar');
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
+
+    // ...and the "Kurulum durumu" panel is the second way to move: its rows go
+    // to the three steps, and its foot goes to Dersler, which is a tab now.
     await page
       .locator('.panel', { hasText: 'Kurulum durumu' })
-      .getByRole('button', { name: /Dersler/ })
+      .getByRole('button', { name: 'Derslikler' })
       .click();
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Dersler');
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Derslikler');
   });
 
   test('kısaltma addan üretiliyor, çakışma uyarısı çıkıyor', async ({ page }) => {
@@ -354,7 +354,7 @@ test.describe('30. Kurulum — düzenleme', () => {
 
   test('dersin haftalık saati ve blok boyu değiştirilebiliyor', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
     const row = page.locator('table.list tbody tr').first();
     const numbers = row.locator('input[type=number]');
 
@@ -394,7 +394,7 @@ test.describe('30. Kurulum — düzenleme', () => {
     const { dragAndDrop } = await import('./helpers');
     await dragAndDrop(page);
 
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
     await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
     expect(await answerDialog(page, 'cancel')).toContain('silinecek');
   });
@@ -430,14 +430,18 @@ test.describe('31. Kurulum — sağ sütun', () => {
     await expect(page.locator('.cols aside .warn-box')).toContainText('dersliği yok');
   });
 
-  test('dersi olmayan sınıf ders adımında sayılıyor', async ({ page }) => {
-    await open(page);
+  // The sentence survived the move: Dersler is a tab now, so Kurulum keeps the
+  // COUNT and the door rather than the step. Losing this line was the risk of
+  // the move — it is the one thing on that screen nobody would go looking for.
+  test('dersi olmayan sınıf Kurulum durumunda sayılıyor', async ({ page }) => {
+    await openWithSample(page);
     await openSetup(page, 'Sınıflar');
     await page.getByPlaceholder(/Sınıf adı/).fill('700');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await openSetup(page, 'Dersler');
-    await expect(page.locator('.cols aside .warn-box')).toContainText('hiç dersi yok');
+    await expect(page.locator('.lesson-jump')).toContainText('1 sınıfın dersi yok');
+    await page.locator('.lesson-jump').getByRole('button').click();
+    await expect(page.locator('.ribbon')).toHaveAttribute('data-section', 'lessons');
   });
 });
 
@@ -460,6 +464,13 @@ test.describe('44. Panel simetrisi', () => {
       [...el.children]
         .map((c) => {
           if (c.tagName === 'H2') return 'baslik';
+          // The heading grew a button beside it ("Excel'den yapıştır" moved out
+          // of the form row), so it is wrapped. It is still the heading, and it
+          // is still first — which is the only thing this test is about.
+          if (c.classList.contains('panel-head')) return 'baslik';
+          // The paste box opens BELOW the form now instead of inside it. It is
+          // not part of the shape: it is closed on every one of these screens.
+          if (c.classList.contains('panel') && c.classList.contains('inset')) return '';
           if (c.tagName === 'P' && c.classList.contains('hint')) return 'aciklama';
           if (c.classList.contains('warn-box')) return 'uyari';
           if (c.classList.contains('form-row')) return 'ekleme';
@@ -473,10 +484,14 @@ test.describe('44. Panel simetrisi', () => {
     );
   }
 
+  // Dersler is in the list because it is the SAME kind of panel, even though it
+  // is a tab of its own now: the shape is a rule about what a reader meets
+  // first, and it does not stop applying when a screen changes address.
   for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
-    test(`Kurulum → ${step}: başlık, açıklama, ekleme, liste`, async ({ page }) => {
+    test(`${step}: başlık, açıklama, ekleme, liste`, async ({ page }) => {
       await openWithSample(page);
-      await openSetup(page, step);
+      if (step === 'Dersler') await openLessons(page);
+      else await openSetup(page, step);
       const shape = await shapeOf(page, '.panel.step-panel');
 
       // The first three are the contract. What follows them (search strip,
@@ -696,6 +711,13 @@ test.describe('63. Öğretmende cinsiyet', () => {
 test.describe('65. Kurulum listelerinin ölçüleri', () => {
   const STEPS = ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler'];
 
+  // Still four lists, at two addresses: Dersler became a tab this round. The
+  // measurements below are about the four reading as ONE program, and that
+  // claim does not weaken because one of them moved — if anything it is the
+  // claim most worth keeping after a move.
+  const goList = async (page: Page, step: string) =>
+    step === 'Dersler' ? openLessons(page, 'all') : openSetup(page, step);
+
   /** How far the row's delete button ends from the table's right edge. */
   async function deleteInset(page: Page) {
     return mainList(page)
@@ -720,7 +742,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     await openWithSample(page);
     const inset: Record<string, number> = {};
     for (const step of STEPS) {
-      await openSetup(page, step);
+      await goList(page, step);
       inset[step] = await deleteInset(page);
     }
     const values = Object.values(inset);
@@ -744,7 +766,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       await openWithSample(page);
       if (pct !== 110) await chooseScale(page, pct);
       for (const step of STEPS) {
-        await openSetup(page, step);
+        await goList(page, step);
         const spill = await page
           .locator('.cols > div .table-scroll')
           .evaluate((el) => Math.round(el.scrollWidth - el.clientWidth));
@@ -916,7 +938,7 @@ test.describe('67. Ders dağılımı', () => {
 
   test('haftalık saat ne ise dağılım seçenekleri odur', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
 
     await newHours(page).fill('3');
     await expect(newSplit(page).locator('option')).toHaveText(['1+1+1', '2+1']);
@@ -945,7 +967,7 @@ test.describe('67. Ders dağılımı', () => {
 
   test('seçilen dağılım kaydediliyor ve saat düşünce kırpılıyor', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
 
     const row = page.locator('table.list tbody tr').first();
     const hours = row.locator('input[type="number"].num').first();
@@ -962,13 +984,13 @@ test.describe('67. Ders dağılımı', () => {
     await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
 
     await page.reload();
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
     await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
   });
 
   test('havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
 
     const row = page.locator('table.list tbody tr').first();
     const name = (await row.locator('td').nth(2).innerText()).trim();
@@ -999,7 +1021,7 @@ test.describe('67. Ders dağılımı', () => {
     test(`dağılım kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({ page }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Dersler');
+      await openLessons(page);
 
       // A long week, so the longest label this box can ever hold is on screen.
       const hours = mainList(page)
@@ -1035,7 +1057,7 @@ test.describe('67. Ders dağılımı', () => {
   // different lengths for one lesson to give them.
   test('2+1 dersin ÜÇ saati de diziliyor — kaybolan saat yok', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Dersler');
+    await openLessons(page);
 
     const row = page.locator('table.list tbody tr').first();
     const hours = row.locator('input[type="number"].num').first();

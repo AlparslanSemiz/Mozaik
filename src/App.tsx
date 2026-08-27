@@ -31,6 +31,8 @@ import { surumEtiketi } from './version';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
 import Setup from './components/setup';
+import Lessons from './components/lessons';
+import { lessonIcon } from './components/steps';
 import Availability from './components/Availability';
 import Program from './components/Program';
 import { useT } from './components/T';
@@ -106,6 +108,15 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
         />
       </svg>
     ),
+  },
+  {
+    id: 'lessons',
+    label: 'Dersler',
+    // The open book, and the ONE copy of it: `steps.tsx` owns the drawing
+    // because the three kinds beside it are owned there too, and a symbol that
+    // means the same thing in two rooms has to be one drawing (pitfall 56's
+    // family — two answers to "what does this look like" is two answers).
+    icon: lessonIcon,
   },
   {
     id: 'program',
@@ -335,7 +346,7 @@ export default function App() {
   const mainRef = useRef<HTMLElement>(null);
 
   /**
-   * Every navigation goes through here — the six tab buttons, Alt+1..6, the
+   * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
    * command palette and the status chip.
    *
    * It used to wrap the change in `document.startViewTransition`, and it was
@@ -418,7 +429,7 @@ export default function App() {
   // destination, so asking "am I still all right?" meant leaving the grid.
   const status = useMemo(() => health(state), [state]);
 
-  // Ctrl/⌘+K opens the palette; Alt+1..6 go to a section.
+  // Ctrl/⌘+K opens the palette; Alt+1..7 go to a section.
   //
   // Alt and not a bare digit: a bare "5" while a lesson card has focus would
   // jump to Yazdır, and every card on the grid is a focusable button. The
@@ -430,7 +441,7 @@ export default function App() {
         setPaletteOpen((open) => !open);
         return;
       }
-      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-6]$/.test(e.key)) {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-7]$/.test(e.key)) {
         const next = TABS[Number(e.key) - 1];
         if (next !== undefined) {
           e.preventDefault();
@@ -579,7 +590,7 @@ export default function App() {
           <BrandMark />
         </span>
 
-        {/* Zone one: WHERE YOU ARE. Six destinations, one lit, and they come
+        {/* Zone one: WHERE YOU ARE. Seven destinations, one lit, and they come
             FIRST: they are the most-clicked thing on the row and the eye starts
             at the left edge. The document identity used to stand here, but the
             name of the school does not change and is not clicked — it was
@@ -883,6 +894,7 @@ export default function App() {
               plans={plans}
               step={ui.step}
               setStep={ui.setStep}
+              goLessons={() => goTab('lessons')}
             />
           )}
           {tab === 'availability' && (
@@ -892,6 +904,15 @@ export default function App() {
               kind={ui.kind}
               chosen={ui.chosen}
               setChosen={ui.setChosen}
+            />
+          )}
+          {tab === 'lessons' && (
+            <Lessons
+              state={state}
+              change={change}
+              mode={ui.lessonMode}
+              focus={ui.lessonFocus}
+              setFocus={ui.setLessonFocus}
             />
           )}
           {tab === 'program' && (

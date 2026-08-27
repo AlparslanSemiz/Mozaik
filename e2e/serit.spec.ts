@@ -1,4 +1,4 @@
-// 57. The tool strip, as a CONTRACT rather than five hand-made rows.
+// 57. The tool strip, as a CONTRACT rather than a row hand-made per tab.
 //
 // Before 2026-08-27 the five strips were five different objects — Kurulum had
 // symbols but no caption, Yazdır and Ayarlar were bare rows of words, and
@@ -13,7 +13,13 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { chooseScale, open, openSettings, openWithSample } from './helpers';
 
-const TABS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;
+// Seven since Dersler left Kurulum. The contract is the point: a new tab has
+// to bring a strip with it, at the same height, opening with a caption, with a
+// symbol and a word on every button — otherwise arriving there moves
+// everything underneath.
+const TABS = [
+  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+] as const;
 
 /** What the strip IS right now, read in one round trip. */
 async function strip(page: Page) {
@@ -49,8 +55,8 @@ async function go(page: Page, tab: string) {
   await page.waitForTimeout(120);
 }
 
-test.describe('57. Araç şeridi — altı sekme, tek iskelet', () => {
-  test('altı sekmenin ALTISINDA şerit var ve hepsi aynı yükseklikte', async ({ page }) => {
+test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
+  test('yedi sekmenin YEDİSİNDE şerit var ve hepsi aynı yükseklikte', async ({ page }) => {
     await openWithSample(page);
 
     const heights: number[] = [];
@@ -93,7 +99,7 @@ test.describe('57. Araç şeridi — altı sekme, tek iskelet', () => {
     }
   });
 
-  test('%150 ölçekte de altısı aynı yükseklikte ve hiçbiri taşmıyor', async ({ page }) => {
+  test('%150 ölçekte de yedisi aynı yükseklikte ve hiçbiri taşmıyor', async ({ page }) => {
     // Pitfall 48: a bar whose contents do not shrink pushes them out of itself,
     // and what spills is not hidden, it is UNCLICKABLE. 150% is the scale this
     // tool's reader actually uses, so it is the scale the contract is measured
@@ -127,7 +133,7 @@ test.describe('57. Araç şeridi — altı sekme, tek iskelet', () => {
     await chooseScale(page, 100);
   });
 
-  test('şerit katlanınca altı sekmede de gidiyor, geri gelince duruyor', async ({ page }) => {
+  test('şerit katlanınca yedi sekmede de gidiyor, geri gelince duruyor', async ({ page }) => {
     await openWithSample(page);
     // The fold button's accessible name is its `aria-label` — the title
     // changes with the state and a name that moves is not a name (pitfall 49).

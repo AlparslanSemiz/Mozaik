@@ -135,9 +135,11 @@ test.describe('53. Durum çipi', () => {
 });
 
 test.describe('54. Klavye kısayolları', () => {
-  test('Alt+1..6 sekmelere gidiyor', async ({ page }) => {
+  test('Alt+1..7 sekmelere gidiyor', async ({ page }) => {
     await openWithSample(page);
-    const names = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'];
+    const names = [
+      'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+    ];
     for (const [i, name] of names.entries()) {
       await page.keyboard.press(`Alt+${i + 1}`);
       await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', name);

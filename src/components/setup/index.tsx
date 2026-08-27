@@ -20,7 +20,6 @@ import { markIntroSeen, readIntroSeen } from '../../theme';
 import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
-import Lessons from './Lessons';
 import Summary from './Summary';
 import Progress from './Progress';
 import { drafts as draftsOf } from '../../library';
@@ -30,7 +29,7 @@ import type { StepId } from '../../toolState';
 import { STEPS } from '../steps';
 
 /**
- * The four lists' label, count and symbol live in `components/steps.tsx` — one
+ * The three lists' label, count and symbol live in `components/steps.tsx` — one
  * definition read by this shell, by the ribbon and by Progress. Only the
  * RENDERING of a step is this file's business, so only that is here.
  */
@@ -38,17 +37,18 @@ const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
   rooms: (p) => <Rooms {...p} />,
   teachers: (p) => <Teachers {...p} />,
   classes: (p) => <Classes {...p} />,
-  lessons: (p) => <Lessons {...p} />,
 };
 
 interface Props extends PanelProps {
   plans: PlanControls;
-  /** Which of the four lists. Owned by App: the tool strip above shows it. */
+  /** Which of the three lists. Owned by App: the tool strip above shows it. */
   step: StepId;
   setStep: (next: StepId) => void;
+  /** Dersler is a tab of its own now, so Progress can only point at it. */
+  goLessons: () => void;
 }
 
-export default function Setup({ state, change, plans, step, setStep }: Props) {
+export default function Setup({ state, change, plans, step, setStep, goLessons }: Props) {
   const { alert } = useDialogs();
   const notify = useToast();
   const loadSample = useLoadSample();
@@ -180,7 +180,7 @@ export default function Setup({ state, change, plans, step, setStep }: Props) {
 
         <aside>
           <Summary state={state} step={current.id} />
-          <Progress state={state} step={step} setStep={setStep} />
+          <Progress state={state} step={step} setStep={setStep} goLessons={goLessons} />
         </aside>
       </div>
     </>

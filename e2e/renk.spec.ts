@@ -123,7 +123,7 @@ test.describe('8. Tema', () => {
     });
   }
 
-  // The six section colours. They are the newest thing on screen that is a
+  // The seven section colours. They are the newest thing on screen that is a
   // COLOUR and not a state, so they are the likeliest to muddy the one channel
   // this tool cannot afford to lose: green = droppable, yellow = warning,
   // red = blocked. Nothing here is asserted about how they look; all three
@@ -137,6 +137,7 @@ test.describe('8. Tema', () => {
       const SECTIONS = [
         '--sec-setup',
         '--sec-availability',
+        '--sec-lessons',
         '--sec-program',
         '--sec-check',
         '--sec-print',
@@ -158,7 +159,7 @@ test.describe('8. Tema', () => {
 
       // The section colour is a GROUND now, not only a rule: it fills the lit
       // tab, and since `data-section` moved to the app root it fills a pressed
-      // filter chip too. Whatever --on-accent is, it has to survive on all six.
+      // filter chip too. Whatever --on-accent is, it has to survive on all seven.
       const ink = await tokens(page, ['--on-accent']);
       for (const name of SECTIONS) {
         expect(
@@ -167,7 +168,10 @@ test.describe('8. Tema', () => {
         ).toBeGreaterThanOrEqual(4.5);
       }
 
-      // Six sections have to be six identities, or the colour says nothing.
+      // Seven sections have to be seven identities, or the colour says nothing.
+      // The seventh was the hard one: the wheel was already full (see the note
+      // beside the tokens in styles.css), and every free arc but one landed in
+      // a functional colour's family or in a neighbouring section's.
       for (let i = 0; i < SECTIONS.length; i++) {
         for (let j = i + 1; j < SECTIONS.length; j++) {
           expect(

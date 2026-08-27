@@ -1,33 +1,37 @@
-// The Excel paste box, shared by Rooms, Teachers, Classes and Lessons.
+// The Excel paste box, shared by Rooms, Teachers, Classes and Dersler.
+//
+// CONTROLLED, since the trigger left the form row. "Excel'den yapıştır o
+// bloğun en sağında hatta en sağ üstünde bile olabilir." — the button now
+// rides the panel's heading and the box opens BELOW the form, so opening it no
+// longer breaks the row of controls in half. The button belongs to the panel
+// (there is one shape for all four, `.panel-head`) and the box belongs here,
+// which is why `open` is a prop rather than state.
 
 import { useState } from 'react';
 import type { ParseResult } from '../../import';
 
 /** The Excel paste box: preview, then add. It never adds directly. */
 export default function Paste<T>({
+  open,
+  close,
   title,
   example,
   parse,
   rowText,
   onAdd,
 }: {
+  open: boolean;
+  close: () => void;
   title: string;
   example: string;
   parse: (text: string) => ParseResult<T>;
   rowText: (x: T) => string;
   onAdd: (rows: T[]) => void;
 }) {
-  const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [result, setResult] = useState<ParseResult<T> | null>(null);
 
-  if (!open) {
-    return (
-      <button className="btn" onClick={() => setOpen(true)}>
-        Excel'den yapıştır
-      </button>
-    );
-  }
+  if (!open) return null;
 
   return (
     <div className="panel inset">
@@ -52,7 +56,7 @@ export default function Paste<T>({
         <button
           className="btn"
           onClick={() => {
-            setOpen(false);
+            close();
             setText('');
             setResult(null);
           }}
@@ -86,7 +90,7 @@ export default function Paste<T>({
                 className="btn primary"
                 onClick={() => {
                   onAdd(result.accepted);
-                  setOpen(false);
+                  close();
                   setText('');
                   setResult(null);
                 }}

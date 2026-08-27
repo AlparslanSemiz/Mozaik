@@ -14,7 +14,7 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { mainList, openSettings, openSetup, openWithSample, savedState, settledText } from './helpers';
+import { mainList, openSettings, openSetup, openLessons, openWithSample, savedState, settledText } from './helpers';
 
 const rows = (page: Page) => mainList(page).locator('tbody tr');
 const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
@@ -186,13 +186,41 @@ test.describe('61. Elle sıralama', () => {
 
   test('beş listenin beşinde de tutamak var', async ({ page }) => {
     await openWithSample(page);
-    for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
+    for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar']) {
       await openSetup(page, step);
       expect(await grips(page).count(), step).toBeGreaterThan(1);
     }
-    // The fifth is not a Kurulum step: it is Ayarlar → Branşlar.
+    // The fourth is a tab of its own now, and only in its GENERAL mode: the
+    // focused modes show a subset, and dragging row 3 of a subset would move
+    // row 3 of the array (see `useRowOrder`'s lock).
+    await openLessons(page, 'all');
+    expect(await grips(page).count(), 'Dersler').toBeGreaterThan(1);
+    // The fifth is not a Kurulum step either: it is Ayarlar → Branşlar.
     await openSettings(page, 'Branşlar');
     expect(await grips(page).count(), 'Branşlar').toBeGreaterThan(1);
+  });
+
+  // The other half of the lock, and the reason it is not a bug: a focused mode
+  // shows a SUBSET, and `reorderList` moves rows of the ARRAY — row 3 on screen
+  // is not row 3 in `state.lessons`.
+  //
+  // DISABLED and not removed, which is the same answer the other four lists
+  // give while a search is on: a column that comes and goes would move every
+  // other column sideways as you switch modes, and the reader would be looking
+  // at a different table each time. The title says why it is off.
+  test('sınıfa daralmış listede tutamak KİLİTLİ', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page, 'class');
+    const handles = grips(page);
+    expect(await handles.count()).toBeGreaterThan(1);
+    for (let i = 0; i < (await handles.count()); i++) {
+      await expect(handles.nth(i)).toBeDisabled();
+    }
+
+    // ...and unlocked again in the general list, which is the one whose rows
+    // ARE the array.
+    await openLessons(page, 'all');
+    await expect(grips(page).first()).toBeEnabled();
   });
 
   // Branşlar has its own reader: the name cell is plain text, not a box, so
@@ -240,6 +268,62 @@ test.describe('61. Elle sıralama', () => {
       .allInnerTexts();
     expect(options.filter((o) => after.includes(o.trim())).slice(0, 4).map((o) => o.trim()))
       .toEqual(after.slice(0, 4));
+  });
+
+  // "Branşa göre sıralandığında ayarlardaki branş sırasına göre olması gerek.
+  // alfabetik olarak değil."
+  //
+  // Until this round the school's hand-sorted subject list reached exactly one
+  // place, the Branş dropdown. Sorting teachers by subject answered in the
+  // Turkish alphabet — an order nobody chose and nobody can change — and so did
+  // the row of subject chips above the list.
+  test('Öğretmenler branşa göre AYARLARDAKİ sıraya diziliyor, alfabetik değil', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Branşlar');
+    const listedRows = mainList(page).locator('tbody').first().locator('tr');
+    const subjects = async () =>
+      (await listedRows.evaluateAll((rows) =>
+        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+      )).map((x) => x.trim());
+
+    // Take a subject that is LATE in the alphabet and put it first. If the sort
+    // were still alphabetical the teachers holding it would stay at the bottom.
+    const all = await subjects();
+    const late = all.indexOf([...all].sort((a, b) => b.localeCompare(a, 'tr'))[0]!);
+    await dragRow(page, late, 0);
+    const order = await subjects();
+
+    await openSetup(page, 'Öğretmenler');
+    await page.getByLabel('Sırala').selectOption({ label: 'Branşa göre' });
+
+    // The chips read the same order, and they are the other half of the ask.
+    const chips = (await page.locator('.chips').first().locator('.chip').allInnerTexts())
+      .map((t) => t.replace(/\s*\d+$/, '').trim())
+      .filter((t) => order.includes(t));
+    expect(chips, 'çip satırı ayarlardaki sırada değil').toEqual(
+      order.filter((s) => chips.includes(s)),
+    );
+
+    // ...and so do the rows. Read the subject from the CONTROL that holds it
+    // (`aria-label="<kısaltma> branşı"`), not from a column position: that cell
+    // has moved twice already and a positional selector went on reading an
+    // empty neighbour and passing.
+    const rowSubjects = await mainList(page)
+      .locator('tbody tr')
+      .evaluateAll((rows) =>
+        rows.map((r) => {
+          const box = r.querySelector('select[aria-label$="branşı"]') as HTMLSelectElement | null;
+          return box === null ? '' : (box.selectedOptions[0]?.textContent ?? '').trim();
+        }),
+      );
+    const ranks = rowSubjects.map((x) => order.indexOf(x)).filter((n) => n >= 0);
+    expect(ranks.length).toBeGreaterThan(3);
+    expect([...ranks].sort((a, b) => a - b), rowSubjects.join(' | ')).toEqual(ranks);
+    // The proof it is not the alphabet: the moved subject is now first, and it
+    // is not the alphabetically first one.
+    expect(rowSubjects.filter(Boolean)[0]).toBe(order[0]);
   });
 
   test('branşlarda klavyeyle de taşınıyor', async ({ page }) => {

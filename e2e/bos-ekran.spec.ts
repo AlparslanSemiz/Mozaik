@@ -116,12 +116,12 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
   test('Kurulum adım sayaçları boşken soluk', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(4);
+    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(3);
 
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(3);
+    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(2);
   });
 
   test('boş projede bile Ayarlar açılıyor ve dolu', async ({ page }) => {
@@ -133,13 +133,13 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 });
 
 test.describe('36. Klavye', () => {
-  test('Tab ile altı sekmeye de ulaşılıyor', async ({ page }) => {
+  test('Tab ile yedi sekmeye de ulaşılıyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
 
     // The rail is first in the DOM, so the first stop is the first section.
     const names: string[] = [];
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 7; i++) {
       names.push(
         await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? ''),
       );
@@ -148,6 +148,7 @@ test.describe('36. Klavye', () => {
     expect(names).toEqual([
       'Kurulum',
       'Müsaitlik',
+      'Dersler',
       'Program',
       'Kontrol',
       'Yazdır',
@@ -158,11 +159,12 @@ test.describe('36. Klavye', () => {
   test('Enter ile sekme değiştirilebiliyor ve aria-current takip ediyor', async ({ page }) => {
     await open(page);
     await page.keyboard.press('Tab');
+    // Four stops in: Kurulum, Müsaitlik, Dersler, Program.
     for (let i = 0; i < 3; i++) await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Kontrol',
+      'Program',
     );
   });
 

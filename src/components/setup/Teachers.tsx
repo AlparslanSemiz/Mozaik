@@ -26,6 +26,8 @@ import {
   setTeacherLimit,
   subjectKey,
   subjectOptions,
+  subjectRank,
+  teacherRank,
   teacherSubjects,
   updateTeacher,
   weeklyLoad,
@@ -49,22 +51,32 @@ export default function Teachers({ state, change }: PanelProps) {
   // asked for both halves of this: "listeleri ... grupça filtreleyebilelim"
   // and "sıralama ... branşa göre, isme göre vesaire".
   const listCfg = useMemo<ListConfig<Teacher>>(
-    () => ({
+    () => {
+      const rank = subjectRank(state);
+      return {
       haystack: (t) =>
         `${t.name} ${t.short} ${teacherSubjects(t).join(' ')} ${genderLabel(t.gender)}`,
       facets: [
         // BOTH subjects: a teacher who holds two belongs under either chip, and
         // "Edebiyat" that could not find the person teaching it would be a
-        // filter that lies.
-        { id: 'brans', label: 'Branş', of: teacherSubjects },
+        // filter that lies. The chips run in the school's own order, the one
+        // Ayarlar > Branşlar is dragged into — not the alphabet.
+        {
+          id: 'brans',
+          label: 'Branş',
+          of: teacherSubjects,
+          order: (name) => rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER,
+        },
         // Blank is a group too, and it is the one worth finding: it is the
         // list of rows still to be filled in.
         { id: 'cinsiyet', label: 'Cinsiyet', of: (t) => genderLabel(t.gender) },
       ],
       sorts: [
         { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
+        // The school's order, not the alphabet — and read from BOTH of a
+        // teacher's subjects, the way the chip above already does.
         { id: 'brans', label: 'Branşa göre', cmp: (a, b) =>
-            compareTr(a.subject, b.subject) || compareTr(a.name, b.name) },
+            teacherRank(rank, a) - teacherRank(rank, b) || compareTr(a.name, b.name) },
         { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
             byNumberThen((t) => weeklyLoad(state, 'teacher', t.id), (t) => t.name) },
         { id: 'acik', label: 'Açık saate göre (az → çok)', cmp:
@@ -73,7 +85,8 @@ export default function Teachers({ state, change }: PanelProps) {
             compareTr(genderLabel(a.gender), genderLabel(b.gender)) ||
             compareTr(a.name, b.name) },
       ],
-    }),
+      };
+    },
     [state],
   );
   const shown = applyList(state.teachers, query, listCfg);
@@ -97,6 +110,7 @@ export default function Teachers({ state, change }: PanelProps) {
   // A box that is always there would be a fifth thing to read past on a row
   // that is typed twenty-five times; the question is one small button.
   const [askSecond, setAskSecond] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
   const [freshSubject, setFreshSubject] = useState<string | null>(null);
   // Which rows have been ASKED the second-subject question and answered "yes"
   // but not yet picked one. Nothing is written to `State` until a subject is
@@ -115,7 +129,16 @@ export default function Teachers({ state, change }: PanelProps) {
 
   return (
     <div className="panel step-panel">
-      <h2>Öğretmenler ({state.teachers.length})</h2>
+      {/* The paste button rides the HEADING, not the form row: "Excel'den
+          yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
+          All four panels put it in the same corner, so the shape of a panel
+          stays one shape. */}
+      <div className="panel-head">
+        <h2>Öğretmenler ({state.teachers.length})</h2>
+        <button className="btn" onClick={() => setPasteOpen(true)}>
+          Excel'den yapıştır
+        </button>
+      </div>
       <p className="hint">
         Branş <b>listeden seçilir</b>; listede yoksa “+ Yeni branş…” ile eklenir.
         Bir öğretmen iki branş veriyorsa (Türkçe ve Edebiyat gibi){' '}
@@ -239,18 +262,21 @@ export default function Teachers({ state, change }: PanelProps) {
         >
           Ekle
         </button>
-        <Paste
-          title="Öğretmenleri yapıştır"
-          example="Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş"
-          parse={parseTeachers}
-          rowText={(x) =>
-            `${x.name} (${x.short}) · ${x.subject}` +
-            (x.subject2 === '' ? '' : ` + ${x.subject2}`) +
-            (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
-          }
-          onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
-        />
       </div>
+
+      <Paste
+        open={pasteOpen}
+        close={() => setPasteOpen(false)}
+        title="Öğretmenleri yapıştır"
+        example="Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş"
+        parse={parseTeachers}
+        rowText={(x) =>
+          `${x.name} (${x.short}) · ${x.subject}` +
+          (x.subject2 === '' ? '' : ` + ${x.subject2}`) +
+          (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
+        }
+        onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
+      />
 
       {clashes.length > 0 && (
         <div className="warn-box">

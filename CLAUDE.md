@@ -328,13 +328,15 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 25 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79) |
+| **E2E** | `e2e/*.spec.ts` (Playwright, 25 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
+(`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
+formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79) |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
 | **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
 | **Rust** | `src-tauri/src/{lib,update}.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. Artı güncelleme: `is_newer`'ın `1.10 > 1.9` bildiği, inen dosyanın **MZ ile başladığı ve boyutunun tuttuğu**, adresin yalnız kendi Release'imizden olabildiği, ve takas yarıda kalırsa **eski programın yerine geri konduğu**. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
 | **Hata kapanı** | `e2e/kapan.ts` — **bütün** E2E süiti | Test ne ölçerse ölçsün, sayfanın kendi şikayeti: `console.error`, `pageerror`, yakalanmamış promise reddi, ve `file://` altında **herhangi bir ağ isteği**. `auto: true`, yani unutulamaz. Bir testin beklediği hata `beklenenHata()` ile adıyla serbest bırakılır — susturmak için değil, **beklendiğini söylemek** için |
-| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: altı sekme, dört adım, beş bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
+| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: yedi sekme, üç adım, beş bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
@@ -455,9 +457,10 @@ theme.ts                        makine tercihleri (tema, kenar, havuz açık mı
                                 on bağımsız skaler, on anahtar, hiçbiri State'e
                                 girmez
 toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
-                                kapsam/Kontrol süzgeci. App'te yaşar, çünkü sekme
-                                değişimi bileşeni söküyor (tuzak 18) ve çünkü
-                                onu gösteren şerit <main>'in ÜSTÜNDE
+                                kapsam/Kontrol süzgeci, artı Dersler'in MODU ve
+                                odağı. App'te yaşar, çünkü sekme değişimi
+                                bileşeni söküyor (tuzak 18) ve çünkü onu
+                                gösteren şerit <main>'in ÜSTÜNDE
 gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
                                 React BİLMEZ — drag.ts'in deseni (tuzak 1)
 poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
@@ -524,9 +527,9 @@ components/useRowOrder.tsx      dört listenin ortak sıralama kancası: tutamak
 Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
                                 ağacı çizsin diye tek yerde
   |
-components/Ribbon.tsx           araç şeridi: sekmeye göre switch, ALTI sekmede
+components/Ribbon.tsx           araç şeridi: sekmeye göre switch, YEDİ sekmede
                                 de çizilir (2026-08-27; Kontrol'ünki raporu
-                                süzer). Tek iskelet: Group(başlık) + Sep +
+                                süzer, Dersler'inki modu seçer). Tek iskelet: Group(başlık) + Sep +
                                 Spacer, her düğmede simge ve kelime. İş mantığı
                                 YOK — "Otomatik diz (N)"in N'i entities.ts'teki
                                 saf pendingLessons()'tan, Kontrol'ün sayıları
@@ -537,7 +540,16 @@ components/Field.tsx            iki klasörün de kullandığı küçük parçal
 components/ColorPick.tsx        36 renklik swatch diyaloğu (Kurulum'un iki adımı)
 components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
-components/setup/*.tsx          Kurulum: index (kabuk) + 4 liste adımı + Paste + Summary
+components/setup/*.tsx          Kurulum: index (kabuk) + 3 liste adımı + Paste +
+                                Summary + Progress. Paste KONTROLLÜ: düğme
+                                panelin başlığında (.panel-head), kutu formun
+                                altında
+components/lessons/index.tsx    Dersler sekmesi. Kurulum'un 4. adımıydı; ders
+                                en çok kullanılan ekran ve bir sihirbazın
+                                dördüncü adımından geçilerek varılmıyor. Üç
+                                mod: Sınıftan · Öğretmenden · Genel. Odaklanmış
+                                modda form o ekseni HİÇ SORMAZ — şerit söyler,
+                                sağ sütun seçer (Müsaitlik'in deseni)
 components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar ·
                                 Görünüm · Veri.  Veri, Plans.tsx'i (plan
                                 kitaplığı) kendi içine alır; Görünüm okulu
@@ -662,6 +674,12 @@ da yazacaksın — `ders-programi-baski` haftalarca eksikti ve görünmedi, çü
 anahtar ancak biri bir baskı ayarına dokununca doğuyor. **Yeni bir tercih
 `sessionStorage`'a giderse bu borç doğmaz**, ve "bu oturumda bir daha sorma"
 zaten oraya aittir (güncelleme şeridinin `Sonra`'sı böyle).
+
+**Dersler'in modu ve odağı HİÇBİR yerde saklanmaz** — ne `State`'te ne
+`localStorage`'da. `toolState.ts`'in sözleşmesi bu: orası bir POZİSYON tutar,
+bir tercih değil. "Hangi sınıfın derslerini giriyorum" bir oturumun içindeki
+yerdir; yarın açılışta hatırlanması, bir yedeğin onu taşıması ya da bir şema
+sürümü artması gereken bir şey değil.
 
 **Onuncu makine tercihi localStorage'da DEĞİL:** babanın seçtiği klasörün
 tutamağı `IndexedDB['ders-programi-klasor']`'da durur. Sebep tercih değil,
@@ -1575,6 +1593,30 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     burada **kodun kendisinin** okuyucusu yoktu. Bir dosya hiçbir komut
     satırının açmadığı bir yerdeyse, oradaki `strict` bir dilektir.
 
+84. **`z-index` STATİK konumlu bir kutuda hiçbir şey yapmaz — ve konumlanmış
+    bir komşu, sayı ne derse desin onun üstüne boyar.** Havuz destesinin
+    gömülü kartları `position: absolute; z-index: 1..2`, üstteki kart
+    `z-index: 3` idi ve **statikti**, yani o 3 hiç okunmadı: aynı yığma
+    bağlamında konumlanmış her kutu, konumlanmamış her kutunun üstüne çizilir.
+    Sonuç, hata mesajı olmayan bir sınıf hatanın en sinsi hâliydi — kopyalar
+    üstteki kartın birebir aynısı olduğu için **ekranda her şey doğru
+    görünüyordu**, yalnız rozet yoktu. Ve rozet DOM'da vardı: kutusu vardı
+    (20,2 × 15,8 px), `display: block`, `visibility: visible`, `opacity: 1`,
+    hesaplanmış zemini `rgba(0,0,0,.17)`, ve `document.elementsFromPoint`
+    merkezinde **onu birinci** döndürüyordu. Ölçülen her şey "oradayım"
+    diyordu; ekran "değilim" diyordu, ve haklı olan ekrandı.
+    İki yan ders, ikisi de bir saate mal oldu:
+    (a) `locator.screenshot()` öğeyi görünür alana **kaydırır**, yani ondan
+    önce alınmış bir `getBoundingClientRect` ile uyuşmaz; sabit gerçek,
+    kırpmasız tam ekran görüntüsünden gelir — kırpma matematiği hata
+    ayıklanacak ikinci bir şeydir.
+    (b) `npm run build` çıkış kodu okunmadan bir mutasyon denendi, `tsc`
+    kırıldı, ve test **eski `dist`'i** ölçüp yeşil geçti. Tuzak 62 tam olarak
+    bu, ikinci kez.
+    Genel kural: bir öğe "orada ama görünmüyor"sa, sorulacak ilk şey rengi
+    değil **boyama sırası**dır, ve `z-index` yazan her yerde ikinci soru
+    *"bu kutu konumlanmış mı?"*dır.
+
 ---
 
 ## Tasarım — serbest
@@ -1596,6 +1638,11 @@ bu belgeden izin almaz. Ne yapıldığı [docs/DESIGN.md](docs/DESIGN.md)'de
    kırmızı = engel · gri taralı = kapalı. Bu, aracın çalışma biçimi; kimlik
    paletinin 36 rengi bu üçüne yaklaşamaz. `palette.test.ts` ve
    `e2e/renk.spec.ts` her koşuda yeniden ölçer.
+   **Bölüm renkleri de aynı kanala tabidir ve tekerlek DOLU:** yedinci sekme
+   yedinci rengi isteyince (2026-08-27) bütün çember iki temada birden tarandı
+   ve serbest kalan her yayın ya işlevsel bir rengin ya komşu bir sekmenin
+   ailesine düştüğü **ölçüldü**. Sekizincisi aranırsa aynı ölçüm tekrarlanır;
+   `var(--sec, …)`'in fallback'ine düşmek bir karar değil, tuzak 52'dir.
 2. **Erişilebilirlik.** Kontrast AA. Çözücü ilerlemesi, sonuç satırı ve hata
    mesajları `aria-live="polite"` (`.reason-bar`, `role="status"` — sözleşme
    burada yazılıydı ama satırın kendisinde **2026-08-27'ye kadar yoktu**); geri
@@ -1672,7 +1719,12 @@ Tip hataları için `typescript-lsp` eklentisi. `npm run kontrol` son sözü sö
 > Bir kararı değiştirirken buradaki gerekçeyi **okumak** işe yarar; ona
 > **uymak** zorunlu değil. Değiştirilen karar burada da güncellenir.
 
-Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar**.
+Yedi sekme: **Kurulum · Müsaitlik · Dersler · Program · Kontrol · Yazdır ·
+Ayarlar**. Dersler 2026-08-27'de Kurulum'un dördüncü adımından çıkıp kendi
+sekmesi oldu; gerekçe kullanıcının kendi cümlesi: *"hocaları onu bunu
+ayarlıyorsun ama **ders en önemli kısım**"*. Kurulum üç adıma indi ve
+"Kurulum durumu" panelinin ayağında ders sayısı, eksik uyarısı ve o sekmeye
+giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
 
 - **Üst çubuğun sol ucunda marka işareti** (2026-08-26). Ayrıntılı çizim,
   `1.75rem` — yani `--ui-scale`'i izliyor (28 px @%100, 42 px @%150). Düğme
@@ -1684,7 +1736,7 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   belge kimliği · 6 sekme · geri/ileri al · dosya · şerit katlama · tema. Satır iki:
   **o sekmeye ait araç şeridi** (`.ribbon`) — Word/Excel/aSc mantığı.
   - Rail'in savı ("yatay bant ızgaradan bir satır götürür") 768px ekran için
-    yazılmıştı ve rail'in **kendi maliyeti hiç sayılmamıştı**: altı sekmenin
+    yazılmıştı ve rail'in **kendi maliyeti hiç sayılmamıştı**: her sekmenin
     hepsinde 92px **genişlik**, ve Program dışındaki beşinin harcayacak
     genişliği yok — her ekranın sağının boş kalmasının sebebi buydu.
   - Bant ancak **kendi satırı** olursa bir satıra mal olur. Ölçülen baş toplamı:
@@ -1709,7 +1761,7 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
     simgeliydi ama başlıksız, Yazdır ve Ayarlar salt yazıydı, Kontrol'de şerit
     yoktu. Yanlış bir şey yoktu; **bir şekil** yoktu, ve şekli olmayan bir şeyi
     hiçbir test koruyamaz.
-    1. Altı sekmenin altısı da `.ribbon` çizer ve **aynı yükseklikte** (±1px,
+    1. Yedi sekmenin yedisi de `.ribbon` çizer ve **aynı yükseklikte** (±1px,
        %100'de de %150'de de).
     2. Her şerit bir `.ribbon-label` **başlığıyla** açılır — düğmelerin hangi
        soruyu cevapladığı.
@@ -1744,8 +1796,8 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   orada — proje doluyken sorusu **ne kaybedileceğini sayar** ve kırmızıdır.
   Eskiden tek ev Kurulum'du, yani ancak **boş** bir projeyle ulaşılabiliyordu:
   kendi verisine başlamış biri örneğe bir daha hiç bakamıyordu.
-- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum dört sayılabilir adım:
-  `1 Derslikler · 2 Öğretmenler · 3 Sınıflar · 4 Dersler`. Okul adı, günler, zil,
+- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum üç sayılabilir adım:
+  `1 Derslikler · 2 Öğretmenler · 3 Sınıflar`; dersler kendi sekmesinde. Okul adı, günler, zil,
   kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
   dokunulan şey aynı ekranda durmaz.
 - **Ayarlar beş bölüm**: `Okul ve zil · Kurallar · Branşlar · Görünüm · Veri`.
@@ -1815,7 +1867,16 @@ Altı sekme: **Kurulum · Müsaitlik · Program · Kontrol · Yazdır · Ayarlar
   tablo. **Havuz ALTTA, ve boyu SÜRÜKLENEBİLİR** (`.pool` + `.pool-split`).
   **Havuzda ders başına değil BLOK başına kart** (2026-08-27): `2+1` bir ders
   bir ikili ve bir tekli bırakır, kart hangisi olduğunu hem yazar (`2 saat`) hem
-  genişliğiyle söyler (`[data-size='2']` iki katı). Hangi bloğu nereye koyacağı
+  genişliğiyle söyler (`[data-size='2']` iki katı).
+  **Aynı dersin aynı boydaki blokları TEK DESTE** (2026-08-27): altı saatlik
+  bir ders altı özdeş kart ve altı kez aynı `0/6` bırakıyordu. Rozet
+  (`1 saat ×6`) blok boyunun yanında durur, ve en çok iki katman görünür.
+  **`.pool-card` hâlâ "bekleyen BİR blok" demek, ve bu bir SÖZLEŞME:** sekiz
+  dosyada ~40 test onu sayıyor, "N blok bekliyor" ondan geliyor,
+  `pendingBlocks()`'un aynası o. Deste bir **düzen**, bir gruplama değil — aynı
+  N eleman DOM'da kalır, gömülü olanlar yalnız mürekkebini bırakır. Mürekkep,
+  `visibility` değil: gizli bir öğenin `innerText`'i boştur ve `allInnerTexts()`
+  okuyan iki test tepsiyi dağılmış sanır (ölçüldü). Hangi bloğu nereye koyacağı
   tepsideki bir seçim, gizli bir "sıradaki" değil. Yan fayda: `weeklyHours`'ı
   elle aşmak imkânsızlaştı — kart bitince sürüklenecek bir şey kalmıyor.
   Bir sürüm sağda durdu; sav ("ızgara yatayda zaten taşıyor") doğruydu ama
