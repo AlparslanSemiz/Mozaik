@@ -1,7 +1,8 @@
 # STATUS — Nerede olduğumuz
 
 Son güncelleme: 2026-08-27 (yirmi sekizinci oturum: **v1.3.0 YAYINDA**, çift
-branş — şema v8, tek kart blok, listelerde sıra ve yön, yoğunluk her yerde)
+branş — şema v8, tek kart blok, listelerde sıra ve yön, yoğunluk her yerde,
+ve **dil turunun makinesi**)
 
 > **v1.3.0 çıktı ve doğrulandı.** Release'in dört varlığı da 200 veriyor,
 > ve **dördüncüsü ilk kez var**: `surum.json`. Ondan önceki hiçbir exe kendini
@@ -184,10 +185,67 @@ boşluk; hiçbir yazı boyutu küçülmedi ve test bunu ölçüyor.
   ad sütununu gösteriyordu; iki kez sütun eklendi ve her seferinde **boş bir
   hücreyi** okuyup boşu boşla karşılaştırarak yanlış şeyi doğruladı.
 
+### 8. Dil turunun makinesi (v2.0.0'ın birinci yarısı)
+
+**Anahtar Türkçe cümlenin KENDİSİ**: `t('Öğretmenler')`, `t('setup.teachers')`
+değil. Bu bir derli-toplu-luk kaybı değil, üç şeyin birden kazancı:
+
+- Eksik çeviri **doğru Türkçeye** düşer. Bitmemiş bir sözlüğün arıza biçimi
+  "bu satır hâlâ Türkçe", babanın ekranında `setup.teachers.title` değil.
+- JSX okunur kalır: `Teachers.tsx`'i okuyan, ekranda çıkacak cümleyi görür —
+  bu dosyalar iki yıldır öyle yazıldı ve öyle gözden geçirildi.
+- Altı yüz isim uydurulmaz, ve hiçbir isim temsil ettiği cümleden sapamaz.
+
+Bedeli gerçek ve yazıldı: Türkçe metni düzenlemek çevirisini **öksüz** bırakır.
+`i18n.test.ts`'in son testi kaynağın tamamını okuyup sözlükte karşılığı
+kalmamış anahtarı kırmızıya döndürüyor.
+
+**Bunun asıl sonucu, ve turun geri kalanını mümkün kılan şey:** bir dosyayı
+`t()`'ye taşımak Türkçe ekranda **hiçbir şeyi değiştirmez**. 440 E2E testinin
+tek bir locator'ı kaymadı, ve kaymayacak — yani kalan 710 dizge parça parça,
+her adımda yeşil bir süitle, istenildiği yerde durdurulabilir biçimde
+çevrilebilir.
+
+| Ne | Nerede |
+|---|---|
+| dil, depo, `<html lang>` | **yeni** `src/i18n.ts` — yaprak, `keys.ts` deseni |
+| `useT()` + `<T>` | **yeni** `src/components/T.tsx` |
+| sözlük | **yeni** `src/lang/en.ts` |
+| seçici | Ayarlar → Görünüm, her dil **kendi adını kendi dilinde** söylüyor |
+| testler | `i18n.test.ts` 13 · `e2e/dil.spec.ts` 7 |
+
+`<T>` niçin var: ekrandaki cümlelerin yarısında bir `<b>` duruyor. Bir cümleyi
+üç anahtara bölmek onu **çevrilemez** yapar — diller arasında değişen şey tam
+olarak kelime sırasıdır. Sözlük değeri `**` ile vurgu, `{ad}` ile değer
+taşıyor; ayrıştırıcı on satır ve hiçbir şey `dangerouslySetInnerHTML`'e
+verilmiyor.
+
+**Dil on birinci makine tercihi**: kendi anahtarı, `State`'e girmez,
+`schemaVersion` artmaz, "Veriler nerede" tablosunda satırı var (sözleşme).
+
+**E2E'nin dili `kapan.ts`'te sabitlendi, `helpers.ts`'te değil.** Gerekçe hata
+kapanınınkiyle aynı: `auto: true` unutulamaz, ve üç spec dosyası hiçbir
+yardımcıdan geçmeden `page.goto('/')` yapıyor. **Tohumluyor, dayatmıyor**
+(tuzak 68) — dili bilerek değiştirip yenileyen bir test seçimini koruyor.
+
+**Bir test doğru davranışı yakaladı ve düzeltilen şey testti.** "Kayıt
+çalışmıyorsa kırmızı uyarı" testi `localStorage`'ı tamamen çökertiyor; o
+durumda dil tercihi de okunamıyor ve program **cihazın** diline düşüyor —
+özel sekmedeki bir okuyucu yine kendi dilini görsün diye, ki doğrusu budur.
+Test artık uyarıyı sekme adıyla değil sınıfıyla arıyor.
+
+**Sözlük 9 / ~720.** Kabuk çevrildi, gerisi Türkçe. Yüzey ölçüldü: 47 dosya,
+en ağırları `settings/Data.tsx` (113), `settings/Appearance.tsx` (57),
+`App.tsx` (43), `Ribbon.tsx` (40), `setup/Teachers.tsx` (39).
+
+**İLKE 4 henüz YENİDEN YAZILMADI** ve bilerek: bugünkü hâli "Tek dil, i18n
+altyapısı yok" diyor ve artık doğru değil, ama yarısı çevrilmiş bir program
+için "çok dilli" demek de doğru olmazdı. Sözlük bitince yazılacak.
+
 ### Sayılar
 
 ```
-587 birim + 433 E2E + 22 site + 7 çözücü      hepsi yeşil
+600 birim + 440 E2E + 22 site + 7 çözücü      hepsi yeşil
 npm run patrol                                 4/4, konsol temiz
 npm run ekran                                  34 görüntü, BAKILDI
 ```

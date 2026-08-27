@@ -404,6 +404,17 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
+i18n.ts                         arayüz hangi dili konuşuyor. Yaprak. ANAHTAR
+                                Türkçe cümlenin KENDİSİ — eksik çeviri doğru
+                                Türkçeye düşer, JSX okunur kalır, altı yüz ad
+                                uydurulmaz. Bedelini i18n.test.ts öder: ölü
+                                anahtarı o yakalar. State'e GİRMEZ
+components/T.tsx                useT() ve <T>. <T> var çünkü bir cümleyi üç
+                                anahtara bölmek onu çevrilemez yapar: diller
+                                arasında değişen şey kelime SIRASI
+lang/en.ts                      İngilizce sözlük. Türkçenin sözlüğü YOK ve
+                                olmayacak — hepsi 'X': 'X' olurdu, yani altı
+                                yüz kez kaynak dili sessizce bozma şansı
 subjects.ts                     bir şeyin HANGİ branştan olduğu. Yaprak, çünkü
                                 entities.ts zaten constraints.ts'i çağırıyor:
                                 ikisinin de ihtiyacı olan kural ikisinin de
@@ -630,6 +641,7 @@ ders-programi-plan-<id>  -> diğer planların State'i
 ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
 ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana ait
 ders-programi-tema       -> tema tercihi
+ders-programi-dil        -> arayüz dili (tr / en)
 ders-programi-kenar      -> kenar çubuğu tercihi
 ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.50)
 ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (ferah / rahat / sigdir)

@@ -13,9 +13,15 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > Ayrıntı ve **ölçülen her sayı** aşağıda, *V turu* bölümünde ve
 > [STATUS.md](STATUS.md) → *Yirmi sekizinci oturum*.
 >
-> **Bir sonraki oturumun ilk işi: v2.0.0 — DİL.** Kararlar verildi (aşağıda):
-> altyapı + Türkçe + İngilizce önce, DE · ES · FR sonraki turda, **yeni ad
-> ayrı bir tur**.
+> **Dil turunun MAKİNESİ kuruldu ve kanıtlandı (aşağıda, v2.0.0 → DİL).**
+> Bir sonraki oturumun ilk işi onun **sözlüğü**: 720 dizgenin 9'u çevrildi,
+> yani İngilizceye geçen biri bugün ekranın çoğunu Türkçe görür. Bu
+> tasarlanmış geri düşme yolu — anahtar Türkçe cümlenin kendisi olduğu için
+> eksik çeviri anahtar adı değil doğru Türkçe gösterir — ama yarısı çevrilmiş
+> bir program teslim edilecek bir şey değil.
+> **Bir dosyayı `t()`'ye taşımak Türkçe ekranda NO-OP**, ve 440 E2E testi
+> bunu her koşuda doğruluyor: kalan iş parça parça, güvenle, ve istenildiği
+> yerde durdurulabilir biçimde yapılabilir.
 >
 > **Sende kalanlar — kodda değil:**
 > 1. **Windows'ta denensin.** Artık indirilebilir:
@@ -1427,10 +1433,46 @@ ve babanın bekleyen düzeltmeleri onların arkasında beklememeli.
       sütun bu ikisinin arasında kalmalı, yani gömülü yüz değişince tavan da
       onunla birlikte oynuyor (tuzak 42).
 
-### v2.0.0 turu — dil ve isim — **BEKLİYOR**
+### v2.0.0 turu — DİL — **makine bitti, sözlük başladı** (2026-08-27)
 
-Kullanıcının kalan iki maddesi, ve ikisi de bir **kimlik** değişikliği.
-Kararlar 2026-08-27'de soruldu ve verildi:
+Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
+önce**, DE · ES · FR sonraki turda, **yeni ad ayrı bir tur**.
+
+- [x] **D1 Makine.** `src/i18n.ts` (yaprak, `keys.ts` deseni) ·
+      `components/T.tsx` (`useT()` + `<T>`) · `src/lang/en.ts` ·
+      `i18n.test.ts` (13 test) · `e2e/dil.spec.ts` (7 test).
+      **Anahtar Türkçe cümlenin KENDİSİ**, uydurulmuş bir ad değil: eksik
+      çeviri doğru Türkçeye düşer, JSX okunur kalır, ve altı yüz isim
+      uydurulmaz. Bedeli `i18n.test.ts` ödüyor — ölü anahtarı o yakalıyor.
+- [x] **D2 Tercih on birinci makine tercihi.** `ders-programi-dil`,
+      `State`'e girmez, `schemaVersion` artmaz, "Veriler nerede" tablosunda
+      satırı var. `<html lang>` onunla kıpırdıyor.
+- [x] **D3 E2E'nin dili `kapan.ts`'te sabitlendi.** `auto: true` unutulamaz,
+      ve üç spec dosyası hiçbir yardımcıdan geçmeden `page.goto('/')` yapıyor.
+      Tohumluyor, dayatmıyor (tuzak 68).
+- [x] **D4 Ayarlar → Görünüm'de dil seçici.** Her dil **kendi adını kendi
+      dilinde** söylüyor — bir dil menüsünü, uygulamanın o an konuştuğu dili
+      henüz bilmeyen biri okur.
+- [~] **D5 SÖZLÜK — 9 / ~720 anahtar.** Kabuk (altı sekme + "Bölümler" +
+      dil paneli) çevrildi; **gerisi hâlâ Türkçe.** Bu bir kusur değil
+      tasarlanmış geri düşme yolu, ama **İngilizceye geçen biri bugün
+      ekranın çoğunu Türkçe görür.**
+      Yüzey ölçüldü: **720 dizge, 47 dosya**; en ağırları
+      `settings/Data.tsx` (113), `settings/Appearance.tsx` (57),
+      `App.tsx` (43), `Ribbon.tsx` (40), `setup/Teachers.tsx` (39).
+      **Bir dosyayı `t()`'ye taşımak Türkçe ekranda NO-OP** — 440 E2E testi
+      bunu her koşuda doğruluyor — yani kalan iş parça parça ve güvenle
+      yapılabilir.
+- [ ] **D6 DE · ES · FR.** Yapı doğrulandıktan sonra çeviri mekanik iş, ve
+      yanlış bir çeviri hiçbir testte kırmızıya dönmez — o yüzden sonraki tur.
+      Beş dile çıkıldığında `systemDil()`'in geri düşme dili **İngilizce**
+      olacak; bugün Türkçe, çünkü tam sözlüğü olan tek dil o.
+- [ ] **D7 İLKE 4 yeniden yazılacak.** Bugünkü hâli hâlâ "Tek dil. i18n
+      altyapısı yok, string dosyası yok" diyor ve artık doğru değil. Sözlük
+      bitince yazılacak — yarısı çevrilmiş bir program için "çok dilli" demek
+      de doğru olmazdı.
+
+### v2.0.0 turu — kalan: YENİ AD — **BEKLİYOR**
 
 - [ ] **Dil seçeneği: TR · EN · DE · ES · FR.** Varsayılan `navigator.language`
       üstünden; cihaz dili bu beşten biri değilse **İngilizce**. Türkçe kaynak
