@@ -70,7 +70,7 @@ test.describe('57. Araç şeridi — altı sekme, tek iskelet', () => {
     const max = Math.max(...heights);
     expect(
       max - min,
-      `şerit yükseklikleri ayrışıyor: ${TABS.map((t, i) => `${t} ${heights[i].toFixed(1)}`).join(' · ')}`,
+      `şerit yükseklikleri ayrışıyor: ${TABS.map((t, i) => `${t} ${heights[i]!.toFixed(1)}`).join(' · ')}`,
     ).toBeLessThanOrEqual(1);
   });
 

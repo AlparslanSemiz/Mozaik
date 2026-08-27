@@ -12,7 +12,8 @@
     "paket": "npm run build:site && node scripts/paket.mjs",
     "test": "vitest run",
     "test:izle": "vitest",
-    "kontrol": "tsc --noEmit && vitest run && vite build && playwright test && npm run test:site && playwright test --config playwright.cozucu.config.ts",
+    "tipler": "tsc --noEmit && tsc --noEmit -p tsconfig.tools.json",
+    "kontrol": "npm run tipler && vitest run && vite build && playwright test && npm run test:site && playwright test --config playwright.cozucu.config.ts",
     "test:e2e": "vite build && playwright test",
     "test:site": "vite build && vite build --config vite.site.config.ts && playwright test --config playwright.site.config.ts",
     "ekran": "vite build && playwright test --config playwright.ekran.config.ts",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",

@@ -163,10 +163,12 @@ test.describe('14. Hareket', () => {
     // Shorter, but not nothing: this step exists because "kapat YA DA azalt"
     // is two asks, and a middle step that quietly equalled "off" would be one.
     for (let i = 0; i < 3; i++) {
-      const a = ms(some.durs[i]);
-      const b = ms(full.durs[i]);
-      expect(a, `${some.durs[i]} < ${full.durs[i]} olmalı`).toBeLessThan(b);
-      expect(a, `${some.durs[i]} sıfır olmamalı — bu "Kapalı" olurdu`).toBeGreaterThan(0);
+      const az = some.durs[i]!;
+      const tam = full.durs[i]!;
+      const a = ms(az);
+      const b = ms(tam);
+      expect(a, `${az} < ${tam} olmalı`).toBeLessThan(b);
+      expect(a, `${az} sıfır olmamalı — bu "Kapalı" olurdu`).toBeGreaterThan(0);
     }
     // What "az" drops is MOVEMENT: a panel fades in where it will sit.
     expect(isZero(some.slide)).toBe(true);

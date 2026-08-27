@@ -110,3 +110,8 @@ export const test = base.extend<{ kapan: void }>({
 });
 
 export { expect };
+
+// The trap is the entry point for the whole suite, so `Page` comes through it
+// too: a spec that imported `test` from here and `Page` from @playwright/test
+// would be naming two things that must stay the same type.
+export type { Page };

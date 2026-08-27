@@ -1,7 +1,6 @@
 // Colour, contrast and theme. Nothing here is claimed; everything is measured
 // with real getComputedStyle values, WCAG contrast and CIE Lab ΔE.
 
-import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { answerDialog, open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
 

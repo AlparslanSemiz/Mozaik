@@ -399,8 +399,9 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
         const s = c / 255;
         return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
       };
-      const lum = (c: number[]) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
-      const [a, b] = [
+      const lum = ([r, g, b]: number[]) =>
+        0.2126 * lin(r ?? 0) + 0.7152 * lin(g ?? 0) + 0.0722 * lin(b ?? 0);
+      const [a = 0, b = 0] = [
         lum(rgb(cs.getPropertyValue('--print-line'))),
         lum(rgb(cs.getPropertyValue('--paper'))),
       ].sort((x, y) => y - x);

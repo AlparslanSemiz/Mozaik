@@ -126,7 +126,10 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
 
     // The bytes are the bundle, not the open plan — a folder holding one of
     // three plans is the kind of backup that is wrong where nobody looks.
-    const bundle = JSON.parse(written['ders-programi-tumu.json']);
+    // `?? '{}'` is unreachable — the poll above proved the key is there. It is
+    // written that way so a broken run fails on the assertion below rather
+    // than inside JSON.parse, where the message names no expectation.
+    const bundle = JSON.parse(written['ders-programi-tumu.json'] ?? '{}');
     expect(bundle.bundleVersion).toBe(1);
   });
 

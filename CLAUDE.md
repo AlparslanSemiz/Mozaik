@@ -195,12 +195,13 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 
 ```bash
 npm run dev        # geliştirme sunucusu
+npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
 npm test           # Vitest — 587 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
 npm run test:e2e   # Playwright — derler, sonra 433 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
-npm run kontrol    # hepsi: tsc + birim + derleme + E2E + site + cozucu
+npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
 npm run cozucu     # gerçek ölçekli çözücü stresi — 7 test, 34,8 sn (kontrol'ün parçası)
 npm run patrol     # devriye: her ekranı gezer + tohumlu rastgele gezinme (kontrol'ün parçası DEĞİL)
@@ -248,16 +249,17 @@ scripts/yayinla.mjs  -> bir sürümün dört adımı, tek komutta
 ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (üç
 sütun, hayalet yok). İkisi **Windows'un gerçekten istediği boylarda**
 (16/20/24/32/40/48, iki zeminde) render edilip **bakıldı**
-(`scripts/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı okunuyor, 24'te bulanık,
-16'da altı sütun mavi bir lekeye dönüyor. Eşik **2026-08-27'de 48'den 32'ye
-indi** ve `.ico`'ya 20 · 24 · 40 eklendi — ikisi de tek bir şikayetten çıktı,
-bkz. tuzak 78. Bölüşüm:
+(`scripts/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı temiz okunuyor,
+20 ile 24'te bulanık ama sütunları ayırt edilebiliyor, 16'da altı sütun mavi
+bir lekeye dönüyor. Eşik **iki kez indi**: 2026-08-27'de 48'den 32'ye, sonra
+aynı gün 32'den **20**'ye. `.ico`'ya 20 · 24 · 40 eklendi. Üçü de tek bir
+şikayetten çıktı ve şikayet **iki kez** geldi, bkz. tuzak 78. Bölüşüm:
 
 | Nerede | Hangi | Niçin |
 |---|---|---|
 | Sekme (favicon, `index.html`) | **sade** | bir sekme simgesi HER ZAMAN 16–32 px |
-| `icon.ico` 16 · 20 · 24 px | **sade** | aynı sebep: ayrıntılı çizim orada bulanık |
-| `icon.ico` 32–256 px | ayrıntılı | **görev çubuğu 32 px'lik bir yuvadır** (tuzak 78) |
+| `icon.ico` 16 px | **sade** | ayrıntılı çizim orada daha kötü bir logo değil, **logo değil** |
+| `icon.ico` 20–256 px | ayrıntılı | **görev çubuğu %100'de 24 px ister** (tuzak 78) |
 | PWA 192/512 PNG | ayrıntılı | yer var |
 | Üst çubuk (`.brand-mark`) | ayrıntılı | 28 px @%100, 42 px @%150 |
 
@@ -1471,13 +1473,27 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     çubuğu düğmelerinde **24** istiyor. İstenen boy yoksa Windows en yakınını
     büyütür. Yani hata bir kod yolunda değil, bir **dosyanın içindekinde**ydi,
     ve hiçbir test bir dosyanın içindekine bakmıyordu. İkinci yarısı aynı
-    ailedendi: eşik `< 48 sade` yazılıydı, yani görev çubuğunun 32 px'lik
-    yuvasına **sade** çizim düşüyordu ve o çizim gerçek logonun yanında bir
-    yer tutucu gibi okunuyor. Yeni eşik uydurulmadı, **bakılarak** bulundu
-    (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizim 16–20'de mavi bir leke, 24'te
-    hâlâ bulanık, **32'den itibaren okunuyor**. Ve karar artık bir yerde
-    yaşıyor: `temel.spec.ts` 79 `.ico`'nun dizinini ayrıştırıp her boyu iki
-    çizimin taze render'ıyla **piksel piksel** karşılaştırıyor.
+    ailedendi: eşik `< 48 sade` yazılıydı, yani görev çubuğunun yuvasına
+    **sade** çizim düşüyordu ve o çizim gerçek logonun yanında bir yer tutucu
+    gibi okunuyor. Eşik uydurulmadı, **bakılarak** bulundu
+    (`scripts/ikon-karsilastir.mjs`) ve 32'ye indirildi.
+
+    **VE ŞİKAYET GERİ GELDİ — asıl tuzak burada.** Eşiği 32'ye indirmek
+    pikselleri doğru okumuştu ama yanında ölçülmemiş bir cümle taşıyordu:
+    *"görev çubuğu 32 px'lik bir yuvadır"*. Windows 11 %100 ölçekte **24**
+    istiyor, 32 değil — yani düzeltmenin kendisi, düzeltmeye çalıştığı boyu
+    eşiğin **bir basamak altında** bırakmıştı. Görülme biçimi de aynı: hiçbir
+    test kırmızı değil, `temel.spec.ts` 79 dosyayla betiği karşılaştırıyor ve
+    ikisi de anlaşıyor, çünkü ölçtükleri şey eşiğin **tutarlılığı**, eşiğin
+    **doğruluğu** değil. Eşik 20'ye indi; yalnız 16 sade kaldı, çünkü orada
+    ayrıntılı çizim daha kötü bir logo değil, **logo değil**. Artık bir
+    görev çubuğunun isteyebileceği hiçbir boy sade tarafta değil, yani cevap
+    "Windows hangi boyu seçiyor" tahminine **dayanmıyor**.
+
+    Genel hâli: bir eşiği ölçmek, eşiğin **hangi tarafında ne olduğunu**
+    ölçmektir; bir platformun o eşikten ne isteyeceği **ikinci** bir ölçümdür
+    ve tuzak 65 tam olarak bunun için yazılmıştı. Bir ölçümün yanına yazılan
+    ölçülmemiş cümle, ölçümü de götürür.
 
 79. **Bir devriyenin maliyeti tıklama sayısı değil, ZAMAN AŞIMLARININ
     TOPLAMIDIR.** İlk `npm run patrol` üç dakikada **hiçbir sekmeye
@@ -1534,6 +1550,30 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     genişlik, yükseklik, hizalama taban çizgisi. Burada çare `height: 1lh`,
     yani kutunun eskiden bir karakterle çağırdığı satır kutusunu doğrudan
     istemesi.
+
+83. **Hiçbir komutun okumadığı bir katılık, katılık değildir — ve onu okuyan
+    tek yer editörün Sorunlar panelidir.** `tsconfig.json`'ın `include`'u iki
+    yıl boyunca `["src", "vite.config.ts"]`'ti, yani `e2e/`'nin 35 dosyası,
+    `vite.site.config.ts` ve beş Playwright config'i **hiçbir `tsc`
+    koşusunda** yer almıyordu. Playwright tipleri kontrol etmez, derler; Vitest
+    de öyle. Sonuç: `npm run kontrol` yeşil geçerken editörde **48 sorun**
+    duruyordu, ve ikisi de doğruydu.
+    Bir yarısı eksik bir bağımlılıktı: `@types/node` **kurulu değildi**, o
+    yüzden her `node:fs`, `node:path` ve `Buffer` çözümsüzdü. Öteki yarısı
+    gerçek hatalardı ve biri gerçek bir kusurdu: `patrol.spec.ts`
+    `kapan.ts`'ten `Page` tipini alıyordu, `kapan.ts` onu **dışa aktarmıyordu**,
+    ve o dosyada `page` bir hata tipine düştüğü için üç geri çağırım sessizce
+    `any` olmuştu — yani devriyenin tip güvencesi hiç yoktu.
+    Çare üç parça, ve üçüncüsü olmadan ilk ikisi bir yıl içinde geri gelirdi:
+    `tsconfig.tools.json` (src dışındaki her şey, `types: ["node"]`, **aynı**
+    katılık), `e2e/tsconfig.json` (tek satır — editör yalnız `tsconfig.json`
+    adını arar, üstüne doğru yürüyerek), ve `npm run tipler`, `kontrol`'ün ilk
+    adımı. `types`'ı ayırmanın sebebi kozmetik değil: kök config'e `node`
+    eklemek e2e'yi denetlerdi ama bir bileşenin `process`'e uzanmasını da
+    **inandırırdı**.
+    Genel kural tuzak 77'nin kardeşi: orada belgedeki bir cümlenin testi yoktu,
+    burada **kodun kendisinin** okuyucusu yoktu. Bir dosya hiçbir komut
+    satırının açmadığı bir yerdeyse, oradaki `strict` bir dilektir.
 
 ---
 

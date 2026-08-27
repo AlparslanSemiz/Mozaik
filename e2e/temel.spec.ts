@@ -1,7 +1,6 @@
 // Persistence, backups and schema migration: the layer where a mistake costs
 // my father his saved timetable, not just a wrong pixel.
 
-import { type Page } from '@playwright/test';
 import { beklenenHata, expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
@@ -826,9 +825,17 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
   //      normal scaling got the three-column mark, which next to the real
   //      logo reads as a placeholder rather than as the program.
   //
-  // Both were decided by looking (scratch/ikon-olc.mjs renders both drawings
-  // at 16/20/24/32/40/48 on light and dark). The threshold came out at 32:
-  // detailed is a smear at 16-20, still mushy at 24, and readable from 32 up.
+  // Both were decided by looking (scripts/ikon-karsilastir.mjs renders both
+  // drawings at 16/20/24/32/40/48 on light and dark).
+  //
+  // The threshold first came out at 32 and the report CAME BACK: the taskbar
+  // was still showing the simplified mark. The error was an assumption about
+  // Windows rather than about pixels — Windows 11 asks for 24 at 100 %
+  // scaling, so 24 was the size actually reaching the taskbar and it sat just
+  // under the line. It is now 20, and only 16 stays simplified: there the
+  // detailed drawing is not a worse logo, it is a smear. Everything a taskbar
+  // can ask for is detailed at every scaling, so the answer no longer depends
+  // on guessing which size Windows picks.
   //
   // This test exists because that decision lived NOWHERE. `scripts/ikon.mjs`
   // has a constant; the committed .ico is what actually ships, and the two
@@ -855,7 +862,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
     for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
   });
 
-  test('32 ve üstü AYRINTILI çizim, altı sade — ve bu ölçülmüş bir eşik', async ({ page }) => {
+  test('20 ve üstü AYRINTILI çizim, 16 sade: ölçülmüş bir eşik', async ({ page }) => {
     // Compared by pixels, because the .ico holds PNGs and the .svg files hold
     // rectangles: the only thing the two have in common is what they look
     // like. Each entry is decoded and put next to a fresh render of both
@@ -873,7 +880,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
       offset += bytes;
       if (size > 48) continue; // above the threshold on both sides; nothing to tell apart
 
-      const beklenen = size < 32 ? sade : detay;
+      const beklenen = size < 20 ? sade : detay;
       await page.setViewportSize({ width: size, height: size });
       await page.setContent(
         `<style>html,body{margin:0;padding:0}svg{display:block;width:${size}px;height:${size}px}</style>${beklenen}`,
@@ -881,7 +888,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
       const taze = await page.locator('svg').screenshot({ omitBackground: true });
       expect(
         Buffer.compare(taze, png),
-        `${size} px, ${size < 32 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
+        `${size} px, ${size < 20 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
       ).toBe(0);
     }
   });

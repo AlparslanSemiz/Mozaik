@@ -7,7 +7,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { chooseEntity, open, openWithSample, dragAndDrop, tokens, rgb, contrast } from './helpers';
+import { chooseEntity, openWithSample, dragAndDrop, tokens, rgb, contrast } from './helpers';
 
 test.describe('10. Müsaitlik çizelgesi', () => {
   test('satır = gün, sütun = ders; gün satırına tıklayınca o gün kapanıyor', async ({ page }) => {

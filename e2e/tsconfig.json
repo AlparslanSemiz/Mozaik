@@ -1,0 +1,7 @@
+{
+  // The editor only ever looks for a file named `tsconfig.json`, walking up
+  // from the file it is opening. Without this pointer every spec in here falls
+  // into an inferred project — no `types`, no strictness, and a Problems panel
+  // that disagrees with `npm run kontrol` in both directions.
+  "extends": "../tsconfig.tools.json"
+}

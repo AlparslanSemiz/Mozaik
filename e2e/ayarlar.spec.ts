@@ -1,6 +1,5 @@
 // The Ayarlar tab: days, the bell, the four rules, subjects and data.
 
-import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { answerDialog, open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
 

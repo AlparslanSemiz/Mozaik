@@ -28,19 +28,33 @@ import { resolve } from 'node:path';
 //
 // TWO SOURCES, and the threshold is measured, not picked. Both drawings were
 // rendered at 16/20/24/32/40/48 on light and dark strips and looked at
-// (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png):
+// (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
 //
-//   16 · 20   detailed is a blue smear; its six columns merge completely
-//   24        detailed is still mushy, the ghost columns bleed into the solid
-//   32        detailed reads: six columns separate, ghosts behind them
-//   40 · 48   detailed is clean
+// The line moved TWICE, and the second move is the interesting one.
 //
-// So the line is at 32, not the 48 it used to be. That change is the other
-// half of the same complaint: the taskbar is a 32 px slot at normal scaling,
-// and it was being handed the simplified three-column mark, which next to the
-// real logo reads as a low-detail placeholder rather than the program.
+//   48 -> 32  because the taskbar is a 32 px slot at normal scaling and it was
+//             being handed the simplified three-column mark, which next to the
+//             real logo reads as a placeholder rather than as the program.
+//   32 -> 20  because that was still wrong, and the report came back a second
+//             time: "windowsta alttaki barda uygulamanın logosu küçük çizim,
+//             onun büyük çizim olması lazım."
+//
+// The mistake in the 32 was an ASSUMPTION about Windows, not about pixels:
+// Windows 11 asks for 24 at 100 % scaling, not 32, so 24 was the size actually
+// reaching the taskbar and 24 sat just under the line. Reading the sheet again
+// with that in mind:
+//
+//   16        detailed collapses into a blue smear; its six columns merge
+//   20 · 24   detailed is mushy but the columns are TELLABLE, and it is the
+//             real mark rather than a stand-in
+//   32 +      detailed reads cleanly
+//
+// So 16 keeps the simplified drawing, because there the detailed one is not a
+// worse logo but no logo at all. Everything a taskbar can ask for is detailed
+// at every scaling — which is what the complaint asked for, and this time it
+// does not depend on guessing which size Windows picks.
 const SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256];
-const SADE_ALTINDA = 32;
+const SADE_ALTINDA = 20;
 
 const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
 const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');

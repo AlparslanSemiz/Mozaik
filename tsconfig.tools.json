@@ -1,0 +1,31 @@
+{
+  // Everything OUTSIDE src: the browser-driving suites and the build configs.
+  //
+  // It is a second project rather than a bigger `include` in tsconfig.json for
+  // one reason: `types`. These files import `node:fs`, `node:path` and touch
+  // `Buffer`; src must not be able to. Widening the root config would have
+  // typechecked e2e at the price of letting a component reach for `process`
+  // and be believed.
+  //
+  // Same strictness as src, on purpose. Being outside `npm run build` is what
+  // let TS6133, TS2532 and a `Page` that was never exported sit in the editor's
+  // Problems panel for weeks: nothing on any command line was reading them.
+  // `npm run kontrol` now does — see the `tsc -p` in package.json.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // src is floored at ES2020 because a browser has to run it. Nothing here
+    // ships to a browser: these files run under Node or inside Playwright's
+    // own Chromium, so `replaceAll` and friends are simply available.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": [
+    "e2e",
+    "vite.site.config.ts",
+    "playwright.config.ts",
+    "playwright.cozucu.config.ts",
+    "playwright.ekran.config.ts",
+    "playwright.patrol.config.ts",
+    "playwright.site.config.ts"
+  ]
+}

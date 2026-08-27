@@ -1500,3 +1500,15 @@ Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
 
 > **Bu dokuz satırın ham hâli buradaydı; V turu olarak numaralanıp yukarı
 > taşındı (2026-08-27). Dokuzu da bitti.**
+
+Görev çubuğundaki işaret büyük çizim değil küçük çizim olmalı, benim bahsettiğim windowsta alttaki barda uygulamanın logosu küçük çizim onun büyük çizim olması lazım.
+
+Programda da eğer bloksa blok olarak gözükmeli, hatalı foto örnek fotolarda.
+
+Ders eklenirken en sonki seçilen sınıfa ders eklendikten sonra sınıf seçeneği hatırlansın varsayılana dönülmesin.
+
+Eğer mümkünse tek bir sınıf için ders eklemeyi çok daha kısa hale ya da pratik hale getirelim.
+
+Ders ekleme tarafı çok daha pratik hale getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama ders en önemli kısım. Hatta Ders kısmının kendine özgü bir alanı bile olabilir en üstteki ilk bara bile çıkabilir. ikinci şeritte de artık sınıftan mı eklemek istiyorsun? öğretmenden mi eklemek istiyorsun genel bakmak mı istiyorsun gibi olabilir.
+
+Excelden yapıştır o bloğun en sağında hatta en sağ üstünde bil olabilir.
