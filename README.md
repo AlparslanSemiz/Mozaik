@@ -39,9 +39,8 @@ Hiçbir şey derlemeye gerek yok — üçü de hazır dosya olarak iner:
 Bu adresler her zaman **en son sürüme** gider; sürüm numarası bilmeye gerek
 yok. Giriş yapmak da gerekmez.
 
-> ⚠️ **Henüz tek bir sürüm yayınlanmadı**, yani bugün bu üç bağlantı 404
-> verir. İlk sürüm çıkana kadar aşağıdaki "kendiniz üretmek isterseniz"
-> adımları geçerli. Sürüm yayınlamak: aşağıda *Sürüm çıkarmak*.
+İlk sürüm **v1.1.0** (2026-08-27). Ölçülen boyutlar: `.html` 537 092 bayt ·
+`.zip` 216 719 bayt · `.exe` 3 226 112 bayt.
 
 Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
@@ -214,10 +213,11 @@ verilmiştir.** Program bütün planları `Belgelerim\Ders Programı` klasörün
 kendiliğinden yazar — tıklama yok, izin penceresi yok, klasör seçici yok — ve
 her gün için ayrı bir yedek bırakır (son 10 gün).
 
-> ⚠️ **Bu yol henüz Windows'ta denenmedi.** Kod yazıldı, Linux'ta derlendi ve
-> çalıştı; `.exe` üreten iş akışı yazıldı ama **bir kez bile koşturulmadı**.
-> Aşağıdaki adımlar tarif edilmiştir, doğrulanmamıştır. Bugünkü sağlam yol
-> hâlâ 1 ve 2'dir.
+> ⚠️ **Bu yol Windows'ta hâlâ ÇALIŞTIRILMADI.** v1.1.0 ile `windows-latest`
+> üstünde gerçekten **derlendi** (3 226 112 bayt, `cargo test` yeşil) ve
+> indirilebilir durumda — ama kimse ona henüz çift tıklamadı. WebView2'nin
+> varlığı, SmartScreen'in ne dediği ve Belgelerim'e gerçekten yazıp yazmadığı
+> **o makinede** görülecek. Bugünkü sağlam yollar 3 ve 2'dir.
 
 ### `.exe`'yi almak
 

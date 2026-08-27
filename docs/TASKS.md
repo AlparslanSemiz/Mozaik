@@ -34,16 +34,26 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > - [x] **GitHub Pages AÇILDI ve site canlı** — ölçüldü: 200, `has_pages: true`,
 >       son `site` koşusu success. (Eski maddedeki 3. iş bitti.)
 >
-> **Buradan çıkan iki iş — ikisi de KULLANICIDA:**
-> - [ ] **İlk sürüm yayınlansın:** `npm run yayinla -- 1.1.0`. O ana kadar
->       README'deki üç indirme bağlantısı 404 veriyor (ölçüldü). Yayınlandıktan
->       sonra üçünün de **200** verdiği `curl -IL` ile doğrulanacak, ve
->       README'deki "henüz sürüm yayınlanmadı" uyarısı silinecek.
-> - [ ] **Babanın makinesinde denensin**, ve önce şu yapılsın:
->       **Ayarlar → Veri → Klasör seç… → Belgelerim.** Bu tek adım, "veriler
->       asla kaybolmasın"ın tek gerçek karşılığı. Sonra bir tur geri bildirim
->       alınıp `npm run yayinla` ile ikinci sürüm çıkarılsın — asıl ölçülecek
->       şey döngünün kendisi: **şerit gerçekten çıkıyor mu.**
+> - [x] **v1.1.0 YAYINLANDI** — deponun ilk sürümü. İki iş akışı da yeşil,
+>       üç bağlantı da **200**. `.html` indirilip gerçekten açıldı (0 ağ
+>       isteği, 0 hata), `.zip` açılıp BOM/CRLF/ASCII'si denetlendi.
+>       `yayinla`'nın ilk koşusu etiketi sessizce itmedi (hafif etiket +
+>       `--follow-tags`); düzeltildi ve artık `ls-remote` ile doğruluyor.
+>
+> **SIRADAKİ İŞ — ikisi de KULLANICIDA:**
+> - [ ] **Babanın makinesinde denensin.** Önerilen yol **site**:
+>       <https://alparslansemiz.github.io/ders-programi/> — indirilecek bir şey
+>       yok, ve düzeltmeler oraya kendiliğinden geliyor.
+>       **İlk açılışta tek bir şey yapılsın: Ayarlar → Veri → `Klasör seç…` →
+>       Belgelerim.** Bu tek adım, "veriler asla kaybolmasın"ın tek gerçek
+>       karşılığı; gerisi alışkanlık.
+> - [ ] **Döngünün kendisi ölçülsün.** Bir tur geri bildirim alınsın,
+>       düzeltilsin, `npm run yayinla -- 1.1.1` densin, ve babanın **açık duran
+>       sekmesinde** şeridin çıktığı GÖRÜLSÜN. Testte ölçüldü ama gerçek bir
+>       makinede görülmedi — bu turun tek asıl iddiası o.
+> - [ ] **`.exe` Windows'ta hâlâ çalıştırılmadı.** Derlendi ve indirilebilir
+>       (3 226 112 bayt), ama kimse çift tıklamadı: WebView2, SmartScreen ve
+>       Belgelerim'e yazma orada görülecek.
 
 > **2026-08-27 · iki sessiz boş ekran KAPANDI.** Kullanıcı kök
 > `index.html`'e ve `kurulum/Kur.cmd`'ye tıkladı; ikisi de teslim edilen

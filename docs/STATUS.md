@@ -110,6 +110,41 @@ ve efekt hiç kurulmuyor. Onun yerine gerçek bir iddia yazıldı — *hiçbir �
 değişmemişken `update()` çağırmak şerit çıkarmıyor* — ve ikinci mutasyonu
 yakalayan da o oldu.
 
+### v1.1.0 YAYINLANDI — ve zincirin tamamı ölçüldü
+
+Deponun **ilk sürümü**. İki iş akışı da yeşil geçti.
+
+| Ne | Ölçülen |
+|---|---|
+| `site` iş akışı | success · canlı `sw.js` → `const CACHE = 'ders-programi-1.1.0-357d878';` |
+| canlı sayfa | 537 414 bayt, içinde `1.1.0` ve `357d878` |
+| `sürüm` iş akışı (`windows-latest`) | **success** — `cargo test` dahil |
+| `Ders-Programi.html` | **200**, 537 092 bayt |
+| `Ders-Programi-Windows-kurulum.zip` | **200**, 216 719 bayt |
+| `Ders-Programi.exe` | **200**, 3 226 112 bayt |
+
+Üçü de indirildi ve **açıldı**, tarif edilmedi:
+
+- **`.html` gerçekten çift tıklandı** (Playwright, `file://`): uygulama çizildi,
+  panel *"v1.1.0 · 27 Ağustos 2026 · Dosya (çift tıklanan .html) · file://"*
+  dedi, **dışarı giden istek 0**, **sayfa hatası 0**.
+- **`.zip` açıldı ve içi denetlendi**: 13 giriş; `kur.ps1`/`sunucu.ps1`/`OKU.txt`
+  BOM+CRLF, `.cmd`'ler salt ASCII+CRLF — hepsi zip gidiş-dönüşünden **sağ
+  çıktı**. `Guncelle.cmd` içinde `-Internetten`, `kur.ps1` içinde
+  `releases/latest/download`. İçindeki `site/sw.js` de damgalı.
+- **`.exe` yalnızca DERLENDİ.** 3 226 112 bayt indirilebilir durumda, ama
+  **kimse ona çift tıklamadı** — WebView2, SmartScreen ve Belgelerim'e yazma
+  babanın makinesinde görülecek. README bunu artık böyle yazıyor.
+
+**İlk `yayinla` koşusu, engellemek için yazıldığı hatayı yaptı.** `git tag`
+hafif bir etiket üretir; `git push --follow-tags` yalnız *annotated* olanları
+iter ve ötekini **tek kelime etmeden** atlar — çıkış kodu 0, ekranda
+"Everything up-to-date". Sonuç: main gitti, etiket evde kaldı, `surum.yml` hiç
+tetiklenmedi, ve site güncellenirken üç bağlantı 404 kalmaya devam etti.
+Düzeltme iki parçalı ve ikisi de gerekli: etiket **annotated** üretiliyor, ve
+push'tan sonra `git ls-remote` ile uzakta **gerçekten var mı** diye bakılıyor.
+Bir push'a inanmak, hatayı sessizliğine geri verirdi.
+
 ### Yeşil olmayan tek şey — ve bu turun işi DEĞİL
 
 `e2e/gorunum.spec.ts:341` → *"Sığdır haftanın tamamını kutuya sokuyor"*
