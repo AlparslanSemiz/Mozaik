@@ -92,12 +92,28 @@ if (onceki === surum) {
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 
-git('tag', etiket);
+// ANNOTATED, and that is not a style preference — it is a bug this script
+// already had once. `--follow-tags` pushes annotated tags only; a lightweight
+// one is skipped WITHOUT A WORD, exit code 0, "Everything up-to-date". The
+// first release went out with main pushed, the tag left at home, and surum.yml
+// never triggered: exactly the silent half-release this file exists to stop.
+git('tag', '-a', etiket, '-m', `Sürüm ${etiket}`);
 
 // One push, both refs: two pushes is two chances to do half of it.
 git('push', '--follow-tags', 'origin', 'main');
 
-console.log(`  ${etiket} itildi. İki iş akışı da koşuyor:\n`);
+// ...and then LOOK. The whole point of this script is the step that is easy to
+// forget, so believing a push rather than checking it would give the failure
+// back its silence.
+const uzakta = git('ls-remote', '--tags', 'origin', etiket);
+if (uzakta === '') {
+  dur(
+    `${etiket} uzağa GİTMEDİ — sürüm çıkmayacak, yalnız site güncellenecek.`,
+    `git push origin ${etiket}`,
+  );
+}
+
+console.log(`  ${etiket} itildi ve uzakta görüldü. İki iş akışı da koşuyor:\n`);
 console.log('      site   → https://alparslansemiz.github.io/ders-programi/');
 console.log('      sürüm  → https://github.com/AlparslanSemiz/ders-programi/releases/latest');
 console.log('');
