@@ -72,20 +72,26 @@ const yol = resolve(KOK, 'package.json');
 const metin = readFileSync(yol, 'utf8');
 const pkg = JSON.parse(metin);
 const onceki = pkg.version;
+
+// package.json ALREADY at this version is not an error, and refusing was
+// wrong. It is the normal state after a round that bumped it by hand — and
+// refusing then puts the TAG out of this script's reach, which is the one
+// step it exists to stop anybody forgetting.
 if (onceki === surum) {
-  dur(`package.json zaten ${surum}.`, 'Bir sonraki numarayı verin.');
+  console.log(`\n  package.json zaten ${surum}; yalnız etiket atılıyor.\n`);
+} else {
+  // Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
+  // reformat a file nobody asked to reformat, and the diff of a release
+  // should be one line.
+  const yeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
+  if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
+  writeFileSync(yol, yeni, 'utf8');
+
+  console.log(`\n  ${onceki} → ${surum}\n`);
+  git('add', 'package.json');
+  git('commit', '-m', `Sürüm ${etiket}`);
 }
 
-// Rewritten as TEXT rather than JSON.stringify(pkg): re-serialising would
-// reformat a file nobody asked to reformat, and the diff of a release should
-// be one line.
-const yeni = metin.replace(`"version": "${onceki}"`, `"version": "${surum}"`);
-if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
-writeFileSync(yol, yeni, 'utf8');
-
-console.log(`\n  ${onceki} → ${surum}\n`);
-git('add', 'package.json');
-git('commit', '-m', `Sürüm ${etiket}`);
 git('tag', etiket);
 
 // One push, both refs: two pushes is two chances to do half of it.
