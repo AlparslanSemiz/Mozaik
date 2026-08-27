@@ -9,6 +9,61 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **2026-08-27 · GERİ BİLDİRİM DÖNGÜSÜ KAPANDI.** Baba bir kusur bildirecek,
+> düzeltilecek, ve düzeltmenin ona **ulaştığı görülecek**. Bugüne kadar son
+> adım yoktu: arayüzde sürüm numarası yoktu ve site yolunda yeni sürüm
+> **bir açılış geriden** geliyordu (tuzak 73). Ayrıntı ve ölçülen her sayı
+> [STATUS.md](STATUS.md) → *Yirmi beşinci oturum*.
+>
+> - [x] Sürüm kimliği: `scripts/surum.mjs` + `define: __SURUM__` (iki config)
+>       + `src/version.ts`. `package.json` **1.1.0**.
+> - [x] `sw.js` önbellek adı derlemeyle kıpırdıyor — `stampServiceWorker`.
+> - [x] `src/update.ts` + güncelleme şeridi: *"Yeni sürüm hazır"* / `Yenile` /
+>       `Sonra`. **Mutasyonla denendi, iki yönde de kırmızıya döndü.**
+> - [x] Ayarlar → Veri → **"Sürüm ve güncelleme"** paneli: sürüm, hangi kopya,
+>       adres, ve güncellemenin o yolda nasıl geldiği.
+> - [x] "Veriler nerede" hangi **depo** olduğunu ve dört yolun depolarının
+>       **ayrı** olduğunu söylüyor. `ders-programi-baski` rapora girdi.
+> - [x] "Nereye kaydedilsin" gidiş-dönüşü adıyla yazıyor
+>       (`ders-programi-tumu.json` → *Tümünü dosyadan aç*).
+> - [x] Klasör bozulunca (`izin-gerek` / `hata`) şerit.
+> - [x] `Guncelle.cmd` en yeni sürümü **kendisi indiriyor**.
+> - [x] `npm run yayinla -- 1.2.0`.
+> - [x] README: canlı adres (hiç yazılı değildi), güncelleme bölümü, **ilk
+>       kurulum listesi**. OKU.txt ve `surum-notu.md` de.
+> - [x] **GitHub Pages AÇILDI ve site canlı** — ölçüldü: 200, `has_pages: true`,
+>       son `site` koşusu success. (Eski maddedeki 3. iş bitti.)
+>
+> **Buradan çıkan iki iş — ikisi de KULLANICIDA:**
+> - [ ] **İlk sürüm yayınlansın:** `npm run yayinla -- 1.1.0`. O ana kadar
+>       README'deki üç indirme bağlantısı 404 veriyor (ölçüldü). Yayınlandıktan
+>       sonra üçünün de **200** verdiği `curl -IL` ile doğrulanacak, ve
+>       README'deki "henüz sürüm yayınlanmadı" uyarısı silinecek.
+> - [ ] **Babanın makinesinde denensin**, ve önce şu yapılsın:
+>       **Ayarlar → Veri → Klasör seç… → Belgelerim.** Bu tek adım, "veriler
+>       asla kaybolmasın"ın tek gerçek karşılığı. Sonra bir tur geri bildirim
+>       alınıp `npm run yayinla` ile ikinci sürüm çıkarılsın — asıl ölçülecek
+>       şey döngünün kendisi: **şerit gerçekten çıkıyor mu.**
+
+> **2026-08-27 · iki sessiz boş ekran KAPANDI.** Kullanıcı kök
+> `index.html`'e ve `kurulum/Kur.cmd`'ye tıkladı; ikisi de teslim edilen
+> dosyanın **kaynağı**ydı ve ikisi de bunu söylemeden başarısız oluyordu.
+> Artık söylüyorlar (tuzak 72, `temel.spec.ts` 77). Üç ürün de üretilip
+> denendi: `dist/index.html` açıldı, `dist-kurulum/` üretildi, kurulum
+> gerçekten koşturuldu ve kurulan kopyadan sunucu dosyaları verdi.
+> Ayrıntı ve ölçülen her sayı [STATUS.md](STATUS.md) → *Yirmi dördüncü
+> oturum*.
+>
+> **Buradan çıkan iki iş:**
+> - [ ] `e2e/gorunum.spec.ts` → "Sığdır haftanın tamamını kutuya sokuyor"
+>       **kırmızı ve HEAD'de de kırmızı**: hücre 39,55 px, istenen 37,4 px,
+>       pay 2 px. Payı büyütmek yasak (tuzak 42) — sütunun tabanını koyan
+>       başlık min-content'i tek tek kapatılarak yeniden ölçülecek
+>       (tuzak 37).
+> - [ ] `dist/` ve `dist-kurulum/` `.gitignore`'da: depoda **hiçbir zaman**
+>       çalışan bir ürün durmuyor. Bugünkü uyarı bunu söylüyor ama
+>       çözmüyor; asıl çözüm bir sürüm yayınlamak, yani aşağıdaki 1. madde.
+
 > **Y turu bitti (2026-08-26).** Kullanıcının on bir maddesi + üç liste kusuru
 > karşılandı: `Sil` hizası, Öğretmenler listesinin yatay kayması, şerit-liste
 > boşluğu, Müsaitlik'in çarpıları, kartın üstüne kart bırakma, bir A4'e 1/2/4
@@ -52,13 +107,9 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 >    babaya `npm` anlatmak gerekmez. Bugün o bağlantılar 404 veriyor.
 >    Kurulum klasörü yolu **kalıyor** (kullanıcı kararı, 2026-08-27):
 >    hangisinin tuttuğuna baba kullandıktan sonra bakılır, ilke 5.
-> 3. **GitHub Pages'in açılması — YARISI YAPILDI.** Depo `ders-programi`
->    olarak yeniden adlandırıldı (2026-08-27, kullanıcı). Kalan tek adım:
->    **Settings → Pages → Source: "GitHub Actions"**.
->    `site.yml` bugüne kadar 4 kez koştu ve 4'ünde de aynı yerde düştü —
->    `build` uçtan uca geçiyor, `deploy` `Failed to create deployment
->    (status: 404) … Ensure GitHub Pages has been enabled` diyor. Yani kırmızı
->    işaret site bozuk demek değil, **anahtar açılmamış** demek.
+> 3. ~~**GitHub Pages'in açılması.**~~ **BİTTİ (2026-08-27).** Anahtar açıldı,
+>    `site.yml` geçti, ve site ölçüldü: `https://alparslansemiz.github.io/
+>    ders-programi/` → **200**, 528 999 bayt. Her `main` push'u onu tazeliyor.
 >
 > Ondan sonra hâlâ bekleyen tek büyük şey: **gerçek veriyle deneme**
 > (babanın listesi) — v0'ın çıkma şartı.

@@ -257,6 +257,41 @@ export function storageKind(): StorageKind {
   return safely(() => location.protocol) === 'file:' ? 'file' : 'site';
 }
 
+/**
+ * WHICH copy of the program this is, in the words the four delivery routes are
+ * described in (README). Separate from `StorageKind` on purpose: that type
+ * answers "can 'tarama verilerini temizle' take this away", and three of these
+ * four routes answer it the same way. This one answers "which one am I
+ * looking at", which is the question somebody asks before they tell me what
+ * went wrong.
+ *
+ * The Windows install is a `site` as far as storage goes — it IS an http
+ * origin — but calling it "Site" on my father's own machine would send him to
+ * look for an internet address that does not exist.
+ */
+export function routeName(): string {
+  if (isDesktop()) return 'Uygulama (.exe)';
+  if (safely(() => location.protocol) === 'file:') return 'Dosya (çift tıklanan .html)';
+  return safely(() => location.hostname)?.endsWith('.localhost') === true
+    ? 'Windows kurulumu'
+    : 'Site';
+}
+
+/**
+ * The address this copy's storage belongs to, verbatim, because "the browser's
+ * store for this site" leaves out the one word that matters. Every route has
+ * its OWN store, and two of them look identical on screen.
+ *
+ * '' in the exe: there is an origin there too, but it is an implementation
+ * detail of the window rather than somewhere anybody can go.
+ */
+export function storageAddress(): string {
+  if (isDesktop()) return '';
+  const origin = safely(() => location.origin) ?? '';
+  if (origin === 'file://' || origin === 'null' || origin === '') return 'file://';
+  return origin + (safely(() => location.pathname) ?? '');
+}
+
 export interface StorageRow {
   key: string;
   what: string;
@@ -334,6 +369,16 @@ export function storageReport(lib: Library): StorageReport {
     key: `${BASE_KEY}-hareket`,
     what: 'hareket (animasyon) tercihi',
     chars: charsAt(`${BASE_KEY}-hareket`),
+  });
+  // The print options were the F round's key and this report was never told.
+  // It hid because the key is only WRITTEN when somebody changes a print
+  // option, so a fresh profile has nothing to leave out — the panel would
+  // have started lying on the first day my father touched "Sayfada ne olsun",
+  // and the one thing this table is for is being trusted.
+  rows.push({
+    key: `${BASE_KEY}-baski`,
+    what: 'kâğıt seçenekleri',
+    chars: charsAt(`${BASE_KEY}-baski`),
   });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };

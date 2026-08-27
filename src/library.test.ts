@@ -28,6 +28,8 @@ import {
   renamePlan,
   setActive,
   setDraft,
+  routeName,
+  storageAddress,
   storageKind,
   storageReport,
   uniquePlanName,
@@ -327,6 +329,7 @@ describe('veriler nerede — depo raporu', () => {
     expect(keys).toContain('ders-programi-havuz');
     expect(keys).toContain('ders-programi-havuz-boy');
     expect(keys).toContain('ders-programi-serit');
+    expect(keys).toContain('ders-programi-baski');
     // An absent backup chain is information too, so the row stays with 0.
     expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
   });
@@ -341,6 +344,10 @@ describe('veriler nerede — depo raporu', () => {
     localStorage.setItem('ders-programi-havuz', 'kapali');
     localStorage.setItem('ders-programi-havuz-boy', '17.5');
     localStorage.setItem('ders-programi-serit', 'kapali');
+    // The one that was actually missing when this was written. It only gets
+    // written when somebody changes a print option, which is why a fresh
+    // profile never caught it.
+    localStorage.setItem('ders-programi-baski', '{"clock":false}');
     writePlanText(FIRST_PLAN_ID, 'abcde');
 
     const keys = storageReport(two()).rows.map((r) => r.key);
@@ -368,6 +375,16 @@ describe('veriler nerede — depo raporu', () => {
     expect(storageKind()).toBe('site');
   });
 
+  it('kâğıt seçenekleri raporda — YAZILMADAN önce de', () => {
+    // Written or not, the row is there with 0: the table's contract is "every
+    // key this program owns", and a key that appears only after you touch a
+    // feature is exactly the one a reader would not know to look for.
+    const row = storageReport(two()).rows.find((r) => r.key === 'ders-programi-baski');
+    expect(row).toBeDefined();
+    expect(row!.what).toBe('kâğıt seçenekleri');
+    expect(row!.chars).toBe(0);
+  });
+
   it('exe içinde "exe" diyor — köken hâlâ http olsa BİLE', () => {
     // The exe is served over a normal origin, so the protocol question keeps
     // answering "site" about it: true, and useless. What the panel has to get
@@ -382,5 +399,90 @@ describe('veriler nerede — depo raporu', () => {
       delete w.__TAURI__;
     }
     expect(storageKind()).toBe('site');
+  });
+});
+
+// ---------------------------------------------------------- hangi kopya bu
+
+/** jsdom's location is read-only, so the branch under test gets its own. */
+function withLocation(fake: Partial<Location>, job: () => void) {
+  const real = Object.getOwnPropertyDescriptor(window, 'location');
+  Object.defineProperty(window, 'location', { value: fake, configurable: true, writable: true });
+  try {
+    job();
+  } finally {
+    if (real === undefined) delete (window as unknown as Record<string, unknown>).location;
+    else Object.defineProperty(window, 'location', real);
+  }
+}
+
+describe('routeName — hangi kopya bu', () => {
+  it('çift tıklanan dosyayı ADIYLA söylüyor', () => {
+    withLocation({ protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' }, () => {
+      expect(routeName()).toBe('Dosya (çift tıklanan .html)');
+    });
+  });
+
+  it('yerel kurulumu "Site" demiyor', () => {
+    // It IS an http origin, so StorageKind answers 'site' about it and that is
+    // correct. But telling my father he is on a "site" would send him looking
+    // for an internet address that does not exist on his machine.
+    withLocation(
+      { protocol: 'http:', hostname: 'dersprogrami.localhost', origin: 'http://dersprogrami.localhost:7654', pathname: '/' },
+      () => {
+        expect(routeName()).toBe('Windows kurulumu');
+        expect(storageKind()).toBe('site');
+      },
+    );
+  });
+
+  it('gerçek site "Site"', () => {
+    withLocation(
+      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/ders-programi/' },
+      () => expect(routeName()).toBe('Site'),
+    );
+  });
+
+  it('exe her şeyin önünde', () => {
+    const w = window as unknown as { __TAURI__?: unknown };
+    w.__TAURI__ = { core: { invoke: async () => undefined } };
+    try {
+      withLocation({ protocol: 'file:', hostname: '', origin: 'file://', pathname: '/x' }, () =>
+        expect(routeName()).toBe('Uygulama (.exe)'),
+      );
+    } finally {
+      delete w.__TAURI__;
+    }
+  });
+});
+
+describe('storageAddress — hangi depo', () => {
+  it('adresi yol dahil veriyor', () => {
+    withLocation(
+      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/ders-programi/' },
+      () => expect(storageAddress()).toBe('https://alparslansemiz.github.io/ders-programi/'),
+    );
+  });
+
+  it('file:// tek başına — çünkü orada makinedeki HER yerel sayfa aynı kökende', () => {
+    withLocation({ protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' }, () =>
+      expect(storageAddress()).toBe('file://'),
+    );
+  });
+
+  it("bazı tarayıcılarda file:// kökeni 'null' yazar", () => {
+    withLocation({ protocol: 'file:', hostname: '', origin: 'null', pathname: '/C:/a.html' }, () =>
+      expect(storageAddress()).toBe('file://'),
+    );
+  });
+
+  it('exe bir adres göstermiyor — gidilecek bir yer değil', () => {
+    const w = window as unknown as { __TAURI__?: unknown };
+    w.__TAURI__ = { core: { invoke: async () => undefined } };
+    try {
+      expect(storageAddress()).toBe('');
+    } finally {
+      delete w.__TAURI__;
+    }
   });
 });

@@ -1,10 +1,181 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-27 (yirmi üçüncü oturum: **G turu — kalan üçlü ve
-`.exe`**; şema değişmedi)
+Son güncelleme: 2026-08-27 (yirmi beşinci oturum: **sürüm, güncelleme ve
+"verilerim nerede"**; şema değişmedi)
 
 ---
 
+## Yirmi beşinci oturum — geri bildirim döngüsünün kapanması (2026-08-27)
+
+Kullanıcının cümlesi üç parçaydı: *"babam bana feedbackler verecek ben onları
+yapıp tekrar deploy edeceğim, güncellemelerin kolayca yüklenebilmesi için bir
+sistem kuralım"* · *"babamın verilerinin nereye kaydedildiğini açıkça belirt"*
+· *"npm run vesaire ile kurulmaması, direkt githubtan kolayca kurulabilmesi
+lazım — bunu yaptık değil mi?"*
+
+Son sorunun cevabı **yarı yarıya evet**ti, ve bunu ölçmek turun ilk işi oldu.
+
+### Önce ölçüldü — ve belgelerin yarısı bayat çıktı
+
+| Ne | Ölçülen |
+|---|---|
+| `https://alparslansemiz.github.io/ders-programi/` | **200**, 528 999 bayt gerçek uygulama |
+| `sw.js` · `manifest.webmanifest` · `icon-192.png` · `icon.svg` | 200 · 200 · 200 · 200 |
+| `has_pages` | **true** — yani Pages AÇILMIŞ |
+| son `site` koşusu (09:33) | **success** (öncesindeki 4'ü başarısızdı) |
+| `docs/STATUS.md`'nin Pages tablosu | **BAYAT**: hâlâ "`has_pages: false`, 4 koşu 4 hata" diyordu |
+| `/releases` · `git tag -l` | **ikisi de boş** — hiç sürüm çıkmamış |
+| README'deki üç indirme bağlantısı | **404** |
+| README'de site adresi | **hiç yazılı değil** |
+| arayüzde sürüm numarası | **yok**; `package.json` `0.1.0`'da donmuş |
+| `site/sw.js` önbellek adı | `ders-programi-v1` — **sabit** |
+
+Yani site çalışıyordu ve kimse bilmiyordu (adresi hiçbir yerde yazmıyordu),
+indirilebilir dosyalar ise hiç doğmamıştı.
+
+### Asıl kusur: güncelleme bir açılış geriden geliyordu
+
+Sabit önbellek adı + cache-first strateji. Tarayıcı `sw.js`'i bayt bayt
+karşılaştırıyor; dosya hiç değişmediği için `install` bir daha koşmuyor,
+`addAll(SHELL)` kabuğu bir daha indirmiyor. Baba programı açıyor → **eskisini**
+görüyor; kapatıp açıyor → yenisi geliyor. Hata yok, uyarı yok. Tuzak 73.
+
+### Ne yapıldı
+
+1. **Sürüm kimliği — tek kaynak, dört yolda da.** `scripts/surum.mjs` +
+   `define: { __SURUM__ }` (iki config birden) + `src/version.ts`.
+   `package.json` `0.1.0` → **`1.1.0`**.
+2. **`sw.js`'in önbellek adı derlemeyle kıpırdıyor** (`stampServiceWorker`).
+   Ölçülen çıktı: `const CACHE = 'ders-programi-1.1.0-83950c5';`
+3. **`src/update.ts`** — yeni bir worker devralınca üst çubuğun altında bir
+   şerit: *"Yeni sürüm hazır."* + `Yenile` / `Sonra`. `Sonra` **sessionStorage**
+   ile yaşar, localStorage'a yazmaz: yeni bir `ders-programi-*` anahtarı
+   "Veriler nerede" tablosuna satır borcu doğururdu. `controller` yoksa
+   **tamamen no-op**, yani `file://` ve `.exe` hiçbir yere bağlanmaz.
+4. **Ayarlar → Veri'ye "Sürüm ve güncelleme" paneli**: sürüm, tarih, **hangi
+   kopya** (`Dosya · Windows kurulumu · Site · Uygulama`), **adres**. Site'te
+   *Güncellemeleri denetle*; dosya/exe'de "kendini güncellemez" + en yeni
+   sürümün adresi.
+5. **"Veriler nerede" artık hangi depo olduğunu söylüyor** — ve dört yolun
+   depolarının **ayrı** olduğunu, aralarında taşımanın iki düğme olduğunu.
+   Eksik anahtar `ders-programi-baski` rapora girdi; IndexedDB'deki
+   `ders-programi-klasor` bir **cümleyle** anıldı (tabloya satır olarak değil:
+   tablo bayt sayıyor, bir tutamak metin değil).
+6. **"Nereye kaydedilsin" gidiş-dönüşü adıyla yazıyor**:
+   `ders-programi-tumu.json` → *Tümünü dosyadan aç*. İki yarısı da zaten
+   kuruluydu; söylenmemişti.
+7. **Klasör bozulunca şerit** (`izin-gerek` / `hata`) — tuzak 7'nin kuralı.
+   `secilmedi` bilerek şerit DEĞİL: başlangıç durumu bir kusur değil, ve
+   `file://` altında izin zaten her açılışta yeniden soruluyor.
+8. **`Guncelle.cmd` artık kendisi indiriyor** (`kur.ps1 -Internetten`,
+   `releases/latest/download/…`). İnternet yoksa hata vermez, yanındaki
+   klasörü kurar. TLS 1.2 elle açılıyor: PowerShell 5.1'in varsayılanını
+   GitHub kabul etmiyor.
+9. **`npm run yayinla -- 1.2.0`** — bump + commit + etiket + tek push. Kirli
+   ağaçta, `main` dışında bir dalda, ve var olan bir etikette **reddediyor**.
+10. **README · OKU.txt · surum-notu.md**: canlı adres, güncelleme bölümü, ve
+    **ilk kurulum listesi** — "Ayarlar → Veri → Klasör seç… → Belgelerim".
+
+### Ölçülen
+
+| Ne | Değer |
+|---|---|
+| `dist/index.html` | 528 677 → **537 134** bayt (+8 457: sürüm damgası, `update.ts`, yeni panel) |
+| `dist-site/index.html` | 537 456 bayt |
+| `dist-kurulum/` | **590 984** bayt |
+| `sw.js` önbellek adı | `ders-programi-1.1.0-83950c5` |
+| Birim testi | **521 → 537** (yeni: `version.test.ts` 7, `library.test.ts` +9) |
+| E2E (`file://`) | **396 → 401** (yeni: `surum.spec.ts` 5) |
+| Site · sunucu · klasör | **19 → 21** (yeni: önbellek adı, güncelleme şeridi) |
+| Çözücü | 7, yeşil |
+| BOM · CRLF · ASCII kapısı | yerelde koşturuldu, **üçü de doğru** |
+| `kur.ps1` sözdizimi | PowerShell ayrıştırıcısıyla **hatasız** |
+| Yeni panel, %150 ölçek | panel 915 px, **kırpılma 0**, sayfa taşması **0** |
+| `file://` ilk boyama, 7 koşu | **18 ms** medyan · 81 ms en kötü (ilk koşu, soğuk) |
+| `dist/index.html`'de `fetch(` · `XMLHttpRequest` · `serviceWorker.register` | **0 · 0 · 0** |
+
+### Test bedava yeşil değil — mutasyonla denendi (tuzak 23)
+
+Turun tek asıl iddiası "yeni sürüm gelince şerit çıkıyor". İki yönde de
+bozuldu ve ikisinde de kırmızıya döndü:
+
+| Bozma | Sonuç |
+|---|---|
+| `if (vardi && false) setReady(true)` — hiç duyurma | **kırmızı** (`toBeVisible` düştü) |
+| `check()` içinde `setReady(true)` — her denetimde duyur | **kırmızı** (`toHaveCount(0)` düştü) |
+
+İlk hâlindeki "ilk açılışta çıkmıyor" iddiası ise **bedava yeşildi**: `vardi`
+korumasını kaldırmak testi kırmadı, çünkü ilk boyamada `supported` zaten false
+ve efekt hiç kurulmuyor. Onun yerine gerçek bir iddia yazıldı — *hiçbir şey
+değişmemişken `update()` çağırmak şerit çıkarmıyor* — ve ikinci mutasyonu
+yakalayan da o oldu.
+
+### Yeşil olmayan tek şey — ve bu turun işi DEĞİL
+
+`e2e/gorunum.spec.ts:341` → *"Sığdır haftanın tamamını kutuya sokuyor"*
+**kırmızı**: hücre **39,546875 px**, istenen 37,4 px, pay 2 px. Bir önceki
+oturumda da aynı sayılarla kırmızıydı, yani bu turun gerilemesi değil.
+`surum.yml` E2E koşturmuyor, dolayısıyla sürüm çıkarmayı engellemiyor.
+
+---
+
+## Yirmi dördüncü oturum — iki sessiz boş ekran (2026-08-27)
+
+Kullanıcının cümlesi tek satırdı: *"hem index.html'ye basıyorum açılmıyor hem
+de kurulum kısmında Kur.cmd'ye basınca da kurulmuyor."* İkisi de doğruydu ve
+ikisi de **kodun hatası değildi**: tıklanan iki dosya da teslim edilen
+dosyanın **kaynağıydı**. Ama bunu ekranda söyleyen hiçbir şey yoktu — biri
+bomboş beyaz bir sayfa veriyordu, öteki hiç indirilmemiş bir ZIP'i
+aratıyordu. Tuzak 72 bu.
+
+### Ölçülen
+
+| Ne | Değer |
+|---|---|
+| Kök `index.html`, `file://` — önce | `#root` **boş**, konsolda CORS, ekranda hiçbir şey |
+| ...sonra | uyarı **1 059 bayt**, "dist/index.html" ekranda |
+| `dist/index.html` — depoda duran dosya | 253 441 bayt, **24 Ağustos**'tan kalma |
+| ...yeniden derlendi | 528 700 bayt |
+| ...uyarı eklendikten sonra | **530 690** (+1 990) |
+| `dist-site/index.html` | 531 015 bayt |
+| `dist-kurulum/` (yoktu, üretildi) | **581 433 bayt** |
+| `kurulum/Kur.cmd` — önceki teşhis | "ZIP'i açmadan çalıştırmış olabilirsiniz" — **yanlış** |
+| ...yeni teşhis | "Bu klasör kurulumun KAYNAĞI" + `npm run paket` |
+| Kurulum GERÇEKTEN koşturuldu | `%LOCALAPPDATA%\Ders Programı` **562 KB** + 2 kısayol |
+| Kurulmuş hâlinden yerel sunucu | `/` **200**, 531 015 bayt, başlık "Ders Programı" |
+| ...`sw.js` · `manifest.webmanifest` · `icon-192.png` | 200 · 200 · 200 |
+| `dersprogrami.localhost` ad çözümü (bu makine) | **127.0.0.1** |
+| Süit | **521 birim + 395 E2E yeşil, 1 KIRMIZI** (aşağıda) |
+
+### Ne yapıldı
+
+1. **Kök `index.html`'e bir kaynak uyarısı.** `file://` altında ve yalnız
+   `script[type="module"][src]` varsa `#root`'a Türkçe bir sayfa yazar:
+   "bu dosya programın kendisi değil", `dist/index.html`, `npm run build`,
+   ve kurulum için `npm run paket` → `dist-kurulum/Kur.cmd`.
+   **Derlenmiş dosyada çalışamaz** ve bu ölçüldü: singlefile `src`'yi
+   kaldırıyor, seçici orada null dönüyor. Derleme yapılandırmalarına
+   dokunulmadı — sıyrılacak bir şey yok, çünkü sıyrılması gereken bir şey de
+   yok.
+2. **`kur.ps1` iki durumu ayırıyor.** Klasör adı `kurulum` ve bir üstünde
+   `package.json` varsa: depo kaynağı. Değilse: eski ZIP cümlesi.
+3. **`e2e/temel.spec.ts` 77** — iki test: kaynak şablon boş DEĞİL ve nereye
+   bakılacağını yazıyor; derlenmiş dosyada uyarı canlanamıyor.
+4. **Üç ürün de üretildi ve denendi**: `dist/index.html` açıldı (uygulama
+   çizildi, konsol temiz), `dist-kurulum/` üretildi, `Kur.cmd` yolu gerçekten
+   koşturuldu ve kurulan kopyadan sunucu ayağa kalkıp dosyaları verdi.
+
+### Yeşil olmayan tek şey — ve bu oturumun işi DEĞİL
+
+`e2e/gorunum.spec.ts` → *"Sığdır haftanın tamamını kutuya sokuyor"*
+**kırmızı**, ve **HEAD'de de kırmızı**: değişiklikler `git stash`'lenip
+yeniden derlenerek ölçüldü. Hücre **39,55 px**, istenen 37,4 px, izin verilen
+pay 2 px — yani **0,15 px** taşıyor. Tuzak 37/39 ailesi: sütunun tabanını
+başlığın min-content'i koyuyor ve o taban `ch`'nin kuantasıyla birlikte
+kaymış. Payı büyütmek bir ölçümü kanun sanmak olurdu (tuzak 42); tabanın
+nereden geldiği tek tek kapatılarak ölçülmeden dokunulmadı.
+
+---
 ## Yirmi üçüncü oturum — G turu: kalan üçlü ve `.exe` (2026-08-27)
 
 Kullanıcının isteği iki parçaydı: *"o üçlüye de son noktayı koyalım ayrıca
@@ -119,10 +290,9 @@ Tauri'yi gördü → `data_dir_path` döndü → `write_file` gidip geldi → di
   `od` ile bayt karşılaştırmasına çevrildi ve bozulmuş dosyalarla test edildi.
 - **Hiç sürüm yayınlanmadı**, yani README'deki üç indirme bağlantısı bugün
   404 veriyor (ölçüldü: `curl -IL` → 404). README bunu açıkça yazıyor.
-- **`surum.yml` GitHub'a hiç gitmedi.** `origin/main`'de yalnız `exe.yml` ve
-  `site.yml` var, yani Actions'ta "sürüm" diye bir iş akışı görünmüyor ve
-  görünmemesi doğru — `workflow_dispatch` düğmesi ancak dosya varsayılan dalda
-  olunca çıkar.
+- ~~**`surum.yml` GitHub'a hiç gitmedi.**~~ **Artık gitti** (commit 83950c5,
+  `origin/main`). 2026-08-27'de ölçüldü: `.github/workflows/` altında yalnız
+  `site.yml` ve `surum.yml` var; `exe.yml` yok, ikincisinin içine girdi.
 
 ### Depo tarafında ölçülenler (2026-08-27, açık depo API'si)
 
@@ -138,6 +308,11 @@ plan değil).
 | `site` → `build` işi | uçtan uca **success** |
 | `site` → `deploy` işi | **failure**: `Failed to create deployment (status: 404) … Ensure GitHub Pages has been enabled` |
 | `has_pages` | **false** |
+
+> **Bu tablo aynı gün BAYATLADI ve yerinde bırakıldı**, çünkü o saatin ölçümü
+> buydu. Öğleden sonra Pages açıldı: `has_pages: true`, 09:33 koşusu
+> **success**, site 200 veriyor. Güncel hâli **Yirmi beşinci oturum**
+> bölümünde. `exe` iş akışı ise artık YOK — `surum.yml`'in içine girdi.
 
 Yani `site.yml`'in kendi başlığında yazan iki şarttan biri (yeniden adlandırma)
 yapılmış, öteki (Pages kaynağı = "GitHub Actions") yapılmamış. Ölçülen 3,64 MB ve ~1 sn açılış **Linux/WebKitGTK**;
@@ -1308,6 +1483,14 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 ---
 
 ## Bilinen hatalar
+
+### AÇIK — `Sığdır` hücresi payı 0,15 px aşıyor (2026-08-27)
+
+`e2e/gorunum.spec.ts:341`. Hücre 39,55 px, istenen 37,4 px, pay 2 px.
+HEAD'de de kırmızı, yani bir gerilemenin sonucu değil: sütunun tabanını
+koyan başlık min-content'i kaymış. Doğru düzeltme payı büyütmek değil,
+tabanı yeniden ölçmek (tuzak 37: alt sınırın nereden geldiği tek tek
+kapatılarak bulunur).
 
 **Üçü de 2026-08-25'te (sekizinci oturum) kapandı.** Ne oldukları ve nasıl
 kapandıkları aşağıdaki oturum bölümünde; testleri `solver.test.ts` ve

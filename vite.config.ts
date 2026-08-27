@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { surumBilgisi } from './scripts/surum.mjs';
 
 // Cikti TEK bir dist/index.html olmali: babama giden sey o dosya, baska hicbir sey degil.
 // Cift tiklayinca, internet olmadan, sunucu olmadan calisir.
@@ -11,6 +12,10 @@ export default defineConfig({
   // build is ONE file and the claim has to stay checkable with ls.
   publicDir: false,
   plugins: [react(), viteSingleFile()],
+  // Which build this is, pressed in at build time. BOTH configs define it:
+  // a number that only one of the four routes carries is worse than no
+  // number, because the route without it looks like an old one.
+  define: { __SURUM__: JSON.stringify(surumBilgisi()) },
   build: {
     target: 'es2020',
     cssCodeSplit: false,

@@ -17,14 +17,16 @@ Dört teslim yolu var ve **dördü de birebir aynı programı** verir — dörd�
 içindeki sayfa aynı `dist/index.html`. Fark programda değil, programın
 etrafında.
 
-| | Ne yapılır | Kime |
-|---|---|---|
-| **1. Dosya** | `dist/index.html`'e çift tıkla | En hızlı yol. Denemek, taşımak, USB'yle götürmek |
-| **2. Windows kurulumu** | `Kur.cmd`'ye çift tıkla | Babamın makinesi. Kısayol, gerçek adres, çevrimdışı |
-| **3. Site** | Adresi tarayıcıda aç | Başka bir bilgisayardan bakmak |
-| **4. `.exe`** | Tek dosyaya çift tıkla | Aynı iş, ama klasöre yazma hiç sorulmadan çalışır |
+| | Ne yapılır | Kime | Güncelleme |
+|---|---|---|---|
+| **1. Dosya** | `Ders-Programi.html`'e çift tıkla | En hızlı yol. Denemek, taşımak, USB'yle götürmek | Yeni dosyayı indirip eskisinin üstüne koyarsınız |
+| **2. Windows kurulumu** | `Kur.cmd`'ye çift tıkla | Kısayol, gerçek adres, çevrimdışı | `Guncelle.cmd` — yenisini kendisi indirir |
+| **3. Site** | [Adresi tarayıcıda aç](https://alparslansemiz.github.io/ders-programi/) | Kurulum hiç istemeyen yol | **Kendiliğinden.** Yeni sürüm çıkınca program size söyler |
+| **4. `.exe`** | Tek dosyaya çift tıkla | Aynı iş, ama klasöre yazma hiç sorulmadan çalışır | Yeni dosyayı indirirsiniz |
 
-Karar veremiyorsanız: **1'i deneyin, işinize yarıyorsa 2'yi kurun.**
+Karar veremiyorsanız: **3'ü açın.** Hiçbir şey indirmeden çalışır, çevrimdışı da
+açılır, ve düzeltmeler size kendiliğinden gelir — bu dördü içinde güncellemesi
+en kolay olan yol. Bilgisayarda **duran** bir program istiyorsanız 2'yi kurun.
 
 ### İndirme bağlantıları
 
@@ -154,8 +156,14 @@ Programın gerçek bir kökeni olur, ve bunun **ölçülmüş** üç sonucu vard
 
 ### Güncellemek
 
-Yeni bir `dist-kurulum` aldığınızda **`Guncelle.cmd`**'ye çift tıklayın.
-Yalnız program dosyalarını tazeler; kısayollara ve verilerinize dokunmaz.
+**`Guncelle.cmd`**'ye çift tıklayın. Başka hiçbir şey gerekmez: betik en yeni
+sürümü **kendisi indirir** (`releases/latest`), kurar ve ne yaptığını yazar.
+İnternet yoksa hata vermez — yanındaki klasörde duran sürümü kurar.
+
+Yalnız program dosyalarını tazeler; **kısayollara ve verilerinize dokunmaz**.
+Eski `site` klasörü silinip yeniden yazılır: üstüne kopyalamak, bir sonraki
+sürümde *kaldırılan* bir dosyayı orada bırakır ve service worker onu
+önbelleğinde tutmaya devam eder.
 
 ### Kaldırmak
 
@@ -177,11 +185,21 @@ Program başka hiçbir yere hiçbir şey yazmaz.
 
 ## 3 · Site — bir adresten açmak
 
-`npm run build:site` ile üretilen `dist-site/` klasörü statik bir sayfadır ve
-GitHub Pages'e konabilir. Orada da **backend, veritabanı, hesap, oturum ya da
-API yoktur** — yayınlanan şey bir klasör dolusu dosyadır.
+**<https://alparslansemiz.github.io/ders-programi/>**
 
-İlk açılıştan sonra bir service worker sayesinde **çevrimdışı** da açılır.
+İndirilecek bir şey, çıkarılacak bir ZIP, çalıştırılacak bir betik yok: adresi
+açarsınız, program oradadır. Orada da **backend, veritabanı, hesap, oturum ya
+da API yoktur** — yayınlanan şey `npm run build:site`'ın ürettiği bir klasör
+dolusu statik dosyadır.
+
+İlk açılıştan sonra bir service worker sayesinde **çevrimdışı** da açılır —
+fişi çekip denendi.
+
+### Masaüstüne almak (isteğe bağlı)
+
+Chrome ya da Edge'de adres çubuğunun sağındaki **Yükle** simgesine basın.
+Program kendi penceresinde, kendi simgesiyle, sekmesiz açılır — bir masaüstü
+uygulamasından ayırt edilmez, ama güncellemesi hâlâ kendiliğinden gelir.
 
 > **Not:** her tarayıcının verisi kendine aittir. Siteyi işten açıp evden
 > açarsanız iki ayrı boş program görürsünüz. Programı taşımanın yolu üst
@@ -260,11 +278,58 @@ programı değil, çalışmanızı siler.
 
 ---
 
+## Güncelleme — düzeltme size nasıl ulaşır
+
+Hangi sürümde olduğunuz her zaman **Ayarlar → Veri → "Sürüm ve güncelleme"**
+bölümünde yazar. Bir şey bildirdiğinizde sorulacak ilk şey odur.
+
+| Yol | Ne olur |
+|---|---|
+| **Site** | Yeni sürüm yayınlanınca program **kendisi görür** ve üstte bir satırla söyler: *"Yeni sürüm hazır."* **Yenile** deyene kadar hiçbir şey değişmez — yarım kalmış bir sürükleme sizin elinizden alınmaz. Verileriniz güncellemeden etkilenmez |
+| **Windows kurulumu** | `Guncelle.cmd`'ye çift tıklarsınız. En yeni sürümü kendisi indirir. İnternet yoksa hata vermez, yanındaki klasörde duranı kurar |
+| **Dosya / `.exe`** | Bu iki kopya **hiçbir yere bağlanmaz** — sürümünü gösterir, ama kendini güncellemez. Yenisi çıktığında dosyayı yeniden indirip eskisinin üstüne koyarsınız |
+
+Site kendini güncelleyebiliyor da öteki ikisi güncelleyemiyor değil:
+**güncelleyemesin diye öyle yazıldılar.** Çift tıklanan dosyanın tek iddiası
+çalışırken ağdan tek bayt indirmemesi, ve bu iddia her koşuda `grep` ile
+denetleniyor. Bir sürüm denetimi o iddiayı bozardı.
+
+---
+
+## İlk kurulum — bir kez, ve en önemlisi bu
+
+Programı ilk kez kuran kişi **bir tek şeyi** yapsın; gerisi kendiliğinden yürür.
+
+1. Programı açın (yukarıdaki dört yoldan biri).
+2. **Ayarlar → Veri → "Nereye kaydedilsin" → `Klasör seç…`**
+3. **Belgelerim**'i seçin. Tarayıcı izin isterse **İzin ver** deyin.
+
+O andan sonra program **her değişikliği** o klasöre de yazar: bütün planlar tek
+bir `ders-programi-tumu.json` dosyasında, artı her gün için ayrı bir yedek (son
+10 gün). Hiçbir şey hatırlamanız, hiçbir düğmeye basmanız gerekmez.
+
+Bu adım atlanırsa program yine çalışır — ama işiniz **yalnızca tarayıcının
+deposunda** durur, ve tarayıcıda "tarama verilerini temizle" demek onu siler.
+
+> **Yeni bir bilgisayara ya da yeni bir sürüme taşımak** de aynı dosyayla
+> olur: **Ayarlar → Veri → Tümünü dosyadan aç** → o klasördeki
+> `ders-programi-tumu.json`. Gidiş de dönüş de tek dosya.
+
+---
+
 ## Verileriniz — dört yolda da geçerli olan
 
 > Programınız **bu bilgisayarda ve bu tarayıcıda** durur. Başka bir tarayıcı
 > onu görmez, ve tarayıcıda "tarama verilerini temizle" derseniz **silinir**.
 > (`.exe` yolunda bir kopya zaten Belgelerim'dedir, orada bu risk yoktur.)
+
+> ⚠️ **Dört yolun her birinin deposu AYRIDIR.** Çift tıklanan dosyada girdiğiniz
+> program sitede görünmez, sitede girdiğiniz `.exe`'de görünmez. İkisi de
+> durur, ama iki ayrı program olurlar. **Bir yolu seçin ve onda kalın.**
+> Yol değiştirmeniz gerekirse taşıma tek adımdır: eskisinde
+> **Ayarlar → Veri → Tümünü dosyaya kaydet**, yenisinde
+> **Tümünü dosyadan aç**. Hangi kopyada olduğunuz
+> **Ayarlar → Veri → "Sürüm ve güncelleme"** bölümünde adıyla yazar.
 
 Öğrenilecek tek alışkanlık: *değişiklik yaptın, yedek indir.* Üst çubuktaki
 **Dosyaya kaydet** bunun içindir.
@@ -295,13 +360,34 @@ ekler.
 2. `yayinla` kutusunu **işaretlemeyin**.
 3. Koşu bitince **Artifacts** bölümünden üçünü de indirip bakabilirsiniz.
 
-**Yayınlamak** — iki yol:
+**Yayınlamak** — tek komut:
 
 ```bash
-git tag v1.1.0 && git push origin v1.1.0     # etiket iter, sürüm çıkar
+npm run yayinla -- 1.2.0
 ```
 
-ya da Actions → sürüm → Run workflow → `yayinla` ✓ → `etiket`: `v1.1.0`.
+`package.json`'ı yazar, commit'ler, `v1.2.0` etiketini atar ve ikisini birden
+iter. Kirli bir ağaçta, `main` dışında bir dalda ya da var olan bir etikette
+**reddeder** — üçünün de doğru cevabı "tahmin et" değil.
+
+Tek push iki iş akışını birden tetikler, ve ikisi de gerekli:
+
+```
+push main    -> site.yml   -> GitHub Pages   (babamın site yolu tazelenir)
+push v1.2.0  -> surum.yml  -> Release        (üç indirilebilir dosya)
+```
+
+Etiketi unutmak sessiz bir hatadır: site güncellenir, `.html`/`.zip`/`.exe`
+eski kalır. `npm run yayinla` tam olarak bunun için var.
+
+Elle yapmak isterseniz: `git tag v1.2.0 && git push origin v1.2.0`, ya da
+Actions → sürüm → Run workflow → `yayinla` ✓ → `etiket`: `v1.2.0`.
+
+**Sürüm numarası arayüze girer.** `package.json`'daki değer derleme anında
+dört teslim yoluna da damgalanır (`scripts/surum.mjs`) ve Ayarlar → Veri →
+*Sürüm ve güncelleme*'de görünür. Aynı numara service worker'ın önbellek adına
+da girer — sabit bir ad, yeni sürümün babama **bir açılış geriden** ulaşması
+demekti.
 
 İş akışı yayınlamadan önce kurulum klasörünü **denetler**: `.ps1` ve `.txt`
 dosyaları UTF-8 BOM taşıyor mu (yoksa PowerShell 5.1 her "ı"yı bozar),
