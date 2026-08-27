@@ -1,0 +1,187 @@
+# Görev 4i, genişletilmiş: ÜÇ teslim yolunu da indirilebilir hâle getirmek.
+#
+# Bu dosya `exe.yml`'in yerine geçti. Sebep bir eksikti: `npm run …`
+# çalıştırmadan indirilebilecek hiçbir şey yoktu. `dist/` .gitignore'da, ve
+# bir Actions artefaktı GİRİŞ İSTER ve 90 günde silinir — yani babama
+# verilebilecek bir bağlantı değil. Bir GitHub Release'in varlıkları ise
+# kalıcı, açık ve girişsizdir, ve `releases/latest/download/<ad>` adresi
+# sürüm numarası bilmeden en yenisine gider. README'nin bağlantıları bunlar.
+#
+# İlke 2 bozulmuyor: yayınlanan şey backend değil, üç dosya.
+#
+# ÜÇ VARLIK, ve üçü de aynı `dist/index.html`'i taşır:
+#   Ders-Programi.html                  çift tıkla, tarayıcıda açılır
+#   Ders-Programi-Windows-kurulum.zip   Kur.cmd + yerel sunucu
+#   Ders-Programi.exe                   kendi penceresi, Belgelerim'e yazar
+#
+# VARLIK ADLARI SADECE ASCII. `.cmd` dosyalarının yalnız ASCII olmasıyla aynı
+# aile: bir indirme bağlantısındaki "ı" harfi tarayıcıdan tarayıcıya farklı
+# kodlanıyor. Babanın ekranda gördüğü ad zaten dosya adı değil — pencere
+# başlığı da, kısayol adı da uygulamanın kendisinden geliyor.
+
+name: sürüm
+
+on:
+  # Bir etiket itilince YAYINLAR.
+  push:
+    tags: ['v*']
+  # Elle koşturunca varsayılan olarak yalnız DERLER — üçü de artefakt olarak
+  # iner, hiçbir şey yayınlanmaz. "Bir kez deneyelim" için olan yol budur.
+  workflow_dispatch:
+    inputs:
+      yayinla:
+        description: 'Sürüm olarak yayınla (etiket adı gerekir)'
+        type: boolean
+        default: false
+      etiket:
+        description: 'Etiket adı, örn. v1.1.0 — yalnız yayınlarken'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------------------------------------- 1 · paket
+  paket:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # `paket` zaten `build:site`'i çağırıyor; `build` ayrı, çünkü tek dosya
+      # yolu ondan çıkıyor ve ikisi ayrı config.
+      - run: npm run build
+      - run: npm run paket
+
+      # Satır sonları ve BOM burada ölçülür, Windows'ta değil: bir Linux
+      # checkout'unda `* text=auto` bunlara LF verebilir ve Notepad OKU.txt'yi
+      # tek satır gösterir. paket.mjs düzeltiyor — düzelttiği KANITLANIYOR.
+      - name: kurulum klasörü Windows'un okuyacağı hâlde mi
+        run: |
+          set -o pipefail
+          # `od` ile, `grep` ile DEĞİL: UTF-8 bir yerelde grep aynı üç baytı
+          # desen olarak alıp eşleştiremiyor (yerelde ölçüldü — doğru
+          # dosyalarda kırmızı verdi). Bayt karşılaştırması yerelden bağımsız.
+          for f in kur.ps1 sunucu.ps1 OKU.txt; do
+            bom=$(head -c3 "dist-kurulum/$f" | od -An -tx1 | tr -d ' \n')
+            [ "$bom" = "efbbbf" ] \
+              || { echo "$f BOM taşımıyor ($bom) — PowerShell 5.1 Türkçe harfleri bozar" >&2; exit 1; }
+          done
+          for f in kur.ps1 sunucu.ps1 OKU.txt Kur.cmd Guncelle.cmd; do
+            file "dist-kurulum/$f" | grep -q CRLF \
+              || { echo "$f CRLF değil" >&2; exit 1; }
+          done
+          if LC_ALL=C grep -qP '[\x80-\xFF]' dist-kurulum/Kur.cmd dist-kurulum/Guncelle.cmd; then
+            echo ".cmd dosyaları yalnız ASCII olmalı — cmd.exe kod sayfası Türkçe harfleri bozuyor" >&2
+            exit 1
+          fi
+          echo "BOM · CRLF · ASCII: üçü de doğru"
+
+      - name: adlandır ve sıkıştır
+        run: |
+          mkdir -p teslim
+          cp dist/index.html "teslim/Ders-Programi.html"
+          (cd dist-kurulum && zip -qr "../teslim/Ders-Programi-Windows-kurulum.zip" .)
+          ls -l teslim
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paket
+          path: teslim/*
+          if-no-files-found: error
+
+  # ----------------------------------------------------------------- 2 · exe
+  exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - run: npm ci
+
+      # Sayfa ÖNCE derlenir: bir TypeScript hatası otuz saniyede düşsün,
+      # Rust bağlama adımından sonra değil.
+      - run: npm run build
+
+      # Rust'ta yaşayan tek kural `safe_name` — exe'yi tek bir klasöre
+      # hapseden kapı. `cargo test` onu yargılayabilen tek yer.
+      - run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - run: npx --yes @tauri-apps/cli@^2 build --no-bundle
+
+      - name: adlandır ve boyutunu ÖLÇ
+        shell: pwsh
+        run: |
+          $exe = "src-tauri/target/release/ders-programi.exe"
+          if (-not (Test-Path $exe)) {
+            Get-ChildItem src-tauri/target/release -Filter *.exe
+            throw "exe üretilmedi"
+          }
+          $mb = [math]::Round((Get-Item $exe).Length / 1MB, 2)
+          Write-Host "Ders-Programi.exe  $mb MB"
+          New-Item -ItemType Directory -Force -Path teslim | Out-Null
+          Copy-Item $exe "teslim/Ders-Programi.exe"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          path: teslim/*
+          if-no-files-found: error
+
+  # ------------------------------------------------------------- 3 · yayınla
+  yayinla:
+    needs: [paket, exe]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.yayinla
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: indirilen
+
+      - name: üç varlık da geldi mi
+        run: |
+          mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
+          ls -l teslim
+          for f in Ders-Programi.html Ders-Programi-Windows-kurulum.zip Ders-Programi.exe; do
+            test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
+          done
+
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/surum-notu.md
+          sparse-checkout-cone-mode: false
+          path: depo
+
+      - name: sürümü yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Elle koşuda etiket girdiden gelir; itilmiş bir etikette ref'ten.
+          ETIKET: ${{ inputs.etiket || github.ref_name }}
+        run: |
+          set -o pipefail
+          if [ -z "$ETIKET" ]; then echo "etiket adı boş" >&2; exit 1; fi
+          # `gh` runner'da zaten kurulu — sürüm yayınlamak gibi bir işe
+          # üçüncü parti bir action sokmak, en az istenecek yerde yabancı kod
+          # çalıştırmak olurdu.
+          # Notu ayrı dosyadan: bir YAML blok skalerinin içine heredoc koymak
+          # girintiyi bozuyor, ve notun kendisi düzenlenebilir kalmalı.
+          gh release create "$ETIKET" \
+            --repo "${{ github.repository }}" \
+            --title "Ders Programı $ETIKET" \
+            --notes-file depo/.github/surum-notu.md \
+            teslim/Ders-Programi.html \
+            teslim/Ders-Programi-Windows-kurulum.zip \
+            teslim/Ders-Programi.exe

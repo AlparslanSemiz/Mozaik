@@ -177,7 +177,7 @@ npm run exe:test   # cargo test — safe_name kapısı ve dosya işleri, 6 test
 `font`, `exe` ve `exe:test` **`kontrol`'ün parçası değil** ve bilerek öyle:
 üçü de bu depoda olmayan bir araç zinciri istiyor (Python+fontTools, Rust),
 ve `kontrol`'ün sözleşmesi "her makinede koşar"dı. Rust'ı gerçekten derleyen
-tek yer `.github/workflows/exe.yml`; orada `cargo test` de koşuyor.
+tek yer `.github/workflows/surum.yml`; orada `cargo test` de koşuyor.
 
 Yeni bilgisayarda bir kez: `npm install && npx playwright install chromium`
 
@@ -233,7 +233,16 @@ tıklayacağı dosyanın ta kendisi. Bu yüzden dört yolun dördü de aynı
 **`--no-bundle`, ve bu bir ilke kararı.** Tauri'nin NSIS hedefi bir kurulum
 sihirbazı üretir; ilke 1 tam olarak onu reddediyor. Teslim edilen şey tek bir
 `Ders Programı.exe`. Çapraz derleme yok: bu makine Fedora, hedef Windows, ve
-exe `windows-latest` üstünde doğuyor (`.github/workflows/exe.yml`).
+exe `windows-latest` üstünde doğuyor (`.github/workflows/surum.yml`).
+
+**Üç teslim dosyasının tek kaynağı o iş akışı, ve sebebi bir eksikti:**
+`npm run …` çalıştırmadan indirilebilecek hiçbir şey yoktu — `dist/`
+`.gitignore`'da, ve bir Actions artefaktı **giriş ister ve 90 günde silinir**,
+yani babaya verilebilecek bir bağlantı değil. Bir GitHub Release'in varlıkları
+kalıcı ve girişsizdir; `releases/latest/download/<ad>` sürüm numarası bilmeden
+en yenisine gider ve README'nin bağlantıları bunlardır. Varlık adları
+**yalnız ASCII** — `.cmd` dosyalarının ASCII olmasıyla aynı aile, farkı
+kod sayfası değil URL kodlaması.
 
 **Exe hiçbir şeyi yeniden yazmaz — bir ADAPTÖR takar.** `folder.ts` dosya
 adlarının, günlük yedeğin ve "son 10" budamasının tek evi; `src/desktop.ts` üç

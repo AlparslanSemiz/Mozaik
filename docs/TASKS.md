@@ -40,17 +40,25 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > Sayılar: **521 birim + 394 E2E + 19 site + 7 çözücü + 6 Rust**, hepsi yeşil.
 >
 > **SIRADAKİ İŞ — üçü de KULLANICIDA, ve ikisi artık aynı gün yapılabilir:**
-> 1. **`exe.yml` bir kez koşturulsun** (Actions → exe → Run workflow) ve çıkan
->    `Ders Programı.exe` babanın makinesinde **çift tıklansın**. Bu makinede
+> 1. **`surum.yml` bir kez koşturulsun** (Actions → sürüm → Run workflow,
+>    `yayinla` **işaretsiz**). Tek koşuda üç teslim dosyası da çıkar:
+>    `Ders-Programi.html`, `Ders-Programi-Windows-kurulum.zip`,
+>    `Ders-Programi.exe`. Üçü de babanın makinesinde denensin — bu makinede
 >    ölçülemeyen her şey orada görülecek: WebView2, gerçek açılış süresi,
->    SmartScreen'in ne dediği, ve Belgelerim'e gerçekten yazıp yazmadığı.
-> 2. **Windows kurulum klasörü de denensin** — `npm run paket` →
->    `dist-kurulum/` → `Kur.cmd`. Exe geldi diye bu yol **kalıyor** (kullanıcı
->    kararı, 2026-08-27): hangisinin tuttuğuna baba kullandıktan sonra
->    bakılır, ilke 5.
-> 3. **GitHub Pages'in açılması.** İş akışı yazıldı; depo `ders-programi`
->    olarak yeniden adlandırılacak ve Pages kaynağı "GitHub Actions"
->    seçilecek.
+>    SmartScreen'in ne dediği, `Kur.cmd`, `.lnk` üretimi, PowerShell 5.1, ve
+>    Belgelerim'e gerçekten yazıp yazmadığı.
+> 2. **Tutuyorsa bir sürüm yayınlansın** (`git tag v1.1.0 && git push origin
+>    v1.1.0`). O andan itibaren README'deki üç indirme bağlantısı çalışır ve
+>    babaya `npm` anlatmak gerekmez. Bugün o bağlantılar 404 veriyor.
+>    Kurulum klasörü yolu **kalıyor** (kullanıcı kararı, 2026-08-27):
+>    hangisinin tuttuğuna baba kullandıktan sonra bakılır, ilke 5.
+> 3. **GitHub Pages'in açılması — YARISI YAPILDI.** Depo `ders-programi`
+>    olarak yeniden adlandırıldı (2026-08-27, kullanıcı). Kalan tek adım:
+>    **Settings → Pages → Source: "GitHub Actions"**.
+>    `site.yml` bugüne kadar 4 kez koştu ve 4'ünde de aynı yerde düştü —
+>    `build` uçtan uca geçiyor, `deploy` `Failed to create deployment
+>    (status: 404) … Ensure GitHub Pages has been enabled` diyor. Yani kırmızı
+>    işaret site bozuk demek değil, **anahtar açılmamış** demek.
 >
 > Ondan sonra hâlâ bekleyen tek büyük şey: **gerçek veriyle deneme**
 > (babanın listesi) — v0'ın çıkma şartı.
@@ -532,10 +540,16 @@ adlandırılacak** (kullanıcı yapacak).
       Testler: 3 birim (`desktop.test.ts` — gerçek `saveInto()` adaptör
       üstünde) + 5 E2E (`exe.spec.ts`) + 6 Rust (`cargo test`).
 - [~] **4i Windows `.exe` — iş akışı yazıldı, HENÜZ KOŞMADI.**
-      `.github/workflows/exe.yml` → `windows-latest` → `npm ci` → `npm run
-      build` → `cargo test` → `tauri build --no-bundle` → artefakt
-      `Ders Programı.exe`. Elle tetiklenir (`workflow_dispatch`) ya da `v*`
-      etiketiyle.
+      `.github/workflows/surum.yml` (eski adı `exe.yml`; **üç** teslim
+      dosyasını birden üretecek şekilde genişletildi, çünkü `npm run …`
+      çalıştırmadan indirilebilecek hiçbir şey yoktu). Üç iş:
+      `paket` (ubuntu — HTML + kurulum zip'i, artı BOM/CRLF/ASCII denetimi),
+      `exe` (windows — `cargo test` + `tauri build --no-bundle`),
+      `yayinla` (üçünü bir GitHub Release'e ekler).
+      Elle tetiklenince varsayılan olarak **yalnız derler**; `v*` etiketiyle
+      yayınlar. **Kabuk denetimleri yerelde koşturuldu** ve ilk hâli yanlıştı:
+      `grep` UTF-8 bir yerelde BOM'u eşleştiremiyor, `od`'a çevrildi ve bozuk
+      dosyalarla kırmızıya döndürüldü.
       **Bu makinede ölçülen (Linux/WebKitGTK, Windows/WebView2 DEĞİL):** sürüm
       ikilisi **3,64 MB**, derleme 1 dk 38 sn.
       **Kalan:** iş akışı bir kez koşturulmalı ve çıkan exe babanın

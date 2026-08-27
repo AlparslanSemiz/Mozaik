@@ -112,8 +112,35 @@ Tauri'yi gördü → `data_dir_path` döndü → `write_file` gidip geldi → di
 
 ### Doğrulanmamış — ve bu bilerek yazılıyor
 
-- **Windows'ta tek satır koşmadı.** `exe.yml` yazıldı, YAML'i geçerli,
-  hiç tetiklenmedi. Ölçülen 3,64 MB ve ~1 sn açılış **Linux/WebKitGTK**;
+- **Windows'ta tek satır koşmadı.** `surum.yml` yazıldı, YAML'i geçerli,
+  hiç tetiklenmedi. Ubuntu tarafının kabuk adımları **yerelde koşturuldu**
+  (BOM/CRLF/ASCII denetimi + zip); ilk hâli doğru dosyalarda kırmızı veriyordu
+  çünkü `grep` UTF-8 bir yerelde üç baytlık BOM'u desen olarak eşleştiremiyor —
+  `od` ile bayt karşılaştırmasına çevrildi ve bozulmuş dosyalarla test edildi.
+- **Hiç sürüm yayınlanmadı**, yani README'deki üç indirme bağlantısı bugün
+  404 veriyor (ölçüldü: `curl -IL` → 404). README bunu açıkça yazıyor.
+- **`surum.yml` GitHub'a hiç gitmedi.** `origin/main`'de yalnız `exe.yml` ve
+  `site.yml` var, yani Actions'ta "sürüm" diye bir iş akışı görünmüyor ve
+  görünmemesi doğru — `workflow_dispatch` düğmesi ancak dosya varsayılan dalda
+  olunca çıkar.
+
+### Depo tarafında ölçülenler (2026-08-27, açık depo API'si)
+
+Depo **yeniden adlandırılmış**: `AlparslanSemiz/AscLike` →
+`AlparslanSemiz/ders-programi`. Yerel remote ve README bağlantıları buna göre
+düzeltildi (GitHub eskisini yönlendiriyor, ama yönlendirmeye yaslanmak bir
+plan değil).
+
+| Ne | Durum |
+|---|---|
+| `exe` iş akışı | tanımlı, **0 koşu** — hiç tetiklenmemiş |
+| `site` iş akışı | **4 koşu, 4 başarısızlık** |
+| `site` → `build` işi | uçtan uca **success** |
+| `site` → `deploy` işi | **failure**: `Failed to create deployment (status: 404) … Ensure GitHub Pages has been enabled` |
+| `has_pages` | **false** |
+
+Yani `site.yml`'in kendi başlığında yazan iki şarttan biri (yeniden adlandırma)
+yapılmış, öteki (Pages kaynağı = "GitHub Actions") yapılmamış. Ölçülen 3,64 MB ve ~1 sn açılış **Linux/WebKitGTK**;
   Windows/WebView2 başka bir sayı verecek.
 - **SmartScreen görülmedi.** İmzasız exe'de Windows "bilinmeyen yayıncı" der;
   babaya ne yapacağı henüz yazılmadı, çünkü ekranın ne dediği görülmedi.
@@ -2598,11 +2625,11 @@ Tümü ve karar gerekçeleri: [TASKS.md](TASKS.md) → BİTENLER 13 (1a–1m). *
 
 ## Başka bir bilgisayarda devam etmek için
 
-Depo: `https://github.com/AlparslanSemiz/AscLike.git`
+Depo: `https://github.com/AlparslanSemiz/ders-programi.git`
 
 ```bash
-git clone https://github.com/AlparslanSemiz/AscLike.git
-cd AscLike
+git clone https://github.com/AlparslanSemiz/ders-programi.git
+cd ders-programi
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
 npm run kontrol                   # tsc + 453 birim + derleme + 318 E2E + 6 site (~3 dk)

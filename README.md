@@ -26,6 +26,21 @@ etrafında.
 
 Karar veremiyorsanız: **1'i deneyin, işinize yarıyorsa 2'yi kurun.**
 
+### İndirme bağlantıları
+
+Hiçbir şey derlemeye gerek yok — üçü de hazır dosya olarak iner:
+
+- **[Ders-Programi.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.html)** — çift tıkla, tarayıcıda açılır
+- **[Ders-Programi-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip)** — çıkar, `Kur.cmd`'ye çift tıkla
+- **[Ders-Programi.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe)** — çift tıkla, kendi penceresinde açılır
+
+Bu adresler her zaman **en son sürüme** gider; sürüm numarası bilmeye gerek
+yok. Giriş yapmak da gerekmez.
+
+> ⚠️ **Henüz tek bir sürüm yayınlanmadı**, yani bugün bu üç bağlantı 404
+> verir. İlk sürüm çıkana kadar aşağıdaki "kendiniz üretmek isterseniz"
+> adımları geçerli. Sürüm yayınlamak: aşağıda *Sürüm çıkarmak*.
+
 Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
 ---
@@ -34,19 +49,21 @@ Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
 En kısa yol, ve **asıl teslim yolu** budur.
 
-1. `dist/index.html` dosyasını üretin:
-
-   ```bash
-   npm install     # yeni bilgisayarda bir kez
-   npm run build
-   ```
-
-   Bu dosya **depoda durmaz** (`.gitignore`'da): derleme çıktısıdır, kaynak
-   değil. Programı kullanacak kişi bunu kendisi üretmez — siz üretip
-   gönderirsiniz, ya da 2. yoldaki klasörü verirsiniz.
-2. Dosyayı nereye isterseniz koyun — Masaüstü, Belgelerim, USB, fark etmez.
-   Yanına başka hiçbir dosya gerekmez.
+1. **[Ders-Programi.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.html)** dosyasını indirin.
+2. Nereye isterseniz koyun — Masaüstü, Belgelerim, USB, fark etmez. Yanına
+   başka hiçbir dosya gerekmez.
 3. **Çift tıklayın.** Varsayılan tarayıcınızda açılır.
+
+Kendiniz üretmek isterseniz:
+
+```bash
+npm install     # yeni bilgisayarda bir kez
+npm run build   # -> dist/index.html
+```
+
+Bu dosya **depoda durmaz** (`.gitignore`'da): derleme çıktısıdır, kaynak
+değil. İndirilebilir olmasının sebebi de bu — her sürümde yeniden üretilip
+sürüme eklenir.
 
 Tek bir dosyadır: JavaScript, CSS ve yazı tipi dahil her şey onun içinde
 gömülüdür. İnternet bağlantısı olmadan da açılır, çünkü açarken hiçbir yere
@@ -74,14 +91,12 @@ hiçbir şey gitmez, dışarıdan hiçbir şey gelmez. `*.localhost` adreslerini
 Chrome ve Edge kendileri çözer, yani `hosts` dosyası düzenlemek ya da yönetici
 olmak **gerekmez**.
 
-### Kuran klasörü hazırlamak (geliştirici tarafı)
+### Klasörü almak
 
-```bash
-npm run paket
-```
+**[Ders-Programi-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip)** — indirin ve **çıkarın** (zip'in içinden çalıştırmayın).
 
-`dist-kurulum/` klasörü oluşur. **Babaya giden tek şey bu klasördür** — zip'leyip
-gönderin ya da USB'ye kopyalayın. İçinde şunlar var:
+Kendiniz üretmek isterseniz `npm run paket` → `dist-kurulum/`. **Babaya giden
+tek şey bu klasördür.** İçinde şunlar var:
 
 ```
 dist-kurulum/
@@ -96,8 +111,7 @@ dist-kurulum/
 
 ### Kurmak (kullanıcı tarafı)
 
-1. `dist-kurulum` klasörünü bilgisayara kopyalayın (zip geldiyse **önce
-   çıkarın** — zip'in içinden çalıştırmayın).
+1. Çıkardığınız klasörü bilgisayara kopyalayın.
 2. **`Kur.cmd`'ye çift tıklayın.**
 3. Windows *"bilinmeyen bir uygulama"* uyarısı gösterebilir:
    **"Daha fazla bilgi"** → **"Yine de çalıştır"**. Bu uyarı dosyanın imzalı
@@ -187,32 +201,32 @@ her gün için ayrı bir yedek bırakır (son 10 gün).
 > Aşağıdaki adımlar tarif edilmiştir, doğrulanmamıştır. Bugünkü sağlam yol
 > hâlâ 1 ve 2'dir.
 
-### `.exe`'yi üretmek
+### `.exe`'yi almak
 
-Windows'ta derlenmesi gerekir; bu depo Fedora'da geliştiriliyor ve çapraz
-derleme güvenilir değil. Bu yüzden GitHub Actions kullanılır:
+**[Ders-Programi.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe)** — tek dosya, doğrudan iner.
 
-1. GitHub'da depoya gidin → **Actions** sekmesi.
-2. Soldaki listeden **exe** iş akışını seçin.
-3. Sağdaki **Run workflow** düğmesine basın.
-4. Koşu bitince (birkaç dakika) sayfanın altındaki **Artifacts** bölümünden
-   `Ders-Programi-exe` dosyasını indirin. Bir `.zip` iner.
-5. Zip'i **çıkarın**. İçinde tek bir dosya vardır: `Ders Programı.exe`
-
-Kendi Windows makinenizde derlemek isterseniz — Rust ve Node kurulu olmalı:
+Kendi Windows makinenizde derlemek isterseniz (Rust ve Node kurulu olmalı):
 
 ```bash
 npm ci
 npm run exe          # -> src-tauri/target/release/
 ```
 
+Bu depo Fedora'da geliştiriliyor ve Windows'a çapraz derleme güvenilir değil;
+`.exe` bu yüzden GitHub Actions'ta `windows-latest` üstünde doğuyor.
+
 ### Çalıştırmak
 
-1. `Ders Programı.exe`'yi nereye isterseniz koyun.
+1. `Ders-Programi.exe`'yi nereye isterseniz koyun.
 2. **Çift tıklayın.** Program kendi penceresinde açılır — tarayıcı sekmesi
    yok, siyah pencere yok, adres çubuğu yok.
 3. Windows *"bilinmeyen yayıncı"* uyarısı gösterirse:
    **"Daha fazla bilgi"** → **"Yine de çalıştır"**.
+
+Dosyanın adını beğenmezseniz değiştirebilirsiniz — pencere başlığı ve program
+adı dosya adından değil, programın kendisinden gelir. (Sürümdeki ad yalnız
+ASCII, çünkü indirme adresindeki bir "ı" harfi tarayıcıdan tarayıcıya farklı
+kodlanıyor.)
 
 **Kurulum yoktur.** Dosya nereye konduysa oradan çalışır; taşınabilir.
 
@@ -237,7 +251,7 @@ değildir.
 
 ### Kaldırmak
 
-`Ders Programı.exe` dosyasını silin. Kayıt defterine hiçbir şey yazılmaz,
+`Ders-Programi.exe` dosyasını silin. Kayıt defterine hiçbir şey yazılmaz,
 kısayol oluşturulmaz.
 
 Programın deposunu da temizlemek isterseniz `%LOCALAPPDATA%\com.dersprogrami.arac`
@@ -262,6 +276,40 @@ kendiliğinden yazılır ve her gün için ayrı bir yedek kalır (son 10).
 
 Ayarlar → Veri bölümü ayrıca verinin **tam olarak hangi anahtarda, ne kadar
 yer kapladığını** söyler — tahmin değil, gerçek sayılar.
+
+---
+
+## Sürüm çıkarmak
+
+Yukarıdaki üç indirme bağlantısı bir **GitHub Release**'in varlıklarına gider.
+Sürüm çıkarmadan o bağlantılar çalışmaz — Actions artefaktları onların yerini
+tutmaz, çünkü giriş ister ve 90 günde silinirler.
+
+`.github/workflows/surum.yml` üçünü birden üretir: HTML'i ve kurulum zip'ini
+`ubuntu-latest`'te, `.exe`'yi `windows-latest`'te, sonra üçünü tek bir sürüme
+ekler.
+
+**Önce denemek** (hiçbir şey yayınlanmaz):
+
+1. GitHub → **Actions** → **sürüm** → **Run workflow**.
+2. `yayinla` kutusunu **işaretlemeyin**.
+3. Koşu bitince **Artifacts** bölümünden üçünü de indirip bakabilirsiniz.
+
+**Yayınlamak** — iki yol:
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0     # etiket iter, sürüm çıkar
+```
+
+ya da Actions → sürüm → Run workflow → `yayinla` ✓ → `etiket`: `v1.1.0`.
+
+İş akışı yayınlamadan önce kurulum klasörünü **denetler**: `.ps1` ve `.txt`
+dosyaları UTF-8 BOM taşıyor mu (yoksa PowerShell 5.1 her "ı"yı bozar),
+hepsi CRLF mi (yoksa Notepad `OKU.txt`'yi tek satır gösterir), ve `.cmd`
+dosyaları yalnız ASCII mi (cmd.exe'nin kod sayfası Türkçe harfleri bozuyor).
+Üçünden biri tutmazsa sürüm çıkmaz.
+
+Sürüm notu `.github/surum-notu.md` dosyasında ve düzenlenebilir.
 
 ---
 

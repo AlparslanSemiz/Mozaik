@@ -10,10 +10,18 @@
 # deploy. There is deliberately no separate type-check step: two places that
 # can disagree about whether the code compiles is one place too many.
 #
-# TWO THINGS ARE STILL ON THE REPOSITORY OWNER, and until both are done this
-# workflow runs and fails at the deploy step:
-#   1. rename the repository to `ders-programi`
-#   2. Settings -> Pages -> Source: "GitHub Actions"
+# ONE THING IS STILL ON THE REPOSITORY OWNER, and until it is done this
+# workflow builds fine and FAILS at the deploy step:
+#
+#     Settings -> Pages -> Source: "GitHub Actions"
+#
+# Measured 2026-08-27, run #4: `build` succeeded end to end and `deploy` came
+# back with `Failed to create deployment (status: 404) ... Ensure GitHub Pages
+# has been enabled`. So a red mark here does not mean the site is broken — it
+# means the switch has not been thrown yet.
+#
+# The other half of this note is DONE: the repository was renamed to
+# `ders-programi` (2026-08-27).
 
 name: site
 
