@@ -17,12 +17,15 @@ import { useDialogs } from '../Dialogs';
 import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState, respreadColors } from '../../entities';
-import { KEEP_DAILY } from '../../folder';
-import { storageKind, storageReport } from '../../library';
+import { KEEP_DAILY, MAIN_NAME } from '../../folder';
+import { routeName, storageAddress, storageKind, storageReport } from '../../library';
 import { downloadBundle, listBackups } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
 import type { FolderRun } from '../../useFolder';
+import type { UpdateRun } from '../../update';
+import { SITE_ADRESI } from '../../update';
+import { surumEtiketi } from '../../version';
 import Plans from './Plans';
 
 interface Props {
@@ -31,6 +34,7 @@ interface Props {
   loadState: (next: State) => void;
   plans: PlanControls;
   folder: FolderRun;
+  update: UpdateRun;
 }
 
 /**
@@ -123,11 +127,38 @@ function Folder({ folder }: { folder: FolderRun }) {
             </div>
           )}
 
+          {/* THE ROUND TRIP, named. The folder is not only a backup — it is
+              how work moves to the next machine and into the next version,
+              and until this sentence existed nothing anywhere said which of
+              the files in there was the one to open, or with which button.
+              Both halves are already built; what was missing was saying so. */}
+          {s.kind !== 'secilmedi' && (
+            <p className="hint">
+              O klasördeki <code>{MAIN_NAME}</code> dosyası{' '}
+              <b>bütün planlarınızın tamamıdır</b>. Yeni bir bilgisayarda, yeni bir
+              tarayıcıda ya da programın yeni bir sürümünde işinizi geri getirmenin
+              yolu tek: aşağıdaki <b>Tümünü dosyadan aç</b> ile o dosyayı seçmek.
+              Yanındaki tarihli dosyalar aynı şeyin gün gün duran hâlleri.
+            </p>
+          )}
+
           {/* One line, and it is the only place this feature can be seen
               working. `role="status"` because it changes without anyone
               looking at it — pitfall 7 says a save that stopped working has
-              to be visible, not quiet. */}
-          <p className={s.kind === 'hata' ? 'hint bad' : 'hint'} role="status">
+              to be visible, not quiet.
+
+              'secilmedi' reads RED on the routes where the offer actually
+              works well (an origin the browser can keep the permission for).
+              It is not an error, but it is the one state in which a term's
+              work has exactly one copy and a cleared browser takes it. */}
+          <p
+            className={
+              s.kind === 'hata' || (s.kind === 'secilmedi' && storageKind() === 'site')
+                ? 'hint bad'
+                : 'hint'
+            }
+            role="status"
+          >
             {s.kind === 'secilmedi' && 'Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.'}
             {s.kind === 'izin-gerek' && (
               <>
@@ -163,7 +194,98 @@ function Folder({ folder }: { folder: FolderRun }) {
   );
 }
 
-export default function Data({ state, change, loadState, plans, folder }: Props) {
+/**
+ * "Bu program" (2026-08-27).
+ *
+ * Two questions that had no answer anywhere in the app, and both of them are
+ * the first thing anybody needs when a fix is reported: WHICH build is this,
+ * and WHICH copy am I looking at. Without the first, "düzelttim, dener misin"
+ * has nothing to check against. Without the second, two routes with separate
+ * stores look identical on screen and the work silently splits in two.
+ *
+ * The update half only exists where it can: the site (and the local install)
+ * are already served over http, so asking their own origin costs nothing new.
+ * The double-clicked file and the .exe say where the newest one is and go
+ * nowhere — principle 3 is checked with grep there, and a version check that
+ * reached the network would be the first byte this program ever fetched.
+ *
+ * THE HEADING IS NOT "Bu program", and that is pitfall 49 again. `hasText`
+ * and `getByRole(name:)` both match on SUBSTRING and case-insensitively, and
+ * the panel one column over already said "Tarayıcının bu program için ayırdığı
+ * yer" — so a locator aimed here landed there instead, and the test failed
+ * with the wrong panel's contents printed at it. It also shares no words with
+ * "Veriler nerede", "Nereye kaydedilsin" or "Bütün planlar tek dosyada": those
+ * three are the locators four E2E specs hang on.
+ */
+function Build({ update }: { update: UpdateRun }) {
+  const adres = storageAddress();
+
+  return (
+    <div className="panel">
+      <h2>Sürüm ve güncelleme</h2>
+      <table className="stat">
+        <tbody>
+          <tr>
+            <td>Sürüm</td>
+            <td>
+              <b>{surumEtiketi()}</b>
+            </td>
+          </tr>
+          <tr>
+            <td>Nasıl açıldı</td>
+            <td>{routeName()}</td>
+          </tr>
+          {adres !== '' && (
+            <tr>
+              <td>Adres</td>
+              <td>
+                <code>{adres}</code>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {update.supported ? (
+        <>
+          <p className="hint">
+            Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve üstte
+            bir satırla söyler. Hiçbir şey zorla değişmez — <b>Yenile</b> demeden eski
+            sürümle çalışmaya devam edersiniz.
+          </p>
+          <div className="form-row">
+            <button className="btn" onClick={update.check}>
+              Güncellemeleri denetle
+            </button>
+          </div>
+          {update.ready && (
+            <p className="hint" role="status">
+              <b>Yeni sürüm hazır.</b> Üstteki <b>Yenile</b> düğmesine basın.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="hint">
+          <b>Bu kopya kendini güncellemez</b> ve hiçbir yere bağlanmaz. Yenisi
+          çıktığında en son sürüm her zaman şuradadır:{' '}
+          {/* A link under file://, plain text in the .exe. Not a fetch either
+              way — but the exe's window has nowhere to put a second page, and
+              a link that navigates the app away from itself would look like
+              the program crashing. There it is text to read, or to type. */}
+          {storageKind() === 'exe' ? (
+            <code>{SITE_ADRESI}</code>
+          ) : (
+            <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
+              <code>{SITE_ADRESI}</code>
+            </a>
+          )}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export default function Data({ state, change, loadState, plans, folder, update }: Props) {
   const { confirm } = useDialogs();
   const backups = listBackups();
   const bundleInput = useRef<HTMLInputElement>(null);
@@ -333,6 +455,8 @@ export default function Data({ state, change, loadState, plans, folder }: Props)
       </div>
 
       <aside>
+        <Build update={update} />
+
         <div className="panel">
           <h2>Veriler nerede</h2>
           {/* The exe changes what is TRUE here, not just the wording. On the
@@ -363,6 +487,22 @@ export default function Data({ state, change, loadState, plans, folder }: Props)
               </>
             )}
           </p>
+          {/* WHICH store. "The browser's store for this site" leaves out the
+              one word somebody would need to act on it, and there are three
+              stores on this machine that look identical on screen: the
+              double-clicked file, the local install and the site. Anybody
+              running two routes has two programs and no way to tell — until
+              half a term is in the wrong one. The way ACROSS is named here
+              because it is the same two buttons in both directions. */}
+          {storageKind() !== 'exe' && (
+            <p className="hint">
+              Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız ona:
+              çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>'nin
+              depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>.
+              Birinden ötekine taşımanın yolu şu ikisi:{' '}
+              <b>Tümünü dosyaya kaydet</b> → öbür kopyada <b>Tümünü dosyadan aç</b>.
+            </p>
+          )}
           {/* The one habit, spelled out. It used to be a sentence across the
               top bar on every screen; it belongs next to the report that says
               where the data actually lives, and the bar it left had six
@@ -397,6 +537,18 @@ export default function Data({ state, change, loadState, plans, folder }: Props)
           <p className="hint">
             Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için ayırdığı
             yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
+          </p>
+          {/* A row would be a lie in the "Yer" column: the table counts
+              localStorage characters, and a directory handle is not text —
+              it is the one thing only structured clone can carry, which is
+              why it lives in IndexedDB. Left out entirely it would be the
+              one key this report does not name. */}
+          <p className="hint">
+            Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha var
+            ve o listede değil, çünkü metin değil: seçtiğiniz klasörün tutamağı{' '}
+            <b>IndexedDB</b>'de, <code>ders-programi-klasor</code> adıyla durur.
+            Programınız orada <b>değildir</b> — orada duran şey yalnız hangi
+            klasöre yazılacağıdır.
           </p>
         </div>
 

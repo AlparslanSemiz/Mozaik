@@ -26,6 +26,8 @@ import {
 import { attachScrollFade } from './scrollFade';
 import { useSolver } from './useSolver';
 import { useFolder } from './useFolder';
+import { useUpdate } from './update';
+import { surumEtiketi } from './version';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
 import Setup from './components/setup';
@@ -387,9 +389,20 @@ export default function App() {
   const solver = useSolver(change);
   // The folder my father picked, if he picked one (task B4). Here for the
   // same reason as the solver: a pending write must not die because a tab
-  // changed. It only does anything on the local-server route — under file://
-  // there is no secure context and the API is not defined at all.
+  // changed. It works on EVERY route in Chromium — file:// included, where
+  // showDirectoryPicker is defined and the context is secure (pitfall 65);
+  // what file:// lacks is a real origin, so the permission is asked again on
+  // each launch. The browsers it is missing in are Firefox and Safari.
   const folder = useFolder(plans.library, plans.planId, state);
+  // Whether a newer build has taken over this page. A no-op unless a service
+  // worker is in charge, i.e. everywhere except the site and the local
+  // install — file:// and the .exe fetch nothing, by design (principle 3).
+  const update = useUpdate();
+  // Dismissed for THIS session only, and in sessionStorage rather than
+  // localStorage on purpose: a new ders-programi-* key would owe the
+  // "Veriler nerede" table a row (planlar.spec.ts checks every one of them),
+  // and "do not ask again today" is exactly what a session is.
+  const [updateHidden, setUpdateHidden] = useState(false);
   const { confirm, alert } = useDialogs();
   const notify = useToast();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -769,6 +782,72 @@ export default function App() {
           </div>
         )}
 
+        {/* A NEW BUILD IS RUNNING THE SERVICE WORKER, this page is still the
+            old one. Announced rather than applied: principle 1's promise is
+            that nothing updates itself out from under him, and a timetable
+            half-dragged is exactly the moment a silent reload would land.
+
+            It is a strip and not a toast because it carries an ACTION, and
+            toasts in this program deliberately do not (see Toasts.tsx). */}
+        {update.ready && !updateHidden && (
+          <div className="update-bar" role="status">
+            <span>
+              <b>Yeni sürüm hazır.</b> Şu an {surumEtiketi()} sürümünü kullanıyorsunuz;
+              yenisi <b>Yenile</b> deyince gelir. İşiniz kaybolmaz.
+            </span>
+            <span className="update-acts">
+              <button className="btn primary" onClick={update.reload}>
+                Yenile
+              </button>
+              <button className="btn" onClick={() => setUpdateHidden(true)}>
+                Sonra
+              </button>
+            </span>
+          </div>
+        )}
+
+        {/* A SAVE THAT STOPPED WORKING HAS TO BE VISIBLE (pitfall 7). These
+            two states mean my father once picked a folder and it is no longer
+            being written to — the folder moved, the disk filled, or the
+            browser dropped the permission on reload. Silence here is a term's
+            work quietly stopping to be backed up.
+
+            'secilmedi' is deliberately NOT here: never having picked a folder
+            is not a fault, it is the starting state, and a strip that is up on
+            every screen from the first minute is a strip nobody reads. It is
+            said instead in Ayarlar → Veri, in red, on the routes where the
+            offer is a good one. */}
+        {(folder.status.kind === 'izin-gerek' || folder.status.kind === 'hata') && (
+          <div className="save-warning">
+            ⚠{' '}
+            {folder.status.kind === 'izin-gerek' ? (
+              <>
+                <b>{folder.status.name}</b> klasörüne yazılamıyor: tarayıcı izni
+                sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor.
+              </>
+            ) : (
+              <>
+                <b>{folder.status.name}</b> klasörüne <b>yazılamıyor</b>. {folder.status.text}{' '}
+                İşiniz şu an yalnız bu tarayıcıda duruyor.
+              </>
+            )}{' '}
+            {/* NOT "Ayarlar → Veri" (pitfall 49). getByRole name matching is
+                substring AND case-insensitive, so that label answered to the
+                Ayarlar TAB's own query and broke the folder suite's helper —
+                a button three pixels from a tab must not wear its name, in
+                any case. This one says what it does instead. */}
+            <button
+              className="btn"
+              onClick={() => {
+                goTab('settings');
+                ui.setSection('data');
+              }}
+            >
+              Klasörü düzelt
+            </button>
+          </div>
+        )}
+
         {/* The scroll container lives HERE, not in the six tab components: they
             all used to render their own `.main` and one of them had to opt out
             of scrolling (the grid scrolls inside itself).
@@ -837,6 +916,7 @@ export default function App() {
               loadState={loadState}
               plans={plans}
               folder={folder}
+              update={update}
               scale={scale}
               setScale={setScale}
               density={density}

@@ -13,6 +13,14 @@ Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](
 Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazılmaz.
 
 1. **Kurulum yok.** İndir, çift tıkla, çalışsın. Sihirbaz, hesap, şifre, güncelleme yok.
+   > **Netleştirildi (2026-08-27): "güncelleme yok" = ZORLANAN güncelleme yok.**
+   > Site yolunda program yeni bir sürümün geldiğini **söyler** ve orada durur:
+   > `Yenile` denene kadar hiçbir şey değişmez, `Sonra` denince o oturumda bir
+   > daha sorulmaz. Yasaklanan şey buydu — kendiliğinden değişen bir arayüz,
+   > kapatılamayan bir bildirim, sürüm sorulan bir açılış ekranı. Söylenmeyen
+   > bir güncelleme ise başka bir şeyi bozuyordu: baba bir kusur bildiriyor,
+   > düzeltiliyor, ve düzeltmenin ona ulaşıp ulaşmadığını **iki taraf da**
+   > göremiyordu. Çift tıklanan dosya ve `.exe` hâlâ hiçbir yere bağlanmaz.
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain yok.
 3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Font **ağdan
    çekilmez** — gömülü font serbest, bkz. aşağıdaki güncelleme.
@@ -155,6 +163,15 @@ giremez (ilke 3). Sürükle-bırak kütüphanesi de girmiyor ama gerekçesi baş
 
 CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
 
+**Sürüm numarasının TEK kaynağı `package.json` + `scripts/surum.mjs`.** İki
+vite config de `define: { __SURUM__ }` ile onu derlemeye basar, yani dört
+teslim yolu da aynı numarayı taşır — `isDesktop()`'ın doktrini burada da
+geçerli: bu bir **derleme bayrağı değil**, hepsine basılan aynı damga.
+`src/version.ts` onu okur (`__SURUM__` tanımsızsa `0.0.0-dev`'e düşer, yoksa
+`tsc` ve vitest modül yüklenirken çöker) ve Ayarlar → Veri onu gösterir.
+Aynı damga `dist-site/sw.js`'in **önbellek adına** da girer — bkz. tuzak 73.
+Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
+
 ### Komutlar
 
 ```bash
@@ -172,6 +189,7 @@ npm run paket      # dist-kurulum/ — babaya giden TEK klasör (Windows)
 npm run font       # src/fonts/*.woff2 yeniden üretir (fontTools ister)
 npm run exe        # src-tauri/target/release/ — Tauri ikilisi (Rust ister)
 npm run exe:test   # cargo test — safe_name kapısı ve dosya işleri, 6 test
+npm run yayinla -- 1.2.0   # sürüm: package.json + commit + etiket + push
 ```
 
 `font`, `exe` ve `exe:test` **`kontrol`'ün parçası değil** ve bilerek öyle:
@@ -195,6 +213,8 @@ scripts/ikon.mjs     -> .ico: 16/32 SADE, 48+ AYRINTILI (konteyner elle yazılı
 scripts/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
 scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
 scripts/font.mjs     -> gömülü yüzün REÇETESİ (kaynak scripts/font-source/)
+scripts/surum.mjs    -> sürüm numarasının TEK kaynağı (define + sw damgası)
+scripts/yayinla.mjs  -> bir sürümün dört adımı, tek komutta
 ```
 
 **İşaretin İKİ çizimi var, ve eşik ölçülerek bulundu.** `site/icon.svg`
@@ -277,7 +297,8 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 20 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **altı şeridin tek iskeleti ve Kontrol'ün süzgeci** (`serit.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği |
-| **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si |
+| **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
+| **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
 | **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu** |
 | **Rust** | `src-tauri/src/lib.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
 | Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
@@ -389,6 +410,13 @@ rowDrag.ts                      liste satırını sürükleme. Saf DOM, React B�
                                 orta noktayla değil (tuzak 60)
 printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
+version.ts                      HANGİ DERLEME BU. `__SURUM__`'ü okur, yoksa
+                                `0.0.0-dev`'e düşer. Hiçbir şey import etmez
+update.ts                       yeni bir derleme devraldı mı. Service worker
+                                yoksa ya da controller yoksa TAMAMEN no-op —
+                                yani file:// ve exe'de hiçbir şey yapmaz.
+                                SITE_ADRESI de burada: en yeni sürümün adresi
+                                tek yerde yazılı, ve bir METİN, bir fetch değil
 desktop.ts                      exe'nin klasörü. folder.ts'in KURALLARINI
                                 kopyalamaz — üç Tauri komutunu bir
                                 FileSystemDirectoryHandle kılığına sokar, yani
@@ -532,6 +560,14 @@ ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
 ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
 ```
+
+**Bu listenin tamamı Ayarlar → Veri'deki tabloda görünür ve bu bir SÖZLEŞME:**
+`planlar.spec.ts` gerçekten yazılmış her `ders-programi*` anahtarını tabloda
+arar. Yeni bir anahtar açıyorsan `library.ts`'teki `storageReport`'a satırını
+da yazacaksın — `ders-programi-baski` haftalarca eksikti ve görünmedi, çünkü o
+anahtar ancak biri bir baskı ayarına dokununca doğuyor. **Yeni bir tercih
+`sessionStorage`'a giderse bu borç doğmaz**, ve "bu oturumda bir daha sorma"
+zaten oraya aittir (güncelleme şeridinin `Sonra`'sı böyle).
 
 **Onuncu makine tercihi localStorage'da DEĞİL:** babanın seçtiği klasörün
 tutamağı `IndexedDB['ders-programi-klasor']`'da durur. Sebep tercih değil,
@@ -1222,6 +1258,51 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     karıştırıcı, çünkü kanıt "kod bozuk" değil "test yalan söylüyor" diyordu.
     Bir anahtarın **varlığını** sormanın yolu `Object.keys(...)` +
     `toContain`. Nokta içeren hiçbir anahtar `toHaveProperty` ile sorulamaz.
+
+72. **Depoda "programın kendisi" gibi görünen İKİ yem var, ve ikisi de
+    SESSİZCE başarısız oluyordu.** Kök `index.html` Vite'ın şablonu: çift
+    tıklanınca modülü `file:///C:/src/main.tsx`'e çözülür, CORS'a takılır ve
+    geriye **bomboş beyaz bir sayfa** kalır — hata yok, uyarı yok, konsolu
+    açmayan biri için hiçbir ipucu yok. "Açılmıyor" diye okunan şey tam
+    olarak budur. `kurulum/Kur.cmd` de kurulumun **kaynağı**dır ve paketin
+    `site/`'siz hâline birebir benzer; eski mesajı "ZIP'i açmadan
+    çalıştırmış olabilirsiniz" diyerek okuyanı hiç indirilmemiş bir ZIP'i
+    aramaya yolluyordu — yani yanlış teşhis, teşhissizlikten beter.
+    İkisi de artık kendini söylüyor: şablon `file://` altında nereye
+    bakılacağını yazar, `kur.ps1` depo kaynağını paketten ayırıp
+    `npm run paket` der. Uyarının derlenmiş dosyada **çalışamaz** olması bir
+    umut değil bir ölçüm: singlefile `src`'yi kaldırıp kodu gömüyor, yani
+    `script[type="module"][src]` orada null dönüyor — `temel.spec.ts` 77
+    ikisini de ölçer. Genel kural: bir depoda **teslim edilen dosyanın
+    ikizi** duruyorsa, o ikiz çalıştırıldığında ne olacağı yazılır. Sessiz
+    bir boş ekran, bir hata mesajından pahalıdır.
+
+73. **Sabit bir service worker önbellek adı, güncellemeyi bir açılış
+    geciktirir — ve bunu hiçbir yerde söylemez.** `site/sw.js` iki sürüm
+    boyunca `CACHE = 'ders-programi-v1'` yazıyordu. Tarayıcı `sw.js`'i **bayt
+    bayt** karşılaştırır; dosya değişmediği için `install` bir daha hiç
+    koşmadı, `addAll(SHELL)` kabuğu bir daha hiç indirmedi, ve yeni sürüm
+    yalnızca `fetch` işleyicisinin arka plan tazelemesiyle geldi — yani baba
+    programı açıyor, **eskisini** görüyor; kapatıp yeniden açıyor, yenisi
+    geliyor. Ekranda hata yok, konsol temiz, ve "düzelttim, dener misin"in
+    cevabı **her seferinde yanlış**. Çare adın derlemeyle birlikte
+    kıpırdaması (`scripts/surum.mjs` → `vite.site.config.ts`'in
+    `stampServiceWorker`'ı). Genel kural: **bir önbelleğin adı, önbelleğin
+    içindekinin sürümüdür.** Sabit yazılmış her önbellek adı, eski bir kopyayı
+    süresiz servis etme iznidir.
+
+74. **Bir düğmenin adı bir sekmenin adını İÇERİYORSA da süit kırılır — tuzak
+    49 yalnız "başlıyorsa" değil.** Klasör uyarı şeridine `Ayarlar → Veri`
+    adında bir düğme kondu; `getByRole(name:)` **alt dize** eşler ve
+    **büyük/küçük harf ayırmaz**, yani o düğme `name: 'Ayarlar'` sorgusuna da
+    cevap verdi ve klasör süitinin yardımcısı strict-mode ihlaliyle düştü.
+    Aynı gün aynı hata bir **panel başlığında** tekrar etti: `.panel`,
+    `{ hasText: 'Bu program' }` ile arandı ve bir sütun ötedeki panel
+    *"Tarayıcının **bu program** için ayırdığı yer"* dediği için o bulundu —
+    test yanlış panelin içeriğini basarak kırmızıya döndü. İki sonucu var:
+    kısa adlar `exact: true` ile aranır, ve **bir panel kendi başlığıyla
+    (`has: getByRole('heading')`) kapsanır**, metniyle değil. "Ayarlar"ın
+    hiçbir çekimi (`ayarlarına`, `Ayarlar →`) bir düğme adına giremez.
 
 ---
 

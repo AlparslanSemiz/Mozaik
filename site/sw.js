@@ -8,8 +8,16 @@
 // hashed file names — which do not exist here, because the site is built with
 // vite-plugin-singlefile exactly like dist/index.html. The shell below is the
 // WHOLE app plus its icons.
+//
+// __SURUM__ IS REPLACED AT BUILD TIME (vite.site.config.ts, stampServiceWorker).
+// Do not write a number here by hand. The name held still at 'ders-programi-v1'
+// for two versions and that was a real bug rather than an untidy one: a browser
+// byte-compares sw.js, an unchanged file never runs `install` again, `addAll`
+// never re-fetches the shell, and a new deploy therefore arrived ONE LOAD LATE
+// with nothing on screen to say so. A name that moves with the build makes
+// `install` run, the shell refresh, and `activate` drop what came before.
 
-const CACHE = 'ders-programi-v1';
+const CACHE = 'ders-programi-__SURUM__';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {

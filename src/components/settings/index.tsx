@@ -19,6 +19,7 @@ import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
 import type { Density, Motion } from '../../theme';
 import type { FolderRun } from '../../useFolder';
+import type { UpdateRun } from '../../update';
 import type { SectionId } from '../../toolState';
 
 interface Props extends PanelProps {
@@ -26,6 +27,8 @@ interface Props extends PanelProps {
   plans: PlanControls;
   /** The folder that gets a copy of everything. Owned by App (pitfall 18). */
   folder: FolderRun;
+  /** Whether a newer build has taken over. Owned by App: the strip is up there. */
+  update: UpdateRun;
   /** A machine preference, so it comes down from App, not out of `State`. */
   scale: number;
   setScale: (next: number) => void;
@@ -54,6 +57,7 @@ export default function Settings({
   motion,
   setMotion,
   section,
+  update,
 }: Props) {
 
   return (
@@ -75,7 +79,14 @@ export default function Settings({
         />
       )}
       {section === 'data' && (
-        <Data state={state} change={change} loadState={loadState} plans={plans} folder={folder} />
+        <Data
+          state={state}
+          change={change}
+          loadState={loadState}
+          plans={plans}
+          folder={folder}
+          update={update}
+        />
       )}
     </>
   );

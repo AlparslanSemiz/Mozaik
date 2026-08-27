@@ -3,6 +3,8 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
 import {
   FIXTURE,
   open,
@@ -728,5 +730,44 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
       'SecurityError',
     );
     expect(facts['sw'], 'service worker artık file:// altında kaydoluyor').toBe('TypeError');
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('77. Kaynak şablonu ile teslim edilen dosya karıştırılamaz', () => {
+  // The failure this closes had no error message at all: double-clicking the
+  // repository's own index.html gives a BLANK WHITE PAGE. It is Vite's
+  // template, its module is `src="/src/main.tsx"`, and under file:// that
+  // resolves to the drive root and dies in CORS. Nothing on screen says so.
+  //
+  // The guard in index.html is only allowed to exist because it is provably
+  // dead in the built file: singlefile strips `src` and inlines the code, so
+  // the selector below finds nothing there. Both halves are measured — a
+  // guard that could fire in dist/index.html would be a new way to lose.
+
+  const KAYNAK = pathToFileURL(resolve('index.html')).href;
+
+  test('kaynak index.html çift tıklanınca BOŞ değil, nereye bakılacağını yazar', async ({
+    page,
+  }) => {
+    await page.goto(KAYNAK);
+
+    await expect(page.getByRole('heading', { name: /programın kendisi değil/i })).toBeVisible();
+    await expect(page.locator('#root')).toContainText('dist/index.html');
+    // The other half of the same confusion, one sentence away.
+    await expect(page.locator('#root')).toContainText('npm run paket');
+  });
+
+  test('derlenmiş dosyada uyarı ÇALIŞAMAZ: src taşıyan modül betiği yok', async ({ page }) => {
+    await open(page);
+
+    const kalinti = await page.evaluate(() => ({
+      srcli: document.querySelectorAll('script[type="module"][src]').length,
+      uyari: document.body.innerText.includes('programın kendisi değil'),
+    }));
+
+    expect(kalinti.srcli, 'singlefile artık src bırakıyor — uyarı canlanabilir').toBe(0);
+    expect(kalinti.uyari, 'kaynak uyarısı derlenmiş dosyada görünüyor').toBe(false);
   });
 });

@@ -13,11 +13,12 @@
 // base: './' so it works both at the root and under a repository path
 // (kullanici.github.io/ders-programi/), which is where GitHub Pages puts it.
 
-import { rmSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import { surumBilgisi, surumEki } from './scripts/surum.mjs';
 
 /** Registration is guarded twice: no service worker API, or not http(s). */
 const REGISTER = `
@@ -66,6 +67,38 @@ function siteShell(): Plugin {
  */
 const SERVIS_EDILMEYEN = ['logo-adaylari', 'icon-small.svg'];
 
+/** The placeholder site/sw.js carries where its cache name goes. */
+const ISARET = '__SURUM__';
+
+/**
+ * The service worker's cache name is stamped with the build, here, and the
+ * source file keeps a placeholder instead of a number.
+ *
+ * MEASURED, and it was the whole update bug: with a fixed name the browser
+ * byte-compares sw.js, finds it unchanged, and never runs `install` again —
+ * so `addAll(SHELL)` never re-fetches the app and a new deploy arrives one
+ * load late, quietly. A name that moves with the build makes `install` run,
+ * the shell refresh, and `activate` delete what came before.
+ *
+ * publicDir copies sw.js verbatim, so the rewrite happens in closeBundle on
+ * the OUTPUT — site/sw.js is never edited by hand or by a build.
+ */
+function stampServiceWorker(): Plugin {
+  return {
+    name: 'ders-programi-site-sw-damgasi',
+    closeBundle() {
+      const out = resolve('dist-site', 'sw.js');
+      const src = readFileSync(out, 'utf8');
+      if (!src.includes(ISARET)) {
+        // Loud, because a silent miss here is invisible until my father is a
+        // version behind and neither of us can tell.
+        throw new Error(`site/sw.js icinde ${ISARET} yok — cache adi damgalanamaz`);
+      }
+      writeFileSync(out, src.replaceAll(ISARET, surumEki()), 'utf8');
+    },
+  };
+}
+
 function dropUnserved(): Plugin {
   return {
     name: 'ders-programi-site-servis-edilmeyeni-atla',
@@ -80,7 +113,10 @@ function dropUnserved(): Plugin {
 export default defineConfig({
   base: './',
   publicDir: 'site',
-  plugins: [react(), viteSingleFile(), siteShell(), dropUnserved()],
+  plugins: [react(), viteSingleFile(), siteShell(), dropUnserved(), stampServiceWorker()],
+  // Same record as vite.config.ts: the site and the double-clicked file are
+  // the same app and have to say the same thing about which build they are.
+  define: { __SURUM__: JSON.stringify(surumBilgisi()) },
   build: {
     outDir: 'dist-site',
     emptyOutDir: true,

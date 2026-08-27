@@ -3447,6 +3447,39 @@ table.bell-preview td {
   line-height: 1.45;
 }
 
+/* "Yeni sürüm hazır." Same shape as .save-warning and deliberately NOT the
+   same colour: nothing is wrong, and the functional channel says red means
+   blocked. It carries buttons, so it is a strip rather than a toast — toasts
+   here do not take actions (Toasts.tsx).
+
+   `flex-wrap` and not a fixed layout: the sentence is long and the two
+   buttons must stay on screen at --ui-scale 1.5, where the row is 50% wider
+   than it looks here (pitfall 48 — what gives way is named, and it is the
+   line break, never a button). */
+.update-bar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 14px;
+  background: var(--accent-bg);
+  color: var(--text);
+  border-bottom: 2px solid var(--accent);
+  line-height: 1.45;
+}
+
+.update-bar > span:first-child {
+  flex: 1 1 20ch;
+  min-width: 0;
+}
+
+.update-acts {
+  flex: 0 0 auto;
+  display: flex;
+  gap: var(--space-2);
+}
+
 /* A list that reads as prose, not as bullets in a document. */
 .plain-list {
   margin: 0 0 var(--space-3);

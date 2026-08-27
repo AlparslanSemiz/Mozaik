@@ -60,8 +60,15 @@ Bunun iki çaresi var, ikisi de programın içinde:
 GÜNCELLEME
 ----------
 
-Yeni bir sürüm aldığınızda:  Guncelle.cmd  dosyasına çift tıklayın.
-Verilerinize ve kısayollarınıza dokunmaz.
+Guncelle.cmd  dosyasına çift tıklayın. Başka hiçbir şey yapmanız gerekmez:
+betik en yeni sürümü kendisi indirir, kurar ve size ne yaptığını yazar.
+
+  * Verilerinize dokunmaz.
+  * Kısayollarınıza dokunmaz.
+  * İnternet yoksa bir hata vermez; yanındaki klasörde duran sürümü kurar.
+
+Programın hangi sürümde olduğunu görmek isterseniz: Ayarlar -> Veri ->
+"Sürüm ve güncelleme".
 
 
 KALDIRMA

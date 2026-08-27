@@ -13,7 +13,7 @@
 # unpacked, so deleting the Downloads folder cannot take the program with it.
 # It writes NOTHING outside that folder and the two shortcuts.
 
-param([switch]$Guncelle)
+param([switch]$Guncelle, [switch]$Internetten)
 
 $ErrorActionPreference = 'Stop'
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
@@ -21,6 +21,7 @@ try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
 $Kaynak = $PSScriptRoot
 $Hedef  = Join-Path $env:LOCALAPPDATA 'Ders Programı'
 $Ad     = 'Ders Programı'
+$Adres  = 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip'
 
 function Yaz { param([string]$Metin, [string]$Renk = 'Gray') Write-Host $Metin -ForegroundColor $Renk }
 
@@ -28,13 +29,66 @@ Yaz ''
 Yaz "  $Ad — $(if ($Guncelle) { 'güncelleme' } else { 'kurulum' })" 'Cyan'
 Yaz ''
 
+# ------------------------------------------------------------- yeni sürümü al
+#
+# Guncelle.cmd geldiğinde en yeni sürüm İNTERNETTEN alınır, çünkü öteki türlü
+# güncellemek "önce bir ZIP indir, sonra çıkar, sonra oradan çalıştır" demekti
+# ve bu, hiç güncellememekle aynı şeydir.
+#
+# İnternet YOKSA bu bir hata değil: yanındaki klasör zaten bir kurulum
+# paketidir ve o kurulur. İlke 3 programın kendisi hakkındadır — çalışan sayfa
+# hiçbir yere bağlanmaz; bir güncelleme betiği bağlanır, çünkü işi budur.
+$Gecici = ''
+if ($Internetten) {
+  Yaz '  En yeni sürüm indiriliyor…'
+  $gecici = Join-Path ([System.IO.Path]::GetTempPath()) ("ders-programi-" + [guid]::NewGuid().ToString('N'))
+  try {
+    New-Item -ItemType Directory -Path $gecici -Force | Out-Null
+    $zip = Join-Path $gecici 'paket.zip'
+    # TLS 1.2 elle açılır: PowerShell 5.1 varsayılanı hâlâ eski protokoller ve
+    # GitHub onları kabul etmiyor — indirme sebepsiz yere "bağlanılamadı" der.
+    try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 } catch { }
+    $eski = $ProgressPreference; $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri $Adres -OutFile $zip -UseBasicParsing
+    $ProgressPreference = $eski
+    Expand-Archive -LiteralPath $zip -DestinationPath $gecici -Force
+    if (Test-Path -LiteralPath (Join-Path $gecici 'site\index.html')) {
+      $Kaynak = $gecici
+      $Gecici = $gecici
+      Yaz ("  İndirildi ({0:N0} KB)." -f [math]::Round((Get-Item -LiteralPath $zip).Length / 1KB)) 'Green'
+    } else {
+      Yaz '  İnen dosya beklenen kurulum paketi değil; yanındaki klasörden devam ediliyor.' 'Yellow'
+    }
+  } catch {
+    Yaz '  İnternete bağlanılamadı, en yeni sürüm alınamadı.' 'Yellow'
+    Yaz '  Yanındaki klasörde duran sürümle devam ediliyor.'
+  }
+  Yaz ''
+}
+
 # Kurulum paketi eksikse hiçbir şeye dokunma: yarım bir kurulum, hiç
 # kurulmamış olmaktan kötüdür.
 $SiteKaynak = Join-Path $Kaynak 'site'
 if (-not (Test-Path -LiteralPath (Join-Path $SiteKaynak 'index.html'))) {
+  # Two ways to land here, and telling them apart is the point: the
+  # repository's own kurulum/ folder is a SOURCE and looks exactly like the
+  # package minus site/. Sending that reader after a ZIP they never
+  # downloaded is worse than saying nothing.
+  $depo = ((Split-Path -Leaf $Kaynak) -eq 'kurulum') -and
+          (Test-Path -LiteralPath (Join-Path (Split-Path -Parent $Kaynak) 'package.json'))
+
   Yaz '  Bu klasörde "site" klasörü bulunamadı.' 'Red'
-  Yaz '  İndirdiğiniz ZIP dosyasını AÇMADAN çalıştırmış olabilirsiniz.'
-  Yaz '  ZIP''i bir klasöre çıkarın, sonra Kur.cmd''yi oradan çalıştırın.'
+  Yaz ''
+  if ($depo) {
+    Yaz '  Bu klasör kurulumun KAYNAĞI, kurulumun kendisi değil.'
+    Yaz '  Önce paketi üretin, sonra paketin içinden çalıştırın:'
+    Yaz ''
+    Yaz '      npm run paket'
+    Yaz '      dist-kurulum\Kur.cmd'
+  } else {
+    Yaz '  İndirdiğiniz ZIP dosyasını AÇMADAN çalıştırmış olabilirsiniz.'
+    Yaz '  ZIP''i bir klasöre çıkarın, sonra Kur.cmd''yi oradan çalıştırın.'
+  }
   Yaz ''
   Read-Host '  Kapatmak için Enter'
   exit 1
@@ -93,6 +147,11 @@ if (-not $Guncelle) {
     $k.Save()
     Yaz "  Kısayol: $lnk"
   }
+}
+
+# İndirilen paket kopyalandı; Temp'te bırakmanın bir sebebi yok.
+if ($Gecici -ne '' -and (Test-Path -LiteralPath $Gecici)) {
+  try { Remove-Item -LiteralPath $Gecici -Recurse -Force } catch { }
 }
 
 Yaz ''

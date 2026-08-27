@@ -1,7 +1,7 @@
 {
   "name": "ders-programi",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Haftalik ders programi dizme araci - tek dosya, sunucusuz, internetsiz",
   "scripts": {
@@ -19,7 +19,8 @@
     "cozucu": "vite build && playwright test --config playwright.cozucu.config.ts",
     "font": "node scripts/font.mjs",
     "exe": "npm run build && cargo build --manifest-path src-tauri/Cargo.toml --release",
-    "exe:test": "cargo test --manifest-path src-tauri/Cargo.toml"
+    "exe:test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "yayinla": "node scripts/yayinla.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
