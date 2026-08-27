@@ -35,8 +35,8 @@ function build(): State {
       { id: 'dB', name: 'B' },
     ],
     teachers: [
-      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
+      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } },
+      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
     ],
     classes: [
       { id: 's510', name: '510', roomId: 'dA', color: 0 },
@@ -44,9 +44,9 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, pairs: 1, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, second: false, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, second: false, maxPerDay: null },
+      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, pairs: 1, second: false, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},
@@ -128,7 +128,7 @@ describe('solve — küçük dünya', () => {
       teachers: [build().teachers[0]!],
       classes: [build().classes[0]!],
       lessons: [
-        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, maxPerDay: null },
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, second: false, maxPerDay: null },
       ],
       settings: {
         ...build().settings,

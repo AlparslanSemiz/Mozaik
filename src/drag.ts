@@ -260,12 +260,26 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
           const rowEl = document.querySelector<HTMLElement>('tr.target-row');
           const cls = blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
           for (let i = 0; i < d.blockSize; i++) {
-            const el = rowEl?.querySelector<HTMLElement>(
-              `td[data-day="${target.day}"][data-hour="${target.hour + i}"]`,
-            );
+            const hour = target.hour + i;
+            // Two ways an hour can be on screen: as its own cell, or swallowed
+            // by the cell to its left when a two-hour block is drawn as one
+            // (see Grid.tsx). Asking only the first way made the second half of
+            // such an hour resolve to null — and the `break` below then stopped
+            // painting the REST of the block too, with nothing to show for it.
+            const el =
+              rowEl?.querySelector<HTMLElement>(
+                `td[data-day="${target.day}"][data-hour="${hour}"]`,
+              ) ??
+              rowEl?.querySelector<HTMLElement>(
+                `td[data-day="${target.day}"][data-hour="${hour - 1}"][data-span="2"]`,
+              );
             if (el == null) break;
-            el.classList.add(cls);
-            highlighted.current.push(el);
+            // A merged cell can answer for both of its hours; painting it twice
+            // would also push it onto the cleanup list twice.
+            if (!highlighted.current.includes(el)) {
+              el.classList.add(cls);
+              highlighted.current.push(el);
+            }
           }
         }
       }

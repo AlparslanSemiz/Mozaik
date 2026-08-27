@@ -85,15 +85,32 @@ const Row = memo(function Row({
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
       // The SECOND half of a block, i.e. the cell whose neighbour to the left
-      // said it continues. Without it only one end of a two-hour block could
-      // lose its rounded corners and the pair would read as two objects that
-      // happen to touch. A day boundary resets it: `continues` never crosses one.
+      // said it continues. A day boundary resets it: `continues` never crosses
+      // one.
       const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
       const inBlock = previous !== null && previous.continues;
 
+      // "blok 2 saatlik olarak duruyorsa o iki farklı kart değil TEK kart
+      // olarak gözükmeli, büyükçe kart olarak." So the two halves become one
+      // <td> with colSpan 2 and one label, instead of two cards whose corners
+      // were squared off to suggest they were one thing.
+      //
+      // EXCEPT across the lunch break, and that is not a nicety: the separator
+      // is its own column and it deliberately carries no data-day, because
+      // drag.ts finds its target with closest('[data-day]') and a droppable
+      // lunch break is pitfall 13. Swallowing it inside a colSpan would give it
+      // one. A block whose two hours straddle the break therefore keeps the old
+      // two-card drawing, which is also honest: on screen there really is
+      // something between them.
+      const breakBefore = breakAt[g] === s;
+      const breakAfter = breakAt[g] === s + 1;
+      if (inBlock && !breakBefore) continue; // absorbed by the cell to its left
+      const spans = cell !== null && cell.continues && !breakAfter;
+
       const className = [
         s === 0 ? 'day-first' : '',
-        cell !== null && cell.continues ? 'block-cont' : '',
+        spans ? 'block-wide' : '',
+        !spans && cell !== null && cell.continues ? 'block-cont' : '',
         inBlock ? 'block-in' : '',
         cell === null && closed ? 'unavailable' : '',
         band.trim(),
@@ -107,6 +124,11 @@ const Row = memo(function Row({
           data-row={row.id}
           data-day={g}
           data-hour={s}
+          // How many hours this one <td> stands for. drag.ts needs it: it looks
+          // a cell up BY HOUR, and without this the second hour of a merged
+          // block resolves to nothing and its highlight silently never paints.
+          data-span={spans ? 2 : undefined}
+          colSpan={spans ? 2 : undefined}
           className={className}
           title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >

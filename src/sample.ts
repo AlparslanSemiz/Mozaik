@@ -101,6 +101,7 @@ export function sampleState(): State {
     name,
     short: makeShort(name),
     subject: SUBJECTS[i % SUBJECTS.length] ?? 'Matematik',
+    subject2: '',
     gender,
     color: i % PALETTE_SIZE,
     // Every third teacher gets a personal limit so the rule engine is actually
@@ -148,6 +149,7 @@ export function sampleState(): State {
         teacherId: teacher.id,
         weeklyHours,
         pairs,
+        second: false,
         maxPerDay: null,
       });
       budget -= weeklyHours;

@@ -21,6 +21,9 @@ import {
   addLessonsFromRows,
   deleteLesson,
   deletionQuestion,
+  hasTwoSubjects,
+  lessonSubject,
+  teacherSubjects,
   updateLesson,
 } from '../../entities';
 import LimitBox from '../LimitBox';
@@ -76,9 +79,20 @@ export default function Lessons({ state, change }: PanelProps) {
     return {
       haystack: (x) => {
         const t = tch(x);
-        return `${cls(x)?.name ?? ''} ${t?.name ?? ''} ${t?.short ?? ''} ${t?.subject ?? ''}`;
+        return `${cls(x)?.name ?? ''} ${t?.name ?? ''} ${t?.short ?? ''} ${lessonSubject(state, x)}`;
       },
-      facets: [{ id: 'brans', label: 'Branş', of: (x) => tch(x)?.subject ?? '' }],
+      // Three axes, and they narrow TOGETHER: "kolay seçme filtresinde sadece
+      // branş değil, öğretmene göre veya sınıfa göre de filtreleme olsun".
+      // Ninety-nine rows is where reading a column stops working, and a lesson
+      // is the one row in this program that belongs to two other lists.
+      facets: [
+        // The LESSON's subject, not the teacher's first one: filtering by
+        // Edebiyat has to return the Edebiyat lessons of a teacher who also
+        // teaches Türkçe, and none of their Türkçe ones.
+        { id: 'brans', label: 'Branş', of: (x) => lessonSubject(state, x) },
+        { id: 'ogretmen', label: 'Öğretmen', of: (x) => tch(x)?.short ?? '' },
+        { id: 'sinif', label: 'Sınıf', of: (x) => cls(x)?.name ?? '' },
+      ],
       sorts: [
         { id: 'sinif', label: 'Sınıfa göre', cmp: (a, b) =>
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') ||
@@ -105,7 +119,9 @@ export default function Lessons({ state, change }: PanelProps) {
     teacherId: '',
     hours: '4',
     pairs: '0',
+    second: false,
   });
+  const newTeacherObj = state.teachers.find((t) => t.id === newLesson.teacherId);
   // The choices depend on the hours in the box next to it, so they are rebuilt
   // as it is typed in — and the chosen one is clamped, because going from 6
   // hours to 3 has to take "2+2+2" with it.
@@ -117,7 +133,8 @@ export default function Lessons({ state, change }: PanelProps) {
     <div className="panel step-panel">
       <h2>Dersler ({state.lessons.length})</h2>
       <p className="hint">
-        Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat.{' '}
+        Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen
+        iki branş veriyorsa dersin hangi branştan olduğu da seçilir.{' '}
         <b>Dağılım</b>, o saatlerin haftaya nasıl bölüneceğidir: <b>2+1</b> demek bir
         gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2
         saattir. <b>Günde ↑</b> bu dersin bir günde en fazla kaç saat olabileceğidir;
@@ -153,6 +170,26 @@ export default function Lessons({ state, change }: PanelProps) {
             </option>
           ))}
         </select>
+        {/* "hocayı seçtikten sonra eğer çift branşlı bir hoca varsa onun hangi
+            branşının dersi olacağını seçme özelliği de olsun." Only then: for
+            the twenty-three teachers who hold one subject there is no question
+            to ask, and a box offering one option is a box that lies about
+            having a choice. */}
+        {newTeacherObj !== undefined && hasTwoSubjects(newTeacherObj) && (
+          <Field label="Branş">
+            <select
+              aria-label="Dersin branşı"
+              value={newLesson.second ? '1' : '0'}
+              onChange={(e) => setNewLesson({ ...newLesson, second: e.target.value === '1' })}
+            >
+              {teacherSubjects(newTeacherObj).map((name, i) => (
+                <option key={name} value={i === 0 ? '0' : '1'}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
         <Field label="Haftalık saat">
           <input
             type="number"
@@ -180,6 +217,10 @@ export default function Lessons({ state, change }: PanelProps) {
                 teacherId: newLesson.teacherId,
                 weeklyHours: newHours,
                 pairs: newPairs,
+                // A teacher with one subject cannot be "second", whatever the
+                // box last said before the teacher was changed.
+                second: newLesson.second && newTeacherObj !== undefined &&
+                  hasTwoSubjects(newTeacherObj),
               }),
             );
             setNewLesson({ ...newLesson, classId: '' });
@@ -253,9 +294,7 @@ export default function Lessons({ state, change }: PanelProps) {
         <table className="list">
           <thead>
             <tr>
-              {/* The handle gets a column of its own: squeezed in beside
-                  something else, half of it belongs to the neighbour. */}
-              <th className="grip-col" />
+              {order.head}
               <th>Sınıf</th>
               <th>Öğretmen</th>
               <th className="w-col-lg">Haftalık saat</th>
@@ -286,7 +325,31 @@ export default function Lessons({ state, change }: PanelProps) {
                       className="color-dot"
                       style={{ background: paletteColor(teacher?.color ?? 0) }}
                     />{' '}
-                    {teacher?.short ?? '?'} · {teacher?.subject ?? ''}
+                    {teacher?.short ?? '?'}{' '}
+                    {/* The subject is a LABEL for a single-subject teacher and a
+                        CHOICE for one who holds two — so it is drawn as the one
+                        it is, in the cell where the teacher already is. A column
+                        of its own would be twenty-three empty cells wide. */}
+                    {teacher !== undefined && hasTwoSubjects(teacher) ? (
+                      <select
+                        className="text-sm"
+                        aria-label={`${group?.name ?? '?'} · ${teacher.short} dersinin branşı`}
+                        value={x.second ? '1' : '0'}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateLesson(d, x.id, { second: e.target.value === '1' }),
+                          )
+                        }
+                      >
+                        {teacherSubjects(teacher).map((name, i) => (
+                          <option key={name} value={i === 0 ? '0' : '1'}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <>· {lessonSubject(state, x)}</>
+                    )}
                   </td>
                   <td>
                     <input

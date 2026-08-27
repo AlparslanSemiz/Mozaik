@@ -108,7 +108,13 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     // The teacher, the class and the placed 2-hour block all survived.
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
+    // block is drawn as a single wide cell rather than two cards with their
+    // touching corners squared off. Counting the cells it COVERS is the
+    // stronger claim anyway — it is what "the block survived" actually means,
+    // and it would still be 2 if the drawing changed back.
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator('table.grid td:has(.card)')).toHaveAttribute('colspan', '2');
     await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
     await expect(page.locator('table.grid .card').first()).toContainText('510');
   });
@@ -155,7 +161,13 @@ test.describe('5. Yedek ve şema göçü', () => {
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
+    // block is drawn as a single wide cell rather than two cards with their
+    // touching corners squared off. Counting the cells it COVERS is the
+    // stronger claim anyway — it is what "the block survived" actually means,
+    // and it would still be 2 if the drawing changed back.
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator('table.grid td:has(.card)')).toHaveAttribute('colspan', '2');
     await expect(page.locator('.day-head').first()).toHaveText('Cuma');
     // The bell times the migration filled in are visible in the header.
     await expect(page.locator('table.grid thead').first()).toContainText('09:00');
@@ -222,7 +234,13 @@ test.describe('5. Yedek ve şema göçü', () => {
     await answerDialog(page); // "şu anki programın yerine geçecek"
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
+    // block is drawn as a single wide cell rather than two cards with their
+    // touching corners squared off. Counting the cells it COVERS is the
+    // stronger claim anyway — it is what "the block survived" actually means,
+    // and it would still be 2 if the drawing changed back.
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator('table.grid td:has(.card)')).toHaveAttribute('colspan', '2');
     await expect(page.locator('.day-head').first()).toHaveText('Salı');
     await expect(page.locator('tbody .row-head').first()).toContainText('MÇ');
 
@@ -304,7 +322,13 @@ test.describe('5. Yedek ve şema göçü', () => {
 
     // The laid-out block survived the migration untouched.
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(2);
+    // ONE card, and it stands for TWO hours: since 2026-08-27 a two-hour
+    // block is drawn as a single wide cell rather than two cards with their
+    // touching corners squared off. Counting the cells it COVERS is the
+    // stronger claim anyway — it is what "the block survived" actually means,
+    // and it would still be 2 if the drawing changed back.
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator('table.grid td:has(.card)')).toHaveAttribute('colspan', '2');
     await expect(page.locator('table.grid .card').first()).toContainText('510');
 
     // The two teachers no longer share a colour...

@@ -7,7 +7,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { answerDialog, chooseEntity, openSettings, openWithSample } from './helpers';
+import { answerDialog, chooseEntity, openSettings, openWithSample, placedHours } from './helpers';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page) {
@@ -26,7 +26,7 @@ test.describe('22. Otomatik dizme', () => {
 
     await expect(page.locator('.reason-bar')).toContainText('Program dizildi');
     await expect(page.locator('.pool-card')).toHaveCount(0);
-    expect(await page.locator('table.grid .card').count()).toBeGreaterThan(400);
+    expect(await placedHours(page)).toBeGreaterThan(400);
   });
 
   test('bütün dizim TEK Ctrl+Z ile geri alınıyor', async ({ page }) => {
@@ -119,7 +119,7 @@ test.describe('22. Otomatik dizme', () => {
 
     // The grid really is laid out: 424 of 426 hours, measured. An empty grid
     // cannot make this assertion pass, which is the whole point of it.
-    const placed = await page.locator('table.grid td:has(.card)').count();
+    const placed = await placedHours(page);
     expect(placed).toBeGreaterThan(400);
 
     // Kontrol lists every breach of a rule; at "Engelle" there must be none.

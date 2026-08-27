@@ -17,7 +17,7 @@
 import { useMemo } from 'react';
 import { periodGroups } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
-import { shortDay, subjectShort } from '../entities';
+import { lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
 import type { Scope } from '../toolState';
@@ -327,6 +327,14 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
                         const teacher =
                           lesson === undefined ? undefined : ix.teacherById.get(lesson.teacherId);
+                        // The LESSON's subject, not the teacher's first one: a
+                        // teacher who holds two is standing in this room for
+                        // exactly one of them, and the sheet on the wall has to
+                        // say which.
+                        const subject =
+                          lesson === undefined
+                            ? ''
+                            : subjectShort(state.settings, lessonSubject(state, lesson));
                         return (
                           <td
                             key={s}
@@ -339,9 +347,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                           >
                             {teacher !== undefined && (
                               <>
-                                <span className="p-top">
-                                  {subjectShort(state.settings, teacher.subject)}
-                                </span>
+                                <span className="p-top">{subject}</span>
                                 {options.cellBottom && (
                                   <span className="p-bottom">{teacher.short}</span>
                                 )}
@@ -374,7 +380,11 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                 {(() => {
                   const sub = credits(
                     options.school ? state.settings.schoolName : '',
-                    options.credits ? teacher.subject : '',
+                    // Both subjects on the teacher's own sheet: the credit line
+                    // says who this person is, and half of that is not who they
+                    // are. The CELLS on the same page still each name the one
+                    // subject that lesson is taught under.
+                    options.credits ? teacherSubjects(teacher).join(' · ') : '',
                   );
                   return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
                 })()}

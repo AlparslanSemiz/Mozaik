@@ -589,3 +589,73 @@ test.describe('11. Görsel cila', () => {
     expect(danger).toBe(bad['--bad']);
   });
 });
+
+// The 4px rule of section colour along the very top of the bar.
+//
+// The reader asked whether it is weaker in the light theme — "en üstteki
+// şeridin üstündeki renk şeridi açık temada biraz daha az gözüküyor gibi …
+// eğer bana öyle geldiyse boş verebilirsin" — so it was MEASURED rather than
+// adjusted by eye, and the measurement said no. Against the top stop of the
+// bar's own gradient, on 2026-08-27:
+//
+//   light   Kurulum 6.92 · Müsaitlik 7.26 · Program 7.31 ·
+//           Kontrol 5.53 · Yazdır 7.05 · Ayarlar 7.26
+//   dark    Kurulum 4.66 · Müsaitlik 4.65 · Program 4.28 ·
+//           Kontrol 5.84 · Yazdır 5.28 · Ayarlar 4.49
+//
+// So it is the stronger of the two in five sections out of six, and nothing was
+// changed. What is worth keeping is the FLOOR: this rule is how the bar says
+// which room you are in before any label does, and WCAG 1.4.11 asks 3:1 of a
+// non-text element that carries meaning. 3.5 leaves a little room under the
+// weakest measured value without leaving room for a regression.
+//
+// The mix is PAINTED and the pixel read back: Chromium keeps
+// `color-mix(in oklab, …)` in oklab, and reading it as a string gave numbers
+// that looked plausible and were wrong by a factor of three — the parser took
+// the lightness for a red channel and called every backdrop black.
+test.describe('80. Bölüm şeridi', () => {
+  const SECTIONS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`üst çubuğun renk şeridi ${theme} temada da görünüyor`, async ({ page }) => {
+      await open(page);
+      await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
+      await page.reload();
+
+      for (const section of SECTIONS) {
+        await page.getByRole('button', { name: section, exact: true }).click();
+        const m = await page.evaluate((dark) => {
+          const bar = document.querySelector('.topbar') as HTMLElement;
+          const probe = document.createElement('div');
+          probe.style.background =
+            `color-mix(in oklab, var(--sec, var(--accent)) ${dark ? 14 : 16}%, var(--chrome-lit))`;
+          bar.appendChild(probe);
+          const mixed = getComputedStyle(probe).backgroundColor;
+          probe.remove();
+
+          const cv = document.createElement('canvas');
+          cv.width = 1;
+          cv.height = 1;
+          const ctx = cv.getContext('2d')!;
+          ctx.fillStyle = mixed;
+          ctx.fillRect(0, 0, 1, 1);
+          const px = ctx.getImageData(0, 0, 1, 1).data;
+
+          const before = getComputedStyle(bar, '::before');
+          return {
+            strip: before.backgroundColor,
+            height: parseFloat(before.height),
+            under: `rgb(${px[0]}, ${px[1]}, ${px[2]})`,
+          };
+        }, theme === 'dark');
+
+        // It has to BE there before it can be visible.
+        expect(m.height, `${section}: şerit çizilmiyor`).toBeGreaterThanOrEqual(3);
+        expect(
+          contrast(m.strip, m.under),
+          `${theme} ${section}: ${contrast(m.strip, m.under).toFixed(2)}`,
+        ).toBeGreaterThanOrEqual(3.5);
+      }
+    });
+  }
+});

@@ -130,9 +130,7 @@ export default function Classes({ state, change }: PanelProps) {
         <table className="list">
           <thead>
             <tr>
-              {/* The handle gets a column of its own: squeezed in beside
-                  something else, half of it belongs to the neighbour. */}
-              <th className="grip-col" />
+              {order.head}
               <th>Renk</th>
               <th>Ad</th>
               <th className="w-col-xl">Derslik</th>

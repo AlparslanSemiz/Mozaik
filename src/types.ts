@@ -24,12 +24,29 @@ export type RuleLevel = 'off' | 'warn' | 'block';
  */
 export type Gender = '' | 'k' | 'e';
 
-/** Every teacher has exactly ONE subject; subject belongs to the teacher, not the lesson. */
+/**
+ * Subject belongs to the TEACHER, not to the lesson — and a teacher may have a
+ * second one.
+ *
+ * The second is a real case in this school and not a guess: one person teaches
+ * both "Matematik 1" and "Matematik 2", another both "Türkçe" and "Edebiyat".
+ * A sub-branch tree under `settings.subjects` would express the first pair and
+ * NOT the second — Türkçe is not a child of Edebiyat — so two flat subjects it
+ * is. Which of them a given lesson is taught under lives on the lesson, as a
+ * flag; see `Lesson.second`.
+ */
 export interface Teacher {
   id: Id;
   name: string;
   short: string; // "MÇ" — row header in the grid
   subject: string; // "Matematik" — free text, not a separate table
+  /**
+   * The teacher's OTHER subject, or '' for the usual case of only one.
+   *
+   * '' is a real value here exactly as it is in `Gender`: most of the staff
+   * list has one subject and that is data, not a gap to be filled in later.
+   */
+  subject2: string;
   gender: Gender; // '' | 'k' | 'e' — never printed, only listed and grouped
   color: number; // index into PALETTE (palette.ts), not a hex value
   /** null -> use settings.limits. A number wins over the school-wide default. */
@@ -74,6 +91,21 @@ export interface Lesson {
    * total, this is only its shape, and it cannot contradict it.
    */
   pairs: number;
+  /**
+   * Is this lesson taught under the teacher's SECOND subject?
+   *
+   * A flag and not the subject's NAME, on purpose. The name is already stored
+   * once, on the teacher; storing it again here would be a second truth that
+   * drifts the moment somebody corrects a typo in the teacher's branch — and
+   * `Teacher.subject` is deliberately a string rather than an id precisely so
+   * that renaming stays cheap. A flag cannot contradict the teacher: it points
+   * at one of two fields the teacher already has.
+   *
+   * `false` for every lesson of a single-subject teacher, and `sanitize()`
+   * forces it back to `false` when a teacher's `subject2` is cleared — an
+   * orphan flag would make a lesson claim a subject nobody teaches.
+   */
+  second: boolean;
   /** Max hours of THIS lesson on one day. null -> settings.limits.maxSameLessonPerDay. */
   maxPerDay: number | null;
 }
@@ -161,5 +193,6 @@ export interface State {
  * v5: ClassGroup.color and settings.subjects.
  * v6: Teacher.gender.
  * v7: Lesson.pairs replaces Lesson.blockSize.
+ * v8: Teacher.subject2 and Lesson.second — a teacher may hold two subjects.
  */
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;

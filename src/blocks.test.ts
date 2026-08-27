@@ -10,6 +10,7 @@ const lesson = (weeklyHours: number, pairs: number): Lesson => ({
   teacherId: 'oMC',
   weeklyHours,
   pairs,
+  second: false,
   maxPerDay: null,
 });
 
@@ -59,6 +60,40 @@ describe('patternLabel', () => {
   it('boş liste için tire', () => {
     expect(patternLabel([])).toBe('–');
   });
+
+  // "adamın 10 saat dersi varsa 1+1+1+1+1… diye gözükmesi biraz kötü"
+  it('dört terime kadar açık yazıyor — hafta bir RESİM', () => {
+    expect(patternLabel([1, 1, 1, 1])).toBe('1+1+1+1');
+    expect(patternLabel([2, 2, 1, 1])).toBe('2+2+1+1');
+  });
+
+  it('dört terimden sonra katlıyor', () => {
+    expect(patternLabel([1, 1, 1, 1, 1])).toBe('5×1');
+    expect(patternLabel(new Array<number>(10).fill(1))).toBe('10×1');
+    expect(patternLabel([2, 2, 2, 2, 2])).toBe('5×2');
+    expect(patternLabel([2, 2, 2, 1, 1, 1, 1])).toBe('3×2 + 4×1');
+  });
+
+  // The fold is a way of WRITING the split, never a change to it: whatever the
+  // label says, the hours it stands for are the same hours.
+  it('katlanmış etiket aynı toplamı anlatıyor', () => {
+    for (let hours = 1; hours <= 14; hours++) {
+      for (let pairs = 0; pairs <= Math.floor(hours / 2); pairs++) {
+        const blocks = blockPlan(lesson(hours, pairs));
+        const etiket = patternLabel(blocks);
+        const toplam = [...etiket.matchAll(/(\d+)×(\d)/g)].reduce(
+          (a, m) => a + Number(m[1]) * Number(m[2]),
+          0,
+        );
+        // Either it folded (and the arithmetic in it adds up to the week) or it
+        // did not (and the plus signs already do).
+        const beklenen = etiket.includes('×')
+          ? toplam
+          : etiket.split('+').reduce((a, b) => a + Number(b), 0);
+        expect(beklenen).toBe(hours);
+      }
+    }
+  });
 });
 
 describe('patternOptions', () => {
@@ -70,8 +105,11 @@ describe('patternOptions', () => {
   });
 
   it('5 saat için üç seçenek, en az ikiliden en çoğa', () => {
+    // The first one folds and the other two do not, which is the fold doing its
+    // job inside the dropdown itself: five terms is where "1+1+1+1+1" stopped
+    // being a picture of the week and became a row of ones.
     expect(patternOptions(5).map((x) => x.label)).toEqual([
-      '1+1+1+1+1',
+      '5×1',
       '2+1+1+1',
       '2+2+1',
     ]);

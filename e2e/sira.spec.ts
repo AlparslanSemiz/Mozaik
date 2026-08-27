@@ -205,10 +205,16 @@ test.describe('61. Elle sıralama', () => {
 
     // Only the school's OWN list can be dragged, and it is the first tbody.
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
-    // `td:nth-child(2)` and not `.locator('td').nth(1)`: the second one picks
-    // the second cell of the whole table, not the second cell of each row.
+    // Read from `data-row-name` and NOT from a column position. The name cell
+    // has moved twice now — a drag handle went in front of it, then a row
+    // number in front of that — and each time a positional selector went on
+    // reading a DIFFERENT, empty cell and the test compared "" with "" and
+    // passed the wrong thing. The attribute is what the drag itself uses to
+    // announce a row, so it cannot drift away from the row it names.
     const subjects = async () =>
-      (await listedRows.locator('td:nth-child(2)').allInnerTexts()).map((x) => x.trim());
+      (await listedRows.evaluateAll((rows) =>
+        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+      )).map((x) => x.trim());
 
     const before = await subjects();
     expect(before.length).toBeGreaterThan(3);
@@ -240,12 +246,17 @@ test.describe('61. Elle sıralama', () => {
     await openWithSample(page);
     await openSettings(page, 'Branşlar');
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
-    const first = (await listedRows.locator('td:nth-child(2)').allInnerTexts())[0]!.trim();
+    // `data-row-name`, not a column position — see the test above.
+    const names = async () =>
+      (await listedRows.evaluateAll((rows) =>
+        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+      )).map((x) => x.trim());
+    const first = (await names())[0]!;
 
     await grips(page).first().focus();
     await page.keyboard.press('ArrowDown');
 
-    const after = (await listedRows.locator('td:nth-child(2)').allInnerTexts()).map((x) => x.trim());
+    const after = await names();
     expect(after[1]).toBe(first);
   });
 

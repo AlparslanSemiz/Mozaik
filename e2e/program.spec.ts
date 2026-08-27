@@ -5,6 +5,44 @@ import { expect, test } from './kapan';
 import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover } from './helpers';
 
 test.describe('2. Sürükle-bırak', () => {
+
+  // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
+  //  çekmecenin altına kaçıyorlar."
+  //
+  // The lift was right and the box was wrong: `.pool-list` scrolls, its top
+  // padding was 0, and the first row of cards therefore sat flush against the
+  // edge that clips. Measured before the fix: the hovered card's painted top —
+  // its own box, minus the 2px outline drawn 1px outside it, minus the
+  // --slide/4 lift — was 5.2px ABOVE the scroll box and simply cut off.
+  //
+  // The card is measured with its OUTLINE, not by its bounding box: the box was
+  // never the part that disappeared.
+  test('havuzda hover eden kart çekmecenin dışına taşmıyor', async ({ page }) => {
+    await openWithSample(page);
+    const card = page.locator('.pool-card').first();
+    await expect(card).toBeVisible();
+    await card.hover();
+
+    const m = await page.evaluate(() => {
+      const c = document.querySelector('.pool-card') as HTMLElement;
+      const list = document.querySelector('.pool-list') as HTMLElement;
+      const style = getComputedStyle(c);
+      const paintedTop =
+        c.getBoundingClientRect().top -
+        (parseFloat(style.outlineWidth) || 0) -
+        (parseFloat(style.outlineOffset) || 0);
+      return {
+        outside: list.getBoundingClientRect().top - paintedTop,
+        lifted: style.transform !== 'none',
+      };
+    });
+
+    // The lift itself has to still be happening, or this would pass on a card
+    // that simply stopped moving — the reader liked the movement.
+    expect(m.lifted, 'kart artık hiç kalkmıyor').toBe(true);
+    // 0.5px of tolerance and no more: that is sub-pixel rounding, not a gap.
+    expect(m.outside, `${m.outside.toFixed(2)}px dışarıda`).toBeLessThanOrEqual(0.5);
+  });
   test('hayalet kart oluşuyor ve imleci takip ediyor', async ({ page }) => {
     await openWithSample(page);
     const card = page.locator('.pool-card').first();
@@ -855,17 +893,24 @@ test.describe('68. 2+1 bitişikken', () => {
 
   test('üç bitişik hücre TEK blok gibi çizilmiyor — sınır 2. saatten sonra', async ({ page }) => {
     await loadWorld(page, SPLIT_WORLD);
-    for (const h of [0, 1, 2]) await expect(cell(page, h)).toContainText('510');
 
-    // `block-cont` is on the cell that runs INTO the next one and `block-in` on
-    // the one it runs into. The double covers hours 0-1, so hour 0 continues,
-    // hour 1 is its second half, and hour 2 begins the single on its own.
-    // Plain adjacency — what this used to be — would have said all three.
-    await expect(cell(page, 0)).toHaveClass(/block-cont/);
-    await expect(cell(page, 1)).toHaveClass(/block-in/);
-    await expect(cell(page, 1)).not.toHaveClass(/block-cont/);
-    await expect(cell(page, 2)).not.toHaveClass(/block-cont/);
-    await expect(cell(page, 2)).not.toHaveClass(/block-in/);
+    // Since 2026-08-27 a two-hour block is ONE cell spanning two columns, so
+    // the boundary this test is about is now visible in the DOM itself: the
+    // double is one <td> that stands for hours 0-1, and the single is its own
+    // <td> at hour 2. Hour 1 has no cell of its own — it is inside the wide one.
+    await expect(cell(page, 0)).toHaveAttribute('colspan', '2');
+    await expect(cell(page, 0)).toHaveClass(/block-wide/);
+    await expect(cell(page, 0)).toContainText('510');
+    await expect(cell(page, 1)).toHaveCount(0);
+    await expect(cell(page, 2)).toContainText('510');
+    await expect(cell(page, 2)).not.toHaveAttribute('colspan', '2');
+    await expect(cell(page, 2)).not.toHaveClass(/block-wide/);
+
+    // TWO cards for three adjacent hours, which is the whole claim: plain
+    // adjacency would have drawn one card three hours wide.
+    await expect(page.locator('tr:has(td[data-row="oMC"]) .card')).toHaveCount(2);
+    // …and the label is written ONCE per block, not once per hour.
+    expect((await cell(page, 0).innerText()).match(/510/g) ?? []).toHaveLength(1);
   });
 
   test('sağ tık tek saatlik bloğu alıyor, koşunun tamamını değil', async ({ page }) => {
@@ -873,7 +918,7 @@ test.describe('68. 2+1 bitişikken', () => {
     await cell(page, 2).click({ button: 'right' });
 
     await expect(cell(page, 0)).toContainText('510');
-    await expect(cell(page, 1)).toContainText('510');
+    await expect(cell(page, 0)).toHaveAttribute('colspan', '2');
     await expect(cell(page, 2)).toHaveText('');
     // …and what came back is a ONE-hour card, not the whole lesson.
     const back = page.locator('.pool-card');
@@ -881,12 +926,19 @@ test.describe('68. 2+1 bitişikken', () => {
     expect(await back.getAttribute('data-size')).toBe('1');
   });
 
-  test('sağ tık ikili bloğun ikinci saatinden de İKİ hücre alıyor', async ({ page }) => {
+  test('sağ tık ikili bloğun İKİNCİ saatine denk gelse de İKİ hücre alıyor', async ({ page }) => {
     await loadWorld(page, SPLIT_WORLD);
-    await cell(page, 1).click({ button: 'right' });
+
+    // Hour 1 no longer has a cell of its own, so the click is aimed at WHERE IT
+    // IS ON SCREEN: the right-hand half of the wide cell. That is the gesture
+    // this test was always about — the reader points at the second hour of a
+    // double — and the merge must not have turned it into a miss.
+    const box = (await cell(page, 0).boundingBox())!;
+    await page.mouse.click(box.x + box.width * 0.75, box.y + box.height / 2, {
+      button: 'right',
+    });
 
     await expect(cell(page, 0)).toHaveText('');
-    await expect(cell(page, 1)).toHaveText('');
     await expect(cell(page, 2)).toContainText('510');
     const back = page.locator('.pool-card');
     await expect(back).toHaveCount(1);

@@ -35,7 +35,13 @@ export interface RowOrder {
   bodyRef: (node: HTMLTableSectionElement | null) => void;
   /** For ListTools, so a keyboard move is spoken rather than only seen. */
   notice: string;
-  /** The handle cell. `name` is what the row is called out loud. */
+  /**
+   * The two leading <th>s, so the head and the body cannot drift apart. Every
+   * list that draws `grip()` draws this, and neither is written out by hand in
+   * four files any more.
+   */
+  head: ReactElement;
+  /** The number cell and the handle cell. `name` is what the row is called out loud. */
   grip: (index: number, name: string) => ReactElement;
 }
 
@@ -75,8 +81,29 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
   // being told, so the teardown also lives here.
   useEffect(() => () => detach.current?.(), []);
 
+  const head = (
+    <>
+      {/* "Liste görünümünde de en solda sıralamaya göre sıra sıra sayılar
+          olsun." Its heading is a bare # rather than "Sıra": the column is
+          three characters wide and a word in it would set its floor. */}
+      <th className="row-no-col" title="Sıra">
+        #
+      </th>
+      {/* The handle gets a column of its own: squeezed in beside something
+          else, half of it belongs to the neighbour (pitfall 47). */}
+      <th className="grip-col" />
+    </>
+  );
+
   const grip = useCallback(
     (index: number, name: string) => (
+      <>
+      {/* The number the reader SEES, not the index in the array: under a sort
+          or a filter the third row on screen is the third row on screen, and a
+          column quietly counting something else would be worse than no column.
+          It is also why this is not `aria-label`ed as a position — the handle
+          beside it already says the row's real place in the list. */}
+      <td className="row-no">{index + 1}</td>
       <td className="grip-col">
         <button
           type="button"
@@ -100,9 +127,10 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
           <GripVertical size={16} aria-hidden="true" focusable="false" />
         </button>
       </td>
+      </>
     ),
     [locked, move],
   );
 
-  return { bodyRef, notice, grip };
+  return { bodyRef, notice, head, grip };
 }

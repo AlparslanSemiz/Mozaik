@@ -6,7 +6,7 @@
  * feeling like one program. All of the actual work is in `src/listview.ts` —
  * this draws controls and reports what was chosen.
  */
-import { Search, X } from 'lucide-react';
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, X } from 'lucide-react';
 import { canReorder, facetCounts, isFiltering } from '../listview';
 import type { ListConfig, ListQuery } from '../listview';
 
@@ -26,6 +26,7 @@ interface Props<T> {
    */
   notice?: string;
 }
+
 
 export default function ListTools<T>({
   items,
@@ -71,7 +72,10 @@ export default function ListTools<T>({
           <select
             className="sort-pick"
             value={query.sortId}
-            onChange={(e) => setQuery({ ...query, sortId: e.target.value })}
+            // Choosing a NEW sort starts it the way its own label reads:
+            // "Ders yüküne göre (çok → az)" that opened reversed would be a
+            // menu whose entries do not describe what they do.
+            onChange={(e) => setQuery({ ...query, sortId: e.target.value, desc: false })}
           >
             {/* Entry order is a real answer and the DEFAULT one: it is the
                 order they were typed in, which is the order the reader
@@ -85,6 +89,36 @@ export default function ListTools<T>({
             ))}
           </select>
         </label>
+
+        {/* "sıralamanın yanına aşağı ya da yukarı diye ayrı bir tuş koyalım ki
+            o filtreye göre aşağı ya da yukarı olsun." Beside the menu and not
+            in it, so five options stay five.
+
+            Disabled with no sort chosen rather than hidden: a control that
+            appears and disappears beside a menu moves the menu, and there is
+            nothing to reverse in "Girildiği sıra" — that order is the list
+            itself, and turning it upside down is what the drag handles are
+            for. Its NAME says what pressing it will do, not what is currently
+            true, because that is the question a reader asks of a button. */}
+        <button
+          className="btn"
+          disabled={query.sortId === ''}
+          aria-label={query.desc ? 'Artan sıraya al' : 'Azalan sıraya al'}
+          title={
+            query.sortId === ''
+              ? 'Önce bir sıralama seçin'
+              : query.desc
+                ? 'Şu an tersten sıralı — düz sıraya almak için tıklayın'
+                : 'Şu an düz sıralı — tersten sıralamak için tıklayın'
+          }
+          onClick={() => setQuery({ ...query, desc: !query.desc })}
+        >
+          {query.desc ? (
+            <ArrowUpNarrowWide size={16} strokeWidth={2} aria-hidden="true" />
+          ) : (
+            <ArrowDownWideNarrow size={16} strokeWidth={2} aria-hidden="true" />
+          )}
+        </button>
 
         <span className="spacer" />
 
@@ -126,11 +160,27 @@ export default function ListTools<T>({
       </div>
 
       {/* One chip row per axis. Each is its own `role="group"` with its own
-          name, so "Branş" and "Cinsiyet" cannot be read as one long row. */}
+          name, so "Branş" and "Öğretmen" cannot be read as one long row.
+
+          CHIPS AT EVERY COUNT, and that is a measurement rather than a
+          preference. A dropdown fallback was written here for "too many
+          groups" and then the groups were measured, on the sample school, in
+          the box they actually live in:
+
+            110 %   12 branş · 25 öğretmen · 20 sınıf   all ONE line, 28 px
+            150 %   the same three                      all ~2 lines, 81 px
+
+          The chips are short forms — "MÇ 4", "510 6" — so the count barely
+          moves the row. There was no cliff to fall off, and the fallback's only
+          real effect was to turn the one filter the reader already uses into a
+          box that hides its own numbers. */}
       {facets.map((facet) => {
         const counts = facetCounts(items, query, config, facet.id);
         if (counts.length < 2) return null;
         const chosen = query.facets[facet.id] ?? '';
+        const pick = (value: string) =>
+          setQuery({ ...query, facets: { ...query.facets, [facet.id]: value } });
+
         return (
           <div className="chips" key={facet.id} role="group" aria-label={facet.label}>
             {counts.map((f) => (
@@ -138,15 +188,7 @@ export default function ListTools<T>({
                 key={f.value}
                 className="chip"
                 aria-pressed={chosen === f.value}
-                onClick={() =>
-                  setQuery({
-                    ...query,
-                    facets: {
-                      ...query.facets,
-                      [facet.id]: chosen === f.value ? '' : f.value,
-                    },
-                  })
-                }
+                onClick={() => pick(chosen === f.value ? '' : f.value)}
               >
                 {f.value}
                 <span className="chip-count">{f.count}</span>

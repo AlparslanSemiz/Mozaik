@@ -73,14 +73,21 @@ export interface TeacherRow {
   short: string;
   subject: string;
   gender: Gender;
+  /** The teacher's other subject, or '' — see `Teacher.subject2`. */
+  subject2: string;
 }
 
 /**
- * Columns: Ad · Kısaltma · Branş · Cinsiyet
+ * Columns: Ad · Kısaltma · Branş · Cinsiyet · İkinci branş
  *
- * The fourth column arrived after the first three and stays OPTIONAL: a list
- * pasted from the old three-column shape reads `undefined` there, which
- * `parseGender` turns into "not stated". Nobody has to re-paste anything.
+ * Columns four and five each arrived after the ones before them and each stays
+ * OPTIONAL: a list pasted in the old three- or four-column shape reads
+ * `undefined` there, which becomes "not stated" and "no second subject".
+ * Nobody has to re-paste anything.
+ *
+ * The second subject is APPENDED rather than slotted in beside the first,
+ * which would read better and would silently turn every existing four-column
+ * paste into a list of teachers whose second subject is "Erkek".
  */
 export function parseTeachers(text: string): ParseResult<TeacherRow> {
   const accepted: TeacherRow[] = [];
@@ -100,6 +107,7 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
       short: (cells[1] ?? '') || makeShort(name),
       subject,
       gender: parseGender(cells[3] ?? ''),
+      subject2: cells[4] ?? '',
     });
   }
   return { accepted, errors };

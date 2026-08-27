@@ -5,11 +5,19 @@
 // the result. Now the trigger shows the colour it IS, and opening it shows all
 // thirty-six at once.
 //
-// The index has not gone away, and that is deliberate: it is what `State`
-// stores, what a backup file carries and what the "two teachers share a
-// colour" question is asked in. It stays legible ON the swatch — pitfall 15
-// and 35: the palette does not flip with the theme, so its ink must not either
-// (--on-color), or the number vanishes on the pale rows in dark mode.
+// The index is NOT DRAWN on the swatch any more — "Renklerin üzerinde sayılar
+// olmasın", 2026-08-27, and the reader is right: the number was there to make
+// the old <select> legible, and once the control shows the colour it IS, a
+// digit printed over it is a second answer to a question already answered.
+// Twenty-five rows of numbered squares also read as a ranking, which they are
+// not.
+//
+// It has not gone away, only gone quiet: the index is still what `State`
+// stores, what a backup carries and what "do two teachers share a colour" is
+// asked in, and it is still the swatch's ACCESSIBLE NAME ("Renk 12"). So a
+// screen reader and every test can still say which one is which, and the
+// --on-color ink rule (pitfalls 15 and 35) stays in force for the cards and
+// the grid, which do still carry text on a palette ground.
 //
 // A <dialog> and showModal(), per the design rule; window.prompt and friends
 // are banned. It is mounted only while open, so twenty-five teachers do not
@@ -44,12 +52,12 @@ export default function ColorPick({ value, owner, onChange }: Props) {
         type="button"
         className="color-pick"
         style={{ background: paletteColor(value) }}
-        aria-label={`${owner} rengi`}
-        title="Renk"
+        // The index rides in the NAME now that it is off the face of the
+        // swatch: "MÇ rengi" alone could not tell two teachers apart out loud.
+        aria-label={`${owner} rengi: ${value + 1}`}
+        title={`Renk ${value + 1}`}
         onClick={() => setOpen(true)}
-      >
-        {value + 1}
-      </button>
+      />
 
       {open && (
         <dialog
@@ -76,9 +84,7 @@ export default function ColorPick({ value, owner, onChange }: Props) {
                 aria-label={`Renk ${i + 1}`}
                 aria-pressed={i === value}
                 onClick={() => choose(i)}
-              >
-                {i + 1}
-              </button>
+              />
             ))}
           </div>
           <p className="hint">

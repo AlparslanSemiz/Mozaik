@@ -24,6 +24,7 @@ import type {
   Teacher,
 } from './types';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
+import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './subjects';
 import { SCHEMA_VERSION } from './types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1
@@ -212,9 +213,9 @@ export const DEFAULT_SUBJECT_SHORTS: Record<string, string> = {
 };
 
 /** Lookup key: the user types "matematik" as readily as "Matematik". */
-export function subjectKey(subject: string): string {
-  return subject.trim().toLocaleLowerCase('tr');
-}
+// Re-exported so call sites keep saying `from '../entities'` — the same shape
+// `constraints.ts` uses for the key builders that live in `keys.ts`.
+export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects };
 
 const DEFAULT_BY_KEY = new Map(
   Object.entries(DEFAULT_SUBJECT_SHORTS).map(([name, short]) => [subjectKey(name), short]),
@@ -257,12 +258,19 @@ export function setSubjectShort(d: State, subject: string, value: string): State
   return { ...d, settings: { ...d.settings, subjectShorts: next } };
 }
 
-/** The distinct subjects actually taught, in the order the teachers were added. */
+/**
+ * The distinct subjects actually taught, in the order the teachers were added.
+ *
+ * BOTH of a teacher's subjects count: the second one is taught by somebody, so
+ * a Branş dropdown that could not show it would silently rewrite a teacher.
+ */
 export function usedSubjects(d: State): string[] {
   const seen = new Map<string, string>();
   for (const t of d.teachers) {
-    const key = subjectKey(t.subject);
-    if (key !== '' && !seen.has(key)) seen.set(key, t.subject.trim());
+    for (const name of teacherSubjects(t)) {
+      const key = subjectKey(name);
+      if (!seen.has(key)) seen.set(key, name);
+    }
   }
   return [...seen.values()];
 }
@@ -287,10 +295,16 @@ export function subjectOptions(d: State): string[] {
   return [...seen.values()];
 }
 
-/** How many teachers carry this subject. Deleting one is refused while > 0. */
+/**
+ * How many teachers carry this subject. Deleting one is refused while > 0.
+ *
+ * A SECOND subject counts exactly as much as a first: leaving it out would let
+ * "Edebiyat" be deleted out from under the person who teaches it, and the
+ * lesson pointing at it would then name a subject the school does not have.
+ */
 export function subjectTeachers(d: State, subject: string): Teacher[] {
   const key = subjectKey(subject);
-  return d.teachers.filter((t) => subjectKey(t.subject) === key);
+  return d.teachers.filter((t) => teacherSubjects(t).some((s) => subjectKey(s) === key));
 }
 
 /** No duplicates, no blanks — the same name twice would be two dropdown rows. */
@@ -416,11 +430,14 @@ export function deleteRoom(d: State, id: Id): State {
 
 export function addTeacher(
   d: State,
-  // `gender` is OPTIONAL rather than part of the Omit: every caller that
-  // predates it — the add form, the paste rows, a dozen tests — still hands
-  // over three fields, and a required fourth would have made a listing
-  // question into a compile error everywhere.
-  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender'> & { gender?: Gender },
+  // `gender` and `subject2` are OPTIONAL rather than part of the Omit: every
+  // caller that predates them — the add form, the paste rows, a dozen tests —
+  // still hands over three fields, and a required fourth would have made a
+  // listing question into a compile error everywhere.
+  fields: Omit<Teacher, 'id' | 'color' | 'limits' | 'gender' | 'subject2'> & {
+    gender?: Gender;
+    subject2?: string;
+  },
 ): State {
   // An empty short form would leave a nameless row in the grid: derive one.
   const short = fields.short.trim() === '' ? makeShort(fields.name) : fields.short;
@@ -429,6 +446,7 @@ export function addTeacher(
     name: fields.name.trim(),
     short: short.trim(),
     subject: fields.subject.trim(),
+    subject2: (fields.subject2 ?? '').trim(),
     gender: fields.gender ?? '',
     color: firstFreeColor(d.teachers.map((x) => x.color)),
     limits: { ...NO_TEACHER_LIMITS },
@@ -484,7 +502,13 @@ export function deleteClass(d: State, id: Id): State {
 
 // ------------------------------------------------------------------- lesson
 
-export function addLesson(d: State, fields: Omit<Lesson, 'id' | 'maxPerDay'>): State {
+export function addLesson(
+  d: State,
+  // `second` is optional for the same reason `gender` is on addTeacher: every
+  // caller that predates it hands over four fields, and the usual answer — the
+  // teacher's only subject — is the one a missing field should mean.
+  fields: Omit<Lesson, 'id' | 'maxPerDay' | 'second'> & { second?: boolean },
+): State {
   const weeklyHours = Math.max(1, Math.round(fields.weeklyHours));
   const created: Lesson = {
     id: newId(),
@@ -492,6 +516,7 @@ export function addLesson(d: State, fields: Omit<Lesson, 'id' | 'maxPerDay'>): S
     teacherId: fields.teacherId,
     weeklyHours,
     pairs: clampPairs(weeklyHours, fields.pairs),
+    second: fields.second === true,
     maxPerDay: null,
   };
   return { ...d, lessons: [...d.lessons, created] };
@@ -667,7 +692,13 @@ const fold = (x: string): string => x.trim().toLocaleLowerCase('tr');
  * teacher whose branch the dropdown cannot show.
  */
 export function addTeachersFromRows(d: State, rows: TeacherRow[]): State {
-  return rows.reduce((acc, row) => addTeacher(addSubject(acc, row.subject), row), d);
+  // BOTH subjects are registered. Missing the second one would leave a teacher
+  // whose other branch the dropdown cannot show — the exact failure this
+  // function exists to prevent, one column further to the right.
+  return rows.reduce(
+    (acc, row) => addTeacher(addSubject(addSubject(acc, row.subject), row.subject2), row),
+    d,
+  );
 }
 
 /**

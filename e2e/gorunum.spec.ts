@@ -54,7 +54,14 @@ async function gridMetrics(page: import('@playwright/test').Page) {
       table: document.querySelector('table.grid')!.getBoundingClientRect().width,
       overflow: wrap.scrollWidth - wrap.clientWidth,
       clock: clock === null ? 'yok' : getComputedStyle(clock).display,
-      cards: cards.length,
+      // Lesson HOURS, not cards: a two-hour block is one card spanning two
+      // columns since 2026-08-27, so counting cards would count blocks — and
+      // "the grid has to be FULL" is a claim about hours. It would give the
+      // same answer if the drawing changed back.
+      cards: cards.reduce(
+        (sum, c) => sum + (Number(c.closest('td')?.getAttribute('colspan')) || 1),
+        0,
+      ),
       // A cell narrow enough to clip the class name would make the whole mode
       // pointless, so the cards are measured, not assumed.
       clipped: cards.filter((c) => c.scrollWidth - c.clientWidth > 0.5).length,
@@ -506,5 +513,73 @@ test.describe('51. Program: programı boşalt', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Programı boşalt' })).toBeDisabled();
+  });
+});
+
+// 81. Density is no longer only the grid's.
+//
+// "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
+//  yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
+//
+// Measured on the sample school at the default scale, Kurulum → Öğretmenler,
+// 2026-08-27:
+//
+//   Ferah    row 65px   9 rows above the fold
+//   Rahat    row 57px  10
+//   Sığdır   row 34px  19        (Sınıflar: 20 of 20 — the whole list)
+//
+// Twenty-five teachers still do not ALL fit, and that is written down rather
+// than tuned away: what is left setting the row's height is the text box in it,
+// and the only thing that would take it lower is a smaller letter. 12px on
+// screen is a floor this program does not cross for a reader who has trouble
+// seeing. So the claim here is the one that is true — each step shows strictly
+// more than the one before it, and none of them shrinks the type.
+test.describe('81. Yoğunluk listelerde de', () => {
+  test('üç basamak listede gerçekten farklı, ve hiçbiri yazıyı küçültmüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+
+    const measure = async () => {
+      await openSetup(page, 'Öğretmenler');
+      return page.evaluate(() => {
+        const main = document.querySelector('.main') as HTMLElement;
+        const rows = [...document.querySelectorAll('.cols > div table.list tbody tr')];
+        const box = main.getBoundingClientRect();
+        const sizes = rows
+          .slice(0, 3)
+          .flatMap((r) => [...r.querySelectorAll('td, td *')])
+          .map((el) => parseFloat(getComputedStyle(el as HTMLElement).fontSize))
+          .filter((n) => Number.isFinite(n) && n > 0);
+        return {
+          height: Math.round(rows[0]!.getBoundingClientRect().height),
+          visible: rows.filter((r) => {
+            const b = r.getBoundingClientRect();
+            return b.top >= box.top && b.bottom <= box.bottom;
+          }).length,
+          smallest: Math.min(...sizes),
+        };
+      });
+    };
+
+    await chooseDensity(page, 'Ferah');
+    const ferah = await measure();
+    await chooseDensity(page, 'Rahat');
+    const rahat = await measure();
+    await chooseDensity(page, 'Sığdır');
+    const sigdir = await measure();
+
+    // Each step is tighter than the one before it — in the LIST, which is the
+    // part of this setting that did not exist until now.
+    expect(sigdir.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(rahat.height);
+    expect(rahat.height, JSON.stringify({ ferah, rahat, sigdir })).toBeLessThan(ferah.height);
+    // ...and the point of it: more of the list at once. Comfortably more, not
+    // one row more — 10 to 19 when this was written.
+    expect(sigdir.visible).toBeGreaterThanOrEqual(rahat.visible + 5);
+
+    // The floor that must survive all of it. What comes out of a row is AIR.
+    for (const [name, m] of [['ferah', ferah], ['rahat', rahat], ['sigdir', sigdir]] as const) {
+      expect(m.smallest, `${name}: ${m.smallest}px`).toBeGreaterThanOrEqual(12);
+    }
   });
 });

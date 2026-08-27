@@ -39,9 +39,15 @@ test.describe('48. Varlık paneli', () => {
     // would pass every other check in this file.
     const fromGrid = await page.evaluate(() => {
       const row = document.querySelector('table.grid tbody tr')!;
-      return [...row.querySelectorAll('td[data-day]')]
-        .map((td) => td.querySelector('.card-top')?.textContent ?? '')
-        .filter((t) => t !== '');
+      return [...row.querySelectorAll('td[data-day]')].flatMap((td) => {
+        const label = td.querySelector('.card-top')?.textContent ?? '';
+        if (label === '') return [];
+        // A two-hour block is ONE cell spanning two columns on the grid but
+        // still two hours in the sheet, so the label is repeated as many times
+        // as the cell stands for. Comparing the raw cells would have compared
+        // blocks against hours and called the panel wrong for being right.
+        return new Array<string>(Number(td.getAttribute('colspan')) || 1).fill(label);
+      });
     });
     const fromSheet = await sheet
       .locator('.sheet-week tbody .sheet-cell-top')

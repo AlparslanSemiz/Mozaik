@@ -94,7 +94,9 @@ export function makeWorld(spec: WorldSpec = {}): State {
     name: t.short,
     short: t.short,
     subject: t.subject ?? 'Matematik',
-    // A synthetic world has no opinion about this, and the solver never asks.
+    // A synthetic world has no opinion about either of these, and the solver
+    // never asks: it places blocks, and a block's subject is a label.
+    subject2: '',
     gender: '' as Gender,
     color: i,
     limits: t.limits ?? { ...NO_TEACHER_LIMITS },
@@ -110,6 +112,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     teacherId: x.teacherId,
     weeklyHours: x.weeklyHours,
     pairs: (x.blockSize ?? 1) >= 2 ? Math.floor(x.weeklyHours / 2) : 0,
+    second: false,
     maxPerDay: x.maxPerDay ?? null,
   }));
 

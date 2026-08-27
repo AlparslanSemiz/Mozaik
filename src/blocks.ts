@@ -25,9 +25,31 @@ export function blockPlan(lesson: Pick<Lesson, 'weeklyHours' | 'pairs'>): number
   return [...Array<number>(pairs).fill(2), ...Array<number>(hours - pairs * 2).fill(1)];
 }
 
-/** "2+2+1" — how a split is written wherever one is shown. */
+/** Past this many terms the sum is folded — see `patternLabel`. */
+const FOLD_AT = 4;
+
+/**
+ * "2+2+1" — how a split is written wherever one is shown.
+ *
+ * Long ones are FOLDED: "adamın 10 saat dersi varsa 1+1+1+1+1… diye gözükmesi
+ * biraz kötü". Ten singles spelled out is nineteen characters that say one
+ * thing, and it is the same nineteen characters for eleven and for twelve — the
+ * shape stops being readable exactly where the number starts to matter. Folded
+ * it is "10×1", and a mixed week is "3×2 + 4×1".
+ *
+ * Short ones are NOT folded, and the threshold is about reading rather than
+ * width: "2+2+1" is a picture of the week — three blocks, one of them short —
+ * and "2×2 + 1×1" is arithmetic about it. Up to four terms the picture wins.
+ */
 export function patternLabel(blocks: number[]): string {
-  return blocks.length === 0 ? '–' : blocks.join('+');
+  if (blocks.length === 0) return '–';
+  if (blocks.length <= FOLD_AT) return blocks.join('+');
+  const pairs = blocks.filter((b) => b === 2).length;
+  const singles = blocks.length - pairs;
+  const parts: string[] = [];
+  if (pairs > 0) parts.push(`${pairs}×2`);
+  if (singles > 0) parts.push(`${singles}×1`);
+  return parts.join(' + ');
 }
 
 /** Every way N hours can be split into 1s and 2s: fewest twos first. */

@@ -29,7 +29,7 @@ describe('parseTeachers', () => {
   it('ad, kısaltma ve branşı okur, başlık satırını atlar', () => {
     const { accepted } = parseTeachers('Ad\tKısaltma\tBranş\nMehmet Çelik\tMÇ\tMatematik');
     expect(accepted).toEqual([
-      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '' },
+      { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', subject2: '' },
     ]);
   });
 

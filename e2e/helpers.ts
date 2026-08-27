@@ -659,3 +659,20 @@ export async function chooseDensity(page: Page, name: 'Ferah' | 'Rahat' | 'Sığ
   await page.getByRole('button', { name: 'Program', exact: true }).click();
   await expect(page.locator('table.grid')).toBeVisible();
 }
+
+/**
+ * How many lesson HOURS are on the grid.
+ *
+ * Not `.card` count, and the difference is the point: since 2026-08-27 a
+ * two-hour block is drawn as ONE card spanning two columns, so counting cards
+ * counts blocks and counting blocks is not what "the school got placed" means.
+ * Every claim about how full the week is asks this instead, and it would give
+ * the same answer if the drawing changed again.
+ */
+export async function placedHours(page: Page): Promise<number> {
+  return page
+    .locator('table.grid td:has(.card)')
+    .evaluateAll((tds) =>
+      tds.reduce((sum, td) => sum + (Number(td.getAttribute('colspan')) || 1), 0),
+    );
+}

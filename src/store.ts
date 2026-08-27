@@ -279,12 +279,17 @@ function migrateV2toV3(raw: LegacyV2): State {
       ),
     },
     rooms: asArray<Room>(raw.rooms, []),
-    teachers: asArray<Omit<Teacher, 'limits' | 'gender'>>(raw.teachers, []).map((x) => ({
-      ...x,
-      // A v1/v2 file cannot carry this and it is not guessed from the name.
-      gender: '' as Gender,
-      limits: { ...NO_TEACHER_LIMITS },
-    })),
+    teachers: asArray<Omit<Teacher, 'limits' | 'gender' | 'subject2'>>(raw.teachers, []).map(
+      (x) => ({
+        ...x,
+        // Neither of these can be in a v1/v2 file, and neither is guessed: a
+        // gender is not read off a name, and a second subject nobody wrote down
+        // is a subject nobody teaches.
+        gender: '' as Gender,
+        subject2: '',
+        limits: { ...NO_TEACHER_LIMITS },
+      }),
+    ),
     classes: asArray<ClassGroup>(raw.classes, []),
     lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
@@ -326,6 +331,9 @@ function readLessons(raw: unknown[], version: number): Lesson[] {
       teacherId: x.teacherId ?? '',
       weeklyHours,
       pairs,
+      // A file below v8 cannot carry this and it is not guessed: every lesson
+      // in it was taught under the teacher's only subject.
+      second: x.second === true,
       maxPerDay: asBox(x.maxPerDay),
     };
   });
@@ -370,13 +378,15 @@ export function parseState(text: string): State | null {
     version === 4 ||
     version === 5 ||
     version === 6 ||
+    version === 7 ||
     version === SCHEMA_VERSION
   ) {
-    // v3..v7 go through ONE reader: v3..v6 only ADD fields — a v3 file arrives
-    // with no subject overrides, a v4 with no class colours and no subject
-    // list, a v5 with no gender — and v7 is the first that CHANGES one, which
-    // `readLessons` below handles on its own. Ids, day indexes and therefore
-    // `unavailable` / `placements` carry over untouched in every case.
+    // v3..v8 go through ONE reader: most of them only ADD fields — a v3 file
+    // arrives with no subject overrides, a v4 with no class colours and no
+    // subject list, a v5 with no gender, a v7 with no second subject — and v7
+    // is the only one that CHANGES one, which `readLessons` below handles on
+    // its own. Ids, day indexes and therefore `unavailable` / `placements`
+    // carry over untouched in every case.
     //
     // Every version below the current one is spelled out ON PURPOSE. Bumping
     // SCHEMA_VERSION without adding the number it used to be makes every backup
@@ -423,6 +433,7 @@ export function parseState(text: string): State | null {
         asArray<Teacher>(g.teachers, blank.teachers).map((t) => ({
           ...t,
           gender: asGender(t.gender),
+          subject2: asText(t.subject2, ''),
           limits: {
             maxConsecutive: asBox(t.limits?.maxConsecutive),
             maxPerDay: asBox(t.limits?.maxPerDay),

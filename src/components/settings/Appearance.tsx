@@ -122,15 +122,17 @@ export default function Appearance({
         </div>
 
         <div className="panel">
-          <h2>Izgara yoğunluğu</h2>
+          <h2>Arayüz yoğunluğu</h2>
           <p className="hint">
-            Üç basamak, ve üçü de aynı şeyi takas ediyor: <b>bir hücrenin
-            büyüklüğü</b> ile <b>ekranda görünen gün sayısı</b>.
+            Üç basamak, ve üçü de aynı şeyi takas ediyor: <b>bir satırın
+            büyüklüğü</b> ile <b>ekranda aynı anda görünen satır sayısı</b>.
+            Program ızgarasını da, Kurulum ve Ayarlar’daki listeleri de birlikte
+            etkiler.
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda. En kolay
-              okunan, en çok kaydırılan.
+              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda, liste
+              satırları en açık. En kolay okunan, en çok kaydırılan.
             </li>
             <li>
               <b>Rahat.</b> Bugüne kadarki ızgara: hücre geniş, her ders
@@ -141,11 +143,12 @@ export default function Appearance({
               <b>Sığdır.</b> Haftanın tamamı bir ekranda: hücre ekranın
               genişliğinden hesaplanır ve <b>saatler gizlenir</b>, çünkü sütunu
               dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
-              renkler yerinde kalır.
+              renkler yerinde kalır. Listelerde satır aralığı daralır;{' '}
+              <b>yazı boyutu küçülmez</b>, kısılan şey yalnızca boşluk.
             </li>
           </ul>
 
-          <div className="form-row" role="group" aria-label="Izgara yoğunluğu">
+          <div className="form-row" role="group" aria-label="Arayüz yoğunluğu">
             <button
               className="btn"
               aria-pressed={density === 'ferah'}

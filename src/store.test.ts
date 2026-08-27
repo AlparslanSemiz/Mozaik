@@ -63,7 +63,9 @@ describe('parseState — v1 göçü', () => {
         name: 'Mehmet Çelik',
         short: 'MÇ',
         subject: 'Matematik',
-        // A v1 file cannot carry this; it arrives "not stated", not guessed.
+        // A v1 file cannot carry either of these; they arrive "not stated" and
+        // "no second subject", not guessed.
+        subject2: '',
         gender: '',
         color: 3,
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
@@ -71,7 +73,7 @@ describe('parseState — v1 göçü', () => {
     ]);
     expect(d.classes).toEqual([{ id: 's510', name: '510', roomId: 'dA' }]);
     expect(d.lessons).toEqual([
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 2, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 2, second: false, maxPerDay: null },
     ]);
     // The ids never changed, so the keys carry over untouched.
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
@@ -459,8 +461,8 @@ describe('parseState — v6 → v7 göçü', () => {
     const raw = JSON.parse(JSON.stringify(sampleState()));
     raw.placements = {};
     raw.lessons = [
-      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: 9, maxPerDay: null },
-      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: -3, maxPerDay: null },
+      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: 9, second: false, maxPerDay: null },
+      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: -3, second: false, maxPerDay: null },
       { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, maxPerDay: null },
     ];
     const d = parseState(JSON.stringify(raw))!;
@@ -478,6 +480,77 @@ describe('parseState — v6 → v7 göçü', () => {
     expect(migrated.settings).toEqual(original.settings);
     expect(migrated.placements).toEqual(original.placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
+  });
+});
+
+/** A v7 backup: the shape the previous release wrote — no second subject. */
+function v7Backup() {
+  const raw = JSON.parse(JSON.stringify(sampleState()));
+  raw.schemaVersion = 7;
+  for (const t of raw.teachers) delete t.subject2;
+  for (const x of raw.lessons) delete x.second;
+  return raw;
+}
+
+describe('parseState — v7 → v8 göçü', () => {
+  // The one a version bump breaks silently, and it has now been the same test
+  // three versions running: every backup the PREVIOUS release wrote carries
+  // `schemaVersion: 7`. Take `version === 7` out of the reader's condition and
+  // all of them fall through to `null` — the father's saved timetable simply
+  // stops opening, with no error anywhere.
+  it('BİR ÖNCEKİ sürümün yazdığı v7 dosyası hâlâ açılıyor', () => {
+    const d = parseState(JSON.stringify(v7Backup()));
+    expect(d).not.toBeNull();
+    expect(d!.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d!.teachers).toHaveLength(sampleState().teachers.length);
+    expect(d!.lessons).toHaveLength(sampleState().lessons.length);
+  });
+
+  it('ikinci branşı olmayan öğretmen BOŞ geliyor — tahmin edilmiyor', () => {
+    const d = parseState(JSON.stringify(v7Backup()))!;
+    expect(d.teachers.every((t) => t.subject2 === '')).toBe(true);
+    expect(d.lessons.every((x) => x.second === false)).toBe(true);
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v7Backup()))!;
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
+    expect(migrated.teachers.map((t) => t.subject)).toEqual(
+      original.teachers.map((t) => t.subject),
+    );
+    expect(migrated.lessons.map((x) => x.pairs)).toEqual(original.lessons.map((x) => x.pairs));
+  });
+
+  it('v8 dosyası ikinci branşı KORUYOR, ikinci geçişte de aynı', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.teachers[0].subject2 = 'Edebiyat';
+    raw.lessons[0].second = true;
+    const once = parseState(JSON.stringify(raw))!;
+    const twice = parseState(JSON.stringify(once))!;
+    expect(once.teachers[0]!.subject2).toBe('Edebiyat');
+    expect(once.lessons.find((x) => x.id === raw.lessons[0].id)!.second).toBe(true);
+    expect(twice.teachers[0]!.subject2).toBe('Edebiyat');
+    expect(twice.lessons.find((x) => x.id === raw.lessons[0].id)!.second).toBe(true);
+  });
+
+  // A hand-edited file, or one written before the teacher's second subject was
+  // removed. `sanitize()` runs on every load, so the flag never reaches a screen
+  // pointing at a subject nobody teaches.
+  it('ikinci branşı OLMAYAN hocanın second bayrağı yükleme sırasında siliniyor', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.teachers[0].subject2 = '';
+    raw.lessons[0].second = true;
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.lessons.find((x) => x.id === raw.lessons[0].id)!.second).toBe(false);
+  });
+
+  // Widening the condition must not narrow it.
+  it('v3, v4 ve v6 yedekleri de hâlâ açılıyor', () => {
+    expect(parseState(JSON.stringify(v3Backup()))).not.toBeNull();
+    expect(parseState(JSON.stringify(v4Backup()))).not.toBeNull();
+    expect(parseState(JSON.stringify(v6Backup()))).not.toBeNull();
   });
 });
 

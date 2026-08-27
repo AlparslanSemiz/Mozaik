@@ -922,16 +922,24 @@ test.describe('67. Ders dağılımı', () => {
     await expect(newSplit(page).locator('option')).toHaveText(['1+1+1', '2+1']);
 
     await newHours(page).fill('5');
+    // The first one is FOLDED and the other two are not: past four terms a row
+    // of ones stops being a picture of the week. See `patternLabel`.
     await expect(newSplit(page).locator('option')).toHaveText([
-      '1+1+1+1+1',
+      '5×1',
       '2+1+1+1',
       '2+2+1',
     ]);
 
-    // Three-hour blocks left with v7: every part is a 1 or a 2.
+    // Three-hour blocks left with v7: every part is a 1 or a 2. Read through
+    // BOTH ways a split is written, because "6×1" is the folded form of six
+    // ones and the claim here is about the block LENGTHS, not the notation.
     await newHours(page).fill('6');
     for (const label of await newSplit(page).locator('option').allInnerTexts()) {
-      expect(label.split('+').every((x) => x === '1' || x === '2'), label).toBe(true);
+      const parts = label
+        .split('+')
+        .map((x) => x.trim())
+        .map((x) => (x.includes('×') ? x.split('×')[1]!.trim() : x));
+      expect(parts.every((x) => x === '1' || x === '2'), label).toBe(true);
     }
   });
 

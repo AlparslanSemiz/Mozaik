@@ -15,24 +15,84 @@
 // (user decision — accessibility measurements stay, layout measurements go).
 // What is left is the half that is accessibility and not taste:
 //
-//   READ it   — the index has to be legible ON the palette colour its box is
-//               painted with, in both themes;
+//   NAME it   — the swatch has no text on it any more ("Renklerin üzerinde
+//               sayılar olmasın", 2026-08-27), so the index has to be in its
+//               ACCESSIBLE NAME instead. That is not a downgrade of the old
+//               requirement, it is the same requirement asked of the thing that
+//               still answers it: something has to be able to say WHICH colour
+//               a row has, and now that something is the name.
 //   CHOOSE    — and the thirty-six have to be visible AS colours,
 //               distinguishable, and actually applied.
+//   INK       — pitfall 15 and 35 have not gone anywhere: wherever text still
+//               sits on a palette ground it must be --on-color ink, or the pale
+//               half of the palette goes unreadable in dark mode. The swatches
+//               stopped being such a place, so that measurement MOVED rather
+//               than died — to the cards on the grid and in the tray, which are
+//               where palette-coloured text actually lives now.
 //
 // The palette's own contrast is not re-measured here — `palette.test.ts`
 // already proves all 36 clear 4.5:1 against --on-color on every run. What that
 // unit test cannot know is whether the token reaches the element.
 
 import { expect, test } from './kapan';
-import { openSetup, openWithSampleTheme, contrast, deltaE, tokens } from './helpers';
+import {
+  openSetup,
+  openWithSampleTheme,
+  contrast,
+  deltaE,
+  dragAndDrop,
+  tokens,
+} from './helpers';
 
 const STEPS = ['Öğretmenler', 'Sınıflar'] as const;
 
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`renk seçici — ${theme}`, () => {
+
+  // Where palette-coloured TEXT actually lives now that the swatches carry
+  // none: the card on the grid and the card in the tray. This is pitfall 15 and
+  // 35's guard, moved rather than dropped — `.card` and `.pool-card` paint
+  // their ground from PALETTE (the same 36 in both themes) and their ink from
+  // --on-color, and the day somebody writes `color: inherit` on either of them
+  // the pale half of the palette goes unreadable in dark mode with nothing to
+  // show for it. `palette.test.ts` proves the 36 clear 4.5:1 against the token;
+  // only a real page can say whether the token reaches the element.
+  test(`kart mürekkebi palet zemininde okunuyor — ${theme}`, async ({ page }) => {
+    await openWithSampleTheme(page, theme);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+    // The sample school arrives UNPLACED — 367 cards in the tray, 0 on the
+    // grid — so one has to be put down before there is a grid card to measure.
+    // Measuring only the tray would leave `.card`'s own rule unguarded, and
+    // `.card` and `.pool-card` are two different rules that have to agree.
+    await dragAndDrop(page);
+    await expect(page.locator('table.grid .card').first()).toBeVisible();
+
+    const ink = (await tokens(page, ['--on-color']))['--on-color'];
+
+    for (const sel of ['table.grid .card', '.pool-card']) {
+      const cards = page.locator(sel);
+      expect(await cards.count(), `${sel} hiç çizilmemiş`).toBeGreaterThan(0);
+      const measured = await cards.evaluateAll((nodes) =>
+        nodes.slice(0, 40).map((node) => {
+          const style = getComputedStyle(node as HTMLElement);
+          return { text: (node.textContent ?? '').trim(), ink: style.color, bg: style.backgroundColor };
+        }),
+      );
+      for (const c of measured) {
+        expect(c.text, `${sel} boş çizilmiş`).not.toBe('');
+        expect(c.ink, `${sel} "${c.text}" mürekkebi --on-color değil`).toBe(ink);
+        expect(
+          contrast(c.ink, c.bg),
+          `${sel} "${c.text}" okunmuyor`,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
     for (const step of STEPS) {
-      test(`${step}: seçili rengin üstündeki mürekkep okunuyor`, async ({ page }) => {
+      test(`${step}: swatch üstünde YAZI YOK ama hangi renk olduğunu SÖYLÜYOR`, async ({
+        page,
+      }) => {
         await openWithSampleTheme(page, theme);
         await openSetup(page, step);
 
@@ -40,26 +100,31 @@ for (const theme of ['light', 'dark'] as const) {
         await expect(picks.first()).toBeVisible();
         expect(await picks.count()).toBeGreaterThan(10);
 
-        const ink = (await tokens(page, ['--on-color']))['--on-color'];
         const measured = await picks.evaluateAll((nodes) =>
-          nodes.map((node) => {
-            const style = getComputedStyle(node as HTMLElement);
-            return {
-              label: node.textContent ?? '',
-              ink: style.color,
-              swatch: style.backgroundColor,
-            };
-          }),
+          nodes.map((node) => ({
+            text: (node.textContent ?? '').trim(),
+            name: node.getAttribute('aria-label') ?? '',
+            swatch: getComputedStyle(node as HTMLElement).backgroundColor,
+          })),
         );
 
         for (const cell of measured) {
-          // Pitfall 15 and 35: a palette ground needs palette ink. `color:
-          // inherit` puts light theme ink on a pastel and the index vanishes.
-          expect(cell.ink, `"${cell.label}" mürekkebi --on-color değil`).toBe(ink);
+          // What the reader asked for: the number is off the colour.
+          expect(cell.text, 'swatch üstünde hâlâ yazı var').toBe('');
+          // ...and what must not have gone with it. The index is what `State`
+          // stores and what "iki öğretmen aynı renkte mi" is asked in, so a
+          // swatch that cannot say which one it is would leave that question
+          // with no answer at all for anyone not looking at the pixels.
+          expect(cell.name, 'swatch hangi renk olduğunu söylemiyor').toMatch(/rengi: \d+$/);
           // The swatch is a palette colour and must not have been flattened to
           // a theme surface by some later rule.
-          expect(contrast(cell.ink, cell.swatch)).toBeGreaterThanOrEqual(4.5);
+          expect(cell.swatch).not.toBe('rgba(0, 0, 0, 0)');
         }
+
+        // Twenty-five rows, twenty-five different names: the colour is an
+        // IDENTITY, and a name that repeats would hide two teachers sharing one.
+        const names = measured.map((c) => c.name);
+        expect(new Set(names).size, 'iki satırın adı aynı').toBe(names.length);
       });
 
       test(`${step}: otuz altı rengin hepsi GÖRÜNÜYOR ve seçilebiliyor`, async ({ page }) => {
@@ -85,15 +150,13 @@ for (const theme of ['light', 'dark'] as const) {
           })),
         );
 
-        // A colour, not a number: every square is painted, no two the same, and
-        // the index on it stays readable because the palette does not flip with
-        // the theme and its ink must not either (pitfall 15 and 35).
+        // A colour, not a number: every square is painted and no two the same.
+        // Each still SAYS which index it is — that is how it is chosen from the
+        // keyboard and how the click below finds one.
         expect(new Set(grid.map((s) => s.colour)).size).toBe(36);
-        const ink = (await tokens(page, ['--on-color']))['--on-color'];
         for (const s of grid) {
           expect(s.colour).not.toBe('rgba(0, 0, 0, 0)');
-          expect(s.ink, `${s.label} mürekkebi --on-color değil`).toBe(ink);
-          expect(contrast(s.ink, s.colour), `${s.label} okunmuyor`).toBeGreaterThanOrEqual(4.5);
+          expect(s.label, 'swatch adsız').toMatch(/^Renk \d+$/);
         }
         // Exactly one is marked as the current choice — a grid that marks none
         // cannot tell you what you already have.
@@ -103,7 +166,8 @@ for (const theme of ['light', 'dark'] as const) {
         // first row started on that the change cannot be a rounding artefact.
         await dialog.getByRole('button', { name: 'Renk 30', exact: true }).click();
         await expect(dialog).toBeHidden();
-        await expect(first).toHaveText('30');
+        // The trigger carries no text now, so what is checked is what it SAYS.
+        await expect(first).toHaveAttribute('aria-label', /rengi: 30$/);
 
         const after = await first.evaluate((el) => getComputedStyle(el).backgroundColor);
         expect(deltaE(before, after), 'renk değişmedi').toBeGreaterThan(10);

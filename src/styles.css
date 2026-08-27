@@ -1047,6 +1047,27 @@ textarea {
   cursor: default;
 }
 
+/* "There could be something here." A dashed edge and muted ink, because this
+   button appears once per row in a list of twenty-five and almost every one of
+   them will be left alone: at full weight the column would read as twenty-five
+   things still to do. It is a real button, not a hint — so the border and the
+   focus ring stay, and only the VOLUME comes down. */
+.btn.subtle {
+  border-style: dashed;
+  border-color: var(--hairline);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-3);
+}
+
+.btn.subtle:hover:not(:disabled) {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--text);
+}
+
 .btn.primary {
   background: linear-gradient(180deg,
     color-mix(in oklab, #fff 8%, var(--accent)) 0%,
@@ -1534,6 +1555,74 @@ table.grid thead tr:nth-child(2) th {
   );
 }
 
+
+/* ------------------------------- Density is no longer only the grid's
+   "genel anlamda görünümü biraz daha sıkı, ferah sığdır şeklinde gibi
+   yapabilirsin her yer için. babam tek seferde tüm listeleri görmek istiyor."
+
+   The switch existed and moved one table. What the reader wants from it is the
+   thing it was never wired to: twenty-five teachers, twenty classes and
+   ninety-nine lessons on screen without scrolling down.
+
+   Only the BLOCK padding is touched, never the inline. `th.grip-col` and
+   `td.row-no` set their own left and right to reclaim table width (see
+   pitfall 34), and those rules carry the same specificity as these — a
+   `padding` shorthand here would silently win by coming later in the file and
+   hand the handle column its padding back.
+
+   The 12px floor on screen text is NOT crossed: nothing here changes a font
+   size. What comes out is air, and air is the right thing to spend. */
+:root[data-density='ferah'] table.list th,
+:root[data-density='ferah'] table.list td,
+:root[data-density='ferah'] table.stat th,
+:root[data-density='ferah'] table.stat td {
+  padding-block: 9px;
+}
+
+:root[data-density='sigdir'] table.list th,
+:root[data-density='sigdir'] table.list td,
+:root[data-density='sigdir'] table.stat th,
+:root[data-density='sigdir'] table.stat td {
+  padding-block: 1px;
+}
+
+/* The row's real floor is the CONTROL in it, not the cell around it: a text box
+   at .25rem top and bottom is taller than a 1px cell. Measured on the teacher
+   list, and it is why trimming the cell alone bought almost nothing. */
+:root[data-density='sigdir'] .main input,
+:root[data-density='sigdir'] .main select,
+:root[data-density='sigdir'] .main textarea,
+:root[data-density='sigdir'] .main .btn {
+  padding-block: var(--space-1);
+  /* The leading, not the SIZE. A control's height is its line box plus its
+     padding, and once the padding is at 2px the line box is what is left —
+     --lh-base to --lh-tight is the last thing that can come out of a row
+     without making a letter smaller, and 12px on screen is a floor this
+     program does not cross. */
+  line-height: var(--lh-tight);
+}
+
+:root[data-density='ferah'] .main input,
+:root[data-density='ferah'] .main select,
+:root[data-density='ferah'] .main textarea {
+  padding-block: var(--space-3);
+}
+
+/* The sheet the list sits on, and the strip above it. A panel at --space-6 top
+   and bottom is 48px of margin around a table whose whole complaint is that it
+   does not fit. */
+:root[data-density='sigdir'] .main .panel {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+:root[data-density='sigdir'] .main .list-tools {
+  gap: var(--space-2);
+}
+
+:root[data-density='ferah'] .main .panel {
+  padding: var(--space-7);
+}
 /* A thick separator between days — so the eye can navigate 84 columns.
    Asked to be clearer (2026-08-26, "günlerin arasındaki boşluk veya fark biraz
    daha belli olmalı") and it got its OWN token rather than a bigger number on
@@ -1626,9 +1715,24 @@ table.grid tbody td {
   padding: 1px;
 }
 
-/* A block is one object across two hours: the halves lose the corners that
-   face each other and the air between them, and the faded rule that already
-   marked the join is all that is left of the boundary. */
+/* A two-hour block is ONE card across two columns.
+   "blok 2 saatlik olarak duruyorsa o iki farklı kart değil TEK kart olarak
+   gözükmeli, büyükçe kart olarak." Nothing here makes the cell wide — the
+   `colSpan` in Grid.tsx does that — so what is left is the SIZE of what is in
+   it: a card with twice the room can say its name at the next step up the
+   ladder instead of at the size a 34px cell forced on it.
+
+   The bottom line is left where it is: it is the room letter or the subject
+   short, a second-order fact, and growing both would just be zoom. */
+table.grid tbody td.block-wide .card-top {
+  font-size: var(--fs-sm);
+}
+
+/* The two-card drawing has NOT gone away — a block whose two hours straddle the
+   lunch break still uses it, because the separator column between them cannot
+   be swallowed by a colSpan (pitfall 13, and see Grid.tsx). There the halves
+   lose the corners that face each other and the air between them, and the faded
+   rule that already marked the join is all that is left of the boundary. */
 td.block-cont {
   padding-right: 0;
 }
@@ -1710,9 +1814,8 @@ table.grid tbody td.unavailable {
   color: var(--on-color-sub);
 }
 
-/* Block display: rowspan is NOT used (a bug factory in a dynamic table).
-   The label repeats in every cell, like the aSc screen he is used to; that the
-   block is one piece is shown by the faded separator between the cells. */
+/* rowspan is still NOT used (a bug factory in a dynamic table): the merge above
+   is a colSpan across HOURS, which is the axis a block actually runs along. */
 td.block-cont {
   border-right-color: var(--block-cont);
 }
@@ -1993,7 +2096,20 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  padding: 0 var(--space-3) var(--space-3);
+  /* The top is NOT zero, and the 3px is not a taste.
+     "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
+      çekmecenin altına kaçıyorlar."
+     Measured: the first row of cards sat flush against this box's top edge,
+     hover lifts a card by --slide/4 (2.2px at the default scale) and draws a
+     2px outline 1px outside it — so 5.2px of the card was above the scroll
+     box, and `overflow-y: auto` cut it off. The lift is DERIVED from the same
+     token the transform uses, so it follows the scale and it goes to zero with
+     the motion setting; the 3px is the outline and its offset, which do not,
+     and the 4th pixel is sub-pixel slack — with exactly 3 the card's painted
+     edge came out 0.0125px above the box, because the lift resolves to
+     2.2000122 rather than 2.2. Measured, the same way pitfall 37 measured the
+     grid's two pixels of column-border rounding. */
+  padding: calc(var(--slide) / 4 + 4px) var(--space-3) var(--space-3);
 }
 
 /* Closed, the COUNT stays: down the right it had to go because a 40px column
@@ -2842,8 +2958,17 @@ table.list td > select.split-pick,
    So the right-hand column becomes a SIDEBAR — the shape `.narrow-right`
    already uses — and the list takes what is left. Measured at 1920, scale 1.1:
    left 1185 -> 1414 px, teacher table overflow 106 -> 0. */
+/* 24rem -> 20rem, and the number is MEASURED rather than trimmed by feel: with
+   the sidebar forced to `min-content` its two panels come out at 19.94rem at
+   every scale (they are rem-sized, so the figure is scale-invariant). The
+   remaining 4rem was blank in every screenshot — exactly what the paragraph
+   above says the right-hand column must not hold — and the teacher list needed
+   it: an eleventh and twelfth column (İkinci branş, sıra numarası) put the
+   table 106 px over its box at 125 %.
+   19rem stays the floor, so this is a ceiling coming down onto the floor, not
+   a new constraint. */
 .cols.wide-left {
-  grid-template-columns: minmax(0, 1fr) minmax(19rem, 24rem);
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 20rem);
 }
 
 .cols.narrow-right {
@@ -4413,6 +4538,23 @@ table.list td.grip-col {
   padding-left: 0;
   padding-right: 0;
   text-align: center;
+}
+
+/* The row's place in what is on screen. Right-aligned and tabular, so ten
+   sits under nine rather than beside it; muted, because it is a landmark for
+   the eye and never the row's content. Its width is in `ch` of the BODY —
+   three digits' worth — for the reason pitfall 34 spells out: a width given to
+   the <th> is measured in the heading's smaller ch and comes out narrower than
+   the number it has to hold. */
+table.list th.row-no-col,
+table.list td.row-no {
+  width: 3ch;
+  padding-left: 0;
+  padding-right: var(--space-1);
+  text-align: right;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-sm);
 }
 
 .row-grip {

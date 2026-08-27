@@ -23,7 +23,7 @@ import {
 } from '../constraints';
 import type { Index } from '../constraints';
 import { useToast } from './Toasts';
-import { subjectShort } from '../entities';
+import { lessonSubject, subjectShort, teacherSubjects } from '../entities';
 import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
 import type { SolverRun } from '../useSolver';
@@ -169,7 +169,9 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
         id: t.id,
         kind: 'teacher' as const,
         name: t.short,
-        secondary: t.subject,
+        // Both, because this line IS the teacher — the cells in the row each
+        // name the one subject their own lesson is taught under.
+        secondary: teacherSubjects(t).join(' · '),
         color: t.color,
         cells,
         closed,
@@ -190,11 +192,14 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
 
         const lessonId = d.placements[placementKey(group.id, g, s)];
         if (lessonId === undefined) continue;
-        const teacher = ix.teacherById.get(ix.lessonById.get(lessonId)?.teacherId ?? '');
+        const lesson = ix.lessonById.get(lessonId);
+        const teacher = ix.teacherById.get(lesson?.teacherId ?? '');
         cells[i] = {
           lessonId,
           top: teacher?.short ?? '?',
-          bottom: teacher === undefined ? '' : subjectShort(d.settings, teacher.subject),
+          // The LESSON's subject, not the teacher's first one: a teacher who
+          // holds two is in this class for exactly one of them.
+          bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
           color: teacher?.color ?? 0,
           conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
           continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
@@ -264,7 +269,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
         row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
         top: teacherView ? className : teacherShort,
         bottom: teacherView ? teacherShort : className,
-        subject: teacher?.subject ?? '',
+        subject: lessonSubject(d, lesson),
         // The card keeps the TEACHER's colour in both views: a cell is always
         // painted by its teacher, so this is what the card will look like.
         color: teacher?.color ?? 0,
@@ -407,9 +412,7 @@ export default function Program({ state, change, solver, view }: Props) {
           top: teacherView ? (group?.name ?? '?') : (teacher?.short ?? '?'),
           bottom: teacherView
             ? roomLetter(ix, group?.roomId)
-            : teacher === undefined
-              ? ''
-              : subjectShort(state.settings, teacher.subject),
+            : subjectShort(state.settings, lessonSubject(state, lesson)),
           color: teacher?.color ?? 0,
         },
       );

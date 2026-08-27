@@ -193,7 +193,7 @@ export default function Subjects({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th className="grip-col" />
+                {order.head}
                 <th>Branş</th>
                 <th className="w-col-lg">Kısaltma</th>
                 <th className="num">
@@ -225,7 +225,16 @@ export default function Subjects({ state, change }: PanelProps) {
                     state={state}
                     change={change}
                     inList={false}
-                    grip={<td className="grip-col" />}
+                    // No number and no handle: these rows are not IN the
+                    // ordered list, so numbering them would count a sequence
+                    // they are not part of. Two empty cells keep the columns
+                    // lined up with the table above.
+                    grip={
+                      <>
+                        <td className="row-no" />
+                        <td className="grip-col" />
+                      </>
+                    }
                     onRemove={() => remove(subject)}
                   />
                 ))}

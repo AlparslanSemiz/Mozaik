@@ -5,6 +5,7 @@
 
 import { blockPlan, clampPairs } from './blocks';
 import { closedKey, placementKey, teacherKey } from './keys';
+import { hasTwoSubjects } from './subjects';
 import {
   lessonDayCount,
   lessonLimit,
@@ -826,11 +827,20 @@ export function sanitize(d: State): State {
   // block geometry before v7 — `blockSize` came out of a backup file raw — and
   // a `pairs` above the ceiling would make `blockPlan` and `placedBlocks`
   // disagree about how many twos exist.
+  //
+  // The same pass clears an ORPHAN `second` flag: a lesson marked "taught under
+  // the teacher's second subject" whose teacher no longer HAS a second subject.
+  // That happens the moment somebody empties the box, and left alone the lesson
+  // would keep claiming a subject nobody teaches — the same shape of orphan as
+  // a placement pointing at a deleted lesson, and it is cleaned in the same
+  // place for the same reason.
+  const twoSubjects = new Set(d.teachers.filter(hasTwoSubjects).map((t) => t.id));
   const lessons = kept.map((x) => {
     const pairs = clampPairs(x.weeklyHours, x.pairs);
-    if (pairs === x.pairs) return x;
+    const second = x.second && twoSubjects.has(x.teacherId);
+    if (pairs === x.pairs && second === x.second) return x;
     changed = true;
-    return { ...x, pairs };
+    return { ...x, pairs, second };
   });
   const lessonById = new Map(lessons.map((x) => [x.id, x]));
 

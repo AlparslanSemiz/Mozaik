@@ -59,10 +59,23 @@ export interface Sorter<T> {
 export interface Facet<T> {
   /** Which chip row this is, and the key the choice is stored under. */
   id: string;
-  /** The group this row belongs to, or '' for "belongs to no group". */
-  of: (item: T) => string;
+  /**
+   * The group(s) this row belongs to, or '' / [] for "belongs to no group".
+   *
+   * A LIST and not just a string, because one row can honestly be in two
+   * groups: a teacher who holds both Türkçe and Edebiyat belongs under either
+   * chip, and picking one has to find them. Single-value facets keep returning
+   * a plain string and nothing about them changes.
+   */
+  of: (item: T) => string | string[];
   /** What the chip row is called. */
   label: string;
+}
+
+/** One facet's answer for one row, always as a list and never with blanks. */
+function groupsOf<T>(facet: Facet<T>, item: T): string[] {
+  const answer = facet.of(item);
+  return (typeof answer === 'string' ? [answer] : answer).filter((x) => x !== '');
 }
 
 export interface ListConfig<T> {
@@ -80,11 +93,25 @@ export interface ListQuery {
   text: string;
   /** '' means the list's own order — which for these lists is entry order. */
   sortId: string;
+  /**
+   * Read the chosen sort backwards.
+   *
+   * A separate switch and not a second entry in `sorts`, which is what doubling
+   * the menu would have cost: "Ada göre" and "Ada göre (Z→A)" is ten options
+   * where there were five, and the reader asked for the other shape by name —
+   * "sıralamanın yanına aşağı ya da yukarı diye ayrı bir tuş koyalım ki O
+   * FİLTREYE GÖRE aşağı ya da yukarı olsun". It also composes: a sorter that
+   * already reads high-to-low simply reads low-to-high here.
+   *
+   * Means nothing while `sortId` is '' — there is no chosen order to reverse —
+   * and the control that sets it is disabled there rather than lying.
+   */
+  desc: boolean;
   /** facet id -> chosen value. A missing or '' entry means every group. */
   facets: Record<string, string>;
 }
 
-export const EMPTY_QUERY: ListQuery = { text: '', sortId: '', facets: {} };
+export const EMPTY_QUERY: ListQuery = { text: '', sortId: '', desc: false, facets: {} };
 
 /** Is anything narrowing the list right now? */
 export function isFiltering(query: ListQuery): boolean {
@@ -122,7 +149,7 @@ export function applyList<T>(items: T[], query: ListQuery, cfg: ListConfig<T>): 
   for (const facet of cfg.facets ?? []) {
     const want = query.facets[facet.id] ?? '';
     if (want === '') continue;
-    rows = rows.filter((x) => facet.of(x) === want);
+    rows = rows.filter((x) => groupsOf(facet, x).includes(want));
   }
 
   const needle = fold(query.text.trim());
@@ -137,9 +164,16 @@ export function applyList<T>(items: T[], query: ListQuery, cfg: ListConfig<T>): 
   }
 
   const sorter = cfg.sorts.find((s) => s.id === query.sortId);
+  if (sorter === undefined) return rows;
   // Copied before sorting: `items` is state, and sorting in place would mutate
   // the array React is holding.
-  return sorter === undefined ? rows : [...rows].sort(sorter.cmp);
+  // NEGATED rather than sorted-then-reversed, and the difference shows on ties.
+  // Array.prototype.sort is stable, so a negated comparator flips the groups
+  // and leaves rows the sorter called EQUAL in their original order; a
+  // `.reverse()` would flip those too, and two teachers with the same load
+  // would swap places for a reason the reader cannot see.
+  const cmp = query.desc ? (a: T, b: T) => -sorter.cmp(a, b) : sorter.cmp;
+  return [...rows].sort(cmp);
 }
 
 export interface FacetCount {
@@ -167,9 +201,11 @@ export function facetCounts<T>(
   const searched = applyList(items, { ...query, facets: others }, cfg);
   const counts = new Map<string, number>();
   for (const x of searched) {
-    const key = facet.of(x);
-    if (key === '') continue;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    // A row in two groups is counted under BOTH — the chips are a way in, not
+    // a partition, and their numbers therefore need not add up to the list.
+    for (const key of groupsOf(facet, x)) {
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
   }
   return [...counts.entries()]
     .map(([value, count]) => ({ value, count }))
