@@ -1,8 +1,13 @@
 # STATUS — Nerede olduğumuz
 
 Son güncelleme: 2026-08-27 (yirmi yedinci oturum: **exe kendini güncelliyor**,
-görev çubuğu ikonu, devriye + hata kapanı, metin turu) — **v1.3.0 hazır,
-etiketlenmeyi bekliyor**
+görev çubuğu ikonu, devriye + hata kapanı, metin turu) — **v1.3.0
+etiketlendi, İTİLMEYİ bekliyor**
+
+> **Tek kalan adım:** `git push --follow-tags origin main`.
+> `npm run yayinla -- 1.3.0` push dışında her şeyi yaptı (iki dosyada sürüm,
+> commit, annotated etiket); push bu makinede GitHub kimliği olmadığı için
+> düştü. Uzak hâlâ `v1.1.0`'da.
 
 ---
 

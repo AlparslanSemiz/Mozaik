@@ -16,11 +16,23 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > [STATUS.md](STATUS.md) → *Yirmi yedinci oturum*.
 >
 > **Bir sonraki oturumun ilk işi — üçü de KULLANICIDA:**
-> 1. **`v1.3.0` yayınlansın** (`npm run yayinla -- 1.3.0`). Bu sürümle birlikte
->    Release'e dördüncü bir varlık düşer: `surum.json`. Ondan **önceki** hiçbir
->    exe kendini güncelleyemez, çünkü bakacağı dosya henüz yok.
->    Not: `v1.2.0` **hiç etiketlenmedi** — `package.json` 1.2.0'da ama uzakta
->    yalnız `v1.1.0` var, yani ders dağılımı turu babaya hiç ulaşmadı.
+> 1. **`v1.3.0` İTİLSİN — tek komut, ve tek kalan adım bu:**
+>
+>    ```
+>    git push --follow-tags origin main
+>    ```
+>
+>    `npm run yayinla -- 1.3.0` koşturuldu ve **push dışında her şeyi yaptı**:
+>    `package.json` ve `Cargo.toml` 1.3.0'a çıktı, `Sürüm v1.3.0` commit'lendi,
+>    **annotated** `v1.3.0` etiketi atıldı. Push, bu makinede GitHub kimliği
+>    olmadığı için düştü (`could not read Username`) — yani yapılacak iş bir
+>    karar değil, bir kimlik.
+>    İtilince iki iş akışı birden koşar: `site.yml` (Pages) ve `surum.yml`
+>    (Release). Release'e bu kez **dördüncü** bir varlık düşer: `surum.json`.
+>    Ondan **önceki hiçbir exe kendini güncelleyemez**, çünkü bakacağı dosya
+>    henüz yok.
+>    Not: `v1.2.0` **hiç etiketlenmedi**, yani ders dağılımı turu da babaya bu
+>    push'la birlikte gidecek.
 > 2. **Windows'ta denensin.** Bu makinede ölçülemeyen üç şey var ve üçü de
 >    aynı koşuda görülür: exe'nin kendini gerçekten değiştirmesi, görev
 >    çubuğundaki ikonun yeni hâli, ve SmartScreen'in ne dediği.
