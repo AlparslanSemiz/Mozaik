@@ -17,7 +17,7 @@ import { loadPlan } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
-import { useT } from '../T';
+import { T, useT } from '../T';
 
 interface Props {
   state: State;
@@ -65,14 +65,21 @@ export default function Plans({ state, plans }: Props) {
     const c = found?.counts;
     const what =
       c === undefined
-        ? 'Bu işlem geri alınamaz.'
-        : `${c.teachers} öğretmen, ${c.classes} sınıf, ${c.lessons} ders ve ` +
-          `yerleşmiş ${c.placed} saat silinecek. Bu işlem geri alınamaz.`;
+        ? t('Bu işlem geri alınamaz.')
+        : t(
+            '{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.',
+            {
+              ogretmen: c.teachers,
+              sinif: c.classes,
+              ders: c.lessons,
+              saat: c.placed,
+            },
+          );
     if (
       !(await confirm({
-        title: `"${name}" planı silinecek`,
+        title: t('"{ad}" planı silinecek', { ad: name }),
         body: what,
-        confirmLabel: 'Planı sil',
+        confirmLabel: t('Planı sil'),
         danger: true,
       }))
     ) {
@@ -85,9 +92,7 @@ export default function Plans({ state, plans }: Props) {
     <div className="panel">
       <h2>Planlar ({library.plans.length})</h2>
       <p className="hint">
-        Her plan <b>ayrı bir programdır</b>: kendi öğretmenleri, sınıfları ve dizilmiş
-        ızgarasıyla. Üst çubuktaki listeden aralarında geçilir. <b>Taslak</b> olarak
-        işaretlenen bir plan, yeni bir plana başlarken hazır kurulum olarak sunulur.
+        <T k="Her plan **ayrı bir programdır**: kendi öğretmenleri, sınıfları ve dizilmiş ızgarasıyla. Üst çubuktaki listeden aralarında geçilir. **Taslak** olarak işaretlenen bir plan, yeni bir plana başlarken hazır kurulum olarak sunulur." />
       </p>
 
       {/* The way to ADD one comes before the list of what there is — the rule
@@ -95,9 +100,7 @@ export default function Plans({ state, plans }: Props) {
           had it the other way round. */}
       <h3>{t('Yeni plan')}</h3>
       <p className="hint">
-        Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır.{' '}
-        <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır, çünkü bir planın hamlesi
-        başka bir plana uygulanamaz.
+        <T k="Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır. **Geri al** geçmişi her plan geçişinde sıfırlanır, çünkü bir planın hamlesi başka bir plana uygulanamaz." />
       </p>
       <div className="form-row">
         <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
@@ -137,7 +140,7 @@ export default function Plans({ state, plans }: Props) {
               <td>
                 <input
                   type="text"
-                  aria-label={`${plan.name} adı`}
+                  aria-label={t('{ad} adı', { ad: plan.name })}
                   // defaultValue + a key that follows the value: a re-render on
                   // every keystroke steals the caret (PLAN pitfall 3).
                   key={plan.name}
@@ -147,8 +150,7 @@ export default function Plans({ state, plans }: Props) {
                 {plan.id === planId && <span className="hint">{t('· açık olan')}</span>}
                 {missing && (
                   <span className="hint" title={t('Bu planın verisi bulunamadı')}>
-                    {' '}
-                    · verisi yok
+                    <T k="· verisi yok" />
                   </span>
                 )}
               </td>
@@ -176,8 +178,8 @@ export default function Plans({ state, plans }: Props) {
                     disabled={library.plans.length <= 1}
                     title={
                       library.plans.length <= 1
-                        ? 'Tek plan silinemez'
-                        : 'Bu planı tamamen siler'
+                        ? t('Tek plan silinemez')
+                        : t('Bu planı tamamen siler')
                     }
                     onClick={() => remove(plan.id, plan.name)}
                   >{t('Sil')}</button>
@@ -192,8 +194,7 @@ export default function Plans({ state, plans }: Props) {
         <>
           <h3>{t('Taslaktan başla')}</h3>
           <p className="hint">
-            Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır;
-            <b> dizilmiş program boş gelir</b>. Taslağın kendisi değişmez.
+            <T k="Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır; ** dizilmiş program boş gelir**. Taslağın kendisi değişmez." />
           </p>
           <DraftStart plans={plans} label={(name) => `${name} → yeni plan`} />
         </>

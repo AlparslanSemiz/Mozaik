@@ -25,6 +25,8 @@
  */
 export const APP_NAME = 'Ders Programı';
 
+import { t } from './i18n';
+
 export interface Surum {
   /** package.json's version, e.g. "1.1.0". */
   version: string;
@@ -45,6 +47,8 @@ export const GELISTIRME: Surum = { version: '0.0.0-dev', commit: '', date: '' };
 export const SURUM: Surum =
   typeof __SURUM__ === 'undefined' || __SURUM__ === undefined ? GELISTIRME : __SURUM__;
 
+// Translated when they are READ, not here: the array is module state and the
+// language can change while the page is open.
 const AYLAR = [
   'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
   'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
@@ -60,7 +64,9 @@ export function tarihYazisi(iso: string): string {
   if (m === null) return '';
   const ay = AYLAR[Number(m[2]) - 1];
   if (ay === undefined) return '';
-  return `${Number(m[3])} ${ay} ${m[1]}`;
+  // The ORDER moves between languages too ("27 August 2026" / "August 27,
+  // 2026"), so the whole line is one key rather than three pieces glued here.
+  return t('{gun} {ay} {yil}', { gun: Number(m[3]), ay: t(ay), yil: m[1]! });
 }
 
 /** "v1.1.0 · 27 Ağustos 2026", or just "v1.1.0" when there is no date. */

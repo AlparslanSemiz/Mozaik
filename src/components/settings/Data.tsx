@@ -31,9 +31,10 @@ import type { PlanControls } from "../props";
 import type { FolderRun } from "../../useFolder";
 import type { UpdateRun } from "../../update";
 import { SITE_ADRESI } from "../../update";
+import { EXE_FOLDER } from "../../desktop";
 import { surumEtiketi } from "../../version";
 import Plans from "./Plans";
-import { useT } from '../T';
+import { T, useT } from '../T';
 
 interface Props {
   state: State;
@@ -90,18 +91,14 @@ function Folder({ folder }: { folder: FolderRun }) {
       {s.kind === "yok" ? (
         <>
           <p className="hint">
-            Bu, programın{" "}
-            <b>her değişikliği kendiliğinden bir klasöre yazması</b>
-            demek, yedek indirmeyi hiç düşünmeden. Ama{" "}
-            <b>kullandığınız tarayıcı bunu desteklemiyor.</b> Chrome ve Edge
-            destekliyor; Firefox ve Safari desteklemiyor.
+            <T k="Bu, programın **her değişikliği kendiliğinden bir klasöre yazması** demek, yedek indirmeyi hiç düşünmeden. Ama **kullandığınız tarayıcı bunu desteklemiyor.** Chrome ve Edge destekliyor; Firefox ve Safari desteklemiyor." />
           </p>
           {/* The one-habit sentence is NOT repeated here: it already sits in
               "Veriler nerede" two panels down, and saying it twice on one
               screen makes both copies read like boilerplate (and made a test
               ambiguous — pitfall 49). */}
           <p className="hint">
-            O zamana kadar üst çubuktaki <b>Dosyaya kaydet</b> tek çare.
+            <T k="O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare." />
           </p>
         </>
       ) : (
@@ -113,19 +110,15 @@ function Folder({ folder }: { folder: FolderRun }) {
               controls that cannot mean anything. */}
           <p className="hint">
             {folder.fixed ? (
-              <>
-                Program <b>bütün planları</b> kendiliğinden Belgelerim'e yazıyor
-                ve her gün için ayrı bir yedek bırakıyor (son {KEEP_DAILY} gün).
-                Seçecek bir şey yok. Üst çubuktaki <b>Dosyaya kaydet</b> yalnız
-                bu bilgisayarın dışına bir kopya çıkarmak için.
-              </>
+              <T
+                k="Program **bütün planları** kendiliğinden Belgelerim'e yazıyor ve her gün için ayrı bir yedek bırakıyor (son {gun} gün). Seçecek bir şey yok. Üst çubuktaki **Dosyaya kaydet** yalnız bu bilgisayarın dışına bir kopya çıkarmak için."
+                vars={{ gun: KEEP_DAILY }}
+              />
             ) : (
-              <>
-                Bir klasör seçin; program <b>bütün planları</b> oraya yazar ve
-                her gün için ayrı bir yedek bırakır (son {KEEP_DAILY} gün). Üst
-                çubuktaki <b>Dosyaya kaydet</b> yerine geçmez, onu{" "}
-                <b>gereksiz</b> kılar.
-              </>
+              <T
+                k="Bir klasör seçin; program **bütün planları** oraya yazar ve her gün için ayrı bir yedek bırakır (son {gun} gün). Üst çubuktaki **Dosyaya kaydet** yerine geçmez, onu **gereksiz** kılar."
+                vars={{ gun: KEEP_DAILY }}
+              />
             )}
           </p>
 
@@ -135,7 +128,7 @@ function Folder({ folder }: { folder: FolderRun }) {
                 className="btn primary"
                 onClick={() => void folder.choose()}
               >
-                {s.kind === "secilmedi" ? "Klasör seç…" : "Başka klasör seç…"}
+                {s.kind === "secilmedi" ? t('Klasör seç…') : t('Başka klasör seç…')}
               </button>
               {s.kind === "izin-gerek" && (
                 <button
@@ -156,12 +149,10 @@ function Folder({ folder }: { folder: FolderRun }) {
               Both halves are already built; what was missing was saying so. */}
           {s.kind !== "secilmedi" && (
             <p className="hint">
-              O klasördeki <code>{MAIN_NAME}</code> dosyası{" "}
-              <b>bütün planlarınızın tamamıdır</b>. Yeni bir bilgisayarda, yeni
-              bir tarayıcıda ya da programın yeni bir sürümünde işinizi geri
-              getirmenin yolu tek: aşağıdaki <b>Tümünü dosyadan aç</b> ile o
-              dosyayı seçmek. Yanındaki tarihli dosyalar aynı şeyin gün gün
-              duran hâlleri.
+              <T
+                k="O klasördeki {dosya} dosyası **bütün planlarınızın tamamıdır**. Yeni bir bilgisayarda, yeni bir tarayıcıda ya da programın yeni bir sürümünde işinizi geri getirmenin yolu tek: aşağıdaki **Tümünü dosyadan aç** ile o dosyayı seçmek. Yanındaki tarihli dosyalar aynı şeyin gün gün duran hâlleri."
+                vars={{ dosya: MAIN_NAME }}
+              />
             </p>
           )}
 
@@ -184,17 +175,15 @@ function Folder({ folder }: { folder: FolderRun }) {
             role="status"
           >
             {s.kind === "secilmedi" &&
-              "Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor."}
+              t('Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.')}
             {s.kind === "izin-gerek" && (
-              <>
-                <b>{s.name}</b> klasörü seçilmiş, ama tarayıcı izni her açılışta
-                yeniden soruyor. <b>İzin ver</b> deyin.
-              </>
+              <T
+                k="**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin."
+                vars={{ klasor: s.name }}
+              />
             )}
             {s.kind === "bekliyor" && (
-              <>
-                <b>{s.name}</b> · yazılıyor…
-              </>
+              <T k="**{klasor}** · yazılıyor…" vars={{ klasor: s.name }} />
             )}
             {s.kind === "yazildi" && (
               <>
@@ -282,8 +271,7 @@ function Build({ update }: { update: UpdateRun }) {
       {update.kind === "exe" && <ExeUpdate update={update} />}
       {update.kind === "yok" && (
         <p className="hint">
-          <b>Bu kopya kendini güncellemez</b> ve hiçbir yere bağlanmaz. Yenisi
-          çıktığında en son sürüm her zaman şuradadır:{" "}
+          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. Yenisi çıktığında en son sürüm her zaman şuradadır:" />{" "}
           <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
           </a>
@@ -299,16 +287,14 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
   return (
     <>
       <p className="hint">
-        Yeni bir sürüm yayınlandığında program bunu <b>kendisi görür</b> ve
-        üstte bir satırla söyler. Hiçbir şey zorla değişmez. <b>Yenile</b>{" "}
-        demediğiniz sürece eski sürümle çalışmaya devam edersiniz.
+        <T k="Yeni bir sürüm yayınlandığında program bunu **kendisi görür** ve üstte bir satırla söyler. Hiçbir şey zorla değişmez. **Yenile** demediğiniz sürece eski sürümle çalışmaya devam edersiniz." />
       </p>
       <div className="form-row">
         <button className="btn" onClick={update.check}>{t('Güncellemeleri denetle')}</button>
       </div>
       {update.ready && (
         <p className="hint" role="status">
-          <b>Yeni sürüm hazır.</b> Üstteki <b>Yenile</b> düğmesine basın.
+          <T k="**Yeni sürüm hazır.** Üstteki **Yenile** düğmesine basın." />
         </p>
       )}
     </>
@@ -337,9 +323,7 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
   return (
     <>
       <p className="hint">
-        Bu kopya kendini güncelleyebilir, ama <b>kendi başına yapmaz</b>.
-        Aşağıdaki düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa
-        program normal çalışmaya devam eder.
+        <T k="Bu kopya kendini güncelleyebilir, ama **kendi başına yapmaz**. Aşağıdaki düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa program normal çalışmaya devam eder." />
       </p>
 
       <div className="form-row">
@@ -361,23 +345,24 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
           again (design contract 2). */}
       {d.ad !== "bos" && (
         <p className={`hint${d.ad === "hata" ? " bad" : ""}`} role="status">
-          {d.ad === "bakiliyor" && "Bakılıyor…"}
-          {d.ad === "guncel" && <b>En son sürümü kullanıyorsunuz.</b>}
+          {d.ad === "bakiliyor" && t('Bakılıyor…')}
+          {d.ad === "guncel" && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
           {d.ad === "var" && (
-            <>
-              <b>
-                v{d.surum} çıktı{d.tarih === "" ? "" : ` (${d.tarih})`}.
-              </b>{" "}
-              İndirmek {Math.round(d.boyut / 1024 / 1024)} MB yer kaplar.
-              İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz.
-            </>
+            <T
+              k="**v{surum} çıktı{tarih}.** İndirmek {mb} MB yer kaplar. İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz."
+              vars={{
+                surum: d.surum,
+                tarih: d.tarih === "" ? "" : ` (${d.tarih})`,
+                mb: Math.round(d.boyut / 1024 / 1024),
+              }}
+            />
           )}
-          {d.ad === "indiriliyor" && "Yeni sürüm iniyor…"}
+          {d.ad === "indiriliyor" && t('Yeni sürüm iniyor…')}
           {d.ad === "hazir" && (
-            <>
-              <b>v{d.surum} indi.</b> Yeniden başlatınca yeni sürüm açılır.
-              Programınız kayıtlı, hiçbir şey kaybolmaz.
-            </>
+            <T
+              k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz."
+              vars={{ surum: d.surum }}
+            />
           )}
           {d.ad === "hata" && d.mesaj}
         </p>
@@ -410,9 +395,9 @@ export default function Data({
     // button in the program that cannot be undone.
     if (
       !(await confirm({
-        title: "Her şey silinecek",
-        body: "Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.",
-        confirmLabel: "Devam et",
+        title: t('Her şey silinecek'),
+        body: t('Öğretmenler, sınıflar, dersler ve dizilmiş program. Bu plan bomboş kalacak.'),
+        confirmLabel: t('Devam et'),
         danger: true,
       }))
     ) {
@@ -420,9 +405,11 @@ export default function Data({
     }
     if (
       !(await confirm({
-        title: "Son kez soruyorum",
-        body: 'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.',
-        confirmLabel: "Sil",
+        title: t('Son kez soruyorum'),
+        body: t(
+          'Bu işlem geri alınamaz. Vazgeçme ihtimaliniz varsa önce üst çubuktan "Dosyaya kaydet" deyin.',
+        ),
+        confirmLabel: t('Sil'),
         danger: true,
       }))
     ) {
@@ -437,8 +424,11 @@ export default function Data({
       bad: written < planCount,
       text:
         written < planCount
-          ? `${written} plan dosyaya yazıldı; ${planCount - written} planın verisi bulunamadı.`
-          : `${written} plan tek dosyaya yazıldı.`,
+          ? t('{yazilan} plan dosyaya yazıldı; {eksik} planın verisi bulunamadı.', {
+              yazilan: written,
+              eksik: planCount - written,
+            })
+          : t('{yazilan} plan tek dosyaya yazıldı.', { yazilan: written }),
     });
   }
 
@@ -455,9 +445,10 @@ export default function Data({
         bad: true,
         text:
           version !== null && version !== BUNDLE_VERSION
-            ? "Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin."
-            : "Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst " +
-              'çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+            ? t('Bu dosya programın daha yeni bir sürümüyle yazılmış. Programı güncelleyin.')
+            : t(
+                'Bu dosya bütün planları içeren bir dosya değil. Tek bir planı üst çubuktaki "Dosyadan aç" ile açabilirsiniz.',
+              ),
       });
       return;
     }
@@ -465,9 +456,12 @@ export default function Data({
     const incoming = bundle.library.plans.length;
     if (
       !(await confirm({
-        title: "Bu bilgisayardaki bütün planların yerine geçecek",
-        body: `Buradaki ${planCount} plan silinip dosyadaki ${incoming} plan açılacak. Bu işlem geri alınamaz.`,
-        confirmLabel: "Hepsini değiştir",
+        title: t('Bu bilgisayardaki bütün planların yerine geçecek'),
+        body: t(
+          'Buradaki {buradaki} plan silinip dosyadaki {gelen} plan açılacak. Bu işlem geri alınamaz.',
+          { buradaki: planCount, gelen: incoming },
+        ),
+        confirmLabel: t('Hepsini değiştir'),
         danger: true,
       }))
     ) {
@@ -478,7 +472,7 @@ export default function Data({
     if (ok === 0) {
       setNote({
         bad: true,
-        text: "Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.",
+        text: t('Dosyadaki hiçbir plan okunamadı; hiçbir şey değişmedi.'),
       });
       return;
     }
@@ -486,9 +480,11 @@ export default function Data({
       bad: failed > 0,
       text:
         failed > 0
-          ? `${ok} plan açıldı, ${failed} plan yazılamadı. Depolama dolmuş olabilir. ` +
-            "Dosyayı saklayın."
-          : `${ok} plan açıldı.`,
+          ? t(
+              '{acilan} plan açıldı, {yazilamayan} plan yazılamadı. Depolama dolmuş olabilir. Dosyayı saklayın.',
+              { acilan: ok, yazilamayan: failed },
+            )
+          : t('{acilan} plan açıldı.', { acilan: ok }),
     });
   }
 
@@ -499,16 +495,11 @@ export default function Data({
     <div className="panel">
       <h2>{t('Bütün planlar tek dosyada')}</h2>
       <p className="hint">
-        Üst çubuktaki <b>Dosyaya kaydet</b> yalnızca <b>açık olan planı</b>{" "}
-        yazar. Buradaki dosya <b>bütün planları</b> içerir: her planın
-        derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı,
-        taslak işareti ve hangisinin açık olduğu. <b>İçermediği</b> şeyler: tema
-        ve kenar çubuğu tercihi ile aşağıdaki oturum yedekleri. Onlar bu
-        bilgisayara aittir, programa değil.
+        <T k="Üst çubuktaki **Dosyaya kaydet** yalnızca **açık olan planı** yazar. Buradaki dosya **bütün planları** içerir: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı, taslak işareti ve hangisinin açık olduğu. **İçermediği** şeyler: tema ve kenar çubuğu tercihi ile aşağıdaki oturum yedekleri. Onlar bu bilgisayara aittir, programa değil." />
       </p>
       <div className="form-row">
         <button className="btn primary" onClick={saveAll}>
-          Tümünü dosyaya kaydet ({planCount} plan)
+          {t('Tümünü dosyaya kaydet ({n} plan)', { n: planCount })}
         </button>
         <button
           className="btn"
@@ -546,9 +537,7 @@ export default function Data({
             first run; this is where it stays. */}
         <h3>{t('Örnek okul verisi')}</h3>
         <p className="hint">
-          25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir
-          okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{" "}
-          <b>Açık olan planın yerine geçer</b>; diğer planlara dokunulmaz.
+          <T k="25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için. **Açık olan planın yerine geçer**; diğer planlara dokunulmaz." />
         </p>
         <div className="form-row">
           <button
@@ -560,9 +549,7 @@ export default function Data({
   
         <h3>{t('Sıfırla')}</h3>
         <p className="hint">
-          <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri,
-          dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz.{" "}
-          <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
+          <T k="**Açık olan planın** öğretmenleri, sınıfları, derslikleri, dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz. **Geri alınamaz.** Önce **Dosyaya kaydet** deyin." />
         </p>
         <div className="form-row">
           <button
@@ -587,21 +574,16 @@ export default function Data({
             that a person acts on. */}
         <p className="hint">
           {storageKind() === "exe" ? (
-            <>
-              Aşağıdaki depo bu programın kendi deposu, ve{" "}
-              <b>tek kopya değil</b>: her değişiklikten sonra bütün planlar
-              Belgelerim'deki <b>Ders Programı</b> klasörüne de yazılıyor. Bu
-              bilgisayarı değiştiriyorsanız taşınacak şey o klasör.
-            </>
+            <T
+              k="Aşağıdaki depo bu programın kendi deposu, ve **tek kopya değil**: her değişiklikten sonra bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor. Bu bilgisayarı değiştiriyorsanız taşınacak şey o klasör."
+              vars={{ klasor: EXE_FOLDER }}
+            />
           ) : (
             <>
               {storageKind() === "file"
-                ? "Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor."
-                : "Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor."}{" "}
-              Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>;
-              tarayıcıda “tarama verilerini temizle” dediğinizde{" "}
-              <b>silinir</b>. Taşınan ve gerçekten güvende olan tek şey{" "}
-              <b>dosyaya kaydettiğinizdir</b>.
+                ? t('Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.')
+                : t('Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.')}{" "}
+              <T k="Başka bir tarayıcı ve başka bir bilgisayar bunu **görmez**; tarayıcıda “tarama verilerini temizle” dediğinizde **silinir**. Taşınan ve gerçekten güvende olan tek şey **dosyaya kaydettiğinizdir**." />
             </>
           )}
         </p>
@@ -614,12 +596,10 @@ export default function Data({
             because it is the same two buttons in both directions. */}
         {storageKind() !== "exe" && (
           <p className="hint">
-            Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız
-            ona: çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>
-            'nin depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>
-            . Birinden ötekine taşımanın yolu şu ikisi:{" "}
-            <b>Tümünü dosyaya kaydet</b> → öbür kopyada{" "}
-            <b>Tümünü dosyadan aç</b>.
+            <T
+              k="Bu depo {adres} adresine ait ve yalnız ona: çift tıklanan dosyanın, yerel kurulumun ve .exe'nin depoları **ayrıdır**, biri ötekinin verisini **görmez**. Birinden ötekine taşımanın yolu şu ikisi: **Tümünü dosyaya kaydet** → öbür kopyada **Tümünü dosyadan aç**."
+              vars={{ adres: storageAddress() }}
+            />
           </p>
         )}
         {/* The one habit, spelled out. It used to be a sentence across the
@@ -627,11 +607,7 @@ export default function Data({
             where the data actually lives, and the bar it left had six
             destinations to hold instead. */}
         <p className="hint">
-          Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor, kaydet
-          düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{" "}
-          <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
-          taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{" "}
-          <i>değişiklik yaptın, yedek indir.</i>
+          <T k="Program bu bilgisayarda **kendiliğinden** saklanıyor, kaydet düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki **Dosyaya kaydet** bunun yerine geçmez, **yanına** gelir: taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu: değişiklik yaptın, yedek indir." />
         </p>
         <table className="stat">
           <thead>
@@ -654,8 +630,10 @@ export default function Data({
           </tbody>
         </table>
         <p className="hint">
-          Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için
-          ayırdığı yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
+          <T
+            k="Toplam **{yer}**. Tarayıcının bu program için ayırdığı yer yaklaşık **5 MB**; her plan kendi yerini kaplar."
+            vars={{ yer: size(report.totalChars) }}
+          />
         </p>
         {/* A row would be a lie in the "Yer" column: the table counts
             localStorage characters, and a directory handle is not text —
@@ -663,11 +641,7 @@ export default function Data({
             why it lives in IndexedDB. Left out entirely it would be the
             one key this report does not name. */}
         <p className="hint">
-          Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha
-          var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün
-          tutamağı <b>IndexedDB</b>'de, <code>ders-programi-klasor</code>{" "}
-          adıyla durur. Programınız orada <b>değildir</b>. Orada duran şey
-          yalnız hangi klasöre yazılacağıdır.
+          <T k="Yukarıdakiler tarayıcının **localStorage**'ında. Bir tane daha var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün tutamağı **IndexedDB**'de, ders-programi-klasor adıyla durur. Programınız orada **değildir**. Orada duran şey yalnız hangi klasöre yazılacağıdır." />
         </p>
       </div>
   );
@@ -676,11 +650,7 @@ export default function Data({
       <div className="panel">
         <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
         <p className="hint">
-          Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç
-          oturumun durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve
-          programı açtığınızda <b>hangi plan açıksa ona</b> aittir. Taşımak ve
-          gerçekten güvende olmak için üst çubuktaki <b>Dosyaya kaydet</b>'i
-          kullanın.
+          <T k="Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç oturumun durumu ayrı tutuluyor. Bunlar **bu bilgisayara** ve programı açtığınızda **hangi plan açıksa ona** aittir. Taşımak ve gerçekten güvende olmak için üst çubuktaki **Dosyaya kaydet**'i kullanın." />
         </p>
         {backups.length === 0 ? (
           <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
@@ -699,7 +669,9 @@ export default function Data({
               {backups.map(({ index, state: b }) => (
                 <tr key={index}>
                   <td>
-                    {index === 0 ? "bir önceki" : `${index + 1} oturum önce`}
+                    {index === 0
+                      ? t('bir önceki')
+                      : t('{n} oturum önce', { n: index + 1 })}
                   </td>
                   <td className="num">{b.teachers.length}</td>
                   <td className="num">{b.classes.length}</td>

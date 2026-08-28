@@ -9,6 +9,7 @@
 // kaydet" produces. Not the open plan: a folder that holds one of three plans
 // is a backup that is wrong in the way nobody checks.
 
+import { t } from './i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle } from './bundle';
 import { isDesktop, openDesktopFolder } from './desktop';
@@ -101,8 +102,8 @@ export function useFolder(
         kind: 'hata',
         name: handle.name,
         text: err instanceof Error && err.name === 'NotAllowedError'
-          ? 'Klasöre yazma izni geri alınmış.'
-          : 'Klasöre yazılamadı. Klasör silinmiş ya da taşınmış olabilir.',
+          ? t('Klasöre yazma izni geri alınmış.')
+          : t('Klasöre yazılamadı. Klasör silinmiş ya da taşınmış olabilir.'),
       });
     }
   }, []);

@@ -9,6 +9,7 @@
 // makeShort lives in entities.ts (one home); re-exported so callers and the
 // existing tests do not have to care where it moved.
 export { makeShort } from './entities';
+import { t } from './i18n';
 import { makeShort, parseGender } from './entities';
 import type { Gender } from './types';
 
@@ -57,7 +58,7 @@ export function parseRooms(text: string): ParseResult<{ name: string }> {
     const name = cells[0] ?? '';
     if (name === '') continue;
     if (seen.has(name)) {
-      errors.push(`${i + 1}. satır: "${name}" iki kez geçiyor, biri alındı.`);
+      errors.push(t('{n}. satır: "{ad}" iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }));
       continue;
     }
     seen.add(name);
@@ -99,7 +100,8 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
     if (name === '') continue;
 
     const subject = cells[2] ?? '';
-    if (subject === '') errors.push(`${i + 1}. satır: "${name}" için branş boş.`);
+    if (subject === '')
+      errors.push(t('{n}. satır: "{ad}" için branş boş.', { n: i + 1, ad: name }));
 
     accepted.push({
       name,
@@ -132,7 +134,9 @@ export function parseClasses(text: string): ParseResult<ClassRow> {
     const name = cells[0] ?? '';
     if (name === '') continue;
     if (seen.has(name)) {
-      errors.push(`${i + 1}. satır: "${name}" sınıfı iki kez geçiyor, biri alındı.`);
+      errors.push(
+        t('{n}. satır: "{ad}" sınıfı iki kez geçiyor, biri alındı.', { n: i + 1, ad: name }),
+      );
       continue;
     }
     seen.add(name);
@@ -171,12 +175,18 @@ export function parseLessons(text: string): ParseResult<LessonRow> {
     if (className === '' && teacher === '') continue;
 
     if (className === '' || teacher === '') {
-      errors.push(`${i + 1}. satır: sınıf veya öğretmen boş, atlandı.`);
+      errors.push(t('{n}. satır: sınıf veya öğretmen boş, atlandı.', { n: i + 1 }));
       continue;
     }
     const weeklyHours = toNumber(cells[2], 0);
     if (weeklyHours === 0) {
-      errors.push(`${i + 1}. satır: "${className} / ${teacher}" için saat okunamadı, atlandı.`);
+      errors.push(
+        t('{n}. satır: "{sinif} / {kim}" için saat okunamadı, atlandı.', {
+          n: i + 1,
+          sinif: className,
+          kim: teacher,
+        }),
+      );
       continue;
     }
     const blockSize = Math.min(2, toNumber(cells[3], 1));

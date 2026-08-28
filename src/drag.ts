@@ -15,6 +15,7 @@
 // reach it. So (a) the target row is scrolled into view when the drag starts,
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
+import { t } from './i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { DropVerdict } from './constraints';
@@ -253,7 +254,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
           setReason(null);
         } else {
           const verdict = d.map.get(signature);
-          const blocked = verdict === undefined ? 'Bu hücreye bırakılamaz' : verdict.blocked;
+          const blocked = verdict === undefined ? t('Bu hücreye bırakılamaz') : verdict.blocked;
           const warning = verdict?.warning ?? null;
 
           setReason(

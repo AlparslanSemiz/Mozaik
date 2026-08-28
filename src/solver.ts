@@ -23,6 +23,7 @@ import {
   placedBlocks as blocksOnGrid,
   vacate,
 } from './constraints';
+import { t } from './i18n';
 import type { Index, PlacedBlock } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
@@ -621,8 +622,10 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
         name: lessonName(finalIx, lesson.id),
         missing,
         reason: capped
-          ? `haftada ${lesson.weeklyHours} saat isteniyor, ` +
-            `açık saatler ve kurallar en fazla ${fits} saat veriyor`
+          ? t(
+              'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
+              { istenen: lesson.weeklyHours, olabilen: fits },
+            )
           : commonestBlock(state, finalIx, lesson.id).reason,
       });
     }

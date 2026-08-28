@@ -31,6 +31,7 @@
 // registration, when there was no controller, and announcing "new version" to
 // somebody who just opened the site for the first time is a lie.
 
+import { t } from './i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';
@@ -96,7 +97,7 @@ export interface UpdateRun {
     cases it can name; this is the floor under everything else. */
 function hataMetni(e: unknown): string {
   const ham = typeof e === 'string' ? e : e instanceof Error ? e.message : '';
-  return ham.trim() === '' ? 'Güncelleme denetlenemedi.' : ham;
+  return ham.trim() === '' ? t('Güncelleme denetlenemedi.') : ham;
 }
 
 function registration(): Promise<ServiceWorkerRegistration | undefined> {

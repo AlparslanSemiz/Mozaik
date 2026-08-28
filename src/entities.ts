@@ -26,6 +26,16 @@ import type {
 import { t } from './i18n';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
 import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './subjects';
+import {
+  DEFAULT_DAY_NAMES,
+  DEFAULT_SUBJECT_SHORTS,
+  WEEK,
+  builtInShort,
+  builtInShortRaw,
+  dayLabel,
+  shortDay,
+  subjectLabel,
+} from './names';
 import { SCHEMA_VERSION } from './types';
 
 const ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789'; // no lookalikes: l, o, 0, 1
@@ -38,35 +48,6 @@ export function newId(): Id {
   return s;
 }
 
-/** The week in calendar order. The checkboxes in Setup are built from this. */
-export const WEEK = [
-  'Pazartesi',
-  'Salı',
-  'Çarşamba',
-  'Perşembe',
-  'Cuma',
-  'Cumartesi',
-  'Pazar',
-];
-
-/** Monday is NOT taught at this school; the week runs Tuesday to Sunday. */
-export const DEFAULT_DAY_NAMES = WEEK.slice(1);
-
-const WEEKEND = new Set(['Cumartesi', 'Pazar']);
-
-/**
- * Column headers. NOT the first three letters: "Cuma" and "Cumartesi" both give
- * "Cum" and the availability grid becomes unreadable.
- */
-const SHORT_DAY: Record<string, string> = {
-  Pazartesi: 'Pzt',
-  Salı: 'Sal',
-  Çarşamba: 'Çar',
-  Perşembe: 'Per',
-  Cuma: 'Cum',
-  Cumartesi: 'Cmt',
-  Pazar: 'Pzr',
-};
 
 /**
  * "Mehmet Çelik" -> "MÇ". Two initials, Turkish uppercase (i -> İ).
@@ -87,6 +68,8 @@ export function makeShort(name: string): string {
  * What a gender reads as in PROSE: a chip, a count, a paste preview. ONE home,
  * because a chip saying "k" would be a chip nobody clicks.
  */
+// The KEYS stay Turkish (they are what a paste is matched against and what a
+// chip is grouped by); `genderLabel` translates on the way out.
 export const GENDER_LABEL: Record<Gender, string> = {
   '': 'Belirtilmemiş',
   k: 'Kadın',
@@ -111,11 +94,13 @@ export const GENDER_CELL: Record<Gender, string> = {
 };
 
 export function genderLabel(gender: Gender): string {
-  return GENDER_LABEL[gender];
+  return t(GENDER_LABEL[gender]);
 }
 
 export function genderCell(gender: Gender): string {
-  return GENDER_CELL[gender];
+  // The dash is not a word; translating it would only invite a dictionary
+  // entry that changes it.
+  return gender === '' ? GENDER_CELL[gender] : t(GENDER_CELL[gender]);
 }
 
 /**
@@ -136,25 +121,6 @@ export function parseGender(raw: string): Gender {
   return '';
 }
 
-/**
- * A day's name ON SCREEN — which is not the same thing as a day's name.
- *
- * `settings.days[].name` is DATA: it goes into the backup, `remapDays()` builds
- * its mapping from it (pitfall 11), and my father may rename a day. So the
- * stored string never changes language; only the drawing of it does, and only
- * for the seven names this program itself put there. Anything else — a renamed
- * day, a pasted one — is handed back untouched, because a translation of it
- * would be a guess about somebody else's word.
- */
-export function dayLabel(name: string): string {
-  return name in SHORT_DAY ? t(name) : name;
-}
-
-export function shortDay(name: string): string {
-  const known = SHORT_DAY[name];
-  return known === undefined ? name.slice(0, 3) : t(known);
-}
-
 /** 40 min lesson, 10 min break, 09:00 start, 30 min lunch -> 12th ends 19:10. */
 export const DEFAULT_BELL: Bell = {
   start: '09:00',
@@ -162,6 +128,8 @@ export const DEFAULT_BELL: Bell = {
   breakMinutes: 10,
   longBreakMinutes: 30,
 };
+
+const WEEKEND = new Set(['Cumartesi', 'Pazar']);
 
 /** On weekdays the long break falls after the 5th lesson, at the weekend after the 6th. */
 export function defaultLongBreak(dayName: string): number {
@@ -197,60 +165,15 @@ export const NO_TEACHER_LIMITS = {
   minPerDay: null,
 };
 
-// ----------------------------------------------------------------- subjects
-//
-// "Matematik" does not fit a 34px cell, and on A4 landscape a column is ~21mm.
-// "Mat" fits. The full name is kept where there is room (row headings, the
-// Kurulum tables, the printed page title).
-
-/** Built in, so an empty project already reads well. Overridable, one by one. */
-export const DEFAULT_SUBJECT_SHORTS: Record<string, string> = {
-  Matematik: 'Mat',
-  Fizik: 'Fzk',
-  Geometri: 'Geo',
-  Kimya: 'Kim',
-  Biyoloji: 'Biy',
-  Türkçe: 'Trk',
-  Edebiyat: 'Edb',
-  Tarih: 'Tar',
-  Coğrafya: 'Coğ',
-  İngilizce: 'İng',
-  Felsefe: 'Fel',
-  'Din Kültürü': 'Din',
-  Almanca: 'Alm',
-  Fransızca: 'Fra',
-  Müzik: 'Müz',
-  Resim: 'Res',
-  'Beden Eğitimi': 'Bed',
-  'Sosyal Bilgiler': 'Sos',
-  'Fen Bilimleri': 'Fen',
-  Rehberlik: 'Reh',
-  'İnkılap Tarihi': 'İnk',
-};
-
 /** Lookup key: the user types "matematik" as readily as "Matematik". */
 // Re-exported so call sites keep saying `from '../entities'` — the same shape
 // `constraints.ts` uses for the key builders that live in `keys.ts`.
 export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects };
+// The week and the subject vocabulary moved DOWN to `names.ts`, so that
+// `constraints.ts` — which sits below this file — can draw a day name in the
+// interface language. Re-exported so no call site had to learn a second path.
+export { DEFAULT_DAY_NAMES, DEFAULT_SUBJECT_SHORTS, WEEK, dayLabel, shortDay, subjectLabel };
 
-const DEFAULT_BY_KEY = new Map(
-  Object.entries(DEFAULT_SUBJECT_SHORTS).map(([name, short]) => [subjectKey(name), short]),
-);
-
-const BUILT_IN_SUBJECT = new Set(Object.keys(DEFAULT_SUBJECT_SHORTS).map(subjectKey));
-
-/**
- * A subject's name ON SCREEN — the same split `dayLabel()` makes, for the same
- * reason. `settings.subjects` is a list the reader edits and the backup carries;
- * translating what is stored would mean a plan taken here arrives on my
- * father's machine speaking English. So the built-in twenty-one are drawn in
- * the interface language and everything he typed himself is drawn as he typed
- * it.
- */
-export function subjectLabel(subject: string): string {
-  const key = subjectKey(subject);
-  return BUILT_IN_SUBJECT.has(key) ? t(subject.trim()) : subject;
-}
 
 /** Override -> built-in table -> first three letters. */
 export function subjectShort(settings: Settings, subject: string): string {
@@ -262,8 +185,8 @@ export function subjectShort(settings: Settings, subject: string): string {
 
   // Translated, unlike the two around it: an override is what the reader typed
   // and the three-letter slice is cut from a name they typed.
-  const known = DEFAULT_BY_KEY.get(key);
-  if (known !== undefined) return t(known);
+  const known = builtInShort(subject);
+  if (known !== undefined) return known;
 
   const head = subject.trim().slice(0, 3);
   return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
@@ -280,7 +203,7 @@ export function subjectShort(settings: Settings, subject: string): string {
 export function defaultSubjectShort(subject: string): string {
   const key = subjectKey(subject);
   if (key === '') return '';
-  const known = DEFAULT_BY_KEY.get(key);
+  const known = builtInShortRaw(subject);
   if (known !== undefined) return known;
   const head = subject.trim().slice(0, 3);
   return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
@@ -909,8 +832,6 @@ export function duplicateShorts(teachers: Teacher[]): Array<{ short: string; nam
 
 export type EntityKind = 'room' | 'teacher' | 'class' | 'lesson';
 
-const plural = (n: number, word: string): string => `${n} ${word}`;
-
 /**
  * What exactly is about to be lost, COUNTED — never guessed. The sentence is
  * what decides whether my father presses Enter or Escape, so it names the
@@ -937,31 +858,38 @@ export interface DeletionQuestion {
 export function deletionQuestion(d: State, kind: EntityKind, id: Id): DeletionQuestion {
   if (kind === 'room') {
     const room = d.rooms.find((x) => x.id === id);
-    if (room === undefined) return { title: 'Bu derslik silinecek', cost: '' };
+    if (room === undefined) return { title: t('Bu derslik silinecek'), cost: '' };
     const groups = roomClasses(d, id);
-    if (groups.length === 0) return { title: `${room.name} dersliği silinecek`, cost: '' };
+    const title = t('{ad} dersliği silinecek', { ad: room.name });
+    if (groups.length === 0) return { title, cost: '' };
     return {
-      title: `${room.name} dersliği silinecek`,
-      cost:
-        `${plural(groups.length, 'sınıfın')} dersliği boşalacak ` +
-        `(${groups.map((c) => c.name).join(', ')}) ve derslik çakışması artık ` +
-        'kontrol edilmeyecek.',
+      title,
+      cost: t(
+        '{n} sınıfın dersliği boşalacak ({hangileri}) ve derslik çakışması artık kontrol edilmeyecek.',
+        { n: groups.length, hangileri: groups.map((c) => c.name).join(', ') },
+      ),
     };
   }
 
   if (kind === 'lesson') {
     const lesson = d.lessons.find((x) => x.id === id);
-    if (lesson === undefined) return { title: 'Bu ders silinecek', cost: '' };
+    if (lesson === undefined) return { title: t('Bu ders silinecek'), cost: '' };
     const group = d.classes.find((c) => c.id === lesson.classId);
-    const teacher = d.teachers.find((t) => t.id === lesson.teacherId);
-    const who = `${group?.name ?? '?'} sınıfının ${teacher?.short ?? '?'} dersi`;
+    const teacher = d.teachers.find((x) => x.id === lesson.teacherId);
+    const who = t('{sinif} sınıfının {kim} dersi', {
+      sinif: group?.name ?? '?',
+      kim: teacher?.short ?? '?',
+    });
     const placed = countPlacedHours(d, id);
     if (placed === 0) {
-      return { title: `${who} silinecek (${plural(lesson.weeklyHours, 'saat')})`, cost: '' };
+      return {
+        title: t('{ne} silinecek ({n} saat)', { ne: who, n: lesson.weeklyHours }),
+        cost: '',
+      };
     }
     return {
-      title: `${who} silinecek`,
-      cost: `Programa yerleşmiş ${plural(placed, 'saati')} de kalkacak.`,
+      title: t('{ne} silinecek', { ne: who }),
+      cost: t('Programa yerleşmiş {n} saati de kalkacak.', { n: placed }),
     };
   }
 
@@ -974,23 +902,25 @@ export function deletionQuestion(d: State, kind: EntityKind, id: Id): DeletionQu
   const who =
     kind === 'teacher'
       ? (() => {
-          const t = d.teachers.find((x) => x.id === id);
-          return t === undefined ? 'Bu öğretmen' : `${t.short} (${t.name})`;
+          const x = d.teachers.find((y) => y.id === id);
+          return x === undefined ? t('Bu öğretmen') : `${x.short} (${x.name})`;
         })()
       : (() => {
           const c = d.classes.find((x) => x.id === id);
-          return c === undefined ? 'Bu sınıf' : `${c.name} sınıfı`;
+          return c === undefined ? t('Bu sınıf') : t('{ad} sınıfı', { ad: c.name });
         })();
 
-  if (lessons.length === 0) return { title: `${who} silinecek`, cost: '' };
+  const title = t('{ne} silinecek', { ne: who });
+  if (lessons.length === 0) return { title, cost: '' };
   if (placed === 0) {
-    return { title: `${who} silinecek`, cost: `${plural(lessons.length, 'dersi')} de gidecek.` };
+    return { title, cost: t('{n} dersi de gidecek.', { n: lessons.length }) };
   }
   return {
-    title: `${who} silinecek`,
-    cost:
-      `${plural(lessons.length, 'dersi')} ve programa yerleşmiş ` +
-      `${plural(placed, 'saati')} de gidecek.`,
+    title,
+    cost: t('{ders} dersi ve programa yerleşmiş {saat} saati de gidecek.', {
+      ders: lessons.length,
+      saat: placed,
+    }),
   };
 }
 
@@ -1140,24 +1070,31 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     color,
     links,
     rows: [
-      { label: 'Haftalık ders yükü', value: `${load} saat`, tight: load > open },
-      { label: 'Açık saat', value: `${open} / ${week}`, tight: open < load },
-      { label: 'Programa yerleşmiş', value: `${placed} / ${load} saat`, tight: placed < load },
-      { label: 'Kapalı saat', value: `${week - open} saat`, tight: false },
+      { label: t('Haftalık ders yükü'), value: t('{n} saat', { n: load }), tight: load > open },
+      { label: t('Açık saat'), value: `${open} / ${week}`, tight: open < load },
+      {
+        label: t('Programa yerleşmiş'),
+        value: t('{yerlesen} / {toplam} saat', { yerlesen: placed, toplam: load }),
+        tight: placed < load,
+      },
+      { label: t('Kapalı saat'), value: t('{n} saat', { n: week - open }), tight: false },
     ],
   });
 
   if (kind === 'teacher') {
-    const t = ix.teacherById.get(id);
-    if (t === undefined) return null;
+    const person = ix.teacherById.get(id);
+    if (person === undefined) return null;
     const lessons = d.lessons.filter((x) => x.teacherId === id);
     const classes = [...new Set(lessons.map((x) => ix.classById.get(x.classId)?.name ?? '?'))];
     return {
-      ...common(t.short, t.name, t.color, [
-        `Branşı: ${t.subject}`,
+      ...common(person.short, person.name, person.color, [
+        t('Branşı: {brans}', { brans: subjectLabel(person.subject) }),
         lessons.length === 0
-          ? 'Henüz dersi yok'
-          : `${lessons.length} dersi var: ${classes.join(', ')}`,
+          ? t('Henüz dersi yok')
+          : t('{n} dersi var: {hangileri}', {
+              n: lessons.length,
+              hangileri: classes.join(', '),
+            }),
       ]),
     };
   }
@@ -1168,11 +1105,14 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     const lessons = d.lessons.filter((x) => x.classId === id);
     const teachers = [...new Set(lessons.map((x) => ix.teacherById.get(x.teacherId)?.short ?? '?'))];
     return {
-      ...common(c.name, `${c.name} sınıfı`, c.color, [
-        `Dersliği: ${roomName(d, c.roomId)}`,
+      ...common(c.name, t('{ad} sınıfı', { ad: c.name }), c.color, [
+        t('Dersliği: {derslik}', { derslik: roomName(d, c.roomId) }),
         lessons.length === 0
-          ? 'Henüz dersi yok'
-          : `${lessons.length} dersi var: ${teachers.join(', ')}`,
+          ? t('Henüz dersi yok')
+          : t('{n} dersi var: {hangileri}', {
+              n: lessons.length,
+              hangileri: teachers.join(', '),
+            }),
       ]),
     };
   }
@@ -1181,10 +1121,13 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
   if (r === undefined) return null;
   const groups = roomClasses(d, id);
   return {
-    ...common(r.name, `${r.name} dersliği`, null, [
+    ...common(r.name, t('{ad} dersliği', { ad: r.name }), null, [
       groups.length === 0
-        ? 'Hiçbir sınıf bu dersliği kullanmıyor'
-        : `${groups.length} sınıf paylaşıyor: ${groups.map((c) => c.name).join(', ')}`,
+        ? t('Hiçbir sınıf bu dersliği kullanmıyor')
+        : t('{n} sınıf paylaşıyor: {hangileri}', {
+            n: groups.length,
+            hangileri: groups.map((c) => c.name).join(', '),
+          }),
     ]),
   };
 }

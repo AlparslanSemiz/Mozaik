@@ -4,7 +4,12 @@
 // Rule: business logic lives here, never inside components.
 
 import { blockPlan, clampPairs } from './blocks';
+import { t } from './i18n';
 import { closedKey, placementKey, teacherKey } from './keys';
+// A leaf BELOW this file, on purpose: these sentences name a day and a subject,
+// and both have to reach the screen in the interface language. `entities.ts`
+// already imports this file, so the vocabulary lives under both of them.
+import { dayLabel, subjectLabel } from './names';
 import { hasTwoSubjects } from './subjects';
 import {
   lessonDayCount,
@@ -115,18 +120,18 @@ export function blockerDetail(
   size?: number,
 ): Block | null {
   const lesson = ix.lessonById.get(lessonId);
-  if (lesson === undefined) return { code: 'missing', message: 'Ders bulunamadı' };
+  if (lesson === undefined) return { code: 'missing', message: t('Ders bulunamadı') };
 
   const group = ix.classById.get(lesson.classId);
   const teacher = ix.teacherById.get(lesson.teacherId);
   if (group === undefined || teacher === undefined) {
-    return { code: 'missing', message: 'Ders eksik tanımlı' };
+    return { code: 'missing', message: t('Ders eksik tanımlı') };
   }
 
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
   if (day < 0 || day >= dayCount || hour < 0) {
-    return { code: 'missing', message: 'Geçersiz hücre' };
+    return { code: 'missing', message: t('Geçersiz hücre') };
   }
 
   // 1. Does the block fit before the end of the day
@@ -142,11 +147,14 @@ export function blockerDetail(
   if (hour + block > hourCount) {
     return {
       code: 'dayEnd',
-      message: block === 1 ? 'Bu saat günün dışında' : `${block} saatlik blok güne sığmıyor`,
+      message:
+        block === 1
+          ? t('Bu saat günün dışında')
+          : t('{boy} saatlik blok güne sığmıyor', { boy: block }),
     };
   }
 
-  const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
+  const dayName = dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 }));
 
   for (let i = 0; i < block; i++) {
     const h = hour + i;
@@ -159,20 +167,36 @@ export function blockerDetail(
       const otherSubject = other && ix.teacherById.get(other.teacherId)?.subject;
       return {
         code: 'classBusy',
-        message: `${group.name} sınıfının ${dayName} ${hourName} saatinde ${otherSubject ?? 'başka ders'} var`,
+        message: t('{sinif} sınıfının {gun} {saat} saatinde {ders} var', {
+          sinif: group.name,
+          gun: dayName,
+          saat: hourName,
+          ders: otherSubject === undefined ? t('başka ders') : subjectLabel(otherSubject),
+        }),
       };
     }
 
     // 3. Is the class itself closed at that hour
     if (d.unavailable[closedKey(group.id, day, h)] !== undefined) {
-      return { code: 'classClosed', message: `${group.name} sınıfı ${dayName} ${hourName} saatinde kapalı` };
+      return {
+        code: 'classClosed',
+        message: t('{sinif} sınıfı {gun} {saat} saatinde kapalı', {
+          sinif: group.name,
+          gun: dayName,
+          saat: hourName,
+        }),
+      };
     }
 
     // 4. Can the teacher come at that hour
     if (d.unavailable[closedKey(teacher.id, day, h)] !== undefined) {
       return {
         code: 'teacherClosed',
-        message: `${teacher.short} ${dayName} ${hourName} saatinde müsait değil`,
+        message: t('{kim} {gun} {saat} saatinde müsait değil', {
+          kim: teacher.short,
+          gun: dayName,
+          saat: hourName,
+        }),
       };
     }
 
@@ -183,7 +207,12 @@ export function blockerDetail(
       const otherClass = other && ix.classById.get(other.classId);
       return {
         code: 'teacherBusy',
-        message: `${teacher.short} ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka'} sınıfında`,
+        message: t('{kim} {gun} {saat} saatinde {sinif} sınıfında', {
+          kim: teacher.short,
+          gun: dayName,
+          saat: hourName,
+          sinif: otherClass?.name ?? t('başka'),
+        }),
       };
     }
 
@@ -196,7 +225,12 @@ export function blockerDetail(
         const otherClass = other && ix.classById.get(other.classId);
         return {
           code: 'roomBusy',
-          message: `${roomName} dersliğinde ${dayName} ${hourName} saatinde ${otherClass?.name ?? 'başka sınıf'} var`,
+          message: t('{derslik} dersliğinde {gun} {saat} saatinde {sinif} var', {
+            derslik: roomName,
+            gun: dayName,
+            saat: hourName,
+            sinif: otherClass?.name ?? t('başka sınıf'),
+          }),
         };
       }
 
@@ -204,7 +238,11 @@ export function blockerDetail(
       if (d.unavailable[closedKey(group.roomId, day, h)] !== undefined) {
         return {
           code: 'roomClosed',
-          message: `${roomName} dersliği ${dayName} ${hourName} saatinde kapalı`,
+          message: t('{derslik} dersliği {gun} {saat} saatinde kapalı', {
+            derslik: roomName,
+            gun: dayName,
+            saat: hourName,
+          }),
         };
       }
     }
@@ -274,7 +312,12 @@ function limitBreaches(
     if (count > maxDay) {
       out.push({
         name: 'maxPerDay',
-        message: `${teacher.short} ${dayName} günü en fazla ${maxDay} saat girmeli, burada ${count} saat olur`,
+        message: t('{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur', {
+          kim: teacher.short,
+          gun: dayName,
+          sinir: maxDay,
+          olan: count,
+        }),
       });
     }
   }
@@ -285,9 +328,10 @@ function limitBreaches(
     if (count > maxSame) {
       out.push({
         name: 'maxSameLessonPerDay',
-        message:
-          `${group.name} sınıfı ${dayName} günü ${teacher.short} dersinden en fazla ` +
-          `${maxSame} saat görmeli, burada ${count} saat olur`,
+        message: t(
+          '{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur',
+          { sinif: group.name, gun: dayName, kim: teacher.short, sinir: maxSame, olan: count },
+        ),
       });
     }
   }
@@ -322,7 +366,7 @@ export function check(
     return { blocked: null, warning: null };
   }
 
-  const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
+  const dayName = dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 }));
   const block = blockSizeFor(d, lesson, size);
   const warnings = limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName, block)
     .filter((x) => ruleLevel(d, x.name) === 'warn')
@@ -632,8 +676,8 @@ export function evictionNotice(ix: Index, lessons: Lesson[]): string {
     return `${group} · ${teacher}`;
   });
   return names.length === 1
-    ? `${names[0]} dersi havuza dönecek`
-    : `${names.join(', ')} dersleri havuza dönecek`;
+    ? t('{ders} dersi havuza dönecek', { ders: names[0]! })
+    : t('{dersler} dersleri havuza dönecek', { dersler: names.join(', ') });
 }
 
 /**
@@ -767,21 +811,21 @@ export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
     const teacher = ix.teacherById.get(lesson.teacherId);
     if (group === undefined || teacher === undefined) continue;
 
-    const dayName = d.settings.days[day]?.name ?? `${day + 1}. gün`;
+    const dayName = dayLabel(d.settings.days[day]?.name ?? t('{n}. gün', { n: day + 1 }));
     const hourName = d.settings.hours[hour] ?? `${hour + 1}`;
-    const when = `${dayName} ${hourName} saatinde`;
+    const when = t('{gun} {saat} saatinde', { gun: dayName, saat: hourName });
 
     let reason: string | null = null;
     if (d.unavailable[closedKey(teacher.id, day, hour)] !== undefined) {
-      reason = `${teacher.short} ${when} müsait değil`;
+      reason = t('{kim} {ne_zaman} müsait değil', { kim: teacher.short, ne_zaman: when });
     } else if (d.unavailable[closedKey(group.id, day, hour)] !== undefined) {
-      reason = `${group.name} sınıfı ${when} kapalı`;
+      reason = t('{sinif} sınıfı {ne_zaman} kapalı', { sinif: group.name, ne_zaman: when });
     } else if (
       group.roomId != null &&
       d.unavailable[closedKey(group.roomId, day, hour)] !== undefined
     ) {
       const roomName = ix.roomById.get(group.roomId)?.name ?? '?';
-      reason = `${roomName} dersliği ${when} kapalı`;
+      reason = t('{derslik} dersliği {ne_zaman} kapalı', { derslik: roomName, ne_zaman: when });
     }
     if (reason === null) continue;
 

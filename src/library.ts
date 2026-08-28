@@ -10,6 +10,7 @@
 // that parses them. That is what keeps store.ts <-> library.ts free of a runtime
 // cycle, the same arrangement `keys.ts` has for constraints <-> rules.
 
+import { t } from './i18n';
 import { isDesktop } from './desktop';
 import type { Id } from './types';
 
@@ -79,7 +80,7 @@ export function normalizeLibrary(raw: unknown): Library {
     if (typeof p.id !== 'string' || p.id === '' || seen.has(p.id)) continue;
     const name = typeof p.name === 'string' ? p.name.trim() : '';
     seen.add(p.id);
-    plans.push({ id: p.id, name: name === '' ? 'Adsız plan' : name, draft: p.draft === true });
+    plans.push({ id: p.id, name: name === '' ? t('Adsız plan') : name, draft: p.draft === true });
   }
   if (plans.length === 0) return defaultLibrary();
 
@@ -270,11 +271,11 @@ export function storageKind(): StorageKind {
  * look for an internet address that does not exist.
  */
 export function routeName(): string {
-  if (isDesktop()) return 'Uygulama (.exe)';
-  if (safely(() => location.protocol) === 'file:') return 'Dosya (çift tıklanan .html)';
+  if (isDesktop()) return t('Uygulama (.exe)');
+  if (safely(() => location.protocol) === 'file:') return t('Dosya (çift tıklanan .html)');
   return safely(() => location.hostname)?.endsWith('.localhost') === true
-    ? 'Windows kurulumu'
-    : 'Site';
+    ? t('Windows kurulumu')
+    : t('Site');
 }
 
 /**
@@ -318,39 +319,39 @@ export function storageReport(lib: Library): StorageReport {
     chars: charsAt(planKey(plan.id)),
   }));
 
-  rows.push({ key: LIBRARY_KEY, what: 'plan listesi', chars: charsAt(LIBRARY_KEY) });
+  rows.push({ key: LIBRARY_KEY, what: t('plan listesi'), chars: charsAt(LIBRARY_KEY) });
   for (let i = 0; i < 3; i++) {
     rows.push({
       key: `${BASE_KEY}-yedek-${i}`,
-      what: i === 0 ? 'bir önceki oturum' : `${i + 1} oturum önce`,
+      what: i === 0 ? t('bir önceki oturum') : t('{n} oturum önce', { n: i + 1 }),
       chars: charsAt(`${BASE_KEY}-yedek-${i}`),
     });
   }
-  rows.push({ key: `${BASE_KEY}-tema`, what: 'tema tercihi', chars: charsAt(`${BASE_KEY}-tema`) });
-  rows.push({ key: `${BASE_KEY}-dil`, what: 'dil tercihi', chars: charsAt(`${BASE_KEY}-dil`) });
+  rows.push({ key: `${BASE_KEY}-tema`, what: t('tema tercihi'), chars: charsAt(`${BASE_KEY}-tema`) });
+  rows.push({ key: `${BASE_KEY}-dil`, what: t('dil tercihi'), chars: charsAt(`${BASE_KEY}-dil`) });
   rows.push({
     key: `${BASE_KEY}-kenar`,
-    what: 'kenar çubuğu tercihi',
+    what: t('kenar çubuğu tercihi'),
     chars: charsAt(`${BASE_KEY}-kenar`),
   });
   rows.push({
     key: `${BASE_KEY}-olcek`,
-    what: 'yazı büyüklüğü tercihi',
+    what: t('yazı büyüklüğü tercihi'),
     chars: charsAt(`${BASE_KEY}-olcek`),
   });
   rows.push({
     key: `${BASE_KEY}-yogunluk`,
-    what: 'ızgara yoğunluğu tercihi',
+    what: t('ızgara yoğunluğu tercihi'),
     chars: charsAt(`${BASE_KEY}-yogunluk`),
   });
   rows.push({
     key: `${BASE_KEY}-arayuz-yogunluk`,
-    what: 'arayüz yoğunluğu tercihi',
+    what: t('arayüz yoğunluğu tercihi'),
     chars: charsAt(`${BASE_KEY}-arayuz-yogunluk`),
   });
   rows.push({
     key: `${BASE_KEY}-havuz`,
-    what: 'havuz çekmecesi tercihi',
+    what: t('havuz çekmecesi tercihi'),
     chars: charsAt(`${BASE_KEY}-havuz`),
   });
   // These two arrived with the C round and the panel was never told. A report
@@ -358,32 +359,32 @@ export function storageReport(lib: Library): StorageReport {
   // being trusted when somebody asks "is all of it in here?".
   rows.push({
     key: `${BASE_KEY}-havuz-boy`,
-    what: 'havuz çekmecesinin boyu',
+    what: t('havuz çekmecesinin boyu'),
     chars: charsAt(`${BASE_KEY}-havuz-boy`),
   });
   rows.push({
     key: `${BASE_KEY}-serit`,
-    what: 'araç şeridi tercihi',
+    what: t('araç şeridi tercihi'),
     chars: charsAt(`${BASE_KEY}-serit`),
   });
   rows.push({
     key: `${BASE_KEY}-serit-gizle`,
-    what: 'şerit kaydırınca gizlensin mi',
+    what: t('şerit kaydırınca gizlensin mi'),
     chars: charsAt(`${BASE_KEY}-serit-gizle`),
   });
   rows.push({
     key: `${BASE_KEY}-musaitlik-saat`,
-    what: 'müsaitlikte saat gösterimi',
+    what: t('müsaitlikte saat gösterimi'),
     chars: charsAt(`${BASE_KEY}-musaitlik-saat`),
   });
   rows.push({
     key: `${BASE_KEY}-hareket`,
-    what: 'hareket (animasyon) tercihi',
+    what: t('hareket (animasyon) tercihi'),
     chars: charsAt(`${BASE_KEY}-hareket`),
   });
   rows.push({
     key: `${BASE_KEY}-tanitim`,
-    what: 'örnek veri satırı görüldü mü',
+    what: t('örnek veri satırı görüldü mü'),
     chars: charsAt(`${BASE_KEY}-tanitim`),
   });
   // The print options were the F round's key and this report was never told.
@@ -393,7 +394,7 @@ export function storageReport(lib: Library): StorageReport {
   // and the one thing this table is for is being trusted.
   rows.push({
     key: `${BASE_KEY}-baski`,
-    what: 'kâğıt seçenekleri',
+    what: t('kâğıt seçenekleri'),
     chars: charsAt(`${BASE_KEY}-baski`),
   });
 

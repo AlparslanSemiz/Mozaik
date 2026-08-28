@@ -7,7 +7,7 @@ import { updateLimits, updateRules } from '../../entities';
 import { findViolations } from '../../rules';
 import type { PanelProps } from '../props';
 import { paletteColor } from '../../palette';
-import { useT } from '../T';
+import { T, useT } from '../T';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -72,9 +72,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Kurallar')}</h2>
           <p className="hint">
-            Buradaki sayılar <b>bütün okul</b> için geçerlidir. Tek bir öğretmen için farklı
-            bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız
-            kutu buradaki sayıyı kullanır. <b>0</b> yazmak “sınır yok” demektir.
+            <T k="Buradaki sayılar **bütün okul** için geçerlidir. Tek bir öğretmen için farklı bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır. **0** yazmak “sınır yok” demektir." />
           </p>
           <table className="list">
             <thead>
@@ -89,9 +87,9 @@ export default function Rules({ state, change }: PanelProps) {
               {RULE_ROWS.map((rule) => (
                 <tr key={rule.name}>
                   <td>
-                    {rule.label}
+                    {t(rule.label)}
                     <br />
-                    <span className="hint">{rule.hint}</span>
+                    <span className="hint">{t(rule.hint)}</span>
                   </td>
                   <td>
                     <input
@@ -112,16 +110,16 @@ export default function Rules({ state, change }: PanelProps) {
                   <td>
                     <select
                       value={state.settings.rules[rule.name]}
-                      aria-label={`${rule.label} kuralı`}
+                      aria-label={t('{kural} kuralı', { kural: t(rule.label) })}
                       onChange={(e) =>
                         change((d) =>
                           updateRules(d, { [rule.name]: e.target.value as RuleLevel }),
                         )
                       }
                     >
-                      <option value="off">{LEVEL_LABEL.off}</option>
-                      <option value="warn">{LEVEL_LABEL.warn}</option>
-                      {rule.canBlock && <option value="block">{LEVEL_LABEL.block}</option>}
+                      <option value="off">{t(LEVEL_LABEL.off)}</option>
+                      <option value="warn">{t(LEVEL_LABEL.warn)}</option>
+                      {rule.canBlock && <option value="block">{t(LEVEL_LABEL.block)}</option>}
                     </select>
                   </td>
                   {/* What this number costs on the timetable as it stands. A
@@ -156,10 +154,7 @@ export default function Rules({ state, change }: PanelProps) {
           <h2>Kendi sınırı olan öğretmenler ({custom.length})</h2>
           {custom.length === 0 ? (
             <p className="hint">
-              Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir
-              öğretmen için farklı bir sayı gerekiyorsa{' '}
-              <b>Okul → Öğretmenler</b> tablosundaki kutuya yazın; boş bıraktığınız
-              kutu buradaki sayıyı kullanır.
+              <T k="Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır." />
             </p>
           ) : (
             <table className="list">
@@ -197,9 +192,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>Şu anki ihlaller ({violations.length})</h2>
           <p className="hint">
-            Soldaki sayıları değiştirdikçe bu liste anında değişir. <b>Uyar</b>{' '}
-            yerleştirmeyi durdurmaz, yalnızca sayar; <b>Engelle</b> dersi o hücreye hiç
-            bıraktırmaz. Aynı liste <b>Kontrol</b> sekmesinde de var.
+            <T k="Soldaki sayıları değiştirdikçe bu liste anında değişir. **Uyar** yerleştirmeyi durdurmaz, yalnızca sayar; **Engelle** dersi o hücreye hiç bıraktırmaz. Aynı liste **Kontrol** sekmesinde de var." />
           </p>
           {violations.length === 0 ? (
             <div className="ok-box">
@@ -220,7 +213,7 @@ export default function Rules({ state, change }: PanelProps) {
                   <tr key={v.key}>
                     <td>
                       <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                        {v.level === 'block' ? 'Kural dışı' : 'Uyarı'}
+                        {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
                       </span>
                     </td>
                     <td>{v.message}</td>

@@ -34,6 +34,16 @@ declare global {
 /** Are we inside the exe? Feature detection, never a build flag: the exact
     same bundle is served from file://, from Pages, from the local server and
     from here (pitfall 65 — detect, do not assume from the delivery route). */
+/**
+ * The folder the exe writes into, under Belgelerim.
+ *
+ * The SAME string as `FOLDER` in `src-tauri/src/lib.rs`, and it does NOT move
+ * when the program is renamed: a folder somebody's timetables already live in
+ * is data, exactly like `ders-programi` and the backup file names. It is here
+ * rather than typed into a sentence in Ayarlar so there is one place to read.
+ */
+export const EXE_FOLDER = 'Ders Programı';
+
 export function isDesktop(): boolean {
   return typeof window !== 'undefined' && typeof window.__TAURI__?.core?.invoke === 'function';
 }

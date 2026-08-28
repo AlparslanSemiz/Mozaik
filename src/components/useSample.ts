@@ -9,6 +9,7 @@
 
 import { useCallback } from 'react';
 import { useDialogs } from './Dialogs';
+import { useT } from './T';
 import { useToast } from './Toasts';
 import { markIntroSeen } from '../theme';
 import { sampleState } from '../sample';
@@ -22,20 +23,30 @@ export type LoadSample = (
 export function useLoadSample(): LoadSample {
   const { confirm } = useDialogs();
   const notify = useToast();
+  const t = useT();
 
   return useCallback(
     async (state, change) => {
       const holds = state.teachers.length + state.classes.length + state.lessons.length > 0;
-      const cost = `${state.teachers.length} öğretmen, ${state.classes.length} sınıf ve ${state.lessons.length} ders silinecek.`;
+      const cost = t('{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.', {
+        ogretmen: state.teachers.length,
+        sinif: state.classes.length,
+        ders: state.lessons.length,
+      });
       if (
         !(await confirm({
           title: holds
-            ? 'Bu plandaki her şeyin yerine örnek veri geçecek'
-            : 'Örnek okul verisi yüklenecek',
+            ? t('Bu plandaki her şeyin yerine örnek veri geçecek')
+            : t('Örnek okul verisi yüklenecek'),
           body: holds
-            ? `${cost} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 derslik örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.`
-            : '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.',
-          confirmLabel: holds ? 'Yerine koy' : 'Yükle',
+            ? t(
+                '{kayip} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 derslik örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.',
+                { kayip: cost },
+              )
+            : t(
+                '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.',
+              ),
+          confirmLabel: holds ? t('Yerine koy') : t('Yükle'),
           danger: holds,
         }))
       ) {

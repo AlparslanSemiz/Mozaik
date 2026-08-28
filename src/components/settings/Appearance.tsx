@@ -35,7 +35,7 @@ import {
 } from '../../theme';
 import type { Density, Motion, Theme } from '../../theme';
 import { DILLER, DIL_ADI } from '../../i18n';
-import { useLang } from '../T';
+import { T, useLang } from '../T';
 import type { State } from '../../types';
 import { paletteColor } from '../../palette';
 
@@ -140,12 +140,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Tema')}</h2>
           <p className="hint">
-            Varsayılan <b>açık</b>, ve bu bir seçim: ızgaranın işlevsel renkleri
-            (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık zeminde
-            seçildi ve orada ölçüldü. Koyu tema bilgisayarınızın tercihini{' '}
-            <b>izlemez</b>: burada ne seçerseniz o kalır. Yedek dosyasına
-            girmez. Yazdırılan sayfa her iki durumda da <b>açık</b> palet
-            kullanır: o renkler kâğıda basılıyor.
+            <T k="Varsayılan **açık**, ve bu bir seçim: ızgaranın işlevsel renkleri (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık zeminde seçildi ve orada ölçüldü. Koyu tema bilgisayarınızın tercihini **izlemez**: burada ne seçerseniz o kalır. Yedek dosyasına girmez. Yazdırılan sayfa her iki durumda da **açık** palet kullanır: o renkler kâğıda basılıyor." />
           </p>
           <div className="form-row" role="group" aria-label={t('Tema')}>
             {THEMES.map((x) => (
@@ -155,7 +150,7 @@ export default function Appearance({
                 aria-pressed={x.id === theme}
                 onClick={() => chooseTheme(x.id)}
               >
-                {x.label}
+                {t(x.label)}
               </button>
             ))}
           </div>
@@ -183,12 +178,7 @@ export default function Appearance({
           </div>
 
           <p className="hint">
-            Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve başka bir
-            bilgisayarda açılan programı etkilemez. <b>Yazdırmayı da
-            etkilemez</b>: kâğıt sabit boyda (A4 yatay) ve basılan sayfanın
-            yazısı ayrı bir ölçüde tutulur, o yüzden burayı büyütmek bir
-            programın sayfaya sığıp sığmadığını değiştirmez. Kâğıdın kendi yazı
-            boyu <b>Çıktı</b> sekmesinde.
+            <T k="Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve başka bir bilgisayarda açılan programı etkilemez. **Yazdırmayı da etkilemez**: kâğıt sabit boyda (A4 yatay) ve basılan sayfanın yazısı ayrı bir ölçüde tutulur, o yüzden burayı büyütmek bir programın sayfaya sığıp sığmadığını değiştirmez. Kâğıdın kendi yazı boyu **Çıktı** sekmesinde." />
           </p>
         </div>
 
@@ -208,24 +198,17 @@ export default function Appearance({
           <h2>{t('Yoğunluk')}</h2>
           <h3>{t('Izgara')}</h3>
           <p className="hint">
-            Yalnız <b>Program</b> sekmesindeki haftalık ızgarayı etkiler: bir
-            hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı.
+            <T k="Yalnız **Program** sekmesindeki haftalık ızgarayı etkiler: bir hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı." />
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Ferah.</b> Hücre en büyük, kartın alt satırı tam boyda. En kolay
-              okunan, en çok kaydırılan.
+              <T k="**Ferah.** Hücre en büyük, kartın alt satırı tam boyda. En kolay okunan, en çok kaydırılan." />
             </li>
             <li>
-              <b>Rahat.</b> Bugüne kadarki ızgara: hücre geniş, her ders
-              numarasının altında başlangıç saati yazıyor, hafta ekrana sığmadığı
-              için sağa kaydırıyorsunuz.
+              <T k="**Rahat.** Bugüne kadarki ızgara: hücre geniş, her ders numarasının altında başlangıç saati yazıyor, hafta ekrana sığmadığı için sağa kaydırıyorsunuz." />
             </li>
             <li>
-              <b>Sığdır.</b> Haftanın tamamı bir ekranda: hücre ekranın
-              genişliğinden hesaplanır ve <b>saatler gizlenir</b>, çünkü sütunu
-              dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve
-              renkler yerinde kalır.
+              <T k="**Sığdır.** Haftanın tamamı bir ekranda: hücre ekranın genişliğinden hesaplanır ve **saatler gizlenir**, çünkü sütunu dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve renkler yerinde kalır." />
             </li>
           </ul>
 
@@ -248,26 +231,22 @@ export default function Appearance({
           </div>
 
           <p className="hint">
-            Saatleri görmek için <b>Ayarlar → Zil ve günler</b>'deki zil önizlemesine
-            bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
+            <T k="Saatleri görmek için **Ayarlar → Zil ve günler**'deki zil önizlemesine bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar." />
           </p>
 
           <h3>{t('Arayüzün geri kalanı')}</h3>
           <p className="hint">
-            Ekranın <b>geri kalanı</b>: Okul, Dersler, Kontrol ve Ayarlar’daki
-            listeler, panellerin kenar boşlukları, kutuların ve düğmelerin
-            yüksekliği. Program ızgarasına dokunmaz.
+            <T k="Ekranın **geri kalanı**: Okul, Dersler, Kontrol ve Ayarlar’daki listeler, panellerin kenar boşlukları, kutuların ve düğmelerin yüksekliği. Program ızgarasına dokunmaz." />
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Ferah.</b> Satırlar en açık, paneller en geniş.
+              <T k="**Ferah.** Satırlar en açık, paneller en geniş." />
             </li>
             <li>
-              <b>Rahat.</b> Bugüne kadarki aralık.
+              <T k="**Rahat.** Bugüne kadarki aralık." />
             </li>
             <li>
-              <b>Sığdır.</b> Satır aralığı daralır, tek ekranda daha çok satır
-              görünür. <b>Yazı boyutu küçülmez</b>: kısılan şey yalnızca boşluk.
+              <T k="**Sığdır.** Satır aralığı daralır, tek ekranda daha çok satır görünür. **Yazı boyutu küçülmez**: kısılan şey yalnızca boşluk." />
             </li>
           </ul>
 
@@ -298,11 +277,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Araç şeridi')}</h2>
           <p className="hint">
-            Sekmelerin altındaki ikinci bar, sayfayı <b>aşağı kaydırırken
-            kendiliğinden gizlenir</b> ve yukarı çıkınca geri gelir. Böylece uzun
-            bir listeyi okurken bir satır daha görünür. Bu hareket rahatsız
-            ediyorsa kapatın: şerit her zaman yerinde durur. Şeridi <b>tamamen</b>
-            kaldırmak ayrı bir şey; onun düğmesi üst çubukta, temanın yanında.
+            <T k="Sekmelerin altındaki ikinci bar, sayfayı **aşağı kaydırırken kendiliğinden gizlenir** ve yukarı çıkınca geri gelir. Böylece uzun bir listeyi okurken bir satır daha görünür. Bu hareket rahatsız ediyorsa kapatın: şerit her zaman yerinde durur. Şeridi **tamamen** kaldırmak ayrı bir şey; onun düğmesi üst çubukta, temanın yanında." />
           </p>
           <div className="form-row">
             <button
@@ -313,7 +288,7 @@ export default function Appearance({
                 setRibbonAuto(!ribbonAuto);
               }}
             >
-              {ribbonAuto ? 'Kaydırınca gizlenir' : 'Her zaman durur'}
+              {ribbonAuto ? t('Kaydırınca gizlenir') : t('Her zaman durur')}
             </button>
           </div>
         </div>
@@ -321,12 +296,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Müsaitlik çizelgesi')}</h2>
           <p className="hint">
-            Müsaitlik ekranındaki ders numaralarının altında <b>başlangıç saati</b>
-            yazsın mı? Varsayılan <b>kapalı</b>. Sebebi yer kazanmak değil: o tablo
-            iki durumda da aynı boyda, ölçüldü. Sebep o ekranın işi. Orada
-            yapılan tek şey saatleri açıp kapatmak, ve on iki saat orada
-            okunmuyor. Saatler yukarıdaki <b>zil önizlemesinde</b> ve basılan her
-            sayfada iki durumda da yazıyor.
+            <T k="Müsaitlik ekranındaki ders numaralarının altında **başlangıç saati** yazsın mı? Varsayılan **kapalı**. Sebebi yer kazanmak değil: o tablo iki durumda da aynı boyda, ölçüldü. Sebep o ekranın işi. Orada yapılan tek şey saatleri açıp kapatmak, ve on iki saat orada okunmuyor. Saatler yukarıdaki **zil önizlemesinde** ve basılan her sayfada iki durumda da yazıyor." />
           </p>
           <div className="form-row">
             <button
@@ -337,7 +307,7 @@ export default function Appearance({
                 setAvailClock(!availClock);
               }}
             >
-              {availClock ? 'Saatler görünüyor' : 'Saatler gizli'}
+              {availClock ? t('Saatler görünüyor') : t('Saatler gizli')}
             </button>
           </div>
         </div>
@@ -347,14 +317,11 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Örnek')}</h2>
           <p className="hint">
-            Seçtiğiniz büyüklük bu sayfada da geçerli. Aşağıdaki satırlar{' '}
-            <b>kendi öğretmenleriniz</b>, uydurma bir örnek değil. Bir ad
-            kutusuna sığmıyorsa ölçek o makine için fazla büyük demektir.
+            <T k="Seçtiğiniz büyüklük bu sayfada da geçerli. Aşağıdaki satırlar **kendi öğretmenleriniz**, uydurma bir örnek değil. Bir ad kutusuna sığmıyorsa ölçek o makine için fazla büyük demektir." />
           </p>
           {teachers.length === 0 ? (
             <p className="hint">
-              Henüz öğretmen yok. <b>Okul → Öğretmenler</b> adımından ekleyin;
-              burası o listeyi gösterir.
+              <T k="Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir." />
             </p>
           ) : (
             <table className="list">
@@ -393,22 +360,17 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Hareket')}</h2>
           <p className="hint">
-            Ekranda bir şey belirirken, bir kutu açılırken ya da bir düğmeye
-            basarken görülen kısa hareketler. Rahatsız ediyorsa <b>azaltın</b>{' '}
-            ya da <b>tamamen kapatın</b>; programın çalışmasında hiçbir şey
-            değişmez.
+            <T k="Ekranda bir şey belirirken, bir kutu açılırken ya da bir düğmeye basarken görülen kısa hareketler. Rahatsız ediyorsa **azaltın** ya da **tamamen kapatın**; programın çalışmasında hiçbir şey değişmez." />
           </p>
           <ul className="hint choice-list">
             <li>
-              <b>Tam.</b> Tasarlandığı gibi.
+              <T k="**Tam.** Tasarlandığı gibi." />
             </li>
             <li>
-              <b>Az.</b> Süreler yarıya iner ve <b>yer değiştiren</b> hareketler
-              kapanır: paneller kayarak değil, duracakları yerde belirir. Renk
-              geçişleri kalır, yani düğme imlece hâlâ cevap verir.
+              <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır: paneller kayarak değil, duracakları yerde belirir. Renk geçişleri kalır, yani düğme imlece hâlâ cevap verir." />
             </li>
             <li>
-              <b>Kapalı.</b> Hiçbir şey kaymaz, hiçbir şey solmaz.
+              <T k="**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz." />
             </li>
           </ul>
 
@@ -420,16 +382,13 @@ export default function Appearance({
                 aria-pressed={m.id === motion}
                 onClick={() => chooseMotion(m.id)}
               >
-                {m.label}
+                {t(m.label)}
               </button>
             ))}
           </div>
 
           <p className="hint">
-            Bilgisayarınız <i>“azaltılmış hareket”</i> istiyorsa (Windows’ta{' '}
-            <b>Ayarlar → Erişilebilirlik → Görsel efektler</b>), burada ne
-            seçerseniz seçin hareket <b>kapalı</b> kalır. Bu ayar makinenin
-            isteğinin <b>ötesine</b> geçebilir, gerisine değil.
+            <T k="Bilgisayarınız “azaltılmış hareket” istiyorsa (Windows’ta **Ayarlar → Erişilebilirlik → Görsel efektler**), burada ne seçerseniz seçin hareket **kapalı** kalır. Bu ayar makinenin isteğinin **ötesine** geçebilir, gerisine değil." />
           </p>
         </div>
 

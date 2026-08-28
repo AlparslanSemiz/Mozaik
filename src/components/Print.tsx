@@ -23,7 +23,7 @@ import type { State } from '../types';
 import type { Scope } from '../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
 import type { PrintOptions } from '../printOptions';
-import { useT } from './T';
+import { T, useT } from './T';
 
 interface Props {
   state: State;
@@ -193,9 +193,8 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     return (
       <>
         <div className="empty-screen">
-          <strong>Yazdırılacak program yok.</strong>
-          Önce <b>Okul</b> sekmesinden dersleri girip <b>Program</b> sekmesinde
-          dizin.
+          <strong>{t('Yazdırılacak program yok.')}</strong>
+          <T k="Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin." />
         </div>
       </>
     );
@@ -258,9 +257,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     return (
       <div className="pick-list">
         <div className="pick-head">
-          <b>
-            {title} ({chosen}/{items.length})
-          </b>
+          <b>{t('{ne} ({secili}/{toplam})', { ne: t(title), secili: chosen, toplam: items.length })}</b>
           <button className="btn" onClick={() => setAll(kind, true)}>{t('Tümü')}</button>
           <button className="btn" onClick={() => setAll(kind, false)}>{t('Hiçbiri')}</button>
         </div>
@@ -299,14 +296,14 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                   {colored && (
                     <span className="p-dot" style={{ background: paletteColor(group.color) }} />
                   )}
-                  {group.name} sınıfı · Haftalık ders programı
+                  {t('{ad} sınıfı · Haftalık ders programı', { ad: group.name })}
                 </span>
                 {(() => {
                   const room =
                     group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
                   const sub = credits(
                     options.school ? state.settings.schoolName : '',
-                    !options.credits || room === '' ? '' : `${room} dersliği`,
+                    !options.credits || room === '' ? '' : t('{ad} dersliği', { ad: room }),
                   );
                   return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
                 })()}
@@ -455,10 +452,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
         <div className="panel no-print">
           <h2>{t('Çıktı')}</h2>
           <p className="hint">
-            Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
-            penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
-            açık</b> olsun, yoksa renkler çıkmaz. Tarih ve dosya adı kâğıda çıkmaz;
-            yine de görürseniz <b>üstbilgi ve altbilgi</b> kutusunun işaretini kaldırın.
+            <T k="Her sınıf ve her öğretmen ayrı sayfaya basılır (**A4 yatay**). Yazdırma penceresinde **kenar boşlukları: varsayılan** ve **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz. Tarih ve dosya adı kâğıda çıkmaz; yine de görürseniz **üstbilgi ve altbilgi** kutusunun işaretini kaldırın." />
           </p>
           {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
               button stayed, because the page COUNT comes from the tick lists
@@ -521,9 +515,9 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             ))}
           </div>
           <p className="hint">
-            {PER_SHEET_LABELS.find((x) => x.value === options.perSheet)?.hint}
+            {t(PER_SHEET_LABELS.find((x) => x.value === options.perSheet)?.hint ?? '')}
             {' · '}
-            <b>{Math.ceil(pageCount / options.perSheet)}</b> kâğıt
+            <T k="**{n}** kâğıt" vars={{ n: Math.ceil(pageCount / options.perSheet) }} />
           </p>
 
           <h3>{t('Kâğıttaki yazı')}</h3>
@@ -535,7 +529,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                 aria-pressed={options.size === x.value}
                 onClick={() => setOptions({ ...options, size: x.value })}
               >
-                {x.label}
+                {t(x.label)}
               </button>
             ))}
           </div>
@@ -561,7 +555,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                   onChange={() => setOptions({ ...options, [x.id]: !options[x.id] })}
                 />
                 <span>
-                  {x.label} <span className="muted-inline">· {x.hint}</span>
+                  {t(x.label)} <span className="muted-inline">· {t(x.hint)}</span>
                 </span>
               </label>
             ))}
@@ -600,9 +594,20 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           </table>
           {emptyPages > 0 && (
             <div className="warn-box">
-              Seçilen sayfaların <b>{emptyPages}</b> tanesi tamamen boş. O
-              {' '}{scope === 'teachers' ? 'öğretmenlerin' : 'sınıfların'} programı
-              henüz dizilmemiş. <b>Program</b> sekmesinden dizebilirsiniz.
+              {/* Two whole sentences: Turkish inflects the noun ("o
+                  öğretmenlerin"), and a dictionary cannot add a case ending to
+                  a word it has just translated. */}
+              {scope === 'teachers' ? (
+                <T
+                  k="Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz."
+                  vars={{ n: emptyPages }}
+                />
+              ) : (
+                <T
+                  k="Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz."
+                  vars={{ n: emptyPages }}
+                />
+              )}
             </div>
           )}
         </div>

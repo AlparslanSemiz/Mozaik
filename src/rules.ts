@@ -7,6 +7,8 @@
 // Only the TYPE Index comes from constraints.ts (erased at compile time), so
 // there is no runtime import cycle.
 
+import { t } from './i18n';
+import { dayLabel } from './names';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from './keys';
 import type { Id, Lesson, RuleLevel, RuleName, State, Teacher } from './types';
@@ -139,14 +141,21 @@ export function findViolations(d: State, ix: Index): Violation[] {
     for (const [day, dayInfo] of d.settings.days.entries()) {
       const count = teacherDayCount(ix, teacher.id, day, hourCount);
       if (count === 0) continue; // a free day is not a breach
-      const when = `${teacher.short} ${dayInfo.name} günü`;
+      const when = t('{kim} {gun} günü', {
+        kim: teacher.short,
+        gun: dayLabel(dayInfo.name),
+      });
 
       if (ruleActive(d, 'maxPerDay', maxDay) && count > maxDay) {
         out.push({
           key: `${teacher.id}|${day}|maxPerDay`,
           rule: 'maxPerDay',
           level: ruleLevel(d, 'maxPerDay'),
-          message: `${when} ${count} saat ders veriyor, en fazla ${maxDay} saat isteniyor.`,
+          message: t('{kim_gun} {olan} saat ders veriyor, en fazla {sinir} saat isteniyor.', {
+            kim_gun: when,
+            olan: count,
+            sinir: maxDay,
+          }),
         });
       }
       if (ruleActive(d, 'minPerDay', minDay) && count < minDay) {
@@ -154,7 +163,11 @@ export function findViolations(d: State, ix: Index): Violation[] {
           key: `${teacher.id}|${day}|minPerDay`,
           rule: 'minPerDay',
           level: ruleLevel(d, 'minPerDay'),
-          message: `${when} sadece ${count} saat ders veriyor, en az ${minDay} saat isteniyor.`,
+          message: t('{kim_gun} sadece {olan} saat ders veriyor, en az {sinir} saat isteniyor.', {
+            kim_gun: when,
+            olan: count,
+            sinir: minDay,
+          }),
         });
       }
       if (ruleActive(d, 'maxConsecutive', maxRun)) {
@@ -164,7 +177,10 @@ export function findViolations(d: State, ix: Index): Violation[] {
             key: `${teacher.id}|${day}|maxConsecutive`,
             rule: 'maxConsecutive',
             level: ruleLevel(d, 'maxConsecutive'),
-            message: `${when} art arda ${run} saat ders veriyor, en fazla ${maxRun} saat isteniyor.`,
+            message: t(
+              '{kim_gun} art arda {olan} saat ders veriyor, en fazla {sinir} saat isteniyor.',
+              { kim_gun: when, olan: run, sinir: maxRun },
+            ),
           });
         }
       }
@@ -184,9 +200,16 @@ export function findViolations(d: State, ix: Index): Violation[] {
         key: `${lesson.id}|${day}|maxSameLessonPerDay`,
         rule: 'maxSameLessonPerDay',
         level: ruleLevel(d, 'maxSameLessonPerDay'),
-        message:
-          `${group?.name ?? '?'} sınıfı ${dayInfo.name} günü ${teacher?.short ?? '?'} ` +
-          `dersinden ${count} saat görüyor, en fazla ${limit} saat isteniyor.`,
+        message: t(
+          '{sinif} sınıfı {gun} günü {kim} dersinden {olan} saat görüyor, en fazla {sinir} saat isteniyor.',
+          {
+            sinif: group?.name ?? '?',
+            gun: dayLabel(dayInfo.name),
+            kim: teacher?.short ?? '?',
+            olan: count,
+            sinir: limit,
+          },
+        ),
       });
     }
   }

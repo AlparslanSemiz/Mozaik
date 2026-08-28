@@ -4,6 +4,7 @@
 // timetable cannot be built. It comes before a solver because it is far
 // cheaper and far more useful.
 
+import { t } from './i18n';
 import { blockerDetail, buildIndex, closedConflicts } from './constraints';
 import type { BlockCode, Index } from './constraints';
 import { findViolations } from './rules';
@@ -102,7 +103,7 @@ export function commonestBlock(
     }
   }
 
-  let reason = 'Boş yer kalmamış';
+  let reason = t('Boş yer kalmamış');
   let top = 0;
   for (const entry of counts.values()) {
     if (entry.count > top) {
@@ -130,24 +131,37 @@ export function buildCapacity(d: State): Capacity {
     closedCount.set(entityId, (closedCount.get(entityId) ?? 0) + 1);
   }
 
-  const teachers: ReportRow[] = d.teachers.map((t) => {
-    const capacity = totalSlots - (closedCount.get(t.id) ?? 0);
+  const teachers: ReportRow[] = d.teachers.map((x) => {
+    const capacity = totalSlots - (closedCount.get(x.id) ?? 0);
     const load = d.lessons
-      .filter((x) => x.teacherId === t.id)
-      .reduce((sum, x) => sum + x.weeklyHours, 0);
+      .filter((l) => l.teacherId === x.id)
+      .reduce((sum, l) => sum + l.weeklyHours, 0);
     const level = levelOf(capacity, load);
     const message =
       level === 'impossible'
-        ? `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş. ${load - capacity} saat fazla.`
+        ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. {fazla} saat fazla.', {
+            kim: x.short,
+            acik: capacity,
+            yuk: load,
+            fazla: load - capacity,
+          })
         : level === 'tight'
-          ? `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş. Zor olacak.`
-          : `${t.short} ${capacity} saat müsait, ${load} saat ders yüklenmiş.`;
+          ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. Zor olacak.', {
+              kim: x.short,
+              acik: capacity,
+              yuk: load,
+            })
+          : t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş.', {
+              kim: x.short,
+              acik: capacity,
+              yuk: load,
+            });
     // The NAME alone, since 2026-08-27: "Öğretmen yükü tarafında her öğretmen
     // için çok uzun satır. kısaltmayı gösterme orada." The short is not lost —
     // `message` still opens with it, and that is what the cell's tooltip shows
     // and what Kontrol prints. Rows for classes and rooms were never prefixed
     // this way, so the table is now consistent as well as shorter.
-    return { id: t.id, name: t.name, capacity, load, level, message };
+    return { id: x.id, name: x.name, capacity, load, level, message };
   });
 
   const classes: ReportRow[] = d.classes.map((c) => {
@@ -158,8 +172,15 @@ export function buildCapacity(d: State): Capacity {
     const level = levelOf(capacity, load);
     const message =
       level === 'impossible'
-        ? `${c.name} sınıfına ${load} saat ders yüklenmiş ama haftada ${capacity} saati açık. ${load - capacity} saat fazla.`
-        : `${c.name} sınıfı: açık olan ${capacity} saatin ${load} saati dolu.`;
+        ? t(
+            '{sinif} sınıfına {yuk} saat ders yüklenmiş ama haftada {acik} saati açık. {fazla} saat fazla.',
+            { sinif: c.name, yuk: load, acik: capacity, fazla: load - capacity },
+          )
+        : t('{sinif} sınıfı: açık olan {acik} saatin {yuk} saati dolu.', {
+            sinif: c.name,
+            acik: capacity,
+            yuk: load,
+          });
     return { id: c.id, name: c.name, capacity, load, level, message };
   });
 
@@ -176,8 +197,23 @@ export function buildCapacity(d: State): Capacity {
     const names = sharing.map((c) => c.name).join(', ');
     const message =
       level === 'impossible'
-        ? `${r.name} dersliğini ${sharing.length} sınıf paylaşıyor (${names}) ve toplam ${load} saat ders var. Haftada ${capacity} saati açık, ${load - capacity} saat fazla.`
-        : `${r.name} dersliği (${names || 'sınıf yok'}): açık olan ${capacity} saatin ${load} saati dolu.`;
+        ? t(
+            '{derslik} dersliğini {n} sınıf paylaşıyor ({hangileri}) ve toplam {yuk} saat ders var. Haftada {acik} saati açık, {fazla} saat fazla.',
+            {
+              derslik: r.name,
+              n: sharing.length,
+              hangileri: names,
+              yuk: load,
+              acik: capacity,
+              fazla: load - capacity,
+            },
+          )
+        : t('{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.', {
+            derslik: r.name,
+            hangileri: names || t('sınıf yok'),
+            acik: capacity,
+            yuk: load,
+          });
     return { id: r.id, name: r.name, capacity, load, level, message };
   });
 
@@ -202,7 +238,10 @@ export function buildReport(d: State): Report {
       lessonId: lesson.id,
       name: lessonName(ix, lesson.id),
       missing,
-      message: `${missing} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: ${summary.reason}`,
+      message: t('{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}', {
+        n: missing,
+        sebep: summary.reason,
+      }),
     });
   }
 
@@ -311,9 +350,9 @@ export function health(d: State): Health {
     problems: stranded + report.violations.length + report.unplaceable.length,
     level,
     message: empty
-      ? 'Henüz ders girilmedi'
+      ? t('Henüz ders girilmedi')
       : parts.length === 0
-        ? 'Sorun yok'
+        ? t('Sorun yok')
         : parts.join(' · '),
   };
 }

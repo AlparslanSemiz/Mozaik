@@ -6,10 +6,10 @@
 import { useMemo } from 'react';
 import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../bell';
 import type { Day } from '../../types';
-import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
+import { WEEK, dayLabel, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import Field from '../Field';
 import type { PanelProps } from '../props';
-import { useT } from '../T';
+import { T, useT } from '../T';
 
 export default function School({ state, change }: PanelProps) {
   const t = useT();
@@ -81,15 +81,11 @@ export default function School({ state, change }: PanelProps) {
               if it belonged to neither. Every panel now reads
               heading, description, entry, list. */}
           <p className="hint">
-            Okul adı yazdırılan her sayfanın başlığında görünür. Altındaki listede
-            ders yapılan günleri işaretleyin; her günün yanındaki kutu, <b>öğle
-            arasının</b> kaçıncı dersten sonra verileceğini söyler. Bir günü
-            kaldırırsanız o güne yerleşmiş dersler silinir; kalan günlerin
-            programı yerinde durur.
+            <T k="Okul adı yazdırılan her sayfanın başlığında görünür. Altındaki listede ders yapılan günleri işaretleyin; her günün yanındaki kutu, **öğle arasının** kaçıncı dersten sonra verileceğini söyler. Bir günü kaldırırsanız o güne yerleşmiş dersler silinir; kalan günlerin programı yerinde durur." />
           </p>
 
           <div className="form-row">
-            <Field label="Okul adı (yazdırılan sayfaların başlığında görünür)" wide>
+            <Field label={t('Okul adı (yazdırılan sayfaların başlığında görünür)')} wide>
               <input
                 type="text"
                 className="grow"
@@ -121,20 +117,20 @@ export default function School({ state, change }: PanelProps) {
                         onChange={(e) => toggleDay(name, e.target.checked)}
                       />
                     </td>
-                    <td>{name}</td>
+                    <td>{dayLabel(name)}</td>
                     <td>
                       {day === undefined ? (
                         <span className="hint">{t('ders yok')}</span>
                       ) : (
                         <select
                           value={day.longBreakAfter}
-                          aria-label={`${name} öğle arası`}
+                          aria-label={t('{gun} öğle arası', { gun: dayLabel(name) })}
                           onChange={(e) => setLongBreak(name, Number(e.target.value))}
                         >
                           <option value={0}>{t('Uzun ara yok')}</option>
                           {state.settings.hours.map((_, i) => (
                             <option key={i} value={i + 1}>
-                              {i + 1}. dersten sonra
+                              {t('{n}. dersten sonra', { n: i + 1 })}
                             </option>
                           ))}
                         </select>
@@ -147,8 +143,11 @@ export default function School({ state, change }: PanelProps) {
           </table>
 
           <p className="hint">
-            Şu an <b>{dayCount} gün × {hourCount} saat</b> = {dayCount * hourCount} slot.
-            {dayCount === 0 && ' En az bir gün seçmelisiniz.'}
+            <T
+              k="Şu an **{gun} gün × {saat} saat** = {yer} slot."
+              vars={{ gun: dayCount, saat: hourCount, yer: dayCount * hourCount }}
+            />
+            {dayCount === 0 && ` ${t('En az bir gün seçmelisiniz.')}`}
           </p>
         </div>
 
@@ -160,7 +159,7 @@ export default function School({ state, change }: PanelProps) {
             )}
           </p>
           <div className="form-row">
-            <Field label="Günlük ders sayısı">
+            <Field label={t('Günlük ders sayısı')}>
               <input
                 type="number"
                 min={1}
@@ -214,7 +213,7 @@ export default function School({ state, change }: PanelProps) {
                 onBlur={(e) => change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))}
               />
             </Field>
-            <Field label="Teneffüs (dk)">
+            <Field label={t('Teneffüs (dk)')}>
               <input
                 type="number"
                 min={0}
@@ -224,7 +223,7 @@ export default function School({ state, change }: PanelProps) {
                 onBlur={(e) => change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))}
               />
             </Field>
-            <Field label="Öğle arası (dk)">
+            <Field label={t('Öğle arası (dk)')}>
               <input
                 type="number"
                 min={0}
@@ -239,7 +238,7 @@ export default function School({ state, change }: PanelProps) {
           </div>
 
           <div className="form-row spaced">
-            <Field label="Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)" wide>
+            <Field label={t('Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)')} wide>
               <input
                 type="text"
                 className="grow"
@@ -295,7 +294,9 @@ export default function School({ state, change }: PanelProps) {
                           {patterns.map((p) => (
                             <td key={p.after}>
                               {p.after === i + 1
-                                ? `Öğle arası, ${state.settings.bell.longBreakMinutes} dk`
+                                ? t('Öğle arası, {dk} dk', {
+                                    dk: state.settings.bell.longBreakMinutes,
+                                  })
                                 : ''}
                             </td>
                           ))}
