@@ -79,6 +79,7 @@ import { applyDensity } from '../theme';
 import { paletteColor } from '../palette';
 import type { Kind, LessonMode, SectionId, ToolState, View } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
+import { useT } from './T';
 
 interface Props {
   ui: ToolState;
@@ -200,15 +201,17 @@ function Spacer() {
  * is smaller than the outside one and the group reads as a group.
  */
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
+  const t = useT();
   return (
     <>
-      <span className="ribbon-label">{label}</span>
+      <span className="ribbon-label">{t(label)}</span>
       <span className="ribbon-group">{children}</span>
     </>
   );
 }
 
 export default function Ribbon({ ui, open, state, change, solver, density, setDensity }: Props) {
+  const t = useT();
   const { confirm } = useDialogs();
   const ix = useMemo(() => buildIndex(state), [state]);
   const status = useMemo(() => health(state), [state]);
@@ -220,7 +223,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
 
   if (ui.tab === 'setup') {
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Okul listeleri">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Okul listeleri')}>
         <Group label="Liste">
           {STEPS.map((s) => {
             const count = s.count(state);
@@ -236,7 +239,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
                   {s.icon}
                 </span>
 
-                {s.label}
+                {t(s.label)}
                 <span className="step-count">{count}</span>
               </button>
             );
@@ -268,7 +271,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         className="ribbon"
         data-section={ui.tab}
         role="toolbar"
-        aria-label="Ders girişi araçları"
+        aria-label={t('Ders girişi araçları')}
       >
         <Group label="Yöntem">
           {LESSON_MODES.map((m) => (
@@ -276,7 +279,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               key={m.id}
               className="btn"
               aria-pressed={ui.lessonMode === m.id}
-              title={m.why}
+              title={t(m.why)}
               onClick={() => {
                 ui.setLessonMode(m.id);
                 // The focus is an id from the OTHER list once the axis turns,
@@ -285,7 +288,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               }}
             >
               {m.icon}
-              {m.label}
+              {t(m.label)}
             </button>
           ))}
         </Group>
@@ -298,7 +301,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             <Group label="Açık olan">
               <span className="ribbon-value">
                 {selected === undefined ? (
-                  'Liste boş'
+                  t('Liste boş')
                 ) : (
                   <>
                     <span
@@ -331,7 +334,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
       ui.kind === 'teacher' ? state.teachers : ui.kind === 'class' ? state.classes : state.rooms;
     const selected = list.find((x) => x.id === ui.chosen) ?? list[0];
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Müsaitlik araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Müsaitlik araçları')}>
         <Group label="Kim">
           {KINDS.map((k) => (
             <button
@@ -344,7 +347,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               }}
             >
               {KIND_ICON[k.id]}
-              {k.label}
+              {t(k.label)}
             </button>
           ))}
         </Group>
@@ -382,7 +385,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     const pending = pendingLessons(state, ix);
     const placed = Object.keys(state.placements).length;
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Program araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
         {/* Two positions, not one toggle: a single button saying "switch to the
             class view" tells you what the next click does, never where you are. */}
         <Group label="Görünüm">
@@ -391,8 +394,8 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               key={v.id}
               className="btn"
               aria-pressed={ui.view === v.id}
-              aria-label={v.label}
-              title={v.label}
+              aria-label={t(v.label)}
+              title={t(v.label)}
               onClick={() => ui.setView(v.id)}
             >
               {v.icon}
@@ -409,9 +412,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         <Group label="Diz">
           {solver.running ? (
             <button className="btn danger" onClick={solver.stop}>
-              <Square {...ICON} />
-              Durdur
-            </button>
+              <Square {...ICON} />{t('Durdur')}</button>
           ) : (
             <>
               <button
@@ -419,24 +420,24 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
                 disabled={pending === 0}
                 title={
                   pending === 0
-                    ? 'Havuzda bekleyen ders yok'
-                    : 'Havuzdaki dersleri kurallara uyarak yerleştirir'
+                    ? t('Havuzda bekleyen ders yok')
+                    : t('Havuzdaki dersleri kurallara uyarak yerleştirir')
                 }
                 onClick={() => solver.start(state, { keepPlaced: true })}
               >
                 <Play {...ICON} />
-                Otomatik diz ({pending})
+                {t('Otomatik diz ({n})', { n: pending })}
               </button>
               <button
                 className="btn"
                 disabled={placed === 0}
-                title="Dizilmiş programı silip baştan dizer"
+                title={t('Dizilmiş programı silip baştan dizer')}
                 onClick={async () => {
                   if (
                     await confirm({
-                      title: `Dizilmiş ${placed} saatin tamamı silinecek`,
-                      body: 'Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.',
-                      confirmLabel: 'Baştan diz',
+                      title: t('Dizilmiş {n} saatin tamamı silinecek', { n: placed }),
+                      body: t('Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.'),
+                      confirmLabel: t('Baştan diz'),
                       danger: true,
                     })
                   ) {
@@ -444,9 +445,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
                   }
                 }}
               >
-                <RotateCcw {...ICON} />
-                Baştan diz
-              </button>
+                <RotateCcw {...ICON} />{t('Baştan diz')}</button>
             </>
           )}
         </Group>
@@ -466,14 +465,14 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               key={d.id}
               className="btn"
               aria-pressed={density === d.id}
-              title={d.why}
+              title={t(d.why)}
               onClick={() => {
                 applyDensity(d.id);
                 setDensity(d.id);
               }}
             >
               {d.icon}
-              {d.label}
+              {t(d.label)}
             </button>
           ))}
         </Group>
@@ -495,13 +494,15 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
           <button
             className="btn danger"
             disabled={placed === 0 || solver.running}
-            title="Dizilmiş bütün dersleri havuza geri gönderir"
+            title={t('Dizilmiş bütün dersleri havuza geri gönderir')}
             onClick={async () => {
               if (
                 await confirm({
-                  title: `Dizilmiş ${placed} saatin tamamı havuza dönecek`,
-                  body: 'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                  confirmLabel: 'Programı boşalt',
+                  title: t('Dizilmiş {n} saatin tamamı havuza dönecek', { n: placed }),
+                  body: t(
+                    'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                  ),
+                  confirmLabel: t('Programı boşalt'),
                   danger: true,
                 })
               ) {
@@ -509,9 +510,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               }
             }}
           >
-            <Eraser {...ICON} />
-            Programı boşalt
-          </button>
+            <Eraser {...ICON} />{t('Programı boşalt')}</button>
         </Group>
       </div>
     );
@@ -533,26 +532,26 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
       document.querySelector(sel)?.scrollIntoView({ block: 'start' });
     };
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kontrol araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol araçları')}>
         <Group label="Git">
           <button
             className="btn"
             disabled={sorunlar === 0}
-            title={sorunlar === 0 ? 'Sorun yok' : 'Çözülmesi gereken satırlara gider'}
+            title={sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlara gider')}
             onClick={jump('.kontrol-sorun')}
           >
             <TriangleAlert {...ICON} />
-            Sorunlar ({sorunlar})
+            {t('Sorunlar ({n})', { n: sorunlar })}
           </button>
-          <button className="btn" title="Öğretmen yüklerine gider" onClick={jump('#kontrol-ogretmenler')}>
+          <button className="btn" title={t('Öğretmen yüklerine gider')} onClick={jump('#kontrol-ogretmenler')}>
             {KIND_ICON.teacher}
             Öğretmenler
           </button>
-          <button className="btn" title="Sınıf yüklerine gider" onClick={jump('#kontrol-siniflar')}>
+          <button className="btn" title={t('Sınıf yüklerine gider')} onClick={jump('#kontrol-siniflar')}>
             {KIND_ICON.class}
             Sınıflar
           </button>
-          <button className="btn" title="Derslik yüklerine gider" onClick={jump('#kontrol-derslikler')}>
+          <button className="btn" title={t('Derslik yüklerine gider')} onClick={jump('#kontrol-derslikler')}>
             {KIND_ICON.room}
             Derslikler
           </button>
@@ -579,7 +578,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
 
   if (ui.tab === 'print') {
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Yazdırma araçları">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Yazdırma araçları')}>
         {/* The two kinds of sheet are drawn with the same two symbols they carry
             in Kurulum, Müsaitlik and the entity panel — one drawing per thing. */}
         <Group label="İçerik">
@@ -604,21 +603,17 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             aria-pressed={ui.scope === 'both'}
             onClick={() => ui.setScope('both')}
           >
-            <Layers {...ICON} />
-            İkisi de
-          </button>
+            <Layers {...ICON} />{t('İkisi de')}</button>
         </Group>
         <Sep />
         <Group label="Renk">
           <button
             className="btn"
             aria-pressed={ui.colored}
-            title="Öğretmen renkleri kâğıda basılır"
+            title={t('Öğretmen renkleri kâğıda basılır')}
             onClick={() => ui.setColored(!ui.colored)}
           >
-            <PaletteIcon {...ICON} />
-            Renkli bas
-          </button>
+            <PaletteIcon {...ICON} />{t('Renkli bas')}</button>
         </Group>
         {/* "Yazdır (N sayfa)" is NOT here: the N comes from the tick lists in
             the panel, and a button that says how many pages belongs next to the
@@ -629,7 +624,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
 
   // settings
   return (
-    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Ayar bölümleri">
+    <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Ayar bölümleri')}>
       <Group label="Bölüm">
         {SECTIONS.map((s) => (
           <button
@@ -639,7 +634,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             onClick={() => ui.setSection(s.id)}
           >
             {s.icon}
-            {s.label}
+            {t(s.label)}
           </button>
         ))}
       </Group>

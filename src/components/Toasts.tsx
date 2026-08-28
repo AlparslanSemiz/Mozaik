@@ -17,6 +17,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Check, CircleAlert, Info, X } from 'lucide-react';
+import { useT } from './T';
 
 export type ToastTone = 'ok' | 'info' | 'warn';
 
@@ -40,6 +41,7 @@ export function useToast(): Notify {
 const LIFETIME = 6000;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [items, setItems] = useState<Toast[]>([]);
   const next = useRef(1);
   const timers = useRef(new Map<number, number>());
@@ -80,22 +82,22 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {/* polite, not assertive: none of these interrupt anything. */}
       <div className="toasts" role="status" aria-live="polite">
-        {items.map((t) => (
-          <div key={t.id} className={`toast ${t.tone}`}>
+        {items.map((toast) => (
+          <div key={toast.id} className={`toast ${toast.tone}`}>
             <span className="toast-icon" aria-hidden="true">
-              {t.tone === 'ok' ? (
+              {toast.tone === 'ok' ? (
                 <Check size={16} strokeWidth={2.6} />
-              ) : t.tone === 'warn' ? (
+              ) : toast.tone === 'warn' ? (
                 <CircleAlert size={16} strokeWidth={2.4} />
               ) : (
                 <Info size={16} strokeWidth={2.4} />
               )}
             </span>
-            <span className="toast-text">{t.text}</span>
+            <span className="toast-text">{toast.text}</span>
             <button
               className="toast-close"
-              aria-label="Kapat"
-              onClick={() => drop(t.id)}
+              aria-label={t('Kapat')}
+              onClick={() => drop(toast.id)}
             >
               <X size={14} strokeWidth={2.4} />
             </button>

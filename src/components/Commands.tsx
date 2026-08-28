@@ -24,6 +24,8 @@ import {
 import Palette from './Palette';
 import type { Command } from './Palette';
 import { useInspect } from './Inspector';
+import { useT } from './T';
+import { subjectLabel } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
 import type { Tab, ToolState } from '../toolState';
@@ -55,12 +57,13 @@ function Dot({ color }: { color: number }) {
 
 export default function Commands({ open, setOpen, state, ui, go, sections, actions }: Props) {
   const inspect = useInspect();
+  const t = useT();
 
   const commands = useMemo<Command[]>(() => {
     const out: Command[] = sections.map((s, i) => ({
       id: `tab-${s.id}`,
-      label: s.label,
-      group: 'Git',
+      label: t(s.label),
+      group: t('Git'),
       hint: `Alt+${i + 1}`,
       icon: s.icon,
       run: () => go(s.id),
@@ -70,7 +73,7 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
       out.push({
         id: `do-${a.id}`,
         label: a.label,
-        group: 'Yap',
+        group: t('Yap'),
         // Spread rather than `hint: a.hint`: `exactOptionalPropertyTypes` is on,
         // so an explicit `undefined` is not the same as an absent key.
         ...(a.hint === undefined ? {} : { hint: a.hint }),
@@ -79,15 +82,15 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
       });
     }
 
-    for (const t of state.teachers) {
+    for (const teacher of state.teachers) {
       out.push({
-        id: `t-${t.id}`,
-        label: `${t.short} · ${t.name}`,
-        group: 'Öğretmenler',
-        extra: t.subject,
-        hint: t.subject,
-        icon: <Dot color={t.color} />,
-        run: () => inspect('teacher', t.id),
+        id: `t-${teacher.id}`,
+        label: `${teacher.short} · ${teacher.name}`,
+        group: t('Öğretmenler'),
+        extra: teacher.subject,
+        hint: subjectLabel(teacher.subject),
+        icon: <Dot color={teacher.color} />,
+        run: () => inspect('teacher', teacher.id),
       });
     }
 
@@ -95,10 +98,10 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
       const room = state.rooms.find((r) => r.id === c.roomId);
       out.push({
         id: `c-${c.id}`,
-        label: `${c.name} sınıfı`,
-        group: 'Sınıflar',
+        label: t('{ad} sınıfı', { ad: c.name }),
+        group: t('Sınıflar'),
         extra: room?.name ?? '',
-        hint: room === undefined ? 'derslik yok' : `${room.name} dersliği`,
+        hint: room === undefined ? t('derslik yok') : t('{ad} dersliği', { ad: room.name }),
         icon: <Dot color={c.color} />,
         run: () => inspect('class', c.id),
       });
@@ -108,16 +111,16 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
       const count = state.classes.filter((c) => c.roomId === r.id).length;
       out.push({
         id: `r-${r.id}`,
-        label: `${r.name} dersliği`,
-        group: 'Derslikler',
-        hint: `${count} sınıf`,
+        label: t('{ad} dersliği', { ad: r.name }),
+        group: t('Derslikler'),
+        hint: t('{n} sınıf', { n: count }),
         icon: <DoorOpen size={16} strokeWidth={2} />,
         run: () => inspect('room', r.id),
       });
     }
 
     return out;
-  }, [state, ui, go, sections, actions, inspect]);
+  }, [state, ui, go, sections, actions, inspect, t]);
 
   return <Palette open={open} onOpenChange={setOpen} commands={commands} />;
 }

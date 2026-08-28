@@ -9,6 +9,7 @@
 import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, X } from 'lucide-react';
 import { canReorder, facetCounts, isFiltering } from '../listview';
 import type { ListConfig, ListQuery } from '../listview';
+import { T, useT } from './T';
 
 interface Props<T> {
   items: T[];
@@ -37,6 +38,7 @@ export default function ListTools<T>({
   noun,
   notice = '',
 }: Props<T>) {
+  const t = useT();
   const filtering = isFiltering(query);
   const facets = config.facets ?? [];
 
@@ -50,13 +52,13 @@ export default function ListTools<T>({
             className="search-box"
             value={query.text}
             aria-label={`${noun} ara`}
-            placeholder="Ara…"
+            placeholder={t('Ara…')}
             onChange={(e) => setQuery({ ...query, text: e.target.value })}
           />
           {query.text !== '' && (
             <button
               className="search-clear"
-              aria-label="Aramayı temizle"
+              aria-label={t('Aramayı temizle')}
               onClick={() => setQuery({ ...query, text: '' })}
             >
               <X size={14} strokeWidth={2.4} />
@@ -65,7 +67,7 @@ export default function ListTools<T>({
         </div>
 
         <label className="field">
-          <span className="field-label">Sırala</span>
+          <span className="field-label">{t('Sırala')}</span>
           {/* Not `.text-sm`: "Ders yüküne göre (çok → az)" is the longest label
               in the app and a 16ch box showed "Girildiği s". A select that
               hides which sort is active is a select nobody trusts. */}
@@ -81,7 +83,7 @@ export default function ListTools<T>({
                 order they were typed in, which is the order the reader
                 remembers them in — and, since the rows can be dragged, the
                 order they were last PUT in. */}
-            <option value="">Girildiği sıra</option>
+            <option value="">{t('Girildiği sıra')}</option>
             {config.sorts.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
@@ -103,13 +105,13 @@ export default function ListTools<T>({
         <button
           className="btn"
           disabled={query.sortId === ''}
-          aria-label={query.desc ? 'Artan sıraya al' : 'Azalan sıraya al'}
+          aria-label={query.desc ? t('Artan sıraya al') : t('Azalan sıraya al')}
           title={
             query.sortId === ''
-              ? 'Önce bir sıralama seçin'
+              ? t('Önce bir sıralama seçin')
               : query.desc
-                ? 'Şu an tersten sıralı — düz sıraya almak için tıklayın'
-                : 'Şu an düz sıralı — tersten sıralamak için tıklayın'
+                ? t('Şu an tersten sıralı. Düz sıraya almak için tıklayın')
+                : t('Şu an düz sıralı. Tersten sıralamak için tıklayın')
           }
           onClick={() => setQuery({ ...query, desc: !query.desc })}
         >
@@ -153,9 +155,7 @@ export default function ListTools<T>({
           <button
             className="btn"
             onClick={() => setQuery({ ...query, text: '', facets: {} })}
-          >
-            Süzmeyi kaldır
-          </button>
+          >{t('Süzmeyi kaldır')}</button>
         )}
       </div>
 
@@ -203,8 +203,7 @@ export default function ListTools<T>({
           because `.list-tools` is not one of the panel's counted children. */}
       {!canReorder(query) && (
         <p className="list-note">
-          Satırları elle sıralamak için <b>Sırala</b>’yı «Girildiği sıra»ya alın
-          ve süzmeyi kaldırın.
+          <T k="Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın." />
         </p>
       )}
     </div>

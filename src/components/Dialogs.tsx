@@ -23,6 +23,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, TriangleAlert } from 'lucide-react';
+import { useT } from './T';
 
 export interface ConfirmOptions {
   /** The heading: what is about to happen, in one line. */
@@ -62,6 +63,7 @@ export function useDialogs(): Api {
 }
 
 export function DialogProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [pending, setPending] = useState<Pending | null>(null);
   // The resolver of the question currently on screen. It is a ref and not
   // state because closing has to settle the promise exactly once, from an
@@ -147,7 +149,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                           child. Visually it stays on the left, where a
                           secondary action belongs. */}
                       <button className="btn" onClick={() => close(false)}>
-                        {pending.options.cancelLabel ?? 'Vazgeç'}
+                        {pending.options.cancelLabel ?? t('Vazgeç')}
                       </button>
                       <button
                         className={`btn ${danger ? 'danger-solid' : 'primary'}`}

@@ -20,6 +20,7 @@ import { canReorder } from '../listview';
 import type { ListQuery } from '../listview';
 import { attachRowDrag, clampIndex } from '../rowDrag';
 import type { State } from '../types';
+import { useT } from './T';
 
 interface Options {
   kind: ListKind;
@@ -46,20 +47,24 @@ export interface RowOrder {
 }
 
 export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
+  const t = useT();
   const [notice, setNotice] = useState('');
   const locked = !canReorder(query) || count < 2;
 
   // Read inside the gesture's callback rather than captured by it: the listeners
   // are attached once, and a stale `change` would write into an old State.
-  const latest = useRef({ kind, count, change });
-  latest.current = { kind, count, change };
+  // `t` rides along in the ref for the same reason the other three do: `move`
+  // is attached to a DOM listener once, and a callback that changed identity
+  // with the language would detach and reattach the drag on every switch.
+  const latest = useRef({ kind, count, change, t });
+  latest.current = { kind, count, change, t };
 
   const move = useCallback((from: number, to: number, name: string) => {
-    const { kind: k, count: n, change: apply } = latest.current;
+    const { kind: k, count: n, change: apply, t: say } = latest.current;
     const target = clampIndex(to, n);
     if (target === from) return;
     apply((d) => reorderList(d, k, from, target));
-    setNotice(`${name} ${target + 1}. sıraya taşındı.`);
+    setNotice(say('{ad} {n}. sıraya taşındı.', { ad: name, n: target + 1 }));
   }, []);
 
   const detach = useRef<(() => void) | null>(null);
@@ -71,7 +76,7 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
       body: node,
       commit: (from, to) => {
         const row = node.children[from];
-        const name = row?.getAttribute('data-row-name') ?? 'Satır';
+        const name = row?.getAttribute('data-row-name') ?? latest.current.t('Satır');
         move(from, to, name);
       },
     });
@@ -86,7 +91,7 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
       {/* "Liste görünümünde de en solda sıralamaya göre sıra sıra sayılar
           olsun." Its heading is a bare # rather than "Sıra": the column is
           three characters wide and a word in it would set its floor. */}
-      <th className="row-no-col" title="Sıra">
+      <th className="row-no-col" title={t('Sıra')}>
         #
       </th>
       {/* The handle gets a column of its own: squeezed in beside something
@@ -111,8 +116,15 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
           disabled={locked}
           // The position is IN the name: a handle that says only "taşı" gives
           // no way to tell whether the last keypress did anything.
-          aria-label={`${name}, ${index + 1}. sıra, taşımak için yukarı ve aşağı ok`}
-          title={locked ? 'Elle sıralama için süzmeyi ve sıralamayı kaldırın' : 'Sürükleyerek sırala'}
+          aria-label={t('{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok', {
+            ad: name,
+            n: index + 1,
+          })}
+          title={
+            locked
+              ? t('Elle sıralama için süzmeyi ve sıralamayı kaldırın')
+              : t('Sürükleyerek sırala')
+          }
           onKeyDown={(e) => {
             let next: number | null = null;
             if (e.key === 'ArrowUp') next = index - 1;

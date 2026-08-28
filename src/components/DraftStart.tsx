@@ -11,6 +11,7 @@
 // out, so those are the props. Everything else is here.
 
 import { useDialogs } from './Dialogs';
+import { useT } from './T';
 import { loadPlan } from '../store';
 import type { PlanControls } from './props';
 
@@ -24,6 +25,7 @@ interface Props {
 
 export default function DraftStart({ plans, label, notify }: Props) {
   const { alert } = useDialogs();
+  const t = useT();
   const drafts = plans.library.plans.filter((p) => p.draft);
   if (drafts.length === 0) return null;
 
@@ -37,16 +39,18 @@ export default function DraftStart({ plans, label, notify }: Props) {
             const seed = loadPlan(d.id);
             if (seed === null) {
               await alert({
-                title: 'Bu taslağın verisi bulunamadı',
+                title: t('Bu taslağın verisi bulunamadı'),
                 tone: 'warn',
-                body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
+                body: t(
+                  'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
+                ),
               });
               return;
             }
             // The setup is copied and the GRID is not: a draft is a school
             // without a timetable, which is the whole reason to keep one.
-            plans.createPlan(`${d.name} kopyası`, { ...seed, placements: {} });
-            notify?.(`"${d.name}" taslağından yeni bir plan açıldı.`);
+            plans.createPlan(t('{ad} kopyası', { ad: d.name }), { ...seed, placements: {} });
+            notify?.(t('"{ad}" taslağından yeni bir plan açıldı.', { ad: d.name }));
           }}
         >
           {label(d.name)}

@@ -11,6 +11,20 @@
 // a ReferenceError at module load, which would take the whole app down on the
 // one screen that is supposed to explain what is going on.
 
+/**
+ * What the program is CALLED.
+ *
+ * One place, because it reaches the screen from four of them: the window
+ * title, the <h1> a school with no name falls back to, the page title and the
+ * manifest. It is NOT translated and never will be — a name is a name in every
+ * language, and this one was picked because it is the same word in all five.
+ *
+ * What it is not: a storage key. `ders-programi*`, the backup file names and
+ * the `Belgelerim` folder keep their old spelling on purpose, because a key
+ * whose identity changes is deleted data.
+ */
+export const APP_NAME = 'Ders Programı';
+
 export interface Surum {
   /** package.json's version, e.g. "1.1.0". */
   version: string;

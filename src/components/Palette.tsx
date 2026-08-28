@@ -18,6 +18,7 @@ import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Search } from 'lucide-react';
 import { fold } from '../listview';
+import { useT } from './T';
 
 export interface Command {
   id: string;
@@ -42,6 +43,7 @@ interface Props {
 const LIMIT = 40;
 
 export default function Palette({ open, onOpenChange, commands }: Props) {
+  const t = useT();
   const [text, setText] = useState('');
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -109,25 +111,25 @@ export default function Palette({ open, onOpenChange, commands }: Props) {
       <Dialog.Portal>
         <Dialog.Overlay className="dlg-overlay" />
         <Dialog.Content className="palette" aria-describedby={undefined} onKeyDown={onKeyDown}>
-          <Dialog.Title className="hidden">Komut paleti</Dialog.Title>
+          <Dialog.Title className="hidden">{t('Komut paleti')}</Dialog.Title>
           <div className="palette-search">
             <Search size={18} strokeWidth={2} aria-hidden="true" />
             <input
               type="text"
               autoFocus
               value={text}
-              aria-label="Ara veya komut yaz"
-              placeholder="Öğretmen, sınıf, derslik ara ya da bir komut yaz…"
+              aria-label={t('Ara veya komut yaz')}
+              placeholder={t('Öğretmen, sınıf, derslik ara ya da bir komut yaz…')}
               onChange={(e) => {
                 setText(e.target.value);
                 setActive(0);
               }}
             />
-            <kbd>Esc</kbd>
+            <kbd>{t('Esc')}</kbd>
           </div>
 
-          <div className="palette-list" ref={listRef} role="listbox" aria-label="Sonuçlar">
-            {shown.length === 0 && <p className="palette-empty">Eşleşen bir şey yok.</p>}
+          <div className="palette-list" ref={listRef} role="listbox" aria-label={t('Sonuçlar')}>
+            {shown.length === 0 && <p className="palette-empty">{t('Eşleşen bir şey yok.')}</p>}
             {shown.map((c, i) => {
               const heading = c.group !== lastGroup ? c.group : null;
               lastGroup = c.group;

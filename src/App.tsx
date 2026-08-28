@@ -30,7 +30,7 @@ import { attachRibbonScroll } from './ribbonScroll';
 import { useSolver } from './useSolver';
 import { useFolder } from './useFolder';
 import { useUpdate } from './update';
-import { surumEtiketi } from './version';
+import { APP_NAME, surumEtiketi } from './version';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
 import Setup from './components/setup';
@@ -38,7 +38,7 @@ import Lessons from './components/lessons';
 import { lessonIcon } from './components/steps';
 import Availability from './components/Availability';
 import Program from './components/Program';
-import { useT } from './components/T';
+import { T, useT } from './components/T';
 import Check from './components/Check';
 import Ribbon from './components/Ribbon';
 import Print, { NOTHING_EXCLUDED } from './components/Print';
@@ -490,17 +490,17 @@ export default function App() {
     () => [
       {
         id: 'save',
-        label: 'Dosyaya kaydet',
-        hint: 'yedek al',
+        label: t('Dosyaya kaydet'),
+        hint: t('yedek al'),
         run: () => {
           downloadBackup(state);
-          notify('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.');
+          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         },
       },
       {
         id: 'auto',
-        label: 'Otomatik diz',
-        hint: 'Program',
+        label: t('Otomatik diz'),
+        hint: t('Program'),
         run: () => {
           goTab('program');
           solver.start(state, { keepPlaced: true });
@@ -508,22 +508,22 @@ export default function App() {
       },
       {
         id: 'theme',
-        label: theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç',
+        label: theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç'),
         run: toggleTheme,
       },
       {
         id: 'ribbon',
-        label: ribbon ? 'Araç şeridini gizle' : 'Araç şeridini göster',
+        label: ribbon ? t('Araç şeridini gizle') : t('Araç şeridini göster'),
         run: toggleRibbon,
       },
       {
         id: 'motion',
-        label: motion === 'kapali' ? 'Animasyonları aç' : 'Animasyonları kapat',
-        hint: 'Ayarlar → Görünüm',
+        label: motion === 'kapali' ? t('Animasyonları aç') : t('Animasyonları kapat'),
+        hint: t('Ayarlar → Görünüm'),
         run: toggleMotion,
       },
     ],
-    [state, theme, ribbon, motion, solver, goTab, notify],
+    [state, theme, ribbon, motion, solver, goTab, notify, t],
   );
 
   function toggleRibbon() {
@@ -565,32 +565,36 @@ export default function App() {
       await alert({
         title:
           version === BUNDLE_VERSION
-            ? 'Bu dosya bütün planları içeriyor'
+            ? t('Bu dosya bütün planları içeriyor')
             : version !== null
-              ? 'Bu dosya daha yeni bir sürümle yazılmış'
-              : 'Bu dosya okunamadı',
+              ? t('Bu dosya daha yeni bir sürümle yazılmış')
+              : t('Bu dosya okunamadı'),
         tone: 'warn',
         body:
           version === BUNDLE_VERSION
-            ? 'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.'
+            ? t(
+                'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
+              )
             : version !== null
-              ? 'Programı güncelleyin, sonra tekrar deneyin.'
-              : 'Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+              ? t('Programı güncelleyin, sonra tekrar deneyin.')
+              : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
       });
       return;
     }
     if (
       !(await confirm({
-        title: 'Şu anki programın yerine geçecek',
-        body: 'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
-        confirmLabel: 'Yedeği yükle',
+        title: t('Şu anki programın yerine geçecek'),
+        body: t(
+          'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+        ),
+        confirmLabel: t('Yedeği yükle'),
         danger: true,
       }))
     ) {
       return;
     }
     loadState(loaded);
-    notify('Yedek yüklendi.');
+    notify(t('Yedek yüklendi.'));
   }
 
   return (
@@ -666,8 +670,10 @@ export default function App() {
              draw it — and it is an aria-label rather than a title so the
              accessible name is this and not "Kontrol", which is also the name
              of a tab three pixels away. */
-          aria-label={`Programın durumu: ${status.message}. Ayrıntı için Kontrol.`}
-          title={`${status.message}. Kontrol sekmesini açar`}
+          aria-label={t('Programın durumu: {durum}. Ayrıntı için Kontrol.', {
+            durum: status.message,
+          })}
+          title={t('{durum}. Kontrol sekmesini açar', { durum: status.message })}
         >
           <span className="health-dot" aria-hidden="true" />
           <span className="health-text">{status.message}</span>
@@ -681,7 +687,7 @@ export default function App() {
             sits at the head of the right-hand group — the things you reach for
             about this document rather than about where you are in it. */}
         <div className="topbar-doc">
-          <h1 className="app-title">{state.settings.schoolName.trim() || 'Ders Programı'}</h1>
+          <h1 className="app-title">{state.settings.schoolName.trim() || APP_NAME}</h1>
 
           {/* Which timetable is open. It is shown even when there is only one:
               "hangi planı düzenliyorum" is the question this answers, and a
@@ -691,8 +697,8 @@ export default function App() {
               stay a place where no click can lose an afternoon. */}
           <select
             className="plan-picker"
-            aria-label="Plan"
-            title="Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek"
+            aria-label={t('Plan')}
+            title={t('Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek')}
             value={plans.planId}
             onChange={(e) => plans.switchPlan(e.target.value)}
           >
@@ -714,8 +720,8 @@ export default function App() {
             className="btn icon"
             onClick={undo}
             disabled={!canUndo}
-            aria-label="Geri al"
-            title="Geri al (Ctrl+Z)"
+            aria-label={t('Geri al')}
+            title={t('Geri al (Ctrl+Z)')}
           >
             {ICON.undo}
           </button>
@@ -723,8 +729,8 @@ export default function App() {
             className="btn icon"
             onClick={redo}
             disabled={!canRedo}
-            aria-label="İleri al"
-            title="İleri al (Ctrl+Y)"
+            aria-label={t('İleri al')}
+            title={t('İleri al (Ctrl+Y)')}
           >
             {ICON.redo}
           </button>
@@ -741,19 +747,17 @@ export default function App() {
           className="btn primary"
           onClick={() => {
             downloadBackup(state);
-            notify('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.');
+            notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
           }}
-          title="Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için."
-        >
-          Dosyaya kaydet
-        </button>
+          title={t(
+            'Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.',
+          )}
+        >{t('Dosyaya kaydet')}</button>
         <button
           className="btn"
           onClick={() => fileInput.current?.click()}
-          title="Daha önce kaydedilmiş bir .json dosyasını açar"
-        >
-          Dosyadan aç
-        </button>
+          title={t('Daha önce kaydedilmiş bir .json dosyasını açar')}
+        >{t('Dosyadan aç')}</button>
         {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
             aç". It is now in Ayarlar > Veri: the rarest button in the app,
             and the only one that cannot be undone. */}
@@ -775,8 +779,8 @@ export default function App() {
             here: once folded, the strip has no row to hold its own button. */}
         <button
           className="btn icon"
-          aria-label="Ara ve git"
-          title="Ara ve git (Ctrl+K)"
+          aria-label={t('Ara ve git')}
+          title={t('Ara ve git (Ctrl+K)')}
           onClick={() => setPaletteOpen(true)}
         >
           <SearchIcon size={18} strokeWidth={2} />
@@ -785,8 +789,12 @@ export default function App() {
         <button
           className="btn icon"
           aria-expanded={ribbon}
-          aria-label="Araç şeridi"
-          title={ribbon ? 'Araç şeridini gizle, ızgaraya bir satır daha kalsın' : 'Araç şeridini göster'}
+          aria-label={t('Araç şeridi')}
+          title={
+            ribbon
+              ? t('Araç şeridini gizle, ızgaraya bir satır daha kalsın')
+              : t('Araç şeridini göster')
+          }
           onClick={toggleRibbon}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
@@ -804,8 +812,8 @@ export default function App() {
         <button
           className="btn icon"
           aria-pressed={theme === 'dark'}
-          aria-label="Koyu tema"
-          title={theme === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'}
+          aria-label={t('Koyu tema')}
+          title={theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç')}
           onClick={toggleTheme}
         >
           {theme === 'dark' ? ICON.sun : ICON.moon}
@@ -836,9 +844,8 @@ export default function App() {
       <div className="workspace">
         {!canSave && (
           <div className="save-warning">
-            ⚠ <b>Bu bilgisayarda otomatik kayıt çalışmıyor.</b> Program kapanınca yaptığınız
-            her şey kaybolur. Çalışırken sık sık <b>Dosyaya kaydet</b> düğmesine basın ve
-            bilgisayarı kapatmadan önce mutlaka bir yedek alın.
+            ⚠{' '}
+            <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın." />
           </div>
         )}
 
@@ -852,16 +859,14 @@ export default function App() {
         {update.ready && !updateHidden && (
           <div className="update-bar" role="status">
             <span>
-              <b>Yeni sürüm hazır.</b> Şu an {surumEtiketi()} sürümünü kullanıyorsunuz;
-              yenisi <b>Yenile</b> deyince gelir. İşiniz kaybolmaz.
+              <T
+                k="**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz."
+                vars={{ surum: surumEtiketi() }}
+              />
             </span>
             <span className="update-acts">
-              <button className="btn primary" onClick={update.reload}>
-                Yenile
-              </button>
-              <button className="btn" onClick={() => setUpdateHidden(true)}>
-                Sonra
-              </button>
+              <button className="btn primary" onClick={update.reload}>{t('Yenile')}</button>
+              <button className="btn" onClick={() => setUpdateHidden(true)}>{t('Sonra')}</button>
             </span>
           </div>
         )}
@@ -882,13 +887,17 @@ export default function App() {
             ⚠{' '}
             {folder.status.kind === 'izin-gerek' ? (
               <>
-                <b>{folder.status.name}</b> klasörüne yazılamıyor: tarayıcı izni
-                sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor.
+                <T
+                  k="**{klasor}** klasörüne yazılamıyor: tarayıcı izni sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor."
+                  vars={{ klasor: folder.status.name }}
+                />
               </>
             ) : (
               <>
-                <b>{folder.status.name}</b> klasörüne <b>yazılamıyor</b>. {folder.status.text}{' '}
-                İşiniz şu an yalnız bu tarayıcıda duruyor.
+                <T
+                  k="**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor."
+                  vars={{ klasor: folder.status.name, sebep: folder.status.text }}
+                />
               </>
             )}{' '}
             {/* NOT "Ayarlar → Veri" (pitfall 49). getByRole name matching is
@@ -902,9 +911,7 @@ export default function App() {
                 goTab('settings');
                 ui.setSection('plans');
               }}
-            >
-              Klasörü düzelt
-            </button>
+            >{t('Klasörü düzelt')}</button>
           </div>
         )}
 

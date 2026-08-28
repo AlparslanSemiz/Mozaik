@@ -25,6 +25,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { PALETTE_SIZE, paletteColor } from '../palette';
+import { useT } from './T';
 
 interface Props {
   value: number;
@@ -34,6 +35,7 @@ interface Props {
 }
 
 export default function ColorPick({ value, owner, onChange }: Props) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
 
@@ -88,13 +90,12 @@ export default function ColorPick({ value, owner, onChange }: Props) {
             ))}
           </div>
           <p className="hint">
-            Renk kimliktir: ızgarada bu satırı ve havuzdaki kartını eşleştiren şey
-            budur, o yüzden iki öğretmene aynı rengi vermeyin.
+            {t(
+              'Renk kimliktir: ızgarada bu satırı ve havuzdaki kartını eşleştiren şey budur, o yüzden iki öğretmene aynı rengi vermeyin.',
+            )}
           </p>
           <div className="form-row nowrap">
-            <button type="button" className="btn" onClick={() => setOpen(false)}>
-              Vazgeç
-            </button>
+            <button type="button" className="btn" onClick={() => setOpen(false)}>{t('Vazgeç')}</button>
           </div>
         </dialog>
       )}
