@@ -20,6 +20,9 @@
 // the entity sheet all name the same three kinds, and `KIND_ICON` below is the
 // single map they read. The drawing has one home even where the labels differ.
 
+import { Tags } from 'lucide-react';
+
+import { subjectOptions } from '../entities';
 import type { State } from '../types';
 import type { Kind, StepId } from '../toolState';
 
@@ -107,6 +110,14 @@ export const classIcon = (
  * room is not a symbol, it is decoration — so every screen that names one of
  * the three kinds reads it from here.
  */
+/**
+ * A subject is not one of the three KINDS — it has no colour, no closed hours
+ * and no row in the grid — so it is not drawn by hand next to them. lucide's
+ * tag is what Ayarlar already used for this list; moving the list must not
+ * fork the drawing.
+ */
+export const subjectIcon = <Tags size={18} strokeWidth={2} aria-hidden="true" focusable="false" />;
+
 export const KIND_ICON: Record<Kind, React.ReactElement> = {
   teacher: teacherIcon,
   class: classIcon,
@@ -114,13 +125,22 @@ export const KIND_ICON: Record<Kind, React.ReactElement> = {
 };
 
 /**
- * THREE, since Dersler moved out. "Ders ekleme tarafı çok daha pratik hale
- * getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama DERS EN ÖNEMLİ
- * KISIM." Step four of a wizard is not where the most-used screen belongs, and
- * as a step it could only ever be reached by way of Kurulum.
+ * FOUR. Dersler moved out to a tab of its own ("Ders ekleme tarafı çok daha
+ * pratik hale getirilmeli, neden? Çünkü hocaları onu bunu ayarlıyorsun ama
+ * DERS EN ÖNEMLİ KISIM."), and Branşlar moved IN from Ayarlar for the mirror
+ * reason: a teacher picks a subject off that list, so keeping it a tab away
+ * meant leaving the screen mid-row to add one.
+ *
+ * The order is the dependency chain. Subjects before teachers, rooms before
+ * classes — each list can be filled without going back.
+ *
+ * Branşlar counts `subjectOptions`, not `settings.subjects.length`: the panel
+ * heading counts the same thing, and a strip that disagreed with the heading
+ * three pixels below it would be a second truth.
  */
 export const STEPS: StepDef[] = [
   { id: 'rooms', label: 'Derslikler', count: (d) => d.rooms.length, icon: roomIcon },
+  { id: 'subjects', label: 'Branşlar', count: (d) => subjectOptions(d).length, icon: subjectIcon },
   { id: 'teachers', label: 'Öğretmenler', count: (d) => d.teachers.length, icon: teacherIcon },
   { id: 'classes', label: 'Sınıflar', count: (d) => d.classes.length, icon: classIcon },
 ];

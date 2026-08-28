@@ -72,7 +72,7 @@ export default function School({ state, change }: PanelProps) {
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>Okul ve günler</h2>
+          <h2>Zil ve günler</h2>
           {/* The description comes before the control it describes — this panel
               was the one place in the app where it did not, and the sentence
               about days sat between the school-name field and the day table as

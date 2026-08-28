@@ -163,7 +163,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await loadWorld(page, world.state);
     await autoFill(page);
 
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     expect(await page.locator('.print-page .p-top').count()).toBeGreaterThan(0);
   });

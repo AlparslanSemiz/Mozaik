@@ -22,8 +22,8 @@ import { markIntroSeen, readIntroSeen } from '../../theme';
 import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
+import Subjects from './Subjects';
 import Summary from './Summary';
-import Progress from './Progress';
 import { drafts as draftsOf } from '../../library';
 import type { PanelProps, PlanControls } from '../props';
 import type { StepId } from '../../toolState';
@@ -32,25 +32,26 @@ import DraftStart from '../DraftStart';
 
 /**
  * The three lists' label, count and symbol live in `components/steps.tsx` — one
- * definition read by this shell, by the ribbon and by Progress. Only the
+ * definition read by this shell and by the ribbon. Only the
  * RENDERING of a step is this file's business, so only that is here.
  */
 const RENDER: Record<StepId, (p: PanelProps) => React.ReactElement> = {
   rooms: (p) => <Rooms {...p} />,
+  subjects: (p) => <Subjects {...p} />,
   teachers: (p) => <Teachers {...p} />,
   classes: (p) => <Classes {...p} />,
 };
 
 interface Props extends PanelProps {
   plans: PlanControls;
-  /** Which of the three lists. Owned by App: the tool strip above shows it. */
+  /**
+   * Which of the four lists. Owned by App, and the tool strip above is the
+   * only thing that CHANGES it — so no setter comes down here any more.
+   */
   step: StepId;
-  setStep: (next: StepId) => void;
-  /** Dersler is a tab of its own now, so Progress can only point at it. */
-  goLessons: () => void;
 }
 
-export default function Setup({ state, change, plans, step, setStep, goLessons }: Props) {
+export default function Setup({ state, change, plans, step }: Props) {
   const notify = useToast();
   const loadSample = useLoadSample();
   // Read once on mount: `markIntroSeen()` writes to localStorage, and a
@@ -87,8 +88,9 @@ export default function Setup({ state, change, plans, step, setStep, goLessons }
         <div className="panel">
           <h2>Başlarken</h2>
           <p className="hint">
-            Yukarıdaki adımları sırayla doldurun: önce <b>derslikler</b>, sonra{' '}
-            <b>öğretmenler</b> ve <b>sınıflar</b>, en son her sınıfın <b>dersleri</b>.
+            Yukarıdaki adımları sırayla doldurun: önce <b>derslikler</b> ve{' '}
+            <b>branşlar</b>, sonra <b>öğretmenler</b> ve <b>sınıflar</b>, en son her sınıfın{' '}
+            <b>dersleri</b>.
             Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini
             kullanın, tek tek girmekten çok daha hızlıdır. Okulun günleri, zil saatleri
             ve kuralları <b>Ayarlar</b> sekmesinde.
@@ -113,7 +115,7 @@ export default function Setup({ state, change, plans, step, setStep, goLessons }
               </button>
               <button
                 className="btn quiet"
-                title="Bu satır bir daha çıkmaz; örnek veri Ayarlar → Veri’de durmaya devam eder"
+                title="Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder"
                 onClick={() => {
                   markIntroSeen();
                   setIntroSeen(true);
@@ -147,23 +149,16 @@ export default function Setup({ state, change, plans, step, setStep, goLessons }
           capacity numbers Kontrol shows, but while you are typing rather than
           one screen and one decision later.
 
-          Progress ("Kurulum durumu") sits UNDER the summary in the right
-          column, not under the list. It used to be on the left, on the grounds
-          that "what do I do after this one" is a question about the work — but
-          that put every panel on this screen in one column and left the right
-          one ending halfway down. Both panels on the right answer the same kind
-          of question: not what you are typing, but where it has got you.
-
-          The "Sonraki adım" button that used to stand between them is gone.
-          Moving between steps already had two homes — the four buttons in the
-          ribbon and the rows of the Progress table — and a third one that could
-          only ever go forwards was the weakest of them. */}
-      <div className="cols wide-left">
+          ONE panel, not two. "Kurulum durumu" used to sit under this one and
+          repeat the four counters that are already in the strip above, plus a
+          door to a tab that is already in the tab bar — "çok fazla kaydırma
+          olmuş, gereksiz". The two sentences of its that said something
+          nothing else said moved into the Sınıflar branch of Özet. */}
+      <div className="cols">
         <div>{RENDER[current.id]({ state, change })}</div>
 
         <aside>
-          <Summary state={state} step={current.id} />
-          <Progress state={state} step={step} setStep={setStep} goLessons={goLessons} />
+          <Summary state={state} change={change} step={current.id} />
         </aside>
       </div>
     </>

@@ -476,7 +476,7 @@ export function applyUiDensity(density: Density): void {
 // So the reason is the one the reader actually gave: they do not want to look
 // at it. Twelve times across a heading is twelve numbers nobody is reading on
 // a screen whose whole job is a grid of open and closed. The times are in
-// Ayarlar → Okul's bell preview and on every printed sheet, in both states.
+// Ayarlar → Zil ve günler's bell preview and on every printed sheet, in both states.
 //
 // A machine preference like all the others: its own key, never in `State`,
 // never in a backup.

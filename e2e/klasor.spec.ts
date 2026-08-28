@@ -97,7 +97,7 @@ async function seed(page: Page, names: string[]) {
 
 async function openData(page: Page) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Veri' }).first().click();
+  await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
   await expect(page.getByRole('heading', { name: 'Nereye kaydedilsin' })).toBeVisible();
 }
 
@@ -136,7 +136,7 @@ test.describe('74. Nereye kaydedilsin', () => {
     await page.getByRole('button', { name: 'Klasör seç…' }).click();
     await expect(page.getByText(/klasörüne yazıldı/)).toBeVisible();
 
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await page.getByPlaceholder('Derslik adı, örn. A').fill('Zk1');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
@@ -266,7 +266,7 @@ test.describe('74b. Desteklemeyen tarayıcıda — özellik yok ve bunu SÖYLÜY
     await page.goto('/');
     await openData(page);
 
-    // Scoped to the panel: Ayarlar → Veri has four panels and two of them
+    // Scoped to the panel: Ayarlar → Planlar ve yedek has several panels and two of them
     // talk about saving (pitfall 49).
     const panel = page.locator('.panel', { hasText: 'Nereye kaydedilsin' });
     await expect(panel.getByText(/kullandığınız tarayıcı bunu desteklemiyor/i)).toBeVisible();

@@ -70,7 +70,7 @@ import Settings from './components/settings';
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
   {
     id: 'setup',
-    label: 'Kurulum',
+    label: 'Okul',
     // A clipboard: the four lists you fill in at the start of a term.
     icon: (
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
@@ -168,7 +168,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
   },
   {
     id: 'print',
-    label: 'Yazdır',
+    label: 'Çıktı',
     // A printer with paper coming out.
     icon: (
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
@@ -572,7 +572,7 @@ export default function App() {
         tone: 'warn',
         body:
           version === BUNDLE_VERSION
-            ? 'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Veri bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.'
+            ? 'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.'
             : version !== null
               ? 'Programı güncelleyin, sonra tekrar deneyin.'
               : 'Program tarafından indirilmiş bir .json yedek dosyası seçin.',
@@ -692,7 +692,7 @@ export default function App() {
           <select
             className="plan-picker"
             aria-label="Plan"
-            title="Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Veri"
+            title="Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek"
             value={plans.planId}
             onChange={(e) => plans.switchPlan(e.target.value)}
           >
@@ -900,7 +900,7 @@ export default function App() {
               className="btn"
               onClick={() => {
                 goTab('settings');
-                ui.setSection('data');
+                ui.setSection('plans');
               }}
             >
               Klasörü düzelt
@@ -934,8 +934,6 @@ export default function App() {
               change={change}
               plans={plans}
               step={ui.step}
-              setStep={ui.setStep}
-              goLessons={() => goTab('lessons')}
             />
           )}
           {tab === 'availability' && (
@@ -964,7 +962,7 @@ export default function App() {
               view={ui.view}
             />
           )}
-          {tab === 'check' && <Check state={state} view={ui.checkView} />}
+          {tab === 'check' && <Check state={state} />}
           {tab === 'print' && (
             <Print
               state={state}

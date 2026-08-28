@@ -17,7 +17,7 @@ import { useDialogs } from "../Dialogs";
 import { useLoadSample } from "../useSample";
 import type React from "react";
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../bundle";
-import { emptyState, respreadColors } from "../../entities";
+import { emptyState } from "../../entities";
 import { KEEP_DAILY, MAIN_NAME } from "../../folder";
 import {
   routeName,
@@ -51,7 +51,7 @@ interface Props {
    * `storageReport` belongs beside the folder. One file, one set of handlers,
    * two doors.
    */
-  part: "plans" | "data";
+  part: "plans" | "about";
 }
 
 /**
@@ -539,224 +539,217 @@ export default function Data({
   // THE PLAN LIBRARY AND THE FILE THAT HOLDS ALL OF IT — one question, one
   // screen. The bundle sits under the library rather than under the folder
   // because it is the same noun: every plan, in one place.
-  if (part === "plans") {
-    return (
-      <div className="cols solo">
-        <div>
-          <Plans state={state} plans={plans} />
-          {bundlePanel}
+  const planDataPanel = (
+      <div className="panel">
+        <h2>Bu planın verisi</h2>
+  
+        {/* The sample school's home. It used to live only on the Kurulum
+            screen, where it could only ever be reached by an EMPTY project —
+            so anyone who wanted to look at it again after starting their own
+            work had no way back to it. Kurulum still offers it once, on a
+            first run; this is where it stays. */}
+        <h3>Örnek okul verisi</h3>
+        <p className="hint">
+          25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir
+          okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{" "}
+          <b>Açık olan planın yerine geçer</b>; diğer planlara dokunulmaz.
+        </p>
+        <div className="form-row">
+          <button
+            className="btn"
+            title="Bu planın yerine hazır örnek okulu koyar"
+            onClick={() => void loadSample(state, change)}
+          >
+            Örnek okulu yükle
+          </button>
+        </div>
+  
+        <h3>Sıfırla</h3>
+        <p className="hint">
+          <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri,
+          dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz.{" "}
+          <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
+        </p>
+        <div className="form-row">
+          <button
+            className="btn danger"
+            onClick={reset}
+            title="Her şeyi siler"
+          >
+            Her şeyi sil
+          </button>
         </div>
       </div>
-    );
-  }
+  );
 
-  return (
-    <div className="cols">
-      <div>
-        <Folder folder={folder} />
-
-        <div className="panel">
-          <h2>Veri</h2>
-
-          <h3>Renkler</h3>
-          <p className="hint">
-            Her öğretmene ve her sınıfa kendi rengi verilir. Çok silme
-            yaptıysanız renkler arada delik bırakabilir; aşağıdaki düğmeler
-            hepsini baştan sıraya dizer. Program bozulmaz, yalnızca renkler
-            değişir.
-          </p>
-          <div className="form-row">
-            <button
-              className="btn"
-              onClick={() => change((d) => respreadColors(d, "teacher"))}
-            >
-              Öğretmen renklerini yeniden dağıt ({state.teachers.length})
-            </button>
-            <button
-              className="btn"
-              onClick={() => change((d) => respreadColors(d, "class"))}
-            >
-              Sınıf renklerini yeniden dağıt ({state.classes.length})
-            </button>
-          </div>
-
-          {/* The sample school's home. It used to live only on the Kurulum
-              screen, where it could only ever be reached by an EMPTY project —
-              so anyone who wanted to look at it again after starting their own
-              work had no way back to it. Kurulum still offers it once, on a
-              first run; this is where it stays. */}
-          <h3>Örnek okul verisi</h3>
-          <p className="hint">
-            25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir
-            okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{" "}
-            <b>Açık olan planın yerine geçer</b>; diğer planlara dokunulmaz.
-          </p>
-          <div className="form-row">
-            <button
-              className="btn"
-              title="Bu planın yerine hazır örnek okulu koyar"
-              onClick={() => void loadSample(state, change)}
-            >
-              Örnek okulu yükle
-            </button>
-          </div>
-
-          <h3>Sıfırla</h3>
-          <p className="hint">
-            <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri,
-            dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz.{" "}
-            <b>Geri alınamaz.</b> Önce <b>Dosyaya kaydet</b> deyin.
-          </p>
-          <div className="form-row">
-            <button
-              className="btn danger"
-              onClick={reset}
-              title="Her şeyi siler"
-            >
-              Her şeyi sil
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <aside>
-        <Build update={update} />
-
-        <div className="panel">
-          <h2>Veriler nerede</h2>
-          {/* The exe changes what is TRUE here, not just the wording. On the
-              three browser routes the storage below is the only copy until
-              somebody saves a file, and "tarama verilerini temizle" can take
-              it. In the exe the same storage exists, but a copy of everything
-              is already on disk in Belgelerim after every change — so the
-              sentence that ends "taşınan tek şey dosyaya kaydettiğinizdir"
-              would be a lie there, and it is the one sentence on this screen
-              that a person acts on. */}
-          <p className="hint">
-            {storageKind() === "exe" ? (
-              <>
-                Aşağıdaki depo bu programın kendi deposu, ve{" "}
-                <b>tek kopya değil</b>: her değişiklikten sonra bütün planlar
-                Belgelerim'deki <b>Ders Programı</b> klasörüne de yazılıyor. Bu
-                bilgisayarı değiştiriyorsanız taşınacak şey o klasör.
-              </>
-            ) : (
-              <>
-                {storageKind() === "file"
-                  ? "Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor."
-                  : "Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor."}{" "}
-                Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>;
-                tarayıcıda “tarama verilerini temizle” dediğinizde{" "}
-                <b>silinir</b>. Taşınan ve gerçekten güvende olan tek şey{" "}
-                <b>dosyaya kaydettiğinizdir</b>.
-              </>
-            )}
-          </p>
-          {/* WHICH store. "The browser's store for this site" leaves out the
-              one word somebody would need to act on it, and there are three
-              stores on this machine that look identical on screen: the
-              double-clicked file, the local install and the site. Anybody
-              running two routes has two programs and no way to tell — until
-              half a term is in the wrong one. The way ACROSS is named here
-              because it is the same two buttons in both directions. */}
-          {storageKind() !== "exe" && (
-            <p className="hint">
-              Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız
-              ona: çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>
-              'nin depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>
-              . Birinden ötekine taşımanın yolu şu ikisi:{" "}
-              <b>Tümünü dosyaya kaydet</b> → öbür kopyada{" "}
-              <b>Tümünü dosyadan aç</b>.
-            </p>
+  const wherePanel = (
+      <div className="panel">
+        <h2>Veriler nerede</h2>
+        {/* The exe changes what is TRUE here, not just the wording. On the
+            three browser routes the storage below is the only copy until
+            somebody saves a file, and "tarama verilerini temizle" can take
+            it. In the exe the same storage exists, but a copy of everything
+            is already on disk in Belgelerim after every change — so the
+            sentence that ends "taşınan tek şey dosyaya kaydettiğinizdir"
+            would be a lie there, and it is the one sentence on this screen
+            that a person acts on. */}
+        <p className="hint">
+          {storageKind() === "exe" ? (
+            <>
+              Aşağıdaki depo bu programın kendi deposu, ve{" "}
+              <b>tek kopya değil</b>: her değişiklikten sonra bütün planlar
+              Belgelerim'deki <b>Ders Programı</b> klasörüne de yazılıyor. Bu
+              bilgisayarı değiştiriyorsanız taşınacak şey o klasör.
+            </>
+          ) : (
+            <>
+              {storageKind() === "file"
+                ? "Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor."
+                : "Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor."}{" "}
+              Başka bir tarayıcı ve başka bir bilgisayar bunu <b>görmez</b>;
+              tarayıcıda “tarama verilerini temizle” dediğinizde{" "}
+              <b>silinir</b>. Taşınan ve gerçekten güvende olan tek şey{" "}
+              <b>dosyaya kaydettiğinizdir</b>.
+            </>
           )}
-          {/* The one habit, spelled out. It used to be a sentence across the
-              top bar on every screen; it belongs next to the report that says
-              where the data actually lives, and the bar it left had six
-              destinations to hold instead. */}
+        </p>
+        {/* WHICH store. "The browser's store for this site" leaves out the
+            one word somebody would need to act on it, and there are three
+            stores on this machine that look identical on screen: the
+            double-clicked file, the local install and the site. Anybody
+            running two routes has two programs and no way to tell — until
+            half a term is in the wrong one. The way ACROSS is named here
+            because it is the same two buttons in both directions. */}
+        {storageKind() !== "exe" && (
           <p className="hint">
-            Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor, kaydet
-            düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{" "}
-            <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
-            taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{" "}
-            <i>değişiklik yaptın, yedek indir.</i>
+            Bu depo <code>{storageAddress()}</code> adresine ait ve yalnız
+            ona: çift tıklanan dosyanın, yerel kurulumun ve <code>.exe</code>
+            'nin depoları <b>ayrıdır</b>, biri ötekinin verisini <b>görmez</b>
+            . Birinden ötekine taşımanın yolu şu ikisi:{" "}
+            <b>Tümünü dosyaya kaydet</b> → öbür kopyada{" "}
+            <b>Tümünü dosyadan aç</b>.
           </p>
+        )}
+        {/* The one habit, spelled out. It used to be a sentence across the
+            top bar on every screen; it belongs next to the report that says
+            where the data actually lives, and the bar it left had six
+            destinations to hold instead. */}
+        <p className="hint">
+          Program bu bilgisayarda <b>kendiliğinden</b> saklanıyor, kaydet
+          düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki{" "}
+          <b>Dosyaya kaydet</b> bunun yerine geçmez, <b>yanına</b> gelir:
+          taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu:{" "}
+          <i>değişiklik yaptın, yedek indir.</i>
+        </p>
+        <table className="stat">
+          <thead>
+            <tr>
+              <th>Anahtar</th>
+              <th>Ne</th>
+              <th className="num">Yer</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.rows.map((row) => (
+              <tr key={row.key}>
+                <td>
+                  <code>{row.key}</code>
+                </td>
+                <td>{row.what}</td>
+                <td className="num">{size(row.chars)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="hint">
+          Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için
+          ayırdığı yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
+        </p>
+        {/* A row would be a lie in the "Yer" column: the table counts
+            localStorage characters, and a directory handle is not text —
+            it is the one thing only structured clone can carry, which is
+            why it lives in IndexedDB. Left out entirely it would be the
+            one key this report does not name. */}
+        <p className="hint">
+          Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha
+          var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün
+          tutamağı <b>IndexedDB</b>'de, <code>ders-programi-klasor</code>{" "}
+          adıyla durur. Programınız orada <b>değildir</b>. Orada duran şey
+          yalnız hangi klasöre yazılacağıdır.
+        </p>
+      </div>
+  );
+
+  const backupsPanel = (
+      <div className="panel">
+        <h2>Bu bilgisayardaki otomatik yedekler</h2>
+        <p className="hint">
+          Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç
+          oturumun durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve
+          programı açtığınızda <b>hangi plan açıksa ona</b> aittir. Taşımak ve
+          gerçekten güvende olmak için üst çubuktaki <b>Dosyaya kaydet</b>'i
+          kullanın.
+        </p>
+        {backups.length === 0 ? (
+          <p className="hint">Henüz otomatik yedek yok, bu ilk oturum.</p>
+        ) : (
           <table className="stat">
             <thead>
               <tr>
-                <th>Anahtar</th>
-                <th>Ne</th>
-                <th className="num">Yer</th>
+                <th>Oturum</th>
+                <th className="num">Öğretmen</th>
+                <th className="num">Sınıf</th>
+                <th className="num">Ders</th>
+                <th className="num">Yerleşmiş saat</th>
               </tr>
             </thead>
             <tbody>
-              {report.rows.map((row) => (
-                <tr key={row.key}>
+              {backups.map(({ index, state: b }) => (
+                <tr key={index}>
                   <td>
-                    <code>{row.key}</code>
+                    {index === 0 ? "bir önceki" : `${index + 1} oturum önce`}
                   </td>
-                  <td>{row.what}</td>
-                  <td className="num">{size(row.chars)}</td>
+                  <td className="num">{b.teachers.length}</td>
+                  <td className="num">{b.classes.length}</td>
+                  <td className="num">{b.lessons.length}</td>
+                  <td className="num">{Object.keys(b.placements).length}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className="hint">
-            Toplam <b>{size(report.totalChars)}</b>. Tarayıcının bu program için
-            ayırdığı yer yaklaşık <b>5 MB</b>; her plan kendi yerini kaplar.
-          </p>
-          {/* A row would be a lie in the "Yer" column: the table counts
-              localStorage characters, and a directory handle is not text —
-              it is the one thing only structured clone can carry, which is
-              why it lives in IndexedDB. Left out entirely it would be the
-              one key this report does not name. */}
-          <p className="hint">
-            Yukarıdakiler tarayıcının <b>localStorage</b>'ında. Bir tane daha
-            var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün
-            tutamağı <b>IndexedDB</b>'de, <code>ders-programi-klasor</code>{" "}
-            adıyla durur. Programınız orada <b>değildir</b>. Orada duran şey
-            yalnız hangi klasöre yazılacağıdır.
-          </p>
-        </div>
+        )}
+      </div>
+  );
 
-        <div className="panel">
-          <h2>Bu bilgisayardaki otomatik yedekler</h2>
-          <p className="hint">
-            Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç
-            oturumun durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve
-            programı açtığınızda <b>hangi plan açıksa ona</b> aittir. Taşımak ve
-            gerçekten güvende olmak için üst çubuktaki <b>Dosyaya kaydet</b>'i
-            kullanın.
-          </p>
-          {backups.length === 0 ? (
-            <p className="hint">Henüz otomatik yedek yok, bu ilk oturum.</p>
-          ) : (
-            <table className="stat">
-              <thead>
-                <tr>
-                  <th>Oturum</th>
-                  <th className="num">Öğretmen</th>
-                  <th className="num">Sınıf</th>
-                  <th className="num">Ders</th>
-                  <th className="num">Yerleşmiş saat</th>
-                </tr>
-              </thead>
-              <tbody>
-                {backups.map(({ index, state: b }) => (
-                  <tr key={index}>
-                    <td>
-                      {index === 0 ? "bir önceki" : `${index + 1} oturum önce`}
-                    </td>
-                    <td className="num">{b.teachers.length}</td>
-                    <td className="num">{b.classes.length}</td>
-                    <td className="num">{b.lessons.length}</td>
-                    <td className="num">{Object.keys(b.placements).length}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+  // PLANLAR VE YEDEK: everything that answers "where does my work live and
+  // how do I get it out". The library, the folder it is mirrored into, the
+  // one-file bundle and the automatic session chain — one section, because
+  // they are one question and the reader who has it asks all four.
+  if (part === "plans") {
+    return (
+      <div className="cols">
+        <div>
+          <Plans state={state} plans={plans} />
+          <Folder folder={folder} />
+          {bundlePanel}
         </div>
-      </aside>
+        <aside>{backupsPanel}</aside>
+      </div>
+    );
+  }
+
+  // HAKKINDA: which copy this is, how it updates, and the two operations that
+  // replace or empty the open plan. Named for the program rather than for the
+  // data because that is what the reader comes here to ask — and "Program
+  // hakkında" would have answered to `name: 'Program'`, three pixels from
+  // the tab (pitfall 49).
+  return (
+    <div className="cols">
+      <div>
+        <Build update={update} />
+        {planDataPanel}
+      </div>
+      <aside>{wherePanel}</aside>
     </div>
   );
 }

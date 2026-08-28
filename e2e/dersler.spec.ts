@@ -21,25 +21,14 @@ test.describe('69. Dersler sekmesi', () => {
       tabs.map((t) => t.getAttribute('aria-label')),
     );
     expect(names).toEqual([
-      'Kurulum',
+      'Okul',
       'Müsaitlik',
       'Dersler',
       'Program',
       'Kontrol',
-      'Yazdır',
+      'Çıktı',
       'Ayarlar',
     ]);
-  });
-
-  test('Kurulum durumundaki kapı Dersler sekmesini açıyor', async ({ page }) => {
-    await openWithSample(page);
-    await openSetup(page, 'Derslikler');
-    await page.locator('.lesson-jump').getByRole('button').click();
-    await expect(page.locator('.ribbon')).toHaveAttribute('data-section', 'lessons');
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
-      'aria-label',
-      'Dersler',
-    );
   });
 
   // The shortening the reader asked for by name: "tek bir sınıf için ders
@@ -177,10 +166,33 @@ test.describe('69. Dersler sekmesi', () => {
     await expect(page.locator('.entity-list .entity[aria-current="true"]')).toHaveCount(1);
   });
 
-  test('Genel modda seçilecek bir şey yok, sağ sütun da yok', async ({ page }) => {
+  test('Genel modda seçilecek bir şey yok — ama sağ sütun DURUYOR', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'all');
+    // Nothing to pick between: Genel is the whole list.
     await expect(page.locator('.entity-list')).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: /^Dersler \(/ })).toBeVisible();
+
+    // The rail stays, and it stays the same width. It used to vanish here, so
+    // switching modes moved the list's right edge by several hundred pixels —
+    // on a button whose only job is to change which lessons are listed.
+    const rail = page.locator('.cols > aside');
+    await expect(rail).toHaveCount(1);
+    await expect(rail).toContainText('Ders yükü');
+    const wide = (await rail.boundingBox())!.width;
+
+    await page.getByRole('button', { name: 'Sınıftan', exact: true }).click();
+    await expect(page.locator('.entity-list')).toHaveCount(1);
+    expect((await rail.boundingBox())!.width).toBeCloseTo(wide, 0);
+  });
+
+  // Rows and hours, and the same two numbers the strip states. One screen
+  // reading one number two ways is the drift this program keeps catching.
+  test('başlık ders sayısını da saati de söylüyor, şeritle AYNI', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page, 'all');
+    const heading = await page.locator('.cols > div .panel h2').first().innerText();
+    expect(heading).toMatch(/^Dersler · \d+ ders · \d+ saat$/);
+    const strip = await page.locator('.ribbon .ribbon-value').last().innerText();
+    expect(heading.replace('Dersler · ', '')).toBe(strip.trim());
   });
 });

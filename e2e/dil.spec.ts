@@ -28,7 +28,7 @@ test.describe('82. Dil', () => {
   test('varsayılan Türkçe ve <html lang> onu söylüyor', async ({ page }) => {
     await open(page);
     await expect(page.locator('html')).toHaveAttribute('lang', 'tr');
-    await expect(page.getByRole('button', { name: 'Kurulum', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
   });
 
   test('İngilizceye geçince sekmeler ÇEVRİLİYOR ve lang değişiyor', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('82. Dil', () => {
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     for (const [tr, en] of [
-      ['Kurulum', 'Setup'],
+      ['Okul', 'School'],
       ['Program', 'Timetable'],
       ['Ayarlar', 'Settings'],
     ] as const) {
@@ -79,12 +79,12 @@ test.describe('82. Dil', () => {
     expect(saved.plan).not.toContain('lang');
   });
 
-  test('Ayarlar → Veri dil anahtarını da SAYIYOR', async ({ page }) => {
+  test('Ayarlar → Hakkında dil anahtarını da SAYIYOR', async ({ page }) => {
     await open(page);
     // Write it first: the table lists a key with 0 as well, but a key that is
     // there for real is the stronger check.
     await page.evaluate(() => localStorage.setItem('ders-programi-dil', 'tr'));
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     await expect(page.locator('table').filter({ hasText: 'ders-programi-dil' })).toBeVisible();
   });
 

@@ -24,12 +24,12 @@ import { expect, test } from './kapan';
 import { openWithSample } from './helpers';
 
 const SEKMELER = [
-  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
 ];
-const ADIMLAR = ['Derslikler', 'Öğretmenler', 'Sınıflar'];
+const ADIMLAR = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar'];
 // Dersler is a tab now, and its three modes draw three different screens.
 const DERS_MODLARI = ['Sınıftan', 'Öğretmenden', 'Genel'];
-const BOLUMLER = ['Okul', 'Kurallar', 'Branşlar', 'Görünüm', 'Veri'];
+const BOLUMLER = ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında'];
 
 test.describe('80. Ekranda okunan metin', () => {
   test('hiçbir ekranda uzun çizgi (—) yok', async ({ page }) => {
@@ -49,10 +49,10 @@ test.describe('80. Ekranda okunan metin', () => {
       await page.getByRole('button', { name: sekme, exact: true }).click();
       await bak(sekme);
 
-      if (sekme === 'Kurulum') {
+      if (sekme === 'Okul') {
         for (const adim of ADIMLAR) {
           await page.locator('.ribbon .step', { hasText: adim }).click();
-          await bak(`Kurulum → ${adim}`);
+          await bak(`Okul → ${adim}`);
         }
       }
       if (sekme === 'Dersler') {

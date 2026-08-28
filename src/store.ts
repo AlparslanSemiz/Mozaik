@@ -271,6 +271,11 @@ function migrateV2toV3(raw: LegacyV2): State {
     schemaVersion: SCHEMA_VERSION,
     settings: {
       ...blank.settings,
+      // Written out because `blank` is `emptyState()`, whose subject list is
+      // now EMPTY by design. A v1/v2 file predates `settings.subjects`
+      // entirely, so inheriting that emptiness would turn every subject its
+      // teachers carry into a "listede değil" stray — silently, on open.
+      subjects: defaultSubjects(),
       // A v2 file has no bell times at all; the school day drafted for v3 is
       // the most reasonable guess and it is visible on the Kurulum screen.
       days: names.length > 0 ? names.map(makeDay) : blank.settings.days,

@@ -211,6 +211,15 @@ export default function Teachers({ state, change }: PanelProps) {
           ))}
           <option value={NEW}>+ Yeni branş…</option>
         </select>
+        {/* A new project's subject list is empty by design, so on the very
+            first teacher this dropdown offers nothing but "+ Yeni branş…" and
+            the Ekle button stays locked. Say where the list is rather than
+            leaving the reader to find the step. */}
+        {subjects.length === 0 && (
+          <span className="hint">
+            Branş listesi boş. <b>Branşlar</b> adımından ekleyebilirsiniz.
+          </span>
+        )}
         {freshSubject !== null && (
           <input
             type="text"

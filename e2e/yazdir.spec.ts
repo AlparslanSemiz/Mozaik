@@ -8,7 +8,7 @@ import { openWithSample, openSetup, openSettings, loadWorld } from './helpers';
 test.describe('4. Yazdırma', () => {
   test('her sınıf için bir sayfa ve yatay taşma yok', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(20);
 
     await page.emulateMedia({ media: 'print' });
@@ -23,14 +23,14 @@ test.describe('4. Yazdırma', () => {
 
   test('PDF üretilebiliyor ve boş değil', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
     expect(pdf.length).toBeGreaterThan(20_000);
   });
 
   test('sayfa A4 YATAY basılıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
 
     // 12 lesson columns do not fit portrait; the page must come out landscape.
@@ -47,7 +47,7 @@ test.describe('4. Yazdırma', () => {
 
   test('baskı sütunları eşit ve eksen dönmüş', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     const table = page.locator('table.print').first();
@@ -88,7 +88,7 @@ test.describe('4. Yazdırma', () => {
 test.describe('35. Basılan sayfanın düzeni', () => {
   test('başlık ORTALI, iki satır ve ana satır daha büyük', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     const head = page.locator('.print-page').first().locator('h3');
@@ -115,7 +115,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     // page box. If this padding is ever lost the timetable prints into the
     // unprintable edge of the sheet.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     const box = page.locator('.print-page').first();
@@ -140,7 +140,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
 
   test('plan sayfada DİKEY ortalanıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     const gaps = await page.locator('.print-page').first().evaluate((el) => {
@@ -161,7 +161,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     // plus `break-after: page` would put a blank sheet after every timetable,
     // and nothing else in the suite would notice.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
@@ -178,10 +178,10 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     // header row and the title. `safe center` keeps the top from being cut off
     // if it ever does not fit; this measures that it still fits.
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Pazartesi', { exact: true }).check();
 
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     const first = page.locator('.print-page').first();
@@ -202,7 +202,7 @@ test.describe('35. Basılan sayfanın düzeni', () => {
 test.describe('21. Yazdırmada seçim', () => {
   test('yalnız seçilen sınıflar basılıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const pages = page.locator('.print-page');
     await expect(pages).toHaveCount(20); // everything is on by default
@@ -226,7 +226,7 @@ test.describe('21. Yazdırmada seçim', () => {
 
   test('öğretmen sayfaları ayrı seçiliyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     // "Ne basılsın" moved into the tool strip and became three buttons: the
     // strip carries what you are looking at, and a scope you switch while
     // reading the preview should not need a dropdown opened first.
@@ -245,7 +245,7 @@ test.describe('21. Yazdırmada seçim', () => {
     // The selection stores what is LEFT OUT: a class added after the last
     // printout must not go silently missing on the next one.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
     await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
@@ -255,14 +255,14 @@ test.describe('21. Yazdırmada seçim', () => {
     await page.getByPlaceholder('Sınıf adı, örn. 510').fill('999');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(2);
     await expect(page.locator('.print-page').nth(1).locator('h3')).toContainText('999');
   });
 
   test('seçim yazdırma çıktısına da yansıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
     await list.locator('.pick-item', { hasText: '510' }).first().locator('input').check();
@@ -308,7 +308,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
 
   test('ekranda bir SAYFA gibi duruyor — A4 yatayın kendisi', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     const screen = await sheet(page);
@@ -337,7 +337,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     // 297 mm page (a tenth of a millimetre there is a blank sheet behind every
     // timetable — pitfall 31).
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     const screen = await sheet(page);
 
@@ -381,7 +381,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     // timetable onto a second sheet, and "3 classes = 3 pages" is the cheapest
     // way to see it.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
@@ -402,7 +402,7 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     // theme was darkened, 3.01 after.
     await openWithSample(page);
     await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     const ratio = await page.evaluate(() => {
@@ -472,7 +472,7 @@ test.describe('69. Kâğıdın 2026-08-26 turu', () => {
     // MÇ is shut all of Çarşamba in this world, so the page HAS closed hours
     // to draw: before the change they came out as a cross and a grey hatch.
     await loadWorld(page, PAPER_WORLD);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
@@ -492,7 +492,7 @@ test.describe('69. Kâğıdın 2026-08-26 turu', () => {
     // title dot is the honest thing to compare against — no palette index is
     // written down twice.
     await loadWorld(page, PAPER_WORLD);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     // The strip opens on class sheets only; this comparison needs both kinds.
     await page.getByRole('button', { name: 'İkisi de', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(3);
@@ -548,7 +548,7 @@ test.describe('69. Kâğıdın 2026-08-26 turu', () => {
         await openSettings(page, 'Görünüm');
         await page.getByRole('button', { name: `%${pct}`, exact: true }).click();
       }
-      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
       const clipped = await page
         .locator('.panel', { hasText: 'Sayfada ne olsun' })
@@ -575,7 +575,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
 
   test('bir A4’e 1, 2 ya da 4 program — ve kâğıt sayısı ona göre', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(20);
 
     for (const [per, sheets] of [
@@ -595,7 +595,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
 
   test('kâğıt 297x205mm KALIYOR — dörde bölünen sayfa değil, içindekiler', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     for (const per of ['1', '2', '4']) {
       await choose(page, per);
       const m = await page.locator('.print-sheet').first().evaluate((el) => {
@@ -627,7 +627,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     // The reader's report was "yazdırmada yazıları büyük yapınca yazdırma
     // bozuluyor" — one setting, one number, and no test could see it.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const spill: Record<string, string> = {};
     for (const per of ['1', '2', '4']) {
       await choose(page, per);
@@ -679,7 +679,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
   // vertical was ever looked at.
   test('kâğıt ortamında da dokuz birleşimin dokuzu SIĞIYOR', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const spill: Record<string, string> = {};
     for (const per of ['1', '2', '4']) {
@@ -706,7 +706,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
 
   test('yazı boyutu GERÇEKTEN değişiyor, üç basamak da ayrı', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const seen: number[] = [];
     for (const size of ['Küçük', 'Normal', 'Büyük']) {
       await choose(page, size);
@@ -723,7 +723,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
 
   test('düzen ve boyut BAĞIMSIZ — 4’lüde de büyütülebiliyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await choose(page, '4');
     const read = () =>
       page.locator('.p-title-main').first().evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
@@ -739,7 +739,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     // starts at 13:30 on a weekday and 13:10 at the weekend, and the header
     // refused to say either. Now it says both, each with its own days.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const heads = await page
       .locator('.print-page')
@@ -771,7 +771,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     // `table-layout: fixed` is what keeps the columns equal, and a header that
     // grew its own column would break the one thing paper has to get right.
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     for (const per of ['1', '2', '4']) {
       await choose(page, per);
       const w = await page
@@ -792,7 +792,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     // overflow shows up (pitfall 31 cost a blank sheet behind every timetable
     // and no DOM measurement saw it).
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();

@@ -464,10 +464,12 @@ theme.ts                        makine tercihleri (tema, kenar, havuz açık mı
                                 on bağımsız skaler, on anahtar, hiçbiri State'e
                                 girmez
 toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
-                                kapsam/Kontrol süzgeci, artı Dersler'in MODU ve
-                                odağı. App'te yaşar, çünkü sekme değişimi
-                                bileşeni söküyor (tuzak 18) ve çünkü onu
-                                gösteren şerit <main>'in ÜSTÜNDE
+                                kapsamı, artı Dersler'in MODU ve odağı. App'te
+                                yaşar, çünkü sekme değişimi bileşeni söküyor
+                                (tuzak 18) ve çünkü onu gösteren şerit
+                                <main>'in ÜSTÜNDE. Kontrol'ün süzgeci
+                                2026-08-28'de SİLİNDİ: rapor tek sayfa,
+                                şeridin düğmeleri bir pozisyon tutmuyor
 gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
                                 React BİLMEZ — drag.ts'in deseni (tuzak 1)
 poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
@@ -547,20 +549,30 @@ components/Field.tsx            iki klasörün de kullandığı küçük parçal
 components/ColorPick.tsx        36 renklik swatch diyaloğu (Kurulum'un iki adımı)
 components/LimitBox.tsx
 components/*.tsx                sadece görüntüleme ve olay yakalama
-components/setup/*.tsx          Kurulum: index (kabuk) + 3 liste adımı + Paste +
-                                Summary + Progress. Paste KONTROLLÜ: düğme
-                                panelin başlığında (.panel-head), kutu formun
-                                altında
+components/setup/*.tsx          Okul: index (kabuk) + 4 liste adımı (Rooms ·
+                                Subjects · Teachers · Classes) + Paste + Summary.
+                                Progress ("Kurulum durumu") 2026-08-28'de
+                                SİLİNDİ. Summary'nin adı ekranda ÖZET ve dalı
+                                başına bir <h3> taşıyor; Dersler → Genel de onu
+                                çiziyor (SummaryView = StepId | 'lessons').
+                                Paste KONTROLLÜ: düğme panelin başlığında
+                                (.panel-head), kutu formun altında
 components/lessons/index.tsx    Dersler sekmesi. Kurulum'un 4. adımıydı; ders
                                 en çok kullanılan ekran ve bir sihirbazın
                                 dördüncü adımından geçilerek varılmıyor. Üç
                                 mod: Sınıftan · Öğretmenden · Genel. Odaklanmış
                                 modda form o ekseni HİÇ SORMAZ — şerit söyler,
                                 sağ sütun seçer (Müsaitlik'in deseni)
-components/settings/*.tsx       Ayarlar: index (kabuk) + Okul · Kurallar · Branşlar ·
-                                Görünüm · Veri.  Veri, Plans.tsx'i (plan
-                                kitaplığı) kendi içine alır; Görünüm okulu
-                                değil MAKİNEYİ tarif eder (theme.ts)
+components/settings/*.tsx       Ayarlar: index (kabuk) + Zil ve günler ·
+                                Kurallar · Görünüm · Planlar ve yedek ·
+                                Hakkında. Son ikisini Data.tsx çiziyor
+                                (part prop'u) ve Plans.tsx'i kendi içine alır;
+                                Görünüm okulu değil MAKİNEYİ tarif eder
+                                (theme.ts)
+components/CapacityRows.tsx     kapasite tablosu, TEK çizim. Özet ve Kontrol
+                                aynı ReportRow[]'yu iki ayrı şekilde
+                                çiziyordu; buildReport zaten buildCapacity'nin
+                                satırlarını döndürüyor, yani ikisi tek gerçek
 ```
 
 `rules.ts`, `constraints.ts`'ten **yalnızca `Index` tipini** alır (`import type`,
@@ -1662,6 +1674,34 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     sarmayı bırakır, ve satır yükseklikleri gerçek A4'tekiyle **tutmaz**. Kâğıdı
     ölçen bir test pencereyi de kâğıdın boyuna getirmeli.
 
+87. **`i18n.test.ts`'in ölü anahtar tarayıcısı YORUMLARA da bakar, o yüzden bir
+    arayüz metnini yeniden adlandırmak sözlük girdisini öksüz bırakır ve
+    hiçbir şey söylemez.** Sözlüğün anahtarları Türkçe cümlelerin kendisi, ve
+    o testin tek işi "kaynakta artık geçmeyen anahtar var mı" diye sormak.
+    Ama `source` **bütün `src/`'nin ham metni**, İngilizce yorumlar dâhil.
+    `Kurulum → Okul` ve `Yazdır → Çıktı` yapıldıktan sonra o iki kelime on
+    beş kadar yorumda hâlâ duruyordu, yani `'Kurulum': 'Setup'` satırı ölü
+    olmasına rağmen "kaynakta var" sayılıyordu. **Mutasyonla ölçüldü:** iki
+    ölü anahtar bilerek geri kondu ve süit yeşil geçti. Tuzak 80'in ailesi —
+    orada bir toplu değiştirme karakterin **rolüne** değil kendisine bakıyordu,
+    burada bir tarayıcı aynı şeyi yapıyor. Bir arayüz metnini yeniden
+    adlandıran, `lang/*.ts`'i **elle** düzeltir; onu hatırlatacak bir şey yok.
+
+88. **Bir `<th>`'ye yüzde genişlik yazmak, otomatik düzenli bir tabloda
+    DÖNGÜSELDİR.** "Tablo panelin sonuna kadar gitsin" için ilk yazılan kural
+    `th:last-child { width: 100% }` idi; bir hücrenin yüzdesi **tablonun**
+    genişliğine göre çözülür, tablonun genişliği de hücrelerden gelir.
+    Chromium bunu hata olarak bildirmedi — tabloyu **1 000 000 piksele**
+    çıkardı, yani ekranda kalan tek iz yatay kaydırma çubuğuydu. Aynı turda
+    ölçülen ikinci yarısı daha sinsi: `width: 100%` ya da `min-width: 100%`
+    tablonun kendisine yazıldığında panel gerçekten doluyor **ama fazlalık
+    doğrudan adı taşıyan sütuna gidiyor** (Derslikler'de Ad 187 → 640,8 px),
+    yani bir önceki turun şikayeti geri geliyor. Çalışan tek şey kutuyu
+    doldurmak **ve fazlalığı alacak sütunu serbest bırakmak** —
+    `min-width: 100%; width: max-content` artı `th:last-child { width: auto }`.
+    Genel kural: bir tabloyu genişletirken sorulacak soru "dolar mı" değil,
+    **"fazlalık hangi sütuna gidiyor"**dur, ve cevabı ölçülür.
+
 ---
 
 ## Tasarım — serbest
@@ -1764,12 +1804,18 @@ Tip hataları için `typescript-lsp` eklentisi. `npm run kontrol` son sözü sö
 > Bir kararı değiştirirken buradaki gerekçeyi **okumak** işe yarar; ona
 > **uymak** zorunlu değil. Değiştirilen karar burada da güncellenir.
 
-Yedi sekme: **Kurulum · Müsaitlik · Dersler · Program · Kontrol · Yazdır ·
-Ayarlar**. Dersler 2026-08-27'de Kurulum'un dördüncü adımından çıkıp kendi
-sekmesi oldu; gerekçe kullanıcının kendi cümlesi: *"hocaları onu bunu
-ayarlıyorsun ama **ders en önemli kısım**"*. Kurulum üç adıma indi ve
-"Kurulum durumu" panelinin ayağında ders sayısı, eksik uyarısı ve o sekmeye
-giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
+Yedi sekme: **Okul · Müsaitlik · Dersler · Program · Kontrol · Çıktı ·
+Ayarlar**. Dersler 2026-08-27'de dördüncü adımdan çıkıp kendi sekmesi oldu;
+gerekçe kullanıcının kendi cümlesi: *"hocaları onu bunu ayarlıyorsun ama
+**ders en önemli kısım**"*.
+
+**İki ad 2026-08-28'de değişti.** `Kurulum → Okul`: ilke 1'in ilk cümlesi
+"kurulum yok" ve ilk sekmenin adı Kurulum'du, üstelik o sekme artık okulun
+dört listesini birden tutuyor. `Yazdır → Çıktı`: isimler arasındaki tek
+fiildi. Ad çakışması yüzünden zorunlu üçüncü bir yeniden adlandırma geldi
+(tuzak 49/74): Ayarlar'ın `Okul ve zil` bölümü **`Zil ve günler`** oldu, çünkü
+`getByRole(name:)` alt dize eşler ve bir düğme üç piksel ötedeki sekmenin
+adını taşıyamaz.
 
 - **Üst çubuğun sol ucunda marka işareti** (2026-08-26). Ayrıntılı çizim,
   `1.75rem` — yani `--ui-scale`'i izliyor (28 px @%100, 42 px @%150). Düğme
@@ -1792,9 +1838,16 @@ giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
     gelip gidiyordu, yani Kontrol'e her girişte altındaki her şey **45px
     zıplıyordu** ve her çıkışta geri. Üstelik rapora sorulacak bir soru da
     varmış: tam hâli yedi panel, üçü ancak bir şey yanlışsa var oluyor.
-    Kontrol'ün şeridi artık raporu **süzüyor** (`Hepsi · Sorunlar · Kapasite`)
-    ve sağ ucunda sayıları söylüyor. Süzgeç `toolState`'te, çünkü sekme değişimi
-    bileşeni söküyor (tuzak 18).
+    Şerit bir tur boyunca raporu **süzdü** (`Hepsi · Sorunlar · Kapasite`) ve
+    **o karar 2026-08-28'de geri alındı.** Okuyanın hükmü "üçü de gereksiz gibi"
+    idi ve büyük ölçüde doğruydu: herkesin geldiği panel üçünde de vardı, yani
+    iki düğme yalnızca bir şeyleri **kaldırıyordu**. Rapor artık tek sayfa ve
+    şerit süzmüyor, **götürüyor**: `Sorunlar (N) · Öğretmenler · Sınıflar ·
+    Derslikler`, sağ ucunda yine sayılar. Atlama saf DOM
+    (`scrollIntoView`) — `gridChrome.ts`'in deseni, çünkü şerit `<main>`'in
+    ÜSTÜNDE ve içine ref uzatamaz; yumuşaklık koda değil **CSS'e** yazılı
+    (`scroll-behavior`, `[data-motion]`'a bağlı), yoksa kapatma düğmesi
+    olmayan bir hareket olurdu (tuzak 57).
   - Şerit katlanır (`ders-programi-serit`); katlanınca **tamamen** gider, 45px'i
     ızgaraya bırakır. %100'de Program'da bir şey kazandırmaz ve bu doğru:
     müşterisi %125/%150 kullanan baba, orada 39px bir tam satırdır. Katlama
@@ -1841,21 +1894,35 @@ giden kapı duruyor — o cümleyi kaybetmek taşımanın tek gerçek riskiydi.
   orada — proje doluyken sorusu **ne kaybedileceğini sayar** ve kırmızıdır.
   Eskiden tek ev Kurulum'du, yani ancak **boş** bir projeyle ulaşılabiliyordu:
   kendi verisine başlamış biri örneğe bir daha hiç bakamıyordu.
-- **Kurulum yalnız listeler, Ayarlar yalnız ayarlar.** Kurulum üç sayılabilir
-  liste: `Derslikler · Öğretmenler · Sınıflar`; dersler kendi sekmesinde.
+- **Okul yalnız listeler, Ayarlar yalnız ayarlar.** Okul **dört** sayılabilir
+  liste: `Derslikler · Branşlar · Öğretmenler · Sınıflar`; dersler kendi
+  sekmesinde. **Branşlar 2026-08-28'de Ayarlar'dan buraya geldi** ve sıra
+  bağımlılık zinciri: sınıf bir dersliği gösterir, öğretmen listeden bir branş
+  **seçer**, yani ikisi de onları adlandıran adımdan önce gelmeli. Bir tur
+  boyunca Ayarlar'daydı ve bedeli şuydu: branş eklemek, yarısı yazılmış bir
+  öğretmeni bırakıp bir sekme öteye gitmek demekti.
   **Sıra numaraları 2026-08-28'de kalktı** (kullanıcı isteği) ve gerekçe
   şeridin kendi savıyla aynı: bu bir sihirbaz değil, her liste her an açık, yani
   önlerindeki 1·2·3 kimsenin saymadığı bir sırayı sayıyordu. Sayaç kalıyor —
   **0 gösteren liste**, eksik olanın nerede olduğunu söyleyen tek şey. Okul adı, günler, zil,
-  kurallar ve branş listesi **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir
-  dokunulan şey aynı ekranda durmaz.
-- **Ayarlar ALTI bölüm** (2026-08-28): `Okul ve zil · Kurallar · Branşlar ·
-  Görünüm · Planlar · Veri`. **Planlar** Veri'den ayrıldı: orası tek başına yedi
-  paneldi ve dört ayrı soruya cevap veriyordu (hangi plandayım · dosyalar nereye
-  gidiyor · bu bilgisayarda ne duruyor · bu hangi derleme). Plan kitaplığı ile
-  "bütün planlar tek dosyada" birlikte gitti, çünkü paketin adı kitaplığın kendi
-  adı. `Data.tsx` ikisini de çiziyor (`part` prop'u) — paketi yazan işleyiciler
-  kitaplığı okuyanlarla aynı, dosyayı bölmek onları da bölerdi.
+  kurallar **Ayarlar**'da — dönem başında doldurulan şeyle yılda bir dokunulan
+  şey aynı ekranda durmaz.
+- **Yeni bir proje BOŞ branş listesiyle doğar** (2026-08-28). Gömülü 21 branş
+  hâlâ duruyor ama bir **teklif** olarak: Branşlar adımının sağındaki panel
+  onları tek tıkla listeye koyar. Tohumlanmış hâlde o panel her yeni projede
+  `(0)` yazıyordu, yani işe yaradığı tek ekranda boştu. **`defaultSubjects()`
+  bir varsayılan değil bir tablo:** v5 öncesi bir yedeğin geri düştüğü yer hâlâ
+  o (`store.ts`, İKİ yerde — `parseState` ve `migrateV2toV3`), çünkü listeden
+  önce yazılmış bir dosya, öğretmenlerinin taşıdığı branşları kaybedemez.
+- **Ayarlar BEŞ bölüm** (2026-08-28, aynı gün ikinci kez): `Zil ve günler ·
+  Kurallar · Görünüm · Planlar ve yedek · Hakkında`. Branşlar Okul'a gitti;
+  kalan dördü iki soruya göre bölündü. **Planlar ve yedek** = "işim nerede
+  duruyor ve dışarı nasıl çıkar": kitaplık, klasör, paket, oturum yedekleri.
+  **Hakkında** = "bu hangi kopya": sürüm, güncelleme, veriler nerede, artı açık
+  planın yerine geçen ya da onu boşaltan iki işlem. `Data.tsx` ikisini de
+  çiziyor (`part` prop'u) — paketi yazan işleyiciler kitaplığı okuyanlarla aynı,
+  dosyayı bölmek onları da bölerdi. **`Program hakkında` DEĞİL:** o ad
+  `name: 'Program'` sorgusuna da cevap verirdi (tuzak 49).
   Görünüm'de iki yoğunluk **tek panelde iki soru** oldu (ayıran şey iki
   `role="group"`, ki testin bulduğu da o), **tema** oraya geldi (düğmesi üst
   çubukta kalıyor; orası kısayol, burası envanter), ve "Yazdırma bundan

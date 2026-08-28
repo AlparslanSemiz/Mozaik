@@ -99,10 +99,18 @@ function disk(page: Page): Promise<Record<string, string>> {
   });
 }
 
-async function openData(page: Page) {
+// Two sections since the Ayarlar round: the folder lives with the plans and
+// the backups, the version lives with what this copy IS.
+async function openFolder(page: Page) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
-  await page.locator('.ribbon .btn', { hasText: 'Veri' }).first().click();
+  await page.locator('.ribbon .btn', { hasText: 'Planlar ve yedek' }).first().click();
   await expect(page.getByRole('heading', { name: 'Nereye kaydedilsin' })).toBeVisible();
+}
+
+async function openAbout(page: Page) {
+  await page.getByRole('button', { name: 'Ayarlar' }).click();
+  await page.locator('.ribbon .btn', { hasText: 'Hakkında' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
 }
 
 const DAILY = /^ders-programi-\d{4}-\d{2}-\d{2}\.json$/;
@@ -151,7 +159,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
   test('exe’de SEÇİLECEK bir klasör yok — üç düğme de çizilmiyor', async ({ page }) => {
     await fakeExe(page);
     await open(page);
-    await openData(page);
+    await openFolder(page);
 
     const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }) });
     await expect(panel.getByRole('button', { name: /Klasör seç/ })).toHaveCount(0);
@@ -171,7 +179,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     // sentence a person acts on has to change with the route.
     await fakeExe(page);
     await open(page);
-    await openData(page);
+    await openAbout(page);
 
     const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Veriler nerede' }) });
     await expect(panel.getByText(/tek kopya/)).toBeVisible();
@@ -184,11 +192,12 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     // keep behaving like a browser page when the bridge is absent. Without
     // this, a stray `__TAURI__` shim would be invisible.
     await open(page);
-    await openData(page);
+    await openFolder(page);
 
     const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }) });
     await expect(panel.getByRole('button', { name: /Klasör seç/ })).toHaveCount(1);
 
+    await openAbout(page);
     const where = page.locator('.panel', { has: page.getByRole('heading', { name: 'Veriler nerede' }) });
     await expect(where.getByText(/tarama verilerini temizle/)).toBeVisible();
   });
@@ -207,7 +216,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     // is merely drawn.
     await fakeExe(page, { cevap: 'var', version: '9.9.9', date: '2026-09-02', boyut: 4_000_000 });
     await open(page);
-    await openData(page);
+    await openAbout(page);
     await expect(surumPaneli(page).getByRole('button', { name: 'Güncellemeleri denetle' }))
       .toBeVisible();
 
@@ -219,7 +228,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
   test('güncelse "en son sürümü kullanıyorsunuz" diyor', async ({ page }) => {
     await fakeExe(page, { cevap: 'guncel' });
     await open(page);
-    await openData(page);
+    await openAbout(page);
 
     await surumPaneli(page).getByRole('button', { name: 'Güncellemeleri denetle' }).click();
     await expect(surumPaneli(page).getByText(/En son sürümü kullanıyorsunuz/)).toBeVisible();
@@ -233,7 +242,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     // step.
     await fakeExe(page, { cevap: 'var', version: '1.9.0', date: '2026-09-02', boyut: 4_194_304 });
     await open(page);
-    await openData(page);
+    await openAbout(page);
     const panel = surumPaneli(page);
 
     await panel.getByRole('button', { name: 'Güncellemeleri denetle' }).click();
@@ -259,7 +268,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
       mesaj: 'İnternete bağlanılamadı. Program çalışmaya devam ediyor, sonra tekrar deneyebilirsiniz.',
     });
     await open(page);
-    await openData(page);
+    await openAbout(page);
     const panel = surumPaneli(page);
 
     await panel.getByRole('button', { name: 'Güncellemeleri denetle' }).click();
@@ -287,7 +296,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     // detection, so the browser copy has to keep saying it cannot update
     // itself and pointing at the address instead.
     await open(page);
-    await openData(page);
+    await openAbout(page);
     const panel = surumPaneli(page);
 
     await expect(panel.getByRole('button', { name: 'Güncellemeleri denetle' })).toHaveCount(0);

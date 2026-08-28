@@ -29,9 +29,9 @@ function buildPanel(page: Page) {
 }
 
 test.describe('78. Sürüm ve güncelleme', () => {
-  test('Ayarlar → Veri hangi SÜRÜM olduğunu söylüyor', async ({ page }) => {
+  test('Ayarlar → Hakkında hangi SÜRÜM olduğunu söylüyor', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     const panel = buildPanel(page);
     await expect(panel).toBeVisible();
@@ -42,7 +42,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
 
   test('hangi KOPYA olduğunu söylüyor — çünkü üçünün deposu ayrı', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     const panel = buildPanel(page);
     // This IS the double-clicked file. Calling it "Site" here would send
@@ -58,7 +58,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
 
   test('kendini güncellemediğini SÖYLÜYOR ve nereye bakılacağını yazıyor', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     const panel = buildPanel(page);
     await expect(panel).toContainText('kendini güncellemez');
@@ -78,7 +78,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
     });
 
     await open(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     await expect(page.locator('.panel', { hasText: 'Bu program' }).last()).toBeVisible();
     // Give anything asynchronous a chance to misbehave before we believe it.
     await page.waitForTimeout(500);

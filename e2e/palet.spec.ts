@@ -31,13 +31,13 @@ test.describe('52. Komut paleti', () => {
   test('sekmeye gidiyor', async ({ page }) => {
     await openWithSample(page);
     await page.keyboard.press('Control+k');
-    await page.getByLabel('Ara veya komut yaz').fill('yazdır');
+    await page.getByLabel('Ara veya komut yaz').fill('çıktı');
     await page.keyboard.press('Enter');
 
     await expect(page.locator('.palette')).toBeHidden();
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Yazdır',
+      'Çıktı',
     );
   });
 
@@ -122,7 +122,7 @@ test.describe('53. Durum çipi', () => {
 
   test('her sekmede duruyor ve Kontrol\'e götürüyor', async ({ page }) => {
     await openWithSample(page);
-    for (const tab of ['Kurulum', 'Müsaitlik', 'Program', 'Yazdır', 'Ayarlar']) {
+    for (const tab of ['Okul', 'Müsaitlik', 'Program', 'Çıktı', 'Ayarlar']) {
       await page.getByRole('button', { name: tab, exact: true }).click();
       await expect(page.locator('.health')).toBeVisible();
     }
@@ -138,7 +138,7 @@ test.describe('54. Klavye kısayolları', () => {
   test('Alt+1..7 sekmelere gidiyor', async ({ page }) => {
     await openWithSample(page);
     const names = [
-      'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+      'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
     ];
     for (const [i, name] of names.entries()) {
       await page.keyboard.press(`Alt+${i + 1}`);

@@ -51,24 +51,22 @@ test.describe('5. Yedek ve şema göçü', () => {
     await expect(page.getByRole('button', { name: 'Yedek indir' })).toHaveCount(0);
 
     // Where the teaching went. The sentence used to be 400px of explanation on
-    // the top bar; C9 moved it to Ayarlar → Veri, beside the report that says
+    // the top bar; C9 moved it to Ayarlar → Hakkında, beside the report that says
     // where the data actually IS, and left a short version on the save
     // button's own tooltip — which is where somebody about to click it looks.
     await expect(
       page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }),
     ).toHaveAttribute('title', /kendiliğinden saklanıyor/);
 
-    await openSettings(page, 'Veri');
-    // `.panel` nests (a panel inside the Veri panel), so two match — take the
-    // innermost, which is the one that actually holds the sentence.
+    await openSettings(page, 'Planlar ve yedek');
     await expect(
       page.locator('.panel', { hasText: 'kendiliğinden saklanıyor' }).last(),
     ).toBeVisible();
 
     // "Sıfırla" is not in the top bar at all any more: it was one careless
-    // click from "Dosyadan aç" and it cannot be undone. It is in Ayarlar > Veri.
+    // click from "Dosyadan aç" and it cannot be undone. It is in Ayarlar > Hakkında.
     await expect(page.getByRole('button', { name: 'Sıfırla' })).toHaveCount(0);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     await expect(page.getByRole('button', { name: 'Her şeyi sil' })).toBeVisible();
   });
 
@@ -122,7 +120,7 @@ test.describe('5. Yedek ve şema göçü', () => {
   test('günlük saat azaltılınca taşan dersler temizleniyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
 
     const hourBox = page.getByLabel('Günlük ders sayısı');
     await hourBox.fill('4');

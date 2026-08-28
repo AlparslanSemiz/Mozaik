@@ -34,7 +34,7 @@ export function useLoadSample(): LoadSample {
             : 'Örnek okul verisi yüklenecek',
           body: holds
             ? `${cost} Yerine 25 öğretmen, 20 sınıf, 8 derslik ve 99 derslik örnek bir okul gelir. Diğer planlara dokunulmaz. Geri alınamaz, önce "Dosyaya kaydet" deyin.`
-            : '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Veri → "Her şeyi sil" ile temizleyin.',
+            : '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.',
           confirmLabel: holds ? 'Yerine koy' : 'Yükle',
           danger: holds,
         }))

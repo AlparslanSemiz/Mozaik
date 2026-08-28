@@ -28,7 +28,7 @@ const picker = (page: Page) => page.getByLabel('Plan', { exact: true });
  * of the plans, in one file" is the library's own noun.
  */
 async function openPlans(page: Page) {
-  await openSettings(page, 'Planlar');
+  await openSettings(page, 'Planlar ve yedek');
   await expect(page.getByRole('heading', { name: /^Planlar/ })).toBeVisible();
 }
 
@@ -49,7 +49,7 @@ async function openWithOneLesson(page: Page) {
   return placedCards(page);
 }
 
-/** The row of the plan that is currently open, in Ayarlar > Veri. */
+/** The row of the plan that is currently open, in Ayarlar > Planlar ve yedek. */
 const openRow = (page: Page) => page.locator('table.list tr[aria-current="true"]');
 
 test.describe('40. Plan kitaplığı', () => {
@@ -128,7 +128,7 @@ test.describe('40. Plan kitaplığı', () => {
   test('plan geçişi geri-al yığınını sıfırlıyor', async ({ page }) => {
     await openWithSample(page);
     // Make something undoable first, so a disabled button means the switch did it.
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Okul adı').fill('Deneme Kursu');
     await page.getByLabel('Okul adı').blur();
     await expect(page.getByRole('button', { name: /Geri al/ })).toBeEnabled();
@@ -146,7 +146,7 @@ test.describe('40. Plan kitaplığı', () => {
     // write whenever the plan changes. Without an explicit flush the last edit
     // before a switch is dropped silently — the only kind of loss that matters.
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Okul adı').fill('Son Saniye Kursu');
     await page.getByLabel('Okul adı').blur();
 
@@ -241,7 +241,7 @@ test.describe('41. Taslaklar', () => {
     await expect(picker(page).locator('option').nth(1)).toContainText('(taslak)');
 
     // The teachers came with it.
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
     await page.locator('.step', { hasText: 'Öğretmenler' }).click();
     await expect(page.locator('table.list tbody tr').first()).toBeVisible();
   });
@@ -278,14 +278,14 @@ test.describe('41. Taslaklar', () => {
     // A brand new empty plan: this is the screen a new term starts on.
     await openPlans(page);
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
 
     const start = page.getByRole('button', { name: /taslağı ile başla$/ });
     await expect(start).toBeVisible();
     await start.click();
 
     await expect(picker(page).locator('option')).toHaveCount(4);
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
     await page.locator('.step', { hasText: 'Öğretmenler' }).click();
     await expect(page.locator('table.list tbody tr').first()).toBeVisible();
   });
@@ -350,7 +350,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
 
     // Give the second plan something of its own, so "it came back" means the
     // DATA came back and not just a row in the directory.
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Okul adı').fill('İkinci Okul');
     await page.getByLabel('Okul adı').blur();
     await openPlans(page);
@@ -374,7 +374,7 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     await answerDialog(page);
 
     // Scoped to the panel that says it. Pitfall 49's shape: `.panel .hint`
-    // was unique until Ayarlar → Veri grew a second panel with a live line in
+    // was unique until the section grew a second panel with a live line in
     // it ("Nereye kaydedilsin"), and then this query stopped naming one thing.
     await expect(
       page.locator('.panel', { hasText: 'Bütün planlar tek dosyada' }).locator('.hint[role="status"]'),
@@ -435,9 +435,9 @@ test.describe('43. Veriler nerede', () => {
     // A second plan first, so the table has more than one plan row to be
     // right about — and that button is in Ayarlar → Planlar now, while the
     // table it is checked against stayed in Veri.
-    await openSettings(page, 'Planlar');
+    await openSettings(page, 'Planlar ve yedek');
     await page.getByRole('button', { name: 'Boş plan', exact: true }).click();
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     const shown = await panel.locator('tbody code').allInnerTexts();
@@ -460,7 +460,7 @@ test.describe('43. Veriler nerede', () => {
   test('file:// altında deponun TARAYICIDA olduğunu söylüyor', async ({ page }) => {
     // The E2E suite is the only place this branch is real: jsdom serves http.
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel).toContainText('tarayıcının bu bilgisayardaki deposunda');
     await expect(panel).toContainText('tarama verilerini temizle');

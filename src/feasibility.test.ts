@@ -224,6 +224,30 @@ describe('health', () => {
     expect(h.stranded).toBe(1);
     expect(h.level).toBe('impossible');
     expect(h.message).toContain('1 ders kapalı saatte');
+    // ...and the strip's own number counts the ROW, once.
+    expect(h.problems).toBe(1);
+  });
+
+  // What Kontrol's "Sorunlar (N)" button counts: rows in the three problem
+  // panels. Not `blocked + warnings` — those split the same violations by
+  // level and then add capacity rows on top, so on a healthy-but-tight school
+  // they are non-zero while there is not one line to go and read.
+  it('problems SATIR sayıyor, blocked/warnings ile aynı şey değil', () => {
+    expect(health(emptyState()).problems).toBe(0);
+
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    // More hours than the week can hold: a capacity row goes 'impossible', so
+    // `warnings` rises — but no problem PANEL gains a row.
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 4, pairs: 0,
+    });
+    const h = health(d);
+    expect(h.problems).toBe(0);
   });
 
   it('cümle SAYIYOR, "sorun var" demiyor', () => {

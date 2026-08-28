@@ -239,6 +239,18 @@ export interface Health {
   pending: number;
   /** Lessons sitting on an hour that was closed afterwards (pitfall 16). */
   stranded: number;
+  /**
+   * ROWS in Kontrol's three problem panels — closed hours, rule breaches and
+   * lessons with nowhere left to go.
+   *
+   * Deliberately not `blocked + warnings`: those two split the SAME violations
+   * by level and then add capacity rows on top, which is the question the chip
+   * asks ("how bad is it"). This one answers the strip's question ("how many
+   * lines are there to read"), and it is computed here because `health()`
+   * already has the report in its hand — a second `buildReport` in the ribbon
+   * would be the third of that walk per change.
+   */
+  problems: number;
   /** The loudest thing to say, for the chip's colour. */
   level: Level;
   /** The chip's own sentence. Never "there is a problem" — always which. */
@@ -296,6 +308,7 @@ export function health(d: State): Health {
     warnings,
     pending,
     stranded,
+    problems: stranded + report.violations.length + report.unplaceable.length,
     level,
     message: empty
       ? 'Henüz ders girilmedi'

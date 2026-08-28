@@ -39,7 +39,7 @@ export default function DraftStart({ plans, label, notify }: Props) {
               await alert({
                 title: 'Bu taslağın verisi bulunamadı',
                 tone: 'warn',
-                body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Veri → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
+                body: 'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.',
               });
               return;
             }

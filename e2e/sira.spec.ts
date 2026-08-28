@@ -14,7 +14,7 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { mainList, openSettings, openSetup, openLessons, openWithSample, savedState, settledText } from './helpers';
+import { mainList, openSetup, openLessons, openWithSample, savedState, settledText } from './helpers';
 
 const rows = (page: Page) => mainList(page).locator('tbody tr');
 const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
@@ -195,8 +195,8 @@ test.describe('61. Elle sıralama', () => {
     // row 3 of the array (see `useRowOrder`'s lock).
     await openLessons(page, 'all');
     expect(await grips(page).count(), 'Dersler').toBeGreaterThan(1);
-    // The fifth is not a Kurulum step either: it is Ayarlar → Branşlar.
-    await openSettings(page, 'Branşlar');
+    // The fifth IS an Okul step now — Branşlar moved in from Ayarlar.
+    await openSetup(page, 'Branşlar');
     expect(await grips(page).count(), 'Branşlar').toBeGreaterThan(1);
   });
 
@@ -229,7 +229,7 @@ test.describe('61. Elle sıralama', () => {
     page,
   }) => {
     await openWithSample(page);
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
 
     // Only the school's OWN list can be dragged, and it is the first tbody.
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
@@ -281,7 +281,7 @@ test.describe('61. Elle sıralama', () => {
     page,
   }) => {
     await openWithSample(page);
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
     const subjects = async () =>
       (await listedRows.evaluateAll((rows) =>
@@ -328,7 +328,7 @@ test.describe('61. Elle sıralama', () => {
 
   test('branşlarda klavyeyle de taşınıyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
     // `data-row-name`, not a column position — see the test above.
     const names = async () =>

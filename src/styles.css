@@ -627,6 +627,19 @@
   animation: none;
 }
 
+/* Kontrol's strip jumps to a panel. `scrollIntoView({ behavior })` would put
+   that decision in a .tsx file, where the motion setting cannot reach it
+   (pitfall 57: a distance written by hand has no off switch). Declared here
+   instead, so the same three-step preference — and the machine's own — owns it
+   like everything else. */
+.main {
+  scroll-behavior: auto;
+}
+
+:root[data-motion="tam"] .main {
+  scroll-behavior: smooth;
+}
+
 /* The one place motion is switched off by the MACHINE, and it switches off ALL
    of it: every transition in this file reads --dur, every movement reads one of
    the four distance tokens. Last on purpose (see above). */
@@ -655,6 +668,11 @@
   .btn:active:not(:disabled),
   .pool-card:hover {
     transform: none;
+  }
+
+  /* ...and the jump is instant, whatever the in-app setting says. */
+  .main {
+    scroll-behavior: auto;
   }
 
   .toast {
@@ -1736,7 +1754,7 @@ table.grid thead tr:nth-child(2) th {
    hiding the clock took the table from 2461px to 1728px. Pitfall 37.
 
    The lesson NUMBER stays: it is what the eye navigates by, and the times are
-   a click away in Ayarlar → Okul and printed on every sheet. */
+   a click away in Ayarlar → Zil ve günler and printed on every sheet. */
 :root[data-density='sigdir'] .hour-clock {
   display: none;
 }
@@ -2696,14 +2714,6 @@ table.list th.w-col-2xl, table.stat th.w-col-2xl { width: var(--w-col-2xl); }
   margin-top: 0;
 }
 
-/* Kurulum's door to Dersler. A row, not a table line: it stopped being step
-   four this round, and drawing it as one would say it is still in there. */
-.lesson-jump {
-  align-items: center;
-  justify-content: space-between;
-  margin-top: var(--space-4);
-}
-
 /* A panel heading is the first thing read on the sheet, so it is set like one
    and it carries the section's colour as a short rule rather than as ink —
    coloured heading TEXT would put a seventh hue in the reading column, which
@@ -3291,52 +3301,45 @@ table.list td > select.split-pick,
    inside a grid cell pushes the whole page sideways. */
 .cols {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) var(--aside-w);
   gap: var(--space-4);
   align-items: start;
 }
 
-/* Kurulum. `2fr 1fr` gave the right-hand column 620 px at 1920 — and the two
-   panels in it (the capacity summary, the step counters) are read at a fixed
-   width: they hold short lines and a narrow table, and every pixel past that
-   is blank. The LIST is what wanted those pixels: at the default scale the
-   teacher table needed 1287 px and had 1185, so it scrolled sideways in a
-   panel that had 200 px of white space three centimetres to its right.
+/* ONE shape for every screen, and the right-hand rail is ALWAYS there — even
+   on the two screens with nothing to put in it.
+   ("Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı
+    ortalansın ve sığdırılsın.")
 
-   So the right-hand column becomes a SIDEBAR — the shape `.narrow-right`
-   already uses — and the list takes what is left. Measured at 1920, scale 1.1:
-   left 1185 -> 1414 px, teacher table overflow 106 -> 0. */
-/* 24rem -> 20rem, and the number is MEASURED rather than trimmed by feel: with
-   the sidebar forced to `min-content` its two panels come out at 19.94rem at
-   every scale (they are rem-sized, so the figure is scale-invariant). The
-   remaining 4rem was blank in every screenshot — exactly what the paragraph
-   above says the right-hand column must not hold — and the teacher list needed
-   it: an eleventh and twelfth column (İkinci branş, sıra numarası) put the
-   table 106 px over its box at 125 %.
-   19rem stays the floor, so this is a ceiling coming down onto the floor, not
-   a new constraint. */
-.cols.wide-left {
-  grid-template-columns: minmax(0, 1fr) minmax(19rem, 20rem);
-}
+   There used to be four: `.cols` at 50/50, `.wide-left` for Kurulum,
+   `.narrow-right` for Müsaitlik and Yazdır, `.solo` for a single column. So the
+   side block began at a different x on almost every screen, and Dersler swapped
+   between `solo` and `wide-left` as the mode changed — the list's right edge
+   jumped several hundred pixels on a button that was supposed to change only
+   which lessons were listed. A rail that is sometimes absent is a rail that
+   moves.
 
-/* One column, still `.cols`. The Dersler tab's general list has nothing to put
-   beside it, but every list screen in this program is `.cols > div > .panel` —
-   in the stylesheet, in the panel-shape test and in the E2E helper that finds
-   "the list on this screen". A screen that stepped out of that shape for one
-   of its three modes would be the only one its own helpers could not find. */
-.cols.solo {
-  grid-template-columns: minmax(0, 1fr);
-}
+   23.5rem is MEASURED, not chosen. Every side column was forced to
+   `width: min-content` at 100/125/150 % and asked what it wanted (the figures
+   are rem, so they hold at every scale — the panel padding is in them):
 
-.cols.narrow-right {
-  grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+     Müsaitlik `.entity-list`   23.50   <- binding: a teacher's name and
+                                          "N ders · N saat" on one nowrap line
+     Yazdır sayfa seçimi        20.57
+     Okul Özet                  20.29   (agrees with the 19.94 measured before)
+     Ayarlar zil önizlemesi     16.47
+     Dersler seçicisi           11.03
+
+   Then both canaries were re-measured at this width: Yazdır's `.pick-item`
+   clips nothing at 100 % or 150 % (pitfall 64), and Okul → Öğretmenler's
+   `.table-scroll` still overflows by exactly 0 at 100/110/125 %. */
+:root {
+  --aside-w: 23.5rem;
 }
 
 /* Below this the two columns are narrower than the tables they hold. */
 @media (max-width: 68rem) {
-  .cols,
-  .cols.wide-left,
-  .cols.narrow-right {
+  .cols {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -3981,8 +3984,6 @@ table.bell-preview td {
   }
 
   .cols,
-  .cols.wide-left,
-  .cols.narrow-right,
   .app,
   .workspace,
   .main,
@@ -4735,7 +4736,7 @@ table.availability.heat td.closed {
    the same one pitfall 37 measured on the Program grid: the clock is the
    widest thing in the heading, so it sets the column's floor — and this is a
    screen you PAINT by dragging across, where a narrower column is a shorter
-   drag. Whoever wants the times has them in Ayarlar → Okul and on paper. */
+   drag. Whoever wants the times has them in Ayarlar → Zil ve günler and on paper. */
 :root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
   display: none;
 }
@@ -5122,29 +5123,57 @@ body.row-dragging {
   margin: -2px;
 }
 
-/* AS WIDE AS ITS CONTENTS AND NO WIDER — the four lists take their width from
-   the column ladder, not from the panel they happen to be in.
-   ("Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun.
-    Derslikte de çok uzun.")
+/* THE TABLE IS THE PANEL, AND NO DATA COLUMN TAKES THE SLACK.
+   Two complaints, one rule, and they pull in opposite directions:
 
-   `width: 100%` was the cause and it took two forms. A table that must fill its
-   box has to hand the slack to SOME column, and it hands it to the ones with no
-   width written down: in Derslikler that was Ad alone, so a box holding "A" ran
-   the width of the panel; in Sınıflar it was Renk AND Ad, and since the swatch
-   inside Renk is a fixed 5ch, that column grew while its content did not — dead
-   space that pushed the name sideways, which is the "kayma" that was reported.
+     "Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun.
+      Derslikte de çok uzun."                                    (2026-08-27)
+     "Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular
+      güzel de gözükmüyor."                                      (2026-08-28)
 
-   Both go away by not stretching: every column is now either on the ladder or
-   sized by the control it holds, the tables line up column for column when you
-   step between them, and the slack stays where slack belongs — outside the
-   table. The case this box was BUILT for is unchanged: at 150 % `max-content`
-   is wider than the panel and the box scrolls sideways, which is the whole
-   reason the name is not crushed to 26 px any more (pitfall 61). One property
-   now says it — `min-width: max-content` beside it would be inert, since a
-   used width is `max(min-width, min(max-width, width))` and both are the same
-   keyword. Measured after: Ad is 187 px in all four lists. */
+   The first was answered with `width: max-content`, which stopped stretching
+   the columns — and left the table ending a long way short of its panel. How
+   short was measured rather than argued about, at 1920 on the sample school,
+   as the gap between the table's right edge and the panel's inner right:
+
+     Derslikler   @100 % -1094 px   @125 % -888   @150 % -681
+     Sınıflar            -965              -726          -487
+     Öğretmenler         -496              -170          +157
+
+   Four candidates were then measured. `width: 100%` and `min-width: 100%` both
+   fill the panel and both hand the slack straight back to Ad — 187 px to
+   640.8 px in Derslikler, i.e. the FIRST complaint, returned. What works is
+   filling the box AND freeing the last column, because that column is already
+   empty: every one of the five lists ends with a bare `<th className="w-col-md" />`
+   over a cell whose `.form-row` is `justify-content: flex-end`, so Sil stays
+   flush right (7 px in, the cell padding) in all of them.
+
+   Measured after, with `--aside-w` at 23.5rem:
+
+     table right edge vs panel   -1 px      every list, 100/110/125 %
+     .table-scroll overflow       0         every list, 100/110/125 %
+     Ad                         187 / 205.8 / 233.8 / 280.6 — IDENTICAL in all
+                                            three lists, and unchanged from
+                                            before this rule
+     page overflow                0         every scale
+
+   The box this scroller was built for is unchanged: at 150 % `max-content` is
+   wider than the panel and Öğretmenler scrolls sideways (211 px in the box,
+   0 on the page), which is what keeps the name from being crushed to 26 px
+   (pitfall 61). What is NOT written here is `th:last-child { width: 100% }` —
+   a percentage width on a cell resolves against the table, which is circular
+   in an auto layout: measured, it blew the table out to 1 000 000 px. */
 .table-scroll > table.list {
+  min-width: 100%;
   width: max-content;
+}
+
+/* The one column allowed to absorb everything left over. It carries no data —
+   only the row's buttons, already pinned right — so the slack lands where
+   nothing is read. Specificity 0,3,2 beats `table.list th.w-col-md` at 0,2,2,
+   which is what lets the ladder keep every OTHER column. */
+.table-scroll > table.list th:last-child {
+  width: auto;
 }
 
 /* ...and `max-content` only means something if the cells HAVE a content width.

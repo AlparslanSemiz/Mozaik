@@ -188,7 +188,7 @@ export default function Appearance({
             etkilemez</b>: kâğıt sabit boyda (A4 yatay) ve basılan sayfanın
             yazısı ayrı bir ölçüde tutulur, o yüzden burayı büyütmek bir
             programın sayfaya sığıp sığmadığını değiştirmez. Kâğıdın kendi yazı
-            boyu <b>Yazdır</b> sekmesinde.
+            boyu <b>Çıktı</b> sekmesinde.
           </p>
         </div>
 
@@ -254,13 +254,13 @@ export default function Appearance({
           </div>
 
           <p className="hint">
-            Saatleri görmek için <b>Ayarlar → Okul ve zil</b>'deki zil önizlemesine
+            Saatleri görmek için <b>Ayarlar → Zil ve günler</b>'deki zil önizlemesine
             bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
           </p>
 
           <h3>Arayüzün geri kalanı</h3>
           <p className="hint">
-            Ekranın <b>geri kalanı</b>: Kurulum, Dersler, Kontrol ve Ayarlar’daki
+            Ekranın <b>geri kalanı</b>: Okul, Dersler, Kontrol ve Ayarlar’daki
             listeler, panellerin kenar boşlukları, kutuların ve düğmelerin
             yüksekliği. Program ızgarasına dokunmaz.
           </p>
@@ -355,7 +355,7 @@ export default function Appearance({
         </div>
       </div>
 
-      <div>
+      <aside>
         <div className="panel">
           <h2>Örnek</h2>
           <p className="hint">
@@ -365,7 +365,7 @@ export default function Appearance({
           </p>
           {teachers.length === 0 ? (
             <p className="hint">
-              Henüz öğretmen yok. <b>Kurulum → Öğretmenler</b> adımından ekleyin;
+              Henüz öğretmen yok. <b>Okul → Öğretmenler</b> adımından ekleyin;
               burası o listeyi gösterir.
             </p>
           ) : (
@@ -470,7 +470,7 @@ export default function Appearance({
           </div>
         </div>
 
-      </div>
+      </aside>
     </div>
   );
 }

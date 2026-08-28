@@ -49,7 +49,7 @@ test.afterAll(() => {
 test.describe('73. Yerel sunucu', () => {
   test('GERÇEK BİR KÖKEN — turun gerekçesi, ölçülmüş hâliyle', async ({ page }) => {
     await page.goto(AD);
-    await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
 
     const facts = await page.evaluate(async () => {
       const out: Record<string, unknown> = {
@@ -111,7 +111,7 @@ test.describe('73. Yerel sunucu', () => {
 
   test('bilinmeyen yol uygulamaya düşüyor, ölü bir sayfaya değil', async ({ page }) => {
     await page.goto(`${AD}/bilinmeyen/yol`);
-    await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
 
     // Derin bir yolda sayfa yanındaki `sw.js`'i istiyor ve orada öyle bir
     // dosya YOK, yani kayıt 404 alıyor. Bu bir kusur değil, yolun bir
@@ -137,7 +137,7 @@ test.describe('73. Yerel sunucu', () => {
     // Gezinme geri dönüşü DURUYOR: kural yalnız dosya adı taşıyan yollar için.
     const gezinme = await request.get(`${IP}/bilinmeyen/yol`);
     expect(gezinme.status()).toBe(200);
-    expect(await gezinme.text()).toContain('Kurulum');
+    expect(await gezinme.text()).toContain('Okul');
   });
 
   async function head(request: APIRequestContext, url: string) {

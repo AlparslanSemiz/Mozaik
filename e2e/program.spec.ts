@@ -813,7 +813,7 @@ test.describe('9. Öğle arası ayracı', () => {
 
   test('zil önizlemesinde öğle arası satırı var ve iki desende ayrı yerde', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
 
     const rows = page.locator('table.bell-preview tr.break-row');
     await expect(rows).toHaveCount(2); // after the 5th and after the 6th

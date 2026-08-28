@@ -27,14 +27,14 @@ test.describe('26. Kontrol — kapasite', () => {
     await open(page);
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
-    await expect(page.locator('.empty-screen')).toContainText('Kurulum');
+    await expect(page.locator('.empty-screen')).toContainText('Okul');
   });
 
   test('her şey sığıyorsa net biçimde "Sorun görünmüyor" diyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
-    await expect(page.locator('table.list .badge.impossible')).toHaveCount(0);
+    await expect(page.locator('table.stat .badge.impossible')).toHaveCount(0);
   });
 
   test('öğretmene müsait olduğundan fazla ders yüklenince İmkânsız', async ({ page }) => {
@@ -44,10 +44,15 @@ test.describe('26. Kontrol — kapasite', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3 }],
     });
 
-    const row = page.locator('table.list tr', { hasText: 'MÇ 2 saat müsait' });
-    await expect(row).toContainText('3 saat ders yüklenmiş');
-    await expect(row).toContainText('1 saat fazla');
+    // The row is compact now — Ad | Açık | Yük | Durum — and the sentence it
+    // used to spell out is its tooltip. Both are asserted: the numbers are what
+    // the eye reads, the sentence is what the reader acts on.
+    const row = page.locator('#kontrol-ogretmenler tbody tr', { hasText: 'MÇ' });
+    await expect(row.locator('td').nth(1)).toHaveText('2');
+    await expect(row.locator('td').nth(2)).toHaveText('3');
     await expect(row.locator('.badge.impossible')).toBeVisible();
+    await expect(row.locator('td').first()).toHaveAttribute('title', /3 saat ders yüklenmiş/);
+    await expect(row.locator('td').first()).toHaveAttribute('title', /1 saat fazla/);
   });
 
   test('sınıfa haftasından fazla ders yüklenince İmkânsız', async ({ page }) => {
@@ -59,9 +64,10 @@ test.describe('26. Kontrol — kapasite', () => {
       ],
     });
 
-    const row = page.locator('table.list tr', { hasText: '510 sınıfına 6 saat' });
-    await expect(row).toContainText('2 saat fazla');
+    const row = page.locator('#kontrol-siniflar tbody tr', { hasText: '510' });
+    await expect(row.locator('td').nth(2)).toHaveText('6');
     await expect(row.locator('.badge.impossible')).toBeVisible();
+    await expect(row.locator('td').first()).toHaveAttribute('title', /2 saat fazla/);
   });
 
   test('dersliği paylaşan sınıfların TOPLAMI da sayılıyor', async ({ page }) => {
@@ -78,10 +84,11 @@ test.describe('26. Kontrol — kapasite', () => {
       ],
     });
 
-    const row = page.locator('table.list tr', { hasText: 'A dersliğini 2 sınıf paylaşıyor' });
-    await expect(row).toContainText('toplam 6 saat');
-    await expect(row).toContainText('2 saat fazla');
+    const row = page.locator('#kontrol-derslikler tbody tr', { hasText: 'A' });
+    await expect(row.locator('td').nth(2)).toHaveText('6');
     await expect(row.locator('.badge.impossible')).toBeVisible();
+    await expect(row.locator('td').first()).toHaveAttribute('title', /2 sınıf paylaşıyor/);
+    await expect(row.locator('td').first()).toHaveAttribute('title', /2 saat fazla/);
   });
 
   test('sıkışık ama mümkün olan yük uyarı veriyor, engel değil', async ({ page }) => {
@@ -89,10 +96,10 @@ test.describe('26. Kontrol — kapasite', () => {
     await load(page, {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4 }],
     });
-    await expect(page.locator('table.list .badge.tight').first()).toBeVisible();
+    await expect(page.locator('table.stat .badge.tight').first()).toBeVisible();
     // Scoped to the tables: the intro paragraph SHOWS an "İmkânsız" badge to
     // explain what one looks like.
-    await expect(page.locator('table.list .badge.impossible')).toHaveCount(0);
+    await expect(page.locator('table.stat .badge.impossible')).toHaveCount(0);
   });
 });
 

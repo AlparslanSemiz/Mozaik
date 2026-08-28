@@ -192,7 +192,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
       <>
         <div className="empty-screen">
           <strong>Yazdırılacak program yok.</strong>
-          Önce <b>Kurulum</b> sekmesinden dersleri girip <b>Program</b> sekmesinde
+          Önce <b>Okul</b> sekmesinden dersleri girip <b>Program</b> sekmesinde
           dizin.
         </div>
       </>
@@ -287,7 +287,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     // The preview takes the room it needs; the choices stand BESIDE it instead
     // of pushing twenty pages of preview a screen down. When printing, `.cols`
     // collapses to a block and the whole control panel is `.no-print` anyway.
-    <div className="cols narrow-right">
+    <div className="cols">
       <div className="print-area" data-per={options.perSheet} data-size={options.size}>
         {sheets(
           [
@@ -455,7 +455,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
 
       <aside>
         <div className="panel no-print">
-          <h2>Yazdır</h2>
+          <h2>Çıktı</h2>
           <p className="hint">
             Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
             penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:

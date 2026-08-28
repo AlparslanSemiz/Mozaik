@@ -11,14 +11,15 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { chooseScale, open, openSettings, openWithSample } from './helpers';
+import { chooseScale, loadWorld, open, openSettings, openWithSample } from './helpers';
+import { makeWorld } from '../src/worlds';
 
 // Seven since Dersler left Kurulum. The contract is the point: a new tab has
 // to bring a strip with it, at the same height, opening with a caption, with a
 // symbol and a word on every button — otherwise arriving there moves
 // everything underneath.
 const TABS = [
-  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
 ] as const;
 
 /** What the strip IS right now, read in one round trip. */
@@ -214,87 +215,116 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
   });
 });
 
-test.describe('58. Kontrol şeridi — raporu süzüyor', () => {
-  /**
-   * The sample school on Kontrol. Its capacity tables always exist (every
-   * teacher, class and room gets a row whatever the news is), which is what
-   * makes them the half a filter can be measured against.
-   */
+test.describe('58. Kontrol şeridi — rapora GÖTÜRÜYOR', () => {
+  // For one round this strip held a three-way filter (Hepsi · Sorunlar ·
+  // Kapasite) and the reader's verdict was that the three read the same. They
+  // largely did: the panel everyone comes for was in all three, so two of the
+  // buttons only ever removed things. The report is one page now, every table
+  // is bounded and scrolls in place, and the strip does what a strip over a
+  // long report is for — it goes somewhere, and says how much is there.
+
   async function openCheck(page: Page) {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.locator('.ribbon')).toBeVisible();
   }
 
-  test('üç basamak: Hepsi · Sorunlar · Kapasite', async ({ page }) => {
+  test('dört kapı: Sorunlar · Öğretmenler · Sınıflar · Derslikler', async ({ page }) => {
     await openCheck(page);
     const bar = page.locator('.ribbon');
-    for (const name of ['Hepsi', 'Sorunlar', 'Kapasite']) {
+    await expect(bar.getByRole('button', { name: /^Sorunlar \(\d+\)$/ })).toBeVisible();
+    for (const name of ['Öğretmenler', 'Sınıflar', 'Derslikler']) {
       await expect(bar.getByRole('button', { name, exact: true })).toBeVisible();
     }
-    // 'hepsi' is the report as it always was: nothing hidden until asked.
-    await expect(bar.getByRole('button', { name: 'Hepsi', exact: true })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
   });
 
-  test('Kapasite sorun panellerini, Sorunlar kapasite tablolarını kaldırıyor', async ({ page }) => {
+  test('BÜTÜN rapor tek sayfada — süzülecek bir şey yok', async ({ page }) => {
     await openCheck(page);
-    const bar = page.locator('.ribbon');
-    const loads = page.locator('.panel', { hasText: 'Derslikler' });
-    const status = page.locator('.panel', { hasText: 'Programın durumu' });
-
-    await expect(loads).toHaveCount(1);
-    await expect(status).toHaveCount(1);
-
-    await bar.getByRole('button', { name: 'Sorunlar', exact: true }).click();
-    await expect(loads).toHaveCount(0);
-    // The one panel that is in all three: it is the question you arrive with.
-    await expect(status).toHaveCount(1);
-
-    await bar.getByRole('button', { name: 'Kapasite', exact: true }).click();
-    await expect(loads).toHaveCount(1);
-    await expect(status).toHaveCount(1);
-
-    await bar.getByRole('button', { name: 'Hepsi', exact: true }).click();
-    await expect(loads).toHaveCount(1);
+    // The three panels a filter used to be able to hide are all here at once.
+    for (const name of ['Programın durumu', 'Öğretmenler', 'Sınıflar', 'Derslikler']) {
+      await expect(
+        page.locator('.panel', { has: page.getByRole('heading', { name, exact: true }) }),
+      ).toHaveCount(1);
+    }
+    await expect(page.locator('.ribbon .btn[aria-pressed]')).toHaveCount(0);
   });
 
-  test('süzgeç bir POZİSYON — başka sekmeye bakıp dönünce duruyor', async ({ page }) => {
-    // Pitfall 18: switching tabs unmounts the component, so anything held in
-    // its own useState is lost by a glance at the grid.
+  test('sayfa EKRANA sığıyor — tablolar kendi içinde kayıyor', async ({ page }) => {
+    // The complaint this round answered: "çok aşağı doğru gidiyor". The old
+    // `.panel-grid` placed row-major, so every row was as tall as its tallest
+    // panel and a 25-teacher school ran to three screens of mostly dead air.
+    await openCheck(page);
+    const box = await page.evaluate(() => {
+      const m = document.querySelector('.main')!;
+      return { page: m.scrollHeight, view: m.clientHeight, bounded: document.querySelectorAll('.main .stat-scroll').length };
+    });
+    // Every capacity table is bounded, and the page is not a scroll marathon.
+    expect(box.bounded).toBe(3);
+    expect(box.page / box.view).toBeLessThan(1.6);
+  });
+
+  test('kapılar gerçekten GÖTÜRÜYOR', async ({ page }) => {
+    await openCheck(page);
+    // Off-screen to begin with, or the click could not be shown to do anything.
+    const room = page.locator('#kontrol-derslikler');
+    await page.locator('.main').evaluate((m) => { m.scrollTop = 0; });
+    await page.locator('.ribbon').getByRole('button', { name: 'Derslikler', exact: true }).click();
+    await expect(room).toBeInViewport();
+  });
+
+  test('"Sorunlar" sorun yokken KAPALI ve sayıyor', async ({ page }) => {
     await openCheck(page);
     const bar = page.locator('.ribbon');
-    await bar.getByRole('button', { name: 'Kapasite', exact: true }).click();
-
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid')).toBeVisible();
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-
-    await expect(bar.getByRole('button', { name: 'Kapasite', exact: true })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toHaveCount(0);
+    // The sample school is healthy, so there is nowhere to go and the door
+    // says so rather than pretending to be a door.
+    await expect(bar.getByRole('button', { name: 'Sorunlar (0)', exact: true })).toBeDisabled();
   });
 
   test('şeritteki sayılar raporun kendisiyle aynı şeyi söylüyor', async ({ page }) => {
     // The strip states rather than asks here, and a reading that disagrees with
-    // the panels under it is worse than no reading: `buildReport` runs in full
-    // whatever the filter says, which is what makes them the same numbers.
+    // the panels under it is worse than no reading.
     await openCheck(page);
     const value = page.locator('.ribbon .ribbon-value');
     await expect(value).toContainText(/\d+ engel/);
     await expect(value).toContainText(/\d+ uyarı/);
 
     const blocked = Number((await value.innerText()).match(/(\d+) engel/)![1]);
-    const inPanels = await page.locator('table.list .badge.impossible').count();
+    const inPanels = await page.locator('table.stat .badge.impossible').count();
     // Not equality — the panels also badge closed-hour leftovers and capacity
     // rows, which the chip counts separately. What must hold is the direction:
     // a strip saying "0 engel" over a page full of red is the bug.
     if (blocked > 0) expect(inPanels).toBeGreaterThan(0);
     else await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toHaveCount(0);
+  });
+
+  test('"Sorunlar (N)" gerçek sorunlu okulda AÇIK ve doğru sayıyor', async ({ page }) => {
+    // A hand-built school with TWO real problem rows, so the assertion cannot
+    // pass by both sides being zero (pitfall 23 — the first version of this
+    // test did exactly that on the healthy sample and looked green).
+    //   - a lesson left on an hour closed afterwards (principle 6 keeps it)
+    //   - a lesson with more hours than the week can hold
+    await loadWorld(
+      page,
+      makeWorld({
+        unavailable: { 'oMC|0|0': 1 },
+        lessons: [
+          { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+          { id: 'x2', classId: 's510', teacherId: 'oMC', weeklyHours: 8 },
+        ],
+        placements: { 's510|0|0': 'x1' },
+      }),
+      'Kontrol',
+    );
+
+    const btn = page.locator('.ribbon').getByRole('button', { name: /^Sorunlar \(\d+\)$/ });
+    const n = Number((await btn.innerText()).match(/\((\d+)\)/)![1]);
+    const rows = await page.locator('.kontrol-sorun table.list tbody tr').count();
+
+    // The guard: this school really is broken, so the equality below is worth
+    // something.
+    expect(n).toBeGreaterThan(0);
+    expect(n).toBe(rows);
+    await expect(btn).toBeEnabled();
   });
 });
 
@@ -316,14 +346,14 @@ test.describe('59. Şeritteki simgeler', () => {
         .evaluate((n) => n.innerHTML.replace(/\s+/g, ''));
     };
 
-    const setupTeacher = await shapeOf('Kurulum', 'Öğretmenler');
+    const setupTeacher = await shapeOf('Okul', 'Öğretmenler');
     const availTeacher = await shapeOf('Müsaitlik', 'Öğretmen');
-    const printTeacher = await shapeOf('Yazdır', 'Öğretmenler');
+    const printTeacher = await shapeOf('Çıktı', 'Öğretmenler');
     expect(availTeacher).toBe(setupTeacher);
     expect(printTeacher).toBe(setupTeacher);
 
-    const setupClass = await shapeOf('Kurulum', 'Sınıflar');
-    const printClass = await shapeOf('Yazdır', 'Sınıflar');
+    const setupClass = await shapeOf('Okul', 'Sınıflar');
+    const printClass = await shapeOf('Çıktı', 'Sınıflar');
     expect(printClass).toBe(setupClass);
     // ...and a teacher does not look like a class.
     expect(setupClass).not.toBe(setupTeacher);

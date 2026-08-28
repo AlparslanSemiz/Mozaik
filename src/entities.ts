@@ -433,7 +433,13 @@ export function defaultSettings(): Settings {
     bell: { ...DEFAULT_BELL },
     limits: { ...DEFAULT_LIMITS },
     rules: { ...DEFAULT_RULES },
-    subjects: defaultSubjects(),
+    // EMPTY, not the built-in 21. The list is a step in Okul now, with the
+    // built-in table offered beside it — seeding it meant that panel read
+    // "Hazır branşlar (0)" on every new project, i.e. the one screen where it
+    // is useful was the one screen it was empty on. `defaultSubjects()` is
+    // still what a pre-v5 backup falls back to (`store.ts`): a file that
+    // predates the list must not lose the subjects its teachers carry.
+    subjects: [],
     subjectShorts: {},
   };
 }

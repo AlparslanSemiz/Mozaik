@@ -53,13 +53,11 @@ import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
 import {
   Bell,
-  Database,
   Eraser,
   Eye,
-  Gauge,
   Layers,
+  Info,
   Library,
-  LayoutList,
   List,
   Maximize2,
   Minimize2,
@@ -69,7 +67,6 @@ import {
   Rows3,
   Scale,
   Square,
-  Tags,
   TriangleAlert,
 } from 'lucide-react';
 import { buildIndex } from './../constraints';
@@ -80,7 +77,7 @@ import type { SolverRun } from '../useSolver';
 import type { Density } from '../theme';
 import { applyDensity } from '../theme';
 import { paletteColor } from '../palette';
-import type { CheckView, Kind, LessonMode, SectionId, ToolState, View } from '../toolState';
+import type { Kind, LessonMode, SectionId, ToolState, View } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 
 interface Props {
@@ -120,34 +117,13 @@ const KINDS: Array<{ id: Kind; label: string }> = [
 ];
 
 const SECTIONS: Array<{ id: SectionId; label: string; icon: React.ReactElement }> = [
-  { id: 'school', label: 'Okul ve zil', icon: <Bell {...ICON} /> },
+  { id: 'school', label: 'Zil ve günler', icon: <Bell {...ICON} /> },
   { id: 'rules', label: 'Kurallar', icon: <Scale {...ICON} /> },
-  { id: 'subjects', label: 'Branşlar', icon: <Tags {...ICON} /> },
   { id: 'appearance', label: 'Görünüm', icon: <Eye {...ICON} /> },
-  { id: 'plans', label: 'Planlar', icon: <Library {...ICON} /> },
-  { id: 'data', label: 'Veri', icon: <Database {...ICON} /> },
+  { id: 'plans', label: 'Planlar ve yedek', icon: <Library {...ICON} /> },
+  { id: 'about', label: 'Hakkında', icon: <Info {...ICON} /> },
 ];
 
-/**
- * Which of Kontrol's panels are drawn. The three symbols are chosen to differ
- * in SILHOUETTE, the same rule the four Kurulum steps are drawn under: a list,
- * a triangle, a dial.
- */
-const CHECK_VIEWS: Array<{ id: CheckView; label: string; icon: React.ReactElement; why: string }> = [
-  { id: 'hepsi', label: 'Hepsi', icon: <LayoutList {...ICON} />, why: 'Bütün rapor' },
-  {
-    id: 'sorunlar',
-    label: 'Sorunlar',
-    icon: <TriangleAlert {...ICON} />,
-    why: 'Yalnız çözülmesi gereken satırlar',
-  },
-  {
-    id: 'kapasite',
-    label: 'Kapasite',
-    icon: <Gauge {...ICON} />,
-    why: 'Öğretmen, sınıf ve derslik yükleri',
-  },
-];
 
 /** Three densities, and the symbols say which way each one goes. */
 const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; why: string }> = [
@@ -244,7 +220,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
 
   if (ui.tab === 'setup') {
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kurulum listeleri">
+      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Okul listeleri">
         <Group label="Liste">
           {STEPS.map((s) => {
             const count = s.count(state);
@@ -546,24 +522,40 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     // you read and there is nothing to do to it. That was true of its CONTENT
     // and false of the screen: the strip's height came and went with the tab,
     // so everything under it jumped every time this report was opened or left.
-    // And the report does have a question of its own — a full one runs to seven
-    // panels, three of which only exist when something is wrong.
-    const shown = ui.checkView;
+    //
+    // For one round it held a three-way FILTER (Hepsi · Sorunlar · Kapasite),
+    // and the reader's verdict was that the three read the same — which they
+    // largely did, since the panel everyone comes for was in all three. The
+    // report is one page now and the strip does what a strip on a long report
+    // is actually for: it goes somewhere. Every button says how many.
+    const sorunlar = status.problems;
+    const jump = (sel: string) => () => {
+      document.querySelector(sel)?.scrollIntoView({ block: 'start' });
+    };
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label="Kontrol araçları">
-        <Group label="Süzgeç">
-          {CHECK_VIEWS.map((v) => (
-            <button
-              key={v.id}
-              className="btn"
-              aria-pressed={shown === v.id}
-              title={v.why}
-              onClick={() => ui.setCheckView(v.id)}
-            >
-              {v.icon}
-              {v.label}
-            </button>
-          ))}
+        <Group label="Git">
+          <button
+            className="btn"
+            disabled={sorunlar === 0}
+            title={sorunlar === 0 ? 'Sorun yok' : 'Çözülmesi gereken satırlara gider'}
+            onClick={jump('.kontrol-sorun')}
+          >
+            <TriangleAlert {...ICON} />
+            Sorunlar ({sorunlar})
+          </button>
+          <button className="btn" title="Öğretmen yüklerine gider" onClick={jump('#kontrol-ogretmenler')}>
+            {KIND_ICON.teacher}
+            Öğretmenler
+          </button>
+          <button className="btn" title="Sınıf yüklerine gider" onClick={jump('#kontrol-siniflar')}>
+            {KIND_ICON.class}
+            Sınıflar
+          </button>
+          <button className="btn" title="Derslik yüklerine gider" onClick={jump('#kontrol-derslikler')}>
+            {KIND_ICON.room}
+            Derslikler
+          </button>
         </Group>
 
         <Spacer />

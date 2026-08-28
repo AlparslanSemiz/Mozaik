@@ -115,7 +115,7 @@ function click(el: Element) {
 }
 
 describe('uygulama açılıyor', () => {
-  it('veri yokken Kurulum sekmesiyle açılır ve yol gösterir', () => {
+  it('veri yokken Okul sekmesiyle açılır ve yol gösterir', () => {
     render();
     expect(container.textContent).toContain('Başlarken');
     expect(container.textContent).toContain('Derslikler');
@@ -126,7 +126,7 @@ describe('uygulama açılıyor', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
 
-    for (const label of ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar']) {
+    for (const label of ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar']) {
       click(button(label));
       expect(container.querySelector('.main')).not.toBeNull();
     }
@@ -207,10 +207,10 @@ describe('uygulama açılıyor', () => {
     expect(container.textContent).toContain('Sorun görünmüyor');
   });
 
-  it('Yazdır sekmesi her sınıf için bir sayfa üretir', () => {
+  it('Çıktı sekmesi her sınıf için bir sayfa üretir', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
-    click(button('Yazdır'));
+    click(button('Çıktı'));
     expect(container.querySelectorAll('.print-page')).toHaveLength(20);
   });
 
@@ -243,16 +243,16 @@ describe('uygulama açılıyor', () => {
     expect(container.querySelectorAll('table.grid .card')).toHaveLength(1);
   });
 
-  it('Ayarlar sekmesinin dört bölümü de çiziliyor', () => {
+  it('Ayarlar sekmesinin bölümleri çiziliyor', () => {
     localStorage.setItem('ders-programi', JSON.stringify(sampleState()));
     render();
     click(button('Ayarlar'));
 
     for (const [section, text] of [
-      ['Okul ve zil', 'Okul ve günler'],
+      ['Zil ve günler', 'Zil ve günler'],
       ['Kurallar', 'Öğretmen art arda'],
-      ['Branşlar', 'listeden'],
-      ['Veri', 'Her şeyi sil'],
+      ['Planlar ve yedek', 'Bütün planlar tek dosyada'],
+      ['Hakkında', 'Her şeyi sil'],
     ] as const) {
       click(button(section));
       expect(container.textContent, section).toContain(text);

@@ -46,6 +46,7 @@ import {
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
   defaultDays,
+  defaultSubjects,
   emptyState,
   makeDay,
   openHours,
@@ -522,6 +523,18 @@ describe('setSubjectShort', () => {
     expect(subjectShort(d.settings, 'Kimya')).toBe('Kim');
   });
 
+
+  // Two different facts that used to be one. `defaultSubjects()` is the
+  // BUILT-IN table — what a pre-v5 backup falls back to, and what the Branşlar
+  // step offers on the side. `emptyState()` is what a NEW project starts with,
+  // and it starts with nothing, so that offer is not empty on the one screen
+  // it matters. Asserting both here so neither can quietly become the other.
+  it('yeni proje BOŞ branş listesiyle doğuyor, gömülü tablo ise duruyor', () => {
+    expect(emptyState().settings.subjects).toEqual([]);
+    expect(defaultSubjects()).toHaveLength(21);
+    expect(defaultSubjects()).toContain('Matematik');
+  });
+
   it('gömülü tablodaki her kısaltma kendi varsayılanıdır', () => {
     for (const [subject, short] of Object.entries(DEFAULT_SUBJECT_SHORTS)) {
       expect(defaultSubjectShort(subject)).toBe(short);
@@ -600,9 +613,13 @@ describe('respreadColors', () => {
 });
 
 describe('branş listesi', () => {
-  it('varsayılan listeyle geliyor', () => {
-    expect(emptyState().settings.subjects).toContain('Matematik');
-    expect(emptyState().settings.subjects.length).toBeGreaterThan(15);
+  // Was "varsayılan listeyle geliyor" and asserted the opposite. A new project
+  // starts EMPTY on purpose now; the built-in table is what the Branşlar step
+  // offers beside the list, and a project that already held all 21 made that
+  // offer read "Hazır branşlar (0)" on the one screen it is for.
+  it('yeni proje BOŞ geliyor — gömülü tablo bir TEKLİF, varsayılan değil', () => {
+    expect(emptyState().settings.subjects).toEqual([]);
+    expect(defaultSubjects()).toContain('Matematik');
   });
 
   it('yeni branş ekleniyor, aynısı iki kez eklenmiyor', () => {

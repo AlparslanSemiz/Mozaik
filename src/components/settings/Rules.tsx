@@ -65,7 +65,7 @@ export default function Rules({ state, change }: PanelProps) {
   }, [violations]);
 
   return (
-    <div className="panel-grid">
+    <div className="cols">
       <div>
         <div className="panel">
           <h2>Kurallar</h2>
@@ -156,7 +156,7 @@ export default function Rules({ state, change }: PanelProps) {
             <p className="hint">
               Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir
               öğretmen için farklı bir sayı gerekiyorsa{' '}
-              <b>Kurulum → Öğretmenler</b> tablosundaki kutuya yazın; boş bıraktığınız
+              <b>Okul → Öğretmenler</b> tablosundaki kutuya yazın; boş bıraktığınız
               kutu buradaki sayıyı kullanır.
             </p>
           ) : (
@@ -191,7 +191,7 @@ export default function Rules({ state, change }: PanelProps) {
         </div>
       </div>
 
-      <div>
+      <aside>
         <div className="panel">
           <h2>Şu anki ihlaller ({violations.length})</h2>
           <p className="hint">
@@ -226,7 +226,7 @@ export default function Rules({ state, change }: PanelProps) {
             </table>
           )}
         </div>
-      </div>
+      </aside>
     </div>
   );
 }

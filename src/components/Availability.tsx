@@ -132,7 +132,7 @@ export default function Availability({
           <h2>Müsait olmayan saatler</h2>
           <div className="empty-screen">
             <strong>Önce {EMPTY_TEXT[kind]} ekleyin.</strong>
-            Müsaitlik girebilmek için <b>Kurulum</b> sekmesinden en az bir{" "}
+            Müsaitlik girebilmek için <b>Okul</b> sekmesinden en az bir{" "}
             {EMPTY_TEXT[kind]} eklemeniz gerekiyor.
           </div>
         </div>
@@ -214,7 +214,7 @@ export default function Availability({
   );
 
   return (
-    <div className="cols narrow-right">
+    <div className="cols">
       <div>
         <div className="panel">
           <h2>{selected.full} · müsait olmayan saatler</h2>

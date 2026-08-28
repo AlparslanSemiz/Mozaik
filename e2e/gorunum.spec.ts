@@ -140,7 +140,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.5, 1);
 
     for (const [name, go] of [
-      ['Kurulum → Öğretmenler', () => openSetup(page, 'Öğretmenler')],
+      ['Okul → Öğretmenler', () => openSetup(page, 'Öğretmenler')],
       ['Ayarlar → Kurallar', () => openSettings(page, 'Kurallar')],
     ] as const) {
       await go();
@@ -211,7 +211,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
 
   test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
     await list.getByRole('button', { name: 'Hiçbiri' }).click();
@@ -250,7 +250,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(at100.pages).toBe(3);
 
     await chooseScale(page, 125);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page')).toHaveCount(3);
     const at125 = await paperSizes();
 
@@ -280,12 +280,12 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(stored).toBe('1.2');
   });
 
-  test('Ayarlar → Veri ölçek anahtarını da sayıyor', async ({ page }) => {
+  test('Ayarlar → Hakkında ölçek anahtarını da sayıyor', async ({ page }) => {
     // The "where is my data" table must name every key the program owns; a new
     // preference that is not listed makes the panel a liar.
     await openWithSample(page);
     await chooseScale(page, 110);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-olcek' })).toHaveCount(1);
   });
@@ -440,10 +440,10 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     expect((await gridMetrics(page)).clock).toBe('none');
   });
 
-  test('Ayarlar → Veri yoğunluk anahtarını da sayıyor', async ({ page }) => {
+  test('Ayarlar → Hakkında yoğunluk anahtarını da sayıyor', async ({ page }) => {
     await openWithSample(page);
     await chooseDensity(page, 'Sığdır');
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-yogunluk' })).toHaveCount(1);
   });
@@ -500,9 +500,9 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     ).toBe('acik');
   });
 
-  test('Ayarlar → Veri bu anahtarı da sayıyor', async ({ page }) => {
+  test('Ayarlar → Hakkında bu anahtarı da sayıyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(
       panel.locator('tbody code', { hasText: 'ders-programi-musaitlik-saat' }),

@@ -247,12 +247,12 @@ test.describe('14. Hareket', () => {
     expect(saved!.includes('hareket')).toBe(false);
   });
 
-  test('Ayarlar → Veri hareket anahtarını da sayıyor', async ({ page }) => {
+  test('Ayarlar → Hakkında hareket anahtarını da sayıyor', async ({ page }) => {
     // A report that leaves a key out is worse than no report: the one thing it
     // is for is being trusted when somebody asks "is all of it in here?".
     await openWithSample(page);
     await chooseMotion(page, 'Kapalı');
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-hareket' })).toHaveCount(1);
   });
@@ -275,7 +275,7 @@ test.describe('14. Hareket', () => {
     // and measuring one that does not is measuring nothing (pitfall 41).
     await page.setViewportSize({ width: 1280, height: 620 });
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
 
     const main = page.locator('main');
     await expect(main).toHaveClass(/scroll-fade/);

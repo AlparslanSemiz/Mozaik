@@ -3,7 +3,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open, openWithSample, openSetup, openLessons, openSettings, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
+import { open, openWithSample, openSetup, openLessons, openSettings, addSubjects, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -34,12 +34,10 @@ test.describe('5. Kurulum ve yedek', () => {
     await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
     await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
 
-    // THREE steps: the school's own settings moved to Ayarlar, and Dersler to a
-    // tab of its own — the counter for it is the pointer at the foot of
-    // "Kurulum durumu" now.
-    await expect(page.locator('.ribbon .step')).toHaveCount(3);
-    await expect(page.locator('.lesson-jump')).toContainText('99 ders');
-    await expect(page.getByRole('heading', { name: 'Okul ve günler' })).toHaveCount(0);
+    // FOUR steps: Dersler left for a tab of its own, and Branşlar came IN from
+    // Ayarlar — the list a teacher picks from belongs beside the teacher.
+    await expect(page.locator('.ribbon .step')).toHaveCount(4);
+    await expect(page.getByRole('heading', { name: 'Zil ve günler' })).toHaveCount(0);
 
     // Only the current step is on screen; the 1132-line scroll is gone
     await expect(page.getByRole('heading', { name: /^Derslikler/ })).toBeVisible();
@@ -53,17 +51,15 @@ test.describe('5. Kurulum ve yedek', () => {
     await openSetup(page, 'Sınıflar');
     await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
 
-    // ...and the "Kurulum durumu" panel is the second way to move: its rows go
-    // to the three steps, and its foot goes to Dersler, which is a tab now.
-    await page
-      .locator('.panel', { hasText: 'Kurulum durumu' })
-      .getByRole('button', { name: 'Derslikler' })
-      .click();
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Derslikler');
+    // The strip is the ONLY way between steps now. "Kurulum durumu" used to be
+    // a second one, and it repeated the four counters three pixels below the
+    // ones that are already in the strip.
+    await expect(page.locator('.panel', { hasText: 'Kurulum durumu' })).toHaveCount(0);
   });
 
   test('kısaltma addan üretiliyor, çakışma uyarısı çıkıyor', async ({ page }) => {
     await open(page);
+    await addSubjects(page, 'Matematik', 'Fizik');
     await openSetup(page, 'Öğretmenler');
 
     const name = page.getByPlaceholder('Ad Soyad');
@@ -138,7 +134,7 @@ test.describe('12. Branş kısaltmaları', () => {
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
     const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
 
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     // The box comes FILLED with the default, not with a faint placeholder
     const target = page.locator('table.list tbody tr', {
       has: page.locator(`input[value="${before}"]`),
@@ -155,13 +151,13 @@ test.describe('12. Branş kısaltmaları', () => {
     await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
 
     // ...and the printed page uses the same short form
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-area')).toContainText('Zzz');
   });
 
   test('varsayılana geri yazılınca override kayboluyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
 
     const row = page.locator('table.list tbody tr').first();
     const input = row.locator('input');
@@ -188,6 +184,7 @@ test.describe('12. Branş kısaltmaları', () => {
 test.describe('16. Branş seçimi', () => {
   test('öğretmenin branşı açılır listeden seçiliyor, metin kutusu yok', async ({ page }) => {
     await open(page);
+    await addSubjects(page, 'Matematik');
     await openSetup(page, 'Öğretmenler');
 
     const branch = page.getByLabel('Branş', { exact: true });
@@ -216,7 +213,7 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.getByLabel('AY branşı')).toHaveValue('Robotik');
 
     // ...and it is in the school's list from now on, with a short form
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     const row = page.locator('table.list tbody tr', { hasText: 'Robotik' });
     await expect(row).toHaveCount(1);
     await expect(row.locator('input')).toHaveValue('Rob');
@@ -224,7 +221,7 @@ test.describe('16. Branş seçimi', () => {
 
   test('kullanılan branş silinemiyor ve kimin kullandığı yazıyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
 
     await page
       .locator('table.list tbody tr', { hasText: 'Matematik' })
@@ -241,7 +238,9 @@ test.describe('16. Branş seçimi', () => {
     page,
   }) => {
     await open(page);
-    await openSettings(page, 'Branşlar');
+    // Put them on the list first — through the offer panel, which is what a
+    // new project's Branşlar step actually looks like.
+    await addSubjects(page, 'Matematik', 'Fransızca');
 
     await page
       .locator('table.list tbody tr', { hasText: 'Fransızca' })
@@ -271,7 +270,7 @@ test.describe('16. Branş seçimi', () => {
     await page.getByRole('button', { name: /2 satırı ekle/ }).click();
 
     await expect(page.getByLabel('KA branşı')).toHaveValue('Robotik');
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     await expect(page.locator('table.list tbody tr', { hasText: 'Robotik' })).toHaveCount(1);
     await expect(page.locator('table.list tbody tr', { hasText: 'Astronomi' })).toHaveCount(1);
   });
@@ -430,18 +429,21 @@ test.describe('31. Kurulum — sağ sütun', () => {
     await expect(page.locator('.cols aside .warn-box')).toContainText('dersliği yok');
   });
 
-  // The sentence survived the move: Dersler is a tab now, so Kurulum keeps the
-  // COUNT and the door rather than the step. Losing this line was the risk of
-  // the move — it is the one thing on that screen nobody would go looking for.
-  test('dersi olmayan sınıf Kurulum durumunda sayılıyor', async ({ page }) => {
+  // This sentence outlived the panel it used to live in. It is the only warning
+  // that a class was created and then forgotten, and nobody would go looking
+  // for it — so when "Kurulum durumu" was deleted it moved into Özet rather
+  // than going with it.
+  test('dersi olmayan sınıf Özet’te sayılıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Sınıflar');
     await page.getByPlaceholder(/Sınıf adı/).fill('700');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
 
-    await expect(page.locator('.lesson-jump')).toContainText('1 sınıfın dersi yok');
-    await page.locator('.lesson-jump').getByRole('button').click();
-    await expect(page.locator('.ribbon')).toHaveAttribute('data-section', 'lessons');
+    await expect(page.locator('.cols aside .warn-box')).toContainText(
+      '1 sınıfın hiç dersi yok',
+    );
+    // ...and so did the one number that decides whether the week fits at all.
+    await expect(page.locator('.cols aside')).toContainText('Haftada sınıf başına');
   });
 });
 
@@ -503,9 +505,9 @@ test.describe('44. Panel simetrisi', () => {
     });
   }
 
-  test('Ayarlar → Okul: açıklama formdan ÖNCE', async ({ page }) => {
+  test('Ayarlar → Zil ve günler: açıklama formdan ÖNCE', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     const shape = await shapeOf(page, '.cols > div > .panel');
     expect(shape.slice(0, 3)).toEqual(['baslik', 'aciklama', 'ekleme']);
   });
@@ -513,7 +515,7 @@ test.describe('44. Panel simetrisi', () => {
   test('Ayarlar → Planlar: yeni plan formu listenin ÜSTÜNDE', async ({ page }) => {
     await openWithSample(page);
     // Its own section since 2026-08-28; the panel and its shape did not move.
-    await openSettings(page, 'Planlar');
+    await openSettings(page, 'Planlar ve yedek');
     const plans = page.locator('.panel', { hasText: 'Yeni plan' }).first();
     const order = await plans.evaluate((el) => {
       const kids = [...el.children];
@@ -694,7 +696,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
 
   test('cinsiyet KÂĞIDA çıkmıyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
     const paper = await page.locator('.print-area').innerText();
@@ -786,7 +788,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       await openSetup(page, step);
       width[step] = await nameColumn('Ad');
     }
-    await openSettings(page, 'Branşlar');
+    await openSetup(page, 'Branşlar');
     width['Branşlar'] = await nameColumn('Branş');
 
     const values = Object.values(width);
@@ -808,6 +810,30 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       `ad sütunu panelin ${((Math.max(...values) / panel) * 100).toFixed(0)}%'i`,
     ).toBeLessThan(0.35);
   });
+
+  // The other half of the same rule, and the thing the reader actually asked
+  // for: "Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular
+  // güzel de gözükmüyor." Nothing measured this before — the table could end a
+  // thousand pixels short of its panel and every assertion above stayed green.
+  // Measured before the fix, at 100 %: Derslikler -1094 px, Sınıflar -965,
+  // Öğretmenler -496.
+  for (const pct of [100, 125]) {
+    test(`%${pct} ölçekte tablo panelin SONUNA kadar gidiyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      for (const step of STEPS) {
+        await goList(page, step);
+        const gap = await page.locator('.cols > div .panel').first().evaluate((panel) => {
+          const table = panel.querySelector('.table-scroll > table.list')!;
+          const pad = parseFloat(getComputedStyle(panel).paddingRight);
+          const inner = panel.getBoundingClientRect().right - pad;
+          return table.getBoundingClientRect().right - inner;
+        });
+        expect(gap, `%${pct} ${step}: tablo panelin ${Math.round(-gap)}px gerisinde bitiyor`)
+          .toBeGreaterThan(-2);
+      }
+    });
+  }
 
   // The teacher list is eleven columns wide and it did not fit: 106 px of
   // sideways scroll at the DEFAULT scale, in a panel that had 200 px of white

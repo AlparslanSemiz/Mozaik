@@ -19,7 +19,7 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 // once — see the note there.
 export async function open(page: Page) {
   await page.goto(FILE);
-  await expect(page.getByRole('button', { name: 'Kurulum' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
   // The embedded face decides `ch`, and `ch` decides every column on the
   // width ladder. `font-display: block` means nothing is painted with the
   // fallback's metrics, so this wait is the moment the first glyph appears —
@@ -54,7 +54,7 @@ export async function openWithSample(page: Page) {
  * Every test that used to just click "Kurulum" goes through here.
  */
 export async function openSetup(page: Page, step: string) {
-  await page.getByRole('button', { name: 'Kurulum' }).click();
+  await page.getByRole('button', { name: 'Okul', exact: true }).click();
   await revealRibbon(page);
   // The four steps live in the tool strip now, and they are `.btn`s there, so
   // "you are here" is `aria-pressed` — the button state — rather than
@@ -72,6 +72,25 @@ export async function openSetup(page: Page, step: string) {
  * button. `mode` picks which way round the entry runs; 'all' is the general
  * list, which is the shape this screen had before it moved.
  */
+/**
+ * Puts subjects on the school's list, through the offer panel that is the
+ * reason the list starts empty.
+ *
+ * A new project has NO subjects (`emptyState`), so any test that reaches for
+ * the Branş dropdown has to say which subjects this school teaches first —
+ * exactly as the reader does. "Listeye ekle" and not "Ekle": the add form on
+ * the left of the same screen owns that name (pitfall 49).
+ */
+export async function addSubjects(page: Page, ...names: string[]) {
+  await openSetup(page, 'Branşlar');
+  for (const name of names) {
+    await page
+      .locator('.cols aside table.stat tr', { hasText: name })
+      .getByRole('button', { name: 'Listeye ekle', exact: true })
+      .click();
+  }
+}
+
 export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' = 'all') {
   await page.getByRole('button', { name: 'Dersler', exact: true }).click();
   await revealRibbon(page);
@@ -444,7 +463,7 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  * The editable list on the left of a Kurulum step.
  *
  * Scoped on purpose. The C round put a SECOND `table.list` in the right-hand
- * column ("Kurulum durumu", `setup/Progress.tsx`), so a bare
+ * column (Özet, `setup/Summary.tsx`), so a bare
  * `table.list tbody tr` counts both and every count in the suite came out four
  * rows high. One definition here rather than the same `.cols > div` prefix
  * written out in nine places.
@@ -520,9 +539,9 @@ const tab = (name: string) => async (page: Page) => {
 };
 
 export const SCENES: Scene[] = [
-  { name: '1-kurulum', go: tab('Kurulum') },
+  { name: '1-okul', go: tab('Okul') },
   {
-    name: '2-kurulum-ogretmenler',
+    name: '2-okul-ogretmenler',
     go: async (page) => {
       await openSetup(page, 'Öğretmenler');
     },
@@ -629,9 +648,9 @@ export const SCENES: Scene[] = [
     },
   },
   {
-    name: '8-yazdir',
+    name: '8-cikti',
     go: async (page) => {
-      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
       await page.emulateMedia({ media: 'print' });
     },
     after: async (page) => {
@@ -643,9 +662,9 @@ export const SCENES: Scene[] = [
     // one above: 8-yazdir emulates print media, so it shows the paper. This is
     // the sheet lying on the desk with the tick lists beside it — what somebody
     // actually looks at while deciding what to print.
-    name: '8b-yazdir-onizleme',
+    name: '8b-cikti-onizleme',
     go: async (page) => {
-      await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
       await page.locator('.print-page').first().waitFor();
     },
   },
@@ -658,9 +677,9 @@ export const SCENES: Scene[] = [
     },
   },
   {
-    name: '9-ayarlar-okul',
+    name: '9-ayarlar-zil',
     go: async (page) => {
-      await openSettings(page, 'Okul');
+      await openSettings(page, 'Zil ve günler');
     },
   },
   {
@@ -672,9 +691,9 @@ export const SCENES: Scene[] = [
   {
     // The plan library and the backup chain: the screen that answers "where is
     // my data" — and the one place a click can destroy a whole timetable.
-    name: '11-ayarlar-veri',
+    name: '11-ayarlar-hakkinda',
     go: async (page) => {
-      await openSettings(page, 'Veri');
+      await openSettings(page, 'Hakkında');
     },
   },
   {

@@ -5,91 +5,44 @@ import { useMemo } from 'react';
 import { buildIndex, closedConflicts } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
-import type { CheckView } from '../toolState';
 import type { Id, State } from '../types';
-import { paletteColor } from '../palette';
+import CapacityRows from './CapacityRows';
 
 interface Props {
   state: State;
-  /**
-   * Which half of the report to draw. Owned by App, shown in the tool strip —
-   * a position, so it must survive a glance at another tab (pitfall 18).
-   *
-   * It filters WHAT IS DRAWN and nothing else: `buildReport` and
-   * `closedConflicts` run in full whatever is chosen, so the counts in the
-   * strip and the chip cannot disagree with the panels.
-   */
-  view: CheckView;
 }
 
-const BADGE: Record<ReportRow['level'], string> = {
-  ok: 'Sorun yok',
-  tight: 'Zor olacak',
-  impossible: 'İmkânsız',
-};
-
+/**
+ * One capacity panel. `id` is what the strip's jump buttons aim at — the strip
+ * lives ABOVE `<main>` and cannot hold a ref into here, so the hop is plain
+ * DOM, the pattern `gridChrome.ts` and `drag.ts` already use.
+ */
 function Section({
+  id,
   title,
   rows,
   description,
   colorOf,
 }: {
+  id: string;
   title: string;
   rows: ReportRow[];
   description: string;
-  /** Palette index for a row, or null where the kind has no colour (rooms). */
-  colorOf?: (id: Id) => number | null;
+  colorOf?: ((id: Id) => number | null) | undefined;
 }) {
   if (rows.length === 0) return null;
-  // Problems first: his eye should land on what needs attention.
-  const sorted = [...rows].sort((a, b) => {
-    const order = { impossible: 0, tight: 1, ok: 2 };
-    return order[a.level] - order[b.level] || a.name.localeCompare(b.name, 'tr');
-  });
-
   return (
-    <div className="panel">
+    <div className="panel" id={id}>
       <h2>{title}</h2>
       <p className="hint">{description}</p>
-      <table className="list">
-        <thead>
-          <tr>
-            <th className="w-col-lg">Durum</th>
-            <th>Açıklama</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((r) => (
-            <tr key={r.id}>
-              <td>
-                <span className={`badge ${r.level}`}>{BADGE[r.level]}</span>
-              </td>
-              <td>
-                {colorOf !== undefined && colorOf(r.id) !== null && (
-                  <span
-                    className="row-dot"
-                    style={{ background: paletteColor(colorOf(r.id)!) }}
-                  />
-                )}
-                {r.message}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <CapacityRows rows={rows} empty="" problemsFirst colorOf={colorOf} />
     </div>
   );
 }
 
-export default function Check({ state, view }: Props) {
+export default function Check({ state }: Props) {
   const report = useMemo(() => buildReport(state), [state]);
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
-
-  // "Programın durumu" is in all three: it is the question you arrive with, and
-  // a filter that could hide how much of the week is laid out would make the
-  // other two views answerable only by leaving.
-  const showProblems = view !== 'kapasite';
-  const showLoads = view !== 'sorunlar';
 
   // Where the week stands, from the same numbers the pool and the grid use.
   const placed = Object.keys(state.placements).length;
@@ -108,7 +61,7 @@ export default function Check({ state, view }: Props) {
       <>
         <div className="empty-screen">
           <strong>Kontrol edilecek bir şey yok.</strong>
-          <b>Kurulum</b> sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra
+          <b>Okul</b> sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra
           buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.
         </div>
       </>
@@ -134,12 +87,16 @@ export default function Check({ state, view }: Props) {
         </div>
       )}
 
-      {/* An auto-flowing card grid, not two fixed columns: when nothing is
-          wrong the problem panels are absent, and a fixed left column would
-          then be empty while everything piled up on the right. It also fixes
-          the older fault — a 110px badge next to a 1200px sentence is well
-          past the length a line can still be read at. */}
-      <div className="panel-grid">
+      {/* TWO FIXED COLUMNS, not an auto-flowing grid.
+          `.panel-grid` placed row-major, so every grid ROW was as tall as its
+          tallest panel: "Yerleşemeyen dersler" sat at the top of a track sized
+          by the 25-row teacher table beside it, with ~600px of dead air under
+          it, and the page came to three screens. Now the left column is what
+          is WRONG and the right is what the school can HOLD — and every table
+          in both is bounded and scrolls in place, so the page does not grow
+          with the school. */}
+      <div className="cols">
+        <div>
         {/* Where the week stands. It is the question you come to this tab with
             and the one it never answered: everything else here is about what
             COULD go wrong, and this is what is actually done. */}
@@ -177,8 +134,8 @@ export default function Check({ state, view }: Props) {
           )}
         </div>
 
-        {showProblems && conflicts.length > 0 && (
-          <div className="panel">
+        {conflicts.length > 0 && (
+          <div className="panel kontrol-sorun">
             <h2>Kapalı saatte ders ({conflicts.length})</h2>
             <p className="hint">
               Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
@@ -206,8 +163,8 @@ export default function Check({ state, view }: Props) {
           </div>
         )}
 
-        {showProblems && report.violations.length > 0 && (
-          <div className="panel">
+        {report.violations.length > 0 && (
+          <div className="panel kontrol-sorun">
             <h2>Kural ihlalleri ({report.violations.length})</h2>
             <p className="hint">
               Dizilmiş program, <b>Ayarlar → Kurallar</b> bölümünde girdiğiniz sınırları
@@ -237,8 +194,8 @@ export default function Check({ state, view }: Props) {
           </div>
         )}
 
-        {showProblems && report.unplaceable.length > 0 && (
-          <div className="panel">
+        {report.unplaceable.length > 0 && (
+          <div className="panel kontrol-sorun">
             <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
             <p className="hint">
               Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş
@@ -263,30 +220,34 @@ export default function Check({ state, view }: Props) {
           </div>
         )}
 
+        </div>
+
         {/* The colour is the same mark the grid row and the pool card carry —
             a name without it makes the reader look the person up again. Rooms
-            have none, so that Section is given no lookup. */}
-        {showLoads && (
-          <>
-            <Section
-              title="Öğretmenler"
-              rows={report.teachers}
-              colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
-              description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
-            />
-            <Section
-              title="Sınıflar"
-              rows={report.classes}
-              colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
-              description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
-            />
-            <Section
-              title="Derslikler"
-              rows={report.rooms}
-              description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
-            />
-          </>
-        )}
+            have none, so that Section is given no lookup. The ids are what the
+            strip's jump buttons aim at. */}
+        <aside>
+          <Section
+            id="kontrol-ogretmenler"
+            title="Öğretmenler"
+            rows={report.teachers}
+            colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
+            description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
+          />
+          <Section
+            id="kontrol-siniflar"
+            title="Sınıflar"
+            rows={report.classes}
+            colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
+            description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
+          />
+          <Section
+            id="kontrol-derslikler"
+            title="Derslikler"
+            rows={report.rooms}
+            description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
+          />
+        </aside>
       </div>
     </>
   );

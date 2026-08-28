@@ -47,6 +47,7 @@ import {
 import { KIND_ICON } from '../steps';
 import LimitBox from '../LimitBox';
 import Paste from '../setup/Paste';
+import Summary from '../setup/Summary';
 import Field from '../Field';
 
 interface Props {
@@ -310,12 +311,18 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // The heading carries the branch when the box does not ("Başlıkta branşı da
   // yazsın") — and it carries BOTH when the box is there, because then the
   // heading is naming the teacher rather than the lesson being typed.
+  // Rows AND hours, like the picker beside it: "kaç ders girdim" and "haftası
+  // doldu mu" are different questions and the second is the one that bites.
+  // The hours come from `weeklyLoad`, the same function the picker rows and
+  // the strip's Toplam read — one number, one source.
+  const scopeHours = scope.reduce((n, l) => n + l.weeklyHours, 0);
+  const counted = `${scope.length} ders · ${scopeHours} saat`;
   const heading =
     mode === 'all' || focused === undefined
-      ? `Dersler (${state.lessons.length})`
+      ? `Dersler · ${counted}`
       : mode === 'teacher' && focusedSubjects !== ''
-        ? `${focused.name} · ${focusedSubjects} dersleri (${scope.length})`
-        : `${focused.name} dersleri (${scope.length})`;
+        ? `${focused.name} · ${focusedSubjects} dersleri · ${counted}`
+        : `${focused.name} dersleri · ${counted}`;
 
   const panel = (
     <div className="panel step-panel">
@@ -340,7 +347,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
 
         {(state.classes.length === 0 || state.teachers.length === 0) && (
           <div className="warn-box">
-            Ders eklemek için önce <b>Kurulum</b> sekmesinde en az bir öğretmen ve
+            Ders eklemek için önce <b>Okul</b> sekmesinde en az bir öğretmen ve
             bir sınıf girin.
           </div>
         )}
@@ -652,16 +659,24 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // INSIDE `.cols` either way: that wrapper is the shape every list screen has
   // (`.cols > div > .panel`), and dropping it in one mode would have made this
   // the only list in the program its own helpers could not find.
+  //
+  // And the RAIL is there either way too. It used to appear with the focused
+  // modes and vanish in Genel, so the list's right edge jumped several hundred
+  // pixels on a button whose whole job was to change which lessons were
+  // listed. Genel gets the summary the setup steps get — the one panel that
+  // says whether each class's week is actually full.
   return (
-    <div className={mode === 'all' ? 'cols solo' : 'cols wide-left'}>
+    <div className="cols">
       <div>{panel}</div>
 
       {/* The picker, and the same list Müsaitlik puts in this column: choosing
           among twenty classes should not be a <select> showing one row at a
           time, and the number that says whether this one is done — lessons
           entered, hours loaded — belongs on the row itself. */}
-      {mode !== 'all' && (
       <aside>
+        {mode === 'all' ? (
+          <Summary state={state} change={change} step="lessons" />
+        ) : (
           <div className="panel">
             <h2>{mode === 'teacher' ? 'Hangi öğretmen' : 'Hangi sınıf'}</h2>
             <p className="hint">
@@ -699,12 +714,12 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             </div>
             {picking.length === 0 && (
               <p className="hint">
-                Henüz {modeNoun} yok. <b>Kurulum</b> sekmesinden ekleyin.
+                Henüz {modeNoun} yok. <b>Okul</b> sekmesinden ekleyin.
               </p>
             )}
           </div>
+        )}
       </aside>
-      )}
     </div>
   );
 }

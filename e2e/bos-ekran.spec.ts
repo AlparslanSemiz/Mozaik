@@ -12,12 +12,12 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await open(page);
     await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
       'aria-label',
-      'Kurulum',
+      'Okul',
     );
     await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
   });
 
-  // The sample school is offered ONCE here and lives in Ayarlar → Veri. Before
+  // The sample school is offered ONCE here and lives in Ayarlar → Hakkında. Before
   // this it was a permanent button on the Kurulum screen — reachable only by an
   // empty project, so anybody who had started their own work could never look
   // at it again.
@@ -64,12 +64,12 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await expect(page.locator('.intro-line')).toHaveCount(0);
     });
 
-    test('asıl evi Ayarlar → Veri ve oradan her zaman yüklenebiliyor', async ({ page }) => {
+    test('asıl evi Ayarlar → Hakkında ve oradan her zaman yüklenebiliyor', async ({ page }) => {
       await open(page);
       // Dismiss it on Kurulum first, so this really is the other way in.
       await page.getByRole('button', { name: 'Bir daha gösterme' }).click();
 
-      await openSettings(page, 'Veri');
+      await openSettings(page, 'Hakkında');
       const button = page.getByRole('button', { name: 'Örnek okulu yükle' });
       await expect(button).toBeVisible();
       await button.click();
@@ -89,7 +89,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     const screen = page.locator('.empty-screen');
     await expect(screen).toContainText('Henüz dizilecek ders yok');
-    await expect(screen).toContainText('Kurulum');
+    await expect(screen).toContainText('Okul');
     await expect(screen).toContainText('Müsaitlik');
     // Not clipped: the empty screen must never live inside the grid's
     // overflow:hidden shell.
@@ -98,7 +98,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
   test('Yazdır: basılacak bir şey olmadığını söylüyor', async ({ page }) => {
     await open(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.empty-screen')).toBeVisible();
   });
 
@@ -114,19 +114,22 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await expect(page.locator('.empty-screen')).toContainText('derslik ekleyin');
   });
 
-  test('Kurulum adım sayaçları boşken soluk', async ({ page }) => {
+  test('Okul adım sayaçları boşken soluk', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(3);
+    // Four steps, and on a brand-new project every one of them is empty —
+    // Branşlar included, since a new project no longer arrives with the 21
+    // built-in subjects already on its list.
+    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(4);
 
     await openSetup(page, 'Derslikler');
     await page.getByPlaceholder('Derslik adı, örn. A').fill('A');
     await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(2);
+    await expect(page.locator('.step[data-empty="true"]')).toHaveCount(3);
   });
 
   test('boş projede bile Ayarlar açılıyor ve dolu', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     await expect(page.locator('.cols aside')).toContainText('Zil saatleri');
     await expect(page.locator('table.bell-preview')).toBeVisible();
   });
@@ -146,12 +149,12 @@ test.describe('36. Klavye', () => {
       await page.keyboard.press('Tab');
     }
     expect(names).toEqual([
-      'Kurulum',
+      'Okul',
       'Müsaitlik',
       'Dersler',
       'Program',
       'Kontrol',
-      'Yazdır',
+      'Çıktı',
       'Ayarlar',
     ]);
   });

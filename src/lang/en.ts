@@ -17,11 +17,11 @@ import type { Sozluk } from '../i18n';
 
 const EN: Sozluk = {
   // ------------------------------------------------------------ the shell
-  'Kurulum': 'Setup',
+  'Okul': 'School',
   'Müsaitlik': 'Availability',
   'Program': 'Timetable',
   'Kontrol': 'Check',
-  'Yazdır': 'Print',
+  'Çıktı': 'Print',
   'Ayarlar': 'Settings',
 
   'Bölümler': 'Sections',

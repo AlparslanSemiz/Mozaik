@@ -77,7 +77,7 @@ describe('translate', () => {
   });
 
   it('İngilizcede sözlüğü kullanıyor, bilmediğinde ANAHTARA düşüyor', () => {
-    expect(translate('en', 'Kurulum')).toBe('Setup');
+    expect(translate('en', 'Okul')).toBe('School');
     // The failure mode of an unfinished dictionary: this line is still in
     // Turkish. Not a key name printed on my father's screen.
     expect(translate('en', 'çevrilmemiş bir cümle')).toBe('çevrilmemiş bir cümle');

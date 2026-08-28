@@ -12,76 +12,175 @@
 
 import { useMemo } from 'react';
 import { buildCapacity } from '../../feasibility';
-import type { ReportRow } from '../../feasibility';
-import { genderLabel, roomClasses, subjectOptions, subjectTeachers } from '../../entities';
+import CapacityRows from '../CapacityRows';
+import {
+  DEFAULT_SUBJECT_SHORTS,
+  addSubject,
+  respreadColors,
+  genderLabel,
+  roomClasses,
+  subjectKey,
+  subjectOptions,
+  subjectTeachers,
+} from '../../entities';
+import type { StepId } from '../../toolState';
+
+/**
+ * The four Okul steps, plus the one screen outside Okul that reads this panel:
+ * Dersler → Genel, whose rail would otherwise be empty and whose question is
+ * exactly the one the fallback branch answers ("does each class's week fit").
+ */
+export type SummaryView = StepId | 'lessons';
 import type { Gender } from '../../types';
 
 /** The three values, in the order the teacher list offers them. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
 import type { State } from '../../types';
 
-export type StepId = 'rooms' | 'teachers' | 'classes' | 'lessons';
+/**
+ * Colour repair, offered where the colours are CHOSEN.
+ *
+ * This was a panel in Ayarlar → Veri, three tabs from the swatch it repairs.
+ * A colour is an identity here, not decoration — the grid row, the pool card
+ * and the printed sheet all read it.
+ *
+ * Drawn only when redistributing would actually CHANGE something, which is
+ * exactly `respreadColors`'s own contract: it hands out 0..n-1 in list order,
+ * so if that is already what the list wears there is nothing to offer. On a
+ * healthy project this panel is not there at all, which is the point — the
+ * right-hand column had two panels and one of them was furniture.
+ */
+function Colors({
+  state,
+  change,
+  kind,
+}: {
+  state: State;
+  change: (apply: (d: State) => State) => void;
+  kind: 'teacher' | 'class';
+}) {
+  const rows = kind === 'teacher' ? state.teachers : state.classes;
+  if (!rows.some((x, i) => x.color !== i)) return null;
 
-const BADGE: Record<ReportRow['level'], string> = {
-  ok: 'ok',
-  tight: 'tight',
-  impossible: 'impossible',
-};
-
-const BADGE_TEXT: Record<ReportRow['level'], string> = {
-  ok: 'Uygun',
-  tight: 'Sıkışık',
-  impossible: 'İmkânsız',
-};
-
-function Rows({ rows, empty }: { rows: ReportRow[]; empty: string }) {
-  if (rows.length === 0) return <p className="hint">{empty}</p>;
+  const noun = kind === 'teacher' ? 'öğretmen' : 'sınıf';
+  // Two different faults with one repair. A duplicate is a real problem — two
+  // people wearing one identity — so it is a warning. A gap is only untidy.
+  const clashes = rows.length - new Set(rows.map((x) => x.color)).size;
   return (
-    // A ROW PER TEACHER, so this is the one panel on the screen that grows with
-    // the school. Twenty-five of them make a side column taller than the list
-    // it is summarising — and a summary you have to scroll past to reach the
-    // next summary is not one. Bounded and scrolled in place, which is the
-    // pattern `.entity-list` already uses for the same reason.
-    <div className="stat-scroll">
-    <table className="stat">
-      <thead>
-        <tr>
-          <th>Ad</th>
-          <th className="num">Açık</th>
-          <th className="num">Yük</th>
-          <th>Durum</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => (
-          <tr key={r.id}>
-            <td title={r.message}>{r.name}</td>
-            <td>{r.capacity}</td>
-            <td>{r.load}</td>
-            <td>
-              <span className={`badge ${BADGE[r.level]}`}>{BADGE_TEXT[r.level]}</span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    </div>
+    <>
+      <h3>Renkler</h3>
+      {clashes > 0 ? (
+        <div className="warn-box">
+          <b>
+            {clashes} {noun} başkasıyla aynı renkte.
+          </b>{' '}
+          Renk burada bir kimlik: ızgarada, havuzda ve kâğıtta okunuyor.
+        </div>
+      ) : (
+        <p className="hint">
+          Silmelerden sonra renkler arada delik bıraktı. Yeniden dağıtmak programı
+          bozmaz, yalnızca renkleri baştan sıraya dizer.
+        </p>
+      )}
+      <div className="form-row">
+        <button className="btn" onClick={() => change((d) => respreadColors(d, kind))}>
+          {kind === 'teacher' ? 'Öğretmen' : 'Sınıf'} renklerini yeniden dağıt ({rows.length})
+        </button>
+      </div>
+    </>
   );
 }
 
-export default function Summary({ state, step }: { state: State; step: StepId }) {
+export default function Summary({
+  state,
+  change,
+  step,
+}: {
+  state: State;
+  change: (apply: (d: State) => State) => void;
+  step: SummaryView;
+}) {
   const capacity = useMemo(() => buildCapacity(state), [state]);
+
+  if (step === 'subjects') {
+    // The built-in table the short forms come from. Anything already on the
+    // school's list is not on offer; what is left is one click away instead of
+    // being retyped — and typed-in names are exactly how "Matemtik" was born.
+    const options = subjectOptions(state);
+    const ready = Object.keys(DEFAULT_SUBJECT_SHORTS).filter(
+      (name) => !options.some((x) => subjectKey(x) === subjectKey(name)),
+    );
+    const unused = options.filter((x) => subjectTeachers(state, x).length === 0);
+    return (
+      <div className="panel">
+        <h2>Özet</h2>
+        <h3>Hazır branşlar ({ready.length})</h3>
+        <p className="hint">
+          Programda gömülü olan ve okulun listesinde <b>bulunmayan</b> branşlar.
+          Kısaltmaları hazır; eklemek için tıklayın.
+        </p>
+        {ready.length === 0 ? (
+          <div className="ok-box">Gömülü tablodaki branşların hepsi listenizde.</div>
+        ) : (
+          <>
+            <div className="form-row">
+              <button
+                className="btn"
+                title="Gömülü tablodaki bütün branşları listeye ekler"
+                onClick={() =>
+                  change((d) => ready.reduce((acc, name) => addSubject(acc, name), d))
+                }
+              >
+                Hepsini ekle
+              </button>
+            </div>
+            <div className="stat-scroll">
+              <table className="stat">
+                <tbody>
+                  {ready.map((name) => (
+                    <tr key={name}>
+                      <td>{name}</td>
+                      <td className="num">{DEFAULT_SUBJECT_SHORTS[name]}</td>
+                      <td>
+                        {/* Not "Ekle": the add form on the LEFT of this screen
+                            has a button by that name, and `getByRole(name:)`
+                            would then be ambiguous across the two (pitfall 49). */}
+                        <button
+                          className="btn"
+                          title={`${name} branşını listeye ekler`}
+                          onClick={() => change((d) => addSubject(d, name))}
+                        >
+                          Listeye ekle
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        {unused.length > 0 && (
+          <p className="hint">
+            Hiçbir öğretmende kullanılmayan {unused.length} branş var: {unused.join(', ')}.
+            Silinebilirler.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   if (step === 'rooms') {
     const homeless = state.classes.filter((c) => c.roomId == null);
     return (
       <div className="panel">
-        <h2>Derslik yükü</h2>
+        <h2>Özet</h2>
+        <h3>Derslik yükü</h3>
         <p className="hint">
           Aynı dersliği paylaşan sınıfların <b>toplam</b> ders saati de haftaya sığmalı.
           En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu.
         </p>
-        <Rows rows={capacity.rooms} empty="Henüz derslik yok." />
+        <CapacityRows rows={capacity.rooms} empty="Henüz derslik yok." />
         {state.rooms.length > 0 && (
           <>
             <h3>Hangi sınıflar</h3>
@@ -124,7 +223,8 @@ export default function Summary({ state, step }: { state: State; step: StepId })
     })).filter((x) => x.count > 0);
     return (
       <div className="panel">
-        <h2>Öğretmen yükü</h2>
+        <h2>Özet</h2>
+        <h3>Öğretmen yükü</h3>
         <p className="hint">
           Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz. Müsait saatler{' '}
           <b>Müsaitlik</b> sekmesinde daralır.
@@ -141,7 +241,7 @@ export default function Summary({ state, step }: { state: State; step: StepId })
             ))}
           </p>
         )}
-        <Rows rows={capacity.teachers} empty="Henüz öğretmen yok." />
+        <CapacityRows rows={capacity.teachers} empty="Henüz öğretmen yok." />
         {subjects.length > 0 && (
           <>
             <h3>Branşlar ({subjects.length})</h3>
@@ -154,18 +254,41 @@ export default function Summary({ state, step }: { state: State; step: StepId })
             </ul>
           </>
         )}
+        <Colors state={state} change={change} kind="teacher" />
       </div>
     );
   }
 
   if (step === 'classes') {
+    const noLesson = state.classes.filter((c) => !state.lessons.some((x) => x.classId === c.id));
+    const slots = state.settings.days.length * state.settings.hours.length;
+    const weekly = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
     return (
       <div className="panel">
-        <h2>Sınıf yükü</h2>
+        <h2>Özet</h2>
+        <h3>Sınıf yükü</h3>
         <p className="hint">
           Sınıfa yüklenen toplam ders saati, sınıfın <b>açık</b> olduğu saatlere sığmalı.
         </p>
-        <Rows rows={capacity.classes} empty="Henüz sınıf yok." />
+        <CapacityRows rows={capacity.classes} empty="Henüz sınıf yok." />
+        {/* Both of these outlived the "Kurulum durumu" panel they used to sit
+            in. The first is the only warning that a class was created and then
+            forgotten; the second is the one number that decides whether any of
+            this can be laid out at all. */}
+        {noLesson.length > 0 && (
+          <div className="warn-box">
+            <b>{noLesson.length} sınıfın hiç dersi yok</b> (
+            {noLesson.map((c) => c.name).join(', ')}).
+          </div>
+        )}
+        {state.classes.length > 0 && (
+          <p className="hint">
+            Haftada sınıf başına <b>{slots}</b> saat var ({state.settings.days.length} gün ×{' '}
+            {state.settings.hours.length} ders). Girilen toplam ders yükü <b>{weekly}</b> saat.
+            Gün ve saat sayısı <b>Ayarlar → Zil ve günler</b>'de.
+          </p>
+        )}
+        <Colors state={state} change={change} kind="class" />
       </div>
     );
   }
@@ -178,12 +301,13 @@ export default function Summary({ state, step }: { state: State; step: StepId })
   );
   return (
     <div className="panel">
-      <h2>Ders yükü</h2>
+      <h2>Özet</h2>
+      <h3>Ders yükü</h3>
       <p className="hint">
-        Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Bu tabloyu görmek için
-        <b> Kontrol</b> sekmesine gitmek gerekiyordu.
+        Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı
+        girdikçe artar; <b>Yük</b> <b>Açık</b>'ı geçerse o sınıfın haftası tutmaz.
       </p>
-      <Rows rows={capacity.classes} empty="Henüz sınıf yok." />
+      <CapacityRows rows={capacity.classes} empty="Henüz sınıf yok." />
       {noLesson.length > 0 && (
         <div className="warn-box">
           <b>{noLesson.length} sınıfın hiç dersi yok</b> ({noLesson.map((c) => c.name).join(', ')}).

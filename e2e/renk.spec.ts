@@ -318,7 +318,7 @@ test.describe('8. Tema', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Koyu tema' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 
     await page.emulateMedia({ media: 'print' });
     const printed = await tokens(page, ['--paper', '--text']);
@@ -589,7 +589,7 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
 test.describe('11. Görsel cila', () => {
   test('başlık altındaki sütunla aynı hizada', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
 
     // The bell preview centres its cells; its headings used to be left-aligned,
     // so the day names sat visibly off their own column.
@@ -618,7 +618,7 @@ test.describe('11. Görsel cila', () => {
 
   test('tehlikeli düğme beklemeden tehlikeli görünüyor', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
     const [danger, plain] = await Promise.all([
       page
         .getByRole('button', { name: 'Her şeyi sil' })
@@ -656,7 +656,7 @@ test.describe('11. Görsel cila', () => {
 // that looked plausible and were wrong by a factor of three — the parser took
 // the lightness for a red channel and called every backdrop black.
 test.describe('80. Bölüm şeridi', () => {
-  const SECTIONS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;
+  const SECTIONS = ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
 
   for (const theme of ['light', 'dark'] as const) {
     test(`üst çubuğun renk şeridi ${theme} temada da görünüyor`, async ({ page }) => {

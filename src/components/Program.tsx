@@ -455,7 +455,7 @@ export default function Program({ state, change, solver, view }: Props) {
       <>
         <div className="empty-screen">
           <strong>Henüz dizilecek ders yok.</strong>
-          Önce <b>Kurulum</b> sekmesinden derslikleri, öğretmenleri ve sınıfları girin,
+          Önce <b>Okul</b> sekmesinden derslikleri, öğretmenleri ve sınıfları girin,
           sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından <b>Müsaitlik</b>{' '}
           sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.
           <br />

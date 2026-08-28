@@ -1680,36 +1680,140 @@ yazıldı ve üçü de mutasyonla denendi.
       200px'lik kaydırması **hesaplanan** orta noktaya çevrildi: o sabit yalnız
       Kurulum'un sayfası yan sütun yüzünden uzunken bir ortaydı.
 
+## Y turu — arayüzün şekli — **BİTTİ ✅** (2026-08-28)
+
+Kullanıcının on maddesi. Hepsi tek bir aileden: **ekranın şekli tutarsızdı.**
+Branş listesi onu okuyan açılır listeden bir sekme uzaktaydı, Kurulum'un sağ
+sütununda gereksiz bir ikinci panel vardı, Kontrol'ün üç süzgeci birbirinin
+aynıydı ve sayfa üç ekran sürüyordu, liste tabloları panellerinin yarısını
+kaplıyordu, ve sağdaki blok her ekranda başka bir x'te başlıyordu.
+
+**Adım 1 hiç ürün kodu yazmadı: ölçtü.** İki sayı bu turun bütün düzen
+kararlarını belirledi ve ikisi de [STATUS.md](STATUS.md)'de duruyor.
+
+- [x] **Y1 Sekme adları.** `Kurulum → Okul` (ilke 1 "kurulum yok" diyor ve ilk
+      sekmenin adı Kurulum'du; üstelik artık branşları da tutuyor),
+      `Yazdır → Çıktı` (isimler arasındaki tek fiildi). Ad çakışması yüzünden
+      zorunlu ikinci yeniden adlandırma: Ayarlar'ın `Okul ve zil` bölümü
+      **`Zil ve günler`** oldu — tuzak 49/74, bir düğme üç piksel ötedeki
+      sekmenin adını taşıyamaz.
+- [x] **Y2 Branşlar Okul'un 2. adımı.** Sıra artık bağımlılık zinciri:
+      `Derslikler · Branşlar · Öğretmenler · Sınıflar`. Sınıf bir dersliği
+      gösterir, öğretmen listeden bir branş seçer. `Subjects.tsx` kendi
+      `.cols`'unu ve `<aside>`'ını bıraktı (iç içe `.cols` `mainList()`'i
+      kırardı); yan paneli `setup/Summary.tsx`'in bir dalı oldu.
+- [x] **Y3 Yeni proje BOŞ branş listesiyle doğuyor.** "Hazır branşlar" paneli
+      21 gömülü branşın hepsi zaten listede olduğu için her yeni projede
+      `(0)` yazıyordu — yani işe yaradığı tek ekranda boştu.
+      **Ve bu, kayda değer bir kusuru ortaya çıkardı:** `migrateV2toV3`
+      `emptyState().settings`'i yayıyordu, yani v1/v2 yedeklerinin branş
+      listesi sessizce boşalacak ve her öğretmenin branşı "listede değil"e
+      düşecekti. Düzeltildi, testi yazıldı, **mutasyonla denendi.**
+- [x] **Y4 "Kurulum durumu" silindi.** Şeritte zaten duran dört sayacı üç
+      piksel altında tekrarlıyor, sekme çubuğunda zaten duran bir kapıyı
+      gösteriyordu ("çok fazla kaydırma olmuş, gereksiz"). Söylediği tek iki
+      şey — "N sınıfın hiç dersi yok" ve haftalık saat cümlesi — Özet'e taşındı.
+      Sağdaki panelin adı artık her adımda **Özet**.
+- [x] **Y5 Renkler paneli Ayarlar'dan Özet'e.** Renk burada bir kimlik ve
+      swatch'lar zaten o ekranda. Yalnız yeniden dağıtmanın gerçekten bir şey
+      **değiştireceği** zaman çiziliyor: sağlıklı bir projede panel hiç yok.
+- [x] **Y6 Ayarlar beş bölüm.** `Zil ve günler · Kurallar · Görünüm ·
+      Planlar ve yedek · Hakkında`. 762 satırlık `Data.tsx` bölündü: dosya,
+      klasör, paket ve yedekler plan kitaplığının yanına; sürüm, güncelleme,
+      "veriler nerede", örnek veri ve sıfırla `Hakkında`'ya. **`Hakkında`,
+      `Program hakkında` değil** — ikincisi `name: 'Program'` sorgusuna cevap
+      verirdi (tuzak 49).
+- [x] **Y7 Kontrol tek sayfa.** Üç süzgeç (Hepsi · Sorunlar · Kapasite) kalktı;
+      okuyanın hükmü "üçü de aynı" idi ve büyük ölçüde doğruydu, çünkü herkesin
+      geldiği panel üçünde de vardı. `.panel-grid` satır sıralı yerleştiriyordu,
+      yani her satır en uzun paneli kadar uzundu — 25 öğretmenlik okulda sayfa
+      üç ekrandı, çoğu boşluk. Artık iki sabit sütun, her tablo kendi içinde
+      kayıyor, **ölçülen: 1,09 ekran.** Şerit süzmüyor, **götürüyor**:
+      `Sorunlar (N) · Öğretmenler · Sınıflar · Derslikler`.
+- [x] **Y8 Tek `.cols`, tek kenar genişliği.** `.wide-left`, `.narrow-right` ve
+      `.solo` silindi. Sağ ray **her ekranda** var, içi boş olsa bile — bir
+      bazen yok olan ray, oynayan bir raydır. Dersler'de mod değiştirmek
+      listenin sağ kenarını yüzlerce piksel oynatıyordu; Genel artık `Ders
+      yükü` özetini alıyor. Ölçülen: **on dört ekranın on dördünde ray tam
+      olarak aynı x'te (1568 px).**
+- [x] **Y9 Liste satırları panelin sonuna kadar.** Dört aday ölçüldü;
+      `width: 100%` ve `min-width: 100%` paneli dolduruyor **ama fazlalığı
+      doğrudan Ad'a veriyor** (Derslikler'de 187 → 640,8 px), yani bir önceki
+      turun şikayetini geri getiriyor. Çalışan şey kutuyu doldurmak **ve son
+      sütunu serbest bırakmak** — o sütun zaten boş ve `Sil`'i sağa yaslı
+      tutuyor. Ad üç listede de **değişmedi**.
+- [x] **Y10 Dersler başlığı saati de söylüyor.** `Dersler (99)` →
+      `Dersler · 99 ders · 433 saat`; odaklanmış modda da aynı ikili. Şeridin
+      `Toplam`'ıyla aynı olduğu teste bağlandı.
+
+### Bu turda ölçülen, iddia edilmeyen
+
+| Ne | Değer |
+|---|---|
+| Tablonun panel kenarına uzaklığı (önce) | Derslikler **-1094 px** · Sınıflar -965 · Öğretmenler -496 |
+| Tablonun panel kenarına uzaklığı (sonra) | **-1 px**, üç listede de, %100/110/125'te |
+| `Ad` sütunu | 187 / 205,8 / 233,8 / 280,6 — üç listede de aynı, **değişmedi** |
+| `--aside-w` | **23,5rem** — bağlayıcı olan Müsaitlik'in `.entity-list`'i |
+| Rayın x'i | on dört ekranın on dördünde **1568 px** |
+| Kontrol sayfası | 3 ekran → **1,09 ekran** |
+
+### Bu turda çıkan yeni tuzak
+
+- **87. `i18n.test.ts`'in ölü anahtar tarayıcısı YORUMLARA da bakıyor.** Bir
+  arayüz metnini yeniden adlandırmak sözlük girdisini öksüz bırakır ve
+  **hiçbir şey söylemez**. Mutasyonla doğrulandı: `'Kurulum': 'Setup'` ve
+  `'Yazdır': 'Print'` gerçekten ölü anahtarlar olarak geri kondu ve süit
+  **yeşil geçti**, çünkü o kelimeler hâlâ on beş kadar İngilizce yorumda
+  duruyor. Tuzak 80'in ailesi: bir karakter üstünden yapılan tarama, o
+  karakterin **rolünü** değil kendisini görüyor.
+
 ### ŞİMDİ SIRADA
 
-Bu turun kendi bıraktığı tek borç: **Derslikler listesi artık panelin solunda
-dar bir tablo** ve sağında geniş bir boşluk kalıyor. Bu, istenen kısalmanın
-doğrudan sonucu ve dürüst; ama bakıldığında dengesiz görünüyorsa seçenek
-`.cols.wide-left`'in sol izini içeriğe göre daraltmak. **Kullanıcıya sorulacak,
-tahminle değiştirilmeyecek** (ilke 5).
+Bu turun kendi bıraktığı borç yok; on maddenin onu da bitti, her biri ölçüldü,
+ve **`npm run kontrol` çıkış kodu 0** (612 birim · 466 E2E · 22 site · 7
+çözücü). İki not:
+
+1. **Tur boyunca görülen tek tük düşmelerin sebebi bulundu ve kod değildi.**
+   Ölçüm betiklerim `npm run build` çağırıyordu, yani süit `dist/index.html`'i
+   okurken dosya altından yeniden yazılıyordu. İlk teşhis "paralel yükte
+   kararsızlık" idi ve yanlıştı. **Bir süit koşarken derleme yapılmaz.**
+2. **Görsel kanıt alındı.** `npm run ekran` iki temada on dokuz görüntü
+   üretti ve **bakıldı** — Y8/Y9/Y10'u yargılayabilecek hiçbir iddia yok
+   (tuzak 82). Sahne adları da güncellendi (`1-okul`, `8-cikti`,
+   `11-ayarlar-hakkinda`).
 
 
+---
 
-Kurulumda Derslikler Öğretmenler ve SInıfların yanında 1 2 3'ü kaldır.
-Tüm Listeleri de olabildiğince birbiriyle simetrik ve uyumlu yap.
-Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun. Derslikte de çok uzun. Uzun olması daha iyiyse beni ikna et ve öyle kalsın.
-Sol üstteki logonun küçüğü kullanılsın.
-İkinci barın açılıp kapanması ayarlarda bir ayar olsun.
-İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı yerde olsun ve yazı ortalansın gerekirse ona uygun bir yazı seçilsin.
-Öğretmenin tek bir branşı varsa seçme tuşu açılmasın dersler sectionu öğretmenden seçeneğinde, varsa tabii ki açılsın. Başlıkta branşı da yazsın.
-Programda blok saatlerinin yeni mantığından dolayı önizleme artısı kaymış durumda. Foto örnek fotolarda.
-Programda kartların üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın.
-Yazdırmada yazıları büyük yapınca yazdırma bozuluyor. Önizleme doğru olmasına rağmen.
-Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor buna bir çözüm bul.
-Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin.
+## Ham notlar — kullanıcının kendi satırları
 
+Bu turların kaynağı. Hiçbiri silinmedi; her satırın nereye gittiği yanında.
 
-Branşlar kuruluma gelsin.
-Branşlarda yanda hazır eklenebilirleri ekleyelim.
-Kurulum müsaitlik falan işte üst taraftaki sectionların da isimleri daha güzel hale getirilebilir.
-Kurulum öğretmenlerde kurulum durumu dersler sekmesine gidinize gerek yok. Hatta direkt onu da silebilirsin çok fazla kaydırma olmuş gereksiz.
-Kurulum özeti ya da özet vebenziren çevrilebilir o. ya da artık ileride nasıl adlandıracaksak.
-Öğretmenler Sınıfflar dersliklerde yazdığı gibi derslerin içinde genelin yanında da toplam dersler yazsın.
-Kontrol tarafında hepsi sorunlar kapasite biraz fazla gereksizler gibi ya düzgün şekilde onları doldur ya da öyle gereksiz yapma. ayrıca çok aşağı doğru gidiyor daha mantıklı bir çözüm bulunabilir mi?
-Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular güzel de gözükmüyor.
-Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı ortalansın ve sığdırılsın.
+**X turu (2026-08-28) · on iki satır, on ikisi de bitti:**
+
+> Kurulumda Derslikler Öğretmenler ve SInıfların yanında 1 2 3'ü kaldır. → X1
+> Tüm Listeleri de olabildiğince birbiriyle simetrik ve uyumlu yap. → X2
+> Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun. Derslikte de çok uzun. Uzun olması daha iyiyse beni ikna et ve öyle kalsın. → X2
+> Sol üstteki logonun küçüğü kullanılsın. → X3
+> İkinci barın açılıp kapanması ayarlarda bir ayar olsun. → X10
+> İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı yerde olsun ve yazı ortalansın gerekirse ona uygun bir yazı seçilsin. → X4
+> Öğretmenin tek bir branşı varsa seçme tuşu açılmasın dersler sectionu öğretmenden seçeneğinde, varsa tabii ki açılsın. Başlıkta branşı da yazsın. → X5
+> Programda blok saatlerinin yeni mantığından dolayı önizleme artısı kaymış durumda. Foto örnek fotolarda. → X6
+> Programda kartların üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın. → X7
+> Yazdırmada yazıları büyük yapınca yazdırma bozuluyor. Önizleme doğru olmasına rağmen. → X8
+> Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor buna bir çözüm bul. → X9
+> Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin. → X11, sonra Y6
+
+**Y turu (2026-08-28) · on satır, onu da bitti:**
+
+> Branşlar kuruluma gelsin. → Y2
+> Branşlarda yanda hazır eklenebilirleri ekleyelim. → Y3
+> Kurulum müsaitlik falan işte üst taraftaki sectionların da isimleri daha güzel hale getirilebilir. → Y1
+> Kurulum öğretmenlerde kurulum durumu dersler sekmesine gidinize gerek yok. Hatta direkt onu da silebilirsin çok fazla kaydırma olmuş gereksiz. → Y4
+> Kurulum özeti ya da özet vebenziren çevrilebilir o. ya da artık ileride nasıl adlandıracaksak. → Y4
+> Öğretmenler Sınıfflar dersliklerde yazdığı gibi derslerin içinde genelin yanında da toplam dersler yazsın. → Y10
+> Kontrol tarafında hepsi sorunlar kapasite biraz fazla gereksizler gibi ya düzgün şekilde onları doldur ya da öyle gereksiz yapma. ayrıca çok aşağı doğru gidiyor daha mantıklı bir çözüm bulunabilir mi? → Y7
+> Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular güzel de gözükmüyor. → Y9
+> Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı ortalansın ve sığdırılsın. → Y8
+> Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin. → Y6
+> Tüm sectionları cesurca her şeyi değiştirebilsirsin. → Y1–Y10'un tamamının izni

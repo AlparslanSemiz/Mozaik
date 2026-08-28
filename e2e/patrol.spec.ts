@@ -106,7 +106,7 @@ async function diyalogKapat(page: Page): Promise<boolean> {
 }
 
 const SEKMELER = [
-  'Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar',
+  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
 ];
 
 test.describe('Devriye', () => {
@@ -118,7 +118,7 @@ test.describe('Devriye', () => {
     // empty screen is the one place a rendering bug cannot happen (pitfall
     // 41: a layout measured on nothing measures nothing).
     await page.getByRole('button', { name: 'Ayarlar' }).click();
-    await page.locator('.ribbon .btn', { hasText: 'Veri' }).first().click();
+    await page.locator('.ribbon .btn', { hasText: 'Hakkında' }).first().click();
     await page.getByRole('button', { name: 'Örnek okulu yükle' }).click();
     await answerDialog(page);
     await expect(page.locator('.dlg')).toHaveCount(0);

@@ -121,6 +121,21 @@ describe('parseState — v2 göçü', () => {
     });
     expect(d.lessons[0]!.maxPerDay).toBeNull();
   });
+
+  // A v1/v2 file predates `settings.subjects` entirely. `emptyState()` used to
+  // carry the built-in 21 and the migration inherited them by spreading
+  // `blank.settings`; now that a new project starts with NO subjects, that
+  // spread would hand this file an empty list and turn "Matematik" — which its
+  // teacher still carries — into a stray the Branşlar step marks "listede
+  // değil". Nothing on screen would say so.
+  it('BRANŞ LİSTESİ boş kalmıyor: eski dosya gömülü listeyi alıyor', () => {
+    for (const eski of [legacyV1(), legacyV2()]) {
+      const d = parseState(JSON.stringify(eski))!;
+      expect(d.settings.subjects).toEqual(defaultSubjects());
+      // ...which is the same as saying the teacher's subject is not a stray.
+      expect(d.settings.subjects).toContain(d.teachers[0]!.subject);
+    }
+  });
 });
 
 describe('parseState — v4', () => {

@@ -15,7 +15,7 @@ import { dragAndDrop, openWithSample } from './helpers';
 
 async function openPrint(page: Page) {
   await openWithSample(page);
-  await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+  await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -27,7 +27,7 @@ async function openPrint(page: Page) {
 async function openPrintWithALesson(page: Page) {
   await openWithSample(page);
   await dragAndDrop(page);
-  await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+  await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
   await expect(page.locator('.print-page').first()).toBeVisible();
 }
 
@@ -154,7 +154,7 @@ test.describe('62. Sayfada ne olsun', () => {
     await box(page, 'Çıktı tarihi').check();
 
     await page.reload();
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 
     await expect(box(page, 'Ders saatleri')).not.toBeChecked();

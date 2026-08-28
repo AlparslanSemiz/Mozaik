@@ -20,7 +20,6 @@
 import type { State } from '../../types';
 import School from './School';
 import Rules from './Rules';
-import Subjects from './Subjects';
 import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../props';
@@ -83,7 +82,6 @@ export default function Settings({
     <>
       {section === 'school' && <School state={state} change={change} />}
       {section === 'rules' && <Rules state={state} change={change} />}
-      {section === 'subjects' && <Subjects state={state} change={change} />}
       {section === 'appearance' && (
         <Appearance
           state={state}
@@ -103,7 +101,7 @@ export default function Settings({
           setMotion={setMotion}
         />
       )}
-      {(section === 'plans' || section === 'data') && (
+      {(section === 'plans' || section === 'about') && (
         <Data
           state={state}
           change={change}

@@ -1,6 +1,7 @@
 // The Ayarlar tab: days, the bell, the four rules, subjects and data.
 
 import { expect, test } from './kapan';
+import type { Page } from '@playwright/test';
 import { answerDialog, open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
 
 test.describe('6. Gün ve ders saatleri', () => {
@@ -19,7 +20,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     const day = Number(placed.day);
     const hour = Number(placed.hour);
 
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     await page.getByLabel('Pazartesi', { exact: true }).check();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -45,7 +46,7 @@ test.describe('6. Gün ve ders saatleri', () => {
     await expect(header).toContainText('09:00');
     await expect(header).toContainText('09:50');
 
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     const preview = page.locator('table.bell-preview');
     await expect(preview).toContainText('09:00–09:40');
     // Weekdays break after the 5th, the weekend after the 6th: 13:30 vs 13:10.
@@ -74,37 +75,58 @@ test.describe('6. Gün ve ders saatleri', () => {
 // wiring: a setting changed in Ayarlar must still reach the grid, and the one
 // button that cannot be undone must no longer sit next to a button used daily.
 
+/**
+ * Leaves a hole in the colour sequence, which is the state `respreadColors`
+ * exists for and the only state its button is drawn in.
+ */
+async function makeColourGap(page: Page) {
+  await openSetup(page, 'Öğretmenler');
+  await page
+    .locator('table.list tbody tr')
+    .nth(1)
+    .getByRole('button', { name: 'Sil' })
+    .click();
+  await answerDialog(page);
+  await expect(page.locator('.cols aside')).toContainText('Renkler');
+}
+
 test.describe('15. Ayarlar sekmesi', () => {
-  test('kendi sekmesi var ve dört bölümü açılıyor', async ({ page }) => {
+  test('kendi sekmesi var ve beş bölümü açılıyor', async ({ page }) => {
     await open(page);
     await expect(page.locator('.tabstrip .tab')).toHaveCount(7);
     await expect(page.getByRole('button', { name: 'Ayarlar' })).toBeVisible();
 
     for (const [section, heading] of [
-      ['Okul ve zil', 'Okul ve günler'],
+      ['Zil ve günler', 'Zil ve günler'],
       ['Kurallar', 'Kurallar'],
-      ['Branşlar', /^Branşlar/],
-      ['Veri', /^Veri$/], // 'Veri' alone now also matches 'Veriler nerede'
+      ['Görünüm', 'Tema'],
+      ['Planlar ve yedek', /^Planlar/],
+      ['Hakkında', 'Sürüm ve güncelleme'],
     ] as const) {
       await openSettings(page, section);
       await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     }
   });
 
-  // Three, not four: Dersler left for a tab of its own this round, and it left
-  // for the reason the reader gave — "ders en önemli kısım", which is not a
-  // thing you reach through step four of a wizard.
-  test('Kurulum ÜÇ adıma indi, okul ayarları da dersler de orada değil', async ({ page }) => {
+  // Four LISTS, and nothing else. What Okul holds is the things the school is
+  // made of; what Ayarlar holds is the settings touched once a year. Branşlar
+  // is on the first side of that line and spent a year on the second: the
+  // dropdown that reads it is one step away, so adding a subject used to mean
+  // leaving a half-typed teacher behind.
+  test('Okul DÖRT liste, ve ayarların hiçbiri orada değil', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Kurulum' }).click();
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
 
     const steps = await page.locator('.ribbon .step').allInnerTexts();
-    expect(steps).toHaveLength(3);
+    expect(steps).toHaveLength(4);
     expect(steps.join(' ')).toContain('Derslikler');
-    expect(steps.join(' ')).not.toContain('Dersler');
-    expect(steps.join(' ')).not.toContain('Okul');
+    expect(steps.join(' ')).toContain('Branşlar');
+    // A step is a LIST. These three are settings, and they stayed in Ayarlar.
+    expect(steps.join(' ')).not.toContain('Zil');
     expect(steps.join(' ')).not.toContain('Kurallar');
-    expect(steps.join(' ')).not.toContain('Branşlar');
+    expect(steps.join(' ')).not.toContain('Görünüm');
+    // ...and Dersler is a tab, not step five.
+    expect(steps.join(' ')).not.toContain('Dersler');
   });
 
   test('Ayarlar\'dan değişen zil saati ızgaraya geçiyor', async ({ page }) => {
@@ -112,7 +134,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     const firstHour = page.locator('table.grid thead .hour-clock').first();
     await expect(firstHour).toHaveText('09:00');
 
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     const lessonMinutes = page.getByLabel('Ders (dk)');
     await lessonMinutes.fill('45');
     await lessonMinutes.blur();
@@ -148,7 +170,10 @@ test.describe('15. Ayarlar sekmesi', () => {
     const placed = await page.locator('table.grid .card').count();
     expect(placed).toBeGreaterThan(0);
 
-    await openSettings(page, 'Veri');
+    // The offer lives in Okul → Özet now, beside the swatches it repairs, and
+    // it is only there when redistributing would actually change something.
+    // A fresh project wears 0..n-1 already, so make the gap first.
+    await makeColourGap(page);
     await page.getByRole('button', { name: /Öğretmen renklerini yeniden dağıt/ }).click();
 
     // The colours are still one per teacher, and the timetable is untouched.
@@ -174,7 +199,7 @@ test.describe('15. Ayarlar sekmesi', () => {
 test.describe('17. Başlangıç saati', () => {
   test('saat 24 saatlik ve dakika beşer beşer', async ({ page }) => {
     await open(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
 
     const hour = page.getByLabel('Başlangıç saati');
     const minute = page.getByLabel('Başlangıç dakikası');
@@ -195,7 +220,7 @@ test.describe('17. Başlangıç saati', () => {
 
   test('seçilen saat ızgaraya ve zil önizlemesine geçiyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
 
     await page.getByLabel('Başlangıç saati').selectOption('14');
     await page.getByLabel('Başlangıç dakikası').selectOption('35');
@@ -207,7 +232,7 @@ test.describe('17. Başlangıç saati', () => {
 
   test('boş bırakılıp 00:00\'a düşme tuzağı kalmadı', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul ve zil');
+    await openSettings(page, 'Zil ve günler');
     // There is no empty option to choose, in either dropdown.
     for (const label of ['Başlangıç saati', 'Başlangıç dakikası']) {
       const values = await page.getByLabel(label).locator('option').evaluateAll((list) =>
@@ -320,12 +345,12 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
 test.describe('32. Ayarlar — okul ve günler', () => {
   test('okul adı basılan sayfaya geçiyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     const name = page.getByLabel(/Okul adı/);
     await name.fill('Semiz Kurs');
     await name.blur();
 
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page h3').first()).toContainText('Semiz Kurs');
     // ...and into the top bar, which is where you see which file you are in.
     await expect(page.locator('.app-title')).toHaveText('Semiz Kurs');
@@ -340,7 +365,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
       .nth(Number(spot.day))
       .textContent();
 
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     // Çarşamba is the second teaching day: removing it re-indexes everything
     // after it.
     const row = page.locator('table.list tr', { hasText: 'Çarşamba' });
@@ -362,7 +387,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
 
   test('gün eklenince ızgaraya bir sütun grubu ekleniyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     await page
       .locator('table.list tr', { hasText: 'Pazartesi' })
       .locator('input[type=checkbox]')
@@ -375,7 +400,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
 
   test('günlük ders sayısı artırılınca ızgara büyüyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     const count = page.getByLabel('Günlük ders sayısı');
     await count.fill('14');
     await count.blur();
@@ -387,7 +412,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
 
   test('ders adları verilebiliyor ve ızgarada görünüyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     const count = page.getByLabel('Günlük ders sayısı');
     await count.fill('3');
     await count.blur();
@@ -403,7 +428,7 @@ test.describe('32. Ayarlar — okul ve günler', () => {
 
   test('öğle arasının yeri gün gün seçilebiliyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Okul');
+    await openSettings(page, 'Zil ve günler');
     await page
       .locator('table.list tr', { hasText: 'Salı' })
       .locator('select')
@@ -504,13 +529,13 @@ test.describe('33. Ayarlar — kurallar', () => {
   });
 });
 
-test.describe('34. Ayarlar — veri', () => {
+test.describe('34. Ayarlar — planlar ve hakkında', () => {
   test('renkleri yeniden dağıt sağ sütunu ve ızgarayı bozmuyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     const before = await page.locator('table.grid .card').count();
 
-    await openSettings(page, 'Veri');
+    await makeColourGap(page);
     await page.getByRole('button', { name: /Öğretmen renklerini yeniden dağıt/ }).click();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -519,14 +544,14 @@ test.describe('34. Ayarlar — veri', () => {
 
   test('yedek zinciri sağ sütunda listeleniyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Planlar ve yedek');
     const side = page.locator('.cols aside');
     await expect(side).toContainText('otomatik yedekler');
   });
 
   test('"Her şeyi sil" önce soruyor, reddedilince hiçbir şey gitmiyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     await page.getByRole('button', { name: 'Her şeyi sil' }).click();
     await answerDialog(page, 'cancel');
@@ -536,7 +561,7 @@ test.describe('34. Ayarlar — veri', () => {
 
   test('"Her şeyi sil" onaylanınca gerçekten siliyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Veri');
+    await openSettings(page, 'Hakkında');
 
     // It asks TWICE. The second question is the point: this is the one button
     // in the app that cannot be undone.

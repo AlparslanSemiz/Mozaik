@@ -20,7 +20,7 @@ import { expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { chooseScale, open, openSetup, openWithSample } from './helpers';
 
-const TABS = ['Kurulum', 'Müsaitlik', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'] as const;
+const TABS = ['Okul', 'Müsaitlik', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
 
 test.describe('23. Sekmeler', () => {
   test('seçili sekme belli, tıklayınca değişiyor', async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe('23. Sekmeler', () => {
 test.describe('25. Kabuk kâğıda basılmıyor', () => {
   test('üst çubuk ve şerit basılmıyor, iki sütun tek sütuna iniyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır' }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
     await expect(page.locator('header.topbar')).toBeHidden();
@@ -240,7 +240,7 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
 
   test('Yazdır: yan sütun ekranda kalıyor, kâğıtlar akıp gidiyor', async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Yazdır', exact: true }).click();
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.locator('.print-page').first().waitFor();
 
     const m = await boxes(page);

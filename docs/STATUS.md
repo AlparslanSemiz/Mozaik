@@ -1,7 +1,113 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-28 (otuzuncu oturum: **X turu** — on iki ham not; üçü
-ölçülebilir kusurdu ve üçü de yeşil bir süitin altında duruyordu)
+Son güncelleme: 2026-08-28 (otuz birinci oturum: **Y turu** — arayüzün şekli;
+on madde, hepsi ölçülerek)
+
+---
+
+## Otuz birinci oturum — Y turu: arayüzün şekli (2026-08-28)
+
+Ayrıntı [TASKS.md](TASKS.md) → *Y turu*; burada **ölçülenler**.
+
+Bu turun ilk adımı hiç ürün kodu yazmadı. İki sayı bütün düzen kararlarını
+belirledi, ve ikisi de tahmin edilebilirdi — biri tahmin edilseydi turun
+yarısı yanlış olurdu.
+
+### Ölçüm 1 — tablo fazlası nereye gidiyor
+
+Şikayet: *"Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar
+oldular güzel de gözükmüyor."* Önce kusurun büyüklüğü ölçüldü — tablonun sağ
+kenarı ile panelin iç sağ kenarı arasındaki fark, 1920×1080, örnek okul:
+
+| Liste | %100 | %125 | %150 |
+|---|---|---|---|
+| Derslikler | **-1094 px** | -888 | -681 |
+| Sınıflar | -965 | -726 | -487 |
+| Öğretmenler | -496 | -170 | +157 |
+
+Sonra dört aday **denendi**, çünkü doğru görünen ikisi yanlıştı:
+
+| Aday | Panel doluyor mu | `Ad` sütunu |
+|---|---|---|
+| `width: 100%` + `min-width: max-content` | evet | 187 → **640,8** ✗ |
+| `min-width: 100%` + `width: max-content` | evet | 187 → **640,8** ✗ |
+| ↑ + `th:last-child { width: auto }` | evet | **187, değişmedi** ✓ |
+| `th:last-child { width: 100% }` | — | tablo **1 000 000 px** ✗ |
+
+Sonuncusu tuzak 88 oldu: bir hücrenin yüzdesi tablonun genişliğine göre
+çözülür, tablonun genişliği de hücrelerden gelir. Hata verilmedi.
+
+**Seçilen** (`min-width: 100%; width: max-content` + son sütun `auto`) ile
+ölçülen son durum:
+
+| | %100 | %110 | %125 | %150 |
+|---|---|---|---|---|
+| Tablo sağ kenarı − panel iç kenarı | −1 px | −1 px | −1 px | −1 (Öğretmenler taşıyor) |
+| `.table-scroll` taşması | 0 | 0 | 0 | 211 (yalnız Öğretmenler) |
+| `Ad`, ÜÇ listede de | 187 | 205,8 | 233,8 | 280,6 |
+| Sayfa yatay taşması | 0 | 0 | 0 | 0 |
+
+### Ölçüm 2 — `--aside-w`
+
+Şikayet: *"Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın."*
+Dört `.cols` varyantı vardı (`wide-left` · `narrow-right` · `solo` · 50/50), o
+yüzden sağdaki blok neredeyse her ekranda başka bir x'te başlıyordu. Her yan
+sütun `width: min-content`'e zorlandı ve ne istediği okundu (rem, panel dolgusu
+dâhil — ölçekten bağımsız):
+
+| Nerede | İstediği |
+|---|---|
+| **Müsaitlik `.entity-list`** | **23,50 rem** ← bağlayıcı |
+| Çıktı sayfa seçimi | 20,57 |
+| Okul Özet | 20,29 (daha önce ölçülen 19,94 ile uyumlu) |
+| Ayarlar zil önizlemesi | 16,47 |
+| Dersler seçicisi | 11,03 |
+
+Seçilen **23,5rem**, ve iki kanarya bu genişlikte yeniden ölçüldü: Çıktı'nın
+`.pick-item`'ı %100'de de %150'de de hiçbir metnini kırpmıyor (tuzak 64), ve
+Okul → Öğretmenler'in `.table-scroll` taşması %100/110/125'te hâlâ tam 0.
+
+**Sonuç:** on dört ekranın on dördünde sağ ray tam olarak **x = 1568 px**.
+
+### Kontrol sayfası
+
+`.panel-grid` satır sıralı yerleştiriyordu, yani her ızgara satırı en uzun
+paneli kadar uzundu: "Yerleşemeyen dersler" 25 satırlık öğretmen tablosunun
+boyladığı bir satırın tepesinde, altında ~600 px boşlukla duruyordu.
+
+| | önce | sonra |
+|---|---|---|
+| Sayfa boyu (örnek okul, 1080 px görünen) | ~3 ekran | **1,09 ekran** |
+| Sınırlı yükseklikli tablo | 0 | 3 |
+
+### Bu turda mutasyonla denenen üç şey
+
+Üçü de yeşil geçebilirdi ve üçü de bilerek kırıldı:
+
+1. **v1/v2 göçü.** `migrateV2toV3` `emptyState().settings`'i yayıyor; branş
+   listesi boşalınca eski yedeklerin her öğretmeninin branşı "listede değil"e
+   düşecekti. Düzeltme geri alındı → test kırmızı. ✓
+2. **Tablo kuralı.** Eski `width: max-content` geri kondu → yeni test
+   *"%100 Derslikler: tablo panelin 1048px gerisinde bitiyor"* dedi. ✓
+3. **`i18n.test.ts`.** İki ölü sözlük anahtarı bilerek geri kondu → süit
+   **yeşil geçti** (tuzak 87). Bu üçüncüsü bir düzeltme değil, aletin kendi
+   körlüğünün kaydı.
+
+### Tur boyunca görülen "flake"lerin sebebi bulundu: kendi derlemelerim
+
+Turun ortasında yapılan tam koşuların çoğunda **tek** bir test düşüyordu, her
+seferinde **başka biri**, ve düşen her test tek başına koşturulunca geçiyordu.
+İlk teşhis "paralel yükte kararsızlık" oldu ve **yanlıştı**.
+
+Gerçek sebep daha sıkıcı: ölçüm betiklerim `npm run build` çağırıyor, yani
+süit `dist/index.html`'i okurken o dosya **altından yeniden yazılıyordu**.
+Süit `file://` üzerinden tek bir dosyayı okuyor (bkz. `helpers.ts`), o yüzden
+derleme ile koşuyu üst üste bindirmek testin ölçtüğü şeyi değiştiriyor.
+
+Hiçbir şeyin `dist/`'e dokunmadığı son koşu: **`npm run kontrol` çıkış kodu 0**
+— 612 birim · 466 E2E · 22 site/sunucu/klasör · 7 çözücü. Kayda geçen ders:
+*bir süit koşarken derleme yapılmaz*, ve "flake" teşhisi konmadan önce koşunun
+girdisinin sabit olduğu doğrulanır.
 
 ---
 

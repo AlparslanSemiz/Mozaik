@@ -208,7 +208,7 @@ const GRID = { acik: legalGrid('acik'), koyu: legalGrid('koyu') };
 
 const N = 7;
 const NAMES = ['setup', 'availability', 'lessons', 'program', 'check', 'print', 'settings'];
-const TR = ['Kurulum', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Yazdır', 'Ayarlar'];
+const TR = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
 
 /** A hue is usable only if BOTH themes have something legal at it. */
 const HUES = [...GRID.acik.keys()].filter((h) => GRID.koyu.has(h));
