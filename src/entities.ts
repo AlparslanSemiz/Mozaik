@@ -23,6 +23,7 @@ import type {
   State,
   Teacher,
 } from './types';
+import { t } from './i18n';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
 import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './subjects';
 import { SCHEMA_VERSION } from './types';
@@ -135,8 +136,23 @@ export function parseGender(raw: string): Gender {
   return '';
 }
 
+/**
+ * A day's name ON SCREEN — which is not the same thing as a day's name.
+ *
+ * `settings.days[].name` is DATA: it goes into the backup, `remapDays()` builds
+ * its mapping from it (pitfall 11), and my father may rename a day. So the
+ * stored string never changes language; only the drawing of it does, and only
+ * for the seven names this program itself put there. Anything else — a renamed
+ * day, a pasted one — is handed back untouched, because a translation of it
+ * would be a guess about somebody else's word.
+ */
+export function dayLabel(name: string): string {
+  return name in SHORT_DAY ? t(name) : name;
+}
+
 export function shortDay(name: string): string {
-  return SHORT_DAY[name] ?? name.slice(0, 3);
+  const known = SHORT_DAY[name];
+  return known === undefined ? name.slice(0, 3) : t(known);
 }
 
 /** 40 min lesson, 10 min break, 09:00 start, 30 min lunch -> 12th ends 19:10. */
@@ -221,6 +237,21 @@ const DEFAULT_BY_KEY = new Map(
   Object.entries(DEFAULT_SUBJECT_SHORTS).map(([name, short]) => [subjectKey(name), short]),
 );
 
+const BUILT_IN_SUBJECT = new Set(Object.keys(DEFAULT_SUBJECT_SHORTS).map(subjectKey));
+
+/**
+ * A subject's name ON SCREEN — the same split `dayLabel()` makes, for the same
+ * reason. `settings.subjects` is a list the reader edits and the backup carries;
+ * translating what is stored would mean a plan taken here arrives on my
+ * father's machine speaking English. So the built-in twenty-one are drawn in
+ * the interface language and everything he typed himself is drawn as he typed
+ * it.
+ */
+export function subjectLabel(subject: string): string {
+  const key = subjectKey(subject);
+  return BUILT_IN_SUBJECT.has(key) ? t(subject.trim()) : subject;
+}
+
 /** Override -> built-in table -> first three letters. */
 export function subjectShort(settings: Settings, subject: string): string {
   const key = subjectKey(subject);
@@ -229,16 +260,30 @@ export function subjectShort(settings: Settings, subject: string): string {
   const override = settings.subjectShorts[key];
   if (override !== undefined && override.trim() !== '') return override.trim();
 
+  // Translated, unlike the two around it: an override is what the reader typed
+  // and the three-letter slice is cut from a name they typed.
   const known = DEFAULT_BY_KEY.get(key);
-  if (known !== undefined) return known;
+  if (known !== undefined) return t(known);
 
   const head = subject.trim().slice(0, 3);
   return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
 }
 
-/** What subjectShort() would say with no override at all. */
+/**
+ * What subjectShort() would say with no override at all — IN TURKISH.
+ *
+ * Not a display value: it is the thing an override is compared against, and a
+ * comparison that moved with the interface language would decide whether to
+ * WRITE to `settings.subjectShorts` differently in two sessions of the same
+ * project. See `setSubjectShort`.
+ */
 export function defaultSubjectShort(subject: string): string {
-  return subjectShort({ subjectShorts: {} } as Settings, subject);
+  const key = subjectKey(subject);
+  if (key === '') return '';
+  const known = DEFAULT_BY_KEY.get(key);
+  if (known !== undefined) return known;
+  const head = subject.trim().slice(0, 3);
+  return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
 }
 
 /**
@@ -252,7 +297,14 @@ export function setSubjectShort(d: State, subject: string, value: string): State
 
   const next = { ...d.settings.subjectShorts };
   const trimmed = value.trim();
-  if (trimmed === '' || trimmed === defaultSubjectShort(subject)) delete next[key];
+  // Both forms clear it: the Turkish default is what the file means, and the
+  // translated one is what the reader was looking at when they typed it back.
+  // Comparing against only one of them would let an interface language decide
+  // what ends up in the backup.
+  const isDefault =
+    trimmed === defaultSubjectShort(subject) ||
+    trimmed === subjectShort({ subjectShorts: {} } as Settings, subject);
+  if (trimmed === '' || isDefault) delete next[key];
   else next[key] = trimmed;
 
   return { ...d, settings: { ...d.settings, subjectShorts: next } };

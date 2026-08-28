@@ -16,7 +16,7 @@
  */
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { applyDil, readDil, translate } from '../i18n';
+import { applyDil, readDil, setAktifDil, translate } from '../i18n';
 import type { Dil, Vars } from '../i18n';
 
 interface LangBox {
@@ -38,7 +38,15 @@ export function LangProvider({ children }: { children: ReactNode }) {
   // Read ONCE, at mount, exactly like the theme: the value is applied to
   // <html> before the first paint by main.tsx, and reading it again here would
   // invite the two to disagree.
-  const [dil, setState] = useState<Dil>(() => readDil());
+  const [dil, setState] = useState<Dil>(() => {
+    // Set the module-level language HERE rather than in an effect: the pure
+    // modules read it while this tree renders, and an effect runs after the
+    // first paint. `main.tsx` has normally done it already; a tree drawn
+    // without it — the jsdom smoke test — would otherwise speak two languages.
+    const d = readDil();
+    setAktifDil(d);
+    return d;
+  });
 
   const setDil = useCallback((next: Dil) => {
     applyDil(next);

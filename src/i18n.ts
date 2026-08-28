@@ -22,8 +22,8 @@
  *     the sentence it stands for.
  *
  * The cost is real and worth stating: editing the Turkish copy orphans its
- * translations. `i18n.test.ts` is what makes that visible — it fails when the
- * English dictionary holds a key nothing uses any more.
+ * translations. `i18n.test.ts` is what makes that visible — it fails when a
+ * dictionary holds a key nothing uses any more.
  *
  * -------------------------------------------------------------- the markup
  *
@@ -33,39 +33,59 @@
  * emphasis and `{name}` for a value, and `<T>` in `components/T.tsx` renders it.
  * The syntax is ours, the parser is ten lines, and nothing is ever handed to
  * `dangerouslySetInnerHTML`.
+ *
+ * ------------------------------------------------------------- the plurals
+ *
+ * Turkish takes no plural after a number — "4 sınıf", "1 sınıf" — which is why
+ * `entities.ts` got away with `${n} ${word}` for two years. The other four do
+ * take one, so a dictionary VALUE (never a key: keys are Turkish) may write
+ * `{n:class|classes}`: the same slot, with the two forms after a colon.
+ *
+ * Which form is picked is `Intl.PluralRules(dil).select(n) === 'one'`, not
+ * `n === 1`, and the difference is real: French puts 0 in the "one" category
+ * ("0 livre") and Spanish does not ("0 libros"). The rule ships with the
+ * browser, so it costs zero bytes and needs no network (principle 3).
+ *
+ * Two forms rather than CLDR's full set on purpose: every one of these five
+ * languages distinguishes exactly "one" from "everything else" over the range
+ * of integers this program can produce (hours, lessons, rooms, pages). The
+ * category is asked for properly; only the alternatives are two.
  */
 
-export type Dil = 'tr' | 'en';
+export type Dil = 'tr' | 'en' | 'de' | 'es' | 'fr';
 
 /** Every language this build can actually speak, in menu order. */
-export const DILLER: Dil[] = ['tr', 'en'];
+export const DILLER: Dil[] = ['tr', 'en', 'de', 'es', 'fr'];
 
 /** What each one calls ITSELF — a language menu is read by somebody who does
  *  not yet speak the language the app is currently in. */
 export const DIL_ADI: Record<Dil, string> = {
   tr: 'Türkçe',
   en: 'English',
+  de: 'Deutsch',
+  es: 'Español',
+  fr: 'Français',
 };
 
 /** Turkish on purpose: like `ders-programi`, this key is user data, not code. */
 export const LANG_KEY = 'ders-programi-dil';
 
 /**
- * The device's own answer, or Turkish.
+ * The device's own answer, or English.
  *
  * `navigator.language` is a BCP 47 tag ("tr-TR", "en-GB"), so only the primary
- * subtag is looked at. Anything this build cannot speak falls back — and the
- * fallback is Turkish rather than English while Turkish is the only complete
- * dictionary. When the other four arrive the fallback becomes English, which is
- * the decision recorded in TASKS; it is one line and it is not worth pretending
- * to have made it early.
+ * subtag is looked at. Anything this build cannot speak falls back to ENGLISH:
+ * for one round the fallback was Turkish, because Turkish was the only complete
+ * dictionary and a Greek reader was better served by a language than by a half
+ * of one. All five are complete now, so the fallback is the one the most
+ * readers have a second chance with.
  */
 export function systemDil(): Dil {
   try {
     const tag = (navigator.language ?? '').toLowerCase().split('-')[0];
-    return DILLER.find((d) => d === tag) ?? 'tr';
+    return DILLER.find((d) => d === tag) ?? 'en';
   } catch {
-    return 'tr';
+    return 'en';
   }
 }
 
@@ -88,6 +108,10 @@ export function applyDil(dil: Dil): void {
   // `lang` is not decoration: it is what a screen reader picks a voice from and
   // what the browser hyphenates by. It was hard-coded to "tr" in index.html.
   document.documentElement.setAttribute('lang', dil);
+  // The pure modules read the language from HERE and nowhere else, so setting
+  // it is part of applying it. Doing this anywhere else would let the two
+  // disagree for one render — see the note on `t()` below.
+  setAktifDil(dil);
   try {
     localStorage.setItem(LANG_KEY, dil);
   } catch {
@@ -114,8 +138,53 @@ export function sozlukOf(dil: Dil): Sozluk | undefined {
   return SOZLUKLER[dil];
 }
 
+// ------------------------------------------------------------ the language
+//
+// `constraints.ts` writes "MÇ Salı 3 saatinde müsait değil", `entities.ts`
+// writes what a deletion costs, `feasibility.ts` writes the Kontrol report.
+// None of them can call `useT()`: they are pure functions that know nothing
+// about React, and threading a `t` parameter through them would put a second
+// number-shaped argument next to `day` and `hour` (pitfall 76) and rewrite
+// every one of their unit tests for no reader-visible gain.
+//
+// So the language lives here, next to the dictionaries that were already
+// module state, and `applyDil()` — which runs before the first paint in
+// main.tsx and again inside `LangProvider.setDil` — is the only writer.
+// `setDil` applies BEFORE it sets React state, so the re-render that follows
+// already sees the new language.
+
+let aktif: Dil = 'tr';
+
+export function setAktifDil(dil: Dil): void {
+  aktif = dil;
+}
+
+export function aktifDil(): Dil {
+  return aktif;
+}
+
+/** The translator for anything that cannot reach a React context. */
+export function t(key: string, vars?: Vars): string {
+  return translate(aktif, key, vars);
+}
+
 /** Values for the `{name}` slots in a phrase. */
 export type Vars = Record<string, string | number>;
+
+// `{ad}` or `{ad:tekil|çoğul}`. One regex for both, so `slotsOf` and the
+// interpolator can never disagree about what a slot is.
+const SLOT = /\{(\w+)(?::([^{}]*))?\}/g;
+
+const RULES = new Map<Dil, Intl.PluralRules>();
+
+function isOne(dil: Dil, n: number): boolean {
+  let rule = RULES.get(dil);
+  if (rule === undefined) {
+    rule = new Intl.PluralRules(dil);
+    RULES.set(dil, rule);
+  }
+  return rule.select(n) === 'one';
+}
 
 /**
  * The translated phrase, with its slots filled.
@@ -131,12 +200,23 @@ export type Vars = Record<string, string | number>;
 export function translate(dil: Dil, key: string, vars?: Vars): string {
   const phrase = (dil === 'tr' ? undefined : SOZLUKLER[dil]?.[key]) ?? key;
   if (vars === undefined) return phrase;
-  return phrase.replace(/\{(\w+)\}/g, (whole, name: string) =>
-    name in vars ? String(vars[name]) : whole,
-  );
+  return phrase.replace(SLOT, (whole, name: string, forms: string | undefined) => {
+    if (!(name in vars)) return whole;
+    const value = vars[name]!;
+    if (forms === undefined) return String(value);
+    // A plural form asks its OWN slot for the count, not "the first number in
+    // vars": one sentence can carry two of them ("2 lessons and 6 hours").
+    const [one = '', other = ''] = forms.split('|');
+    return typeof value === 'number' && isOne(dil, value) ? one : other;
+  });
 }
 
 /** Every `{slot}` a phrase uses — for the dictionary's own test. */
 export function slotsOf(phrase: string): string[] {
-  return [...phrase.matchAll(/\{(\w+)\}/g)].map((m) => m[1]!);
+  return [...phrase.matchAll(SLOT)].map((m) => m[1]!);
+}
+
+/** Just the plural slots, so the test can say what a form is missing. */
+export function pluralSlotsOf(phrase: string): string[] {
+  return [...phrase.matchAll(SLOT)].filter((m) => m[2] !== undefined).map((m) => m[1]!);
 }

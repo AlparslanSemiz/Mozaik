@@ -15,6 +15,9 @@ import { DialogProvider } from './components/Dialogs';
 import { LangProvider } from './components/T';
 import { ToastProvider } from './components/Toasts';
 import './lang/en';
+import './lang/de';
+import './lang/es';
+import './lang/fr';
 
 export default function Root() {
   // The language is OUTERMOST: every provider below it puts words on the
