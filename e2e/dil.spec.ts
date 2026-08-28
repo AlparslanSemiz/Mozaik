@@ -16,10 +16,12 @@
 // is the one that deliberately unpins itself.
 
 import { expect, test } from './kapan';
-import { open, openSettings, FILE } from './helpers';
+import { open, openSettings, openWithSample, FILE } from './helpers';
+
+type Dil = 'tr' | 'en' | 'de' | 'es' | 'fr';
 
 /** Sets the preference the way the app itself stores it, then reloads. */
-async function chooseLang(page: import('@playwright/test').Page, dil: 'tr' | 'en') {
+async function chooseLang(page: import('@playwright/test').Page, dil: Dil) {
   await page.evaluate((d) => localStorage.setItem('ders-programi-dil', d), dil);
   await page.reload();
 }
@@ -64,6 +66,52 @@ test.describe('82. Dil', () => {
     // Nothing that looks like an untranslated identifier ever reaches a screen.
     expect(text).not.toMatch(/\b[a-z]+\.[a-z]+\.[a-z]+\b/);
     expect(text.length).toBeGreaterThan(100);
+  });
+
+  // The other three, and what is measured is NOT the size of a dictionary: it
+  // is that each one reaches the screen at all and that the tab strip is fully
+  // in it. A half-translated shell is exactly the state this round existed to
+  // leave behind.
+  test('beş dilin beşi de sekmeleri KENDİ dilinde çiziyor', async ({ page }) => {
+    await open(page);
+    const beklenen: Array<[Dil, string, string, string]> = [
+      ['en', 'School', 'Timetable', 'Settings'],
+      ['de', 'Schule', 'Stundenplan', 'Einstellungen'],
+      ['es', 'Escuela', 'Horario', 'Ajustes'],
+      ['fr', 'École', 'Emploi du temps', 'Réglages'],
+    ];
+    for (const [dil, okul, program, ayarlar] of beklenen) {
+      await chooseLang(page, dil);
+      await expect(page.locator('html')).toHaveAttribute('lang', dil);
+      for (const ad of [okul, program, ayarlar]) {
+        await expect(page.getByRole('button', { name: ad, exact: true })).toBeVisible();
+      }
+      // and no Turkish left standing in the strip
+      await expect(page.getByRole('button', { name: 'Okul', exact: true })).toHaveCount(0);
+    }
+  });
+
+  // The pure modules are the half a hook cannot reach: `constraints.ts` writes
+  // this sentence and reads the language from `i18n.ts`'s module state. If
+  // `applyDil` ever stopped setting it, the interface would change language
+  // and every one of these would stay Turkish.
+  test('SAF modüllerin cümleleri de çevriliyor — kapasite raporu', async ({ page }) => {
+    await openWithSample(page);
+    await chooseLang(page, 'en');
+    await page.getByRole('button', { name: 'Check', exact: true }).click();
+    const metin = await page.locator('.main').innerText();
+    expect(metin).toContain('available');
+    expect(metin).not.toContain('müsait');
+  });
+
+  // Turkish takes no plural after a number; the other four do, and the form is
+  // asked of Intl.PluralRules rather than guessed from n === 1.
+  test('çoğul EKRANDA doğru biçimi seçiyor', async ({ page }) => {
+    await openWithSample(page);
+    await chooseLang(page, 'en');
+    await page.getByRole('button', { name: 'School', exact: true }).click();
+    const metin = await page.locator('body').innerText();
+    expect(metin).toMatch(/\b\d+ (rooms|classes|teachers|subjects)\b/);
   });
 
   test('tercih bu MAKİNEYE ait — programın kendisine girmiyor', async ({ page }) => {
