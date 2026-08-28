@@ -19,10 +19,14 @@ import type { ReactNode } from 'react';
 import { applyDil, readDil, setAktifDil, translate } from '../i18n';
 import type { Dil, Vars } from '../i18n';
 
+/** What every caller of `useT()` gets, and what a helper below a component
+ *  takes as an argument when it needs to write a sentence. */
+export type Translate = (key: string, vars?: Vars) => string;
+
 interface LangBox {
   dil: Dil;
   setDil: (next: Dil) => void;
-  t: (key: string, vars?: Vars) => string;
+  t: Translate;
 }
 
 // The default is not a fallback anybody should reach — every tree that draws
@@ -66,7 +70,7 @@ export function useLang(): LangBox {
 }
 
 /** Just the translator, which is what almost every caller wants. */
-export function useT(): (key: string, vars?: Vars) => string {
+export function useT(): Translate {
   return useContext(Ctx).t;
 }
 

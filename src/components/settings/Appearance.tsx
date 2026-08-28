@@ -138,7 +138,7 @@ export default function Appearance({
             for it here found eight panels and no theme. Same state, two doors;
             the one in the top bar is the shortcut, this is the inventory. */}
         <div className="panel">
-          <h2>Tema</h2>
+          <h2>{t('Tema')}</h2>
           <p className="hint">
             Varsayılan <b>açık</b>, ve bu bir seçim: ızgaranın işlevsel renkleri
             (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık zeminde
@@ -147,7 +147,7 @@ export default function Appearance({
             girmez. Yazdırılan sayfa her iki durumda da <b>açık</b> palet
             kullanır: o renkler kâğıda basılıyor.
           </p>
-          <div className="form-row" role="group" aria-label="Tema">
+          <div className="form-row" role="group" aria-label={t('Tema')}>
             {THEMES.map((x) => (
               <button
                 key={x.id}
@@ -162,14 +162,14 @@ export default function Appearance({
         </div>
 
         <div className="panel">
-          <h2>Yazı büyüklüğü</h2>
+          <h2>{t('Yazı büyüklüğü')}</h2>
           <p className="hint">
-            Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve program
-            ızgarasının hücrelerini. Ayrı ayrı ayar yok, çünkü biri büyüyüp öteki yerinde
-            kalırsa ekran ferahlamaz, sıkışır.
+            {t(
+              'Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve program ızgarasının hücrelerini. Ayrı ayrı ayar yok, çünkü biri büyüyüp öteki yerinde kalırsa ekran ferahlamaz, sıkışır.',
+            )}
           </p>
 
-          <div className="form-row" role="group" aria-label="Yazı büyüklüğü">
+          <div className="form-row" role="group" aria-label={t('Yazı büyüklüğü')}>
             {STEPS.map((value) => (
               <button
                 key={value}
@@ -205,8 +205,8 @@ export default function Appearance({
             `role="group"`s with their own names, which is also how the test
             helper finds them. */}
         <div className="panel">
-          <h2>Yoğunluk</h2>
-          <h3>Izgara</h3>
+          <h2>{t('Yoğunluk')}</h2>
+          <h3>{t('Izgara')}</h3>
           <p className="hint">
             Yalnız <b>Program</b> sekmesindeki haftalık ızgarayı etkiler: bir
             hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı.
@@ -229,28 +229,22 @@ export default function Appearance({
             </li>
           </ul>
 
-          <div className="form-row" role="group" aria-label="Izgara yoğunluğu">
+          <div className="form-row" role="group" aria-label={t('Izgara yoğunluğu')}>
             <button
               className="btn"
               aria-pressed={density === 'ferah'}
               onClick={() => chooseDensity('ferah')}
-            >
-              Ferah
-            </button>
+            >{t('Ferah')}</button>
             <button
               className="btn"
               aria-pressed={density === 'rahat'}
               onClick={() => chooseDensity('rahat')}
-            >
-              Rahat
-            </button>
+            >{t('Rahat')}</button>
             <button
               className="btn"
               aria-pressed={density === 'sigdir'}
               onClick={() => chooseDensity('sigdir')}
-            >
-              Sığdır
-            </button>
+            >{t('Sığdır')}</button>
           </div>
 
           <p className="hint">
@@ -258,7 +252,7 @@ export default function Appearance({
             bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar.
           </p>
 
-          <h3>Arayüzün geri kalanı</h3>
+          <h3>{t('Arayüzün geri kalanı')}</h3>
           <p className="hint">
             Ekranın <b>geri kalanı</b>: Okul, Dersler, Kontrol ve Ayarlar’daki
             listeler, panellerin kenar boşlukları, kutuların ve düğmelerin
@@ -277,28 +271,22 @@ export default function Appearance({
             </li>
           </ul>
 
-          <div className="form-row" role="group" aria-label="Arayüz yoğunluğu">
+          <div className="form-row" role="group" aria-label={t('Arayüz yoğunluğu')}>
             <button
               className="btn"
               aria-pressed={uiDensity === 'ferah'}
               onClick={() => chooseUiDensity('ferah')}
-            >
-              Ferah
-            </button>
+            >{t('Ferah')}</button>
             <button
               className="btn"
               aria-pressed={uiDensity === 'rahat'}
               onClick={() => chooseUiDensity('rahat')}
-            >
-              Rahat
-            </button>
+            >{t('Rahat')}</button>
             <button
               className="btn"
               aria-pressed={uiDensity === 'sigdir'}
               onClick={() => chooseUiDensity('sigdir')}
-            >
-              Sığdır
-            </button>
+            >{t('Sığdır')}</button>
           </div>
         </div>
 
@@ -308,7 +296,7 @@ export default function Appearance({
             itself", which is the only thing on this screen that happens
             without being asked for. */}
         <div className="panel">
-          <h2>Araç şeridi</h2>
+          <h2>{t('Araç şeridi')}</h2>
           <p className="hint">
             Sekmelerin altındaki ikinci bar, sayfayı <b>aşağı kaydırırken
             kendiliğinden gizlenir</b> ve yukarı çıkınca geri gelir. Böylece uzun
@@ -331,7 +319,7 @@ export default function Appearance({
         </div>
 
         <div className="panel">
-          <h2>Müsaitlik çizelgesi</h2>
+          <h2>{t('Müsaitlik çizelgesi')}</h2>
           <p className="hint">
             Müsaitlik ekranındaki ders numaralarının altında <b>başlangıç saati</b>
             yazsın mı? Varsayılan <b>kapalı</b>. Sebebi yer kazanmak değil: o tablo
@@ -357,7 +345,7 @@ export default function Appearance({
 
       <aside>
         <div className="panel">
-          <h2>Örnek</h2>
+          <h2>{t('Örnek')}</h2>
           <p className="hint">
             Seçtiğiniz büyüklük bu sayfada da geçerli. Aşağıdaki satırlar{' '}
             <b>kendi öğretmenleriniz</b>, uydurma bir örnek değil. Bir ad
@@ -372,9 +360,9 @@ export default function Appearance({
             <table className="list">
               <thead>
                 <tr>
-                  <th>Öğretmen</th>
-                  <th>Branş</th>
-                  <th className="num">Saat</th>
+                  <th>{t('Öğretmen')}</th>
+                  <th>{t('Branş')}</th>
+                  <th className="num">{t('Saat')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -403,7 +391,7 @@ export default function Appearance({
         </div>
 
         <div className="panel">
-          <h2>Hareket</h2>
+          <h2>{t('Hareket')}</h2>
           <p className="hint">
             Ekranda bir şey belirirken, bir kutu açılırken ya da bir düğmeye
             basarken görülen kısa hareketler. Rahatsız ediyorsa <b>azaltın</b>{' '}
@@ -424,7 +412,7 @@ export default function Appearance({
             </li>
           </ul>
 
-          <div className="form-row" role="group" aria-label="Hareket">
+          <div className="form-row" role="group" aria-label={t('Hareket')}>
             {MOTIONS.map((m) => (
               <button
                 key={m.id}

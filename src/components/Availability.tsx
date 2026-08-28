@@ -17,12 +17,18 @@ import { buildIndex, closedConflicts, closedKey } from "../constraints";
 import type { Id, State } from "../types";
 import {
   openHours,
+  dayLabel,
   setAvailability,
   setWholeWeek,
   shortDay,
+  subjectLabel,
   weeklyLoad,
 } from "../entities";
+// The module-level `entitiesOf` cannot hold a hook, so it uses the pure
+// translator — the same one `constraints.ts` writes its sentences with.
+import { t } from '../i18n';
 import type { Kind } from "../toolState";
+import { T } from './T';
 
 interface Props {
   state: State;
@@ -54,26 +60,26 @@ interface Entity {
 
 function entitiesOf(d: State, kind: Kind): Entity[] {
   if (kind === "teacher") {
-    return d.teachers.map((t) => ({
-      id: t.id,
-      label: `${t.short} · ${t.name} (${t.subject})`,
-      short: t.short,
+    return d.teachers.map((x) => ({
+      id: x.id,
+      label: `${x.short} · ${x.name} (${subjectLabel(x.subject)})`,
+      short: x.short,
       // Name first, code in brackets: the heading already ends with an em dash
       // ("… — müsait olmayan saatler") and "MÇ — Mehmet Çelik — müsait…" put
       // three clauses on one rule. The code still shows, because the code is
       // what the grid row is labelled with.
-      full: `${t.name} (${t.short})`,
-      load: weeklyLoad(d, "teacher", t.id),
-      open: openHours(d, t.id),
-      color: t.color,
+      full: `${x.name} (${x.short})`,
+      load: weeklyLoad(d, "teacher", x.id),
+      open: openHours(d, x.id),
+      color: x.color,
     }));
   }
   if (kind === "class") {
     return d.classes.map((c) => ({
       id: c.id,
       label: c.name,
-      short: `${c.name} sınıfı`,
-      full: `${c.name} sınıfı`,
+      short: t('{ad} sınıfı', { ad: c.name }),
+      full: t('{ad} sınıfı', { ad: c.name }),
       load: weeklyLoad(d, "class", c.id),
       open: openHours(d, c.id),
       color: c.color,
@@ -82,8 +88,8 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
   return d.rooms.map((r) => ({
     id: r.id,
     label: r.name,
-    short: `${r.name} dersliği`,
-    full: `${r.name} dersliği`,
+    short: t('{ad} dersliği', { ad: r.name }),
+    full: t('{ad} dersliği', { ad: r.name }),
     load: weeklyLoad(d, "room", r.id),
     open: openHours(d, r.id),
     color: -1,
@@ -129,11 +135,13 @@ export default function Availability({
     return (
       <>
         <div className="panel">
-          <h2>Müsait olmayan saatler</h2>
+          <h2>{t('Müsait olmayan saatler')}</h2>
           <div className="empty-screen">
-            <strong>Önce {EMPTY_TEXT[kind]} ekleyin.</strong>
-            Müsaitlik girebilmek için <b>Okul</b> sekmesinden en az bir{" "}
-            {EMPTY_TEXT[kind]} eklemeniz gerekiyor.
+            <strong>{t('Önce {ne} ekleyin.', { ne: t(EMPTY_TEXT[kind]) })}</strong>
+            <T
+              k="Müsaitlik girebilmek için **Okul** sekmesinden en az bir {ne} eklemeniz gerekiyor."
+              vars={{ ne: t(EMPTY_TEXT[kind]) }}
+            />
           </div>
         </div>
       </>
@@ -217,12 +225,13 @@ export default function Availability({
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>{selected.full} · müsait olmayan saatler</h2>
+          <h2>{t('{kim} · müsait olmayan saatler', { kim: selected.full })}</h2>
 
           <p className="hint">
-            {HINT[kind]} Basılı tutup sürükleyerek birden çok hücre
-            işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı,
-            üstteki ders numarasına tıklayınca haftanın o saati değişir.
+            {t(HINT[kind])}{' '}
+            {t(
+              'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına tıklayınca haftanın o saati değişir.',
+            )}
           </p>
 
           <div className="scroll-x">
@@ -238,7 +247,7 @@ export default function Availability({
                     <th
                       key={s}
                       onClick={() => toggleHour(s)}
-                      title="Haftanın bu saatini değiştir"
+                      title={t('Haftanın bu saatini değiştir')}
                     >
                       {hour}
                       <span className="hour-clock">
@@ -253,7 +262,7 @@ export default function Availability({
                   <tr key={g}>
                     <th
                       onClick={() => toggleDay(g)}
-                      title={`${day.name}: bütün günü değiştir`}
+                      title={t('{gun}: bütün günü değiştir', { gun: dayLabel(day.name) })}
                     >
                       {shortDay(day.name)}
                     </th>
@@ -292,11 +301,12 @@ export default function Availability({
             reason the solver gets stuck, and it was only visible by clicking
             through twenty-five people one at a time. */}
         <div className="panel">
-          <h2>Haftanın darlığı</h2>
+          <h2>{t('Haftanın darlığı')}</h2>
           <p className="hint">
-            Her hücre, o saatte <b>kaç {KIND_WORD[kind]} kapalı</b> olduğunu
-            gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına
-            gelir. Program dizilirken genellikle burada tıkanılır.
+            <T
+              k="Her hücre, o saatte **kaç {ne} kapalı** olduğunu gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına gelir. Program dizilirken genellikle burada tıkanılır."
+              vars={{ ne: t(KIND_WORD[kind]) }}
+            />
           </p>
           <div className="scroll-x">
             <table className="availability heat">
@@ -336,7 +346,12 @@ export default function Availability({
                                   ).toFixed(2),
                                 } as React.CSSProperties)
                           }
-                          title={`${day.name} ${sIdx + 1}. ders: ${n} / ${list.length} kapalı`}
+                          title={t('{gun} {ders}. ders: {kapali} / {toplam} kapalı', {
+                            gun: dayLabel(day.name),
+                            ders: sIdx + 1,
+                            kapali: n,
+                            toplam: list.length,
+                          })}
                         >
                           {n === 0 ? "" : n}
                         </td>
@@ -357,12 +372,12 @@ export default function Availability({
           somebody. Here every row carries it. */}
       <aside>
         <div className="panel">
-          <h2>Kimin saatleri</h2>
+          <h2>{t('Kimin saatleri')}</h2>
 
           {/* Plain buttons with `aria-current`, the way the tabs and the setup
               steps already mark "you are here". A listbox role would be more
               precise on paper and less predictable in practice. */}
-          <div className="entity-list" aria-label="Müsaitlik listesi">
+          <div className="entity-list" aria-label={t('Müsaitlik listesi')}>
             {list.map((x) => (
               <button
                 key={x.id}
@@ -398,15 +413,11 @@ export default function Availability({
             <button
               className="btn"
               onClick={() => change((d) => setWholeWeek(d, entityId, false))}
-            >
-              Tümünü aç
-            </button>
+            >{t('Tümünü aç')}</button>
             <button
               className="btn"
               onClick={() => change((d) => setWholeWeek(d, entityId, true))}
-            >
-              Tümünü kapat
-            </button>
+            >{t('Tümünü kapat')}</button>
           </div>
 
           <p className={open < selected.load ? "error-box" : "hint"}>

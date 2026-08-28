@@ -33,6 +33,7 @@ import type { UpdateRun } from "../../update";
 import { SITE_ADRESI } from "../../update";
 import { surumEtiketi } from "../../version";
 import Plans from "./Plans";
+import { useT } from '../T';
 
 interface Props {
   state: State;
@@ -79,11 +80,12 @@ function size(chars: number): string {
  * an earlier version of this text said the opposite and was wrong.
  */
 function Folder({ folder }: { folder: FolderRun }) {
+  const t = useT();
   const s = folder.status;
 
   return (
     <div className="panel">
-      <h2>Nereye kaydedilsin</h2>
+      <h2>{t('Nereye kaydedilsin')}</h2>
 
       {s.kind === "yok" ? (
         <>
@@ -139,14 +141,10 @@ function Folder({ folder }: { folder: FolderRun }) {
                 <button
                   className="btn primary"
                   onClick={() => void folder.allow()}
-                >
-                  İzin ver
-                </button>
+                >{t('İzin ver')}</button>
               )}
               {s.kind !== "secilmedi" && (
-                <button className="btn" onClick={() => void folder.forget()}>
-                  Vazgeç
-                </button>
+                <button className="btn" onClick={() => void folder.forget()}>{t('Vazgeç')}</button>
               )}
             </div>
           )}
@@ -251,26 +249,27 @@ function Folder({ folder }: { folder: FolderRun }) {
  * three are the locators four E2E specs hang on.
  */
 function Build({ update }: { update: UpdateRun }) {
+  const t = useT();
   const adres = storageAddress();
 
   return (
     <div className="panel">
-      <h2>Sürüm ve güncelleme</h2>
+      <h2>{t('Sürüm ve güncelleme')}</h2>
       <table className="stat">
         <tbody>
           <tr>
-            <td>Sürüm</td>
+            <td>{t('Sürüm')}</td>
             <td>
               <b>{surumEtiketi()}</b>
             </td>
           </tr>
           <tr>
-            <td>Nasıl açıldı</td>
+            <td>{t('Nasıl açıldı')}</td>
             <td>{routeName()}</td>
           </tr>
           {adres !== "" && (
             <tr>
-              <td>Adres</td>
+              <td>{t('Adres')}</td>
               <td>
                 <code>{adres}</code>
               </td>
@@ -296,6 +295,7 @@ function Build({ update }: { update: UpdateRun }) {
 
 /** The site and the local install: a service worker does the work. */
 function SiteUpdate({ update }: { update: UpdateRun }) {
+  const t = useT();
   return (
     <>
       <p className="hint">
@@ -304,9 +304,7 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
         demediğiniz sürece eski sürümle çalışmaya devam edersiniz.
       </p>
       <div className="form-row">
-        <button className="btn" onClick={update.check}>
-          Güncellemeleri denetle
-        </button>
+        <button className="btn" onClick={update.check}>{t('Güncellemeleri denetle')}</button>
       </div>
       {update.ready && (
         <p className="hint" role="status">
@@ -332,6 +330,7 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
  * button.
  */
 function ExeUpdate({ update }: { update: UpdateRun }) {
+  const t = useT();
   const d = update.durum;
   const mesgul = d.ad === "bakiliyor" || d.ad === "indiriliyor";
 
@@ -345,17 +344,15 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
 
       <div className="form-row">
         <button className="btn" onClick={update.check} disabled={mesgul}>
-          Güncellemeleri denetle
+          {t(
+            'Güncellemeleri denetle',
+          )}
         </button>
         {d.ad === "var" && (
-          <button className="btn primary" onClick={update.indir}>
-            Yeni sürümü indir
-          </button>
+          <button className="btn primary" onClick={update.indir}>{t('Yeni sürümü indir')}</button>
         )}
         {d.ad === "hazir" && (
-          <button className="btn primary" onClick={update.uygula}>
-            Şimdi yeniden başlat
-          </button>
+          <button className="btn primary" onClick={update.uygula}>{t('Şimdi yeniden başlat')}</button>
         )}
       </div>
 
@@ -398,6 +395,7 @@ export default function Data({
   update,
   part,
 }: Props) {
+  const t = useT();
   const { confirm } = useDialogs();
   const loadSample = useLoadSample();
   const backups = listBackups();
@@ -499,7 +497,7 @@ export default function Data({
   // it is drawn in the plans section.
   const bundlePanel = (
     <div className="panel">
-      <h2>Bütün planlar tek dosyada</h2>
+      <h2>{t('Bütün planlar tek dosyada')}</h2>
       <p className="hint">
         Üst çubuktaki <b>Dosyaya kaydet</b> yalnızca <b>açık olan planı</b>{" "}
         yazar. Buradaki dosya <b>bütün planları</b> içerir: her planın
@@ -515,15 +513,13 @@ export default function Data({
         <button
           className="btn"
           onClick={() => bundleInput.current?.click()}
-          title="Bu bilgisayardaki bütün planların yerine dosyadakiler geçer"
-        >
-          Tümünü dosyadan aç
-        </button>
+          title={t('Bu bilgisayardaki bütün planların yerine dosyadakiler geçer')}
+        >{t('Tümünü dosyadan aç')}</button>
         <input
           ref={bundleInput}
           type="file"
           accept=".json,application/json"
-          aria-label="Bütün planları içeren dosya"
+          aria-label={t('Bütün planları içeren dosya')}
           className="hidden"
           onChange={openAll}
         />
@@ -541,14 +537,14 @@ export default function Data({
   // because it is the same noun: every plan, in one place.
   const planDataPanel = (
       <div className="panel">
-        <h2>Bu planın verisi</h2>
+        <h2>{t('Bu planın verisi')}</h2>
   
         {/* The sample school's home. It used to live only on the Kurulum
             screen, where it could only ever be reached by an EMPTY project —
             so anyone who wanted to look at it again after starting their own
             work had no way back to it. Kurulum still offers it once, on a
             first run; this is where it stays. */}
-        <h3>Örnek okul verisi</h3>
+        <h3>{t('Örnek okul verisi')}</h3>
         <p className="hint">
           25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir
           okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için.{" "}
@@ -557,14 +553,12 @@ export default function Data({
         <div className="form-row">
           <button
             className="btn"
-            title="Bu planın yerine hazır örnek okulu koyar"
+            title={t('Bu planın yerine hazır örnek okulu koyar')}
             onClick={() => void loadSample(state, change)}
-          >
-            Örnek okulu yükle
-          </button>
+          >{t('Örnek okulu yükle')}</button>
         </div>
   
-        <h3>Sıfırla</h3>
+        <h3>{t('Sıfırla')}</h3>
         <p className="hint">
           <b>Açık olan planın</b> öğretmenleri, sınıfları, derslikleri,
           dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz.{" "}
@@ -574,17 +568,15 @@ export default function Data({
           <button
             className="btn danger"
             onClick={reset}
-            title="Her şeyi siler"
-          >
-            Her şeyi sil
-          </button>
+            title={t('Her şeyi siler')}
+          >{t('Her şeyi sil')}</button>
         </div>
       </div>
   );
 
   const wherePanel = (
       <div className="panel">
-        <h2>Veriler nerede</h2>
+        <h2>{t('Veriler nerede')}</h2>
         {/* The exe changes what is TRUE here, not just the wording. On the
             three browser routes the storage below is the only copy until
             somebody saves a file, and "tarama verilerini temizle" can take
@@ -644,9 +636,9 @@ export default function Data({
         <table className="stat">
           <thead>
             <tr>
-              <th>Anahtar</th>
-              <th>Ne</th>
-              <th className="num">Yer</th>
+              <th>{t('Anahtar')}</th>
+              <th>{t('Ne')}</th>
+              <th className="num">{t('Yer')}</th>
             </tr>
           </thead>
           <tbody>
@@ -682,7 +674,7 @@ export default function Data({
 
   const backupsPanel = (
       <div className="panel">
-        <h2>Bu bilgisayardaki otomatik yedekler</h2>
+        <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
         <p className="hint">
           Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç
           oturumun durumu ayrı tutuluyor. Bunlar <b>bu bilgisayara</b> ve
@@ -691,16 +683,16 @@ export default function Data({
           kullanın.
         </p>
         {backups.length === 0 ? (
-          <p className="hint">Henüz otomatik yedek yok, bu ilk oturum.</p>
+          <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
         ) : (
           <table className="stat">
             <thead>
               <tr>
-                <th>Oturum</th>
-                <th className="num">Öğretmen</th>
-                <th className="num">Sınıf</th>
-                <th className="num">Ders</th>
-                <th className="num">Yerleşmiş saat</th>
+                <th>{t('Oturum')}</th>
+                <th className="num">{t('Öğretmen')}</th>
+                <th className="num">{t('Sınıf')}</th>
+                <th className="num">{t('Ders')}</th>
+                <th className="num">{t('Yerleşmiş saat')}</th>
               </tr>
             </thead>
             <tbody>

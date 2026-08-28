@@ -16,6 +16,7 @@
 import { paletteColor } from '../palette';
 import type { ReportRow } from '../feasibility';
 import type { Id } from '../types';
+import { useT } from './T';
 
 const BADGE: Record<ReportRow['level'], string> = {
   ok: 'ok',
@@ -48,6 +49,7 @@ export default function CapacityRows({
   /** Palette index for a row, or null where the kind has none (rooms). */
   colorOf?: ((id: Id) => number | null) | undefined;
 }) {
+  const t = useT();
   if (rows.length === 0) return <p className="hint">{empty}</p>;
   const shown = problemsFirst
     ? [...rows].sort((a, b) => RANK[a.level] - RANK[b.level] || a.name.localeCompare(b.name, 'tr'))
@@ -63,10 +65,10 @@ export default function CapacityRows({
       <table className="stat">
         <thead>
           <tr>
-            <th>Ad</th>
-            <th className="num">Açık</th>
-            <th className="num">Yük</th>
-            <th>Durum</th>
+            <th>{t('Ad')}</th>
+            <th className="num">{t('Açık')}</th>
+            <th className="num">{t('Yük')}</th>
+            <th>{t('Durum')}</th>
           </tr>
         </thead>
         <tbody>
@@ -81,7 +83,7 @@ export default function CapacityRows({
               <td>{r.capacity}</td>
               <td>{r.load}</td>
               <td>
-                <span className={`badge ${BADGE[r.level]}`}>{BADGE_TEXT[r.level]}</span>
+                <span className={`badge ${BADGE[r.level]}`}>{t(BADGE_TEXT[r.level])}</span>
               </td>
             </tr>
           ))}

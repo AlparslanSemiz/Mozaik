@@ -22,6 +22,8 @@ import {
   subjectKey,
   subjectOptions,
   subjectTeachers,
+  defaultSubjectShort,
+  subjectLabel,
 } from '../../entities';
 import type { StepId } from '../../toolState';
 
@@ -36,6 +38,7 @@ import type { Gender } from '../../types';
 /** The three values, in the order the teacher list offers them. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
 import type { State } from '../../types';
+import { T, useT } from '../T';
 
 /**
  * Colour repair, offered where the colours are CHOSEN.
@@ -59,6 +62,7 @@ function Colors({
   change: (apply: (d: State) => State) => void;
   kind: 'teacher' | 'class';
 }) {
+  const t = useT();
   const rows = kind === 'teacher' ? state.teachers : state.classes;
   if (!rows.some((x, i) => x.color !== i)) return null;
 
@@ -68,23 +72,26 @@ function Colors({
   const clashes = rows.length - new Set(rows.map((x) => x.color)).size;
   return (
     <>
-      <h3>Renkler</h3>
+      <h3>{t('Renkler')}</h3>
       {clashes > 0 ? (
         <div className="warn-box">
-          <b>
-            {clashes} {noun} başkasıyla aynı renkte.
-          </b>{' '}
-          Renk burada bir kimlik: ızgarada, havuzda ve kâğıtta okunuyor.
+          <T
+            k="**{n} {ne} başkasıyla aynı renkte.** Renk burada bir kimlik: ızgarada, havuzda ve kâğıtta okunuyor."
+            vars={{ n: clashes, ne: t(noun) }}
+          />
         </div>
       ) : (
         <p className="hint">
-          Silmelerden sonra renkler arada delik bıraktı. Yeniden dağıtmak programı
-          bozmaz, yalnızca renkleri baştan sıraya dizer.
+          {t(
+            'Silmelerden sonra renkler arada delik bıraktı. Yeniden dağıtmak programı bozmaz, yalnızca renkleri baştan sıraya dizer.',
+          )}
         </p>
       )}
       <div className="form-row">
         <button className="btn" onClick={() => change((d) => respreadColors(d, kind))}>
-          {kind === 'teacher' ? 'Öğretmen' : 'Sınıf'} renklerini yeniden dağıt ({rows.length})
+          {kind === 'teacher'
+            ? t('Öğretmen renklerini yeniden dağıt ({n})', { n: rows.length })
+            : t('Sınıf renklerini yeniden dağıt ({n})', { n: rows.length })}
         </button>
       </div>
     </>
@@ -100,6 +107,7 @@ export default function Summary({
   change: (apply: (d: State) => State) => void;
   step: SummaryView;
 }) {
+  const t = useT();
   const capacity = useMemo(() => buildCapacity(state), [state]);
 
   if (step === 'subjects') {
@@ -113,45 +121,40 @@ export default function Summary({
     const unused = options.filter((x) => subjectTeachers(state, x).length === 0);
     return (
       <div className="panel">
-        <h2>Özet</h2>
-        <h3>Hazır branşlar ({ready.length})</h3>
+        <h2>{t('Özet')}</h2>
+        <h3>{t('Hazır branşlar ({n})', { n: ready.length })}</h3>
         <p className="hint">
-          Programda gömülü olan ve okulun listesinde <b>bulunmayan</b> branşlar.
-          Kısaltmaları hazır; eklemek için tıklayın.
+          <T k="Programda gömülü olan ve okulun listesinde **bulunmayan** branşlar. Kısaltmaları hazır; eklemek için tıklayın." />
         </p>
         {ready.length === 0 ? (
-          <div className="ok-box">Gömülü tablodaki branşların hepsi listenizde.</div>
+          <div className="ok-box">{t('Gömülü tablodaki branşların hepsi listenizde.')}</div>
         ) : (
           <>
             <div className="form-row">
               <button
                 className="btn"
-                title="Gömülü tablodaki bütün branşları listeye ekler"
+                title={t('Gömülü tablodaki bütün branşları listeye ekler')}
                 onClick={() =>
                   change((d) => ready.reduce((acc, name) => addSubject(acc, name), d))
                 }
-              >
-                Hepsini ekle
-              </button>
+              >{t('Hepsini ekle')}</button>
             </div>
             <div className="stat-scroll">
               <table className="stat">
                 <tbody>
                   {ready.map((name) => (
                     <tr key={name}>
-                      <td>{name}</td>
-                      <td className="num">{DEFAULT_SUBJECT_SHORTS[name]}</td>
+                      <td>{subjectLabel(name)}</td>
+                      <td className="num">{defaultSubjectShort(name)}</td>
                       <td>
                         {/* Not "Ekle": the add form on the LEFT of this screen
                             has a button by that name, and `getByRole(name:)`
                             would then be ambiguous across the two (pitfall 49). */}
                         <button
                           className="btn"
-                          title={`${name} branşını listeye ekler`}
+                          title={t('{ad} branşını listeye ekler', { ad: subjectLabel(name) })}
                           onClick={() => change((d) => addSubject(d, name))}
-                        >
-                          Listeye ekle
-                        </button>
+                        >{t('Listeye ekle')}</button>
                       </td>
                     </tr>
                   ))}
@@ -162,8 +165,10 @@ export default function Summary({
         )}
         {unused.length > 0 && (
           <p className="hint">
-            Hiçbir öğretmende kullanılmayan {unused.length} branş var: {unused.join(', ')}.
-            Silinebilirler.
+            {t('Hiçbir öğretmende kullanılmayan {n} branş var: {hangileri}. Silinebilirler.', {
+              n: unused.length,
+              hangileri: unused.map(subjectLabel).join(', '),
+            })}
           </p>
         )}
       </div>
@@ -174,16 +179,15 @@ export default function Summary({
     const homeless = state.classes.filter((c) => c.roomId == null);
     return (
       <div className="panel">
-        <h2>Özet</h2>
-        <h3>Derslik yükü</h3>
+        <h2>{t('Özet')}</h2>
+        <h3>{t('Derslik yükü')}</h3>
         <p className="hint">
-          Aynı dersliği paylaşan sınıfların <b>toplam</b> ders saati de haftaya sığmalı.
-          En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu.
+          <T k="Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu." />
         </p>
-        <CapacityRows rows={capacity.rooms} empty="Henüz derslik yok." />
+        <CapacityRows rows={capacity.rooms} empty={t('Henüz derslik yok.')} />
         {state.rooms.length > 0 && (
           <>
-            <h3>Hangi sınıflar</h3>
+            <h3>{t('Hangi sınıflar')}</h3>
             <ul className="plain-list">
               {state.rooms.map((r) => {
                 const inside = roomClasses(state, r.id);
@@ -191,8 +195,11 @@ export default function Summary({
                   <li key={r.id}>
                     <b>{r.name}</b>:{' '}
                     {inside.length === 0
-                      ? 'sınıf yok'
-                      : `${inside.length} sınıf: ${inside.map((c) => c.name).join(', ')}`}
+                      ? t('sınıf yok')
+                      : t('{n} sınıf: {hangileri}', {
+                          n: inside.length,
+                          hangileri: inside.map((c) => c.name).join(', '),
+                        })}
                   </li>
                 );
               })}
@@ -219,15 +226,14 @@ export default function Summary({
     // number worth seeing is how many rows are still to be filled in.
     const byGender = GENDERS.map((g) => ({
       label: genderLabel(g),
-      count: state.teachers.filter((t) => t.gender === g).length,
+      count: state.teachers.filter((x) => x.gender === g).length,
     })).filter((x) => x.count > 0);
     return (
       <div className="panel">
-        <h2>Özet</h2>
-        <h3>Öğretmen yükü</h3>
+        <h2>{t('Özet')}</h2>
+        <h3>{t('Öğretmen yükü')}</h3>
         <p className="hint">
-          Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz. Müsait saatler{' '}
-          <b>Müsaitlik</b> sekmesinde daralır.
+          <T k="Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz. Müsait saatler **Müsaitlik** sekmesinde daralır." />
         </p>
         {/* Above the table, not below it: under twenty-five rows this line is
             a screen away from the heading it belongs to. */}
@@ -241,14 +247,17 @@ export default function Summary({
             ))}
           </p>
         )}
-        <CapacityRows rows={capacity.teachers} empty="Henüz öğretmen yok." />
+        <CapacityRows rows={capacity.teachers} empty={t('Henüz öğretmen yok.')} />
         {subjects.length > 0 && (
           <>
-            <h3>Branşlar ({subjects.length})</h3>
+            <h3>{t('Branşlar ({n})', { n: subjects.length })}</h3>
             <ul className="plain-list">
               {subjects.map((name) => (
                 <li key={name}>
-                  <b>{name}</b>: {subjectTeachers(state, name).length} öğretmen
+                  <T
+                    k="**{ad}**: {n} öğretmen"
+                    vars={{ ad: subjectLabel(name), n: subjectTeachers(state, name).length }}
+                  />
                 </li>
               ))}
             </ul>
@@ -265,27 +274,35 @@ export default function Summary({
     const weekly = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
     return (
       <div className="panel">
-        <h2>Özet</h2>
-        <h3>Sınıf yükü</h3>
+        <h2>{t('Özet')}</h2>
+        <h3>{t('Sınıf yükü')}</h3>
         <p className="hint">
-          Sınıfa yüklenen toplam ders saati, sınıfın <b>açık</b> olduğu saatlere sığmalı.
+          <T k="Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı." />
         </p>
-        <CapacityRows rows={capacity.classes} empty="Henüz sınıf yok." />
+        <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} />
         {/* Both of these outlived the "Kurulum durumu" panel they used to sit
             in. The first is the only warning that a class was created and then
             forgotten; the second is the one number that decides whether any of
             this can be laid out at all. */}
         {noLesson.length > 0 && (
           <div className="warn-box">
-            <b>{noLesson.length} sınıfın hiç dersi yok</b> (
-            {noLesson.map((c) => c.name).join(', ')}).
+            <T
+              k="**{n} sınıfın hiç dersi yok** ({hangileri})."
+              vars={{ n: noLesson.length, hangileri: noLesson.map((c) => c.name).join(', ') }}
+            />
           </div>
         )}
         {state.classes.length > 0 && (
           <p className="hint">
-            Haftada sınıf başına <b>{slots}</b> saat var ({state.settings.days.length} gün ×{' '}
-            {state.settings.hours.length} ders). Girilen toplam ders yükü <b>{weekly}</b> saat.
-            Gün ve saat sayısı <b>Ayarlar → Zil ve günler</b>'de.
+            <T
+              k="Haftada sınıf başına **{yer}** saat var ({gun} gün × {ders} ders). Girilen toplam ders yükü **{yuk}** saat. Gün ve saat sayısı **Ayarlar → Zil ve günler**'de."
+              vars={{
+                yer: slots,
+                gun: state.settings.days.length,
+                ders: state.settings.hours.length,
+                yuk: weekly,
+              }}
+            />
           </p>
         )}
         <Colors state={state} change={change} kind="class" />
@@ -297,25 +314,29 @@ export default function Summary({
     (c) => !state.lessons.some((x) => x.classId === c.id),
   );
   const idleTeachers = state.teachers.filter(
-    (t) => !state.lessons.some((x) => x.teacherId === t.id),
+    (x) => !state.lessons.some((l) => l.teacherId === x.id),
   );
   return (
     <div className="panel">
-      <h2>Özet</h2>
-      <h3>Ders yükü</h3>
+      <h2>{t('Özet')}</h2>
+      <h3>{t('Ders yükü')}</h3>
       <p className="hint">
-        Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı
-        girdikçe artar; <b>Yük</b> <b>Açık</b>'ı geçerse o sınıfın haftası tutmaz.
+        <T k="Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı girdikçe artar; **Yük** **Açık**'ı geçerse o sınıfın haftası tutmaz." />
       </p>
-      <CapacityRows rows={capacity.classes} empty="Henüz sınıf yok." />
+      <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} />
       {noLesson.length > 0 && (
         <div className="warn-box">
-          <b>{noLesson.length} sınıfın hiç dersi yok</b> ({noLesson.map((c) => c.name).join(', ')}).
+          <T
+            k="**{n} sınıfın hiç dersi yok** ({hangileri})."
+            vars={{ n: noLesson.length, hangileri: noLesson.map((c) => c.name).join(', ') }}
+          />
         </div>
       )}
       {idleTeachers.length > 0 && (
         <p className="hint">
-          Hiç dersi olmayan öğretmen: {idleTeachers.map((t) => t.short).join(', ')}.
+          {t('Hiç dersi olmayan öğretmen: {kimler}.', {
+            kimler: idleTeachers.map((x) => x.short).join(', '),
+          })}
         </p>
       )}
     </div>

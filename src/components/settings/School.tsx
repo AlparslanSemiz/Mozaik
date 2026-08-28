@@ -9,8 +9,10 @@ import type { Day } from '../../types';
 import { WEEK, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import Field from '../Field';
 import type { PanelProps } from '../props';
+import { useT } from '../T';
 
 export default function School({ state, change }: PanelProps) {
+  const t = useT();
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
@@ -72,7 +74,7 @@ export default function School({ state, change }: PanelProps) {
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>Zil ve günler</h2>
+          <h2>{t('Zil ve günler')}</h2>
           {/* The description comes before the control it describes — this panel
               was the one place in the app where it did not, and the sentence
               about days sat between the school-name field and the day table as
@@ -92,7 +94,7 @@ export default function School({ state, change }: PanelProps) {
                 type="text"
                 className="grow"
                 defaultValue={state.settings.schoolName}
-                placeholder="örn. Semiz Kurs"
+                placeholder={t('örn. Semiz Kurs')}
                 onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
               />
             </Field>
@@ -102,8 +104,8 @@ export default function School({ state, change }: PanelProps) {
             <thead>
               <tr>
                 <th className="w-col-xs" />
-                <th>Gün</th>
-                <th className="w-col-2xl">Öğle arası</th>
+                <th>{t('Gün')}</th>
+                <th className="w-col-2xl">{t('Öğle arası')}</th>
               </tr>
             </thead>
             <tbody>
@@ -122,14 +124,14 @@ export default function School({ state, change }: PanelProps) {
                     <td>{name}</td>
                     <td>
                       {day === undefined ? (
-                        <span className="hint">ders yok</span>
+                        <span className="hint">{t('ders yok')}</span>
                       ) : (
                         <select
                           value={day.longBreakAfter}
                           aria-label={`${name} öğle arası`}
                           onChange={(e) => setLongBreak(name, Number(e.target.value))}
                         >
-                          <option value={0}>Uzun ara yok</option>
+                          <option value={0}>{t('Uzun ara yok')}</option>
                           {state.settings.hours.map((_, i) => (
                             <option key={i} value={i + 1}>
                               {i + 1}. dersten sonra
@@ -151,10 +153,11 @@ export default function School({ state, change }: PanelProps) {
         </div>
 
         <div className="panel">
-          <h2>Ders saatleri</h2>
+          <h2>{t('Ders saatleri')}</h2>
           <p className="hint">
-            Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan
-            hesaplanır, tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.
+            {t(
+              'Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan hesaplanır, tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.',
+            )}
           </p>
           <div className="form-row">
             <Field label="Günlük ders sayısı">
@@ -174,10 +177,10 @@ export default function School({ state, change }: PanelProps) {
                 start at 00:00 with nothing to say so. There is no empty value to
                 pick here. */}
             <div className="field">
-              <span className="field-label">İlk ders başlangıcı</span>
+              <span className="field-label">{t('İlk ders başlangıcı')}</span>
               <span className="clock-pick">
                 <select
-                  aria-label="Başlangıç saati"
+                  aria-label={t('Başlangıç saati')}
                   value={startAt.hour}
                   onChange={(e) => setStart(Number(e.target.value), startAt.minute)}
                 >
@@ -189,7 +192,7 @@ export default function School({ state, change }: PanelProps) {
                 </select>
                 <b>:</b>
                 <select
-                  aria-label="Başlangıç dakikası"
+                  aria-label={t('Başlangıç dakikası')}
                   value={startAt.minute}
                   onChange={(e) => setStart(startAt.hour, Number(e.target.value))}
                 >
@@ -255,18 +258,18 @@ export default function School({ state, change }: PanelProps) {
           are still being typed. */}
       <aside>
         <div className="panel">
-          <h2>Zil saatleri</h2>
+          <h2>{t('Zil saatleri')}</h2>
           <p className="hint">
-            Soldaki başlangıç saatinden ve üç süreden hesaplanır, tek tek saklanmaz. Öğle
-            arası hafta içi ve hafta sonu farklı derse denk geldiği için her desen kendi
-            sütununda.
+            {t(
+              'Soldaki başlangıç saatinden ve üç süreden hesaplanır, tek tek saklanmaz. Öğle arası hafta içi ve hafta sonu farklı derse denk geldiği için her desen kendi sütununda.',
+            )}
           </p>
 
           {patterns.length > 0 && (
             <table className="list bell-preview">
               <thead>
                 <tr>
-                  <th className="w-col-xs">Ders</th>
+                  <th className="w-col-xs">{t('Ders')}</th>
                   {patterns.map((p) => (
                     <th key={p.after}>{p.dayNames}</th>
                   ))}
@@ -288,7 +291,7 @@ export default function School({ state, change }: PanelProps) {
                   ...(patterns.some((p) => p.after === i + 1)
                     ? [
                         <tr key={`break-${i}`} className="break-row">
-                          <th>Ara</th>
+                          <th>{t('Ara')}</th>
                           {patterns.map((p) => (
                             <td key={p.after}>
                               {p.after === i + 1
@@ -301,7 +304,7 @@ export default function School({ state, change }: PanelProps) {
                     : []),
                 ])}
                 <tr>
-                  <th>Bitiş</th>
+                  <th>{t('Bitiş')}</th>
                   {patterns.map((p) => (
                     <td key={p.after}>
                       <b>{p.periods[p.periods.length - 1]?.end ?? ''}</b>

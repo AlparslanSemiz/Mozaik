@@ -36,6 +36,7 @@ import {
   deletionQuestion,
   hasTwoSubjects,
   lessonSubject,
+  subjectLabel,
   subjectKey,
   subjectOptions,
   subjectRank,
@@ -49,6 +50,7 @@ import LimitBox from '../LimitBox';
 import Paste from '../setup/Paste';
 import Summary from '../setup/Summary';
 import Field from '../Field';
+import { T, useT } from '../T';
 
 interface Props {
   state: State;
@@ -94,6 +96,7 @@ function SplitPick({
 }
 
 export default function Lessons({ state, change, mode, focus, setFocus }: Props) {
+  const t = useT();
   const { confirm, alert } = useDialogs();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -136,23 +139,23 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         // school's own order (Ayarlar > Branşlar), not the alphabet.
         {
           id: 'brans',
-          label: 'Branş',
-          of: (x) => lessonSubject(state, x),
+          label: t('Branş'),
+          of: (x) => subjectLabel(lessonSubject(state, x)),
           order: (name) => rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER,
         },
-        { id: 'ogretmen', label: 'Öğretmen', of: (x) => tch(x)?.short ?? '' },
-        { id: 'sinif', label: 'Sınıf', of: (x) => cls(x)?.name ?? '' },
+        { id: 'ogretmen', label: t('Öğretmen'), of: (x) => tch(x)?.short ?? '' },
+        { id: 'sinif', label: t('Sınıf'), of: (x) => cls(x)?.name ?? '' },
       ],
       sorts: [
-        { id: 'sinif', label: 'Sınıfa göre', cmp: (a, b) =>
+        { id: 'sinif', label: t('Sınıfa göre'), cmp: (a, b) =>
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') ||
             compareTr(tch(a)?.short ?? '', tch(b)?.short ?? '') },
-        { id: 'ogretmen', label: 'Öğretmene göre', cmp: (a, b) =>
+        { id: 'ogretmen', label: t('Öğretmene göre'), cmp: (a, b) =>
             compareTr(tch(a)?.name ?? '', tch(b)?.name ?? '') ||
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') },
-        { id: 'saat', label: 'Haftalık saate göre (çok → az)', cmp:
+        { id: 'saat', label: t('Haftalık saate göre (çok → az)'), cmp:
             byNumberThen((x) => x.weeklyHours, (x) => cls(x)?.name ?? '') },
-        { id: 'blok', label: 'İkili blok sayısına göre (çok → az)', cmp:
+        { id: 'blok', label: t('İkili blok sayısına göre (çok → az)'), cmp:
             byNumberThen((x) => x.pairs, (x) => cls(x)?.name ?? '') },
       ],
     };
@@ -316,13 +319,17 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // The hours come from `weeklyLoad`, the same function the picker rows and
   // the strip's Toplam read — one number, one source.
   const scopeHours = scope.reduce((n, l) => n + l.weeklyHours, 0);
-  const counted = `${scope.length} ders · ${scopeHours} saat`;
+  const counted = t('{ders} ders · {saat} saat', { ders: scope.length, saat: scopeHours });
   const heading =
     mode === 'all' || focused === undefined
-      ? `Dersler · ${counted}`
+      ? t('Dersler · {sayilar}', { sayilar: counted })
       : mode === 'teacher' && focusedSubjects !== ''
-        ? `${focused.name} · ${focusedSubjects} dersleri · ${counted}`
-        : `${focused.name} dersleri · ${counted}`;
+        ? t('{kim} · {brans} dersleri · {sayilar}', {
+            kim: focused.name,
+            brans: focusedSubjects,
+            sayilar: counted,
+          })
+        : t('{kim} dersleri · {sayilar}', { kim: focused.name, sayilar: counted });
 
   const panel = (
     <div className="panel step-panel">
@@ -332,28 +339,22 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             are filled in every time, and opening it broke the row in half. */}
         <div className="panel-head">
           <h2>{heading}</h2>
-          <button className="btn" onClick={() => setPasteOpen(true)}>
-            Excel'den yapıştır
-          </button>
+          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
         </div>
         <p className="hint">
-          Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen
-          iki branş veriyorsa dersin hangi branştan olduğu da seçilir.{' '}
-          <b>Dağılım</b>, o saatlerin haftaya nasıl bölüneceğidir: <b>2+1</b> demek bir
-          gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2
-          saattir. <b>Günde ↑</b> bu dersin bir günde en fazla kaç saat olabileceğidir;
-          boşsa Ayarlar → Kurallar'daki sayı geçerli olur.
+          <T k="Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen iki branş veriyorsa dersin hangi branştan olduğu da seçilir. **Dağılım**, o saatlerin haftaya nasıl bölüneceğidir: **2+1** demek bir gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2 saattir. **Günde ↑** bu dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki sayı geçerli olur." />
         </p>
 
         {(state.classes.length === 0 || state.teachers.length === 0) && (
           <div className="warn-box">
-            Ders eklemek için önce <b>Okul</b> sekmesinde en az bir öğretmen ve
-            bir sınıf girin.
+            <T k="Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin." />
           </div>
         )}
 
         {mode !== 'all' && focused === undefined && state.classes.length > 0 && (
-          <div className="warn-box">Önce sağdaki listeden bir {modeNoun} seçin.</div>
+          <div className="warn-box">
+            {t('Önce sağdaki listeden bir {ne} seçin.', { ne: t(modeNoun) })}
+          </div>
         )}
 
         {/* Enter adds, the way it already does on the Derslikler step: a form
@@ -370,11 +371,11 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         >
           {mode !== 'class' && (
             <select
-              aria-label="Sınıf"
+              aria-label={t('Sınıf')}
               value={newLesson.classId}
               onChange={(e) => setNewLesson({ ...newLesson, classId: e.target.value })}
             >
-              <option value="">Sınıf seçin</option>
+              <option value="">{t('Sınıf seçin')}</option>
               {state.classes.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -401,16 +402,16 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
               and `chooseTeacher` keep the two boxes agreeing, `add()` writes
               `second`. */}
           {askSubject && (
-            <Field label="Branş">
+            <Field label={t('Branş')}>
               <select
-                aria-label="Branş"
+                aria-label={t('Branş')}
                 value={subjectValue}
                 onChange={(e) => chooseSubject(e.target.value)}
               >
-                {mode !== 'teacher' && <option value="">Tüm branşlar</option>}
+                {mode !== 'teacher' && <option value="">{t('Tüm branşlar')}</option>}
                 {subjectPool.map((name) => (
                   <option key={name} value={name}>
-                    {name}
+                    {subjectLabel(name)}
                   </option>
                 ))}
               </select>
@@ -418,26 +419,29 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           )}
           {mode !== 'teacher' && (
             <select
-              aria-label="Öğretmen"
+              aria-label={t('Öğretmen')}
               value={newLesson.teacherId}
               onChange={(e) => chooseTeacher(e.target.value)}
             >
               <option value="">
                 {newLesson.subject === ''
-                  ? 'Öğretmen seçin'
-                  : `${newLesson.subject}: ${teacherPool.length} öğretmen`}
+                  ? t('Öğretmen seçin')
+                  : t('{brans}: {n} öğretmen', {
+                      brans: subjectLabel(newLesson.subject),
+                      n: teacherPool.length,
+                    })}
               </option>
               {/* BOTH subjects, not just the first. The list printed `t.subject`
                   alone, so a teacher's second branch was invisible in the one
                   place a lesson is given one. */}
-              {teacherPool.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.short} · {teacherSubjects(t).join(' / ')}
+              {teacherPool.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {x.short} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
                 </option>
               ))}
             </select>
           )}
-          <Field label="Haftalık saat">
+          <Field label={t('Haftalık saat')}>
             <input
               type="number"
               min={1}
@@ -447,28 +451,29 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
               onChange={(e) => setNewLesson({ ...newLesson, hours: e.target.value })}
             />
           </Field>
-          <Field label="Dağılım">
+          <Field label={t('Dağılım')}>
             <SplitPick
               options={newSplits}
               value={newPairs}
               onPick={(pairs) => setNewLesson({ ...newLesson, pairs: String(pairs) })}
             />
           </Field>
-          <button className="btn" disabled={!canAdd} onClick={add}>
-            Ekle
-          </button>
+          <button className="btn" disabled={!canAdd} onClick={add}>{t('Ekle')}</button>
         </div>
 
         <Paste
           open={pasteOpen}
           close={() => setPasteOpen(false)}
-          title="Dersleri yapıştır"
-          example="Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 veya 2)"
+          title={t('Dersleri yapıştır')}
+          example={t('Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 veya 2)')}
           parse={parseLessons}
           rowText={(x) =>
-            `${x.className} · ${x.teacher}: ${x.weeklyHours} saat (${patternLabel(
-              blockPlan(x),
-            )})`
+            t('{sinif} · {kim}: {saat} saat ({dagilim})', {
+              sinif: x.className,
+              kim: x.teacher,
+              saat: x.weeklyHours,
+              dagilim: patternLabel(blockPlan(x)),
+            })
           }
           onAdd={(rows) => {
             // The report is computed OUTSIDE the reducer. It used to be raised
@@ -482,17 +487,17 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             change((d) => addLessonsFromRows(d, rows).state);
             if (missing.length > 0) {
               void alert({
-                title: `${missing.length} satır eklenemedi`,
+                title: t('{n} satır eklenemedi', { n: missing.length }),
                 tone: 'warn',
                 body: (
                   <>
-                    <p>Sınıf veya öğretmen bulunamadı:</p>
+                    <p>{t('Sınıf veya öğretmen bulunamadı:')}</p>
                     <ul className="choice-list">
                       {missing.map((row) => (
                         <li key={row}>{row}</li>
                       ))}
                     </ul>
-                    <p>Önce onları ekleyip tekrar deneyin.</p>
+                    <p>{t('Önce onları ekleyip tekrar deneyin.')}</p>
                   </>
                 ),
               });
@@ -513,7 +518,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         )}
 
         {scope.length > 0 && shown.length === 0 && (
-          <p className="hint">Bu aramaya uyan ders yok.</p>
+          <p className="hint">{t('Bu aramaya uyan ders yok.')}</p>
         )}
 
         {scope.length === 0 && state.lessons.length > 0 && mode !== 'all' && (
@@ -533,12 +538,14 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             <thead>
               <tr>
                 {order.head}
-                <th>Sınıf</th>
-                <th>Öğretmen</th>
-                <th className="w-col-lg">Haftalık saat</th>
-                <th className="w-col-lg">Dağılım</th>
-                <th className="w-col-md" title="Bu ders bir günde en fazla kaç saat">
-                  Günde ↑
+                <th>{t('Sınıf')}</th>
+                <th>{t('Öğretmen')}</th>
+                <th className="w-col-lg">{t('Haftalık saat')}</th>
+                <th className="w-col-lg">{t('Dağılım')}</th>
+                <th className="w-col-md" title={t('Bu ders bir günde en fazla kaç saat')}>
+                  {t(
+                    'Günde ↑',
+                  )}
                 </th>
                 <th className="w-col-md" />
               </tr>
@@ -571,7 +578,10 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                       {teacher !== undefined && hasTwoSubjects(teacher) ? (
                         <select
                           className="text-sm"
-                          aria-label={`${group?.name ?? '?'} · ${teacher.short} dersinin branşı`}
+                          aria-label={t('{sinif} · {kim} dersinin branşı', {
+                            sinif: group?.name ?? '?',
+                            kim: teacher.short,
+                          })}
                           value={x.second ? '1' : '0'}
                           onChange={(e) =>
                             change((d) =>
@@ -581,12 +591,12 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                         >
                           {teacherSubjects(teacher).map((name, i) => (
                             <option key={name} value={i === 0 ? '0' : '1'}>
-                              {name}
+                              {subjectLabel(name)}
                             </option>
                           ))}
                         </select>
                       ) : (
-                        <>· {lessonSubject(state, x)}</>
+                        <>· {subjectLabel(lessonSubject(state, x))}</>
                       )}
                     </td>
                     <td>
@@ -609,7 +619,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                       <SplitPick
                         options={patternOptions(x.weeklyHours)}
                         value={x.pairs}
-                        title="Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar"
+                        title={t('Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar')}
                         onPick={(pairs) => change((d) => updateLesson(d, x.id, { pairs }))}
                       />
                     </td>
@@ -617,7 +627,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                       <LimitBox
                         value={x.maxPerDay}
                         fallback={state.settings.limits.maxSameLessonPerDay}
-                        title="Bu ders bir günde en fazla kaç saat"
+                        title={t('Bu ders bir günde en fazla kaç saat')}
                         onSet={(v) => change((d) => updateLesson(d, x.id, { maxPerDay: v }))}
                       />
                     </td>
@@ -638,9 +648,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                               return;
                             change((d) => deleteLesson(d, x.id));
                           }}
-                        >
-                          Sil
-                        </button>
+                        >{t('Sil')}</button>
                       </div>
                     </td>
                   </tr>
@@ -678,12 +686,17 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           <Summary state={state} change={change} step="lessons" />
         ) : (
           <div className="panel">
-            <h2>{mode === 'teacher' ? 'Hangi öğretmen' : 'Hangi sınıf'}</h2>
+            <h2>{mode === 'teacher' ? t('Hangi öğretmen') : t('Hangi sınıf')}</h2>
+            {/* Two whole sentences rather than one with a noun slot: Turkish
+                suffixes the noun ("o sınıfa"), so a shared sentence would have
+                to glue a case ending onto a translated word — which is the one
+                thing this dictionary cannot do. */}
             <p className="hint">
-              Seçtiğiniz {modeNoun} için ders girin. Soldaki liste de o {modeNoun}a
-              daralır.
+              {mode === 'teacher'
+                ? t('Seçtiğiniz öğretmen için ders girin. Soldaki liste de o öğretmene daralır.')
+                : t('Seçtiğiniz sınıf için ders girin. Soldaki liste de o sınıfa daralır.')}
             </p>
-            <div className="entity-list" aria-label="Ders listesi">
+            <div className="entity-list" aria-label={t('Ders listesi')}>
               {picking.map((x) => {
                 const count = state.lessons.filter((l) =>
                   mode === 'teacher' ? l.teacherId === x.id : l.classId === x.id,

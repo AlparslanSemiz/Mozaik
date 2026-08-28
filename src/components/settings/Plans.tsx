@@ -17,6 +17,7 @@ import { loadPlan } from '../../store';
 import type { State } from '../../types';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
+import { useT } from '../T';
 
 interface Props {
   state: State;
@@ -34,6 +35,7 @@ function summary(state: State) {
 }
 
 export default function Plans({ state, plans }: Props) {
+  const t = useT();
   const { confirm } = useDialogs();
   const { library, planId } = plans;
 
@@ -91,7 +93,7 @@ export default function Plans({ state, plans }: Props) {
       {/* The way to ADD one comes before the list of what there is — the rule
           every setup step already follows, and the only panel in the app that
           had it the other way round. */}
-      <h3>Yeni plan</h3>
+      <h3>{t('Yeni plan')}</h3>
       <p className="hint">
         Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır.{' '}
         <b>Geri al</b> geçmişi her plan geçişinde sıfırlanır, çünkü bir planın hamlesi
@@ -99,37 +101,33 @@ export default function Plans({ state, plans }: Props) {
       </p>
       <div className="form-row">
         <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
-          Boş plan
+          {t(
+            'Boş plan',
+          )}
         </button>
         <button
           className="btn"
           onClick={() => plans.createPlan(`${active?.name ?? 'Plan'} kopyası`, state)}
-        >
-          Bu planın kopyası
-        </button>
+        >{t('Bu planın kopyası')}</button>
         <button
           className="btn"
-          title="Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır"
+          title={t('Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır')}
           onClick={() =>
             plans.createPlan(`${active?.name ?? 'Plan'} taslağı`, { ...state, placements: {} }, true)
           }
-        >
-          Taslak olarak kaydet
-        </button>
+        >{t('Taslak olarak kaydet')}</button>
       </div>
 
       <table className="list">
         <thead>
           <tr>
-            <th>Plan</th>
-            <th className="w-col-xs">Taslak</th>
+            <th>{t('Plan')}</th>
+            <th className="w-col-xs">{t('Taslak')}</th>
             {/* One glanceable line instead of three number columns: the name
                 column was collapsing to nothing and "1. plan" did not fit in
                 its own box. */}
-            <th>İçerik</th>
-            <th className="num">
-              Yerleşmiş saat
-            </th>
+            <th>{t('İçerik')}</th>
+            <th className="num">{t('Yerleşmiş saat')}</th>
             <th className="w-col-xl" />
           </tr>
         </thead>
@@ -146,9 +144,9 @@ export default function Plans({ state, plans }: Props) {
                   defaultValue={plan.name}
                   onBlur={(e) => plans.renamePlan(plan.id, e.target.value)}
                 />
-                {plan.id === planId && <span className="hint"> · açık olan</span>}
+                {plan.id === planId && <span className="hint">{t('· açık olan')}</span>}
                 {missing && (
-                  <span className="hint" title="Bu planın verisi bulunamadı">
+                  <span className="hint" title={t('Bu planın verisi bulunamadı')}>
                     {' '}
                     · verisi yok
                   </span>
@@ -172,9 +170,7 @@ export default function Plans({ state, plans }: Props) {
                     className="btn"
                     disabled={plan.id === planId}
                     onClick={() => plans.switchPlan(plan.id)}
-                  >
-                    Bu plana geç
-                  </button>
+                  >{t('Bu plana geç')}</button>
                   <button
                     className="btn danger"
                     disabled={library.plans.length <= 1}
@@ -184,9 +180,7 @@ export default function Plans({ state, plans }: Props) {
                         : 'Bu planı tamamen siler'
                     }
                     onClick={() => remove(plan.id, plan.name)}
-                  >
-                    Sil
-                  </button>
+                  >{t('Sil')}</button>
                 </div>
               </td>
             </tr>
@@ -196,7 +190,7 @@ export default function Plans({ state, plans }: Props) {
 
       {draftList.length > 0 && (
         <>
-          <h3>Taslaktan başla</h3>
+          <h3>{t('Taslaktan başla')}</h3>
           <p className="hint">
             Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır;
             <b> dizilmiş program boş gelir</b>. Taslağın kendisi değişmez.

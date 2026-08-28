@@ -51,7 +51,7 @@ export default function ListTools<T>({
             type="text"
             className="search-box"
             value={query.text}
-            aria-label={`${noun} ara`}
+            aria-label={t('{ne} ara', { ne: t(noun) })}
             placeholder={t('Ara…')}
             onChange={(e) => setQuery({ ...query, text: e.target.value })}
           />
@@ -141,13 +141,9 @@ export default function ListTools<T>({
 
         <span className="list-count" aria-live="polite">
           {filtering ? (
-            <>
-              <b>{shown}</b> / {items.length} {noun}
-            </>
+            <T k="**{gorunen}** / {toplam} {ne}" vars={{ gorunen: shown, toplam: items.length, ne: t(noun) }} />
           ) : (
-            <>
-              {items.length} {noun}
-            </>
+            t('{toplam} {ne}', { toplam: items.length, ne: t(noun) })
           )}
         </span>
 

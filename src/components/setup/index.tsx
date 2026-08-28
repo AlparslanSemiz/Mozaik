@@ -29,6 +29,7 @@ import type { PanelProps, PlanControls } from '../props';
 import type { StepId } from '../../toolState';
 import { STEPS } from '../steps';
 import DraftStart from '../DraftStart';
+import { T, useT } from '../T';
 
 /**
  * The three lists' label, count and symbol live in `components/steps.tsx` — one
@@ -52,6 +53,7 @@ interface Props extends PanelProps {
 }
 
 export default function Setup({ state, change, plans, step }: Props) {
+  const t = useT();
   const notify = useToast();
   const loadSample = useLoadSample();
   // Read once on mount: `markIntroSeen()` writes to localStorage, and a
@@ -86,14 +88,9 @@ export default function Setup({ state, change, plans, step }: Props) {
           do first" has to be answered. */}
       {state.teachers.length === 0 && state.classes.length === 0 && (
         <div className="panel">
-          <h2>Başlarken</h2>
+          <h2>{t('Başlarken')}</h2>
           <p className="hint">
-            Yukarıdaki adımları sırayla doldurun: önce <b>derslikler</b> ve{' '}
-            <b>branşlar</b>, sonra <b>öğretmenler</b> ve <b>sınıflar</b>, en son her sınıfın{' '}
-            <b>dersleri</b>.
-            Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini
-            kullanın, tek tek girmekten çok daha hızlıdır. Okulun günleri, zil saatleri
-            ve kuralları <b>Ayarlar</b> sekmesinde.
+            <T k="Yukarıdaki adımları sırayla doldurun: önce **derslikler** ve **branşlar**, sonra **öğretmenler** ve **sınıflar**, en son her sınıfın **dersleri**. Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini kullanın, tek tek girmekten çok daha hızlıdır. Okulun günleri, zil saatleri ve kuralları **Ayarlar** sekmesinde." />
           </p>
           {/* Once, on a first run, and then never here again — its home is
               Ayarlar → Veri. It used to be a permanent button on this screen
@@ -104,40 +101,33 @@ export default function Setup({ state, change, plans, step }: Props) {
           {!introSeen && (
             <p className="hint intro-line">
               <Info size={16} strokeWidth={2} aria-hidden="true" focusable="false" />
-              Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.
+              {t('Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.')}
               <button
                 className="btn"
                 onClick={async () => {
                   if (await loadSample(state, change)) setIntroSeen(true);
                 }}
-              >
-                Örnek veriyle doldur
-              </button>
+              >{t('Örnek veriyle doldur')}</button>
               <button
                 className="btn quiet"
-                title="Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder"
+                title={t('Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder')}
                 onClick={() => {
                   markIntroSeen();
                   setIntroSeen(true);
                 }}
-              >
-                Bir daha gösterme
-              </button>
+              >{t('Bir daha gösterme')}</button>
             </p>
           )}
 
           {templates.length > 0 && (
             <>
-              <h3>Taslaktan başla</h3>
+              <h3>{t('Taslaktan başla')}</h3>
               <p className="hint">
-                Daha önce <b>taslak</b> olarak işaretlediğiniz planların kurulumu hazır
-                duruyor. Seçtiğinizden <b>yeni bir plan</b> açılır: derslikler,
-                öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir.
-                Taslağın kendisi değişmez.
+                <T k="Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez." />
               </p>
               <DraftStart
                 plans={plans}
-                label={(name) => `${name} ile başla`}
+                label={(name) => t('{ad} ile başla', { ad: name })}
                 notify={notify}
               />
             </>

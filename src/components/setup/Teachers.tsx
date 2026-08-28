@@ -25,6 +25,7 @@ import {
   makeShort,
   setTeacherLimit,
   subjectKey,
+  subjectLabel,
   subjectOptions,
   subjectRank,
   teacherRank,
@@ -35,6 +36,7 @@ import {
 import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
+import { T, useT } from '../T';
 
 /** Sentinel option value: picking it opens a box instead of setting a subject. */
 const NEW = '\u0000yeni';
@@ -43,6 +45,7 @@ const NEW = '\u0000yeni';
 const GENDERS: Gender[] = ['', 'k', 'e'];
 
 export default function Teachers({ state, change }: PanelProps) {
+  const t = useT();
   const { confirm } = useDialogs();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
@@ -63,25 +66,25 @@ export default function Teachers({ state, change }: PanelProps) {
         // Ayarlar > Branşlar is dragged into — not the alphabet.
         {
           id: 'brans',
-          label: 'Branş',
-          of: teacherSubjects,
+          label: t('Branş'),
+          of: (x) => teacherSubjects(x).map(subjectLabel),
           order: (name) => rank.get(subjectKey(name)) ?? Number.MAX_SAFE_INTEGER,
         },
         // Blank is a group too, and it is the one worth finding: it is the
         // list of rows still to be filled in.
-        { id: 'cinsiyet', label: 'Cinsiyet', of: (t) => genderLabel(t.gender) },
+        { id: 'cinsiyet', label: t('Cinsiyet'), of: (x) => genderLabel(x.gender) },
       ],
       sorts: [
-        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'ad', label: t('Ada göre'), cmp: (a, b) => compareTr(a.name, b.name) },
         // The school's order, not the alphabet — and read from BOTH of a
         // teacher's subjects, the way the chip above already does.
-        { id: 'brans', label: 'Branşa göre', cmp: (a, b) =>
+        { id: 'brans', label: t('Branşa göre'), cmp: (a, b) =>
             teacherRank(rank, a) - teacherRank(rank, b) || compareTr(a.name, b.name) },
-        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
-            byNumberThen((t) => weeklyLoad(state, 'teacher', t.id), (t) => t.name) },
-        { id: 'acik', label: 'Açık saate göre (az → çok)', cmp:
-            byNumberThen((t) => openHours(state, t.id), (t) => t.name, 'asc') },
-        { id: 'cinsiyet', label: 'Cinsiyete göre', cmp: (a, b) =>
+        { id: 'yuk', label: t('Ders yüküne göre (çok → az)'), cmp:
+            byNumberThen((x) => weeklyLoad(state, 'teacher', x.id), (x) => x.name) },
+        { id: 'acik', label: t('Açık saate göre (az → çok)'), cmp:
+            byNumberThen((x) => openHours(state, x.id), (x) => x.name, 'asc') },
+        { id: 'cinsiyet', label: t('Cinsiyete göre'), cmp: (a, b) =>
             compareTr(genderLabel(a.gender), genderLabel(b.gender)) ||
             compareTr(a.name, b.name) },
       ],
@@ -119,7 +122,7 @@ export default function Teachers({ state, change }: PanelProps) {
   const subjects = subjectOptions(state);
 
   // Left empty, the short form is derived — so show what it will be.
-  const suggested = newTeacher.name.trim() === '' ? 'Kısaltma' : makeShort(newTeacher.name);
+  const suggested = newTeacher.name.trim() === '' ? t('Kısaltma') : makeShort(newTeacher.name);
   const clashes = duplicateShorts(state.teachers);
 
   /** What the Ekle button will actually store as the branch. */
@@ -151,25 +154,16 @@ export default function Teachers({ state, change }: PanelProps) {
           All four panels put it in the same corner, so the shape of a panel
           stays one shape. */}
       <div className="panel-head">
-        <h2>Öğretmenler ({state.teachers.length})</h2>
-        <button className="btn" onClick={() => setPasteOpen(true)}>
-          Excel'den yapıştır
-        </button>
+        <h2>{t('Öğretmenler ({n})', { n: state.teachers.length })}</h2>
+        <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
       </div>
       <p className="hint">
-        Branş <b>listeden seçilir</b>; listede yoksa “+ Yeni branş…” ile eklenir.
-        Bir öğretmen iki branş veriyorsa (Türkçe ve Edebiyat gibi){' '}
-        <b>+ İkinci branş</b> ile ikincisi de yazılır; o zaman her dersinde
-        hangi branştan olduğu ayrıca seçilir.
-        Kısaltma ızgarada satır başlığı olarak
-        görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu
-        öğretmene özel sınırdır; <b>boş bırakılırsa Ayarlar → Kurallar'daki sayı</b>{' '}
-        geçerli olur.
+        <T k="Branş **listeden seçilir**; listede yoksa “+ Yeni branş…” ile eklenir. Bir öğretmen iki branş veriyorsa (Türkçe ve Edebiyat gibi) **+ İkinci branş** ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Kısaltma ızgarada satır başlığı olarak görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; **boş bırakılırsa Ayarlar → Kurallar'daki sayı** geçerli olur." />
       </p>
       <div className="form-row">
         <input
           type="text"
-          placeholder="Ad Soyad"
+          placeholder={t('Ad Soyad')}
           value={newTeacher.name}
           onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
           onKeyDown={(e) => {
@@ -178,9 +172,9 @@ export default function Teachers({ state, change }: PanelProps) {
         />
         <input
           type="text"
-          aria-label="Kısaltma"
+          aria-label={t('Kısaltma')}
           placeholder={suggested}
-          title="Boş bırakırsanız addan üretilir"
+          title={t('Boş bırakırsanız addan üretilir')}
           className="text-sm"
           value={newTeacher.short}
           onChange={(e) => setNewTeacher({ ...newTeacher, short: e.target.value })}
@@ -192,7 +186,7 @@ export default function Teachers({ state, change }: PanelProps) {
             subject that still printed as "Mat" and could not be told from the
             first one on paper. New subjects are added on the spot. */}
         <select
-          aria-label="Branş"
+          aria-label={t('Branş')}
           value={freshSubject === null ? newTeacher.subject : NEW}
           onChange={(e) => {
             if (e.target.value === NEW) {
@@ -203,13 +197,13 @@ export default function Teachers({ state, change }: PanelProps) {
             setNewTeacher({ ...newTeacher, subject: e.target.value });
           }}
         >
-          <option value="">Branş seçin</option>
+          <option value="">{t('Branş seçin')}</option>
           {subjects.map((x) => (
             <option key={x} value={x}>
               {x}
             </option>
           ))}
-          <option value={NEW}>+ Yeni branş…</option>
+          <option value={NEW}>{t('+ Yeni branş…')}</option>
         </select>
         {/* A new project's subject list is empty by design, so on the very
             first teacher this dropdown offers nothing but "+ Yeni branş…" and
@@ -217,15 +211,15 @@ export default function Teachers({ state, change }: PanelProps) {
             leaving the reader to find the step. */}
         {subjects.length === 0 && (
           <span className="hint">
-            Branş listesi boş. <b>Branşlar</b> adımından ekleyebilirsiniz.
+            <T k="Branş listesi boş. **Branşlar** adımından ekleyebilirsiniz." />
           </span>
         )}
         {freshSubject !== null && (
           <input
             type="text"
             autoFocus
-            placeholder="Yeni branşın adı"
-            aria-label="Yeni branşın adı"
+            placeholder={t('Yeni branşın adı')}
+            aria-label={t('Yeni branşın adı')}
             value={freshSubject}
             onChange={(e) => setFreshSubject(e.target.value)}
           />
@@ -239,16 +233,14 @@ export default function Teachers({ state, change }: PanelProps) {
             type="button"
             className="btn subtle"
             onClick={() => setAskSecond(true)}
-          >
-            + İkinci branş
-          </button>
+          >{t('+ İkinci branş')}</button>
         ) : (
           <select
-            aria-label="İkinci branş"
+            aria-label={t('İkinci branş')}
             value={newTeacher.subject2}
             onChange={(e) => setNewTeacher({ ...newTeacher, subject2: e.target.value })}
           >
-            <option value="">İkinci branş yok</option>
+            <option value="">{t('İkinci branş yok')}</option>
             {subjects
               .filter((x) => subjectKey(x) !== subjectKey(subjectOf()))
               .map((x) => (
@@ -264,7 +256,7 @@ export default function Teachers({ state, change }: PanelProps) {
             "Belirtilm". A control that hides which value is in it is the same
             mistake the sort menu carries a comment about. */}
         <select
-          aria-label="Cinsiyet"
+          aria-label={t('Cinsiyet')}
           value={newTeacher.gender}
           onChange={(e) =>
             setNewTeacher({ ...newTeacher, gender: e.target.value as Gender })
@@ -280,20 +272,18 @@ export default function Teachers({ state, change }: PanelProps) {
           className="btn"
           disabled={newTeacher.name.trim() === '' || subjectOf() === ''}
           onClick={addNew}
-        >
-          Ekle
-        </button>
+        >{t('Ekle')}</button>
       </div>
 
       <Paste
         open={pasteOpen}
         close={() => setPasteOpen(false)}
-        title="Öğretmenleri yapıştır"
-        example="Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş"
+        title={t('Öğretmenleri yapıştır')}
+        example={t('Ad Soyad · Kısaltma · Branş · Cinsiyet · İkinci branş')}
         parse={parseTeachers}
         rowText={(x) =>
-          `${x.name} (${x.short}) · ${x.subject}` +
-          (x.subject2 === '' ? '' : ` + ${x.subject2}`) +
+          `${x.name} (${x.short}) · ${subjectLabel(x.subject)}` +
+          (x.subject2 === '' ? '' : ` + ${subjectLabel(x.subject2)}`) +
           (x.gender === '' ? '' : ` · ${genderLabel(x.gender)}`)
         }
         onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
@@ -301,7 +291,7 @@ export default function Teachers({ state, change }: PanelProps) {
 
       {clashes.length > 0 && (
         <div className="warn-box">
-          <b>Aynı kısaltma birden çok öğretmende:</b> ızgarada iki satır ayırt edilemez.
+          <T k="**Aynı kısaltma birden çok öğretmende:** ızgarada iki satır ayırt edilemez." />
           {clashes.map((c) => (
             <div key={c.short}>
               <b>{c.short}</b> · {c.names.join(', ')}
@@ -323,7 +313,7 @@ export default function Teachers({ state, change }: PanelProps) {
       )}
 
       {state.teachers.length > 0 && shown.length === 0 && (
-        <p className="hint">Bu aramaya uyan öğretmen yok.</p>
+        <p className="hint">{t('Bu aramaya uyan öğretmen yok.')}</p>
       )}
 
       {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
@@ -337,55 +327,49 @@ export default function Teachers({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th className="w-col-xs">Renk</th>
-              <th className="w-col-xl">Ad</th>
+              <th className="w-col-xs">{t('Renk')}</th>
+              <th className="w-col-xl">{t('Ad')}</th>
               {/* --w-col-lg was 16ch — 144 px at 125 %, for a heading that
                   asks for 78 and a box that holds "MÇ". This column alone was
                   the last 54 px of the sideways scroll. */}
-              <th className="w-col-sm">Kısaltma</th>
-              <th>Branş</th>
+              <th className="w-col-sm">{t('Kısaltma')}</th>
+              <th>{t('Branş')}</th>
               {/* Most of the staff hold one subject, so this column is usually
                   a row of small buttons rather than a row of dropdowns — see
                   the cell. It still gets a heading: a column of controls with
                   no name is a column nobody reads. */}
-              <th title="İkinci branş">2. branş</th>
+              <th title={t('İkinci branş')}>{t('2. branş')}</th>
               {/* No width class: the <select>'s own longest option
                   ("Belirtilmemiş") is wider than any ladder step this column
                   deserves, so the box decides and the column follows it
                   (pitfall 34). --w-col-md was 12 px more than that. */}
-              <th>Cinsiyet</th>
-              <th className="num" title="Art arda en fazla kaç saat">
-                Art arda
-              </th>
-              <th className="num" title="Bir günde en fazla kaç saat">
-                Günde ↑
-              </th>
-              <th className="num" title="Geldiği gün en az kaç saat">
-                Günde ↓
-              </th>
-              <th className="w-col-sm">Ders saati</th>
+              <th>{t('Cinsiyet')}</th>
+              <th className="num" title={t('Art arda en fazla kaç saat')}>{t('Art arda')}</th>
+              <th className="num" title={t('Bir günde en fazla kaç saat')}>{t('Günde ↑')}</th>
+              <th className="num" title={t('Geldiği gün en az kaç saat')}>{t('Günde ↓')}</th>
+              <th className="w-col-sm">{t('Ders saati')}</th>
               <th className="w-col-md" />
             </tr>
           </thead>
           <tbody ref={order.bodyRef}>
-            {shown.map((t, i) => (
-              <tr key={t.id} data-row-name={t.name}>
-                {order.grip(i, t.name)}
+            {shown.map((teacher, i) => (
+              <tr key={teacher.id} data-row-name={teacher.name}>
+                {order.grip(i, teacher.name)}
                 <td>
                   <ColorPick
-                    value={t.color}
-                    owner={t.short}
+                    value={teacher.color}
+                    owner={teacher.short}
                     onChange={(next) =>
-                      change((d) => updateTeacher(d, t.id, { color: next }))
+                      change((d) => updateTeacher(d, teacher.id, { color: next }))
                     }
                   />
                 </td>
                 <td>
                   <input
                     type="text"
-                    defaultValue={t.name}
+                    defaultValue={teacher.name}
                     onBlur={(e) =>
-                      change((d) => updateTeacher(d, t.id, { name: e.target.value.trim() }))
+                      change((d) => updateTeacher(d, teacher.id, { name: e.target.value.trim() }))
                     }
                   />
                 </td>
@@ -393,18 +377,18 @@ export default function Teachers({ state, change }: PanelProps) {
                   <input
                     type="text"
                     className="text-sm"
-                    defaultValue={t.short}
+                    defaultValue={teacher.short}
                     onBlur={(e) =>
-                      change((d) => updateTeacher(d, t.id, { short: e.target.value.trim() }))
+                      change((d) => updateTeacher(d, teacher.id, { short: e.target.value.trim() }))
                     }
                   />
                 </td>
                 <td>
                   <select
-                    aria-label={`${t.short} branşı`}
-                    value={t.subject}
+                    aria-label={t('{kim} branşı', { kim: teacher.short })}
+                    value={teacher.subject}
                     onChange={(e) =>
-                      change((d) => updateTeacher(d, t.id, { subject: e.target.value }))
+                      change((d) => updateTeacher(d, teacher.id, { subject: e.target.value }))
                     }
                   >
                     {/* subjectOptions already contains this teacher's subject
@@ -424,15 +408,15 @@ export default function Teachers({ state, change }: PanelProps) {
                       dropdown here always, twenty-three of twenty-five teachers
                       would carry a box saying "yok" and the column would read
                       as something to fill in. */}
-                  {t.subject2 === '' && !opening.has(t.id) ? (
+                  {teacher.subject2 === '' && !opening.has(teacher.id) ? (
                     <button
                       type="button"
                       className="btn subtle"
                       // Its own name per row: twenty-five buttons all called
                       // "+ İkinci branş" name nothing (pitfall 49).
-                      aria-label={`${t.short} için ikinci branş ekle`}
-                      title="İkinci branş ekle"
-                      onClick={() => setOpening(new Set(opening).add(t.id))}
+                      aria-label={t('{kim} için ikinci branş ekle', { kim: teacher.short })}
+                      title={t('İkinci branş ekle')}
+                      onClick={() => setOpening(new Set(opening).add(teacher.id))}
                     >
                       {/* A bare + under a column headed "2. branş", because the
                           words cost 39 px of column width across a table that
@@ -444,19 +428,19 @@ export default function Teachers({ state, change }: PanelProps) {
                     </button>
                   ) : (
                     <select
-                      aria-label={`${t.short} ikinci branşı`}
-                      value={t.subject2}
+                      aria-label={t('{kim} ikinci branşı', { kim: teacher.short })}
+                      value={teacher.subject2}
                       onChange={(e) =>
-                        change((d) => updateTeacher(d, t.id, { subject2: e.target.value }))
+                        change((d) => updateTeacher(d, teacher.id, { subject2: e.target.value }))
                       }
                     >
                       {/* Blank first, and it is how the column is emptied
                           again: a second subject that could be added but not
                           removed is a one-way door. Choosing it clears the
                           flag on that teacher's lessons too — sanitize(). */}
-                      <option value="">Yok</option>
+                      <option value="">{t('Yok')}</option>
                       {subjects
-                        .filter((x) => subjectKey(x) !== subjectKey(t.subject))
+                        .filter((x) => subjectKey(x) !== subjectKey(teacher.subject))
                         .map((x) => (
                           <option key={x} value={x}>
                             {x}
@@ -469,11 +453,11 @@ export default function Teachers({ state, change }: PanelProps) {
                   {/* Named per row like the subject box beside it: twenty-five
                       controls all called "Cinsiyet" name nothing. */}
                   <select
-                    aria-label={`${t.short} cinsiyeti`}
-                    value={t.gender}
+                    aria-label={`${teacher.short} cinsiyeti`}
+                    value={teacher.gender}
                     onChange={(e) =>
                       change((d) =>
-                        updateTeacher(d, t.id, { gender: e.target.value as Gender }),
+                        updateTeacher(d, teacher.id, { gender: e.target.value as Gender }),
                       )
                     }
                   >
@@ -486,29 +470,29 @@ export default function Teachers({ state, change }: PanelProps) {
                 </td>
                 <td>
                   <LimitBox
-                    value={t.limits.maxConsecutive}
+                    value={teacher.limits.maxConsecutive}
                     fallback={state.settings.limits.maxConsecutive}
-                    title={`${t.short} art arda en fazla kaç saat`}
-                    onSet={(v) => change((d) => setTeacherLimit(d, t.id, 'maxConsecutive', v))}
+                    title={t('{kim} art arda en fazla kaç saat', { kim: teacher.short })}
+                    onSet={(v) => change((d) => setTeacherLimit(d, teacher.id, 'maxConsecutive', v))}
                   />
                 </td>
                 <td>
                   <LimitBox
-                    value={t.limits.maxPerDay}
+                    value={teacher.limits.maxPerDay}
                     fallback={state.settings.limits.maxPerDay}
-                    title={`${t.short} günde en fazla kaç saat`}
-                    onSet={(v) => change((d) => setTeacherLimit(d, t.id, 'maxPerDay', v))}
+                    title={t('{kim} günde en fazla kaç saat', { kim: teacher.short })}
+                    onSet={(v) => change((d) => setTeacherLimit(d, teacher.id, 'maxPerDay', v))}
                   />
                 </td>
                 <td>
                   <LimitBox
-                    value={t.limits.minPerDay}
+                    value={teacher.limits.minPerDay}
                     fallback={state.settings.limits.minPerDay}
-                    title={`${t.short} geldiği gün en az kaç saat`}
-                    onSet={(v) => change((d) => setTeacherLimit(d, t.id, 'minPerDay', v))}
+                    title={t('{kim} geldiği gün en az kaç saat', { kim: teacher.short })}
+                    onSet={(v) => change((d) => setTeacherLimit(d, teacher.id, 'minPerDay', v))}
                   />
                 </td>
-                <td>{weeklyLoad(state, 'teacher', t.id)}</td>
+                <td>{weeklyLoad(state, 'teacher', teacher.id)}</td>
                 <td>
                   <div className="form-row nowrap">
                   {/* Its whole week, its load and what it is tied to, without
@@ -516,23 +500,21 @@ export default function Teachers({ state, change }: PanelProps) {
                       was spread over four tabs. */}
                   <button
                     className="btn icon"
-                    aria-label={`${t.short} bilgileri`}
-                    title="Bilgileri ve haftalık programı"
-                    onClick={() => inspect('teacher', t.id)}
+                    aria-label={`${teacher.short} bilgileri`}
+                    title={t('Bilgileri ve haftalık programı')}
+                    onClick={() => inspect('teacher', teacher.id)}
                   >
                     <PanelRight size={16} strokeWidth={2} />
                   </button>
                   <button
                     className="btn danger"
                     onClick={async () => {
-                      const q = deletionQuestion(state, 'teacher', t.id);
+                      const q = deletionQuestion(state, 'teacher', teacher.id);
                       if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
                         return;
-                      change((d) => deleteTeacher(d, t.id));
+                      change((d) => deleteTeacher(d, teacher.id));
                     }}
-                  >
-                    Sil
-                  </button>
+                  >{t('Sil')}</button>
                   </div>
                 </td>
               </tr>

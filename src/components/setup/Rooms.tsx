@@ -15,8 +15,10 @@ import { parseRooms } from '../../import';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../entities';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
+import { useT } from '../T';
 
 export default function Rooms({ state, change }: PanelProps) {
+  const t = useT();
   const { confirm } = useDialogs();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
@@ -25,14 +27,14 @@ export default function Rooms({ state, change }: PanelProps) {
     () => ({
       haystack: (r) => `${r.name} ${roomClasses(state, r.id).map((c) => c.name).join(' ')}`,
       sorts: [
-        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
-        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
+        { id: 'ad', label: t('Ada göre'), cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'yuk', label: t('Ders yüküne göre (çok → az)'), cmp:
             byNumberThen((r) => weeklyLoad(state, 'room', r.id), (r) => r.name) },
-        { id: 'sinif', label: 'Sınıf sayısına göre (çok → az)', cmp:
+        { id: 'sinif', label: t('Sınıf sayısına göre (çok → az)'), cmp:
             byNumberThen((r) => roomClasses(state, r.id).length, (r) => r.name) },
       ],
     }),
-    [state],
+    [state, t],
   );
   const shown = applyList(state.rooms, query, listCfg);
   const order = useRowOrder({
@@ -52,19 +54,18 @@ export default function Rooms({ state, change }: PanelProps) {
           stays one shape. */}
       <div className="panel-head">
         <h2>Derslikler ({state.rooms.length})</h2>
-        <button className="btn" onClick={() => setPasteOpen(true)}>
-          Excel'den yapıştır
-        </button>
+        <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
       </div>
       <p className="hint">
-        Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate
-        konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.
+        {t(
+          'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.',
+        )}
       </p>
       <div className="form-row">
         <input
           type="text"
           value={newRoom}
-          placeholder="Derslik adı, örn. A"
+          placeholder={t('Derslik adı, örn. A')}
           onChange={(e) => setNewRoom(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && newRoom.trim() !== '') {
@@ -80,16 +81,14 @@ export default function Rooms({ state, change }: PanelProps) {
             change((d) => addRoom(d, newRoom));
             setNewRoom('');
           }}
-        >
-          Ekle
-        </button>
+        >{t('Ekle')}</button>
       </div>
 
       <Paste
         open={pasteOpen}
         close={() => setPasteOpen(false)}
-        title="Derslikleri yapıştır"
-        example="Derslik adı (her satırda bir tane)"
+        title={t('Derslikleri yapıştır')}
+        example={t('Derslik adı (her satırda bir tane)')}
         parse={parseRooms}
         rowText={(x) => x.name}
         onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
@@ -108,7 +107,7 @@ export default function Rooms({ state, change }: PanelProps) {
       )}
 
       {state.rooms.length > 0 && shown.length === 0 && (
-        <p className="hint">Bu aramaya uyan derslik yok.</p>
+        <p className="hint">{t('Bu aramaya uyan derslik yok.')}</p>
       )}
 
       {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
@@ -122,8 +121,8 @@ export default function Rooms({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th className="w-col-xl">Ad</th>
-              <th className="w-col-lg">Sınıf sayısı</th>
+              <th className="w-col-xl">{t('Ad')}</th>
+              <th className="w-col-lg">{t('Sınıf sayısı')}</th>
               <th className="w-col-md" />
             </tr>
           </thead>
@@ -147,7 +146,7 @@ export default function Rooms({ state, change }: PanelProps) {
                   <button
                     className="btn icon"
                     aria-label={`${r.name} bilgileri`}
-                    title="Bilgileri ve haftalık programı"
+                    title={t('Bilgileri ve haftalık programı')}
                     onClick={() => inspect('room', r.id)}
                   >
                     <PanelRight size={16} strokeWidth={2} />
@@ -160,9 +159,7 @@ export default function Rooms({ state, change }: PanelProps) {
                         return;
                       change((d) => deleteRoom(d, r.id));
                     }}
-                  >
-                    Sil
-                  </button>
+                  >{t('Sil')}</button>
                   </div>
                 </td>
               </tr>

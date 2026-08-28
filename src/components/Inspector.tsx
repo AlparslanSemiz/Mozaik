@@ -26,6 +26,7 @@ import type { InspectKind } from '../entities';
 import { paletteColor } from '../palette';
 import { KIND_ICON } from './steps';
 import type { State } from '../types';
+import { T, useT } from './T';
 
 interface Target {
   kind: InspectKind;
@@ -83,6 +84,7 @@ function Inspector({
   target: Target | null;
   onClose: () => void;
 }) {
+  const t = useT();
   // Recomputed only while the sheet is open: `entityWeek` walks every
   // placement, and the grid behind this must not pay for a closed sheet.
   const view = useMemo(() => {
@@ -115,9 +117,9 @@ function Inspector({
                 </span>
                 <div className="sheet-id">
                   <Dialog.Title className="sheet-title">{view.facts.name}</Dialog.Title>
-                  <span className="sheet-kind">{KIND_LABEL[target.kind]}</span>
+                  <span className="sheet-kind">{t(KIND_LABEL[target.kind])}</span>
                 </div>
-                <Dialog.Close className="btn icon" aria-label="Kapat">
+                <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
                   <X size={18} strokeWidth={2.2} />
                 </Dialog.Close>
               </div>
@@ -137,7 +139,7 @@ function Inspector({
                 ))}
               </dl>
 
-              <h3 className="sheet-h">Haftalık programı</h3>
+              <h3 className="sheet-h">{t('Haftalık programı')}</h3>
               {/* Row = day, column = lesson: the same way round as Müsaitlik
                   and the printed sheet, because this is a "read one day"
                   screen. The Program grid is the other way round on purpose. */}
@@ -186,15 +188,14 @@ function Inspector({
               </div>
 
               <p className="hint">
-                <CalendarX2 size={14} strokeWidth={2} aria-hidden="true" /> Kapalı saatler
-                taralı. Değiştirmek için <b>Müsaitlik</b> sekmesine gidin; kırmızı çerçeve,
-                kapatıldıktan sonra yerinde kalmış bir derstir.
+                <CalendarX2 size={14} strokeWidth={2} aria-hidden="true" />{' '}
+                <T k="Kapalı saatler taralı. Değiştirmek için **Müsaitlik** sekmesine gidin; kırmızı çerçeve, kapatıldıktan sonra yerinde kalmış bir derstir." />
               </p>
             </>
           ) : (
             <div className="sheet-head">
-              <Dialog.Title className="sheet-title">Kayıt bulunamadı</Dialog.Title>
-              <Dialog.Close className="btn icon" aria-label="Kapat">
+              <Dialog.Title className="sheet-title">{t('Kayıt bulunamadı')}</Dialog.Title>
+              <Dialog.Close className="btn icon" aria-label={t('Kapat')}>
                 <X size={18} strokeWidth={2.2} />
               </Dialog.Close>
             </div>

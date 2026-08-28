@@ -23,8 +23,10 @@ import {
 } from '../../entities';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
+import { T, useT } from '../T';
 
 export default function Classes({ state, change }: PanelProps) {
+  const t = useT();
   const { confirm } = useDialogs();
   const inspect = useInspect();
   const [query, setQuery] = useState<ListQuery>(EMPTY_QUERY);
@@ -35,17 +37,17 @@ export default function Classes({ state, change }: PanelProps) {
       // Grouping classes by the room they share is the one grouping this
       // screen can offer that Kontrol cannot: it is what makes a room's load
       // legible before it becomes a clash.
-      facets: [{ id: 'derslik', label: 'Derslik', of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)) }],
+      facets: [{ id: 'derslik', label: t('Derslik'), of: (c) => (c.roomId === null ? '' : roomName(state, c.roomId)) }],
       sorts: [
-        { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
-        { id: 'derslik', label: 'Dersliğe göre', cmp: (a, b) =>
+        { id: 'ad', label: t('Ada göre'), cmp: (a, b) => compareTr(a.name, b.name) },
+        { id: 'derslik', label: t('Dersliğe göre'), cmp: (a, b) =>
             compareTr(roomName(state, a.roomId), roomName(state, b.roomId)) ||
             compareTr(a.name, b.name) },
-        { id: 'yuk', label: 'Ders yüküne göre (çok → az)', cmp:
+        { id: 'yuk', label: t('Ders yüküne göre (çok → az)'), cmp:
             byNumberThen((c) => weeklyLoad(state, 'class', c.id), (c) => c.name) },
       ],
     }),
-    [state],
+    [state, t],
   );
   const shown = applyList(state.classes, query, listCfg);
   const order = useRowOrder({
@@ -75,21 +77,16 @@ export default function Classes({ state, change }: PanelProps) {
           All four panels put it in the same corner, so the shape of a panel
           stays one shape. */}
       <div className="panel-head">
-        <h2>Sınıflar ({state.classes.length})</h2>
-        <button className="btn" onClick={() => setPasteOpen(true)}>
-          Excel'den yapıştır
-        </button>
+        <h2>{t('Sınıflar ({n})', { n: state.classes.length })}</h2>
+        <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
       </div>
       <p className="hint">
-        Bir sınıf, aynı programı paylaşan öğrenci grubudur. <b>Derslik</b> sınıfın
-        sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki
-        sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz ve
-        satır başındaki nokta ile basılan sayfanın başlığında görünür.
+        <T k="Bir sınıf, aynı programı paylaşan öğrenci grubudur. **Derslik** sınıfın sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz ve satır başındaki nokta ile basılan sayfanın başlığında görünür." />
       </p>
       <div className="form-row">
         <input
           type="text"
-          placeholder="Sınıf adı, örn. 510"
+          placeholder={t('Sınıf adı, örn. 510')}
           value={newClass.name}
           onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
           onKeyDown={(e) => {
@@ -100,7 +97,7 @@ export default function Classes({ state, change }: PanelProps) {
           value={newClass.roomId}
           onChange={(e) => setNewClass({ ...newClass, roomId: e.target.value })}
         >
-          <option value="">Derslik yok</option>
+          <option value="">{t('Derslik yok')}</option>
           {state.rooms.map((r) => (
             <option key={r.id} value={r.id}>
               {r.name}
@@ -108,17 +105,21 @@ export default function Classes({ state, change }: PanelProps) {
           ))}
         </select>
         <button className="btn" disabled={newClass.name.trim() === ''} onClick={addNew}>
-          Ekle
+          {t(
+            'Ekle',
+          )}
         </button>
       </div>
 
       <Paste
         open={pasteOpen}
         close={() => setPasteOpen(false)}
-        title="Sınıfları yapıştır"
-        example="Sınıf adı · Derslik adı"
+        title={t('Sınıfları yapıştır')}
+        example={t('Sınıf adı · Derslik adı')}
         parse={parseClasses}
-        rowText={(x) => `${x.name}${x.roomName ? ` → ${x.roomName} dersliği` : ''}`}
+        rowText={(x) =>
+          x.roomName ? t('{ad} → {derslik} dersliği', { ad: x.name, derslik: x.roomName }) : x.name
+        }
         onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
       />
 
@@ -135,7 +136,7 @@ export default function Classes({ state, change }: PanelProps) {
       )}
 
       {state.classes.length > 0 && shown.length === 0 && (
-        <p className="hint">Bu aramaya uyan sınıf yok.</p>
+        <p className="hint">{t('Bu aramaya uyan sınıf yok.')}</p>
       )}
 
       {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
@@ -149,16 +150,16 @@ export default function Classes({ state, change }: PanelProps) {
           <thead>
             <tr>
               {order.head}
-              <th className="w-col-xs">Renk</th>
-              <th className="w-col-xl">Ad</th>
+              <th className="w-col-xs">{t('Renk')}</th>
+              <th className="w-col-xl">{t('Ad')}</th>
               {/* Narrower than the name beside it, and that is the point: a
                   room is a letter, not a name. The box still has to hold its
                   longest OPTION ("Derslik yok"), which is what --w-col-lg
                   clears — the width is on the <th> because a <select> at
                   `width: 100%` contributes nothing to max-content (pitfall
                   34). */}
-              <th className="w-col-lg">Derslik</th>
-              <th className="w-col-sm">Ders saati</th>
+              <th className="w-col-lg">{t('Derslik')}</th>
+              <th className="w-col-sm">{t('Ders saati')}</th>
               <th className="w-col-md" />
             </tr>
           </thead>
@@ -187,12 +188,12 @@ export default function Classes({ state, change }: PanelProps) {
                 <td>
                   <select
                     value={c.roomId ?? ''}
-                    aria-label={`${c.name} dersliği`}
+                    aria-label={t('{ad} dersliği', { ad: c.name })}
                     onChange={(e) =>
                       change((d) => updateClass(d, c.id, { roomId: e.target.value || null }))
                     }
                   >
-                    <option value="">Derslik yok</option>
+                    <option value="">{t('Derslik yok')}</option>
                     {state.rooms.map((r) => (
                       <option key={r.id} value={r.id}>
                         {r.name}
@@ -213,7 +214,7 @@ export default function Classes({ state, change }: PanelProps) {
                   <button
                     className="btn icon"
                     aria-label={`${c.name} bilgileri`}
-                    title="Bilgileri ve haftalık programı"
+                    title={t('Bilgileri ve haftalık programı')}
                     onClick={() => inspect('class', c.id)}
                   >
                     <PanelRight size={16} strokeWidth={2} />
@@ -226,9 +227,7 @@ export default function Classes({ state, change }: PanelProps) {
                         return;
                       change((d) => deleteClass(d, c.id));
                     }}
-                  >
-                    Sil
-                  </button>
+                  >{t('Sil')}</button>
                   </div>
                 </td>
               </tr>

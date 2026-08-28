@@ -7,6 +7,7 @@ import { updateLimits, updateRules } from '../../entities';
 import { findViolations } from '../../rules';
 import type { PanelProps } from '../props';
 import { paletteColor } from '../../palette';
+import { useT } from '../T';
 
 /** The four limit boxes, in the order they are shown. */
 const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: boolean }> = [
@@ -43,6 +44,7 @@ const LEVEL_LABEL: Record<RuleLevel, string> = {
 };
 
 export default function Rules({ state, change }: PanelProps) {
+  const t = useT();
   // What the numbers on the left ALREADY cost, on the timetable as it stands.
   // Kontrol shows the same list one tab away; the point of showing it here is
   // that "Engelle" and "Uyar" mean nothing until you see what they catch.
@@ -68,7 +70,7 @@ export default function Rules({ state, change }: PanelProps) {
     <div className="cols">
       <div>
         <div className="panel">
-          <h2>Kurallar</h2>
+          <h2>{t('Kurallar')}</h2>
           <p className="hint">
             Buradaki sayılar <b>bütün okul</b> için geçerlidir. Tek bir öğretmen için farklı
             bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız
@@ -77,10 +79,10 @@ export default function Rules({ state, change }: PanelProps) {
           <table className="list">
             <thead>
               <tr>
-                <th>Kural</th>
-                <th className="w-col-lg">Saat</th>
-                <th className="w-col-lg">Ne yapsın</th>
-                <th className="w-col-md">Şu an</th>
+                <th>{t('Kural')}</th>
+                <th className="w-col-lg">{t('Saat')}</th>
+                <th className="w-col-lg">{t('Ne yapsın')}</th>
+                <th className="w-col-md">{t('Şu an')}</th>
               </tr>
             </thead>
             <tbody>
@@ -127,9 +129,9 @@ export default function Rules({ state, change }: PanelProps) {
                       — and this is the screen where you pick it. */}
                   <td>
                     {state.settings.rules[rule.name] === 'off' ? (
-                      <span className="hint">Kapalı</span>
+                      <span className="hint">{t('Kapalı')}</span>
                     ) : (perRule[rule.name] ?? 0) === 0 ? (
-                      <span className="badge ok">Uyan yok</span>
+                      <span className="badge ok">{t('Uyan yok')}</span>
                     ) : (
                       <span
                         className={`badge ${
@@ -163,10 +165,10 @@ export default function Rules({ state, change }: PanelProps) {
             <table className="list">
               <thead>
                 <tr>
-                  <th>Öğretmen</th>
-                  <th className="num">Art arda</th>
-                  <th className="num">Günde ↑</th>
-                  <th className="num">Günde ↓</th>
+                  <th>{t('Öğretmen')}</th>
+                  <th className="num">{t('Art arda')}</th>
+                  <th className="num">{t('Günde ↑')}</th>
+                  <th className="num">{t('Günde ↓')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,14 +203,16 @@ export default function Rules({ state, change }: PanelProps) {
           </p>
           {violations.length === 0 ? (
             <div className="ok-box">
-              Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.
+              {t(
+                'Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.',
+              )}
             </div>
           ) : (
             <table className="stat">
               <thead>
                 <tr>
-                  <th className="w-col-lg">Durum</th>
-                  <th>Açıklama</th>
+                  <th className="w-col-lg">{t('Durum')}</th>
+                  <th>{t('Açıklama')}</th>
                 </tr>
               </thead>
               <tbody>

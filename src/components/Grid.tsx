@@ -11,6 +11,7 @@ import { dayPeriods } from '../bell';
 import { attachGridChrome } from '../gridChrome';
 import { paletteColor } from '../palette';
 import type { Settings, Id } from '../types';
+import { useT } from './T';
 
 export interface GridCell {
   lessonId: Id;
@@ -63,6 +64,7 @@ const Row = memo(function Row({
   // the provider's `open` is a `useCallback([])`, i.e. stable for the life of
   // the app, so this cannot be what re-renders 25 rows of 84 cells (pitfall 10).
   const inspect = useInspect();
+  const t = useT();
   const cells = [];
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
@@ -78,7 +80,7 @@ const Row = memo(function Row({
 
       if (breakAt[g] === s) {
         cells.push(
-          <td key={`break-${g}`} className={`break-col${band}`} title="Öğle arası" />,
+          <td key={`break-${g}`} className={`break-col${band}`} title={t('Öğle arası')} />,
         );
       }
       const i = g * hourCount + s;
@@ -166,11 +168,16 @@ const Row = memo(function Row({
                   onCellRemove(row.id, g, s);
                 }
               }}
-              aria-label={`${cell.top} ${cell.bottom}, kaldırmak için Delete`}
+              aria-label={t('{ust} {alt}, kaldırmak için Delete', {
+                ust: cell.top,
+                alt: cell.bottom,
+              })}
               title={
                 cell.conflict === null
-                  ? 'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir'
-                  : `${cell.conflict}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin`
+                  ? t('Sürükleyerek taşıyın · sağ tık: havuza geri gönderir')
+                  : t('{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin', {
+                      sorun: cell.conflict,
+                    })
               }
             >
               <span className="card-top">{cell.top}</span>
@@ -197,7 +204,7 @@ const Row = memo(function Row({
         <button
           className="inspect"
           onClick={() => inspect(row.kind, row.id)}
-          title={`${row.name}: bilgileri ve haftalık programı`}
+          title={t('{ad}: bilgileri ve haftalık programı', { ad: row.name })}
         >
           {row.name}
         </button>
@@ -226,6 +233,7 @@ function GridInner({
   onCellRemove,
   onCellMoveStart,
 }: Props) {
+  const t = useT();
   const hourCount = settings.hours.length;
   const dayCount = settings.days.length;
 
@@ -286,7 +294,7 @@ function GridInner({
                       <th
                         key={`break-${g}`}
                         className={g % 2 === 1 ? 'break-col band' : 'break-col'}
-                        title="Öğle arası"
+                        title={t('Öğle arası')}
                       />,
                     ]
                   : []),

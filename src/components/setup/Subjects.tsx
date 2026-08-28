@@ -34,6 +34,7 @@ import {
   defaultSubjectShort,
   deleteSubject,
   subjectKey,
+  subjectLabel,
   subjectOptions,
   setSubjectShort,
   subjectShort,
@@ -41,6 +42,7 @@ import {
 } from '../../entities';
 import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
+import { T, useT } from '../T';
 
 interface RowProps extends PanelProps {
   subject: string;
@@ -52,6 +54,7 @@ interface RowProps extends PanelProps {
 }
 
 function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps) {
+  const t = useT();
   const current = subjectShort(state.settings, subject);
   const fallback = defaultSubjectShort(subject);
   const users = subjectTeachers(state, subject);
@@ -59,11 +62,11 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
     <tr data-row-name={subject}>
       {grip}
       <td>
-        {subject}
+        {subjectLabel(subject)}
         {!inList && (
-          <span className="hint" title="Bir öğretmende var ama listede yok">
+          <span className="hint" title={t('Bir öğretmende var ama listede yok')}>
             {' '}
-            · listede değil
+            {t('· listede değil')}
           </span>
         )}
       </td>
@@ -71,7 +74,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
         <input
           type="text"
           className="text-sm"
-          aria-label={`${subject} kısaltması`}
+          aria-label={t('{ad} kısaltması', { ad: subjectLabel(subject) })}
           // defaultValue + a key that changes with the value: typing
           // must not re-render on every keystroke (PLAN pitfall 3).
           key={current}
@@ -79,11 +82,11 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
           onBlur={(e) => change((d) => setSubjectShort(d, subject, e.target.value))}
         />
       </td>
-      <td className="num" title={users.map((t) => t.name).join(', ')}>
+      <td className="num" title={users.map((x) => x.name).join(', ')}>
         {users.length}
       </td>
       <td className="hint">
-        {current === fallback ? 'varsayılan' : `varsayılanı: ${fallback}`}
+        {current === fallback ? t('varsayılan') : t('varsayılanı: {kisa}', { kisa: fallback })}
       </td>
       <td>
         {/* The same action cell as the other three lists. `.form-row` is what
@@ -94,11 +97,9 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
           <button
             className="btn danger"
             disabled={!inList}
-            title={inList ? 'Listeden çıkar' : 'Bu branş zaten listede değil'}
+            title={inList ? t('Listeden çıkar') : t('Bu branş zaten listede değil')}
             onClick={onRemove}
-          >
-            Sil
-          </button>
+          >{t('Sil')}</button>
         </div>
       </td>
     </tr>
@@ -106,6 +107,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
 }
 
 export default function Subjects({ state, change }: PanelProps) {
+  const t = useT();
   const { confirm, alert } = useDialogs();
   const [fresh, setFresh] = useState('');
 
@@ -141,17 +143,20 @@ export default function Subjects({ state, change }: PanelProps) {
     const users = subjectTeachers(state, subject);
     if (users.length > 0) {
       await alert({
-        title: `"${subject}" branşı kullanılıyor`,
+        title: t('"{ad}" branşı kullanılıyor', { ad: subjectLabel(subject) }),
         tone: 'warn',
-        body: `${users.length} öğretmen bu branşta (${users.map((t) => t.short).join(', ')}). Önce onların branşını değiştirin, sonra bu branşı silin.`,
+        body: t(
+          '{n} öğretmen bu branşta ({kimler}). Önce onların branşını değiştirin, sonra bu branşı silin.',
+          { n: users.length, kimler: users.map((x) => x.short).join(', ') },
+        ),
       });
       return;
     }
     if (
       !(await confirm({
-        title: `"${subject}" branşı listeden çıkarılacak`,
-        body: 'Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.',
-        confirmLabel: 'Çıkar',
+        title: t('"{ad}" branşı listeden çıkarılacak', { ad: subjectLabel(subject) }),
+        body: t('Hiçbir öğretmen bu branşta değil, yani başka bir şey etkilenmiyor.'),
+        confirmLabel: t('Çıkar'),
         danger: true,
       }))
     ) {
@@ -163,32 +168,25 @@ export default function Subjects({ state, change }: PanelProps) {
   return (
     <div className="panel step-panel">
       <div className="panel-head">
-        <h2>Branşlar ({options.length})</h2>
+        <h2>{t('Branşlar ({n})', { n: options.length })}</h2>
       </div>
       <p className="hint">
-        Öğretmen eklerken branş <b>bu listeden</b> seçilir, elle yazılmaz. Böylece
-        aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve
-        yazdırılan sayfada görünür; yalnızca <b>değiştirdikleriniz</b> saklanır.
-        Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok
-        tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu
-        sırada gelir.
+        <T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz. Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca **değiştirdikleriniz** saklanır. Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu sırada gelir." />
       </p>
 
       <div className="form-row">
         <input
           type="text"
-          placeholder="Yeni branş (örn. Robotik)"
-          aria-label="Yeni branş"
+          placeholder={t('Yeni branş (örn. Robotik)')}
+          aria-label={t('Yeni branş')}
           value={fresh}
           onChange={(e) => setFresh(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') add();
           }}
         />
-        <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>
-          Ekle
-        </button>
-        {clash && <span className="hint">Bu branş listede zaten var.</span>}
+        <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>{t('Ekle')}</button>
+        {clash && <span className="hint">{t('Bu branş listede zaten var.')}</span>}
       </div>
 
       {/* Said out loud, because a keyboard move happens somewhere the eye
@@ -202,13 +200,11 @@ export default function Subjects({ state, change }: PanelProps) {
         <thead>
           <tr>
             {order.head}
-            <th className="w-col-xl">Branş</th>
+            <th className="w-col-xl">{t('Branş')}</th>
             {/* --w-col-sm, the number Teachers measured for the same box:
                 the heading asks for 78 px and the box holds "Mat". */}
-            <th className="w-col-sm">Kısaltma</th>
-            <th className="num">
-              Öğretmen
-            </th>
+            <th className="w-col-sm">{t('Kısaltma')}</th>
+            <th className="num">{t('Öğretmen')}</th>
             {/* The "varsayılan" note. --w-col-lg and not xl: it holds
                 "varsayılanı: Mat", and at xl it was as wide as the name
                 column beside it and read like a second one. */}

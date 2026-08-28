@@ -23,6 +23,7 @@ import type { State } from '../types';
 import type { Scope } from '../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
 import type { PrintOptions } from '../printOptions';
+import { useT } from './T';
 
 interface Props {
   state: State;
@@ -90,6 +91,7 @@ export default function Print({
   options,
   setOptions,
 }: Props) {
+  const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
 
   // Read once per mount, on purpose: the sheet says when it was printed, and
@@ -155,7 +157,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     return (
       <thead>
         <tr>
-          <th className="p-daycol">Gün</th>
+          <th className="p-daycol">{t('Gün')}</th>
           {state.settings.hours.map((hour, s) => {
             const groups = clock[s] ?? [];
             return (
@@ -259,12 +261,8 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           <b>
             {title} ({chosen}/{items.length})
           </b>
-          <button className="btn" onClick={() => setAll(kind, true)}>
-            Tümü
-          </button>
-          <button className="btn" onClick={() => setAll(kind, false)}>
-            Hiçbiri
-          </button>
+          <button className="btn" onClick={() => setAll(kind, true)}>{t('Tümü')}</button>
+          <button className="btn" onClick={() => setAll(kind, false)}>{t('Hiçbiri')}</button>
         </div>
         <div className="pick-items">
           {items.map((x) => (
@@ -455,7 +453,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
 
       <aside>
         <div className="panel no-print">
-          <h2>Çıktı</h2>
+          <h2>{t('Çıktı')}</h2>
           <p className="hint">
             Her sınıf ve her öğretmen ayrı sayfaya basılır (<b>A4 yatay</b>). Yazdırma
             penceresinde <b>kenar boşlukları: varsayılan</b> ve <b>arka plan grafikleri:
@@ -487,7 +485,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
           </div>
 
           {pageCount === 0 && (
-            <div className="warn-box">Hiçbir sayfa seçili değil, basılacak bir şey yok.</div>
+            <div className="warn-box">{t('Hiçbir sayfa seçili değil, basılacak bir şey yok.')}</div>
           )}
         </div>
 
@@ -501,13 +499,14 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             the reader's own adjustment on top of it. One knob would have had
             no room for "biraz daha büyük olsun". */}
         <div className="panel no-print">
-          <h2>Sayfa düzeni</h2>
+          <h2>{t('Sayfa düzeni')}</h2>
           <p className="hint">
-            Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar
-            büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez, bu ayrı bir ayardır.
+            {t(
+              'Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez, bu ayrı bir ayardır.',
+            )}
           </p>
 
-          <h3>Bir kâğıda kaç program</h3>
+          <h3>{t('Bir kâğıda kaç program')}</h3>
           <div className="form-row">
             {PER_SHEET_LABELS.map((x) => (
               <button
@@ -527,7 +526,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             <b>{Math.ceil(pageCount / options.perSheet)}</b> kâğıt
           </p>
 
-          <h3>Kâğıttaki yazı</h3>
+          <h3>{t('Kâğıttaki yazı')}</h3>
           <div className="form-row">
             {PRINT_SIZE_LABELS.map((x) => (
               <button
@@ -547,10 +546,11 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             buttons do not fit a strip that is already measured for spill at
             150%, and this is a term-long decision, not a per-glance one. */}
         <div className="panel no-print">
-          <h2>Sayfada ne olsun</h2>
+          <h2>{t('Sayfada ne olsun')}</h2>
           <p className="hint">
-            İşareti kaldırılan şey kâğıda basılmaz. Seçiminiz bu bilgisayarda
-            hatırlanır; yedeğe girmez.
+            {t(
+              'İşareti kaldırılan şey kâğıda basılmaz. Seçiminiz bu bilgisayarda hatırlanır; yedeğe girmez.',
+            )}
           </p>
           <div className="form-col">
             {PRINT_OPTION_LABELS.map((x) => (
@@ -573,27 +573,27 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             come out with holes in it. An empty timetable printed for a parents'
             evening is the mistake this catches. */}
         <div className="panel no-print">
-          <h2>Çıktı özeti</h2>
+          <h2>{t('Çıktı özeti')}</h2>
           <table className="stat">
             <tbody>
               <tr>
-                <td>Program</td>
+                <td>{t('Program')}</td>
                 <td className="num">{pageCount}</td>
               </tr>
               <tr>
-                <td>Kâğıt</td>
+                <td>{t('Kâğıt')}</td>
                 <td className="num">{Math.ceil(pageCount / options.perSheet)}</td>
               </tr>
               <tr>
-                <td>Sayfa</td>
-                <td className="num">A4 yatay</td>
+                <td>{t('Sayfa')}</td>
+                <td className="num">{t('A4 yatay')}</td>
               </tr>
               <tr>
-                <td>Renk</td>
+                <td>{t('Renk')}</td>
                 <td className="num">{colored ? 'Renkli' : 'Siyah-beyaz'}</td>
               </tr>
               <tr>
-                <td>Yerleşmiş saat</td>
+                <td>{t('Yerleşmiş saat')}</td>
                 <td className="num">{placedHours}</td>
               </tr>
             </tbody>

@@ -32,6 +32,7 @@ import {
   writeDockHeight,
 } from "../theme";
 import { attachSplitter, maxDockHeight } from "../poolSplit";
+import { useT } from './T';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */
@@ -99,6 +100,7 @@ function stackCards(cards: PoolCard[]): CardStack[] {
 }
 
 export default function LessonPool({ cards, completed, onStart }: Props) {
+  const t = useT();
   // The cards ARE the hours left now: one card per block still owed, so adding
   // up their sizes is the answer. Summing `total - placed` per card would count
   // one lesson's whole remainder once per card it still has out.
@@ -150,7 +152,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
       // sentence saying so) and gives the height back to the grid. A 176px
       // tray of nothing is 176px that was carrying five teachers.
       className={open && cards.length > 0 ? "pool" : "pool pool-closed"}
-      aria-label="Yerleşmeyi bekleyen dersler"
+      aria-label={t('Yerleşmeyi bekleyen dersler')}
     >
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
@@ -159,12 +161,12 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
         className="pool-split"
         role="separator"
         aria-orientation="horizontal"
-        aria-label="Havuz yüksekliği"
+        aria-label={t('Havuz yüksekliği')}
         aria-valuenow={height}
         aria-valuemin={DOCK_H_MIN}
         aria-valuemax={Math.round(ceiling * 100) / 100}
         tabIndex={open ? 0 : -1}
-        title="Sürükleyerek havuzun boyunu ayarlayın"
+        title={t('Sürükleyerek havuzun boyunu ayarlayın')}
       />
 
       <div className="pool-head">
@@ -172,9 +174,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
           className="btn icon pool-toggle"
           disabled={cards.length === 0}
           aria-expanded={open && cards.length > 0}
-          aria-label="Havuz"
+          aria-label={t('Havuz')}
           title={
-            open ? "Havuzu kapat: ızgara bütün yüksekliği alır" : "Havuzu aç"
+            open ? t('Havuzu kapat: ızgara bütün yüksekliği alır') : t('Havuzu aç')
           }
           onClick={toggle}
         >
@@ -203,9 +205,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
         <span className="pool-count">
           {cards.length === 0 ? (
             <>
-              <strong>Hepsi yerleşti</strong>
+              <strong>{t('Hepsi yerleşti')}</strong>
               <span className="pool-sub">
-                {completed} dersin tamamı programda
+                {t('{n} dersin tamamı programda', { n: completed })}
               </span>
             </>
           ) : (
@@ -249,9 +251,19 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
                 title={
                   i > 0
                     ? undefined
-                    : `${c.top} · ${c.bottom} ${c.subject} · ${c.size} saatlik blok` +
-                      (s.cards.length > 1 ? ` · ${s.cards.length} tane bekliyor` : "") +
-                      ` · dersin ${c.placed}/${c.total} saati yerleşti`
+                    : t('{ust} · {alt} {brans} · {boy} saatlik blok', {
+                        ust: c.top,
+                        alt: c.bottom,
+                        brans: c.subject,
+                        boy: c.size,
+                      }) +
+                      (s.cards.length > 1
+                        ? t(' · {n} tane bekliyor', { n: s.cards.length })
+                        : '') +
+                      t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
+                        yerlesen: c.placed,
+                        toplam: c.total,
+                      })
                 }
               >
                 <span className="card-top">{c.top}</span>

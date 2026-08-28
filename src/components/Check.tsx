@@ -7,6 +7,7 @@ import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
 import type { Id, State } from '../types';
 import CapacityRows from './CapacityRows';
+import { T, useT } from './T';
 
 interface Props {
   state: State;
@@ -41,6 +42,7 @@ function Section({
 }
 
 export default function Check({ state }: Props) {
+  const t = useT();
   const report = useMemo(() => buildReport(state), [state]);
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
@@ -60,9 +62,8 @@ export default function Check({ state }: Props) {
     return (
       <>
         <div className="empty-screen">
-          <strong>Kontrol edilecek bir şey yok.</strong>
-          <b>Okul</b> sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra
-          buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.
+          <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
+          <T k="**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
         </div>
       </>
     );
@@ -73,16 +74,15 @@ export default function Check({ state }: Props) {
       {!report.hasProblem ? (
         <div className="panel">
           <div className={conflicts.length > 0 ? 'warn-box' : 'ok-box'}>
-            <b>Sorun görünmüyor.</b> Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri
-            yüklenen ders saatlerini karşılıyor. Program dizilebilir.
+            <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
           </div>
         </div>
       ) : (
         <div className="panel">
           <div className="warn-box">
-            <b>Dikkat edilmesi gereken noktalar var.</b> Aşağıdaki listelerde{' '}
-            <span className="badge impossible">İmkânsız</span> yazan satırlar programın
-            dizilmesini engeller. Önce onları çözün.
+            <T k="**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde" />{' '}
+            <span className="badge impossible">{t('İmkânsız')}</span>{' '}
+            <T k="yazan satırlar programın dizilmesini engeller. Önce onları çözün." />
           </div>
         </div>
       )}
@@ -101,59 +101,59 @@ export default function Check({ state }: Props) {
             and the one it never answered: everything else here is about what
             COULD go wrong, and this is what is actually done. */}
         <div className="panel">
-          <h2>Programın durumu</h2>
+          <h2>{t('Programın durumu')}</h2>
           <table className="stat">
             <tbody>
               <tr>
-                <td>Yerleşmiş saat</td>
+                <td>{t('Yerleşmiş saat')}</td>
                 <td className="num">
                   {placed} / {totalWanted}
                 </td>
               </tr>
               <tr>
-                <td>Tamamlanan ders</td>
+                <td>{t('Tamamlanan ders')}</td>
                 <td className="num">
                   {doneLessons} / {state.lessons.length}
                 </td>
               </tr>
               <tr>
-                <td>Haftanın doluluğu</td>
+                <td>{t('Haftanın doluluğu')}</td>
                 <td className="num">%{fillPercent}</td>
               </tr>
               <tr>
-                <td>Boş kalan sınıf saati</td>
+                <td>{t('Boş kalan sınıf saati')}</td>
                 <td className="num">{freeSlots}</td>
               </tr>
             </tbody>
           </table>
           {placed < totalWanted && (
             <p className="hint">
-              Kalan <b>{totalWanted - placed}</b> saat havuzda bekliyor.{' '}
-              <b>Program</b> sekmesindeki <b>Otomatik diz</b> ile yerleştirebilirsiniz.
+              <T
+                k="Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz."
+                vars={{ n: totalWanted - placed }}
+              />
             </p>
           )}
         </div>
 
         {conflicts.length > 0 && (
           <div className="panel kontrol-sorun">
-            <h2>Kapalı saatte ders ({conflicts.length})</h2>
+            <h2>{t('Kapalı saatte ders ({n})', { n: conflicts.length })}</h2>
             <p className="hint">
-              Bu dersler programa konduktan <b>sonra</b> o saatler kapatıldı. Hiçbiri
-              silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle işaretli. Ya saati
-              yeniden açın, ya dersi başka saate taşıyın.
+              <T k="Bu dersler programa konduktan **sonra** o saatler kapatıldı. Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle işaretli. Ya saati yeniden açın, ya dersi başka saate taşıyın." />
             </p>
             <table className="list">
               <thead>
                 <tr>
-                  <th className="w-col-lg">Durum</th>
-                  <th>Açıklama</th>
+                  <th className="w-col-lg">{t('Durum')}</th>
+                  <th>{t('Açıklama')}</th>
                 </tr>
               </thead>
               <tbody>
                 {conflicts.map((c) => (
                   <tr key={`${c.classId}|${c.day}|${c.hour}`}>
                     <td>
-                      <span className="badge impossible">Kapalı saat</span>
+                      <span className="badge impossible">{t('Kapalı saat')}</span>
                     </td>
                     <td>{c.reason}</td>
                   </tr>
@@ -165,17 +165,15 @@ export default function Check({ state }: Props) {
 
         {report.violations.length > 0 && (
           <div className="panel kontrol-sorun">
-            <h2>Kural ihlalleri ({report.violations.length})</h2>
+            <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
             <p className="hint">
-              Dizilmiş program, <b>Ayarlar → Kurallar</b> bölümünde girdiğiniz sınırları
-              aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece
-              burada listelenir.
+              <T k="Dizilmiş program, **Ayarlar → Kurallar** bölümünde girdiğiniz sınırları aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece burada listelenir." />
             </p>
             <table className="list">
               <thead>
                 <tr>
-                  <th className="w-col-lg">Durum</th>
-                  <th>Açıklama</th>
+                  <th className="w-col-lg">{t('Durum')}</th>
+                  <th>{t('Açıklama')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -183,7 +181,7 @@ export default function Check({ state }: Props) {
                   <tr key={v.key}>
                     <td>
                       <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                        {v.level === 'block' ? 'Kural dışı' : 'Uyarı'}
+                        {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
                       </span>
                     </td>
                     <td>{v.message}</td>
@@ -198,14 +196,15 @@ export default function Check({ state }: Props) {
           <div className="panel kontrol-sorun">
             <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
             <p className="hint">
-              Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş
-              hücre bile kalmamış.
+              {t(
+                'Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş hücre bile kalmamış.',
+              )}
             </p>
             <table className="list">
               <thead>
                 <tr>
-                  <th className="w-col-2xl">Ders</th>
-                  <th>Sebep</th>
+                  <th className="w-col-2xl">{t('Ders')}</th>
+                  <th>{t('Sebep')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -229,23 +228,25 @@ export default function Check({ state }: Props) {
         <aside>
           <Section
             id="kontrol-ogretmenler"
-            title="Öğretmenler"
+            title={t('Öğretmenler')}
             rows={report.teachers}
-            colorOf={(id) => state.teachers.find((t) => t.id === id)?.color ?? null}
-            description="Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz."
+            colorOf={(id) => state.teachers.find((x) => x.id === id)?.color ?? null}
+            description={t('Öğretmenin müsait saat sayısı, ona yüklenen ders saatinden az olamaz.')}
           />
           <Section
             id="kontrol-siniflar"
-            title="Sınıflar"
+            title={t('Sınıflar')}
             rows={report.classes}
             colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
-            description="Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı."
+            description={t('Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı.')}
           />
           <Section
             id="kontrol-derslikler"
-            title="Derslikler"
+            title={t('Derslikler')}
             rows={report.rooms}
-            description="Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır."
+            description={t(
+              'Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.',
+            )}
           />
         </aside>
       </div>

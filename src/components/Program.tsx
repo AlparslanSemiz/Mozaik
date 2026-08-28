@@ -33,6 +33,8 @@ import Grid from './Grid';
 import type { GridCell, GridRow } from './Grid';
 import LessonPool from './LessonPool';
 import type { PoolCard } from './LessonPool';
+import { T, useT } from './T';
+import type { Translate } from './T';
 
 interface Props {
   state: State;
@@ -57,14 +59,19 @@ function describeBar(
   dragging: boolean,
   solver: SolverRun,
   view: View,
+  t: Translate,
 ): { text: string; level: string } {
   if (reason !== null) return { text: reason.text, level: reason.level === 'warn' ? 'warn' : 'bad' };
-  if (dragging) return { text: 'Buraya bırakılabilir.', level: 'ok' };
+  if (dragging) return { text: t('Buraya bırakılabilir.'), level: 'ok' };
 
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
-      text: `Otomatik diziliyor… ${p.placedBlocks}/${p.totalBlocks} blok · ${seconds(p.elapsedMs)} sn`,
+      text: t('Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn', {
+        yerlesen: p.placedBlocks,
+        toplam: p.totalBlocks,
+        sure: seconds(p.elapsedMs),
+      }),
       level: 'busy',
     };
   }
@@ -78,28 +85,47 @@ function describeBar(
     return {
       text:
         view === 'teacher'
-          ? 'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.'
-          : 'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+          ? t(
+              'Satırlar öğretmen. Hücrede sınıf ve derslik yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+            )
+          : t(
+              'Satırlar sınıf. Hücrede öğretmen ve branşı yazar. Yerleşmiş dersi sürükleyerek taşıyın, sağ tıklayınca havuza döner.',
+            ),
       level: '',
     };
   }
 
   if (done.stuck.length === 0) {
     return {
-      text: `Program dizildi. ${done.placedBlocks} blok yerleşti (${seconds(done.elapsedMs)} sn). Ctrl+Z ile geri alabilirsiniz.`,
+      text: t('Program dizildi. {n} blok yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
+        n: done.placedBlocks,
+        sure: seconds(done.elapsedMs),
+      }),
       level: 'ok',
     };
   }
 
   const worst = done.stuck[0]!;
   const others =
-    done.stuck.length > 1 ? ` (ve ${done.stuck.length - 1} ders daha)` : '';
+    done.stuck.length > 1 ? t(' (ve {n} ders daha)', { n: done.stuck.length - 1 }) : '';
   const head =
     done.phase === 'cancelled'
-      ? `Durduruldu. ${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`
-      : `${done.placedBlocks}/${done.totalBlocks} blok yerleşti.`;
+      ? t('Durduruldu. {yerlesen}/{toplam} blok yerleşti.', {
+          yerlesen: done.placedBlocks,
+          toplam: done.totalBlocks,
+        })
+      : t('{yerlesen}/{toplam} blok yerleşti.', {
+          yerlesen: done.placedBlocks,
+          toplam: done.totalBlocks,
+        });
   return {
-    text: `${head} ${worst.name}: ${worst.missing} saat yerleşemedi. ${worst.reason}${others}.`,
+    text: t('{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.', {
+      bas: head,
+      ders: worst.name,
+      saat: worst.missing,
+      sebep: worst.reason,
+      digerleri: others,
+    }),
     level: done.phase === 'cancelled' ? 'warn' : 'bad',
   };
 }
@@ -109,7 +135,7 @@ function roomLetter(ix: Index, roomId: string | null | undefined): string {
   return ix.roomById.get(roomId)?.name ?? '';
 }
 
-function buildRows(d: State, ix: Index, view: View): GridRow[] {
+function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
   // Availability is edited after the timetable is laid out, and a cell whose
   // hour has since been closed used to look perfectly normal: the hatch is only
   // drawn on EMPTY cells, so the card simply covered it up.
@@ -211,7 +237,7 @@ function buildRows(d: State, ix: Index, view: View): GridRow[] {
       id: group.id,
       kind: 'class' as const,
       name: group.name,
-      secondary: letter === '' ? 'derslik yok' : `${letter} dersliği`,
+      secondary: letter === '' ? t('derslik yok') : t('{ad} dersliği', { ad: letter }),
       color: group.color,
       cells,
       closed,
@@ -287,6 +313,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
 }
 
 export default function Program({ state, change, solver, view }: Props) {
+  const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
   const notify = useToast();
 
@@ -304,7 +331,7 @@ export default function Program({ state, change, solver, view }: Props) {
           : evictionNotice(
               ix,
               pushedOut.map((id) => ix.lessonById.get(id)).filter((x) => x !== undefined),
-            ).replace('dönecek', 'döndü');
+            ).replace(t('dönecek'), t('döndü'));
 
       change((d) => {
         // Lifting the old block and laying the new one down are ONE reducer
@@ -339,12 +366,21 @@ export default function Program({ state, change, solver, view }: Props) {
 
   const { start, dragging, reason } = useDrag(drop);
 
-  const rows = useMemo(() => buildRows(state, ix, view), [state, ix, view]);
+  // `t` is IN the deps and not an import, so a language switch rebuilds the
+  // rows. A module-level translator would read the new language only the next
+  // time `state` happened to change.
+  const rows = useMemo(() => buildRows(state, ix, view, t), [state, ix, view, t]);
   const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
 
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
-  const { text: barText, level: barLevel } = describeBar(reason, dragging !== null, solver, view);
+  const { text: barText, level: barLevel } = describeBar(
+    reason,
+    dragging !== null,
+    solver,
+    view,
+    t,
+  );
 
   const cellRemove = useCallback(
     (rowId: string, day: number, hour: number) => {
@@ -454,13 +490,13 @@ export default function Program({ state, change, solver, view }: Props) {
     return (
       <>
         <div className="empty-screen">
-          <strong>Henüz dizilecek ders yok.</strong>
-          Önce <b>Okul</b> sekmesinden derslikleri, öğretmenleri ve sınıfları girin,
-          sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından <b>Müsaitlik</b>{' '}
-          sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.
+          <strong>{t('Henüz dizilecek ders yok.')}</strong>
+          <T k="Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin." />
           <br />
           <br />
-          Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.
+          {t(
+            'Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.',
+          )}
         </div>
       </>
     );
@@ -492,11 +528,9 @@ export default function Program({ state, change, solver, view }: Props) {
         {solver.result !== null && !solver.running && (
           <span className="bar-actions">
             {solver.result.stuck.length > 0 && (
-              <span className="hint inline">Ayrıntı: Kontrol sekmesi.</span>
+              <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
             )}
-            <button className="btn" onClick={solver.clear}>
-              Tamam
-            </button>
+            <button className="btn" onClick={solver.clear}>{t('Tamam')}</button>
           </span>
         )}
       </div>
@@ -508,7 +542,7 @@ export default function Program({ state, change, solver, view }: Props) {
         <Grid
           settings={state.settings}
           rows={rows}
-          firstColumnTitle={view === 'teacher' ? 'Öğretmen' : 'Sınıf'}
+          firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
           draggedRowId={dragging?.rowId ?? null}
           onCellRemove={cellRemove}
           onCellMoveStart={cellMoveStart}

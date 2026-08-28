@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import type { ParseResult } from '../../import';
+import { T, useT } from '../T';
 
 /** The Excel paste box: preview, then add. It never adds directly. */
 export default function Paste<T>({
@@ -28,6 +29,7 @@ export default function Paste<T>({
   rowText: (x: T) => string;
   onAdd: (rows: T[]) => void;
 }) {
+  const t = useT();
   const [text, setText] = useState('');
   const [result, setResult] = useState<ParseResult<T> | null>(null);
 
@@ -37,8 +39,10 @@ export default function Paste<T>({
     <div className="panel inset">
       <h3>{title}</h3>
       <p className="hint">
-        Excel'de sütunları seçip kopyalayın, aşağıya yapıştırın. Beklenen sıra:{' '}
-        <b>{example}</b>
+        <T
+          k="Excel'de sütunları seçip kopyalayın, aşağıya yapıştırın. Beklenen sıra: **{ornek}**"
+          vars={{ ornek: example }}
+        />
       </p>
       <textarea
         rows={6}
@@ -47,12 +51,10 @@ export default function Paste<T>({
           setText(e.target.value);
           setResult(null);
         }}
-        placeholder="Buraya yapıştırın..."
+        placeholder={t('Buraya yapıştırın...')}
       />
       <div className="form-row spaced">
-        <button className="btn" onClick={() => setResult(parse(text))}>
-          Önizle
-        </button>
+        <button className="btn" onClick={() => setResult(parse(text))}>{t('Önizle')}</button>
         <button
           className="btn"
           onClick={() => {
@@ -60,9 +62,7 @@ export default function Paste<T>({
             setText('');
             setResult(null);
           }}
-        >
-          Vazgeç
-        </button>
+        >{t('Vazgeç')}</button>
       </div>
 
       {result !== null && (
@@ -75,11 +75,14 @@ export default function Paste<T>({
             </div>
           )}
           {result.accepted.length === 0 ? (
-            <div className="error-box">Okunabilir satır bulunamadı.</div>
+            <div className="error-box">{t('Okunabilir satır bulunamadı.')}</div>
           ) : (
             <>
               <div className="ok-box">
-                <b>{result.accepted.length} satır okundu.</b> Aşağıdakiler eklenecek:
+                <T
+                  k="**{n} satır okundu.** Aşağıdakiler eklenecek:"
+                  vars={{ n: result.accepted.length }}
+                />
               </div>
               <ul className="paste-preview">
                 {result.accepted.map((x, i) => (
