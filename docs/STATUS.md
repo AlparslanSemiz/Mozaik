@@ -1,7 +1,39 @@
 # STATUS — Nerede olduğumuz
 
 Son güncelleme: 2026-08-28 (otuz birinci oturum: **Y turu** — arayüzün şekli;
-on madde, hepsi ölçülerek)
+on madde, hepsi ölçülerek — ve **`v1.4.0` yayınlandı**)
+
+---
+
+## Sürüm — v1.4.0 (2026-08-28)
+
+Y turu etiketlendi ve itildi. Bu sürümün taşıdığı iki şey **koddan önce
+bekliyordu**: görev çubuğu işaretinin `.ico`'su (tuzak 78, eşik 20'ye indi) ve
+`kur.ps1`'in kısayol tazelemesi. İkisi de v1.3.0'ın exe'sinde yoktu, yani
+babanın makinesine ancak bu sürümle ulaşırlar.
+
+Etiketten önce koşan kapı, **hiçbir şey `dist/`'e dokunmadan**:
+
+| Katman | Sonuç |
+|---|---|
+| `tipler` (tsc x2) | ✓ |
+| Birim (Vitest) | **612** ✓ |
+| E2E (`file://`) | **466** ✓ |
+| Site · sunucu · klasör (http) | **22** ✓ |
+| Çözücü stresi | **7** ✓ (50,3 sn) |
+
+**Bir kayıt, çünkü tekrarlanacak:** ilk tam koşuda iki test düştü
+(`dil.spec.ts` ve `hareket.spec.ts`), ikisi de tek başına koşturulunca geçti,
+ve ikinci tam koşuda **466/466** yeşil geçti. Yani bu ikisi yük altında
+kararsız — geçen turun "flake'lerin sebebi kendi derlemelerimdi" teşhisinin
+kapsamadığı bir kalıntı. Bu koşuda hiçbir derleme süitle üst üste binmedi,
+o yüzden sebep o değil. Düşen iki testin ortak yanı bir **reload'dan sonra
+okuma**: `chooseLang` ve `revealRibbon`. Bir sonraki turda bakılacak; şimdilik
+bir sürümü durduracak bir kusur değil, ama **yazılı** duruyor.
+
+Bir tuzak da bu oturumda ikinci kez göründü: `npm run kontrol 2>&1 | tail -60`
+zincirinde okunan çıkış kodu **`tail`'inki**, yani iki kırmızı testin üstünde
+0 gördüm (tuzak 62). Boru varsa `PIPESTATUS` okunur.
 
 ---
 

@@ -9,17 +9,23 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **Y turu bitti (2026-08-28): on maddenin onu, ve `v1.4.0` YAYINDA.**
+> Sekme adları değişti (`Kurulum → Okul`, `Yazdır → Çıktı`), Branşlar Ayarlar'dan
+> Okul'a geldi, Kontrol tek sayfa oldu, listeler paneli dolduruyor ve yan sütun
+> on dört ekranın on dördünde aynı x'te. **Şema değişmedi, yeni depolama
+> anahtarı açılmadı.** Ayrıntı ve **ölçülen her sayı** aşağıda, *Y turu —
+> arayüzün şekli* bölümünde ve [STATUS.md](STATUS.md) → *Otuz birinci oturum*.
+>
+> **Bekleyen sürüm ÇIKTI.** v1.3.0'ın exe'si eski `.ico`'yu taşıyordu; görev
+> çubuğu ikonu ve `kur.ps1`'in kısayol tazeleme düzeltmesi **v1.4.0 ile
+> ulaştı**. Babanın makinesinde denenmesi hâlâ *sende kalanlar*da.
+>
 > **W turu bitti (2026-08-27): yedi maddenin yedisi.** Ders girişi kendi
 > sekmesine çıktı (yedinci sekme, Müsaitlik ile Program arasında), havuzda
 > aynı dersin blokları tek deste, branş sırası artık Ayarlar'daki sıra.
 > **Şema değişmedi, yeni depolama anahtarı açılmadı.** İki maddenin karşılığı
 > sıfır satır kod oldu ve bu bir sonuç: ikisi de ölçüldü, zaten çözülmüş
 > çıktı. Ayrıntı aşağıda, *W turu* bölümünde.
->
-> **BİR SÜRÜM BEKLİYOR.** Görev çubuğu ikonu kodda düzeltilmiş durumda ama
-> babanın makinesindeki **v1.3.0 exe'si hâlâ eski `.ico`'yu taşıyor**; o madde
-> ancak `npm run yayinla -- 1.4.0` ile ulaşır. Aynı sürüm `kur.ps1`'in
-> kısayol tazeleme düzeltmesini de götürür.
 >
 > **V turu bitti (2026-08-27): dokuz maddenin dokuzu, ve `v1.3.0` YAYINDA.**
 > Ayrıntı ve **ölçülen her sayı** aşağıda, *V turu* bölümünde ve
