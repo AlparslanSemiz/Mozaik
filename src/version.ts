@@ -23,7 +23,7 @@
  * the `Belgelerim` folder keep their old spelling on purpose, because a key
  * whose identity changes is deleted data.
  */
-export const APP_NAME = 'Ders Programı';
+export const APP_NAME = 'Mozaik';
 
 import { t } from './i18n';
 

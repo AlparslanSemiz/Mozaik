@@ -24,12 +24,19 @@ const uri =
 // The comment is deliberately three lines: an HTML comment is the one kind of
 // comment this project SHIPS — JS and CSS are minified, this is not — and the
 // reasoning belongs in CLAUDE.md, not in my father's copy of the file.
+//
+// THE SOURCE-TEMPLATE WARNING IS PART OF THIS TEMPLATE, and it was not: it had
+// been written into index.html by hand, so running this script deleted it
+// without a word — the recipe and its output had drifted apart (pitfall 69's
+// shape). `temel.spec.ts` 77 measures that warning, so it would have come back
+// red; but a script that silently removes what a test is about to ask for is a
+// trap of its own.
 const html = `<!doctype html>
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ders Programı</title>
+    <title>Mozaik</title>
     <!-- Gömülü işaret (B3b). Kaynağı site/icon-small.svg — bir sekme
          simgesi HER ZAMAN küçüktür ve ayrıntılı işaret 16 px'te
          okunmuyor (ölçüldü). Ayrışmasını e2e/temel.spec.ts yakalar.
@@ -40,7 +47,31 @@ const html = `<!doctype html>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <!--
+      KAYNAK ŞABLONU UYARISI. Bu dosya programın kendisi değil: Vite'ın
+      şablonu. Çift tıklanınca yukarıdaki modül \`file://\` altında CORS'a
+      takılır ve geriye BOMBOŞ BEYAZ bir sayfa kalır — hata yok, ipucu yok,
+      "açılmıyor" diye okunan tam olarak bu.
+
+      Derlenmiş dosyada bu betik hiçbir şey YAPAMAZ ve bu bir umut değil,
+      bir ölçüm: vite-plugin-singlefile \`src\`'yi kaldırıp kodu gömüyor,
+      yani \`script[type="module"][src]\` orada null döner. İkisi de
+      e2e/temel.spec.ts'te ölçülüyor (bölüm 77).
+    -->
+    <script>
+      if (location.protocol === 'file:' && document.querySelector('script[type="module"][src]')) {
+        document.getElementById('root').innerHTML =
+          '<div style="max-width:42rem;margin:10vh auto;padding:0 1.5rem;color:#1a1c22;font:16px/1.6 system-ui,Segoe UI,sans-serif">' +
+          '<h1 style="font-size:1.7rem;line-height:1.25;margin:0 0 1rem">Bu dosya programın kendisi değil</h1>' +
+          '<p style="margin:0 0 1rem">Çift tıkladığınız dosya programın <b>kaynak şablonu</b>; tek başına açılmaz. Programın tamamı tek bir dosyada duruyor:</p>' +
+          '<p style="margin:0 0 1.5rem;padding:.75rem 1rem;background:#eef1f7;border-radius:.5rem;font-family:ui-monospace,Consolas,monospace"><b>dist/index.html</b></p>' +
+          '<p style="margin:0 0 1rem">O dosya yoksa ya da eskiyse, bu klasörde bir kez:<br><code style="font-family:ui-monospace,Consolas,monospace">npm run build</code></p>' +
+          '<hr style="border:0;border-top:1px solid #ccd2e0;margin:1.5rem 0">' +
+          '<p style="margin:0">Kurulum (<code style="font-family:ui-monospace,Consolas,monospace">Kur.cmd</code>) için: <code style="font-family:ui-monospace,Consolas,monospace">npm run paket</code> çalıştırın, sonra <b>dist-kurulum/Kur.cmd</b>. Depodaki <b>kurulum/Kur.cmd</b> yalnızca kaynaktır, kurmaz.</p>' +
+          '</div>';
+      }
+    </script>
+    </body>
 </html>
 `;
 writeFileSync('index.html', html);

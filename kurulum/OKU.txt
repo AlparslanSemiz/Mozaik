@@ -10,7 +10,7 @@ NASIL KURULUR
 
 1. Bu klasördeki  Kur.cmd  dosyasına çift tıklayın.
 2. Açılan pencerede yazanları okuyun; bitince "Bitti" yazacak.
-3. Masaüstünüzde "Ders Programı" adında bir kısayol oluşacak.
+3. Masaüstünüzde "Mozaik" adında bir kısayol oluşacak.
 
 Windows "bilinmeyen bir uygulama" diye bir uyarı gösterirse: "Daha fazla bilgi"
 yazısına, sonra "Yine de çalıştır" düğmesine basın. Bu uyarı, dosyanın imzalı
@@ -22,7 +22,7 @@ Yönetici hakkı istemez. Kayıt defterine (registry) hiçbir şey yazmaz.
 NASIL AÇILIR
 ------------
 
-Masaüstündeki "Ders Programı" kısayoluna çift tıklayın.
+Masaüstündeki "Mozaik" kısayoluna çift tıklayın.
 
 İki şey olur:
   - Siyah bir pencere açılır.  BU PENCEREYİ KAPATMAYIN.  Program orada
@@ -75,7 +75,7 @@ KALDIRMA
 --------
 
 1. Masaüstündeki ve Başlat menüsündeki kısayolları silin.
-2. Şu klasörü silin:   %LOCALAPPDATA%\Ders Programı
+2. Şu klasörü silin:   %LOCALAPPDATA%\Mozaik
    (Adres çubuğuna bunu yazıp Enter'a basarsanız klasör açılır.)
 
 Program başka hiçbir yere hiçbir şey yazmaz.

@@ -31,7 +31,7 @@ test.describe('36. Site sürümü', () => {
     const res = await request.get('/manifest.webmanifest');
     expect(res.status()).toBe(200);
     const manifest = JSON.parse(await res.text());
-    expect(manifest.name).toBe('Ders Programı');
+    expect(manifest.name).toBe('Mozaik');
     expect(manifest.display).toBe('standalone');
     // Installability needs a 192 and a 512; a maskable one keeps Android from
     // drawing our square inside its own circle with white corners.

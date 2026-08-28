@@ -517,14 +517,16 @@ test.describe('29. Hata yolları', () => {
         configurable: true,
         value: { getItem: blow, setItem: blow, removeItem: blow, clear: blow, key: blow, length: 0 },
       });
+      // With storage gone the language preference cannot be read either, so
+      // the app falls back to `navigator.language` — which is en-US here. That
+      // fallback is correct and `dil.spec.ts` measures it; THIS test is about
+      // the warning, so the device language is pinned rather than left to
+      // decide which dictionary the sentence below comes from.
+      Object.defineProperty(navigator, 'language', { value: 'tr-TR', configurable: true });
     });
-    // NOT `open()`, and the reason is the behaviour under test itself: with
-    // storage gone the language preference cannot be read either, so the app
-    // falls back to `navigator.language` — which in this browser is en-US.
-    // That is correct (a reader whose storage is broken should still get their
-    // own language), but it means the Turkish tab name `open()` waits for is
-    // not on screen. The warning below is what this test is about, and it is
-    // found by class rather than by wording.
+    // NOT `open()`: that helper writes the language preference into storage,
+    // and storage is exactly what has been taken away. The warning is found by
+    // class rather than by tab name for the same reason.
     await page.goto(FILE);
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
 

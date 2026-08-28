@@ -156,5 +156,5 @@ console.log('      site   → https://alparslansemiz.github.io/ders-programi/');
 console.log('      sürüm  → https://github.com/AlparslanSemiz/ders-programi/releases/latest');
 console.log('');
 console.log('  Bitince üç indirme bağlantısının 200 verdiğini görün:\n');
-console.log('      Ders-Programi.html · Ders-Programi-Windows-kurulum.zip · Ders-Programi.exe');
+console.log('      Mozaik.html · Mozaik-Windows-kurulum.zip · Mozaik.exe');
 console.log('');

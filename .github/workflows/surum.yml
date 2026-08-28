@@ -10,9 +10,9 @@
 # İlke 2 bozulmuyor: yayınlanan şey backend değil, üç dosya.
 #
 # ÜÇ VARLIK, ve üçü de aynı `dist/index.html`'i taşır:
-#   Ders-Programi.html                  çift tıkla, tarayıcıda açılır
-#   Ders-Programi-Windows-kurulum.zip   Kur.cmd + yerel sunucu
-#   Ders-Programi.exe                   kendi penceresi, Belgelerim'e yazar
+#   Mozaik.html                  çift tıkla, tarayıcıda açılır
+#   Mozaik-Windows-kurulum.zip   Kur.cmd + yerel sunucu
+#   Mozaik.exe                   kendi penceresi, Belgelerim'e yazar
 #
 # ARTI BİR DÖRDÜNCÜ, ve o bir program değil bir CÜMLE: `surum.json`. Exe'nin
 # "yeni sürüm var mı" diye sorduğu tek yer burasıdır
@@ -94,8 +94,8 @@ jobs:
       - name: adlandır ve sıkıştır
         run: |
           mkdir -p teslim
-          cp dist/index.html "teslim/Ders-Programi.html"
-          (cd dist-kurulum && zip -qr "../teslim/Ders-Programi-Windows-kurulum.zip" .)
+          cp dist/index.html "teslim/Mozaik.html"
+          (cd dist-kurulum && zip -qr "../teslim/Mozaik-Windows-kurulum.zip" .)
           ls -l teslim
 
       - uses: actions/upload-artifact@v4
@@ -139,9 +139,9 @@ jobs:
             throw "exe üretilmedi"
           }
           $mb = [math]::Round((Get-Item $exe).Length / 1MB, 2)
-          Write-Host "Ders-Programi.exe  $mb MB"
+          Write-Host "Mozaik.exe  $mb MB"
           New-Item -ItemType Directory -Force -Path teslim | Out-Null
-          Copy-Item $exe "teslim/Ders-Programi.exe"
+          Copy-Item $exe "teslim/Mozaik.exe"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -163,7 +163,7 @@ jobs:
         run: |
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
-          for f in Ders-Programi.html Ders-Programi-Windows-kurulum.zip Ders-Programi.exe; do
+          for f in Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe; do
             test -s "teslim/$f" || { echo "$f eksik ya da boş" >&2; exit 1; }
           done
 
@@ -192,8 +192,8 @@ jobs:
             echo "  npm run yayinla -- $surum   (etiketi de o atar)" >&2
             exit 1
           fi
-          boyut=$(stat -c%s teslim/Ders-Programi.exe)
-          adres="https://github.com/${{ github.repository }}/releases/latest/download/Ders-Programi.exe"
+          boyut=$(stat -c%s teslim/Mozaik.exe)
+          adres="https://github.com/${{ github.repository }}/releases/latest/download/Mozaik.exe"
           node -e "
             const fs = require('fs');
             fs.writeFileSync('teslim/surum.json', JSON.stringify({
@@ -220,9 +220,9 @@ jobs:
           # girintiyi bozuyor, ve notun kendisi düzenlenebilir kalmalı.
           gh release create "$ETIKET" \
             --repo "${{ github.repository }}" \
-            --title "Ders Programı $ETIKET" \
+            --title "Mozaik $ETIKET" \
             --notes-file depo/.github/surum-notu.md \
-            teslim/Ders-Programi.html \
-            teslim/Ders-Programi-Windows-kurulum.zip \
-            teslim/Ders-Programi.exe \
+            teslim/Mozaik.html \
+            teslim/Mozaik-Windows-kurulum.zip \
+            teslim/Mozaik.exe \
             teslim/surum.json

@@ -1,4 +1,4 @@
-﻿# Ders Programı — yerel sunucu (Windows).
+﻿# Mozaik — yerel sunucu (Windows).
 #
 # Bu betik programı BİLGİSAYARINIZDA açar. İnternete çıkmaz, hiçbir yere veri
 # göndermez, hiçbir yerden veri almaz. Yaptığı tek şey, yanındaki "site"
@@ -143,7 +143,7 @@ if ($dinleyiciler.Count -eq 0) {
 
 $adres = "http://${AnaBilgisayar}:$Port/"
 Write-Host ''
-Write-Host '  Ders Programı çalışıyor.' -ForegroundColor Green
+Write-Host '  Mozaik çalışıyor.' -ForegroundColor Green
 Write-Host "  $adres"
 Write-Host ''
 Write-Host '  Bu pencereyi KAPATMAYIN - kapatırsanız program da kapanır.'

@@ -1,6 +1,6 @@
-<img src="site/icon.svg" alt="Ders Programı" width="72">
+<img src="site/icon.svg" alt="Mozaik" width="72">
 
-# Ders Programı
+# Mozaik
 
 Bir dershanenin haftalık ders programını dizmek için yazılmış tek dosyalık bir
 araç. aSc Timetables'ın yerini alır — onun yaptığı işin bu kursla ilgili
@@ -30,9 +30,9 @@ Karar veremiyorsanız: **1'i deneyin, işinize yarıyorsa 2'yi kurun.**
 
 Hiçbir şey derlemeye gerek yok — üçü de hazır dosya olarak iner:
 
-- **[Ders-Programi.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.html)** — çift tıkla, tarayıcıda açılır
-- **[Ders-Programi-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip)** — çıkar, `Kur.cmd`'ye çift tıkla
-- **[Ders-Programi.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe)** — çift tıkla, kendi penceresinde açılır
+- **[Mozaik.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.html)** — çift tıkla, tarayıcıda açılır
+- **[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Windows-kurulum.zip)** — çıkar, `Kur.cmd`'ye çift tıkla
+- **[Mozaik.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe)** — çift tıkla, kendi penceresinde açılır
 
 Bu adresler her zaman **en son sürüme** gider; sürüm numarası bilmeye gerek
 yok. Giriş yapmak da gerekmez.
@@ -49,7 +49,7 @@ Aşağıdaki dört bölüm dördünü de adım adım anlatır.
 
 En kısa yol, ve **asıl teslim yolu** budur.
 
-1. **[Ders-Programi.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.html)** dosyasını indirin.
+1. **[Mozaik.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.html)** dosyasını indirin.
 2. Nereye isterseniz koyun — Masaüstü, Belgelerim, USB, fark etmez. Yanına
    başka hiçbir dosya gerekmez.
 3. **Çift tıklayın.** Varsayılan tarayıcınızda açılır.
@@ -93,7 +93,7 @@ olmak **gerekmez**.
 
 ### Klasörü almak
 
-**[Ders-Programi-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip)** — indirin ve **çıkarın** (zip'in içinden çalıştırmayın).
+**[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Windows-kurulum.zip)** — indirin ve **çıkarın** (zip'in içinden çalıştırmayın).
 
 Kendiniz üretmek isterseniz `npm run paket` → `dist-kurulum/`. **Babaya giden
 tek şey bu klasördür.** İçinde şunlar var:
@@ -120,8 +120,8 @@ dist-kurulum/
 
 Kurulum şunları yapar, başka hiçbir şey yapmaz:
 
-- Programı `%LOCALAPPDATA%\Ders Programı` klasörüne kopyalar.
-- **Masaüstüne** ve **Başlat menüsüne** *Ders Programı* adında birer kısayol
+- Programı `%LOCALAPPDATA%\Mozaik` klasörüne kopyalar.
+- **Masaüstüne** ve **Başlat menüsüne** *Mozaik* adında birer kısayol
   koyar.
 
 Yönetici hakkı istemez. Kayıt defterine (registry) hiçbir şey yazmaz.
@@ -129,7 +129,7 @@ Node.js **gerekmez** — sunucu Windows'un kendi PowerShell'iyle koşar.
 
 ### Açmak
 
-Masaüstündeki **Ders Programı** kısayoluna çift tıklayın. İki şey olur:
+Masaüstündeki **Mozaik** kısayoluna çift tıklayın. İki şey olur:
 
 - **Siyah bir pencere açılır. Bu pencereyi kapatmayın.** Sunucu orada
   çalışıyor; kapatırsanız program da kapanır. Pencere bilerek gizlenmedi:
@@ -160,7 +160,7 @@ Yalnız program dosyalarını tazeler; kısayollara ve verilerinize dokunmaz.
 ### Kaldırmak
 
 1. Masaüstündeki ve Başlat menüsündeki kısayolları silin.
-2. Şu klasörü silin: `%LOCALAPPDATA%\Ders Programı`
+2. Şu klasörü silin: `%LOCALAPPDATA%\Mozaik`
    (Dosya Gezgini'nin adres çubuğuna bunu yazıp Enter'a basarsanız açılır.)
 
 Program başka hiçbir yere hiçbir şey yazmaz.
@@ -214,7 +214,7 @@ her gün için ayrı bir yedek bırakır (son 10 gün).
 
 ### `.exe`'yi almak
 
-**[Ders-Programi.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe)** — tek dosya, doğrudan iner.
+**[Mozaik.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe)** — tek dosya, doğrudan iner.
 
 Kendi Windows makinenizde derlemek isterseniz (Rust ve Node kurulu olmalı):
 
@@ -228,7 +228,7 @@ Bu depo Fedora'da geliştiriliyor ve Windows'a çapraz derleme güvenilir değil
 
 ### Çalıştırmak
 
-1. `Ders-Programi.exe`'yi nereye isterseniz koyun.
+1. `Mozaik.exe`'yi nereye isterseniz koyun.
 2. **Çift tıklayın.** Program kendi penceresinde açılır — tarayıcı sekmesi
    yok, siyah pencere yok, adres çubuğu yok.
 3. Windows *"bilinmeyen yayıncı"* uyarısı gösterirse:
@@ -265,7 +265,7 @@ bağlanılamadı" yazar, program normal çalışmaya devam eder. Denetle düğme
 basmadıkça `.exe` hiçbir yere bağlanmaz: açılışta bağlanmaz, arka planda
 bağlanmaz, kendiliğinden hiç bağlanmaz.
 
-Eski sürüm `Ders-Programi.exe.eski` adıyla bir süre yanında durur ve program
+Eski sürüm `Mozaik.exe.eski` adıyla bir süre yanında durur ve program
 bir sonraki açılışta onu kendisi siler.
 
 ### Verileriniz nerede
@@ -285,7 +285,7 @@ değildir.
 
 ### Kaldırmak
 
-`Ders-Programi.exe` dosyasını silin. Kayıt defterine hiçbir şey yazılmaz,
+`Mozaik.exe` dosyasını silin. Kayıt defterine hiçbir şey yazılmaz,
 kısayol oluşturulmaz.
 
 Programın deposunu da temizlemek isterseniz `%LOCALAPPDATA%\com.dersprogrami.arac`

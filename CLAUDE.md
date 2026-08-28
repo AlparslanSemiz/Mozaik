@@ -34,7 +34,27 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain yok.
 3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Font **ağdan
    çekilmez** — gömülü font serbest, bkz. aşağıdaki güncelleme.
-4. **Türkçe.** Tek dil. i18n altyapısı yok, string dosyası yok — doğrudan Türkçe yazılır.
+4. **Türkçe KAYNAK dildir.** Beş dil konuşulur (tr · en · de · es · fr) ama
+   biri ötekilerin arasında değil: **anahtar Türkçe cümlenin kendisidir.**
+   `t('Öğretmenler')` yazılır, `t('setup.teachers')` değil.
+   > **Yeniden yazıldı (2026-08-28).** Eski hâli *"Tek dil. i18n altyapısı yok,
+   > string dosyası yok — doğrudan Türkçe yazılır"* idi ve iki sürüm boyunca
+   > yanlıştı: altyapı v2.0.0'da kuruldu, sözlük bu turda tamamlandı (786
+   > anahtar × 4 dil). Değişmeyen üç şey var ve kısıt onlar:
+   >
+   > - **JSX Türkçe okunur.** `Teachers.tsx`'i açan, ekranda çıkacak cümleyi
+   >   görür — bu dosyalar iki yıl öyle yazıldı ve öyle gözden geçirildi.
+   >   Altı yüz isim uydurulmaz, ve hiçbir isim temsil ettiği cümleden sapamaz.
+   > - **Eksik çeviri doğru TÜRKÇEYE düşer.** Bitmemiş bir sözlüğün arıza
+   >   biçimi "bu satır hâlâ Türkçe"dir, babanın ekranında
+   >   `setup.teachers.title` değil.
+   > - **`State`'e giren hiçbir metin çevrilmez.** Gün ve branş adları depoda
+   >   Türkçe kalır, ekranda çevrilir (`names.ts`). Yedek dosyası her makinede
+   >   aynı şeyi anlatır; `remapDays()` hâlâ isimden eşler (tuzak 11).
+   >
+   > Bedeli de yazılı: Türkçe metni düzenlemek çevirisini **öksüz** bırakır.
+   > `i18n.test.ts` bunu dört sözlükte birden yakalar, ve yorumları ayıklayarak
+   > yakalar (tuzak 87).
 5. **Bir dönem kullanılmadan özellik eklenmez.** Tahmine dayalı özellik = yanlış özellik.
 6. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir.
 7. **Hedef makine yavaş** — ama bu bir **varsayım**, gerekçe değil; bkz.
@@ -419,13 +439,33 @@ i18n.ts                         arayüz hangi dili konuşuyor. Yaprak. ANAHTAR
                                 Türkçe cümlenin KENDİSİ — eksik çeviri doğru
                                 Türkçeye düşer, JSX okunur kalır, altı yüz ad
                                 uydurulmaz. Bedelini i18n.test.ts öder: ölü
-                                anahtarı o yakalar. State'e GİRMEZ
+                                anahtarı o yakalar. State'e GİRMEZ.
+                                AKTİF DİLİ de burası tutar ve çıplak bir t()
+                                verir: constraints.ts "MÇ Salı 3 saatinde
+                                müsait değil" yazıyor ve useT() çağıramaz. Tek
+                                yazan applyDil(); o zaten ilk boyamadan ÖNCE ve
+                                her dil değişiminde koşuyor.
+                                ÇOĞUL sözlük DEĞERİNDE: {n:tekil|çoğul},
+                                kategoriyi Intl.PluralRules seçiyor — Fransızca
+                                0'ı "one" sayar, İspanyolca saymaz
+names.ts                        programın KENDİ koyduğu sözcükler: yedi gün ve
+                                yirmi bir branş, ve her birinin ekranda ne
+                                okunduğu. constraints.ts'in ALTINDA, çünkü
+                                entities.ts zaten constraints.ts'i çağırıyor ve
+                                blocker() bir gün adını arayüz dilinde çizmek
+                                zorunda (keys.ts'in deseni). Depoya YAZILANI
+                                değiştirmez: settings.days[].name Türkçe kalır,
+                                babanın kendi yazdığı ad olduğu gibi geçer.
+                                entities.ts yeniden dışa aktarır
 components/T.tsx                useT() ve <T>. <T> var çünkü bir cümleyi üç
                                 anahtara bölmek onu çevrilemez yapar: diller
                                 arasında değişen şey kelime SIRASI
-lang/en.ts                      İngilizce sözlük. Türkçenin sözlüğü YOK ve
-                                olmayacak — hepsi 'X': 'X' olurdu, yani altı
-                                yüz kez kaynak dili sessizce bozma şansı
+lang/{en,de,es,fr}.ts           dört sözlük, 786 anahtar. Türkçenin sözlüğü
+                                YOK ve olmayacak — hepsi 'X': 'X' olurdu, yani
+                                altı yüz kez kaynak dili sessizce bozma şansı.
+                                Ölçülen maliyet: üç sözlük daha +242 242 bayt
+                                ve açılışa 0 ms (gömülü metin taşınıyor,
+                                ayrıştırılmıyor)
 subjects.ts                     bir şeyin HANGİ branştan olduğu. Yaprak, çünkü
                                 entities.ts zaten constraints.ts'i çağırıyor:
                                 ikisinin de ihtiyacı olan kural ikisinin de
@@ -491,7 +531,10 @@ rowDrag.ts                      liste satırını sürükleme. Saf DOM, React B�
 printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
 version.ts                      HANGİ DERLEME BU. `__SURUM__`'ü okur, yoksa
-                                `0.0.0-dev`'e düşer. Hiçbir şey import etmez
+                                `0.0.0-dev`'e düşer. APP_NAME de burada:
+                                programın adı dört yerden ekrana çıkıyor
+                                (pencere başlığı · belge başlığı · okulsuz
+                                <h1> · manifest) ve tek bir yerde durmalı
 update.ts                       bu kopya nasıl güncellenir. ÜÇ yol, üç
                                 mekanizma: `sw` (site ve yerel kurulum —
                                 controllerchange), `exe` (üç Tauri komutu, üç
@@ -574,6 +617,32 @@ components/CapacityRows.tsx     kapasite tablosu, TEK çizim. Özet ve Kontrol
                                 çiziyordu; buildReport zaten buildCapacity'nin
                                 satırlarını döndürüyor, yani ikisi tek gerçek
 ```
+
+### Programın adı — ne DEĞİŞTİ, ne DEĞİŞMEDİ (2026-08-28)
+
+Ad **Mozaik**. Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik · Mosaico ·
+Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `version.ts`'teki
+`APP_NAME`.
+
+**Değişmeyenler, ve bu bir VERİ kararı:** `localStorage` anahtarları
+(`ders-programi*`) · yedek dosya adları (`ders-programi-YYYY-AA-GG.json`) ·
+`Belgelerim\Ders Programı` klasörü (`lib.rs`'in `FOLDER`'ı ve `desktop.ts`'in
+`EXE_FOLDER`'ı) · **GitHub deposunun adı**. Sonuncusu kozmetik değil:
+`update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına **derlenmiş**, yani depo
+yeniden adlandırılırsa o kopyalar bir daha hiç güncellenemez.
+
+**Güncelleme yolu kırılmıyor ve sebebi yazılı:** `update.rs` takası **çalışan
+programın kendi dosya adı** üstünden yapıyor (`current_exe()` + `.yeni`/
+`.eski`) ve indirme adresini `surum.json`'dan okuyor. Babanın makinesindeki
+`Ders-Programi.exe`, `Mozaik.exe`'yi indirir ve **kendi adıyla** yerine koyar:
+dosya adı eski kalır, içindeki program yenidir.
+
+**Kurulum yolunda tek gerçek risk kapatıldı:** `%LOCALAPPDATA%\Mozaik`'e
+kurulurken eski adla duran **kısayol siliniyor** (iki kısayol iki program
+demektir ve ikincisi artık güncellenmeyen bir kopyayı açar); eski **klasör**
+silinmiyor, yalnızca söyleniyor.
+
+---
 
 `rules.ts`, `constraints.ts`'ten **yalnızca `Index` tipini** alır (`import type`,
 derlemede silinir) — çalışma zamanında döngü yok. Anahtar üreten fonksiyonlar

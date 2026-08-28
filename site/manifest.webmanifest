@@ -1,6 +1,6 @@
 {
-  "name": "Ders Programı",
-  "short_name": "Ders Programı",
+  "name": "Mozaik",
+  "short_name": "Mozaik",
   "description": "Haftalık ders programı dizme aracı. Kurulum yok, hesap yok, internet gerekmez.",
   "lang": "tr",
   "start_url": "./",

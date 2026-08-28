@@ -1,9 +1,9 @@
-﻿# Ders Programı — kurulum.
+﻿# Mozaik — kurulum.
 #
 # Bu betik programı bilgisayarınıza kopyalar ve masaüstünüze bir kısayol
 # koyar. Yönetici hakkı istemez, kayıt defterine (registry) dokunmaz,
 # internete çıkmaz. Kaldırmak isterseniz: kısayolları ve
-# %LOCALAPPDATA%\Ders Programı klasörünü silmeniz yeter.
+# %LOCALAPPDATA%\Mozaik klasörünü silmeniz yeter.
 #
 # ---------------------------------------------------------------------------
 # Kur.cmd calls this; the .cmd is two ASCII lines because cmd.exe's code page
@@ -19,9 +19,18 @@ $ErrorActionPreference = 'Stop'
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
 
 $Kaynak = $PSScriptRoot
-$Hedef  = Join-Path $env:LOCALAPPDATA 'Ders Programı'
-$Ad     = 'Ders Programı'
-$Adres  = 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi-Windows-kurulum.zip'
+$Hedef  = Join-Path $env:LOCALAPPDATA 'Mozaik'
+$Ad     = 'Mozaik'
+$Adres  = 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Windows-kurulum.zip'
+
+# Programın eski adı. Ne veri ne de bir karar: yalnızca 2026-08-28 öncesinde
+# kurulmuş bir kopyanın diskte bıraktığı ad. Kurulan yer ve kısayol yeni adı
+# alıyor, ama ESKİ kısayol öylece bırakılırsa masaüstünde iki program görünür
+# ve biri eski sürümü açar — o yüzden bulunursa siliniyor. Eski KLASÖR
+# silinmiyor, yalnızca söyleniyor: içinde kullanıcı verisi yok (veri
+# tarayıcının deposunda ve Belgelerim'de), ama bir klasörü sessizce silmek
+# ilke 6'nın sesiyle çelişir.
+$EskiAd = 'Ders Programı'
 
 function Yaz { param([string]$Metin, [string]$Renk = 'Gray') Write-Host $Metin -ForegroundColor $Renk }
 
@@ -144,6 +153,10 @@ $hedefler = @(
   (Join-Path ([Environment]::GetFolderPath('Desktop')) "$Ad.lnk"),
   (Join-Path ([Environment]::GetFolderPath('Programs')) "$Ad.lnk")
 )
+$eskiler = @(
+  (Join-Path ([Environment]::GetFolderPath('Desktop')) "$EskiAd.lnk"),
+  (Join-Path ([Environment]::GetFolderPath('Programs')) "$EskiAd.lnk")
+)
 foreach ($lnk in $hedefler) {
   $vardi = Test-Path -LiteralPath $lnk
   if ($Guncelle -and -not $vardi) { continue }
@@ -158,6 +171,20 @@ foreach ($lnk in $hedefler) {
   if ($Guncelle) { Yaz "  Kısayol tazelendi: $lnk" } else { Yaz "  Kısayol: $lnk" }
 }
 
+# Eski adla duran kısayollar: iki kısayol iki program demektir, ve ikincisi
+# artık güncellenmeyen bir kopyayı açar.
+foreach ($lnk in $eskiler) {
+  if (Test-Path -LiteralPath $lnk) {
+    try { Remove-Item -LiteralPath $lnk -Force; Yaz "  Eski kısayol kaldırıldı: $lnk" } catch { }
+  }
+}
+$eskiKlasor = Join-Path $env:LOCALAPPDATA $EskiAd
+if (Test-Path -LiteralPath $eskiKlasor) {
+  Yaz ''
+  Yaz "  Programın eski adıyla duran bir klasör var: $eskiKlasor" 'Yellow'
+  Yaz '  İçinde veriniz YOK; isterseniz silebilirsiniz.' 'Yellow'
+}
+
 # İndirilen paket kopyalandı; Temp'te bırakmanın bir sebebi yok.
 if ($Gecici -ne '' -and (Test-Path -LiteralPath $Gecici)) {
   try { Remove-Item -LiteralPath $Gecici -Recurse -Force } catch { }
@@ -166,7 +193,7 @@ if ($Gecici -ne '' -and (Test-Path -LiteralPath $Gecici)) {
 Yaz ''
 Yaz '  Bitti.' 'Green'
 Yaz ''
-Yaz '  Programı açmak için masaüstündeki "Ders Programı" kısayoluna çift tıklayın.'
+Yaz '  Programı açmak için masaüstündeki "Mozaik" kısayoluna çift tıklayın.'
 Yaz '  Açılan siyah pencereyi KAPATMAYIN — program orada çalışıyor.'
 Yaz ''
 Yaz '  Verileriniz bu bilgisayarda, tarayıcınızın deposunda durur. Ayarlar →'

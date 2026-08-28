@@ -29,6 +29,10 @@ use tauri::Manager;
 /// The folder under Belgelerim. Turkish on purpose: this is a name my father
 /// reads in Explorer, so it falls under the same exception as the
 /// localStorage keys and the downloaded backup's file name.
+///
+/// It did NOT move when the program was renamed to Mozaik, and that is a data
+/// decision rather than an oversight: a folder somebody's timetables already
+/// live in is data. The same string is `EXE_FOLDER` in `src/desktop.ts`.
 const FOLDER: &str = "Ders Programı";
 
 /// Creates the folder on first use and hands back its path.
@@ -153,7 +157,7 @@ pub fn run() {
             update::apply_update
         ])
         .run(tauri::generate_context!())
-        .expect("Ders Programı başlatılamadı");
+        .expect("Mozaik başlatılamadı");
 }
 
 #[cfg(test)]

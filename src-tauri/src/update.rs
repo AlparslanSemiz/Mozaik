@@ -39,8 +39,14 @@ const MANIFEST_URL: &str =
     "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/surum.json";
 
 /// Suffixes hung on the running program's own file name. Appended rather than
-/// swapped into the extension: `Ders-Programi.exe.yeni` cannot be
-/// double-clicked by accident, `Ders-Programi.yeni.exe` can.
+/// swapped into the extension: `Mozaik.exe.yeni` cannot be double-clicked by
+/// accident, `Mozaik.yeni.exe` can.
+///
+/// "The running program's OWN file name" is what makes the rename to Mozaik
+/// harmless for copies already out there: a machine holding
+/// `Ders-Programi.exe` downloads whatever the manifest points at and swaps it
+/// into its own name. The file keeps the old name; the program inside it is
+/// the new one.
 const YENI: &str = "yeni";
 const ESKI: &str = "eski";
 
@@ -203,7 +209,7 @@ pub fn sweep_old(exe: &Path) {
 
 fn istemci(saniye: u64) -> Result<reqwest::Client, String> {
     reqwest::Client::builder()
-        .user_agent("DersProgrami")
+        .user_agent("Mozaik")
         .timeout(Duration::from_secs(saniye))
         .build()
         .map_err(|e| format!("Ağ hazırlanamadı: {e}"))
@@ -304,7 +310,7 @@ mod tests {
             Scratch(dir)
         }
         fn exe(&self) -> PathBuf {
-            self.0.join("Ders-Programi.exe")
+            self.0.join("Mozaik.exe")
         }
     }
 
@@ -364,7 +370,7 @@ mod tests {
 
     #[test]
     fn only_our_own_releases_are_fetched() {
-        assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Ders-Programi.exe")).is_ok());
+        assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Mozaik.exe")).is_ok());
         // v2.0.0 renames the delivery file; the gate must not care.
         assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Mozaik.exe")).is_ok());
         for bad in [

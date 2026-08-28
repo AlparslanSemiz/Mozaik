@@ -156,7 +156,7 @@ function listen() {
       console.error('Hiçbir adrese bağlanılamadı.');
       process.exit(1);
     }
-    console.log(`Ders Programı çalışıyor:  http://${HOST_NAME}:${PORT}`);
+    console.log(`Mozaik çalışıyor:  http://${HOST_NAME}:${PORT}`);
     console.log(`Klasör: ${ROOT}`);
     console.log('Kapatmak için bu pencereyi kapatın (Ctrl+C).');
   }, 50);
