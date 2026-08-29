@@ -1,7 +1,128 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-28 (otuz birinci oturum: **Y turu** — arayüzün şekli;
-on madde, hepsi ölçülerek — ve **`v1.4.0` yayınlandı**)
+Son güncelleme: 2026-08-29 (otuz ikinci oturum: **v2.0.0 dil turu** — sözlük
+bitti, beş dil, ve programın adı **Mozaik**)
+
+---
+
+## Otuz ikinci oturum — D5 · D6 · D7 · Mozaik (2026-08-29)
+
+TASKS'in *ŞİMDİ SIRADA*'sı bir sonraki oturumun ilk işini adıyla yazmıştı:
+**D5'in sözlüğü**. Bu oturum onu ve yanındaki üç maddeyi bitirdi.
+
+### Ne yapıldı
+
+| Madde | Sonuç |
+|---|---|
+| **D5** sözlük | 9 anahtar → **814**, arayüzün tamamı |
+| **D6** DE · ES · FR | üç sözlük daha, aynı 814 anahtar |
+| **D7** ilke 4 | yeniden yazıldı: Türkçe **kaynak dil** |
+| **Mozaik** | ad değişti, **verinin adı değişmedi** |
+
+### Makinenin eksik üç parçası
+
+Altyapı v2.0.0'da kurulmuştu ama sözlük yazılamıyordu, çünkü üç şey yoktu:
+
+1. **Saf modüllerin çevirmeni.** `constraints.ts` "MÇ Salı 3 saatinde müsait
+   değil" yazıyor ve `useT()` çağıramaz. `i18n.ts` zaten modül düzeyinde
+   sözlük tutuyordu; yanına **aktif dil** ve çıplak bir `t()` kondu. Tek
+   yazan `applyDil()`, ve o zaten ilk boyamadan **önce** (main.tsx) ve her dil
+   değişiminde (`setDil`, `setState`'ten önce) koşuyor.
+   Alternatifi `t`'yi parametre olarak geçirmekti: gün ve saatin yanına
+   üçüncü bir sayı-şeklinde argüman, yani **tuzak 76**.
+2. **Çoğul.** Türkçe sayıdan sonra ek almaz, öteki dördü alır. Sözlük
+   **değeri** `{n:tekil|çoğul}` yazabiliyor; kategoriyi `Intl.PluralRules`
+   seçiyor, `n === 1` değil — **Fransızca 0'ı "one" sayar, İspanyolca
+   saymaz**, ve "0 sınıf" boş bir projenin söylediği şey. Tarayıcıda gömülü:
+   sıfır bayt, çevrimdışı (ilke 3).
+3. **Veri metinlerinin sınırı.** Gün ve branş adları `State`'e yazılıyor.
+   Karar: **depoda Türkçe, ekranda çevrili.** Yeni yaprak modül
+   `src/names.ts`, ve yeri bir zorunluluk: `entities.ts` zaten
+   `constraints.ts`'i çağırıyor, yani ikisinin de ihtiyacı olan sözcükler
+   ikisinin de **altında** durmalı (`keys.ts`'in deseni).
+
+### Ölçülen — iddia edilmeyen
+
+```
+TR + EN yalnız      642 729 bayt   ·  82 ms medyan   (7 koşu, file://, 1920×1080)
+beş dil             893 424 bayt   ·  83 ms medyan
+```
+
+Yani üç sözlük daha **242 KB** ekliyor ve açılışa **1 ms bile eklemiyor**:
+gömülü metin ayrıştırılmıyor, yalnızca taşınıyor.
+
+### Sözlüğün kendi denetçileri — beşi de MUTASYONLA sınandı
+
+| Denetçi | Sabotaj | Sonuç |
+|---|---|---|
+| ölü anahtar | kaynakta olmayan bir cümle | kırmızı |
+| yuva kümesi | çeviriden `{n}` düşürüldü | kırmızı |
+| dengeli `**` | (mevcut) | — |
+| çoğulun iki biçimi | `{n:Stunden}` tek biçim | kırmızı |
+| uzun çizgi | Almanca bir cümleye `—` | kırmızı |
+| `applyDil` → aktif dil | `setAktifDil` çağrısı silindi | kırmızı |
+
+### EKRANA BAKILDI, ve on dört yerde Türkçe duruyordu
+
+Bu turun en önemli ölçümü bir test değil. **Hiçbir test göremezdi ve görmesi
+de gerekmezdi:** bütün süit `kapan.ts`'te Türkçeye sabitli, ve Türkçede `t()`
+anahtarın kendisini döndürüyor — yani **çevrilmemiş bir metin, Türkçe ekranda
+çevrilmiş olandan ayırt edilemez.**
+
+Onları bulan iki şey oldu: İngilizce açılmış sayfanın `body`'sini okuyup
+Türkçe harf arayan bir tarama, ve **Almanca ekran görüntülerine bakmak**
+(en uzun dil, en dar satır).
+
+Bulunanlar: `Dersler` sekmesinin adı · altı panel başlığı (`Derslikler (8)`,
+`Planlar (N)`, `Kural ihlalleri (N)`, `Yerleşemeyen dersler (N)`, `Kendi
+sınırı olan öğretmenler (N)`, `Şu anki ihlaller (N)`) · **ızgaranın ve
+kâğıdın gün başlıkları** · havuzun "N blok bekliyor"u · `Yazdır (N kâğıt)` ·
+üst çubuktaki durum çipi · şeridin görünüm düğmeleri ve Kontrol'ün atlama
+düğmeleri · örnek veri toast'ı · zil önizlemesinin gün listesi · branş açılır
+listeleri · `Ders (dk)`.
+
+Yanlarında **iki gerçek kusur**:
+
+- **Çoğul listelerde yoktu.** Almanca ekranda `8 Raum` yazıyordu. Sebep:
+  sayı `ListTools`'un cümlesinde değil bir **yuvadaydı**, ve bir yuvanın
+  içeriği çoğullanamaz. `countKey` prop'u eklendi — sayı artık çevrilen
+  anahtarın **içinde**.
+- **`varsayılanı: İng`** İngilizce ekranda da öyle yazıyordu. Branş
+  kısaltmasının **iki** varsayılanı var ve bu bilerek: biri karşılaştırma
+  değeri (Türkçe kalmak zorunda, yoksa aynı projenin iki oturumu
+  `subjectShorts`'a başka şey yazar), öteki çizilen. İpucu yanlış olanı
+  okuyordu.
+
+### "Reload'dan sonra flake"in sebebi bulundu, ve KOD çıktı
+
+Geçen tur STATUS'e *"`dil.spec.ts` ve `hareket.spec.ts` yük altında
+kararsız"* diye yazılmıştı ve teşhis **yük değildi**: `revealRibbon`
+yardımcısı `.main` yoksa **sessizce dönüyordu**. Boyanmamış bir sayfada
+hiçbir şey dürtülmüyor, şerit katlı kalıyor ve iddia beş saniye sonra
+düşüyordu. Artık bekliyor, bulamazsa **fırlatıyor**.
+
+Yanında ikinci bir şey: yirmi kadar test çıplak `page.reload()`'dan sonra
+ekranı okuyordu — `open()`'ın yaptığı iki bekleyişin **hiçbirini** yapmadan.
+Yeni `reopen()` yardımcısı ikisini de yapıyor.
+
+**Kalan artık:** beş tam koşunun ikisinde **bir** test düşüyor, her seferinde
+başkası, hep bir `reload`'dan sonra, ve tek başına koşunca geçiyor. İki
+worker'la da düştü, yani salt aşırı yüklenme değil. **Bir sürümü durduracak
+bir kusur değil ama yazılı duruyor** ve bir sonraki turda bakılacak.
+
+### Sayılar
+
+```
+tipler (tsc x2)                                ✓
+639 birim + 469 E2E + 22 site + 7 çözücü       temiz koşuda hepsi yeşil
+npm run patrol                                 4/4, konsol temiz
+npm run paket                                  dist-kurulum/ 952 690 bayt
+beş dilde ekran görüntüsü                      30 görüntü, BAKILDI
+```
+
+`cargo test` bu makinede **koşmadı** — Rust kurulu değil, ve `exe:test`
+zaten `kontrol`'ün parçası değil. Rust'ı derleyen tek yer
+`.github/workflows/surum.yml`.
 
 ---
 

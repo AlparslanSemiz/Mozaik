@@ -9,49 +9,49 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-> **Y turu bitti (2026-08-28): on maddenin onu, ve `v1.4.0` YAYINDA.**
-> Sekme adları değişti (`Kurulum → Okul`, `Yazdır → Çıktı`), Branşlar Ayarlar'dan
-> Okul'a geldi, Kontrol tek sayfa oldu, listeler paneli dolduruyor ve yan sütun
-> on dört ekranın on dördünde aynı x'te. **Şema değişmedi, yeni depolama
-> anahtarı açılmadı.** Ayrıntı ve **ölçülen her sayı** aşağıda, *Y turu —
-> arayüzün şekli* bölümünde ve [STATUS.md](STATUS.md) → *Otuz birinci oturum*.
+> **v2.0.0 dil turu BİTTİ (2026-08-29): D5 · D6 · D7 ve YENİ AD.**
+> Sözlük **9 anahtardan 814'e** çıktı ve arayüzün tamamını kapsıyor; dört
+> sözlük var (en · de · es · fr); ilke 4 yeniden yazıldı; program artık
+> **Mozaik**. **Şema değişmedi, yeni depolama anahtarı açılmadı** — ve bu
+> turun en önemli cümlesi bu: `ders-programi*` anahtarları, yedek dosya
+> adları ve `Belgelerim\Ders Programı` klasörü **kıpırdamadı**.
+> Ayrıntı ve **ölçülen her sayı** [STATUS.md](STATUS.md) → *Otuz ikinci
+> oturum*.
 >
-> **Bekleyen sürüm ÇIKTI.** v1.3.0'ın exe'si eski `.ico`'yu taşıyordu; görev
-> çubuğu ikonu ve `kur.ps1`'in kısayol tazeleme düzeltmesi **v1.4.0 ile
-> ulaştı**. Babanın makinesinde denenmesi hâlâ *sende kalanlar*da.
+> **Bir sonraki oturumun ilk işi — SÜRÜM ÇIKARMAK.**
+> `npm run yayinla -- 2.0.0`. Bu sürüm babanın makinesine iki şey taşıyor ve
+> ikisi de kodda bekliyor: yeni ad ve beş dil. Etiketten önce
+> `npm run kontrol` yeşil olmalı ve **hiçbir şey `dist/`'e dokunmamalı**.
+> Yayınlandığında Release'in varlık adları da değişecek:
+> `Mozaik.html` · `Mozaik-Windows-kurulum.zip` · `Mozaik.exe` · `surum.json`.
+> Babanın makinesindeki `Ders-Programi.exe` bunu **yine de** alır: takas
+> çalışan programın kendi dosya adı üstünden yapılıyor, adres
+> `surum.json`'dan okunuyor.
 >
-> **W turu bitti (2026-08-27): yedi maddenin yedisi.** Ders girişi kendi
-> sekmesine çıktı (yedinci sekme, Müsaitlik ile Program arasında), havuzda
-> aynı dersin blokları tek deste, branş sırası artık Ayarlar'daki sıra.
-> **Şema değişmedi, yeni depolama anahtarı açılmadı.** İki maddenin karşılığı
-> sıfır satır kod oldu ve bu bir sonuç: ikisi de ölçüldü, zaten çözülmüş
-> çıktı. Ayrıntı aşağıda, *W turu* bölümünde.
+> **Bu turun bıraktığı tek açık madde:**
+> - [ ] **Bir testlik artık: "reload'dan sonra düşme".** Sebebin BİRİ bulundu
+>       ve kod çıktı (`revealRibbon` `.main` yoksa sessizce dönüyordu), ama
+>       beş tam koşunun ikisinde hâlâ **bir** test düşüyor — her seferinde
+>       başkası, hep bir `reload`'dan sonra, tek başına koşunca geçiyor. İki
+>       worker'la da düştü, yani salt aşırı yüklenme değil. Bir sürümü
+>       durduracak bir kusur değil; bakılacak.
 >
-> **V turu bitti (2026-08-27): dokuz maddenin dokuzu, ve `v1.3.0` YAYINDA.**
-> Ayrıntı ve **ölçülen her sayı** aşağıda, *V turu* bölümünde ve
-> [STATUS.md](STATUS.md) → *Yirmi sekizinci oturum*.
->
-> **Dil turunun MAKİNESİ kuruldu ve kanıtlandı (aşağıda, v2.0.0 → DİL).**
-> Bir sonraki oturumun ilk işi onun **sözlüğü**: 720 dizgenin 9'u çevrildi,
-> yani İngilizceye geçen biri bugün ekranın çoğunu Türkçe görür. Bu
-> tasarlanmış geri düşme yolu — anahtar Türkçe cümlenin kendisi olduğu için
-> eksik çeviri anahtar adı değil doğru Türkçe gösterir — ama yarısı çevrilmiş
-> bir program teslim edilecek bir şey değil.
-> **Bir dosyayı `t()`'ye taşımak Türkçe ekranda NO-OP**, ve 440 E2E testi
-> bunu her koşuda doğruluyor: kalan iş parça parça, güvenle, ve istenildiği
-> yerde durdurulabilir biçimde yapılabilir.
->
-> **Sende kalanlar — kodda değil:**
-> 1. **Windows'ta denensin.** Artık indirilebilir:
->    `releases/latest/download/Ders-Programi.exe`. Bu makinede ölçülemeyen
->    dört şey aynı koşuda görülür: exe'nin kendini gerçekten değiştirmesi,
->    görev çubuğundaki ikonun yeni hâli, SmartScreen'in ne dediği, ve
->    WebView2'nin yazdırma diyaloğu.
+> **Sende kalanlar — kodda değil, ve üçü de geçen turdan devrediyor:**
+> 1. **Windows'ta denensin.** `releases/latest/download/Mozaik.exe`. Bu
+>    makinede ölçülemeyen dört şey aynı koşuda görülür: exe'nin kendini
+>    gerçekten değiştirmesi, görev çubuğundaki ikon, SmartScreen'in ne
+>    dediği, ve WebView2'nin yazdırma diyaloğu. **Yeni:** ilk kurulumda
+>    `kur.ps1` eski adla duran kısayolu siliyor — o da orada görülecek.
 > 2. **GitHub Pages hâlâ başkasına gidiyor.** `AlparslanSemiz.github.io`
 >    deposunda Settings → Pages → Custom domain temizlenecek **ve** kökteki
 >    `CNAME` silinecek. Kaldırmanın GameMetrix'i kırmayacağı ölçülmüştü.
 > 3. **Babanın gerçek listesi** — hâlâ v0'ın çıkma şartı, ve hâlâ tek
 >    bekleyen büyük şey.
+>
+> **DEPONUN ADI DEĞİŞMEYECEK.** `ders-programi` kalıyor ve bu kozmetik değil:
+> `update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına **derlenmiş**. Depo
+> yeniden adlandırılırsa babanın makinesindeki kopya bir daha hiç
+> güncellenemez.
 
 ### V turu — dokuz madde — **BİTTİ ✅** (2026-08-27)
 
@@ -1479,37 +1479,42 @@ Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
 - [x] **D4 Ayarlar → Görünüm'de dil seçici.** Her dil **kendi adını kendi
       dilinde** söylüyor — bir dil menüsünü, uygulamanın o an konuştuğu dili
       henüz bilmeyen biri okur.
-- [~] **D5 SÖZLÜK — 9 / ~720 anahtar.** Kabuk (altı sekme + "Bölümler" +
-      dil paneli) çevrildi; **gerisi hâlâ Türkçe.** Bu bir kusur değil
-      tasarlanmış geri düşme yolu, ama **İngilizceye geçen biri bugün
-      ekranın çoğunu Türkçe görür.**
-      Yüzey ölçüldü: **720 dizge, 47 dosya**; en ağırları
-      `settings/Data.tsx` (113), `settings/Appearance.tsx` (57),
-      `App.tsx` (43), `Ribbon.tsx` (40), `setup/Teachers.tsx` (39).
-      **Bir dosyayı `t()`'ye taşımak Türkçe ekranda NO-OP** — 440 E2E testi
-      bunu her koşuda doğruluyor — yani kalan iş parça parça ve güvenle
-      yapılabilir.
-- [ ] **D6 DE · ES · FR.** Yapı doğrulandıktan sonra çeviri mekanik iş, ve
-      yanlış bir çeviri hiçbir testte kırmızıya dönmez — o yüzden sonraki tur.
-      Beş dile çıkıldığında `systemDil()`'in geri düşme dili **İngilizce**
-      olacak; bugün Türkçe, çünkü tam sözlüğü olan tek dil o.
-- [ ] **D7 İLKE 4 yeniden yazılacak.** Bugünkü hâli hâlâ "Tek dil. i18n
-      altyapısı yok, string dosyası yok" diyor ve artık doğru değil. Sözlük
-      bitince yazılacak — yarısı çevrilmiş bir program için "çok dilli" demek
-      de doğru olmazdı.
+- [x] **D5 SÖZLÜK — BİTTİ (2026-08-29). 9 → 814 anahtar.** Arayüzün tamamı
+      `t()`'den geçiyor. Makinenin eksik üç parçası da bu turda kondu: saf
+      modüller için **aktif dil + çıplak `t()`** (bkz. tuzak 76 — alternatifi
+      `t`'yi parametre geçirmekti), **çoğul** (`{n:tekil|çoğul}`, kategoriyi
+      `Intl.PluralRules` seçiyor), ve **veri metinlerinin sınırı**
+      (`src/names.ts`: depoda Türkçe, ekranda çevrili).
+      **Asıl ölçüm bir test değil:** hiçbir test çevrilmemiş metni göremez,
+      çünkü süit Türkçeye sabitli ve Türkçede `t()` anahtarın kendisini
+      döndürüyor. İngilizce ekranın gövdesi tarandı ve Almanca ekran
+      görüntülerine **bakıldı**; on dört yerde Türkçe duruyordu, ikisi gerçek
+      kusurdu (listelerde çoğul yoktu; kısaltma ipucu yanlış varsayılanı
+      okuyordu). Ayrıntı [STATUS.md](STATUS.md) → *Otuz ikinci oturum*.
+- [x] **D6 DE · ES · FR — BİTTİ (2026-08-29).** Aynı 814 anahtar, dört sözlük.
+      `systemDil()`'in geri düşme dili Türkçeden **İngilizceye** çevrildi.
+      Sözlüğün beş denetçisi de **mutasyonla** sınandı (ölü anahtar · yuva
+      kümesi · dengeli `**` · çoğulun iki biçimi · uzun çizgi), beşi de
+      kırmızıya döndü.
+      **Ölçülen maliyet:** üç sözlük daha **+242 KB** ve açılışa **0 ms**
+      (82 → 83 ms medyan). Gömülü metin ayrıştırılmıyor, taşınıyor.
+- [x] **D7 İLKE 4 yeniden yazıldı (2026-08-29).** Yerine geçen şey hâlâ bir
+      **kısıt**: Türkçe kaynak dildir, anahtar Türkçe cümlenin kendisidir,
+      eksik çeviri doğru Türkçeye düşer, ve `State`'e giren hiçbir metin
+      çevrilmez.
 
-### v2.0.0 turu — kalan: YENİ AD — **BEKLİYOR**
+### v2.0.0 turu — YENİ AD — **BİTTİ ✅** (2026-08-29)
 
-- [ ] **Dil seçeneği: TR · EN · DE · ES · FR.** Varsayılan `navigator.language`
+- [x] **Dil seçeneği: TR · EN · DE · ES · FR.** Varsayılan `navigator.language`
       üstünden; cihaz dili bu beşten biri değilse **İngilizce**. Türkçe kaynak
       dil kalır. Tercih `ders-programi-dil`'de, `State`'e **girmez**
       (`schemaVersion` artmaz). `theme.ts`'in on birinci makine tercihi, ve
       `library.ts`'teki `storageReport`'a satırı yazılacak.
       **İLKE 4 YENİDEN YAZILACAK** — bugünkü hâli "Tek dil. i18n altyapısı
       yok, string dosyası yok".
-      E2E'nin dili `open()` yardımcısında `tr`'ye **sabitlenecek**, yoksa 529
-      locator'ın hepsi cihaz diline göre kayar.
-- [ ] **Yeni ad: Mozaik.** Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik ·
+      E2E'nin dili `open()` değil **`kapan.ts`**'te `tr`'ye sabitlendi
+      (`auto: true` unutulamaz, ve üç spec hiçbir yardımcıdan geçmiyor).
+- [x] **Yeni ad: Mozaik — YAPILDI (2026-08-29).** Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik ·
       Mosaico · Mosaïque) ve ekrandaki şeyi tarif ediyor.
       **DEĞİŞMEYECEK olanlar, ve bu bir veri kararı:** `localStorage`
       anahtarları (`ders-programi*`), yedek dosya adları

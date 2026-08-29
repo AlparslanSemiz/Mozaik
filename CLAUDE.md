@@ -216,10 +216,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 609 birim testi
+npm test           # Vitest — 639 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 461 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 469 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -358,6 +358,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | **E2E** | `e2e/*.spec.ts` (Playwright, 25 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
 formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79) |
+| **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
 | **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
@@ -743,7 +744,7 @@ ders-programi-plan-<id>  -> diğer planların State'i
 ders-programi-planlar    -> { activeId, plans: [{ id, name, draft }] }
 ders-programi-yedek-N    -> oturum yedek zinciri (son 3), açılıştaki plana ait
 ders-programi-tema       -> tema tercihi
-ders-programi-dil        -> arayüz dili (tr / en)
+ders-programi-dil        -> arayüz dili (tr / en / de / es / fr)
 ders-programi-kenar      -> kenar çubuğu tercihi
 ders-programi-olcek      -> yazı büyüklüğü tercihi (--ui-scale, 1.0–1.50)
 ders-programi-yogunluk   -> ızgara yoğunluğu tercihi (ferah / rahat / sigdir)
@@ -1770,6 +1771,57 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     `min-width: 100%; width: max-content` artı `th:last-child { width: auto }`.
     Genel kural: bir tabloyu genişletirken sorulacak soru "dolar mı" değil,
     **"fazlalık hangi sütuna gidiyor"**dur, ve cevabı ölçülür.
+
+89. **Bir SÜİT çevrilmemiş metni göremez, çünkü anahtar cümlenin kendisidir.**
+    `t('Öğretmenler')` Türkçede `'Öğretmenler'` döndürür — yani `t()`'ye
+    taşınmış bir cümle ile taşınmamış bir cümle Türkçe ekranda **birebir
+    aynıdır**, ve bütün E2E süiti `kapan.ts`'te Türkçeye sabitli. Sözlük
+    bittiğinde 469 test yeşildi ve İngilizce ekranda **on dört yerde Türkçe
+    duruyordu**: bir sekmenin adı, altı panel başlığı, ızgaranın ve kâğıdın
+    gün başlıkları, üst çubuğun durum çipi, şeridin düğmeleri. Hepsi
+    "çevrilmiş gibi görünen" yerlerdi, çünkü Türkçede öyle görünüyorlardı.
+    Onları bulan iki şey oldu ve ikisi de bir iddia değil: **İngilizce açılmış
+    sayfanın `body`'sini okuyup Türkçe harf arayan bir tarama**, ve **en uzun
+    dilde (Almanca) ekran görüntülerine bakmak**. Genel kural: bir doğruluk
+    kaynak dilde **tanım gereği** sağlanıyorsa, onu ölçen tek yer öteki dildir.
+
+90. **Bir sayı YUVAYA girerse çoğullanamaz.** Listelerin altındaki sayaç
+    `'{toplam} {ne}'` idi ve `{ne}` zaten çevrilmiş bir kelimeydi; Almancada
+    `8 Raum` yazıyordu ve sözlüğün söyleyecek hiçbir şeyi yoktu, çünkü çoğulu
+    seçen şey **anahtarın kendisi** olmak zorunda. Çare bir çeviri değil bir
+    imza: sayı, çevrilen anahtarın **içine** alındı (`countKey='{n} derslik'`).
+    Türkçe hiçbir şey kaybetmedi — sayıdan sonra ek almıyor, ve bu yüzden
+    kusur iki yıl boyunca görünmedi.
+
+91. **Bir değerin İKİ işi varsa çeviri onları ayırır.** `defaultSubjectShort`
+    hem "ekranda ne yazıyor" hem "override sayılır mı" sorusuna cevap
+    veriyordu, ve tek dilde ikisi aynı cevaptı. İkinci soru **çevrilemez**:
+    dille birlikte kıpırdayan bir karşılaştırma, aynı projenin iki oturumunda
+    `settings.subjectShorts`'a başka şeyler yazdırır — yani bir arayüz
+    tercihi, **yedek dosyasının içeriğini** değiştirir. Ayrıldılar: biri
+    Türkçe kaldı, öteki çevrildi, ve `setSubjectShort` **ikisini birden**
+    kabul ediyor ki kullanıcı ekranda gördüğü şeyi geri yazdığında silinsin.
+
+92. **Bir yardımcının SESSİZ dönüşü, bir zaman aşımı olarak görünür.**
+    `revealRibbon` `.main` bulamazsa `return` ediyordu; boyanmamış bir sayfada
+    hiçbir şey dürtülmüyor, şerit katlı kalıyor ve iddia beş saniye sonra
+    düşüyordu. Bu tam bir tur boyunca **"yük altında kararsız"** diye
+    STATUS'e yazıldı — yani bir kod kusuru bir ortam özelliği sanıldı, ve
+    teşhis yanlış olduğu için kimse koda bakmadı. Bir test yardımcısı bir
+    önkoşulu bulamıyorsa **fırlatır**; sessizce dönmek, ölçmediği şeyi
+    ölçüyormuş gibi göstermenin en ucuz yoludur (tuzak 23'ün ailesi).
+    Yanında ikinci yarısı: yirmi test çıplak `page.reload()`'dan sonra ekranı
+    okuyordu, `open()`'ın yaptığı iki bekleyişin hiçbirini yapmadan.
+
+93. **Bir çıktı dosyasının REÇETESİ, o dosyaya elle eklenen şeyi silmişti.**
+    `scripts/favicon.mjs` `index.html`'i baştan yazıyor; tuzak 72'nin "kaynak
+    şablonu" uyarısı ise dosyaya **elle** yazılmıştı. Yani betiği çalıştırmak
+    o uyarıyı sessizce kaldırıyordu — `temel.spec.ts` 77 onu ölçtüğü için
+    kırmızı dönerdi, ama bir betiğin, bir testin birazdan soracağı şeyi
+    haberi olmadan silmesi kendi başına bir tuzak. Tuzak 69'un aynası: orada
+    reçete **yoktu**, burada reçete ile çıktısı **ayrışmıştı**. Bir dosya bir
+    betik tarafından üretiliyorsa, o dosyaya elle eklenen her şey **betiğe**
+    eklenir.
 
 ---
 
