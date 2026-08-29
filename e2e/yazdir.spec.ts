@@ -5,6 +5,95 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { openWithSample, openSetup, openSettings, loadWorld } from './helpers';
 
+// The request: "Çıktıda da blok dersler birlikte gözükmeli programdaki gibi
+// birleşik görünsünler." Paper drew one <td> per hour, so a two-hour block
+// printed as two identical cells that happened to match — which is exactly the
+// asymmetry the same note complains about two lines later.
+test.describe('81. Kâğıtta blok birleşmesi', () => {
+  /** Every printed row, as the widths its cells claim. */
+  const rowSpans = (page: Page) =>
+    page.locator('.print-page').first().locator('table.print tbody tr').evaluateAll((rows) =>
+      rows.map((tr) =>
+        [...tr.querySelectorAll('td')].map((td) => (td as HTMLTableCellElement).colSpan),
+      ),
+    );
+
+  test('blok kâğıtta TEK hücre — ve satır hâlâ tam hafta', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    const spans = await rowSpans(page);
+
+    // At least one cell really is wider than an hour...
+    expect(spans.flat().some((n) => n > 1), 'kâğıtta hiç birleşmiş hücre yok').toBe(true);
+
+    // ...and no row lost or gained an hour doing it. This is the half that a
+    // colSpan gets wrong: `table-layout: fixed` will happily draw a short row,
+    // and a short row is a week with an hour missing.
+    for (const row of spans) {
+      expect(row.reduce((a, b) => a + b, 0)).toBe(12);
+    }
+  });
+
+  // A merged cell must never swallow the long break. On screen the break is a
+  // column of its own and a colSpan over it would make it a drop target
+  // (pitfall 13); on paper it is a thick right edge, and a block straddling it
+  // would put that edge through its own middle. Both drawings cut at the break.
+  test('birleşmiş hücre ÖĞLE ARASINI yutmuyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+
+    // Where the break falls on each day, out of the project itself rather than
+    // out of the drawing being judged.
+    const breaks: number[] = await page.evaluate(() => {
+      const raw = localStorage.getItem('ders-programi');
+      const state = JSON.parse(raw ?? '{}') as {
+        settings?: { days?: Array<{ longBreakAfter?: number }> };
+      };
+      return (state.settings?.days ?? []).map((d) => d.longBreakAfter ?? 0);
+    });
+    expect(breaks.length).toBeGreaterThan(0);
+    expect(breaks.some((b) => b > 0), 'örnek okulda öğle arası yok').toBe(true);
+
+    // EVERY sheet, not the first one: whether a block happens to straddle the
+    // break depends on which class it is, and a scan of one page was green
+    // against a build that had the cut removed altogether.
+    const straddling = await page.locator('.print-page').evaluateAll((sheets, breakAt: number[]) => {
+        const bad: string[] = [];
+        const rows = sheets.flatMap((sheet) => [
+          ...sheet.querySelectorAll('table.print tbody tr'),
+        ]);
+        rows.forEach((tr, i) => {
+          const day = i % breakAt.length;
+          const stop = breakAt[day] ?? 0;
+          let hour = 0;
+          for (const td of tr.querySelectorAll('td')) {
+            const span = (td as HTMLTableCellElement).colSpan;
+            // The break sits between hour stop-1 and hour stop. A cell covering
+            // [hour, hour + span) crosses it when it starts before and ends
+            // after.
+            if (stop > 0 && hour < stop && hour + span > stop) {
+              bad.push(`${day}. gün: ${hour}. saatten ${span} saat, ara ${stop}. saatte`);
+            }
+            hour += span;
+          }
+          if (hour !== 12) bad.push(`${day}. gün ${hour} saat çizdi`);
+        });
+        return bad;
+      }, breaks);
+
+    expect(straddling).toEqual([]);
+  });
+
+});
+
 test.describe('4. Yazdırma', () => {
   test('her sınıf için bir sayfa ve yatay taşma yok', async ({ page }) => {
     await openWithSample(page);

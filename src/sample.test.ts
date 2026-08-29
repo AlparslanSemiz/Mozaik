@@ -18,8 +18,9 @@ function greedyFill(start: State): { state: State; placed: number; total: number
   let placed = 0;
 
   // Bigger blocks first: the lessons with the least room go in first.
+  const longest = (x: (typeof d.lessons)[number]) => x.blocks[0] ?? 1;
   const sorted = [...d.lessons].sort(
-    (a, b) => b.pairs - a.pairs || b.weeklyHours - a.weeklyHours,
+    (a, b) => longest(b) - longest(a) || b.weeklyHours - a.weeklyHours,
   );
 
   for (const lesson of sorted) {

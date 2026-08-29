@@ -79,18 +79,21 @@ export interface Lesson {
   teacherId: Id;
   weeklyHours: number; // weekly total
   /**
-   * How many of those hours go down as TWO-hour blocks. The rest are singles,
-   * so `pairs` alone fixes the whole shape: 5 hours with pairs 2 is 2+2+1.
-   * Always 0..floor(weeklyHours / 2); `clampPairs` in entities.ts is the only
-   * place that decides it.
+   * The blocks longer than an hour, biggest first. Whatever the sum leaves over
+   * is taught as single hours, so this list alone fixes the whole shape: 9
+   * hours with blocks [3, 2] is 3+2+1+1+1+1.
    *
-   * It replaced a single `blockSize` (1, 2 or 3) meaning "every block is this
-   * long", which could not express 2+1 at all and made the solver drop the
-   * remainder: 5 hours in 2-hour blocks placed 4 and left 1 unplaceable
-   * forever. NOT a second truth next to `weeklyHours` — the total is still the
-   * total, this is only its shape, and it cannot contradict it.
+   * Every entry is 2, 3 or 4 and the sum never exceeds `weeklyHours`;
+   * `clampBlocks` in blocks.ts is the only place that decides it. NOT a second
+   * truth next to `weeklyHours` — the total is still the total, this is only
+   * its shape, and it cannot contradict it.
+   *
+   * It replaced a single `pairs` count, which could only ever mean "this many
+   * TWO-hour blocks" and so could not say 3 or 4 at all; and that in turn had
+   * replaced a single `blockSize` meaning "every block is this long", which
+   * could not say 2+1. A list can say all three.
    */
-  pairs: number;
+  blocks: number[];
   /**
    * Is this lesson taught under the teacher's SECOND subject?
    *
@@ -194,5 +197,6 @@ export interface State {
  * v6: Teacher.gender.
  * v7: Lesson.pairs replaces Lesson.blockSize.
  * v8: Teacher.subject2 and Lesson.second — a teacher may hold two subjects.
+ * v9: Lesson.blocks replaces Lesson.pairs — a block may be 2, 3 or 4 hours.
  */
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;

@@ -2559,6 +2559,14 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   min-width: 6.5rem;
 }
 
+.pool-card[data-size='3'] {
+  min-width: 9rem;
+}
+
+.pool-card[data-size='4'] {
+  min-width: 11.5rem;
+}
+
 /* ------------------------------------------------------------ setup steps */
 
 /* Kurulum's three lists, IN the ribbon. They are `.btn`s so pressed, hover,
@@ -3176,21 +3184,126 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
-/* The split picker in Kurulum > Dersler. Unlike every other box on this screen
-   it has NO width of its own, and that is the point: its labels grow with the
-   hours — "2+1" is three characters, eleven singles are twenty-one — so any
-   single number is wrong for some lesson. Measured at 150 % with a fixed box:
-   "1+1+1+1+1" was drawn as "1+1+1+1+", the value right and unreadable
-   (pitfall 33).
+/* "Listelerde ekleme kısmı bloğu ile alttaki liste arasında çizgi olsun yani
+   iki farklı blok olsun. ama yerleri değişmesin."
 
-   `width: auto` is the browser sizing a `<select>` from its longest option,
-   which is exactly the question being asked, and it needs the class ON THE SAME
-   ELEMENT to outrank `table.list td > select { width: 100% }` (0,1,3) —
-   pitfall 34's second half. The column it widens is inside `.table-scroll`, so
-   what it costs is scrolling, not somebody else's words. */
-table.list td > select.split-pick,
-.form-row select.split-pick {
+   A rule and some room, on the add row itself. Nothing moves in the DOM: the
+   form is still the first thing in the panel and the list is still under it —
+   what changes is that the eye can now see where one ends. The margin the row
+   already carried is folded into the padding so the gap does not double. */
+.form-row.panel-add {
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Kontrol is one panel at a time now, so nothing constrains its width any
+   more — the two-column layout used to. A capacity table given 1900 px puts
+   the label at one edge of the monitor and the number at the other. */
+.check-page {
+  max-width: 68rem;
+}
+
+/* A number never wraps. `.num` is 8ch wide and "433 / 433" is nine characters,
+   so the fullest week — the one somebody actually wants to read — was the one
+   case that broke onto two lines. Measured at 72px against a 73px box. */
+table.stat td.num {
+  white-space: nowrap;
+}
+
+/* The sheet's lesson rows: what this teacher (or class) is tied to, with the
+   ids kept so each one can be acted on. `links` above says the same thing in a
+   sentence, and a sentence cannot be handed to another teacher. */
+table.sheet-lessons {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-5);
+}
+
+table.sheet-lessons td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
+}
+
+table.sheet-lessons td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Sized by the browser from its longest option, like every other picker whose
+   labels are names rather than a fixed vocabulary (pitfall 33/34). */
+table.sheet-lessons select.transfer-pick {
   width: auto;
+  max-width: 14rem;
+}
+
+/* The split editor: three counters and the shape they add up to.
+   ("4 saatlik [1] 3 saatlik [0] 2 saatlik [1]   4+2+1+1")
+
+   It replaced a `<select>` that listed every way a week could be divided, and
+   the reason was arithmetic — 12 hours have 7 splits out of {1,2} and 34 out of
+   {1,2,3,4}. That select had needed `width: auto` so the browser could size it
+   from its longest option (pitfall 33: pinned narrower, "1+1+1+1+1" drew as
+   "1+1+1+1+", the value right and unreadable). Three fixed boxes have no such
+   problem: what grows with the hours is a COUNT, and a count is at most two
+   digits.
+
+   `min-width: 0` on the boxes, because they sit in a `.table-scroll` column and
+   a number input's default size is wider than two digits ever need. */
+.split-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* NOWRAP, and it is the row height that says why: spelled out over three
+     lines these three boxes made every lesson row twice as tall, in the one
+     list somebody scrolls ninety-nine times. */
+  flex-wrap: nowrap;
+}
+
+.split-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* MEASURED, not guessed. At 3.5ch the content box was 23px while the control
+   wanted 29 — a digit plus Chromium's spinner — so every counter clipped its
+   own value and read as an empty sliver (pitfall 33, again). 6ch gives 34px of
+   content at 12px type, and the assertion that it stays that way lives in
+   `kurulum.spec.ts`'s "dağılım sayaçları %N ölçekte KIRPILMIYOR". */
+table.list td .split-count > input.num,
+.form-row .split-count > input.num {
+  width: 6ch;
+  min-width: 0;
+  padding-inline: var(--space-2);
+  text-align: center;
+}
+
+/* "4 saat > günde 2" — a block the daily rule can never fit anywhere. Warning
+   colour and not danger: nothing is broken, the lesson simply will not place,
+   and the two hours it names are both true numbers. */
+.split-warn {
+  margin-inline-start: var(--space-3);
+  padding: 0 var(--space-2);
+  border-radius: var(--r-sm, 4px);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* What the counters add up to, in the same voice a card's title uses. Not a
+   `.hint`: it is a value, and it changes as the boxes are typed in. */
+.split-shape {
+  margin-inline-start: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* The first-run line on Kurulum: a symbol, one sentence, and the two things
@@ -3240,7 +3353,10 @@ table.list td > select.split-pick,
 .panel code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: var(--fs-xs);
-  white-space: nowrap;
+  /* A storage key is one long unbroken token — `ders-programi-serit-gizlensin`
+     — and nowrap made it push the "Veriler nerede" table past a 329px rail.
+     Wrapping ANYWHERE is right for a key: there is no word to keep together. */
+  overflow-wrap: anywhere;
 }
 
 .empty-screen {
@@ -3400,11 +3516,21 @@ table.list td > select.split-pick,
 
    The floor is what one panel needs to be worth showing; below it the column
    would be a slot, not a column. */
+/* NO SIDEWAYS SCROLLING IN A RIGHT RAIL, and it takes one line per box.
+
+   Per CSS Overflow 3, when one axis is `auto` and the other is `visible`, the
+   `visible` one computes to `auto` too. So every box below — and with it every
+   right rail on every screen — has been a horizontal scroller since the day it
+   was given `overflow-y`. Nothing looked wrong until the content got wide
+   enough to use it. `.pool-list` already knew and wrote it out.
+
+   "Hiçbir yerde sağ taraftaki bloklar sağa sola hareket ettirme olmasın." */
 .cols > aside {
   position: sticky;
   top: 0;
   max-height: max(18rem, 100cqh);
   overflow-y: auto;
+  overflow-x: hidden;
   /* A focus ring on a control in the first or last row would otherwise be
      clipped by the scroll box — the same two lines `.table-scroll` uses. */
   padding: 2px;
@@ -3433,6 +3559,7 @@ table.list td > select.split-pick,
   gap: 1px;
   max-height: 62vh;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   padding: var(--space-1);
@@ -3802,6 +3929,7 @@ table.availability td.closed {
   padding: var(--space-3);
   max-height: 168px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .pick-item {
@@ -5141,6 +5269,7 @@ body.row-dragging {
 .stat-scroll {
   max-height: 22rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* A list wider than its panel scrolls SIDEWAYS rather than crushing a column.

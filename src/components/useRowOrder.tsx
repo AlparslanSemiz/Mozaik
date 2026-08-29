@@ -120,10 +120,12 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
             ad: name,
             n: index + 1,
           })}
+          // The arrow keys were only ever in the accessible name, so a reader
+          // who can see the handle was never told about them.
           title={
             locked
               ? t('Elle sıralama için süzmeyi ve sıralamayı kaldırın')
-              : t('Sürükleyerek sırala')
+              : t('Sürükleyerek ya da ok tuşlarıyla sırala')
           }
           onKeyDown={(e) => {
             let next: number | null = null;

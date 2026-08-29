@@ -107,6 +107,9 @@ test.describe('82. Dil', () => {
     await openWithSample(page);
     await chooseLang(page, 'en');
     await page.getByRole('button', { name: 'Check', exact: true }).click();
+    // The capacity report is one panel at a time now, and its sentence — the
+    // one written by a PURE module — lives on the teachers view.
+    await page.locator('.ribbon').getByRole('button', { name: 'Teachers', exact: true }).click();
     const metin = await page.locator('.main').innerText();
     expect(metin).toContain('available');
     expect(metin).not.toContain('müsait');

@@ -61,7 +61,7 @@ export default function Rooms({ state, change }: PanelProps) {
           'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.',
         )}
       </p>
-      <div className="form-row">
+      <div className="form-row panel-add">
         <input
           type="text"
           value={newRoom}

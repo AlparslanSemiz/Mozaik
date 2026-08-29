@@ -22,7 +22,7 @@ const lesson = (second: boolean, teacherId = 'oMC'): Lesson => ({
   classId: 's510',
   teacherId,
   weeklyHours: 4,
-  pairs: 0,
+  blocks: [],
   second,
   maxPerDay: null,
 });

@@ -91,6 +91,42 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     expect(bad[0]?.hour).toBe(2);
   });
 
+  // The auditor asks about the block it FOUND, at the length it found it. With
+  // only 1 and 2 in the model an off-by-one here still landed inside the block;
+  // a 3 has a middle hour, and a middle hour is the one a wrong length skips.
+  it('ÜÇLÜ bloğun ORTA saati kapalıysa yakalıyor', () => {
+    let d = makeWorld({
+      days: 2,
+      hours: 4,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 3 }],
+    });
+    for (let h = 0; h < 3; h++) d.placements[placementKey('s510', 0, h)] = 'x1';
+    expect(illegalBlocks(d)).toEqual([]);
+
+    d = closeHours(d, 'oMC', [[0, 1]]);
+    const bad = illegalBlocks(d);
+    expect(bad).toHaveLength(1);
+    expect(bad[0]?.size).toBe(3);
+    expect(bad[0]?.reason).toContain('müsait değil');
+  });
+
+  // The LAST hour of a four. An auditor that walked two hours per block — the
+  // number that was hard-coded everywhere before v9 — would clear this grid.
+  it('DÖRTLÜ bloğun SON saati kapalıysa yakalıyor', () => {
+    let d = makeWorld({
+      days: 2,
+      hours: 6,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 4 }],
+    });
+    for (let h = 0; h < 4; h++) d.placements[placementKey('s510', 0, h)] = 'x1';
+    expect(illegalBlocks(d)).toEqual([]);
+
+    d = closeHours(d, 'oMC', [[0, 3]]);
+    const bad = illegalBlocks(d);
+    expect(bad).toHaveLength(1);
+    expect(bad[0]?.size).toBe(4);
+  });
+
   it('çok saatlik bloğu TEK blok sayıyor, saat saat değil', () => {
     const d = makeWorld({
       days: 1,

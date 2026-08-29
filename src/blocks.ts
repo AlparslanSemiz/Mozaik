@@ -1,28 +1,68 @@
 /**
  * How one lesson's week is SPLIT — and nothing else.
  *
- * A lesson's weekly hours go down as some 2-hour blocks and some 1-hour blocks,
- * and `Lesson.pairs` says how many of the first kind. This module turns that
- * one number into the shapes the rest of the program needs: a list to place, a
- * sentence to read, and the choices to offer.
+ * A lesson's weekly hours go down as blocks. `Lesson.blocks` lists the ones
+ * longer than an hour, biggest first; whatever is left over is a single hour.
+ * This module turns that list into the shapes the rest of the program needs: a
+ * list to place, a sentence to read, and the counts a stepper edits.
  *
  * It imports NOTHING but the type, on purpose — the same reason `palette.ts`
  * and `keys.ts` stand alone. `entities.ts` already imports `constraints.ts`, so
  * anything both of them need has to live below both of them or the two start
  * importing each other.
  *
- * Only 1 and 2. Three-hour blocks were dropped with schema v7, and the reason
- * is the reader's: a school week is planned in single and double periods, and
- * every extra part multiplies the choices on a dropdown somebody has to read
- * (12 hours would go from 7 options to 19).
+ * 1 to 4. Schema v7 had dropped everything but 1 and 2, and the reason given
+ * was the dropdown: every extra part multiplies the choices somebody has to
+ * read, and twelve hours went from 7 options to 19. That reason died with the
+ * dropdown. The split is now edited as three counts — how many fours, how many
+ * threes, how many twos — so the number of controls is three whatever the
+ * hours are, and 34 ways to divide twelve hours never become 34 rows.
  */
 import type { Lesson } from './types';
 
-/** The blocks a lesson asks for, biggest first: `pairs` twos, then the singles. */
-export function blockPlan(lesson: Pick<Lesson, 'weeklyHours' | 'pairs'>): number[] {
+/** The longest block a week can be asked for. */
+export const MAX_BLOCK = 4;
+
+/** The block lengths a lesson may name, biggest first. Singles are implied. */
+export const BLOCK_SIZES = [4, 3, 2] as const;
+
+export type BlockSize = (typeof BLOCK_SIZES)[number];
+
+/**
+ * The only place that decides which blocks a week can hold.
+ *
+ * Out-of-range lengths are dropped, the rest are sorted biggest first, and the
+ * tail is cut while the sum would outrun the hours. Cutting from the TAIL keeps
+ * the big blocks a reader asked for: dropping an hour from 4+2 leaves 4, not 2.
+ *
+ * `Number('')` and `Number(null)` are both 0 and 0 is a legal count elsewhere
+ * (pitfall 43), so a caller reading storage has to tell "missing" from "none"
+ * before it gets this far — this one only cleans a list it is given.
+ */
+export function clampBlocks(weeklyHours: number, blocks: readonly number[]): number[] {
+  const hours = Math.max(0, Math.round(weeklyHours));
+  if (!Array.isArray(blocks)) return [];
+  const sized = blocks
+    .map((b) => Math.round(Number(b)))
+    .filter((b) => Number.isFinite(b) && b >= 2 && b <= MAX_BLOCK)
+    .sort((a, b) => b - a);
+
+  const kept: number[] = [];
+  let used = 0;
+  for (const b of sized) {
+    if (used + b > hours) continue;
+    kept.push(b);
+    used += b;
+  }
+  return kept;
+}
+
+/** The blocks a lesson asks for, biggest first: its named blocks, then singles. */
+export function blockPlan(lesson: Pick<Lesson, 'weeklyHours' | 'blocks'>): number[] {
   const hours = Math.max(0, Math.round(lesson.weeklyHours));
-  const pairs = clampPairs(hours, lesson.pairs);
-  return [...Array<number>(pairs).fill(2), ...Array<number>(hours - pairs * 2).fill(1)];
+  const named = clampBlocks(hours, lesson.blocks);
+  const singles = hours - named.reduce((sum, b) => sum + b, 0);
+  return [...named, ...Array<number>(Math.max(0, singles)).fill(1)];
 }
 
 /** Past this many terms the sum is folded — see `patternLabel`. */
@@ -40,37 +80,57 @@ const FOLD_AT = 4;
  * Short ones are NOT folded, and the threshold is about reading rather than
  * width: "2+2+1" is a picture of the week — three blocks, one of them short —
  * and "2×2 + 1×1" is arithmetic about it. Up to four terms the picture wins.
+ *
+ * The fold counts EVERY length separately. It used to count twos and call
+ * everything else a single, which was the same thing while a block could only
+ * be 1 or 2 — and would have printed `[3,3,3,1,1]` as "5×1".
  */
 export function patternLabel(blocks: number[]): string {
   if (blocks.length === 0) return '–';
   if (blocks.length <= FOLD_AT) return blocks.join('+');
-  const pairs = blocks.filter((b) => b === 2).length;
-  const singles = blocks.length - pairs;
-  const parts: string[] = [];
-  if (pairs > 0) parts.push(`${pairs}×2`);
-  if (singles > 0) parts.push(`${singles}×1`);
-  return parts.join(' + ');
+
+  const counts = new Map<number, number>();
+  for (const b of blocks) counts.set(b, (counts.get(b) ?? 0) + 1);
+
+  return [...counts.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .map(([size, n]) => `${n}×${size}`)
+    .join(' + ');
 }
 
-/** Every way N hours can be split into 1s and 2s: fewest twos first. */
-export function patternOptions(weeklyHours: number): Array<{ pairs: number; label: string }> {
-  const hours = Math.max(0, Math.round(weeklyHours));
-  const options: Array<{ pairs: number; label: string }> = [];
-  for (let pairs = 0; pairs <= Math.floor(hours / 2); pairs++) {
-    options.push({ pairs, label: patternLabel(blockPlan({ weeklyHours: hours, pairs })) });
+/** How many blocks of each length a split names. Singles are not counted. */
+export function blockCounts(blocks: readonly number[]): Record<BlockSize, number> {
+  const counts = { 4: 0, 3: 0, 2: 0 } as Record<BlockSize, number>;
+  for (const b of blocks) {
+    if (b === 4 || b === 3 || b === 2) counts[b]++;
   }
-  return options;
+  return counts;
 }
 
 /**
- * The only place that decides how many twos a week can hold.
+ * The most blocks of one length a week could still hold, the OTHER counts kept.
  *
- * `Number('')` and `Number(null)` are both 0 and 0 is a legal answer here
- * (pitfall 43), so a caller reading storage has to tell "missing" from "none"
- * before it gets this far — this one only clamps a number it is given.
+ * This is the ceiling a stepper stops at, so it has to answer with the rest of
+ * the split standing: asking "how many threes fit in 9 hours" is the wrong
+ * question when two of those hours are already spoken for by a pair.
  */
-export function clampPairs(weeklyHours: number, pairs: number): number {
-  const ceiling = Math.floor(Math.max(0, Math.round(weeklyHours)) / 2);
-  if (!Number.isFinite(pairs)) return 0;
-  return Math.max(0, Math.min(ceiling, Math.round(pairs)));
+export function maxCount(weeklyHours: number, blocks: readonly number[], size: BlockSize): number {
+  const hours = Math.max(0, Math.round(weeklyHours));
+  const others = clampBlocks(hours, blocks)
+    .filter((b) => b !== size)
+    .reduce((sum, b) => sum + b, 0);
+  return Math.max(0, Math.floor((hours - others) / size));
+}
+
+/** The same split with a different number of `size`-hour blocks in it. */
+export function withCount(
+  weeklyHours: number,
+  blocks: readonly number[],
+  size: BlockSize,
+  count: number,
+): number[] {
+  const hours = Math.max(0, Math.round(weeklyHours));
+  const wanted = Math.max(0, Math.min(maxCount(hours, blocks, size), Math.round(count) || 0));
+  const others = clampBlocks(hours, blocks).filter((b) => b !== size);
+  return clampBlocks(hours, [...others, ...Array<number>(wanted).fill(size)]);
 }

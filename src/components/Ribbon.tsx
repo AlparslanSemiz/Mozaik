@@ -49,12 +49,15 @@
 // not a side effect of drawing them up here.
 
 import type React from 'react';
+import type { ReactNode } from 'react';
 import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
 import {
   Bell,
+  Clock,
   Eraser,
   Eye,
+  Flame,
   Layers,
   Info,
   Library,
@@ -77,7 +80,7 @@ import type { SolverRun } from '../useSolver';
 import type { Density } from '../theme';
 import { applyDensity } from '../theme';
 import { paletteColor } from '../palette';
-import type { Kind, LessonMode, SectionId, ToolState, View } from '../toolState';
+import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';
 
@@ -91,6 +94,10 @@ interface Props {
   solver: SolverRun;
   density: Density;
   setDensity: (next: Density) => void;
+  /** Müsaitlik's hour labels. A MACHINE preference, so App still owns it —
+      only the control moved here, out of Ayarlar → Görünüm. */
+  availClock: boolean;
+  setAvailClock: (next: boolean) => void;
 }
 
 /** Every lucide symbol in the strip is drawn at the size the hand-drawn four are. */
@@ -210,7 +217,17 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export default function Ribbon({ ui, open, state, change, solver, density, setDensity }: Props) {
+export default function Ribbon({
+  ui,
+  open,
+  state,
+  change,
+  solver,
+  density,
+  setDensity,
+  availClock,
+  setAvailClock,
+}: Props) {
   const t = useT();
   const { confirm } = useDialogs();
   const ix = useMemo(() => buildIndex(state), [state]);
@@ -377,6 +394,38 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             )}
           </span>
         </Group>
+
+        <Spacer />
+
+        {/* What is ON THIS SCREEN, top right — "sağ üstte haftanın darlığı
+            açılsın mı kapalı mı kalsın özelliği olsun. Saatleri de oraya
+            koyalım. ikinci şeritte olsun."
+
+            The two are not the same kind of thing and it does not matter here:
+            one is a position (`toolState`) and one a machine preference
+            (`ders-programi-musaitlik-saat`), but both answer "what am I
+            looking at", and that is the question a strip is for. The hour
+            toggle used to live three clicks away in Ayarlar → Görünüm. */}
+        <Group label={t('Göster')}>
+          <button
+            className="btn"
+            aria-pressed={ui.showHeat}
+            title={t('Haftanın darlığı tablosunu göster ya da gizle')}
+            onClick={() => ui.setShowHeat(!ui.showHeat)}
+          >
+            <Flame {...ICON} />
+            {t('Haftanın darlığı')}
+          </button>
+          <button
+            className="btn"
+            aria-pressed={availClock}
+            title={t('Ders numaralarının altına başlangıç saatlerini yaz')}
+            onClick={() => setAvailClock(!availClock)}
+          >
+            <Clock {...ICON} />
+            {t('Saatler')}
+          </button>
+        </Group>
       </div>
     );
   }
@@ -522,39 +571,59 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     // and false of the screen: the strip's height came and went with the tab,
     // so everything under it jumped every time this report was opened or left.
     //
-    // For one round it held a three-way FILTER (Hepsi · Sorunlar · Kapasite),
-    // and the reader's verdict was that the three read the same — which they
-    // largely did, since the panel everyone comes for was in all three. The
-    // report is one page now and the strip does what a strip on a long report
-    // is actually for: it goes somewhere. Every button says how many.
+    // Then it held a three-way FILTER, and the reader's verdict was that the
+    // three read the same — the panel everyone comes for was in all three. Then
+    // it held four `scrollIntoView` buttons, and those were worse: three of the
+    // four aimed into the sticky right rail, which is pinned to the top of the
+    // scrollport and scrolls inside itself, so the page could not move. No
+    // pressed state, no movement, no message. "Alt sekmede bir şeyler seçiyoruz
+    // ama değişmiyor" is exactly that.
+    //
+    // Now they CHOOSE THE PAGE. A click always changes the screen, the choice
+    // stays visible in `aria-pressed`, and the report stopped being something
+    // you scroll.
     const sorunlar = status.problems;
-    const jump = (sel: string) => () => {
-      document.querySelector(sel)?.scrollIntoView({ block: 'start' });
-    };
+    const views: Array<{ id: CheckView; label: string; icon: ReactNode; title: string }> = [
+      {
+        id: 'problems',
+        label: t('Sorunlar ({n})', { n: sorunlar }),
+        icon: <TriangleAlert {...ICON} />,
+        title: sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlar'),
+      },
+      {
+        id: 'teachers',
+        label: t('Öğretmenler'),
+        icon: KIND_ICON.teacher,
+        title: t('Öğretmen yükleri'),
+      },
+      {
+        id: 'classes',
+        label: t('Sınıflar'),
+        icon: KIND_ICON.class,
+        title: t('Sınıf yükleri'),
+      },
+      {
+        id: 'rooms',
+        label: t('Derslikler'),
+        icon: KIND_ICON.room,
+        title: t('Derslik yükleri'),
+      },
+    ];
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol araçları')}>
-        <Group label="Git">
-          <button
-            className="btn"
-            disabled={sorunlar === 0}
-            title={sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlara gider')}
-            onClick={jump('.kontrol-sorun')}
-          >
-            <TriangleAlert {...ICON} />
-            {t('Sorunlar ({n})', { n: sorunlar })}
-          </button>
-          <button className="btn" title={t('Öğretmen yüklerine gider')} onClick={jump('#kontrol-ogretmenler')}>
-            {KIND_ICON.teacher}
-            {t('Öğretmenler')}
-          </button>
-          <button className="btn" title={t('Sınıf yüklerine gider')} onClick={jump('#kontrol-siniflar')}>
-            {KIND_ICON.class}
-            {t('Sınıflar')}
-          </button>
-          <button className="btn" title={t('Derslik yüklerine gider')} onClick={jump('#kontrol-derslikler')}>
-            {KIND_ICON.room}
-            {t('Derslikler')}
-          </button>
+        <Group label={t('Göster')}>
+          {views.map((v) => (
+            <button
+              key={v.id}
+              className="btn"
+              aria-pressed={v.id === ui.checkView}
+              title={v.title}
+              onClick={() => ui.setCheckView(v.id)}
+            >
+              {v.icon}
+              {v.label}
+            </button>
+          ))}
         </Group>
 
         <Spacer />

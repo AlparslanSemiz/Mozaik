@@ -137,18 +137,28 @@ export function sampleState(): State {
         2,
         Math.min(budget - (remainingLessons - 1) * 2, Math.ceil(budget / remainingLessons)),
       );
-      // Some lessons want double periods and some do not. The hours no longer
+      // Some lessons want long periods and some do not. The hours no longer
       // have to be rounded to a multiple of the block: a week of 5 with doubles
-      // is 2+2+1, which is exactly what v7 made expressible.
+      // is 2+2+1, and a week of 7 with triples is 3+3+1.
+      //
+      // CAPPED BY THE SAME-LESSON DAILY LIMIT, and that is not a nicety: a
+      // block longer than "this class may see this lesson N hours a day" can
+      // never be placed anywhere, by any solver, on any grid. Left uncapped the
+      // sample school — the one thing a first-time reader loads to watch the
+      // tool work — came up with nine lessons that had no legal cell at all.
       const weeklyHours = Math.max(1, share);
-      const pairs = rnd() < 0.35 ? Math.floor(weeklyHours / 2) : 0;
+      const roll = rnd();
+      const wanted = roll < 0.12 ? 3 : roll < 0.35 ? 2 : 1;
+      const size = Math.min(wanted, Math.max(1, DEFAULT_LIMITS_SAMPLE.maxSameLessonPerDay));
+      const blocks =
+        size >= 2 ? Array<number>(Math.floor(weeklyHours / size)).fill(size) : [];
 
       lessons.push({
         id: `d${counter++}`,
         classId: group.id,
         teacherId: teacher.id,
         weeklyHours,
-        pairs,
+        blocks,
         second: false,
         maxPerDay: null,
       });

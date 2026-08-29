@@ -44,9 +44,9 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, pairs: 1, second: false, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blocks: [], second: false, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
+      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, blocks: [2], second: false, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},
@@ -128,7 +128,7 @@ describe('solve — küçük dünya', () => {
       teachers: [build().teachers[0]!],
       classes: [build().classes[0]!],
       lessons: [
-        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 0, second: false, maxPerDay: null },
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blocks: [], second: false, maxPerDay: null },
       ],
       settings: {
         ...build().settings,
@@ -208,7 +208,7 @@ describe('solve — tıkanma', () => {
   // lesson to do it, which is the whole point of splitting the items.
   it('2+1 dersin ÜÇ saati de yerleşiyor — artık bölünmeyen saat yok', () => {
     const d = build();
-    d.lessons[2] = { ...d.lessons[2]!, weeklyHours: 3, pairs: 1 };
+    d.lessons[2] = { ...d.lessons[2]!, weeklyHours: 3, blocks: [2] };
     const result = solve(d);
     const x3 = Object.keys(result.state.placements).filter(
       (k) => result.state.placements[k] === 'x3',

@@ -4,8 +4,17 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
-import { clampPairs } from './blocks';
-import { buildIndex, closedKey, countPlacedHours, sanitize, teacherKey } from './constraints';
+import { clampBlocks } from './blocks';
+import {
+  blocker,
+  buildIndex,
+  closedKey,
+  countPlacedHours,
+  place,
+  placedBlocks,
+  sanitize,
+  teacherKey,
+} from './constraints';
 import type { Index } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
@@ -334,6 +343,63 @@ export function addSubject(d: State, name: string): State {
 }
 
 /**
+ * Renames a subject EVERYWHERE it is written down.
+ *
+ * The one operation on this list that has to cascade, and the reason is a
+ * decision made two schema versions ago: `Teacher.subject` holds the NAME, not
+ * an id, precisely so that renaming stays cheap (see types.ts). Cheap, not
+ * free — the name lives in three places and all three move together:
+ *
+ *   settings.subjects      in place, so the list keeps its order
+ *   settings.subjectShorts keyed by subjectKey, so the override MOVES
+ *   teachers[*].subject/2  every field that matched
+ *
+ * `deleteSubject` deliberately does none of this — dropping a name off a list
+ * must never blank a teacher's branch. A rename is the opposite promise: the
+ * branch is the same branch, it is only called something else now.
+ *
+ * Returns the state unchanged if the new name is blank or already taken by a
+ * different subject; the caller checks first and says which.
+ */
+export function renameSubject(d: State, from: string, to: string): State {
+  const oldKey = subjectKey(from);
+  const clean = to.trim();
+  const newKey = subjectKey(clean);
+  if (oldKey === '' || newKey === '') return d;
+  if (oldKey === newKey && from === clean) return d;
+  // Colliding with a DIFFERENT subject is the caller's to refuse; changing only
+  // the casing of the same one is fine and is why the keys are compared.
+  if (oldKey !== newKey && subjectOptions(d).some((x) => subjectKey(x) === newKey)) return d;
+
+  const subjects = d.settings.subjects.map((x) => (subjectKey(x) === oldKey ? clean : x));
+
+  // No teacher can end up holding the same branch twice, and that is the
+  // collision check above rather than anything done here: `subjectOptions()`
+  // covers both of a teacher's fields, so renaming onto a name somebody already
+  // holds is refused before this point. Nothing here can orphan a
+  // `Lesson.second`, so nothing here has to call `sanitize()`.
+  const teachers = d.teachers.map((teacher) => {
+    const first = subjectKey(teacher.subject) === oldKey ? clean : teacher.subject;
+    const second = subjectKey(teacher.subject2) === oldKey ? clean : teacher.subject2;
+    if (first === teacher.subject && second === teacher.subject2) return teacher;
+    return { ...teacher, subject: first, subject2: second };
+  });
+
+  // The override moves with the name, and is then re-judged: "Mat" is the
+  // built-in default for Matematik and a real override for Matematik 1, so the
+  // same stored value can be redundant before the rename and meaningful after.
+  const shorts = { ...d.settings.subjectShorts };
+  const carried = shorts[oldKey];
+  delete shorts[oldKey];
+  const moved: State = {
+    ...d,
+    teachers,
+    settings: { ...d.settings, subjects, subjectShorts: shorts },
+  };
+  return carried === undefined ? moved : setSubjectShort(moved, clean, carried);
+}
+
+/**
  * Removes a subject from the list. The teachers' `subject` strings are NOT
  * touched: nothing may delete a teacher's branch as a side effect. A subject
  * still in use simply cannot be removed — the caller checks subjectTeachers()
@@ -538,7 +604,7 @@ export function addLesson(
     classId: fields.classId,
     teacherId: fields.teacherId,
     weeklyHours,
-    pairs: clampPairs(weeklyHours, fields.pairs),
+    blocks: clampBlocks(weeklyHours, fields.blocks),
     second: fields.second === true,
     maxPerDay: null,
   };
@@ -550,9 +616,9 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
   const lessons = d.lessons.map((x) => {
     if (x.id !== id) return x;
     const merged = { ...x, ...fields, id };
-    // Raising the hours leaves the twos alone; lowering them can force the
+    // Raising the hours leaves the blocks alone; lowering them can force the
     // shape to shrink, and the clamp is the one place that says by how much.
-    return { ...merged, pairs: clampPairs(merged.weeklyHours, merged.pairs) };
+    return { ...merged, blocks: clampBlocks(merged.weeklyHours, merged.blocks) };
   });
 
   // If the SPLIT changed, the placed blocks are the wrong lengths and the
@@ -560,7 +626,10 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
   // differently; safest is to drop them.
   const after = lessons.find((x) => x.id === id);
   const splitChanged =
-    before !== undefined && after !== undefined && before.pairs !== after.pairs;
+    before !== undefined &&
+    after !== undefined &&
+    (before.blocks.length !== after.blocks.length ||
+      before.blocks.some((b, i) => b !== after.blocks[i]));
   if (!splitChanged) return { ...d, lessons };
 
   const placements = { ...d.placements };
@@ -568,6 +637,71 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
     if (placements[key] === id) delete placements[key];
   }
   return { ...d, lessons, placements };
+}
+
+/**
+ * Hands one lesson to a different teacher, and JUDGES its placements.
+ *
+ * The naive version is one line — `updateLesson(d, id, { teacherId })` — and it
+ * is wrong in a way nothing on screen would show. `placements` is keyed by
+ * class, so every cell stays exactly where it was; but teacher occupancy is
+ * DERIVED, and `buildIndex` writes it into a Map (`teacherBusy`). Two lessons
+ * on one teacher at one hour therefore do not clash, they OVERWRITE — last one
+ * in wins — and neither `sanitize()` nor `findViolations()` looks for it. The
+ * receiving teacher would quietly stand in two rooms at once, on a printed
+ * sheet, with every count still adding up.
+ *
+ * So each block is lifted and offered its own square back, against an index
+ * rebuilt without it: whatever `blocker()` clears goes down again, whatever it
+ * refuses returns to the pool. Same question the auditor asks of a laid-out
+ * grid (`worlds.ts`), and the same one a drag asks — the rules cannot mean one
+ * thing here and another there.
+ *
+ * `second` is re-read rather than carried: the flag points at one of the OLD
+ * teacher's two fields, and the new teacher's fields are their own. Carried
+ * over blindly, a lesson silently changes subject.
+ *
+ * Returns the lesson's blocks that could NOT be re-placed, so the caller can
+ * say how many went back to the tray.
+ */
+export function transferLesson(
+  d: State,
+  id: Id,
+  teacherId: Id,
+): { state: State; returned: number } {
+  const lesson = d.lessons.find((x) => x.id === id);
+  const next = d.teachers.find((x) => x.id === teacherId);
+  if (lesson === undefined || next === undefined || lesson.teacherId === teacherId) {
+    return { state: d, returned: 0 };
+  }
+
+  // Which of the new teacher's fields teaches what this lesson was under. Not
+  // found -> the first one, which is what a single-subject teacher means.
+  const wanted = subjectKey(lessonSubject(d, lesson));
+  const mine = teacherSubjects(next);
+  const second = mine.length > 1 && subjectKey(mine[1] ?? '') === wanted;
+
+  const blocks = placedBlocks(d, lesson);
+
+  // Lift everything first: judging a block against a grid that still holds the
+  // lesson's own other blocks would make it clash with itself.
+  const placements = { ...d.placements };
+  for (const key in placements) {
+    if (placements[key] === id) delete placements[key];
+  }
+  const lessons = d.lessons.map((x) => (x.id === id ? { ...x, teacherId, second } : x));
+  let work: State = { ...d, lessons, placements };
+
+  let returned = 0;
+  for (const b of blocks) {
+    const ix = buildIndex(work);
+    if (blocker(work, ix, id, b.day, b.hour, b.size) === null) {
+      work = place(work, id, b.day, b.hour, b.size);
+    } else {
+      returned++;
+    }
+  }
+  return { state: sanitize(work), returned };
 }
 
 export function deleteLesson(d: State, id: Id): State {
@@ -767,7 +901,7 @@ export function addLessonsFromRows(
       classId: group.id,
       teacherId: teacher.id,
       weeklyHours: row.weeklyHours,
-      pairs: row.pairs,
+      blocks: row.blocks,
     });
   }
   return { state, missing };
@@ -1045,6 +1179,21 @@ export interface EntityFacts {
   rows: Array<{ label: string; value: string; tight: boolean }>;
   /** Sentences that name the other entities it is tied to. */
   links: string[];
+  /**
+   * The lessons this entity is part of, as ROWS rather than as a sentence.
+   *
+   * `links` already says "3 dersi var: 510, 511, 512" and that is the right
+   * shape for reading. It is the wrong shape for DOING anything: the ids are
+   * thrown away, so the panel could name a lesson but never act on one. Empty
+   * for a room, which has lessons only through the classes that sit in it.
+   */
+  lessons: Array<{
+    id: Id;
+    /** The other end of it: the class, on a teacher's panel, and vice versa. */
+    other: string;
+    subject: string;
+    weeklyHours: number;
+  }>;
 }
 
 /**
@@ -1064,11 +1213,18 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     for (const cell of row) if (cell.color !== null) placed++;
   }
 
-  const common = (short: string, name: string, color: number | null, links: string[]) => ({
+  const common = (
+    short: string,
+    name: string,
+    color: number | null,
+    links: string[],
+    lessons: EntityFacts['lessons'] = [],
+  ): EntityFacts => ({
     short,
     name,
     color,
     links,
+    lessons,
     rows: [
       { label: t('Haftalık ders yükü'), value: t('{n} saat', { n: load }), tight: load > open },
       { label: t('Açık saat'), value: `${open} / ${week}`, tight: open < load },
@@ -1087,15 +1243,28 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     const lessons = d.lessons.filter((x) => x.teacherId === id);
     const classes = [...new Set(lessons.map((x) => ix.classById.get(x.classId)?.name ?? '?'))];
     return {
-      ...common(person.short, person.name, person.color, [
-        t('Branşı: {brans}', { brans: subjectLabel(person.subject) }),
-        lessons.length === 0
-          ? t('Henüz dersi yok')
-          : t('{n} dersi var: {hangileri}', {
-              n: lessons.length,
-              hangileri: classes.join(', '),
-            }),
-      ]),
+      ...common(
+        person.short,
+        person.name,
+        person.color,
+        [
+          t('Branşı: {brans}', {
+            brans: teacherSubjects(person).map(subjectLabel).join(' · '),
+          }),
+          lessons.length === 0
+            ? t('Henüz dersi yok')
+            : t('{n} dersi var: {hangileri}', {
+                n: lessons.length,
+                hangileri: classes.join(', '),
+              }),
+        ],
+        lessons.map((x) => ({
+          id: x.id,
+          other: ix.classById.get(x.classId)?.name ?? '?',
+          subject: subjectLabel(lessonSubject(d, x)),
+          weeklyHours: x.weeklyHours,
+        })),
+      ),
     };
   }
 
@@ -1105,15 +1274,26 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     const lessons = d.lessons.filter((x) => x.classId === id);
     const teachers = [...new Set(lessons.map((x) => ix.teacherById.get(x.teacherId)?.short ?? '?'))];
     return {
-      ...common(c.name, t('{ad} sınıfı', { ad: c.name }), c.color, [
-        t('Dersliği: {derslik}', { derslik: roomName(d, c.roomId) }),
-        lessons.length === 0
-          ? t('Henüz dersi yok')
-          : t('{n} dersi var: {hangileri}', {
-              n: lessons.length,
-              hangileri: teachers.join(', '),
-            }),
-      ]),
+      ...common(
+        c.name,
+        t('{ad} sınıfı', { ad: c.name }),
+        c.color,
+        [
+          t('Dersliği: {derslik}', { derslik: roomName(d, c.roomId) }),
+          lessons.length === 0
+            ? t('Henüz dersi yok')
+            : t('{n} dersi var: {hangileri}', {
+                n: lessons.length,
+                hangileri: teachers.join(', '),
+              }),
+        ],
+        lessons.map((x) => ({
+          id: x.id,
+          other: ix.teacherById.get(x.teacherId)?.short ?? '?',
+          subject: subjectLabel(lessonSubject(d, x)),
+          weeklyHours: x.weeklyHours,
+        })),
+      ),
     };
   }
 

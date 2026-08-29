@@ -22,7 +22,6 @@
 // father would discover at the printer.
 
 import {
-  applyAvailClock,
   applyRibbonAuto,
   applyTheme,
   applyDensity,
@@ -48,8 +47,6 @@ interface Props {
   setDensity: (next: Density) => void;
   uiDensity: Density;
   setUiDensity: (next: Density) => void;
-  availClock: boolean;
-  setAvailClock: (next: boolean) => void;
   /** Whether the tool strip slides away while you read down the page. */
   ribbonAuto: boolean;
   setRibbonAuto: (next: boolean) => void;
@@ -86,8 +83,6 @@ export default function Appearance({
   setDensity,
   uiDensity,
   setUiDensity,
-  availClock,
-  setAvailClock,
   ribbonAuto,
   setRibbonAuto,
   theme,
@@ -293,24 +288,6 @@ export default function Appearance({
           </div>
         </div>
 
-        <div className="panel">
-          <h2>{t('Müsaitlik çizelgesi')}</h2>
-          <p className="hint">
-            <T k="Müsaitlik ekranındaki ders numaralarının altında **başlangıç saati** yazsın mı? Varsayılan **kapalı**. Sebebi yer kazanmak değil: o tablo iki durumda da aynı boyda, ölçüldü. Sebep o ekranın işi. Orada yapılan tek şey saatleri açıp kapatmak, ve on iki saat orada okunmuyor. Saatler yukarıdaki **zil önizlemesinde** ve basılan her sayfada iki durumda da yazıyor." />
-          </p>
-          <div className="form-row">
-            <button
-              className="btn"
-              aria-pressed={availClock}
-              onClick={() => {
-                applyAvailClock(!availClock);
-                setAvailClock(!availClock);
-              }}
-            >
-              {availClock ? t('Saatler görünüyor') : t('Saatler gizli')}
-            </button>
-          </div>
-        </div>
       </div>
 
       <aside>

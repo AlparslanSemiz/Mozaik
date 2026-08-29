@@ -22,6 +22,17 @@ async function load(page: Page, world: WorldSpec) {
   await loadWorld(page, makeWorld(world), 'Kontrol');
 }
 
+/**
+ * Puts one capacity panel on screen.
+ *
+ * The report is one panel at a time since the strip became a view switcher —
+ * the three used to be stacked in a sticky rail, reached by buttons that called
+ * `scrollIntoView` at a rail that never moves.
+ */
+async function showCapacity(page: Page, which: string) {
+  await page.locator('.ribbon').getByRole('button', { name: which, exact: true }).click();
+}
+
 test.describe('26. Kontrol — kapasite', () => {
   test('veri yokken ne yapılacağını söylüyor', async ({ page }) => {
     await open(page);
@@ -47,6 +58,7 @@ test.describe('26. Kontrol — kapasite', () => {
     // The row is compact now — Ad | Açık | Yük | Durum — and the sentence it
     // used to spell out is its tooltip. Both are asserted: the numbers are what
     // the eye reads, the sentence is what the reader acts on.
+    await showCapacity(page, 'Öğretmenler');
     const row = page.locator('#kontrol-ogretmenler tbody tr', { hasText: 'MÇ' });
     await expect(row.locator('td').nth(1)).toHaveText('2');
     await expect(row.locator('td').nth(2)).toHaveText('3');
@@ -64,6 +76,7 @@ test.describe('26. Kontrol — kapasite', () => {
       ],
     });
 
+    await showCapacity(page, 'Sınıflar');
     const row = page.locator('#kontrol-siniflar tbody tr', { hasText: '510' });
     await expect(row.locator('td').nth(2)).toHaveText('6');
     await expect(row.locator('.badge.impossible')).toBeVisible();
@@ -84,6 +97,7 @@ test.describe('26. Kontrol — kapasite', () => {
       ],
     });
 
+    await showCapacity(page, 'Derslikler');
     const row = page.locator('#kontrol-derslikler tbody tr', { hasText: 'A' });
     await expect(row.locator('td').nth(2)).toHaveText('6');
     await expect(row.locator('.badge.impossible')).toBeVisible();
@@ -96,10 +110,15 @@ test.describe('26. Kontrol — kapasite', () => {
     await load(page, {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4 }],
     });
+    await showCapacity(page, 'Öğretmenler');
     await expect(page.locator('table.stat .badge.tight').first()).toBeVisible();
     // Scoped to the tables: the intro paragraph SHOWS an "İmkânsız" badge to
-    // explain what one looks like.
-    await expect(page.locator('table.stat .badge.impossible')).toHaveCount(0);
+    // explain what one looks like. Every capacity view is checked, because
+    // "tight somewhere, impossible nowhere" is the claim.
+    for (const which of ['Öğretmenler', 'Sınıflar', 'Derslikler']) {
+      await showCapacity(page, which);
+      await expect(page.locator('table.stat .badge.impossible'), which).toHaveCount(0);
+    }
   });
 });
 

@@ -104,19 +104,24 @@ describe('parseLessons', () => {
   it('sınıf, öğretmen, saat ve bloğu okur', () => {
     const { accepted } = parseLessons('510\tMÇ\t6\t2');
     expect(accepted).toEqual([
-      { className: '510', teacher: 'MÇ', weeklyHours: 6, pairs: 3 },
+      { className: '510', teacher: 'MÇ', weeklyHours: 6, blocks: [2, 2, 2] },
     ]);
   });
 
   it('blok boşsa hepsi tek saat', () => {
-    expect(parseLessons('510\tMÇ\t6').accepted[0]!.pairs).toBe(0);
+    expect(parseLessons('510\tMÇ\t6').accepted[0]!.blocks).toEqual([]);
   });
 
-  // Three-hour blocks left with v7 and the column cannot ask for one any more;
-  // anything above 2 is read as "make them doubles".
-  it('bloğu en fazla 2 ile sınırlar', () => {
-    expect(parseLessons('510\tMÇ\t6\t9').accepted[0]!.pairs).toBe(3);
-    expect(parseLessons('510\tMÇ\t7\t3').accepted[0]!.pairs).toBe(3);
+  // The column says how LONG a block is, and the remainder stays single: 7
+  // hours at 3 is 3+3+1, not "as many threes as divide evenly".
+  it('bloğu o boyda tekrarlar, kalanı tek bırakır', () => {
+    expect(parseLessons('510\tMÇ\t7\t3').accepted[0]!.blocks).toEqual([3, 3]);
+    expect(parseLessons('510\tMÇ\t9\t4').accepted[0]!.blocks).toEqual([4, 4]);
+  });
+
+  // 4 is the ceiling the model has; a column that says 9 cannot mean 9.
+  it('bloğu en fazla 4 ile sınırlar', () => {
+    expect(parseLessons('510\tMÇ\t8\t9').accepted[0]!.blocks).toEqual([4, 4]);
   });
 
   it('saat okunamayan satırı atlar ve sebebini yazar', () => {

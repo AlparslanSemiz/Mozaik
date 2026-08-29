@@ -57,9 +57,10 @@ export interface WorldSpec {
     weeklyHours: number;
     /**
      * A SPEC convenience, not the model: "make this lesson's blocks N hours
-     * long". It is converted to `Lesson.pairs` below by exactly the rule the
-     * v7 migration uses, so a world written before the split still means what
-     * it meant — 2 (or the old 3) becomes floor(hours / 2) doubles, 1 none.
+     * long". It is converted to `Lesson.blocks` below — N becomes
+     * floor(hours / N) blocks of N and the remainder stays single, 1 becomes
+     * no blocks at all. Worlds written when 3 was illegal meant doubles; they
+     * now say 2, and the ones that say 3 mean it.
      */
     blockSize?: number;
     maxPerDay?: number | null;
@@ -71,6 +72,15 @@ export interface WorldSpec {
 }
 
 const WEEKDAYS = ['Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar', 'Pazartesi'];
+
+/**
+ * "Make this lesson's blocks N hours long" — the spec shorthand, spelled out.
+ * The remainder stays single, so 7 hours at 3 is 3+3+1.
+ */
+function blocksOfSize(weeklyHours: number, size: number): number[] {
+  if (size < 2) return [];
+  return Array<number>(Math.floor(weeklyHours / size)).fill(size);
+}
 
 function daysOf(spec: WorldSpec['days']): Day[] {
   if (Array.isArray(spec)) return spec;
@@ -111,7 +121,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     classId: x.classId,
     teacherId: x.teacherId,
     weeklyHours: x.weeklyHours,
-    pairs: (x.blockSize ?? 1) >= 2 ? Math.floor(x.weeklyHours / 2) : 0,
+    blocks: blocksOfSize(x.weeklyHours, x.blockSize ?? 1),
     second: false,
     maxPerDay: x.maxPerDay ?? null,
   }));
@@ -160,6 +170,12 @@ export interface Illegal {
   classId: Id;
   day: number;
   hour: number;
+  /**
+   * How long the block the auditor FOUND is. Reported because the length is
+   * half the finding: "hour 0 is illegal" and "the four-hour block starting at
+   * hour 0 is illegal" send a reader to different places.
+   */
+  size: number;
   /** What blocker() said when the block was offered its own square back. */
   reason: string;
 }
@@ -169,7 +185,7 @@ interface Block {
   classId: Id;
   day: number;
   hour: number;
-  /** How long it is. A lesson can hold blocks of two lengths since v7. */
+  /** How long it is: 1 to 4. A lesson can hold blocks of several lengths. */
   size: number;
 }
 
@@ -702,6 +718,37 @@ function parcalanmisGunler(): State {
   return d;
 }
 
+/**
+ * ONE lesson whose split uses three different lengths at once: 4+3+2+1.
+ *
+ * This is the case no world could ask before v9, and it is the one that proves
+ * the solver's item split. A lesson becomes one item per block LENGTH, so this
+ * lesson alone is four items competing for the same class, the same teacher and
+ * the same daily ceiling — and `ceilingHours` has to hand the week out biggest
+ * first across all four rather than "doubles, then the rest".
+ */
+function karisikBloklar(): State {
+  const d = makeWorld({
+    days: 4,
+    hours: 6,
+    teachers: [
+      { id: 'oMC', short: 'MÇ' },
+      { id: 'oAV', short: 'AV', subject: 'Fizik' },
+    ],
+    classes: [{ id: 's510', name: '510', roomId: null }],
+    lessons: [
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 10, maxPerDay: 4 },
+      { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 6, blockSize: 2 },
+    ],
+  });
+  // Written straight in: `blockSize` can only say "all the same length", and
+  // the whole point of this world is a lesson that is not.
+  return {
+    ...d,
+    lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, blocks: [4, 3, 2] } : x)),
+  };
+}
+
 // ------------------------------------------------------------ heavy worlds
 
 /**
@@ -739,16 +786,16 @@ function realScale(ratio: number, cap: number): State {
       const remaining = list.length - i;
       // The hours no longer have to divide by the block length: whatever is
       // left over is a single. What has to be kept is the SHAPE the world asked
-      // for — a lesson written as doubles stays doubles — so `pairs` is
-      // recomputed against the new total rather than carried over.
-      const wantsPairs = lesson.pairs > 0;
+      // for — a lesson written as triples stays triples — so the split is
+      // recomputed at the same block LENGTH against the new total.
+      const wants = lesson.blocks[0] ?? 1;
       const share = Math.max(1, Math.floor(budget / remaining));
       const hours = Math.min(budget, share);
       if (hours < 1) continue;
       lessons.push({
         ...lesson,
         weeklyHours: hours,
-        pairs: wantsPairs ? Math.floor(hours / 2) : 0,
+        blocks: blocksOfSize(hours, wants),
       });
       budget -= hours;
     }
@@ -779,6 +826,12 @@ export const WORLDS: SolverWorld[] = [
     note: 'Üç sınıf tek odayı paylaşıyor, toplam yük odaya sığmıyor.',
     state: dersllikDarbogazi(),
     want: { solved: false, reasonLike: /sınıf|derslik|A/, backtracks: true },
+  },
+  {
+    name: 'karisik-bloklar',
+    note: 'Tek derste 4+3+2+1; çözücünün DÖRT iş kalemi aynı sınıf için yarışıyor.',
+    state: karisikBloklar(),
+    want: { solved: true },
   },
   {
     name: 'salt-blok',

@@ -115,3 +115,48 @@ test.describe('49. Liste araçları', () => {
     await expect(page.locator('.hint', { hasText: 'Bu aramaya uyan sınıf yok' })).toBeVisible();
   });
 });
+
+// "Sıralamada aşağı yukarı işareti düzgün olsun."
+//
+// The arrow used to show the OTHER direction — a list running Z→A drew an
+// ascending arrow — on the reasoning that a button's name says what pressing it
+// will do. True of the name; backwards for the picture, because the picture is
+// the only thing on screen that claims to describe the rows underneath it.
+test.describe('84. Sıralama yönü işareti', () => {
+  const dirButton = (page: import('@playwright/test').Page) =>
+    page.getByRole('button', { name: /sıralı\. /i });
+
+  test('ok ŞU ANKİ yönü gösteriyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+
+    // Nothing to reverse until a sort is chosen.
+    await expect(dirButton(page)).toBeDisabled();
+    await page.locator('select.sort-pick').first().selectOption({ index: 1 });
+
+    const button = dirButton(page);
+    await expect(button).toBeEnabled();
+    await expect(button).toHaveAccessibleName(/^artan sıralı/i);
+    const up = await button.locator('svg').getAttribute('class');
+
+    await button.click();
+    await expect(button).toHaveAccessibleName(/^azalan sıralı/i);
+    const down = await button.locator('svg').getAttribute('class');
+
+    // Two different icons, and each one names its own direction.
+    expect(up).not.toBe(down);
+    expect(up).toContain('arrow-up');
+    expect(down).toContain('arrow-down');
+  });
+
+  // The arrow keys move a row, and they were only ever named in the accessible
+  // name — so a reader who can see the handle was never told.
+  test('tutamak ok tuşlarını da SÖYLÜYOR', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    await expect(mainList(page).locator('.row-grip').first()).toHaveAttribute(
+      'title',
+      /ok tuşlar/,
+    );
+  });
+});
