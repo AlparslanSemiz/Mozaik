@@ -355,15 +355,21 @@ test.describe('30. Kurulum — düzenleme', () => {
     await openWithSample(page);
     await openLessons(page);
     const row = page.locator('table.list tbody tr').first();
-    const numbers = row.locator('input[type=number]');
+    const hours = row.locator('input[type=number].num').first();
 
-    await numbers.nth(0).fill('6');
-    await numbers.nth(0).blur();
-    await numbers.nth(1).fill('3');
-    await numbers.nth(1).blur();
+    await hours.fill('6');
+    await hours.blur();
+    // Boxes are asked for BY NAME rather than by position: the split editor is
+    // three inputs of its own next to the hours, and an nth() into that row
+    // silently meant "however many number boxes there happen to be".
+    const twos = row.getByRole('spinbutton', { name: '2 saatlik blok sayısı' });
+    await twos.fill('3');
 
-    await expect(numbers.nth(0)).toHaveValue('6');
-    await expect(numbers.nth(1)).toHaveValue('3');
+    await expect(hours).toHaveValue('6');
+    await expect(twos).toHaveValue('3');
+    // Three terms, so it is NOT folded: up to four the sum is a picture of
+    // the week and "3×2" is arithmetic about it (see `patternLabel`).
+    await expect(row.locator('.split-shape')).toHaveText('2+2+2');
 
     // The pool counter reads off the same numbers.
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -1008,63 +1014,87 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
 // 1+1+1 or a single 3-hour block — never 2+1 — and a 5-hour lesson in doubles
 // lost its fifth hour for good.
 test.describe('67. Ders dağılımı', () => {
-  const splitPick = (page: Page) =>
-    page.locator('.cols > div table.list tbody tr').first().locator('select.split-pick');
+  /** One of the three counters on the first row of the main list. */
+  const rowCount = (page: Page, size: number) =>
+    page
+      .locator('.cols > div table.list tbody tr')
+      .first()
+      .getByRole('spinbutton', { name: `${size} saatlik blok sayısı` });
 
-  /** The new-lesson row's own two boxes. */
+  /** What that row's split adds up to, as the screen writes it. */
+  const rowShape = (page: Page) =>
+    page.locator('.cols > div table.list tbody tr').first().locator('.split-shape');
+
+  /** The new-lesson row's own boxes. */
   const newHours = (page: Page) => page.locator('.form-row input[type="number"].num').first();
-  const newSplit = (page: Page) => page.locator('.form-row select.split-pick').first();
+  const newCount = (page: Page, size: number) =>
+    page.locator('.form-row').getByRole('spinbutton', { name: `${size} saatlik blok sayısı` });
+  const newShape = (page: Page) => page.locator('.form-row .split-shape').first();
 
-  test('haftalık saat ne ise dağılım seçenekleri odur', async ({ page }) => {
+  const setRowHours = async (page: Page, value: string) => {
+    const hours = page
+      .locator('.cols > div table.list tbody tr')
+      .first()
+      .locator('input[type="number"].num')
+      .first();
+    await hours.fill(value);
+    await hours.blur();
+  };
+
+  // The dropdown that used to be here listed every way the week could be
+  // divided, and with blocks of 2, 3 and 4 that list runs to 34 rows for a
+  // twelve-hour lesson. Three counters are three controls whatever the hours
+  // are — so what is measured now is the CEILING each one stops at.
+  test('her sayacın tavanı ÖTEKİ blokları hesaba katıyor', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    await newHours(page).fill('3');
-    await expect(newSplit(page).locator('option')).toHaveText(['1+1+1', '2+1']);
+    await newHours(page).fill('9');
+    await expect(newCount(page, 4)).toHaveAttribute('max', '2');
+    await expect(newCount(page, 3)).toHaveAttribute('max', '3');
+    await expect(newCount(page, 2)).toHaveAttribute('max', '4');
 
-    await newHours(page).fill('5');
-    // The first one is FOLDED and the other two are not: past four terms a row
-    // of ones stops being a picture of the week. See `patternLabel`.
-    await expect(newSplit(page).locator('option')).toHaveText([
-      '5×1',
-      '2+1+1+1',
-      '2+2+1',
-    ]);
+    // Spend four hours on a four and the others have to come down with it.
+    await newCount(page, 4).fill('1');
+    await expect(newCount(page, 3)).toHaveAttribute('max', '1');
+    await expect(newCount(page, 2)).toHaveAttribute('max', '2');
+  });
 
-    // Three-hour blocks left with v7: every part is a 1 or a 2. Read through
-    // BOTH ways a split is written, because "6×1" is the folded form of six
-    // ones and the claim here is about the block LENGTHS, not the notation.
-    await newHours(page).fill('6');
-    for (const label of await newSplit(page).locator('option').allInnerTexts()) {
-      const parts = label
-        .split('+')
-        .map((x) => x.trim())
-        .map((x) => (x.includes('×') ? x.split('×')[1]!.trim() : x));
-      expect(parts.every((x) => x === '1' || x === '2'), label).toBe(true);
-    }
+  test('sayaçlar haftanın ŞEKLİNİ yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page);
+
+    await newHours(page).fill('9');
+    await expect(newShape(page)).toHaveText('9×1');
+
+    await newCount(page, 4).fill('1');
+    await expect(newShape(page)).toHaveText('1×4 + 5×1');
+
+    await newCount(page, 3).fill('1');
+    await expect(newShape(page)).toHaveText('4+3+1+1');
+
+    await newCount(page, 2).fill('1');
+    await expect(newShape(page)).toHaveText('4+3+2');
   });
 
   test('seçilen dağılım kaydediliyor ve saat düşünce kırpılıyor', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    const row = page.locator('table.list tbody tr').first();
-    const hours = row.locator('input[type="number"].num').first();
-    await hours.fill('6');
-    await hours.blur();
-    await splitPick(page).selectOption({ label: '2+2+2' });
-    await expect(splitPick(page)).toHaveValue('3');
+    await setRowHours(page, '6');
+    await rowCount(page, 3).fill('2');
+    await expect(rowShape(page)).toHaveText('3+3');
 
     // Lower the total and the shape has to come with it — there is no room for
-    // three doubles in three hours.
-    await hours.fill('3');
-    await hours.blur();
-    await expect(splitPick(page)).toHaveValue('1');
-    await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
+    // two threes in three hours.
+    await setRowHours(page, '3');
+    await expect(rowCount(page, 3)).toHaveValue('1');
+    await expect(rowShape(page)).toHaveText('3');
 
     await reopen(page);
     await openLessons(page);
-    await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
+    await expect(rowCount(page, 3)).toHaveValue('1');
+    await expect(rowShape(page)).toHaveText('3');
   });
 
   test('havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor', async ({ page }) => {
@@ -1073,17 +1103,15 @@ test.describe('67. Ders dağılımı', () => {
 
     const row = page.locator('table.list tbody tr').first();
     const name = (await row.locator('td').nth(2).innerText()).trim();
-    const hours = row.locator('input[type="number"].num').first();
-    await hours.fill('3');
-    await hours.blur();
-    await splitPick(page).selectOption({ label: '2+1' });
+    await setRowHours(page, '3');
+    await rowCount(page, 2).fill('1');
+    await expect(rowShape(page)).toHaveText('2+1');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     const mine = page.locator('.pool-card', { hasText: name.split('·')[0]!.trim() });
     // Two cards for one lesson: a double and a single, and they say which.
     const own = mine.filter({ hasText: '0/3' });
     await expect(own).toHaveCount(2);
-    await expect(own.filter({ has: page.locator('[data-size="2"]') }).or(own)).not.toHaveCount(0);
     expect(await own.first().getAttribute('data-size')).toBe('2');
     expect(await own.last().getAttribute('data-size')).toBe('1');
     // The block length left the card's TEXT on 2026-08-27 ("Programda 1 saat x5
@@ -1094,43 +1122,87 @@ test.describe('67. Ders dağılımı', () => {
     await expect(own.last()).toHaveAttribute('title', /1 saatlik blok/);
   });
 
-  // Pitfall 33 again, and it DID happen while this box was being added: at 150 %
-  // a fixed-width picker drew "1+1+1+1+" and the rest was simply gone — the
-  // value was right, every test was green, and it could not be read. The
-  // labels grow with the hours, so the box carries a character COUNT taken from
-  // the longest one it holds. The assertion invents no number: it clones the
-  // control at `width: auto` and asks the browser what IT wants.
+  // A THREE-hour block, which the model could not express between v7 and v9.
+  // Measured on the grid rather than in the store: the point of a long block is
+  // that it is drawn as ONE cell, and the cell is what the reader sees.
+  test('üç saatlik blok ızgarada TEK hücre olarak çiziliyor', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page);
+
+    const row = page.locator('table.list tbody tr').first();
+    const name = (await row.locator('td').nth(2).innerText()).trim().split('·')[0]!.trim();
+    await setRowHours(page, '3');
+    await rowCount(page, 3).fill('1');
+    await expect(rowShape(page)).toHaveText('3');
+
+    // A block can never be longer than "this class may see this lesson N hours
+    // a day" — the sample school says 2, so without raising this lesson's own
+    // ceiling the three-hour block has no legal cell anywhere and the solver is
+    // right to leave it in the tray.
+    await row.locator('input[type="number"]').last().fill('3');
+    await row.locator('input[type="number"]').last().blur();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    const card = page.locator('.pool-card', { hasText: name }).first();
+    await expect(card).toHaveAttribute('data-size', '3');
+
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+
+    // One <td> standing for three hours — not three cells that happen to match.
+    await expect(page.locator('table.grid td[data-span="3"]').first()).toBeVisible();
+  });
+
+  // The gap the 3-hour block found: "günde en fazla N saat" is checked at drop
+  // time, so a block longer than N simply never places — no error, no red cell,
+  // nothing to click. Kontrol reports it three screens away from the box that
+  // caused it, so the box says it itself.
+  test('günlük sınırı aşan blok UYARIYOR', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page);
+
+    const row = page.locator('.cols > div table.list tbody tr').first();
+    await setRowHours(page, '8');
+    await expect(row.locator('.split-warn')).toHaveCount(0);
+
+    // The sample school says "at most 2 hours of one lesson a day".
+    await rowCount(page, 4).fill('1');
+    await expect(row.locator('.split-warn')).toHaveText('4 saat > günde 2');
+
+    // Raise THIS lesson's own ceiling and the warning goes: the number it was
+    // reading is per lesson, not per school.
+    const perDay = row.locator('input[type="number"]').last();
+    await perDay.fill('4');
+    await perDay.blur();
+    await expect(row.locator('.split-warn')).toHaveCount(0);
+  });
+
+  // Pitfall 33's ghost: the box this replaced had to be sized from its longest
+  // option or it clipped at 150 %. A counter holds at most two digits, so the
+  // claim is now simply that nothing in the split editor is cut off.
   for (const pct of [100, 125, 150]) {
-    test(`dağılım kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({ page }) => {
+    test(`dağılım sayaçları %${pct} ölçekte KIRPILMIYOR`, async ({ page }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
       await openLessons(page);
 
-      // A long week, so the longest label this box can ever hold is on screen.
-      const hours = mainList(page)
-        .locator('tbody tr')
-        .first()
-        .locator('input[type="number"].num')
-        .first();
-      await hours.fill('11');
-      await hours.blur();
+      await setRowHours(page, '11');
+      await rowCount(page, 2).fill('4');
 
-      for (const box of [splitPick(page), page.locator('.form-row select.split-pick')]) {
-        const fit = await box.evaluate((el) => {
-          const s = el as HTMLSelectElement;
-          const clone = s.cloneNode(true) as HTMLSelectElement;
-          clone.style.width = 'auto';
-          clone.style.position = 'absolute';
-          clone.style.visibility = 'hidden';
-          s.parentElement!.appendChild(clone);
-          const want = clone.getBoundingClientRect().width;
-          clone.remove();
-          return { have: s.getBoundingClientRect().width, want };
-        });
-        expect(fit.have, `%${pct}: kutu ${fit.have} < istenen ${fit.want}`).toBeGreaterThanOrEqual(
-          fit.want - 1,
-        );
+      // The shape sentence AND the counters. The boxes are the half that
+      // actually broke: at 3.5ch a digit plus Chromium's spinner wanted 29px of
+      // a 23px content box, so every counter drew an empty sliver — value
+      // right, every test green, nothing readable.
+      for (const box of [rowShape(page), newShape(page)]) {
+        const cut = await box.evaluate((el) => el.scrollWidth - el.clientWidth);
+        expect(cut, `%${pct}: "${await box.innerText()}" kırpılmış`).toBeLessThanOrEqual(1);
       }
+      const cuts = await page
+        .locator('.split-count > input.num')
+        .evaluateAll((els) =>
+          els.map((el) => el.scrollWidth - el.clientWidth).filter((n) => n > 1),
+        );
+      expect(cuts, `%${pct}: ${cuts.length} sayaç kutusu kırpılmış`).toEqual([]);
     });
   }
 
@@ -1143,10 +1215,8 @@ test.describe('67. Ders dağılımı', () => {
     await openLessons(page);
 
     const row = page.locator('table.list tbody tr').first();
-    const hours = row.locator('input[type="number"].num').first();
-    await hours.fill('3');
-    await hours.blur();
-    await splitPick(page).selectOption({ label: '2+1' });
+    await setRowHours(page, '3');
+    await rowCount(page, 2).fill('1');
     const name = (await row.locator('td').nth(2).innerText()).trim().split('·')[0]!.trim();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();

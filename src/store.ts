@@ -7,7 +7,7 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { clampPairs } from './blocks';
+import { MAX_BLOCK, clampBlocks } from './blocks';
 import { type Bundle, buildBundle } from './bundle';
 import { sanitize } from './constraints';
 import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
@@ -305,37 +305,54 @@ function migrateV2toV3(raw: LegacyV2): State {
 /**
  * The lessons out of a file of ANY version.
  *
- * v7 replaced `blockSize` (every block is this long) with `pairs` (how many of
- * the week's hours are doubles). A v1..v6 file is read as "make the blocks that
- * long and let the odd hour be a single": `blockSize` 2 or 3 becomes
- * floor(hours / 2) doubles, 1 becomes none.
+ * The shape of a week has been written three ways. v1..v6 stored `blockSize`
+ * ("every block is this long"), v7 replaced it with `pairs` ("this many of the
+ * hours are doubles"), and v9 replaces that with `blocks` (the list itself).
+ * Each older form is read as the list it was always describing:
  *
- * The three-hour block is the one thing that does not survive, and it cannot:
- * v7 has no way to write it. What DOES survive is the timetable — a 3-hour run
- * on the grid is still three hours of the same lesson in the same class, and
- * every placement key is untouched. Only where the boundary inside that run is
- * read changes, and no clash rule looks at a boundary (see the contract in
- * constraints.ts).
+ *   v9+     blocks, clamped
+ *   v7 v8   `pairs` doubles, then singles
+ *   v1..v6  floor(hours / blockSize) blocks that long, then singles
  *
- * Nothing validated `blockSize` on the way in before this, so `pairs` is
- * clamped here as well as in `sanitize()`: a hand-edited file can say anything.
+ * THE THREE-HOUR BLOCK COMES BACK. v7's migration had to fold `blockSize: 3`
+ * into doubles because 3 had stopped being expressible; it is expressible
+ * again, so an old file gets to mean what it said. This is safe for exactly the
+ * reason the fold was safe: the timetable itself never moved. A 3-hour run on
+ * the grid is three hours of the same lesson in the same class either way,
+ * every placement key is untouched, and no clash rule looks at a boundary (see
+ * the contract in constraints.ts). Only the READING of that run changes — and
+ * it now matches the drawing the file's author had in front of them.
+ *
+ * Nothing validated the old fields on the way in, so the list is clamped here
+ * as well as in `sanitize()`: a hand-edited file can say anything.
  */
 function readLessons(raw: unknown[], version: number): Lesson[] {
   return raw.map((item) => {
-    const x = item as Partial<Lesson> & { blockSize?: unknown };
+    const x = item as Partial<Lesson> & { blockSize?: unknown; pairs?: unknown };
     const weeklyHours = asCount(x.weeklyHours, 1);
-    const pairs =
-      version >= 7
-        ? clampPairs(weeklyHours, asCount(x.pairs, 0))
-        : asCount(x.blockSize, 1) >= 2
-          ? Math.floor(weeklyHours / 2)
-          : 0;
+
+    let blocks: number[];
+    if (version >= 9) {
+      blocks = clampBlocks(weeklyHours, asArray<unknown>(x.blocks, []).map((b) => asCount(b, 0)));
+    } else if (version >= 7) {
+      const pairs = Math.min(Math.floor(weeklyHours / 2), asCount(x.pairs, 0));
+      blocks = Array<number>(Math.max(0, pairs)).fill(2);
+    } else {
+      const size = asCount(x.blockSize, 1);
+      blocks =
+        size >= 2
+          ? Array<number>(Math.floor(weeklyHours / Math.min(size, MAX_BLOCK))).fill(
+              Math.min(size, MAX_BLOCK),
+            )
+          : [];
+    }
+
     return {
       id: x.id ?? '',
       classId: x.classId ?? '',
       teacherId: x.teacherId ?? '',
       weeklyHours,
-      pairs,
+      blocks: clampBlocks(weeklyHours, blocks),
       // A file below v8 cannot carry this and it is not guessed: every lesson
       // in it was taught under the teacher's only subject.
       second: x.second === true,

@@ -4,7 +4,7 @@
 // lessons, deleting a lesson must delete its placements. An orphan lessonId
 // breaks the grid.
 
-import { clampPairs } from './blocks';
+import { clampBlocks } from './blocks';
 import { buildIndex, closedKey, countPlacedHours, sanitize, teacherKey } from './constraints';
 import type { Index } from './constraints';
 // Type-only, erased at build time: import.ts knows nothing about State, so
@@ -538,7 +538,7 @@ export function addLesson(
     classId: fields.classId,
     teacherId: fields.teacherId,
     weeklyHours,
-    pairs: clampPairs(weeklyHours, fields.pairs),
+    blocks: clampBlocks(weeklyHours, fields.blocks),
     second: fields.second === true,
     maxPerDay: null,
   };
@@ -550,9 +550,9 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
   const lessons = d.lessons.map((x) => {
     if (x.id !== id) return x;
     const merged = { ...x, ...fields, id };
-    // Raising the hours leaves the twos alone; lowering them can force the
+    // Raising the hours leaves the blocks alone; lowering them can force the
     // shape to shrink, and the clamp is the one place that says by how much.
-    return { ...merged, pairs: clampPairs(merged.weeklyHours, merged.pairs) };
+    return { ...merged, blocks: clampBlocks(merged.weeklyHours, merged.blocks) };
   });
 
   // If the SPLIT changed, the placed blocks are the wrong lengths and the
@@ -560,7 +560,10 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
   // differently; safest is to drop them.
   const after = lessons.find((x) => x.id === id);
   const splitChanged =
-    before !== undefined && after !== undefined && before.pairs !== after.pairs;
+    before !== undefined &&
+    after !== undefined &&
+    (before.blocks.length !== after.blocks.length ||
+      before.blocks.some((b, i) => b !== after.blocks[i]));
   if (!splitChanged) return { ...d, lessons };
 
   const placements = { ...d.placements };
@@ -767,7 +770,7 @@ export function addLessonsFromRows(
       classId: group.id,
       teacherId: teacher.id,
       weeklyHours: row.weeklyHours,
-      pairs: row.pairs,
+      blocks: row.blocks,
     });
   }
   return { state, missing };

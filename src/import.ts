@@ -9,6 +9,7 @@
 // makeShort lives in entities.ts (one home); re-exported so callers and the
 // existing tests do not have to care where it moved.
 export { makeShort } from './entities';
+import { MAX_BLOCK } from './blocks';
 import { t } from './i18n';
 import { makeShort, parseGender } from './entities';
 import type { Gender } from './types';
@@ -151,18 +152,18 @@ export interface LessonRow {
   className: string;
   teacher: string; // full name or short form
   weeklyHours: number;
-  /** How many 2-hour blocks the week holds. See `Lesson.pairs`. */
-  pairs: number;
+  /** The blocks longer than an hour, biggest first. See `Lesson.blocks`. */
+  blocks: number[];
 }
 
 /**
  * Columns: Sınıf · Öğretmen · Haftalık saat · Blok (empty block = 1)
  *
  * The fourth column stays a BLOCK LENGTH and not a "2+2+1" pattern: it is a
- * column somebody copies out of a spreadsheet, and the sheets that exist say 1
- * or 2. It is read as "make the blocks this long and let the odd hour be a
- * single", which is `pairs = floor(hours / 2)` for 2 and 0 for 1. Anything
- * bigger is clamped to 2 — three-hour blocks left with v7.
+ * column somebody copies out of a spreadsheet, and a spreadsheet says how long
+ * a block is, not how the week is shaped. It is read as "make the blocks this
+ * long and let the remainder be singles" — 9 hours at 4 is 4+4+1. 1 means no
+ * blocks at all, and anything above 4 is clamped to 4.
  */
 export function parseLessons(text: string): ParseResult<LessonRow> {
   const accepted: LessonRow[] = [];
@@ -189,9 +190,12 @@ export function parseLessons(text: string): ParseResult<LessonRow> {
       );
       continue;
     }
-    const blockSize = Math.min(2, toNumber(cells[3], 1));
-    const pairs = blockSize >= 2 ? Math.floor(weeklyHours / 2) : 0;
-    accepted.push({ className, teacher, weeklyHours, pairs });
+    const blockSize = Math.max(1, Math.min(MAX_BLOCK, toNumber(cells[3], 1)));
+    const blocks =
+      blockSize >= 2
+        ? Array<number>(Math.floor(weeklyHours / blockSize)).fill(blockSize)
+        : [];
+    accepted.push({ className, teacher, weeklyHours, blocks });
   }
   return { accepted, errors };
 }

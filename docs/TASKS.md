@@ -1828,3 +1828,32 @@ Bu turların kaynağı. Hiçbiri silinmedi; her satırın nereye gittiği yanın
 > Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı ortalansın ve sığdırılsın. → Y8
 > Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin. → Y6
 > Tüm sectionları cesurca her şeyi değiştirebilsirsin. → Y1–Y10'un tamamının izni
+
+
+Derslerin blok saatleri 2 3 ve 4 de olabilsin.
+Branş isimleri değiştirme de olsun.
+Sıralamada aşağı yukarı işareti düzgün olsun.
+Öğretmenin bilgisine girip bir sınıfı başka bir hocaya aktarma olsun.
+Aynı şekilde öğretmenin bilgilendirmesine girip de yapılabilir olsun bu.
+ASC derslerinde ekleme ya da değiştirme kısmına bak.
+Uygulamanın windows çubuğundaki simgesi büyük simge olsun.
+Babamın zaten windowsu bilgisayarın ölçeklenmesi çok büyük o sebeple biz de büyük yaptık ama devasa oldu. ölçeklendirmeyı azatltmamız lazım.
+Dosyadan aç biraz sıkıntılı gibi ya da yavaş.
+Çıktıda da blokd dersler birlikte gözükmeli programdaki gibi birleşik görünsünler.
+
+Benden çıktılar için ve asc dersler tarafı için foto iste eğer örnek fotolarda atmadıysam.
+Readmenin ingilizce olması ve githubtaki her şeyin ingilizce olması ve github sayfasının tamtakır olması lazım.
+Babama indirdim exeyi zip virüs algılandı. .exeyi açarken de window engelledi yine de açmak istiyor musun dedi nedendir bunu düzeltelim.
+Kontrol kısmı çok saçma olmuş. biraz daha düzgün olmalı. Alt sekmede bir şeyler seçiyoruz ama değişmiyor onu ayarlamak lazım.
+Ayarlarda görünüm kısmı biraz daha düzenlenmeli. Bir de çok fazla info var ve çok uzunlar her yerde infoları olabildiğince anlaşılır kısa ve öz yap.
+Hareket ve Dil solda olmalı. Hatta dil istersen başka yere bile geçebilir.
+Ayarlar hakkında kısmında sağa sola kaydırma olmasın.
+Hiçbir yerde sağ taraaftaki bloklar sağa sola hareket ettirme olmasın. yukarı aşağı eh işte ama o da ne kadar az o kadar iyi.
+Listelerde ekleme kısmı bloğu ile alttaki liste arasında çizgi olsun yani iki farklı blok olsun. ama yerleri değişmesin. Ekleme kısmı sadece biraz daha belirli olur arama kısmı da listede belli olur.
+Çıktıda her ama her zaman simetri çok önemli. Satırların uzunluğu genişliği vesaire hep aynı olmalı.
+Müsaitlikteki programların satıların uzunluğu artsın. aşağıdaki boşluk azalsın ama olabildiğince her zaman arayüze göre değişiklikler olsa dahai iki program da müsaitlikte tam ekranda gözüksün. Ayrıca sağ üstte haftanın darlığı açılsın mı kapalı mı kalsın özelliği olsun. Saatleri de oraya koyalım. ikinci şeritte olsun.
+Ayarlardaki özel sectionlara özgü ayarlar o sectionun alt şeridinde sağm üstte gözüksün.
+Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz zor o sebeple ya yatay şekilde ya sağa sola ya da biraz daha geniş şekilde yapabiliriz aslında çünkü çıktı kısmında bayağı boşluk var ama artık çözebiliyorsak çözelim.
+
+
+Benden çıktılar için ve asc dersler tarafı için foto iste eğer örnek fotolarda atmadıysam.

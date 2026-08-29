@@ -52,8 +52,8 @@ function build(): State {
       { id: 's511', name: '511', roomId: null, color: 1 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 6, pairs: 0, second: false, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},

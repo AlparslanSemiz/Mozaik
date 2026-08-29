@@ -20,7 +20,15 @@
 
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
-import { blockPlan, clampPairs, patternLabel, patternOptions } from '../../blocks';
+import {
+  BLOCK_SIZES,
+  blockCounts,
+  blockPlan,
+  clampBlocks,
+  maxCount,
+  patternLabel,
+  withCount,
+} from '../../blocks';
 import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
@@ -29,6 +37,7 @@ import type { LessonMode } from '../../toolState';
 import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../import';
 import { paletteColor } from '../../palette';
+import { lessonLimit, ruleLevel } from '../../rules';
 import {
   addLesson,
   addLessonsFromRows,
@@ -61,37 +70,84 @@ interface Props {
 }
 
 /**
- * The split picker: aSc's dropdown next to "Lessons/week".
+ * The longest block this lesson could ever have placed, or 0 for no ceiling.
  *
- * No width of its own — see `.split-pick` in styles.css. The labels grow with
- * the hours, so the browser is left to size the box from its longest option;
- * pinned at one width it clipped ("1+1+1+1+" at 150 %), and pinned at the
- * longest possible one it would be a very wide column for a two-hour lesson.
+ * Only when the rule is set to ENGELLE: at Uyar a long block still goes down,
+ * it just paints yellow, and calling that impossible would be a lie.
  */
-function SplitPick({
-  options,
-  value,
+function blockCeiling(d: State, lesson: Lesson | undefined): number {
+  if (ruleLevel(d, 'maxSameLessonPerDay') !== 'block') return 0;
+  return lessonLimit(d, lesson);
+}
+
+/**
+ * The split editor: how many 4s, how many 3s, how many 2s. The rest are singles.
+ *
+ * It replaced a dropdown listing every way the week could be divided, and the
+ * reason is arithmetic: with blocks of 1 and 2 a twelve-hour lesson had 7 ways,
+ * and with 3 and 4 it has 34. A list nobody can read is not a choice. Three
+ * counters are three controls whatever the hours are, and the sentence beside
+ * them ("3+3+2+1") says what the week will look like.
+ *
+ * Each counter's ceiling is asked for with the OTHER two standing (`maxCount`),
+ * so the boxes can never be driven into a split that does not fit — which is
+ * also why there is nothing here to clamp afterwards.
+ */
+function BlockCounts({
+  weeklyHours,
+  blocks,
+  dayLimit,
   title,
   onPick,
 }: {
-  options: Array<{ pairs: number; label: string }>;
-  value: number;
+  weeklyHours: number;
+  blocks: number[];
+  /** Most hours of THIS lesson one day may hold, or 0 for no ceiling. */
+  dayLimit: number;
   title?: string;
-  onPick: (pairs: number) => void;
+  onPick: (blocks: number[]) => void;
 }) {
+  const t = useT();
+  const counts = blockCounts(blocks);
+  // A block longer than the daily ceiling has no legal cell ANYWHERE — not a
+  // hard search, an impossible one. Left unsaid the reader picks a four, presses
+  // "Otomatik diz", and watches nothing happen; Kontrol reports it, but three
+  // screens away from the box that caused it.
+  const tooLong = dayLimit > 0 ? blocks.filter((b) => b > dayLimit) : [];
   return (
-    <select
-      className="split-pick"
-      value={value}
-      title={title}
-      onChange={(e) => onPick(Number(e.target.value))}
-    >
-      {options.map((o) => (
-        <option key={o.pairs} value={o.pairs}>
-          {o.label}
-        </option>
+    <span className="split-counts" title={title}>
+      {BLOCK_SIZES.map((size) => (
+        // Count first, length second: "2×4" is read "two fours", which is the
+        // same notation `patternLabel` folds a long week into. Spelling the
+        // unit out ("4 saatlik") wrapped the three boxes onto three lines in
+        // the list column and doubled every row's height.
+        <label key={size} className="split-count">
+          <input
+            type="number"
+            className="num"
+            min={0}
+            max={maxCount(weeklyHours, blocks, size)}
+            value={counts[size]}
+            aria-label={t('{boy} saatlik blok sayısı', { boy: size })}
+            title={t('{boy} saatlik blok sayısı', { boy: size })}
+            onChange={(e) => onPick(withCount(weeklyHours, blocks, size, Number(e.target.value)))}
+          />
+          <span aria-hidden="true">×{size}</span>
+        </label>
       ))}
-    </select>
+      <output className="split-shape">{patternLabel(blockPlan({ weeklyHours, blocks }))}</output>
+      {tooLong.length > 0 && (
+        <span
+          className="split-warn"
+          role="status"
+          title={t('Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz', {
+            n: dayLimit,
+          })}
+        >
+          {t('{boy} saat > günde {n}', { boy: Math.max(...tooLong), n: dayLimit })}
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -155,8 +211,8 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             compareTr(cls(a)?.name ?? '', cls(b)?.name ?? '') },
         { id: 'saat', label: t('Haftalık saate göre (çok → az)'), cmp:
             byNumberThen((x) => x.weeklyHours, (x) => cls(x)?.name ?? '') },
-        { id: 'blok', label: t('İkili blok sayısına göre (çok → az)'), cmp:
-            byNumberThen((x) => x.pairs, (x) => cls(x)?.name ?? '') },
+        { id: 'blok', label: t('Blok sayısına göre (çok → az)'), cmp:
+            byNumberThen((x) => x.blocks.length, (x) => cls(x)?.name ?? '') },
       ],
     };
   }, [state]);
@@ -193,8 +249,10 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
     // being filled in, and `add()` turns it back into the flag.
     subject: '',
     hours: '4',
-    pairs: '0',
   });
+  // The blocks longer than an hour, as the form has them so far. A list, so it
+  // does not live in `newLesson` with the strings.
+  const [newSplit, setNewSplit] = useState<number[]>([]);
   // In a focused mode the axis comes from the ribbon, not from the form: that
   // IS the shortening the reader asked for.
   const classId = mode === 'class' ? (focused?.id ?? '') : newLesson.classId;
@@ -267,12 +325,12 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
       name !== '' && newTeacherObj !== undefined && slotOf(teacherSubs, name) < 0 && mode !== 'teacher';
     setNewLesson({ ...newLesson, subject: name, ...(drops ? { teacherId: '' } : {}) });
   }
-  // The choices depend on the hours in the box next to it, so they are rebuilt
-  // as it is typed in — and the chosen one is clamped, because going from 6
-  // hours to 3 has to take "2+2+2" with it.
+  // The split lives beside the hours rather than inside `newLesson`, because it
+  // is a list and the rest of that form is strings. Clamped against the hours
+  // as they are typed: going from 6 hours to 3 has to take "2+2+2" with it.
   const newHours = Math.max(1, Number(newLesson.hours) || 1);
-  const newSplits = patternOptions(newHours);
-  const newPairs = clampPairs(newHours, Number(newLesson.pairs) || 0);
+  const newBlocks = clampBlocks(newHours, newSplit);
+  const newDayLimit = blockCeiling(state, undefined);
   const canAdd = classId !== '' && teacherId !== '';
 
   function add() {
@@ -282,7 +340,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         classId,
         teacherId,
         weeklyHours: newHours,
-        pairs: newPairs,
+        blocks: newBlocks,
         // A teacher with one subject cannot be "second", whatever the box last
         // said before the teacher was changed.
         second: secondFlag && newTeacherObj !== undefined && hasTwoSubjects(newTeacherObj),
@@ -342,7 +400,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
         </div>
         <p className="hint">
-          <T k="Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen iki branş veriyorsa dersin hangi branştan olduğu da seçilir. **Dağılım**, o saatlerin haftaya nasıl bölüneceğidir: **2+1** demek bir gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2 saattir. **Günde ↑** bu dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki sayı geçerli olur." />
+          <T k="Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen iki branş veriyorsa dersin hangi branştan olduğu da seçilir. **Dağılım**, o saatlerin haftaya nasıl bölüneceğidir: **2+1** demek bir gün iki saat üst üste, başka bir gün tek saat demektir. Bir blok 2, 3 ya da 4 saat olabilir; geri kalan saatler tektir. **Günde ↑** bu dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki sayı geçerli olur." />
         </p>
 
         {(state.classes.length === 0 || state.teachers.length === 0) && (
@@ -452,10 +510,11 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             />
           </Field>
           <Field label={t('Dağılım')}>
-            <SplitPick
-              options={newSplits}
-              value={newPairs}
-              onPick={(pairs) => setNewLesson({ ...newLesson, pairs: String(pairs) })}
+            <BlockCounts
+              weeklyHours={newHours}
+              blocks={newBlocks}
+              dayLimit={newDayLimit}
+              onPick={setNewSplit}
             />
           </Field>
           <button className="btn" disabled={!canAdd} onClick={add}>{t('Ekle')}</button>
@@ -465,7 +524,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           open={pasteOpen}
           close={() => setPasteOpen(false)}
           title={t('Dersleri yapıştır')}
-          example={t('Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 veya 2)')}
+          example={t('Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)')}
           parse={parseLessons}
           rowText={(x) =>
             t('{sinif} · {kim}: {saat} saat ({dagilim})', {
@@ -617,11 +676,12 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                       />
                     </td>
                     <td>
-                      <SplitPick
-                        options={patternOptions(x.weeklyHours)}
-                        value={x.pairs}
+                      <BlockCounts
+                        weeklyHours={x.weeklyHours}
+                        blocks={x.blocks}
+                        dayLimit={blockCeiling(state, x)}
                         title={t('Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar')}
-                        onPick={(pairs) => change((d) => updateLesson(d, x.id, { pairs }))}
+                        onPick={(blocks) => change((d) => updateLesson(d, x.id, { blocks }))}
                       />
                     </td>
                     <td>

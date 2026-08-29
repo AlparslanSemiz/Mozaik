@@ -73,7 +73,7 @@ describe('parseState — v1 göçü', () => {
     ]);
     expect(d.classes).toEqual([{ id: 's510', name: '510', roomId: 'dA' }]);
     expect(d.lessons).toEqual([
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 2, second: false, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [2, 2], second: false, maxPerDay: null },
     ]);
     // The ids never changed, so the keys carry over untouched.
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
@@ -222,8 +222,27 @@ describe('parseState — v4', () => {
  */
 function asPreV7Lessons(raw: { lessons: Array<Record<string, unknown>> }) {
   for (const lesson of raw.lessons) {
-    lesson.blockSize = (lesson.pairs as number) > 0 ? 2 : 1;
-    delete lesson.pairs;
+    // A pre-v7 file said "every block is this long", so the longest block the
+    // sample asked for IS what that file would have written. Since v9 reads it
+    // back as floor(hours / size) blocks that long — the same rule sample.ts
+    // builds them with — the round trip is exact again, including threes.
+    const blocks = lesson.blocks as number[];
+    lesson.blockSize = blocks.length > 0 ? blocks[0] : 1;
+    delete lesson.blocks;
+  }
+}
+
+/**
+ * A v7/v8 file, which could only ever say "N of the hours are doubles".
+ * Anything the sample wanted as a three or a four is not expressible there, so
+ * the fixture writes what v7 would have written and the test expects that back.
+ */
+function asV7Lessons(raw: { lessons: Array<Record<string, unknown>> }) {
+  for (const lesson of raw.lessons) {
+    const blocks = lesson.blocks as number[];
+    const hours = lesson.weeklyHours as number;
+    lesson.pairs = blocks.length > 0 ? Math.floor(hours / 2) : 0;
+    delete lesson.blocks;
   }
 }
 
@@ -444,17 +463,22 @@ describe('parseState — v6 → v7 göçü', () => {
     expect(d!.lessons).toHaveLength(sampleState().lessons.length);
   });
 
-  it('blockSize → pairs: 2’lik blok istenen ders ikili, 1’lik olan tek saat', () => {
+  it('blockSize → blocks: [2, 2]’lik blok istenen ders ikili, 1’lik olan tek saat', () => {
     const raw = v6Backup();
     raw.lessons = [
       { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
       { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 1, maxPerDay: null },
-      // Three-hour blocks left with v7; they become doubles, hours untouched.
+      // Three-hour blocks came BACK with v9: a pre-v7 file gets to mean what
+      // it said, because 3 is expressible again and the placements never moved.
       { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 6, blockSize: 3, maxPerDay: null },
     ];
     raw.placements = {};
     const d = parseState(JSON.stringify(raw))!;
-    expect(d.lessons.map((x) => [x.weeklyHours, x.pairs])).toEqual([[5, 2], [5, 0], [6, 3]]);
+    expect(d.lessons.map((x) => [x.weeklyHours, x.blocks])).toEqual([
+      [5, [2, 2]],
+      [5, []],
+      [6, [3, 3]],
+    ]);
     expect(d.lessons.every((x) => !('blockSize' in x))).toBe(true);
   });
 
@@ -476,12 +500,12 @@ describe('parseState — v6 → v7 göçü', () => {
     const raw = JSON.parse(JSON.stringify(sampleState()));
     raw.placements = {};
     raw.lessons = [
-      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: 9, second: false, maxPerDay: null },
-      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, pairs: -3, second: false, maxPerDay: null },
+      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [2, 2, 2, 2, 2, 2, 2, 2, 2], second: false, maxPerDay: null },
+      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [-3, 9, 'x'], second: false, maxPerDay: null },
       { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, maxPerDay: null },
     ];
     const d = parseState(JSON.stringify(raw))!;
-    expect(d.lessons.map((x) => x.pairs)).toEqual([2, 0, 0]);
+    expect(d.lessons.map((x) => x.blocks)).toEqual([[2, 2], [], []]);
   });
 
   it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
@@ -504,6 +528,7 @@ function v7Backup() {
   raw.schemaVersion = 7;
   for (const t of raw.teachers) delete t.subject2;
   for (const x of raw.lessons) delete x.second;
+  asV7Lessons(raw);
   return raw;
 }
 
@@ -535,7 +560,13 @@ describe('parseState — v7 → v8 göçü', () => {
     expect(migrated.teachers.map((t) => t.subject)).toEqual(
       original.teachers.map((t) => t.subject),
     );
-    expect(migrated.lessons.map((x) => x.pairs)).toEqual(original.lessons.map((x) => x.pairs));
+    // Against what the FILE said, not against the sample: v7 had no way to
+    // write a three-hour block, so a v7 backup of a sample that wanted one
+    // legitimately comes back as doubles. What must not move is the timetable.
+    const wrote = v7Backup() as { lessons: Array<{ pairs: number }> };
+    expect(migrated.lessons.map((x) => x.blocks)).toEqual(
+      wrote.lessons.map((x) => Array<number>(x.pairs).fill(2)),
+    );
   });
 
   it('v8 dosyası ikinci branşı KORUYOR, ikinci geçişte de aynı', () => {

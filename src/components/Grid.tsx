@@ -87,28 +87,43 @@ const Row = memo(function Row({
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
-      // The SECOND half of a block, i.e. the cell whose neighbour to the left
-      // said it continues. A day boundary resets it: `continues` never crosses
-      // one.
+      // A LATER hour of a block, i.e. the cell whose neighbour to the left said
+      // it continues. A day boundary resets it: `continues` never crosses one.
       const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
       const inBlock = previous !== null && previous.continues;
 
       // "blok 2 saatlik olarak duruyorsa o iki farklı kart değil TEK kart
-      // olarak gözükmeli, büyükçe kart olarak." So the two halves become one
-      // <td> with colSpan 2 and one label, instead of two cards whose corners
+      // olarak gözükmeli, büyükçe kart olarak." So the hours of one block
+      // become one <td> with one label, instead of several cards whose corners
       // were squared off to suggest they were one thing.
       //
       // EXCEPT across the lunch break, and that is not a nicety: the separator
       // is its own column and it deliberately carries no data-day, because
       // drag.ts finds its target with closest('[data-day]') and a droppable
       // lunch break is pitfall 13. Swallowing it inside a colSpan would give it
-      // one. A block whose two hours straddle the break therefore keeps the old
-      // two-card drawing, which is also honest: on screen there really is
-      // something between them.
+      // one. A block that straddles the break is therefore CUT at it and drawn
+      // as two, which is also honest: on screen there really is something
+      // between them. For a two-hour block that is the old drawing exactly;
+      // a four-hour block split 2+2 by the break keeps both halves merged.
       const breakBefore = breakAt[g] === s;
-      const breakAfter = breakAt[g] === s + 1;
       if (inBlock && !breakBefore) continue; // absorbed by the cell to its left
-      const spans = cell !== null && cell.continues && !breakAfter;
+
+      // How many hours this ONE cell stands for. Walked rather than read off a
+      // number, because the walk is what the break can interrupt: `continues`
+      // says the block goes on, the break says this cell does not.
+      let span = 1;
+      if (cell !== null) {
+        let k = s;
+        while (
+          k + 1 < hourCount &&
+          breakAt[g] !== k + 1 &&
+          row.cells[g * hourCount + k]?.continues === true
+        ) {
+          span++;
+          k++;
+        }
+      }
+      const spans = span > 1;
 
       const className = [
         s === 0 ? 'day-first' : '',
@@ -135,10 +150,10 @@ const Row = memo(function Row({
           // and the crosshair drifted left of the pointer (pitfall 85).
           data-col={i}
           // How many hours this one <td> stands for. drag.ts needs it: it looks
-          // a cell up BY HOUR, and without this the second hour of a merged
-          // block resolves to nothing and its highlight silently never paints.
-          data-span={spans ? 2 : undefined}
-          colSpan={spans ? 2 : undefined}
+          // a cell up BY HOUR, and without this the later hours of a merged
+          // block resolve to nothing and their highlight silently never paints.
+          data-span={spans ? span : undefined}
+          colSpan={spans ? span : undefined}
           className={className}
           title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >

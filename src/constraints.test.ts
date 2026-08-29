@@ -1,5 +1,6 @@
 import {
   blockAt,
+  blockSpans,
   blockStart,
   pendingBlocks,
   placedBlocks,
@@ -60,16 +61,53 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2 },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oAV', weeklyHours: 4, pairs: 2, second: false, maxPerDay: null },
-      { id: 'x4', classId: 's510', teacherId: 'oAV', weeklyHours: 2, pairs: 1, second: false, maxPerDay: null },
-      { id: 'x5', classId: 's511', teacherId: 'oAV', weeklyHours: 2, pairs: 0, second: false, maxPerDay: null },
-      { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, pairs: 1, second: false, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
+      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
+      { id: 'x3', classId: 's433', teacherId: 'oAV', weeklyHours: 4, blocks: [2, 2], second: false, maxPerDay: null },
+      { id: 'x4', classId: 's510', teacherId: 'oAV', weeklyHours: 2, blocks: [2], second: false, maxPerDay: null },
+      { id: 'x5', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
+      { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, blocks: [2], second: false, maxPerDay: null },
     ],
     unavailable: {},
     placements: {},
   };
+}
+
+/**
+ * A world holding ONE lesson of a given shape, already sitting on the listed
+ * cells. Written straight into `placements` rather than through `place()`,
+ * because the point is to ask how an arbitrary run of hours gets READ.
+ */
+function withLesson(
+  spec: { id: string; weeklyHours: number; blocks: number[] },
+  cells: Array<[number, number]>,
+): State {
+  const d = build();
+  const placements: Record<string, string> = {};
+  for (const [day, hour] of cells) placements[placementKey('s510', day, hour)] = spec.id;
+  return {
+    ...d,
+    // Six hours a day rather than the four the shared fixture uses: a run has
+    // to be long enough to hold a 3 and a 2 back to back, or the case cannot be
+    // asked at all.
+    settings: { ...d.settings, hours: ['1', '2', '3', '4', '5', '6'] },
+    lessons: [
+      {
+        id: spec.id,
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: spec.weeklyHours,
+        blocks: spec.blocks,
+        second: false,
+        maxPerDay: null,
+      },
+    ],
+    placements,
+  };
+}
+
+function lessonById(d: State, id: string) {
+  return d.lessons.find((x) => x.id === id)!;
 }
 
 /** Shortcut for blocker(): rebuilds the index every time. */
@@ -318,6 +356,70 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
     let d = build();
     for (let h = 0; h < 4; h++) d = place(d, 'x4', 0, h, 1); // x4 only asks for 2 hours
     expect(pendingBlocks(d, d.lessons[3]!)).toEqual([]);
+  });
+
+  // The contract says BIGGEST FIRST, and with only 1 and 2 in the model there
+  // was no way to tell that apart from "twos first". These are the cases that
+  // can tell.
+  it('koşu içinde EN BÜYÜK blok önce alınıyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 1]);
+  });
+
+  it('3+2 tek koşuda 3 sonra 2 okunuyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
+      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+    ]);
+    expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 2]);
+  });
+
+  // A four cannot fit a run of three, so the run takes the biggest that DOES.
+  it('koşuya sığmayan boy atlanıyor, sığan alınıyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 7, blocks: [4, 3] }, [
+      [0, 0], [0, 1], [0, 2], // a run of 3
+      [1, 0], [1, 1], [1, 2], [1, 3], // a run of 4
+    ]);
+    expect(placedBlocks(d, lessonById(d, 'y1'))).toEqual([
+      { day: 0, hour: 0, size: 3 },
+      { day: 1, hour: 0, size: 4 },
+    ]);
+  });
+
+  it('bütçe bitince kalan hücreler tek saat', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3] }, [
+      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+    ]);
+    expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 1, 1]);
+  });
+
+  it('karışık boylu ders kalanını doğru söylüyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 7, blocks: [4, 3] }, [[1, 0], [1, 1], [1, 2], [1, 3]]);
+    expect(pendingBlocks(d, lessonById(d, 'y1'))).toEqual([3]);
+  });
+});
+
+describe('blockSpans — bir tek kaynak', () => {
+  it('yalnız blok BAŞLARINI, boylarıyla veriyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    const spans = blockSpans(d);
+    expect(spans.get(placementKey('s510', 0, 0))).toBe(3);
+    expect(spans.get(placementKey('s510', 0, 1))).toBeUndefined();
+    expect(spans.get(placementKey('s510', 0, 2))).toBeUndefined();
+    expect(spans.get(placementKey('s510', 0, 3))).toBe(1);
+  });
+
+  // The whole point of the map: every drawing of the week cuts a run of hours
+  // in the same places, so the grid, the two printed tables and the auditor can
+  // never disagree about where one block ends (pitfall 75).
+  it('placedBlocks ile birebir aynı sınırları veriyor', () => {
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
+      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+    ]);
+    const spans = blockSpans(d);
+    for (const b of placedBlocks(d, lessonById(d, 'y1'))) {
+      expect(spans.get(placementKey('s510', b.day, b.hour))).toBe(b.size);
+    }
+    expect(spans.size).toBe(placedBlocks(d, lessonById(d, 'y1')).length);
   });
 });
 

@@ -2526,6 +2526,14 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   min-width: 6.5rem;
 }
 
+.pool-card[data-size='3'] {
+  min-width: 9rem;
+}
+
+.pool-card[data-size='4'] {
+  min-width: 11.5rem;
+}
+
 /* ------------------------------------------------------------ setup steps */
 
 /* Kurulum's three lists, IN the ribbon. They are `.btn`s so pressed, hover,
@@ -3143,21 +3151,72 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
-/* The split picker in Kurulum > Dersler. Unlike every other box on this screen
-   it has NO width of its own, and that is the point: its labels grow with the
-   hours — "2+1" is three characters, eleven singles are twenty-one — so any
-   single number is wrong for some lesson. Measured at 150 % with a fixed box:
-   "1+1+1+1+1" was drawn as "1+1+1+1+", the value right and unreadable
-   (pitfall 33).
+/* The split editor: three counters and the shape they add up to.
+   ("4 saatlik [1] 3 saatlik [0] 2 saatlik [1]   4+2+1+1")
 
-   `width: auto` is the browser sizing a `<select>` from its longest option,
-   which is exactly the question being asked, and it needs the class ON THE SAME
-   ELEMENT to outrank `table.list td > select { width: 100% }` (0,1,3) —
-   pitfall 34's second half. The column it widens is inside `.table-scroll`, so
-   what it costs is scrolling, not somebody else's words. */
-table.list td > select.split-pick,
-.form-row select.split-pick {
-  width: auto;
+   It replaced a `<select>` that listed every way a week could be divided, and
+   the reason was arithmetic — 12 hours have 7 splits out of {1,2} and 34 out of
+   {1,2,3,4}. That select had needed `width: auto` so the browser could size it
+   from its longest option (pitfall 33: pinned narrower, "1+1+1+1+1" drew as
+   "1+1+1+1+", the value right and unreadable). Three fixed boxes have no such
+   problem: what grows with the hours is a COUNT, and a count is at most two
+   digits.
+
+   `min-width: 0` on the boxes, because they sit in a `.table-scroll` column and
+   a number input's default size is wider than two digits ever need. */
+.split-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* NOWRAP, and it is the row height that says why: spelled out over three
+     lines these three boxes made every lesson row twice as tall, in the one
+     list somebody scrolls ninety-nine times. */
+  flex-wrap: nowrap;
+}
+
+.split-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* MEASURED, not guessed. At 3.5ch the content box was 23px while the control
+   wanted 29 — a digit plus Chromium's spinner — so every counter clipped its
+   own value and read as an empty sliver (pitfall 33, again). 6ch gives 34px of
+   content at 12px type, and the assertion that it stays that way lives in
+   `kurulum.spec.ts`'s "dağılım sayaçları %N ölçekte KIRPILMIYOR". */
+table.list td .split-count > input.num,
+.form-row .split-count > input.num {
+  width: 6ch;
+  min-width: 0;
+  padding-inline: var(--space-2);
+  text-align: center;
+}
+
+/* "4 saat > günde 2" — a block the daily rule can never fit anywhere. Warning
+   colour and not danger: nothing is broken, the lesson simply will not place,
+   and the two hours it names are both true numbers. */
+.split-warn {
+  margin-inline-start: var(--space-3);
+  padding: 0 var(--space-2);
+  border-radius: var(--r-sm, 4px);
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* What the counters add up to, in the same voice a card's title uses. Not a
+   `.hint`: it is a value, and it changes as the boxes are typed in. */
+.split-shape {
+  margin-inline-start: var(--space-2);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 /* The first-run line on Kurulum: a symbol, one sentence, and the two things

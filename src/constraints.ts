@@ -3,7 +3,7 @@
 //
 // Rule: business logic lives here, never inside components.
 
-import { blockPlan, clampPairs } from './blocks';
+import { blockPlan, clampBlocks } from './blocks';
 import { t } from './i18n';
 import { closedKey, placementKey, teacherKey } from './keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
@@ -402,9 +402,11 @@ export function validHours(
 // everywhere:
 //
 //   A lesson's placed blocks are read in day/hour order. Inside each run the
-//   TWO-hour blocks are taken first, while the lesson still has twos left to
-//   account for; whatever is left over is a single.
+//   BIGGEST block the lesson still owes is taken first, as long as it fits what
+//   is left of the run; whatever no named block fits is a single.
 //
+// That is the same order `blockPlan` writes the split in, so a lesson placed
+// straight out of the pool reads back exactly as it went down.
 // Which reading is chosen cannot make a timetable wrong: every clash rule looks
 // at hours and at runs, never at where a boundary was drawn, so all readings of
 // the same cells are equally legal. What it decides is what a right-click takes
@@ -420,7 +422,10 @@ export interface PlacedBlock {
 /** Every placed block of one lesson, in day/hour order. See the contract above. */
 export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
   const out: PlacedBlock[] = [];
-  let twosLeft = clampPairs(lesson.weeklyHours, lesson.pairs);
+  // What the lesson still owes, longest first — the countdown the contract
+  // above spends. A plain counter worked while 2 was the only length worth
+  // naming; with 2, 3 and 4 the run has to be offered each of them in turn.
+  const left = clampBlocks(lesson.weeklyHours, lesson.blocks);
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
 
@@ -439,8 +444,10 @@ export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
         end++;
       }
       for (let cur = h; cur < end; ) {
-        const size = end - cur >= 2 && twosLeft > 0 ? 2 : 1;
-        if (size === 2) twosLeft--;
+        const room = end - cur;
+        const at = left.findIndex((b) => b <= room);
+        const size = at === -1 ? 1 : left[at]!;
+        if (at !== -1) left.splice(at, 1);
         out.push({ day: g, hour: cur, size });
         cur += size;
       }
@@ -448,6 +455,24 @@ export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
     }
   }
   return out;
+}
+
+/**
+ * How many hours the block starting at each placed cell stands for.
+ *
+ * ONE map, keyed the way `placements` is, so every drawing of the week reads
+ * the same boundaries: the grid, the two printed tables and the auditor. A cell
+ * that is not the head of a block is absent — its hours belong to the head to
+ * its left. Anything that recomputes this on its own drifts (pitfall 75).
+ */
+export function blockSpans(d: State): Map<string, number> {
+  const spans = new Map<string, number>();
+  for (const lesson of d.lessons) {
+    for (const b of placedBlocks(d, lesson)) {
+      spans.set(placementKey(lesson.classId, b.day, b.hour), b.size);
+    }
+  }
+  return spans;
 }
 
 /**
@@ -867,10 +892,10 @@ export function sanitize(d: State): State {
   const kept = d.lessons.filter((x) => classIds.has(x.classId) && teacherIds.has(x.teacherId));
   if (kept.length !== d.lessons.length) changed = true;
 
-  // …and lessons whose SPLIT no longer fits their hours. Nothing else validated
-  // block geometry before v7 — `blockSize` came out of a backup file raw — and
-  // a `pairs` above the ceiling would make `blockPlan` and `placedBlocks`
-  // disagree about how many twos exist.
+  // …and lessons whose SPLIT no longer fits their hours. Nothing else validates
+  // block geometry — `blocks` comes out of a backup file raw — and a list that
+  // outruns the hours would make `blockPlan` and `placedBlocks` disagree about
+  // how many blocks exist.
   //
   // The same pass clears an ORPHAN `second` flag: a lesson marked "taught under
   // the teacher's second subject" whose teacher no longer HAS a second subject.
@@ -880,11 +905,15 @@ export function sanitize(d: State): State {
   // place for the same reason.
   const twoSubjects = new Set(d.teachers.filter(hasTwoSubjects).map((t) => t.id));
   const lessons = kept.map((x) => {
-    const pairs = clampPairs(x.weeklyHours, x.pairs);
+    const blocks = clampBlocks(x.weeklyHours, x.blocks);
     const second = x.second && twoSubjects.has(x.teacherId);
-    if (pairs === x.pairs && second === x.second) return x;
+    const sameBlocks =
+      Array.isArray(x.blocks) &&
+      blocks.length === x.blocks.length &&
+      blocks.every((b, i) => b === x.blocks[i]);
+    if (sameBlocks && second === x.second) return x;
     changed = true;
-    return { ...x, pairs, second };
+    return { ...x, blocks, second };
   });
   const lessonById = new Map(lessons.map((x) => [x.id, x]));
 

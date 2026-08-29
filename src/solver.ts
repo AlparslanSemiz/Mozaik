@@ -93,18 +93,18 @@ export interface Solver {
 /**
  * One lesson's blocks OF ONE LENGTH that still need putting down.
  *
- * Not one item per lesson any more: since v7 a lesson can want 2+2+1, and the
- * search's whole shape — a domain of legal start cells, an MRV count, a
- * forward-checking bound — assumes every block it is holding is the same
- * length. So a 2+2+1 lesson becomes two items, one asking for two 2s and one
- * asking for a single. They share a class, so `neighbours` already makes each
- * the other's neighbour and the grid keeps them apart the same way it keeps any
- * two lessons apart.
+ * Not one item per lesson: a lesson can want 4+3+2+1, and the search's whole
+ * shape — a domain of legal start cells, an MRV count, a forward-checking
+ * bound — assumes every block it is holding is the same length. So a 2+2+1
+ * lesson becomes two items, one asking for two 2s and one asking for a single,
+ * and at most four items cover every split there is. They share a class, so
+ * `neighbours` already makes each the other's neighbour and the grid keeps
+ * them apart the same way it keeps any two lessons apart.
  */
 interface Item {
   lesson: Lesson;
   roomId: Id | null;
-  /** How long each of THIS item's blocks is: 1 or 2. */
+  /** How long each of THIS item's blocks is: 1, 2, 3 or 4. */
   block: number;
   /** Blocks still to place — never more than the week can hold. */
   need: number;
@@ -199,7 +199,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     // 5-hour lesson in 2-hour blocks; there is no remainder to throw away now
     // because the split says what the last block is.
     const owed = pendingBlocks(work, lesson);
-    for (const block of [2, 1]) {
+    for (const block of [4, 3, 2, 1]) {
       const need = owed.filter((x) => x === block).length;
       if (need <= 0) continue;
       items.push({
@@ -262,36 +262,41 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
    * raise the number.
    *
    * In HOURS and per LESSON rather than in blocks and per item, because a
-   * 2+2+1 lesson is two items competing for the same cells and the same daily
-   * limit: capping each of them on its own would let the pair between them
+   * 4+2+1 lesson is three items competing for the same cells and the same daily
+   * limit: capping each of them on its own would let the others between them
    * claim a day twice over.
    */
-  function ceilingHours(two: Item | undefined, one: Item | undefined): number {
-    const lesson = (two ?? one)!.lesson;
+  function ceilingHours(list: Item[]): number {
+    const lesson = list[0]!.lesson;
     const limit = lessonLimit(base, lesson);
     const perDay =
       ruleLevel(base, 'maxSameLessonPerDay') === 'block' && limit > 0 ? limit : Infinity;
 
-    let twosLeft = two?.need ?? 0;
+    // Longest first, and one counter per length rather than one for doubles:
+    // a lesson can now be 4+3+2+1 and each of those is its own item competing
+    // for the same cells and the same daily limit.
+    const order = [...list].sort((a, b) => b.block - a.block);
+    const left = new Map<Item, number>(order.map((x) => [x, x.need]));
+
     let total = 0;
     for (let day = 0; day < dayCount; day++) {
       let onDay = 0;
-      // Earliest-start packing, doubles first — the same order the split itself
+      // Earliest-start packing, biggest first — the same order the split itself
       // is written in, and the one that leaves the singles the easy job.
       for (let h = 0; h < hourCount; ) {
         const cell = day * hourCount + h;
-        if (twosLeft > 0 && two !== undefined && two.domain[cell] === 1 && onDay + 2 <= perDay) {
-          twosLeft--;
-          total += 2;
-          onDay += 2;
-          h += 2;
-          continue;
+        let took = 0;
+        for (const item of order) {
+          if ((left.get(item) ?? 0) <= 0) continue;
+          if (item.domain[cell] !== 1) continue;
+          if (onDay + item.block > perDay) continue;
+          left.set(item, (left.get(item) ?? 0) - 1);
+          total += item.block;
+          onDay += item.block;
+          took = item.block;
+          break;
         }
-        if (one !== undefined && one.domain[cell] === 1 && onDay + 1 <= perDay) {
-          total += 1;
-          onDay += 1;
-        }
-        h++;
+        h += took > 0 ? took : 1;
       }
     }
     return total;
@@ -308,8 +313,6 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   }
 
   for (const list of itemsByLesson.values()) {
-    const two = list.find((x) => x.block === 2);
-    const one = list.find((x) => x.block === 1);
     // Ask for no more than the week can hold. Without this the search spends
     // its whole budget on a lesson it can never finish: MRV keeps choosing it
     // (its domain is the smallest), it fills every day it is allowed, forward
@@ -322,18 +325,14 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     // would trade a partly-taught class for a tidier number; `report()` reads
     // what is missing off the grid, so the count stays honest either way.
     //
-    // The room is handed out doubles first, because that is the order the split
+    // The room is handed out biggest first, because that is the order the split
     // is written in: a week that can only hold four of a five-hour lesson keeps
     // 2+2 and drops the single, not the other way round.
-    let room = ceilingHours(two, one);
-    if (two !== undefined) {
-      two.need = Math.min(two.need, Math.floor(room / 2));
-      room -= two.need * 2;
-      if (two.need <= 0) two.abandoned = true;
-    }
-    if (one !== undefined) {
-      one.need = Math.min(one.need, room);
-      if (one.need <= 0) one.abandoned = true;
+    let room = ceilingHours(list);
+    for (const item of [...list].sort((a, b) => b.block - a.block)) {
+      item.need = Math.min(item.need, Math.floor(room / item.block));
+      room -= item.need * item.block;
+      if (item.need <= 0) item.abandoned = true;
     }
   }
 

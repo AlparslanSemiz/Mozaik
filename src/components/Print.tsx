@@ -16,7 +16,7 @@
 
 import { useMemo } from 'react';
 import { periodGroups } from '../bell';
-import { buildIndex, closedKey, placementKey } from '../constraints';
+import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
@@ -93,6 +93,10 @@ export default function Print({
 }: Props) {
   const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
+  // Where each placed block BEGINS and how wide it is — the same map the
+  // screen grid reads, so paper and screen cut a run of hours in the same
+  // places. Computed once for the whole print job rather than per sheet.
+  const spans = useMemo(() => blockSpans(state), [state]);
 
   // Read once per mount, on purpose: the sheet says when it was printed, and
   // the honest answer is "about now". Recomputing it per page would put five
@@ -127,6 +131,71 @@ export default function Print({
  * The small line under the title: whose sheet this is. Empty parts are dropped,
  * so a school with no name does not print a stray separator.
  */
+/**
+ * How many hours the ONE printed cell starting at this hour stands for.
+ *
+ * 0 means "do not draw it": a block to the left already covers this hour. 1 is
+ * an ordinary cell. Anything more is a merged block, drawn on paper the way the
+ * screen grid draws it, from the same `blockSpans()` map — so a run of hours is
+ * never cut in one place on screen and another on paper.
+ *
+ * CUT AT THE LONG BREAK, for a reason of its own. On screen the break is a
+ * column of its own and swallowing it inside a colSpan would make it a drop
+ * target (pitfall 13); on paper it is a thick right edge on one cell, and a
+ * colSpan straddling it would put that edge through the middle of a block. Both
+ * drawings therefore end a cell at the break, which is also the honest reading:
+ * there really is something between those hours.
+ */
+function cellSpan(
+  spans: Map<string, number>,
+  state: State,
+  classId: string,
+  day: number,
+  hour: number,
+  longBreakAfter: number,
+): number {
+  if (classId === '') return 1;
+  const here = state.placements[placementKey(classId, day, hour)];
+  if (here === undefined) return 1;
+
+  const head = spans.get(placementKey(classId, day, hour));
+  if (head === undefined) {
+    // Not a block head. It is drawn on its own only if the break cut the block
+    // just before it — otherwise the cell to its left is already covering it.
+    return longBreakAfter === hour ? blockTail(spans, state, classId, day, hour, longBreakAfter) : 0;
+  }
+  return clampToBreak(head, hour, longBreakAfter, state.settings.hours.length);
+}
+
+/** The rest of a block after the long break cut it, as its own cell. */
+function blockTail(
+  spans: Map<string, number>,
+  state: State,
+  classId: string,
+  day: number,
+  hour: number,
+  longBreakAfter: number,
+): number {
+  const id = state.placements[placementKey(classId, day, hour)];
+  let start = hour;
+  while (start > 0 && spans.get(placementKey(classId, day, start)) === undefined) start--;
+  const size = spans.get(placementKey(classId, day, start)) ?? 1;
+  const left = size - (hour - start);
+  if (left <= 0 || id === undefined) return 1;
+  return clampToBreak(left, hour, longBreakAfter, state.settings.hours.length);
+}
+
+/** A width that never reaches past the long break or past the last hour. */
+function clampToBreak(
+  size: number,
+  hour: number,
+  longBreakAfter: number,
+  hourCount: number,
+): number {
+  const toBreak = longBreakAfter > hour ? longBreakAfter - hour : Infinity;
+  return Math.max(1, Math.min(size, toBreak, hourCount - hour));
+}
+
 function credits(...parts: string[]): string {
   return parts.filter((p) => p !== '').join(' · ');
 }
@@ -318,6 +387,13 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                       <th className="p-daycol">{dayLabel(day.name)}</th>
                       {state.settings.hours.map((_, s) => {
                         const lessonId = state.placements[placementKey(group.id, g, s)];
+                        // A block is ONE cell on paper too — "çıktıda da blok
+                        // dersler birlikte gözükmeli programdaki gibi birleşik
+                        // görünsünler". `cellSpan` returns 0 for the hours a
+                        // block to the left already covers, and they are simply
+                        // not drawn.
+                        const span = cellSpan(spans, state, group.id, g, s, day.longBreakAfter);
+                        if (span === 0) return null;
                         const lesson =
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
                         const teacher =
@@ -333,7 +409,8 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                         return (
                           <td
                             key={s}
-                            className={breakClass(day.longBreakAfter, s)}
+                            colSpan={span > 1 ? span : undefined}
+                            className={breakClass(day.longBreakAfter, s + span - 1)}
                             style={
                               colored && teacher !== undefined
                                 ? { background: paletteColor(teacher.color) }
@@ -396,10 +473,24 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                           lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
                         const group =
                           lesson === undefined ? undefined : ix.classById.get(lesson.classId);
+                        // The boundary belongs to the CLASS's grid, exactly as
+                        // it does in the screen grid's teacher view: the block
+                        // was placed into a class's week, and this sheet is
+                        // only another way of reading it.
+                        const span = cellSpan(
+                          spans,
+                          state,
+                          group?.id ?? '',
+                          g,
+                          s,
+                          day.longBreakAfter,
+                        );
+                        if (span === 0) return null;
                         return (
                           <td
                             key={s}
-                            className={breakClass(day.longBreakAfter, s)}
+                            colSpan={span > 1 ? span : undefined}
+                            className={breakClass(day.longBreakAfter, s + span - 1)}
                             // The CLASS's colour, not the teacher's.
                             //
                             // On the screen grid a cell is painted by the

@@ -76,6 +76,31 @@ const EDGE = 56;
 /** Scroll amount per frame (px). Kept low so the user stays in control. */
 const STEP = 14;
 
+/**
+ * The drawn cell that COVERS an hour, when that hour has no cell of its own.
+ *
+ * A merged block is one <td> carrying data-hour of its first hour and data-span
+ * of its length, so the later hours of it are not in the DOM at all. Scanning
+ * for the cell whose range contains the hour answers for any width; the old
+ * `data-hour = hour - 1, data-span = 2` lookup only ever answered for a pair
+ * (pitfalls 60 and 85 — a position is found by what covers it, not by a count).
+ */
+function coveringCell(
+  row: HTMLElement | null | undefined,
+  day: number,
+  hour: number,
+): HTMLElement | null {
+  if (row == null) return null;
+  for (const el of row.querySelectorAll<HTMLElement>(`td[data-day="${day}"][data-span]`)) {
+    const start = Number(el.dataset.hour);
+    const span = Number(el.dataset.span);
+    if (Number.isFinite(start) && Number.isFinite(span) && start <= hour && hour < start + span) {
+      return el;
+    }
+  }
+  return null;
+}
+
 export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
   // Only changes when the drag starts and ends -> two re-renders, that is all.
   const [dragging, setDragging] = useState<DragData | null>(null);
@@ -271,17 +296,20 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
           for (let i = 0; i < d.blockSize; i++) {
             const hour = target.hour + i;
             // Two ways an hour can be on screen: as its own cell, or swallowed
-            // by the cell to its left when a two-hour block is drawn as one
-            // (see Grid.tsx). Asking only the first way made the second half of
-            // such an hour resolve to null — and the `break` below then stopped
+            // by a cell to its left when a multi-hour block is drawn as one
+            // (see Grid.tsx). Asking only the first way made the later hours of
+            // such a block resolve to null — and the `break` below then stopped
             // painting the REST of the block too, with nothing to show for it.
+            //
+            // The swallowing cell is found by CONTAINMENT and not by a fixed
+            // offset: a block is 1 to 4 hours wide, so "the cell one to the
+            // left with span 2" only ever answered for the old pair (pitfalls
+            // 60 and 85 — a position is found by what covers it, not by a
+            // count).
             const el =
               rowEl?.querySelector<HTMLElement>(
                 `td[data-day="${target.day}"][data-hour="${hour}"]`,
-              ) ??
-              rowEl?.querySelector<HTMLElement>(
-                `td[data-day="${target.day}"][data-hour="${hour - 1}"][data-span="2"]`,
-              );
+              ) ?? coveringCell(rowEl, target.day, hour);
             if (el == null) break;
             // A merged cell can answer for both of its hours; painting it twice
             // would also push it onto the cleanup list twice.

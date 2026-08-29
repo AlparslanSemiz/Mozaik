@@ -86,7 +86,7 @@ function build(): State {
     ],
     classes: [{ id: 's510', name: '510', roomId: null, color: 0 }],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, pairs: 0, second: false, maxPerDay: null },
+      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
     ],
     unavailable: { [teacherKey('oMC', 2, 3)]: 1 },
     placements: {
@@ -230,7 +230,7 @@ describe('addLessonsFromRows', () => {
   const row = (teacher: string) => ({
     className: '510',
     teacher,
-    weeklyHours: 4, pairs: 2,
+    weeklyHours: 4, blocks: [2, 2],
   });
 
   it('öğretmeni kısaltmadan da tam addan da bulur', () => {
@@ -239,15 +239,15 @@ describe('addLessonsFromRows', () => {
       expect(missing).toEqual([]);
       expect(state.lessons).toHaveLength(1);
       expect(state.lessons[0]!.weeklyHours).toBe(4);
-      expect(state.lessons[0]!.pairs).toBe(2);
+      expect(state.lessons[0]!.blocks).toEqual([2, 2]);
     }
   });
 
   it('bulunamayan satırı TAHMİN ETMEZ, geri bildirir', () => {
     const { state, missing } = addLessonsFromRows(school(), [
       row('MÇ'),
-      { className: '999', teacher: 'MÇ', weeklyHours: 2, pairs: 0 },
-      { className: '510', teacher: 'ZZ', weeklyHours: 2, pairs: 0 },
+      { className: '999', teacher: 'MÇ', weeklyHours: 2, blocks: [] },
+      { className: '510', teacher: 'ZZ', weeklyHours: 2, blocks: [] },
     ]);
     expect(state.lessons).toHaveLength(1); // only the good row landed
     expect(missing).toEqual(['999 / MÇ', '510 / ZZ']);
@@ -260,8 +260,8 @@ describe('weeklyLoad', () => {
     d = addClass(d, '511', d.rooms[0]!.id); // shares room A with 510
     const [a, b] = d.classes;
     const teacher = d.teachers[0]!.id;
-    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, pairs: 0 });
-    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 3, pairs: 0 });
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blocks: [] });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 3, blocks: [] });
 
     expect(weeklyLoad(d, 'teacher', teacher)).toBe(7);
     expect(weeklyLoad(d, 'class', a!.id)).toBe(4);
@@ -370,8 +370,8 @@ describe('deletionSummary', () => {
     d = addClass(d, '511', room);
     const teacher = d.teachers[0]!.id;
     const [a, b] = d.classes;
-    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, pairs: 2 });
-    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 2, pairs: 0 });
+    d = addLesson(d, { classId: a!.id, teacherId: teacher, weeklyHours: 4, blocks: [2, 2] });
+    d = addLesson(d, { classId: b!.id, teacherId: teacher, weeklyHours: 2, blocks: [] });
     // put the 2-hour block of the first lesson on the grid
     d = place(d, d.lessons[0]!.id, 0, 0);
     return d;
@@ -775,7 +775,7 @@ describe('entityWeek', () => {
     d = addClass(d, '510', room);
     const teacher = d.teachers[0]!.id;
     const group = d.classes[0]!.id;
-    d = addLesson(d, { classId: group, teacherId: teacher, weeklyHours: 4, pairs: 2 });
+    d = addLesson(d, { classId: group, teacherId: teacher, weeklyHours: 4, blocks: [2, 2] });
     d = place(d, d.lessons[0]!.id, 0, 0); // Salı, 1-2. ders
     return d;
   }
@@ -853,7 +853,7 @@ describe('entityFacts', () => {
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 4, pairs: 2,
+      weeklyHours: 4, blocks: [2, 2],
     });
     return place(d, d.lessons[0]!.id, 0, 0);
   }
@@ -1013,7 +1013,7 @@ describe('reorderList', () => {
     d = addTeacher(d, { name: 'Deniz Ak', short: 'DA', subject: 'Fizik' });
     d = addClass(d, '510', null);
     const cls = d.classes[0]!.id;
-    d = addLesson(d, { classId: cls, teacherId: d.teachers[0]!.id, weeklyHours: 2, pairs: 0 });
+    d = addLesson(d, { classId: cls, teacherId: d.teachers[0]!.id, weeklyHours: 2, blocks: [] });
     d = setAvailability(d, d.teachers[1]!.id, [{ day: 0, hour: 0 }], true);
     d = place(d, d.lessons[0]!.id, 0, 0);
 

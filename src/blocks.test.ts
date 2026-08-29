@@ -1,156 +1,173 @@
-// How a week is split. Pure arithmetic, and the choices a dropdown offers.
-
 import { describe, expect, it } from 'vitest';
-import { blockPlan, clampPairs, patternLabel, patternOptions } from './blocks';
+import {
+  BLOCK_SIZES,
+  MAX_BLOCK,
+  blockCounts,
+  blockPlan,
+  clampBlocks,
+  maxCount,
+  patternLabel,
+  withCount,
+} from './blocks';
 import type { Lesson } from './types';
 
-const lesson = (weeklyHours: number, pairs: number): Lesson => ({
+const lesson = (weeklyHours: number, blocks: number[]): Lesson => ({
   id: 'x1',
-  classId: 's510',
-  teacherId: 'oMC',
+  classId: 's1',
+  teacherId: 'o1',
   weeklyHours,
-  pairs,
+  blocks,
   second: false,
   maxPerDay: null,
 });
 
-describe('blockPlan', () => {
-  it('ikililer önce, sonra tek saatler', () => {
-    expect(blockPlan(lesson(3, 1))).toEqual([2, 1]);
-    expect(blockPlan(lesson(3, 0))).toEqual([1, 1, 1]);
-    expect(blockPlan(lesson(5, 2))).toEqual([2, 2, 1]);
-    expect(blockPlan(lesson(6, 3))).toEqual([2, 2, 2]);
-    expect(blockPlan(lesson(1, 0))).toEqual([1]);
+describe('clampBlocks', () => {
+  it('sıralar: her zaman büyükten küçüğe', () => {
+    expect(clampBlocks(9, [2, 4, 3])).toEqual([4, 3, 2]);
   });
 
-  // The whole reason `pairs` is one number next to `weeklyHours` and not a
-  // second list: the two can never disagree about the total.
-  it('blokların toplamı HER ZAMAN haftalık saate eşit', () => {
-    for (let hours = 0; hours <= 40; hours++) {
-      for (let pairs = 0; pairs <= 25; pairs++) {
-        const sum = blockPlan(lesson(hours, pairs)).reduce((a, b) => a + b, 0);
-        expect(sum, `${hours} saat / ${pairs} ikili`).toBe(hours);
+  it('2 ile 4 dışındaki her boyu atar', () => {
+    expect(clampBlocks(20, [1, 0, -2, 5, 9, NaN, Infinity])).toEqual([]);
+  });
+
+  // Rounded and then judged, the same way every other count out of a file is
+  // read: a hand-edited 2.5 is a 3, not a reason to throw the lesson away.
+  it('kesirli boyu yuvarlar', () => {
+    expect(clampBlocks(20, [2.5, 1.4])).toEqual([3]);
+  });
+
+  // A block list is not a second truth next to `weeklyHours` — it is the shape
+  // of it, and a shape that outran the total would make `blockPlan` and
+  // `placedBlocks` disagree about how many blocks exist (sanitize's job).
+  it('haftalık saati AŞAMAZ, sondan düşürür', () => {
+    expect(clampBlocks(5, [4, 3, 2])).toEqual([4]);
+    expect(clampBlocks(7, [4, 3, 2])).toEqual([4, 3]);
+    expect(clampBlocks(9, [4, 3, 2])).toEqual([4, 3, 2]);
+  });
+
+  // Cutting from the tail keeps the BIG blocks the reader asked for. Dropping
+  // an hour from 4+2 has to leave 4, not 2.
+  it('kırparken büyük bloğu korur', () => {
+    expect(clampBlocks(5, [4, 2])).toEqual([4]);
+  });
+
+  it('dizi olmayan girdide boş liste', () => {
+    expect(clampBlocks(6, undefined as unknown as number[])).toEqual([]);
+    expect(clampBlocks(6, null as unknown as number[])).toEqual([]);
+  });
+
+  it('sıfır saatte hiçbir blok yok', () => {
+    expect(clampBlocks(0, [4, 3, 2])).toEqual([]);
+  });
+});
+
+describe('blockPlan', () => {
+  // The whole reason the split is a list next to `weeklyHours` and not a second
+  // total: whatever the list says, the hours have to add up.
+  it('toplamı HER ZAMAN haftalık saate eşit', () => {
+    for (let hours = 0; hours <= 24; hours++) {
+      for (const blocks of [[], [2], [3], [4], [4, 4], [4, 3, 2], [2, 2, 2, 2], [3, 3, 3]]) {
+        const sum = blockPlan(lesson(hours, blocks)).reduce((a, b) => a + b, 0);
+        expect(sum, `${hours} saat / [${blocks.join(',')}]`).toBe(hours);
       }
     }
   });
 
-  it('sığmayan ikili sayısı kırpılıyor, saat sayısı bozulmuyor', () => {
-    expect(blockPlan(lesson(3, 9))).toEqual([2, 1]);
-    expect(blockPlan(lesson(4, -2))).toEqual([1, 1, 1, 1]);
+  it('büyükten küçüğe: adlandırılan bloklar, sonra tek saatler', () => {
+    expect(blockPlan(lesson(9, [3, 2]))).toEqual([3, 2, 1, 1, 1, 1]);
+    expect(blockPlan(lesson(4, [4]))).toEqual([4]);
+    expect(blockPlan(lesson(5, []))).toEqual([1, 1, 1, 1, 1]);
   });
 
-  it('yalnız 1 ve 2 üretiyor — üçlü blok v7 ile kalktı', () => {
-    for (let hours = 1; hours <= 20; hours++) {
-      for (const size of blockPlan(lesson(hours, Math.floor(hours / 3)))) {
-        expect([1, 2]).toContain(size);
+  it('hiçbir parça 1 ile MAX_BLOCK dışına çıkmaz', () => {
+    for (let hours = 1; hours <= 24; hours++) {
+      for (const b of blockPlan(lesson(hours, [4, 3, 2, 2]))) {
+        expect(b).toBeGreaterThanOrEqual(1);
+        expect(b).toBeLessThanOrEqual(MAX_BLOCK);
       }
     }
   });
 });
 
 describe('patternLabel', () => {
-  it('artı ile yazıyor', () => {
+  it('kısa olanı açık yazar', () => {
     expect(patternLabel([2, 1])).toBe('2+1');
-    expect(patternLabel([2, 2, 1])).toBe('2+2+1');
+    expect(patternLabel([4, 3, 2, 1])).toBe('4+3+2+1');
     expect(patternLabel([1])).toBe('1');
   });
 
-  // A lesson with no hours has no split, and an empty string in a dropdown
-  // reads as a broken row rather than as an answer.
-  it('boş liste için tire', () => {
+  it('boş liste için kısa çizgi', () => {
     expect(patternLabel([])).toBe('–');
   });
 
-  // "adamın 10 saat dersi varsa 1+1+1+1+1… diye gözükmesi biraz kötü"
-  it('dört terime kadar açık yazıyor — hafta bir RESİM', () => {
-    expect(patternLabel([1, 1, 1, 1])).toBe('1+1+1+1');
-    expect(patternLabel([2, 2, 1, 1])).toBe('2+2+1+1');
-  });
-
-  it('dört terimden sonra katlıyor', () => {
+  it('dörtten uzun olanı katlar', () => {
     expect(patternLabel([1, 1, 1, 1, 1])).toBe('5×1');
-    expect(patternLabel(new Array<number>(10).fill(1))).toBe('10×1');
-    expect(patternLabel([2, 2, 2, 2, 2])).toBe('5×2');
-    expect(patternLabel([2, 2, 2, 1, 1, 1, 1])).toBe('3×2 + 4×1');
+    expect(patternLabel([2, 2, 2, 1, 1])).toBe('3×2 + 2×1');
   });
 
-  // The fold is a way of WRITING the split, never a change to it: whatever the
-  // label says, the hours it stands for are the same hours.
-  it('katlanmış etiket aynı toplamı anlatıyor', () => {
-    for (let hours = 1; hours <= 14; hours++) {
-      for (let pairs = 0; pairs <= Math.floor(hours / 2); pairs++) {
-        const blocks = blockPlan(lesson(hours, pairs));
-        const etiket = patternLabel(blocks);
-        const toplam = [...etiket.matchAll(/(\d+)×(\d)/g)].reduce(
-          (a, m) => a + Number(m[1]) * Number(m[2]),
-          0,
-        );
-        // Either it folded (and the arithmetic in it adds up to the week) or it
-        // did not (and the plus signs already do).
-        const beklenen = etiket.includes('×')
-          ? toplam
-          : etiket.split('+').reduce((a, b) => a + Number(b), 0);
-        expect(beklenen).toBe(hours);
+  // The fold used to count twos and call EVERYTHING else a single, which was
+  // the same thing while a block could only be 1 or 2. It is not the same thing
+  // now: this list would have read "5×1".
+  it('katlarken her boyu AYRI sayar', () => {
+    expect(patternLabel([3, 3, 3, 1, 1])).toBe('3×3 + 2×1');
+    expect(patternLabel([4, 3, 2, 1, 1])).toBe('1×4 + 1×3 + 1×2 + 2×1');
+  });
+});
+
+describe('blockCounts', () => {
+  it('her boyu sayar, tek saatleri saymaz', () => {
+    expect(blockCounts([4, 3, 3, 2])).toEqual({ 4: 1, 3: 2, 2: 1 });
+    expect(blockCounts([])).toEqual({ 4: 0, 3: 0, 2: 0 });
+    expect(blockCounts([1, 1, 1])).toEqual({ 4: 0, 3: 0, 2: 0 });
+  });
+});
+
+describe('maxCount', () => {
+  // The ceiling a stepper stops at, asked with the OTHER counters standing:
+  // "how many threes fit in 9 hours" is the wrong question when two of those
+  // hours are already spoken for.
+  it('ÖTEKİ blokları hesaba katar', () => {
+    expect(maxCount(9, [], 3)).toBe(3);
+    expect(maxCount(9, [2], 3)).toBe(2);
+    expect(maxCount(9, [4], 3)).toBe(1);
+  });
+
+  it('kendi boyunu iki kez saymaz', () => {
+    expect(maxCount(9, [3, 3], 3)).toBe(3);
+  });
+
+  it('sığmıyorsa sıfır', () => {
+    expect(maxCount(3, [], 4)).toBe(0);
+    expect(maxCount(5, [4], 3)).toBe(0);
+  });
+});
+
+describe('withCount', () => {
+  it('yalnız o boyu değiştirir', () => {
+    expect(withCount(9, [3, 2], 3, 2)).toEqual([3, 3, 2]);
+    expect(withCount(9, [3, 2], 3, 0)).toEqual([2]);
+  });
+
+  it('tavanı aşamaz', () => {
+    expect(withCount(9, [], 4, 99)).toEqual([4, 4]);
+    expect(withCount(9, [2], 4, 99)).toEqual([4, 2]);
+  });
+
+  it('okunamayan sayıyı sıfır sayar', () => {
+    expect(withCount(9, [3], 3, NaN)).toEqual([]);
+  });
+
+  // Every reachable split is still a legal one — the steppers cannot be driven
+  // into a shape `clampBlocks` would have to repair afterwards.
+  it('her çıktı zaten kelepçeli', () => {
+    for (let hours = 0; hours <= 14; hours++) {
+      let blocks: number[] = [];
+      for (const size of BLOCK_SIZES) {
+        for (let n = 0; n <= 6; n++) {
+          blocks = withCount(hours, blocks, size, n);
+          expect(clampBlocks(hours, blocks), `${hours}h ${size}×${n}`).toEqual(blocks);
+        }
       }
     }
-  });
-});
-
-describe('patternOptions', () => {
-  it('3 saat için iki seçenek: 1+1+1 ve 2+1', () => {
-    expect(patternOptions(3)).toEqual([
-      { pairs: 0, label: '1+1+1' },
-      { pairs: 1, label: '2+1' },
-    ]);
-  });
-
-  it('5 saat için üç seçenek, en az ikiliden en çoğa', () => {
-    // The first one folds and the other two do not, which is the fold doing its
-    // job inside the dropdown itself: five terms is where "1+1+1+1+1" stopped
-    // being a picture of the week and became a row of ones.
-    expect(patternOptions(5).map((x) => x.label)).toEqual([
-      '5×1',
-      '2+1+1+1',
-      '2+2+1',
-    ]);
-  });
-
-  it('seçenek sayısı floor(saat/2) + 1', () => {
-    for (let hours = 0; hours <= 24; hours++) {
-      expect(patternOptions(hours), `${hours} saat`).toHaveLength(Math.floor(hours / 2) + 1);
-    }
-  });
-
-  it('her seçeneğin etiketi kendi pairs değerinden üretiliyor', () => {
-    for (const option of patternOptions(7)) {
-      expect(option.label).toBe(patternLabel(blockPlan(lesson(7, option.pairs))));
-    }
-  });
-});
-
-describe('clampPairs', () => {
-  it('tavan floor(saat / 2)', () => {
-    expect(clampPairs(4, 9)).toBe(2);
-    expect(clampPairs(5, 9)).toBe(2);
-    expect(clampPairs(6, 9)).toBe(3);
-  });
-
-  it('sıfırın altına inmiyor', () => {
-    expect(clampPairs(4, -1)).toBe(0);
-    expect(clampPairs(0, 3)).toBe(0);
-  });
-
-  // Pitfall 43: `Number('')` and `Number(null)` are both 0, and 0 is a LEGAL
-  // answer here — so telling "missing" from "none" is the caller's job, and
-  // this one only refuses what is not a number at all.
-  it('sayı olmayan girdi sıfıra düşüyor, çökmüyor', () => {
-    expect(clampPairs(6, NaN)).toBe(0);
-    expect(clampPairs(6, Infinity)).toBe(0);
-    expect(clampPairs(6, 0)).toBe(0);
-  });
-
-  it('zaten geçerli olan değere dokunmuyor', () => {
-    expect(clampPairs(6, 2)).toBe(2);
-    expect(clampPairs(6, 3)).toBe(3);
   });
 });
