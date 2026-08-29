@@ -322,7 +322,7 @@ function limitBreaches(
     }
   }
 
-  const maxSame = lessonLimit(d, lesson);
+  const maxSame = lessonLimit(d, lesson, group);
   if (ruleActive(d, 'maxSameLessonPerDay', maxSame)) {
     const count = lessonDayCount(d, lesson, day, hourCount) + block;
     if (count > maxSame) {

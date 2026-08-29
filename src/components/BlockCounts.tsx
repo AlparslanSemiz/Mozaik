@@ -14,7 +14,7 @@ import {
   withCount,
 } from '../blocks';
 import { lessonLimit, ruleLevel } from '../rules';
-import type { Lesson, State } from '../types';
+import type { ClassGroup, Lesson, State } from '../types';
 
 /**
  * The longest block this lesson could ever have placed, or 0 for no ceiling.
@@ -22,9 +22,12 @@ import type { Lesson, State } from '../types';
  * Only when the rule is set to ENGELLE: at Uyar a long block still goes down,
  * it just paints yellow, and calling that impossible would be a lie.
  */
-export function blockCeiling(d: State, lesson: Lesson | undefined): number {
+export function blockCeiling(d: State, lesson: Lesson | undefined, group?: ClassGroup): number {
   if (ruleLevel(d, 'maxSameLessonPerDay') !== 'block') return 0;
-  return lessonLimit(d, lesson);
+  // `group` given explicitly for the form that has no lesson yet: the class is
+  // picked in the box above and its own limit has to reach the counters before
+  // anything is added. `lessonLimit` resolves the three layers.
+  return lessonLimit(d, lesson, group);
 }
 
 /**

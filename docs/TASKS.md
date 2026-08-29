@@ -32,7 +32,7 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > - [x] **`store.ts` v8 dosyalarını okumuyordu.** Yayınlanmış v2.0.0'ın yazdığı
 >       her yedek `parseState`'ten `null` dönüyordu. Kabul listesine `8` ve `9`
 >       eklendi; yanına **sayı adlandırmayan** bir test yazıldı
->       (`SCHEMA_VERSION - 1`), mutasyonla sınandı. Tuzak 86.
+>       (`SCHEMA_VERSION - 1`), mutasyonla sınandı. Tuzak 97.
 > - [x] **`npm run tipler` 5 hata veriyordu** (`availClock` Ayarlar →
 >       Görünüm'den çıkmış, App hâlâ ona veriyordu) ve `@types/node` kurulu
 >       değildi. Kontrol Müsaitlik'in kendi şeridine bağlandı,
@@ -58,7 +58,7 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
       sağ tıkla/Delete ile kaldırılmaz, üstüne bırakılmaz, `Baştan diz` ve
       `Programı boşalt` yerinde bırakır. Kilidi `removeBlock`'a koymak
       denetçiyi bozdu ve denetçi bunu yakaladı → `liftBlock()` ayrıldı,
-      tuzak 87.
+      tuzak 98.
 - [x] **Yerinde ders düzenleme** (`LessonEdit.tsx`): haftalık saat · dağılım ·
       günde en fazla. `BlockCounts` paylaşıma çıkarıldı, mantık kopyalanmadı.
       Sabitleme işaretinin yeri **ekran görüntüsüne bakılarak** düzeltildi:
@@ -76,14 +76,20 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > (bkz. [STATUS.md](STATUS.md) → *Otuz üçüncü oturum*, ve tuzak 95).
 >
 > - [ ] **`npm run yayinla -- 2.0.1`.** Kod hazır ve `npm run kontrol` yeşil
->       olmalı. Bu sürümün taşıdığı iki şey: doğru kimlik, ve şeridin
->       kaymaması.
+>       olmalı. Bu sürümün taşıdığı şeyler: doğru kimlik, şeridin
+>       kaymaması, ve AA turunun beş maddesi (şema v11 dahil).
 > - [ ] **Yayınlanana kadar babanın exe'sinde güncelleme düğmelerine
 >       BASILMASIN.** `surum.json` şu anda 2.0.0'ı gösteriyor, ve ≥ v1.3.0
 >       her kopya onu görüyor.
 > - [ ] Yayından sonra **Windows'ta bir kez denensin**: eski kopya
 >       güncellendikten sonra planlar yerinde mi. Bu, bu makinede
 >       ölçülemeyen tek şey.
+>
+> **AA turu BİTTİ (2026-08-29).** Kullanıcının beş satırı: ekleme kendi bloğu,
+> özet kendi içinde kayıyor, hatalar en üstte, sınıfın kendi günlük sınırı
+> (**şema v11**), kısaltma varsayılanı sütun başlığı. `npm run kontrol` yeşil —
+> 698 birim · 489 E2E · 22 site · 7 çözücü. Ayrıntı aşağıda, ölçümler
+> [STATUS.md](STATUS.md) → *Otuz dördüncü oturum*.
 >
 > **Kayma turu BİTTİ (2026-08-29).** *"Alt bardaki seçenekler arasında
 > geçerken bazen kayıyor"* — iki bağımsız sebep, ikisi de ölçüldü, ikisi de
@@ -1929,3 +1935,53 @@ Benden çıktılar için ve asc dersler tarafı için foto iste eğer örnek fot
 Program kısmında branşlar kısaltmalar olsun sol tarafta.
 Program otomatik dizmeye bakmak lazım.
 Programda derslere sağ tıklayınca seçenekler gelsin: kaldır, dersi düzenle, dersi oraya sabitle.
+
+
+### AA turu — beş satır — **BİTTİ ✅** (2026-08-29)
+
+Kullanıcının yazdığı beş satır. **Şema v10 → v11'e çıktı.** Ayrıntı ve
+ölçülen her sayı [STATUS.md](STATUS.md) → *Otuz dördüncü oturum*.
+
+> Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın. → AA1
+> Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir ama en fazla tam ekranın uzunluğu kadar olsun ondan fazla uzun olmasın eğer liste çok uzunsa işte kaydırma o özetin içinde olsun. → AA2
+> Özetteki hatalar özetin en üstüne gelsin. Hata gidince yok olsun. → AA3
+> Sınıfların özel olarak bir günde aynı dersten kaç saat girme opsiyonu olsun. → AA4
+> Branşların kısaltma varsayılanı varsayılan ismi en üste liste katgeorisine gitsin. → AA5
+
+- [x] **AA1 Ekleme kendi paneli.** Beş liste ekranının (Derslikler · Branşlar ·
+      Öğretmenler · Sınıflar · Dersler) tek paneli **iki kardeş panele**
+      bölündü. Geçen turun cevabı bir **çizgi**ydi (`.form-row.panel-add`'in
+      `border-bottom`'ı) ve yetmedi; o kural silindi. Ekleme paneli işi
+      adlandırıyor (`Yeni derslik`…), sayılı başlık (`Derslikler (8)`) saydığı
+      **listeyle** kaldı, `Excel'den yapıştır` ekleme bloğunun köşesinde.
+      Sıra değişmedi: *"ama yerleri değişmesin."* Test 44 iki panele yayıldı
+      ve artık ikisinin **ayrı blok olduğunu** da iddia ediyor.
+- [x] **AA2 Kaydıran kutu SÜTUN değil PANEL.** Sağ ray zaten ekran boyunda
+      sınırlıydı; sınırlı olmayan şey panelin **kendisi**ydi, ve içindeki
+      kutular sabit tavan taşıyordu (`.stat-scroll` 22rem, `.entity-list`
+      62vh) — yani boy bu dosyadaki bir sayıdan geliyordu, içindekinden değil.
+      Artık: panel içeriği kadar uzun, en fazla `100cqh`, fazlası panelin
+      içinde kayıyor, ve başlık yapışkan. `18rem` **tabanı da kalktı**: tavanı
+      aşabilen bir taban tavan değildir. Ölçüldü — Müsaitlik'te 25 öğretmenin
+      hepsi artık tek ekranda, altındaki iki düğmeyle birlikte.
+- [x] **AA3 Hata Özet'in en üstünde.** Uyarı kutuları kapasite tablosundan
+      **öncesine** taşındı, ve `CapacityRows` Özet'te de `problemsFirst`
+      alıyor — o bayrak Kontrol için yazılmış ve buraya hiç geçilmemişti.
+      Sorun yoksa hiçbir şey çizilmiyor. İkisi de mutasyonla sınandı.
+- [x] **AA4 Sınıfın kendi günlük sınırı — şema v11.**
+      `ClassGroup.maxSameLessonPerDay`, ve kural artık **üç katmanlı**: dersin
+      kutusu → sınıfın kutusu → okul varsayılanı. Tek çözen yer hâlâ
+      `lessonLimit()`; `group` sondan ve isteğe bağlı (tuzak 76). Kutu
+      Okul → Sınıflar tablosunda, Ayarlar → Kurallar onu **sayıyor**, ve
+      Dersler'deki kutunun placeholder'ı artık **sınıfın** sayısını gösteriyor.
+      `parseState`'e `version === 10` eklendi — "IT HAPPENED" satırının
+      hatırlattığı şey tam buydu.
+- [x] **AA5 Kısaltma varsayılanı sütun BAŞLIĞI oldu.** Her satırda
+      "varsayılan" / "varsayılanı: Mat" yazan adsız sütun, başlığı
+      **Varsayılan** olan bir sütuna dönüştü; hücre yalnız değeri, aynıysa
+      boş hücrenin kısa çizgisini taşıyor. İki ölü anahtar dört sözlükten
+      silindi. Yol üstünde bir kusur da kapandı: sağdaki "Hazır branşlar"
+      tablosu `defaultSubjectShort` (Türkçe, karşılaştırma biçimi) çağırıyordu,
+      yani İngilizce ekran "Mathematics / **Mat**" yazıp listeye eklenince
+      kutuya "Mth" koyuyordu.
+

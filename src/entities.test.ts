@@ -87,7 +87,7 @@ function build(): State {
         limits: { ...NO_TEACHER_LIMITS },
       },
     ],
-    classes: [{ id: 's510', name: '510', roomId: null, color: 0 }],
+    classes: [{ id: 's510', name: '510', roomId: null, color: 0, maxSameLessonPerDay: null }],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
     ],

@@ -39,9 +39,9 @@ function build(): State {
       { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
     ],
     classes: [
-      { id: 's510', name: '510', roomId: 'dA', color: 0 },
-      { id: 's511', name: '511', roomId: 'dA', color: 1 },
-      { id: 's433', name: '433', roomId: 'dB', color: 2 },
+      { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
+      { id: 's511', name: '511', roomId: 'dA', color: 1, maxSameLessonPerDay: null },
+      { id: 's433', name: '433', roomId: 'dB', color: 2, maxSameLessonPerDay: null },
     ],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blocks: [], second: false, maxPerDay: null },

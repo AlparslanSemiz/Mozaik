@@ -48,8 +48,8 @@ function build(): State {
       },
     ],
     classes: [
-      { id: 's510', name: '510', roomId: null, color: 0 },
-      { id: 's511', name: '511', roomId: null, color: 1 },
+      { id: 's510', name: '510', roomId: null, color: 0, maxSameLessonPerDay: null },
+      { id: 's511', name: '511', roomId: null, color: 1, maxSameLessonPerDay: null },
     ],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
@@ -91,6 +91,38 @@ describe('lessonLimit', () => {
     d.settings.limits.maxSameLessonPerDay = 2;
     expect(lessonLimit(d, lesson(d))).toBe(2);
     lesson(d).maxPerDay = 4;
+    expect(lessonLimit(d, lesson(d))).toBe(4);
+  });
+
+  // Three layers, narrowest first. The middle one is what "510 should never see
+  // the same subject twice in a day" needed: before it, that sentence had to be
+  // typed into every one of that class's lessons and again into each new one.
+  it('sınıfın kutusu okul sayısını ezer, dersin kutusu sınıfınkini', () => {
+    const d = build();
+    d.settings.limits.maxSameLessonPerDay = 4;
+    expect(lessonLimit(d, lesson(d))).toBe(4);
+
+    d.classes[0]!.maxSameLessonPerDay = 2;
+    expect(lessonLimit(d, lesson(d))).toBe(2);
+
+    lesson(d).maxPerDay = 1;
+    expect(lessonLimit(d, lesson(d))).toBe(1);
+  });
+
+  // The class can be handed in rather than looked up — that is what the hot
+  // callers do — and the two answers must not differ.
+  it('sınıf ELDEN verilince de aynı cevabı veriyor', () => {
+    const d = build();
+    d.settings.limits.maxSameLessonPerDay = 4;
+    d.classes[0]!.maxSameLessonPerDay = 3;
+    expect(lessonLimit(d, lesson(d), d.classes[0])).toBe(3);
+    expect(lessonLimit(d, lesson(d), d.classes[0])).toBe(lessonLimit(d, lesson(d)));
+  });
+
+  it('sınıfın kutusu yalnız O sınıfı bağlıyor', () => {
+    const d = build();
+    d.settings.limits.maxSameLessonPerDay = 4;
+    d.classes[1]!.maxSameLessonPerDay = 1;
     expect(lessonLimit(d, lesson(d))).toBe(4);
   });
 });

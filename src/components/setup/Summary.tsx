@@ -16,13 +16,13 @@ import CapacityRows from '../CapacityRows';
 import {
   DEFAULT_SUBJECT_SHORTS,
   addSubject,
+  builtInShort,
   respreadColors,
   genderLabel,
   roomClasses,
   subjectKey,
   subjectOptions,
   subjectTeachers,
-  defaultSubjectShort,
   subjectLabel,
 } from '../../entities';
 import type { StepId } from '../../toolState';
@@ -145,7 +145,7 @@ export default function Summary({
                   {ready.map((name) => (
                     <tr key={name}>
                       <td>{subjectLabel(name)}</td>
-                      <td className="num">{defaultSubjectShort(name)}</td>
+                      <td className="num">{builtInShort(name)}</td>
                       <td>
                         {/* Not "Ekle": the add form on the LEFT of this screen
                             has a button by that name, and `getByRole(name:)`
@@ -180,11 +180,22 @@ export default function Summary({
     return (
       <div className="panel">
         <h2>{t('Özet')}</h2>
+        {/* WHAT IS WRONG COMES FIRST. These boxes used to be written after the
+            capacity table and after the list under it, i.e. below the fold on
+            the one screen whose job is to say something is missing. Nothing is
+            drawn at all when there is nothing wrong — the panel has no
+            "problems" heading to leave behind. */}
+        {homeless.length > 0 && (
+          <div className="warn-box">
+            <b>{homeless.length} sınıfın dersliği yok</b> ({homeless.map((c) => c.name).join(', ')}
+            ). Derslik çakışması onlar için hiç kontrol edilmez.
+          </div>
+        )}
         <h3>{t('Derslik yükü')}</h3>
         <p className="hint">
           <T k="Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu." />
         </p>
-        <CapacityRows rows={capacity.rooms} empty={t('Henüz derslik yok.')} />
+        <CapacityRows rows={capacity.rooms} empty={t('Henüz derslik yok.')} problemsFirst />
         {state.rooms.length > 0 && (
           <>
             <h3>{t('Hangi sınıflar')}</h3>
@@ -205,12 +216,6 @@ export default function Summary({
               })}
             </ul>
           </>
-        )}
-        {homeless.length > 0 && (
-          <div className="warn-box">
-            <b>{homeless.length} sınıfın dersliği yok</b> ({homeless.map((c) => c.name).join(', ')}
-            ). Derslik çakışması onlar için hiç kontrol edilmez.
-          </div>
         )}
       </div>
     );
@@ -247,7 +252,7 @@ export default function Summary({
             ))}
           </p>
         )}
-        <CapacityRows rows={capacity.teachers} empty={t('Henüz öğretmen yok.')} />
+        <CapacityRows rows={capacity.teachers} empty={t('Henüz öğretmen yok.')} problemsFirst />
         {subjects.length > 0 && (
           <>
             <h3>{t('Branşlar ({n})', { n: subjects.length })}</h3>
@@ -275,15 +280,8 @@ export default function Summary({
     return (
       <div className="panel">
         <h2>{t('Özet')}</h2>
-        <h3>{t('Sınıf yükü')}</h3>
-        <p className="hint">
-          <T k="Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı." />
-        </p>
-        <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} />
-        {/* Both of these outlived the "Kurulum durumu" panel they used to sit
-            in. The first is the only warning that a class was created and then
-            forgotten; the second is the one number that decides whether any of
-            this can be laid out at all. */}
+        {/* Above the table, like the room step's: the only warning that a class
+            was created and then forgotten should not be under twenty rows. */}
         {noLesson.length > 0 && (
           <div className="warn-box">
             <T
@@ -292,6 +290,13 @@ export default function Summary({
             />
           </div>
         )}
+        <h3>{t('Sınıf yükü')}</h3>
+        <p className="hint">
+          <T k="Sınıfa yüklenen toplam ders saati, sınıfın **açık** olduğu saatlere sığmalı." />
+        </p>
+        <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} problemsFirst />
+        {/* The one number that decides whether any of this can be laid out at
+            all. It outlived the "Kurulum durumu" panel it used to sit in. */}
         {state.classes.length > 0 && (
           <p className="hint">
             <T
@@ -319,11 +324,6 @@ export default function Summary({
   return (
     <div className="panel">
       <h2>{t('Özet')}</h2>
-      <h3>{t('Ders yükü')}</h3>
-      <p className="hint">
-        <T k="Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı girdikçe artar; **Yük** **Açık**'ı geçerse o sınıfın haftası tutmaz." />
-      </p>
-      <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} />
       {noLesson.length > 0 && (
         <div className="warn-box">
           <T
@@ -332,6 +332,11 @@ export default function Summary({
           />
         </div>
       )}
+      <h3>{t('Ders yükü')}</h3>
+      <p className="hint">
+        <T k="Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı girdikçe artar; **Yük** **Açık**'ı geçerse o sınıfın haftası tutmaz." />
+      </p>
+      <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} problemsFirst />
       {idleTeachers.length > 0 && (
         <p className="hint">
           {t('Hiç dersi olmayan öğretmen: {kimler}.', {

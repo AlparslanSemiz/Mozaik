@@ -32,7 +32,7 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'maxSameLessonPerDay',
     label: 'Bir sınıf aynı dersten günde en fazla',
-    hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat.',
+    hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat. Tek bir sınıf için Okul → Sınıflar tablosundaki kutuya, tek bir ders için Dersler tablosundakine yazılır.',
     canBlock: true,
   },
 ];
@@ -59,6 +59,8 @@ export default function Rules({ state, change }: PanelProps) {
       t.limits.maxPerDay !== null ||
       t.limits.minPerDay !== null,
   );
+  // The daily rule is the one with three layers, and the middle one is new.
+  const customClasses = state.classes.filter((c) => c.maxSameLessonPerDay !== null);
 
   const perRule = useMemo(() => {
     const n: Partial<Record<RuleName, number>> = {};
@@ -72,7 +74,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Kurallar')}</h2>
           <p className="hint">
-            <T k="Buradaki sayılar **bütün okul** için geçerlidir. Tek bir öğretmen için farklı bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır. **0** yazmak “sınır yok” demektir." />
+            <T k="Buradaki sayılar **bütün okul** için geçerlidir. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya, tek bir sınıf için **Okul → Sınıflar** tablosundakine, tek bir ders için **Dersler** tablosundakine yazın. Boş bıraktığınız kutu bir üstteki sayıyı kullanır: ders, sonra sınıf, sonra buradaki. **0** yazmak “sınır yok” demektir." />
           </p>
           <table className="list">
             <thead>
@@ -180,6 +182,43 @@ export default function Rules({ state, change }: PanelProps) {
                     <td className="num">{t.limits.maxConsecutive ?? '–'}</td>
                     <td className="num">{t.limits.maxPerDay ?? '–'}</td>
                     <td className="num">{t.limits.minPerDay ?? '–'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* The class layer of the same rule. Which classes carry their own
+            number was visible only by scrolling Okul → Sınıflar and looking for
+            a filled-in box — the same gap the teacher panel above was written
+            to close. */}
+        <div className="panel">
+          <h2>{t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}</h2>
+          {customClasses.length === 0 ? (
+            <p className="hint">
+              <T k="Şu anda her sınıf yukarıdaki **aynı dersten günde en fazla** sayısını kullanıyor. Tek bir sınıf için farklı bir sayı gerekiyorsa **Okul → Sınıflar** tablosundaki kutuya yazın." />
+            </p>
+          ) : (
+            <table className="list">
+              <thead>
+                <tr>
+                  <th>{t('Sınıf')}</th>
+                  <th className="num">{t('Günde aynı ders ↑')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {customClasses.map((c) => (
+                  <tr key={c.id}>
+                    <td>
+                      <span
+                        className="color-dot"
+                        style={{ background: paletteColor(c.color) }}
+                        aria-hidden="true"
+                      />
+                      {c.name}
+                    </td>
+                    <td className="num">{c.maxSameLessonPerDay}</td>
                   </tr>
                 ))}
               </tbody>

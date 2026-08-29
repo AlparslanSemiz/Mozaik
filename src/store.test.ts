@@ -722,6 +722,48 @@ describe('parseState — v9 → v10: sabitleme', () => {
   });
 });
 
+/**
+ * v10 -> v11: the daily rule gained a middle layer, so `ClassGroup` gained a
+ * box. A v10 file has no such field, and `null` is exactly what its absence
+ * means — "use the school's number", which is what every class did before.
+ */
+describe('parseState — v10 → v11 göçü', () => {
+  function v10Backup() {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.schemaVersion = 10;
+    for (const c of raw.classes) delete c.maxSameLessonPerDay;
+    return raw;
+  }
+
+  it('v10 dosyası açılıyor ve sınıflar okul sayısına düşüyor', () => {
+    const d = parseState(JSON.stringify(v10Backup()));
+    expect(d).not.toBeNull();
+    expect(d!.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d!.classes).toHaveLength(sampleState().classes.length);
+    expect(d!.classes.every((c) => c.maxSameLessonPerDay === null)).toBe(true);
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const d = parseState(JSON.stringify(v10Backup()))!;
+    expect(d.placements).toEqual(original.placements);
+    expect(d.unavailable).toEqual(original.unavailable);
+    expect(d.lessons).toEqual(original.lessons);
+  });
+
+  it('sınıfın kutusu asBox’tan geçiyor — sıfır ve çöp null oluyor', () => {
+    const raw = v10Backup();
+    raw.classes[0].maxSameLessonPerDay = 2;
+    raw.classes[1].maxSameLessonPerDay = 0;
+    raw.classes[2].maxSameLessonPerDay = 'iki';
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.classes[0]!.maxSameLessonPerDay).toBe(2);
+    // 0 is not "no limit" in a box; it is "nothing typed here" (pitfall 43).
+    expect(d.classes[1]!.maxSameLessonPerDay).toBeNull();
+    expect(d.classes[2]!.maxSameLessonPerDay).toBeNull();
+  });
+});
+
 // ---------------------------------------------------------------------------
 // The undo stack and the plan library.
 //

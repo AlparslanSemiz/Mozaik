@@ -70,6 +70,18 @@ export interface ClassGroup {
    * same square; the class colour marks the row head and the printed page.
    */
   color: number;
+  /**
+   * Max hours of ONE lesson on one day, for this class. null -> use
+   * settings.limits.maxSameLessonPerDay.
+   *
+   * The middle of three layers, and the only one that could not be said before:
+   * the school-wide number is one number for everybody and `Lesson.maxPerDay`
+   * is one number per teacher-and-class pair, so "510 should never see the same
+   * subject twice in a day" had to be typed into every one of that class's
+   * lessons and typed again into each new one. A number here wins over the
+   * school's; a lesson's own box wins over both.
+   */
+  maxSameLessonPerDay: number | null;
 }
 
 /** The weekly load one teacher gives to one class. */
@@ -109,7 +121,11 @@ export interface Lesson {
    * orphan flag would make a lesson claim a subject nobody teaches.
    */
   second: boolean;
-  /** Max hours of THIS lesson on one day. null -> settings.limits.maxSameLessonPerDay. */
+  /**
+   * Max hours of THIS lesson on one day. null -> the CLASS's own number, and
+   * failing that settings.limits.maxSameLessonPerDay. Three layers, narrowest
+   * first — `lessonLimit()` in rules.ts is the only place that resolves them.
+   */
   maxPerDay: number | null;
 }
 
@@ -215,5 +231,6 @@ export interface State {
  * v8: Teacher.subject2 and Lesson.second — a teacher may hold two subjects.
  * v9: Lesson.blocks replaces Lesson.pairs — a block may be 2, 3 or 4 hours.
  * v10: State.pinned — cells the reader has locked in place.
+ * v11: ClassGroup.maxSameLessonPerDay — the daily limit gained a middle layer.
  */
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;

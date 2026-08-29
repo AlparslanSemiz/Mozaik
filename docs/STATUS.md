@@ -1,11 +1,206 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-29 (otuz dördüncü oturum: **v8 dosyaları okunamıyordu**,
-branş kısaltmaları, çözücünün ÖLÇÜMÜ, ızgarada **sağ tık menüsü ve sabitleme**)
+Son güncelleme: 2026-08-29 (otuz dördüncü oturum, **iki makinede paralel**:
+**A** — AA turu, sınıfın kendi günlük sınırı ve **şema v11**;
+**B** — v8 dosyaları okunamıyordu, branş kısaltmaları, çözücünün ÖLÇÜMÜ,
+ızgarada **sağ tık menüsü ve sabitleme**)
 
 ---
 
-## Otuz dördüncü oturum — dört madde, ve yolun üstünde bir veri kaybı (2026-08-29)
+## Otuz dördüncü oturum (A) — AA turu: beş satır (2026-08-29)
+
+Kullanıcının yazdığı beş satır. Üçü düzen, biri veri modeli, biri bir sütun
+başlığı. **Şema v10 → v11.**
+
+### AA1 — ekleme kısmı kendi bloğu
+
+Geçen turda aynı şikayet gelmişti ve cevabı bir **çizgi** olmuştu:
+`.form-row.panel-add` üstünde bir `border-bottom`, ve o turun yorumu
+*"nothing moves in the DOM"* diyordu. Yetmedi, ve neden yetmediği isteğin
+kendisinde yazılıydı: *"aynı özetin ayrı blok olduğu gibi"*. Bir çizgi bir
+şeyin nerede bittiğini söyler; bir panel ikisinin **ayrı şeyler** olduğunu
+söyler.
+
+Beş liste ekranının (Derslikler · Branşlar · Öğretmenler · Sınıflar · Dersler)
+tek `.panel.step-panel`'i iki kardeş panele bölündü:
+
+```
+.panel.add-panel     Yeni derslik   + açıklama + form + (Excel'den yapıştır)
+.panel.step-panel    Derslikler (8) + arama şeridi + tablo
+```
+
+Sayılı başlık **saydığı listeyle** gitti; ekleme paneli işi adlandırıyor. Yani
+ekranda hâlâ tek bir `--fs-xl` başlık var (`.panel.step-panel h2`) ve o,
+okunan satırların üstündeki. `Excel'den yapıştır` ekleme bloğunun köşesinde
+kaldı — kullanıcının kendi cümlesi zaten *"o bloğun en sağında"* diyordu.
+Uyarılar da bölündü: eklemeyi engelleyen uyarı ekleme panelinde (Dersler'in
+iki kutusu), listedekiler hakkındaki uyarı liste panelinde (Öğretmenler'in
+aynı kısaltma kutusu).
+
+**Test 44 ("Panel simetrisi") iki panele yayıldı.** Ölçtüğü şey hâlâ bir
+**sıra** — okuyanın önce neye rastladığı — ama artık ikisinin iki KUTU
+olduğunu da iddia ediyor, çünkü istenen şey buydu:
+
+```
+.cols > div > .panel  ->  2 tane, ilki .add-panel, ikincisi .step-panel
+add   ->  [baslik, aciklama, ekleme]      (uyari ayıklanarak)
+list  ->  [baslik, …, liste]
+```
+
+Yol üstünde beş E2E seçicisi düzeltildi: `.cols > div .panel` artık iki panel
+buluyor, o yüzden `.panel.step-panel` diye adlandırılmaları gerekti
+(`kurulum.spec.ts` iki ölçüm, `dersler.spec.ts` iki başlık okuması).
+
+### AA2 — kaydıran kutu SÜTUN değil, PANEL
+
+Sağ ray zaten ekran boyunda sınırlıydı (`.cols > aside`, otuzuncu oturum).
+Sınırlı olmayan şey panelin **kendisi**ydi, ve içindeki kutular kendi sabit
+tavanlarını taşıyordu:
+
+```
+.stat-scroll   22rem     Özet'in kapasite tablosu
+.entity-list   62vh      Müsaitlik'in varlık listesi
+```
+
+Yani bir panelin boyu **bu dosyadaki bir sayıdan** geliyordu, içindekinden
+değil — otuz satırlık yer olan bir ekranda on satırlık bir pencere. İstenen
+tam tersiydi: *"içlerindeki bilgilerin uzunluklarına göre uzunlukları
+değişebilir ama en fazla tam ekranın uzunluğu kadar olsun."*
+
+Artık `.cols > aside` bir flex sütunu, `.cols > aside > .panel:only-child`
+`min-height: 0` + `overflow-y: auto`, ve o iki tavan orada geçersiz. Sonuç:
+panel içeriği kadar uzun, en fazla `100cqh`, fazlası **panelin içinde**
+kayıyor. Başlık yapışkan, yoksa hangi özeti okuduğunuzu söyleyen kelime ilk
+gidecek şey olurdu.
+
+`:only-child` bilerek: Çıktı'nın rayında dört panel var ve orada "panel ekranı
+doldursun" yanlış olurdu; o ray kendi kaydırmasını koruyor.
+
+**`18rem` tabanı da kalktı.** `max(18rem, 100cqh)` yazıyordu, yani kısa bir
+pencerede taban tavanı aşıyordu — tavanı aşabilen bir taban tavan değildir
+(tuzak 43'ün şekli).
+
+Görülen kazanç (`npm run ekran` + elle bakma): Müsaitlik'te 25 öğretmenin
+**hepsi** artık tek ekranda, altındaki `Tümünü aç / Tümünü kapat` düğmeleriyle
+birlikte. Eskiden liste 62vh'de kesiliyor, düğmeler de onun altında kalıyordu.
+
+Yeni test `kabuk.spec.ts` 83'te ve önkoşulunu **iddia ediyor** (tuzak 41):
+kısa bir pencerede örnek proje yüklüyken önce "bu özet zaten sığıyorsa
+ölçülecek bir şey yok" der, sonra kaydıran kutunun panel olduğunu, rayın
+kaydırmadığını ve başlığın yerinde durduğunu ölçer. Kural silinerek kırmızıya
+döndürüldü.
+
+### AA3 — hata Özet'in en üstünde
+
+İki şey birden yanlıştı ve ikisi de "sonra" ile ilgiliydi:
+
+1. Uyarı kutuları (`dersliği yok`, `hiç dersi yok`) kapasite tablosundan ve
+   altındaki listeden **sonra** yazılıydı — yani bir şeyin eksik olduğunu
+   söylemek işi olan panelde, katlanın altında.
+2. `CapacityRows`'un `problemsFirst` bayrağı Kontrol için yazılmış ve Özet'ten
+   **hiç geçilmemişti**, yani "İmkânsız" bir satır listenin ortasında
+   duruyordu.
+
+İkisi de düzeltildi. Sorun yoksa hiçbir şey çizilmiyor — bırakılan bir başlık
+ya da boşluk yok. `Colors` yerinde bırakıldı ve bu bilinçli: onun uyarısı
+yanında **onu düzelten düğmeyle** geliyor.
+
+İki yeni test, ikisi de mutasyonla sınandı. İkincisi ilk yazılışında
+**bedavaya yeşildi** — kapattığı öğretmen listenin zaten ilk sırasındaydı,
+yani sıralama kaldırılınca da geçiyordu (tuzak 23). Şimdi **son** öğretmeni
+kapatıyor.
+
+### AA4 — sınıfın kendi günlük sınırı, şema v11
+
+Kural üç katmanlı oldu, ve eklenen katman ortadaki:
+
+```
+Lesson.maxPerDay              en dar    bir sınıfın bir öğretmenden aldığı ders
+ClassGroup.maxSameLessonPerDay YENİ     o sınıfın bütün dersleri
+settings.limits.maxSameLessonPerDay     bütün okul
+```
+
+Söylenemeyen cümle şuydu: *"510 bir günde aynı dersten en fazla 2 saat
+görsün."* Okul geneli herkes için tek sayı, dersin kutusu ise
+öğretmen-sınıf çifti başına tek sayı — yani o cümle o sınıfın **her dersine**
+tek tek yazılmak ve sonradan eklenen her derse yeniden yazılmak zorundaydı.
+
+Çözen tek yer hâlâ `lessonLimit()`. `group` parametresi **sondan ve isteğe
+bağlı** (tuzak 76): yüzlerce çağrı yeri olduğu gibi derlendi, ve sınıfı zaten
+elinde tutan sıcak yol (`limitBreaches`, `findViolations`) aramayı hiç
+yapmıyor. Çözücü kendi mantığını yazmadı, imza değişikliği yetti.
+
+Arayüz: kutu Okul → Sınıflar tablosunda (`LimitBox`, öğretmen sınırlarıyla
+aynı), Ayarlar → Kurallar'da **"Kendi sınırı olan sınıflar (N)"** paneli —
+öğretmen ikizinin aynısı — ve Dersler'deki kutunun placeholder'ı artık
+**sınıfın** sayısını gösteriyor. Bu sonuncusu kozmetik değil: boş bir kutunun
+kullanmayacağı bir sayıyı gösteren placeholder yalan söyler. Aynı sebeple
+`blockCeiling` de sınıfı alıyor, ve yeni ders formundaki `undefined` çağrısı
+formun **seçili sınıfını** veriyor.
+
+**`parseState`'e `version === 10` eklendi.** O satırın üstünde duran
+"IT HAPPENED" yorumu tam bunun için yazılmıştı: v9, `8`'i listeye koymayı
+unutmuş ve yayınlanmış v2.0.0'ın yazdığı her dosya `null` dönmüştü. Yeni
+`describe('parseState — v10 → v11 göçü')` üç şeyi ölçüyor: v10 dosyası
+açılıyor ve her sınıf `null`'a düşüyor, program birebir duruyor, ve kutu
+`asBox`'tan geçiyor (0 ve çöp → `null`, tuzak 43).
+
+Ayrıca yol üstünde: `LimitBox`'ın `'yok'` placeholder'ı `t()`'den geçmiyordu.
+
+### AA5 — kısaltma varsayılanı sütun başlığı oldu
+
+Branşlar tablosunda adsız bir sütun her satırda `varsayılan` ya da
+`varsayılanı: Mat` yazıyordu — kelime yirmi bir kez, sütunun başlığı ise boş.
+Artık başlık **Varsayılan**, hücre yalnız değeri taşıyor, kutu zaten
+varsayılanı tutuyorsa boş hücrenin kısa çizgisi (`–`). İki ölü anahtar dört
+sözlükten elle silindi (tuzak 87: ölü anahtar tarayıcısı yorumlara da bakıyor,
+yani unutulan biri yakalanmayabilirdi).
+
+**Yol üstünde duran gerçek kusur:** sağdaki "Hazır branşlar" tablosu
+`defaultSubjectShort()` çağırıyordu. O fonksiyon **bilerek Türkçe** — bir
+override'ın karşılaştırıldığı biçim, ve dille birlikte kıpırdarsa
+`subjectShorts`'a iki oturumda iki şey yazdırır (tuzak 91). Sonuç: İngilizce
+ekran "Mathematics / **Mat**" yazıyor, listeye eklenince soldaki kutuya "Mth"
+geliyordu. Soldaki ipucu bu hatayı zaten düzeltmişti ve yorumu anlatıyordu;
+sağ panel `builtInShort()`'a geçirildi.
+
+### Ölçülen
+
+```
+npm run kontrol      yeşil
+  birim              698 test   (rules 23 · constraints 104 · store 56)
+  E2E                489 test   3,3 dk
+  site · sunucu      22 test
+  çözücü             7 test     50 sn
+dist/index.html      913 262 bayt   (öncesi 906 452 — +6,8 KB)
+```
+
+Yeni testler ve mutasyonla sınananlar:
+
+| Test | Mutasyon | Sonuç |
+|---|---|---|
+| `kabuk.spec.ts` 83 · "uzun özet PANELİN içinde kayıyor" | `:only-child` kuralının gövdesi silindi | kırmızı ✅ |
+| `kurulum.spec.ts` · "uyarı kapasite tablosunun ÜSTÜNDE" | uyarı kutusu tablonun altına geri taşındı | kırmızı ✅ |
+| `kurulum.spec.ts` · "sorunlu satır EN ÜSTTE" | `problemsFirst` kaldırıldı | kırmızı ✅ |
+| `rules.test.ts` · üç katman | `cls?.maxSameLessonPerDay` kaldırıldı | 3 test kırmızı ✅ |
+
+### Bu turda öğrenilen (tuzak listesine girmedi ama girecek kadar pahalıydı)
+
+**`git checkout -- <dosya>` bir mutasyonu geri almaz, o dosyadaki BÜTÜN
+oturumu geri alır.** `Summary.tsx` üstünde bir mutasyon denenip geri alınırken
+kullanıldı ve o dosyaya ait AA3'ün tamamını sildi — hiçbir hata vermeden,
+çünkü commit edilmemiş her şey `HEAD`'e göre "değişiklik". Kalanı sadece
+testler yakaladı. Doğrusu, denenen dosyayı önce bir yere kopyalamak.
+
+---
+
+## Otuz dördüncü oturum (B) — dört madde, ve yolun üstünde bir veri kaybı (2026-08-29)
+
+> **Bu tur ile yukarıdaki AA turu AYNI GÜN, İKİ MAKİNEDE paralel koşuldu**
+> ve `40bcaa5` üstünde birleştirildi. Aynı dosyaya dokunan tek yer
+> `lessons/index.tsx` oldu: bu tur `BlockCounts`'u paylaşıma çıkarmıştı, AA
+> turu ona sınıfın kendi limitini eklemişti. İkisi de duruyor —
+> `components/BlockCounts.tsx` artık üçüncü bir parametre alıyor.
 
 Kullanıcının dört satırı: *"Öğretmenler listelerde branşlarda kısaltmalar ·
 Program kısmında branşlar kısaltmalar olsun sol tarafta · Program otomatik
@@ -37,7 +232,7 @@ expect(parseState(JSON.stringify(raw))).not.toBeNull();
 ```
 
 Mutasyonla sınandı: `version === 8` geri çıkarıldığında **dört test birden**
-kırmızıya döndü. Yeni tuzak 86.
+kırmızıya döndü. Yeni tuzak 97.
 
 **Aynı turda `main`'de bulunan iki kırmızı daha** — ikisi de `8341b98`
 ("yarıda kestik") commit'inden, yani yarım bırakılmış bir taşımadan:
@@ -136,7 +331,7 @@ yıkıcı düğme (ikisi de pinli saatleri **saymıyor** ve yerinde bırakıyor)
 `illegalBlocks()` her bloğu kaldırıp `blocker()`'a "buraya geri konabilir mi"
 diye soruyor, ve o bir **kural** sorusu — bir pin kural değil. Kilitli bloğu
 kaldıramayınca denetçi onu "kendisiyle çakışıyor" diye raporladı. Çare iki ad:
-`liftBlock()` mekanik, `removeBlock()` = kapı + `liftBlock`. Yeni tuzak 87.
+`liftBlock()` mekanik, `removeBlock()` = kapı + `liftBlock`. Yeni tuzak 98.
 
 ### 4. Yerinde ders düzenleme
 

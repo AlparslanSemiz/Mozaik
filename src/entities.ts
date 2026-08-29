@@ -181,7 +181,15 @@ export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects };
 // The week and the subject vocabulary moved DOWN to `names.ts`, so that
 // `constraints.ts` — which sits below this file — can draw a day name in the
 // interface language. Re-exported so no call site had to learn a second path.
-export { DEFAULT_DAY_NAMES, DEFAULT_SUBJECT_SHORTS, WEEK, dayLabel, shortDay, subjectLabel };
+export {
+  DEFAULT_DAY_NAMES,
+  DEFAULT_SUBJECT_SHORTS,
+  WEEK,
+  builtInShort,
+  dayLabel,
+  shortDay,
+  subjectLabel,
+};
 
 
 /** Override -> built-in table -> first three letters. */
@@ -578,6 +586,8 @@ export function addClass(d: State, name: string, roomId: Id | null): State {
     name: name.trim(),
     roomId,
     color: firstFreeColor(d.classes.map((x) => x.color)),
+    // Nothing is guessed: null means "use the school's number" (principle 5).
+    maxSameLessonPerDay: null,
   };
   return { ...d, classes: [...d.classes, created] };
 }

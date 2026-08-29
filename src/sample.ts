@@ -94,6 +94,7 @@ export function sampleState(): State {
     name,
     roomId: roomIdByLetter.get(letter) ?? null,
     color: i % PALETTE_SIZE,
+    maxSameLessonPerDay: null,
   }));
 
   const teachers: Teacher[] = NAMES.map(([name, gender], i) => ({

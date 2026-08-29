@@ -240,7 +240,8 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
   // as they are typed: going from 6 hours to 3 has to take "2+2+2" with it.
   const newHours = Math.max(1, Number(newLesson.hours) || 1);
   const newBlocks = clampBlocks(newHours, newSplit);
-  const newDayLimit = blockCeiling(state, undefined);
+  const newClass = state.classes.find((c) => c.id === classId);
+  const newDayLimit = blockCeiling(state, undefined, newClass);
   const canAdd = classId !== '' && teacherId !== '';
 
   function add() {
@@ -300,13 +301,23 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
         : t('{kim} dersleri · {sayilar}', { kim: focused.name, sayilar: counted });
 
   const panel = (
-    <div className="panel step-panel">
-        {/* The paste button rides the HEADING, not the form row: "Excel'den
-            yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
-            In the form row it was a sixth control competing with the five that
-            are filled in every time, and opening it broke the row in half. */}
+    <>
+      {/* ADDING IS ITS OWN BLOCK — not a rule drawn across one panel.
+          ("Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok
+           olduğu gibi, yani sadece çizgi olmasın.")
+
+          A line says where something ends; a panel says the two are
+          different things. Nothing moved: the form is still above the list.
+          The COUNTED heading went with the list it counts, and this one
+          names the work — so the screen still has exactly one --fs-xl
+          heading, and it is the one over the rows being read.
+
+          The paste button rides the HEADING, not the form row: "Excel'den
+          yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
+          All five panels put it in the same corner. */}
+      <div className="panel add-panel">
         <div className="panel-head">
-          <h2>{heading}</h2>
+          <h2>{t('Yeni ders')}</h2>
           <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
         </div>
         <p className="hint">
@@ -473,6 +484,10 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             }
           }}
         />
+      </div>
+
+      <div className="panel step-panel">
+        <h2>{heading}</h2>
 
         {scope.length > 0 && (
           <ListTools
@@ -589,7 +604,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                       <BlockCounts
                         weeklyHours={x.weeklyHours}
                         blocks={x.blocks}
-                        dayLimit={blockCeiling(state, x)}
+                        dayLimit={blockCeiling(state, x, group)}
                         title={t('Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar')}
                         onPick={(blocks) => change((d) => updateLesson(d, x.id, { blocks }))}
                       />
@@ -597,7 +612,9 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                     <td>
                       <LimitBox
                         value={x.maxPerDay}
-                        fallback={state.settings.limits.maxSameLessonPerDay}
+                        fallback={
+                          group?.maxSameLessonPerDay ?? state.settings.limits.maxSameLessonPerDay
+                        }
                         title={t('Bu ders bir günde en fazla kaç saat')}
                         onSet={(v) => change((d) => updateLesson(d, x.id, { maxPerDay: v }))}
                       />
@@ -630,7 +647,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           </div>
         )}
       </div>
-
+    </>
   );
 
   // The general list has nothing to pick, so it gets the whole width — a
