@@ -1985,3 +1985,222 @@ Kullanıcının yazdığı beş satır. **Şema v10 → v11'e çıktı.** Ayrın
       yani İngilizce ekran "Mathematics / **Mat**" yazıp listeye eklenince
       kutuya "Mth" koyuyordu.
 
+
+---
+
+## AB turu — Z planından DEVREDEN maddeler — **BAŞLANMADI** (2026-08-29)
+
+> **ŞİMDİ SIRADA burasıdır.** Yukarıdaki AA turu bitti; sıradaki iş bu
+> bölümün sekiz maddesi. Başka bir makinede yapılacak.
+
+Bu maddeler 2026-08-29'da onaylanan beş aşamalı planın parçasıydı; ilk üç
+aşama bitti ve `main`'e girdi (blok boyları 2·3·4, çıktıda birleşme, branş
+yeniden adlandırma, ders aktarma, sıralama işareti, Kontrol'ün şeridi, sağ
+raylarda yatay kaydırma). **Aşağıdakiler yapılmadı.** Her maddenin yanında
+gerekçesi, dokunulacak yer ve —varsa— ÖLÇÜLMÜŞ sayısı var, çünkü bu turu
+başka bir makine bitirecek.
+
+Kaynak satırlar bu dosyanın sonundaki *Ham notlar* bölümünde duruyor.
+
+### AB1 Ayarlar — Hareket ve Dil SOLA, bölüme özgü ayar ŞERİDE
+
+> Hareket ve Dil solda olmalı. Hatta dil istersen başka yere bile geçebilir.
+> Ayarlardaki özel sectionlara özgü ayarlar o sectionun alt şeridinde sağ üstte gözüksün.
+
+- [ ] **Hareket** ([Appearance.tsx:341](../src/components/settings/Appearance.tsx#L341))
+      ve **Dil** ([:376](../src/components/settings/Appearance.tsx#L376)) sağ
+      `<aside>`'dan (`:293`–`:400`) sol sütunun sonuna taşınır. Saf JSX
+      taşıması, mantık değişmiyor.
+- [ ] **Bölüme özgü ayar, o bölümün şeridinde sağ üstte.** Ayarlar şeridi
+      ([Ribbon.tsx:724](../src/components/Ribbon.tsx#L724)) tek bir
+      `<Group label="Bölüm">` çiziyor ve `<Spacer/>` bile taşımıyor — sağ uç
+      boş. Müsaitlik şeridine bu turda eklenen `Göster` grubunun deseni
+      birebir kullanılabilir. Her bölüm için bir sağ grup: Görünüm → tema +
+      yoğunluk, Zil ve günler → gün sayısı, Kurallar → seviye özeti,
+      Planlar → aktif plan, Hakkında → sürüm.
+
+### AB2 İnfolar kısalsın — her ekranda
+
+> Bir de çok fazla info var ve çok uzunlar her yerde infoları olabildiğince anlaşılır kısa ve öz yap.
+
+- [ ] Kural: bir `.hint` **tek cümle** ve ~90 karakteri geçmez; uzun gerekçe
+      `title`'a iner. Müsaitlik'in iki uzun hint'i bu turda böyle kısaltıldı
+      (`Availability.tsx`), deseni oradan alın.
+- [ ] En kalabalık yerler: `settings/Appearance.tsx` (tema · yazı büyüklüğü ·
+      yoğunluğun iki grubu · araç şeridi · örnek · hareket · dil),
+      `settings/Data.tsx`'in "Veriler nerede" ve yedek panelleri.
+- [ ] **Her kısaltma dört sözlüğü ELLE günceller** — `i18n.test.ts`'in ölü
+      anahtar tarayıcısı İngilizce yorumlara da baktığı için bunu söylemez
+      (tuzak 87). Tur sonunda sayfa **Almanca** açılıp ekrana bakılır
+      (tuzak 89).
+
+### AB3 Çıktının sağ bloğu — iç içe ÜÇ kaydırıcı
+
+> Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz zor
+> o sebeple ya yatay şekilde ya sağa sola ya da biraz daha geniş şekilde
+> yapabiliriz aslında çünkü çıktı kısmında bayağı boşluk var.
+
+Ölçülen boş alan (1920, %100): kâğıdın iki yanında **≈400 px**; %150'de
+≈236 px. Yani genişletecek yer gerçekten var.
+
+- [ ] `.pick-items`'ın tavanı **`max-height: 168px`**
+      ([styles.css:4097](../src/styles.css#L4097)) — `--ui-scale`'i hiç
+      görmeyen sabit bir piksel, yani %150'de orantılı olarak DAHA AZ satır
+      tutuyor. `rem`'e çevrilir ya da kalkar.
+- [ ] İki `.pick-list` (`min-width: 240px`,
+      [:4074](../src/styles.css#L4074)) + `gap` = 494 px, ray ise 23.5rem =
+      **329 px** ([:3582](../src/styles.css#L3582)). Sığmadığı için alt alta
+      düşüyorlar ve iki ayrı 168px'lik kaydırıcı doğuyor. Çıktı ekranında ray
+      genişletilir (`--aside-w` yerel ezme, ~30rem) ve ikisi **yan yana**
+      durur.
+- [ ] Hedef: üç kaydırıcı **bire** insin. `.cols > aside` bu turda
+      `overflow-x: hidden` aldı, yani yatay kaydırma zaten bitti; kalan iş
+      dikey olanı.
+
+### AB4 Ölçek — kök 13px VE %100'ün altı
+
+> Babamın zaten windowsu bilgisayarın ölçeklenmesi çok büyük o sebeple biz de
+> büyük yaptık ama devasa oldu. ölçeklendirmeyı azatltmamız lazım.
+
+Kullanıcı kararı: **ikisi de**.
+
+- [ ] [styles.css:461](../src/styles.css#L461) `calc(14px * var(--ui-scale))`
+      → **13px**. Tipografi merdiveni (`--fs-*`, `:302`–`:307`) 14px'e
+      sabitlenmişti; 13'e yeniden sabitlenir ve **12 px ekran tabanı korunur**
+      (CLAUDE.md'nin erişilebilirlik sözleşmesi).
+- [ ] [theme.ts:292](../src/theme.ts#L292) `SCALE_MIN` 1 → **0.8**.
+      `SCALE_DEFAULT` **1 kalır**: kimsenin ekranı kendiliğinden değişmez,
+      baba kendi makinesinde küçültür. `Appearance.tsx`'in `STEPS`'i zaten
+      MIN/MAX/STEP'ten türüyor.
+- [ ] `theme.test.ts` güncellenir.
+- [ ] **TUZAK 33 BURADA**: bir ölçek değişikliği sabit genişlikli sütunu
+      sessizce kırpar ve süit yeşil kalır. %80 · %100 · %150'de iki temada
+      `npm run ekran` alınır ve **BAKILIR**.
+- [ ] Tauri penceresinde zoom/DPI ayarı **yok** (`tauri.conf.json` `app.windows[0]`);
+      Windows ölçeği bunun üstüne çarpılmaya devam eder. Kullanıcının elindeki
+      tek kol %80 basamağıdır.
+
+### AB5 Windows simgesi — önce ÖLÇ, sonra çiz
+
+> Uygulamanın windows çubuğundaki simgesi büyük simge olsun.
+> (Netleştirme: *"sanki küçük simge yani 9x9 pixellik kullanılıyor gibi onu 16x16'e çevir"*)
+
+`kurulum/icon.ico` dokuz boy taşıyor (16·20·24·32·40·48·64·128·256) ve
+20'den itibaren ayrıntılı çizim — o kol tükenmiş.
+**Ama** [STATUS.md:1818](STATUS.md#L1818) kendi kaydında yazıyor:
+*"`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü **varsayıldı**, ölçülmedi."*
+Babanın gördüğü düşük çözünürlük tam olarak bunun belirtisi.
+
+- [ ] `.github/workflows/surum.yml`'nin `exe` işine bir **ölçüm** eklenir:
+      üretilen `Mozaik.exe`'nin ikon kaynağı çıkarılıp gömülü boylar
+      listelenir, `kurulum/icon.ico` ile karşılaştırılır, tutmuyorsa iş
+      kırmızıya döner.
+- [ ] Tutmuyorsa çare Win32 ikon kaynağını **açıkça** yazmak.
+- [ ] Ölçüm yeşilse şikayetin sebebi çizimdir: `site/icon.svg`'nin sütunları
+      512'lik karenin içinde büyütülür (ikisi de full-bleed, kırpılacak
+      şeffaf kenar yok).
+- [ ] `e2e/temel.spec.ts` **79. bölüm** ([:815](../e2e/temel.spec.ts#L815))
+      boy listesini ve eşiği İKİNCİ kez sabitliyor — dosyaya dokunulursa
+      orası da güncellenir.
+- [ ] Tuzak 65 aynen geçerli: bir platform iddiası **ölçülmeden** yazılmaz.
+
+### AB6 Virüs / SmartScreen — sertifikasız hafifletme
+
+> Babama indirdim exeyi zip virüs algılandı. .exeyi açarken de window engelledi
+> yine de açmak istiyor musun dedi nedendir bunu düzeltelim.
+
+Kullanıcı kararı: **sertifika ALINMAYACAK**, para gerektirmeyen her şey
+yapılacak. Exe imzasız (repoda hiçbir imza yapılandırması yok) ve üç ayrı
+tetikleyici var; ikisi kapatılabilir.
+
+- [ ] **`-ExecutionPolicy Bypass`** — `kurulum/Kur.cmd:6`,
+      `kurulum/Guncelle.cmd:7`, `kurulum/kur.ps1:149` ve `:207`. İndirilen bir
+      arşivin içinde bu, tarayıcıların en tanıdık imzalarından biri ve
+      *"zip virüs algılandı"* raporunun **en olası sebebi**.
+      `RemoteSigned` + `Unblock-File` ile değişir.
+- [ ] **VERSIONINFO yok.** Yayıncısı, ürün adı, sürümü olmayan bir PE sezgisel
+      tarayıcıya çıplak görünür. Ürün adı, açıklama, sürüm ve şirket alanları
+      gömülür.
+- [ ] **`strip = true` + `lto` + `opt-level = "s"`**
+      (`src-tauri/Cargo.toml:52`–`:56`) — sembolsüz, sıkı paketlenmiş küçük
+      bir ikili entropi puanını yükseltir. `strip = false`'un boyut maliyeti
+      **ÖLÇÜLÜR**, karar ölçümle verilir.
+- [ ] Yayına **`SHA256SUMS.txt`** eklenir
+      (`surum.yml:221`, `gh release create`).
+- [ ] Microsoft Defender'a ve zip'i işaretleyen tarayıcıya **yanlış-pozitif
+      bildirimi** yapılır; adresler README'ye yazılır.
+- [ ] README'de Windows'un ne diyeceği ve tam tıklama yolu yazılır.
+- [ ] Sertifika ileride alınırsa bağlamanın tek commit olması için OV/EV
+      adımları buraya not düşülür.
+- [ ] **Kaldırılmayacak olan:** kendi kendini güncelleyen ikili
+      (`update.rs`: indir → yanına yaz → üstüne adlandır → çalıştır). Üçüncü
+      tetikleyici odur ve ilke 1'in genişletilmiş hâli onu açıkça istiyor;
+      `update.rs` zaten AV'nin araya girebileceğini yazıyor.
+
+### AB7 Vitrin İngilizce — CLAUDE.md ve docs/ TÜRKÇE KALIR
+
+> Readmenin ingilizce olması ve githubtaki her şeyin ingilizce olması ve
+> github sayfasının tamtakır olması lazım.
+
+Kullanıcı kararı: **"Sadece vitrin İngilizce".** `CLAUDE.md`, `docs/`,
+`.claude/` ve `.mcp.json` **repoda kalır ve Türkçe kalır** — proje hafızası
+versiyonlanmaya devam eder.
+
+- [ ] `README.md` — 439 satır, tamamı Türkçe. **Kısa ve İngilizce** yeniden
+      yazılır: ne olduğu, indirme bağlantıları, dört teslim yolu, verinin
+      nerede durduğu, geliştirme komutları.
+- [ ] `.github/surum-notu.md` → İngilizce (her Release sayfasının gövdesi bu).
+- [ ] `.github/workflows/surum.yml` → adım adları, workflow adı ve girdi
+      açıklamaları İngilizce; **Actions arayüzünde görünüyorlar**. Girdiler
+      `yayinla`/`etiket` → `publish`/`tag` (`scripts/yayinla.mjs` referans
+      veriyorsa orası da).
+- [ ] `package.json`'ın `description`'ı ve `src-tauri/Cargo.toml`'un
+      `description`'ı İngilizce.
+- [ ] **`LICENSE` eklenir** — repoda hiç yok, `package.json`'da `license`
+      alanı da yok (`"private": true`). Öneri **MIT**, yanında gömülü IBM
+      Plex için **OFL 1.1** bildirimi (`scripts/font-source/`).
+- [ ] GitHub'ın kendi alanları (açıklama, konular, Pages) repo dosyası
+      değil — elle yapılır. `STATUS.md` ayrıca Pages kaynağının
+      ("Settings → Pages → Source: GitHub Actions") hiç açılmadığını söylüyor.
+
+### AB8 aSc ders ekranı — FOTOĞRAF BEKLİYOR
+
+> ASC derslerinde ekleme ya da değiştirme kısmına bak.
+
+- [ ] `docs/Örnek Fotolar/` altında aSc'nin ders **ekleme/değiştirme
+      penceresinin** fotoğrafı yok; yalnız "Lessons/week + Single" açılır
+      listesi var. Kullanıcı bu maddeyi **o tur atladı**; fotoğraf gelince
+      açılır.
+
+---
+
+### AB turu — ÖLÇÜLDÜ, iddia edilmedi
+
+Bu iki madde plana "yapılacak" diye yazılmıştı; ölçüldüler ve **plan yanlış
+çıktı**. Kayıt burada dursun ki bir daha aynı yere bakılmasın.
+
+- **"Dosyadan aç yavaş" — parse YAVAŞ DEĞİL.** Dolu bir haftada (426
+  yerleşim, sampleState) ölçüldü:
+
+  | Ne | Süre |
+  |---|---|
+  | `JSON.parse` | 0,17 ms |
+  | `sanitize` | 0,33 ms |
+  | `parseState` (hepsi) | **0,65 ms** |
+  | `health()` | 5,8 ms |
+
+  Plan `sanitize`'ın iki kez koşmasını kaldırmayı öngörüyordu; maliyeti
+  **0,33 ms**, yani hissedilen yavaşlığın sebebi o değil. Yapılan tek gerçek
+  düzeltme: **hata yolu dosyayı iki kez okuyup iki kez ayrıştırıyordu**, artık
+  bir kez okuyor (`readBackupFile` tek çağıranıydı, silindi).
+  **Geriye kalan sürtünme onay diyaloğu**: dosya seçiliyor ve açılmak yerine
+  bir daha soruluyor. Bilerek öyle — üst çubuk, hiçbir tıklamanın bir
+  öğleden sonrayı götüremeyeceği yer.
+
+- **`kayma.spec.ts` "taşan bölümle taşmayan bölüm AYNI genişlikte" macOS'ta
+  DÜŞÜYOR, ve kusur kodda değil.** Testin kendi koruması söylüyor:
+  *"kaydırma çubuğu yer kaplamıyor — bu test hiçbir şey ölçmüyor"*. macOS'un
+  bindirmeli kaydırma çubuğu 0 px, yani ölçmek istediği oluk orada yok.
+  Regresyon değil, **platform farkı**; koruma işini yapıyor. Karar gerekiyor:
+  oluk yoksa test `skip` mi etsin, yoksa yazıldığı makineye özel mi kalsın.
+

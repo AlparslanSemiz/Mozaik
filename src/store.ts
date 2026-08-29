@@ -605,10 +605,6 @@ export function downloadBackup(d: State): void {
   download(backupFileName(new Date()), JSON.stringify(d));
 }
 
-export function readBackupFile(file: File): Promise<State | null> {
-  return file.text().then(parseState);
-}
-
 // ------------------------------------------------------------- the bundle
 //
 // One file holding EVERY plan. The single-plan file is unchanged and still
