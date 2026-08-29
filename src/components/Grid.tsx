@@ -5,6 +5,8 @@
 // all (see drag.ts).
 
 import { memo, useEffect, useMemo, useRef } from 'react';
+import * as ContextMenu from '@radix-ui/react-context-menu';
+import { Pin } from 'lucide-react';
 import { useInspect } from './Inspector';
 import type React from 'react';
 import { dayLabel } from '../names';
@@ -23,6 +25,12 @@ export interface GridCell {
   continues: boolean;
   /** The hour has since been closed for this teacher, class or room. */
   conflict: string | null;
+  /**
+   * The reader has locked this block in place: it survives "Baştan diz", it
+   * cannot be dragged, removed or dropped on. Drawn with a mark and not only
+   * with a colour — colour alone never carries state here.
+   */
+  pinned: boolean;
 }
 
 export interface GridRow {
@@ -46,7 +54,7 @@ interface RowProps {
   /** Per day: the hour index the long break falls BEFORE. -1 = no long break. */
   breakAt: number[];
   dim: boolean;
-  /** Right click, or Delete on a focused card: send the block back to the pool. */
+  /** Delete on a focused card, or the menu's own item: back to the pool. */
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   /** Left button down on a placed card: start moving the block. */
   onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
@@ -161,19 +169,24 @@ const Row = memo(function Row({
             // A left click used to REMOVE the block, which made moving a lesson
             // mean deleting it and dragging it out of the pool again. Now:
             //   left button + drag  -> move it
-            //   right click         -> send it back to the pool
-            //   Delete / Backspace  -> the same, from the keyboard
+            //   right click         -> a menu (remove · edit · pin)
+            //   Delete / Backspace  -> back to the pool, from the keyboard
             // `e.detail === 0` is how a keyboard-generated click is told from a
             // real one, which keeps Enter and Space working on a focused card.
+            //
+            // A PINNED card starts no drag at all. The refusal is also in
+            // `removeBlock`, so nothing gets through by another road; stopping
+            // here as well is what keeps the card from following the pointer
+            // and then snapping back, which reads as a bug rather than a lock.
             <button
               type="button"
-              className={cell.conflict === null ? 'card' : 'card conflict'}
+              className={
+                (cell.conflict === null ? 'card' : 'card conflict') + (cell.pinned ? ' pinned' : '')
+              }
               style={{ background: paletteColor(cell.color) }}
               draggable={false}
-              onPointerDown={(e) => onCellMoveStart(e, row.id, g, s)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                onCellRemove(row.id, g, s);
+              onPointerDown={(e) => {
+                if (!cell.pinned) onCellMoveStart(e, row.id, g, s);
               }}
               onClick={(e) => {
                 if (e.detail === 0) onCellRemove(row.id, g, s);
@@ -184,20 +197,24 @@ const Row = memo(function Row({
                   onCellRemove(row.id, g, s);
                 }
               }}
-              aria-label={t('{ust} {alt}, kaldırmak için Delete', {
-                ust: cell.top,
-                alt: cell.bottom,
-              })}
+              aria-label={
+                cell.pinned
+                  ? t('{ust} {alt}, sabitlenmiş', { ust: cell.top, alt: cell.bottom })
+                  : t('{ust} {alt}, kaldırmak için Delete', { ust: cell.top, alt: cell.bottom })
+              }
               title={
-                cell.conflict === null
-                  ? t('Sürükleyerek taşıyın · sağ tık: havuza geri gönderir')
-                  : t('{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin', {
-                      sorun: cell.conflict,
-                    })
+                cell.pinned
+                  ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
+                  : cell.conflict === null
+                    ? t('Sürükleyerek taşıyın · sağ tık: seçenekler')
+                    : t('{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın', {
+                        sorun: cell.conflict,
+                      })
               }
             >
               <span className="card-top">{cell.top}</span>
               {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
+              {cell.pinned && <Pin className="card-pin" aria-hidden="true" />}
             </button>
           ) : closed ? (
             '×'
@@ -239,6 +256,18 @@ interface Props {
   draggedRowId: string | null;
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
+  /**
+   * A right click landed on a placed card: which one. Called BEFORE the menu
+   * opens, so whatever `menu` draws can be about this block.
+   */
+  onCellMenu: (rowId: string, day: number, hour: number) => void;
+  /**
+   * The menu's own content, drawn by the caller. Grid knows where the click
+   * landed and nothing about what may be done there — removing a block, editing
+   * a lesson and pinning a cell all need `change`, dialogs and the teacher →
+   * class translation, none of which belong in a table that draws 2100 cells.
+   */
+  menu: React.ReactNode;
 }
 
 function GridInner({
@@ -248,6 +277,8 @@ function GridInner({
   draggedRowId,
   onCellRemove,
   onCellMoveStart,
+  onCellMenu,
+  menu,
 }: Props) {
   const t = useT();
   const hourCount = settings.hours.length;
@@ -284,8 +315,33 @@ function GridInner({
     '--break-cols': breakAt.filter((at) => at >= 0).length,
   } as React.CSSProperties;
 
+  /**
+   * ONE trigger for the whole table, not one per cell.
+   *
+   * 2100 cells, every row memoised (`Row` above): a trigger per card would put
+   * a new element and a new handler into each of them and undo the one thing
+   * this file is careful about. The event already says where it landed —
+   * `data-row`, `data-day` and `data-hour` are on the <td> because drag.ts
+   * needs them — so the menu reads the click the same way the drag does.
+   *
+   * A right click on anything that is NOT a card opens nothing: preventDefault
+   * here runs before Radix's own handler (it composes ours first and checks
+   * `defaultPrevented`), so an empty cell keeps behaving as it always did.
+   */
+  const openMenu = (e: React.MouseEvent) => {
+    const card = (e.target as Element).closest?.('.card');
+    const td = card?.closest('td[data-row]') as HTMLElement | null | undefined;
+    if (card == null || td == null) {
+      e.preventDefault();
+      return;
+    }
+    onCellMenu(td.dataset.row ?? '', Number(td.dataset.day), Number(td.dataset.hour));
+  };
+
   return (
     <div className="grid-wrap" ref={wrapRef}>
+      <ContextMenu.Root>
+      <ContextMenu.Trigger asChild onContextMenu={openMenu}>
       <table className={`grid${draggedRowId !== null ? ' dragging' : ''}`} style={columns}>
         <thead>
           <tr>
@@ -355,6 +411,9 @@ function GridInner({
           ))}
         </tbody>
       </table>
+      </ContextMenu.Trigger>
+      {menu}
+      </ContextMenu.Root>
     </div>
   );
 }

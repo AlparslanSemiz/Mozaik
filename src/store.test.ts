@@ -674,6 +674,54 @@ describe('parseState — v8 → v9 göçü', () => {
   });
 });
 
+/**
+ * v10: the pins. A separate describe because they are not a migration — v9 and
+ * everything under it simply had none, and the reader's own file is the first
+ * one that can carry any.
+ */
+describe('parseState — v9 → v10: sabitleme', () => {
+  /** The sample ships an empty grid, so a pin needs a cell put down first. */
+  function withOnePlacement() {
+    const d = JSON.parse(JSON.stringify(sampleState()));
+    const lesson = d.lessons[0];
+    const key = `${lesson.classId}|0|0`;
+    d.placements = { [key]: lesson.id };
+    return { d, key };
+  }
+
+  it('v9 dosyasında sabitleme YOK, ve tahmin de edilmiyor', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.schemaVersion = 9;
+    delete raw.pinned;
+    const parsed = parseState(JSON.stringify(raw))!;
+    expect(parsed).not.toBeNull();
+    expect(parsed.pinned).toEqual({});
+    // The timetable itself is untouched: pins were added BESIDE it, not into it.
+    expect(parsed.placements).toEqual(sampleState().placements);
+  });
+
+  it('sabitleme dosyaya YAZILIYOR ve geri OKUNUYOR', () => {
+    const { d, key } = withOnePlacement();
+    const back = parseState(JSON.stringify({ ...d, pinned: { [key]: 1 } }))!;
+    expect(back.pinned).toEqual({ [key]: 1 });
+    expect(back.placements[key]).toBe(d.lessons[0].id);
+  });
+
+  it('YETİM sabitleme yüklemede siliniyor — elle yazılmış dosya', () => {
+    const { d } = withOnePlacement();
+    // A cell nothing is placed in. sanitize() runs on every load.
+    const back = parseState(JSON.stringify({ ...d, pinned: { 'yok|0|0': 1 } }))!;
+    expect(back.pinned).toEqual({});
+  });
+
+  it('sabitleme İKİNCİ geçişte de duruyor', () => {
+    const { d, key } = withOnePlacement();
+    const once = parseState(JSON.stringify({ ...d, pinned: { [key]: 1 } }))!;
+    const twice = parseState(JSON.stringify(once))!;
+    expect(twice.pinned).toEqual({ [key]: 1 });
+  });
+});
+
 // ---------------------------------------------------------------------------
 // The undo stack and the plan library.
 //

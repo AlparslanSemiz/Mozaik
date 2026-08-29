@@ -9,6 +9,63 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> **ÇÖZÜCÜNÜN KALİTESİ ÖLÇÜLDÜ — karar bekliyor.** (2026-08-29, otuz dördüncü
+> oturum. Bütün sayılar [STATUS.md](STATUS.md) → *Otuz dördüncü oturum* → 2.)
+>
+> Örnek okulda **yasallık ve tamlık kusursuz**: 367/367 blok, 433/433 saat,
+> havuzda 0, yasa dışı 0, 367 düğüm, **69 ms**. Kusur kalitede: bir öğretmen
+> okula geldiği günlerin **%87'sinde** arada boş saat bekliyor (274 boş saat),
+> sınıflarda 268. Sebep kasıtlı — `order()` yayıyor.
+>
+> - [ ] **Deney B uygulansın mı?** "Sınıfın o gün dolu saatine yaslanan hücreyi
+>       tercih et": sınıf deliği 268 → **251**, delikli gün 85 → **72**, ve
+>       hiçbir bedeli yok (blok yine 367/367, düğüm yine 367, süre 71 ms).
+>       Ölçüldü, uygulanmadı — çözücüye özellik eklemek ayrı bir karar.
+> - [ ] **Deney A uygulanMASIN.** Öğretmeni günlere sıkıştırmak deliği
+>       274 → 227 indiriyor ama programı **eksik** bırakıyor (363/367) ve
+>       süreyi 69 ms → **9 856 ms**'ye çıkarıyor. Tuzak 21'in ta kendisi.
+> - [ ] Asıl cevap hâlâ babada: **"bu programı kullanır mıydın?"**
+
+> **Bu turda kapanan üç ESKİ kırmızı** — üçü de `8341b98`/`5fc0316`'dan
+> devrediyordu ve üçü de `main`'de duruyordu:
+>
+> - [x] **`store.ts` v8 dosyalarını okumuyordu.** Yayınlanmış v2.0.0'ın yazdığı
+>       her yedek `parseState`'ten `null` dönüyordu. Kabul listesine `8` ve `9`
+>       eklendi; yanına **sayı adlandırmayan** bir test yazıldı
+>       (`SCHEMA_VERSION - 1`), mutasyonla sınandı. Tuzak 86.
+> - [x] **`npm run tipler` 5 hata veriyordu** (`availClock` Ayarlar →
+>       Görünüm'den çıkmış, App hâlâ ona veriyordu) ve `@types/node` kurulu
+>       değildi. Kontrol Müsaitlik'in kendi şeridine bağlandı,
+>       `gorunum.spec.ts` 50 onu yeni evinde arıyor.
+> - [x] **`i18n.test.ts` 4 kırmızı veriyordu**: kaldırılan ekranın 5 anahtarı
+>       dört sözlükte duruyordu.
+
+### Otuz dördüncü oturum — kullanıcının dört maddesi — **BİTTİ ✅**
+
+- [x] **Öğretmen listelerinde branş KISALTMASI.** Üç yer: Kurulum →
+      Öğretmenler'in iki açılır listesi (`Mat · Matematik`), Müsaitlik listesi
+      (`MÇ · Mehmet Çelik (Mat)`, artık **ikinci branşı da**), ve ızgaranın sol
+      sütunu. Çip süzgeci bilerek DEĞİŞMEDİ: `Matematik 1` ile `Matematik 2`
+      aynı kısaltmaya düşüyor ve iki branşı tek süzgeçte birleştirirdi.
+- [x] **Sol sütun daraldı: `--rowhead-w` 6.75rem → 5.25rem.** Uydurulmadı —
+      `izgara.spec.ts` 68 tarayıcıya soruyor: var 94,5 px, **gereken 66 px**,
+      yani test kendi 1,2× tavanında kırmızıya döndü. 21 px ders sütunlarına.
+- [x] **Otomatik dizme ÖLÇÜLDÜ.** Yukarıdaki karara bakın.
+- [x] **Sağ tık menüsü**: `Havuza kaldır · Dersi düzenle · Dersi buraya
+      sabitle`. Tek `ContextMenu.Root` bütün tabloyu sarıyor, 2100 hücreye
+      tetikleyici konmuyor.
+- [x] **SABİTLEME — şema v9 → v10** (`State.pinned`). Tam kilit: sürüklenmez,
+      sağ tıkla/Delete ile kaldırılmaz, üstüne bırakılmaz, `Baştan diz` ve
+      `Programı boşalt` yerinde bırakır. Kilidi `removeBlock`'a koymak
+      denetçiyi bozdu ve denetçi bunu yakaladı → `liftBlock()` ayrıldı,
+      tuzak 87.
+- [x] **Yerinde ders düzenleme** (`LessonEdit.tsx`): haftalık saat · dağılım ·
+      günde en fazla. `BlockCounts` paylaşıma çıkarıldı, mantık kopyalanmadı.
+      Sabitleme işaretinin yeri **ekran görüntüsüne bakılarak** düzeltildi:
+      sağ üstte sınıf numarasının üstüne biniyordu, sol alta taşındı.
+
+---
+
 > **v2.0.0 YAYINLANDI ve BİR VERİ KAYBI TAŞIYOR — ilk iş bunu kapatmak.**
 >
 > Ad turunun tek gözden kaçan satırı `tauri.conf.json`'ın `identifier`'ıydı:

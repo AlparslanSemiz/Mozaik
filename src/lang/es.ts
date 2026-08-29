@@ -209,8 +209,29 @@ const ES: Sozluk = {
   // src/components/Grid.tsx
   'Öğle arası': 'Descanso del mediodía',
   '{ust} {alt}, kaldırmak için Delete': '{ust} {alt}, pulse Supr para quitar',
-  'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir': 'Arrastre para mover · clic derecho lo devuelve a la bandeja',
-  '{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin': '{sorun}. Arrastre para mover, clic derecho para enviarlo a la bandeja',
+  'Sürükleyerek taşıyın · sağ tık: seçenekler': 'Arrastre para mover · clic derecho para opciones',
+  '{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın': '{sorun}. Arrastre para mover, clic derecho para opciones',
+  '{ust} {alt}, sabitlenmiş': '{ust} {alt}, fijada',
+  'Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz': 'Fijada. Clic derecho para soltarla',
+
+  // src/components/Program.tsx — the grid's own menu
+  'Havuza kaldır': 'Enviar a la bandeja',
+  'sabitlenmiş': 'fijada',
+  'Dersi düzenle': 'Editar la clase',
+  'Dersi buraya sabitle': 'Fijar la clase aquí',
+  'Sabitlemeyi kaldır': 'Soltar',
+  'Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.': 'Esta clase está fijada. Suéltela primero.',
+  'Ders sabitlendi.': 'Clase fijada.',
+  'Sabitleme kaldırıldı.': 'Clase soltada.',
+
+  // src/components/LessonEdit.tsx
+  'Günde en fazla': 'Máximo por día',
+  'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da': 'Si cambia el reparto, esta clase sale del horario, también los bloques fijados',
+  'Sınıf ve öğretmen burada değişmez. **Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir.': 'La clase y el profesor no se cambian aquí. Las clases se borran y se añaden en la pestaña **Dersler**.',
+
+  // src/components/Ribbon.tsx — what the two destructive questions promise
+  'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.': 'Las {n} horas fijadas se quedan; el resto se organiza desde cero. Ctrl+Z lo deshace.',
+  'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.': 'Las {n} horas fijadas se quedan. Las clases, los profesores y las horas cerradas no cambian. Ctrl+Z lo deshace.',
   '{ad}: bilgileri ve haftalık programı': '{ad}: datos y horario semanal',
 
   // src/components/Inspector.tsx

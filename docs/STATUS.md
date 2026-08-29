@@ -1,7 +1,176 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-29 (otuz üçüncü oturum: **şerit kaymıyor**, ve
-v2.0.0'ın **veri kaybettiren kimliği** geri alındı)
+Son güncelleme: 2026-08-29 (otuz dördüncü oturum: **v8 dosyaları okunamıyordu**,
+branş kısaltmaları, çözücünün ÖLÇÜMÜ, ızgarada **sağ tık menüsü ve sabitleme**)
+
+---
+
+## Otuz dördüncü oturum — dört madde, ve yolun üstünde bir veri kaybı (2026-08-29)
+
+Kullanıcının dört satırı: *"Öğretmenler listelerde branşlarda kısaltmalar ·
+Program kısmında branşlar kısaltmalar olsun sol tarafta · Program otomatik
+dizmeye bakmak lazım · Programda derslere sağ tıklayınca seçenekler gelsin:
+kaldır, dersi düzenle, dersi oraya sabitle"*.
+
+### 0. YAYINLANMIŞ v2.0.0'IN YEDEKLERİ AÇILMIYORDU — ilk iş buydu
+
+`5fc0316` şemayı 8'den 9'a çıkardı ve `store.ts`'in kabul listesine
+**`version === 8`'i yazmadı**. O listenin üstünde tam bu hatayı anlatan bir
+yorum duruyordu:
+
+> *"Bumping SCHEMA_VERSION without adding the number it used to be makes every
+> backup the previous release wrote fall through to `return null` below — which
+> is the one failure this whole function exists to prevent."*
+
+Yorum doğruydu ve **hiçbir şeyi engellemedi**: bir cümle bir koşuda kırmızıya
+dönemez. Babanın elindeki kopya v2.0.0 (`git show 31fc6c8:src/types.ts` →
+`SCHEMA_VERSION = 8`), yani o kopyanın yazdığı her yedek ve her plan
+`parseState`'ten `null` dönüyordu — ekranda "dosya okunamadı".
+
+v6 ve v7 için birer test vardı (`store.test.ts:456`, `:538`) ve **ikisi de bunu
+göremezdi**: her biri bir SAYI adlandırıyor, ve bir sonraki bump'ta geride
+kalan sayı hep başkası oluyor. Yazılan dördüncü test numara adlandırmıyor:
+
+```ts
+raw.schemaVersion = SCHEMA_VERSION - 1;
+expect(parseState(JSON.stringify(raw))).not.toBeNull();
+```
+
+Mutasyonla sınandı: `version === 8` geri çıkarıldığında **dört test birden**
+kırmızıya döndü. Yeni tuzak 86.
+
+**Aynı turda `main`'de bulunan iki kırmızı daha** — ikisi de `8341b98`
+("yarıda kestik") commit'inden, yani yarım bırakılmış bir taşımadan:
+`npm run tipler` **5 hata** veriyordu (`availClock` Ayarlar → Görünüm'den
+çıkmış, App hâlâ ona veriyordu) ve `@types/node` **kurulu değildi**;
+`i18n.test.ts` **4 kırmızı** veriyordu (kaldırılan ekranın 5 sözlük anahtarı
+dört dilde duruyordu). Üçü de kapatıldı: `availClock` Müsaitlik'in kendi
+şeridine bağlandı, `gorunum.spec.ts` 50 o kontrolü yeni evinde arıyor.
+
+### 1. Branş kısaltmaları — ve sol sütun kendi ölçümüyle daraldı
+
+Tek kaynak zaten vardı (`subjectShort`), yeni fonksiyon yazılmadı. Üç yer:
+
+| Nerede | Önce | Sonra |
+|---|---|---|
+| Izgaranın sol sütunu | `Türkçe · Edebiyat` (kırpılıyordu) | `Trk · Edb` |
+| Müsaitlik listesi | `MÇ · Mehmet Çelik (Matematik)` | `MÇ · Mehmet Çelik (Mat)` · ve **ikinci branş da** |
+| Kurulum → Öğretmenler'in iki açılır listesi | `Matematik` | `Mat · Matematik` |
+
+Kullanıcının seçmediği yerler değişmedi (Dersler, komut paleti, Görünüm).
+**Çip süzgeci de değişmedi ve bu bir ölçüm değil bir çakışma:** `Matematik 1`
+ile `Matematik 2` aynı kısaltmaya (`Mat`) düşüyor, yani çipleri kısaltmak iki
+ayrı branşı sessizce tek süzgeçte birleştirirdi.
+
+**`--rowhead-w` 6.75rem → 5.25rem, ve karar ölçümün kendisinden çıktı.**
+`izgara.spec.ts` 68 tarayıcıya "bu hücre neye ihtiyaç duyuyor" diye soruyor ve
+%20'den fazlasını reddediyor. Kısaltmaya geçince:
+
+```
+satır başı VAR    94,5 px
+satır başı GEREKEN 66,0 px      -> 94,5 > 66 x 1,2 = test KIRMIZI
+```
+
+Yani daralma bir zevk değil, duran testin talebiydi. 5.25rem = 73,5 px: 66'yı
+7,5 px payla geçiyor ve kalan **21 px 72 ders sütununa** gidiyor. Testin
+sondası da güncellendi — `"Sosyal Bilgiler"` artık o hücrenin çizebileceği bir
+dize değil, iki aday ölçülüp büyüğü alınıyor.
+
+### 2. Otomatik dizme — ÖLÇÜLDÜ (karar: "önce ölç, sonra karar")
+
+STATUS'ün 7. açık maddesi *"çıktı kalitesi ölçülmedi"* iki yıldır duruyordu.
+Ölçüldü. Örnek okul, boş ızgaradan, `solve()` doğrudan:
+
+```
+faz              solved
+blok             367/367        saat 433/433, havuzda 0
+düğüm            367            -> hiç geri sarma yok
+süre             69 ms          (v7 döneminde 292 ms'ti)
+YASA DIŞI blok   0
+KALİTE sınıf     268 boş saat · 117 sınıf-günü · 433/701 doluluk · delikli gün 85
+KALİTE öğretmen  274 boş saat · 110 öğretmen-günü · delikli gün 96
+KALİTE yayılma   öğretmen başına 4,40 gün / 6
+```
+
+**Yasallık ve tamlık kusursuz; kusur kalitede.** Bir öğretmen okula geldiği
+günlerin **%87'sinde** arada boş saat bekliyor. Sebep kodda yazılı ve kasıtlı:
+`order()` yayıyor (1. kural sınıfın o dersten en az olduğu gün, 2. kural
+öğretmenin en az yüklü olduğu gün) ve hafta %30 dolu olduğu için yaymak deliği
+garanti ediyor.
+
+İki düzeltme **denendi ve ölçüldü**, ikisi de uygulanmadı — karar kullanıcının:
+
+| Deney | Sonuç |
+|---|---|
+| **A**: öğretmeni günlere yayma yerine SIKIŞTIR (`order` 2. kuralı ters) | ❌ öğretmen deliği 274 → **227** ama blok **363/367**, düğüm 367 → **47 373**, süre 69 ms → **9 856 ms**, faz `stuck`, sınıf deliği 268 → **284** |
+| **B**: sınıfın o gün dolu saatine YASLANAN hücreyi tercih et (yayma kuralları aynı) | ✅ sınıf deliği 268 → **251**, delikli gün 85 → **72** · blok yine **367/367**, düğüm yine **367**, süre **71 ms** |
+
+Deney A tuzak 21'in ta kendisi: teoride doğru olan ölçülmeden konmuyor.
+Deney B bedava görünüyor ve **bu turda uygulanmadı** — çözücüye özellik
+eklemek ayrı bir karardı.
+
+### 3. Sağ tık menüsü, ve SABİTLEME (şema **v9 → v10**)
+
+Sağ tık bloğu doğrudan havuza gönderiyordu; artık üç kalemlik bir menü açıyor:
+**Havuza kaldır · Dersi düzenle · Dersi buraya sabitle**.
+
+`@radix-ui/react-context-menu` alındı — konumlama, klavye gezinmesi, Escape,
+dışarı tıklama ve odağın geri dönmesi elle yazılmıyor. **Tek bir
+`ContextMenu.Root` bütün tabloyu sarıyor**, 2100 hücreye tetikleyici konmuyor:
+tıklamanın nereye düştüğü `data-row/day/hour`'dan okunuyor, yani `drag.ts` ile
+aynı yerden. Karta gelmeyen sağ tıkta `preventDefault()` çağrılıyor ve Radix'in
+kendi işleyicisi hiç koşmuyor (`composeEventHandlers` önce bizimkini çağırıp
+`defaultPrevented`'a bakıyor).
+
+**`State.pinned: Record<'${classId}|${day}|${hour}', 1>`** — `unavailable`'ın
+birebir deseni. Hücreye bağlı, derse değil: bir ders birden çok blok hâlinde
+iniyor ve kilitlenen bir **kare**.
+
+Sözleşme tek cümle ve istisnası yok: **sabitlenmiş bir bloğu sabitlemeyi
+kaldırmaktan başka hiçbir şey indirmez.** Beş yol da aynı yere çıkıyor —
+`removeBlock` (sağ tık · menü · Delete), `dropMap` (üstüne bırakma),
+`solver.ts` (`keepPlaced: false` artık pinlileri tohumluyor), ve şeritteki iki
+yıkıcı düğme (ikisi de pinli saatleri **saymıyor** ve yerinde bırakıyor).
+
+**Kilidi `removeBlock`'a koymak bir şeyi kırdı ve denetçi yakaladı:**
+`illegalBlocks()` her bloğu kaldırıp `blocker()`'a "buraya geri konabilir mi"
+diye soruyor, ve o bir **kural** sorusu — bir pin kural değil. Kilitli bloğu
+kaldıramayınca denetçi onu "kendisiyle çakışıyor" diye raporladı. Çare iki ad:
+`liftBlock()` mekanik, `removeBlock()` = kapı + `liftBlock`. Yeni tuzak 87.
+
+### 4. Yerinde ders düzenleme
+
+`src/components/LessonEdit.tsx` — `Inspector.tsx`'in deseni (context + Radix
+Dialog). Üç alan: **haftalık saat · dağılım · günde en fazla**, üçü de aynı
+`updateLesson`'dan geçiyor. Mantık kopyalanmadı: `BlockCounts` ve
+`blockCeiling` `lessons/index.tsx`'ten `components/BlockCounts.tsx`'e taşındı
+ve iki ekran da oradan okuyor.
+
+**Ekran görüntüsü bir kusur yakaladı** (tuzak 82'nin deseni): sabitleme işareti
+ilk hâlinde sağ ÜST köşedeydi ve sınıf numarasının son basamağının üstüne
+biniyordu — 34 px'lik hücrede kalın ilk satır iki üst köşeyi de dolduruyor.
+Sol ALTA taşındı; sağ alt zaten çakışma kamasının (`.card.conflict`). Hiçbir
+test göremezdi: düğme oradaydı, görünürdü, `aria-label`'ı doğruydu.
+
+### Ölçülen — bağımlılık politikasının şartı
+
+```
+dist/index.html   903 307 bayt  ->  967 411 bayt   (+64 104 · +62,6 KB)
+```
+
+İçindekiler: `@radix-ui/react-context-menu`, `LessonEdit.tsx`, menü ve
+sabitleme CSS'i, ve dört dile giren 18 yeni anahtar.
+
+### Testler
+
+```
+birim     696   (679 -> +17: sabitleme, v8/v9 göçü, remapDays'in pinleri)
+E2E       485   (469 -> +16: menü, sabitleme, düzenleme penceresi)
+```
+
+`npm run kontrol` yeşil. Paralel koşuda düşen 8 test **tek worker'la
+163/163 geçti** — TASKS'te kayıtlı "reload'dan sonra düşme" flake'i, bu turun
+işi değil.
 
 ---
 

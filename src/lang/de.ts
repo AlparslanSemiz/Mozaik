@@ -209,8 +209,29 @@ const DE: Sozluk = {
   // src/components/Grid.tsx
   'Öğle arası': 'Mittagspause',
   '{ust} {alt}, kaldırmak için Delete': '{ust} {alt}, zum Entfernen Entf drücken',
-  'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir': 'Zum Verschieben ziehen · Rechtsklick schickt es zurück ins Ablagefach',
-  '{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin': '{sorun}. Zum Verschieben ziehen, mit Rechtsklick ins Ablagefach schicken',
+  'Sürükleyerek taşıyın · sağ tık: seçenekler': 'Zum Verschieben ziehen · Rechtsklick für Optionen',
+  '{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın': '{sorun}. Zum Verschieben ziehen, Rechtsklick für Optionen',
+  '{ust} {alt}, sabitlenmiş': '{ust} {alt}, angeheftet',
+  'Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz': 'Angeheftet. Mit Rechtsklick lösen',
+
+  // src/components/Program.tsx — the grid's own menu
+  'Havuza kaldır': 'Ins Ablagefach',
+  'sabitlenmiş': 'angeheftet',
+  'Dersi düzenle': 'Stunde bearbeiten',
+  'Dersi buraya sabitle': 'Stunde hier anheften',
+  'Sabitlemeyi kaldır': 'Anheftung lösen',
+  'Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.': 'Diese Stunde ist angeheftet. Lösen Sie zuerst die Anheftung.',
+  'Ders sabitlendi.': 'Stunde angeheftet.',
+  'Sabitleme kaldırıldı.': 'Anheftung gelöst.',
+
+  // src/components/LessonEdit.tsx
+  'Günde en fazla': 'Höchstens pro Tag',
+  'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da': 'Wird die Aufteilung geändert, verschwindet diese Stunde aus dem Plan, auch die angehefteten Blöcke',
+  'Sınıf ve öğretmen burada değişmez. **Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir.': 'Klasse und Lehrkraft lassen sich hier nicht ändern. Stunden werden im Reiter **Dersler** gelöscht und angelegt.',
+
+  // src/components/Ribbon.tsx — what the two destructive questions promise
+  'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.': 'Die {n} angehefteten Stunden bleiben, der Rest wird neu geplant. Ctrl+Z macht es rückgängig.',
+  'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.': 'Die {n} angehefteten Stunden bleiben. Stunden, Lehrkräfte und Sperrzeiten bleiben unberührt. Ctrl+Z macht es rückgängig.',
   '{ad}: bilgileri ve haftalık programı': '{ad}: Angaben und Wochenplan',
 
   // src/components/Inspector.tsx

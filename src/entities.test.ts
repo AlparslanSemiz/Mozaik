@@ -125,6 +125,25 @@ describe('remapDays', () => {
     expect(next.placements[placementKey('s510', 1, 2)]).toBe('x1'); // Çarşamba moved 2 -> 1
   });
 
+  // Pins carry a day INDEX exactly like the two maps around them. A pin left
+  // behind would lock the square a different day slid into, and the lesson it
+  // was holding would be somewhere else entirely.
+  it('SABİTLEMELER de aynı şekilde taşınır', () => {
+    const d = build();
+    const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
+    // The pinned cell was Salı (index 1) and Salı is index 0 now.
+    expect(next.pinned[placementKey('s510', 0, 1)]).toBe(1);
+    expect(next.pinned[placementKey('s510', 1, 1)]).toBeUndefined();
+    // ...and it still sits on top of the lesson it was pinning.
+    expect(next.placements[placementKey('s510', 0, 1)]).toBe('x1');
+  });
+
+  it('silinen günün SABİTLEMESİ de gider', () => {
+    const d = build();
+    const next = remapDays(d, without(d.settings.days, 'Salı'));
+    expect(next.pinned).toEqual({});
+  });
+
   it('müsaitlik kayıtları da aynı şekilde taşınır', () => {
     const d = build();
     const next = remapDays(d, without(d.settings.days, 'Pazartesi'));

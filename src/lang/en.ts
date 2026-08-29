@@ -209,8 +209,29 @@ const EN: Sozluk = {
   // src/components/Grid.tsx
   'Öğle arası': 'Lunch break',
   '{ust} {alt}, kaldırmak için Delete': '{ust} {alt}, press Delete to remove',
-  'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir': 'Drag to move · right-click sends it back to the tray',
-  '{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin': '{sorun}. Drag to move, right-click to send it to the tray',
+  'Sürükleyerek taşıyın · sağ tık: seçenekler': 'Drag to move · right-click for options',
+  '{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın': '{sorun}. Drag to move, right-click for options',
+  '{ust} {alt}, sabitlenmiş': '{ust} {alt}, pinned',
+  'Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz': 'Pinned. Right-click to unpin',
+
+  // src/components/Program.tsx — the grid's own menu
+  'Havuza kaldır': 'Send to tray',
+  'sabitlenmiş': 'pinned',
+  'Dersi düzenle': 'Edit lesson',
+  'Dersi buraya sabitle': 'Pin lesson here',
+  'Sabitlemeyi kaldır': 'Unpin',
+  'Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.': 'This lesson is pinned. Unpin it first.',
+  'Ders sabitlendi.': 'Lesson pinned.',
+  'Sabitleme kaldırıldı.': 'Lesson unpinned.',
+
+  // src/components/LessonEdit.tsx
+  'Günde en fazla': 'Most per day',
+  'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da': 'Changing the split clears this lesson from the timetable, pinned blocks included',
+  'Sınıf ve öğretmen burada değişmez. **Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir.': 'Class and teacher cannot be changed here. Lessons are deleted and added on the **Dersler** tab.',
+
+  // src/components/Ribbon.tsx — what the two destructive questions promise
+  'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.': 'The {n} pinned hours stay where they are; the rest is laid out from scratch. Ctrl+Z undoes it.',
+  'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.': 'The {n} pinned hours stay where they are. Lessons, teachers and time off are untouched. Ctrl+Z undoes it.',
   '{ad}: bilgileri ve haftalık programı': '{ad}: details and weekly timetable',
 
   // src/components/Inspector.tsx

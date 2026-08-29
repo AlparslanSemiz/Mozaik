@@ -152,7 +152,7 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 Vite + React + TypeScript
 vite-plugin-singlefile  ->  dist/index.html  (tek dosya, gömülü JS/CSS)
 Vitest                  ->  saf mantık testleri
-Radix UI                ->  diyalog · toast · menü · tooltip · popover
+Radix UI                ->  diyalog · bağlam menüsü (ızgaranın sağ tıkı)
 lucide-react            ->  simgeler (ağaç budanır, simge başına ~0.3 KB)
 ```
 
@@ -216,10 +216,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 641 birim testi
+npm test           # Vitest — 696 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 472 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 485 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -357,7 +357,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 26 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
-formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
+formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menü üç kalem, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
@@ -566,6 +566,13 @@ components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
                                 window.confirm/alert YOK — hiç kalmadı
 components/Toasts.tsx           olan biteni söyleyen satır. Radix Toast DEĞİL:
                                 eylem taşımıyorlar, o yüzden 19,6 KB'a gerek yok
+components/LessonEdit.tsx        bir dersi YERİNDE düzenler: haftalık saat ·
+                                dağılım · günde en fazla. Inspector'ın deseni
+                                (context + Radix Dialog). Kendi kuralı YOK,
+                                üçü de updateLesson'dan geçer
+components/BlockCounts.tsx      dağılım sayaçları + blockCeiling. İKİ ekran
+                                kullanıyor (Dersler listesi ve LessonEdit), o
+                                yüzden lessons/index.tsx'ten çıktı
 components/Inspector.tsx        varlık paneli. entityWeek/entityFacts'i ÇİZER,
                                 hesaplamaz. useInspect() her yerden çağrılır
 components/Palette.tsx          Ctrl+K kutusu — komut listesini DIŞARIDAN alır
@@ -712,7 +719,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 8
+  schemaVersion: 10
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -726,6 +733,7 @@ State {
   rooms, teachers, classes, lessons
   unavailable: Record<`${entityId}|${day}|${hour}`, 1>   // öğretmen + sınıf + derslik
   placements:  Record<`${classId}|${day}|${hour}`, lessonId>
+  pinned:      Record<`${classId}|${day}|${hour}`, 1>   // KİLİTLİ hücreler
 }
 Day        { name, longBreakAfter }         // 5 = öğle arası 5. dersten sonra, 0 = yok
 Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }  // 09:00 · 40 · 10 · 30
@@ -898,6 +906,8 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   v5 = `ClassGroup.color` + `settings.subjects`, v6 = `Teacher.gender`.
   v7 = `Lesson.pairs`, `blockSize`'ın yerine.
   v8 = `Teacher.subject2` + `Lesson.second` — bir öğretmen iki branş verebilir.
+  v9 = `Lesson.blocks`, `pairs`'in yerine — blok 2, 3 ya da 4 saat olabilir.
+  v10 = `State.pinned` — okuyanın yerine kilitlediği hücreler.
   `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v8 tek okuyucudan geçer —
   v3–v6'nın tek farkı **eklenen** alanlar, v7 ise ilkin **değişen** alanı ve onu
   `readLessons()` kendi başına çevirir (`blockSize` 2 ya da 3 → `floor(saat/2)`
@@ -1885,6 +1895,45 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     okunmasın. Genel kural: bir dizeyi yeniden adlandırmadan önce sorulacak
     soru "bu kime görünüyor" değil, **"bunu kim ARIYOR"**dur.
 
+86. **Bir SAYI adlandıran göç testi, bir sonraki bump'ta geride kalan sayıyı
+    göremez — ve tam olarak o sayı unutulur.** `store.ts`'in kabul listesinin
+    üstünde iki yıldır şu yorum duruyordu: *"Bumping SCHEMA_VERSION without
+    adding the number it used to be makes every backup the previous release
+    wrote fall through to `return null` — which is the one failure this whole
+    function exists to prevent."* Yorum doğruydu, uyarı yerindeydi, ve hiçbir
+    şeyi engellemedi: `5fc0316` şemayı 8'den 9'a çıkarırken `version === 8`'i
+    listeye **yazmadı**, yani **yayınlanmış v2.0.0'ın yazdığı her yedek ve her
+    plan okunamaz oldu**. Ekranda tek bir şey görünür: "dosya okunamadı".
+    Süit bunu göremezdi ve görmemesi tesadüf değildi: v6 için bir test vardı,
+    v7 için bir test vardı, ve **her biri bir sayı adlandırıyordu**. Geride
+    kalan sayı her bump'ta başkası olduğu için o testler sonsuza kadar yeşil
+    geçer. Yazılan test hiçbir sayı adlandırmıyor:
+
+    ```ts
+    raw.schemaVersion = SCHEMA_VERSION - 1;
+    expect(parseState(JSON.stringify(raw))).not.toBeNull();
+    ```
+
+    Bu tuzak 77'nin ("bir belge cümlesi 'tek/her zaman/asla' diyorsa, yanında
+    onu ölçen bir test yoksa o cümle bir niyet beyanıdır") tam kardeşi, bir
+    basamak daha sinsi hâli: burada ölçen bir test **vardı**, ama ölçtüğü şey
+    sabit bir sayıydı. Genel kural: bir değişmezin testi, değişmezin
+    **KENDİSİNİ** yazsın — bugünkü değerini değil.
+
+87. **Kullanıcıya ait bir REDDİ paylaşılan bir fonksiyona koymak, o
+    fonksiyonun mekanik çağıranını bozar.** Sabitleme kilidi `removeBlock`'a
+    kondu, ve doğru yer orasıydı: dört yol (sağ tık · menü · Delete · üstüne
+    bırakma) oradan geçiyor ve yalnız üçünün saydığı bir kilit kilit değil.
+    Ama beşinci bir çağıran vardı ve o bir **insan değildi**: `illegalBlocks()`
+    her bloğu kaldırıp `blocker()`'a "buraya geri konabilir mi" diye soruyor.
+    O bir **kural** sorusudur ve bir pin kural değildir. Denetçi kilitli bloğu
+    kaldıramayınca onu *kendisiyle* çakışıyor diye raporladı — yani sabitleme
+    testinin çıktısı "yasa dışı blok var" oldu, ve okuyan kişi çözücüye
+    yollanırdı. Çare şemayı değil **adları** ayırmak: `liftBlock()` mekanik
+    (kapı yok), `removeBlock()` = kapı + `liftBlock`. Genel kural: bir kapı
+    yazmadan önce çağıranların listesi çıkarılır, ve her biri için sorulur —
+    *bu çağrıyı bir el mi yapıyor, yoksa bir hesap mı?*
+
 ---
 
 ## Tasarım — serbest
@@ -2161,12 +2210,27 @@ adını taşıyamaz.
   Hücre **yeşil değil sarı**: izin var ama bir şey kaybediyorsunuz, ve ızgaranın
   üç renginde bunun karşılığı zaten vardı — dördüncü bir renk uydurulmadı.
   Bütün hamle **tek geri-al adımı**, ve ne kaybedildiği toast'ta adıyla yazar.
-- **Sol tık taşır, sağ tık siler.** Yerleşmiş bir derse sol tıklamak bloğu siliyordu,
-  dolayısıyla taşımanın tek yolu silip havuzdan yeniden sürüklemekti. Şimdi: sol düğme
-  + sürükle = taşı, sağ tık = havuza gönder, Delete = aynısı klavyeden. Klavyeden gelen
-  "click" `e.detail === 0` ile ayrılır, böylece odaklı kartta Enter/Space çalışır.
-  Sürükleme haritası **kaynağı kaldırılmış** bir durum üstünde hesaplanır, yoksa ders
-  kendi kendini engeller.
+- **Sol tık taşır, sağ tık MENÜ açar (2026-08-29).** Yerleşmiş bir derse sol
+  tıklamak bloğu siliyordu, dolayısıyla taşımanın tek yolu silip havuzdan
+  yeniden sürüklemekti. Şimdi: sol düğme + sürükle = taşı, **sağ tık = üç
+  kalemlik menü** (`Havuza kaldır · Dersi düzenle · Dersi buraya sabitle`),
+  Delete = havuza gönder, klavyeden. Klavyeden gelen "click" `e.detail === 0`
+  ile ayrılır, böylece odaklı kartta Enter/Space çalışır. Sürükleme haritası
+  **kaynağı kaldırılmış** bir durum üstünde hesaplanır, yoksa ders kendi
+  kendini engeller.
+  **Menü TEK bir `ContextMenu.Root`**, tabloyu sarar — 2100 hücreye tetikleyici
+  konmaz, tıklamanın nerede olduğu `data-row/day/hour`'dan okunur (drag.ts ile
+  aynı yerden). Karta gelmeyen sağ tıkta `preventDefault()` çağrılır ve Radix'in
+  kendi işleyicisi hiç koşmaz.
+- **SABİTLEME: bir bloğu sabitlemeyi kaldırmaktan başka hiçbir şey indirmez.**
+  Tek cümle, istisnası yok, ve beş yolun beşi de aynı kapıdan geçer:
+  `removeBlock` (sağ tık · menü · Delete), `dropMap` (üstüne bırakma),
+  `solver.ts` (`keepPlaced: false` pinlileri **tohumlar**), ve şeritteki iki
+  yıkıcı düğme — `Baştan diz` ile `Programı boşalt` pinli saatleri **saymaz** ve
+  yerinde bırakır. Kilit `State.pinned`'da; hücreye bağlı, derse değil, çünkü
+  bir ders birden çok blok hâlinde iner ve kilitlenen bir **karedir**.
+  İşaret bir **simge** (sol alt köşe), renk değil: ızgaranın dört rengi zaten
+  bırakılabilir / uyarı / engel / kapalı demek.
 - **Otomatik dizme Program sekmesinde iki düğme**: `Otomatik diz (N)` ve `Baştan diz`
   (onaylı). Ayar yok — "sabaha yay" gibi tercihlerin doğru cevabı bir dönem
   kullanılmadan bilinemez (ilke 5). İlerleme ve sonuç `.reason-bar`'da: sabit

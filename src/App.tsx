@@ -4,6 +4,7 @@ import { useEffect, useMemo } from 'react';
 import Commands from './components/Commands';
 import { health } from './feasibility';
 import { InspectorProvider } from './components/Inspector';
+import { LessonEditProvider } from './components/LessonEdit';
 import { useDialogs } from './components/Dialogs';
 import { useToast } from './components/Toasts';
 import type React from 'react';
@@ -843,6 +844,7 @@ export default function App() {
       />
 
       <InspectorProvider state={state} change={change}>
+      <LessonEditProvider state={state} change={change}>
       <Commands
         open={paletteOpen}
         setOpen={setPaletteOpen}
@@ -1021,6 +1023,7 @@ export default function App() {
           )}
         </main>
       </div>
+      </LessonEditProvider>
       </InspectorProvider>
     </div>
   );

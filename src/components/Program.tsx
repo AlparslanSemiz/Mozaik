@@ -5,10 +5,13 @@
 //   - Grid is React.memo; changing the reason bar does not redraw the grid.
 //   - No state changes at all during a drag (see drag.ts).
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type React from 'react';
+import * as ContextMenu from '@radix-ui/react-context-menu';
+import { Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import {
   blockAt,
+  blockPinned,
   buildIndex,
   closedConflicts,
   closedKey,
@@ -20,9 +23,11 @@ import {
   removeBlock,
   placementKey,
   place,
+  setBlockPinned,
 } from '../constraints';
 import type { Index } from '../constraints';
 import { useToast } from './Toasts';
+import { useLessonEdit } from './LessonEdit';
 import { lessonSubject, subjectLabel, subjectShort, teacherSubjects } from '../entities';
 import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
@@ -184,6 +189,7 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
             bottom: roomLetter(ix, group?.roomId),
             color: t.color,
             conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
+            pinned: d.pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
             continues:
               s + 1 < hourCount &&
               group !== undefined &&
@@ -236,6 +242,7 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
           bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
           color: teacher?.color ?? 0,
           conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
+          pinned: d.pinned[placementKey(group.id, g, s)] !== undefined,
           continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
         };
       }
@@ -324,6 +331,7 @@ export default function Program({ state, change, solver, view }: Props) {
   const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
   const notify = useToast();
+  const editLesson = useLessonEdit();
 
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
@@ -390,21 +398,76 @@ export default function Program({ state, change, solver, view }: Props) {
     t,
   );
 
+  /**
+   * WHICH CLASS a grid cell belongs to.
+   *
+   * In the class view the row id already is one; in the teacher view the row is
+   * a person and the cell's class has to be looked up through what they are
+   * teaching at that hour. Every action the menu offers needs this — remove,
+   * edit, pin — and it used to be written inside the remove handler, where the
+   * next two would each have copied it.
+   */
+  const classAt = useCallback(
+    (d: State, rowId: string, day: number, hour: number): Id | null => {
+      if (view === 'class') return rowId;
+      const fresh = buildIndex(d);
+      const lessonId = fresh.teacherBusy.get(closedKey(rowId, day, hour));
+      return lessonId === undefined ? null : (fresh.lessonById.get(lessonId)?.classId ?? null);
+    },
+    [view],
+  );
+
   const cellRemove = useCallback(
     (rowId: string, day: number, hour: number) => {
+      // Asked BEFORE the change so the refusal can be spoken. `removeBlock`
+      // returns the same state for a pinned block, which the store correctly
+      // treats as "nothing happened" — and nothing happening in silence is
+      // what a reader reads as a broken key.
+      const classId = classAt(state, rowId, day, hour);
+      if (classId !== null && blockPinned(state, classId, day, hour)) {
+        notify(t('Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.'));
+        return;
+      }
       change((d) => {
-        // In the teacher view the row id is a teacher; removing needs the class.
-        let classId: Id | null = rowId;
-        if (view === 'teacher') {
-          const fresh = buildIndex(d);
-          const lessonId = fresh.teacherBusy.get(closedKey(rowId, day, hour));
-          classId = lessonId === undefined ? null : (fresh.lessonById.get(lessonId)?.classId ?? null);
-        }
-        return classId === null ? d : removeBlock(d, classId, day, hour);
+        const fresh = classAt(d, rowId, day, hour);
+        return fresh === null ? d : removeBlock(d, fresh, day, hour);
       });
     },
-    [change, view],
+    [change, classAt, notify, state, t],
   );
+
+  /**
+   * The right-click menu: which block it is about.
+   *
+   * Kept as the CELL that was clicked rather than as a resolved lesson, because
+   * the state can move under an open menu (an autosave, an undo, a solver run)
+   * and every item re-reads from the state it acts on.
+   */
+  const [menuAt, setMenuAt] = useState<{ rowId: string; day: number; hour: number } | null>(null);
+  const cellMenu = useCallback(
+    (rowId: string, day: number, hour: number) => setMenuAt({ rowId, day, hour }),
+    [],
+  );
+
+  const menuClass = menuAt === null ? null : classAt(state, menuAt.rowId, menuAt.day, menuAt.hour);
+  const menuPinned =
+    menuAt !== null && menuClass !== null && blockPinned(state, menuClass, menuAt.day, menuAt.hour);
+  const menuLessonId =
+    menuAt === null || menuClass === null
+      ? undefined
+      : state.placements[
+          placementKey(menuClass, menuAt.day, blockAt(state, menuClass, menuAt.day, menuAt.hour)?.hour ?? menuAt.hour)
+        ];
+
+  const togglePin = useCallback(() => {
+    if (menuAt === null) return;
+    const on = !menuPinned;
+    change((d) => {
+      const fresh = classAt(d, menuAt.rowId, menuAt.day, menuAt.hour);
+      return fresh === null ? d : setBlockPinned(d, fresh, menuAt.day, menuAt.hour, on);
+    });
+    notify(on ? t('Ders sabitlendi.') : t('Sabitleme kaldırıldı.'));
+  }, [change, classAt, menuAt, menuPinned, notify, t]);
 
   /**
    * One drag, two sources: a card from the pool (`source === null`) or a block
@@ -554,6 +617,46 @@ export default function Program({ state, change, solver, view }: Props) {
           draggedRowId={dragging?.rowId ?? null}
           onCellRemove={cellRemove}
           onCellMoveStart={cellMoveStart}
+          onCellMenu={cellMenu}
+          menu={
+            <ContextMenu.Portal>
+              <ContextMenu.Content className="menu" collisionPadding={8}>
+                {/* Every item carries an icon AND a word, the same rule the
+                    tool strip keeps: an icon alone is not read the first time
+                    and a word alone gives the eye nothing to aim at. */}
+                <ContextMenu.Item
+                  className="menu-item"
+                  disabled={menuPinned}
+                  onSelect={() =>
+                    menuAt !== null && cellRemove(menuAt.rowId, menuAt.day, menuAt.hour)
+                  }
+                >
+                  <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
+                  {t('Havuza kaldır')}
+                  {menuPinned && (
+                    <span className="menu-why">{t('sabitlenmiş')}</span>
+                  )}
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  className="menu-item"
+                  disabled={menuLessonId === undefined}
+                  onSelect={() => menuLessonId !== undefined && editLesson(menuLessonId)}
+                >
+                  <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+                  {t('Dersi düzenle')}
+                </ContextMenu.Item>
+                <ContextMenu.Separator className="menu-sep" />
+                <ContextMenu.Item className="menu-item" onSelect={togglePin}>
+                  {menuPinned ? (
+                    <PinOff size={15} strokeWidth={2} aria-hidden="true" />
+                  ) : (
+                    <Pin size={15} strokeWidth={2} aria-hidden="true" />
+                  )}
+                  {menuPinned ? t('Sabitlemeyi kaldır') : t('Dersi buraya sabitle')}
+                </ContextMenu.Item>
+              </ContextMenu.Content>
+            </ContextMenu.Portal>
+          }
         />
 
         <LessonPool cards={cards} completed={completed} onStart={cardStart} />

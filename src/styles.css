@@ -2097,6 +2097,98 @@ table.grid tbody td.unavailable {
   font: inherit;
 }
 
+/* A PINNED block: locked in place by the reader.
+   `position: relative` for the mark, and `cursor: default` because the card no
+   longer follows the pointer — a grab cursor over something that cannot be
+   grabbed is the interface promising a gesture it will refuse.
+   The mark itself carries the state, not a colour: the four colours of this
+   grid already mean droppable / warning / blocked / closed, and a fifth would
+   have had to be told apart from all of them. */
+.card.pinned {
+  position: relative;
+  cursor: default;
+}
+
+/* BOTTOM-LEFT, and the corner was chosen by LOOKING at it.
+   Top-right was the first try and the mark landed on the last digit of the
+   class number: the card is 34px wide and its first line ("310", bold) fills
+   nearly all of it, so neither top corner is free. The second line is one
+   letter — a room — so the bottom corners are. Bottom-RIGHT is taken: the
+   conflict wedge lives there (`.card.conflict`), and a card can be pinned and
+   in conflict at once. */
+.card-pin {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  width: 9px;
+  height: 9px;
+  stroke-width: 3;
+  /* --on-color, like every other mark that sits on a palette colour: the ink
+     over a pastel must not turn with the theme (pitfall 15). */
+  color: var(--on-color);
+  opacity: .85;
+  pointer-events: none;
+}
+
+/* At the tightest density the cell is already on its content floor, so the mark
+   shrinks with it rather than stealing a corner of the two lines of text. */
+:root[data-density='sigdir'] .card-pin {
+  width: 7px;
+  height: 7px;
+}
+
+/* ------------------------------------------------------- the grid's own menu
+   Right click on a placed card. One menu for the whole table (see Grid.tsx),
+   so this styles a single element rather than 2100 of them. */
+.menu {
+  z-index: 42;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+  background: var(--paper);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--elev-3);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
+/* Radix moves a `data-highlighted` marker with both the pointer and the arrow
+   keys, so one rule serves the mouse and the keyboard and they cannot drift. */
+.menu-item[data-highlighted] {
+  background: var(--accent-bg);
+}
+
+.menu-item[data-disabled] {
+  color: var(--muted);
+  cursor: default;
+}
+
+/* Why the item above is greyed out, said rather than left to be guessed. */
+.menu-why {
+  margin-left: auto;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.menu-sep {
+  height: 1px;
+  margin: var(--space-1) 0;
+  background: var(--hairline);
+}
+
 /* A lesson sitting on an hour that has since been closed. It is NOT removed —
    a wrong click on the availability grid must not cost a laid-out lesson — so
    it has to be visible instead. The inset outline stays inside the 34px cell,
@@ -4554,6 +4646,34 @@ table.availability.heat td.closed {
   color: var(--text);
   border-left: 1px solid var(--hairline);
   box-shadow: var(--elev-3);
+}
+
+/* The lesson sheet asks three short questions; the entity sheet draws a week.
+   Same drawer, different width. */
+.sheet-narrow {
+  width: min(30rem, calc(100vw - 3rem));
+}
+
+.sheet-edit {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin: 0;
+}
+
+.sheet-edit dt {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  /* The label column is `auto`, so without this "Günde en fazla" folded onto
+     three lines and dragged its own row three times taller than the box beside
+     it. Seen in a screenshot, not deduced: nothing here overflows, it just
+     reads as a mistake. */
+  white-space: nowrap;
+}
+
+.sheet-edit dd {
+  margin: 0;
 }
 
 .sheet-head {

@@ -209,8 +209,29 @@ const FR: Sozluk = {
   // src/components/Grid.tsx
   'Öğle arası': 'Pause déjeuner',
   '{ust} {alt}, kaldırmak için Delete': '{ust} {alt}, appuyez sur Suppr pour retirer',
-  'Sürükleyerek taşıyın · sağ tık: havuza geri gönderir': 'Faites glisser pour déplacer · clic droit le renvoie dans le bac',
-  '{sorun}. Sürükleyerek taşıyın, sağ tıkla havuza gönderin': '{sorun}. Faites glisser pour déplacer, clic droit pour l’envoyer dans le bac',
+  'Sürükleyerek taşıyın · sağ tık: seçenekler': 'Glissez pour déplacer · clic droit pour les options',
+  '{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın': '{sorun}. Glissez pour déplacer, clic droit pour les options',
+  '{ust} {alt}, sabitlenmiş': '{ust} {alt}, épinglé',
+  'Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz': 'Épinglé. Clic droit pour le détacher',
+
+  // src/components/Program.tsx — the grid's own menu
+  'Havuza kaldır': 'Renvoyer au bac',
+  'sabitlenmiş': 'épinglé',
+  'Dersi düzenle': 'Modifier le cours',
+  'Dersi buraya sabitle': 'Épingler le cours ici',
+  'Sabitlemeyi kaldır': 'Détacher',
+  'Bu ders sabitlenmiş. Önce sabitlemeyi kaldırın.': 'Ce cours est épinglé. Détachez-le d’abord.',
+  'Ders sabitlendi.': 'Cours épinglé.',
+  'Sabitleme kaldırıldı.': 'Cours détaché.',
+
+  // src/components/LessonEdit.tsx
+  'Günde en fazla': 'Maximum par jour',
+  'Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da': 'Si la répartition change, ce cours quitte l’emploi du temps, y compris les blocs épinglés',
+  'Sınıf ve öğretmen burada değişmez. **Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir.': 'La classe et l’enseignant ne se changent pas ici. Les cours se suppriment et s’ajoutent dans l’onglet **Dersler**.',
+
+  // src/components/Ribbon.tsx — what the two destructive questions promise
+  'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.': 'Les {n} heures épinglées restent en place, le reste est refait à zéro. Ctrl+Z annule.',
+  'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.': 'Les {n} heures épinglées restent en place. Cours, enseignants et indisponibilités ne changent pas. Ctrl+Z annule.',
   '{ad}: bilgileri ve haftalık programı': '{ad} : informations et emploi du temps hebdomadaire',
 
   // src/components/Inspector.tsx

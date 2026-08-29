@@ -398,7 +398,10 @@ function placedCell(page: Page) {
 }
 
 test.describe('3. Izgara — taşıma ve kaldırma', () => {
-  test('sağ tık dersi havuza geri gönderir, Ctrl+Z geri getirir', async ({ page }) => {
+  // Right click used to remove the block outright. It opens a MENU now, asked
+  // for in one line: "programda derslere sağ tıklayınca seçenekler gelsin:
+  // kaldır, dersi düzenle, dersi oraya sabitle".
+  test('sağ tık MENÜ açıyor, "Havuza kaldır" siliyor, Ctrl+Z geri getiriyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
@@ -407,30 +410,73 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     expect(before).toBeGreaterThan(0);
 
     await cards.first().click({ button: 'right' });
+    const menu = page.locator('.menu');
+    await expect(menu).toBeVisible();
+    // Three items, and all three were named by the reader.
+    await expect(menu.getByRole('menuitem')).toHaveCount(3);
+
+    await menu.getByRole('menuitem', { name: 'Havuza kaldır' }).click();
     await expect(cards).toHaveCount(0); // if it was a block, all of it went
 
     await page.keyboard.press('Control+z');
     await expect(cards).toHaveCount(before);
   });
 
-  test('sağ tıkta tarayıcı menüsü açılmıyor, sayfa çalışır kalıyor', async ({ page }) => {
+  // The item is not a lesson, so the menu has nothing to be about; the browser's
+  // own menu must not appear either, because the page has taken the gesture.
+  test('BOŞ hücrede sağ tık hiçbir menü açmıyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    // A context menu would be a native window Playwright cannot see; what CAN
-    // be measured is that the event was cancelled and the app kept working.
-    const cancelled = await page.evaluate(async () => {
-      const card = document.querySelector('table.grid .card');
-      if (card === null) return null;
+    const cancelled = await page.evaluate(() => {
+      const empty = document.querySelector('table.grid tbody td[data-day]:not(:has(.card))');
+      if (empty === null) return null;
       const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
-      card.dispatchEvent(event);
+      empty.dispatchEvent(event);
       return event.defaultPrevented;
     });
     expect(cancelled).toBe(true);
+    await expect(page.locator('.menu')).toHaveCount(0);
+  });
 
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+  test('menü Escape ile kapanıyor ve ızgara çalışır kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const cards = page.locator('table.grid .card');
+    const before = await cards.count();
+    await cards.first().click({ button: 'right' });
+    await expect(page.locator('.menu')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('.menu')).toHaveCount(0);
+    await expect(cards).toHaveCount(before);
+  });
+
+  test('"Dersi düzenle" yerinde pencere açıyor, saat oradan değişiyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    await page.locator('table.grid .card').first().click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
+
+    const sheet = page.locator('.sheet');
+    await expect(sheet).toBeVisible();
+    const hours = sheet.getByLabel('Haftalık saat');
+    const before = Number(await hours.inputValue());
+    expect(before).toBeGreaterThan(0);
+
+    await hours.fill(String(before + 1));
+    await hours.blur();
+    // The sheet reads the CURRENT state, so the new number is drawn back into
+    // the box it was typed into rather than kept only in the box's own draft.
+    await expect(hours).toHaveValue(String(before + 1));
+
+    // ...and the Dersler tab agrees, which is the half that says it was written
+    // to the program and not to the sheet.
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Dersler', exact: true }).click();
+    await expect(page.locator('table.list')).toBeVisible();
   });
 
   test('SOL tık silmiyor — ders yerinde kalıyor', async ({ page }) => {
@@ -1009,9 +1055,13 @@ test.describe('68. 2+1 bitişikken', () => {
     expect((await cell(page, 0).innerText()).match(/510/g) ?? []).toHaveLength(1);
   });
 
-  test('sağ tık tek saatlik bloğu alıyor, koşunun tamamını değil', async ({ page }) => {
+  test('menü tek saatlik bloğu alıyor, koşunun tamamını değil', async ({ page }) => {
     await loadWorld(page, SPLIT_WORLD);
+    // Right click opens the menu now; "Havuza kaldır" is what it used to do on
+    // its own. Which BLOCK the click landed on is what this test is about, and
+    // that answer is unchanged: it comes from the <td> under the pointer.
     await cell(page, 2).click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
 
     await expect(cell(page, 0)).toContainText('510');
     await expect(cell(page, 0)).toHaveAttribute('colspan', '2');
@@ -1022,7 +1072,7 @@ test.describe('68. 2+1 bitişikken', () => {
     expect(await back.getAttribute('data-size')).toBe('1');
   });
 
-  test('sağ tık ikili bloğun İKİNCİ saatine denk gelse de İKİ hücre alıyor', async ({ page }) => {
+  test('menü ikili bloğun İKİNCİ saatine denk gelse de İKİ hücre alıyor', async ({ page }) => {
     await loadWorld(page, SPLIT_WORLD);
 
     // Hour 1 no longer has a cell of its own, so the click is aimed at WHERE IT
@@ -1033,11 +1083,156 @@ test.describe('68. 2+1 bitişikken', () => {
     await page.mouse.click(box.x + box.width * 0.75, box.y + box.height / 2, {
       button: 'right',
     });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
 
     await expect(cell(page, 0)).toHaveText('');
     await expect(cell(page, 2)).toContainText('510');
     const back = page.locator('.pool-card');
     await expect(back).toHaveCount(1);
     expect(await back.getAttribute('data-size')).toBe('2');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PINNING. One rule with no exceptions: nothing takes a pinned block down but
+// unpinning it. The refusal lives in `removeBlock` and `dropMap` (unit-tested),
+// so what is asked HERE is that every road a hand can take arrives at it.
+
+test.describe('86. Sabitleme', () => {
+  /** Puts one lesson down and pins it. Returns that cell. */
+  async function pinFirst(page: Page) {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const card = page.locator('table.grid .card').first();
+    await card.click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    await expect(card).toHaveClass(/pinned/);
+    return card;
+  }
+
+  /**
+   * A LAID-OUT timetable with one pinned block in it.
+   *
+   * The two destructive buttons count the hours they would take, and pinned
+   * hours are not among them — so with a grid holding nothing BUT a pin, both
+   * buttons are correctly disabled and there is nothing to test. The question
+   * these tests ask is what happens to the pin while everything else goes.
+   */
+  async function filledWithOnePin(page: Page) {
+    await openWithSample(page);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+    const card = page.locator('table.grid .card').first();
+    await card.click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    await expect(card).toHaveClass(/pinned/);
+    return card;
+  }
+
+  test('menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor', async ({ page }) => {
+    const card = await pinFirst(page);
+    // The mark, not a colour: the grid's four colours already mean droppable,
+    // warning, blocked and closed.
+    await expect(card.locator('.card-pin')).toBeVisible();
+    // And a screen reader is told the same thing the mark says.
+    await expect(card).toHaveAttribute('aria-label', /sabitlenmiş/);
+
+    await card.click({ button: 'right' });
+    const menu = page.locator('.menu');
+    await expect(menu.getByRole('menuitem', { name: 'Sabitlemeyi kaldır' })).toBeVisible();
+    await expect(menu.getByRole('menuitem', { name: 'Dersi buraya sabitle' })).toHaveCount(0);
+  });
+
+  test('sabitlenmiş kartta "Havuza kaldır" KAPALI ve sebebi yazıyor', async ({ page }) => {
+    const card = await pinFirst(page);
+    await card.click({ button: 'right' });
+    const item = page.locator('.menu').getByRole('menuitem', { name: /Havuza kaldır/ });
+    await expect(item).toHaveAttribute('data-disabled', '');
+    await expect(item).toContainText('sabitlenmiş');
+  });
+
+  test('sabitlenmiş kart Delete ile GİTMİYOR, ve neden gitmediğini söylüyor', async ({ page }) => {
+    const card = await pinFirst(page);
+    const cards = page.locator('table.grid .card');
+    const before = await cards.count();
+
+    await card.focus();
+    await page.keyboard.press('Delete');
+    await expect(cards).toHaveCount(before);
+    // Silence would read as a broken key. `.last()`: the sample's own "veri
+    // yüklendi" line is still on screen, and this is the newest thing said.
+    await expect(page.locator('.toast').last()).toContainText('sabitlenmiş');
+  });
+
+  test('sabitlenmiş kart SÜRÜKLENMİYOR — ızgara kıpırdamıyor', async ({ page }) => {
+    const card = await pinFirst(page);
+    const box = (await card.boundingBox())!;
+    const text = await card.textContent();
+
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300, box.y + 120, { steps: 8 });
+    // No ghost, because no drag ever started.
+    await expect(page.locator('.ghost')).toHaveCount(0);
+    await page.mouse.up();
+
+    await expect(card).toHaveText(text!);
+    await expect(card).toHaveClass(/pinned/);
+  });
+
+  test('sabitleme YENİLEMEDEN sonra da duruyor — programın kendisine giriyor', async ({ page }) => {
+    await pinFirst(page);
+    await expect
+      .poll(async () => await page.evaluate(() => localStorage.getItem('ders-programi')), {
+        timeout: 5_000,
+      })
+      .toContain('pinned');
+
+    await page.reload();
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
+  });
+
+  test('"Baştan diz" sabitlenmişi YERİNDE bırakıyor, sorusu da onu sayıyor', async ({ page }) => {
+    const card = await filledWithOnePin(page);
+    const where = (await card.boundingBox())!;
+    const text = (await card.textContent())!;
+
+    await page.getByRole('button', { name: 'Baştan diz' }).click();
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Sabitlenen');
+    await dialog.getByRole('button', { name: 'Baştan diz' }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+
+    // Same card, same square, still pinned.
+    const after = page.locator('table.grid .card.pinned');
+    await expect(after).toHaveCount(1);
+    await expect(after).toHaveText(text);
+    const box = (await after.boundingBox())!;
+    expect(Math.round(box.x)).toBe(Math.round(where.x));
+    expect(Math.round(box.y)).toBe(Math.round(where.y));
+  });
+
+  test('"Programı boşalt" da sabitlenmişi bırakıyor', async ({ page }) => {
+    await filledWithOnePin(page);
+    await page.getByRole('button', { name: 'Programı boşalt' }).click();
+    const dialog = page.getByRole('alertdialog');
+    await expect(dialog).toContainText('Sabitlenen');
+    await dialog.getByRole('button', { name: 'Programı boşalt' }).click();
+
+    // Everything else went; the pin is what is left.
+    await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
+    await expect(page.locator('table.grid .card')).toHaveCount(1);
+  });
+
+  test('sabitleme kaldırılınca her şey eskisi gibi', async ({ page }) => {
+    const card = await pinFirst(page);
+    await card.click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Sabitlemeyi kaldır' }).click();
+    await expect(card).not.toHaveClass(/pinned/);
+
+    await card.click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
+    await expect(page.locator('table.grid .card')).toHaveCount(0);
   });
 });
