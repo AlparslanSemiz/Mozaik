@@ -1,9 +1,93 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-29 (otuz dördüncü oturum, **iki makinede paralel**:
-**A** — AA turu, sınıfın kendi günlük sınırı ve **şema v11**;
-**B** — v8 dosyaları okunamıyordu, branş kısaltmaları, çözücünün ÖLÇÜMÜ,
-ızgarada **sağ tık menüsü ve sabitleme**)
+Son güncelleme: 2026-08-29 (otuz beşinci oturum: **kaydıran şey listenin
+kendisi** — özet kutusu duruyor, içindeki liste kayıyor)
+
+> **İKİ MAKİNENİN DALI BURADA BİRLEŞTİ, ve sayılar yeniden ÖLÇÜLDÜ.** Otuz
+> dördüncü oturum paralel koştu — **A**: AA turu, sınıfın kendi günlük sınırı
+> ve **şema v11**; **B**: v8 dosyaları okunamıyordu, branş kısaltmaları,
+> çözücünün ÖLÇÜMÜ, ızgarada **sağ tık menüsü ve sabitleme** — ve otuz beşinci
+> oturum yalnız **A**'nın üstünde yazıldı. Yani aşağıdaki her oturumun kendi
+> `npm run kontrol` satırı **kendi ağacının** sayısıdır ve birleşik ağacınki
+> değildir; üçü de olduğu gibi bırakıldı, çünkü bir oturum kaydı o gün ölçüleni
+> yazar. Birleşik ağaçta ölçülen: **704 birim · 500 E2E**.
+>
+> Birleşmenin kendi bedeli bir satırdı ve yazılı olması gerekiyor: **B**'nin
+> sağ tık menüsü `@radix-ui/react-context-menu` getiriyor, `package.json`
+> birleşmeyle geldi ama bu makinede paket **kurulu değildi** — `npm install`
+> koşulana kadar duman testi dosyası hiç yüklenemedi ve vitest bunu
+> *"1 failed | 23 passed"* diye gösterirken **çıkış kodu 0** döndürdü. İki
+> makinede yürüyen bir depoda bir birleşmenin ilk adımı `npm install`.
+
+---
+
+## Otuz beşinci oturum — kaydıran kutu PANEL değil, LİSTE (2026-08-29)
+
+> *"özet kutusu değil içindeki liste yukarı aşağı scrollanabilsin"*
+
+Aynı günün AA2'sinin ikinci yarısı, ve düzeltilen şey tavan değil **kaydıran
+kutu**. AA2 doğru bir şey söylüyordu — bir özet içindekinden boylanır ve ekranı
+geçmez — ama scrollbar'ı panelin kendisine koymuştu: başlığın altındaki cümle,
+uyarı kutusu ve tablonun altındaki branş listesi satırlarla birlikte gidiyordu,
+ve kutunun kendi kenarı imlecin altından kayıyordu. Bu panellerde uzun olan şey
+hep **tek** bir şey: öğretmen başına bir satır, varlık başına bir satır.
+
+**Mekanizma tek satır ve hiç aritmetik yok.** Panel bir flex sütunu
+(`.cols > aside > .panel:only-child`), yani içindeki her şey kendi boyunu
+koruyor ve yer verebilen tek kutu liste oluyor. Veren şey `min-height`: bir
+flex öğesinin tabanı `auto`, yani kendi içeriği — listenin hiç küçülmemesinin
+sebebi tam olarak buydu. Geri verilen taban `6rem`, **rem** cinsinden, yani
+`--ui-scale`'i izliyor: her basamakta "iki satır ve başlığı".
+
+```
+1920×1080, örnek okul, %100          panel      liste      panel taşması
+Okul → Öğretmenler                   962 px     468/889    0
+Okul → Sınıflar                      930 px     699/699    0
+Müsaitlik                            898 px     742/740    0
+Dersler (sınıf seçici)               714 px     595/593    0
+Ayarlar → Zil saatleri               962 px     803/829    0
+
+aynı ekran, %150                     panel      liste      panel taşması
+Okul → Öğretmenler                   907 px     199/1156   0
+Müsaitlik                            907 px     681/1075   0
+Ayarlar → Zil saatleri               907 px     676/1154   0
+```
+
+**Panel `overflow-y: auto`'sunu KORUYOR, ama plan olarak değil son çare
+olarak.** Küçülemeyen yarı tek başına ekrandan uzunsa oraya düşülüyor, ve
+oradaki seçenek daha derli toplu bir kutu değil, **hiç ulaşılamayan içerik**.
+Ölçüldü (1600×540, %100, Okul → Öğretmenler): liste `6rem` tabanında duruyor
+(84 px), panel 156 px kaydırıyor, başlık yapışkan olduğu için yerinde kalıyor.
+
+**İki tablo bir kutu kazandı**, çünkü sözleşme "tek panelli her rayda liste
+kayar" ve o iki panelde kayacak bir kutu yoktu: Ayarlar → Kurallar'ın ihlal
+listesi (satır sayısının tavanı yok) ve Ayarlar → Zil saatleri'nin önizlemesi.
+İkincisi ölçülmüştü: 1080'de panel **25 px** taşıyordu, %150'de aynı fark
+**478 px**.
+
+**Kaydıran bir tablonun BAŞLIĞI da yapışkan oldu** (`.stat-scroll thead th`).
+Panel başlığının savı bir kat aşağıda: artık kayan tek şey satırlarsa, "Açık"
+ile "Yük"ün ilk gidecek şey olması her sayının anlamını götürürdü. Başlığın
+altındaki çizgi `box-shadow: inset` — `border-collapse: collapse` altında
+kenarlık hücrenin değil tablonun ızgarasının, ve yapışkan hücre zeminini
+altından çekip kenarlığı geride bırakıyor.
+
+**Test:** `kabuk.spec.ts` 83'ün iki testi. Birincisi iki kutu türünü de gezer
+(`.stat-scroll` ve `.entity-list`), önkoşulunu iddia eder (tuzak 41) ve asıl
+soruyu şöyle sorar: **listenin ALTINDAKİ şey yerinde mi kaldı.** Panel
+düzeyinde bir scrollbar öteki bütün iddialardan geçer, bundan geçemez.
+İkincisi son çareyi ölçer. İkisi de mutasyonla sınandı: flex sütunu
+kaldırıldığında birincisi, taban kaldırıldığında ikincisi kırmızıya döndü
+(*"liste 0px'e ezilmiş"*).
+
+**Bir saat, tuzak 59'un ölçüm hâline gitti.** Müsaitlik'te ray 5 px kaydırıyor
+göründü ve sebebi düzen değildi: sekme geçişi paneli `translateY(var(--slide))`
+= 7 px aşağıdan soluyor, ve boyama bitmeden okunan bir `getBoundingClientRect`
+paneli rayın 5 px altında gösteriyor. Testler artık ölçmeden önce
+`document.getAnimations()`'ı bekliyor.
+
+`npm run kontrol` yeşil: **698 birim · 490 E2E · 22 site · 7 çözücü.**
+(Bu ağaçta **B**'nin turu yoktu; birleşik sayılar yukarıdaki nota yazıldı.)
 
 ---
 
@@ -89,6 +173,11 @@ kısa bir pencerede örnek proje yüklüyken önce "bu özet zaten sığıyorsa
 ölçülecek bir şey yok" der, sonra kaydıran kutunun panel olduğunu, rayın
 kaydırmadığını ve başlığın yerinde durduğunu ölçer. Kural silinerek kırmızıya
 döndürüldü.
+
+> **Aynı gün düzeltildi, bkz. otuz beşinci oturum.** Tavan doğruydu, kaydıran
+> kutu değildi: scrollbar panelden **listeye** indi. Bu bölümdeki "fazlası
+> panelin içinde kayıyor" ve "başlık yapışkan" cümleleri artık yalnız son çare
+> için geçerli.
 
 ### AA3 — hata Özet'in en üstünde
 

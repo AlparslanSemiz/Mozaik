@@ -3642,23 +3642,38 @@ table.list td .split-count > input.num,
   margin: -2px;
 }
 
-/* THE SUMMARY IS THE SCROLLER, NOT THE COLUMN.
-   ("Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir
-    ama en fazla tam ekranın uzunluğu kadar olsun ... eğer liste çok uzunsa
-    işte kaydırma o özetin içinde olsun.")
+/* THE LIST IS THE SCROLLER, NOT THE BOX.
+   ("özet kutusu değil içindeki liste yukarı aşağı scrollanabilsin")
 
-   Before this the rail scrolled and the boxes inside it had their own fixed
-   ceilings — 22rem on the capacity table, 62vh on the availability list — so a
-   panel's height came from a number written in this file rather than from what
-   was in it: a ten-row table scrolled in a 22rem window on a monitor with room
-   for thirty. Now the panel is as tall as its content, the flex column stops
-   it at the screen, and what does not fit scrolls INSIDE the panel.
+   Two rounds, two halves of one answer. The first said a summary must be as
+   tall as what is in it and never taller than the screen — that stands, and
+   the flex column above is still what does it. What it got wrong was WHERE the
+   scrollbar goes: the whole panel became the scroller, so the hint under the
+   heading, the warning box and the colour row travelled with the rows, and the
+   box's own edge slid past under the cursor. What is long in these panels is
+   always ONE thing — a row per teacher, a row per class, a row per entity —
+   and that one thing is what should move.
+
+   No arithmetic anywhere: the panel is a flex column, so everything in it
+   keeps its own height and the single box allowed to give ground is the list.
+   `min-height` is the whole mechanism — a flex item's floor is `auto`, i.e.
+   its own content, which is exactly why the list would not shrink without
+   this line. The floor it is given back is what a list has to be to still read
+   as one: two rows and the heading over them. Below that a scroller says less
+   than the sentence beside it.
+
+   The panel KEEPS `overflow-y: auto`, as a last resort rather than as the
+   plan: it is reached only when the part that cannot shrink is by itself
+   taller than the screen, and there the alternative is not a tidier box, it is
+   content nobody can reach.
 
    `:only-child` on purpose: Çıktı's rail holds four stacked panels and there
    "one panel fills the screen" would be the wrong answer — that rail keeps its
    own scrollbar, which is what the rule above still gives it. */
 .cols > aside > .panel:only-child {
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -3678,12 +3693,26 @@ table.list td .split-count > input.num,
   margin-block: calc(var(--space-6) * -1) 0;
 }
 
-/* ...and the ceilings those boxes carried are the screen's job now. Both axes,
-   because per CSS Overflow 3 one axis at `auto` drags a `visible` one with it. */
-.cols > aside > .panel:only-child .stat-scroll,
-.cols > aside > .panel:only-child .entity-list {
+/* ...and the ceilings those boxes carried are the screen's job now: 22rem on
+   the capacity table and 62vh on the availability list were numbers written in
+   this file, and a ten-row table scrolling in its own little window on a
+   monitor with room for thirty is what was being complained about. Here the
+   ceiling is whatever the panel has left over, and the box keeps the
+   `overflow-y: auto` its own rule already gives it.
+
+   A DIRECT CHILD, because only a direct child is a flex item: a list wrapped
+   in one more div would take this floor and none of the shrinking, and would
+   then be the one box in the panel that cannot give ground. It falls back to
+   its own ceiling instead of failing silently. */
+.cols > aside > .panel:only-child > .stat-scroll:not(:empty),
+.cols > aside > .panel:only-child > .entity-list:not(:empty) {
   max-height: none;
-  overflow: visible;
+  /* In rem, so the floor follows --ui-scale like the rows it is counted in:
+     about two rows and their heading at every step of the ladder. `:not(:empty)`
+     because a floor under a list with nothing in it is not a list either — the
+     one screen where that happens says "Önce ekleyin" in the box beside it, and
+     an empty 6rem frame under that sentence would be the loudest thing on it. */
+  min-height: 6rem;
 }
 
 /* One column, one flow: nothing is beside anything, so there is nothing to
@@ -3699,8 +3728,11 @@ table.list td .split-count > input.num,
 
   /* ...and the panel gives its scrollbar back too: below this width nothing is
      beside anything, so a box scrolling inside a page that scrolls is worse
-     than a long page. */
+     than a long page. The list keeps its floor and loses its ceiling with the
+     panel — with nothing capping the column there is no leftover space to
+     shrink into, so it draws in full. */
   .cols > aside > .panel:only-child {
+    display: block;
     overflow-y: visible;
     overflow-x: visible;
   }
@@ -5467,6 +5499,23 @@ body.row-dragging {
   max-height: 22rem;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* ...and the column names stay while the rows move under them. This is the
+   panel heading's argument one level down: in a right rail the rows are now
+   the only thing that scrolls, so "Açık" and "Yük" leaving first would take
+   the meaning of every number with them.
+
+   The line under the heading is drawn as an inset shadow rather than left to
+   the border: under `border-collapse: collapse` the border belongs to the
+   table's grid, not to the cell, and a sticky cell carries its background out
+   from under it and leaves the border behind. */
+.stat-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper);
+  box-shadow: inset 0 -1px 0 var(--line);
 }
 
 /* A list wider than its panel scrolls SIDEWAYS rather than crushing a column.
