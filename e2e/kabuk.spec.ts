@@ -264,42 +264,124 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
   // "Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir
   //  ama en fazla tam ekranın uzunluğu kadar olsun ... eğer liste çok uzunsa
   //  işte kaydırma o özetin içinde olsun."
+  //  "özet kutusu değil içindeki liste yukarı aşağı scrollanabilsin"
   //
-  // The ceiling above was already there; what was NOT was where the scrollbar
-  // sits. The rail scrolled and the boxes inside it carried fixed ceilings of
-  // their own (22rem on the capacity table, 62vh on the availability list), so
-  // a panel's height came from a number in the stylesheet rather than from what
-  // was in it — a ten-row table scrolling in its own little window on a screen
-  // with room for thirty.
+  // Two sentences, two rounds, and the second one moved the scrollbar. The
+  // ceiling was already right — a summary is as tall as what is in it and never
+  // taller than the screen. What was wrong was WHAT scrolled: the whole panel
+  // did, so the hint under the heading and the list of subjects under the table
+  // travelled with the rows. What is long in these panels is one thing — a row
+  // per teacher, a row per entity — and that is the thing that moves now.
   //
+  // Both boxes, because they are two different rules with one contract: the
+  // capacity table (`.stat-scroll`) and the entity list (`.entity-list`).
   // Measured on a SHORT viewport with the sample loaded, because a summary that
   // fits measures nothing (pitfall 41): the precondition is asserted first.
-  test('uzun özet PANELİN içinde kayıyor, sütunun değil', async ({ page }) => {
+  // MEASURE AFTER THE MOTION STOPS (pitfall 59). A tab change fades its panel
+  // in from `translateY(var(--slide))`, i.e. seven pixels below where it lands,
+  // and a rect read mid-fade puts the panel seven pixels past the bottom of the
+  // rail — which reads exactly like a rail that scrolls, and cost an hour here
+  // before it was recognised.
+  async function settled(page: Page) {
+    await page.evaluate(async () => {
+      await Promise.race([
+        Promise.allSettled(
+          document
+            .getAnimations()
+            .filter((a) => a.playState === 'running')
+            .map((a) => a.finished),
+        ),
+        new Promise((r) => setTimeout(r, 2_000)),
+      ]);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    });
+  }
+
+  const SCROLLERS = [
+    { where: 'Okul → Öğretmenler', box: '.stat-scroll' },
+    { where: 'Müsaitlik', box: '.entity-list' },
+  ] as const;
+
+  test('uzun özet LİSTESİNİN içinde kayıyor, kutunun değil', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 700 });
     await openWithSample(page);
+
+    for (const { where, box } of SCROLLERS) {
+      if (where === 'Müsaitlik') await page.getByRole('button', { name: 'Müsaitlik' }).click();
+      else await openSetup(page, 'Öğretmenler');
+      await settled(page);
+
+      const panel = page.locator('.cols > aside > .panel');
+      const list = panel.locator(`> ${box}`);
+      const m = await panel.evaluate((el, sel) => {
+        const inner = el.querySelector(`:scope > ${sel}`) as HTMLElement;
+        const main = document.querySelector('.main') as HTMLElement;
+        return {
+          panelOver: el.scrollHeight - el.clientHeight,
+          panelHeight: Math.round(el.getBoundingClientRect().height),
+          listOver: inner.scrollHeight - inner.clientHeight,
+          screen: main.clientHeight,
+        };
+      }, box);
+
+      // The precondition: there really is more list than there is room.
+      expect(m.listOver, `${where}: liste zaten sığıyor — ölçülecek bir şey yok`).toBeGreaterThan(
+        20,
+      );
+      // ...the box does NOT scroll...
+      expect(m.panelOver, `${where}: kaydıran kutu özetin kendisi`).toBeLessThan(4);
+      // ...nor does the column it sits in...
+      const rail = await page
+        .locator('.cols > aside')
+        .evaluate((el) => el.scrollHeight - el.clientHeight);
+      expect(rail, `${where}: yan sütun ${rail}px kaydırıyor`).toBeLessThan(4);
+      // ...and the box still fits the screen, which is the round before this.
+      expect(
+        m.panelHeight,
+        `${where}: özet ${m.panelHeight}px, ekranda ${m.screen}px yer var`,
+      ).toBeLessThanOrEqual(m.screen);
+
+      // The assertion that says WHICH box is scrolling: what sits under the
+      // list stays where it is while the list moves. A panel-level scrollbar
+      // passes every check above and fails this one.
+      const below = panel.locator('> *').last();
+      const before = await below.boundingBox();
+      await list.evaluate((el) => el.scrollTo(0, 200));
+      const after = await below.boundingBox();
+      expect(
+        Math.abs(after!.y - before!.y),
+        `${where}: listenin altındaki şey de kaydı`,
+      ).toBeLessThan(2);
+    }
+  });
+
+  // ...and the last resort, which is the reason the panel keeps an
+  // `overflow-y` of its own. Squeeze the screen until the part that CANNOT
+  // shrink is taller than it by itself: the list stops at its floor rather than
+  // vanishing, the panel takes over the scrolling, and the heading stays put so
+  // the word saying which summary this is is not the first thing to leave.
+  test('ekran çok kısalınca kutu SON ÇARE olarak kayıyor', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 540 });
+    await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
+    await settled(page);
 
-    const m = await page.locator('.cols > aside > .panel').evaluate((el) => ({
-      scroll: el.scrollHeight,
-      client: el.clientHeight,
-      overflowY: getComputedStyle(el).overflowY,
-    }));
-    expect(m.scroll, 'bu ekranda özet zaten sığıyor — ölçülecek bir şey yok').toBeGreaterThan(
-      m.client + 20,
-    );
-    expect(m.overflowY, 'kaydıran kutu panel değil').toBe('auto');
+    const panel = page.locator('.cols > aside > .panel');
+    const m = await panel.evaluate((el) => {
+      const inner = el.querySelector(':scope > .stat-scroll') as HTMLElement;
+      return {
+        panelOver: el.scrollHeight - el.clientHeight,
+        listHeight: Math.round(inner.getBoundingClientRect().height),
+      };
+    });
+    expect(m.panelOver, 'bu ekranda özet hâlâ sığıyor — ölçülecek bir şey yok').toBeGreaterThan(20);
+    // 6rem at --ui-scale 1 is 84px: two rows and their heading. A list shrunk
+    // to nothing is not a list, and nothing on screen would say it was there.
+    expect(m.listHeight, `liste ${m.listHeight}px'e ezilmiş`).toBeGreaterThanOrEqual(80);
 
-    // ...and the column it sits in is not the one scrolling.
-    const rail = await page
-      .locator('.cols > aside')
-      .evaluate((el) => el.scrollHeight - el.clientHeight);
-    expect(rail, `yan sütun ${rail}px kaydırıyor — kaydırma özetin içinde olmalı`).toBeLessThan(4);
-
-    // The heading stays put while the panel scrolls under it: the word saying
-    // WHICH summary this is should not be the first thing to leave.
-    const before = await page.locator('.cols > aside > .panel h2').boundingBox();
-    await page.locator('.cols > aside > .panel').evaluate((el) => el.scrollTo(0, 400));
-    const after = await page.locator('.cols > aside > .panel h2').boundingBox();
+    const before = await panel.locator('h2').boundingBox();
+    await panel.evaluate((el) => el.scrollTo(0, 400));
+    const after = await panel.locator('h2').boundingBox();
     expect(Math.abs(after!.y - before!.y), 'özetin başlığı kayıp gitti').toBeLessThan(2);
   });
 });

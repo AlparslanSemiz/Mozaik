@@ -216,10 +216,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 696 birim testi
+npm test           # Vitest — 704 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 485 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 500 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -355,7 +355,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 26 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
+| **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
 formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menü üç kalem, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
@@ -1393,6 +1393,13 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     bitene kadar beklemek — sabit bir `waitForTimeout` değil, çünkü süre artık
     bir **ayar**. Ve gerçek ders: kanıt üreten bir katmana da bakılır.
 
+    **Aynısı ÖLÇÜM için de geçerli ve bir saate mal oldu (2026-08-29).** Sekme
+    geçişi paneli `translateY(var(--slide))` = 7 px aşağıdan soluyor, yani
+    boyama bitmeden okunan bir `getBoundingClientRect` paneli rayın 5 px
+    altında gösteriyor — ve o 5 px, kaydırmaması gereken bir rayın kaydırdığı
+    gibi okunuyor. Bir düzen ölçen her testin ilk satırı `getAnimations()`
+    beklemek.
+
 60. **"Orta noktayı geçtim mi" bir sürükleme hedefi seçmez — tam ortaya
     bırakmak SIK bir koordinattır.** Satır sıralamasının ilk hâli hedefi
     "hangi orta noktaları geçtim" ile buluyordu; `y > middle` tam eşitlikte
@@ -2165,12 +2172,21 @@ adını taşıyamaz.
   değişmedi (*"ama yerleri değişmesin"*) ve sayılı başlık **saydığı listeyle**
   gitti, yani ekranda hâlâ tek bir `--fs-xl` başlık var. `e2e/kurulum.spec.ts`
   44 hem sırayı hem **iki kutu olduğunu** ölçüyor.
-- **SAĞ RAYDA KAYDIRAN KUTU PANELİN KENDİSİ (2026-08-29).** `.cols > aside` bir
-  flex sütunu ve `100cqh`'de duruyor; tek panelli her rayda o panel
-  `min-height: 0; overflow-y: auto` alıyor ve içindeki sabit tavanlar
-  (`.stat-scroll` 22rem, `.entity-list` 62vh) geçersiz kılınıyor. Yani bir
-  özetin boyu **içindekinden** geliyor, styles.css'teki bir sayıdan değil; ekranı
-  geçince kaydırma **özetin içinde** oluyor ve başlığı yapışkan kalıyor.
+- **SAĞ RAYDA KAYDIRAN ŞEY LİSTENİN KENDİSİ (2026-08-29, aynı gün iki tur).**
+  `.cols > aside` bir flex sütunu ve `100cqh`'de duruyor; tek panelli her rayda
+  o panel de bir **flex sütunu**, yani içindeki her şey kendi boyunu koruyor ve
+  yer verebilen tek kutu liste oluyor (`> .stat-scroll`, `> .entity-list`:
+  sabit tavanları — 22rem ve 62vh — geçersiz, tabanları `6rem`). Bir özetin
+  boyu **içindekinden** geliyor, styles.css'teki bir sayıdan değil; ekranı
+  geçince kayan şey **liste** oluyor, kutu değil.
+  İlk tur (AA2) scrollbar'ı panele koymuştu ve şikayet oydu: *"özet kutusu
+  değil içindeki liste"* — başlığın altındaki cümle ve tablonun altındaki
+  liste satırlarla birlikte gidiyordu.
+  Panelin `overflow-y`'si **son çare** olarak duruyor (küçülemeyen yarı tek
+  başına ekrandan uzunsa), başlığı da o yüzden hâlâ yapışkan. Taban `rem`
+  cinsinden: `--ui-scale` büyüyünce liste de büyümeli. Kayan bir tablonun
+  `thead`'i yapışkan — kayan tek şey satırlarsa sütun adları ilk gidecek şey
+  olamaz.
   `:only-child` bilerek — Çıktı'nın dört panelli rayı kendi kaydırmasını tutar.
   Sabit tavanlar Kontrol'de duruyor (orası ray değil).
 - **ÖZET'TE ÖNCE NE YANLIŞ.** Uyarı kutuları kapasite tablosunun **üstünde**, ve
