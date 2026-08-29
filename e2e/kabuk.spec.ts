@@ -260,4 +260,46 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
       .evaluate((el) => el.getBoundingClientRect().top);
     expect(top, `kaydırdıktan sonra yan sütun ${Math.round(top)}px'te`).toBeLessThan(m.client);
   });
+
+  // "Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir
+  //  ama en fazla tam ekranın uzunluğu kadar olsun ... eğer liste çok uzunsa
+  //  işte kaydırma o özetin içinde olsun."
+  //
+  // The ceiling above was already there; what was NOT was where the scrollbar
+  // sits. The rail scrolled and the boxes inside it carried fixed ceilings of
+  // their own (22rem on the capacity table, 62vh on the availability list), so
+  // a panel's height came from a number in the stylesheet rather than from what
+  // was in it — a ten-row table scrolling in its own little window on a screen
+  // with room for thirty.
+  //
+  // Measured on a SHORT viewport with the sample loaded, because a summary that
+  // fits measures nothing (pitfall 41): the precondition is asserted first.
+  test('uzun özet PANELİN içinde kayıyor, sütunun değil', async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 700 });
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+
+    const m = await page.locator('.cols > aside > .panel').evaluate((el) => ({
+      scroll: el.scrollHeight,
+      client: el.clientHeight,
+      overflowY: getComputedStyle(el).overflowY,
+    }));
+    expect(m.scroll, 'bu ekranda özet zaten sığıyor — ölçülecek bir şey yok').toBeGreaterThan(
+      m.client + 20,
+    );
+    expect(m.overflowY, 'kaydıran kutu panel değil').toBe('auto');
+
+    // ...and the column it sits in is not the one scrolling.
+    const rail = await page
+      .locator('.cols > aside')
+      .evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(rail, `yan sütun ${rail}px kaydırıyor — kaydırma özetin içinde olmalı`).toBeLessThan(4);
+
+    // The heading stays put while the panel scrolls under it: the word saying
+    // WHICH summary this is should not be the first thing to leave.
+    const before = await page.locator('.cols > aside > .panel h2').boundingBox();
+    await page.locator('.cols > aside > .panel').evaluate((el) => el.scrollTo(0, 400));
+    const after = await page.locator('.cols > aside > .panel h2').boundingBox();
+    expect(Math.abs(after!.y - before!.y), 'özetin başlığı kayıp gitti').toBeLessThan(2);
+  });
 });

@@ -120,8 +120,9 @@ test.describe('69. Dersler sekmesi', () => {
     const who = (await open.innerText()).trim();
     await expect(box, 'tek branşlı hocada branş kutusu hâlâ çiziliyor').toHaveCount(0);
 
-    // ...and the branch is not lost, it moved to the heading.
-    const heading = await page.locator('.cols > div .panel h2').first().innerText();
+    // ...and the branch is not lost, it moved to the heading — the LIST's one,
+    // which is where the counted heading went when adding became its own panel.
+    const heading = await page.locator('.panel.step-panel h2').first().innerText();
     expect(heading, `başlık branşı söylemiyor: "${heading}"`).toMatch(/ · .+ dersleri/);
 
     // Now give that same teacher a second branch and the question becomes real.
@@ -190,7 +191,7 @@ test.describe('69. Dersler sekmesi', () => {
   test('başlık ders sayısını da saati de söylüyor, şeritle AYNI', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'all');
-    const heading = await page.locator('.cols > div .panel h2').first().innerText();
+    const heading = await page.locator('.panel.step-panel h2').first().innerText();
     expect(heading).toMatch(/^Dersler · \d+ ders · \d+ saat$/);
     const strip = await page.locator('.ribbon .ribbon-value').last().innerText();
     expect(heading.replace('Dersler · ', '')).toBe(strip.trim());

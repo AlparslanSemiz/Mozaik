@@ -11,7 +11,7 @@ import { t } from './i18n';
 import { dayLabel } from './names';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from './keys';
-import type { Id, Lesson, RuleLevel, RuleName, State, Teacher } from './types';
+import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from './types';
 
 export interface Violation {
   key: string; // stable-ish key for React lists
@@ -39,9 +39,23 @@ export function limitFor(
   return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
 }
 
-/** Max hours of ONE lesson on one day: the lesson's own box, else the default. */
-export function lessonLimit(d: State, lesson: Lesson | undefined): number {
-  const own = lesson?.maxPerDay;
+/**
+ * Max hours of ONE lesson on one day. THREE layers, narrowest first: the
+ * lesson's own box, then the CLASS's, then the school-wide default.
+ *
+ * The class layer is the one that could not be said before. The school number
+ * is one number for everybody and a lesson's box is one number per
+ * teacher-and-class pair, so "510 should never see the same subject twice in a
+ * day" had to be typed into every one of that class's lessons — and typed again
+ * into every lesson added afterwards.
+ *
+ * `group` is optional and LAST (pitfall 76): every caller that predates it goes
+ * on compiling, and the hot ones — `limitBreaches`, `findViolations` — already
+ * hold the class and hand it over rather than paying for a lookup per call.
+ */
+export function lessonLimit(d: State, lesson: Lesson | undefined, group?: ClassGroup): number {
+  const cls = group ?? d.classes.find((c) => c.id === lesson?.classId);
+  const own = lesson?.maxPerDay ?? cls?.maxSameLessonPerDay;
   const value = own == null ? d.settings.limits.maxSameLessonPerDay : own;
   return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
 }
@@ -188,9 +202,9 @@ export function findViolations(d: State, ix: Index): Violation[] {
   }
 
   for (const lesson of d.lessons) {
-    const limit = lessonLimit(d, lesson);
-    if (!ruleActive(d, 'maxSameLessonPerDay', limit)) continue;
     const group = ix.classById.get(lesson.classId);
+    const limit = lessonLimit(d, lesson, group);
+    if (!ruleActive(d, 'maxSameLessonPerDay', limit)) continue;
     const teacher = ix.teacherById.get(lesson.teacherId);
 
     for (const [day, dayInfo] of d.settings.days.entries()) {

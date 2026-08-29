@@ -47,128 +47,143 @@ export default function Rooms({ state, change }: PanelProps) {
   const [pasteOpen, setPasteOpen] = useState(false);
 
   return (
-    <div className="panel step-panel">
-      {/* The paste button rides the HEADING, not the form row: "Excel'den
+    <>
+      {/* ADDING IS ITS OWN BLOCK — not a rule drawn across one panel.
+          ("Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok
+           olduğu gibi, yani sadece çizgi olmasın.")
+
+          A line says where something ends; a panel says the two are
+          different things. Nothing moved: the form is still above the list.
+          The COUNTED heading went with the list it counts, and this one
+          names the work — so the screen has one "which step am I on"
+          heading, still the only --fs-xl one on it.
+
+          The paste button rides the HEADING, not the form row: "Excel'den
           yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
-          All four panels put it in the same corner, so the shape of a panel
-          stays one shape. */}
-      <div className="panel-head">
-        <h2>{t('Derslikler ({n})', { n: state.rooms.length })}</h2>
-        <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
-      </div>
-      <p className="hint">
-        {t(
-          'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.',
-        )}
-      </p>
-      <div className="form-row panel-add">
-        <input
-          type="text"
-          value={newRoom}
-          placeholder={t('Derslik adı, örn. A')}
-          onChange={(e) => setNewRoom(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && newRoom.trim() !== '') {
+          All five panels put it in the same corner. */}
+      <div className="panel add-panel">
+        <div className="panel-head">
+          <h2>{t('Yeni derslik')}</h2>
+          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
+        </div>
+        <p className="hint">
+          {t(
+            'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.',
+          )}
+        </p>
+        <div className="form-row">
+          <input
+            type="text"
+            value={newRoom}
+            placeholder={t('Derslik adı, örn. A')}
+            onChange={(e) => setNewRoom(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newRoom.trim() !== '') {
+                change((d) => addRoom(d, newRoom));
+                setNewRoom('');
+              }
+            }}
+          />
+          <button
+            className="btn"
+            disabled={newRoom.trim() === ''}
+            onClick={() => {
               change((d) => addRoom(d, newRoom));
               setNewRoom('');
-            }
-          }}
+            }}
+          >{t('Ekle')}</button>
+        </div>
+
+        <Paste
+          open={pasteOpen}
+          close={() => setPasteOpen(false)}
+          title={t('Derslikleri yapıştır')}
+          example={t('Derslik adı (her satırda bir tane)')}
+          parse={parseRooms}
+          rowText={(x) => x.name}
+          onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
         />
-        <button
-          className="btn"
-          disabled={newRoom.trim() === ''}
-          onClick={() => {
-            change((d) => addRoom(d, newRoom));
-            setNewRoom('');
-          }}
-        >{t('Ekle')}</button>
       </div>
 
-      <Paste
-        open={pasteOpen}
-        close={() => setPasteOpen(false)}
-        title={t('Derslikleri yapıştır')}
-        example={t('Derslik adı (her satırda bir tane)')}
-        parse={parseRooms}
-        rowText={(x) => x.name}
-        onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
-      />
+      <div className="panel step-panel">
+        <h2>{t('Derslikler ({n})', { n: state.rooms.length })}</h2>
 
-      {state.rooms.length > 0 && (
-        <ListTools
-          items={state.rooms}
-          query={query}
-          setQuery={setQuery}
-          config={listCfg}
-          shown={shown.length}
-          noun="derslik"
-          countKey="{n} derslik"
-          notice={order.notice}
-        />
-      )}
+        {state.rooms.length > 0 && (
+          <ListTools
+            items={state.rooms}
+            query={query}
+            setQuery={setQuery}
+            config={listCfg}
+            shown={shown.length}
+            noun="derslik"
+            countKey="{n} derslik"
+            notice={order.notice}
+          />
+        )}
 
-      {state.rooms.length > 0 && shown.length === 0 && (
-        <p className="hint">{t('Bu aramaya uyan derslik yok.')}</p>
-      )}
+        {state.rooms.length > 0 && shown.length === 0 && (
+          <p className="hint">{t('Bu aramaya uyan derslik yok.')}</p>
+        )}
 
-      {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
-          1.5: the browser answers by crushing whichever column can
-          still shrink, and at 150 % that was the NAME — 232 px down
-          to 26 px, measured. Wide content scrolls in its own box
-          rather than squeezing the reader's own words out. */}
-      {shown.length > 0 && (
-        <div className="table-scroll">
-        <table className="list">
-          <thead>
-            <tr>
-              {order.head}
-              <th className="w-col-xl">{t('Ad')}</th>
-              <th className="w-col-lg">{t('Sınıf sayısı')}</th>
-              <th className="w-col-md" />
-            </tr>
-          </thead>
-          <tbody ref={order.bodyRef}>
-            {shown.map((r, i) => (
-              <tr key={r.id} data-row-name={r.name}>
-                {order.grip(i, r.name)}
-                <td>
-                  <input
-                    type="text"
-                    defaultValue={r.name}
-                    onBlur={(e) => change((d) => updateRoom(d, r.id, e.target.value))}
-                  />
-                </td>
-                <td>{state.classes.filter((c) => c.roomId === r.id).length}</td>
-                <td>
-                  <div className="form-row nowrap">
-                  {/* Its whole week, its load and what it is tied to, without
-                      leaving the list. The information was always there; it
-                      was spread over four tabs. */}
-                  <button
-                    className="btn icon"
-                    aria-label={`${r.name} bilgileri`}
-                    title={t('Bilgileri ve haftalık programı')}
-                    onClick={() => inspect('room', r.id)}
-                  >
-                    <PanelRight size={16} strokeWidth={2} />
-                  </button>
-                  <button
-                    className="btn danger"
-                    onClick={async () => {
-                      const q = deletionQuestion(state, 'room', r.id);
-                      if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
-                        return;
-                      change((d) => deleteRoom(d, r.id));
-                    }}
-                  >{t('Sil')}</button>
-                  </div>
-                </td>
+        {/* Eleven columns do not fit a 100 %-wide table at --ui-scale
+            1.5: the browser answers by crushing whichever column can
+            still shrink, and at 150 % that was the NAME — 232 px down
+            to 26 px, measured. Wide content scrolls in its own box
+            rather than squeezing the reader's own words out. */}
+        {shown.length > 0 && (
+          <div className="table-scroll">
+          <table className="list">
+            <thead>
+              <tr>
+                {order.head}
+                <th className="w-col-xl">{t('Ad')}</th>
+                <th className="w-col-lg">{t('Sınıf sayısı')}</th>
+                <th className="w-col-md" />
               </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      )}
-    </div>
+            </thead>
+            <tbody ref={order.bodyRef}>
+              {shown.map((r, i) => (
+                <tr key={r.id} data-row-name={r.name}>
+                  {order.grip(i, r.name)}
+                  <td>
+                    <input
+                      type="text"
+                      defaultValue={r.name}
+                      onBlur={(e) => change((d) => updateRoom(d, r.id, e.target.value))}
+                    />
+                  </td>
+                  <td>{state.classes.filter((c) => c.roomId === r.id).length}</td>
+                  <td>
+                    <div className="form-row nowrap">
+                    {/* Its whole week, its load and what it is tied to, without
+                        leaving the list. The information was always there; it
+                        was spread over four tabs. */}
+                    <button
+                      className="btn icon"
+                      aria-label={`${r.name} bilgileri`}
+                      title={t('Bilgileri ve haftalık programı')}
+                      onClick={() => inspect('room', r.id)}
+                    >
+                      <PanelRight size={16} strokeWidth={2} />
+                    </button>
+                    <button
+                      className="btn danger"
+                      onClick={async () => {
+                        const q = deletionQuestion(state, 'room', r.id);
+                        if (!(await confirm({ title: q.title, body: q.cost, confirmLabel: 'Sil', danger: true })))
+                          return;
+                        change((d) => deleteRoom(d, r.id));
+                      }}
+                    >{t('Sil')}</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

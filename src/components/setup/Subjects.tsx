@@ -116,8 +116,13 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }
       <td className="num" title={users.map((x) => x.name).join(', ')}>
         {users.length}
       </td>
-      <td className="hint">
-        {current === shown ? t('varsayılan') : t('varsayılanı: {kisa}', { kisa: shown })}
+      {/* The word "varsayılan" is the COLUMN HEADING now. It used to be
+          repeated on every row — "varsayılan" or "varsayılanı: Mat" — over a
+          blank header, so the label was written once per subject and the
+          column itself was never named. Where the box already holds the
+          default the cell carries the empty-cell mark, a SHORT dash. */}
+      <td className="hint" title={t('Programda gömülü olan kısaltma')}>
+        {current === shown ? '–' : shown}
       </td>
       <td>
         {/* The same action cell as the other three lists. `.form-row` is what
@@ -238,95 +243,111 @@ export default function Subjects({ state, change }: PanelProps) {
   }
 
   return (
-    <div className="panel step-panel">
-      <div className="panel-head">
+    <>
+      {/* ADDING IS ITS OWN BLOCK — not a rule drawn across one panel.
+          ("Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok
+           olduğu gibi, yani sadece çizgi olmasın.")
+
+          A line says where something ends; a panel says the two are
+          different things. Nothing moved: the form is still above the list.
+          The COUNTED heading went with the list it counts, and this one
+          names the work. No `.panel-head` here: that wrapper exists to put
+          one control beside a heading, and this step has no paste button.
+          (Excel'den yapıştır is missing on purpose — a subject is a word,
+          and a column of words is not what anyone has in a spreadsheet.) */}
+      <div className="panel add-panel">
+        <h2>{t('Yeni branş')}</h2>
+        <p className="hint">
+          <T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz. Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca **değiştirdikleriniz** saklanır. Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu sırada gelir." />
+        </p>
+
+        <div className="form-row">
+          <input
+            type="text"
+            placeholder={t('Yeni branş (örn. Robotik)')}
+            aria-label={t('Yeni branş')}
+            value={fresh}
+            onChange={(e) => setFresh(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') add();
+            }}
+          />
+          <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>{t('Ekle')}</button>
+          {clash && <span className="hint">{t('Bu branş listede zaten var.')}</span>}
+        </div>
+      </div>
+
+      <div className="panel step-panel">
         <h2>{t('Branşlar ({n})', { n: options.length })}</h2>
-      </div>
-      <p className="hint">
-        <T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz. Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca **değiştirdikleriniz** saklanır. Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu sırada gelir." />
-      </p>
 
-      <div className="form-row panel-add">
-        <input
-          type="text"
-          placeholder={t('Yeni branş (örn. Robotik)')}
-          aria-label={t('Yeni branş')}
-          value={fresh}
-          onChange={(e) => setFresh(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') add();
-          }}
-        />
-        <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>{t('Ekle')}</button>
-        {clash && <span className="hint">{t('Bu branş listede zaten var.')}</span>}
-      </div>
+        {/* Said out loud, because a keyboard move happens somewhere the eye
+            is not necessarily following. Same markup ListTools uses. */}
+        <span className="list-said" role="status" aria-live="polite">
+          {order.notice}
+        </span>
 
-      {/* Said out loud, because a keyboard move happens somewhere the eye
-          is not necessarily following. Same markup ListTools uses. */}
-      <span className="list-said" role="status" aria-live="polite">
-        {order.notice}
-      </span>
-
-      <div className="table-scroll">
-      <table className="list">
-        <thead>
-          <tr>
-            {order.head}
-            <th className="w-col-xl">{t('Branş')}</th>
-            {/* --w-col-sm, the number Teachers measured for the same box:
-                the heading asks for 78 px and the box holds "Mat". */}
-            <th className="w-col-sm">{t('Kısaltma')}</th>
-            <th className="num">{t('Öğretmen')}</th>
-            {/* The "varsayılan" note. --w-col-lg and not xl: it holds
-                "varsayılanı: Mat", and at xl it was as wide as the name
-                column beside it and read like a second one. */}
-            <th className="w-col-lg" />
-            <th className="w-col-md" />
-          </tr>
-        </thead>
-        <tbody ref={order.bodyRef}>
-          {state.settings.subjects.map((subject, i) => (
-            <SubjectRow
-              key={subjectKey(subject)}
-              subject={subject}
-              state={state}
-              change={change}
-              inList
-              grip={order.grip(i, subject)}
-              onRemove={() => remove(subject)}
-              onRename={(next) => void rename(subject, next)}
-            />
-          ))}
-        </tbody>
-        {strays.length > 0 && (
-          <tbody>
-            {strays.map((subject) => (
+        <div className="table-scroll">
+        <table className="list">
+          <thead>
+            <tr>
+              {order.head}
+              <th className="w-col-xl">{t('Branş')}</th>
+              {/* --w-col-sm, the number Teachers measured for the same box:
+                  the heading asks for 78 px and the box holds "Mat". */}
+              <th className="w-col-sm">{t('Kısaltma')}</th>
+              <th className="num">{t('Öğretmen')}</th>
+              {/* The built-in short. --w-col-md and not sm: the cell holds
+                  "Mat" or a dash, so the width is the HEADING's now, and
+                  "Varsayılan" is ten characters — sm's 10ch leaves nothing for
+                  the cell padding. */}
+              <th className="w-col-md">{t('Varsayılan')}</th>
+              <th className="w-col-md" />
+            </tr>
+          </thead>
+          <tbody ref={order.bodyRef}>
+            {state.settings.subjects.map((subject, i) => (
               <SubjectRow
                 key={subjectKey(subject)}
                 subject={subject}
                 state={state}
                 change={change}
-                inList={false}
-                // A stray is read-only, so this is never reached — the prop is
-                // required so a new row site cannot forget it.
-                onRename={() => undefined}
-                // No number and no handle: these rows are not IN the
-                // ordered list, so numbering them would count a sequence
-                // they are not part of. Two empty cells keep the columns
-                // lined up with the table above.
-                grip={
-                  <>
-                    <td className="row-no" />
-                    <td className="grip-col" />
-                  </>
-                }
+                inList
+                grip={order.grip(i, subject)}
                 onRemove={() => remove(subject)}
+                onRename={(next) => void rename(subject, next)}
               />
             ))}
           </tbody>
-        )}
-      </table>
+          {strays.length > 0 && (
+            <tbody>
+              {strays.map((subject) => (
+                <SubjectRow
+                  key={subjectKey(subject)}
+                  subject={subject}
+                  state={state}
+                  change={change}
+                  inList={false}
+                  // A stray is read-only, so this is never reached — the prop is
+                  // required so a new row site cannot forget it.
+                  onRename={() => undefined}
+                  // No number and no handle: these rows are not IN the
+                  // ordered list, so numbering them would count a sequence
+                  // they are not part of. Two empty cells keep the columns
+                  // lined up with the table above.
+                  grip={
+                    <>
+                      <td className="row-no" />
+                      <td className="grip-col" />
+                    </>
+                  }
+                  onRemove={() => remove(subject)}
+                />
+              ))}
+            </tbody>
+          )}
+        </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

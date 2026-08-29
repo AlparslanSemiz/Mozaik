@@ -712,7 +712,7 @@ Tam hâli [src/types.ts](src/types.ts). Değiştirmek pahalı; değiştirmeden �
 
 ```ts
 State {
-  schemaVersion: 8
+  schemaVersion: 11
   settings: {
     schoolName: string
     days:   Day[]      // varsayılan 6 gün: Salı..Pazar (Pazartesi ders yok)
@@ -726,6 +726,7 @@ State {
   rooms, teachers, classes, lessons
   unavailable: Record<`${entityId}|${day}|${hour}`, 1>   // öğretmen + sınıf + derslik
   placements:  Record<`${classId}|${day}|${hour}`, lessonId>
+  pinned:      Record<`${classId}|${day}|${hour}`, 1>   // sabitlenmiş hücreler
 }
 Day        { name, longBreakAfter }         // 5 = öğle arası 5. dersten sonra, 0 = yok
 Bell       { start, lessonMinutes, breakMinutes, longBreakMinutes }  // 09:00 · 40 · 10 · 30
@@ -737,17 +738,23 @@ Teacher    { name, short, subject, subject2, gender, color, limits }
                                             // eksik veri değil. Kâğıda çıkmaz.
                                             // limits alanları null = okul varsayılanı
                                             // color = PALETTE indeksi, kimseyle çakışmaz
-ClassGroup { name, roomId, color }          // derslik sınıfın sabit alanı, seçilmez
-Lesson     { classId, teacherId, weeklyHours, pairs, second, maxPerDay }
+ClassGroup { name, roomId, color, maxSameLessonPerDay }
+                                            // derslik sınıfın sabit alanı, seçilmez
+                                            // maxSameLessonPerDay: null = okul
+                                            // varsayılanı. Günlük sınırın ORTA
+                                            // katmanı; dersin kutusu onu da ezer.
+Lesson     { classId, teacherId, weeklyHours, blocks, second, maxPerDay }
                                             // second = hocanın İKİNCİ branşından
                                             // mı. Branşın ADI değil BAYRAK: ad
                                             // ikinci bir gerçek olur ve hoca
                                             // düzeltilince sessizce sapar.
-                                            // pairs = haftanın kaç saati İKİLİ
-                                            // blok olarak inecek. 0..floor(h/2).
-                                            // Gerisi tek saat, yani şekil tek
-                                            // sayıyla belli: 5 saat + pairs 2 =
-                                            // 2+2+1. blockSize'ın yerine geçti.
+                                            // blocks = birden uzun blokların
+                                            // LİSTESİ, büyükten küçüğe. Her
+                                            // eleman 2, 3 ya da 4; toplamı
+                                            // weeklyHours'ı geçmez, kalanı tek
+                                            // saat. 9 saat + [3,2] = 3+2+1+1+1+1.
+                                            // pairs'ın yerine geçti (v9), o da
+                                            // blockSize'ın yerine geçmişti (v7).
 ```
 
 ### Depolama anahtarları
@@ -864,21 +871,30 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   aynı `lessonId` yazılır. Bir dersin blokları eşit boylu olmadığından (2+1) bir
   koşu birden çok türlü okunabilir; hangisi olduğuna **tek bir sözleşme** karar
   verir — `constraints.ts`'teki `placedBlocks()`: gün/saat sırasıyla gezilir, her
-  koşuda önce **ikililer** alınır (dersin `pairs` bütçesi bitene kadar), kalan
-  hücreler tek saattir. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur.
-- **Haftalık saatin şekli tek sayıyla saklanır.** `pairs`; blok dizisi değil.
-  `weeklyHours` zaten toplam, yanına bir de dizi koymak ikinci bir gerçek olurdu.
-  Kombinasyonlar yalnız **1 ve 2**'den kurulur — üç saatlik blok v7'de kalktı,
-  gerekçe listenin okunabilirliği (12 saat 7 seçenek, üçlüyle 19 olurdu).
+  koşuda önce **uzun bloklar** alınır (dersin `blocks` listesi büyükten küçüğe
+  tükenene kadar), kalan hücreler tek saattir. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur.
+- **Haftalık saatin şekli bir LİSTE.** `blocks`: birden uzun blokların boyları,
+  büyükten küçüğe. `weeklyHours` zaten toplam ve bu onu **tekrar etmez**, yalnız
+  şeklini söyler; toplamı asla toplamı geçemez (`clampBlocks`, `blocks.ts`).
+  Tek sayı olan `pairs` yalnız "şu kadar İKİLİ" diyebiliyordu, yani 3 ve 4'ü
+  hiç söyleyemiyordu; ondan önceki `blockSize` ise "her blok bu boyda"
+  diyebiliyordu, yani `2+1`'i söyleyemiyordu. Bir liste üçünü de söyler.
 - **Anahtarlarda asla isim kullanılmaz, hep `id`.** "Şükrü" adı değişince yerleşim bozulmasın.
 - **Zil saatleri hesaplanır, saklanmaz.** Başlangıç + üç süre; her günün tek farkı öğle
   arasının nereye düştüğü. Period başına satır tutmak aynı bilgiyi 12 kez saklamak olurdu.
 - **Kapalı saatler tek sözlükte.** `id`'ler üç liste arasında benzersiz olduğu için
   öğretmen, sınıf ve derslik aynı `unavailable` haritasını paylaşır — ikinci bir sözlük,
   ikinci bir göç ve ikinci bir `sanitize` dalı gerekmiyor.
-- **Sınırlar iki katmanlı.** `settings.limits` okul geneli; `Teacher.limits` /
-  `Lesson.maxPerDay` içinde `null` "varsayılanı kullan" demektir. 25 hocaya aynı sayıyı
-  25 kez girdirmemek için.
+- **Sınırlar KATMANLI, ve "aynı dersten günde en fazla" ÜÇ katmanlı.**
+  `settings.limits` okul geneli; `Teacher.limits`, `ClassGroup.maxSameLessonPerDay`
+  ve `Lesson.maxPerDay` içinde `null` "bir üsttekini kullan" demektir. Günlük ders
+  sınırında sıra en dardan en genişe: **dersin kutusu → sınıfın kutusu → okul**.
+  Gerekçe her katmanda aynı: 25 hocaya aynı sayıyı 25 kez girdirmemek, ve
+  "510 bir günde aynı dersten en fazla 2 saat görsün"ü o sınıfın **her dersine**
+  tek tek yazdırmamak. Çözen tek yer `rules.ts`'teki `lessonLimit()`; `group`
+  parametresi sondan ve isteğe bağlı (tuzak 76), sıcak yollar sınıfı elden verir.
+  Bir kutunun placeholder'ı **bir üstteki katmanın** sayısıdır — kullanılmayacak
+  bir sayı gösteren placeholder yalan söyler.
 - **Branş kısaltmasında yalnızca DEĞİŞTİRİLEN saklanır.** `Matematik → Mat` gömülü
   tablodan gelir; `subjectShorts`'a ancak varsayılandan farklı bir şey yazılınca kayıt
   düşer, varsayılana geri yazılırsa silinir. Böylece yedek 21 varsayılanla şişmez ve
@@ -898,7 +914,10 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   v5 = `ClassGroup.color` + `settings.subjects`, v6 = `Teacher.gender`.
   v7 = `Lesson.pairs`, `blockSize`'ın yerine.
   v8 = `Teacher.subject2` + `Lesson.second` — bir öğretmen iki branş verebilir.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v8 tek okuyucudan geçer —
+  v9 = `Lesson.blocks`, `pairs`ın yerine — blok 2, 3 ya da 4 saat olabilir.
+  v10 = `State.pinned` — okuyanın yerine çivilediği hücreler.
+  v11 = `ClassGroup.maxSameLessonPerDay` — günlük sınır bir orta katman kazandı.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v11 tek okuyucudan geçer —
   v3–v6'nın tek farkı **eklenen** alanlar, v7 ise ilkin **değişen** alanı ve onu
   `readLessons()` kendi başına çevirir (`blockSize` 2 ya da 3 → `floor(saat/2)`
   ikili, 1 → sıfır). `id`'ler ve gün indeksleri değişmediği için `unavailable` ve
@@ -1552,8 +1571,8 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     dersin üç bitişik hücresi hem `[2,1]` hem `[1,2]`dir ve ızgarada ikisini
     ayıran hiçbir işaret yok. Çare şemayı büyütmek **değil**, bir **sözleşme**
     yazıp her yeri ona uydurmak: `placedBlocks()` gün/saat sırasıyla gezer, her
-    koşuda önce ikilileri alır (dersin `pairs` bütçesi bitene kadar), kalanı tek
-    sayar. Hangi okumanın seçildiği bir programı **yanlış yapamaz** — her kısıt
+    koşuda önce uzun blokları alır (dersin `blocks` listesi büyükten küçüğe
+    tükenene kadar), kalanı tek sayar. Hangi okumanın seçildiği bir programı **yanlış yapamaz** — her kısıt
     saate ve koşuya bakar, sınıra değil — ama sağ tıkın kaç hücre aldığına ve
     havuzun hangi kartları borçlu olduğuna karar verir, ve o **tek** cevap
     olmalı. Bu fonksiyonu çağırmayan her yer sessizce sapar: `continues`
@@ -1885,6 +1904,20 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     okunmasın. Genel kural: bir dizeyi yeniden adlandırmadan önce sorulacak
     soru "bu kime görünüyor" değil, **"bunu kim ARIYOR"**dur.
 
+96. **`git checkout -- <dosya>` BİR MUTASYONU GERİ ALMAZ, O DOSYADAKİ BÜTÜN
+    OTURUMU GERİ ALIR.** Bu depoda bir testin gerçekten bir şey ölçtüğü
+    mutasyonla sınanıyor: kural bilerek bozulur, süit koşulur, sonra geri
+    alınır. `Summary.tsx` üstünde tam bunu yaparken geri alma `git checkout --`
+    ile yapıldı ve o dosyaya ait o turun **tamamını** sildi — commit edilmemiş
+    her şey `HEAD`'e göre "değişiklik"tir, ve komut hiçbir şey sormaz, hiçbir
+    şey yazmaz. Görülme biçimi de öğretici: mutasyon testi **yeşil** geçti, yani
+    okunan sonuç "test bir şey ölçmüyor" oldu — teşhis, teşhissizlikten beter
+    (tuzak 72'nin ailesi). Gerçek sebep testin zayıflığı DEĞİLDİ; o turun kodu
+    artık orada değildi. Kural: mutasyon denenecek dosya önce bir yere
+    **kopyalanır** (`cp x /tmp/x.bak`), geri alma o kopyadan yapılır. Bir sürüm
+    denetimi komutu, yazılmamış işi olan bir dosyada bir geri-alma aracı
+    değildir.
+
 ---
 
 ## Tasarım — serbest
@@ -2077,6 +2110,26 @@ adını taşıyamaz.
   orada — proje doluyken sorusu **ne kaybedileceğini sayar** ve kırmızıdır.
   Eskiden tek ev Kurulum'du, yani ancak **boş** bir projeyle ulaşılabiliyordu:
   kendi verisine başlamış biri örneğe bir daha hiç bakamıyordu.
+- **EKLEME KENDİ BLOĞU (2026-08-29).** Beş liste ekranının (Derslikler ·
+  Branşlar · Öğretmenler · Sınıflar · Dersler) her biri **iki kardeş panel**:
+  `.panel.add-panel` (işi adlandıran başlık + açıklama + form + Excel'den
+  yapıştır) ve `.panel.step-panel` (sayılı başlık + arama şeridi + tablo).
+  Bir tur boyunca aradaki ayrım tek bir **çizgi**ydi ve yetmedi:
+  *"aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın."* Sıra
+  değişmedi (*"ama yerleri değişmesin"*) ve sayılı başlık **saydığı listeyle**
+  gitti, yani ekranda hâlâ tek bir `--fs-xl` başlık var. `e2e/kurulum.spec.ts`
+  44 hem sırayı hem **iki kutu olduğunu** ölçüyor.
+- **SAĞ RAYDA KAYDIRAN KUTU PANELİN KENDİSİ (2026-08-29).** `.cols > aside` bir
+  flex sütunu ve `100cqh`'de duruyor; tek panelli her rayda o panel
+  `min-height: 0; overflow-y: auto` alıyor ve içindeki sabit tavanlar
+  (`.stat-scroll` 22rem, `.entity-list` 62vh) geçersiz kılınıyor. Yani bir
+  özetin boyu **içindekinden** geliyor, styles.css'teki bir sayıdan değil; ekranı
+  geçince kaydırma **özetin içinde** oluyor ve başlığı yapışkan kalıyor.
+  `:only-child` bilerek — Çıktı'nın dört panelli rayı kendi kaydırmasını tutar.
+  Sabit tavanlar Kontrol'de duruyor (orası ray değil).
+- **ÖZET'TE ÖNCE NE YANLIŞ.** Uyarı kutuları kapasite tablosunun **üstünde**, ve
+  `CapacityRows` Özet'te de `problemsFirst` alıyor. Sorun yoksa hiçbir şey
+  çizilmez: bırakılan bir başlık ya da boşluk yok.
 - **Okul yalnız listeler, Ayarlar yalnız ayarlar.** Okul **dört** sayılabilir
   liste: `Derslikler · Branşlar · Öğretmenler · Sınıflar`; dersler kendi
   sekmesinde. **Branşlar 2026-08-28'de Ayarlar'dan buraya geldi** ve sıra

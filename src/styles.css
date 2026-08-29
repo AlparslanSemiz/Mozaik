@@ -3186,17 +3186,19 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
-/* "Listelerde ekleme kısmı bloğu ile alttaki liste arasında çizgi olsun yani
-   iki farklı blok olsun. ama yerleri değişmesin."
+/* THE ADD BLOCK IS A PANEL.
+   ("Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok olduğu gibi,
+    yani sadece çizgi olmasın.")
 
-   A rule and some room, on the add row itself. Nothing moves in the DOM: the
-   form is still the first thing in the panel and the list is still under it —
-   what changes is that the eye can now see where one ends. The margin the row
-   already carried is folded into the padding so the gap does not double. */
-.form-row.panel-add {
-  padding-bottom: var(--space-4);
-  margin-bottom: var(--space-4);
-  border-bottom: 1px solid var(--line);
+   The round before this drew a rule across the one panel — `.form-row.panel-add`
+   with a `border-bottom` — and the answer to that was that a line is not a
+   block: it says where something ends, not that the two are different things.
+   The rule is gone and the markup does the saying now, so the CSS left here is
+   the one thing splitting a panel in two costs: a `.form-row` carries a bottom
+   margin for a STACK of form rows, and as the last thing in a panel that margin
+   lands on top of the panel's own padding. */
+.add-panel > .form-row:last-child {
+  margin-bottom: 0;
 }
 
 /* Kontrol is one panel at a time now, so nothing constrains its width any
@@ -3530,7 +3532,16 @@ table.list td .split-count > input.num,
 .cols > aside {
   position: sticky;
   top: 0;
-  max-height: max(18rem, 100cqh);
+  /* A flex column so a single panel can be told to fit the rail without any
+     arithmetic: `min-height: 0` on the child is the whole mechanism. */
+  display: flex;
+  flex-direction: column;
+  /* The 18rem FLOOR is gone. A floor above the ceiling is a ceiling that can
+     be exceeded (the shape of pitfall 43), and on a short window that is
+     exactly what it did: the rail grew past the screen it was measured
+     against. What is left is the one sentence the rail promises — never
+     longer than the box being scrolled. */
+  max-height: 100cqh;
   overflow-y: auto;
   overflow-x: hidden;
   /* A focus ring on a control in the first or last row would otherwise be
@@ -3539,14 +3550,74 @@ table.list td .split-count > input.num,
   margin: -2px;
 }
 
+/* THE SUMMARY IS THE SCROLLER, NOT THE COLUMN.
+   ("Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir
+    ama en fazla tam ekranın uzunluğu kadar olsun ... eğer liste çok uzunsa
+    işte kaydırma o özetin içinde olsun.")
+
+   Before this the rail scrolled and the boxes inside it had their own fixed
+   ceilings — 22rem on the capacity table, 62vh on the availability list — so a
+   panel's height came from a number written in this file rather than from what
+   was in it: a ten-row table scrolled in a 22rem window on a monitor with room
+   for thirty. Now the panel is as tall as its content, the flex column stops
+   it at the screen, and what does not fit scrolls INSIDE the panel.
+
+   `:only-child` on purpose: Çıktı's rail holds four stacked panels and there
+   "one panel fills the screen" would be the wrong answer — that rail keeps its
+   own scrollbar, which is what the rule above still gives it. */
+.cols > aside > .panel:only-child {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* The heading stays put while its own panel scrolls under it: without this the
+   word telling you WHICH summary you are reading is the first thing to leave.
+   The negative offset and the padding cancel the panel's own --space-6, so the
+   sticky band lands on the panel edge rather than 1.5rem below it. Sticky is a
+   positioned box, so the z-index here is actually read (pitfall 84). */
+.cols > aside > .panel:only-child > h2:first-child,
+.cols > aside > .panel:only-child > .panel-head:first-child {
+  position: sticky;
+  top: calc(var(--space-6) * -1);
+  z-index: 1;
+  background: var(--paper);
+  padding-block: var(--space-6) var(--space-2);
+  margin-block: calc(var(--space-6) * -1) 0;
+}
+
+/* ...and the ceilings those boxes carried are the screen's job now. Both axes,
+   because per CSS Overflow 3 one axis at `auto` drags a `visible` one with it. */
+.cols > aside > .panel:only-child .stat-scroll,
+.cols > aside > .panel:only-child .entity-list {
+  max-height: none;
+  overflow: visible;
+}
+
 /* One column, one flow: nothing is beside anything, so there is nothing to
    keep in place and a box that scrolls inside a box that scrolls is worse
    than a long page. */
 @media (max-width: 68rem) {
   .cols > aside {
     position: static;
+    display: block;
     max-height: none;
     overflow-y: visible;
+  }
+
+  /* ...and the panel gives its scrollbar back too: below this width nothing is
+     beside anything, so a box scrolling inside a page that scrolls is worse
+     than a long page. */
+  .cols > aside > .panel:only-child {
+    overflow-y: visible;
+    overflow-x: visible;
+  }
+
+  .cols > aside > .panel:only-child > h2:first-child,
+  .cols > aside > .panel:only-child > .panel-head:first-child {
+    position: static;
+    padding-block: 0;
+    margin-block: 0;
   }
 }
 
@@ -3555,6 +3626,8 @@ table.list td .split-count > input.num,
 /* Choosing among 25 teachers used to be a <select>: one visible row, and the
    count of closed hours invisible until you picked one. The list shows all of
    them at once, which is also what fills the second column. */
+/* Same story as `.stat-scroll`: this ceiling holds wherever the list is NOT the
+   only panel in a rail, and is overridden away where it is. */
 .entity-list {
   display: flex;
   flex-direction: column;
@@ -5262,12 +5335,14 @@ body.row-dragging {
   font-size: var(--fs-sm);
 }
 
-/* A COUNTED SUMMARY, kept to a readable height. The capacity table in Kurulum's
-   right-hand column has a row per teacher; the panel under it is where the
-   reader goes next, and at twenty-five rows it was below the fold. 22rem is
-   about ten rows — enough to read the shape of the list and see that it
-   continues. `.entity-list` bounds itself at 62vh for the same reason; this one
-   is smaller because it is a summary, not the list itself. */
+/* A COUNTED SUMMARY, kept to a readable height. 22rem is about ten rows —
+   enough to read the shape of the list and see that it continues.
+
+   THIS NUMBER IS KONTROL'S NOW. In a right rail it is overridden away: there
+   the panel itself is the scroller and its height comes from the screen, not
+   from a number written here (see `.cols > aside > .panel:only-child`). A
+   fixed rem ceiling was the thing being complained about — a ten-row table
+   scrolling in its own little window while the column beside it had room. */
 .stat-scroll {
   max-height: 22rem;
   overflow-y: auto;

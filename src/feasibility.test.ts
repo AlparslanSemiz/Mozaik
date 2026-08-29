@@ -33,8 +33,8 @@ function build(): State {
     rooms: [{ id: 'dA', name: 'A' }],
     teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } }],
     classes: [
-      { id: 's510', name: '510', roomId: 'dA', color: 0 },
-      { id: 's511', name: '511', roomId: 'dA', color: 1 },
+      { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
+      { id: 's511', name: '511', roomId: 'dA', color: 1, maxSameLessonPerDay: null },
     ],
     lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blocks: [], second: false, maxPerDay: null }],
     unavailable: {},

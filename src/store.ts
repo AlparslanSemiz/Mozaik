@@ -405,13 +405,14 @@ export function parseState(text: string): State | null {
     version === 7 ||
     version === 8 ||
     version === 9 ||
+    version === 10 ||
     version === SCHEMA_VERSION
   ) {
-    // v3..v10 go through ONE reader: most of them only ADD fields — a v3 file
+    // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
     // arrives with no subject overrides, a v4 with no class colours and no
-    // subject list, a v5 with no gender, a v7 with no second subject — and v7
-    // is the only one that CHANGES one, which `readLessons` below handles on
-    // its own. Ids, day indexes and therefore `unavailable` / `placements`
+    // subject list, a v5 with no gender, a v7 with no second subject, a v10
+    // with no daily limit on the class — and v7 is the only one that CHANGES
+    // one, which `readLessons` below handles on its own. Ids, day indexes and therefore `unavailable` / `placements`
     // carry over untouched in every case.
     //
     // Every version below the current one is spelled out ON PURPOSE. Bumping
@@ -473,7 +474,15 @@ export function parseState(text: string): State | null {
           },
         })),
       ),
-      classes: spreadColors(asArray<ClassGroup>(g.classes, blank.classes)),
+      // A v10 file and below arrives with no daily limit on the class, and
+      // `null` is exactly what that means: use the school's number. `asBox` is
+      // the same reader the three teacher boxes go through.
+      classes: spreadColors(
+        asArray<ClassGroup>(g.classes, blank.classes).map((c) => ({
+          ...c,
+          maxSameLessonPerDay: asBox(c.maxSameLessonPerDay),
+        })),
+      ),
       lessons: readLessons(asArray<unknown>(g.lessons, blank.lessons), Number(version)),
       unavailable: asMap<1>(g.unavailable),
       placements: asMap<string>(g.placements),

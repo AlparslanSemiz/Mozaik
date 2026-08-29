@@ -59,9 +59,9 @@ function build(): State {
       { id: 'oMB', name: 'Murat Bey', short: 'MB', subject: 'Kimya', subject2: '', gender: '', color: 2, limits: { ...NO_TEACHER_LIMITS } },
     ],
     classes: [
-      { id: 's510', name: '510', roomId: 'dA', color: 0 },
-      { id: 's511', name: '511', roomId: 'dA', color: 1 },
-      { id: 's433', name: '433', roomId: 'dB', color: 2 },
+      { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
+      { id: 's511', name: '511', roomId: 'dA', color: 1, maxSameLessonPerDay: null },
+      { id: 's433', name: '433', roomId: 'dB', color: 2, maxSameLessonPerDay: null },
     ],
     lessons: [
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
@@ -607,6 +607,25 @@ describe('blocker — bir ders günde en fazla N saat', () => {
     d = { ...d, lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, maxPerDay: 3 } : x)) };
     d = place(d, 'x1', 0, 0);
     expect(why(d, 'x1', 0, 1)).toBeNull();
+  });
+
+  // The middle layer, through the same funnel every drop goes through: one
+  // number on the class, and every lesson that class has obeys it.
+  it('sınıfın kutusu okul varsayılanını ezer', () => {
+    let d = withRule(build(), 'maxSameLessonPerDay', 4, 'block');
+    d = { ...d, classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)) };
+    d = place(d, 'x1', 0, 0);
+    expect(why(d, 'x1', 0, 2)).toBe(
+      '510 sınıfı Pazartesi günü MÇ dersinden en fazla 1 saat görmeli, burada 2 saat olur',
+    );
+  });
+
+  it('dersin kutusu SINIFIN kutusunu da ezer', () => {
+    let d = withRule(build(), 'maxSameLessonPerDay', 4, 'block');
+    d = { ...d, classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)) };
+    d = { ...d, lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, maxPerDay: 3 } : x)) };
+    d = place(d, 'x1', 0, 0);
+    expect(why(d, 'x1', 0, 2)).toBeNull();
   });
 });
 

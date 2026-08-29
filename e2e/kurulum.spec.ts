@@ -176,14 +176,19 @@ test.describe('12. Branş kısaltmaları', () => {
     const input = row.getByRole('textbox', { name: /kısaltması$/ });
     const original = (await input.inputValue())!;
 
+    // The built-in short is a COLUMN now, not a sentence repeated on every
+    // row: the word "varsayılan" is the heading and the cell holds the value
+    // alone, or the empty-cell dash where the box already carries it.
+    const note = row.locator('td.hint');
     await input.fill('Zzz');
     await input.blur();
-    await expect(row).toContainText(`varsayılanı: ${original}`);
+    await expect(note).toHaveText(original);
+    await expect(page.getByRole('columnheader', { name: 'Varsayılan' })).toBeVisible();
 
     await input.fill(original);
     await input.blur();
-    await expect(row).toContainText('varsayılan');
-    await expect(row).not.toContainText('varsayılanı:');
+    await expect(note).toHaveText('–');
+    await expect(row).not.toContainText('varsayılan');
   });
 });
 
@@ -468,6 +473,60 @@ test.describe('31. Kurulum — sağ sütun', () => {
     // ...and so did the one number that decides whether the week fits at all.
     await expect(page.locator('.cols aside')).toContainText('Haftada sınıf başına');
   });
+
+  // "Özetteki hatalar özetin en üstüne gelsin. Hata gidince yok olsun."
+  //
+  // Both boxes above used to be written AFTER the capacity table and after the
+  // list under it — i.e. below the fold on the one panel whose job is to say
+  // something is missing. Position, not existence, is what this measures, so it
+  // asks the DOM which came first rather than reading the sentence again.
+  test('uyarı kapasite tablosunun ÜSTÜNDE, ve sorun gidince kayboluyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    await page.getByPlaceholder(/Sınıf adı/).fill('700');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+
+    const panel = page.locator('.cols > aside > .panel');
+    const order = await panel.evaluate((el) => {
+      const kids = [...el.children];
+      return {
+        warn: kids.findIndex((c) => c.classList.contains('warn-box')),
+        table: kids.findIndex((c) => c.querySelector('table.stat') !== null),
+      };
+    });
+    expect(order.warn, 'uyarı kutusu yok').toBeGreaterThan(-1);
+    expect(order.table, 'kapasite tablosu yok').toBeGreaterThan(-1);
+    expect(order.warn, 'uyarı tablonun altında kalmış').toBeLessThan(order.table);
+
+    // Give it a lesson and the warning is simply not drawn any more — no empty
+    // heading, no gap where it used to be.
+    await openLessons(page, 'class');
+    await expect(panel.locator('.warn-box')).toHaveCount(0);
+  });
+
+  // The rows that are wrong come first inside the table too. `problemsFirst` was
+  // written for Kontrol and never passed here, so an "İmkânsız" teacher sat
+  // wherever the list happened to put them.
+  test('kapasite tablosunda sorunlu satır EN ÜSTTE', async ({ page }) => {
+    await openWithSample(page);
+    // The LAST teacher in the list, closed for the whole week: capacity 0
+    // against whatever they carry, so the row cannot be anything but
+    // "İmkânsız". The last one on purpose — closing the first would put the
+    // problem at the top whether anything sorted or not, and a test that passes
+    // with the sort removed is measuring nothing (pitfall 23).
+    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
+    await page.locator('.entity').last().click();
+    const label = (await page.locator('.entity[aria-current="true"] .entity-name').innerText()).trim();
+    // "CA · Cem Aslan (Mat)" on the availability row; the summary carries the
+    // plain name. Split rather than strip — no regex to get subtly wrong.
+    const who = label.split(' · ')[1]!.split(' (')[0]!;
+    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+
+    await openSetup(page, 'Öğretmenler');
+    const first = page.locator('.cols > aside table.stat tbody tr').first();
+    await expect(first, 'sorunlu satır listenin sonunda kalmış').toContainText(who);
+    await expect(first.locator('.badge')).toHaveText('İmkânsız');
+  });
 });
 
 // THE SHAPE OF A PANEL, asked for by name: "başlık, açıklama, ekleme ve
@@ -482,8 +541,14 @@ test.describe('31. Kurulum — sağ sütun', () => {
 // This measures ORDER, not geometry: it is a rule about what a reader meets
 // first, and it survives any amount of restyling. The layout measurements
 // deleted in the D round were the other kind.
+//
+// THE SHAPE NOW SPANS TWO PANELS. "Listelerde ekleme kısmı ayrı blok olsun.
+// aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın." — the order a
+// reader meets things in did not change, so neither did this test's point; what
+// it has to say now is that the two halves are two BOXES. That the second one
+// is separate is the request itself, so it is asserted rather than assumed.
 test.describe('44. Panel simetrisi', () => {
-  /** The tag/class sequence a panel actually renders, top to bottom. */
+  /** The tag/class sequence one panel actually renders, top to bottom. */
   async function shapeOf(page: Page, panel: string) {
     return page.locator(panel).first().evaluate((el) =>
       [...el.children]
@@ -517,14 +582,28 @@ test.describe('44. Panel simetrisi', () => {
       await openWithSample(page);
       if (step === 'Dersler') await openLessons(page);
       else await openSetup(page, step);
-      const shape = await shapeOf(page, '.panel.step-panel');
+      // Two boxes, in this order, and the add one is FIRST: "ama yerleri
+      // değişmesin".
+      const panels = page.locator('.cols > div > .panel');
+      await expect(panels, `${step}: ekleme ve liste iki ayrı blok değil`).toHaveCount(2);
+      await expect(panels.nth(0)).toHaveClass(/add-panel/);
+      await expect(panels.nth(1)).toHaveClass(/step-panel/);
 
-      // The first three are the contract. What follows them (search strip,
-      // "no match" line, the table) is the list, and only its ORDER is fixed.
-      expect(shape.slice(0, 3), `${step} sırası`).toEqual(['baslik', 'aciklama', 'ekleme']);
-      expect(shape.indexOf('liste'), `${step}: liste eklemeden önce`).toBeGreaterThan(
-        shape.indexOf('ekleme'),
-      );
+      const add = await shapeOf(page, '.panel.add-panel');
+      const list = await shapeOf(page, '.panel.step-panel');
+
+      // The add block names the work, explains it, then asks for it. Warnings
+      // are dropped rather than placed: Dersler grows one between the two when
+      // there is nothing to add a lesson TO, and where it appears is that
+      // screen's business, not this rule's.
+      expect(
+        add.filter((x) => x !== 'uyari'),
+        `${step} ekleme bloğu`,
+      ).toEqual(['baslik', 'aciklama', 'ekleme']);
+      // The list block names what it holds. What follows (search strip, "no
+      // match" line, the table) is the list, and only its ORDER is fixed.
+      expect(list[0], `${step} liste bloğu başlıkla açmıyor`).toBe('baslik');
+      expect(list.indexOf('liste'), `${step}: listede tablo yok`).toBeGreaterThan(0);
     });
   }
 
@@ -846,7 +925,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       if (pct !== 100) await chooseScale(page, pct);
       for (const step of STEPS) {
         await goList(page, step);
-        const gap = await page.locator('.cols > div .panel').first().evaluate((panel) => {
+        const gap = await page.locator('.panel.step-panel').evaluate((panel) => {
           const table = panel.querySelector('.table-scroll > table.list')!;
           const pad = parseFloat(getComputedStyle(panel).paddingRight);
           const inner = panel.getBoundingClientRect().right - pad;
@@ -999,12 +1078,12 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       .first()
       .evaluate((el) => el.getBoundingClientRect().width);
     const inForm = await page
-      .locator('.panel.step-panel > .form-row input.text-sm')
+      .locator('.panel.add-panel > .form-row input.text-sm')
       .evaluate((el) => el.getBoundingClientRect().width);
     expect(inRow).toBeLessThan(inForm);
     // The add box has to hold its own placeholder, whatever it happens to be.
     const fits = await page
-      .locator('.panel.step-panel > .form-row input.text-sm')
+      .locator('.panel.add-panel > .form-row input.text-sm')
       .evaluate((el) => {
         const s = el as HTMLInputElement;
         const probe = document.createElement('span');
@@ -1192,6 +1271,57 @@ test.describe('67. Ders dağılımı', () => {
     await perDay.fill('4');
     await perDay.blur();
     await expect(row.locator('.split-warn')).toHaveCount(0);
+  });
+
+  // THE MIDDLE LAYER — "Sınıfların özel olarak bir günde aynı dersten kaç saat
+  // girme opsiyonu olsun." One number on the class, and every lesson that class
+  // has obeys it; the lesson's own box still wins over it. Schema v11.
+  test('sınıfın kendi günlük sınırı derslerine geçiyor ve yenilemeden sonra duruyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+
+    // The first class, tightened to one hour of any one lesson a day. The
+    // sample school's own number is 2.
+    const first = mainList(page).locator('tbody tr').first();
+    const className = (await first.getAttribute('data-row-name'))!;
+    const box = first.getByRole('spinbutton', { name: /aynı dersten en fazla/ });
+    await expect(box, 'boş kutu okulun sayısını gösteriyor').toHaveAttribute('placeholder', '2');
+    await box.fill('1');
+    await box.blur();
+
+    // Dersler reads it: that class's lessons now warn at two hours a day, and
+    // the placeholder in their own box names the CLASS's number, not the
+    // school's — a placeholder that names a number the empty box would not use
+    // would be a lie.
+    await openLessons(page, 'all');
+    const lesson = page
+      .locator('.panel.step-panel table.list tbody tr')
+      .filter({ has: page.locator(`td:text-is("${className}")`) })
+      .first();
+    await expect(lesson.locator('input[type="number"]').last()).toHaveAttribute(
+      'placeholder',
+      '1',
+    );
+
+    // ...and it survives a reload, which is the half a schema bump can break.
+    await reopen(page);
+    await openSetup(page, 'Sınıflar');
+    await expect(
+      mainList(page)
+        .locator('tbody tr')
+        .first()
+        .getByRole('spinbutton', { name: /aynı dersten en fazla/ }),
+    ).toHaveValue('1');
+
+    // Ayarlar → Kurallar counts it, the way it already counts teachers who
+    // carry their own numbers.
+    await openSettings(page, 'Kurallar');
+    const panel = page.locator('.panel', {
+      has: page.getByRole('heading', { name: /Kendi sınırı olan sınıflar/ }),
+    });
+    await expect(panel).toContainText(className);
   });
 
   // Pitfall 33's ghost: the box this replaced had to be sized from its longest

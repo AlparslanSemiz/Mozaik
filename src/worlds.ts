@@ -114,7 +114,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
 
   const classes: ClassGroup[] = (
     spec.classes ?? [{ id: 's510', name: '510', roomId: 'dA' }]
-  ).map((c, i) => ({ ...c, color: i }));
+  ).map((c, i) => ({ maxSameLessonPerDay: null, ...c, color: i }));
 
   const lessons: Lesson[] = (spec.lessons ?? []).map((x) => ({
     id: x.id,
