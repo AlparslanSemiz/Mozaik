@@ -31,7 +31,6 @@ import { useRowOrder } from '../useRowOrder';
 import { EMPTY_QUERY } from '../../listview';
 import {
   addSubject,
-  defaultSubjectShort,
   deleteSubject,
   subjectKey,
   subjectLabel,
@@ -42,6 +41,7 @@ import {
 } from '../../entities';
 import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
+import type { Settings } from '../../types';
 import { T, useT } from '../T';
 
 interface RowProps extends PanelProps {
@@ -53,10 +53,19 @@ interface RowProps extends PanelProps {
   onRemove: () => void;
 }
 
+/** "No overrides at all", for asking what a subject's short would be. */
+const BLANK_SHORTS = { subjectShorts: {} } as Settings;
+
 function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps) {
   const t = useT();
   const current = subjectShort(state.settings, subject);
-  const fallback = defaultSubjectShort(subject);
+  // The default AS DRAWN, not the one an override is compared against.
+  // `defaultSubjectShort` is deliberately Turkish (see `setSubjectShort`: a
+  // comparison that moved with the language would write different things into
+  // `subjectShorts` in two sessions of one project). The hint is a reading, so
+  // it takes the drawn one — it used to take the other, and an English screen
+  // read "default: İng".
+  const shown = subjectShort(BLANK_SHORTS, subject);
   const users = subjectTeachers(state, subject);
   return (
     <tr data-row-name={subject}>
@@ -86,7 +95,7 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
         {users.length}
       </td>
       <td className="hint">
-        {current === fallback ? t('varsayılan') : t('varsayılanı: {kisa}', { kisa: fallback })}
+        {current === shown ? t('varsayılan') : t('varsayılanı: {kisa}', { kisa: shown })}
       </td>
       <td>
         {/* The same action cell as the other three lists. `.form-row` is what

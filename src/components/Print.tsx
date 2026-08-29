@@ -17,7 +17,7 @@
 import { useMemo } from 'react';
 import { periodGroups } from '../bell';
 import { buildIndex, closedKey, placementKey } from '../constraints';
-import { lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
+import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
 import type { Scope } from '../toolState';
@@ -315,7 +315,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                     <tr key={g}>
                       {/* The FULL day name: a printout on a wall is read from a
                           distance, and abbreviations belong to narrow screens. */}
-                      <th className="p-daycol">{day.name}</th>
+                      <th className="p-daycol">{dayLabel(day.name)}</th>
                       {state.settings.hours.map((_, s) => {
                         const lessonId = state.placements[placementKey(group.id, g, s)];
                         const lesson =
@@ -389,7 +389,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                 <tbody>
                   {state.settings.days.map((day, g) => (
                     <tr key={g}>
-                      <th className="p-daycol">{day.name}</th>
+                      <th className="p-daycol">{dayLabel(day.name)}</th>
                       {state.settings.hours.map((_, s) => {
                         const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
                         const lesson =
@@ -466,7 +466,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
               {/* Sheets, not timetables: at 4-up, twenty classes are five
                   pieces of paper, and the number beside the button is the
                   number the printer will produce. */}
-              Yazdır ({Math.ceil(pageCount / options.perSheet)} kâğıt)
+              {t('Yazdır ({n} kâğıt)', { n: Math.ceil(pageCount / options.perSheet) })}
             </button>
           </div>
 

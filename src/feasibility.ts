@@ -331,11 +331,12 @@ export function health(d: State): Health {
   // The sentence names the loudest thing and counts it. "Sorun var" would
   // send somebody to Kontrol to find out what; this tells them before they go.
   const parts: string[] = [];
-  if (blocked > 0) parts.push(`${blocked} kural ihlali`);
-  if (stranded > 0) parts.push(`${stranded} ders kapalı saatte`);
-  if (report.unplaceable.length > 0) parts.push(`${report.unplaceable.length} ders sığmıyor`);
-  if (warnings > 0) parts.push(`${warnings} uyarı`);
-  if (pending > 0) parts.push(`${pending} saat havuzda`);
+  if (blocked > 0) parts.push(t('{n} kural ihlali', { n: blocked }));
+  if (stranded > 0) parts.push(t('{n} ders kapalı saatte', { n: stranded }));
+  if (report.unplaceable.length > 0)
+    parts.push(t('{n} ders sığmıyor', { n: report.unplaceable.length }));
+  if (warnings > 0) parts.push(t('{n} uyarı', { n: warnings }));
+  if (pending > 0) parts.push(t('{n} saat havuzda', { n: pending }));
 
   // An empty project is not "fine", it is NOT STARTED — and saying "Sorun yok"
   // to somebody who has just opened the program for the first time is the chip

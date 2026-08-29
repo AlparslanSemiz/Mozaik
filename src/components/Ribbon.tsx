@@ -399,7 +399,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               onClick={() => ui.setView(v.id)}
             >
               {v.icon}
-              {v.short}
+              {t(v.short)}
             </button>
           ))}
         </Group>
@@ -545,15 +545,15 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
           </button>
           <button className="btn" title={t('Öğretmen yüklerine gider')} onClick={jump('#kontrol-ogretmenler')}>
             {KIND_ICON.teacher}
-            Öğretmenler
+            {t('Öğretmenler')}
           </button>
           <button className="btn" title={t('Sınıf yüklerine gider')} onClick={jump('#kontrol-siniflar')}>
             {KIND_ICON.class}
-            Sınıflar
+            {t('Sınıflar')}
           </button>
           <button className="btn" title={t('Derslik yüklerine gider')} onClick={jump('#kontrol-derslikler')}>
             {KIND_ICON.room}
-            Derslikler
+            {t('Derslikler')}
           </button>
         </Group>
 
@@ -565,10 +565,10 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
         <Group label="Durum">
           <span className="ribbon-value">
             <span className={`badge ${status.blocked > 0 ? 'impossible' : 'ok'}`}>
-              {status.blocked} engel
+              {t('{n} engel', { n: status.blocked })}
             </span>
             <span className={`badge ${status.warnings > 0 ? 'tight' : 'ok'}`}>
-              {status.warnings} uyarı
+              {t('{n} uyarı', { n: status.warnings })}
             </span>
           </span>
         </Group>
@@ -588,7 +588,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             onClick={() => ui.setScope('teachers')}
           >
             {KIND_ICON.teacher}
-            Öğretmenler
+            {t('Öğretmenler')}
           </button>
           <button
             className="btn"
@@ -596,7 +596,7 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
             onClick={() => ui.setScope('classes')}
           >
             {KIND_ICON.class}
-            Sınıflar
+            {t('Sınıflar')}
           </button>
           <button
             className="btn"

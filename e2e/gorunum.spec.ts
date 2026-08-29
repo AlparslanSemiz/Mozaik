@@ -9,7 +9,7 @@
 // instead of a comment.
 
 import { expect, test } from './kapan';
-import {
+import { reopen,
   openSetup,
   chooseDensity,
   chooseUiDensity,
@@ -105,7 +105,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
 
     // The preference is a machine preference, so it lives in localStorage and
     // has to survive the reload that proves it is not React state.
-    await page.reload();
+    await reopen(page);
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.25, 1);
     await openSettings(page, 'Görünüm');
     await expect(page.getByRole('button', { name: '%125', exact: true })).toHaveAttribute(
@@ -114,7 +114,7 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     );
 
     await chooseScale(page, 100);
-    await page.reload();
+    await reopen(page);
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX, 1);
   });
 
@@ -335,7 +335,7 @@ test.describe('46. Görünüm — Ferah', () => {
       'true',
     );
 
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-density', 'ferah');
 
@@ -434,7 +434,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     expect(await savedText(page)).toBe(before);
     expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe('sigdir');
 
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
     expect((await gridMetrics(page)).clock).toBe('none');
@@ -490,7 +490,7 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
       'true',
     );
 
-    await page.reload();
+    await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-avail-clock', 'acik');
 
     const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
@@ -644,7 +644,7 @@ test.describe('81. Yoğunluk listelerde de', () => {
     expect(html).toEqual({ izgara: 'ferah', arayuz: 'sigdir' });
 
     // ...and it survives the reload, because two axes means two keys.
-    await page.reload();
+    await reopen(page);
     expect(
       await page.evaluate(() => ({
         izgara: document.documentElement.getAttribute('data-density'),

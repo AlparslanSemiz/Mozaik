@@ -11,6 +11,7 @@
 // the site build leaking into the file:// build.
 
 import { expect, test } from './kapan';
+import { reopen } from './helpers';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { cacheAdi } from '../scripts/surum.mjs';
@@ -107,7 +108,7 @@ test.describe('36. Site sürümü', () => {
       .toBe(true);
 
     await context.setOffline(true);
-    await page.reload();
+    await reopen(page);
     await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
     await context.setOffline(false);
@@ -125,7 +126,7 @@ test.describe('36. Site sürümü', () => {
     await expect(page.locator('table.list tbody input').first()).toHaveValue('Ç1');
 
     await context.setOffline(true);
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Okul', exact: true }).click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
     await expect(page.locator('table.list tbody input').first()).toHaveValue('Ç1');

@@ -56,9 +56,9 @@ export function useLoadSample(): LoadSample {
       // Whoever has seen the sample once does not need to be shown the line
       // again, wherever they saw it from.
       markIntroSeen();
-      notify('Örnek veri yüklendi.');
+      notify(t('Örnek veri yüklendi.'));
       return true;
     },
-    [confirm, notify],
+    [confirm, notify, t],
   );
 }

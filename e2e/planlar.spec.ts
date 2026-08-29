@@ -7,7 +7,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFile } from 'node:fs/promises';
-import {
+import { reopen,
   dragAndDrop,
   openSettings,
   openSetup,
@@ -102,7 +102,7 @@ test.describe('40. Plan kitaplığı', () => {
     expect(id).not.toBe('1');
 
     await settledText(page);
-    await page.reload();
+    await reopen(page);
     await expect(picker(page)).toHaveValue(id);
     expect(await placedCards(page)).toBe(0);
   });
@@ -171,7 +171,7 @@ test.describe('40. Plan kitaplığı', () => {
     await box.blur();
 
     await expect(picker(page).locator('option')).toHaveText(['Güz dönemi']);
-    await page.reload();
+    await reopen(page);
     await expect(picker(page).locator('option')).toHaveText(['Güz dönemi']);
   });
 
@@ -298,7 +298,7 @@ test.describe('41. Taslaklar', () => {
 
     await openRow(page).getByRole('checkbox').uncheck();
     await expect(picker(page).locator('option').nth(1)).not.toContainText('(taslak)');
-    await page.reload();
+    await reopen(page);
     await expect(picker(page).locator('option').nth(1)).not.toContainText('(taslak)');
   });
 });

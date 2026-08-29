@@ -194,7 +194,7 @@ export default function Check({ state }: Props) {
 
         {report.unplaceable.length > 0 && (
           <div className="panel kontrol-sorun">
-            <h2>Yerleşemeyen dersler ({report.unplaceable.length})</h2>
+            <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
             <p className="hint">
               {t(
                 'Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş hücre bile kalmamış.',

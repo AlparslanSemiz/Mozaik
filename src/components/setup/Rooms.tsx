@@ -53,7 +53,7 @@ export default function Rooms({ state, change }: PanelProps) {
           All four panels put it in the same corner, so the shape of a panel
           stays one shape. */}
       <div className="panel-head">
-        <h2>Derslikler ({state.rooms.length})</h2>
+        <h2>{t('Derslikler ({n})', { n: state.rooms.length })}</h2>
         <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
       </div>
       <p className="hint">
@@ -102,6 +102,7 @@ export default function Rooms({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="derslik"
+          countKey="{n} derslik"
           notice={order.notice}
         />
       )}

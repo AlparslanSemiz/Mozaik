@@ -3,7 +3,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { open, openWithSample, openSetup, openLessons, openSettings, addSubjects, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
+import { reopen, open, openWithSample, openSetup, openLessons, openSettings, addSubjects, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
   test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
@@ -553,7 +553,7 @@ test.describe('63. Öğretmende cinsiyet', () => {
     await expect(first).toHaveValue('e');
 
     await first.selectOption('k');
-    await page.reload();
+    await reopen(page);
     await openSetup(page, 'Öğretmenler');
     await expect(row(page, 0).locator('select').nth(1)).toHaveValue('k');
   });
@@ -1062,7 +1062,7 @@ test.describe('67. Ders dağılımı', () => {
     await expect(splitPick(page)).toHaveValue('1');
     await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
 
-    await page.reload();
+    await reopen(page);
     await openLessons(page);
     await expect(splitPick(page).locator('option:checked')).toHaveText('2+1');
   });

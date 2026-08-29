@@ -23,7 +23,7 @@ import {
 } from '../constraints';
 import type { Index } from '../constraints';
 import { useToast } from './Toasts';
-import { lessonSubject, subjectShort, teacherSubjects } from '../entities';
+import { lessonSubject, subjectLabel, subjectShort, teacherSubjects } from '../entities';
 import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
 import type { SolverRun } from '../useSolver';
@@ -197,7 +197,7 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
         name: t.short,
         // Both, because this line IS the teacher — the cells in the row each
         // name the one subject their own lesson is taught under.
-        secondary: teacherSubjects(t).join(' · '),
+        secondary: teacherSubjects(t).map(subjectLabel).join(' · '),
         color: t.color,
         cells,
         closed,
@@ -295,7 +295,7 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
         row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
         top: teacherView ? className : teacherShort,
         bottom: teacherView ? teacherShort : className,
-        subject: lessonSubject(d, lesson),
+        subject: subjectLabel(lessonSubject(d, lesson)),
         // The card keeps the TEACHER's colour in both views: a cell is always
         // painted by its teacher, so this is what the card will look like.
         color: teacher?.color ?? 0,

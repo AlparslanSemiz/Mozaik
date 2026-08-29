@@ -2,7 +2,7 @@
 // with real getComputedStyle values, WCAG contrast and CIE Lab ΔE.
 
 import { expect, test } from './kapan';
-import { answerDialog, open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
+import { reopen, answerDialog, open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
 
 // 8. Theme
 //
@@ -21,12 +21,12 @@ test.describe('8. Tema', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(toggle).toHaveAttribute('aria-pressed', 'true');
 
-    await page.reload();
+    await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
     await page.getByRole('button', { name: 'Koyu tema' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.reload();
+    await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   });
 
@@ -46,7 +46,7 @@ test.describe('8. Tema', () => {
       // …and a deliberate choice still sticks, so "ignore the machine" has not
       // become "ignore the reader".
       await page.getByRole('button', { name: 'Koyu tema' }).click();
-      await page.reload();
+      await reopen(page);
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     });
   });
@@ -662,7 +662,7 @@ test.describe('80. Bölüm şeridi', () => {
     test(`üst çubuğun renk şeridi ${theme} temada da görünüyor`, async ({ page }) => {
       await open(page);
       await page.evaluate((t) => localStorage.setItem('ders-programi-tema', t), theme);
-      await page.reload();
+      await reopen(page);
 
       for (const section of SECTIONS) {
         await page.getByRole('button', { name: section, exact: true }).click();

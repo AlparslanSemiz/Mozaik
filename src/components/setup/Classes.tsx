@@ -131,6 +131,7 @@ export default function Classes({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="sınıf"
+          countKey="{n} sınıf"
           notice={order.notice}
         />
       )}

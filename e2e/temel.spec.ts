@@ -5,7 +5,7 @@ import { beklenenHata, expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import {
+import { reopen,
   FILE,
   FIXTURE,
   open,
@@ -32,7 +32,7 @@ test.describe('1. Kalıcılık — file:// altında', () => {
 
     // Auto-save is debounced by 400 ms
     await page.waitForTimeout(700);
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     await expect(page.locator('table.grid .card')).toHaveCount(before);

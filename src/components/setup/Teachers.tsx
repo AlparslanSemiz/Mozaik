@@ -200,7 +200,7 @@ export default function Teachers({ state, change }: PanelProps) {
           <option value="">{t('Branş seçin')}</option>
           {subjects.map((x) => (
             <option key={x} value={x}>
-              {x}
+              {subjectLabel(x)}
             </option>
           ))}
           <option value={NEW}>{t('+ Yeni branş…')}</option>
@@ -245,7 +245,7 @@ export default function Teachers({ state, change }: PanelProps) {
               .filter((x) => subjectKey(x) !== subjectKey(subjectOf()))
               .map((x) => (
                 <option key={x} value={x}>
-                  {x}
+                  {subjectLabel(x)}
                 </option>
               ))}
           </select>
@@ -308,6 +308,7 @@ export default function Teachers({ state, change }: PanelProps) {
           config={listCfg}
           shown={shown.length}
           noun="öğretmen"
+          countKey="{n} öğretmen"
           notice={order.notice}
         />
       )}
@@ -396,7 +397,7 @@ export default function Teachers({ state, change }: PanelProps) {
                         dropdown would silently change it on first render. */}
                     {subjects.map((x) => (
                       <option key={x} value={x}>
-                        {x}
+                        {subjectLabel(x)}
                       </option>
                     ))}
                   </select>
@@ -443,7 +444,7 @@ export default function Teachers({ state, change }: PanelProps) {
                         .filter((x) => subjectKey(x) !== subjectKey(teacher.subject))
                         .map((x) => (
                           <option key={x} value={x}>
-                            {x}
+                            {subjectLabel(x)}
                           </option>
                         ))}
                     </select>

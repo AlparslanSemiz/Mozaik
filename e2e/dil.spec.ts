@@ -16,14 +16,22 @@
 // is the one that deliberately unpins itself.
 
 import { expect, test } from './kapan';
-import { open, openSettings, openWithSample, FILE } from './helpers';
+import { reopen, open, openSettings, openWithSample, FILE } from './helpers';
 
 type Dil = 'tr' | 'en' | 'de' | 'es' | 'fr';
 
-/** Sets the preference the way the app itself stores it, then reloads. */
+/**
+ * Sets the preference the way the app itself stores it, then reloads.
+ *
+ * It CHECKS afterwards, and that is not belt and braces: everything below
+ * reads the screen or the store on the assumption that the reload landed in
+ * the chosen language, so a failure here should say "the language did not
+ * take" rather than surface three assertions later as a missing button.
+ */
 async function chooseLang(page: import('@playwright/test').Page, dil: Dil) {
   await page.evaluate((d) => localStorage.setItem('ders-programi-dil', d), dil);
-  await page.reload();
+  await reopen(page);
+  await expect(page.locator('html')).toHaveAttribute('lang', dil);
 }
 
 test.describe('82. Dil', () => {

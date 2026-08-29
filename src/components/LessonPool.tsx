@@ -214,9 +214,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             <>
               {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
                   calling them two lessons would not add up against Kurulum. */}
-              <strong>{cards.length} blok bekliyor</strong>
+              <strong>{t('{n} blok bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
-                {remainingHours} saat · sürükleyip bırakın
+                {t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
               </span>
             </>
           )}

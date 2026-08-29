@@ -19,7 +19,16 @@ interface Props<T> {
   /** How many rows are showing, for the "3 / 25" line. */
   shown: number;
   /** "öğretmen", "sınıf" — what the count is counting. */
+  /** The bare word, for "search rooms". */
   noun: string;
+  /**
+   * The COUNT phrase, e.g. `'{n} derslik'`, and a separate prop rather than
+   * `'{n} ' + noun` for one reason: only a whole key can carry a plural.
+   * Turkish takes none after a number, so one phrase served both jobs for two
+   * years; German wants "8 Räume" and the dictionary can only say so if the
+   * number is inside the key it translates.
+   */
+  countKey: string;
   /**
    * What just happened to the order, said out loud. Keyboard reordering moves a
    * row somewhere the eye is not necessarily following, and the handle's own
@@ -36,6 +45,7 @@ export default function ListTools<T>({
   config,
   shown,
   noun,
+  countKey,
   notice = '',
 }: Props<T>) {
   const t = useT();
@@ -141,9 +151,12 @@ export default function ListTools<T>({
 
         <span className="list-count" aria-live="polite">
           {filtering ? (
-            <T k="**{gorunen}** / {toplam} {ne}" vars={{ gorunen: shown, toplam: items.length, ne: t(noun) }} />
+            <T
+              k="**{gorunen}** / {sayim}"
+              vars={{ gorunen: shown, sayim: t(countKey, { n: items.length }) }}
+            />
           ) : (
-            t('{toplam} {ne}', { toplam: items.length, ne: t(noun) })
+            t(countKey, { n: items.length })
           )}
         </span>
 

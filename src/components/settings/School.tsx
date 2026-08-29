@@ -59,7 +59,7 @@ export default function School({ state, change }: PanelProps) {
     }
     return [...byBreak.entries()].map(([after, days]) => ({
       after,
-      dayNames: days.map((x) => x.name).join(', '),
+      dayNames: days.map((x) => dayLabel(x.name)).join(', '),
       periods: dayPeriods(state.settings.bell, state.settings.hours, after),
     }));
   }, [state.settings]);
@@ -203,7 +203,7 @@ export default function School({ state, change }: PanelProps) {
                 </select>
               </span>
             </div>
-            <Field label="Ders (dk)">
+            <Field label={t('Ders (dk)')}>
               <input
                 type="number"
                 min={5}

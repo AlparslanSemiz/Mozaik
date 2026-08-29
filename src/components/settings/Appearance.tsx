@@ -352,7 +352,10 @@ export default function Appearance({
           )}
           {state.teachers.length > teachers.length && (
             <p className="hint">
-              {state.teachers.length} öğretmenin ilk {teachers.length} tanesi.
+              {t('{toplam} öğretmenin ilk {kac} tanesi.', {
+                toplam: state.teachers.length,
+                kac: teachers.length,
+              })}
             </p>
           )}
         </div>

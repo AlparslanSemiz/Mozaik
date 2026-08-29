@@ -25,6 +25,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
+import { reopen } from './helpers';
 
 const KLASOR = 'Belgelerim';
 
@@ -181,7 +182,7 @@ test.describe('74. Nereye kaydedilsin', () => {
     await page.getByRole('button', { name: 'Klasör seç…' }).click();
     await expect(page.getByText(/klasörüne yazıldı/)).toBeVisible();
 
-    await page.reload();
+    await reopen(page);
     await openData(page);
     await expect(page.getByText(/Belgelerim klasörüne yazıldı/)).toBeVisible();
 
@@ -201,7 +202,7 @@ test.describe('74. Nereye kaydedilsin', () => {
     // Same handle in IndexedDB, but the browser now says "prompt" — which is
     // exactly what a restart does.
     await page.evaluate(() => localStorage.setItem('__izin', 'prompt'));
-    await page.reload();
+    await reopen(page);
     await openData(page);
 
     await expect(page.getByText(/tarayıcı izni her açılışta yeniden soruyor/)).toBeVisible();
@@ -223,7 +224,7 @@ test.describe('74. Nereye kaydedilsin', () => {
     await page.getByRole('button', { name: 'Vazgeç' }).click();
     await expect(page.getByText('yalnızca bu bilgisayarın tarayıcısında')).toBeVisible();
 
-    await page.reload();
+    await reopen(page);
     await openData(page);
     await expect(page.getByText('yalnızca bu bilgisayarın tarayıcısında')).toBeVisible();
   });

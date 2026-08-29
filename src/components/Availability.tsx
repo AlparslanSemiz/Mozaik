@@ -421,22 +421,28 @@ export default function Availability({
           </div>
 
           <p className={open < selected.load ? "error-box" : "hint"}>
-            <b>{selected.short}</b>: {open} saat açık, {selected.load} saat ders
-            yüklenmiş.
+            <T
+              k="**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş."
+              vars={{ kim: selected.short, acik: open, yuk: selected.load }}
+            />
             {open < selected.load &&
-              ` ${selected.load - open} saat fazla, bu program dizilemez.`}
+              ` ${t('{n} saat fazla, bu program dizilemez.', { n: selected.load - open })}`}
           </p>
 
           {/* Closing an hour never removes what is already on it (principle 6),
               so the only honest thing to do is say that it happened. */}
           {conflicts.length > 0 && (
             <div className="warn-box">
-              <b>
-                Kapattığınız saatlerde yerleşmiş {conflicts.length} ders var
-                {mine > 0 && `, ${mine} tanesi ${selected.short}'de`}.
-              </b>{" "}
-              Hiçbiri silinmedi. <b>Program</b> sekmesinde kırmızı çerçeveyle,{" "}
-              <b>Kontrol</b> sekmesinde tek tek listeleniyor.
+              <T
+                k="**Kapattığınız saatlerde yerleşmiş {n} ders var{kimde}.** Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle, **Kontrol** sekmesinde tek tek listeleniyor."
+                vars={{
+                  n: conflicts.length,
+                  kimde:
+                    mine > 0
+                      ? t(', {n} tanesi {kim} üzerinde', { n: mine, kim: selected.short })
+                      : '',
+                }}
+              />
             </div>
           )}
         </div>

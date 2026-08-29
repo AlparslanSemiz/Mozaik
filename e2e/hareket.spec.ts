@@ -14,7 +14,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { chooseMotion, open, openSettings, openWithSample, savedText, settledText } from './helpers';
+import { reopen, chooseMotion, open, openSettings, openWithSample, savedText, settledText } from './helpers';
 
 /** The four levers, straight off the root element. */
 const levers = (page: Page) =>
@@ -241,7 +241,7 @@ test.describe('14. Hareket', () => {
     expect(await savedText(page)).toBe(before);
     expect(await page.evaluate(() => localStorage.getItem('ders-programi-hareket'))).toBe('az');
 
-    await page.reload();
+    await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'az');
     const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
     expect(saved!.includes('hareket')).toBe(false);

@@ -146,8 +146,12 @@ const ES: Sozluk = {
   'Müsaitlik listesi': 'Lista de disponibilidad',
   'Tümünü aç': 'Abrir todas',
   'Tümünü kapat': 'Cerrar todas',
+  '{n} saat fazla, bu program dizilemez.': '{n} {n:hora|horas} de más; este horario no se puede montar.',
+  ', {n} tanesi {kim} üzerinde': ', {n} de ellas en {kim}',
   'Müsaitlik girebilmek için **Okul** sekmesinden en az bir {ne} eklemeniz gerekiyor.': 'Para introducir disponibilidad necesita al menos {ne} en la pestaña **Escuela**.',
   'Her hücre, o saatte **kaç {ne} kapalı** olduğunu gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına gelir. Program dizilirken genellikle burada tıkanılır.': 'Cada celda muestra **cuántos {ne} están cerrados** a esa hora. Una columna oscura significa que esa hora será difícil de llenar. Aquí es donde suele atascarse el horario.',
+  '**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş.': '**{kim}**: {acik} horas abiertas, {yuk} horas de clase asignadas.',
+  '**Kapattığınız saatlerde yerleşmiş {n} ders var{kimde}.** Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle, **Kontrol** sekmesinde tek tek listeleniyor.': '**{n} {n:clase colocada está|clases colocadas están} en horas que ha cerrado{kimde}.** No se ha borrado ninguna. Están marcadas en rojo en la pestaña **Horario** y listadas una a una en **Revisión**.',
 
   // src/components/CapacityRows.tsx
   'Ad': 'Nombre',
@@ -169,6 +173,7 @@ const ES: Sozluk = {
   'Kural ihlalleri ({n})': 'Reglas incumplidas ({n})',
   'Kural dışı': 'Contra una regla',
   'Uyarı': 'Aviso',
+  'Yerleşemeyen dersler ({n})': 'Clases que no se pueden colocar ({n})',
   'Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş hücre bile kalmamış.': 'A estas clases les faltan horas y no queda ni una celda libre donde ponerlas.',
   'Ders': 'Clase',
   'Sebep': 'Motivo',
@@ -224,6 +229,8 @@ const ES: Sozluk = {
   'Havuzu aç': 'Abrir la bandeja',
   'Hepsi yerleşti': 'Todo colocado',
   '{n} dersin tamamı programda': 'las {n} {n:clase está|clases están} en el horario',
+  '{n} blok bekliyor': '{n} {n:bloque espera|bloques esperan}',
+  '{n} saat · sürükleyip bırakın': '{n} {n:hora|horas} · arrastre y suelte',
   '{ust} · {alt} {brans} · {boy} saatlik blok': '{ust} · {alt} {brans} · bloque de {boy} horas',
   ' · {n} tane bekliyor': ' · {n} en espera',
   ' · dersin {yerlesen}/{toplam} saati yerleşti': ' · {yerlesen} de las {toplam} horas de la clase colocadas',
@@ -239,9 +246,8 @@ const ES: Sozluk = {
   'Önce bir sıralama seçin': 'Elija primero un orden',
   'Şu an tersten sıralı. Düz sıraya almak için tıklayın': 'Ahora descendente. Pulse para ascendente',
   'Şu an düz sıralı. Tersten sıralamak için tıklayın': 'Ahora ascendente. Pulse para descendente',
-  '{toplam} {ne}': '{toplam} {ne}',
   'Süzmeyi kaldır': 'Quitar el filtro',
-  '**{gorunen}** / {toplam} {ne}': '**{gorunen}** de {toplam} {ne}',
+  '**{gorunen}** / {sayim}': '**{gorunen}** de {sayim}',
   'Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.': 'Para ordenar las filas a mano, ponga **Ordenar** en «Orden de entrada» y quite el filtro.',
 
   // src/components/Palette.tsx
@@ -260,6 +266,7 @@ const ES: Sozluk = {
   'Hiçbiri': 'Ninguno',
   '{ad} sınıfı · Haftalık ders programı': 'Clase {ad} · Horario semanal',
   'Çıktı': 'Impresión',
+  'Yazdır ({n} kâğıt)': 'Imprimir ({n} {n:hoja|hojas})',
   'Hiçbir sayfa seçili değil, basılacak bir şey yok.': 'No hay ninguna página seleccionada, no hay nada que imprimir.',
   'Sayfa düzeni': 'Diseño de página',
   'Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez, bu ayrı bir ayardır.': 'Cuántos horarios caben en una hoja A4 apaisada y qué tamaño tiene el texto en papel. El tamaño en pantalla no afecta al papel; es un ajuste aparte.',
@@ -323,6 +330,8 @@ const ES: Sozluk = {
   'Öğretmen yüklerine gider': 'Va a las cargas de los profesores',
   'Sınıf yüklerine gider': 'Va a las cargas de las clases',
   'Derslik yüklerine gider': 'Va a las cargas de las aulas',
+  '{n} engel': '{n} {n:bloqueo|bloqueos}',
+  '{n} uyarı': '{n} {n:aviso|avisos}',
   'Yazdırma araçları': 'Herramientas de impresión',
   'İkisi de': 'Ambos',
   'Öğretmen renkleri kâğıda basılır': 'Los colores de los profesores se imprimen en el papel',
@@ -367,6 +376,7 @@ const ES: Sozluk = {
   "Excel'den yapıştır": 'Pegar desde Excel',
   "Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen iki branş veriyorsa dersin hangi branştan olduğu da seçilir. **Dağılım**, o saatlerin haftaya nasıl bölüneceğidir: **2+1** demek bir gün iki saat üst üste, başka bir gün tek saat demektir. Her blok 1 ya da 2 saattir. **Günde ↑** bu dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki sayı geçerli olur.": 'Una clase = las horas semanales que un grupo recibe de un profesor. Si el profesor tiene dos asignaturas, también se elige a cuál pertenece. **Reparto** es cómo se dividen esas horas en la semana: **2+1** significa dos horas seguidas un día y una hora suelta otro. Cada bloque es de 1 o 2 horas. **Al día ↑** es el máximo de horas en un día; si se deja vacío, rige el número de Ajustes → Reglas.',
   'Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin.': 'Para añadir una clase, introduzca primero al menos un profesor y una clase en la pestaña **Escuela**.',
+  'Henüz {ne} yok. **Okul** sekmesinden ekleyin.': 'Todavía no hay {ne}. Añada una en la pestaña **Escuela**.',
 
   // src/components/settings/Appearance.tsx
   'Tema': 'Tema',
@@ -387,6 +397,7 @@ const ES: Sozluk = {
   'Saatler gizli': 'Horas ocultas',
   'Örnek': 'Ejemplo',
   'Saat': 'Hora',
+  '{toplam} öğretmenin ilk {kac} tanesi.': 'Los primeros {kac} de {toplam} {toplam:profesor|profesores}.',
   'Hareket': 'Movimiento',
   'Dil': 'Idioma',
   'Arayüzün dili. Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve programın kendisini değiştirmez.': 'El idioma de la interfaz. Este ajuste pertenece a este ordenador; no entra en el archivo de copia y no cambia el horario en sí.',
@@ -494,6 +505,7 @@ const ES: Sozluk = {
   '{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.': 'Se borrarán {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:clase|clases}, {ders} {ders:asignatura|asignaturas} y {saat} {saat:hora colocada|horas colocadas}. Esto no se puede deshacer.',
   '"{ad}" planı silinecek': 'Se borrará el plan "{ad}"',
   'Planı sil': 'Borrar el plan',
+  'Planlar ({n})': 'Planes ({n})',
   'Yeni plan': 'Plan nuevo',
   'Boş plan': 'Plan vacío',
   'Bu planın kopyası': 'Copia de este plan',
@@ -504,6 +516,7 @@ const ES: Sozluk = {
   '{ad} adı': 'nombre de {ad}',
   '· açık olan': '· abierto',
   'Bu planın verisi bulunamadı': 'No se han encontrado los datos de este plan',
+  '{ogretmen} öğretmen · {sinif} sınıf · {ders} ders': '{ogretmen} {ogretmen:profesor|profesores} · {sinif} {sinif:clase|clases} · {ders} {ders:clase|clases}',
   'Bu plana geç': 'Cambiar a este plan',
   'Tek plan silinemez': 'No se puede borrar el único plan',
   'Bu planı tamamen siler': 'Borra este plan por completo',
@@ -521,8 +534,10 @@ const ES: Sozluk = {
   '{kural} kuralı': 'la regla {kural}',
   'Kapalı': 'Desactivada',
   'Uyan yok': 'Nada coincide',
+  'Kendi sınırı olan öğretmenler ({n})': 'Profesores con límites propios ({n})',
   'Art arda': 'Seguidas',
   'Günde ↓': 'Al día ↓',
+  'Şu anki ihlaller ({n})': 'Incumplimientos actuales ({n})',
   'Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.': 'El horario montado no supera ninguno de los límites que ha fijado.',
   'Buradaki sayılar **bütün okul** için geçerlidir. Tek bir öğretmen için farklı bir sayı gerekiyorsa aşağıdaki öğretmen tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır. **0** yazmak “sınır yok” demektir.': 'Los números de aquí valen para **toda la escuela**. Si un profesor necesita otro número, escríbalo en la casilla de la tabla de profesores de abajo; una casilla vacía usa el número de aquí. Escribir **0** significa “sin límite”.',
   'Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır.': 'Ahora mismo todos usan los límites de la escuela de arriba. Si un profesor necesita otro número, escríbalo en la casilla de la tabla **Escuela → Profesores**; una casilla vacía usa el número de aquí.',
@@ -543,6 +558,7 @@ const ES: Sozluk = {
   'İlk ders başlangıcı': 'Inicio de la primera clase',
   'Başlangıç saati': 'Hora de inicio',
   'Başlangıç dakikası': 'Minuto de inicio',
+  'Ders (dk)': 'Clase (min)',
   'Teneffüs (dk)': 'Recreo (min)',
   'Öğle arası (dk)': 'Descanso del mediodía (min)',
   'Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)': 'Nombres de las horas (separados por comas; vacío da 1, 2, 3…)',
@@ -579,6 +595,7 @@ const ES: Sozluk = {
 
   // src/components/setup/Rooms.tsx
   'Sınıf sayısına göre (çok → az)': 'Por número de clases (más → menos)',
+  'Derslikler ({n})': 'Aulas ({n})',
   'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.': 'La sala fija de cada clase. Si dos clases comparten aula no pueden ir a la misma hora. Para las clases sin aula no se hace esta comprobación.',
   'Derslik adı, örn. A': 'Nombre del aula, p. ej. A',
   'Derslikleri yapıştır': 'Pegar aulas',
@@ -697,6 +714,7 @@ const ES: Sozluk = {
   '25 öğretmen, 20 sınıf, 8 derslik ve 99 ders. Aracın ne yaptığını görmek için; kendi verinizi girmeye başlamadan önce Ayarlar → Hakkında → "Her şeyi sil" ile temizleyin.': '25 profesores, 20 clases, 8 aulas y 99 asignaturas. Para ver qué hace la herramienta; antes de introducir sus propios datos, límpielos con Ajustes → Acerca de → "Borrar todo".',
   'Yerine koy': 'Sustituir',
   'Yükle': 'Cargar',
+  'Örnek veri yüklendi.': 'Datos de ejemplo cargados.',
 
   // src/constraints.ts
   'Ders bulunamadı': 'No se ha encontrado la clase',
@@ -761,6 +779,10 @@ const ES: Sozluk = {
   '{derslik} dersliğini {n} sınıf paylaşıyor ({hangileri}) ve toplam {yuk} saat ders var. Haftada {acik} saati açık, {fazla} saat fazla.': 'El aula {derslik} la comparten {n} clases ({hangileri}) con {yuk} horas en total. Está abierta {acik} a la semana, {fazla} de menos.',
   '{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.': 'Aula {derslik} ({hangileri}): {yuk} de sus {acik} horas abiertas están llenas.',
   '{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}': '{n} {n:hora sin colocar|horas sin colocar} y sin sitio donde ponerlas. Un motivo de ejemplo: {sebep}',
+  '{n} kural ihlali': '{n} {n:regla incumplida|reglas incumplidas}',
+  '{n} ders kapalı saatte': '{n} {n:clase|clases} en hora cerrada',
+  '{n} ders sığmıyor': '{n} {n:clase no cabe|clases no caben}',
+  '{n} saat havuzda': '{n} {n:hora|horas} en la bandeja',
   'Henüz ders girilmedi': 'Todavía no se han introducido clases',
 
   // src/import.ts
@@ -815,8 +837,8 @@ const ES: Sozluk = {
 
   // ---------------------------------------------- the module-level tables
   //
-  // VIEWS, KINDS, SECTIONS, DENSITIES, LESSON_MODES, STEPS, RULE_ROWS, the
-  // tab labels and their like. A constant cannot hold a hook, so these are
+  // VIEWS, KINDS, SECTIONS, DENSITIES, LESSON_MODES, STEPS, RULE_ROWS, the tab
+  // labels and their like. A constant cannot hold a hook, so these are
   // translated where they are DRAWN - which means no literal `t('...')` call
   // carries them and they have to be listed by hand.
   'Branşlar': 'Asignaturas',
@@ -901,6 +923,10 @@ const ES: Sozluk = {
   'Müsaitlik': 'Disponibilidad',
   'Kontrol': 'Revisión',
   'Ayarlar': 'Ajustes',
+  '{n} öğretmen': '{n} {n:profesor|profesores}',
+  '{n} derslik': '{n} {n:aula|aulas}',
+  '{n} ders': '{n} {n:clase|clases}',
+  'Dersler': 'Clases',
 };
 
 registerSozluk('es', ES);

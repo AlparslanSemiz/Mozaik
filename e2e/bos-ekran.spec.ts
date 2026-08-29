@@ -5,7 +5,7 @@
 // only place that answers "what do I do first".
 
 import { expect, test } from './kapan';
-import { answerDialog, open, openSetup, openSettings, savedText } from './helpers';
+import { reopen, answerDialog, open, openSetup, openSettings, savedText } from './helpers';
 
 test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       // The panel around it stays: it is the "what do I do first" answer.
       await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
 
-      await page.reload();
+      await reopen(page);
       await expect(page.locator('.panel', { hasText: 'Başlarken' })).toBeVisible();
       await expect(page.locator('.intro-line')).toHaveCount(0);
     });
@@ -48,7 +48,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
 
       await openSetup(page, 'Derslikler');
       await expect(page.locator('.intro-line')).toHaveCount(0);
-      await page.reload();
+      await reopen(page);
       await expect(page.locator('.intro-line')).toHaveCount(0);
     });
 
@@ -60,7 +60,7 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
       await page.getByRole('button', { name: 'Ekle', exact: true }).first().click();
       await expect(page.locator('.intro-line')).toHaveCount(0);
 
-      await page.reload();
+      await reopen(page);
       await expect(page.locator('.intro-line')).toHaveCount(0);
     });
 

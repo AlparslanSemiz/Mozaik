@@ -7,6 +7,7 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
 import { useInspect } from './Inspector';
 import type React from 'react';
+import { dayLabel } from '../names';
 import { dayPeriods } from '../bell';
 import { attachGridChrome } from '../gridChrome';
 import { paletteColor } from '../palette';
@@ -282,7 +283,7 @@ function GridInner({
                 colSpan={hourCount + ((breakAt[g] ?? -1) >= 0 ? 1 : 0)}
                 className={g % 2 === 1 ? 'day-head band' : 'day-head'}
               >
-                {day.name}
+                {dayLabel(day.name)}
               </th>
             ))}
           </tr>

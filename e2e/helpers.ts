@@ -17,6 +17,29 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 
 // The language is pinned in `kapan.ts`, for every test in every config at
 // once — see the note there.
+/**
+ * A reload, and then the SAME two waits `open()` makes.
+ *
+ * This exists because a bare `page.reload()` had none of them, and about
+ * twenty tests read the screen straight after one. `font-display: block` means
+ * nothing is painted until the embedded face resolves, so a click issued right
+ * after `reload()` can land before the first paint — under four parallel
+ * workers that window is wide enough to lose, which is exactly the shape of
+ * the "flake after a reload" recorded in STATUS for `dil` and `hareket`. It
+ * got wider when the four dictionaries were embedded (+242 KB).
+ *
+ * It waits for `.topbar` and `.main` rather than for a tab NAME: the same
+ * helper has to work after the language has been switched, and a Turkish name
+ * is not on screen then. Both, not just the chrome: `.topbar` is drawn before
+ * the tab's own content, and every one of these tests reads that content.
+ */
+export async function reopen(page: Page) {
+  await page.reload();
+  await expect(page.locator('.topbar')).toBeVisible();
+  await expect(page.locator('.main')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+}
+
 export async function open(page: Page) {
   await page.goto(FILE);
   await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
@@ -113,9 +136,16 @@ export async function openLessons(page: Page, mode: 'class' | 'teacher' | 'all' 
  * only needed for the strips that also navigate WITHIN a tab.
  */
 export async function revealRibbon(page: Page) {
+  // WAIT for the box first. `page.evaluate` runs whenever it is asked to, and
+  // this helper used to answer "no `.main` yet" by returning silently — so on a
+  // page that had not finished painting, nothing was nudged, the strip stayed
+  // folded, and the assertion below timed out five seconds later. That is the
+  // "flake after a reload" STATUS recorded against `revealRibbon`, and it was
+  // never load SENSITIVITY: it was a helper with a silent no-op in it.
+  await expect(page.locator('.main')).toBeVisible();
   await page.evaluate(() => {
     const box = document.querySelector('.main');
-    if (box === null) return;
+    if (box === null) throw new Error('.main yok — revealRibbon boşa çalışırdı');
     // A nudge and then the top, because `scrollTop = 0` on a box already at 0
     // fires nothing at all and the strip would stay folded on a page that has
     // no room to scroll.

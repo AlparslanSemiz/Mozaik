@@ -18,7 +18,7 @@
 // layout measurements went with the rest of the layout contract.
 
 import { expect, test } from './kapan';
-import { openWithSample, startDrag, deltaE, tokens } from './helpers';
+import { reopen, openWithSample, startDrag, deltaE, tokens } from './helpers';
 
 test.describe('47. Izgara enstrümanı', () => {
   test('gün bandı grupluyor ama bir DURUM gibi okunmuyor', async ({ page }) => {
@@ -269,7 +269,7 @@ test.describe('47. Izgara enstrümanı', () => {
       'false',
     );
 
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Havuz', exact: true })).toHaveAttribute(
       'aria-expanded',

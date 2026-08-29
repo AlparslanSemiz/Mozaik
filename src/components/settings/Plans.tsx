@@ -90,7 +90,7 @@ export default function Plans({ state, plans }: Props) {
 
   return (
     <div className="panel">
-      <h2>Planlar ({library.plans.length})</h2>
+      <h2>{t('Planlar ({n})', { n: library.plans.length })}</h2>
       <p className="hint">
         <T k="Her plan **ayrı bir programdır**: kendi öğretmenleri, sınıfları ve dizilmiş ızgarasıyla. Üst çubuktaki listeden aralarında geçilir. **Taslak** olarak işaretlenen bir plan, yeni bir plana başlarken hazır kurulum olarak sunulur." />
       </p>
@@ -163,7 +163,11 @@ export default function Plans({ state, plans }: Props) {
                 />
               </td>
               <td className="hint">
-                {counts.teachers} öğretmen · {counts.classes} sınıf · {counts.lessons} ders
+                {t('{ogretmen} öğretmen · {sinif} sınıf · {ders} ders', {
+                  ogretmen: counts.teachers,
+                  sinif: counts.classes,
+                  ders: counts.lessons,
+                })}
               </td>
               <td className="num">{counts.placed}</td>
               <td>

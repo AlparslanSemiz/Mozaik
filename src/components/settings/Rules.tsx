@@ -151,7 +151,7 @@ export default function Rules({ state, change }: PanelProps) {
             done that used to be visible only by scrolling the Kurulum table
             and looking for filled-in boxes. */}
         <div className="panel">
-          <h2>Kendi sınırı olan öğretmenler ({custom.length})</h2>
+          <h2>{t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}</h2>
           {custom.length === 0 ? (
             <p className="hint">
               <T k="Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır." />
@@ -190,7 +190,7 @@ export default function Rules({ state, change }: PanelProps) {
 
       <aside>
         <div className="panel">
-          <h2>Şu anki ihlaller ({violations.length})</h2>
+          <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
           <p className="hint">
             <T k="Soldaki sayıları değiştirdikçe bu liste anında değişir. **Uyar** yerleştirmeyi durdurmaz, yalnızca sayar; **Engelle** dersi o hücreye hiç bıraktırmaz. Aynı liste **Kontrol** sekmesinde de var." />
           </p>

@@ -11,7 +11,7 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { dragAndDrop, openWithSample } from './helpers';
+import { reopen, dragAndDrop, openWithSample } from './helpers';
 
 async function openPrint(page: Page) {
   await openWithSample(page);
@@ -153,7 +153,7 @@ test.describe('62. Sayfada ne olsun', () => {
     await box(page, 'Ders saatleri').uncheck();
     await box(page, 'Çıktı tarihi').check();
 
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await expect(page.locator('.print-page').first()).toBeVisible();
 

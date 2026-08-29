@@ -513,6 +513,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             config={listCfg}
             shown={shown.length}
             noun="ders"
+          countKey="{n} ders"
             notice={order.notice}
           />
         )}
@@ -727,7 +728,10 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             </div>
             {picking.length === 0 && (
               <p className="hint">
-                Henüz {modeNoun} yok. <b>Okul</b> sekmesinden ekleyin.
+                <T
+                  k="Henüz {ne} yok. **Okul** sekmesinden ekleyin."
+                  vars={{ ne: t(modeNoun) }}
+                />
               </p>
             )}
           </div>
