@@ -1857,3 +1857,9 @@ Ayarlardaki özel sectionlara özgü ayarlar o sectionun alt şeridinde sağm ü
 
 
 Benden çıktılar için ve asc dersler tarafı için foto iste eğer örnek fotolarda atmadıysam.
+
+Öğretmenler listelerde branşlarda kısaltmalar.
+Program kısmında branşlar kısaltmalar olsun sol tarafta.
+
+Program otomatik dizmeye bakmak lazım.
+Programda derslere sağ tıklayınca seçenekler gelsin: kaldır, dersi düzenle, dersi oraya sabitle.

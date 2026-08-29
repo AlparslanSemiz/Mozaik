@@ -3151,6 +3151,33 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
+/* The sheet's lesson rows: what this teacher (or class) is tied to, with the
+   ids kept so each one can be acted on. `links` above says the same thing in a
+   sentence, and a sentence cannot be handed to another teacher. */
+table.sheet-lessons {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-5);
+}
+
+table.sheet-lessons td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
+}
+
+table.sheet-lessons td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Sized by the browser from its longest option, like every other picker whose
+   labels are names rather than a fixed vocabulary (pitfall 33/34). */
+table.sheet-lessons select.transfer-pick {
+  width: auto;
+  max-width: 14rem;
+}
+
 /* The split editor: three counters and the shape they add up to.
    ("4 saatlik [1] 3 saatlik [0] 2 saatlik [1]   4+2+1+1")
 

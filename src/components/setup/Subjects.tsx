@@ -32,6 +32,7 @@ import { EMPTY_QUERY } from '../../listview';
 import {
   addSubject,
   deleteSubject,
+  renameSubject,
   subjectKey,
   subjectLabel,
   subjectOptions,
@@ -51,12 +52,13 @@ interface RowProps extends PanelProps {
   /** The handle cell, or an empty one to keep the columns lined up. */
   grip: ReactElement;
   onRemove: () => void;
+  onRename: (next: string) => void;
 }
 
 /** "No overrides at all", for asking what a subject's short would be. */
 const BLANK_SHORTS = { subjectShorts: {} } as Settings;
 
-function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps) {
+function SubjectRow({ subject, state, change, inList, grip, onRemove, onRename }: RowProps) {
   const t = useT();
   const current = subjectShort(state.settings, subject);
   // The default AS DRAWN, not the one an override is compared against.
@@ -71,12 +73,32 @@ function SubjectRow({ subject, state, change, inList, grip, onRemove }: RowProps
     <tr data-row-name={subject}>
       {grip}
       <td>
-        {subjectLabel(subject)}
-        {!inList && (
-          <span className="hint" title={t('Bir öğretmende var ama listede yok')}>
-            {' '}
-            {t('· listede değil')}
-          </span>
+        {/* On the list: an editable NAME. A rename has to reach the teachers
+            carrying it, because `Teacher.subject` stores the name and not an id
+            — `renameSubject` is the one operation here that cascades.
+
+            Off the list ("listede değil"): read-only. That name is a stray held
+            by some teacher, and the school's list is not what would be edited;
+            changing it there would rewrite a teacher from a row that claims to
+            be about the list. */}
+        {inList ? (
+          <input
+            type="text"
+            aria-label={t('{ad} branşının adı', { ad: subjectLabel(subject) })}
+            // defaultValue + a key that changes with the value: typing must not
+            // re-render on every keystroke (PLAN pitfall 3).
+            key={subject}
+            defaultValue={subject}
+            onBlur={(e) => onRename(e.target.value)}
+          />
+        ) : (
+          <>
+            {subjectLabel(subject)}
+            <span className="hint" title={t('Bir öğretmende var ama listede yok')}>
+              {' '}
+              {t('· listede değil')}
+            </span>
+          </>
         )}
       </td>
       <td>
@@ -146,6 +168,47 @@ export default function Subjects({ state, change }: PanelProps) {
     if (name === '' || clash) return;
     change((d) => addSubject(d, name));
     setFresh('');
+  }
+
+  async function rename(subject: string, raw: string) {
+    const next = raw.trim();
+    if (next === '' || next === subject) return;
+
+    // The two refusals `renameSubject` reports by returning the state
+    // unchanged, said out loud here so the reader knows WHICH one it was. The
+    // collision is the one that matters: merging two subjects would rewrite
+    // every teacher on one of them, and there is no undo for "which of these
+    // two did that teacher actually hold".
+    const taken = subjectOptions(state).find(
+      (x) => subjectKey(x) === subjectKey(next) && subjectKey(x) !== subjectKey(subject),
+    );
+    if (taken !== undefined) {
+      await alert({
+        title: t('"{ad}" adı zaten kullanılıyor', { ad: subjectLabel(taken) }),
+        tone: 'warn',
+        body: t('İki branş aynı adı taşıyamaz. Başka bir ad seçin.'),
+      });
+      return;
+    }
+
+    const users = subjectTeachers(state, subject);
+    if (
+      users.length > 0 &&
+      !(await confirm({
+        title: t('"{eski}" branşı "{yeni}" olacak', {
+          eski: subjectLabel(subject),
+          yeni: next,
+        }),
+        body: t('{n} öğretmenin branşı da bu adla değişecek ({kimler}).', {
+          n: users.length,
+          kimler: users.map((x) => x.short).join(', '),
+        }),
+        confirmLabel: t('Değiştir'),
+      }))
+    ) {
+      return;
+    }
+    change((d) => renameSubject(d, subject, next));
   }
 
   async function remove(subject: string) {
@@ -231,6 +294,7 @@ export default function Subjects({ state, change }: PanelProps) {
               inList
               grip={order.grip(i, subject)}
               onRemove={() => remove(subject)}
+              onRename={(next) => void rename(subject, next)}
             />
           ))}
         </tbody>
@@ -243,6 +307,9 @@ export default function Subjects({ state, change }: PanelProps) {
                 state={state}
                 change={change}
                 inList={false}
+                // A stray is read-only, so this is never reached — the prop is
+                // required so a new row site cannot forget it.
+                onRename={() => undefined}
                 // No number and no handle: these rows are not IN the
                 // ordered list, so numbering them would count a sequence
                 // they are not part of. Two empty cells keep the columns

@@ -110,25 +110,40 @@ export default function ListTools<T>({
             appears and disappears beside a menu moves the menu, and there is
             nothing to reverse in "Girildiği sıra" — that order is the list
             itself, and turning it upside down is what the drag handles are
-            for. Its NAME says what pressing it will do, not what is currently
-            true, because that is the question a reader asks of a button. */}
+            for.
+
+            THE ARROW SHOWS THE CURRENT DIRECTION, and it used to show the
+            other one. The reasoning behind that was "a button's name says what
+            pressing it will do" — true of the NAME, and exactly backwards for
+            the picture: a list running Z→A drew an ascending arrow, so the one
+            mark on screen contradicted the rows underneath it. "Sıralamada
+            aşağı yukarı işareti düzgün olsun" is that contradiction.
+
+            The name now carries both, in the order a reader needs them: what
+            it is, then what a click does — and it deliberately does NOT begin
+            with "Sıralama", because the `<select>` beside it is labelled
+            "Sırala" and `getByLabel` matches substrings (pitfall 49). */}
         <button
           className="btn"
           disabled={query.sortId === ''}
-          aria-label={query.desc ? t('Artan sıraya al') : t('Azalan sıraya al')}
+          aria-label={
+            query.desc
+              ? t('Azalan sıralı. Artana çevirmek için tıklayın')
+              : t('Artan sıralı. Azalana çevirmek için tıklayın')
+          }
           title={
             query.sortId === ''
               ? t('Önce bir sıralama seçin')
               : query.desc
-                ? t('Şu an tersten sıralı. Düz sıraya almak için tıklayın')
-                : t('Şu an düz sıralı. Tersten sıralamak için tıklayın')
+                ? t('Azalan sıralı. Artana çevirmek için tıklayın')
+                : t('Artan sıralı. Azalana çevirmek için tıklayın')
           }
           onClick={() => setQuery({ ...query, desc: !query.desc })}
         >
           {query.desc ? (
-            <ArrowUpNarrowWide size={16} strokeWidth={2} aria-hidden="true" />
-          ) : (
             <ArrowDownWideNarrow size={16} strokeWidth={2} aria-hidden="true" />
+          ) : (
+            <ArrowUpNarrowWide size={16} strokeWidth={2} aria-hidden="true" />
           )}
         </button>
 

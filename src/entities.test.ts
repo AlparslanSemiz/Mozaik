@@ -5,7 +5,8 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/PLAN.md 14).
 
-import { place, placementKey, teacherKey } from './constraints';
+import { buildIndex, place, placementKey, teacherKey } from './constraints';
+import { lessonSubject } from './subjects';
 import {
   addClass,
   addSubject,
@@ -29,7 +30,9 @@ import {
   duplicateShorts,
   setSubjectShort,
   respreadColors,
+  renameSubject,
   subjectKey,
+  transferLesson,
   subjectOptions,
   subjectRank,
   teacherRank,
@@ -468,6 +471,253 @@ describe('deletionSummary', () => {
       title: 'B dersliği silinecek',
       cost: '',
     });
+  });
+});
+
+describe('transferLesson', () => {
+  function twoClasses(): State {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addRoom(d, 'B');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Matematik', subject2: 'Fizik', gender: '' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addClass(d, '511', d.rooms[1]!.id);
+    return d;
+  }
+
+  const lessonOf = (d: State, i: number) => d.lessons[i]!;
+
+  it('dersi yeni hocaya veriyor', () => {
+    let d = twoClasses();
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    const { state } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
+    expect(lessonOf(state, 0).teacherId).toBe(d.teachers[1]!.id);
+  });
+
+  // THE reason this is not `updateLesson(d, id, { teacherId })`. Placements are
+  // keyed by CLASS, so a plain write leaves every cell where it is; teacher
+  // occupancy is derived into a Map, so two lessons on one teacher at one hour
+  // silently overwrite instead of clashing — and nothing in sanitize() or
+  // findViolations() looks for it. The receiving teacher would stand in two
+  // rooms at once with every count still adding up.
+  it('yeni hocayı ÇİFT REZERVE ETMİYOR — çakışan blok havuza dönüyor', () => {
+    let d = twoClasses();
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    d = addLesson(d, {
+      classId: d.classes[1]!.id,
+      teacherId: d.teachers[1]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    // Both lessons sit on Tuesday hours 0 and 1, in their own classes.
+    for (let h = 0; h < 2; h++) {
+      d = place(d, d.lessons[0]!.id, 0, h, 1);
+      d = place(d, d.lessons[1]!.id, 0, h, 1);
+    }
+
+    const { state, returned } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
+    expect(returned).toBe(2);
+
+    // Not one hour of the moved lesson is left on the grid...
+    const moved = d.lessons[0]!.id;
+    expect(Object.values(state.placements).filter((x) => x === moved)).toHaveLength(0);
+    // ...and the receiving teacher is in exactly one place at a time.
+    const ix = buildIndex(state);
+    for (let h = 0; h < 2; h++) {
+      const at = Object.entries(state.placements).filter(([key]) => key.endsWith(`|0|${h}`));
+      const holders = at.map(([, id]) => state.lessons.find((x) => x.id === id)!.teacherId);
+      expect(new Set(holders).size).toBe(holders.length);
+    }
+    expect(ix.teacherBusy.size).toBe(2);
+  });
+
+  it('çakışmayan blok YERİNDE kalıyor', () => {
+    let d = twoClasses();
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    d = place(d, d.lessons[0]!.id, 0, 0, 1);
+    d = place(d, d.lessons[0]!.id, 1, 0, 1);
+
+    const { state, returned } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
+    expect(returned).toBe(0);
+    expect(state.placements[placementKey(d.classes[0]!.id, 0, 0)]).toBe(d.lessons[0]!.id);
+    expect(state.placements[placementKey(d.classes[0]!.id, 1, 0)]).toBe(d.lessons[0]!.id);
+  });
+
+  // `second` points at one of the OLD teacher's two fields. Carried over
+  // blindly it would make the lesson claim whatever happens to sit in the new
+  // teacher's second slot — a silent change of subject.
+  it('BRANŞI koruyor: second bayrağı yeni hocada yeniden eşleniyor', () => {
+    let d = twoClasses();
+    // A teacher whose SECOND subject is what the lesson is taught under.
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[1]!.id,
+      weeklyHours: 2,
+      blocks: [],
+      second: true,
+    });
+    expect(lessonSubject(d, d.lessons[0]!)).toBe('Fizik');
+
+    // Moving it to a teacher who only holds Matematik cannot keep Fizik, and
+    // the flag has to say so rather than point past the end.
+    const { state } = transferLesson(d, d.lessons[0]!.id, d.teachers[0]!.id);
+    expect(lessonOf(state, 0).second).toBe(false);
+    expect(lessonSubject(state, lessonOf(state, 0))).toBe('Matematik');
+  });
+
+  it('aynı branş yeni hocanın İKİNCİ alanındaysa bayrak açılıyor', () => {
+    let d = twoClasses();
+    d = addTeacher(d, { name: 'Can Er', short: 'CE', subject: 'Fizik', subject2: '', gender: '' });
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[2]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    expect(lessonSubject(d, d.lessons[0]!)).toBe('Fizik');
+
+    // AV holds Matematik first and Fizik second.
+    const { state } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
+    expect(lessonOf(state, 0).second).toBe(true);
+    expect(lessonSubject(state, lessonOf(state, 0))).toBe('Fizik');
+  });
+
+  it('bilinmeyen ders ya da hoca hiçbir şeyi değiştirmiyor', () => {
+    const d = twoClasses();
+    expect(transferLesson(d, 'yok', d.teachers[0]!.id).state).toBe(d);
+  });
+});
+
+describe('renameSubject', () => {
+  function withSubjects(): State {
+    let d = emptyState();
+    d = addSubject(d, 'Matematik');
+    d = addSubject(d, 'Fizik');
+    d = addSubject(d, 'Edebiyat');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: 'Fizik', gender: '' });
+    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '' });
+    return d;
+  }
+
+  it('listede YERİNDE değişiyor — sıra bozulmuyor', () => {
+    const d = renameSubject(withSubjects(), 'Fizik', 'Fizik ve Astronomi');
+    expect(d.settings.subjects).toEqual(['Matematik', 'Fizik ve Astronomi', 'Edebiyat']);
+  });
+
+  // The cascade `deleteSubject` deliberately refuses to do. `Teacher.subject`
+  // is a NAME, so a rename that stopped at the list would leave every teacher
+  // holding a branch that is no longer on it.
+  it('öğretmenlerin İKİ alanını da takip ediyor', () => {
+    const d = renameSubject(withSubjects(), 'Fizik', 'Fizik ve Astronomi');
+    expect(d.teachers[0]!.subject).toBe('Matematik');
+    expect(d.teachers[0]!.subject2).toBe('Fizik ve Astronomi');
+    expect(d.teachers[1]!.subject).toBe('Fizik ve Astronomi');
+  });
+
+  it('kısaltma OVERRIDE’ı yeni ada taşınıyor', () => {
+    let d = setSubjectShort(withSubjects(), 'Fizik', 'Fz');
+    expect(d.settings.subjectShorts[subjectKey('Fizik')]).toBe('Fz');
+
+    d = renameSubject(d, 'Fizik', 'Fizik ve Astronomi');
+    expect(d.settings.subjectShorts[subjectKey('Fizik')]).toBeUndefined();
+    expect(subjectShort(d.settings, 'Fizik ve Astronomi')).toBe('Fz');
+  });
+
+  // The stored value is re-judged against the NEW name's default. "Fzk" is a
+  // real override on "Uzay" (whose default is "Uza") and is exactly what the
+  // built-in table already says for "Fizik", so the record has to disappear —
+  // while the short form ON SCREEN does not move. Left unjudged the backup
+  // would carry a row that says nothing, which is the whole reason
+  // `subjectShorts` stores only what was changed.
+  it('yeni adın varsayılanına eşit KALAN override siliniyor', () => {
+    let d = emptyState();
+    d = addSubject(d, 'Uzay');
+    d = setSubjectShort(d, 'Uzay', 'Fzk');
+    expect(d.settings.subjectShorts[subjectKey('Uzay')]).toBe('Fzk');
+
+    d = renameSubject(d, 'Uzay', 'Fizik');
+    expect(d.settings.subjectShorts[subjectKey('Fizik')]).toBeUndefined();
+    expect(subjectShort(d.settings, 'Fizik')).toBe('Fzk');
+  });
+
+  // …and the mirror: a value that was redundant before the rename becomes a
+  // real override after it, so the record has to APPEAR.
+  it('yeni adın varsayılanından AYRILAN kısaltma override oluyor', () => {
+    let d = emptyState();
+    d = addSubject(d, 'Fizik');
+    d = setSubjectShort(d, 'Fizik', 'Fzk'); // the default: nothing is stored
+    expect(d.settings.subjectShorts[subjectKey('Fizik')]).toBeUndefined();
+
+    d = renameSubject(d, 'Fizik', 'Uzay');
+    // Nothing was carried, so the short form now follows the NEW name.
+    expect(subjectShort(d.settings, 'Uzay')).toBe('Uza');
+  });
+
+  it('boş ada ve BAŞKA bir branşın adına çevirmiyor', () => {
+    const before = withSubjects();
+    expect(renameSubject(before, 'Fizik', '   ')).toBe(before);
+    expect(renameSubject(before, 'Fizik', 'Edebiyat')).toBe(before);
+    expect(renameSubject(before, 'Fizik', 'edebiyat')).toBe(before);
+  });
+
+  it('yalnız büyük/küçük harfi değiştirmek SERBEST', () => {
+    const d = renameSubject(withSubjects(), 'Fizik', 'FİZİK');
+    expect(d.settings.subjects).toContain('FİZİK');
+    expect(d.teachers[1]!.subject).toBe('FİZİK');
+  });
+
+  // Renaming one of a teacher's two branches ONTO the other would collapse
+  // them: `teacherSubjects()` dedupes, `hasTwoSubjects` goes false, and every
+  // `Lesson.second` on that teacher becomes an orphan. It is refused instead —
+  // and refused by the ordinary collision check, because `subjectOptions()`
+  // covers what teachers hold as well as what the list says.
+  it('bir hocanın ÖTEKİ branşının adına çevirmiyor — ders sessizce branş değiştirmez', () => {
+    let d = withSubjects();
+    d = addRoom(d, 'A');
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 4,
+      blocks: [],
+      second: true,
+    });
+
+    const before = d;
+    expect(renameSubject(d, 'Fizik', 'Matematik')).toBe(before);
+    expect(before.lessons[0]!.second).toBe(true);
+  });
+
+  // Even a name nobody put on the list: a teacher carrying a stray branch is
+  // still carrying it, and a rename onto it would merge two real things.
+  it('yalnız bir öğretmende duran "listede olmayan" ada da çevirmiyor', () => {
+    let d = emptyState();
+    d = addSubject(d, 'Uzay');
+    d = addTeacher(d, { name: 'A B', short: 'AB', subject: 'Kayıp Branş', subject2: '', gender: '' });
+    expect(renameSubject(d, 'Uzay', 'Kayıp Branş')).toBe(d);
+  });
+
+  it('listede olmayan bir adı yeniden adlandırmak hiçbir şeyi bozmuyor', () => {
+    const before = withSubjects();
+    const after = renameSubject(before, 'Yokoluş', 'Bir şey');
+    expect(after.settings.subjects).toEqual(before.settings.subjects);
+    expect(after.teachers).toEqual(before.teachers);
   });
 });
 

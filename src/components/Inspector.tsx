@@ -21,7 +21,10 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CalendarX2, X } from 'lucide-react';
-import { entityFacts, entityWeek, hourLabels, shortDay } from '../entities';
+import { entityFacts, entityWeek, hourLabels, shortDay, transferLesson } from '../entities';
+import { placedBlocks } from '../constraints';
+import { useDialogs } from './Dialogs';
+import { useToast } from './Toasts';
 import type { InspectKind } from '../entities';
 import { paletteColor } from '../palette';
 import { KIND_ICON } from './steps';
@@ -59,9 +62,14 @@ const KIND_LABEL: Record<InspectKind, string> = {
 
 export function InspectorProvider({
   state,
+  change,
   children,
 }: {
   state: State;
+  // The panel used to be read-only, so this is new. It is here rather than in
+  // the sheet because the provider is the only thing that knows the store, and
+  // the sheet is drawn from it.
+  change: (apply: (d: State) => State) => void;
   children: ReactNode;
 }) {
   const [target, setTarget] = useState<Target | null>(null);
@@ -70,21 +78,80 @@ export function InspectorProvider({
   return (
     <InspectContext.Provider value={open}>
       {children}
-      <Inspector state={state} target={target} onClose={() => setTarget(null)} />
+      <Inspector
+        state={state}
+        change={change}
+        target={target}
+        onClose={() => setTarget(null)}
+      />
     </InspectContext.Provider>
   );
 }
 
 function Inspector({
   state,
+  change,
   target,
   onClose,
 }: {
   state: State;
+  change: (apply: (d: State) => State) => void;
   target: Target | null;
   onClose: () => void;
 }) {
   const t = useT();
+  const { confirm } = useDialogs();
+  const toast = useToast();
+  const teacherOf = (lessonId: string) =>
+    state.lessons.find((x) => x.id === lessonId)?.teacherId ?? '';
+
+  /**
+   * Hands one lesson to another teacher.
+   *
+   * Confirmed before it happens, because the blocks that clash on the new
+   * teacher's week go back to the tray and there is no way to know from the
+   * dropdown how many that will be. Counted after, because the number is what
+   * the reader has to act on next.
+   */
+  async function hand(lessonId: string, other: string, teacherId: string) {
+    if (teacherId === '') return;
+    const to = state.teachers.find((x) => x.id === teacherId);
+    if (to === undefined) return;
+
+    const placed = placedBlocks(state, state.lessons.find((x) => x.id === lessonId)!).length;
+    if (
+      !(await confirm({
+        title: t('{ne} dersi {kim} öğretmenine geçecek', { ne: other, kim: to.short }),
+        body:
+          placed === 0
+            ? t('Bu ders henüz programa yerleşmemiş, yani kaybolacak bir şey yok.')
+            : t(
+                'Programdaki {n} bloğu yeni öğretmenin haftasına göre yeniden denenecek; sığmayanlar havuza döner.',
+                { n: placed },
+              ),
+        confirmLabel: t('Aktar'),
+      }))
+    ) {
+      return;
+    }
+
+    let returned = 0;
+    change((d) => {
+      const result = transferLesson(d, lessonId, teacherId);
+      returned = result.returned;
+      return result.state;
+    });
+    toast(
+      returned === 0
+        ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.short })
+        : t('{ne} dersi {kim} öğretmenine geçti. {n} blok havuza döndü.', {
+            ne: other,
+            kim: to.short,
+            n: returned,
+          }),
+    );
+  }
+
   // Recomputed only while the sheet is open: `entityWeek` walks every
   // placement, and the grid behind this must not pay for a closed sheet.
   const view = useMemo(() => {
@@ -129,6 +196,52 @@ function Inspector({
                   <li key={line}>{line}</li>
                 ))}
               </ul>
+
+              {/* "Öğretmenin bilgisine girip bir sınıfı başka bir hocaya
+                  aktarma olsun." The lessons are already named a line above,
+                  in a sentence; a sentence cannot be acted on, so they are
+                  drawn again as rows with the ids kept. Both panels do it and
+                  they are mirrors: a teacher's rows move the CLASS to another
+                  teacher, a class's rows move the TEACHER of one lesson. */}
+              {view.facts.lessons.length > 0 && target.kind !== 'room' && (
+                <>
+                  {/* Not "Dersleri": that name is a substring of the Dersler
+                      tab's, and `getByRole(name:)` matches substrings
+                      case-insensitively (pitfalls 49 and 74). Naming the
+                      DIRECTION also says which way the transfer goes. */}
+                  <h3 className="sheet-h">
+                    {target.kind === 'teacher' ? t('Verdiği dersler') : t('Aldığı dersler')}
+                  </h3>
+                  <table className="sheet-lessons">
+                    <tbody>
+                      {view.facts.lessons.map((x) => (
+                        <tr key={x.id}>
+                          <td>{x.other}</td>
+                          <td className="hint">{x.subject}</td>
+                          <td className="num">{t('{n} saat', { n: x.weeklyHours })}</td>
+                          <td>
+                            <select
+                              className="transfer-pick"
+                              value=""
+                              aria-label={t('{ne} dersini başka öğretmene aktar', { ne: x.other })}
+                              onChange={(e) => void hand(x.id, x.other, e.target.value)}
+                            >
+                              <option value="">{t('Başka hocaya aktar…')}</option>
+                              {state.teachers
+                                .filter((teacher) => teacher.id !== teacherOf(x.id))
+                                .map((teacher) => (
+                                  <option key={teacher.id} value={teacher.id}>
+                                    {teacher.short} · {teacher.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </>
+              )}
 
               <dl className="sheet-facts">
                 {view.facts.rows.map((row) => (

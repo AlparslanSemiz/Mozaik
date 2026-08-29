@@ -135,12 +135,16 @@ test.describe('12. Branş kısaltmaları', () => {
     const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
 
     await openSetup(page, 'Branşlar');
-    // The box comes FILLED with the default, not with a faint placeholder
-    const target = page.locator('table.list tbody tr', {
-      has: page.locator(`input[value="${before}"]`),
+    // The row is found by its NAME attribute, not by its text: since the name
+    // became editable it lives in an input's value, and a row's text no longer
+    // contains it. The short-form box is asked for by its own label, because
+    // the row now holds two text inputs.
+    const target = page.locator(`table.list tr[data-row-name]`, {
+      has: page.locator(`input.text-sm[value="${before}"]`),
     });
     await expect(target).toHaveCount(1);
-    const input = target.locator('input');
+    const input = target.getByRole('textbox', { name: /kısaltması$/ });
+    // The box comes FILLED with the default, not with a faint placeholder
     await expect(input).toHaveValue(before);
 
     await input.fill('Zzz');
@@ -159,16 +163,18 @@ test.describe('12. Branş kısaltmaları', () => {
     await openWithSample(page);
     await openSetup(page, 'Branşlar');
 
-    const row = page.locator('table.list tbody tr').first();
-    const input = row.locator('input');
+    const row = page.locator('table.list tr[data-row-name]').first();
+    // The SHORT form box by its own label: the row carries two text inputs
+    // since the name became editable.
+    const input = row.getByRole('textbox', { name: /kısaltması$/ });
     const original = (await input.inputValue())!;
 
     await input.fill('Zzz');
     await input.blur();
     await expect(row).toContainText(`varsayılanı: ${original}`);
 
-    await row.locator('input').fill(original);
-    await row.locator('input').blur();
+    await input.fill(original);
+    await input.blur();
     await expect(row).toContainText('varsayılan');
     await expect(row).not.toContainText('varsayılanı:');
   });
@@ -214,9 +220,9 @@ test.describe('16. Branş seçimi', () => {
 
     // ...and it is in the school's list from now on, with a short form
     await openSetup(page, 'Branşlar');
-    const row = page.locator('table.list tbody tr', { hasText: 'Robotik' });
+    const row = page.locator(`table.list tr[data-row-name="Robotik"]`);
     await expect(row).toHaveCount(1);
-    await expect(row.locator('input')).toHaveValue('Rob');
+    await expect(row.getByRole('textbox', { name: /kısaltması$/ })).toHaveValue('Rob');
   });
 
   test('kullanılan branş silinemiyor ve kimin kullandığı yazıyor', async ({ page }) => {
@@ -224,14 +230,14 @@ test.describe('16. Branş seçimi', () => {
     await openSetup(page, 'Branşlar');
 
     await page
-      .locator('table.list tbody tr', { hasText: 'Matematik' })
+      .locator(`table.list tr[data-row-name="Matematik"]`)
       .getByRole('button', { name: 'Sil' })
       .click();
 
     const said = await answerDialog(page);
     expect(said).toContain('öğretmen bu branşta');
     expect(said).toContain('Önce onların branşını değiştirin');
-    await expect(page.locator('table.list tbody tr', { hasText: 'Matematik' })).toHaveCount(1);
+    await expect(page.locator(`table.list tr[data-row-name="Matematik"]`)).toHaveCount(1);
   });
 
   test('kullanılmayan branş listeden çıkarılıyor ve açılır listede kalmıyor', async ({
@@ -243,11 +249,11 @@ test.describe('16. Branş seçimi', () => {
     await addSubjects(page, 'Matematik', 'Fransızca');
 
     await page
-      .locator('table.list tbody tr', { hasText: 'Fransızca' })
+      .locator(`table.list tr[data-row-name="Fransızca"]`)
       .getByRole('button', { name: 'Sil' })
       .click();
     await answerDialog(page);
-    await expect(page.locator('table.list tbody tr', { hasText: 'Fransızca' })).toHaveCount(0);
+    await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
     const options = await page
@@ -271,8 +277,8 @@ test.describe('16. Branş seçimi', () => {
 
     await expect(page.getByLabel('KA branşı')).toHaveValue('Robotik');
     await openSetup(page, 'Branşlar');
-    await expect(page.locator('table.list tbody tr', { hasText: 'Robotik' })).toHaveCount(1);
-    await expect(page.locator('table.list tbody tr', { hasText: 'Astronomi' })).toHaveCount(1);
+    await expect(page.locator(`table.list tr[data-row-name="Robotik"]`)).toHaveCount(1);
+    await expect(page.locator(`table.list tr[data-row-name="Astronomi"]`)).toHaveCount(1);
   });
 });
 
@@ -1227,5 +1233,62 @@ test.describe('67. Ders dağılımı', () => {
 
     // Nothing of this lesson is left in the tray: both its blocks went down.
     await expect(page.locator('.pool-card', { hasText: '/3' })).toHaveCount(0);
+  });
+});
+
+// "Branş isimleri değiştirme de olsun." The cascade is the whole difficulty:
+// `Teacher.subject` stores the NAME, not an id, so a rename that stopped at the
+// list would leave every teacher holding a branch nobody offers.
+test.describe('82. Branş yeniden adlandırma', () => {
+  const nameBox = (page: Page, subject: string) =>
+    page.getByRole('textbox', { name: `${subject} branşının adı` });
+
+  test('ad değişince ÖĞRETMENİN branşı da değişiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Branşlar');
+
+    await nameBox(page, 'Coğrafya').fill('Coğrafya ve Jeoloji');
+    await nameBox(page, 'Coğrafya').blur();
+    // Somebody teaches it, so the change is confirmed and says how many.
+    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog'))).toContainText(
+      'öğretmenin branşı da bu adla değişecek',
+    );
+    await page.getByRole('button', { name: 'Değiştir' }).click();
+
+    await expect(nameBox(page, 'Coğrafya ve Jeoloji')).toBeVisible();
+
+    // The teachers' dropdown is the proof: it reads the same list.
+    await openSetup(page, 'Öğretmenler');
+    await expect(
+      page.locator('table.list select').filter({ hasText: 'Coğrafya ve Jeoloji' }).first(),
+    ).toBeVisible();
+  });
+
+  // Merging two subjects would rewrite every teacher on one of them, and no
+  // undo can say which of the two a given teacher actually held.
+  test('BAŞKA bir branşın adına çevirmeye izin vermiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Branşlar');
+
+    await nameBox(page, 'Fizik').fill('Kimya');
+    await nameBox(page, 'Fizik').blur();
+    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog'))).toContainText(
+      'zaten kullanılıyor',
+    );
+    await page.getByRole('button', { name: 'Tamam' }).click();
+
+    await expect(nameBox(page, 'Fizik')).toBeVisible();
+  });
+
+  // A name only a teacher carries is not the school's to edit from this row.
+  test('"listede değil" satırı salt okunur', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Branşlar');
+    const strays = page.locator('table.list tbody').nth(1).locator('input[type="text"]');
+    // Whatever the sample leaves stray, none of those rows offers a NAME box:
+    // the only text input on them is the short form.
+    for (const box of await strays.all()) {
+      await expect(box).toHaveAttribute('aria-label', /kısaltması$/);
+    }
   });
 });

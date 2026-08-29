@@ -125,3 +125,109 @@ test.describe('48. Varlık paneli', () => {
     expect(await sheet.locator('.sheet-week td.conflict').count()).toBeGreaterThan(0);
   });
 });
+
+// "Öğretmenin bilgisine girip bir sınıfı başka bir hocaya aktarma olsun.
+// Aynı şekilde öğretmenin bilgilendirmesine girip de yapılabilir olsun bu."
+//
+// The panel was read-only, so this is the first thing it can DO. What is worth
+// testing is not the dropdown but the safety: a plain teacherId write would
+// leave every cell where it is, and `buildIndex` puts teacher occupancy in a
+// Map — two lessons on one teacher at one hour overwrite instead of clashing,
+// with every count still adding up.
+test.describe('83. Panelden ders aktarma', () => {
+  const sheet = (page: import('@playwright/test').Page) => page.locator('.sheet');
+
+  test('öğretmenin dersi BAŞKA hocaya geçiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Öğretmenler');
+    // The row's own "bilgileri" button: an icon-only control, so its
+    // aria-label is its only name.
+    await mainList(page)
+      .locator('tbody tr')
+      .first()
+      .getByRole('button', { name: /bilgileri$/ })
+      .click();
+
+    await expect(sheet(page)).toBeVisible();
+    const rows = sheet(page).locator('.sheet-lessons tbody tr');
+    await expect(rows.first()).toBeVisible();
+    const which = (await rows.first().locator('td').first().innerText()).trim();
+    const before = await rows.count();
+
+    const pick = rows.first().getByRole('combobox');
+    const to = (await pick.locator('option').nth(1).innerText()).trim();
+    await pick.selectOption({ index: 1 });
+
+    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
+      'öğretmenine geçecek',
+    );
+    await page.getByRole('button', { name: 'Aktar' }).click();
+
+    // Gone from THIS teacher's list…
+    await expect(rows).toHaveCount(before - 1);
+    // …and the toast names where it went.
+    // `.last()`: the sample-data toast may still be on screen, and two toasts
+    // are a strict-mode violation rather than a failure of the thing measured.
+    await expect(page.locator('.toast').last()).toContainText(which);
+    expect(to.length).toBeGreaterThan(0);
+  });
+
+  // The mirror the reader asked for in the second sentence.
+  test('sınıfın panelinde de aynı aktarma var', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Sınıflar');
+    await mainList(page)
+      .locator('tbody tr')
+      .first()
+      .getByRole('button', { name: /bilgileri$/ })
+      .click();
+
+    await expect(sheet(page)).toBeVisible();
+    await expect(sheet(page).getByRole('heading', { name: 'Aldığı dersler' })).toBeVisible();
+    await expect(
+      sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox'),
+    ).toBeVisible();
+  });
+
+  // The whole reason this is not a one-line teacherId write.
+  test('aktarma yeni hocayı ÇİFT REZERVE ETMİYOR', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+
+    await openSetup(page, 'Öğretmenler');
+    await mainList(page)
+      .locator('tbody tr')
+      .first()
+      .getByRole('button', { name: /bilgileri$/ })
+      .click();
+    const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
+    await pick.selectOption({ index: 1 });
+    await page.getByRole('button', { name: 'Aktar' }).click();
+    await expect(page.locator('.toast').last()).toContainText('geçti');
+
+    // Read the whole grid out of the store and ask the only question that
+    // matters: is any teacher in two classes at one hour?
+    const clashes = await page.evaluate(() => {
+      const raw = localStorage.getItem('ders-programi');
+      const s = JSON.parse(raw ?? '{}') as {
+        lessons?: Array<{ id: string; teacherId: string }>;
+        placements?: Record<string, string>;
+      };
+      const teacherOf = new Map((s.lessons ?? []).map((x) => [x.id, x.teacherId]));
+      const seen = new Set<string>();
+      const bad: string[] = [];
+      for (const [key, lessonId] of Object.entries(s.placements ?? {})) {
+        const [, day, hour] = key.split('|');
+        const who = teacherOf.get(lessonId);
+        if (who === undefined) continue;
+        const slot = `${who}|${day}|${hour}`;
+        if (seen.has(slot)) bad.push(slot);
+        seen.add(slot);
+      }
+      return bad;
+    });
+    expect(clashes).toEqual([]);
+  });
+});

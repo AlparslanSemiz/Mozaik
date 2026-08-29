@@ -831,7 +831,7 @@ export default function App() {
         setDensity={setDensity}
       />
 
-      <InspectorProvider state={state}>
+      <InspectorProvider state={state} change={change}>
       <Commands
         open={paletteOpen}
         setOpen={setPaletteOpen}
