@@ -1,6 +1,6 @@
 [package]
 name = "ders-programi"
-version = "1.4.0"
+version = "2.0.0"
 description = "Haftalik ders programi dizme araci"
 authors = ["Alparslan"]
 edition = "2021"

@@ -1,7 +1,7 @@
 {
   "name": "ders-programi",
   "private": true,
-  "version": "1.4.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Haftalik ders programi dizme araci - tek dosya, sunucusuz, internetsiz",
   "scripts": {
