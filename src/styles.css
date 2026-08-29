@@ -716,8 +716,10 @@ textarea {
 /* The scrollbars are FURNITURE, and the default ones are the loudest furniture
    on the screen: a 15px light-grey trough down the side of a grid whose whole
    job is to be read. Thin, on the plane they scroll over, and they darken when
-   you reach for them. `scrollbar-gutter: stable` on the scrolling panes keeps
-   the layout from stepping sideways when a list crosses the overflow line. */
+   you reach for them. `scrollbar-gutter: stable` keeps the layout from stepping
+   sideways when a list crosses the overflow line — on `.main`, which is the
+   page, and on `.palette-list`. Named, not implied: for two versions this line
+   said "the scrolling panes" and `.main` was not one of them (pitfall 94). */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
@@ -1092,12 +1094,24 @@ textarea {
    accent. The strip already carries --sec down its leading edge and the tab
    above it is drawn in it; a blue "Rahat" sitting inside a teal Program strip
    was two identities on one row saying the same thing. Measured: white on the
-   six section colours is 5.63 at worst in light, 5.92 in dark. */
+   six section colours is 5.63 at worst in light, 5.92 in dark.
+
+   AND THE COLOUR IS ALL OF IT: pressing does NOT change the weight (pitfall
+   94). `.ribbon-group` is a grid of equal columns, so the column width is the
+   WIDEST button's max-content — and `.btn[aria-pressed="true"]` further up
+   sets `font-weight: 600`, which is a metric. Measured on Kurulum's four
+   lists: "Öğretmenler 25" asks for 128.19px at 400 and 130.59px at 600, so
+   pressing the longest option widened all four boxes and slid the last one
+   7.3px sideways, and pressing any of the other three slid it back. Sometimes
+   the strip moved and sometimes it did not, which is exactly how it was
+   reported. `.tab[aria-current]` in the bar above uses the same equal-column
+   grid and has never moved, because it says where you are in colour alone. */
 .ribbon .btn[aria-pressed="true"],
 .ribbon .btn[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--sec, var(--accent));
   border-color: var(--sec, var(--accent));
   color: var(--on-accent);
+  font-weight: inherit;
 }
 
 .ribbon .btn:hover:not(:disabled) {
@@ -1465,6 +1479,18 @@ textarea {
   overflow: auto;
   padding: var(--space-5) var(--space-6);
 
+  /* THE GUTTER IS ALWAYS THERE, whether or not anything is overflowing.
+     The line beside the scrollbar tokens claimed this was already true of
+     "the scrolling panes" and it was true of exactly one of them, the command
+     palette (pitfall 77's shape: a sentence with nothing measuring it). What
+     actually happened, measured at 1920 with the sample school loaded: Ayarlar
+     → Zil ve günler fits and Görünüm does not, Okul → Derslikler fits and the
+     other three do not, Dersler → Genel does not. So moving between two
+     options of the SAME strip took the page from 1538.5px wide to 1528.5 and
+     back — every panel, every table and every heading stepping 10px sideways,
+     on some pairs and not others. */
+  scrollbar-gutter: stable;
+
   /* A SIZE CONTAINER, so the side column can be told how tall the screen is.
      `.main` already had a definite size — it is the `1 1 auto` child of a
      fixed-height column that hands it its width — so naming it a container
@@ -1565,6 +1591,13 @@ table.list tbody tr {
   padding: 0;
   display: flex;
   flex-direction: column;
+  /* ...and here the gutter goes back, because `overflow: hidden` is still a
+     scroll container to Chromium and `stable` reserved the 10px anyway:
+     measured, `.grid-wrap` came out 1910 instead of 1920, i.e. Program paid
+     for a scrollbar it can never show. There is nothing to stabilise on this
+     tab — the overflow belongs to `.grid-wrap`, which has its own bar and is
+     never on either side of a section change. */
+  scrollbar-gutter: auto;
 }
 
 /* The bar showing the reason during a drag. Its height is fixed so the grid

@@ -1,7 +1,94 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-29 (otuz ikinci oturum: **v2.0.0 dil turu** — sözlük
-bitti, beş dil, ve programın adı **Mozaik**)
+Son güncelleme: 2026-08-29 (otuz üçüncü oturum: **şerit kaymıyor**, ve
+v2.0.0'ın **veri kaybettiren kimliği** geri alındı)
+
+---
+
+## Otuz üçüncü oturum — kayma, ve exe'nin adresi (2026-08-29)
+
+İki şikayet, ikisi de ölçüldü, ikisinin de karşılığı bir test.
+
+### 1. "Alt bardaki seçenekler arasında geçerken bazen kayıyor"
+
+**İki bağımsız sebep**, ve ikisi de bir eşiğin hangi tarafına düştüğünüze
+bağlı olduğu için "bazen" görünüyordu.
+
+**a) Şerit kendini kaydırıyordu.** `.ribbon-group` eşit sütunlu bir grid, yani
+sütun genişliği **en geniş** düğmenin max-content'i — ve basılı düğme
+`font-weight: 600` çiziliyordu, yani bir **ölçü**. Kurulum'un dört listesinde
+ölçüldü:
+
+```
+"Öğretmenler 25"   400 -> 128,19 px      600 -> 130,59 px
+en sondaki düğmenin x'i        490,9  <->  498,2      (7,3 px)
+```
+
+Yani en uzun seçeneği basmak dört kutuyu birden genişletiyor, başka birini
+basmak geri alıyordu. Üstteki sekme çubuğu **aynı** ızgarayı kullanıyor ve hiç
+kıpırdamadı: `.tab[aria-current]` nerede olduğunu yalnız renkle söylüyor.
+Şerit de artık öyle.
+
+**b) Altındaki sayfa 10 px yana adım atıyordu.** `.main`'de ayrılmış bir
+kaydırma çubuğu oluğu yoktu:
+
+```
+Ayarlar -> Zil ve günler   taşmıyor   panel 1538,5 px
+Ayarlar -> Görünüm         taşıyor    panel 1528,5 px
+Okul    -> Derslikler      taşmıyor   ·  Branşlar/Öğretmenler/Sınıflar taşıyor
+Dersler -> Genel           taşıyor    ·  öteki iki mod taşmıyor
+```
+
+`styles.css` `scrollbar-gutter: stable`'ın "kaydıran panellerde" kurulu
+olduğunu **yazıyordu**; kurulu olduğu tek yer komut paletiydi. Şimdi `.main`'de
+kurulu, ve Program sekmesi muaf (`overflow: hidden` de Chromium'a göre bir
+kaydırma kabı: `stable` orada `.grid-wrap`'i 1920'den **1910**'a düşürüyordu).
+
+**Süitin bunu görmesi imkânsızdı:** Playwright Chromium'u `--hide-scrollbars`
+ile açıyor, yani 469 testin hiçbirinde ölçülecek bir çubuk yoktu.
+`e2e/kayma.spec.ts` kendi tarayıcısını açıyor ve oluğun **yer kapladığını**
+iddia etmeden önce ölçüyor. Üç testin üçü de mutasyonla sınandı: düzeltmeler
+tek tek geri konunca üçü de kırmızıya döndü.
+
+### 2. "Babamın verileri gitmez değil mi?" — gidiyordu
+
+Yayınlanmış **v2.0.0 bir veri kaybı taşıyor**, ve sebebi ad turunun tek
+gözden kaçan satırı: `tauri.conf.json`'ın `identifier`'ı `productName`'le
+birlikte `com.dersprogrami.arac` → `me.mozaik.arac` yapılmıştı. Tauri
+WebView2'ye profil olarak `%LOCALAPPDATA%\<identifier>` veriyor, yani o dize bir
+ad değil bir **adres**. Bu makinede ölçüldü:
+
+```
+%LOCALAPPDATA%\com.dersprogrami.arac\EBWebView\Default\Local Storage\leveldb
+  -> ders-programi · ders-programi-planlar · ders-programi-yedek-0 · ...
+     köken: http://tauri.localhost
+```
+
+O commit'ten derlenen exe **bomboş** açılır: veri diskte durur, program ona
+bakmaz, konsol temiz, ekranda hiçbir cümle sebebini söylemez. Geri alındı;
+`src/surum.test.ts` dizeyi çiviliyor (mutasyonla sınandı) ve `productName`'in
+hâlâ `Mozaik` olduğunu ayrıca ölçüyor. Ekrandaki ad değişmedi.
+
+**Ölçülen, iddia edilmeyen — güncelleme yolu:**
+
+```
+releases/latest/download/surum.json  ->  2.0.0 · 2026-08-29 · Mozaik.exe · 3 732 480 bayt
+exe'nin kendini güncellemesi         ->  v1.3.0 ve sonrası (update.rs, 22a8e2d)
+exe'nin Belgelerim'e yazması         ->  v1.1.0'dan beri, TIKLAMASIZ
+```
+
+Yani ≥ v1.3.0 bir kopya **şu anda** v2.0.0'ı görüyor ve alabilir. Düzeltme
+yayınlanana kadar o üç düğmeye basılmamalı. Ve en kötü durumda bile veri
+kurtarılabilir: eski profil klasörü silinmiyor, artı exe her açılışta
+`Belgelerim\Ders Programı\ders-programi-tumu.json`'ı zaten yazıyor.
+
+### Sayılar
+
+```
+birim   639 -> 641      (kimlik: iki test)
+E2E     469 -> 472      (kayma.spec.ts: üç test)
+tipler  temiz           npm run tipler
+```
 
 ---
 

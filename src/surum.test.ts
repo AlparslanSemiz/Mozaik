@@ -43,3 +43,37 @@ describe('sürüm numarasının tek kaynağı', () => {
     expect(tauriConf.version).toBe('../package.json');
   });
 });
+
+describe('kimlik — verinin ADRESİ', () => {
+  it('identifier DEĞİŞMİYOR: com.dersprogrami.arac', () => {
+    // THIS STRING IS WHERE MY FATHER'S TIMETABLES LIVE, and it is the one part
+    // of the rename to Mozaik that could not follow the name (pitfall 95).
+    //
+    // Measured on a Windows machine that had actually run the exe:
+    //
+    //   %LOCALAPPDATA%\com.dersprogrami.arac\EBWebView\Default\
+    //     Local Storage\leveldb\000003.log   ->  ders-programi,
+    //     ders-programi-planlar, ders-programi-yedek-0, ... at the
+    //     http://tauri.localhost origin
+    //
+    // Tauri hands WebView2 `%LOCALAPPDATA%\<identifier>` as its profile, so
+    // the identifier is not a label — it is the path localStorage sits under.
+    // v2.0.0 changed it to `me.mozaik.arac` alongside `productName`, and an
+    // exe built that way opens a BRAND NEW empty profile: every plan still on
+    // the disk, none of them visible, and no error anywhere to say why.
+    //
+    // The rest of the rename was decided the other way round and stays that
+    // way — the keys, the backup file names, `Belgelerim\Ders Programı` and
+    // the GitHub repo all kept their old names because they are data. This is
+    // the same rule; it was simply missed, because a reverse-DNS id looks like
+    // a name and is an address.
+    expect(tauriConf.identifier).toBe('com.dersprogrami.arac');
+  });
+
+  it('ekrandaki ad Mozaik — kimlik onunla birlikte kıpırdamıyor', () => {
+    // The guard that keeps the test above from being read as "the rename was
+    // reverted". It was not: the name is Mozaik everywhere a person sees one.
+    expect(tauriConf.productName).toBe('Mozaik');
+    expect(tauriConf.app.windows.map((w) => w.title)).toContain('Mozaik');
+  });
+});

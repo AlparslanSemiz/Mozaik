@@ -35,6 +35,23 @@ use tauri::Manager;
 /// live in is data. The same string is `EXE_FOLDER` in `src/desktop.ts`.
 const FOLDER: &str = "Ders Programı";
 
+// AND NEITHER DID THE BUNDLE IDENTIFIER, for a harder reason than the folder.
+//
+// `tauri.conf.json` says `com.dersprogrami.arac` under a program called
+// Mozaik, and that looks like something nobody finished renaming. It is the
+// opposite: Tauri hands WebView2 `%LOCALAPPDATA%/<identifier>` as its profile,
+// so that string is the PATH localStorage sits under — every plan, every
+// preference, the whole backup chain. Measured on a machine that had run the
+// exe: `%LOCALAPPDATA%/com.dersprogrami.arac/EBWebView/Default/Local Storage/
+// leveldb` holds `ders-programi`, `ders-programi-planlar`,
+// `ders-programi-yedek-0`, at the `http://tauri.localhost` origin.
+//
+// v2.0.0 renamed it to `me.mozaik.arac` beside `productName`, which means an
+// exe built from that commit opens a brand new empty profile: the data is
+// still on the disk, none of it is visible, and nothing on screen says why.
+// `src/surum.test.ts` pins the string now, because a name that is really an
+// address will look renameable again the next time somebody reads it.
+
 /// Creates the folder on first use and hands back its path.
 fn data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let docs = app

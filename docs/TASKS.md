@@ -9,32 +9,40 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
-> **v2.0.0 dil turu BİTTİ (2026-08-29): D5 · D6 · D7 ve YENİ AD.**
-> Sözlük **9 anahtardan 814'e** çıktı ve arayüzün tamamını kapsıyor; dört
-> sözlük var (en · de · es · fr); ilke 4 yeniden yazıldı; program artık
-> **Mozaik**. **Şema değişmedi, yeni depolama anahtarı açılmadı** — ve bu
-> turun en önemli cümlesi bu: `ders-programi*` anahtarları, yedek dosya
-> adları ve `Belgelerim\Ders Programı` klasörü **kıpırdamadı**.
-> Ayrıntı ve **ölçülen her sayı** [STATUS.md](STATUS.md) → *Otuz ikinci
-> oturum*.
+> **v2.0.0 YAYINLANDI ve BİR VERİ KAYBI TAŞIYOR — ilk iş bunu kapatmak.**
 >
-> **Bir sonraki oturumun ilk işi — SÜRÜM ÇIKARMAK.**
-> `npm run yayinla -- 2.0.0`. Bu sürüm babanın makinesine iki şey taşıyor ve
-> ikisi de kodda bekliyor: yeni ad ve beş dil. Etiketten önce
-> `npm run kontrol` yeşil olmalı ve **hiçbir şey `dist/`'e dokunmamalı**.
-> Yayınlandığında Release'in varlık adları da değişecek:
-> `Mozaik.html` · `Mozaik-Windows-kurulum.zip` · `Mozaik.exe` · `surum.json`.
-> Babanın makinesindeki `Ders-Programi.exe` bunu **yine de** alır: takas
-> çalışan programın kendi dosya adı üstünden yapılıyor, adres
-> `surum.json`'dan okunuyor.
+> Ad turunun tek gözden kaçan satırı `tauri.conf.json`'ın `identifier`'ıydı:
+> `productName`'le birlikte `com.dersprogrami.arac` → `me.mozaik.arac`
+> yapılmıştı. Tauri WebView2'ye profil olarak `%LOCALAPPDATA%\<identifier>`
+> veriyor, yani o dize bir ad değil **adres** — babanın bütün planlarının
+> durduğu yol. Ölçüldü, geri alındı, `src/surum.test.ts` çiviledi
+> (bkz. [STATUS.md](STATUS.md) → *Otuz üçüncü oturum*, ve tuzak 95).
 >
-> **Bu turun bıraktığı tek açık madde:**
+> - [ ] **`npm run yayinla -- 2.0.1`.** Kod hazır ve `npm run kontrol` yeşil
+>       olmalı. Bu sürümün taşıdığı iki şey: doğru kimlik, ve şeridin
+>       kaymaması.
+> - [ ] **Yayınlanana kadar babanın exe'sinde güncelleme düğmelerine
+>       BASILMASIN.** `surum.json` şu anda 2.0.0'ı gösteriyor, ve ≥ v1.3.0
+>       her kopya onu görüyor.
+> - [ ] Yayından sonra **Windows'ta bir kez denensin**: eski kopya
+>       güncellendikten sonra planlar yerinde mi. Bu, bu makinede
+>       ölçülemeyen tek şey.
+>
+> **Kayma turu BİTTİ (2026-08-29).** *"Alt bardaki seçenekler arasında
+> geçerken bazen kayıyor"* — iki bağımsız sebep, ikisi de ölçüldü, ikisi de
+> `e2e/kayma.spec.ts`'te (üçü de mutasyonla sınandı): basılı düğmenin
+> **kalınlığı** eşit sütunlu ızgarada bir ölçüydü (7,3 px), ve `.main`'de
+> ayrılmış kaydırma çubuğu oluğu yoktu (10 px). Süit bunu göremezdi:
+> Playwright `--hide-scrollbars` ile açıyor, o yüzden yeni dosya kendi
+> tarayıcısını açıyor.
+>
+> **Bu turun bıraktığı açık madde:**
 > - [ ] **Bir testlik artık: "reload'dan sonra düşme".** Sebebin BİRİ bulundu
 >       ve kod çıktı (`revealRibbon` `.main` yoksa sessizce dönüyordu), ama
 >       beş tam koşunun ikisinde hâlâ **bir** test düşüyor — her seferinde
 >       başkası, hep bir `reload`'dan sonra, tek başına koşunca geçiyor. İki
->       worker'la da düştü, yani salt aşırı yüklenme değil. Bir sürümü
->       durduracak bir kusur değil; bakılacak.
+>       worker'la da düştü, yani salt aşırı yüklenme değil. **Bu oturumun iki
+>       tam koşusunda düşmedi** (472/472, iki kez).
 >
 > **Sende kalanlar — kodda değil, ve üçü de geçen turdan devrediyor:**
 > 1. **Windows'ta denensin.** `releases/latest/download/Mozaik.exe`. Bu
@@ -48,10 +56,11 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 > 3. **Babanın gerçek listesi** — hâlâ v0'ın çıkma şartı, ve hâlâ tek
 >    bekleyen büyük şey.
 >
-> **DEPONUN ADI DEĞİŞMEYECEK.** `ders-programi` kalıyor ve bu kozmetik değil:
-> `update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına **derlenmiş**. Depo
-> yeniden adlandırılırsa babanın makinesindeki kopya bir daha hiç
-> güncellenemez.
+> **DEPONUN ADI DA KİMLİĞİ DE DEĞİŞMEYECEK.** `ders-programi` ve
+> `com.dersprogrami.arac` kalıyor, ve ikisi de kozmetik değil:
+> `update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına **derlenmiş** (depo
+> yeniden adlandırılırsa o kopyalar bir daha hiç güncellenemez), ve kimlik
+> verinin durduğu yol.
 
 ### V turu — dokuz madde — **BİTTİ ✅** (2026-08-27)
 

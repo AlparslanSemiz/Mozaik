@@ -216,10 +216,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 639 birim testi
+npm test           # Vitest — 641 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 469 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 472 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -355,9 +355,9 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 25 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
+| **E2E** | `e2e/*.spec.ts` (Playwright, 26 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
-formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79) |
+formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
@@ -628,9 +628,23 @@ Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `version.ts`'teki
 **Değişmeyenler, ve bu bir VERİ kararı:** `localStorage` anahtarları
 (`ders-programi*`) · yedek dosya adları (`ders-programi-YYYY-AA-GG.json`) ·
 `Belgelerim\Ders Programı` klasörü (`lib.rs`'in `FOLDER`'ı ve `desktop.ts`'in
-`EXE_FOLDER`'ı) · **GitHub deposunun adı**. Sonuncusu kozmetik değil:
-`update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına **derlenmiş**, yani depo
-yeniden adlandırılırsa o kopyalar bir daha hiç güncellenemez.
+`EXE_FOLDER`'ı) · **GitHub deposunun adı** · **`tauri.conf.json`'ın
+`identifier`'ı**. Sondan ikincisi kozmetik değil: `update.rs`'in `RELEASE_KOK`'u
+v1.4.0 kopyalarına **derlenmiş**, yani depo yeniden adlandırılırsa o kopyalar
+bir daha hiç güncellenemez.
+
+> **Sonuncusu 2026-08-29'a kadar listede DEĞİLDİ ve orada olmalıydı.** v2.0.0
+> `identifier`'ı `com.dersprogrami.arac` → `me.mozaik.arac` yaptı, çünkü bir
+> ters-DNS kimliği bir **ad** gibi görünüyor. Değil: Tauri WebView2'ye profil
+> olarak `%LOCALAPPDATA%\<identifier>` veriyor, yani o dize localStorage'ın
+> **durduğu yol**. Bu makinede ölçüldü — `%LOCALAPPDATA%\com.dersprogrami.arac`
+> altında `EBWebView\Default\Local Storage\leveldb` içinde `ders-programi`,
+> `ders-programi-planlar`, `ders-programi-yedek-0`, köken
+> `http://tauri.localhost`. O commit'ten derlenen exe **bomboş** açılır: veri
+> diskte durur, programda görünmez, ve hiçbir yerde hiçbir cümle sebebini
+> söylemez. Geri alındı, ve `src/surum.test.ts` artık dizeyi çiviliyor
+> (bkz. tuzak 95). **Yayınlanmış v2.0.0 varlığı bu kusuru taşıyor** — düzeltme
+> bir sonraki sürümle gider.
 
 **Güncelleme yolu kırılmıyor ve sebebi yazılı:** `update.rs` takası **çalışan
 programın kendi dosya adı** üstünden yapıyor (`current_exe()` + `.yeni`/
@@ -1822,6 +1836,54 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     reçete **yoktu**, burada reçete ile çıktısı **ayrışmıştı**. Bir dosya bir
     betik tarafından üretiliyorsa, o dosyaya elle eklenen her şey **betiğe**
     eklenir.
+
+94. **BİR DURUMUN AĞIRLIĞI BİR ÖLÇÜDÜR, ve eşit sütunlu bir ızgarada onu
+    bütün komşularına dağıtır.** Şikayet *"alt bardaki seçeneklerin arasında
+    geçerken bazen böyle kayıyor gibi oluyor"* idi ve "bazen"i açıklayan iki
+    ayrı sebep vardı, ikisi de bir eşiğin hangi tarafına düştüğünüze bağlı.
+    Birincisi şeridin kendisi: `.ribbon-group` eşit sütunlu bir grid, yani
+    sütun genişliği **en geniş** düğmenin max-content'i, ve
+    `.btn[aria-pressed="true"]` `font-weight: 600` yazıyordu. Ölçüldü:
+    "Öğretmenler 25" 400'de **128,19 px**, 600'de **130,59 px** — yani en uzun
+    seçeneği basmak dört kutuyu birden genişletiyor ve sonuncuyu **7,3 px**
+    yana kaydırıyor, başka birini basmak geri alıyordu. Üstteki sekme çubuğu
+    **aynı** ızgarayı kullanıyor ve iki yıldır kıpırdamadı, çünkü
+    `.tab[aria-current]` nerede olduğunuzu yalnız **renkle** söylüyor. Kural:
+    bir durumun işareti bir ölçüyü değiştiriyorsa, o işaret bir renk olur.
+    İkincisi altındaki sayfa: `.main`'de ayrılmış bir kaydırma çubuğu oluğu
+    yoktu, yani taşan bir bölümle taşmayan bölüm sayfaya iki farklı genişlik
+    veriyordu — panel **1538,5 → 1528,5 px**, ve arada her tablo, her başlık.
+    `styles.css`'in kaydırma çubuğu tokenlerinin yanındaki satır
+    `scrollbar-gutter: stable`'ın "kaydıran panellerde" zaten kurulu olduğunu
+    **yazıyordu**; kurulu olduğu tek yer komut paletiydi (tuzak 77'nin şekli).
+    **Ve süitin bunu görmesi imkânsızdı:** Playwright Chromium'u
+    `--hide-scrollbars` ile açıyor, yani buradaki her testte her kaydırma
+    çubuğu sıfır piksel. Yer kaplamayan bir çubuk hiçbir yeri kaplayamaz, o
+    yüzden 10 px'lik adım hiçbir koşuda var olmadı. `e2e/kayma.spec.ts` kendi
+    tarayıcısını `ignoreDefaultArgs: ['--hide-scrollbars']` ile açıyor, ve
+    oluğun gerçekten yer kapladığını **iddia etmeden önce ölçüyor**. Program
+    sekmesi oluktan muaf: `overflow: hidden` de Chromium'a göre bir kaydırma
+    kabı, `stable` orada da 10 px ayırıyordu — `.grid-wrap` 1920 yerine 1910.
+
+95. **BİR TERS-DNS KİMLİĞİ BİR AD DEĞİL, BİR ADRESTİR.** Program Mozaik olurken
+    `tauri.conf.json`'ın `identifier`'ı da `com.dersprogrami.arac` →
+    `me.mozaik.arac` yapıldı; aynı commit'in mesajı *"programın adı değişti,
+    verinin adı değişmedi"* diyordu ve anahtarlar, dosya adları, `Belgelerim`
+    klasörü ve depo adı gerçekten değişmemişti. Ama Tauri WebView2'ye profil
+    olarak `%LOCALAPPDATA%\<identifier>` veriyor: o dize babanın bütün
+    planlarının **durduğu yol**. Windows'ta ölçüldü —
+    `%LOCALAPPDATA%\com.dersprogrami.arac` altında
+    `EBWebView\Default\Local Storage\leveldb` içinde `ders-programi`,
+    `ders-programi-planlar` ve `ders-programi-yedek-0`, köken
+    `http://tauri.localhost`. Yani o exe
+    **bomboş** açılır ve bunu kimse haber vermez: dosyalar diskte, program
+    onlara bakmıyor, konsol temiz, hata yok. Tuzak 65'in ailesi (ölçülmeden
+    yazılmış bir platform cümlesi) ama zararı başka bir kategoride: orada bir
+    gerekçe yanlıştı, burada bir **dönem kaybolur**. İki karşı önlem:
+    `src/surum.test.ts` dizeyi çiviliyor, ve `productName`'in hâlâ `Mozaik`
+    olduğunu ayrıca ölçüyor ki bu satır "ad değişikliği geri alındı" diye
+    okunmasın. Genel kural: bir dizeyi yeniden adlandırmadan önce sorulacak
+    soru "bu kime görünüyor" değil, **"bunu kim ARIYOR"**dur.
 
 ---
 
