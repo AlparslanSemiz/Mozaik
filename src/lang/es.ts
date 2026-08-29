@@ -321,11 +321,7 @@ const ES: Sozluk = {
   'Programı boşalt': 'Vaciar el horario',
   'Kontrol araçları': 'Herramientas de revisión',
   'Sorun yok': 'Sin problemas',
-  'Çözülmesi gereken satırlara gider': 'Va a las filas que hay que resolver',
   'Sorunlar ({n})': 'Problemas ({n})',
-  'Öğretmen yüklerine gider': 'Va a las cargas de los profesores',
-  'Sınıf yüklerine gider': 'Va a las cargas de las clases',
-  'Derslik yüklerine gider': 'Va a las cargas de las aulas',
   '{n} engel': '{n} {n:bloqueo|bloqueos}',
   '{n} uyarı': '{n} {n:aviso|avisos}',
   'Yazdırma araçları': 'Herramientas de impresión',
@@ -944,6 +940,11 @@ const ES: Sozluk = {
   'Azalan sıralı. Artana çevirmek için tıklayın': 'Orden descendente. Haga clic para ascendente',
   'Artan sıralı. Azalana çevirmek için tıklayın': 'Orden ascendente. Haga clic para descendente',
   'Sürükleyerek ya da ok tuşlarıyla sırala': 'Arrastre o use las flechas para reordenar',
+  'Çözülmesi gereken satırlar': 'Filas por resolver',
+  'Öğretmen yükleri': 'Cargas de los profesores',
+  'Sınıf yükleri': 'Cargas de los grupos',
+  'Derslik yükleri': 'Cargas de las aulas',
+  'Kapalı saatte ders, kural ihlali ya da yerleşemeyen ders yok.': 'Ninguna clase en horas cerradas, ninguna regla incumplida, nada sin colocar.',
 };
 
 registerSozluk('es', ES);

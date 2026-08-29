@@ -64,6 +64,18 @@ export type SectionId =
   | "about";
 /** Yazdır: which pages the preview builds. */
 export type Scope = "classes" | "teachers" | "both";
+
+/**
+ * WHICH PART of the Kontrol report is on screen.
+ *
+ * A position and not a preference, so it is not stored anywhere — the same
+ * contract as `step` and `section`. It replaced four buttons that called
+ * `scrollIntoView`: three of them aimed into the sticky right rail, which is
+ * pinned to the top of the scrollport and therefore never moved, so pressing
+ * them did nothing at all and nothing said so ("alt sekmede bir şeyler
+ * seçiyoruz ama değişmiyor").
+ */
+export type CheckView = "problems" | "teachers" | "classes" | "rooms";
 export interface ToolState {
   tab: Tab;
   setTab: (next: Tab) => void;
@@ -85,6 +97,8 @@ export interface ToolState {
   setSection: (next: SectionId) => void;
   scope: Scope;
   setScope: (next: Scope) => void;
+  checkView: CheckView;
+  setCheckView: (next: CheckView) => void;
   colored: boolean;
   setColored: (next: boolean) => void;
 }
@@ -108,7 +122,10 @@ export function useToolState(firstTab: Tab): ToolState {
   const [section, setSection] = useState<SectionId>("school");
   const [scope, setScope] = useState<Scope>("classes");
   const [colored, setColored] = useState(true);
-  // 'hepsi' is the report as it has always been: nothing is hidden until asked.
+  // 'problems' is where a reader arrives with a question, and it is also the
+  // only part of the report that can be empty — an empty problems view is the
+  // answer "there are none", which is worth landing on.
+  const [checkView, setCheckView] = useState<CheckView>("problems");
 
   return {
     tab,
@@ -129,6 +146,8 @@ export function useToolState(firstTab: Tab): ToolState {
     setSection,
     scope,
     setScope,
+    checkView,
+    setCheckView,
     colored,
     setColored,
   };

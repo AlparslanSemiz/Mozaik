@@ -3151,6 +3151,20 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
+/* Kontrol is one panel at a time now, so nothing constrains its width any
+   more — the two-column layout used to. A capacity table given 1900 px puts
+   the label at one edge of the monitor and the number at the other. */
+.check-page {
+  max-width: 68rem;
+}
+
+/* A number never wraps. `.num` is 8ch wide and "433 / 433" is nine characters,
+   so the fullest week — the one somebody actually wants to read — was the one
+   case that broke onto two lines. Measured at 72px against a 73px box. */
+table.stat td.num {
+  white-space: nowrap;
+}
+
 /* The sheet's lesson rows: what this teacher (or class) is tied to, with the
    ids kept so each one can be acted on. `links` above says the same thing in a
    sentence, and a sentence cannot be handed to another teacher. */

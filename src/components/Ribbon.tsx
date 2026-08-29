@@ -49,6 +49,7 @@
 // not a side effect of drawing them up here.
 
 import type React from 'react';
+import type { ReactNode } from 'react';
 import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
 import {
@@ -77,7 +78,7 @@ import type { SolverRun } from '../useSolver';
 import type { Density } from '../theme';
 import { applyDensity } from '../theme';
 import { paletteColor } from '../palette';
-import type { Kind, LessonMode, SectionId, ToolState, View } from '../toolState';
+import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';
 
@@ -522,39 +523,59 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
     // and false of the screen: the strip's height came and went with the tab,
     // so everything under it jumped every time this report was opened or left.
     //
-    // For one round it held a three-way FILTER (Hepsi · Sorunlar · Kapasite),
-    // and the reader's verdict was that the three read the same — which they
-    // largely did, since the panel everyone comes for was in all three. The
-    // report is one page now and the strip does what a strip on a long report
-    // is actually for: it goes somewhere. Every button says how many.
+    // Then it held a three-way FILTER, and the reader's verdict was that the
+    // three read the same — the panel everyone comes for was in all three. Then
+    // it held four `scrollIntoView` buttons, and those were worse: three of the
+    // four aimed into the sticky right rail, which is pinned to the top of the
+    // scrollport and scrolls inside itself, so the page could not move. No
+    // pressed state, no movement, no message. "Alt sekmede bir şeyler seçiyoruz
+    // ama değişmiyor" is exactly that.
+    //
+    // Now they CHOOSE THE PAGE. A click always changes the screen, the choice
+    // stays visible in `aria-pressed`, and the report stopped being something
+    // you scroll.
     const sorunlar = status.problems;
-    const jump = (sel: string) => () => {
-      document.querySelector(sel)?.scrollIntoView({ block: 'start' });
-    };
+    const views: Array<{ id: CheckView; label: string; icon: ReactNode; title: string }> = [
+      {
+        id: 'problems',
+        label: t('Sorunlar ({n})', { n: sorunlar }),
+        icon: <TriangleAlert {...ICON} />,
+        title: sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlar'),
+      },
+      {
+        id: 'teachers',
+        label: t('Öğretmenler'),
+        icon: KIND_ICON.teacher,
+        title: t('Öğretmen yükleri'),
+      },
+      {
+        id: 'classes',
+        label: t('Sınıflar'),
+        icon: KIND_ICON.class,
+        title: t('Sınıf yükleri'),
+      },
+      {
+        id: 'rooms',
+        label: t('Derslikler'),
+        icon: KIND_ICON.room,
+        title: t('Derslik yükleri'),
+      },
+    ];
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol araçları')}>
-        <Group label="Git">
-          <button
-            className="btn"
-            disabled={sorunlar === 0}
-            title={sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlara gider')}
-            onClick={jump('.kontrol-sorun')}
-          >
-            <TriangleAlert {...ICON} />
-            {t('Sorunlar ({n})', { n: sorunlar })}
-          </button>
-          <button className="btn" title={t('Öğretmen yüklerine gider')} onClick={jump('#kontrol-ogretmenler')}>
-            {KIND_ICON.teacher}
-            {t('Öğretmenler')}
-          </button>
-          <button className="btn" title={t('Sınıf yüklerine gider')} onClick={jump('#kontrol-siniflar')}>
-            {KIND_ICON.class}
-            {t('Sınıflar')}
-          </button>
-          <button className="btn" title={t('Derslik yüklerine gider')} onClick={jump('#kontrol-derslikler')}>
-            {KIND_ICON.room}
-            {t('Derslikler')}
-          </button>
+        <Group label={t('Göster')}>
+          {views.map((v) => (
+            <button
+              key={v.id}
+              className="btn"
+              aria-pressed={v.id === ui.checkView}
+              title={v.title}
+              onClick={() => ui.setCheckView(v.id)}
+            >
+              {v.icon}
+              {v.label}
+            </button>
+          ))}
         </Group>
 
         <Spacer />

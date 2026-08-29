@@ -969,7 +969,7 @@ export default function App() {
               view={ui.view}
             />
           )}
-          {tab === 'check' && <Check state={state} />}
+          {tab === 'check' && <Check state={state} view={ui.checkView} />}
           {tab === 'print' && (
             <Print
               state={state}

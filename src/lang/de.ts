@@ -321,11 +321,7 @@ const DE: Sozluk = {
   'Programı boşalt': 'Stundenplan leeren',
   'Kontrol araçları': 'Prüfwerkzeuge',
   'Sorun yok': 'Keine Probleme',
-  'Çözülmesi gereken satırlara gider': 'Springt zu den Zeilen, die gelöst werden müssen',
   'Sorunlar ({n})': 'Probleme ({n})',
-  'Öğretmen yüklerine gider': 'Springt zu den Lehrerlasten',
-  'Sınıf yüklerine gider': 'Springt zu den Klassenlasten',
-  'Derslik yüklerine gider': 'Springt zu den Raumlasten',
   '{n} engel': '{n} {n:Sperre|Sperren}',
   '{n} uyarı': '{n} {n:Warnung|Warnungen}',
   'Yazdırma araçları': 'Druckwerkzeuge',
@@ -944,6 +940,11 @@ const DE: Sozluk = {
   'Azalan sıralı. Artana çevirmek için tıklayın': 'Absteigend sortiert. Klicken für aufsteigend',
   'Artan sıralı. Azalana çevirmek için tıklayın': 'Aufsteigend sortiert. Klicken für absteigend',
   'Sürükleyerek ya da ok tuşlarıyla sırala': 'Zum Umsortieren ziehen oder Pfeiltasten benutzen',
+  'Çözülmesi gereken satırlar': 'Zu lösende Zeilen',
+  'Öğretmen yükleri': 'Lehrerdeputate',
+  'Sınıf yükleri': 'Klassendeputate',
+  'Derslik yükleri': 'Raumbelegung',
+  'Kapalı saatte ders, kural ihlali ya da yerleşemeyen ders yok.': 'Keine Stunden auf gesperrten Zeiten, keine Regelverstöße, nichts Unplatzierbares.',
 };
 
 registerSozluk('de', DE);
