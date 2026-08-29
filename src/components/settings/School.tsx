@@ -264,56 +264,62 @@ export default function School({ state, change }: PanelProps) {
             )}
           </p>
 
+          {/* Twelve lessons and their breaks, and on a short window that is
+              taller than the panel: the one box here that can outgrow the
+              screen is the one that scrolls. */}
           {patterns.length > 0 && (
-            <table className="list bell-preview">
-              <thead>
-                <tr>
-                  <th className="w-col-xs">{t('Ders')}</th>
-                  {patterns.map((p) => (
-                    <th key={p.after}>{p.dayNames}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {state.settings.hours.flatMap((label, i) => [
-                  <tr key={i}>
-                    <th>{label}</th>
+            <div className="stat-scroll">
+              <table className="list bell-preview">
+                <thead>
+                  <tr>
+                    <th className="w-col-xs">{t('Ders')}</th>
+                    {patterns.map((p) => (
+                      <th key={p.after}>{p.dayNames}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {state.settings.hours.flatMap((label, i) => [
+                    <tr key={i}>
+                      <th>{label}</th>
+                      {patterns.map((p) => (
+                        <td key={p.after}>
+                          {p.periods[i]?.start ?? ''}–{p.periods[i]?.end ?? ''}
+                        </td>
+                      ))}
+                    </tr>,
+                    // A break row for every distinct break position. It shows the
+                    // break ONLY in the columns that break there — weekdays and the
+                    // weekend differ, and one shared row would lie about one of them.
+                    ...(patterns.some((p) => p.after === i + 1)
+                      ? [
+                          <tr key={`break-${i}`} className="break-row">
+                            <th>{t('Ara')}</th>
+                            {patterns.map((p) => (
+                              <td key={p.after}>
+                                {p.after === i + 1
+                                  ? t('Öğle arası, {dk} dk', {
+                                      dk: state.settings.bell.longBreakMinutes,
+                                    })
+                                  : ''}
+                              </td>
+                            ))}
+                          </tr>,
+                        ]
+                      : []),
+                  ])}
+                  <tr>
+                    <th>{t('Bitiş')}</th>
                     {patterns.map((p) => (
                       <td key={p.after}>
-                        {p.periods[i]?.start ?? ''}–{p.periods[i]?.end ?? ''}
+                        <b>{p.periods[p.periods.length - 1]?.end ?? ''}</b>
                       </td>
                     ))}
-                  </tr>,
-                  // A break row for every distinct break position. It shows the
-                  // break ONLY in the columns that break there — weekdays and the
-                  // weekend differ, and one shared row would lie about one of them.
-                  ...(patterns.some((p) => p.after === i + 1)
-                    ? [
-                        <tr key={`break-${i}`} className="break-row">
-                          <th>{t('Ara')}</th>
-                          {patterns.map((p) => (
-                            <td key={p.after}>
-                              {p.after === i + 1
-                                ? t('Öğle arası, {dk} dk', {
-                                    dk: state.settings.bell.longBreakMinutes,
-                                  })
-                                : ''}
-                            </td>
-                          ))}
-                        </tr>,
-                      ]
-                    : []),
-                ])}
-                <tr>
-                  <th>{t('Bitiş')}</th>
-                  {patterns.map((p) => (
-                    <td key={p.after}>
-                      <b>{p.periods[p.periods.length - 1]?.end ?? ''}</b>
-                    </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
           )}
         </div>
       </aside>

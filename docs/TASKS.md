@@ -28,11 +28,13 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 >       güncellendikten sonra planlar yerinde mi. Bu, bu makinede
 >       ölçülemeyen tek şey.
 >
-> **AA turu BİTTİ (2026-08-29).** Kullanıcının beş satırı: ekleme kendi bloğu,
-> özet kendi içinde kayıyor, hatalar en üstte, sınıfın kendi günlük sınırı
-> (**şema v11**), kısaltma varsayılanı sütun başlığı. `npm run kontrol` yeşil —
-> 698 birim · 489 E2E · 22 site · 7 çözücü. Ayrıntı aşağıda, ölçümler
-> [STATUS.md](STATUS.md) → *Otuz dördüncü oturum*.
+> **AA turu BİTTİ (2026-08-29)**, ve **AA2 aynı gün bir kez daha düzeltildi**:
+> *"özet kutusu değil içindeki liste yukarı aşağı scrollanabilsin"* — tavan
+> doğruydu, kaydıran kutu değildi. Beş satır: ekleme kendi bloğu, özet kendi
+> içinde kayıyor, hatalar en üstte, sınıfın kendi günlük sınırı (**şema v11**),
+> kısaltma varsayılanı sütun başlığı. `npm run kontrol` yeşil —
+> 698 birim · 490 E2E · 22 site · 7 çözücü. Ayrıntı aşağıda, ölçümler
+> [STATUS.md](STATUS.md) → *Otuz dördüncü* ve *Otuz beşinci oturum*.
 >
 > **Kayma turu BİTTİ (2026-08-29).** *"Alt bardaki seçenekler arasında
 > geçerken bazen kayıyor"* — iki bağımsız sebep, ikisi de ölçüldü, ikisi de
@@ -1907,6 +1909,16 @@ Kullanıcının yazdığı beş satır. **Şema v10 → v11'e çıktı.** Ayrın
       içinde kayıyor, ve başlık yapışkan. `18rem` **tabanı da kalktı**: tavanı
       aşabilen bir taban tavan değildir. Ölçüldü — Müsaitlik'te 25 öğretmenin
       hepsi artık tek ekranda, altındaki iki düğmeyle birlikte.
+- [x] **AA2b Kaydıran kutu PANEL değil LİSTE.** AA2'nin ikinci yarısı, aynı
+      gün: scrollbar panelin kendisindeydi, yani başlığın altındaki cümle ve
+      tablonun altındaki liste satırlarla birlikte gidiyordu. Panel artık bir
+      **flex sütunu**, yer verebilen tek kutu liste, ve tabanı `6rem` (rem,
+      yani `--ui-scale`'i izliyor). Panelin `overflow-y`'si **son çare** olarak
+      duruyor: küçülemeyen yarı tek başına ekrandan uzunsa oraya düşülür,
+      yoksa ulaşılamayan içerik olurdu. İki tabloya kutu verildi (Ayarlar →
+      Kurallar'ın ihlal listesi, Zil önizlemesi: 1080'de 25 px, %150'de 478 px
+      taşıyordu) ve kayan tablonun **başlığı yapışkan** oldu. İki test, ikisi
+      de mutasyonla sınandı.
 - [x] **AA3 Hata Özet'in en üstünde.** Uyarı kutuları kapasite tablosundan
       **öncesine** taşındı, ve `CapacityRows` Özet'te de `problemsFirst`
       alıyor — o bayrak Kontrol için yazılmış ve buraya hiç geçilmemişti.

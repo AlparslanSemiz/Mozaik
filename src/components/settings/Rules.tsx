@@ -233,6 +233,9 @@ export default function Rules({ state, change }: PanelProps) {
           <p className="hint">
             <T k="Soldaki sayıları değiştirdikçe bu liste anında değişir. **Uyar** yerleştirmeyi durdurmaz, yalnızca sayar; **Engelle** dersi o hücreye hiç bıraktırmaz. Aynı liste **Kontrol** sekmesinde de var." />
           </p>
+          {/* A row per breach and no ceiling on how many there can be, so this
+              is the box in this panel that gives ground: in a right rail the
+              list scrolls and the sentence above it stays where it was. */}
           {violations.length === 0 ? (
             <div className="ok-box">
               {t(
@@ -240,26 +243,28 @@ export default function Rules({ state, change }: PanelProps) {
               )}
             </div>
           ) : (
-            <table className="stat">
-              <thead>
-                <tr>
-                  <th className="w-col-lg">{t('Durum')}</th>
-                  <th>{t('Açıklama')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {violations.map((v) => (
-                  <tr key={v.key}>
-                    <td>
-                      <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                        {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
-                      </span>
-                    </td>
-                    <td>{v.message}</td>
+            <div className="stat-scroll">
+              <table className="stat">
+                <thead>
+                  <tr>
+                    <th className="w-col-lg">{t('Durum')}</th>
+                    <th>{t('Açıklama')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {violations.map((v) => (
+                    <tr key={v.key}>
+                      <td>
+                        <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
+                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
+                        </span>
+                      </td>
+                      <td>{v.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </aside>
