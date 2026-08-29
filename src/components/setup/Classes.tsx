@@ -83,7 +83,7 @@ export default function Classes({ state, change }: PanelProps) {
       <p className="hint">
         <T k="Bir sınıf, aynı programı paylaşan öğrenci grubudur. **Derslik** sınıfın sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz ve satır başındaki nokta ile basılan sayfanın başlığında görünür." />
       </p>
-      <div className="form-row">
+      <div className="form-row panel-add">
         <input
           type="text"
           placeholder={t('Sınıf adı, örn. 510')}

@@ -160,7 +160,7 @@ export default function Teachers({ state, change }: PanelProps) {
       <p className="hint">
         <T k="Branş **listeden seçilir**; listede yoksa “+ Yeni branş…” ile eklenir. Bir öğretmen iki branş veriyorsa (Türkçe ve Edebiyat gibi) **+ İkinci branş** ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Kısaltma ızgarada satır başlığı olarak görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; **boş bırakılırsa Ayarlar → Kurallar'daki sayı** geçerli olur." />
       </p>
-      <div className="form-row">
+      <div className="form-row panel-add">
         <input
           type="text"
           placeholder={t('Ad Soyad')}

@@ -246,7 +246,7 @@ export default function Subjects({ state, change }: PanelProps) {
         <T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz. Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca **değiştirdikleriniz** saklanır. Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu sırada gelir." />
       </p>
 
-      <div className="form-row">
+      <div className="form-row panel-add">
         <input
           type="text"
           placeholder={t('Yeni branş (örn. Robotik)')}

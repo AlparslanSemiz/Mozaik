@@ -54,8 +54,10 @@ import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
 import {
   Bell,
+  Clock,
   Eraser,
   Eye,
+  Flame,
   Layers,
   Info,
   Library,
@@ -92,6 +94,10 @@ interface Props {
   solver: SolverRun;
   density: Density;
   setDensity: (next: Density) => void;
+  /** Müsaitlik's hour labels. A MACHINE preference, so App still owns it —
+      only the control moved here, out of Ayarlar → Görünüm. */
+  availClock: boolean;
+  setAvailClock: (next: boolean) => void;
 }
 
 /** Every lucide symbol in the strip is drawn at the size the hand-drawn four are. */
@@ -211,7 +217,17 @@ function Group({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-export default function Ribbon({ ui, open, state, change, solver, density, setDensity }: Props) {
+export default function Ribbon({
+  ui,
+  open,
+  state,
+  change,
+  solver,
+  density,
+  setDensity,
+  availClock,
+  setAvailClock,
+}: Props) {
   const t = useT();
   const { confirm } = useDialogs();
   const ix = useMemo(() => buildIndex(state), [state]);
@@ -377,6 +393,38 @@ export default function Ribbon({ ui, open, state, change, solver, density, setDe
               </>
             )}
           </span>
+        </Group>
+
+        <Spacer />
+
+        {/* What is ON THIS SCREEN, top right — "sağ üstte haftanın darlığı
+            açılsın mı kapalı mı kalsın özelliği olsun. Saatleri de oraya
+            koyalım. ikinci şeritte olsun."
+
+            The two are not the same kind of thing and it does not matter here:
+            one is a position (`toolState`) and one a machine preference
+            (`ders-programi-musaitlik-saat`), but both answer "what am I
+            looking at", and that is the question a strip is for. The hour
+            toggle used to live three clicks away in Ayarlar → Görünüm. */}
+        <Group label={t('Göster')}>
+          <button
+            className="btn"
+            aria-pressed={ui.showHeat}
+            title={t('Haftanın darlığı tablosunu göster ya da gizle')}
+            onClick={() => ui.setShowHeat(!ui.showHeat)}
+          >
+            <Flame {...ICON} />
+            {t('Haftanın darlığı')}
+          </button>
+          <button
+            className="btn"
+            aria-pressed={availClock}
+            title={t('Ders numaralarının altına başlangıç saatlerini yaz')}
+            onClick={() => setAvailClock(!availClock)}
+          >
+            <Clock {...ICON} />
+            {t('Saatler')}
+          </button>
         </Group>
       </div>
     );

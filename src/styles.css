@@ -3151,6 +3151,19 @@ table.stat tbody tr:hover {
   margin: 4px 0 8px;
 }
 
+/* "Listelerde ekleme kısmı bloğu ile alttaki liste arasında çizgi olsun yani
+   iki farklı blok olsun. ama yerleri değişmesin."
+
+   A rule and some room, on the add row itself. Nothing moves in the DOM: the
+   form is still the first thing in the panel and the list is still under it —
+   what changes is that the eye can now see where one ends. The margin the row
+   already carried is folded into the padding so the gap does not double. */
+.form-row.panel-add {
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
 /* Kontrol is one panel at a time now, so nothing constrains its width any
    more — the two-column layout used to. A capacity table given 1900 px puts
    the label at one edge of the monitor and the number at the other. */
@@ -3307,7 +3320,10 @@ table.list td .split-count > input.num,
 .panel code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: var(--fs-xs);
-  white-space: nowrap;
+  /* A storage key is one long unbroken token — `ders-programi-serit-gizlensin`
+     — and nowrap made it push the "Veriler nerede" table past a 329px rail.
+     Wrapping ANYWHERE is right for a key: there is no word to keep together. */
+  overflow-wrap: anywhere;
 }
 
 .empty-screen {
@@ -3467,11 +3483,21 @@ table.list td .split-count > input.num,
 
    The floor is what one panel needs to be worth showing; below it the column
    would be a slot, not a column. */
+/* NO SIDEWAYS SCROLLING IN A RIGHT RAIL, and it takes one line per box.
+
+   Per CSS Overflow 3, when one axis is `auto` and the other is `visible`, the
+   `visible` one computes to `auto` too. So every box below — and with it every
+   right rail on every screen — has been a horizontal scroller since the day it
+   was given `overflow-y`. Nothing looked wrong until the content got wide
+   enough to use it. `.pool-list` already knew and wrote it out.
+
+   "Hiçbir yerde sağ taraftaki bloklar sağa sola hareket ettirme olmasın." */
 .cols > aside {
   position: sticky;
   top: 0;
   max-height: max(18rem, 100cqh);
   overflow-y: auto;
+  overflow-x: hidden;
   /* A focus ring on a control in the first or last row would otherwise be
      clipped by the scroll box — the same two lines `.table-scroll` uses. */
   padding: 2px;
@@ -3500,6 +3526,7 @@ table.list td .split-count > input.num,
   gap: 1px;
   max-height: 62vh;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
   padding: var(--space-1);
@@ -3869,6 +3896,7 @@ table.availability td.closed {
   padding: var(--space-3);
   max-height: 168px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .pick-item {
@@ -5208,6 +5236,7 @@ body.row-dragging {
 .stat-scroll {
   max-height: 22rem;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* A list wider than its panel scrolls SIDEWAYS rather than crushing a column.

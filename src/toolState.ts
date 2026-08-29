@@ -99,6 +99,16 @@ export interface ToolState {
   setScope: (next: Scope) => void;
   checkView: CheckView;
   setCheckView: (next: CheckView) => void;
+  /**
+   * Is the "haftanın darlığı" heat table on screen.
+   *
+   * A POSITION, so it lives here and not in `theme.ts`: it says what is being
+   * looked at right now, not how this machine likes its screen. That also
+   * means no new `localStorage` key, and so no new row owed to the "Veriler
+   * nerede" table (CLAUDE.md prefers exactly this trade).
+   */
+  showHeat: boolean;
+  setShowHeat: (next: boolean) => void;
   colored: boolean;
   setColored: (next: boolean) => void;
 }
@@ -126,6 +136,10 @@ export function useToolState(firstTab: Tab): ToolState {
   // only part of the report that can be empty — an empty problems view is the
   // answer "there are none", which is worth landing on.
   const [checkView, setCheckView] = useState<CheckView>("problems");
+  // Open, because it is the half of this screen nobody would think to ask for:
+  // twenty-five teachers all off on Tuesday afternoon is why the solver gets
+  // stuck, and it is invisible one person at a time.
+  const [showHeat, setShowHeat] = useState(true);
 
   return {
     tab,
@@ -148,6 +162,8 @@ export function useToolState(firstTab: Tab): ToolState {
     setScope,
     checkView,
     setCheckView,
+    showHeat,
+    setShowHeat,
     colored,
     setColored,
   };

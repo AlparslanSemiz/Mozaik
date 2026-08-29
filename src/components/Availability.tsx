@@ -38,6 +38,8 @@ interface Props {
   /** Which one of them is open. */
   chosen: Id;
   setChosen: (next: Id) => void;
+  /** Is the week-pressure table drawn. Chosen from the strip, top right. */
+  showHeat: boolean;
 }
 
 interface Entity {
@@ -116,13 +118,11 @@ const HINT: Record<Kind, string> = {
   room: "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.",
 };
 
-export default function Availability({
-  state,
+export default function Availability({ state,
   change,
   kind,
   chosen,
-  setChosen,
-}: Props) {
+  setChosen, showHeat }: Props) {
   // Nothing is applied until the drag ends: painting 40 cells must not create
   // 40 separate undo steps.
   const [pending, setPending] = useState<Set<string> | null>(null);
@@ -227,11 +227,17 @@ export default function Availability({
         <div className="panel">
           <h2>{t('{kim} · müsait olmayan saatler', { kim: selected.full })}</h2>
 
-          <p className="hint">
-            {t(HINT[kind])}{' '}
-            {t(
+          {/* One line. The long version — drag to paint, click a day name for
+              the whole day, click an hour number for the whole week — is on the
+              table's own tooltip now: it is a thing you discover by touching
+              the thing, not by reading a paragraph above it. */}
+          <p
+            className="hint"
+            title={t(
               'Basılı tutup sürükleyerek birden çok hücre işaretleyebilirsiniz. Soldaki gün adına tıklayınca o günün tamamı, üstteki ders numarasına tıklayınca haftanın o saati değişir.',
             )}
+          >
+            {t(HINT[kind])}
           </p>
 
           <div className="scroll-x">
@@ -299,12 +305,17 @@ export default function Availability({
             school has closed. It is the thing this screen creates and could not
             see — twenty-five teachers all off on Tuesday afternoon is the
             reason the solver gets stuck, and it was only visible by clicking
-            through twenty-five people one at a time. */}
+            through twenty-five people one at a time.
+
+            It can be put away from the strip, top right: two full week tables
+            is a lot of screen, and somebody who is only editing one person's
+            hours does not need the school-wide reading under it. */}
+        {showHeat && (
         <div className="panel">
           <h2>{t('Haftanın darlığı')}</h2>
           <p className="hint">
             <T
-              k="Her hücre, o saatte **kaç {ne} kapalı** olduğunu gösterir. Koyu bir sütun, o saate ders koymanın zor olacağı anlamına gelir. Program dizilirken genellikle burada tıkanılır."
+              k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
               vars={{ ne: t(KIND_WORD[kind]) }}
             />
           </p>
@@ -363,6 +374,7 @@ export default function Availability({
             </table>
           </div>
         </div>
+        )}
       </div>
 
       {/* Everything that used to be crammed ABOVE the grid. The list is the

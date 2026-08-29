@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import Commands from './components/Commands';
@@ -17,6 +17,7 @@ import {
   readMotion,
   readRibbon,
   readRibbonAuto,
+  applyAvailClock,
   readAvailClock,
   readScale,
   readTheme,
@@ -415,7 +416,16 @@ export default function App() {
   const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
   // Applied to the document by main.tsx before the first paint; this copy
   // exists only so Ayarlar → Görünüm can show which way the switch is.
-  const [availClock, setAvailClock] = useState<boolean>(readAvailClock);
+  const [availClockRaw, setAvailClockRaw] = useState<boolean>(readAvailClock);
+  // The <html> attribute goes with the state, wherever the control lives. It
+  // used to be written by the one button in Ayarlar → Görünüm; that button is
+  // in Müsaitlik's own strip now, and a second caller must not have to know to
+  // do this (the toggle would flip and nothing on the table would change).
+  const availClock = availClockRaw;
+  const setAvailClock = useCallback((next: boolean) => {
+    applyAvailClock(next);
+    setAvailClockRaw(next);
+  }, []);
   // Same again for how much the interface is allowed to move.
   const [motion, setMotion] = useState<Motion>(readMotion);
   // Whether the tool strip is drawn. It lives here and not in Ribbon because
@@ -950,6 +960,7 @@ export default function App() {
               kind={ui.kind}
               chosen={ui.chosen}
               setChosen={ui.setChosen}
+              showHeat={ui.showHeat}
             />
           )}
           {tab === 'lessons' && (
@@ -998,8 +1009,6 @@ export default function App() {
               setDensity={setDensity}
               uiDensity={uiDensity}
               setUiDensity={setUiDensity}
-              availClock={availClock}
-              setAvailClock={setAvailClock}
               ribbonAuto={ribbonAuto}
               setRibbonAuto={setRibbonAuto}
               theme={theme}
