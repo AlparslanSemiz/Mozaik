@@ -495,6 +495,7 @@ export function emptyState(): State {
     lessons: [],
     unavailable: {},
     placements: {},
+    pinned: {},
   };
 }
 
@@ -751,7 +752,15 @@ export function remapDays(d: State, nextDays: Day[]): State {
     nextDays.every((_, i) => oldToNew.get(i) === i);
   if (identity) return d;
 
-  return { ...d, placements: move(d.placements), unavailable: move(d.unavailable) };
+  // Pins go through the same `move` for the same reason the other two do:
+  // their key holds a day INDEX, and an index that is not remapped points at
+  // whichever day slid into its place (pitfall 11).
+  return {
+    ...d,
+    placements: move(d.placements),
+    unavailable: move(d.unavailable),
+    pinned: move(d.pinned),
+  };
 }
 
 /** Every settings write goes through here: remap first, then sanitize. */

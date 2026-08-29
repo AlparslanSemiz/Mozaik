@@ -42,8 +42,6 @@ interface Props extends PanelProps {
   setDensity: (next: Density) => void;
   uiDensity: Density;
   setUiDensity: (next: Density) => void;
-  availClock: boolean;
-  setAvailClock: (next: boolean) => void;
   ribbonAuto: boolean;
   setRibbonAuto: (next: boolean) => void;
   theme: Theme;
@@ -66,8 +64,6 @@ export default function Settings({
   setDensity,
   uiDensity,
   setUiDensity,
-  availClock,
-  setAvailClock,
   ribbonAuto,
   setRibbonAuto,
   theme,
@@ -91,8 +87,6 @@ export default function Settings({
           setDensity={setDensity}
           uiDensity={uiDensity}
           setUiDensity={setUiDensity}
-          availClock={availClock}
-          setAvailClock={setAvailClock}
           ribbonAuto={ribbonAuto}
           setRibbonAuto={setRibbonAuto}
           theme={theme}

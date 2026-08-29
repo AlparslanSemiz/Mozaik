@@ -415,13 +415,12 @@ export default function App() {
   // sets this one — the Program strip still speaks for the grid alone.
   const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
   // Applied to the document by main.tsx before the first paint; this copy
-  // exists only so Ayarlar → Görünüm can show which way the switch is.
-  const [availClockRaw, setAvailClockRaw] = useState<boolean>(readAvailClock);
+  // exists so the button that flips it can show which way the switch is.
+  const [availClock, setAvailClockRaw] = useState<boolean>(readAvailClock);
   // The <html> attribute goes with the state, wherever the control lives. It
   // used to be written by the one button in Ayarlar → Görünüm; that button is
   // in Müsaitlik's own strip now, and a second caller must not have to know to
   // do this (the toggle would flip and nothing on the table would change).
-  const availClock = availClockRaw;
   const setAvailClock = useCallback((next: boolean) => {
     applyAvailClock(next);
     setAvailClockRaw(next);
@@ -839,6 +838,8 @@ export default function App() {
         solver={solver}
         density={density}
         setDensity={setDensity}
+        availClock={availClock}
+        setAvailClock={setAvailClock}
       />
 
       <InspectorProvider state={state} change={change}>

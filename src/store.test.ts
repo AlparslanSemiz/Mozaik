@@ -600,6 +600,80 @@ describe('parseState — v7 → v8 göçü', () => {
   });
 });
 
+/**
+ * A v8 backup: THE SHAPE THE RELEASED v2.0.0 WROTE.
+ *
+ * Second subjects exist — that is what v8 added — and the week is still
+ * `pairs`. This is the file the reader's own copy produces today, and for one
+ * release it did not open at all: v9 moved SCHEMA_VERSION and left `8` out of
+ * the reader's condition, so every one of them came back `null`, which on
+ * screen reads "unreadable file".
+ */
+function v8Backup() {
+  const raw = JSON.parse(JSON.stringify(sampleState()));
+  raw.schemaVersion = 8;
+  raw.teachers[0].subject2 = 'Edebiyat';
+  // On a lesson that teacher actually gives: `sanitize()` clears an orphan flag,
+  // so pinning it to lessons[0] blindly would assert nothing on most samples.
+  const mine = raw.lessons.find(
+    (x: { teacherId: string }) => x.teacherId === raw.teachers[0].id,
+  );
+  if (mine !== undefined) mine.second = true;
+  asV7Lessons(raw);
+  return raw;
+}
+
+describe('parseState — v8 → v9 göçü', () => {
+  it('YAYINLANMIŞ sürümün yazdığı v8 dosyası açılıyor', () => {
+    const d = parseState(JSON.stringify(v8Backup()));
+    expect(d).not.toBeNull();
+    expect(d!.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(d!.teachers).toHaveLength(sampleState().teachers.length);
+    expect(d!.lessons).toHaveLength(sampleState().lessons.length);
+  });
+
+  it('ikinci branş ve second bayrağı v8’den olduğu gibi geliyor', () => {
+    const raw = v8Backup();
+    const d = parseState(JSON.stringify(raw))!;
+    expect(d.teachers[0]!.subject2).toBe('Edebiyat');
+    const mine = raw.lessons.find(
+      (x: { teacherId: string }) => x.teacherId === raw.teachers[0].id,
+    );
+    expect(d.lessons.find((x) => x.id === mine.id)!.second).toBe(true);
+  });
+
+  it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
+    const original = sampleState();
+    const migrated = parseState(JSON.stringify(v8Backup()))!;
+    expect(migrated.placements).toEqual(original.placements);
+    expect(migrated.unavailable).toEqual(original.unavailable);
+    expect(migrated.classes).toEqual(original.classes);
+    // Against what the FILE said: v8 could only write doubles, so a sample that
+    // wanted a three legitimately comes back as doubles. The timetable is what
+    // must not move, and the assertion above is the one that says so.
+    const wrote = v8Backup() as { lessons: Array<{ pairs: number }> };
+    expect(migrated.lessons.map((x) => x.blocks)).toEqual(
+      wrote.lessons.map((x) => Array<number>(x.pairs).fill(2)),
+    );
+  });
+
+  /**
+   * THE ONE THAT SURVIVES THE NEXT BUMP.
+   *
+   * Every version-shaped test above names a number, so each of them goes on
+   * passing while the number that was just left behind falls through to null —
+   * which is exactly how v8 broke with a warning comment sitting right above
+   * the line. This one names no number: it asks the reader to open a file
+   * stamped one below whatever the constant currently is. Move SCHEMA_VERSION
+   * without widening the condition and it turns red on its own.
+   */
+  it('BİR ÖNCEKİ şema sürümü her zaman okunabiliyor', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.schemaVersion = SCHEMA_VERSION - 1;
+    expect(parseState(JSON.stringify(raw))).not.toBeNull();
+  });
+});
+
 // ---------------------------------------------------------------------------
 // The undo stack and the plan library.
 //

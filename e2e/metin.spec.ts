@@ -86,7 +86,10 @@ test.describe('80. Ekranda okunan metin', () => {
     // be defended, so it is asserted where it still belongs — a row that says
     // BOTH things needs the dot between them.
     await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await expect(page.getByText('MÇ · Mehmet Çelik (Matematik)').first()).toBeVisible();
+    // The subject in brackets is the SHORT form now (asked for 2026-08-29:
+    // "öğretmenler listelerde branşlarda kısaltmalar"). What this test defends
+    // is the dot, not the length of what stands either side of it.
+    await expect(page.getByText('MÇ · Mehmet Çelik (Mat)').first()).toBeVisible();
 
     // And the empty cell still says "there is nothing here" rather than
     // looking like a rendering fault.

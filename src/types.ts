@@ -186,6 +186,22 @@ export interface State {
   unavailable: Record<string, 1>;
   /** `${classId}|${day}|${hour}` -> lessonId . A block = consecutive equal lessonIds. */
   placements: Record<string, Id>;
+  /**
+   * `${classId}|${day}|${hour}` -> 1 . If the key exists, the lesson sitting in
+   * that cell is PINNED: it survives "Baştan diz", it cannot be dragged away,
+   * right-clicked back to the pool or deleted with the keyboard, and nothing
+   * may be dropped on top of it.
+   *
+   * Keyed by CELL and not by lesson, because a lesson goes down as several
+   * blocks and the reader pins one of them — "this class has maths first thing
+   * on Tuesday" is a fact about a square, not about a lesson.
+   *
+   * The same shape as `unavailable` above and cleaned in the same place: a pin
+   * whose placement is gone is an orphan, and `sanitize()` drops it. Nothing
+   * outside this map ever means "pinned", so there is no second truth to keep
+   * in step.
+   */
+  pinned: Record<string, 1>;
 }
 
 /**
@@ -198,5 +214,6 @@ export interface State {
  * v7: Lesson.pairs replaces Lesson.blockSize.
  * v8: Teacher.subject2 and Lesson.second — a teacher may hold two subjects.
  * v9: Lesson.blocks replaces Lesson.pairs — a block may be 2, 3 or 4 hours.
+ * v10: State.pinned — cells the reader has locked in place.
  */
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;

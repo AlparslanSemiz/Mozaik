@@ -173,6 +173,16 @@ function warningsPossible(d: State): boolean {
   return warned && rulesBite(d);
 }
 
+/** Just the cells the reader pinned, with the lessons that are in them. */
+function pinnedPlacements(base: State): Record<string, Id> {
+  const out: Record<string, Id> = {};
+  for (const key in base.pinned) {
+    const lessonId = base.placements[key];
+    if (lessonId !== undefined) out[key] = lessonId;
+  }
+  return out;
+}
+
 export function createSolver(base: State, options?: Partial<SolverOptions>): Solver {
   const opts: SolverOptions = { ...DEFAULTS, ...options };
 
@@ -182,7 +192,15 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   // ONE mutable dictionary and ONE index for the whole search. `work` shares
   // the dictionary object, so blocker() sees every assignment immediately.
-  const placements: Record<string, Id> = opts.keepPlaced ? { ...base.placements } : {};
+  // A clean sheet still keeps the PINNED cells. "Baştan diz" means "throw away
+  // the timetable you built", not "throw away the decisions I made by hand" —
+  // and the rest of the search needs no telling: `work` shares this dictionary,
+  // so `placedHours`, `placedBlocks` and `pendingBlocks` below all count the
+  // pinned blocks as already down, and `retract()` only ever vacates a cell
+  // this search itself filled.
+  const placements: Record<string, Id> = opts.keepPlaced
+    ? { ...base.placements }
+    : pinnedPlacements(base);
   const work: State = { ...base, placements };
   let ix: Index = buildIndex(work);
 

@@ -11,6 +11,7 @@
 import { expect, test } from './kapan';
 import { reopen,
   openSetup,
+  revealRibbon,
   chooseDensity,
   chooseUiDensity,
   open,
@@ -449,6 +450,11 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
   });
 });
 
+/** Müsaitlik's own strip holds it; `.ribbon` scopes the short name (pitfall 49). */
+function hoursButton(page: import('@playwright/test').Page) {
+  return page.locator('.ribbon .btn').filter({ hasText: /^Saatler$/ });
+}
+
 test.describe('50. Müsaitlikte saat gösterimi', () => {
   // "Ayarlarda müsaitlikteki programda derslerin altında saatleri olsun olmasın
   // diye ayar olsun ve default olarak kapalı olsun." — the reader's own words,
@@ -464,9 +470,11 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     await expect(clock).toBeHidden();
     const before = (await grid.boundingBox())!;
 
-    await openSettings(page, 'Görünüm');
-    await page.getByRole('button', { name: 'Saatler gizli' }).click();
-    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    // The switch is in Müsaitlik's OWN strip now, not three screens away in
+    // Ayarlar → Görünüm: what it changes is on this table, and it used to be
+    // reached by leaving the table to find it.
+    await revealRibbon(page);
+    await hoursButton(page).click();
     await expect(clock).toBeVisible();
     await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
 
@@ -483,12 +491,14 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
 
   test('tercih yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Görünüm');
-    await page.getByRole('button', { name: 'Saatler gizli' }).click();
-    await expect(page.getByRole('button', { name: 'Saatler görünüyor' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    await revealRibbon(page);
+    // One button with two states rather than two labels: `aria-pressed` is
+    // what a toggle says, and a label that renames itself cannot be found by
+    // the name it had a moment ago.
+    await expect(hoursButton(page)).toHaveAttribute('aria-pressed', 'false');
+    await hoursButton(page).click();
+    await expect(hoursButton(page)).toHaveAttribute('aria-pressed', 'true');
 
     await reopen(page);
     await expect(page.locator('html')).toHaveAttribute('data-avail-clock', 'acik');

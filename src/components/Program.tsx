@@ -197,7 +197,15 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
         name: t.short,
         // Both, because this line IS the teacher — the cells in the row each
         // name the one subject their own lesson is taught under.
-        secondary: teacherSubjects(t).map(subjectLabel).join(' · '),
+        //
+        // SHORT, not the full name. This line sits in a column narrow enough
+        // that "Matematik" was being cut to "Matemat…" and a pair of subjects
+        // never showed the second one at all; the cells of the grid have read
+        // the short form all along, so the row head now says what its own row
+        // says. `subjectShort` is the one place that resolves it.
+        secondary: teacherSubjects(t)
+          .map((name) => subjectShort(d.settings, name))
+          .join(' · '),
         color: t.color,
         cells,
         closed,

@@ -259,15 +259,17 @@ test.describe('61. Elle sıralama', () => {
 
     // THE point: the dropdown the reader picks a branch from is in this order.
     await openSetup(page, 'Öğretmenler');
+    // Read the VALUE, not the text. Each option reads "Mat · Matematik" now —
+    // the short first, because that is the string the grid and the paper carry
+    // — and the subject's identity was never the label anyway.
     const options = await mainList(page)
       .locator('tbody tr')
       .first()
       .locator('select')
       .first()
       .locator('option')
-      .allInnerTexts();
-    expect(options.filter((o) => after.includes(o.trim())).slice(0, 4).map((o) => o.trim()))
-      .toEqual(after.slice(0, 4));
+      .evaluateAll((els) => els.map((e) => (e as HTMLOptionElement).value));
+    expect(options.filter((o) => after.includes(o)).slice(0, 4)).toEqual(after.slice(0, 4));
   });
 
   // "Branşa göre sıralandığında ayarlardaki branş sırasına göre olması gerek.
@@ -315,7 +317,10 @@ test.describe('61. Elle sıralama', () => {
       .evaluateAll((rows) =>
         rows.map((r) => {
           const box = r.querySelector('select[aria-label$="branşı"]') as HTMLSelectElement | null;
-          return box === null ? '' : (box.selectedOptions[0]?.textContent ?? '').trim();
+          // The value, not the option's text: the text carries the short form
+          // in front of the name ("Mat · Matematik") and the subject's identity
+          // is the name.
+          return box === null ? '' : box.value;
         }),
       );
     const ranks = rowSubjects.map((x) => order.indexOf(x)).filter((n) => n >= 0);

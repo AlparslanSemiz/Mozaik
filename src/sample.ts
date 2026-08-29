@@ -196,5 +196,6 @@ export function sampleState(): State {
     lessons,
     unavailable,
     placements: {},
+    pinned: {},
   };
 }

@@ -21,7 +21,8 @@ import {
   setAvailability,
   setWholeWeek,
   shortDay,
-  subjectLabel,
+  subjectShort,
+  teacherSubjects,
   weeklyLoad,
 } from "../entities";
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
@@ -64,7 +65,14 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
   if (kind === "teacher") {
     return d.teachers.map((x) => ({
       id: x.id,
-      label: `${x.short} · ${x.name} (${subjectLabel(x.subject)})`,
+      // The subject SHORT, and both of them. Short because this line is read
+      // while hunting for a name, not while reading about a subject, and the
+      // full one pushed the name it is next to off the end of the box. Both
+      // because a teacher who holds two was showing only the first here while
+      // every other list showed the pair.
+      label: `${x.short} · ${x.name} (${teacherSubjects(x)
+        .map((name) => subjectShort(d.settings, name))
+        .join(' · ')})`,
       short: x.short,
       // Name first, code in brackets: the heading already ends with an em dash
       // ("… — müsait olmayan saatler") and "MÇ — Mehmet Çelik — müsait…" put

@@ -39,6 +39,7 @@ function build(): State {
     lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blocks: [], second: false, maxPerDay: null }],
     unavailable: {},
     placements: {},
+    pinned: {},
   };
 }
 

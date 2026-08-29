@@ -116,7 +116,13 @@ export default function Plans({ state, plans }: Props) {
           className="btn"
           title={t('Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır')}
           onClick={() =>
-            plans.createPlan(`${active?.name ?? 'Plan'} taslağı`, { ...state, placements: {} }, true)
+            // The pins go with the placements they held: a pin over an empty
+            // cell locks a square for a lesson that is not there.
+            plans.createPlan(
+              `${active?.name ?? 'Plan'} taslağı`,
+              { ...state, placements: {}, pinned: {} },
+              true,
+            )
           }
         >{t('Taslak olarak kaydet')}</button>
       </div>

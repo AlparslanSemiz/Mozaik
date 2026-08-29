@@ -299,18 +299,26 @@ test.describe('68. Satır başı ve gün sınırı', () => {
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
     const m = await page.locator('table.grid tbody th.row-head').first().evaluate((th) => {
-      // What the column would have to be for the longest built-in subject —
-      // the widest thing this cell ever holds, since the line above it is a
-      // short form. Asked of the browser, not guessed (pitfall 34).
-      const probe = th.cloneNode(true) as HTMLElement;
-      probe.style.cssText = 'position:absolute;visibility:hidden;width:max-content;min-width:0';
-      const sub = probe.querySelector('.secondary') as HTMLElement;
-      sub.textContent = 'Sosyal Bilgiler';
-      sub.style.overflow = 'visible';
-      sub.style.textOverflow = 'clip';
-      th.parentElement!.appendChild(probe);
-      const need = probe.getBoundingClientRect().width;
-      probe.remove();
+      // What the column would have to be for the widest thing it can hold.
+      // TWO candidates, and the probe used to name only the first of them:
+      // the second line is a SUBJECT SHORT now, so "Sosyal Bilgiler" is a
+      // string this cell can no longer be asked to draw. What it can be asked
+      // to draw is a pair of shorts in the teacher view and a room in the
+      // class view, and which of those is wider is a question for the font.
+      // Asked of the browser, not guessed (pitfall 34).
+      const measure = (text: string) => {
+        const probe = th.cloneNode(true) as HTMLElement;
+        probe.style.cssText = 'position:absolute;visibility:hidden;width:max-content;min-width:0';
+        const sub = probe.querySelector('.secondary') as HTMLElement;
+        sub.textContent = text;
+        sub.style.overflow = 'visible';
+        sub.style.textOverflow = 'clip';
+        th.parentElement!.appendChild(probe);
+        const width = probe.getBoundingClientRect().width;
+        probe.remove();
+        return width;
+      };
+      const need = Math.max(measure('İnk · Sos'), measure('G dersliği'));
       return { have: th.getBoundingClientRect().width, need };
     });
 

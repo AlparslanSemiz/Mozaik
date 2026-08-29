@@ -7,7 +7,7 @@ import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { openHours } from '../../entities';
-import type { Gender, Id, Teacher } from '../../types';
+import type { Gender, Id, Settings, Teacher } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -27,6 +27,7 @@ import {
   subjectKey,
   subjectLabel,
   subjectOptions,
+  subjectShort,
   subjectRank,
   teacherRank,
   teacherSubjects,
@@ -40,6 +41,22 @@ import { T, useT } from '../T';
 
 /** Sentinel option value: picking it opens a box instead of setting a subject. */
 const NEW = '\u0000yeni';
+
+/**
+ * One line of a subject dropdown: "Mat · Matematik".
+ *
+ * The short form FIRST, because it is the string the reader has to recognise
+ * everywhere else — the grid row heads, the cells and the printed page all
+ * carry it, and until now the only screen that ever showed it was the Branşlar
+ * editor. The full name stays beside it: a dropdown of three-letter codes is
+ * not a list anyone can pick from, which is why this is not simply
+ * `subjectShort`. When the two are the same string it is written once.
+ */
+function subjectOption(settings: Settings, name: string): string {
+  const short = subjectShort(settings, name);
+  const full = subjectLabel(name);
+  return short === full ? full : `${short} · ${full}`;
+}
 
 /** Blank first: it is the value a row starts at, and the honest default. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
@@ -200,7 +217,7 @@ export default function Teachers({ state, change }: PanelProps) {
           <option value="">{t('Branş seçin')}</option>
           {subjects.map((x) => (
             <option key={x} value={x}>
-              {subjectLabel(x)}
+              {subjectOption(state.settings, x)}
             </option>
           ))}
           <option value={NEW}>{t('+ Yeni branş…')}</option>
@@ -245,7 +262,7 @@ export default function Teachers({ state, change }: PanelProps) {
               .filter((x) => subjectKey(x) !== subjectKey(subjectOf()))
               .map((x) => (
                 <option key={x} value={x}>
-                  {subjectLabel(x)}
+                  {subjectOption(state.settings, x)}
                 </option>
               ))}
           </select>
@@ -397,7 +414,7 @@ export default function Teachers({ state, change }: PanelProps) {
                         dropdown would silently change it on first render. */}
                     {subjects.map((x) => (
                       <option key={x} value={x}>
-                        {subjectLabel(x)}
+                        {subjectOption(state.settings, x)}
                       </option>
                     ))}
                   </select>
@@ -444,7 +461,7 @@ export default function Teachers({ state, change }: PanelProps) {
                         .filter((x) => subjectKey(x) !== subjectKey(teacher.subject))
                         .map((x) => (
                           <option key={x} value={x}>
-                            {subjectLabel(x)}
+                            {subjectOption(state.settings, x)}
                           </option>
                         ))}
                     </select>

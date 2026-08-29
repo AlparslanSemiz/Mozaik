@@ -409,14 +409,16 @@
      short form.
 
      RE-MEASURED 2026-08-27 with the 14px root: 6rem became 84px and the subject
-     needs 93. This is the cost of re-pinning the type ladder rather than
-     letting it shrink — the text in here came down 9% while the root came down
-     12.5%, so anything sized in `rem` that has to HOLD text got relatively
-     tighter and has to be re-measured rather than assumed. 6.75rem is 94.5px,
-     which clears it by a pixel and a half; `izgara.spec.ts` 68 asks the browser
-     for the number every run and also refuses more than 1.2x of it, so this
-     cannot quietly drift wide either. */
-  --rowhead-w: 6.75rem;
+     needed 93 while the second line held a subject's FULL name.
+
+     It does not hold one any more: the row head reads the subject SHORT, the
+     same string the cells of its own row carry. Re-measured rather than
+     assumed — 6.75rem was 94.5px against a requirement that had dropped to
+     66px, so `izgara.spec.ts` 68 went red on its own 1.2x ceiling. 5.25rem is
+     73.5px, which clears 66 with room for a longer teacher code and hands the
+     other 21px to the 72 lesson columns. The test asks the browser for the
+     number every run, so this cannot quietly drift wide again either. */
+  --rowhead-w: 5.25rem;
 
   /* The height of a control in the tool strip, and therefore of the strip.
      2.25rem = 31.5px at scale 1 on the 14px root: still over the 24px WCAG 2.2

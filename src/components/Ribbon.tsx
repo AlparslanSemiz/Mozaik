@@ -432,7 +432,12 @@ export default function Ribbon({
 
   if (ui.tab === 'program') {
     const pending = pendingLessons(state, ix);
-    const placed = Object.keys(state.placements).length;
+    // What the two destructive buttons are ABOUT: the hours that would go.
+    // Pinned hours are not among them — nothing takes a pinned block down but
+    // unpinning it — so counting them would make both questions overstate what
+    // they ask for, and the count is the whole reason they are asked.
+    const pinnedHours = Object.keys(state.pinned).length;
+    const placed = Object.keys(state.placements).length - pinnedHours;
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
         {/* Two positions, not one toggle: a single button saying "switch to the
@@ -485,7 +490,13 @@ export default function Ribbon({
                   if (
                     await confirm({
                       title: t('Dizilmiş {n} saatin tamamı silinecek', { n: placed }),
-                      body: t('Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.'),
+                      body:
+                        pinnedHours === 0
+                          ? t('Program sıfırdan dizilecek. Ctrl+Z ile geri alınabilir.')
+                          : t(
+                              'Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.',
+                              { n: pinnedHours },
+                            ),
                       confirmLabel: t('Baştan diz'),
                       danger: true,
                     })
@@ -548,14 +559,29 @@ export default function Ribbon({
               if (
                 await confirm({
                   title: t('Dizilmiş {n} saatin tamamı havuza dönecek', { n: placed }),
-                  body: t(
-                    'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                  ),
+                  body:
+                    pinnedHours === 0
+                      ? t(
+                          'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                        )
+                      : t(
+                          'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                          { n: pinnedHours },
+                        ),
                   confirmLabel: t('Programı boşalt'),
                   danger: true,
                 })
               ) {
-                change((d) => ({ ...d, placements: {} }));
+                // The pinned cells stay, and so do their pins. One rule with no
+                // exceptions: nothing takes a pinned block down but unpinning it.
+                change((d) => ({
+                  ...d,
+                  placements: Object.fromEntries(
+                    Object.keys(d.pinned)
+                      .filter((k) => d.placements[k] !== undefined)
+                      .map((k) => [k, d.placements[k]!]),
+                  ),
+                }));
               }
             }}
           >

@@ -57,6 +57,7 @@ function build(): State {
     ],
     unavailable: {},
     placements: {},
+    pinned: {},
   };
 }
 

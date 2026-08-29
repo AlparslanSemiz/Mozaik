@@ -3,7 +3,7 @@
 // SAME engine the user's own dragging is judged by".
 
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place } from './constraints';
+import { buildIndex, placementKey, place, setBlockPinned } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import { findViolations } from './rules';
 import { sampleState } from './sample';
@@ -50,6 +50,7 @@ function build(): State {
     ],
     unavailable: {},
     placements: {},
+    pinned: {},
   };
 }
 
@@ -171,6 +172,39 @@ describe('solve — yerleşmişleri koruma', () => {
     const result = solve(d, { keepPlaced: false });
     expect(placedHours(result.state)).toBe(7);
     expectLegal(result.state);
+  });
+
+  // "Baştan diz" means "throw away the timetable you built", not "throw away
+  // the decisions I made by hand". Without this the one thing a reader is sure
+  // about — the block they placed and locked — would be the first casualty of
+  // the button next to it.
+  it('keepPlaced: false SABİTLENMİŞ bloğu yerinde bırakıyor', () => {
+    let d = place(build(), 'x1', 1, 3);
+    d = setBlockPinned(d, 's510', 1, 3, true);
+    const result = solve(d, { keepPlaced: false });
+    expect(result.state.placements[placementKey('s510', 1, 3)]).toBe('x1');
+    // ...and the rest is still laid out from scratch around it.
+    expect(placedHours(result.state)).toBe(7);
+    expectLegal(result.state);
+  });
+
+  it('keepPlaced: false sabitlenmiş saati İKİ KEZ saymıyor', () => {
+    let d = place(build(), 'x1', 1, 3);
+    d = setBlockPinned(d, 's510', 1, 3, true);
+    const result = solve(d, { keepPlaced: false });
+    const x1 = Object.keys(result.state.placements).filter(
+      (k) => result.state.placements[k] === 'x1',
+    );
+    // x1 wants 3 hours and one of them is already down and locked.
+    expect(x1).toHaveLength(3);
+  });
+
+  it('sabitlenmemiş yerleşim keepPlaced: false ile GİDİYOR', () => {
+    const d = place(build(), 'x1', 1, 3);
+    const result = solve(d, { keepPlaced: false });
+    // Not an assertion about where it lands, only that the pin is what saved
+    // the cell in the test above and not some accident of the search order.
+    expect(Object.keys(result.state.placements)).not.toEqual(Object.keys(d.placements));
   });
 
   it('kapalı saatte kalmış dersi silmiyor (ilke 6)', () => {

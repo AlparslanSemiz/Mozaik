@@ -97,6 +97,10 @@ function build(): State {
       [placementKey('s510', 1, 1)]: 'x1', // Salı
       [placementKey('s510', 2, 2)]: 'x1', // Çarşamba
     },
+    // One of the three is PINNED, so `remapDays` has something to carry: pins
+    // are keyed by day index exactly like placements, and a pin left behind
+    // would lock a cell the lesson had moved out of.
+    pinned: { [placementKey('s510', 1, 1)]: 1 },
   };
 }
 

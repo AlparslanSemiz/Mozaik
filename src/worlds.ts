@@ -15,7 +15,7 @@ import {
   blocker,
   buildIndex,
   placementKey,
-  removeBlock,
+  liftBlock,
 } from './constraints';
 import {
   DEFAULT_BELL,
@@ -144,6 +144,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     lessons,
     unavailable: spec.unavailable ?? {},
     placements: spec.placements ?? {},
+    pinned: {},
   };
 }
 
@@ -226,7 +227,10 @@ export function blocksOf(d: State): Block[] {
 export function illegalBlocks(d: State): Illegal[] {
   const out: Illegal[] = [];
   for (const b of blocksOf(d)) {
-    const lifted = removeBlock(d, b.classId, b.day, b.hour);
+    // `liftBlock`, not `removeBlock`: this is a question about the RULES, and
+    // a pin is not a rule. The user-facing remove refuses a pinned block, and
+    // an auditor that cannot lift one reports it as colliding with itself.
+    const lifted = liftBlock(d, b.classId, b.day, b.hour);
     // The size is passed EXPLICITLY: with the block lifted, "whichever block
     // this lesson still owes first" is not necessarily the one that was there,
     // and the auditor has to re-ask about the block it actually found.

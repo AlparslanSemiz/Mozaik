@@ -1,5 +1,7 @@
 import {
   blockAt,
+  blockCells,
+  blockPinned,
   blockSpans,
   blockStart,
   pendingBlocks,
@@ -19,6 +21,7 @@ import {
   placementKey,
   removeBlock,
   sanitize,
+  setBlockPinned,
   teacherKey,
   validHours,
 } from './constraints';
@@ -70,6 +73,7 @@ function build(): State {
     ],
     unavailable: {},
     placements: {},
+    pinned: {},
   };
 }
 
@@ -1024,5 +1028,96 @@ describe('dropMap — üstüne bırakma', () => {
     const x2 = ix.lessonById.get('x2')!;
     expect(evictionNotice(ix, [x1])).toBe('510 · MÇ dersi havuza dönecek');
     expect(evictionNotice(ix, [x1, x2])).toContain('dersleri');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// PINNING (schema v10).
+//
+// One rule with no exceptions: nothing takes a pinned block down but unpinning
+// it. Four ways in — right click, the menu, Delete, and a drop that would evict
+// — so the refusal lives in `removeBlock` and `dropMap` rather than in any of
+// the buttons, and these tests ask the two functions rather than the buttons.
+
+describe('sabitleme', () => {
+  it('setBlockPinned bloğun BÜTÜN saatlerini işaretler, tek saatini değil', () => {
+    const d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
+    // x4 is a single 2-hour block, so both hours carry the pin.
+    expect(Object.keys(d.pinned).sort()).toEqual(
+      [placementKey('s510', 0, 1), placementKey('s510', 0, 2)].sort(),
+    );
+    // Asked at either hour, the answer is the same: a pin is about the BLOCK.
+    expect(blockPinned(d, 's510', 0, 1)).toBe(true);
+    expect(blockPinned(d, 's510', 0, 2)).toBe(true);
+  });
+
+  it('sabitleme kaldırılınca hiçbir iz kalmıyor', () => {
+    let d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
+    d = setBlockPinned(d, 's510', 0, 2, false);
+    expect(d.pinned).toEqual({});
+    expect(blockPinned(d, 's510', 0, 1)).toBe(false);
+  });
+
+  it('boş hücrede sabitlenecek bir şey yok', () => {
+    const d = build();
+    expect(setBlockPinned(d, 's510', 0, 0, true)).toBe(d);
+    expect(blockCells(d, 's510', 0, 0)).toEqual([]);
+    expect(blockPinned(d, 's510', 0, 0)).toBe(false);
+  });
+
+  it('removeBlock sabitlenmiş bloğu KALDIRMIYOR', () => {
+    const placed = place(build(), 'x4', 0, 1);
+    const pinnedState = setBlockPinned(placed, 's510', 0, 1, true);
+    // Same object back, so the store pushes no undo step either.
+    expect(removeBlock(pinnedState, 's510', 0, 1)).toBe(pinnedState);
+    expect(removeBlock(pinnedState, 's510', 0, 2)).toBe(pinnedState);
+    // ...and the very same call works once the pin is gone, which is what
+    // makes this a test of the pin and not of some other refusal.
+    const free = setBlockPinned(pinnedState, 's510', 0, 1, false);
+    expect(Object.keys(removeBlock(free, 's510', 0, 1).placements)).toHaveLength(0);
+  });
+
+  it('dropMap sabitlenmiş dersi TAHLİYE ETMİYOR, ve sebebini söylüyor', () => {
+    // x4 sits on 510 at Monday 1-2. x1 belongs to the same class, so without a
+    // pin that cell is the one refusal a drop is allowed to overrule.
+    const placed = place(build(), 'x4', 0, 1);
+    const free = dropMap(placed, buildIndex(placed), 'x1');
+    expect(free.get('0|1')!.blocked).toBeNull();
+    expect(free.get('0|1')!.evicts).toEqual(['x4']);
+
+    const locked = setBlockPinned(placed, 's510', 0, 1, true);
+    const map = dropMap(locked, buildIndex(locked), 'x1');
+    const verdict = map.get('0|1')!;
+    expect(verdict.blocked).not.toBeNull();
+    expect(verdict.blocked).toContain('sabitlenmiş');
+    // Concrete, like every other refusal: it names the class and the hour.
+    expect(verdict.blocked).toContain('510');
+    expect(verdict.evicts).toEqual([]);
+  });
+
+  it('sanitize YETİM pini düşürüyor — altındaki ders gidince pin de gider', () => {
+    let d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
+    // Take the lesson out from under it the one way that is allowed to: the
+    // lesson itself stops existing.
+    d = { ...d, lessons: d.lessons.filter((x) => x.id !== 'x4') };
+    const clean = sanitize(d);
+    expect(clean.placements).toEqual({});
+    expect(clean.pinned).toEqual({});
+  });
+
+  it('sanitize dokunulmamış pini KORUYOR — her yüklemede silinmiyor', () => {
+    const d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
+    expect(sanitize(d).pinned).toEqual(d.pinned);
+  });
+
+  it('gün sayısı azalınca taşan pin de siliniyor', () => {
+    const d = setBlockPinned(place(build(), 'x4', 1, 1), 's510', 1, 1, true);
+    expect(Object.keys(d.pinned)).toHaveLength(2);
+    const shrunk = sanitize({
+      ...d,
+      settings: { ...d.settings, days: d.settings.days.slice(0, 1) },
+    });
+    expect(shrunk.placements).toEqual({});
+    expect(shrunk.pinned).toEqual({});
   });
 });

@@ -299,6 +299,8 @@ function migrateV2toV3(raw: LegacyV2): State {
     lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
     placements: asMap<string>(raw.placements),
+    // Nothing this old can carry a pin: v10 is where they start.
+    pinned: {},
   };
 }
 
@@ -401,9 +403,11 @@ export function parseState(text: string): State | null {
     version === 5 ||
     version === 6 ||
     version === 7 ||
+    version === 8 ||
+    version === 9 ||
     version === SCHEMA_VERSION
   ) {
-    // v3..v8 go through ONE reader: most of them only ADD fields — a v3 file
+    // v3..v10 go through ONE reader: most of them only ADD fields — a v3 file
     // arrives with no subject overrides, a v4 with no class colours and no
     // subject list, a v5 with no gender, a v7 with no second subject — and v7
     // is the only one that CHANGES one, which `readLessons` below handles on
@@ -414,6 +418,12 @@ export function parseState(text: string): State | null {
     // SCHEMA_VERSION without adding the number it used to be makes every backup
     // the previous release wrote fall through to `return null` below — which is
     // the one failure this whole function exists to prevent.
+    //
+    // IT HAPPENED. v9 shipped with `8` missing from this list, so every file the
+    // RELEASED v2.0.0 wrote — the copy the reader actually has — parsed to null.
+    // Nothing on screen could say why: `null` here is "unreadable file". The
+    // comment above was already here and was not enough, because a sentence
+    // cannot fail a test run. `store.test.ts` now reads one file per version.
     const g = raw as Partial<State>;
     const limits = g.settings?.limits;
     const rules = g.settings?.rules;
@@ -467,6 +477,10 @@ export function parseState(text: string): State | null {
       lessons: readLessons(asArray<unknown>(g.lessons, blank.lessons), Number(version)),
       unavailable: asMap<1>(g.unavailable),
       placements: asMap<string>(g.placements),
+      // v9 and below arrive with none, which is the right answer: a file
+      // written before pins existed pinned nothing. `sanitize()` then drops
+      // any that point at a cell the same load already threw away.
+      pinned: asMap<1>(g.pinned),
     };
   } else {
     return null; // an unknown (newer) version is not guessed at

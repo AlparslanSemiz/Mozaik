@@ -113,19 +113,26 @@ test.describe('5. Kurulum ve yedek', () => {
 });
 
 test.describe('12. Branş kısaltmaları', () => {
-  test('ızgarada kısaltma yazıyor, tam ad yer olan yerde kalıyor', async ({ page }) => {
+  test('kısaltma hücrede DE satır başında DA, ve ikisi aynı', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
 
     // "Matematik" does not fit a 34px cell; the short form does.
-    const shortText = (await page.locator('table.grid .card-bottom').first().textContent())!;
-    expect(shortText.length).toBeLessThanOrEqual(4);
+    const card = page.locator('table.grid .card').first();
+    const teacher = (await card.locator('.card-top').textContent())!.trim();
+    const subject = (await card.locator('.card-bottom').textContent())!.trim();
+    expect(subject.length).toBeLessThanOrEqual(4);
 
-    // The teacher row heading has room, so it keeps the FULL subject
+    // And the row head says the SAME thing, which until 2026-08-29 it did not:
+    // it carried the full name and cut it off with an ellipsis, so one grid
+    // spoke two vocabularies about one subject. Asked for in one line:
+    // "program kısmında branşlar kısaltmalar olsun sol tarafta".
     await page.getByRole('button', { name: 'Öğretmen görünümü' }).click();
-    const full = (await page.locator('tbody .row-head .secondary').first().textContent())!;
-    expect(full.length).toBeGreaterThan(4);
+    const head = page.locator('tbody tr', {
+      has: page.locator('.row-head .inspect', { hasText: new RegExp(`^${teacher}$`) }),
+    }).locator('.row-head .secondary');
+    await expect(head).toContainText(subject);
   });
 
   test('Branşlar adımından değiştirilince ızgara ve baskı birlikte değişiyor', async ({ page }) => {
@@ -256,10 +263,12 @@ test.describe('16. Branş seçimi', () => {
     await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
 
     await openSetup(page, 'Öğretmenler');
+    // By VALUE: an option reads "Mat · Matematik" now, and what this test asks
+    // is which subjects the dropdown still OFFERS.
     const options = await page
       .getByLabel('Branş', { exact: true })
       .locator('option')
-      .allInnerTexts();
+      .evaluateAll((els) => els.map((e) => (e as HTMLOptionElement).value));
     expect(options).not.toContain('Fransızca');
     expect(options).toContain('Matematik');
   });
@@ -314,7 +323,9 @@ test.describe('30. Kurulum — düzenleme', () => {
     await row.getByLabel('YA branşı').selectOption('Fizik');
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.getByRole('rowheader', { name: 'YA Fizik' })).toBeVisible();
+    // "Fzk", not "Fizik": the row head reads the subject SHORT, the same string
+    // the cells of its own row carry.
+    await expect(page.getByRole('rowheader', { name: 'YA Fzk' })).toBeVisible();
   });
 
   test('öğretmen sınırı: boş kutu okul varsayılanını kullanıyor', async ({ page }) => {
