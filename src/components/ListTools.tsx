@@ -111,11 +111,30 @@ export default function ListTools<T>({
             o filtreye göre aşağı ya da yukarı olsun." Beside the menu and not
             in it, so five options stay five.
 
-            Disabled with no sort chosen rather than hidden: a control that
-            appears and disappears beside a menu moves the menu, and there is
-            nothing to reverse in "Girildiği sıra" — that order is the list
-            itself, and turning it upside down is what the drag handles are
-            for.
+            NOTHING TO REVERSE IN "Girildiği sıra", so at the default sort it
+            shows nothing — and the reason it is `visibility` rather than a
+            `disabled` box or no element at all was measured, not chosen.
+
+            Disabled, it was a lone white box with an unlabelled glyph sitting
+            past the end of the sort menu: "arama kısmını düzelt böyle en sağda
+            saçma sapan bir çizgi var gibi". The `ArrowUpNarrowWide` icon
+            literally draws three stacked rules, and the surface is `--paper`
+            while both of its neighbours are sunken, so it read as a stray mark
+            rather than as a control waiting for a reason to exist.
+
+            Not removed either. Measured at 1920x1080, sample school:
+
+              button present   select 408.2  count 1479.6  ROW 37.5
+              button removed   select 408.2  count 1479.6  ROW 31.0
+
+            i.e. the note that used to stand here — "a control that appears and
+            disappears beside a menu moves the menu" — is false in this layout:
+            the button sits AFTER the menu and a `.spacer` eats its width, so
+            nothing moves sideways. What it costs is 6.5px of ROW HEIGHT, which
+            is the same jump the reader reported one round earlier about the
+            ribbon (pitfall 94). `visibility: hidden` keeps the box and takes
+            the mark: the two states are the same height BY CONSTRUCTION, the
+            way the availability heading holds its second line (pitfall 102).
 
             THE ARROW SHOWS THE CURRENT DIRECTION, and it used to show the
             other one. The reasoning behind that was "a button's name says what
@@ -129,7 +148,7 @@ export default function ListTools<T>({
             with "Sıralama", because the `<select>` beside it is labelled
             "Sırala" and `getByLabel` matches substrings (pitfall 49). */}
         <button
-          className="btn"
+          className="btn sort-dir"
           disabled={query.sortId === ""}
           aria-label={
             query.desc

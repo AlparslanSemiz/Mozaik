@@ -2176,6 +2176,62 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
      `display: none` — orada geri verilen yer **ölçülmüş bir kazanç**
      (2461 → 1728 px, tuzak 37), yani aynı iki satır iki ekranda iki ayrı şey.
 
+     **VE O İKİ EKRAN 2026-08-31'DE AYRILMAMIŞ ÇIKTI.** `:root[data-density=
+     'sigdir'] .hour-clock { display: none }` seçicisinde `table.grid` yoktu,
+     yani Sığdır yoğunluğunda müsaitlik başlığının saatini de kapatıyordu — ve
+     orada okuyanın bir **düğmesi** var. Ölçülen, üç yoğunlukta, saat AÇIKKEN:
+     `rahat` block/visible · `sigdir` **NONE**/visible · `ferah` block/visible.
+     Yani düğme basılıyor, `aria-pressed` dönüyor, `data-avail-clock='acik'`
+     yazılıyor, ekranda hiçbir şey olmuyor: *"Saat açma kapama çalışmıyor
+     müsaitlikte."* Bedeli bu maddenin kendi değişmezi de oldu — tablo
+     `sigdir`'de 332 yerine **329,9 px**, yani inşaat gereği eşit olan iki boy
+     eşit değildi. Bkz. tuzak 103.
+
+103. **BİR KURALIN KAPSAMI YORUMDA DEĞİL SEÇİCİDE YAZILIDIR.** Yukarıdaki
+     kusurun genel hâli, ve iki dosya birbiriyle **açıkça** çelişiyordu:
+     müsaitlik kuralının üstündeki yorum *"The grid's own `.hour-clock` keeps
+     `display: none` under Sığdır"* diyordu ve doğruydu; otuz satır yukarıdaki
+     seçici `table.grid` demiyordu. Bir yorum kapsam iddia ediyorsa o kapsam
+     seçicide de olmalı — yoksa iddia bir dilektir (tuzak 77'nin CSS hâli).
+     Testin görememesinin sebebi ayrı bir ders: `gorunum.spec.ts` 50 varsayılan
+     yoğunlukta koşuyordu, yani kusurun yaşadığı yoğunluğa hiç uğramıyordu
+     (tuzak 23'ün bedava yeşili). Bir ayar birden çok modda yaşıyorsa, onu
+     ölçen test **kusurun yaşayabileceği modda** koşmalı.
+
+104. **`<Activity mode="hidden">` SEKMEYİ DOM'DA BIRAKIR, VE O ANDAN İTİBAREN
+     HER SEKMENİN ADLARI HER SEKMEDEN BULUNUR.** `fb052f4` Program'ı React'in
+     `<Activity>`'sine sardı — doğru karar, çünkü 1950 hücrelik ızgara geri
+     gelirken yeniden kurulmuyor — ve **tek başına yedi testi kırmızıya
+     döndürdü**. Kırılma biçimi hep aynıydı ve hiçbiri "Program" hakkında
+     değildi: `.empty-screen` iki öğe buluyor (Çıktı'nınki ve gizli Program'ın
+     *"Henüz dizilecek ders yok"*'u), `getByLabel('Sırala')` iki öğe buluyor
+     (liste şeridininki ve havuzun `aria-label="Havuz sıralaması"`'ı, çünkü
+     `getByLabel` alt dize eşler). Tuzak 49/74'ün ailesi ama **sebebi yeni**:
+     orada iki kontrol benzer adlandırılmıştı, burada iki SEKME aynı anda
+     belgede. Karşı önlem `e2e/helpers.ts`'teki `onScreen()`: *"bu ekran ne
+     diyor"* diye soran bir test hangi ekran olduğunu söylemek zorunda. Gerçek
+     kullanıcı etkilenmiyor — `<Activity>` gizli dalı erişilebilirlik
+     ağacından da çıkarıyor — yani bu bir **test** sözleşmesi, bir kusur değil.
+
+105. **BİR EKRANIN EN PAHALI SATIRI, İSRAF OLMAYABİLİR.** *"Program sectionu
+     açılırken bi' yavaşlama oluyor"* ölçüldü ve profil tek bir satırı
+     gösterdi: `gridChrome.ts`'in `scrolled()`'ü, sekme başına **bir** çağrı,
+     4× CPU kısıkta **119,7 ms**, bütün CPU örneklerinin **%35,3'ü** (Program'ın
+     toplam 144,8 ms'sinin içinde; öteki sekmeler 30–50 ms). Teşhis kendini
+     yazıyordu: `scrollTop` bir düzen okumasıdır, efekt React 1950 taze hücreyi
+     belgeye koyar koymaz koşar, ve taze bir kapta cevap **her zaman 0**'dır —
+     yani hiçbir şey öğrenmemek için bütün tabloyu hesaplatıyor gibi görünür.
+     `requestAnimationFrame`'e ertelendi ve **gerçek sayı kıpırdamadı**:
+     tıklamadan boyamaya 105,5 / 104,9 ms (ertelenmiş) ↔ 104,5 ms (olduğu
+     gibi). Yani o düzen israf değil, **boyamanın zaten yapacağı düzen**; o
+     çağrı yalnızca faturanın nereye kesildiğini seçiyor. Geri alındı: aynı
+     sayıyı ölçen bir iyileştirme, düzeltme kılığında bir yorumdur (tuzak 21).
+     Genel kural: bir profil satırı pahalı diye **boşa** çalışmıyordur — önce
+     kaldırılıp **toplam** yeniden ölçülür, çünkü kaldırılan iş çoğu zaman
+     başka bir yere taşınır. Program'ın gerçek maliyeti hâlâ 1950 hücreyi ve
+     367 kartı çizmek, ve onu ucuzlatmak bir mimari karardır, buradaki bir
+     satır değil.
+
 ---
 
 ## Tasarım — serbest

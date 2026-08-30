@@ -11,7 +11,15 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { chooseScale, loadWorld, open, openSettings, openWithSample } from './helpers';
+import {
+  chooseScale,
+  loadWorld,
+  open,
+  openSettings,
+  openWithSample,
+  revealRibbon,
+  settledMotion,
+} from './helpers';
 import { makeWorld } from '../src/worlds';
 
 // Seven since Dersler left Kurulum. The contract is the point: a new tab has
@@ -50,10 +58,18 @@ async function strip(page: Page) {
 
 async function go(page: Page, tab: string) {
   await page.getByRole('button', { name: tab, exact: true }).click();
-  // The strip is remounted with the tab; give the cross-fade a frame to land
-  // before measuring a height.
   await expect(page.locator('.ribbon')).toBeVisible();
-  await page.waitForTimeout(120);
+  // UNFOLD IT FIRST, and wait for the motion instead of guessing at it.
+  //
+  // The strip hides itself while you read down a page (`ribbonScroll.ts`), and
+  // at 150% the Ayarlar → Görünüm panel that `chooseScale` leaves you on is
+  // long enough to scroll — so the first `go()` after a scale change measured a
+  // strip that was still folding. Read height 2.38px against 54.63px on the
+  // other six, i.e. the 52.25px spread this file reported as "yedisi aynı
+  // yükseklikte değil". All seven ARE the same height; the ruler was moving
+  // (pitfalls 59 and 92).
+  await revealRibbon(page);
+  await settledMotion(page);
 }
 
 test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {

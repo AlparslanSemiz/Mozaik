@@ -1799,8 +1799,26 @@ table.grid thead tr:nth-child(2) th {
    hiding the clock took the table from 2461px to 1728px. Pitfall 37.
 
    The lesson NUMBER stays: it is what the eye navigates by, and the times are
-   a click away in Ayarlar → Zil ve günler and printed on every sheet. */
-:root[data-density='sigdir'] .hour-clock {
+   a click away in Ayarlar → Zil ve günler and printed on every sheet.
+
+   SCOPED TO `table.grid`, and the scope is the whole point rather than tidying.
+   Unscoped it also hit Müsaitlik's heading, where the reader has a BUTTON for
+   this ("Göster → Saatler") — so at Sığdır that button flipped `aria-pressed`,
+   wrote `data-avail-clock='acik'`, and nothing on the table moved. Measured
+   before it was written, all three densities, both states:
+
+     rahat  / acik   display: block, visibility: visible   table 1514.8x332
+     sigdir / acik   display: NONE,  visibility: visible   table 1514.8x329.9
+     ferah  / acik   display: block, visibility: visible   table 1514.8x332
+
+   Which also cost the availability rule below the invariant it was written
+   for: `visibility: hidden` reserves the second line box so the two states are
+   the same height BY CONSTRUCTION (pitfall 102), and `display: none` from here
+   took 2.1px of it back. The measurement above is what this rule is FOR — the
+   grid's 2461px -> 1728px (pitfall 37) — and it was never a claim about any
+   other table. The comment on the availability rule already said "the grid's
+   own"; the selector did not (pitfall 77, in CSS). */
+:root[data-density='sigdir'] table.grid .hour-clock {
   display: none;
 }
 
@@ -5390,6 +5408,17 @@ input.search-box:focus-visible {
   background: var(--line-dark);
 }
 
+/* The sort DIRECTION button, with no sort chosen.
+   Hidden rather than drawn-disabled, and the box kept rather than the element
+   dropped: both halves were measured, and the reasoning is in ListTools.tsx.
+   Short version - drawn, it is a lone unlabelled white box past the end of the
+   sort menu ("en sagda sacma sapan bir cizgi"); removed, the strip loses 6.5px
+   of height the moment a sort is picked. `visibility` takes the mark and keeps
+   the height (pitfall 102's construction). */
+.sort-dir:disabled {
+  visibility: hidden;
+}
+
 .list-count {
   font-size: var(--fs-sm);
   color: var(--muted);
@@ -5477,7 +5506,11 @@ input.search-box:focus-visible {
 
    The grid's own `.hour-clock` keeps `display: none` under Sığdır, and that is
    the opposite case on purpose: there the whole measured point IS the room the
-   line gives back (2461 -> 1728px, pitfall 37). */
+   line gives back (2461 -> 1728px, pitfall 37). That sentence was true and the
+   SELECTOR did not say it — the Sığdır rule was unscoped, so at that density it
+   took this heading's second line box too and the reader's "Saatler" button had
+   nothing left to switch. Scoped to `table.grid` now, and `gorunum.spec.ts` 50
+   measures it at Sığdır rather than only at the default density. */
 :root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
   visibility: hidden;
 }

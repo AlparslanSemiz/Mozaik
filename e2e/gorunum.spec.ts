@@ -566,6 +566,57 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
     expect(after.height).toBeCloseTo(before.height, 0);
   });
 
+  // "Saat açma kapama çalışmıyor müsaitlikte."
+  //
+  // And it did work — at the DEFAULT density, which is the only one the test
+  // above ever ran at. `:root[data-density='sigdir'] .hour-clock` was written
+  // for the grid (2461 -> 1728px, pitfall 37) and left unscoped, so at Sığdır
+  // it also took this heading: the button flipped `aria-pressed`, wrote
+  // `data-avail-clock='acik'`, and `display: none` outranked the `visibility`
+  // this screen switches. Nothing on screen moved and nothing said why.
+  //
+  // Measured before the fix, all three densities, clock ON:
+  //   rahat   block / visible    table 1514.8 x 332
+  //   sigdir  NONE  / visible    table 1514.8 x 329.9
+  //   ferah   block / visible    table 1514.8 x 332
+  //
+  // The height is the second half: `visibility: hidden` keeps the second line
+  // box so the two states match BY CONSTRUCTION (pitfall 102), and the
+  // `display: none` arriving from the grid's rule took 2.1px of that back.
+  // Both are asserted, and at the density the fault lived at.
+  test('Sığdır yoğunluğunda da açılıyor, ve tablo boyu değişmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await chooseDensity(page, 'Sığdır');
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+
+    const grid = page.locator('table.availability:not(.heat)');
+    await expect(grid).toBeVisible();
+    const clock = grid.locator('thead .hour-clock').first();
+    await expect(clock).toBeHidden();
+    const before = (await grid.boundingBox())!;
+
+    await revealRibbon(page);
+    await hoursButton(page).click();
+    await expect(clock).toBeVisible();
+    await expect(clock).toHaveText(/^\d{2}:\d{2}$/);
+
+    const after = (await grid.boundingBox())!;
+    expect(after.height).toBeCloseTo(before.height, 0);
+
+    // ...and the grid's own clock is STILL gone at this density: the scope was
+    // narrowed, not the rule dropped. Measuring it here is what stops the fix
+    // from being "delete the Sığdır rule", which would give the week back the
+    // 733px it was written to reclaim.
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+    expect(
+      await page.evaluate(() => {
+        const el = document.querySelector('table.grid thead .hour-clock');
+        return el === null ? 'YOK' : getComputedStyle(el).display;
+      }),
+    ).toBe('none');
+  });
+
   test('tercih yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();

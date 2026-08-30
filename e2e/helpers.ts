@@ -33,6 +33,25 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
  * is not on screen then. Both, not just the chrome: `.topbar` is drawn before
  * the tab's own content, and every one of these tests reads that content.
  */
+/**
+ * A locator that ignores the tab that is not on screen.
+ *
+ * The Program tab is wrapped in React's `<Activity mode="hidden">` since
+ * `fb052f4`, which keeps its whole subtree — 1950 cells, the pool, its two
+ * selects and its own empty state — MOUNTED and merely hidden. That is the
+ * right call for the app (the grid does not have to be rebuilt to come back)
+ * and it changes what a test means: a bare `.empty-screen` or a
+ * `getByLabel('Sırala')` now resolves on every tab, because the hidden tab is
+ * still in the document.
+ *
+ * This is pitfall 49's family with a new cause: there the collision came from
+ * naming two controls alike, here it comes from two TABS being in the DOM at
+ * once. A test that asks "what does this screen say" has to say which screen.
+ */
+export function onScreen(page: Page, selector: string) {
+  return page.locator(`${selector}:visible`);
+}
+
 export async function reopen(page: Page) {
   await page.reload();
   await expect(page.locator('.topbar')).toBeVisible();

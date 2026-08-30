@@ -5,7 +5,15 @@
 // only place that answers "what do I do first".
 
 import { expect, test } from './kapan';
-import { reopen, answerDialog, open, openSetup, openSettings, savedText } from './helpers';
+import {
+  reopen,
+  answerDialog,
+  open,
+  onScreen,
+  openSetup,
+  openSettings,
+  savedText,
+} from './helpers';
 
 test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
@@ -99,19 +107,21 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('Yazdır: basılacak bir şey olmadığını söylüyor', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await expect(page.locator('.empty-screen')).toBeVisible();
+    // `onScreen`, not a bare locator: the Program tab is mounted-but-hidden and
+    // carries an empty state of its own ("Henüz dizilecek ders yok").
+    await expect(onScreen(page, '.empty-screen')).toBeVisible();
   });
 
   test('Müsaitlik: üç türün üçü de ne eksik olduğunu söylüyor', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    await expect(page.locator('.empty-screen')).toContainText('öğretmen ekleyin');
+    await expect(onScreen(page, '.empty-screen')).toContainText('öğretmen ekleyin');
 
     await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await expect(page.locator('.empty-screen')).toContainText('sınıf ekleyin');
+    await expect(onScreen(page, '.empty-screen')).toContainText('sınıf ekleyin');
 
     await page.getByRole('button', { name: 'Derslik', exact: true }).click();
-    await expect(page.locator('.empty-screen')).toContainText('derslik ekleyin');
+    await expect(onScreen(page, '.empty-screen')).toContainText('derslik ekleyin');
   });
 
   test('Okul adım sayaçları boşken soluk', async ({ page }) => {

@@ -1,8 +1,307 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-30 (otuz sekizinci oturum: **aSc araştırma hattı** —
-2940 arayüz metni, 528 yardım konusu, **Türkçe arayüz ve 18 ekranlık tur**,
-[ASC.md](ASC.md) özellik pusulası; artı **ilke 5 kaldırıldı**, hedef %50)
+Son güncelleme: 2026-08-31 (kırkıncı oturum: TASKS yeniden dizildi · R5
+Roboders ölçüldü · **BABANIN GERÇEK VERİSİ fotoğraftan geldi** ve iki yıllık
+varsayımlar tuttu; kod yazılmadı)
+
+---
+
+## 🎯 BABANIN GERÇEK VERİSİ GELDİ — fotoğraftan (2026-08-31)
+
+Kullanıcı `docs/Örnek Fotolar/`'a **33 telefon fotoğrafı** koydu ve içlerinde
+hem **aSc'nin hem Roboders'in çalışan hâli** var, babanın gerçek verisiyle
+(`aSc … 2027 — [15 EYLÜL.roz]`, `C:\Users\BİREY ÜMRANİYE\...`).
+
+**İki yıllık varsayımların hepsi tuttu:**
+
+| Varsayım | Gerçek |
+|---|---|
+| 6 gün, Pazartesi yok | aSc Ayarlar: **Gün Sayısı 6**, ızgara Salı→Pazar |
+| 12 ders | **Günlük Ders Saati 12** |
+| 09:00 · 40+10 · 5'ten sonra 30 dk | `9:00–9:40 … 12:20–13:00 → 13:30–14:10` |
+| **12. ders 19:10** | Kâğıtta `18:30–19:10` — `bell.test.ts` haklıydı |
+| ~20 sınıf · 8 derslik · ~25 öğretmen | **20 sınıf · A–H = 8 derslik · 18 öğretmen** |
+
+**Dört yeni şey öğrenildi:** sınıfın bir **türü** var (`310 G SAY`) ve bizde
+o alan yok (→ B4.3b) · branşlar numaralı (`MAT1`/`Mat2`), yani **çift branş
+kararı doğruydu** · babanın aSc'si **lisanssız** ve kâğıda kırmızı
+*"Please register / ILLEGAL"* basıyor — tek başına bir taşınma sebebi · aSc
+dosyasının adı **`15 EYLÜL.roz`**, yani `B6.2` artık somut bir hedefe sahip.
+
+**Bir iddia okunarak ÇÜRÜTÜLDÜ:** bir öğretmenin kısaltması `İSAY` (4 harf)
+çıkınca `makeShort`'un tek biçim varsaydığı düşünüldü; `entities.ts:75`
+okundu — o yalnız **varsayılan** üretiyor, `Teacher.short` düzenlenebilir.
+Kusur yok, madde açılmadı.
+
+---
+
+## R5 · Roboders — ne olduğu ölçüldü (2026-08-31)
+
+> *"Roboderse başlayalım eğer arkada yapıp da benim dersimi bozmayacaksan."*
+
+**Ekranda hiçbir şey açılmadan yapıldı** ve bu kasıtlı: Playwright MCP'si bu
+depoda `--headless` olmadan kurulu (`.mcp.json`), yani **görünür bir Chromium
+penceresi** açar ve odağı alır. R5'in ihtiyacı olan şey bir tarayıcı değil bir
+**web araması**ydı, o yüzden yalnız `WebSearch` + `WebFetch` kullanıldı.
+
+**Ürünün adı `Roboders`** (`Robodersi` belirtme hâli). Bulgular
+[ROBODERS.md](ROBODERS.md)'de; özet:
+
+| Soru | Cevap |
+|---|---|
+| Ne | **Web uygulaması**, bulut tabanlı, indirilen program yok |
+| Hesap | **Zorunlu** — demo bile |
+| Deneme | 5 gün, kredi kartsız |
+| Fiyat | aylık ₺1.499,99 · ₺2.999,99 · ₺4.649,99 (KDV dahil) |
+
+**İki gerçek bulgu, ikisi de plana dokunuyor:**
+
+- **Derslik programı raporu onlarda var, bizde YOK.** "G dersliğinde bu hafta
+  ne var" diye bakılan bir kâğıt bizde hiç olmadı. R8'e aday.
+- **Öğretmenlere e-posta ile dağıtım onlarda da var**, yani `B3.4` bir tahmin
+  değil, ölçülmüş bir rakip davranışı — 5. ilkenin yerine geçen ölçüt tam da
+  buydu.
+
+**R6'nın kayıt engeli AYNI GÜN düştü: hesap varmış** (kullanıcı). Yani 5
+günlük sayaç kaygısı geçersiz. Kalan iki şey erişim değil **yöntem**:
+Playwright bu depoda `--headless` olmadan kurulu (görünür pencere, odağı
+alıyor — zamanlama kullanıcıya bağlı), ve oturumu kullanıcının kendisi
+açacak — şifre sohbete yazılmıyor.
+
+**Buna rağmen aSc ile fark duruyor ve R6'yı pahalı yapan o:** aSc bu makinede
+kurulu, süresiz, ve 528 yardım konusu **dosya olarak** elimizdeydi. Roboders'te
+geri dönüp bakılacak bir döküm yok — envanter yalnız ekrandan çıkacak, yani
+turun eksiksiz olması gerekiyor.
+
+**Üç satır bilerek YAZILMADI.** Aramada `nöbet`, `kulüp` ve *"bir ana + birden
+çok yardımcı öğretmen"* çıktı ama kaynakları büyük ihtimalle **Eyotek'in**
+(Roboders'in entegre olduğu ayrı ürün) modül sayfaları. Roboders'e mal
+edilmediler; `R7b` onları ekrana bakarak doğrulayacak ya da düşürecek.
+Gerekçe tuzak 65 · 101: ölçülmemiş bir rakip iddiası kendisini doğrulayacak
+bir iş planı üretir.
+
+**Yol üstünde bulunan bir kusur:** `.mcp.json`'daki `chrome-devtools`
+`--executablePath` hâlâ **Linux yolu** gösteriyor
+(`/home/alp/.cache/ms-playwright/...`). Bu makine Windows, yani o sunucu
+burada çalışmaz. Dokunulmadı — ölçülmedi, ve bu turun işi değildi.
+
+---
+
+## Kırkıncı oturum — TASKS.md yeniden dizildi (2026-08-31)
+
+> *"Tasks.md'yi düzene sok ve tam sırala ve kısımlara ayır … benim notlarımı
+> da düzgün şekilde task haline getir. en üstte benim her zaman yazabilmem
+> için bir boşluk da bırak."*
+
+**Kod yazılmadı, ölçüm yapılmadı.** Yapılan şey iki yıl boyunca kronolojik
+olarak birikmiş 2412 satırlık dosyanın **açık iş** ile **arşiv** olarak
+ikiye ayrılması: 2766 satır, on bölüm (§0–§9), açık maddelerin hepsi
+numaralandı (`B1.6`, `B2.1`…`B7.9`), arşivin tamamı **yeniden sıraya** kondu
+(yeniden → eskiye) ve **hiçbir satır silinmedi**.
+
+| Ölçülen | Değer |
+|---|---|
+| Açık madde, §1–§7'de | **63** |
+| Arşivde kalan açık kutu | **0** (hepsi numaralı maddeye taşındı) |
+| Arşivde `[→]` işaretli işaretçi | 5 (canlı hâli yukarıda) |
+| Kaybolan orijinal satır | **0** — `comm` ile denetlendi |
+
+**Bulunan tek gerçek kayıp:** dosyanın son satırı (`"Arama kısmına bir şey
+yazınca arama bloğu genişliyor genişlemesin."`) satır sonu taşımadığı için
+**hiçbir tura hiç girmemişti** — iki yıldır orada duruyordu ve hiçbir yerde
+sayılmıyordu. Şimdi **B1.6**.
+
+**Ölçülerek kapatılan iki eski satır** (kod okunarak, iddia edilmeden):
+*"Branş isimleri değiştirme de olsun"* → `renameSubject()` zaten var ve
+cascade'li; *"Çıktıda blok dersler birleşik görünsün"* → `Print.tsx` zaten
+`colSpan` veriyor (415 · 495).
+
+**Düzeltilen iki bayat kayıt:** `4i` (*"iş akışı HENÜZ KOŞMADI"*) — koştu,
+v2.0.1 yayınlandı; ve *"`bundle.icon` ikonu gömüyor mu, ölçülmedi"* — AB5'te
+ölçüldü, gömüyordu.
+
+**Yeni sözleşme: §0 bir NOT DEFTERİ.** Dosyanın en üstünde kullanıcıya ait
+boş bir blok var (`▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼`). Yeni iş oradan doğar,
+§1–§7'de numaralanır, ham hâli §9'a geçer, bitince §10'a taşınır.
+
+### Aynı oturumda gelen iki satır — sıra DEĞİŞTİ
+
+> *"Program tarafı da tuval gibi word gibi olsun hareket ettirme vesaire eğer
+> olabiliyorsa."* · *"her şeyden önce. tasklara ASC ve Robodersin tekrardan
+> her inciği cıncığının feature'nın incelenmesi lazım."*
+
+**Rakip incelemesi §1 oldu ve öteki her bölümün önüne geçti.** Bölümler bir
+kaydı: §1 envanter · §2 Ayarlar · §3 Çıktı · §4 Tuval · §5 Kısıt · §6 Veri
+modeli · §7 Dağıtım · §8 Karar · §9 Ham notlar · §10 Arşiv. Açık madde **64**,
+arşivde kalan açık kutu yine **0**.
+
+Gerekçe CLAUDE.md'de zaten yazılıydı: 5. ilke kaldırıldığında yerine geçen şey
+*"rakibin gerçekten yaptığı iş"* olmuştu, yani §3–§7'nin **kaynağı** o
+envanter. İlk aSc turu bir **hat** kurdu (2940 metin · 528 konu · 18 ekran)
+ama özellikleri tek tek işaretlemedi, Robodersi'ye ise hiç bakılmadı —
+eksik envanterden türetilmiş bir yol haritası tuzak 101'dir. `R9` bunu açıkça
+söylüyor: bu bölümün asıl çıktısı bir özellik değil, **öteki bölümlerin
+kendisi**.
+
+**Tuval maddesi (B4.2) yeniden yazıldı.** Artık bir baskı önizleme özelliği
+değil, **Program ızgarasının kendi davranışı**. *"Eğer olabiliyorsa"* bir
+ölçüm kapısına çevrildi (B4.1) ve çakışacağı üç yer şimdiden yazıldı:
+`drag.ts`'in `closest('[data-day]')`'i (tuzak 13), `gridChrome.ts`'in
+`data-col`'u (tuzak 85), ve öğretmen sütununun `position: sticky`'si —
+`transform` bir sticky bağlamını kırar.
+
+---
+
+## Otuz dokuzuncu oturum — Bölüm 1 (2026-08-31)
+
+> *"Tasklarda kalanları yapalım kısım kısım."*
+
+Önce TASKS'in en altındaki ham istek listesi **koda karşı** okundu, çünkü
+oradaki satırların çoğu AA · AB · AC turlarında kapanmış ve liste bunu
+söylemiyordu. Üç satır **ölçülerek** kapalı bulundu ve hiç kod yazılmadı:
+
+| Satır | Nerede kapanmış |
+|---|---|
+| *"ekleme yerinde branş ayrıca yazıyor"* | `lessons/index.tsx` — `mode === 'teacher'` dalı `<Field label>` kullanmıyor |
+| *"filtrelere başka filtreler de getir"* | `loadStatusFacet` (commit `fb052f4`); kullanıcı doğruladı: *"haa kalkmış zaten"* |
+| *"öğretmende öğretmene göre filtre saçma"* | `mode === 'teacher' ? [] : [...]` |
+
+### 1 · Müsaitlikte "Saatler" düğmesi ölüydü — ONARILDI
+
+Kullanıcı düğmeyi adıyla seçti (Müsaitlik şeridi → Göster → **Saatler**).
+Sebep okunarak bulundu, sonra **ölçüldü**: `:root[data-density='sigdir']
+.hour-clock` seçicisinde `table.grid` yoktu.
+
+```
+                    saat KAPALI            saat AÇIK              tablo
+rahat        block / hidden          block / visible       1514,8 x 332
+sigdir       NONE  / hidden          NONE  / visible       1514,8 x 329,9   <-- ölü
+ferah        block / hidden          block / visible       1514,8 x 332
+```
+
+`display: none`, `visibility`'yi yener; yani düğme basılıyor, `aria-pressed`
+dönüyor, `data-avail-clock='acik'` yazılıyor ve ekranda hiçbir şey olmuyor.
+İkinci yarısı tuzak 102'nin kendi değişmezini de yiyordu: iki durumun boyu
+**inşaat gereği** eşit olmalıydı, `sigdir`'de 2,1 px eşit değildi.
+
+Seçici `table.grid`'e daraltıldı. Düzeltmeden sonra altı satırın altısında da
+tablo **332 px**, ve ızgaranın kendi saati `sigdir`'de hâlâ `none` — yani
+ölçülmüş kazanç (2461 → 1728 px, tuzak 37) yerinde.
+
+**Test kusuru göremiyordu ve sebebi kayda değer:** `gorunum.spec.ts` 50
+varsayılan yoğunlukta koşuyordu, yani kusurun yaşadığı yoğunluğa hiç
+uğramıyordu. Yeni test Sığdır'da koşuyor, boyu da ölçüyor, ve eski seçici geri
+konarak **kırmızıya döndürüldü**. Tuzak 103.
+
+### 2 · Aramanın sağındaki "saçma sapan çizgi" — ONARILDI
+
+*"Arama kısmını düzelt böyle en sağda saçma sapan bir çizgi var gibi."*
+Ekran görüntüsüne **bakılarak** bulundu: Sırala kutusunun sağındaki pasif
+sıralama yönü düğmesi. Zemini `--paper` (iki komşusu gömük), etiketi yok,
+simgesi (`ArrowUpNarrowWide`) üst üste üç çizgi, ve tıklanmıyor.
+
+İki çare de ölçüldü:
+
+```
+düğme çizili       select x=408,2  sayaç x=1479,6   ŞERİT 37,5 px
+düğme kaldırılmış  select x=408,2  sayaç x=1479,6   ŞERİT 31,0 px
+```
+
+Yani `ListTools.tsx`'te iki yıldır duran gerekçe — *"beliren ve kaybolan bir
+kontrol menüyü oynatır"* — bu düzende **yanlış**: düğme menüden SONRA ve
+`.spacer` genişliğini yutuyor, yatayda hiçbir şey kıpırdamıyor. Bedeli
+dikeyde: 6,5 px, yani sıralama seçilince altındaki her satır adım atardı
+(tuzak 94'ün ta kendisi). Çare `visibility: hidden` — kutusu kalıyor, işareti
+gidiyor (tuzak 102'nin inşaatı). Yeni test iki durumun şerit boyunu ve
+select'in yerini birden ölçüyor; ilk hâli **hareket bitmeden** ölçtüğü için
+1,54 px "kayma" gördü, `settledMotion()` eklendi (tuzak 59).
+
+**Aynı ekranda değişmeden kalan:** sıralama seçilince tablo 438,8 → **464,8**
+px iniyor, çünkü `.list-note` beliriyor. O satıra yer ayırmak bir tur önce
+ölçülerek **kaldırılmıştı** (neredeyse her zaman boş, ve şeritle tablo
+arasındaki 44 px'in çoğu oydu), dolayısıyla geri konmadı.
+
+### 3 · Liste açıklamalarının hizası — ÖLÇÜLDÜ, SAPMA YOK
+
+*"Listelerdeki açıklamların hizaları da aynı olsun."* Beş liste ekranı, iki
+ölçekte:
+
+```
+%100    descTop 147,8   hintTop 151,0   hint 19,5 px (tek satır)   beşinde de
+%150    descTop 219,1   hintTop 224,0   hint 29,3 px (tek satır)   beşinde de
+```
+
+AA1 ve AC1 bunu zaten kapatmış, ve `kurulum.spec.ts` 44 çiviliyor. Kod
+yazılmadı.
+
+### 4 · "Program açılırken yavaşlama" — ÖLÇÜLDÜ, TEORİ ÇÜRÜTÜLDÜ
+
+Sekme geçiş maliyeti, örnek okul, `file://`, 1920×1080, motion kapalı:
+
+| Sekme | x1 | x4 | x8 |
+|---|---|---|---|
+| Okul | 6,6 ms | 30,4 | 62,5 |
+| Müsaitlik | 6,8 | 37,0 | 71,9 |
+| Dersler | 10,1 | 49,8 | 104,1 |
+| **Program** | **32,6** | **144,8** | **302,0** |
+| Kontrol | 10,8 | 47,8 | 95,4 |
+| Çıktı | 26,7 | 120,0 | 245,3 |
+| Ayarlar | 7,6 | 38,5 | 104,1 |
+
+Yani şikayet gerçek: Program her sekmenin **3–4 katı**. DOM sayısı sebep
+değil (Program 3225 öğe, Çıktı 5809). Küçültmesiz bir derlemeden CPU profili
+alındı ve tek satırı gösterdi:
+
+```
+35,3%  scrolled            (gridChrome.ts)
+32,0%  (program)           V8'in kendi kovası
+10,5%  get scrollHeight    (scrollFade.ts)
+ 1,4%  placedBlocks
+ 0,01 ms  buildIndex       — sebep DEĞİL, ölçüldü
+```
+
+Sayarak doğrulandı: `scrolled()` sekme başına **1 kez** koşuyor ve o tek
+çağrı 4×'te **119,7 ms**. `requestAnimationFrame`'e ertelendi ve **gerçek
+sayı kıpırdamadı**: tıklamadan boyamaya 105,5 / 104,9 ms (ertelenmiş) ↔
+104,5 ms (olduğu gibi). Yani o düzen israf değil, boyamanın zaten yapacağı
+düzen. **Değişiklik geri alındı**, ölçüm `gridChrome.ts`'e yazıldı ki aynı
+yere bir daha bakılmasın (tuzak 105).
+
+Yanında ölçülen iki şey daha: havuz kapalıyken geçiş 154,1 → **98,7 ms**
+(%36), ve Program `<Activity>` sayesinde zaten **sökülmüyor** — yani kalan
+maliyet React değil, 1950 hücrenin düzeni ve boyaması. Onu ucuzlatmak bir
+mimari karar; bu turda yapılmadı.
+
+### 5 · Devralınan YEDİ kırmızı — kapandı, hepsi TEK sebepten
+
+`npm run kontrol` bu turun başında yedi kırmızı verdi ve temiz ağaçta da
+verdi, yani devralınmıştı. Hepsinin kaynağı `fb052f4`: Program `<Activity
+mode="hidden">`'a sarıldı ve **DOM'da kalmaya başladı**.
+
+| Test | Ne oldu |
+|---|---|
+| `bos-ekran` ×2, `kontrol` ×1 | `.empty-screen` iki öğe: Çıktı/Kontrol'ünki ve gizli Program'ın *"Henüz dizilecek ders yok"*'u |
+| `sira` ×3 | `getByLabel('Sırala')` iki öğe: liste şeridi ve havuzun `aria-label="Havuz sıralaması"` (alt dize eşleşmesi) |
+| `serit` ×1 | **başka sebep:** %150'de `chooseScale` uzun bir panelde bırakıyor, sayfa kayıyor, şerit kendini gizliyor, ve ölçüm katlanan şeridi yakalıyor — 2,38 px ↔ 54,63 px, yani raporlanan 52,25 px'lik "fark" |
+
+İlk altısının çaresi `e2e/helpers.ts`'e giren `onScreen()`; yedincisininki
+`go()`'nun içine `revealRibbon` + `settledMotion`. Yedi şeridin yedisi de
+%100'de **36,75 px**, %150'de **54,63 px** — ölçüldü, sözleşme zaten
+tutuyormuş. Tuzak 104.
+
+### Ölçülen
+
+```
+npm run kontrol   YEŞİL
+  birim   725      (öncesi 719)
+  E2E     528      (öncesi 514; +2 yeni, +12 devralınan)
+  site     22
+  çözücü    7
+dist/index.html   962 434 bayt   (öncesi 961 584 — +850)
+```
+
+`npm run ekran` iki temada 19 görüntü, ve **bakıldı**: liste şeridi iki temada
+da temiz, hizalar yerinde.
 
 ---
 

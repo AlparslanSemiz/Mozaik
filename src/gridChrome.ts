@@ -89,6 +89,30 @@ export function attachGridChrome(wrap: HTMLElement): () => void {
   // something once there is something under them. Drawing their shadow before
   // that is the "an element that looks like it is floating is wrong" mistake
   // the old rule was written against.
+  //
+  // THE FIRST CALL IS THE MOST EXPENSIVE LINE ON THIS SCREEN, AND DEFERRING IT
+  // BUYS NOTHING. Written down because it looks exactly like a bug and is not.
+  //
+  // "Program sectionu açılırken bi' yavaşlama oluyor" — measured, sample
+  // school, file://, 4x CPU throttling, 12 Okul<->Program round trips:
+  //
+  //   Program tab switch, total .......... 144.8 ms
+  //   this function, ONE call ............ 119.7 ms   (35% of all CPU samples)
+  //   every other tab .................... 30-50 ms
+  //
+  // `scrollTop` is a layout read and this effect runs the moment React has put
+  // ~1950 fresh cells in the document, so the read lays the whole table out
+  // synchronously — and on a freshly mounted container the answer is always 0,
+  // i.e. it appears to force a full layout to learn nothing.
+  //
+  // It was deferred to `requestAnimationFrame` and the real number did not
+  // move: click-to-paint 105.5 / 104.9 ms deferred against 104.5 ms as it is.
+  // So the layout is not WASTE, it is the layout the paint needed anyway, and
+  // this call only chooses where it is billed. Reverted rather than kept: an
+  // optimisation that measures the same is a comment pretending to be a fix
+  // (pitfall 21). What Program actually costs is drawing 1950 cells and 367
+  // pool cards from scratch on every entry, because the tab unmounts
+  // (pitfall 18) — and that is an architecture decision, not a line here.
   function scrolled() {
     wrap.classList.toggle('scrolled-y', wrap.scrollTop > 0);
     wrap.classList.toggle('scrolled-x', wrap.scrollLeft > 0);

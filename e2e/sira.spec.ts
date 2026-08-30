@@ -134,15 +134,20 @@ test.describe('61. Elle sıralama', () => {
     // something that was never the note. The announcement has moved onto the
     // strip's own row and carries `.list-said` now (pitfall 49), so the note
     // is either drawn or it is not — which is what the rule actually says.
+    // `select.sort-pick` and not `getByLabel('Sırala')`, in this file and in
+    // every list test: the Program tab is mounted-but-hidden since `fb052f4`
+    // (`<Activity>`), and its pool carries a select labelled "Havuz
+    // sıralaması" — which `getByLabel` matches, because it matches substrings
+    // (pitfall 49/74). The name did not become ambiguous; the DOM did.
     const note = page.locator('.list-tools .list-note');
     await expect(grips(page).first()).toBeEnabled();
     await expect(note).toHaveCount(0);
 
-    await page.getByLabel('Sırala').selectOption({ label: 'Ada göre' });
+    await page.locator('select.sort-pick').selectOption({ label: 'Ada göre' });
     await expect(grips(page).first()).toBeDisabled();
     await expect(note).toContainText('Girildiği sıra');
 
-    await page.getByLabel('Sırala').selectOption('');
+    await page.locator('select.sort-pick').selectOption('');
     await expect(grips(page).first()).toBeEnabled();
 
     // A search narrows the rows too, so it locks for the same reason.
@@ -159,7 +164,7 @@ test.describe('61. Elle sıralama', () => {
   test('pasif tutamak sürüklenmiyor — sıra kıpırdamıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
-    await page.getByLabel('Sırala').selectOption({ label: 'Ada göre' });
+    await page.locator('select.sort-pick').selectOption({ label: 'Ada göre' });
 
     const before = await names(page);
     await dragRow(page, 0, 3);
@@ -298,7 +303,7 @@ test.describe('61. Elle sıralama', () => {
     const order = await subjects();
 
     await openSetup(page, 'Öğretmenler');
-    await page.getByLabel('Sırala').selectOption({ label: 'Branşa göre' });
+    await page.locator('select.sort-pick').selectOption({ label: 'Branşa göre' });
 
     // The chips read the same order, and they are the other half of the ask.
     const chips = (await page.locator('.chips').first().locator('.chip').allInnerTexts())

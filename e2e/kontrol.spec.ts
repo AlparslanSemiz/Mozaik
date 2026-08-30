@@ -9,7 +9,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { makeWorld, type WorldSpec } from '../src/worlds';
-import { loadWorld, open, openWithSample } from './helpers';
+import { loadWorld, onScreen, open, openWithSample } from './helpers';
 
 /**
  * Loads a tiny hand-built world through the real backup dialog.
@@ -37,8 +37,9 @@ test.describe('26. Kontrol — kapasite', () => {
   test('veri yokken ne yapılacağını söylüyor', async ({ page }) => {
     await open(page);
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.locator('.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
-    await expect(page.locator('.empty-screen')).toContainText('Okul');
+    // The hidden Program tab has an empty state too — see `onScreen`.
+    await expect(onScreen(page, '.empty-screen')).toContainText('Kontrol edilecek bir şey yok');
+    await expect(onScreen(page, '.empty-screen')).toContainText('Okul');
   });
 
   test('her şey sığıyorsa net biçimde "Sorun görünmüyor" diyor', async ({ page }) => {

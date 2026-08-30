@@ -10,7 +10,13 @@
 // the round trip through a real input.
 
 import { expect, test } from "./kapan";
-import { openSetup, openLessons, openWithSample, mainList } from "./helpers";
+import {
+  openSetup,
+  openLessons,
+  openWithSample,
+  mainList,
+  settledMotion,
+} from "./helpers";
 
 const rows = (page: import("@playwright/test").Page) =>
   mainList(page).locator("tbody tr");
@@ -236,8 +242,10 @@ test.describe("84. Sıralama yönü işareti", () => {
     await openWithSample(page);
     await openSetup(page, "Öğretmenler");
 
-    // Nothing to reverse until a sort is chosen.
-    await expect(dirButton(page)).toBeDisabled();
+    // Nothing to reverse until a sort is chosen, so there is nothing to see:
+    // it used to be a drawn-but-disabled white box past the end of the sort
+    // menu, which is the "saçma sapan çizgi" the reader reported.
+    await expect(dirButton(page)).toBeHidden();
     await page.locator("select.sort-pick").first().selectOption({ index: 1 });
 
     const button = dirButton(page);
@@ -253,6 +261,54 @@ test.describe("84. Sıralama yönü işareti", () => {
     expect(up).not.toBe(down);
     expect(up).toContain("arrow-up");
     expect(down).toContain("arrow-down");
+  });
+
+  // The other half of hiding it, and the half that decides HOW it is hidden.
+  //
+  // Not rendering the button at all was measured first and rejected: the strip
+  // is 37.5px tall with it and 31px without, so choosing a sort would move
+  // every row of the table underneath by 6.5px. That is the same complaint
+  // this project already answered once about the ribbon (pitfall 94), and the
+  // answer is the same — a state's mark must not be a measure.
+  //
+  // `visibility: hidden` keeps the box, so the two states are the same height
+  // by construction rather than by a number anybody re-derives.
+  test("yön düğmesi gizliyken de yerini tutuyor: şerit KIPIRDAMIYOR", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, "Öğretmenler");
+
+    const strip = page.locator(".list-tools-row").first();
+    const select = page.locator("select.sort-pick").first();
+    await expect(strip).toBeVisible();
+    // The panel fades in from `translateY(var(--slide))`, so a rect read before
+    // that lands is a rect off the rail by a couple of pixels — measured here
+    // as a 1.54px "move" that was the fade, not the button (pitfall 59).
+    await settledMotion(page);
+    const stripBefore = (await strip.boundingBox())!;
+    const selectBefore = (await select.boundingBox())!;
+
+    await select.selectOption({ index: 1 });
+    await expect(dirButton(page)).toBeVisible();
+
+    const stripAfter = (await strip.boundingBox())!;
+    const selectAfter = (await select.boundingBox())!;
+    // Measured: 37.5px in both states. Without the reserved box it is 37.5 and
+    // 31.0, i.e. every row of the table below would step 6.5px.
+    expect(stripAfter.height).toBeCloseTo(stripBefore.height, 1);
+    // ...and the menu it sits beside does not move either, which is the claim
+    // the old "disabled, not hidden" note made and got backwards: the button
+    // is AFTER the menu and `.spacer` absorbs its width.
+    expect(selectAfter.x).toBeCloseTo(selectBefore.x, 1);
+    expect(selectAfter.y).toBeCloseTo(selectBefore.y, 1);
+
+    // What DOES move here is the table, by a measured 26px (438.8 -> 464.8),
+    // and that is a different thing on purpose: choosing a sort switches the
+    // drag handles off, and `.list-note` says so. Reserving a line for it was
+    // tried and removed once already — empty almost always, and most of the
+    // 44px that used to sit between the strip and the table.
+    await expect(page.locator(".list-tools .list-note")).toBeVisible();
   });
 
   // The arrow keys move a row, and they were only ever named in the accessible
