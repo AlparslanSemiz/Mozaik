@@ -82,9 +82,7 @@ function Colors({
         </div>
       ) : (
         <p className="hint">
-          {t(
-            'Silmelerden sonra renkler arada delik bıraktı. Yeniden dağıtmak programı bozmaz, yalnızca renkleri baştan sıraya dizer.',
-          )}
+          {t('Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.')}
         </p>
       )}
       <div className="form-row">
@@ -124,7 +122,7 @@ export default function Summary({
         <h2>{t('Özet')}</h2>
         <h3>{t('Hazır branşlar ({n})', { n: ready.length })}</h3>
         <p className="hint">
-          <T k="Programda gömülü olan ve okulun listesinde **bulunmayan** branşlar. Kısaltmaları hazır; eklemek için tıklayın." />
+          <T k="Okulun listesinde **bulunmayan** hazır branşlar; eklemek için tıklayın." />
         </p>
         {ready.length === 0 ? (
           <div className="ok-box">{t('Gömülü tablodaki branşların hepsi listenizde.')}</div>
@@ -163,8 +161,14 @@ export default function Summary({
             </div>
           </>
         )}
+        {/* `data-hint` below: what makes that hint long is DATA, not prose —
+            it names every unused subject, so its length is the school's and
+            not a paragraph nobody trimmed. The ceiling in metin.spec.ts skips
+            these, and marking them is what keeps the ceiling honest. The
+            comment is OUTSIDE the condition: between `{cond && (` and the
+            element it is an object literal, not a comment (pitfall 62). */}
         {unused.length > 0 && (
-          <p className="hint">
+          <p className="hint data-hint">
             {t('Hiçbir öğretmende kullanılmayan {n} branş var: {hangileri}. Silinebilirler.', {
               n: unused.length,
               hangileri: unused.map(subjectLabel).join(', '),
@@ -193,7 +197,7 @@ export default function Summary({
         )}
         <h3>{t('Derslik yükü')}</h3>
         <p className="hint">
-          <T k="Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır, girerken görünsün diye buraya kondu." />
+          <T k="Aynı dersliği paylaşan sınıfların **toplam** ders saati de haftaya sığmalı." />
         </p>
         <CapacityRows rows={capacity.rooms} empty={t('Henüz derslik yok.')} problemsFirst />
         {state.rooms.length > 0 && (
@@ -238,7 +242,7 @@ export default function Summary({
         <h2>{t('Özet')}</h2>
         <h3>{t('Öğretmen yükü')}</h3>
         <p className="hint">
-          <T k="Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz. Müsait saatler **Müsaitlik** sekmesinde daralır." />
+          <T k="Öğretmenin müsait saati, ona yüklenen ders saatinden az olamaz." />
         </p>
         {/* Above the table, not below it: under twenty-five rows this line is
             a screen away from the heading it belongs to. */}
@@ -300,7 +304,7 @@ export default function Summary({
         {state.classes.length > 0 && (
           <p className="hint">
             <T
-              k="Haftada sınıf başına **{yer}** saat var ({gun} gün × {ders} ders). Girilen toplam ders yükü **{yuk}** saat. Gün ve saat sayısı **Ayarlar → Zil ve günler**'de."
+              k="Sınıf başına **{yer}** saat var ({gun} gün × {ders} ders); girilen yük **{yuk}** saat."
               vars={{
                 yer: slots,
                 gun: state.settings.days.length,
@@ -334,11 +338,11 @@ export default function Summary({
       )}
       <h3>{t('Ders yükü')}</h3>
       <p className="hint">
-        <T k="Her sınıfın haftalık saati, açık olduğu saatlere sığmalı. Sağdaki sayı girdikçe artar; **Yük** **Açık**'ı geçerse o sınıfın haftası tutmaz." />
+        <T k="**Yük**, **Açık**'ı geçerse o sınıfın haftası tutmaz." />
       </p>
       <CapacityRows rows={capacity.classes} empty={t('Henüz sınıf yok.')} problemsFirst />
       {idleTeachers.length > 0 && (
-        <p className="hint">
+        <p className="hint data-hint">
           {t('Hiç dersi olmayan öğretmen: {kimler}.', {
             kimler: idleTeachers.map((x) => x.short).join(', '),
           })}

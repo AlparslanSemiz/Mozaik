@@ -76,6 +76,22 @@ export type Scope = "classes" | "teachers" | "both";
  * seçiyoruz ama değişmiyor").
  */
 export type CheckView = "problems" | "teachers" | "classes" | "rooms";
+
+/**
+ * HOW THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
+ * olsun, hatta neye göre filtrelensin sıralansın ayarı bile olabilir."
+ *
+ * `row` is what the tray has always done and stays the default: the cards run
+ * the same way down as the grid rows they are aimed at, so a row's cards stand
+ * together under the row you are looking at. The other four answer questions
+ * the tray could not be asked before — "what is left of Matematik", "which are
+ * the long blocks", "who is furthest from finished".
+ *
+ * A POSITION and not a preference, so it lives here rather than in `theme.ts`:
+ * it says what is being looked at right now. No new localStorage key, and so
+ * no new row owed to the "Veriler nerede" table.
+ */
+export type PoolSort = "row" | "name" | "subject" | "size" | "left";
 export interface ToolState {
   tab: Tab;
   setTab: (next: Tab) => void;
@@ -111,6 +127,11 @@ export interface ToolState {
   setShowHeat: (next: boolean) => void;
   colored: boolean;
   setColored: (next: boolean) => void;
+  poolSort: PoolSort;
+  setPoolSort: (next: PoolSort) => void;
+  /** Subject key the tray is narrowed to. '' = all of them. */
+  poolFilter: string;
+  setPoolFilter: (next: string) => void;
 }
 
 /**
@@ -140,6 +161,8 @@ export function useToolState(firstTab: Tab): ToolState {
   // twenty-five teachers all off on Tuesday afternoon is why the solver gets
   // stuck, and it is invisible one person at a time.
   const [showHeat, setShowHeat] = useState(true);
+  const [poolSort, setPoolSort] = useState<PoolSort>("row");
+  const [poolFilter, setPoolFilter] = useState("");
 
   return {
     tab,
@@ -166,5 +189,9 @@ export function useToolState(firstTab: Tab): ToolState {
     setShowHeat,
     colored,
     setColored,
+    poolSort,
+    setPoolSort,
+    poolFilter,
+    setPoolFilter,
   };
 }

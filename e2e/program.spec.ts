@@ -2,7 +2,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover } from './helpers';
+import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover, settledMotion, openGridMenu } from './helpers';
 
 test.describe('2. Sürükle-bırak', () => {
 
@@ -412,8 +412,21 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await cards.first().click({ button: 'right' });
     const menu = page.locator('.menu');
     await expect(menu).toBeVisible();
-    // Three items, and all three were named by the reader.
-    await expect(menu.getByRole('menuitem')).toHaveCount(3);
+    // THE WHOLE TOP LEVEL, written out rather than counted: this menu has now
+    // been reshaped twice, and both times a bare count said "it changed"
+    // without saying what to. Reading in order it is: the block, the three
+    // things behind it, the one-hour lock, and two doors — the locks that take
+    // many hours, and putting a row or a day aside. Nothing that a hand reaches
+    // for often is behind either door.
+    await expect(menu.getByRole('menuitem')).toHaveText([
+      /^Havuza kaldır/,
+      'Dersi düzenle',
+      'Öğretmeni düzenle',
+      'Sınıfı düzenle',
+      'Dersi buraya sabitle',
+      'Toplu sabitle',
+      'Geçici görünüm',
+    ]);
 
     await menu.getByRole('menuitem', { name: 'Havuza kaldır' }).click();
     await expect(cards).toHaveCount(0); // if it was a block, all of it went
@@ -715,6 +728,12 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
 
     // The bottom line names the target row, and equal values must be adjacent:
     // otherwise one row's cards are spread across the whole pool.
+    //
+    // Asserted in the DEFAULT order only, and that is the point of saying so:
+    // the tray can be sorted five ways since 2026-08-30, and "one row's cards
+    // stand together" is a promise the grid order makes. Sorted by block
+    // length it is deliberately false — the heading over each run says which
+    // promise is in force.
     for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
       await page.getByRole('button', { name: view }).click();
       const list = await bottoms();
@@ -729,6 +748,97 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
         }
       }
     }
+  });
+
+  // 88. THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
+  // olsun, hatta neye göre filtrelensin sıralansın ayarı bile olabilir."
+  test('havuz beş türlü sıralanıyor, ve her sıra kendi BAŞLIKLARINI çiziyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    const groups = page.locator('.pool-group');
+    const labels = () => page.locator('.pool-group-label').allInnerTexts();
+    const cards = page.locator('.pool-card');
+    const before = await cards.count();
+    expect(before).toBeGreaterThan(10);
+
+    // The default is the grid's own order, one heading per row.
+    const byRow = await labels();
+    expect(byRow.length).toBeGreaterThan(5);
+    expect(byRow[0]).toContain('MÇ');
+
+    // ...and the setting SHOWS: choosing branches makes the headings branches.
+    await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption('subject');
+    const bySubject = await labels();
+    expect(bySubject.join(' ')).toContain('Matematik');
+    expect(bySubject).not.toEqual(byRow);
+
+    // Two groups when the question is block length, and not one card lost on
+    // the way: a re-order that dropped or duplicated a block would be the one
+    // thing this tray must never do.
+    await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption('size');
+    await expect(groups).toHaveCount(2);
+    await expect(cards).toHaveCount(before);
+
+    // EVERY ORDER HAS TO HOLD THE SAME CARDS, AND EVERY CARD HAS TO BE UNDER A
+    // HEADING.
+    //
+    // Two things can go wrong on this path and neither shows up as an error:
+    // a re-order that loses a block (the tray just looks shorter), and a
+    // heading that disagrees with the run under it (`poolGroup` deciding one
+    // thing and `groupStacks` cutting somewhere else), which leaves cards
+    // outside any group. The counts on the headings have to add up to the
+    // cards on screen, in all five orders.
+    //
+    // The deck signature beside it is a GUARD rather than a live risk: every
+    // field a comparator can read is identical within one lesson's run of
+    // equal blocks, and `Array.sort` is stable, so today no order can split a
+    // deck. It would stop being true the moment a comparator reads `key` — and
+    // a split deck is invisible to every other assertion in this file, because
+    // they all count `.pool-card`, which does not change.
+    // Measured on the honest build: 109 distinct signatures, 109 stacks.
+    const signatures = async () =>
+      page.locator('.pool-stack').evaluateAll((els) =>
+        els.map((el) => {
+          const card = el.querySelector('.pool-card')!;
+          const top = card.querySelector('.card-top')?.textContent ?? '';
+          const bottom = card.querySelector('.card-bottom')?.textContent ?? '';
+          return `${top}|${bottom}|${card.getAttribute('data-size')}`;
+        }),
+      );
+    for (const sort of ['row', 'name', 'subject', 'size', 'left']) {
+      await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption(sort);
+      await expect(cards).toHaveCount(before);
+      const decks = await signatures();
+      expect(new Set(decks).size, `${sort}: aynı dersin destesi ikiye bölünmüş`).toBe(decks.length);
+
+      const counted = await page
+        .locator('.pool-group-count')
+        .evaluateAll((els) => els.reduce((sum, el) => sum + Number(el.textContent ?? 0), 0));
+      expect(counted, `${sort}: başlıkların saydığı blok sayısı ekrandakiyle tutmuyor`).toBe(before);
+    }
+  });
+
+  test('havuz branşa göre SÜZÜLÜYOR ve neyi sakladığını söylüyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+
+    const cards = page.locator('.pool-card');
+    const all = await cards.count();
+
+    const filter = page.getByRole('combobox', { name: 'Havuz süzgeci' });
+    await filter.selectOption({ index: 1 });
+    const shown = await cards.count();
+    expect(shown).toBeGreaterThan(0);
+    expect(shown).toBeLessThan(all);
+
+    // A tray that quietly showed a twelfth of what is left would make the head
+    // count a lie, so the head says what it is holding back.
+    await expect(page.locator('.pool-sub')).toContainText('süzgeç dışında');
+    await expect(page.locator('.pool-count strong')).toContainText(`${shown} blok`);
+
+    await filter.selectOption('');
+    await expect(cards).toHaveCount(all);
   });
 
   test('kart ile hayalet aynı şeyi söylüyor', async ({ page }) => {
@@ -1099,6 +1209,17 @@ test.describe('68. 2+1 bitişikken', () => {
 // so what is asked HERE is that every road a hand can take arrives at it.
 
 test.describe('86. Sabitleme', () => {
+  /**
+   * The pin BUTTON of the first placed card.
+   *
+   * It is a sibling of the card and not a child of it: `.card` is a <button>
+   * and a button inside a button is invalid HTML, so the two sit side by side
+   * in the cell (Grid.tsx). Reached through the cell for exactly that reason.
+   */
+  function firstPin(page: Page) {
+    return page.locator('table.grid td:has(.card)').first().locator('.card-pin');
+  }
+
   /** Puts one lesson down and pins it. Returns that cell. */
   async function pinFirst(page: Page) {
     await openWithSample(page);
@@ -1129,11 +1250,68 @@ test.describe('86. Sabitleme', () => {
     return card;
   }
 
+  // THE PIN ON THE CARD. "Program kısmında kartların üzerinde sabitleye
+  // basınca dersi sabitlesin babamın en çok kullanacağı bu."
+  //
+  // Three separate claims, and each of them is a way this could be built and
+  // still be wrong: it is THERE before anything is hovered (a control that
+  // appears on hover is a control this reader never finds), pressing it locks
+  // the block, and pressing it does NOT pick the card up — the card underneath
+  // starts a drag on pointerdown and would happily take the press.
+  test('karttaki raptiye hep GÖRÜNÜYOR ve tek tıkla sabitliyor', async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const card = page.locator('table.grid .card').first();
+    const pin = firstPin(page);
+    await expect(pin).toBeVisible();
+    await expect(pin).toHaveAttribute('aria-pressed', 'false');
+
+    // WITH NOTHING HOVERED, and that qualifier is the whole assertion.
+    // `toBeVisible` passes at opacity 0, and the cell's own :hover rule turns
+    // the pin fully on — `dragAndDrop` leaves the pointer sitting in the cell
+    // it just dropped into, so reading the ink there measures the hover state
+    // of a build that only shows the pin on hover. Measured with the mutation
+    // in place: opacity 0 read back as 1.
+    await page.mouse.move(4, 4);
+    await settledMotion(page);
+    const ink = await pin.evaluate((el) => Number(getComputedStyle(el).opacity));
+    expect(ink, 'raptiye hover olmadan görünmüyor').toBeGreaterThan(0.25);
+
+    const box = await card.boundingBox();
+
+    // PRESS AND DRAG ON THE PIN, and this is a STRUCTURAL claim: the card
+    // starts a move on its own pointerdown, so the pin only escapes that by
+    // being the card's sibling rather than its child. Move it inside — the
+    // shape somebody will reach for the next time this corner is touched — and
+    // the press picks the block up. A plain click cannot see it: down and up
+    // in one place, the ghost never travels, and everything looks fine.
+    const pinBox = (await pin.boundingBox())!;
+    await page.mouse.move(pinBox.x + pinBox.width / 2, pinBox.y + pinBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(pinBox.x + 140, pinBox.y + 70, { steps: 8 });
+    await expect(page.locator('.ghost'), 'raptiyeye basmak kartı kaldırdı').toHaveCount(0);
+    await page.mouse.up();
+    await page.mouse.move(4, 4);
+    expect(await card.boundingBox(), 'kart yerinden oynadı').toEqual(box);
+
+    // ...and a plain click on it locks the block.
+    await pin.click();
+    await expect(card).toHaveClass(/pinned/);
+    await expect(pin).toHaveAttribute('aria-pressed', 'true');
+    expect(await card.boundingBox()).toEqual(box);
+
+    // ...and the same button takes it off again.
+    await pin.click();
+    await expect(card).not.toHaveClass(/pinned/);
+    await expect(pin).toHaveAttribute('aria-pressed', 'false');
+  });
+
   test('menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor', async ({ page }) => {
     const card = await pinFirst(page);
     // The mark, not a colour: the grid's four colours already mean droppable,
-    // warning, blocked and closed.
-    await expect(card.locator('.card-pin')).toBeVisible();
+    // warning, blocked and closed. It is the pin CONTROL now, and it says so.
+    await expect(firstPin(page)).toHaveAttribute('aria-pressed', 'true');
     // And a screen reader is told the same thing the mark says.
     await expect(card).toHaveAttribute('aria-label', /sabitlenmiş/);
 
@@ -1215,7 +1393,8 @@ test.describe('86. Sabitleme', () => {
 
   test('"Programı boşalt" da sabitlenmişi bırakıyor', async ({ page }) => {
     await filledWithOnePin(page);
-    await page.getByRole('button', { name: 'Programı boşalt' }).click();
+    await openGridMenu(page);
+    await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
     const dialog = page.getByRole('alertdialog');
     await expect(dialog).toContainText('Sabitlenen');
     await dialog.getByRole('button', { name: 'Programı boşalt' }).click();

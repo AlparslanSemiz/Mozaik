@@ -13,6 +13,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/worlds';
+import { activePlacements } from '../src/programs';
 import { loadWorld, savedState, settledText } from './helpers';
 
 /** Runs it and waits for the verdict line. */
@@ -43,9 +44,9 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
       //    against the grid as it was BEFORE the button was pressed, so the
       //    first thing checked is that the run really reached localStorage.
       expect(
-        Object.keys(saved.placements).length,
+        Object.keys(activePlacements(saved)).length,
         `${world.name}: kaydedilen durum dizimden önceki hâli`,
-      ).toBeGreaterThan(Object.keys(world.state.placements).length);
+      ).toBeGreaterThan(Object.keys(activePlacements(world.state)).length);
 
       // 1. Every block the page saved is legal by the same blocker() the drag
       //    is judged by. A lesson left in an hour that was closed afterwards is
@@ -61,8 +62,8 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
       }
 
       // 3. Nothing that was placed by hand moved.
-      for (const [cell, lessonId] of Object.entries(world.state.placements)) {
-        expect(saved.placements[cell], `${world.name}: ${cell}`).toBe(lessonId);
+      for (const [cell, lessonId] of Object.entries(activePlacements(world.state))) {
+        expect(activePlacements(saved)[cell], `${world.name}: ${cell}`).toBe(lessonId);
       }
 
       // 4. The bar says something a person can act on.
@@ -107,7 +108,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     const saved = await savedState(page, before);
 
     expect(illegalBlocks(saved)).toEqual([]);
-    expect(Object.keys(saved.placements)).toHaveLength(12);
+    expect(Object.keys(activePlacements(saved))).toHaveLength(12);
     await expect(page.locator('.pool-card')).toHaveCount(0);
   });
 
@@ -131,8 +132,8 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     const before = await autoFill(page);
     const saved = await savedState(page, before);
 
-    for (const [cell, lessonId] of Object.entries(world.state.placements)) {
-      expect(saved.placements[cell]).toBe(lessonId);
+    for (const [cell, lessonId] of Object.entries(activePlacements(world.state))) {
+      expect(activePlacements(saved)[cell]).toBe(lessonId);
     }
     // The one in the closed hour is still there and Kontrol counts it.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();

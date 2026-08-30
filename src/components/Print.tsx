@@ -20,6 +20,7 @@ import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints'
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
+import { activePlacements } from '../programs';
 import type { Scope } from '../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
 import type { PrintOptions } from '../printOptions';
@@ -155,7 +156,7 @@ function cellSpan(
   longBreakAfter: number,
 ): number {
   if (classId === '') return 1;
-  const here = state.placements[placementKey(classId, day, hour)];
+  const here = activePlacements(state)[placementKey(classId, day, hour)];
   if (here === undefined) return 1;
 
   const head = spans.get(placementKey(classId, day, hour));
@@ -176,7 +177,7 @@ function blockTail(
   hour: number,
   longBreakAfter: number,
 ): number {
-  const id = state.placements[placementKey(classId, day, hour)];
+  const id = activePlacements(state)[placementKey(classId, day, hour)];
   let start = hour;
   while (start > 0 && spans.get(placementKey(classId, day, start)) === undefined) start--;
   const size = spans.get(placementKey(classId, day, start)) ?? 1;
@@ -285,17 +286,17 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
   //
   // Both sets are built in ONE pass over the placements: asking "does this
   // teacher have anything" per teacher would walk 1800 placements 25 times.
-  const placedHours = Object.keys(state.placements).length;
+  const placedHours = Object.keys(activePlacements(state)).length;
   const { busyClasses, busyTeachers } = useMemo(() => {
     const classes = new Set<string>();
     const teachers = new Set<string>();
-    for (const [key, lessonId] of Object.entries(state.placements)) {
+    for (const [key, lessonId] of Object.entries(activePlacements(state))) {
       classes.add(key.slice(0, key.indexOf('|')));
       const lesson = ix.lessonById.get(lessonId);
       if (lesson !== undefined) teachers.add(lesson.teacherId);
     }
     return { busyClasses: classes, busyTeachers: teachers };
-  }, [state.placements, ix]);
+  }, [state, ix]);
 
   const emptyPages =
     chosenClasses.filter((c) => !busyClasses.has(c.id)).length +
@@ -351,7 +352,9 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     // The preview takes the room it needs; the choices stand BESIDE it instead
     // of pushing twenty pages of preview a screen down. When printing, `.cols`
     // collapses to a block and the whole control panel is `.no-print` anyway.
-    <div className="cols">
+    // `print-cols`: this screen's rail is wider than the other six, because
+    // this screen is the one with room to spare beside a fixed-size sheet.
+    <div className="cols print-cols">
       <div className="print-area" data-per={options.perSheet} data-size={options.size}>
         {sheets(
           [
@@ -386,7 +389,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                           distance, and abbreviations belong to narrow screens. */}
                       <th className="p-daycol">{dayLabel(day.name)}</th>
                       {state.settings.hours.map((_, s) => {
-                        const lessonId = state.placements[placementKey(group.id, g, s)];
+                        const lessonId = activePlacements(state)[placementKey(group.id, g, s)];
                         // A block is ONE cell on paper too — "çıktıda da blok
                         // dersler birlikte gözükmeli programdaki gibi birleşik
                         // görünsünler". `cellSpan` returns 0 for the hours a
@@ -543,7 +546,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
         <div className="panel no-print">
           <h2>{t('Çıktı')}</h2>
           <p className="hint">
-            <T k="Her sınıf ve her öğretmen ayrı sayfaya basılır (**A4 yatay**). Yazdırma penceresinde **kenar boşlukları: varsayılan** ve **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz. Tarih ve dosya adı kâğıda çıkmaz; yine de görürseniz **üstbilgi ve altbilgi** kutusunun işaretini kaldırın." />
+            <T k="Yazdırma penceresinde **arka plan grafikleri: açık** olsun, yoksa renkler çıkmaz." />
           </p>
           {/* "Ne basılsın" and "Renkli bas" moved to the tool strip; the
               button stayed, because the page COUNT comes from the tick lists
@@ -586,9 +589,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
         <div className="panel no-print">
           <h2>{t('Sayfa düzeni')}</h2>
           <p className="hint">
-            {t(
-              'Bir A4 yatay kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun. Ekrandaki yazı büyüklüğü kâğıdı etkilemez, bu ayrı bir ayardır.',
-            )}
+            {t('Bir A4 kâğıda kaç program bassın, ve kâğıttaki yazı ne kadar büyük olsun.')}
           </p>
 
           <h3>{t('Bir kâğıda kaç program')}</h3>
@@ -633,9 +634,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
         <div className="panel no-print">
           <h2>{t('Sayfada ne olsun')}</h2>
           <p className="hint">
-            {t(
-              'İşareti kaldırılan şey kâğıda basılmaz. Seçiminiz bu bilgisayarda hatırlanır; yedeğe girmez.',
-            )}
+            {t('İşareti kaldırılan şey kâğıda basılmaz.')}
           </p>
           <div className="form-col">
             {PRINT_OPTION_LABELS.map((x) => (

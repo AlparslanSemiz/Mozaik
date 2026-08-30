@@ -73,6 +73,72 @@ test.describe('80. Ekranda okunan metin', () => {
     expect(tekil, `uzun çizgi taşıyan ${tekil.length} satır:\n${tekil.join('\n')}`).toEqual([]);
   });
 
+
+  // 2026-08-30: "çok fazla info var ve çok uzunlar her yerde, infoları
+  // olabildiğince anlaşılır kısa ve öz yap."
+  //
+  // The rule that came out of it is one sentence, and a rule with no test is a
+  // wish (pitfall 77): a `.hint` says ONE thing, and what does not fit goes to
+  // the element's `title`, where it is looked for instead of read past.
+  //
+  // The ceiling is MEASURED, not chosen. After the pass the longest static
+  // hint on any screen was 126 characters — the line carrying the site's
+  // address, which cannot be shortened without dropping the address — and the
+  // next was 122. 140 leaves both of them room to be reworded and still turns
+  // red at the paragraph this replaced: five of them were over 260, and the
+  // teacher form's ran to 438.
+  //
+  // `.data-hint` is excluded and marked at the source, because what makes
+  // those long is the SCHOOL rather than the prose: they name every unused
+  // subject, every teacher with no lessons. A ceiling that counted them would
+  // be a ceiling on how many subjects a school may leave unused.
+  test('hiçbir açıklama satırı bir paragrafa dönüşmüyor', async ({ page }) => {
+    await openWithSample(page);
+
+    const TAVAN = 140;
+    const uzun: string[] = [];
+    const bak = async (nerede: string) => {
+      const satirlar = await page.evaluate(() =>
+        [...document.querySelectorAll('p.hint:not(.data-hint)')]
+          .map((p) => (p as HTMLElement).innerText.split(/\s+/).join(' ').trim())
+          .filter((s) => s.length > 0),
+      );
+      for (const s of satirlar) {
+        if (s.length > TAVAN) uzun.push(`${nerede} [${s.length}]: ${s}`);
+      }
+    };
+
+    for (const sekme of SEKMELER) {
+      await page.getByRole('button', { name: sekme, exact: true }).click();
+      await bak(sekme);
+
+      if (sekme === 'Okul') {
+        for (const adim of ADIMLAR) {
+          await page.locator('.ribbon .step', { hasText: adim }).click();
+          await bak(`Okul → ${adim}`);
+        }
+      }
+      if (sekme === 'Dersler') {
+        for (const mod of DERS_MODLARI) {
+          await page.getByRole('button', { name: mod, exact: true }).click();
+          await bak(`Dersler → ${mod}`);
+        }
+      }
+      if (sekme === 'Ayarlar') {
+        for (const bolum of BOLUMLER) {
+          await page.locator('.ribbon .btn', { hasText: bolum }).first().click();
+          await bak(`Ayarlar → ${bolum}`);
+        }
+      }
+    }
+
+    const tekil = [...new Set(uzun)];
+    expect(
+      tekil,
+      `${TAVAN} karakteri geçen ${tekil.length} açıklama:\n${tekil.join('\n')}`,
+    ).toEqual([]);
+  });
+
   test('ayraç ve boş değer İŞARETLERİ hâlâ yerinde', async ({ page }) => {
     // The other half, and it is the half that keeps this from being satisfied
     // by deleting text. "MÇ · Mehmet Çelik" still says two things; "MÇ Mehmet

@@ -3,7 +3,15 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { openWithSample, openSetup, openSettings, loadWorld } from './helpers';
+import {
+  openWithSample,
+  openSetup,
+  openSettings,
+  loadWorld,
+  chooseScale,
+  revealRibbon,
+  settledMotion as settled,
+} from './helpers';
 
 // The request: "Çıktıda da blok dersler birlikte gözükmeli programdaki gibi
 // birleşik görünsünler." Paper drew one <td> per hour, so a two-hour block
@@ -899,4 +907,77 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
       expect(count, `per=${per}: PDF ${count} sayfa, beklenen ${sheets}`).toBe(sheets);
     }
   });
+});// 84. Çıktının sağ rayı — ÜÇ kaydırıcı BİRE indi.
+//
+// "Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz zor
+//  o sebeple ya yatay şekilde ya sağa sola ya da biraz daha geniş şekilde
+//  yapabiliriz aslında çünkü çıktı kısmında bayağı boşluk var."
+//
+// Measured before the change, sample school, "İkisi de" selected:
+//
+//   %100  kaydırıcı 3 (ray 728px + iki `.pick-items` 22/74px) · ray 310px
+//         kâğıdın yanındaki boş yer 433px
+//   %150  kaydırıcı 3 (ray 1373px + iki 117px)                · ray 462px
+//         boş yer 256px
+//
+// The room really was there, and the two tick lists were reading twenty-five
+// names through a 168px window inside a column that also scrolled. The 168 was
+// a raw pixel as well, so the larger the reader set the scale the FEWER names
+// that window held.
+test.describe('84. Çıktının sağ rayı', () => {
+  const scope = (page: import('@playwright/test').Page, name: string) =>
+    page.getByRole('button', { name, exact: true }).click();
+
+  for (const pct of [100, 150]) {
+    test(`%${pct}: rayda TEK kaydırıcı var ve kâğıt hâlâ sığıyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
+      await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+      await revealRibbon(page);
+      // Both lists: one scope draws one list, and the complaint was about two.
+      await scope(page, 'İkisi de');
+      await settled(page);
+
+      const m = await page.evaluate(() => {
+        const aside = document.querySelector('.cols > aside') as HTMLElement;
+        const boxes = [aside, ...aside.querySelectorAll<HTMLElement>('*')];
+        const area = document.querySelector('.print-area') as HTMLElement;
+        const sheet = document.querySelector('.print-sheet') as HTMLElement;
+        const lists = [...aside.querySelectorAll<HTMLElement>('.pick-list')];
+        return {
+          scrollers: boxes
+            .filter((e) => e.scrollHeight > e.clientHeight + 1)
+            .map((e) => `${e.className || e.tagName}+${e.scrollHeight - e.clientHeight}`),
+          listCount: lists.length,
+          tops: lists.map((e) => Math.round(e.getBoundingClientRect().top)),
+          margin: Math.round(
+            area.getBoundingClientRect().width - sheet.getBoundingClientRect().width,
+          ),
+          bodyOver: document.body.scrollWidth - document.body.clientWidth,
+        };
+      });
+
+      // The guard: two lists, or there is nothing here to have been hard.
+      expect(m.listCount, 'iki liste yok, ölçülecek bir şey yok').toBe(2);
+      // ONE box gives ground, and it is the rail — the box `100cqh` already
+      // bounds. Not the lists inside it, and not both at once.
+      expect(m.scrollers, `rayda ${m.scrollers.length} kaydırıcı`).toHaveLength(1);
+      expect(m.scrollers[0]).toBe('ASIDE+' + m.scrollers[0]!.split('+')[1]);
+      // The room came from beside the paper, and the paper has to keep some.
+      // The sheet is 297mm fixed; the preview column must stay wider than it.
+      expect(m.margin, `kâğıdın yanında ${m.margin}px kaldı`).toBeGreaterThan(60);
+      expect(m.bodyOver, 'sayfa yatay taşıyor').toBeLessThanOrEqual(1);
+
+      // AND THE TWO LISTS STAND SIDE BY SIDE AT 100%, which is what the wider
+      // rail bought. At 150% they do not fit beside each other and `auto-fit`
+      // stacks them — that is a measurement, not a fallback nobody looked at:
+      // two 16rem columns and a 19.5px gap want 643px of a 532px box.
+      if (pct === 100) {
+        expect(m.tops[0], `yan yana değiller: ${JSON.stringify(m.tops)}`).toBe(m.tops[1]);
+      } else {
+        expect(m.tops[0]).not.toBe(m.tops[1]);
+      }
+    });
+  }
 });
+

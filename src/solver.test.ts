@@ -49,8 +49,8 @@ function build(): State {
       { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, blocks: [2], second: false, maxPerDay: null },
     ],
     unavailable: {},
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -80,7 +80,7 @@ function expectLegal(d: State) {
 }
 
 function placedHours(d: State): number {
-  return Object.keys(d.placements).length;
+  return Object.keys(activeProgram(d).placements).length;
 }
 
 describe('solve — küçük dünya', () => {
@@ -95,8 +95,8 @@ describe('solve — küçük dünya', () => {
   it('aynı girdi aynı çıktıyı veriyor — rastgelelik yok', () => {
     const a = solve(build());
     const b = solve(build());
-    expect(Object.keys(a.state.placements).sort()).toEqual(Object.keys(b.state.placements).sort());
-    expect(a.state.placements).toEqual(b.state.placements);
+    expect(Object.keys(activeProgram(a.state).placements).sort()).toEqual(Object.keys(activeProgram(b.state).placements).sort());
+    expect(activeProgram(a.state).placements).toEqual(activeProgram(b.state).placements);
   });
 
   it('kapalı saate hiç yerleştirmiyor', () => {
@@ -116,8 +116,8 @@ describe('solve — küçük dünya', () => {
     const result = solve(build());
     const block = blocksOf(result.state).find((b) => b.lessonId === 'x3')!;
     expect(block.hour + 2).toBeLessThanOrEqual(4);
-    expect(result.state.placements[placementKey('s433', block.day, block.hour)]).toBe('x3');
-    expect(result.state.placements[placementKey('s433', block.day, block.hour + 1)]).toBe('x3');
+    expect(activeProgram(result.state).placements[placementKey('s433', block.day, block.hour)]).toBe('x3');
+    expect(activeProgram(result.state).placements[placementKey('s433', block.day, block.hour + 1)]).toBe('x3');
   });
 
   it('dersi haftaya yayıyor, tek güne yığmıyor', () => {
@@ -144,7 +144,7 @@ describe('solve — küçük dünya', () => {
     const result = solve(d);
     expect(result.phase).toBe('solved');
     const days = new Set(
-      Object.keys(result.state.placements).map((k) => k.split('|')[1]),
+      Object.keys(activeProgram(result.state).placements).map((k) => k.split('|')[1]),
     );
     expect(days.size).toBe(3);
   });
@@ -154,15 +154,15 @@ describe('solve — yerleşmişleri koruma', () => {
   it('keepPlaced: yerleşmiş blok olduğu yerde kalıyor', () => {
     const d = place(build(), 'x1', 1, 3);
     const result = solve(d, { keepPlaced: true });
-    expect(result.state.placements[placementKey('s510', 1, 3)]).toBe('x1');
+    expect(activeProgram(result.state).placements[placementKey('s510', 1, 3)]).toBe('x1');
     expectLegal(result.state);
   });
 
   it('keepPlaced: kalan saatler kadar ekliyor, fazlasını değil', () => {
     const d = place(build(), 'x1', 1, 3); // 1 of x1's 3 hours already down
     const result = solve(d, { keepPlaced: true });
-    const x1 = Object.keys(result.state.placements).filter(
-      (k) => result.state.placements[k] === 'x1',
+    const x1 = Object.keys(activeProgram(result.state).placements).filter(
+      (k) => activeProgram(result.state).placements[k] === 'x1',
     );
     expect(x1).toHaveLength(3);
   });
@@ -182,7 +182,7 @@ describe('solve — yerleşmişleri koruma', () => {
     let d = place(build(), 'x1', 1, 3);
     d = setBlockPinned(d, 's510', 1, 3, true);
     const result = solve(d, { keepPlaced: false });
-    expect(result.state.placements[placementKey('s510', 1, 3)]).toBe('x1');
+    expect(activeProgram(result.state).placements[placementKey('s510', 1, 3)]).toBe('x1');
     // ...and the rest is still laid out from scratch around it.
     expect(placedHours(result.state)).toBe(7);
     expectLegal(result.state);
@@ -192,8 +192,8 @@ describe('solve — yerleşmişleri koruma', () => {
     let d = place(build(), 'x1', 1, 3);
     d = setBlockPinned(d, 's510', 1, 3, true);
     const result = solve(d, { keepPlaced: false });
-    const x1 = Object.keys(result.state.placements).filter(
-      (k) => result.state.placements[k] === 'x1',
+    const x1 = Object.keys(activeProgram(result.state).placements).filter(
+      (k) => activeProgram(result.state).placements[k] === 'x1',
     );
     // x1 wants 3 hours and one of them is already down and locked.
     expect(x1).toHaveLength(3);
@@ -204,14 +204,14 @@ describe('solve — yerleşmişleri koruma', () => {
     const result = solve(d, { keepPlaced: false });
     // Not an assertion about where it lands, only that the pin is what saved
     // the cell in the test above and not some accident of the search order.
-    expect(Object.keys(result.state.placements)).not.toEqual(Object.keys(d.placements));
+    expect(Object.keys(activeProgram(result.state).placements)).not.toEqual(Object.keys(activeProgram(d).placements));
   });
 
   it('kapalı saatte kalmış dersi silmiyor (ilke 6)', () => {
     let d = place(build(), 'x1', 0, 0);
     d = { ...d, unavailable: { ...d.unavailable, ['oMC|0|0']: 1 } };
     const result = solve(d, { keepPlaced: true });
-    expect(result.state.placements[placementKey('s510', 0, 0)]).toBe('x1');
+    expect(activeProgram(result.state).placements[placementKey('s510', 0, 0)]).toBe('x1');
   });
 });
 
@@ -244,8 +244,8 @@ describe('solve — tıkanma', () => {
     const d = build();
     d.lessons[2] = { ...d.lessons[2]!, weeklyHours: 3, blocks: [2] };
     const result = solve(d);
-    const x3 = Object.keys(result.state.placements).filter(
-      (k) => result.state.placements[k] === 'x3',
+    const x3 = Object.keys(activeProgram(result.state).placements).filter(
+      (k) => activeProgram(result.state).placements[k] === 'x3',
     );
     expect(x3).toHaveLength(3);
     expect(result.stuck.find((x) => x.lessonId === 'x3')).toBeUndefined();
@@ -348,7 +348,7 @@ describe('createSolver — dilimleme ve iptal', () => {
   });
 
   it('ders yoksa anında çözülmüş sayılıyor', () => {
-    const base: State = { ...build(), lessons: [], placements: {} };
+    const base: State = replaceActiveGrid({ ...build(), lessons: [] }, { placements: {} });
     const result = solve(base);
     expect(result.phase).toBe('solved');
     expect(result.state).toBe(base);
@@ -373,8 +373,8 @@ describe('solve — gerçek ölçek', () => {
     expect(result.placedBlocks).toBeGreaterThan(0);
     // Whatever it managed, it may never place MORE than was asked for.
     for (const lesson of base.lessons) {
-      const placed = Object.keys(result.state.placements).filter(
-        (k) => result.state.placements[k] === lesson.id,
+      const placed = Object.keys(activeProgram(result.state).placements).filter(
+        (k) => activeProgram(result.state).placements[k] === lesson.id,
       ).length;
       expect(placed).toBeLessThanOrEqual(lesson.weeklyHours);
     }
@@ -432,14 +432,14 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     ).toEqual([]);
 
     // 4. Every hand-placed block is exactly where it was left.
-    for (const [key, lessonId] of Object.entries(world.state.placements)) {
-      expect(first.state.placements[key], `${world.name}: ${key} kaydı`).toBe(lessonId);
+    for (const [key, lessonId] of Object.entries(activeProgram(world.state).placements)) {
+      expect(activeProgram(first.state).placements[key], `${world.name}: ${key} kaydı`).toBe(lessonId);
     }
   });
 
   it('aynı girdi aynı çıktıyı veriyor', () => {
     const second = solve(world.state, { budgetMs: 4_000 });
-    expect(second.state.placements).toEqual(first.state.placements);
+    expect(activeProgram(second.state).placements).toEqual(activeProgram(first.state).placements);
   });
 
   if (world.want.solved) {
@@ -477,3 +477,4 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     });
   }
 });
+import { activeProgram, blankProgram, replaceActiveGrid } from './programs';

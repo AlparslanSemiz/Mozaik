@@ -58,9 +58,22 @@ describe('normalizeSidebar', () => {
 
 describe('normalizeScale', () => {
   it('yasal değerleri aynen geçirir', () => {
-    for (const value of [1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5]) {
+    // The first four are BELOW 100% and they are the point of the list: the
+    // floor came down to 0.80 on 2026-08-30 and a range whose new half nobody
+    // names is a range whose new half nobody measures.
+    for (const value of [0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.4, 1.5]) {
       expect(normalizeScale(String(value))).toBe(value);
     }
+  });
+
+  // The floor and the default are two questions (the note in theme.ts says so)
+  // and since 2026-08-30 they are two ANSWERS. This is the assertion that keeps
+  // them apart: nobody's screen shrinks by arriving. It names neither number —
+  // if the floor moves again, what has to stay true is the gap.
+  it('TABAN varsayılanın ALTINDA — %80 gidilen bir yer, açılan değil', () => {
+    expect(SCALE_MIN).toBeLessThan(SCALE_DEFAULT);
+    expect(normalizeScale(null)).toBe(SCALE_DEFAULT);
+    expect(normalizeScale(String(SCALE_MIN))).toBe(SCALE_MIN);
   });
 
   it('aralık dışını sınıra çeker', () => {

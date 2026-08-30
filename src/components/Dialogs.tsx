@@ -45,13 +45,24 @@ export interface AlertOptions {
   closeLabel?: string;
 }
 
+export interface PromptOptions {
+  title: string;
+  body?: ReactNode;
+  defaultValue?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  inputLabel: string;
+}
+
 type Pending =
-  | { kind: 'confirm'; options: ConfirmOptions; settle: (ok: boolean) => void }
-  | { kind: 'alert'; options: AlertOptions; settle: (ok: boolean) => void };
+  | { kind: 'confirm'; options: ConfirmOptions }
+  | { kind: 'alert'; options: AlertOptions }
+  | { kind: 'prompt'; options: PromptOptions };
 
 interface Api {
   confirm: (options: ConfirmOptions) => Promise<boolean>;
   alert: (options: AlertOptions) => Promise<void>;
+  prompt: (options: PromptOptions) => Promise<string | null>;
 }
 
 const DialogContext = createContext<Api | null>(null);
@@ -65,31 +76,39 @@ export function useDialogs(): Api {
 export function DialogProvider({ children }: { children: ReactNode }) {
   const t = useT();
   const [pending, setPending] = useState<Pending | null>(null);
+  const [promptValue, setPromptValue] = useState('');
   // The resolver of the question currently on screen. It is a ref and not
   // state because closing has to settle the promise exactly once, from an
   // event handler that must not wait for a render (pitfall 20's family: a
   // value read inside a callback that runs later is a value that may be gone).
-  const settle = useRef<((ok: boolean) => void) | null>(null);
+  const settle = useRef<((answer: boolean | string | null) => void) | null>(null);
 
-  const ask = useCallback((next: Omit<Pending, 'settle'>) => {
+  const askBoolean = useCallback((next: Pending) => {
     return new Promise<boolean>((resolve) => {
-      settle.current = resolve;
-      setPending({ ...next, settle: resolve } as Pending);
+      settle.current = (answer) => resolve(answer === true);
+      setPending(next);
     });
   }, []);
 
   const api = useMemo<Api>(
     () => ({
-      confirm: (options) => ask({ kind: 'confirm', options }),
+      confirm: (options) => askBoolean({ kind: 'confirm', options }),
       alert: async (options) => {
-        await ask({ kind: 'alert', options });
+        await askBoolean({ kind: 'alert', options });
+      },
+      prompt: (options) => {
+        setPromptValue(options.defaultValue ?? '');
+        return new Promise<string | null>((resolve) => {
+          settle.current = (answer) => resolve(typeof answer === 'string' ? answer : null);
+          setPending({ kind: 'prompt', options });
+        });
       },
     }),
-    [ask],
+    [askBoolean],
   );
 
   /** One exit for every way out: the button, Escape, the backdrop. */
-  function close(answer: boolean) {
+  function close(answer: boolean | string | null) {
     const resolve = settle.current;
     settle.current = null;
     setPending(null);
@@ -108,7 +127,7 @@ export function DialogProvider({ children }: { children: ReactNode }) {
         onOpenChange={(open) => {
           // Escape and the backdrop both mean "no". For an alert there is only
           // one answer, so it does not matter which.
-          if (!open) close(false);
+          if (!open) close(pending?.kind === 'prompt' ? null : false);
         }}
       >
         <Dialog.Portal>
@@ -141,6 +160,22 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                   </Dialog.Description>
                 )}
 
+                {pending.kind === 'prompt' && (
+                  <input
+                    className="dlg-input"
+                    autoFocus
+                    aria-label={pending.options.inputLabel}
+                    value={promptValue}
+                    onChange={(event) => setPromptValue(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && promptValue.trim() !== '') {
+                        event.preventDefault();
+                        close(promptValue);
+                      }
+                    }}
+                  />
+                )}
+
                 <div className="dlg-actions">
                   {pending.kind === 'confirm' ? (
                     <>
@@ -156,6 +191,19 @@ export function DialogProvider({ children }: { children: ReactNode }) {
                         onClick={() => close(true)}
                       >
                         {pending.options.confirmLabel ?? 'Devam et'}
+                      </button>
+                    </>
+                  ) : pending.kind === 'prompt' ? (
+                    <>
+                      <button className="btn" onClick={() => close(null)}>
+                        {pending.options.cancelLabel ?? t('Vazgeç')}
+                      </button>
+                      <button
+                        className="btn primary"
+                        disabled={promptValue.trim() === ''}
+                        onClick={() => close(promptValue)}
+                      >
+                        {pending.options.confirmLabel ?? t('Kaydet')}
                       </button>
                     </>
                   ) : (

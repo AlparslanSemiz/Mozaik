@@ -81,7 +81,7 @@ export default function School({ state, change }: PanelProps) {
               if it belonged to neither. Every panel now reads
               heading, description, entry, list. */}
           <p className="hint">
-            <T k="Okul adı yazdırılan her sayfanın başlığında görünür. Altındaki listede ders yapılan günleri işaretleyin; her günün yanındaki kutu, **öğle arasının** kaçıncı dersten sonra verileceğini söyler. Bir günü kaldırırsanız o güne yerleşmiş dersler silinir; kalan günlerin programı yerinde durur." />
+            <T k="Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler." />
           </p>
 
           <div className="form-row">
@@ -154,9 +154,7 @@ export default function School({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Ders saatleri')}</h2>
           <p className="hint">
-            {t(
-              'Gün kaçta başlıyor, bir ders ve bir teneffüs kaç dakika. Saatler bunlardan hesaplanır, tek tek girmeye gerek yok. Aşağıdaki tablo anında güncellenir.',
-            )}
+            {t('Gün kaçta başlıyor, ders ve teneffüs kaç dakika. Saatler bunlardan hesaplanır.')}
           </p>
           <div className="form-row">
             <Field label={t('Günlük ders sayısı')}>
@@ -259,9 +257,7 @@ export default function School({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Zil saatleri')}</h2>
           <p className="hint">
-            {t(
-              'Soldaki başlangıç saatinden ve üç süreden hesaplanır, tek tek saklanmaz. Öğle arası hafta içi ve hafta sonu farklı derse denk geldiği için her desen kendi sütununda.',
-            )}
+            {t('Soldaki saatten ve üç süreden hesaplanır; her öğle arası deseni kendi sütununda.')}
           </p>
 
           {/* Twelve lessons and their breaks, and on a short window that is

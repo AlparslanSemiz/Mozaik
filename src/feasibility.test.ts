@@ -38,8 +38,8 @@ function build(): State {
     ],
     lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blocks: [], second: false, maxPerDay: null }],
     unavailable: {},
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -114,8 +114,8 @@ describe('buildReport — yerleşemeyenler', () => {
 
   it('tamamı yerleşmiş dersi yerleşemeyen saymaz', () => {
     const d = build();
-    d.placements['s510|0|0'] = 'x1';
-    d.placements['s510|0|1'] = 'x1';
+    activeProgram(d).placements['s510|0|0'] = 'x1';
+    activeProgram(d).placements['s510|0|1'] = 'x1';
     expect(buildReport(d).unplaceable).toHaveLength(0);
   });
 });
@@ -287,3 +287,4 @@ describe('health', () => {
     expect(h.warnings).toBeLessThan(10);
   });
 });
+import { activeProgram, blankProgram } from './programs';

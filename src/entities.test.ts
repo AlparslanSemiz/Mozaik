@@ -5,7 +5,7 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/PLAN.md 14).
 
-import { buildIndex, place, placementKey, teacherKey } from './constraints';
+import { buildIndex, place, placementKey, setBlockPinned, teacherKey } from './constraints';
 import { lessonSubject } from './subjects';
 import {
   addClass,
@@ -32,6 +32,7 @@ import {
   respreadColors,
   renameSubject,
   subjectKey,
+  moveLessonToClass,
   transferLesson,
   subjectOptions,
   subjectRank,
@@ -92,15 +93,16 @@ function build(): State {
       { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
     ],
     unavailable: { [teacherKey('oMC', 2, 3)]: 1 },
-    placements: {
-      [placementKey('s510', 0, 0)]: 'x1', // Pazartesi
-      [placementKey('s510', 1, 1)]: 'x1', // Salı
-      [placementKey('s510', 2, 2)]: 'x1', // Çarşamba
-    },
-    // One of the three is PINNED, so `remapDays` has something to carry: pins
-    // are keyed by day index exactly like placements, and a pin left behind
-    // would lock a cell the lesson had moved out of.
-    pinned: { [placementKey('s510', 1, 1)]: 1 },
+    programs: [{
+      ...blankProgram(),
+      placements: {
+        [placementKey('s510', 0, 0)]: 'x1', // Pazartesi
+        [placementKey('s510', 1, 1)]: 'x1', // Salı
+        [placementKey('s510', 2, 2)]: 'x1', // Çarşamba
+      },
+      pinned: { [placementKey('s510', 1, 1)]: 1 },
+    }],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -112,17 +114,17 @@ describe('remapDays', () => {
     const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
 
     // Salı was index 1, is now index 0 — and its lesson moved with it.
-    expect(next.placements[placementKey('s510', 0, 1)]).toBe('x1'); // Salı
-    expect(next.placements[placementKey('s510', 1, 2)]).toBe('x1'); // Çarşamba
-    expect(Object.keys(next.placements)).toHaveLength(2);
+    expect(activeProgram(next).placements[placementKey('s510', 0, 1)]).toBe('x1'); // Salı
+    expect(activeProgram(next).placements[placementKey('s510', 1, 2)]).toBe('x1'); // Çarşamba
+    expect(Object.keys(activeProgram(next).placements)).toHaveLength(2);
   });
 
   it('silinen günün dersleri gider', () => {
     const d = build();
     const next = remapDays(d, without(d.settings.days, 'Salı'));
-    expect(Object.keys(next.placements)).toHaveLength(2);
-    expect(next.placements[placementKey('s510', 0, 0)]).toBe('x1'); // Pazartesi stays put
-    expect(next.placements[placementKey('s510', 1, 2)]).toBe('x1'); // Çarşamba moved 2 -> 1
+    expect(Object.keys(activeProgram(next).placements)).toHaveLength(2);
+    expect(activeProgram(next).placements[placementKey('s510', 0, 0)]).toBe('x1'); // Pazartesi stays put
+    expect(activeProgram(next).placements[placementKey('s510', 1, 2)]).toBe('x1'); // Çarşamba moved 2 -> 1
   });
 
   // Pins carry a day INDEX exactly like the two maps around them. A pin left
@@ -132,16 +134,16 @@ describe('remapDays', () => {
     const d = build();
     const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
     // The pinned cell was Salı (index 1) and Salı is index 0 now.
-    expect(next.pinned[placementKey('s510', 0, 1)]).toBe(1);
-    expect(next.pinned[placementKey('s510', 1, 1)]).toBeUndefined();
+    expect(activeProgram(next).pinned[placementKey('s510', 0, 1)]).toBe(1);
+    expect(activeProgram(next).pinned[placementKey('s510', 1, 1)]).toBeUndefined();
     // ...and it still sits on top of the lesson it was pinning.
-    expect(next.placements[placementKey('s510', 0, 1)]).toBe('x1');
+    expect(activeProgram(next).placements[placementKey('s510', 0, 1)]).toBe('x1');
   });
 
   it('silinen günün SABİTLEMESİ de gider', () => {
     const d = build();
     const next = remapDays(d, without(d.settings.days, 'Salı'));
-    expect(next.pinned).toEqual({});
+    expect(activeProgram(next).pinned).toEqual({});
   });
 
   it('müsaitlik kayıtları da aynı şekilde taşınır', () => {
@@ -154,14 +156,14 @@ describe('remapDays', () => {
   it('gün eklenince mevcut günler yerinde kalır, yeni gün boş gelir', () => {
     const d = build();
     const next = remapDays(d, [...d.settings.days, makeDay('Perşembe')]);
-    expect(next.placements).toEqual(d.placements);
+    expect(activeProgram(next).placements).toEqual(activeProgram(d).placements);
   });
 
   it('gün BAŞA eklenince her şey bir sağa kayar', () => {
     const d = build();
     const next = remapDays(d, [makeDay('Pazar'), ...d.settings.days]);
-    expect(next.placements[placementKey('s510', 1, 0)]).toBe('x1');
-    expect(next.placements[placementKey('s510', 3, 2)]).toBe('x1');
+    expect(activeProgram(next).placements[placementKey('s510', 1, 0)]).toBe('x1');
+    expect(activeProgram(next).placements[placementKey('s510', 3, 2)]).toBe('x1');
   });
 
   it('sıra değişmediyse AYNI nesneyi döner (gereksiz çizim yok)', () => {
@@ -178,14 +180,14 @@ describe('updateSettings', () => {
     const d = build();
     const next = updateSettings(d, { days: without(d.settings.days, 'Pazartesi') });
     expect(next.settings.days.map((x) => x.name)).toEqual(['Salı', 'Çarşamba']);
-    expect(next.placements[placementKey('s510', 0, 1)]).toBe('x1');
+    expect(activeProgram(next).placements[placementKey('s510', 0, 1)]).toBe('x1');
   });
 
   it('saat sayısı düşünce taşan yerleşimler temizlenir', () => {
     const d = build();
     const next = updateSettings(d, { hours: ['1', '2'] });
-    expect(next.placements[placementKey('s510', 2, 2)]).toBeUndefined();
-    expect(next.placements[placementKey('s510', 1, 1)]).toBe('x1');
+    expect(activeProgram(next).placements[placementKey('s510', 2, 2)]).toBeUndefined();
+    expect(activeProgram(next).placements[placementKey('s510', 1, 1)]).toBe('x1');
   });
 
   it('dokunulmayan alanlar korunur', () => {
@@ -554,11 +556,11 @@ describe('transferLesson', () => {
 
     // Not one hour of the moved lesson is left on the grid...
     const moved = d.lessons[0]!.id;
-    expect(Object.values(state.placements).filter((x) => x === moved)).toHaveLength(0);
+    expect(Object.values(activeProgram(state).placements).filter((x) => x === moved)).toHaveLength(0);
     // ...and the receiving teacher is in exactly one place at a time.
     const ix = buildIndex(state);
     for (let h = 0; h < 2; h++) {
-      const at = Object.entries(state.placements).filter(([key]) => key.endsWith(`|0|${h}`));
+      const at = Object.entries(activeProgram(state).placements).filter(([key]) => key.endsWith(`|0|${h}`));
       const holders = at.map(([, id]) => state.lessons.find((x) => x.id === id)!.teacherId);
       expect(new Set(holders).size).toBe(holders.length);
     }
@@ -578,8 +580,8 @@ describe('transferLesson', () => {
 
     const { state, returned } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
     expect(returned).toBe(0);
-    expect(state.placements[placementKey(d.classes[0]!.id, 0, 0)]).toBe(d.lessons[0]!.id);
-    expect(state.placements[placementKey(d.classes[0]!.id, 1, 0)]).toBe(d.lessons[0]!.id);
+    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 0, 0)]).toBe(d.lessons[0]!.id);
+    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 1, 0)]).toBe(d.lessons[0]!.id);
   });
 
   // `second` points at one of the OLD teacher's two fields. Carried over
@@ -624,6 +626,111 @@ describe('transferLesson', () => {
   it('bilinmeyen ders ya da hoca hiçbir şeyi değiştirmiyor', () => {
     const d = twoClasses();
     expect(transferLesson(d, 'yok', d.teachers[0]!.id).state).toBe(d);
+  });
+});
+
+// The mirror of the block above, and it fails the other way round if written
+// naively: placements are keyed BY CLASS, so a plain `updateLesson(d, id,
+// { classId })` leaves every hour of the lesson in the OLD class's row.
+describe('moveLessonToClass', () => {
+  function school(): State {
+    let d = emptyState();
+    d = addRoom(d, 'A');
+    d = addRoom(d, 'B');
+    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addClass(d, '510', d.rooms[0]!.id);
+    d = addClass(d, '511', d.rooms[1]!.id);
+    return d;
+  }
+
+  function withLesson(hours = 2): State {
+    let d = school();
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: hours,
+      blocks: [],
+    });
+    return d;
+  }
+
+  it('dersi yeni sınıfa veriyor', () => {
+    const d = withLesson();
+    const { state } = moveLessonToClass(d, d.lessons[0]!.id, d.classes[1]!.id);
+    expect(state.lessons[0]!.classId).toBe(d.classes[1]!.id);
+  });
+
+  // THE reason this is not a plain field write. Every assertion here passes
+  // against `updateLesson(d, id, { classId })` except the last one, and the
+  // last one is the whole bug: the hours stay under a class that no longer has
+  // the lesson, and the class that does looks free.
+  it('SAATLER de taşınıyor — eski satırda tek hücre kalmıyor', () => {
+    let d = withLesson();
+    const id = d.lessons[0]!.id;
+    const from = d.classes[0]!.id;
+    const to = d.classes[1]!.id;
+    d = place(d, id, 0, 0, 1);
+    d = place(d, id, 0, 1, 1);
+
+    const { state, returned } = moveLessonToClass(d, id, to);
+    expect(returned).toBe(0);
+
+    const cells = activeProgram(state).placements;
+    expect(Object.keys(cells).filter((k) => k.startsWith(`${from}|`))).toEqual([]);
+    expect(cells[placementKey(to, 0, 0)]).toBe(id);
+    expect(cells[placementKey(to, 0, 1)]).toBe(id);
+  });
+
+  it('yeni sınıfın DOLU saati havuza dönüyor', () => {
+    let d = school();
+    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '' });
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    d = addLesson(d, {
+      classId: d.classes[1]!.id,
+      teacherId: d.teachers[1]!.id,
+      weeklyHours: 2,
+      blocks: [],
+    });
+    const moving = d.lessons[0]!.id;
+    // Both sit on Tuesday hours 0 and 1, each in its own class.
+    for (let h = 0; h < 2; h++) {
+      d = place(d, moving, 0, h, 1);
+      d = place(d, d.lessons[1]!.id, 0, h, 1);
+    }
+
+    const { state, returned } = moveLessonToClass(d, moving, d.classes[1]!.id);
+    // 511 is busy at both hours, so both blocks go back to the tray rather
+    // than overwriting somebody else's lesson.
+    expect(returned).toBe(2);
+    expect(Object.values(activeProgram(state).placements).filter((x) => x === moving)).toHaveLength(0);
+  });
+
+  // A pin is `classId|day|hour`. Left behind it would point at a square that
+  // now belongs to another class and lock a stranger's hour — and nothing on
+  // screen would say why that hour cannot be used.
+  it('SABİTLEMELER düşüyor ve sayılıyor', () => {
+    let d = withLesson();
+    const id = d.lessons[0]!.id;
+    d = place(d, id, 0, 0, 1);
+    d = setBlockPinned(d, d.classes[0]!.id, 0, 0, true);
+    expect(Object.keys(activeProgram(d).pinned)).toHaveLength(1);
+
+    const { state, unpinned } = moveLessonToClass(d, id, d.classes[1]!.id);
+    expect(unpinned).toBe(1);
+    expect(activeProgram(state).pinned).toEqual({});
+  });
+
+  it('bilinmeyen ders ya da sınıf hiçbir şeyi değiştirmiyor', () => {
+    const d = withLesson();
+    expect(moveLessonToClass(d, 'yok', d.classes[1]!.id).state).toBe(d);
+    expect(moveLessonToClass(d, d.lessons[0]!.id, 'yok').state).toBe(d);
+    // ...and neither does moving it where it already is.
+    expect(moveLessonToClass(d, d.lessons[0]!.id, d.classes[0]!.id).state).toBe(d);
   });
 });
 
@@ -1292,7 +1399,7 @@ describe('reorderList', () => {
 
     const moved = reorderList(d, 'teachers', 0, 1);
     expect(moved.teachers.map((t) => t.short)).toEqual(['DA', 'AV']);
-    expect(moved.placements).toEqual(d.placements);
+    expect(activeProgram(moved).placements).toEqual(activeProgram(d).placements);
     expect(moved.unavailable).toEqual(d.unavailable);
     expect(moved.lessons).toEqual(d.lessons);
     expect(moved.classes).toEqual(d.classes);
@@ -1301,3 +1408,4 @@ describe('reorderList', () => {
     expect(moved.teachers).toEqual([d.teachers[1], d.teachers[0]]);
   });
 });
+import { activeProgram, blankProgram } from './programs';

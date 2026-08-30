@@ -87,8 +87,8 @@ describe('gerçek ölçekte doldurma', () => {
     const seenRoom = new Set<string>();
     const ix = buildIndex(state);
 
-    for (const key in state.placements) {
-      const lessonId = state.placements[key]!;
+    for (const key in activeProgram(state).placements) {
+      const lessonId = activeProgram(state).placements[key]!;
       const [classId, day, hour] = key.split('|') as [string, string, string];
       const lesson = ix.lessonById.get(lessonId)!;
       expect(lesson.classId).toBe(classId);
@@ -132,3 +132,4 @@ describe('gerçek ölçekte doldurma', () => {
     expect(oneDrag).toBeLessThan(50);
   });
 });
+import { activeProgram } from './programs';

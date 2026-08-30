@@ -27,16 +27,25 @@ import { t } from './i18n';
 import type { Index, PlacedBlock } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
+import { activePinned, activePlacements, replaceActiveGrid } from './programs';
 import type { Id, Lesson, State } from './types';
+import { lessonExcluded } from './programMask';
+import type { SolverExclusions } from './programMask';
 
 export interface SolverOptions {
   /** Keep what is already on the grid and fill in around it (default true). */
   keepPlaced: boolean;
   /** How long the search may WORK, in milliseconds. Slices are summed. */
   budgetMs: number;
+  /** Session-only rows/days that this run must leave untouched. */
+  exclusions: SolverExclusions;
 }
 
-const DEFAULTS: SolverOptions = { keepPlaced: true, budgetMs: 15_000 };
+const DEFAULTS: SolverOptions = {
+  keepPlaced: true,
+  budgetMs: 15_000,
+  exclusions: { teacherIds: [], classIds: [], dayNames: [] },
+};
 
 /**
  * How many nodes may pass without the grid getting any better before the search
@@ -67,6 +76,7 @@ export interface SolverProgress {
   totalBlocks: number;
   nodes: number;
   elapsedMs: number;
+  excludedBlocks: number;
 }
 
 export interface SolverResult extends SolverProgress {
@@ -174,17 +184,36 @@ function warningsPossible(d: State): boolean {
 }
 
 /** Just the cells the reader pinned, with the lessons that are in them. */
-function pinnedPlacements(base: State): Record<string, Id> {
+function preservedPlacements(base: State, exclusions: SolverExclusions): Record<string, Id> {
   const out: Record<string, Id> = {};
-  for (const key in base.pinned) {
-    const lessonId = base.placements[key];
+  const placements = activePlacements(base);
+  for (const key in activePinned(base)) {
+    const lessonId = placements[key];
     if (lessonId !== undefined) out[key] = lessonId;
+  }
+  const excludedDays = new Set(exclusions.dayNames);
+  const lessons = new Map(base.lessons.map((lesson) => [lesson.id, lesson]));
+  for (const [key, lessonId] of Object.entries(placements)) {
+    const lesson = lessons.get(lessonId);
+    const day = Number(key.split('|')[1]);
+    const dayName = base.settings.days[day]?.name;
+    if (
+      lesson !== undefined &&
+      (lessonExcluded(lesson, exclusions) || (dayName !== undefined && excludedDays.has(dayName)))
+    ) {
+      out[key] = lessonId;
+    }
   }
   return out;
 }
 
 export function createSolver(base: State, options?: Partial<SolverOptions>): Solver {
   const opts: SolverOptions = { ...DEFAULTS, ...options };
+  const excludedDays = new Set(opts.exclusions.dayNames);
+  const isExcludedDay = (day: number) => {
+    const name = base.settings.days[day]?.name;
+    return name !== undefined && excludedDays.has(name);
+  };
 
   const dayCount = base.settings.days.length;
   const hourCount = base.settings.hours.length;
@@ -199,9 +228,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // pinned blocks as already down, and `retract()` only ever vacates a cell
   // this search itself filled.
   const placements: Record<string, Id> = opts.keepPlaced
-    ? { ...base.placements }
-    : pinnedPlacements(base);
-  const work: State = { ...base, placements };
+    ? { ...activePlacements(base) }
+    : preservedPlacements(base, opts.exclusions);
+  const work: State = replaceActiveGrid(base, { placements });
   let ix: Index = buildIndex(work);
 
   const wideWindow = rulesBite(base);
@@ -210,6 +239,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // ---- the items -----------------------------------------------------------
   const items: Item[] = [];
   for (const lesson of base.lessons) {
+    if (lessonExcluded(lesson, opts.exclusions)) continue;
     const already = ix.placedHours.get(lesson.id) ?? 0;
     const down = blocksOnGrid(work, lesson);
     // The blocks still owed, read off the grid rather than divided out of the
@@ -238,6 +268,10 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   }
 
   const totalBlocks = items.reduce((sum, x) => sum + x.need, 0);
+  const excludedBlocks = base.lessons.reduce((sum, lesson) => {
+    if (lessonExcluded(lesson, opts.exclusions)) return sum + pendingBlocks(base, lesson).length;
+    return sum + blocksOnGrid(base, lesson).filter((block) => isExcludedDay(block.day)).length;
+  }, 0);
 
   // Neighbours: an assignment can only ever narrow a lesson that shares a
   // teacher, a class or a room with it. ~25 of 99 lessons, not all of them.
@@ -264,6 +298,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     for (let cell = 0; cell < cellCount; cell++) {
       const day = Math.floor(cell / hourCount);
       const hour = cell % hourCount;
+      if (isExcludedDay(day)) continue;
       if (blocker(work, ix, item.lesson.id, day, hour, item.block) === null) {
         item.domain[cell] = 1;
         item.size++;
@@ -608,15 +643,17 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
 
   function report(phase: SolverPhase): SolverResult {
     const best = bestPlacements;
-    const changed = Object.keys(best).length !== Object.keys(base.placements).length ||
-      Object.keys(best).some((k) => base.placements[k] !== best[k]);
-    const state: State = changed ? { ...base, placements: best } : base;
+    const basePlacements = activePlacements(base);
+    const changed = Object.keys(best).length !== Object.keys(basePlacements).length ||
+      Object.keys(best).some((k) => basePlacements[k] !== best[k]);
+    const state: State = changed ? replaceActiveGrid(base, { placements: best }) : base;
 
     // The stuck report is read off the BEST assignment, not off wherever the
     // search stopped — that is the grid the user is about to look at.
     const finalIx = buildIndex(state);
     const stuck: StuckLesson[] = [];
     for (const lesson of base.lessons) {
+      if (lessonExcluded(lesson, opts.exclusions)) continue;
       const missing = lesson.weeklyHours - (finalIx.placedHours.get(lesson.id) ?? 0);
       if (missing <= 0) continue;
       // Which sentence tells the reader what to DO about it?
@@ -662,6 +699,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       totalBlocks,
       nodes,
       elapsedMs,
+      excludedBlocks,
       stuck,
     };
   }
@@ -747,7 +785,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     },
 
     progress(): SolverProgress {
-      return { placedBlocks, totalBlocks, nodes, elapsedMs };
+      return { placedBlocks, totalBlocks, nodes, elapsedMs, excludedBlocks };
     },
 
     cancel(): SolverResult {

@@ -13,6 +13,7 @@
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
 import { loadPlan } from '../store';
+import { blankProgram } from '../programs';
 import type { PlanControls } from './props';
 
 interface Props {
@@ -49,7 +50,11 @@ export default function DraftStart({ plans, label, notify }: Props) {
             }
             // The setup is copied and the GRID is not: a draft is a school
             // without a timetable, which is the whole reason to keep one.
-            plans.createPlan(t('{ad} kopyası', { ad: d.name }), { ...seed, placements: {} });
+            plans.createPlan(t('{ad} kopyası', { ad: d.name }), {
+              ...seed,
+              programs: [blankProgram()],
+              activeProgramId: 'program-1',
+            });
             notify?.(t('"{ad}" taslağından yeni bir plan açıldı.', { ad: d.name }));
           }}
         >

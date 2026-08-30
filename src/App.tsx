@@ -47,6 +47,8 @@ import Print, { NOTHING_EXCLUDED } from './components/Print';
 import { readPrintOptions, writePrintOptions } from './printOptions';
 import type { PrintOptions } from './printOptions';
 import type { Excluded } from './components/Print';
+import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './programMask';
+import type { ProgramMask } from './programMask';
 import Settings from './components/settings';
 
 
@@ -337,7 +339,7 @@ function BrandMark() {
 
 export default function App() {
   const t = useT();
-  const { state, change, undo, redo, loadState, canUndo, canRedo, plans, park } = useStore();
+  const { state, change, manageProgram, undo, redo, loadState, canUndo, canRedo, plans, park } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -439,6 +441,23 @@ export default function App() {
   // lists — Print unmounts on every tab change — but unlike them it is
   // remembered between sessions: it is set once a term, not once a printout.
   const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
+  // Temporary row/day visibility is a view of one PLAN, not backup data. It
+  // follows alternative programs because they share the same school entities,
+  // survives tab switches, and disappears with the browser session.
+  const [programMasks, setProgramMasks] = useState<Record<string, ProgramMask>>({});
+  const programMask = useMemo(
+    () => cleanMask(programMasks[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
+    [programMasks, plans.planId, state],
+  );
+  const setProgramMask = useCallback(
+    (apply: (mask: ProgramMask) => ProgramMask) => {
+      setProgramMasks((all) => ({
+        ...all,
+        [plans.planId]: apply(cleanMask(all[plans.planId] ?? EMPTY_PROGRAM_MASK, state)),
+      }));
+    },
+    [plans.planId, state],
+  );
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
@@ -513,7 +532,7 @@ export default function App() {
         hint: t('Program'),
         run: () => {
           goTab('program');
-          solver.start(state, { keepPlaced: true });
+          solver.start(state, { keepPlaced: true, exclusions: solverExclusions(programMask) });
         },
       },
       {
@@ -533,7 +552,7 @@ export default function App() {
         run: toggleMotion,
       },
     ],
-    [state, theme, ribbon, motion, solver, goTab, notify, t],
+    [state, theme, ribbon, motion, solver, goTab, notify, t, programMask],
   );
 
   function toggleRibbon() {
@@ -843,11 +862,17 @@ export default function App() {
         open={ribbon}
         state={state}
         change={change}
+        manageProgram={manageProgram}
         solver={solver}
+        programMask={programMask}
+        setProgramMask={setProgramMask}
         density={density}
         setDensity={setDensity}
         availClock={availClock}
         setAvailClock={setAvailClock}
+        theme={theme}
+        setTheme={setTheme}
+        planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
       />
 
       <InspectorProvider state={state} change={change}>
@@ -988,6 +1013,12 @@ export default function App() {
               change={change}
               solver={solver}
               view={ui.view}
+              mask={programMask}
+              setMask={setProgramMask}
+              poolSort={ui.poolSort}
+              setPoolSort={ui.setPoolSort}
+              poolFilter={ui.poolFilter}
+              setPoolFilter={ui.setPoolFilter}
             />
           )}
           {tab === 'check' && <Check state={state} view={ui.checkView} />}

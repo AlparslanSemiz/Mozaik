@@ -192,6 +192,6 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
 
     const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
     await expect(panel).toContainText('MÇ Salı 1 saatinde müsait değil');
-    await expect(panel).toContainText('Hiçbiri silinmedi');
+    await expect(panel).toContainText('hiçbiri silinmedi');
   });
 });

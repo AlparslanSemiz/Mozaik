@@ -16,7 +16,7 @@
 #
 # ARTI BİR DÖRDÜNCÜ, ve o bir program değil bir CÜMLE: `surum.json`. Exe'nin
 # "yeni sürüm var mı" diye sorduğu tek yer burasıdır
-# (`src-tauri/src/update.rs`). `yayinla` işinde üretilir, çünkü içindeki
+# (`src-tauri/src/update.rs`). `publish` işinde üretilir, çünkü içindeki
 # `boyut` alanı ancak exe gerçekten derlendikten sonra bilinir; ve numarası
 # ETİKETLE `package.json`'ın aynı olduğu doğrulanmadan yazılmaz. İkisi
 # ayrışırsa exe kurulduktan sonra da kendini güncel saymaz ve aynı
@@ -27,7 +27,7 @@
 # kodlanıyor. Babanın ekranda gördüğü ad zaten dosya adı değil — pencere
 # başlığı da, kısayol adı da uygulamanın kendisinden geliyor.
 
-name: sürüm
+name: release
 
 on:
   # Bir etiket itilince YAYINLAR.
@@ -35,14 +35,16 @@ on:
     tags: ['v*']
   # Elle koşturunca varsayılan olarak yalnız DERLER — üçü de artefakt olarak
   # iner, hiçbir şey yayınlanmaz. "Bir kez deneyelim" için olan yol budur.
+  # The input NAMES are English because they are what the Actions UI shows;
+  # everything else in this file is a comment for me.
   workflow_dispatch:
     inputs:
-      yayinla:
-        description: 'Sürüm olarak yayınla (etiket adı gerekir)'
+      publish:
+        description: 'Publish as a release (needs a tag name)'
         type: boolean
         default: false
-      etiket:
-        description: 'Etiket adı, örn. v1.1.0 — yalnız yayınlarken'
+      tag:
+        description: 'Tag name, e.g. v1.1.0 — only when publishing'
         type: string
         default: ''
 
@@ -50,8 +52,8 @@ permissions:
   contents: write
 
 jobs:
-  # -------------------------------------------------------------- 1 · paket
-  paket:
+  # ------------------------------------------------------------ 1 · package
+  package:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +72,7 @@ jobs:
       # Satır sonları ve BOM burada ölçülür, Windows'ta değil: bir Linux
       # checkout'unda `* text=auto` bunlara LF verebilir ve Notepad OKU.txt'yi
       # tek satır gösterir. paket.mjs düzeltiyor — düzelttiği KANITLANIYOR.
-      - name: kurulum klasörü Windows'un okuyacağı hâlde mi
+      - name: Is the install folder in the shape Windows will read
         run: |
           set -o pipefail
           # `od` ile, `grep` ile DEĞİL: UTF-8 bir yerelde grep aynı üç baytı
@@ -91,7 +93,7 @@ jobs:
           fi
           echo "BOM · CRLF · ASCII: üçü de doğru"
 
-      - name: adlandır ve sıkıştır
+      - name: Name and zip
         run: |
           mkdir -p teslim
           cp dist/index.html "teslim/Mozaik.html"
@@ -100,7 +102,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: paket
+          name: package
           path: teslim/*
           if-no-files-found: error
 
@@ -130,7 +132,7 @@ jobs:
 
       - run: npx --yes @tauri-apps/cli@^2 build --no-bundle
 
-      - name: adlandır ve boyutunu ÖLÇ
+      - name: Name it and MEASURE its size
         shell: pwsh
         run: |
           $exe = "src-tauri/target/release/ders-programi.exe"
@@ -143,23 +145,36 @@ jobs:
           New-Item -ItemType Directory -Force -Path teslim | Out-Null
           Copy-Item $exe "teslim/Mozaik.exe"
 
+      # WHAT IS ACTUALLY IN THE BINARY, and this step exists because a sentence
+      # in STATUS.md said it was ASSUMED. `bundle.icon` is supposed to embed
+      # kurulum/icon.ico even under `--no-bundle`, and my father's "the taskbar
+      # icon looks like 9x9 pixels" was read as evidence that it does not. It
+      # does — measured on the published 2.0.0 binary: nine RT_ICON entries,
+      # sizes byte-identical to the .ico. The cause was the drawing, and it was
+      # fixed by moving the simplified-mark threshold.
+      #
+      # The gate stays because the assumption is what cost the time (pitfall
+      # 65): if a Tauri upgrade ever stops embedding the icon, this turns red
+      # in a build instead of turning up in a complaint six months later.
+      - name: Are the icon and the version info REALLY embedded
+        run: node scripts/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
       - uses: actions/upload-artifact@v4
         with:
           name: exe
           path: teslim/*
           if-no-files-found: error
 
-  # ------------------------------------------------------------- 3 · yayınla
-  yayinla:
-    needs: [paket, exe]
+  # ------------------------------------------------------------- 3 · publish
+  publish:
+    needs: [package, exe]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || inputs.yayinla
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: indirilen
 
-      - name: üç varlık da geldi mi
+      - name: Did all three assets arrive
         run: |
           mkdir -p teslim && find indirilen -type f -exec mv {} teslim/ \;
           ls -l teslim
@@ -181,9 +196,9 @@ jobs:
       # `__SURUM__` odur (scripts/surum.mjs), yani exe kendini o numarayla
       # tanıtır. Etiket ondan başkaysa iş burada durur — yayınlanmış ama
       # kendini asla güncel sayamayan bir exe, hiç yayınlamamaktan kötüdür.
-      - name: surum.json üret
+      - name: Build surum.json
         env:
-          ETIKET: ${{ inputs.etiket || github.ref_name }}
+          ETIKET: ${{ inputs.tag || github.ref_name }}
         run: |
           set -o pipefail
           surum=$(node -p "require('./depo/package.json').version")
@@ -205,11 +220,24 @@ jobs:
           " "$surum" "$adres" "$boyut"
           cat teslim/surum.json
 
-      - name: sürümü yayınla
+      # WHAT WAS DOWNLOADED, in a form somebody can check. The .exe is unsigned
+      # and always will be — a certificate costs money and the answer to that
+      # was no — so "is this the file they published" has no answer from
+      # Windows. It has one from a hash: `Get-FileHash Mozaik.exe` beside the
+      # line in this file. It does not stop SmartScreen and is not meant to;
+      # it is the one thing that can be offered in place of a signature.
+      - name: Build SHA256SUMS.txt
+        run: |
+          set -o pipefail
+          cd teslim
+          sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe surum.json > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           # Elle koşuda etiket girdiden gelir; itilmiş bir etikette ref'ten.
-          ETIKET: ${{ inputs.etiket || github.ref_name }}
+          ETIKET: ${{ inputs.tag || github.ref_name }}
         run: |
           set -o pipefail
           if [ -z "$ETIKET" ]; then echo "etiket adı boş" >&2; exit 1; fi
@@ -225,4 +253,5 @@ jobs:
             teslim/Mozaik.html \
             teslim/Mozaik-Windows-kurulum.zip \
             teslim/Mozaik.exe \
-            teslim/surum.json
+            teslim/surum.json \
+            teslim/SHA256SUMS.txt

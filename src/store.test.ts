@@ -77,15 +77,15 @@ describe('parseState — v1 göçü', () => {
     ]);
     // The ids never changed, so the keys carry over untouched.
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
-    expect(d.placements).toEqual({ 's510|0|0': 'x1', 's510|0|1': 'x1' });
+    expect(activeProgram(d).placements).toEqual({ 's510|0|0': 'x1', 's510|0|1': 'x1' });
   });
 
   it('v1 yedeğinde de temizleme çalışır (taşan yerleşim atılır)', () => {
     const raw = legacyV1();
     raw.yerlesim['s510|0|9'] = 'x1'; // day has only 4 hours
     const d = parseState(JSON.stringify(raw))!;
-    expect(d.placements['s510|0|9']).toBeUndefined();
-    expect(d.placements['s510|0|0']).toBe('x1');
+    expect(activeProgram(d).placements['s510|0|9']).toBeUndefined();
+    expect(activeProgram(d).placements['s510|0|0']).toBe('x1');
   });
 });
 
@@ -101,7 +101,7 @@ describe('parseState — v2 göçü', () => {
 
   it('dizilmiş program birebir korunur — 2 saatlik blok yerinde kalır', () => {
     const d = parseState(JSON.stringify(legacyV2()))!;
-    expect(d.placements).toEqual({ 's510|0|0': 'x1', 's510|0|1': 'x1' });
+    expect(activeProgram(d).placements).toEqual({ 's510|0|0': 'x1', 's510|0|1': 'x1' });
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
   });
 
@@ -159,7 +159,7 @@ describe('parseState — v4', () => {
     expect(d.settings.hours).toHaveLength(12);
     expect(d.settings.rules.minPerDay).toBe('warn');
     expect(d.teachers).toEqual([]);
-    expect(d.placements).toEqual({});
+    expect(activeProgram(d).placements).toEqual({});
   });
 
   it('bozuk kural/limit değerlerini varsayılana çevirir', () => {
@@ -276,7 +276,7 @@ describe('parseState — v3 → v4 göçü', () => {
     expect(migrated.settings.bell).toEqual(original.settings.bell);
     expect(migrated.settings.rules).toEqual(original.settings.rules);
     // the keys that hold the laid-out timetable
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
   });
 
@@ -347,7 +347,7 @@ describe('parseState — v4 → v5 göçü', () => {
     expect(migrated.lessons).toEqual(original.lessons);
     expect(migrated.settings.days).toEqual(original.settings.days);
     expect(migrated.settings.bell).toEqual(original.settings.bell);
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
     // names and rooms survive; only the colour is new
     expect(migrated.classes.map((c) => c.name)).toEqual(original.classes.map((c) => c.name));
@@ -411,7 +411,7 @@ describe('parseState — v5 → v6 göçü', () => {
     expect(migrated.classes).toEqual(original.classes);
     expect(migrated.lessons).toEqual(original.lessons);
     expect(migrated.settings).toEqual(original.settings);
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
     // Order is the feature now, so it is asserted rather than assumed.
     expect(migrated.teachers.map((t) => t.id)).toEqual(original.teachers.map((t) => t.id));
@@ -472,7 +472,7 @@ describe('parseState — v6 → v7 göçü', () => {
       // it said, because 3 is expressible again and the placements never moved.
       { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 6, blockSize: 3, maxPerDay: null },
     ];
-    raw.placements = {};
+    activeProgram(raw).placements = {};
     const d = parseState(JSON.stringify(raw))!;
     expect(d.lessons.map((x) => [x.weeklyHours, x.blocks])).toEqual([
       [5, [2, 2]],
@@ -490,7 +490,7 @@ describe('parseState — v6 → v7 göçü', () => {
     raw.lessons = [
       { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
     ];
-    raw.placements = {};
+    activeProgram(raw).placements = {};
     const lesson = parseState(JSON.stringify(raw))!.lessons[0]!;
     expect(blockPlan(lesson)).toEqual([2, 2, 1]);
     expect(blockPlan(lesson).reduce((a, b) => a + b, 0)).toBe(lesson.weeklyHours);
@@ -498,7 +498,7 @@ describe('parseState — v6 → v7 göçü', () => {
 
   it('bozuk pairs kırpılıyor — dosya elle yazılmış olabilir', () => {
     const raw = JSON.parse(JSON.stringify(sampleState()));
-    raw.placements = {};
+    activeProgram(raw).placements = {};
     raw.lessons = [
       { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [2, 2, 2, 2, 2, 2, 2, 2, 2], second: false, maxPerDay: null },
       { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [-3, 9, 'x'], second: false, maxPerDay: null },
@@ -517,7 +517,7 @@ describe('parseState — v6 → v7 göçü', () => {
     expect(migrated.teachers).toEqual(original.teachers);
     expect(migrated.lessons).toEqual(original.lessons);
     expect(migrated.settings).toEqual(original.settings);
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
   });
 });
@@ -555,7 +555,7 @@ describe('parseState — v7 → v8 göçü', () => {
   it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
     const original = sampleState();
     const migrated = parseState(JSON.stringify(v7Backup()))!;
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
     expect(migrated.teachers.map((t) => t.subject)).toEqual(
       original.teachers.map((t) => t.subject),
@@ -645,7 +645,7 @@ describe('parseState — v8 → v9 göçü', () => {
   it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
     const original = sampleState();
     const migrated = parseState(JSON.stringify(v8Backup()))!;
-    expect(migrated.placements).toEqual(original.placements);
+    expect(activeProgram(migrated).placements).toEqual(activeProgram(original).placements);
     expect(migrated.unavailable).toEqual(original.unavailable);
     expect(migrated.classes).toEqual(original.classes);
     // Against what the FILE said: v8 could only write doubles, so a sample that
@@ -680,45 +680,55 @@ describe('parseState — v8 → v9 göçü', () => {
  * one that can carry any.
  */
 describe('parseState — v9 → v10: sabitleme', () => {
+  function legacy(d: ReturnType<typeof sampleState>, version: number) {
+    const program = activeProgram(d);
+    const { programs: _programs, activeProgramId: _activeProgramId, ...shared } = d;
+    return {
+      ...shared,
+      schemaVersion: version,
+      placements: { ...program.placements },
+      pinned: { ...program.pinned },
+    };
+  }
+
   /** The sample ships an empty grid, so a pin needs a cell put down first. */
   function withOnePlacement() {
-    const d = JSON.parse(JSON.stringify(sampleState()));
-    const lesson = d.lessons[0];
+    const d = legacy(sampleState(), 10);
+    const lesson = d.lessons[0]!;
     const key = `${lesson.classId}|0|0`;
     d.placements = { [key]: lesson.id };
     return { d, key };
   }
 
   it('v9 dosyasında sabitleme YOK, ve tahmin de edilmiyor', () => {
-    const raw = JSON.parse(JSON.stringify(sampleState()));
-    raw.schemaVersion = 9;
-    delete raw.pinned;
+    const raw = legacy(sampleState(), 9);
+    delete (raw as { pinned?: Record<string, 1> }).pinned;
     const parsed = parseState(JSON.stringify(raw))!;
     expect(parsed).not.toBeNull();
-    expect(parsed.pinned).toEqual({});
+    expect(activeProgram(parsed).pinned).toEqual({});
     // The timetable itself is untouched: pins were added BESIDE it, not into it.
-    expect(parsed.placements).toEqual(sampleState().placements);
+    expect(activeProgram(parsed).placements).toEqual(activeProgram(sampleState()).placements);
   });
 
   it('sabitleme dosyaya YAZILIYOR ve geri OKUNUYOR', () => {
     const { d, key } = withOnePlacement();
     const back = parseState(JSON.stringify({ ...d, pinned: { [key]: 1 } }))!;
-    expect(back.pinned).toEqual({ [key]: 1 });
-    expect(back.placements[key]).toBe(d.lessons[0].id);
+    expect(activeProgram(back).pinned).toEqual({ [key]: 1 });
+    expect(activeProgram(back).placements[key]).toBe(d.lessons[0]!.id);
   });
 
   it('YETİM sabitleme yüklemede siliniyor — elle yazılmış dosya', () => {
     const { d } = withOnePlacement();
     // A cell nothing is placed in. sanitize() runs on every load.
     const back = parseState(JSON.stringify({ ...d, pinned: { 'yok|0|0': 1 } }))!;
-    expect(back.pinned).toEqual({});
+    expect(activeProgram(back).pinned).toEqual({});
   });
 
   it('sabitleme İKİNCİ geçişte de duruyor', () => {
     const { d, key } = withOnePlacement();
     const once = parseState(JSON.stringify({ ...d, pinned: { [key]: 1 } }))!;
     const twice = parseState(JSON.stringify(once))!;
-    expect(twice.pinned).toEqual({ [key]: 1 });
+    expect(activeProgram(twice).pinned).toEqual({ [key]: 1 });
   });
 });
 
@@ -746,7 +756,7 @@ describe('parseState — v10 → v11 göçü', () => {
   it('BAŞKA HİÇBİR ŞEY değişmiyor — dizilmiş program birebir duruyor', () => {
     const original = sampleState();
     const d = parseState(JSON.stringify(v10Backup()))!;
-    expect(d.placements).toEqual(original.placements);
+    expect(activeProgram(d).placements).toEqual(activeProgram(original).placements);
     expect(d.unavailable).toEqual(original.unavailable);
     expect(d.lessons).toEqual(original.lessons);
   });
@@ -857,7 +867,7 @@ describe('planların ayrı anahtarları', () => {
     localStorage.setItem(BASE_KEY, JSON.stringify(sampleState()));
     const adopted = loadPlan(FIRST_PLAN_ID)!;
     expect(adopted.teachers).toHaveLength(sampleState().teachers.length);
-    expect(adopted.placements).toEqual(sampleState().placements);
+    expect(activeProgram(adopted).placements).toEqual(activeProgram(sampleState()).placements);
   });
 });
 
@@ -907,3 +917,4 @@ describe('savePlan kota hatasını bildiriyor', () => {
     expect(savePlan('abcd', emptyState())).toBe(false);
   });
 });
+import { activeProgram } from './programs';

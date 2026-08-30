@@ -15,20 +15,42 @@
  * bookkeeping are not written here for the third time.
  *
  * All of the counting is in `entities.ts` (`entityFacts`, `entityWeek`). This
- * file draws.
+ * file draws — and, since 2026-08-30, EDITS: "öğretmeni düzenleme ve sınıfı
+ * düzenlemede her şeyi düzenleyebilelim". Every box in the block below is the
+ * control the Okul list draws, bound to the same mutator (`updateTeacher`,
+ * `updateClass`, `updateRoom`, `setTeacherLimit`), so there is no second copy
+ * of any rule. What is new is the ROAD: the grid's row head, a card's
+ * right-click menu and the command palette all open this, and none of them
+ * used to end anywhere you could change a name.
  */
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CalendarX2, X } from 'lucide-react';
-import { entityFacts, entityWeek, hourLabels, shortDay, transferLesson } from '../entities';
+import {
+  entityFacts,
+  entityWeek,
+  genderCell,
+  hourLabels,
+  setTeacherLimit,
+  shortDay,
+  subjectKey,
+  subjectOption,
+  subjectOptions,
+  transferLesson,
+  updateClass,
+  updateRoom,
+  updateTeacher,
+} from '../entities';
+import ColorPick from './ColorPick';
+import LimitBox from './LimitBox';
 import { placedBlocks } from '../constraints';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type { InspectKind } from '../entities';
 import { paletteColor } from '../palette';
 import { KIND_ICON } from './steps';
-import type { State } from '../types';
+import type { Gender, State } from '../types';
 import { T, useT } from './T';
 
 interface Target {
@@ -48,6 +70,9 @@ const InspectContext = createContext<Open | null>(null);
 export function useInspect(): Open {
   return useContext(InspectContext) ?? (() => undefined);
 }
+
+/** Blank first: it is the value a teacher starts at, and the honest default. */
+const GENDERS: Gender[] = ['', 'k', 'e'];
 
 const KIND_LABEL: Record<InspectKind, string> = {
   teacher: 'Öğretmen',
@@ -102,8 +127,28 @@ function Inspector({
   const t = useT();
   const { confirm } = useDialogs();
   const toast = useToast();
-  const teacherOf = (lessonId: string) =>
+  const lessonTeacher = (lessonId: string) =>
     state.lessons.find((x) => x.id === lessonId)?.teacherId ?? '';
+
+  // The RECORD behind the sheet, when there is one to edit. `entityFacts` gives
+  // a drawing (`name`, `short`, `color`, rows of text); the boxes below write
+  // to the entity itself, so they need it.
+  const teacherOf =
+    target?.kind === 'teacher' ? state.teachers.find((x) => x.id === target.id) : undefined;
+  const classOf =
+    target?.kind === 'class' ? state.classes.find((x) => x.id === target.id) : undefined;
+  const roomOf = target?.kind === 'room' ? state.rooms.find((x) => x.id === target.id) : undefined;
+  const subjects = subjectOptions(state);
+
+  /** One name, three tables. Trimmed, and an empty name is refused rather than
+      written: a nameless row is unfindable everywhere else. */
+  function rename(raw: string) {
+    const name = raw.trim();
+    if (name === '') return;
+    if (teacherOf !== undefined) change((d) => updateTeacher(d, teacherOf.id, { name }));
+    else if (classOf !== undefined) change((d) => updateClass(d, classOf.id, { name }));
+    else if (roomOf !== undefined) change((d) => updateRoom(d, roomOf.id, name));
+  }
 
   /**
    * Hands one lesson to another teacher.
@@ -191,6 +236,217 @@ function Inspector({
                 </Dialog.Close>
               </div>
 
+              {/* WHAT IT IS, editable where it is read.
+                  ("öğretmeni düzenleme ve sınıfı düzenlemede her şeyi
+                   düzenleyebilelim")
+
+                  Every control here is the one the Okul list draws, bound to
+                  the same mutator: nothing is re-implemented, so a rule cannot
+                  mean one thing in a list and another in a sheet. What this
+                  buys is the road — from the grid, from a card's right-click
+                  menu, from the command palette — without going to find the
+                  row in a table first.
+
+                  `defaultValue` + `onBlur` + a `key`, not a controlled box: a
+                  re-render on every keystroke takes the focus with it
+                  (pitfall 3), and the key makes the box forget its draft when
+                  a different entity is opened in the same sheet. */}
+              <dl className="sheet-edit">
+                <dt>{t('Ad')}</dt>
+                <dd>
+                  <input
+                    type="text"
+                    className="dlg-input"
+                    aria-label={t('Ad')}
+                    key={`n-${target.id}-${view.facts.name}`}
+                    defaultValue={view.facts.name}
+                    onBlur={(e) => rename(e.target.value)}
+                  />
+                </dd>
+
+                {teacherOf !== undefined && (
+                  <>
+                    <dt>{t('Kısaltma')}</dt>
+                    <dd>
+                      <input
+                        type="text"
+                        className="text-sm"
+                        aria-label={t('Kısaltma')}
+                        key={`s-${teacherOf.id}-${teacherOf.short}`}
+                        defaultValue={teacherOf.short}
+                        onBlur={(e) =>
+                          change((d) =>
+                            updateTeacher(d, teacherOf.id, { short: e.target.value.trim() }),
+                          )
+                        }
+                      />
+                    </dd>
+
+                    <dt>{t('Branş')}</dt>
+                    <dd>
+                      <select
+                        aria-label={t('Branş')}
+                        value={teacherOf.subject}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateTeacher(d, teacherOf.id, { subject: e.target.value }),
+                          )
+                        }
+                      >
+                        {subjects.map((x) => (
+                          <option key={x} value={x}>
+                            {subjectOption(state.settings, x)}
+                          </option>
+                        ))}
+                      </select>
+                    </dd>
+
+                    {/* Blank first, and that is how it is emptied again: a
+                        second branch that can be added but not removed is a
+                        one-way door. Clearing it also clears the flag on that
+                        teacher's lessons — `sanitize()`. */}
+                    <dt>{t('2. branş')}</dt>
+                    <dd>
+                      <select
+                        aria-label={t('2. branş')}
+                        value={teacherOf.subject2}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateTeacher(d, teacherOf.id, { subject2: e.target.value }),
+                          )
+                        }
+                      >
+                        <option value="">{t('Yok')}</option>
+                        {subjects
+                          .filter((x) => subjectKey(x) !== subjectKey(teacherOf.subject))
+                          .map((x) => (
+                            <option key={x} value={x}>
+                              {subjectOption(state.settings, x)}
+                            </option>
+                          ))}
+                      </select>
+                    </dd>
+
+                    <dt>{t('Cinsiyet')}</dt>
+                    <dd>
+                      <select
+                        aria-label={t('Cinsiyet')}
+                        value={teacherOf.gender}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateTeacher(d, teacherOf.id, { gender: e.target.value as Gender }),
+                          )
+                        }
+                      >
+                        {GENDERS.map((g) => (
+                          <option key={g} value={g}>{genderCell(g)}</option>
+                        ))}
+                      </select>
+                    </dd>
+
+                    <dt>{t('Renk')}</dt>
+                    <dd>
+                      <ColorPick
+                        value={teacherOf.color}
+                        owner={teacherOf.short}
+                        onChange={(next) =>
+                          change((d) => updateTeacher(d, teacherOf.id, { color: next }))
+                        }
+                      />
+                    </dd>
+
+                    {/* The three per-teacher limits, and the placeholder in
+                        each is the school-wide number one layer up — a box
+                        whose placeholder shows a value that will never be used
+                        would be lying. */}
+                    <dt>{t('Art arda en fazla')}</dt>
+                    <dd>
+                      <LimitBox
+                        value={teacherOf.limits.maxConsecutive}
+                        fallback={state.settings.limits.maxConsecutive}
+                        title={t('{kim} art arda en fazla kaç saat', { kim: teacherOf.short })}
+                        onSet={(v) =>
+                          change((d) => setTeacherLimit(d, teacherOf.id, 'maxConsecutive', v))
+                        }
+                      />
+                    </dd>
+                    <dt>{t('Günde en fazla')}</dt>
+                    <dd>
+                      <LimitBox
+                        value={teacherOf.limits.maxPerDay}
+                        fallback={state.settings.limits.maxPerDay}
+                        title={t('{kim} günde en fazla kaç saat', { kim: teacherOf.short })}
+                        onSet={(v) =>
+                          change((d) => setTeacherLimit(d, teacherOf.id, 'maxPerDay', v))
+                        }
+                      />
+                    </dd>
+                    <dt>{t('Geldiği gün en az')}</dt>
+                    <dd>
+                      <LimitBox
+                        value={teacherOf.limits.minPerDay}
+                        fallback={state.settings.limits.minPerDay}
+                        title={t('{kim} geldiği gün en az kaç saat', { kim: teacherOf.short })}
+                        onSet={(v) =>
+                          change((d) => setTeacherLimit(d, teacherOf.id, 'minPerDay', v))
+                        }
+                      />
+                    </dd>
+                  </>
+                )}
+
+                {classOf !== undefined && (
+                  <>
+                    <dt>{t('Derslik')}</dt>
+                    <dd>
+                      <select
+                        aria-label={t('Derslik')}
+                        value={classOf.roomId ?? ''}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateClass(d, classOf.id, {
+                              roomId: e.target.value === '' ? null : e.target.value,
+                            }),
+                          )
+                        }
+                      >
+                        <option value="">{t('Derslik yok')}</option>
+                        {state.rooms.map((r) => (
+                          <option key={r.id} value={r.id}>{r.name}</option>
+                        ))}
+                      </select>
+                    </dd>
+
+                    <dt>{t('Renk')}</dt>
+                    <dd>
+                      <ColorPick
+                        value={classOf.color}
+                        owner={classOf.name}
+                        onChange={(next) =>
+                          change((d) => updateClass(d, classOf.id, { color: next }))
+                        }
+                      />
+                    </dd>
+
+                    {/* The MIDDLE layer of the daily limit: the lesson's own
+                        box overrides this, this overrides the school's. */}
+                    <dt>{t('Günde aynı dersten en fazla')}</dt>
+                    <dd>
+                      <LimitBox
+                        value={classOf.maxSameLessonPerDay}
+                        fallback={state.settings.limits.maxSameLessonPerDay}
+                        title={t('{ad} bir günde aynı dersten en fazla kaç saat', {
+                          ad: classOf.name,
+                        })}
+                        onSet={(v) =>
+                          change((d) => updateClass(d, classOf.id, { maxSameLessonPerDay: v }))
+                        }
+                      />
+                    </dd>
+                  </>
+                )}
+              </dl>
+
               <ul className="sheet-links">
                 {view.facts.links.map((line) => (
                   <li key={line}>{line}</li>
@@ -228,7 +484,7 @@ function Inspector({
                             >
                               <option value="">{t('Başka hocaya aktar…')}</option>
                               {state.teachers
-                                .filter((teacher) => teacher.id !== teacherOf(x.id))
+                                .filter((teacher) => teacher.id !== lessonTeacher(x.id))
                                 .map((teacher) => (
                                   <option key={teacher.id} value={teacher.id}>
                                     {teacher.short} · {teacher.name}
@@ -302,7 +558,7 @@ function Inspector({
 
               <p className="hint">
                 <CalendarX2 size={14} strokeWidth={2} aria-hidden="true" />{' '}
-                <T k="Kapalı saatler taralı. Değiştirmek için **Müsaitlik** sekmesine gidin; kırmızı çerçeve, kapatıldıktan sonra yerinde kalmış bir derstir." />
+                <T k="Kapalı saatler taralı; değiştirmek için **Müsaitlik** sekmesine gidin." />
               </p>
             </>
           ) : (

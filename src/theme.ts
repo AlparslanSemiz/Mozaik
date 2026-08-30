@@ -289,7 +289,18 @@ export function writeDockHeight(rem: number): void {
  */
 export const SCALE_KEY = 'ders-programi-olcek';
 
-export const SCALE_MIN = 1;
+/* The floor was 1 and is 0.80, and the reason is a SECOND scale nobody here
+   controls: Windows has its own display scaling and my father's is set large,
+   so what he sees is the product of two numbers. Shrinking the root (13px)
+   moves one of them; this moves the other, and it is the only knob he has on
+   the machine he is actually on.
+
+   Below 1 the type comes down with everything else, and that is not an
+   oversight: the 12px screen floor is a promise about the DEFAULT screen, and
+   a reader who reaches for %80 is answering it himself. Which is exactly why
+   SCALE_DEFAULT stays at 1 (see below) — the floor may be crossed on purpose,
+   never by arriving. */
+export const SCALE_MIN = 0.8;
 /* The ceiling was 1.25 and is 1.50. The reason is the reader, not the design:
    my father has trouble seeing, and a ceiling is only worth having if it is
    above what somebody actually needs. */
@@ -307,8 +318,11 @@ export const SCALE_STEP = 0.05;
  * the anchor moved instead — `:root` is 14px now, not 16 — and the default
  * came back to the floor.
  *
- * The two are still not the same question, and `normalizeScale` still tells
- * them apart (the note below): they merely agree again for the moment.
+ * ON 2026-08-30 THEY CAME APART AGAIN, and this is the case the split was
+ * written for: the floor went to 0.80 and the default did NOT follow. Nobody's
+ * screen changes by itself; my father reaches for %80 on the machine whose
+ * Windows scaling is already large, and every other machine opens where it
+ * always did.
  */
 export const SCALE_DEFAULT = 1;
 

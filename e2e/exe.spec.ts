@@ -182,7 +182,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await openAbout(page);
 
     const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Veriler nerede' }) });
-    await expect(panel.getByText(/tek kopya/)).toBeVisible();
+    await expect(panel.getByText(/klasörüne de yazılıyor/)).toBeVisible();
     await expect(panel.getByText(/tarama verilerini temizle/)).toHaveCount(0);
   });
 

@@ -25,6 +25,7 @@ import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
+import AddPanel from '../AddPanel';
 
 export default function Classes({ state, change }: PanelProps) {
   const t = useT();
@@ -86,14 +87,14 @@ export default function Classes({ state, change }: PanelProps) {
           The paste button rides the HEADING, not the form row: "Excel'den
           yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
           All five panels put it in the same corner. */}
-      <div className="panel add-panel">
-        <div className="panel-head">
-          <h2>{t('Yeni sınıf')}</h2>
-          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
-        </div>
-        <p className="hint">
-          <T k="Bir sınıf, aynı programı paylaşan öğrenci grubudur. **Derslik** sınıfın sabit odasıdır ve yerleştirirken seçilmez. Aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz ve satır başındaki nokta ile basılan sayfanın başlığında görünür." />
-        </p>
+      <AddPanel
+        title={t('Yeni sınıf')}
+        action={<button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>}
+        description={<T k="Aynı programı paylaşan öğrenci grubu; **derslik** sınıfın sabit odasıdır." />}
+        more={t(
+          'Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.',
+        )}
+      >
         <div className="form-row">
           <input
             type="text"
@@ -133,7 +134,7 @@ export default function Classes({ state, change }: PanelProps) {
           }
           onAdd={(rows) => change((d) => addClassesFromRows(d, rows))}
         />
-      </div>
+      </AddPanel>
 
       <div className="panel step-panel">
         <h2>{t('Sınıflar ({n})', { n: state.classes.length })}</h2>

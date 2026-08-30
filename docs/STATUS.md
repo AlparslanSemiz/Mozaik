@@ -1,7 +1,517 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-29 (otuz beşinci oturum: **kaydıran şey listenin
-kendisi** — özet kutusu duruyor, içindeki liste kayıyor)
+Son güncelleme: 2026-08-30 (otuz yedinci oturum: **AB turu** — kök 13px ve
+%80 basamağı, Ayarlar şeridinin sağ ucu, kısalan infolar, Çıktının tek
+kaydırıcısı, exe ikonunun ÖLÇÜLMESİ, SmartScreen hafifletmeleri, İngilizce
+vitrin ve LICENSE)
+
+---
+
+## Otuz yedinci oturum — AB turu: devreden yedi madde (2026-08-30)
+
+> *"AB oturumundan kalan taskları yap."*
+
+TASKS'in *ŞİMDİ SIRADA*'sı bu turu adıyla yazmıştı ve *"başka bir makinede
+yapılacak"* diyordu. O makine bu makine. Sekiz maddenin yedisi yapıldı; AB8
+(aSc'nin ders ekleme penceresi) hâlâ **fotoğraf bekliyor** — `docs/Örnek
+Fotolar/` altına bakıldı, o pencerenin resmi yok.
+
+**Turun en pahalı bulgusu bir kod değil bir ÖLÇÜM: iki maddenin planı
+yanlıştı.** AB5 "ikon exe'ye gömülmüyor olabilir", AB6 "VERSIONINFO yok"
+diyordu. İkisi de yayınlanmış ikiliye bakılarak sınandı ve ikisi de **yanlış**
+çıktı. Bkz. aşağıda 5 ve 6, ve yeni tuzak 101.
+
+### 0 · Devralınan ölçüm borcu — sıçrama ATFEDİLDİ
+
+AC turu `dist/index.html`'i 1 031 525 bayt ölçmüş ve *"kaynağı ölçülmedi, bir
+sonraki turun ilk işi"* diye bırakmıştı. Yöntem D2'nin Radix paketlerini
+ölçtüğü yöntem: `enforce: 'pre'` bir vite eklentisi modülü boş bir gövdeyle
+değiştiriyor, dosya yeniden derleniyor.
+
+| Derleme | Bayt |
+|---|---|
+| olduğu gibi | 1 031 525 |
+| `@radix-ui/react-context-menu` boş | 1 024 418 |
+| de·es·fr sözlükleri boş | 759 874 |
+| ikisi birden | 752 767 |
+| en·de·es·fr + menü boş | 667 885 |
+
+```
+dört sözlük (en·de·es·fr)               356 533 bayt   %34,6
+@radix-ui/react-context-menu              7 107 bayt   % 0,7
+geri kalan (uygulama + öteki paketler)  667 885 bayt
+CLAUDE.md tabanı (2026-08-26)           489 815
+  sözlüksüz/menüsüz büyüme            +178 070 bayt
+```
+
+**Sıçramanın kaynağı bir bağımlılık DEĞİL, veri.** Sağ tık menüsü 7,1 KB —
+popper'ı `dropdown-menu` zaten getiriyordu, yani AC turunun endişelendiği paket
+büyümenin %0,7'si. Büyümenin **üçte ikisi gömülü metin** (dört sözlük, 906
+anahtar × 4). Toplamlar birebir toplanıyor (7 107 + 271 651 = 278 758), yani
+ölçüm kendi içinde tutarlı.
+
+### 1 · AB4 — kök 13px ve %100'ün altı
+
+Sırada öne alındı çünkü kök font-size **her rem'i** oynatıyor: AB3'ün Çıktı
+rayını AB4'ten önce ölçmek aynı rayı iki kez ölçmek olurdu.
+
+```
+:root font-size    calc(14px * --ui-scale)  ->  calc(13px * --ui-scale)
+--fs-2xs … --fs-3xl   13px'e YENİDEN sabitlendi (px karşılıkları korundu)
+SCALE_MIN             1  ->  0.80        SCALE_DEFAULT 1 KALDI
+basamak sayısı        11 ->  15
+```
+
+Yani yazı boyu değişmedi; küçülen şey **rem cinsinden yazı olmayan her şey** —
+boşluk, hücre, `ch` sütunları, şerit, havuz: **%7,1**. Bu, 2026-08-27'de 16→14
+yapılırken kullanılan yöntemin aynısı.
+
+**Kullanıcı kararı, 12 px tabanı:** taban **%100'de** geçerli. %80'de yazı da
+%20 küçülüyor ve bu bilerek: taban varsayılan ekran hakkında bir söz, ve %80'e
+uzanan okuyucu ona kendisi cevap veriyor. `SCALE_DEFAULT` 1'de kaldığı için
+kimsenin ekranı kendiliğinden küçülmüyor.
+
+Ölçülen (örnek okul, %80 · %100 · %150, iki temada bakıldı):
+
+```
+%80'de yatay taşma        0        kırpılan başlık/düğme  0
+%150'de yatay taşma       0        kırpılan başlık        0
+marka işareti (1.75rem)   24,5 px  ->  22,75 px   (%150'de 34,125)
+liste tabanı 6rem         84 px    ->  78 px
+```
+
+Yeni test `gorunum.spec.ts` 44: **taban %80** — kökün gerçekten 10,4 px olduğu,
+ve üç ekranda hiçbir şeyin kırpılmadığı. Mutasyonla sınandı (`.btn` dar
+yapıldı → kırmızı).
+
+**İki test kökün eski sayısını ezberlemişti ve ikisi de düzeltilirken
+TÜRETİLDİ**: `kabuk.spec.ts` marka işaretinin px'ini yazıyordu (22,75/34,125
+oldu ve yorumu üç taşınmayı da anlatıyor), `kabuk.spec.ts` 83 ise `6rem`'in px
+karşılığını **80** diye sabitlemişti — artık kökten hesaplıyor.
+
+### 2 · AB1 — Hareket ve Dil sola, bölüme özgü ayar şeride
+
+`Appearance.tsx`'te iki panel sağ raydan sol sütunun sonuna taşındı. Rayda tek
+panel kaldı (`Örnek`), yani `.cols > aside > .panel:only-child` artık Görünüm'e
+de uygulanıyor — otuz beşinci oturumun sözleşmesi. Örnek tablosu `.stat-scroll`
+ile sarıldı ki kayan şey **liste** olsun, panel değil.
+
+Ayarlar şeridinin sağ ucu bugüne kadar **boştu**; beş bölümün beşi de artık bir
+şey söylüyor:
+
+```
+Görünüm            Tema · Açık / Koyu      <- tek KONTROL
+Zil ve günler      {n} gün · {n} ders      .ribbon-value
+Kurallar           N engelle · N uyar · N kapalı
+Planlar ve yedek   açık planın adı
+Hakkında           v2.0.0
+```
+
+**Dördü STATE ediyor, biri SORUYOR, ve ayrım keyfi değil:** Ayarlar'ın bütün
+kontrolleri iki parmak aşağıdaki panellerde duruyor, ve dört inç altındaki bir
+düğmeyi tekrar eden şerit bu dosyanın kendi başlığının uyardığı "her şeyin
+şeridi"dir. Görünüm istisna ve sebebi ölçülebilir: **kayacak kadar uzun olan
+tek bölüm o**, ve tema onun ilk paneli — Hareket'e indiğinizde iki düğme
+ekranın üstünde kalıyor, şerit ise kıpırdamıyor.
+
+**Yoğunluk sağ gruba KONMADI, ve önce ölçüldü** (plan öyle diyordu):
+
+```
+%150, Ayarlar şeridi   kutu 1916 px
+  Görünüm bölümü       dolu 1342 px · PAY 574 px
+  bir Yoğunluk grubu   maliyet 400 px      -> SIĞIYOR
+```
+
+Yani yer vardı; konmama sebebi yer değil **belirsizlik**: o ekranda iki yoğunluk
+ekseni var (Izgara ve Arayüz) ve "Yoğunluk" başlıklı tek bir grup hangisini
+sürdüğünü söyleyemez. Izgara ekseni zaten Program şeridinde duruyor.
+
+Yeni bölüm `serit.spec.ts` 60, iki test: beş bölümün beşinde de spacer'ın
+SAĞINDA bir grup var, beşi **ayrı şeyler** söylüyor (aynı cümleyi tekrarlayan
+bir şerit nerede olduğunuzu söylemiyor demektir), ve Görünüm'ünki temayı
+gerçekten çeviriyor. Mutasyonla sınandı: dal kapatılınca ikisi de kırmızı.
+
+### 3 · AB2 — infolar kısaldı, bütün ekranlarda
+
+Kural: bir `.hint` **tek cümle**, ~90 karakter; uzayan gerekçe `title`'a iner.
+`AddPanel`'e bunun için `more` prop'u eklendi.
+
+```
+ekrandaki en uzun .hint     438 -> 126 karakter
+  438  Okul -> Öğretmenler  (ekleme paneli)
+  426  Dersler
+  350  Okul -> Branşlar
+  269  Okul -> Sınıflar
+kalan en uzun ikisi: 126 (içinde site adresi geçiyor) ve 122
+```
+
+Dokunulan: `settings/{Data,Appearance,Rules,Plans,School}.tsx`,
+`setup/{Summary,Rooms,Subjects,Teachers,Classes,index}.tsx`,
+`{Check,Print,Inspector,ColorPick}.tsx`, `lessons/index.tsx`.
+
+**Sözlük işi elle, ve iki yönlü:** `i18n.test.ts` ölü anahtarı söyler, eksik
+anahtarı **söyleyemez** (tuzak 87). Bu turda ikisi de tarandı — **66 ölü
+anahtar** dört sözlükten silindi, **75 yeni anahtar** dördüne de yazıldı
+(300 çeviri). Doğrulama tuzak 89'un yoluyla: sayfa Almanca açıldı ve
+`body.innerText` Türkçe harf için tarandı — **15 satır çıktı ve on beşi de
+örnek okulun öğretmen adları** (Ayşe Varol, Kemal Yıldız…), yani kullanıcı
+verisi. Arayüzden sıfır satır.
+
+Yeni test `metin.spec.ts`: yedi sekme ve beş bölüm gezilip her `p.hint`'in
+uzunluğu okunuyor, **tavan 140** — ölçülen en uzun 126, ve turun sildiği
+paragrafların beşi 260'ın üstündeydi. `.data-hint` sınıfı hariç tutuluyor ve
+kaynakta işaretli: onları uzatan şey **okul**, kullanılmayan her branşın adını
+sayıyorlar, ve onları sayan bir tavan bir okulun kaç branşı boşta
+bırakabileceğine tavan koyardı.
+
+### 4 · AB3 — Çıktının sağ bloğu: üç kaydırıcı BİRE indi
+
+Ölçülen (örnek okul, "İkisi de" seçili):
+
+```
+                  ÖNCE                          SONRA
+%100   kaydırıcı  3 (ray 728 + 22 + 74)         1 (yalnız ray, 419)
+       iki liste  alt alta (top 243 / 477)      YAN YANA (ikisi de 243)
+       ray        310 px                        485 px
+       kâğıdın yanındaki pay  433 px            257 px
+%150   kaydırıcı  3 (ray 1373 + 117 + 117)      1 (ray 1204)
+       ray        462 px                        596 px
+       pay        256 px                        121 px
+```
+
+Üç değişiklik: `.pick-items`'ın `max-height: 168px` **kalktı** (ham piksel —
+ölçek büyüdükçe oransal olarak DAHA AZ ad tutuyordu), `.pick-list`'in
+`min-width: 240px`'i **16rem** oldu (ölçülen min-content 206 px @%100 ve 305 px
+@%150, ikisi de 15,85rem), ve `.pickers` `auto-fit` bir grid oldu. Çıktı'nın
+rayı `min(37rem, 32cqw)`: 37rem iki listenin %100'de yan yana durması için
+gereken genişlik, 32cqw ise %150'de kâğıdın payını 28 px yerine 167 px'te
+tutan tavan.
+
+Yeni bölüm `yazdir.spec.ts` 84, iki ölçek. Mutasyonla sınandı: 168px geri
+konunca ikisi de kırmızı.
+
+### 5 · AB5 — ikon: PLAN YANLIŞTI, ölçüm doğruyu söyledi
+
+STATUS'ün kendi kaydı *"`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü
+**varsayıldı**, ölçülmedi"* diyordu, ve AB5 bu varsayımı şikayetin sebebi
+sayıyordu. Yeni betik `scripts/exe-ikon.mjs` PE kaynak tablosunu ayrıştırıyor
+(bağımlılık yok); yayınlanmış 2.0.0 ikilisi indirilip ölçüldü:
+
+```
+Mozaik.exe  3 732 480 bayt
+  RT_GROUP_ICON 1 · RT_ICON 9 · RT_VERSION 1
+  gömülü boylar  16 · 20 · 24 · 32 · 40 · 48 · 64 · 128 · 256
+  kurulum/icon.ico  aynı dokuz boy       -> BOYLAR TUTUYOR
+```
+
+**Yani hiçbir boy eksik değildi ve hiçbir şey komşusundan ölçeklenmiyordu.**
+Görev çubuğuna ulaşan işaret AYRINTILI çizimdi, doğru çizilmişti, ve 24 px'te
+altı çubuğu 2,25 cihaz pikseli genişliğinde, aralarındaki boşluk 0,56 px — bir
+cihaz pikselinin altındaki boşluk yoktur. Babanın *"sanki 9x9 pixellik"*
+cümlesi tam olarak bunu tarif ediyor.
+
+**Kullanıcı kararı: eşik 32'ye çıktı** (`SADE_ALTINDA` 20 → 32), yani 16 · 20 ·
+24 artık sade çizim. Karar `scripts/ikon-karsilastir.mjs`'in ürettiği sayfaya
+**bakılarak** verildi. Eşik böylece üç kez taşınmış oldu (48 → 32 → 20 → 32) ve
+üçüncüsü, ilk ikisinin tartıştığı şeyi ölçen ilk taşıma.
+
+`kurulum/icon.ico` yeniden üretildi (14 483 bayt), `temel.spec.ts` 79 eşiği
+yeni yerinde ölçüyor. Ve `surum.yml`'in `exe` işine bir **kapı** eklendi: her
+derlemede aynı betik koşuyor, boylar tutmazsa iş kırmızıya dönüyor — varsayım
+bir daha geri gelemesin.
+
+### 6 · AB6 — SmartScreen: bir madde ölçümle kapandı, biri ölçülemedi
+
+**VERSIONINFO VAR.** AB6 *"yayıncısı, ürün adı, sürümü olmayan bir PE sezgisel
+tarayıcıya çıplak görünür"* diyordu; aynı ölçüm beş alan buldu:
+
+```
+CompanyName mozaik · FileDescription Mozaik · FileVersion 2.0.0
+ProductName Mozaik · ProductVersion 2.0.0
+```
+
+Yapılan: **`-ExecutionPolicy Bypass` dört yerden de kalktı.** Yerine geçen desen
+`RemoteSigned` + `Unblock-File`: bir ZIP'ten çıkan her dosya "Internet" bölgesi
+damgası taşır, Bypass o damgayı görmezden gelmenin en geniş yolu, ve indirilen
+bir arşivin içinde tarayıcıların en tanıdık imzalarından biri. Damga
+kaldırıldıktan sonra RemoteSigned yerel bir betiğe imza sormuyor — aynı iş,
+benzemeyen imza. `kur.ps1` kopyaladığı `.ps1`'leri de unblock ediyor.
+
+Doğrulandı: `kur.ps1` PowerShell ayrıştırıcısıyla **hatasız**, `.cmd`'lerin
+yeni komut satırı da öyle; `npm run paket` sonrası BOM · CRLF · ASCII kapısı
+üçünde de yeşil.
+
+Ayrıca `SHA256SUMS.txt` yayına eklendi — imza alınamıyorsa "bu, yayınladıkları
+dosya mı" sorusuna verilebilecek tek cevap bir özet.
+
+**ÖLÇÜLEMEYEN tek şey:** `strip = false`'un boyut maliyeti. Bu makinede Rust
+yok, `Cargo.toml`'a dokunulmadı, ve ölçmeden bir entropi iddiası yazmak tuzak
+65'in ta kendisi olurdu.
+
+### 7 · AB7 — vitrin İngilizce, ve bir LICENSE
+
+`README.md` 439 satır Türkçeydi; kısa ve İngilizce yeniden yazıldı (ne olduğu,
+indirme, dört teslim yolu, verinin nerede durduğu, SmartScreen'in ne dediği,
+geliştirme komutları). `CLAUDE.md`, `docs/`, `.claude/` **Türkçe kaldı** ve
+README bunun sebebini yazıyor.
+
+`.github/surum-notu.md` İngilizce, **ama sonunda üç satırlık Türkçe kurulum
+özeti var**: o metin her Release sayfasının gövdesi, yani babanın indirirken
+göreceği sayfa. Ayrıntılı Türkçe yol zaten zip'in içindeki `OKU.txt`'de.
+
+İş akışları: `name: sürüm` → `release`, işler `paket`/`yayinla` →
+`package`/`publish`, girdiler `yayinla`/`etiket` → `publish`/`tag`, adım adları
+İngilizce — hepsi Actions arayüzünde görünüyor. `scripts/yayinla.mjs` bu girdi
+adlarını kullanmıyor, yani yeniden adlandırma güvenli (kontrol edildi).
+
+**`LICENSE` eklendi** — repoda hiç yoktu. MIT, yanında gömülü IBM Plex için OFL
+1.1 bildirimi. `package.json`'a `"license": "MIT"`, iki `description` İngilizce.
+
+### Ölçülen
+
+```
+npm run kontrol      YEŞİL
+  birim              719 test
+  E2E                514 test    3,6 dk
+  site · sunucu      22 test
+  çözücü             7 test      52 sn
+dist/index.html      961 584 bayt   (AC turu: 1 031 525 — 69 941 bayt DÜŞTÜ)
+file:// açılış       DCL medyan 41 ms · en kötü 45 ms (7/7 koşu)
+                     FCP 84–92 ms, ama 7 koşunun yalnız 5'inde ÖLÇÜLEBİLDİ
+```
+
+**Boyut düştü ve sebebi AB2:** 66 ölü sözlük anahtarı silindi, 75 kısa anahtar
+eklendi, ve kısalan Türkçe cümleler dört sözlükte birden kısaldı.
+
+> **FCP satırı bir uyarıyla yazılıyor.** `first-contentful-paint` girdisi
+> `file://` altında bu Chromium'da her koşuda üretilmiyor (7'de 5). AC turunun
+> "17 ms" ve daha eski "73 ms" sayıları **aynı kronometreyle alınmadı**; üçü
+> yan yana konup karşılaştırılamaz. `domContentLoadedEventEnd` her koşuda var,
+> o yüzden bu turdan itibaren yazılan sayı odur.
+
+### Turun düzelttiği devralınan kırmızılar
+
+Hiçbiri bu turun eseri değildi; hepsi metin ya da sayı ezberlemiş testlerdi ve
+AB2 ile AB4 onları açığa çıkardı.
+
+| Test | Ne oluyordu |
+|---|---|
+| `kayma.spec.ts` 76, iki test | Şeridin sağ ucu artık bölüme göre değiştiği için `geometry()` iki farklı şeridi sıra sıra karşılaştırıyordu. Artık **ada göre** eşliyor: iki şeritte de olan bir kontrol oynamamış olmalı. İkinci test `helpers.ts`'in strict-mode kusurunu kendi kopyasında taşıyordu |
+| `temel.spec.ts` 5 | `kendiliğinden saklanıyor` cümlesini **Planlar ve yedek**'te arıyordu; o cümle Hakkında'da, ve orada bulunması bir rastlantıydı (oturum yedeği hint'i aynı kelimeleri taşıyordu) |
+| `gorunum.spec.ts` 50 | Müsaitlik başlığı `2.125rem`'e **kıl payı** sığıyordu (14px kökte 29,75 px ile 30 px metin). Kök 13'e inince tablo, saat açılınca 2,16 px büyüdü |
+| `kabuk.spec.ts` 76 · 83 | Kökün eski px karşılıklarını ezberlemişlerdi |
+| `kontrol` · `kurulum` · `exe` · `klasor` | Kısalan hint cümlelerini arıyorlardı |
+
+Müsaitlik başlığının çaresi bir sayı değil bir **yapı**: kapalıyken
+`display: none` olan saat artık `visibility: hidden`, yani ikinci satır kutusu
+her iki durumda da orada. İki yükseklik artık **inşaat gereği** eşit
+(332,03 px ile 332,03 px), yeniden türetilmesi gereken bir sayı yüzünden değil.
+
+---
+
+## Otuz altıncı oturum — AC turu: kullanıcının altı satırı (2026-08-30)
+
+> *"Yeni eklemeleri simetrik hale getirdik ama çok uzun olmuş kısalt. Müsaitlik
+> programlarının satırlarını uzat. Program kısmında kartların üzerinde
+> sabitleye basınca dersi sabitlesin babamın en çok kullancağı bu. Ayrıca biraz
+> daha düzenle babamın kafası çok karışmasın. Programın ikinci şeridinin
+> düzenini ayarla tekrardan. öğretmen ve sınıftan seçimleri en solda eski
+> yerinde olmalı. Programda dersi düzenle ve öğretmeni düzenleme ve sınıfı
+> düzenlemede her şeyi düzenleyebilelim. Ayrıca kartlar havuzdayken ayrım daha
+> bir güzel ve hoş olsun, hatta neye göre filtrelensin sıralansın ayarı bile
+> olabilir."*
+
+Tur bir **düzeltme turu**: altı maddenin hepsi çalışma ağacındaki bitmemiş
+turun üstüne geldi (35 değişmiş dosya + `programs.ts` · `programMask.ts` ·
+`AddPanel.tsx`, hiçbiri commit'li değil). Devralınan **dört kırmızı** da bu
+turda kapandı, ve dördü de aynı aileden — bitmemiş tur kodu taşımıştı, testi
+taşımamıştı:
+
+| Devralınan kırmızı | Ne oluyordu |
+|---|---|
+| `npm run tipler` 8 hata | `e2e/otomatik-*.spec.ts` hâlâ `state.placements` okuyor; alan `programs[]` içine girmişti |
+| `program.spec.ts` 86, üç test | `Dersi buraya sabitle` alt menüye taşınmıştı, test onu düz menüde arıyordu |
+| `kurulum.spec.ts` 44 + 65, beş test | `AddPanel.tsx` üç parçayı birer `<div>`'e sardı; `shapeOf` yalnız DOĞRUDAN çocuklara bakıyor, bloğun tamamını "yalnız başlık" diye okuyordu |
+| `panel.spec.ts` 83, sessizce | *Çift rezerve* testi `s.placements`'i okuyordu, `undefined` geliyordu, döngü hiç koşmuyordu — **bedava yeşil** (tuzak 23), üstelik tek işi çift rezervasyonu yakalamak olan testte |
+
+### 1 · Ekleme bloğu kısaldı — geometri, metin değil
+
+Kullanıcı kararı: *yalnız kutu küçülsün, açıklamalar kalsın.* Simetri de kaldı
+ve sebebi o: ortak taban, beş ekran arasında geçerken formun aynı y'de
+durmasını sağlayan şey.
+
+```
+.add-panel yüksekliği          önce      sonra
+%100  (beş ekranın beşi de)    259 px    182 px      (18.5rem -> 13rem)
+%150  Derslikler/Branşlar/
+      Öğretmenler/Sınıflar     389 px    273 px
+%150  Dersler                  389 px    316 px      ← metin taban dışına çıktı
+```
+
+Açıklama rayı `minmax(5.5rem, auto)` → `3.25rem`, `.add-panel-head` 2.25 →
+2rem, `.panel` dolgusu `--space-6` → `--space-5`. **Dersler'in %150'de tabandan
+taşması kusur değil, ölçümün kendisi**: o ekranın paragrafı raydan uzun, yani
+oradaki tek kol metindir ve kullanıcı bu turda onu istemedi.
+
+### 2 · Müsaitlik satırları uzadı
+
+```
+                     önce    sonra    sayfa dikey taşması
+%100 hücre           42 px   54,3 px  0
+%100 tablo          282 px  355 px    0
+%150 hücre           63 px   81,4 px  0
+%150 tablo          423 px  533 px    0
+"Haftanın darlığı"   42/63   42/63    (kendi kuralını aldı)
+```
+
+Isı tablosu bilerek dışarıda: o bir müsaitlik programı değil, bütün okula tek
+bakış, ve aynı iskeleti yalnız çizim için ödünç alıyor. Yorumdaki eski cümle de
+düzeltildi — *"48px"* yazıyordu, kural `3rem` yani **42 px** diyordu.
+
+### 3 · Raptiye kartın ÜSTÜNDE
+
+Kullanıcı kararı: **hep görünsün, sabitlenmemişken şeffaf, sağ tıkta da dursun.**
+
+Raptiye kartın **kardeşi**, çocuğu değil: `.card` bir `<button>` ve düğme içinde
+düğme geçersiz HTML'dir. Konumlanma bağlamı `<td>`. Boyu hücreden türüyor
+(`clamp(.75rem, --cell-h * .48, 1.125rem)`), mürekkebi `--on-color` (tuzak 15),
+sönük hâli `opacity: .38`.
+
+**Testi iki kez yazıldı, çünkü ilki iki mutasyonu birden yuttu:**
+
+- `opacity: 0` mutasyonu geçti — `dragAndDrop` imleci bıraktığı hücrede
+  bırakıyor ve `td:hover > .card-pin` raptiyeyi tam açıyordu. İmleç kenara
+  çekildi; **hâlâ geçti**, ve sebebi tuzak 59'un ölçüm hâliydi: geçiş sürerken
+  okunan opaklık **0,64** dönüyordu. `settledMotion()` `helpers.ts`'e taşındı
+  (`ekran.spec.ts`'in kendi kopyası ona bağlandı), sonra mutasyon **kırmızıya
+  döndü**.
+- `stopPropagation` mutasyonu da geçti, **ve bu sefer haklı olarak**: raptiye
+  kartın kardeşi olduğu için basış zaten karta uğramıyor. Guard silindi, yorumu
+  ölçümü söylüyor, ve basıp sürükleyen iddia yapısal koruma olarak kaldı.
+
+### 4 · Program şeridi — Görünüm en solda, kitaplık tek menüde
+
+```
+önce:  Program(select+2 düğme) · Görünüm · Diz  ␣  Yoğunluk · Izgara(3 düğme)
+sonra: Görünüm · Diz · Program(1 menü)          ␣  Yoğunluk · Izgara(1 menü)
+```
+
+İkinci menü bir **ölçümden** doğdu, tercihten değil: `serit.spec.ts` %150'de
+kırmızıydı ve **iki düğme şeridin dışına taşıyordu**. Eşit sütunlu bir grupta
+üç uzun kelime, en uzunun üç katıdır:
+
+```
+%150, Program şeridi        önce      sonra
+şeridin istediği toplam    2061 px   1717 px   (kutu 1920 px)
+"Izgara" grubu              639 px    ~137 px
+taşan düğme                     2         0
+%100 toplam                1783 px   (taşma 0)
+```
+
+`Görünüm`'ün en sola dönmesi `HEAD`'deki hâline dönmek: kitaplık geçen turda
+şeridin başına girip görünüm anahtarını bir grup sağa itmişti.
+
+### 5 · "Her şeyi düzenleyebilelim" — sınıf değişimi dahil
+
+Kullanıcı kararı: **hepsi**, dersin **sınıfını** değiştirmek de.
+
+Yeni saf fonksiyon `moveLessonToClass()` (`entities.ts`), `transferLesson`'ın
+aynası ve ters yönden yanlış olanı: `placements` **sınıfa göre** anahtarlı, yani
+düz bir alan yazımı dersin bütün saatlerini eski sınıfın satırında bırakır.
+Doğrusu her bloğu kaldırıp aynı kareyi yeni satırda **teklif etmek**; sığmayan
+havuza döner. **Pinler düşer ve sayılır** — bir pin `classId|day|hour`, geride
+kalırsa bir başkasının saatini kilitler.
+
+Mutasyonla sınandı: naif `updateLesson(d, id, { classId })` konunca
+`entities.test.ts` **3 testte** kırmızıya döndü.
+
+Ekranlar: `LessonEdit` üç alandan **altıya** çıktı (sınıf · öğretmen · branş ·
+saat · dağılım · günde en fazla), `Inspector` okunan panelden **düzenlenen**
+panele geçti (öğretmen: ad · kısaltma · branş · 2. branş · cinsiyet · renk · üç
+sınır; sınıf: ad · derslik · renk · günlük sınır; derslik: ad). Hiçbir kontrol
+yeniden yazılmadı — hepsi Okul listesinin kendi kontrolü, aynı mutator'a bağlı.
+
+Sağ tık menüsü de yeniden dizildi: yedi üst kalem, ikisi kapı.
+
+```
+Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
+────
+Dersi buraya sabitle          ← ÜST DÜZEYE geri döndü
+Toplu sabitle ▸               (satır · sütun · gün)
+────
+Geçici görünüm ▸              (satırı/günü soluklaştır · gizle)
+```
+
+`ghostla` gitti: Türkçe ekranda İngilizce fiil. Mod hâlâ `ghost` — o kod.
+
+### 6 · Havuz — sıra, süzgeç ve görünür ayrım
+
+`poolSort` (beş sıra) ve `poolFilter` (branş) **`toolState.ts`'te**, çünkü ikisi
+de bir POZİSYON: yeni `localStorage` anahtarı yok, "Veriler nerede" tablosuna
+satır borcu yok.
+
+Kartlar artık **başlıklı gruplar** hâlinde: satır rengi noktası + ad + sayı,
+gruplar arası kıl çizgi, ve başlık **sıralamadan türüyor** (branşa göre
+sıralayınca başlıklar branş olur). Kartın kendi kenarı da var
+(`inset 0 0 0 1px color-mix(--on-color 22%)`).
+
+**İki ölçüm turu gerekti ve ikisi de gerçek kusur buldu:**
+
+```
+grup kutusu `flex: 0 0 auto` iken (1920 px'lik tepside)
+  sıra          grup   en geniş grup   yatay taşma   kırpılan grup
+  boy'a göre       2        4015 px        2109 px         2
+  kalan'a göre     7        1653 px              0         0
+  %150 boy'a       2        6022 px        4123 px         2
+```
+
+`overflow-x: hidden` olduğu için o kartlar **erişilemezdi** ve ekranda hiçbir
+şey olduklarını söylemiyordu. `flex: 0 1 auto; max-width: 100%` ile grup kendi
+`flex-wrap`'ine düşüyor: **beş sıranın beşinde de taşma 0, kırpılan 0.**
+
+İkincisi kısa ekranda: başlık kartların **üstünde**yken bir satır götürüyordu ve
+tepsinin tabanı 6rem = 84 px (560 px'lik pencerede clamp oraya iniyor). Baş 32 +
+başlık 24 + kart 40, 84'e sığmaz → tek kart satırı kırpılıyordu ve
+`program.spec.ts`'in ekran dışı sürükleme testi kırmızıya döndü. Başlık
+**yanlarına** alındı: dikeyde maliyeti sıfır.
+
+### Dil — dört sözlük ELLE, 71 anahtar
+
+`i18n.test.ts` ölü anahtarı söyler, **eksik anahtarı söyleyemez**: çevirisi
+olmayan bir cümle doğru Türkçeye düşer ve susar (tuzak 87). Kaynağın istediği
+her cümle sözlüklerle karşılaştırıldı: **71 eksik** çıktı, ve yaklaşık yarısı
+bu turdan değil geçen turdan devrediyordu (`Göster` · `Saatler` · `Satır` ·
+"Haftanın darlığı" cümleleri · program kitaplığının tamamı). Dördüne de elle
+yazıldı; iki ölü anahtar silindi.
+
+Doğrulama pitfall 89'un yoluyla: sayfa **Almanca** açıldı, `body.innerText`'te
+Türkçe harf araması **sıfır satır** buldu, ve iki yeni menü de Almanca:
+`["Ganzen Plan anheften", "Ausgeblendet (0)", "Alle zurückholen", "Stundenplan
+leeren"]`, `["Ins Ablagefach", "Stunde bearbeiten", "Lehrkraft bearbeiten",
+"Klasse bearbeiten", "Stunde hier anheften", "Mehrere anheften", "Vorübergehend
+ausblenden"]`.
+
+### Doğrulama
+
+`npm run kontrol` **yeşil**: **718 birim · 507 E2E · 22 site · 7 çözücü.**
+`npm run ekran` iki temada 19 görüntü, ve **bakıldı** — müsaitlik satırı,
+kısalan ekleme bloğu, karttaki sönük raptiye, havuzun grup başlıkları.
+
+```
+dist/index.html   1 031 525 bayt
+file:// açılış    FCP medyan 17 ms · en kötü 40 ms (7 koşu)
+```
+
+> **Boyut uyarısı, ve bu turun eseri DEĞİL.** CLAUDE.md'nin tabanı 489 815 bayt
+> (2026-08-26). Bu oturumun İLK derlemesi — yani devralınan ağaç, tek satır
+> yazılmadan — **1 002 837 bayt**tı; turun eklediği 28 688 baytın büyük kısmı
+> 71×4 sözlük girdisi. Sıçramanın kendisi bitmemiş turda (`programs.ts`,
+> `programMask.ts`, `@radix-ui/react-context-menu`) ve **ölçülmemiş**; bir
+> sonraki turun işi.
+> Açılış süresi de eski sayıyla (73 ms) **aynı yöntemle ölçülmedi**: bu satır
+> `first-contentful-paint` girdisi, o satır başka bir kronometre.
+
+---
 
 > **İKİ MAKİNENİN DALI BURADA BİRLEŞTİ, ve sayılar yeniden ÖLÇÜLDÜ.** Otuz
 > dördüncü oturum paralel koştu — **A**: AA turu, sınıfın kendi günlük sınırı

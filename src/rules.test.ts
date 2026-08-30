@@ -2,6 +2,7 @@
 // no feature lands in a pure module without a test).
 
 import { buildIndex, place } from './constraints';
+import { blankProgram } from './programs';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import {
   findViolations,
@@ -56,8 +57,8 @@ function build(): State {
       { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
     ],
     unavailable: {},
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }
 

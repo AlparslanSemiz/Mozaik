@@ -10,6 +10,7 @@ import { closedKey, placementKey, teacherKey } from './keys';
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
 import { dayLabel, subjectLabel } from './names';
+import { activePinned, activePlacements, blankProgram, replaceActiveGrid } from './programs';
 import { hasTwoSubjects } from './subjects';
 import {
   lessonDayCount,
@@ -21,6 +22,7 @@ import {
   teacherDayCount,
 } from './rules';
 import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher } from './types';
+import type { View } from './toolState';
 
 // Re-exported so call sites keep importing keys from here.
 export { closedKey, placementKey, teacherKey };
@@ -52,8 +54,9 @@ export function buildIndex(d: State): Index {
   const roomBusy = new Map<string, Id>();
   const placedHours = new Map<Id, number>();
 
-  for (const key in d.placements) {
-    const lessonId = d.placements[key];
+  const placements = activePlacements(d);
+  for (const key in placements) {
+    const lessonId = placements[key];
     if (lessonId === undefined) continue;
     const lesson = lessonById.get(lessonId);
     if (lesson === undefined) continue; // orphan record — sanitize() deals with it
@@ -161,7 +164,7 @@ export function blockerDetail(
     const hourName = d.settings.hours[h] ?? `${h + 1}`;
 
     // 2. Is the class free at that hour
-    const busyLessonId = d.placements[placementKey(group.id, day, h)];
+    const busyLessonId = activePlacements(d)[placementKey(group.id, day, h)];
     if (busyLessonId !== undefined) {
       const other = ix.lessonById.get(busyLessonId);
       const otherSubject = other && ix.teacherById.get(other.teacherId)?.subject;
@@ -432,14 +435,14 @@ export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
   for (let g = 0; g < dayCount; g++) {
     let h = 0;
     while (h < hourCount) {
-      if (d.placements[placementKey(lesson.classId, g, h)] !== lesson.id) {
+      if (activePlacements(d)[placementKey(lesson.classId, g, h)] !== lesson.id) {
         h++;
         continue;
       }
       let end = h;
       while (
         end < hourCount &&
-        d.placements[placementKey(lesson.classId, g, end)] === lesson.id
+        activePlacements(d)[placementKey(lesson.classId, g, end)] === lesson.id
       ) {
         end++;
       }
@@ -516,7 +519,7 @@ export function blockAt(
   day: number,
   hour: number,
 ): PlacedBlock | null {
-  const lessonId = d.placements[placementKey(classId, day, hour)];
+  const lessonId = activePlacements(d)[placementKey(classId, day, hour)];
   if (lessonId === undefined) return null;
   const lesson = d.lessons.find((x) => x.id === lessonId);
   if (lesson === undefined) return { day, hour, size: 1 };
@@ -542,11 +545,11 @@ export function place(
   if (lesson === undefined) return d;
 
   const block = blockSizeFor(d, lesson, size);
-  const placements = { ...d.placements };
+  const placements = { ...activePlacements(d) };
   for (let i = 0; i < block; i++) {
     placements[placementKey(lesson.classId, day, hour + i)] = lessonId;
   }
-  return { ...d, placements };
+  return replaceActiveGrid(d, { placements });
 }
 
 /**
@@ -560,7 +563,7 @@ export function blockPinned(d: State, classId: Id, day: number, hour: number): b
   const found = blockAt(d, classId, day, hour);
   if (found === null) return false;
   for (let i = 0; i < found.size; i++) {
-    if (d.pinned[placementKey(classId, day, found.hour + i)] !== undefined) return true;
+    if (activePinned(d)[placementKey(classId, day, found.hour + i)] !== undefined) return true;
   }
   return false;
 }
@@ -584,12 +587,12 @@ export function setBlockPinned(
 ): State {
   const cells = blockCells(d, classId, day, hour);
   if (cells.length === 0) return d;
-  const pinned = { ...d.pinned };
+  const pinned = { ...activePinned(d) };
   for (const key of cells) {
     if (on) pinned[key] = 1;
     else delete pinned[key];
   }
-  return { ...d, pinned };
+  return replaceActiveGrid(d, { pinned });
 }
 
 /**
@@ -607,15 +610,15 @@ export function liftBlock(d: State, classId: Id, day: number, hour: number): Sta
   const found = blockAt(d, classId, day, hour);
   if (found === null) return d;
 
-  const lessonId = d.placements[placementKey(classId, day, found.hour)];
+  const lessonId = activePlacements(d)[placementKey(classId, day, found.hour)];
   if (lessonId === undefined) return d;
 
-  const placements = { ...d.placements };
+  const placements = { ...activePlacements(d) };
   for (let i = 0; i < found.size; i++) {
     const k = placementKey(classId, day, found.hour + i);
     if (placements[k] === lessonId) delete placements[k];
   }
-  return { ...d, placements };
+  return replaceActiveGrid(d, { placements });
 }
 
 /**
@@ -679,7 +682,7 @@ export function dropMap(
   // render, and a vacate that was not followed by its occupy would leave it
   // lying about who is busy. Copying costs one pass over ~1800 entries, once —
   // the thing being avoided is doing that 72 times.
-  const work: State = { ...d, placements: { ...d.placements } };
+  const work: State = replaceActiveGrid(d, { placements: { ...activePlacements(d) } });
   const workIx: Index = {
     ...ix,
     teacherBusy: new Map(ix.teacherBusy),
@@ -712,7 +715,7 @@ export function dropMap(
       for (let i = 0; i < block && s + i < hourCount; i++) {
         const found = blockAt(work, lesson.classId, g, s + i);
         if (found === null) continue;
-        const occupantId = work.placements[placementKey(lesson.classId, g, found.hour)];
+        const occupantId = activePlacements(work)[placementKey(lesson.classId, g, found.hour)];
         if (occupantId === undefined) continue;
         const mark = `${occupantId}|${found.hour}`;
         if (seen.has(mark)) continue;
@@ -733,7 +736,7 @@ export function dropMap(
       // that: without this the lock would hold against the mouse, the keyboard
       // and the solver, and then quietly lose to a card dropped on top of it.
       const locked = heads.find(
-        (h) => d.pinned[placementKey(lesson.classId, g, h.hour)] !== undefined,
+        (h) => activePinned(d)[placementKey(lesson.classId, g, h.hour)] !== undefined,
       );
       if (locked !== undefined) {
         map.set(key, {
@@ -749,11 +752,11 @@ export function dropMap(
       }
 
       for (const h of heads) {
-        vacate(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
+        vacate(activePlacements(work), workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
       const after = check(work, workIx, lessonId, g, s, size);
       for (const h of heads) {
-        occupy(work.placements, workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
+        occupy(activePlacements(work), workIx, h.lesson, roomOf(ix, h.lesson), g, h.hour, h.size);
       }
 
       if (after.blocked !== null) {
@@ -871,8 +874,9 @@ export function vacate(
 /** Counter: how many hours of this lesson are on the grid. */
 export function countPlacedHours(d: State, lessonId: Id): number {
   let n = 0;
-  for (const key in d.placements) {
-    if (d.placements[key] === lessonId) n++;
+  const placements = activePlacements(d);
+  for (const key in placements) {
+    if (placements[key] === lessonId) n++;
   }
   return n;
 }
@@ -906,8 +910,9 @@ export interface ClosedConflict {
 export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
   const out: ClosedConflict[] = [];
 
-  for (const key in d.placements) {
-    const lessonId = d.placements[key];
+  const placements = activePlacements(d);
+  for (const key in placements) {
+    const lessonId = placements[key];
     if (lessonId === undefined) continue;
 
     const parts = key.split('|');
@@ -1003,37 +1008,94 @@ export function sanitize(d: State): State {
   });
   const lessonById = new Map(lessons.map((x) => [x.id, x]));
 
-  // Placements: overflowing, orphan or class-mismatched records
-  const placements: Record<string, Id> = {};
-  for (const key in d.placements) {
-    const lessonId = d.placements[key];
-    if (lessonId === undefined) continue;
+  // Every alternative grid is cleaned against the ONE shared school model.
+  // A deleted teacher/class/lesson therefore cannot leave an orphan in a
+  // program that happened not to be open when the edit was made.
+  const seenIds = new Set<Id>();
+  const seenNames = new Set<string>();
+  const sourcePrograms = Array.isArray(d.programs) && d.programs.length > 0
+    ? d.programs
+    : [blankProgram()];
+  if (sourcePrograms !== d.programs) changed = true;
 
-    const parts = key.split('|');
-    const classId = parts[0];
-    if (parts.length !== 3 || classId === undefined) {
-      changed = true;
-      continue;
+  const programs = sourcePrograms.map((program, index) => {
+    let programChanged = false;
+    let id = typeof program.id === 'string' ? program.id.trim() : '';
+    if (id === '' || seenIds.has(id)) {
+      const base = `program-${index + 1}`;
+      id = base;
+      let suffix = 2;
+      while (seenIds.has(id)) id = `${base}-${suffix++}`;
+      programChanged = true;
     }
-    const day = Number(parts[1]);
-    const hour = Number(parts[2]);
-    const lesson = lessonById.get(lessonId);
+    seenIds.add(id);
 
-    if (
-      lesson === undefined ||
-      lesson.classId !== classId ||
-      !Number.isInteger(day) ||
-      day < 0 ||
-      day >= dayCount ||
-      !Number.isInteger(hour) ||
-      hour < 0 ||
-      hour >= hourCount
-    ) {
-      changed = true;
-      continue;
+    let name = typeof program.name === 'string' ? program.name.trim() : '';
+    if (name === '') {
+      name = `Program ${index + 1}`;
+      programChanged = true;
     }
-    placements[key] = lessonId;
-  }
+    const baseName = name;
+    let nameKey = name.toLocaleLowerCase('tr');
+    let suffix = 2;
+    while (seenNames.has(nameKey)) {
+      name = `${baseName} (${suffix++})`;
+      nameKey = name.toLocaleLowerCase('tr');
+      programChanged = true;
+    }
+    seenNames.add(nameKey);
+
+    const placements: Record<string, Id> = {};
+    for (const key in program.placements) {
+      const lessonId = program.placements[key];
+      if (lessonId === undefined) continue;
+
+      const parts = key.split('|');
+      const classId = parts[0];
+      const day = Number(parts[1]);
+      const hour = Number(parts[2]);
+      const lesson = lessonById.get(lessonId);
+      if (
+        parts.length !== 3 ||
+        classId === undefined ||
+        lesson === undefined ||
+        lesson.classId !== classId ||
+        !Number.isInteger(day) ||
+        day < 0 ||
+        day >= dayCount ||
+        !Number.isInteger(hour) ||
+        hour < 0 ||
+        hour >= hourCount
+      ) {
+        programChanged = true;
+        continue;
+      }
+      placements[key] = lessonId;
+    }
+
+    const pinned: Record<string, 1> = {};
+    for (const key in program.pinned) {
+      if (placements[key] === undefined) {
+        programChanged = true;
+        continue;
+      }
+      pinned[key] = 1;
+    }
+
+    if (!programChanged) {
+      const samePlacements =
+        Object.keys(placements).length === Object.keys(program.placements).length;
+      const samePins = Object.keys(pinned).length === Object.keys(program.pinned).length;
+      if (samePlacements && samePins) return program;
+    }
+    changed = true;
+    return { id, name, placements, pinned };
+  });
+
+  const activeProgramId = programs.some((program) => program.id === d.activeProgramId)
+    ? d.activeProgramId
+    : programs[0]!.id;
+  if (activeProgramId !== d.activeProgramId) changed = true;
 
   // Closed hours: deleted teacher/class/room, or overflowing day/hour
   const unavailable: Record<string, 1> = {};
@@ -1062,21 +1124,52 @@ export function sanitize(d: State): State {
     unavailable[key] = 1;
   }
 
-  // Pins: whatever no longer has a lesson under it. Judged against the
-  // placements THIS pass just rebuilt rather than against `d.placements`, so a
-  // pin dies in the same sweep that removes the block it was holding — a
-  // teacher deleted, a day dropped, a split changed. A pin over an empty cell
-  // would lock a square for a lesson that is not there and refuse every drop
-  // onto it, with nothing on screen to explain why.
-  const pinned: Record<string, 1> = {};
-  for (const key in d.pinned) {
-    if (placements[key] === undefined) {
-      changed = true;
-      continue;
-    }
-    pinned[key] = 1;
-  }
-
   if (!changed) return d;
-  return { ...d, classes, lessons, placements, unavailable, pinned };
+  return { ...d, classes, lessons, unavailable, programs, activeProgramId };
+}
+
+export type PinScope =
+  | { kind: 'all' }
+  | { kind: 'row'; view: View; rowId: Id }
+  | { kind: 'day'; day: number }
+  | { kind: 'column'; day: number; hour: number };
+
+/** Every CELL of every whole block touched by a bulk pin scope. */
+export function pinScopeCells(d: State, scope: PinScope): string[] {
+  const cells = new Set<string>();
+  for (const lesson of d.lessons) {
+    for (const block of placedBlocks(d, lesson)) {
+      const matches =
+        scope.kind === 'all' ||
+        (scope.kind === 'day' && scope.day === block.day) ||
+        (scope.kind === 'column' &&
+          scope.day === block.day &&
+          scope.hour >= block.hour &&
+          scope.hour < block.hour + block.size) ||
+        (scope.kind === 'row' &&
+          (scope.view === 'class'
+            ? scope.rowId === lesson.classId
+            : scope.rowId === lesson.teacherId));
+      if (!matches) continue;
+      for (let offset = 0; offset < block.size; offset++) {
+        const key = placementKey(lesson.classId, block.day, block.hour + offset);
+        cells.add(key);
+      }
+    }
+  }
+  return [...cells];
+}
+
+/** Toggle policy: all pinned -> clear all; otherwise pin all. One state change. */
+export function togglePinScope(d: State, scope: PinScope): State {
+  const cells = pinScopeCells(d, scope);
+  if (cells.length === 0) return d;
+  const current = activePinned(d);
+  const on = !cells.every((key) => current[key] !== undefined);
+  const pinned = { ...current };
+  for (const key of cells) {
+    if (on) pinned[key] = 1;
+    else delete pinned[key];
+  }
+  return replaceActiveGrid(d, { pinned });
 }

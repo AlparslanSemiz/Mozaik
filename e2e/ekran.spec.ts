@@ -19,7 +19,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { openWithSampleTheme, SCENES } from './helpers';
+import { openWithSampleTheme, SCENES, settledMotion } from './helpers';
 
 const OUT = 'test-results/ekran';
 
@@ -39,17 +39,7 @@ const OUT = 'test-results/ekran';
  * three steps. Animations that never finish are filtered out rather than
  * waited on, and the whole wait is capped — a picture is not worth a hang.
  */
-async function settled(page: Page) {
-  await page.evaluate(async () => {
-    await Promise.race([
-      Promise.allSettled(
-        document.getAnimations().filter((a) => a.playState === 'running').map((a) => a.finished),
-      ),
-      new Promise((r) => setTimeout(r, 2_000)),
-    ]);
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-  });
-}
+const settled = settledMotion;
 
 /**
  * The shutter check: everything the camera is pointed at is fully opaque.

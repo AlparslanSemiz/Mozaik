@@ -57,6 +57,28 @@ async function go(page: Page, tab: string) {
 }
 
 test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
+  // THE ORDER OF THE PROGRAM STRIP, asked for by name: "öğretmen ve sınıftan
+  // seçimleri en solda eski yerinde olmalı". The program library arrived at the
+  // head of the strip in the round before this one and pushed the view switch a
+  // group to the right; it is a menu now and it stands third.
+  //
+  // Read as CAPTIONS rather than as buttons, because that is the level the
+  // request was about — which question the strip asks first.
+  test('Program şeridi Görünüm ile başlıyor, kitaplık üçüncü grup', async ({ page }) => {
+    await openWithSample(page);
+    await go(page, 'Program');
+
+    // Upper case because the stylesheet says so, and read as RENDERED: the
+    // screen is what the request was about.
+    const captions = await page.locator('.ribbon .ribbon-label').allInnerTexts();
+    expect(captions).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM', 'YOĞUNLUK', 'IZGARA']);
+
+    // ...and the first control on it is the teacher view, before the class one
+    // (the strip's own teacher-before-class rule).
+    const first = page.locator('.ribbon .btn').first();
+    await expect(first).toHaveAccessibleName('Öğretmen görünümü');
+  });
+
   test('yedi sekmenin YEDİSİNDE şerit var ve hepsi aynı yükseklikte', async ({ page }) => {
     await openWithSample(page);
 
@@ -346,6 +368,69 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     expect(n).toBeGreaterThan(0);
     expect(n).toBe(rows);
     await expect(btn).toBeEnabled();
+  });
+});
+
+// Ayarlar was the one strip with an empty right-hand end: a single `Bölüm`
+// group and nothing past it, on all five sections. ("Ayarlardaki özel
+// sectionlara özgü ayarlar o sectionun alt şeridinde sağ üstte gözüksün.")
+//
+// The assertion is deliberately about the SHAPE rather than the wording: every
+// section has something at the right end, it sits past the spacer, and no two
+// sections say the same thing — a strip that reads the same wherever you stand
+// is a strip that is not about where you are.
+test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
+  const SECTIONS = ['Zil ve günler', 'Kurallar', 'Görünüm', 'Planlar ve yedek', 'Hakkında'];
+
+  test('beş bölümün beşinde de sağda bir grup var, ve beşi ayrı şeyler söylüyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+
+    const seen: string[] = [];
+    for (const s of SECTIONS) {
+      await openSettings(page, s);
+      const right = await page.evaluate(() => {
+        const bar = document.querySelector('.ribbon')!;
+        const kids = [...bar.children];
+        const at = kids.findIndex((k) => k.classList.contains('spacer'));
+        if (at < 0) return null;
+        const after = kids.slice(at + 1) as HTMLElement[];
+        if (after.length === 0) return null;
+        const box = bar.getBoundingClientRect();
+        return {
+          text: after.map((k) => k.textContent ?? '').join(' ').split(/\s+/).join(' ').trim(),
+          // Past the middle of the strip: "sağ üstte" is the request itself.
+          rightOfCentre: after[0]!.getBoundingClientRect().left > box.left + box.width / 2,
+          spill: after.some((k) => k.getBoundingClientRect().right > box.right + 1),
+        };
+      });
+      expect(right, `${s}: şeridin sağ ucu boş`).not.toBeNull();
+      expect(right!.text, `${s}: sağ grup boş`).not.toBe('');
+      expect(right!.rightOfCentre, `${s}: sağ grup sağda değil`).toBe(true);
+      expect(right!.spill, `${s}: sağ grup şeridin dışına taştı`).toBe(false);
+      seen.push(right!.text);
+    }
+
+    // Five sections, five different readings — not one sentence repeated.
+    expect(new Set(seen).size, seen.join(' | ')).toBe(SECTIONS.length);
+  });
+
+  // The one section whose right-hand group ASKS instead of stating, and the
+  // reason it earns that is scrolling: Görünüm is long enough that the theme
+  // panel — its first — is off the top of the screen by the time you are at
+  // Hareket or Dil. The strip does not move.
+  test('Görünümün sağ ucu temayı GERÇEKTEN çeviriyor', async ({ page }) => {
+    await open(page);
+    await openSettings(page, 'Görünüm');
+
+    const ground = () => page.evaluate(() => document.documentElement.dataset.theme ?? '');
+    const rightEnd = page.locator('.ribbon .ribbon-group').last();
+
+    await rightEnd.getByRole('button', { name: 'Koyu', exact: true }).click();
+    expect(await ground()).toBe('dark');
+    await rightEnd.getByRole('button', { name: 'Açık', exact: true }).click();
+    expect(await ground()).toBe('light');
   });
 });
 

@@ -9,6 +9,59 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+### AB turu — devreden yedi madde — **BİTTİ ✅** (2026-08-30)
+
+Yedisi de yapıldı; **AB8 fotoğraf bekliyor**. Maddelerin tamamı ve gerekçeleri
+bu dosyanın altındaki *AB turu* bölümünde, ölçümler
+[STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
+
+- [x] **AB1** Hareket ve Dil sola · Ayarlar şeridinin boş sağ ucu doldu
+- [x] **AB2** İnfolar kısaldı: en uzunu **438 → 126** karakter · 4 sözlük elle
+- [x] **AB3** Çıktının sağ bloğu: **üç kaydırıcı bire** indi
+- [x] **AB4** Kök **13px** ve **%80** basamağı · %80/%100/%150'de bakıldı
+- [x] **AB5** Exe ikonu **ÖLÇÜLDÜ** — gömülüymüş; eşik 20 → **32**
+- [x] **AB6** `-ExecutionPolicy Bypass` kalktı · `SHA256SUMS.txt` · VERSIONINFO
+      zaten varmış
+- [x] **AB7** İngilizce README + `LICENSE` (MIT + OFL) + İngilizce iş akışları
+- [x] **Devralınan ölçüm borcu:** `dist` sıçraması atfedildi — sebep bir
+      bağımlılık değil **veri** (dört sözlük %34,6, sağ tık menüsü %0,7)
+
+`npm run kontrol` yeşil: **719 birim · 514 E2E · 22 site · 7 çözücü.**
+`dist/index.html` **961 584 bayt** (öncesi 1 031 525 — AB2 sayesinde düştü).
+
+---
+
+### SIRADAKİ İŞ — üçü de KULLANICIDA, ve üçü de kodda değil
+
+1. **`npm run yayinla -- 2.0.1`.** Kod hazır ve `npm run kontrol` yeşil. Bu
+   sürümün taşıdıkları: v2.0.0'ın **veri kaybı düzeltmesi** (doğru
+   `identifier`), AA turunun beş maddesi (şema v11), AC turunun altısı, ve bu
+   turun yedisi. Yayınlanana kadar babanın exe'sinde **güncelleme düğmelerine
+   basılmasın** — `surum.json` hâlâ 2.0.0'ı gösteriyor.
+2. **Yayından sonra Windows'ta bir kez denensin.** Bu makinede ölçülemeyen
+   şeyler orada görülür: exe'nin kendini gerçekten değiştirmesi, planların
+   yerinde kalması, **görev çubuğundaki yeni simge** (eşik 32'ye çıktı),
+   SmartScreen'in ne dediği, ve `Kur.cmd`'nin yeni `RemoteSigned` yolu.
+3. **GitHub Pages hâlâ başkasına gidiyor.** `AlparslanSemiz.github.io`
+   deposunda Settings → Pages → Custom domain temizlenecek **ve** kökteki
+   `CNAME` silinecek. Kaldırmanın GameMetrix'i kırmayacağı ölçülmüştü.
+
+Ve hâlâ bekleyen tek büyük şey: **babanın gerçek listesi** — v0'ın çıkma şartı.
+
+### Karar bekleyenler
+
+- [ ] **Çözücüde Deney B uygulansın mı?** Ölçüldü ve bedeli yok: sınıf deliği
+      268 → **251**, delikli gün 85 → **72**, blok yine 367/367, düğüm yine
+      367, süre 71 ms. Ayrıntısı aşağıda.
+- [ ] **AB8 — aSc'nin ders ekleme penceresinin fotoğrafı.**
+- [ ] **`strip = false`'un boyut maliyeti** — Rust olan bir makinede ölçülecek.
+- [ ] **`kayma.spec.ts`'in "aynı genişlikte" testi macOS'ta düşüyor** ve kusur
+      kodda değil: bindirmeli kaydırma çubuğu 0 px, yani testin ölçmek istediği
+      oluk orada yok. Testin kendi koruması bunu söylüyor. Karar: oluk yoksa
+      `skip` mi etsin, yoksa yazıldığı makineye özel mi kalsın.
+
+---
+
 > **ÇÖZÜCÜNÜN KALİTESİ ÖLÇÜLDÜ — karar bekliyor.** (2026-08-29, otuz dördüncü
 > oturum. Bütün sayılar [STATUS.md](STATUS.md) → *Otuz dördüncü oturum* → 2.)
 >
@@ -2000,189 +2053,138 @@ Kullanıcının yazdığı beş satır. **Şema v10 → v11'e çıktı.** Ayrın
 
 ---
 
-## AB turu — Z planından DEVREDEN maddeler — **BAŞLANMADI** (2026-08-29)
+### AC turu — kullanıcının altı satırı — **BİTTİ ✅** (2026-08-30)
 
-> **ŞİMDİ SIRADA burasıdır.** Yukarıdaki AA turu bitti; sıradaki iş bu
-> bölümün sekiz maddesi. Başka bir makinede yapılacak.
+Tur bir **düzeltme turu**ydu: altı madde de çalışma ağacındaki bitmemiş turun
+üstüne geldi. Ölçümlerin hepsi [STATUS.md](STATUS.md) → *Otuz altıncı oturum*.
 
-Bu maddeler 2026-08-29'da onaylanan beş aşamalı planın parçasıydı; ilk üç
-aşama bitti ve `main`'e girdi (blok boyları 2·3·4, çıktıda birleşme, branş
-yeniden adlandırma, ders aktarma, sıralama işareti, Kontrol'ün şeridi, sağ
-raylarda yatay kaydırma). **Aşağıdakiler yapılmadı.** Her maddenin yanında
-gerekçesi, dokunulacak yer ve —varsa— ÖLÇÜLMÜŞ sayısı var, çünkü bu turu
-başka bir makine bitirecek.
+- [x] **AC1 Ekleme bloğu kısaldı, simetri kalarak.** Kullanıcı kararı: yalnız
+      kutu. `18.5rem → 13rem`, açıklama rayı `5.5 → 3.25rem`. Ölçüldü:
+      %100'de **259 → 182 px**, beş ekranın beşi de eşit. Dersler %150'de
+      316'da kalıyor çünkü kendi paragrafı raydan uzun — oradaki tek kol metin.
+      *(O paragraf **AB2'de kısaldı**, yani bu madde de kapandı.)*
+- [x] **AC2 Müsaitlik satırı 42 → 54,3 px** (%150'de 63 → 81,4). Sayfa dikey
+      taşması iki ölçekte de **0**. "Haftanın darlığı" kendi kuralıyla eski
+      boyunda kaldı: o bir müsaitlik programı değil, iskeleti ödünç alıyor.
+- [x] **AC3 Raptiye kartın ÜSTÜNDE** — babanın en çok kullanacağı iş, artık tek
+      tık. Kartın **kardeşi** (düğme içinde düğme olmaz), hep görünür, sönük,
+      hover/odak/basılıyken tam. Sağ tıktaki kalem de duruyor.
+      **Testi iki mutasyonu birden yuttu ve iki kez yazıldı** — bkz. tuzak 99.
+- [x] **AC4 Program şeridi yeniden dizildi.** `Görünüm` en solda (eski yeri),
+      kitaplık tek menüde, `Izgara`'nın üç düğmesi tek menüde. Sebep ölçüm:
+      %150'de şerit **2061 px** istiyordu ve **iki düğme taşıyordu**; şimdi
+      1717 px, taşma 0.
+- [x] **AC5 Her şey düzenlenebilir, sınıf değişimi dahil.** Yeni saf fonksiyon
+      `moveLessonToClass()` (`transferLesson`'ın aynası; pinler düşer ve
+      **sayılır**), `LessonEdit` üç alandan altıya, `Inspector` okunan panelden
+      düzenlenen panele. Sağ tık menüsü yedi kaleme indi, ikisi kapı.
+      `ghostla` → `soluklaştır`.
+- [x] **AC6 Havuzda sıra, süzgeç ve görünür ayrım.** Beş sıra + branş süzgeci
+      (`toolState`, yeni depolama anahtarı YOK), başlıklı gruplar. İki ölçüm
+      turu iki gerçek kusur buldu: kırpılan kartlar (%150'de **4123 px**
+      erişilemez) ve kısa ekranda kaybolan kart satırı — bkz. tuzak 100.
+- [x] **AC7 Devralınan DÖRT kırmızı kapandı** — `tipler`'in 8 hatası,
+      `program.spec.ts` 86'nın üç testi, `kurulum.spec.ts` 44+65'in beş testi,
+      ve `panel.spec.ts` 83'ün **bedava yeşili** (çift rezervasyonu ölçen test
+      `s.placements`'i okuyup boş dönüyordu).
+- [x] **AC8 Dört sözlük, 71 anahtar, elle.** Yarısı geçen turdan devrediyordu.
+      Almanca ekranda Türkçe harf taraması **sıfır satır**.
 
-Kaynak satırlar bu dosyanın sonundaki *Ham notlar* bölümünde duruyor.
+`npm run kontrol` o turda yeşildi: **718 birim · 507 E2E · 22 site · 7 çözücü.**
 
-### AB1 Ayarlar — Hareket ve Dil SOLA, bölüme özgü ayar ŞERİDE
+> **O turun bıraktığı tek açık madde — ÖLÇÜM — AB turunda KAPANDI.**
+> `dist/index.html` 1 031 525 bayttı ve sıçramanın kaynağı ölçülmemişti.
+> Ölçüldü: dört sözlük **356 533 bayt** (%34,6),
+> `@radix-ui/react-context-menu` yalnız **7 107 bayt** (%0,7), geri kalan
+> 667 885. Yani sıçrama bir bağımlılıktan değil **veriden** geliyordu.
 
-> Hareket ve Dil solda olmalı. Hatta dil istersen başka yere bile geçebilir.
-> Ayarlardaki özel sectionlara özgü ayarlar o sectionun alt şeridinde sağ üstte gözüksün.
+---
 
-- [ ] **Hareket** ([Appearance.tsx:341](../src/components/settings/Appearance.tsx#L341))
-      ve **Dil** ([:376](../src/components/settings/Appearance.tsx#L376)) sağ
-      `<aside>`'dan (`:293`–`:400`) sol sütunun sonuna taşınır. Saf JSX
-      taşıması, mantık değişmiyor.
-- [ ] **Bölüme özgü ayar, o bölümün şeridinde sağ üstte.** Ayarlar şeridi
-      ([Ribbon.tsx:724](../src/components/Ribbon.tsx#L724)) tek bir
-      `<Group label="Bölüm">` çiziyor ve `<Spacer/>` bile taşımıyor — sağ uç
-      boş. Müsaitlik şeridine bu turda eklenen `Göster` grubunun deseni
-      birebir kullanılabilir. Her bölüm için bir sağ grup: Görünüm → tema +
-      yoğunluk, Zil ve günler → gün sayısı, Kurallar → seviye özeti,
-      Planlar → aktif plan, Hakkında → sürüm.
+## AB turu — Z planından devreden maddeler — **BİTTİ ✅** (2026-08-30)
 
-### AB2 İnfolar kısalsın — her ekranda
+Sekiz maddenin **yedisi** yapıldı. AB8 hâlâ fotoğraf bekliyor. Ölçümlerin
+hepsi [STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
 
-> Bir de çok fazla info var ve çok uzunlar her yerde infoları olabildiğince anlaşılır kısa ve öz yap.
+> **BU TURUN EN PAHALI BULGUSU BİR KOD DEĞİL: İKİ MADDENİN PLANI YANLIŞTI.**
+> AB5 "ikon exe'ye gömülmüyor olabilir" diyordu, AB6 "VERSIONINFO yok"
+> diyordu. İkisi de yayınlanmış ikiliye bakılarak sınandı; ikisi de **yanlış**.
+> Kayıt burada dursun ki bir daha aynı yere bakılmasın — ve yeni **tuzak 101**
+> bunun genel hâlini yazıyor.
 
-- [ ] Kural: bir `.hint` **tek cümle** ve ~90 karakteri geçmez; uzun gerekçe
-      `title`'a iner. Müsaitlik'in iki uzun hint'i bu turda böyle kısaltıldı
-      (`Availability.tsx`), deseni oradan alın.
-- [ ] En kalabalık yerler: `settings/Appearance.tsx` (tema · yazı büyüklüğü ·
-      yoğunluğun iki grubu · araç şeridi · örnek · hareket · dil),
-      `settings/Data.tsx`'in "Veriler nerede" ve yedek panelleri.
-- [ ] **Her kısaltma dört sözlüğü ELLE günceller** — `i18n.test.ts`'in ölü
-      anahtar tarayıcısı İngilizce yorumlara da baktığı için bunu söylemez
-      (tuzak 87). Tur sonunda sayfa **Almanca** açılıp ekrana bakılır
-      (tuzak 89).
-
-### AB3 Çıktının sağ bloğu — iç içe ÜÇ kaydırıcı
-
-> Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz zor
-> o sebeple ya yatay şekilde ya sağa sola ya da biraz daha geniş şekilde
-> yapabiliriz aslında çünkü çıktı kısmında bayağı boşluk var.
-
-Ölçülen boş alan (1920, %100): kâğıdın iki yanında **≈400 px**; %150'de
-≈236 px. Yani genişletecek yer gerçekten var.
-
-- [ ] `.pick-items`'ın tavanı **`max-height: 168px`**
-      ([styles.css:4097](../src/styles.css#L4097)) — `--ui-scale`'i hiç
-      görmeyen sabit bir piksel, yani %150'de orantılı olarak DAHA AZ satır
-      tutuyor. `rem`'e çevrilir ya da kalkar.
-- [ ] İki `.pick-list` (`min-width: 240px`,
-      [:4074](../src/styles.css#L4074)) + `gap` = 494 px, ray ise 23.5rem =
-      **329 px** ([:3582](../src/styles.css#L3582)). Sığmadığı için alt alta
-      düşüyorlar ve iki ayrı 168px'lik kaydırıcı doğuyor. Çıktı ekranında ray
-      genişletilir (`--aside-w` yerel ezme, ~30rem) ve ikisi **yan yana**
-      durur.
-- [ ] Hedef: üç kaydırıcı **bire** insin. `.cols > aside` bu turda
-      `overflow-x: hidden` aldı, yani yatay kaydırma zaten bitti; kalan iş
-      dikey olanı.
-
-### AB4 Ölçek — kök 13px VE %100'ün altı
-
-> Babamın zaten windowsu bilgisayarın ölçeklenmesi çok büyük o sebeple biz de
-> büyük yaptık ama devasa oldu. ölçeklendirmeyı azatltmamız lazım.
-
-Kullanıcı kararı: **ikisi de**.
-
-- [ ] [styles.css:461](../src/styles.css#L461) `calc(14px * var(--ui-scale))`
-      → **13px**. Tipografi merdiveni (`--fs-*`, `:302`–`:307`) 14px'e
-      sabitlenmişti; 13'e yeniden sabitlenir ve **12 px ekran tabanı korunur**
-      (CLAUDE.md'nin erişilebilirlik sözleşmesi).
-- [ ] [theme.ts:292](../src/theme.ts#L292) `SCALE_MIN` 1 → **0.8**.
-      `SCALE_DEFAULT` **1 kalır**: kimsenin ekranı kendiliğinden değişmez,
-      baba kendi makinesinde küçültür. `Appearance.tsx`'in `STEPS`'i zaten
-      MIN/MAX/STEP'ten türüyor.
-- [ ] `theme.test.ts` güncellenir.
-- [ ] **TUZAK 33 BURADA**: bir ölçek değişikliği sabit genişlikli sütunu
-      sessizce kırpar ve süit yeşil kalır. %80 · %100 · %150'de iki temada
-      `npm run ekran` alınır ve **BAKILIR**.
-- [ ] Tauri penceresinde zoom/DPI ayarı **yok** (`tauri.conf.json` `app.windows[0]`);
-      Windows ölçeği bunun üstüne çarpılmaya devam eder. Kullanıcının elindeki
-      tek kol %80 basamağıdır.
-
-### AB5 Windows simgesi — önce ÖLÇ, sonra çiz
-
-> Uygulamanın windows çubuğundaki simgesi büyük simge olsun.
-> (Netleştirme: *"sanki küçük simge yani 9x9 pixellik kullanılıyor gibi onu 16x16'e çevir"*)
-
-`kurulum/icon.ico` dokuz boy taşıyor (16·20·24·32·40·48·64·128·256) ve
-20'den itibaren ayrıntılı çizim — o kol tükenmiş.
-**Ama** [STATUS.md:1818](STATUS.md#L1818) kendi kaydında yazıyor:
-*"`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü **varsayıldı**, ölçülmedi."*
-Babanın gördüğü düşük çözünürlük tam olarak bunun belirtisi.
-
-- [ ] `.github/workflows/surum.yml`'nin `exe` işine bir **ölçüm** eklenir:
-      üretilen `Mozaik.exe`'nin ikon kaynağı çıkarılıp gömülü boylar
-      listelenir, `kurulum/icon.ico` ile karşılaştırılır, tutmuyorsa iş
-      kırmızıya döner.
-- [ ] Tutmuyorsa çare Win32 ikon kaynağını **açıkça** yazmak.
-- [ ] Ölçüm yeşilse şikayetin sebebi çizimdir: `site/icon.svg`'nin sütunları
-      512'lik karenin içinde büyütülür (ikisi de full-bleed, kırpılacak
-      şeffaf kenar yok).
-- [ ] `e2e/temel.spec.ts` **79. bölüm** ([:815](../e2e/temel.spec.ts#L815))
-      boy listesini ve eşiği İKİNCİ kez sabitliyor — dosyaya dokunulursa
-      orası da güncellenir.
-- [ ] Tuzak 65 aynen geçerli: bir platform iddiası **ölçülmeden** yazılmaz.
-
-### AB6 Virüs / SmartScreen — sertifikasız hafifletme
-
-> Babama indirdim exeyi zip virüs algılandı. .exeyi açarken de window engelledi
-> yine de açmak istiyor musun dedi nedendir bunu düzeltelim.
-
-Kullanıcı kararı: **sertifika ALINMAYACAK**, para gerektirmeyen her şey
-yapılacak. Exe imzasız (repoda hiçbir imza yapılandırması yok) ve üç ayrı
-tetikleyici var; ikisi kapatılabilir.
-
-- [ ] **`-ExecutionPolicy Bypass`** — `kurulum/Kur.cmd:6`,
-      `kurulum/Guncelle.cmd:7`, `kurulum/kur.ps1:149` ve `:207`. İndirilen bir
-      arşivin içinde bu, tarayıcıların en tanıdık imzalarından biri ve
-      *"zip virüs algılandı"* raporunun **en olası sebebi**.
-      `RemoteSigned` + `Unblock-File` ile değişir.
-- [ ] **VERSIONINFO yok.** Yayıncısı, ürün adı, sürümü olmayan bir PE sezgisel
-      tarayıcıya çıplak görünür. Ürün adı, açıklama, sürüm ve şirket alanları
-      gömülür.
-- [ ] **`strip = true` + `lto` + `opt-level = "s"`**
-      (`src-tauri/Cargo.toml:52`–`:56`) — sembolsüz, sıkı paketlenmiş küçük
-      bir ikili entropi puanını yükseltir. `strip = false`'un boyut maliyeti
-      **ÖLÇÜLÜR**, karar ölçümle verilir.
-- [ ] Yayına **`SHA256SUMS.txt`** eklenir
-      (`surum.yml:221`, `gh release create`).
-- [ ] Microsoft Defender'a ve zip'i işaretleyen tarayıcıya **yanlış-pozitif
-      bildirimi** yapılır; adresler README'ye yazılır.
-- [ ] README'de Windows'un ne diyeceği ve tam tıklama yolu yazılır.
-- [ ] Sertifika ileride alınırsa bağlamanın tek commit olması için OV/EV
-      adımları buraya not düşülür.
-- [ ] **Kaldırılmayacak olan:** kendi kendini güncelleyen ikili
-      (`update.rs`: indir → yanına yaz → üstüne adlandır → çalıştır). Üçüncü
-      tetikleyici odur ve ilke 1'in genişletilmiş hâli onu açıkça istiyor;
-      `update.rs` zaten AV'nin araya girebileceğini yazıyor.
-
-### AB7 Vitrin İngilizce — CLAUDE.md ve docs/ TÜRKÇE KALIR
-
-> Readmenin ingilizce olması ve githubtaki her şeyin ingilizce olması ve
-> github sayfasının tamtakır olması lazım.
-
-Kullanıcı kararı: **"Sadece vitrin İngilizce".** `CLAUDE.md`, `docs/`,
-`.claude/` ve `.mcp.json` **repoda kalır ve Türkçe kalır** — proje hafızası
-versiyonlanmaya devam eder.
-
-- [ ] `README.md` — 439 satır, tamamı Türkçe. **Kısa ve İngilizce** yeniden
-      yazılır: ne olduğu, indirme bağlantıları, dört teslim yolu, verinin
-      nerede durduğu, geliştirme komutları.
-- [ ] `.github/surum-notu.md` → İngilizce (her Release sayfasının gövdesi bu).
-- [ ] `.github/workflows/surum.yml` → adım adları, workflow adı ve girdi
-      açıklamaları İngilizce; **Actions arayüzünde görünüyorlar**. Girdiler
-      `yayinla`/`etiket` → `publish`/`tag` (`scripts/yayinla.mjs` referans
-      veriyorsa orası da).
-- [ ] `package.json`'ın `description`'ı ve `src-tauri/Cargo.toml`'un
-      `description`'ı İngilizce.
-- [ ] **`LICENSE` eklenir** — repoda hiç yok, `package.json`'da `license`
-      alanı da yok (`"private": true`). Öneri **MIT**, yanında gömülü IBM
-      Plex için **OFL 1.1** bildirimi (`scripts/font-source/`).
-- [ ] GitHub'ın kendi alanları (açıklama, konular, Pages) repo dosyası
-      değil — elle yapılır. `STATUS.md` ayrıca Pages kaynağının
-      ("Settings → Pages → Source: GitHub Actions") hiç açılmadığını söylüyor.
-
-### AB8 aSc ders ekranı — FOTOĞRAF BEKLİYOR
-
-> ASC derslerinde ekleme ya da değiştirme kısmına bak.
-
-- [ ] `docs/Örnek Fotolar/` altında aSc'nin ders **ekleme/değiştirme
-      penceresinin** fotoğrafı yok; yalnız "Lessons/week + Single" açılır
-      listesi var. Kullanıcı bu maddeyi **o tur atladı**; fotoğraf gelince
+- [x] **AB1 Hareket ve Dil SOLA, bölüme özgü ayar ŞERİDE.** İki panel sağ
+      raydan sol sütunun sonuna taşındı; rayda tek panel kalınca `Örnek`
+      tablosu `.stat-scroll`'a girdi (otuz beşinci oturumun sözleşmesi: kayan
+      şey liste, panel değil). Ayarlar şeridinin **boş olan sağ ucu** doldu:
+      Görünüm'de `Tema` (tek kontrol; o bölüm kayacak kadar uzun ve tema onun
+      ilk paneli), öteki dörtte bir `.ribbon-value` okuması. **Yoğunluk
+      konmadı, ve önce ölçüldü**: %150'de pay 574 px, maliyet 400 px — yani
+      sığıyordu; engel yer değil belirsizlik (o ekranda iki yoğunluk ekseni
+      var). Yeni `serit.spec.ts` 60, mutasyonla sınandı.
+- [x] **AB2 İnfolar kısaldı — her ekranda.** Ekrandaki en uzun `.hint`
+      **438 → 126 karakter**. Kural: tek cümle, ~90 karakter, uzayan gerekçe
+      `title`'a (bunun için `AddPanel`'e `more` prop'u). Dört sözlük **elle**:
+      66 ölü anahtar silindi, 75 yeni anahtar yazıldı (300 çeviri). Almanca
+      tarama (tuzak 89) arayüzden **sıfır** Türkçe satır buldu; çıkan 15
+      satırın on beşi de örnek okulun öğretmen adları. Yeni tavan testi
+      `metin.spec.ts`'te (140), `.data-hint` hariç ve sebebi yazılı.
+- [x] **AB3 Çıktının sağ bloğu: üç kaydırıcı BİRE indi.** `.pick-items`'ın
+      168 px'lik tavanı kalktı (ham piksel: ölçek büyüdükçe oransal olarak
+      daha az ad tutuyordu), `min-width` 240px → **16rem** (ölçülen min-content
+      206 px @%100 · 305 px @%150), `.pickers` `auto-fit` grid oldu ve Çıktı'nın
+      rayı `min(37rem, 32cqw)`. %100'de iki liste **yan yana**. Yeni
+      `yazdir.spec.ts` 84, mutasyonla sınandı.
+- [x] **AB4 Kök 13px VE %100'ün altı.** Tipografi merdiveni 13'e yeniden
+      sabitlendi (px karşılıkları korundu), `SCALE_MIN` 0.80, `SCALE_DEFAULT`
+      **1 kaldı** — kimsenin ekranı kendiliğinden küçülmez. Küçülen şey rem
+      cinsinden yazı olmayan her şey: **%7,1**. %80 · %100 · %150'de iki temada
+      ölçüldü **ve bakıldı**: yatay taşma 0, kırpılan kutu 0. Yeni test
+      `gorunum.spec.ts` 44 (taban %80).
+      **Kullanıcı kararı:** 12 px tabanı **%100'de** geçerli; %80 gidilen bir
+      yer, açılan değil.
+- [x] **AB5 Windows simgesi — ÖLÇÜLDÜ, ve plan yanlıştı.** Yeni
+      `scripts/exe-ikon.mjs` PE kaynak tablosunu ayrıştırıyor; yayınlanmış
+      2.0.0 ikilisinde **dokuz ikon boyunun dokuzu da var** ve `icon.ico` ile
+      birebir tutuyor. Yani hiçbir şey eksik değildi. Sebep çizimdi: 24 px'te
+      ayrıntılı çizimin altı çubuğu 2,25 cihaz pikseli, araları 0,56 px.
+      **Kullanıcı kararı: eşik 20 → 32**, yani 16 · 20 · 24 sade çizim.
+      `icon.ico` yeniden üretildi, `temel.spec.ts` 79 güncellendi, ve
+      `surum.yml`'e bir **kapı** eklendi ki varsayım geri gelmesin.
+- [x] **AB6 Virüs / SmartScreen — sertifikasız hafifletme.**
+      `-ExecutionPolicy Bypass` **dört yerden de** kalktı; yerine `RemoteSigned`
+      + `Unblock-File`. `kur.ps1` kopyaladığı `.ps1`'leri de unblock ediyor.
+      `SHA256SUMS.txt` yayına eklendi. README Windows'un ne diyeceğini ve
+      yanlış-pozitif bildirim adreslerini yazıyor.
+      **VERSIONINFO zaten VARDI** (5 alan) — madde ölçümle kapandı.
+      **`strip = false` ÖLÇÜLEMEDİ**: bu makinede Rust yok, `Cargo.toml`'a
+      dokunulmadı, ve ölçmeden bir entropi iddiası yazmak tuzak 65 olurdu.
+- [x] **AB7 Vitrin İngilizce + LICENSE.** `README.md` kısa ve İngilizce;
+      `CLAUDE.md`, `docs/`, `.claude/` **Türkçe kaldı** ve README sebebini
+      yazıyor. `surum-notu.md` İngilizce **ama sonunda üç satır Türkçe kurulum
+      özeti var** — o sayfa babanın indirirken gördüğü sayfa. İş akışlarının
+      adları, işleri, girdileri ve adımları İngilizce. **`LICENSE` eklendi**
+      (MIT + gömülü IBM Plex için OFL 1.1), `package.json`'a `license` alanı,
+      iki `description` İngilizce.
+- [ ] **AB8 aSc ders ekranı — HÂLÂ FOTOĞRAF BEKLİYOR.** `docs/Örnek Fotolar/`
+      altına bakıldı: aSc'nin ders **ekleme/değiştirme penceresinin** resmi
+      yok, yalnız "Lessons/week + Single" açılır listesi var. Fotoğraf gelince
       açılır.
+
+`npm run kontrol` yeşil: **719 birim · 514 E2E · 22 site · 7 çözücü.**
+
+> **Devralınan ölçüm borcu da kapandı** (AC turu bunu "bir sonraki turun ilk
+> işi" diye bırakmıştı): `dist/index.html`'in sıçraması **atfedildi**. Dört
+> sözlük 356 533 bayt (%34,6), `@radix-ui/react-context-menu` yalnız **7 107
+> bayt** (%0,7), geri kalan 667 885. Yani sıçramanın kaynağı bir bağımlılık
+> değil **veri**. Bu turdan sonra dosya **961 584 bayt** — AB2'nin sildiği 66
+> ölü anahtar yüzünden 69 941 bayt **düştü**.
+
+### Bu turdan çıkan, yapılmayan tek şey
+
+- [ ] **`.color-dot`'un sağında boşluk yok.** Ayarlar → Görünüm'ün `Örnek`
+      tablosunda renk noktası ada yapışık duruyor (`●Mehmet Çelik`). Bu turun
+      eseri **değil** ve bu turda düzeltilmedi: sınıf altı yerde kullanılıyor
+      ve ikisi kendi boşluğunu flex `gap`'ten alıyor, yani paylaşılan sınıfa
+      `margin` eklemek ötekileri çift boşluklu yapar. Çare çağrı yerinde.
 
 ---
 
@@ -2216,3 +2218,25 @@ Bu iki madde plana "yapılacak" diye yazılmıştı; ölçüldüler ve **plan ya
   Regresyon değil, **platform farkı**; koruma işini yapıyor. Karar gerekiyor:
   oluk yoksa test `skip` mi etsin, yoksa yazıldığı makineye özel mi kalsın.
 
+
+
+Okul tarafında hatta her yerde yeni ekleme bloğu simetrik olmalı. boyutu içindekiler vesaire. 
+Dersler öğretmenden tarafında neden ekleme yerinde branş seçme yerinin solunda branş ayrıca yazıyor gereksiz.
+Programda satır sabitleme olması lazım. ya da sütun ya da günler de olabilir sağ tıklayarak açılsın bunlar.
+Ayrıca programda satır ghostlama ya da işte anlık kapatma çıkarma gibi olabilir. aynı şey günler için de 
+Tüm programı sabitleme ya da tüm programı kaydetme olmalı ve programlar arasında değiştirme olabilir.
+
+
+Program sectionu açılırken bi' yavaşlama oluyor. Bakmak lazım.
+Listelerdeki açıklamların hizaları da aynı olsun.
+Müsaitlikteki alltaki programla üstteki aynı benzer olsun.
+Arama kısmını düzelt böyle en sağda saçma sapan bir çizgi var gibi.
+Filtrelere başka filtreler de getir ve çokdan aza ifadelerini kaldır.
+Dersi düzenlemede dersi başka bir hocaya verme de olmalı.
+O raptiye işareti hover edildiğinde gelsin şeffaf olmasın.
+Sağ tıkta da sabitleme özelliği olsun.
+Derslerde öğretmende öğretmene göre filre olması ve sınıftanda sınıfa göre filtre olması saçma.
+
+
+
+ASC ve Robodersi playwright ile inceleyip oradaki güzel feaureları bize ekleyelim.

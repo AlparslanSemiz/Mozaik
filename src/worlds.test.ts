@@ -29,15 +29,15 @@ function pair(): State {
 describe('illegalBlocks — denetçinin kendisi', () => {
   it('temiz ızgarada hiçbir şey bulmuyor', () => {
     const d = pair();
-    d.placements[placementKey('s510', 0, 0)] = 'x1';
-    d.placements[placementKey('s511', 0, 1)] = 'x2';
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1';
+    activeProgram(d).placements[placementKey('s511', 0, 1)] = 'x2';
     expect(illegalBlocks(d)).toEqual([]);
   });
 
   it('aynı öğretmeni aynı saatte iki sınıfa koyunca YAKALIYOR', () => {
     const d = pair();
-    d.placements[placementKey('s510', 0, 0)] = 'x1';
-    d.placements[placementKey('s511', 0, 0)] = 'x2'; // MÇ iki yerde birden
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1';
+    activeProgram(d).placements[placementKey('s511', 0, 0)] = 'x2'; // MÇ iki yerde birden
     // BOTH are illegal, and that is the right answer: lift either one and the
     // other is still sitting in the teacher's hour.
     const bad = illegalBlocks(d);
@@ -47,7 +47,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
 
   it('kapalı saatte duran dersi yakalıyor', () => {
     let d = pair();
-    d.placements[placementKey('s510', 1, 2)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 1, 2)] = 'x1';
     d = closeHours(d, 'oMC', [[1, 2]]);
     expect(illegalBlocks(d)).toHaveLength(1);
     expect(illegalBlocks(d)[0]?.reason).toContain('müsait değil');
@@ -63,8 +63,8 @@ describe('illegalBlocks — denetçinin kendisi', () => {
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 }],
     });
-    d.placements[placementKey('s510', 0, 0)] = 'x1';
-    d.placements[placementKey('s510', 0, 1)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 0, 1)] = 'x1';
     d = closeHours(d, 'oMC', [[0, 1]]);
     const bad = illegalBlocks(d);
     expect(bad).toHaveLength(1);
@@ -80,9 +80,9 @@ describe('illegalBlocks — denetçinin kendisi', () => {
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 2 }],
     });
-    d.placements[placementKey('s510', 0, 0)] = 'x1'; // the double: 0 and 1
-    d.placements[placementKey('s510', 0, 1)] = 'x1';
-    d.placements[placementKey('s510', 1, 2)] = 'x1'; // the single, another day
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1'; // the double: 0 and 1
+    activeProgram(d).placements[placementKey('s510', 0, 1)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 1, 2)] = 'x1'; // the single, another day
     expect(illegalBlocks(d)).toEqual([]);
 
     d = closeHours(d, 'oMC', [[1, 2]]);
@@ -100,7 +100,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 3 }],
     });
-    for (let h = 0; h < 3; h++) d.placements[placementKey('s510', 0, h)] = 'x1';
+    for (let h = 0; h < 3; h++) activeProgram(d).placements[placementKey('s510', 0, h)] = 'x1';
     expect(illegalBlocks(d)).toEqual([]);
 
     d = closeHours(d, 'oMC', [[0, 1]]);
@@ -118,7 +118,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
       hours: 6,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 4 }],
     });
-    for (let h = 0; h < 4; h++) d.placements[placementKey('s510', 0, h)] = 'x1';
+    for (let h = 0; h < 4; h++) activeProgram(d).placements[placementKey('s510', 0, h)] = 'x1';
     expect(illegalBlocks(d)).toEqual([]);
 
     d = closeHours(d, 'oMC', [[0, 3]]);
@@ -133,9 +133,9 @@ describe('illegalBlocks — denetçinin kendisi', () => {
       hours: 4,
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 2 }],
     });
-    d.placements[placementKey('s510', 0, 0)] = 'x1';
-    d.placements[placementKey('s510', 0, 1)] = 'x1';
-    d.placements[placementKey('s510', 0, 2)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 0, 1)] = 'x1';
+    activeProgram(d).placements[placementKey('s510', 0, 2)] = 'x1';
     expect(illegalBlocks(d)).toEqual([]);
     expect(hoursOf(d, 'x1')).toBe(3);
   });
@@ -149,8 +149,8 @@ describe('makeWorld', () => {
       expect(back!.lessons).toHaveLength(w.state.lessons.length);
       expect(back!.teachers).toHaveLength(w.state.teachers.length);
       expect(back!.classes).toHaveLength(w.state.classes.length);
-      expect(Object.keys(back!.placements)).toHaveLength(
-        Object.keys(w.state.placements).length,
+      expect(Object.keys(activeProgram(back!).placements)).toHaveLength(
+        Object.keys(activeProgram(w.state).placements).length,
       );
     }
   });
@@ -184,3 +184,4 @@ describe('closeWeek / closeHours', () => {
     expect(Object.keys(d.unavailable)).toHaveLength(2);
   });
 });
+import { activeProgram } from './programs';

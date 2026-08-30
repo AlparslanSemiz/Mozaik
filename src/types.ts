@@ -200,23 +200,19 @@ export interface State {
    * the three lists, so no second dictionary is needed.
    */
   unavailable: Record<string, 1>;
-  /** `${classId}|${day}|${hour}` -> lessonId . A block = consecutive equal lessonIds. */
+  /** Alternative grids that share every school entity above. */
+  programs: ProgramVariant[];
+  /** The grid shown, checked, printed and edited right now. */
+  activeProgramId: Id;
+}
+
+/** One alternative timetable inside a plan. */
+export interface ProgramVariant {
+  id: Id;
+  name: string;
+  /** `${classId}|${day}|${hour}` -> lessonId. */
   placements: Record<string, Id>;
-  /**
-   * `${classId}|${day}|${hour}` -> 1 . If the key exists, the lesson sitting in
-   * that cell is PINNED: it survives "Baştan diz", it cannot be dragged away,
-   * right-clicked back to the pool or deleted with the keyboard, and nothing
-   * may be dropped on top of it.
-   *
-   * Keyed by CELL and not by lesson, because a lesson goes down as several
-   * blocks and the reader pins one of them — "this class has maths first thing
-   * on Tuesday" is a fact about a square, not about a lesson.
-   *
-   * The same shape as `unavailable` above and cleaned in the same place: a pin
-   * whose placement is gone is an orphan, and `sanitize()` drops it. Nothing
-   * outside this map ever means "pinned", so there is no second truth to keep
-   * in step.
-   */
+  /** `${classId}|${day}|${hour}` -> 1. Pins belong to this alternative only. */
   pinned: Record<string, 1>;
 }
 
@@ -232,5 +228,6 @@ export interface State {
  * v9: Lesson.blocks replaces Lesson.pairs — a block may be 2, 3 or 4 hours.
  * v10: State.pinned — cells the reader has locked in place.
  * v11: ClassGroup.maxSameLessonPerDay — the daily limit gained a middle layer.
+ * v12: placements/pinned moved into named alternative programs.
  */
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;

@@ -7,7 +7,7 @@ import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { openHours } from '../../entities';
-import type { Gender, Id, Settings, Teacher } from '../../types';
+import type { Gender, Id, Teacher } from '../../types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
@@ -26,8 +26,8 @@ import {
   setTeacherLimit,
   subjectKey,
   subjectLabel,
+  subjectOption,
   subjectOptions,
-  subjectShort,
   subjectRank,
   teacherRank,
   teacherSubjects,
@@ -38,25 +38,14 @@ import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
+import AddPanel from '../AddPanel';
 
 /** Sentinel option value: picking it opens a box instead of setting a subject. */
 const NEW = '\u0000yeni';
 
-/**
- * One line of a subject dropdown: "Mat · Matematik".
- *
- * The short form FIRST, because it is the string the reader has to recognise
- * everywhere else — the grid row heads, the cells and the printed page all
- * carry it, and until now the only screen that ever showed it was the Branşlar
- * editor. The full name stays beside it: a dropdown of three-letter codes is
- * not a list anyone can pick from, which is why this is not simply
- * `subjectShort`. When the two are the same string it is written once.
- */
-function subjectOption(settings: Settings, name: string): string {
-  const short = subjectShort(settings, name);
-  const full = subjectLabel(name);
-  return short === full ? full : `${short} · ${full}`;
-}
+/* `subjectOption` moved to entities.ts on 2026-08-30: the entity sheet draws
+   the same dropdown now, and two copies of "short · full" are two places for
+   the two to disagree. */
 
 /** Blank first: it is the value a row starts at, and the honest default. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
@@ -179,14 +168,14 @@ export default function Teachers({ state, change }: PanelProps) {
           The paste button rides the HEADING, not the form row: "Excel'den
           yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
           All five panels put it in the same corner. */}
-      <div className="panel add-panel">
-        <div className="panel-head">
-          <h2>{t('Yeni öğretmen')}</h2>
-          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
-        </div>
-        <p className="hint">
-          <T k="Branş **listeden seçilir**; listede yoksa “+ Yeni branş…” ile eklenir. Bir öğretmen iki branş veriyorsa (Türkçe ve Edebiyat gibi) **+ İkinci branş** ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Kısaltma ızgarada satır başlığı olarak görünür, kısa tutun (örn. MÇ). Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; **boş bırakılırsa Ayarlar → Kurallar'daki sayı** geçerli olur." />
-        </p>
+      <AddPanel
+        title={t('Yeni öğretmen')}
+        action={<button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>}
+        description={<T k="Branş **listeden seçilir**; kısaltma ızgarada satır başlığı olur." />}
+        more={t(
+          'Bir öğretmen iki branş veriyorsa + İkinci branş ile ikincisi de yazılır; o zaman her dersinde hangi branştan olduğu ayrıca seçilir. Renk otomatik atanır, kimseyle çakışmaz. Sağdaki üç kutu bu öğretmene özel sınırdır; boş bırakılırsa Ayarlar → Kurallar’daki sayı geçerli olur.',
+        )}
+      >
         <div className="form-row">
           <input
             type="text"
@@ -315,7 +304,7 @@ export default function Teachers({ state, change }: PanelProps) {
           }
           onAdd={(rows) => change((d) => addTeachersFromRows(d, rows))}
         />
-      </div>
+      </AddPanel>
 
       <div className="panel step-panel">
         <h2>{t('Öğretmenler ({n})', { n: state.teachers.length })}</h2>

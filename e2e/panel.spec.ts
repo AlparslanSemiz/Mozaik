@@ -211,14 +211,22 @@ test.describe('83. Panelden ders aktarma', () => {
     // matters: is any teacher in two classes at one hour?
     const clashes = await page.evaluate(() => {
       const raw = localStorage.getItem('ders-programi');
+      // `placements` moved INSIDE the active program variant. Read from the
+      // old place this came back `undefined`, the loop below ran zero times
+      // and the assertion passed against anything — the exact shape of a
+      // vacuous test (pitfall 23), on the one test whose whole job is to catch
+      // a double-booked teacher.
       const s = JSON.parse(raw ?? '{}') as {
         lessons?: Array<{ id: string; teacherId: string }>;
-        placements?: Record<string, string>;
+        activeProgramId?: string;
+        programs?: Array<{ id: string; placements: Record<string, string> }>;
       };
+      const grid = (s.programs ?? []).find((p) => p.id === s.activeProgramId);
+      if (grid === undefined) return ['aktif program bulunamadı'];
       const teacherOf = new Map((s.lessons ?? []).map((x) => [x.id, x.teacherId]));
       const seen = new Set<string>();
       const bad: string[] = [];
-      for (const [key, lessonId] of Object.entries(s.placements ?? {})) {
+      for (const [key, lessonId] of Object.entries(grid.placements)) {
         const [, day, hour] = key.split('|');
         const who = teacherOf.get(lessonId);
         if (who === undefined) continue;
@@ -229,5 +237,74 @@ test.describe('83. Panelden ders aktarma', () => {
       return bad;
     });
     expect(clashes).toEqual([]);
+  });
+});
+
+// 87. THE SHEET EDITS NOW. "öğretmeni düzenleme ve sınıfı düzenlemede her şeyi
+// düzenleyebilelim."
+//
+// The controls themselves are the Okul list's, bound to the same mutators, so
+// what is worth asking is not "does the box exist" but whether the road works
+// end to end: from a card on the grid, to the entity behind it, to a change
+// the GRID then shows.
+test.describe('87. Panelden düzenleme', () => {
+  const sheet = (page: import('@playwright/test').Page) => page.locator('.sheet');
+
+  async function laidOut(page: import('@playwright/test').Page) {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+  }
+
+  test('karttan "Öğretmeni düzenle" o hocayı açıyor, kısaltma ızgarayı DEĞİŞTİRİYOR', async ({ page }) => {
+    await laidOut(page);
+
+    const head = page.locator('table.grid .row-head .inspect').first();
+    const before = (await head.innerText()).trim();
+
+    await page.locator('table.grid .card').first().click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Öğretmeni düzenle' }).click();
+    await expect(sheet(page)).toBeVisible();
+    await expect(sheet(page).locator('.sheet-kind')).toHaveText('Öğretmen');
+
+    // The row head of the grid IS the short form, so changing it here is the
+    // shortest end-to-end this sheet has.
+    const short = sheet(page).getByRole('textbox', { name: 'Kısaltma' });
+    await short.fill('ZZ');
+    await short.blur();
+    await page.keyboard.press('Escape');
+
+    await expect(page.locator('table.grid .row-head .inspect', { hasText: 'ZZ' })).toHaveCount(1);
+    expect(before).not.toBe('ZZ');
+  });
+
+  test('karttan "Sınıfı düzenle" SINIFI açıyor — ızgaranın çizilmediği eksen', async ({ page }) => {
+    await laidOut(page);
+    await page.locator('table.grid .card').first().click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Sınıfı düzenle' }).click();
+    await expect(sheet(page).locator('.sheet-kind')).toHaveText('Sınıf');
+    // A class has a room and the school's per-day ceiling; a teacher has
+    // neither, so this is also how the two sheets are told apart.
+    await expect(sheet(page).getByRole('combobox', { name: 'Derslik' })).toBeVisible();
+  });
+
+  test('dersin SINIFI ders penceresinden değişiyor, ve önce ne kaybedileceği soruluyor', async ({ page }) => {
+    await laidOut(page);
+
+    await page.locator('table.grid .card').first().click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
+    const pick = sheet(page).getByRole('combobox', { name: 'Sınıf' });
+    const from = await pick.inputValue();
+
+    await pick.selectOption({ index: 1 });
+    // The question comes BEFORE the move, and it counts what it costs: a class
+    // change lifts every hour off the old row and offers it to the new one.
+    const dialog = page.locator('[role="dialog"], [role="alertdialog"]').last();
+    await expect(dialog).toContainText('sınıfına taşınsın mı?');
+    await dialog.getByRole('button', { name: 'Taşı' }).click();
+
+    await expect(page.locator('.toast').last()).toContainText('taşındı');
+    await expect(pick).not.toHaveValue(from);
   });
 });

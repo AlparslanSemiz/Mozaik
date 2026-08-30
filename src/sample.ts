@@ -10,6 +10,7 @@ import { teacherKey } from './constraints';
 import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
 import { PALETTE_SIZE } from './palette';
 import { SCHEMA_VERSION } from './types';
+import { blankProgram } from './programs';
 import {
   DEFAULT_BELL,
   DEFAULT_RULES,
@@ -196,7 +197,7 @@ export function sampleState(): State {
     classes,
     lessons,
     unavailable,
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }

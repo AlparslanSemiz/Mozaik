@@ -125,6 +125,18 @@ foreach ($dosya in @('sunucu.ps1', 'icon.ico', 'OKU.txt')) {
   if (Test-Path -LiteralPath $yol) { Copy-Item -LiteralPath $yol -Destination $Hedef -Force }
 }
 
+# İNTERNET İŞARETİNİ KALDIR — ve bunun sebebi kolaylık değil, bir uyarıdan
+# kaçınmak. Bir ZIP'ten çıkan her dosya "Internet" bölgesi damgası taşır
+# (Zone.Identifier), ve o damgayı taşıyan bir .ps1'i çalıştırmanın iki yolu
+# vardır: yürütme ilkesini BYPASS'a almak, ya da damgayı kaldırmak. İlki, bir
+# arşivin içindeki bir .cmd'de tarayıcıların ve virüs tarayıcılarının en
+# tanıdık imzalarından biridir — "zip virüs algılandı" raporunun en olası
+# sebebi de oydu. İkincisi aynı işi yapar ve hiçbir şeye benzemez.
+#
+# Kopyalamadan SONRA: Copy-Item damgayı beraberinde getirebiliyor.
+Get-ChildItem -LiteralPath $Hedef -Filter *.ps1 -File |
+  ForEach-Object { try { Unblock-File -LiteralPath $_.FullName } catch {} }
+
 $boyut = (Get-ChildItem -LiteralPath $Hedef -Recurse -File | Measure-Object -Property Length -Sum).Sum
 Yaz ("  Kopyalandı: {0}  ({1:N0} KB)" -f $Hedef, [math]::Round($boyut / 1KB))
 
@@ -146,7 +158,11 @@ $ikon   = Join-Path $Hedef 'icon.ico'
 # Pencere GİZLENMİYOR. Sunucu bu pencerede yaşıyor ve programı kapatmanın
 # tek yolu onu kapatmak; gizli bir pencere, kapatılamayan bir program
 # demektir. sunucu.ps1 pencerede bunu zaten yazıyor.
-$arg = '-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f $sunucu
+# RemoteSigned, Bypass DEĞİL: yukarıda `Unblock-File` damgayı kaldırdı, yani
+# bu dosya artık YEREL bir betik ve RemoteSigned yerel betiklere imza sormaz.
+# Bypass, kurulmuş bir kısayolun komut satırında oturmak için fazla geniş bir
+# izin — ve okuyan tarayıcıya da öyle görünüyor.
+$arg = '-NoProfile -ExecutionPolicy RemoteSigned -File "{0}"' -f $sunucu
 
 $kabuk = New-Object -ComObject WScript.Shell
 $hedefler = @(
@@ -204,5 +220,5 @@ Yaz ''
 $cevap = Read-Host '  Şimdi açılsın mı? (E/H)'
 if ($cevap -match '^(e|E|y|Y)') {
   Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') `
-                -ArgumentList ('-NoProfile -ExecutionPolicy Bypass -File "{0}"' -f (Join-Path $Hedef 'sunucu.ps1'))
+                -ArgumentList ('-NoProfile -ExecutionPolicy RemoteSigned -File "{0}"' -f (Join-Path $Hedef 'sunucu.ps1'))
 }

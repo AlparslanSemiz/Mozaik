@@ -27,6 +27,7 @@ import {
 } from "../../library";
 import { downloadBundle, listBackups } from "../../store";
 import type { State } from "../../types";
+import { activePlacements } from "../../programs";
 import type { PlanControls } from "../props";
 import type { FolderRun } from "../../useFolder";
 import type { UpdateRun } from "../../update";
@@ -91,7 +92,7 @@ function Folder({ folder }: { folder: FolderRun }) {
       {s.kind === "yok" ? (
         <>
           <p className="hint">
-            <T k="Bu, programın **her değişikliği kendiliğinden bir klasöre yazması** demek, yedek indirmeyi hiç düşünmeden. Ama **kullandığınız tarayıcı bunu desteklemiyor.** Chrome ve Edge destekliyor; Firefox ve Safari desteklemiyor." />
+            <T k="**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor." />
           </p>
           {/* The one-habit sentence is NOT repeated here: it already sits in
               "Veriler nerede" two panels down, and saying it twice on one
@@ -111,12 +112,12 @@ function Folder({ folder }: { folder: FolderRun }) {
           <p className="hint">
             {folder.fixed ? (
               <T
-                k="Program **bütün planları** kendiliğinden Belgelerim'e yazıyor ve her gün için ayrı bir yedek bırakıyor (son {gun} gün). Seçecek bir şey yok. Üst çubuktaki **Dosyaya kaydet** yalnız bu bilgisayarın dışına bir kopya çıkarmak için."
+                k="**Bütün planlar** kendiliğinden Belgelerim'e yazılıyor; son {gun} günün yedeği durur."
                 vars={{ gun: KEEP_DAILY }}
               />
             ) : (
               <T
-                k="Bir klasör seçin; program **bütün planları** oraya yazar ve her gün için ayrı bir yedek bırakır (son {gun} gün). Üst çubuktaki **Dosyaya kaydet** yerine geçmez, onu **gereksiz** kılar."
+                k="Bir klasör seçin; **bütün planlar** oraya yazılır ve son {gun} günün yedeği durur."
                 vars={{ gun: KEEP_DAILY }}
               />
             )}
@@ -150,7 +151,7 @@ function Folder({ folder }: { folder: FolderRun }) {
           {s.kind !== "secilmedi" && (
             <p className="hint">
               <T
-                k="O klasördeki {dosya} dosyası **bütün planlarınızın tamamıdır**. Yeni bir bilgisayarda, yeni bir tarayıcıda ya da programın yeni bir sürümünde işinizi geri getirmenin yolu tek: aşağıdaki **Tümünü dosyadan aç** ile o dosyayı seçmek. Yanındaki tarihli dosyalar aynı şeyin gün gün duran hâlleri."
+                k="{dosya} **bütün planlarınızdır**; yanındakiler onun gün gün duran hâlleri."
                 vars={{ dosya: MAIN_NAME }}
               />
             </p>
@@ -271,7 +272,7 @@ function Build({ update }: { update: UpdateRun }) {
       {update.kind === "exe" && <ExeUpdate update={update} />}
       {update.kind === "yok" && (
         <p className="hint">
-          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. Yenisi çıktığında en son sürüm her zaman şuradadır:" />{" "}
+          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{" "}
           <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
           </a>
@@ -287,7 +288,7 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
   return (
     <>
       <p className="hint">
-        <T k="Yeni bir sürüm yayınlandığında program bunu **kendisi görür** ve üstte bir satırla söyler. Hiçbir şey zorla değişmez. **Yenile** demediğiniz sürece eski sürümle çalışmaya devam edersiniz." />
+        <T k="Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez." />
       </p>
       <div className="form-row">
         <button className="btn" onClick={update.check}>{t('Güncellemeleri denetle')}</button>
@@ -323,7 +324,7 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
   return (
     <>
       <p className="hint">
-        <T k="Bu kopya kendini güncelleyebilir, ama **kendi başına yapmaz**. Aşağıdaki düğmeye basmadıkça hiçbir yere bağlanmaz. İnternet yoksa program normal çalışmaya devam eder." />
+        <T k="Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
       </p>
 
       <div className="form-row">
@@ -494,8 +495,11 @@ export default function Data({
   const bundlePanel = (
     <div className="panel">
       <h2>{t('Bütün planlar tek dosyada')}</h2>
-      <p className="hint">
-        <T k="Üst çubuktaki **Dosyaya kaydet** yalnızca **açık olan planı** yazar. Buradaki dosya **bütün planları** içerir: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı, taslak işareti ve hangisinin açık olduğu. **İçermediği** şeyler: tema ve kenar çubuğu tercihi ile aşağıdaki oturum yedekleri. Onlar bu bilgisayara aittir, programa değil." />
+      <p
+        className="hint"
+        title={t('İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve oturum yedekleri girmez.')}
+      >
+        <T k="Üst çubuktaki **Dosyaya kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
       </p>
       <div className="form-row">
         <button className="btn primary" onClick={saveAll}>
@@ -537,7 +541,7 @@ export default function Data({
             first run; this is where it stays. */}
         <h3>{t('Örnek okul verisi')}</h3>
         <p className="hint">
-          <T k="25 öğretmen, 20 sınıf, 8 derslik ve 99 dersten oluşan hazır bir okul. Aracın ne yaptığını görmek, denemek ve yazdırmayı görmek için. **Açık olan planın yerine geçer**; diğer planlara dokunulmaz." />
+          <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
         </p>
         <div className="form-row">
           <button
@@ -549,7 +553,7 @@ export default function Data({
   
         <h3>{t('Sıfırla')}</h3>
         <p className="hint">
-          <T k="**Açık olan planın** öğretmenleri, sınıfları, derslikleri, dersleri ve dizilmiş programı silinir; diğer planlara dokunulmaz. **Geri alınamaz.** Önce **Dosyaya kaydet** deyin." />
+          <T k="**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin." />
         </p>
         <div className="form-row">
           <button
@@ -575,15 +579,15 @@ export default function Data({
         <p className="hint">
           {storageKind() === "exe" ? (
             <T
-              k="Aşağıdaki depo bu programın kendi deposu, ve **tek kopya değil**: her değişiklikten sonra bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor. Bu bilgisayarı değiştiriyorsanız taşınacak şey o klasör."
+              k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
               vars={{ klasor: EXE_FOLDER }}
             />
           ) : (
             <>
               {storageKind() === "file"
-                ? t('Bu dosyayı açtığınız tarayıcının bu bilgisayardaki deposunda duruyor.')
-                : t('Tarayıcının bu site için bu bilgisayarda ayırdığı depoda duruyor.')}{" "}
-              <T k="Başka bir tarayıcı ve başka bir bilgisayar bunu **görmez**; tarayıcıda “tarama verilerini temizle” dediğinizde **silinir**. Taşınan ve gerçekten güvende olan tek şey **dosyaya kaydettiğinizdir**." />
+                ? t('Bu tarayıcının bu bilgisayardaki deposunda duruyor.')
+                : t('Tarayıcının bu site için ayırdığı depoda duruyor.')}{" "}
+              <T k="Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**." />
             </>
           )}
         </p>
@@ -597,7 +601,7 @@ export default function Data({
         {storageKind() !== "exe" && (
           <p className="hint">
             <T
-              k="Bu depo {adres} adresine ait ve yalnız ona: çift tıklanan dosyanın, yerel kurulumun ve .exe'nin depoları **ayrıdır**, biri ötekinin verisini **görmez**. Birinden ötekine taşımanın yolu şu ikisi: **Tümünü dosyaya kaydet** → öbür kopyada **Tümünü dosyadan aç**."
+              k="Bu depo yalnız {adres} adresine ait; öteki kopyaların depoları **ayrıdır**."
               vars={{ adres: storageAddress() }}
             />
           </p>
@@ -607,7 +611,7 @@ export default function Data({
             where the data actually lives, and the bar it left had six
             destinations to hold instead. */}
         <p className="hint">
-          <T k="Program bu bilgisayarda **kendiliğinden** saklanıyor, kaydet düğmesine basmayı unutsanız da işiniz durur. Üst çubuktaki **Dosyaya kaydet** bunun yerine geçmez, **yanına** gelir: taşımak ve yedeklemek için. Öğrenilecek tek alışkanlık bu: değişiklik yaptın, yedek indir." />
+          <T k="Program **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
         </p>
         <table className="stat">
           <thead>
@@ -631,7 +635,7 @@ export default function Data({
         </table>
         <p className="hint">
           <T
-            k="Toplam **{yer}**. Tarayıcının bu program için ayırdığı yer yaklaşık **5 MB**; her plan kendi yerini kaplar."
+            k="Toplam **{yer}**; tarayıcının bu programa ayırdığı yer yaklaşık **5 MB**."
             vars={{ yer: size(report.totalChars) }}
           />
         </p>
@@ -641,7 +645,7 @@ export default function Data({
             why it lives in IndexedDB. Left out entirely it would be the
             one key this report does not name. */}
         <p className="hint">
-          <T k="Yukarıdakiler tarayıcının **localStorage**'ında. Bir tane daha var ve o listede değil, çünkü metin değil: seçtiğiniz klasörün tutamağı **IndexedDB**'de, ders-programi-klasor adıyla durur. Programınız orada **değildir**. Orada duran şey yalnız hangi klasöre yazılacağıdır." />
+          <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
         </p>
       </div>
   );
@@ -650,7 +654,7 @@ export default function Data({
       <div className="panel">
         <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
         <p className="hint">
-          <T k="Program her değişiklikte kendiliğinden saklanıyor; ayrıca son üç oturumun durumu ayrı tutuluyor. Bunlar **bu bilgisayara** ve programı açtığınızda **hangi plan açıksa ona** aittir. Taşımak ve gerçekten güvende olmak için üst çubuktaki **Dosyaya kaydet**'i kullanın." />
+          <T k="Son üç oturumun durumu ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
         </p>
         {backups.length === 0 ? (
           <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
@@ -676,7 +680,7 @@ export default function Data({
                   <td className="num">{b.teachers.length}</td>
                   <td className="num">{b.classes.length}</td>
                   <td className="num">{b.lessons.length}</td>
-                  <td className="num">{Object.keys(b.placements).length}</td>
+                  <td className="num">{Object.keys(activePlacements(b)).length}</td>
                 </tr>
               ))}
             </tbody>

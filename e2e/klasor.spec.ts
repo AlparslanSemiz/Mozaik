@@ -270,7 +270,7 @@ test.describe('74b. Desteklemeyen tarayıcıda — özellik yok ve bunu SÖYLÜY
     // Scoped to the panel: Ayarlar → Planlar ve yedek has several panels and two of them
     // talk about saving (pitfall 49).
     const panel = page.locator('.panel', { hasText: 'Nereye kaydedilsin' });
-    await expect(panel.getByText(/kullandığınız tarayıcı bunu desteklemiyor/i)).toBeVisible();
+    await expect(panel.getByText(/tarayıcınız klasöre yazmayı desteklemiyor/i)).toBeVisible();
     await expect(panel.getByText(/Dosyaya kaydet<\/b> tek çare|tek çare/)).toBeVisible();
     await expect(page.getByRole('button', { name: /Klasör seç/ })).toHaveCount(0);
   });

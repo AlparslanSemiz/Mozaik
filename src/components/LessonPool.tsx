@@ -33,6 +33,7 @@ import {
 } from "../theme";
 import { attachSplitter, maxDockHeight } from "../poolSplit";
 import { useT } from './T';
+import type { PoolSort } from '../toolState';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */
@@ -51,12 +52,42 @@ export interface PoolCard {
   color: number;
   placed: number;
   total: number;
+  masked?: boolean;
+  /** The heading this card stands under. Derived from the chosen order in
+      `buildPool`, so the tray SHOWS what the setting did. */
+  group: string;
 }
 
 interface Props {
   cards: PoolCard[];
   completed: number;
+  /** Blocks waiting BEFORE the filter, so the head can say "12 / 99". */
+  total: number;
+  sort: PoolSort;
+  setSort: (next: PoolSort) => void;
+  /** Subject key the tray is narrowed to, '' for all. */
+  filter: string;
+  setFilter: (next: string) => void;
+  /** The branches that still have something waiting: `[key, label]`. */
+  subjects: Array<[string, string]>;
   onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
+}
+
+/** The five orders, named for the question each one answers. */
+const SORTS: Array<{ id: PoolSort; label: string }> = [
+  { id: 'row', label: 'Izgara sırası' },
+  { id: 'name', label: 'Ada göre' },
+  { id: 'subject', label: 'Branşa göre' },
+  { id: 'size', label: 'Uzun bloklar önce' },
+  { id: 'left', label: 'En çok kalan' },
+];
+
+/** One run of cards under one heading. */
+interface CardGroup {
+  key: string;
+  label: string;
+  stacks: CardStack[];
+  cards: number;
 }
 
 /** One pile on the tray: identical blocks of one lesson, drawn as a deck. */
@@ -99,13 +130,52 @@ function stackCards(cards: PoolCard[]): CardStack[] {
   return piles;
 }
 
-export default function LessonPool({ cards, completed, onStart }: Props) {
+/**
+ * ...and the piles fall into RUNS under a heading.
+ *
+ * "kartlar havuzdayken ayrım daha bir güzel ve hoş olsun." What separated one
+ * teacher's cards from the next was a `gap` of 7 px between pastel rectangles —
+ * the tray was already sorted so that a row's cards stood together, and nothing
+ * on screen said where one row ended.
+ *
+ * Consecutive runs again, for the same reason `stackCards` walks them: the
+ * order is decided in `buildPool` and every one of the five puts a group's
+ * cards next to each other. Grouping with a Map here would let the headings
+ * come out in a different order from the cards under them.
+ */
+function groupStacks(stacks: CardStack[]): CardGroup[] {
+  const groups: CardGroup[] = [];
+  for (const s of stacks) {
+    const label = s.cards[0]?.group ?? '';
+    const last = groups[groups.length - 1];
+    if (last !== undefined && last.label === label) {
+      last.stacks.push(s);
+      last.cards += s.cards.length;
+    } else {
+      groups.push({ key: s.key, label, stacks: [s], cards: s.cards.length });
+    }
+  }
+  return groups;
+}
+
+export default function LessonPool({
+  cards,
+  completed,
+  total,
+  sort,
+  setSort,
+  filter,
+  setFilter,
+  subjects,
+  onStart,
+}: Props) {
   const t = useT();
   // The cards ARE the hours left now: one card per block still owed, so adding
   // up their sizes is the answer. Summing `total - placed` per card would count
   // one lesson's whole remainder once per card it still has out.
   const remainingHours = cards.reduce((sum, c) => sum + c.size, 0);
-  const stacks = stackCards(cards);
+  const groups = groupStacks(stackCards(cards));
+  const narrowed = filter !== '' && total !== cards.length;
   // Read from storage on every mount, so the tab switch that unmounts this
   // component cannot lose either setting (pitfall 18 does not apply to a
   // preference that lives outside React).
@@ -216,15 +286,80 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
                   calling them two lessons would not add up against Kurulum. */}
               <strong>{t('{n} blok bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
-                {t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
+                {/* Narrowed, the head says so with the number it is hiding.
+                    A tray that quietly shows a twelfth of what is left would
+                    make "hepsi yerleşti" a lie one click away. */}
+                {narrowed
+                  ? t('{n} blok süzgeç dışında · sürükleyip bırakın', { n: total - cards.length })
+                  : t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
               </span>
             </>
           )}
         </span>
+
+        {/* HOW THE TRAY IS ARRANGED, on the tray. Two positions, not two
+            preferences: they say what is being looked at right now, so they
+            live in `toolState` and cost no storage (see PoolSort there). */}
+        {(cards.length > 0 || filter !== '') && (
+          <div className="pool-tools">
+            <label className="pool-pick">
+              <span>{t('Sırala')}</span>
+              <select
+                value={sort}
+                aria-label={t('Havuz sıralaması')}
+                onChange={(e) => setSort(e.target.value as PoolSort)}
+              >
+                {SORTS.map((s) => (
+                  <option key={s.id} value={s.id}>{t(s.label)}</option>
+                ))}
+              </select>
+            </label>
+            {/* Only when there is something to choose between: one branch in
+                the tray makes this a control that cannot be answered
+                differently — the same rule the lesson form's branch box
+                follows. */}
+            {(subjects.length > 1 || filter !== '') && (
+              <label className="pool-pick">
+                <span>{t('Branş')}</span>
+                <select
+                  value={filter}
+                  aria-label={t('Havuz süzgeci')}
+                  onChange={(e) => setFilter(e.target.value)}
+                >
+                  <option value="">{t('Tüm branşlar')}</option>
+                  {subjects.map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="pool-list">
-        {stacks.map((s) => (
+        {groups.map((g) => (
+          <section className="pool-group" key={g.key} aria-label={g.label}>
+            {/* The heading is what the reader asked for: a break between one
+                row's cards and the next, rather than one more 7px gap. It also
+                makes the order VISIBLE — pick "branşa göre" and the headings
+                become branches. */}
+            <h3 className="pool-group-label">
+              {/* The dot is the ROW's colour, so it is drawn only when the
+                  heading IS a row. Over "7 saat kaldı" it would be the colour
+                  of whichever card happened to sort first — a mark that means
+                  nothing is worse than no mark. */}
+              {(sort === 'row' || sort === 'name') && (
+                <span
+                  className="color-dot"
+                  style={{ background: paletteColor(g.stacks[0]?.cards[0]?.color ?? 0) }}
+                />
+              )}
+              {g.label}
+              <span className="pool-group-count">{g.cards}</span>
+            </h3>
+            <div className="pool-group-cards">
+        {g.stacks.map((s) => (
           <div
             key={s.key}
             className="pool-stack"
@@ -238,7 +373,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
             {s.cards.map((c, i) => (
               <div
                 key={c.key}
-                className="pool-card"
+                className={`pool-card${c.masked ? ' masked-scope' : ''}`}
                 data-size={c.size}
                 // Everything under the top card is DRAWING. It is the same
                 // block and would do the same thing if dropped, so it takes no
@@ -247,7 +382,7 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
                 // and in the forty tests that ask how much is left.
                 aria-hidden={i > 0 ? true : undefined}
                 style={{ background: paletteColor(c.color) }}
-                onPointerDown={i === 0 ? (e) => onStart(e, c.lessonId, c.size) : undefined}
+                onPointerDown={i === 0 && !c.masked ? (e) => onStart(e, c.lessonId, c.size) : undefined}
                 title={
                   i > 0
                     ? undefined
@@ -274,6 +409,9 @@ export default function LessonPool({ cards, completed, onStart }: Props) {
               </div>
             ))}
           </div>
+        ))}
+            </div>
+          </section>
         ))}
       </div>
     </aside>

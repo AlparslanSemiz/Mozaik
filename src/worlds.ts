@@ -38,6 +38,7 @@ import type {
   Teacher,
 } from './types';
 import { SCHEMA_VERSION } from './types';
+import { activePlacements, blankProgram, replaceActiveGrid } from './programs';
 
 // ---------------------------------------------------------------- the builder
 
@@ -143,8 +144,8 @@ export function makeWorld(spec: WorldSpec = {}): State {
     classes,
     lessons,
     unavailable: spec.unavailable ?? {},
-    placements: spec.placements ?? {},
-    pinned: {},
+    programs: [{ ...blankProgram(), placements: spec.placements ?? {} }],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -194,7 +195,8 @@ interface Block {
 export function blocksOf(d: State): Block[] {
   const seen = new Set<string>();
   const out: Block[] = [];
-  for (const key of Object.keys(d.placements)) {
+  const placements = activePlacements(d);
+  for (const key of Object.keys(placements)) {
     const cut = key.lastIndexOf('|');
     const hour = Number(key.slice(cut + 1));
     const rest = key.slice(0, cut);
@@ -207,7 +209,7 @@ export function blocksOf(d: State): Block[] {
     if (seen.has(mark)) continue;
     seen.add(mark);
 
-    const lessonId = d.placements[placementKey(classId, day, found.hour)];
+    const lessonId = placements[placementKey(classId, day, found.hour)];
     if (lessonId === undefined) continue;
     out.push({ lessonId, classId, day, hour: found.hour, size: found.size });
   }
@@ -242,7 +244,7 @@ export function illegalBlocks(d: State): Illegal[] {
 
 /** How many hours of one lesson are on the grid. */
 export function hoursOf(d: State, lessonId: Id): number {
-  return Object.values(d.placements).filter((x) => x === lessonId).length;
+  return Object.values(activePlacements(d)).filter((x) => x === lessonId).length;
 }
 
 // ----------------------------------------------------------------- the worlds
@@ -804,7 +806,7 @@ function realScale(ratio: number, cap: number): State {
       budget -= hours;
     }
   }
-  return { ...base, lessons, placements: {} };
+  return replaceActiveGrid({ ...base, lessons }, { placements: {} });
 }
 
 function withRules(d: State, limits: Partial<Limits>, rules: Partial<Rules>): State {

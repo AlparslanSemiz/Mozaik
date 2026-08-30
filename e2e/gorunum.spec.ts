@@ -21,6 +21,7 @@ import { reopen,
   savedText,
   settledText,
   answerDialog,
+  openGridMenu,
 } from './helpers';
 
 
@@ -87,11 +88,12 @@ const rootFontSize = (page: import('@playwright/test').Page) =>
 const SCALE_DEFAULT = 1;
 
 /**
- * ...and the root it multiplies. 16px until 2026-08-27, 14 since: the reader
- * asked for a smaller 100% AND 100% as the default, so the anchor moved and
- * the default came back to the floor.
+ * ...and the root it multiplies. 16px until 2026-08-27, 14 until 2026-08-30,
+ * 13 since. The same request twice — the screen is too big — answered the same
+ * way twice: move the anchor, re-pin the type ladder against it, leave the
+ * default at 100%.
  */
-const ROOT_PX = 14;
+const ROOT_PX = 13;
 
 test.describe('44. Görünüm — yazı büyüklüğü', () => {
   test('ölçek kökün yazı boyunu değiştiriyor ve yenilemede duruyor', async ({ page }) => {
@@ -131,11 +133,14 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
       .getByRole('group', { name: 'Yazı büyüklüğü' })
       .getByRole('button')
       .allInnerTexts();
-    expect(steps[0]).toBe('%100');
+    // The ladder starts BELOW 100% since 2026-08-30. Windows has a display
+    // scale of its own and my father's is set large, so the two multiply and
+    // %80 is the only end of that product this program owns.
+    expect(steps[0]).toBe('%80');
     expect(steps[steps.length - 1]).toBe('%150');
-    // 1.00 to 1.50 in steps of 0.05: eleven rungs, and they are buttons rather
-    // than a slider because the ladder has exactly eleven legal values.
-    expect(steps).toHaveLength(11);
+    // 0.80 to 1.50 in steps of 0.05: fifteen rungs, and they are buttons rather
+    // than a slider because the ladder has exactly fifteen legal values.
+    expect(steps).toHaveLength(15);
 
     await chooseScale(page, 150);
     expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 1.5, 1);
@@ -156,6 +161,78 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     }
 
     await chooseScale(page, 100);
+  });
+
+  // THE FLOOR IS THE HALF NOBODY HAD MEASURED. A ceiling gets measured because
+  // things SPILL; a floor has to be measured because things stop shrinking —
+  // every length still written in raw px keeps its pixels while everything
+  // around it comes down, so it grows in relative terms and takes the room from
+  // whatever CAN shrink. That is pitfall 33 read backwards, and the suite goes
+  // green either way.
+  test('taban %80 — gerçekten uygulanıyor ve hiçbir şey kırpılmıyor', async ({ page }) => {
+    await openWithSample(page);
+    await chooseScale(page, 80);
+    expect(await rootFontSize(page)).toBeCloseTo(ROOT_PX * 0.8, 1);
+
+    for (const [name, go] of [
+      ['Okul → Öğretmenler', () => openSetup(page, 'Öğretmenler')],
+      ['Ayarlar → Kurallar', () => openSettings(page, 'Kurallar')],
+      ['Ayarlar → Görünüm', () => openSettings(page, 'Görünüm')],
+    ] as const) {
+      await go();
+      const spill = await page.evaluate(() => ({
+        x: document.body.scrollWidth - document.body.clientWidth,
+        clipped: [...document.querySelectorAll('table.list th, .btn')].filter(
+          (el) => el.scrollWidth > el.clientWidth + 0.5,
+        ).length,
+      }));
+      expect(spill.x, `${name} %80'de yatay taşıyor`).toBeLessThanOrEqual(1);
+      expect(spill.clipped, `${name} %80'de ${spill.clipped} kutu kırpıldı`).toBe(0);
+    }
+
+    await chooseScale(page, 100);
+  });
+
+  // "Hareket ve Dil solda olmalı." Both were in the right rail, which on this
+  // screen is the one column that is NOT about the screen: the rail holds the
+  // sample rows you judge the size by, and two settings had been parked beside
+  // it. Now the rail holds one panel and the settings are all in one column, in
+  // the order they are read.
+  //
+  // The test asks WHICH COLUMN, not which pixel: a panel's x is a layout
+  // detail, its parent is the decision.
+  test('Hareket ve Dil SOL sütunda, rayda yalnız örnek var', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Görünüm');
+
+    const where = await page.evaluate(() => {
+      const cols = document.querySelector('.cols')!;
+      const left = cols.firstElementChild!;
+      const rail = cols.querySelector('aside')!;
+      const titles = (root: Element) =>
+        [...root.querySelectorAll(':scope > .panel > h2')].map((h) => h.textContent?.trim() ?? '');
+      return { left: titles(left), rail: titles(rail) };
+    });
+
+    expect(where.left, JSON.stringify(where)).toContain('Hareket');
+    expect(where.left, JSON.stringify(where)).toContain('Dil');
+    expect(where.rail, JSON.stringify(where)).not.toContain('Hareket');
+    expect(where.rail, JSON.stringify(where)).not.toContain('Dil');
+    // ...and the rail is down to one panel, which is the shape
+    // `.cols > aside > .panel:only-child` is written for: what gives ground
+    // inside it is the LIST, never the panel. Without the scroll box the
+    // sample table would take the panel's own last-resort scrollbar and the
+    // two sentences above it would travel with the rows.
+    expect(where.rail).toEqual(['Örnek']);
+    const scroller = await page.evaluate(() => {
+      const panel = document.querySelector('.cols > aside > .panel')!;
+      return {
+        onlyChild: panel.matches(':only-child'),
+        list: panel.querySelector(':scope > .stat-scroll') !== null,
+      };
+    });
+    expect(scroller.onlyChild).toBe(true);
+    expect(scroller.list, 'örnek tablosu kendi kutusunda değil').toBe(true);
   });
 
   test('ızgara ölçekle birlikte büyüyor', async ({ page }) => {
@@ -529,8 +606,9 @@ test.describe('51. Program: programı boşalt', () => {
     const placed = await page.locator('table.grid .card').count();
     expect(placed).toBeGreaterThan(0);
 
-    await page.getByRole('button', { name: 'Programı boşalt' }).click();
-    // Not the same button as "Baştan diz": that one refills the grid. This one
+    await openGridMenu(page);
+    await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
+    // Not the same thing as "Baştan diz": that one refills the grid. This one
     // clears it, which is what the reader asked for by name.
     const asked = await answerDialog(page);
     expect(asked).toContain('havuza dönecek');
@@ -547,7 +625,11 @@ test.describe('51. Program: programı boşalt', () => {
   test('boş ızgarada kapalı', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Programı boşalt' })).toBeDisabled();
+    await openGridMenu(page);
+    await expect(page.getByRole('menuitem', { name: 'Programı boşalt' })).toHaveAttribute(
+      'data-disabled',
+      '',
+    );
   });
 });
 

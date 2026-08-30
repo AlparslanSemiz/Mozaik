@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type React from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import { Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Pin, PinOff, Trash2 } from 'lucide-react';
 import {
   blockAt,
   blockPinned,
@@ -24,18 +24,27 @@ import {
   placementKey,
   place,
   setBlockPinned,
+  pinScopeCells,
+  togglePinScope,
 } from '../constraints';
+import type { PinScope } from '../constraints';
 import type { Index } from '../constraints';
 import { useToast } from './Toasts';
+import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
-import { lessonSubject, subjectLabel, subjectShort, teacherSubjects } from '../entities';
+import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort, teacherSubjects } from '../entities';
+import { compareTr } from '../listview';
 import { useDrag } from '../drag';
 import type { DragData, Reason } from '../drag';
 import type { SolverRun } from '../useSolver';
 import type { State, Id } from '../types';
-import type { View } from '../toolState';
+import { activePinned, activePlacements } from '../programs';
+import { rowMask, setDayMask, setRowMask } from '../programMask';
+import type { ProgramMask } from '../programMask';
+import type { PoolSort, View } from '../toolState';
+import { KIND_ICON } from './steps';
 import Grid from './Grid';
-import type { GridCell, GridRow } from './Grid';
+import type { GridCell, GridMenuTarget, GridRow } from './Grid';
 import LessonPool from './LessonPool';
 import type { PoolCard } from './LessonPool';
 import { T, useT } from './T';
@@ -48,6 +57,13 @@ interface Props {
   solver: SolverRun;
   /** Which axis the rows are. Owned by App: the tool strip above shows it. */
   view: View;
+  mask: ProgramMask;
+  setMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
+  /** How the tray is arranged. A POSITION, owned by App (see toolState.ts). */
+  poolSort: PoolSort;
+  setPoolSort: (next: PoolSort) => void;
+  poolFilter: string;
+  setPoolFilter: (next: string) => void;
 }
 
 /** "3,4" — one decimal, Turkish comma. */
@@ -76,7 +92,7 @@ function describeBar(
         yerlesen: p.placedBlocks,
         toplam: p.totalBlocks,
         sure: seconds(p.elapsedMs),
-      }),
+      }) + (p.excludedBlocks > 0 ? t(' · {n} blok geçici kapsam dışında', { n: p.excludedBlocks }) : ''),
       level: 'busy',
     };
   }
@@ -105,7 +121,7 @@ function describeBar(
       text: t('Program dizildi. {n} blok yerleşti ({sure} sn). Ctrl+Z ile geri alabilirsiniz.', {
         n: done.placedBlocks,
         sure: seconds(done.elapsedMs),
-      }),
+      }) + (done.excludedBlocks > 0 ? t(' {n} blok geçici kapsam dışında kaldı.', { n: done.excludedBlocks }) : ''),
       level: 'ok',
     };
   }
@@ -140,7 +156,7 @@ function roomLetter(ix: Index, roomId: string | null | undefined): string {
   return ix.roomById.get(roomId)?.name ?? '';
 }
 
-function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
+function buildRows(d: State, ix: Index, view: View, mask: ProgramMask, t: Translate): GridRow[] {
   // Availability is edited after the timetable is laid out, and a cell whose
   // hour has since been closed used to look perfectly normal: the hatch is only
   // drawn on EMPTY cells, so the card simply covered it up.
@@ -162,8 +178,10 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
       heads.add(placementKey(lesson.classId, b.day, b.hour));
     }
   }
+  const placements = activePlacements(d);
+  const pinned = activePinned(d);
   const continuesAt = (classId: Id, day: number, hour: number, lessonId: Id): boolean =>
-    d.placements[placementKey(classId, day, hour + 1)] === lessonId &&
+    placements[placementKey(classId, day, hour + 1)] === lessonId &&
     !heads.has(placementKey(classId, day, hour + 1));
 
   const dayCount = d.settings.days.length;
@@ -189,7 +207,8 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
             bottom: roomLetter(ix, group?.roomId),
             color: t.color,
             conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
-            pinned: d.pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
+            pinned: pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
+            mask: group === undefined ? undefined : mask.classes[group.id],
             continues:
               s + 1 < hourCount &&
               group !== undefined &&
@@ -215,8 +234,9 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
         color: t.color,
         cells,
         closed,
+        mask: mask.teachers[t.id],
       };
-    });
+    }).filter((row) => row.mask !== 'hidden');
   }
 
   return d.classes.map((group) => {
@@ -230,7 +250,7 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
           d.unavailable[closedKey(group.id, g, s)] !== undefined ||
           (group.roomId != null && d.unavailable[closedKey(group.roomId, g, s)] !== undefined);
 
-        const lessonId = d.placements[placementKey(group.id, g, s)];
+        const lessonId = placements[placementKey(group.id, g, s)];
         if (lessonId === undefined) continue;
         const lesson = ix.lessonById.get(lessonId);
         const teacher = ix.teacherById.get(lesson?.teacherId ?? '');
@@ -242,7 +262,8 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
           bottom: lesson === undefined ? '' : subjectShort(d.settings, lessonSubject(d, lesson)),
           color: teacher?.color ?? 0,
           conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
-          pinned: d.pinned[placementKey(group.id, g, s)] !== undefined,
+          pinned: pinned[placementKey(group.id, g, s)] !== undefined,
+          mask: teacher === undefined ? undefined : mask.teachers[teacher.id],
           continues: s + 1 < hourCount && continuesAt(group.id, g, s, lessonId),
         };
       }
@@ -256,8 +277,9 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
       color: group.color,
       cells,
       closed,
+      mask: mask.classes[group.id],
     };
-  });
+  }).filter((row) => row.mask !== 'hidden');
 }
 
 /**
@@ -277,15 +299,27 @@ function buildRows(d: State, ix: Index, view: View, t: Translate): GridRow[] {
  * and an alphabetical tray under a hand-ordered grid means hunting upward for
  * the cards of the row you are looking at.
  */
-function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; completed: number } {
+function buildPool(
+  d: State,
+  ix: Index,
+  view: View,
+  mask: ProgramMask,
+  sort: PoolSort,
+  filter: string,
+  t: Translate,
+): { cards: PoolCard[]; completed: number; total: number } {
   const cards: PoolCard[] = [];
   let completed = 0;
+  let total = 0;
   const teacherView = view === 'teacher';
   const rowAt = new Map<string, number>(
     (teacherView ? d.teachers : d.classes).map((x, i) => [x.id, i]),
   );
 
   for (const lesson of d.lessons) {
+    const teacherMode = mask.teachers[lesson.teacherId];
+    const classMode = mask.classes[lesson.classId];
+    if (teacherMode === 'hidden' || classMode === 'hidden') continue;
     // ONE CARD PER BLOCK, not per lesson. A 2+1 lesson is a two-hour card and a
     // one-hour card, and which of them is picked up decides how many cells the
     // drop covers — so the choice has to be a thing on the tray, not a hidden
@@ -300,6 +334,11 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
     const teacher = ix.teacherById.get(lesson.teacherId);
     const className = group?.name ?? '?';
     const teacherShort = teacher?.short ?? '?';
+    const subject = lessonSubject(d, lesson);
+    total += owed.length;
+    // The filter narrows by BRANCH, and it is applied after `total` so the
+    // head can say "12 / 99" rather than pretending the rest went away.
+    if (filter !== '' && subjectKey(subject) !== filter) continue;
     for (const [i, size] of owed.entries()) {
       cards.push({
         // Identity has to include WHICH of the lesson's cards this is, or React
@@ -310,28 +349,97 @@ function buildPool(d: State, ix: Index, view: View): { cards: PoolCard[]; comple
         row: rowAt.get(teacherView ? lesson.teacherId : lesson.classId) ?? Number.MAX_SAFE_INTEGER,
         top: teacherView ? className : teacherShort,
         bottom: teacherView ? teacherShort : className,
-        subject: subjectLabel(lessonSubject(d, lesson)),
+        subject: subjectLabel(subject),
         // The card keeps the TEACHER's colour in both views: a cell is always
         // painted by its teacher, so this is what the card will look like.
         color: teacher?.color ?? 0,
         placed,
         total: lesson.weeklyHours,
+        masked: teacherMode === 'ghost' || classMode === 'ghost',
+        group: '',
       });
     }
   }
 
-  // Doubles before singles inside one lesson, the way the split is written.
-  cards.sort(
-    (a, b) => a.row - b.row || a.top.localeCompare(b.top, 'tr') || b.size - a.size,
-  );
-  return { cards, completed };
+  cards.sort(poolOrder(sort));
+  for (const card of cards) card.group = poolGroup(card, sort, t);
+  return { cards, completed, total };
 }
 
-export default function Program({ state, change, solver, view }: Props) {
+/**
+ * The five orders, and the LAST TWO KEYS OF EVERY ONE OF THEM ARE THE SAME.
+ *
+ * `stackCards()` in LessonPool.tsx reads consecutive runs: identical blocks of
+ * one lesson are drawn as a deck because the tray hands them over already
+ * neighbours. Any order that lets a lesson's own cards drift apart silently
+ * turns one deck into several, and forty tests count `.pool-card` rather than
+ * decks, so nothing would say so. Hence `lessonId` then `size` at the end of
+ * each comparator, every time.
+ *
+ * `compareTr` and not a bare `localeCompare('tr')`: the list screens already
+ * have one home for Turkish collation and this is the same question.
+ */
+function poolOrder(sort: PoolSort): (a: PoolCard, b: PoolCard) => number {
+  const tail = (a: PoolCard, b: PoolCard) => compareTr(a.lessonId, b.lessonId) || b.size - a.size;
+  switch (sort) {
+    case 'name':
+      return (a, b) => compareTr(a.bottom, b.bottom) || compareTr(a.top, b.top) || tail(a, b);
+    case 'subject':
+      return (a, b) => compareTr(a.subject, b.subject) || a.row - b.row || tail(a, b);
+    case 'size':
+      return (a, b) => b.size - a.size || a.row - b.row || tail(a, b);
+    case 'left':
+      return (a, b) => b.total - b.placed - (a.total - a.placed) || a.row - b.row || tail(a, b);
+    // The tray's own order since the rows became draggable: it runs the same
+    // way down as the grid, so a row's cards stand under the row.
+    case 'row':
+    default:
+      return (a, b) => a.row - b.row || compareTr(a.top, b.top) || tail(a, b);
+  }
+}
+
+/**
+ * What the heading over a run of cards says.
+ *
+ * Derived from the SORT rather than fixed, which is what makes the setting
+ * visible: choosing "branşa göre" and getting the same nameless wall of
+ * rectangles would be a setting that changed nothing you could see.
+ */
+function poolGroup(card: PoolCard, sort: PoolSort, t: Translate): string {
+  switch (sort) {
+    case 'subject':
+      return card.subject;
+    case 'size':
+      return t('{n} saatlik bloklar', { n: card.size });
+    case 'left':
+      return t('{n} saat kaldı', { n: card.total - card.placed });
+    case 'name':
+    case 'row':
+    default:
+      return card.bottom;
+  }
+}
+
+export default function Program({
+  state,
+  change,
+  solver,
+  view,
+  mask,
+  setMask,
+  poolSort,
+  setPoolSort,
+  poolFilter,
+  setPoolFilter,
+}: Props) {
   const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
   const notify = useToast();
   const editLesson = useLessonEdit();
+  // "öğretmeni düzenleme ve sınıfı düzenlemede her şeyi düzenleyebilelim":
+  // the entity sheet is the one that edits an entity, and from a card it is
+  // the only way to reach the axis the grid is NOT drawn along.
+  const inspect = useInspect();
 
   const drop = useCallback(
     (data: DragData, day: number, hour: number) => {
@@ -385,8 +493,35 @@ export default function Program({ state, change, solver, view }: Props) {
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
-  const rows = useMemo(() => buildRows(state, ix, view, t), [state, ix, view, t]);
-  const { cards, completed } = useMemo(() => buildPool(state, ix, view), [state, ix, view]);
+  const rows = useMemo(() => buildRows(state, ix, view, mask, t), [state, ix, view, mask, t]);
+  const { cards, completed, total: poolTotal } = useMemo(
+    () => buildPool(state, ix, view, mask, poolSort, poolFilter, t),
+    [state, ix, view, mask, poolSort, poolFilter, t],
+  );
+  /**
+   * The branches with something still waiting — the only ones worth offering.
+   *
+   * Computed off the UNFILTERED lessons, so choosing "Matematik" does not
+   * empty the list that chose it. Keyed by `subjectKey` because that is what
+   * the filter compares, and labelled with what the rest of the screen calls
+   * it.
+   */
+  const poolSubjects = useMemo<Array<[string, string]>>(() => {
+    const seen = new Map<string, string>();
+    for (const lesson of state.lessons) {
+      if (mask.teachers[lesson.teacherId] === 'hidden') continue;
+      if (mask.classes[lesson.classId] === 'hidden') continue;
+      if (pendingBlocks(state, lesson).length === 0) continue;
+      const name = lessonSubject(state, lesson);
+      const key = subjectKey(name);
+      if (key !== '' && !seen.has(key)) seen.set(key, subjectLabel(name));
+    }
+    return [...seen.entries()].sort((a, b) => compareTr(a[1], b[1]));
+  }, [state, mask]);
+  const dayIndices = useMemo(
+    () => state.settings.days.flatMap((day, index) => mask.days[day.name] === 'hidden' ? [] : [index]),
+    [state.settings.days, mask.days],
+  );
 
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
@@ -443,11 +578,14 @@ export default function Program({ state, change, solver, view }: Props) {
    * the state can move under an open menu (an autosave, an undo, a solver run)
    * and every item re-reads from the state it acts on.
    */
-  const [menuAt, setMenuAt] = useState<{ rowId: string; day: number; hour: number } | null>(null);
-  const cellMenu = useCallback(
-    (rowId: string, day: number, hour: number) => setMenuAt({ rowId, day, hour }),
-    [],
-  );
+  const [menuTarget, setMenuTarget] = useState<GridMenuTarget | null>(null);
+  const menuAt = menuTarget?.kind === 'card' ? menuTarget : null;
+  const menuRowId =
+    menuTarget?.kind === 'row' || menuTarget?.kind === 'card' ? menuTarget.rowId : null;
+  const menuDay =
+    menuTarget?.kind === 'day' || menuTarget?.kind === 'column' || menuTarget?.kind === 'card'
+      ? menuTarget.day
+      : null;
 
   const menuClass = menuAt === null ? null : classAt(state, menuAt.rowId, menuAt.day, menuAt.hour);
   const menuPinned =
@@ -455,19 +593,134 @@ export default function Program({ state, change, solver, view }: Props) {
   const menuLessonId =
     menuAt === null || menuClass === null
       ? undefined
-      : state.placements[
+      : activePlacements(state)[
           placementKey(menuClass, menuAt.day, blockAt(state, menuClass, menuAt.day, menuAt.hour)?.hour ?? menuAt.hour)
         ];
+  const menuLesson = menuLessonId === undefined ? undefined : ix.lessonById.get(menuLessonId);
+  const menuCellMasked =
+    menuLesson !== undefined &&
+    (mask.teachers[menuLesson.teacherId] !== undefined || mask.classes[menuLesson.classId] !== undefined);
+
+  /**
+   * Lock or unlock ONE block, wherever the ask came from.
+   *
+   * Two callers, and they are different kinds of thing: the pin drawn ON the
+   * card (a hand, on a square it is already looking at) and the menu item (the
+   * same question asked the long way). Both land here, so the toast and the
+   * refusal cannot drift apart — the shape `cellRemove` already has.
+   */
+  const pinCell = useCallback(
+    (rowId: string, day: number, hour: number) => {
+      const classId = classAt(state, rowId, day, hour);
+      if (classId === null) return;
+      const on = !blockPinned(state, classId, day, hour);
+      change((d) => {
+        const fresh = classAt(d, rowId, day, hour);
+        return fresh === null ? d : setBlockPinned(d, fresh, day, hour, on);
+      });
+      notify(on ? t('Ders sabitlendi.') : t('Sabitleme kaldırıldı.'));
+    },
+    [change, classAt, notify, state, t],
+  );
 
   const togglePin = useCallback(() => {
     if (menuAt === null) return;
-    const on = !menuPinned;
-    change((d) => {
-      const fresh = classAt(d, menuAt.rowId, menuAt.day, menuAt.hour);
-      return fresh === null ? d : setBlockPinned(d, fresh, menuAt.day, menuAt.hour, on);
-    });
-    notify(on ? t('Ders sabitlendi.') : t('Sabitleme kaldırıldı.'));
-  }, [change, classAt, menuAt, menuPinned, notify, t]);
+    pinCell(menuAt.rowId, menuAt.day, menuAt.hour);
+  }, [menuAt, pinCell]);
+
+  const toggleScope = useCallback(
+    (scope: PinScope) => {
+      const cells = pinScopeCells(state, scope);
+      if (cells.length === 0) return;
+      const pinned = activePinned(state);
+      const willPin = !cells.every((key) => pinned[key] !== undefined);
+      change((d) => togglePinScope(d, scope));
+      notify(
+        willPin
+          ? t('{n} saat sabitlendi.', { n: cells.length })
+          : t('{n} saatin sabitlemesi kaldırıldı.', { n: cells.length }),
+      );
+    },
+    [state, change, notify, t],
+  );
+
+  const setMenuRowMode = useCallback(
+    (mode?: 'ghost' | 'hidden') => {
+      if (menuRowId === null || solver.running) return;
+      setMask((current) => setRowMask(current, view, menuRowId, mode));
+    },
+    [menuRowId, solver.running, setMask, view],
+  );
+
+  const setMenuDayMode = useCallback(
+    (mode?: 'ghost' | 'hidden') => {
+      if (menuDay === null || solver.running) return;
+      const name = state.settings.days[menuDay]?.name;
+      if (name !== undefined) setMask((current) => setDayMask(current, name, mode));
+    },
+    [menuDay, solver.running, setMask, state.settings.days],
+  );
+  const menuRowMode = menuRowId === null ? undefined : rowMask(mask, view, menuRowId);
+  const menuDayName = menuDay === null ? undefined : state.settings.days[menuDay]?.name;
+  const menuDayMode = menuDayName === undefined ? undefined : mask.days[menuDayName];
+
+  /**
+   * "Put this row (or this day) aside for a moment."
+   *
+   * Written once and drawn in two places: flat on a row or day heading, where
+   * the whole menu is two lines long, and one step in on a CARD, whose menu
+   * already asks seven other questions. Same items either way — a Radix
+   * `Item` is the same component in a `Content` and in a `SubContent`.
+   *
+   * "ghostla" is gone: it was an English verb wearing a Turkish suffix, in a
+   * program whose one language rule is that the interface is Turkish and the
+   * code is English. The MODE is still `ghost` in programMask.ts, because that
+   * is code.
+   */
+  const maskItems = (
+    <>
+      {menuRowId !== null && (
+        <>
+          <ContextMenu.Item
+            className="menu-item"
+            disabled={solver.running}
+            onSelect={() => setMenuRowMode(menuRowMode === 'ghost' ? undefined : 'ghost')}
+          >
+            <Eye size={15} aria-hidden="true" />
+            {menuRowMode === 'ghost' ? t('Satırı geri yükle') : t('Satırı soluklaştır')}
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            className="menu-item"
+            disabled={solver.running}
+            onSelect={() => setMenuRowMode('hidden')}
+          >
+            <EyeOff size={15} aria-hidden="true" />
+            {t('Satırı gizle')}
+          </ContextMenu.Item>
+        </>
+      )}
+      {menuDay !== null && (
+        <>
+          <ContextMenu.Item
+            className="menu-item"
+            disabled={solver.running}
+            onSelect={() => setMenuDayMode(menuDayMode === 'ghost' ? undefined : 'ghost')}
+          >
+            <Eye size={15} aria-hidden="true" />
+            {menuDayMode === 'ghost' ? t('Günü geri yükle') : t('Günü soluklaştır')}
+          </ContextMenu.Item>
+          <ContextMenu.Item
+            className="menu-item"
+            disabled={solver.running}
+            onSelect={() => setMenuDayMode('hidden')}
+          >
+            <EyeOff size={15} aria-hidden="true" />
+            {t('Günü gizle')}
+          </ContextMenu.Item>
+        </>
+      )}
+    </>
+  );
 
   /**
    * One drag, two sources: a card from the pool (`source === null`) or a block
@@ -501,6 +754,18 @@ export default function Program({ state, change, solver, view }: Props) {
       // the constraint engine answering 72 questions, and one of the answers
       // ("occupied by this class's own lesson") now costs an eviction to say.
       const map = dropMap(base, baseIx, lessonId, size);
+      for (const [key, verdict] of map) {
+        const day = Number(key.split('|')[0]);
+        const dayName = state.settings.days[day]?.name;
+        if (dayName !== undefined && mask.days[dayName] !== undefined) {
+          map.set(key, {
+            ...verdict,
+            blocked: t('{gun} geçici olarak kapsam dışında', { gun: dayLabel(dayName) }),
+            warning: null,
+            evicts: [],
+          });
+        }
+      }
 
       const group = ix.classById.get(lesson.classId);
       const teacher = ix.teacherById.get(lesson.teacherId);
@@ -524,7 +789,7 @@ export default function Program({ state, change, solver, view }: Props) {
         },
       );
     },
-    [state, ix, view, start, solver.running],
+    [state, ix, view, start, solver.running, mask.days, t],
   );
 
   const cardStart = useCallback(
@@ -538,7 +803,7 @@ export default function Program({ state, change, solver, view }: Props) {
       const teacherView = view === 'teacher';
       const lessonId = teacherView
         ? ix.teacherBusy.get(closedKey(rowId, day, hour))
-        : state.placements[placementKey(rowId, day, hour)];
+        : activePlacements(state)[placementKey(rowId, day, hour)];
       if (lessonId === undefined) return;
 
       const classId = teacherView
@@ -613,53 +878,149 @@ export default function Program({ state, change, solver, view }: Props) {
         <Grid
           settings={state.settings}
           rows={rows}
+          dayIndices={dayIndices}
+          dayModes={mask.days}
           firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
           draggedRowId={dragging?.rowId ?? null}
           onCellRemove={cellRemove}
           onCellMoveStart={cellMoveStart}
-          onCellMenu={cellMenu}
+          onCellPin={pinCell}
+          onMenu={setMenuTarget}
           menu={
             <ContextMenu.Portal>
               <ContextMenu.Content className="menu" collisionPadding={8}>
-                {/* Every item carries an icon AND a word, the same rule the
-                    tool strip keeps: an icon alone is not read the first time
-                    and a word alone gives the eye nothing to aim at. */}
-                <ContextMenu.Item
-                  className="menu-item"
-                  disabled={menuPinned}
-                  onSelect={() =>
-                    menuAt !== null && cellRemove(menuAt.rowId, menuAt.day, menuAt.hour)
-                  }
-                >
-                  <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
-                  {t('Havuza kaldır')}
-                  {menuPinned && (
-                    <span className="menu-why">{t('sabitlenmiş')}</span>
-                  )}
-                </ContextMenu.Item>
-                <ContextMenu.Item
-                  className="menu-item"
-                  disabled={menuLessonId === undefined}
-                  onSelect={() => menuLessonId !== undefined && editLesson(menuLessonId)}
-                >
-                  <Pencil size={15} strokeWidth={2} aria-hidden="true" />
-                  {t('Dersi düzenle')}
-                </ContextMenu.Item>
-                <ContextMenu.Separator className="menu-sep" />
-                <ContextMenu.Item className="menu-item" onSelect={togglePin}>
-                  {menuPinned ? (
-                    <PinOff size={15} strokeWidth={2} aria-hidden="true" />
-                  ) : (
-                    <Pin size={15} strokeWidth={2} aria-hidden="true" />
-                  )}
-                  {menuPinned ? t('Sabitlemeyi kaldır') : t('Dersi buraya sabitle')}
-                </ContextMenu.Item>
+                {menuAt !== null && (
+                  <>
+                    <ContextMenu.Item
+                      className="menu-item"
+                      disabled={menuPinned || menuRowMode !== undefined || menuDayMode !== undefined || menuCellMasked}
+                      onSelect={() => cellRemove(menuAt.rowId, menuAt.day, menuAt.hour)}
+                    >
+                      <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
+                      {t('Havuza kaldır')}
+                      {menuPinned && <span className="menu-why">{t('sabitlenmiş')}</span>}
+                    </ContextMenu.Item>
+                    <ContextMenu.Item
+                      className="menu-item"
+                      disabled={menuLessonId === undefined}
+                      onSelect={() => menuLessonId !== undefined && editLesson(menuLessonId)}
+                    >
+                      <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+                      {t('Dersi düzenle')}
+                    </ContextMenu.Item>
+                    {/* THE TWO ENDS OF THE LESSON, and this is the only way to
+                        reach the one the grid is NOT drawn along: the row head
+                        opens the axis you are looking at, and finding the other
+                        meant switching view and hunting for a name.
+                        ("dersi düzenle ve öğretmeni düzenleme ve sınıfı
+                         düzenlemede her şeyi düzenleyebilelim") */}
+                    <ContextMenu.Item
+                      className="menu-item"
+                      disabled={menuLesson === undefined}
+                      onSelect={() => menuLesson !== undefined && inspect('teacher', menuLesson.teacherId)}
+                    >
+                      {KIND_ICON.teacher}
+                      {t('Öğretmeni düzenle')}
+                    </ContextMenu.Item>
+                    <ContextMenu.Item
+                      className="menu-item"
+                      disabled={menuLesson === undefined}
+                      onSelect={() => menuLesson !== undefined && inspect('class', menuLesson.classId)}
+                    >
+                      {KIND_ICON.class}
+                      {t('Sınıfı düzenle')}
+                    </ContextMenu.Item>
+                    <ContextMenu.Separator className="menu-sep" />
+                    {/* ONE HOUR, back at the top level. It spent a round inside
+                        the scope submenu, where the commonest lock in the
+                        program was two clicks and a hover away from the hand
+                        that wanted it. The card now carries a pin of its own,
+                        so this is the same question asked the long way — and
+                        the long way should still put it first. */}
+                    <ContextMenu.Item
+                      className="menu-item"
+                      disabled={menuRowMode !== undefined || menuDayMode !== undefined || menuCellMasked}
+                      onSelect={togglePin}
+                    >
+                      {menuPinned ? <PinOff size={15} aria-hidden="true" /> : <Pin size={15} aria-hidden="true" />}
+                      {menuPinned ? t('Sabitlemeyi kaldır') : t('Dersi buraya sabitle')}
+                    </ContextMenu.Item>
+                  </>
+                )}
+
+                {menuAt !== null ? (
+                  /* ...and the three that lock MANY hours at once stay one step
+                     in. They are the rarer question and the dangerous one: a
+                     click here can freeze a whole day. */
+                  <ContextMenu.Sub>
+                    <ContextMenu.SubTrigger className="menu-item" disabled={menuRowMode !== undefined || menuDayMode !== undefined || menuCellMasked}>
+                      <Pin size={15} strokeWidth={2} aria-hidden="true" />
+                      {t('Toplu sabitle')}
+                    </ContextMenu.SubTrigger>
+                    <ContextMenu.Portal>
+                      <ContextMenu.SubContent className="menu" sideOffset={4}>
+                        <ContextMenu.Item className="menu-item" onSelect={() => toggleScope({ kind: 'row', view, rowId: menuAt.rowId })}>
+                          <Pin size={15} aria-hidden="true" />{t('Satırı sabitle / kaldır')}
+                        </ContextMenu.Item>
+                        <ContextMenu.Item className="menu-item" onSelect={() => toggleScope({ kind: 'column', day: menuAt.day, hour: menuAt.hour })}>
+                          <Pin size={15} aria-hidden="true" />{t('Sütunu sabitle / kaldır')}
+                        </ContextMenu.Item>
+                        <ContextMenu.Item className="menu-item" onSelect={() => toggleScope({ kind: 'day', day: menuAt.day })}>
+                          <Pin size={15} aria-hidden="true" />{t('Günü sabitle / kaldır')}
+                        </ContextMenu.Item>
+                      </ContextMenu.SubContent>
+                    </ContextMenu.Portal>
+                  </ContextMenu.Sub>
+                ) : menuTarget?.kind === 'row' ? (
+                  <ContextMenu.Item className="menu-item" disabled={menuRowMode !== undefined} onSelect={() => toggleScope({ kind: 'row', view, rowId: menuTarget.rowId })}>
+                    <Pin size={15} aria-hidden="true" />{t('Satırı sabitle / kaldır')}
+                  </ContextMenu.Item>
+                ) : menuTarget?.kind === 'day' ? (
+                  <ContextMenu.Item className="menu-item" disabled={menuDayMode !== undefined} onSelect={() => toggleScope({ kind: 'day', day: menuTarget.day })}>
+                    <Pin size={15} aria-hidden="true" />{t('Günü sabitle / kaldır')}
+                  </ContextMenu.Item>
+                ) : menuTarget?.kind === 'column' ? (
+                  <ContextMenu.Item className="menu-item" disabled={menuDayMode !== undefined} onSelect={() => toggleScope({ kind: 'column', day: menuTarget.day, hour: menuTarget.hour })}>
+                    <Pin size={15} aria-hidden="true" />{t('Sütunu sabitle / kaldır')}
+                  </ContextMenu.Item>
+                ) : null}
+
+                {(menuRowId !== null || menuDay !== null) && menuTarget?.kind !== 'column' && (
+                  <>
+                    <ContextMenu.Separator className="menu-sep" />
+                    {menuAt !== null ? (
+                      <ContextMenu.Sub>
+                        <ContextMenu.SubTrigger className="menu-item" disabled={solver.running}>
+                          <Eye size={15} strokeWidth={2} aria-hidden="true" />
+                          {t('Geçici görünüm')}
+                        </ContextMenu.SubTrigger>
+                        <ContextMenu.Portal>
+                          <ContextMenu.SubContent className="menu" sideOffset={4}>
+                            {maskItems}
+                          </ContextMenu.SubContent>
+                        </ContextMenu.Portal>
+                      </ContextMenu.Sub>
+                    ) : (
+                      maskItems
+                    )}
+                  </>
+                )}
               </ContextMenu.Content>
             </ContextMenu.Portal>
           }
         />
 
-        <LessonPool cards={cards} completed={completed} onStart={cardStart} />
+        <LessonPool
+          cards={cards}
+          completed={completed}
+          total={poolTotal}
+          sort={poolSort}
+          setSort={setPoolSort}
+          filter={poolFilter}
+          setFilter={setPoolFilter}
+          subjects={poolSubjects}
+          onStart={cardStart}
+        />
       </div>
     </>
   );

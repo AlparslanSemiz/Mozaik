@@ -90,7 +90,7 @@ export default function Setup({ state, change, plans, step }: Props) {
         <div className="panel">
           <h2>{t('Başlarken')}</h2>
           <p className="hint">
-            <T k="Yukarıdaki adımları sırayla doldurun: önce **derslikler** ve **branşlar**, sonra **öğretmenler** ve **sınıflar**, en son her sınıfın **dersleri**. Elinizde Excel listesi varsa her adımdaki “Excel'den yapıştır” düğmesini kullanın, tek tek girmekten çok daha hızlıdır. Okulun günleri, zil saatleri ve kuralları **Ayarlar** sekmesinde." />
+            <T k="Sırayla: **derslikler**, **branşlar**, **öğretmenler**, **sınıflar**, sonra **dersler**." />
           </p>
           {/* Once, on a first run, and then never here again — its home is
               Ayarlar → Veri. It used to be a permanent button on this screen

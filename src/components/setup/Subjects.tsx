@@ -44,6 +44,7 @@ import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
 import type { Settings } from '../../types';
 import { T, useT } from '../T';
+import AddPanel from '../AddPanel';
 
 interface RowProps extends PanelProps {
   subject: string;
@@ -255,11 +256,13 @@ export default function Subjects({ state, change }: PanelProps) {
           one control beside a heading, and this step has no paste button.
           (Excel'den yapıştır is missing on purpose — a subject is a word,
           and a column of words is not what anyone has in a spreadsheet.) */}
-      <div className="panel add-panel">
-        <h2>{t('Yeni branş')}</h2>
-        <p className="hint">
-          <T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz. Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca **değiştirdikleriniz** saklanır. Satırları tutamağından sürükleyerek (ya da tutamak seçiliyken ok tuşlarıyla) sıralayabilirsiniz. Öğretmen eklerken açılan liste bu sırada gelir." />
-        </p>
+      <AddPanel
+        title={t('Yeni branş')}
+        description={<T k="Öğretmen eklerken branş **bu listeden** seçilir, elle yazılmaz." />}
+        more={t(
+          'Böylece aynı branş iki farklı yazımla iki branşa dönüşmez. Kısaltma ızgarada ve yazdırılan sayfada görünür; yalnızca değiştirdikleriniz saklanır. Satırları tutamağından sürükleyerek sıralayabilirsiniz; öğretmen eklerken açılan liste bu sırada gelir.',
+        )}
+      >
 
         <div className="form-row">
           <input
@@ -275,7 +278,7 @@ export default function Subjects({ state, change }: PanelProps) {
           <button className="btn" disabled={fresh.trim() === '' || clash} onClick={add}>{t('Ekle')}</button>
           {clash && <span className="hint">{t('Bu branş listede zaten var.')}</span>}
         </div>
-      </div>
+      </AddPanel>
 
       <div className="panel step-panel">
         <h2>{t('Branşlar ({n})', { n: options.length })}</h2>

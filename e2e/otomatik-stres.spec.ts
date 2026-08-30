@@ -12,6 +12,7 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { solve } from '../src/solver';
 import { HEAVY_WORLDS, hoursOf, illegalBlocks } from '../src/worlds';
+import { activePlacements } from '../src/programs';
 import { loadWorld, savedState, settledText } from './helpers';
 
 /** The budget the app itself uses (solver.ts DEFAULTS). */
@@ -95,7 +96,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
     const saved = await savedState(page, before);
 
     const asked = world.state.lessons.reduce((sum, l) => sum + l.weeklyHours, 0);
-    const placed = Object.keys(saved.placements).length;
+    const placed = Object.keys(activePlacements(saved)).length;
     console.log(`[ölçüm] ${world.name}: ${placed}/${asked} saat yerleşti`);
 
     // Half the school is the promise; 241 of 426 hours is what it measures at.

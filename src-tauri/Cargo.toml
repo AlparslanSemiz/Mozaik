@@ -1,7 +1,7 @@
 [package]
 name = "ders-programi"
 version = "2.0.0"
-description = "Haftalik ders programi dizme araci"
+description = "Weekly school timetable builder"
 authors = ["Alparslan"]
 edition = "2021"
 # Raised from 1.77.2 for reqwest 0.13, which `tauri` already pulls in. Pinning

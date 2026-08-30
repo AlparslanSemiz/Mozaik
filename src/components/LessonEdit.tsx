@@ -11,11 +11,19 @@
  * focus trap, Escape and the `aria-modal` bookkeeping are not written a fourth
  * time.
  *
- * NO SECOND COPY OF THE RULES. The three things it edits are the three the
- * Dersler list edits, through the same `updateLesson`, with the same
- * `BlockCounts` control (which moved out of `lessons/index.tsx` for exactly
- * this). Class and teacher are shown and NOT editable — they are not editable
- * in the list either, and a lesson whose ends can move is a different lesson.
+ * NO SECOND COPY OF THE RULES. Everything it edits, it edits through the same
+ * functions the Dersler list uses — `updateLesson`, `transferLesson`,
+ * `moveLessonToClass` — with the same `BlockCounts` control (which moved out of
+ * `lessons/index.tsx` for exactly this).
+ *
+ * BOTH ENDS MOVE NOW (2026-08-30). They did not before, and the note here said
+ * so: "a lesson whose ends can move is a different lesson". That was a claim
+ * about identity, and the reader's answer was about work — the same lesson
+ * given to another class, or another teacher, is a thing that happens in a term
+ * and retyping it is not an edit, it is a re-entry. Neither is a field write:
+ * `placements` is keyed by class and teacher occupancy is derived, so each one
+ * lifts its blocks and offers them back, and what will not fit is COUNTED
+ * before the question is asked.
  */
 import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -24,7 +32,17 @@ import { X } from 'lucide-react';
 import BlockCounts, { blockCeiling } from './BlockCounts';
 import LimitBox from './LimitBox';
 import { paletteColor } from '../palette';
-import { lessonSubject, subjectLabel, updateLesson } from '../entities';
+import {
+  hasTwoSubjects,
+  lessonSubject,
+  moveLessonToClass,
+  subjectLabel,
+  teacherSubjects,
+  transferLesson,
+  updateLesson,
+} from '../entities';
+import { useDialogs } from './Dialogs';
+import { useToast } from './Toasts';
 import type { Id, State } from '../types';
 import { T, useT } from './T';
 
@@ -78,12 +96,87 @@ function LessonSheet({
   onClose: () => void;
 }) {
   const t = useT();
+  const { confirm } = useDialogs();
+  const toast = useToast();
   // Read out of the CURRENT state every render rather than captured when the
   // sheet opened: the boxes below write through `change`, and a copy taken at
   // open time would show the reader their own edit failing to happen.
   const lesson = lessonId === null ? undefined : state.lessons.find((x) => x.id === lessonId);
   const group = state.classes.find((c) => c.id === lesson?.classId);
   const teacher = state.teachers.find((x) => x.id === lesson?.teacherId);
+
+  /**
+   * Move the lesson to another class.
+   *
+   * Asked first, because the cost is not visible from the dropdown: an hour the
+   * new class is already using cannot take this block, so it goes back to the
+   * tray, and a pin on the old class's square has to go with it (it is keyed by
+   * class, so left behind it would lock a stranger's hour). Counted after,
+   * because the number is what the reader has to act on next — the same shape
+   * `Inspector.hand()` has.
+   */
+  async function handClass(classId: Id) {
+    if (lesson === undefined || classId === '' || classId === lesson.classId) return;
+    const to = state.classes.find((x) => x.id === classId);
+    if (to === undefined) return;
+    const preview = moveLessonToClass(state, lesson.id, classId);
+    if (
+      !(await confirm({
+        title: t('Ders {ad} sınıfına taşınsın mı?', { ad: to.name }),
+        body:
+          preview.returned === 0 && preview.unpinned === 0
+            ? t('Yerleşmiş saatler olduğu gibi taşınır. Ctrl+Z ile geri alınabilir.')
+            : t(
+                '{n} blok havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.',
+                { n: preview.returned, s: preview.unpinned },
+              ),
+        confirmLabel: t('Taşı'),
+        danger: preview.returned > 0 || preview.unpinned > 0,
+      }))
+    ) {
+      return;
+    }
+    change((d) => moveLessonToClass(d, lesson.id, classId).state);
+    toast(
+      preview.returned === 0
+        ? t('Ders {ad} sınıfına taşındı.', { ad: to.name })
+        : t('Ders {ad} sınıfına taşındı. {n} blok havuza döndü.', {
+            ad: to.name,
+            n: preview.returned,
+          }),
+    );
+  }
+
+  /** The same question for the other end. `Inspector` asks it from the entity
+      side; this asks it from the lesson's. One function underneath. */
+  async function handTeacher(teacherId: Id) {
+    if (lesson === undefined || teacherId === '' || teacherId === lesson.teacherId) return;
+    const to = state.teachers.find((x) => x.id === teacherId);
+    if (to === undefined) return;
+    const preview = transferLesson(state, lesson.id, teacherId);
+    if (
+      !(await confirm({
+        title: t('Ders {kim} öğretmenine geçsin mi?', { kim: to.short }),
+        body:
+          preview.returned === 0
+            ? t('Yerleşmiş saatler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.')
+            : t('{n} blok havuza döner. Ctrl+Z ile geri alınabilir.', { n: preview.returned }),
+        confirmLabel: t('Aktar'),
+        danger: preview.returned > 0,
+      }))
+    ) {
+      return;
+    }
+    change((d) => transferLesson(d, lesson.id, teacherId).state);
+    toast(
+      preview.returned === 0
+        ? t('Ders {kim} öğretmenine geçti.', { kim: to.short })
+        : t('Ders {kim} öğretmenine geçti. {n} blok havuza döndü.', {
+            kim: to.short,
+            n: preview.returned,
+          }),
+    );
+  }
 
   return (
     <Dialog.Root open={lessonId !== null} onOpenChange={(o) => !o && onClose()}>
@@ -112,6 +205,69 @@ function LessonSheet({
               </div>
 
               <dl className="sheet-edit">
+                {/* BOTH ENDS OF THE LESSON, and until 2026-08-30 neither could
+                    be changed anywhere in the program: the hint under this
+                    sheet said so in as many words. "dersi düzenle ve öğretmeni
+                    düzenleme ve sınıfı düzenlemede her şeyi düzenleyebilelim."
+
+                    Neither is a plain field write, and the two are wrong in
+                    opposite ways — see `transferLesson` and
+                    `moveLessonToClass` in entities.ts. Both are asked for
+                    first, because both can send hours back to the tray and the
+                    number is not guessable from the dropdown. */}
+                <dt>{t('Sınıf')}</dt>
+                <dd>
+                  <select
+                    aria-label={t('Sınıf')}
+                    value={lesson.classId}
+                    onChange={(e) => void handClass(e.target.value)}
+                  >
+                    {state.classes.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </dd>
+
+                <dt>{t('Öğretmen')}</dt>
+                <dd>
+                  <select
+                    aria-label={t('Öğretmen')}
+                    value={lesson.teacherId}
+                    onChange={(e) => void handTeacher(e.target.value)}
+                  >
+                    {state.teachers.map((x) => (
+                      <option key={x.id} value={x.id}>
+                        {x.short} · {teacherSubjects(x).map(subjectLabel).join(' / ')}
+                      </option>
+                    ))}
+                  </select>
+                </dd>
+
+                {/* Only for a teacher who holds two: a dropdown with one entry
+                    asks nothing. Same rule as the Dersler list. */}
+                {teacher !== undefined && hasTwoSubjects(teacher) && (
+                  <>
+                    <dt>{t('Branş')}</dt>
+                    <dd>
+                      <select
+                        aria-label={t('Branş')}
+                        value={lesson.second ? '1' : '0'}
+                        onChange={(e) =>
+                          change((d) =>
+                            updateLesson(d, lesson.id, { second: e.target.value === '1' }),
+                          )
+                        }
+                      >
+                        {teacherSubjects(teacher).map((name, i) => (
+                          <option key={name} value={i === 0 ? '0' : '1'}>
+                            {subjectLabel(name)}
+                          </option>
+                        ))}
+                      </select>
+                    </dd>
+                  </>
+                )}
+
                 <dt>{t('Haftalık saat')}</dt>
                 <dd>
                   <input
@@ -161,7 +317,7 @@ function LessonSheet({
               </dl>
 
               <p className="hint">
-                <T k="Sınıf ve öğretmen burada değişmez. **Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir." />
+                <T k="**Dersler** sekmesinde ders silinebilir, yeni ders eklenebilir." />
               </p>
             </>
           ) : (

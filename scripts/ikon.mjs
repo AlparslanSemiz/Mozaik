@@ -30,31 +30,44 @@ import { resolve } from 'node:path';
 // rendered at 16/20/24/32/40/48 on light and dark strips and looked at
 // (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
 //
-// The line moved TWICE, and the second move is the interesting one.
+// The line has moved THREE times now, and the third move is the one that was
+// finally made with the pixels in front of it rather than a claim about
+// Windows in front of it.
 //
 //   48 -> 32  because the taskbar is a 32 px slot at normal scaling and it was
 //             being handed the simplified three-column mark, which next to the
 //             real logo reads as a placeholder rather than as the program.
 //   32 -> 20  because that was still wrong, and the report came back a second
 //             time: "windowsta alttaki barda uygulamanın logosu küçük çizim,
-//             onun büyük çizim olması lazım."
+//             onun büyük çizim olması lazım." Windows 11 asks for 24 at 100 %
+//             scaling, not 32, so 24 was the size actually reaching the
+//             taskbar and it sat just under the line.
+//   20 -> 32  because the report came back a THIRD time — "sanki küçük simge
+//             yani 9x9 pixellik kullanılıyor gibi" — and this round measured
+//             the thing the first two rounds had argued about instead.
 //
-// The mistake in the 32 was an ASSUMPTION about Windows, not about pixels:
-// Windows 11 asks for 24 at 100 % scaling, not 32, so 24 was the size actually
-// reaching the taskbar and 24 sat just under the line. Reading the sheet again
-// with that in mind:
+// WHAT THE THIRD ROUND MEASURED, and it closed the other two theories first:
+// the .exe really does carry all nine sizes, byte-identical to the ones in
+// `kurulum/icon.ico` (`scripts/exe-ikon.mjs` on the published 2.0.0 binary), so
+// nothing was being scaled from a neighbour and nothing was missing. The mark
+// reaching the taskbar was the detailed one, drawn correctly, at 24 px.
+//
+// And at 24 px the detailed drawing is six bars 2.25 device pixels wide with
+// 0.56 px gaps between them. A gap under one device pixel does not exist. The
+// sheet says so plainly:
 //
 //   16        detailed collapses into a blue smear; its six columns merge
-//   20 · 24   detailed is mushy but the columns are TELLABLE, and it is the
-//             real mark rather than a stand-in
-//   32 +      detailed reads cleanly
+//   20 · 24   detailed is mushy — "the columns are tellable" was generous, and
+//             it is what somebody looking at a taskbar called 9x9 pixels
+//   32 +      detailed reads cleanly, and it is the real mark
 //
-// So 16 keeps the simplified drawing, because there the detailed one is not a
-// worse logo but no logo at all. Everything a taskbar can ask for is detailed
-// at every scaling — which is what the complaint asked for, and this time it
-// does not depend on guessing which size Windows picks.
+// So the simplified drawing takes every size a taskbar can ask for below 32,
+// and that is not a stand-in reaching the taskbar: three fat bars ARE the same
+// idea — coloured lessons sitting in a week — drawn with what survives at
+// 24 px. The earlier objection was to a mark that could not be read as the
+// program; this is a mark that can be read at all.
 const SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256];
-const SADE_ALTINDA = 20;
+const SADE_ALTINDA = 32;
 
 const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
 const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');

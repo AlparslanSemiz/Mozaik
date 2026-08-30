@@ -31,12 +31,14 @@ import {
   writePlanText,
 } from './library';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
+import { blankProgram } from './programs';
 import type {
   ClassGroup,
   Day,
   Gender,
   Id,
   Lesson,
+  ProgramVariant,
   Room,
   RuleLevel,
   State,
@@ -66,6 +68,7 @@ interface Box {
 
 type Action =
   | { type: 'change'; apply: (d: State) => State }
+  | { type: 'program-change'; apply: (d: State) => State }
   | { type: 'undo' }
   | { type: 'redo' }
   | { type: 'load'; state: State }
@@ -83,6 +86,13 @@ export function reduce(box: Box, action: Action): Box {
         past: [...box.past, box.present].slice(-HISTORY_LIMIT),
         future: [],
       };
+    }
+    // A program boundary is also an undo boundary: an action created while
+    // looking at one alternative must never be replayed into another.
+    case 'program-change': {
+      const next = sanitize(action.apply(box.present));
+      if (next === box.present) return box;
+      return { ...box, present: next, past: [], future: [] };
     }
     case 'undo': {
       const previous = box.past[box.past.length - 1];
@@ -298,9 +308,11 @@ function migrateV2toV3(raw: LegacyV2): State {
     classes: asArray<ClassGroup>(raw.classes, []),
     lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
-    placements: asMap<string>(raw.placements),
-    // Nothing this old can carry a pin: v10 is where they start.
-    pinned: {},
+    programs: [{
+      ...blankProgram(),
+      placements: asMap<string>(raw.placements),
+    }],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -406,6 +418,7 @@ export function parseState(text: string): State | null {
     version === 8 ||
     version === 9 ||
     version === 10 ||
+    version === 11 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -425,7 +438,12 @@ export function parseState(text: string): State | null {
     // Nothing on screen could say why: `null` here is "unreadable file". The
     // comment above was already here and was not enough, because a sentence
     // cannot fail a test run. `store.test.ts` now reads one file per version.
-    const g = raw as Partial<State>;
+    const g = raw as Partial<State> & {
+      placements?: unknown;
+      pinned?: unknown;
+      programs?: unknown;
+      activeProgramId?: unknown;
+    };
     const limits = g.settings?.limits;
     const rules = g.settings?.rules;
     candidate = {
@@ -485,11 +503,22 @@ export function parseState(text: string): State | null {
       ),
       lessons: readLessons(asArray<unknown>(g.lessons, blank.lessons), Number(version)),
       unavailable: asMap<1>(g.unavailable),
-      placements: asMap<string>(g.placements),
-      // v9 and below arrive with none, which is the right answer: a file
-      // written before pins existed pinned nothing. `sanitize()` then drops
-      // any that point at a cell the same load already threw away.
-      pinned: asMap<1>(g.pinned),
+      programs:
+        Number(version) >= 12
+          ? asArray<Partial<ProgramVariant>>(g.programs, []).map((program) => ({
+              id: asText(program.id, ''),
+              name: asText(program.name, ''),
+              placements: asMap<Id>(program.placements),
+              pinned: asMap<1>(program.pinned),
+            }))
+          : [{
+              ...blankProgram(),
+              placements: asMap<Id>(g.placements),
+              // v9 and below arrive with none, which is the right answer.
+              pinned: asMap<1>(g.pinned),
+            }],
+      activeProgramId:
+        Number(version) >= 12 ? asText(g.activeProgramId, '') : 'program-1',
     };
   } else {
     return null; // an unknown (newer) version is not guessed at
@@ -670,6 +699,9 @@ export function useStore() {
   const change = useCallback((apply: (d: State) => State) => {
     dispatch({ type: 'change', apply });
   }, []);
+  const manageProgram = useCallback((apply: (d: State) => State) => {
+    dispatch({ type: 'program-change', apply });
+  }, []);
   const undo = useCallback(() => dispatch({ type: 'undo' }), []);
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
   const loadState = useCallback((state: State) => dispatch({ type: 'load', state }), []);
@@ -844,6 +876,7 @@ export function useStore() {
   return {
     state: box.present,
     change,
+    manageProgram,
     undo,
     redo,
     loadState,

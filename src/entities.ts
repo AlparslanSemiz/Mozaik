@@ -6,12 +6,20 @@
 
 import { clampBlocks } from './blocks';
 import {
+  activePinned,
+  activePlacements,
+  mapProgramGrids,
+  replaceActiveGrid,
+  blankProgram,
+} from './programs';
+import {
   blocker,
   buildIndex,
   closedKey,
   countPlacedHours,
   place,
   placedBlocks,
+  placementKey,
   sanitize,
   teacherKey,
 } from './constraints';
@@ -207,6 +215,23 @@ export function subjectShort(settings: Settings, subject: string): string {
 
   const head = subject.trim().slice(0, 3);
   return head.charAt(0).toLocaleUpperCase('tr') + head.slice(1);
+}
+
+/**
+ * One line of a subject dropdown: "Mat · Matematik".
+ *
+ * The short form FIRST, because it is the string the reader has to recognise
+ * everywhere else — the grid row heads, the cells and the printed page all
+ * carry it. The full name stays beside it: a dropdown of three-letter codes is
+ * not a list anyone can pick from, which is why this is not simply
+ * `subjectShort`. When the two are the same string it is written once.
+ *
+ * Lived in `setup/Teachers.tsx` until the entity sheet grew the same dropdown.
+ */
+export function subjectOption(settings: Settings, name: string): string {
+  const short = subjectShort(settings, name);
+  const full = subjectLabel(name);
+  return short === full ? full : `${short} · ${full}`;
 }
 
 /**
@@ -502,8 +527,8 @@ export function emptyState(): State {
     classes: [],
     lessons: [],
     unavailable: {},
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -643,11 +668,13 @@ export function updateLesson(d: State, id: Id, fields: Partial<Lesson>): State {
       before.blocks.some((b, i) => b !== after.blocks[i]));
   if (!splitChanged) return { ...d, lessons };
 
-  const placements = { ...d.placements };
-  for (const key in placements) {
-    if (placements[key] === id) delete placements[key];
-  }
-  return { ...d, lessons, placements };
+  return mapProgramGrids({ ...d, lessons }, (program) => {
+    const placements = { ...program.placements };
+    for (const key in placements) {
+      if (placements[key] === id) delete placements[key];
+    }
+    return { ...program, placements };
+  });
 }
 
 /**
@@ -692,27 +719,112 @@ export function transferLesson(
   const mine = teacherSubjects(next);
   const second = mine.length > 1 && subjectKey(mine[1] ?? '') === wanted;
 
-  const blocks = placedBlocks(d, lesson);
-
-  // Lift everything first: judging a block against a grid that still holds the
-  // lesson's own other blocks would make it clash with itself.
-  const placements = { ...d.placements };
-  for (const key in placements) {
-    if (placements[key] === id) delete placements[key];
-  }
   const lessons = d.lessons.map((x) => (x.id === id ? { ...x, teacherId, second } : x));
-  let work: State = { ...d, lessons, placements };
-
   let returned = 0;
-  for (const b of blocks) {
-    const ix = buildIndex(work);
-    if (blocker(work, ix, id, b.day, b.hour, b.size) === null) {
-      work = place(work, id, b.day, b.hour, b.size);
-    } else {
-      returned++;
+  const originalActive = d.activeProgramId;
+  let work: State = { ...d, lessons };
+
+  // The teacher is shared, so every alternative grid has to be judged. Doing
+  // only the open one would leave a quiet double-booking in the others.
+  for (const program of d.programs) {
+    let grid: State = { ...work, activeProgramId: program.id };
+    const changedLesson = grid.lessons.find((item) => item.id === id)!;
+    const blocks = placedBlocks(grid, changedLesson);
+    const placements = { ...activePlacements(grid) };
+    for (const key in placements) {
+      if (placements[key] === id) delete placements[key];
     }
+    grid = replaceActiveGrid(grid, { placements });
+
+    for (const block of blocks) {
+      const ix = buildIndex(grid);
+      if (blocker(grid, ix, id, block.day, block.hour, block.size) === null) {
+        grid = place(grid, id, block.day, block.hour, block.size);
+      } else {
+        returned++;
+      }
+    }
+    work = grid;
   }
-  return { state: sanitize(work), returned };
+  return { state: sanitize({ ...work, activeProgramId: originalActive }), returned };
+}
+
+/**
+ * Hands one lesson to a different CLASS, and judges its placements.
+ *
+ * The mirror of `transferLesson`, and wrong in the opposite way if written
+ * naively. There the cells stayed put and the teacher's occupancy was derived;
+ * here `placements` is keyed BY CLASS, so changing `classId` leaves every hour
+ * of this lesson sitting in the old class's row — the timetable would show the
+ * lesson under a class that no longer has it, and the new class would look
+ * free. `sanitize()` would not notice: the keys are well formed and the lesson
+ * exists.
+ *
+ * So each block is lifted off the old row and offered the SAME square on the
+ * new one, against an index rebuilt without it. Whatever `blocker()` clears
+ * goes down again; whatever it refuses goes back to the tray. Same question
+ * the auditor asks and the same one a drag asks.
+ *
+ * PINS GO. A pin is `classId|day|hour`, so a pin left behind would point at a
+ * square belonging to someone else and lock a stranger's hour. The count comes
+ * back so the caller can say what it cost before it happens.
+ *
+ * `blocks` and `second` are carried untouched: the shape of the week and which
+ * of the teacher's branches this is are facts about the lesson, and neither
+ * end of it moved.
+ */
+export function moveLessonToClass(
+  d: State,
+  id: Id,
+  classId: Id,
+): { state: State; returned: number; unpinned: number } {
+  const lesson = d.lessons.find((x) => x.id === id);
+  const next = d.classes.find((x) => x.id === classId);
+  if (lesson === undefined || next === undefined || lesson.classId === classId) {
+    return { state: d, returned: 0, unpinned: 0 };
+  }
+
+  const lessons = d.lessons.map((x) => (x.id === id ? { ...x, classId } : x));
+  let returned = 0;
+  let unpinned = 0;
+  const originalActive = d.activeProgramId;
+  let work: State = { ...d, lessons };
+
+  // Every alternative grid, for the same reason `transferLesson` walks them:
+  // the school data is shared and only the grids differ.
+  for (const program of d.programs) {
+    let grid: State = { ...work, activeProgramId: program.id };
+    // Read off the OLD row, so the blocks have to be found before the lessons
+    // list is swapped under them.
+    const old: State = { ...grid, lessons: d.lessons };
+    const blocks = placedBlocks(old, lesson);
+
+    const placements = { ...activePlacements(grid) };
+    for (const key in placements) {
+      if (placements[key] === id) delete placements[key];
+    }
+    const pinned = { ...activePinned(grid) };
+    for (const block of blocks) {
+      for (let k = 0; k < block.size; k++) {
+        if (pinned[placementKey(lesson.classId, block.day, block.hour + k)] !== undefined) {
+          delete pinned[placementKey(lesson.classId, block.day, block.hour + k)];
+          unpinned++;
+        }
+      }
+    }
+    grid = replaceActiveGrid(grid, { placements, pinned });
+
+    for (const block of blocks) {
+      const ix = buildIndex(grid);
+      if (blocker(grid, ix, id, block.day, block.hour, block.size) === null) {
+        grid = place(grid, id, block.day, block.hour, block.size);
+      } else {
+        returned++;
+      }
+    }
+    work = grid;
+  }
+  return { state: sanitize({ ...work, activeProgramId: originalActive }), returned, unpinned };
 }
 
 export function deleteLesson(d: State, id: Id): State {
@@ -767,9 +879,12 @@ export function remapDays(d: State, nextDays: Day[]): State {
   // whichever day slid into its place (pitfall 11).
   return {
     ...d,
-    placements: move(d.placements),
     unavailable: move(d.unavailable),
-    pinned: move(d.pinned),
+    programs: d.programs.map((program) => ({
+      ...program,
+      placements: move(program.placements),
+      pinned: move(program.pinned),
+    })),
   };
 }
 
@@ -1148,7 +1263,7 @@ export function entityWeek(d: State, kind: InspectKind, id: Id): WeekCell[][] {
       const closed = d.unavailable[`${id}|${day}|${hour}`] === 1;
       const lessonId =
         kind === 'class'
-          ? d.placements[`${id}|${day}|${hour}`]
+          ? activePlacements(d)[`${id}|${day}|${hour}`]
           : kind === 'teacher'
             ? ix.teacherBusy.get(teacherKey(id, day, hour))
             : ix.roomBusy.get(`${id}|${day}|${hour}`);

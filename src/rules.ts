@@ -11,6 +11,7 @@ import { t } from './i18n';
 import { dayLabel } from './names';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from './keys';
+import { activePlacements } from './programs';
 import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from './types';
 
 export interface Violation {
@@ -130,7 +131,7 @@ export function lessonDayCount(
 ): number {
   let n = 0;
   for (let h = 0; h < hourCount; h++) {
-    if (d.placements[placementKey(lesson.classId, day, h)] === lesson.id) n++;
+    if (activePlacements(d)[placementKey(lesson.classId, day, h)] === lesson.id) n++;
   }
   return n;
 }

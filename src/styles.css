@@ -277,34 +277,34 @@
      12px stays the absolute floor and that is NOT taste — the reader has
      trouble seeing.
 
-     RE-PINNED 2026-08-27 to a 14px root (it was 16px, and the default scale was
-     110%, so the body was really 17.6px). The reader asked for the whole screen
-     to come down: "yüzde yüzü biraz daha küçült, oransal küçült her şeyi,
-     default yüzde 100 olsun".
+     RE-PINNED TWICE: to a 14px root on 2026-08-27 (from 16px at a 110%
+     default), and to a 13px root on 2026-08-30. Both times the reader asked
+     for the same thing in the same words — the screen is too big — and both
+     times the answer was the anchor, not the letters.
 
      It cannot ALL come down by the same fraction, and that is the floor's
-     doing rather than a compromise: at a 14px root the old ladder put --fs-xs
-     at 10.5px and --fs-sm at 11.4px, which is the one thing this file is not
-     allowed to do. So the ladder is written against the new root instead of
-     scaled with it, and what shrinks is what is allowed to:
+     doing rather than a compromise: scaled with the root, --fs-xs would sit at
+     10.5px and then 11.1px, which is the one thing this file is not allowed to
+     do. So the ladder is written against each new root instead of scaled with
+     it, and what shrinks is what is allowed to. Across both moves:
 
-       small print  -9%   (13.2 -> 12.0, and 12.0 is the floor, not a choice)
-       body        -15%   (17.6 -> 15.0)
-       headings    -22%   (39.6 -> 31.0 at the top)
-       everything in rem that is NOT type  -20%, the full amount
+       small print   -9%   (13.2 -> 12.0, and 12.0 is the floor, not a choice)
+       body         -15%   (17.6 -> 15.0)
+       headings     -22%   (39.6 -> 31.0 at the top)
+       everything in rem that is NOT type  -20%, then -7.1% again
 
      That last line is where the room actually comes from: spacing, cells, the
      strip, the `ch` columns and the dock all follow the root and none of them
      has a floor to respect. */
-  --fs-2xs:  .786rem;  /* 11px — print preview furniture ONLY, never screen UI */
-  --fs-xs:   .857rem;  /* 12px — the screen floor */
-  --fs-sm:   .929rem;  /* 13px */
-  --fs-md:   1rem;     /* 14px */
-  --fs-base: 1.071rem; /* 15px — body */
-  --fs-lg:   1.214rem; /* 17px */
-  --fs-xl:   1.429rem; /* 20px */
-  --fs-2xl:  1.786rem; /* 25px */
-  --fs-3xl:  2.214rem; /* 31px */
+  --fs-2xs:  .846rem;  /* 11px — print preview furniture ONLY, never screen UI */
+  --fs-xs:   .923rem;  /* 12px — the screen floor */
+  --fs-sm:   1rem;     /* 13px */
+  --fs-md:   1.077rem; /* 14px */
+  --fs-base: 1.154rem; /* 15px — body */
+  --fs-lg:   1.308rem; /* 17px */
+  --fs-xl:   1.538rem; /* 20px */
+  --fs-2xl:  1.923rem; /* 25px */
+  --fs-3xl:  2.385rem; /* 31px */
 
   /* Tracking. Plex wants a touch of negative at display sizes, real positive
      when small text is set in caps, and a hair of negative on headings. */
@@ -451,14 +451,24 @@
   /* The one raw px font-size in the file: the anchor the whole rem ladder
      hangs from.
 
-     14px and scale 1.00 since 2026-08-27, asked for by the reader ("genel
-     anlamda yüzde yüzü biraz daha küçült ... default yüzde 100 olsun"). It was
-     16px and 1.10, so the screen has come down 20% in every rem that is not
-     type; the type ladder above is re-pinned to the new root instead, because
-     12px on screen is a floor and not a preference. Ayarlar > Görünüm still
-     walks 1.00 to 1.50 in eleven steps. */
+     13px since 2026-08-30, 14px before that, 16px before that. The move is
+     the same one twice, asked for twice: "babamın zaten windowsu bilgisayarın
+     ölçeklenmesi çok büyük o sebeple biz de büyük yaptık ama devasa oldu".
+     Windows' own display scaling multiplies on top of this one, so what the
+     reader sees is the product of two numbers and only one of them is ours.
+
+     The type ladder above is RE-PINNED to each new root rather than scaled
+     with it, and that is the floor's doing: 12px on screen is not a
+     preference. So the small print stays 12px and what comes down is
+     everything in rem that is NOT type — spacing, cells, the strip, the `ch`
+     columns, the dock: -7.1% this time.
+
+     Ayarlar > Görünüm walks 0.80 to 1.50 in fifteen steps now. Below 100% the
+     type does come down with everything else, and that is deliberate: the
+     floor is a promise about the DEFAULT screen, and a reader who reaches for
+     %80 is answering it himself. */
   --ui-scale: 1;
-  font-size: calc(14px * var(--ui-scale));
+  font-size: calc(13px * var(--ui-scale));
   line-height: var(--lh-base);
 
   /* So `height: auto` can be transitioned — the tool strip slides away while
@@ -2017,6 +2027,10 @@ table.grid tbody td {
   text-align: center;
   vertical-align: middle;
   background: var(--paper);
+  /* The positioning context for `.card-pin`. It cannot be the card: the card
+     is a <button> and the pin is a second button, so they are SIBLINGS in the
+     cell (Grid.tsx). */
+  position: relative;
   /* One pixel of air, so a colour block reads as an OBJECT sitting in the hour
      rather than as a painted cell. box-sizing is border-box, so the cell keeps
      its 34px and the grid keeps its measured width. */
@@ -2098,43 +2112,85 @@ table.grid tbody td.unavailable {
 }
 
 /* A PINNED block: locked in place by the reader.
-   `position: relative` for the mark, and `cursor: default` because the card no
-   longer follows the pointer — a grab cursor over something that cannot be
-   grabbed is the interface promising a gesture it will refuse.
+   `cursor: default` because the card no longer follows the pointer — a grab
+   cursor over something that cannot be grabbed is the interface promising a
+   gesture it will refuse.
    The mark itself carries the state, not a colour: the four colours of this
    grid already mean droppable / warning / blocked / closed, and a fifth would
-   have had to be told apart from all of them. */
+   have had to be told apart from all of them.
+   It no longer needs `position: relative`: the mark became a control and moved
+   out of the card (see `.card-pin`), and the conflict wedge next to it is a
+   background gradient, not a positioned child. */
 .card.pinned {
-  position: relative;
   cursor: default;
 }
 
-/* BOTTOM-LEFT, and the corner was chosen by LOOKING at it.
+/* THE PIN, and since 2026-08-30 it is a CONTROL and not a mark: "kartların
+   üzerinde sabitleye basınca dersi sabitlesin babamın en çok kullanacağı bu."
+
+   BOTTOM-LEFT, and the corner was chosen by LOOKING at it.
    Top-right was the first try and the mark landed on the last digit of the
    class number: the card is 34px wide and its first line ("310", bold) fills
    nearly all of it, so neither top corner is free. The second line is one
    letter — a room — so the bottom corners are. Bottom-RIGHT is taken: the
    conflict wedge lives there (`.card.conflict`), and a card can be pinned and
-   in conflict at once. */
+   in conflict at once.
+
+   `pointer-events: none` is GONE, which was the whole point. */
 .card-pin {
   position: absolute;
-  bottom: 1px;
-  left: 1px;
-  width: 9px;
-  height: 9px;
-  stroke-width: 3;
+  bottom: 0;
+  left: 0;
+  /* Derived from the cell rather than written down, because the cell is the
+     thing that moves: 38.5px at "Ferah", as little as 18px at "Sığdır". A
+     fixed button fills a tight cell corner to corner and leaves nowhere to
+     take hold of the card (pitfall 36 — a size that comes from another size is
+     calculated from it, not copied). */
+  --pin-size: clamp(.75rem, calc(var(--cell-h) * .48), 1.125rem);
+  width: var(--pin-size);
+  height: var(--pin-size);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
   /* --on-color, like every other mark that sits on a palette colour: the ink
      over a pastel must not turn with the theme (pitfall 15). */
   color: var(--on-color);
-  opacity: .85;
-  pointer-events: none;
+  cursor: pointer;
+  /* FADED, NOT HIDDEN, and that is the user's own answer ("hep görünsün +
+     şeffaf"). A control that appears on hover is a control the reader this
+     tool is built for never finds — and this is the action they asked for by
+     name. Faded, it stays discoverable without turning 400 cells into 400
+     symbols. */
+  opacity: .38;
+  transition:
+    opacity var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease);
 }
 
-/* At the tightest density the cell is already on its content floor, so the mark
-   shrinks with it rather than stealing a corner of the two lines of text. */
-:root[data-density='sigdir'] .card-pin {
-  width: 7px;
-  height: 7px;
+.card-pin > svg {
+  width: 74%;
+  height: 74%;
+  stroke-width: 3;
+}
+
+/* On, or being aimed at. Hovering the CELL is enough: the pointer is already
+   over the card by the time the hand decides. */
+.card-pin[aria-pressed='true'],
+table.grid tbody td:hover > .card-pin,
+.card-pin:hover,
+.card-pin:focus-visible {
+  opacity: 1;
+}
+
+.card-pin:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--on-color) 20%, transparent);
+}
+
+.card-pin:disabled {
+  cursor: not-allowed;
 }
 
 /* ------------------------------------------------------- the grid's own menu
@@ -2177,10 +2233,30 @@ table.grid tbody td.unavailable {
 }
 
 /* Why the item above is greyed out, said rather than left to be guessed. */
+/* A fixed slot for the tick on a radio item, so the names line up whether or
+   not it is in it. Sized like the symbols beside every other menu item. */
+.menu-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
 .menu-why {
   margin-left: auto;
   font-size: var(--fs-xs);
   color: var(--muted);
+}
+
+/* A heading INSIDE a menu: what the items under it are about. Quieter than an
+   item and not clickable, so the eye skips it on the way down. */
+.menu-label {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  user-select: none;
 }
 
 .menu-sep {
@@ -2465,6 +2541,31 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   padding: var(--space-2) var(--space-3);
 }
 
+/* "neye göre filtrelensin sıralansın ayarı bile olabilir." Pushed to the far
+   end, because the count on the left is what the eye comes to this strip for
+   and these two are asked once and then left alone. */
+.pool-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.pool-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pool-pick select {
+  font-size: var(--fs-xs);
+  padding: 2px var(--space-2);
+}
+
 /* Along the bottom the count sits BESIDE its subtitle, not above it: the strip
    is 32px tall and a stacked label would set the drawer's floor by itself. */
 .pool-count {
@@ -2516,6 +2617,81 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
      2.2000122 rather than 2.2. Measured, the same way pitfall 37 measured the
      grid's two pixels of column-border rounding. */
   padding: calc(var(--slide) / 4 + 4px) var(--space-3) var(--space-3);
+}
+
+/* ONE RUN OF CARDS, UNDER A NAME.
+   "kartlar havuzdayken ayrım daha bir güzel ve hoş olsun."
+
+   What separated one teacher's cards from the next was `gap`: 7 px between
+   pastel rectangles, on a tray that was already sorted so a row's cards stood
+   together and never said where the row ended. A heading says it, and it says
+   the ORDER too — pick "branşa göre" and the headings become branches.
+
+   The group is a column so the label sits over its own cards; the space
+   BETWEEN groups is bigger than the space between cards, which is the whole
+   trick (a gap only groups when there is a smaller gap inside it). */
+.pool-group {
+  display: flex;
+  /* A ROW, so the heading costs the tray no HEIGHT — measured, and the reason
+     is the short screen. Above its cards the label took a line of a tray that
+     can be as little as 84 px tall (6rem, the floor of the dock clamp, which a
+     560 px viewport reaches): head 32 + label 24 + card 40 does not fit in 84,
+     so the only row of cards was clipped and the first card could not be
+     picked up at all. Beside them it costs nothing vertical and the tray is
+     the dense wrap it always was, with names in it. */
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  /* SHRINKABLE, and capped at the tray — MEASURED, because the first version
+     was `flex: 0 0 auto` and a group could be any width its cards asked for.
+     Sorted by block length there are only two groups, and the wider of them
+     wanted 4015 px inside a 1920 px tray whose `overflow-x` is hidden: 2109 px
+     of cards, unreachable, with nothing on screen saying they existed. At 150%
+     it was 4123 px. Capped, the group falls back on its own `flex-wrap` and
+     the cards wrap inside it. */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  padding-right: var(--space-3);
+  border-right: 1px solid var(--hairline);
+}
+
+.pool-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.pool-group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  line-height: var(--lh-tight);
+  white-space: nowrap;
+}
+
+/* How many blocks are under this heading. It is the number the corner badge on
+   a deck used to carry, moved to where it costs nothing (2026-08-28 took the
+   badge off the card by request; the count itself was never the complaint). */
+.pool-group-count {
+  padding: 0 .35em;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pool-group-cards {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 /* Closed, the COUNT stays: down the right it had to go because a 40px column
@@ -2608,7 +2784,14 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   padding: var(--space-2) var(--space-3);
   border: none;
   border-radius: var(--r-sm);
-  box-shadow: var(--elev-1);
+  /* An EDGE of its own, not just a shadow: two cards of neighbouring palette
+     indices sit 23.8 apart in CIE Lab, which is plenty to tell apart and not
+     always enough to see a boundary between when they touch across a 7px gap.
+     The ink is --on-color, so it does not turn with the theme (pitfall 15) and
+     it is always the colour that already reads on this card. */
+  box-shadow:
+    var(--elev-1),
+    inset 0 0 0 1px color-mix(in oklab, var(--on-color) 22%, transparent);
   cursor: grab;
   line-height: var(--lh-tight);
   touch-action: none;
@@ -2621,7 +2804,9 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
 .pool-card:hover {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
-  box-shadow: var(--elev-2);
+  box-shadow:
+    var(--elev-2),
+    inset 0 0 0 1px color-mix(in oklab, var(--on-color) 22%, transparent);
   /* A card in the tray is a thing you are about to pick up, so it comes to
      meet the pointer. One frame — enough to feel, too small to shift the row it
      sits in. Derived from --slide rather than written as 2px: it is a quarter
@@ -2958,6 +3143,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 .card:focus-visible,
+.card-pin:focus-visible,
 .pool-card:focus-visible {
   /* Two rings, not one: a --paper gap and then the accent. A single ring
      disappears the moment the focused thing is sitting on a palette colour —
@@ -3070,7 +3256,8 @@ table.list td > input.text-sm {
    own text like every other box on the width ladder (pitfall 34: the width
    belongs to the control, not to the <th>), and it is wide enough for "36"
    rather than for whatever number happens to be in it. */
-table.list td > .color-pick {
+table.list td > .color-pick,
+.sheet-edit .color-pick {
   /* Its width was sized for two digits and its HEIGHT came from the line box
      those digits made. The digits went ("Renklerin üzerinde sayılar olmasın")
      and the height went with them: the swatch collapsed into a 10px bar, which
@@ -3079,7 +3266,13 @@ table.list td > .color-pick {
      have, asked for directly instead of conjured by a character.
      5ch stays: the column's real floor is the "Renk" heading anyway
      (45/48/54px + padding at 110/125/150 %), so a narrower box would buy
-     nothing and a colour needs room to BE a colour. */
+     nothing and a colour needs room to BE a colour.
+
+     THE SHEET IS ON THE SAME RULE (2026-08-30), and it had to be added by
+     name rather than by dropping `table.list td >`: a bare `.color-pick` is
+     (0,1,0) and `table.list td > select` is (0,1,3), so the swatch inside a
+     list would go back to `width: 100%` and the column would swallow it
+     (pitfall 34). Seen as the same 10px bar the digits left behind. */
   width: 5ch;
   height: 1lh;
   padding: 0;
@@ -3094,7 +3287,8 @@ table.list td > .color-pick {
   transition: box-shadow var(--dur) var(--ease);
 }
 
-table.list td > .color-pick:hover {
+table.list td > .color-pick:hover,
+.sheet-edit .color-pick:hover {
   box-shadow: var(--elev-1);
 }
 
@@ -3289,8 +3483,82 @@ table.stat tbody tr:hover {
    the one thing splitting a panel in two costs: a `.form-row` carries a bottom
    margin for a STACK of form rows, and as the last thing in a panel that margin
    lands on top of the panel's own padding. */
-.add-panel > .form-row:last-child {
+.add-panel {
+  display: grid;
+  /* The shared floor is what makes the five screens SYMMETRIC: stepping from
+     Derslikler to Öğretmenler must not move the form out from under the
+     pointer. That is why it was CUT rather than dropped ("simetrik hale
+     getirdik ama çok uzun olmuş kısalt", 2026-08-30) - 18.5rem to 13rem, and
+     the description rail 5.5rem to 3.25rem.
+
+     What this CANNOT shorten is written down in STATUS: the two screens whose
+     paragraph is longer than the rail (Öğretmenler, Dersler) are boxed by
+     their own text and give back only the padding. The next lever there is the
+     sentence, not the geometry. */
+  grid-template-rows: auto minmax(3.25rem, auto) auto 1fr;
+  min-height: 13rem;
+  padding: var(--space-5);
+}
+
+.add-panel-head {
+  min-height: 2rem;
+}
+
+.add-panel-description > .hint {
+  margin-top: var(--space-2);
+}
+
+.add-panel-notice {
+  align-self: start;
+}
+
+.add-panel-body {
+  align-self: end;
+  min-width: 0;
+}
+
+.add-panel-body > .form-row:last-child {
   margin-bottom: 0;
+}
+
+/* Session-only program masks keep their meaning without relying on colour.
+   Opacity says "still here, temporarily inactive"; disabled controls remove
+   the interaction path, and the context menu on the header remains the way
+   back. */
+.grid .masked-scope,
+.pool-card.masked-scope {
+  opacity: 0.42;
+}
+
+.grid .card:disabled,
+.pool-card.masked-scope {
+  cursor: not-allowed;
+  filter: grayscale(0.45);
+}
+
+/* The name of the timetable you are in, riding the button that opens the
+   library. It is the only caption in the strip whose text the reader wrote, so
+   it is the only one that can be arbitrarily long: it gets a ceiling and an
+   ellipsis rather than the right to push "Yoğunluk" off the end (pitfall 48 —
+   a strip says in advance what it gives up first). */
+.ribbon-ellipsis {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dlg-input {
+  width: 100%;
+}
+
+/* At the largest comfort scale content wins over the shared floor: the card
+   grows naturally instead of clipping a wrapped explanation or form row. */
+@media (max-width: 80rem) {
+  .add-panel {
+    min-height: 0;
+    grid-template-rows: auto auto auto auto;
+  }
 }
 
 /* Kontrol is one panel at a time now, so nothing constrains its width any
@@ -3582,6 +3850,26 @@ table.list td .split-count > input.num,
   --aside-w: 23.5rem;
 }
 
+/* ...EXCEPT ON ÇIKTI, and the extra room comes from a measurement of what is
+   already empty. The sheet is a fixed physical thing — 297mm, 1123px — and at
+   1920 the preview column was 1556px wide, so 433px of it was blank paper-side
+   margin (256px at 150%). The rail was 305px and holding two stacked tick
+   lists, each looking through a 168px window.
+
+   `min()` and not a flat width: `cqw` is `.main`, the box the preview actually
+   lives in, so on a narrower window the rail gives room back instead of
+   pushing the sheet off the side.
+
+   The two numbers are measured against two different things. 37rem is what the
+   tick lists need to stand SIDE BY SIDE at 100% (two 16rem columns and a 13px
+   gap inside 45px of panel padding = 474px, and 37rem is 481). 32cqw is the
+   ceiling that keeps the sheet's margin honest at 150%, where two columns do
+   not fit anyway and `auto-fit` stacks them: the rail lands on 613px and the
+   preview keeps 167px beside the paper instead of 28. */
+.cols.print-cols {
+  --aside-w: min(37rem, 32cqw);
+}
+
 /* Below this the two columns are narrower than the tables they hold. */
 @media (max-width: 68rem) {
   .cols {
@@ -3851,14 +4139,30 @@ table.availability td {
 /* The paintable rows are what grows; the header keeps the compact height its
    two lines need. The cell is wider than it is tall on any real screen (~67px
    at 1366px, wider still at 1920px), so 34px made it a 2:1 slab and the screen
-   ended at 238px with a third of the page empty under it. 48px puts
-   the cell near 1.4:1 and doubles nothing else.
+   ended at 238px with a third of the page empty under it.
+
+   3.875rem = 54.25px at the default scale, asked for by name ("müsaitlik
+   programlarının satırlarını uzat", 2026-08-30) and MEASURED before it was
+   written: the numbers for both scales, both day counts and the clock on and
+   off are in STATUS. The comment here used to say "48px" while the rule said
+   3rem, i.e. 42px - a sentence nobody re-read after the root became 14px. It
+   says the arithmetic now.
 
    Specificity (0,1,3) beats the shared `table.availability th, td` rule (0,1,2)
    above ON PURPOSE. Pitfall 17 is the story of doing this the other way round:
    a single-class rule that quietly lost. */
 table.availability tbody th,
 table.availability tbody td {
+  height: 3.875rem;
+}
+
+/* ...but the heat map is NOT an availability sheet. It borrows this skeleton
+   to draw one glance at the whole school ("Haftanın darlığı"), it has no cell
+   to click and no cross to read, and growing it would cost a row per day for
+   nothing. It keeps the height the paint grid had before 2026-08-30, and the
+   selector (0,2,3) is what lets it. */
+table.availability.heat tbody th,
+table.availability.heat tbody td {
   height: 3rem;
 }
 
@@ -4096,17 +4400,37 @@ table.availability td.closed {
 
 /* The page's own colour, so a stack of printed sheets can be sorted by eye the
    same way the rows are on screen. */
-/* The "which pages" tick lists. Two columns side by side, each scrolling on
-   its own: 25 teachers must not push the Yazdır button off the screen. */
+/* The "which pages" tick lists — side by side when the rail has room for two,
+   stacked when it does not, and NEITHER of them a scroller of its own.
+
+   ("Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz
+    zor ... ya biraz daha geniş şekilde yapabiliriz aslında çünkü çıktı
+    kısmında bayağı boşluk var.")
+
+   There used to be THREE scrollboxes nested here and it was measured that way:
+   the rail itself, plus one 168px `.pick-items` per list. Reading a tick list
+   twenty-five names long through a window six names tall, inside a column that
+   also scrolled, is the thing that was hard to use.
+
+   `auto-fit` rather than a media query: the two land beside each other exactly
+   when two fit, which is a question about this rail's width at this scale and
+   not about the window. */
 .pickers {
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  align-items: start;
   gap: var(--space-5);
 }
 
+/* 16rem is MEASURED, not chosen: forced to `min-content` on the sample school
+   a list asks for 206px at 100% and 305px at 150%, which is 15.85rem in both
+   — the header row (its name, `Tümü`, `Hiçbiri`) is what sets it, and that row
+   is built from `ch` and rem like everything else. It was a flat `240px`, a
+   number in the one unit that does not follow the reader's scale. */
 .pick-list {
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
-  min-width: 240px;
+  min-width: 16rem;
 }
 
 .pick-head {
@@ -4121,13 +4445,19 @@ table.availability td.closed {
   margin-right: auto;
 }
 
+/* NO CEILING OF ITS OWN. It was `max-height: 168px`, and two things were wrong
+   with that at once: it is a raw pixel, so it held proportionally FEWER names
+   the larger the reader set the scale, and it made this box the second and
+   third scrollbar on a screen that already had one.
+
+   The list is as long as the school is. What gives ground is the rail around
+   it, which is bounded by `100cqh` and was always going to be the one box
+   doing the scrolling here. */
 .pick-items {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-4);
   padding: var(--space-3);
-  max-height: 168px;
-  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -5125,8 +5455,29 @@ table.availability.heat td.closed {
    widest thing in the heading, so it sets the column's floor — and this is a
    screen you PAINT by dragging across, where a narrower column is a shorter
    drag. Whoever wants the times has them in Ayarlar → Zil ve günler and on paper. */
+/* HIDDEN, NOT REMOVED — and the difference is the claim the setting makes.
+
+   Turning the clock off is about NOISE, not about room: the reader said he did
+   not want to look at the times, not that he wanted the table shorter. A table
+   that changes height would make that a lie, and `gorunum.spec.ts` 50 measures
+   exactly that.
+
+   `display: none` held only by luck. The heading's height came from the shared
+   cell rule at 2.125rem, which at a 14px root is 29.75px against two 14.4px
+   line boxes — near enough to round equal. The root went to 13px on 2026-08-30
+   and the type did not follow it (re-pinned; 12px is the floor), so the margin
+   went negative and the table grew 2.16px the moment the clock came on.
+
+   Reserving the line costs no arithmetic and cannot drift: the second line box
+   is there in both states, so the two heights are the same BY CONSTRUCTION
+   rather than by a number somebody has to re-derive whenever the root moves
+   (pitfall 36). `toBeHidden()` and `innerText` both still say it is gone.
+
+   The grid's own `.hour-clock` keeps `display: none` under Sığdır, and that is
+   the opposite case on purpose: there the whole measured point IS the room the
+   line gives back (2461 -> 1728px, pitfall 37). */
 :root:not([data-avail-clock='acik']) table.availability thead .hour-clock {
-  display: none;
+  visibility: hidden;
 }
 
 /* ------------------------------------------------------------- health chip

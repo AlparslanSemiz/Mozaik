@@ -52,6 +52,7 @@ import Paste from '../setup/Paste';
 import Summary from '../setup/Summary';
 import Field from '../Field';
 import { T, useT } from '../T';
+import AddPanel from '../AddPanel';
 
 interface Props {
   state: State;
@@ -315,26 +316,28 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
           The paste button rides the HEADING, not the form row: "Excel'den
           yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
           All five panels put it in the same corner. */}
-      <div className="panel add-panel">
-        <div className="panel-head">
-          <h2>{t('Yeni ders')}</h2>
-          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
-        </div>
-        <p className="hint">
-          <T k="Bir ders = bir sınıfın, bir öğretmenden aldığı haftalık saat. Öğretmen iki branş veriyorsa dersin hangi branştan olduğu da seçilir. **Dağılım**, o saatlerin haftaya nasıl bölüneceğidir: **2+1** demek bir gün iki saat üst üste, başka bir gün tek saat demektir. Bir blok 2, 3 ya da 4 saat olabilir; geri kalan saatler tektir. **Günde ↑** bu dersin bir günde en fazla kaç saat olabileceğidir; boşsa Ayarlar → Kurallar'daki sayı geçerli olur." />
-        </p>
-
-        {(state.classes.length === 0 || state.teachers.length === 0) && (
-          <div className="warn-box">
-            <T k="Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin." />
-          </div>
+      <AddPanel
+        title={t('Yeni ders')}
+        action={<button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>}
+        description={<T k="Bir ders = bir sınıfın bir öğretmenden aldığı haftalık saat." />}
+        more={t(
+          'Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.',
         )}
-
-        {mode !== 'all' && focused === undefined && state.classes.length > 0 && (
-          <div className="warn-box">
-            {t('Önce sağdaki listeden bir {ne} seçin.', { ne: t(modeNoun) })}
-          </div>
-        )}
+        notice={
+          <>
+            {(state.classes.length === 0 || state.teachers.length === 0) && (
+              <div className="warn-box">
+                <T k="Ders eklemek için önce **Okul** sekmesinde en az bir öğretmen ve bir sınıf girin." />
+              </div>
+            )}
+            {mode !== 'all' && focused === undefined && state.classes.length > 0 && (
+              <div className="warn-box">
+                {t('Önce sağdaki listeden bir {ne} seçin.', { ne: t(modeNoun) })}
+              </div>
+            )}
+          </>
+        }
+      >
 
         {/* Enter adds, the way it already does on the Derslikler step: a form
             whose five controls are all filled from the keyboard should not need
@@ -380,8 +383,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
               Still a NAME in the form and a FLAG in the lesson — `chooseSubject`
               and `chooseTeacher` keep the two boxes agreeing, `add()` writes
               `second`. */}
-          {askSubject && (
-            <Field label={t('Branş')}>
+          {askSubject && (mode === 'teacher' ? (
               <select
                 aria-label={t('Branş')}
                 value={subjectValue}
@@ -394,8 +396,22 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
                   </option>
                 ))}
               </select>
-            </Field>
-          )}
+            ) : (
+              <Field label={t('Branş')}>
+                <select
+                  aria-label={t('Branş')}
+                  value={subjectValue}
+                  onChange={(e) => chooseSubject(e.target.value)}
+                >
+                  <option value="">{t('Tüm branşlar')}</option>
+                  {subjectPool.map((name) => (
+                    <option key={name} value={name}>
+                      {subjectLabel(name)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ))}
           {mode !== 'teacher' && (
             <select
               aria-label={t('Öğretmen')}
@@ -484,7 +500,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
             }
           }}
         />
-      </div>
+      </AddPanel>
 
       <div className="panel step-panel">
         <h2>{heading}</h2>

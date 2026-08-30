@@ -52,9 +52,12 @@ import type React from 'react';
 import type { ReactNode } from 'react';
 import { useDialogs } from './Dialogs';
 import { useMemo } from 'react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import {
   Bell,
+  Check,
   Clock,
+  Copy,
   Eraser,
   Eye,
   Flame,
@@ -64,22 +67,45 @@ import {
   List,
   Maximize2,
   Minimize2,
+  Moon,
   Palette as PaletteIcon,
+  Pencil,
   Play,
+  Plus,
+  Pin,
+  PinOff,
   RotateCcw,
   Rows3,
   Scale,
+  Sun,
   Square,
   TriangleAlert,
+  Trash2,
 } from 'lucide-react';
-import { buildIndex } from './../constraints';
-import { pendingLessons } from './../entities';
 import { health } from '../feasibility';
 import type { State } from '../types';
 import type { SolverRun } from '../useSolver';
-import type { Density } from '../theme';
-import { applyDensity } from '../theme';
+import type { Density, Theme } from '../theme';
+import { applyDensity, applyTheme } from '../theme';
+import { surumEtiketi } from '../version';
 import { paletteColor } from '../palette';
+import {
+  activePinned,
+  activePlacements,
+  activeProgram,
+  addProgram,
+  blankProgram,
+  nextProgramName,
+  removeProgram,
+  renameProgram,
+  replaceActiveGrid,
+  switchProgram,
+  validProgramName,
+} from '../programs';
+import { newId } from '../entities';
+import { maskCount, setDayMask, setRowMask, solverExclusions } from '../programMask';
+import type { ProgramMask } from '../programMask';
+import { pendingBlocks, pinScopeCells, togglePinScope } from '../constraints';
 import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';
@@ -91,13 +117,24 @@ interface Props {
   state: State;
   /** Only the strip's own destructive action needs it: "Programı boşalt". */
   change: (fn: (d: State) => State) => void;
+  /** Program boundaries deliberately clear undo/redo history. */
+  manageProgram: (fn: (d: State) => State) => void;
   solver: SolverRun;
+  programMask: ProgramMask;
+  setProgramMask: (apply: (mask: ProgramMask) => ProgramMask) => void;
   density: Density;
   setDensity: (next: Density) => void;
   /** Müsaitlik's hour labels. A MACHINE preference, so App still owns it —
       only the control moved here, out of Ayarlar → Görünüm. */
   availClock: boolean;
   setAvailClock: (next: boolean) => void;
+  /** Ayarlar → Görünüm's strip carries the theme; the top bar's button stays.
+      Same state, two doors — that one is the shortcut, this is the section. */
+  theme: Theme;
+  setTheme: (next: Theme) => void;
+  /** Ayarlar → Planlar's strip STATES which plan is open. A name, not the
+      library: everything that creates, renames and deletes stays in the panel. */
+  planName: string;
 }
 
 /** Every lucide symbol in the strip is drawn at the size the hand-drawn four are. */
@@ -132,6 +169,14 @@ const SECTIONS: Array<{ id: SectionId; label: string; icon: React.ReactElement }
   { id: 'about', label: 'Hakkında', icon: <Info {...ICON} /> },
 ];
 
+
+/** The two grounds, named rather than toggled — the same list Ayarlar →
+    Görünüm draws, because a strip and a panel showing the same two buttons may
+    not disagree about what they are called. */
+const THEMES: Array<{ id: Theme; label: string; icon: React.ReactElement }> = [
+  { id: 'light', label: 'Açık', icon: <Sun {...ICON} /> },
+  { id: 'dark', label: 'Koyu', icon: <Moon {...ICON} /> },
+];
 
 /** Three densities, and the symbols say which way each one goes. */
 const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; why: string }> = [
@@ -222,15 +267,20 @@ export default function Ribbon({
   open,
   state,
   change,
+  manageProgram,
   solver,
+  programMask,
+  setProgramMask,
   density,
   setDensity,
   availClock,
   setAvailClock,
+  theme,
+  setTheme,
+  planName,
 }: Props) {
   const t = useT();
-  const { confirm } = useDialogs();
-  const ix = useMemo(() => buildIndex(state), [state]);
+  const { confirm, prompt, alert } = useDialogs();
   const status = useMemo(() => health(state), [state]);
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold
@@ -431,17 +481,89 @@ export default function Ribbon({
   }
 
   if (ui.tab === 'program') {
-    const pending = pendingLessons(state, ix);
+    const exclusions = solverExclusions(programMask);
+    const excludedTeachers = new Set(exclusions.teacherIds);
+    const excludedClasses = new Set(exclusions.classIds);
+    const pending = state.lessons
+      .filter((lesson) => !excludedTeachers.has(lesson.teacherId) && !excludedClasses.has(lesson.classId))
+      .reduce((sum, lesson) => sum + pendingBlocks(state, lesson).length, 0);
     // What the two destructive buttons are ABOUT: the hours that would go.
     // Pinned hours are not among them — nothing takes a pinned block down but
     // unpinning it — so counting them would make both questions overstate what
     // they ask for, and the count is the whole reason they are asked.
-    const pinnedHours = Object.keys(state.pinned).length;
-    const placed = Object.keys(state.placements).length - pinnedHours;
+    const placements = activePlacements(state);
+    const pinned = activePinned(state);
+    const pinnedHours = Object.keys(pinned).length;
+    const placed = Object.keys(placements).length - pinnedHours;
+    const currentProgram = activeProgram(state);
+    const masked = maskCount(programMask);
+    const allPinCells = pinScopeCells(state, { kind: 'all' });
+    const allPinned = allPinCells.length > 0 && allPinCells.every((key) => pinned[key] !== undefined);
+
+    const askProgramName = async (initial: string, exceptId?: string) => {
+      const name = await prompt({
+        title: t('Program adı'),
+        body: t('Aynı okul verilerini kullanan alternatif program için bir ad yazın.'),
+        defaultValue: initial,
+        inputLabel: t('Program adı'),
+        confirmLabel: t('Kaydet'),
+      });
+      if (name === null) return null;
+      const clean = validProgramName(state.programs, name, exceptId);
+      if (clean !== null) return clean;
+      await alert({
+        title: name.trim() === '' ? t('Program adı boş olamaz') : t('Bu program adı zaten kullanılıyor'),
+        tone: 'warn',
+      });
+      return null;
+    };
+
+    const copyCurrent = async () => {
+      const name = await askProgramName(nextProgramName(state.programs));
+      if (name === null) return;
+      const source = activeProgram(state);
+      manageProgram((d) => addProgram(d, {
+        id: newId(),
+        name,
+        placements: { ...source.placements },
+        pinned: { ...source.pinned },
+      }));
+    };
+
+    const createBlank = async () => {
+      const name = await askProgramName(nextProgramName(state.programs));
+      if (name === null) return;
+      manageProgram((d) => addProgram(d, blankProgram(newId(), name)));
+    };
+
+    const renameCurrent = async () => {
+      const name = await askProgramName(currentProgram.name, currentProgram.id);
+      if (name !== null) manageProgram((d) => renameProgram(d, currentProgram.id, name));
+    };
+
+    const deleteCurrent = async () => {
+      if (state.programs.length <= 1) return;
+      if (!(await confirm({
+        title: t('{ad} programı silinecek', { ad: currentProgram.name }),
+        body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
+          n: Object.keys(currentProgram.placements).length,
+          s: Object.keys(currentProgram.pinned).length,
+        }),
+        confirmLabel: t('Programı sil'),
+        danger: true,
+      }))) return;
+      manageProgram((d) => removeProgram(d, currentProgram.id));
+    };
     return (
       <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
         {/* Two positions, not one toggle: a single button saying "switch to the
-            class view" tells you what the next click does, never where you are. */}
+            class view" tells you what the next click does, never where you are.
+
+            FIRST, and back where it stood before the program library arrived
+            and pushed it a group to the right: "öğretmen ve sınıftan seçimleri
+            en solda eski yerinde olmalı". It earns the place on its own terms
+            too — the leftmost group on the other six strips answers "what am I
+            looking at", and on this screen that is the axis. */}
         <Group label="Görünüm">
           {VIEWS.map((v) => (
             <button
@@ -477,7 +599,7 @@ export default function Ribbon({
                     ? t('Havuzda bekleyen ders yok')
                     : t('Havuzdaki dersleri kurallara uyarak yerleştirir')
                 }
-                onClick={() => solver.start(state, { keepPlaced: true })}
+                onClick={() => solver.start(state, { keepPlaced: true, exclusions })}
               >
                 <Play {...ICON} />
                 {t('Otomatik diz ({n})', { n: pending })}
@@ -501,13 +623,87 @@ export default function Ribbon({
                       danger: true,
                     })
                   ) {
-                    solver.start(state, { keepPlaced: false });
+                    solver.start(state, { keepPlaced: false, exclusions });
                   }
                 }}
               >
                 <RotateCcw {...ICON} />{t('Baştan diz')}</button>
             </>
           )}
+        </Group>
+
+        <Sep />
+
+        {/* WHICH TIMETABLE — and everything that can be done to one — behind a
+            SINGLE button.
+
+            It arrived as three controls (a `<select>`, "Kopyasını kaydet" and a
+            "Yönet" menu) sitting at the head of the strip, and that was two
+            problems in one. It displaced the view switch, and it put a second
+            library selector three rows under the plan selector in the top bar —
+            two dropdowns, two different meanings of "which one am I editing",
+            and no way to tell from either which was which.
+
+            One button, showing the name of the timetable you are in. The list
+            of them is a RadioGroup rather than a row of items, because picking
+            one is a choice with a current answer, and Radix says so out loud
+            (`aria-checked`) instead of leaving it to the tick. */}
+        <Group label="Program">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                className="btn"
+                disabled={solver.running}
+                title={t('Program seç ve yönet')}
+              >
+                <Library {...ICON} />
+                <span className="ribbon-ellipsis">{currentProgram.name}</span>
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
+                <DropdownMenu.RadioGroup
+                  value={state.activeProgramId}
+                  onValueChange={(id) => manageProgram((d) => switchProgram(d, id))}
+                >
+                  {state.programs.map((program) => (
+                    <DropdownMenu.RadioItem
+                      key={program.id}
+                      className="menu-item"
+                      value={program.id}
+                    >
+                      {/* A fixed slot, so the names line up whether or not the
+                          tick is in it. */}
+                      <span className="menu-mark" aria-hidden="true">
+                        <DropdownMenu.ItemIndicator>
+                          <Check size={15} strokeWidth={2.4} />
+                        </DropdownMenu.ItemIndicator>
+                      </span>
+                      {program.name}
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </DropdownMenu.RadioGroup>
+                <DropdownMenu.Separator className="menu-sep" />
+                <DropdownMenu.Item className="menu-item" onSelect={() => void copyCurrent()}>
+                  <Copy size={15} aria-hidden="true" />{t('Kopyasını kaydet')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item className="menu-item" onSelect={() => void createBlank()}>
+                  <Plus size={15} aria-hidden="true" />{t('Boş program oluştur')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item className="menu-item" onSelect={() => void renameCurrent()}>
+                  <Pencil size={15} aria-hidden="true" />{t('Yeniden adlandır')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator className="menu-sep" />
+                <DropdownMenu.Item
+                  className="menu-item danger"
+                  disabled={state.programs.length <= 1}
+                  onSelect={() => void deleteCurrent()}
+                >
+                  <Trash2 size={15} aria-hidden="true" />{t('Programı sil')}
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </Group>
 
         {/* THE RIGHT-HAND END: what you are looking at, and the way back.
@@ -550,42 +746,112 @@ export default function Ribbon({
             longer sit next to each other. It is NOT renamed to "Sıfırla" —
             temel.spec.ts asserts no button anywhere is called that, because
             the one thing in this program that cannot be undone is. */}
+        {/* THE WHOLE RIGHT-HAND END BEHIND ONE DOOR, and the reason is a
+            MEASUREMENT. Three buttons in an equal-column group are as wide as
+            the widest of them times three: at 150% — the scale this tool's
+            reader actually uses — the group asked for 639 px of a strip that
+            had 1920 px for 2061 px of content, and two of the three came out
+            past the right edge. Not hidden: UNCLICKABLE (pitfall 48).
+
+            One button now. What is behind it is also what belongs behind a
+            door: locking a whole timetable, listing what has been put aside,
+            and emptying the grid are all rare, and two of them are the kind of
+            click that costs an afternoon. */}
         <Group label="Izgara">
-          <button
-            className="btn danger"
-            disabled={placed === 0 || solver.running}
-            title={t('Dizilmiş bütün dersleri havuza geri gönderir')}
-            onClick={async () => {
-              if (
-                await confirm({
-                  title: t('Dizilmiş {n} saatin tamamı havuza dönecek', { n: placed }),
-                  body:
-                    pinnedHours === 0
-                      ? t(
-                          'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                        )
-                      : t(
-                          'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
-                          { n: pinnedHours },
-                        ),
-                  confirmLabel: t('Programı boşalt'),
-                  danger: true,
-                })
-              ) {
-                // The pinned cells stay, and so do their pins. One rule with no
-                // exceptions: nothing takes a pinned block down but unpinning it.
-                change((d) => ({
-                  ...d,
-                  placements: Object.fromEntries(
-                    Object.keys(d.pinned)
-                      .filter((k) => d.placements[k] !== undefined)
-                      .map((k) => [k, d.placements[k]!]),
-                  ),
-                }));
-              }
-            }}
-          >
-            <Eraser {...ICON} />{t('Programı boşalt')}</button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button className="btn" disabled={solver.running} title={t('Izgara işlemleri')}>
+                <Layers {...ICON} />{t('İşlemler')}
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
+                <DropdownMenu.Item
+                  className="menu-item"
+                  disabled={Object.keys(placements).length === 0}
+                  onSelect={() => change((d) => togglePinScope(d, { kind: 'all' }))}
+                >
+                  {allPinned
+                    ? <PinOff size={15} aria-hidden="true" />
+                    : <Pin size={15} aria-hidden="true" />}
+                  {allPinned
+                    ? t('Tüm sabitlemeleri kaldır')
+                    : t('Tüm programı sabitle')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator className="menu-sep" />
+                {/* WHAT IS PUT ASIDE, and the count is the reason the label is
+                    here rather than on a button of its own: with nothing set
+                    aside there is nothing to list, and a disabled button that
+                    says "(0)" spends a fifth of the strip saying so. */}
+                <DropdownMenu.Label className="menu-label">
+                  {t('Geçici görünüm ({n})', { n: masked })}
+                </DropdownMenu.Label>
+                {Object.entries(programMask.teachers).map(([id, mode]) => (
+                  <DropdownMenu.Item key={`t-${id}`} className="menu-item" onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}>
+                    <Eye size={15} aria-hidden="true" />
+                    {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                  </DropdownMenu.Item>
+                ))}
+                {Object.entries(programMask.classes).map(([id, mode]) => (
+                  <DropdownMenu.Item key={`c-${id}`} className="menu-item" onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}>
+                    <Eye size={15} aria-hidden="true" />
+                    {state.classes.find((group) => group.id === id)?.name ?? id} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                  </DropdownMenu.Item>
+                ))}
+                {Object.entries(programMask.days).map(([name, mode]) => (
+                  <DropdownMenu.Item key={`d-${name}`} className="menu-item" onSelect={() => setProgramMask((m) => setDayMask(m, name))}>
+                    <Eye size={15} aria-hidden="true" />{name} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                  </DropdownMenu.Item>
+                ))}
+                <DropdownMenu.Item
+                  className="menu-item"
+                  disabled={masked === 0}
+                  onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
+                >
+                  <Eye size={15} aria-hidden="true" />{t('Tümünü geri yükle')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Separator className="menu-sep" />
+                <DropdownMenu.Item
+                  className="menu-item danger"
+                  disabled={placed === 0}
+                  onSelect={async () => {
+                    if (
+                      await confirm({
+                        title: t('Dizilmiş {n} saatin tamamı havuza dönecek', { n: placed }),
+                        body:
+                          pinnedHours === 0
+                            ? t(
+                                'Izgara boşalır; dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                              )
+                            : t(
+                                'Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.',
+                                { n: pinnedHours },
+                              ),
+                        confirmLabel: t('Programı boşalt'),
+                        danger: true,
+                      })
+                    ) {
+                      // The pinned cells stay, and so do their pins. One rule
+                      // with no exceptions: nothing takes a pinned block down
+                      // but unpinning it.
+                      change((d) => {
+                        const currentPlacements = activePlacements(d);
+                        return replaceActiveGrid(d, {
+                          placements: Object.fromEntries(
+                            Object.keys(activePinned(d))
+                              .filter((k) => currentPlacements[k] !== undefined)
+                              .map((k) => [k, currentPlacements[k]!]),
+                          ),
+                        });
+                      });
+                    }
+                  }}
+                >
+                  <Eraser size={15} aria-hidden="true" />{t('Programı boşalt')}
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </Group>
       </div>
     );
@@ -718,6 +984,7 @@ export default function Ribbon({
   }
 
   // settings
+  const rules = Object.values(state.settings.rules);
   return (
     <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Ayar bölümleri')}>
       <Group label="Bölüm">
@@ -733,6 +1000,72 @@ export default function Ribbon({
           </button>
         ))}
       </Group>
+
+      <Spacer />
+
+      {/* WHAT THIS SECTION IS ABOUT, at the right-hand end — the one place on
+          the six strips that was empty. ("Ayarlardaki özel sectionlara özgü
+          ayarlar o sectionun alt şeridinde sağ üstte gözüksün.")
+
+          Four of the five STATE and one ASKS, and the split is not a mood: a
+          strip that repeats a control standing four inches under it is the
+          "ribbon of everything" this file's header warns about. Ayarlar keeps
+          every control in its panels, so what the strip can add is the reading
+          — how many days, how strict, which plan, which build.
+
+          Görünüm is the exception and the reason is measurable: it is the one
+          section long enough to SCROLL, and the theme is the first panel on it.
+          By the time you are at Hareket or Dil the two buttons are off the top
+          of the screen, and the strip does not move. */}
+      {ui.section === 'appearance' ? (
+        <Group label="Tema">
+          {THEMES.map((x) => (
+            <button
+              key={x.id}
+              className="btn"
+              aria-pressed={x.id === theme}
+              title={t('{ad} temaya geç', { ad: t(x.label) })}
+              onClick={() => {
+                applyTheme(x.id);
+                setTheme(x.id);
+              }}
+            >
+              {x.icon}
+              {t(x.label)}
+            </button>
+          ))}
+        </Group>
+      ) : ui.section === 'school' ? (
+        <Group label="Hafta">
+          <span className="ribbon-value">
+            {t('{n} gün', { n: state.settings.days.length })}
+            {' · '}
+            {t('{n} ders', { n: state.settings.hours.length })}
+          </span>
+        </Group>
+      ) : ui.section === 'rules' ? (
+        <Group label="Seviye">
+          <span className="ribbon-value">
+            <span className={`badge ${rules.filter((r) => r === 'block').length > 0 ? 'impossible' : 'ok'}`}>
+              {t('{n} engelle', { n: rules.filter((r) => r === 'block').length })}
+            </span>
+            <span className={`badge ${rules.filter((r) => r === 'warn').length > 0 ? 'tight' : 'ok'}`}>
+              {t('{n} uyar', { n: rules.filter((r) => r === 'warn').length })}
+            </span>
+            <span className="badge ok">
+              {t('{n} kapalı', { n: rules.filter((r) => r === 'off').length })}
+            </span>
+          </span>
+        </Group>
+      ) : ui.section === 'plans' ? (
+        <Group label="Açık plan">
+          <span className="ribbon-value">{planName}</span>
+        </Group>
+      ) : (
+        <Group label="Sürüm">
+          <span className="ribbon-value">{surumEtiketi()}</span>
+        </Group>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { emptyState } from '../../entities';
 import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
 import type { State } from '../../types';
+import { activePlacements, blankProgram } from '../../programs';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';
@@ -30,7 +31,7 @@ function summary(state: State) {
     teachers: state.teachers.length,
     classes: state.classes.length,
     lessons: state.lessons.length,
-    placed: Object.keys(state.placements).length,
+    placed: Object.keys(activePlacements(state)).length,
   };
 }
 
@@ -92,7 +93,7 @@ export default function Plans({ state, plans }: Props) {
     <div className="panel">
       <h2>{t('Planlar ({n})', { n: library.plans.length })}</h2>
       <p className="hint">
-        <T k="Her plan **ayrı bir programdır**: kendi öğretmenleri, sınıfları ve dizilmiş ızgarasıyla. Üst çubuktaki listeden aralarında geçilir. **Taslak** olarak işaretlenen bir plan, yeni bir plana başlarken hazır kurulum olarak sunulur." />
+        <T k="Her plan **ayrı bir programdır**; üst çubuktaki listeden aralarında geçilir." />
       </p>
 
       {/* The way to ADD one comes before the list of what there is — the rule
@@ -100,7 +101,7 @@ export default function Plans({ state, plans }: Props) {
           had it the other way round. */}
       <h3>{t('Yeni plan')}</h3>
       <p className="hint">
-        <T k="Yeni plan açılınca ona geçilir; açık olan plan olduğu gibi saklanır. **Geri al** geçmişi her plan geçişinde sıfırlanır, çünkü bir planın hamlesi başka bir plana uygulanamaz." />
+        <T k="Yeni plan açılınca ona geçilir ve **geri al** geçmişi sıfırlanır." />
       </p>
       <div className="form-row">
         <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
@@ -120,7 +121,7 @@ export default function Plans({ state, plans }: Props) {
             // cell locks a square for a lesson that is not there.
             plans.createPlan(
               `${active?.name ?? 'Plan'} taslağı`,
-              { ...state, placements: {}, pinned: {} },
+              { ...state, programs: [blankProgram()], activeProgramId: 'program-1' },
               true,
             )
           }

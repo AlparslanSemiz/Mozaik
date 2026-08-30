@@ -135,7 +135,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Tema')}</h2>
           <p className="hint">
-            <T k="Varsayılan **açık**, ve bu bir seçim: ızgaranın işlevsel renkleri (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık zeminde seçildi ve orada ölçüldü. Koyu tema bilgisayarınızın tercihini **izlemez**: burada ne seçerseniz o kalır. Yedek dosyasına girmez. Yazdırılan sayfa her iki durumda da **açık** palet kullanır: o renkler kâğıda basılıyor." />
+            <T k="Burada ne seçerseniz o kalır; bilgisayarınızın tercihini **izlemez**." />
           </p>
           <div className="form-row" role="group" aria-label={t('Tema')}>
             {THEMES.map((x) => (
@@ -154,9 +154,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Yazı büyüklüğü')}</h2>
           <p className="hint">
-            {t(
-              'Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve program ızgarasının hücrelerini. Ayrı ayrı ayar yok, çünkü biri büyüyüp öteki yerinde kalırsa ekran ferahlamaz, sıkışır.',
-            )}
+            {t('Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve ızgara hücrelerini.')}
           </p>
 
           <div className="form-row" role="group" aria-label={t('Yazı büyüklüğü')}>
@@ -173,7 +171,7 @@ export default function Appearance({
           </div>
 
           <p className="hint">
-            <T k="Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve başka bir bilgisayarda açılan programı etkilemez. **Yazdırmayı da etkilemez**: kâğıt sabit boyda (A4 yatay) ve basılan sayfanın yazısı ayrı bir ölçüde tutulur, o yüzden burayı büyütmek bir programın sayfaya sığıp sığmadığını değiştirmez. Kâğıdın kendi yazı boyu **Çıktı** sekmesinde." />
+            <T k="Bu bilgisayara aittir ve **yazdırmayı etkilemez**; kâğıdın yazısı **Çıktı** sekmesinde." />
           </p>
         </div>
 
@@ -193,17 +191,17 @@ export default function Appearance({
           <h2>{t('Yoğunluk')}</h2>
           <h3>{t('Izgara')}</h3>
           <p className="hint">
-            <T k="Yalnız **Program** sekmesindeki haftalık ızgarayı etkiler: bir hücrenin büyüklüğü ile ekranda aynı anda görünen gün sayısı." />
+            <T k="Yalnız **Program** ızgarasını etkiler: hücrenin büyüklüğü ve ekrana sığan gün sayısı." />
           </p>
           <ul className="hint choice-list">
             <li>
-              <T k="**Ferah.** Hücre en büyük, kartın alt satırı tam boyda. En kolay okunan, en çok kaydırılan." />
+              <T k="**Ferah.** Hücre en büyük; en kolay okunan, en çok kaydırılan." />
             </li>
             <li>
-              <T k="**Rahat.** Bugüne kadarki ızgara: hücre geniş, her ders numarasının altında başlangıç saati yazıyor, hafta ekrana sığmadığı için sağa kaydırıyorsunuz." />
+              <T k="**Rahat.** Hücre geniş ve saatler yazılı; hafta sığmadığı için sağa kaydırırsınız." />
             </li>
             <li>
-              <T k="**Sığdır.** Haftanın tamamı bir ekranda: hücre ekranın genişliğinden hesaplanır ve **saatler gizlenir**, çünkü sütunu dar olmaya bırakmayan tek şey oydu. Ders numarası, sınıf adı ve renkler yerinde kalır." />
+              <T k="**Sığdır.** Haftanın tamamı bir ekranda, ve bunun bedeli **saatlerin gizlenmesi**." />
             </li>
           </ul>
 
@@ -226,12 +224,12 @@ export default function Appearance({
           </div>
 
           <p className="hint">
-            <T k="Saatleri görmek için **Ayarlar → Zil ve günler**'deki zil önizlemesine bakabilirsiniz; basılan sayfada saatler her üç durumda da yazar." />
+            <T k="Basılan sayfada saatler her üç durumda da yazar." />
           </p>
 
           <h3>{t('Arayüzün geri kalanı')}</h3>
           <p className="hint">
-            <T k="Ekranın **geri kalanı**: Okul, Dersler, Kontrol ve Ayarlar’daki listeler, panellerin kenar boşlukları, kutuların ve düğmelerin yüksekliği. Program ızgarasına dokunmaz." />
+            <T k="Ekranın **geri kalanı**: listeler, paneller, kutular. Program ızgarasına dokunmaz." />
           </p>
           <ul className="hint choice-list">
             <li>
@@ -241,7 +239,7 @@ export default function Appearance({
               <T k="**Rahat.** Bugüne kadarki aralık." />
             </li>
             <li>
-              <T k="**Sığdır.** Satır aralığı daralır, tek ekranda daha çok satır görünür. **Yazı boyutu küçülmez**: kısılan şey yalnızca boşluk." />
+              <T k="**Sığdır.** Satır aralığı daralır; kısılan şey boşluk, **yazı boyutu değil**." />
             </li>
           </ul>
 
@@ -272,7 +270,7 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Araç şeridi')}</h2>
           <p className="hint">
-            <T k="Sekmelerin altındaki ikinci bar, sayfayı **aşağı kaydırırken kendiliğinden gizlenir** ve yukarı çıkınca geri gelir. Böylece uzun bir listeyi okurken bir satır daha görünür. Bu hareket rahatsız ediyorsa kapatın: şerit her zaman yerinde durur. Şeridi **tamamen** kaldırmak ayrı bir şey; onun düğmesi üst çubukta, temanın yanında." />
+            <T k="Sekmelerin altındaki bar, sayfayı **aşağı kaydırırken kendiliğinden gizlenir**." />
           </p>
           <div className="form-row">
             <button
@@ -288,19 +286,82 @@ export default function Appearance({
           </div>
         </div>
 
+        <div className="panel">
+          <h2>{t('Hareket')}</h2>
+          <p className="hint">
+            <T k="Bir şey belirirken görülen kısa hareketler; kapatmak programın işini değiştirmez." />
+          </p>
+          <ul className="hint choice-list">
+            <li>
+              <T k="**Tam.** Tasarlandığı gibi." />
+            </li>
+            <li>
+              <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır." />
+            </li>
+            <li>
+              <T k="**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz." />
+            </li>
+          </ul>
+
+          <div className="form-row" role="group" aria-label={t('Hareket')}>
+            {MOTIONS.map((m) => (
+              <button
+                key={m.id}
+                className="btn"
+                aria-pressed={m.id === motion}
+                onClick={() => chooseMotion(m.id)}
+              >
+                {t(m.label)}
+              </button>
+            ))}
+          </div>
+
+          <p className="hint">
+            <T k="Bilgisayarınız “azaltılmış hareket” istiyorsa hareket, ne seçerseniz seçin, **kapalı** kalır." />
+          </p>
+        </div>
+
+        <div className="panel">
+          <h2>{t('Dil')}</h2>
+          <p className="hint">
+            {t('Arayüzün dili. Bu bilgisayara aittir, yedek dosyasına girmez.')}
+          </p>
+          {/* The same button shape as the four questions above it, and each
+              language NAMES ITSELF: a language menu is read by somebody who
+              does not yet speak the one the app is currently in. */}
+          <div className="form-row" role="group" aria-label={t('Dil')}>
+            {DILLER.map((d) => (
+              <button
+                key={d}
+                className="btn"
+                lang={d}
+                aria-pressed={d === dil}
+                onClick={() => setDil(d)}
+              >
+                {DIL_ADI[d]}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <aside>
         <div className="panel">
           <h2>{t('Örnek')}</h2>
           <p className="hint">
-            <T k="Seçtiğiniz büyüklük bu sayfada da geçerli. Aşağıdaki satırlar **kendi öğretmenleriniz**, uydurma bir örnek değil. Bir ad kutusuna sığmıyorsa ölçek o makine için fazla büyük demektir." />
+            <T k="Aşağıdakiler **kendi öğretmenleriniz**: bir ad sığmıyorsa ölçek fazla büyük demektir." />
           </p>
           {teachers.length === 0 ? (
             <p className="hint">
               <T k="Henüz öğretmen yok. **Okul → Öğretmenler** adımından ekleyin; burası o listeyi gösterir." />
             </p>
           ) : (
+            /* IN A SCROLL BOX, because Hareket and Dil moved to the left column on
+               2026-08-30 and this is now the rail's ONLY panel — which is the
+               shape `.cols > aside > .panel:only-child` is written for: the box
+               that gives ground is the list, never the panel around it. The
+               heading and the two sentences under it stay put. */
+            <div className="stat-scroll">
             <table className="list">
               <thead>
                 <tr>
@@ -326,6 +387,7 @@ export default function Appearance({
                 ))}
               </tbody>
             </table>
+            </div>
           )}
           {state.teachers.length > teachers.length && (
             <p className="hint">
@@ -335,66 +397,6 @@ export default function Appearance({
               })}
             </p>
           )}
-        </div>
-
-        <div className="panel">
-          <h2>{t('Hareket')}</h2>
-          <p className="hint">
-            <T k="Ekranda bir şey belirirken, bir kutu açılırken ya da bir düğmeye basarken görülen kısa hareketler. Rahatsız ediyorsa **azaltın** ya da **tamamen kapatın**; programın çalışmasında hiçbir şey değişmez." />
-          </p>
-          <ul className="hint choice-list">
-            <li>
-              <T k="**Tam.** Tasarlandığı gibi." />
-            </li>
-            <li>
-              <T k="**Az.** Süreler yarıya iner ve **yer değiştiren** hareketler kapanır: paneller kayarak değil, duracakları yerde belirir. Renk geçişleri kalır, yani düğme imlece hâlâ cevap verir." />
-            </li>
-            <li>
-              <T k="**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz." />
-            </li>
-          </ul>
-
-          <div className="form-row" role="group" aria-label={t('Hareket')}>
-            {MOTIONS.map((m) => (
-              <button
-                key={m.id}
-                className="btn"
-                aria-pressed={m.id === motion}
-                onClick={() => chooseMotion(m.id)}
-              >
-                {t(m.label)}
-              </button>
-            ))}
-          </div>
-
-          <p className="hint">
-            <T k="Bilgisayarınız “azaltılmış hareket” istiyorsa (Windows’ta **Ayarlar → Erişilebilirlik → Görsel efektler**), burada ne seçerseniz seçin hareket **kapalı** kalır. Bu ayar makinenin isteğinin **ötesine** geçebilir, gerisine değil." />
-          </p>
-        </div>
-
-        <div className="panel">
-          <h2>{t('Dil')}</h2>
-          <p className="hint">
-            {t(
-              'Arayüzün dili. Bu ayar bu bilgisayara aittir; yedek dosyasına girmez ve programın kendisini değiştirmez.',
-            )}
-          </p>
-          {/* The same button shape as the four questions above it, and each
-              language NAMES ITSELF: a language menu is read by somebody who
-              does not yet speak the one the app is currently in. */}
-          <div className="form-row" role="group" aria-label={t('Dil')}>
-            {DILLER.map((d) => (
-              <button
-                key={d}
-                className="btn"
-                lang={d}
-                aria-pressed={d === dil}
-                onClick={() => setDil(d)}
-              >
-                {DIL_ADI[d]}
-              </button>
-            ))}
-          </div>
         </div>
 
       </aside>

@@ -55,6 +55,18 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
    > Bedeli de yazılı: Türkçe metni düzenlemek çevirisini **öksüz** bırakır.
    > `i18n.test.ts` bunu dört sözlükte birden yakalar, ve yorumları ayıklayarak
    > yakalar (tuzak 87).
+   >
+   > **VİTRİN İNGİLİZCE (2026-08-30, kullanıcı kararı).** Depoya **dışarıdan**
+   > bakan ne varsa İngilizce: `README.md`, `LICENSE`, `.github/surum-notu.md`,
+   > iş akışlarının adları/işleri/girdileri/adımları (hepsi Actions arayüzünde
+   > görünüyor), `package.json` ve `Cargo.toml`'un `description`'ları.
+   > **`CLAUDE.md`, `docs/`, `.claude/` ve `.mcp.json` TÜRKÇE KALIR** — onlar
+   > projenin hafızası ve kararların alındığı dilde duruyorlar; README bunun
+   > sebebini de yazıyor.
+   > İki istisna bilerek: `surum-notu.md`'nin sonunda **üç satır Türkçe**
+   > kurulum özeti var (o metin her Release sayfasının gövdesi, yani babanın
+   > indirirken gördüğü sayfa), ve `kurulum/OKU.txt` baştan sona Türkçe.
+   > Programın kendisi de öyle: arayüzün varsayılanı hâlâ Türkçe.
 5. **Bir dönem kullanılmadan özellik eklenmez.** Tahmine dayalı özellik = yanlış özellik.
 6. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir.
 7. **Hedef makine yavaş** — ama bu bir **varsayım**, gerekçe değil; bkz.
@@ -270,25 +282,40 @@ ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (ü�
 sütun, hayalet yok). İkisi **Windows'un gerçekten istediği boylarda**
 (16/20/24/32/40/48, iki zeminde) render edilip **bakıldı**
 (`scripts/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı temiz okunuyor,
-20 ile 24'te bulanık ama sütunları ayırt edilebiliyor, 16'da altı sütun mavi
-bir lekeye dönüyor. Eşik **iki kez indi**: 2026-08-27'de 48'den 32'ye, sonra
-aynı gün 32'den **20**'ye. `.ico`'ya 20 · 24 · 40 eklendi. Üçü de tek bir
-şikayetten çıktı ve şikayet **iki kez** geldi, bkz. tuzak 78. Bölüşüm:
+20 ile 24'te bulanık, 16'da altı sütun mavi bir lekeye dönüyor. Eşik **üç kez
+taşındı**: 2026-08-27'de 48'den 32'ye, aynı gün 32'den 20'ye, ve 2026-08-30'da
+20'den **32'ye geri**. `.ico`'ya 20 · 24 · 40 eklendi. Dördü de tek bir
+şikayetten çıktı ve şikayet **üç kez** geldi, bkz. tuzak 78 ve 101. Bölüşüm:
 
 | Nerede | Hangi | Niçin |
 |---|---|---|
 | Sekme (favicon, `index.html`) | **sade** | bir sekme simgesi HER ZAMAN 16–32 px |
-| `icon.ico` 16 px | **sade** | ayrıntılı çizim orada daha kötü bir logo değil, **logo değil** |
-| `icon.ico` 20–256 px | ayrıntılı | **görev çubuğu %100'de 24 px ister** (tuzak 78) |
+| `icon.ico` 16 · 20 · 24 px | **sade** | görev çubuğu %100'de **24 px** ister, ve orada ayrıntılı çizimin çubukları 2,25 cihaz pikseli, araları 0,56 px |
+| `icon.ico` 32–256 px | ayrıntılı | orada temiz okunuyor, ve gerçek işaret o |
 | PWA 192/512 PNG | ayrıntılı | yer var |
-| Üst çubuk (`.brand-mark`) | **sade** (2026-08-28) | 24,5 px @%100 — eşiğin *içinde* kalan tek yer |
+| Üst çubuk (`.brand-mark`) | **sade** (2026-08-28) | 22,75 px @%100 — eşiğin altında |
 
-**Üst çubuk 2026-08-28'de ayrıntılıdan sadeye geçti, kullanıcı isteğiyle.** Karar
-ölçümle çelişmiyor, ölçümün belirsiz bandında: `.brand-mark` `1.75rem`, yani
-%100'de **24,5 px**, ve `ikon-karsilastir.mjs` 20–32 px'i *"bulanık ama sütunları
-ayırt edilebilir"* diye kaydetmişti. O bandın hangi tarafında durulacağı bir
-ölçüm değil bir tercih. Yan kazanç: sekme ile üst çubuk artık **aynı dosyadan**
-(`site/icon-small.svg`) besleniyor, yani bir çizimin üç kopyası ikiye indi.
+**Üçüncü taşıma, ilk ikisinin TARTIŞTIĞI şeyi ölçen ilk taşıma
+(2026-08-30).** 48→32 ve 32→20 hamleleri "görev çubuğu hangi boyu ister"
+sorusunu tahmin ederek yapılmıştı; şikayet üçüncü kez gelince
+(*"sanki küçük simge yani 9x9 pixellik kullanılıyor gibi"*) önce **ikilinin
+içine bakıldı** (`scripts/exe-ikon.mjs`, yayınlanmış 2.0.0):
+
+```
+RT_ICON 9 · gömülü boylar 16·20·24·32·40·48·64·128·256
+kurulum/icon.ico ile BİREBİR
+```
+
+Yani eksik boy yoktu, komşusundan ölçeklenen bir şey yoktu, ve görev çubuğuna
+ulaşan işaret **ayrıntılı çizimdi, doğru çizilmişti**. 24 px'te altı çubuk
+2,25 cihaz pikseli ve araları 0,56 px — bir cihaz pikselinin altındaki boşluk
+yoktur. Eşik 32'ye çıktı; 24'e artık üç kalın çubuk düşüyor, ve o üç çubuk bir
+yer tutucu değil **aynı fikrin 24 px'te ayakta kalan hâli**.
+
+**Üst çubuğun sayısı da kökle birlikte kıpırdadı:** `.brand-mark` `1.75rem`,
+kök 14px iken 24,5 px, kök 13px olunca **22,75 px** (%150'de 34,125). İkisi de
+eşiğin altında, yani sade çizim kararı değişmedi — ama sayı `kabuk.spec.ts`
+76'da yazılı ve orada güncellendi.
 
 Çizim böylece **üç yerde** duruyor (svg dosyası · `index.html`'in data URI'si ·
 `App.tsx`'in inline SVG'si). Üçünün de ayrışması iki testle yakalanıyor:
@@ -338,6 +365,21 @@ Windows PowerShell 5.1 ANSI okur ve her "ı" bozulur. `.cmd` dosyaları
 **yalnız ASCII**: cmd.exe'nin kod sayfası Türkçe harfleri bozuyor, o yüzden
 kullanıcıya görünen her cümle PowerShell'den yazılıyor.
 
+**`-ExecutionPolicy Bypass` YASAK (2026-08-30).** Dört yerde vardı (iki `.cmd`,
+`kur.ps1`'de iki `Start-Process`) ve dördü de `RemoteSigned` + `Unblock-File`
+oldu. Gerekçe kolaylık değil bir **imza**: bir ZIP'ten çıkan her dosya
+"Internet" bölgesi damgası taşır, ve Bypass o damgayı görmezden gelmenin en
+geniş yolu — indirilen bir arşivin içinde tarayıcıların ve virüs
+tarayıcılarının en tanıdık desenlerinden biri. `Unblock-File` damgayı
+**kaldırıyor**, ve damgasız bir betik RemoteSigned altında yerel sayılıyor:
+aynı iş, benzemeyen imza. `kur.ps1` kopyaladığı `.ps1`'leri de unblock ediyor,
+çünkü `Copy-Item` damgayı beraberinde getirebiliyor.
+
+**Exe İMZASIZ ve öyle kalıyor** (sertifika para istiyor, cevap hayırdı). Onun
+yerine yayına `SHA256SUMS.txt` giriyor: imza yoksa "bu, yayınladıkları dosya
+mı" sorusuna verilebilecek tek cevap bir özettir. VERSIONINFO'yu aramaya gerek
+yok — `tauri-build` onu zaten gömüyor, ve bu **ölçüldü** (tuzak 101).
+
 Site **de** tek dosya (`viteSingleFile` korundu): service worker'ın önbelleğe
 alacağı kabuk böylece bir sabit, her derlemeden sonra üretilip senkron tutulması
 gereken bir hash listesi değil.
@@ -357,7 +399,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
-formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menü üç kalem, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
+formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menünün YEDİ üst kalemi adlarıyla, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor; artı **karttaki raptiye**: hover olmadan da görünüyor, basıp sürüklemek kartı KALDIRMIYOR, tek tık kilitliyor). **Havuzun sırası ve süzgeci** (`program.spec.ts` 88: beş sıra, her sıranın kendi başlıkları, başlıkların saydığı toplam ekrandakine eşit, süzgeç neyi sakladığını söylüyor). **Panelden düzenleme** (`panel.spec.ts` 87: karttan öğretmene/sınıfa açılan yol, ve sheet'te değişen kısaltmanın IZGARADA görünmesi). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
@@ -419,6 +461,12 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
   bir karakter. `e2e/metin.spec.ts` her sekmede ve her Ayarlar bölümünde
   `document.body.innerText`'i okuyup sayıyor — yani **kaynağa değil ekrana**
   bakıyor, ve bu yüzden İngilizce kod yorumları serbest kalıyor.
+- **Bir `.hint` TEK CÜMLE** (2026-08-30, kullanıcı isteği: *"çok fazla info var
+  ve çok uzunlar her yerde"*). ~90 karakter; uzayan gerekçe öğenin `title`'ına
+  iner, yani okunup geçilen bir yere değil **arandığı** yere. `AddPanel`'in
+  `more` prop'u bunun için. Ölçülen: ekrandaki en uzun `.hint` **438 → 126**
+  karakter. `e2e/metin.spec.ts` tavanı 140'ta tutuyor; uzunluğu **veriden**
+  gelen satırlar (`.data-hint`) hariç, çünkü onları uzatan şey okulun kendisi.
 - **Yorumlar İngilizce**, kısa, sadece *neden*i açıklar. *Ne* yaptığını kod söyler.
 - Depolanan JSON alan adları da İngilizce — ama **değiştirmek yedek dosyalarını
   bozar**, o yüzden şema değişirse `schemaVersion` artırılır ve göç kodu yazılır.
@@ -505,12 +553,18 @@ theme.ts                        makine tercihleri (tema, kenar, havuz açık mı
                                 on bağımsız skaler, on anahtar, hiçbiri State'e
                                 girmez
 toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
-                                kapsamı, artı Dersler'in MODU ve odağı. App'te
+                                kapsamı, artı Dersler'in MODU ve odağı, artı
+                                HAVUZUN sırası ve süzgeci (2026-08-30). App'te
                                 yaşar, çünkü sekme değişimi bileşeni söküyor
                                 (tuzak 18) ve çünkü onu gösteren şerit
                                 <main>'in ÜSTÜNDE. Kontrol'ün süzgeci
                                 2026-08-28'de SİLİNDİ: rapor tek sayfa,
-                                şeridin düğmeleri bir pozisyon tutmuyor
+                                şeridin düğmeleri bir pozisyon tutmuyor.
+                                Buraya girenin ölçütü tek: bir POZİSYON mu, bir
+                                TERCİH mi. `poolSort`/`poolFilter` "şu anda
+                                neye bakıyorum"dur, "bu makine nasıl sever"
+                                değil — yani yeni bir localStorage anahtarı
+                                yok, "Veriler nerede" tablosuna satır borcu yok
 gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
                                 React BİLMEZ — drag.ts'in deseni (tuzak 1)
 poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
@@ -566,15 +620,24 @@ components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
                                 window.confirm/alert YOK — hiç kalmadı
 components/Toasts.tsx           olan biteni söyleyen satır. Radix Toast DEĞİL:
                                 eylem taşımıyorlar, o yüzden 19,6 KB'a gerek yok
-components/LessonEdit.tsx        bir dersi YERİNDE düzenler: haftalık saat ·
-                                dağılım · günde en fazla. Inspector'ın deseni
-                                (context + Radix Dialog). Kendi kuralı YOK,
-                                üçü de updateLesson'dan geçer
+components/LessonEdit.tsx        bir dersi YERİNDE düzenler: sınıf · öğretmen ·
+                                branş · haftalık saat · dağılım · günde en
+                                fazla. Inspector'ın deseni (context + Radix
+                                Dialog). Kendi kuralı YOK — üçü updateLesson'
+                                dan, ikisi transferLesson/moveLessonToClass'
+                                tan geçer, ve o ikisi ne kaybedileceğini ÖNCE
+                                sayar
 components/BlockCounts.tsx      dağılım sayaçları + blockCeiling. İKİ ekran
                                 kullanıyor (Dersler listesi ve LessonEdit), o
                                 yüzden lessons/index.tsx'ten çıktı
 components/Inspector.tsx        varlık paneli. entityWeek/entityFacts'i ÇİZER,
-                                hesaplamaz. useInspect() her yerden çağrılır
+                                hesaplamaz — ama 2026-08-30'dan beri DÜZENLER
+                                de: her kutu Okul listesinin kendi kutusu, aynı
+                                mutator'a bağlı (updateTeacher · updateClass ·
+                                updateRoom · setTeacherLimit). Yeni olan şey
+                                kontrol değil YOL: ızgaranın satır başı, kartın
+                                sağ tık menüsü ve komut paleti buraya çıkıyor.
+                                useInspect() her yerden çağrılır
 components/Palette.tsx          Ctrl+K kutusu — komut listesini DIŞARIDAN alır
 components/Commands.tsx         o listeyi kurar. App'te DEĞİL, çünkü komutların
                                 yarısı useInspect() çağırıyor ve o hook ancak
@@ -1971,6 +2034,86 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
     yazmadan önce çağıranların listesi çıkarılır, ve her biri için sorulur —
     *bu çağrıyı bir el mi yapıyor, yoksa bir hesap mı?*
 
+99. **BOYANMIŞ BİR DEĞERİ GEÇİŞ SÜRERKEN OKUMAK, HİÇBİR ŞEY OKUMAMAKTIR — ve
+    okuduğu sayı inandırıcıdır.** Karttaki raptiyenin iddiası "hover olmadan da
+    görünüyor"du; testi `getComputedStyle(...).opacity`'i okuyup `> 0.25`
+    diyordu, ve `opacity: 0` mutasyonuyla **yeşil geçti**. İki ayrı sebep, ve
+    ikincisi asıl ders. (a) `dragAndDrop` imleci bıraktığı hücrede bırakıyor,
+    yani `td:hover > .card-pin` kuralı raptiyeyi tam açıyordu — bir "hover
+    olmadan" iddiası imleci **kenara çekmeden** yazılamaz. (b) İmleç çekildikten
+    sonra bile geçti: `.card-pin`'in `transition`'ı sürerken okunan opaklık
+    **0,643877** dönüyordu. Yani ölçüm 0 ile 1 arasında bir sayı gördü,
+    eşiğin üstündeydi, ve iddia doğrulanmış sayıldı.
+    Tuzak 59 bunun **ekran görüntüsü** hâliydi ve o turda yazılan kural
+    ("bir düzen ölçen her testin ilk satırı `getAnimations()` beklemek")
+    yalnız düzeni sayıyordu. Genişledi: **boyanmış bir değeri — opaklık, renk,
+    dönüşüm — okuyan her ölçüm de önce hareketin bitmesini bekler.**
+    `settledMotion()` artık `e2e/helpers.ts`'te ve `ekran.spec.ts`'in kendi
+    kopyası da ona bağlı; iki kopya, ikinci kez unutulacak yerdi.
+
+100. **SARMALANAMAYAN BİR GRUP KENDİ KARTLARINI KIRPAR, ve `overflow: hidden`
+    bunu sessizce yapar.** Havuzun grupları `flex: 0 0 auto` bir sütundu, yani
+    her grup kartlarının istediği kadar genişti. "Blok boyuna göre" sıralamada
+    grup sayısı **ikiye** düşüyor ve geniş olanı 1920 px'lik tepside **4015 px**
+    istiyor: `2109 px` kart, `.pool-list`'in `overflow-x: hidden`'ı altında,
+    **erişilemez** ve ekranda var olduklarını söyleyen hiçbir şey yok. %150'de
+    4123 px. Çare kutuyu tavanlamak (`flex: 0 1 auto; max-width: 100%`) —
+    o zaman grup kendi `flex-wrap`'ine düşüyor.
+    İkinci yarısı aynı turda ve ters yönden geldi: başlık kartların **üstünde**
+    dururken dikeyde bir satır götürüyordu, ve tepsinin tabanı 6rem = 84 px
+    (560 px'lik bir pencerede clamp oraya iner). Baş 32 + başlık 24 + kart 40,
+    84'e sığmaz; tek kart satırı kırpıldı ve ekran dışı sürükleme testi
+    kırmızıya döndü — `boundingBox()` kırpılmış bir kutunun koordinatını
+    veriyor, `mouse.move` oraya gidiyor, ve altında kart yok. Başlık
+    **yanlarına** alındı.
+    Genel kural: bir kutuyu bölmeden önce **hem yönünün taşması** hem
+    **öteki yönün tabanı** ölçülür, ve ölçüm gerçek veriyle yapılır (tuzak 41).
+
+
+101. **BİR ŞİKAYETTEN YAZILMIŞ PLAN BİR SEBEP ADLANDIRIR, VE O SEBEP ÖLÇÜLECEK
+     İLK ŞEYDİR — SONUNCUSU DEĞİL.** Görev çubuğundaki simge için üç tur
+     harcandı. Şikayet her seferinde aynıydı (*"küçük/bulanık görünüyor"*), ve
+     her seferinde plan bir sebep adlandırdı: önce "`.ico`'da boy eksik", sonra
+     "eşik yanlış yerde", sonunda "`bundle.icon` `--no-bundle` ile ikonu
+     gömmüyor olabilir". Sonuncusu STATUS'e *"varsayıldı, ölçülmedi"* diye
+     yazılmıştı ve bir turun **iş listesine** dönüşmüştü: iş akışına ölçüm
+     eklemek, tutmuyorsa Win32 kaynağını elle yazmak.
+     Yayınlanmış ikiliye bakmak **on dakika** sürdü ve iddiayı çürüttü: dokuz
+     boyun dokuzu da gömülüydü, `.ico` ile birebir. Aynı ölçüm ikinci bir
+     maddeyi de çürüttü — AB6 *"VERSIONINFO yok"* diyordu, beş alan vardı.
+     Yani bir turun iki maddesi, yapılmadan önce **ölçülerek** kapandı, ve
+     kalan gerçek sebep (24 px'te altı çubuğun araları 0,56 cihaz pikseli)
+     ancak o iki teori kalkınca görünür oldu.
+     Tuzak 65 "bir platform iddiası ölçülmeden yazılmaz" diyor; bu onun bir
+     basamak yukarısı: **ölçülmeden yazılmış bir iddia, kendisini doğrulayacak
+     bir iş planı üretiyor.** Karşı önlem sırayı çevirmek — bir plan bir sebep
+     adlandırıyorsa, o turun ilk işi o sebebi ölçmektir, ve ölçüm o sebebi
+     kaldırırsa plan da kalkar. Ölçüm bir kapıya dönüştürüldü
+     (`scripts/exe-ikon.mjs`, `surum.yml`'in `exe` işi) ki varsayım bir daha
+     doğmasın.
+
+102. **KIL PAYI SIĞAN BİR KUTU, KÖK KIPIRDADIĞI GÜN SIĞMAZ — ve `display:
+     none` ile gizlenen bir satır o payı kendi eliyle harcar.** Müsaitlik
+     başlığı bir ders numarası ve altında başlangıç saati taşıyor, ve saati
+     kapatan ayarın bütün iddiası *"bu gürültü meselesi, yer meselesi değil"*
+     — yani tablonun boyu değişmemeli. İki yıl değişmedi, ama **tesadüfen**:
+     paylaşılan hücre kuralı 2.125rem veriyordu, 14px kökte 29,75 px, ve iki
+     satır metin 30 px istiyordu. Kök 13px'e inince metin **inmedi** (merdiven
+     yeniden sabitleniyor, 12 px taban), pay negatife döndü, ve saat açılınca
+     tablo 2,16 px büyüdü.
+     İlk çare `height: 2lh` idi ve yetmedi (2,16 → 1,03 px): blok bir çocuk
+     kendi satır kutusunu getiriyor ve toplam iki `lh`'den büyük. Doğru çare
+     bir sayı değil bir **yapı**: satırı gizlerken `visibility: hidden`
+     kullanmak, yani ikinci satır kutusunu **her iki durumda da** orada
+     bırakmak. İki yükseklik artık inşaat gereği eşit (332,03 ↔ 332,03), ve
+     kök bir daha kıpırdarsa da eşit kalacak.
+     Genel hâli tuzak 36'nın kardeşi: orada elle hesaplanmış bir yarım vardı,
+     burada elle doğrulanmış bir **pay**. Bir kutunun içindekine kıl payı
+     yettiğini ölçtüğünüzde, yazacağınız şey o payın sayısı değil, payı
+     gereksiz kılan düzendir. Ve ızgaranın kendi `.hour-clock`'u hâlâ
+     `display: none` — orada geri verilen yer **ölçülmüş bir kazanç**
+     (2461 → 1728 px, tuzak 37), yani aynı iki satır iki ekranda iki ayrı şey.
+
 ---
 
 ## Tasarım — serbest
@@ -2002,8 +2145,17 @@ bu belgeden izin almaz. Ne yapıldığı [docs/DESIGN.md](docs/DESIGN.md)'de
    burada yazılıydı ama satırın kendisinde **2026-08-27'ye kadar yoktu**); geri
    alınamaz uyarılar `role="alertdialog"`. Renk tek başına durum taşımaz.
    Klavyeyle gidilen her yerde odak görünür. **Hedef kullanıcı zor görüyor** —
-   bu, süsün değil *boyutun* tarafındaki bir kısıt: 12 px ekranda mutlak alt
-   sınır olarak kalır.
+   bu, süsün değil *boyutun* tarafındaki bir kısıt: 12 px ekranda alt sınır
+   olarak kalır.
+   > **Netleştirildi (2026-08-30): taban VARSAYILAN ÖLÇEKTE (%100) geçerli.**
+   > O gün `SCALE_MIN` 1'den **0,80**'e indi, yani ölçek merdiveninin altında
+   > `--fs-xs` 12 px değil 9,6 px çiziyor. Bu bir gevşetme değil bir **kapsam**:
+   > taban, programın kendiliğinden geldiği ekran hakkında bir söz —
+   > `SCALE_DEFAULT` **1'de kaldı**, yani kimsenin ekranı küçülerek açılmıyor.
+   > %80'e uzanan okuyucu tabana kendisi cevap veriyor, ve o okuyucu bunu
+   > Windows'un kendi ölçeklemesi zaten büyükken yapıyor (bkz. `theme.ts`).
+   > Tipografi merdiveni her kök değişiminde **yeniden sabitleniyor** (16 → 14
+   > → 13 px), yani %100'de 12 px hâlâ 12 px.
    **Hareket bir tercihtir, ve makinenin tercihi tabandır:** `--dur-*` süreleri
    ile `--slide` · `--sweep` · `--press` · `--pop` mesafeleri tek yerden
    kısılır. Kural şudur: bir kuralda `translateY(.5rem)` gibi elle yazılmış bir
@@ -2086,8 +2238,9 @@ fiildi. Ad çakışması yüzünden zorunlu üçüncü bir yeniden adlandırma g
 `getByRole(name:)` alt dize eşler ve bir düğme üç piksel ötedeki sekmenin
 adını taşıyamaz.
 
-- **Üst çubuğun sol ucunda marka işareti** (2026-08-26). Ayrıntılı çizim,
-  `1.75rem` — yani `--ui-scale`'i izliyor (28 px @%100, 42 px @%150). Düğme
+- **Üst çubuğun sol ucunda marka işareti** (2026-08-26). Sade çizim
+  (2026-08-28), `1.75rem` — yani `--ui-scale`'i izliyor. Kök 16px iken 28 px,
+  14px iken 24,5 px, **13px'ten beri 22,75 px** (%150'de 34,125). Düğme
   **değil** ve `aria-hidden`: programın adı zaten belge başlığı, ve bu satırın
   neyin feda edileceği yazılı bir satır (tuzak 48) — işaret hiç feda edilmiyor,
   onun yerine sığması ölçülüyor. `<img src>` değil **inline SVG**: bu dosya
@@ -2278,12 +2431,27 @@ adını taşıyamaz.
   Bütün hamle **tek geri-al adımı**, ve ne kaybedildiği toast'ta adıyla yazar.
 - **Sol tık taşır, sağ tık MENÜ açar (2026-08-29).** Yerleşmiş bir derse sol
   tıklamak bloğu siliyordu, dolayısıyla taşımanın tek yolu silip havuzdan
-  yeniden sürüklemekti. Şimdi: sol düğme + sürükle = taşı, **sağ tık = üç
-  kalemlik menü** (`Havuza kaldır · Dersi düzenle · Dersi buraya sabitle`),
+  yeniden sürüklemekti. Şimdi: sol düğme + sürükle = taşı, **sağ tık = menü**,
   Delete = havuza gönder, klavyeden. Klavyeden gelen "click" `e.detail === 0`
   ile ayrılır, böylece odaklı kartta Enter/Space çalışır. Sürükleme haritası
   **kaynağı kaldırılmış** bir durum üstünde hesaplanır, yoksa ders kendi
   kendini engeller.
+  **Menü 2026-08-30'da yeniden dizildi** ve şekli bir kuraldır: üst düzeyde
+  elin sık uzandığı şey, kapıların arkasında nadir ve tehlikeli olan.
+
+  ```
+  Havuza kaldır · Dersi düzenle · Öğretmeni düzenle · Sınıfı düzenle
+  ────
+  Dersi buraya sabitle / Sabitlemeyi kaldır
+  Toplu sabitle ▸        Satırı · Sütunu · Günü
+  ────
+  Geçici görünüm ▸       Satırı/Günü soluklaştır · gizle
+  ```
+
+  Tek saatlik sabitleme bir tur alt menüde durdu ve **geri alındı**: programın
+  en sık kilidi iki tık ve bir hover uzaktaydı. `Öğretmeni düzenle` ile
+  `Sınıfı düzenle` ızgaranın **çizilmediği** eksene ulaşmanın tek yolu — satır
+  başı zaten bakılan ekseni açıyor.
   **Menü TEK bir `ContextMenu.Root`**, tabloyu sarar — 2100 hücreye tetikleyici
   konmaz, tıklamanın nerede olduğu `data-row/day/hour`'dan okunur (drag.ts ile
   aynı yerden). Karta gelmeyen sağ tıkta `preventDefault()` çağrılır ve Radix'in
@@ -2297,6 +2465,25 @@ adını taşıyamaz.
   bir ders birden çok blok hâlinde iner ve kilitlenen bir **karedir**.
   İşaret bir **simge** (sol alt köşe), renk değil: ızgaranın dört rengi zaten
   bırakılabilir / uyarı / engel / kapalı demek.
+  **VE O SİMGE 2026-08-30'DAN BERİ BİR DÜĞME** — *"kartların üzerinde
+  sabitleye basınca dersi sabitlesin babamın en çok kullancağı bu."* İki şey
+  bağlayıcı. (a) Raptiye kartın **kardeşi**, çocuğu değil: `.card` bir
+  `<button>` ve düğme içinde düğme geçersiz HTML'dir; konumlanma bağlamı
+  `<td>`. Bunun yan etkisi sağ tıka da dokunuyor — `openMenu` hedefini artık
+  `.card` üstünden değil HÜCRE üstünden buluyor, yoksa raptiyeye sağ tıklamak
+  hiçbir menü açmazdı. (b) **Hep görünür, sönük** (`opacity: .38`), hover /
+  odak / basılıyken tam. Kullanıcı kararı, ve gerekçesi kullanıcı: hover'da
+  beliren bir kontrol, bu programın okuyucusunun bir daha hiç bulamadığı
+  kontroldür.
+- **PROGRAM ŞERİDİNİN SIRASI (2026-08-30):** `Görünüm · Diz · Program` … boşluk
+  … `Yoğunluk · Izgara`. Görünüm en solda ve orası **eski yeri** — kitaplık bir
+  tur şeridin başına girip onu sağa itmişti (*"öğretmen ve sınıftan seçimleri
+  en solda eski yerinde olmalı"*). İki grup birer **menü**: kitaplık (seçim +
+  kopyala + adlandır + sil) ve `Izgara` (tümünü sabitle · geçici görünüm ·
+  programı boşalt). İkisi de tercih değil **ölçüm**: eşit sütunlu bir grupta üç
+  uzun kelime en uzunun üç katıdır, ve %150'de şerit 1920 px'lik kutuda
+  **2061 px** istiyordu — iki düğme dışarıda, yani tıklanamaz (tuzak 48). Menüye
+  inince 1717 px.
 - **Otomatik dizme Program sekmesinde iki düğme**: `Otomatik diz (N)` ve `Baştan diz`
   (onaylı). Ayar yok — "sabaha yay" gibi tercihlerin doğru cevabı bir dönem
   kullanılmadan bilinemez (ilke 5). İlerleme ve sonuç `.reason-bar`'da: sabit
@@ -2312,10 +2499,24 @@ adını taşıyamaz.
   görünür. **Kaç tane olduğunu söyleyen rozet 2026-08-28'de kalktı**
   (kullanıcı isteği); sayı kaybolmadı, kartta yazmıyor: `data-count`'ta,
   kartın `title`'ında ve tepsinin başındaki "N blok bekliyor"da.
+  **Kartlar BAŞLIKLI gruplar hâlinde duruyor (2026-08-30)** — *"kartlar
+  havuzdayken ayrım daha bir güzel ve hoş olsun."* Bir grubun başlığı satır
+  rengi noktası + ad + sayı, gruplar arası kıl çizgi, ve **başlık sıralamadan
+  türüyor**: branşa göre sıralayınca başlıklar branş olur, yani ayarın
+  karşılığı gözle görülür. Başlık kartların **yanında** durur, üstünde değil —
+  dikeyde bir satır götürmesi kısa ekranda tek kart satırını kırpıyordu
+  (tuzak 100).
+  **Sıra ve süzgeç `toolState`'te, çünkü ikisi de bir POZİSYON**: beş sıra
+  (ızgara sırası · ada · branşa · uzun bloklar önce · en çok kalan) ve bir
+  branş süzgeci. Yeni depolama anahtarı yok. Süzülünce tepsinin başlığı neyi
+  sakladığını **söyler** — sessizce onikide birini göstermek "hepsi yerleşti"yi
+  bir tık ötede yalan yapardı. Sıralayıcıların hepsi `listview.ts`'in
+  `compareTr`'siyle çalışır; ikinci bir Türkçe karşılaştırma yazılmaz.
   **`.pool-card` hâlâ "bekleyen BİR blok" demek, ve bu bir SÖZLEŞME:** sekiz
   dosyada ~40 test onu sayıyor, "N blok bekliyor" ondan geliyor,
   `pendingBlocks()`'un aynası o. Deste bir **düzen**, bir gruplama değil — aynı
-  N eleman DOM'da kalır, gömülü olanlar yalnız mürekkebini bırakır. Mürekkep,
+  N eleman DOM'da kalır, gömülü olanlar yalnız mürekkebini bırakır. Grup da
+  öyle: bir kabuk, bir eleme değil. Mürekkep,
   `visibility` değil: gizli bir öğenin `innerText`'i boştur ve `allInnerTexts()`
   okuyan iki test tepsiyi dağılmış sanır (ölçüldü). Hangi bloğu nereye koyacağı
   tepsideki bir seçim, gizli bir "sıradaki" değil. Yan fayda: `weeklyHours`'ı
@@ -2328,6 +2529,13 @@ adını taşıyamaz.
   altısı) — artık sabit değil: kenar bir `role="separator"`, bıraktığınız yer
   `ders-programi-havuz-boy`'da hatırlanıyor, ve **havuz boşalınca kendiliğinden
   kapanıyor** (boş bir tepsi 176px'i hiçbir şey için tutar).
+- **Müsaitlik satırı 3.875rem, ve ısı tablosu ONA DAHİL DEĞİL (2026-08-30).**
+  Boyanan ızgara `54,3 px`'e çıktı (%150'de 81,4) ve sayfanın dikey taşması iki
+  ölçekte de **0** — istendiği gibi (*"müsaitlik programlarının satırlarını
+  uzat"*). "Haftanın darlığı" aynı iskeleti ödünç alıyor ama bir müsaitlik
+  programı değil: tıklanacak hücresi ve okunacak çarpısı yok, bütün okula tek
+  bakış. Kendi kuralıyla (`table.availability.heat`, özgüllük 0,2,3) eski
+  boyunda kaldı.
 - **Müsaitlik'te kapalı saatin çarpısı BÜYÜK ve KIRMIZI (2026-08-26).** İşlevsel
   renk kanalını bozmuyor ve bunu koruyan şey **kapsam**: Program ızgarasında
   kırmızı "bu bırakma reddedildi" demektir ve gri tarama "bu saat kapalı" —

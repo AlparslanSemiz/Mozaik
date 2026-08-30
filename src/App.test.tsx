@@ -183,7 +183,7 @@ describe('uygulama açılıyor', () => {
     // click below is a click on a whole block and not on part of one.
     const span = blockPlan(lesson)[0]!;
     for (let i = 0; i < span; i++) {
-      d.placements[`${group.id}|${day}|${i}`] = lesson.id;
+      activeProgram(d).placements[`${group.id}|${day}|${i}`] = lesson.id;
     }
     localStorage.setItem('ders-programi', JSON.stringify(d));
 
@@ -267,3 +267,4 @@ describe('uygulama açılıyor', () => {
     expect(topbar.textContent).toContain('Dosyaya kaydet');
   });
 });
+import { activeProgram } from './programs';

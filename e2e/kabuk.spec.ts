@@ -156,13 +156,18 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
       expect(facts.beforeTabs, `%${scale}: işaret sekmelerin solunda değil`).toBe(true);
       expect(facts.left, `%${scale}: işaret sol uçta değil`).toBeLessThan(40);
       // rem, not px: at 150% it grows with the tabs instead of becoming a
-      // speck beside them. 1.75rem, and the numbers moved on 2026-08-27 with
-      // the root — 16px became 14, so 28/42 became 24.5/36.75. They are still
-      // written out rather than computed, because what this line guards is
-      // that the mark is in `rem` AT ALL: a px width would sit on 28 at both
-      // ends and the assertion would say so.
+      // speck beside them. 1.75rem, and the numbers have moved twice with the
+      // root — 16px gave 28/42, 14px gave 24.5/36.75, and 13px since
+      // 2026-08-30 gives 22.75/34.125. They are still written out rather than
+      // computed, because what this line guards is that the mark is in `rem`
+      // AT ALL: a px width would sit on one number at both ends and the
+      // assertion would say so.
+      //
+      // 22.75px keeps the mark inside the band the icon threshold was measured
+      // in (20-32px: "blurry but the columns are still told apart"), which is
+      // why it draws the SIMPLE variant — see CLAUDE.md's icon table.
       expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`)
-        .toBeCloseTo(scale === 100 ? 24.5 : 36.75, 0);
+        .toBeCloseTo(scale === 100 ? 22.75 : 34.125, 0);
       // Pitfall 48: a seventh thing on this row must not push the tabs out of
       // their own box. Nothing gives way for it — it has to fit.
       expect(facts.tabOver, `%${scale}: sekmeler kutusundan taştı`).toBeLessThanOrEqual(0);
@@ -372,12 +377,19 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
       return {
         panelOver: el.scrollHeight - el.clientHeight,
         listHeight: Math.round(inner.getBoundingClientRect().height),
+        // The floor is written in the stylesheet as `6rem`, so the pixel it
+        // lands on is the ROOT's business and moves whenever the root does
+        // (14px -> 13px on 2026-08-30). Derived here for the same reason it is
+        // in rem there: a number copied out of a stylesheet is a number that
+        // goes stale silently.
+        floor: 6 * parseFloat(getComputedStyle(document.documentElement).fontSize),
       };
     });
     expect(m.panelOver, 'bu ekranda özet hâlâ sığıyor — ölçülecek bir şey yok').toBeGreaterThan(20);
-    // 6rem at --ui-scale 1 is 84px: two rows and their heading. A list shrunk
-    // to nothing is not a list, and nothing on screen would say it was there.
-    expect(m.listHeight, `liste ${m.listHeight}px'e ezilmiş`).toBeGreaterThanOrEqual(80);
+    // Two rows and their heading. A list shrunk to nothing is not a list, and
+    // nothing on the screen would say it had been there.
+    expect(m.listHeight, `liste ${m.listHeight}px'e ezilmiş (taban ${m.floor})`)
+      .toBeGreaterThanOrEqual(m.floor - 1);
 
     const before = await panel.locator('h2').boundingBox();
     await panel.evaluate((el) => el.scrollTo(0, 400));

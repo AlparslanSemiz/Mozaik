@@ -36,15 +36,32 @@ import { openWithSample } from './helpers';
 
 test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } });
 
-/** Where every control on the strip is, and how wide the page under it is. */
+/** Where every control on the strip is, and how wide the page under it is.
+ *
+ * KEYED BY NAME rather than listed in order, and that is the whole difference
+ * between measuring a shift and measuring a different strip. Since 2026-08-30
+ * the right-hand end of Ayarlar belongs to the SECTION you are in — the theme
+ * on Görünüm, a reading on the other four — so the strip legitimately holds a
+ * different number of controls before and after a press. Two lists compared
+ * position by position would call that a shift, which is exactly the word this
+ * file exists to use precisely.
+ *
+ * What still has to hold, and what the assertion below says: a control that is
+ * on BOTH strips has not moved. */
 async function geometry(page: Page) {
   return page.evaluate(() => {
     const main = document.querySelector('.main')!;
+    const buttons: Record<string, string> = {};
+    for (const b of document.querySelectorAll<HTMLElement>('.ribbon .btn')) {
+      const r = b.getBoundingClientRect();
+      const name = (b.innerText || b.getAttribute('aria-label') || '')
+        .split(/\s+/)
+        .join(' ')
+        .trim();
+      buttons[name] = `${r.x.toFixed(2)}|${r.width.toFixed(2)}`;
+    }
     return {
-      buttons: [...document.querySelectorAll<HTMLElement>('.ribbon .btn')].map((b) => {
-        const r = b.getBoundingClientRect();
-        return `${r.x.toFixed(2)}|${r.width.toFixed(2)}`;
-      }),
+      buttons,
       page: main.clientWidth,
       gutter: (main as HTMLElement).offsetWidth - main.clientWidth,
       overflowing: main.scrollHeight > main.clientHeight,
@@ -88,7 +105,15 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
       for (let i = 1; i < options; i += 1) {
         const name = await press(page, i);
         const now = await geometry(page);
-        expect(now.buttons, `${tab} · "${name}" şeridi kaydırdı`).toEqual(first.buttons);
+        // The controls the two strips have in common, and there have to BE some:
+        // an empty intersection would make this test free (pitfall 23).
+        const ortak = Object.keys(first.buttons).filter((k) => k in now.buttons);
+        expect(ortak.length, `${tab} · "${name}" ortak düğme yok`).toBeGreaterThan(1);
+        for (const k of ortak) {
+          expect(now.buttons[k], `${tab} · "${name}" bastıktan sonra "${k}" oynadı`).toBe(
+            first.buttons[k],
+          );
+        }
         expect(now.page, `${tab} · "${name}" sayfayı kaydırdı`).toBe(first.page);
       }
     }
@@ -101,7 +126,11 @@ test.describe('76. Şeritte gezinmek hiçbir şeyi kaydırmıyor', () => {
 
     const section = async (name: string) => {
       await page.locator('.ribbon .btn', { hasText: name }).first().click();
-      await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(name);
+      // The FIRST group: Görünüm's strip carries a pressed theme button at its
+      // right-hand end too, and the whole-strip selector became two elements.
+      await expect(
+        page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
+      ).toContainText(name);
       await page.waitForTimeout(200);
       return geometry(page);
     };

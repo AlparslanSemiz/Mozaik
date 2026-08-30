@@ -471,7 +471,7 @@ test.describe('31. Kurulum — sağ sütun', () => {
       '1 sınıfın hiç dersi yok',
     );
     // ...and so did the one number that decides whether the week fits at all.
-    await expect(page.locator('.cols aside')).toContainText('Haftada sınıf başına');
+    await expect(page.locator('.cols aside')).toContainText('Sınıf başına');
   });
 
   // "Özetteki hatalar özetin en üstüne gelsin. Hata gidince yok olsun."
@@ -564,6 +564,13 @@ test.describe('44. Panel simetrisi', () => {
           if (c.tagName === 'P' && c.classList.contains('hint')) return 'aciklama';
           if (c.classList.contains('warn-box')) return 'uyari';
           if (c.classList.contains('form-row')) return 'ekleme';
+          // The add block is a GRID now (`AddPanel.tsx`), so each of its three
+          // parts is wrapped in a track of its own — that is what gives the
+          // five screens one geometry, and it is also what let this test start
+          // reading the whole block as nothing but a heading.
+          if (c.classList.contains('add-panel-description')) return 'aciklama';
+          if (c.classList.contains('add-panel-notice')) return 'uyari';
+          if (c.classList.contains('add-panel-body')) return 'ekleme';
           // The list lives in a scroll box now (eleven columns do not fit a
           // 100%-wide table at 150%), so "the list" is either shape.
           if (c.tagName === 'TABLE') return 'liste';
@@ -1077,13 +1084,17 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       .locator('tbody tr input.text-sm')
       .first()
       .evaluate((el) => el.getBoundingClientRect().width);
+    // A descendant and not a child: the form sits inside `.add-panel-body`,
+    // one of the three grid tracks `AddPanel.tsx` draws.
     const inForm = await page
-      .locator('.panel.add-panel > .form-row input.text-sm')
+      .locator('.panel.add-panel .form-row input.text-sm')
+      .first()
       .evaluate((el) => el.getBoundingClientRect().width);
     expect(inRow).toBeLessThan(inForm);
     // The add box has to hold its own placeholder, whatever it happens to be.
     const fits = await page
-      .locator('.panel.add-panel > .form-row input.text-sm')
+      .locator('.panel.add-panel .form-row input.text-sm')
+      .first()
       .evaluate((el) => {
         const s = el as HTMLInputElement;
         const probe = document.createElement('span');

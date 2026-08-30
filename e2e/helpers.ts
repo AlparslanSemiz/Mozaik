@@ -164,7 +164,14 @@ export async function openSettings(page: Page, section: string) {
     .locator('.ribbon .btn', { hasText: section })
     .first()
     .click();
-  await expect(page.locator('.ribbon .btn[aria-pressed="true"]')).toContainText(section);
+  // THE FIRST GROUP, not the whole strip. Since 2026-08-30 the right-hand end
+  // of Ayarlar → Görünüm carries the theme, and a pressed button there made
+  // `.ribbon .btn[aria-pressed="true"]` two elements — a strict-mode violation
+  // in a helper twenty files call. The section buttons are the FIRST
+  // `.ribbon-group`, which is what this was always asking about.
+  await expect(
+    page.locator('.ribbon .ribbon-group').first().locator('.btn[aria-pressed="true"]'),
+  ).toContainText(section);
 }
 
 export async function startDrag(page: Page, index = 0) {
@@ -833,4 +840,45 @@ export async function placedHours(page: Page): Promise<number> {
     .evaluateAll((tds) =>
       tds.reduce((sum, td) => sum + (Number(td.getAttribute('colspan')) || 1), 0),
     );
+}
+
+/**
+ * Wait until nothing on the page is still moving.
+ *
+ * A measurement taken mid-transition measures nothing. The pin on a card fades
+ * over `--dur-fast` when the pointer leaves its cell, and an opacity read one
+ * frame later came back **0.64** on a build whose rule says `0` — so a test
+ * written to catch "the pin only appears on hover" passed against exactly that
+ * build. Pitfall 59 is the same thing in its screenshot form, and the round
+ * that wrote it also wrote the rule: a test that measures a LAYOUT or a
+ * PAINTED value waits for this first.
+ *
+ * `a.finished` and not a fixed sleep: the durations are a setting (Ayarlar →
+ * Görünüm → Hareket), so a number here would be wrong at two of the three
+ * steps. Animations that never finish are filtered out rather than waited on,
+ * and the whole wait is capped.
+ */
+export async function settledMotion(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await Promise.race([
+      Promise.allSettled(
+        document.getAnimations().filter((a) => a.playState === 'running').map((a) => a.finished),
+      ),
+      new Promise((r) => setTimeout(r, 2_000)),
+    ]);
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  });
+}
+
+/**
+ * Open the Program strip's "Izgara → İşlemler" menu.
+ *
+ * The three controls at the right-hand end went behind one button on
+ * 2026-08-30, because three equal columns of long words asked for 639 px of a
+ * 1920 px strip at 150% and two of them came out past the edge (pitfall 48).
+ * Everything they used to do is a `menuitem` now.
+ */
+export async function openGridMenu(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'İşlemler', exact: true }).click();
+  await expect(page.locator('.menu')).toBeVisible();
 }

@@ -72,8 +72,8 @@ function build(): State {
       { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, blocks: [2], second: false, maxPerDay: null },
     ],
     unavailable: {},
-    placements: {},
-    pinned: {},
+    programs: [blankProgram()],
+    activeProgramId: 'program-1',
   };
 }
 
@@ -89,7 +89,7 @@ function withLesson(
   const d = build();
   const placements: Record<string, string> = {};
   for (const [day, hour] of cells) placements[placementKey('s510', day, hour)] = spec.id;
-  return {
+  return replaceActiveGrid({
     ...d,
     // Six hours a day rather than the four the shared fixture uses: a run has
     // to be long enough to hold a 3 and a 2 back to back, or the case cannot be
@@ -106,8 +106,7 @@ function withLesson(
         maxPerDay: null,
       },
     ],
-    placements,
-  };
+  }, { placements });
 }
 
 function lessonById(d: State, id: string) {
@@ -258,13 +257,13 @@ describe('validHours', () => {
 describe('blockStart ve removeBlock', () => {
   it('blok kaldırılınca tüm saatleri temizlenir', () => {
     const d = removeBlock(place(build(), 'x4', 0, 0), 's510', 0, 0);
-    expect(Object.keys(d.placements)).toHaveLength(0);
+    expect(Object.keys(activeProgram(d).placements)).toHaveLength(0);
   });
 
   it('ortadan tıklanan blok tamamen kalkar', () => {
     // x6 is 2+1, so a fresh grid places the double: hours 0 and 1.
     const d = removeBlock(place(build(), 'x6', 0, 0), 's433', 0, 1); // click its second hour
-    expect(Object.keys(d.placements)).toHaveLength(0);
+    expect(Object.keys(activeProgram(d).placements)).toHaveLength(0);
   });
 
   it('bitişik iki bloğu birbirine karıştırmaz', () => {
@@ -277,7 +276,7 @@ describe('blockStart ve removeBlock', () => {
     expect(blockStart(d, 's433', 0, 1)).toBe(0);
 
     const after = removeBlock(d, 's433', 0, 3);
-    expect(Object.keys(after.placements).sort()).toEqual([
+    expect(Object.keys(activeProgram(after).placements).sort()).toEqual([
       placementKey('s433', 0, 0),
       placementKey('s433', 0, 1),
     ]);
@@ -296,7 +295,7 @@ describe('blockStart ve removeBlock', () => {
 
     // Clicking the single takes one cell, not the run.
     const after = removeBlock(d, 's433', 0, 2);
-    expect(Object.keys(after.placements).sort()).toEqual([
+    expect(Object.keys(activeProgram(after).placements).sort()).toEqual([
       placementKey('s433', 0, 0),
       placementKey('s433', 0, 1),
     ]);
@@ -446,8 +445,8 @@ describe('sanitize — cascade ve taşma', () => {
 
     const s = sanitize(d);
     expect(s.lessons.map((x) => x.id)).not.toContain('x1');
-    expect(s.placements[placementKey('s510', 0, 0)]).toBeUndefined();
-    expect(s.placements[placementKey('s433', 0, 0)]).toBe('x3'); // untouched
+    expect(activeProgram(s).placements[placementKey('s510', 0, 0)]).toBeUndefined();
+    expect(activeProgram(s).placements[placementKey('s433', 0, 0)]).toBe('x3'); // untouched
   });
 
   it('sınıf silinince dersleri ve yerleşimleri de silinir', () => {
@@ -457,7 +456,7 @@ describe('sanitize — cascade ve taşma', () => {
     const s = sanitize(d);
     expect(s.lessons.map((x) => x.id)).not.toContain('x1');
     expect(s.lessons.map((x) => x.id)).not.toContain('x4');
-    expect(Object.keys(s.placements)).toHaveLength(0);
+    expect(Object.keys(activeProgram(s).placements)).toHaveLength(0);
   });
 
   it('derslik silinince sınıfın roomId alanı null olur', () => {
@@ -473,8 +472,8 @@ describe('sanitize — cascade ve taşma', () => {
     d = { ...d, settings: { ...d.settings, hours: ['1', '2'] } };
 
     const s = sanitize(d);
-    expect(s.placements[placementKey('s510', 0, 3)]).toBeUndefined();
-    expect(s.placements[placementKey('s510', 0, 0)]).toBe('x1');
+    expect(activeProgram(s).placements[placementKey('s510', 0, 3)]).toBeUndefined();
+    expect(activeProgram(s).placements[placementKey('s510', 0, 0)]).toBe('x1');
   });
 
   it('gün sayısı azalınca taşan müsaitlik kayıtları temizlenir', () => {
@@ -493,10 +492,10 @@ describe('sanitize — cascade ve taşma', () => {
 
   it('yetim ve bozuk anahtarları atar', () => {
     const d = build();
-    d.placements['s510|0|0'] = 'olmayanDers';
-    d.placements['bozuk'] = 'x1';
-    d.placements['s433|0|0'] = 'x1'; // the lesson belongs to 510 -> inconsistent
-    expect(Object.keys(sanitize(d).placements)).toHaveLength(0);
+    activeProgram(d).placements['s510|0|0'] = 'olmayanDers';
+    activeProgram(d).placements['bozuk'] = 'x1';
+    activeProgram(d).placements['s433|0|0'] = 'x1'; // the lesson belongs to 510 -> inconsistent
+    expect(Object.keys(activeProgram(sanitize(d)).placements)).toHaveLength(0);
   });
 
   it('değişiklik yoksa AYNI nesneyi döner', () => {
@@ -684,7 +683,7 @@ describe('closedConflicts', () => {
     expect(found[0]!.reason).toBe('MÇ Pazartesi 1 saatinde müsait değil');
     expect(found[0]!.lessonId).toBe('x1');
     // The whole point: nothing is removed.
-    expect(closed.placements['s510|0|0']).toBe('x1');
+    expect(activeProgram(closed).placements['s510|0|0']).toBe('x1');
   });
 
   it('sınıf kapatılınca yakalıyor', () => {
@@ -719,7 +718,7 @@ describe('closedConflicts', () => {
     // after the timetable is laid out and a wrong click would cost a lesson.
     const d = laidOut();
     const closed: State = { ...d, unavailable: { 'oMC|0|0': 1 } };
-    expect(sanitize(closed).placements['s510|0|0']).toBe('x1');
+    expect(activeProgram(sanitize(closed)).placements['s510|0|0']).toBe('x1');
   });
 
   it('kapalı ama boş saat çakışma değil', () => {
@@ -764,8 +763,8 @@ describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', (
     expect(blockStart(placed, 's510', 0, 2)).toBe(1);
 
     const lifted = removeBlock(placed, 's510', 0, blockStart(placed, 's510', 0, 2)!);
-    expect(lifted.placements[placementKey('s510', 0, 1)]).toBeUndefined();
-    expect(lifted.placements[placementKey('s510', 0, 2)]).toBeUndefined();
+    expect(activeProgram(lifted).placements[placementKey('s510', 0, 1)]).toBeUndefined();
+    expect(activeProgram(lifted).placements[placementKey('s510', 0, 2)]).toBeUndefined();
     expect(why(lifted, 'x4', 0, 1)).toBeNull();
   });
 
@@ -800,7 +799,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
   function snapshot(d: State) {
     const ix = buildIndex(d);
     return {
-      placements: { ...d.placements },
+      placements: { ...activeProgram(d).placements },
       teacherBusy: [...ix.teacherBusy.entries()].sort(),
       roomBusy: [...ix.roomBusy.entries()].sort(),
       placedHours: [...ix.placedHours.entries()].sort(),
@@ -808,8 +807,8 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
   }
 
   function mutable(d: State) {
-    const placements = { ...d.placements };
-    const work: State = { ...d, placements };
+    const placements = { ...activeProgram(d).placements };
+    const work: State = replaceActiveGrid(d, { placements });
     return { work, placements, ix: buildIndex(work) };
   }
 
@@ -827,7 +826,7 @@ describe('occupy / vacate — yerinde yerleştirme', () => {
     const { work, placements, ix } = mutable(d);
     occupy(placements, ix, d.lessons[0]!, 'dA', 0, 1, 1);
     expect(live(placements, ix)).toEqual(snapshot(place(d, 'x1', 0, 1)));
-    expect(work.placements).toBe(placements); // the state really shares the object
+    expect(activeProgram(work).placements).toBe(placements); // the state really shares the object
   });
 
   it('çok saatlik blok da aynı', () => {
@@ -1024,10 +1023,10 @@ describe('dropMap — üstüne bırakma', () => {
   it('ızgarayı ve dizini BOZMUYOR — simülasyon geri sarılıyor', () => {
     const d = place(build(), 'x1', 0, 0);
     const ix = buildIndex(d);
-    const before = JSON.stringify(d.placements);
+    const before = JSON.stringify(activeProgram(d).placements);
     const busyBefore = new Map(ix.teacherBusy);
     dropMap(d, ix, 'x4');
-    expect(JSON.stringify(d.placements)).toBe(before);
+    expect(JSON.stringify(activeProgram(d).placements)).toBe(before);
     expect([...ix.teacherBusy.entries()]).toEqual([...busyBefore.entries()]);
   });
 
@@ -1035,9 +1034,9 @@ describe('dropMap — üstüne bırakma', () => {
     let d = place(build(), 'x1', 0, 0);
     d = place(d, 'x1', 0, 2);
     const after = evict(d, 's510', 0, [0, 1]);
-    expect(after.placements[placementKey('s510', 0, 0)]).toBeUndefined();
+    expect(activeProgram(after).placements[placementKey('s510', 0, 0)]).toBeUndefined();
     // The one outside the target hours is untouched.
-    expect(after.placements[placementKey('s510', 0, 2)]).toBe('x1');
+    expect(activeProgram(after).placements[placementKey('s510', 0, 2)]).toBe('x1');
   });
 
   it('evictionNotice tekil ve çoğul', () => {
@@ -1062,7 +1061,7 @@ describe('sabitleme', () => {
   it('setBlockPinned bloğun BÜTÜN saatlerini işaretler, tek saatini değil', () => {
     const d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
     // x4 is a single 2-hour block, so both hours carry the pin.
-    expect(Object.keys(d.pinned).sort()).toEqual(
+    expect(Object.keys(activeProgram(d).pinned).sort()).toEqual(
       [placementKey('s510', 0, 1), placementKey('s510', 0, 2)].sort(),
     );
     // Asked at either hour, the answer is the same: a pin is about the BLOCK.
@@ -1073,7 +1072,7 @@ describe('sabitleme', () => {
   it('sabitleme kaldırılınca hiçbir iz kalmıyor', () => {
     let d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
     d = setBlockPinned(d, 's510', 0, 2, false);
-    expect(d.pinned).toEqual({});
+    expect(activeProgram(d).pinned).toEqual({});
     expect(blockPinned(d, 's510', 0, 1)).toBe(false);
   });
 
@@ -1093,7 +1092,7 @@ describe('sabitleme', () => {
     // ...and the very same call works once the pin is gone, which is what
     // makes this a test of the pin and not of some other refusal.
     const free = setBlockPinned(pinnedState, 's510', 0, 1, false);
-    expect(Object.keys(removeBlock(free, 's510', 0, 1).placements)).toHaveLength(0);
+    expect(Object.keys(activeProgram(removeBlock(free, 's510', 0, 1)).placements)).toHaveLength(0);
   });
 
   it('dropMap sabitlenmiş dersi TAHLİYE ETMİYOR, ve sebebini söylüyor', () => {
@@ -1120,23 +1119,24 @@ describe('sabitleme', () => {
     // lesson itself stops existing.
     d = { ...d, lessons: d.lessons.filter((x) => x.id !== 'x4') };
     const clean = sanitize(d);
-    expect(clean.placements).toEqual({});
-    expect(clean.pinned).toEqual({});
+    expect(activeProgram(clean).placements).toEqual({});
+    expect(activeProgram(clean).pinned).toEqual({});
   });
 
   it('sanitize dokunulmamış pini KORUYOR — her yüklemede silinmiyor', () => {
     const d = setBlockPinned(place(build(), 'x4', 0, 1), 's510', 0, 1, true);
-    expect(sanitize(d).pinned).toEqual(d.pinned);
+    expect(activeProgram(sanitize(d)).pinned).toEqual(activeProgram(d).pinned);
   });
 
   it('gün sayısı azalınca taşan pin de siliniyor', () => {
     const d = setBlockPinned(place(build(), 'x4', 1, 1), 's510', 1, 1, true);
-    expect(Object.keys(d.pinned)).toHaveLength(2);
+    expect(Object.keys(activeProgram(d).pinned)).toHaveLength(2);
     const shrunk = sanitize({
       ...d,
       settings: { ...d.settings, days: d.settings.days.slice(0, 1) },
     });
-    expect(shrunk.placements).toEqual({});
-    expect(shrunk.pinned).toEqual({});
+    expect(activeProgram(shrunk).placements).toEqual({});
+    expect(activeProgram(shrunk).pinned).toEqual({});
   });
 });
+import { activeProgram, blankProgram, replaceActiveGrid } from './programs';

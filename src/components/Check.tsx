@@ -6,6 +6,7 @@ import { buildIndex, closedConflicts } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
 import type { Id, State } from '../types';
+import { activePlacements } from '../programs';
 import type { CheckView } from '../toolState';
 import CapacityRows from './CapacityRows';
 import { T, useT } from './T';
@@ -58,7 +59,7 @@ export default function Check({ state, view }: Props) {
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
   // Where the week stands, from the same numbers the pool and the grid use.
-  const placed = Object.keys(state.placements).length;
+  const placed = Object.keys(activePlacements(state)).length;
   const totalWanted = state.lessons.reduce((n, l) => n + l.weeklyHours, 0);
   const ix = useMemo(() => buildIndex(state), [state]);
   const doneLessons = state.lessons.filter(
@@ -160,7 +161,7 @@ export default function Check({ state, view }: Props) {
           <div className="panel kontrol-sorun">
             <h2>{t('Kapalı saatte ders ({n})', { n: conflicts.length })}</h2>
             <p className="hint">
-              <T k="Bu dersler programa konduktan **sonra** o saatler kapatıldı. Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle işaretli. Ya saati yeniden açın, ya dersi başka saate taşıyın." />
+              <T k="Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi." />
             </p>
             <table className="list">
               <thead>
@@ -187,7 +188,7 @@ export default function Check({ state, view }: Props) {
           <div className="panel kontrol-sorun">
             <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
             <p className="hint">
-              <T k="Dizilmiş program, **Ayarlar → Kurallar** bölümünde girdiğiniz sınırları aşıyor. “Uyar” olarak ayarlanmış kurallar yerleştirmeyi engellemez, sadece burada listelenir." />
+              <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
             </p>
             <table className="list">
               <thead>
@@ -216,9 +217,7 @@ export default function Check({ state, view }: Props) {
           <div className="panel kontrol-sorun">
             <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
             <p className="hint">
-              {t(
-                'Bu derslerin yerleşmemiş saatleri var ama programda koyulabilecek tek bir boş hücre bile kalmamış.',
-              )}
+              {t('Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.')}
             </p>
             <table className="list">
               <thead>

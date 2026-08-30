@@ -16,6 +16,7 @@ import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../entitie
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { useT } from '../T';
+import AddPanel from '../AddPanel';
 
 export default function Rooms({ state, change }: PanelProps) {
   const t = useT();
@@ -61,16 +62,12 @@ export default function Rooms({ state, change }: PanelProps) {
           The paste button rides the HEADING, not the form row: "Excel'den
           yapıştır o bloğun en sağında hatta en sağ üstünde bile olabilir."
           All five panels put it in the same corner. */}
-      <div className="panel add-panel">
-        <div className="panel-head">
-          <h2>{t('Yeni derslik')}</h2>
-          <button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>
-        </div>
-        <p className="hint">
-          {t(
-            'Her sınıfın sabit odası. İki sınıf aynı dersliği paylaşıyorsa aynı saate konamazlar. Dersliği olmayan sınıflar için bu kontrol yapılmaz.',
-          )}
-        </p>
+      <AddPanel
+        title={t('Yeni derslik')}
+        action={<button className="btn" onClick={() => setPasteOpen(true)}>{t("Excel'den yapıştır")}</button>}
+        description={t('Her sınıfın sabit odası; aynı dersliği paylaşan iki sınıf aynı saate konamaz.')}
+        more={t('Dersliği olmayan sınıflar için bu kontrol yapılmaz.')}
+      >
         <div className="form-row">
           <input
             type="text"
@@ -103,7 +100,7 @@ export default function Rooms({ state, change }: PanelProps) {
           rowText={(x) => x.name}
           onAdd={(rows) => change((d) => rows.reduce((acc, x) => addRoom(acc, x.name), d))}
         />
-      </div>
+      </AddPanel>
 
       <div className="panel step-panel">
         <h2>{t('Derslikler ({n})', { n: state.rooms.length })}</h2>

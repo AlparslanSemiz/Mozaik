@@ -26,13 +26,13 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
   {
     name: 'minPerDay',
     label: 'Öğretmen günde en az',
-    hint: 'Okula geldiği gün boşuna gelmesin. Yerleştirmeyi engelleyemez, sadece Kontrol sekmesinde uyarır.',
+    hint: 'Okula geldiği gün boşuna gelmesin. Yalnız Kontrol sekmesinde uyarır.',
     canBlock: false,
   },
   {
     name: 'maxSameLessonPerDay',
     label: 'Bir sınıf aynı dersten günde en fazla',
-    hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat. Tek bir sınıf için Okul → Sınıflar tablosundaki kutuya, tek bir ders için Dersler tablosundakine yazılır.',
+    hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat.',
     canBlock: true,
   },
 ];
@@ -74,7 +74,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Kurallar')}</h2>
           <p className="hint">
-            <T k="Buradaki sayılar **bütün okul** için geçerlidir. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya, tek bir sınıf için **Okul → Sınıflar** tablosundakine, tek bir ders için **Dersler** tablosundakine yazın. Boş bıraktığınız kutu bir üstteki sayıyı kullanır: ders, sonra sınıf, sonra buradaki. **0** yazmak “sınır yok” demektir." />
+            <T k="Bu sayılar **bütün okul** için; **0** yazmak “sınır yok” demektir." />
           </p>
           <table className="list">
             <thead>
@@ -156,7 +156,7 @@ export default function Rules({ state, change }: PanelProps) {
           <h2>{t('Kendi sınırı olan öğretmenler ({n})', { n: custom.length })}</h2>
           {custom.length === 0 ? (
             <p className="hint">
-              <T k="Şu anda herkes yukarıdaki okul sınırlarını kullanıyor. Tek bir öğretmen için farklı bir sayı gerekiyorsa **Okul → Öğretmenler** tablosundaki kutuya yazın; boş bıraktığınız kutu buradaki sayıyı kullanır." />
+              <T k="Herkes okul sınırlarını kullanıyor. Bir öğretmene özel sayı: **Okul → Öğretmenler**." />
             </p>
           ) : (
             <table className="list">
@@ -197,7 +197,7 @@ export default function Rules({ state, change }: PanelProps) {
           <h2>{t('Kendi sınırı olan sınıflar ({n})', { n: customClasses.length })}</h2>
           {customClasses.length === 0 ? (
             <p className="hint">
-              <T k="Şu anda her sınıf yukarıdaki **aynı dersten günde en fazla** sayısını kullanıyor. Tek bir sınıf için farklı bir sayı gerekiyorsa **Okul → Sınıflar** tablosundaki kutuya yazın." />
+              <T k="Her sınıf okul sayısını kullanıyor. Bir sınıfa özel sayı: **Okul → Sınıflar**." />
             </p>
           ) : (
             <table className="list">
@@ -231,7 +231,7 @@ export default function Rules({ state, change }: PanelProps) {
         <div className="panel">
           <h2>{t('Şu anki ihlaller ({n})', { n: violations.length })}</h2>
           <p className="hint">
-            <T k="Soldaki sayıları değiştirdikçe bu liste anında değişir. **Uyar** yerleştirmeyi durdurmaz, yalnızca sayar; **Engelle** dersi o hücreye hiç bıraktırmaz. Aynı liste **Kontrol** sekmesinde de var." />
+            <T k="**Uyar** yalnız sayar, **Engelle** dersi o hücreye hiç bıraktırmaz." />
           </p>
           {/* A row per breach and no ceiling on how many there can be, so this
               is the box in this panel that gives ground: in a right rail the
