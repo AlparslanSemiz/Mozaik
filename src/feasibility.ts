@@ -4,17 +4,30 @@
 // timetable cannot be built. It comes before a solver because it is far
 // cheaper and far more useful.
 
-import { t } from './i18n';
-import { blockerDetail, buildIndex, closedConflicts } from './constraints';
-import type { BlockCode, Index } from './constraints';
-import { findViolations } from './rules';
-import type { Violation } from './rules';
-import type { State, Id } from './types';
+import { t } from "./i18n";
+import { blockerDetail, buildIndex, closedConflicts } from "./constraints";
+import type { BlockCode, Index } from "./constraints";
+import { findViolations } from "./rules";
+import type { Violation } from "./rules";
+import type { State, Id } from "./types";
 
 /** Above this ratio of load the "this will be hard" warning is raised. */
 const TIGHT_RATIO = 0.85;
 
-export type Level = 'ok' | 'tight' | 'impossible';
+export type Level = "ok" | "tight" | "impossible";
+export type LoadStatus = "empty" | Level;
+
+/** The same capacity ladder used by Kontrol, exposed for list filtering. */
+export function capacityLevel(capacity: number, load: number): Level {
+  if (load > capacity) return "impossible";
+  if (capacity > 0 && load > capacity * TIGHT_RATIO) return "tight";
+  return "ok";
+}
+
+/** Zero load is useful to filter separately even though it is feasible. */
+export function loadStatus(capacity: number, load: number): LoadStatus {
+  return load === 0 ? "empty" : capacityLevel(capacity, load);
+}
 
 export interface ReportRow {
   id: Id;
@@ -57,7 +70,7 @@ export function lessonName(ix: Index, lessonId: Id): string {
   const lesson = ix.lessonById.get(lessonId);
   const group = lesson && ix.classById.get(lesson.classId);
   const teacher = lesson && ix.teacherById.get(lesson.teacherId);
-  return `${group?.name ?? '?'} · ${teacher?.short ?? '?'} ${teacher?.subject ?? ''}`.trim();
+  return `${group?.name ?? "?"} · ${teacher?.short ?? "?"} ${teacher?.subject ?? ""}`.trim();
 }
 
 /**
@@ -97,13 +110,14 @@ export function commonestBlock(
         if (stopAtFirstValid) break outer;
       } else {
         const seen = counts.get(found.code);
-        if (seen === undefined) counts.set(found.code, { count: 1, message: found.message });
+        if (seen === undefined)
+          counts.set(found.code, { count: 1, message: found.message });
         else seen.count++;
       }
     }
   }
 
-  let reason = t('Boş yer kalmamış');
+  let reason = t("Boş yer kalmamış");
   let top = 0;
   for (const entry of counts.values()) {
     if (entry.count > top) {
@@ -114,12 +128,6 @@ export function commonestBlock(
   return { reason, anyValid };
 }
 
-function levelOf(capacity: number, load: number): Level {
-  if (load > capacity) return 'impossible';
-  if (capacity > 0 && load > capacity * TIGHT_RATIO) return 'tight';
-  return 'ok';
-}
-
 export function buildCapacity(d: State): Capacity {
   const totalSlots = d.settings.days.length * d.settings.hours.length;
 
@@ -127,7 +135,7 @@ export function buildCapacity(d: State): Capacity {
   // classes and rooms alike, and each id only ever means one of them.
   const closedCount = new Map<Id, number>();
   for (const key in d.unavailable) {
-    const entityId = key.slice(0, key.indexOf('|'));
+    const entityId = key.slice(0, key.indexOf("|"));
     closedCount.set(entityId, (closedCount.get(entityId) ?? 0) + 1);
   }
 
@@ -136,22 +144,28 @@ export function buildCapacity(d: State): Capacity {
     const load = d.lessons
       .filter((l) => l.teacherId === x.id)
       .reduce((sum, l) => sum + l.weeklyHours, 0);
-    const level = levelOf(capacity, load);
+    const level = capacityLevel(capacity, load);
     const message =
-      level === 'impossible'
-        ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. {fazla} saat fazla.', {
-            kim: x.short,
-            acik: capacity,
-            yuk: load,
-            fazla: load - capacity,
-          })
-        : level === 'tight'
-          ? t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. Zor olacak.', {
+      level === "impossible"
+        ? t(
+            "{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. {fazla} saat fazla.",
+            {
               kim: x.short,
               acik: capacity,
               yuk: load,
-            })
-          : t('{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş.', {
+              fazla: load - capacity,
+            },
+          )
+        : level === "tight"
+          ? t(
+              "{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş. Zor olacak.",
+              {
+                kim: x.short,
+                acik: capacity,
+                yuk: load,
+              },
+            )
+          : t("{kim} {acik} saat müsait, {yuk} saat ders yüklenmiş.", {
               kim: x.short,
               acik: capacity,
               yuk: load,
@@ -169,14 +183,19 @@ export function buildCapacity(d: State): Capacity {
     const load = d.lessons
       .filter((x) => x.classId === c.id)
       .reduce((sum, x) => sum + x.weeklyHours, 0);
-    const level = levelOf(capacity, load);
+    const level = capacityLevel(capacity, load);
     const message =
-      level === 'impossible'
+      level === "impossible"
         ? t(
-            '{sinif} sınıfına {yuk} saat ders yüklenmiş ama haftada {acik} saati açık. {fazla} saat fazla.',
-            { sinif: c.name, yuk: load, acik: capacity, fazla: load - capacity },
+            "{sinif} sınıfına {yuk} saat ders yüklenmiş ama haftada {acik} saati açık. {fazla} saat fazla.",
+            {
+              sinif: c.name,
+              yuk: load,
+              acik: capacity,
+              fazla: load - capacity,
+            },
           )
-        : t('{sinif} sınıfı: açık olan {acik} saatin {yuk} saati dolu.', {
+        : t("{sinif} sınıfı: açık olan {acik} saatin {yuk} saati dolu.", {
             sinif: c.name,
             acik: capacity,
             yuk: load,
@@ -193,12 +212,12 @@ export function buildCapacity(d: State): Capacity {
     const load = d.lessons
       .filter((x) => classIds.has(x.classId))
       .reduce((sum, x) => sum + x.weeklyHours, 0);
-    const level = levelOf(capacity, load);
-    const names = sharing.map((c) => c.name).join(', ');
+    const level = capacityLevel(capacity, load);
+    const names = sharing.map((c) => c.name).join(", ");
     const message =
-      level === 'impossible'
+      level === "impossible"
         ? t(
-            '{derslik} dersliğini {n} sınıf paylaşıyor ({hangileri}) ve toplam {yuk} saat ders var. Haftada {acik} saati açık, {fazla} saat fazla.',
+            "{derslik} dersliğini {n} sınıf paylaşıyor ({hangileri}) ve toplam {yuk} saat ders var. Haftada {acik} saati açık, {fazla} saat fazla.",
             {
               derslik: r.name,
               n: sharing.length,
@@ -208,12 +227,15 @@ export function buildCapacity(d: State): Capacity {
               fazla: load - capacity,
             },
           )
-        : t('{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.', {
-            derslik: r.name,
-            hangileri: names || t('sınıf yok'),
-            acik: capacity,
-            yuk: load,
-          });
+        : t(
+            "{derslik} dersliği ({hangileri}): açık olan {acik} saatin {yuk} saati dolu.",
+            {
+              derslik: r.name,
+              hangileri: names || t("sınıf yok"),
+              acik: capacity,
+              yuk: load,
+            },
+          );
     return { id: r.id, name: r.name, capacity, load, level, message };
   });
 
@@ -238,10 +260,13 @@ export function buildReport(d: State): Report {
       lessonId: lesson.id,
       name: lessonName(ix, lesson.id),
       missing,
-      message: t('{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}', {
-        n: missing,
-        sebep: summary.reason,
-      }),
+      message: t(
+        "{n} saati yerleşmemiş ve koyacak yer yok. Örnek sebep: {sebep}",
+        {
+          n: missing,
+          sebep: summary.reason,
+        },
+      ),
     });
   }
 
@@ -250,7 +275,7 @@ export function buildReport(d: State): Report {
   const hasProblem =
     unplaceable.length > 0 ||
     violations.length > 0 ||
-    [...teachers, ...classes, ...rooms].some((x) => x.level !== 'ok');
+    [...teachers, ...classes, ...rooms].some((x) => x.level !== "ok");
 
   return { teachers, classes, rooms, unplaceable, violations, hasProblem };
 }
@@ -303,7 +328,7 @@ export function health(d: State): Health {
   let blocked = 0;
   let warnings = 0;
   for (const v of report.violations) {
-    if (v.level === 'block') blocked++;
+    if (v.level === "block") blocked++;
     else warnings++;
   }
   // Capacity that cannot hold its load is a warning even when nothing has been
@@ -311,32 +336,35 @@ export function health(d: State): Health {
   // `Level` here is the capacity ladder: 'impossible' means the load cannot
   // fit at all, 'tight' means it barely does. Only the first is a problem.
   for (const row of [...report.teachers, ...report.classes, ...report.rooms]) {
-    if (row.level === 'impossible') warnings++;
+    if (row.level === "impossible") warnings++;
   }
 
   let pending = 0;
   for (const lesson of d.lessons) {
-    pending += Math.max(0, lesson.weeklyHours - (ix.placedHours.get(lesson.id) ?? 0));
+    pending += Math.max(
+      0,
+      lesson.weeklyHours - (ix.placedHours.get(lesson.id) ?? 0),
+    );
   }
 
   const stranded = closedConflicts(d, ix).length;
 
   const level: Level =
     blocked > 0 || stranded > 0 || report.unplaceable.length > 0
-      ? 'impossible'
+      ? "impossible"
       : warnings > 0
-        ? 'tight'
-        : 'ok';
+        ? "tight"
+        : "ok";
 
   // The sentence names the loudest thing and counts it. "Sorun var" would
   // send somebody to Kontrol to find out what; this tells them before they go.
   const parts: string[] = [];
-  if (blocked > 0) parts.push(t('{n} kural ihlali', { n: blocked }));
-  if (stranded > 0) parts.push(t('{n} ders kapalı saatte', { n: stranded }));
+  if (blocked > 0) parts.push(t("{n} kural ihlali", { n: blocked }));
+  if (stranded > 0) parts.push(t("{n} ders kapalı saatte", { n: stranded }));
   if (report.unplaceable.length > 0)
-    parts.push(t('{n} ders sığmıyor', { n: report.unplaceable.length }));
-  if (warnings > 0) parts.push(t('{n} uyarı', { n: warnings }));
-  if (pending > 0) parts.push(t('{n} saat havuzda', { n: pending }));
+    parts.push(t("{n} ders sığmıyor", { n: report.unplaceable.length }));
+  if (warnings > 0) parts.push(t("{n} uyarı", { n: warnings }));
+  if (pending > 0) parts.push(t("{n} saat havuzda", { n: pending }));
 
   // An empty project is not "fine", it is NOT STARTED — and saying "Sorun yok"
   // to somebody who has just opened the program for the first time is the chip
@@ -351,9 +379,9 @@ export function health(d: State): Health {
     problems: stranded + report.violations.length + report.unplaceable.length,
     level,
     message: empty
-      ? t('Henüz ders girilmedi')
+      ? t("Henüz ders girilmedi")
       : parts.length === 0
-        ? t('Sorun yok')
-        : parts.join(' · '),
+        ? t("Sorun yok")
+        : parts.join(" · "),
   };
 }

@@ -2159,12 +2159,9 @@ table.grid tbody td.unavailable {
      over a pastel must not turn with the theme (pitfall 15). */
   color: var(--on-color);
   cursor: pointer;
-  /* FADED, NOT HIDDEN, and that is the user's own answer ("hep görünsün +
-     şeffaf"). A control that appears on hover is a control the reader this
-     tool is built for never finds — and this is the action they asked for by
-     name. Faded, it stays discoverable without turning 400 cells into 400
-     symbols. */
-  opacity: .38;
+  /* Hidden at rest, fully opaque when aimed at. A pinned card remains visible
+     through the aria-pressed rule below so the lock state never disappears. */
+  opacity: 0;
   transition:
     opacity var(--dur-fast) var(--ease),
     background var(--dur-fast) var(--ease);
@@ -3495,13 +3492,16 @@ table.stat tbody tr:hover {
      paragraph is longer than the rail (Öğretmenler, Dersler) are boxed by
      their own text and give back only the padding. The next lever there is the
      sentence, not the geometry. */
-  grid-template-rows: auto minmax(3.25rem, auto) auto 1fr;
+  grid-template-rows: minmax(3rem, auto) minmax(3.25rem, auto) auto 1fr;
   min-height: 13rem;
   padding: var(--space-5);
 }
 
 .add-panel-head {
-  min-height: 2rem;
+  /* Reserve the same rail even when this panel has no heading action. The
+     paste button is the tallest common occupant; without this floor Branşlar
+     pulled its description and form four pixels upward. */
+  min-height: 3rem;
 }
 
 .add-panel-description > .hint {
@@ -4161,11 +4161,6 @@ table.availability tbody td {
    to click and no cross to read, and growing it would cost a row per day for
    nothing. It keeps the height the paint grid had before 2026-08-30, and the
    selector (0,2,3) is what lets it. */
-table.availability.heat tbody th,
-table.availability.heat tbody td {
-  height: 3rem;
-}
-
 table.availability thead th {
   line-height: var(--lh-tight);
   font-weight: 600;
@@ -5358,16 +5353,23 @@ table.availability.heat td.closed {
 /* The box inside carries no chrome of its own: the wrapper IS the control, so
    the icon and the clear button sit inside the same recess rather than beside
    a second one. */
-.search-box {
+input.search-box {
   width: var(--w-col-2xl);
   padding: var(--space-2) 0;
   border: none;
+  border-radius: 0;
   background: none;
   color: var(--text);
+  box-shadow: none;
 }
 
-.search-box:focus {
+input.search-box:hover:not(:disabled),
+input.search-box:focus,
+input.search-box:focus-visible {
+  border: none;
   outline: none;
+  box-shadow: none;
+  position: static;
 }
 
 .search-clear {
@@ -5441,7 +5443,7 @@ table.availability.heat td.closed {
 }
 
 /* The sort picker sizes itself from its own longest option, not from the
-   column ladder: its labels are sentences ("Ders yüküne göre (çok → az)") and
+   column ladder: its labels are sentences ("Ders yüküne göre") and
    a box that clips them hides which sort is active. */
 .sort-pick {
   width: auto;

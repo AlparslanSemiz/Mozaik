@@ -24,28 +24,29 @@
  */
 export function fold(text: string): string {
   return text
-    .toLocaleLowerCase('tr')
-    .replace(/ı/g, 'i')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ş/g, 's')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c');
+    .toLocaleLowerCase("tr")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c");
 }
 
 /** Turkish alphabetical order: ç after c, ğ after g, ı before i, ş after s. */
 export function compareTr(a: string, b: string): number {
-  return a.localeCompare(b, 'tr');
+  return a.localeCompare(b, "tr");
 }
 
 /** A number, then a name as the tie-break — the shape most of these take. */
 export function byNumberThen<T>(
   value: (x: T) => number,
   name: (x: T) => string,
-  direction: 'asc' | 'desc' = 'desc',
+  direction: "asc" | "desc" = "desc",
 ): (a: T, b: T) => number {
   return (a, b) => {
-    const diff = direction === 'desc' ? value(b) - value(a) : value(a) - value(b);
+    const diff =
+      direction === "desc" ? value(b) - value(a) : value(a) - value(b);
     return diff !== 0 ? diff : compareTr(name(a), name(b));
   };
 }
@@ -59,6 +60,8 @@ export interface Sorter<T> {
 export interface Facet<T> {
   /** Which chip row this is, and the key the choice is stored under. */
   id: string;
+  /** Keep the axis visible even when the current scope has only one value. */
+  always?: boolean;
   /**
    * The group(s) this row belongs to, or '' / [] for "belongs to no group".
    *
@@ -88,7 +91,9 @@ export interface Facet<T> {
 /** One facet's answer for one row, always as a list and never with blanks. */
 function groupsOf<T>(facet: Facet<T>, item: T): string[] {
   const answer = facet.of(item);
-  return (typeof answer === 'string' ? [answer] : answer).filter((x) => x !== '');
+  return (typeof answer === "string" ? [answer] : answer).filter(
+    (x) => x !== "",
+  );
 }
 
 export interface ListConfig<T> {
@@ -124,13 +129,18 @@ export interface ListQuery {
   facets: Record<string, string>;
 }
 
-export const EMPTY_QUERY: ListQuery = { text: '', sortId: '', desc: false, facets: {} };
+export const EMPTY_QUERY: ListQuery = {
+  text: "",
+  sortId: "",
+  desc: false,
+  facets: {},
+};
 
 /** Is anything narrowing the list right now? */
 export function isFiltering(query: ListQuery): boolean {
   return (
-    query.text.trim() !== '' ||
-    Object.values(query.facets).some((value) => value !== '')
+    query.text.trim() !== "" ||
+    Object.values(query.facets).some((value) => value !== "")
   );
 }
 
@@ -143,7 +153,7 @@ export function isFiltering(query: ListQuery): boolean {
  * one up" means when two thirds of the list is hidden, the handle goes quiet.
  */
 export function canReorder(query: ListQuery): boolean {
-  return query.sortId === '' && !isFiltering(query);
+  return query.sortId === "" && !isFiltering(query);
 }
 
 /**
@@ -154,19 +164,23 @@ export function canReorder(query: ListQuery): boolean {
  * the facet counts below are taken from the SEARCHED set, so that a chip
  * saying "Matematik 3" while the search shows one row cannot happen.
  */
-export function applyList<T>(items: T[], query: ListQuery, cfg: ListConfig<T>): T[] {
+export function applyList<T>(
+  items: T[],
+  query: ListQuery,
+  cfg: ListConfig<T>,
+): T[] {
   let rows = items;
 
   // Every chosen facet narrows: picking "Matematik" and "Kadın" asks for the
   // rows that are both, not the rows that are either.
   for (const facet of cfg.facets ?? []) {
-    const want = query.facets[facet.id] ?? '';
-    if (want === '') continue;
+    const want = query.facets[facet.id] ?? "";
+    if (want === "") continue;
     rows = rows.filter((x) => groupsOf(facet, x).includes(want));
   }
 
   const needle = fold(query.text.trim());
-  if (needle !== '') {
+  if (needle !== "") {
     // Every word has to appear somewhere, in any order: "mat mehmet" finds the
     // maths teacher called Mehmet without caring which column each word is in.
     const words = needle.split(/\s+/);
@@ -210,7 +224,7 @@ export function facetCounts<T>(
 ): FacetCount[] {
   const facet = (cfg.facets ?? []).find((f) => f.id === facetId);
   if (facet === undefined) return [];
-  const others = { ...query.facets, [facetId]: '' };
+  const others = { ...query.facets, [facetId]: "" };
   const searched = applyList(items, { ...query, facets: others }, cfg);
   const counts = new Map<string, number>();
   for (const x of searched) {
@@ -226,5 +240,7 @@ export function facetCounts<T>(
   const rank = facet.order ?? (() => 0);
   return [...counts.entries()]
     .map(([value, count]) => ({ value, count }))
-    .sort((a, b) => rank(a.value) - rank(b.value) || compareTr(a.value, b.value));
+    .sort(
+      (a, b) => rank(a.value) - rank(b.value) || compareTr(a.value, b.value),
+    );
 }

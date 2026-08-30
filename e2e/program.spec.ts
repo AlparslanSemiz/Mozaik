@@ -1,11 +1,23 @@
 // The Program tab: the grid, the pool, dragging, moving and removing.
 
-import { type Page } from '@playwright/test';
-import { expect, test } from './kapan';
-import { openWithSample, openSettings, startDrag, visibleCells, dragAndDrop, loadWorld, hover, settledMotion, openGridMenu } from './helpers';
+import { type Page } from "@playwright/test";
+import { expect, test } from "./kapan";
+import {
+  answerDialog,
+  mainList,
+  openSetup,
+  openWithSample,
+  openSettings,
+  startDrag,
+  visibleCells,
+  dragAndDrop,
+  loadWorld,
+  hover,
+  settledMotion,
+  openGridMenu,
+} from "./helpers";
 
-test.describe('2. Sürükle-bırak', () => {
-
+test.describe("2. Sürükle-bırak", () => {
   // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
   //  çekmecenin altına kaçıyorlar."
   //
@@ -17,15 +29,17 @@ test.describe('2. Sürükle-bırak', () => {
   //
   // The card is measured with its OUTLINE, not by its bounding box: the box was
   // never the part that disappeared.
-  test('havuzda hover eden kart çekmecenin dışına taşmıyor', async ({ page }) => {
+  test("havuzda hover eden kart çekmecenin dışına taşmıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    const card = page.locator('.pool-card').first();
+    const card = page.locator(".pool-card").first();
     await expect(card).toBeVisible();
     await card.hover();
 
     const m = await page.evaluate(() => {
-      const c = document.querySelector('.pool-card') as HTMLElement;
-      const list = document.querySelector('.pool-list') as HTMLElement;
+      const c = document.querySelector(".pool-card") as HTMLElement;
+      const list = document.querySelector(".pool-list") as HTMLElement;
       const style = getComputedStyle(c);
       const paintedTop =
         c.getBoundingClientRect().top -
@@ -33,35 +47,37 @@ test.describe('2. Sürükle-bırak', () => {
         (parseFloat(style.outlineOffset) || 0);
       return {
         outside: list.getBoundingClientRect().top - paintedTop,
-        lifted: style.transform !== 'none',
+        lifted: style.transform !== "none",
       };
     });
 
     // The lift itself has to still be happening, or this would pass on a card
     // that simply stopped moving — the reader liked the movement.
-    expect(m.lifted, 'kart artık hiç kalkmıyor').toBe(true);
+    expect(m.lifted, "kart artık hiç kalkmıyor").toBe(true);
     // 0.5px of tolerance and no more: that is sub-pixel rounding, not a gap.
-    expect(m.outside, `${m.outside.toFixed(2)}px dışarıda`).toBeLessThanOrEqual(0.5);
+    expect(m.outside, `${m.outside.toFixed(2)}px dışarıda`).toBeLessThanOrEqual(
+      0.5,
+    );
   });
-  test('hayalet kart oluşuyor ve imleci takip ediyor', async ({ page }) => {
+  test("hayalet kart oluşuyor ve imleci takip ediyor", async ({ page }) => {
     await openWithSample(page);
-    const card = page.locator('.pool-card').first();
+    const card = page.locator(".pool-card").first();
     const box = (await card.boundingBox())!;
 
     await page.mouse.move(box.x + 10, box.y + 10);
     await page.mouse.down();
-    await expect(page.locator('.ghost')).toHaveCount(1);
+    await expect(page.locator(".ghost")).toHaveCount(1);
 
     await page.mouse.move(600, 400, { steps: 5 });
-    const first = (await page.locator('.ghost').boundingBox())!;
+    const first = (await page.locator(".ghost").boundingBox())!;
     await page.mouse.move(800, 500, { steps: 5 });
-    const second = (await page.locator('.ghost').boundingBox())!;
+    const second = (await page.locator(".ghost").boundingBox())!;
     expect(second.x).toBeGreaterThan(first.x);
     expect(second.y).toBeGreaterThan(first.y);
 
     // The ghost must not hide the cell under the cursor (pointer-events: none)
     await page.mouse.up();
-    await expect(page.locator('.ghost')).toHaveCount(0);
+    await expect(page.locator(".ghost")).toHaveCount(0);
   });
 
   // THE GHOST IS AS WIDE AS WHAT IT WILL FILL.
@@ -72,7 +88,7 @@ test.describe('2. Sürükle-bırak', () => {
   // the tray (`[data-size='2']`) shrank the moment it was lifted. Same family
   // as the crosshair drift, same cause: the drawing did not learn what the
   // block logic already knew.
-  test('ikili bloğun hayaleti iki hücre geniş', async ({ page }) => {
+  test("ikili bloğun hayaleti iki hücre geniş", async ({ page }) => {
     await openWithSample(page);
 
     const measure = async (size: string) => {
@@ -80,25 +96,30 @@ test.describe('2. Sürükle-bırak', () => {
       const box = (await card.boundingBox())!;
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();
-      await expect(page.locator('.ghost')).toHaveCount(1);
+      await expect(page.locator(".ghost")).toHaveCount(1);
       await page.mouse.move(700, 400, { steps: 3 });
-      const w = await page.locator('.ghost').evaluate((el) => el.getBoundingClientRect().width);
-      await page.keyboard.press('Escape');
+      const w = await page
+        .locator(".ghost")
+        .evaluate((el) => el.getBoundingClientRect().width);
+      await page.keyboard.press("Escape");
       await page.mouse.up();
       return w;
     };
 
-    const single = await measure('1');
-    const double = await measure('2');
-    expect(single, 'tek saatlik hayalet ölçülemedi').toBeGreaterThan(0);
+    const single = await measure("1");
+    const double = await measure("2");
+    expect(single, "tek saatlik hayalet ölçülemedi").toBeGreaterThan(0);
     // Two cells and one cell, and the grid's own cell is what both are made of
     // — no pixel is written down here or in the stylesheet (pitfall 36).
-    expect(double / single, `tek ${single.toFixed(1)}px, ikili ${double.toFixed(1)}px`).toBeCloseTo(2, 1);
+    expect(
+      double / single,
+      `tek ${single.toFixed(1)}px, ikili ${double.toFixed(1)}px`,
+    ).toBeCloseTo(2, 1);
   });
 
-  test('geçerli hücre yeşil, ders bırakılınca yerleşiyor', async ({ page }) => {
+  test("geçerli hücre yeşil, ders bırakılınca yerleşiyor", async ({ page }) => {
     await openWithSample(page);
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await expect(page.locator("table.grid .card")).toHaveCount(0);
 
     const { day, hour, row } = await dragAndDrop(page);
 
@@ -107,10 +128,12 @@ test.describe('2. Sürükle-bırak', () => {
     const cell = page.locator(
       `tbody td[data-row="${row}"][data-day="${day}"][data-hour="${hour}"]`,
     );
-    await expect(cell.locator('.card')).toHaveCount(1);
+    await expect(cell.locator(".card")).toHaveCount(1);
   });
 
-  test('hedef satır ekran dışındaysa sürükleme başlayınca görünür oluyor', async ({ page }) => {
+  test("hedef satır ekran dışındaysa sürükleme başlayınca görünür oluyor", async ({
+    page,
+  }) => {
     // A SHORT screen, deliberately. 25 teachers now fit the 1080px monitor with
     // the pool docked to the right, so on the real viewport there is no row
     // below the fold to scroll to — and the condition this test exists for
@@ -118,7 +141,7 @@ test.describe('2. Sürükle-bırak', () => {
     // teachers, or a laptop, produces it on any screen.
     await page.setViewportSize({ width: 1920, height: 560 });
     await openWithSample(page);
-    const wrap = page.locator('.grid-wrap');
+    const wrap = page.locator(".grid-wrap");
 
     // The condition this test is about has to be FORCED, not hoped for.
     // It used to rely on the pool costing the grid 215px at the bottom of the
@@ -128,11 +151,16 @@ test.describe('2. Sürükle-bırak', () => {
     // exactly the free green of pitfalls 23 and 33. So: scroll the grid to the
     // bottom, then check that the row this card is aimed at really is out of
     // sight BEFORE the drag starts.
-    const aimedAt = (await page.locator('.pool-card').first().locator('.card-bottom').innerText())
-      .trim();
+    const aimedAt = (
+      await page
+        .locator(".pool-card")
+        .first()
+        .locator(".card-bottom")
+        .innerText()
+    ).trim();
     const targetRow = page
-      .locator('table.grid tbody tr')
-      .filter({ has: page.locator('.row-head', { hasText: aimedAt }) })
+      .locator("table.grid tbody tr")
+      .filter({ has: page.locator(".row-head", { hasText: aimedAt }) })
       .first();
 
     // Scroll AWAY from the row, whichever way that is: the first card in the
@@ -141,9 +169,12 @@ test.describe('2. Sürükle-bırak', () => {
     // half the time — and a precondition that only sometimes holds is a test
     // that only sometimes tests.
     await targetRow.evaluate((tr) => {
-      const scroller = tr.closest('.grid-wrap')!;
-      const middle = tr.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
-      scroller.scrollTo({ top: middle > scroller.clientHeight / 2 ? 0 : scroller.scrollHeight });
+      const scroller = tr.closest(".grid-wrap")!;
+      const middle =
+        tr.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+      scroller.scrollTo({
+        top: middle > scroller.clientHeight / 2 ? 0 : scroller.scrollHeight,
+      });
     });
     await page.waitForTimeout(100);
 
@@ -157,43 +188,49 @@ test.describe('2. Sürükle-bırak', () => {
     // This was the real bug the E2E suite caught: when the target row stayed
     // outside the fold the user could never reach it.
     await startDrag(page);
-    const row = (await page.locator('tr.target-row').boundingBox())!;
+    const row = (await page.locator("tr.target-row").boundingBox())!;
 
     expect(row.y).toBeGreaterThanOrEqual(box.y - 1);
     expect(row.y + row.height).toBeLessThanOrEqual(box.y + box.height + 1);
     await page.mouse.up();
   });
 
-  test('imleç sağ kenara gelince ızgara kendiliğinden kayıyor', async ({ page }) => {
+  test("imleç sağ kenara gelince ızgara kendiliğinden kayıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    const wrap = page.locator('.grid-wrap');
+    const wrap = page.locator(".grid-wrap");
     const box = (await wrap.boundingBox())!;
     expect(await wrap.evaluate((el) => el.scrollLeft)).toBe(0);
 
     await startDrag(page);
     // Approach the right edge and wait
-    await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2, { steps: 5 });
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2, {
+      steps: 5,
+    });
     await page.waitForTimeout(400);
 
     expect(await wrap.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('engelli hücre kırmızı olur ve üstte somut sebep yazar', async ({ page }) => {
+  test("engelli hücre kırmızı olur ve üstte somut sebep yazar", async ({
+    page,
+  }) => {
     await openWithSample(page);
 
     // Teachers are closed for a whole day, and that day may sit off the right
     // edge. Keep trying cards until one has a visible closed cell.
-    const cardCount = Math.min(await page.locator('.pool-card').count(), 10);
+    const cardCount = Math.min(await page.locator(".pool-card").count(), 10);
     let tried = false;
 
     for (let i = 0; i < cardCount && !tried; i++) {
       await startDrag(page, i);
-      const points = await visibleCells(page, 'tr.target-row td.unavailable');
+      const points = await visibleCells(page, "tr.target-row td.unavailable");
 
       if (points.length === 0) {
-        await page.keyboard.press('Escape');
+        await page.keyboard.press("Escape");
         await page.mouse.up();
         continue;
       }
@@ -202,20 +239,22 @@ test.describe('2. Sürükle-bırak', () => {
       await page.mouse.move(point.x, point.y, { steps: 3 });
       await page.waitForTimeout(80);
 
-      const closed = page.locator('tr.target-row td.unavailable').nth(point.index);
+      const closed = page
+        .locator("tr.target-row td.unavailable")
+        .nth(point.index);
       await expect(closed).toHaveClass(/drop-blocked/);
 
-      const reason = await page.locator('.reason-bar').textContent();
-      expect(reason).toContain('müsait değil');
+      const reason = await page.locator(".reason-bar").textContent();
+      expect(reason).toContain("müsait değil");
       // The message must be concrete, not an empty "there is a clash"
-      expect(reason).not.toContain('Çakışma var');
+      expect(reason).not.toContain("Çakışma var");
 
       await page.mouse.up();
-      await expect(page.locator('table.grid .card')).toHaveCount(0); // not dropped
+      await expect(page.locator("table.grid .card")).toHaveCount(0); // not dropped
       tried = true;
     }
 
-    expect(tried, 'görünür kapalı hücresi olan bir kart bulunamadı').toBe(true);
+    expect(tried, "görünür kapalı hücresi olan bir kart bulunamadı").toBe(true);
   });
 
   // A card no longer stands for a whole lesson: since v7 the tray holds ONE
@@ -223,32 +262,47 @@ test.describe('2. Sürükle-bırak', () => {
   // and the card itself says which it is. That makes the double findable
   // instead of hunted for — and the test can now also assert the other half,
   // that a single highlights exactly one cell.
-  test('2 saatlik blok sürüklenirken iki hücre birden vurgulanır', async ({ page }) => {
+  test("2 saatlik blok sürüklenirken iki hücre birden vurgulanır", async ({
+    page,
+  }) => {
     await openWithSample(page);
     const doubles = page.locator('.pool-card[data-size="2"]');
     const singles = page.locator('.pool-card[data-size="1"]');
-    expect(await doubles.count(), 'örnek okulda ikili blok yok').toBeGreaterThan(0);
-    expect(await singles.count(), 'örnek okulda tek saatlik blok yok').toBeGreaterThan(0);
+    expect(
+      await doubles.count(),
+      "örnek okulda ikili blok yok",
+    ).toBeGreaterThan(0);
+    expect(
+      await singles.count(),
+      "örnek okulda tek saatlik blok yok",
+    ).toBeGreaterThan(0);
     // Not in the card's TEXT since 2026-08-27 — "Programda 1 saat x5 veeya
     // 2 saat x3 gibi gözükmesin kartlarda güzel değil." What answers "which
     // block is this" on screen is now the width (`[data-size='2']` is twice
     // `[data-size='1']`, asserted below) and the tooltip, which is where a
     // number the eye does not need but a reader might still lives.
-    await expect(doubles.first()).toHaveAttribute('title', /2 saatlik blok/);
-    await expect(singles.first()).toHaveAttribute('title', /1 saatlik blok/);
+    await expect(doubles.first()).toHaveAttribute("title", /2 saatlik blok/);
+    await expect(singles.first()).toHaveAttribute("title", /1 saatlik blok/);
     const widths = await page.evaluate(() => {
       const one = document.querySelector('.pool-card[data-size="1"]')!;
       const two = document.querySelector('.pool-card[data-size="2"]')!;
-      return { one: one.getBoundingClientRect().width, two: two.getBoundingClientRect().width };
+      return {
+        one: one.getBoundingClientRect().width,
+        two: two.getBoundingClientRect().width,
+      };
     });
-    expect(widths.two, 'ikili blok tekliden geniş çizilmiyor').toBeGreaterThan(widths.one * 1.5);
+    expect(widths.two, "ikili blok tekliden geniş çizilmiyor").toBeGreaterThan(
+      widths.one * 1.5,
+    );
 
     // `startDrag` takes a position in the whole tray, so the double and the
     // single are found by their position among ALL the cards.
     const indexOf = (size: number) =>
       page.evaluate(
-        (n) => [...document.querySelectorAll('.pool-card')]
-          .findIndex((el) => el.getAttribute('data-size') === String(n)),
+        (n) =>
+          [...document.querySelectorAll(".pool-card")].findIndex(
+            (el) => el.getAttribute("data-size") === String(n),
+          ),
         size,
       );
 
@@ -256,18 +310,18 @@ test.describe('2. Sürükle-bırak', () => {
       await startDrag(page, await indexOf(size));
       // A cell the drag map already says yes to: hovering a refused one would
       // measure the refusal, not the block's length.
-      const ok = await visibleCells(page, 'tr.target-row td.can-ok');
+      const ok = await visibleCells(page, "tr.target-row td.can-ok");
       const spot = ok[0]!;
       await page.mouse.move(spot.x, spot.y, { steps: 3 });
       await page.waitForTimeout(60);
-      const n = await page.locator('td.drop-ok').count();
-      await page.keyboard.press('Escape');
+      const n = await page.locator("td.drop-ok").count();
+      await page.keyboard.press("Escape");
       await page.mouse.up();
       return n;
     };
 
-    expect(await litCells(2), 'ikili blok iki hücre yakmalı').toBe(2);
-    expect(await litCells(1), 'tek saatlik blok bir hücre yakmalı').toBe(1);
+    expect(await litCells(2), "ikili blok iki hücre yakmalı").toBe(2);
+    expect(await litCells(1), "tek saatlik blok bir hücre yakmalı").toBe(1);
   });
 
   // THE ROW'S ANSWER. Until this existed, the only cell the grid ever painted
@@ -275,58 +329,66 @@ test.describe('2. Sürükle-bırak', () => {
   // to was a question you answered by sweeping the mouse across 78 columns,
   // and everything else on screen said only which ROW. The verdicts were
   // already computed — all 84 of them, before the hand had moved a pixel.
-  test('sürükleme başlar başlamaz hedef satırın TAMAMI cevaplanıyor', async ({ page }) => {
+  test("sürükleme başlar başlamaz hedef satırın TAMAMI cevaplanıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await startDrag(page);
 
-    const cells = page.locator('tr.target-row td[data-day]');
+    const cells = page.locator("tr.target-row td[data-day]");
     const total = await cells.count();
-    expect(total, 'hedef satırda hücre yok') .toBeGreaterThan(40);
+    expect(total, "hedef satırda hücre yok").toBeGreaterThan(40);
 
-    const ok = await page.locator('tr.target-row td.can-ok').count();
-    const warn = await page.locator('tr.target-row td.can-warn').count();
-    const no = await page.locator('tr.target-row td.can-no').count();
+    const ok = await page.locator("tr.target-row td.can-ok").count();
+    const warn = await page.locator("tr.target-row td.can-warn").count();
+    const no = await page.locator("tr.target-row td.can-no").count();
 
     // Every cell is answered, and both answers actually occur — a preview that
     // painted the row one single colour would pass a count check and say
     // nothing (the vacuous-audit trap, pitfall 23).
-    expect(ok + warn + no, 'cevaplanmayan hücre var').toBe(total);
-    expect(ok, 'hiçbir hücre bırakılabilir değil').toBeGreaterThan(0);
-    expect(no, 'hiçbir hücre engelli değil').toBeGreaterThan(0);
+    expect(ok + warn + no, "cevaplanmayan hücre var").toBe(total);
+    expect(ok, "hiçbir hücre bırakılabilir değil").toBeGreaterThan(0);
+    expect(no, "hiçbir hücre engelli değil").toBeGreaterThan(0);
 
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('sürükleme bitince önizleme ızgarada kalmıyor', async ({ page }) => {
+  test("sürükleme bitince önizleme ızgarada kalmıyor", async ({ page }) => {
     await openWithSample(page);
     await startDrag(page);
-    expect(await page.locator('td.can-ok').count()).toBeGreaterThan(0);
+    expect(await page.locator("td.can-ok").count()).toBeGreaterThan(0);
 
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
 
     // React will not clean these up: the rows do re-render when the drag ends,
     // but their className PROP is unchanged, so the attribute is never touched.
-    await expect(page.locator('td.can-ok, td.can-warn, td.can-no')).toHaveCount(0);
+    await expect(page.locator("td.can-ok, td.can-warn, td.can-no")).toHaveCount(
+      0,
+    );
   });
 
-  test('imlecin altındaki hücre satırın zemininden AYRILIYOR', async ({ page }) => {
+  test("imlecin altındaki hücre satırın zemininden AYRILIYOR", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await startDrag(page);
 
-    const free = page.locator('tr.target-row td.can-ok').first();
+    const free = page.locator("tr.target-row td.can-ok").first();
     const box = await free.boundingBox();
     expect(box).not.toBeNull();
-    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, { steps: 3 });
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, {
+      steps: 3,
+    });
     await page.waitForTimeout(80);
 
     const strong = await page
-      .locator('td.drop-ok')
+      .locator("td.drop-ok")
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor);
     const weak = await page
-      .locator('td.can-ok:not(.drop-ok)')
+      .locator("td.can-ok:not(.drop-ok)")
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor);
 
@@ -335,11 +397,11 @@ test.describe('2. Sürükle-bırak', () => {
     // invisible and the first would be a lie about precision.
     expect(strong).not.toBe(weak);
 
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('kapalı saat önizlemenin altında kaybolmuyor', async ({ page }) => {
+  test("kapalı saat önizlemenin altında kaybolmuyor", async ({ page }) => {
     await openWithSample(page);
 
     // Pitfall 16 and 40, one layer up: a closed hour already says it cannot be
@@ -351,8 +413,10 @@ test.describe('2. Sürükle-bırak', () => {
     // decides a closed hour keeps its own ground — the same `:not(.unavailable)`
     // the crosshair uses two rules further down. Asserting the absence of the
     // class would pin the wrong half of that pair.
-    const closed = page.locator('tr.target-row td.unavailable').first();
-    const untouched = page.locator('tbody tr:not(.target-row) td.unavailable').first();
+    const closed = page.locator("tr.target-row td.unavailable").first();
+    const untouched = page
+      .locator("tbody tr:not(.target-row) td.unavailable")
+      .first();
     await startDrag(page);
     if ((await closed.count()) > 0 && (await untouched.count()) > 0) {
       const paint = (l: typeof closed) =>
@@ -362,25 +426,27 @@ test.describe('2. Sürükle-bırak', () => {
         });
       const inRow = await paint(closed);
       const outside = await paint(untouched);
-      expect(inRow.image, 'kapalı saatin taraması gitti').toContain('gradient');
-      expect(inRow.color, 'kapalı saat önizleme zemini aldı').toBe(outside.color);
+      expect(inRow.image, "kapalı saatin taraması gitti").toContain("gradient");
+      expect(inRow.color, "kapalı saat önizleme zemini aldı").toBe(
+        outside.color,
+      );
     }
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('Escape sürüklemeyi iptal eder', async ({ page }) => {
+  test("Escape sürüklemeyi iptal eder", async ({ page }) => {
     await openWithSample(page);
-    const box = (await page.locator('.pool-card').first().boundingBox())!;
+    const box = (await page.locator(".pool-card").first().boundingBox())!;
     await page.mouse.move(box.x + 10, box.y + 10);
     await page.mouse.down();
-    await expect(page.locator('.ghost')).toHaveCount(1);
+    await expect(page.locator(".ghost")).toHaveCount(1);
 
-    await page.keyboard.press('Escape');
-    await expect(page.locator('.ghost')).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".ghost")).toHaveCount(0);
 
     await page.mouse.up();
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await expect(page.locator("table.grid .card")).toHaveCount(0);
   });
 });
 
@@ -394,23 +460,25 @@ test.describe('2. Sürükle-bırak', () => {
 
 /** The <td> holding the first placed card. */
 function placedCell(page: Page) {
-  return page.locator('table.grid td:has(.card)').first();
+  return page.locator("table.grid td:has(.card)").first();
 }
 
-test.describe('3. Izgara — taşıma ve kaldırma', () => {
+test.describe("3. Izgara — taşıma ve kaldırma", () => {
   // Right click used to remove the block outright. It opens a MENU now, asked
   // for in one line: "programda derslere sağ tıklayınca seçenekler gelsin:
   // kaldır, dersi düzenle, dersi oraya sabitle".
-  test('sağ tık MENÜ açıyor, "Havuza kaldır" siliyor, Ctrl+Z geri getiriyor', async ({ page }) => {
+  test('sağ tık MENÜ açıyor, "Havuza kaldır" siliyor, Ctrl+Z geri getiriyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const cards = page.locator('table.grid .card');
+    const cards = page.locator("table.grid .card");
     const before = await cards.count();
     expect(before).toBeGreaterThan(0);
 
-    await cards.first().click({ button: 'right' });
-    const menu = page.locator('.menu');
+    await cards.first().click({ button: "right" });
+    const menu = page.locator(".menu");
     await expect(menu).toBeVisible();
     // THE WHOLE TOP LEVEL, written out rather than counted: this menu has now
     // been reshaped twice, and both times a bare count said "it changed"
@@ -418,64 +486,76 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // things behind it, the one-hour lock, and two doors — the locks that take
     // many hours, and putting a row or a day aside. Nothing that a hand reaches
     // for often is behind either door.
-    await expect(menu.getByRole('menuitem')).toHaveText([
+    await expect(menu.getByRole("menuitem")).toHaveText([
       /^Havuza kaldır/,
-      'Dersi düzenle',
-      'Öğretmeni düzenle',
-      'Sınıfı düzenle',
-      'Dersi buraya sabitle',
-      'Toplu sabitle',
-      'Geçici görünüm',
+      "Dersi düzenle",
+      "Öğretmeni düzenle",
+      "Sınıfı düzenle",
+      "Dersi buraya sabitle",
+      "Toplu sabitle",
+      "Geçici görünüm",
     ]);
 
-    await menu.getByRole('menuitem', { name: 'Havuza kaldır' }).click();
+    await menu.getByRole("menuitem", { name: "Havuza kaldır" }).click();
     await expect(cards).toHaveCount(0); // if it was a block, all of it went
 
-    await page.keyboard.press('Control+z');
+    await page.keyboard.press("Control+z");
     await expect(cards).toHaveCount(before);
   });
 
   // The item is not a lesson, so the menu has nothing to be about; the browser's
   // own menu must not appear either, because the page has taken the gesture.
-  test('BOŞ hücrede sağ tık hiçbir menü açmıyor', async ({ page }) => {
+  test("BOŞ hücrede sağ tık hiçbir menü açmıyor", async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
     const cancelled = await page.evaluate(() => {
-      const empty = document.querySelector('table.grid tbody td[data-day]:not(:has(.card))');
+      const empty = document.querySelector(
+        "table.grid tbody td[data-day]:not(:has(.card))",
+      );
       if (empty === null) return null;
-      const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+      const event = new MouseEvent("contextmenu", {
+        bubbles: true,
+        cancelable: true,
+      });
       empty.dispatchEvent(event);
       return event.defaultPrevented;
     });
     expect(cancelled).toBe(true);
-    await expect(page.locator('.menu')).toHaveCount(0);
+    await expect(page.locator(".menu")).toHaveCount(0);
   });
 
-  test('menü Escape ile kapanıyor ve ızgara çalışır kalıyor', async ({ page }) => {
+  test("menü Escape ile kapanıyor ve ızgara çalışır kalıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const cards = page.locator('table.grid .card');
+    const cards = page.locator("table.grid .card");
     const before = await cards.count();
-    await cards.first().click({ button: 'right' });
-    await expect(page.locator('.menu')).toBeVisible();
+    await cards.first().click({ button: "right" });
+    await expect(page.locator(".menu")).toBeVisible();
 
-    await page.keyboard.press('Escape');
-    await expect(page.locator('.menu')).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".menu")).toHaveCount(0);
     await expect(cards).toHaveCount(before);
   });
 
-  test('"Dersi düzenle" yerinde pencere açıyor, saat oradan değişiyor', async ({ page }) => {
+  test('"Dersi düzenle" yerinde pencere açıyor, saat oradan değişiyor', async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    await page.locator('table.grid .card').first().click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi düzenle' }).click();
+    await page.locator("table.grid .card").first().click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Dersi düzenle" })
+      .click();
 
-    const sheet = page.locator('.sheet');
+    const sheet = page.locator(".sheet");
     await expect(sheet).toBeVisible();
-    const hours = sheet.getByLabel('Haftalık saat');
+    const hours = sheet.getByLabel("Haftalık saat");
     const before = Number(await hours.inputValue());
     expect(before).toBeGreaterThan(0);
 
@@ -487,64 +567,152 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
 
     // ...and the Dersler tab agrees, which is the half that says it was written
     // to the program and not to the sheet.
-    await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: 'Dersler', exact: true }).click();
-    await expect(page.locator('table.list')).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Dersler", exact: true }).click();
+    await expect(page.locator("table.list")).toBeVisible();
   });
 
-  test('SOL tık silmiyor — ders yerinde kalıyor', async ({ page }) => {
+  test("ders düzenleme penceresi dersi başka öğretmene aktarabiliyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const cards = page.locator('table.grid .card');
+    await page.locator("table.grid .card").first().click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Dersi düzenle" })
+      .click();
+    const sheet = page.locator(".sheet");
+    const teacher = sheet.getByLabel("Öğretmen", { exact: true });
+    const before = await teacher.inputValue();
+    const next = await teacher
+      .locator("option")
+      .evaluateAll(
+        (options, current) =>
+          options
+            .find((option) => (option as HTMLOptionElement).value !== current)
+            ?.getAttribute("value"),
+        before,
+      );
+    expect(next).toBeTruthy();
+    await teacher.selectOption(next!);
+    await answerDialog(page);
+    await expect(teacher).toHaveValue(next!);
+    await expect(page.locator(".toast").last()).toContainText(
+      "öğretmenine geçti",
+    );
+  });
+
+  test("Program sekmesi aynı ızgarayı ve kaydırmayı korurken gizli değişikliği hazırlar", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const wrap = page.locator(".grid-wrap");
+    await wrap.evaluate((el) => {
+      el.scrollLeft = 600;
+      (window as unknown as { __keptGrid?: Element }).__keptGrid = el;
+    });
+    const before = await wrap.evaluate((el) => el.scrollLeft);
+    expect(before).toBeGreaterThan(0);
+
+    await openSetup(page, "Öğretmenler");
+    const first = mainList(page).locator("tbody tr").first();
+    const short = first.locator("input.text-sm").first();
+    await short.fill("ZZ");
+    await short.blur();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+
+    expect(
+      await wrap.evaluate(
+        (el) =>
+          (window as unknown as { __keptGrid?: Element }).__keptGrid === el,
+      ),
+    ).toBe(true);
+    expect(await wrap.evaluate((el) => el.scrollLeft)).toBe(before);
+    await expect(
+      page.locator("table.grid .row-head", { hasText: "ZZ" }),
+    ).toBeVisible();
+  });
+
+  test("sekme değişimi sürükleme hayaletini ve açık sağ-tık menüsünü temizliyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await startDrag(page);
+    await page.keyboard.press("Alt+5");
+    await expect(page.locator(".ghost")).toHaveCount(0);
+    await expect(page.locator("table.grid")).not.toHaveClass(/dragging/);
+    await expect(
+      page.locator(".drop-ok, .drop-warn, .drop-blocked"),
+    ).toHaveCount(0);
+    await page.mouse.up();
+
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await dragAndDrop(page);
+    await page.locator("table.grid .card").first().click({ button: "right" });
+    await expect(page.locator(".menu")).toBeVisible();
+    await page.keyboard.press("Alt+5");
+    await expect(page.locator(".menu")).not.toBeVisible();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await expect(page.locator(".menu")).toHaveCount(0);
+  });
+
+  test("SOL tık silmiyor — ders yerinde kalıyor", async ({ page }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const cards = page.locator("table.grid .card");
     const before = await cards.count();
 
     await cards.first().click(); // a plain left click, no movement
     await expect(cards).toHaveCount(before);
   });
 
-  test('odaklı kartta Delete kaldırıyor', async ({ page }) => {
+  test("odaklı kartta Delete kaldırıyor", async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const cards = page.locator('table.grid .card');
+    const cards = page.locator("table.grid .card");
     const before = await cards.count();
 
     await cards.first().focus();
-    await page.keyboard.press('Delete');
+    await page.keyboard.press("Delete");
     await expect(cards).toHaveCount(0);
 
-    await page.keyboard.press('Control+z');
+    await page.keyboard.press("Control+z");
     await expect(cards).toHaveCount(before);
   });
 
-  test('yerleşmiş ders sürüklenerek taşınıyor; havuz sayacı değişmiyor', async ({ page }) => {
+  test("yerleşmiş ders sürüklenerek taşınıyor; havuz sayacı değişmiyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const poolBefore = await page.locator('.pool-card').count();
-    const cards = page.locator('table.grid .card');
+    const poolBefore = await page.locator(".pool-card").count();
+    const cards = page.locator("table.grid .card");
     const blockSize = await cards.count();
 
     const from = placedCell(page);
-    const fromDay = await from.getAttribute('data-day');
-    const fromHour = await from.getAttribute('data-hour');
+    const fromDay = await from.getAttribute("data-day");
+    const fromHour = await from.getAttribute("data-hour");
     const box = (await from.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await expect(page.locator('tr.target-row')).toHaveCount(1);
+    await expect(page.locator("tr.target-row")).toHaveCount(1);
 
     // Find a green cell in the same row that is NOT where it already is.
-    const rowCells = page.locator('tr.target-row td');
+    const rowCells = page.locator("tr.target-row td");
     let landed: { day: string; hour: string } | null = null;
-    for (const point of await visibleCells(page, 'tr.target-row td')) {
+    for (const point of await visibleCells(page, "tr.target-row td")) {
       const cell = rowCells.nth(point.index);
-      const day = await cell.getAttribute('data-day');
-      const hour = await cell.getAttribute('data-hour');
+      const day = await cell.getAttribute("data-day");
+      const hour = await cell.getAttribute("data-hour");
       if (day === fromDay && hour === fromHour) continue;
       await page.mouse.move(point.x, point.y, { steps: 3 });
       await page.waitForTimeout(40);
-      if ((await cell.getAttribute('class'))?.includes('drop-ok') === true) {
+      if ((await cell.getAttribute("class"))?.includes("drop-ok") === true) {
         landed = { day: day!, hour: hour! };
         break;
       }
@@ -555,44 +723,53 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // It moved: same number of cards, at a different hour, and the pool is
     // untouched — a move must not look like a removal plus a placement.
     await expect(cards).toHaveCount(blockSize);
-    await expect(page.locator('.pool-card')).toHaveCount(poolBefore);
+    await expect(page.locator(".pool-card")).toHaveCount(poolBefore);
     const now = placedCell(page);
-    expect(await now.getAttribute('data-hour')).toBe(landed!.hour);
+    expect(await now.getAttribute("data-hour")).toBe(landed!.hour);
 
     // ONE undo step puts it back where it was, not into the pool.
-    await page.keyboard.press('Control+z');
+    await page.keyboard.press("Control+z");
     await expect(cards).toHaveCount(blockSize);
-    await expect(placedCell(page)).toHaveAttribute('data-hour', fromHour!);
+    await expect(placedCell(page)).toHaveAttribute("data-hour", fromHour!);
   });
 
-  test('kaynak hücrenin KENDİSİ yeşil — ders kendini engellemiyor', async ({ page }) => {
+  test("kaynak hücrenin KENDİSİ yeşil — ders kendini engellemiyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
     const from = placedCell(page);
-    const day = await from.getAttribute('data-day');
-    const hour = await from.getAttribute('data-hour');
+    const day = await from.getAttribute("data-day");
+    const hour = await from.getAttribute("data-hour");
     const box = (await from.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 + 2, box.y + box.height / 2, { steps: 2 });
+    await page.mouse.move(box.x + box.width / 2 + 2, box.y + box.height / 2, {
+      steps: 2,
+    });
     await page.waitForTimeout(120);
 
     // Its own cells are still occupied by itself; without lifting the source
     // block first, hard constraints 2 and 5 would paint this red.
-    const self = page.locator(`tr.target-row td[data-day="${day}"][data-hour="${hour}"]`);
+    const self = page.locator(
+      `tr.target-row td[data-day="${day}"][data-hour="${hour}"]`,
+    );
     await expect(self).toHaveClass(/drop-ok/);
 
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('ızgaradan kart alınınca ızgara zıplamıyor', async ({ page }) => {
+  test("ızgaradan kart alınınca ızgara zıplamıyor", async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const wrap = page.locator('.grid-wrap');
-    const before = await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop }));
+    const wrap = page.locator(".grid-wrap");
+    const before = await wrap.evaluate((el) => ({
+      x: el.scrollLeft,
+      y: el.scrollTop,
+    }));
 
     const box = (await placedCell(page).boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
@@ -602,45 +779,52 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     // The pool card path centres the target row on purpose. A block already on
     // the grid is already on that row, so centring would yank the grid out from
     // under the hand that just pressed it.
-    expect(await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop }))).toEqual(before);
+    expect(
+      await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop })),
+    ).toEqual(before);
 
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
   });
 
-  test('Escape ile taşıma iptal edilince ders yerinde kalıyor', async ({ page }) => {
+  test("Escape ile taşıma iptal edilince ders yerinde kalıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const cards = page.locator('table.grid .card');
+    const cards = page.locator("table.grid .card");
     const count = await cards.count();
-    const hour = await placedCell(page).getAttribute('data-hour');
+    const hour = await placedCell(page).getAttribute("data-hour");
 
     const box = (await placedCell(page).boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.move(box.x + 120, box.y, { steps: 4 });
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await page.mouse.up();
 
     await expect(cards).toHaveCount(count);
-    await expect(placedCell(page)).toHaveAttribute('data-hour', hour!);
+    await expect(placedCell(page)).toHaveAttribute("data-hour", hour!);
   });
 
-  test('sağa kaydırınca öğretmen sütunu sabit kalır', async ({ page }) => {
+  test("sağa kaydırınca öğretmen sütunu sabit kalır", async ({ page }) => {
     await openWithSample(page);
-    const head = page.locator('tbody .row-head').first();
+    const head = page.locator("tbody .row-head").first();
     const before = (await head.boundingBox())!;
 
     // All the way, not a fixed number of pixels: how far the grid CAN scroll
     // depends on the screen (788px at 1920x1080, 1342px at the old 1366x768),
     // and a constant larger than that silently becomes "scroll to the end"
     // anyway — it just stops saying so.
-    const room = await page.locator('.grid-wrap').evaluate((el) => {
+    const room = await page.locator(".grid-wrap").evaluate((el) => {
       el.scrollLeft = el.scrollWidth;
       return el.scrollWidth - el.clientWidth;
     });
-    expect(room, 'ızgara yatay kaymıyor, test bir şey ölçmüyor').toBeGreaterThan(200);
+    expect(
+      room,
+      "ızgara yatay kaymıyor, test bir şey ölçmüyor",
+    ).toBeGreaterThan(200);
     await page.waitForTimeout(120);
 
     const after = (await head.boundingBox())!;
@@ -648,16 +832,18 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     expect(after.x).toBeGreaterThanOrEqual(0); // still on screen
   });
 
-  test('sınıf görünümüne geçilir ve sürükleme orada da çalışır', async ({ page }) => {
+  test("sınıf görünümüne geçilir ve sürükleme orada da çalışır", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
-    await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
+    await expect(page.locator("table.grid tbody tr")).toHaveCount(20);
 
     await dragAndDrop(page);
-    await expect(page.locator('table.grid .card')).not.toHaveCount(0);
+    await expect(page.locator("table.grid .card")).not.toHaveCount(0);
   });
 
-  test('1920x1080 ekranda sayfa dikey taşmıyor', async ({ page }) => {
+  test("1920x1080 ekranda sayfa dikey taşmıyor", async ({ page }) => {
     await openWithSample(page);
     const overflow = await page.evaluate(
       () => document.body.scrollHeight - document.body.clientHeight,
@@ -666,28 +852,30 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
   });
 });
 
-test.describe('13. Görünüm simgeleri', () => {
-  test('seçili olan basılı, diğeri değil; tıklayınca satırlar dönüyor', async ({ page }) => {
+test.describe("13. Görünüm simgeleri", () => {
+  test("seçili olan basılı, diğeri değil; tıklayınca satırlar dönüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
 
-    const teacher = page.getByRole('button', { name: 'Öğretmen görünümü' });
-    const group = page.getByRole('button', { name: 'Sınıf görünümü' });
+    const teacher = page.getByRole("button", { name: "Öğretmen görünümü" });
+    const group = page.getByRole("button", { name: "Sınıf görünümü" });
 
     // The old single button said what the next click does, never where you are
-    await expect(teacher).toHaveAttribute('aria-pressed', 'true');
-    await expect(group).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.locator('table.grid .corner')).toHaveText('Öğretmen');
-    await expect(page.locator('table.grid tbody tr')).toHaveCount(25);
+    await expect(teacher).toHaveAttribute("aria-pressed", "true");
+    await expect(group).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("table.grid .corner")).toHaveText("Öğretmen");
+    await expect(page.locator("table.grid tbody tr")).toHaveCount(25);
 
     await group.click();
-    await expect(group).toHaveAttribute('aria-pressed', 'true');
-    await expect(teacher).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.locator('table.grid .corner')).toHaveText('Sınıf');
-    await expect(page.locator('table.grid tbody tr')).toHaveCount(20);
+    await expect(group).toHaveAttribute("aria-pressed", "true");
+    await expect(teacher).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("table.grid .corner")).toHaveText("Sınıf");
+    await expect(page.locator("table.grid tbody tr")).toHaveCount(20);
 
     // The sentence stays — an icon alone is a guess the first time — but it
     // moved into the reason bar when the view switch went up into the ribbon.
-    await expect(page.locator('.reason-bar')).toContainText('Satırlar sınıf');
+    await expect(page.locator(".reason-bar")).toContainText("Satırlar sınıf");
   });
 });
 
@@ -699,19 +887,21 @@ test.describe('13. Görünüm simgeleri', () => {
 // belonging to one visible row were scattered, and the ghost that lifted off a
 // card said something the card did not.
 
-test.describe('18. Havuz görünümü takip ediyor', () => {
-  test('sınıf görünümünde kartın üst satırı öğretmen oluyor', async ({ page }) => {
+test.describe("18. Havuz görünümü takip ediyor", () => {
+  test("sınıf görünümünde kartın üst satırı öğretmen oluyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
 
-    const first = page.locator('.pool-card').first();
-    const teacherViewTop = await first.locator('.card-top').innerText();
-    const teacherViewBottom = await first.locator('.card-bottom').innerText();
+    const first = page.locator(".pool-card").first();
+    const teacherViewTop = await first.locator(".card-top").innerText();
+    const teacherViewBottom = await first.locator(".card-bottom").innerText();
 
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
 
-    const cards = page.locator('.pool-card');
-    const tops = await cards.locator('.card-top').allInnerTexts();
-    const bottoms = await cards.locator('.card-bottom').allInnerTexts();
+    const cards = page.locator(".pool-card");
+    const tops = await cards.locator(".card-top").allInnerTexts();
+    const bottoms = await cards.locator(".card-bottom").allInnerTexts();
 
     // Class names in the sample are numbers ("510"); teacher short forms are not.
     expect(teacherViewTop).toMatch(/^\d+$/);
@@ -720,11 +910,11 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     expect(bottoms.every((x) => /^\d+$/.test(x))).toBe(true);
   });
 
-  test('kartlar gidecekleri satıra göre gruplanıyor', async ({ page }) => {
+  test("kartlar gidecekleri satıra göre gruplanıyor", async ({ page }) => {
     await openWithSample(page);
 
     const bottoms = async () =>
-      page.locator('.pool-card .card-bottom').allInnerTexts();
+      page.locator(".pool-card .card-bottom").allInnerTexts();
 
     // The bottom line names the target row, and equal values must be adjacent:
     // otherwise one row's cards are spread across the whole pool.
@@ -734,12 +924,12 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // stand together" is a promise the grid order makes. Sorted by block
     // length it is deliberately false — the heading over each run says which
     // promise is in force.
-    for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
-      await page.getByRole('button', { name: view }).click();
+    for (const view of ["Öğretmen görünümü", "Sınıf görünümü"]) {
+      await page.getByRole("button", { name: view }).click();
       const list = await bottoms();
       expect(list.length).toBeGreaterThan(10);
       const seen = new Set<string>();
-      let previous = '';
+      let previous = "";
       for (const value of list) {
         if (value !== previous) {
           expect(seen.has(value), `${value} havuzda dağılmış`).toBe(false);
@@ -752,31 +942,37 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
 
   // 88. THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
   // olsun, hatta neye göre filtrelensin sıralansın ayarı bile olabilir."
-  test('havuz beş türlü sıralanıyor, ve her sıra kendi BAŞLIKLARINI çiziyor', async ({ page }) => {
+  test("havuz beş türlü sıralanıyor, ve her sıra kendi BAŞLIKLARINI çiziyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
 
-    const groups = page.locator('.pool-group');
-    const labels = () => page.locator('.pool-group-label').allInnerTexts();
-    const cards = page.locator('.pool-card');
+    const groups = page.locator(".pool-group");
+    const labels = () => page.locator(".pool-group-label").allInnerTexts();
+    const cards = page.locator(".pool-card");
     const before = await cards.count();
     expect(before).toBeGreaterThan(10);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
     expect(byRow.length).toBeGreaterThan(5);
-    expect(byRow[0]).toContain('MÇ');
+    expect(byRow[0]).toContain("MÇ");
 
     // ...and the setting SHOWS: choosing branches makes the headings branches.
-    await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption('subject');
+    await page
+      .getByRole("combobox", { name: "Havuz sıralaması" })
+      .selectOption("subject");
     const bySubject = await labels();
-    expect(bySubject.join(' ')).toContain('Matematik');
+    expect(bySubject.join(" ")).toContain("Matematik");
     expect(bySubject).not.toEqual(byRow);
 
     // Two groups when the question is block length, and not one card lost on
     // the way: a re-order that dropped or duplicated a block would be the one
     // thing this tray must never do.
-    await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption('size');
+    await page
+      .getByRole("combobox", { name: "Havuz sıralaması" })
+      .selectOption("size");
     await expect(groups).toHaveCount(2);
     await expect(cards).toHaveCount(before);
 
@@ -798,35 +994,47 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // they all count `.pool-card`, which does not change.
     // Measured on the honest build: 109 distinct signatures, 109 stacks.
     const signatures = async () =>
-      page.locator('.pool-stack').evaluateAll((els) =>
+      page.locator(".pool-stack").evaluateAll((els) =>
         els.map((el) => {
-          const card = el.querySelector('.pool-card')!;
-          const top = card.querySelector('.card-top')?.textContent ?? '';
-          const bottom = card.querySelector('.card-bottom')?.textContent ?? '';
-          return `${top}|${bottom}|${card.getAttribute('data-size')}`;
+          const card = el.querySelector(".pool-card")!;
+          const top = card.querySelector(".card-top")?.textContent ?? "";
+          const bottom = card.querySelector(".card-bottom")?.textContent ?? "";
+          return `${top}|${bottom}|${card.getAttribute("data-size")}`;
         }),
       );
-    for (const sort of ['row', 'name', 'subject', 'size', 'left']) {
-      await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption(sort);
+    for (const sort of ["row", "name", "subject", "size", "left"]) {
+      await page
+        .getByRole("combobox", { name: "Havuz sıralaması" })
+        .selectOption(sort);
       await expect(cards).toHaveCount(before);
       const decks = await signatures();
-      expect(new Set(decks).size, `${sort}: aynı dersin destesi ikiye bölünmüş`).toBe(decks.length);
+      expect(
+        new Set(decks).size,
+        `${sort}: aynı dersin destesi ikiye bölünmüş`,
+      ).toBe(decks.length);
 
       const counted = await page
-        .locator('.pool-group-count')
-        .evaluateAll((els) => els.reduce((sum, el) => sum + Number(el.textContent ?? 0), 0));
-      expect(counted, `${sort}: başlıkların saydığı blok sayısı ekrandakiyle tutmuyor`).toBe(before);
+        .locator(".pool-group-count")
+        .evaluateAll((els) =>
+          els.reduce((sum, el) => sum + Number(el.textContent ?? 0), 0),
+        );
+      expect(
+        counted,
+        `${sort}: başlıkların saydığı blok sayısı ekrandakiyle tutmuyor`,
+      ).toBe(before);
     }
   });
 
-  test('havuz branşa göre SÜZÜLÜYOR ve neyi sakladığını söylüyor', async ({ page }) => {
+  test("havuz branşa göre SÜZÜLÜYOR ve neyi sakladığını söylüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
 
-    const cards = page.locator('.pool-card');
+    const cards = page.locator(".pool-card");
     const all = await cards.count();
 
-    const filter = page.getByRole('combobox', { name: 'Havuz süzgeci' });
+    const filter = page.getByRole("combobox", { name: "Havuz süzgeci" });
     await filter.selectOption({ index: 1 });
     const shown = await cards.count();
     expect(shown).toBeGreaterThan(0);
@@ -834,39 +1042,43 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
 
     // A tray that quietly showed a twelfth of what is left would make the head
     // count a lie, so the head says what it is holding back.
-    await expect(page.locator('.pool-sub')).toContainText('süzgeç dışında');
-    await expect(page.locator('.pool-count strong')).toContainText(`${shown} blok`);
+    await expect(page.locator(".pool-sub")).toContainText("süzgeç dışında");
+    await expect(page.locator(".pool-count strong")).toContainText(
+      `${shown} blok`,
+    );
 
-    await filter.selectOption('');
+    await filter.selectOption("");
     await expect(cards).toHaveCount(all);
   });
 
-  test('kart ile hayalet aynı şeyi söylüyor', async ({ page }) => {
+  test("kart ile hayalet aynı şeyi söylüyor", async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
 
-    const card = page.locator('.pool-card').first();
-    const cardTop = await card.locator('.card-top').innerText();
+    const card = page.locator(".pool-card").first();
+    const cardTop = await card.locator(".card-top").innerText();
 
     const box = (await card.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
     await page.mouse.move(box.x + 60, box.y - 40, { steps: 4 });
 
-    const ghostTop = await page.locator('.ghost .card-top').innerText();
+    const ghostTop = await page.locator(".ghost .card-top").innerText();
     expect(ghostTop).toBe(cardTop);
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
   });
 
-  test('kart rengi iki görünümde de öğretmen rengi', async ({ page }) => {
+  test("kart rengi iki görünümde de öğretmen rengi", async ({ page }) => {
     await openWithSample(page);
     const read = () =>
       page
-        .locator('.pool-card')
-        .evaluateAll((cards) => cards.map((el) => getComputedStyle(el).backgroundColor));
+        .locator(".pool-card")
+        .evaluateAll((cards) =>
+          cards.map((el) => getComputedStyle(el).backgroundColor),
+        );
 
     const inTeacherView = await read();
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
     const inClassView = await read();
     // Same set of colours; only the order and the labels change.
     expect(new Set(inClassView)).toEqual(new Set(inTeacherView));
@@ -879,25 +1091,41 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
   // side and said `0/6` on every one of them. What this locks is the pair of
   // facts that made it safe to draw them as a deck: the pile is one FLOW item,
   // and a `.pool-card` still means one waiting block — to the head count, to
-  // `pendingBlocks()` and to the forty locators that ask how much is left.
-  test('aynı dersin aynı boydaki blokları TEK deste, kartta rozet yok', async ({ page }) => {
+  // `pendingBlocks()` and to the locators that ask how much is left. Only the
+  // reachable top card carries text; the decorative depth cards are cheap.
+  test("aynı dersin aynı boydaki blokları TEK deste, kartta rozet yok", async ({
+    page,
+  }) => {
     await openWithSample(page);
 
-    const cards = await page.locator('.pool-card').count();
-    const stacks = await page.locator('.pool-stack').count();
-    expect(cards, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
-    expect(stacks, 'hiçbir kart yığılmamış').toBeLessThan(cards);
-    await expect(page.locator('.pool-count strong')).toContainText(`${cards} blok`);
+    const cards = await page.locator(".pool-card").count();
+    const stacks = await page.locator(".pool-stack").count();
+    expect(cards, "örnek okulda bekleyen blok yok").toBeGreaterThan(0);
+    expect(stacks, "hiçbir kart yığılmamış").toBeLessThan(cards);
+    await expect(page.locator(".pool-count strong")).toContainText(
+      `${cards} blok`,
+    );
 
     // Every card lives in exactly one pile, and a pile is one lesson at one
     // block length — the two things that make its cards interchangeable.
-    const piles = await page.locator('.pool-stack').evaluateAll((nodes) =>
+    const piles = await page.locator(".pool-stack").evaluateAll((nodes) =>
       nodes.map((el) => ({
-        count: Number(el.getAttribute('data-count')),
-        cards: el.querySelectorAll('.pool-card').length,
-        sizes: new Set([...el.querySelectorAll('.pool-card')].map((c) => c.getAttribute('data-size'))).size,
-        tops: new Set([...el.querySelectorAll('.card-top')].map((c) => c.textContent)).size,
-        counters: el.querySelectorAll('.pool-card:not([aria-hidden]) .counter').length,
+        count: Number(el.getAttribute("data-count")),
+        cards: el.querySelectorAll(".pool-card").length,
+        sizes: new Set(
+          [...el.querySelectorAll(".pool-card")].map((c) =>
+            c.getAttribute("data-size"),
+          ),
+        ).size,
+        tops: new Set(
+          [...el.querySelectorAll(".card-top")].map((c) => c.textContent),
+        ).size,
+        counters: el.querySelectorAll(".pool-card:not([aria-hidden]) .counter")
+          .length,
+        reachable: el.querySelectorAll(".pool-card:not([aria-hidden])").length,
+        emptyDepth: [...el.querySelectorAll(".pool-card[aria-hidden]")].every(
+          (c) => c.childElementCount === 0,
+        ),
       })),
     );
     expect(piles.reduce((n, p) => n + p.cards, 0)).toBe(cards);
@@ -907,42 +1135,48 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       expect(p.tops).toBe(1);
       // The counter the reader asked to keep, said once instead of six times.
       expect(p.counters).toBe(1);
+      expect(p.reachable).toBe(1);
+      expect(p.emptyDepth).toBe(true);
     }
 
     // ...and NOTHING else is written on the cards. The corner badge that used
     // to say how many were in the pile came off on 2026-08-28 ("kartların
     // üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın"); the count
     // is still on `data-count`, in the card's title and in the head count.
-    await expect(page.locator('.stack-badge')).toHaveCount(0);
+    await expect(page.locator(".stack-badge")).toHaveCount(0);
 
     // Placing one block takes one card off the pile rather than emptying it.
     const deep = page.locator('.pool-stack[data-count="5"]').first();
-    const before = await deep.locator('.card-top').first().innerText();
+    const before = await deep.locator(".card-top").first().innerText();
     await dragAndDrop(page);
-    await expect(page.locator('table.grid .card')).toHaveCount(1);
-    await expect(page.locator('.pool-card')).toHaveCount(cards - 1);
-    expect(before).not.toBe('');
+    await expect(page.locator("table.grid .card")).toHaveCount(1);
+    await expect(page.locator(".pool-card")).toHaveCount(cards - 1);
+    expect(before).not.toBe("");
   });
 });
 
-test.describe('9. Öğle arası ayracı', () => {
-  test('ayraç hafta içi 5., hafta sonu 6. dersten sonra duruyor', async ({ page }) => {
+test.describe("9. Öğle arası ayracı", () => {
+  test("ayraç hafta içi 5., hafta sonu 6. dersten sonra duruyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
 
     // One separator per day, 6 days
-    await expect(page.locator('table.grid tbody tr').first().locator('td.break-col')).toHaveCount(6);
+    await expect(
+      page.locator("table.grid tbody tr").first().locator("td.break-col"),
+    ).toHaveCount(6);
 
     // Its position IS the break: count the real cells before it in each day.
     const positions = await page.evaluate(() => {
-      const row = document.querySelector('table.grid tbody tr')!;
+      const row = document.querySelector("table.grid tbody tr")!;
       const out: number[] = [];
       let seen = 0;
-      for (const cell of row.querySelectorAll('td')) {
-        if (cell.classList.contains('break-col')) {
+      for (const cell of row.querySelectorAll("td")) {
+        if (cell.classList.contains("break-col")) {
           out.push(seen);
           continue;
         }
-        if (cell.dataset['hour'] === '0') seen = 0; // a new day starts
+        if (cell.dataset["hour"] === "0") seen = 0; // a new day starts
         seen++;
       }
       return out;
@@ -951,34 +1185,40 @@ test.describe('9. Öğle arası ayracı', () => {
     expect(positions).toEqual([5, 5, 5, 5, 6, 6]);
   });
 
-  test('ayraca ders bırakılamaz — sürükleme onu hedef saymıyor', async ({ page }) => {
+  test("ayraca ders bırakılamaz — sürükleme onu hedef saymıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    const separator = page.locator('tr.target-row td.break-col').first();
+    const separator = page.locator("tr.target-row td.break-col").first();
 
     await startDrag(page);
     const box = await separator.boundingBox();
-    expect(box, 'ayraç görünür olmalı').not.toBeNull();
-    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, { steps: 3 });
+    expect(box, "ayraç görünür olmalı").not.toBeNull();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2, {
+      steps: 3,
+    });
     await page.waitForTimeout(80);
 
     // Nothing is highlighted: the separator is not a cell
     await expect(separator).not.toHaveClass(/drop-/);
     await page.mouse.up();
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await expect(page.locator("table.grid .card")).toHaveCount(0);
   });
 
-  test('zil önizlemesinde öğle arası satırı var ve iki desende ayrı yerde', async ({ page }) => {
+  test("zil önizlemesinde öğle arası satırı var ve iki desende ayrı yerde", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSettings(page, 'Zil ve günler');
+    await openSettings(page, "Zil ve günler");
 
-    const rows = page.locator('table.bell-preview tr.break-row');
+    const rows = page.locator("table.bell-preview tr.break-row");
     await expect(rows).toHaveCount(2); // after the 5th and after the 6th
-    await expect(rows.first()).toContainText('Öğle arası, 30 dk');
+    await expect(rows.first()).toContainText("Öğle arası, 30 dk");
 
     // The weekday column breaks after the 5th, the weekend column does not
-    const first = rows.first().locator('td');
-    await expect(first.nth(0)).toContainText('Öğle arası');
-    await expect(first.nth(1)).toHaveText('');
+    const first = rows.first().locator("td");
+    await expect(first.nth(0)).toContainText("Öğle arası");
+    await expect(first.nth(1)).toHaveText("");
   });
 });
 
@@ -992,61 +1232,108 @@ test.describe('9. Öğle arası ayracı', () => {
 const EVICT_WORLD = {
   schemaVersion: 7,
   settings: {
-    schoolName: 'Tahliye Kursu',
+    schoolName: "Tahliye Kursu",
     days: [
-      { name: 'Salı', longBreakAfter: 0 },
-      { name: 'Çarşamba', longBreakAfter: 0 },
+      { name: "Salı", longBreakAfter: 0 },
+      { name: "Çarşamba", longBreakAfter: 0 },
     ],
-    hours: ['1', '2', '3', '4'],
-    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
-    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
-    rules: { maxConsecutive: 'block', maxPerDay: 'block', minPerDay: 'warn', maxSameLessonPerDay: 'block' },
-    subjects: ['Matematik', 'Fizik'],
+    hours: ["1", "2", "3", "4"],
+    bell: {
+      start: "09:00",
+      lessonMinutes: 40,
+      breakMinutes: 10,
+      longBreakMinutes: 30,
+    },
+    limits: {
+      maxConsecutive: 0,
+      maxPerDay: 0,
+      minPerDay: 0,
+      maxSameLessonPerDay: 0,
+    },
+    rules: {
+      maxConsecutive: "block",
+      maxPerDay: "block",
+      minPerDay: "warn",
+      maxSameLessonPerDay: "block",
+    },
+    subjects: ["Matematik", "Fizik"],
     subjectShorts: {},
   },
-  rooms: [{ id: 'dA', name: 'A' }],
+  rooms: [{ id: "dA", name: "A" }],
   teachers: [
-    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
-      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
-    { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', gender: '', color: 1,
-      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+    {
+      id: "oMC",
+      name: "Mehmet Çelik",
+      short: "MÇ",
+      subject: "Matematik",
+      gender: "",
+      color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
+    {
+      id: "oAV",
+      name: "Ayşe Var",
+      short: "AV",
+      subject: "Fizik",
+      gender: "",
+      color: 1,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
   ],
-  classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
+  classes: [{ id: "s510", name: "510", roomId: "dA", color: 0 }],
   lessons: [
-    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, pairs: 0, maxPerDay: null },
-    { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 2, pairs: 0, maxPerDay: null },
+    {
+      id: "x1",
+      classId: "s510",
+      teacherId: "oMC",
+      weeklyHours: 2,
+      pairs: 0,
+      maxPerDay: null,
+    },
+    {
+      id: "x2",
+      classId: "s510",
+      teacherId: "oAV",
+      weeklyHours: 2,
+      pairs: 0,
+      maxPerDay: null,
+    },
   ],
   unavailable: {},
   // MÇ is sitting on Salı 1. AV has the whole grid free.
-  placements: { 's510|0|0': 'x1' },
+  placements: { "s510|0|0": "x1" },
 };
 
-test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
+test.describe("66. Dolu hücrenin üstüne bırakmak", () => {
   /** Grabs the pool card whose top or bottom line says `text`. */
   async function grabCard(page: Page, text: string) {
-    const card = page.locator('.pool-card', { hasText: text }).first();
+    const card = page.locator(".pool-card", { hasText: text }).first();
     const box = (await card.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await expect(page.locator('.ghost')).toHaveCount(1);
+    await expect(page.locator(".ghost")).toHaveCount(1);
     await page.waitForTimeout(150);
   }
 
-  test('dolu hücre artık kırmızı değil SARI — bir şey kaybedeceğini söylüyor', async ({ page }) => {
+  test("dolu hücre artık kırmızı değil SARI — bir şey kaybedeceğini söylüyor", async ({
+    page,
+  }) => {
     await loadWorld(page, EVICT_WORLD);
-    await grabCard(page, 'AV');
+    await grabCard(page, "AV");
     const cell = await hover(page, 0, 0);
     // Yellow, not green: the drop is allowed but it costs a lesson. No fourth
     // colour was invented for this — the functional channel already had one.
     await expect(cell).toHaveClass(/drop-warn/);
     await expect(cell).not.toHaveClass(/drop-blocked/);
     // ...and the bar says WHAT it costs, by name.
-    await expect(page.locator('.reason-bar')).toContainText('havuza dönecek');
-    await expect(page.locator('.reason-bar')).toContainText('MÇ');
+    await expect(page.locator(".reason-bar")).toContainText("havuza dönecek");
+    await expect(page.locator(".reason-bar")).toContainText("MÇ");
     await page.mouse.up();
   });
 
-  test('bırakınca eski ders havuza döner, yeni ders yerini alır', async ({ page }) => {
+  test("bırakınca eski ders havuza döner, yeni ders yerini alır", async ({
+    page,
+  }) => {
     await loadWorld(page, EVICT_WORLD);
     // The grid is in TEACHER view, so a cell is named by its row as well: the
     // same day and hour exist once per teacher.
@@ -1054,47 +1341,62 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     const av = page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]');
     // In teacher view a cell says which CLASS the teacher is with, so both
     // rows would read "510" — which row it is on is the whole assertion.
-    await expect(mc).toContainText('510');
-    await expect(av).toHaveText('');
+    await expect(mc).toContainText("510");
+    await expect(av).toHaveText("");
 
-    await grabCard(page, 'AV');
+    await grabCard(page, "AV");
     await hover(page, 0, 0);
     await page.mouse.up();
 
     // The lesson moved rows: AV now has that hour and MÇ does not.
-    await expect(av).toContainText('510');
-    await expect(mc).toHaveText('');
+    await expect(av).toContainText("510");
+    await expect(mc).toHaveText("");
     // ...and the old one is back in the tray, not deleted (principle 6). Two
     // cards, not one: MÇ's lesson is 2 hours of singles, so what came back is
-    // its second single beside the one that was already waiting.
-    await expect(page.locator('.pool-card', { hasText: 'MÇ' })).toHaveCount(2);
+    // its second single beneath the one that was already waiting. Only the
+    // reachable top card carries text; data-count carries the deck depth.
+    await expect(
+      page.locator('.pool-stack[data-count="2"]', {
+        has: page.locator('.pool-card:not([aria-hidden])', { hasText: "MÇ" }),
+      }),
+    ).toHaveCount(1);
     // .last(): "Yedek yüklendi" from loadWorld is still on screen.
-    await expect(page.locator('.toast').last()).toContainText('510 · MÇ dersi havuza döndü');
+    await expect(page.locator(".toast").last()).toContainText(
+      "510 · MÇ dersi havuza döndü",
+    );
   });
 
-  test('bütün hamle TEK geri-al adımı', async ({ page }) => {
+  test("bütün hamle TEK geri-al adımı", async ({ page }) => {
     await loadWorld(page, EVICT_WORLD);
-    await grabCard(page, 'AV');
+    await grabCard(page, "AV");
     await hover(page, 0, 0);
     await page.mouse.up();
-    await expect(page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]')).toContainText('510');
+    await expect(
+      page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]'),
+    ).toContainText("510");
 
     // One Ctrl+Z puts BOTH halves back: the evicted lesson returns to the grid
     // and the dropped one goes back to the pool. An eviction that cost two
     // undos would leave the grid in a state the reader never made.
-    await page.keyboard.press('Control+z');
-    await expect(page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]')).toContainText('510');
-    await expect(page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]')).toHaveText('');
+    await page.keyboard.press("Control+z");
+    await expect(
+      page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]'),
+    ).toContainText("510");
+    await expect(
+      page.locator('td[data-row="oAV"][data-day="0"][data-hour="0"]'),
+    ).toHaveText("");
   });
 
-  test('BAŞKA bir sebeple kapalı hücre tahliyeyle açılmıyor', async ({ page }) => {
+  test("BAŞKA bir sebeple kapalı hücre tahliyeyle açılmıyor", async ({
+    page,
+  }) => {
     // AV is unavailable at Salı 1. The class is busy there too, so the first
     // refusal is "class busy" — but evicting it does not make AV available.
-    await loadWorld(page, { ...EVICT_WORLD, unavailable: { 'oAV|0|0': 1 } });
-    await grabCard(page, 'AV');
+    await loadWorld(page, { ...EVICT_WORLD, unavailable: { "oAV|0|0": 1 } });
+    await grabCard(page, "AV");
     const cell = await hover(page, 0, 0);
     await expect(cell).toHaveClass(/drop-blocked/);
-    await expect(page.locator('.reason-bar')).toContainText('müsait değil');
+    await expect(page.locator(".reason-bar")).toContainText("müsait değil");
     await page.mouse.up();
   });
 });
@@ -1108,81 +1410,118 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
 const SPLIT_WORLD = {
   schemaVersion: 7,
   settings: {
-    schoolName: 'Bölünmüş',
+    schoolName: "Bölünmüş",
     days: [
-      { name: 'Salı', longBreakAfter: 0 },
-      { name: 'Çarşamba', longBreakAfter: 0 },
+      { name: "Salı", longBreakAfter: 0 },
+      { name: "Çarşamba", longBreakAfter: 0 },
     ],
-    hours: ['1', '2', '3', '4'],
-    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
-    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
-    rules: {
-      maxConsecutive: 'block',
-      maxPerDay: 'block',
-      minPerDay: 'warn',
-      maxSameLessonPerDay: 'block',
+    hours: ["1", "2", "3", "4"],
+    bell: {
+      start: "09:00",
+      lessonMinutes: 40,
+      breakMinutes: 10,
+      longBreakMinutes: 30,
     },
-    subjects: ['Matematik'],
+    limits: {
+      maxConsecutive: 0,
+      maxPerDay: 0,
+      minPerDay: 0,
+      maxSameLessonPerDay: 0,
+    },
+    rules: {
+      maxConsecutive: "block",
+      maxPerDay: "block",
+      minPerDay: "warn",
+      maxSameLessonPerDay: "block",
+    },
+    subjects: ["Matematik"],
     subjectShorts: {},
   },
-  rooms: [{ id: 'dA', name: 'A' }],
+  rooms: [{ id: "dA", name: "A" }],
   teachers: [
-    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
-      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+    {
+      id: "oMC",
+      name: "Mehmet Çelik",
+      short: "MÇ",
+      subject: "Matematik",
+      gender: "",
+      color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
   ],
-  classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
+  classes: [{ id: "s510", name: "510", roomId: "dA", color: 0 }],
   // 3 hours as 2+1, all three sitting side by side on one day.
   lessons: [
-    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, pairs: 1, maxPerDay: null },
+    {
+      id: "x1",
+      classId: "s510",
+      teacherId: "oMC",
+      weeklyHours: 3,
+      pairs: 1,
+      maxPerDay: null,
+    },
   ],
   unavailable: {},
-  placements: { 's510|0|0': 'x1', 's510|0|1': 'x1', 's510|0|2': 'x1' },
+  placements: { "s510|0|0": "x1", "s510|0|1": "x1", "s510|0|2": "x1" },
 };
 
-test.describe('68. 2+1 bitişikken', () => {
+test.describe("68. 2+1 bitişikken", () => {
   const cell = (page: Page, hour: number) =>
     page.locator(`td[data-row="oMC"][data-day="0"][data-hour="${hour}"]`);
 
-  test('üç bitişik hücre TEK blok gibi çizilmiyor — sınır 2. saatten sonra', async ({ page }) => {
+  test("üç bitişik hücre TEK blok gibi çizilmiyor — sınır 2. saatten sonra", async ({
+    page,
+  }) => {
     await loadWorld(page, SPLIT_WORLD);
 
     // Since 2026-08-27 a two-hour block is ONE cell spanning two columns, so
     // the boundary this test is about is now visible in the DOM itself: the
     // double is one <td> that stands for hours 0-1, and the single is its own
     // <td> at hour 2. Hour 1 has no cell of its own — it is inside the wide one.
-    await expect(cell(page, 0)).toHaveAttribute('colspan', '2');
+    await expect(cell(page, 0)).toHaveAttribute("colspan", "2");
     await expect(cell(page, 0)).toHaveClass(/block-wide/);
-    await expect(cell(page, 0)).toContainText('510');
+    await expect(cell(page, 0)).toContainText("510");
     await expect(cell(page, 1)).toHaveCount(0);
-    await expect(cell(page, 2)).toContainText('510');
-    await expect(cell(page, 2)).not.toHaveAttribute('colspan', '2');
+    await expect(cell(page, 2)).toContainText("510");
+    await expect(cell(page, 2)).not.toHaveAttribute("colspan", "2");
     await expect(cell(page, 2)).not.toHaveClass(/block-wide/);
 
     // TWO cards for three adjacent hours, which is the whole claim: plain
     // adjacency would have drawn one card three hours wide.
-    await expect(page.locator('tr:has(td[data-row="oMC"]) .card')).toHaveCount(2);
+    await expect(page.locator('tr:has(td[data-row="oMC"]) .card')).toHaveCount(
+      2,
+    );
     // …and the label is written ONCE per block, not once per hour.
-    expect((await cell(page, 0).innerText()).match(/510/g) ?? []).toHaveLength(1);
+    expect((await cell(page, 0).innerText()).match(/510/g) ?? []).toHaveLength(
+      1,
+    );
   });
 
-  test('menü tek saatlik bloğu alıyor, koşunun tamamını değil', async ({ page }) => {
+  test("menü tek saatlik bloğu alıyor, koşunun tamamını değil", async ({
+    page,
+  }) => {
     await loadWorld(page, SPLIT_WORLD);
     // Right click opens the menu now; "Havuza kaldır" is what it used to do on
     // its own. Which BLOCK the click landed on is what this test is about, and
     // that answer is unchanged: it comes from the <td> under the pointer.
-    await cell(page, 2).click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
+    await cell(page, 2).click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Havuza kaldır" })
+      .click();
 
-    await expect(cell(page, 0)).toContainText('510');
-    await expect(cell(page, 0)).toHaveAttribute('colspan', '2');
-    await expect(cell(page, 2)).toHaveText('');
+    await expect(cell(page, 0)).toContainText("510");
+    await expect(cell(page, 0)).toHaveAttribute("colspan", "2");
+    await expect(cell(page, 2)).toHaveText("");
     // …and what came back is a ONE-hour card, not the whole lesson.
-    const back = page.locator('.pool-card');
+    const back = page.locator(".pool-card");
     await expect(back).toHaveCount(1);
-    expect(await back.getAttribute('data-size')).toBe('1');
+    expect(await back.getAttribute("data-size")).toBe("1");
   });
 
-  test('menü ikili bloğun İKİNCİ saatine denk gelse de İKİ hücre alıyor', async ({ page }) => {
+  test("menü ikili bloğun İKİNCİ saatine denk gelse de İKİ hücre alıyor", async ({
+    page,
+  }) => {
     await loadWorld(page, SPLIT_WORLD);
 
     // Hour 1 no longer has a cell of its own, so the click is aimed at WHERE IT
@@ -1191,15 +1530,18 @@ test.describe('68. 2+1 bitişikken', () => {
     // double — and the merge must not have turned it into a miss.
     const box = (await cell(page, 0).boundingBox())!;
     await page.mouse.click(box.x + box.width * 0.75, box.y + box.height / 2, {
-      button: 'right',
+      button: "right",
     });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Havuza kaldır" })
+      .click();
 
-    await expect(cell(page, 0)).toHaveText('');
-    await expect(cell(page, 2)).toContainText('510');
-    const back = page.locator('.pool-card');
+    await expect(cell(page, 0)).toHaveText("");
+    await expect(cell(page, 2)).toContainText("510");
+    const back = page.locator(".pool-card");
     await expect(back).toHaveCount(1);
-    expect(await back.getAttribute('data-size')).toBe('2');
+    expect(await back.getAttribute("data-size")).toBe("2");
   });
 });
 
@@ -1208,7 +1550,7 @@ test.describe('68. 2+1 bitişikken', () => {
 // unpinning it. The refusal lives in `removeBlock` and `dropMap` (unit-tested),
 // so what is asked HERE is that every road a hand can take arrives at it.
 
-test.describe('86. Sabitleme', () => {
+test.describe("86. Sabitleme", () => {
   /**
    * The pin BUTTON of the first placed card.
    *
@@ -1217,16 +1559,22 @@ test.describe('86. Sabitleme', () => {
    * in the cell (Grid.tsx). Reached through the cell for exactly that reason.
    */
   function firstPin(page: Page) {
-    return page.locator('table.grid td:has(.card)').first().locator('.card-pin');
+    return page
+      .locator("table.grid td:has(.card)")
+      .first()
+      .locator(".card-pin");
   }
 
   /** Puts one lesson down and pins it. Returns that cell. */
   async function pinFirst(page: Page) {
     await openWithSample(page);
     await dragAndDrop(page);
-    const card = page.locator('table.grid .card').first();
-    await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    const card = page.locator("table.grid .card").first();
+    await card.click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Dersi buraya sabitle" })
+      .click();
     await expect(card).toHaveClass(/pinned/);
     return card;
   }
@@ -1241,11 +1589,16 @@ test.describe('86. Sabitleme', () => {
    */
   async function filledWithOnePin(page: Page) {
     await openWithSample(page);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
-    const card = page.locator('table.grid .card').first();
-    await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+    await page.getByRole("button", { name: /^Otomatik diz/ }).click();
+    await expect(page.locator(".reason-bar.ok, .reason-bar.bad")).toBeVisible({
+      timeout: 30_000,
+    });
+    const card = page.locator("table.grid .card").first();
+    await card.click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Dersi buraya sabitle" })
+      .click();
     await expect(card).toHaveClass(/pinned/);
     return card;
   }
@@ -1253,30 +1606,31 @@ test.describe('86. Sabitleme', () => {
   // THE PIN ON THE CARD. "Program kısmında kartların üzerinde sabitleye
   // basınca dersi sabitlesin babamın en çok kullanacağı bu."
   //
-  // Three separate claims, and each of them is a way this could be built and
-  // still be wrong: it is THERE before anything is hovered (a control that
-  // appears on hover is a control this reader never finds), pressing it locks
-  // the block, and pressing it does NOT pick the card up — the card underneath
-  // starts a drag on pointerdown and would happily take the press.
-  test('karttaki raptiye hep GÖRÜNÜYOR ve tek tıkla sabitliyor', async ({ page }) => {
+  // The dormant pin stays out of the card's visual hierarchy, becomes fully
+  // opaque on hover/focus, and remains visible after it has become a status.
+  // Pressing it must still not pick the draggable card underneath up.
+  test("karttaki raptiye hoverda beliriyor, sabitlenince kalıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const card = page.locator('table.grid .card').first();
+    const card = page.locator("table.grid .card").first();
     const pin = firstPin(page);
     await expect(pin).toBeVisible();
-    await expect(pin).toHaveAttribute('aria-pressed', 'false');
+    await expect(pin).toHaveAttribute("aria-pressed", "false");
 
-    // WITH NOTHING HOVERED, and that qualifier is the whole assertion.
-    // `toBeVisible` passes at opacity 0, and the cell's own :hover rule turns
-    // the pin fully on — `dragAndDrop` leaves the pointer sitting in the cell
-    // it just dropped into, so reading the ink there measures the hover state
-    // of a build that only shows the pin on hover. Measured with the mutation
-    // in place: opacity 0 read back as 1.
+    // WITH NOTHING HOVERED, then with the card hovered.
     await page.mouse.move(4, 4);
     await settledMotion(page);
-    const ink = await pin.evaluate((el) => Number(getComputedStyle(el).opacity));
-    expect(ink, 'raptiye hover olmadan görünmüyor').toBeGreaterThan(0.25);
+    expect(
+      await pin.evaluate((el) => Number(getComputedStyle(el).opacity)),
+    ).toBe(0);
+    await card.hover();
+    await settledMotion(page);
+    expect(
+      await pin.evaluate((el) => Number(getComputedStyle(el).opacity)),
+    ).toBe(1);
 
     const box = await card.boundingBox();
 
@@ -1287,62 +1641,224 @@ test.describe('86. Sabitleme', () => {
     // the press picks the block up. A plain click cannot see it: down and up
     // in one place, the ghost never travels, and everything looks fine.
     const pinBox = (await pin.boundingBox())!;
-    await page.mouse.move(pinBox.x + pinBox.width / 2, pinBox.y + pinBox.height / 2);
+    await page.mouse.move(
+      pinBox.x + pinBox.width / 2,
+      pinBox.y + pinBox.height / 2,
+    );
     await page.mouse.down();
     await page.mouse.move(pinBox.x + 140, pinBox.y + 70, { steps: 8 });
-    await expect(page.locator('.ghost'), 'raptiyeye basmak kartı kaldırdı').toHaveCount(0);
+    await expect(
+      page.locator(".ghost"),
+      "raptiyeye basmak kartı kaldırdı",
+    ).toHaveCount(0);
     await page.mouse.up();
     await page.mouse.move(4, 4);
-    expect(await card.boundingBox(), 'kart yerinden oynadı').toEqual(box);
+    expect(await card.boundingBox(), "kart yerinden oynadı").toEqual(box);
 
     // ...and a plain click on it locks the block.
     await pin.click();
     await expect(card).toHaveClass(/pinned/);
-    await expect(pin).toHaveAttribute('aria-pressed', 'true');
+    await expect(pin).toHaveAttribute("aria-pressed", "true");
+    await page.mouse.move(4, 4);
+    await settledMotion(page);
+    expect(
+      await pin.evaluate((el) => Number(getComputedStyle(el).opacity)),
+    ).toBe(1);
     expect(await card.boundingBox()).toEqual(box);
 
     // ...and the same button takes it off again.
     await pin.click();
     await expect(card).not.toHaveClass(/pinned/);
-    await expect(pin).toHaveAttribute('aria-pressed', 'false');
+    await expect(pin).toHaveAttribute("aria-pressed", "false");
+    await page.mouse.move(4, 4);
+    await settledMotion(page);
+    expect(
+      await pin.evaluate((el) => Number(getComputedStyle(el).opacity)),
+    ).toBe(0);
   });
 
-  test('menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor', async ({ page }) => {
+  test("sağ tık satır, sütun ve gün başlıklarını sabitliyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cell = page.locator("table.grid td:has(.card)").first();
+    const row = cell.locator("xpath=ancestor::tr");
+    const card = cell.locator(".card");
+    const day = Number(await cell.getAttribute("data-day"));
+    const hour = Number(await cell.getAttribute("data-hour"));
+
+    const toggle = async (
+      target: import("@playwright/test").Locator,
+      name: string,
+    ) => {
+      await target.click({ button: "right" });
+      await page.locator(".menu").getByRole("menuitem", { name }).click();
+    };
+
+    await toggle(row.locator(".row-head"), "Satırı sabitle / kaldır");
+    await expect(card).toHaveClass(/pinned/);
+    await toggle(row.locator(".row-head"), "Satırı sabitle / kaldır");
+    await expect(card).not.toHaveClass(/pinned/);
+
+    const dayHead = page.locator(
+      `table.grid .day-head[data-menu-day="${day}"]`,
+    );
+    await toggle(dayHead, "Günü sabitle / kaldır");
+    await expect(card).toHaveClass(/pinned/);
+    await toggle(dayHead, "Günü sabitle / kaldır");
+    await expect(card).not.toHaveClass(/pinned/);
+
+    const column = page.locator(
+      `table.grid thead th[data-menu-day="${day}"][data-menu-hour="${hour}"]`,
+    );
+    await toggle(column, "Sütunu sabitle / kaldır");
+    await expect(card).toHaveClass(/pinned/);
+  });
+
+  test("satır ve gün geçici görünümü yenilemede kalıcılaşmıyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cell = page.locator("table.grid td:has(.card)").first();
+    const row = cell.locator("xpath=ancestor::tr");
+    const day = Number(await cell.getAttribute("data-day"));
+
+    await row.locator(".row-head").click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Satırı soluklaştır" })
+      .click();
+    await expect(row).toHaveClass(/masked-scope/);
+
+    const days = await page.locator("table.grid .day-head").count();
+    await page
+      .locator(`table.grid .day-head[data-menu-day="${day}"]`)
+      .click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Günü gizle" })
+      .click();
+    await expect(page.locator("table.grid .day-head")).toHaveCount(days - 1);
+
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Program", exact: true }),
+    ).toHaveAttribute("aria-current", "true");
+    await expect(page.locator("table.grid .day-head")).toHaveCount(days);
+    await expect(page.locator("table.grid tbody tr.masked-scope")).toHaveCount(
+      0,
+    );
+  });
+
+  test("ızgara menüsü bütün programı tek seferde sabitliyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator("table.grid .card");
+    const count = await cards.count();
+    await openGridMenu(page);
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Tüm programı sabitle" })
+      .click();
+    await expect(page.locator("table.grid .card.pinned")).toHaveCount(count);
+
+    await openGridMenu(page);
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Tüm sabitlemeleri kaldır" })
+      .click();
+    await expect(page.locator("table.grid .card.pinned")).toHaveCount(0);
+  });
+
+  test("program kopyası bağımsız kalıyor ve programlar arasında geçiliyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+    const cards = page.locator("table.grid .card");
+    await expect(cards).toHaveCount(1);
+
+    const programs = page.getByTitle("Program seç ve yönet");
+    await programs.click();
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Kopyasını kaydet" })
+      .click();
+    await answerDialog(page);
+    await expect(programs).toContainText("Program 2");
+
+    await cards.first().focus();
+    await page.keyboard.press("Delete");
+    await expect(cards).toHaveCount(0);
+
+    await programs.click();
+    await page
+      .locator(".menu")
+      .getByRole("menuitemradio", { name: "Program 1" })
+      .click();
+    await expect(cards).toHaveCount(1);
+    await programs.click();
+    await page
+      .locator(".menu")
+      .getByRole("menuitemradio", { name: "Program 2" })
+      .click();
+    await expect(cards).toHaveCount(0);
+  });
+
+  test("menü sabitliyor, kart işaretleniyor, menü artık TERSİNİ söylüyor", async ({
+    page,
+  }) => {
     const card = await pinFirst(page);
     // The mark, not a colour: the grid's four colours already mean droppable,
     // warning, blocked and closed. It is the pin CONTROL now, and it says so.
-    await expect(firstPin(page)).toHaveAttribute('aria-pressed', 'true');
+    await expect(firstPin(page)).toHaveAttribute("aria-pressed", "true");
     // And a screen reader is told the same thing the mark says.
-    await expect(card).toHaveAttribute('aria-label', /sabitlenmiş/);
+    await expect(card).toHaveAttribute("aria-label", /sabitlenmiş/);
 
-    await card.click({ button: 'right' });
-    const menu = page.locator('.menu');
-    await expect(menu.getByRole('menuitem', { name: 'Sabitlemeyi kaldır' })).toBeVisible();
-    await expect(menu.getByRole('menuitem', { name: 'Dersi buraya sabitle' })).toHaveCount(0);
+    await card.click({ button: "right" });
+    const menu = page.locator(".menu");
+    await expect(
+      menu.getByRole("menuitem", { name: "Sabitlemeyi kaldır" }),
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Dersi buraya sabitle" }),
+    ).toHaveCount(0);
   });
 
-  test('sabitlenmiş kartta "Havuza kaldır" KAPALI ve sebebi yazıyor', async ({ page }) => {
+  test('sabitlenmiş kartta "Havuza kaldır" KAPALI ve sebebi yazıyor', async ({
+    page,
+  }) => {
     const card = await pinFirst(page);
-    await card.click({ button: 'right' });
-    const item = page.locator('.menu').getByRole('menuitem', { name: /Havuza kaldır/ });
-    await expect(item).toHaveAttribute('data-disabled', '');
-    await expect(item).toContainText('sabitlenmiş');
+    await card.click({ button: "right" });
+    const item = page
+      .locator(".menu")
+      .getByRole("menuitem", { name: /Havuza kaldır/ });
+    await expect(item).toHaveAttribute("data-disabled", "");
+    await expect(item).toContainText("sabitlenmiş");
   });
 
-  test('sabitlenmiş kart Delete ile GİTMİYOR, ve neden gitmediğini söylüyor', async ({ page }) => {
+  test("sabitlenmiş kart Delete ile GİTMİYOR, ve neden gitmediğini söylüyor", async ({
+    page,
+  }) => {
     const card = await pinFirst(page);
-    const cards = page.locator('table.grid .card');
+    const cards = page.locator("table.grid .card");
     const before = await cards.count();
 
     await card.focus();
-    await page.keyboard.press('Delete');
+    await page.keyboard.press("Delete");
     await expect(cards).toHaveCount(before);
     // Silence would read as a broken key. `.last()`: the sample's own "veri
     // yüklendi" line is still on screen, and this is the newest thing said.
-    await expect(page.locator('.toast').last()).toContainText('sabitlenmiş');
+    await expect(page.locator(".toast").last()).toContainText("sabitlenmiş");
   });
 
-  test('sabitlenmiş kart SÜRÜKLENMİYOR — ızgara kıpırdamıyor', async ({ page }) => {
+  test("sabitlenmiş kart SÜRÜKLENMİYOR — ızgara kıpırdamıyor", async ({
+    page,
+  }) => {
     const card = await pinFirst(page);
     const box = (await card.boundingBox())!;
     const text = await card.textContent();
@@ -1351,39 +1867,49 @@ test.describe('86. Sabitleme', () => {
     await page.mouse.down();
     await page.mouse.move(box.x + 300, box.y + 120, { steps: 8 });
     // No ghost, because no drag ever started.
-    await expect(page.locator('.ghost')).toHaveCount(0);
+    await expect(page.locator(".ghost")).toHaveCount(0);
     await page.mouse.up();
 
     await expect(card).toHaveText(text!);
     await expect(card).toHaveClass(/pinned/);
   });
 
-  test('sabitleme YENİLEMEDEN sonra da duruyor — programın kendisine giriyor', async ({ page }) => {
+  test("sabitleme YENİLEMEDEN sonra da duruyor — programın kendisine giriyor", async ({
+    page,
+  }) => {
     await pinFirst(page);
     await expect
-      .poll(async () => await page.evaluate(() => localStorage.getItem('ders-programi')), {
-        timeout: 5_000,
-      })
-      .toContain('pinned');
+      .poll(
+        async () =>
+          await page.evaluate(() => localStorage.getItem("ders-programi")),
+        {
+          timeout: 5_000,
+        },
+      )
+      .toContain("pinned");
 
     await page.reload();
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await expect(page.locator("table.grid .card.pinned")).toHaveCount(1);
   });
 
-  test('"Baştan diz" sabitlenmişi YERİNDE bırakıyor, sorusu da onu sayıyor', async ({ page }) => {
+  test('"Baştan diz" sabitlenmişi YERİNDE bırakıyor, sorusu da onu sayıyor', async ({
+    page,
+  }) => {
     const card = await filledWithOnePin(page);
     const where = (await card.boundingBox())!;
     const text = (await card.textContent())!;
 
-    await page.getByRole('button', { name: 'Baştan diz' }).click();
-    const dialog = page.getByRole('alertdialog');
-    await expect(dialog).toContainText('Sabitlenen');
-    await dialog.getByRole('button', { name: 'Baştan diz' }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Baştan diz" }).click();
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toContainText("Sabitlenen");
+    await dialog.getByRole("button", { name: "Baştan diz" }).click();
+    await expect(page.locator(".reason-bar.ok, .reason-bar.bad")).toBeVisible({
+      timeout: 30_000,
+    });
 
     // Same card, same square, still pinned.
-    const after = page.locator('table.grid .card.pinned');
+    const after = page.locator("table.grid .card.pinned");
     await expect(after).toHaveCount(1);
     await expect(after).toHaveText(text);
     const box = (await after.boundingBox())!;
@@ -1394,24 +1920,30 @@ test.describe('86. Sabitleme', () => {
   test('"Programı boşalt" da sabitlenmişi bırakıyor', async ({ page }) => {
     await filledWithOnePin(page);
     await openGridMenu(page);
-    await page.getByRole('menuitem', { name: 'Programı boşalt' }).click();
-    const dialog = page.getByRole('alertdialog');
-    await expect(dialog).toContainText('Sabitlenen');
-    await dialog.getByRole('button', { name: 'Programı boşalt' }).click();
+    await page.getByRole("menuitem", { name: "Programı boşalt" }).click();
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toContainText("Sabitlenen");
+    await dialog.getByRole("button", { name: "Programı boşalt" }).click();
 
     // Everything else went; the pin is what is left.
-    await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
-    await expect(page.locator('table.grid .card')).toHaveCount(1);
+    await expect(page.locator("table.grid .card.pinned")).toHaveCount(1);
+    await expect(page.locator("table.grid .card")).toHaveCount(1);
   });
 
-  test('sabitleme kaldırılınca her şey eskisi gibi', async ({ page }) => {
+  test("sabitleme kaldırılınca her şey eskisi gibi", async ({ page }) => {
     const card = await pinFirst(page);
-    await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Sabitlemeyi kaldır' }).click();
+    await card.click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Sabitlemeyi kaldır" })
+      .click();
     await expect(card).not.toHaveClass(/pinned/);
 
-    await card.click({ button: 'right' });
-    await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
-    await expect(page.locator('table.grid .card')).toHaveCount(0);
+    await card.click({ button: "right" });
+    await page
+      .locator(".menu")
+      .getByRole("menuitem", { name: "Havuza kaldır" })
+      .click();
+    await expect(page.locator("table.grid .card")).toHaveCount(0);
   });
 });

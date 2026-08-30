@@ -9,65 +9,157 @@
 // under them, that the count tells the truth, and that Turkish text survives
 // the round trip through a real input.
 
-import { expect, test } from './kapan';
-import { openSetup, openLessons, openWithSample, mainList } from './helpers';
+import { expect, test } from "./kapan";
+import { openSetup, openLessons, openWithSample, mainList } from "./helpers";
 
-const rows = (page: import('@playwright/test').Page) => mainList(page).locator('tbody tr');
+const rows = (page: import("@playwright/test").Page) =>
+  mainList(page).locator("tbody tr");
 
-test.describe('49. Liste araçları', () => {
-  test('arama tabloyu daraltıyor ve sayaç doğruyu söylüyor', async ({ page }) => {
+test.describe("49. Liste araçları", () => {
+  async function checkLoadFacet(
+    page: import("@playwright/test").Page,
+    total: number,
+  ) {
+    const group = page.getByRole("group", { name: "Yük durumu" });
+    await expect(group).toBeVisible();
+    const chips = group.locator(".chip");
+    const labels = await chips.evaluateAll((nodes) =>
+      nodes.map((node) => node.childNodes[0]?.textContent?.trim() ?? ""),
+    );
+    const order = ["Boş", "Uygun", "Sıkışık", "İmkânsız"];
+    expect(labels).toEqual(
+      [...labels].sort((a, b) => order.indexOf(a) - order.indexOf(b)),
+    );
+    const counts = await group.locator(".chip-count").allInnerTexts();
+    expect(counts.reduce((sum, count) => sum + Number(count), 0)).toBe(total);
+
+    for (let i = 0; i < labels.length; i++) {
+      await chips.nth(i).click();
+      await expect(rows(page)).toHaveCount(Number(counts[i]));
+    }
+  }
+
+  test("arama tabloyu daraltıyor ve sayaç doğruyu söylüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     await expect(rows(page)).toHaveCount(25);
-    await expect(page.locator('.list-count')).toContainText('25 öğretmen');
+    await expect(page.locator(".list-count")).toContainText("25 öğretmen");
 
-    await page.getByLabel('öğretmen ara').fill('matematik');
+    await page.getByLabel("öğretmen ara").fill("matematik");
     await expect(rows(page)).toHaveCount(3);
-    await expect(page.locator('.list-count')).toContainText('3 / 25 öğretmen');
+    await expect(page.locator(".list-count")).toContainText("3 / 25 öğretmen");
 
-    await page.getByRole('button', { name: 'Süzmeyi kaldır' }).click();
+    await page.getByRole("button", { name: "Süzmeyi kaldır" }).click();
     await expect(rows(page)).toHaveCount(25);
   });
 
-  test('Türkçe: aksansız yazınca da buluyor, İ ile başlayan adı da', async ({ page }) => {
+  test("arama kutusunun tek sınırı dış kabında", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const box = page.getByLabel('öğretmen ara');
+    await openSetup(page, "Öğretmenler");
+    const input = page.getByLabel("öğretmen ara");
+    const style = await input.evaluate((el) => {
+      const s = getComputedStyle(el);
+      const outer = getComputedStyle(el.closest(".search")!);
+      return {
+        borders: [
+          s.borderTopWidth,
+          s.borderRightWidth,
+          s.borderBottomWidth,
+          s.borderLeftWidth,
+        ],
+        shadow: s.boxShadow,
+        outerBorder: outer.borderTopWidth,
+      };
+    });
+    expect(style.borders).toEqual(["0px", "0px", "0px", "0px"]);
+    expect(style.shadow).toBe("none");
+    expect(style.outerBorder).toBe("1px");
+  });
+
+  test("Türkçe: aksansız yazınca da buluyor, İ ile başlayan adı da", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, "Öğretmenler");
+    const box = page.getByLabel("öğretmen ara");
 
     // 'İlknur'.toLowerCase() is an `i` plus a COMBINING DOT in the default
     // locale, so this is the search that silently found nothing.
-    await box.fill('ilknur');
+    await box.fill("ilknur");
     await expect(rows(page)).toHaveCount(1);
-    await expect(rows(page).first().locator('input').first()).toHaveValue('İlknur Aydın');
+    await expect(rows(page).first().locator("input").first()).toHaveValue(
+      "İlknur Aydın",
+    );
 
     // ...and somebody typing quickly leaves the accents off.
-    await box.fill('gokhan');
+    await box.fill("gokhan");
     await expect(rows(page)).toHaveCount(1);
-    await expect(rows(page).first().locator('input').first()).toHaveValue('Gökhan Çetin');
+    await expect(rows(page).first().locator("input").first()).toHaveValue(
+      "Gökhan Çetin",
+    );
   });
 
-  test('branş çipi süzüyor ve ÖTEKİ çiplerin sayıları duruyor', async ({ page }) => {
+  test("branş çipi süzüyor ve ÖTEKİ çiplerin sayıları duruyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
-    const maths = page.locator('.chip', { hasText: 'Matematik' });
-    const physics = page.locator('.chip', { hasText: 'Fizik' });
-    await expect(maths).toContainText('3');
+    const maths = page.locator(".chip", { hasText: "Matematik" });
+    const physics = page.locator(".chip", { hasText: "Fizik" });
+    await expect(maths).toContainText("3");
     await maths.click();
 
-    await expect(maths).toHaveAttribute('aria-pressed', 'true');
+    await expect(maths).toHaveAttribute("aria-pressed", "true");
     await expect(rows(page)).toHaveCount(3);
     // The one that would break if the counts were taken after the facet: the
     // row of chips has to stay a way BACK, not a dead end.
-    await expect(physics).toContainText('2');
+    await expect(physics).toContainText("2");
 
     await maths.click();
     await expect(rows(page)).toHaveCount(25);
   });
 
-  test('sıralama gerçekten sıralıyor, ve varsayılan GİRİLDİĞİ sıra', async ({ page }) => {
+  test("öğretmen, sınıf ve derslik yük durumunu aynı kapasite hesabıyla süzüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+
+    // Bir öğretmeni bütünüyle kapatmak örnekteki uygun öğretmenlerin yanına
+    // kesin bir “İmkânsız” sınır örneği koyar.
+    await page.getByRole("button", { name: "Müsaitlik", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Tümünü kapat", exact: true })
+      .click();
+    await openSetup(page, "Öğretmenler");
+    await checkLoadFacet(page, await rows(page).count());
+
+    // Yüksüz yeni kayıtlar “Boş” sınıfını görünür yapar. Diğer kayıtların
+    // yükü ve sayaçları aynı Kontrol raporundan gelir.
+    await openSetup(page, "Derslikler");
+    await page.getByPlaceholder("Derslik adı, örn. A").fill("Z boş derslik");
+    await page
+      .locator(".add-panel")
+      .getByRole("button", { name: "Ekle", exact: true })
+      .click();
+    await checkLoadFacet(page, await rows(page).count());
+
+    await openSetup(page, "Sınıflar");
+    await page.getByPlaceholder("Sınıf adı, örn. 510").fill("Z boş sınıf");
+    await page
+      .locator(".add-panel")
+      .getByRole("button", { name: "Ekle", exact: true })
+      .click();
+    await checkLoadFacet(page, await rows(page).count());
+  });
+
+  test("sıralama gerçekten sıralıyor, ve varsayılan GİRİLDİĞİ sıra", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSetup(page, "Öğretmenler");
     // NOT `td:nth-child(n)`: the name column has moved twice now (a drag
     // handle went in front of it, a gender box behind it) and each time this
     // line failed with "undefined" rather than with anything about columns.
@@ -76,43 +168,57 @@ test.describe('49. Liste araçları', () => {
     const names = () =>
       rows(page).locator('td > input[type="text"]:not(.text-sm)').all();
 
-    const entered = await Promise.all((await names()).map((i) => i.inputValue()));
-    expect(entered[0]).toBe('Mehmet Çelik'); // sample order, not alphabetical
+    const entered = await Promise.all(
+      (await names()).map((i) => i.inputValue()),
+    );
+    expect(entered[0]).toBe("Mehmet Çelik"); // sample order, not alphabetical
 
-    await page.getByLabel('Sırala').selectOption({ label: 'Ada göre' });
+    await page.locator("select.sort-pick").selectOption({ label: "Ada göre" });
     const alpha = await Promise.all((await names()).map((i) => i.inputValue()));
     expect(alpha).not.toEqual(entered);
     // Turkish collation, done by the browser: Ç sorts after C, not after Z.
-    expect([...alpha].sort((a, b) => a.localeCompare(b, 'tr'))).toEqual(alpha);
+    expect([...alpha].sort((a, b) => a.localeCompare(b, "tr"))).toEqual(alpha);
 
-    await page.getByLabel('Sırala').selectOption({ label: 'Ders yüküne göre (çok → az)' });
+    const sort = page.locator("select.sort-pick");
+    expect(await sort.locator("option").allInnerTexts()).not.toContainEqual(
+      expect.stringContaining("→"),
+    );
+    await sort.selectOption({ label: "Ders yüküne göre" });
     // Counted from the END for the same reason: "Ders saati" is always the
     // cell before the buttons, whatever gets inserted ahead of it.
-    const loads = await rows(page).locator('td:nth-last-child(2)').allInnerTexts();
+    const loads = await rows(page)
+      .locator("td:nth-last-child(2)")
+      .allInnerTexts();
     const numbers = loads.map((t) => Number(t.trim()));
     expect([...numbers].sort((a, b) => b - a)).toEqual(numbers);
   });
 
-  test('dersler listesi de aranıyor — 99 satırın olduğu tek yer', async ({ page }) => {
+  test("dersler listesi de aranıyor — 99 satırın olduğu tek yer", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
     await expect(rows(page)).toHaveCount(99);
 
     // The teacher's SHORT form is what the grid says, so it is what gets
     // remembered and therefore what gets typed.
-    await page.getByLabel('ders ara').fill('MÇ');
+    await page.getByLabel("ders ara").fill("MÇ");
     const found = await rows(page).count();
     expect(found).toBeGreaterThan(0);
     expect(found).toBeLessThan(99);
-    await expect(rows(page).first()).toContainText('MÇ');
+    await expect(rows(page).first()).toContainText("MÇ");
   });
 
-  test('hiçbir şey bulunamayınca söylüyor, boş tablo bırakmıyor', async ({ page }) => {
+  test("hiçbir şey bulunamayınca söylüyor, boş tablo bırakmıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
-    await page.getByLabel('sınıf ara').fill('böyle bir sınıf yok');
+    await openSetup(page, "Sınıflar");
+    await page.getByLabel("sınıf ara").fill("böyle bir sınıf yok");
     await expect(rows(page)).toHaveCount(0);
-    await expect(page.locator('.hint', { hasText: 'Bu aramaya uyan sınıf yok' })).toBeVisible();
+    await expect(
+      page.locator(".hint", { hasText: "Bu aramaya uyan sınıf yok" }),
+    ).toBeVisible();
   });
 });
 
@@ -122,40 +228,40 @@ test.describe('49. Liste araçları', () => {
 // ascending arrow — on the reasoning that a button's name says what pressing it
 // will do. True of the name; backwards for the picture, because the picture is
 // the only thing on screen that claims to describe the rows underneath it.
-test.describe('84. Sıralama yönü işareti', () => {
-  const dirButton = (page: import('@playwright/test').Page) =>
-    page.getByRole('button', { name: /sıralı\. /i });
+test.describe("84. Sıralama yönü işareti", () => {
+  const dirButton = (page: import("@playwright/test").Page) =>
+    page.getByRole("button", { name: /sıralı\. /i });
 
-  test('ok ŞU ANKİ yönü gösteriyor', async ({ page }) => {
+  test("ok ŞU ANKİ yönü gösteriyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
     // Nothing to reverse until a sort is chosen.
     await expect(dirButton(page)).toBeDisabled();
-    await page.locator('select.sort-pick').first().selectOption({ index: 1 });
+    await page.locator("select.sort-pick").first().selectOption({ index: 1 });
 
     const button = dirButton(page);
     await expect(button).toBeEnabled();
     await expect(button).toHaveAccessibleName(/^artan sıralı/i);
-    const up = await button.locator('svg').getAttribute('class');
+    const up = await button.locator("svg").getAttribute("class");
 
     await button.click();
     await expect(button).toHaveAccessibleName(/^azalan sıralı/i);
-    const down = await button.locator('svg').getAttribute('class');
+    const down = await button.locator("svg").getAttribute("class");
 
     // Two different icons, and each one names its own direction.
     expect(up).not.toBe(down);
-    expect(up).toContain('arrow-up');
-    expect(down).toContain('arrow-down');
+    expect(up).toContain("arrow-up");
+    expect(down).toContain("arrow-down");
   });
 
   // The arrow keys move a row, and they were only ever named in the accessible
   // name — so a reader who can see the handle was never told.
-  test('tutamak ok tuşlarını da SÖYLÜYOR', async ({ page }) => {
+  test("tutamak ok tuşlarını da SÖYLÜYOR", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    await expect(mainList(page).locator('.row-grip').first()).toHaveAttribute(
-      'title',
+    await openSetup(page, "Öğretmenler");
+    await expect(mainList(page).locator(".row-grip").first()).toHaveAttribute(
+      "title",
       /ok tuşlar/,
     );
   });

@@ -1,147 +1,204 @@
 // The Kurulum tab: four countable steps, the paste box, and the subject list
 // they feed.
 
-import { type Page } from '@playwright/test';
-import { expect, test } from './kapan';
-import { reopen, open, openWithSample, openSetup, openLessons, openSettings, addSubjects, dragAndDrop, mainList, answerDialog, chooseScale } from './helpers';
+import { type Page } from "@playwright/test";
+import { expect, test } from "./kapan";
+import {
+  reopen,
+  open,
+  openWithSample,
+  openSetup,
+  openLessons,
+  openSettings,
+  addSubjects,
+  dragAndDrop,
+  mainList,
+  answerDialog,
+  chooseScale,
+} from "./helpers";
 
-test.describe('5. Kurulum ve yedek', () => {
-  test('Excel yapıştırma önizleme gösterip ekliyor', async ({ page }) => {
+test.describe("5. Kurulum ve yedek", () => {
+  test("Excel yapıştırma önizleme gösterip ekliyor", async ({ page }) => {
     await open(page);
-    await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await openSetup(page, "Öğretmenler");
+    await page.getByRole("button", { name: "Excel'den yapıştır" }).click();
 
-    await page.locator('textarea').fill('Ali Vural\tAV\tMatematik\nDeniz Ak\tDA\tFizik');
-    await page.getByRole('button', { name: 'Önizle' }).click();
-    await expect(page.getByText('2 satır okundu.')).toBeVisible();
+    await page
+      .locator("textarea")
+      .fill("Ali Vural\tAV\tMatematik\nDeniz Ak\tDA\tFizik");
+    await page.getByRole("button", { name: "Önizle" }).click();
+    await expect(page.getByText("2 satır okundu.")).toBeVisible();
 
-    await page.getByRole('button', { name: /2 satırı ekle/ }).click();
-    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('2');
+    await page.getByRole("button", { name: /2 satırı ekle/ }).click();
+    await expect(
+      page.locator(".step", { hasText: "Öğretmenler" }),
+    ).toContainText("2");
   });
 
-  test('Kurulum adımlar hâlinde: sayaçlar doğru, geçiş serbest', async ({ page }) => {
+  test("Kurulum adımlar hâlinde: sayaçlar doğru, geçiş serbest", async ({
+    page,
+  }) => {
     await open(page);
     // An empty step is dimmed — that is the whole point of the counter
-    await expect(page.locator('.step', { hasText: 'Derslikler' })).toHaveAttribute(
-      'data-empty',
-      'true',
-    );
+    await expect(
+      page.locator(".step", { hasText: "Derslikler" }),
+    ).toHaveAttribute("data-empty", "true");
 
-    await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
+    await page.getByRole("button", { name: /Örnek veriyle doldur/ }).click();
     await answerDialog(page);
 
-    await expect(page.locator('.step', { hasText: 'Derslikler' })).toContainText('8');
-    await expect(page.locator('.step', { hasText: 'Öğretmenler' })).toContainText('25');
-    await expect(page.locator('.step', { hasText: 'Sınıflar' })).toContainText('20');
+    await expect(
+      page.locator(".step", { hasText: "Derslikler" }),
+    ).toContainText("8");
+    await expect(
+      page.locator(".step", { hasText: "Öğretmenler" }),
+    ).toContainText("25");
+    await expect(page.locator(".step", { hasText: "Sınıflar" })).toContainText(
+      "20",
+    );
 
     // FOUR steps: Dersler left for a tab of its own, and Branşlar came IN from
     // Ayarlar — the list a teacher picks from belongs beside the teacher.
-    await expect(page.locator('.ribbon .step')).toHaveCount(4);
-    await expect(page.getByRole('heading', { name: 'Zil ve günler' })).toHaveCount(0);
+    await expect(page.locator(".ribbon .step")).toHaveCount(4);
+    await expect(
+      page.getByRole("heading", { name: "Zil ve günler" }),
+    ).toHaveCount(0);
 
     // Only the current step is on screen; the 1132-line scroll is gone
-    await expect(page.getByRole('heading', { name: /^Derslikler/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: /^Derslikler/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /^Öğretmenler/ }),
+    ).toHaveCount(0);
 
-    await openSetup(page, 'Öğretmenler');
-    await expect(page.getByRole('heading', { name: /^Öğretmenler/ })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /^Derslikler/ })).toHaveCount(0);
+    await openSetup(page, "Öğretmenler");
+    await expect(
+      page.getByRole("heading", { name: /^Öğretmenler/ }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /^Derslikler/ }),
+    ).toHaveCount(0);
 
     // Not a locked wizard: jumping straight to the last step works.
-    await openSetup(page, 'Sınıflar');
-    await expect(page.locator('.step[aria-pressed="true"]')).toContainText('Sınıflar');
+    await openSetup(page, "Sınıflar");
+    await expect(page.locator('.step[aria-pressed="true"]')).toContainText(
+      "Sınıflar",
+    );
 
     // The strip is the ONLY way between steps now. "Kurulum durumu" used to be
     // a second one, and it repeated the four counters three pixels below the
     // ones that are already in the strip.
-    await expect(page.locator('.panel', { hasText: 'Kurulum durumu' })).toHaveCount(0);
+    await expect(
+      page.locator(".panel", { hasText: "Kurulum durumu" }),
+    ).toHaveCount(0);
   });
 
-  test('kısaltma addan üretiliyor, çakışma uyarısı çıkıyor', async ({ page }) => {
+  test("kısaltma addan üretiliyor, çakışma uyarısı çıkıyor", async ({
+    page,
+  }) => {
     await open(page);
-    await addSubjects(page, 'Matematik', 'Fizik');
-    await openSetup(page, 'Öğretmenler');
+    await addSubjects(page, "Matematik", "Fizik");
+    await openSetup(page, "Öğretmenler");
 
-    const name = page.getByPlaceholder('Ad Soyad');
-    const short = page.getByLabel('Kısaltma');
-    const branch = page.getByLabel('Branş', { exact: true });
+    const name = page.getByPlaceholder("Ad Soyad");
+    const short = page.getByLabel("Kısaltma");
+    const branch = page.getByLabel("Branş", { exact: true });
 
     // The placeholder shows what will be derived, live
-    await name.fill('Ahmet Sarı');
-    await expect(short).toHaveAttribute('placeholder', 'AS');
-    await branch.selectOption('Matematik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await name.fill("Ahmet Sarı");
+    await expect(short).toHaveAttribute("placeholder", "AS");
+    await branch.selectOption("Matematik");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
 
     // "Ayşe Solmaz" derives AS as well — in a real 25-person list this happens
-    await name.fill('Ayşe Solmaz');
-    await expect(short).toHaveAttribute('placeholder', 'AS');
-    await branch.selectOption('Fizik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await name.fill("Ayşe Solmaz");
+    await expect(short).toHaveAttribute("placeholder", "AS");
+    await branch.selectOption("Fizik");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
 
-    const warning = page.locator('.warn-box', { hasText: 'Aynı kısaltma' });
+    const warning = page.locator(".warn-box", { hasText: "Aynı kısaltma" });
     await expect(warning).toBeVisible();
-    await expect(warning).toContainText('Ahmet Sarı, Ayşe Solmaz');
+    await expect(warning).toContainText("Ahmet Sarı, Ayşe Solmaz");
 
     // Fixing one of them clears the warning
-    const secondShort = page.locator('table.list tbody tr').nth(1).locator('input').nth(1);
-    await secondShort.fill('AYS');
+    const secondShort = page
+      .locator("table.list tbody tr")
+      .nth(1)
+      .locator("input")
+      .nth(1);
+    await secondShort.fill("AYS");
     await secondShort.blur();
-    await expect(page.locator('.warn-box', { hasText: 'Aynı kısaltma' })).toHaveCount(0);
+    await expect(
+      page.locator(".warn-box", { hasText: "Aynı kısaltma" }),
+    ).toHaveCount(0);
   });
 
-  test('silmeden önce her zaman soruyor ve ne gideceğini sayıyor', async ({ page }) => {
+  test("silmeden önce her zaman soruyor ve ne gideceğini sayıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Derslikler');
+    await openSetup(page, "Derslikler");
 
     // Deleting a room used to ask NOTHING at all
-    const rows = mainList(page).locator('tbody tr');
+    const rows = mainList(page).locator("tbody tr");
     const before = await rows.count();
-    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await rows.first().getByRole("button", { name: "Sil" }).click();
     // Cancelled -> nothing may change, and the sentence has to have COUNTED.
-    const asked = await answerDialog(page, 'cancel');
-    expect(asked).toContain('dersliği silinecek');
-    expect(asked).toContain('sınıfın dersliği boşalacak');
-    expect(asked).toContain('çakışması artık kontrol edilmeyecek');
+    const asked = await answerDialog(page, "cancel");
+    expect(asked).toContain("dersliği silinecek");
+    expect(asked).toContain("sınıfın dersliği boşalacak");
+    expect(asked).toContain("çakışması artık kontrol edilmeyecek");
     await expect(rows).toHaveCount(before);
 
     // Confirmed, it goes
-    await rows.first().getByRole('button', { name: 'Sil' }).click();
+    await rows.first().getByRole("button", { name: "Sil" }).click();
     await answerDialog(page);
     await expect(rows).toHaveCount(before - 1);
   });
-
 });
 
-test.describe('12. Branş kısaltmaları', () => {
-  test('kısaltma hücrede DE satır başında DA, ve ikisi aynı', async ({ page }) => {
+test.describe("12. Branş kısaltmaları", () => {
+  test("kısaltma hücrede DE satır başında DA, ve ikisi aynı", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
 
     // "Matematik" does not fit a 34px cell; the short form does.
-    const card = page.locator('table.grid .card').first();
-    const teacher = (await card.locator('.card-top').textContent())!.trim();
-    const subject = (await card.locator('.card-bottom').textContent())!.trim();
+    const card = page.locator("table.grid .card").first();
+    const teacher = (await card.locator(".card-top").textContent())!.trim();
+    const subject = (await card.locator(".card-bottom").textContent())!.trim();
     expect(subject.length).toBeLessThanOrEqual(4);
 
     // And the row head says the SAME thing, which until 2026-08-29 it did not:
     // it carried the full name and cut it off with an ellipsis, so one grid
     // spoke two vocabularies about one subject. Asked for in one line:
     // "program kısmında branşlar kısaltmalar olsun sol tarafta".
-    await page.getByRole('button', { name: 'Öğretmen görünümü' }).click();
-    const head = page.locator('tbody tr', {
-      has: page.locator('.row-head .inspect', { hasText: new RegExp(`^${teacher}$`) }),
-    }).locator('.row-head .secondary');
+    await page.getByRole("button", { name: "Öğretmen görünümü" }).click();
+    const head = page
+      .locator("tbody tr", {
+        has: page.locator(".row-head .inspect", {
+          hasText: new RegExp(`^${teacher}$`),
+        }),
+      })
+      .locator(".row-head .secondary");
     await expect(head).toContainText(subject);
   });
 
-  test('Branşlar adımından değiştirilince ızgara ve baskı birlikte değişiyor', async ({ page }) => {
+  test("Branşlar adımından değiştirilince ızgara ve baskı birlikte değişiyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await dragAndDrop(page);
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
-    const before = (await page.locator('table.grid .card-bottom').first().textContent())!;
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
+    const before = (await page
+      .locator("table.grid .card-bottom")
+      .first()
+      .textContent())!;
 
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
     // The row is found by its NAME attribute, not by its text: since the name
     // became editable it lives in an input's value, and a row's text no longer
     // contains it. The short-form box is asked for by its own label, because
@@ -150,45 +207,49 @@ test.describe('12. Branş kısaltmaları', () => {
       has: page.locator(`input.text-sm[value="${before}"]`),
     });
     await expect(target).toHaveCount(1);
-    const input = target.getByRole('textbox', { name: /kısaltması$/ });
+    const input = target.getByRole("textbox", { name: /kısaltması$/ });
     // The box comes FILLED with the default, not with a faint placeholder
     await expect(input).toHaveValue(before);
 
-    await input.fill('Zzz');
+    await input.fill("Zzz");
     await input.blur();
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
-    await expect(page.locator('table.grid .card-bottom').first()).toHaveText('Zzz');
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
+    await expect(page.locator("table.grid .card-bottom").first()).toHaveText(
+      "Zzz",
+    );
 
     // ...and the printed page uses the same short form
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await expect(page.locator('.print-area')).toContainText('Zzz');
+    await page.getByRole("button", { name: "Çıktı", exact: true }).click();
+    await expect(page.locator(".print-area")).toContainText("Zzz");
   });
 
-  test('varsayılana geri yazılınca override kayboluyor', async ({ page }) => {
+  test("varsayılana geri yazılınca override kayboluyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
 
-    const row = page.locator('table.list tr[data-row-name]').first();
+    const row = page.locator("table.list tr[data-row-name]").first();
     // The SHORT form box by its own label: the row carries two text inputs
     // since the name became editable.
-    const input = row.getByRole('textbox', { name: /kısaltması$/ });
+    const input = row.getByRole("textbox", { name: /kısaltması$/ });
     const original = (await input.inputValue())!;
 
     // The built-in short is a COLUMN now, not a sentence repeated on every
     // row: the word "varsayılan" is the heading and the cell holds the value
     // alone, or the empty-cell dash where the box already carries it.
-    const note = row.locator('td.hint');
-    await input.fill('Zzz');
+    const note = row.locator("td.hint");
+    await input.fill("Zzz");
     await input.blur();
     await expect(note).toHaveText(original);
-    await expect(page.getByRole('columnheader', { name: 'Varsayılan' })).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "Varsayılan" }),
+    ).toBeVisible();
 
     await input.fill(original);
     await input.blur();
-    await expect(note).toHaveText('–');
-    await expect(row).not.toContainText('varsayılan');
+    await expect(note).toHaveText("–");
+    await expect(row).not.toContainText("varsayılan");
   });
 });
 
@@ -199,100 +260,122 @@ test.describe('12. Branş kısaltmaları', () => {
 // "Mat", so on paper the two were indistinguishable and nothing warned about
 // it. The branch is now picked from the school's own list.
 
-test.describe('16. Branş seçimi', () => {
-  test('öğretmenin branşı açılır listeden seçiliyor, metin kutusu yok', async ({ page }) => {
+test.describe("16. Branş seçimi", () => {
+  test("öğretmenin branşı açılır listeden seçiliyor, metin kutusu yok", async ({
+    page,
+  }) => {
     await open(page);
-    await addSubjects(page, 'Matematik');
-    await openSetup(page, 'Öğretmenler');
+    await addSubjects(page, "Matematik");
+    await openSetup(page, "Öğretmenler");
 
-    const branch = page.getByLabel('Branş', { exact: true });
-    await expect(branch).toHaveJSProperty('tagName', 'SELECT');
-    await expect(page.getByPlaceholder('Branş')).toHaveCount(0);
+    const branch = page.getByLabel("Branş", { exact: true });
+    await expect(branch).toHaveJSProperty("tagName", "SELECT");
+    await expect(page.getByPlaceholder("Branş")).toHaveCount(0);
 
     // Branch is required: half a teacher record is not worth storing
-    await page.getByPlaceholder('Ad Soyad').fill('Mehmet Çelik');
-    await expect(page.getByRole('button', { name: 'Ekle', exact: true })).toBeDisabled();
+    await page.getByPlaceholder("Ad Soyad").fill("Mehmet Çelik");
+    await expect(
+      page.getByRole("button", { name: "Ekle", exact: true }),
+    ).toBeDisabled();
 
-    await branch.selectOption('Matematik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
-    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
-    await expect(page.getByLabel('MÇ branşı')).toHaveValue('Matematik');
+    await branch.selectOption("Matematik");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
+    await expect(mainList(page).locator("tbody tr")).toHaveCount(1);
+    await expect(page.getByLabel("MÇ branşı")).toHaveValue("Matematik");
   });
 
-  test('“+ Yeni branş” hem öğretmene atanıyor hem listeye giriyor', async ({ page }) => {
+  test("“+ Yeni branş” hem öğretmene atanıyor hem listeye giriyor", async ({
+    page,
+  }) => {
     await open(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
-    await page.getByPlaceholder('Ad Soyad').fill('Ayşe Yıldız');
-    await page.getByLabel('Branş', { exact: true }).selectOption({ label: '+ Yeni branş…' });
-    await page.getByLabel('Yeni branşın adı').fill('Robotik');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await page.getByPlaceholder("Ad Soyad").fill("Ayşe Yıldız");
+    await page
+      .getByLabel("Branş", { exact: true })
+      .selectOption({ label: "+ Yeni branş…" });
+    await page.getByLabel("Yeni branşın adı").fill("Robotik");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
 
-    await expect(page.getByLabel('AY branşı')).toHaveValue('Robotik');
+    await expect(page.getByLabel("AY branşı")).toHaveValue("Robotik");
 
     // ...and it is in the school's list from now on, with a short form
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
     const row = page.locator(`table.list tr[data-row-name="Robotik"]`);
     await expect(row).toHaveCount(1);
-    await expect(row.getByRole('textbox', { name: /kısaltması$/ })).toHaveValue('Rob');
+    await expect(row.getByRole("textbox", { name: /kısaltması$/ })).toHaveValue(
+      "Rob",
+    );
   });
 
-  test('kullanılan branş silinemiyor ve kimin kullandığı yazıyor', async ({ page }) => {
+  test("kullanılan branş silinemiyor ve kimin kullandığı yazıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
 
     await page
       .locator(`table.list tr[data-row-name="Matematik"]`)
-      .getByRole('button', { name: 'Sil' })
+      .getByRole("button", { name: "Sil" })
       .click();
 
     const said = await answerDialog(page);
-    expect(said).toContain('öğretmen bu branşta');
-    expect(said).toContain('Önce onların branşını değiştirin');
-    await expect(page.locator(`table.list tr[data-row-name="Matematik"]`)).toHaveCount(1);
+    expect(said).toContain("öğretmen bu branşta");
+    expect(said).toContain("Önce onların branşını değiştirin");
+    await expect(
+      page.locator(`table.list tr[data-row-name="Matematik"]`),
+    ).toHaveCount(1);
   });
 
-  test('kullanılmayan branş listeden çıkarılıyor ve açılır listede kalmıyor', async ({
+  test("kullanılmayan branş listeden çıkarılıyor ve açılır listede kalmıyor", async ({
     page,
   }) => {
     await open(page);
     // Put them on the list first — through the offer panel, which is what a
     // new project's Branşlar step actually looks like.
-    await addSubjects(page, 'Matematik', 'Fransızca');
+    await addSubjects(page, "Matematik", "Fransızca");
 
     await page
       .locator(`table.list tr[data-row-name="Fransızca"]`)
-      .getByRole('button', { name: 'Sil' })
+      .getByRole("button", { name: "Sil" })
       .click();
     await answerDialog(page);
-    await expect(page.locator(`table.list tr[data-row-name="Fransızca"]`)).toHaveCount(0);
+    await expect(
+      page.locator(`table.list tr[data-row-name="Fransızca"]`),
+    ).toHaveCount(0);
 
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     // By VALUE: an option reads "Mat · Matematik" now, and what this test asks
     // is which subjects the dropdown still OFFERS.
     const options = await page
-      .getByLabel('Branş', { exact: true })
-      .locator('option')
+      .getByLabel("Branş", { exact: true })
+      .locator("option")
       .evaluateAll((els) => els.map((e) => (e as HTMLOptionElement).value));
-    expect(options).not.toContain('Fransızca');
-    expect(options).toContain('Matematik');
+    expect(options).not.toContain("Fransızca");
+    expect(options).toContain("Matematik");
   });
 
-  test('yapıştırılan listedeki yeni branş okul listesine giriyor', async ({ page }) => {
+  test("yapıştırılan listedeki yeni branş okul listesine giriyor", async ({
+    page,
+  }) => {
     await open(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
+    await page.getByRole("button", { name: "Excel'den yapıştır" }).click();
     await page
-      .locator('textarea')
-      .fill('Kerem Aslan\tKA\tRobotik\nSelin Demir\tSD\tAstronomi');
-    await page.getByRole('button', { name: 'Önizle' }).click();
-    await page.getByRole('button', { name: /2 satırı ekle/ }).click();
+      .locator("textarea")
+      .fill("Kerem Aslan\tKA\tRobotik\nSelin Demir\tSD\tAstronomi");
+    await page.getByRole("button", { name: "Önizle" }).click();
+    await page.getByRole("button", { name: /2 satırı ekle/ }).click();
 
-    await expect(page.getByLabel('KA branşı')).toHaveValue('Robotik');
-    await openSetup(page, 'Branşlar');
-    await expect(page.locator(`table.list tr[data-row-name="Robotik"]`)).toHaveCount(1);
-    await expect(page.locator(`table.list tr[data-row-name="Astronomi"]`)).toHaveCount(1);
+    await expect(page.getByLabel("KA branşı")).toHaveValue("Robotik");
+    await openSetup(page, "Branşlar");
+    await expect(
+      page.locator(`table.list tr[data-row-name="Robotik"]`),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(`table.list tr[data-row-name="Astronomi"]`),
+    ).toHaveCount(1);
   });
 });
 
@@ -301,177 +384,207 @@ test.describe('16. Branş seçimi', () => {
 // not — and every box here is `defaultValue` + `onBlur`, a deliberate choice
 // (pitfall 3) whose wiring nothing was checking.
 
-test.describe('30. Kurulum — düzenleme', () => {
-  test('derslik adı değiştirilebiliyor ve sınıflarda görünüyor', async ({ page }) => {
+test.describe("30. Kurulum — düzenleme", () => {
+  test("derslik adı değiştirilebiliyor ve sınıflarda görünüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Derslikler');
+    await openSetup(page, "Derslikler");
 
-    const first = page.locator('table.list tbody tr').first();
-    await first.locator('input').fill('Z');
-    await first.locator('input').blur();
-    await expect(first.locator('input')).toHaveValue('Z');
+    const first = page.locator("table.list tbody tr").first();
+    await first.locator("input").fill("Z");
+    await first.locator("input").blur();
+    await expect(first.locator("input")).toHaveValue("Z");
 
-    await openSetup(page, 'Sınıflar');
-    await expect(page.getByLabel('410 dersliği')).toContainText('Z');
+    await openSetup(page, "Sınıflar");
+    await expect(page.getByLabel("410 dersliği")).toContainText("Z");
   });
 
-  test('öğretmenin adı, kısaltması ve branşı değiştirilebiliyor', async ({ page }) => {
+  test("öğretmenin adı, kısaltması ve branşı değiştirilebiliyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const row = page.locator('table.list tbody tr').first();
+    await openSetup(page, "Öğretmenler");
+    const row = page.locator("table.list tbody tr").first();
 
-    await row.locator('input[type=text]').first().fill('Yeni Ad');
-    await row.locator('input[type=text]').first().blur();
-    await row.locator('input[type=text]').nth(1).fill('YA');
-    await row.locator('input[type=text]').nth(1).blur();
+    await row.locator("input[type=text]").first().fill("Yeni Ad");
+    await row.locator("input[type=text]").first().blur();
+    await row.locator("input[type=text]").nth(1).fill("YA");
+    await row.locator("input[type=text]").nth(1).blur();
     // The label follows the short form, which the line above just changed.
-    await row.getByLabel('YA branşı').selectOption('Fizik');
+    await row.getByLabel("YA branşı").selectOption("Fizik");
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
     // "Fzk", not "Fizik": the row head reads the subject SHORT, the same string
     // the cells of its own row carry.
-    await expect(page.getByRole('rowheader', { name: 'YA Fzk' })).toBeVisible();
+    await expect(page.getByRole("rowheader", { name: "YA Fzk" })).toBeVisible();
   });
 
-  test('öğretmen sınırı: boş kutu okul varsayılanını kullanıyor', async ({ page }) => {
+  test("öğretmen sınırı: boş kutu okul varsayılanını kullanıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSettings(page, 'Kurallar');
-    const rule = page.locator('table.list tr', { hasText: 'Öğretmen art arda en fazla' });
-    await rule.locator('input[type=number]').fill('3');
-    await rule.locator('input[type=number]').blur();
+    await openSettings(page, "Kurallar");
+    const rule = page.locator("table.list tr", {
+      hasText: "Öğretmen art arda en fazla",
+    });
+    await rule.locator("input[type=number]").fill("3");
+    await rule.locator("input[type=number]").blur();
 
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     // Row 1, not row 0: the sample gives every third teacher a limit of their
     // own, and an overridden box would not show the default at all.
-    const box = page.locator('table.list tbody tr').nth(1).locator('input[type=number]').first();
+    const box = page
+      .locator("table.list tbody tr")
+      .nth(1)
+      .locator("input[type=number]")
+      .first();
     // Empty means "use the school default", and the default is shown as the
     // placeholder so an empty box still says what it will do.
-    await expect(box).toHaveValue('');
-    await expect(box).toHaveAttribute('placeholder', '3');
+    await expect(box).toHaveValue("");
+    await expect(box).toHaveAttribute("placeholder", "3");
 
-    await box.fill('1');
+    await box.fill("1");
     await box.blur();
-    await expect(box).toHaveValue('1');
+    await expect(box).toHaveValue("1");
 
-    await box.fill('');
+    await box.fill("");
     await box.blur();
-    await expect(box).toHaveValue('');
-    await expect(box).toHaveAttribute('placeholder', '3');
+    await expect(box).toHaveValue("");
+    await expect(box).toHaveAttribute("placeholder", "3");
   });
 
-  test('sınıfın adı ve dersliği değiştirilebiliyor', async ({ page }) => {
+  test("sınıfın adı ve dersliği değiştirilebiliyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
-    const row = page.locator('table.list tbody tr').first();
+    await openSetup(page, "Sınıflar");
+    const row = page.locator("table.list tbody tr").first();
 
-    await row.locator('input[type=text]').fill('999');
-    await row.locator('input[type=text]').blur();
-    await page.getByLabel('999 dersliği').selectOption({ label: 'B' });
+    await row.locator("input[type=text]").fill("999");
+    await row.locator("input[type=text]").blur();
+    await page.getByLabel("999 dersliği").selectOption({ label: "B" });
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page.getByRole('button', { name: 'Sınıf görünümü' }).click();
-    await expect(page.locator('tbody .row-head', { hasText: '999' })).toContainText('B dersliği');
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
+    await expect(
+      page.locator("tbody .row-head", { hasText: "999" }),
+    ).toContainText("B dersliği");
   });
 
-  test('dersin haftalık saati ve blok boyu değiştirilebiliyor', async ({ page }) => {
+  test("dersin haftalık saati ve blok boyu değiştirilebiliyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
-    const row = page.locator('table.list tbody tr').first();
-    const hours = row.locator('input[type=number].num').first();
+    const row = page.locator("table.list tbody tr").first();
+    const hours = row.locator("input[type=number].num").first();
 
-    await hours.fill('6');
+    await hours.fill("6");
     await hours.blur();
     // Boxes are asked for BY NAME rather than by position: the split editor is
     // three inputs of its own next to the hours, and an nth() into that row
     // silently meant "however many number boxes there happen to be".
-    const twos = row.getByRole('spinbutton', { name: '2 saatlik blok sayısı' });
-    await twos.fill('3');
+    const twos = row.getByRole("spinbutton", { name: "2 saatlik blok sayısı" });
+    await twos.fill("3");
 
-    await expect(hours).toHaveValue('6');
-    await expect(twos).toHaveValue('3');
+    await expect(hours).toHaveValue("6");
+    await expect(twos).toHaveValue("3");
     // Three terms, so it is NOT folded: up to four the sum is a picture of
     // the week and "3×2" is arithmetic about it (see `patternLabel`).
-    await expect(row.locator('.split-shape')).toHaveText('2+2+2');
+    await expect(row.locator(".split-shape")).toHaveText("2+2+2");
 
     // The pool counter reads off the same numbers.
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('.pool-card .counter').first()).toContainText('/');
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await expect(page.locator(".pool-card .counter").first()).toContainText(
+      "/",
+    );
   });
 
-  test('boş adla ekleme yapılamıyor', async ({ page }) => {
+  test("boş adla ekleme yapılamıyor", async ({ page }) => {
     await open(page);
-    await openSetup(page, 'Derslikler');
-    const add = page.getByRole('button', { name: 'Ekle', exact: true });
+    await openSetup(page, "Derslikler");
+    const add = page.getByRole("button", { name: "Ekle", exact: true });
     await expect(add).toBeDisabled();
 
-    await page.getByPlaceholder('Derslik adı, örn. A').fill('   ');
+    await page.getByPlaceholder("Derslik adı, örn. A").fill("   ");
     await expect(add).toBeDisabled();
   });
 
-  test('Enter ile ekleniyor', async ({ page }) => {
+  test("Enter ile ekleniyor", async ({ page }) => {
     await open(page);
-    await openSetup(page, 'Derslikler');
-    await page.getByPlaceholder('Derslik adı, örn. A').fill('Q');
-    await page.getByPlaceholder('Derslik adı, örn. A').press('Enter');
-    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
+    await openSetup(page, "Derslikler");
+    await page.getByPlaceholder("Derslik adı, örn. A").fill("Q");
+    await page.getByPlaceholder("Derslik adı, örn. A").press("Enter");
+    await expect(mainList(page).locator("tbody tr")).toHaveCount(1);
   });
 
-  test('yerleşimi olan dersi silmek ne kaybedileceğini sayıyor', async ({ page }) => {
+  test("yerleşimi olan dersi silmek ne kaybedileceğini sayıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    const { dragAndDrop } = await import('./helpers');
+    const { dragAndDrop } = await import("./helpers");
     await dragAndDrop(page);
 
     await openLessons(page);
-    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
-    expect(await answerDialog(page, 'cancel')).toContain('silinecek');
+    await mainList(page)
+      .locator("tbody tr")
+      .first()
+      .getByRole("button", { name: "Sil" })
+      .click();
+    expect(await answerDialog(page, "cancel")).toContain("silinecek");
   });
 });
 
-test.describe('31. Kurulum — sağ sütun', () => {
-  test('derslik adımında derslik yükü ve hangi sınıflar yazıyor', async ({ page }) => {
+test.describe("31. Kurulum — sağ sütun", () => {
+  test("derslik adımında derslik yükü ve hangi sınıflar yazıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Derslikler');
+    await openSetup(page, "Derslikler");
 
-    const side = page.locator('.cols aside');
-    await expect(side).toContainText('Derslik yükü');
-    await expect(side).toContainText('Hangi sınıflar');
-    await expect(side.locator('table.stat tbody tr')).toHaveCount(8);
+    const side = page.locator(".cols aside");
+    await expect(side).toContainText("Derslik yükü");
+    await expect(side).toContainText("Hangi sınıflar");
+    await expect(side.locator("table.stat tbody tr")).toHaveCount(8);
   });
 
-  test('öğretmen adımında yük ve branş dağılımı yazıyor', async ({ page }) => {
+  test("öğretmen adımında yük ve branş dağılımı yazıyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
-    const side = page.locator('.cols aside');
-    await expect(side).toContainText('Öğretmen yükü');
-    await expect(side).toContainText('Branşlar');
-    await expect(side.locator('table.stat tbody tr')).toHaveCount(25);
+    const side = page.locator(".cols aside");
+    await expect(side).toContainText("Öğretmen yükü");
+    await expect(side).toContainText("Branşlar");
+    await expect(side.locator("table.stat tbody tr")).toHaveCount(25);
   });
 
-  test('dersliksiz sınıf sağ sütunda uyarı çıkarıyor', async ({ page }) => {
+  test("dersliksiz sınıf sağ sütunda uyarı çıkarıyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
-    await page.getByLabel('410 dersliği').selectOption({ label: 'Derslik yok' });
+    await openSetup(page, "Sınıflar");
+    await page
+      .getByLabel("410 dersliği")
+      .selectOption({ label: "Derslik yok" });
 
-    await openSetup(page, 'Derslikler');
-    await expect(page.locator('.cols aside .warn-box')).toContainText('dersliği yok');
+    await openSetup(page, "Derslikler");
+    await expect(page.locator(".cols aside .warn-box")).toContainText(
+      "dersliği yok",
+    );
   });
 
   // This sentence outlived the panel it used to live in. It is the only warning
   // that a class was created and then forgotten, and nobody would go looking
   // for it — so when "Kurulum durumu" was deleted it moved into Özet rather
   // than going with it.
-  test('dersi olmayan sınıf Özet’te sayılıyor', async ({ page }) => {
+  test("dersi olmayan sınıf Özet’te sayılıyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder(/Sınıf adı/).fill('700');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await openSetup(page, "Sınıflar");
+    await page.getByPlaceholder(/Sınıf adı/).fill("700");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
 
-    await expect(page.locator('.cols aside .warn-box')).toContainText(
-      '1 sınıfın hiç dersi yok',
+    await expect(page.locator(".cols aside .warn-box")).toContainText(
+      "1 sınıfın hiç dersi yok",
     );
     // ...and so did the one number that decides whether the week fits at all.
-    await expect(page.locator('.cols aside')).toContainText('Sınıf başına');
+    await expect(page.locator(".cols aside")).toContainText("Sınıf başına");
   });
 
   // "Özetteki hatalar özetin en üstüne gelsin. Hata gidince yok olsun."
@@ -480,52 +593,64 @@ test.describe('31. Kurulum — sağ sütun', () => {
   // list under it — i.e. below the fold on the one panel whose job is to say
   // something is missing. Position, not existence, is what this measures, so it
   // asks the DOM which came first rather than reading the sentence again.
-  test('uyarı kapasite tablosunun ÜSTÜNDE, ve sorun gidince kayboluyor', async ({ page }) => {
+  test("uyarı kapasite tablosunun ÜSTÜNDE, ve sorun gidince kayboluyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
-    await page.getByPlaceholder(/Sınıf adı/).fill('700');
-    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await openSetup(page, "Sınıflar");
+    await page.getByPlaceholder(/Sınıf adı/).fill("700");
+    await page.getByRole("button", { name: "Ekle", exact: true }).click();
 
-    const panel = page.locator('.cols > aside > .panel');
+    const panel = page.locator(".cols > aside > .panel");
     const order = await panel.evaluate((el) => {
       const kids = [...el.children];
       return {
-        warn: kids.findIndex((c) => c.classList.contains('warn-box')),
-        table: kids.findIndex((c) => c.querySelector('table.stat') !== null),
+        warn: kids.findIndex((c) => c.classList.contains("warn-box")),
+        table: kids.findIndex((c) => c.querySelector("table.stat") !== null),
       };
     });
-    expect(order.warn, 'uyarı kutusu yok').toBeGreaterThan(-1);
-    expect(order.table, 'kapasite tablosu yok').toBeGreaterThan(-1);
-    expect(order.warn, 'uyarı tablonun altında kalmış').toBeLessThan(order.table);
+    expect(order.warn, "uyarı kutusu yok").toBeGreaterThan(-1);
+    expect(order.table, "kapasite tablosu yok").toBeGreaterThan(-1);
+    expect(order.warn, "uyarı tablonun altında kalmış").toBeLessThan(
+      order.table,
+    );
 
     // Give it a lesson and the warning is simply not drawn any more — no empty
     // heading, no gap where it used to be.
-    await openLessons(page, 'class');
-    await expect(panel.locator('.warn-box')).toHaveCount(0);
+    await openLessons(page, "class");
+    await expect(panel.locator(".warn-box")).toHaveCount(0);
   });
 
   // The rows that are wrong come first inside the table too. `problemsFirst` was
   // written for Kontrol and never passed here, so an "İmkânsız" teacher sat
   // wherever the list happened to put them.
-  test('kapasite tablosunda sorunlu satır EN ÜSTTE', async ({ page }) => {
+  test("kapasite tablosunda sorunlu satır EN ÜSTTE", async ({ page }) => {
     await openWithSample(page);
     // The LAST teacher in the list, closed for the whole week: capacity 0
     // against whatever they carry, so the row cannot be anything but
     // "İmkânsız". The last one on purpose — closing the first would put the
     // problem at the top whether anything sorted or not, and a test that passes
     // with the sort removed is measuring nothing (pitfall 23).
-    await page.getByRole('button', { name: 'Müsaitlik', exact: true }).click();
-    await page.locator('.entity').last().click();
-    const label = (await page.locator('.entity[aria-current="true"] .entity-name').innerText()).trim();
+    await page.getByRole("button", { name: "Müsaitlik", exact: true }).click();
+    await page.locator(".entity").last().click();
+    const label = (
+      await page
+        .locator('.entity[aria-current="true"] .entity-name')
+        .innerText()
+    ).trim();
     // "CA · Cem Aslan (Mat)" on the availability row; the summary carries the
     // plain name. Split rather than strip — no regex to get subtly wrong.
-    const who = label.split(' · ')[1]!.split(' (')[0]!;
-    await page.getByRole('button', { name: 'Tümünü kapat', exact: true }).click();
+    const who = label.split(" · ")[1]!.split(" (")[0]!;
+    await page
+      .getByRole("button", { name: "Tümünü kapat", exact: true })
+      .click();
 
-    await openSetup(page, 'Öğretmenler');
-    const first = page.locator('.cols > aside table.stat tbody tr').first();
-    await expect(first, 'sorunlu satır listenin sonunda kalmış').toContainText(who);
-    await expect(first.locator('.badge')).toHaveText('İmkânsız');
+    await openSetup(page, "Öğretmenler");
+    const first = page.locator(".cols > aside table.stat tbody tr").first();
+    await expect(first, "sorunlu satır listenin sonunda kalmış").toContainText(
+      who,
+    );
+    await expect(first.locator(".badge")).toHaveText("İmkânsız");
   });
 });
 
@@ -547,95 +672,167 @@ test.describe('31. Kurulum — sağ sütun', () => {
 // reader meets things in did not change, so neither did this test's point; what
 // it has to say now is that the two halves are two BOXES. That the second one
 // is separate is the request itself, so it is asserted rather than assumed.
-test.describe('44. Panel simetrisi', () => {
+test.describe("44. Panel simetrisi", () => {
   /** The tag/class sequence one panel actually renders, top to bottom. */
   async function shapeOf(page: Page, panel: string) {
-    return page.locator(panel).first().evaluate((el) =>
-      [...el.children]
-        .map((c) => {
-          if (c.tagName === 'H2') return 'baslik';
-          // The heading grew a button beside it ("Excel'den yapıştır" moved out
-          // of the form row), so it is wrapped. It is still the heading, and it
-          // is still first — which is the only thing this test is about.
-          if (c.classList.contains('panel-head')) return 'baslik';
-          // The paste box opens BELOW the form now instead of inside it. It is
-          // not part of the shape: it is closed on every one of these screens.
-          if (c.classList.contains('panel') && c.classList.contains('inset')) return '';
-          if (c.tagName === 'P' && c.classList.contains('hint')) return 'aciklama';
-          if (c.classList.contains('warn-box')) return 'uyari';
-          if (c.classList.contains('form-row')) return 'ekleme';
-          // The add block is a GRID now (`AddPanel.tsx`), so each of its three
-          // parts is wrapped in a track of its own — that is what gives the
-          // five screens one geometry, and it is also what let this test start
-          // reading the whole block as nothing but a heading.
-          if (c.classList.contains('add-panel-description')) return 'aciklama';
-          if (c.classList.contains('add-panel-notice')) return 'uyari';
-          if (c.classList.contains('add-panel-body')) return 'ekleme';
-          // The list lives in a scroll box now (eleven columns do not fit a
-          // 100%-wide table at 150%), so "the list" is either shape.
-          if (c.tagName === 'TABLE') return 'liste';
-          if (c.classList.contains('table-scroll')) return 'liste';
-          return '';
-        })
-        .filter(Boolean),
-    );
+    return page
+      .locator(panel)
+      .first()
+      .evaluate((el) =>
+        [...el.children]
+          .map((c) => {
+            if (c.tagName === "H2") return "baslik";
+            // The heading grew a button beside it ("Excel'den yapıştır" moved out
+            // of the form row), so it is wrapped. It is still the heading, and it
+            // is still first — which is the only thing this test is about.
+            if (c.classList.contains("panel-head")) return "baslik";
+            // The paste box opens BELOW the form now instead of inside it. It is
+            // not part of the shape: it is closed on every one of these screens.
+            if (c.classList.contains("panel") && c.classList.contains("inset"))
+              return "";
+            if (c.tagName === "P" && c.classList.contains("hint"))
+              return "aciklama";
+            if (c.classList.contains("warn-box")) return "uyari";
+            if (c.classList.contains("form-row")) return "ekleme";
+            // The add block is a GRID now (`AddPanel.tsx`), so each of its three
+            // parts is wrapped in a track of its own — that is what gives the
+            // five screens one geometry, and it is also what let this test start
+            // reading the whole block as nothing but a heading.
+            if (c.classList.contains("add-panel-description"))
+              return "aciklama";
+            if (c.classList.contains("add-panel-notice")) return "uyari";
+            if (c.classList.contains("add-panel-body")) return "ekleme";
+            // The list lives in a scroll box now (eleven columns do not fit a
+            // 100%-wide table at 150%), so "the list" is either shape.
+            if (c.tagName === "TABLE") return "liste";
+            if (c.classList.contains("table-scroll")) return "liste";
+            return "";
+          })
+          .filter(Boolean),
+      );
   }
+
+  test("beş yeni-ekleme panelinin başlık, açıklama ve form rayları eşit", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await openWithSample(page);
+    const screens = [
+      "Derslikler",
+      "Branşlar",
+      "Öğretmenler",
+      "Sınıflar",
+      "Dersler",
+    ];
+    const measured: Array<{
+      name: string;
+      height: number;
+      head: number;
+      desc: number;
+      body: number;
+    }> = [];
+    for (const name of screens) {
+      if (name === "Dersler") await openLessons(page);
+      else await openSetup(page, name);
+      const value = await page
+        .locator(".add-panel")
+        .first()
+        .evaluate((panel) => {
+          const p = panel.getBoundingClientRect();
+          const rel = (selector: string) =>
+            Math.round(
+              panel.querySelector(selector)!.getBoundingClientRect().top -
+                p.top,
+            );
+          return {
+            height: Math.round(p.height),
+            head: rel(".add-panel-head"),
+            desc: rel(".add-panel-description"),
+            body: rel(".add-panel-body"),
+          };
+        });
+      measured.push({ name, ...value });
+      await expect(page.locator(".add-panel-notice")).toHaveCount(0);
+    }
+    const reference = measured[0]!;
+    for (const panel of measured.slice(1)) {
+      expect(panel, panel.name).toEqual({
+        name: panel.name,
+        ...{
+          height: reference.height,
+          head: reference.head,
+          desc: reference.desc,
+          body: reference.body,
+        },
+      });
+    }
+  });
 
   // Dersler is in the list because it is the SAME kind of panel, even though it
   // is a tab of its own now: the shape is a rule about what a reader meets
   // first, and it does not stop applying when a screen changes address.
-  for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler']) {
+  for (const step of ["Derslikler", "Öğretmenler", "Sınıflar", "Dersler"]) {
     test(`${step}: başlık, açıklama, ekleme, liste`, async ({ page }) => {
       await openWithSample(page);
-      if (step === 'Dersler') await openLessons(page);
+      if (step === "Dersler") await openLessons(page);
       else await openSetup(page, step);
       // Two boxes, in this order, and the add one is FIRST: "ama yerleri
       // değişmesin".
-      const panels = page.locator('.cols > div > .panel');
-      await expect(panels, `${step}: ekleme ve liste iki ayrı blok değil`).toHaveCount(2);
+      const panels = page.locator(".cols > div > .panel");
+      await expect(
+        panels,
+        `${step}: ekleme ve liste iki ayrı blok değil`,
+      ).toHaveCount(2);
       await expect(panels.nth(0)).toHaveClass(/add-panel/);
       await expect(panels.nth(1)).toHaveClass(/step-panel/);
 
-      const add = await shapeOf(page, '.panel.add-panel');
-      const list = await shapeOf(page, '.panel.step-panel');
+      const add = await shapeOf(page, ".panel.add-panel");
+      const list = await shapeOf(page, ".panel.step-panel");
 
       // The add block names the work, explains it, then asks for it. Warnings
       // are dropped rather than placed: Dersler grows one between the two when
       // there is nothing to add a lesson TO, and where it appears is that
       // screen's business, not this rule's.
       expect(
-        add.filter((x) => x !== 'uyari'),
+        add.filter((x) => x !== "uyari"),
         `${step} ekleme bloğu`,
-      ).toEqual(['baslik', 'aciklama', 'ekleme']);
+      ).toEqual(["baslik", "aciklama", "ekleme"]);
       // The list block names what it holds. What follows (search strip, "no
       // match" line, the table) is the list, and only its ORDER is fixed.
-      expect(list[0], `${step} liste bloğu başlıkla açmıyor`).toBe('baslik');
-      expect(list.indexOf('liste'), `${step}: listede tablo yok`).toBeGreaterThan(0);
+      expect(list[0], `${step} liste bloğu başlıkla açmıyor`).toBe("baslik");
+      expect(
+        list.indexOf("liste"),
+        `${step}: listede tablo yok`,
+      ).toBeGreaterThan(0);
     });
   }
 
-  test('Ayarlar → Zil ve günler: açıklama formdan ÖNCE', async ({ page }) => {
+  test("Ayarlar → Zil ve günler: açıklama formdan ÖNCE", async ({ page }) => {
     await openWithSample(page);
-    await openSettings(page, 'Zil ve günler');
-    const shape = await shapeOf(page, '.cols > div > .panel');
-    expect(shape.slice(0, 3)).toEqual(['baslik', 'aciklama', 'ekleme']);
+    await openSettings(page, "Zil ve günler");
+    const shape = await shapeOf(page, ".cols > div > .panel");
+    expect(shape.slice(0, 3)).toEqual(["baslik", "aciklama", "ekleme"]);
   });
 
-  test('Ayarlar → Planlar: yeni plan formu listenin ÜSTÜNDE', async ({ page }) => {
+  test("Ayarlar → Planlar: yeni plan formu listenin ÜSTÜNDE", async ({
+    page,
+  }) => {
     await openWithSample(page);
     // Its own section since 2026-08-28; the panel and its shape did not move.
-    await openSettings(page, 'Planlar ve yedek');
-    const plans = page.locator('.panel', { hasText: 'Yeni plan' }).first();
+    await openSettings(page, "Planlar ve yedek");
+    const plans = page.locator(".panel", { hasText: "Yeni plan" }).first();
     const order = await plans.evaluate((el) => {
       const kids = [...el.children];
       return {
-        form: kids.findIndex((c) => c.classList.contains('form-row')),
-        table: kids.findIndex((c) => c.tagName === 'TABLE'),
+        form: kids.findIndex((c) => c.classList.contains("form-row")),
+        table: kids.findIndex((c) => c.tagName === "TABLE"),
       };
     });
     expect(order.form).toBeGreaterThan(-1);
     expect(order.table).toBeGreaterThan(-1);
-    expect(order.form, 'ekleme formu listenin altında kalmış').toBeLessThan(order.table);
+    expect(order.form, "ekleme formu listenin altında kalmış").toBeLessThan(
+      order.table,
+    );
   });
 });
 
@@ -649,101 +846,116 @@ test.describe('44. Panel simetrisi', () => {
 //
 // It deliberately does NOT reach the paper. Nobody asked for a form of address
 // on a timetable, and a printed sheet is the last place to guess at one.
-test.describe('63. Öğretmende cinsiyet', () => {
+test.describe("63. Öğretmende cinsiyet", () => {
   const row = (page: Page, n: number) =>
-    mainList(page).locator('tbody tr').nth(n);
+    mainList(page).locator("tbody tr").nth(n);
 
-  test('seçilen cinsiyet YENİLEMEDEN sonra da duruyor', async ({ page }) => {
+  test("seçilen cinsiyet YENİLEMEDEN sonra da duruyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
 
     // Mehmet Çelik ships as "Erkek"; İlknur Aydın as "Kadın".
-    const first = row(page, 0).locator('select').nth(1);
-    await expect(first).toHaveValue('e');
+    const first = row(page, 0).locator("select").nth(1);
+    await expect(first).toHaveValue("e");
 
-    await first.selectOption('k');
+    await first.selectOption("k");
     await reopen(page);
-    await openSetup(page, 'Öğretmenler');
-    await expect(row(page, 0).locator('select').nth(1)).toHaveValue('k');
+    await openSetup(page, "Öğretmenler");
+    await expect(row(page, 0).locator("select").nth(1)).toHaveValue("k");
   });
 
-  test('belirtilmemiş de bir DEĞER — boş bırakılabiliyor', async ({ page }) => {
+  test("belirtilmemiş de bir DEĞER — boş bırakılabiliyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const box = row(page, 0).locator('select').nth(1);
-    await box.selectOption('');
-    await expect(box).toHaveValue('');
+    await openSetup(page, "Öğretmenler");
+    const box = row(page, 0).locator("select").nth(1);
+    await box.selectOption("");
+    await expect(box).toHaveValue("");
 
     // And it is not only reachable, it is SHIPPED: "Deniz" is genuinely both,
     // so the sample carries the blank the real staff list will carry.
-    await page.getByLabel('öğretmen ara').fill('Deniz Erdem');
-    await expect(mainList(page).locator('tbody tr')).toHaveCount(1);
-    await expect(row(page, 0).locator('select[aria-label*="cinsiyeti"]')).toHaveValue('');
+    await page.getByLabel("öğretmen ara").fill("Deniz Erdem");
+    await expect(mainList(page).locator("tbody tr")).toHaveCount(1);
+    await expect(
+      row(page, 0).locator('select[aria-label*="cinsiyeti"]'),
+    ).toHaveValue("");
   });
 
-  test('çip satırı süzüyor — Branş’ın YANINDA, yerine değil', async ({ page }) => {
+  test("çip satırı süzüyor — Branş’ın YANINDA, yerine değil", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const rows = mainList(page).locator('tbody tr');
+    await openSetup(page, "Öğretmenler");
+    const rows = mainList(page).locator("tbody tr");
     await expect(rows).toHaveCount(25);
 
-    const women = page.getByRole('button', { name: /^Kadın/ });
+    const women = page.getByRole("button", { name: /^Kadın/ });
     await expect(women).toBeVisible();
     await women.click();
     await expect(rows).toHaveCount(11);
 
     // Both chip rows exist and NARROW together rather than replacing each other.
-    await page.getByRole('button', { name: /^Matematik/ }).first().click();
+    await page
+      .getByRole("button", { name: /^Matematik/ })
+      .first()
+      .click();
     const both = await rows.count();
     expect(both).toBeGreaterThan(0);
     expect(both).toBeLessThan(11);
 
-    await page.getByRole('button', { name: 'Süzmeyi kaldır' }).click();
+    await page.getByRole("button", { name: "Süzmeyi kaldır" }).click();
     await expect(rows).toHaveCount(25);
   });
 
-  test('cinsiyete göre sıralama gerçekten sıralıyor', async ({ page }) => {
+  test("cinsiyete göre sıralama gerçekten sıralıyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    await page.getByLabel('Sırala').selectOption({ label: 'Cinsiyete göre' });
+    await openSetup(page, "Öğretmenler");
+    await page
+      .locator("select.sort-pick")
+      .selectOption({ label: "Cinsiyete göre" });
 
     const values = await mainList(page)
       .locator('tbody tr td select[aria-label*="cinsiyeti"]')
       .evaluateAll((els) => els.map((e) => (e as HTMLSelectElement).value));
     // Turkish order of the LABELS: Belirtilmemiş, Erkek, Kadın.
-    expect(values).toEqual([...values].sort((a, b) => {
-      const label = (v: string) =>
-        v === '' ? 'Belirtilmemiş' : v === 'e' ? 'Erkek' : 'Kadın';
-      return label(a).localeCompare(label(b), 'tr');
-    }));
+    expect(values).toEqual(
+      [...values].sort((a, b) => {
+        const label = (v: string) =>
+          v === "" ? "Belirtilmemiş" : v === "e" ? "Erkek" : "Kadın";
+        return label(a).localeCompare(label(b), "tr");
+      }),
+    );
   });
 
-  test('Kurulum özeti dağılımı SAYIYOR', async ({ page }) => {
+  test("Kurulum özeti dağılımı SAYIYOR", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    const summary = page.locator('.panel', { hasText: 'Öğretmen yükü' });
-    await expect(summary).toContainText('Kadın');
-    await expect(summary).toContainText('Erkek');
-    await expect(summary).toContainText('Belirtilmemiş');
+    await openSetup(page, "Öğretmenler");
+    const summary = page.locator(".panel", { hasText: "Öğretmen yükü" });
+    await expect(summary).toContainText("Kadın");
+    await expect(summary).toContainText("Erkek");
+    await expect(summary).toContainText("Belirtilmemiş");
   });
 
-  test('yapıştırma kutusu dördüncü sütunu okuyor, üç sütunluyu da kabul ediyor', async ({
+  test("yapıştırma kutusu dördüncü sütunu okuyor, üç sütunluyu da kabul ediyor", async ({
     page,
   }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
-    await page.getByRole('button', { name: "Excel'den yapıştır" }).click();
-    await expect(page.getByText('Ad Soyad · Kısaltma · Branş · Cinsiyet')).toBeVisible();
+    await openSetup(page, "Öğretmenler");
+    await page.getByRole("button", { name: "Excel'den yapıştır" }).click();
+    await expect(
+      page.getByText("Ad Soyad · Kısaltma · Branş · Cinsiyet"),
+    ).toBeVisible();
 
-    await page.locator('textarea').fill('Nazlı Er\tNE\tFizik\tKadın\nOkan Su\tOS\tKimya');
-    await page.getByRole('button', { name: 'Önizle' }).click();
-    await expect(page.getByText('2 satır okundu.')).toBeVisible();
+    await page
+      .locator("textarea")
+      .fill("Nazlı Er\tNE\tFizik\tKadın\nOkan Su\tOS\tKimya");
+    await page.getByRole("button", { name: "Önizle" }).click();
+    await expect(page.getByText("2 satır okundu.")).toBeVisible();
     // Scoped to the preview: the textarea still holds the pasted text and
     // would match the same words.
-    const preview = page.locator('.paste-preview li');
-    await expect(preview.first()).toHaveText('Nazlı Er (NE) · Fizik · Kadın');
+    const preview = page.locator(".paste-preview li");
+    await expect(preview.first()).toHaveText("Nazlı Er (NE) · Fizik · Kadın");
     // The three-column row is not an error, and says nothing it does not know.
-    await expect(preview.nth(1)).toHaveText('Okan Su (OS) · Kimya');
+    await expect(preview.nth(1)).toHaveText("Okan Su (OS) · Kimya");
   });
 
   // Pitfall 33's shape, and it happened again while this column was being
@@ -751,10 +963,12 @@ test.describe('63. Öğretmende cinsiyet', () => {
   // The assertion does not invent a number — it clones the control at
   // `width: auto` and asks the browser what IT wants (renk-secici.spec.ts).
   for (const pct of [100, 125, 150]) {
-    test(`cinsiyet kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({ page }) => {
+    test(`cinsiyet kutusu %${pct} ölçekte kendi metnini SIĞDIRIYOR`, async ({
+      page,
+    }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Öğretmenler');
+      await openSetup(page, "Öğretmenler");
 
       for (const box of [
         mainList(page).locator('select[aria-label*="cinsiyeti"]').first(),
@@ -765,17 +979,18 @@ test.describe('63. Öğretmende cinsiyet', () => {
         const fit = await box.evaluate((el) => {
           const s = el as HTMLSelectElement;
           const clone = s.cloneNode(true) as HTMLSelectElement;
-          clone.style.width = 'auto';
-          clone.style.position = 'absolute';
-          clone.style.visibility = 'hidden';
+          clone.style.width = "auto";
+          clone.style.position = "absolute";
+          clone.style.visibility = "hidden";
           s.parentElement!.appendChild(clone);
           const want = clone.getBoundingClientRect().width;
           clone.remove();
           return { have: s.getBoundingClientRect().width, want };
         });
-        expect(fit.have, `%${pct}: kutu ${fit.have} < istenen ${fit.want}`).toBeGreaterThanOrEqual(
-          fit.want - 1,
-        );
+        expect(
+          fit.have,
+          `%${pct}: kutu ${fit.have} < istenen ${fit.want}`,
+        ).toBeGreaterThanOrEqual(fit.want - 1);
       }
     });
   }
@@ -784,10 +999,12 @@ test.describe('63. Öğretmende cinsiyet', () => {
   // name input went from 232 px to 26 px, because a `width: 100%` table takes
   // the room it needs from whichever column can still shrink.
   for (const pct of [100, 150]) {
-    test(`%${pct} ölçekte AD kutusu okunur kalıyor, sayfa yatay taşmıyor`, async ({ page }) => {
+    test(`%${pct} ölçekte AD kutusu okunur kalıyor, sayfa yatay taşmıyor`, async ({
+      page,
+    }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Öğretmenler');
+      await openSetup(page, "Öğretmenler");
 
       const ad = await mainList(page)
         .locator('tbody tr td > input[type="text"]:not(.text-sm)')
@@ -803,12 +1020,14 @@ test.describe('63. Öğretmende cinsiyet', () => {
     });
   }
 
-  test('cinsiyet KÂĞIDA çıkmıyor', async ({ page }) => {
+  test("cinsiyet KÂĞIDA çıkmıyor", async ({ page }) => {
     await openWithSample(page);
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await page.getByRole('button', { name: 'Öğretmenler', exact: true }).click();
-    await expect(page.locator('.print-page').first()).toBeVisible();
-    const paper = await page.locator('.print-area').innerText();
+    await page.getByRole("button", { name: "Çıktı", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Öğretmenler", exact: true })
+      .click();
+    await expect(page.locator(".print-page").first()).toBeVisible();
+    const paper = await page.locator(".print-area").innerText();
     expect(paper).not.toMatch(/Kadın|Erkek|Belirtilmemiş/);
   });
 });
@@ -820,26 +1039,27 @@ test.describe('63. Öğretmende cinsiyet', () => {
 // styling note because none of them can be seen by jsdom and none of them
 // changes a single word, attribute or count: the suite was green through all
 // of it (pitfall 33's family).
-test.describe('65. Kurulum listelerinin ölçüleri', () => {
-  const STEPS = ['Derslikler', 'Öğretmenler', 'Sınıflar', 'Dersler'];
+test.describe("65. Kurulum listelerinin ölçüleri", () => {
+  const STEPS = ["Derslikler", "Öğretmenler", "Sınıflar", "Dersler"];
 
   // Still four lists, at two addresses: Dersler became a tab this round. The
   // measurements below are about the four reading as ONE program, and that
   // claim does not weaken because one of them moved — if anything it is the
   // claim most worth keeping after a move.
   const goList = async (page: Page, step: string) =>
-    step === 'Dersler' ? openLessons(page, 'all') : openSetup(page, step);
+    step === "Dersler" ? openLessons(page, "all") : openSetup(page, step);
 
   /** How far the row's delete button ends from the table's right edge. */
   async function deleteInset(page: Page) {
     return mainList(page)
-      .locator('tbody tr')
+      .locator("tbody tr")
       .first()
       .evaluate((tr) => {
-        const table = tr.closest('table')!;
-        const btn = tr.querySelector('td:last-child .btn.danger')!;
+        const table = tr.closest("table")!;
+        const btn = tr.querySelector("td:last-child .btn.danger")!;
         return Math.round(
-          table.getBoundingClientRect().right - btn.getBoundingClientRect().right,
+          table.getBoundingClientRect().right -
+            btn.getBoundingClientRect().right,
         );
       });
   }
@@ -850,7 +1070,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // button sat with dead space after it: measured 42 px at 100 % and 73 px at
   // 150 %, against 6 to 19 px elsewhere. Same markup, different answer,
   // because the alignment came from a neighbour instead of from a rule.
-  test('Sil dört listede de aynı yerde — en sağda', async ({ page }) => {
+  test("Sil dört listede de aynı yerde — en sağda", async ({ page }) => {
     await openWithSample(page);
     const inset: Record<string, number> = {};
     for (const step of STEPS) {
@@ -859,13 +1079,17 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     }
     const values = Object.values(inset);
     for (const step of STEPS) {
-      expect(inset[step], `${step}: Sil sağ kenardan ${inset[step]}px içeride`).toBeLessThanOrEqual(
-        14,
-      );
+      expect(
+        inset[step],
+        `${step}: Sil sağ kenardan ${inset[step]}px içeride`,
+      ).toBeLessThanOrEqual(14);
     }
     // ...and the same distance in all four, which is the part that reads as
     // "one program" rather than four screens that happen to look alike.
-    expect(Math.max(...values) - Math.min(...values), JSON.stringify(inset)).toBeLessThanOrEqual(4);
+    expect(
+      Math.max(...values) - Math.min(...values),
+      JSON.stringify(inset),
+    ).toBeLessThanOrEqual(4);
   });
 
   // THE NAME COLUMN IS ONE COLUMN, IN ALL FOUR LISTS.
@@ -881,24 +1105,24 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // reader feels: stepping between the lists no longer moves the column under
   // the cursor. A number is deliberately not written down — the ladder decides,
   // and the test only says the four agree with each other.
-  test('ad sütunu dört listede de aynı genişlikte', async ({ page }) => {
+  test("ad sütunu dört listede de aynı genişlikte", async ({ page }) => {
     await openWithSample(page);
 
     /** The width of the column headed `label`, in the list on screen. */
     const nameColumn = async (label: string) =>
       mainList(page)
-        .locator('thead th')
+        .locator("thead th")
         .filter({ hasText: label })
         .first()
         .evaluate((el) => Math.round(el.getBoundingClientRect().width));
 
     const width: Record<string, number> = {};
-    for (const step of ['Derslikler', 'Öğretmenler', 'Sınıflar']) {
+    for (const step of ["Derslikler", "Öğretmenler", "Sınıflar"]) {
       await openSetup(page, step);
-      width[step] = await nameColumn('Ad');
+      width[step] = await nameColumn("Ad");
     }
-    await openSetup(page, 'Branşlar');
-    width['Branşlar'] = await nameColumn('Branş');
+    await openSetup(page, "Branşlar");
+    width["Branşlar"] = await nameColumn("Branş");
 
     const values = Object.values(width);
     expect(Math.min(...values), JSON.stringify(width)).toBeGreaterThan(0);
@@ -911,7 +1135,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
     // at this window; a name box that takes half of it is the bug, whatever
     // its neighbours do.
     const panel = await page
-      .locator('.cols > div .panel')
+      .locator(".cols > div .panel")
       .first()
       .evaluate((el) => el.getBoundingClientRect().width);
     expect(
@@ -927,19 +1151,25 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // Measured before the fix, at 100 %: Derslikler -1094 px, Sınıflar -965,
   // Öğretmenler -496.
   for (const pct of [100, 125]) {
-    test(`%${pct} ölçekte tablo panelin SONUNA kadar gidiyor`, async ({ page }) => {
+    test(`%${pct} ölçekte tablo panelin SONUNA kadar gidiyor`, async ({
+      page,
+    }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
       for (const step of STEPS) {
         await goList(page, step);
-        const gap = await page.locator('.panel.step-panel').evaluate((panel) => {
-          const table = panel.querySelector('.table-scroll > table.list')!;
-          const pad = parseFloat(getComputedStyle(panel).paddingRight);
-          const inner = panel.getBoundingClientRect().right - pad;
-          return table.getBoundingClientRect().right - inner;
-        });
-        expect(gap, `%${pct} ${step}: tablo panelin ${Math.round(-gap)}px gerisinde bitiyor`)
-          .toBeGreaterThan(-2);
+        const gap = await page
+          .locator(".panel.step-panel")
+          .evaluate((panel) => {
+            const table = panel.querySelector(".table-scroll > table.list")!;
+            const pad = parseFloat(getComputedStyle(panel).paddingRight);
+            const inner = panel.getBoundingClientRect().right - pad;
+            return table.getBoundingClientRect().right - inner;
+          });
+        expect(
+          gap,
+          `%${pct} ${step}: tablo panelin ${Math.round(-gap)}px gerisinde bitiyor`,
+        ).toBeGreaterThan(-2);
       }
     });
   }
@@ -956,7 +1186,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       for (const step of STEPS) {
         await goList(page, step);
         const spill = await page
-          .locator('.cols > div .table-scroll')
+          .locator(".cols > div .table-scroll")
           .evaluate((el) => Math.round(el.scrollWidth - el.clientWidth));
         expect(spill, `%${pct} ${step}: ${spill}px taşma`).toBe(0);
       }
@@ -966,18 +1196,20 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // 110 % is the default the reader actually uses; 150 % is the case the
   // scroll box exists for, and the rule there is unchanged — the TABLE
   // scrolls, the page never does.
-  test('%150’de taşma tabloda kalıyor, sayfada değil', async ({ page }) => {
+  test("%150’de taşma tabloda kalıyor, sayfada değil", async ({ page }) => {
     await openWithSample(page);
     await chooseScale(page, 150);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     const m = await page.evaluate(() => ({
       box: (() => {
-        const el = document.querySelector('.cols > div .table-scroll') as HTMLElement;
+        const el = document.querySelector(
+          ".cols > div .table-scroll",
+        ) as HTMLElement;
         return Math.round(el.scrollWidth - el.clientWidth);
       })(),
       page: Math.round(document.body.scrollWidth - document.body.clientWidth),
     }));
-    expect(m.box, 'kaydırma kutusu bu ölçekte iş görmeli').toBeGreaterThan(0);
+    expect(m.box, "kaydırma kutusu bu ölçekte iş görmeli").toBeGreaterThan(0);
     expect(m.page).toBeLessThanOrEqual(1);
   });
 
@@ -985,21 +1217,30 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // all of it was an EMPTY announcement line holding `min-height: 1.2em` open
   // for a sentence that is there for about a second after a keypress.
   for (const pct of [100, 150]) {
-    test(`%${pct}: arama şeridiyle liste arasında boşluk kalmıyor`, async ({ page }) => {
+    test(`%${pct}: arama şeridiyle liste arasında boşluk kalmıyor`, async ({
+      page,
+    }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Öğretmenler');
+      await openSetup(page, "Öğretmenler");
       const gap = await page.evaluate(() => {
-        const tools = document.querySelector('.cols > div .list-tools') as HTMLElement;
-        const table = document.querySelector('.cols > div table.list') as HTMLElement;
+        const tools = document.querySelector(
+          ".cols > div .list-tools",
+        ) as HTMLElement;
+        const table = document.querySelector(
+          ".cols > div table.list",
+        ) as HTMLElement;
         // The last child of the strip that actually PAINTS something. An empty
         // box between the chips and the table is exactly what this measures.
         const seen = ([...tools.children] as HTMLElement[]).filter(
-          (k) => k.getBoundingClientRect().height > 0 && (k.textContent ?? '').trim() !== '',
+          (k) =>
+            k.getBoundingClientRect().height > 0 &&
+            (k.textContent ?? "").trim() !== "",
         );
         const last = seen[seen.length - 1]!;
         return Math.round(
-          table.getBoundingClientRect().top - last.getBoundingClientRect().bottom,
+          table.getBoundingClientRect().top -
+            last.getBoundingClientRect().bottom,
         );
       });
       // 44 px before, at 100 %. A strip and the table it belongs to are one
@@ -1010,18 +1251,22 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
 
   // ...and it still SAYS what happened. The announcement did not go quiet, it
   // moved onto the strip's own row, where an empty one costs no height.
-  test('duyuru satırı boşken yer kaplamıyor, doluyken okunuyor', async ({ page }) => {
+  test("duyuru satırı boşken yer kaplamıyor, doluyken okunuyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Derslikler');
-    const said = page.locator('.list-tools .list-said');
+    await openSetup(page, "Derslikler");
+    const said = page.locator(".list-tools .list-said");
     expect(
-      await said.evaluate((el) => Math.round(el.getBoundingClientRect().height)),
+      await said.evaluate((el) =>
+        Math.round(el.getBoundingClientRect().height),
+      ),
     ).toBe(0);
 
-    await mainList(page).locator('tbody .row-grip').first().focus();
-    await page.keyboard.press('ArrowDown');
+    await mainList(page).locator("tbody .row-grip").first().focus();
+    await page.keyboard.press("ArrowDown");
     await expect(said).toHaveText(/2\. sıraya taşındı/);
-    expect(await said.evaluate((el) => el.getAttribute('role'))).toBe('status');
+    expect(await said.evaluate((el) => el.getAttribute("role"))).toBe("status");
   });
 
   // THE GUARD ON THE TRIM. Four widths came down and every one of them was set
@@ -1030,21 +1275,23 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // compare. Written the day the widths changed, and run at the two scales
   // where a `ch` count and a font's quantisation disagree most (pitfall 39).
   for (const pct of [100, 150]) {
-    test(`%${pct}: kırpılan kutuların hiçbiri metnini kesmiyor`, async ({ page }) => {
+    test(`%${pct}: kırpılan kutuların hiçbiri metnini kesmiyor`, async ({
+      page,
+    }) => {
       await openWithSample(page);
       if (pct !== 100) await chooseScale(page, pct);
-      await openSetup(page, 'Öğretmenler');
+      await openSetup(page, "Öğretmenler");
 
       const boxes = await mainList(page)
-        .locator('tbody tr')
+        .locator("tbody tr")
         .first()
         .evaluate((tr) => {
           function want(el: HTMLElement) {
             const c = el.cloneNode(true) as HTMLElement;
-            c.style.width = 'auto';
-            c.style.minWidth = '0';
-            c.style.position = 'absolute';
-            c.style.visibility = 'hidden';
+            c.style.width = "auto";
+            c.style.minWidth = "0";
+            c.style.position = "absolute";
+            c.style.visibility = "hidden";
             el.parentElement!.appendChild(c);
             const w = c.getBoundingClientRect().width;
             c.remove();
@@ -1052,19 +1299,23 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
           }
           const out: Array<{ ad: string; var: number; istenen: number }> = [];
           for (const [ad, sel] of [
-            ['renk', '.color-pick'],
-            ['sayı kutusu', 'input.num'],
-            ['cinsiyet', 'select[aria-label*="cinsiyeti"]'],
-            ['eylemler', 'td:last-child > .form-row'],
+            ["renk", ".color-pick"],
+            ["sayı kutusu", "input.num"],
+            ["cinsiyet", 'select[aria-label*="cinsiyeti"]'],
+            ["eylemler", "td:last-child > .form-row"],
           ] as const) {
             const el = tr.querySelector(sel) as HTMLElement | null;
             if (el !== null)
-              out.push({ ad, var: el.getBoundingClientRect().width, istenen: want(el) });
+              out.push({
+                ad,
+                var: el.getBoundingClientRect().width,
+                istenen: want(el),
+              });
           }
           return out;
         });
 
-      expect(boxes.length, 'ölçülecek kutu bulunamadı').toBe(4);
+      expect(boxes.length, "ölçülecek kutu bulunamadı").toBe(4);
       for (const b of boxes) {
         expect(
           b.var,
@@ -1077,28 +1328,31 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
   // The short-form box is the one that got narrowest, and it is narrowed ONLY
   // inside a row: the add form's box carries the placeholder "Kısaltma", a
   // whole word, and shrinking that one would be pitfall 33 with a new coat on.
-  test('kısaltma kutusu satırda dar, ekleme formunda geniş', async ({ page }) => {
+  test("kısaltma kutusu satırda dar, ekleme formunda geniş", async ({
+    page,
+  }) => {
     await openWithSample(page);
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     const inRow = await mainList(page)
-      .locator('tbody tr input.text-sm')
+      .locator("tbody tr input.text-sm")
       .first()
       .evaluate((el) => el.getBoundingClientRect().width);
     // A descendant and not a child: the form sits inside `.add-panel-body`,
     // one of the three grid tracks `AddPanel.tsx` draws.
     const inForm = await page
-      .locator('.panel.add-panel .form-row input.text-sm')
+      .locator(".panel.add-panel .form-row input.text-sm")
       .first()
       .evaluate((el) => el.getBoundingClientRect().width);
     expect(inRow).toBeLessThan(inForm);
     // The add box has to hold its own placeholder, whatever it happens to be.
     const fits = await page
-      .locator('.panel.add-panel .form-row input.text-sm')
+      .locator(".panel.add-panel .form-row input.text-sm")
       .first()
       .evaluate((el) => {
         const s = el as HTMLInputElement;
-        const probe = document.createElement('span');
-        probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
+        const probe = document.createElement("span");
+        probe.style.cssText =
+          "position:absolute;visibility:hidden;white-space:pre";
         probe.style.font = getComputedStyle(s).font;
         probe.textContent = s.placeholder;
         document.body.appendChild(probe);
@@ -1108,7 +1362,7 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
       });
     expect(
       fits.have,
-      `ekleme kutusu ${Math.round(fits.have)} < "${'Kısaltma'}" ${Math.round(fits.need)}`,
+      `ekleme kutusu ${Math.round(fits.have)} < "${"Kısaltma"}" ${Math.round(fits.need)}`,
     ).toBeGreaterThanOrEqual(fits.need);
   });
 });
@@ -1120,27 +1374,34 @@ test.describe('65. Kurulum listelerinin ölçüleri', () => {
 // Before v7 there was one block LENGTH per lesson, so "3 saat" could only be
 // 1+1+1 or a single 3-hour block — never 2+1 — and a 5-hour lesson in doubles
 // lost its fifth hour for good.
-test.describe('67. Ders dağılımı', () => {
+test.describe("67. Ders dağılımı", () => {
   /** One of the three counters on the first row of the main list. */
   const rowCount = (page: Page, size: number) =>
     page
-      .locator('.cols > div table.list tbody tr')
+      .locator(".cols > div table.list tbody tr")
       .first()
-      .getByRole('spinbutton', { name: `${size} saatlik blok sayısı` });
+      .getByRole("spinbutton", { name: `${size} saatlik blok sayısı` });
 
   /** What that row's split adds up to, as the screen writes it. */
   const rowShape = (page: Page) =>
-    page.locator('.cols > div table.list tbody tr').first().locator('.split-shape');
+    page
+      .locator(".cols > div table.list tbody tr")
+      .first()
+      .locator(".split-shape");
 
   /** The new-lesson row's own boxes. */
-  const newHours = (page: Page) => page.locator('.form-row input[type="number"].num').first();
+  const newHours = (page: Page) =>
+    page.locator('.form-row input[type="number"].num').first();
   const newCount = (page: Page, size: number) =>
-    page.locator('.form-row').getByRole('spinbutton', { name: `${size} saatlik blok sayısı` });
-  const newShape = (page: Page) => page.locator('.form-row .split-shape').first();
+    page
+      .locator(".form-row")
+      .getByRole("spinbutton", { name: `${size} saatlik blok sayısı` });
+  const newShape = (page: Page) =>
+    page.locator(".form-row .split-shape").first();
 
   const setRowHours = async (page: Page, value: string) => {
     const hours = page
-      .locator('.cols > div table.list tbody tr')
+      .locator(".cols > div table.list tbody tr")
       .first()
       .locator('input[type="number"].num')
       .first();
@@ -1152,185 +1413,205 @@ test.describe('67. Ders dağılımı', () => {
   // divided, and with blocks of 2, 3 and 4 that list runs to 34 rows for a
   // twelve-hour lesson. Three counters are three controls whatever the hours
   // are — so what is measured now is the CEILING each one stops at.
-  test('her sayacın tavanı ÖTEKİ blokları hesaba katıyor', async ({ page }) => {
+  test("her sayacın tavanı ÖTEKİ blokları hesaba katıyor", async ({ page }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    await newHours(page).fill('9');
-    await expect(newCount(page, 4)).toHaveAttribute('max', '2');
-    await expect(newCount(page, 3)).toHaveAttribute('max', '3');
-    await expect(newCount(page, 2)).toHaveAttribute('max', '4');
+    await newHours(page).fill("9");
+    await expect(newCount(page, 4)).toHaveAttribute("max", "2");
+    await expect(newCount(page, 3)).toHaveAttribute("max", "3");
+    await expect(newCount(page, 2)).toHaveAttribute("max", "4");
 
     // Spend four hours on a four and the others have to come down with it.
-    await newCount(page, 4).fill('1');
-    await expect(newCount(page, 3)).toHaveAttribute('max', '1');
-    await expect(newCount(page, 2)).toHaveAttribute('max', '2');
+    await newCount(page, 4).fill("1");
+    await expect(newCount(page, 3)).toHaveAttribute("max", "1");
+    await expect(newCount(page, 2)).toHaveAttribute("max", "2");
   });
 
-  test('sayaçlar haftanın ŞEKLİNİ yazıyor', async ({ page }) => {
+  test("sayaçlar haftanın ŞEKLİNİ yazıyor", async ({ page }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    await newHours(page).fill('9');
-    await expect(newShape(page)).toHaveText('9×1');
+    await newHours(page).fill("9");
+    await expect(newShape(page)).toHaveText("9×1");
 
-    await newCount(page, 4).fill('1');
-    await expect(newShape(page)).toHaveText('1×4 + 5×1');
+    await newCount(page, 4).fill("1");
+    await expect(newShape(page)).toHaveText("1×4 + 5×1");
 
-    await newCount(page, 3).fill('1');
-    await expect(newShape(page)).toHaveText('4+3+1+1');
+    await newCount(page, 3).fill("1");
+    await expect(newShape(page)).toHaveText("4+3+1+1");
 
-    await newCount(page, 2).fill('1');
-    await expect(newShape(page)).toHaveText('4+3+2');
+    await newCount(page, 2).fill("1");
+    await expect(newShape(page)).toHaveText("4+3+2");
   });
 
-  test('seçilen dağılım kaydediliyor ve saat düşünce kırpılıyor', async ({ page }) => {
+  test("seçilen dağılım kaydediliyor ve saat düşünce kırpılıyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    await setRowHours(page, '6');
-    await rowCount(page, 3).fill('2');
-    await expect(rowShape(page)).toHaveText('3+3');
+    await setRowHours(page, "6");
+    await rowCount(page, 3).fill("2");
+    await expect(rowShape(page)).toHaveText("3+3");
 
     // Lower the total and the shape has to come with it — there is no room for
     // two threes in three hours.
-    await setRowHours(page, '3');
-    await expect(rowCount(page, 3)).toHaveValue('1');
-    await expect(rowShape(page)).toHaveText('3');
+    await setRowHours(page, "3");
+    await expect(rowCount(page, 3)).toHaveValue("1");
+    await expect(rowShape(page)).toHaveText("3");
 
     await reopen(page);
     await openLessons(page);
-    await expect(rowCount(page, 3)).toHaveValue('1');
-    await expect(rowShape(page)).toHaveText('3');
+    await expect(rowCount(page, 3)).toHaveValue("1");
+    await expect(rowShape(page)).toHaveText("3");
   });
 
-  test('havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor', async ({ page }) => {
+  test("havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    const row = page.locator('table.list tbody tr').first();
-    const name = (await row.locator('td').nth(2).innerText()).trim();
-    await setRowHours(page, '3');
-    await rowCount(page, 2).fill('1');
-    await expect(rowShape(page)).toHaveText('2+1');
+    const row = page.locator("table.list tbody tr").first();
+    const name = (await row.locator("td").nth(2).innerText()).trim();
+    await setRowHours(page, "3");
+    await rowCount(page, 2).fill("1");
+    await expect(rowShape(page)).toHaveText("2+1");
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    const mine = page.locator('.pool-card', { hasText: name.split('·')[0]!.trim() });
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    const mine = page.locator(".pool-card", {
+      hasText: name.split("·")[0]!.trim(),
+    });
     // Two cards for one lesson: a double and a single, and they say which.
-    const own = mine.filter({ hasText: '0/3' });
+    const own = mine.filter({ hasText: "0/3" });
     await expect(own).toHaveCount(2);
-    expect(await own.first().getAttribute('data-size')).toBe('2');
-    expect(await own.last().getAttribute('data-size')).toBe('1');
+    expect(await own.first().getAttribute("data-size")).toBe("2");
+    expect(await own.last().getAttribute("data-size")).toBe("1");
     // The block length left the card's TEXT on 2026-08-27 ("Programda 1 saat x5
     // veeya 2 saat x3 gibi gözükmesin kartlarda güzel değil"). It is still in
     // the tooltip, and on screen it is the WIDTH — which is what the reader is
     // choosing between when two cards of one lesson sit side by side.
-    await expect(own.first()).toHaveAttribute('title', /2 saatlik blok/);
-    await expect(own.last()).toHaveAttribute('title', /1 saatlik blok/);
+    await expect(own.first()).toHaveAttribute("title", /2 saatlik blok/);
+    await expect(own.last()).toHaveAttribute("title", /1 saatlik blok/);
   });
 
   // A THREE-hour block, which the model could not express between v7 and v9.
   // Measured on the grid rather than in the store: the point of a long block is
   // that it is drawn as ONE cell, and the cell is what the reader sees.
-  test('üç saatlik blok ızgarada TEK hücre olarak çiziliyor', async ({ page }) => {
+  test("üç saatlik blok ızgarada TEK hücre olarak çiziliyor", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    const row = page.locator('table.list tbody tr').first();
-    const name = (await row.locator('td').nth(2).innerText()).trim().split('·')[0]!.trim();
-    await setRowHours(page, '3');
-    await rowCount(page, 3).fill('1');
-    await expect(rowShape(page)).toHaveText('3');
+    const row = page.locator("table.list tbody tr").first();
+    const name = (await row.locator("td").nth(2).innerText())
+      .trim()
+      .split("·")[0]!
+      .trim();
+    await setRowHours(page, "3");
+    await rowCount(page, 3).fill("1");
+    await expect(rowShape(page)).toHaveText("3");
 
     // A block can never be longer than "this class may see this lesson N hours
     // a day" — the sample school says 2, so without raising this lesson's own
     // ceiling the three-hour block has no legal cell anywhere and the solver is
     // right to leave it in the tray.
-    await row.locator('input[type="number"]').last().fill('3');
+    await row.locator('input[type="number"]').last().fill("3");
     await row.locator('input[type="number"]').last().blur();
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    const card = page.locator('.pool-card', { hasText: name }).first();
-    await expect(card).toHaveAttribute('data-size', '3');
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    const card = page.locator(".pool-card", { hasText: name }).first();
+    await expect(card).toHaveAttribute("data-size", "3");
 
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+    await page.getByRole("button", { name: /^Otomatik diz/ }).click();
+    await expect(page.locator(".reason-bar.ok, .reason-bar.bad")).toBeVisible({
+      timeout: 60_000,
+    });
 
     // One <td> standing for three hours — not three cells that happen to match.
-    await expect(page.locator('table.grid td[data-span="3"]').first()).toBeVisible();
+    await expect(
+      page.locator('table.grid td[data-span="3"]').first(),
+    ).toBeVisible();
   });
 
   // The gap the 3-hour block found: "günde en fazla N saat" is checked at drop
   // time, so a block longer than N simply never places — no error, no red cell,
   // nothing to click. Kontrol reports it three screens away from the box that
   // caused it, so the box says it itself.
-  test('günlük sınırı aşan blok UYARIYOR', async ({ page }) => {
+  test("günlük sınırı aşan blok UYARIYOR", async ({ page }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    const row = page.locator('.cols > div table.list tbody tr').first();
-    await setRowHours(page, '8');
-    await expect(row.locator('.split-warn')).toHaveCount(0);
+    const row = page.locator(".cols > div table.list tbody tr").first();
+    await setRowHours(page, "8");
+    await expect(row.locator(".split-warn")).toHaveCount(0);
 
     // The sample school says "at most 2 hours of one lesson a day".
-    await rowCount(page, 4).fill('1');
-    await expect(row.locator('.split-warn')).toHaveText('4 saat > günde 2');
+    await rowCount(page, 4).fill("1");
+    await expect(row.locator(".split-warn")).toHaveText("4 saat > günde 2");
 
     // Raise THIS lesson's own ceiling and the warning goes: the number it was
     // reading is per lesson, not per school.
     const perDay = row.locator('input[type="number"]').last();
-    await perDay.fill('4');
+    await perDay.fill("4");
     await perDay.blur();
-    await expect(row.locator('.split-warn')).toHaveCount(0);
+    await expect(row.locator(".split-warn")).toHaveCount(0);
   });
 
   // THE MIDDLE LAYER — "Sınıfların özel olarak bir günde aynı dersten kaç saat
   // girme opsiyonu olsun." One number on the class, and every lesson that class
   // has obeys it; the lesson's own box still wins over it. Schema v11.
-  test('sınıfın kendi günlük sınırı derslerine geçiyor ve yenilemeden sonra duruyor', async ({
+  test("sınıfın kendi günlük sınırı derslerine geçiyor ve yenilemeden sonra duruyor", async ({
     page,
   }) => {
     await openWithSample(page);
-    await openSetup(page, 'Sınıflar');
+    await openSetup(page, "Sınıflar");
 
     // The first class, tightened to one hour of any one lesson a day. The
     // sample school's own number is 2.
-    const first = mainList(page).locator('tbody tr').first();
-    const className = (await first.getAttribute('data-row-name'))!;
-    const box = first.getByRole('spinbutton', { name: /aynı dersten en fazla/ });
-    await expect(box, 'boş kutu okulun sayısını gösteriyor').toHaveAttribute('placeholder', '2');
-    await box.fill('1');
+    const first = mainList(page).locator("tbody tr").first();
+    const className = (await first.getAttribute("data-row-name"))!;
+    const box = first.getByRole("spinbutton", {
+      name: /aynı dersten en fazla/,
+    });
+    await expect(box, "boş kutu okulun sayısını gösteriyor").toHaveAttribute(
+      "placeholder",
+      "2",
+    );
+    await box.fill("1");
     await box.blur();
 
     // Dersler reads it: that class's lessons now warn at two hours a day, and
     // the placeholder in their own box names the CLASS's number, not the
     // school's — a placeholder that names a number the empty box would not use
     // would be a lie.
-    await openLessons(page, 'all');
+    await openLessons(page, "all");
     const lesson = page
-      .locator('.panel.step-panel table.list tbody tr')
+      .locator(".panel.step-panel table.list tbody tr")
       .filter({ has: page.locator(`td:text-is("${className}")`) })
       .first();
     await expect(lesson.locator('input[type="number"]').last()).toHaveAttribute(
-      'placeholder',
-      '1',
+      "placeholder",
+      "1",
     );
 
     // ...and it survives a reload, which is the half a schema bump can break.
     await reopen(page);
-    await openSetup(page, 'Sınıflar');
+    await openSetup(page, "Sınıflar");
     await expect(
       mainList(page)
-        .locator('tbody tr')
+        .locator("tbody tr")
         .first()
-        .getByRole('spinbutton', { name: /aynı dersten en fazla/ }),
-    ).toHaveValue('1');
+        .getByRole("spinbutton", { name: /aynı dersten en fazla/ }),
+    ).toHaveValue("1");
 
     // Ayarlar → Kurallar counts it, the way it already counts teachers who
     // carry their own numbers.
-    await openSettings(page, 'Kurallar');
-    const panel = page.locator('.panel', {
-      has: page.getByRole('heading', { name: /Kendi sınırı olan sınıflar/ }),
+    await openSettings(page, "Kurallar");
+    const panel = page.locator(".panel", {
+      has: page.getByRole("heading", { name: /Kendi sınırı olan sınıflar/ }),
     });
     await expect(panel).toContainText(className);
   });
@@ -1344,8 +1625,8 @@ test.describe('67. Ders dağılımı', () => {
       if (pct !== 100) await chooseScale(page, pct);
       await openLessons(page);
 
-      await setRowHours(page, '11');
-      await rowCount(page, 2).fill('4');
+      await setRowHours(page, "11");
+      await rowCount(page, 2).fill("4");
 
       // The shape sentence AND the counters. The boxes are the half that
       // actually broke: at 3.5ch a digit plus Chromium's spinner wanted 29px of
@@ -1353,14 +1634,19 @@ test.describe('67. Ders dağılımı', () => {
       // right, every test green, nothing readable.
       for (const box of [rowShape(page), newShape(page)]) {
         const cut = await box.evaluate((el) => el.scrollWidth - el.clientWidth);
-        expect(cut, `%${pct}: "${await box.innerText()}" kırpılmış`).toBeLessThanOrEqual(1);
+        expect(
+          cut,
+          `%${pct}: "${await box.innerText()}" kırpılmış`,
+        ).toBeLessThanOrEqual(1);
       }
       const cuts = await page
-        .locator('.split-count > input.num')
+        .locator(".split-count > input.num")
         .evaluateAll((els) =>
           els.map((el) => el.scrollWidth - el.clientWidth).filter((n) => n > 1),
         );
-      expect(cuts, `%${pct}: ${cuts.length} sayaç kutusu kırpılmış`).toEqual([]);
+      expect(cuts, `%${pct}: ${cuts.length} sayaç kutusu kırpılmış`).toEqual(
+        [],
+      );
     });
   }
 
@@ -1368,79 +1654,94 @@ test.describe('67. Ders dağılımı', () => {
   // was floor(3 / 2) = 1 block and the third hour could never be placed;
   // "2+1" asks for all three and the solver has to place blocks of two
   // different lengths for one lesson to give them.
-  test('2+1 dersin ÜÇ saati de diziliyor — kaybolan saat yok', async ({ page }) => {
+  test("2+1 dersin ÜÇ saati de diziliyor — kaybolan saat yok", async ({
+    page,
+  }) => {
     await openWithSample(page);
     await openLessons(page);
 
-    const row = page.locator('table.list tbody tr').first();
-    await setRowHours(page, '3');
-    await rowCount(page, 2).fill('1');
-    const name = (await row.locator('td').nth(2).innerText()).trim().split('·')[0]!.trim();
+    const row = page.locator("table.list tbody tr").first();
+    await setRowHours(page, "3");
+    await rowCount(page, 2).fill("1");
+    const name = (await row.locator("td").nth(2).innerText())
+      .trim()
+      .split("·")[0]!
+      .trim();
 
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('.pool-card', { hasText: name }).first()).toBeVisible();
+    await page.getByRole("button", { name: "Program", exact: true }).click();
+    await expect(
+      page.locator(".pool-card", { hasText: name }).first(),
+    ).toBeVisible();
 
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 60_000 });
+    await page.getByRole("button", { name: /^Otomatik diz/ }).click();
+    await expect(page.locator(".reason-bar.ok, .reason-bar.bad")).toBeVisible({
+      timeout: 60_000,
+    });
 
     // Nothing of this lesson is left in the tray: both its blocks went down.
-    await expect(page.locator('.pool-card', { hasText: '/3' })).toHaveCount(0);
+    await expect(page.locator(".pool-card", { hasText: "/3" })).toHaveCount(0);
   });
 });
 
 // "Branş isimleri değiştirme de olsun." The cascade is the whole difficulty:
 // `Teacher.subject` stores the NAME, not an id, so a rename that stopped at the
 // list would leave every teacher holding a branch nobody offers.
-test.describe('82. Branş yeniden adlandırma', () => {
+test.describe("82. Branş yeniden adlandırma", () => {
   const nameBox = (page: Page, subject: string) =>
-    page.getByRole('textbox', { name: `${subject} branşının adı` });
+    page.getByRole("textbox", { name: `${subject} branşının adı` });
 
-  test('ad değişince ÖĞRETMENİN branşı da değişiyor', async ({ page }) => {
+  test("ad değişince ÖĞRETMENİN branşı da değişiyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
 
-    await nameBox(page, 'Coğrafya').fill('Coğrafya ve Jeoloji');
-    await nameBox(page, 'Coğrafya').blur();
+    await nameBox(page, "Coğrafya").fill("Coğrafya ve Jeoloji");
+    await nameBox(page, "Coğrafya").blur();
     // Somebody teaches it, so the change is confirmed and says how many.
-    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog'))).toContainText(
-      'öğretmenin branşı da bu adla değişecek',
-    );
-    await page.getByRole('button', { name: 'Değiştir' }).click();
+    await expect(
+      page.getByRole("alertdialog").or(page.getByRole("dialog")),
+    ).toContainText("öğretmenin branşı da bu adla değişecek");
+    await page.getByRole("button", { name: "Değiştir" }).click();
 
-    await expect(nameBox(page, 'Coğrafya ve Jeoloji')).toBeVisible();
+    await expect(nameBox(page, "Coğrafya ve Jeoloji")).toBeVisible();
 
     // The teachers' dropdown is the proof: it reads the same list.
-    await openSetup(page, 'Öğretmenler');
+    await openSetup(page, "Öğretmenler");
     await expect(
-      page.locator('table.list select').filter({ hasText: 'Coğrafya ve Jeoloji' }).first(),
+      page
+        .locator("table.list select")
+        .filter({ hasText: "Coğrafya ve Jeoloji" })
+        .first(),
     ).toBeVisible();
   });
 
   // Merging two subjects would rewrite every teacher on one of them, and no
   // undo can say which of the two a given teacher actually held.
-  test('BAŞKA bir branşın adına çevirmeye izin vermiyor', async ({ page }) => {
+  test("BAŞKA bir branşın adına çevirmeye izin vermiyor", async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
+    await openSetup(page, "Branşlar");
 
-    await nameBox(page, 'Fizik').fill('Kimya');
-    await nameBox(page, 'Fizik').blur();
-    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog'))).toContainText(
-      'zaten kullanılıyor',
-    );
-    await page.getByRole('button', { name: 'Tamam' }).click();
+    await nameBox(page, "Fizik").fill("Kimya");
+    await nameBox(page, "Fizik").blur();
+    await expect(
+      page.getByRole("alertdialog").or(page.getByRole("dialog")),
+    ).toContainText("zaten kullanılıyor");
+    await page.getByRole("button", { name: "Tamam" }).click();
 
-    await expect(nameBox(page, 'Fizik')).toBeVisible();
+    await expect(nameBox(page, "Fizik")).toBeVisible();
   });
 
   // A name only a teacher carries is not the school's to edit from this row.
   test('"listede değil" satırı salt okunur', async ({ page }) => {
     await openWithSample(page);
-    await openSetup(page, 'Branşlar');
-    const strays = page.locator('table.list tbody').nth(1).locator('input[type="text"]');
+    await openSetup(page, "Branşlar");
+    const strays = page
+      .locator("table.list tbody")
+      .nth(1)
+      .locator('input[type="text"]');
     // Whatever the sample leaves stray, none of those rows offers a NAME box:
     // the only text input on them is the short form.
     for (const box of await strays.all()) {
-      await expect(box).toHaveAttribute('aria-label', /kısaltması$/);
+      await expect(box).toHaveAttribute("aria-label", /kısaltması$/);
     }
   });
 });

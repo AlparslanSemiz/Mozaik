@@ -15,12 +15,12 @@
 // reach it. So (a) the target row is scrolled into view when the drag starts,
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
-import { t } from './i18n';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type React from 'react';
-import type { DropVerdict } from './constraints';
-import { paletteColor } from './palette';
-import type { Id } from './types';
+import { t } from "./i18n";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import type { DropVerdict } from "./constraints";
+import { paletteColor } from "./palette";
+import type { Id } from "./types";
 
 export interface DragData {
   lessonId: Id;
@@ -48,7 +48,7 @@ export interface DragData {
 /** What the bar above the grid says, and how loudly. */
 export interface Reason {
   text: string;
-  level: 'ok' | 'warn' | 'blocked';
+  level: "ok" | "warn" | "blocked";
 }
 
 export interface GhostContent {
@@ -63,13 +63,13 @@ export interface GhostContent {
 // both would have been the cheap way and it breaks a real assertion: the suite
 // counts `td.drop-ok` to check that a two-hour block lights exactly two cells,
 // and a 78-column preview would have made that 40 (pitfall 53).
-const HL_OK = 'drop-ok';
-const HL_WARN = 'drop-warn';
-const HL_BLOCKED = 'drop-blocked';
+const HL_OK = "drop-ok";
+const HL_WARN = "drop-warn";
+const HL_BLOCKED = "drop-blocked";
 
-const PV_OK = 'can-ok';
-const PV_WARN = 'can-warn';
-const PV_NO = 'can-no';
+const PV_OK = "can-ok";
+const PV_WARN = "can-warn";
+const PV_NO = "can-no";
 
 /** The grid scrolls while the cursor is this close to an edge. */
 const EDGE = 56;
@@ -91,17 +91,26 @@ function coveringCell(
   hour: number,
 ): HTMLElement | null {
   if (row == null) return null;
-  for (const el of row.querySelectorAll<HTMLElement>(`td[data-day="${day}"][data-span]`)) {
+  for (const el of row.querySelectorAll<HTMLElement>(
+    `td[data-day="${day}"][data-span]`,
+  )) {
     const start = Number(el.dataset.hour);
     const span = Number(el.dataset.span);
-    if (Number.isFinite(start) && Number.isFinite(span) && start <= hour && hour < start + span) {
+    if (
+      Number.isFinite(start) &&
+      Number.isFinite(span) &&
+      start <= hour &&
+      hour < start + span
+    ) {
       return el;
     }
   }
   return null;
 }
 
-export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
+export function useDrag(
+  drop: (data: DragData, day: number, hour: number) => void,
+) {
   // Only changes when the drag starts and ends -> two re-renders, that is all.
   const [dragging, setDragging] = useState<DragData | null>(null);
   // For the reason bar at the top. The grid is React.memo, so changing this
@@ -112,21 +121,23 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
   const ghost = useRef<HTMLDivElement | null>(null);
   const highlighted = useRef<HTMLElement[]>([]);
   const previewed = useRef<HTMLElement[]>([]);
-  const lastTarget = useRef<string>('');
+  const lastTarget = useRef<string>("");
   const pos = useRef({ x: 0, y: 0 });
   const loop = useRef(0);
 
   const clearHighlight = useCallback(() => {
-    for (const el of highlighted.current) el.classList.remove(HL_OK, HL_WARN, HL_BLOCKED);
+    for (const el of highlighted.current)
+      el.classList.remove(HL_OK, HL_WARN, HL_BLOCKED);
     highlighted.current = [];
-    lastTarget.current = '';
+    lastTarget.current = "";
   }, []);
 
   // React will NOT undo these for us. The rows do re-render when the drag ends
   // (`dim` flips on every one of them), but the className PROP is unchanged, so
   // React never touches the attribute and the classes would simply stay.
   const clearPreview = useCallback(() => {
-    for (const el of previewed.current) el.classList.remove(PV_OK, PV_WARN, PV_NO);
+    for (const el of previewed.current)
+      el.classList.remove(PV_OK, PV_WARN, PV_NO);
     previewed.current = [];
   }, []);
 
@@ -142,42 +153,45 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     setReason(null);
   }, [clearHighlight, clearPreview]);
 
-  const start = useCallback((e: React.PointerEvent, d: DragData, content: GhostContent) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
+  const start = useCallback(
+    (e: React.PointerEvent, d: DragData, content: GhostContent) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
 
-    data.current = d;
-    pos.current = { x: e.clientX, y: e.clientY };
-    setDragging(d);
-    setReason(null);
+      data.current = d;
+      pos.current = { x: e.clientX, y: e.clientY };
+      setDragging(d);
+      setReason(null);
 
-    const el = document.createElement('div');
-    el.className = 'ghost';
-    el.style.background = paletteColor(content.color);
-    // AS WIDE AS WHAT IT WILL COVER. The ghost was one cell wide whatever the
-    // block was, while the highlight below it ran `blockSize` cells to the
-    // RIGHT — so on a double the card sat half a cell left of the pair it was
-    // about to fill, and the card lifted off the tray (twice as wide there,
-    // `[data-size='2']`) shrank in the hand. The offset does not change: the
-    // ghost's LEFT edge stays half a cell left of the pointer, which is the
-    // left edge of the target cell.
-    el.style.setProperty('--ghost-span', String(Math.max(1, d.blockSize)));
-    const top = document.createElement('span');
-    top.className = 'card-top';
-    top.textContent = content.top;
-    const bottom = document.createElement('span');
-    bottom.className = 'card-bottom';
-    bottom.textContent = content.bottom;
-    el.append(top, bottom);
-    el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-    document.body.appendChild(el);
-    ghost.current = el;
-  }, []);
+      const el = document.createElement("div");
+      el.className = "ghost";
+      el.style.background = paletteColor(content.color);
+      // AS WIDE AS WHAT IT WILL COVER. The ghost was one cell wide whatever the
+      // block was, while the highlight below it ran `blockSize` cells to the
+      // RIGHT — so on a double the card sat half a cell left of the pair it was
+      // about to fill, and the card lifted off the tray (twice as wide there,
+      // `[data-size='2']`) shrank in the hand. The offset does not change: the
+      // ghost's LEFT edge stays half a cell left of the pointer, which is the
+      // left edge of the target cell.
+      el.style.setProperty("--ghost-span", String(Math.max(1, d.blockSize)));
+      const top = document.createElement("span");
+      top.className = "card-top";
+      top.textContent = content.top;
+      const bottom = document.createElement("span");
+      bottom.className = "card-bottom";
+      bottom.textContent = content.bottom;
+      el.append(top, bottom);
+      el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      document.body.appendChild(el);
+      ghost.current = el;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (dragging === null) return;
 
-    const wrap = document.querySelector<HTMLElement>('.grid-wrap');
+    const wrap = document.querySelector<HTMLElement>(".grid-wrap");
 
     // If the target row is off-screen the user can never reach it. React has
     // already painted the .target-row class by the time this effect runs.
@@ -191,8 +205,8 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     // that just pressed it.
     if (dragging.source === null) {
       document
-        .querySelector<HTMLElement>('tr.target-row')
-        ?.scrollIntoView({ block: 'center', inline: 'nearest' });
+        .querySelector<HTMLElement>("tr.target-row")
+        ?.scrollIntoView({ block: "center", inline: "nearest" });
     }
 
     // THE WHOLE ROW'S ANSWER, painted once.
@@ -210,10 +224,14 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     // What it marks is DROP POINTS, not covered cells — the map is keyed by the
     // block's START. For a two-hour block those genuinely differ, and the strong
     // highlight under the cursor is the one that shows the span.
-    const targetRow = document.querySelector<HTMLElement>('tr.target-row');
+    const targetRow = document.querySelector<HTMLElement>("tr.target-row");
     if (targetRow !== null) {
-      for (const cell of targetRow.querySelectorAll<HTMLElement>('td[data-day]')) {
-        const verdict = dragging.map.get(`${cell.dataset['day']}|${cell.dataset['hour']}`);
+      for (const cell of targetRow.querySelectorAll<HTMLElement>(
+        "td[data-day]",
+      )) {
+        const verdict = dragging.map.get(
+          `${cell.dataset["day"]}|${cell.dataset["hour"]}`,
+        );
         const cls =
           verdict === undefined || verdict.blocked !== null
             ? PV_NO
@@ -226,14 +244,25 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     }
 
     /** The grid cell under the cursor. The ghost MUST be pointer-events: none. */
-    const findTarget = (x: number, y: number): { day: number; hour: number } | null => {
-      const el = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-day]');
+    const findTarget = (
+      x: number,
+      y: number,
+    ): { day: number; hour: number } | null => {
+      const el = document
+        .elementFromPoint(x, y)
+        ?.closest<HTMLElement>("[data-day]");
       // We check the class instead of comparing the row id as text: ids can
       // start with a digit and escaping them in a CSS selector is a chore.
-      if (el == null || el.closest('tr')?.classList.contains('target-row') !== true) return null;
-      const day = Number(el.dataset['day']);
-      const hour = Number(el.dataset['hour']);
-      return Number.isInteger(day) && Number.isInteger(hour) ? { day, hour } : null;
+      if (
+        el == null ||
+        el.closest("tr")?.classList.contains("target-row") !== true
+      )
+        return null;
+      const day = Number(el.dataset["day"]);
+      const hour = Number(el.dataset["hour"]);
+      return Number.isInteger(day) && Number.isInteger(hour)
+        ? { day, hour }
+        : null;
     };
 
     /** Scrolls the grid if the cursor is near an edge. Returns true if it scrolled. */
@@ -269,7 +298,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       const scrolled = scrollAtEdge(x, y);
 
       const target = findTarget(x, y);
-      const signature = target === null ? '' : `${target.day}|${target.hour}`;
+      const signature = target === null ? "" : `${target.day}|${target.hour}`;
       // If it scrolled, the cell under the cursor may have changed; look again.
       if (signature !== lastTarget.current || scrolled) {
         clearHighlight();
@@ -279,20 +308,24 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
           setReason(null);
         } else {
           const verdict = d.map.get(signature);
-          const blocked = verdict === undefined ? t('Bu hücreye bırakılamaz') : verdict.blocked;
+          const blocked =
+            verdict === undefined
+              ? t("Bu hücreye bırakılamaz")
+              : verdict.blocked;
           const warning = verdict?.warning ?? null;
 
           setReason(
             blocked !== null
-              ? { text: blocked, level: 'blocked' }
+              ? { text: blocked, level: "blocked" }
               : warning !== null
-                ? { text: warning, level: 'warn' }
+                ? { text: warning, level: "warn" }
                 : null,
           );
 
           // Paint every cell the block will cover.
-          const rowEl = document.querySelector<HTMLElement>('tr.target-row');
-          const cls = blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
+          const rowEl = document.querySelector<HTMLElement>("tr.target-row");
+          const cls =
+            blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
           for (let i = 0; i < d.blockSize; i++) {
             const hour = target.hour + i;
             // Two ways an hour can be on screen: as its own cell, or swallowed
@@ -344,20 +377,21 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     };
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') finish();
+      if (e.key === "Escape") finish();
     };
 
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('pointercancel', finish);
-    window.addEventListener('keydown', onKey);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", finish);
+    window.addEventListener("keydown", onKey);
     return () => {
-      cancelAnimationFrame(loop.current);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', finish);
-      window.removeEventListener('keydown', onKey);
-      clearPreview();
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", finish);
+      window.removeEventListener("keydown", onKey);
+      // Activity tears effects down while Program is hidden. Treat that just
+      // like Escape so no body-level ghost or painted cell survives the tab.
+      finish();
     };
   }, [dragging, drop, finish, clearHighlight, clearPreview]);
 
