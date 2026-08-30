@@ -9,9 +9,35 @@ Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
 
 ## ŞİMDİ SIRADA
 
+> ### YENİ SOHBETE DEVİR (2026-08-30, otuz sekizinci oturumun sonu)
+>
+> Bu oturumda **kod yazılmadı**; yazılan şey bir **araştırma hattı** ve bir
+> **karar tablosu**. Yeni sohbetin ilk okuyacağı yer [ASC.md](ASC.md) →
+> *Karar tablosu*, ikinci yer [PLAN.md](PLAN.md) → **v4**.
+>
+> **İlk üç iş, sırayla:**
+>
+> 1. **Windows'u yeniden başlat, sonra `scripts/asc-tur.ps1`'i bir kez
+>    koştur.** UTF-8 düzeltmesi uygulandı (`ACP 65001 -> 1254`) ama yeniden
+>    başlatmadan geçerli olmuyor. Şu anki 18 ekran görüntüsü hâlâ bozuk Türkçe
+>    harf taşıyor ve yeniden başlatmadan çekilen her yenisi de bozuk olur.
+> 2. **Kova 4'ün önkoşul maddeleri**: okul adı · öğretim yılı · okul logosu ·
+>    sınıf öğretmeni · özel alanlar. Bunlar baskı tasarımının **değişkenleri**
+>    ve olmadan kova 1'in baskı yarısı yazılamaz.
+> 3. **Tuval ölçümü**: 2100 hücrede zoom `transform: scale()` mi `--cell-w` mi.
+>    Ölçülmeden yazılırsa yanlış olan seçilir (tuzak 10 · tuzak 42).
+>
+> **Değişen ilkeler** — CLAUDE.md güncel, ama yeni sohbet bunları bilmeli:
+> 5. ilke (*"bir dönem kullanılmadan özellik eklenmez"*) **kaldırıldı**,
+> kurulum ve paylaşma yasakları **kalktı**, hedef **%50**. Geriye üç engel
+> kaldı: ilke 2 (sunucu yok) · ilke 3 (çalışırken ağ yok) · yasak liste.
+>
+> **Babaya sorulacak iki soru:** vekil öğretmen (Substitution) ve nöbet.
+
 ### AB turu — devreden yedi madde — **BİTTİ ✅** (2026-08-30)
 
-Yedisi de yapıldı; **AB8 fotoğraf bekliyor**. Maddelerin tamamı ve gerekçeleri
+Yedisi de yapıldı; **AB8 otuz sekizinci oturumda kapandı** (aSc'nin ekleme
+pencereleri artık `docs/asc/ekran/` altında). Maddelerin tamamı ve gerekçeleri
 bu dosyanın altındaki *AB turu* bölümünde, ölçümler
 [STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
 
@@ -48,12 +74,94 @@ bu dosyanın altındaki *AB turu* bölümünde, ölçümler
 
 Ve hâlâ bekleyen tek büyük şey: **babanın gerçek listesi** — v0'ın çıkma şartı.
 
+### aSc araştırma hattı — **KURULDU ✅** (2026-08-30, otuz sekizinci oturum)
+
+aSc bu makinede kurulu çıktı (`C:\TimeTables`), emülatör gerekmedi. Üç kaynak
+da yeniden üretilebilir; karar haritası [ASC.md](ASC.md), ölçümler
+[STATUS.md](STATUS.md) → *Otuz sekizinci oturum*.
+
+- [x] `scripts/asc-sozluk.mjs` → **2940 arayüz metni**, EN ↔ TR (%98 Türkçe)
+- [x] `scripts/asc-yardim.mjs` → **528 yardım konusu**, 19 bölüm, 0 hata
+- [x] `scripts/asc-ekran.ps1` → pencere yakalama (UI Automation çalışmıyor,
+      ölçüldü: 0 kontrol)
+- [x] `scripts/asc-tur.ps1` → **18 ekranlık tam tur**, Türkçe arayüzde; sonunda
+      MD5 karşılaştırıp kaçan tıklamayı haber veriyor
+- [x] **Arayüz Türkçeye alındı** (`Lang0: e → t`); program kendi adını da
+      değiştiriyor: *aSc k12 Bilişim Ders Planlama 2027*
+- [x] `docs/ASC.md` → 19 bölümün tablosu + kısıt karşılaştırması + ekran envanteri
+
+**Bunlar `npm run kontrol`'ün parçası DEĞİL** — `font`/`exe`/`patrol` gibi, bu
+depoda olmayan bir şeye bağlılar (aSc kurulumu, ağ).
+
+### aSc'den gelen iş — KARARLAR VERİLDİ (2026-08-30)
+
+Kova 1 · 2 · 3 · 4 **evet**, kova 6 **hayır**. Tam tablo [ASC.md](ASC.md) →
+*Karar tablosu*. Sıra kabaca yukarıdan aşağı.
+
+**Kova 1 — kesin:**
+
+- [ ] **Tuval davranışı ("Word gibi")** — serbest kaydırma · **sağ altta ölçek
+      kaydırıcısı** · `Ctrl`+tekerlek zoom · kartta ne yazacağı ve neye göre
+      boyanacağı seçilebilsin. Ayrıntı: [PLAN.md](PLAN.md) → **v4**.
+      **Ölçüm borcu:** 2100 hücrede zoom `transform: scale()` mi `--cell-w` mi —
+      ölçülerek seçilecek (tuzak 10)
+- [ ] **Baskı tasarımları** — *"kesinlikle olması lazım"*. Model aSc'den
+      **çözüldü**: logo · künye · kenarlık · ekstra sütun, ve yer tutucular
+      `{Okul:Okulun Adı}` `{Okul:Öğretim Yılı}` `{Okul:Okul Logosu}`
+      `{Sınıf:Tam Adı}` `{Sınıf:Sınıfın Dersliği}` `{Sınıf:Sınıf Öğretmeni}`
+      `{Öğretmen:Tam Adı}`. Düzenleme yeri önizlemenin kendisi
+- [ ] **Farklı baskı çeşitleri** — rapor yapısı seçilebilsin: satırda ne,
+      sütunda ne, sayfa başına ne
+- [ ] **Kısıt motoru genişlesin** — boşluk (pencere) kuralları · kartlar arası
+      ilişki · sınıf için günlük min/max · ardışıklık · "belirli ders belirli
+      konumda" · öğretmen günde en fazla N sınıf
+- [ ] **Paylaşma** — PDF ya da görsel, e-posta ve WhatsApp, hocalara **tek
+      tıkla**. Bağlantı yok, sunucu yok
+- [ ] **Kurulum**
+- [ ] **Kontrol'e Danışman uyarıları**
+- [ ] **Özet çarşaf liste** — bütün öğretmenler tek sayfada
+
+**Kova 2 — bedeli var:**
+
+- [ ] **Gruplar / bölünmeler.** Kullanıcı: *"seçmeli ders yok ama olsun."*
+      `placements` bir hücreye tek ders tutuyor → `schemaVersion` 12, göç kodu,
+      `sanitize()`, cascade ve kısıt motorunun tamamı
+- [ ] **aSc'den içe aktarma (XML)** — babanın gerçek verisi
+- [ ] **HTML'e dışa aktarma** (Excel sonra)
+- [ ] **A/B haftası** — kullanıcı *"olabilir"*; gruplardan sonra
+
+**Kova 3–4:**
+
+- [ ] **Ders başına derslik** (önceliklendirme, paylaşılan derslik, kapasite)
+- [ ] **Okul adı · öğretim yılı · logo · sınıf öğretmeni · özel alanlar** —
+      baskı tasarımının değişkenleri bunları istiyor, yani kova 1'in önkoşulu
+- [ ] Ders kopyalama · toplu ders ekleme · ad biçimi · kısayol listesi ·
+      iki programı karşılaştırma · ders ızgarası toplu giriş
+
+**Bu makinede yapılacak:**
+
+- [x] **UTF-8 düzeltmesi uygulandı** — `ACP 65001 -> 1254`, `OEMCP -> 857`,
+      `MACCP -> 10081`, sistem yereli `tr-TR`
+- [ ] **Yeniden başlat, sonra `scripts/asc-tur.ps1`'i koştur.** 18 ekran
+      görüntüsü hâlâ bozuk harfli; düzeltme yeniden başlatmadan geçerli olmuyor.
+      Geri alma: `scripts/asc-utf8-geri-al.ps1`
+
+**Babaya sorulacak — kalan iki soru:**
+
+- [ ] **Vekil öğretmen (Substitution)?** aSc'de 62 konu
+- [ ] **Nöbet var mı?**
+
+**Kapananlar:** seçmeli ders **yok** · **tek bina** (binalar özelliği düştü) ·
+Türkiye sürümü **boş verildi**.
+
 ### Karar bekleyenler
 
 - [ ] **Çözücüde Deney B uygulansın mı?** Ölçüldü ve bedeli yok: sınıf deliği
       268 → **251**, delikli gün 85 → **72**, blok yine 367/367, düğüm yine
       367, süre 71 ms. Ayrıntısı aşağıda.
-- [ ] **AB8 — aSc'nin ders ekleme penceresinin fotoğrafı.**
+- [x] **AB8 — aSc'nin ders ekleme penceresinin fotoğrafı.** **BİTTİ**:
+      `docs/asc/ekran/28-brans-ekle.png` ve `30-ogretmen-ekle.png`, Türkçe
+      arayüzde. Tekrarı: `.\scripts\asc-tur.ps1`
 - [ ] **`strip = false`'un boyut maliyeti** — Rust olan bir makinede ölçülecek.
 - [ ] **`kayma.spec.ts`'in "aynı genişlikte" testi macOS'ta düşüyor** ve kusur
       kodda değil: bindirmeli kaydırma çubuğu 0 px, yani testin ölçmek istediği
@@ -2164,10 +2272,10 @@ hepsi [STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
       adları, işleri, girdileri ve adımları İngilizce. **`LICENSE` eklendi**
       (MIT + gömülü IBM Plex için OFL 1.1), `package.json`'a `license` alanı,
       iki `description` İngilizce.
-- [ ] **AB8 aSc ders ekranı — HÂLÂ FOTOĞRAF BEKLİYOR.** `docs/Örnek Fotolar/`
-      altına bakıldı: aSc'nin ders **ekleme/değiştirme penceresinin** resmi
-      yok, yalnız "Lessons/week + Single" açılır listesi var. Fotoğraf gelince
-      açılır.
+- [x] **AB8 aSc ders ekranı — KAPANDI (otuz sekizinci oturum).** Fotoğrafı
+      beklemeye gerek kalmadı: aSc bu makinede kurulu çıktı, arayüzü Türkçeye
+      alındı ve `scripts/asc-tur.ps1` ekleme pencerelerini de çekti
+      (`28-brans-ekle`, `30-ogretmen-ekle`).
 
 `npm run kontrol` yeşil: **719 birim · 514 E2E · 22 site · 7 çözücü.**
 
@@ -2240,3 +2348,8 @@ Derslerde öğretmende öğretmene göre filre olması ve sınıftanda sınıfa 
 
 
 ASC ve Robodersi playwright ile inceleyip oradaki güzel feaureları bize ekleyelim.
+
+Çıktıda eposta ve whatsapptan atma opsiyonu. Öğretmenlerin teli ve epostanın.
+Çıktıda ayrı ayrı birden fazla pdf oluşturma.
+Excele çıkartma.
+Görsel çıkartma

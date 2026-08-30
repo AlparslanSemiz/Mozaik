@@ -1,9 +1,271 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-30 (otuz yedinci oturum: **AB turu** — kök 13px ve
-%80 basamağı, Ayarlar şeridinin sağ ucu, kısalan infolar, Çıktının tek
-kaydırıcısı, exe ikonunun ÖLÇÜLMESİ, SmartScreen hafifletmeleri, İngilizce
-vitrin ve LICENSE)
+Son güncelleme: 2026-08-30 (otuz sekizinci oturum: **aSc araştırma hattı** —
+2940 arayüz metni, 528 yardım konusu, **Türkçe arayüz ve 18 ekranlık tur**,
+[ASC.md](ASC.md) özellik pusulası; artı **ilke 5 kaldırıldı**, hedef %50)
+
+---
+
+## Otuz sekizinci oturum — aSc'yi okumak (2026-08-30)
+
+> *"asc timetables uygulamasına girip orayı emülatörden ya da başka
+> şekillerde girip tüm feauterlara bakıp gereklileri kendi uygulamamıza
+> eklemek için dokümente edebilir miyiz?"*
+
+**Emülatör gerekmedi ve bu turun tek sürprizi buydu:** aSc bu makinede zaten
+kurulu, `C:\TimeTables\roz.exe`, **aSc Timetables 2027**, Haziran 2026
+derlemesi, kayıtsız deneme. İlk arama onu kaçırdı çünkü Program Files'ta değil
+**sürücü kökünde**; bulan şey Başlat menüsü kısayolunun hedefi oldu.
+
+Üç kaynak kuruldu, üçü de yeniden üretilebilir. Kararların tamamı
+[ASC.md](ASC.md)'de; buraya yalnız **ölçümler**.
+
+### 1 · `lang.asc` — 2940 arayüz metni, EN ↔ TR
+
+aSc bütün arayüzünü düz metin bir string tablosunda tutuyor ve dosyanın kendi
+başlığı *"You can edit this file with any text editor"* diyor.
+
+```
+dosya            C:\TimeTables\lang.asc      5 689 850 bayt · 165 512 satır
+kayit            2940      (Menu 2572 · Dialogs 368)
+turkcesi olan    2894      %98
+cikti            docs/asc/sozluk.tsv         322 555 bayt
+```
+
+**Kodlama karışık ve bu bir kusur değil:** her dil kendi eski kod sayfasında
+saklanıyor, yani tek bir çözücüyle Kiril satırları bozuk çıkıyor. Bizi
+ilgilendiren ikisi temiz: EN ASCII (her kod sayfasında aynı), TR cp1254.
+`asc-sozluk.mjs` dosyayı **windows-1254** okuyup gerisini atıyor.
+
+**İki gerçek bölüm var**, ve ilk koşu dördünü uydurdu: `//` satırlarının çoğu
+çevirmene not (*"2704 means the length of the lesson"*). Bölüm başlığı olan
+şey, bir `//////` kural çizgisinin **hemen ardından** gelen yorum.
+
+### 2 · Yardım ağacı — 528 konu, 19 bölüm
+
+Tek indeks sayfası bütün ağacı listeliyor.
+
+```
+istek            528 konu, 4 koşucu, 150 ms aralik
+basarisiz        0
+cikti            docs/asc/yardim/*.md        19 dosya · 592 KB · 7350 satir
+en buyuk         Data input 137 · Constraints 97 · Substitutions 62 · Printing 48
+```
+
+### 3 · Ekran yakalama — ve iki ölçülen sınır
+
+`scripts/asc-ekran.ps1`: adlandırılmış demoyu açar, pencereyi öne alır, PNG
+yazar. **Bilerek bir UI robotu değil**, ve gerekçesi ölçüldü:
+
+```
+AutomationElement.FromHandle -> Afx:00400000:8:00010003:00000000:5FCF0E77
+Descendants / ControlType.Button -> 0
+```
+
+aSc kendi çizen bir MFC uygulaması; **UI Automation sıfır kontrol görüyor.**
+Menü ağacını süren bir robot körlemesine koordinat tıklardı.
+
+İki tuzağa aynı turda düşüldü ve ikisi de betiğe yazıldı:
+
+- `SetForegroundWindow` arka plandaki bir süreçten **yok sayılıyor**, yani
+  `SendKeys` odakta gerçekten ne varsa oraya gidiyor. Çalışan tek yol
+  `WScript.Shell.AppActivate`.
+- Kayıtsız sürümün "Continue" penceresi birkaç saniye **geri sayımla kilitli**;
+  erken gönderilen Enter yutuluyor. Ama körlemesine altı kez Enter basmak
+  **bir tarayıcı açtı** ve ekran görüntüsü onu yakaladı. Döngü artık ön
+  penceresinin sahibini soruyor ve belge açılınca duruyor.
+
+### 4 · Türkiye demoları BU DERLEMEDE AÇILMIYOR
+
+`demos/International/Turkey/` altında dokuz Türk senaryosu var (`İkili Egitim`,
+`Meslek Lisesi`, **`Yetersiz Derslik`**, `Secmeli Ders`…) ve ikisi denendi,
+ikisi de aynı kutuyu verdi: *"This file can be opened by a version that can be
+downloaded from ascturkiye.com"*. Yani o dosyalar **Türkiye sürümünü** istiyor.
+Açılanlar: `Demo1..4.roz` ve `Tutorial/Training_01..10.roz`.
+
+Bu, ASC.md'ye önce **ölçülmeden** yazılmıştı ("dokuz Türk senaryosu var")
+ve bakılınca düzeltildi — tuzak 101'in tam kalıbı.
+
+### 5 · Ekranın söylediği
+
+`docs/asc/ekran/02-demo1-program.png`: ızgara + **altta kart tepsisi**, renkli
+branş kısaltmalı kartlar, satır = sınıf. Üçü de bizim yaptığımızın aynısı;
+havuzu alta alma kararı bağımsız olarak doğrulanmış oldu. Tek büyük görünür
+fark **çapraz bölünmüş kartlar** = gruplar/bölünmeler, bizde karşılığı yok.
+
+### 6 · İKİNCİ YARI — Türkçe arayüz, ekran turu, ve ilkelerin hizalanması
+
+**İlke 5 KALDIRILDI (kullanıcı kararı).** PLAN.md elle düzenlenmişti: hedef
+%10 → **%50**, *"bir dönem kullanılmadan özellik eklenmez"* silindi, yerine
+**"Kolay kullanılabilir ve yenilikçi"** ve **"Şık ve modern"** geldi, ve yasak
+listeden `istatistik/dashboard` · `SMS/e-posta` · `aynı planın sürüm ağacı`
+çıktı. CLAUDE.md bunlara göre hizalandı ve kaldırma bir **not** olarak yazıldı
+(deponun kendi *"Listeden çıkarıldı"* kalıbıyla).
+
+`STATUS.md` ve `TASKS.md`'deki eski `(ilke 5)` atıfları **düzeltilmedi** ve
+bu bir karar: onlar bir günlük, o gün geçerli kuralla alınmış kararları
+anlatıyorlar. Düzeltilirlerse kayıt yalan söyler. Düzeltilen yalnız **canlı**
+kural metinleri oldu (CLAUDE.md'de üç yer, ASC.md'de iki satır, TASKS'in bu
+turda yazılmış bölümü).
+
+**Arayüz Türkçe.** Uluslararası derleme bunu kendi başına yapıyor:
+
+```
+Yardim seridi -> Language -> Turkish
+Lang0            e  ->  t
+pencere basligi  "aSc Timetables 2027" -> "aSc k12 Bilisim Ders Planlama 2027"
+```
+
+Program Türkçeye geçince kendi adını da değiştiriyor.
+
+**Türkiye sürümü KURULMADI ve sebebi teknik değil:** `ascturkiye.com`'da
+indirme bağlantısı yok, deneme bir forma bağlı ve form **ad-soyad, telefon,
+e-posta** istiyor. Kullanıcının kişisel bilgilerini bir satış formuna girmek
+bir kurulum adımı değil; karar kullanıcıya bırakıldı. Türkçe demolar dil
+değişikliğinden sonra da **açılmıyor** — onları kilitleyen şey arayüz dili
+değil, derlemenin kendisi.
+
+**Ekran turu kuruldu: `scripts/asc-tur.ps1`, 18 görüntü.** Yedi şerit sekmesi,
+sekiz veri penceresi, üç pencere içi form. Tur bittiğinde **kendini
+denetliyor**: iki görüntünün MD5'i eşitse bir tıklama kaçmıştır ve uyarı
+basar. Son koşu: *"bütün görüntüler farklı"*.
+
+Üç şey ölçülerek öğrenildi ve üçü de betiğe yazıldı:
+
+1. **Alt tuş ipuçları var ama yetmiyor.** Alt keytipleri açıyor, ama
+   hızlandırıcılar çakışıyor (`Ana Menü` ve `Arayüz Ayarları` ikisi de A) ve
+   üç sekme hiç değişmedi — üç görüntü aynı MD5 çıktı. Gezinme sekme
+   şeridine **tıklamaya** çevrildi.
+2. **Nag penceresi İKİ kez çıkıyor** ve `Devam` birkaç saniye kilitli. `-Gec`
+   artık bir sayaca değil hedefe bağlı: başlıkta belge görünene kadar tıklar.
+3. **Enter kullanılmıyor.** Türkçe kutu onu almıyor, ve kör Enter bir kere
+   "Türkiye sürümünü indir" kutusunun bağlantısını tetikleyip **tarayıcı
+   açtı**; ekran görüntüsü de onu yakaladı.
+
+**TÜRKÇE HARFLER DİYALOGLARDA BOZUK, ve suçlu aSc değil:**
+
+```
+HKLM\SYSTEM\CurrentControlSet\Control\Nls\CodePage   ACP = 65001
+Get-WinSystemLocale                                  en-US
+Get-Culture                                          tr-TR
+```
+
+`ACP = 65001` = Windows'un **"Unicode UTF-8 kullan (Beta)"** seçeneği açık.
+aSc Unicode olmayan bir MFC uygulaması: cp1254 bayt yazıyor, sistem UTF-8
+bekliyor. Şerit düzgün, diyaloglar bozuk (`K�s�tlamalar`). **Düzeltilmedi:**
+sistem yerel ayarını değiştirip yeniden başlatmak gerekiyor, ve o sistem
+geneli bir karar.
+
+**Bir adlandırma tuzağı:** aSc'de **`Dersler` = branş**. Bizim `Dersler`imiz
+sınıf + öğretmen + haftalık saat; aSc'de onun karşılığı `Ders Atama`. Aynı
+kelime iki program için iki şey.
+
+### 7 · ÜÇÜNCÜ YARI — kalan yasaklar da kalktı, ve karar tablosu yazıldı
+
+Kullanıcı kararı, aynı gün: *"Kısıtlamaları ben koydum ve kaldırıyorum
+şimdi."* Kaldırılanlar:
+
+- **İlke 1'in "kurulum yok"u.** Yerine geçen sözleşme: hesap/şifre sorulmaz ve
+  **kurulmadan çalışan bir yol hep kalır** (`dist/index.html` çift tıklanır).
+  Kurulum bir seçenek olabilir, tek kapı olamaz.
+- **Paylaşma yasağı.** Baba istedi: e-posta ve WhatsApp. İlke 2'yi bozmuyor
+  çünkü paylaşılan şey bir **dosya** ve taşıyan şey işletim sistemi — bizim
+  sunucumuz, hesabımız, oturumumuz yok. **aSc'nin "Sharing"i bu değil** ve
+  karıştırılmamalı: orada veri buluta yükleniyor ve veliye hesap açılıyor.
+- **Kısıtlar programa girecek**, plana değil.
+- **Substitution** hayırdan **karar bekleyene** taşındı (babaya sorulacak).
+
+Geriye **üç** engel kaldı ve bir özelliği ancak bunlar reddedebilir: ilke 2
+(sunucu yok) · ilke 3 (çalışırken ağ yok) · yasak liste.
+
+**[ASC.md](ASC.md) yeniden yazıldı: altı kova.** Kesin ekleyelim · eklenmeli
+ama kısıtlama var · eklenebilir ama kısıtlama var · eklenebilir · karar
+verelim · kesin eklemeyelim. Kaynak 528 yardım konusu + 2940 arayüz metni +
+18 ekran; hiçbir satır tahminle yazılmadı.
+
+En pahalı satır **gruplar/bölünmeler**: `placements` anahtarı bir hücreye tek
+ders tutuyor, bölünme ikisini istiyor — yani `schemaVersion` 12, göç kodu,
+`sanitize()`, cascade ve kısıt motorunun tamamı. Ekrandaki en görünür fark da o.
+
+Bu yarıda **aSc hiç açılmadı**: iş tamamen diskteki hasadı okumaktı.
+
+### 8 · DÖRDÜNCÜ YARI — kararlar, ve iki yeni başlık
+
+Kullanıcı altı kovanın hepsine cevap verdi: **1 · 2 · 3 · 4 evet, 6 hayır.**
+Kova 5'in cevapları: **seçmeli ders yok** (ama gruplar yine de yapılacak) ·
+A/B haftası **olabilir** · **tek bina** (binalar özelliği düştü) · Türkiye
+sürümü **boş verildi**. Açık kalan iki soru babaya: **vekil öğretmen** ve
+**nöbet**.
+
+**Baskı tasarımları kova 3'ten kova 1'e taşındı** — *"kesinlikle olması
+lazım"*.
+
+**İki yeni başlık doğdu, ikisi de bir eksikten değil bir BEĞENİDEN:**
+
+**(a) Tuval davranışı.** Kullanıcının cümlesi: *"Word gibi olması — sağa sola
+aşağı yukarı kaydırabilme, sağ aşağıda ölçeğin olması, zoom in zoom out,
+neredeyse her şeyi değiştirebiliyor olmamız."* [PLAN.md](PLAN.md)'e **v4**
+olarak yazıldı. İki ölçülmüş kısıt bu sürümde de duruyor: `--ui-scale`
+kâğıda geçmez, ve kâğıdın fiziksel kutusu sabit (tuzak 31). Bir de **ölçüm
+borcu**: 2100 hücrede sürekli zoom `transform: scale()` ile mi `--cell-w` ile
+mi yapılacak — biri metni yeniden sarar, öteki bulanıklaştırır, ve seçim
+ölçülerek yapılacak (tuzak 10).
+
+**(b) Baskı tasarımı — ve MODELİ ÇÖZÜLDÜ.** aSc'nin tasarımları
+`C:\TimeTables\designs\<ad>\def.xml`, okunabilir XML, sayfa **binde bir**
+koordinatlarla bölünmüş, her kutu bir `<PrintObject>`: rect · metin · resim ·
+9 konumlu hizalama · zemin/yazı/çizgi rengi · dört kenarlık · font · `m_bOnTop`.
+
+Asıl kazanç yer tutucularda: metinler `{#1035:#1635}` gibi **`lang.asc` kayıt
+numaraları** taşıyor, ve sözlüğümüz onları çözüyor —
+
+```
+{#1035:#1635}  Sınıf : Tam Adı            {#3148:#1166}  Okul : Okulun Adı
+{#1035:#1067}  Sınıf : Sınıfın Dersliği   {#3148:#1167}  Okul : Öğretim Yılı
+{#1035:#1532}  Sınıf : Sınıf Öğretmeni    {#3148:#4055}  Okul : Okul Logosu
+{#1048:#1635}  Öğretmen : Tam Adı         {sum}          toplam
+```
+
+Yani kendi yer tutucu dağarcığımızı **uydurmayacağız**: yedisi de burada, ve
+`docs/asc/sozluk.tsv`'den çözüldü. Yan sonuç — o değişkenlerin beslediği
+alanlar (okul adı, öğretim yılı, logo, sınıf öğretmeni) bizde **yok**, yani
+kova 4'ün birkaç maddesi kova 1'in **önkoşulu** oldu.
+
+**UTF-8 düzeltmesi UYGULANDI, yeniden başlatma bekliyor.**
+`scripts/asc-utf8-duzelt.ps1` yazıldı (yönetici ister; kullanıcı ders
+çalışırken UAC açmamak için ben çalıştırmadım) ve **kullanıcı oturum içinde
+kendisi koşturdu**. Ölçüldü:
+
+```
+ACP    65001 -> 1254        OEMCP  65001 -> 857
+MACCP  65001 -> 10081       sistem yereli -> tr-TR (yeniden başlatmada geçerli)
+```
+
+Yalnız beta'yı kapatmak yetmezdi: `en-US` altında ACP 1252 olur ve orada
+`ı ğ ş İ` yoktur, o yüzden sistem yereli de değişti. Geri alma dosyası betiğin
+kendi yazdığı `scripts/asc-utf8-geri-al.ps1`.
+
+**Borç:** `docs/asc/ekran/` altındaki 18 görüntü yeniden başlatmadan **önce**
+çekildi, yani hâlâ bozuk harf taşıyor. Yeniden başlatma sonrası
+`scripts/asc-tur.ps1` bir kez koşacak.
+
+**Bu yarıda aSc HİÇ AÇILMADI.** Bütün araştırma diskten yapıldı: `designs/`
+klasörü, `def.xml`, ve hasat edilmiş 528 konu. Kullanıcı ders çalışıyordu ve
+şart buydu.
+
+### Bu turda YAPILMAYAN
+
+- Türkiye sürümü kurulmadı (ayrı indirme, ayrı karar).
+- Arayüz Türkçeye alınmadı. `HKCU:\Software\aSc\aSc Rozvrhy\Language` →
+  `Lang0 = e`; Türkçe değeri **tahmin edilmedi** (tuzak 65).
+- `.roz` içe aktarma araştırılmadı — kullanıcı kararıyla kapsam dışı. Ölçülen
+  tek şey biçim: `.roz` ikili (`3a 01 00 00`), `.ziptt` yedekleri ZIP içinde
+  `.roz` taşıyor.
+- **AB8 KAPANDI:** aSc'nin ekleme pencereleri artık `docs/asc/ekran/` altında
+  (`28-brans-ekle`, `30-ogretmen-ekle`), üstelik Türkçe arayüzde.
+
+`npm run tipler` yeşil. `src/` altında hiçbir şeye dokunulmadı; eklenenler
+`docs/` ve `scripts/`.
 
 ---
 

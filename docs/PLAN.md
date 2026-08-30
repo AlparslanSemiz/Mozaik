@@ -18,8 +18,8 @@ Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı 
 > geçerli, sayılar değil — güncel şema ve kısıt listesi [../CLAUDE.md](../CLAUDE.md)
 > içinde, ne değiştiği [STATUS.md](STATUS.md) oturum kaydında.
 
-Bu bir aSc klonu **değil**. aSc'nin yaptığı işin kursla ilgili olan %10'unu yapıp
-o %10'u aSc'den iyi yapmak hedefi.
+Bu bir aSc klonu **değil**. Ondan daha iyi yapmak. aSc'nin yaptığı işin kursla ilgili olan %50'sini yapıp
+o %50'yi aSc'den iyi yapmak hedefi.
 
 ---
 
@@ -27,23 +27,22 @@ o %10'u aSc'den iyi yapmak hedefi.
 
 Her özellik kararında bu listeye dönülecek. Listeyle çelişen özellik yazılmaz.
 
-1. **Babam kurulum yapmayacak.** İndir, çift tıkla, çalışsın. Kurulum sihirbazı,
-   hesap açma, şifre, güncelleme kontrolü yok.
+1. **Babam çift tıklayacak.** İndir, çift tıkla, çalışsın. Hesap açma, şifre yok.
+   *Kurulum yasağı 2026-08-30'da kalktı: kurulum bir seçenek olabilir, ama
+   kurulmadan çalışan bir yol hep kalır.*
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain, sertifika yok.
    Ben Karlsruhe'deyken çöken bir şey olmayacak.
 3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmeyecek. Kurs internetsiz
    kaldığında program yapılamıyor olması kabul edilemez.
-4. **Türkçe.** Tek dil. i18n altyapısı yok, string dosyası yok, doğrudan Türkçe yazılır.
-5. **Bir dönem kullanılmadan özellik eklenmez.** Tahmine dayalı özellik yazmak,
-   yanlış özelliği yazmaktır.
-6. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir olacak.
+4. **Türkçe.** Asıl dil Türkçe ama diğer dilleri de zamanla ekleyeceğiz.
+5. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir olacak.
+6. **Kolay kullanılabilir ve yenilikçi**
+7. **Şık ve modern**
 
 ### Yasak liste (bunlar bu projeye asla girmeyecek)
 
-Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama ·
-istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
-takvim entegrasyonu · **aynı planın** sürüm ağacı ·
-sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz stack yeterli)
+Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama · yoklama · not girişi · öğrenci kaydı ·
+takvim entegrasyonu · sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz stack yeterli)
 
 > *Bu listeden 2026-08-24'te karanlık mod ve tema seçimi, 2026-08-25'te animasyon,
 > 2026-08-26'da PDF/UI kütüphanesi yasağı çıkarıldı. Gerekçeler CLAUDE.md'de.*
@@ -330,6 +329,49 @@ Sadece babam "asıl derdim bu" derse. (Soru 7)
 
 - "Bu hafta Ahmet Hoca yok" → etkilenen dersleri işaretle, boş alternatif öner
 - Haftalık sapmaları ana programdan ayrı tut, ana program bozulmasın
+
+### v4 — TUVAL ve BASKI TASARIMI (2026-08-30, kullanıcı isteği)
+
+Bu sürüm aSc'yi gezdikten sonra doğdu ve gerekçesi bir eksik değil bir
+**beğeni**: *"Programda ve baskı önizleme tarafında Word gibi olması yani
+sağa sola aşağı yukarı kaydırabilme, sağ aşağıda ölçeğin olması, ayrıca
+kendimizin zoom in zoom out yapabiliyor olmamız, neredeyse her şeyi
+değiştirebiliyor olmamız, ayrıca farklı çeşitlerde baskı alabiliyor olmamız."*
+
+Tam dökümü ve aSc'deki karşılıkları [ASC.md](ASC.md) → *Karar tablosu* → 1a
+ve 1b'de. Özeti:
+
+**Tuval (Program ve Çıktı sekmeleri):**
+
+- Serbest kaydırma, yatay **ve** dikey; sürükleyerek de (orta tuş / boşluk).
+- **Sağ altta ölçek**: yüzde + kaydırıcı, ızgaraya bakarken değişiyor.
+  Bugün `--ui-scale` Ayarlar → Görünüm'de altı düğme; oradan çıkmıyor.
+- `Ctrl` + tekerlek, `Ctrl +` / `Ctrl -`, `%100'e dön`.
+- **Kartta ne yazacağı ve neye göre boyanacağı seçilebilir** — aSc'nin
+  `Görünüm → Tanımla`sı: öğretmen / sınıf / derslik / branş.
+
+**Baskı:**
+
+- Rapor **yapısı** seçilebilir: satırda ne, sütunda ne, sayfa başına ne.
+- **Tasarım katmanı**: okul logosu, künye, kenarlık, ekstra sütun. Modeli
+  aSc'den çözüldü ve uydurulmadı — yer tutucular `{Okul:Okulun Adı}` ·
+  `{Okul:Öğretim Yılı}` · `{Okul:Okul Logosu}` · `{Sınıf:Tam Adı}` ·
+  `{Sınıf:Sınıfın Dersliği}` · `{Sınıf:Sınıf Öğretmeni}` · `{Öğretmen:Tam Adı}`.
+- Düzenleme yeri **önizlemenin kendisi** (sağ tık → o parçanın ayarı), çünkü
+  önizleme 2026-08-26'dan beri kâğıdın **modeli değil kendisi**.
+
+**İki şey bu sürümde de değişmiyor, ve ikisi de ölçülmüş kısıt:**
+
+1. **`--ui-scale` kâğıda geçmez.** Ekran ölçeği bir okuma tercihi, kâğıdınki
+   ayrı bir ayar. Karışırlarsa yazıcıdan çıkan şey ekrana bakanın gözüne göre
+   değişir.
+2. **Kâğıdın fiziksel kutusu sabit**: A4 yatay, `@page { margin: 0 }`,
+   205 mm (tuzak 31). Serbest tasarım o kutunun **içinde** yaşar.
+
+**Ölçüm borcu:** ızgara 2100 hücre, satırlar `React.memo` ile sarılı
+(tuzak 10). Sürekli zoom her adımda yeniden düzen demek. `transform: scale()`
+mi `--cell-w` mi — **ölçülerek** seçilecek: ikincisi metni yeniden sarar,
+birincisi bulanıklaştırır.
 
 ---
 

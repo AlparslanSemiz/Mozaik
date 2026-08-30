@@ -2,9 +2,16 @@
 
 Babamın dershanesinde haftalık ders programını dizmek için kullanacağı araç.
 aSc Timetables'ın yerini alacak. aSc'nin yaptığı işin bu kursla ilgili %50'sini
-yapıp o %50'yi'u aSc'den iyi yapmak hedefi.
+yapıp o %50'yi aSc'den iyi yapmak hedefi.
 
 Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](docs/STATUS.md) · Görevler: [docs/TASKS.md](docs/TASKS.md)
+
+**Rakip ne yapıyor:** [docs/ASC.md](docs/ASC.md) — aSc'nin 19 bölümü, hangisi
+alındı, hangisi bilerek alınmadı, hangisi sırada. Hedef %50'ye çıktığından beri
+bu dosya projenin **özellik pusulası**. Altındaki `docs/asc/` üretilir: `asc-sozluk.mjs` (2940 arayüz
+metni, EN ↔ TR), `asc-yardim.mjs` (528 yardım konusu), `asc-ekran.ps1`
+(pencere yakalama). Üçü de `npm run kontrol`'ün parçası değil — `font` ve
+`exe` gibi, bu depoda olmayan bir şeye bağlılar.
 
 ---
 
@@ -12,7 +19,18 @@ Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](
 
 Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazılmaz.
 
-1. **Kurulum yok.** İndir, çift tıkla, çalışsın. Sihirbaz, hesap, şifre, güncelleme yok.
+1. **Çift tıkla çalışır.** İndir, çift tıkla, çalışsın. Hesap yok, şifre yok.
+   > **KURULUM YASAĞI KALKTI (2026-08-30, kullanıcı kararı).** Eski hâli
+   > *"Kurulum yok. Sihirbaz, hesap, şifre, güncelleme yok"* idi. Kurulum artık
+   > serbest — ve zaten yarısı yapılmıştı: `kurulum/Kur.cmd`, `dist-kurulum/`
+   > ve `Ders-Programi.exe` üç ayrı teslim yolu.
+   >
+   > **Kalan iki şey ve ikisi de yasak değil bir SÖZLEŞME:** hesap/şifre
+   > sorulmaz, ve **kurulmadan da çalışan bir yol hep kalır** —
+   > `dist/index.html` çift tıklanır. Bir kurulum bir *seçenek* olabilir,
+   > tek kapı olamaz: kurulamayan bir makinede program açılmıyorsa ilke 1
+   > diye bir şey kalmaz.
+   >
    > **Netleştirildi (2026-08-27): "güncelleme yok" = ZORLANAN güncelleme yok.**
    > Site yolunda program yeni bir sürümün geldiğini **söyler** ve orada durur:
    > `Yenile` denene kadar hiçbir şey değişmez, `Sonra` denince o oturumda bir
@@ -32,6 +50,20 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
    > yazılıydı: *ilke 3 programın kendisi hakkındadır; çalışan sayfa hiçbir
    > yere bağlanmaz, bir güncelleme bağlanır, çünkü işi budur.*
 2. **Sunucu yok.** Backend, veritabanı, deploy, domain yok.
+   > **PAYLAŞMA YASAK DEĞİL (2026-08-30, kullanıcı kararı: "babam istedi").**
+   > Programın çıktısını **e-postayla ve WhatsApp'la göndermek** yapılacak
+   > özellikler arasında. İlke 2'yi bozmuyor ve sebebi şu: paylaşılan şey bir
+   > **dosya** — bir PNG, bir PDF, bir bağlantı — ve onu taşıyan şey işletim
+   > sisteminin kendi paylaşım yolu. Ortada bizim bir sunucumuz yok, hesap yok,
+   > oturum yok, yüklenen bir veri yok.
+   >
+   > **aSc'nin "Sharing"i BU DEĞİL** ve karıştırılmamalı: orada program veriyi
+   > EduPage'e yüklüyor, öğretmene ve veliye hesap açıyor, şifreyle kimin neyi
+   > gördüğünü ayarlıyor. O hâlâ hayır — ilke 2 ve yasak listedeki
+   > "kullanıcı hesapları".
+   >
+   > Ağ kuralı güncellemeninkiyle aynı: **yalnız tıklanınca**. Program
+   > kendiliğinden hiçbir şey göndermez.
 3. **İnternet gerekmez.** CDN'den tek bir dosya bile çekilmez. Font **ağdan
    çekilmez** — gömülü font serbest, bkz. aşağıdaki güncelleme.
 4. **Türkçe KAYNAK dildir.** Beş dil konuşulur (tr · en · de · es · fr) ama
@@ -67,17 +99,47 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
    > kurulum özeti var (o metin her Release sayfasının gövdesi, yani babanın
    > indirirken gördüğü sayfa), ve `kurulum/OKU.txt` baştan sona Türkçe.
    > Programın kendisi de öyle: arayüzün varsayılanı hâlâ Türkçe.
-5. **Bir dönem kullanılmadan özellik eklenmez.** Tahmine dayalı özellik = yanlış özellik.
-6. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir.
-7. **Hedef makine yavaş** — ama bu bir **varsayım**, gerekçe değil; bkz.
+5. **Veri kaybı kabul edilemez.** Her şey her an dışa aktarılabilir.
+6. **Kolay kullanılabilir ve yenilikçi.**
+7. **Şık ve modern.**
+8. **Hedef makine yavaş** — ama bu bir **varsayım**, gerekçe değil; bkz.
    aşağıdaki güncelleme.
+
+> **KALDIRILDI (2026-08-30, kullanıcı kararı): "Bir dönem kullanılmadan özellik
+> eklenmez."** İki yıl boyunca 5. ilkeydi ve tam metni şuydu: *"Tahmine dayalı
+> özellik = yanlış özellik."* Yerine geçen bir kural **yok**; yerine geçen şey
+> iki yeni ilke (6 ve 7) ve bir hedef değişikliği — aSc'nin kursla ilgili
+> kısmının %10'u değil **%50'si**, ve ondan iyisi.
+>
+> **Bu bir gevşetme değil bir YÖN değişikliği, ve ikisini karıştırmamak önemli.**
+> Eski ilke "elde veri yokken yazma" diyordu ve karşılığında bir bekleme
+> öneriyordu: babanın bir dönem kullanması. Yeni duruş özelliği rakibin
+> gerçekten yaptığı işten türetiyor — [docs/ASC.md](docs/ASC.md) tam da bunun
+> için var, ve orada aSc'nin 528 yardım konusu ile 2940 arayüz metni okunabilir
+> hâlde duruyor. Yani "tahmin" ile "ölçülmüş bir rakip davranışı" artık aynı
+> şey değil.
+>
+> **Değişmeyen üç şey:** ilke 1–3 (kurulum yok · sunucu yok · internet
+> gerekmez) hâlâ her özelliğin üstünde, aşağıdaki yasak liste hâlâ yasak, ve
+> **ölçmek hâlâ zorunlu** (tuzak 65 ve 101: ölçülmemiş bir iddia bir iş planı
+> üretir). Bir özelliği artık "baba istemedi" diye reddetmiyoruz; "ilke 1–3'ü
+> bozuyor" ya da "ölçülmedi" diye reddediyoruz.
+>
+> `docs/STATUS.md` ve `docs/TASKS.md`'deki eski `(ilke 5)` atıfları **olduğu
+> gibi bırakıldı**: onlar bir günlük, o gün geçerli olan kuralla alınmış
+> kararları anlatıyorlar ve geriye dönük düzeltilirlerse kayıt yalan söyler.
 
 ## Yasak liste — bunlar bu projeye asla girmeyecek
 
-Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama ·
-istatistik/dashboard · yoklama · not girişi · öğrenci kaydı · SMS/e-posta ·
-takvim entegrasyonu · **aynı planın** sürüm ağacı (v3, v4, v5 diye yan yana tutma) ·
+Kullanıcı hesapları · bulut senkronizasyonu · mobil uygulama · yoklama ·
+not girişi · öğrenci kaydı · takvim entegrasyonu ·
 sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın yeterli)
+
+> **Listeden çıkarıldı (2026-08-30, kullanıcı kararı): istatistik/dashboard ·
+> SMS/e-posta · aynı planın sürüm ağacı.** Üçü de PLAN.md'de silindi. Yasak
+> olmaktan çıkmak **yapılacak olmak demek değil** — üçü de artık ölçülüp
+> karar verilebilir, o kadar. Sürüm ağacının aşağıdaki 2026-08-25 tarihli
+> daraltma notu artık tarihseldir.
 
 > **Listeden çıkarıldı (2026-08-24): karanlık mod ve tema seçimi.** Gerekçe zevk değil:
 > tarayıcı (Brave, Chrome) açık temalı sayfayı zaten **zorla karartıyor** ve bunu kendi
@@ -2485,8 +2547,9 @@ adını taşıyamaz.
   **2061 px** istiyordu — iki düğme dışarıda, yani tıklanamaz (tuzak 48). Menüye
   inince 1717 px.
 - **Otomatik dizme Program sekmesinde iki düğme**: `Otomatik diz (N)` ve `Baştan diz`
-  (onaylı). Ayar yok — "sabaha yay" gibi tercihlerin doğru cevabı bir dönem
-  kullanılmadan bilinemez (ilke 5). İlerleme ve sonuç `.reason-bar`'da: sabit
+  (onaylı). Ayar yok — "sabaha yay" gibi tercihler **henüz ölçülmedi**; aSc'nin
+  karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de duruyor ve
+  bakılmadı. İlerleme ve sonuç `.reason-bar`'da: sabit
   yükseklikli, ızgarayı kaydırmıyor, göz zaten oraya alışkın. İlerleme **düz metin**,
   çubuk değil (yasak liste: animasyon). Bütün koşu **tek geri-al adımı**.
 - Ana ekran aSc'deki gibi: **satır = öğretmen, sütun = 6 gün x 12 saat**, tek geniş
@@ -2659,8 +2722,9 @@ adını taşıyamaz.
 - Bir şey belirsizse **sor**, tahmin etme. Yanlış varsayımla yazılan kod, yazılmamış
   koddan pahalıdır.
 - Bir sürümün **çıkma şartı** sağlanmadan sonrakine geçilmez.
-- Özellikler babanın geri dönütüne göre önceliklenir. Kullanılmamış bir özelliğin
-  "sonraki adımı" tahminle yazılmaz (ilke 5).
+- Özellikler iki kaynaktan önceliklenir: **babanın geri dönütü** ve
+  [docs/ASC.md](docs/ASC.md). İkisi de yoksa yazılan şey hâlâ bir tahmindir —
+  değişen kural "bekle" değil, **"nereden geldiğini söyle"**.
 
 ### Her oturumun sonunda — zorunlu
 
