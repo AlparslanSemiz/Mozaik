@@ -135,7 +135,8 @@ jobs:
       - name: Name it and MEASURE its size
         shell: pwsh
         run: |
-          $exe = "src-tauri/target/release/ders-programi.exe"
+          Write-Host "Measuring Mozaik.exe size..."
+          $exe = "src-tauri/target/release/mozaik.exe"
           if (-not (Test-Path $exe)) {
             Get-ChildItem src-tauri/target/release -Filter *.exe
             throw "exe üretilmedi"
