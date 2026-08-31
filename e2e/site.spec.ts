@@ -11,6 +11,7 @@
 // the site build leaking into the file:// build.
 
 import { expect, test } from './kapan';
+import { SITE_ADRESI } from '../src/update';
 import { reopen } from './helpers';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -222,7 +223,13 @@ test.describe('36. Site sürümü', () => {
     // The site's own address IS in there - as text, in Ayarlar -> Veri, so the
     // two routes that cannot update themselves can say where the newest one
     // is. A string is not a request; the five lines above are what say so.
-    expect(single).toContain('https://alparslansemiz.github.io/ders-programi/');
+    //
+    // Read from the constant, not written out again: this asks whether the
+    // address reached the bundle, NOT whether it is the right address. That
+    // second question is asked from the SCREEN in surum.spec.ts, where the
+    // literal is spelled out - and answered by a person opening it, because
+    // the suite is forbidden to touch the network (kapan.ts).
+    expect(single).toContain(SITE_ADRESI);
     // ...and it is still ONE file.
     const site = readFileSync(resolve('dist-site/index.html'), 'utf8');
     expect(site).toContain('serviceWorker');

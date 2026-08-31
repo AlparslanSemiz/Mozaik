@@ -11,7 +11,7 @@
 // the same app, not a variant of it.
 //
 // base: './' so it works both at the root and under a repository path
-// (kullanici.github.io/ders-programi/), which is where GitHub Pages puts it.
+// (kullanici.github.io/Mozaik/), which is where GitHub Pages puts it.
 
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

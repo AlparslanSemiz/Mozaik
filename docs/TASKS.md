@@ -392,6 +392,33 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [x] **v2.0.1 yayınlandı.** `54403b6` + `v2.0.1` etiketi. Taşıdıkları:
       v2.0.0'ın **veri kaybı düzeltmesi** (doğru `identifier`, tuzak 95),
       AA turunun beş maddesi (şema v11), AC turunun altısı, AB turunun yedisi.
+- [x] **B7.10 Exe'nin "Güncellemeleri denetle"si onarıldı** (2026-08-31).
+      Depo `ders-programi` → `Mozaik` olunca yayınlanmış v2.0.2 manifestteki
+      yeni adresi reddetti: `Beklenmeyen adres: https://…`. `update.rs` artık
+      **iki** kök tanıyor, manifest **eski** adresi yazıyor (GitHub 301'liyor),
+      adres kapısı yalnız **indirilecek bir şey varken** çalışıyor, ve
+      `src/surum.test.ts` iki dosyanın anlaştığını her koşuda ölçüyor.
+      Bkz. tuzak 106.
+- [x] **B7.11 `SITE_ADRESI` 404'tü, düzeltildi** (2026-08-31). Pages bir depoyu
+      **adıyla** yayınlıyor: `…github.io/ders-programi/` → 404,
+      `…github.io/Mozaik/` → 200. Programın "en son sürüm şurada" dediği tek
+      adres bu.
+- [ ] **B7.12 Yeni sürüm yayınlanınca babanın v2.0.2'si DENENSİN.** Düzeltmenin
+      o kopyaya ulaşan yarısı **manifest**; ikilinin içindeki önek
+      değiştirilemez. Yayından sonra "Güncellemeleri denetle" yeni sürümü
+      görmeli ve indirebilmeli. Görülene kadar bu bir varsayım (tuzak 65).
+- [ ] **B7.14 v2.0.3 YAYINI DÜŞTÜ ve `latest` 2.0.2'de kaldı.** `exe` işinin
+      "Name it and MEASURE its size" adımı başarısız (`tauri build` başarılı).
+      Adım iki ada da bakacak şekilde sağlamlaştırıldı, ama **asıl sebep
+      ölçülmedi**: job log'u admin hakkı istiyor (403). Kullanıcı log'a bakıp
+      etiketi yeniden koştursun — düzeltmenin babanın kopyasına ulaşması bu
+      yayına bağlı.
+- [x] **B7.13 `e2e/exe.spec.ts`'in `Mozaik-tumu.json` beklentisi geri alındı**
+      (2026-08-31, kullanıcı kararı: *ad `ders-programi-*` kalsın*). `658c019`
+      yalnız testi değiştirmişti; kod haklıydı. Ad artık bir **birim testinde
+      çivili** (`folder.test.ts`) — mutasyonla sınandı, çünkü tersi hiçbir
+      yerde yakalanmıyordu: adı değiştiren biri `prunable`'ın kalıbını da
+      değiştirir ve baba klasöründe iki nesil yedek yan yana kalır.
 - [ ] **B7.1 Exe babanın makinesinde bir kez denensin.** Bu makinede
       ölçülemeyen şeyler orada görülür: exe'nin kendini gerçekten
       değiştirmesi, planların yerinde kalması, **görev çubuğundaki yeni simge**
@@ -437,6 +464,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       alacak; oturumu sen açacaksın. Müsait olduğun bir zaman gerekiyor.
 - [ ] **Çözücüde Deney B uygulansın mı?** (B5.1 — ölçüldü, bedeli yok.)
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
+- [ ] **Yedek dosya adı `ders-programi-*` mı kalsın, `Mozaik-*` mi olsun?**
+      (B7.13.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
+      tanımaz: birikirler, ve eski ana dosya klasörde öksüz kalır.
 - [ ] **Excel mi, `.csv` mi?** (B3.3 — `.xlsx` bir zip, `.csv` düz metin;
       ikisi çok farklı iş.)
 - [ ] **Çıktı ekranları için örnek fotoğraf.** Senin satırın: *"Benden çıktılar

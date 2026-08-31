@@ -132,17 +132,32 @@ jobs:
 
       - run: npx --yes @tauri-apps/cli@^2 build --no-bundle
 
+      # İKİ ADA DA BAKIYOR, ve sebebi ölçülmüş bir kırıklık: v2.0.3 koşusu tam
+      # burada düştü (`tauri build` başarılı, bu adım başarısız) ve o yüzden
+      # `latest` v2.0.2'de kaldı. Tauri ikiliyi Cargo paket adıyla üretip
+      # `productName`'e göre YENİDEN ADLANDIRIYOR; o yeniden adlandırma
+      # atlanırsa dosya `ders-programi.exe` kalır, ve tek ada bakan bir adım
+      # "exe üretilmedi" der — üretilmişken.
+      #
+      # Teslim edilen ad her iki durumda da `Mozaik.exe`: bulunan dosya oraya
+      # KOPYALANIYOR. Hangisi bulunduysa loga yazılır, çünkü bir sonraki sefer
+      # sorulacak soru "hangisi vardı" olacak.
       - name: Name it and MEASURE its size
         shell: pwsh
         run: |
           Write-Host "Measuring Mozaik.exe size..."
-          $exe = "src-tauri/target/release/mozaik.exe"
-          if (-not (Test-Path $exe)) {
+          $aday = @(
+            "src-tauri/target/release/Mozaik.exe",
+            "src-tauri/target/release/ders-programi.exe"
+          )
+          $exe = $aday | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $exe) {
+            Write-Host "Aranan adlar bulunamadı; klasörde duranlar:"
             Get-ChildItem src-tauri/target/release -Filter *.exe
             throw "exe üretilmedi"
           }
           $mb = [math]::Round((Get-Item $exe).Length / 1MB, 2)
-          Write-Host "Mozaik.exe  $mb MB"
+          Write-Host "$exe  ->  Mozaik.exe  $mb MB"
           New-Item -ItemType Directory -Force -Path teslim | Out-Null
           Copy-Item $exe "teslim/Mozaik.exe"
 
@@ -209,7 +224,23 @@ jobs:
             exit 1
           fi
           boyut=$(stat -c%s teslim/Mozaik.exe)
-          adres="https://github.com/${{ github.repository }}/releases/latest/download/Mozaik.exe"
+          # ADRES DEPONUN BUGÜNKÜ ADINDAN GELMEZ, ve bu bilerek.
+          #
+          # `update.rs`'in kabul ettiği adres önekleri, dağıtılmış her exe'nin
+          # İÇİNE derlenmiş. Depo `ders-programi` -> `Mozaik` olunca
+          # yayınlanmış v2.0.2 yeni adı tanımadı: "Güncellemeleri denetle"
+          # `Beklenmeyen adres: ...` dedi ve o kopya bir daha güncellenemez
+          # hâle geldi. O ikiliyi artık değiştiremeyiz; değiştirebileceğimiz
+          # tek şey manifestteki adres.
+          #
+          # GitHub eski adı yeni ada 301'liyor (ölçüldü 2026-08-31), yani ESKİ
+          # adla yazılmış bir adres HER İKİ tarafı da memnun eder: eski kopya
+          # öneki tanır ve yönlendirmeyi izler, buradan derlenen kopya da onu
+          # tanır (RELEASE_KOKLERI iki adı da taşır, ve src/surum.test.ts bu
+          # satırın o listeyle uyuştuğunu her koşuda ölçer).
+          #
+          # Bunu yeni ada çevirmenin şartı: babanın makinesindeki exe >= 2.0.4.
+          adres="https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe"
           node -e "
             const fs = require('fs');
             fs.writeFileSync('teslim/surum.json', JSON.stringify({

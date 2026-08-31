@@ -283,6 +283,10 @@ geçerli: bu bir **derleme bayrağı değil**, hepsine basılan aynı damga.
 `src/version.ts` onu okur (`__SURUM__` tanımsızsa `0.0.0-dev`'e düşer, yoksa
 `tsc` ve vitest modül yüklenirken çöker) ve Ayarlar → Veri onu gösterir.
 Aynı damga `dist-site/sw.js`'in **önbellek adına** da girer — bkz. tuzak 73.
+`surum.test.ts` bir kapı daha tutuyor: `surum.yml`'in manifeste yazdığı indirme
+adresi ile `update.rs`'in kabul ettiği önekler **aynı şeyi** söylemek zorunda —
+o ikisi ayrışınca dağıtılmış exe kendini güncelleyemez hâle geliyor
+(tuzak 106).
 Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 
 ### Komutlar
@@ -290,7 +294,7 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 704 birim testi
+npm test           # Vitest — 716 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
 npm run test:e2e   # Playwright — derler, sonra 500 E2E testi (file://)
@@ -760,10 +764,29 @@ Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `version.ts`'teki
 **Değişmeyenler, ve bu bir VERİ kararı:** `localStorage` anahtarları
 (`ders-programi*`) · yedek dosya adları (`ders-programi-YYYY-AA-GG.json`) ·
 `Belgelerim\Ders Programı` klasörü (`lib.rs`'in `FOLDER`'ı ve `desktop.ts`'in
-`EXE_FOLDER`'ı) · **GitHub deposunun adı** · **`tauri.conf.json`'ın
-`identifier`'ı**. Sondan ikincisi kozmetik değil: `update.rs`'in `RELEASE_KOK`'u
-v1.4.0 kopyalarına **derlenmiş**, yani depo yeniden adlandırılırsa o kopyalar
-bir daha hiç güncellenemez.
+`EXE_FOLDER`'ı) · **`tauri.conf.json`'ın `identifier`'ı**.
+
+> **DEPO ADI BU LİSTEDEYDİ, VE LİSTEDEN ÇIKARILARAK DEĞİL, YENİDEN
+> ADLANDIRILARAK ÇIKTI — fatura da geldi (2026-08-31).** Buradaki uyarı
+> aynen şuydu: *"`update.rs`'in `RELEASE_KOK`'u v1.4.0 kopyalarına derlenmiş,
+> yani depo yeniden adlandırılırsa o kopyalar bir daha hiç güncellenemez."*
+> `ddae9fe` depoyu `ders-programi` → `Mozaik` yaptı; yayınlanmış **v2.0.2**
+> yalnız eski öneki tanıyor, ondan sonra yazılan manifest yeni adı taşıyor, ve
+> babanın "Güncellemeleri denetle"si `Beklenmeyen adres: https://…` dedi.
+> Depo adı artık `Mozaik` ve geri alınmıyor; kırılan şey üç yerden onarıldı,
+> üçü de bir daha aynı sabahı yaşamamak için:
+>
+> - `update.rs` **iki** kök tanıyor (`RELEASE_KOKLERI`) — bir kopyaya sonradan
+>   önek öğretilemez, o yüzden liste ancak **uzar**.
+> - `surum.yml`'in manifeste yazdığı adres **eski** adı taşır; GitHub onu
+>   yeni ada 301'liyor (ölçüldü), yani tek adres iki tarafı da doyuruyor.
+> - `src/surum.test.ts` o iki dosyanın anlaştığını **her koşuda** ölçüyor —
+>   kusur tam da hiç buluşmayan iki dosyada yaşıyordu (tuzak 106).
+>
+> Aynı yeniden adlandırma **ikinci** bir şeyi de kırdı ve onun yönlendirmesi
+> yok: GitHub Pages bir depoyu **adıyla** yayınlıyor, yani `SITE_ADRESI`
+> (`…github.io/ders-programi/`) **404** oldu — programın "en son sürüm
+> şuradadır" diye gösterdiği adres. `…github.io/Mozaik/` ölçüldü: 200.
 
 > **Sonuncusu 2026-08-29'a kadar listede DEĞİLDİ ve orada olmalıydı.** v2.0.0
 > `identifier`'ı `com.dersprogrami.arac` → `me.mozaik.arac` yaptı, çünkü bir
@@ -2233,6 +2256,37 @@ Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
      başka bir yere taşınır. Program'ın gerçek maliyeti hâlâ 1950 hücreyi ve
      367 kartı çizmek, ve onu ucuzlatmak bir mimari karardır, buradaki bir
      satır değil.
+
+106. **BİR DEPO ADI BİR ADRESTİR, VE DAĞITILMIŞ HER İKİLİNİN İÇİNE
+     DERLENMİŞTİR.** Tuzak 95 ters-DNS kimliğinin bir ad değil bir **yol**
+     olduğunu söylüyordu; bu onun dışa bakan yarısı, ve bu sefer uyarı
+     CLAUDE.md'de **yazılıydı**: *"depo yeniden adlandırılırsa o kopyalar bir
+     daha hiç güncellenemez."* `ddae9fe` depoyu `ders-programi` → `Mozaik`
+     yaptı. Yayınlanmış v2.0.2'nin `RELEASE_KOK`'u eski adı taşıyor —
+     değiştirilemez, çünkü bir ikilinin içinde — ve ondan sonra yayınlanan
+     manifest yeni adı yazdı:
+
+     ```
+     surum.json  exe: https://github.com/AlparslanSemiz/Mozaik/releases/...
+     v2.0.2      RELEASE_KOK: .../AlparslanSemiz/ders-programi/releases/
+     ekran       Beklenmeyen adres: https://github.com/AlparslanSemiz/Mozaik/...
+     ```
+
+     Süitin bunu görememesi tesadüf değil: cümlenin iki yarısı **hiç
+     buluşmayan iki dosyada** yaşıyordu — bir iş akışındaki kabuk satırı ve
+     bir Rust sabiti. İkisini de tek tek ölçen testler vardı ve ikisi de
+     yeşildi. Karşı önlem üç parça: kabul edilen önekler bir **liste**
+     (bir kopyaya sonradan önek öğretilemez, o yüzden liste ancak uzar),
+     manifestin yazdığı adres **eski** ad (GitHub 301'liyor, yani tek adres
+     hem eski hem yeni kopyayı doyuruyor), ve `src/surum.test.ts` o iki dosyayı
+     **birbirine karşı** okuyor.
+
+     İkinci yarısı ise yönlendirmesiz: GitHub Pages bir depoyu **adıyla**
+     yayınlar, yani aynı yeniden adlandırma `SITE_ADRESI`'ni 404 yaptı — ve o
+     adres programın "kendimi güncelleyemem, en son sürüm şurada" derken
+     gösterdiği tek yer. Genel kural, tuzak 77'nin acı hâli: bir belge cümlesi
+     bir riski **doğru** adlandırıyorsa, o cümle bir teste dönüşene kadar
+     yalnızca riskin **tarihini** yazar, önünü kesmez.
 
 ---
 
