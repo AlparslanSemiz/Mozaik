@@ -1,7 +1,111 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-31 (kırk beşinci oturum: kısayol yardım ekranı ve
-Ayarlar → Hakkında'ya "Yenilikler" paneli)
+Son güncelleme: 2026-09-01 (kırk yedinci oturum: sürükleme performansı +
+ayrıntılı görev çubuğu simgesi + Sınıftan etiketi)
+
+---
+
+## Kırk yedinci oturum — Son not defteri turu (2026-09-01)
+
+`TASKS.md` §0'daki dört ham not tamamlandı. Şema, bağımlılık ve genel API
+değişmedi; aynı uygulama paketi kullanıldığı için düzeltme file/site/PWA/exe
+yollarının hepsine birlikte geçti.
+
+**Sürükleme takılmasının üç kök nedeni ölçüldü ve kapatıldı.** Başlangıçta
+`dragging` React durumu Program'ı yeniden çiziyor, taze context-menu JSX'i
+`Grid` ve `LessonPool` memo sınırlarını deliyor; her satırın `dim` prop'u
+yaklaşık 1950 hücreyi yeniden uzlaştırıyordu. Ardından
+`.grid.dragging ... td { opacity }` geniş tablonun tamamını çok sayıda raster
+katmanına çeviriyordu. Son olarak `dropMap()` her aday hücrede `blockAt()` ile
+aynı derslerin bütün haftasını tekrar tarıyor ve `classBusy` sonucunda engel
+detayını iki kez hesaplıyordu.
+
+- Sürükleme yaşam döngüsü ve hedef satır sınıfı saf DOM'da kaldı; React yalnız
+  somut gerekçe değişince barı güncelliyor. Kapalı context menü portalının yeni
+  ReactNode kimliği artık Grid/Havuz'u yeniden çizdirmiyor.
+- Hedef satırın birleşik hücreleri sürükleme başına bir kez indeksleniyor;
+  görünür satır için `scrollIntoView` çalışmıyor; rAF yalnız imleç hareketinde
+  veya kenar kaydırması sürerken yeniden isteniyor.
+- Satır `opacity` katmanları yerine görünür hedefin üstü ve altında iki
+  `pointer-events:none` gölgeleme düzlemi var. Görseli korunurken raster işi iki
+  düzleme indi.
+- `dropMap()` hedef sınıfın blok-hücre tablosunu bir kez kuruyor ve tek
+  `blockerDetail()` sonucundan hüküm üretiyor.
+
+**Ölçüm:** otomatik doldurulmuş yoğun örnekte yerleşmiş kart, Chromium 4× CPU,
+pointerdown yakalamadan ikinci rAF'a medyan: önce **~125 ms**, sonra file://
+**46,2 ms** (9 örnek), HTTP **47,1 ms** (7 örnek). İyileşme file yolunda
+**%63**; iki son ölçüm serisinde 50 ms üzeri uzun görev **0**. Aynı görünür
+satırda sürükleme `scrollTop`'u değiştirmedi; ekran dışı satır yine ortalandı.
+
+**Öteki iki not:** `kurulum/icon.ico` artık yalnız 16 px'te sade, 20 px ve
+üstünde ayrıntılı çizimi taşıyor; ICO'nun dokuz boyu piksel karşılaştırmasıyla
+doğrulandı. Dersler → Sınıftan'da seçicinin önündeki görünür `Branş` etiketi
+kalktı, `aria-label="Branş"` ve `Tüm branşlar` korundu; Genel görünüm değişmedi.
+
+**Doğrulama:** birleşik `npm run kontrol` çıkış kodu **0**: tipler, birim
+**750/750**, ana E2E **552/552**, site **22/22** ve çözücü stresi **7/7**
+geçti. Ayrıca ekran görüntüsü **2/2**, hedefli sürükleme/performance testleri
+ve simge piksel testi geçti. Yerelde Rust aracı bulunmadığı için EXE kaynak
+gömme kontrolü çalıştırılamadı; yayın hattındaki `scripts/exe-ikon.mjs` son
+gömülü kaynak doğrulaması olmaya devam ediyor.
+
+---
+
+## Kırk altıncı oturum — aSc R3+R4 + Roboders R7b (2026-08-31)
+
+Kullanıcı isteği: "aSc ve Roboders incelemelerini yapalım" — TASKS §1'in
+öteki her bölümün önünde duran envanter işi. Roboders'in R6'sı (canlı hesap
+turu) kullanıcının görünür pencerede giriş yapmasını istiyor; kullanıcı bu
+oturumda hazır değildi, kapsam **aSc R3+R4 + Roboders R7b**'ye daraltıldı
+(kullanıcı onayı, plan modunda soruldu).
+
+**R7b — Roboders'teki üç şüpheli satır DÜŞTÜ.** `nöbet`, `kulüp`,
+"ana+yardımcı öğretmen" — `site:roboders.com` kısıtlı arama üçü için de
+**sıfır** sonuç verdi, sınırsız aramadaki hiçbir kaynak `roboders.com`
+değildi (hepsi `eyotek.com.tr`). Hipotez doğrulandı, `ROBODERS.md`'den
+düşürüldü.
+
+**R3+R4 — 528 yardım konusunun TAMAMI okundu, 5 paralel ajanla** (chapter
+bazlı: data input · kısıt motoru+çözücü · baskı+kurulum+doğrulama+günlük
+kullanım · vekil+nöbet · kalan bölümler+sanity-check). Dictionary (R4) ayrı
+bir tur olmadı — her ajan kendi bölümünün sözlük satırlarını da taradı.
+`ASC.md`'nin kova 1–6 tabloları ~30 yeni satırla genişledi. Öne çıkanlar:
+
+- **Vekil öğretmen ve Nöbet için "evet denirse ne inşa edilir" spesifikasyonu
+  yazıldı** (§5a) — kova kararı hâlâ babada, ama `State`'in ilk kez **tarih**
+  taşıması gerektiği (vekil öğretmen günlük bir istisna katmanı) ve nöbetin
+  teneffüsleri de adresleyebilen yeni bir zaman-dilimi ekseni istediği gibi
+  mimari sonuçlar önceden çıkarıldı.
+- **"Kova 6/ilgisiz" altı bölümün sanity-check'inde bir etiket hatası
+  bulundu:** `u103-other.md` "ilgisiz" sanılıyordu, aslında dört ucuz
+  toplu-düzenleme komutu (`!swapdays`, `!deletependingcards`, ders
+  numarası kaydırma, `!swapdpd`) içeriyordu — kova 4'e eklendi.
+  `u104-what-s-new.md`'de de aSc'nin 2026 sürümüne yeni eklenen "asistanlı
+  ders" özelliği bulundu (bağımsız olarak data-input ajanı da aynı
+  boşluğa işaret etmişti — iki ajan aynı sonuca ulaştı).
+  Kalan beş bölüm (`u104` kalanı, `u343`, `u2182`, `u5460`, `u9131`)
+  doğrulandı, sürpriz çıkmadı.
+- **İki ajan bağımsız aynı boşluğu buldu:** derslik/sınıf kapasitesi hiçbir
+  yerde tutulmuyor (`Room`/`ClassGroup`'ta alan yok, grep'le doğrulandı) —
+  kova 2'ye birleştirilmiş tek satır olarak yazıldı.
+  Aynı şekilde "üç durumlu müsaitlik / şartlı pozisyon" da iki ajanda çıktı.
+- **u63 (öğrenci bazlı program) ve u338 (paylaşma)'nın önceki retleri
+  DOĞRULANDI**, hesapsız bir alt-yol aranıp bulunamadı — ikisi de artık
+  "ölçülmeden yazılmadı" diye işaretli.
+- **Sözlük çakışması bulundu:** aSc'nin `Substitutes` → `Yedekler`
+  çevirisi bizim `Yedekler` (backup) kelimemizle çakışıyor; vekil öğretmen
+  alınırsa bu isim kullanılamaz.
+
+`TASKS.md` §1a'da R1–R5 ve R7b `[x]`'lendi (R1/R2 kutucukları önceki
+oturumlarda fiilen bitmişti ama işaretlenmemişti — düzeltildi). Kalan açık:
+**R6** (Roboders canlı tur, kullanıcının müsaitliğini bekliyor), **R7/R7b
+sonrası R7** (R6'yı bekliyor), **R8/R9** (ikisinin birleşmesini bekliyor).
+
+**Ölçülen/doğrulanan, tahmin edilmeyen:** her yeni satır ilgili `src/`
+dosyasında gerçek bir `grep`/okuma ile "bizde yok" doğrulandıktan sonra
+yazıldı (tuzak 65/101 gereği) — bu oturumda hiçbir "bizde var/yok" iddiası
+kod okunmadan yazılmadı.
 
 ---
 

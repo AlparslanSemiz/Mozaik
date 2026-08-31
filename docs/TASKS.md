@@ -34,7 +34,7 @@ bitince §10'a taşınır.
 | Kısım | Ne var | Durum |
 |---|---|---|
 | **§0** | **Not defteri** — senin ham satırların | ✍️ boş, senin |
-| **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 10 açık, R5 bitti |
+| **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | 10 + 1 madde |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | 7 madde |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | 6 madde |
@@ -93,22 +93,39 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
 
 ### 1a · aSc — ikinci ve TAM tur
 
-- [ ] **R1 `scripts/asc-tur.ps1` yeniden koşturulsun.** UTF-8 düzeltmesi
-      uygulandı (`ACP 65001 -> 1254`) ama **yeniden başlatmadan geçerli
-      olmuyor**; şu anki 18 ekran görüntüsü hâlâ bozuk Türkçe harf taşıyor.
-      Bu, aşağıdaki her maddenin önkoşulu. Geri alma:
-      `scripts/asc-utf8-geri-al.ps1`. *(Eskiden B7.8'di.)*
-- [ ] **R2 18 ekranın ÖTESİNE geçilsin.** Şu an yakalanan şey ana pencereler.
-      Eksik olan: her diyalog, her sağ tık menüsü, her ayar sekmesi, her
-      sihirbaz adımı. *"Her inciği cıncığı"* tam olarak burası.
-- [ ] **R3 528 yardım konusu tek tek okunsun ve İŞARETLENSİN.** Döküm
-      `docs/asc/yardim/` altında ve **okunmadı**; okunması gereken şey konu
-      başlıkları değil, her konunun tarif ettiği **davranış**. Çıktı:
-      [ASC.md](ASC.md) → *Karar tablosu*'nun satır satır genişlemesi
-      (`bizde var` · `yok, alınacak` · `yok, alınmayacak + gerekçe`).
-- [ ] **R4 2940 arayüz metni bir ÖZELLİK LİSTESİNE çevrilsin.** Bir menü
-      kalemi bir özelliktir; sözlük elimizde ve hiçbir yerde bir özellik
-      listesine dönüştürülmedi.
+- [x] **R1 `scripts/asc-tur.ps1` yeniden koşturulsun. — BİTTİ (2026-08-31).**
+      UTF-8 düzeltmesi uygulandı ve **yeniden başlatmadan sonra** doğrulandı
+      (`WinSystemLocale en-US → tr-TR`, diyalog metni `Tanımlı Dersler`
+      düzgün okunuyor — `docs/asc/ekran-envanteri.md` başındaki ölçüm).
+      *(Eskiden B7.8'di.)*
+- [x] **R2 18 ekranın ÖTESİNE geçilsin. — BİTTİ (2026-08-31).**
+      `docs/asc/ekran-envanteri.md`: 79 ekran görüntüsü, altı bölüm derin
+      analiz (Görünüm/kart tanımlama · liste pencerelerinin içi · kısıt
+      ağırlıkları · çözücü ekranları · baskı ailesi · bir hücrenin baskı
+      modeli). **Kalan bilerek görülmeyenler** o dosyanın *"7 · Bu turda
+      GÖRÜLMEYEN"* bölümünde adlı adına yazılı (Danışman'ın uyarı metinleri,
+      sihirbaz adımları, sağ tık alt menüleri, vb — hepsi demo verisini
+      değiştirdiği için bilerek atlandı). Bu kalan liste küçük ve isteğe
+      bağlı bir R2b turu olarak kalabilir, R3/R4'ün önkoşulu değil.
+- [x] **R3 528 yardım konusu tek tek okunsun ve İŞARETLENSİN — BİTTİ
+      (2026-08-31).** 5 paralel ajan (data input · kısıt motoru+çözücü ·
+      baskı+kurulum+doğrulama+günlük kullanım · vekil+nöbet · kalan
+      bölümler+sanity-check), 19 dosyanın **hepsi** baştan sona okundu.
+      [ASC.md](ASC.md)'nin kova 1–6 tabloları ~30 yeni satırla genişledi;
+      Vekil öğretmen ve Nöbet için ayrıca "evet denirse ne inşa edilir"
+      spesifikasyonu yazıldı (§5a) — kova kararı hâlâ babada, ama cevap
+      gelince iş beklemeyecek. Sanity-check turu "kova 6/ilgisiz" altı
+      bölümde de iki gerçek eksik buldu (`u103`'ün dört toplu-düzenleme
+      komutu, `u104`'ün "asistanlı ders" 2026 eklentisi) — "ilgisiz" etiketi
+      tek yerde (u103) hatalı çıktı, düzeltildi.
+- [x] **R4 2940 arayüz metni bir ÖZELLİK LİSTESİNE çevrilsin — BİTTİ
+      (2026-08-31).** R3 ile birlikte yürüdü: her ajan kendi bölümüyle
+      ilgili sözlük satırlarını da taradı (dictionary konu bazlı
+      gruplanmadığı için ayrı bir tur yerine R3'e gömüldü). Yardım
+      metninde geçmeyen ama sözlükte duran birkaç satır bulundu (`Substitutes
+      → Yedekler` çakışması gibi), ayrı bir "kaçan özellik" listesi çıkmadı —
+      2940 satırın ezici çoğunluğu zaten yardım metninde açıklanan
+      özelliklerin arayüz karşılığıydı.
 
 ### 1b · Roboders — sıfırdan
 
@@ -149,10 +166,13 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
 - [ ] **R7 Özellik envanteri çıkarılsın** → [ROBODERS.md](ROBODERS.md)
       genişletilsin, [ASC.md](ASC.md)'nin deseninde: bölümler, ekranlar,
       kısıt karşılaştırması. R6'yı bekliyor.
-- [ ] **R7b Aramada çıkan üç satır DOĞRULANSIN ya da DÜŞSÜN:** `nöbet`,
-      `kulüp`, *"bir ana + birden çok yardımcı öğretmen"*. Kaynakları büyük
-      ihtimalle **Eyotek'in** modül sayfaları (Roboders'in entegre olduğu ayrı
-      ürün), o yüzden ROBODERS.md'ye **yazılmadılar** — tuzak 65 · 101.
+- [x] **R7b Aramada çıkan üç satır DOĞRULANSIN ya da DÜŞSÜN — DÜŞTÜ
+      (2026-08-31).** `nöbet`, `kulüp`, *"bir ana + birden çok yardımcı
+      öğretmen"*: `site:roboders.com` kısıtlı arama üçü için de **sıfır**
+      sonuç verdi, sınırsız aramadaki hiçbir kaynak `roboders.com` değildi
+      (hepsi `eyotek.com.tr`'nin modül sayfaları). Ölçüldü ve doğrulandı:
+      kaynakları **Eyotek**, Roboders'in kendi tanıtım sayfasında geçmiyor.
+      Ayrıntı [ROBODERS.md](ROBODERS.md) → *Doğrulanmamış*.
 
 ### 1c · Birleştirme ve karar
 
@@ -751,6 +771,10 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
 ```
+Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms
+aynı şey daha da az olsa da uygulamada da oluyor. uygulamada daha çok koyulabilir yerlerin üzerine gelince hesaplama olunca oluyor. -> [x] 2026-09-01, dropMap + boya yolu
+uygulamanın logosunun aşağıda nasıl gözüktüğünün fotosonu attım onun düzelmesi lazım. ayrıntılı logo kullanılmalı. -> [x] 2026-09-01, yalnız 16 sade; 20+ ayrıntılı
+Dersler sınıftan kısmında branş seçmenin önünde branş yazıyor onu düzelt. -> [x] 2026-09-01, görünür etiket kalktı; aria-label kaldı
 Derslerin blok saatleri 2 3 ve 4 de olabilsin.                    -> [x] şema v9, Lesson.blocks
 Branş isimleri değiştirme de olsun.                               -> [x] renameSubject() (cascade'li)
 Sıralamada aşağı yukarı işareti düzgün olsun.                     -> [x] B1.2 (2026-08-31)
@@ -843,6 +867,7 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 
 | Tarih | Tur | Ne yapıldı |
 |---|---|---|
+| 09-01 | **Son not defteri turu** | sürükleme %63 hızlandı, ayrıntılı görev çubuğu simgesi, Sınıftan Branş etiketi |
 | 08-31 | **Program ve blok dağılımı · şema v13** | gerçek Sığdır, havuz sağ tık, kombinasyon seçici, kırmızı kapalı saat |
 | 08-31 | **Bölüm 1** | müsaitlikteki saat düğmesi, arama şeridi, Program'ın hızı, yedi kırmızı |
 | 08-30 | **aSc araştırma hattı** · **AB turu** · **AC turu** | 2940 metin + 528 konu, yedi + altı madde |
@@ -853,6 +878,24 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 | 08-25 → 08-27 | **v1.0 teslim turu** · **Tauri** | `.exe` · site · planlar · klasör |
 | 08-25 | **Tasarım sistemi (A0–A6 + B)** · araçlar | o günkü tasarım sistemi |
 | 08-23 → 08-25 | **BİTENLER 0–15** | v0 → v0.9: çekirdek, ızgara, sürükle-bırak, baskı, otomatik dizme |
+
+---
+
+### 2026-09-01 · Son not defteri turu — **BİTTİ ✅**
+
+- [x] Program kartı sürükleme başlangıcında `Grid`/satırlar React ile yeniden
+      çizilmiyor; hedef satır ve önizleme doğrudan, sürükleme başına bir kez
+      işaretleniyor. Sürekli rAF döngüsü yalnız hareket veya kenar kaydırma
+      varken çalışıyor.
+- [x] `dropMap()` hedef sınıfın yerleşmiş bloklarını bir kez indeksliyor ve her
+      hücrede aynı engel hesabını iki kez yapmıyor.
+- [x] Geniş satırlardaki pahalı `opacity` katmanları yerine hedef satırın üstü
+      ve altında iki düz gölgeleme kullanılıyor. Yoğun program + 4× CPU:
+      file `125 → 46,2 ms`, HTTP `47,1 ms`; ölçülen uzun görev yok.
+- [x] Görev çubuğu ICO'sunda yalnız 16 px sade; 20/24/32/40/48 ve üstü
+      ayrıntılı logo. Dokuz Windows boyutunun tamamı dosyada.
+- [x] Dersler → Sınıftan formunda görünen `Branş` etiketi kalktı; erişilebilir
+      adı ve `Tüm branşlar` seçeneği korundu. Genel modun etiketi değişmedi.
 
 ---
 

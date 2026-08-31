@@ -165,9 +165,9 @@ Kovalar:
 | **Tuval davranışı — "Word gibi"** | Kullanıcı isteği, aşağıda ayrı başlık | ekranın sağ altındaki ölçek · `u65` |
 | **Baskı tasarımları** | *"kesinlikle olması lazım"*. Modeli çözüldü, aşağıda ayrı başlık | `u61/u102` |
 | **Kısıt motoru genişlesin** | *"gerekli constraintler olsun programda"*. Liste aşağıda | `u57` (97 konu) |
-| **Paylaşma: e-posta · WhatsApp** | Baba istedi. **PDF ya da görsel**, hocalara **tek tıkla**. Bizim sunucumuz yok | bizde yeni |
+| **Paylaşma: e-posta · WhatsApp** | Baba istedi. **PDF ya da görsel**, hocalara **tek tıkla**. Bizim sunucumuz yok. R3 (u338): aSc'nin 12 paylaşma konusunun 12'si de EduPage hesabına bağlı (kiosk modu, takvim senkronu dahil) — hesapsız bir alternatif fikir bulunamadı, kendi yaklaşımımız zaten en ucuz yol | bizde yeni |
 | **Kurulum** | İlke 1'in yasağı kalktı; yarısı zaten var | `u56` |
-| **Kontrol'e "Danışman" uyarıları** | Beşi de "neden dizilemedi"ye cevap: gün sayısından çok ders · kapasitesi aşılmış varlık · çok kapalı günü olan öğretmen · farklı boyda bloklar · özel derslik tanımsız | `u60` |
+| **Kontrol'e "Danışman" uyarıları** | Beşi de "neden dizilemedi"ye cevap: gün sayısından çok ders · kapasitesi aşılmış varlık · çok kapalı günü olan öğretmen · farklı boyda bloklar · özel derslik tanımsız. **YAPILDI (B5.4)** — `feasibility.ts`'teki `buildAdvice()`. R3 (u60): iki **altıncı/yedinci** madde daha var ama **gruplar/bölünmeler** (kova 2) bekliyor — "bölünmüş kartlar çok fazla pozisyona yayılmış" ve "gruplar arası farklı ders sayısı"; gruplar geldiğinde eklenecek | `u60` |
 | **Özet çarşaf liste** | Bütün öğretmenler (ya da sınıflar) **tek sayfada**. Babanın duvara asacağı şey muhtemelen bu | `u61` |
 
 #### 1a · Tuval davranışı — istenen şey ne
@@ -292,6 +292,12 @@ ihlalleri **puanlıyor** ve tek bir toplam veriyor (`Genel 365`), ölçüyü yaz
 > gösteriyor ve adı **pencere**: `Pencerelerin Toplam Sayısı 147 · Ortalama
 > 3,27 · Öğretmenin Maksimumu 8`.
 
+> **R3'te (`u57`) İKİNCİ bir katman bulundu.** Yukarıdaki 14'lük liste ekrandaki
+> **temel (basic)** ilişkiler; yardım metninde bunun ötesinde en az seksenlik
+> numaralandırılmış bir **gelişmiş (advanced) ilişki kataloğu** var. Aşağıdaki
+> kova 2/3 satırları oradan çıktı — "kısıt motoru genişlesin" tek bir liste
+> değil, iki katmanlı.
+
 ---
 
 ### 2 · Eklenmeli — ama kısıtlama var
@@ -299,9 +305,15 @@ ihlalleri **puanlıyor** ve tek bir toplam veriyor (`Genel 365`), ölçüyü yaz
 | Ne | Kısıtlama | Karar |
 |---|---|---|
 | **Gruplar / bölünmeler** | **`State` şeması değişir.** `placements` anahtarı `sınıf\|gün\|saat` → bir hücreye **tek** ders; bölünme aynı hücrede iki ders demek. Anahtarın şekli, `sanitize()`, cascade silme, `blocker()`'ın altı kuralı ve çözücünün tamamı etkilenir. `schemaVersion` 12 + göç kodu | **YAPILACAK.** Kullanıcı: *"seçmeli ders vesaire yok ama olsun."* Yani gerekçesi seçmeli değil: bölünme kendi başına isteniyor (beden kız/erkek, yabancı dil grubu) |
-| **aSc'den içe aktarma (XML)** | aSc'nin XML şeması geniş, ama **yalnız okumak** yetiyor. `.roz` ikili — yol aSc'nin kendi dışa aktarması | **YAPILACAK.** Karşılığı büyük: babanın gerçek verisi |
-| **Excel'e / HTML'e dışa aktarma** | Excel gerçek bir dosya biçimi ister; HTML ucuz | **YAPILACAK**, HTML önce |
+| **aSc'den içe aktarma (XML)** | aSc'nin XML şeması geniş, ama **yalnız okumak** yetiyor. `.roz` ikili — yol aSc'nin kendi dışa aktarması. R3 (u64): alan listesi netleşti — `classes(id,name,teacherid)` · `subjects` · `teachers(id,name,short,+3 özel alan)` · `classrooms` · `classsubjects(classid,subjectid,periodsperweek,teacherid)`, id'ler geçici/ada göre eşlenir — Mozaik'in `Teacher/ClassGroup/Lesson` modeline neredeyse birebir oturuyor | **YAPILACAK.** Karşılığı büyük: babanın gerçek verisi |
+| **Excel'e / HTML'e dışa aktarma** | Excel gerçek bir dosya biçimi ister; HTML ucuz. R3 (u64): aSc'nin **kendi** HTML dışa aktarması da yerel bir dosya işlemi (Online'a bağlı değil) — "HTML önce" kararını güçlendiriyor; Excel tarafı çok-sayfalı (her liste kendi sayfası) | **YAPILACAK**, HTML önce |
 | **Çok haftalı (A/B haftası)** | Şema + ızgaranın ekseni + baskı. Büyük | **BELKİ** — kullanıcı: *"olabilir"*. Gruplardan sonraya |
+| **Birleşik ders** (birden çok şubenin öğrencisi TEK derste birleşiyor — örn. üç şubeden ortak dil grubu) | `Lesson.classId` tekil `Id` (`types.ts`); çoklu sınıf ister. Gruplar/bölünmenin **aynası**: orada bir hücre ikiye bölünüyor, burada iki hücre birleşiyor — şema bedeli aynı aile | R3 (u55). **Gruplarla birlikte** değerlendirilsin, ayrı şema turu açılmasın |
+| **Asistanlı/ortak öğretmenli ders** (iki öğretmen aynı dersi aynı anda birlikte veriyor) | `Lesson.teacherId` tekil `Id`; ikinci öğretmen alanı yok. **aSc'nin 2026 sürümüne YENİ eklendi** (`u104`, *"Support for adding assistants' lessons"*) — rakip de bunu yeni önemsemiş | R3 (u55+u104). **YAPILACAK adayı** — kova 2'ye, `subject2`'nin deseninde (bayrak değil ama benzer "ikinci bir gerçek" sorunu) |
+| **Sınıfsız / öğretmensiz ders** (`Without class` = öğretmen toplantısı/hazırlık zamanı, `Without teacher` = henüz atanmamış ders) | `classId`/`teacherId` ikisi de zorunlu; nullable yapmak cascade silme ve `blocker()`'ın 4–6. kurallarını etkiler | R3 (u55). **Düşük öncelik**, gruplar/asistanlı ders yapıldıktan sonra tekrar bakılsın |
+| **Kısıtların "Apply to" kapsam seçici** (Genel · Öğretmenler · Sınıflar · Seçili sınıflarda branşlar · Derslikler · Öğrenciler · Sınıf seviyeleri) | `rules.ts`'teki katman sabit (ders→sınıf→okul, `lessonLimit()`); aSc'de HER gelişmiş ilişki bu altı kapsamdan birine bağlanabiliyor | R3 (u57). Kısıt motoru genişledikçe (kova 1) bu eksen tekrar tekrar gerekecek, tek seferde çözülsün |
+| **Eğitim bloğu** (haftalık toplam saatten otomatik hesaplanan günlük min/maks, üç mod: otomatik · kesintisiz · elle A-B-C-D sınırlı; bazı sınıflar geç gelip erken çıkabiliyor) | `maxGapsClass` (şema v14) bunun küçük bir dilimi; otomatik hesap, mod seçimi ve kısmi gün başlangıcı yok | R3 (u57) |
+| **Derslik kapasitesi + aynı dersliği paylaşan derslerin TOPLANARAK kontrolü** ("Enhanced classroom capacity") | `Room`/`ClassGroup`'ta kapasite alanı yok (grep doğrulandı). R3'te iki ajan (data-input `u55` + constraints `u57`) bağımsız aynı boşluğa işaret etti | R3. Basit hâli (tek alan + uyarı) kova 3'e denk, **paylaşılan derslik toplamı** onu kova 2'ye çeker |
 
 ---
 
@@ -311,10 +323,19 @@ Baskı tasarımları buradan **kova 1'e taşındı**.
 
 | Ne | Kısıtlama | Karar |
 |---|---|---|
-| **Ders başına derslik** (önceliklendirme, paylaşılan derslik, kapasite) | Bizde derslik **sınıfın sabit alanı**, ders seçmiyor. Değiştirmek `Lesson`'a alan ekler ve kısıt 6–7'yi yeniden yazar | **evet** (kova 4'ün ardından) |
-| **Nöbet** | Yeni varlık, ve kâğıda da çıkması gerekir | **babaya sorulacak** |
-| **Öğrenci bazlı program** | Yasak listede **öğrenci kaydı** var; seçmeli ders yönetimi öğrenci listesi ister | **hayır** — seçmeli ders zaten yok |
+| **Ders başına derslik** (önceliklendirme, paylaşılan derslik, kapasite) | Bizde derslik **sınıfın sabit alanı**, ders seçmiyor. Değiştirmek `Lesson`'a alan ekler ve kısıt 6–7'yi yeniden yazar. R3 (u55): aSc'de dört kademeli önceliklendirme (`Optimal/Normal/Bad/Emergency`) VE bir derste birden fazla derslik aynı anda — bedel bu iki eksenle büyüyor | **evet** (kova 4'ün ardından) |
+| **Nöbet** | Yeni varlık, ve kâğıda da çıkması gerekir. R3 (u62) spesifikasyonu hazır, bkz. §5a | **babaya sorulacak** |
+| **Öğrenci bazlı program** | Yasak listede **öğrenci kaydı** var; seçmeli ders yönetimi öğrenci listesi ister. R3 (u63) **doğrulandı**: 18 konunun 18'i de öğrenci kaydına bağlı, hesapsız/kayıtsız bir alt-yol yok — aSc'nin kendi metni de basit vakayı (`Boys`/`Girls`) gruplarla çözmeyi öneriyor, yani o zaten kova 2'nin "Gruplar" maddesiyle karşılanıyor | **hayır** — seçmeli ders zaten yok, basit vaka kova 2'de |
 | ~~Binalar~~ | — | **HAYIR.** Kullanıcı: *"tek bina"* |
+| **Üç durumlu müsaitlik / "şartlı" pozisyon** (yeşil/kırmızı yanında "gerekirse olabilir, en fazla N kez" — sözlükte `Question marked`/`Şartlı`, ~15 kayıt) | `unavailable` ikili sözlük (`types.ts`, grep doğrulandı). Üçüncü durumun `blocker()`, `sanitize()`, ekran ve kâğıtta karşılığı gerekir | R3 — iki ajan (data-input `u55` + constraints `u57`) bağımsız buldu. Önerilir, orta bedel |
+| **"Geçici ders"** (dizim bittikten SONRA eklenen, her yeniden dizimde otomatik silinen ekstra kayıt — öğretmen toplantısı vb.) | Pin/solver mimarimizde karşılığı yok, ayrı bir kavram | R3 (u55). **Babaya sorulacak adayı** |
+| **Öğretmen "sözleşme" hedefi** (haftalık hedef saat, ders girerken canlı karşılaştırma) | `Teacher`'da yok, tek sayı alanı yeter | R3 (u55). Düşük öncelik, kova 4'e yakın |
+| **Zaman haritası** — bir kısıtın yalnız işaretli periyot altkümesinde (ör. "öğleden sonra") sayılması | Kural başına periyot maskesi `Rules`/`Lesson` şemasına yeni bir alan tipi sokar; bizim kurallarımız hep haftanın tamamında geçerli | R3 (u57) |
+| **Kısıt gevşetme (relaxation) çözücü modu** — tam yerleştirmeyi garantiler, gerekirse belirtilen kısıtları KIRARAK yerleştirir ve hangilerinin kırıldığını raporlar | Çözücümüz (tuzak 26) tıkanınca dersi havuzda bırakıyor; aSc zorla yerleştirip ihlali sayıyor — felsefe farkı | R3 (u58). **Ölçülmeden yazılmasın** — kova 1c'nin "ağırlık ölçülmedi" notuyla aynı aile |
+| **Ön-test / hızlı fizibilite katmanı** — tam çözümden önce her varlığı (sınıf/öğretmen/derslik/branş) tek başına ya da seçili bir kümeyi üretmeyi deneyip temel veri hatasını yakalama | `health()`/`buildAdvice()` **sonradan** (dizilmiş ızgara üstünde) çalışıyor; aSc'ninki dizmeden ÖNCE, gerçekten deneyerek | R3 (u59, 5 konu) |
+| **Extended tests** — en küçük imkânsız alt kümeyi ikili aramayla bulma (sınıfları teker teker eleyerek) | Solver'a arama modu eklemek; Danışman statik kurallara bakıyor, arama yapmıyor | R3 (u59) |
+| **"Yalnız bu sınıfı/öğretmeni doğrula"** — satır başlığına sağ tık, Kontrol raporunu o varlığa süzer | `Check.tsx`'te ihlaller tüm okul için tek liste (grep: `entityId` süzgeç kalıbı yok) | R3 (u65/u60). Kontrol zaten `Sorunlar (N)` şeridiyle götürüyor, satır başından oraya bir süzgeçle atlamak orta maliyetli |
+| **Adlandırılmış/kaydedilebilir özel görünüm** (View → Define: "yalnız 5. sınıflar" gibi alt küme, açılır listeden seçilip basılabiliyor) | Bizim en yakınımız `programMask.ts`'teki geçici soluklaştır/gizle — **oturumluk**, kalıcı değil | R3 (u65). Kalıcılık `State`'e mi `toolState`'e mi girer — küçük bir mimari karar gerektiriyor |
 
 ---
 
@@ -335,6 +356,38 @@ Hiçbirinin şema ya da mimari bedeli yok. **Onaylandı**, sıra gelince yapıl�
 - **Ders ızgarası**: sınıf × branş matrisini tek ekranda doldurma
 - **0. ders** — bizde saat etiketleri zaten serbest metin
 - **Geçen yılın verisini yeniden kullanma** — kitaplık + kopyala bunu yapıyor
+- **Havuz süzgeci: sınıf/öğretmen/derslik de** — R3 (u65). Bizde yalnız
+  branşa göre süzülüyor (`toolState.ts`'te `poolFilter: string` tek alan,
+  grep doğrulandı); `listview.ts`'in deseni zaten var, eksen çoğaltmak ucuz
+- **Havuz süzgeci: yalnız iki-saatlik / tek bölümlü dersleri göster** — R3
+  (u65). `data-size` zaten kartta duruyor, süzgeç eklemek ucuz
+- **Sürüklerken Shift: imlecin altındaki hedefin müsaitliğini göster** — R3
+  (u65). `drag.ts`'e küçük bir dal
+- **F5 / Space kısayolları** ("otomatik diz" · "doğrula") — R3 (u65).
+  `ShortcutsHelp.tsx`'te grep edildi, ikisi de yok
+- **Baskıda ardışık tekli dersleri tek hücre gibi bas** (yalnız kâğıtta,
+  ekranda değişmez) — R3 (u61). `placedBlocks()`'un dışında, salt baskı
+  katmanında bir gruplama
+- **Kâğıt altına lejant** (branş/öğretmen/derslik kısaltma listesi) — R3
+  (u61). Babanın kısaltmalarını (`Mat`, `Fiz`…) okuyanlar için doğrudan
+  faydalı
+- **Dört toplu-düzenleme komutu** (`u103`, "ilgisiz" sanılan bölümden
+  çıktı): `!swapdays` (iki günü değiştir) · `!deletependingcards`
+  (yerleşmemiş kartları toptan sil) · ders numarasını kaydırma (bir dersten
+  sonrasını bir saat öteler) · `!swapdpd` (iki periyodu değiştir)
+- **"Analyze by generation"** — 1 dakikalık deneme üretimi çalıştırıp
+  kartları AMPİRİK zor/kolay boyar. Bizim "en sık sebep" (tuzak 22) DEDÜKTİF;
+  bu ölçerek bulan ayrı bir teşhis yolu — R3 (u59)
+- **Karmaşıklık seviyesi** (Normal/Large/Huge) — arama bütçesini (tuzak
+  26'daki sabit 20 000 düğüm) üç kademeli seçenek yapmak — R3 (u58)
+- **Taslak (Draft) üretim** — bütün kısıtları kapatıp yalnız temel
+  verilerle hızlı deneme yerleştirmesi, "Baştan diz"in kısıtsız varyantı —
+  R3 (u58)
+- **İptalin iki türü**: "Hemen iptal" (donduğu yerde kalır) / "Hızlı bitir"
+  (kalanı kaba biçimde tamamlar) — şu an tek durdurma davranışımız var —
+  R3 (u58)
+- **İlerleme grafiğinde "en iyi nokta" işareti** — `.reason-bar`'a ucuz bir
+  ek — R3 (u58)
 
 ---
 
@@ -348,8 +401,45 @@ Hiçbirinin şema ya da mimari bedeli yok. **Onaylandı**, sıra gelince yapıl�
 | Türkiye sürümü | **Boş verildi** |
 | Windows UTF-8 beta | **Düzeltilecek** — `scripts/asc-utf8-duzelt.ps1` |
 | Paylaşmanın sınırı | **PDF ya da görsel**, e-posta ve WhatsApp, hocalara **tek tıkla**. Bağlantı yok, yani ilke 2 geri gelmiyor |
-| **Vekil öğretmen (Substitution)** | **HÂLÂ AÇIK** — babaya sorulacak. aSc'de 62 konu |
-| **Nöbet** | **HÂLÂ AÇIK** — babaya sorulacak |
+| **Vekil öğretmen (Substitution)** | **HÂLÂ AÇIK** — babaya sorulacak. aSc'de 62 konu. **"Evet" denirse spesifikasyon hazır**, bkz. §5a |
+| **Nöbet** | **HÂLÂ AÇIK** — babaya sorulacak. **"Evet" denirse spesifikasyon hazır**, bkz. §5a |
+| **İki bağımsız öğretmen aynı anda ders veremesin** (ortak sınıf/derslik olmadan) | R3 (u57). Çakışmamız yalnız paylaşılan kaynaktan (sınıf/derslik/öğretmen) doğuyor; keyfi iki öğretmeni bağlamak yeni bir ilişki tipi ister. Kullanım sıklığı belirsiz |
+| **"İlişkili programlar" paneli (Ctrl+R)** — sürüklerken elde tutulan/imleç altındaki karta ilişkili varlıkların mini programları geçici bir panelde beliriyor | R3 (u65). En yakınımız statik Inspector (tıklamayla açılıyor), sürüklerken canlı değil. Faydası ölçülmeli, orta-büyük UI işi |
+| **Etkileşimli Tanıtım (Tutorial)** — adım adım "Enter'a bas / animasyonu izle" biçiminde öğretici | R3 (u56). Bizde `.intro-line` tek satırlık ipucu var. Gerçekten gerekiyor mu, yoksa tek satır yeterli mi |
+
+#### 5a · Vekil öğretmen ve Nöbet — "evet" denirse spesifikasyon
+
+R3'te (`u4` 62 konu, `u62` 9 konu) her ikisi için de "alalım mı" kararı
+**verilmedi** — bu hâlâ babaya sorulacak. Aşağısı yalnız cevap "evet"
+gelirse ne inşa edileceğinin taslağı, ki soru sorulup cevap gelince iş
+beklemesin.
+
+**Vekil öğretmen:** `State` bugüne kadar hiç **tarih** taşımıyor, yalnız
+haftalık şablon (`placements`/`unavailable` hep `id|gün|saat`). Vekil
+özünde **günlük bir istisna katmanı** — yeni `Absence` ve `Substitution`
+tipleri, haftalık programı bozmadan o güne özel. Atama `blocker()`'ın 7 sert
+kuralına aynen tabi olmalı (aSc da öyle yapıyor). `schemaVersion` bu turun en
+büyük genişlemesi olur — bir `date` alanı **takvim entegrasyonu** (yasak
+liste) değildir, dış hiçbir takvim okunmuyor, salt kendi kaydımızın bir
+alanı; sınırı böyle çizmek gerekir. aSc'de **online yayınlama adımı** ayrı
+(EduPage hesabı) — o kısım ilke 2 + yasak listeyi doğrudan ihlal eder ve
+**asla alınmaz**, yalnız yerel kısım (atama, çakışma tespiti, günlük rapor)
+konu dışı kalır; aSc'nin kendi belgesi de ikisini ayırıyor.
+
+**Nöbet:** `Room`'a `requiresSupervision` + yakın oda listesi, yeni
+`Supervision` varlığı (ekseni **oda × (gün, zaman dilimi)**, sınıf değil).
+Teneffüsler bugün hiç saklanmıyor (CLAUDE.md: "zil saatleri hesaplanır,
+saklanmaz") — nöbet onları **adreslenebilir** ister, `Bell`'den türeyen bir
+slot kimliği gerekir. Bir noktaya 1–5 öğretmen atanabilmesi "bir hücre bir
+dersId" modelimizden **farklı**, çoklu atama ister. `TeacherLimits`'e
+nöbet sayısı/dakikası sınırı eklenir. Kâğıda doğrudan çıkması gerekiyor —
+bizim "ekranda öğretmen rengi, kâğıtta öğretmen sayfasında sınıf rengi"
+kuralımızın aynı ailesinden bir renk kararı ister.
+
+> **Sözlük çakışması:** aSc'nin `Substitutes` (id 2041) Türkçesi `Yedekler`
+> — bizim `Yedekler` kelimemiz zaten **backup/yedek dosyası** anlamında
+> dolu (`ders-programi-yedek-N`). Vekil öğretmen alınırsa bu kelime
+> **kullanılamaz**, gerçek bir çakışma riski.
 
 ---
 
@@ -364,6 +454,7 @@ Hiçbirinin şema ya da mimari bedeli yok. **Onaylandı**, sıra gelince yapıl�
 | **AI modülü** | Ağa çıkan bir hizmet. İlke 3 |
 | **EduPage · Smartschool · iSAMs entegrasyonları** | Başkasının okul yönetim sistemi |
 | **Veritabanı senkronizasyonu** | İlke 2 |
+| **Uygulama içi destek formu** (yardım şeridindeki "?" ikonu, okul adı + e-posta + **açık dosyanın kendisini** aSc'nin sunucusuna gönderiyor) | İlke 2 — kendi sunucumuz yok. R3 (u56). Bir `mailto:` bağlantısı aynı işi sunucusuz görür; o zaman kova 4 olur ama form + dosya yükleme olarak değil |
 
 ---
 

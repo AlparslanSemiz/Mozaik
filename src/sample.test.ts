@@ -2,10 +2,10 @@
 //
 // It answers two questions:
 //   1. Is the constraint engine consistent at real scale, can a timetable be built?
-//   2. Is the start-of-drag cost (84 blocker calls) small enough not to stutter
+//   2. Is the real drop-map cost small enough not to stutter
 //      on my father's slow machine?
 
-import { blocker, buildIndex, sanitize, place } from './constraints';
+import { blocker, buildIndex, dropMap, sanitize, place } from './constraints';
 import { buildReport } from './feasibility';
 import { blockPlan } from './blocks';
 import { sampleState } from './sample';
@@ -111,25 +111,31 @@ describe('gerçek ölçekte doldurma', () => {
     }
   });
 
-  it('sürükleme başlangıcı (84 blocker çağrısı) hızlı kalır', () => {
-    const { state } = greedyFill(sampleState());
-    const lessonId = state.lessons[0]!.id;
+  it('sürükleme başlangıcının gerçek dropMap hesabı boş ve dolu programda hızlı kalır', () => {
+    const blank = sampleState();
+    const dense = greedyFill(sampleState()).state;
 
-    const started = performance.now();
-    for (let round = 0; round < 20; round++) {
+    const median = (state: State) => {
+      const lessonId = state.lessons[0]!.id;
       const ix = buildIndex(state);
-      for (let g = 0; g < state.settings.days.length; g++) {
-        for (let s = 0; s < state.settings.hours.length; s++) {
-          blocker(state, ix, lessonId, g, s);
-        }
+      const timings: number[] = [];
+      for (let round = 0; round < 15; round++) {
+        const started = performance.now();
+        const map = dropMap(state, ix, lessonId, 1);
+        timings.push(performance.now() - started);
+        expect(map.size).toBe(state.settings.days.length * state.settings.hours.length);
       }
-    }
-    const oneDrag = (performance.now() - started) / 20;
+      timings.sort((a, b) => a - b);
+      return timings[Math.floor(timings.length / 2)]!;
+    };
 
-    // ~1 ms on the dev machine. The threshold is deliberately loose: the point
-    // is not a flaky test but catching a big regression (e.g. an O(n) scan
-    // creeping into blocker).
-    expect(oneDrag).toBeLessThan(50);
+    const blankMs = median(blank);
+    const denseMs = median(dense);
+
+    // Deliberately loose: this catches an accidental per-cell whole-week scan
+    // without turning normal CI scheduling noise into a failure.
+    expect(blankMs, `boş program medyanı ${blankMs.toFixed(2)} ms`).toBeLessThan(50);
+    expect(denseMs, `dolu program medyanı ${denseMs.toFixed(2)} ms`).toBeLessThan(50);
   });
 });
 import { activeProgram } from './programs';

@@ -479,7 +479,7 @@ export default function Lessons({
               and `chooseTeacher` keep the two boxes agreeing, `add()` writes
               `second`. */}
           {askSubject &&
-            (mode === "teacher" ? (
+            (mode !== "all" ? (
               <select
                 aria-label={t("Branş")}
                 value={subjectValue}

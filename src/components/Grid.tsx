@@ -65,7 +65,6 @@ interface RowProps {
   breakAt: number[];
   dayModes: Record<string, MaskMode>;
   settings: Settings;
-  dim: boolean;
   /** Delete on a focused card, or the menu's own item: back to the pool. */
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   /** Left button down on a placed card: start moving the block. */
@@ -89,7 +88,6 @@ const Row = memo(function Row({
   breakAt,
   dayModes,
   settings,
-  dim,
   onCellRemove,
   onCellMoveStart,
   onCellPin,
@@ -326,7 +324,8 @@ const Row = memo(function Row({
 
   return (
     <tr
-      className={`${dim ? "" : "target-row"}${row.mask === "ghost" ? " masked-scope" : ""}`}
+      data-row-id={row.id}
+      className={row.mask === "ghost" ? "masked-scope" : undefined}
     >
       <th className="row-head" scope="row" data-menu-row={row.id}>
         {/* The row's own colour. In the teacher view it repeats the colour of
@@ -359,8 +358,6 @@ interface Props {
   dayIndices: number[];
   dayModes: Record<string, MaskMode>;
   firstColumnTitle: string;
-  /** Id of the target row while dragging; the other rows dim. */
-  draggedRowId: string | null;
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   onCellMoveStart: (
     e: React.PointerEvent,
@@ -391,7 +388,6 @@ function GridInner({
   dayIndices,
   dayModes,
   firstColumnTitle,
-  draggedRowId,
   onCellRemove,
   onCellMoveStart,
   onCellPin,
@@ -496,7 +492,7 @@ function GridInner({
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
           <table
-            className={`grid${draggedRowId !== null ? " dragging" : ""}`}
+            className="grid"
             style={columns}
           >
             {/* Explicit columns make `table-layout: fixed` an actual contract.
@@ -594,7 +590,6 @@ function GridInner({
                   breakAt={breakAt}
                   dayModes={dayModes}
                   settings={settings}
-                  dim={draggedRowId !== null && draggedRowId !== row.id}
                   onCellRemove={onCellRemove}
                   onCellMoveStart={onCellMoveStart}
                   onCellPin={onCellPin}
@@ -609,4 +604,27 @@ function GridInner({
   );
 }
 
-export default memo(GridInner);
+/**
+ * The closed context menu is intentionally ignored. Program creates its portal
+ * JSX while rendering the reason bar; treating that fresh ReactNode as grid
+ * data would redraw the table on drag start and on every reason change. The
+ * moment the menu opens, `menuOpen` changes and the current portal is rendered.
+ */
+function sameGridProps(a: Props, b: Props): boolean {
+  return (
+    a.settings === b.settings &&
+    a.rows === b.rows &&
+    a.dayIndices === b.dayIndices &&
+    a.dayModes === b.dayModes &&
+    a.firstColumnTitle === b.firstColumnTitle &&
+    a.onCellRemove === b.onCellRemove &&
+    a.onCellMoveStart === b.onCellMoveStart &&
+    a.onCellPin === b.onCellPin &&
+    a.onMenu === b.onMenu &&
+    a.menuOpen === b.menuOpen &&
+    a.onMenuOpenChange === b.onMenuOpenChange &&
+    (!a.menuOpen || a.menu === b.menu)
+  );
+}
+
+export default memo(GridInner, sameGridProps);

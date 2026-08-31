@@ -182,19 +182,32 @@ yer yok.
 sürmekte olan bir deneme mi**. İkincisiyse turun kaç günü kaldığı turun
 kapsamını belirler.
 
-## Doğrulanmamış — ve bilerek yazılmadı
+## Doğrulanmamış — R7b'de DÜŞTÜ (2026-08-31)
 
 Aramada `nöbet`, `kulüp` ve *"bir derse bir ana öğretmen ve birden çok yardımcı
-öğretmen"* satırları çıktı, **ama kaynakları büyük ihtimalle Eyotek'in kendi
-modül sayfaları**, Roboders'in değil. Eyotek Roboders'in entegre olduğu okul
-yönetim sistemi, yani ayrı bir ürün.
+öğretmen"* satırları çıkmıştı, kaynağı **büyük ihtimalle Eyotek'in kendi modül
+sayfaları** sanılıyordu — Roboders'in değil, Eyotek Roboders'in entegre olduğu
+okul yönetim sistemi.
 
-Buraya yazılmadılar. Gerekçe tuzak 65 ve 101: bir rakip iddiası ölçülmeden
-yazılırsa kendisini doğrulayacak bir iş planı üretir. Bu üç satır `R6`'da
-**ekrana bakılarak** doğrulanacak ya da düşecek.
+**Ölçüldü, hipotez doğrulandı.** `site:roboders.com` ile kısıtlanmış arama
+(`nöbet kulüp yardımcı öğretmen`) **sıfır sonuç** verdi — bu üç kavramdan
+hiçbiri `roboders.com`'un kendi sayfalarında geçmiyor. Sınırsız aramada çıkan
+sonuçların **hiçbiri** `roboders.com` değildi; hepsi `eyotek.com.tr`'nin kendi
+modül sayfalarıydı (`Ders ve Nöbet Programı Modülü`, `Sorum Var`, `Öğrenci`,
+`Kullanıcı Yetkilendirme` gibi) ve web aramasının kendi özet cümleleri bu
+sayfaların içeriğini Roboders'e ait gibi **birbirine karıştırıyordu** —
+hiçbirinin doğrudan alıntısı ya da `roboders.com` kaynağı yoktu.
+
+**Sonuç: üçü de Roboders envanterinden düşer.** `roboders.com`'un tek gerçek
+sayfasında (`R5`'te ölçüldü, `/ozellikler` 404) bu üç özellik hiç
+geçmiyor — bu, aracın kendisinde olmadığı anlamına gelmez, yalnızca **tanıtım
+sayfasından çıkarılamayacağı** anlamına gelir. `R6` (canlı hesap turu)
+bunları yine de görebilir, ama tahmin edilerek buraya yazılmayacaklar
+(tuzak 65 · 101).
 
 > **Nöbet ayrıca babaya sorulacak bir soru** (§8b) ve cevabı Eyotek'in bir
-> modülü olmasından çıkmaz.
+> modülü olmasından çıkmaz — babanın okulunda nöbet varsa, o ihtiyaç
+> Roboders'in sunup sunmadığından bağımsız olarak Mozaik'e girebilir.
 
 ## Yeniden üretmek
 

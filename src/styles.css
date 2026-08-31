@@ -2386,9 +2386,14 @@ td.drop-blocked {
   background: var(--drop-bad-bg) !important;
 }
 
-/* While dragging, everything outside the target row dims: it leads the eye. */
-.grid.dragging tbody tr:not(.target-row) td {
-  opacity: 0.25;
+/* Two fixed rectangles dim the visible rows outside the target. Per-row (and
+   previously per-cell) opacity makes Chromium raster the whole wide table into
+   many layers at drag start; drag.ts positions these two flat paints instead. */
+.drag-shade {
+  position: fixed;
+  z-index: 8;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
 }
 
 .ghost {

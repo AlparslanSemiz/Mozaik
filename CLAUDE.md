@@ -2742,6 +2742,15 @@ adını taşıyamaz.
   kendi üç rengi konuşur. `src/gridChrome.ts`, saf DOM, React state'e dokunmaz
   (tuzak 1'in deseni). Ölçülen maliyet: **0,148 ms / sütun değişimi**, 16,7 ms'lik
   kare bütçesinin %1'inden azı.
+- **Sürükleme durumu geniş ızgaranın React prop'u DEĞİLDİR (2026-09-01).**
+  Hedef satır, bırakma önizlemesi ve hayalet `src/drag.ts` tarafından doğrudan
+  yönetilir; Grid ve havuz yalnız gerçek verileri değişince yeniden çizilir.
+  Geniş tablonun satırlarına/hücrelerine `opacity` vermek de ucuz bir CSS
+  değişikliği değildir: Chromium her geniş satırı ayrı raster katmanına aldı ve
+  4× CPU'da ikinci kareyi ~75 ms'ye taşıdı. Hedef dışını karartmak için görünür
+  alanı örten **iki düz `pointer-events:none` gölgeleme** kullanılır. Yoğun
+  program ölçümü `~125 → 46,2 ms`; performans testi gerçek `dropMap()` çağırır,
+  ham `blocker()` döngüsü bu yolu temsil etmez.
 - **Gün bandı.** Tek indeksli günler çok hafif bir zemin alır (ΔE 2,7). Amaç
   gruplamak; bir *durum* gibi okunmaması ölçülerek sabitlenir. Saat başlığında ders numarası ve altında
   başlangıç saati (`3` / `10:40`).

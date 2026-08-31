@@ -351,16 +351,17 @@ export interface Verdict {
   warning: string | null;
 }
 
-export function check(
+/** Finish a verdict from a blocker result that the caller already computed. */
+function verdictAfterBlocker(
   d: State,
   ix: Index,
   lessonId: Id,
   day: number,
   hour: number,
-  size?: number,
+  size: number | undefined,
+  detail: Block | null,
 ): Verdict {
-  const blocked = blocker(d, ix, lessonId, day, hour, size);
-  if (blocked !== null) return { blocked, warning: null };
+  if (detail !== null) return { blocked: detail.message, warning: null };
 
   const lesson = ix.lessonById.get(lessonId);
   const group = lesson && ix.classById.get(lesson.classId);
@@ -376,6 +377,18 @@ export function check(
     .map((x) => x.message);
 
   return { blocked: null, warning: warnings[0] ?? null };
+}
+
+export function check(
+  d: State,
+  ix: Index,
+  lessonId: Id,
+  day: number,
+  hour: number,
+  size?: number,
+): Verdict {
+  const detail = blockerDetail(d, ix, lessonId, day, hour, size);
+  return verdictAfterBlocker(d, ix, lessonId, day, hour, size, detail);
 }
 
 /** Every hour a lesson can go into on one day. Computed ONCE when a drag starts. */
@@ -690,16 +703,36 @@ export function dropMap(
     placedHours: new Map(ix.placedHours),
   };
 
+  // Every occupied hour of the target class points at its whole block. The old
+  // inner loop called blockAt() for every candidate cell; blockAt() then found
+  // a lesson and reconstructed that lesson's whole week each time. Build the
+  // same answer once per drag instead.
+  const occupied = new Map<string, { lesson: Lesson; hour: number; size: number }>();
+  if (lesson !== undefined) {
+    for (const occupant of d.lessons) {
+      if (occupant.classId !== lesson.classId) continue;
+      for (const block of placedBlocks(d, occupant)) {
+        for (let i = 0; i < block.size; i++) {
+          occupied.set(`${block.day}|${block.hour + i}`, {
+            lesson: occupant,
+            hour: block.hour,
+            size: block.size,
+          });
+        }
+      }
+    }
+  }
+
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
       const key = `${g}|${s}`;
-      const plain = check(d, ix, lessonId, g, s, size);
+      const detail = blockerDetail(d, ix, lessonId, g, s, size);
+      const plain = verdictAfterBlocker(d, ix, lessonId, g, s, size, detail);
       if (plain.blocked === null || lesson === undefined) {
         map.set(key, { ...plain, evicts: [] });
         continue;
       }
 
-      const detail = blockerDetail(d, ix, lessonId, g, s, size);
       if (detail === null || detail.code !== 'classBusy') {
         map.set(key, { ...plain, evicts: [] });
         continue;
@@ -713,17 +746,12 @@ export function dropMap(
       const heads: Array<{ lesson: Lesson; hour: number; size: number }> = [];
       const seen = new Set<string>();
       for (let i = 0; i < block && s + i < hourCount; i++) {
-        const found = blockAt(work, lesson.classId, g, s + i);
-        if (found === null) continue;
-        const occupantId = activePlacements(work)[placementKey(lesson.classId, g, found.hour)];
-        if (occupantId === undefined) continue;
-        const mark = `${occupantId}|${found.hour}`;
+        const found = occupied.get(`${g}|${s + i}`);
+        if (found === undefined) continue;
+        const mark = `${found.lesson.id}|${found.hour}`;
         if (seen.has(mark)) continue;
         seen.add(mark);
-        const occupant = ix.lessonById.get(occupantId);
-        if (occupant !== undefined) {
-          heads.push({ lesson: occupant, hour: found.hour, size: found.size });
-        }
+        heads.push(found);
       }
 
       if (heads.length === 0) {

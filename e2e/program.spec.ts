@@ -195,6 +195,76 @@ test.describe("2. Sürükle-bırak", () => {
     await page.mouse.up();
   });
 
+  test("hedef satır zaten görünürse sürükleme ızgarayı kaydırmıyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const wrap = page.locator(".grid-wrap");
+    const aimedAt = (
+      await page.locator(".pool-card").first().locator(".card-bottom").innerText()
+    ).trim();
+    const targetRow = page
+      .locator("table.grid tbody tr")
+      .filter({ has: page.locator(".row-head", { hasText: aimedAt }) })
+      .first();
+
+    await targetRow.evaluate((row) => row.scrollIntoView({ block: "center" }));
+    const before = await wrap.evaluate((el) => ({
+      x: el.scrollLeft,
+      y: el.scrollTop,
+    }));
+
+    await startDrag(page);
+    expect(
+      await wrap.evaluate((el) => ({ x: el.scrollLeft, y: el.scrollTop })),
+    ).toEqual(before);
+
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+  });
+
+  test("sürükleme yalnız hedef satırın sınıfını değiştiriyor", async ({ page }) => {
+    await openWithSample(page);
+    await page.evaluate(() => {
+      const state = window as unknown as {
+        __dragRowMutations?: number;
+        __dragRowObserver?: MutationObserver;
+      };
+      state.__dragRowMutations = 0;
+      state.__dragRowObserver = new MutationObserver((records) => {
+        state.__dragRowMutations! += records.filter(
+          (record) => record.target instanceof HTMLTableRowElement,
+        ).length;
+      });
+      state.__dragRowObserver.observe(document.querySelector("table.grid tbody")!, {
+        attributes: true,
+        attributeFilter: ["class"],
+        subtree: true,
+      });
+    });
+
+    await startDrag(page);
+    await expect(page.locator("tr.target-row")).toHaveCount(1);
+    await expect(page.locator(".drag-shade")).toHaveCount(2);
+    expect(
+      await page.evaluate(
+        () =>
+          (window as unknown as { __dragRowMutations?: number })
+            .__dragRowMutations,
+      ),
+    ).toBe(1);
+
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+    await expect(page.locator("tr.target-row")).toHaveCount(0);
+    await expect(page.locator("table.grid")).not.toHaveClass(/dragging/);
+    await expect(page.locator(".drag-shade")).toHaveCount(0);
+    await page.evaluate(() => {
+      (window as unknown as { __dragRowObserver?: MutationObserver })
+        .__dragRowObserver?.disconnect();
+    });
+  });
+
   test("imleç sağ kenara gelince ızgara kendiliğinden kayıyor", async ({
     page,
   }) => {
@@ -367,6 +437,9 @@ test.describe("2. Sürükle-bırak", () => {
     await expect(page.locator("td.can-ok, td.can-warn, td.can-no")).toHaveCount(
       0,
     );
+    await expect(page.locator("tr.target-row")).toHaveCount(0);
+    await expect(page.locator("table.grid")).not.toHaveClass(/dragging/);
+    await expect(page.locator(".drag-shade")).toHaveCount(0);
   });
 
   test("imlecin altındaki hücre satırın zemininden AYRILIYOR", async ({

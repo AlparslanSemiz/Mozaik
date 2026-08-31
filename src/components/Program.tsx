@@ -86,7 +86,6 @@ function seconds(ms: number): string {
  */
 function describeBar(
   reason: Reason | null,
-  dragging: boolean,
   solver: SolverRun,
   view: View,
   t: Translate,
@@ -96,8 +95,6 @@ function describeBar(
       text: reason.text,
       level: reason.level === "warn" ? "warn" : "bad",
     };
-  if (dragging) return { text: t("Buraya bırakılabilir."), level: "ok" };
-
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
@@ -556,7 +553,7 @@ function Program({
     [change, ix, notify],
   );
 
-  const { start, dragging, reason } = useDrag(drop);
+  const { start, reason } = useDrag(drop);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
@@ -605,7 +602,6 @@ function Program({
   // the hand is asking right now.
   const { text: barText, level: barLevel } = describeBar(
     reason,
-    dragging !== null,
     solver,
     view,
     t,
@@ -1037,7 +1033,6 @@ function Program({
           dayIndices={dayIndices}
           dayModes={mask.days}
           firstColumnTitle={view === "teacher" ? t("Öğretmen") : t("Sınıf")}
-          draggedRowId={dragging?.rowId ?? null}
           onCellRemove={cellRemove}
           onCellMoveStart={cellMoveStart}
           onCellPin={pinCell}

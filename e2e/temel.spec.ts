@@ -831,26 +831,11 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
   // Both were decided by looking (scripts/ikon-karsilastir.mjs renders both
   // drawings at 16/20/24/32/40/48 on light and dark).
   //
-  // The threshold has moved three times and the third move is the one made
-  // with the pixels in front of it. 48 -> 32 -> 20 -> 32:
-  //
-  //   * 32 came back because Windows 11 asks for 24 at 100 % scaling, not 32,
-  //     so 24 was the size actually reaching the taskbar and it sat just under
-  //     the line. The line went to 20 and everything a taskbar can ask for
-  //     became detailed.
-  //   * 20 came back too, a third time — "sanki küçük simge yani 9x9 pixellik
-  //     kullanılıyor gibi" — and this round measured what the first two had
-  //     argued about. The published .exe carries all nine sizes, byte-identical
-  //     to this file (`scripts/exe-ikon.mjs`), so nothing was missing and
-  //     nothing was being scaled from a neighbour. The mark on the taskbar was
-  //     the detailed one, drawn correctly, at 24 px — where it is six bars
-  //     2.25 device pixels wide with 0.56 px gaps, and a gap under one device
-  //     pixel does not exist.
-  //
-  // So below 32 the simplified drawing wins, and that is not a stand-in
-  // reaching the taskbar: three fat bars are the same idea drawn with what
-  // survives at 24 px. The old objection was to a mark that could not be read
-  // as the program; this is a mark that can be read at all.
+  // Latest explicit decision (2026-09-01): the supplied taskbar screenshot
+  // showed that the simplified 20/24 px mark reads as the wrong logo. Only the
+  // true 16 px small-icon slot remains simplified; every taskbar size uses the
+  // detailed mark. The release still verifies that the .exe embeds this file
+  // byte-for-byte (`scripts/exe-ikon.mjs`).
   //
   // This test exists because that decision lived NOWHERE. `scripts/ikon.mjs`
   // has a constant; the committed .ico is what actually ships, and the two
@@ -876,7 +861,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
     for (const e of entries) expect(e.bytes, `${e.size} px boş`).toBeGreaterThan(0);
   });
 
-  test('32 ve üstü AYRINTILI çizim, altı sade: ölçülmüş bir eşik', async ({ page }) => {
+  test('20 ve üstü AYRINTILI çizim, yalnız 16 sade', async ({ page }) => {
     // Compared by pixels, because the .ico holds PNGs and the .svg files hold
     // rectangles: the only thing the two have in common is what they look
     // like. Each entry is decoded and put next to a fresh render of both
@@ -894,7 +879,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
       offset += bytes;
       if (size > 48) continue; // above the threshold on both sides; nothing to tell apart
 
-      const beklenen = size < 32 ? sade : detay;
+      const beklenen = size < 20 ? sade : detay;
       await page.setViewportSize({ width: size, height: size });
       await page.setContent(
         `<style>html,body{margin:0;padding:0}svg{display:block;width:${size}px;height:${size}px}</style>${beklenen}`,
@@ -902,7 +887,7 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
       const taze = await page.locator('svg').screenshot({ omitBackground: true });
       expect(
         Buffer.compare(taze, png),
-        `${size} px, ${size < 32 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
+        `${size} px, ${size < 20 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
       ).toBe(0);
     }
   });

@@ -52,6 +52,19 @@ test.describe("69. Dersler sekmesi", () => {
     await expect(
       page.locator(".form-row").getByLabel("Öğretmen", { exact: true }),
     ).toBeVisible();
+    await expect(
+      page.locator(".form-row").getByLabel("Branş", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.locator(".form-row .field-label", { hasText: /^Branş$/ }),
+      "Sınıftan formunda seçicinin önünde ayrıca Branş yazmamalı",
+    ).toHaveCount(0);
+    await expect(
+      page
+        .locator(".form-row")
+        .getByLabel("Branş", { exact: true })
+        .locator('option[value=""]'),
+    ).toHaveText("Tüm branşlar");
 
     // Which one is open is said in the strip and in the heading, and the list
     // underneath holds only that class's lessons.
@@ -84,6 +97,11 @@ test.describe("69. Dersler sekmesi", () => {
   }) => {
     await openWithSample(page);
     await openLessons(page, "all");
+
+    await expect(
+      page.locator(".form-row .field-label", { hasText: /^Branş$/ }),
+      "Genel formun görünür Branş etiketi korunmalı",
+    ).toBeVisible();
 
     const classPick = page
       .locator(".form-row")

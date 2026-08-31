@@ -6,7 +6,8 @@
 //
 // The trick that keeps it smooth on a slow machine: valid cells are computed
 // ONCE when the drag STARTS (84 checks), not on every frame. Per frame we only
-// move the ghost, scroll if needed, and do a single elementFromPoint.
+// move the ghost, scroll if needed, and do a single elementFromPoint. Frames
+// are requested only while the pointer moves or edge scrolling is active.
 // React state does NOT change during the drag, the grid is not redrawn.
 //
 // Why scrolling is mandatory: 25 rows x 84 columns do not fit the screen at any
@@ -16,7 +17,7 @@
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
 import { t } from "./i18n";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type React from "react";
 import type { DropVerdict } from "./constraints";
 import { paletteColor } from "./palette";
@@ -92,45 +93,11 @@ const EDGE = 56;
 /** Scroll amount per frame (px). Kept low so the user stays in control. */
 const STEP = 14;
 
-/**
- * The drawn cell that COVERS an hour, when that hour has no cell of its own.
- *
- * A merged block is one <td> carrying data-hour of its first hour and data-span
- * of its length, so the later hours of it are not in the DOM at all. Scanning
- * for the cell whose range contains the hour answers for any width; the old
- * `data-hour = hour - 1, data-span = 2` lookup only ever answered for a pair
- * (pitfalls 60 and 85 — a position is found by what covers it, not by a count).
- */
-function coveringCell(
-  row: HTMLElement | null | undefined,
-  day: number,
-  hour: number,
-): HTMLElement | null {
-  if (row == null) return null;
-  for (const el of row.querySelectorAll<HTMLElement>(
-    `td[data-day="${day}"][data-span]`,
-  )) {
-    const start = Number(el.dataset.hour);
-    const span = Number(el.dataset.span);
-    if (
-      Number.isFinite(start) &&
-      Number.isFinite(span) &&
-      start <= hour &&
-      hour < start + span
-    ) {
-      return el;
-    }
-  }
-  return null;
-}
-
 export function useDrag(
   drop: (data: DragData, day: number, hour: number) => void,
 ) {
-  // Only changes when the drag starts and ends -> two re-renders, that is all.
-  const [dragging, setDragging] = useState<DragData | null>(null);
-  // For the reason bar at the top. The grid is React.memo, so changing this
-  // does not redraw the grid, only the bar.
+  // Only the reason text uses React state. Starting/ending a drag is entirely
+  // imperative so the Program tree is not rendered just to toggle DOM classes.
   const [reason, setReason] = useState<Reason | null>(null);
 
   const data = useRef<DragData | null>(null);
@@ -140,6 +107,17 @@ export function useDrag(
   const lastTarget = useRef<string>("");
   const pos = useRef({ x: 0, y: 0 });
   const loop = useRef(0);
+  const dragTable = useRef<HTMLTableElement | null>(null);
+  const targetRow = useRef<HTMLTableRowElement | null>(null);
+  const cellAt = useRef(new Map<string, HTMLElement>());
+  const shades = useRef<HTMLElement[]>([]);
+  const activate = useRef<(d: DragData) => void>(() => undefined);
+  const detach = useRef<() => void>(() => undefined);
+  const savedBar = useRef<{
+    element: HTMLElement;
+    className: string;
+    text: string;
+  } | null>(null);
 
   const clearHighlight = useCallback(() => {
     for (const el of highlighted.current)
@@ -148,9 +126,8 @@ export function useDrag(
     lastTarget.current = "";
   }, []);
 
-  // React will NOT undo these for us. The rows do re-render when the drag ends
-  // (`dim` flips on every one of them), but the className PROP is unchanged, so
-  // React never touches the attribute and the classes would simply stay.
+  // React will NOT undo these for us: they are deliberately painted directly
+  // so a drag does not redraw the memoised grid.
   const clearPreview = useCallback(() => {
     for (const el of previewed.current)
       el.classList.remove(PV_OK, PV_WARN, PV_NO);
@@ -160,12 +137,26 @@ export function useDrag(
   const finish = useCallback(() => {
     cancelAnimationFrame(loop.current);
     loop.current = 0;
+    detach.current();
+    detach.current = () => undefined;
     clearHighlight();
     clearPreview();
+    targetRow.current?.classList.remove("target-row");
+    dragTable.current?.classList.remove("dragging");
+    targetRow.current = null;
+    dragTable.current = null;
+    cellAt.current.clear();
+    for (const shade of shades.current) shade.remove();
+    shades.current = [];
     ghost.current?.remove();
     ghost.current = null;
     data.current = null;
-    setDragging(null);
+    if (savedBar.current !== null) {
+      savedBar.current.element.className = savedBar.current.className;
+      const text = savedBar.current.element.querySelector<HTMLElement>(":scope > span");
+      if (text !== null) text.textContent = savedBar.current.text;
+      savedBar.current = null;
+    }
     setReason(null);
   }, [clearHighlight, clearPreview]);
 
@@ -176,7 +167,6 @@ export function useDrag(
 
       data.current = d;
       pos.current = { x: e.clientX, y: e.clientY };
-      setDragging(d);
       setReason(null);
 
       const el = document.createElement("div");
@@ -200,17 +190,54 @@ export function useDrag(
       el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
       document.body.appendChild(el);
       ghost.current = el;
+
+      // The generic answer is immediate but does not need a Program render.
+      // A concrete blocker/warning later uses normal React state.
+      const bar = document.querySelector<HTMLElement>(".reason-bar");
+      const barText = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
+      if (bar !== null && barText !== null) {
+        savedBar.current = {
+          element: bar,
+          className: bar.className,
+          text: barText.textContent ?? "",
+        };
+        bar.className = "reason-bar ok";
+        barText.textContent = t("Buraya bırakılabilir.");
+      }
+
+      activate.current(d);
     },
     [],
   );
 
-  useEffect(() => {
-    if (dragging === null) return;
+  // Returning from a concrete warning/block to a valid or outside position
+  // sets `reason` back to null. React then restores Program's idle sentence;
+  // put the active drag sentence back before that commit is painted. Starting
+  // a drag still causes no state update — start() writes the same text itself.
+  useLayoutEffect(() => {
+    if (data.current === null || reason !== null) return;
+    const bar = document.querySelector<HTMLElement>(".reason-bar");
+    const barText = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
+    if (bar !== null && barText !== null) {
+      bar.className = "reason-bar ok";
+      barText.textContent = t("Buraya bırakılabilir.");
+    }
+  }, [reason]);
 
+  activate.current = (dragging: DragData) => {
     const wrap = document.querySelector<HTMLElement>(".grid-wrap");
+    const table = wrap?.querySelector<HTMLTableElement>("table.grid") ?? null;
+    const row =
+      [...(table?.querySelectorAll<HTMLTableRowElement>("tbody tr") ?? [])].find(
+        (candidate) => candidate.dataset.rowId === dragging.rowId,
+      ) ?? null;
+
+    dragTable.current = table;
+    targetRow.current = row;
 
     // If the target row is off-screen the user can never reach it. React has
-    // already painted the .target-row class by the time this effect runs.
+    // painted the table by the time this effect runs. Measure BEFORE adding
+    // drag classes or the preview, while layout is still clean.
     //
     // 'center', not 'nearest': centring the row shows the neighbouring rows and
     // keeps the cursor out of the auto-scroll band (otherwise the grid drifts
@@ -219,10 +246,60 @@ export function useDrag(
     // NOT when a placed block is being moved: the cursor is already on that row,
     // so centring it would yank the grid half a screen out from under the hand
     // that just pressed it.
-    if (dragging.source === null) {
-      document
-        .querySelector<HTMLElement>("tr.target-row")
-        ?.scrollIntoView({ block: "center", inline: "nearest" });
+    if (dragging.source === null && wrap !== null && row !== null) {
+      const wrapBox = wrap.getBoundingClientRect();
+      const rowBox = row.getBoundingClientRect();
+      const headingBottom =
+        table?.querySelector("thead")?.getBoundingClientRect().bottom ?? wrapBox.top;
+      const visibleTop = Math.max(wrapBox.top, headingBottom);
+      if (rowBox.top < visibleTop || rowBox.bottom > wrapBox.bottom) {
+        row.scrollIntoView({ block: "center", inline: "nearest" });
+      }
+    }
+
+    table?.classList.add("dragging");
+    row?.classList.add("target-row");
+
+    // Two flat overlays dim the visible rows above and below the target. CSS
+    // opacity on every non-target row made Chromium raster ~24 wide layers at
+    // drag start; two viewport-sized rectangles paint the same guidance once.
+    const positionShades = () => {
+      if (wrap === null || row === null || shades.current.length !== 2) return;
+      const wrapBox = wrap.getBoundingClientRect();
+      const rowBox = row.getBoundingClientRect();
+      const headingBottom =
+        table?.querySelector("thead")?.getBoundingClientRect().bottom ?? wrapBox.top;
+      const top = Math.max(wrapBox.top, headingBottom);
+      const splitTop = Math.max(top, Math.min(rowBox.top, wrapBox.bottom));
+      const splitBottom = Math.max(top, Math.min(rowBox.bottom, wrapBox.bottom));
+      const [above, below] = shades.current;
+      for (const shade of shades.current) {
+        shade.style.left = `${wrapBox.left}px`;
+        shade.style.width = `${wrapBox.width}px`;
+      }
+      above!.style.top = `${top}px`;
+      above!.style.height = `${Math.max(0, splitTop - top)}px`;
+      below!.style.top = `${splitBottom}px`;
+      below!.style.height = `${Math.max(0, wrapBox.bottom - splitBottom)}px`;
+    };
+    if (wrap !== null && row !== null) {
+      shades.current = [document.createElement("div"), document.createElement("div")];
+      for (const shade of shades.current) {
+        shade.className = "drag-shade";
+        document.body.appendChild(shade);
+      }
+      positionShades();
+    }
+
+    // A merged block has one <td> for several hours. Build the containment
+    // lookup once, so highlighting never scans/query-selects the row again.
+    if (row !== null) {
+      for (const cell of row.querySelectorAll<HTMLElement>("td[data-day][data-hour]")) {
+        const day = Number(cell.dataset.day);
+        const hour = Number(cell.dataset.hour);
+        const span = Math.max(1, Number(cell.dataset.span) || 1);
+        for (let i = 0; i < span; i++) cellAt.current.set(`${day}|${hour + i}`, cell);
+      }
     }
 
     // THE WHOLE ROW'S ANSWER, painted once.
@@ -246,9 +323,8 @@ export function useDrag(
     // day's last empty hour is always a "dayEnd" rejection for anything wider
     // than one hour, which painted it red even where dropping there actually
     // succeeds (the block lands a bit earlier and still covers that hour).
-    const targetRow = document.querySelector<HTMLElement>("tr.target-row");
-    if (targetRow !== null) {
-      for (const cell of targetRow.querySelectorAll<HTMLElement>(
+    if (row !== null) {
+      for (const cell of row.querySelectorAll<HTMLElement>(
         "td[data-day]",
       )) {
         const rawHour = Number(cell.dataset["hour"]);
@@ -273,13 +349,9 @@ export function useDrag(
       const el = document
         .elementFromPoint(x, y)
         ?.closest<HTMLElement>("[data-day]");
-      // We check the class instead of comparing the row id as text: ids can
-      // start with a digit and escaping them in a CSS selector is a chore.
-      if (
-        el == null ||
-        el.closest("tr")?.classList.contains("target-row") !== true
-      )
-        return null;
+      // Compare the element, not the id as a selector: ids can start with a
+      // digit and escaping them in CSS is a chore.
+      if (el == null || el.closest("tr") !== row) return null;
       const day = Number(el.dataset["day"]);
       const hour = Number(el.dataset["hour"]);
       return Number.isInteger(day) && Number.isInteger(hour)
@@ -309,6 +381,9 @@ export function useDrag(
     };
 
     const frame = () => {
+      // This callback is no longer pending. A pointer move or successful edge
+      // scroll may request the next one below.
+      loop.current = 0;
       const { x, y } = pos.current;
       const d = data.current;
       if (d === null) return;
@@ -318,6 +393,7 @@ export function useDrag(
       }
 
       const scrolled = scrollAtEdge(x, y);
+      if (scrolled) positionShades();
 
       // The raw cell under the cursor, clamped so a block being placed near
       // the end of the day is read by the last start that still fits it
@@ -352,7 +428,6 @@ export function useDrag(
           );
 
           // Paint every cell the block will cover.
-          const rowEl = document.querySelector<HTMLElement>("tr.target-row");
           const cls =
             blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
           for (let i = 0; i < d.blockSize; i++) {
@@ -368,10 +443,7 @@ export function useDrag(
             // left with span 2" only ever answered for the old pair (pitfalls
             // 60 and 85 — a position is found by what covers it, not by a
             // count).
-            const el =
-              rowEl?.querySelector<HTMLElement>(
-                `td[data-day="${target.day}"][data-hour="${hour}"]`,
-              ) ?? coveringCell(rowEl, target.day, hour);
+            const el = cellAt.current.get(`${target.day}|${hour}`) ?? null;
             if (el == null) break;
             // A merged cell can answer for both of its hours; painting it twice
             // would also push it onto the cleanup list twice.
@@ -383,12 +455,17 @@ export function useDrag(
         }
       }
 
-      loop.current = requestAnimationFrame(frame);
+      if (scrolled) scheduleFrame();
     };
-    loop.current = requestAnimationFrame(frame);
+
+    const scheduleFrame = () => {
+      if (loop.current === 0) loop.current = requestAnimationFrame(frame);
+    };
+    scheduleFrame();
 
     const onMove = (e: PointerEvent) => {
       pos.current = { x: e.clientX, y: e.clientY };
+      scheduleFrame();
     };
 
     const onUp = (e: PointerEvent) => {
@@ -417,16 +494,22 @@ export function useDrag(
     window.addEventListener("pointerup", onUp);
     window.addEventListener("pointercancel", finish);
     window.addEventListener("keydown", onKey);
-    return () => {
+    detach.current = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", finish);
       window.removeEventListener("keydown", onKey);
-      // Activity tears effects down while Program is hidden. Treat that just
+    };
+  };
+
+  useEffect(
+    () => () => {
+      // Activity tears this tree down while Program is hidden. Treat that just
       // like Escape so no body-level ghost or painted cell survives the tab.
       finish();
-    };
-  }, [dragging, drop, finish, clearHighlight, clearPreview]);
+    },
+    [finish],
+  );
 
-  return { start, dragging, reason };
+  return { start, reason };
 }

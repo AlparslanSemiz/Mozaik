@@ -528,10 +528,18 @@ const DE: Sozluk = {
   Yenilikler: "Neuigkeiten",
   "Eski sürümler": "Ältere Versionen",
   // src/changelog.ts — release-note bullets, translated like any other UI copy
+  "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
+    "Regeln für Lücken bei Klassen und Lehrkräften, die Planungsanalyse und Berater-Hinweise wurden hinzugefügt.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
     "Für Tastenkombinationen wurde ein Hilfebildschirm hinzugefügt (obere Leiste, Strg+K oder die ?-Taste).",
   'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
     "Dieses Neuigkeiten-Panel wurde zu Einstellungen → Über hinzugefügt.",
+  "Program kartlarını sürükleme, yoğun programlarda yaklaşık yüzde 63 hızlandırıldı.":
+    "Das Ziehen von Stundenplankarten ist bei dichten Plänen etwa 63 Prozent schneller.",
+  "Windows görev çubuğu simgesi 20 piksel ve üzerinde ayrıntılı logoyu kullanıyor.":
+    "Das Windows-Taskleistensymbol verwendet ab 20 Pixeln das detaillierte Logo.",
+  "Dersler → Sınıftan görünümündeki gereksiz Branş başlığı kaldırıldı.":
+    "Die überflüssige Fach-Überschrift wurde aus Unterricht → Nach Klasse entfernt.",
   "Nasıl açıldı": "Wie es geöffnet wurde",
   Adres: "Adresse",
   "Güncellemeleri denetle": "Nach Aktualisierungen suchen",

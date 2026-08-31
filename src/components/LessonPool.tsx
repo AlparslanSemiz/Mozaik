@@ -20,7 +20,7 @@
 // would be cheaper and would quietly make `.pool-card` count zero — and
 // twenty-odd tests ask exactly that question to find out how much is left.
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type React from "react";
 import type { ReactNode } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
@@ -169,7 +169,7 @@ function groupStacks(stacks: CardStack[]): CardGroup[] {
   return groups;
 }
 
-export default function LessonPool({
+function LessonPool({
   cards,
   completed,
   total,
@@ -471,3 +471,24 @@ export default function LessonPool({
     </aside>
   );
 }
+
+/** Same drag isolation as Grid: a closed menu's fresh portal is not pool data. */
+function samePoolProps(a: Props, b: Props): boolean {
+  return (
+    a.cards === b.cards &&
+    a.completed === b.completed &&
+    a.total === b.total &&
+    a.sort === b.sort &&
+    a.setSort === b.setSort &&
+    a.filter === b.filter &&
+    a.setFilter === b.setFilter &&
+    a.subjects === b.subjects &&
+    a.onStart === b.onStart &&
+    a.onMenu === b.onMenu &&
+    a.menuOpen === b.menuOpen &&
+    a.onMenuOpenChange === b.onMenuOpenChange &&
+    (!a.menuOpen || a.menu === b.menu)
+  );
+}
+
+export default memo(LessonPool, samePoolProps);

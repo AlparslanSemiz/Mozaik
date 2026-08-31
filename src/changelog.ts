@@ -27,10 +27,14 @@ export interface SurumNotu {
 export const SURUM_NOTLARI: SurumNotu[] = [
   {
     version: '2.1.0',
-    date: '2026-08-31',
+    date: '2026-09-01',
     items: [
+      'Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.',
       'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).',
       'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.',
+      'Program kartlarını sürükleme, yoğun programlarda yaklaşık yüzde 63 hızlandırıldı.',
+      'Windows görev çubuğu simgesi 20 piksel ve üzerinde ayrıntılı logoyu kullanıyor.',
+      'Dersler → Sınıftan görünümündeki gereksiz Branş başlığı kaldırıldı.',
     ],
   },
 ];

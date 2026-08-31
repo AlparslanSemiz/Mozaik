@@ -521,10 +521,18 @@ const EN: Sozluk = {
   Yenilikler: "What's new",
   "Eski sürümler": "Older versions",
   // src/changelog.ts — release-note bullets, translated like any other UI copy
+  "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
+    "Class and teacher gap rules, planning analysis, and Advisor notes were added.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
     "A help screen for keyboard shortcuts was added (top bar, Ctrl+K, or the ? key).",
   'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
     "This What's new panel was added to Settings → About.",
+  "Program kartlarını sürükleme, yoğun programlarda yaklaşık yüzde 63 hızlandırıldı.":
+    "Dragging timetable cards is about 63 percent faster on dense timetables.",
+  "Windows görev çubuğu simgesi 20 piksel ve üzerinde ayrıntılı logoyu kullanıyor.":
+    "The Windows taskbar icon now uses the detailed logo at 20 pixels and above.",
+  "Dersler → Sınıftan görünümündeki gereksiz Branş başlığı kaldırıldı.":
+    "The unnecessary Subject heading was removed from Lessons → By class.",
   "Nasıl açıldı": "How it was opened",
   Adres: "Address",
   "Güncellemeleri denetle": "Check for updates",
