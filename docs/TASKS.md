@@ -25,22 +25,6 @@ bitince §10'a taşınır.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
 
 ---
@@ -50,14 +34,14 @@ bitince §10'a taşınır.
 | Kısım | Ne var | Durum |
 |---|---|---|
 | **§0** | **Not defteri** — senin ham satırların | ✍️ boş, senin |
-| **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 9 açık, R5 bitti |
-| **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | 6 + 1 madde |
-| **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | 6 madde |
-| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | 5 madde |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | 5 madde |
+| **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 10 açık, R5 bitti |
+| **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | 10 + 1 madde |
+| **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | 7 madde |
+| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | 6 madde |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | 6 madde, 5 bitti (B5.1·B5.2·B5.4·B5.5·B5.6) |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | 6 madde |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | 7 madde |
-| **§8** | **Karar bekleyenler** — sende, babada, ve babanın gerçek verisi | 5 + 4 + 11 |
+| **§8** | **Karar bekleyenler** — sende, babada, ve babanın gerçek verisi | 6 + 4 + 11 |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
 
@@ -181,6 +165,21 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       değişebilir. Bu bölümün asıl çıktısı bir özellik değil, **öteki
       bölümlerin kendisi**.
 
+### 1d · Diğer ilham kaynakları
+
+- [ ] **R10 Word · Paint · Excel · PowerPoint · Adobe programlarından
+      kullanılabilirlik ilhamı.** Senin satırın: *"Kullanım kolaylığı ve
+      kullanım tarzı bakımından ASC'den, Robodersten, Word, Paint, Excel,
+      Powerpoint, Adobe programları gibi yerlerden ilham alıp ona göre
+      design'imizi ve kullanım kolaylığımızı en yukarı taşımalıyız."* Bu,
+      §1'in aSc/Roboders envanterinden **ayrı bir soru**: oradaki envanter
+      "hangi özellik" diye soruyor, bu ise "en tanıdık programlar bir işi
+      nasıl kolay yapıyor" diye soruyor — bir özellik listesi değil bir
+      **kullanılabilirlik dili** turu. Çıktısı [DESIGN.md](DESIGN.md)'ye
+      yazılacak notlar (tasarım serbest, 2026-08-26 — burada da buyrulmaz,
+      anlatılır). **§1'in çıkma şartını etkilemiyor** — paralel, isteğe
+      bağlı bir tur.
+
 > **Bu bölüm `npm run kontrol`'ün parçası değil ve olmayacak** — `font`, `exe`
 > ve `asc-*` betikleri gibi, bu depoda olmayan bir şeye bağlı (aSc kurulumu,
 > Roboders erişimi, ağ).
@@ -222,6 +221,49 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       üretir).
 - [ ] **B2.6 Ekran görüntüsü kanıtı.** `npm run ekran`, iki temada beş bölüm,
       ve **bakılacak** — iddia edilmeyecek (tuzak 82).
+- [ ] **B2.7 'Zil ve günler' ve 'Kurallar' Okul sekmesine mi taşınmalı? — §1
+      BİTMEDEN KARAR VERİLMEYECEK.** Senin satırın: *"Ayarlardaki zil ve
+      günler okul ile alakalı bir şey olduğuından okul sekmesine koymak daha
+      mı mantıklı olur bunu düşünmek lazım. Kurallar sekmesi de aynı şekilde
+      hem okul hem de daha çok öğretmenlerle ilgili onları da oraya
+      alabiliriz belki. Bu düşünceler ASC ve Roboders'i tamtakır
+      inceledikten sonra karar verilsin."* Kendi satırınla kilitli: §1'in
+      (R1–R9) çıkma şartı sağlanmadan bu maddeye dokunulmayacak.
+- [ ] **B2.8 Üç ek ekranda ölçek yeniden ölçülsün.** Senin satırın: *"Babamın
+      ekranı 27 in. 1920x1080 60hz MSI MAG271C... Benimkisi ise 27 inç 2k.
+      macbook m1 13 inç. thinkpad 16 inç. o sebeple her şeye uygun ama en
+      çok da babama uygun olsun ölçeklemeler."* `--ui-scale` merdiveni
+      (%80–%150) ve `SCALE_DEFAULT=1` babanın 1920×1080'ine göre zaten
+      ölçüldü (CLAUDE.md "İlke 7"); eksik olan geri kalan üç ekranda (27"
+      2K, MacBook M1 13", ThinkPad 16") aynı ölçümün **tekrarlanması** —
+      `npm run ekran` + gerçek pikselde bakmak, tahmin değil.
+- [ ] **B2.9 Hakkında bölümüne "what's new" — sürüm değişiklik notu.** Senin
+      satırın: *"Ayrıca hakkında kısmında what's new gibi olmalı. babam her
+      güncelleme alındığında neyin değiştiğini soruyor ben de pek
+      hatırlamıyorum. orada nelerin değiştiği nelerin eklendiği yazmalı ve
+      arşiv de olabilir."* `Data.tsx`'in Hakkında bölümü şu an yalnız sürüm
+      numarasını ve güncelleme durumunu gösteriyor; her sürümün kendi kısa
+      değişiklik notu (ve eskilerin arşivi) eklenecek. Kaynağı büyük
+      ihtimalle `.github/surum-notu.md`'nin kendisi — ikinci bir yerde aynı
+      metni tutmak tuzak 77'nin ("tek kaynak" iddiası ölçülmeden yazılmaz)
+      ailesine girer, o yüzden veri **tek yerden** okunacak.
+- [ ] **B2.10 Her Ayarlar bölümünün kendi alan/seçenek görünürlüğü —
+      KALICI, KULLANICIYA AÇIK ÖZELLİK.** Senin satırın: *"Ayarlarda her
+      sectionun görüntüsü değişebiliyor olsun. Seçenekler olsun açma kapama
+      değiştirme gibi. Önizleme şeklinde görelim onları."* Netleştirmenle
+      (2026-08-31) bu B2.1-B2.6'nın tasarım turu bağlamından farklı: geçici
+      bir görüntüleme denemesi değil, babanın kendisinin her bölümde hangi
+      alan/seçeneği göreceğini açıp kapatabildiği kalıcı bir özellik, ve
+      seçim **önizlemeyle** yapılacak — renk seçicinin `<dialog>`'u ya da
+      B4.4'ün "düzenleme yeri önizlemenin kendisi" deseni örnek alınabilir.
+      **Netleşmesi gereken üç soru, kod yazılmadan önce:** (a) hangi
+      bölümler/hangi alanlar kapsamda — beşinin de mi, yoksa hangileri; (b)
+      tercih `State`'e mi girecek yoksa `theme.ts`'in dokuz bağımsız
+      skaleri gibi bir MAKİNE tercihi mi (kapatılan bir alan başka bir
+      bilgisayarda da kapalı mı kalmalı); (c) kapatılan bir alanın
+      altındaki kural/veri hâlâ uygulanıyor mu, yoksa görünmeyen bir kural
+      sessizce `Kapalı`ya mı düşüyor — bir görünüm tercihi verinin kendisini
+      değiştirmemeli (tuzak 96'nın ailesi).
 
 **Çıkma şartı:** `npm run kontrol` yeşil · beş bölümün iki temada görüntüsü
 alınmış · ölçümler [STATUS.md](STATUS.md)'ye yazılmış.
@@ -276,6 +318,13 @@ tıklanınca**.
       aynı olmalı."* `table-layout: fixed` bunu iddia ediyor ama **ölçülmedi**.
       Dokuz baskı birleşiminde sütun genişlikleri ve satır yükseklikleri
       okunacak — ve pencere kâğıdın boyuna getirilecek (tuzak 86).
+- [ ] **B3.7 Çıktı ekranının sağ panelindeki bazı seçenekler şeride
+      taşınsın.** Senin satırın: *"Çıktı alanında sağdaki seçeneklerin
+      bazıları alttaki şeride gidebilir, sağ tarafta yerden tasarruf etmiş
+      oluruz."* Hangi seçeneklerin taşınacağı (sayfa seçimi mi, yazı boyu
+      zoom'u mu) ölçülerek karar verilecek — sağ panelin ne kadarının
+      boşaldığı `npm run ekran` ile kanıtlanacak (tuzak 82: bir kutudan
+      içerik çıkarmadan önce ne taşıdığı sorulur).
 
 > **Senden istenen:** çıktı ekranları için **örnek fotoğraf** — hangi çıktı
 > biçimini istediğini gösteren bir görüntü, `docs/Örnek Fotolar/` altına.
@@ -324,32 +373,109 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [PLAN.md](PLAN.md) →
       `{Öğretmen:Tam Adı}`. Düzenleme yeri **önizlemenin kendisi**.
 - [ ] **B4.5 Farklı baskı çeşitleri** — rapor yapısı seçilebilsin: satırda ne,
       sütunda ne, sayfa başına ne.
+- [ ] **B4.6 Program ızgarasında sınıfın altındaki "derslik yok" ibaresi
+      kalksın.** Senin satırın: *"program tarafında sınıf tarafında
+      dersliği yok ibaresi kalkması lazım."* Kaynak `Program.tsx:321-327`:
+      `roomLetter(...) === "" ? t("derslik yok") : t("{ad} dersliği", ...)`
+      — sınıf görünümünde satır başlığının ikinci satırı. Derslik
+      atanmamış her sınıfta bu metin tekrar ediyor; kaldırılınca o satırın
+      **boş mu kalacağı yoksa kutunun tamamen mi küçüleceği** sorusu var
+      (tuzak 82: bir metni kaldırmadan önce o metnin ne taşıdığı sorulur —
+      burada bir satır yüksekliği).
 
 ---
 
 ## §5. Bölüm 5 — Kısıt motoru, çözücü ve Kontrol
 
-- [ ] **B5.1 Çözücüde Deney B uygulansın mı? — SENDE KARAR.** Ölçüldü ve
-      **bedeli yok**: "sınıfın o gün dolu saatine yaslanan hücreyi tercih et"
-      → sınıf deliği 268 → **251**, delikli gün 85 → **72**, blok yine
-      367/367, düğüm yine 367, süre 71 ms. Ölçüldü, uygulanmadı — çözücüye
-      özellik eklemek ayrı bir karar.
+- [x] **B5.1 Çözücüde Deney B uygulandı (2026-08-31, kırk ikinci oturum).**
+      Önce **ölçüm aleti** yazıldı — `src/worlds.ts`'teki `gridQuality()` —
+      çünkü "bedeli yok" cümlesi tek bir dünyada (örnek okul) ölçülmüştü ve
+      depoda kaliteyi tekrar ölçen hiçbir şey yoktu (tuzak 42). `order()`'a
+      **beşinci** bir anahtar eklendi: sınıfın o gün dolu olan saatine yaslanan
+      hücre önce dener. Dört ağır dünyanın **hepsinde** önce/sonra alındı:
+      `gercek-olcek-sikisik` 410→**413** blok (sınıf deliği 339→273),
+      `gercek-olcek-kurali` 253=253 blok (delik 145→118), `parcalanmis-gunler`
+      22=22 (delik zaten 0), `gercek-olcek-imkansiz` 163→**217** blok. Hiçbir
+      dünyada blok düşmedi — kabul kapısı geçti. 21 dünyalık matris
+      değişmeden yeşil.
 - [x] **Deney A uygulanMAYACAK — karar verildi.** Öğretmeni günlere sıkıştırmak
       deliği 274 → 227 indiriyor ama programı **eksik** bırakıyor (363/367) ve
       süreyi 69 ms → **9 856 ms**'ye çıkarıyor. Tuzak 21'in ta kendisi.
-- [ ] **B5.2 Boşluk (pencere) kuralları** — sınıf ve öğretmen için ayrı ayrı,
-      Kapalı / Uyar / Engelle. v0.6'da bilerek yapılmadı (istenen o değildi);
-      aSc karar tablosu artık istiyor.
+- [x] **B5.2 Boşluk (pencere) kuralları girdi (2026-08-31, şema v14).**
+      `maxGapsTeacher` · `maxGapsClass`, `minPerDay`'in deseninde: yalnız
+      **Kapalı / Uyar** (bir bırakmayı engelleyemez — gün yarı dizilmişken
+      her açık saat bir "boşluk"). **0, öteki dört kuraldan farklı olarak
+      birebir kullanılır** (`gapRuleActive()`), çünkü okuyucunun isteyeceği
+      sayı büyük ihtimalle tam 0. Delik tanımı tek yerde
+      (`rules.ts`'teki `gapsBetween()`) ve `gridQuality()` ile aynı cümleyi
+      paylaşıyor. Öğretmene özel kutu **yok** bu turda — okul geneli tek
+      katman.
 - [ ] **B5.3 Kısıt motorunun kalan genişlemesi:** kartlar arası ilişki · sınıf
       için günlük min/max · ardışıklık · "belirli ders belirli konumda" ·
       öğretmen günde en fazla N sınıf.
-- [ ] **B5.4 Kontrol'e Danışman uyarıları.** aSc kova 1.
-- [ ] **B5.5 Kontrol ekranının kendisi.** Senin satırın: *"Kontrol kısmı çok
-      saçma olmuş. biraz daha düzgün olmalı. Alt sekmede bir şeyler seçiyoruz
-      ama değişmiyor."* İkinci yarısı **kapandı**: şeridin süzgeci
-      2026-08-28'de kaldırıldı, rapor tek sayfa oldu, şerit artık süzmüyor
-      **götürüyor**. **Kalan yarısı açık**: rapor hâlâ aşağı doğru uzuyor mu,
-      yedi panel daha az yerde söylenebilir mi. Önce ölçülecek.
+- [x] **B5.4 Kontrol'e Danışman uyarıları — YAPILDI (2026-08-31).** aSc kova 1
+      (`docs/asc/yardim/u60-verification.md`, beş madde). Üç madde **yeni
+      kod** oldu: `feasibility.ts`'teki `buildAdvice()` — haftadan çok gün
+      isteyen ders (`lessonNeedsMoreDays`), açık günü yetmeyen öğretmen
+      (`teacherManyBlockedDays`), hiç tekli saat bırakmayan çok bloklu ders
+      (`lessonManyBlocks`). **Overbooked** maddesi zaten `buildCapacity()`ta
+      vardı, yeni kod istemedi. **Bölünmüş gruba özel derslik** maddesi
+      kapsam dışı bırakıldı — `ClassGroup`'ta grup/bölünme alanı yok, **B6.1**
+      bekliyor. `Report.advice` / `Health.advice`, `hasProblem`'ı **etkilemiyor**
+      — aSc'nin kendi şeridi de Doğrulama/Danışman'ı iki ayrı düğme tutuyor.
+      Kontrol'e beşinci görünüm (`Danışman`) eklendi, panel `.stat-scroll` ile
+      **sınırlı**: örnek okulda 43 satır çıktı ve sınırsız bırakılsaydı %100'de
+      1201px taşardı — ölçülüp (`e2e/kontrol.spec.ts` 88, `e2e/serit.spec.ts`
+      58) düzeltildi. Dört dile de çevrildi. Testler: `feasibility.test.ts`
+      (17 yeni), `e2e/kontrol.spec.ts` 89 (4 yeni), `e2e/serit.spec.ts`
+      güncellendi.
+- [x] **B5.5 Kontrol ekranının kendisi — ÖLÇÜLDÜ, kusur yok (2026-08-31).**
+      Senin satırın: *"Kontrol kısmı çok saçma olmuş... Alt sekmede bir şeyler
+      seçiyoruz ama değişmiyor."* İlk yarısı zaten kapanmıştı (şerit artık
+      sayfayı seçiyor). Kalan yarı — "rapor hâlâ aşağı doğru uzuyor mu" —
+      ölçüldü (`e2e/kontrol.spec.ts` 88): %80 ve %100'de, **iki temada**,
+      dört görünümün dördü de `.main`'i **0px** taşırıyor. %150'de 141–174px
+      taşıyor ama bu Kontrol'e özgü değil — **aynı ölçekte karşılaştırıldı**:
+      Okul → Öğretmenler 1355px, Ayarlar → Kurallar 450px taşıyor. Kontrol
+      üçünün **en azı**. Kod yazılmadı; iddia ölçüldü ve doğrulandı.
+- [x] **B5.6 Bloklu ders sürüklerken/işaretlenirken "tek ders" gibi
+      davranıyordu — DÜZELTİLDİ (2026-08-31).** Senin satırın: *"Eğer hata
+      varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir. Bu
+      önemli. Programda bloklu bir şey alındığında ya da üzerine
+      gelindiğinde o blok kartının çift sütun seçili olmalı veya mesela
+      sürüklerken son ders kapalı gözüküyor kırmızı. bu böyle olmamalı son
+      saate koyuluyorsa son saat ve ondan bir önceki saate yani son 2
+      saate konulabilmeli."* Kod okunarak KÖK SEBEP ikisi için de bulundu —
+      "worlds.ts'te yeniden üret" ihtiyatı gereksiz çıktı: ikisi de
+      `constraints.ts`'in kısıt mantığında değil, **etkileşim katmanında**
+      yaşıyordu, `dropMap()`/`blockerDetail()` hiç değişmedi.
+      **(a) Görsel — `src/gridChrome.ts`.** İmleç haçı bir hücrenin
+      `data-col`'unu okuyordu ama hücrenin KENDİ `data-span`'ine hiç
+      bakmıyordu, yani 2 (ya da 3) saatlik bir bloğun üzerine gelince yalnız
+      bloğun BAŞLADIĞI sütun (+ başlığı + o sütunu solundan kapsayan başka
+      satırlar) yanıyordu — ikinci (ve varsa üçüncü) sütun hiç. `move()`
+      artık hovered hücrenin span'inden kapladığı bütün sütunları çıkarıp
+      her birini (başlık dahil, her satırda o sütunu örten hücre neyse)
+      aydınlatıyor; sabit `"2"` yerine `blocks.ts`'teki `MAX_BLOCK`'tan
+      türeyen bir döngü var (tuzak 78'in dersi: eşiği elle sabit yazma).
+      **(b) Bug — `src/drag.ts` + `src/components/Program.tsx`.**
+      `blockerDetail()` `hour`'u her zaman bloğun mutlak başlangıcı sayıyor
+      (doğru davranış — o hâlâ değişmedi), ama sürükleme imlecin bulunduğu
+      hücreyi olduğu gibi bu "başlangıç" olarak geçiriyordu. Günün son
+      saatine gelince blok oradan başlamaya çalışıp sığmıyor, kırmızı
+      oluyordu. `dropMap()` zaten HER (gün, saat) çifti için bir kayıt
+      üretiyor, yani "son N saatin başlangıcı" için doğru cevap `d.map`'te
+      hazırdı — yeni `clampToDay()` yardımcısı imlecin ham hücresini, blok
+      tam sığana kadar geriye kaydırıp o anahtarla arıyor. Üç yerde
+      kullanıldı: zayıf satır önizlemesi, güçlü vurgu + sebep çubuğu, ve
+      `onUp()`'ın kendisi — üçü de aynı "hangi hücreye bakılacak" sorusunu
+      soruyordu.
+      `constraints.ts` hiç değişmediği için `constraints.test.ts`'in
+      `dayEnd` testleri aynen yeşil kaldı. Yeni testler: `e2e/izgara.spec.ts`
+      ("imleç haçı 2 saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor") ve
+      `e2e/program.spec.ts` ("89. Gün sonunda blok geriye kaydırılır") —
+      ikisi de `loadWorld()` ile kurulmuş belirli bir dünyada, tahmine değil
+      ölçüme dayanıyor.
 
 ---
 
@@ -435,12 +561,36 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kaç gün kaldığı R6'nın kapsamını belirler.
 - [ ] **R6 ne zaman koşsun?** Görünür bir Chromium penceresi açılacak ve odağı
       alacak; oturumu sen açacaksın. Müsait olduğun bir zaman gerekiyor.
-- [ ] **Çözücüde Deney B uygulansın mı?** (B5.1 — ölçüldü, bedeli yok.)
+- [x] **Çözücüde Deney B uygulansın mı? — UYGULANDI** (2026-08-31, B5.1).
+      "Uygula — önce ölç" dedin; dört ağır dünyada önce/sonra ölçüldü, hiçbir
+      dünyada blok düşmedi.
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
 - [ ] **Excel mi, `.csv` mi?** (B3.3 — `.xlsx` bir zip, `.csv` düz metin;
       ikisi çok farklı iş.)
 - [ ] **Çıktı ekranları için örnek fotoğraf.** Senin satırın: *"Benden çıktılar
       için ... foto iste eğer örnek fotolarda atmadıysam."* → **isteniyor**.
+- [ ] **Bulut senkronizasyonu / backend isteği — KURAL ÇELİŞKİSİ, önce
+      CLAUDE.md kararı gerekiyor.** Senin satırın: *"Sanırım cloud tabanlı
+      bir şey kuracağız babam öyle istedi. Bende 1gb ramli 8gb depolama
+      alanlı VM var bedava... onun yanına dockerda falan küçük yer kaplayan
+      bir cloud sistemi kuralım."* Netleştirmen üzerine (2026-08-31): bu
+      **programın backend'i / veri senkronizasyonu** için — yani ilke 2'nin
+      ("Sunucu yok") tam karşısında ve yasak listedeki **"bulut
+      senkronizasyonu"** maddesiyle birebir çakışıyor. Yasak liste "bunlar
+      bu projeye ASLA girmeyecek" diyor; bu satır o cümleyle duruyor.
+      **İlerlemeden önce gereken, bir TASKS.md maddesi değil bir CLAUDE.md
+      kararı**: ilke 2'nin 2026-08-30'daki "KURULUM YASAĞI KALKTI" ve
+      "PAYLAŞMA YASAK DEĞİL" örneklerindeki gibi açıkça **kullanıcı
+      kararıyla** gevşetilmesi, ve yasak listeden "bulut senkronizasyonu"nun
+      (gerekirse "kullanıcı hesapları"nın da) çıkarılması. Netleşmesi
+      gereken sorular: hangi veri senkronize edilecek (bütün plan kitaplığı
+      mı, yalnız son hâl mi) · kaç cihaz arasında · aynı planın iki yerde
+      değişmesi nasıl çözülecek (çakışma) · hesap/kimlik gerekip
+      gerekmediği · 1 GB RAM / 8 GB disk'lik VM'in bunu kaldırıp
+      kaldırmayacağı · eski (bozuk) sitenin ne olacağı. **Statik site zaten
+      ücretsiz yayınlanabiliyor** (`dist-site` + GitHub Pages, B7.2) — VM
+      fikri onun ötesinde bir şey mi istiyor, bu da netleşecek. Bu sorular
+      cevaplanmadan bir görev numarası (B7.x) açılmayacak.
 
 ### 8b · Babada
 
@@ -547,6 +697,15 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Program otomatik dizmeye bakmak lazım. | **B5.1** — ölçüldü, karar sende |
 | ASC ve Robodersi playwright ile inceleyip oradaki güzel featureları bize ekleyelim. | **§1** — ilk turu yetersiz bulundu, tam envanter isteniyor |
 | Babama indirdim exeyi zip virüs algılandı. .exeyi açarken de window engelledi. | AB6 azalttı; ekranın kendisi → **B7.3** |
+| Sanırım cloud tabanlı bir şey kuracağız babam öyle istedi... dockerda falan küçük yer kaplayan bir cloud sistemi kuralım. | **§8a** — kural çelişkisi (ilke 2 · yasak liste "bulut senkronizasyonu"), CLAUDE.md kararı bekliyor |
+| Kullanım kolaylığı ve kullanım tarzı bakımından ASC'den, Robodersten, Word, Paint, Excel, Powerpoint, Adobe programları gibi yerlerden ilham... | **R10** (§1d) |
+| Statik bir site olduğundan kolayca aslında ücretsiz bir şekilde internete de yükleyebiliriz, deploylayabiliriz. | zaten var — `dist-site` + GitHub Pages (**B7.2**); §8a'daki bulut maddesine not düşüldü |
+| Çıktı alanında sağdaki seçeneklerin bazıları alttaki şeride gidebilir, sağ tarafta yerden tasarruf etmiş oluruz. | **B3.7** |
+| Ayarlardaki zil ve günler okul ile alakalı bir şey olduğuından okul sekmesine... Kurallar sekmesi de aynı şekilde... | **B2.7** — §1 bitmeden karara bağlanmayacak |
+| Babamın ekranı 27 in. 1920x1080... dersliği yok ibaresi kalkması lazım... Sınıfların türü olmalı... o sebeple her şeye uygun ama en çok da babama uygun olsun ölçeklemeler. | ölçekleme → **B2.8** · "derslik yok" ibaresi → **B4.6** · sınıf türü zaten **B4.3b**'de var |
+| Ayrıca hakkında kısmında what's new gibi olmalı. babam her güncelleme alındığında neyin değiştiğini soruyor... | **B2.9** |
+| Eğer hata varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir... son 2 saate konulabilmeli. | **B5.6** |
+| Ayarlarda her sectionun görüntüsü değişebiliyor olsun... Önizleme şeklinde görelim onları. | **B2.10** |
 
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 

@@ -248,6 +248,47 @@ export default function Check({ state, view }: Props) {
         </>
       )}
 
+      {/* aSc's "Danışman" (Advisor): data that will not BLOCK a build but is
+          worth a second look. Kept apart from the `problems` view above on
+          purpose — aSc's own strip carries "Doğrulama" and "Danışman" as two
+          separate buttons, and the "Sorun görünmüyor" box only answers the
+          first question. */}
+      {view === 'advisor' && (
+        <div className="panel">
+          <h2>{t('Danışman uyarıları ({n})', { n: report.advice.length })}</h2>
+          <p className="hint">
+            {t('Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.')}
+          </p>
+          {report.advice.length === 0 ? (
+            <p className="hint">{t('Danışmanın söyleyecek bir şeyi yok.')}</p>
+          ) : (
+            // Bounded and scrolled in place — the pattern CapacityRows already
+            // uses (`.stat-scroll`): a list that grows with the school must not
+            // push the rest of the page down with it.
+            <div className="stat-scroll">
+              <table className="list">
+                <thead>
+                  <tr>
+                    <th className="w-col-lg">{t('Durum')}</th>
+                    <th>{t('Açıklama')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.advice.map((a) => (
+                    <tr key={a.key}>
+                      <td>
+                        <span className="badge tight">{t('Öneri')}</span>
+                      </td>
+                      <td>{a.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* The colour is the same mark the grid row and the pool card carry — a
           name without it makes the reader look the person up again. Rooms have
           none, so that Section is given no lookup. */}

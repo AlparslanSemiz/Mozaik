@@ -167,6 +167,8 @@ export const DEFAULT_LIMITS: Limits = {
   maxPerDay: 0,
   minPerDay: 0,
   maxSameLessonPerDay: 0,
+  maxGapsTeacher: 0,
+  maxGapsClass: 0,
 };
 
 export const DEFAULT_RULES: Rules = {
@@ -174,6 +176,11 @@ export const DEFAULT_RULES: Rules = {
   maxPerDay: 'block',
   minPerDay: 'warn', // can never block: the first lesson of a day always breaches it
   maxSameLessonPerDay: 'block',
+  // 'off' and not 'warn': a school that never asked for this must not wake up
+  // to a wall of new warnings. maxGapsTeacher/maxGapsClass also can never
+  // block, for the same reason minPerDay cannot (types.ts, v14).
+  maxGapsTeacher: 'off',
+  maxGapsClass: 'off',
 };
 
 export const NO_TEACHER_LIMITS = {

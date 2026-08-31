@@ -18,7 +18,64 @@
 // layout measurements went with the rest of the layout contract.
 
 import { expect, test } from './kapan';
-import { reopen, openWithSample, startDrag, deltaE, tokens } from './helpers';
+import { reopen, openWithSample, startDrag, deltaE, tokens, loadWorld } from './helpers';
+
+/**
+ * One teacher with a placed two-hour block (day 0, hours 0-1, one wide <td>
+ * with colSpan 2), and a second teacher whose row has no lesson at all — so
+ * hour 0 and hour 1 are each their OWN plain <td> there. Hovering the block
+ * should light BOTH columns, in both rows and in both headers; before the
+ * fix `gridChrome.ts` only ever read the block's own `data-col`, i.e. its
+ * FIRST hour, and its second column never lit at all (pitfall 85's residue).
+ */
+const COLSPAN_WORLD = {
+  schemaVersion: 7,
+  settings: {
+    schoolName: 'Sütun',
+    days: [
+      { name: 'Salı', longBreakAfter: 0 },
+      { name: 'Çarşamba', longBreakAfter: 0 },
+    ],
+    hours: ['1', '2', '3', '4'],
+    bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+    limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
+    rules: {
+      maxConsecutive: 'block',
+      maxPerDay: 'block',
+      minPerDay: 'warn',
+      maxSameLessonPerDay: 'block',
+    },
+    subjects: ['Matematik'],
+    subjectShorts: {},
+  },
+  rooms: [{ id: 'dA', name: 'A' }],
+  teachers: [
+    {
+      id: 'oMC',
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      gender: '',
+      color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
+    {
+      id: 'oAV',
+      name: 'Ayşe Vergili',
+      short: 'AV',
+      subject: 'Matematik',
+      gender: '',
+      color: 1,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
+  ],
+  classes: [{ id: 's510', name: '510', roomId: 'dA', color: 0 }],
+  lessons: [
+    { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, pairs: 1, maxPerDay: null },
+  ],
+  unavailable: {},
+  placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
+};
 
 test.describe('47. Izgara enstrümanı', () => {
   test('gün bandı grupluyor ama bir DURUM gibi okunmuyor', async ({ page }) => {
@@ -141,6 +198,47 @@ test.describe('47. Izgara enstrümanı', () => {
       .evaluate((el) => getComputedStyle(el).backgroundColor);
     const t = await tokens(page, ['--accent-bg']);
     expect(deltaE(head, t['--accent-bg']!)).toBeLessThan(2);
+  });
+
+  test('imleç haçı 2 saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor', async ({
+    page,
+  }) => {
+    // "2 derslik bir blok kesinlikle 1 ders değil 2 derstir" — hovering a
+    // two-hour block used to light only the column it STARTS at.
+    await loadWorld(page, COLSPAN_WORLD);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid')).toBeVisible();
+
+    const block = page.locator(
+      'table.grid tbody td[data-day="0"][data-hour="0"][data-span="2"]',
+    );
+    await expect(block).toBeVisible();
+    await block.hover();
+
+    // Two headers, and — the same count as the single-column test above but
+    // for a block one row wide and one row empty — five cells in total: the
+    // block itself, plus the second teacher's two plain cells at hour 0 and
+    // hour 1.
+    await expect(page.locator('table.grid thead .col-hot')).toHaveCount(2);
+    await expect(page.locator('table.grid .col-hot')).toHaveCount(5);
+
+    const rects = await page.evaluate(() => {
+      const heads = [...document.querySelectorAll('table.grid thead .col-hot')]
+        .map((el) => el.getBoundingClientRect().left)
+        .sort((a, b) => a - b);
+      const b = document
+        .querySelector('table.grid tbody td[data-span="2"]')!
+        .getBoundingClientRect();
+      return { heads, left: b.left, right: b.right };
+    });
+    expect(rects.heads).toHaveLength(2);
+    // The first lit header sits at the block's own left edge, the same
+    // alignment claim the single-column test makes above.
+    expect(Math.abs(rects.heads[0]! - rects.left)).toBeLessThanOrEqual(1);
+    // The second lit header sits INSIDE the block — its second column, not
+    // some unrelated one further along the row.
+    expect(rects.heads[1]!).toBeGreaterThan(rects.left);
+    expect(rects.heads[1]!).toBeLessThan(rects.right);
   });
 
   // THE CROSSHAIR ON A GRID THAT HAS BLOCKS IN IT — and that is the whole test.

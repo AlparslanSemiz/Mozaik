@@ -1,11 +1,167 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-31 (kırk birinci oturum: Program Sığdır gerçekten
-sığıyor · havuz kartlarında sağ tık · dağılım seçici · şema v13)
+Son güncelleme: 2026-08-31 (kırk üçüncü oturum: B5.6 — bloklu dersin
+crosshair'i ve gün-sonu sürükleme kaydırması düzeltildi)
 
 ---
 
-## Kırk birinci oturum — Program ve blok dağılımı (2026-08-31)
+## Kırk üçüncü oturum — B5.6: iki sütun crosshair'i · gün sonu kaydırma (2026-08-31)
+
+Kullanıcının kendi bildirdiği hata, TASKS §5 B5.6: *"2 derslik bir blok
+kesinlikle 1 ders değil 2 derstir."* Kod okunarak KÖK SEBEP ikisi için de
+bulundu — `constraints.ts`'in kısıt mantığı (`dropMap()`/`blockerDetail()`)
+hiç değişmedi, ikisi de **etkileşim katmanında** yaşıyordu.
+
+**(a) Crosshair — `src/gridChrome.ts`.** `move()` hovered hücrenin kendi
+`data-span`'ine hiç bakmıyordu: 2 (ya da 3) saatlik bir bloğun üzerine
+gelince yalnız bloğun BAŞLADIĞI sütun (+ başlığı + onu solundan kapsayan
+başka satırlar) yanıyordu, ikinci/üçüncü sütun hiç. Artık hovered hücrenin
+kapladığı bütün sütunlar (`blocks.ts`'teki `MAX_BLOCK`'tan türeyen bir
+döngüyle, sabit `"2"` değil) tek tek aydınlatılıyor — başlık dahil, her
+satırda o sütunu örten hücre neyse.
+
+**(b) Gün sonu kaydırma — `src/drag.ts` + `Program.tsx`.**
+`blockerDetail()` `hour`'u her zaman bloğun mutlak başlangıcı sayıyor (bu
+doğru davranış, değişmedi), ama sürükleme imlecin bulunduğu hücreyi olduğu
+gibi "başlangıç" olarak geçiriyordu — günün son saatine gelince blok oradan
+başlamaya çalışıp sığmıyor, kırmızı oluyordu. Yeni `clampToDay()` yardımcısı
+imlecin ham hücresini blok tam sığana kadar geriye kaydırıp `dropMap()`'in
+zaten ürettiği doğru anahtarla arıyor — üç yerde (zayıf satır önizlemesi,
+güçlü vurgu + sebep çubuğu, `onUp()`).
+
+Yeni testler tahmine değil kurulmuş bir dünyaya dayanıyor
+(`e2e/helpers.ts`'teki `loadWorld()`): `e2e/izgara.spec.ts` ("imleç haçı 2
+saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor") ve `e2e/program.spec.ts`
+("89. Gün sonunda blok geriye kaydırılır").
+
+### Ölçülen
+
+```
+npm run tipler        YEŞİL
+npm test               746/746   (değişmedi — constraints.test.ts'e dokunulmadı)
+npm run test:e2e       542 geçti + 3 önceden bilinen exe.spec.ts hatası
+npm run test:site      22/22
+npm run cozucu          7/7      (rakamlar kırk ikinci oturumla birebir aynı)
+dist/index.html        985 919 bayt   (öncesi 978 033 — +7 886)
+```
+
+**`exe.spec.ts`'in üç hatası bu turdan ÖNCE de vardı** — kırk ikinci oturumda
+`git stash` ile bağımsız doğrulanmıştı (bkz. yukarısı); bu turda dokunulan
+dosyalar (`drag.ts`, `gridChrome.ts`, `Program.tsx`, iki e2e dosyası) Tauri
+köprüsü / klasör yazımıyla hiç kesişmiyor, o yüzden ikinci bir stash turu
+atılmadı.
+
+`npm run ekran` çalıştırılmadı — değişiklik gözle görülür bir tasarım
+değişikliği değil, bir vurgulama/sürükleme düzeltmesi; kanıt yeni e2e
+testlerindeki tam sınıf ve koordinat iddiaları.
+
+---
+
+## Kırk ikinci oturum — Çözücü kalitesi · Boşluk kuralları · Kontrol (2026-08-31)
+
+TASKS §5'in üç maddesi kapandı: B5.1 (Deney B), B5.2 (boşluk kuralları),
+B5.5 (Kontrol'ün sayfa boyu). Sıra kullanıcının kendi şartıydı: **önce ölçüm,
+sonra kod.**
+
+### 1. Kalite ölçüm aleti — `gridQuality()` (B5.1'in önkoşulu)
+
+"Sınıf deliği 268 → 251" cümlesi tek bir dünyada (örnek okul) ölçülmüştü ve
+depoda bunu tekrar ölçen hiçbir şey yoktu — tuzak 42'nin tanımı ("ölçüm bir
+tarihtir, kanun değil"). `src/worlds.ts`'e `gridQuality()` eklendi: bir günde
+ilk ve son dolu saat arasında kalan boş saati sayıyor (uçlardaki boşluk delik
+değil — geç başlangıç / erken bitiş). Denetçinin kendisi test edildi (tuzak
+23): `worlds.test.ts`'e sekiz bilerek kurulmuş ızgara verildi.
+
+### 2. Deney B — DÖRT ağır dünyanın hepsinde önce/sonra
+
+[src/solver.ts](../src/solver.ts)'teki `order()`'a **beşinci** bir anahtar
+girdi: sınıfın o gün zaten dolu olan saatine yaslanan hücre önce dener.
+Yayma kuralları (1. ve 2. anahtar) dokunulmadan kaldı — Deney A tam da onlara
+dokunduğu için reddedilmişti (tuzak 21). MEASURED, `npm run cozucu`'nun
+gerçek çıktısı:
+
+```
+                       ÖNCE                          SONRA
+gercek-olcek-sikisik   410/429 blok, 7607 ms          413/429 blok, 4170 ms
+                       sınıf deliği 339 (90 gün)       sınıf deliği 273 (75 gün)
+                       öğretmen deliği 303 (95 gün)    öğretmen deliği 296 (95 gün)
+
+gercek-olcek-kurali    253/367 blok, 53 ms             253/367 blok, 48 ms
+                       sınıf deliği 145 (55 gün)       sınıf deliği 118 (44 gün)
+                       öğretmen deliği 159 (67 gün)    öğretmen deliği 154 (69 gün)
+
+parcalanmis-gunler     22/24 blok, 189 ms              22/24 blok, 169 ms
+                       delik zaten 0                   delik zaten 0 (değişmedi)
+
+gercek-olcek-imkansiz  163/713 blok, 15000 ms (dolu)   218/713 blok, 15000 ms (dolu)
+                       sınıf deliği 123 (38 gün)       sınıf deliği 133 (35 gün)
+                       öğretmen deliği 122 (33 gün)    öğretmen deliği 160 (49 gün)
+```
+
+**Kabul kapısı geçti: hiçbir dünyada blok düşmedi**, ikisinde arttı (413,
+218). `gercek-olcek-imkansiz` bütçesi zaten dolu bir dünya (`elapsedMs =
+15000` iki tarafta da) — o karşılaştırma gürültülü, ama `placedBlocks` yine
+de yükseldi. 21 dünyalık `solver.test.ts` matrisi **değişmeden** yeşil.
+Uygulandı.
+
+### 3. Boşluk (pencere) kuralları — şema v13 → **v14**
+
+`Limits.maxGapsTeacher` · `maxGapsClass`, `minPerDay`'in deseninde: yalnız
+**Kapalı / Uyar**, çünkü yerleştirme sırasında her açık saat bir "boşluk"tur
+— gün yarı dizilmişken bir bırakmayı engellemek elle dizmeyi soldan sağa
+doldurmaktan başka her sırada imkânsız kılardı. **0, öteki dört kuraldan
+FARKLI olarak birebir kullanılır** (`gapRuleActive()` — `ruleActive()`'in
+`limit > 0` şartı yok): okuyucunun isteyeceği sayı büyük ihtimalle tam 0.
+Delik tanımı `rules.ts`'teki `gapsBetween()`'de tek yerde ve `gridQuality()`
+ile **aynı** cümleyi paylaşıyor.
+
+`store.ts`'in kabul listesine `version === 13` eklendi (tuzak 97); eksik
+alanlar 0 ve `'off'`e düşüyor. Öğretmene özel kutu **yok** bu turda — okul
+geneli tek katman, `Teacher.limits`'in şekli değişmedi.
+
+Beş dosya, dört sözlük: `types.ts` (şema) · `entities.ts` (varsayılanlar) ·
+`store.ts` (göç) · `rules.ts` (`gapsBetween` / `teacherDayGaps` /
+`classDayGaps` / `gapRuleActive` / `findViolations`'a iki dal) ·
+`components/settings/Rules.tsx` (iki satır) · `lang/{en,de,es,fr}.ts` (etiket
++ ipucu + iki ihlal cümlesi, dördünde).
+
+### 4. Kontrol'ün sayfa boyu — ÖLÇÜLDÜ, kod yazılmadı (B5.5)
+
+`e2e/kontrol.spec.ts`'e 88 numaralı bölüm eklendi: dört görünüm (Sorunlar ·
+Öğretmenler · Sınıflar · Derslikler) × üç ölçek (%80/%100/%150) × iki tema,
+`.main`'in kendi `scrollHeight`/`clientHeight` farkı okunarak.
+
+```
+%80, %100 (iki temada da)   0px  — dört görünümün dördü de
+%150                        Sorunlar 0 · Öğretmenler 174 · Sınıflar 174 · Derslikler 141
+```
+
+%150'deki taşma ilk okumada bir kusur gibi göründü ve test önce "hiçbir
+görünüm hiç taşmasın" diye yazılmıştı — sonra AYNI ölçekte karşılaştırma
+yapıldı (tuzak 101: bir prediction bir ölçüm değil): aynı sample okul, aynı
+%150'de Okul → Öğretmenler **1355px**, Ayarlar → Kurallar **450px** taşıyor.
+Kontrol'ün 174px'i üçünün **en azı**. `.main`'in `overflow: auto` sözleşmesi
+zaten bunun için var — %150'de hiçbir ekranın sığmaması normal, ve Kontrol
+artık en iyi davranan ekran. **Madde kod yazılmadan kapandı**; test iddiayı
+%80/%100'de sıfıra, %150'de ölçülmüş bir tavana (300px, 174'ün üstünde
+cömert bir pay) bağladı.
+
+### Ölçülen
+
+```
+npm run kontrol   YEŞİL (exe.spec.ts'teki 3 kusur ÖNCEDEN VAR — stash ile
+                  doğrulandı, bu turdan bağımsız, dokunulmadı)
+  birim   737      (öncesi 725, +12)
+  E2E     539      (536 geçti + 3 önceden bilinen; site 22 · çözücü 7 ayrı)
+dist/index.html   978 033 bayt   (öncesi 962 434 — +15 599, +15,2 KB)
+```
+
+`npm run ekran` çalıştırılmadı — bu tur görsel bir değişiklik yapmadı (iki
+yeni kural satırı hariç, o da mevcut `.list` tablosunun bir satırı).
+
+**exe.spec.ts'in üç kusuru bu turdan ÖNCE de vardı.** `git stash` ile
+oturumun bütün değişiklikleri kaldırılıp derleme baştan alındı: aynı üç test
+aynı sebeple kırmızı. Dokunulmadı — bu turun kapsamı §5, dağıtım/exe değil.
 
 Kullanıcının dört geri bildirimi birlikte kapandı:
 

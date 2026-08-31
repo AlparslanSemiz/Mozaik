@@ -35,6 +35,18 @@ const RULE_ROWS: Array<{ name: RuleName; label: string; hint: string; canBlock: 
     hint: 'Aynı sınıfın aynı öğretmenden bir günde göreceği saat.',
     canBlock: true,
   },
+  {
+    name: 'maxGapsTeacher',
+    label: 'Öğretmenin dersleri arasında en fazla boşluk',
+    hint: 'Bir günde ilk ve son ders arasında kaç saat boş kalabilir. 0 hiç boşluk olmasın demektir.',
+    canBlock: false,
+  },
+  {
+    name: 'maxGapsClass',
+    label: 'Sınıfın dersleri arasında en fazla boşluk',
+    hint: 'Aynısı sınıf için. Yalnız Kontrol sekmesinde uyarır.',
+    canBlock: false,
+  },
 ];
 
 const LEVEL_LABEL: Record<RuleLevel, string> = {

@@ -2,7 +2,20 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { answerDialog, open, openWithSample, openSetup, openSettings, startDrag, dragAndDrop, openFixture, hover, mainList } from './helpers';
+import {
+  answerDialog,
+  open,
+  openWithSample,
+  openSetup,
+  openSettings,
+  startDrag,
+  dragAndDrop,
+  openFixture,
+  hover,
+  mainList,
+  loadWorld,
+} from './helpers';
+import { makeWorld } from '../src/worlds';
 
 test.describe('6. Gün ve ders saatleri', () => {
   test('varsayılan hafta Pazartesisiz 6 gün ve Salı ile başlıyor', async ({ page }) => {
@@ -448,14 +461,17 @@ test.describe('33. Ayarlar — kurallar', () => {
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
     // The rules table is the first of three on this screen: C9 added "kaç yeri
-    // etkiliyor" and the teachers with limits of their own.
-    await expect(page.locator('table.list').first().locator('tbody tr')).toHaveCount(4);
+    // etkiliyor" and the teachers with limits of their own. Two more rows
+    // joined it in v14: the gap (boşluk) rules for teacher and class.
+    await expect(page.locator('table.list').first().locator('tbody tr')).toHaveCount(6);
 
     for (const label of [
       'Öğretmen art arda en fazla',
       'Öğretmen günde en fazla',
       'Öğretmen günde en az',
       'Bir sınıf aynı dersten günde en fazla',
+      'Öğretmenin dersleri arasında en fazla boşluk',
+      'Sınıfın dersleri arasında en fazla boşluk',
     ]) {
       await expect(page.locator('table.list tr', { hasText: label })).toBeVisible();
     }
@@ -473,6 +489,54 @@ test.describe('33. Ayarlar — kurallar', () => {
 
     const max = page.locator('table.list tr', { hasText: 'Öğretmen günde en fazla' });
     await expect(max.locator('select option')).toHaveCount(3);
+  });
+
+  // Same reason as "günde en az": while a day is half-placed, every hour
+  // still open reads as a gap, so a hard version of this rule could never let
+  // placing continue. Both gap rows share that ceiling (types.ts, v14).
+  test('boşluk kurallarında da Engelle seçeneği HİÇ yok', async ({ page }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Kurallar');
+
+    for (const label of [
+      'Öğretmenin dersleri arasında en fazla boşluk',
+      'Sınıfın dersleri arasında en fazla boşluk',
+    ]) {
+      const row = page.locator('table.list tr', { hasText: label });
+      await expect(row.locator('select option')).toHaveCount(2);
+      await expect(row.locator('select')).not.toContainText('Engelle');
+    }
+  });
+
+  test('boşluk kuralı 0 + Uyar iken sürüklemeyi engellemiyor, Kontrol ihlal olarak sayıyor', async ({
+    page,
+  }) => {
+    // MÇ: 0 ve 2 -> aralarında 1 saatlik boşluk. The gap rule reads 0 LITERALLY
+    // (rules.ts, unlike the other four rules) so "0 + Uyar" is enough to flag
+    // it without touching maxGapsClass or any of the four older rules.
+    const world = makeWorld({
+      days: 2,
+      hours: 4,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+      placements: { 's510|0|0': 'x1', 's510|0|2': 'x1' },
+    });
+    await loadWorld(page, world, 'Ayarlar');
+    await openSettings(page, 'Kurallar');
+    const rule = page.locator('table.list tr', { hasText: 'Öğretmenin dersleri arasında' });
+    await rule.locator('input[type=number]').fill('0');
+    await rule.locator('input[type=number]').blur();
+    await rule.locator('select').selectOption('warn');
+
+    // A gap rule can never block a drop (v14, same reason as minPerDay) — the
+    // grid the world arrived with is untouched, no drag needed.
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await page.locator('.ribbon').getByRole('button', { name: /^Sorunlar/ }).click();
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
+      'MÇ',
+    );
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
+      'boşlukta',
+    );
   });
 
   test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {

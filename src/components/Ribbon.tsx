@@ -64,6 +64,7 @@ import {
   Layers,
   Info,
   Library,
+  Lightbulb,
   List,
   Maximize2,
   Minimize2,
@@ -881,6 +882,15 @@ export default function Ribbon({
         label: t('Sorunlar ({n})', { n: sorunlar }),
         icon: <TriangleAlert {...ICON} />,
         title: sorunlar === 0 ? t('Sorun yok') : t('Çözülmesi gereken satırlar'),
+      },
+      {
+        id: 'advisor',
+        label: t('Danışman ({n})', { n: status.advice }),
+        icon: <Lightbulb {...ICON} />,
+        title:
+          status.advice === 0
+            ? t('Öneri yok')
+            : t('Veri girişinde gözden kaçmış olabilecek noktalar'),
       },
       {
         id: 'teachers',

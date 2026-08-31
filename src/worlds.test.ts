@@ -6,7 +6,15 @@
 import { describe, expect, it } from 'vitest';
 import { placementKey } from './constraints';
 import { parseState } from './store';
-import { closeHours, closeWeek, hoursOf, illegalBlocks, makeWorld, WORLDS } from './worlds';
+import {
+  closeHours,
+  closeWeek,
+  gridQuality,
+  hoursOf,
+  illegalBlocks,
+  makeWorld,
+  WORLDS,
+} from './worlds';
 import type { State } from './types';
 
 /** Two classes, one teacher, four hours. */
@@ -138,6 +146,95 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     activeProgram(d).placements[placementKey('s510', 0, 2)] = 'x1';
     expect(illegalBlocks(d)).toEqual([]);
     expect(hoursOf(d, 'x1')).toBe(3);
+  });
+});
+
+// The same argument one floor up: `gridQuality` returning zeroes would make the
+// Deney B measurement — and every solver-quality number written into STATUS —
+// agree with whatever was hoped for. So it is shown a grid whose gaps can be
+// counted on paper before it is trusted to count a school's.
+describe('gridQuality — kalite ölçerin kendisi', () => {
+  /** One class, one teacher, one day of 6 hours; fills the given hours. */
+  function day(hours: number[]): State {
+    const d = makeWorld({
+      days: 1,
+      hours: 6,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6 }],
+    });
+    for (const h of hours) activeProgram(d).placements[placementKey('s510', 0, h)] = 'x1';
+    return d;
+  }
+
+  it('bitişik saatlerde delik YOK', () => {
+    const q = gridQuality(day([0, 1, 2]));
+    expect(q.classGaps).toBe(0);
+    expect(q.teacherGaps).toBe(0);
+    expect(q.gappyClassDays).toBe(0);
+  });
+
+  it('iki dersin ARASINDAKİ boş saati sayıyor', () => {
+    const q = gridQuality(day([0, 2]));
+    expect(q.classGaps).toBe(1);
+    expect(q.teacherGaps).toBe(1);
+    expect(q.gappyClassDays).toBe(1);
+    expect(q.gappyTeacherDays).toBe(1);
+  });
+
+  it('iki delik iki sayılıyor, ama GÜN bir', () => {
+    const q = gridQuality(day([0, 2, 4]));
+    expect(q.classGaps).toBe(2);
+    expect(q.gappyClassDays).toBe(1);
+  });
+
+  // The half that makes this a definition rather than a count of empty cells:
+  // coming in at the second period is a late start, not a gap.
+  it('UÇLARDAKİ boşluk delik değil — geç başlangıç ve erken bitiş', () => {
+    const q = gridQuality(day([2, 3]));
+    expect(q.classGaps).toBe(0);
+    expect(q.teacherGaps).toBe(0);
+  });
+
+  it('tek dolu saatli gün deliksiz', () => {
+    expect(gridQuality(day([3])).classGaps).toBe(0);
+  });
+
+  it('boş gün hiç sayılmıyor — öğretmen-günü de artmıyor', () => {
+    const q = gridQuality(day([]));
+    expect(q.classGaps).toBe(0);
+    expect(q.teacherDays).toBe(0);
+  });
+
+  it('öğretmen-günü okula GELDİĞİ günleri sayıyor', () => {
+    expect(gridQuality(day([1, 4])).teacherDays).toBe(1);
+  });
+
+  // A teacher's gaps are their own: two classes back to back leave the teacher
+  // whole while each class waits. Counting one and calling it the other is the
+  // mistake this separates.
+  it('sınıfın deliği ile öğretmenin deliği AYRI şeyler', () => {
+    const d = makeWorld({
+      days: 1,
+      hours: 4,
+      teachers: [{ id: 'oMC', short: 'MÇ' }],
+      classes: [
+        { id: 's510', name: '510', roomId: null },
+        { id: 's511', name: '511', roomId: null },
+      ],
+      lessons: [
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 },
+        { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2 },
+      ],
+    });
+    // MÇ: 0,1,2,3 kesintisiz. 510: 0 ve 2 → bir delik. 511: 1 ve 3 → bir delik.
+    activeProgram(d).placements[placementKey('s510', 0, 0)] = 'x1';
+    activeProgram(d).placements[placementKey('s511', 0, 1)] = 'x2';
+    activeProgram(d).placements[placementKey('s510', 0, 2)] = 'x1';
+    activeProgram(d).placements[placementKey('s511', 0, 3)] = 'x2';
+
+    const q = gridQuality(d);
+    expect(q.teacherGaps).toBe(0);
+    expect(q.classGaps).toBe(2);
+    expect(q.gappyClassDays).toBe(2);
   });
 });
 

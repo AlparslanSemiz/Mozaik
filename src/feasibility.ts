@@ -5,10 +5,16 @@
 // cheaper and far more useful.
 
 import { t } from "./i18n";
-import { blockerDetail, buildIndex, closedConflicts } from "./constraints";
+import {
+  blockerDetail,
+  buildIndex,
+  closedConflicts,
+  closedKey,
+} from "./constraints";
 import type { BlockCode, Index } from "./constraints";
 import { findViolations } from "./rules";
 import type { Violation } from "./rules";
+import { blockPlan } from "./blocks";
 import type { State, Id } from "./types";
 
 /** Above this ratio of load the "this will be hard" warning is raised. */
@@ -62,6 +68,8 @@ export interface Report extends Capacity {
   unplaceable: Unplaceable[];
   /** Limit rules broken by the timetable as it stands (rules.ts). */
   violations: Violation[];
+  /** aSc's "Advisor" — data that will not BLOCK a build but is worth a look. */
+  advice: Advice[];
   hasProblem: boolean;
 }
 
@@ -242,6 +250,106 @@ export function buildCapacity(d: State): Capacity {
   return { teachers, classes, rooms };
 }
 
+// ------------------------------------------------------------------ advice
+//
+// aSc's own "Advisor": data that will not BLOCK a build but is worth a
+// second look, straight from `docs/asc/yardim/u60-verification.md`. Kept
+// apart from `hasProblem` on purpose — aSc's own strip carries "Doğrulama"
+// (this file's `unplaceable`/`violations`) and "Danışman" as two separate
+// buttons (docs/ASC.md), and Kontrol's "Sorun görünmüyor" box answers the
+// first question, not the second.
+
+export interface Advice {
+  key: string;
+  /** WHICH aSc Advisor category this is — a code, not the sentence (pitfall 22). */
+  code: "lessonNeedsMoreDays" | "teacherManyBlockedDays" | "lessonManyBlocks";
+  message: string;
+}
+
+/** How many of a school week's days are closed for this entity, start to end. */
+function fullyClosedDayCount(
+  d: State,
+  entityId: Id,
+  dayCount: number,
+  hourCount: number,
+): number {
+  let closed = 0;
+  for (let day = 0; day < dayCount; day++) {
+    let allClosed = true;
+    for (let h = 0; h < hourCount; h++) {
+      if (d.unavailable[closedKey(entityId, day, h)] === undefined) {
+        allClosed = false;
+        break;
+      }
+    }
+    if (allClosed) closed++;
+  }
+  return closed;
+}
+
+export function buildAdvice(d: State, ix: Index): Advice[] {
+  const out: Advice[] = [];
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+
+  // aSc: "More lessons than days" — a lesson asking for more separate blocks
+  // than the week has days is guaranteed to land twice on at least one day.
+  for (const lesson of d.lessons) {
+    const plan = blockPlan(lesson);
+    if (plan.length <= dayCount) continue;
+    out.push({
+      key: `lessonNeedsMoreDays|${lesson.id}`,
+      code: "lessonNeedsMoreDays",
+      message: t(
+        "{ders} haftada {n} kez konacak ama yalnızca {gun} gün var; en az bir günde iki kez görülecek.",
+        { ders: lessonName(ix, lesson.id), n: plan.length, gun: dayCount },
+      ),
+    });
+  }
+
+  // aSc: "Teachers have many blocked days" — a teacher whose OPEN days are
+  // fewer than what their heaviest lesson needs will see it land twice on a
+  // day no matter how the week is arranged. A raw "closed ratio" would flag
+  // every part-time teacher (normal at a dershane); this only flags the ones
+  // that are actually squeezed.
+  for (const teacher of d.teachers) {
+    const teacherLessons = d.lessons.filter((l) => l.teacherId === teacher.id);
+    if (teacherLessons.length === 0) continue;
+    const openDays =
+      dayCount - fullyClosedDayCount(d, teacher.id, dayCount, hourCount);
+    const maxNeeded = Math.max(
+      ...teacherLessons.map((l) => blockPlan(l).length),
+    );
+    if (openDays >= maxNeeded) continue;
+    out.push({
+      key: `teacherManyBlockedDays|${teacher.id}`,
+      code: "teacherManyBlockedDays",
+      message: t(
+        "{kim} yalnızca {acik} günde müsait ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.",
+        { kim: teacher.short, acik: openDays, n: maxNeeded },
+      ),
+    });
+  }
+
+  // aSc: "Lessons of different length" — a lesson locked entirely into
+  // multi-hour blocks, with no single hour left over, gives the solver only
+  // one shape to try.
+  for (const lesson of d.lessons) {
+    const sum = lesson.blocks.reduce((a, b) => a + b, 0);
+    if (lesson.blocks.length < 2 || sum !== lesson.weeklyHours) continue;
+    out.push({
+      key: `lessonManyBlocks|${lesson.id}`,
+      code: "lessonManyBlocks",
+      message: t(
+        "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.",
+        { ders: lessonName(ix, lesson.id), n: lesson.blocks.length },
+      ),
+    });
+  }
+
+  return out;
+}
+
 export function buildReport(d: State): Report {
   const ix = buildIndex(d);
   const { teachers, classes, rooms } = buildCapacity(d);
@@ -271,13 +379,14 @@ export function buildReport(d: State): Report {
   }
 
   const violations = findViolations(d, ix);
+  const advice = buildAdvice(d, ix);
 
   const hasProblem =
     unplaceable.length > 0 ||
     violations.length > 0 ||
     [...teachers, ...classes, ...rooms].some((x) => x.level !== "ok");
 
-  return { teachers, classes, rooms, unplaceable, violations, hasProblem };
+  return { teachers, classes, rooms, unplaceable, violations, advice, hasProblem };
 }
 
 // ------------------------------------------------------------------ health
@@ -315,6 +424,13 @@ export interface Health {
    * would be the third of that walk per change.
    */
   problems: number;
+  /**
+   * Rows in the Danışman (Advisor) view — data that will not block a build.
+   * Deliberately NOT folded into `problems`, `warnings` or `level`: aSc keeps
+   * "Doğrulama" and "Danışman" as two separate buttons, and this chip answers
+   * the first question only.
+   */
+  advice: number;
   /** The loudest thing to say, for the chip's colour. */
   level: Level;
   /** The chip's own sentence. Never "there is a problem" — always which. */
@@ -377,6 +493,7 @@ export function health(d: State): Health {
     pending,
     stranded,
     problems: stranded + report.violations.length + report.unplaceable.length,
+    advice: report.advice.length,
     level,
     message: empty
       ? t("Henüz ders girilmedi")

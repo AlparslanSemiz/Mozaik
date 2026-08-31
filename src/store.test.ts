@@ -674,6 +674,28 @@ describe('parseState — v8 → v9 göçü', () => {
   });
 });
 
+describe('parseState — v13 → v14: boşluk (pencere) kuralları', () => {
+  it("eksik alanlar 0 ve 'off'a düşüyor, ötekiler dokunulmadan geçiyor", () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.schemaVersion = 13;
+    // A real v13 backup has neither field at all — settings.limits and
+    // settings.rules predate them entirely.
+    delete raw.settings.limits.maxGapsTeacher;
+    delete raw.settings.limits.maxGapsClass;
+    delete raw.settings.rules.maxGapsTeacher;
+    delete raw.settings.rules.maxGapsClass;
+    raw.settings.limits.maxConsecutive = 3; // an existing field: must survive untouched
+
+    const migrated = parseState(JSON.stringify(raw))!;
+    expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
+    expect(migrated.settings.limits.maxGapsTeacher).toBe(0);
+    expect(migrated.settings.limits.maxGapsClass).toBe(0);
+    expect(migrated.settings.rules.maxGapsTeacher).toBe('off');
+    expect(migrated.settings.rules.maxGapsClass).toBe('off');
+    expect(migrated.settings.limits.maxConsecutive).toBe(3);
+  });
+});
+
 describe('parseState — v12 → v13: dört saatlik bloklar', () => {
   it('4 saatlik blokları 3+1 yapar; alternatifleri, yerleşimleri ve sabitlemeleri korur', () => {
     const raw = JSON.parse(JSON.stringify(sampleState()));
@@ -697,7 +719,7 @@ describe('parseState — v12 → v13: dört saatlik bloklar', () => {
     const originalPrograms = JSON.parse(JSON.stringify(raw.programs));
 
     const migrated = parseState(JSON.stringify(raw))!;
-    expect(migrated.schemaVersion).toBe(13);
+    expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
     expect(migrated.lessons[0]!.blocks).toEqual([3, 3, 2]);
     expect(blockPlan(migrated.lessons[0]!)).toEqual([3, 3, 2, 1, 1]);
     expect(migrated.lessons[1]!.blocks).toEqual([3]);

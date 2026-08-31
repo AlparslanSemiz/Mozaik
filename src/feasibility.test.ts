@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAdvice,
   buildCapacity,
   buildReport,
   capacityLevel,
@@ -262,6 +263,172 @@ describe("commonestBlock", () => {
     expect(commonestBlock(d, ix, "x1", true).anyValid).toBe(
       commonestBlock(d, ix, "x1", false).anyValid,
     );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// aSc's "Advisor" (Danışman): data that will not BLOCK a build, unlike
+// everything else in this file. B5.4.
+
+describe("buildAdvice", () => {
+  it("haftanın gün sayısından çok blok isteyen dersi işaretler", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    // Default week is 6 days. 7 single hours need 7 separate days.
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 7,
+      blocks: [],
+    });
+
+    const advice = buildAdvice(d, buildIndex(d));
+    expect(advice.map((a) => a.code)).toContain("lessonNeedsMoreDays");
+  });
+
+  it("gün sayısı kadar (fazlası değil) blok isteyen dersi işaretlemez", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: d.settings.days.length, // exactly 6 -> 6 blocks, 6 days
+      blocks: [],
+    });
+
+    const codes = buildAdvice(d, buildIndex(d)).map((a) => a.code);
+    expect(codes).not.toContain("lessonNeedsMoreDays");
+  });
+
+  it("bir blok, aynı saat sayısını daha az güne indirirse işaretlemez", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    // 7 hours as [2,1,1,1,1,1] = 6 blocks -> fits 6 days.
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 7,
+      blocks: [2],
+    });
+
+    const codes = buildAdvice(d, buildIndex(d)).map((a) => a.code);
+    expect(codes).not.toContain("lessonNeedsMoreDays");
+  });
+
+  it("açık gün sayısı en talepkâr dersin ihtiyacından azsa öğretmeni işaretler", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 5, // needs 5 separate days
+      blocks: [],
+    });
+    // Close two whole days -> only 4 of the 6 stay open, less than the 5 needed.
+    const hourCount = d.settings.hours.length;
+    for (const day of [0, 1]) {
+      const cells = Array.from({ length: hourCount }, (_, h) => ({ day, hour: h }));
+      d = setAvailability(d, d.teachers[0]!.id, cells, true);
+    }
+
+    const advice = buildAdvice(d, buildIndex(d));
+    expect(advice.map((a) => a.code)).toContain("teacherManyBlockedDays");
+  });
+
+  it("yarı zamanlı öğretmeni — az kapalı gün, hafif ders — işaretlemez", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 2, // only needs 2 days
+      blocks: [],
+    });
+    // Close three whole days: 3 stay open, still >= the 2 the lesson needs.
+    const hourCount = d.settings.hours.length;
+    for (const day of [0, 1, 2]) {
+      const cells = Array.from({ length: hourCount }, (_, h) => ({ day, hour: h }));
+      d = setAvailability(d, d.teachers[0]!.id, cells, true);
+    }
+
+    const codes = buildAdvice(d, buildIndex(d)).map((a) => a.code);
+    expect(codes).not.toContain("teacherManyBlockedDays");
+  });
+
+  it("hiç tekli saat bırakmayan çok bloklu dersi işaretler", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 5,
+      blocks: [3, 2], // sums to 5: no single hour left over
+    });
+
+    const advice = buildAdvice(d, buildIndex(d));
+    expect(advice.map((a) => a.code)).toContain("lessonManyBlocks");
+  });
+
+  it("bir tekli saat bırakan çok bloklu dersi işaretlemez", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 6,
+      blocks: [3, 2], // sums to 5, leaves a single hour
+    });
+
+    const codes = buildAdvice(d, buildIndex(d)).map((a) => a.code);
+    expect(codes).not.toContain("lessonManyBlocks");
+  });
+
+  it("tek bloklu dersi işaretlemez", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 3,
+      blocks: [3],
+    });
+
+    const codes = buildAdvice(d, buildIndex(d)).map((a) => a.code);
+    expect(codes).not.toContain("lessonManyBlocks");
+  });
+
+  it("Danışman uyarısı hasProblem'ı KIRMIZI yapmıyor — Doğrulama'dan ayrı", () => {
+    let d = emptyState();
+    d = addRoom(d, "A");
+    d = addTeacher(d, { name: "Mehmet Çelik", short: "MÇ", subject: "Matematik" });
+    d = addClass(d, "510", d.rooms[0]!.id);
+    d = addLesson(d, {
+      classId: d.classes[0]!.id,
+      teacherId: d.teachers[0]!.id,
+      weeklyHours: 7, // triggers lessonNeedsMoreDays, nothing else
+      blocks: [],
+    });
+
+    const report = buildReport(d);
+    expect(report.advice.length).toBeGreaterThan(0);
+    expect(report.hasProblem).toBe(false);
+    expect(health(d).advice).toBe(report.advice.length);
   });
 });
 

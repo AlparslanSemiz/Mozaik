@@ -267,10 +267,11 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     await expect(page.locator('.ribbon')).toBeVisible();
   }
 
-  test('dört kapı: Sorunlar · Öğretmenler · Sınıflar · Derslikler', async ({ page }) => {
+  test('beş kapı: Sorunlar · Danışman · Öğretmenler · Sınıflar · Derslikler', async ({ page }) => {
     await openCheck(page);
     const bar = page.locator('.ribbon');
     await expect(bar.getByRole('button', { name: /^Sorunlar \(\d+\)$/ })).toBeVisible();
+    await expect(bar.getByRole('button', { name: /^Danışman \(\d+\)$/ })).toBeVisible();
     for (const name of ['Öğretmenler', 'Sınıflar', 'Derslikler']) {
       await expect(bar.getByRole('button', { name, exact: true })).toBeVisible();
     }
@@ -310,8 +311,19 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     await openCheck(page);
     const bar = page.locator('.ribbon');
 
-    for (const name of ['Sorunlar (0)', 'Öğretmenler', 'Sınıflar', 'Derslikler']) {
-      await bar.getByRole('button', { name, exact: true }).click();
+    // Danışman's label carries a live count, like Sorunlar's — matched by
+    // pattern rather than a guessed number (the real count comes from the
+    // sample school and is not predicted here, pitfall 101).
+    const buttons = [
+      bar.getByRole('button', { name: 'Sorunlar (0)', exact: true }),
+      bar.getByRole('button', { name: /^Danışman \(\d+\)$/ }),
+      bar.getByRole('button', { name: 'Öğretmenler', exact: true }),
+      bar.getByRole('button', { name: 'Sınıflar', exact: true }),
+      bar.getByRole('button', { name: 'Derslikler', exact: true }),
+    ];
+    for (const button of buttons) {
+      const label = await button.innerText();
+      await button.click();
       const box = await page.evaluate(() => {
         const m = document.querySelector('.main')!;
         return {
@@ -320,8 +332,8 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
           bounded: document.querySelectorAll('.main .stat-scroll').length,
         };
       });
-      expect(box.bounded, name).toBeLessThanOrEqual(1);
-      expect(box.page / box.view, name).toBeLessThan(1.6);
+      expect(box.bounded, label).toBeLessThanOrEqual(1);
+      expect(box.page / box.view, label).toBeLessThan(1.6);
     }
   });
 

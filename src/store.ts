@@ -427,6 +427,7 @@ export function parseState(text: string): State | null {
     version === 10 ||
     version === 11 ||
     version === 12 ||
+    version === 13 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -474,6 +475,11 @@ export function parseState(text: string): State | null {
           maxPerDay: asCount(limits?.maxPerDay, 0),
           minPerDay: asCount(limits?.minPerDay, 0),
           maxSameLessonPerDay: asCount(limits?.maxSameLessonPerDay, 0),
+          // v14. A pre-v14 file has neither field; 0 is the right fallback
+          // for BOTH — it is what DEFAULT_LIMITS ships and, unlike the four
+          // rules above, it is also a real number here rather than "no limit".
+          maxGapsTeacher: asCount(limits?.maxGapsTeacher, 0),
+          maxGapsClass: asCount(limits?.maxGapsClass, 0),
         },
         rules: {
           maxConsecutive: asLevel(rules?.maxConsecutive, blank.settings.rules.maxConsecutive),
@@ -483,6 +489,10 @@ export function parseState(text: string): State | null {
             rules?.maxSameLessonPerDay,
             blank.settings.rules.maxSameLessonPerDay,
           ),
+          // v14. A pre-v14 file predates the rule entirely, so it falls back
+          // to 'off' — DEFAULT_RULES's own choice, not a guess made here.
+          maxGapsTeacher: asLevel(rules?.maxGapsTeacher, blank.settings.rules.maxGapsTeacher),
+          maxGapsClass: asLevel(rules?.maxGapsClass, blank.settings.rules.maxGapsClass),
         },
         subjects: asNames(g.settings?.subjects, defaultSubjects()),
         subjectShorts: asShorts(g.settings?.subjectShorts),

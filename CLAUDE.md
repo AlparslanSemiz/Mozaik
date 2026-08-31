@@ -596,7 +596,10 @@ bundle.ts                       "bütün planlar tek dosyada" zarfı. library.ts
   |
 constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
                                 dropMap() de burada: 72 hücrenin yargısı bir
-                                ÇİZİM kararı değil, kısıt motorunun cevabı
+                                ÇİZİM kararı değil, kısıt motorunun cevabı.
+                                buildAdvice() (B5.4) aSc'nin Danışman'ı: engel
+                                DEĞİL, hasProblem'ı etkilemez — Doğrulama'dan
+                                (unplaceable/violations) kasıtlı ayrı
 rules.ts / bell.ts              Testleri zorunlu.
 import.ts / entities.ts
 solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
@@ -1051,7 +1054,9 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   v11 = `ClassGroup.maxSameLessonPerDay` — günlük sınır bir orta katman kazandı.
   v12 = yerleşim ve sabitlemeler adlı program alternatiflerine taşındı.
   v13 = dört saatlik blok kaldırıldı; eski her 4, 3 + örtük tek saate dönüşür.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v13 tek okuyucudan geçer —
+  v14 = `Limits.maxGapsTeacher` / `maxGapsClass` — boşluk (pencere) kuralı,
+  yalnız `Kapalı / Uyar` (B5.2). Eksik alan 0 ve `'off'`e düşer.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v14 tek okuyucudan geçer —
   `readLessons()` her tarihsel biçimi tek yerde çevirir: v1–v6 `blockSize`,
   v7–v8 ikili blok sayısı `pairs`, v9–v12 doğrudan `blocks`; v13 okurken eski
   her 4'ü 3'e çevirir ve kalan saati örtük tek saat olarak bırakır. `id`'ler,
@@ -1059,6 +1064,9 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   gibi geçer; yalnız koşu içindeki blok sınırı yeniden okunur ve hiçbir sert
   kısıt bu sınıra bakmaz (bkz. tuzak 63). **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
   hem birim hem E2E testini ekle.** Eski yedek açılmıyorsa veri kayıptır.
+  **Kabul listesine EKLENEN sayı unutulmaz** (tuzak 97) — v14'ü çıkarırken
+  `version === 13` kabul listesine elle eklendi, `parseState` `SCHEMA_VERSION`'a
+  değil o listeye bakıyor.
 
 ---
 
@@ -1098,7 +1106,16 @@ Sebepleri sayan her yer (Kontrol'ün "yerleşemeyen dersler"i, çözücünün t�
 cümlesi) koda göre gruplar — mesaj gün ve saat adı taşıdığı için cümle saymak yanlış
 cevabı veriyordu (tuzak 22).
 
-Boşluk (pencere) kuralları hâlâ **yok**. İstenirse sonra gelir.
+**Boşluk (pencere) kuralları var (2026-08-31, şema v14): `maxGapsTeacher` ·
+`maxGapsClass`, `minPerDay`'in deseninde.** Bir GÜN içinde ilk ve son dolu
+saat arasında kalan boş saat sayılır (`rules.ts`'teki `gapsBetween()` — tek
+tanım, üç okuyucu: iki kural artı `worlds.ts`'teki `gridQuality()`, çözücü
+kalitesini ölçen test aleti). `minPerDay` gibi bir bırakmayı **engelleyemez**
+— gün yarı dizilmişken açık kalan her saat bir "boşluk", yani sadece
+`Kapalı / Uyar` var, `Engelle` seçilemiyor. **Ve 0, öteki dört kuraldan
+FARKLI olarak BİREBİR kullanılır**: onlarda `limit > 0` şart (`ruleActive()`),
+burada 0 "hiç boşluk olmasın" demek olan gerçek bir sayı — etkinliği yalnız
+seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
 
 ---
 

@@ -216,6 +216,11 @@ const EN: Sozluk = {
     "stop the timetable from being laid out. Resolve those first.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
     "The remaining **{n}** hours are waiting in the tray. You can place them with **Fill automatically** in the **Timetable** tab.",
+  "Danışman uyarıları ({n})": "Advisor notes ({n})",
+  "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
+    "These do not block the timetable; they are points that may have been overlooked while entering data.",
+  "Danışmanın söyleyecek bir şeyi yok.": "The advisor has nothing to say.",
+  Öneri: "Note",
 
   // src/components/ColorPick.tsx
   Vazgeç: "Cancel",
@@ -894,6 +899,12 @@ const EN: Sozluk = {
   "{n} ders sığmıyor": "{n} {n:lesson does|lessons do} not fit",
   "{n} saat havuzda": "{n} {n:hour|hours} in the tray",
   "Henüz ders girilmedi": "No lessons entered yet",
+  "{ders} haftada {n} kez konacak ama yalnızca {gun} gün var; en az bir günde iki kez görülecek.":
+    "{ders} needs to be placed {n} times a week but there are only {gun} days; it will land twice on at least one day.",
+  "{kim} yalnızca {acik} günde müsait ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.":
+    "{kim} is only available on {acik} days but one lesson needs placing {n} times a week; it may land twice on one day.",
+  "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.":
+    "{ders} is split into {n} separate blocks with no single hour left over; that is the only shape the solver can try.",
 
   // src/import.ts
   '{n}. satır: "{ad}" iki kez geçiyor, biri alındı.':
@@ -940,6 +951,10 @@ const EN: Sozluk = {
     "{kim_gun} teaches {olan} hours in a row; at most {sinir} were asked for.",
   "{sinif} sınıfı {gun} günü {kim} dersinden {olan} saat görüyor, en fazla {sinir} saat isteniyor.":
     "Class {sinif} has {olan} hours of {kim} on {gun}; at most {sinir} were asked for.",
+  "{kim} {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.":
+    "{kim} has {olan} hour(s) of gap between lessons on {gun}; at most {sinir} were asked for.",
+  "{sinif} sınıfı {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.":
+    "Class {sinif} has {olan} hour(s) of gap between lessons on {gun}; at most {sinir} were asked for.",
 
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
@@ -1044,6 +1059,14 @@ const EN: Sozluk = {
   "Öğretmen günde en az": "Teacher, at least per day",
   "Bir sınıf aynı dersten günde en fazla":
     "A class, at most of the same lesson per day",
+  "Öğretmenin dersleri arasında en fazla boşluk":
+    "Teacher, at most gap between lessons",
+  "Bir günde ilk ve son ders arasında kaç saat boş kalabilir. 0 hiç boşluk olmasın demektir.":
+    "How many hours may sit empty between the first and last lesson of a day. 0 means no gap at all.",
+  "Sınıfın dersleri arasında en fazla boşluk":
+    "Class, at most gap between lessons",
+  "Aynısı sınıf için. Yalnız Kontrol sekmesinde uyarır.":
+    "The same for a class. Warns only, in the Kontrol tab.",
   Ocak: "January",
   Şubat: "February",
   Mart: "March",
@@ -1094,6 +1117,10 @@ const EN: Sozluk = {
   "Sürükleyerek ya da ok tuşlarıyla sırala":
     "Drag or use the arrow keys to reorder",
   "Çözülmesi gereken satırlar": "Rows that need solving",
+  "Danışman ({n})": "Advisor ({n})",
+  "Öneri yok": "No notes",
+  "Veri girişinde gözden kaçmış olabilecek noktalar":
+    "Points that may have been overlooked while entering data",
   "Öğretmen yükleri": "Teacher loads",
   "Sınıf yükleri": "Class loads",
   "Derslik yükleri": "Room loads",

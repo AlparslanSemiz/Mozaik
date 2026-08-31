@@ -11,7 +11,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { solve } from '../src/solver';
-import { HEAVY_WORLDS, hoursOf, illegalBlocks } from '../src/worlds';
+import { HEAVY_WORLDS, gridQuality, hoursOf, illegalBlocks, qualityLine } from '../src/worlds';
 import { activePlacements } from '../src/programs';
 import { loadWorld, savedState, settledText } from './helpers';
 
@@ -114,6 +114,10 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
         `[ölçüm] ${world.name}: ${r.placedBlocks}/${r.totalBlocks} blok, ${r.nodes} düğüm, ` +
           `${Math.round(r.elapsedMs)} ms, faz=${r.phase}, yerleşemeyen ders=${r.stuck.length}`,
       );
+      // The QUALITY half, printed and not asserted: a legal timetable can
+      // still leave a teacher waiting an hour between lessons, and until now
+      // nothing in this repository could say how often it did.
+      console.log(`[kalite] ${world.name}: ${qualityLine(gridQuality(r.state))}`);
       expect(illegalBlocks(r.state)).toEqual([]);
       // The budget is a promise to the user: it may be spent, never overrun by
       // more than a slice.

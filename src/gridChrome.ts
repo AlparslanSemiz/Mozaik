@@ -23,6 +23,8 @@
 // crosshair must not hide why a cell cannot be used), and during a drag the
 // crosshair switches off entirely.
 
+import { MAX_BLOCK } from './blocks';
+
 /** Attaches the chrome to a `.grid-wrap`. Returns the detach function. */
 export function attachGridChrome(wrap: HTMLElement): () => void {
   let lit: Element[] = [];
@@ -73,13 +75,31 @@ export function attachGridChrome(wrap: HTMLElement): () => void {
     if (column === litColumn) return;
     clear();
 
-    // A merged block is lit by the column it COVERS, not by the one it starts
-    // at — the same "which cell is the pointer inside" question rowDrag.ts had
-    // to answer with containment rather than with an index (pitfall 60).
+    // A HOVERED BLOCK LIGHTS EVERY COLUMN IT COVERS, not just the one it
+    // starts at. "2 derslik bir blok kesinlikle 1 ders değil 2 derstir" — a
+    // two- or three-hour block is one wide <td>, but before this its own
+    // data-col only ever named its FIRST hour, so the crosshair lit that one
+    // column's header and cross-row cells and left the block's later
+    // column(s) dark, as if the block were one hour wide.
+    //
+    // For each column the hovered cell covers, a cell in ANY row lights it if
+    // it starts there OR starts up to MAX_BLOCK-1 columns earlier with a span
+    // long enough to reach it — the same "found by what covers it, not by an
+    // index" rule as pitfall 60/85, generalised past the one span (`"2"`)
+    // this used to hardcode.
+    const span = Number(cell.dataset.span ?? '1');
+    const bodySelectors: string[] = [];
+    const headSelectors: string[] = [];
+    for (let c = column; c < column + span; c++) {
+      bodySelectors.push(`td[data-col="${c}"]`);
+      for (let j = 1; j < MAX_BLOCK; j++) {
+        bodySelectors.push(`td[data-col="${c - j}"][data-span="${j + 1}"]`);
+      }
+      headSelectors.push(`th[data-col="${c}"]`);
+    }
     lit = [
-      ...table.querySelectorAll(`tbody td[data-col="${column}"]`),
-      ...table.querySelectorAll(`tbody td[data-col="${column - 1}"][data-span="2"]`),
-      ...table.querySelectorAll(`thead th[data-col="${column}"]`),
+      ...table.querySelectorAll(`tbody :is(${bodySelectors.join(',')})`),
+      ...table.querySelectorAll(`thead :is(${headSelectors.join(',')})`),
     ];
     for (const el of lit) el.classList.add('col-hot');
     litColumn = column;

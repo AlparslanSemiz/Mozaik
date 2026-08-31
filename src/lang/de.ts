@@ -215,6 +215,11 @@ const DE: Sozluk = {
     "das Legen des Plans. Lösen Sie diese zuerst.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
     "Die restlichen **{n}** Stunden warten im Ablagefach. Sie können sie mit **Automatisch legen** im Reiter **Stundenplan** platzieren.",
+  "Danışman uyarıları ({n})": "Berater-Hinweise ({n})",
+  "Bunlar programı engellemez; veri girişinde gözden kaçmış olabilecek noktalardır.":
+    "Diese blockieren den Plan nicht; es sind Punkte, die bei der Dateneingabe übersehen worden sein könnten.",
+  "Danışmanın söyleyecek bir şeyi yok.": "Der Berater hat nichts zu sagen.",
+  Öneri: "Hinweis",
 
   // src/components/ColorPick.tsx
   Vazgeç: "Abbrechen",
@@ -907,6 +912,12 @@ const DE: Sozluk = {
   "{n} ders sığmıyor": "{n} {n:Fach passt|Fächer passen} nicht",
   "{n} saat havuzda": "{n} {n:Stunde|Stunden} im Ablagefach",
   "Henüz ders girilmedi": "Noch keine Fächer eingetragen",
+  "{ders} haftada {n} kez konacak ama yalnızca {gun} gün var; en az bir günde iki kez görülecek.":
+    "{ders} muss {n} Mal pro Woche gelegt werden, aber es gibt nur {gun} Tage; an mindestens einem Tag erscheint es zweimal.",
+  "{kim} yalnızca {acik} günde müsait ama bir dersi haftada {n} kez konacak; bir güne iki kez düşebilir.":
+    "{kim} ist nur an {acik} Tagen verfügbar, aber ein Fach muss {n} Mal pro Woche gelegt werden; es kann an einem Tag zweimal landen.",
+  "{ders} {n} ayrı bloğa bölünmüş ve hiç tekli saat bırakmıyor; çözücünün deneyebileceği tek şekil bu.":
+    "{ders} ist in {n} eigenständige Blöcke aufgeteilt und lässt keine Einzelstunde übrig; das ist die einzige Form, die der Löser versuchen kann.",
 
   // src/import.ts
   '{n}. satır: "{ad}" iki kez geçiyor, biri alındı.':
@@ -953,6 +964,10 @@ const DE: Sozluk = {
     "{kim_gun} unterrichtet {olan} Stunden am Stück; höchstens {sinir} waren gewünscht.",
   "{sinif} sınıfı {gun} günü {kim} dersinden {olan} saat görüyor, en fazla {sinir} saat isteniyor.":
     "Klasse {sinif} hat am {gun} {olan} Stunden bei {kim}; höchstens {sinir} waren gewünscht.",
+  "{kim} {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.":
+    "{kim} hat am {gun} {olan} Stunden Lücke zwischen den Stunden; höchstens {sinir} waren gewünscht.",
+  "{sinif} sınıfı {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.":
+    "Klasse {sinif} hat am {gun} {olan} Stunden Lücke zwischen den Stunden; höchstens {sinir} waren gewünscht.",
 
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
@@ -1059,6 +1074,14 @@ const DE: Sozluk = {
   "Öğretmen günde en az": "Lehrkraft, mindestens pro Tag",
   "Bir sınıf aynı dersten günde en fazla":
     "Eine Klasse, höchstens vom selben Fach pro Tag",
+  "Öğretmenin dersleri arasında en fazla boşluk":
+    "Lehrkraft, höchstens Lücke zwischen den Stunden",
+  "Bir günde ilk ve son ders arasında kaç saat boş kalabilir. 0 hiç boşluk olmasın demektir.":
+    "Wie viele Stunden zwischen der ersten und letzten Stunde eines Tages frei bleiben dürfen. 0 bedeutet keine Lücke.",
+  "Sınıfın dersleri arasında en fazla boşluk":
+    "Klasse, höchstens Lücke zwischen den Stunden",
+  "Aynısı sınıf için. Yalnız Kontrol sekmesinde uyarır.":
+    "Dasselbe für eine Klasse. Warnt nur, im Reiter Kontrol.",
   Ocak: "Januar",
   Şubat: "Februar",
   Mart: "März",
@@ -1108,6 +1131,10 @@ const DE: Sozluk = {
   "Sürükleyerek ya da ok tuşlarıyla sırala":
     "Zum Umsortieren ziehen oder Pfeiltasten benutzen",
   "Çözülmesi gereken satırlar": "Zu lösende Zeilen",
+  "Danışman ({n})": "Berater ({n})",
+  "Öneri yok": "Keine Hinweise",
+  "Veri girişinde gözden kaçmış olabilecek noktalar":
+    "Punkte, die bei der Dateneingabe übersehen worden sein könnten",
   "Öğretmen yükleri": "Lehrerdeputate",
   "Sınıf yükleri": "Klassendeputate",
   "Derslik yükleri": "Raumbelegung",

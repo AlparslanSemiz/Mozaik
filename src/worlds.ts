@@ -24,6 +24,7 @@ import {
   NO_TEACHER_LIMITS,
   hourNames,
 } from './entities';
+import { classDayGaps, teacherDayCount, teacherDayGaps } from './rules';
 import { sampleState } from './sample';
 import type {
   ClassGroup,
@@ -245,6 +246,72 @@ export function illegalBlocks(d: State): Illegal[] {
 /** How many hours of one lesson are on the grid. */
 export function hoursOf(d: State, lessonId: Id): number {
   return Object.values(activePlacements(d)).filter((x) => x === lessonId).length;
+}
+
+// ------------------------------------------------------------ the QUALITY meter
+//
+// `illegalBlocks()` asks "is this timetable legal". Nothing asked "is it any
+// GOOD", and that is the half the solver was weakest at: measured on the sample
+// school it laid out 367/367 blocks in 367 nodes and left a teacher waiting
+// between lessons on 87% of the days they came in.
+//
+// The numbers below are the ones that answer that, and they are PRINTED rather
+// than asserted: a quality figure is a measurement, and a measurement is a date
+// rather than a law (pitfall 42). The only thing asserted about a solver change
+// is that it placed no fewer blocks than before.
+//
+// It lives here and not in feasibility.ts on purpose: nothing on screen shows
+// it, so it is a test instrument and the application must not import it.
+
+export interface GridQuality {
+  /** Free hours between a class's first and last lesson, summed over the week. */
+  classGaps: number;
+  /** The same for teachers. */
+  teacherGaps: number;
+  /** Class-days holding at least one gap. */
+  gappyClassDays: number;
+  /** Teacher-days holding at least one gap. */
+  gappyTeacherDays: number;
+  /** Teacher-days with any lesson at all — how far the load is SPREAD. */
+  teacherDays: number;
+}
+
+export function gridQuality(d: State): GridQuality {
+  const ix = buildIndex(d);
+  const dayCount = d.settings.days.length;
+  const hourCount = d.settings.hours.length;
+
+  const out: GridQuality = {
+    classGaps: 0,
+    teacherGaps: 0,
+    gappyClassDays: 0,
+    gappyTeacherDays: 0,
+    teacherDays: 0,
+  };
+
+  for (let day = 0; day < dayCount; day++) {
+    for (const group of d.classes) {
+      const gaps = classDayGaps(d, group.id, day, hourCount);
+      out.classGaps += gaps;
+      if (gaps > 0) out.gappyClassDays++;
+    }
+    for (const teacher of d.teachers) {
+      const gaps = teacherDayGaps(ix, teacher.id, day, hourCount);
+      out.teacherGaps += gaps;
+      if (gaps > 0) out.gappyTeacherDays++;
+      if (teacherDayCount(ix, teacher.id, day, hourCount) > 0) out.teacherDays++;
+    }
+  }
+  return out;
+}
+
+/** One line, for the `[ölçüm]` output of the stress run. */
+export function qualityLine(q: GridQuality): string {
+  return (
+    `sınıf deliği ${q.classGaps} (${q.gappyClassDays} gün) · ` +
+    `öğretmen deliği ${q.teacherGaps} (${q.gappyTeacherDays} gün) · ` +
+    `öğretmen-günü ${q.teacherDays}`
+  );
 }
 
 // ----------------------------------------------------------------- the worlds

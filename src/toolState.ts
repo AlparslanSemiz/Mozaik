@@ -75,7 +75,7 @@ export type Scope = "classes" | "teachers" | "both";
  * them did nothing at all and nothing said so ("alt sekmede bir şeyler
  * seçiyoruz ama değişmiyor").
  */
-export type CheckView = "problems" | "teachers" | "classes" | "rooms";
+export type CheckView = "problems" | "advisor" | "teachers" | "classes" | "rooms";
 
 /**
  * HOW THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş

@@ -27,6 +27,10 @@ const DEFAULT_LIMITS_SAMPLE = {
   maxPerDay: 8,
   minPerDay: 2,
   maxSameLessonPerDay: 2,
+  // The sample school does not exercise the gap rule (v14): it stays off,
+  // like every other school's until somebody turns it on.
+  maxGapsTeacher: 0,
+  maxGapsClass: 0,
 };
 
 /** A tiny linear generator — Math.random is not deterministic. */

@@ -926,6 +926,7 @@ function Program({
           lessonId,
           rowId: teacherView ? lesson.teacherId : lesson.classId,
           blockSize: Math.max(1, size),
+          hourCount: state.settings.hours.length,
           map,
           source,
         },

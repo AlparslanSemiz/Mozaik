@@ -1617,6 +1617,97 @@ test.describe("68. 2+1 bitişikken", () => {
   });
 });
 
+// A single two-hour block, nothing placed yet — the whole 4-hour day is
+// free. Hour 3 (0-indexed) is the day's LAST hour.
+const EDGE_WORLD = {
+  schemaVersion: 7,
+  settings: {
+    schoolName: "Kenar",
+    days: [{ name: "Salı", longBreakAfter: 0 }],
+    hours: ["1", "2", "3", "4"],
+    bell: {
+      start: "09:00",
+      lessonMinutes: 40,
+      breakMinutes: 10,
+      longBreakMinutes: 30,
+    },
+    limits: {
+      maxConsecutive: 0,
+      maxPerDay: 0,
+      minPerDay: 0,
+      maxSameLessonPerDay: 0,
+    },
+    rules: {
+      maxConsecutive: "block",
+      maxPerDay: "block",
+      minPerDay: "warn",
+      maxSameLessonPerDay: "block",
+    },
+    subjects: ["Matematik"],
+    subjectShorts: {},
+  },
+  rooms: [{ id: "dA", name: "A" }],
+  teachers: [
+    {
+      id: "oMC",
+      name: "Mehmet Çelik",
+      short: "MÇ",
+      subject: "Matematik",
+      gender: "",
+      color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
+  ],
+  classes: [{ id: "s510", name: "510", roomId: "dA", color: 0 }],
+  lessons: [
+    {
+      id: "x1",
+      classId: "s510",
+      teacherId: "oMC",
+      weeklyHours: 2,
+      pairs: 1,
+      maxPerDay: null,
+    },
+  ],
+  unavailable: {},
+  placements: {},
+};
+
+test.describe("89. Gün sonunda blok geriye kaydırılır", () => {
+  test("son saate sürüklenen 2 saatlik blok son iki saate oturur, kırmızı olmaz", async ({
+    page,
+  }) => {
+    // "2 derslik bir blok kesinlikle 1 ders değil 2 derstir ... sürüklerken
+    // son ders kapalı gözüküyor kırmızı. bu böyle olmamalı son saate
+    // koyuluyorsa son saat ve ondan bir önceki saate yani son 2 saate
+    // konulabilmeli."
+    await loadWorld(page, EDGE_WORLD);
+    await expect(page.locator(".pool-card")).toHaveCount(1);
+
+    await startDrag(page);
+    // The day's LAST hour. Read literally as a start it needs a 5th hour
+    // that does not exist ("dayEnd"), which used to paint it red outright.
+    const last = await hover(page, 0, 3);
+    await expect(last).not.toHaveClass(/drop-blocked/);
+    await expect(last).toHaveClass(/drop-ok/);
+    // The block's OTHER cell — the one it will actually start at once
+    // clamped to the day's last two hours — lights too.
+    const earlier = page.locator(
+      'tr.target-row td[data-day="0"][data-hour="2"]',
+    );
+    await expect(earlier).toHaveClass(/drop-ok/);
+
+    await page.mouse.up();
+
+    // It landed on hours 2-3, not on a rejected attempt at 3-4.
+    await expect(page.locator(".pool-card")).toHaveCount(0);
+    const placed = page.locator(
+      'table.grid tbody td[data-day="0"][data-hour="2"][data-span="2"]',
+    );
+    await expect(placed).toContainText("510");
+  });
+});
+
 // ---------------------------------------------------------------------------
 // PINNING. One rule with no exceptions: nothing takes a pinned block down but
 // unpinning it. The refusal lives in `removeBlock` and `dropMap` (unit-tested),

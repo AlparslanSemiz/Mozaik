@@ -5,7 +5,10 @@ import { buildIndex, place } from './constraints';
 import { blankProgram } from './programs';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import {
+  classDayGaps,
   findViolations,
+  gapRuleActive,
+  gapsBetween,
   lessonDayCount,
   lessonLimit,
   limitFor,
@@ -14,6 +17,7 @@ import {
   ruleLevel,
   runLength,
   teacherDayCount,
+  teacherDayGaps,
 } from './rules';
 import type { State } from './types';
 import { SCHEMA_VERSION } from './types';
@@ -268,5 +272,128 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x1', 0, 1);
     expect(findViolations(d, buildIndex(d))).toEqual([]);
+  });
+});
+
+describe('gapsBetween — tek delik tanımı', () => {
+  const set = (hours: number[]) => (h: number) => hours.includes(h);
+
+  it('bitişik saatlerde delik yok', () => {
+    expect(gapsBetween(set([0, 1, 2]), 6)).toBe(0);
+  });
+
+  it('arada kalan boş saati sayıyor', () => {
+    expect(gapsBetween(set([0, 2]), 6)).toBe(1);
+  });
+
+  it('birden fazla delik toplanıyor', () => {
+    expect(gapsBetween(set([0, 2, 5]), 6)).toBe(3); // 1, 3 ve 4
+  });
+
+  it('UÇLARDAKİ boşluk delik değil — geç başlangıç, erken bitiş', () => {
+    expect(gapsBetween(set([2, 3]), 6)).toBe(0);
+  });
+
+  it('tek dolu saat deliksiz', () => {
+    expect(gapsBetween(set([3]), 6)).toBe(0);
+  });
+
+  it('hiç dolu saat yoksa 0', () => {
+    expect(gapsBetween(set([]), 6)).toBe(0);
+  });
+});
+
+describe('teacherDayGaps / classDayGaps', () => {
+  it('öğretmenin dersleri arasındaki boşluğu sayıyor', () => {
+    let d = build();
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 3, 1);
+    expect(teacherDayGaps(buildIndex(d), 'oMC', 0, 6)).toBe(2);
+  });
+
+  it('sınıfın dersleri arasındaki boşluğu sayıyor', () => {
+    let d = build();
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 2, 1);
+    expect(classDayGaps(d, 's510', 0, 6)).toBe(1);
+  });
+
+  it('sınıfın ve öğretmenin deliği AYRI şeyler', () => {
+    // 510: saat 0 ve 2 -> bir delik. 511: saat 1 ve 3 -> bir delik.
+    // MÇ ikisine de girdiği için kendisi 0,1,2,3 kesintisiz -> delik yok.
+    let d = build();
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    d = place(d, 'x1', 0, 2, 1);
+    d = place(d, 'x2', 0, 3, 1);
+    const ix = buildIndex(d);
+    expect(teacherDayGaps(ix, 'oMC', 0, 6)).toBe(0);
+    expect(classDayGaps(d, 's510', 0, 6)).toBe(1);
+    expect(classDayGaps(d, 's511', 0, 6)).toBe(1);
+  });
+});
+
+describe('gapRuleActive — 0, öteki dört kuraldan FARKLI olarak, birebir kullanılır', () => {
+  it('limit 0 iken bile seviye kapalı değilse etkin', () => {
+    const d = build();
+    d.settings.limits.maxGapsTeacher = 0;
+    d.settings.rules.maxGapsTeacher = 'warn';
+    expect(gapRuleActive(d, 'maxGapsTeacher')).toBe(true);
+    // The other four rules: limit 0 turns them off regardless of level.
+    d.settings.limits.maxPerDay = 0;
+    d.settings.rules.maxPerDay = 'warn';
+    expect(ruleActive(d, 'maxPerDay', d.settings.limits.maxPerDay)).toBe(false);
+  });
+
+  it('seviye Kapalı iken limit ne olursa olsun etkin değil', () => {
+    const d = build();
+    d.settings.limits.maxGapsTeacher = 2;
+    d.settings.rules.maxGapsTeacher = 'off';
+    expect(gapRuleActive(d, 'maxGapsTeacher')).toBe(false);
+  });
+});
+
+describe('findViolations — boşluk (pencere) kuralları', () => {
+  it('öğretmen deliği limit 0 + Uyar iken bir tane bile ihlal üretir', () => {
+    let d = build();
+    d.settings.limits.maxGapsTeacher = 0;
+    d.settings.rules.maxGapsTeacher = 'warn';
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 2, 1); // MÇ: 0 ve 2 -> 1 saat boşluk
+    const found = findViolations(d, buildIndex(d));
+    expect(found.some((x) => x.rule === 'maxGapsTeacher')).toBe(true);
+    expect(found.find((x) => x.rule === 'maxGapsTeacher')?.level).toBe('warn');
+  });
+
+  it('sınıf deliği aynı sayıyı aşınca ayrıca yakalanır', () => {
+    let d = build();
+    d.settings.limits.maxGapsClass = 0;
+    d.settings.rules.maxGapsClass = 'warn';
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 2, 1);
+    const found = findViolations(d, buildIndex(d));
+    expect(found.some((x) => x.rule === 'maxGapsClass')).toBe(true);
+  });
+
+  it('kural Kapalı iken delik olsa da hiçbir ihlal raporlanmaz', () => {
+    let d = build();
+    d.settings.rules.maxGapsTeacher = 'off';
+    d.settings.rules.maxGapsClass = 'off';
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 2, 1);
+    const found = findViolations(d, buildIndex(d));
+    expect(found.some((x) => x.rule === 'maxGapsTeacher' || x.rule === 'maxGapsClass')).toBe(
+      false,
+    );
+  });
+
+  it('delik yoksa Uyar açık olsa da hiçbir şey raporlanmaz', () => {
+    let d = build();
+    d.settings.limits.maxGapsTeacher = 0;
+    d.settings.rules.maxGapsTeacher = 'warn';
+    d = place(d, 'x1', 0, 0, 1);
+    d = place(d, 'x1', 0, 1, 1); // bitişik, delik yok
+    const found = findViolations(d, buildIndex(d));
+    expect(found.some((x) => x.rule === 'maxGapsTeacher')).toBe(false);
   });
 });

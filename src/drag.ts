@@ -28,6 +28,9 @@ export interface DragData {
   rowId: string;
   /** How many cells it will cover. */
   blockSize: number;
+  /** The day's hour count — the same for every day, needed to clamp a drop
+   * near the end of the day (see `clampToDay`). */
+  hourCount: number;
   /**
    * `${day}|${hour}` -> verdict. `blocked === null` means droppable.
    *
@@ -70,6 +73,19 @@ const HL_BLOCKED = "drop-blocked";
 const PV_OK = "can-ok";
 const PV_WARN = "can-warn";
 const PV_NO = "can-no";
+
+/**
+ * A block keeps its full length. "2 derslik bir blok kesinlikle 1 ders değil
+ * 2 derstir" — the cell under the cursor used to be read as the block's
+ * START no matter what, so hovering the day's LAST hour with a two-hour
+ * block always failed (it would need an hour past the end of the day) even
+ * though the block plainly fits in the day's last two hours. This reads a
+ * cell too close to the end as the last start that still lets the whole
+ * block land inside the day, instead of refusing on that boundary technicality.
+ */
+function clampToDay(hour: number, blockSize: number, hourCount: number): number {
+  return hour + blockSize > hourCount ? Math.max(0, hourCount - blockSize) : hour;
+}
 
 /** The grid scrolls while the cursor is this close to an edge. */
 const EDGE = 56;
@@ -224,14 +240,20 @@ export function useDrag(
     // What it marks is DROP POINTS, not covered cells — the map is keyed by the
     // block's START. For a two-hour block those genuinely differ, and the strong
     // highlight under the cursor is the one that shows the span.
+    //
+    // The day's own last (blockSize - 1) cells are looked up through
+    // `clampToDay` rather than by their own raw hour: read literally, the
+    // day's last empty hour is always a "dayEnd" rejection for anything wider
+    // than one hour, which painted it red even where dropping there actually
+    // succeeds (the block lands a bit earlier and still covers that hour).
     const targetRow = document.querySelector<HTMLElement>("tr.target-row");
     if (targetRow !== null) {
       for (const cell of targetRow.querySelectorAll<HTMLElement>(
         "td[data-day]",
       )) {
-        const verdict = dragging.map.get(
-          `${cell.dataset["day"]}|${cell.dataset["hour"]}`,
-        );
+        const rawHour = Number(cell.dataset["hour"]);
+        const hour = clampToDay(rawHour, dragging.blockSize, dragging.hourCount);
+        const verdict = dragging.map.get(`${cell.dataset["day"]}|${hour}`);
         const cls =
           verdict === undefined || verdict.blocked !== null
             ? PV_NO
@@ -297,7 +319,14 @@ export function useDrag(
 
       const scrolled = scrollAtEdge(x, y);
 
-      const target = findTarget(x, y);
+      // The raw cell under the cursor, clamped so a block being placed near
+      // the end of the day is read by the last start that still fits it
+      // whole rather than by the literal hour the pointer sits over.
+      const raw = findTarget(x, y);
+      const target =
+        raw === null
+          ? null
+          : { day: raw.day, hour: clampToDay(raw.hour, d.blockSize, d.hourCount) };
       const signature = target === null ? "" : `${target.day}|${target.hour}`;
       // If it scrolled, the cell under the cursor may have changed; look again.
       if (signature !== lastTarget.current || scrolled) {
@@ -364,7 +393,11 @@ export function useDrag(
 
     const onUp = (e: PointerEvent) => {
       const d = data.current;
-      const target = findTarget(e.clientX, e.clientY);
+      const raw = findTarget(e.clientX, e.clientY);
+      const target =
+        raw === null || d === null
+          ? null
+          : { day: raw.day, hour: clampToDay(raw.hour, d.blockSize, d.hourCount) };
       // A warning does not stop the drop; only `blocked` does.
       if (
         d !== null &&

@@ -152,12 +152,22 @@ export interface Bell {
   longBreakMinutes: number; // 30
 }
 
-/** School-wide defaults. 0 means "no limit" everywhere. */
+/**
+ * School-wide defaults. 0 means "no limit" everywhere — EXCEPT the two gap
+ * fields below, where 0 is a real, commonly-wanted number ("no gaps at all")
+ * and whether the rule bites at all is decided by the LEVEL alone
+ * (rules.ts: gapRuleActive). Documented here because it is the one place in
+ * this interface where "0" does not mean the same thing twice.
+ */
 export interface Limits {
   maxConsecutive: number;
   maxPerDay: number;
   minPerDay: number;
   maxSameLessonPerDay: number;
+  /** Free hours a TEACHER may have between the first and last lesson of a day. */
+  maxGapsTeacher: number;
+  /** The same for a CLASS. */
+  maxGapsClass: number;
 }
 
 export type RuleName = keyof Limits;
@@ -230,5 +240,9 @@ export interface ProgramVariant {
  * v11: ClassGroup.maxSameLessonPerDay — the daily limit gained a middle layer.
  * v12: placements/pinned moved into named alternative programs.
  * v13: supported blocks are 2 or 3 hours; each old 4 becomes 3 plus an implied single.
+ * v14: Limits.maxGapsTeacher / maxGapsClass — a window (boşluk) rule, "Kapalı /
+ *      Uyar" only. Like minPerDay it cannot block a drop while placing (every
+ *      hour of a day is a gap violation until the day is full), so it only
+ *      ever shows up in findViolations().
  */
-export const SCHEMA_VERSION = 13;
+export const SCHEMA_VERSION = 14;

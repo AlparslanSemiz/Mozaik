@@ -1,8 +1,15 @@
 // Soft rules: the limit boxes my father fills in (max consecutive, max/min per
-// day, max hours of one lesson per day). PURE functions, every export tested.
+// day, max hours of one lesson per day, gap between lessons). PURE functions,
+// every export tested.
 //
-// A limit of 0 means "no limit". A teacher's own box may be null, which means
-// "use the school-wide default" — so nothing has to be typed 25 times.
+// A limit of 0 means "no limit" — EXCEPT the two gap rules (maxGapsTeacher /
+// maxGapsClass, v14), where 0 is a real, commonly-wanted number ("no gaps at
+// all") and `gapRuleActive` decides activity from the level alone. Documented
+// on `Limits` itself (types.ts) and re-said here because it is the one
+// exception a reader of this file would otherwise assume away.
+//
+// A teacher's own box may be null, which means "use the school-wide default"
+// — so nothing has to be typed 25 times.
 //
 // Only the TYPE Index comes from constraints.ts (erased at compile time), so
 // there is no runtime import cycle.
@@ -70,6 +77,15 @@ export function ruleActive(d: State, key: RuleName, limit: number): boolean {
   return limit > 0 && ruleLevel(d, key) !== 'off';
 }
 
+/**
+ * The gap rules' own version of `ruleActive`. They do NOT require `limit > 0`:
+ * 0 is a real answer here ("no gaps at all"), not "no limit" — types.ts says so
+ * on `Limits` itself. Whether the rule bites is decided by the level alone.
+ */
+export function gapRuleActive(d: State, key: 'maxGapsTeacher' | 'maxGapsClass'): boolean {
+  return ruleLevel(d, key) !== 'off';
+}
+
 // ------------------------------------------------------------------ counting
 
 const busy = (ix: Index, teacherId: Id, day: number, hour: number): boolean =>
@@ -134,6 +150,58 @@ export function lessonDayCount(
     if (activePlacements(d)[placementKey(lesson.classId, day, h)] === lesson.id) n++;
   }
   return n;
+}
+
+// ---------------------------------------------------------------------- gaps
+//
+// A GAP (boşluk, pencere) is a free hour with a busy hour on BOTH sides of it,
+// on one day. The edges are deliberately not gaps: an empty first period is a
+// late start and an empty last period is an early finish, and neither is what
+// anybody complains about. Somebody who comes in at 09:00, teaches, waits an
+// hour doing nothing and teaches again is.
+//
+// ONE definition, three readers: the teacher rule, the class rule, and
+// `gridQuality()` in worlds.ts, which is how the solver's output is measured.
+// Two definitions of "gap" would be two different truths about the same week.
+
+/** The primitive. `isBusy(hour)` answers for one day. */
+export function gapsBetween(isBusy: (hour: number) => boolean, hourCount: number): number {
+  let first = -1;
+  let last = -1;
+  for (let h = 0; h < hourCount; h++) {
+    if (!isBusy(h)) continue;
+    if (first < 0) first = h;
+    last = h;
+  }
+  if (first < 0) return 0;
+
+  let gaps = 0;
+  for (let h = first + 1; h < last; h++) if (!isBusy(h)) gaps++;
+  return gaps;
+}
+
+/** Free hours between this teacher's first and last lesson on one day. */
+export function teacherDayGaps(
+  ix: Index,
+  teacherId: Id,
+  day: number,
+  hourCount: number,
+): number {
+  return gapsBetween((h) => busy(ix, teacherId, day, h), hourCount);
+}
+
+/** Free hours between this class's first and last lesson on one day. */
+export function classDayGaps(
+  d: State,
+  classId: Id,
+  day: number,
+  hourCount: number,
+): number {
+  const placements = activePlacements(d);
+  return gapsBetween(
+    (h) => placements[placementKey(classId, day, h)] !== undefined,
+    hourCount,
+  );
 }
 
 // ---------------------------------------------------------------- violations
@@ -226,6 +294,58 @@ export function findViolations(d: State, ix: Index): Violation[] {
           },
         ),
       });
+    }
+  }
+
+  // Gap (boşluk) rules. Like minPerDay above, these can only ever be found
+  // HERE: while a day is half-placed every hour still open reads as a gap, so
+  // neither one could ever block a drop (types.ts, v14). `gapRuleActive` — not
+  // `ruleActive` — because 0 is a real limit for these two, not "off".
+  if (gapRuleActive(d, 'maxGapsTeacher')) {
+    const limit = d.settings.limits.maxGapsTeacher;
+    for (const teacher of d.teachers) {
+      for (const [day, dayInfo] of d.settings.days.entries()) {
+        const gaps = teacherDayGaps(ix, teacher.id, day, hourCount);
+        if (gaps <= limit) continue;
+        out.push({
+          key: `${teacher.id}|${day}|maxGapsTeacher`,
+          rule: 'maxGapsTeacher',
+          level: ruleLevel(d, 'maxGapsTeacher'),
+          message: t(
+            '{kim} {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.',
+            {
+              kim: teacher.short,
+              gun: dayLabel(dayInfo.name),
+              olan: gaps,
+              sinir: limit,
+            },
+          ),
+        });
+      }
+    }
+  }
+
+  if (gapRuleActive(d, 'maxGapsClass')) {
+    const limit = d.settings.limits.maxGapsClass;
+    for (const group of d.classes) {
+      for (const [day, dayInfo] of d.settings.days.entries()) {
+        const gaps = classDayGaps(d, group.id, day, hourCount);
+        if (gaps <= limit) continue;
+        out.push({
+          key: `${group.id}|${day}|maxGapsClass`,
+          rule: 'maxGapsClass',
+          level: ruleLevel(d, 'maxGapsClass'),
+          message: t(
+            '{sinif} sınıfı {gun} günü dersleri arasında {olan} saat boşlukta, en fazla {sinir} saat isteniyor.',
+            {
+              sinif: group.name,
+              gun: dayLabel(dayInfo.name),
+              olan: gaps,
+              sinir: limit,
+            },
+          ),
+        });
+      }
     }
   }
 

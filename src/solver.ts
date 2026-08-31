@@ -508,8 +508,16 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
    *   1. days where this CLASS has least of this lesson already — spread the
    *      week rather than stacking six hours of maths on Tuesday
    *   2. days where the TEACHER is least loaded
-   *   3. cells that break no "Uyar" rule (only computed when one is set)
-   *   4. earlier hours: the school day starts at 09:00 and fills downward
+   *   3. cells that ABUT an hour the class already has filled — Deney B
+   *      (STATUS 2026-08-29): the spreading rules above are what make the
+   *      week look taught-on-every-day, and they are also what guarantees a
+   *      gap once the week is 30% full. This key does not touch them — it
+   *      only breaks a tie BETWEEN days the first two keys already called
+   *      equal, and a cell that leans on a neighbour cannot leave a hole
+   *      next to itself. MEASURED (STATUS): sınıf deliği 268 → 251, delikli
+   *      gün 85 → 72, blocks/nodes/time unchanged on the sample school.
+   *   4. cells that break no "Uyar" rule (only computed when one is set)
+   *   5. earlier hours: the school day starts at 09:00 and fills downward
    */
   function order(item: Item): number[] {
     const classOnDay = new Array<number>(dayCount).fill(0);
@@ -534,12 +542,28 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       }
     }
 
+    // Deney B: does this start cell sit right against an hour the class is
+    // already IN, on either side? 0 = it abuts one, 1 = it would open a new
+    // island. Read straight off `placements`, the same dictionary blocker()
+    // itself reads — no index rebuild, one lookup on each side.
+    const abuts = (cell: number): number => {
+      const day = Math.floor(cell / hourCount);
+      const hour = cell % hourCount;
+      const classId = item.lesson.classId;
+      const before = hour > 0 && placements[`${classId}|${day}|${hour - 1}`] !== undefined;
+      const after =
+        hour + item.block < hourCount &&
+        placements[`${classId}|${day}|${hour + item.block}`] !== undefined;
+      return before || after ? 0 : 1;
+    };
+
     out.sort((a, b) => {
       const da = Math.floor(a / hourCount);
       const db = Math.floor(b / hourCount);
       return (
         classOnDay[da]! - classOnDay[db]! ||
         teacherOnDay[da]! - teacherOnDay[db]! ||
+        abuts(a) - abuts(b) ||
         (warn.get(a) ?? 0) - (warn.get(b) ?? 0) ||
         a - b
       );
