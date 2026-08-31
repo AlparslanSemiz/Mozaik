@@ -64,7 +64,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
                 yeni_var: false,
                 version: '1.0.0',
                 date: '2026-01-01',
-                exe: 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe',
+                exe: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
                 boyut: 3_742_584,
               };
             }
@@ -72,7 +72,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
               yeni_var: true,
               version: s.version,
               date: s.date,
-              exe: 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Ders-Programi.exe',
+              exe: 'https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe',
               boyut: s.boyut,
             };
           }
@@ -113,7 +113,7 @@ async function openAbout(page: Page) {
   await expect(page.getByRole('heading', { name: 'Sürüm ve güncelleme' })).toBeVisible();
 }
 
-const DAILY = /^ders-programi-\d{4}-\d{2}-\d{2}\.json$/;
+const DAILY = /^Mozaik-\d{4}-\d{2}-\d{2}\.json$/;
 
 test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
   test('tek bir tıklama olmadan ANA dosya ve GÜNÜN yedeği yazılıyor', async ({ page }) => {
@@ -126,7 +126,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     // here ends in ".json".
     await expect
       .poll(async () => Object.keys(await disk(page)), { timeout: 10_000 })
-      .toContain('ders-programi-tumu.json');
+      .toContain('Mozaik-tumu.json');
 
     const written = await disk(page);
     const names = Object.keys(written);
@@ -137,7 +137,7 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     // `?? '{}'` is unreachable — the poll above proved the key is there. It is
     // written that way so a broken run fails on the assertion below rather
     // than inside JSON.parse, where the message names no expectation.
-    const bundle = JSON.parse(written['ders-programi-tumu.json'] ?? '{}');
+    const bundle = JSON.parse(written['Mozaik-tumu.json'] ?? '{}');
     expect(bundle.bundleVersion).toBe(1);
   });
 
@@ -146,13 +146,13 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await open(page);
     await expect
       .poll(async () => Object.keys(await disk(page)), { timeout: 10_000 })
-      .toContain('ders-programi-tumu.json');
+      .toContain('Mozaik-tumu.json');
 
     await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
     await answerDialog(page);
 
     await expect
-      .poll(async () => (await disk(page))['ders-programi-tumu.json'] ?? '', { timeout: 10_000 })
+      .poll(async () => (await disk(page))['Mozaik-tumu.json'] ?? '', { timeout: 10_000 })
       .toContain('Örnek Kurs');
   });
 
@@ -287,7 +287,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     // ...and the folder is still being written to, which is the other half of
     // "çalışmaya devam ediyor".
     await expect
-      .poll(async () => (await disk(page))['ders-programi-tumu.json'] ?? '', { timeout: 10_000 })
+      .poll(async () => (await disk(page))['Mozaik-tumu.json'] ?? '', { timeout: 10_000 })
       .toContain('Örnek Kurs');
   });
 
