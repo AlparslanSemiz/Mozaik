@@ -30,13 +30,13 @@ use std::time::Duration;
 /// The manifest arrives over TLS from GitHub, so the URL inside it is already
 /// ours. Pinning the prefix anyway costs one comparison and closes the only
 /// way a bad manifest could turn into a download from somewhere else.
-const RELEASE_KOK: &str = "https://github.com/AlparslanSemiz/ders-programi/releases/";
+const RELEASE_KOK: &str = "https://github.com/AlparslanSemiz/Mozaik/releases/";
 
 /// Where the newest build always announces itself. `latest/download/` needs no
 /// version number, no token and no API quota; it is a redirect GitHub keeps
 /// pointed at the newest release.
 const MANIFEST_URL: &str =
-    "https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/surum.json";
+    "https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/surum.json";
 
 /// Suffixes hung on the running program's own file name. Appended rather than
 /// swapped into the extension: `Mozaik.exe.yeni` cannot be double-clicked by
@@ -44,7 +44,7 @@ const MANIFEST_URL: &str =
 ///
 /// "The running program's OWN file name" is what makes the rename to Mozaik
 /// harmless for copies already out there: a machine holding
-/// `Ders-Programi.exe` downloads whatever the manifest points at and swaps it
+/// `Mozaik.exe` downloads whatever the manifest points at and swaps it
 /// into its own name. The file keeps the old name; the program inside it is
 /// the new one.
 const YENI: &str = "yeni";
@@ -304,7 +304,7 @@ mod tests {
 
     impl Scratch {
         fn new(tag: &str) -> Self {
-            let dir = std::env::temp_dir().join(format!("ders-programi-update-{tag}"));
+            let dir = std::env::temp_dir().join(format!("Mozaik-update-{tag}"));
             let _ = fs::remove_dir_all(&dir);
             fs::create_dir_all(&dir).unwrap();
             Scratch(dir)
@@ -374,7 +374,7 @@ mod tests {
         // v2.0.0 renames the delivery file; the gate must not care.
         assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Mozaik.exe")).is_ok());
         for bad in [
-            "http://github.com/AlparslanSemiz/ders-programi/releases/latest/download/x.exe",
+            "http://github.com/AlparslanSemiz/Mozaik/releases/latest/download/x.exe",
             "https://example.com/x.exe",
             "https://github.com/baskasi/depo/releases/latest/download/x.exe",
             "file:///etc/passwd",
