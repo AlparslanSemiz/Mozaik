@@ -13,6 +13,7 @@
 import App from './App';
 import { DialogProvider } from './components/Dialogs';
 import { LangProvider } from './components/T';
+import { ShortcutsHelpProvider } from './components/ShortcutsHelp';
 import { ToastProvider } from './components/Toasts';
 import './lang/en';
 import './lang/de';
@@ -27,7 +28,9 @@ export default function Root() {
     <LangProvider>
       <DialogProvider>
         <ToastProvider>
-          <App />
+          <ShortcutsHelpProvider>
+            <App />
+          </ShortcutsHelpProvider>
         </ToastProvider>
       </DialogProvider>
     </LangProvider>

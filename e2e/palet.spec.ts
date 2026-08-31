@@ -190,6 +190,48 @@ test.describe('54. Klavye kısayolları', () => {
     // Six sections and the actions are there even with nothing entered.
     expect(await page.locator('.palette-row').count()).toBeGreaterThan(6);
   });
+
+  test('kısayol yardımı: üst çubuktaki düğme açıyor, gerçek kısayolları listeliyor, Escape kapatıyor', async ({
+    page,
+  }) => {
+    await open(page);
+    const dlg = page.locator('.sheet', { hasText: 'Klavye kısayolları' });
+    await expect(dlg).toBeHidden();
+
+    await page.getByRole('button', { name: 'Klavye kısayolları', exact: true }).click();
+    await expect(dlg).toBeVisible();
+    await expect(dlg).toContainText('Ctrl+K');
+    await expect(dlg).toContainText('Alt+1..7');
+
+    await page.keyboard.press('Escape');
+    await expect(dlg).toBeHidden();
+  });
+
+  test("kısayol yardımı: '?' tuşu açıyor, metin kutusu odaktayken açmıyor", async ({ page }) => {
+    await open(page);
+    const dlg = page.locator('.sheet', { hasText: 'Klavye kısayolları' });
+
+    await page.keyboard.press('Shift+?');
+    await expect(dlg).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dlg).toBeHidden();
+
+    // A text box in focus owns its own '?' — the search box is the
+    // simplest one already on screen, via the palette.
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('?');
+    await expect(dlg).toBeHidden();
+  });
+
+  test('kısayol yardımı: Ctrl+K paletinden de açılıyor', async ({ page }) => {
+    await open(page);
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Ara veya komut yaz').fill('kısayol');
+    await page.keyboard.press('Enter');
+
+    await expect(page.locator('.palette')).toBeHidden();
+    await expect(page.locator('.sheet', { hasText: 'Klavye kısayolları' })).toBeVisible();
+  });
 });
 
 test.describe('55. Durum çipi — boş proje', () => {

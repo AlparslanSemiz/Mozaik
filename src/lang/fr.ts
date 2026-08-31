@@ -130,6 +130,26 @@ const FR: Sozluk = {
   "Dosyadan aç": "Ouvrir depuis un fichier",
   "Ara ve git": "Rechercher et aller",
   "Ara ve git (Ctrl+K)": "Rechercher et aller (Ctrl+K)",
+  "Klavye kısayolları": "Raccourcis clavier",
+  "Klavye kısayolları (?)": "Raccourcis clavier (?)",
+  // -------------------------------------------------- ShortcutsHelp.tsx
+  "Genel kısayollar": "Général",
+  "Komut paletini aç/kapat": "Afficher ou masquer la palette de commandes",
+  "Bir sekmeye git": "Aller à une section",
+  "Bu ekranı aç": "Ouvrir cet écran",
+  "İptal et veya kapat": "Annuler ou fermer",
+  "Odaklı dersi havuza kaldır": "Renvoyer le cours ciblé dans le réservoir",
+  "Odaklı kartın sağ tık menüsünü aç":
+    "Ouvrir le menu contextuel de la carte ciblée",
+  Listeler: "Listes",
+  "Yeni satır ekle veya düzenlemeyi onayla":
+    "Ajouter une ligne ou confirmer la modification",
+  "Tutamaktan bir satırı sırada taşı":
+    "Déplacer une ligne dans l’ordre depuis sa poignée",
+  "Satırı listenin başına veya sonuna taşı":
+    "Déplacer la ligne au début ou à la fin de la liste",
+  Diyaloglar: "Dialogues",
+  Onayla: "Confirmer",
   "Araç şeridi": "Barre d’outils",
   "Araç şeridini gizle, ızgaraya bir satır daha kalsın":
     "Masquer la barre et laisser une ligne de plus à la grille",
@@ -506,6 +526,13 @@ const FR: Sozluk = {
     "Pour l’instant, il n’est conservé que dans le navigateur de cet ordinateur.",
   "Sürüm ve güncelleme": "Version et mise à jour",
   Sürüm: "Version",
+  Yenilikler: "Nouveautés",
+  "Eski sürümler": "Versions précédentes",
+  // src/changelog.ts — release-note bullets, translated like any other UI copy
+  'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
+    "Un écran d'aide pour les raccourcis clavier a été ajouté (barre supérieure, Ctrl+K ou la touche ?).",
+  'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
+    "Ce panneau des nouveautés a été ajouté à Paramètres → À propos.",
   "Nasıl açıldı": "Comment il a été ouvert",
   Adres: "Adresse",
   "Güncellemeleri denetle": "Rechercher des mises à jour",
@@ -959,6 +986,7 @@ const FR: Sozluk = {
   "hareket (animasyon) tercihi": "préférence d’animation",
   "örnek veri satırı görüldü mü": "si la ligne de données d’exemple a été vue",
   "kâğıt seçenekleri": "options du papier",
+  "görülen sürüm notu": "la version des notes de version vue en dernier",
 
   // src/rules.ts
   "{kim} {gun} günü": "{kim} le {gun}",

@@ -1,5 +1,5 @@
 import { Activity, useCallback, useRef, useState } from "react";
-import { Search as SearchIcon } from "lucide-react";
+import { Keyboard, Search as SearchIcon } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import Commands from "./components/Commands";
 import { health } from "./feasibility";
@@ -9,7 +9,7 @@ import { useDialogs } from "./components/Dialogs";
 import { useToast } from "./components/Toasts";
 import type React from "react";
 import { bundleVersionOf, BUNDLE_VERSION } from "./bundle";
-import { storageWorks, useStore, downloadBackup, parseState } from "./store";
+import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from "./store";
 import {
   applyMotion,
   applyRibbon,
@@ -50,6 +50,8 @@ import type { Excluded } from "./components/Print";
 import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from "./programMask";
 import type { ProgramMask } from "./programMask";
 import Settings from "./components/settings";
+import { useShortcutsHelp } from "./components/ShortcutsHelp";
+import { hasUnseenChangelog } from "./changelog";
 
 /**
  * The six sections, along the TOP — on the same row as the document identity
@@ -609,6 +611,12 @@ export default function App() {
   const { confirm, alert } = useDialogs();
   const notify = useToast();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const openShortcuts = useShortcutsHelp();
+  // Read once at mount (a fresh profile has never seen any version, so this
+  // is `true` on first run — that's correct, there IS an unread entry). A
+  // plain read rather than a subscription: `Data.tsx`'s `Changelog` panel
+  // clears it through `onChangelogSeen` below, which is the only writer.
+  const [changelogUnseen, setChangelogUnseen] = useState(hasUnseenChangelog);
 
   // One line that says whether the timetable is in trouble, on screen in every
   // tab. Kontrol could always answer this and that was the problem: it is a
@@ -637,11 +645,25 @@ export default function App() {
           e.preventDefault();
           goTab(next.id);
         }
+        return;
+      }
+      // '?' opens the shortcuts help. Guarded the same way Ctrl+Z is
+      // (store.ts's isTextInput): it is a printable character, and without
+      // the guard it would fire while typing a search or a name.
+      if (
+        e.key === "?" &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !isTextInput(e.target)
+      ) {
+        e.preventDefault();
+        openShortcuts();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [goTab]);
+  }, [goTab, openShortcuts]);
 
   const paletteActions = useMemo(
     () => [
@@ -685,8 +707,14 @@ export default function App() {
         hint: t("Ayarlar → Görünüm"),
         run: toggleMotion,
       },
+      {
+        id: "shortcuts",
+        label: t("Klavye kısayolları"),
+        hint: "?",
+        run: openShortcuts,
+      },
     ],
-    [state, theme, ribbon, motion, solver, goTab, notify, t, programMask],
+    [state, theme, ribbon, motion, solver, goTab, notify, t, programMask, openShortcuts],
   );
 
   function toggleRibbon() {
@@ -825,6 +853,13 @@ export default function App() {
             >
               {dest.icon}
               <span className="tab-label">{t(dest.label)}</span>
+              {/* An unread release note. Presence only, no count — "something
+                  changed" is the whole message, the panel says what. Clears
+                  the moment Ayarlar → Hakkında is actually opened
+                  (`Changelog`'s mount effect), not on a bare tab click. */}
+              {dest.id === "settings" && changelogUnseen && (
+                <span className="tab-dot" aria-hidden="true" />
+              )}
             </button>
           ))}
         </nav>
@@ -965,6 +1000,15 @@ export default function App() {
           onClick={() => setPaletteOpen(true)}
         >
           <SearchIcon size={18} strokeWidth={2} />
+        </button>
+
+        <button
+          className="btn icon"
+          aria-label={t("Klavye kısayolları")}
+          title={t("Klavye kısayolları (?)")}
+          onClick={openShortcuts}
+        >
+          <Keyboard size={18} strokeWidth={2} />
         </button>
 
         <button
@@ -1224,6 +1268,7 @@ export default function App() {
                   motion={motion}
                   setMotion={setMotion}
                   section={ui.section}
+                  onChangelogSeen={() => setChangelogUnseen(false)}
                 />
               )}
             </main>

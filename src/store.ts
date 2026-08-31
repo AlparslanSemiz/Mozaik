@@ -703,8 +703,10 @@ function initialBox(): Box {
   };
 }
 
-/** While typing in a text box let the browser handle Ctrl+Z, do not grab it. */
-function isTextInput(target: EventTarget | null): boolean {
+/** While typing in a text box let the browser handle Ctrl+Z, do not grab it.
+    Exported: App.tsx's own global shortcuts (the '?' help key) need the same
+    guard, and a second copy of a four-line rule is still a second copy. */
+export function isTextInput(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable;

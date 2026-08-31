@@ -12,7 +12,7 @@
 // "it is saved in the browser" does not tell anyone that clearing browsing
 // data destroys it.
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDialogs } from "../Dialogs";
 import { useLoadSample } from "../useSample";
 import type React from "react";
@@ -33,7 +33,8 @@ import type { FolderRun } from "../../useFolder";
 import type { UpdateRun } from "../../update";
 import { SITE_ADRESI } from "../../update";
 import { EXE_FOLDER } from "../../desktop";
-import { surumEtiketi } from "../../version";
+import { surumEtiketi, tarihYazisi } from "../../version";
+import { markChangelogSeen, SURUM_NOTLARI } from "../../changelog";
 import Plans from "./Plans";
 import { T, useT } from '../T';
 
@@ -44,6 +45,10 @@ interface Props {
   plans: PlanControls;
   folder: FolderRun;
   update: UpdateRun;
+  /** Clears the Ayarlar tab's unseen-changelog dot. Owned by App: the tab is
+      up there, and the dot has to go dark the moment this panel is opened,
+      not only on the next full re-render. */
+  onChangelogSeen: () => void;
   /**
    * WHICH HALF. Ayarlar's "Veri" was seven panels and about nine hundred
    * lines — the plan library, a bundle file, a folder, a reset, a version, a
@@ -282,6 +287,70 @@ function Build({ update }: { update: UpdateRun }) {
   );
 }
 
+/**
+ * "Yenilikler" (2026-08-31, TASKS §2 B2.9).
+ *
+ * A SIBLING of `Build`, not a section inside it: `Build`'s own heading
+ * ('Sürüm ve güncelleme') is scoped by four E2E specs and its doc comment
+ * above already spells out pitfall 49/74 — folding new content into that
+ * function risks a new heading landing inside `buildPanel()`'s locator, or
+ * colliding with one three pixels over. A panel of its own keeps both clean.
+ *
+ * The current release is open; older ones sit in a closed `<details>` —
+ * "arşiv de olabilir" was the reader's own line, and the newest entry is
+ * what somebody actually came here to read, not a list they scroll past.
+ *
+ * Marks itself seen on mount, not on click: opening Hakkında and reading
+ * this far down the panel already answers "what changed", and gating the
+ * dot behind a second click would leave it lit under an unread tab.
+ */
+function Changelog({ onSeen }: { onSeen: () => void }) {
+  const t = useT();
+  const [entry, ...older] = SURUM_NOTLARI;
+
+  useEffect(() => {
+    if (entry !== undefined) markChangelogSeen(entry.version);
+    onSeen();
+    // Only at mount: `onSeen` is a stable setter from App, and re-running
+    // this on every render would fight a dot that a DIFFERENT tab just lit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (entry === undefined) return null;
+
+  return (
+    <div className="panel">
+      <h2>{t('Yenilikler')}</h2>
+      <p className="hint">
+        <b>{surumEtiketi({ version: entry.version, date: entry.date, commit: '' })}</b>
+      </p>
+      <ul>
+        {entry.items.map((line) => (
+          <li key={line}>{t(line)}</li>
+        ))}
+      </ul>
+
+      {older.length > 0 && (
+        <details>
+          <summary>{t('Eski sürümler')}</summary>
+          {older.map((old) => (
+            <div key={old.version}>
+              <p className="hint">
+                <b>v{old.version} · {tarihYazisi(old.date)}</b>
+              </p>
+              <ul>
+                {old.items.map((line) => (
+                  <li key={line}>{t(line)}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </details>
+      )}
+    </div>
+  );
+}
+
 /** The site and the local install: a service worker does the work. */
 function SiteUpdate({ update }: { update: UpdateRun }) {
   const t = useT();
@@ -379,6 +448,7 @@ export default function Data({
   plans,
   folder,
   update,
+  onChangelogSeen,
   part,
 }: Props) {
   const t = useT();
@@ -715,6 +785,7 @@ export default function Data({
     <div className="cols">
       <div>
         <Build update={update} />
+        <Changelog onSeen={onChangelogSeen} />
         {planDataPanel}
       </div>
       <aside>{wherePanel}</aside>

@@ -237,16 +237,24 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       ölçüldü (CLAUDE.md "İlke 7"); eksik olan geri kalan üç ekranda (27"
       2K, MacBook M1 13", ThinkPad 16") aynı ölçümün **tekrarlanması** —
       `npm run ekran` + gerçek pikselde bakmak, tahmin değil.
-- [ ] **B2.9 Hakkında bölümüne "what's new" — sürüm değişiklik notu.** Senin
-      satırın: *"Ayrıca hakkında kısmında what's new gibi olmalı. babam her
-      güncelleme alındığında neyin değiştiğini soruyor ben de pek
-      hatırlamıyorum. orada nelerin değiştiği nelerin eklendiği yazmalı ve
-      arşiv de olabilir."* `Data.tsx`'in Hakkında bölümü şu an yalnız sürüm
-      numarasını ve güncelleme durumunu gösteriyor; her sürümün kendi kısa
-      değişiklik notu (ve eskilerin arşivi) eklenecek. Kaynağı büyük
-      ihtimalle `.github/surum-notu.md`'nin kendisi — ikinci bir yerde aynı
-      metni tutmak tuzak 77'nin ("tek kaynak" iddiası ölçülmeden yazılmaz)
-      ailesine girer, o yüzden veri **tek yerden** okunacak.
+- [x] **B2.9 Hakkında bölümüne "what's new" — YAPILDI (2026-08-31, kırk
+      beşinci oturum).** Senin satırın: *"Ayrıca hakkında kısmında what's new
+      gibi olmalı. babam her güncelleme alındığında neyin değiştiğini
+      soruyor ben de pek hatırlamıyorum. orada nelerin değiştiği nelerin
+      eklendiği yazmalı ve arşiv de olabilir."*
+      **`.github/surum-notu.md` kaynak DEĞİL çıktı** — ölçüldü: tek seferlik
+      statik metin (indirme/kurulum talimatları), birikimli değil, ve
+      `dist/`'e hiç girmiyor, yani `file://` altında zaten okunamaz (ilke 3).
+      Gerçek kaynak `src/changelog.ts` — `lang/*.ts` deseninde gömülü, elle
+      düzenlenen tek bir veri dosyası. `Data.tsx`'e `Build`'in **yanına**
+      ayrı bir panel eklendi (içine değil — `Build`'in başlığı dört E2E
+      dosyasının locator'ı, tuzak 49/74). Güncel sürüm açık, eskiler
+      `<details>` ile kapalı arşivde. Ayarlar sekmesinde görülmemiş-yenilik
+      noktası (`hasUnseenChangelog()`, `ders-programi-yenilik-gorulen`),
+      panel açılınca kalıcı olarak siliniyor. `scripts/yayinla.mjs`'e
+      dördüncü bir kapı eklendi: `SURUM_NOTLARI[0].version` yayınlanan
+      sürümle eşleşmiyorsa yayın durur. `e2e/surum.spec.ts` 79, dört dilde
+      çeviri.
 - [ ] **B2.10 Her Ayarlar bölümünün kendi alan/seçenek görünürlüğü —
       KALICI, KULLANICIYA AÇIK ÖZELLİK.** Senin satırın: *"Ayarlarda her
       sectionun görüntüsü değişebiliyor olsun. Seçenekler olsun açma kapama
@@ -498,9 +506,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **B6.3 A/B haftası** — sen *"olabilir"* dedin; **B6.1'den sonra**.
 - [ ] **B6.4 Ders başına derslik** — önceliklendirme, paylaşılan derslik,
       kapasite. (aSc kova 3.)
-- [ ] **B6.5 Ders kopyalama · toplu ders ekleme · ad biçimi · kısayol listesi ·
-      iki programı karşılaştırma · ders ızgarası toplu giriş.** (aSc kova 4;
-      altısı da küçük ve birbirinden bağımsız — bir "boş vakit" turu.)
+- [ ] **B6.5 Ders kopyalama · toplu ders ekleme · ad biçimi · ~~kısayol
+      listesi~~ · iki programı karşılaştırma · ders ızgarası toplu giriş.**
+      (aSc kova 4; altısı da küçük ve birbirinden bağımsız — bir "boş vakit"
+      turu.) **Kısayol listesi bitti (2026-08-31, kırk beşinci oturum):**
+      `src/components/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
+      paleti, dört dilde çeviri, `e2e/palet.spec.ts` 54. Kalan beşi açık.
 - [ ] **B6.6 Kapanırken kaydedilmemiş değişiklik uyarısı — muhtemelen
       GEREKMİYOR.** Her değişiklik 400 ms gecikmeyle kaydediliyor ve sekme
       kapanışında anında yazılıyor, yani "kaydedilmemiş" durum pratikte

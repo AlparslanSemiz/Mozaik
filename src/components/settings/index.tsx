@@ -35,6 +35,8 @@ interface Props extends PanelProps {
   folder: FolderRun;
   /** Whether a newer build has taken over. Owned by App: the strip is up there. */
   update: UpdateRun;
+  /** Clears the Ayarlar tab's unseen-changelog dot. Owned by App. */
+  onChangelogSeen: () => void;
   /** A machine preference, so it comes down from App, not out of `State`. */
   scale: number;
   setScale: (next: number) => void;
@@ -72,6 +74,7 @@ export default function Settings({
   setMotion,
   section,
   update,
+  onChangelogSeen,
 }: Props) {
 
   return (
@@ -103,6 +106,7 @@ export default function Settings({
           plans={plans}
           folder={folder}
           update={update}
+          onChangelogSeen={onChangelogSeen}
           part={section}
         />
       )}

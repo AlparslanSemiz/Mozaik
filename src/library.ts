@@ -12,6 +12,7 @@
 
 import { t } from './i18n';
 import { isDesktop } from './desktop';
+import { CHANGELOG_SEEN_KEY } from './changelog';
 import type { Id } from './types';
 
 /**
@@ -396,6 +397,11 @@ export function storageReport(lib: Library): StorageReport {
     key: `${BASE_KEY}-baski`,
     what: t('kâğıt seçenekleri'),
     chars: charsAt(`${BASE_KEY}-baski`),
+  });
+  rows.push({
+    key: CHANGELOG_SEEN_KEY,
+    what: t('görülen sürüm notu'),
+    chars: charsAt(CHANGELOG_SEEN_KEY),
   });
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };

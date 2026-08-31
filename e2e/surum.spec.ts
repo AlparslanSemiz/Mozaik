@@ -94,3 +94,43 @@ test.describe('78. Sürüm ve güncelleme', () => {
     await expect(page.locator('.update-bar')).toHaveCount(0);
   });
 });
+
+/** Scoped by heading, the same discipline `buildPanel()` documents above —
+    a `.panel` beside this one is not this panel (pitfall 49/74). */
+function changelogPanel(page: Page) {
+  return page
+    .locator('.panel', { has: page.getByRole('heading', { name: 'Yenilikler' }) })
+    .last();
+}
+
+test.describe('79. Yenilikler', () => {
+  test('Ayarlar → Hakkında güncel sürümün maddelerini gösteriyor, eskiler kapalı arşivde', async ({
+    page,
+  }) => {
+    await open(page);
+    await openSettings(page, 'Hakkında');
+
+    const panel = changelogPanel(page);
+    await expect(panel).toBeVisible();
+    await expect(panel).toContainText('Klavye kısayolları için bir yardım ekranı eklendi');
+
+    // A fresh profile has exactly one release logged; nothing to archive yet.
+    await expect(panel.locator('details')).toHaveCount(0);
+  });
+
+  test('Ayarlar sekmesindeki nokta, panel açılınca kayboluyor ve kalıcı', async ({ page }) => {
+    await open(page);
+    const dot = page.locator('.tab[data-section="settings"] .tab-dot');
+    // A fresh profile has never seen any version, so the dot starts lit.
+    await expect(dot).toBeVisible();
+
+    await openSettings(page, 'Hakkında');
+    await expect(dot).toBeHidden();
+
+    // ...and the mark is written, not merely the in-memory state: it survives
+    // the reload the way the sample-data hint does (theme.ts's INTRO_KEY).
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
+    await expect(dot).toBeHidden();
+  });
+});

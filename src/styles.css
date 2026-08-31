@@ -988,6 +988,7 @@ textarea {
 }
 
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
   /* Centred, because the box is now wider than the label on six of the seven
@@ -1019,6 +1020,19 @@ textarea {
 
 .tab-label {
   white-space: nowrap;
+}
+
+/* An unseen release note. Absolutely positioned so it adds no WIDTH to the
+   tab — the %150 tabstrip fit is measured to the pixel (pitfall 48), and an
+   inline dot would have been one more thing to re-measure. */
+.tab-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--r-full);
+  background: var(--accent);
 }
 
 /* Hovering a tab shows THAT tab's colour, and shows it as a glow rather than

@@ -131,6 +131,25 @@ const EN: Sozluk = {
   "Dosyadan aç": "Open from file",
   "Ara ve git": "Search and go",
   "Ara ve git (Ctrl+K)": "Search and go (Ctrl+K)",
+  "Klavye kısayolları": "Keyboard shortcuts",
+  "Klavye kısayolları (?)": "Keyboard shortcuts (?)",
+  // -------------------------------------------------- ShortcutsHelp.tsx
+  "Genel kısayollar": "General",
+  "Komut paletini aç/kapat": "Toggle the command palette",
+  "Bir sekmeye git": "Go to a section",
+  "Bu ekranı aç": "Open this screen",
+  "İptal et veya kapat": "Cancel or close",
+  "Odaklı dersi havuza kaldır": "Send the focused lesson back to the tray",
+  "Odaklı kartın sağ tık menüsünü aç":
+    "Open the focused card's right-click menu",
+  Listeler: "Lists",
+  "Yeni satır ekle veya düzenlemeyi onayla":
+    "Add a new row or confirm an edit",
+  "Tutamaktan bir satırı sırada taşı": "Move a row in order, from its handle",
+  "Satırı listenin başına veya sonuna taşı":
+    "Move the row to the top or bottom of the list",
+  Diyaloglar: "Dialogs",
+  Onayla: "Confirm",
   "Araç şeridi": "Tool strip",
   "Araç şeridini gizle, ızgaraya bir satır daha kalsın":
     "Hide the tool strip and leave the grid one more row",
@@ -499,6 +518,13 @@ const EN: Sozluk = {
     "Right now it is kept only in this computer's browser.",
   "Sürüm ve güncelleme": "Version and updates",
   Sürüm: "Version",
+  Yenilikler: "What's new",
+  "Eski sürümler": "Older versions",
+  // src/changelog.ts — release-note bullets, translated like any other UI copy
+  'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
+    "A help screen for keyboard shortcuts was added (top bar, Ctrl+K, or the ? key).",
+  'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
+    "This What's new panel was added to Settings → About.",
   "Nasıl açıldı": "How it was opened",
   Adres: "Address",
   "Güncellemeleri denetle": "Check for updates",
@@ -940,6 +966,7 @@ const EN: Sozluk = {
   "hareket (animasyon) tercihi": "motion (animation) preference",
   "örnek veri satırı görüldü mü": "whether the sample-data line has been seen",
   "kâğıt seçenekleri": "paper options",
+  "görülen sürüm notu": "the release notes version last seen",
 
   // src/rules.ts
   "{kim} {gun} günü": "{kim} on {gun}",

@@ -1,7 +1,116 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-31 (kırk dördüncü oturum: B5.6 — bloklu dersin
-crosshair'i ve gün-sonu sürükleme kaydırması düzeltildi)
+Son güncelleme: 2026-08-31 (kırk beşinci oturum: kısayol yardım ekranı ve
+Ayarlar → Hakkında'ya "Yenilikler" paneli)
+
+---
+
+## Kırk beşinci oturum — Kısayol yardımı · Yenilikler paneli (2026-08-31)
+
+İki bağımsız küçük özellik, kullanıcının seçtiği sırayla: TASKS §6 B6.5'in
+"kısayol listesi" maddesi, sonra §2 B2.9 ("what's new"). İkisi de şema
+değiştirmiyor — yalnız UI + bir gömülü veri dosyası + `localStorage` bayrağı.
+
+**Önce bir depo ayrışması bulundu ve düzeltildi.** `git fetch` origin/main'in
+local'den **üç commit ileride** olduğunu gösterdi (`146408f` "sürüm 2.0.5" —
+CLAUDE.md'ye 64 satır ekliyor, `80a9602` v2.0.5, `f5d63eb` v2.0.6) ve local'in
+kırk ikinci/kırk üçüncü oturumları aynı iki numarayı origin'in **farklı** bir
+kırk ikinci oturumuyla ("Depo adı bir adresti" — exe güncellemesinin adres
+kırılmasını düzelten tur) paylaşıyordu. Kullanıcı kararıyla `git pull
+--no-rebase` yapıldı; tek çakışma `docs/STATUS.md`'nin kendi oturum
+numaralarındaydı, elle çözüldü: origin'in oturumu **kırk ikinci** kaldı,
+local'in ikisi **kırk üçüncü** ve **kırk dördüncü** oldu (`TASKS.md`'deki tek
+çapraz referans da güncellendi). `package.json`/`Cargo.toml` artık gerçek
+yayınlanmış sürüm olan **2.0.6**'yı gösteriyor. Birleşmeden sonra 750/750
+birim testi yeşil — birleşme temizdi.
+
+### 1 · Kısayol yardım ekranı — B6.5
+
+`src/components/ShortcutsHelp.tsx`: `useInspect()`/`useLessonEdit()`'in
+deseninde bir `useShortcutsHelp()` + provider, `LessonEdit.tsx`'in Radix
+Dialog kalıbı. İçerik **gerçek** kısayolların elle yazılmış, dört gruplu bir
+tablosu (Genel · Izgara · Listeler · Diyaloglar) — beş ayrı dosyada yaşayan
+`keydown` dinleyicilerinin (App.tsx, store.ts, Grid, useRowOrder.tsx,
+poolSplit.ts, Palette.tsx) bir kopyası, otomatik türetilmiyor.
+
+Üç giriş yolu: üst çubukta Ctrl+K düğmesinin yanında yeni bir simge düğme,
+global `?` tuşu (store.ts'teki `isTextInput` guard'ı `export` edilip
+App.tsx'te de kullanıldı — Ctrl+Z'nin metin kutusu korumasıyla aynı desen),
+ve komut paletine bir "Yap" girdisi. `Root.tsx`'e `ShortcutsHelpProvider`
+`DialogProvider`/`ToastProvider`'ın yanına eklendi.
+
+**Bir i18n çakışması bulundu ve önlendi:** grup başlığı için düz `'Genel'`
+kullanılsaydı sözlükte zaten `'Genel': 'All'` (facet süzgeçlerinden) vardı —
+İngilizce ekranda başlık "All" yazardı. `'Genel kısayollar'` bileşik anahtarı
+kullanıldı. `'Izgara'` (→"Grid") ve `'Kapat'` (→"Close") güvenle yeniden
+kullanıldı, anlamları zaten örtüşüyor.
+
+`e2e/palet.spec.ts`'in mevcut "54. Klavye kısayolları" bloğuna üç test
+eklendi: düğme + Escape, `?` tuşu (ve metin kutusu odaktayken açılmadığı),
+Ctrl+K paletinden erişim.
+
+### 2 · "Yenilikler" — Ayarlar → Hakkında — B2.9
+
+**Plandaki varsayım yanlış çıktı, ölçülerek düzeltildi:** TASKS.md'nin B2.9
+maddesi kaynağın `.github/surum-notu.md` olacağını tahmin ediyordu (tuzak 77
+gerekçesiyle). Dosyanın kendisine bakılınca bu **doğru değildi**: tek
+seferlik statik bir metin (indirme/kurulum talimatları, TR/EN), hiç
+birikmiyor, ve `dist/`'e hiç girmiyor — `file://` altında zaten okunamazdı
+(ilke 3). Gerçek kaynak yeni bir dosya oldu: `src/changelog.ts`,
+`lang/*.ts` deseninde gömülü ve elle düzenlenen `SURUM_NOTLARI` dizisi.
+
+`changelog.ts` `library.ts`'ten `BASE_KEY` **almıyor** — tersi bir döngü
+olurdu (`library.ts` zaten `changelog.ts`'ten `CHANGELOG_SEEN_KEY` alıyor,
+`storageReport`'a satır eklemek için). Anahtar `theme.ts`'in `INTRO_KEY`'i
+gibi düz bir literal: `ders-programi-yenilik-gorulen`.
+
+`Data.tsx`'e yeni bir `Changelog` bileşeni, `Build`'in **içine değil yanına**
+eklendi: `Build`'in başlığı (`'Sürüm ve güncelleme'`) dört E2E dosyasının
+locator'ı ve kendi yorum bloğu tuzak 49/74'ü zaten anlatıyor, içine karışık
+içerik eklemek o sözleşmeyi riske atardı. Yeni panelin başlığı `'Yenilikler'`
+— hiçbir sekme adının ya da var olan panel başlığının alt dizesi değil,
+doğrulandı. Güncel sürüm açık, eskiler `<details>`/`<summary>` ile varsayılan
+kapalı arşivde (kullanıcının "arşiv de olabilir" satırına karşılık).
+
+**Ayarlar sekmesinde görülmemiş-yenilik noktası** eklendi (kullanıcı kararı —
+TASKS'te açıkça istenmemişti ama babanın "her güncellemede ne değiştiğini
+soruyor" şikayetine doğrudan cevap): `App.tsx`'te bir `useState` +
+`Settings` → `Data` → `Changelog`'a kadar `onChangelogSeen` prop'uyla
+taşınan bir geri çağırım (`update`/`folder`'ın zaten kullandığı desen).
+Nokta **mutlak konumlu** (`position: absolute`), `.tab`'in genişliğine
+katkı yapmıyor — %150 ölçekte şeridin taşmadığı ölçülmüş bir sınırdı
+(tuzak 48), inline bir nokta onu yeniden ölçmeyi gerektirirdi.
+
+**`scripts/yayinla.mjs`'e dördüncü bir kapı eklendi** (kullanıcı kararı):
+`SURUM_NOTLARI[0].version` yayınlanan sürümle eşleşmiyorsa yayın durur —
+dosya derlenmediği için (bu betikte TS loader yok) sürüm `Cargo.toml`'un
+kendi kapısı gibi bir regex'le okunuyor.
+
+`e2e/surum.spec.ts`'e "79. Yenilikler" bloğu eklendi: panel görünür ve ayrı
+bir başlık taşıyor, güncel sürümün maddeleri görünüyor, arşiv boş profilde
+yok (tek sürüm varken), Ayarlar sekmesindeki nokta panel açılınca kayboluyor
+**ve yenilemeden sonra da kayboluyor** (localStorage'a yazıldığı için).
+
+Değişiklik metinleri (`SURUM_NOTLARI[].items`) kullanıcı kararıyla `t()`
+üzerinden dört dile de çevrildi — eksik çeviri `i18n.test.ts`'in doğruladığı
+gibi sessizce Türkçeye düşer, o yüzden her sürümde çeviri borcu birikmez.
+
+### Ölçülen
+
+```
+npm run tipler        YEŞİL
+npm test               750/750
+npm run test:e2e       550/550   (exe.spec.ts'in bilinen 3 hatası da bu turda
+                                   YOKTU — merge'ün getirdiği update.rs/
+                                   surum.spec.ts düzeltmeleriyle kapanmış
+                                   görünüyor, bu turda dokunulmadı)
+npm run test:site      22/22
+npm run cozucu          7/7      (rakamlar kırk üçüncü oturumla birebir aynı)
+dist/index.html        995 150 bayt   (öncesi 985 919 — +9 231, +9 KB)
+```
+
+`npm run ekran` çalıştırıldı: Ayarlar → Hakkında'da "Yenilikler" paneli ve
+Okul sekmesinde Ayarlar'ın üstündeki nokta gözle doğrulandı, iki temada.
 
 ---
 

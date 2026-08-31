@@ -130,6 +130,26 @@ const ES: Sozluk = {
   "Dosyadan aç": "Abrir desde archivo",
   "Ara ve git": "Buscar e ir",
   "Ara ve git (Ctrl+K)": "Buscar e ir (Ctrl+K)",
+  "Klavye kısayolları": "Atajos de teclado",
+  "Klavye kısayolları (?)": "Atajos de teclado (?)",
+  // -------------------------------------------------- ShortcutsHelp.tsx
+  "Genel kısayollar": "General",
+  "Komut paletini aç/kapat": "Mostrar u ocultar la paleta de comandos",
+  "Bir sekmeye git": "Ir a una sección",
+  "Bu ekranı aç": "Abrir esta pantalla",
+  "İptal et veya kapat": "Cancelar o cerrar",
+  "Odaklı dersi havuza kaldır": "Devolver la clase enfocada al depósito",
+  "Odaklı kartın sağ tık menüsünü aç":
+    "Abrir el menú contextual de la tarjeta enfocada",
+  Listeler: "Listas",
+  "Yeni satır ekle veya düzenlemeyi onayla":
+    "Añadir una fila nueva o confirmar la edición",
+  "Tutamaktan bir satırı sırada taşı":
+    "Mover una fila en orden desde su asa",
+  "Satırı listenin başına veya sonuna taşı":
+    "Mover la fila al principio o al final de la lista",
+  Diyaloglar: "Diálogos",
+  Onayla: "Confirmar",
   "Araç şeridi": "Barra de herramientas",
   "Araç şeridini gizle, ızgaraya bir satır daha kalsın":
     "Ocultar la barra y dejar una fila más a la cuadrícula",
@@ -504,6 +524,13 @@ const ES: Sozluk = {
     "Ahora mismo solo se guarda en el navegador de este ordenador.",
   "Sürüm ve güncelleme": "Versión y actualización",
   Sürüm: "Versión",
+  Yenilikler: "Novedades",
+  "Eski sürümler": "Versiones anteriores",
+  // src/changelog.ts — release-note bullets, translated like any other UI copy
+  'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':
+    "Se añadió una pantalla de ayuda para los atajos de teclado (barra superior, Ctrl+K o la tecla ?).",
+  'Ayarlar → Hakkında bölümüne bu "Yenilikler" paneli eklendi.':
+    "Este panel de novedades se añadió a Ajustes → Acerca de.",
   "Nasıl açıldı": "Cómo se ha abierto",
   Adres: "Dirección",
   "Güncellemeleri denetle": "Buscar actualizaciones",
@@ -953,6 +980,7 @@ const ES: Sozluk = {
   "hareket (animasyon) tercihi": "preferencia de movimiento (animación)",
   "örnek veri satırı görüldü mü": "si se ha visto la línea de datos de ejemplo",
   "kâğıt seçenekleri": "opciones de papel",
+  "görülen sürüm notu": "la versión de las notas de versión vista por última vez",
 
   // src/rules.ts
   "{kim} {gun} günü": "{kim} el {gun}",
