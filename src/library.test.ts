@@ -440,7 +440,7 @@ describe('routeName — hangi kopya bu', () => {
 
   it('gerçek site "Site"', () => {
     withLocation(
-      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/ders-programi/' },
+      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/Mozaik/' },
       () => expect(routeName()).toBe('Site'),
     );
   });
@@ -461,8 +461,8 @@ describe('routeName — hangi kopya bu', () => {
 describe('storageAddress — hangi depo', () => {
   it('adresi yol dahil veriyor', () => {
     withLocation(
-      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/ders-programi/' },
-      () => expect(storageAddress()).toBe('https://alparslansemiz.github.io/ders-programi/'),
+      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/Mozaik/' },
+      () => expect(storageAddress()).toBe('https://alparslansemiz.github.io/Mozaik/'),
     );
   });
 

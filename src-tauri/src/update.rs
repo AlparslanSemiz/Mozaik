@@ -30,7 +30,25 @@ use std::time::Duration;
 /// The manifest arrives over TLS from GitHub, so the URL inside it is already
 /// ours. Pinning the prefix anyway costs one comparison and closes the only
 /// way a bad manifest could turn into a download from somewhere else.
-const RELEASE_KOK: &str = "https://github.com/AlparslanSemiz/Mozaik/releases/";
+///
+/// THERE ARE TWO OF THEM, AND THAT IS THE FIX FOR A REAL BREAKAGE. The
+/// repository was renamed `ders-programi` -> `Mozaik`, and this constant is
+/// COMPILED INTO every copy already out there: the published v2.0.2 knows only
+/// the old name, the manifest published after the rename carries the new one,
+/// and `Beklenmeyen adres: ...` is what my father got when he pressed
+/// "Güncellemeleri denetle". A copy cannot be taught a new prefix after the
+/// fact -- so the list is what a copy built from HERE accepts, and the address
+/// in the manifest stays on the OLD name (surum.yml says why), which GitHub
+/// still 301s to the new one. Measured 2026-08-31:
+/// `ders-programi/releases/latest/download/surum.json` -> 301 -> `Mozaik/...`
+///
+/// Both entries are the same GitHub account, so neither name can be taken by
+/// anybody else. Adding a name here is cheap; removing one strands whatever
+/// copy was built with it.
+const RELEASE_KOKLERI: [&str; 2] = [
+    "https://github.com/AlparslanSemiz/Mozaik/releases/",
+    "https://github.com/AlparslanSemiz/ders-programi/releases/",
+];
 
 /// Where the newest build always announces itself. `latest/download/` needs no
 /// version number, no token and no API quota; it is a redirect GitHub keeps
@@ -116,10 +134,51 @@ pub fn is_newer(aday: &str, simdiki: &str) -> bool {
 
 /// Nothing is fetched from outside our own releases.
 pub fn safe_url(url: &str) -> Result<(), String> {
-    if !url.starts_with(RELEASE_KOK) {
+    if !RELEASE_KOKLERI.iter().any(|kok| url.starts_with(kok)) {
         return Err(format!("Beklenmeyen adres: {url}"));
     }
     Ok(())
+}
+
+/// Where a person can always get the new version by hand.
+///
+/// Derived from the pinned prefix rather than written out again: the address
+/// is on screen in three places already and a fourth copy is a fourth chance
+/// to be wrong.
+fn releases_sayfasi() -> String {
+    format!("{}latest", RELEASE_KOKLERI[0])
+}
+
+/// The answer, decided from a manifest that has already arrived.
+///
+/// Split out from `check_update` so `cargo test` can judge it -- no network,
+/// no Tauri -- because the rule below is the one that turned a repository
+/// rename into an error on a copy that had nothing to download:
+///
+/// THE ADDRESS IS ONLY A QUESTION WHEN THERE IS SOMETHING TO FETCH. An up to
+/// date copy is told it is up to date, whatever the manifest points at; the
+/// gate that actually protects the download is the first line of
+/// `download_update`, and it stays there. And when there IS a new version
+/// behind an address this build does not recognise, the sentence says so and
+/// says where to go -- a copy too old to update itself can still be replaced
+/// by hand, and `Beklenmeyen adres: https://...` never told anybody that.
+pub fn karar(m: Manifest, current: &str) -> Result<Cevap, String> {
+    let yeni_var = is_newer(&m.version, current);
+    if yeni_var && safe_url(&m.exe).is_err() {
+        return Err(format!(
+            "Yeni sürüm ({}) yayımlandı, ama bu kopya onu kendi indiremiyor.\n\
+             Şu adresten indirip eskisinin üzerine koyabilirsiniz:\n{}",
+            m.version,
+            releases_sayfasi()
+        ));
+    }
+    Ok(Cevap {
+        yeni_var,
+        version: m.version,
+        date: m.date,
+        exe: m.exe,
+        boyut: m.boyut,
+    })
 }
 
 /// Is what came down the wire a Windows program, and the one we were promised?
@@ -245,14 +304,7 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
         .await
         .map_err(|_| "Sürüm listesi anlaşılamadı.".to_string())?;
 
-    safe_url(&m.exe)?;
-    Ok(Cevap {
-        yeni_var: is_newer(&m.version, &current),
-        version: m.version,
-        date: m.date,
-        exe: m.exe,
-        boyut: m.boyut,
-    })
+    karar(m, &current)
 }
 
 /// Downloads next to the running program and stops there. Nothing is replaced
@@ -363,24 +415,82 @@ mod tests {
     // ----------------------------------------------------------------- gates
 
     #[test]
-    fn the_manifest_is_under_the_pinned_prefix() {
+    fn the_manifest_is_under_a_pinned_prefix() {
         // Two literals that must agree; this is the only thing that says so.
-        assert!(MANIFEST_URL.starts_with(RELEASE_KOK));
+        assert!(RELEASE_KOKLERI.iter().any(|k| MANIFEST_URL.starts_with(k)));
+        // And the address offered to a person by hand is one of ours too.
+        assert!(safe_url(&releases_sayfasi()).is_ok());
     }
 
     #[test]
     fn only_our_own_releases_are_fetched() {
-        assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Mozaik.exe")).is_ok());
-        // v2.0.0 renames the delivery file; the gate must not care.
-        assert!(safe_url(&format!("{RELEASE_KOK}latest/download/Mozaik.exe")).is_ok());
+        for kok in RELEASE_KOKLERI {
+            // v2.0.0 renames the delivery file; the gate must not care.
+            assert!(safe_url(&format!("{kok}latest/download/Mozaik.exe")).is_ok());
+            assert!(safe_url(&format!("{kok}latest/download/Ders-Programi.exe")).is_ok());
+        }
         for bad in [
             "http://github.com/AlparslanSemiz/Mozaik/releases/latest/download/x.exe",
             "https://example.com/x.exe",
             "https://github.com/baskasi/depo/releases/latest/download/x.exe",
+            "https://github.com/AlparslanSemiz/baska-depo/releases/latest/download/x.exe",
             "file:///etc/passwd",
             "",
         ] {
             assert!(safe_url(bad).is_err(), "kabul edildi: {bad}");
+        }
+    }
+
+    #[test]
+    fn the_old_repository_name_is_still_one_of_ours() {
+        // The whole point of the list. This exact string is compiled into the
+        // published v2.0.2, and the manifest keeps pointing at it (surum.yml)
+        // so that copy can still fetch; a build from here has to accept it too
+        // or the next release strands the previous one all over again.
+        assert!(safe_url("https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe").is_ok());
+    }
+
+    // ------------------------------------------------------------ the answer
+
+    fn manifest(version: &str, exe: &str) -> Manifest {
+        Manifest {
+            version: version.into(),
+            date: "2026-08-31".into(),
+            exe: exe.into(),
+            boyut: 3_757_568,
+        }
+    }
+
+    #[test]
+    fn an_up_to_date_copy_is_told_so_whatever_the_address_says() {
+        // THE BUG, as my father met it: the repository was renamed, the
+        // manifest started carrying the new name, and a copy that had nothing
+        // to download answered "Beklenmeyen adres: https://..." instead of
+        // "güncel". Nothing was being fetched -- there was nothing newer.
+        let c = karar(manifest("2.0.2", "https://baska-yer.example/Mozaik.exe"), "2.0.2").unwrap();
+        assert!(!c.yeni_var);
+    }
+
+    #[test]
+    fn a_new_version_behind_an_unknown_address_says_where_to_go() {
+        // Still an error -- this build cannot fetch that -- but one that can
+        // be acted on: the version, and the page to download it from.
+        let e = karar(manifest("9.0.0", "https://baska-yer.example/Mozaik.exe"), "2.0.2")
+            .unwrap_err();
+        assert!(e.contains("9.0.0"), "sürüm yazmıyor: {e}");
+        assert!(e.contains(&releases_sayfasi()), "adres yazmıyor: {e}");
+    }
+
+    #[test]
+    fn a_new_version_at_either_of_our_names_is_offered() {
+        for kok in RELEASE_KOKLERI {
+            let c = karar(
+                manifest("9.0.0", &format!("{kok}latest/download/Mozaik.exe")),
+                "2.0.2",
+            )
+            .unwrap();
+            assert!(c.yeni_var, "önerilmedi: {kok}");
+            assert_eq!(c.version, "9.0.0");
         }
     }
 

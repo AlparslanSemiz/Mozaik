@@ -22,12 +22,12 @@ Everything below is a finished file — nothing to build.
 
 | File | What to do with it |
 |---|---|
-| **[Mozaik.html](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.html)** | Double-click it. Opens in your browser. This is the real delivery. |
-| **[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik-Windows-kurulum.zip)** | Unzip, double-click `Kur.cmd`. Adds a desktop shortcut and a local address. |
-| **[Mozaik.exe](https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
+| **[Mozaik.html](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.html)** | Double-click it. Opens in your browser. This is the real delivery. |
+| **[Mozaik-Windows-kurulum.zip](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik-Windows-kurulum.zip)** | Unzip, double-click `Kur.cmd`. Adds a desktop shortcut and a local address. |
+| **[Mozaik.exe](https://github.com/AlparslanSemiz/Mozaik/releases/latest/download/Mozaik.exe)** | Double-click it. Own window, and it backs itself up to Documents. |
 
 Or use it without downloading anything:
-**<https://alparslansemiz.github.io/ders-programi/>** — it works offline after
+**<https://alparslansemiz.github.io/Mozaik/>** — it works offline after
 the first visit.
 
 These links always point at the newest release; no version number and no login

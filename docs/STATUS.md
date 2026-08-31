@@ -1,11 +1,11 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-31 (kırk üçüncü oturum: B5.6 — bloklu dersin
+Son güncelleme: 2026-08-31 (kırk dördüncü oturum: B5.6 — bloklu dersin
 crosshair'i ve gün-sonu sürükleme kaydırması düzeltildi)
 
 ---
 
-## Kırk üçüncü oturum — B5.6: iki sütun crosshair'i · gün sonu kaydırma (2026-08-31)
+## Kırk dördüncü oturum — B5.6: iki sütun crosshair'i · gün sonu kaydırma (2026-08-31)
 
 Kullanıcının kendi bildirdiği hata, TASKS §5 B5.6: *"2 derslik bir blok
 kesinlikle 1 ders değil 2 derstir."* Kod okunarak KÖK SEBEP ikisi için de
@@ -41,12 +41,12 @@ npm run tipler        YEŞİL
 npm test               746/746   (değişmedi — constraints.test.ts'e dokunulmadı)
 npm run test:e2e       542 geçti + 3 önceden bilinen exe.spec.ts hatası
 npm run test:site      22/22
-npm run cozucu          7/7      (rakamlar kırk ikinci oturumla birebir aynı)
+npm run cozucu          7/7      (rakamlar kırk üçüncü oturumla birebir aynı)
 dist/index.html        985 919 bayt   (öncesi 978 033 — +7 886)
 ```
 
-**`exe.spec.ts`'in üç hatası bu turdan ÖNCE de vardı** — kırk ikinci oturumda
-`git stash` ile bağımsız doğrulanmıştı (bkz. yukarısı); bu turda dokunulan
+**`exe.spec.ts`'in üç hatası bu turdan ÖNCE de vardı** — kırk üçüncü oturumda
+`git stash` ile bağımsız doğrulanmıştı (bkz. aşağısı); bu turda dokunulan
 dosyalar (`drag.ts`, `gridChrome.ts`, `Program.tsx`, iki e2e dosyası) Tauri
 köprüsü / klasör yazımıyla hiç kesişmiyor, o yüzden ikinci bir stash turu
 atılmadı.
@@ -57,7 +57,7 @@ testlerindeki tam sınıf ve koordinat iddiaları.
 
 ---
 
-## Kırk ikinci oturum — Çözücü kalitesi · Boşluk kuralları · Kontrol (2026-08-31)
+## Kırk üçüncü oturum — Çözücü kalitesi · Boşluk kuralları · Kontrol (2026-08-31)
 
 TASKS §5'in üç maddesi kapandı: B5.1 (Deney B), B5.2 (boşluk kuralları),
 B5.5 (Kontrol'ün sayfa boyu). Sıra kullanıcının kendi şartıydı: **önce ölçüm,
@@ -184,6 +184,83 @@ Kullanıcının dört geri bildirimi birlikte kapandı:
 Regresyonlar birim göç/kombinasyon testlerini; 1280×720, 1366×768 ve
 1920×1080/%150 Sığdır ölçümlerini; havuz menüsünü; yan panel seçicisini ve iki
 tablonun kapalı-saat görünüm eşitliğini kapsıyor.
+
+---
+
+## Kırk ikinci oturum — Depo adı bir adresti (2026-08-31)
+
+**Şikayet:** *"Exede güncellemeleri denetlede hata çıkıyor, beklenen adres şu
+gelmedi vesaire."* Ekrandaki cümle `Beklenmeyen adres: https://…` idi.
+
+**Sebep ölçüldü, tahmin edilmedi** (tuzak 101'in kuralı):
+
+```
+releases/latest/download/surum.json   ->  2.0.2 · exe: .../Mozaik/releases/...
+v2.0.2 etiketinde update.rs           ->  RELEASE_KOK: .../ders-programi/releases/
+ders-programi/... (eski depo adı)     ->  301  ->  Mozaik/...      (yönlendirme VAR)
+alparslansemiz.github.io/ders-programi/  ->  404
+alparslansemiz.github.io/Mozaik/         ->  200
+```
+
+`ddae9fe` depoyu `ders-programi` → `Mozaik` yaptı. Kabul edilen önek
+**yayınlanmış ikilinin içine derlenmiş**, yani babanın v2.0.2'si yeni adı
+tanıyamaz; manifest ise yeni adı yazıyordu. CLAUDE.md bu riski **kelimesi
+kelimesine** yazmıştı ve yazılı olması engellemedi (tuzak 106).
+
+**Yapılanlar:**
+
+| Ne | Nerede | Niçin |
+|---|---|---|
+| `RELEASE_KOK` → `RELEASE_KOKLERI` (iki kök) | `src-tauri/src/update.rs` | bir kopyaya sonradan önek öğretilemez; liste ancak uzar |
+| manifest adresi **eski** adı taşıyor | `.github/workflows/surum.yml` | GitHub 301'liyor, yani tek adres hem v2.0.2'yi hem yenisini doyuruyor |
+| `karar()` ayrıştı, kapı **yalnız yeni sürüm varken** | `update.rs` | güncel bir kopyanın indireceği bir şey yok; artık "güncel" diyor, hata değil |
+| yeni sürüm + tanınmayan adres → adresli cümle | `update.rs` | *"Yeni sürüm (X) yayımlandı, ama bu kopya onu kendi indiremiyor"* + Releases sayfası |
+| `SITE_ADRESI` → `…github.io/Mozaik/` | `src/update.ts` | eskisi 404'tü: program babayı **hiçbir yere** yolluyordu |
+| çapraz kapı | `src/surum.test.ts` | `surum.yml`'in adresi ile `update.rs`'in önekleri her koşuda karşılaştırılıyor |
+| README · `vite.site.config.ts` · `library.test.ts` · `surum.spec.ts` | — | eski depo adını taşıyan son yerler |
+
+**Ölçümler:** `cargo test` 24/24 (üç yeni test: eski önek kabul ediliyor ·
+güncel kopya adresten bağımsız "güncel" diyor · yeni sürüm + yabancı adres
+sürümü ve indirme sayfasını yazıyor). Birim 716/716. `tsc` ikisi de temiz.
+E2E `surum.spec.ts` 5/5. **İki mutasyon denendi, ikisi de kırmızıya döndü:**
+eski önek listeden çıkarılınca, ve kapı yine her cevaba uygulanınca.
+Manifest adresi yeni ada çevrilince `surum.test.ts` kırmızı.
+
+**Etki penceresi:** babanın makinesindeki v2.0.2 ikilisi düzeltilemez —
+düzelten şey **manifest**, yani bir sonraki yayın. O yayından sonra v2.0.2
+"Güncellemeleri denetle"de yeni sürümü görecek ve indirebilecek.
+
+**VE YAYININ KENDİSİ DE KIRIKTI — ölçüldü, tahmin edilmedi.** `v2.0.3`
+etiketi itilmiş, Release **yok**: `latest` hâlâ 2.0.2. Actions API'sinden
+okunan:
+
+```
+release v2.0.3   failure   exe işi ->  "Name it and MEASURE its size"  FAILURE
+                                       (`tauri build --no-bundle` başarılı)
+release v2.0.2   success
+@tauri-apps/cli  son sürüm 2.11.4 (2026-06-28) — iki koşu arasında DEĞİŞMEDİ
+yayınlanan exe boyutları  2.0.2: 3 757 568   2.0.1: 3 755 008  (ayrı ikililer)
+```
+
+Adım `src-tauri/target/release/mozaik.exe` adını arıyordu; Tauri ikiliyi
+Cargo paket adıyla üretip `productName`'e göre yeniden adlandırıyor, ve o
+yeniden adlandırma yapılmazsa dosya `ders-programi.exe` kalıyor. Adım artık
+**iki ada da** bakıyor ve teslim adını kendisi veriyor. **Log okunamadı**
+(job log'u admin hakkı istiyor, 403), yani asıl sebep hâlâ **ölçülmedi** —
+bu bir dayanıklılık, bir teşhis değil (tuzak 101: ölçülmemiş bir sebep bir
+iş planı üretmesin).
+
+**Turdan önce kırık olan üç test de kapandı.** `658c019` `e2e/exe.spec.ts`'te
+beş yeri `Mozaik-tumu.json` / `Mozaik-\d{4}-…` yapmıştı, `folder.ts` ise
+`ders-programi-*` yazıyor. Kullanıcı kararı: **ad kalsın**, test geri alınsın.
+Ad artık `folder.test.ts`'te çivili (mutasyonla sınandı) — tersi hiçbir yerde
+yakalanmıyordu, ve orada kaybedilecek şey bir isim değil: `prunable` kalıpla
+eşliyor, yani yeniden adlandırılmış bir önek eski nesli hiç budamaz ve önceki
+ana dosyayı Belgelerim'de öksüz bırakır.
+
+**Süitin durumu:** E2E 528/532; düşen dört test **her koşuda başkası** ve
+`--workers=1` ile dördü de geçiyor — bu makinede paralel koşunun kararsızlığı,
+regresyon değil (aynı desen bir önceki koşuda başka dört testte çıktı).
 
 ---
 

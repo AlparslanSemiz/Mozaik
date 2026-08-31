@@ -25,6 +25,25 @@ describe('dailyName', () => {
   it('ana dosyanın adıyla çakışmıyor', () => {
     expect(dailyName(new Date())).not.toBe(MAIN_NAME);
   });
+
+  it('ÖNEK `ders-programi` — program Mozaik olsa da dosyalar öyle kalıyor', () => {
+    // A DATA DECISION, and the one test that says so. The program is called
+    // Mozaik; the keys, the backup names and the Documents folder kept their
+    // old names on purpose, because renaming them makes what my father
+    // already has invisible (CLAUDE.md, pitfall 95).
+    //
+    // Here it costs more than a name: `prunable` decides what to delete by
+    // MATCHING this pattern, and the folder it runs in is Belgelerim, next to
+    // his own files. A renamed prefix means the old generation stops matching
+    // — it is never pruned, it piles up, and the previous main file is left
+    // orphaned in there with nothing pointing at it.
+    //
+    // It was almost lost the cheap way: a round renamed the string in
+    // e2e/exe.spec.ts alone, and three tests went red against code that was
+    // right. Nothing in the unit suite would have caught the reverse.
+    expect(MAIN_NAME).toBe('ders-programi-tumu.json');
+    expect(dailyName(new Date(2026, 7, 31))).toBe('ders-programi-2026-08-31.json');
+  });
 });
 
 describe('prunable', () => {

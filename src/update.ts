@@ -44,8 +44,13 @@ import { SURUM, tarihYazisi } from './version';
  *
  * It is a STRING, never a fetch: principle 3 is verified mechanically on the
  * file:// build (temel.spec.ts), and a link is not a request.
+ *
+ * GitHub Pages serves a repository under its NAME, so renaming the repository
+ * `ders-programi` -> `Mozaik` moved this page and left the old address a 404
+ * (measured 2026-08-31). Unlike the release URLs there is no redirect here:
+ * the sentence in Ayarlar -> Hakkında was pointing my father at nothing.
  */
-export const SITE_ADRESI = 'https://alparslansemiz.github.io/ders-programi/';
+export const SITE_ADRESI = 'https://alparslansemiz.github.io/Mozaik/';
 
 /**
  * How often a tab that stays open asks. Half an hour, because the answer only

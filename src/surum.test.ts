@@ -21,6 +21,8 @@ import { describe, expect, it } from 'vitest';
 import pkg from '../package.json';
 import tauriConf from '../src-tauri/tauri.conf.json';
 import cargoToml from '../src-tauri/Cargo.toml?raw';
+import updateRs from '../src-tauri/src/update.rs?raw';
+import surumYml from '../.github/workflows/surum.yml?raw';
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 
@@ -63,10 +65,11 @@ describe('kimlik — verinin ADRESİ', () => {
     // the disk, none of them visible, and no error anywhere to say why.
     //
     // The rest of the rename was decided the other way round and stays that
-    // way — the keys, the backup file names, `Belgelerim\Ders Programı` and
-    // the GitHub repo all kept their old names because they are data. This is
-    // the same rule; it was simply missed, because a reverse-DNS id looks like
-    // a name and is an address.
+    // way — the keys, the backup file names and `Belgelerim\Ders Programı`
+    // kept their old names because they are data. This is the same rule; it
+    // was simply missed, because a reverse-DNS id looks like a name and is an
+    // address. (The repository itself was on that list until it was renamed
+    // anyway, and the bill arrived: see the describe below.)
     expect(tauriConf.identifier).toBe('com.dersprogrami.arac');
   });
 
@@ -75,5 +78,54 @@ describe('kimlik — verinin ADRESİ', () => {
     // reverted". It was not: the name is Mozaik everywhere a person sees one.
     expect(tauriConf.productName).toBe('Mozaik');
     expect(tauriConf.app.windows.map((w) => w.title)).toContain('Mozaik');
+  });
+});
+
+describe('güncelleme adresi — manifest ile exe aynı şeyi tanıyor', () => {
+  // WHY THIS TEST EXISTS. The repository was renamed `ders-programi` ->
+  // `Mozaik`. The prefixes `update.rs` accepts are COMPILED INTO every copy
+  // already on somebody's machine, so the published v2.0.2 knows only the old
+  // name — and the manifest written after the rename carried the new one. What
+  // my father saw when he pressed "Güncellemeleri denetle":
+  //
+  //     Beklenmeyen adres: https://github.com/AlparslanSemiz/Mozaik/...
+  //
+  // Nothing in the repository went red, because the two halves of that
+  // sentence live in two files that never met: a shell line in a workflow and
+  // a Rust constant. They meet here.
+
+  const KOK = /const RELEASE_KOKLERI: \[&str; \d+\] = \[([^\]]*)\]/;
+  const ADRES = /^\s*adres="([^"]+)"/m;
+
+  function kokler(): string[] {
+    const blok = KOK.exec(updateRs);
+    expect(blok, 'update.rs içinde RELEASE_KOKLERI yok').not.toBeNull();
+    return [...(blok?.[1] ?? '').matchAll(/"([^"]+)"/g)].flatMap((m) => m[1] ?? []);
+  }
+
+  it('surum.yml’in yazdığı adresi update.rs kabul ediyor', () => {
+    const m = ADRES.exec(surumYml);
+    expect(m, 'surum.yml içinde adres satırı yok').not.toBeNull();
+    const adres = m?.[1] ?? '';
+    expect(
+      kokler().some((kok) => adres.startsWith(kok)),
+      `manifest ${adres} diyor, update.rs ${kokler().join(' · ')} tanıyor`,
+    ).toBe(true);
+  });
+
+  it('ESKİ depo adı listede duruyor — dağıtılmış v2.0.2 yalnız onu tanıyor', () => {
+    // Removing it would strand that copy for good: it cannot be taught a new
+    // prefix, and there is no screen anywhere that would say why.
+    expect(kokler()).toContain('https://github.com/AlparslanSemiz/ders-programi/releases/');
+  });
+
+  it('manifest adresi ESKİ adı taşıyor — eski kopya da indirebilsin', () => {
+    // GitHub 301s the old name to the new one (measured 2026-08-31), so one
+    // address serves both sides. Flipping this to the new name is only safe
+    // once every copy in use is >= 2.0.4.
+    const m = ADRES.exec(surumYml);
+    expect(m?.[1]).toBe(
+      'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe',
+    );
   });
 });
