@@ -22,6 +22,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type React from "react";
+import type { ReactNode } from "react";
+import * as ContextMenu from "@radix-ui/react-context-menu";
 import type { Id } from "../types";
 import { paletteColor } from "../palette";
 import {
@@ -39,7 +41,7 @@ export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */
   key: string;
   lessonId: Id;
-  /** How many hours THIS card covers when it lands: 1 or 2. */
+  /** How many hours THIS card covers when it lands: 1, 2 or 3. */
   size: number;
   /** What the cell will read: the class, or the teacher — whichever the view is not. */
   top: string;
@@ -71,6 +73,10 @@ interface Props {
   /** The branches that still have something waiting: `[key, label]`. */
   subjects: Array<[string, string]>;
   onStart: (e: React.PointerEvent, lessonId: Id, size: number) => void;
+  onMenu: (lessonId: Id) => void;
+  menuOpen: boolean;
+  onMenuOpenChange: (open: boolean) => void;
+  menu: ReactNode;
 }
 
 /** The five orders, named for the question each one answers. */
@@ -173,6 +179,10 @@ export default function LessonPool({
   setFilter,
   subjects,
   onStart,
+  onMenu,
+  menuOpen,
+  onMenuOpenChange,
+  menu,
 }: Props) {
   const t = useT();
   // The cards ARE the hours left now: one card per block still owed, so adding
@@ -219,6 +229,17 @@ export default function LessonPool({
     const next = !open;
     writeDock(next);
     setOpen(next);
+  }
+
+  function openMenu(e: React.MouseEvent) {
+    const element = e.target as Element;
+    const card = element.closest?.('.pool-card[data-lesson]') as HTMLElement | null;
+    const lessonId = card?.dataset.lesson;
+    if (lessonId === undefined) {
+      e.preventDefault();
+      return;
+    }
+    onMenu(lessonId);
   }
 
   return (
@@ -350,8 +371,10 @@ export default function LessonPool({
         )}
       </div>
 
-      <div className="pool-list">
-        {groups.map((g) => (
+      <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
+        <ContextMenu.Trigger asChild onContextMenu={openMenu}>
+          <div className="pool-list">
+            {groups.map((g) => (
           <section className="pool-group" key={g.key} aria-label={g.label}>
             {/* The heading is what the reader asked for: a break between one
                 row's cards and the next, rather than one more 7px gap. It also
@@ -394,6 +417,7 @@ export default function LessonPool({
                       key={c.key}
                       className={`pool-card${c.masked ? " masked-scope" : ""}`}
                       data-size={c.size}
+                      data-lesson={i === 0 ? c.lessonId : undefined}
                       // Everything under the top card is DRAWING. It is the same
                       // block and would do the same thing if dropped, so it takes no
                       // pointer and says nothing to a screen reader. It still carries
@@ -439,8 +463,11 @@ export default function LessonPool({
               ))}
             </div>
           </section>
-        ))}
-      </div>
+            ))}
+          </div>
+        </ContextMenu.Trigger>
+        {menu}
+      </ContextMenu.Root>
     </aside>
   );
 }

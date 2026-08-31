@@ -1,8 +1,33 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-08-31 (kırkıncı oturum: TASKS yeniden dizildi · R5
-Roboders ölçüldü · **BABANIN GERÇEK VERİSİ fotoğraftan geldi** ve iki yıllık
-varsayımlar tuttu; kod yazılmadı)
+Son güncelleme: 2026-08-31 (kırk birinci oturum: Program Sığdır gerçekten
+sığıyor · havuz kartlarında sağ tık · dağılım seçici · şema v13)
+
+---
+
+## Kırk birinci oturum — Program ve blok dağılımı (2026-08-31)
+
+Kullanıcının dört geri bildirimi birlikte kapandı:
+
+- **Sığdır'ın gerçek kusuru ölçüldü:** 1920 CSS px'de taşma yoktu ama 1536'da
+  209 px, 1366'da 377 px kalıyordu. Sebep hesap değil, tablo içeriğinin
+  `min-content` tabanıydı. Izgara artık açık bir `colgroup` ve sabit tablo
+  geometrisi kullanıyor; dar kart yazısı 12 px altına düşmeden ellipsis oluyor.
+- **Havuz kartları sağ tık menüsü kazandı.** Üç düzenleme yolu çalışıyor;
+  hücre gerektiren kaldırma/sabitleme maddeleri görünür ve kilitli, geçici satır
+  görünümü çalışıyor. Tek kart DOM'u ve sol tuşla sürükleme değişmedi.
+- **Dağılım sayaçları kaldırıldı.** Seçili şekil tek düğmede, bütün 3/2/1
+  kombinasyonları kaydırılabilir popover'da. Sert günlük sınıra sığmayanlar
+  listede duruyor ama gerekçesiyle kilitli.
+- **Şema v13:** en uzun blok 3 saat. v9–v12 kayıtlarındaki her 4, yerleşim ve
+  sabitlemelere dokunmadan 3 + örtük tek saate göçüyor. Excel girişi de 3'te
+  kelepçeleniyor.
+- Program'ın kapalı saat çarpısı Müsaitlik ile aynı `--bad`, `--fs-2xl`, 700
+  sözleşmesine geçti; iki tabloda da taralı zemin kaldı.
+
+Regresyonlar birim göç/kombinasyon testlerini; 1280×720, 1366×768 ve
+1920×1080/%150 Sığdır ölçümlerini; havuz menüsünü; yan panel seçicisini ve iki
+tablonun kapalı-saat görünüm eşitliğini kapsıyor.
 
 ---
 

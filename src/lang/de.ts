@@ -429,9 +429,8 @@ const DE: Sozluk = {
   Dağılım: "Aufteilung",
   Ekle: "Hinzufügen",
   "Dersleri yapıştır": "Fächer einfügen",
-  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)":
-    "Klasse · Lehrkraft (Name oder Kürzel) · Wochenstunden · Block (1 · 2 · 3 · 4)",
-  "{boy} saatlik blok sayısı": "Anzahl der {boy}-stündigen Blöcke",
+  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)":
+    "Klasse · Lehrkraft (Name oder Kürzel) · Wochenstunden · Block (1 · 2 · 3)",
   "Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz":
     'Die Regel "höchstens {n} Stunden am Tag" lässt für diesen Block keinen Platz',
   "{boy} saat > günde {n}": "{boy} Std. > {n}/Tag",
@@ -1287,8 +1286,8 @@ const DE: Sozluk = {
     "Vergrößert den ganzen Bildschirm: Schrift, Abstände, Schaltflächen und Zellen.",
   "Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o.":
     "Alle Pläne gehen auch nach **{klasor}** in Dokumente; dieser Ordner ist das Umzugsgut.",
-  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
-    "Die Aufteilung sagt, wie sich die Stunden über die Woche verteilen: 2+1 heißt zwei Stunden am Stück an einem Tag und eine einzelne an einem anderen. Ein Block kann 2, 3 oder 4 Stunden umfassen; der Rest sind Einzelstunden. Pro Tag ↑ ist das Höchstmaß an einem Tag; bleibt es leer, gilt der Wert aus Einstellungen → Regeln.",
+  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
+    "Die Aufteilung sagt, wie sich die Stunden über die Woche verteilen: 2+1 heißt zwei Stunden am Stück an einem Tag und eine einzelne an einem anderen. Ein Block kann 2 oder 3 Stunden umfassen; der Rest sind Einzelstunden. Pro Tag ↑ ist das Höchstmaß an einem Tag; bleibt es leer, gilt der Wert aus Einstellungen → Regeln.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Haken Sie die Unterrichtstage an; das Feld daneben nennt die **Mittagspause**.",
   "Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":

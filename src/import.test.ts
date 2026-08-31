@@ -116,12 +116,12 @@ describe('parseLessons', () => {
   // hours at 3 is 3+3+1, not "as many threes as divide evenly".
   it('bloğu o boyda tekrarlar, kalanı tek bırakır', () => {
     expect(parseLessons('510\tMÇ\t7\t3').accepted[0]!.blocks).toEqual([3, 3]);
-    expect(parseLessons('510\tMÇ\t9\t4').accepted[0]!.blocks).toEqual([4, 4]);
+    expect(parseLessons('510\tMÇ\t9\t4').accepted[0]!.blocks).toEqual([3, 3, 3]);
   });
 
-  // 4 is the ceiling the model has; a column that says 9 cannot mean 9.
-  it('bloğu en fazla 4 ile sınırlar', () => {
-    expect(parseLessons('510\tMÇ\t8\t9').accepted[0]!.blocks).toEqual([4, 4]);
+  // 3 is the ceiling the model has; a column that says 9 cannot mean 9.
+  it('bloğu en fazla 3 ile sınırlar', () => {
+    expect(parseLessons('510\tMÇ\t8\t9').accepted[0]!.blocks).toEqual([3, 3]);
   });
 
   it('saat okunamayan satırı atlar ve sebebini yazar', () => {

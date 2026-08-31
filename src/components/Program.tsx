@@ -660,6 +660,8 @@ function Program({
    */
   const [menuTarget, setMenuTarget] = useState<GridMenuTarget | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [poolMenuLessonId, setPoolMenuLessonId] = useState<Id | null>(null);
+  const [poolMenuOpen, setPoolMenuOpen] = useState(false);
   // Keep Radix's portal inside the Activity boundary. A body-level portal
   // would remain visible when React hides the retained Program tree.
   const menuPortalRef = useRef<HTMLDivElement>(null);
@@ -671,6 +673,8 @@ function Program({
     () => () => {
       setMenuOpen(false);
       setMenuTarget(null);
+      setPoolMenuOpen(false);
+      setPoolMenuLessonId(null);
     },
     [],
   );
@@ -778,6 +782,24 @@ function Program({
     menuDay === null ? undefined : state.settings.days[menuDay]?.name;
   const menuDayMode =
     menuDayName === undefined ? undefined : mask.days[menuDayName];
+
+  const poolMenuLesson =
+    poolMenuLessonId === null ? undefined : ix.lessonById.get(poolMenuLessonId);
+  const poolMenuRowId =
+    poolMenuLesson === undefined
+      ? null
+      : view === "teacher"
+        ? poolMenuLesson.teacherId
+        : poolMenuLesson.classId;
+  const poolMenuRowMode =
+    poolMenuRowId === null ? undefined : rowMask(mask, view, poolMenuRowId);
+  const setPoolMenuRowMode = useCallback(
+    (mode?: "ghost" | "hidden") => {
+      if (poolMenuRowId === null || solver.running) return;
+      setMask((current) => setRowMask(current, view, poolMenuRowId, mode));
+    },
+    [poolMenuRowId, solver.running, setMask, view],
+  );
 
   /**
    * "Put this row (or this day) aside for a moment."
@@ -1251,6 +1273,100 @@ function Program({
           setFilter={setPoolFilter}
           subjects={poolSubjects}
           onStart={cardStart}
+          onMenu={setPoolMenuLessonId}
+          menuOpen={active && poolMenuOpen}
+          onMenuOpenChange={setPoolMenuOpen}
+          menu={
+            <ContextMenu.Portal container={menuPortalRef.current}>
+              <ContextMenu.Content className="menu" collisionPadding={8}>
+                <ContextMenu.Item className="menu-item" disabled>
+                  <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
+                  {t("Havuza kaldır")}
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  className="menu-item"
+                  disabled={poolMenuLesson === undefined}
+                  onSelect={() =>
+                    poolMenuLesson !== undefined && editLesson(poolMenuLesson.id)
+                  }
+                >
+                  <Pencil size={15} strokeWidth={2} aria-hidden="true" />
+                  {t("Dersi düzenle")}
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  className="menu-item"
+                  disabled={poolMenuLesson === undefined}
+                  onSelect={() =>
+                    poolMenuLesson !== undefined &&
+                    inspect("teacher", poolMenuLesson.teacherId)
+                  }
+                >
+                  {KIND_ICON.teacher}
+                  {t("Öğretmeni düzenle")}
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  className="menu-item"
+                  disabled={poolMenuLesson === undefined}
+                  onSelect={() =>
+                    poolMenuLesson !== undefined &&
+                    inspect("class", poolMenuLesson.classId)
+                  }
+                >
+                  {KIND_ICON.class}
+                  {t("Sınıfı düzenle")}
+                </ContextMenu.Item>
+                <ContextMenu.Separator className="menu-sep" />
+                <ContextMenu.Item className="menu-item" disabled>
+                  <Pin size={15} aria-hidden="true" />
+                  {t("Dersi buraya sabitle")}
+                </ContextMenu.Item>
+                <ContextMenu.Item className="menu-item" disabled>
+                  <Pin size={15} strokeWidth={2} aria-hidden="true" />
+                  {t("Toplu sabitle")}
+                </ContextMenu.Item>
+                {poolMenuRowId !== null && (
+                  <>
+                    <ContextMenu.Separator className="menu-sep" />
+                    <ContextMenu.Sub>
+                      <ContextMenu.SubTrigger
+                        className="menu-item"
+                        disabled={solver.running}
+                      >
+                        <Eye size={15} strokeWidth={2} aria-hidden="true" />
+                        {t("Geçici görünüm")}
+                      </ContextMenu.SubTrigger>
+                      <ContextMenu.Portal container={menuPortalRef.current}>
+                        <ContextMenu.SubContent className="menu" sideOffset={4}>
+                          <ContextMenu.Item
+                            className="menu-item"
+                            disabled={solver.running}
+                            onSelect={() =>
+                              setPoolMenuRowMode(
+                                poolMenuRowMode === "ghost" ? undefined : "ghost",
+                              )
+                            }
+                          >
+                            <Eye size={15} aria-hidden="true" />
+                            {poolMenuRowMode === "ghost"
+                              ? t("Satırı geri yükle")
+                              : t("Satırı soluklaştır")}
+                          </ContextMenu.Item>
+                          <ContextMenu.Item
+                            className="menu-item"
+                            disabled={solver.running}
+                            onSelect={() => setPoolMenuRowMode("hidden")}
+                          >
+                            <EyeOff size={15} aria-hidden="true" />
+                            {t("Satırı gizle")}
+                          </ContextMenu.Item>
+                        </ContextMenu.SubContent>
+                      </ContextMenu.Portal>
+                    </ContextMenu.Sub>
+                  </>
+                )}
+              </ContextMenu.Content>
+            </ContextMenu.Portal>
+          }
         />
       </div>
     </>

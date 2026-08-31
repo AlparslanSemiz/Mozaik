@@ -144,7 +144,7 @@ const Row = memo(function Row({
       // one. A block that straddles the break is therefore CUT at it and drawn
       // as two, which is also honest: on screen there really is something
       // between them. For a two-hour block that is the old drawing exactly;
-      // a four-hour block split 2+2 by the break keeps both halves merged.
+      // a three-hour block split 1+2 by the break keeps each side merged.
       const breakBefore = breakAt[g] === s;
       if (inBlock && !breakBefore) continue; // absorbed by the cell to its left
 
@@ -499,6 +499,20 @@ function GridInner({
             className={`grid${draggedRowId !== null ? " dragging" : ""}`}
             style={columns}
           >
+            {/* Explicit columns make `table-layout: fixed` an actual contract.
+                In Sığdır the table owns exactly the container width; card text
+                may ellipsize, but it cannot impose a min-content floor. */}
+            <colgroup>
+              <col className="grid-row-col" />
+              {dayIndices.flatMap((g) =>
+                settings.hours.flatMap((_, s) => [
+                  ...(breakAt[g] === s
+                    ? [<col key={`break-${g}`} className="grid-break-col" />]
+                    : []),
+                  <col key={`${g}-${s}`} className="grid-hour-col" />,
+                ]),
+              )}
+            </colgroup>
             <thead>
               <tr>
                 <th className="corner" rowSpan={2}>

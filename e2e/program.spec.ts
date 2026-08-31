@@ -503,6 +503,44 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     await expect(cards).toHaveCount(before);
   });
 
+  test("havuz kartının sağ tık menüsü tamdır; konumsuz işlemler kilitli, düzenlemeler çalışır", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const card = page.locator('.pool-card:not([aria-hidden="true"])').first();
+    const before = await page.locator('.pool-card').count();
+
+    await card.click({ button: "right" });
+    const menu = page.locator(".menu");
+    await expect(menu.getByRole("menuitem")).toHaveText([
+      "Havuza kaldır",
+      "Dersi düzenle",
+      "Öğretmeni düzenle",
+      "Sınıfı düzenle",
+      "Dersi buraya sabitle",
+      "Toplu sabitle",
+      "Geçici görünüm",
+    ]);
+    for (const name of ["Havuza kaldır", "Dersi buraya sabitle", "Toplu sabitle"]) {
+      await expect(menu.getByRole("menuitem", { name })).toHaveAttribute("data-disabled");
+    }
+    await expect(page.locator('.ghost')).toHaveCount(0);
+    await expect(page.locator('.pool-card')).toHaveCount(before);
+
+    await menu.getByRole("menuitem", { name: "Dersi düzenle" }).click();
+    await expect(page.locator('.sheet')).toBeVisible();
+    await page.keyboard.press('Escape');
+
+    await card.click({ button: "right" });
+    await page.locator(".menu").getByRole("menuitem", { name: "Öğretmeni düzenle" }).click();
+    await expect(page.locator('.sheet .sheet-kind')).toHaveText('Öğretmen');
+    await page.keyboard.press('Escape');
+
+    await card.click({ button: "right" });
+    await page.locator(".menu").getByRole("menuitem", { name: "Sınıfı düzenle" }).click();
+    await expect(page.locator('.sheet .sheet-kind')).toHaveText('Sınıf');
+  });
+
   // The item is not a lesson, so the menu has nothing to be about; the browser's
   // own menu must not appear either, because the page has taken the gesture.
   test("BOŞ hücrede sağ tık hiçbir menü açmıyor", async ({ page }) => {
@@ -570,6 +608,40 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Dersler", exact: true }).click();
     await expect(page.locator("table.list")).toBeVisible();
+  });
+
+  test("ders düzenleme panelindeki dağılım seçicisi bütün seçenekleri açıyor", async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await dragAndDrop(page);
+
+    const gridCards = page.locator("table.grid .card");
+    const poolCards = page.locator(".pool-card");
+    const poolHoursBefore = await poolCards.evaluateAll((cards) =>
+      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
+    );
+    await gridCards.first().click({ button: "right" });
+    await page.locator(".menu").getByRole("menuitem", { name: "Dersi düzenle" }).click();
+
+    const sheet = page.locator(".sheet");
+    const trigger = sheet.locator(".split-pick");
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+    const options = page.locator(".split-popover:visible").getByRole("option");
+    expect(await options.count()).toBeGreaterThan(1);
+    const other = page
+      .locator('.split-popover:visible .split-option[aria-selected="false"]:not([aria-disabled="true"])')
+      .first();
+    await other.click();
+
+    // A new boundary makes the old placed block ambiguous, so that lesson is
+    // lifted safely and its new cards are offered back in the tray.
+    await expect(gridCards).toHaveCount(0);
+    const poolHoursAfter = await poolCards.evaluateAll((cards) =>
+      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
+    );
+    expect(poolHoursAfter).toBeGreaterThan(poolHoursBefore);
   });
 
   test("ders düzenleme penceresi dersi başka öğretmene aktarabiliyor", async ({

@@ -431,9 +431,8 @@ const FR: Sozluk = {
   Dağılım: "Répartition",
   Ekle: "Ajouter",
   "Dersleri yapıştır": "Coller des cours",
-  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)":
-    "Classe · Enseignant (nom ou initiales) · Heures hebdomadaires · Bloc (1 · 2 · 3 · 4)",
-  "{boy} saatlik blok sayısı": "Nombre de blocs de {boy} heures",
+  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)":
+    "Classe · Enseignant (nom ou initiales) · Heures hebdomadaires · Bloc (1 · 2 · 3)",
   "Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz":
     "La règle « au plus {n} heures par jour » ne laisse aucune place à ce bloc",
   "{boy} saat > günde {n}": "{boy} h > {n}/jour",
@@ -1296,8 +1295,8 @@ const FR: Sozluk = {
     "Agrandit tout l’écran d’un coup : texte, espaces, boutons et cellules.",
   "Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o.":
     "Tous les plans vont aussi dans **{klasor}** (Documents) ; c’est ce dossier qu’on emporte.",
-  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
-    "La répartition dit comment ces heures se découpent sur la semaine : 2+1 signifie deux heures d’affilée un jour et une heure seule un autre. Un bloc peut faire 2, 3 ou 4 heures ; le reste est à l’unité. Par jour ↑ est le maximum de ce cours en une journée ; laissé vide, c’est le nombre de Réglages → Règles qui s’applique.",
+  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
+    "La répartition dit comment ces heures se découpent sur la semaine : 2+1 signifie deux heures d’affilée un jour et une heure seule un autre. Un bloc peut faire 2 ou 3 heures ; le reste est à l’unité. Par jour ↑ est le maximum de ce cours en une journée ; laissé vide, c’est le nombre de Réglages → Règles qui s’applique.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Cochez les jours de cours ; la case à côté indique la **pause déjeuner**.",
   "Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":

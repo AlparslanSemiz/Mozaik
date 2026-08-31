@@ -163,7 +163,7 @@ export interface LessonRow {
  * column somebody copies out of a spreadsheet, and a spreadsheet says how long
  * a block is, not how the week is shaped. It is read as "make the blocks this
  * long and let the remainder be singles" — 9 hours at 4 is 4+4+1. 1 means no
- * blocks at all, and anything above 4 is clamped to 4.
+ * blocks at all, and anything above 3 is clamped to 3.
  */
 export function parseLessons(text: string): ParseResult<LessonRow> {
   const accepted: LessonRow[] = [];

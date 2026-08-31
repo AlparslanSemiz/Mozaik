@@ -376,15 +376,15 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
     expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 2]);
   });
 
-  // A four cannot fit a run of three, so the run takes the biggest that DOES.
+  // A three cannot fit a run of two, so the run takes the biggest that DOES.
   it('koşuya sığmayan boy atlanıyor, sığan alınıyor', () => {
-    const d = withLesson({ id: 'y1', weeklyHours: 7, blocks: [4, 3] }, [
-      [0, 0], [0, 1], [0, 2], // a run of 3
-      [1, 0], [1, 1], [1, 2], [1, 3], // a run of 4
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
+      [0, 0], [0, 1], // a run of 2
+      [1, 0], [1, 1], [1, 2], // a run of 3
     ]);
     expect(placedBlocks(d, lessonById(d, 'y1'))).toEqual([
-      { day: 0, hour: 0, size: 3 },
-      { day: 1, hour: 0, size: 4 },
+      { day: 0, hour: 0, size: 2 },
+      { day: 1, hour: 0, size: 3 },
     ]);
   });
 
@@ -396,7 +396,7 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
   });
 
   it('karışık boylu ders kalanını doğru söylüyor', () => {
-    const d = withLesson({ id: 'y1', weeklyHours: 7, blocks: [4, 3] }, [[1, 0], [1, 1], [1, 2], [1, 3]]);
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [[1, 0], [1, 1]]);
     expect(pendingBlocks(d, lessonById(d, 'y1'))).toEqual([3]);
   });
 });

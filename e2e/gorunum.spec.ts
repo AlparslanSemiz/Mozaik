@@ -501,6 +501,44 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     expect(back.table).toBeCloseTo(roomy.table, 0);
   });
 
+  for (const target of [
+    { width: 1280, height: 720, scale: 100 },
+    { width: 1366, height: 768, scale: 125 },
+    { width: 1920, height: 1080, scale: 150 },
+  ]) {
+    test(`Sığdır ${target.width}×${target.height} ve %${target.scale} ölçekte yatay kaydırmayı SIFIRLIYOR`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: target.width, height: target.height });
+      await openWithSample(page);
+      if (target.scale !== 100) await chooseScale(page, target.scale);
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+
+      await chooseDensity(page, 'Sığdır');
+      const fit = await gridMetrics(page);
+      expect(fit.overflow, `${target.width}px/%${target.scale}: ${fit.overflow}px taşma`).toBe(0);
+
+      const card = page.locator('table.grid .card').first();
+      await expect(card).toBeVisible();
+      const access = await card.evaluate((el) => {
+        const parent = el.getBoundingClientRect();
+        return {
+          name: el.getAttribute('aria-label') ?? '',
+          topSize: parseFloat(getComputedStyle(el.querySelector('.card-top')!).fontSize),
+          contained: [...el.children].every((child) => {
+            const box = child.getBoundingClientRect();
+            return box.left >= parent.left - 0.5 && box.right <= parent.right + 0.5;
+          }),
+        };
+      });
+      expect(access.name.length).toBeGreaterThan(3);
+      expect(access.topSize).toBeGreaterThanOrEqual(12);
+      expect(access.contained).toBe(true);
+    });
+  }
+
   test('yoğunluk tercihi yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
     await openWithSample(page);
     // Pitfall 24: the store debounces by 400 ms and the page's own load write

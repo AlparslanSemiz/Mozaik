@@ -347,7 +347,7 @@ export default function Lessons({
     // lesson to lesson. The old form did the exact opposite — it cleared the
     // class — so eight lessons for one class meant choosing it eight times.
     // Hours and split stay: the next lesson is more often the same length than
-    // it is four hours.
+    // it is a different length.
     setNewLesson(
       mode === "teacher"
         ? { ...newLesson, classId: "" }
@@ -418,7 +418,7 @@ export default function Lessons({
           <T k="Bir ders = bir sınıfın bir öğretmenden aldığı haftalık saat." />
         }
         more={t(
-          "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.",
+          "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.",
         )}
         notice={
           state.classes.length === 0 || state.teachers.length === 0 ? (
@@ -564,7 +564,7 @@ export default function Lessons({
           close={() => setPasteOpen(false)}
           title={t("Dersleri yapıştır")}
           example={t(
-            "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)",
+            "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)",
           )}
           parse={parseLessons}
           rowText={(x) =>

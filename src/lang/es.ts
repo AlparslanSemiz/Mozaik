@@ -428,9 +428,8 @@ const ES: Sozluk = {
   Dağılım: "Reparto",
   Ekle: "Añadir",
   "Dersleri yapıştır": "Pegar clases",
-  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)":
-    "Grupo · Profesor (nombre o iniciales) · Horas semanales · Bloque (1 · 2 · 3 · 4)",
-  "{boy} saatlik blok sayısı": "Número de bloques de {boy} horas",
+  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)":
+    "Grupo · Profesor (nombre o iniciales) · Horas semanales · Bloque (1 · 2 · 3)",
   "Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz":
     'La regla "como máximo {n} horas al día" no deja sitio a este bloque',
   "{boy} saat > günde {n}": "{boy} h > {n}/día",
@@ -1287,8 +1286,8 @@ const ES: Sozluk = {
     "Aumenta toda la pantalla a la vez: letra, espacios, botones y celdas.",
   "Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o.":
     "Todos los planes se escriben también en **{klasor}** de Documentos; eso es lo que se lleva.",
-  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
-    "El reparto es cómo se dividen esas horas en la semana: 2+1 significa dos horas seguidas un día y una hora suelta otro. Un bloque puede ser de 2, 3 o 4 horas; el resto son sueltas. Por día ↑ es el máximo de esta clase en un día; si se deja vacío, rige el número de Ajustes → Reglas.",
+  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
+    "El reparto es cómo se dividen esas horas en la semana: 2+1 significa dos horas seguidas un día y una hora suelta otro. Un bloque puede ser de 2 o 3 horas; el resto son sueltas. Por día ↑ es el máximo de esta clase en un día; si se deja vacío, rige el número de Ajustes → Reglas.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Marque los días con clase; la casilla al lado indica el **recreo largo**.",
   "Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":

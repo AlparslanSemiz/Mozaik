@@ -174,7 +174,7 @@ export interface Illegal {
   hour: number;
   /**
    * How long the block the auditor FOUND is. Reported because the length is
-   * half the finding: "hour 0 is illegal" and "the four-hour block starting at
+   * half the finding: "hour 0 is illegal" and "the three-hour block starting at
    * hour 0 is illegal" send a reader to different places.
    */
   size: number;
@@ -187,7 +187,7 @@ interface Block {
   classId: Id;
   day: number;
   hour: number;
-  /** How long it is: 1 to 4. A lesson can hold blocks of several lengths. */
+  /** How long it is: 1 to 3. A lesson can hold blocks of several lengths. */
   size: number;
 }
 
@@ -725,13 +725,13 @@ function parcalanmisGunler(): State {
 }
 
 /**
- * ONE lesson whose split uses three different lengths at once: 4+3+2+1.
+ * ONE lesson whose split uses three different lengths at once: 3+3+2+1+1.
  *
  * This is the case no world could ask before v9, and it is the one that proves
  * the solver's item split. A lesson becomes one item per block LENGTH, so this
- * lesson alone is four items competing for the same class, the same teacher and
+ * lesson alone is five items competing for the same class, the same teacher and
  * the same daily ceiling — and `ceilingHours` has to hand the week out biggest
- * first across all four rather than "doubles, then the rest".
+ * first rather than "doubles, then the rest".
  */
 function karisikBloklar(): State {
   const d = makeWorld({
@@ -751,7 +751,7 @@ function karisikBloklar(): State {
   // the whole point of this world is a lesson that is not.
   return {
     ...d,
-    lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, blocks: [4, 3, 2] } : x)),
+    lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, blocks: [3, 3, 2] } : x)),
   };
 }
 
@@ -835,7 +835,7 @@ export const WORLDS: SolverWorld[] = [
   },
   {
     name: 'karisik-bloklar',
-    note: 'Tek derste 4+3+2+1; çözücünün DÖRT iş kalemi aynı sınıf için yarışıyor.',
+    note: 'Tek derste 3+3+2+1+1; çözücünün BEŞ iş kalemi aynı sınıf için yarışıyor.',
     state: karisikBloklar(),
     want: { solved: true },
   },

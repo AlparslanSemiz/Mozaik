@@ -4,27 +4,23 @@
  * A lesson's weekly hours go down as blocks. `Lesson.blocks` lists the ones
  * longer than an hour, biggest first; whatever is left over is a single hour.
  * This module turns that list into the shapes the rest of the program needs: a
- * list to place, a sentence to read, and the counts a stepper edits.
+ * list to place, a sentence to read, and every combination the picker offers.
  *
  * It imports NOTHING but the type, on purpose — the same reason `palette.ts`
  * and `keys.ts` stand alone. `entities.ts` already imports `constraints.ts`, so
  * anything both of them need has to live below both of them or the two start
  * importing each other.
  *
- * 1 to 4. Schema v7 had dropped everything but 1 and 2, and the reason given
- * was the dropdown: every extra part multiplies the choices somebody has to
- * read, and twelve hours went from 7 options to 19. That reason died with the
- * dropdown. The split is now edited as three counts — how many fours, how many
- * threes, how many twos — so the number of controls is three whatever the
- * hours are, and 34 ways to divide twelve hours never become 34 rows.
+ * 1 to 3. Schema v13 removes four-hour blocks. The selected distribution is a
+ * compact button; opening it shows every 3/2/1 partition in a scrollable list.
  */
 import type { Lesson } from './types';
 
 /** The longest block a week can be asked for. */
-export const MAX_BLOCK = 4;
+export const MAX_BLOCK = 3;
 
 /** The block lengths a lesson may name, biggest first. Singles are implied. */
-export const BLOCK_SIZES = [4, 3, 2] as const;
+export const BLOCK_SIZES = [3, 2] as const;
 
 export type BlockSize = (typeof BLOCK_SIZES)[number];
 
@@ -98,39 +94,36 @@ export function patternLabel(blocks: number[]): string {
     .join(' + ');
 }
 
-/** How many blocks of each length a split names. Singles are not counted. */
-export function blockCounts(blocks: readonly number[]): Record<BlockSize, number> {
-  const counts = { 4: 0, 3: 0, 2: 0 } as Record<BlockSize, number>;
-  for (const b of blocks) {
-    if (b === 4 || b === 3 || b === 2) counts[b]++;
-  }
-  return counts;
+export interface BlockPatternOption {
+  /** The stored part of the split: only blocks longer than one hour. */
+  blocks: number[];
+  /** The whole week, including the implied singles. */
+  plan: number[];
+  /** The compact notation used everywhere else in the interface. */
+  label: string;
 }
 
 /**
- * The most blocks of one length a week could still hold, the OTHER counts kept.
+ * Every unique way to split N hours into blocks of 3, 2 and 1.
  *
- * This is the ceiling a stepper stops at, so it has to answer with the rest of
- * the split standing: asking "how many threes fit in 9 hours" is the wrong
- * question when two of those hours are already spoken for by a pair.
+ * The order is stable: more threes first, then more twos. The list therefore
+ * scans from concentrated weeks toward single hours without a UI-only sort.
  */
-export function maxCount(weeklyHours: number, blocks: readonly number[], size: BlockSize): number {
+export function patternOptions(weeklyHours: number): BlockPatternOption[] {
   const hours = Math.max(0, Math.round(weeklyHours));
-  const others = clampBlocks(hours, blocks)
-    .filter((b) => b !== size)
-    .reduce((sum, b) => sum + b, 0);
-  return Math.max(0, Math.floor((hours - others) / size));
-}
+  const options: BlockPatternOption[] = [];
 
-/** The same split with a different number of `size`-hour blocks in it. */
-export function withCount(
-  weeklyHours: number,
-  blocks: readonly number[],
-  size: BlockSize,
-  count: number,
-): number[] {
-  const hours = Math.max(0, Math.round(weeklyHours));
-  const wanted = Math.max(0, Math.min(maxCount(hours, blocks, size), Math.round(count) || 0));
-  const others = clampBlocks(hours, blocks).filter((b) => b !== size);
-  return clampBlocks(hours, [...others, ...Array<number>(wanted).fill(size)]);
+  for (let threes = Math.floor(hours / 3); threes >= 0; threes--) {
+    const afterThrees = hours - threes * 3;
+    for (let twos = Math.floor(afterThrees / 2); twos >= 0; twos--) {
+      const blocks = [
+        ...Array<number>(threes).fill(3),
+        ...Array<number>(twos).fill(2),
+      ];
+      const plan = blockPlan({ weeklyHours: hours, blocks });
+      options.push({ blocks, plan, label: patternLabel(plan) });
+    }
+  }
+
+  return options;
 }

@@ -110,21 +110,21 @@ describe('illegalBlocks — denetçinin kendisi', () => {
     expect(bad[0]?.reason).toContain('müsait değil');
   });
 
-  // The LAST hour of a four. An auditor that walked two hours per block — the
+  // The LAST hour of a triple. An auditor that walked two hours per block — the
   // number that was hard-coded everywhere before v9 — would clear this grid.
-  it('DÖRTLÜ bloğun SON saati kapalıysa yakalıyor', () => {
+  it('ÜÇLÜ bloğun SON saati kapalıysa yakalıyor', () => {
     let d = makeWorld({
       days: 2,
-      hours: 6,
-      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blockSize: 4 }],
+      hours: 4,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blockSize: 3 }],
     });
-    for (let h = 0; h < 4; h++) activeProgram(d).placements[placementKey('s510', 0, h)] = 'x1';
+    for (let h = 0; h < 3; h++) activeProgram(d).placements[placementKey('s510', 0, h)] = 'x1';
     expect(illegalBlocks(d)).toEqual([]);
 
-    d = closeHours(d, 'oMC', [[0, 3]]);
+    d = closeHours(d, 'oMC', [[0, 2]]);
     const bad = illegalBlocks(d);
     expect(bad).toHaveLength(1);
-    expect(bad[0]?.size).toBe(4);
+    expect(bad[0]?.size).toBe(3);
   });
 
   it('çok saatlik bloğu TEK blok sayıyor, saat saat değil', () => {

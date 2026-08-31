@@ -882,7 +882,7 @@ Lesson     { classId, teacherId, weeklyHours, blocks, second, maxPerDay }
                                             // düzeltilince sessizce sapar.
                                             // blocks = birden uzun blokların
                                             // LİSTESİ, büyükten küçüğe. Her
-                                            // eleman 2, 3 ya da 4; toplamı
+                                            // eleman 2 ya da 3; toplamı
                                             // weeklyHours'ı geçmez, kalanı tek
                                             // saat. 9 saat + [3,2] = 3+2+1+1+1+1.
                                             // pairs'ın yerine geçti (v9), o da
@@ -1049,13 +1049,15 @@ biter**. Bu `bell.test.ts`'te açıkça iddia edilir.
   v9 = `Lesson.blocks`, `pairs`ın yerine — blok 2, 3 ya da 4 saat olabilir.
   v10 = `State.pinned` — okuyanın yerine sabitlediği hücreler.
   v11 = `ClassGroup.maxSameLessonPerDay` — günlük sınır bir orta katman kazandı.
-  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v11 tek okuyucudan geçer —
-  v3–v6'nın tek farkı **eklenen** alanlar, v7 ise ilkin **değişen** alanı ve onu
-  `readLessons()` kendi başına çevirir (`blockSize` 2 ya da 3 → `floor(saat/2)`
-  ikili, 1 → sıfır). `id`'ler ve gün indeksleri değişmediği için `unavailable` ve
-  `placements` anahtarları olduğu gibi geçer — **üç saatlik blok taşıyan bir
-  yedeğin de programı yerinde kalır**, yalnız o koşunun içindeki sınır yeniden
-  okunur ve hiçbir kısıt bir sınıra bakmaz (bkz. tuzak 63). **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
+  v12 = yerleşim ve sabitlemeler adlı program alternatiflerine taşındı.
+  v13 = dört saatlik blok kaldırıldı; eski her 4, 3 + örtük tek saate dönüşür.
+  `parseState` v1'i v2'ye, v2'yi v3'e taşır; v3–v13 tek okuyucudan geçer —
+  `readLessons()` her tarihsel biçimi tek yerde çevirir: v1–v6 `blockSize`,
+  v7–v8 ikili blok sayısı `pairs`, v9–v12 doğrudan `blocks`; v13 okurken eski
+  her 4'ü 3'e çevirir ve kalan saati örtük tek saat olarak bırakır. `id`'ler,
+  gün indeksleri, program alternatifleri, yerleşimler ve sabitlemeler olduğu
+  gibi geçer; yalnız koşu içindeki blok sınırı yeniden okunur ve hiçbir sert
+  kısıt bu sınıra bakmaz (bkz. tuzak 63). **Şema her değiştiğinde: sürümü artır, göç kodunu yaz,
   hem birim hem E2E testini ekle.** Eski yedek açılmıyorsa veri kayıptır.
 
 ---

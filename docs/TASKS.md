@@ -81,9 +81,9 @@ bitince §10'a taşınır.
             B4.4 baskı tasarımları ──> §3 Bölüm 3 (çıktı aileleri)
                                               |
                                         B3.4 e-posta/WhatsApp
-                                        (öğretmende tel + e-posta = ŞEMA v12)
+                                        (öğretmende tel + e-posta = ŞEMA v14)
 
-§6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (ŞEMA v12) ──> B6.3 A/B haftası
+§6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (ŞEMA v14) ──> B6.3 A/B haftası
 ```
 
 **§2 neden §1'i beklemiyor:** Ayarlar'ın kendi düzeni bir **tasarım** kararı ve
@@ -261,7 +261,7 @@ tıklanınca**.
 - [ ] **B3.3 Excel ve HTML'e çıkarma.** aSc karar tablosunda **HTML önce**,
       Excel sonra. HTML zaten elimizdeki DOM. Excel için `.xlsx` bir zip'tir,
       `.csv` düz metin — hangisinin istendiği sorulacak (§8).
-- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme — ŞEMA v12 İSTİYOR.**
+- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme — ŞEMA v14 İSTİYOR.**
       Öğretmene **telefon** ve **e-posta** alanı gerekiyor: `schemaVersion` 12
       + göç kodu + `sanitize()` dalı + hem birim hem E2E testi (CLAUDE.md'nin
       şema kuralı, tuzak 97). Gönderme yolu `mailto:` ve
@@ -359,7 +359,7 @@ Bunların hepsi ya `schemaVersion`'ı artırıyor ya kısıt motorunun tamamına
 dokunuyor. **Şema her değiştiğinde: sürümü artır, göç kodunu yaz, hem birim
 hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
-- [ ] **B6.1 Gruplar / bölünmeler — ŞEMA v12.** Senin satırın: *"seçmeli ders
+- [ ] **B6.1 Gruplar / bölünmeler — ŞEMA v14.** Senin satırın: *"seçmeli ders
       yok ama olsun."* `placements` bir hücreye **tek** ders tutuyor; bu madde
       tam olarak onu değiştiriyor, yani göç kodu, `sanitize()`, cascade ve
       **kısıt motorunun tamamı** etkileniyor. Listenin en pahalı maddesi.
@@ -643,6 +643,7 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 
 | Tarih | Tur | Ne yapıldı |
 |---|---|---|
+| 08-31 | **Program ve blok dağılımı · şema v13** | gerçek Sığdır, havuz sağ tık, kombinasyon seçici, kırmızı kapalı saat |
 | 08-31 | **Bölüm 1** | müsaitlikteki saat düğmesi, arama şeridi, Program'ın hızı, yedi kırmızı |
 | 08-30 | **aSc araştırma hattı** · **AB turu** · **AC turu** | 2940 metin + 528 konu, yedi + altı madde |
 | 08-29 | **otuz dördüncü oturum** · **v2.0.0 YENİ AD** · **AA turu** | dört madde, Mozaik, şema v11 |
@@ -652,6 +653,21 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 | 08-25 → 08-27 | **v1.0 teslim turu** · **Tauri** | `.exe` · site · planlar · klasör |
 | 08-25 | **Tasarım sistemi (A0–A6 + B)** · araçlar | o günkü tasarım sistemi |
 | 08-23 → 08-25 | **BİTENLER 0–15** | v0 → v0.9: çekirdek, ızgara, sürükle-bırak, baskı, otomatik dizme |
+
+---
+
+### 2026-08-31 · Program ve blok dağılımı — **BİTTİ ✅**
+
+- [x] Sığdır, 1280/1366/1920 genişliklerinde ve büyütülmüş arayüz ölçeklerinde
+      yatay kaydırmayı sıfırlıyor; kart yazısı 12 px altına inmiyor.
+- [x] Alt havuz kartlarının sağ tık menüsünde üç düzenleme yolu ve geçici satır
+      görünümü çalışıyor; konum isteyen maddeler görünür fakat kilitli.
+- [x] Dağılım sayaçları yerine bütün 3/2/1 kombinasyonlarını gösteren ortak
+      seçici geldi; sert günlük sınıra uymayan seçenekler gerekçesiyle kilitli.
+- [x] Şema v13 ile 4 saatlik blok desteği kalktı; v9–v12 `4 → 3+1` göçü
+      alternatif programların yerleşimlerini ve sabitlemelerini koruyor.
+- [x] Program'ın müsait olmayan çarpısı Müsaitlik tablosuyla aynı büyük kırmızı
+      görünümü kullanıyor; taralı zemin iki tabloda da duruyor.
 
 ---
 
@@ -2935,4 +2951,3 @@ madde başına bir commit, her commit `npm run kontrol` yeşilken.
 - **Simetri kırma kaldırıldı** — teoride doğru, ölçüldüğünde felaket (tuzak 21)
 
 ---
-

@@ -103,7 +103,7 @@ export interface Solver {
 /**
  * One lesson's blocks OF ONE LENGTH that still need putting down.
  *
- * Not one item per lesson: a lesson can want 4+3+2+1, and the search's whole
+ * Not one item per lesson: a lesson can want 3+2+1, and the search's whole
  * shape — a domain of legal start cells, an MRV count, a forward-checking
  * bound — assumes every block it is holding is the same length. So a 2+2+1
  * lesson becomes two items, one asking for two 2s and one asking for a single,
@@ -114,7 +114,7 @@ export interface Solver {
 interface Item {
   lesson: Lesson;
   roomId: Id | null;
-  /** How long each of THIS item's blocks is: 1, 2, 3 or 4. */
+  /** How long each of THIS item's blocks is: 1, 2 or 3. */
   block: number;
   /** Blocks still to place — never more than the week can hold. */
   need: number;
@@ -326,7 +326,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       ruleLevel(base, 'maxSameLessonPerDay') === 'block' && limit > 0 ? limit : Infinity;
 
     // Longest first, and one counter per length rather than one for doubles:
-    // a lesson can now be 4+3+2+1 and each of those is its own item competing
+    // a lesson can now be 3+2+1 and each of those is its own item competing
     // for the same cells and the same daily limit.
     const order = [...list].sort((a, b) => b.block - a.block);
     const left = new Map<Item, number>(order.map((x) => [x, x.need]));

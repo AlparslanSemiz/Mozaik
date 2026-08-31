@@ -324,7 +324,8 @@ function migrateV2toV3(raw: LegacyV2): State {
  * hours are doubles"), and v9 replaces that with `blocks` (the list itself).
  * Each older form is read as the list it was always describing:
  *
- *   v9+     blocks, clamped
+ *   v13     blocks, clamped to 3
+ *   v9..v12 blocks, every 4 read as 3 with the remaining hour implicit
  *   v7 v8   `pairs` doubles, then singles
  *   v1..v6  floor(hours / blockSize) blocks that long, then singles
  *
@@ -347,17 +348,23 @@ function readLessons(raw: unknown[], version: number): Lesson[] {
 
     let blocks: number[];
     if (version >= 9) {
-      blocks = clampBlocks(weeklyHours, asArray<unknown>(x.blocks, []).map((b) => asCount(b, 0)));
+      const stored = asArray<unknown>(x.blocks, []).map((b) => asCount(b, 0));
+      // v9..v12 allowed fours. Keeping the three and letting the weekly total
+      // imply the remaining single changes only the boundary, never a placed
+      // cell or pin: 4 -> 3+1.
+      blocks = clampBlocks(
+        weeklyHours,
+        version < 13 ? stored.map((b) => (b === 4 ? 3 : b)) : stored,
+      );
     } else if (version >= 7) {
       const pairs = Math.min(Math.floor(weeklyHours / 2), asCount(x.pairs, 0));
       blocks = Array<number>(Math.max(0, pairs)).fill(2);
     } else {
-      const size = asCount(x.blockSize, 1);
+      const oldSize = Math.min(asCount(x.blockSize, 1), 4);
+      const size = Math.min(oldSize, MAX_BLOCK);
       blocks =
         size >= 2
-          ? Array<number>(Math.floor(weeklyHours / Math.min(size, MAX_BLOCK))).fill(
-              Math.min(size, MAX_BLOCK),
-            )
+          ? Array<number>(Math.floor(weeklyHours / oldSize)).fill(size)
           : [];
     }
 
@@ -419,6 +426,7 @@ export function parseState(text: string): State | null {
     version === 9 ||
     version === 10 ||
     version === 11 ||
+    version === 12 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file

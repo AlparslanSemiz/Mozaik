@@ -426,9 +426,8 @@ const EN: Sozluk = {
   Dağılım: "Split",
   Ekle: "Add",
   "Dersleri yapıştır": "Paste lessons",
-  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3 · 4)":
-    "Class · Teacher (name or initials) · Weekly hours · Block (1 · 2 · 3 · 4)",
-  "{boy} saatlik blok sayısı": "Number of {boy}-hour blocks",
+  "Sınıf · Öğretmen (ad veya kısaltma) · Haftalık saat · Blok (1 · 2 · 3)":
+    "Class · Teacher (name or initials) · Weekly hours · Block (1 · 2 · 3)",
   "Günde en fazla {n} saat kuralı bu bloğu hiçbir yere sığdırmaz":
     'The "at most {n} hours a day" rule leaves this block nowhere to go',
   "{boy} saat > günde {n}": "{boy} h > {n}/day",
@@ -1272,8 +1271,8 @@ const EN: Sozluk = {
     "Enlarges the whole screen together: type, spacing, buttons and grid cells.",
   "Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o.":
     "Every plan is also written to **{klasor}** in Documents; that folder is what moves.",
-  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2, 3 ya da 4 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
-    "The split is how those hours are divided across the week: 2+1 means two hours back to back on one day and a single hour on another. A block can be 2, 3 or 4 hours; the rest are single. Per day ↑ is the most this lesson may take in one day; left empty, the number from Settings → Rules applies.",
+  "Dağılım, o saatlerin haftaya nasıl bölüneceğidir: 2+1 demek bir gün iki saat üst üste, başka bir gün tek saat. Bir blok 2 ya da 3 saat olabilir; kalanlar tektir. Günde ↑ bu dersin bir gündeki en fazla saatidir; boşsa Ayarlar → Kurallar’daki sayı geçerli olur.":
+    "The split is how those hours are divided across the week: 2+1 means two hours back to back on one day and a single hour on another. A block can be 2 or 3 hours; the rest are single. Per day ↑ is the most this lesson may take in one day; left empty, the number from Settings → Rules applies.",
   "Ders yapılan günleri işaretleyin; yanındaki kutu **öğle arasının** yerini söyler.":
     "Tick the teaching days; the box beside each says where the **long break** falls.",
   "Derslik yerleştirirken seçilmez ve aynı dersliği paylaşan iki sınıf aynı saate konamaz. Renk otomatik atanır, kimseyle çakışmaz; satır başındaki nokta ile basılan sayfanın başlığında görünür.":

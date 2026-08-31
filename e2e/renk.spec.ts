@@ -559,6 +559,8 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
         size: parseFloat(own.fontSize),
         color: own.color,
         background: own.backgroundColor,
+        backgroundImage: own.backgroundImage,
+        weight: own.fontWeight,
         beside,
       };
     });
@@ -575,14 +577,28 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     // Bigger must not mean fainter: the hatch sits on --closed.
     const t = await tokens(page, ['--closed']);
     expect(contrast(style.color, t['--closed']!)).toBeGreaterThanOrEqual(4.5);
+    expect(style.backgroundImage).toContain('repeating-linear-gradient');
 
-    // The same mark on the availability grid grew too.
+    // Program now uses the exact same red, size and weight as Availability;
+    // the hatch remains the non-colour channel on both tables.
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
-    const availSize = await page
+    const avail = await page
       .locator('table.availability td.closed')
       .first()
-      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    expect(availSize).toBeGreaterThanOrEqual(15);
+      .evaluate((el) => {
+        const own = getComputedStyle(el);
+        return {
+          size: parseFloat(own.fontSize),
+          color: own.color,
+          weight: own.fontWeight,
+          backgroundImage: own.backgroundImage,
+        };
+      });
+    expect(avail.size).toBeGreaterThanOrEqual(15);
+    expect(style.size).toBeCloseTo(avail.size, 1);
+    expect(style.color).toBe(avail.color);
+    expect(style.weight).toBe(avail.weight);
+    expect(avail.backgroundImage).toContain('repeating-linear-gradient');
   });
 });
 

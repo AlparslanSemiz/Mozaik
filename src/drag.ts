@@ -335,7 +335,7 @@ export function useDrag(
             // painting the REST of the block too, with nothing to show for it.
             //
             // The swallowing cell is found by CONTAINMENT and not by a fixed
-            // offset: a block is 1 to 4 hours wide, so "the cell one to the
+            // offset: a block is 1 to 3 hours wide, so "the cell one to the
             // left with span 2" only ever answered for the old pair (pitfalls
             // 60 and 85 — a position is found by what covers it, not by a
             // count).

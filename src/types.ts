@@ -95,7 +95,7 @@ export interface Lesson {
    * is taught as single hours, so this list alone fixes the whole shape: 9
    * hours with blocks [3, 2] is 3+2+1+1+1+1.
    *
-   * Every entry is 2, 3 or 4 and the sum never exceeds `weeklyHours`;
+   * Every entry is 2 or 3 and the sum never exceeds `weeklyHours`;
    * `clampBlocks` in blocks.ts is the only place that decides it. NOT a second
    * truth next to `weeklyHours` — the total is still the total, this is only
    * its shape, and it cannot contradict it.
@@ -103,7 +103,7 @@ export interface Lesson {
    * It replaced a single `pairs` count, which could only ever mean "this many
    * TWO-hour blocks" and so could not say 3 or 4 at all; and that in turn had
    * replaced a single `blockSize` meaning "every block is this long", which
-   * could not say 2+1. A list can say all three.
+   * could not say 2+1. A list can say both supported long-block lengths.
    */
   blocks: number[];
   /**
@@ -229,5 +229,6 @@ export interface ProgramVariant {
  * v10: State.pinned — cells the reader has locked in place.
  * v11: ClassGroup.maxSameLessonPerDay — the daily limit gained a middle layer.
  * v12: placements/pinned moved into named alternative programs.
+ * v13: supported blocks are 2 or 3 hours; each old 4 becomes 3 plus an implied single.
  */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;

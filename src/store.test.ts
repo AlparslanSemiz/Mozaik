@@ -674,6 +674,39 @@ describe('parseState — v8 → v9 göçü', () => {
   });
 });
 
+describe('parseState — v12 → v13: dört saatlik bloklar', () => {
+  it('4 saatlik blokları 3+1 yapar; alternatifleri, yerleşimleri ve sabitlemeleri korur', () => {
+    const raw = JSON.parse(JSON.stringify(sampleState()));
+    raw.schemaVersion = 12;
+    const first = raw.lessons[0];
+    const second = raw.lessons[1];
+    first.weeklyHours = 10;
+    first.blocks = [4, 4, 2];
+    second.weeklyHours = 4;
+    second.blocks = [4];
+
+    const placements = Object.fromEntries(
+      Array.from({ length: 10 }, (_, hour) => [`${first.classId}|0|${hour}`, first.id]),
+    );
+    const pinned = { [`${first.classId}|0|0`]: 1, [`${first.classId}|0|4`]: 1 };
+    raw.programs = [
+      { id: 'program-1', name: 'Program 1', placements, pinned },
+      { id: 'program-2', name: 'Program 2', placements: { ...placements }, pinned: { ...pinned } },
+    ];
+    raw.activeProgramId = 'program-2';
+    const originalPrograms = JSON.parse(JSON.stringify(raw.programs));
+
+    const migrated = parseState(JSON.stringify(raw))!;
+    expect(migrated.schemaVersion).toBe(13);
+    expect(migrated.lessons[0]!.blocks).toEqual([3, 3, 2]);
+    expect(blockPlan(migrated.lessons[0]!)).toEqual([3, 3, 2, 1, 1]);
+    expect(migrated.lessons[1]!.blocks).toEqual([3]);
+    expect(blockPlan(migrated.lessons[1]!)).toEqual([3, 1]);
+    expect(migrated.programs).toEqual(originalPrograms);
+    expect(migrated.activeProgramId).toBe('program-2');
+  });
+});
+
 /**
  * v10: the pins. A separate describe because they are not a migration — v9 and
  * everything under it simply had none, and the reader's own file is the first
