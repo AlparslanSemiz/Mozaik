@@ -116,9 +116,20 @@ Yerleştirme · Arayüz Ayarları · Yardım`.
 > `ı ğ ş İ` yoktur — o yüzden sistem yereli de değişti. Geri alma:
 > `scripts/asc-utf8-geri-al.ps1` (betik kendi yazdı, eski değerlerle).
 >
-> **AÇIK İŞ:** `docs/asc/ekran/` altındaki 18 görüntü **yeniden başlatmadan
-> önce** çekildi, yani hâlâ bozuk harf taşıyor. Yeniden başlattıktan sonra
-> `scripts/asc-tur.ps1` bir kez koşturulmalı.
+> **KAPANDI (2026-08-31).** Windows yeniden başlatıldı, `asc-tur.ps1` yeniden
+> koşturuldu, ve harfler düzeldi. Ama yeniden başlatmanın gerçekten gerekli
+> olduğunu **ancak ekrana bakmak** söyledi — ve bu tuzak 101'in bir örneği
+> daha:
+>
+> ```
+>                   once            sonra
+> GetACP()          1254            1254        <- YANILTAN: ikisinde de ayni
+> WinSystemLocale   en-US           tr-TR       <- GERCEK fark burada
+> diyalog metni     Tanıml� Dersler Tanımlı Dersler
+> ```
+>
+> Yani kayıt defterindeki `ACP` "düzeldi" diyordu ve yanlış söylüyordu; kapıyı
+> açan ölçüm bir kayıt değeri değil, bir **yakalama** oldu.
 
 ---
 
@@ -235,18 +246,51 @@ serbest; sayfanın fiziksel kutusu değil.
 
 #### 1c · Kısıt listesi — programa girecekler
 
-Bizde şu an 7 sert + 3 ayarlanabilir kural var. aSc'nin 97 konusunda tekrar
-tekrar çıkan ve bizde karşılığı olmayanlar:
+Bizde şu an 7 sert + 3 ayarlanabilir kural var. **2026-08-31'de bu liste
+yardım konularından değil EKRANDAN çıkarıldı** — `54-ogretmen-kisitlamalar`,
+`56-sinif-kisitlamalar` ve `58-iliski-turleri`. Aşağıdakiler aSc'nin kendi
+kelimeleri.
 
-| Kısıt | Not |
+**Öğretmen kısıtları** (`54`):
+
+| aSc'de | Bizde |
 |---|---|
-| **Boşluk (pencere) kuralları** | En büyük aile. Öğretmenin arada boş saati, sınıfın boş saati, "günde en fazla N boşluk", "2 uzunluğunda boşluk olmasın". Kontrol'ün `sınıfta boşluk var` uyarısı da buradan. **Çözücünün kalite ölçümü zaten bunu bekliyor**: bir öğretmen geldiği günlerin %87'sinde boş saat bekliyor |
-| **Kartlar arası ilişki** | "Şu iki ders peş peşe olmasın" · "aynı gün olmasın" · "Biyoloji, Kimya'nın ertesi günü olmasın" · "çift dersler tek derslerden önce" · "iki sınıfta aynı saatte olsun" |
-| **Sınıf için günlük min/max** | Bizde `minPerDay` var ama **yalnız raporda**; yerleştirmede yok |
-| **Aynı dersten günde iki tane: ardışık olsun / olmasın** | Bizde "günde en fazla N" var, ardışıklık yok |
-| **Belirli ders belirli konumda** | "Coğrafya son ders olsun" · "sınıf en fazla bir tane 7. ders görsün" · "beden sabah olmasın" |
-| **Öğretmen: günde en fazla N farklı sınıf** | |
-| **Çift ders belirli günde ya da belirli molada olmasın** | |
+| **Bir haftadaki toplam boş ders sayısını sınırla** (*"2. ve 6. ders arası boş ise boşluk 3'tür"*) | **YOK** |
+| **Bir günde 3 saatten fazla boş ders olamaz** · aynısının 2'lisi | **YOK** |
+| **Ders günlerinin sayısını sınırla** (haftada en fazla N gün gelsin) | **YOK** |
+| Günde alması gereken **min./max** ders sayısı, + *"hafta sonunda uygulama"* istisnası | `minPerDay` var ama **yalnız Kontrol'de** |
+| **Ardışık** derslerin maksimumu, + *"hafta sonu kontrol edilmesin"* | `maxConsecutive` ✔ |
+| Binalar arası günlük transit | tek bina, düştü |
+
+**Sınıf kısıtları** (`56`): `2. derste gelmesine izin ver` · **`Hazırlık`**
+(günde en fazla kaç derse hazırlanılır) · **`Öğrenci grupları aynı saatte
+bitirmeli`** · **`Öğle arası bir ARALIK`** (5–7. ders arası, nereye düşeceğine
+çözücü karar veriyor — bizde `Day.longBreakAfter` tek bir sayı) ·
+`Sınıf öğretmeninin özel ders günü`.
+
+**Kartlar arası ilişkiler** (`58`) — on dört tür, tam liste:
+
+```
+Aynı gün yerleştirilemez · aynı gün ardarda yerleştirilemez
+Ders kartlarının günlere dağılımı · bir güne yerleştirilmelidir
+Ardarda yerleştirilmelidir (belirtilen / rastgele sırayla)
+Grup arasında ayrılma olamaz · farklı sınıflardaki kart grupları bir güne
+Bölünmüş kartlar aynı günde · grup dersleri aynı zamanda başlasın
+Her sınıfa aynı zamanda · her gün aynı periyotta · rezerv alanı
+İlk saatte başlasın veya son saatte bitsin · öğleden sonra olabilir
+```
+
+**Ve kısıtların bir AĞIRLIĞI var** (`59`): `Düşük · Normal · Yüksek ·
+Sıkı(%100) · En Uygun`. Bizde üç kademe (`Kapalı · Uyar · Engelle`);
+`Sıkı(%100)` ≈ `Engelle`, ama ortadaki üç kademenin karşılığı yok — bizim
+`Uyar`ımız tek bir ses. Öteki yarısı çıktıda: `Planlama Sonrası Kontrol`
+ihlalleri **puanlıyor** ve tek bir toplam veriyor (`Genel 365`), ölçüyü yazıyor
+(`3>2`) ve kaç kez olduğunu sayıyor (`2x`).
+
+> **Ağırlıklı kısıt ölçülmeden yazılmaz:** bizim çözücümüzün bir kalite ölçümü
+> bugün yok, ve ağırlık onsuz anlamsız. `İstatistik` ekranı aSc'nin ölçüsünü
+> gösteriyor ve adı **pencere**: `Pencerelerin Toplam Sayısı 147 · Ortalama
+> 3,27 · Öğretmenin Maksimumu 8`.
 
 ---
 
@@ -375,12 +419,25 @@ Sayılar hasat edilen konu sayısı; `Kova` yukarıdaki tabloya işaret eder.
 | Card locking | `State.pinned` | Bizde hücreye bağlı |
 
 
-## Ekran envanteri — 18 görüntü, hepsi Türkçe arayüzde
+## Ekran envanteri — 66 görüntü, hepsi Türkçe arayüzde
+
+> **TAM ENVANTER `docs/asc/ekran-envanteri.md`'de** (2026-08-31, R1+R2).
+> Aşağıdaki tablo ilk turun 18'i; derin turun kalan 48'i ve **her ekranın ne
+> söylediği** o dosyada. Buradaki karar tablosu onun bulgularıyla güncellendi.
 
 `scripts/asc-tur.ps1` tam turu koşar ve `docs/asc/ekran/` altına yazar. Tur
 bittiğinde **kendini denetler**: iki görüntünün MD5'i aynıysa bir tıklama
 kaçmıştır ve uyarı basar — hiçbir şeyi sorgulayamayan bir gezginin tek
 güvenlik ağı bu.
+
+**İki mod eklendi (2026-08-31):** `-Sadece derin` liste pencerelerinin içini,
+çözücü ekranlarını ve **baskı ailesinin tamamını** gezer; yanına
+`scripts/asc-adim.ps1` yazıldı — bir tıklama dizisini dışarıdan alıp yakalayan
+tek atımlık komut. Derin envanter kör koordinatla çıkarılamazdı: her adımda
+görüntü alınıp **okundu** ve sıradaki tıklamanın yeri o görüntüden ölçüldü
+(UI Automation aSc'de sıfır kontrol görüyor, ölçülü). Bulunan koordinatların
+hepsi betiğe geri yazıldı — tuzak 69: bir çıktı commit'leniyorsa reçetesi de
+commit'lenir.
 
 | Dosya | Ne var içinde |
 |---|---|
