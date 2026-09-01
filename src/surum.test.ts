@@ -79,6 +79,29 @@ describe('kimlik — verinin ADRESİ', () => {
     expect(tauriConf.productName).toBe('Mozaik');
     expect(tauriConf.app.windows.map((w) => w.title)).toContain('Mozaik');
   });
+
+  it('pencere BÜYÜTÜLMÜŞ açılıyor, ve en az yüksekliği %150 ekrana sığıyor', () => {
+    // WHY THIS TEST EXISTS. The window asked for 1600x1000 and never
+    // maximised, so the exe ran the page in 1600 CSS px while every layout
+    // number in this repo — playwright.config.ts, `npm run ekran`, the whole
+    // Sığdır ladder — was measured at 1920. Nothing compared the two, because
+    // one of them is a Rust build config and the other is a test runner's
+    // option, and they never meet. Measured in the smaller box on a full grid
+    // in Sığdır: the cell fell to 20.83px and 315 of 374 cards read "4…"
+    // instead of "411". My father's words were "derslerin hepsi gözükmüyor
+    // sığdır olmasına rağmen", and he was describing exactly this.
+    //
+    // The heights are logical pixels, which is the other half of it. Windows
+    // display scaling divides the desktop: at %150 a 1920x1080 screen is
+    // 1280x720 logical and the work area about 672. A minHeight of 700 made
+    // the window IMPOSSIBLE to fit on that screen — and the first thing off
+    // the bottom edge is `.grid-wrap`'s own scrollbar, so the rows you cannot
+    // see are also the rows you cannot scroll to.
+    const win = tauriConf.app.windows[0]!;
+    expect(win.maximized, 'exe ölçülmemiş bir kutuda koşar').toBe(true);
+    expect(win.minHeight, '%150 ölçekte çalışma alanı 672 mantıksal px').toBeLessThanOrEqual(672);
+    expect(win.minWidth).toBeLessThanOrEqual(1280);
+  });
 });
 
 describe('güncelleme adresi — manifest ile exe aynı şeyi tanıyor', () => {

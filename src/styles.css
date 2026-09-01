@@ -420,6 +420,13 @@
      number every run, so this cannot quietly drift wide again either. */
   --rowhead-w: 5.25rem;
 
+  /* The lunch separator's width, and it is a TOKEN because two places need
+     the same number: the `.break-col` cells draw it and Sığdır's --cell-w
+     formula subtracts it. It was written by hand in both, so narrowing one
+     silently made the other's arithmetic wrong by --break-cols pixels
+     (pitfall 36: a derived measure is computed from what it derives from). */
+  --break-w: .375rem;
+
   /* The height of a control in the tool strip, and therefore of the strip.
      2.25rem = 31.5px at scale 1 on the 14px root: still over the 24px WCAG 2.2
      target size. It was 2rem against a 16px root (32px) and is written up here
@@ -1864,14 +1871,24 @@ table.grid thead tr:nth-child(2) th {
      card text at --fs-2xs ......... 1907, over  0
 
    So it is the class number ("411") setting the column's min-content, and one
-   step down the ladder is enough. `max(12px, ...)` and not the token alone:
-   12px is a floor for a reader who has trouble seeing, so it is written in px
-   ON PURPOSE — it must not shrink with the scale the way a rem would. At 100%
-   this max resolves to 12px and nothing changes at all, which is correct:
-   the week already fitted there. */
+   step down the ladder is enough. A px floor and not the token alone: 12px is
+   a floor for a reader who has trouble seeing, so it is written in px ON
+   PURPOSE — it must not shrink with the scale the way a rem would.
+
+   `min(1, --ui-scale)` is the one thing it DOES follow, and only downwards.
+   At scale 1 this resolves to exactly 12px, so the default screen is
+   untouched; above 1 the floor must not grow, which is --fs-2xs's job. The
+   clarification of 2026-08-30 already says the floor is a promise about the
+   DEFAULT scale — "%80'e uzanan okuyucu tabana kendisi cevap veriyor" — and
+   this applies that sentence to the cards. It is the only knob that reaches
+   Windows at %125, where the box is 1536 CSS px: measured there, dropping the
+   app's own scale to %80 takes clipped cards from 315/374 to 25/374 (and the
+   row from 37px to 31px, so more rows fit as well). Left at scale 1 on a
+   %125 machine the clipping stays: 72 columns of ~21.6px text plus the head
+   do not fit in 1536px, and no CSS makes them. */
 :root[data-density='sigdir'] .card-top,
 :root[data-density='sigdir'] .card-bottom {
-  font-size: max(12px, var(--fs-2xs));
+  font-size: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -1896,22 +1913,94 @@ table.grid thead tr:nth-child(2) th {
    `style={{ width }}` is about a measurement written in the JSX, and a column
    count is data the layout needs.
 
-   There is deliberately no readable-width floor here: Sığdır's contract is
-   that the complete week fits horizontally. The colgroup fixes the row and
-   break columns while table-layout distributes the remaining width among
-   lesson columns; card text is ellipsised above instead of growing a column.
+   There is still no readable-width FLOOR here, and that is deliberate: this
+   mode's contract is that the complete week fits horizontally, so when the box
+   is too narrow the card text ellipsises rather than the grid growing a
+   scrollbar. What changed on 2026-09-01 is what the lesson columns are given
+   to begin with. Measured on the sample school, `Otomatik diz`, 374 cards,
+   counting cards whose .card-top actually overflows:
+
+     1920x1080 ..... cell 25.28  clipped  25/374
+     1600x968 ...... cell 20.83  clipped 315/374   <- the exe's real box
+     1536x816 ...... cell 19.94  clipped 315/374   <- Windows at %125
+
+   315 of 374 cards read "4…" instead of "411" — the class number is the only
+   thing on the card, so the week fitted and the lessons did not. Two numbers
+   were being spent on things that are not lessons: the row head at 5.25rem
+   (68.5px) and six separators at .375rem (29px), 97px of a 1920px box. Both
+   are overridden HERE rather than at :root so the other two densities keep
+   theirs, and --cell-w reads them on the SAME element it is declared on —
+   a var() in a custom property resolves where it is declared, not where it is
+   used (pitfall 63).
+
+   5rem is a WINDOW with a measured wall on each side. Swept on a full grid at
+   1920px, in BOTH views, counting what actually overflows:
+
+     4.25rem ... cell 25.66  cards 0/374   class heads 20/20  corner clipped
+     4.50rem ... cell 25.61  cards 0/374   class heads  0/20  corner clipped
+     4.75rem ... cell 25.58  cards 0/374   class heads  0/20  corner ok
+     5.00rem ... cell 25.53  cards 0/374   class heads  0/20  corner ok
+     5.25rem ... cell 25.48  cards 25/374  class heads  0/20  corner ok  <- old
+
+   Two different things set the lower wall, and only one of them is visible in
+   the teacher view. The CLASS row's second line is "G dersliği" where the
+   teacher's is a three-letter subject short, and the corner carries the axis
+   name; sweeping the teacher view alone would have shipped 20 heads reading
+   "G dersliğ…". The upper wall is the cards: every 0.25rem handed back to the
+   head costs the 72 lesson columns 0.045px each, and the old value left 25 of
+   them under the floor. 5rem rather than 4.75rem because the walls move with
+   the school's own words — a longer room name or subject short pushes the
+   left one right, and this is the end of the window with room to give.
 
    The --space-4 term reserves border-rounding slack. Even with the explicit
    colgroup Chromium can round the table border one device pixel beyond the
    container at 1366px/%125, hence the final 1px subtraction on table width. */
 :root[data-density='sigdir'] table.grid {
+  --rowhead-w: 5rem;
+  --break-w: .1875rem;
   --cell-w: max(
     0px,
-    (100cqw - var(--rowhead-w) - var(--break-cols) * 0.375rem - var(--space-4)) /
+    (100cqw - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
+        var(--space-4)) /
       var(--lesson-cols)
   );
   width: calc(100% - 1px);
   max-width: calc(100% - 1px);
+}
+
+/* And the narrower head has to ELLIPSISE, not wrap. Without this the row head
+   broke "MÇ / Mat" onto a third line and the row went 38.5px -> 50.6px, so a
+   width fix bought itself a vertical regression — measured, and the whole
+   point of this round was that the vertical stays untouched. */
+:root[data-density='sigdir'] table.grid tbody th,
+:root[data-density='sigdir'] table.grid tbody th * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The head's side padding goes the way the cell's did, and the note on
+   `tbody td { padding: 0 }` above already argued it: in this mode the column
+   is sitting on its content floor, so padding there is not decoration, it is
+   width. 6px a side against a 65px box is a tenth of the column, and the row
+   head is the one column whose content ("G dersliği", 40px at %80) has no
+   shorter form to fall back to. Measured: without this the class view's 20
+   heads were 2px over at %80 and ellipsised to "G dersliğ…" — a regression
+   this round introduced and the teacher view could never have shown, because
+   its second line is a three-letter subject short. */
+:root[data-density='sigdir'] table.grid .row-head {
+  padding-inline: 3px !important;
+}
+
+/* The corner carries the axis's NAME ("ÖĞRETMEN" / "SINIF"), and the narrower
+   head cut it to "ÖĞRETME" — a word missing its last letter reads as a bug,
+   not as an abbreviation. It steps down one notch instead, the same move the
+   card text makes above and for the same reason: this is the one label in the
+   grid that is read once and then never again. */
+:root[data-density='sigdir'] table.grid .corner {
+  font-size: var(--fs-2xs);
+  letter-spacing: 0;
 }
 
 :root[data-density='sigdir'] table.grid col.grid-row-col {
@@ -1919,7 +2008,7 @@ table.grid thead tr:nth-child(2) th {
 }
 
 :root[data-density='sigdir'] table.grid col.grid-break-col {
-  width: .375rem;
+  width: var(--break-w);
 }
 
 :root[data-density='sigdir'] table.grid col.grid-hour-col {
@@ -2034,9 +2123,9 @@ table.grid thead tr:nth-child(2) th {
   /* !important for the same reason the background and borders below need it:
      `table.grid tbody td` sets every body cell to --cell-w and outranks a bare
      class. Without it the "narrow" separator was as wide as a lesson. */
-  width: .375rem !important;
-  min-width: .375rem !important;
-  max-width: .375rem !important;
+  width: var(--break-w) !important;
+  min-width: var(--break-w) !important;
+  max-width: var(--break-w) !important;
   padding: 0;
   background: var(--bg) !important;
   border-left: 1px solid var(--line-dark) !important;

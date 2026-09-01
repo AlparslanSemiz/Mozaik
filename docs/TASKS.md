@@ -33,7 +33,6 @@ Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre on
 
 kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya işte o kartların arkasından ya da başka bir şekilde de o kartın oraya gelip gelemyeceğini bilmek lazım yani kırmızı mı turuncu mu falan.
 
-Uygulama'da exe'de babamın ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına rağmen.
 
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
@@ -614,6 +613,25 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       istediği oluk orada yok — testin **kendi koruması** bunu söylüyor.
       Regresyon değil, platform farkı. Karar: oluk yoksa `skip` mi etsin,
       yoksa yazıldığı makineye özel mi kalsın.
+- [x] **B7.13 Exe'nin penceresi ekranı KULLANIYOR, ve Sığdır dersleri
+      kırpmıyor** (2026-09-01). Senin satırın: *"Uygulama'da exe'de babamın
+      ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına
+      rağmen."* Sebep tahmin edilmedi, ölçüldü (tuzak 101) ve **iki** taneydi.
+      (a) `tauri.conf.json` `1600×1000` mantıksal px istiyor ve `maximized`
+      yoktu — deponun bütün düzen ölçümleri 1920'de yapılmışken exe 1600 CSS
+      px'te koşuyordu. Dolu ızgarada Sığdır'da: 1920'de 374 kartın 25'i,
+      **1600'de 315'i** `411` yerine `4…` yazıyor. (b) Sığdır satır başına
+      5,25rem ve altı ayraca .375rem, yani 1920'lik kutunun 97 px'ini ders
+      sütunlarına hiç vermiyordu. Yapılanlar: `"maximized": true`,
+      `minHeight` 700 → 640 (%150'de çalışma alanı 672), satır başı **5rem**,
+      ayraç **.1875rem** (artık `--break-w` tokeni, iki yerde birden), satır
+      başına `nowrap` + ellipsis ve daha dar dolgu, köşedeki eksen adı bir
+      basamak küçük, ve kart yazı tabanı `--ui-scale`'i **yalnız 1'in altında**
+      izliyor. Ölçülen: 1920×1032'de kırpılan kart **25 → 0**, iki eksende de,
+      ve satır yüksekliği ile tablo boyu **kıpırdamadan**. Bkz. tuzak 107.
+      Kalan ve kapanmayan: Windows %125'te ölçek 1,0 bırakılırsa kırpılma
+      sürüyor (72 sütun × ~21,6 px 1536 px'e girmiyor); çaresi Ayarlar →
+      Görünüm'den %80, ya da `Geçici görünüm`den gün gizlemek.
 - [→] **B7.8 `scripts/asc-tur.ps1` yeniden koşturulsun** → **R1**'e taşındı.
       Artık bir dağıtım işi değil, envanterin **önkoşulu**.
 - [→] **B7.9 Roboders incelensin** → **§1b** (R5 · R6 · R7). Senin
@@ -758,6 +776,7 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Program tarafı da tuval gibi word gibi olsun hareket ettirme vesaire eğer olabiliyorsa. | **B4.2** — tuval artık Program ızgarasının kendisi |
 | Ayarlar sectionunun kendine has kendi içinde simetrik olma koşuluyla designi olabilir. | **B2.1–B2.3** (§2) |
 | Arama kısmına bir şey yazınca arama bloğu genişliyor genişlemesin. | **B1.6** — dosyanın son satırıydı, hiçbir tura girmemişti |
+| Uygulama'da exe'de babamın ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına rağmen. | **B7.13** — kapandı: pencere maximize + Sığdır'ın genişlik iadesi (tuzak 107) |
 | Ayarlar hakkında kısmında sağa sola kaydırma olmasın. | **B2.5** — önce ölçülecek |
 | Görsel çıkartma | **B3.1** |
 | Çıktıda ayrı ayrı birden fazla pdf oluşturma. | **B3.2** |

@@ -174,8 +174,12 @@ if (uzakta === '') {
 }
 
 console.log(`  ${etiket} itildi ve uzakta görüldü. İki iş akışı da koşuyor:\n`);
-console.log('      site   → https://alparslansemiz.github.io/ders-programi/');
-console.log('      sürüm  → https://github.com/AlparslanSemiz/ders-programi/releases/latest');
+// The repository was renamed `ders-programi` -> `Mozaik` and these two lines
+// were not. The Releases one redirects; the Pages one does NOT — Pages
+// publishes a repository by its NAME, so the old address is a plain 404 and
+// this script was printing it at the end of every release (B7.11, pitfall 106).
+console.log('      site   → https://alparslansemiz.github.io/Mozaik/');
+console.log('      sürüm  → https://github.com/AlparslanSemiz/Mozaik/releases/latest');
 console.log('');
 console.log('  Bitince üç indirme bağlantısının 200 verdiğini görün:\n');
 console.log('      Mozaik.html · Mozaik-Windows-kurulum.zip · Mozaik.exe');

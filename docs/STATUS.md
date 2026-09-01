@@ -1,7 +1,88 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-09-01 (kırk yedinci oturum: sürükleme performansı +
-ayrıntılı görev çubuğu simgesi + Sınıftan etiketi)
+Son güncelleme: 2026-09-01 (kırk sekizinci oturum: exe'nin penceresi +
+Sığdır'ın genişlik iadesi)
+
+---
+
+## Kırk sekizinci oturum — "Sığdır'da dersler gözükmüyor" (2026-09-01)
+
+Tek not defteri satırı: *"Uygulama'da exe'de babamın ekranında program
+kısmında derslerin hepsi gözükmüyor sığdır olmasına rağmen."* → **B7.13**,
+tuzak 107. Şema, bağımlılık ve genel API değişmedi.
+
+**Sebep tahmin edilmedi, ölçüldü** (tuzak 101). HEAD'den derlenen
+`index.html`, `file://`, örnek okul + `Otomatik diz` (25 öğretmen × 72 ders
+sütunu, 374 kart), `Sığdır` açık, kırpılma `.card-top`'un kendi
+`scrollWidth`'inden sayıldı:
+
+| Kutu | Hücre | Kırpılan kart | Görünen satır | Yatay taşma |
+|---|---|---|---|---|
+| 1920×1080 (deponun varsaydığı) | 25,28 px | 25/374 | 23/25 | 0 |
+| **1600×968 (exe'nin gerçek kutusu)** | **20,83 px** | **315/374** | 20/25 | 0 |
+| 1536×816 (Windows %125) | 19,94 px | 315/374 | 20/25 | 0 |
+| 1280×672 (Windows %150) | 16,40 px | 315/374 | 12/25 | 0 |
+
+Yani kartlar `411` değil `4…` yazıyordu: hafta sığıyor, dersler görünmüyor.
+
+**İki bağımsız sebep.** (a) `tauri.conf.json` penceresi `1600×1000`
+**mantıksal** px istiyor ve `maximized` yok — exe %100'de bile sayfayı 1600 CSS
+px'te koşturuyordu, deponun her düzen ölçümü ise 1920'de yapılmıştı; ayrıca
+`minHeight: 700`, %150'deki 672 px'lik çalışma alanından büyük olduğu için
+pencere o ekrana **sığdırılamıyordu**. (b) Sığdır satır başına 5,25rem ve altı
+ayraca .375rem veriyordu: 1920'lik kutunun 97 px'i ders sütunlarına hiç
+ulaşmıyordu.
+
+**Üçüncüsü ve asıl ders: bunu koruyacak test yanlış kutuya bakıyordu**
+(tuzak 64). `gorunum.spec.ts`'in `clipped` sayacı `.card` üstünden
+ölçüyordu; ellipsis `.card-top`'ta ve o `width: 100%`, yani kapsayıcı asla
+taşmıyor. **Mutasyonla ölçüldü:** kusur yerindeyken eski metrik `0`, yenisi
+`315`.
+
+**Yapılanlar** — `maximized: true`, `minHeight` 700 → 640; Sığdır'da satır başı
+5rem, ayraç .1875rem (artık `--break-w` tokeni, çünkü sayı `--cell-w`
+formülünde ve `.break-col`'da **iki kez elle** yazılıydı, tuzak 36), satır
+başında `nowrap` + ellipsis + dar dolgu, köşedeki eksen adı bir basamak küçük,
+ve kart yazı tabanı `max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs))`.
+
+**Sonuç, ölçülen (1920×1032, iki eksende de):**
+
+| | önce | sonra |
+|---|---|---|
+| kırpılan kart | 25/374 | **0/374** |
+| kırpılan satır başı | 0/25 | 0/25 |
+| köşedeki eksen adı | `ÖĞRETME` | tam |
+| satır yüksekliği | 38,5 px | **38,5 px** |
+| tablo yüksekliği | 994 px | **994 px** |
+| yatay taşma | 0 | 0 |
+
+Satır başı **bir pencere**, tek bir sayı değil: iki eksende süpürüldü —
+4,25rem'de sınıf görünümünün 20 satır başının 20'si kırpılıyor, 5,25rem'de
+25 kart kırpılıyor, 4,75rem ile 5rem arasında ikisi de temiz. **Yalnız
+öğretmen görünümünde ölçmek 4,25rem'i "temiz" gösteriyordu**; ızgaranın iki
+ekseni var, ölçüm de iki eksende alınır.
+
+**Dikeye bilerek dokunulmadı** (kullanıcı kararı): 1920×1080'de 25 satırın
+23'ü görünür, gerisi kaydırılır. Ölçülmüştü — Sığdır'da kartın alt satırını
+kaldırmak satırı 38,5 → 35,0 px yapıp 25/25'i sığdırıyordu; istenmedi.
+
+**KAPANMAYAN, ve dürüstlük şartı bu:** Windows %125'te yazı büyüklüğü %100'de
+bırakılırsa kırpılma **315/374 sürüyor**. 72 sütun × ~21,6 px metin + satır
+başı 1536 CSS px'e girmiyor ve bunu düzeltecek bir CSS yok. İki çıkış var,
+ikisi de zaten üründe: Ayarlar → Görünüm'den ölçeği %80'e almak (ölçülen:
+315 → 25, ve satır 37 → 31 px), ya da `Geçici görünüm`den gün gizlemek.
+
+**Doğrulanmayan:** pencerenin kendisi bu makinede görülemez (macOS, hedef
+Windows). `maximized` ve `minHeight` `src/surum.test.ts` ile çivili; gerçek
+pencere babanın makinesinde bir kez görülmeli (**B7.1**).
+
+**Süit:** `npm run kontrol` **549 geçti, 6 düştü**. Altısı da **bu turdan önce
+de düşüyordu** ve bu iddia ölçüldü: değişiklikler `git stash`'lenip aynı
+testler koşuldu, aynı altısı düştü. Üçü havuz sıralaması (`program.spec.ts`),
+ikisi araç şeridi (`serit.spec.ts`), biri `kayma.spec.ts`'in bilinen macOS
+oluk farkı (**B7.7**). İlk koşuda yedinci bir düşüş vardı
+(`gorunum.spec.ts` "Müsaitlikte saat tercihi") — tek başına ve iki tam koşuda
+daha yeşil geçti, yani paralel yük altında bir flake; sebebi aranmadı.
 
 ---
 

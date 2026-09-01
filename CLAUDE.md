@@ -465,7 +465,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
-formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menünün YEDİ üst kalemi adlarıyla, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor; artı **karttaki raptiye**: hover olmadan da görünüyor, basıp sürüklemek kartı KALDIRMIYOR, tek tık kilitliyor). **Havuzun sırası ve süzgeci** (`program.spec.ts` 88: beş sıra, her sıranın kendi başlıkları, başlıkların saydığı toplam ekrandakine eşit, süzgeç neyi sakladığını söylüyor). **Panelden düzenleme** (`panel.spec.ts` 87: karttan öğretmene/sınıfa açılan yol, ve sheet'te değişen kısaltmanın IZGARADA görünmesi). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94) |
+formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menünün YEDİ üst kalemi adlarıyla, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor; artı **karttaki raptiye**: hover olmadan da görünüyor, basıp sürüklemek kartı KALDIRMIYOR, tek tık kilitliyor). **Havuzun sırası ve süzgeci** (`program.spec.ts` 88: beş sıra, her sıranın kendi başlıkları, başlıkların saydığı toplam ekrandakine eşit, süzgeç neyi sakladığını söylüyor). **Panelden düzenleme** (`panel.spec.ts` 87: karttan öğretmene/sınıfa açılan yol, ve sheet'te değişen kısaltmanın IZGARADA görünmesi). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94). **Sığdır'ın EXE kutusu:** 1920×1032 ve 1600×968'de haftanın sığdığı, ve 1920'de hiçbir kart yazısının · satır başının · köşedeki eksen adının kırpılmadığı, **iki eksende birden** — ve satırın Rahat'takinden uzamadığı (`gorunum.spec.ts` 45, tuzak 107) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
 | **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
@@ -2305,6 +2305,52 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      bir riski **doğru** adlandırıyorsa, o cümle bir teste dönüşene kadar
      yalnızca riskin **tarihini** yazar, önünü kesmez.
 
+107. **BİR TESLİM YOLU, ÖLÇTÜĞÜN HER ŞEYDEN DAR BİR KUTUDA KOŞUYOR OLABİLİR —
+     VE ONU KORUYACAK TEST YANLIŞ KUTUYA BAKIYORDU.** Şikayet şuydu:
+     *"exe'de babamın ekranında program kısmında derslerin hepsi gözükmüyor
+     sığdır olmasına rağmen."* İki bağımsız sebep çıktı ve ikisi de bu
+     belgede **yazılı** bir cümlenin arkasında saklanıyordu.
+
+     Birincisi: `tauri.conf.json` penceresi `1600×1000` **mantıksal** px
+     istiyordu ve `maximized` yoktu, yani exe sayfayı **1600 CSS px**'lik bir
+     kutuda koşturuyordu. Deponun bütün düzen ölçümleri 1920'de yapılmıştı —
+     `playwright.config.ts`'in viewport'u, `npm run ekran`, ve bu belgedeki
+     "Ekran 1920x1080 varsayılır" satırı. Aradaki 320 px, 72 ders sütununda
+     sütun başına 4,5 px ve tam olarak okunabilirlik eşiğinin iki yanı.
+     Dolu bir ızgarada, Sığdır'da, ölçülen:
+
+     ```
+     1920×1080   hücre 25,28   kırpılan kart  25/374
+     1600×968    hücre 20,83   kırpılan kart 315/374   <- exe'nin kutusu
+     ```
+
+     Yani 374 kartın 315'i `411` değil **`4…`** yazıyordu. Hafta sığıyordu,
+     dersler görünmüyordu. Sebep bir kod yolunda değil, **iki dosyanın hiç
+     buluşmamasında**ydı: biri bir Rust derleme yapılandırması, öteki bir test
+     koşucusunun seçeneği (tuzak 106'nın deseni).
+
+     İkincisi ve asıl ders: bunu koruyacak test **vardı** ve yanındaki yorum
+     niyeti doğru yazıyordu — *"A cell narrow enough to clip the class name
+     would make the whole mode pointless, so the cards are measured, not
+     assumed."* Ama `clipped` sayımı `.card` üstünden yapılıyordu, ellipsis ise
+     `.card-top`'ta: çocuk kırpılıyor, `width: 100%` olan kapsayıcı **hiçbir
+     zaman taşmıyor**. Mutasyonla ölçüldü — kusur yerindeyken eski metrik
+     **0** diyor, yenisi **315**. Tuzak 64'ün ta kendisi, ve tam olarak ona
+     karşı yazılmış olan yerde.
+
+     Üçüncü bir şey de öğretildi ve o bir **kapsam** dersi: ilk düzeltme satır
+     başını daraltıp yalnız **öğretmen görünümünde** ölçüldü ve temiz çıktı.
+     Sınıf görünümünde 20 satır başının 20'si kırpılmıştı — öğretmen satırının
+     ikinci satırı üç harflik bir branş kısaltması (`Mat`), sınıfınki
+     `G dersliği`. **Bir ızgaranın iki ekseni varsa bir ölçüm iki eksende de
+     alınır.** Aynı hata daralan başın `nowrap` istediğini de gizlemişti:
+     onsuz baş üç satıra sarıyor ve satır **38,5 → 50,6 px** oluyordu, yani
+     bir genişlik düzeltmesi kendine bir dikey gerileme satın alıyordu.
+
+     Genel kural, tuzak 65 ve 101'in dağıtım tarafı: bir ölçümün geçerli
+     olduğu **kutu** da ölçümün parçasıdır, ve program dört yoldan teslim
+     ediliyorsa o kutu dördünde de aynı olduğunu **kimse söylemedi**.
+
 ---
 
 ## Tasarım — serbest
@@ -2848,6 +2894,15 @@ adını taşıyamaz.
 - **Ekran 1920x1080 varsayılır** (babanın 27" monitörü; CSS pikseli, fiziksel
   piksel değil). Öğretmen sütunu `sticky`, yatay kaydırma olacak: ızgara 2616px,
   yani 25 satırın 19'u ve sütunların bir kısmı ekrana sığar, gerisi kaydırılır.
+  > **Bu cümle exe'de İKİ SÜRÜM BOYUNCA YANLIŞTI (2026-09-01).**
+  > `tauri.conf.json` `1600×1000` **mantıksal** px istiyor ve `maximized`
+  > yoktu, yani exe sayfayı 1920 değil **1600 CSS px**'te koşturuyordu — ve
+  > Windows ölçeklemesi mantıksal pikseli ayrıca bölüyor (%125 → 1536,
+  > %150 → 1280). Bedeli Sığdır'da ölçüldü: 1600'de 374 kartın **315'i**
+  > `411` yerine `4…` yazıyor. `"maximized": true` eklendi ve
+  > `minHeight` 700 → 640 indi (%150'de çalışma alanı 672 mantıksal px, yani
+  > 700 pencereyi ekrana **sığdırılamaz** yapıyordu). `src/surum.test.ts`
+  > ikisini de çiviliyor. Bkz. tuzak 107.
 - **Boş ekranlar yönlendirir.** "Henüz ders yok" değil, "Kurulum sekmesinden öğretmen
   ve sınıf ekleyin, sonra ders girin."
 - **Silmeden önce her zaman onay**, ve metin ne kaybedileceğini sayar:

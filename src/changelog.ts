@@ -26,6 +26,16 @@ export interface SurumNotu {
 /** Newest release first — every other history list in this app reads that way. */
 export const SURUM_NOTLARI: SurumNotu[] = [
   {
+    version: '2.1.1',
+    date: '2026-09-01',
+    items: [
+      'Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.',
+      'Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası "4…" değil "411" okunuyor.',
+      'Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.',
+      'Yazı büyüklüğü yüzde 100\'ün altındayken kart yazısı da onunla birlikte küçülüyor.',
+    ],
+  },
+  {
     version: '2.1.0',
     date: '2026-09-01',
     items: [

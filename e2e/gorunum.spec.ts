@@ -67,7 +67,34 @@ async function gridMetrics(page: import('@playwright/test').Page) {
       ),
       // A cell narrow enough to clip the class name would make the whole mode
       // pointless, so the cards are measured, not assumed.
-      clipped: cards.filter((c) => c.scrollWidth - c.clientWidth > 0.5).length,
+      //
+      // The LINE, not the card. This asked `.card` for two versions and got 0
+      // every time, including in the box the exe actually runs in, where 315
+      // of 374 cards were reading "4…" instead of "411" — the whole of the
+      // complaint this metric exists to catch. `.card` is the flex container
+      // and the ellipsis lives on `.card-top`, which is `width: 100%` inside
+      // it: the child clips, the parent never overflows. Pitfall 64, in the
+      // one place that was supposed to be the guard against it — measuring
+      // the right screen with the wrong box answers a question nobody asked.
+      clipped: cards.filter((c) => {
+        const line = c.querySelector('.card-top');
+        return line !== null && line.scrollWidth - line.clientWidth > 0.5;
+      }).length,
+      // The row head and the corner are the OTHER half of the same trade:
+      // every pixel handed to a lesson column is taken from them, so a fix
+      // that stops the cards clipping can start the heads clipping instead
+      // and no card-only metric would say so.
+      headsClipped: [...document.querySelectorAll('table.grid tbody th')].filter((th) =>
+        [th, ...th.querySelectorAll('*')].some((e) => e.scrollWidth - e.clientWidth > 0.5),
+      ).length,
+      heads: document.querySelectorAll('table.grid tbody th').length,
+      cornerClipped: (() => {
+        const c = document.querySelector('table.grid .corner');
+        return c !== null && c.scrollWidth - c.clientWidth > 0.5;
+      })(),
+      // Sığdır's whole subject is WIDTH. If a row got taller the mode paid for
+      // its fit in the one currency it was never allowed to spend.
+      rowH: document.querySelector('table.grid tbody tr')!.getBoundingClientRect().height,
     };
   });
 }
@@ -538,6 +565,80 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       expect(access.contained).toBe(true);
     });
   }
+
+  /**
+   * The box the EXE actually runs in, which is not the box this suite runs in.
+   *
+   * `playwright.config.ts` opens 1920x1080 because that is my father's screen,
+   * and every layout number in this repo was measured there. The exe was not:
+   * `tauri.conf.json` asked for a 1600x1000 window and never maximised, so the
+   * page got 1600 CSS px — 320 less than anything anyone had ever looked at.
+   * Measured in that box, on a full grid, in Sığdır: the cell fell to 20.83px
+   * and 315 of 374 cards read "4…" instead of "411". The week fitted and the
+   * lessons did not, which is the complaint word for word.
+   *
+   * Two boxes, because they fail differently and both are real. 1920x1032 is
+   * the fixed window maximised on his screen and everything must be clean
+   * there. 1600x968 is what an un-maximised window still gives, and the only
+   * thing claimed there is the mode's own contract — the week fits — because
+   * 72 legible columns simply do not go into 1600px and no CSS makes them.
+   *
+   * BOTH views: the teacher row's second line is a subject short ("Mat"), the
+   * class row's is "G dersliği". A sweep of the row-head width against the
+   * teacher view alone said 4.25rem was fine; the class view had 20 of 20
+   * heads clipped there. One view is not this grid.
+   */
+  for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
+    test(`Sığdır exe'nin kutusunda da kırpmıyor · ${view}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1920, height: 1032 });
+      await openWithSample(page);
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await page.getByRole('button', { name: view }).click();
+      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('table.grid .card').first()).toBeVisible();
+
+      // Rahat first, so the row height below is compared against something
+      // measured rather than a number written here (pitfall 42).
+      const roomy = await gridMetrics(page);
+      expect(roomy.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
+
+      await chooseDensity(page, 'Sığdır');
+      const fit = await gridMetrics(page);
+
+      expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+      expect(fit.clipped, `${fit.clipped}/${roomy.cards} kartın yazısı kırpıldı`).toBe(0);
+      expect(
+        fit.headsClipped,
+        `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`,
+      ).toBe(0);
+      expect(fit.cornerClipped, 'köşedeki eksen adı kırpıldı').toBe(false);
+      // Width was the subject; height was not allowed to be the payment. The
+      // first draft of this fix narrowed the head without `nowrap` and the row
+      // went 38.5px -> 50.6px, which no card metric could have seen.
+      expect(
+        fit.rowH,
+        `satır ${fit.rowH.toFixed(1)}px, Rahat'ta ${roomy.rowH.toFixed(1)}px`,
+      ).toBeLessThanOrEqual(roomy.rowH + 0.5);
+    });
+  }
+
+  test("Sığdır maximize edilmemiş 1600px kutuda da haftayı sığdırıyor", async ({ page }) => {
+    await page.setViewportSize({ width: 1600, height: 968 });
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+
+    await chooseDensity(page, 'Sığdır');
+    const fit = await gridMetrics(page);
+    // The contract, and only the contract. Legibility is NOT claimed here:
+    // 72 columns at the 12px reading floor need about 1795 CSS px, so in a
+    // 1600px box something has to give and this mode gives the text. What is
+    // fixed is the window, not the CSS — see tauri.conf.json.
+    expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+    expect(fit.headsClipped, `${fit.headsClipped} satır başı kırpıldı`).toBe(0);
+  });
 
   test('yoğunluk tercihi yenilemede duruyor ve programın kendisine girmiyor', async ({ page }) => {
     await openWithSample(page);
