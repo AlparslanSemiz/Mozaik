@@ -1,6 +1,6 @@
 [package]
 name = "ders-programi"
-version = "2.1.0"
+version = "2.1.1"
 description = "Weekly school timetable builder"
 authors = ["Alparslan"]
 edition = "2021"
