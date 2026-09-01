@@ -676,6 +676,118 @@ export function removeBlock(d: State, classId: Id, day: number, hour: number): S
 export interface DropVerdict extends Verdict {
   /** Lessons that would be sent back to the pool for this drop to happen. */
   evicts: Id[];
+  action: DropAction;
+}
+
+/** A block identity that remains unambiguous when one lesson has several blocks. */
+export interface BlockRef extends PlacedBlock {
+  lessonId: Id;
+  classId: Id;
+}
+
+export type DropAction =
+  | { kind: 'place' }
+  | { kind: 'evict'; blocks: BlockRef[] }
+  | { kind: 'swap'; target: BlockRef };
+
+function sameBlock(d: State, ref: BlockRef): boolean {
+  if (activePlacements(d)[placementKey(ref.classId, ref.day, ref.hour)] !== ref.lessonId) {
+    return false;
+  }
+  const found = blockAt(d, ref.classId, ref.day, ref.hour);
+  return found !== null && found.hour === ref.hour && found.size === ref.size;
+}
+
+function refAt(d: State, lessonId: Id, day: number, hour: number): BlockRef | null {
+  const lesson = d.lessons.find((x) => x.id === lessonId);
+  if (lesson === undefined) return null;
+  const found = blockAt(d, lesson.classId, day, hour);
+  return found === null
+    ? null
+    : { lessonId, classId: lesson.classId, day: found.day, hour: found.hour, size: found.size };
+}
+
+function targetBlocks(
+  d: State,
+  ix: Index,
+  moving: Lesson,
+  source: BlockRef,
+  day: number,
+  hour: number,
+  size: number,
+): BlockRef[] {
+  const found = new Map<string, BlockRef>();
+  for (let i = 0; i < size; i++) {
+    const h = hour + i;
+    const ids = [
+      activePlacements(d)[placementKey(moving.classId, day, h)],
+      ix.teacherBusy.get(teacherKey(moving.teacherId, day, h)),
+    ];
+    for (const id of ids) {
+      if (id === undefined) continue;
+      const ref = refAt(d, id, day, h);
+      if (ref === null) continue;
+      if (
+        ref.lessonId === source.lessonId &&
+        ref.classId === source.classId &&
+        ref.day === source.day &&
+        ref.hour === source.hour
+      ) continue;
+      found.set(`${ref.classId}|${ref.day}|${ref.hour}`, ref);
+    }
+  }
+  return [...found.values()];
+}
+
+function blockName(ix: Index, ref: BlockRef): string {
+  const lesson = ix.lessonById.get(ref.lessonId);
+  const group = ix.classById.get(ref.classId)?.name ?? '?';
+  const teacher = lesson === undefined ? '?' : (ix.teacherById.get(lesson.teacherId)?.short ?? '?');
+  return `${group} · ${teacher}`;
+}
+
+export function swapDoneNotice(ix: Index, source: BlockRef, target: BlockRef): string {
+  return t('{bir} ile {iki} yer değiştirdi', {
+    bir: blockName(ix, source),
+    iki: blockName(ix, target),
+  });
+}
+
+export interface SwapResult {
+  state: State;
+  warning: string;
+}
+
+/** Re-validates and applies a reciprocal move against the state handed to it. */
+export function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapResult | null {
+  if (!sameBlock(d, source) || !sameBlock(d, target)) return null;
+  if (
+    blockPinned(d, source.classId, source.day, source.hour) ||
+    blockPinned(d, target.classId, target.day, target.hour)
+  ) return null;
+
+  const sourceLesson = d.lessons.find((x) => x.id === source.lessonId);
+  const targetLesson = d.lessons.find((x) => x.id === target.lessonId);
+  if (sourceLesson === undefined || targetLesson === undefined) return null;
+
+  let work = liftBlock(d, source.classId, source.day, source.hour);
+  work = liftBlock(work, target.classId, target.day, target.hour);
+
+  const first = check(work, buildIndex(work), source.lessonId, target.day, target.hour, source.size);
+  if (first.blocked !== null) return null;
+  work = place(work, source.lessonId, target.day, target.hour, source.size);
+
+  const second = check(work, buildIndex(work), target.lessonId, source.day, source.hour, target.size);
+  if (second.blocked !== null) return null;
+  work = place(work, target.lessonId, source.day, source.hour, target.size);
+
+  const ix = buildIndex(d);
+  const notice = t('{bir} ile {iki} yer değiştirecek', {
+    bir: blockName(ix, source),
+    iki: blockName(ix, target),
+  });
+  const ruleWarning = first.warning ?? second.warning;
+  return { state: work, warning: ruleWarning === null ? notice : `${notice} · ${ruleWarning}` };
 }
 
 export function dropMap(
@@ -683,8 +795,15 @@ export function dropMap(
   ix: Index,
   lessonId: Id,
   size?: number,
+  source: BlockRef | null = null,
 ): Map<string, DropVerdict> {
   const map = new Map<string, DropVerdict>();
+  const original = d;
+  const originalIx = ix;
+  if (source !== null) {
+    d = liftBlock(d, source.classId, source.day, source.hour);
+    ix = buildIndex(d);
+  }
   const lesson = ix.lessonById.get(lessonId);
   const dayCount = d.settings.days.length;
   const hourCount = d.settings.hours.length;
@@ -728,13 +847,37 @@ export function dropMap(
       const key = `${g}|${s}`;
       const detail = blockerDetail(d, ix, lessonId, g, s, size);
       const plain = verdictAfterBlocker(d, ix, lessonId, g, s, size, detail);
+      if (source !== null && lesson !== undefined) {
+        const candidates = targetBlocks(
+          original,
+          originalIx,
+          lesson,
+          source,
+          g,
+          s,
+          blockSizeFor(d, lesson, size),
+        );
+        if (candidates.length === 1) {
+          const target = candidates[0]!;
+          const swap = swapBlocks(original, source, target);
+          if (swap !== null) {
+            map.set(key, {
+              blocked: null,
+              warning: swap.warning,
+              evicts: [],
+              action: { kind: 'swap', target },
+            });
+            continue;
+          }
+        }
+      }
       if (plain.blocked === null || lesson === undefined) {
-        map.set(key, { ...plain, evicts: [] });
+        map.set(key, { ...plain, evicts: [], action: { kind: 'place' } });
         continue;
       }
 
       if (detail === null || detail.code !== 'classBusy') {
-        map.set(key, { ...plain, evicts: [] });
+        map.set(key, { ...plain, evicts: [], action: { kind: 'place' } });
         continue;
       }
 
@@ -755,7 +898,7 @@ export function dropMap(
       }
 
       if (heads.length === 0) {
-        map.set(key, { ...plain, evicts: [] });
+        map.set(key, { ...plain, evicts: [], action: { kind: 'place' } });
         continue;
       }
 
@@ -775,6 +918,7 @@ export function dropMap(
           }),
           warning: null,
           evicts: [],
+          action: { kind: 'place' },
         });
         continue;
       }
@@ -790,14 +934,22 @@ export function dropMap(
       if (after.blocked !== null) {
         // Evicting did not help: the cell is refused for its own reason, and
         // the sentence the reader gets is that reason, not "class is busy".
-        map.set(key, { ...after, evicts: [] });
+        map.set(key, { ...after, evicts: [], action: { kind: 'place' } });
         continue;
       }
 
+      const evicted = heads.map((h) => ({
+        lessonId: h.lesson.id,
+        classId: h.lesson.classId,
+        day: g,
+        hour: h.hour,
+        size: h.size,
+      }));
       map.set(key, {
         blocked: null,
         warning: after.warning ?? evictionNotice(ix, heads.map((h) => h.lesson)),
         evicts: heads.map((h) => h.lesson.id),
+        action: { kind: 'evict', blocks: evicted },
       });
     }
   }
@@ -833,6 +985,56 @@ export function evict(d: State, classId: Id, day: number, hours: number[]): Stat
   let next = d;
   for (const h of hours) next = removeBlock(next, classId, day, h);
   return next;
+}
+
+export interface DropRequest {
+  lessonId: Id;
+  size: number;
+  source: BlockRef | null;
+  day: number;
+  hour: number;
+  action: DropAction;
+}
+
+/**
+ * Commits the answer shown during a drag, but trusts none of its old grid
+ * contents. React may hand the reducer a newer state, so every referenced
+ * block and every constraint is checked again before one placement changes.
+ */
+export function applyDrop(d: State, request: DropRequest): State {
+  if (request.action.kind === 'swap') {
+    if (request.source === null) return d;
+    return swapBlocks(d, request.source, request.action.target)?.state ?? d;
+  }
+
+  let next = d;
+  if (request.source !== null) {
+    if (!sameBlock(next, request.source)) return d;
+    if (blockPinned(next, request.source.classId, request.source.day, request.source.hour)) return d;
+    next = liftBlock(next, request.source.classId, request.source.day, request.source.hour);
+  }
+
+  if (request.action.kind === 'evict') {
+    for (const target of request.action.blocks) {
+      if (!sameBlock(next, target)) return d;
+      if (blockPinned(next, target.classId, target.day, target.hour)) return d;
+    }
+    for (const target of request.action.blocks) {
+      next = liftBlock(next, target.classId, target.day, target.hour);
+    }
+  }
+
+  const verdict = check(
+    next,
+    buildIndex(next),
+    request.lessonId,
+    request.day,
+    request.hour,
+    request.size,
+  );
+  return verdict.blocked === null
+    ? place(next, request.lessonId, request.day, request.hour, request.size)
+    : d;
 }
 
 // ------------------------------------------------- in-place placing (solver)

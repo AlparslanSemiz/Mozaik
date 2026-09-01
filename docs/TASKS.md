@@ -22,11 +22,22 @@ bitince §10'a taşınır.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
+Program kısmının açılışı daha hızlanmalı.
+Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak.
+Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor.
+Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa.
+Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok.
+Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem.
+Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre.
 
+
+kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya işte o kartların arkasından ya da başka bir şekilde de o kartın oraya gelip gelemyeceğini bilmek lazım yani kırmızı mı turuncu mu falan.
+
+Uygulama'da exe'de babamın ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına rağmen.
 
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
-
+ 
 ---
 
 ## İÇİNDEKİLER — hangi kısımda ne var

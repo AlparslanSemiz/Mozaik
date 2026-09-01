@@ -16,9 +16,8 @@
 // more — the seam is a `role="separator"` you drag, and where you leave it is
 // remembered (`ders-programi-havuz-boy`).
 //
-// The card list stays MOUNTED when the drawer is closed. Rendering it away
-// would be cheaper and would quietly make `.pool-card` count zero — and
-// twenty-odd tests ask exactly that question to find out how much is left.
+// The card list stays MOUNTED when the drawer is closed. One DOM card stands
+// for one stack; the model count in the head remains the number of blocks.
 
 import { memo, useEffect, useRef, useState } from "react";
 import type React from "react";
@@ -111,10 +110,9 @@ interface CardStack {
  * "aynı dersten aynı şeyden birden fazlaysa ... kartlar stacklenmiş gibi altta
  * da olsun ve alttaki stacklenenler de gözüksün."
  *
- * What is NOT happening here: nothing is being merged away. Every block keeps
- * its own `.pool-card`, so the count in the head, `pendingBlocks()` and the
- * forty tests that ask how much is left all keep meaning the same thing. The
- * deck is a LAYOUT of the same elements (see `.pool-stack` in styles.css).
+ * No scheduling data is merged: every block stays in `cards`. The DOM draws
+ * only the top card and two CSS edges, because buried duplicate nodes made the
+ * Program tab pay to paint hundreds of invisible cards on every opening.
  *
  * Consecutive runs and not a `Map`: the tray is already sorted row -> top ->
  * size (see `buildPool` in Program.tsx), so identical cards are already
@@ -397,70 +395,53 @@ function LessonPool({
               <span className="pool-group-count">{g.cards}</span>
             </h3>
             <div className="pool-group-cards">
-              {g.stacks.map((s) => (
-                <div
-                  key={s.key}
-                  className="pool-stack"
-                  data-count={s.cards.length}
-                  // How many layers peek out below the top card. Capped at two, so a
-                  // lesson owing eight hours is a deck and not a staircase. The exact
-                  // number is on `data-count` and in the card's title; it used to be
-                  // a corner badge too, and that came off on 2026-08-28.
-                  style={
-                    {
-                      "--layers": Math.min(s.cards.length - 1, 2),
-                    } as React.CSSProperties
-                  }
-                >
-                  {s.cards.map((c, i) => (
+              {g.stacks.map((s) => {
+                const c = s.cards[0]!;
+                return (
+                  <div
+                    key={s.key}
+                    className="pool-stack"
+                    data-count={s.cards.length}
+                    style={
+                      {
+                        "--layers": Math.min(s.cards.length - 1, 2),
+                        "--stack-color": paletteColor(c.color),
+                      } as React.CSSProperties
+                    }
+                  >
                     <div
-                      key={c.key}
                       className={`pool-card${c.masked ? " masked-scope" : ""}`}
                       data-size={c.size}
-                      data-lesson={i === 0 ? c.lessonId : undefined}
-                      // Everything under the top card is DRAWING. It is the same
-                      // block and would do the same thing if dropped, so it takes no
-                      // pointer and says nothing to a screen reader. It still carries
-                      // its full text: `.pool-card` counts one WAITING BLOCK, here
-                      // and in the forty tests that ask how much is left.
-                      aria-hidden={i > 0 ? true : undefined}
+                      data-lesson={c.lessonId}
                       style={{ background: paletteColor(c.color) }}
                       onPointerDown={
-                        i === 0 && !c.masked
-                          ? (e) => onStart(e, c.lessonId, c.size)
-                          : undefined
+                        c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
                       }
                       title={
-                        i > 0
-                          ? undefined
-                          : t("{ust} · {alt} {brans} · {boy} saatlik blok", {
-                              ust: c.top,
-                              alt: c.bottom,
-                              brans: c.subject,
-                              boy: c.size,
-                            }) +
-                            (s.cards.length > 1
-                              ? t(" · {n} tane bekliyor", { n: s.cards.length })
-                              : "") +
-                            t(" · dersin {yerlesen}/{toplam} saati yerleşti", {
-                              yerlesen: c.placed,
-                              toplam: c.total,
-                            })
+                        t("{ust} · {alt} {brans} · {boy} saatlik blok", {
+                          ust: c.top,
+                          alt: c.bottom,
+                          brans: c.subject,
+                          boy: c.size,
+                        }) +
+                        (s.cards.length > 1
+                          ? t(" · {n} tane bekliyor", { n: s.cards.length })
+                          : "") +
+                        t(" · dersin {yerlesen}/{toplam} saati yerleşti", {
+                          yerlesen: c.placed,
+                          toplam: c.total,
+                        })
                       }
                     >
-                      {i === 0 && (
-                        <>
-                          <span className="card-top">{c.top}</span>
-                          <span className="card-bottom">{c.bottom}</span>
-                          <span className="counter">
-                            {c.placed}/{c.total}
-                          </span>
-                        </>
-                      )}
+                      <span className="card-top">{c.top}</span>
+                      <span className="card-bottom">{c.bottom}</span>
+                      <span className="counter">
+                        {c.placed}/{c.total}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </section>
             ))}

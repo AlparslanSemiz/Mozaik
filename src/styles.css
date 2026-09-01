@@ -1035,6 +1035,21 @@ textarea {
   background: var(--accent);
 }
 
+.ribbon .btn.has-dot {
+  position: relative;
+}
+
+/* The same unread release, on its exact destination inside Settings. */
+.ribbon-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--r-full);
+  background: var(--accent);
+}
+
 /* Hovering a tab shows THAT tab's colour, and shows it as a glow rather than
    only as a tint. Asked for by name: "üst barda sectionları hoverlarken o
    hoverlanan sectionun renginde gölge olsun". The colour comes from
@@ -2277,6 +2292,18 @@ table.grid tbody td:hover > .card-pin,
   background: var(--accent-bg);
 }
 
+.menu-item.danger {
+  color: var(--bad);
+}
+
+.menu-item.danger[data-highlighted] {
+  background: var(--bad-bg);
+}
+
+.menu-item.danger[data-disabled] {
+  color: var(--muted);
+}
+
 .menu-item[data-disabled] {
   color: var(--muted);
   cursor: default;
@@ -2756,18 +2783,9 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   display: none;
 }
 
-/* ONE PILE. Six identical cards used to lie side by side saying `0/6` six
-   times; now they are a deck and the tray gets the room back.
-
-   Every block still has its own `.pool-card` — the merge is a LAYOUT, not a
-   grouping, because `.pool-card` means "one waiting block" in the head count,
-   in `pendingBlocks()` and in forty tests. What changes is where they sit.
-
-   The step is in rem so the deck follows --ui-scale like everything the reader
-   can make bigger; the padding is what the peeking layers stand in, so the
-   stack's box grows with them rather than letting them hang out over the row
-   below. `--layers` is written by React and capped at two: past three edges
-   the eye cannot count anyway, and the badge is there for the real number. */
+/* ONE PILE. Scheduling still keeps every block; the DOM keeps one card per
+   identical stack. Two pseudo-elements draw the visible deck depth, cutting
+   hundreds of buried nodes out of the Program tab's opening paint. */
 .pool-stack {
   --stack-step: .3rem;
   position: relative;
@@ -2775,53 +2793,36 @@ table.grid:not(.dragging) tbody tr:hover > .row-head {
   padding-bottom: calc(var(--layers, 0) * var(--stack-step));
 }
 
-/* The buried cards. Same box as the top one — `bottom` gives back exactly the
-   padding above — shifted down and put behind. `pointer-events: none` is what
-   keeps a drag honest: whatever the pointer lands on, it lands on the card that
-   carries the handler, and every card in a pile is the same block anyway. */
-.pool-stack > .pool-card:not(:first-child) {
+.pool-stack::before,
+.pool-stack::after {
+  content: "";
+  display: none;
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: calc(var(--layers, 0) * var(--stack-step));
   pointer-events: none;
+  border-radius: var(--r-sm);
+  background: var(--stack-color);
+  box-shadow:
+    var(--elev-1),
+    inset 0 0 0 1px color-mix(in oklab, var(--on-color) 22%, transparent);
+}
+
+.pool-stack:not([data-count="1"])::before {
+  display: block;
+  transform: translateY(var(--stack-step));
   z-index: 1;
 }
 
-/* A buried card is an EDGE, not a card: its own words sit 5px lower than the
-   ones on top, so the tail of a second `0/4` was poking out under the pile.
-
-   Transparent INK and not `visibility: hidden`, which was tried and measured:
-   `innerText` is empty for a hidden element, so `allInnerTexts()` came back
-   with a blank between every pair of cards and two pool tests read the tray as
-   scattered. The contract is that a `.pool-card` is one waiting block wherever
-   it is in the pile — to a counter, to `hasText`, and to a screen reader by way
-   of the `aria-hidden` on the card itself. Colour is the only thing it gives
-   up. */
-.pool-stack > .pool-card:not(:first-child),
-.pool-stack > .pool-card:not(:first-child) * {
-  color: transparent;
-}
-
-.pool-stack > .pool-card:nth-child(2) {
-  transform: translateY(var(--stack-step));
+.pool-stack:not([data-count="1"]):not([data-count="2"])::after {
+  display: block;
+  transform: translateY(calc(var(--stack-step) * 2));
   z-index: 2;
 }
 
-/* The third edge and everything past it share one place: a deck of eight is
-   drawn as a deck of three, and `data-count` / the badge carry the rest. */
-.pool-stack > .pool-card:nth-child(n + 3) {
-  transform: translateY(calc(var(--stack-step) * 2));
-}
-
-/* Above its own deck. `position: relative` is not decoration and cost an hour:
-   `z-index` does NOTHING on a statically positioned box, so the top card kept
-   `z-index: 3` and still lost — a positioned element paints above a static one
-   whatever the number says (pitfall 84). The corner badge that taught this is
-   gone (asked for, 2026-08-28), but the rule stays: the card that TAKES THE
-   POINTER has to be the one on top, and the copies behind it are drawing. */
-.pool-stack > .pool-card:first-child {
+.pool-stack > .pool-card {
   position: relative;
   z-index: 3;
 }

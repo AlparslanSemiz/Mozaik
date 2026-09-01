@@ -15,19 +15,19 @@ import {
   buildIndex,
   closedConflicts,
   closedKey,
+  applyDrop,
   dropMap,
-  evict,
   evictionNotice,
   pendingBlocks,
   placedBlocks,
   removeBlock,
   placementKey,
-  place,
+  swapDoneNotice,
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
 } from "../constraints";
-import type { PinScope } from "../constraints";
+import type { BlockRef, PinScope } from "../constraints";
 import type { Index } from "../constraints";
 import { useToast } from "./Toasts";
 import { useInspect } from "./Inspector";
@@ -42,7 +42,7 @@ import {
 } from "../entities";
 import { compareTr } from "../listview";
 import { useDrag } from "../drag";
-import type { DragData, Reason } from "../drag";
+import type { DragData } from "../drag";
 import type { SolverRun } from "../useSolver";
 import type { State, Id } from "../types";
 import { activePinned, activePlacements } from "../programs";
@@ -56,6 +56,8 @@ import LessonPool from "./LessonPool";
 import type { PoolCard } from "./LessonPool";
 import { T, useT } from "./T";
 import type { Translate } from "./T";
+import { programColorIndex } from "../programColor";
+import type { ProgramColorMode } from "../programColor";
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */
@@ -73,6 +75,7 @@ interface Props {
   setPoolSort: (next: PoolSort) => void;
   poolFilter: string;
   setPoolFilter: (next: string) => void;
+  colorMode: ProgramColorMode;
 }
 
 /** "3,4" — one decimal, Turkish comma. */
@@ -85,16 +88,10 @@ function seconds(ms: number): string {
  * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
  */
 function describeBar(
-  reason: Reason | null,
   solver: SolverRun,
   view: View,
   t: Translate,
 ): { text: string; level: string } {
-  if (reason !== null)
-    return {
-      text: reason.text,
-      level: reason.level === "warn" ? "warn" : "bad",
-    };
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
@@ -186,6 +183,7 @@ function buildRows(
   ix: Index,
   view: View,
   mask: ProgramMask,
+  colorMode: ProgramColorMode,
   t: Translate,
 ): GridRow[] {
   // Availability is edited after the timetable is laid out, and a cell whose
@@ -244,7 +242,10 @@ function buildRows(
               lessonId,
               top: group?.name ?? "?",
               bottom: roomLetter(ix, group?.roomId),
-              color: t.color,
+              color:
+                ix.lessonById.get(lessonId) === undefined
+                  ? t.color
+                  : programColorIndex(d, ix.lessonById.get(lessonId)!, colorMode),
               conflict:
                 conflicts.get(placementKey(group?.id ?? "", g, s)) ?? null,
               pinned: pinned[placementKey(group?.id ?? "", g, s)] !== undefined,
@@ -306,7 +307,10 @@ function buildRows(
               lesson === undefined
                 ? ""
                 : subjectShort(d.settings, lessonSubject(d, lesson)),
-            color: teacher?.color ?? 0,
+            color:
+              lesson === undefined
+                ? (teacher?.color ?? 0)
+                : programColorIndex(d, lesson, colorMode),
             conflict: conflicts.get(placementKey(group.id, g, s)) ?? null,
             pinned: pinned[placementKey(group.id, g, s)] !== undefined,
             mask: teacher === undefined ? undefined : mask.teachers[teacher.id],
@@ -355,6 +359,7 @@ function buildPool(
   mask: ProgramMask,
   sort: PoolSort,
   filter: string,
+  colorMode: ProgramColorMode,
   t: Translate,
 ): { cards: PoolCard[]; completed: number; total: number } {
   const cards: PoolCard[] = [];
@@ -401,9 +406,7 @@ function buildPool(
         top: teacherView ? className : teacherShort,
         bottom: teacherView ? teacherShort : className,
         subject: subjectLabel(subject),
-        // The card keeps the TEACHER's colour in both views: a cell is always
-        // painted by its teacher, so this is what the card will look like.
-        color: teacher?.color ?? 0,
+        color: programColorIndex(d, lesson, colorMode),
         placed,
         total: lesson.weeklyHours,
         masked: teacherMode === "ghost" || classMode === "ghost",
@@ -489,6 +492,7 @@ function Program({
   setPoolSort,
   poolFilter,
   setPoolFilter,
+  colorMode,
 }: Props) {
   const t = useT();
   const ix = useMemo(() => buildIndex(state), [state]);
@@ -507,8 +511,9 @@ function Program({
       const verdict = data.map.get(`${day}|${hour}`);
       const pushedOut = verdict?.evicts ?? [];
       const lesson = ix.lessonById.get(data.lessonId);
-      const told =
-        pushedOut.length === 0 || lesson === undefined
+      const told = verdict?.action.kind === "swap" && data.source !== null
+        ? swapDoneNotice(ix, data.source, verdict.action.target)
+        : pushedOut.length === 0 || lesson === undefined
           ? ""
           : evictionNotice(
               ix,
@@ -518,34 +523,15 @@ function Program({
             ).replace(t("dönecek"), t("döndü"));
 
       change((d) => {
-        // Lifting the old block and laying the new one down are ONE reducer
-        // call, so a move costs one undo step and Ctrl+Z puts the lesson back
-        // where it was — not into the pool. The eviction rides along in the
-        // same call for the same reason: dropping onto an occupied cell is one
-        // move, so it is one Ctrl+Z.
-        let next = d;
-        if (data.source !== null) {
-          next = removeBlock(
-            d,
-            data.source.classId,
-            data.source.day,
-            data.source.hour,
-          );
-          if (next === d) return d; // the block went away mid-drag; touch nothing
-        }
-
-        // The cells the new block will cover, cleared of whatever is in them.
-        // Re-derived from the state React just handed us rather than trusted
-        // from the drag's snapshot: between pointerdown and here, an autosave,
-        // an undo or a solver run may have moved the grid underneath.
-        if (pushedOut.length > 0 && lesson !== undefined) {
-          const span = Math.max(1, data.blockSize);
-          const hours: number[] = [];
-          for (let i = 0; i < span; i++) hours.push(hour + i);
-          next = evict(next, lesson.classId, day, hours);
-        }
-
-        return place(next, data.lessonId, day, hour, data.blockSize);
+        if (verdict === undefined) return d;
+        return applyDrop(d, {
+          lessonId: data.lessonId,
+          size: data.blockSize,
+          source: data.source,
+          day,
+          hour,
+          action: verdict.action,
+        });
       });
 
       if (told !== "") notify(told);
@@ -553,22 +539,22 @@ function Program({
     [change, ix, notify],
   );
 
-  const { start, reason } = useDrag(drop);
+  const { start } = useDrag(drop);
 
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
   const rows = useMemo(
-    () => buildRows(state, ix, view, mask, t),
-    [state, ix, view, mask, t],
+    () => buildRows(state, ix, view, mask, colorMode, t),
+    [state, ix, view, mask, colorMode, t],
   );
   const {
     cards,
     completed,
     total: poolTotal,
   } = useMemo(
-    () => buildPool(state, ix, view, mask, poolSort, poolFilter, t),
-    [state, ix, view, mask, poolSort, poolFilter, t],
+    () => buildPool(state, ix, view, mask, poolSort, poolFilter, colorMode, t),
+    [state, ix, view, mask, poolSort, poolFilter, colorMode, t],
   );
   /**
    * The branches with something still waiting — the only ones worth offering.
@@ -601,7 +587,6 @@ function Program({
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
   const { text: barText, level: barLevel } = describeBar(
-    reason,
     solver,
     view,
     t,
@@ -886,17 +871,15 @@ function Program({
       const lesson = ix.lessonById.get(lessonId);
       if (lesson === undefined) return;
 
-      const base =
-        source === null
-          ? state
-          : removeBlock(state, source.classId, source.day, source.hour);
-      const baseIx = source === null ? ix : buildIndex(base);
+      const sourceRef: BlockRef | null = source === null
+        ? null
+        : { ...source, lessonId, size: Math.max(1, size) };
 
       // Valid cells are computed HERE, once — never again during the drag.
       // The loop moved into `dropMap`: it is not a rendering decision, it is
       // the constraint engine answering 72 questions, and one of the answers
       // ("occupied by this class's own lesson") now costs an eviction to say.
-      const map = dropMap(base, baseIx, lessonId, size);
+      const map = dropMap(state, ix, lessonId, size, sourceRef);
       for (const [key, verdict] of map) {
         const day = Number(key.split("|")[0]);
         const dayName = state.settings.days[day]?.name;
@@ -924,18 +907,18 @@ function Program({
           blockSize: Math.max(1, size),
           hourCount: state.settings.hours.length,
           map,
-          source,
+          source: sourceRef,
         },
         {
           top: teacherView ? (group?.name ?? "?") : (teacher?.short ?? "?"),
           bottom: teacherView
             ? roomLetter(ix, group?.roomId)
             : subjectShort(state.settings, lessonSubject(state, lesson)),
-          color: teacher?.color ?? 0,
+          color: programColorIndex(state, lesson, colorMode),
         },
       );
     },
-    [state, ix, view, start, solver.running, mask.days, t],
+    [state, ix, view, start, solver.running, mask.days, colorMode, t],
   );
 
   const cardStart = useCallback(

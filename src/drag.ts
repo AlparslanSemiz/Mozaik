@@ -17,9 +17,10 @@
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
 import { t } from "./i18n";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type React from "react";
 import type { DropVerdict } from "./constraints";
+import type { BlockRef } from "./constraints";
 import { paletteColor } from "./palette";
 import type { Id } from "./types";
 
@@ -46,11 +47,11 @@ export interface DragData {
    * `day`/`hour` are the block's START, not the cell that was grabbed: a two
    * hour block picked up by its second cell still moves as one.
    */
-  source: { classId: Id; day: number; hour: number } | null;
+  source: BlockRef | null;
 }
 
 /** What the bar above the grid says, and how loudly. */
-export interface Reason {
+interface Reason {
   text: string;
   level: "ok" | "warn" | "blocked";
 }
@@ -96,10 +97,6 @@ const STEP = 14;
 export function useDrag(
   drop: (data: DragData, day: number, hour: number) => void,
 ) {
-  // Only the reason text uses React state. Starting/ending a drag is entirely
-  // imperative so the Program tree is not rendered just to toggle DOM classes.
-  const [reason, setReason] = useState<Reason | null>(null);
-
   const data = useRef<DragData | null>(null);
   const ghost = useRef<HTMLDivElement | null>(null);
   const highlighted = useRef<HTMLElement[]>([]);
@@ -157,8 +154,20 @@ export function useDrag(
       if (text !== null) text.textContent = savedBar.current.text;
       savedBar.current = null;
     }
-    setReason(null);
   }, [clearHighlight, clearPreview]);
+
+  const paintReason = (reason: Reason | null) => {
+    const bar = savedBar.current?.element ?? null;
+    const text = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
+    if (bar === null || text === null) return;
+    bar.className =
+      reason === null
+        ? "reason-bar ok"
+        : reason.level === "warn"
+          ? "reason-bar warn"
+          : "reason-bar bad";
+    text.textContent = reason?.text ?? t("Buraya bırakılabilir.");
+  };
 
   const start = useCallback(
     (e: React.PointerEvent, d: DragData, content: GhostContent) => {
@@ -167,7 +176,6 @@ export function useDrag(
 
       data.current = d;
       pos.current = { x: e.clientX, y: e.clientY };
-      setReason(null);
 
       const el = document.createElement("div");
       el.className = "ghost";
@@ -191,8 +199,8 @@ export function useDrag(
       document.body.appendChild(el);
       ghost.current = el;
 
-      // The generic answer is immediate but does not need a Program render.
-      // A concrete blocker/warning later uses normal React state.
+      // Every answer is imperative. Red/yellow targets used to call setState
+      // here and redraw Program while the pointer crossed the row.
       const bar = document.querySelector<HTMLElement>(".reason-bar");
       const barText = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
       if (bar !== null && barText !== null) {
@@ -209,20 +217,6 @@ export function useDrag(
     },
     [],
   );
-
-  // Returning from a concrete warning/block to a valid or outside position
-  // sets `reason` back to null. React then restores Program's idle sentence;
-  // put the active drag sentence back before that commit is painted. Starting
-  // a drag still causes no state update — start() writes the same text itself.
-  useLayoutEffect(() => {
-    if (data.current === null || reason !== null) return;
-    const bar = document.querySelector<HTMLElement>(".reason-bar");
-    const barText = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
-    if (bar !== null && barText !== null) {
-      bar.className = "reason-bar ok";
-      barText.textContent = t("Buraya bırakılabilir.");
-    }
-  }, [reason]);
 
   activate.current = (dragging: DragData) => {
     const wrap = document.querySelector<HTMLElement>(".grid-wrap");
@@ -410,7 +404,7 @@ export function useDrag(
         lastTarget.current = signature;
 
         if (target === null) {
-          setReason(null);
+          paintReason(null);
         } else {
           const verdict = d.map.get(signature);
           const blocked =
@@ -419,7 +413,7 @@ export function useDrag(
               : verdict.blocked;
           const warning = verdict?.warning ?? null;
 
-          setReason(
+          paintReason(
             blocked !== null
               ? { text: blocked, level: "blocked" }
               : warning !== null
@@ -511,5 +505,5 @@ export function useDrag(
     [finish],
   );
 
-  return { start, reason };
+  return { start };
 }

@@ -13,6 +13,7 @@
 import { t } from './i18n';
 import { isDesktop } from './desktop';
 import { CHANGELOG_SEEN_KEY } from './changelog';
+import { PROGRAM_COLOR_KEY } from './programColor';
 import type { Id } from './types';
 
 /**
@@ -344,6 +345,11 @@ export function storageReport(lib: Library): StorageReport {
     key: `${BASE_KEY}-yogunluk`,
     what: t('ızgara yoğunluğu tercihi'),
     chars: charsAt(`${BASE_KEY}-yogunluk`),
+  });
+  rows.push({
+    key: PROGRAM_COLOR_KEY,
+    what: t('program kart rengi tercihi'),
+    chars: charsAt(PROGRAM_COLOR_KEY),
   });
   rows.push({
     key: `${BASE_KEY}-arayuz-yogunluk`,

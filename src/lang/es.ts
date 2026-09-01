@@ -19,6 +19,10 @@ import { registerSozluk } from "../i18n";
 import type { Sozluk } from "../i18n";
 
 const ES: Sozluk = {
+  "Kartların renk ölçütü": "Criterio de color de las tarjetas",
+  "program kart rengi tercihi": "preferencia de color de las tarjetas del horario",
+  "{bir} ile {iki} yer değiştirecek": "{bir} y {iki} intercambiarán sus posiciones",
+  "{bir} ile {iki} yer değiştirdi": "{bir} y {iki} intercambiaron sus posiciones",
   // -------------------------------------------- the week and the subjects
   //
   // DATA drawn, never data stored: `settings.days[].name` and

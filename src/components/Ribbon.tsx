@@ -110,6 +110,7 @@ import { pendingBlocks, pinScopeCells, togglePinScope } from '../constraints';
 import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';
+import type { ProgramColorMode } from '../programColor';
 
 interface Props {
   ui: ToolState;
@@ -133,6 +134,9 @@ interface Props {
       Same state, two doors — that one is the shortcut, this is the section. */
   theme: Theme;
   setTheme: (next: Theme) => void;
+  programColor: ProgramColorMode;
+  setProgramColor: (next: ProgramColorMode) => void;
+  changelogUnseen: boolean;
   /** Ayarlar → Planlar's strip STATES which plan is open. A name, not the
       library: everything that creates, renames and deletes stays in the panel. */
   planName: string;
@@ -168,6 +172,13 @@ const SECTIONS: Array<{ id: SectionId; label: string; icon: React.ReactElement }
   { id: 'appearance', label: 'Görünüm', icon: <Eye {...ICON} /> },
   { id: 'plans', label: 'Planlar ve yedek', icon: <Library {...ICON} /> },
   { id: 'about', label: 'Hakkında', icon: <Info {...ICON} /> },
+];
+
+const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
+  { id: 'teacher', label: 'Öğretmene göre' },
+  { id: 'class', label: 'Sınıfa göre' },
+  { id: 'room', label: 'Dersliğe göre' },
+  { id: 'subject', label: 'Branşa göre' },
 ];
 
 
@@ -278,6 +289,9 @@ export default function Ribbon({
   setAvailClock,
   theme,
   setTheme,
+  programColor,
+  setProgramColor,
+  changelogUnseen,
   planName,
 }: Props) {
   const t = useT();
@@ -713,6 +727,42 @@ export default function Ribbon({
             separator, because what divides them is a job, not a hairline. */}
         <Spacer />
 
+        <Group label="Renk">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button className="btn" title={t('Kartların renk ölçütü')}>
+                <PaletteIcon {...ICON} />
+                {t(PROGRAM_COLORS.find((x) => x.id === programColor)?.label ?? 'Öğretmene göre')}
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className="menu" sideOffset={5} collisionPadding={8}>
+                <DropdownMenu.RadioGroup
+                  value={programColor}
+                  onValueChange={(value) => setProgramColor(value as ProgramColorMode)}
+                >
+                  {PROGRAM_COLORS.map((option) => (
+                    <DropdownMenu.RadioItem
+                      key={option.id}
+                      className="menu-item"
+                      value={option.id}
+                    >
+                      <span className="menu-mark" aria-hidden="true">
+                        <DropdownMenu.ItemIndicator>
+                          <Check size={15} strokeWidth={2.4} />
+                        </DropdownMenu.ItemIndicator>
+                      </span>
+                      {t(option.label)}
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </DropdownMenu.RadioGroup>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        </Group>
+
+        <Sep />
+
         {/* Density is a decision about the grid, taken while looking at the
             grid — it spent a version three clicks away in Ayarlar → Görünüm,
             where you cannot see what it does. It is still there too. */}
@@ -1001,12 +1051,15 @@ export default function Ribbon({
         {SECTIONS.map((s) => (
           <button
             key={s.id}
-            className="btn"
+            className={`btn${s.id === 'about' && changelogUnseen ? ' has-dot' : ''}`}
             aria-pressed={s.id === ui.section}
             onClick={() => ui.setSection(s.id)}
           >
             {s.icon}
             {t(s.label)}
+            {s.id === 'about' && changelogUnseen && (
+              <span className="ribbon-dot" aria-hidden="true" />
+            )}
           </button>
         ))}
       </Group>

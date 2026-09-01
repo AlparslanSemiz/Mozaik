@@ -52,6 +52,11 @@ import type { ProgramMask } from "./programMask";
 import Settings from "./components/settings";
 import { useShortcutsHelp } from "./components/ShortcutsHelp";
 import { hasUnseenChangelog } from "./changelog";
+import {
+  readProgramColor,
+  writeProgramColor,
+  type ProgramColorMode,
+} from "./programColor";
 
 /**
  * The six sections, along the TOP — on the same row as the document identity
@@ -533,6 +538,12 @@ export default function App() {
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
   const [density, setDensity] = useState<Density>(readDensity);
+  const [programColor, setProgramColorRaw] =
+    useState<ProgramColorMode>(readProgramColor);
+  const setProgramColor = useCallback((next: ProgramColorMode) => {
+    writeProgramColor(next);
+    setProgramColorRaw(next);
+  }, []);
   // Its twin, and a separate one since 2026-08-27: the grid's step and the
   // interface's step are two decisions (see theme.ts). Only Ayarlar → Görünüm
   // sets this one — the Program strip still speaks for the grid alone.
@@ -1067,6 +1078,9 @@ export default function App() {
         setAvailClock={setAvailClock}
         theme={theme}
         setTheme={setTheme}
+        programColor={programColor}
+        setProgramColor={setProgramColor}
+        changelogUnseen={changelogUnseen}
         planName={
           plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ""
         }
@@ -1230,6 +1244,7 @@ export default function App() {
                   setPoolSort={ui.setPoolSort}
                   poolFilter={ui.poolFilter}
                   setPoolFilter={ui.setPoolFilter}
+                  colorMode={programColor}
                 />
               </Activity>
               {tab === "check" && <Check state={state} view={ui.checkView} />}

@@ -1,5 +1,6 @@
 import {
   blockAt,
+  applyDrop,
   blockCells,
   blockPinned,
   blockSpans,
@@ -16,6 +17,7 @@ import {
   check,
   buildIndex,
   closedConflicts,
+  closedKey,
   countPlacedHours,
   place,
   placementKey,
@@ -25,6 +27,7 @@ import {
   teacherKey,
   validHours,
 } from './constraints';
+import type { BlockRef } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { RuleLevel, State } from './types';
 import { SCHEMA_VERSION } from './types';
@@ -1046,6 +1049,97 @@ describe('dropMap — üstüne bırakma', () => {
     const x2 = ix.lessonById.get('x2')!;
     expect(evictionNotice(ix, [x1])).toBe('510 · MÇ dersi havuza dönecek');
     expect(evictionNotice(ix, [x1, x2])).toContain('dersleri');
+  });
+});
+
+describe('yerleşmiş blokların atomik takası', () => {
+  const ref = (
+    lessonId: string,
+    classId: string,
+    day: number,
+    hour: number,
+    size: number,
+  ): BlockRef => ({ lessonId, classId, day, hour, size });
+
+  function swapAt(d: State, source: BlockRef, day: number, hour: number) {
+    const verdict = dropMap(d, buildIndex(d), source.lessonId, source.size, source)
+      .get(`${day}|${hour}`)!;
+    return {
+      verdict,
+      state: applyDrop(d, {
+        lessonId: source.lessonId,
+        size: source.size,
+        source,
+        day,
+        hour,
+        action: verdict.action,
+      }),
+    };
+  }
+
+  it('öğretmenin iki sınıftaki dersini karşılıklı değiştirir', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    const source = ref('x1', 's510', 0, 0, 1);
+    const result = swapAt(d, source, 0, 1);
+
+    expect(result.verdict.action.kind).toBe('swap');
+    expect(result.verdict.warning).toContain('yer değiştirecek');
+    expect(activeProgram(result.state).placements[placementKey('s510', 0, 1)]).toBe('x1');
+    expect(activeProgram(result.state).placements[placementKey('s511', 0, 0)]).toBe('x2');
+  });
+
+  it('aynı sınıftaki farklı uzunlukları, uzunluklarını koruyarak değiştirir', () => {
+    let d = place(build(), 'x3', 0, 0, 2);
+    d = place(d, 'x6', 0, 2, 1);
+    const source = ref('x3', 's433', 0, 0, 2);
+    const result = swapAt(d, source, 0, 2);
+
+    expect(result.verdict.action.kind).toBe('swap');
+    expect(activeProgram(result.state).placements[placementKey('s433', 0, 2)]).toBe('x3');
+    expect(activeProgram(result.state).placements[placementKey('s433', 0, 3)]).toBe('x3');
+    expect(activeProgram(result.state).placements[placementKey('s433', 0, 0)]).toBe('x6');
+    expect(activeProgram(result.state).placements[placementKey('s433', 0, 1)]).toBeUndefined();
+  });
+
+  it('sabit hedefi değiştirmez', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    d = setBlockPinned(d, 's511', 0, 1, true);
+    const before = activeProgram(d).placements;
+    const result = swapAt(d, ref('x1', 's510', 0, 0, 1), 0, 1);
+
+    expect(result.verdict.action.kind).not.toBe('swap');
+    expect(activeProgram(result.state).placements).toEqual(before);
+  });
+
+  it('karşı konum sonradan kapanmışsa takası reddeder', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    d = { ...d, unavailable: { [closedKey('s511', 0, 0)]: 1 } };
+    const result = swapAt(d, ref('x1', 's510', 0, 0, 1), 0, 1);
+
+    expect(result.verdict.action.kind).not.toBe('swap');
+    expect(result.state).toBe(d);
+  });
+
+  it('harita çıkarıldıktan sonra hedef değişmişse güncel veriye dokunmaz', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    const source = ref('x1', 's510', 0, 0, 1);
+    const verdict = dropMap(d, buildIndex(d), 'x1', 1, source).get('0|1')!;
+    expect(verdict.action.kind).toBe('swap');
+
+    const changed = removeBlock(d, 's511', 0, 1);
+    const after = applyDrop(changed, {
+      lessonId: 'x1',
+      size: 1,
+      source,
+      day: 0,
+      hour: 1,
+      action: verdict.action,
+    });
+    expect(after).toBe(changed);
   });
 });
 
