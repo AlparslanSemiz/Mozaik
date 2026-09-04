@@ -10,11 +10,11 @@
 
 import { useMemo, useRef, useState } from "react";
 import type React from "react";
-import { sharedPeriods } from "../bell";
-import { paletteColor } from "../palette";
-import { KIND_ICON } from "./steps";
-import { buildIndex, closedConflicts, closedKey } from "../constraints";
-import type { Id, State } from "../types";
+import { sharedPeriods } from "../../bell";
+import { paletteColor } from "../../palette";
+import { KIND_ICON } from "../steps";
+import { buildIndex, closedConflicts, closedKey } from "../../constraints";
+import type { Id, State } from "../../types";
 import {
   openHours,
   dayLabel,
@@ -24,12 +24,12 @@ import {
   subjectShort,
   teacherSubjects,
   weeklyLoad,
-} from "../entities";
+} from "../../entities";
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
-import { t } from '../i18n';
-import type { Kind } from "../toolState";
-import { T } from './T';
+import { t } from '../../i18n';
+import type { Kind } from "../../toolState";
+import { T } from '../T';
 
 interface Props {
   state: State;

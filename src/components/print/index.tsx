@@ -15,16 +15,16 @@
 // Printing the 84-column main table is still impossible and still not attempted.
 
 import { useMemo } from 'react';
-import { periodGroups } from '../bell';
-import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints';
-import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
-import { paletteColor } from '../palette';
-import type { State } from '../types';
-import { activePlacements } from '../programs';
-import type { Scope } from '../toolState';
-import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
-import type { PrintOptions } from '../printOptions';
-import { T, useT } from './T';
+import { periodGroups } from '../../bell';
+import { blockSpans, buildIndex, closedKey, placementKey } from '../../constraints';
+import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../../entities';
+import { paletteColor } from '../../palette';
+import type { State } from '../../types';
+import { activePlacements } from '../../programs';
+import type { Scope } from '../../toolState';
+import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../../printOptions';
+import type { PrintOptions } from '../../printOptions';
+import { T, useT } from '../T';
 
 interface Props {
   state: State;

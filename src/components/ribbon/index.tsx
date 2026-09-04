@@ -22,16 +22,14 @@
 // `checkView`) lives in App — see src/toolState.ts for why that is a fix and
 // not a side effect of drawing them up here.
 
-import AvailabilityRibbon from './ribbon/AvailabilityRibbon';
-import CheckRibbon from './ribbon/CheckRibbon';
-import LessonsRibbon from './ribbon/LessonsRibbon';
-import PrintRibbon from './ribbon/PrintRibbon';
-import ProgramRibbon from './ribbon/ProgramRibbon';
-import SettingsRibbon from './ribbon/SettingsRibbon';
-import SetupRibbon from './ribbon/SetupRibbon';
-import type { RibbonProps } from './ribbon/props';
-
-export { VIEWS } from './ribbon/parts';
+import AvailabilityRibbon from './AvailabilityRibbon';
+import CheckRibbon from './CheckRibbon';
+import LessonsRibbon from './LessonsRibbon';
+import PrintRibbon from './PrintRibbon';
+import ProgramRibbon from './ProgramRibbon';
+import SettingsRibbon from './SettingsRibbon';
+import SetupRibbon from './SetupRibbon';
+import type { RibbonProps } from './props';
 
 export default function Ribbon(props: RibbonProps) {
   const { ui, open } = props;
