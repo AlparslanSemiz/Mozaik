@@ -12,7 +12,7 @@
 import { t } from '../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle } from './bundle';
-import { isDesktop, openDesktopFolder } from '../desktop';
+import { isDesktop, openDesktopFolder } from '../version/desktop';
 import {
   askPermission,
   dailyName,

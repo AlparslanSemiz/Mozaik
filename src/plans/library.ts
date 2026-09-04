@@ -12,8 +12,8 @@
 // constraints <-> rules.
 
 import { t } from '../i18n';
-import { isDesktop } from '../desktop';
-import { CHANGELOG_SEEN_KEY } from '../changelog';
+import { isDesktop } from '../version/desktop';
+import { CHANGELOG_SEEN_KEY } from '../version/changelog';
 import { PROGRAM_COLOR_KEY } from '../view/programColor';
 import type { Id } from '../types';
 

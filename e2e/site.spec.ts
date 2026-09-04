@@ -11,7 +11,7 @@
 // the site build leaking into the file:// build.
 
 import { expect, test } from './kapan';
-import { SITE_ADRESI } from '../src/update';
+import { SITE_ADRESI } from '../src/version/update';
 import { reopen } from './helpers';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';

@@ -15,7 +15,7 @@ import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import { open, openSettings } from './helpers';
 import { surumBilgisi } from '../scripts/surum.mjs';
-import { SURUM_NOTLARI } from '../src/changelog';
+import { SURUM_NOTLARI } from '../src/version/changelog';
 
 /**
  * Scoped by its HEADING, not by its text. `hasText` matches a substring and

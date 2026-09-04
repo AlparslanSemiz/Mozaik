@@ -4,7 +4,7 @@
 // strip's SHAPE is shared (./parts); what each tab ASKS is its own file.
 
 import { applyTheme } from '../../view/theme';
-import { surumEtiketi } from '../../version';
+import { surumEtiketi } from '../../version/version';
 import { useT } from '../T';
 import {
   Group,

@@ -18,8 +18,8 @@ import { useOpenBackup } from "./plans/useOpenBackup";
 import { useProgramMasks } from "./view/useProgramMasks";
 import { useSolver } from "./schedule/useSolver";
 import { useFolder } from "./plans/useFolder";
-import { useUpdate } from "./update";
-import { APP_NAME, surumEtiketi } from "./version";
+import { useUpdate } from "./version/update";
+import { APP_NAME, surumEtiketi } from "./version/version";
 import { useToolState } from "./view/toolState";
 import type { Tab } from "./view/toolState";
 import Setup from "./components/setup";
@@ -37,7 +37,7 @@ import type { Excluded } from "./components/print";
 import { solverExclusions } from "./view/programMask";
 import Settings from "./components/settings";
 import { useShortcutsHelp } from "./components/overlay/ShortcutsHelp";
-import { hasUnseenChangelog } from "./changelog";
+import { hasUnseenChangelog } from "./version/changelog";
 
 /**
  * The six sections, along the TOP — on the same row as the document identity

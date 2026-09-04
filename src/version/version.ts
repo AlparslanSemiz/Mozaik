@@ -25,7 +25,7 @@
  */
 export const APP_NAME = 'Mozaik';
 
-import { t } from './i18n';
+import { t } from '../i18n';
 
 export interface Surum {
   /** package.json's version, e.g. "1.1.0". */

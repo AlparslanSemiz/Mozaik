@@ -67,23 +67,23 @@ if (etiketler !== '') {
   );
 }
 
-// The FOURTH gate, and the newest: `src/changelog.ts` (Ayarlar → Hakkında'nın
+// The FOURTH gate, and the newest: `src/version/changelog.ts` (Ayarlar → Hakkında'nın
 // "Yenilikler" paneli) is hand-edited once per release, same as this file's
 // own bump. Nothing here reads it at build time to check itself, so a
 // forgotten entry ships silently — the exact failure this whole script exists
 // to stop, applied to a fourth step nobody used to check. Not built (no TS
 // loader here), so the top entry's version is read out with a regex, the same
 // way `cargoSurumuYaz` edits Cargo.toml as text rather than as TOML.
-const changelogYol = resolve(KOK, 'src', 'changelog.ts');
+const changelogYol = resolve(KOK, 'src', 'version', 'changelog.ts');
 const changelogMetin = readFileSync(changelogYol, 'utf8');
 const changelogEslesme = /SURUM_NOTLARI[\s\S]*?version:\s*'([^']+)'/.exec(changelogMetin);
 if (changelogEslesme === null) {
-  dur('src/changelog.ts içinde SURUM_NOTLARI\'nin ilk sürümü bulunamadı.');
+  dur('src/version/changelog.ts içinde SURUM_NOTLARI\'nin ilk sürümü bulunamadı.');
 }
 const changelogSurumu = changelogEslesme[1];
 if (changelogSurumu !== surum) {
   dur(
-    `src/changelog.ts'in en üstündeki sürüm "${changelogSurumu}", yayınlanan "${surum}" değil.`,
+    `src/version/changelog.ts'in en üstündeki sürüm "${changelogSurumu}", yayınlanan "${surum}" değil.`,
     'Yenilikler panelinin bu sürümden hiç haberi olmaz.',
     `SURUM_NOTLARI[0].version'ı "${surum}" yapın, o girdinin items[]'ını doldurun, sonra yayınlayın.`,
   );

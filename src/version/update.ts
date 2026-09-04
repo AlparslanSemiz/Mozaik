@@ -31,7 +31,7 @@
 // registration, when there was no controller, and announcing "new version" to
 // somebody who just opened the site for the first time is a lie.
 
-import { t } from './i18n';
+import { t } from '../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';

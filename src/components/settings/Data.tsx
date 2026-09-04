@@ -31,11 +31,11 @@ import type { State } from "../../types";
 import { activePlacements } from "../../state/programs";
 import type { PlanControls } from "../common/props";
 import type { FolderRun } from "../../plans/useFolder";
-import type { UpdateRun } from "../../update";
-import { SITE_ADRESI } from "../../update";
-import { EXE_FOLDER } from "../../desktop";
-import { surumEtiketi, tarihYazisi } from "../../version";
-import { markChangelogSeen, SURUM_NOTLARI } from "../../changelog";
+import type { UpdateRun } from "../../version/update";
+import { SITE_ADRESI } from "../../version/update";
+import { EXE_FOLDER } from "../../version/desktop";
+import { surumEtiketi, tarihYazisi } from "../../version/version";
+import { markChangelogSeen, SURUM_NOTLARI } from "../../version/changelog";
 import Plans from "./Plans";
 import { T, useT } from '../T';
 

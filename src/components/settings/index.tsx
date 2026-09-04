@@ -25,7 +25,7 @@ import Data from './Data';
 import type { PanelProps, PlanControls } from '../common/props';
 import type { Density, Motion, Theme } from '../../view/theme';
 import type { FolderRun } from '../../plans/useFolder';
-import type { UpdateRun } from '../../update';
+import type { UpdateRun } from '../../version/update';
 import type { SectionId } from '../../view/toolState';
 
 interface Props extends PanelProps {
