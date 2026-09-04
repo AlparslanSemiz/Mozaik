@@ -17,7 +17,7 @@ import {
   readScale,
   readTheme,
   readUiDensity,
-} from './theme';
+} from './view/theme';
 import './styles.css';
 
 // Before the first paint, otherwise the page flashes light and then flips.

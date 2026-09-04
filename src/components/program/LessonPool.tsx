@@ -31,10 +31,10 @@ import {
   readDockHeight,
   writeDock,
   writeDockHeight,
-} from "../../theme";
+} from "../../view/theme";
 import { attachSplitter, maxDockHeight } from "../../poolSplit";
 import { useT } from "../T";
-import type { PoolSort } from "../../toolState";
+import type { PoolSort } from "../../view/toolState";
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */

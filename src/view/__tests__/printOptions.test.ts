@@ -6,7 +6,7 @@ import {
   PER_SHEET_LABELS,
   PER_SHEET_VALUES,
   PRINT_SIZE_LABELS,
-} from './printOptions';
+} from '../printOptions';
 
 describe('normalizePrintOptions', () => {
   // "Not stored" and "stored as off" are different facts, and every one of

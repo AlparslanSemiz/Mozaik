@@ -14,7 +14,7 @@
 import { t } from '../i18n';
 import { isDesktop } from '../desktop';
 import { CHANGELOG_SEEN_KEY } from '../changelog';
-import { PROGRAM_COLOR_KEY } from '../programColor';
+import { PROGRAM_COLOR_KEY } from '../view/programColor';
 import type { Id } from '../types';
 
 /**

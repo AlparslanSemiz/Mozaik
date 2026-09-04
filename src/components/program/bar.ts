@@ -6,7 +6,7 @@
 
 import type { SolverRun } from '../../schedule/useSolver';
 import type { Translate } from '../T';
-import type { View } from '../../toolState';
+import type { View } from '../../view/toolState';
 
 /** "3,4" — one decimal, Turkish comma. */
 export function seconds(ms: number): string {

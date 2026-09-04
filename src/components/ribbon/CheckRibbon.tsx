@@ -10,7 +10,7 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { health } from '../../schedule/feasibility';
-import type { CheckView } from '../../toolState';
+import type { CheckView } from '../../view/toolState';
 import { KIND_ICON } from '../common/steps';
 import { useT } from '../T';
 import {

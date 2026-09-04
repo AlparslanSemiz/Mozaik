@@ -20,7 +20,7 @@ import {
   SCALE_MIN,
   SCALE_DEFAULT,
   SCALE_STEP,
-} from './theme';
+} from '../theme';
 
 describe('normalizeTheme', () => {
   it('kayıtlı geçerli tercih olduğu gibi kullanılır', () => {

@@ -36,9 +36,9 @@ import type { DragData } from "../../drag";
 import type { SolverRun } from "../../schedule/useSolver";
 import type { State, Id } from "../../types";
 import { activePinned, activePlacements } from "../../state/programs";
-import { rowMask, setDayMask, setRowMask } from "../../programMask";
-import type { ProgramMask } from "../../programMask";
-import type { PoolSort, View } from "../../toolState";
+import { rowMask, setDayMask, setRowMask } from "../../view/programMask";
+import type { ProgramMask } from "../../view/programMask";
+import type { PoolSort, View } from "../../view/toolState";
 import { KIND_ICON } from "../common/steps";
 import Grid from "./Grid";
 import type { GridMenuTarget } from "./Grid";
@@ -47,8 +47,8 @@ import { T, useT } from "../T";
 import { describeBar } from "./bar";
 import { buildRows, roomLetter } from "./rows";
 import { buildPool } from "./pool";
-import { programColorIndex } from "../../programColor";
-import type { ProgramColorMode } from "../../programColor";
+import { programColorIndex } from "../../view/programColor";
+import type { ProgramColorMode } from "../../view/programColor";
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */

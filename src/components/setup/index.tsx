@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
 import { useToast } from '../overlay/Toasts';
 import { useLoadSample } from '../overlay/useSample';
-import { markIntroSeen, readIntroSeen } from '../../theme';
+import { markIntroSeen, readIntroSeen } from '../../view/theme';
 
 import Rooms from './Rooms';
 import Teachers from './Teachers';
@@ -26,7 +26,7 @@ import Subjects from './Subjects';
 import Summary from './Summary';
 import { drafts as draftsOf } from '../../plans/library';
 import type { PanelProps, PlanControls } from '../common/props';
-import type { StepId } from '../../toolState';
+import type { StepId } from '../../view/toolState';
 import { STEPS } from '../common/steps';
 import DraftStart from '../common/DraftStart';
 import { T, useT } from '../T';

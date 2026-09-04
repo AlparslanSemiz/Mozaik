@@ -70,11 +70,11 @@ import {
   Scale,
   Sun,
 } from 'lucide-react';
-import type { Density, Theme } from '../../theme';
-import type { Kind, LessonMode, SectionId, View } from '../../toolState';
+import type { Density, Theme } from '../../view/theme';
+import type { Kind, LessonMode, SectionId, View } from '../../view/toolState';
 import { KIND_ICON, classIcon, teacherIcon } from '../common/steps';
 import { useT } from '../T';
-import type { ProgramColorMode } from '../../programColor';
+import type { ProgramColorMode } from '../../view/programColor';
 
 /** Every lucide symbol in the strip is drawn at the size the hand-drawn four are. */
 export const ICON = { size: 18, 'aria-hidden': true, focusable: false } as const;

@@ -7,7 +7,7 @@ import { buildReport } from '../../schedule/feasibility';
 import type { ReportRow } from '../../schedule/feasibility';
 import type { Id, State } from '../../types';
 import { activePlacements } from '../../state/programs';
-import type { CheckView } from '../../toolState';
+import type { CheckView } from '../../view/toolState';
 import CapacityRows from '../common/CapacityRows';
 import { T, useT } from '../T';
 

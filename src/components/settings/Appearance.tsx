@@ -31,8 +31,8 @@ import {
   SCALE_MAX,
   SCALE_MIN,
   SCALE_STEP,
-} from '../../theme';
-import type { Density, Motion, Theme } from '../../theme';
+} from '../../view/theme';
+import type { Density, Motion, Theme } from '../../view/theme';
 import { DILLER, DIL_ADI } from '../../i18n';
 import { T, useLang } from '../T';
 import type { State } from '../../types';

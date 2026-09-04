@@ -1,4 +1,4 @@
-import type { Id, State } from './types';
+import type { Id, State } from '../types';
 import type { View } from './toolState';
 
 export type MaskMode = 'ghost' | 'hidden';

@@ -14,10 +14,10 @@ import {
 import type { Index } from '../../constraints';
 import { lessonSubject, subjectShort, teacherSubjects } from '../../entities';
 import { activePinned, activePlacements } from '../../state/programs';
-import { programColorIndex } from '../../programColor';
-import type { ProgramColorMode } from '../../programColor';
-import type { ProgramMask } from '../../programMask';
-import type { View } from '../../toolState';
+import { programColorIndex } from '../../view/programColor';
+import type { ProgramColorMode } from '../../view/programColor';
+import type { ProgramMask } from '../../view/programMask';
+import type { View } from '../../view/toolState';
 import type { Id, State } from '../../types';
 import type { GridCell, GridRow } from './Grid';
 import type { Translate } from '../T';

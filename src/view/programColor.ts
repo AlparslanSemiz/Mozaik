@@ -3,9 +3,9 @@
 // This is a MACHINE preference, never timetable data: opening a backup on a
 // different computer must not change how that computer likes to read cards.
 
-import { lessonSubject, subjectKey } from "./entities";
-import { PALETTE_SIZE } from "./palette";
-import type { Lesson, State } from "./types";
+import { lessonSubject, subjectKey } from "../entities";
+import { PALETTE_SIZE } from "../palette";
+import type { Lesson, State } from "../types";
 
 export type ProgramColorMode = "teacher" | "class" | "room" | "subject";
 

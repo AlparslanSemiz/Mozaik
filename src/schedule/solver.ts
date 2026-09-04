@@ -29,8 +29,8 @@ import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import { activePinned, activePlacements, replaceActiveGrid } from '../state/programs';
 import type { Id, Lesson, State } from '../types';
-import { lessonExcluded } from '../programMask';
-import type { SolverExclusions } from '../programMask';
+import { lessonExcluded } from '../view/programMask';
+import type { SolverExclusions } from '../view/programMask';
 
 export interface SolverOptions {
   /** Keep what is already on the grid and fill in around it (default true). */

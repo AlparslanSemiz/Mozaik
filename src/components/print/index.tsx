@@ -21,9 +21,9 @@ import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from
 import { paletteColor } from '../../palette';
 import type { State } from '../../types';
 import { activePlacements } from '../../state/programs';
-import type { Scope } from '../../toolState';
-import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../../printOptions';
-import type { PrintOptions } from '../../printOptions';
+import type { Scope } from '../../view/toolState';
+import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../../view/printOptions';
+import type { PrintOptions } from '../../view/printOptions';
 import { T, useT } from '../T';
 
 interface Props {

@@ -14,7 +14,7 @@ import { dayPeriods } from "../../schedule/bell";
 import { attachGridChrome } from "../../gridChrome";
 import { paletteColor } from "../../palette";
 import type { Settings, Id } from "../../types";
-import type { MaskMode } from "../../programMask";
+import type { MaskMode } from "../../view/programMask";
 import { useT } from "../T";
 
 export interface GridCell {

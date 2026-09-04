@@ -24,7 +24,7 @@
 // Both are transient gestures, not positions.
 
 import { useState } from "react";
-import type { Id } from "./types";
+import type { Id } from "../types";
 
 export type Tab =
   | "setup"

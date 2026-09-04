@@ -11,7 +11,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { cleanMask, EMPTY_PROGRAM_MASK, type ProgramMask } from './programMask';
-import type { Id, State } from './types';
+import type { Id, State } from '../types';
 
 export interface ProgramMasks {
   /** The open plan's mask, already cleaned against the school it describes. */

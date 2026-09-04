@@ -30,7 +30,7 @@ import {
 } from "../../listview";
 import type { ListConfig, ListQuery } from "../../listview";
 import type { Id, Lesson, State } from "../../types";
-import type { LessonMode } from "../../toolState";
+import type { LessonMode } from "../../view/toolState";
 import { useDialogs } from "../overlay/Dialogs";
 import { parseLessons } from "../../entities/import";
 import { paletteColor } from "../../palette";

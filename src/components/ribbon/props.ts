@@ -2,10 +2,10 @@
 // actually uses — so a file's import line says which of the app's controls that
 // tab is allowed to touch.
 
-import type { ProgramColorMode } from '../../programColor';
-import type { ProgramMask } from '../../programMask';
-import type { Density, Theme } from '../../theme';
-import type { ToolState } from '../../toolState';
+import type { ProgramColorMode } from '../../view/programColor';
+import type { ProgramMask } from '../../view/programMask';
+import type { Density, Theme } from '../../view/theme';
+import type { ToolState } from '../../view/toolState';
 import type { State } from '../../types';
 import type { SolverRun } from '../../schedule/useSolver';
 

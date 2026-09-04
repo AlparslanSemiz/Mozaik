@@ -23,10 +23,10 @@ import Rules from './Rules';
 import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../common/props';
-import type { Density, Motion, Theme } from '../../theme';
+import type { Density, Motion, Theme } from '../../view/theme';
 import type { FolderRun } from '../../plans/useFolder';
 import type { UpdateRun } from '../../update';
-import type { SectionId } from '../../toolState';
+import type { SectionId } from '../../view/toolState';
 
 interface Props extends PanelProps {
   loadState: (next: State) => void;

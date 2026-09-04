@@ -22,7 +22,7 @@ import {
   Square,
   Trash2,
 } from 'lucide-react';
-import { applyDensity } from '../../theme';
+import { applyDensity } from '../../view/theme';
 import {
   activePinned,
   activePlacements,
@@ -37,10 +37,10 @@ import {
   validProgramName,
 } from '../../state/programs';
 import { newId } from '../../entities';
-import { maskCount, setDayMask, setRowMask, solverExclusions } from '../../programMask';
+import { maskCount, setDayMask, setRowMask, solverExclusions } from '../../view/programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../../constraints';
 import { useT } from '../T';
-import type { ProgramColorMode } from '../../programColor';
+import type { ProgramColorMode } from '../../view/programColor';
 import {
   DENSITIES,
   Group,

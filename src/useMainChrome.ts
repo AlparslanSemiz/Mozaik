@@ -11,7 +11,7 @@
 import { useEffect, useLayoutEffect, type RefObject } from 'react';
 import { attachRibbonScroll } from './ribbonScroll';
 import { attachScrollFade } from './scrollFade';
-import type { Tab } from './toolState';
+import type { Tab } from './view/toolState';
 
 /** The fade on the scrolled content. */
 export function useScrollFade(main: RefObject<HTMLElement | null>, tab: Tab): void {
