@@ -29,7 +29,7 @@ import { downloadBundle } from "../../backupFile";
 import { listBackups } from "../../planStorage";
 import type { State } from "../../types";
 import { activePlacements } from "../../programs";
-import type { PlanControls } from "../props";
+import type { PlanControls } from "../common/props";
 import type { FolderRun } from "../../useFolder";
 import type { UpdateRun } from "../../update";
 import { SITE_ADRESI } from "../../update";

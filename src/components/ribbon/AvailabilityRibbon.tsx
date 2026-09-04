@@ -8,7 +8,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { paletteColor } from '../../palette';
-import { KIND_ICON } from '../steps';
+import { KIND_ICON } from '../common/steps';
 import { useT } from '../T';
 import {
   Group,

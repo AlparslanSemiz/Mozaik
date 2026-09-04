@@ -2,8 +2,8 @@
 // placing a lesson — but two classes sharing one room may not clash.
 
 import { useMemo, useState } from "react";
-import ListTools from "../ListTools";
-import { useRowOrder } from "../useRowOrder";
+import ListTools from "../common/ListTools";
+import { useRowOrder } from "../common/useRowOrder";
 import {
   applyList,
   byNumberThen,
@@ -24,9 +24,9 @@ import {
   updateRoom,
 } from "../../entities";
 import Paste from "./Paste";
-import type { PanelProps } from "../props";
+import type { PanelProps } from "../common/props";
 import { useT } from "../T";
-import AddPanel from "../AddPanel";
+import AddPanel from "../common/AddPanel";
 import { buildCapacity } from "../../feasibility";
 import { loadStatusFacet } from "./loadStatusFacet";
 

@@ -13,10 +13,10 @@
 // The sentence is not lost: it is the row's `title`, which is where it was in
 // Özet already.
 
-import { paletteColor } from '../palette';
-import type { ReportRow } from '../feasibility';
-import type { Id } from '../types';
-import { useT } from './T';
+import { paletteColor } from '../../palette';
+import type { ReportRow } from '../../feasibility';
+import type { Id } from '../../types';
+import { useT } from '../T';
 
 const BADGE: Record<ReportRow['level'], string> = {
   ok: 'ok',

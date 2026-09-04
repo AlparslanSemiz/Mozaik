@@ -10,10 +10,10 @@
 // What genuinely differed was the label on the button and whether a toast went
 // out, so those are the props. Everything else is here.
 
-import { useDialogs } from './overlay/Dialogs';
-import { useT } from './T';
-import { loadPlan } from '../planStorage';
-import { blankProgram } from '../programs';
+import { useDialogs } from '../overlay/Dialogs';
+import { useT } from '../T';
+import { loadPlan } from '../../planStorage';
+import { blankProgram } from '../../programs';
 import type { PlanControls } from './props';
 
 interface Props {

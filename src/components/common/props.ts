@@ -1,6 +1,6 @@
-import type { Bundle } from '../bundle';
-import type { Library } from '../library';
-import type { Id, State } from '../types';
+import type { Bundle } from '../../bundle';
+import type { Library } from '../../library';
+import type { Id, State } from '../../types';
 
 /**
  * Every setup step and every settings section gets the same two things and

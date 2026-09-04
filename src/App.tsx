@@ -24,7 +24,7 @@ import { useToolState } from "./toolState";
 import type { Tab } from "./toolState";
 import Setup from "./components/setup";
 import Lessons from "./components/lessons";
-import { lessonIcon } from "./components/steps";
+import { lessonIcon } from "./components/common/steps";
 import Availability from "./components/availability";
 import Program from "./components/program";
 import { T, useT } from "./components/T";

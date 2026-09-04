@@ -12,9 +12,9 @@ import {
   Search,
   X,
 } from "lucide-react";
-import { canReorder, facetCounts, isFiltering } from "../listview";
-import type { ListConfig, ListQuery } from "../listview";
-import { T, useT } from "./T";
+import { canReorder, facetCounts, isFiltering } from "../../listview";
+import type { ListConfig, ListQuery } from "../../listview";
+import { T, useT } from "../T";
 
 interface Props<T> {
   items: T[];

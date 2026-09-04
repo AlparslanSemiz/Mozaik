@@ -12,7 +12,7 @@
 
 import { useMemo } from 'react';
 import { buildCapacity } from '../../feasibility';
-import CapacityRows from '../CapacityRows';
+import CapacityRows from '../common/CapacityRows';
 import {
   DEFAULT_SUBJECT_SHORTS,
   addSubject,

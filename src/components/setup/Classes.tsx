@@ -2,8 +2,8 @@
 // clash with each other — only through a shared room.
 
 import { useMemo, useState } from "react";
-import ListTools from "../ListTools";
-import { useRowOrder } from "../useRowOrder";
+import ListTools from "../common/ListTools";
+import { useRowOrder } from "../common/useRowOrder";
 import {
   applyList,
   byNumberThen,
@@ -17,7 +17,7 @@ import { PanelRight } from "lucide-react";
 import { useInspect } from "../overlay/Inspector";
 import { useDialogs } from "../overlay/Dialogs";
 import { parseClasses } from "../../import";
-import ColorPick from "../ColorPick";
+import ColorPick from "../common/ColorPick";
 import {
   addClass,
   addClassesFromRows,
@@ -26,11 +26,11 @@ import {
   updateClass,
   weeklyLoad,
 } from "../../entities";
-import LimitBox from "../LimitBox";
+import LimitBox from "../common/LimitBox";
 import Paste from "./Paste";
-import type { PanelProps } from "../props";
+import type { PanelProps } from "../common/props";
 import { T, useT } from "../T";
-import AddPanel from "../AddPanel";
+import AddPanel from "../common/AddPanel";
 import { buildCapacity } from "../../feasibility";
 import { loadStatusFacet } from "./loadStatusFacet";
 

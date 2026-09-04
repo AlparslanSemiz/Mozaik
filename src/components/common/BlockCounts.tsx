@@ -6,10 +6,10 @@
 import { useMemo, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Check, ChevronDown, LockKeyhole } from 'lucide-react';
-import { blockPlan, patternLabel, patternOptions } from '../blocks';
-import { lessonLimit, ruleLevel } from '../rules';
-import type { ClassGroup, Lesson, State } from '../types';
-import { useT } from './T';
+import { blockPlan, patternLabel, patternOptions } from '../../blocks';
+import { lessonLimit, ruleLevel } from '../../rules';
+import type { ClassGroup, Lesson, State } from '../../types';
+import { useT } from '../T';
 
 /**
  * The longest block this lesson could ever have placed, or 0 for no ceiling.

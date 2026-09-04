@@ -1,4 +1,4 @@
-import { useT } from './T';
+import { useT } from '../T';
 
 /**
  * One limit box. Empty means "fall back to the wider number", and that number

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { health } from '../../feasibility';
 import type { CheckView } from '../../toolState';
-import { KIND_ICON } from '../steps';
+import { KIND_ICON } from '../common/steps';
 import { useT } from '../T';
 import {
   Group,

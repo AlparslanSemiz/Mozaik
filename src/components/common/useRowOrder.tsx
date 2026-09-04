@@ -14,13 +14,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GripVertical } from 'lucide-react';
 import type { ReactElement } from 'react';
-import { reorderList } from '../entities';
-import type { ListKind } from '../entities';
-import { canReorder } from '../listview';
-import type { ListQuery } from '../listview';
-import { attachRowDrag, clampIndex } from '../rowDrag';
-import type { State } from '../types';
-import { useT } from './T';
+import { reorderList } from '../../entities';
+import type { ListKind } from '../../entities';
+import { canReorder } from '../../listview';
+import type { ListQuery } from '../../listview';
+import { attachRowDrag, clampIndex } from '../../rowDrag';
+import type { State } from '../../types';
+import { useT } from '../T';
 
 interface Options {
   kind: ListKind;

@@ -12,7 +12,7 @@ import { useMemo, useRef, useState } from "react";
 import type React from "react";
 import { sharedPeriods } from "../../bell";
 import { paletteColor } from "../../palette";
-import { KIND_ICON } from "../steps";
+import { KIND_ICON } from "../common/steps";
 import { buildIndex, closedConflicts, closedKey } from "../../constraints";
 import type { Id, State } from "../../types";
 import {

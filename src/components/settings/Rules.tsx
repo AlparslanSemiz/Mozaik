@@ -5,7 +5,7 @@ import type { RuleLevel, RuleName } from '../../types';
 import { buildIndex } from '../../constraints';
 import { updateLimits, updateRules } from '../../entities';
 import { findViolations } from '../../rules';
-import type { PanelProps } from '../props';
+import type { PanelProps } from '../common/props';
 import { paletteColor } from '../../palette';
 import { T, useT } from '../T';
 

@@ -27,7 +27,7 @@
 
 import { useState } from 'react';
 import { useDialogs } from '../overlay/Dialogs';
-import { useRowOrder } from '../useRowOrder';
+import { useRowOrder } from '../common/useRowOrder';
 import { EMPTY_QUERY } from '../../listview';
 import {
   addSubject,
@@ -41,10 +41,10 @@ import {
   subjectTeachers,
 } from '../../entities';
 import type { ReactElement } from 'react';
-import type { PanelProps } from '../props';
+import type { PanelProps } from '../common/props';
 import type { Settings } from '../../types';
 import { T, useT } from '../T';
-import AddPanel from '../AddPanel';
+import AddPanel from '../common/AddPanel';
 
 interface RowProps extends PanelProps {
   subject: string;

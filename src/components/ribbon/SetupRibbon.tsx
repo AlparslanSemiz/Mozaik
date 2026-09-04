@@ -3,7 +3,7 @@
 // Split out of Ribbon.tsx, which was one function with seven branches. The
 // strip's SHAPE is shared (./parts); what each tab ASKS is its own file.
 
-import { STEPS } from '../steps';
+import { STEPS } from '../common/steps';
 import { useT } from '../T';
 import {
   Group,

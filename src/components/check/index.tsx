@@ -8,7 +8,7 @@ import type { ReportRow } from '../../feasibility';
 import type { Id, State } from '../../types';
 import { activePlacements } from '../../programs';
 import type { CheckView } from '../../toolState';
-import CapacityRows from '../CapacityRows';
+import CapacityRows from '../common/CapacityRows';
 import { T, useT } from '../T';
 
 interface Props {

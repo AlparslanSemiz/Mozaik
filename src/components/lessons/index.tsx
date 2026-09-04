@@ -19,9 +19,9 @@
 // for by name: pick the total first, then how it falls apart.
 
 import { useEffect, useMemo, useState } from "react";
-import ListTools from "../ListTools";
+import ListTools from "../common/ListTools";
 import { blockPlan, clampBlocks, patternLabel } from "../../blocks";
-import { useRowOrder } from "../useRowOrder";
+import { useRowOrder } from "../common/useRowOrder";
 import {
   applyList,
   byNumberThen,
@@ -50,14 +50,14 @@ import {
   updateLesson,
   weeklyLoad,
 } from "../../entities";
-import { KIND_ICON } from "../steps";
-import LimitBox from "../LimitBox";
-import BlockCounts, { blockCeiling } from "../BlockCounts";
+import { KIND_ICON } from "../common/steps";
+import LimitBox from "../common/LimitBox";
+import BlockCounts, { blockCeiling } from "../common/BlockCounts";
 import Paste from "../setup/Paste";
 import Summary from "../setup/Summary";
-import Field from "../Field";
+import Field from "../common/Field";
 import { T, useT } from "../T";
-import AddPanel from "../AddPanel";
+import AddPanel from "../common/AddPanel";
 
 interface Props {
   state: State;

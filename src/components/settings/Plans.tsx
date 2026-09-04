@@ -16,8 +16,8 @@ import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../planStorage';
 import type { State } from '../../types';
 import { activePlacements, blankProgram } from '../../programs';
-import type { PlanControls } from '../props';
-import DraftStart from '../DraftStart';
+import type { PlanControls } from '../common/props';
+import DraftStart from '../common/DraftStart';
 import { T, useT } from '../T';
 
 interface Props {

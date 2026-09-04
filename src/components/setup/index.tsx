@@ -25,10 +25,10 @@ import Classes from './Classes';
 import Subjects from './Subjects';
 import Summary from './Summary';
 import { drafts as draftsOf } from '../../library';
-import type { PanelProps, PlanControls } from '../props';
+import type { PanelProps, PlanControls } from '../common/props';
 import type { StepId } from '../../toolState';
-import { STEPS } from '../steps';
-import DraftStart from '../DraftStart';
+import { STEPS } from '../common/steps';
+import DraftStart from '../common/DraftStart';
 import { T, useT } from '../T';
 
 /**

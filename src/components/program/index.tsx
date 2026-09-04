@@ -39,7 +39,7 @@ import { activePinned, activePlacements } from "../../programs";
 import { rowMask, setDayMask, setRowMask } from "../../programMask";
 import type { ProgramMask } from "../../programMask";
 import type { PoolSort, View } from "../../toolState";
-import { KIND_ICON } from "../steps";
+import { KIND_ICON } from "../common/steps";
 import Grid from "./Grid";
 import type { GridMenuTarget } from "./Grid";
 import LessonPool from "./LessonPool";

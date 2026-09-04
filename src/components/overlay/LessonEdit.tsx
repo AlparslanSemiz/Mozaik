@@ -29,8 +29,8 @@ import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import BlockCounts, { blockCeiling } from '../BlockCounts';
-import LimitBox from '../LimitBox';
+import BlockCounts, { blockCeiling } from '../common/BlockCounts';
+import LimitBox from '../common/LimitBox';
 import { paletteColor } from '../../palette';
 import {
   hasTwoSubjects,

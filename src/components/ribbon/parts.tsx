@@ -72,7 +72,7 @@ import {
 } from 'lucide-react';
 import type { Density, Theme } from '../../theme';
 import type { Kind, LessonMode, SectionId, View } from '../../toolState';
-import { KIND_ICON, classIcon, teacherIcon } from '../steps';
+import { KIND_ICON, classIcon, teacherIcon } from '../common/steps';
 import { useT } from '../T';
 import type { ProgramColorMode } from '../../programColor';
 

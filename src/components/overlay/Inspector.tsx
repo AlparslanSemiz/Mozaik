@@ -42,14 +42,14 @@ import {
   updateRoom,
   updateTeacher,
 } from '../../entities';
-import ColorPick from '../ColorPick';
-import LimitBox from '../LimitBox';
+import ColorPick from '../common/ColorPick';
+import LimitBox from '../common/LimitBox';
 import { placedBlocks } from '../../constraints';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type { InspectKind } from '../../entities';
 import { paletteColor } from '../../palette';
-import { KIND_ICON } from '../steps';
+import { KIND_ICON } from '../common/steps';
 import type { Gender, State } from '../../types';
 import { T, useT } from '../T';
 
