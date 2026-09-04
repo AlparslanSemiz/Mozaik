@@ -15,10 +15,10 @@ import { DialogProvider } from './components/overlay/Dialogs';
 import { LangProvider } from './components/T';
 import { ShortcutsHelpProvider } from './components/overlay/ShortcutsHelp';
 import { ToastProvider } from './components/overlay/Toasts';
-import './lang/en';
-import './lang/de';
-import './lang/es';
-import './lang/fr';
+import './i18n/lang/en';
+import './i18n/lang/de';
+import './i18n/lang/es';
+import './i18n/lang/fr';
 
 export default function Root() {
   // The language is OUTERMOST: every provider below it puts words on the

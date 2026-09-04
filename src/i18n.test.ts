@@ -31,10 +31,10 @@ import {
 } from './i18n';
 import { dayLabel, shortDay, subjectLabel, subjectShort } from './entities';
 import type { Settings } from './types';
-import './lang/en';
-import './lang/de';
-import './lang/es';
-import './lang/fr';
+import './i18n/lang/en';
+import './i18n/lang/de';
+import './i18n/lang/es';
+import './i18n/lang/fr';
 
 describe('normalizeDil', () => {
   it('bildiği dili aynen alıyor', () => {
@@ -200,12 +200,30 @@ function stripComments(text: string): string {
 }
 
 describe('sözlükler kaynakla aynı şeyi konuşuyor', () => {
-  const source = Object.entries(SOURCE)
-    .filter(
-      ([p]) => !p.includes('.test.') && !p.startsWith('./lang/') && !p.endsWith('worlds.ts'),
-    )
-    .map(([, text]) => stripComments(text as string))
-    .join('\n');
+  // The paths that survive the filter, held as their own value so the FILTER
+  // can be measured. Until now it could not be, and that gap had teeth: the
+  // dictionaries are excluded by a path PREFIX, so when `lang/` moved under
+  // `i18n/` the prefix stopped matching and every dictionary counted as
+  // "source". Every key is then trivially "found in the source", and the dead
+  // key scanner below goes green forever over real rot.
+  //
+  // Measured, not argued (2026-09-05): with the stale prefix a deliberately
+  // dead key passed 40/40; with the prefix corrected the same key failed by
+  // name. The guard below is what keeps the filter from silently widening
+  // again, because a path filter with nothing measuring it is a wish.
+  const TARANAN = Object.keys(SOURCE).filter(
+    (p) => !p.includes('.test.') && !p.startsWith('./i18n/lang/') && !p.endsWith('worlds.ts'),
+  );
+
+  const source = TARANAN.map((p) => stripComments(SOURCE[p] as string)).join(String.fromCharCode(10));
+
+  it('taranan kaynak SÖZLÜKLERİ dışarıda bırakıyor, ekranları bırakmıyor', () => {
+    // A dictionary in here means every key finds itself.
+    expect(TARANAN.filter((p) => p.includes('/lang/'))).toEqual([]);
+    // ...and an empty-ish set would do the same thing from the other side.
+    expect(TARANAN.length).toBeGreaterThan(100);
+    expect(TARANAN.some((p) => p.endsWith('/setup/Teachers.tsx'))).toBe(true);
+  });
 
   const CEVIRILER = DILLER.filter((d) => d !== 'tr').map(
     (d) => [d, sozlukOf(d) ?? {}] as const,

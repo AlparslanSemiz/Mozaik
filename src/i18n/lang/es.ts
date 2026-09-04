@@ -15,8 +15,8 @@
  * Ordered by the file each sentence is drawn from, so a screen can be read
  * here in the order it is read there.
  */
-import { registerSozluk } from "../i18n";
-import type { Sozluk } from "../i18n";
+import { registerSozluk } from "../index";
+import type { Sozluk } from "../index";
 
 const ES: Sozluk = {
   "Kartların renk ölçütü": "Criterio de color de las tarjetas",
