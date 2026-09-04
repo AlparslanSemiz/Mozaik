@@ -6,7 +6,7 @@
 // the caller's fallback, never with a throw. A parser that throws on one broken
 // field loses the whole timetable behind it.
 
-import type { Gender, RuleLevel } from './types';
+import type { Gender, RuleLevel } from '../types';
 
 export const asArray = <T,>(x: unknown, fallback: T[]): T[] =>
   Array.isArray(x) ? (x as T[]) : fallback;

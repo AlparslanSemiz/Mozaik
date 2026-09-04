@@ -14,7 +14,7 @@ import {
   blockCells,
   blockAt,
 } from '../index';
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';
 import { build } from '../../testing/constraintFixture';
 
 describe('blockStart ve removeBlock', () => {

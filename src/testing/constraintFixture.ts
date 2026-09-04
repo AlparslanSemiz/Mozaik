@@ -6,7 +6,7 @@
 
 import { blocker, buildIndex, check, placementKey } from '../constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../entities';
-import { blankProgram, replaceActiveGrid } from '../programs';
+import { blankProgram, replaceActiveGrid } from '../state/programs';
 import type { RuleLevel, State } from '../types';
 import { SCHEMA_VERSION } from '../types';
 

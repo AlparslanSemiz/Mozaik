@@ -6,11 +6,11 @@
 // which is where parseState.ts's single reader takes over.
 
 import { asArray, asMap } from './coerce';
-import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from './entities';
+import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../entities';
 import { blankProgram } from './programs';
 import { readLessons } from './stateFields';
-import type { ClassGroup, Gender, Room, State, Teacher } from './types';
-import { SCHEMA_VERSION } from './types';
+import type { ClassGroup, Gender, Room, State, Teacher } from '../types';
+import { SCHEMA_VERSION } from '../types';
 
 /** v1 shape: Turkish field names. Kept only so old backups can still be opened. */
 export interface LegacyV1 {

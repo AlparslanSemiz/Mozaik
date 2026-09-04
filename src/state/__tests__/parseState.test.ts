@@ -5,12 +5,12 @@
 // plain string days). BOTH must still open, and the timetable inside them must
 // come out exactly as it went in.
 
-import { blockPlan } from './schedule/blocks';
-import { defaultSubjects } from './entities';
-import { parseState } from './parseState';
-import { activeProgram } from './programs';
-import { sampleState } from './sample';
-import { SCHEMA_VERSION } from './types';
+import { blockPlan } from '../../schedule/blocks';
+import { defaultSubjects } from '../../entities';
+import { parseState } from '../parseState';
+import { activeProgram } from '../programs';
+import { sampleState } from '../sample';
+import { SCHEMA_VERSION } from '../../types';
 
 /** A backup downloaded BEFORE the rename: v1 shape with Turkish field names. */
 function legacyV1() {

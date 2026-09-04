@@ -35,7 +35,7 @@ import {
   replaceActiveGrid,
   switchProgram,
   validProgramName,
-} from '../../programs';
+} from '../../state/programs';
 import { newId } from '../../entities';
 import { maskCount, setDayMask, setRowMask, solverExclusions } from '../../programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../../constraints';

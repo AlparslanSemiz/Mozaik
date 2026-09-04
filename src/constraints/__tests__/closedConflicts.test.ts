@@ -7,7 +7,7 @@ import {
   sanitize,
   buildIndex,
 } from '../index';
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';
 import type { State } from '../../types';
 import { build } from '../../testing/constraintFixture';
 

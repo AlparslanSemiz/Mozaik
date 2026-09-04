@@ -16,7 +16,7 @@ import {
   makeDay,
   NO_TEACHER_LIMITS,
 } from '../entities/defaults';
-import { blankProgram } from '../programs';
+import { blankProgram } from '../state/programs';
 import { addRoom } from '../entities/roomCrud';
 import { addTeacher } from '../entities/teacherCrud';
 import type { Day, State } from '../types';

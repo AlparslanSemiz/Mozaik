@@ -35,7 +35,7 @@ import { useDrag } from "../../drag";
 import type { DragData } from "../../drag";
 import type { SolverRun } from "../../schedule/useSolver";
 import type { State, Id } from "../../types";
-import { activePinned, activePlacements } from "../../programs";
+import { activePinned, activePlacements } from "../../state/programs";
 import { rowMask, setDayMask, setRowMask } from "../../programMask";
 import type { ProgramMask } from "../../programMask";
 import type { PoolSort, View } from "../../toolState";

@@ -8,7 +8,7 @@
 // the guard it would fire while typing a name.
 
 import { useEffect } from 'react';
-import { isTextInput } from './textInput';
+import { isTextInput } from './state/textInput';
 import type { Tab } from './toolState';
 
 export interface ShortcutActions {

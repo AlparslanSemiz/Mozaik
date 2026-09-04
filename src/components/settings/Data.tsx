@@ -26,9 +26,9 @@ import {
   storageReport,
 } from "../../library";
 import { downloadBundle } from "../../backupFile";
-import { listBackups } from "../../planStorage";
+import { listBackups } from "../../state/planStorage";
 import type { State } from "../../types";
-import { activePlacements } from "../../programs";
+import { activePlacements } from "../../state/programs";
 import type { PlanControls } from "../common/props";
 import type { FolderRun } from "../../useFolder";
 import type { UpdateRun } from "../../update";

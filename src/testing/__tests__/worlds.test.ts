@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { placementKey } from '../../constraints';
-import { parseState } from '../../parseState';
+import { parseState } from '../../state/parseState';
 import {
   closeHours,
   closeWeek,
@@ -281,4 +281,4 @@ describe('closeWeek / closeHours', () => {
     expect(Object.keys(d.unavailable)).toHaveLength(2);
   });
 });
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';

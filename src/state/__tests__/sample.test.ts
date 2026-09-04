@@ -5,11 +5,11 @@
 //   2. Is the real drop-map cost small enough not to stutter
 //      on my father's slow machine?
 
-import { blocker, buildIndex, dropMap, sanitize, place } from './constraints';
-import { buildReport } from './schedule/feasibility';
-import { blockPlan } from './schedule/blocks';
-import { sampleState } from './sample';
-import type { State } from './types';
+import { blocker, buildIndex, dropMap, sanitize, place } from '../../constraints';
+import { buildReport } from '../../schedule/feasibility';
+import { blockPlan } from '../../schedule/blocks';
+import { sampleState } from '../sample';
+import type { State } from '../../types';
 
 /** Greedy fill: puts every lesson in the first valid slot. NOT a solver, just a test. */
 function greedyFill(start: State): { state: State; placed: number; total: number } {
@@ -138,4 +138,4 @@ describe('gerçek ölçekte doldurma', () => {
     expect(denseMs, `dolu program medyanı ${denseMs.toFixed(2)} ms`).toBeLessThan(50);
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from '../programs';

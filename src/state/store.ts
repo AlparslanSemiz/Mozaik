@@ -7,8 +7,8 @@
 // Around it: useStore.ts wires it to React and to the autosave, planStorage.ts
 // owns the keys, parseState.ts turns a file into a State.
 
-import { sanitize } from './constraints';
-import type { Id, State } from './types';
+import { sanitize } from '../constraints';
+import type { Id, State } from '../types';
 
 const HISTORY_LIMIT = 30;
 

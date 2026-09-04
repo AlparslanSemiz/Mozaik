@@ -8,7 +8,7 @@ import { t } from '../i18n';
 import { closedKey } from '../keys';
 import { dayLabel } from '../schedule/names';
 import type { Index } from './placement';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../state/programs';
 import type { Id, State } from '../types';
 
 // --------------------------------------------------- closed-hour conflicts

@@ -25,7 +25,7 @@ import {
   hourNames,
 } from '../entities';
 import { classDayGaps, teacherDayCount, teacherDayGaps } from '../schedule/rules';
-import { sampleState } from '../sample';
+import { sampleState } from '../state/sample';
 import type {
   ClassGroup,
   Day,
@@ -39,7 +39,7 @@ import type {
   Teacher,
 } from '../types';
 import { SCHEMA_VERSION } from '../types';
-import { activePlacements, blankProgram, replaceActiveGrid } from '../programs';
+import { activePlacements, blankProgram, replaceActiveGrid } from '../state/programs';
 
 // ---------------------------------------------------------------- the builder
 

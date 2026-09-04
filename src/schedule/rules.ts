@@ -18,7 +18,7 @@ import { t } from '../i18n';
 import { dayLabel } from './names';
 import type { Index } from '../constraints';
 import { closedKey, placementKey } from '../keys';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../state/programs';
 import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../types';
 
 export interface Violation {

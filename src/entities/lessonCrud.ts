@@ -6,7 +6,7 @@
 import { clampBlocks } from '../schedule/blocks';
 import { sanitize } from '../constraints';
 import { newId } from './ids';
-import { mapProgramGrids } from '../programs';
+import { mapProgramGrids } from '../state/programs';
 import type { Id, Lesson, State } from '../types';
 
 export function addLesson(

@@ -5,7 +5,7 @@
 // of a file has its own small reader below, and everything they lean on
 // (coerce.ts, stateFields.ts, migrateLegacy.ts) is testable on its own.
 
-import { sanitize } from './constraints';
+import { sanitize } from '../constraints';
 import {
   asArray,
   asBox,
@@ -17,7 +17,7 @@ import {
   asShorts,
   asText,
 } from './coerce';
-import { defaultSubjects, emptyState } from './entities';
+import { defaultSubjects, emptyState } from '../entities';
 import { type LegacyV1, type LegacyV2, migrateV1, migrateV2toV3 } from './migrateLegacy';
 import { blankProgram } from './programs';
 import { readDays, readLessons, spreadColors } from './stateFields';
@@ -31,8 +31,8 @@ import type {
   Settings,
   State,
   Teacher,
-} from './types';
-import { SCHEMA_VERSION } from './types';
+} from '../types';
+import { SCHEMA_VERSION } from '../types';
 
 /** A v3-or-newer file, before anything in it has been believed. */
 type StoredState = Partial<State> & {

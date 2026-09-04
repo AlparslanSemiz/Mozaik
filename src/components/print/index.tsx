@@ -20,7 +20,7 @@ import { blockSpans, buildIndex, closedKey, placementKey } from '../../constrain
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../../entities';
 import { paletteColor } from '../../palette';
 import type { State } from '../../types';
-import { activePlacements } from '../../programs';
+import { activePlacements } from '../../state/programs';
 import type { Scope } from '../../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../../printOptions';
 import type { PrintOptions } from '../../printOptions';

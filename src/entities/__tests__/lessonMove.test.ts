@@ -3,7 +3,7 @@ import { buildIndex, place, placementKey, setBlockPinned } from '../../constrain
 import { emptyState } from '../defaults';
 import { addLesson } from '../lessonCrud';
 import { moveLessonToClass, transferLesson } from '../lessonMove';
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';
 import { addRoom } from '../roomCrud';
 import { lessonSubject } from '../../schedule/subjects';
 import { addTeacher } from '../teacherCrud';

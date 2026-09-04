@@ -5,11 +5,11 @@
 // What a file turns into lives in parseState.test.ts, where the keys are lives
 // in planStorage.test.ts.
 
-import { emptyState } from './entities';
-import { FIRST_PLAN_ID } from './library';
-import { sampleState } from './sample';
-import { reduce } from './store';
-import type { State } from './types';
+import { emptyState } from '../../entities';
+import { FIRST_PLAN_ID } from '../../library';
+import { sampleState } from '../sample';
+import { reduce } from '../store';
+import type { State } from '../../types';
 
 const box = (present: State, planId = FIRST_PLAN_ID) => ({
   present,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { deleteLesson, remapDays } from './entities';
-import { place, setBlockPinned, togglePinScope } from './constraints';
-import { parseState } from './parseState';
+import { deleteLesson, remapDays } from '../../entities';
+import { place, setBlockPinned, togglePinScope } from '../../constraints';
+import { parseState } from '../parseState';
 import {
   activeProgram,
   addProgram,
@@ -10,8 +10,8 @@ import {
   removeProgram,
   renameProgram,
   switchProgram,
-} from './programs';
-import { makeWorld } from './testing/worlds';
+} from '../programs';
+import { makeWorld } from '../../testing/worlds';
 
 function world() {
   return makeWorld({

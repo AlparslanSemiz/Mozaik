@@ -20,7 +20,7 @@ import {
   vacate,
 } from './placement';
 import { blockPinned, liftBlock, removeBlock } from './pinning';
-import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
+import { activePinned, activePlacements, replaceActiveGrid } from '../state/programs';
 import { swapBlocks, swapWarning } from './swap';
 import type { Id, Lesson, State } from '../types';
 

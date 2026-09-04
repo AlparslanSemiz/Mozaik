@@ -9,9 +9,9 @@
 //   3. "Yedek indir", the ONE habit my father learns — backupFile.ts
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import type { Bundle } from './bundle';
-import { sanitize } from './constraints';
-import { emptyState, newId } from './entities';
+import type { Bundle } from '../bundle';
+import { sanitize } from '../constraints';
+import { emptyState, newId } from '../entities';
 import {
   addPlan,
   findPlan,
@@ -25,12 +25,12 @@ import {
   uniquePlanName,
   writeLibrary,
   dropPlanText,
-} from './library';
+} from '../library';
 import { parseState } from './parseState';
 import { loadPlan, rotateBackups, savePlan } from './planStorage';
 import { type Box, reduce } from './store';
 import { isTextInput } from './textInput';
-import type { Id, State } from './types';
+import type { Id, State } from '../types';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
 

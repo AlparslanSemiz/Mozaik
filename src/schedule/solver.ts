@@ -27,7 +27,7 @@ import { t } from '../i18n';
 import type { Index, PlacedBlock } from '../constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
-import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
+import { activePinned, activePlacements, replaceActiveGrid } from '../state/programs';
 import type { Id, Lesson, State } from '../types';
 import { lessonExcluded } from '../programMask';
 import type { SolverExclusions } from '../programMask';

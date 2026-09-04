@@ -11,7 +11,7 @@ import { closedKey, placementKey, teacherKey } from '../keys';
 // and both have to reach the screen in the interface language.
 import { dayLabel, subjectLabel } from '../schedule/names';
 import { blockSizeFor, type Index } from './placement';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../state/programs';
 import {
   lessonDayCount,
   lessonLimit,

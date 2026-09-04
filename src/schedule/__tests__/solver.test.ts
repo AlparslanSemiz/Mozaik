@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { buildIndex, placementKey, place, setBlockPinned } from '../../constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../../entities';
 import { findViolations } from '../rules';
-import { sampleState } from '../../sample';
+import { sampleState } from '../../state/sample';
 import { createSolver, solve } from '../solver';
 import type { RuleLevel, State } from '../../types';
 import { SCHEMA_VERSION } from '../../types';
@@ -477,4 +477,4 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     });
   }
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from '../../programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from '../../state/programs';

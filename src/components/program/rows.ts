@@ -13,7 +13,7 @@ import {
 } from '../../constraints';
 import type { Index } from '../../constraints';
 import { lessonSubject, subjectShort, teacherSubjects } from '../../entities';
-import { activePinned, activePlacements } from '../../programs';
+import { activePinned, activePlacements } from '../../state/programs';
 import { programColorIndex } from '../../programColor';
 import type { ProgramColorMode } from '../../programColor';
 import type { ProgramMask } from '../../programMask';

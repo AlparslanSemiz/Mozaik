@@ -6,7 +6,7 @@
 // cannot mean one thing while dragging and another while editing.
 
 import { blocker, buildIndex, place, placedBlocks, placementKey, sanitize } from '../constraints';
-import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
+import { activePinned, activePlacements, replaceActiveGrid } from '../state/programs';
 import { lessonSubject, subjectKey, teacherSubjects } from '../schedule/subjects';
 import type { Id, Lesson, ProgramVariant, State } from '../types';
 

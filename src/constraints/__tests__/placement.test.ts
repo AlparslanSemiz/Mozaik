@@ -14,7 +14,7 @@ import {
   vacate,
   buildIndex,
 } from '../index';
-import { activeProgram, replaceActiveGrid } from '../../programs';
+import { activeProgram, replaceActiveGrid } from '../../state/programs';
 import type { State } from '../../types';
 import { build, lessonById, why, withLesson } from '../../testing/constraintFixture';
 

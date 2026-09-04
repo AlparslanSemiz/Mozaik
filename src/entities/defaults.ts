@@ -5,7 +5,7 @@
 // can see and change on the Ayarlar screen, and the limits are all 0 — "no
 // limit" — because my father fills those in himself.
 
-import { blankProgram } from '../programs';
+import { blankProgram } from '../state/programs';
 import { DEFAULT_DAY_NAMES } from '../schedule/names';
 import { hourNames } from './periods';
 import type { Bell, Day, Limits, Rules, Settings, State } from '../types';

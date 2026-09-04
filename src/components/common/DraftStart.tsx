@@ -12,8 +12,8 @@
 
 import { useDialogs } from '../overlay/Dialogs';
 import { useT } from '../T';
-import { loadPlan } from '../../planStorage';
-import { blankProgram } from '../../programs';
+import { loadPlan } from '../../state/planStorage';
+import { blankProgram } from '../../state/programs';
 import type { PlanControls } from './props';
 
 interface Props {

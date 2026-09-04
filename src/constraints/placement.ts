@@ -9,7 +9,7 @@
 
 import { blockPlan, clampBlocks } from '../schedule/blocks';
 import { closedKey, placementKey, teacherKey } from '../keys';
-import { activePlacements, replaceActiveGrid } from '../programs';
+import { activePlacements, replaceActiveGrid } from '../state/programs';
 import type { ClassGroup, Id, Lesson, Room, State, Teacher } from '../types';
 
 // ---------------------------------------------------------------- index

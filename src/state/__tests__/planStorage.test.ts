@@ -4,11 +4,11 @@
 // owns its own key, the first plan keeps the historical one, and a plan with
 // nothing written stays tellable apart from a plan that is empty.
 
-import { emptyState } from './entities';
-import { BASE_KEY, FIRST_PLAN_ID, planKey } from './library';
-import { collectStates, loadPlan, savePlan } from './planStorage';
-import { activeProgram } from './programs';
-import { sampleState } from './sample';
+import { emptyState } from '../../entities';
+import { BASE_KEY, FIRST_PLAN_ID, planKey } from '../../library';
+import { collectStates, loadPlan, savePlan } from '../planStorage';
+import { activeProgram } from '../programs';
+import { sampleState } from '../sample';
 
 function memoryStorage(): Storage {
   const map = new Map<string, string>();

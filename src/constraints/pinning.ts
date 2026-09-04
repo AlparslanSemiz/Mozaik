@@ -4,7 +4,7 @@
 
 import { placementKey } from '../keys';
 import { blockAt, placedBlocks } from './placement';
-import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
+import { activePinned, activePlacements, replaceActiveGrid } from '../state/programs';
 import type { View } from '../toolState';
 import type { Id, State } from '../types';
 

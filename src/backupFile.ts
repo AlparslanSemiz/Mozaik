@@ -5,7 +5,7 @@
 import { buildBundle } from './bundle';
 import { backupFileName, bundleFileName } from './library';
 import type { Library } from './library';
-import { collectStates } from './planStorage';
+import { collectStates } from './state/planStorage';
 import type { Id, State } from './types';
 
 /** Both file kinds go through here. */

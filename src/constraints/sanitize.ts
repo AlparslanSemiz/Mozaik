@@ -6,7 +6,7 @@
 // Returns the SAME object when nothing changed, so no needless re-render.
 
 import { clampBlocks } from '../schedule/blocks';
-import { blankProgram } from '../programs';
+import { blankProgram } from '../state/programs';
 import { hasTwoSubjects } from '../schedule/subjects';
 import type { Id, State } from '../types';
 

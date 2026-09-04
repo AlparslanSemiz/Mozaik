@@ -8,7 +8,7 @@
 import type React from 'react';
 import { useCallback } from 'react';
 import { BUNDLE_VERSION, bundleVersionOf } from './bundle';
-import { parseState } from './parseState';
+import { parseState } from './state/parseState';
 import type { State } from './types';
 
 interface AlertRequest {

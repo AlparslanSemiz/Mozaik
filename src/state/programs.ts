@@ -1,4 +1,4 @@
-import type { Id, ProgramVariant, State } from './types';
+import type { Id, ProgramVariant, State } from '../types';
 
 export const DEFAULT_PROGRAM_ID = 'program-1';
 export const DEFAULT_PROGRAM_NAME = 'Program 1';

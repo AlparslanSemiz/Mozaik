@@ -575,4 +575,4 @@ describe("health", () => {
     expect(h.warnings).toBeLessThan(10);
   });
 });
-import { activeProgram, blankProgram } from "../../programs";
+import { activeProgram, blankProgram } from "../../state/programs";

@@ -16,7 +16,7 @@ import {
   evictionNotice,
 } from '../index';
 import type { BlockRef } from '../index';
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';
 import type { State } from '../../types';
 import { build, why, withRule } from '../../testing/constraintFixture';
 

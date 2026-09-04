@@ -6,7 +6,7 @@ import { buildIndex, closedConflicts } from '../../constraints';
 import { buildReport } from '../../schedule/feasibility';
 import type { ReportRow } from '../../schedule/feasibility';
 import type { Id, State } from '../../types';
-import { activePlacements } from '../../programs';
+import { activePlacements } from '../../state/programs';
 import type { CheckView } from '../../toolState';
 import CapacityRows from '../common/CapacityRows';
 import { T, useT } from '../T';

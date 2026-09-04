@@ -16,7 +16,7 @@ import { openHours } from './availability';
 import { weeklyLoad } from './entityCounts';
 import { t } from '../i18n';
 import { subjectLabel } from '../schedule/names';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../state/programs';
 import { roomClasses, roomName } from './roomCrud';
 import { subjectShort } from './subjectShorts';
 import { lessonSubject, teacherSubjects } from '../schedule/subjects';

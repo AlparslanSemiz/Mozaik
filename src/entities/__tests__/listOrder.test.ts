@@ -4,7 +4,7 @@ import { place } from '../../constraints';
 import { emptyState } from '../defaults';
 import { addLesson } from '../lessonCrud';
 import { reorderList, respreadColors } from '../listOrder';
-import { activeProgram } from '../../programs';
+import { activeProgram } from '../../state/programs';
 import { addRoom } from '../roomCrud';
 import { addTeacher, deleteTeacher } from '../teacherCrud';
 import type { State } from '../../types';

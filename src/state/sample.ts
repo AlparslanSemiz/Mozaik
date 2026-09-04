@@ -6,10 +6,10 @@
 // Generation is DETERMINISTIC: the same input always yields the same output,
 // so a bug found here can be reproduced.
 
-import { teacherKey } from './constraints';
-import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
-import { PALETTE_SIZE } from './palette';
-import { SCHEMA_VERSION } from './types';
+import { teacherKey } from '../constraints';
+import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from '../types';
+import { PALETTE_SIZE } from '../palette';
+import { SCHEMA_VERSION } from '../types';
 import { blankProgram } from './programs';
 import {
   DEFAULT_BELL,
@@ -19,7 +19,7 @@ import {
   hourNames,
   makeShort,
   NO_TEACHER_LIMITS,
-} from './entities';
+} from '../entities';
 
 /** The sample school runs the rules: 6 hours a day, 2 hours of one lesson. */
 const DEFAULT_LIMITS_SAMPLE = {
