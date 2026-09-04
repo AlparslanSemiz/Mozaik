@@ -4,12 +4,12 @@
 // must not silently cost a laid-out lesson. The caller paints these cells red
 // and Kontrol lists them; my father decides.
 
-import { t } from './i18n';
-import { closedKey } from './keys';
-import { dayLabel } from './names';
+import { t } from '../i18n';
+import { closedKey } from '../keys';
+import { dayLabel } from '../names';
 import type { Index } from './placement';
-import { activePlacements } from './programs';
-import type { Id, State } from './types';
+import { activePlacements } from '../programs';
+import type { Id, State } from '../types';
 
 // --------------------------------------------------- closed-hour conflicts
 

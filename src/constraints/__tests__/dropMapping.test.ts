@@ -14,11 +14,11 @@ import {
   applyDrop,
   evict,
   evictionNotice,
-} from './constraints';
-import type { BlockRef } from './constraints';
-import { activeProgram } from './programs';
-import type { State } from './types';
-import { build, why, withRule } from './constraintFixture';
+} from '../index';
+import type { BlockRef } from '../index';
+import { activeProgram } from '../../programs';
+import type { State } from '../../types';
+import { build, why, withRule } from '../../constraintFixture';
 
 describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', () => {
   it('yerinde duran ders KENDİ hücresini dolu görüyor', () => {

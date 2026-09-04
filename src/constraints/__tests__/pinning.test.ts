@@ -13,9 +13,9 @@ import {
   blockPinned,
   blockCells,
   blockAt,
-} from './constraints';
-import { activeProgram } from './programs';
-import { build } from './constraintFixture';
+} from '../index';
+import { activeProgram } from '../../programs';
+import { build } from '../../constraintFixture';
 
 describe('blockStart ve removeBlock', () => {
   it('blok kaldırılınca tüm saatleri temizlenir', () => {

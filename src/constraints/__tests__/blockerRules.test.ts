@@ -9,9 +9,9 @@ import {
   validHours,
   buildIndex,
   teacherKey,
-} from './constraints';
-import type { State } from './types';
-import { build, verdict, why, withRule } from './constraintFixture';
+} from '../index';
+import type { State } from '../../types';
+import { build, verdict, why, withRule } from '../../constraintFixture';
 
 describe('blocker — sert kısıtlar', () => {
   it('boş ızgaraya yerleştirmeye izin verir', () => {

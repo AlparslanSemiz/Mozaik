@@ -5,9 +5,9 @@ import {
   placementKey,
   sanitize,
   teacherKey,
-} from './constraints';
-import { activeProgram } from './programs';
-import { build } from './constraintFixture';
+} from '../index';
+import { activeProgram } from '../../programs';
+import { build } from '../../constraintFixture';
 
 describe('sanitize — cascade ve taşma', () => {
   it('öğretmen silinince dersleri ve yerleşimleri de silinir', () => {

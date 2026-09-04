@@ -2,11 +2,11 @@
 // this one alone" — and that difference is why liftBlock (mechanical) and
 // removeBlock (asks first) are two functions rather than one with a flag.
 
-import { placementKey } from './keys';
+import { placementKey } from '../keys';
 import { blockAt, placedBlocks } from './placement';
-import { activePinned, activePlacements, replaceActiveGrid } from './programs';
-import type { View } from './toolState';
-import type { Id, State } from './types';
+import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
+import type { View } from '../toolState';
+import type { Id, State } from '../types';
 
 /**
  * Is any hour of the block containing this cell pinned?

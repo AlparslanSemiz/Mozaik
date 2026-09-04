@@ -4,9 +4,9 @@
 // while the pointer moves. Three answers come out of it: place, swap with what
 // is there, or evict what is there back to the pool.
 
-import { t } from './i18n';
+import { t } from '../i18n';
 import { blockerDetail, check, type Verdict, verdictAfterBlocker } from './blockerRules';
-import { placementKey, teacherKey } from './keys';
+import { placementKey, teacherKey } from '../keys';
 import {
   type BlockRef,
   blockSizeFor,
@@ -20,9 +20,9 @@ import {
   vacate,
 } from './placement';
 import { blockPinned, liftBlock, removeBlock } from './pinning';
-import { activePinned, activePlacements, replaceActiveGrid } from './programs';
+import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
 import { swapBlocks, swapWarning } from './swap';
-import type { Id, Lesson, State } from './types';
+import type { Id, Lesson, State } from '../types';
 
 /**
  * THE DROP MAP: what every cell on the grid would do if the lesson were let go

@@ -1,11 +1,11 @@
 // Two placed blocks changing places. Re-validated against the state it is
 // handed, never against the one the drag started with (pitfall 20).
 
-import { t } from './i18n';
+import { t } from '../i18n';
 import { check } from './blockerRules';
 import { buildIndex, type BlockRef, type Index, place, sameBlock } from './placement';
 import { blockPinned, liftBlock } from './pinning';
-import type { State } from './types';
+import type { State } from '../types';
 
 export function blockName(ix: Index, ref: BlockRef): string {
   const lesson = ix.lessonById.get(ref.lessonId);

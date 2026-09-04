@@ -13,10 +13,10 @@ import {
   placementKey,
   vacate,
   buildIndex,
-} from './constraints';
-import { activeProgram, replaceActiveGrid } from './programs';
-import type { State } from './types';
-import { build, lessonById, why, withLesson } from './constraintFixture';
+} from '../index';
+import { activeProgram, replaceActiveGrid } from '../../programs';
+import type { State } from '../../types';
+import { build, lessonById, why, withLesson } from '../../constraintFixture';
 
 describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
   it('boş ızgarada yerleşmiş blok yok, bekleyen bloklar plânın kendisi', () => {

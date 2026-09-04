@@ -7,10 +7,10 @@
 // Split into separate files they would still work — and the equivalence a
 // reviewer has to see would be invisible.
 
-import { blockPlan, clampBlocks } from './blocks';
-import { closedKey, placementKey, teacherKey } from './keys';
-import { activePlacements, replaceActiveGrid } from './programs';
-import type { ClassGroup, Id, Lesson, Room, State, Teacher } from './types';
+import { blockPlan, clampBlocks } from '../blocks';
+import { closedKey, placementKey, teacherKey } from '../keys';
+import { activePlacements, replaceActiveGrid } from '../programs';
+import type { ClassGroup, Id, Lesson, Room, State, Teacher } from '../types';
 
 // ---------------------------------------------------------------- index
 

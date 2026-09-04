@@ -27,4 +27,4 @@ export * from './sanitize';
 export * from './swap';
 
 // Re-exported so call sites keep importing keys from here.
-export { closedKey, placementKey, teacherKey } from './keys';
+export { closedKey, placementKey, teacherKey } from '../keys';

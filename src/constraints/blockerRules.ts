@@ -5,13 +5,13 @@
 // standing in the way. blocker() and check() share limitBreaches(), so the
 // enforced rules and the warned ones can never drift apart.
 
-import { t } from './i18n';
-import { closedKey, placementKey, teacherKey } from './keys';
+import { t } from '../i18n';
+import { closedKey, placementKey, teacherKey } from '../keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language.
-import { dayLabel, subjectLabel } from './names';
+import { dayLabel, subjectLabel } from '../names';
 import { blockSizeFor, type Index } from './placement';
-import { activePlacements } from './programs';
+import { activePlacements } from '../programs';
 import {
   lessonDayCount,
   lessonLimit,
@@ -20,8 +20,8 @@ import {
   ruleLevel,
   runLength,
   teacherDayCount,
-} from './rules';
-import type { ClassGroup, Lesson, RuleName, State, Id, Teacher } from './types';
+} from '../rules';
+import type { ClassGroup, Lesson, RuleName, State, Id, Teacher } from '../types';
 
 // -------------------------------------------------------------- blocker
 

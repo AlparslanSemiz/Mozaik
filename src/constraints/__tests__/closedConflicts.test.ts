@@ -6,10 +6,10 @@ import {
   place,
   sanitize,
   buildIndex,
-} from './constraints';
-import { activeProgram } from './programs';
-import type { State } from './types';
-import { build } from './constraintFixture';
+} from '../index';
+import { activeProgram } from '../../programs';
+import type { State } from '../../types';
+import { build } from '../../constraintFixture';
 
 describe('closedConflicts', () => {
   /** Puts x1 (MÇ, 510, room A) on Monday hour 0. */
