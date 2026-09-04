@@ -4,7 +4,7 @@
 // eye — the same rule the e2e colour tests follow (CLAUDE.md).
 
 import { describe, expect, it } from 'vitest';
-import { PALETTE, PALETTE_SIZE, firstFreeColor, paletteColor } from './palette';
+import { PALETTE, PALETTE_SIZE, firstFreeColor, paletteColor } from '../palette';
 
 /** The two inks printed on top of the palette: --on-color, --on-color-sub. */
 const ON_COLOR = '#1b1f24';

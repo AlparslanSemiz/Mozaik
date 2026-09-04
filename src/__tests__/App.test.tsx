@@ -8,9 +8,9 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import AppRoot from './Root';
-import { blockPlan } from './schedule/blocks';
-import { sampleState } from './state/sample';
+import AppRoot from '../Root';
+import { blockPlan } from '../schedule/blocks';
+import { sampleState } from '../state/sample';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -267,4 +267,4 @@ describe('uygulama açılıyor', () => {
     expect(topbar.textContent).toContain('Dosyaya kaydet');
   });
 });
-import { activeProgram } from './state/programs';
+import { activeProgram } from '../state/programs';
