@@ -550,7 +550,7 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 types.ts                        tipler, başka hiçbir şey
 keys.ts                         sözlük anahtarları (constraints ↔ rules döngüsü olmasın)
 palette.ts                      36 renk + firstFreeColor. HİÇBİR ŞEY import etmez.
-i18n.ts                         arayüz hangi dili konuşuyor. Yaprak. ANAHTAR
+i18n/index.ts                   arayüz hangi dili konuşuyor. Yaprak. ANAHTAR
                                 Türkçe cümlenin KENDİSİ — eksik çeviri doğru
                                 Türkçeye düşer, JSX okunur kalır, altı yüz ad
                                 uydurulmaz. Bedelini i18n.test.ts öder: ölü
@@ -563,7 +563,7 @@ i18n.ts                         arayüz hangi dili konuşuyor. Yaprak. ANAHTAR
                                 ÇOĞUL sözlük DEĞERİNDE: {n:tekil|çoğul},
                                 kategoriyi Intl.PluralRules seçiyor — Fransızca
                                 0'ı "one" sayar, İspanyolca saymaz
-names.ts                        programın KENDİ koyduğu sözcükler: yedi gün ve
+schedule/names.ts               programın KENDİ koyduğu sözcükler: yedi gün ve
                                 yirmi bir branş, ve her birinin ekranda ne
                                 okunduğu. constraints.ts'in ALTINDA, çünkü
                                 entities.ts zaten constraints.ts'i çağırıyor ve
@@ -575,30 +575,30 @@ names.ts                        programın KENDİ koyduğu sözcükler: yedi gü
 components/T.tsx                useT() ve <T>. <T> var çünkü bir cümleyi üç
                                 anahtara bölmek onu çevrilemez yapar: diller
                                 arasında değişen şey kelime SIRASI
-lang/{en,de,es,fr}.ts           dört sözlük, 786 anahtar. Türkçenin sözlüğü
+i18n/lang/{en,de,es,fr}.ts      dört sözlük, 786 anahtar. Türkçenin sözlüğü
                                 YOK ve olmayacak — hepsi 'X': 'X' olurdu, yani
                                 altı yüz kez kaynak dili sessizce bozma şansı.
                                 Ölçülen maliyet: üç sözlük daha +242 242 bayt
                                 ve açılışa 0 ms (gömülü metin taşınıyor,
                                 ayrıştırılmıyor)
-subjects.ts                     bir şeyin HANGİ branştan olduğu. Yaprak, çünkü
+schedule/subjects.ts            bir şeyin HANGİ branştan olduğu. Yaprak, çünkü
                                 entities.ts zaten constraints.ts'i çağırıyor:
                                 ikisinin de ihtiyacı olan kural ikisinin de
                                 ALTINDA durmalı (keys.ts'in deseni). sanitize()
                                 yetim bayrağı buradan yargılar, ekranlar branşı
                                 buradan okur. entities.ts yeniden dışa aktarır.
-blocks.ts                       bir haftanın NASIL bölündüğü: blockPlan ·
+schedule/blocks.ts              bir haftanın NASIL bölündüğü: blockPlan ·
                                 patternLabel · patternOptions · clampPairs.
                                 Yalnız `Lesson` tipini import eder — entities.ts
                                 zaten constraints.ts'i çağırdığı için ikisinin de
                                 ihtiyacı olan şey ikisinin de ALTINDA durmalı
-library.ts                      plan kitaplığı: anahtarlar + plan üstverisi +
+plans/library.ts                plan kitaplığı: anahtarlar + plan üstverisi +
                                 dosya adları + "veriler nerede" raporu.
                                 State'i BİLMEZ, ham string alıp verir.
-bundle.ts                       "bütün planlar tek dosyada" zarfı. library.ts'i
+plans/bundle.ts                 "bütün planlar tek dosyada" zarfı. library.ts'i
                                 çağırır, State'i yine BİLMEZ.
   |
-constraints.ts                  BARREL. 1443 satırdı; fiil ailesi başına bir
+constraints/index.ts            BARREL. 1443 satırdı; fiil ailesi başına bir
                                 dosyaya bölündü ve sıra BAĞIMLILIK sırası —
                                 her biri yalnız üstündekileri import eder,
                                 hiçbiri bu dosyayı geri import etmez:
@@ -627,15 +627,15 @@ constraints.ts                  BARREL. 1443 satırdı; fiil ailesi başına bir
                                                      kalmış dersler
                                   sanitize.ts        her cascade'in TEK evi;
                                                      hiçbirini import etmez
-feasibility.ts                  SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
+schedule/feasibility.ts         SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
                                 buildAdvice() (B5.4) aSc'nin Danışman'ı: engel
                                 DEĞİL, hasProblem'ı etkilemez — Doğrulama'dan
                                 (unplaceable/violations) kasıtlı ayrı
-constraintFixture.ts            SADECE TEST: kısıt testlerinin paylaştığı okul
+testing/constraintFixture.ts    SADECE TEST: kısıt testlerinin paylaştığı okul
                                 ve dört yardımcısı (worlds.ts'in deseni)
-rules.ts / bell.ts              Testleri zorunlu.
-import.ts
-entities.ts                     BARREL, başka hiçbir şey. 1454 satırdı ve
+schedule/{rules,bell}.ts        Testleri zorunlu.
+entities/import.ts              
+entities/index.ts               BARREL, başka hiçbir şey. 1454 satırdı ve
                                 ~65 export taşıyordu; kırk dosya bu yolu
                                 söylediği için ad kaldı, içindekiler iş başına
                                 bir dosyaya dağıldı:
@@ -647,37 +647,37 @@ entities.ts                     BARREL, başka hiçbir şey. 1454 satırdı ve
                                   deletion · entityInspect
                                 Hepsi SAF. Silme her zaman sanitize() ile
                                 biter ve o kural artık dört *Crud.ts'te.
-lessonMove.ts                   transferLesson · moveLessonToClass. lessonCrud
+entities/lessonMove.ts          transferLesson · moveLessonToClass. lessonCrud
                                 DEĞİL, çünkü ikisi de yerleşmiş her bloğu
                                 kaldırıp blocker()'a yeniden sorar: bir kural
                                 sürüklerken başka, düzenlerken başka olamaz
-entityInspect.ts                entityWeek · entityFacts. Bir .tsx dosyası
+entities/entityInspect.ts       entityWeek · entityFacts. Bir .tsx dosyası
                                 placements gezerse yanlış yerdedir
-entityFixture.ts                SADECE TEST: build() ve school(). worlds.ts'in
+testing/entityFixture.ts        SADECE TEST: build() ve school(). worlds.ts'in
                                 deseni — uygulama import etmez, Vite budar
-solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
+schedule/solver.ts              otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
                                 Ders başına EN ÇOK İKİ iş kalemi: biri 2'lik
                                 blokları, biri 1'likleri ister. Aramanın her
                                 sayacı (domain, MRV, ileri kontrol) elindeki
                                 blokların eşit boylu olduğunu varsayar
-worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks denetçisi.
+testing/worlds.ts               SADECE TEST: dünya üreteci + illegalBlocks denetçisi.
                                 Uygulama import etmez, Vite budar. Vitest ve
                                 Playwright ikisi de buradan beslenir.
   |
-coerce.ts                       GÜVENİLMEYEN bir değeri okuma: asArray · asMap ·
+state/coerce.ts                 GÜVENİLMEYEN bir değeri okuma: asArray · asMap ·
                                 asText · asCount · asBox · asLevel · asGender ·
                                 asShorts · asNames. Yaprak, yalnız types.ts.
                                 Sözleşmesi tek: ya kullanılabilir bir değer ya
                                 çağıranın yedeği — asla bir throw
-stateFields.ts                  ŞEKLİ sürümden sürüme değişmiş alanlar, alan
+state/stateFields.ts            ŞEKLİ sürümden sürüme değişmiş alanlar, alan
                                 başına bir okuyucu: readLessons (blockSize →
                                 pairs → blocks), readDays, spreadColors.
                                 parseState.ts ile migrateLegacy.ts'in ALTINDA,
                                 çünkü ikisi de aynı alanları okuyor — keys.ts'in
                                 deseni
-migrateLegacy.ts                v1 (Türkçe alan adları) ve v2. Hiçbir sürümün
+state/migrateLegacy.ts          v1 (Türkçe alan adları) ve v2. Hiçbir sürümün
                                 artık yazmadığı iki şekil; ikisi de v3'e çıkar
-parseState.ts                   HER yedek dosyasının ve her localStorage
+state/parseState.ts             HER yedek dosyasının ve her localStorage
                                 okumasının geçtiği kapı. Kendisi yalnız sürüm
                                 yolunu seçer ve bitirir; dosyanın her bölümünün
                                 kendi küçük okuyucusu var (readSettings ·
@@ -685,31 +685,31 @@ parseState.ts                   HER yedek dosyasının ve her localStorage
                                 readClasses · readPrograms). SAF, ALWAYS
                                 sanitize() ile biter. Kabul edilen sürümler bir
                                 LİSTE (tuzak 97)
-store.ts                        SADECE reducer + geri al yığını. SAF: React,
+state/store.ts                  SADECE reducer + geri al yığını. SAF: React,
                                 DOM, localStorage BİLMEZ — "geri al bir planın
                                 hamlesini başka bir plana taşıyamaz" kuralı bu
                                 yüzden React kurmadan sınanabiliyor
-planStorage.ts                  bir planın localStorage'daki EVİ: savePlan ·
+state/planStorage.ts            bir planın localStorage'daki EVİ: savePlan ·
                                 loadPlan · storageWorks · rotateBackups ·
                                 listBackups · collectStates. Hangi anahtar
                                 library.ts'in, metni State yapmak
                                 parseState.ts'in işi
-backupFile.ts                   tarayıcıya kaydedilecek DOSYA vermek:
+plans/backupFile.ts             tarayıcıya kaydedilecek DOSYA vermek:
                                 downloadBackup (tek plan) · downloadBundle
                                 (hepsi). İkisi birbirinin yerine geçmez
                                 (tuzak 30)
-textInput.ts                    yazı kutusuna mı basılıyor. İki çağıran
+state/textInput.ts              yazı kutusuna mı basılıyor. İki çağıran
                                 (useStore'un Ctrl+Z'si, App'in '?' tuşu), tek
                                 kural
-useStore.ts                     reducer'ın React'e bağlandığı yer: otomatik
+state/useStore.ts               reducer'ın React'e bağlandığı yer: otomatik
                                 kayıt (400 ms), Ctrl+Z/Y, ve plan kitaplığı.
                                 folder.ts ↔ useFolder.ts deseni
-theme.ts                        makine tercihleri (tema, kenar, havuz açık mı +
+view/theme.ts                   makine tercihleri (tema, kenar, havuz açık mı +
                                 BOYU, araç şeridi, ölçek, yoğunluk, müsaitlik
                                 saati, HAREKET, örnek veri satırı görüldü mü) —
                                 on bağımsız skaler, on anahtar, hiçbiri State'e
                                 girmez
-toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
+view/toolState.ts               NEREDESİN: her sekmenin görünüm/tür/adım/bölüm/
                                 kapsamı, artı Dersler'in MODU ve odağı, artı
                                 HAVUZUN sırası ve süzgeci (2026-08-30). App'te
                                 yaşar, çünkü sekme değişimi bileşeni söküyor
@@ -722,7 +722,7 @@ toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/b
                                 neye bakıyorum"dur, "bu makine nasıl sever"
                                 değil — yani yeni bir localStorage anahtarı
                                 yok, "Veriler nerede" tablosuna satır borcu yok
-drag.ts                         sürüklemenin YAŞAM ÇEVRİMİ, başka bir şey
+dom/drag.ts                     sürüklemenin YAŞAM ÇEVRİMİ, başka bir şey
                                 değil: start · activate · frame · onMove/onUp/
                                 onKey · detach · finish. Her ref'e dokunan tek
                                 yer burası olduğu için burada kaldı; sayfaya
@@ -743,39 +743,39 @@ drag.ts                         sürüklemenin YAŞAM ÇEVRİMİ, başka bir şe
                                 Bölünme ölçütü fiil DEĞİL ref: bir grup ancak
                                 ayrık bir ref kümesine dokunuyorsa ya da
                                 ihtiyacını parametre olarak alabiliyorsa çıktı
-gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
+dom/gridChrome.ts               imleç haçı + yapışkan başlık gölgesi. SAF DOM,
                                 React BİLMEZ — drag.ts'in deseni (tuzak 1)
-poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
+dom/poolSplit.ts                havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
                                 pointermove'da React'e değil, tek bir custom
                                 property'ye yazar — 2100 hücre yeniden çizilmez
-useSolver.ts                    solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
+schedule/useSolver.ts           solver.ts'i rAF ile dilim dilim sürer. App'te yaşar.
   |
-listview.ts                     ara / sırala / süz. SAF. fold() Türkçe katlama
+lists/listview.ts               ara / sırala / süz. SAF. fold() Türkçe katlama
                                 (İ→i, ğ→g…), compareTr() Türk alfabesi sırası.
                                 State'i BİLMEZ, herhangi bir listeyi alır.
                                 facet'ler ÇOĞUL: iki çip satırı birlikte daraltır,
                                 birinin sayıları öteki uygulanmışken alınır.
                                 canReorder() elle sıralamanın açık olduğu tek
                                 durumu tanımlar: görünen satırlar dizinin KENDİSİ
-rowDrag.ts                      liste satırını sürükleme. Saf DOM, React BİLMEZ —
+dom/rowDrag.ts                  liste satırını sürükleme. Saf DOM, React BİLMEZ —
                                 aynı desenin DÖRDÜNCÜSÜ (drag.ts, gridChrome.ts,
                                 poolSplit.ts). Hedef, satırın KAPSAMASIYLA bulunur,
                                 orta noktayla değil (tuzak 60)
-printOptions.ts                 kâğıtta ne olsun: beş anahtar, tek kayıt, tek
+view/printOptions.ts            kâğıtta ne olsun: beş anahtar, tek kayıt, tek
                                 localStorage anahtarı. State'i de theme'i de BİLMEZ
-version.ts                      HANGİ DERLEME BU. `__SURUM__`'ü okur, yoksa
+version/version.ts              HANGİ DERLEME BU. `__SURUM__`'ü okur, yoksa
                                 `0.0.0-dev`'e düşer. APP_NAME de burada:
                                 programın adı dört yerden ekrana çıkıyor
                                 (pencere başlığı · belge başlığı · okulsuz
                                 <h1> · manifest) ve tek bir yerde durmalı
-update.ts                       bu kopya nasıl güncellenir. ÜÇ yol, üç
+version/update.ts               bu kopya nasıl güncellenir. ÜÇ yol, üç
                                 mekanizma: `sw` (site ve yerel kurulum —
                                 controllerchange), `exe` (üç Tauri komutu, üç
                                 ayrı düğme), `yok` (çift tıklanan .html — bir
                                 dosya kendini değiştiremez). Exe dalı hiçbir
                                 zaman kendiliğinden çalışmaz; ağa çıkan her
                                 çağrı bir tıklamadır. SITE_ADRESI de burada
-desktop.ts                      exe'nin klasörü VE güncelleme köprüsü.
+version/desktop.ts              exe'nin klasörü VE güncelleme köprüsü.
                                 folder.ts'in KURALLARINI kopyalamaz — dört
                                 Tauri komutunu bir FileSystemDirectoryHandle
                                 kılığına sokar, yani saveInto() exe'de olduğu
@@ -785,30 +785,33 @@ desktop.ts                      exe'nin klasörü VE güncelleme köprüsü.
                                 isDesktop() bir DERLEME BAYRAĞI değil, özellik
                                 tespiti: aynı dist/index.html dört yolda da
                                 aynı dosya
-folder.ts                       "nereye kaydedilsin": babanın seçtiği klasör.
+plans/folder.ts                 "nereye kaydedilsin": babanın seçtiği klasör.
                                 library.ts'in deseni — State'i BİLMEZ, ham metin
                                 alıp verir. İki fonksiyonu SAF ve testli
                                 (dailyName, prunable); gerisi tarayıcı tesisatı.
                                 Tutamak IndexedDB'de, çünkü localStorage bir
                                 tutamağı saklayamaz — ama hâlâ State'e GİRMEZ
-useFolder.ts                    folder.ts'i React'ten sürer. App'te yaşar
+plans/useFolder.ts              folder.ts'i React'ten sürer. App'te yaşar
                                 (tuzak 18) ve BUNDLE yazar, açık planı değil
   |
-components/Dialogs.tsx          HER soru. useDialogs() → confirm / alert.
+components/overlay/Dialogs.tsx  HER soru. useDialogs() → confirm / alert.
                                 window.confirm/alert YOK — hiç kalmadı
-components/Toasts.tsx           olan biteni söyleyen satır. Radix Toast DEĞİL:
+components/overlay/Toasts.tsx   olan biteni söyleyen satır. Radix Toast DEĞİL:
                                 eylem taşımıyorlar, o yüzden 19,6 KB'a gerek yok
-components/LessonEdit.tsx        bir dersi YERİNDE düzenler: sınıf · öğretmen ·
+components/overlay/LessonEdit.tsx
+                                 bir dersi YERİNDE düzenler: sınıf · öğretmen ·
                                 branş · haftalık saat · dağılım · günde en
                                 fazla. Inspector'ın deseni (context + Radix
                                 Dialog). Kendi kuralı YOK — üçü updateLesson'
                                 dan, ikisi transferLesson/moveLessonToClass'
                                 tan geçer, ve o ikisi ne kaybedileceğini ÖNCE
                                 sayar
-components/BlockCounts.tsx      dağılım sayaçları + blockCeiling. İKİ ekran
+components/common/BlockCounts.tsx
+                                dağılım sayaçları + blockCeiling. İKİ ekran
                                 kullanıyor (Dersler listesi ve LessonEdit), o
                                 yüzden lessons/index.tsx'ten çıktı
-components/Inspector.tsx        varlık paneli. entityWeek/entityFacts'i ÇİZER,
+components/overlay/Inspector.tsx
+                                varlık paneli. entityWeek/entityFacts'i ÇİZER,
                                 hesaplamaz — ama 2026-08-30'dan beri DÜZENLER
                                 de: her kutu Okul listesinin kendi kutusu, aynı
                                 mutator'a bağlı (updateTeacher · updateClass ·
@@ -816,19 +819,20 @@ components/Inspector.tsx        varlık paneli. entityWeek/entityFacts'i ÇİZER
                                 kontrol değil YOL: ızgaranın satır başı, kartın
                                 sağ tık menüsü ve komut paleti buraya çıkıyor.
                                 useInspect() her yerden çağrılır
-components/Palette.tsx          Ctrl+K kutusu — komut listesini DIŞARIDAN alır
-components/Commands.tsx         o listeyi kurar. App'te DEĞİL, çünkü komutların
+components/overlay/Palette.tsx  Ctrl+K kutusu — komut listesini DIŞARIDAN alır
+components/overlay/Commands.tsx o listeyi kurar. App'te DEĞİL, çünkü komutların
                                 yarısı useInspect() çağırıyor ve o hook ancak
                                 InspectorProvider'ın içinde çalışıyor — App ise
                                 o provider'ı çizen bileşen
-components/ListTools.tsx        dört listenin de üstündeki aynı şerit
-components/useRowOrder.tsx      dört listenin ortak sıralama kancası: tutamak
+components/common/ListTools.tsx dört listenin de üstündeki aynı şerit
+components/common/useRowOrder.tsx
+                                dört listenin ortak sıralama kancası: tutamak
                                 hücresi + klavye + rowDrag.ts'i bağlama +
                                 "N. sıraya taşındı" duyurusu
 Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
                                 ağacı çizsin diye tek yerde
   |
-components/Ribbon.tsx           araç şeridinin DAĞITIMI, başka bir şey değil:
+components/ribbon/index.tsx     araç şeridinin DAĞITIMI, başka bir şey değil:
                                 sekmeye göre switch, YEDİ sekmede de çizilir.
                                 1134 satırdı; sekme başına bir dosya oldu
                                 (components/ribbon/). İş mantığı YOK —
@@ -848,18 +852,18 @@ components/ribbon/props.ts      şeridin aldığı tek arayüz; her sekme Pick'l
 components/ribbon/*Ribbon.tsx   sekme başına bir dosya. En büyüğü
                                 ProgramRibbon (ızgaranın araçları), en küçüğü
                                 SetupRibbon (dört liste ve sayıları)
-components/programGrid.ts       ızgaranın SATIRLARI, State'ten türetilir. Saf:
-components/programPool.ts       tepsinin KARTLARI ve sırası. Saf:
-components/programBar.ts        şeridin altındaki tek cümle. Üçü de JSX'e
+components/program/rows.ts      ızgaranın SATIRLARI, State'ten türetilir. Saf:
+components/program/pool.ts      tepsinin KARTLARI ve sırası. Saf:
+components/program/bar.ts       şeridin altındaki tek cümle. Üçü de JSX'e
                                 dokunmuyor, o yüzden Program.tsx'ten çıktılar —
                                 bir .tsx dosyası placements gezerse yanlış
                                 yerdedir, ve ayrıldıkları için jsdom'suz
                                 test edilebilirler
-components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
-components/Field.tsx            iki klasörün de kullandığı küçük parçalar
-components/ColorPick.tsx        36 renklik swatch diyaloğu (Kurulum'un iki adımı)
-components/LimitBox.tsx
-components/*.tsx                sadece görüntüleme ve olay yakalama
+components/common/props.ts      PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
+components/common/Field.tsx     iki klasörün de kullandığı küçük parçalar
+components/common/ColorPick.tsx 36 renklik swatch diyaloğu (Kurulum'un iki adımı)
+components/common/LimitBox.tsx  
+components/<sekme>/index.tsx    sadece görüntüleme ve olay yakalama
 components/setup/*.tsx          Okul: index (kabuk) + 4 liste adımı (Rooms ·
                                 Subjects · Teachers · Classes) + Paste + Summary.
                                 Progress ("Kurulum durumu") 2026-08-28'de
@@ -880,7 +884,8 @@ components/settings/*.tsx       Ayarlar: index (kabuk) + Zil ve günler ·
                                 (part prop'u) ve Plans.tsx'i kendi içine alır;
                                 Görünüm okulu değil MAKİNEYİ tarif eder
                                 (theme.ts)
-components/CapacityRows.tsx     kapasite tablosu, TEK çizim. Özet ve Kontrol
+components/common/CapacityRows.tsx
+                                kapasite tablosu, TEK çizim. Özet ve Kontrol
                                 aynı ReportRow[]'yu iki ayrı şekilde
                                 çiziyordu; buildReport zaten buildCapacity'nin
                                 satırlarını döndürüyor, yani ikisi tek gerçek
