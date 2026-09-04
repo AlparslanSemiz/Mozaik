@@ -16,7 +16,7 @@ import type { Gender, Id, Teacher } from "../../types";
 import { PanelRight } from "lucide-react";
 import { useInspect } from "../overlay/Inspector";
 import { useDialogs } from "../overlay/Dialogs";
-import { parseTeachers } from "../../import";
+import { parseTeachers } from "../../entities/import";
 import ColorPick from "../common/ColorPick";
 import {
   addSubject,

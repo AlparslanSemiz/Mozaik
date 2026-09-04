@@ -6,7 +6,7 @@
 // application never imports it, so Vite prunes it and it never reaches
 // `dist/index.html`.
 
-import { addClass } from './classCrud';
+import { addClass } from './entities/classCrud';
 import { placementKey, teacherKey } from './constraints';
 import {
   DEFAULT_BELL,
@@ -15,10 +15,10 @@ import {
   emptyState,
   makeDay,
   NO_TEACHER_LIMITS,
-} from './defaults';
+} from './entities/defaults';
 import { blankProgram } from './programs';
-import { addRoom } from './roomCrud';
-import { addTeacher } from './teacherCrud';
+import { addRoom } from './entities/roomCrud';
+import { addTeacher } from './entities/teacherCrud';
 import type { Day, State } from './types';
 import { SCHEMA_VERSION } from './types';
 

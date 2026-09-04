@@ -16,7 +16,7 @@ import type { Room } from "../../types";
 import { PanelRight } from "lucide-react";
 import { useInspect } from "../overlay/Inspector";
 import { useDialogs } from "../overlay/Dialogs";
-import { parseRooms } from "../../import";
+import { parseRooms } from "../../entities/import";
 import {
   addRoom,
   deletionQuestion,

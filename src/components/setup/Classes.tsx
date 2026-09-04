@@ -16,7 +16,7 @@ import type { ClassGroup } from "../../types";
 import { PanelRight } from "lucide-react";
 import { useInspect } from "../overlay/Inspector";
 import { useDialogs } from "../overlay/Dialogs";
-import { parseClasses } from "../../import";
+import { parseClasses } from "../../entities/import";
 import ColorPick from "../common/ColorPick";
 import {
   addClass,
