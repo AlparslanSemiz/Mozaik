@@ -16,10 +16,10 @@ CLAUDE.md'de, ölçümleri testte.
 
 | # | Ne | Nerede ölçülüyor |
 |---|---|---|
-| 1 | **İşlevsel renk kanalı** — yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | `palette.test.ts`, `e2e/renk.spec.ts` |
-| 2 | **Erişilebilirlik** — AA kontrast, görünür odak, `aria-live`, ekranda 12 px taban | `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
-| 3 | **Kâğıt fiziksel** — A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | `e2e/yazdir.spec.ts` |
-| 4 | **İlke 1–3** — çift tıkla çalışır, sunucu yok, çalışma anında ağa çıkmaz | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
+| 1 | **İşlevsel renk kanalı** — yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | `palette.test.ts`, `e2e/gorme/renk.spec.ts` |
+| 2 | **Erişilebilirlik** — AA kontrast, görünür odak, `aria-live`, ekranda 12 px taban | `e2e/gorme/renk.spec.ts`, `e2e/gorme/renk-secici.spec.ts`, `e2e/kabuk/bos-ekran.spec.ts` |
+| 3 | **Kâğıt fiziksel** — A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | `e2e/cikti/yazdir.spec.ts` |
+| 4 | **İlke 1–3** — çift tıkla çalışır, sunucu yok, çalışma anında ağa çıkmaz | `e2e/teslim/temel.spec.ts`, `e2e/teslim/site.spec.ts` |
 
 ---
 
@@ -222,8 +222,8 @@ Hiçbiri `State`'e girmez, hiçbiri yedeğe yazılmaz, hepsi
 
 1. **Sekmenin araçları ribbon'a mı?** "Şu an neye bakıyorum" ve "tek tıkla ne
    yaparım" şeride; liste, sayaç ve açıklama panelde. Aracın durumu şeride
-   çıkıyorsa `src/toolState.ts`'e taşınır (tuzak 18).
-   **Şeridin şekli sabittir** ve `e2e/serit.spec.ts` beş maddesini de ölçer:
+   çıkıyorsa `src/view/toolState.ts`'e taşınır (tuzak 18).
+   **Şeridin şekli sabittir** ve `e2e/kabuk/serit.spec.ts` beş maddesini de ölçer:
    başlıkla açılır · gruplar `Sep`/`Spacer` ile bölünür · her düğmede simge VE
    kelime · her kontrol `--ribbon-h` yüksekliğinde · yedi sekmede de var.
    Üç varlık türünün simgesi `KIND_ICON`'dan gelir, istisnasız.
@@ -231,7 +231,7 @@ Hiçbiri `State`'e girmez, hiçbiri yedeğe yazılmaz, hepsi
 3. Soru soracaksan `useDialogs()`. `window.confirm` **yok**.
 4. Bir şey olduğunu söyleyeceksen `useToast()`.
 5. Bir varlık adı yazıyorsan `.inspect` + `useInspect()` — panel bedava gelir.
-6. Uzun bir liste çiziyorsan `ListTools` + `src/listview.ts`.
+6. Uzun bir liste çiziyorsan `ListTools` + `src/lists/listview.ts`.
 7. Izgaraya hücre eklediysen: `data-day`/`data-hour` taşıyor mu, taşımalı mı?
 8. Hareket eden bir sayı yazdıysan: dört mesafe tokeninden biri mi
    (`--slide`/`--sweep`/`--press`/`--pop`)? Değilse kapatılamaz (tuzak 57).

@@ -186,7 +186,7 @@ sürükleyerek ders süresi uzatma · undo/redo geçmişi ağacı (düz yığın
 >
 > Yani sunucu klasör özelliğinin **tek** evi değil, **daha iyi** evi: çevrimdışı
 > çalışan bir sayfa, bu programa ait bir depo, ve tarayıcının tek bir siteye
-> saklayabildiği bir izin. Bu satırlar `e2e/temel.spec.ts` **75. bölümde**
+> saklayabildiği bir izin. Bu satırlar `e2e/teslim/temel.spec.ts` **75. bölümde**
 > ölçülüyor — yanlış iddia geri yazılırsa test kırmızıya döner.
 
 > **Daraltıldı (2026-08-25): "birden çok program sürümünü yan yana tutma" → "aynı
@@ -268,7 +268,7 @@ zaten olgun bir token katmanı, taşımanın görsel getirisi sıfır.
 
 Hâlâ yasak olan tek şey **ağ**: çalışma anında bayt indiren hiçbir paket
 giremez (ilke 3). Sürükle-bırak kütüphanesi de girmiyor ama gerekçesi başka —
-`src/drag.ts` Pointer Events ile yazıldı çünkü tuzak 1 bir kütüphaneyle de
+`src/dom/drag.ts` Pointer Events ile yazıldı çünkü tuzak 1 bir kütüphaneyle de
 çözülmüyordu.
 
 CSS: tek bir `src/styles.css`, CSS değişkenleriyle.
@@ -280,7 +280,7 @@ boyunca yazılıydı ve yanlıştı). `tauri.conf.json` numarayı kopyalamaz,
 vite config de `define: { __SURUM__ }` ile onu derlemeye basar, yani dört
 teslim yolu da aynı numarayı taşır — `isDesktop()`'ın doktrini burada da
 geçerli: bu bir **derleme bayrağı değil**, hepsine basılan aynı damga.
-`src/version.ts` onu okur (`__SURUM__` tanımsızsa `0.0.0-dev`'e düşer, yoksa
+`src/version/version.ts` onu okur (`__SURUM__` tanımsızsa `0.0.0-dev`'e düşer, yoksa
 `tsc` ve vitest modül yüklenirken çöker) ve Ayarlar → Veri onu gösterir.
 Aynı damga `dist-site/sw.js`'in **önbellek adına** da girer — bkz. tuzak 73.
 `surum.test.ts` bir kapı daha tutuyor: `surum.yml`'in manifeste yazdığı indirme
@@ -294,10 +294,10 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 716 birim testi
+npm test           # Vitest — 773 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
-npm run test:e2e   # Playwright — derler, sonra 500 E2E testi (file://)
+npm run test:e2e   # Playwright — derler, sonra 560 E2E testi (file://)
 npm run test:site  # site · sunucu · klasör, http üzerinde — 22 test
 npm run kontrol    # hepsi: tipler + birim + derleme + E2E + site + cozucu
 npm run ekran      # iki temada ekran görüntüsü -> test-results/ekran/
@@ -333,10 +333,10 @@ scripts/paket.mjs    -> dist-kurulum/     dist-site + kurulum betikleri (WINDOWS
 src-tauri/           -> Ders Programı.exe dist/index.html'i İÇİNE alan tek ikili
 site/                -> manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/             -> Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
-scripts/simge.mjs    -> icon.svg'den 192/512 PNG (Chromium ile, yeni bağımlılık yok)
-scripts/ikon.mjs     -> .ico: 16/20/24 SADE, 32+ AYRINTILI (konteyner elle yazılır)
-scripts/ikon-karsilastir.mjs -> o eşiğin REÇETESİ: iki çizim × altı boy × iki zemin
-scripts/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
+scripts/ikon/simge.mjs    -> icon.svg'den 192/512 PNG (Chromium ile, yeni bağımlılık yok)
+scripts/ikon/ikon.mjs     -> .ico: 16/20/24 SADE, 32+ AYRINTILI (konteyner elle yazılır)
+scripts/ikon/ikon-karsilastir.mjs -> o eşiğin REÇETESİ: iki çizim × altı boy × iki zemin
+scripts/ikon/favicon.mjs  -> index.html'in data: URI favicon'u — SADE varyanttan
 scripts/sunucu.mjs   -> sunucu.ps1'in Node ikizi: geliştirme ve ölçüm
 scripts/font.mjs     -> gömülü yüzün REÇETESİ (kaynak scripts/font-source/)
 scripts/surum.mjs    -> sürüm numarasının TEK kaynağı (define + sw damgası)
@@ -347,7 +347,7 @@ scripts/yayinla.mjs  -> bir sürümün dört adımı, tek komutta
 ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (üç
 sütun, hayalet yok). İkisi **Windows'un gerçekten istediği boylarda**
 (16/20/24/32/40/48, iki zeminde) render edilip **bakıldı**
-(`scripts/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı temiz okunuyor,
+(`scripts/ikon/ikon-karsilastir.mjs`): 32 ve üstünde ayrıntılı temiz okunuyor,
 20 ile 24'te bulanık, 16'da altı sütun mavi bir lekeye dönüyor. Eşik **üç kez
 taşındı**: 2026-08-27'de 48'den 32'ye, aynı gün 32'den 20'ye, ve 2026-08-30'da
 20'den **32'ye geri**. `.ico`'ya 20 · 24 · 40 eklendi. Dördü de tek bir
@@ -365,7 +365,7 @@ taşındı**: 2026-08-27'de 48'den 32'ye, aynı gün 32'den 20'ye, ve 2026-08-30
 (2026-08-30).** 48→32 ve 32→20 hamleleri "görev çubuğu hangi boyu ister"
 sorusunu tahmin ederek yapılmıştı; şikayet üçüncü kez gelince
 (*"sanki küçük simge yani 9x9 pixellik kullanılıyor gibi"*) önce **ikilinin
-içine bakıldı** (`scripts/exe-ikon.mjs`, yayınlanmış 2.0.0):
+içine bakıldı** (`scripts/ikon/exe-ikon.mjs`, yayınlanmış 2.0.0):
 
 ```
 RT_ICON 9 · gömülü boylar 16·20·24·32·40·48·64·128·256
@@ -386,7 +386,7 @@ eşiğin altında, yani sade çizim kararı değişmedi — ama sayı `kabuk.spe
 Çizim böylece **üç yerde** duruyor (svg dosyası · `index.html`'in data URI'si ·
 `App.tsx`'in inline SVG'si). Üçünün de ayrışması iki testle yakalanıyor:
 `temel.spec.ts` 72 (URI ↔ `icon-small.svg`) ve `kabuk.spec.ts` 76 (üst çubuk ↔
-`icon.svg`). `scripts/favicon.mjs` URI'yi yeniden üretir — elle düzenlenmez.
+`icon.svg`). `scripts/ikon/favicon.mjs` URI'yi yeniden üretir — elle düzenlenmez.
 
 **Site derlemesinde `<link rel="icon">` YOKTUR.** `index.html` favicon'u zaten
 `data:` URI olarak taşıyor ve o iki derlemede de geçerli; site'e ikinci bir
@@ -417,11 +417,11 @@ en yenisine gider ve README'nin bağlantıları bunlardır. Varlık adları
 kod sayfası değil URL kodlaması.
 
 **Exe hiçbir şeyi yeniden yazmaz — bir ADAPTÖR takar.** `folder.ts` dosya
-adlarının, günlük yedeğin ve "son 10" budamasının tek evi; `src/desktop.ts` üç
+adlarının, günlük yedeğin ve "son 10" budamasının tek evi; `src/version/desktop.ts` üç
 Tauri komutunu bir `FileSystemDirectoryHandle` kılığına sokuyor ve `saveInto()`
 exe'de **olduğu gibi** koşuyor. Rust'ta yalnızca tarayıcıda karşılığı olmayan
 şey var: hangi klasör, ve bir adın ad olduğunu doğrulayan kapı (`safe_name`).
-`src/desktop.test.ts` gerçek `saveInto()`'yu adaptörün üstünde koşturur — dikiş
+`src/version/__tests__/desktop.test.ts` gerçek `saveInto()`'yu adaptörün üstünde koşturur — dikiş
 kayarsa orası kırmızıya döner.
 
 **`kurulum/*.{cmd,ps1,txt}` `.gitattributes`'ta `eol=crlf`** ve `.ps1`'ler
@@ -461,19 +461,19 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
-| Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzdaki model bloklarının `data-count` ile eksiksiz sayıldığı, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
+| Birim | `src/**/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
+| Duman | `src/__tests__/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
+| **E2E** | `e2e/<konu>/*.spec.ts` (Playwright, 35 dosya dokuz klasörde, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzdaki model bloklarının `data-count` ile eksiksiz sayıldığı, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
 formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menünün YEDİ üst kalemi adlarıyla, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor; artı **karttaki raptiye**: hover olmadan da görünüyor, basıp sürüklemek kartı KALDIRMIYOR, tek tık kilitliyor). **Havuzun sırası ve süzgeci** (`program.spec.ts` 88: beş sıra, her sıranın kendi başlıkları, başlıkların saydığı toplam ekrandakine eşit, süzgeç neyi sakladığını söylüyor). **Panelden düzenleme** (`panel.spec.ts` 87: karttan öğretmene/sınıfa açılan yol, ve sheet'te değişen kısaltmanın IZGARADA görünmesi). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94). **Sığdır'ın EXE kutusu:** 1920×1032 ve 1600×968'de haftanın sığdığı, ve 1920'de hiçbir kart yazısının · satır başının · köşedeki eksen adının kırpılmadığı, **iki eksende birden** — ve satırın Rahat'takinden uzamadığı (`gorunum.spec.ts` 45, tuzak 107) |
-| **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
-| **Sürüm** | `e2e/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
+| **Dil** | `src/i18n.test.ts` + `e2e/teslim/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
+| **Sürüm** | `e2e/teslim/surum.spec.ts` (`file://`) | Ayarlar → Veri hangi **sürüm** ve hangi **kopya** olduğunu söylüyor mu · "kendini güncellemez" cümlesi ve adres · **İLKE 3: sürümü göstermek için ağa çıkılmadığı** · güncelleme şeridinin davetsiz çıkmadığı |
 | **Site · sunucu · klasör** | `e2e/{site,sunucu,klasor}.spec.ts` (`npm run test:site`) | **http üzerinde**: manifest ve simgeler, service worker kaydı, **fiş çekilince açılma**, çevrimdışı girilen verinin durması, ve site derlemesinin `file://` derlemesine sızmadığı. **Üçü de burada, aynı sebeple: hepsi `file://` altında OLMAYAN bir şeyi ölçüyor** — service worker, güvenli bağlam (`isSecureContext`), ve Dosya Sistemi Erişimi API'si. **Ayrıca güncellemenin kendisi**: önbellek adının sürümü taşıdığı, ve `sw.js` diskte değişince AÇIK DURAN sayfada şeridin çıktığı — hiçbir şey değişmemişken çıkmadığı. İkisi de mutasyonla denendi, ikisi de kırmızıya döndü |
-| **Exe** | `e2e/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
+| **Exe** | `e2e/teslim/exe.spec.ts` (`file://`) | Tauri köprüsü sayfada taklit edilir — **postane**, davranış değil; asıl taraf `cargo test`. Ölçülen: hiçbir tıklama olmadan yazım, seçicinin ÇİZİLMEDİĞİ, "Veriler nerede"nin başka bir şey söylediği, ve **köprü yokken aynı dosyanın hâlâ bir tarayıcı sayfası olduğu**. Artı güncelleme: **hiçbir şey sorulmadan ağa çıkılmadığı** (panel çizilmiş olsa bile `check_update` çağrılmaz), üç cevabın üç ayrı cümle yazdığı, **indirmenin yeniden başlatmadığı**, ve internet yokken programın çalışmaya devam ettiği |
 | **Rust** | `src-tauri/src/{lib,update}.rs` (`npm run exe:test`) | `safe_name` kapısı, atomik yazımın tmp bırakmadığı, listenin **yabancı dosyaları da** gösterdiği. Artı güncelleme: `is_newer`'ın `1.10 > 1.9` bildiği, inen dosyanın **MZ ile başladığı ve boyutunun tuttuğu**, adresin yalnız kendi Release'imizden olabildiği, ve takas yarıda kalırsa **eski programın yerine geri konduğu**. `kontrol`'ün parçası DEĞİL: Rust her makinede yok |
 | **Hata kapanı** | `e2e/kapan.ts` — **bütün** E2E süiti | Test ne ölçerse ölçsün, sayfanın kendi şikayeti: `console.error`, `pageerror`, yakalanmamış promise reddi, ve `file://` altında **herhangi bir ağ isteği**. `auto: true`, yani unutulamaz. Bir testin beklediği hata `beklenenHata()` ile adıyla serbest bırakılır — susturmak için değil, **beklendiğini söylemek** için |
-| **Devriye** | `e2e/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: yedi sekme, üç liste, altı bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
-| Görüntü | `e2e/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
+| **Devriye** | `e2e/arac/patrol.spec.ts` (`npm run patrol`) | İddia etmez, **gezer**: yedi sekme, üç liste, altı bölüm ve şeritteki her düğme; artı üç tohumla rastgele gezinme (1 · 42 · 1337). Kapan onu da sarar, yani bulduğu şey "sayfa şunu bastı" olur. Kırılınca ekran görüntüsü, video ve trace bırakır |
+| Görüntü | `e2e/arac/ekran.spec.ts` (`npm run ekran`) | Test değil, **kanıt**: iki temada on yedi ekran görüntüsü. Görüntüyü almadan önce sayfanın hareketi biter (tuzak 59), ve **çekildiğinde perde inmiş olur** — tek iddiası bu |
 
 > **2026-08-26'da silinen katman:** görsel regresyon (`gorsel.spec.ts` + 24 PNG
 > + `npm run gorsel`) ve düzen testleri (`sutun.spec.ts`, `duzen.spec.ts`'in
@@ -491,7 +491,7 @@ ekran dışı hedef ve yazdırma taşması **yalnızca burada** görünür. Nite
 Playwright context'inin kendi `localStorage`'ı var — 200 test paralel koşarken
 birbirinin verisini görmüyor (ölçülen: 66 sn → 51 sn).
 
-**Sahte veri tek yerde: `src/worlds.ts`.** `makeWorld()` küçük bir okul kurar,
+**Sahte veri tek yerde: `src/testing/worlds.ts`.** `makeWorld()` küçük bir okul kurar,
 `illegalBlocks()` dizilmiş bir programı denetler, `WORLDS` 21 senaryoyu tutar.
 `e2e/` altında değil çünkü `tsconfig.json` yalnız `src`'yi kapsıyor — orada duran
 bir dünya `tsc --noEmit`'ten hiç geçmezdi. Uygulama onu import etmediği için Vite
@@ -524,14 +524,14 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
   dört kural: düzyazıda **ayrı cümle**, etiket/değer çiftinde **iki nokta**,
   eşit ağırlıkta iki şey arasında **orta nokta (`·`)**, boş tablo hücresinde
   **kısa çizgi (`–`)**. Aralık çizgisi `–` da kalır (`Sal–Cum 13:30`), o başka
-  bir karakter. `e2e/metin.spec.ts` her sekmede ve her Ayarlar bölümünde
+  bir karakter. `e2e/gorme/metin.spec.ts` her sekmede ve her Ayarlar bölümünde
   `document.body.innerText`'i okuyup sayıyor — yani **kaynağa değil ekrana**
   bakıyor, ve bu yüzden İngilizce kod yorumları serbest kalıyor.
 - **Bir `.hint` TEK CÜMLE** (2026-08-30, kullanıcı isteği: *"çok fazla info var
   ve çok uzunlar her yerde"*). ~90 karakter; uzayan gerekçe öğenin `title`'ına
   iner, yani okunup geçilen bir yere değil **arandığı** yere. `AddPanel`'in
   `more` prop'u bunun için. Ölçülen: ekrandaki en uzun `.hint` **438 → 126**
-  karakter. `e2e/metin.spec.ts` tavanı 140'ta tutuyor; uzunluğu **veriden**
+  karakter. `e2e/gorme/metin.spec.ts` tavanı 140'ta tutuyor; uzunluğu **veriden**
   gelen satırlar (`.data-hint`) hariç, çünkü onları uzatan şey okulun kendisi.
 - **Yorumlar İngilizce**, kısa, sadece *neden*i açıklar. *Ne* yaptığını kod söyler.
 - Depolanan JSON alan adları da İngilizce — ama **değiştirmek yedek dosyalarını
@@ -545,6 +545,98 @@ sayar — koyu yeşil ile koyu zeytin tam olarak bu durumdadır.
 ---
 
 ## Mimari — üç katman, sınırları geçilmez
+
+Katmanlar 2026-09-05'te KLASÖR oldu. Yeni bir mimari kurulmadı: aşağıdaki
+ağaç iki yıldır bu belgede yazılıydı, dosya sistemi ona uymuyordu. Artık
+uyuyor, ve `src/` kökü 136 dosyadan 9'a indi.
+
+```
+src/
+  App.tsx · Root.tsx · main.tsx      kabuk. main.tsx KIPIRDAMAZ:
+                                     index.html ve scripts/ikon/favicon.mjs
+                                     "/src/main.tsx" dizesini iddia ediyor
+  types.ts · keys.ts · palette.ts    hiçbir şey import etmeyen yapraklar
+  raw.d.ts · styles.css              proje geneli
+  i18n.test.ts · surum.test.ts       DEPO tarayıcıları (aşağıda)
+
+  entities/     okulun varlıkları + BARREL index.ts
+  constraints/  kısıt motoru + BARREL index.ts
+  schedule/     saf zaman çizelgesi beyni: rules · bell · blocks ·
+                subjects · names · feasibility · solver · useSolver
+  state/        bir planı oku · göç ettir · indirge · sakla
+  plans/        kitaplık · paket · klasör
+  view/         bu MAKİNE nasıl gösteriyor. Hiçbiri State'e girmez
+  dom/          saf DOM; React BİLMEZ (drag · gridChrome · poolSplit ·
+                rowDrag — tuzak 1'in dört çaresi bir arada)
+  lists/        ara / sırala / süz
+  i18n/         index.ts + lang/{en,de,es,fr}.ts
+  version/      bu hangi kopya, ve nasıl güncelleniyor
+  testing/      SADECE TEST; uygulama import etmez, Vite budar
+  components/   React ve yalnız React
+  __tests__/    kökte kalan iki modülün testi
+  fonts/        gömülü yüz (scripts/font.mjs oraya yazıyor)
+```
+
+**Klasör adı bir KATMANIN adıdır, bir konunun değil.** Bir dosyanın nereye
+gideceğine "neyle ilgili" değil, "kimin altında durabilir" karar verir.
+
+**İKİ test dosyası kökte, ve kuralı tek cümle:** *konusu bir MODÜL değil
+DEPO olan bir test, kaynağın kökünde yaşar.* `i18n.test.ts` her kaynak
+dosyayı ölü anahtar için tarıyor ve globu kendi dizininden kökleniyor — bir
+klasör derinleşse yalnız bir köşeyi tarardı, ve arıza biçimi SESSİZ olurdu.
+`surum.test.ts` dört ayrı üst düzey dizindeki beş dosyayı karşılaştırıyor.
+İkisinin de yanına oturacak bir modülü yok.
+
+**`src/hooks/` YOK ve olmayacak.** Bir `useX.ts` `x.ts`'in yanında yaşar:
+`store ↔ useStore` · `folder ↔ useFolder` · `solver ↔ useSolver` ·
+`theme ↔ useMachinePrefs`. Kanıtı depoda: `drag.ts`, `toolState.ts` ve
+`update.ts` React kancaları import ediyor ve saf modül adıyla duruyorlar —
+bu depoda kanca ile sürdüğü modül tek bir konu, iki yüz. "App'te yaşar"
+(tuzak 18) onu KİMİN ÇAĞIRDIĞI hakkında bir cümle, dosyanın nerede
+durduğu hakkında değil.
+
+**Barrel'lar klasörün `index.ts`'i oldu ve HİÇBİR çağrı sitesi değişmedi** —
+`./constraints` yazan 51, `./entities` yazan 47, `./i18n` yazan 22 satır
+birebir aynı. `moduleResolution: "bundler"` dizin/index çözümlemesini
+yapıyor, ve bu hile depoda zaten üretimdeydi (`App.tsx` →
+`./components/setup`).
+
+
+### `components/` — üç kural, üçü de bu turda ölçüldü
+
+**1. `components/` KLASÖRLER ve bir `T.tsx` tutar.** Yedi sekmenin yedisi de
+`<sekme>/index.tsx`; paylaşılanlar ikiye ayrıldı ve ayrımın ölçütü dosyaların
+kendi export'ları: `overlay/`ın sekizi bir `useX()` + `XProvider` çifti dışa
+aktarıyor (ebeveyninden prop almıyor, her yerden çağrılıyor), `common/`ın on
+biri prop alıyor. `T.tsx` tek istisna ve gerekçesi bu belgenin kendisi: onu
+`i18n` ile `names`in yanında, EN ÜST katmanda listeliyor — bir gereç değil bir
+**sınır**.
+
+**2. Şeridin ekseni ile sekmenin ekseni AYRI, o yüzden `ribbon/` dağıtılmaz.**
+Şeridin değişim ekseni **standart** (tek yükseklik, tek başlık, simge+kelime)
+ve `e2e/kabuk/serit.spec.ts` o standardı yedi sekmede **tek dosyada** ölçüyor;
+bir ekranın değişim ekseni kendi **verisi**. Artı `ribbon/props.ts` yedi
+şeridin `Pick<>`lediği tek arayüz. İki eksen, iki klasör:
+`components/<sekme>/` "bu sekme ne gösteriyor", `components/ribbon/` "bir
+şerit neye benzer".
+
+**3. Bir `.ts` `components/` altında ne zaman meşrudur.** Ya (a) hiç çalışma
+zamanı yoktur (yalnız tip — `props.ts`), ya (b) bir **UI tipi** adlandırır:
+`Translate`, ya da bir bileşenin kendi prop tipi. `src/` köküne ancak çalışma
+zamanı **ve** yalnız `types.ts`/`State` adlandırıyorsa çıkar.
+`program/{rows,pool,bar}.ts` bu yüzden ÇIKAMAZ, ve sebebi ölçüldü — üçü de
+belirli React bileşenlerinin prop'unu kuruyor:
+
+```
+program/rows.ts   import type { GridCell, GridRow } from './Grid';
+program/pool.ts   import type { PoolCard }          from './LessonPool';
+program/bar.ts    import type { Translate }         from '../T';
+```
+
+`src/` köküne taşınsalar saf bir mantık modülü `Grid.tsx`'i import ederdi.
+Kuralın yönü **`.tsx`'in dışı**, `components/`in dışı değil: bir view-model'in
+evi view'ının yanıdır.
+
 
 ```
 types.ts                        tipler, başka hiçbir şey
@@ -845,7 +937,7 @@ components/ribbon/parts.tsx     şeridin ŞEKLİ: Group(başlık) + Sep + Spacer
                                 tablolar. BEŞ MADDELİK STANDART burada yazılı,
                                 çünkü hepsi şekil hakkında — aynı yükseklik,
                                 başlık, gruplar, her düğmede simge VE kelime,
-                                tek kontrol yüksekliği (e2e/serit.spec.ts ölçer)
+                                tek kontrol yüksekliği (e2e/kabuk/serit.spec.ts ölçer)
 components/ribbon/props.ts      şeridin aldığı tek arayüz; her sekme Pick'liyor,
                                 yani import satırı o sekmenin hangi kontrollere
                                 dokunabildiğini söylüyor
@@ -1098,7 +1190,7 @@ tarayıcıda onu tutabilen tek yer structured clone'dur. Kural bozulmadı —
 **`State`'e girmez, `schemaVersion` artmaz**: bu bilgisayarda alınmış bir
 yedek babanın makinesine bir klasör yolu taşımamalı.
 
-`ders-programi-baski` bilerek `theme.ts`'in dışında (`src/printOptions.ts`).
+`ders-programi-baski` bilerek `theme.ts`'in dışında (`src/view/printOptions.ts`).
 Oradaki dokuz skaler **ilk boyamadan önce** `<html>`'e öznitelik yazan düzen
 değerleri; bunlar render anında React prop'u olan **tek bir karar** — "kâğıtta
 ne var" — ve beş cevabı var. Beş ayrı anahtar, bir soru için beş normalize
@@ -1133,7 +1225,7 @@ değil — CLAUDE.md'nin tek hareket sözleşmesi (`prefers-reduced-motion: redu
 paketi açmak bu bilgisayardaki bütün planların yerine geçmek demektir. Paket
 `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki her
 plan hâlâ kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.
-`src/bundle.ts` zarfı bilir, `State`'in ne olduğunu **bilmez** — `library.ts`'in
+`src/plans/bundle.ts` zarfı bilir, `State`'in ne olduğunu **bilmez** — `library.ts`'in
 deseni birebir. Paket **depolama anahtarı değildir**: yeni anahtar açılmadı.
 
 Bir plan = bir program: kendi okulu, kendi öğretmenleri, kendi ızgarası.
@@ -1453,7 +1545,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     hâli: yeşil geçen bir süit "bozulmadı" demek değildir. İki sonucu var,
     ikisi de **uygulandı**: ölçek değiştiren her adımda ekran görüntüsüne
     bakılıyor, ve genişlik `ch` cinsinden CSS'e taşınınca yanına
-    `e2e/renk-secici.spec.ts` yazıldı. O test bir sayı uydurmaz: seçiciyi
+    `e2e/gorme/renk-secici.spec.ts` yazıldı. O test bir sayı uydurmaz: seçiciyi
     `width: auto` ile klonlayıp **tarayıcının kendi istediği genişliği** ölçer
     ve kutunun ondan dar olmadığını iddia eder. Yazıldıktan sonra eski 44px
     geri konarak koşuldu ve dördü de kırmızıya döndü — bedava yeşil değil.
@@ -1939,7 +2031,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     ailedendi: eşik `< 48 sade` yazılıydı, yani görev çubuğunun yuvasına
     **sade** çizim düşüyordu ve o çizim gerçek logonun yanında bir yer tutucu
     gibi okunuyor. Eşik uydurulmadı, **bakılarak** bulundu
-    (`scripts/ikon-karsilastir.mjs`) ve 32'ye indirildi.
+    (`scripts/ikon/ikon-karsilastir.mjs`) ve 32'ye indirildi.
 
     **VE ŞİKAYET GERİ GELDİ — asıl tuzak burada.** Eşiği 32'ye indirmek
     pikselleri doğru okumuştu ama yanında ölçülmemiş bir cümle taşıyordu:
@@ -2169,7 +2261,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     okuyordu, `open()`'ın yaptığı iki bekleyişin hiçbirini yapmadan.
 
 93. **Bir çıktı dosyasının REÇETESİ, o dosyaya elle eklenen şeyi silmişti.**
-    `scripts/favicon.mjs` `index.html`'i baştan yazıyor; tuzak 72'nin "kaynak
+    `scripts/ikon/favicon.mjs` `index.html`'i baştan yazıyor; tuzak 72'nin "kaynak
     şablonu" uyarısı ise dosyaya **elle** yazılmıştı. Yani betiği çalıştırmak
     o uyarıyı sessizce kaldırıyordu — `temel.spec.ts` 77 onu ölçtüğü için
     kırmızı dönerdi, ama bir betiğin, bir testin birazdan soracağı şeyi
@@ -2200,7 +2292,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     **Ve süitin bunu görmesi imkânsızdı:** Playwright Chromium'u
     `--hide-scrollbars` ile açıyor, yani buradaki her testte her kaydırma
     çubuğu sıfır piksel. Yer kaplamayan bir çubuk hiçbir yeri kaplayamaz, o
-    yüzden 10 px'lik adım hiçbir koşuda var olmadı. `e2e/kayma.spec.ts` kendi
+    yüzden 10 px'lik adım hiçbir koşuda var olmadı. `e2e/kabuk/kayma.spec.ts` kendi
     tarayıcısını `ignoreDefaultArgs: ['--hide-scrollbars']` ile açıyor, ve
     oluğun gerçekten yer kapladığını **iddia etmeden önce ölçüyor**. Program
     sekmesi oluktan muaf: `overflow: hidden` de Chromium'a göre bir kaydırma
@@ -2335,7 +2427,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      bir iş planı üretiyor.** Karşı önlem sırayı çevirmek — bir plan bir sebep
      adlandırıyorsa, o turun ilk işi o sebebi ölçmektir, ve ölçüm o sebebi
      kaldırırsa plan da kalkar. Ölçüm bir kapıya dönüştürüldü
-     (`scripts/exe-ikon.mjs`, `surum.yml`'in `exe` işi) ki varsayım bir daha
+     (`scripts/ikon/exe-ikon.mjs`, `surum.yml`'in `exe` işi) ki varsayım bir daha
      doğmasın.
 
 102. **KIL PAYI SIĞAN BİR KUTU, KÖK KIPIRDADIĞI GÜN SIĞMAZ — ve `display:
@@ -2531,6 +2623,71 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      değiştirir, ve o yazma kök katmanının tamamını (üst çubuk, şerit, havuz)
      yeniden boyatır.
 
+
+109. **BİR YENİDEN YAZMAYI KENDİ DESENİN SÜRÜYORSA, GÖRMEDİĞİNİ DE BİLMEZSİN
+     — İŞ LİSTESİNİ DERLEYİCİ VERİR.** 156 dosyalık klasörleme turunda
+     import'lar bir araçla onarıldı, ve araç iki kez eksik gördü. Birincisi
+     ölçüldü ve plana yazıldı: bu depo import'ları **iki tırnak biçiminde
+     birden** yazıyor (772 tek, 233 çift), yani `from './x'` deseni 233
+     satırı sessizce atlıyor. Nitekim ilk sayım `drag.ts`'in **0** importu
+     olduğunu söyledi; gerçek sayı 2 ve ikisi de `Program.tsx`'te çift
+     tırnaklı. İkincisi plana bile giremedi çünkü `src/` altında hiç örneği
+     yok: **`await import('./helpers')`**. e2e'de iki tane var, ve
+     `from` aramayan hiçbir desen onları bulamaz.
+
+     İkisinin de arıza biçimi aynı olurdu — çalışma anında "modül yok" — ve
+     ikisi de aynı şeyle yakalandı: **`npm run tipler`**. `TS2307` bir tahmin
+     değil bir liste. Kural: bir toplu taşımanın kapısı senin grep'in değil,
+     `tsc`'nin çıktısıdır; desen yalnızca **ilk taslağı** üretir, doğruluğu
+     derleyici söyler. Tuzak 80'in ters yüzü — orada desen fazlasını
+     buluyordu (yorumları), burada **eksiğini**.
+
+110. **BİR ÖNEKLE DIŞLANAN KLASÖR TAŞININCA, SÜZGEÇ SESSİZCE HERKESİ İÇERİ
+     ALIR.** `i18n.test.ts` ölü sözlük anahtarlarını arıyor ve sözlükleri bir
+     yol ÖNEKİYLE dışarıda bırakıyordu: `!p.startsWith('./lang/')`. `lang/`
+     `i18n/`in altına girince o önek eşleşmeyi bıraktı; sözlükler "kaynak"
+     sayıldı; her anahtar kendini kaynakta buldu; ve tarayıcı **sonsuza
+     kadar yeşil** geçmeye başladı. Yani bir klasör taşımak, iki yıldır
+     çalışan bir testi çalışıyormuş gibi görünen bir hiçliğe çevirdi.
+
+     Mutasyonla ölçüldü, ve sıra önemli — önce ARIZA gösterildi:
+
+     ```
+     eski önek + bilerek konmuş ölü anahtar   ->  40/40 YEŞİL   (arıza)
+     önek düzeltilmiş + aynı ölü anahtar      ->  adıyla KIRMIZI
+     ölü anahtar geri alındı                  ->  yeşil
+     ```
+
+     Çare öneki düzeltmek DEĞİL, çünkü aynı şey bir sonraki taşımada yine
+     olurdu. Taranan yol kümesi artık kendi değeri (`TARANAN`) ve üç şey
+     iddia ediliyor: içinde hiç `/lang/` yok, küme boşalmamış (>100 dosya),
+     ve bilinen bir uzak köşe hâlâ içinde. O kapı da mutasyonla denendi.
+     Genel kural, tuzak 77'nin bir basamak yukarısı: **bir süzgeç bir yol
+     ÖNEKİNE dayanıyorsa, süzgecin kendisi ölçülür** — yoksa dizin ağacına
+     dokunan her tur onu sessizce genişletebilir.
+
+111. **BİR BETİĞİ BİR KLASÖR DERİNLEŞTİRMEK, ONUN "DEPO KÖKÜ" HESABINI
+     BOZAR.** `scripts/` altındaki yedi `asc-*` dosyası `scripts/asc/`'ye
+     taşındı. Beşi hiçbir şey hissetmedi (`resolve('docs/asc/...')` cwd'ye
+     göre çözülüyor, dosyanın yerine göre değil), ama ikisi kökü şöyle
+     buluyordu:
+
+     ```
+     $kok = Split-Path -Parent $PSScriptRoot
+         scripts/     -> depo kökü      ✓
+         scripts/asc/ -> scripts/       ✗   ve ekranlar scripts/docs/ altına düşer
+     ```
+
+     Hiçbir test görmezdi: `.ps1` dosyaları `npm run kontrol`'ün hiçbir
+     adımında koşmuyor, ve arıza ancak biri aSc'yi yakalamaya çalıştığında
+     ortaya çıkardı. İki ders. (a) Bir dosyayı taşımadan önce sorulacak soru
+     "kim onu import ediyor" değil, **"kendi konumunu kim OKUYOR"**dur —
+     `$PSScriptRoot`, `import.meta.url`, `__dirname`, `import.meta.glob`.
+     (b) Taşınan bir betik **gerçekten koşulur**: `node scripts/ikon/ikon.mjs`
+     çalıştırıldı ve `kurulum/icon.ico`'nun md5'i birebir aynı çıktı, yani
+     cwd'ye göre çözülen girdisini yeni evinden de buluyor. Tuzak 65'in
+     ailesi: taşınan bir şeyin hâlâ çalıştığı **varsayılmaz**.
+
 ---
 
 ## Tasarım — serbest
@@ -2551,7 +2708,7 @@ bu belgeden izin almaz. Ne yapıldığı [docs/DESIGN.md](docs/DESIGN.md)'de
 1. **İşlevsel renk kanalı.** Yeşil = bırakılabilir · sarı = uyarı ·
    kırmızı = engel · gri taralı = kapalı. Bu, aracın çalışma biçimi; kimlik
    paletinin 36 rengi bu üçüne yaklaşamaz. `palette.test.ts` ve
-   `e2e/renk.spec.ts` her koşuda yeniden ölçer.
+   `e2e/gorme/renk.spec.ts` her koşuda yeniden ölçer.
    **Bölüm renkleri de aynı kanala tabidir ve tekerlek DOLU:** yedinci sekme
    yedinci rengi isteyince (2026-08-27) bütün çember iki temada birden tarandı
    ve serbest kalan her yayın ya işlevsel bir rengin ya komşu bir sekmenin
@@ -2610,6 +2767,25 @@ imleç haçı         0,391 ms / sütun değişimi  (16,7 ms karenin %2,3'ü)
 
 Yani 490 KB'lik tek dosya bu makinede 73 ms'de açılıyor. Bu bir **tarih**,
 kanun değil (tuzak 42): paket eklenince yeniden ölçülür.
+
+**YENİDEN ÖLÇÜLDÜ (2026-09-05), ve yukarıdaki satır artık bayat.** Aynı
+makine, aynı yöntem, 1920×1080, `file://`, 7 koşu:
+
+```
+dist/index.html    1 012 966 bayt      (489 815'ti — İKİ KATI)
+açılış             88 ms medyan · 96 ms en kötü   (73 / 83'tü)
+```
+
+Dosya iki katına çıkmış ve açılış 73 ms'den 88 ms'ye gelmiş. **Bu artışın
+sebebi klasörleme turu DEĞİL** ve bu ölçüldü: o tur bir bayt bile
+değiştirmedi — taşımadan önceki ve sonraki `dist/index.html` **birebir aynı
+boyutta** (1 012 966), ki zaten beklenen buydu, çünkü hiçbir modül eklenmedi,
+yalnız yerleri değişti. Aradaki 523 KB 2026-08-26 ile bugün arasındaki
+özelliklerden geliyor ve **nereden geldiği ölçülmedi** — sıradaki turun ilk
+işi (tuzak 101: ölçülmemiş bir iddia bir iş planı üretir, o yüzden burada bir
+sebep adlandırılmıyor).
+
+İlke 7 hâlâ bir ölçüm: 88 ms babanın makinesinde değil, BU makinede.
 
 ### Neyin nerede olduğu
 
@@ -2694,7 +2870,7 @@ adını taşıyamaz.
     satırı yoktur.
   - 1280px altında sekme etiketleri gizlenir, `aria-label` kalır.
   - **ŞERİT STANDARDI (2026-08-27) — beş madde, beşi de ölçülüyor**
-    (`e2e/serit.spec.ts`). Öncesinde beş şerit beş ayrı nesneydi: Kurulum
+    (`e2e/kabuk/serit.spec.ts`). Öncesinde beş şerit beş ayrı nesneydi: Kurulum
     simgeliydi ama başlıksız, Yazdır ve Ayarlar salt yazıydı, Kontrol'de şerit
     yoktu. Yanlış bir şey yoktu; **bir şekil** yoktu, ve şekli olmayan bir şeyi
     hiçbir test koruyamaz.
@@ -2740,7 +2916,7 @@ adını taşıyamaz.
   Bir tur boyunca aradaki ayrım tek bir **çizgi**ydi ve yetmedi:
   *"aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın."* Sıra
   değişmedi (*"ama yerleri değişmesin"*) ve sayılı başlık **saydığı listeyle**
-  gitti, yani ekranda hâlâ tek bir `--fs-xl` başlık var. `e2e/kurulum.spec.ts`
+  gitti, yani ekranda hâlâ tek bir `--fs-xl` başlık var. `e2e/okul/kurulum.spec.ts`
   44 hem sırayı hem **iki kutu olduğunu** ölçüyor.
 - **SAĞ RAYDA KAYDIRAN ŞEY LİSTENİN KENDİSİ (2026-08-29, aynı gün iki tur).**
   `.cols > aside` bir flex sütunu ve `100cqh`'de duruyor; tek panelli her rayda
@@ -2964,11 +3140,11 @@ adını taşıyamaz.
   haftada yerini kaybetmemenin tek yolu ve babanın göz sorununa doğrudan cevap.
   Kapalı saat taramasını **örtmez** (nerede olduğunu söyler, neden
   kullanılamadığını değil) ve sürükleme başlayınca **söner** — orada ızgaranın
-  kendi üç rengi konuşur. `src/gridChrome.ts`, saf DOM, React state'e dokunmaz
+  kendi üç rengi konuşur. `src/dom/gridChrome.ts`, saf DOM, React state'e dokunmaz
   (tuzak 1'in deseni). Ölçülen maliyet: **0,148 ms / sütun değişimi**, 16,7 ms'lik
   kare bütçesinin %1'inden azı.
 - **Sürükleme durumu geniş ızgaranın React prop'u DEĞİLDİR (2026-09-01).**
-  Hedef satır, bırakma önizlemesi ve hayalet `src/drag.ts` tarafından doğrudan
+  Hedef satır, bırakma önizlemesi ve hayalet `src/dom/drag.ts` tarafından doğrudan
   yönetilir; neden çubuğu da kırmızı/sarı hedefler arasında gezerken doğrudan
   DOM'da güncellenir ve bitişte solver/boş durum metni geri yüklenir. Grid ve
   havuz yalnız gerçek veriler değişince yeniden çizilir.

@@ -560,6 +560,30 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 > *"başka bir makinede ölçülecek"* diye bekliyordu ve **artık burada
 > ölçülebilir**.
 
+- [x] **B7.15 KLASÖRLEME TURU** (2026-09-05, kullanıcı isteği: *"Klasörlemeyi
+      düzelt, karışık olmasın, alakalı modülleri classları aynı klasöre
+      koy"*). Elli ikinci oturum yedi modülü böldü ve parçaları `src/` köküne
+      düz serdi: 194 dosyanın **136'sı** kökteydi. CLAUDE.md'nin `## Mimari`
+      bölümü katmanları zaten yazıyordu; bu tur dosya sistemini ona uydurdu.
+      Sonuç: kök **136 → 9 dosya + 14 klasör**, `components/` **30 → 1 dosya
+      (T.tsx) + 10 klasör**, e2e 35 spec → 9 klasör, `scripts/` → `ikon/` +
+      `asc/`. 156 taşıma, ~1100 belirteç, 17 commit, her biri
+      `tipler + vitest` kapısından geçti. Barrel'lar klasör `index.ts`'i
+      oldu ve **120 çağrı sitesi hiç değişmedi**. Ayrıntı: STATUS.md elli
+      üçüncü oturum; yeni tuzaklar 109 · 110 · 111.
+- [ ] **B7.16 `program/{rows,pool,bar}.ts`'in testleri YOK.** CLAUDE.md o üç
+      dosyanın `Program.tsx`'ten çıkarılmasını *"ayrıldıkları için jsdom'suz
+      test edilebilirler"* diye gerekçelendiriyor, ve üçünün de sıfır testi
+      var — yani gerekçe iki oturumdur nakde çevrilmedi. Klasörleme turunda
+      adları kısaldı (`programGrid` → `rows`), borç görünür oldu.
+      `buildRows` · `buildPool` · `describeBar` saf; `entityFixture`
+      ya da `worlds` ile doğrudan sorgulanabilirler.
+- [ ] **B7.17 `constraints/__tests__`'in yedi satırı barrel'ı çağırıyor.**
+      Klasör içinden `from '../index'` — doğru çözülüyor ama barrel'ın kendi
+      yorumu *"hiçbiri bu dosyayı geri import etmez"* diyor. Onları kardeş
+      modüllerine bağlamak bir KONUM değil ANLAM değişikliği (bir adın hangi
+      modülden geldiği), o yüzden taşıma commit'lerine bilerek binmedi.
+      Yapılınca `grep -rn "from '\.\./index'" src/constraints` boş dönmeli.
 - [x] **v2.0.1 yayınlandı.** `54403b6` + `v2.0.1` etiketi. Taşıdıkları:
       v2.0.0'ın **veri kaybı düzeltmesi** (doğru `identifier`, tuzak 95),
       AA turunun beş maddesi (şema v11), AC turunun altısı, AB turunun yedisi.

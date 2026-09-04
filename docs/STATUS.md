@@ -1,8 +1,100 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-09-04 (elli ikinci oturum: tek sorumluluk turu)
+Son güncelleme: 2026-09-05 (elli üçüncü oturum: klasörleme turu)
 
 ---
+
+## Elli üçüncü oturum — klasörleme turu (2026-09-05)
+
+İstek: *"Klasörlemeyi düzelt, karışık olmasın, alakalı modülleri classları
+aynı klasöre koy."*
+
+**Sorun bir zevk meselesi değildi, bir ÇELİŞKİydi.** Elli ikinci oturum yedi
+büyük modülü parçalara böldü ve o parçalar `src/` köküne düz serildi: 194
+`.ts/.tsx` dosyasının **136'sı kökteydi**. Yani `coerce.ts` ile `Program.tsx`
+yardımcıları, çözücü ile sürükleme tesisatı, dört CRUD ile beş tema okuyucusu
+aynı dizin listesinde yan yana duruyordu — oysa CLAUDE.md'nin `## Mimari`
+bölümü o katmanlaşmayı zaten satır satır yazıyordu. Belge doğruydu, dizin
+yanlıştı. Bu tur ikisini eşitledi: **yeni bir mimari kurulmadı, var olan
+mimari dosya sistemine yazıldı.**
+
+### Sonuç
+
+```
+src/ kökü      136 dosya  ->  9 dosya + 14 klasör
+components/    30 dosya + 4 klasör  ->  1 dosya (T.tsx) + 10 klasör
+e2e/           35 düz spec  ->  9 klasör (helpers · kapan kökte)
+scripts/       19 düz dosya  ->  ikon/ + asc/ + kökte beş çağrılan
+```
+
+Kullanıcı kararları: kapsam `src/ · e2e/ · scripts/ · docs/` (dördü de) ·
+**path alias YOK** (göreli yollar kalıyor) · testler `__tests__/` klasörlerine.
+
+### Nasıl yapıldı — ve niçin elle değil
+
+156 dosya taşındı, **~1100 import belirteci** yeniden yazıldı. Elle ya da
+`sed` ile değil: her belirteç **eski ağaca karşı çözülüp** dosyanın yeni
+konumundan yeniden yazıldı. Sebep ölçüldü — bu depo import'ları **iki tırnak
+biçiminde birden** yazıyor (772 tek, 233 çift), yani tek biçim için yazılmış
+bir desen 233 satırı sessizce atlıyor. Nitekim ilk sayım `drag.ts`'in **0**
+importu olduğunu söyledi; gerçek sayı 2. Bkz. tuzak 109.
+
+**Her adımın kapısı `npm run tipler` + `npx vitest run` oldu, ve on yedi adımın
+her biri kendi commit'i.** Önce kayıtsız duran 102 giriş (önceki oturumların
+hiç commit'lenmemiş işi, 73'ü izlenmeyen dosya) bir tabana bağlandı — tuzak
+96'nın sebebi tam olarak buydu.
+
+### Barrel hilesi: 120 çağrı sitesi HİÇ değişmedi
+
+`constraints.ts` ve `entities.ts` bir klasörün `index.ts`'i oldu, ve
+`./constraints` (51) · `./entities` (47) · `./i18n` (22) yazan satırların
+hepsi **birebir aynı kaldı**. `git diff -M --name-only` ile ölçüldü:
+`src/constraints/` dışında değişen dosya **sıfır**.
+
+Bu bir varsayım değildi (tuzak 65): hile depoda **zaten üretimdeydi** —
+`App.tsx` iki yıldır `import Setup from "./components/setup"` diyor.
+
+### Turun üç gerçek bulgusu
+
+1. **`components/Ribbon.tsx` ile `components/ribbon/` yalnız HARFTE
+   farklıydı.** `'./components/Ribbon'` bu makinede (harf duyarsız dosya
+   sistemi) kazayla çözülüyordu, Linux CI'da düşerdi. Yeniden adlandırma ile
+   `App.tsx`'in onarımı aynı commit'te yapıldı, ara durum bırakılmadı.
+2. **`i18n.test.ts`'in ölü anahtar tarayıcısı sessizce ölüyordu.** `lang/`
+   `i18n/`in altına girince sözlükleri dışlayan yol ÖNEKİ eşleşmeyi bıraktı;
+   sözlükler kendilerini taramaya başladı; bilerek konmuş bir ölü anahtar
+   **40/40 yeşil** geçti. Önek düzeltildi ve yanına süzgecin KENDİSİNİ ölçen
+   kalıcı bir kapı kondu (o da mutasyonla denendi). Bkz. tuzak 110.
+3. **İki `.ps1` betiği depo kökünü "betiğin dizininin ebeveyni" diye
+   hesaplıyordu.** `scripts/asc/`'ye inince `docs/asc/ekran` yerine
+   `scripts/docs/...` üretecekti, ve hiçbir test `.ps1` koşmuyor. Gerçek
+   PowerShell'de doğrulandı. Bkz. tuzak 111.
+
+### Ölçüm — turun bir bayt bile eklememesi
+
+```
+                       taban (tur öncesi)   tur sonrası
+dist/index.html        1 012 966 bayt       1 012 966 bayt   BİREBİR AYNI
+npm run kontrol        exit 0               exit 0
+birim testi            772                  773  (+1: süzgeç kapısı)
+E2E                    560                  560
+site · çözücü          22 · 7               22 · 7
+```
+
+Beklenen buydu: hiçbir modül eklenmedi, yalnız yerleri değişti. Ayrıca
+açılış yeniden ölçüldü (1920×1080, `file://`, 7 koşu): **88 ms medyan · 96 ms
+en kötü**. CLAUDE.md'nin 2026-08-26 satırı 73/83 ms ve 489 815 bayt diyordu —
+dosya o gün ile bugün arasında **iki katına** çıkmış, ve sebebi bu tur değil
+(yukarıdaki birebir aynı boy bunu söylüyor). O 523 KB'nin nereden geldiği
+**ölçülmedi**; sıradaki turun ilk işi.
+
+### Bedava çıkan iki şey
+
+- `components/Ribbon.tsx:34`'teki `export { VIEWS } from './ribbon/parts'`
+  **ÖLÜYDÜ** — kimse VIEWS'i oradan almıyor, tek tüketici doğrudan
+  `./parts`'tan alıyor. `noUnusedLocals` yeniden dışa aktarmaları görmüyor.
+- CLAUDE.md'de iki **bayat sayı** bulundu ve düzeltildi: "716 birim testi"
+  (gerçek **773**) ve "500 E2E" (gerçek **560**).
 
 ## Elli ikinci oturum — tek sorumluluk turu (2026-09-04)
 
