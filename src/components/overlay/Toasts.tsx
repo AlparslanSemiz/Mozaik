@@ -17,7 +17,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Check, CircleAlert, Info, X } from 'lucide-react';
-import { useT } from './T';
+import { useT } from '../T';
 
 export type ToastTone = 'ok' | 'info' | 'warn';
 

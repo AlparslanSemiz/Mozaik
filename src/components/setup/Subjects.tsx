@@ -26,7 +26,7 @@
 // on this screen" answers (`e2e/helpers.ts` mainList()).
 
 import { useState } from 'react';
-import { useDialogs } from '../Dialogs';
+import { useDialogs } from '../overlay/Dialogs';
 import { useRowOrder } from '../useRowOrder';
 import { EMPTY_QUERY } from '../../listview';
 import {

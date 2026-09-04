@@ -16,7 +16,7 @@ import { createContext, Fragment, useCallback, useContext, useState } from 'reac
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { T, useT } from './T';
+import { T, useT } from '../T';
 
 type Open = () => void;
 

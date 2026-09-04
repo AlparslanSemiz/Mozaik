@@ -41,17 +41,17 @@ import {
   updateClass,
   updateRoom,
   updateTeacher,
-} from '../entities';
-import ColorPick from './ColorPick';
-import LimitBox from './LimitBox';
-import { placedBlocks } from '../constraints';
+} from '../../entities';
+import ColorPick from '../ColorPick';
+import LimitBox from '../LimitBox';
+import { placedBlocks } from '../../constraints';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
-import type { InspectKind } from '../entities';
-import { paletteColor } from '../palette';
-import { KIND_ICON } from './steps';
-import type { Gender, State } from '../types';
-import { T, useT } from './T';
+import type { InspectKind } from '../../entities';
+import { paletteColor } from '../../palette';
+import { KIND_ICON } from '../steps';
+import type { Gender, State } from '../../types';
+import { T, useT } from '../T';
 
 interface Target {
   kind: InspectKind;

@@ -9,11 +9,11 @@
 
 import { useCallback } from 'react';
 import { useDialogs } from './Dialogs';
-import { useT } from './T';
+import { useT } from '../T';
 import { useToast } from './Toasts';
-import { markIntroSeen } from '../theme';
-import { sampleState } from '../sample';
-import type { State } from '../types';
+import { markIntroSeen } from '../../theme';
+import { sampleState } from '../../sample';
+import type { State } from '../../types';
 
 export type LoadSample = (
   state: State,

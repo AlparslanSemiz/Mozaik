@@ -26,9 +26,9 @@ import {
   togglePinScope,
 } from "../../constraints";
 import type { BlockRef, PinScope } from "../../constraints";
-import { useToast } from "../Toasts";
-import { useInspect } from "../Inspector";
-import { useLessonEdit } from "../LessonEdit";
+import { useToast } from "../overlay/Toasts";
+import { useInspect } from "../overlay/Inspector";
+import { useLessonEdit } from "../overlay/LessonEdit";
 import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort } from "../../entities";
 import { compareTr } from "../../listview";
 import { useDrag } from "../../drag";

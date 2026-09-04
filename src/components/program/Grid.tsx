@@ -7,7 +7,7 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import { Pin } from "lucide-react";
-import { useInspect } from "../Inspector";
+import { useInspect } from "../overlay/Inspector";
 import type React from "react";
 import { dayLabel } from "../../names";
 import { dayPeriods } from "../../bell";

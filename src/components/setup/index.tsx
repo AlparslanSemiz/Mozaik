@@ -15,8 +15,8 @@
 
 import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
-import { useToast } from '../Toasts';
-import { useLoadSample } from '../useSample';
+import { useToast } from '../overlay/Toasts';
+import { useLoadSample } from '../overlay/useSample';
 import { markIntroSeen, readIntroSeen } from '../../theme';
 
 import Rooms from './Rooms';

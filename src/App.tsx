@@ -1,12 +1,12 @@
 import { Activity, useCallback, useRef, useState } from "react";
 import { Keyboard, Search as SearchIcon } from "lucide-react";
 import { useMemo } from "react";
-import Commands from "./components/Commands";
+import Commands from "./components/overlay/Commands";
 import { health } from "./feasibility";
-import { InspectorProvider } from "./components/Inspector";
-import { LessonEditProvider } from "./components/LessonEdit";
-import { useDialogs } from "./components/Dialogs";
-import { useToast } from "./components/Toasts";
+import { InspectorProvider } from "./components/overlay/Inspector";
+import { LessonEditProvider } from "./components/overlay/LessonEdit";
+import { useDialogs } from "./components/overlay/Dialogs";
+import { useToast } from "./components/overlay/Toasts";
 import type React from "react";
 import { downloadBackup } from "./backupFile";
 import { storageWorks } from "./planStorage";
@@ -36,7 +36,7 @@ import type { PrintOptions } from "./printOptions";
 import type { Excluded } from "./components/print";
 import { solverExclusions } from "./programMask";
 import Settings from "./components/settings";
-import { useShortcutsHelp } from "./components/ShortcutsHelp";
+import { useShortcutsHelp } from "./components/overlay/ShortcutsHelp";
 import { hasUnseenChangelog } from "./changelog";
 
 /**

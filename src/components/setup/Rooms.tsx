@@ -14,8 +14,8 @@ import type { ListConfig, ListQuery } from "../../listview";
 import { roomClasses, weeklyLoad } from "../../entities";
 import type { Room } from "../../types";
 import { PanelRight } from "lucide-react";
-import { useInspect } from "../Inspector";
-import { useDialogs } from "../Dialogs";
+import { useInspect } from "../overlay/Inspector";
+import { useDialogs } from "../overlay/Dialogs";
 import { parseRooms } from "../../import";
 import {
   addRoom,

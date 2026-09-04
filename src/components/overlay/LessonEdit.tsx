@@ -29,9 +29,9 @@ import { createContext, useCallback, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import BlockCounts, { blockCeiling } from './BlockCounts';
-import LimitBox from './LimitBox';
-import { paletteColor } from '../palette';
+import BlockCounts, { blockCeiling } from '../BlockCounts';
+import LimitBox from '../LimitBox';
+import { paletteColor } from '../../palette';
 import {
   hasTwoSubjects,
   lessonSubject,
@@ -40,11 +40,11 @@ import {
   teacherSubjects,
   transferLesson,
   updateLesson,
-} from '../entities';
+} from '../../entities';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
-import type { Id, State } from '../types';
-import { T, useT } from './T';
+import type { Id, State } from '../../types';
+import { T, useT } from '../T';
 
 type Open = (lessonId: Id) => void;
 

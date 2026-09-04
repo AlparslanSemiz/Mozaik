@@ -14,8 +14,8 @@ import type { ListConfig, ListQuery } from "../../listview";
 import { openHours } from "../../entities";
 import type { Gender, Id, Teacher } from "../../types";
 import { PanelRight } from "lucide-react";
-import { useInspect } from "../Inspector";
-import { useDialogs } from "../Dialogs";
+import { useInspect } from "../overlay/Inspector";
+import { useDialogs } from "../overlay/Dialogs";
 import { parseTeachers } from "../../import";
 import ColorPick from "../ColorPick";
 import {

@@ -24,11 +24,11 @@ import {
 import Palette from './Palette';
 import type { Command } from './Palette';
 import { useInspect } from './Inspector';
-import { useT } from './T';
-import { subjectLabel } from '../entities';
-import { paletteColor } from '../palette';
-import type { State } from '../types';
-import type { Tab, ToolState } from '../toolState';
+import { useT } from '../T';
+import { subjectLabel } from '../../entities';
+import { paletteColor } from '../../palette';
+import type { State } from '../../types';
+import type { Tab, ToolState } from '../../toolState';
 
 interface Section {
   id: Tab;

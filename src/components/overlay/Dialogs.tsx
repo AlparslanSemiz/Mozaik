@@ -23,7 +23,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { AlertTriangle, Info, TriangleAlert } from 'lucide-react';
-import { useT } from './T';
+import { useT } from '../T';
 
 export interface ConfirmOptions {
   /** The heading: what is about to happen, in one line. */

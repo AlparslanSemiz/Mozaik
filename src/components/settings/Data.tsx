@@ -13,8 +13,8 @@
 // data destroys it.
 
 import { useEffect, useRef, useState } from "react";
-import { useDialogs } from "../Dialogs";
-import { useLoadSample } from "../useSample";
+import { useDialogs } from "../overlay/Dialogs";
+import { useLoadSample } from "../overlay/useSample";
 import type React from "react";
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../bundle";
 import { emptyState } from "../../entities";

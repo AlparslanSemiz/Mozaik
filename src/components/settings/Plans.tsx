@@ -10,7 +10,7 @@
 // twenty classes.
 
 import { useMemo } from 'react';
-import { useDialogs } from '../Dialogs';
+import { useDialogs } from '../overlay/Dialogs';
 import { emptyState } from '../../entities';
 import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../planStorage';

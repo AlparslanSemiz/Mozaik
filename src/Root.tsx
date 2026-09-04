@@ -11,10 +11,10 @@
  * two callers share a definition rather than to teach the test a workaround.
  */
 import App from './App';
-import { DialogProvider } from './components/Dialogs';
+import { DialogProvider } from './components/overlay/Dialogs';
 import { LangProvider } from './components/T';
-import { ShortcutsHelpProvider } from './components/ShortcutsHelp';
-import { ToastProvider } from './components/Toasts';
+import { ShortcutsHelpProvider } from './components/overlay/ShortcutsHelp';
+import { ToastProvider } from './components/overlay/Toasts';
 import './lang/en';
 import './lang/de';
 import './lang/es';

@@ -4,7 +4,7 @@
 // strip's SHAPE is shared (./parts); what each tab ASKS is its own file.
 
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { useDialogs } from '../Dialogs';
+import { useDialogs } from '../overlay/Dialogs';
 import {
   Palette as PaletteIcon,
   Check,
