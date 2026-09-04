@@ -8,8 +8,9 @@ Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](
 
 **Rakip ne yapıyor:** [docs/ASC.md](docs/ASC.md) — aSc'nin 19 bölümü, hangisi
 alındı, hangisi bilerek alınmadı, hangisi sırada. Hedef %50'ye çıktığından beri
-bu dosya projenin **özellik pusulası**. Altındaki `docs/asc/` üretilir: `asc-sozluk.mjs` (2940 arayüz
-metni, EN ↔ TR), `asc-yardim.mjs` (528 yardım konusu), `asc-ekran.ps1`
+bu dosya projenin **özellik pusulası**. Altındaki `docs/asc/` üretilir:
+`scripts/asc/asc-sozluk.mjs` (2940 arayüz metni, EN ↔ TR),
+`scripts/asc/asc-yardim.mjs` (528 yardım konusu), `scripts/asc/asc-ekran.ps1`
 (pencere yakalama). Üçü de `npm run kontrol`'ün parçası değil — `font` ve
 `exe` gibi, bu depoda olmayan bir şeye bağlılar.
 
@@ -343,6 +344,41 @@ scripts/surum.mjs    -> sürüm numarasının TEK kaynağı (define + sw damgas�
 scripts/yayinla.mjs  -> bir sürümün dört adımı, tek komutta
 ```
 
+**`scripts/` ÜÇ bölge, ve sınırı "kim çağırıyor" çiziyor** (2026-09-05):
+
+```
+scripts/            KÖKTE olanlar: bir başkası onları ADIYLA çağırıyor
+  font.mjs          package.json  -> npm run font
+  paket.mjs         package.json  -> npm run paket
+  sunucu.mjs        package.json  -> npm run sunucu
+  yayinla.mjs       package.json  -> npm run yayinla
+  surum.mjs         vite.config.ts · vite.site.config.ts · iki e2e spec'i
+  surum.d.mts       surum.mjs'in tipleri
+  font-source/      gömülü yüzün kaynağı (OFL 1.1)
+
+scripts/ikon/       İŞARETİN ve rengin reçeteleri. Tek dış çağrı:
+                    .github/workflows/surum.yml -> exe-ikon.mjs
+  ikon.mjs · ikon-karsilastir.mjs · simge.mjs · favicon.mjs ·
+  exe-ikon.mjs · bolum-renk.mjs
+
+scripts/asc/        RAKİP ARAŞTIRMASI. package.json'dan da iş
+                    akışlarından da HİÇ çağrılmıyor; elle koşulur
+  asc-sozluk.mjs · asc-yardim.mjs · asc-ekran.ps1 · asc-tur.ps1 ·
+  asc-adim.ps1 · asc-utf8-duzelt.ps1 · asc-utf8-geri-al.ps1
+```
+
+Kökte kalanların ölçütü bir zevk değil: **adı bir başka dosyada yazılı olan
+betik kökte kalır**, çünkü onu taşımak `package.json`'ı, iki vite config'ini
+ya da bir iş akışını da değiştirmek demek. `ikon/` bir dış çağrı taşıyordu ve
+o tek satır güncellendi; `asc/` hiç taşımıyordu.
+
+**Bir betiği taşımadan önce sorulacak soru "kim import ediyor" DEĞİL, "kendi
+konumunu kim OKUYOR"dur.** Buradaki `.mjs`'lerin hepsi yollarını `resolve()`
+ile **cwd'ye** göre çözüyor, yani taşınmaları hiçbir şeyi bozmadı. Ama iki
+`.ps1` depo kökünü `Split-Path -Parent $PSScriptRoot` ile buluyordu ve bir
+klasör derinleşince o hesap `scripts/`'i gösterir oldu — bkz. tuzak 111.
+
+
 **İşaretin İKİ çizimi var, ve eşik ölçülerek bulundu.** `site/icon.svg`
 ayrıntılı (altı sütun + hayalet sütunlar); `site/icon-small.svg` sade (üç
 sütun, hayalet yok). İkisi **Windows'un gerçekten istediği boylarda**
@@ -481,6 +517,36 @@ formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç
 > Sığdır↔havuz takası). Gerekçe kullanıcı kararı: **erişilebilirlik ölçümleri
 > kalır, düzen ölçümleri gider.** `duzen.spec.ts` → `kabuk.spec.ts` oldu ve
 > geriye gezinme, erişilebilir ad, simge ayrımı ve baskı kaldı.
+
+**`e2e/` DOKUZ klasör** (2026-09-05). Ölçüt bir dosya türü değil, testin
+**neye baktığı**:
+
+```
+e2e/
+  helpers.ts  kapan.ts  tsconfig.json     KÖKTE: 30 spec onları çağırıyor
+
+  teslim/   temel · site · sunucu · exe · surum · dil
+            dört teslim yolunun kendisi: file:// · site · yerel sunucu · exe
+  okul/     kurulum · dersler · liste · sira · musaitlik      (listeler)
+  program/  program · izgara · kontrol · panel · otomatik ·
+            otomatik-dunyalar · otomatik-stres                (ızgara ve çözücü)
+  cikti/    yazdir · baski-secenek                            (kâğıt)
+  kabuk/    kabuk · serit · gorunum · kayma · hareket ·
+            palet · bos-ekran                                 (çerçeve)
+  gorme/    renk · renk-secici · metin                        (erişilebilirlik)
+  veri/     planlar · klasor · ayarlar                        (nerede duruyor)
+  arac/     patrol · ekran      İDDİA ETMEYEN ikisi: biri gezer, biri kanıt üretir
+```
+
+**Beş playwright config'inin hiçbirine dokunulmadı** ve bu bir tesadüf değil,
+ölçüldü: hepsi `**/` globu kullanıyor (`testDir: './e2e'` + `testMatch`/
+`testIgnore` desenleri), yani alt klasör bedava. `--list` ile taban ile
+karşılaştırıldı: main 560/29 · site 22/3 · cozucu 7/1 · ekran 2/1 · patrol 4/1.
+
+`helpers.ts` ile `kapan.ts` **kökte kaldı**: 30 spec onları çağırıyor ve kökte
+tutmak o 59 satırı tek bir `'../helpers'`e çeviriyor. `e2e/tsconfig.json` de
+bozulmadı — editör dosyadan yukarı yürüyerek onu buluyor.
+
 
 E2E, `dist/index.html`'i `file://` üzerinden 1920×1080'de açar — yani **babanın çift
 tıklayacağı dosyanın ta kendisini**. jsdom'un düzeni yok; sürükle-bırak, sabit sütun,
@@ -636,6 +702,62 @@ program/bar.ts    import type { Translate }         from '../T';
 `src/` köküne taşınsalar saf bir mantık modülü `Grid.tsx`'i import ederdi.
 Kuralın yönü **`.tsx`'in dışı**, `components/`in dışı değil: bir view-model'in
 evi view'ının yanıdır.
+
+### Testler `__tests__/`'te — ve İKİ istisnanın kuralı yazılı
+
+Bir modülün testi, modülün klasöründeki `__tests__/`e girer:
+`schedule/rules.ts` → `schedule/__tests__/rules.test.ts`. Kök modüllerinki de
+öyle: `palette.ts` → `__tests__/palette.test.ts`.
+
+`vite.config.ts`'in `test.include: ['src/**/*.test.{ts,tsx}']` deseni her
+derinliği zaten kabul ediyor, yani bu bir araç kısıtı değil bir **tercih**
+(kullanıcı kararı, 2026-09-05). Bedeli de ölçüldü ve ucuz değildi: kök
+testlerin içindeki **193 göreli import** bir `../` kazandı. Hepsini `tsc`
+söyledi.
+
+**İki test dosyası bu kuralın DIŞINDA ve kökte duruyor:**
+
+> Konusu bir **MODÜL** değil **DEPO** olan bir test, kaynağın kökünde yaşar.
+
+`i18n.test.ts` her kaynak dosyayı ölü sözlük anahtarı için tarıyor
+(`import.meta.glob('./**/*')` — globu kendi dizininden kökleniyor, yani bir
+klasör derinleşse yalnız bir köşeyi tarardı ve **arıza biçimi sessiz** olurdu).
+`surum.test.ts` dört ayrı üst düzey dizindeki beş dosyayı birbirine karşı
+okuyor (`package.json` · `tauri.conf.json` · `Cargo.toml` · `update.rs` ·
+`surum.yml`) — bir klasör derinleşse beş `../` birden kayardı, ve o beş satır
+güncelleme yolunu koruyan tek şey (tuzak 106). İkisinin de yanına oturacak bir
+modülü yok.
+
+### YENİ BİR DOSYA NEREYE GİDER — sırayla sorulacak sorular
+
+Klasör adı bir **katmanın** adı, bir konunun değil. Sıra önemli: ilk "evet"te
+durulur.
+
+| # | Soru | Evetse |
+|---|---|---|
+| 1 | JSX döndürüyor mu, ya da bir React kancası mı? | `components/<sekme>/` · `components/common/` · `components/overlay/`, ya da ikizinin klasörü (`useX.ts` `x.ts`'in yanına) |
+| 2 | Yalnız test koşarken mi import ediliyor? | `testing/` |
+| 3 | `State`'e girmeyen bir makine/oturum değeri mi? | `view/` |
+| 4 | React'e uğramadan DOM'a mı dokunuyor? | `dom/` |
+| 5 | Bu kopya · sürüm · güncelleme hakkında mı? | `version/` |
+| 6 | Bir planı okuyor/göç ettiriyor/saklıyor mu? | `state/` |
+| 7 | Kitaplık · paket · klasör mü? | `plans/` |
+| 8 | Bir varlığı mı yaratıyor/siliyor/düzenliyor? | `entities/` |
+| 9 | Bir bırakmanın yasal olup olmadığını mı söylüyor? | `constraints/` |
+| 10 | Haftanın kendisi hakkında saf bir kural mı? | `schedule/` |
+| 11 | Herhangi bir listeyi süzüyor/sıralıyor mu? | `lists/` |
+| 12 | Hiçbir şey import etmiyor mu? | **kök** (`types` · `keys` · `palette`'in yanı) |
+
+Hiçbirine uymuyorsa yeni bir klasör açılmadan önce sorulacak şey şudur: *bu
+dosya hangi katmanın ALTINDA durabilir?* Cevap yoksa dosya muhtemelen iki iş
+yapıyordur.
+
+**Klasör açmanın eşiği bir dosya sayısı DEĞİL.** `lists/` tek dosyalık ve
+doğru: kökün ölçütü "hiçbir şey import etmez" ve `listview.ts` `i18n`'i
+çağırıyor — yanlış katmanda duran bir dosya, tek dosyalık bir klasörden
+kötüdür.
+
+
 
 
 ```

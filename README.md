@@ -89,10 +89,10 @@ npm install && npx playwright install chromium   # once, on a new machine
 
 npm run dev          # dev server
 npm run tipler       # tsc, twice: src and everything outside src
-npm test             # Vitest — pure logic (719 tests)
+npm test             # Vitest — pure logic (773 tests)
 npm run build        # dist/index.html, one file — THE delivery
 npm run build:site   # dist-site/ — PWA: one file + manifest + sw.js + icons
-npm run test:e2e     # Playwright over file:// (512 tests)
+npm run test:e2e     # Playwright over file:// (560 tests)
 npm run test:site    # site · local server · folder, over http (22 tests)
 npm run kontrol      # all of it: types + unit + build + e2e + site + solver
 npm run ekran        # screenshots in both themes -> test-results/ekran/
@@ -121,6 +121,51 @@ Architecture, data model, constraints and known pitfalls live in
 [CLAUDE.md](CLAUDE.md) — in Turkish, along with [docs/](docs/). That is
 deliberate: it is the project's memory, and it is written in the language the
 decisions were made in.
+
+## Repository layout
+
+Folders are named after **layers**, not topics: what decides where a file goes
+is not what it is about, but what it is allowed to sit underneath. Nine files
+remain at the root of `src/` and every one of them earns it.
+
+```
+src/
+  App.tsx Root.tsx main.tsx        the shell
+  types.ts keys.ts palette.ts      leaves — these import nothing
+  raw.d.ts styles.css              project-wide
+  i18n.test.ts surum.test.ts       repo scanners, not module tests
+
+  entities/     the school's entities        + barrel index.ts
+  constraints/  is this drop legal            + barrel index.ts
+  schedule/     the pure timetable brain: rules · bell · blocks ·
+                subjects · names · feasibility · solver
+  state/        read · migrate · reduce · persist one plan
+  plans/        library · bundle · chosen folder
+  view/         what this MACHINE prefers. None of it enters State
+  dom/          raw DOM, React never sees it (drag · gridChrome ·
+                poolSplit · rowDrag)
+  lists/        search / sort / filter
+  i18n/         index.ts + lang/{en,de,es,fr}.ts
+  version/      which copy is this, and how it updates itself
+  testing/      TEST-ONLY; the app never imports it, so Vite prunes it
+  components/   React, and only React
+  __tests__/    tests for the two modules that stay at the root
+
+e2e/       nine folders by what a test looks at, plus helpers.ts · kapan.ts
+scripts/   root = called by name elsewhere · ikon/ = the mark · asc/ = research
+```
+
+Two conventions worth knowing before moving anything:
+
+- **A `useX.ts` lives next to its `x.ts`**, never in a `hooks/` folder. The
+  hook and the module it drives are one subject with two faces — `drag.ts`,
+  `toolState.ts` and `update.ts` have them fused into a single file already.
+- **The barrels are folder `index.ts` files**, so `from './constraints'` and
+  `from './entities'` resolve exactly as they always did. Roughly 120 call
+  sites never had to change.
+
+The full reasoning, with the measurements behind each choice, is in
+[CLAUDE.md](CLAUDE.md).
 
 ## How it is built
 

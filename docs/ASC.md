@@ -34,9 +34,9 @@ Haziran 2026 derlemesi, **kayıtsız deneme sürümü** (her açılışta bir
 
 | Kaynak | Ne veriyor | Üreten |
 |---|---|---|
-| `docs/asc/sozluk.tsv` | **2940 arayüz metni**, EN ↔ TR. aSc'nin bir şeye ne DEDİĞİ | `node scripts/asc-sozluk.mjs` |
-| `docs/asc/yardim/*.md` | **528 yardım konusu**, 19 bölüm. Bir şeyin ne YAPTIĞI | `node scripts/asc-yardim.mjs` |
-| `docs/asc/ekran/*.png` | Ekranların ŞEKLİ | `scripts/asc-ekran.ps1` |
+| `docs/asc/sozluk.tsv` | **2940 arayüz metni**, EN ↔ TR. aSc'nin bir şeye ne DEDİĞİ | `node scripts/asc/asc-sozluk.mjs` |
+| `docs/asc/yardim/*.md` | **528 yardım konusu**, 19 bölüm. Bir şeyin ne YAPTIĞI | `node scripts/asc/asc-yardim.mjs` |
+| `docs/asc/ekran/*.png` | Ekranların ŞEKLİ | `scripts/asc/asc-ekran.ps1` |
 
 **Sözlük neden bu kadar ucuz geldi:** aSc bütün arayüzünü `C:\TimeTables\lang.asc`
 adlı düz metin bir dosyada tutuyor ve dosyanın kendi başlığı *"You can edit this
@@ -104,7 +104,7 @@ Yerleştirme · Arayüz Ayarları · Yardım`.
 > çünkü orası başka bir yoldan geçiyor.
 >
 > **DÜZELTİLDİ — yeniden başlatma bekliyor (2026-08-30).**
-> `scripts/asc-utf8-duzelt.ps1` yönetici olarak çalıştırıldı ve kod sayfaları
+> `scripts/asc/asc-utf8-duzelt.ps1` yönetici olarak çalıştırıldı ve kod sayfaları
 > Türkçeye çekildi:
 >
 > ```
@@ -114,7 +114,7 @@ Yerleştirme · Arayüz Ayarları · Yardım`.
 >
 > Yalnız beta'yı kapatmak yetmezdi: `en-US` altında ACP 1252 olur ve orada
 > `ı ğ ş İ` yoktur — o yüzden sistem yereli de değişti. Geri alma:
-> `scripts/asc-utf8-geri-al.ps1` (betik kendi yazdı, eski değerlerle).
+> `scripts/asc/asc-utf8-geri-al.ps1` (betik kendi yazdı, eski değerlerle).
 >
 > **KAPANDI (2026-08-31).** Windows yeniden başlatıldı, `asc-tur.ps1` yeniden
 > koşturuldu, ve harfler düzeldi. Ama yeniden başlatmanın gerçekten gerekli
@@ -399,7 +399,7 @@ Hiçbirinin şema ya da mimari bedeli yok. **Onaylandı**, sıra gelince yapıl�
 | A/B haftası | **Olabilir** — gruplardan sonra |
 | Kaç bina | **Tek bina** — binalar özelliği düştü |
 | Türkiye sürümü | **Boş verildi** |
-| Windows UTF-8 beta | **Düzeltilecek** — `scripts/asc-utf8-duzelt.ps1` |
+| Windows UTF-8 beta | **Düzeltilecek** — `scripts/asc/asc-utf8-duzelt.ps1` |
 | Paylaşmanın sınırı | **PDF ya da görsel**, e-posta ve WhatsApp, hocalara **tek tıkla**. Bağlantı yok, yani ilke 2 geri gelmiyor |
 | **Vekil öğretmen (Substitution)** | **HÂLÂ AÇIK** — babaya sorulacak. aSc'de 62 konu. **"Evet" denirse spesifikasyon hazır**, bkz. §5a |
 | **Nöbet** | **HÂLÂ AÇIK** — babaya sorulacak. **"Evet" denirse spesifikasyon hazır**, bkz. §5a |
@@ -516,14 +516,14 @@ Sayılar hasat edilen konu sayısı; `Kova` yukarıdaki tabloya işaret eder.
 > Aşağıdaki tablo ilk turun 18'i; derin turun kalan 48'i ve **her ekranın ne
 > söylediği** o dosyada. Buradaki karar tablosu onun bulgularıyla güncellendi.
 
-`scripts/asc-tur.ps1` tam turu koşar ve `docs/asc/ekran/` altına yazar. Tur
+`scripts/asc/asc-tur.ps1` tam turu koşar ve `docs/asc/ekran/` altına yazar. Tur
 bittiğinde **kendini denetler**: iki görüntünün MD5'i aynıysa bir tıklama
 kaçmıştır ve uyarı basar — hiçbir şeyi sorgulayamayan bir gezginin tek
 güvenlik ağı bu.
 
 **İki mod eklendi (2026-08-31):** `-Sadece derin` liste pencerelerinin içini,
 çözücü ekranlarını ve **baskı ailesinin tamamını** gezer; yanına
-`scripts/asc-adim.ps1` yazıldı — bir tıklama dizisini dışarıdan alıp yakalayan
+`scripts/asc/asc-adim.ps1` yazıldı — bir tıklama dizisini dışarıdan alıp yakalayan
 tek atımlık komut. Derin envanter kör koordinatla çıkarılamazdı: her adımda
 görüntü alınıp **okundu** ve sıradaki tıklamanın yeri o görüntüden ölçüldü
 (UI Automation aSc'de sıfır kontrol görüyor, ölçülü). Bulunan koordinatların
@@ -590,8 +590,8 @@ Demo1 yüklü. Dört gözlem, ve üçü bizim mimarimizi **doğruluyor**:
 ## Yeniden üretmek
 
 ```bash
-node scripts/asc-sozluk.mjs                    # docs/asc/sozluk.tsv
-node scripts/asc-yardim.mjs                    # docs/asc/yardim/*.md  (528 istek, önbellekli)
+node scripts/asc/asc-sozluk.mjs                    # docs/asc/sozluk.tsv
+node scripts/asc/asc-yardim.mjs                    # docs/asc/yardim/*.md  (528 istek, önbellekli)
 ```
 
 ```powershell
