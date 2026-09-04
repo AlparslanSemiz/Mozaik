@@ -3,14 +3,14 @@
 // SAME engine the user's own dragging is judged by".
 
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place, setBlockPinned } from './constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
-import { findViolations } from './rules';
-import { sampleState } from './sample';
-import { createSolver, solve } from './solver';
-import type { RuleLevel, State } from './types';
-import { SCHEMA_VERSION } from './types';
-import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './testing/worlds';
+import { buildIndex, placementKey, place, setBlockPinned } from '../../constraints';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../../entities';
+import { findViolations } from '../rules';
+import { sampleState } from '../../sample';
+import { createSolver, solve } from '../solver';
+import type { RuleLevel, State } from '../../types';
+import { SCHEMA_VERSION } from '../../types';
+import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from '../../testing/worlds';
 
 // 2 days x 4 hours = 8 cells per class.
 //   room A: 510, 511 (shared)   room B: 433
@@ -477,4 +477,4 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     });
   }
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from './programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from '../../programs';

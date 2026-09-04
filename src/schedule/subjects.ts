@@ -10,7 +10,7 @@
  *
  * Imports the types only — no State logic, no React, no storage.
  */
-import type { Lesson, State, Teacher } from './types';
+import type { Lesson, State, Teacher } from '../types';
 
 /** Comparison form: trimmed and lower-cased the Turkish way (İ→i, I→ı). */
 export function subjectKey(subject: string): string {

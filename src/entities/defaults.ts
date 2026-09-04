@@ -6,7 +6,7 @@
 // limit" — because my father fills those in himself.
 
 import { blankProgram } from '../programs';
-import { DEFAULT_DAY_NAMES } from '../names';
+import { DEFAULT_DAY_NAMES } from '../schedule/names';
 import { hourNames } from './periods';
 import type { Bell, Day, Limits, Rules, Settings, State } from '../types';
 import { SCHEMA_VERSION } from '../types';

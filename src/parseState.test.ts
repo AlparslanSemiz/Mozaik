@@ -5,7 +5,7 @@
 // plain string days). BOTH must still open, and the timetable inside them must
 // come out exactly as it went in.
 
-import { blockPlan } from './blocks';
+import { blockPlan } from './schedule/blocks';
 import { defaultSubjects } from './entities';
 import { parseState } from './parseState';
 import { activeProgram } from './programs';

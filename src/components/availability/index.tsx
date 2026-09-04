@@ -10,7 +10,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import type React from "react";
-import { sharedPeriods } from "../../bell";
+import { sharedPeriods } from "../../schedule/bell";
 import { paletteColor } from "../../palette";
 import { KIND_ICON } from "../common/steps";
 import { buildIndex, closedConflicts, closedKey } from "../../constraints";

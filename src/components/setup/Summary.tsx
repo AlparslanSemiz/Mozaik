@@ -11,7 +11,7 @@
 // without paying for buildReport's 99 x 72 blocker() calls (pitfall 3).
 
 import { useMemo } from 'react';
-import { buildCapacity } from '../../feasibility';
+import { buildCapacity } from '../../schedule/feasibility';
 import CapacityRows from '../common/CapacityRows';
 import {
   DEFAULT_SUBJECT_SHORTS,

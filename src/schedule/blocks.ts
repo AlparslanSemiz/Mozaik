@@ -14,7 +14,7 @@
  * 1 to 3. Schema v13 removes four-hour blocks. The selected distribution is a
  * compact button; opening it shows every 3/2/1 partition in a scrollable list.
  */
-import type { Lesson } from './types';
+import type { Lesson } from '../types';
 
 /** The longest block a week can be asked for. */
 export const MAX_BLOCK = 3;

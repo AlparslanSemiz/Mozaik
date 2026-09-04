@@ -1,5 +1,5 @@
-import type { ReportRow, LoadStatus } from "../../feasibility";
-import { loadStatus } from "../../feasibility";
+import type { ReportRow, LoadStatus } from "../../schedule/feasibility";
+import { loadStatus } from "../../schedule/feasibility";
 import type { Facet } from "../../listview";
 import type { Id } from "../../types";
 import type { Translate } from "../T";

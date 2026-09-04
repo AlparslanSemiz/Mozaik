@@ -14,7 +14,7 @@
 // Özet already.
 
 import { paletteColor } from '../../palette';
-import type { ReportRow } from '../../feasibility';
+import type { ReportRow } from '../../schedule/feasibility';
 import type { Id } from '../../types';
 import { useT } from '../T';
 

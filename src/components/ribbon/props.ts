@@ -7,7 +7,7 @@ import type { ProgramMask } from '../../programMask';
 import type { Density, Theme } from '../../theme';
 import type { ToolState } from '../../toolState';
 import type { State } from '../../types';
-import type { SolverRun } from '../../useSolver';
+import type { SolverRun } from '../../schedule/useSolver';
 
 export interface RibbonProps {
   ui: ToolState;

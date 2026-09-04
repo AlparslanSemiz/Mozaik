@@ -31,7 +31,7 @@ import Paste from "./Paste";
 import type { PanelProps } from "../common/props";
 import { T, useT } from "../T";
 import AddPanel from "../common/AddPanel";
-import { buildCapacity } from "../../feasibility";
+import { buildCapacity } from "../../schedule/feasibility";
 import { loadStatusFacet } from "./loadStatusFacet";
 
 export default function Classes({ state, change }: PanelProps) {

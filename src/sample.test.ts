@@ -6,8 +6,8 @@
 //      on my father's slow machine?
 
 import { blocker, buildIndex, dropMap, sanitize, place } from './constraints';
-import { buildReport } from './feasibility';
-import { blockPlan } from './blocks';
+import { buildReport } from './schedule/feasibility';
+import { blockPlan } from './schedule/blocks';
 import { sampleState } from './sample';
 import type { State } from './types';
 

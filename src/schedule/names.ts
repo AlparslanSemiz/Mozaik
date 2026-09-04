@@ -16,7 +16,7 @@
  * program itself wrote are translated, and anything the reader typed is handed
  * back untouched — translating that would be a guess about somebody else's word.
  */
-import { t } from './i18n';
+import { t } from '../i18n';
 import { subjectKey } from './subjects';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */

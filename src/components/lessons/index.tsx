@@ -20,7 +20,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ListTools from "../common/ListTools";
-import { blockPlan, clampBlocks, patternLabel } from "../../blocks";
+import { blockPlan, clampBlocks, patternLabel } from "../../schedule/blocks";
 import { useRowOrder } from "../common/useRowOrder";
 import {
   applyList,

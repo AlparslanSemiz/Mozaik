@@ -1,5 +1,5 @@
 import { defaultDays, emptyState } from '../defaults';
-import { WEEK, shortDay } from '../../names';
+import { WEEK, shortDay } from '../../schedule/names';
 
 describe('varsayılan hafta', () => {
   it('Pazartesi hariç 6 gün, hafta sonu öğle arası 6. dersten sonra', () => {

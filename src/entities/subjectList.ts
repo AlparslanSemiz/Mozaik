@@ -5,9 +5,9 @@
 // that renaming stays cheap and a backup stays readable. The price is that a
 // rename has to cascade, and `renameSubject` below is the one place it does.
 
-import { DEFAULT_SUBJECT_SHORTS } from '../names';
+import { DEFAULT_SUBJECT_SHORTS } from '../schedule/names';
 import { setSubjectShort } from './subjectShorts';
-import { subjectKey, teacherSubjects } from '../subjects';
+import { subjectKey, teacherSubjects } from '../schedule/subjects';
 import type { State, Teacher } from '../types';
 
 /**

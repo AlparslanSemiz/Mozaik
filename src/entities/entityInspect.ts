@@ -15,11 +15,11 @@ import type { Index } from '../constraints';
 import { openHours } from './availability';
 import { weeklyLoad } from './entityCounts';
 import { t } from '../i18n';
-import { subjectLabel } from '../names';
+import { subjectLabel } from '../schedule/names';
 import { activePlacements } from '../programs';
 import { roomClasses, roomName } from './roomCrud';
 import { subjectShort } from './subjectShorts';
-import { lessonSubject, teacherSubjects } from '../subjects';
+import { lessonSubject, teacherSubjects } from '../schedule/subjects';
 import type { Id, State } from '../types';
 
 export type InspectKind = 'teacher' | 'class' | 'room';

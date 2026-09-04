@@ -33,7 +33,7 @@ import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort } from 
 import { compareTr } from "../../listview";
 import { useDrag } from "../../drag";
 import type { DragData } from "../../drag";
-import type { SolverRun } from "../../useSolver";
+import type { SolverRun } from "../../schedule/useSolver";
 import type { State, Id } from "../../types";
 import { activePinned, activePlacements } from "../../programs";
 import { rowMask, setDayMask, setRowMask } from "../../programMask";

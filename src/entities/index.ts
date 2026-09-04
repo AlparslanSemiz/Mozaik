@@ -33,7 +33,7 @@ export * from './teacherCrud';
 // week and the subject vocabulary live DOWN in `names.ts`, so that
 // `constraints.ts` — which sits below all of this — can draw a day name in the
 // interface language; `subjects.ts` holds the question "which subject is this".
-export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from '../subjects';
+export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from '../schedule/subjects';
 export {
   DEFAULT_DAY_NAMES,
   DEFAULT_SUBJECT_SHORTS,
@@ -42,4 +42,4 @@ export {
   dayLabel,
   shortDay,
   subjectLabel,
-} from '../names';
+} from '../schedule/names';

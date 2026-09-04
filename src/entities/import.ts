@@ -9,7 +9,7 @@
 // makeShort lives in entities.ts (one home); re-exported so callers and the
 // existing tests do not have to care where it moved.
 export { makeShort } from './index';
-import { MAX_BLOCK } from '../blocks';
+import { MAX_BLOCK } from '../schedule/blocks';
 import { t } from '../i18n';
 import { makeShort, parseGender } from './index';
 import type { Gender } from '../types';

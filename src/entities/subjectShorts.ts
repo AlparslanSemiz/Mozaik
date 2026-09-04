@@ -5,8 +5,8 @@
 // keeps the backup small and lets a later, better built-in table reach an old
 // project by itself.
 
-import { builtInShort, builtInShortRaw, subjectLabel } from '../names';
-import { subjectKey } from '../subjects';
+import { builtInShort, builtInShortRaw, subjectLabel } from '../schedule/names';
+import { subjectKey } from '../schedule/subjects';
 import type { Settings, State } from '../types';
 
 /** Override -> built-in table -> first three letters. */

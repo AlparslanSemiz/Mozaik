@@ -9,7 +9,7 @@ import { t } from '../i18n';
 import { closedKey, placementKey, teacherKey } from '../keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language.
-import { dayLabel, subjectLabel } from '../names';
+import { dayLabel, subjectLabel } from '../schedule/names';
 import { blockSizeFor, type Index } from './placement';
 import { activePlacements } from '../programs';
 import {
@@ -20,7 +20,7 @@ import {
   ruleLevel,
   runLength,
   teacherDayCount,
-} from '../rules';
+} from '../schedule/rules';
 import type { ClassGroup, Lesson, RuleName, State, Id, Teacher } from '../types';
 
 // -------------------------------------------------------------- blocker

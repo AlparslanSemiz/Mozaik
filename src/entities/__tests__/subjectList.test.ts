@@ -4,7 +4,7 @@ import { addLesson } from '../lessonCrud';
 import { addRoom } from '../roomCrud';
 import { addSubject, defaultSubjects, deleteSubject, renameSubject, subjectOptions, subjectRank, subjectTeachers, teacherRank, usedSubjects } from '../subjectList';
 import { setSubjectShort, subjectShort } from '../subjectShorts';
-import { subjectKey } from '../../subjects';
+import { subjectKey } from '../../schedule/subjects';
 import { addTeacher } from '../teacherCrud';
 import type { State } from '../../types';
 

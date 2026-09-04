@@ -6,7 +6,7 @@
 // pattern — the rule two modules share lives underneath both of them, so
 // neither has to import the other.
 
-import { clampBlocks, MAX_BLOCK } from './blocks';
+import { clampBlocks, MAX_BLOCK } from './schedule/blocks';
 import { asArray, asBox, asCount } from './coerce';
 import { makeDay } from './entities';
 import { firstFreeColor, PALETTE_SIZE } from './palette';

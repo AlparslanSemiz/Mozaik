@@ -3,7 +3,7 @@
 // Moving one to another teacher or another class is NOT here — that re-judges
 // every placed block and lives in `lessonMove.ts`.
 
-import { clampBlocks } from '../blocks';
+import { clampBlocks } from '../schedule/blocks';
 import { sanitize } from '../constraints';
 import { newId } from './ids';
 import { mapProgramGrids } from '../programs';

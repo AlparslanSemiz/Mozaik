@@ -4,7 +4,7 @@
 // keystroke with onChange loses focus (docs/PLAN.md pitfall 3).
 
 import { useMemo } from 'react';
-import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../bell';
+import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../schedule/bell';
 import type { Day } from '../../types';
 import { WEEK, dayLabel, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import Field from '../common/Field';

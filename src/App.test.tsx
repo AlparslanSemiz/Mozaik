@@ -9,7 +9,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import AppRoot from './Root';
-import { blockPlan } from './blocks';
+import { blockPlan } from './schedule/blocks';
 import { sampleState } from './sample';
 
 declare global {

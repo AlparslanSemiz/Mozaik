@@ -14,12 +14,12 @@
 // Only the TYPE Index comes from constraints.ts (erased at compile time), so
 // there is no runtime import cycle.
 
-import { t } from './i18n';
+import { t } from '../i18n';
 import { dayLabel } from './names';
-import type { Index } from './constraints';
-import { closedKey, placementKey } from './keys';
-import { activePlacements } from './programs';
-import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from './types';
+import type { Index } from '../constraints';
+import { closedKey, placementKey } from '../keys';
+import { activePlacements } from '../programs';
+import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../types';
 
 export interface Violation {
   key: string; // stable-ish key for React lists

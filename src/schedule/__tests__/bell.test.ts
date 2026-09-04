@@ -1,8 +1,8 @@
-import type { Day } from './types';
+import type { Day } from '../../types';
 import { describe, expect, it } from 'vitest';
-import { clockParts, dayEnd, dayPeriods, formatClock, minuteOptions, parseClock, sharedPeriods, periodGroups } from './bell';
-import { DEFAULT_BELL } from './entities';
-import { hourNames } from './entities';
+import { clockParts, dayEnd, dayPeriods, formatClock, minuteOptions, parseClock, sharedPeriods, periodGroups } from '../bell';
+import { DEFAULT_BELL } from '../../entities';
+import { hourNames } from '../../entities';
 
 const LABELS = hourNames(12);
 

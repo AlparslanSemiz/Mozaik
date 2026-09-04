@@ -3,8 +3,8 @@
 
 import { useMemo } from 'react';
 import { buildIndex, closedConflicts } from '../../constraints';
-import { buildReport } from '../../feasibility';
-import type { ReportRow } from '../../feasibility';
+import { buildReport } from '../../schedule/feasibility';
+import type { ReportRow } from '../../schedule/feasibility';
 import type { Id, State } from '../../types';
 import { activePlacements } from '../../programs';
 import type { CheckView } from '../../toolState';

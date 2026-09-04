@@ -4,7 +4,7 @@
 // back. The colour is the same functional channel the grid uses: '' plain,
 // 'warn' yellow, 'bad' red, 'ok' green.
 
-import type { SolverRun } from '../../useSolver';
+import type { SolverRun } from '../../schedule/useSolver';
 import type { Translate } from '../T';
 import type { View } from '../../toolState';
 

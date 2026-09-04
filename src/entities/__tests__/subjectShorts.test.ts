@@ -1,5 +1,5 @@
 import { emptyState } from '../defaults';
-import { DEFAULT_SUBJECT_SHORTS } from '../../names';
+import { DEFAULT_SUBJECT_SHORTS } from '../../schedule/names';
 import { defaultSubjects } from '../subjectList';
 import { defaultSubjectShort, setSubjectShort, subjectShort } from '../subjectShorts';
 

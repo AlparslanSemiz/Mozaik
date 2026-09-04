@@ -24,7 +24,7 @@ import {
   NO_TEACHER_LIMITS,
   hourNames,
 } from '../entities';
-import { classDayGaps, teacherDayCount, teacherDayGaps } from '../rules';
+import { classDayGaps, teacherDayCount, teacherDayGaps } from '../schedule/rules';
 import { sampleState } from '../sample';
 import type {
   ClassGroup,

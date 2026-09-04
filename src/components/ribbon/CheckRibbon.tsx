@@ -9,7 +9,7 @@ import {
   Lightbulb,
   TriangleAlert,
 } from 'lucide-react';
-import { health } from '../../feasibility';
+import { health } from '../../schedule/feasibility';
 import type { CheckView } from '../../toolState';
 import { KIND_ICON } from '../common/steps';
 import { useT } from '../T';

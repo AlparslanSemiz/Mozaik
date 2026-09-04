@@ -7,8 +7,8 @@ import {
   commonestBlock,
   health,
   loadStatus,
-} from "./feasibility";
-import { place } from "./constraints";
+} from "../feasibility";
+import { place } from "../../constraints";
 import {
   addClass,
   addLesson,
@@ -17,17 +17,17 @@ import {
   emptyState,
   setAvailability,
   setWholeWeek,
-} from "./entities";
-import { buildIndex } from "./constraints";
-import { teacherKey } from "./constraints";
+} from "../../entities";
+import { buildIndex } from "../../constraints";
+import { teacherKey } from "../../constraints";
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
-} from "./entities";
-import type { State } from "./types";
-import { SCHEMA_VERSION } from "./types";
+} from "../../entities";
+import type { State } from "../../types";
+import { SCHEMA_VERSION } from "../../types";
 
 // 1 day x 4 hours = 4 slots. Small numbers keep the arithmetic verifiable by hand.
 function build(): State {
@@ -575,4 +575,4 @@ describe("health", () => {
     expect(h.warnings).toBeLessThan(10);
   });
 });
-import { activeProgram, blankProgram } from "./programs";
+import { activeProgram, blankProgram } from "../../programs";

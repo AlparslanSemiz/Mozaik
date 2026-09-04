@@ -7,7 +7,7 @@
 
 import { blocker, buildIndex, place, placedBlocks, placementKey, sanitize } from '../constraints';
 import { activePinned, activePlacements, replaceActiveGrid } from '../programs';
-import { lessonSubject, subjectKey, teacherSubjects } from '../subjects';
+import { lessonSubject, subjectKey, teacherSubjects } from '../schedule/subjects';
 import type { Id, Lesson, ProgramVariant, State } from '../types';
 
 /**

@@ -5,7 +5,7 @@
 // a start time, a lesson length, a break length, and exactly ONE long break
 // whose position is the only thing that differs between weekdays and weekend.
 
-import type { Bell, Day } from './types';
+import type { Bell, Day } from '../types';
 
 export interface Period {
   label: string; // "3" — what the user typed in settings.hours

@@ -5,7 +5,7 @@ import { addLesson } from '../lessonCrud';
 import { moveLessonToClass, transferLesson } from '../lessonMove';
 import { activeProgram } from '../../programs';
 import { addRoom } from '../roomCrud';
-import { lessonSubject } from '../../subjects';
+import { lessonSubject } from '../../schedule/subjects';
 import { addTeacher } from '../teacherCrud';
 import type { State } from '../../types';
 

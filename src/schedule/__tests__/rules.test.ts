@@ -1,9 +1,9 @@
 // The limit boxes. Every export of rules.ts is covered here (CLAUDE.md rule:
 // no feature lands in a pure module without a test).
 
-import { buildIndex, place } from './constraints';
-import { blankProgram } from './programs';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
+import { buildIndex, place } from '../../constraints';
+import { blankProgram } from '../../programs';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '../../entities';
 import {
   classDayGaps,
   findViolations,
@@ -18,9 +18,9 @@ import {
   runLength,
   teacherDayCount,
   teacherDayGaps,
-} from './rules';
-import type { State } from './types';
-import { SCHEMA_VERSION } from './types';
+} from '../rules';
+import type { State } from '../../types';
+import { SCHEMA_VERSION } from '../../types';
 
 // 2 days x 6 hours. MÇ teaches both 510 and 511, so a long run is easy to build.
 function build(): State {

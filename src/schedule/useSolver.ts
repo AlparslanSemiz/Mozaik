@@ -14,7 +14,7 @@ import type {
   SolverProgress,
   SolverResult,
 } from "./solver";
-import type { State } from "./types";
+import type { State } from "../types";
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:

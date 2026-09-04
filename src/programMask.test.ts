@@ -3,7 +3,7 @@ import { place } from './constraints';
 import { activeProgram } from './programs';
 import { setDayMask, setRowMask, solverExclusions } from './programMask';
 import { EMPTY_PROGRAM_MASK } from './programMask';
-import { solve } from './solver';
+import { solve } from './schedule/solver';
 import { makeWorld } from './testing/worlds';
 
 function world() {

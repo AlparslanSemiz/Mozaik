@@ -4,18 +4,18 @@
 // timetable cannot be built. It comes before a solver because it is far
 // cheaper and far more useful.
 
-import { t } from "./i18n";
+import { t } from "../i18n";
 import {
   blockerDetail,
   buildIndex,
   closedConflicts,
   closedKey,
-} from "./constraints";
-import type { BlockCode, Index } from "./constraints";
+} from "../constraints";
+import type { BlockCode, Index } from "../constraints";
 import { findViolations } from "./rules";
 import type { Violation } from "./rules";
 import { blockPlan } from "./blocks";
-import type { State, Id } from "./types";
+import type { State, Id } from "../types";
 
 /** Above this ratio of load the "this will be hard" warning is raised. */
 const TIGHT_RATIO = 0.85;

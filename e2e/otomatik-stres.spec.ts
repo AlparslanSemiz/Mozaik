@@ -10,7 +10,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { solve } from '../src/solver';
+import { solve } from '../src/schedule/solver';
 import { HEAVY_WORLDS, gridQuality, hoursOf, illegalBlocks, qualityLine } from '../src/testing/worlds';
 import { activePlacements } from '../src/programs';
 import { loadWorld, savedState, settledText } from './helpers';

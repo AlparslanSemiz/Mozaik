@@ -15,7 +15,7 @@
 // Printing the 84-column main table is still impossible and still not attempted.
 
 import { useMemo } from 'react';
-import { periodGroups } from '../../bell';
+import { periodGroups } from '../../schedule/bell';
 import { blockSpans, buildIndex, closedKey, placementKey } from '../../constraints';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../../entities';
 import { paletteColor } from '../../palette';
