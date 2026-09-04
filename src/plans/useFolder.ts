@@ -9,10 +9,10 @@
 // kaydet" produces. Not the open plan: a folder that holds one of three plans
 // is a backup that is wrong in the way nobody checks.
 
-import { t } from './i18n';
+import { t } from '../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle } from './bundle';
-import { isDesktop, openDesktopFolder } from './desktop';
+import { isDesktop, openDesktopFolder } from '../desktop';
 import {
   askPermission,
   dailyName,
@@ -25,8 +25,8 @@ import {
   writeHandle,
 } from './folder';
 import type { Library } from './library';
-import { collectStates } from './state/planStorage';
-import type { Id, State } from './types';
+import { collectStates } from '../state/planStorage';
+import type { Id, State } from '../types';
 
 /**
  * Two seconds, not the store's 400 ms.

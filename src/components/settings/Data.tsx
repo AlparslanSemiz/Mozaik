@@ -16,21 +16,21 @@ import { useEffect, useRef, useState } from "react";
 import { useDialogs } from "../overlay/Dialogs";
 import { useLoadSample } from "../overlay/useSample";
 import type React from "react";
-import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../bundle";
+import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../plans/bundle";
 import { emptyState } from "../../entities";
-import { KEEP_DAILY, MAIN_NAME } from "../../folder";
+import { KEEP_DAILY, MAIN_NAME } from "../../plans/folder";
 import {
   routeName,
   storageAddress,
   storageKind,
   storageReport,
-} from "../../library";
-import { downloadBundle } from "../../backupFile";
+} from "../../plans/library";
+import { downloadBundle } from "../../plans/backupFile";
 import { listBackups } from "../../state/planStorage";
 import type { State } from "../../types";
 import { activePlacements } from "../../state/programs";
 import type { PlanControls } from "../common/props";
-import type { FolderRun } from "../../useFolder";
+import type { FolderRun } from "../../plans/useFolder";
 import type { UpdateRun } from "../../update";
 import { SITE_ADRESI } from "../../update";
 import { EXE_FOLDER } from "../../desktop";

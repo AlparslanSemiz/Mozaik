@@ -24,7 +24,7 @@ import Appearance from './Appearance';
 import Data from './Data';
 import type { PanelProps, PlanControls } from '../common/props';
 import type { Density, Motion, Theme } from '../../theme';
-import type { FolderRun } from '../../useFolder';
+import type { FolderRun } from '../../plans/useFolder';
 import type { UpdateRun } from '../../update';
 import type { SectionId } from '../../toolState';
 

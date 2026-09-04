@@ -6,7 +6,7 @@
 // in planStorage.test.ts.
 
 import { emptyState } from '../../entities';
-import { FIRST_PLAN_ID } from '../../library';
+import { FIRST_PLAN_ID } from '../../plans/library';
 import { sampleState } from '../sample';
 import { reduce } from '../store';
 import type { State } from '../../types';

@@ -12,7 +12,7 @@
 import { useMemo } from 'react';
 import { useDialogs } from '../overlay/Dialogs';
 import { emptyState } from '../../entities';
-import { drafts as draftsOf } from '../../library';
+import { drafts as draftsOf } from '../../plans/library';
 import { loadPlan } from '../../state/planStorage';
 import type { State } from '../../types';
 import { activePlacements, blankProgram } from '../../state/programs';

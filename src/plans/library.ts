@@ -11,11 +11,11 @@
 // free of a runtime cycle, the same arrangement `keys.ts` has for
 // constraints <-> rules.
 
-import { t } from './i18n';
-import { isDesktop } from './desktop';
-import { CHANGELOG_SEEN_KEY } from './changelog';
-import { PROGRAM_COLOR_KEY } from './programColor';
-import type { Id } from './types';
+import { t } from '../i18n';
+import { isDesktop } from '../desktop';
+import { CHANGELOG_SEEN_KEY } from '../changelog';
+import { PROGRAM_COLOR_KEY } from '../programColor';
+import type { Id } from '../types';
 
 /**
  * The storage key and the backup file name are USER DATA, not identifiers:

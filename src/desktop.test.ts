@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { desktopFolder } from './desktop';
-import { MAIN_NAME, dailyName, saveInto } from './folder';
+import { MAIN_NAME, dailyName, saveInto } from './plans/folder';
 
 /** An in-memory stand-in for src-tauri/src/lib.rs. */
 function fakeDisk(seed: string[] = []) {

@@ -5,7 +5,7 @@
 // nothing written stays tellable apart from a plan that is empty.
 
 import { emptyState } from '../../entities';
-import { BASE_KEY, FIRST_PLAN_ID, planKey } from '../../library';
+import { BASE_KEY, FIRST_PLAN_ID, planKey } from '../../plans/library';
 import { collectStates, loadPlan, savePlan } from '../planStorage';
 import { activeProgram } from '../programs';
 import { sampleState } from '../sample';

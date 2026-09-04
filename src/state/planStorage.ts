@@ -6,8 +6,8 @@
 // previous session's state is pushed down a backup chain at startup. Layer 1 is
 // the debounced autosave in useStore.ts, layer 3 the file in backupFile.ts.
 
-import { BASE_KEY, readPlanText, writePlanText } from '../library';
-import type { Library } from '../library';
+import { BASE_KEY, readPlanText, writePlanText } from '../plans/library';
+import type { Library } from '../plans/library';
 import { parseState } from './parseState';
 import type { Id, State } from '../types';
 

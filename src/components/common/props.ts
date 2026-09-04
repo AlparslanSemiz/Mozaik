@@ -1,5 +1,5 @@
-import type { Bundle } from '../../bundle';
-import type { Library } from '../../library';
+import type { Bundle } from '../../plans/bundle';
+import type { Library } from '../../plans/library';
 import type { Id, State } from '../../types';
 
 /**

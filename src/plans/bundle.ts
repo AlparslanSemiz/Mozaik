@@ -16,7 +16,7 @@
 // carries several v5 states side by side.
 
 import { normalizeLibrary, type Library } from './library';
-import type { Id } from './types';
+import type { Id } from '../types';
 
 /** Bumped only if the ENVELOPE changes. The states inside carry their own
     `schemaVersion` and are migrated by parseState exactly as a single file is. */

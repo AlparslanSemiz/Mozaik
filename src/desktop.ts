@@ -17,7 +17,7 @@
 // shrink a fake until only the unrunnable part was fake. Here the unrunnable
 // part is the disk, and everything above it stays real.
 
-import type { WriteResult } from './folder';
+import type { WriteResult } from './plans/folder';
 
 /** What `withGlobalTauri` puts on the page. Nothing is imported from an
     `@tauri-apps/*` package: task 4g's rule, and pitfall 19's reason — a npm

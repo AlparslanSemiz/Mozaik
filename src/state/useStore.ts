@@ -9,7 +9,7 @@
 //   3. "Yedek indir", the ONE habit my father learns — backupFile.ts
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import type { Bundle } from '../bundle';
+import type { Bundle } from '../plans/bundle';
 import { sanitize } from '../constraints';
 import { emptyState, newId } from '../entities';
 import {
@@ -25,7 +25,7 @@ import {
   uniquePlanName,
   writeLibrary,
   dropPlanText,
-} from '../library';
+} from '../plans/library';
 import { parseState } from './parseState';
 import { loadPlan, rotateBackups, savePlan } from './planStorage';
 import { type Box, reduce } from './store';

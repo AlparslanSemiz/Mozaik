@@ -6,7 +6,7 @@
 // file this program did not write.
 
 import { describe, expect, it } from 'vitest';
-import { dailyName, KEEP_DAILY, MAIN_NAME, prunable } from './folder';
+import { dailyName, KEEP_DAILY, MAIN_NAME, prunable } from '../folder';
 
 describe('dailyName', () => {
   it('ay ve gün iki basamak', () => {

@@ -9,8 +9,8 @@ import {
   buildBundle,
   bundleVersionOf,
   parseBundle,
-} from './bundle';
-import { FIRST_PLAN_ID, type Library } from './library';
+} from '../bundle';
+import { FIRST_PLAN_ID, type Library } from '../library';
 
 const two = (): Library => ({
   activeId: 'abcd',

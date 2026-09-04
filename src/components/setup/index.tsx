@@ -24,7 +24,7 @@ import Teachers from './Teachers';
 import Classes from './Classes';
 import Subjects from './Subjects';
 import Summary from './Summary';
-import { drafts as draftsOf } from '../../library';
+import { drafts as draftsOf } from '../../plans/library';
 import type { PanelProps, PlanControls } from '../common/props';
 import type { StepId } from '../../toolState';
 import { STEPS } from '../common/steps';
