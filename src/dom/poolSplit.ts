@@ -9,7 +9,7 @@
 // The React side hears about it exactly once, on pointerup, so the preference
 // can be written and the component can agree with the DOM.
 
-import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from "./view/theme";
+import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from "../view/theme";
 
 /** Room the grid must keep for itself: sticky head plus about ten rows. */
 const GRID_FLOOR_REM = 26;

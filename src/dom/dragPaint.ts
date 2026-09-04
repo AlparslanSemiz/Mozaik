@@ -11,7 +11,7 @@
 // counts `td.drop-ok` to check that a two-hour block lights exactly two cells,
 // and a 78-column preview would have made that 40 (pitfall 53).
 
-import type { DropVerdict } from './constraints';
+import type { DropVerdict } from '../constraints';
 import { type Cell, clampToDay } from './dragGeometry';
 
 const HL = { ok: 'drop-ok', warn: 'drop-warn', blocked: 'drop-blocked' } as const;

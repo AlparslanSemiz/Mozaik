@@ -31,15 +31,15 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import type React from "react";
-import type { BlockRef, DropVerdict } from "./constraints";
+import type { BlockRef, DropVerdict } from "../constraints";
 import { blockStart, type Cell, cellKey } from "./dragGeometry";
 import { type Ghost, type GhostContent, mountGhost } from "./dragGhost";
 import { createHitTest } from "./dragHitTest";
 import { createPainter, type Level, type Painter } from "./dragPaint";
 import { mountShades, type Shades } from "./dragShades";
-import { t } from "./i18n";
+import { t } from "../i18n";
 import { captureReasonBar, type ReasonBar } from "./reasonBar";
-import type { Id } from "./types";
+import type { Id } from "../types";
 
 export type { GhostContent } from "./dragGhost";
 

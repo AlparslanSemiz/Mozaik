@@ -11,7 +11,7 @@ import { useInspect } from "../overlay/Inspector";
 import type React from "react";
 import { dayLabel } from "../../schedule/names";
 import { dayPeriods } from "../../schedule/bell";
-import { attachGridChrome } from "../../gridChrome";
+import { attachGridChrome } from "../../dom/gridChrome";
 import { paletteColor } from "../../palette";
 import type { Settings, Id } from "../../types";
 import type { MaskMode } from "../../view/programMask";

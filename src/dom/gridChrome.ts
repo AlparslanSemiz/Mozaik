@@ -23,7 +23,7 @@
 // crosshair must not hide why a cell cannot be used), and during a drag the
 // crosshair switches off entirely.
 
-import { MAX_BLOCK } from './schedule/blocks';
+import { MAX_BLOCK } from '../schedule/blocks';
 
 /** Attaches the chrome to a `.grid-wrap`. Returns the detach function. */
 export function attachGridChrome(wrap: HTMLElement): () => void {

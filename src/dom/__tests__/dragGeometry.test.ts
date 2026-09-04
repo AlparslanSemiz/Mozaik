@@ -3,7 +3,7 @@
 // a mouse; the rule they encode — "2 derslik bir blok kesinlikle 1 ders değil
 // 2 derstir" — is arithmetic, and now it is asked directly.
 
-import { blockStart, cellKey, clampToDay } from './dragGeometry';
+import { blockStart, cellKey, clampToDay } from '../dragGeometry';
 
 describe('clampToDay', () => {
   it('güne sığan saat olduğu gibi kalıyor', () => {

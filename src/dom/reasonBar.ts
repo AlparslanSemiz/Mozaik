@@ -4,7 +4,7 @@
 // the saved bar or the throttle clock, and everything it needs it takes at
 // capture time. Plain DOM, no React — `gridChrome.ts`'s pattern.
 
-import { t } from './i18n';
+import { t } from '../i18n';
 
 /** What the bar says, and how loudly. */
 export interface Reason {

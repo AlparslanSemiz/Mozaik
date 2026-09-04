@@ -2,7 +2,7 @@
 // element, because nothing may re-render the 2100-cell grid mid-drag
 // (pitfall 1).
 
-import { paletteColor } from './palette';
+import { paletteColor } from '../palette';
 
 export interface GhostContent {
   top: string;

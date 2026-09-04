@@ -13,7 +13,7 @@ import { storageWorks } from "./state/planStorage";
 import { useStore } from "./state/useStore";
 import { useAppShortcuts } from "./view/useAppShortcuts";
 import { useMachinePrefs } from "./view/useMachinePrefs";
-import { usePoolReveal, useRibbonAutoHide, useScrollFade } from "./useMainChrome";
+import { usePoolReveal, useRibbonAutoHide, useScrollFade } from "./dom/useMainChrome";
 import { useOpenBackup } from "./plans/useOpenBackup";
 import { useProgramMasks } from "./view/useProgramMasks";
 import { useSolver } from "./schedule/useSolver";

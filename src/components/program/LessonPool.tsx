@@ -32,7 +32,7 @@ import {
   writeDock,
   writeDockHeight,
 } from "../../view/theme";
-import { attachSplitter, maxDockHeight } from "../../poolSplit";
+import { attachSplitter, maxDockHeight } from "../../dom/poolSplit";
 import { useT } from "../T";
 import type { PoolSort } from "../../view/toolState";
 
