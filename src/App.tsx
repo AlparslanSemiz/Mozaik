@@ -1,6 +1,6 @@
 import { Activity, useCallback, useRef, useState } from "react";
 import { Keyboard, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import Commands from "./components/Commands";
 import { health } from "./feasibility";
 import { InspectorProvider } from "./components/Inspector";
@@ -8,27 +8,14 @@ import { LessonEditProvider } from "./components/LessonEdit";
 import { useDialogs } from "./components/Dialogs";
 import { useToast } from "./components/Toasts";
 import type React from "react";
-import { bundleVersionOf, BUNDLE_VERSION } from "./bundle";
-import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from "./store";
-import {
-  applyMotion,
-  applyRibbon,
-  applyTheme,
-  readDensity,
-  readMotion,
-  readRibbon,
-  readRibbonAuto,
-  applyAvailClock,
-  readAvailClock,
-  readScale,
-  readTheme,
-  readUiDensity,
-  type Density,
-  type Motion,
-  type Theme,
-} from "./theme";
-import { attachScrollFade } from "./scrollFade";
-import { attachRibbonScroll } from "./ribbonScroll";
+import { downloadBackup } from "./backupFile";
+import { storageWorks } from "./planStorage";
+import { useStore } from "./useStore";
+import { useAppShortcuts } from "./useAppShortcuts";
+import { useMachinePrefs } from "./useMachinePrefs";
+import { usePoolReveal, useRibbonAutoHide, useScrollFade } from "./useMainChrome";
+import { useOpenBackup } from "./useOpenBackup";
+import { useProgramMasks } from "./useProgramMasks";
 import { useSolver } from "./useSolver";
 import { useFolder } from "./useFolder";
 import { useUpdate } from "./update";
@@ -47,16 +34,10 @@ import Print, { NOTHING_EXCLUDED } from "./components/Print";
 import { readPrintOptions, writePrintOptions } from "./printOptions";
 import type { PrintOptions } from "./printOptions";
 import type { Excluded } from "./components/Print";
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from "./programMask";
-import type { ProgramMask } from "./programMask";
+import { solverExclusions } from "./programMask";
 import Settings from "./components/settings";
 import { useShortcutsHelp } from "./components/ShortcutsHelp";
 import { hasUnseenChangelog } from "./changelog";
-import {
-  readProgramColor,
-  writeProgramColor,
-  type ProgramColorMode,
-} from "./programColor";
 
 /**
  * The six sections, along the TOP — on the same row as the document identity
@@ -326,6 +307,10 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
  *
  * Drawn on currentColor, like the rail's, so both themes are right for free.
  */
+/** The order Alt+1..7 addresses, derived from the table above so the two
+    cannot drift. */
+const TAB_IDS = TABS.map((x) => x.id);
+
 const ICON = {
   undo: (
     <svg
@@ -477,11 +462,7 @@ export default function App() {
   // sideways is a rule nobody finds (see ribbonScroll.ts).
   const appRef = useRef<HTMLDivElement>(null);
 
-  // Whether the strip is allowed to slide away on its own while you read down.
-  // Up here with the refs rather than beside the other preferences because the
-  // effect that reads it is a few lines below — a gesture rather than a
-  // preference, so it gets its own key (theme.ts).
-  const [ribbonAuto, setRibbonAuto] = useState<boolean>(readRibbonAuto);
+  usePoolReveal(mainRef, tab, state.lessons.length);
 
   /**
    * Every navigation goes through here — the seven tab buttons, Alt+1..7, the
@@ -505,66 +486,36 @@ export default function App() {
    */
   const goTab = setTab;
 
-  // The fade on the scrolled content, re-attached per tab: React swaps the
-  // whole child of `.main` on a tab change, and scrollFade reads that child
-  // once (see the note there).
-  useEffect(() => {
-    const box = mainRef.current;
-    return box === null ? undefined : attachScrollFade(box);
-  }, [tab]);
-  // The strip gets out of the way while you read down and comes back when you
-  // look up. Same box, same re-attach on tab change, same reason: React swaps
-  // the whole child of `.main`. Program is left out on purpose — see the note
-  // in ribbonScroll.ts; there `.main` does not scroll at all, so attaching
-  // would simply do nothing, but saying so here is cheaper than finding out.
-  //
-  // ...and only if the reader wants it to. `ribbonAuto` is a preference of its
-  // own and not a widening of `ders-programi-serit`: that one says "I do not
-  // want the strip", this one says "do not move it while I read". Off, the
-  // effect is never attached and the attribute the CSS reads is cleared, so
-  // there is no path left that can hide the strip behind the reader's back.
-  useEffect(() => {
-    const box = mainRef.current;
-    const shell = appRef.current;
-    if (shell !== null && !ribbonAuto) shell.removeAttribute("data-ribbon");
-    if (box === null || shell === null || tab === "program" || !ribbonAuto)
-      return undefined;
-    return attachRibbonScroll(box, shell);
-  }, [tab, ribbonAuto]);
+  useScrollFade(mainRef, tab);
   // Probed once at startup; the answer does not change afterwards.
   const [canSave] = useState(storageWorks);
-  const [theme, setTheme] = useState<Theme>(readTheme);
-  // Already applied to the document by main.tsx before the first paint; this
-  // copy exists only so Ayarlar → Görünüm can show which step is pressed.
-  const [scale, setScale] = useState<number>(readScale);
-  const [density, setDensity] = useState<Density>(readDensity);
-  const [programColor, setProgramColorRaw] =
-    useState<ProgramColorMode>(readProgramColor);
-  const setProgramColor = useCallback((next: ProgramColorMode) => {
-    writeProgramColor(next);
-    setProgramColorRaw(next);
-  }, []);
-  // Its twin, and a separate one since 2026-08-27: the grid's step and the
-  // interface's step are two decisions (see theme.ts). Only Ayarlar → Görünüm
-  // sets this one — the Program strip still speaks for the grid alone.
-  const [uiDensity, setUiDensity] = useState<Density>(readUiDensity);
-  // Applied to the document by main.tsx before the first paint; this copy
-  // exists so the button that flips it can show which way the switch is.
-  const [availClock, setAvailClockRaw] = useState<boolean>(readAvailClock);
-  // The <html> attribute goes with the state, wherever the control lives. It
-  // used to be written by the one button in Ayarlar → Görünüm; that button is
-  // in Müsaitlik's own strip now, and a second caller must not have to know to
-  // do this (the toggle would flip and nothing on the table would change).
-  const setAvailClock = useCallback((next: boolean) => {
-    applyAvailClock(next);
-    setAvailClockRaw(next);
-  }, []);
-  // Same again for how much the interface is allowed to move.
-  const [motion, setMotion] = useState<Motion>(readMotion);
-  // Whether the tool strip is drawn. It lives here and not in Ribbon because
-  // the button that folds it is in the top bar — a folded strip has no row to
-  // put its own chevron on, which is the whole point of folding it.
-  const [ribbon, setRibbon] = useState<boolean>(readRibbon);
+  // Everything this MACHINE likes, in one place. It stays a hook called from
+  // here rather than a component: a tab change unmounts everything below
+  // (pitfall 18), and these have to outlive that.
+  const prefs = useMachinePrefs();
+  const {
+    theme,
+    setTheme,
+    toggleTheme,
+    scale,
+    setScale,
+    density,
+    setDensity,
+    uiDensity,
+    setUiDensity,
+    availClock,
+    setAvailClock,
+    motion,
+    setMotion,
+    toggleMotion,
+    ribbon,
+    toggleRibbon,
+    ribbonAuto,
+    setRibbonAuto,
+    programColor,
+    setProgramColor,
+  } = prefs;
+  useRibbonAutoHide(mainRef, appRef, tab, ribbonAuto);
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
   const [printExcluded, setPrintExcluded] =
@@ -574,27 +525,7 @@ export default function App() {
   // remembered between sessions: it is set once a term, not once a printout.
   const [printOptions, setPrintOptions] =
     useState<PrintOptions>(readPrintOptions);
-  // Temporary row/day visibility is a view of one PLAN, not backup data. It
-  // follows alternative programs because they share the same school entities,
-  // survives tab switches, and disappears with the browser session.
-  const [programMasks, setProgramMasks] = useState<Record<string, ProgramMask>>(
-    {},
-  );
-  const programMask = useMemo(
-    () => cleanMask(programMasks[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
-    [programMasks, plans.planId, state],
-  );
-  const setProgramMask = useCallback(
-    (apply: (mask: ProgramMask) => ProgramMask) => {
-      setProgramMasks((all) => ({
-        ...all,
-        [plans.planId]: apply(
-          cleanMask(all[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
-        ),
-      }));
-    },
-    [plans.planId, state],
-  );
+  const { programMask, setProgramMask } = useProgramMasks(plans.planId, state);
   // The run lives HERE, not in Program: switching tabs unmounts that component
   // and a search that dies because somebody glanced at Kontrol would throw away
   // work with nothing to show for it (pitfall 18).
@@ -621,6 +552,7 @@ export default function App() {
   const [updateHidden, setUpdateHidden] = useState(false);
   const { confirm, alert } = useDialogs();
   const notify = useToast();
+  const fileChosen = useOpenBackup({ alert, confirm, loadState, notify, t });
   const [paletteOpen, setPaletteOpen] = useState(false);
   const openShortcuts = useShortcutsHelp();
   // Read once at mount (a fresh profile has never seen any version, so this
@@ -634,47 +566,8 @@ export default function App() {
   // destination, so asking "am I still all right?" meant leaving the grid.
   const status = useMemo(() => health(state), [state]);
 
-  // Ctrl/⌘+K opens the palette; Alt+1..7 go to a section.
-  //
-  // Alt and not a bare digit: a bare "5" while a lesson card has focus would
-  // jump to Yazdır, and every card on the grid is a focusable button. The
-  // modifier is what keeps a shortcut from being a trap.
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        !e.altKey &&
-        e.key.toLowerCase() === "k"
-      ) {
-        e.preventDefault();
-        setPaletteOpen((open) => !open);
-        return;
-      }
-      if (e.altKey && !e.ctrlKey && !e.metaKey && /^[1-7]$/.test(e.key)) {
-        const next = TABS[Number(e.key) - 1];
-        if (next !== undefined) {
-          e.preventDefault();
-          goTab(next.id);
-        }
-        return;
-      }
-      // '?' opens the shortcuts help. Guarded the same way Ctrl+Z is
-      // (store.ts's isTextInput): it is a printable character, and without
-      // the guard it would fire while typing a search or a name.
-      if (
-        e.key === "?" &&
-        !e.ctrlKey &&
-        !e.metaKey &&
-        !e.altKey &&
-        !isTextInput(e.target)
-      ) {
-        e.preventDefault();
-        openShortcuts();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [goTab, openShortcuts]);
+  const togglePalette = useCallback(() => setPaletteOpen((open) => !open), []);
+  useAppShortcuts({ tabs: TAB_IDS, goTab, togglePalette, openShortcuts });
 
   const paletteActions = useMemo(
     () => [
@@ -727,85 +620,6 @@ export default function App() {
     ],
     [state, theme, ribbon, motion, solver, goTab, notify, t, programMask, openShortcuts],
   );
-
-  function toggleRibbon() {
-    const next = !ribbon;
-    applyRibbon(next);
-    setRibbon(next);
-  }
-
-  /**
-   * Two positions from the palette, three in Ayarlar. The middle step ('az') is
-   * a considered choice and the palette is a place you pass through, so what
-   * this offers is the switch: off, or back to whatever full means.
-   */
-  function toggleMotion() {
-    const next: Motion = motion === "kapali" ? "tam" : "kapali";
-    applyMotion(next);
-    setMotion(next);
-  }
-
-  function toggleTheme() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    applyTheme(next);
-    setTheme(next);
-  }
-
-  async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // so the same file can be picked again
-    if (file === undefined) return;
-
-    // Read ONCE. The failure path used to call `file.text()` a second time and
-    // parse the whole thing again, which made a wrong file the slowest case
-    // rather than the fastest. (Both parses are cheap — MEASURED at 0.65 ms for
-    // a full 426-placement week — so this is about the shape of the code, not
-    // about speed. The thing that actually costs a reader time on this path is
-    // the confirmation dialog, and that one is deliberate.)
-    const text = await file.text();
-    const loaded = parseState(text);
-    if (loaded === null) {
-      // Three different files can land here and each deserves its own sentence.
-      // A BUNDLE is refused rather than opened: it holds every plan, so opening
-      // one means replacing the whole library — and the top bar stays the place
-      // where no click can lose an afternoon.
-      const version = bundleVersionOf(text);
-      await alert({
-        title:
-          version === BUNDLE_VERSION
-            ? t("Bu dosya bütün planları içeriyor")
-            : version !== null
-              ? t("Bu dosya daha yeni bir sürümle yazılmış")
-              : t("Bu dosya okunamadı"),
-        tone: "warn",
-        body:
-          version === BUNDLE_VERSION
-            ? t(
-                'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
-              )
-            : version !== null
-              ? t("Programı güncelleyin, sonra tekrar deneyin.")
-              : t(
-                  "Program tarafından indirilmiş bir .json yedek dosyası seçin.",
-                ),
-      });
-      return;
-    }
-    if (
-      !(await confirm({
-        title: t("Şu anki programın yerine geçecek"),
-        body: t(
-          'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
-        ),
-        confirmLabel: t("Yedeği yükle"),
-        danger: true,
-      }))
-    ) {
-      return;
-    }
-    loadState(loaded);
-    notify(t("Yedek yüklendi."));
-  }
 
   return (
     /* `data-section` belongs on the ROOT, not only on the chrome that first

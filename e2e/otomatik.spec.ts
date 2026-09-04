@@ -19,7 +19,9 @@ test.describe('22. Otomatik dizme', () => {
   test('havuzdaki dersleri yerleştiriyor ve ne yaptığını söylüyor', async ({ page }) => {
     await openWithSample(page);
     await expect(page.locator('table.grid .card')).toHaveCount(0);
-    const poolBefore = await page.locator('.pool-card').count();
+    const poolBefore = await page.locator('.pool-stack').evaluateAll((stacks) =>
+      stacks.reduce((sum, stack) => sum + Number(stack.getAttribute('data-count') ?? 0), 0),
+    );
     expect(poolBefore).toBeGreaterThan(0);
 
     await autoFill(page);

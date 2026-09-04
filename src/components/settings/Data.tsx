@@ -25,7 +25,8 @@ import {
   storageKind,
   storageReport,
 } from "../../library";
-import { downloadBundle, listBackups } from "../../store";
+import { downloadBundle } from "../../backupFile";
+import { listBackups } from "../../planStorage";
 import type { State } from "../../types";
 import { activePlacements } from "../../programs";
 import type { PlanControls } from "../props";

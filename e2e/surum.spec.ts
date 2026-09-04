@@ -15,6 +15,7 @@ import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
 import { open, openSettings } from './helpers';
 import { surumBilgisi } from '../scripts/surum.mjs';
+import { SURUM_NOTLARI } from '../src/changelog';
 
 /**
  * Scoped by its HEADING, not by its text. `hasText` matches a substring and
@@ -114,8 +115,11 @@ test.describe('79. Yenilikler', () => {
     await expect(panel).toBeVisible();
     await expect(panel).toContainText('Klavye kısayolları için bir yardım ekranı eklendi');
 
-    // A fresh profile has exactly one release logged; nothing to archive yet.
-    await expect(panel.locator('details')).toHaveCount(0);
+    const archive = panel.locator('details');
+    await expect(archive).toHaveCount(Math.max(0, SURUM_NOTLARI.length - 1));
+    for (const release of await archive.all()) {
+      await expect(release).not.toHaveAttribute('open', '');
+    }
   });
 
   test('Ayarlar sekmesindeki nokta, panel açılınca kayboluyor ve kalıcı', async ({ page }) => {
@@ -124,8 +128,13 @@ test.describe('79. Yenilikler', () => {
     // A fresh profile has never seen any version, so the dot starts lit.
     await expect(dot).toBeVisible();
 
-    await openSettings(page, 'Hakkında');
+    await page.getByRole('button', { name: 'Ayarlar', exact: true }).click();
+    const about = page.getByRole('button', { name: 'Hakkında', exact: true });
+    await expect(about.locator('.ribbon-dot')).toBeVisible();
+
+    await about.click();
     await expect(dot).toBeHidden();
+    await expect(about.locator('.ribbon-dot')).toBeHidden();
 
     // ...and the mark is written, not merely the in-memory state: it survives
     // the reload the way the sample-data hint does (theme.ts's INTRO_KEY).

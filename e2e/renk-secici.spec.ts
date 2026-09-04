@@ -61,8 +61,9 @@ for (const theme of ['light', 'dark'] as const) {
     await openWithSampleTheme(page, theme);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
-    // The sample school arrives UNPLACED — 367 cards in the tray, 0 on the
-    // grid — so one has to be put down before there is a grid card to measure.
+    // The sample school arrives UNPLACED — 367 model blocks in 114 tray
+    // stacks, 0 on the grid — so one has to be put down before there is a grid
+    // card to measure.
     // Measuring only the tray would leave `.card`'s own rule unguarded, and
     // `.card` and `.pool-card` are two different rules that have to agree.
     await dragAndDrop(page);
@@ -70,11 +71,8 @@ for (const theme of ['light', 'dark'] as const) {
 
     const ink = (await tokens(page, ['--on-color']))['--on-color'];
 
-    // `:not([aria-hidden])` is the TOP of each pile. Identical blocks of one
-    // lesson are drawn as a deck now, and the cards under the top one paint no
-    // words at all (transparent ink, see `.pool-stack` in styles.css) — asking
-    // whether ink nobody can see is readable would be asking nothing.
-    for (const sel of ['table.grid .card', '.pool-card:not([aria-hidden])']) {
+    // Every pile has one real card; CSS draws the decorative depth.
+    for (const sel of ['table.grid .card', '.pool-card']) {
       const cards = page.locator(sel);
       expect(await cards.count(), `${sel} hiç çizilmemiş`).toBeGreaterThan(0);
       const measured = await cards.evaluateAll((nodes) =>

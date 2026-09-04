@@ -87,7 +87,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     // Upper case because the stylesheet says so, and read as RENDERED: the
     // screen is what the request was about.
     const captions = await page.locator('.ribbon .ribbon-label').allInnerTexts();
-    expect(captions).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM', 'YOĞUNLUK', 'IZGARA']);
+    expect(captions).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM', 'RENK', 'YOĞUNLUK', 'IZGARA']);
 
     // ...and the first control on it is the teacher view, before the class one
     // (the strip's own teacher-before-class rule).

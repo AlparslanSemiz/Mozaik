@@ -17,6 +17,26 @@ import {
   openGridMenu,
 } from "./helpers";
 
+const poolBlockCount = (page: Page) =>
+  page.locator(".pool-stack").evaluateAll((stacks) =>
+    stacks.reduce(
+      (sum, stack) => sum + Number((stack as HTMLElement).dataset.count ?? 0),
+      0,
+    ),
+  );
+
+const poolHourCount = (page: Page) =>
+  page.locator(".pool-stack").evaluateAll((stacks) =>
+    stacks.reduce((sum, stack) => {
+      const element = stack as HTMLElement;
+      const count = Number(element.dataset.count ?? 0);
+      const size = Number(
+        element.querySelector<HTMLElement>(".pool-card")?.dataset.size ?? 0,
+      );
+      return sum + count * size;
+    }, 0),
+  );
+
 test.describe("2. Sürükle-bırak", () => {
   // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
   //  çekmecenin altına kaçıyorlar."
@@ -690,10 +710,7 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     await dragAndDrop(page);
 
     const gridCards = page.locator("table.grid .card");
-    const poolCards = page.locator(".pool-card");
-    const poolHoursBefore = await poolCards.evaluateAll((cards) =>
-      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
-    );
+    const poolHoursBefore = await poolHourCount(page);
     await gridCards.first().click({ button: "right" });
     await page.locator(".menu").getByRole("menuitem", { name: "Dersi düzenle" }).click();
 
@@ -711,9 +728,7 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     // A new boundary makes the old placed block ambiguous, so that lesson is
     // lifted safely and its new cards are offered back in the tray.
     await expect(gridCards).toHaveCount(0);
-    const poolHoursAfter = await poolCards.evaluateAll((cards) =>
-      cards.reduce((sum, card) => sum + Number((card as HTMLElement).dataset.size ?? 0), 0),
-    );
+    const poolHoursAfter = await poolHourCount(page);
     expect(poolHoursAfter).toBeGreaterThan(poolHoursBefore);
   });
 
@@ -835,7 +850,7 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     await openWithSample(page);
     await dragAndDrop(page);
 
-    const poolBefore = await page.locator(".pool-card").count();
+    const poolBefore = await poolBlockCount(page);
     const cards = page.locator("table.grid .card");
     const blockSize = await cards.count();
 
@@ -865,10 +880,10 @@ test.describe("3. Izgara — taşıma ve kaldırma", () => {
     expect(landed).not.toBeNull();
     await page.mouse.up();
 
-    // It moved: same number of cards, at a different hour, and the pool is
+    // It moved: same number of model blocks, at a different hour, and the pool is
     // untouched — a move must not look like a removal plus a placement.
     await expect(cards).toHaveCount(blockSize);
-    await expect(page.locator(".pool-card")).toHaveCount(poolBefore);
+    expect(await poolBlockCount(page)).toBe(poolBefore);
     const now = placedCell(page);
     expect(await now.getAttribute("data-hour")).toBe(landed!.hour);
 
@@ -1095,8 +1110,10 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
 
     const groups = page.locator(".pool-group");
     const labels = () => page.locator(".pool-group-label").allInnerTexts();
-    const cards = page.locator(".pool-card");
-    const before = await cards.count();
+    const blockCount = () => page.locator(".pool-stack").evaluateAll((nodes) =>
+      nodes.reduce((sum, el) => sum + Number(el.getAttribute("data-count") ?? 0), 0),
+    );
+    const before = await blockCount();
     expect(before).toBeGreaterThan(10);
 
     // The default is the grid's own order, one heading per row.
@@ -1119,7 +1136,7 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
       .getByRole("combobox", { name: "Havuz sıralaması" })
       .selectOption("size");
     await expect(groups).toHaveCount(2);
-    await expect(cards).toHaveCount(before);
+    expect(await blockCount()).toBe(before);
 
     // EVERY ORDER HAS TO HOLD THE SAME CARDS, AND EVERY CARD HAS TO BE UNDER A
     // HEADING.
@@ -1136,7 +1153,7 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
     // equal blocks, and `Array.sort` is stable, so today no order can split a
     // deck. It would stop being true the moment a comparator reads `key` — and
     // a split deck is invisible to every other assertion in this file, because
-    // they all count `.pool-card`, which does not change.
+    // they all sum `.pool-stack[data-count]`, which does not change.
     // Measured on the honest build: 109 distinct signatures, 109 stacks.
     const signatures = async () =>
       page.locator(".pool-stack").evaluateAll((els) =>
@@ -1151,7 +1168,7 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
       await page
         .getByRole("combobox", { name: "Havuz sıralaması" })
         .selectOption(sort);
-      await expect(cards).toHaveCount(before);
+      expect(await blockCount()).toBe(before);
       const decks = await signatures();
       expect(
         new Set(decks).size,
@@ -1176,12 +1193,14 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
     await openWithSample(page);
     await page.getByRole("button", { name: "Program", exact: true }).click();
 
-    const cards = page.locator(".pool-card");
-    const all = await cards.count();
+    const blockCount = () => page.locator(".pool-stack").evaluateAll((nodes) =>
+      nodes.reduce((sum, el) => sum + Number(el.getAttribute("data-count") ?? 0), 0),
+    );
+    const all = await blockCount();
 
     const filter = page.getByRole("combobox", { name: "Havuz süzgeci" });
     await filter.selectOption({ index: 1 });
-    const shown = await cards.count();
+    const shown = await blockCount();
     expect(shown).toBeGreaterThan(0);
     expect(shown).toBeLessThan(all);
 
@@ -1193,7 +1212,7 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
     );
 
     await filter.selectOption("");
-    await expect(cards).toHaveCount(all);
+    expect(await blockCount()).toBe(all);
   });
 
   test("kart ile hayalet aynı şeyi söylüyor", async ({ page }) => {
@@ -1229,15 +1248,49 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
     expect(new Set(inClassView)).toEqual(new Set(inTeacherView));
   });
 
+  test("kart rengi dört ölçütten seçiliyor, hayalete geçiyor ve cihazda kalıyor", async ({
+    page,
+  }) => {
+    await loadWorld(page, EVICT_WORLD);
+    const card = page.locator(".pool-card", { hasText: "AV" }).first();
+    const color = () => card.evaluate((el) => getComputedStyle(el).backgroundColor);
+    const teacherColor = await color();
+
+    const picker = page.getByTitle("Kartların renk ölçütü");
+    await picker.click();
+    for (const label of ["Öğretmene göre", "Sınıfa göre", "Dersliğe göre", "Branşa göre"]) {
+      await expect(page.getByRole("menuitemradio", { name: label })).toBeVisible();
+    }
+    await page.getByRole("menuitemradio", { name: "Sınıfa göre" }).click();
+    const classColor = await color();
+    expect(classColor).not.toBe(teacherColor);
+
+    const box = (await card.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 50, box.y - 40, { steps: 4 });
+    await expect(page.locator(".ghost")).toHaveCSS("background-color", classColor);
+    await page.keyboard.press("Escape");
+
+    expect(
+      await page.evaluate(() => localStorage.getItem("ders-programi-program-rengi")),
+    ).toBe("class");
+    await page.reload();
+    await expect(page.getByTitle("Kartların renk ölçütü")).toContainText("Sınıf");
+    await expect(page.locator(".pool-card", { hasText: "AV" }).first()).toHaveCSS(
+      "background-color",
+      classColor,
+    );
+  });
+
   // "aynı dersten aynı şeyden birden fazlaysa ... kartlar stacklenmiş gibi
   // altta da olsun ve alttaki stacklenenler de gözüksün."
   //
   // A lesson wanting six single hours laid six identical rectangles side by
   // side and said `0/6` on every one of them. What this locks is the pair of
   // facts that made it safe to draw them as a deck: the pile is one FLOW item,
-  // and a `.pool-card` still means one waiting block — to the head count, to
-  // `pendingBlocks()` and to the locators that ask how much is left. Only the
-  // reachable top card carries text; the decorative depth cards are cheap.
+  // its `data-count` still means the waiting block count, and only one DOM card
+  // is painted. CSS pseudo-elements draw the decorative depth.
   test("aynı dersin aynı boydaki blokları TEK deste, kartta rozet yok", async ({
     page,
   }) => {
@@ -1245,10 +1298,14 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
 
     const cards = await page.locator(".pool-card").count();
     const stacks = await page.locator(".pool-stack").count();
+    const blocks = await page.locator(".pool-stack").evaluateAll((nodes) =>
+      nodes.reduce((sum, el) => sum + Number(el.getAttribute("data-count") ?? 0), 0),
+    );
     expect(cards, "örnek okulda bekleyen blok yok").toBeGreaterThan(0);
-    expect(stacks, "hiçbir kart yığılmamış").toBeLessThan(cards);
+    expect(stacks).toBe(cards);
+    expect(stacks, "hiçbir kart yığılmamış").toBeLessThan(blocks);
     await expect(page.locator(".pool-count strong")).toContainText(
-      `${cards} blok`,
+      `${blocks} blok`,
     );
 
     // Every card lives in exactly one pile, and a pile is one lesson at one
@@ -1265,23 +1322,18 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
         tops: new Set(
           [...el.querySelectorAll(".card-top")].map((c) => c.textContent),
         ).size,
-        counters: el.querySelectorAll(".pool-card:not([aria-hidden]) .counter")
-          .length,
-        reachable: el.querySelectorAll(".pool-card:not([aria-hidden])").length,
-        emptyDepth: [...el.querySelectorAll(".pool-card[aria-hidden]")].every(
-          (c) => c.childElementCount === 0,
-        ),
+        counters: el.querySelectorAll(".pool-card .counter").length,
+        reachable: el.querySelectorAll(".pool-card[data-lesson]").length,
       })),
     );
-    expect(piles.reduce((n, p) => n + p.cards, 0)).toBe(cards);
+    expect(piles.reduce((n, p) => n + p.count, 0)).toBe(blocks);
     for (const p of piles) {
-      expect(p.cards).toBe(p.count);
+      expect(p.cards).toBe(1);
       expect(p.sizes).toBe(1);
       expect(p.tops).toBe(1);
       // The counter the reader asked to keep, said once instead of six times.
       expect(p.counters).toBe(1);
       expect(p.reachable).toBe(1);
-      expect(p.emptyDepth).toBe(true);
     }
 
     // ...and NOTHING else is written on the cards. The corner badge that used
@@ -1295,7 +1347,10 @@ test.describe("18. Havuz görünümü takip ediyor", () => {
     const before = await deep.locator(".card-top").first().innerText();
     await dragAndDrop(page);
     await expect(page.locator("table.grid .card")).toHaveCount(1);
-    await expect(page.locator(".pool-card")).toHaveCount(cards - 1);
+    const afterBlocks = await page.locator(".pool-stack").evaluateAll((nodes) =>
+      nodes.reduce((sum, el) => sum + Number(el.getAttribute("data-count") ?? 0), 0),
+    );
+    expect(afterBlocks).toBe(blocks - 1);
     expect(before).not.toBe("");
   });
 });
@@ -1543,6 +1598,123 @@ test.describe("66. Dolu hücrenin üstüne bırakmak", () => {
     await expect(cell).toHaveClass(/drop-blocked/);
     await expect(page.locator(".reason-bar")).toContainText("müsait değil");
     await page.mouse.up();
+  });
+});
+
+test("Programı boşalt işlemi etkin olduğunda tehlike rengini taşıyor", async ({ page }) => {
+  await openWithSample(page);
+  await dragAndDrop(page);
+  await page.getByRole("button", { name: "İşlemler", exact: true }).click();
+  const clear = page.getByRole("menuitem", { name: "Programı boşalt" });
+  await expect(clear).toBeVisible();
+  const colors = await clear.evaluate((el) => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--bad)";
+    document.body.appendChild(probe);
+    const expected = getComputedStyle(probe).color;
+    probe.remove();
+    return { actual: getComputedStyle(el).color, expected };
+  });
+  expect(colors.actual).toBe(colors.expected);
+});
+
+const TEACHER_SWAP_WORLD = {
+  ...EVICT_WORLD,
+  settings: { ...EVICT_WORLD.settings, schoolName: "Öğretmen Takası" },
+  rooms: [{ id: "dA", name: "A" }, { id: "dB", name: "B" }],
+  teachers: [EVICT_WORLD.teachers[0]],
+  classes: [
+    { id: "s510", name: "510", roomId: "dA", color: 0 },
+    { id: "s511", name: "511", roomId: "dB", color: 1 },
+  ],
+  lessons: [
+    { ...EVICT_WORLD.lessons[0], id: "x1", classId: "s510", teacherId: "oMC" },
+    { ...EVICT_WORLD.lessons[0], id: "x2", classId: "s511", teacherId: "oMC" },
+  ],
+  placements: { "s510|0|0": "x1", "s511|0|1": "x2" },
+};
+
+const CLASS_SWAP_WORLD = {
+  ...EVICT_WORLD,
+  settings: { ...EVICT_WORLD.settings, schoolName: "Sınıf Takası" },
+  placements: { "s510|0|0": "x1", "s510|0|1": "x2" },
+};
+
+async function dragPlaced(
+  page: Page,
+  source: ReturnType<Page["locator"]>,
+  target: ReturnType<Page["locator"]>,
+  beforeDrop?: () => Promise<void>,
+) {
+  const from = (await source.boundingBox())!;
+  const to = (await target.boundingBox())!;
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 5 });
+  await expect(page.locator(".ghost")).toHaveCount(1);
+  await beforeDrop?.();
+  await page.mouse.up();
+}
+
+test.describe("67. Yerleşmiş kartların karşılıklı takası", () => {
+  test("öğretmen görünümünde iki sınıfı değiştirir ve tek geri alır", async ({ page }) => {
+    await loadWorld(page, TEACHER_SWAP_WORLD);
+    const first = page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]');
+    const second = page.locator('td[data-row="oMC"][data-day="0"][data-hour="1"]');
+    await expect(first).toContainText("510");
+    await expect(second).toContainText("511");
+
+    await dragPlaced(page, first, second, async () => {
+      await expect(second).toHaveClass(/drop-warn/);
+      const colors = await second.locator(".card").evaluate((card) => {
+        const styles = getComputedStyle(card);
+        const probe = document.createElement("span");
+        probe.style.color = styles.getPropertyValue("--warn");
+        document.body.appendChild(probe);
+        const warning = getComputedStyle(probe).color;
+        probe.remove();
+        return { outline: styles.outlineColor, warning };
+      });
+      expect(colors.outline).toBe(colors.warning);
+    });
+    await expect(first).toContainText("511");
+    await expect(second).toContainText("510");
+    await expect(page.locator(".toast").last()).toContainText("yer değiştirdi");
+
+    await page.keyboard.press("Control+z");
+    await expect(first).toContainText("510");
+    await expect(second).toContainText("511");
+  });
+
+  test("sınıf görünümünde iki öğretmeni değiştirir", async ({ page }) => {
+    await loadWorld(page, CLASS_SWAP_WORLD);
+    await page.getByRole("button", { name: "Sınıf görünümü" }).click();
+    const first = page.locator('td[data-row="s510"][data-day="0"][data-hour="0"]');
+    const second = page.locator('td[data-row="s510"][data-day="0"][data-hour="1"]');
+    await expect(first).toContainText("MÇ");
+    await expect(second).toContainText("AV");
+
+    await dragPlaced(page, first, second);
+    await expect(first).toContainText("AV");
+    await expect(second).toContainText("MÇ");
+  });
+
+  test("karşı konum sınıfa kapalıysa hiçbir kartı değiştirmez", async ({ page }) => {
+    await loadWorld(page, {
+      ...TEACHER_SWAP_WORLD,
+      unavailable: { "s511|0|0": 1 },
+    });
+    const first = page.locator('td[data-row="oMC"][data-day="0"][data-hour="0"]');
+    const second = page.locator('td[data-row="oMC"][data-day="0"][data-hour="1"]');
+    const from = (await first.boundingBox())!;
+    const to = (await second.boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 5 });
+    await expect(second).toHaveClass(/drop-blocked/);
+    await page.mouse.up();
+    await expect(first).toContainText("510");
+    await expect(second).toContainText("511");
   });
 });
 

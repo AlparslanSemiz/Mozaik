@@ -463,7 +463,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 |---|---|---|
 | Birim | `src/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
 | Duman | `src/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
-| **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzda blok başına kart, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
+| **E2E** | `e2e/*.spec.ts` (Playwright, 29 dosya, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzdaki model bloklarının `data-count` ile eksiksiz sayıldığı, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
 formun o ekseni hiç sormaması** (`dersler.spec.ts`), **hareket ayarının üç basamağı ve makine tercihinin onu ezdiği** (`hareket.spec.ts`). **Erişilebilirlik:** renk kontrastı ve AYRIMI, gün bandının bir DURUM gibi okunmadığı **ve iki temada aynı yükte olduğu**, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, **%150'de üst çubuğun ve şeridin taşmaması**. **Sağ tık menüsü ve SABİTLEME** (`program.spec.ts` 86: menünün YEDİ üst kalemi adlarıyla, boş hücrede açılmıyor, sabitlenmiş kart sürüklenmiyor · Delete'e cevap vermiyor · "Havuza kaldır" kapalı · `Baştan diz` ve `Programı boşalt` onu yerinde bırakıyor · yenilemeden sonra duruyor; artı **karttaki raptiye**: hover olmadan da görünüyor, basıp sürüklemek kartı KALDIRMIYOR, tek tık kilitliyor). **Havuzun sırası ve süzgeci** (`program.spec.ts` 88: beş sıra, her sıranın kendi başlıkları, başlıkların saydığı toplam ekrandakine eşit, süzgeç neyi sakladığını söylüyor). **Panelden düzenleme** (`panel.spec.ts` 87: karttan öğretmene/sınıfa açılan yol, ve sheet'te değişen kısaltmanın IZGARADA görünmesi). **Kâğıt:** başlık, dikey ortalama, sayfa sayısı, A4 yatay, **ekran önizlemesinin süsünün kâğıda sızmadığı**. **İlke 3:** gömülü fontun gerçekten çizildiği, ağdan bayt çekilmediği. **Metin:** hiçbir ekranda uzun çizgi (`—`) olmadığı, ve ayraçların (`·`) yerinde durduğu (`metin.spec.ts`). **İşaret:** `kurulum/icon.ico`'nun Windows'un istediği dokuz boyu da taşıdığı ve **32'den itibaren ayrıntılı çizim** olduğu (`temel.spec.ts` 79). **Kayma:** şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynattığı (`kayma.spec.ts`) — o dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek çubuk yoktur (tuzak 94). **Sığdır'ın EXE kutusu:** 1920×1032 ve 1600×968'de haftanın sığdığı, ve 1920'de hiçbir kart yazısının · satır başının · köşedeki eksen adının kırpılmadığı, **iki eksende birden** — ve satırın Rahat'takinden uzamadığı (`gorunum.spec.ts` 45, tuzak 107) |
 | **Dil** | `src/i18n.test.ts` + `e2e/dil.spec.ts` | **Sözlüğün kendisi:** ölü anahtar · yuva kümesi · dengeli `**` · çoğulun İKİ biçimi · uzun çizgi — dördü de DÖRT sözlükte birden, ve beşi de mutasyonla sınandı. Artı makine: `applyDil`'in aktif dili KURDUĞU (yoksa saf modüller Türkçe kalır), çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, ve veri metinlerinin depoda Türkçe kaldığı. E2E'de: beş dilin beşinin de sekmeleri kendi dilinde çizdiği, **saf modüllerin cümlelerinin de çevrildiği** (Kontrol raporu), ve Türkçenin birebir geri geldiği. **Süitin kalanı `kapan.ts`'te Türkçeye sabitli**, yani çevrilmemiş bir metni GÖREMEZ — onu gören şey bir tarama ve ekrana bakmak |
@@ -598,14 +598,63 @@ library.ts                      plan kitaplığı: anahtarlar + plan üstverisi 
 bundle.ts                       "bütün planlar tek dosyada" zarfı. library.ts'i
                                 çağırır, State'i yine BİLMEZ.
   |
-constraints.ts / feasibility.ts SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
-                                dropMap() de burada: 72 hücrenin yargısı bir
-                                ÇİZİM kararı değil, kısıt motorunun cevabı.
+constraints.ts                  BARREL. 1443 satırdı; fiil ailesi başına bir
+                                dosyaya bölündü ve sıra BAĞIMLILIK sırası —
+                                her biri yalnız üstündekileri import eder,
+                                hiçbiri bu dosyayı geri import etmez:
+                                  placement.ts       index · ızgaradan blok
+                                                     OKUMA · yerleştirme.
+                                                     occupy/vacate BURADA, yani
+                                                     place()+buildIndex()'in
+                                                     yanında: ikisi tek kuralın
+                                                     iki yazımı ve yedi test o
+                                                     eşdeğerliği çiviliyor —
+                                                     ayrı dosyalara koymak
+                                                     eşdeğerliği gizlerdi
+                                  blockerRules.ts    NİÇİN reddedildi, tek
+                                                     cümlede; artı Uyar/Engelle.
+                                                     blocker() ile check()
+                                                     limitBreaches()'i PAYLAŞIR
+                                  pinning.ts         okuyanın kilidi ve toplu
+                                                     kapsamlar. liftBlock
+                                                     (mekanik) ile removeBlock
+                                                     (kapılı) ayrı, çünkü biri
+                                                     denetçinin işi (tuzak 98)
+                                  swap.ts            iki bloğun yer değiştirmesi
+                                  dropMapping.ts     her hücre ne yapardı:
+                                                     yerleştir · takas · tahliye
+                                  closedConflicts.ts sonradan kapatılan saatte
+                                                     kalmış dersler
+                                  sanitize.ts        her cascade'in TEK evi;
+                                                     hiçbirini import etmez
+feasibility.ts                  SAF fonksiyonlar. React, DOM, localStorage BİLMEZ.
                                 buildAdvice() (B5.4) aSc'nin Danışman'ı: engel
                                 DEĞİL, hasProblem'ı etkilemez — Doğrulama'dan
                                 (unplaceable/violations) kasıtlı ayrı
+constraintFixture.ts            SADECE TEST: kısıt testlerinin paylaştığı okul
+                                ve dört yardımcısı (worlds.ts'in deseni)
 rules.ts / bell.ts              Testleri zorunlu.
-import.ts / entities.ts
+import.ts
+entities.ts                     BARREL, başka hiçbir şey. 1454 satırdı ve
+                                ~65 export taşıyordu; kırk dosya bu yolu
+                                söylediği için ad kaldı, içindekiler iş başına
+                                bir dosyaya dağıldı:
+                                  ids · gender · periods · defaults ·
+                                  listOrder · subjectShorts · subjectList ·
+                                  roomCrud · teacherCrud · classCrud ·
+                                  lessonCrud · lessonMove · settingsEdit ·
+                                  availability · importRows · entityCounts ·
+                                  deletion · entityInspect
+                                Hepsi SAF. Silme her zaman sanitize() ile
+                                biter ve o kural artık dört *Crud.ts'te.
+lessonMove.ts                   transferLesson · moveLessonToClass. lessonCrud
+                                DEĞİL, çünkü ikisi de yerleşmiş her bloğu
+                                kaldırıp blocker()'a yeniden sorar: bir kural
+                                sürüklerken başka, düzenlerken başka olamaz
+entityInspect.ts                entityWeek · entityFacts. Bir .tsx dosyası
+                                placements gezerse yanlış yerdedir
+entityFixture.ts                SADECE TEST: build() ve school(). worlds.ts'in
+                                deseni — uygulama import etmez, Vite budar
 solver.ts                       otomatik dizme. Kendi kısıt mantığı YOK — blocker()'ı çağırır.
                                 Ders başına EN ÇOK İKİ iş kalemi: biri 2'lik
                                 blokları, biri 1'likleri ister. Aramanın her
@@ -615,7 +664,46 @@ worlds.ts                       SADECE TEST: dünya üreteci + illegalBlocks den
                                 Uygulama import etmez, Vite budar. Vitest ve
                                 Playwright ikisi de buradan beslenir.
   |
-store.ts                        reducer + geri al yığını + localStorage + göç + plan geçişi
+coerce.ts                       GÜVENİLMEYEN bir değeri okuma: asArray · asMap ·
+                                asText · asCount · asBox · asLevel · asGender ·
+                                asShorts · asNames. Yaprak, yalnız types.ts.
+                                Sözleşmesi tek: ya kullanılabilir bir değer ya
+                                çağıranın yedeği — asla bir throw
+stateFields.ts                  ŞEKLİ sürümden sürüme değişmiş alanlar, alan
+                                başına bir okuyucu: readLessons (blockSize →
+                                pairs → blocks), readDays, spreadColors.
+                                parseState.ts ile migrateLegacy.ts'in ALTINDA,
+                                çünkü ikisi de aynı alanları okuyor — keys.ts'in
+                                deseni
+migrateLegacy.ts                v1 (Türkçe alan adları) ve v2. Hiçbir sürümün
+                                artık yazmadığı iki şekil; ikisi de v3'e çıkar
+parseState.ts                   HER yedek dosyasının ve her localStorage
+                                okumasının geçtiği kapı. Kendisi yalnız sürüm
+                                yolunu seçer ve bitirir; dosyanın her bölümünün
+                                kendi küçük okuyucusu var (readSettings ·
+                                readLimits · readRules · readTeachers ·
+                                readClasses · readPrograms). SAF, ALWAYS
+                                sanitize() ile biter. Kabul edilen sürümler bir
+                                LİSTE (tuzak 97)
+store.ts                        SADECE reducer + geri al yığını. SAF: React,
+                                DOM, localStorage BİLMEZ — "geri al bir planın
+                                hamlesini başka bir plana taşıyamaz" kuralı bu
+                                yüzden React kurmadan sınanabiliyor
+planStorage.ts                  bir planın localStorage'daki EVİ: savePlan ·
+                                loadPlan · storageWorks · rotateBackups ·
+                                listBackups · collectStates. Hangi anahtar
+                                library.ts'in, metni State yapmak
+                                parseState.ts'in işi
+backupFile.ts                   tarayıcıya kaydedilecek DOSYA vermek:
+                                downloadBackup (tek plan) · downloadBundle
+                                (hepsi). İkisi birbirinin yerine geçmez
+                                (tuzak 30)
+textInput.ts                    yazı kutusuna mı basılıyor. İki çağıran
+                                (useStore'un Ctrl+Z'si, App'in '?' tuşu), tek
+                                kural
+useStore.ts                     reducer'ın React'e bağlandığı yer: otomatik
+                                kayıt (400 ms), Ctrl+Z/Y, ve plan kitaplığı.
+                                folder.ts ↔ useFolder.ts deseni
 theme.ts                        makine tercihleri (tema, kenar, havuz açık mı +
                                 BOYU, araç şeridi, ölçek, yoğunluk, müsaitlik
                                 saati, HAREKET, örnek veri satırı görüldü mü) —
@@ -634,6 +722,27 @@ toolState.ts                    NEREDESİN: her sekmenin görünüm/tür/adım/b
                                 neye bakıyorum"dur, "bu makine nasıl sever"
                                 değil — yani yeni bir localStorage anahtarı
                                 yok, "Veriler nerede" tablosuna satır borcu yok
+drag.ts                         sürüklemenin YAŞAM ÇEVRİMİ, başka bir şey
+                                değil: start · activate · frame · onMove/onUp/
+                                onKey · detach · finish. Her ref'e dokunan tek
+                                yer burası olduğu için burada kaldı; sayfaya
+                                dokunan her iş kendi modülünde:
+                                  dragGeometry.ts  bloğun nereye OTURDUĞU (SAF;
+                                                   clampToDay + blockStart,
+                                                   rowDrag'ın clampIndex'i gibi)
+                                  dragHitTest.ts   hangi hücre + kenar kaydırma;
+                                                   önbelleğe alınmış kutuları
+                                                   KENDİ tutar
+                                  dragPaint.ts     hücrelerdeki sınıflar; boyanan
+                                                   listeleri kendi tutar
+                                  dragShades.ts    iki karartma katmanı
+                                  dragGhost.ts     eldeki kart
+                                  reasonBar.ts     üstteki cümle; devraldığı
+                                                   çubuğu ve kısma saatini kendi
+                                                   tutar
+                                Bölünme ölçütü fiil DEĞİL ref: bir grup ancak
+                                ayrık bir ref kümesine dokunuyorsa ya da
+                                ihtiyacını parametre olarak alabiliyorsa çıktı
 gridChrome.ts                   imleç haçı + yapışkan başlık gölgesi. SAF DOM,
                                 React BİLMEZ — drag.ts'in deseni (tuzak 1)
 poolSplit.ts                    havuzun boy sürükleyicisi. Aynı desenin ÜÇÜNCÜSÜ:
@@ -719,14 +828,33 @@ components/useRowOrder.tsx      dört listenin ortak sıralama kancası: tutamak
 Root.tsx                        provider yığını. main.tsx ve App.test.tsx aynı
                                 ağacı çizsin diye tek yerde
   |
-components/Ribbon.tsx           araç şeridi: sekmeye göre switch, YEDİ sekmede
-                                de çizilir (2026-08-27; Kontrol'ünki raporu
-                                süzer, Dersler'inki modu seçer). Tek iskelet: Group(başlık) + Sep +
-                                Spacer, her düğmede simge ve kelime. İş mantığı
-                                YOK — "Otomatik diz (N)"in N'i entities.ts'teki
-                                saf pendingLessons()'tan, Kontrol'ün sayıları
-                                feasibility.ts'teki health()'ten gelir; buildPool
-                                App'e çıkarılmaz (Grid'in memo sözleşmesi)
+components/Ribbon.tsx           araç şeridinin DAĞITIMI, başka bir şey değil:
+                                sekmeye göre switch, YEDİ sekmede de çizilir.
+                                1134 satırdı; sekme başına bir dosya oldu
+                                (components/ribbon/). İş mantığı YOK —
+                                "Otomatik diz (N)"in N'i deletion.ts'teki saf
+                                pendingLessons()'tan, Kontrol'ün sayıları
+                                feasibility.ts'teki health()'ten gelir;
+                                buildPool App'e çıkarılmaz (Grid'in memo
+                                sözleşmesi)
+components/ribbon/parts.tsx     şeridin ŞEKLİ: Group(başlık) + Sep + Spacer ve
+                                tablolar. BEŞ MADDELİK STANDART burada yazılı,
+                                çünkü hepsi şekil hakkında — aynı yükseklik,
+                                başlık, gruplar, her düğmede simge VE kelime,
+                                tek kontrol yüksekliği (e2e/serit.spec.ts ölçer)
+components/ribbon/props.ts      şeridin aldığı tek arayüz; her sekme Pick'liyor,
+                                yani import satırı o sekmenin hangi kontrollere
+                                dokunabildiğini söylüyor
+components/ribbon/*Ribbon.tsx   sekme başına bir dosya. En büyüğü
+                                ProgramRibbon (ızgaranın araçları), en küçüğü
+                                SetupRibbon (dört liste ve sayıları)
+components/programGrid.ts       ızgaranın SATIRLARI, State'ten türetilir. Saf:
+components/programPool.ts       tepsinin KARTLARI ve sırası. Saf:
+components/programBar.ts        şeridin altındaki tek cümle. Üçü de JSX'e
+                                dokunmuyor, o yüzden Program.tsx'ten çıktılar —
+                                bir .tsx dosyası placements gezerse yanlış
+                                yerdedir, ve ayrıldıkları için jsdom'suz
+                                test edilebilirler
 components/props.ts             PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
 components/Field.tsx            iki klasörün de kullandığı küçük parçalar
 components/ColorPick.tsx        36 renklik swatch diyaloğu (Kurulum'un iki adımı)
@@ -821,17 +949,19 @@ silinmiyor, yalnızca söyleniyor.
 derlemede silinir) — çalışma zamanında döngü yok. Anahtar üreten fonksiyonlar
 `keys.ts`'te; `constraints.ts` onları yeniden dışa aktarır, çağrı yerleri değişmez.
 
-`entities.ts` `import.ts`'ten **yalnızca satır tiplerini** alır (`import type`) —
-aynı desen, çalışma zamanında döngü yok. `import.ts` ise `makeShort`'u `entities.ts`'ten
-alır ve yeniden dışa aktarır: kısaltmanın tek evi var.
+`importRows.ts` `import.ts`'ten **yalnızca satır tiplerini** alır (`import type`) —
+aynı desen, çalışma zamanında döngü yok. `import.ts` ise `makeShort`'u `entities.ts`
+barrel'ından alır ve yeniden dışa aktarır: kısaltmanın tek evi `teacherCrud.ts`,
+ve barrel onu taşımaya devam ettiği için `import.ts`'e hiç dokunulmadı.
 
-`library.ts` `store.ts`'i **çağırmaz** ve `State`'in ne olduğunu bilmez: ham
-**string** alıp verir, ayrıştırmayı `store.ts` yapar. `types.ts`'ten yalnız `Id`
-tipini alır (`import type`) — yani `store.ts` ↔ `library.ts` çalışma zamanı
-döngüsü yok, `keys.ts`'in constraints ↔ rules için yaptığının aynısı.
+`library.ts` store ailesinin hiçbirini **çağırmaz** ve `State`'in ne olduğunu
+bilmez: ham **string** alıp verir, ayrıştırmayı `parseState.ts` yapar.
+`types.ts`'ten yalnız `Id` tipini alır (`import type`) — yani
+`planStorage.ts` ↔ `library.ts` çalışma zamanı döngüsü yok, `keys.ts`'in
+constraints ↔ rules için yaptığının aynısı.
 
 `bundle.ts` de aynı sözleşmeyle yaşar: paketin zarfını okur, içindeki her planın
-durumunu **ham `unknown`** olarak geri verir, `parseState`'i `store.ts` çağırır.
+durumunu **ham `unknown`** olarak geri verir, `parseState`'i `useStore.ts` çağırır.
 Bozuk girdi kurallarını (kimliksiz girdi atılır, adsız girdi yeniden adlandırılır)
 kendisi yazmaz — `normalizeLibrary()`'ye devreder, yani o kurallar tek evde durur.
 
@@ -849,18 +979,22 @@ Kendine ait iki şeyi var, ikisi de aramanın kendisiyle ilgili: her dersin
 hesaplanır, ve ızgara 20 000 düğüm boyunca iyileşmezse bir dersten vazgeçilip
 o ana kadarki en iyi ızgaradan devam edilir (tuzak 26). Bir kural
 sürüklerken başka, otomatik dizerken başka anlama gelemez. Aramanın karşılayamadığı
-tek şey `place()`'in her çağrıda sözlüğü kopyalaması; onun için `constraints.ts`'te
-`occupy`/`vacate` var — `place()` + `buildIndex()` ikilisinin yerinde çalışan hâli.
-İkisinin sapmaması `constraints.test.ts`'te yedi testle sabitlenir.
+tek şey `place()`'in her çağrıda sözlüğü kopyalaması; onun için `placement.ts`'te
+`occupy`/`vacate` var — `place()` + `buildIndex()` ikilisinin yerinde çalışan hâli,
+ve **aynı dosyada**, çünkü ayrı dosyalara bölmek eşdeğerliği gizlerdi.
+İkisinin sapmaması `placement.test.ts`'te yedi testle sabitlenir.
 
 **Kural:** iş mantığı bileşenlerin içine yazılmaz. Bir `.tsx` dosyasında çakışma
-hesabı görüyorsan yanlış yerdedir — `constraints.ts`'e taşı.
+hesabı görüyorsan yanlış yerdedir — kısıt ailesine taşı.
 
-**Kural:** `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `blocks.ts` içindeki her dışa aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan
-özellik eklenmez. `store.ts` içindeki `parseState` ve `entities.ts` içindeki
-`remapDays` de test edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi
-değişince programın kaymasını engelleyen tek şeydir.
+**Kural:** kısıt ailesinin tamamı (`placement.ts` · `blockerRules.ts` ·
+`pinning.ts` · `swap.ts` · `dropMapping.ts` · `closedConflicts.ts` ·
+`sanitize.ts`), `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
+`palette.ts`, `solver.ts`, `blocks.ts`, `dragGeometry.ts` içindeki her dışa
+aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan özellik
+eklenmez. `parseState.ts` ve `settingsEdit.ts` içindeki `remapDays` de test
+edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi değişince
+programın kaymasını engelleyen tek şeydir.
 
 ---
 
@@ -932,8 +1066,10 @@ ders-programi-havuz-boy  -> havuz çekmecesinin boyu, REM (6–22, 0.25 adım)
 ders-programi-serit      -> araç şeridi açık mı (acik / kapali)
 ders-programi-serit-gizle-> şerit kaydırınca kendiliğinden gizlensin mi
 ders-programi-hareket    -> hareket (animasyon) tercihi (tam / az / kapali)
+ders-programi-program-rengi -> Program kartı rengi (teacher/class/room/subject)
 ders-programi-baski      -> kâğıtta ne olsun: beş anahtarlı TEK kayıt (JSON)
 ders-programi-tanitim    -> Kurulum'daki örnek veri satırı görüldü mü
+ders-programi-yenilik-gorulen -> en son okunmuş sürüm notu
 ```
 
 **Bu listenin tamamı Ayarlar → Veri'deki tabloda görünür ve bu bir SÖZLEŞME:**
@@ -2100,7 +2236,8 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     değildir.
 
 97. **Bir SAYI adlandıran göç testi, bir sonraki bump'ta geride kalan sayıyı
-    göremez — ve tam olarak o sayı unutulur.** `store.ts`'in kabul listesinin
+    göremez — ve tam olarak o sayı unutulur.** `store.ts`'in (bugün
+    `parseState.ts`'in) kabul listesinin
     üstünde iki yıldır şu yorum duruyordu: *"Bumping SCHEMA_VERSION without
     adding the number it used to be makes every backup the previous release
     wrote fall through to `return null` — which is the one failure this whole
@@ -2351,6 +2488,44 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      olduğu **kutu** da ölçümün parçasıdır, ve program dört yoldan teslim
      ediliyorsa o kutu dördünde de aynı olduğunu **kimse söylemedi**.
 
+108. **BİR SÜRÜKLEME SIRASINDA HOVER DURMAZ — ve hover'a bağlı her süs, elin
+     olmadığı yerde çalışmaya devam eder.** Şikayet *"kartı satır üzerinde,
+     koyulabilme ihtimali olan yerlerin üzerinde gezdirirken kasma oluyor"*
+     idi. Program ızgarasında sürükleme sırasında crosshair'in kapanması iki
+     yıldır yazılıydı (`table.grid:not(.dragging)`), ama aynı ekranda hover'a
+     bağlı **üç** şey daha vardı ve üçü de açık kalmıştı: karttaki raptiye
+     (`td:hover > .card-pin`, `opacity 0→1` ve bir `transition`), raptiyenin
+     kendi hover zemini, ve kartın accent çerçevesi (`.card:hover`). Hayalet
+     bir satır boyunca ilerlerken üstünden geçtiği **her kart** bir geçiş
+     başlatıyordu.
+
+     Ölçüldü (Chromium izi, 4× CPU, örnek okul, en yoğun öğretmenin satırında
+     ileri geri iki tarama, ~200 kare): stil yeniden hesabı isteyen ilk
+     sebep **444 kez `BUTTON class='card-pin' | Animation`** idi, ve boyamanın
+     üçte biri oradan geliyordu. Kapatınca `Paint` 4276 → 3196 ms, animasyon
+     kaynaklı stil hesabı sıfır.
+
+     İki yan ders aynı izden çıktı, ikisi de "kare içinde okuma" hakkında.
+     (a) `frame()` kendi yazdığı şeyden **sonra** ölçüyordu: hayaletin
+     `transform`'u ve hücrelerin sınıfları yazılmış hâlde bir
+     `getBoundingClientRect()` bütün sayfayı yeniden dizdiriyor, ve buradaki
+     tablo 84 sütun × 25 satır. `.grid-wrap`'in kutusu ile imlecin içinde
+     durduğu hücrenin kutusu artık **bir kez** okunup saklanıyor; bir kaydırma
+     ya da yeniden boyutlanma ikisini de unutturuyor. (b) `elementFromPoint`
+     her karede çağrılıyordu, oysa bir hücre 34 px (Sığdır'da 18 px) ve el bir
+     bloğu yerleştirirken orada onlarca kare geçiriyor: kare içindeki en
+     pahalı satır oydu (0,52 ms'nin 0,31 ms'si). rAF geri çağırımı
+     **1,8 ms → 0,4 ms** (4×; 10×'da 4,7 → 1,1 ms), uzun görev sayısı 12 → 1.
+
+     **Ve bir de ölçülüp GERİ ALINAN bir düzeltme var**, tuzak 105'in aynısı:
+     neden çubuğunu saniyede ona kısmak (bir `setTimeout` ile
+     birleştirme) hiçbir şey kazandırmadı — ertelenen yazma kendi karesinde
+     boyanıyor, yani aynı boyama bir kare öteye taşınıyor. Dört kalemin
+     toplamı 7103 ms (kısıksız) ↔ 7200 ms (kısık). Kalan tek koruma bir
+     **eşitlik kapısı**: aynı cümleyi yeniden yazmak metin düğümünü yine de
+     değiştirir, ve o yazma kök katmanının tamamını (üst çubuk, şerit, havuz)
+     yeniden boyatır.
+
 ---
 
 ## Tasarım — serbest
@@ -2600,7 +2775,7 @@ adını taşıyamaz.
   onları tek tıkla listeye koyar. Tohumlanmış hâlde o panel her yeni projede
   `(0)` yazıyordu, yani işe yaradığı tek ekranda boştu. **`defaultSubjects()`
   bir varsayılan değil bir tablo:** v5 öncesi bir yedeğin geri düştüğü yer hâlâ
-  o (`store.ts`, İKİ yerde — `parseState` ve `migrateV2toV3`), çünkü listeden
+  o (İKİ yerde — `parseState.ts` ve `migrateLegacy.ts`), çünkü listeden
   önce yazılmış bir dosya, öğretmenlerinin taşıdığı branşları kaybedemez.
 - **Ayarlar BEŞ bölüm** (2026-08-28, aynı gün ikinci kez): `Zil ve günler ·
   Kurallar · Görünüm · Planlar ve yedek · Hakkında`. Branşlar Okul'a gitti;
@@ -2750,15 +2925,14 @@ adını taşıyamaz.
   sakladığını **söyler** — sessizce onikide birini göstermek "hepsi yerleşti"yi
   bir tık ötede yalan yapardı. Sıralayıcıların hepsi `listview.ts`'in
   `compareTr`'siyle çalışır; ikinci bir Türkçe karşılaştırma yazılmaz.
-  **`.pool-card` hâlâ "bekleyen BİR blok" demek, ve bu bir SÖZLEŞME:** sekiz
-  dosyada ~40 test onu sayıyor, "N blok bekliyor" ondan geliyor,
-  `pendingBlocks()`'un aynası o. Deste bir **düzen**, bir gruplama değil — aynı
-  N eleman DOM'da kalır, gömülü olanlar yalnız mürekkebini bırakır. Grup da
-  öyle: bir kabuk, bir eleme değil. Mürekkep,
-  `visibility` değil: gizli bir öğenin `innerText`'i boştur ve `allInnerTexts()`
-  okuyan iki test tepsiyi dağılmış sanır (ölçüldü). Hangi bloğu nereye koyacağı
-  tepsideki bir seçim, gizli bir "sıradaki" değil. Yan fayda: `weeklyHours`'ı
-  elle aşmak imkânsızlaştı — kart bitince sürüklenecek bir şey kalmıyor.
+  **Bir deste DOM'da tek gerçek `.pool-card` taşır (2026-09-01).** Modeldeki
+  bekleyen blok sayısı kaybolmaz: `.pool-stack[data-count]`, başlık sayaçları
+  ve `pendingBlocks()` aynı toplamı söyler; alttaki en çok iki katman CSS ile
+  çizilir. Testler DOM kartını blok sanmaz, `data-count` toplamını ölçer.
+  Aynı dersin aynı boydaki blokları yerleştirme bakımından özdeş olduğu için
+  sürüklenen gerçek kart destenin sıradaki tam blok referansını taşır. Yan
+  fayda değişmedi: `weeklyHours`'ı elle aşmak imkânsız — deste bitince
+  sürüklenecek kart kalmaz.
   Bir sürüm sağda durdu; sav ("ızgara yatayda zaten taşıyor") doğruydu ama
   havuzu üç kart genişliğinde bir sütuna çeviriyordu: 99 bekleyen ders
   kaydırılan bir liste oluyordu, görülen bir tepsi değil. Altta aynı 99 kart
@@ -2790,13 +2964,26 @@ adını taşıyamaz.
   kare bütçesinin %1'inden azı.
 - **Sürükleme durumu geniş ızgaranın React prop'u DEĞİLDİR (2026-09-01).**
   Hedef satır, bırakma önizlemesi ve hayalet `src/drag.ts` tarafından doğrudan
-  yönetilir; Grid ve havuz yalnız gerçek verileri değişince yeniden çizilir.
+  yönetilir; neden çubuğu da kırmızı/sarı hedefler arasında gezerken doğrudan
+  DOM'da güncellenir ve bitişte solver/boş durum metni geri yüklenir. Grid ve
+  havuz yalnız gerçek veriler değişince yeniden çizilir.
   Geniş tablonun satırlarına/hücrelerine `opacity` vermek de ucuz bir CSS
   değişikliği değildir: Chromium her geniş satırı ayrı raster katmanına aldı ve
   4× CPU'da ikinci kareyi ~75 ms'ye taşıdı. Hedef dışını karartmak için görünür
   alanı örten **iki düz `pointer-events:none` gölgeleme** kullanılır. Yoğun
   program ölçümü `~125 → 46,2 ms`; performans testi gerçek `dropMap()` çağırır,
   ham `blocker()` döngüsü bu yolu temsil etmez.
+- **Program açılışında havuz boyası iki kare ertelenir (2026-09-01).** Çekmece
+  yüksekliği yerinde kalır; yalnız `.pool-list` ilk iki karede
+  `content-visibility:hidden` olur. İşaretçi havuza daha erken girerse
+  pointerdown kaybolmadan önce liste anında açılır. Örnek okul, 1920×1080,
+  Chromium 4× CPU sıcak geçişi: medyan `169 → 123,3 ms`, p95
+  `183,5 → 139,6 ms`. Böylece web/exe yığını ayrılmadı ve 84 hücreli satırı
+  tek yüzeye çeviren ikinci aşama gerekmedi.
+- **Program kart rengi bir makine tercihidir (2026-09-01).** `teacher` /
+  `class` / `room` / `subject`; ızgara kartı, havuz kartı ve hayalet aynı
+  `programColorIndex()` sonucunu kullanır, satır başlığı kendi kimlik rengini
+  korur. Tercih `State`'e ve yedeğe girmez; geçersiz değerde öğretmene döner.
 - **Gün bandı.** Tek indeksli günler çok hafif bir zemin alır (ΔE 2,7). Amaç
   gruplamak; bir *durum* gibi okunmaması ölçülerek sabitlenir. Saat başlığında ders numarası ve altında
   başlangıç saati (`3` / `10:40`).

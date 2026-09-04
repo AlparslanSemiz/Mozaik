@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { placementKey } from './constraints';
-import { parseState } from './store';
+import { parseState } from './parseState';
 import {
   closeHours,
   closeWeek,

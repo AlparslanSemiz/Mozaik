@@ -7,7 +7,7 @@
 //
 // This module follows library.ts's arrangement to the letter: it knows the
 // ENVELOPE and nothing about what a State is. It hands back raw `unknown` for
-// each plan and `store.ts` is the only place that parses one. Dependencies are
+// each plan and `parseState.ts` is the only place that parses one. Dependencies are
 // library.ts (a leaf, so no cycle) and a type-only import from types.ts.
 //
 // Nothing here writes to storage and nothing here reads a key: a bundle is a
@@ -26,7 +26,7 @@ export interface Bundle {
   /** Already through normalizeLibrary: the rules for a broken directory are
       written once, in library.ts, and are not repeated here. */
   library: Library;
-  /** plan id -> the raw state as it sat in the file. Parsed by store.ts. */
+  /** plan id -> the raw state as it sat in the file. Parsed by parseState.ts. */
   states: Record<Id, unknown>;
 }
 

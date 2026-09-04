@@ -22,16 +22,16 @@ bitince §10'a taşınır.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
-Program kısmının açılışı daha hızlanmalı.
-Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak.
-Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor.
-Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa.
-Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok.
-Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem.
-Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre.
+Babamın hata fotolarına bak, orada roboderste çalışan ama bizim programda çalışmayan bir program var. babam aynı hocaları aynı dersleri aynı müsaitlikleri girmiş ama bizim ders programı otomatik şekilde hiçbir ders kalmayacak şekilde oluşturamıyor. Bir programı otomatik dizmeye bastığımız vakit. Ne yapıp ne edip o programı ders kalmayacak şekilde dizmeli. Hiç mi hiç dizemiyorsa o zaman ders kalmalı ve uyarı vermeli. Bunu optimize etmeliyiz. Bir sıkıntı var gibi.
+
+Ayrıca babam kendi bilgisayarındaki program section'unu da attı, oradan bak. Sığdır'da derslerin isimleri sığmıyor ve ... oluyor. Sınıftan kısmında da Sınıfların isimleri aynı şekil ... gözüküyor. Bunları düzeltelim.
+
+Babamın windows'unda uygulamanın belgelerde ders programında değişiklik yapması yani o belirlediğmiz yerde değişiklik yapması windows güvenlik duvarı tarafından engellenmiş. Bu olmaması lazım bunu çözmeliyiz.
+
+Ayarlarda nereye kaydedileceği vesaire klasörü bizim seçme imkanımız da olsun.
 
 
-kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya işte o kartların arkasından ya da başka bir şekilde de o kartın oraya gelip gelemyeceğini bilmek lazım yani kırmızı mı turuncu mu falan.
+
 
 
 
@@ -394,6 +394,10 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [PLAN.md](PLAN.md) →
       dönüşmüş bir tuvalde koordinat başka bir şey demek; `gridChrome.ts`
       imleç haçını `data-col` üstünden yakıyor (tuzak 85); ve öğretmen sütunu
       `position: sticky` — `transform` bir sticky bağlamını kırar.
+      **Renk ölçütü tamamlandı (2026-09-01, B4.7):** Program ızgarası, havuz
+      ve sürükleme hayaleti öğretmen / sınıf / derslik / branş rengine göre
+      birlikte boyanabiliyor. Tuval yakınlaştırma, serbest kaydırma ve kart
+      içeriği seçimi bu maddede açık kalıyor.
 - [ ] **B4.3b Sınıfın TÜRÜ** (`SAY` · `EA` · `SÖZ` …). Babanın kâğıdında
       başlık `310 G SAY` — kod, derslik ve **tür** yan yana. Bizde böyle bir
       alan yok. aSc'nin `Özel Alanlar`'ının karşılığı; `ClassGroup`'a bir alan
@@ -801,6 +805,16 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
 ```
+Program kısmının açılışı daha hızlanmalı.                           -> [x] B4.7, 4× CPU sıcak medyan 169 -> 123,3 ms
+Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak. -> [x] B4.7, ölçümle gerekmedi; web/exe aynı dist'te kaldı
+Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor. -> [x] B4.7, 300 hareket p95 15,8 ms; >50 ms kare yok
+  (GERİ GELDİ 09-01: "satır üzerinde gezdirirken kasma" -> [x] B4.8, karenin kendisi ölçüldü: rAF 1,8 -> 0,4 ms)
+Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa. -> [x] B5.7, iki görünümde atomik ve yeniden doğrulanan takas
+Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok. -> [x] B2.11, iki nokta birlikte temizleniyor
+Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem. -> [x] B2.11, tehlikeli menü rengi
+Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre. -> [x] B4.7, dört renk modu + cihaz tercihi
+kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya işte o kartların arkasından ya da başka bir şekilde de o kartın oraya gelip gelemyeceğini bilmek lazım yani kırmızı mı turuncu mu falan. -> [x] B5.7, hüküm çerçevesi dolu kartın üstünde
+kartları mesela öğretmenin bir kartını öğretmenin kendi satırında gezdirirken kasma oluyor renderda onu düzeltelim. -> [x] 2026-09-01, İKİ bulgu: (1) dropMap() takas dalı buildIndex()'i satır başına iki kez çağırıyordu (B5.7'nin kendisi profillenmemişti); work/workIx üstünde vacate/occupy'a çevrildi, sample okulun en yoğun satırında 10,3 -> 2,7 ms/çağrı (Node, throttle'sız). (2) "hâlâ çok yavaş" — gerçek tarayıcıda 4× CPU ile ölçülünce activate.current()'ın gölge dikdörtgenlerini konumlayan getBoundingClientRect() okuması .dragging sınıfı ve iki <div> eklendiKTEN SONRA geliyordu, bütün 84×25 tabloyu yeniden dizdiriyordu; okuma en başa, hiçbir yazımdan önce taşındı — pointerdown'ın senkron süresi 42,9 -> 23,1 ms (gerçek tarayıcı, 4× CPU)
 Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms
 aynı şey daha da az olsa da uygulamada da oluyor. uygulamada daha çok koyulabilir yerlerin üzerine gelince hesaplama olunca oluyor. -> [x] 2026-09-01, dropMap + boya yolu
 uygulamanın logosunun aşağıda nasıl gözüktüğünün fotosonu attım onun düzelmesi lazım. ayrıntılı logo kullanılmalı. -> [x] 2026-09-01, yalnız 16 sade; 20+ ayrıntılı
@@ -897,6 +911,9 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 
 | Tarih | Tur | Ne yapıldı |
 |---|---|---|
+| 09-04 | **Tek sorumluluk turu** | yedi modül bölündü (store · entities · drag · constraints · App · Program · Ribbon), 47 test dosyası, her tur `kontrol` yeşili |
+| 09-01 | **Sürüklerken hover'ın maliyeti** | B4.8; kare 1,8 -> 0,4 ms, hover süsleri sürüklemede kapalı |
+| 09-01 | **Program performansı, renk ve güvenli takas** | B2.11 · B4.7 · B5.7; açılış ve sürükleme bütçesi geçti |
 | 09-01 | **Son not defteri turu** | sürükleme %63 hızlandı, ayrıntılı görev çubuğu simgesi, Sınıftan Branş etiketi |
 | 08-31 | **Program ve blok dağılımı · şema v13** | gerçek Sığdır, havuz sağ tık, kombinasyon seçici, kırmızı kapalı saat |
 | 08-31 | **Bölüm 1** | müsaitlikteki saat düğmesi, arama şeridi, Program'ın hızı, yedi kırmızı |
@@ -908,6 +925,94 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 | 08-25 → 08-27 | **v1.0 teslim turu** · **Tauri** | `.exe` · site · planlar · klasör |
 | 08-25 | **Tasarım sistemi (A0–A6 + B)** · araçlar | o günkü tasarım sistemi |
 | 08-23 → 08-25 | **BİTENLER 0–15** | v0 → v0.9: çekirdek, ızgara, sürükle-bırak, baskı, otomatik dizme |
+
+---
+
+### 2026-09-04 · Tek sorumluluk turu — **BİTTİ ✅**
+
+İstek: *"her bir classı teker teker refactor edelim. Single responsibility ...
+Her bir fonksiyonun tek bir görevi olsun. Classlar ve fonksiyonlar kısa
+olsun."* Depoda OOP class yok (tek `class` bir test taklidi), o yüzden önce
+soruldu: kapsam **`src/` altındaki her modül** oldu, mimari değişmedi.
+
+- [x] **`store.ts` (922) → dokuz dosya.** Saf reducer · parseState · coerce ·
+      stateFields · migrateLegacy · planStorage · backupFile · textInput ·
+      useStore. Fan-out dar olduğu için çağrı yerleri doğrudan güncellendi.
+- [x] **`entities.ts` (1454) → barrel + 18 dosya.** Kırk dosya bu yolu
+      söylüyor, o yüzden ad `export *` barrel olarak kaldı ve **tek bir çağrı
+      yeri değişmedi**. `lessonMove.ts` düz CRUD'dan ayrı: o ikisi yerleşmiş
+      her bloğu kaldırıp `blocker()`'a yeniden soruyor.
+- [x] **`drag.ts` (645) → 331 + altı dosya.** Ölçüt fiil değil **ref**:
+      dragGeometry (saf) · dragHitTest · dragPaint · dragShades · dragGhost ·
+      reasonBar. Yaşam çevrimi hook'ta kaldı. `dragGeometry` artık
+      tarayıcısız test ediliyor (7 yeni test).
+- [x] **`constraints.ts` (1443) → barrel + yedi dosya.** placement ·
+      blockerRules · pinning · swap · dropMapping · closedConflicts ·
+      sanitize; sıra bağımlılık sırası. `occupy`/`vacate` bilerek
+      `place()`+`buildIndex()` ile aynı dosyada.
+- [x] **`App.tsx` (1341 → 1109) → beş kanca.** useMachinePrefs ·
+      useMainChrome · useOpenBackup · useAppShortcuts · useProgramMasks —
+      hepsi hâlâ `App()` içinden çağrılıyor (tuzak 18).
+- [x] **`Program.tsx` (1355 → 954) → üç saf oluşturucu.** programGrid ·
+      programPool · programBar. Üçü de zaten JSX'e dokunmuyordu; ayrıldıkları
+      için artık jsdom'suz test edilebilirler.
+- [x] **`Ribbon.tsx` (1134 → 78) → sekme başına bir dosya.** `ribbon/parts.tsx`
+      şeridin ŞEKLİNİ taşıyor (beş maddelik standart orada, çünkü hepsi şekil
+      hakkında), `ribbon/props.ts` tek arayüz ve her sekme `Pick`'liyor — yani
+      bir dosyanın import satırı o sekmenin hangi kontrollere dokunabildiğini
+      söylüyor.
+- [x] **Testler aynı sınırlarla bölündü:** 29 → 47 dosya, 765 → 772 test.
+      Paylaşılan fixture'lar `entityFixture.ts` ve `constraintFixture.ts`'e.
+- [ ] **Ölçülmedi:** açılış süresi ve `dist/index.html` boyutu. Kod aynı kod
+      ama bu bir varsayım; bir sonraki turda ölçülmeli (tuzak 42).
+
+Ayrıntı: [STATUS.md](STATUS.md) elli ikinci oturum.
+
+---
+
+### 2026-09-01 · Sürüklerken hover'ın maliyeti — **BİTTİ ✅**
+
+- [x] **B4.8 Sürükleme karesi.** Şikayet üçüncü kez geldi (*"kartı satır
+      üzerinde ... gezdirirken kasma"*) ve ilk kez **kare** ölçüldü: gerçek
+      `dist/index.html`, Chromium izi, en yoğun öğretmenin satırında ~200 kare.
+      Üç sebep: sürüklerken hover'ın durmaması (raptiye ve kart çerçevesi,
+      izde 444 `Animation` stil hesabı), karenin kendi yazdığından sonra
+      `getBoundingClientRect()` okuması, ve her karede `elementFromPoint`.
+      Üçü de kapandı; ana iş parçacığı kalemleri (10× CPU) **9475,7 →
+      7133,7 ms**, sürükleme karesinin betiği (4×) **1,8 → 0,4 ms**, uzun
+      görev 12 → 1–5. Neden çubuğunu kısmak denendi, ölçüldü ve **geri
+      alındı** (aynı boyama bir kare öteye taşınıyor); kalan koruma eşitlik
+      kapısı. `.ghost` / `table.grid` katmana alma ve `.reason-bar` içerme de
+      ölçülüp reddedildi. `State` ve `schemaVersion` değişmedi.
+      Ayrıntı: [STATUS.md](STATUS.md) elli birinci oturum, tuzak 108.
+
+---
+
+### 2026-09-01 · Program performansı, renk ve güvenli takas — **BİTTİ ✅**
+
+- [x] **B4.7 Program açılışı ve sürükleme.** Aynı `dist/index.html` web ve
+      masaüstünde korundu. Özdeş bekleyen blokların destesi DOM'da tek gerçek
+      `.pool-card`, model sayısı `.pool-stack[data-count]`; neden çubuğu
+      sürükleme boyunca saf DOM. Havuz boyası ilk iki kareden sonraya alındı,
+      işaretçi havuza erken girerse anında açılıyor. Örnek okul, 1920×1080,
+      Chromium 4× CPU: sıcak açılış medyanı **169 → 123,3 ms**, p95
+      **183,5 → 139,6 ms**; 300 harekette p95 **15,8 ms**, en kötü **18,9 ms**,
+      50 ms üstü kare **0**. İkinci aşamadaki satır başına tek zaman yüzeyine
+      gerek kalmadı.
+- [x] **B5.7 Güvenli kart takası.** Sürükleme kararı `place` / `evict` /
+      `swap` ve tam kaynak-hedef bloklarını taşıyor. Öğretmen ve sınıf
+      görünümünde iki blok, uzunluklarını koruyarak tek saf yardımcıyla yeniden
+      doğrulanıyor; sabit, değişmiş ya da sert kurala aykırı hedef işlem
+      yapmıyor. Geçerli takas tek reducer ve tek geri-al adımı. Dolu hedefteki
+      sarı/kırmızı hüküm artık kartın kendi üstünde de görünüyor.
+- [x] **B4.2'nin renk ölçütü.** `Öğretmen · Sınıf · Derslik · Branş` modu
+      ızgara, havuz ve hayaleti aynı çözümleyiciyle boyuyor; seçim
+      `ders-programi-program-rengi` altında cihazda kalıyor. `State`, yedek ve
+      `schemaVersion` değişmedi. Zoom ve serbest kaydırma açık.
+- [x] **B2.11 Küçük arayüz işaretleri.** Okunmamış yenilik noktası Ayarlar ve
+      Hakkında düğmesinde birlikte; Hakkında açılınca ikisi de temizleniyor.
+      `.menu-item.danger` kırmızı metin ve kırmızı hover/odak zemini taşıyor;
+      mevcut onaylar korunuyor. Yeni metinler beş dilde.
 
 ---
 

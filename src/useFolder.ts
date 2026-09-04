@@ -25,7 +25,7 @@ import {
   writeHandle,
 } from './folder';
 import type { Library } from './library';
-import { collectStates } from './store';
+import { collectStates } from './planStorage';
 import type { Id, State } from './types';
 
 /**

@@ -2,7 +2,7 @@
  * Every real keyboard shortcut, in one screen — TASKS.md §6 B6.5.
  *
  * A hand-written table, not one derived from the actual listeners: those live
- * in five separate files (App.tsx, store.ts, drag.ts, rowDrag.ts, poolSplit.ts,
+ * in five separate files (App.tsx, useStore.ts, drag.ts, rowDrag.ts, poolSplit.ts,
  * Palette.tsx, the Grid). Deriving it would mean teaching each of them to
  * describe itself in Turkish; writing it by hand means this list can go stale,
  * and it is the price of not inventing a description-registry for six rows.

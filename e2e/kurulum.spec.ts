@@ -838,7 +838,7 @@ test.describe("44. Panel simetrisi", () => {
 //
 // Asked for in one line: "Öğretmende cinsiyet". Stored as `gender: '' | 'k' |
 // 'e'` and bumped the schema to 6 — the migration itself is unit-tested in
-// `src/store.test.ts`, so what belongs here is the round trip through a real
+// `src/parseState.test.ts`, so what belongs here is the round trip through a real
 // control and the two places the reader was promised it would be useful:
 // the sort menu and the chip row.
 //
@@ -1441,7 +1441,7 @@ test.describe("67. Ders dağılımı", () => {
     await expect(rowPicker(page)).toHaveText("2+1");
   });
 
-  test("havuzda her blok AYRI kart ve kaç saat olduğunu söylüyor", async ({
+  test("havuzda her farklı blok boyu ayrı kart ve kaç saat olduğunu söylüyor", async ({
     page,
   }) => {
     await openWithSample(page);
@@ -1457,7 +1457,8 @@ test.describe("67. Ders dağılımı", () => {
     const mine = page.locator(".pool-card", {
       hasText: name.split("·")[0]!.trim(),
     });
-    // Two cards for one lesson: a double and a single, and they say which.
+    // Two distinct stacks for one lesson: a double and a single, and each has
+    // one real card that says which size it represents.
     const own = mine.filter({ hasText: "0/3" });
     await expect(own).toHaveCount(2);
     expect(await own.first().getAttribute("data-size")).toBe("2");

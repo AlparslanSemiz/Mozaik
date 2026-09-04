@@ -1,7 +1,319 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-09-01 (kırk sekizinci oturum: exe'nin penceresi +
-Sığdır'ın genişlik iadesi)
+Son güncelleme: 2026-09-04 (elli ikinci oturum: tek sorumluluk turu)
+
+---
+
+## Elli ikinci oturum — tek sorumluluk turu (2026-09-04)
+
+İstek: *"her bir classı teker teker refactor edelim. Single responsibility,
+object orientedlığa uygun olsun. Her bir fonksiyonun tek bir görevi olsun.
+Classlar ve fonksiyonlar kısa olsun."*
+
+**Önce netleştirildi, ve netleştirme turun yönünü belirledi.** Depoda `class`
+anahtar kelimesi bir tek yerde geçiyor (`App.test.tsx`'teki bir test taklidi):
+mimari fonksiyon tabanlı, ve CLAUDE.md'nin yarısı o tabanın gerekçesi. Soruldu,
+cevap **"src/ altındaki her modül"** oldu — yani OOP'ye geçiş değil, büyümüş
+modülleri tek amaçlı parçalara bölmek. Fonksiyon tabanlı üç katmanlı mimari
+aynen korundu.
+
+**Yedi modül, her biri kendi turunda, her tur `npm run kontrol` yeşiliyle
+kapandı (exit 0 — tipler + birim + derleme + 500 E2E + site + çözücü).**
+
+| Modül | Önce | Sonra |
+|---|---:|---|
+| `store.ts` | 922 | **9 dosya**: store (reducer, 87) · parseState 224 · coerce 59 · stateFields 128 · migrateLegacy 127 · planStorage 110 · backupFile 39 · textInput 13 · useStore 267 |
+| `entities.ts` | 1454 | **45 satırlık barrel + 18 dosya**: ids · gender · periods · defaults · listOrder · subjectShorts · subjectList · roomCrud · teacherCrud · classCrud · lessonCrud · lessonMove · settingsEdit · availability · importRows · entityCounts · deletion · entityInspect |
+| `drag.ts` | 645 | **331 + 6 dosya**: dragGeometry 37 · dragShades 42 · dragGhost 55 · reasonBar 106 · dragHitTest 122 · dragPaint 138 |
+| `constraints.ts` | 1443 | **30 satırlık barrel + 7 dosya**: placement 327 · blockerRules 346 · pinning 137 · swap 82 · dropMapping 374 · closedConflicts 84 · sanitize 186 |
+| `App.tsx` | 1341 | **1109 + 5 kanca**: useMachinePrefs 138 · useMainChrome 106 · useOpenBackup 98 · useAppShortcuts 51 · useProgramMasks 41 |
+| `Program.tsx` | 1355 | **954 + 3 saf oluşturucu**: programGrid 179 · programPool 128 · programBar 94 — üçü de JSX'e dokunmuyordu, artık jsdom'suz test edilebilirler |
+| `Ribbon.tsx` | 1134 | **78 satırlık dispatch + ribbon/**: parts 209 (paylaşılan şekil) · props 40 · ProgramRibbon 469 · CheckRibbon 113 · AvailabilityRibbon 108 · SettingsRibbon 108 · LessonsRibbon 94 · PrintRibbon 65 · SetupRibbon 41 |
+
+**Testler de aynı sınırlarla bölündü:** 29 → **47 test dosyası**, 765 → **772
+test**. Yedi yeni test `dragGeometry.test.ts`'te ve turun kendi kazancı: o üç
+fonksiyon (`clampToDay` · `blockStart` · `cellKey`) `useDrag`'in kapanışının
+içindeydi, yani onlara soru sormanın tek yolu bir tarayıcı açıp fare
+gezdirmekti. Artık doğrudan soruluyorlar. Paylaşılan fixture'lar da tek eve
+çıktı: `entityFixture.ts` ve `constraintFixture.ts` (worlds.ts'in deseni —
+uygulama import etmez, Vite budar).
+
+**Dört karar, dördü de "kolay olan" değil "doğru olan" tarafta:**
+
+1. **Geniş fan-out'ta dosya adı BARREL olarak kaldı.** `entities.ts`'i 40 dosya,
+   `constraints.ts`'i onlarca yer import ediyor; ikisi de `export *` barrel'a
+   döndü ve **tek bir çağrı yeri değişmedi**. Zaten var olan bir desen:
+   `entities.ts` bugüne kadar da `subjects.ts` ile `names.ts`'i yeniden dışa
+   aktarıyordu.
+2. **`occupy`/`vacate` `place()`+`buildIndex()` ile AYNI dosyada tutuldu**
+   (`placement.ts`). Ayırmak mekanik olarak çalışırdı; çalışmayacak olan şey,
+   bir gözden geçirenin o ikizliği görmesiydi — yedi test tam da onu çiviliyor.
+3. **`drag.ts`'te bölünme ölçütü fiil değil REF oldu.** Bir grup ancak ayrık bir
+   ref kümesine dokunuyorsa ya da ihtiyacını parametre olarak alabiliyorsa
+   çıktı. En temiz dikiş neden çubuğuydu: `savedBar` + kısma saati başka
+   hiçbir şeyin okumadığı bir ada. Yaşam çevrimi (her ref'e dokunan tek yer)
+   hook'ta kaldı.
+4. **`App.tsx`'in kancaları hâlâ `App()` İÇİNDEN çağrılıyor** (tuzak 18): taşınan
+   şey kod, state değil. Bir alt bileşene indirilseydi sekme değişimi onları
+   söker ve baskı seçimi ile çözücü koşusu sessizce ölürdü.
+
+**Bir hata yapıldı ve testten önce yakalandı:** `drag.ts`'i bölerken `frame()`
+içine erken `return` kondu ve bu, kenar kaydırmasının kendini yeniden çağıran
+`if (scrolled) scheduleFrame()` satırını atlıyordu — yani imleç kenarda
+durduğunda ızgara bir kare kayıp duracaktı. Yeniden yazıldı; `program.spec.ts`'in
+70 sürükleme/sabitleme testi ondan sonra koşuldu.
+
+**Aynı turda üç ölü/eskimiş cümle de düzeltildi** (tuzak 77'nin ailesi):
+`bundle.ts` ve `library.ts` "ayrıştırmayı `store.ts` yapar" diyordu, artık
+`parseState.ts` yapıyor; CLAUDE.md'nin mimari haritası beş modül için yeniden
+yazıldı.
+
+**Bölünmenin derlemeye sızmadığı ÖLÇÜLDÜ, açılış süresi ölçülMEDİ.** Yeni iki
+fixture (`entityFixture.ts`, `constraintFixture.ts`) tuzak 32'nin tam hedefi:
+test-only bir dosya uygulama grafiğine girerse `dist/index.html`'e test kodu
+sızar. İki kapı da kontrol edildi — hiçbir test dışı dosya onları import
+etmiyor, ve derlenmiş dosyada `makeWorld` · `illegalBlocks` · `gridQuality`
+geçmiyor. `dist/index.html` bu turda **1 012 425 bayt**; bu sayı bir
+karşılaştırma DEĞİL, çünkü ağaçta bu turdan önce de commit edilmemiş iş vardı —
+öncesi/sonrası farkı ölçülmedi ve bir sonraki turda ölçülmeli (tuzak 42).
+
+---
+
+## Elli birinci oturum — sürüklerken hover'ın maliyeti (2026-09-01)
+
+Şikayet: *"programda kartı satır üzerinde yani koyulabilmesi ihtimali olan
+yerlerin üzerinde gezdirirken kasma oluyor"*. Aynı ekran için **üçüncü**
+şikayet, ve önceki ikisinin ölçtüğü yer burası değildi: B4.7 havuzdan
+sürüklemeyi (300 hareket, p95 15,8 ms) ölçmüştü, ellinci oturum ise
+**pointerdown**'ı (42,9 → 23,1 ms). Bu turda ölçülen şey ilk kez **karenin
+kendisi**: el hayaleti satır boyunca gezdirirken ana iş parçacığı ne yapıyor.
+
+**Alet.** Gerçek `dist/index.html`, Playwright Chromium, 1920×1080, örnek okul
+gerçek çözücüyle dizilmiş (374 kart); en yoğun öğretmenin satırında (23 kart)
+ileri geri iki tarama, ~200 kare. Ölçülenler: sayfa içinde rAF geri çağırımının
+süresi ve kare aralıkları, artı CDP izi (`devtools.timeline` +
+`invalidationTracking`) üstünden ana iş parçacığı kalemleri. **4× kısıkta
+sürükleme zaten 60 fps çıkıyordu**, yani kalemleri birbirinden ayırt edebilmek
+için ölçüm **10× kısıkta** da koşuldu; aşağıdaki tablo odur.
+
+**Üç sebep bulundu, üçü de kareyi bir şey ÇİZMEDEN meşgul ediyordu.**
+
+1. **Hover sürükleme sırasında durmuyor.** Hayalet bir satır boyunca ilerlerken
+   üstünden geçtiği her kartın raptiyesi (`td:hover > .card-pin`,
+   `opacity 0→1` + `transition`) ve her kartın accent çerçevesi
+   (`.card:hover`) çalışıyordu. İzde stil yeniden hesabını isteyen ilk sebep
+   **444 kez `card-pin | Animation`**. Crosshair bunu iki yıldır
+   `table.grid:not(.dragging)` ile kapatıyordu; aynı kapı bu üç kurala da
+   takıldı. Tek başına `Paint` 4276 → 3196 ms.
+2. **Kare, kendi yazdığı şeyden sonra ölçüyordu.** `scrollAtEdge` her karede
+   `.grid-wrap`'in kutusunu okuyordu — hayaletin `transform`'u ve hücrelerin
+   sınıfları yazıldıktan sonra, yani 84 sütun × 25 satırlık tabloyu yeniden
+   dizdirerek. Kutu artık sürükleme başında bir kez okunuyor; kaydırma ve
+   yeniden boyutlanma onu unutturuyor.
+3. **`elementFromPoint` her karede çağrılıyordu.** Bir hücre 34 px (Sığdır'da
+   18 px) ve el bir bloğu yerleştirirken orada onlarca kare geçiriyor. İmleç
+   son bulunan hücrenin kutusundan çıkmadıkça artık hiç isabet testi yok.
+   Kare içindeki en pahalı satır buydu: 0,52 ms'nin 0,31 ms'si.
+
+| Kalem (10× CPU, ~200 kare) | Önce | Sonra |
+|---|---:|---:|
+| Paint | 4275,8 ms (332) | **3202,0 ms (216)** |
+| Layerize | 2507,8 ms | **1952,0 ms** |
+| HitTest | 1633,7 ms | **1246,4 ms** |
+| Betik (rAF geri çağırımı) | 1058,4 ms | **733,3 ms** |
+| **Toplam** | **9475,7 ms** | **7133,7 ms** |
+
+| Sürükleme karesi | Önce | Sonra |
+|---|---:|---:|
+| 4× medyan | 1,8 ms | **0,4 ms** |
+| 4× en kötü | 4,4 ms | **2,4 ms** |
+| 10× medyan | 4,7 ms | **1,1–1,5 ms** |
+| 10× en kötü | 14,9 ms | **5,8–13,3 ms** |
+| 10× uzun görev sayısı | 12 | **1–5** |
+| 10× en kötü kare aralığı | 66,7 ms | **50,0 ms** |
+
+**Ölçülüp GERİ ALINAN bir düzeltme var** (tuzak 105'in deseni): neden çubuğunu
+saniyede ona kısmak. Ertelenen yazma kendi karesinde boyanıyor, yani aynı
+boyama bir kare öteye taşınıyor — dört kalemin toplamı 7103 ms (kısıksız) ↔
+7200 ms (kısık). Kalan tek koruma bir **eşitlik kapısı**: aynı cümleyi yeniden
+yazmak metin düğümünü yine de değiştirir ve kök katmanının tamamını (üst
+çubuk, şerit, havuz) yeniden boyatır — ölçülen: bu tek yazma, taramadaki
+tam-ekran boyamaların 105'i, tanesi ~1,5 ms. Hücrelerin kendi vurgusu 0,2 ms,
+çünkü onlar ızgaranın kendi kaydırma katmanında.
+
+**Ölçülüp reddedilen dört fikir daha:** `.ghost{will-change:transform}`
+(Paint değişmedi), `table.grid{will-change:transform}` (Layerize 1,9 → 4,6 s),
+`.reason-bar{contain:content}` ya da kendi katmanı (Paint 3,3 → 1,9 s ama
+Layerize 2,0 → 3,2 s, net ~%3), havuzu tamamen gizlemek (fark yok). Kenarda
+kendiliğinden kaydırma da ölçüldü ve sorun değil: 151 karede betik 0,26 ms.
+
+**Değişen dosya iki:** `src/drag.ts` ve `src/styles.css`. `State`, yedek
+biçimi, `schemaVersion`, sözlükler ve dört teslim yolu **değişmedi**; ekranda
+değişen tek şey sürükleme sırasında raptiyenin ve kartın hover süslerinin
+çıkmaması — pinlenmiş kartın raptiyesi (`aria-pressed`) hover değil, o duruyor.
+
+**Doğrulama:** tipler OK · birim **765/765** · ana E2E **560/560** ·
+site/yerel sunucu/klasör **22/22** · çözücü stresi **7/7**. Sürükleme,
+sabitleme ve neden çubuğu davranışını sınayan hiçbir test değişmedi.
+
+---
+
+## Kırk dokuzuncu oturum — Program performansı, renk ve güvenli takas (2026-09-01)
+
+`TASKS.md` §0'daki sekiz ham not **B2.11 · B4.7 · B5.7** olarak tamamlandı,
+ham cümleleri §9'a aynen taşındı. `State`, yedek biçimi ve `schemaVersion`
+değişmedi. Web, site, file ve exe yine aynı `dist/index.html` arayüzünü
+kullanıyor; ayrı uygulama yığınına gerek kalmadı.
+
+**Performans iki aşamalı kapıyla ölçüldü.** Örnek okul, 1920×1080, Chromium
+4× CPU ve 10 sıcak sekme geçişi:
+
+| Ölçüm | Önce | Sonra | Kapı |
+|---|---:|---:|---:|
+| Program açılışı medyan | 169,0 ms | **123,3 ms** | ≤150 ms |
+| Program açılışı p95 | 183,5 ms | **139,6 ms** | ≤180 ms |
+| Sürükleme hareketi p95 | 22,8 ms | **15,8 ms** | ≤20 ms |
+| Sürükleme en kötü kare | 63,7 ms | **18,9 ms** | 50 ms üstü 0 |
+
+Havuzdaki 367 model bloğu eskiden 367 gerçek `.pool-card` çiziyordu. Özdeş
+bloklar artık **114 deste / 114 gerçek kart**; toplamlar
+`.pool-stack[data-count]` ve modelden okunuyor, iki alt katman CSS. Sürükleme
+neden çubuğu React durumu olmaktan çıktı; hedefler arasında dolaşırken DOM'da
+güncelleniyor ve sürükleme sonunda solver/boş durum metni geri geliyor.
+Program açılırken çekmecenin yüksekliği korunup yalnız havuz listesi iki kare
+geç boyanıyor; kullanıcı o arada havuza girerse liste ilk pointerdown'dan önce
+anında açılıyor. Bu hızlı-ilk-tıklama yolu 10 tekrarda **10/10** geçti.
+Açılış kapısı geçtiği için 84 hücreyi satır başına tek zaman yüzeyine çeviren
+ikinci aşama uygulanmadı.
+
+**Güvenli kart takası.** Sürükleme hükmü artık `place` / `evict` / `swap` ile
+tam kaynak ve hedef blok referanslarını taşıyor. Öğretmen ve sınıf görünümünde
+iki yerleşmiş blok kendi uzunluklarını koruyarak karşılıklı sığıyorsa, güncel
+durum hemen önce yeniden okunup ikisi geçici kaldırılarak aynı kısıt motoruyla
+sınıf, öğretmen, derslik, kapalı saat ve günlük kurallar yeniden doğrulanıyor.
+Sabit kart, değişmiş hedef ya da sert ihlal hiçbir veri değiştirmiyor; yumuşak
+kural sarı. Geçerli takas tek reducer işlemi ve tek geri-al adımı. Dolu hedefin
+sarı/kırmızı hükmü opak kartın arkasında kalmıyor, kartın üstünde de çerçeve.
+Sınıf görünümündeki eski tahliye davranışı takas yoksa korunuyor.
+
+**Renk ve küçük arayüz notları.** Program şeridindeki taşmayan `Renk` menüsü
+`Öğretmen · Sınıf · Derslik · Branş` seçeneklerini ızgara, havuz ve hayalette
+ortak çözümleyiciyle uygular; satır başlıkları kendi kimlik renginde kalır.
+Derslik ve branş sıraları 36 renkli palete deterministik eşlenir. Tercih
+`ders-programi-program-rengi` altında cihazda tutulur, bozuk/eksik değerde
+öğretmene döner ve “Veriler nerede” raporunda görünür. Bu B4.2'nin yalnız renk
+ölçütünü kapattı; zoom ve serbest kaydırma açık. Hakkında düğmesi ile Ayarlar
+sekmesindeki okunmamış noktalar birlikte temizleniyor. Tehlikeli menü öğeleri
+kırmızı metin ve kırmızı hover/odak zemini taşıyor; onaylar değişmedi. Yeni
+metinler İngilizce, Almanca, Fransızca ve İspanyolcaya eklendi.
+
+**Doğrulama:** `npm run kontrol` çıkış kodu **0** — tipler, ana E2E
+**560/560**, site/yerel sunucu/klasör **22/22** ve çözücü stresi **7/7** geçti.
+Son kısıt testleri de eklenince birim paketi ayrıca **764/764** geçti. Program,
+şerit ve sürüm hedef paketi **94/94**;
+renk, takas, tek adımlı geri alma, geçersiz takas bütünlüğü, Hakkında noktası,
+tehlike rengi ve %150 taşma yolları bunun içinde. `npm run exe:test` komutu
+çalıştırıldı fakat bu Windows makinesinde `cargo` kurulu olmadığı için Rust
+testleri başlayamadı; JavaScript'in exe köprüsü E2E'leri ana pakette geçti.
+
+---
+
+## Ellinci oturum — takas dalının dropMap kasması (2026-09-01)
+
+Baba, kırk dokuzuncu oturumun **B4.7** ölçümünden ayrı yeni bir kasma
+bildirdi: *"öğretmenin bir kartını öğretmenin kendi satırında gezdirirken
+kasma oluyor"*. B4.7'nin ölçtüğü senaryo havuzdan yeni kart sürüklemekti
+(`source === null`); kırılan yol **var olan bir kartı taşımak**
+(`source !== null`) — B5.7 "güvenli kart takası" aynı oturumda eklenmişti ve
+hiç profillenmemişti.
+
+**Kök sebep.** `dropMap()`'in 84 hücrelik taraması, `source !== null`
+olduğunda, dolu her hücrede `swapBlocks()` çağırıyordu; `swapBlocks()` ise her
+çağrıda `liftBlock()` + `buildIndex()`'i **iki kez** çalıştırıyor —
+`buildIndex()` bütün `placements`'ı (tüm okul, ~1800 anahtar) baştan tarıyor.
+Yani dolu bir satırda pointerdown anında düzinelerce tam index yeniden
+kuruluyordu — tam olarak `dropMap()`'in kendi yorumunda tahliye (eviction)
+yolu için zaten yasaklanmış desenin (tuzak 76 ailesi) takas yoluna geri
+sızmış hâli. Tahliye yolu `work`/`workIx` üstünde `vacate`/`occupy` kullanıyor
+(`buildIndex` yok); takas B5.7 eklenirken bu deseni taşımamıştı.
+
+**Düzeltme.** `dropMap()`'in takas dalı, `swapBlocks()`'a gitmek yerine aynı
+`work`/`workIx` çalışma kopyasını `vacate`/`occupy`/`check` ile kullanan yerinde
+bir kontrole çevrildi (`src/constraints.ts`, `dropMap()`). `swapBlocks()`'ın
+kendisi değişmedi — gerçek bırakma anında (`applyDrop`, tek çağrı) hâlâ o
+kullanılıyor, orada maliyeti önemsiz.
+
+**Ölçüm.** Örnek okulda (`sampleState()`), gerçek çözücüyle dizildikten sonra
+en yoğun öğretmenin satırında (25 saat yerleşmiş), `dropMap()`'in var olan bir
+kartı taşırken maliyeti — throttle'sız Node, 20 tekrarın ortalaması:
+
+| Ölçüm | Önce | Sonra |
+|---|---:|---:|
+| dropMap (var olan kart) | 10,3 ms/çağrı | **2,7 ms/çağrı** |
+| dropMap (havuz kartı, kıyas) | 0,45 ms/çağrı | 0,46 ms/çağrı (değişmedi) |
+
+Havuz kartı yolu (`source === null`) zaten bu dala hiç girmiyordu, ölçüm de
+bunu doğruluyor. 4× CPU kısıklı bir tarayıcıda önceki 10,3 ms büyük ihtimalle
+iki-üç katına çıkıyordu — pointerdown'da tek bir senkron çağrı için gözle
+görülür bir gecikme.
+
+**İkinci bulgu — baba "hâlâ çok yavaş" dedi, ve haklıydı.** Yukarıdaki ölçüm
+throttle'sız Node'daydı; CLAUDE.md'nin kendi kuralı (tuzak 101) gerçek
+tarayıcıda, throttle'lı ölçmeyi şart koşuyor ve bu tur ilk seferinde o adım
+atlanmıştı. Gerçek `dist/index.html`'i (Playwright, `@playwright/test`'in
+kendi Chromium'u) `sampleState()` + `solve()` ile doldurup 4× CPU altında
+gerçek `pointerdown`/`pointermove` olayları göndererek ölçüldü: en yoğun
+öğretmenin (25 saat) kendi satırında var olan bir kartı almak
+**43 ms sürüyordu** — `dropMap()`'in artık ucuz olan payının (~18 ms, browser
++ 4× throttle'da beklenen büyüklük) üstüne, hiç profillenmemiş **~24 ms**lik
+ikinci bir maliyet biniyordu.
+
+**Kök sebep, ikinci kez.** `activate.current()` (`src/drag.ts`) sürükleme
+başlarken iki gölgeleme dikdörtgenini konumlamak için `wrap`/`row`/`thead`'in
+`getBoundingClientRect()`'ini okuyordu — ama bu okuma `.dragging`/`.target-row`
+sınıflarını eklemekten VE iki gölge `<div>`'ini `document.body`'ye
+eklemekten **SONRA** geliyordu. İkisi de düzeni kirletiyor, ve 84 sütun × 25
+satırlık bu tablo üstünde kirlenmiş bir düzenden sonra gelen bir
+`getBoundingClientRect()` bütün sayfayı yeniden dizdiriyor. Havuz kartında
+(`source === null`) satır ekranda değilse önce `scrollIntoView` için ayrı bir
+**temiz** okuma zaten vardı (yorumda yazılıydı: *"Measure BEFORE adding drag
+classes"*) — ama var olan bir kart taşınırken o dal hiç çalışmıyor, yani
+gölgeleme kodunun kendi geç okuması **ilk ve tek** okuma oluyordu, tam kirli
+anda.
+
+**Düzeltme.** `wrap`/`row`/`thead` geometrisi artık `activate.current()`'ın
+en başında, hiçbir sınıf eklenmeden ve hiçbir `<div>` eklenmeden **önce**, TEK
+seferde okunuyor; hem `scrollIntoView` kararı hem gölgelerin ilk konumu bu
+**aynı** okumayı paylaşıyor. Satır gerçekten ekran dışındaysa (`scrollIntoView`
+çalıştıysa) o okuma bayatlar, ve yalnız o durumda eski (yeniden okuyan)
+`positionShades()`'e geri dönülüyor — kaydırma sırasında `frame()`'in kendi
+çağrısı zaten aynı yolu kullanıyordu, orası dokunulmadı.
+
+**Ölçüm, gerçek tarayıcı + 4× CPU, aynı senaryo:**
+
+| Ölçüm | Önce | Sonra |
+|---|---:|---:|
+| Pointerdown'ın senkron süresi | 42,9 ms | **23,1 ms** |
+
+Ekran görüntüsüyle de bakıldı: gölgeler, hedef satır vurgusu ve takas önizleme
+metni aynı görünüyor — bu bir davranış değişikliği değil, aynı sonucun daha
+az düzen zorlamasıyla üretilmesi.
+
+**Doğrulama:** `npm run kontrol` çıkış kodu **0** — tipler, birim **765/765**,
+ana E2E **560/560**, site/yerel sunucu/klasör **22/22**, çözücü stresi
+**7/7**.
+
+**Doğruluk.** `src/constraints.ts`'teki `describe('yerleşmiş blokların atomik
+takası', …)` süiti (sabitleme, kapalı saat, kural Uyar/Engelle, iki yönlü boy)
+değişmeden geçti; bir öğretmenin satırında **birden çok** takas adayının aynı
+`dropMap()` çağrısında birbirini bozmadığını doğrulayan yeni bir test eklendi
+(paylaşılan `work`/`workIx`'in her aday sonrası doğru geri yüklendiğini
+sınıyor).
+
+**Doğrulama:** `npm run kontrol` çıkış kodu **0** — tipler, birim **765/765**,
+ana E2E **560/560**, site/yerel sunucu/klasör **22/22**, çözücü stresi
+**7/7**. Takas ve sürükleme davranışını sınayan hiçbir test değişmedi;
+değişen tek şey `dropMap()`'in maliyeti.
 
 ---
 

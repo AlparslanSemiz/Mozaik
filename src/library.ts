@@ -6,9 +6,10 @@
 // — a backup file is still one plan, and every old backup still opens.
 //
 // This module knows about KEYS and plan metadata. It does NOT know what a State
-// is: it hands out and takes back raw strings, and `store.ts` is the only place
-// that parses them. That is what keeps store.ts <-> library.ts free of a runtime
-// cycle, the same arrangement `keys.ts` has for constraints <-> rules.
+// is: it hands out and takes back raw strings, and `parseState.ts` is the only
+// place that parses them. That is what keeps the store family <-> library.ts
+// free of a runtime cycle, the same arrangement `keys.ts` has for
+// constraints <-> rules.
 
 import { t } from './i18n';
 import { isDesktop } from './desktop';
@@ -192,7 +193,7 @@ export function bundleFileName(now: Date): string {
 
 // ------------------------------------------------------------- storage layer
 //
-// Raw strings only. Same `safely` guard as store.ts: localStorage can be
+// Raw strings only. Same `safely` guard as planStorage.ts: localStorage can be
 // disabled, full, or absent under file:// in a locked-down browser.
 
 function safely<T>(job: () => T): T | null {

@@ -2331,15 +2331,31 @@ table.grid tbody td.unavailable {
 }
 
 /* On, or being aimed at. Hovering the CELL is enough: the pointer is already
-   over the card by the time the hand decides. */
+   over the card by the time the hand decides.
+
+   NOT WHILE A BLOCK IS BEING DRAGGED, and that is a measured line as much as a
+   design one. A drag crosses a whole row of cards, so every pin it passed lit
+   up and faded out behind the ghost: traced at 4x CPU across the busiest row,
+   those transitions were the single biggest source of style recalcs (444 of
+   them, reason "Animation") and a third of all repaints — a fade nobody can
+   look at, because the hand is somewhere else. It is also what the grid says
+   everywhere else during a drag: the crosshair switches off for the same
+   reason, the three drop colours are the only answer on screen.
+   The pinned state is NOT hover, so it stays lit. */
 .card-pin[aria-pressed='true'],
-table.grid tbody td:hover > .card-pin,
-.card-pin:hover,
-.card-pin:focus-visible {
+.card-pin:focus-visible,
+table.grid:not(.dragging) tbody td:hover > .card-pin,
+table.grid:not(.dragging) .card-pin:hover {
   opacity: 1;
 }
 
-.card-pin:hover:not(:disabled) {
+/* No fade at pickup either: the pin under the hand would otherwise animate
+   away while the ghost is being lifted. */
+table.grid.dragging .card-pin {
+  transition: none;
+}
+
+table.grid:not(.dragging) .card-pin:hover:not(:disabled) {
   background: color-mix(in oklab, var(--on-color) 20%, transparent);
 }
 
@@ -2441,7 +2457,11 @@ table.grid tbody td:hover > .card-pin,
   background-image: linear-gradient(135deg, transparent 62%, var(--bad) 62%);
 }
 
-.card:hover {
+/* `:not(.dragging)` for the same reason as the crosshair and the pin: while a
+   block is in the hand the grid answers in three colours, and an accent
+   outline following the ghost from card to card both says nothing and repaints
+   a card on every cell crossed. */
+table.grid:not(.dragging) .card:hover {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
@@ -2500,6 +2520,25 @@ td.drop-blocked {
   outline: 3px solid var(--bad);
   outline-offset: -3px;
   background: var(--drop-bad-bg) !important;
+}
+
+/* An occupied target fills its cell, so the cell outline above can disappear
+   behind the card precisely when the user is considering a swap. Mirror the
+   verdict on the card itself; this remains presentation-only and keeps the
+   drag path free of React renders. */
+td.drop-ok > .card {
+  outline: 3px solid var(--ok);
+  outline-offset: -3px;
+}
+
+td.drop-warn > .card {
+  outline: 3px solid var(--warn);
+  outline-offset: -3px;
+}
+
+td.drop-blocked > .card {
+  outline: 3px solid var(--bad);
+  outline-offset: -3px;
 }
 
 /* Two fixed rectangles dim the visible rows outside the target. Per-row (and
