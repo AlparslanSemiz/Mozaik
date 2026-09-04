@@ -1,4 +1,4 @@
-import { school } from '../../entityFixture';
+import { school } from '../../testing/entityFixture';
 import { addClass } from '../classCrud';
 import { NO_TEACHER_LIMITS, emptyState } from '../defaults';
 import { duplicateShorts, weeklyLoad } from '../entityCounts';

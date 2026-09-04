@@ -18,7 +18,7 @@ import {
 import type { BlockRef } from '../index';
 import { activeProgram } from '../../programs';
 import type { State } from '../../types';
-import { build, why, withRule } from '../../constraintFixture';
+import { build, why, withRule } from '../../testing/constraintFixture';
 
 describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', () => {
   it('yerinde duran ders KENDİ hücresini dolu görüyor', () => {

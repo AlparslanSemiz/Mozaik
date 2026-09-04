@@ -1,4 +1,4 @@
-import { school } from '../../entityFixture';
+import { school } from '../../testing/entityFixture';
 import { emptyState } from '../defaults';
 import { addClassesFromRows, addLessonsFromRows, addTeachersFromRows } from '../importRows';
 import { deleteSubject } from '../subjectList';

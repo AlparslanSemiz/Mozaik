@@ -1,5 +1,5 @@
 import { openHours, setAvailability, setWholeWeek } from '../availability';
-import { build } from '../../entityFixture';
+import { build } from '../../testing/entityFixture';
 
 describe('openHours', () => {
   // 3 days x 4 hours = 12 cells; build() already closes one for MÇ.

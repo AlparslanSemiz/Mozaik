@@ -7,7 +7,7 @@ import {
   teacherKey,
 } from '../index';
 import { activeProgram } from '../../programs';
-import { build } from '../../constraintFixture';
+import { build } from '../../testing/constraintFixture';
 
 describe('sanitize — cascade ve taşma', () => {
   it('öğretmen silinince dersleri ve yerleşimleri de silinir', () => {

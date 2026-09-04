@@ -11,7 +11,7 @@ import {
   renameProgram,
   switchProgram,
 } from './programs';
-import { makeWorld } from './worlds';
+import { makeWorld } from './testing/worlds';
 
 function world() {
   return makeWorld({

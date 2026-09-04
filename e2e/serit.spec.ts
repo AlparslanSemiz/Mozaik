@@ -20,7 +20,7 @@ import {
   revealRibbon,
   settledMotion,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/testing/worlds';
 
 // Seven since Dersler left Kurulum. The contract is the point: a new tab has
 // to bring a strip with it, at the same height, opening with a caption, with a

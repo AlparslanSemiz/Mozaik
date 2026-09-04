@@ -6,8 +6,8 @@
 // application never imports it, so Vite prunes it and it never reaches
 // `dist/index.html`.
 
-import { addClass } from './entities/classCrud';
-import { placementKey, teacherKey } from './constraints';
+import { addClass } from '../entities/classCrud';
+import { placementKey, teacherKey } from '../constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
@@ -15,12 +15,12 @@ import {
   emptyState,
   makeDay,
   NO_TEACHER_LIMITS,
-} from './entities/defaults';
-import { blankProgram } from './programs';
-import { addRoom } from './entities/roomCrud';
-import { addTeacher } from './entities/teacherCrud';
-import type { Day, State } from './types';
-import { SCHEMA_VERSION } from './types';
+} from '../entities/defaults';
+import { blankProgram } from '../programs';
+import { addRoom } from '../entities/roomCrud';
+import { addTeacher } from '../entities/teacherCrud';
+import type { Day, State } from '../types';
+import { SCHEMA_VERSION } from '../types';
 
 /** One teacher, one class, one 4-hour lesson placed on three separate days. */
 export function build(): State {

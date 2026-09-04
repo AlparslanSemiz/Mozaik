@@ -4,8 +4,8 @@
 // illegal before it is trusted to judge one that should not be.
 
 import { describe, expect, it } from 'vitest';
-import { placementKey } from './constraints';
-import { parseState } from './parseState';
+import { placementKey } from '../../constraints';
+import { parseState } from '../../parseState';
 import {
   closeHours,
   closeWeek,
@@ -14,8 +14,8 @@ import {
   illegalBlocks,
   makeWorld,
   WORLDS,
-} from './worlds';
-import type { State } from './types';
+} from '../worlds';
+import type { State } from '../../types';
 
 /** Two classes, one teacher, four hours. */
 function pair(): State {
@@ -281,4 +281,4 @@ describe('closeWeek / closeHours', () => {
     expect(Object.keys(d.unavailable)).toHaveLength(2);
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from '../../programs';

@@ -10,7 +10,7 @@ import { sampleState } from './sample';
 import { createSolver, solve } from './solver';
 import type { RuleLevel, State } from './types';
 import { SCHEMA_VERSION } from './types';
-import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';
+import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './testing/worlds';
 
 // 2 days x 4 hours = 8 cells per class.
 //   room A: 510, 511 (shared)   room B: 433

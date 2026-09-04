@@ -11,7 +11,7 @@ import {
   teacherKey,
 } from '../index';
 import type { State } from '../../types';
-import { build, verdict, why, withRule } from '../../constraintFixture';
+import { build, verdict, why, withRule } from '../../testing/constraintFixture';
 
 describe('blocker — sert kısıtlar', () => {
   it('boş ızgaraya yerleştirmeye izin verir', () => {

@@ -15,7 +15,7 @@ import {
   blockAt,
 } from '../index';
 import { activeProgram } from '../../programs';
-import { build } from '../../constraintFixture';
+import { build } from '../../testing/constraintFixture';
 
 describe('blockStart ve removeBlock', () => {
   it('blok kaldırılınca tüm saatleri temizlenir', () => {

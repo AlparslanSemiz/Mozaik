@@ -9,7 +9,7 @@ import {
 } from '../index';
 import { activeProgram } from '../../programs';
 import type { State } from '../../types';
-import { build } from '../../constraintFixture';
+import { build } from '../../testing/constraintFixture';
 
 describe('closedConflicts', () => {
   /** Puts x1 (MÇ, 510, room A) on Monday hour 0. */

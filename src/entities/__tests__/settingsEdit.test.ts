@@ -7,7 +7,7 @@
 
 import { placementKey, teacherKey } from '../../constraints';
 import { makeDay } from '../defaults';
-import { build, without } from '../../entityFixture';
+import { build, without } from '../../testing/entityFixture';
 import { activeProgram } from '../../programs';
 import { remapDays, updateSettings } from '../settingsEdit';
 

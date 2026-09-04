@@ -4,7 +4,7 @@ import { activeProgram } from './programs';
 import { setDayMask, setRowMask, solverExclusions } from './programMask';
 import { EMPTY_PROGRAM_MASK } from './programMask';
 import { solve } from './solver';
-import { makeWorld } from './worlds';
+import { makeWorld } from './testing/worlds';
 
 function world() {
   return makeWorld({

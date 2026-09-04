@@ -16,16 +16,16 @@ import {
   buildIndex,
   placementKey,
   liftBlock,
-} from './constraints';
+} from '../constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
   hourNames,
-} from './entities';
-import { classDayGaps, teacherDayCount, teacherDayGaps } from './rules';
-import { sampleState } from './sample';
+} from '../entities';
+import { classDayGaps, teacherDayCount, teacherDayGaps } from '../rules';
+import { sampleState } from '../sample';
 import type {
   ClassGroup,
   Day,
@@ -37,9 +37,9 @@ import type {
   Rules,
   State,
   Teacher,
-} from './types';
-import { SCHEMA_VERSION } from './types';
-import { activePlacements, blankProgram, replaceActiveGrid } from './programs';
+} from '../types';
+import { SCHEMA_VERSION } from '../types';
+import { activePlacements, blankProgram, replaceActiveGrid } from '../programs';
 
 // ---------------------------------------------------------------- the builder
 

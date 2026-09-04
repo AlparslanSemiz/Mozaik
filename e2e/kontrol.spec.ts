@@ -8,7 +8,7 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { makeWorld, type WorldSpec } from '../src/worlds';
+import { makeWorld, type WorldSpec } from '../src/testing/worlds';
 import {
   loadWorld,
   onScreen,
