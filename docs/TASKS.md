@@ -584,6 +584,28 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       modüllerine bağlamak bir KONUM değil ANLAM değişikliği (bir adın hangi
       modülden geldiği), o yüzden taşıma commit'lerine bilerek binmedi.
       Yapılınca `grep -rn "from '\.\./index'" src/constraints` boş dönmeli.
+- [ ] **B7.18 `npm run patrol` KIRMIZI, ve klasörleme turundan ÖNCE de
+      kırmızıydı.** Devriyenin sistematik turu `Kontrol` sekmesine
+      tıklayamıyor: `TimeoutError ... waiting for getByRole('button',
+      {name: 'Kontrol', exact: true})`. Ekran görüntüsü düğmenin ORADA
+      olduğunu gösteriyor, yani bulunamıyor değil — **tıklanamıyor**.
+
+      Turun işi olmadığı ÖLÇÜLDÜ: aynı hata taban commit'inde (`4b1df56`,
+      hiçbir dosya taşınmadan önce) birebir tekrarlanıyor.
+
+      Teşhis: sayfa anlık görüntüsünde bir `button [expanded]` var, yani
+      AÇIK bir menü. `ProgramRibbon.tsx` 2026-08-30'da iki Radix
+      `DropdownMenu` kazandı (kitaplık ve Izgara) ve onlar bir `Portal`
+      ile `.menu` olarak çiziliyor; devriyenin kapatıcısı ise yalnız
+      `dialog[open], .dlg-overlay, .dlg` arıyor. Yani menüyü açan bir şerit
+      düğmesine bastıktan sonra `diyalogKapat()` kapatacak bir şey
+      bulamıyor, menü açık kalıyor, ve Radix'in dış katmanı sonraki
+      tıklamayı yutuyor.
+
+      Kusur UYGULAMADA değil devriyenin yardımcısında; `npm run kontrol`
+      görmüyor çünkü patrol onun parçası değil (bilerek). Çare
+      `diyalogKapat`'ın seçicisine menüyü de eklemek — ama o bir TEST
+      davranışı değişikliği, klasörleme turuna binmedi.
 - [x] **v2.0.1 yayınlandı.** `54403b6` + `v2.0.1` etiketi. Taşıdıkları:
       v2.0.0'ın **veri kaybı düzeltmesi** (doğru `identifier`, tuzak 95),
       AA turunun beş maddesi (şema v11), AC turunun altısı, AB turunun yedisi.

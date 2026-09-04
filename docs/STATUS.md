@@ -88,6 +88,16 @@ dosya o gün ile bugün arasında **iki katına** çıkmış, ve sebebi bu tur d
 (yukarıdaki birebir aynı boy bunu söylüyor). O 523 KB'nin nereden geldiği
 **ölçülmedi**; sıradaki turun ilk işi.
 
+### Turun İŞİ OLMAYAN bir kırmızı: `npm run patrol`
+
+Devriye `Kontrol` sekmesine tıklayamıyor. **Turun işi olmadığı ölçüldü** —
+aynı hata taban commit'inde (`4b1df56`, hiçbir dosya taşınmadan önce)
+birebir tekrarlanıyor. Teşhis: `ProgramRibbon` 2026-08-30'da iki Radix
+`DropdownMenu` kazandı, devriyenin kapatıcısı ise yalnız `.dlg` arıyor, yani
+menü açık kalıyor ve dış katman sonraki tıklamayı yutuyor. Kusur uygulamada
+değil devriyenin yardımcısında, ve `kontrol` onu göremiyor çünkü patrol
+bilerek onun parçası değil. Kaydı: TASKS §7 B7.18.
+
 ### Bedava çıkan iki şey
 
 - `components/Ribbon.tsx:34`'teki `export { VIEWS } from './ribbon/parts'`
