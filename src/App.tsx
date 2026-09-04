@@ -26,7 +26,7 @@ import Setup from "./components/setup";
 import Lessons from "./components/lessons";
 import { lessonIcon } from "./components/steps";
 import Availability from "./components/availability";
-import Program from "./components/Program";
+import Program from "./components/program";
 import { T, useT } from "./components/T";
 import Check from "./components/check";
 import Ribbon from "./components/ribbon";

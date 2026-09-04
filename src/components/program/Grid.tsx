@@ -7,15 +7,15 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import { Pin } from "lucide-react";
-import { useInspect } from "./Inspector";
+import { useInspect } from "../Inspector";
 import type React from "react";
-import { dayLabel } from "../names";
-import { dayPeriods } from "../bell";
-import { attachGridChrome } from "../gridChrome";
-import { paletteColor } from "../palette";
-import type { Settings, Id } from "../types";
-import type { MaskMode } from "../programMask";
-import { useT } from "./T";
+import { dayLabel } from "../../names";
+import { dayPeriods } from "../../bell";
+import { attachGridChrome } from "../../gridChrome";
+import { paletteColor } from "../../palette";
+import type { Settings, Id } from "../../types";
+import type { MaskMode } from "../../programMask";
+import { useT } from "../T";
 
 export interface GridCell {
   lessonId: Id;

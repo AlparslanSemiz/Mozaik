@@ -10,17 +10,17 @@ import {
   closedKey,
   placedBlocks,
   placementKey,
-} from '../constraints';
-import type { Index } from '../constraints';
-import { lessonSubject, subjectShort, teacherSubjects } from '../entities';
-import { activePinned, activePlacements } from '../programs';
-import { programColorIndex } from '../programColor';
-import type { ProgramColorMode } from '../programColor';
-import type { ProgramMask } from '../programMask';
-import type { View } from '../toolState';
-import type { Id, State } from '../types';
+} from '../../constraints';
+import type { Index } from '../../constraints';
+import { lessonSubject, subjectShort, teacherSubjects } from '../../entities';
+import { activePinned, activePlacements } from '../../programs';
+import { programColorIndex } from '../../programColor';
+import type { ProgramColorMode } from '../../programColor';
+import type { ProgramMask } from '../../programMask';
+import type { View } from '../../toolState';
+import type { Id, State } from '../../types';
 import type { GridCell, GridRow } from './Grid';
-import type { Translate } from './T';
+import type { Translate } from '../T';
 
 export function roomLetter(ix: Index, roomId: string | null | undefined): string {
   if (roomId == null) return "";

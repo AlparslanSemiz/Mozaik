@@ -23,18 +23,18 @@ import { memo, useEffect, useRef, useState } from "react";
 import type React from "react";
 import type { ReactNode } from "react";
 import * as ContextMenu from "@radix-ui/react-context-menu";
-import type { Id } from "../types";
-import { paletteColor } from "../palette";
+import type { Id } from "../../types";
+import { paletteColor } from "../../palette";
 import {
   DOCK_H_MIN,
   readDock,
   readDockHeight,
   writeDock,
   writeDockHeight,
-} from "../theme";
-import { attachSplitter, maxDockHeight } from "../poolSplit";
-import { useT } from "./T";
-import type { PoolSort } from "../toolState";
+} from "../../theme";
+import { attachSplitter, maxDockHeight } from "../../poolSplit";
+import { useT } from "../T";
+import type { PoolSort } from "../../toolState";
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */

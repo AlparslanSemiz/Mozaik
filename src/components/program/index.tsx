@@ -24,31 +24,31 @@ import {
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
-} from "../constraints";
-import type { BlockRef, PinScope } from "../constraints";
-import { useToast } from "./Toasts";
-import { useInspect } from "./Inspector";
-import { useLessonEdit } from "./LessonEdit";
-import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort } from "../entities";
-import { compareTr } from "../listview";
-import { useDrag } from "../drag";
-import type { DragData } from "../drag";
-import type { SolverRun } from "../useSolver";
-import type { State, Id } from "../types";
-import { activePinned, activePlacements } from "../programs";
-import { rowMask, setDayMask, setRowMask } from "../programMask";
-import type { ProgramMask } from "../programMask";
-import type { PoolSort, View } from "../toolState";
-import { KIND_ICON } from "./steps";
+} from "../../constraints";
+import type { BlockRef, PinScope } from "../../constraints";
+import { useToast } from "../Toasts";
+import { useInspect } from "../Inspector";
+import { useLessonEdit } from "../LessonEdit";
+import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort } from "../../entities";
+import { compareTr } from "../../listview";
+import { useDrag } from "../../drag";
+import type { DragData } from "../../drag";
+import type { SolverRun } from "../../useSolver";
+import type { State, Id } from "../../types";
+import { activePinned, activePlacements } from "../../programs";
+import { rowMask, setDayMask, setRowMask } from "../../programMask";
+import type { ProgramMask } from "../../programMask";
+import type { PoolSort, View } from "../../toolState";
+import { KIND_ICON } from "../steps";
 import Grid from "./Grid";
 import type { GridMenuTarget } from "./Grid";
 import LessonPool from "./LessonPool";
-import { T, useT } from "./T";
-import { describeBar } from "./programBar";
-import { buildRows, roomLetter } from "./programGrid";
-import { buildPool } from "./programPool";
-import { programColorIndex } from "../programColor";
-import type { ProgramColorMode } from "../programColor";
+import { T, useT } from "../T";
+import { describeBar } from "./bar";
+import { buildRows, roomLetter } from "./rows";
+import { buildPool } from "./pool";
+import { programColorIndex } from "../../programColor";
+import type { ProgramColorMode } from "../../programColor";
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */

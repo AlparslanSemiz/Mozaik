@@ -6,17 +6,17 @@
 // typed in. Now the rows can be dragged, and an alphabetical tray under a
 // hand-ordered grid means hunting upward for the cards of the row you are on.
 
-import { pendingBlocks } from '../constraints';
-import type { Index } from '../constraints';
-import { lessonSubject, subjectKey, subjectLabel } from '../entities';
-import { compareTr } from '../listview';
-import { programColorIndex } from '../programColor';
-import type { ProgramColorMode } from '../programColor';
-import type { ProgramMask } from '../programMask';
-import type { PoolSort, View } from '../toolState';
-import type { State } from '../types';
+import { pendingBlocks } from '../../constraints';
+import type { Index } from '../../constraints';
+import { lessonSubject, subjectKey, subjectLabel } from '../../entities';
+import { compareTr } from '../../listview';
+import { programColorIndex } from '../../programColor';
+import type { ProgramColorMode } from '../../programColor';
+import type { ProgramMask } from '../../programMask';
+import type { PoolSort, View } from '../../toolState';
+import type { State } from '../../types';
 import type { PoolCard } from './LessonPool';
-import type { Translate } from './T';
+import type { Translate } from '../T';
 
 export function buildPool(
   d: State,
