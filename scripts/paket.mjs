@@ -23,7 +23,7 @@ if (!existsSync(join(SITE, 'index.html'))) {
   process.exit(1);
 }
 if (!existsSync(join(KURULUM, 'icon.ico'))) {
-  console.error('kurulum/icon.ico yok. Önce: node scripts/ikon.mjs');
+  console.error('kurulum/icon.ico yok. Önce: node scripts/ikon/ikon.mjs');
   process.exit(1);
 }
 

@@ -11,7 +11,7 @@
 // then the PNGs unchanged. Windows Vista and later accept PNG inside ICO, and
 // the target is Windows 10/11.
 //
-//   node scripts/ikon.mjs
+//   node scripts/ikon/ikon.mjs
 import { chromium } from '@playwright/test';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -28,7 +28,7 @@ import { resolve } from 'node:path';
 //
 // TWO SOURCES, and the threshold is measured, not picked. Both drawings were
 // rendered at 16/20/24/32/40/48 on light and dark strips and looked at
-// (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
+// (scripts/ikon/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
 //
 // The latest explicit decision (2026-09-01) is that the Windows taskbar must
 // show the DETAILED mark even at 20/24 px; the simplified mark in the supplied

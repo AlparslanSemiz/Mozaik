@@ -7,8 +7,8 @@
 // never an argument — it is a measurement. So: open the binary, walk its
 // resource directory, and print what is in it.
 //
-//   node scripts/exe-ikon.mjs <exe>
-//   node scripts/exe-ikon.mjs <exe> --karsilastir kurulum/icon.ico
+//   node scripts/ikon/exe-ikon.mjs <exe>
+//   node scripts/ikon/exe-ikon.mjs <exe> --karsilastir kurulum/icon.ico
 //
 // With `--karsilastir` it is a GATE rather than a report: the sizes embedded in
 // the exe have to be exactly the sizes in the .ico, and it exits 1 if they are
@@ -130,7 +130,7 @@ function versionInfo(bytes) {
 
 const [, , exePath, flag, icoPath] = process.argv;
 if (exePath === undefined) {
-  console.error('kullanım: node scripts/exe-ikon.mjs <exe> [--karsilastir <ico>]');
+  console.error('kullanım: node scripts/ikon/exe-ikon.mjs <exe> [--karsilastir <ico>]');
   process.exit(2);
 }
 

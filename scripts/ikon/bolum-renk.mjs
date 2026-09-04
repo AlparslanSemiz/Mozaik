@@ -1,7 +1,7 @@
 // The SEVEN section colours, searched instead of chosen.
 //
-//   node scripts/bolum-renk.mjs            -> the seven, both themes, measured
-//   node scripts/bolum-renk.mjs --tur 40   -> more annealing rounds
+//   node scripts/ikon/bolum-renk.mjs            -> the seven, both themes, measured
+//   node scripts/ikon/bolum-renk.mjs --tur 40   -> more annealing rounds
 //
 // Why this file exists at all (pitfall 69): `--sec-setup` ... `--sec-settings`
 // are twelve hex literals in styles.css, and until now the reasoning behind

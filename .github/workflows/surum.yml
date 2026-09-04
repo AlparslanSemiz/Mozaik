@@ -173,7 +173,7 @@ jobs:
       # 65): if a Tauri upgrade ever stops embedding the icon, this turns red
       # in a build instead of turning up in a complaint six months later.
       - name: Are the icon and the version info REALLY embedded
-        run: node scripts/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
+        run: node scripts/ikon/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
       - uses: actions/upload-artifact@v4
         with:
           name: exe

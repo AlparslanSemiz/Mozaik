@@ -12,7 +12,7 @@
 // Raw HTML is cached under the scratchpad, so a re-run costs no requests and an
 // interrupted run resumes. Delete the cache to refetch.
 //
-//   node scripts/asc-yardim.mjs [--limit N]   -> docs/asc/yardim/*.md
+//   node scripts/asc/asc-yardim.mjs [--limit N]   -> docs/asc/yardim/*.md
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -144,7 +144,7 @@ for (const [section, items] of bySection) {
   writeFileSync(
     file,
     `# ${name}\n\naSc Timetables yardım belgelerinden alındı (${items.length} konu).\n` +
-      `Üreten: \`node scripts/asc-yardim.mjs\`\n\n---\n\n${body}`,
+      `Üreten: \`node scripts/asc/asc-yardim.mjs\`\n\n---\n\n${body}`,
     'utf8',
   );
   written += 1;

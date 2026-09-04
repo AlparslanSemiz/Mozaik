@@ -9,7 +9,7 @@
 // rendered at 16-32 px, and the detailed mark was measured and looked at at
 // that size — its six columns merge into a smear.
 //
-//   node scripts/favicon.mjs
+//   node scripts/ikon/favicon.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 
 let s = readFileSync('site/icon-small.svg', 'utf8');

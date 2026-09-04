@@ -18,7 +18,7 @@
 // Committed under scripts/ for pitfall 69's reason: docs/asc/ is generated, so
 // what generates it has to be readable too, or the filtering decisions freeze.
 //
-//   node scripts/asc-sozluk.mjs [lang.asc yolu]   -> docs/asc/sozluk.tsv
+//   node scripts/asc/asc-sozluk.mjs [lang.asc yolu]   -> docs/asc/sozluk.tsv
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 

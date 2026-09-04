@@ -4,7 +4,7 @@
 // the SVG better than anything we could add as a dependency. The PNGs are
 // COMMITTED, so `npm run build:site` never needs a browser.
 //
-//   node scripts/simge.mjs
+//   node scripts/ikon/simge.mjs
 import { chromium } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';

@@ -25,7 +25,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$kok = Split-Path -Parent $PSScriptRoot
+$kok = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $demoKok = 'C:\TimeTables\demos\International\Turkey'
 $cikti = Join-Path $kok 'docs\asc\ekran'
 

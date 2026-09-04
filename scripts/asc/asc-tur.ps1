@@ -25,7 +25,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$kok = Split-Path -Parent $PSScriptRoot
+$kok = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $ekranBetik = Join-Path $PSScriptRoot 'asc-ekran.ps1'
 
 Add-Type -AssemblyName System.Windows.Forms

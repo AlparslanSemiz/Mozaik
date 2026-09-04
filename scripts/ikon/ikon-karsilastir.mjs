@@ -11,7 +11,7 @@
 // is committed, so what decides its contents has to be committed too, or the
 // threshold freezes the day somebody redraws the mark.
 //
-//   node scripts/ikon-karsilastir.mjs   -> scratch/ikon-boylar.png
+//   node scripts/ikon/ikon-karsilastir.mjs   -> scratch/ikon-boylar.png
 import { chromium } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
