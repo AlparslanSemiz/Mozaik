@@ -27,8 +27,8 @@ import {
   byNumberThen,
   compareTr,
   EMPTY_QUERY,
-} from "../../listview";
-import type { ListConfig, ListQuery } from "../../listview";
+} from "../../lists/listview";
+import type { ListConfig, ListQuery } from "../../lists/listview";
 import type { Id, Lesson, State } from "../../types";
 import type { LessonMode } from "../../view/toolState";
 import { useDialogs } from "../overlay/Dialogs";

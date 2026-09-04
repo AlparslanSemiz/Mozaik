@@ -9,7 +9,7 @@
 import { pendingBlocks } from '../../constraints';
 import type { Index } from '../../constraints';
 import { lessonSubject, subjectKey, subjectLabel } from '../../entities';
-import { compareTr } from '../../listview';
+import { compareTr } from '../../lists/listview';
 import { programColorIndex } from '../../view/programColor';
 import type { ProgramColorMode } from '../../view/programColor';
 import type { ProgramMask } from '../../view/programMask';

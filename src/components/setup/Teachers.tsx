@@ -9,8 +9,8 @@ import {
   byNumberThen,
   compareTr,
   EMPTY_QUERY,
-} from "../../listview";
-import type { ListConfig, ListQuery } from "../../listview";
+} from "../../lists/listview";
+import type { ListConfig, ListQuery } from "../../lists/listview";
 import { openHours } from "../../entities";
 import type { Gender, Id, Teacher } from "../../types";
 import { PanelRight } from "lucide-react";

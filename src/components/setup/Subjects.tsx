@@ -28,7 +28,7 @@
 import { useState } from 'react';
 import { useDialogs } from '../overlay/Dialogs';
 import { useRowOrder } from '../common/useRowOrder';
-import { EMPTY_QUERY } from '../../listview';
+import { EMPTY_QUERY } from '../../lists/listview';
 import {
   addSubject,
   deleteSubject,

@@ -30,7 +30,7 @@ import { useToast } from "../overlay/Toasts";
 import { useInspect } from "../overlay/Inspector";
 import { useLessonEdit } from "../overlay/LessonEdit";
 import { dayLabel, lessonSubject, subjectKey, subjectLabel, subjectShort } from "../../entities";
-import { compareTr } from "../../listview";
+import { compareTr } from "../../lists/listview";
 import { useDrag } from "../../dom/drag";
 import type { DragData } from "../../dom/drag";
 import type { SolverRun } from "../../schedule/useSolver";

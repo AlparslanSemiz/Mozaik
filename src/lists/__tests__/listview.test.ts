@@ -8,8 +8,8 @@ import {
   facetCounts,
   fold,
   isFiltering,
-} from './listview';
-import type { ListConfig } from './listview';
+} from '../listview';
+import type { ListConfig } from '../listview';
 
 interface Row {
   name: string;
