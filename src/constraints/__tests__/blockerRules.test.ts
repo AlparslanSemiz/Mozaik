@@ -1,15 +1,10 @@
 // The hard constraints and the three configurable limits, plus what a refusal
 // SAYS: the sentence decides the reader's next move, so it is asserted whole.
 
-import {
-  blocker,
-  blockerDetail,
-  place,
-  sanitize,
-  validHours,
-  buildIndex,
-  teacherKey,
-} from '../index';
+import { blocker, blockerDetail, validHours } from '../blockerRules';
+import { buildIndex, place } from '../placement';
+import { sanitize } from '../sanitize';
+import { teacherKey } from '../../keys';
 import type { State } from '../../types';
 import { build, verdict, why, withRule } from '../../testing/constraintFixture';
 

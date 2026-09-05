@@ -1,12 +1,9 @@
 // A lesson sitting on an hour that was closed AFTER it was placed. Nothing is
 // deleted — it is reported, and the reader decides.
 
-import {
-  closedConflicts,
-  place,
-  sanitize,
-  buildIndex,
-} from '../index';
+import { closedConflicts } from '../closedConflicts';
+import { buildIndex, place } from '../placement';
+import { sanitize } from '../sanitize';
 import { activeProgram } from '../../state/programs';
 import type { State } from '../../types';
 import { build } from '../../testing/constraintFixture';

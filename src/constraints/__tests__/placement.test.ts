@@ -2,18 +2,18 @@
 // the solver honest: occupy/vacate must land exactly where place()+buildIndex()
 // would (pitfall: they are two implementations of one rule).
 
+import { blocker } from '../blockerRules';
 import {
-  blocker,
   blockSpans,
+  buildIndex,
   countPlacedHours,
   occupy,
   pendingBlocks,
   place,
   placedBlocks,
-  placementKey,
   vacate,
-  buildIndex,
-} from '../index';
+} from '../placement';
+import { placementKey } from '../../keys';
 import { activeProgram, replaceActiveGrid } from '../../state/programs';
 import type { State } from '../../types';
 import { build, lessonById, why, withLesson } from '../../testing/constraintFixture';

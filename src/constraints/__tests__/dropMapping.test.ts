@@ -1,21 +1,11 @@
 // Dropping onto an occupied cell: what goes back to the pool, what swaps, and
 // what stays refused because the obstacle is somebody else's.
 
-import {
-  blockStart,
-  dropMap,
-  place,
-  placementKey,
-  removeBlock,
-  setBlockPinned,
-  buildIndex,
-  teacherKey,
-  closedKey,
-  applyDrop,
-  evict,
-  evictionNotice,
-} from '../index';
-import type { BlockRef } from '../index';
+import { applyDrop, dropMap, evict, evictionNotice } from '../dropMapping';
+import { blockStart, buildIndex, place } from '../placement';
+import type { BlockRef } from '../placement';
+import { removeBlock, setBlockPinned } from '../pinning';
+import { closedKey, placementKey, teacherKey } from '../../keys';
 import { activeProgram } from '../../state/programs';
 import type { State } from '../../types';
 import { build, why, withRule } from '../../testing/constraintFixture';

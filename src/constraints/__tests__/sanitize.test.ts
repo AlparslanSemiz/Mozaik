@@ -1,11 +1,8 @@
 // Every cascade, in one place: a deleted room, a shrunk week, an orphan pin.
 
-import {
-  place,
-  placementKey,
-  sanitize,
-  teacherKey,
-} from '../index';
+import { place } from '../placement';
+import { sanitize } from '../sanitize';
+import { placementKey, teacherKey } from '../../keys';
 import { activeProgram } from '../../state/programs';
 import { build } from '../../testing/constraintFixture';
 

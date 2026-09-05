@@ -1,19 +1,11 @@
 // The reader's own lock: what it holds against, and what it must not hold
 // against (the auditor, which asks a question about the RULES).
 
-import {
-  blockStart,
-  dropMap,
-  place,
-  placementKey,
-  removeBlock,
-  sanitize,
-  setBlockPinned,
-  buildIndex,
-  blockPinned,
-  blockCells,
-  blockAt,
-} from '../index';
+import { dropMap } from '../dropMapping';
+import { blockAt, blockStart, buildIndex, place } from '../placement';
+import { blockCells, blockPinned, removeBlock, setBlockPinned } from '../pinning';
+import { sanitize } from '../sanitize';
+import { placementKey } from '../../keys';
 import { activeProgram } from '../../state/programs';
 import { build } from '../../testing/constraintFixture';
 
