@@ -79,18 +79,34 @@ async function ayaktaMi(page: Page, nerede: string) {
 /**
  * Closes whatever is open, preferring the way out that changes least.
  *
- * THERE ARE TWO KINDS and the first version only knew about one. Radix draws
- * `.dlg` under a `.dlg-overlay` that swallows pointer events; ColorPick uses a
- * real `<dialog>` with `showModal()`, which makes the whole page `inert`.
- * Either way the next click is not on anything, and Playwright's answer to
- * "not actionable" is to wait — which is how the first tour spent its entire
- * timeout in front of a colour picker.
+ * THERE ARE THREE KINDS and each one was learned the same way — by a tour that
+ * stopped moving:
  *
- * Escape rather than a button: both kinds close on it, and it is the answer
- * that changes the least.
+ *   1. Radix draws `.dlg` under a `.dlg-overlay` that swallows pointer events.
+ *   2. ColorPick uses a real `<dialog>` with `showModal()`, which makes the
+ *      whole page `inert`.
+ *   3. A Radix POPPER — the three `DropdownMenu`s on the Program strip, the
+ *      five `ContextMenu`s on the grid, the `Popover` in BlockCounts. These
+ *      are modal too: they put `pointer-events: none` on <body> and
+ *      `aria-hidden` on everything outside the portal.
+ *
+ * The third is why this helper existed for a round while `npm run patrol` was
+ * still red, and its failure did not look like the other two. `getByRole`
+ * SKIPS an `aria-hidden` subtree, so the next tab click resolved to zero
+ * elements rather than to an unclickable one: the screenshot showed the button
+ * plainly there and the error said "waiting for". The snapshot named the real
+ * culprit — an open `menu "Program 1"` and two `button [expanded]`.
+ *
+ * Matched by ATTRIBUTE, not by `.menu`: the class is on the menus but not on
+ * BlockCounts' popover, and that layer eats a click just the same.
+ *
+ * Escape rather than a button: all three close on it (Radix listens through
+ * `DismissableLayer`), and it is the answer that changes the least.
  */
 async function diyalogKapat(page: Page): Promise<boolean> {
-  const acik = page.locator('dialog[open], .dlg-overlay, .dlg');
+  const acik = page.locator(
+    'dialog[open], .dlg-overlay, .dlg, [data-radix-popper-content-wrapper]',
+  );
   if ((await acik.count()) === 0) return false;
 
   await page.keyboard.press('Escape');
