@@ -22,7 +22,7 @@ bitince §10'a taşınır.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
-Babamın hata fotolarına bak, orada roboderste çalışan ama bizim programda çalışmayan bir program var. babam aynı hocaları aynı dersleri aynı müsaitlikleri girmiş ama bizim ders programı otomatik şekilde hiçbir ders kalmayacak şekilde oluşturamıyor. Bir programı otomatik dizmeye bastığımız vakit. Ne yapıp ne edip o programı ders kalmayacak şekilde dizmeli. Hiç mi hiç dizemiyorsa o zaman ders kalmalı ve uyarı vermeli. Bunu optimize etmeliyiz. Bir sıkıntı var gibi.
+Babamın hata fotolarına bak, orada roboderste çalışan ama bizim programda çalışmayan bir program var. babam aynı hocaları aynı dersleri aynı müsaitlikleri girmiş ama bizim ders programı otomatik şekilde hiçbir ders kalmayacak şekilde oluşturamıyor. Bir programı otomatik dizmeye bastığımız vakit. Ne yapıp ne edip o programı ders kalmayacak şekilde dizmeli. Hiç mi hiç dizemiyorsa o zaman ders kalmalı ve uyarı vermeli. Bunu optimize etmeliyiz. Bir sıkıntı var gibi. Babamın ders programı şeklinde belgeler/ders programında mevcut oradan da bakabilirsin.
 
 Ayrıca babam kendi bilgisayarındaki program section'unu da attı, oradan bak. Sığdır'da derslerin isimleri sığmıyor ve ... oluyor. Sınıftan kısmında da Sınıfların isimleri aynı şekil ... gözüküyor. Bunları düzeltelim.
 
@@ -50,7 +50,7 @@ Ayarlarda nereye kaydedileceği vesaire klasörü bizim seçme imkanımız da ol
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | 6 madde |
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | 6 madde, 5 bitti (B5.1·B5.2·B5.4·B5.5·B5.6) |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | 6 madde |
-| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | 7 madde |
+| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | klasörleme borcu KAPANDI (B7.15-B7.19); kalan maddeler yayın ve makine |
 | **§8** | **Karar bekleyenler** — sende, babada, ve babanın gerçek verisi | 6 + 4 + 11 |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
@@ -571,41 +571,97 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `tipler + vitest` kapısından geçti. Barrel'lar klasör `index.ts`'i
       oldu ve **120 çağrı sitesi hiç değişmedi**. Ayrıntı: STATUS.md elli
       üçüncü oturum; yeni tuzaklar 109 · 110 · 111.
-- [ ] **B7.16 `program/{rows,pool,bar}.ts`'in testleri YOK.** CLAUDE.md o üç
-      dosyanın `Program.tsx`'ten çıkarılmasını *"ayrıldıkları için jsdom'suz
-      test edilebilirler"* diye gerekçelendiriyor, ve üçünün de sıfır testi
-      var — yani gerekçe iki oturumdur nakde çevrilmedi. Klasörleme turunda
-      adları kısaldı (`programGrid` → `rows`), borç görünür oldu.
-      `buildRows` · `buildPool` · `describeBar` saf; `entityFixture`
-      ya da `worlds` ile doğrudan sorgulanabilirler.
-- [ ] **B7.17 `constraints/__tests__`'in yedi satırı barrel'ı çağırıyor.**
-      Klasör içinden `from '../index'` — doğru çözülüyor ama barrel'ın kendi
-      yorumu *"hiçbiri bu dosyayı geri import etmez"* diyor. Onları kardeş
-      modüllerine bağlamak bir KONUM değil ANLAM değişikliği (bir adın hangi
-      modülden geldiği), o yüzden taşıma commit'lerine bilerek binmedi.
-      Yapılınca `grep -rn "from '\.\./index'" src/constraints` boş dönmeli.
-- [ ] **B7.18 `npm run patrol` KIRMIZI, ve klasörleme turundan ÖNCE de
-      kırmızıydı.** Devriyenin sistematik turu `Kontrol` sekmesine
-      tıklayamıyor: `TimeoutError ... waiting for getByRole('button',
-      {name: 'Kontrol', exact: true})`. Ekran görüntüsü düğmenin ORADA
-      olduğunu gösteriyor, yani bulunamıyor değil — **tıklanamıyor**.
+- [x] **B7.16 `program/{rows,pool,bar}.ts`'in testleri YAZILDI (2026-09-05,
+      elli dördüncü oturum).** CLAUDE.md o üç dosyanın `Program.tsx`'ten
+      çıkarılmasını *"ayrıldıkları için jsdom'suz test edilebilirler"* diye
+      gerekçelendiriyordu ve üçünün de sıfır testi vardı — gerekçe iki
+      oturumdur nakde çevrilmemişti. **86 test**
+      (`src/components/program/__tests__/`), üçü de `environment: 'node'`
+      altında: Grid ve LessonPool'dan yalnız TİP aldıkları için React'e hiç
+      dokunmuyorlar, yani jsdom pragması bile gerekmedi.
 
-      Turun işi olmadığı ÖLÇÜLDÜ: aynı hata taban commit'inde (`4b1df56`,
-      hiçbir dosya taşınmadan önce) birebir tekrarlanıyor.
+      **İki değişmez ilk kez ölçüldü, ikisi de mutasyonla sınandı:**
 
-      Teşhis: sayfa anlık görüntüsünde bir `button [expanded]` var, yani
-      AÇIK bir menü. `ProgramRibbon.tsx` 2026-08-30'da iki Radix
-      `DropdownMenu` kazandı (kitaplık ve Izgara) ve onlar bir `Portal`
-      ile `.menu` olarak çiziliyor; devriyenin kapatıcısı ise yalnız
-      `dialog[open], .dlg-overlay, .dlg` arıyor. Yani menüyü açan bir şerit
-      düğmesine bastıktan sonra `diyalogKapat()` kapatacak bir şey
-      bulamıyor, menü açık kalıyor, ve Radix'in dış katmanı sonraki
-      tıklamayı yutuyor.
+      (a) `rows.ts`'in `continues`i düz komşuluk DEĞİL bir **blok sınırı**.
+      Üç şekil tek dünyada sınandı (2+1 · 1+1+1 · 3). Düz komşuluğa
+      düşürüldüğünde **808 eski birim testi yeşil** geçiyor, yalnız yeni
+      dosya kırmızı — yani bitişik bir 2+1'in ekranda tek bir üç saatlik
+      kart gibi çizilmesini söyleyecek başka hiçbir şey yok.
 
-      Kusur UYGULAMADA değil devriyenin yardımcısında; `npm run kontrol`
-      görmüyor çünkü patrol onun parçası değil (bilerek). Çare
-      `diyalogKapat`'ın seçicisine menüyü de eklemek — ama o bir TEST
-      davranışı değişikliği, klasörleme turuna binmedi.
+      (b) `pool.ts`'in beş sıralamasının **ortak kuyruğu**, ve bunu yazarken
+      **iki kez yanıldım; ikisini de mutasyon düzeltti.** İlk hâl "bir dersin
+      bütün kartları bitişik" diyordu ve `size` sıralamasında kırmızı çıktı:
+      kod doğruydu, bir **deste** `(ders, boy)` demek — `size`ın birinci
+      anahtarı boyun kendisi. Düzeltilmiş hâl ise kuyruktan
+      `compareTr(lessonId)` çıkarılınca **39/39 yeşil** geçti, yani bedava
+      yeşildi (tuzak 23); sebep ölçüldü — örnek dünyada kuyruktan önceki
+      anahtarlar hiç eşitlenmiyordu. Aynı öğretmenin aynı sınıftaki İKİ
+      dersiyle ölçüldü:
+
+      ```
+      kuyruk yerinde   name  aa#2  aa#1  zz#2  zz#1
+      kuyruk düşük     name  zz#2  aa#2  zz#1  aa#1   <- iç içe
+      ```
+
+      Deste bozulmuyor, başlık bozulmuyor, ama bir dersin kartları
+      başkasınınkiyle iç içe geçiyor. **Üç ayrı değişmez**, beş sıralama, iki
+      dünya (biri kuyruğu zorlamak için kurulmuş).
+- [x] **B7.17 `constraints/__tests__`'in yedi satırı DÜZELTİLDİ (2026-09-05).**
+      Altı dosya `from '../index'` diyordu; barrel'ın kendi sözleşmesi
+      (`index.ts:17-19`) "hiçbiri bu dosyayı geri import etmez" diyor.
+      **Ölçülen tuzak: üç ad `constraints/` içinde hiç yok** —
+      `placementKey`, `closedKey` ve `teacherKey` `src/keys.ts`'te yaşıyor ve
+      barrel onları yalnız yeniden dışa aktarıyor (`index.ts:30`), yani bu
+      mekanik bir "`../index` → `../<kardeş>`" değildi.
+
+      Dokunulmayanlar ve sebepleri kayıtlı: `testing/constraintFixture.ts`
+      o klasörün **dışında** duruyor (barrel onun için doğru yol), ve
+      `i18n/lang/*.ts`'in `'../index'`i aynı desen değil — `i18n/index.ts`
+      bir yeniden-dışa-aktarma barrel'ı değil, `registerSozluk`'u gerçekten
+      tanımlayan bir modül. Öteki sekiz `__tests__` klasörü ölçüldü, hepsi
+      zaten kardeşini doğrudan çağırıyordu.
+
+      Kapı: `grep -rn "from '\.\./index'" src/constraints` boş dönüyor.
+- [x] **B7.18 `npm run patrol` YEŞİLE DÖNDÜ (2026-09-05).** Kırmızı bu
+      makinede önce **tekrarlandı**, sonra kendi kanıtından okundu:
+      `error-context.md` açık bir `menu "Program 1"` ve iki
+      `button [expanded]` gösteriyordu. `ProgramRibbon` 2026-08-30'da **üç**
+      Radix `DropdownMenu` kazandı (bu madde iki diyordu) ve devriyenin şerit
+      döngüsü onlara tasarımı gereği basıyor.
+
+      Radix'in menüsü varsayılan olarak **modal**: `<body>`'ye
+      `pointer-events: none`, portal dışına `aria-hidden`. `getByRole`
+      `aria-hidden` altını **atladığı** için arıza "tıklanamıyor" değil
+      **"sıfır öğe"** biçiminde geldi — ekran görüntüsünde düğme apaçık
+      dururken. Teşhisi zorlaştıran şey buydu.
+
+      Çare `diyalogKapat`'ın seçicisine `[data-radix-popper-content-wrapper]`
+      eklemek: üç `DropdownMenu`, `program/index.tsx`'in beş `ContextMenu`'sü
+      **ve** `BlockCounts`'un `Popover`'ı birden kapanıyor. Sınıf tabanlı bir
+      çare (`.menu`) sonuncusunu kaçırırdı ve o katman da tıklamayı yiyor.
+      Yorumdaki *"THERE ARE TWO KINDS"* de düzeltildi — bir yorumun kapsam
+      iddiası seçiciden ayrılırsa tuzak 103 olur.
+
+      Ölçüm: **1 failed · 3 passed · 2,5 dk** → **4 passed · 39,8 sn**;
+      sistematik tur **43 durak** gezdi ve yedi sekmenin yedisi de listede.
+- [x] **B7.19 `swap.ts`'in HİÇ testi yoktu — yazıldı (2026-09-05).** Bu madde
+      B7.17 ölçülürken doğdu: `constraints/index.ts:4` iki yıldır *"every
+      exported function has a test"* diyor ve `swap.ts` için yanlıştı.
+      `swapBlocks` ile `swapWarning` `dropMapping.test.ts`'ten dolaylı
+      geçiyordu; `blockName` ile `swapDoneNotice`'a ulaşan tek yol
+      `components/program/index.tsx`'ti, yani hiçbir birim testi.
+
+      19 test, beş export'un beşi de: adın iki soru-işareti dalı, aynı
+      hamlenin **iki anı** (hover'daki "değiştirecek" ile tıktan sonraki
+      "değiştirdi"), ayracın orta nokta olması, ve `swapBlocks`'un altı null
+      dalı ile üç yeşil dalı.
+
+      **Mutasyonla ölçüldü ve ölçüm bir bonus buldu:** `swapBlocks`'un
+      `blockPinned` kapısı kaldırıldığında öteki altı kısıt dosyası
+      **114/114 yeşil** geçiyor — yani *"sabitlemeyi kaldırmaktan başka
+      hiçbir şey indirmez"* cümlesinin takas tarafını ölçen tek şey bu
+      dosya. CLAUDE.md'nin kısıt-testi kuralına da bir uyarı notu düştü
+      (tuzak 77).
 - [x] **v2.0.1 yayınlandı.** `54403b6` + `v2.0.1` etiketi. Taşıdıkları:
       v2.0.0'ın **veri kaybı düzeltmesi** (doğru `identifier`, tuzak 95),
       AA turunun beş maddesi (şema v11), AC turunun altısı, AB turunun yedisi.

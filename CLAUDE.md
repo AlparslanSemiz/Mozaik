@@ -295,7 +295,7 @@ Sürüm çıkarmak tek komut: `npm run yayinla -- 1.2.0`.
 ```bash
 npm run dev        # geliştirme sunucusu
 npm run tipler     # tsc x2: src (tsconfig.json) + src DIŞI (tsconfig.tools.json)
-npm test           # Vitest — 773 birim testi
+npm test           # Vitest — 883 birim testi
 npm run build      # dist/index.html tek dosya üretir  (asıl teslim)
 npm run build:site # dist-site/ — PWA: tek dosya + manifest + sw.js + simgeler
 npm run test:e2e   # Playwright — derler, sonra 560 E2E testi (file://)
@@ -497,7 +497,7 @@ Böylece "internet gerekmez" iddiası **grep ile** doğrulanabilir kalır, ve
 
 | Katman | Nerede | Neyi yakalar |
 |---|---|---|
-| Birim | `src/**/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü** |
+| Birim | `src/**/*.test.ts` | Kısıt mantığı, cascade silme, ayrıştırma, fizibilite, zil saatleri, kural limitleri, gün taşıma, silme özeti, branş kısaltması, şema göçü, palet ayrımı, branş listesi, kapalı saat çakışması, **exe adaptörü — gerçek `saveInto()` onun üstünde koşar**, **plan kitaplığı, anahtarlar, paket zarfı ve dosya adları**, **otomatik dizme (yasallık, belirlenimcilik, tıkanma), `occupy`/`vacate` eşdeğerliği, 21 dünyalık çözücü matrisi ve denetçinin kendisi**, **bir varlığın kendi haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama/sıralama/süzme**, **haftanın 1+2'lere bölünüşü ve ızgaradan geri OKUNUŞU, v6→v7 göçü**, **iki bloğun TAKASI ve sabitlemenin onu da reddettiği**, **ızgaranın satırları ve `continues`in bir komşuluk değil BLOK SINIRI olduğu**, **tepsinin kartları: blok başına bir kart, süzgeçten önce sayılan total, ve beş sıralamanın üç ayrı ardışıklık değişmezi** |
 | Duman | `src/__tests__/App.test.tsx` (jsdom) | Bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | **E2E** | `e2e/<konu>/*.spec.ts` (Playwright, 35 dosya dokuz klasörde, `file://`) | **Davranış:** sürükleme, taşıma, sağ tık, kaydırma, geri-al zinciri, hata yolları, klavye, sekme gezinmesi, plan geçişi, taslaklar, paket gidiş-dönüşü, "veriler nerede" tablosu, otomatik dizme, **ders dağılımı: seçeneklerin saatten türediği, havuzdaki model bloklarının `data-count` ile eksiksiz sayıldığı, bitişik 2+1'in İKİ blok gibi çizildiği ve sağ tıkın doğru parçayı aldığı**, **ilk kullanım satırının bir kez çıkıp bir daha çıkmadığı**, **komut paleti, varlık paneli, listelerde ara/sırala/süz, diyalogların ne SORDUĞU**, **yedi şeridin tek iskeleti, Kontrol'ün süzgeci ve Dersler'in modu**
 (`serit.spec.ts`), **ders girişinin ekseni hatırlaması ve odaklanmış modda
@@ -1072,7 +1072,10 @@ components/program/bar.ts       şeridin altındaki tek cümle. Üçü de JSX'e
                                 dokunmuyor, o yüzden Program.tsx'ten çıktılar —
                                 bir .tsx dosyası placements gezerse yanlış
                                 yerdedir, ve ayrıldıkları için jsdom'suz
-                                test edilebilirler
+                                test edilebilirler. O gerekçe 2026-09-05'te
+                                NAKDE ÇEVRİLDİ (86 test, `program/__tests__/`):
+                                Grid ve LessonPool'dan yalnız TİP aldıkları
+                                için üçü de React'siz, DOM'suz koşuyor
 components/common/props.ts      PanelProps — Kurulum adımı ve Ayarlar bölümü aynı ikiliyi alır
 components/common/Field.tsx     iki klasörün de kullandığı küçük parçalar
 components/common/ColorPick.tsx 36 renklik swatch diyaloğu (Kurulum'un iki adımı)
@@ -1214,6 +1217,16 @@ aktarılan fonksiyonun testi olacak. Bu dosyalara test yazmadan özellik
 eklenmez. `parseState.ts` ve `settingsEdit.ts` içindeki `remapDays` de test
 edilir: ilkinden her yedek dosyası geçer, ikincisi gün listesi değişince
 programın kaymasını engelleyen tek şeydir.
+
+> **Bu kural iki yıl boyunca `swap.ts` üstünde YANLIŞTI, ve barrel da onu
+> tekrar ediyordu** (`constraints/index.ts:4` — *"every exported function has
+> a test"*). O dosyanın hiç testi yoktu: `swapBlocks` ile `swapWarning`
+> `dropMapping.test.ts`'ten dolaylı geçiyordu, `blockName` ile
+> `swapDoneNotice`'a ulaşan tek yol `components/program/index.tsx`'ti.
+> 2026-09-05'te yazıldı ve bedeli **ölçüldü**: `swapBlocks`'un `blockPinned`
+> kapısı kaldırıldığında öteki altı kısıt test dosyası **114/114 yeşil**
+> geçiyor. Tuzak 77 bir kez daha: bir belge cümlesi "her" diyorsa yanında onu
+> ölçen bir test olmalı — yoksa cümle bir niyet beyanıdır.
 
 ---
 
@@ -2809,6 +2822,42 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      çalıştırıldı ve `kurulum/icon.ico`'nun md5'i birebir aynı çıktı, yani
      cwd'ye göre çözülen girdisini yeni evinden de buluyor. Tuzak 65'in
      ailesi: taşınan bir şeyin hâlâ çalıştığı **varsayılmaz**.
+
+112. **YAZILMIŞ BİR DEĞİŞMEZ ÖLÇÜLMÜŞ BİR DEĞİŞMEZ DEĞİLDİR — ve ilk taslak
+     ya fazla iddialı olur ya bedava yeşil.** `pool.ts`'in yorumu iki
+     sürümdür şunu söylüyordu: *"beş sıralamanın son iki anahtarı aynı, yoksa
+     bir dersin kartları dağılır ve kırk test `.pool-card` sayıyor."* Cümle
+     doğruydu, ve onu ölçen hiçbir şey yoktu. Yazılmaya çalışılınca **iki kez
+     yanlış** yazıldı, ve iki yanlış iki ayrı türden:
+
+     - **Fazla iddialı:** *"bir dersin bütün kartları bitişik"* dendi ve
+       `size` sıralamasında kırmızı çıktı. **Kod haklıydı**: `stackCards()`
+       bir desteyi `(lessonId, size)` ile tanıyor, ve `size` sıralamasının
+       birinci anahtarı boyun kendisi — 2+2+1'lik bir dersin tekli kartını
+       ayırması bir kusur değil bir **karar**.
+     - **Bedava yeşil:** düzeltilmiş hâl, kuyruktan `compareTr(lessonId)`
+       bilerek çıkarılınca **39/39 yeşil** geçti (tuzak 23). Sebep test
+       değildi, **dünya**ydı: örnek okulda kuyruktan ÖNCEKİ anahtarlar hiç
+       eşitlenmiyordu, yani kuyruk hiç sorulmuyordu. Aynı öğretmenin aynı
+       sınıftaki İKİ dersiyle kurulan bir dünyada ölçüldü:
+
+     ```
+     kuyruk yerinde   name  aa#2  aa#1  zz#2  zz#1
+     kuyruk düşük     name  zz#2  aa#2  zz#1  aa#1   <- iç içe
+     ```
+
+     Deste bozulmuyor, başlık bozulmuyor, ama bir dersin kartları
+     başkasınınkiyle **iç içe geçiyor**. Yani `LessonPool`'un yasladığı
+     ardışıklık tek değil **üç** ayrı değişmez: deste `(ders, boy)`, başlık
+     `group`, ve `size` dışındaki dört sıralamada dersin kendisi. Yorum
+     üçünü tek cümlede topluyordu ve o yüzden hiçbirini tam söylemiyordu.
+
+     İki kural. (a) **Bir değişmez, onu İHLAL EDEBİLECEK bir dünya
+     kurulmadan yazılmış sayılmaz** — tuzak 41'in ("boş ızgarada yapılan
+     ölçüm hiçbir şey ölçmez") mantık tarafı: burada ızgara doluydu ama
+     karşılaştırıcının kuyruğuna hiç gelinmiyordu. (b) Kodun ilk taslağı
+     **kırmızıya döndürmesi** bir kusur bulgusu değil olabilir; önce "iddia
+     mı yanlış, kod mu" diye sorulur, ve bu turda cevap iddiaydı.
 
 ---
 

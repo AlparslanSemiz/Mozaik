@@ -1,8 +1,160 @@
 # STATUS — Nerede olduğumuz
 
-Son güncelleme: 2026-09-05 (elli üçüncü oturum: klasörleme turu)
+Son güncelleme: 2026-09-05 (elli dördüncü oturum: klasörlemenin geri kalanı)
 
 ---
+
+## Elli dördüncü oturum — klasörlemenin geri kalanı (2026-09-05)
+
+İstek: *"klasörlemede geri kalanları son her şeyi yap."*
+
+Elli üçüncü oturum 156 dosyayı taşıdı ama **üç borcu bilerek commit'lemedi**:
+üçü de bir dosya taşıma değil bir **anlam** değişikliğiydi ve taşıma
+commit'lerine binseler "hangi kırmızı hangi hamleden" sorusu cevapsız
+kalırdı. Bu oturum o üçünü kapattı. **Dördüncüsü planı hazırlarken ölçülerek
+bulundu** ve kullanıcı kararıyla kapsama alındı.
+
+### Sonuç
+
+```
+                 taban        sonra
+birim testi        773          883      (+110)
+test dosyası        47           51      (+4)
+E2E                560          560      değişmedi
+site · çözücü    22 · 7       22 · 7      değişmedi
+npm run patrol   1 KIRMIZI    4 YEŞİL    (2,5 dk -> 39,8 sn)
+dist/index.html  1 012 966    1 012 966  BİREBİR AYNI
+npm run kontrol   exit 0       exit 0
+```
+
+`dist`'in bir bayt bile kıpırdamaması bu turun kendi kapısıydı ve beklenen
+buydu: **hiçbir üretim kodu değişmedi.** Yazılan şey testler, düzeltilen şey
+import satırları ve bir test yardımcısının seçicisi. Beş commit, her birinin
+kapısı `npm run tipler` + `npx vitest run`.
+
+### B7.17 — barrel'ı çağıran yedi satır
+
+`src/constraints/__tests__`'in altı dosyası `from '../index'` diyordu ve
+barrel'ın kendi sözleşmesini deliyordu (`index.ts:17-19`: *"hiçbiri bu
+dosyayı geri import etmez"*).
+
+**Ölçülen tuzak: üç ad `constraints/` içinde HİÇ YOK.** `placementKey`,
+`closedKey` ve `teacherKey` `src/keys.ts`'te yaşıyor; barrel onları yalnız
+yeniden dışa aktarıyor (`index.ts:30`). Yani iş mekanik bir
+"`../index` → `../<kardeş>`" değildi, ve öyle sanılsa üç ad yanlış modüle
+bağlanırdı.
+
+Dokunulmayanlar ve **sebepleri kayıtlı** (bir sonraki tur aynı soruyu
+sormasın diye): `testing/constraintFixture.ts` o klasörün *dışında* duruyor,
+barrel onun için doğru yol; `i18n/lang/*.ts`'in `'../index'`i aynı desen
+değil, çünkü `i18n/index.ts` bir yeniden-dışa-aktarma barrel'ı değil,
+`registerSozluk`'u gerçekten tanımlayan bir modül. Öteki sekiz `__tests__`
+klasörü ölçüldü, hepsi zaten temizdi.
+
+### B7.19 — `swap.ts`'in hiç testi yoktu (yeni madde)
+
+`constraints/index.ts:4` iki yıldır *"every exported function has a test"*
+diyor. `swap.ts` için **yanlıştı**: `swapBlocks` ile `swapWarning`
+`dropMapping.test.ts`'ten dolaylı geçiyordu, `blockName` ile
+`swapDoneNotice`'a ulaşan tek yol `components/program/index.tsx`'ti.
+
+19 test yazıldı, beş export'un beşi de. **Mutasyon bir bonus buldu:**
+
+```
+swapBlocks'un blockPinned kapısı kaldırıldı
+  swap.test.ts          2 test KIRMIZI, adıyla
+  öteki altı dosya    114/114 YEŞİL
+```
+
+Yani *"bir bloğu sabitlemeyi kaldırmaktan başka hiçbir şey indirmez"*
+cümlesinin **takas tarafını** ölçen tek şey bu dosya. CLAUDE.md'nin
+kısıt-testi kuralına uyarı notu düştü.
+
+### B7.16 — üç view-model'in testleri, ve iki kez yanılma
+
+86 test (`src/components/program/__tests__/`). Üçü de `environment: 'node'`
+altında koşuyor: `Grid.tsx` ve `LessonPool.tsx`'ten yalnız **tip** aldıkları
+için React'e hiç dokunmuyorlar — CLAUDE.md'nin *"ayrıldıkları için jsdom'suz
+test edilebilirler"* cümlesi iki oturum sonra nakde çevrildi.
+
+**`rows.ts`'in `continues`i düz komşuluk DEĞİL, bir blok sınırı.** Üç şekil
+tek dünyada sınandı (2+1 · 1+1+1 · 3). Mutasyon:
+
+```
+continues düz komşuluğa düşürüldü
+  rows.test.ts        2 test KIRMIZI
+  öteki her şey     808/808 YEŞİL
+```
+
+**`pool.ts`'in ortak kuyruğunu yazarken iki kez yanıldım, ikisini de
+mutasyon düzeltti** — ve bu turun en öğretici yeri burası.
+
+1. İlk hâl *"bir dersin bütün kartları bitişik"* diyordu ve `size`
+   sıralamasında kırmızı çıktı. **Kod doğruydu:** `LessonPool.tsx`'in
+   `stackCards()`'ı bir desteyi `(lessonId, size)` ile tanıyor, ders ile
+   değil, ve `size` sıralamasının birinci anahtarı boyun kendisi — yani
+   2+2+1'lik bir dersin tekli kartını ayırması bir **karar**.
+2. Düzeltilmiş hâl kuyruktan `compareTr(lessonId)` çıkarılınca **39/39
+   yeşil** geçti, yani bedava yeşildi (tuzak 23). Sebep ölçüldü: örnek
+   dünyada kuyruktan **önceki** anahtarlar hiç eşitlenmiyordu. Aynı
+   öğretmenin aynı sınıftaki iki dersiyle kurulan bir dünyada ölçüldü:
+
+```
+kuyruk yerinde   name  aa#2  aa#1  zz#2  zz#1
+kuyruk düşük     name  zz#2  aa#2  zz#1  aa#1   <- iç içe
+```
+
+Deste bozulmuyor, başlık bozulmuyor, ama **bir dersin kartları
+başkasınınkiyle iç içe geçiyor**. Yani `LessonPool`'un okuduğu ardışıklık
+tek değil **üç** ayrı değişmez: deste `(ders, boy)`, başlık `group`, ve —
+`size` dışındaki dört sıralamada — dersin kendisi. Üçü de beş sıralamada ve
+iki dünyada ölçülüyor.
+
+Genel ders, tuzak 23'ün bir basamak yukarısı: **bir değişmezi yazmak onu
+ölçmek değildir.** İlk yazım fazla iddialıydı ve kod onu düzeltti; ikincisi
+yeterince iddialı değildi ve ancak mutasyon onu söyledi. Bir değişmez, onu
+ihlal edebilecek bir dünya kurulmadan yazılmış sayılmaz (tuzak 41'in
+mantık tarafı).
+
+### B7.18 — devriyenin Radix körlüğü
+
+Kırmızı bu makinede önce **tekrarlandı**, sonra kendi kanıtından okundu:
+
+```
+TimeoutError: waiting for getByRole('button', {name:'Kontrol'})
+error-context.md:3408   menu "Program 1" [active]
+error-context.md:55     button [expanded]
+```
+
+`ProgramRibbon` 2026-08-30'da **üç** Radix `DropdownMenu` kazandı (TASKS iki
+diyordu) ve devriyenin şerit döngüsü onlara tasarımı gereği basıyor. Radix'in
+menüsü varsayılan olarak **modal**: `<body>`'ye `pointer-events: none`,
+portal dışına `aria-hidden`. `getByRole` `aria-hidden` altını **atladığı**
+için arıza "tıklanamıyor" değil **"sıfır öğe"** biçiminde geldi — ekran
+görüntüsünde düğme apaçık dururken. Teşhisi bir tur geciktiren şey buydu.
+
+Çare `diyalogKapat`'ın seçicisine `[data-radix-popper-content-wrapper]`
+eklemek. **Attribute ile, sınıfla değil:** `.menu` üç `DropdownMenu`'de ve
+beş `ContextMenu`'de var ama `BlockCounts`'un `Popover`'ında **yok**, ve o
+katman da tıklamayı yiyor. Yorumdaki *"THERE ARE TWO KINDS"* de düzeltildi
+(bir yorumun kapsam iddiası seçiciden ayrılırsa tuzak 103 olur).
+
+```
+önce   1 failed · 3 passed · 2,5 dk   (Kontrol sekmesinde duruyor)
+sonra  4 passed · 39,8 sn
+sistematik tur 43 durak, yedi sekmenin YEDİSİ de listede
+```
+
+### Bedava çıkan bir düzeltme
+
+Gömülü kısaltma tablosunda `Fizik → Fzk`, `Fiz` değil. Kod doğruydu, benim
+iddiam yanlıştı; `rows.test.ts` yazılırken ölçümle düzeldi.
+
+### Kalan
+
+Klasörleme borcu **kapandı**. `dist/index.html`'in 2026-08-26'dan bugüne
+489 815 → 1 012 966 bayta çıkması hâlâ **ölçülmedi** ve sıradaki turun ilk
+işi — tuzak 101 gereği burada bir sebep adlandırılmıyor.
 
 ## Elli üçüncü oturum — klasörleme turu (2026-09-05)
 
