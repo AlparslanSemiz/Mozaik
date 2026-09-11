@@ -35,6 +35,35 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-11 · Kod refactoru: geliştirme araçları ve tek biçim
+
+**Değişen.** Depoya ESLint, knip ve Prettier geliştirme bağımlılığı olarak girdi.
+ESLint yalnız React'in kanca kurallarıyla başladı (`rules-of-hooks` hata,
+`exhaustive-deps` uyarı). Prettier bütün kod dosyalarını tek biçime getirdi:
+`printWidth` 100, tek tırnak, sondaki virgüller. Refactordan önce iki davranış
+kusuru ayrı commit'lerle düzeltildi, ve yalnız testten çağrılan altı fonksiyonun
+testleriyle birlikte silinmesine karar verildi.
+
+**Eski hâli.** Depoda biçimleyici ve linter yoktu. 20 dosya çift, geri kalanı tek
+tırnak kullanıyordu, ve ESLint olmayan bir depoda bir `eslint-disable` yorumu
+duruyordu.
+
+**Gerekçe.** Hazır çözüm önceliği, ve üçü de bundle'a girmiyor (ölçüldü,
+`dist/index.html` araçlar kurulunca değişmedi). ESLint'in dar başlaması bilerek:
+tam `recommended` setleri yüzlerce bulgu üretir ve refactorun diff'lerini gürültüye
+boğar, kanca kuralı ise bu turda gerçek bir kusuru (Müsaitlik ve Çıktı'daki kanca
+sırası) yakaladığı ölçülen kural. Prettier'ın ayarı bir zevk tercihi değil, mevcut
+koda en az diff verecek biçimde seçildi: satırların yüzde 1,3'ü 100 karakteri
+geçiyordu ve importların üçte ikisi tek tırnaklıydı. Biçim commit'i yalnız başına
+duruyor ve `.git-blame-ignore-revs`'e yazıldı, çünkü taşıma ile içerik değişikliğinin
+aynı commit'te olmaması kuralı biçime de uyuyor. Kusurların refactordan önce
+düzeltilmesi kullanıcı kararı: bölünen bir bileşende kusur sessizce kalkarsa
+"refactor davranışı değiştirmez" iddiası ölçülemez olur.
+
+**Kapsamın dışında kalan.** Prettier `src/lang`'a, CSS'e ve JSON'a dokunmuyor.
+Sözlüklere, çünkü `i18n.test.ts` onların ham metnini okuyor. CSS'e ve JSON'a, çünkü
+bu adımın sorusu kodun biçimiydi.
+
 ### 2026-09-11 · Belgeler yeniden kuruldu
 
 **Değişen.** 2933 satırlık CLAUDE.md bölündü: kurallar `docs/` altındaki konu

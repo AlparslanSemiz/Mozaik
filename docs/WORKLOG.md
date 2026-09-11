@@ -32,8 +32,8 @@ taban ölçümleri alındı, kaynak koda dokunulmadı.
 
 **Yarım olan.** Kod refactoru Faz 2'nin başında: envanter onaylandı, taban ölçümleri
 ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
-alındı ve Faz 2'den önceki iki davranış düzeltmesi commit'lendi. Sıradaki adım
-geliştirme araçları ve Prettier biçim commit'i. [TODO.md](TODO.md)'de açık madde
+alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'nin ilk
+adımı (ESLint, knip, Prettier ve biçim commit'i) bitti. Sıradaki adım ölü kod. [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
 §8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
@@ -201,8 +201,25 @@ build` (çıkış 0, 1 007 873 bayt, 12 bayt azaldı), ve `musaitlik.spec.ts`, `
 ile `panel.spec.ts`'in tamamı (56/56). Ana E2E süitinin kalanı koşulmadı, çünkü değişiklik
 üç bileşenle sınırlı ve o üçünün spec dosyaları koşuldu.
 
-**Sıradaki iş.** Faz 2'nin ilk adımı: geliştirme araçları (ESLint'in kanca kuralı ve
-`knip`, önce yalnız rapor) ve ayrı bir Prettier biçim commit'i.
+**Faz 2, adım 1: geliştirme araçları ve biçim.**
+
+- `324066f`: ESLint (yalnız `rules-of-hooks` hata ve `exhaustive-deps` uyarı), knip ve Prettier geliştirme bağımlılığı olarak girdi, `npm run lint`, `npm run knip` ve `npm run bicim` ile. Kilit dosyasında mevcut hiçbir paketin sürümü değişmedi ve hiçbiri kaldırılmadı (151 yeni paket). İlk kurulumdaki `@eslint/js` ve `globals`'ı knip kullanılmıyor diye gösterdi, kaldırıldılar. `dist/index.html` 1 007 873 bayt kaldı.
+- ESLint'in kuralı ölçüldü: düzeltmeden önceki `Availability.tsx` ve `Print.tsx` (`2e72b1d`) stdin'den verilince 213, 222 ve 290. satırlarda üç `rules-of-hooks` hatası bastı, yani `511b8b4`'ün kusurunu yakalardı. Bugünkü rapor 0 hata ve 5 uyarı: dört `exhaustive-deps` (TODO §8d) ve `App.test.tsx`'te kullanılmayan bir `eslint-disable`.
+- knip bugün 1 kullanılmayan bağımlılık (`@radix-ui/react-tooltip`), 44 kullanılmayan dışa aktarım, 17 kullanılmayan tip ve 1 tekrar eden dışa aktarım (`closedKey` ve `teacherKey`) raporluyor. Envanterin ölü kod listesiyle örtüşüyor ve adım 2'nin girdisi.
+- Prettier'ın ayarı mevcut koda en az diff verecek biçimde seçildi: 58 490 satırın 745'i (yüzde 1,3) 100 karakteri, 3 535'i 80'i geçiyordu, importların 523'ü tek, 237'si çift tırnaklıydı. Ayar `printWidth: 100` ve tek tırnak. Kapsam yalnız kod (`src`, `e2e`, `scripts` ve kökteki TS ile JS), `src/lang` dışarıda çünkü `i18n.test.ts` sözlüklerin ham metnini okuyor, CSS ve JSON da dışarıda.
+- `7d66ab4`: biçim commit'i, 120 dosya. Anlamın değişmediği `scratch/ast-esdeger.mjs` ile ölçüldü: AST yorum, boşluk, tırnak ve parantez sayılmadan karşılaştırılır, JSX çocuklarında yan yana duran metin ve dize ifadeleri React'in çizeceği tek metne birleştirilir. 120 dosyada 0 fark. Karşılaştırıcının kendisi sınandı: bellekte sokulan üç gerçek değişikliği (bir dize, bir JSX metni, bir E2E dizesi) yakaladı, anlamca eşdeğer bir `{' '}` bölmesini fark saymadı. Karşılaştırıcının ilk hâli her dosyada ilk farkta duruyordu ve bundle'daki iki `" · "` bölünmesini göstermemişti, birleştirme ondan sonra yazıldı.
+- `dist/index.html` biçimden sonra 1 007 879 bayt (+6). Token dökümüyle bütün farklar sayıldı: Prettier `Ribbon.tsx`'te `" saat"`i `{' '}saat`'e ve iki `" · "`i `" ·"{' '}`'e böldü, `lessons/index.tsx`'te bir `{' '}saat`'i birleştirdi, ve sürüm damgasındaki commit numarası değişti. Ekrandaki metin aynı.
+- `0ee677d`: `.git-blame-ignore-revs` biçim commit'ini listeliyor. `git blame`'in onu atlaması için `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
+Adım 1'de koşuldu: `npm run tipler` (çıkış 0), `npm test` (763/763), `npm run lint` (0 hata),
+`npx vite build` (çıkış 0), `serit.spec.ts`, `dersler.spec.ts` ve `metin.spec.ts` (28/30,
+düşen ikisi `serit.spec.ts`'in bugünkü tabanda da düşen testleri). Ana E2E süitinin kalanı
+koşulmadı: `src`'deki tek anlam dışı fark iki bileşendeki metin düğümü bölünmesi ve o iki
+bileşenin ekranlarını ölçen spec'ler koşuldu, `e2e` ve `scripts` AST'de birebir aynı.
+
+**Sıradaki iş.** Faz 2, adım 2: ölü kod. Kullanılmayan `@radix-ui/react-tooltip`, hiç
+çağrılmayan dışa aktarımlar, testleriyle birlikte yalnız testten çağrılan altı fonksiyon,
+ve çözücünün `4` dalı. Dosya başına bir commit.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 

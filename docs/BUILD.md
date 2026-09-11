@@ -35,6 +35,9 @@ maliyetleri WORKLOG'da.
 ```bash
 npm run dev          # geliştirme sunucusu
 npm run tipler       # tsc iki kez: src (tsconfig.json) ve src dışı (tsconfig.tools.json)
+npm run lint         # ESLint, şimdilik yalnız React'in kanca kuralları
+npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
+npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç)
 npm test             # Vitest birim testleri
 npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler
@@ -54,6 +57,12 @@ npm run yayinla -- 1.2.0   # sürüm çıkarır
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
 Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
+
+`lint`, `knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
+`kontrol`'ün parçası değiller: knip bugün bilinen ölü kodu raporladığı için sıfırdan
+farklı çıkar, ve bir kapı kırmızı başlarsa kapı olmaktan çıkar. Biçim değişikliği
+yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
+atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
 `font`, `exe` ve `exe:test` `kontrol`'ün parçası değil, çünkü bu depoda olmayan
 bir araç zinciri istiyorlar (Python ile fontTools, Rust) ve `kontrol` her

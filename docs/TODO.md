@@ -830,6 +830,14 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
 - [ ] **Dört E2E testi paralel koşuda düşüp tek işçide geçiyor.** `dil.spec.ts` 70,
       `izgara.spec.ts` 360, `kurulum.spec.ts` 851, `renk.spec.ts` 39, dördü de depoya yazıp
       yeniledikten sonra okuyor. Sebep ölçülecek, "yük" diye yazılmadan (tuzak 92).
+- [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** `App.tsx:728`'deki
+      palet eylemlerinin memo'su üç `toggle*` fonksiyonunu bağımlılıkta saymıyor.
+      `Commands.tsx:123` kullanmadığı `ui`'ya bağlı, yani komut listesi her App çiziminde
+      yeniden kuruluyor. `Program.tsx:539` ve `useRowOrder.tsx:146` geri çağırımda `t`'yi
+      saymıyor, yani dil değişince o geri çağırımın yazdığı cümle eski dilde kalabilir.
+      Dördü de davranışı etkilediği için araç commit'ine girmedi, ilgili modülün refactor
+      adımında ölçülerek ele alınır. `App.test.tsx:16`'da kullanılmayan bir `eslint-disable`
+      yorumu var.
 - [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
       Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
       yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,
