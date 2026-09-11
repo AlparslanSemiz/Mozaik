@@ -149,10 +149,13 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
   });
 
   test('tavan %150 — merdivenin son basamağı gerçekten çiziliyor', async ({ page }) => {
-    // The ceiling moved from %125 to %150 for the reader this tool is built
-    // for. A ceiling nobody measures is a ceiling that quietly does nothing:
-    // this checks that the last rung exists, applies, and does not tear the
-    // layout — on the two screens with the most furniture per pixel.
+    // The ceiling moved from %125 to %150 because a ceiling is only worth
+    // having above what somebody can actually reach for, and the reader has
+    // trouble seeing. It is headroom, not where he sits: he works at 100%.
+    // That is exactly why the rung needs a test — nobody arrives here by
+    // default, so a ceiling nobody measures is a ceiling that quietly does
+    // nothing. This checks that the last rung exists, applies, and does not
+    // tear the layout, on the two screens with the most furniture per pixel.
     await openWithSample(page);
     await openSettings(page, 'Görünüm');
 

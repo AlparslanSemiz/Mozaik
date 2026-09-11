@@ -37,8 +37,9 @@
 // are not this: a class refers to a room, so rooms have to be typed in first.
 //
 // Rule 4 is the accessibility half: the word is the accessible name in both
-// test layers (pitfall 56) and the symbol is what the eye finds first at 150%,
-// which is the scale this tool is built for.
+// test layers (pitfall 56) and the symbol is what the eye finds first at any
+// scale. The word is also the part the strip gives up LAST and only under
+// pressure, and when it goes the name stays (LAYOUT.md, strip rule 6).
 //
 // The three THINGS this program schedules — teacher, class, room — are drawn
 // from `KIND_ICON` wherever they are named, Yazdır included. Everything else is
@@ -307,8 +308,8 @@ export default function Ribbon({
   const status = useMemo(() => health(state), [state]);
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold
-  // its own chevron gives back a third of what it costs, and the whole point of
-  // folding is the row it buys at 150%. The way back is in the top bar.
+  // its own chevron gives back a third of what it costs, and folding is worth
+  // having only if it gives the row back whole. The way back is in the top bar.
   if (!open) return null;
 
   if (ui.tab === 'setup') {
@@ -824,10 +825,13 @@ export default function Ribbon({
             the one thing in this program that cannot be undone is. */}
         {/* THE WHOLE RIGHT-HAND END BEHIND ONE DOOR, and the reason is a
             MEASUREMENT. Three buttons in an equal-column group are as wide as
-            the widest of them times three: at 150% — the scale this tool's
-            reader actually uses — the group asked for 639 px of a strip that
-            had 1920 px for 2061 px of content, and two of the three came out
-            past the right edge. Not hidden: UNCLICKABLE (pitfall 48).
+            the widest of them times three: at 150%, the scale where the strip
+            is under the most pressure, the group asked for 639 px of a strip
+            that had 1920 px for 2061 px of content, and two of the three came
+            out past the right edge. Not hidden: UNCLICKABLE (pitfall 48).
+            The strip has a declared order for what it gives up since then
+            (LAYOUT.md, strip rule 6), but a group this rare belongs behind a
+            door on its own terms.
 
             One button now. What is behind it is also what belongs behind a
             door: locking a whole timetable, listing what has been put aside,

@@ -104,9 +104,15 @@ export const writeDock = dockPreference.write;
 /**
  * Whether the tool strip is open.
  *
- * At 100% it buys nothing on Program — the week already fits — and that is
- * fine: its customer is the 125% and 150% reader, where 40px is one whole
- * teacher row. Applied before the first paint like the other five, or the
+ * The reader works at 100%, where the week already fits on Program, so the row
+ * the strip costs is not what makes it foldable. What makes it foldable is that
+ * it takes that row BY ITSELF: a thing that appears without being asked for has
+ * to be dismissable, which is the same argument the auto-hide gesture below is
+ * written around. It earns its keep in the two boxes that are genuinely short
+ * of height — "Sığdır", whose whole job is getting the week inside the box, and
+ * a window smaller than the one every measurement here was taken in.
+ *
+ * Applied before the first paint like the other layout preferences, or the
  * strip would draw itself and then vanish.
  */
 const RIBBON_ATTRIBUTE = 'data-ribbon';
@@ -255,7 +261,8 @@ export const writeDockHeight = dockHeightPreference.write;
 export const SCALE_MIN = 0.8;
 /* The ceiling was 1.25 and is 1.50. The reason is the reader, not the design:
    my father has trouble seeing, and a ceiling is only worth having if it is
-   above what somebody actually needs. */
+   above what somebody actually reaches for. He works at 100% — the ceiling is
+   headroom, not a description of where he sits. */
 export const SCALE_MAX = 1.5;
 export const SCALE_STEP = 0.05;
 

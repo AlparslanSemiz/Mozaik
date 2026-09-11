@@ -35,6 +35,41 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Hedef ölçek %150 değil %100
+
+**Değişen.** Belgelerde ve kod yorumlarında dolaşan "hedef kullanıcı %125 ya da
+%150 kullanıyor" varsayımı yanlış: %100 kullanıyor. Altı yerde bu varsayıma
+dayanan gerekçeler vardı ve düzeltildi. Hiçbir karar geri alınmadı, çünkü
+altısında da karar başka bir gerekçeyle ayakta kalıyor.
+
+**Karışan üç eksen, ve ayrılması düzeltmenin kendisi.** Windows'un kendi DPI
+ölçeklemesi gerçekten büyük ve bu kullanıcının kendi cümlesiyle kayıtlı
+(`styles.css`, kök yazının 16'dan 13 px'e inmesinin sebebi). Uygulamanın kendi
+`--ui-scale`'i ise %100 ve bu da iki yerde kullanıcı kararı olarak kayıtlı
+(`SCALE_DEFAULT = 1`). Bir avuç yorum birinciden ikinciye atlayıp "okuyucu %125
+ya da %150 kullanıyor" demişti.
+
+**Düzeltilen yerler.** Şerit tercihinin gerekçesi ve ölçek tavanının gerekçesi
+(`theme.ts`), şerit kural 4'ün erişilebilirlik yarısı, katlamanın gerekçesi ve
+ızgara grubunun ölçümü (`Ribbon.tsx`), şerit standardının 4. maddesi
+(`LAYOUT.md`), ve ölçek tavanı testinin gerekçesi (`e2e/gorunum.spec.ts`).
+Şeridin taşma testininki 1b'de düzeltilmişti.
+
+**Ölçümler yerinde kaldı.** "%150'de şu kadar piksel taştı" gibi cümleler
+doğruydu ve duruyor; düşen şey yalnız araya sıkışmış "okuyucunun kullandığı
+ölçek" ifadeleri. %150 artık gerekçelerde "okuyucunun ölçeği" diye değil
+"şeridin en çok baskı altında olduğu ölçek" diye geçiyor.
+
+**Bundan sonraki ölçüm kuralı.** Bir düzen kusuru önce %100'de ölçülür, %150
+ikinci ölçüm olarak kalır ve hiçbir testten çıkarılmaz, çünkü merdiven hâlâ %80
+ile %150 arası ve tavan bilerek ulaşılabilir bırakıldı.
+
+**Erişilebilirlik tabanı bundan zayıflamıyor, tersine bağlayıcılaşıyor.**
+%100'de 12 px alt sınırı, programın kendiliğinden geldiği ekranın hedef
+kullanıcının gerçekten kullandığı ekran olduğu anlamına geliyor.
+
+---
+
 ### 2026-09-12 · Tercih normalize'ları geniş kalıyor, boolean kabulü duruyor
 
 **Değişen.** Bir şey değişmedi, ve yazılan şey bu: `normalizeDock`,
