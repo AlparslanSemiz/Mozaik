@@ -6,7 +6,7 @@
 // Generation is DETERMINISTIC: the same input always yields the same output,
 // so a bug found here can be reproduced.
 
-import { teacherKey } from './constraints';
+import { closedKey } from './constraints';
 import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
 import { PALETTE_SIZE } from './palette';
 import { SCHEMA_VERSION } from './types';
@@ -204,10 +204,10 @@ export function sampleState(): State {
   const unavailable: Record<string, 1> = {};
   for (const [i, t] of teachers.entries()) {
     const closedDay = i % days.length;
-    for (let s = 0; s < hours.length; s++) unavailable[teacherKey(t.id, closedDay, s)] = 1;
+    for (let s = 0; s < hours.length; s++) unavailable[closedKey(t.id, closedDay, s)] = 1;
     if (rnd() < 0.5) {
       const second = (closedDay + 3) % days.length;
-      for (let s = 0; s < hours.length; s++) unavailable[teacherKey(t.id, second, s)] = 1;
+      for (let s = 0; s < hours.length; s++) unavailable[closedKey(t.id, second, s)] = 1;
     }
   }
 

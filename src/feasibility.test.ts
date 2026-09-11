@@ -19,7 +19,7 @@ import {
   setWholeWeek,
 } from './entities';
 import { buildIndex } from './constraints';
-import { teacherKey } from './constraints';
+import { closedKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
 import type { State } from './types';
 import { SCHEMA_VERSION } from './types';
@@ -103,9 +103,9 @@ describe('yük durumu sınırları', () => {
 describe('buildReport — öğretmen yükü', () => {
   it('yük müsaitliği aşarsa kaç saat fazla olduğunu söyler', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
-    d.unavailable[teacherKey('oMC', 0, 1)] = 1;
-    d.unavailable[teacherKey('oMC', 0, 2)] = 1; // 4 - 3 = 1 hour free, 2 hours of load
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 1)] = 1;
+    d.unavailable[closedKey('oMC', 0, 2)] = 1; // 4 - 3 = 1 hour free, 2 hours of load
 
     const row = buildReport(d).teachers[0]!;
     expect(row.level).toBe('impossible');
@@ -116,8 +116,8 @@ describe('buildReport — öğretmen yükü', () => {
 
   it('yük müsaitliğin %85 üstündeyse sıkışık der', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
-    d.unavailable[teacherKey('oMC', 0, 1)] = 1; // 2 hours free, 2 hours load -> exactly full
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 1)] = 1; // 2 hours free, 2 hours load -> exactly full
     expect(buildReport(d).teachers[0]!.level).toBe('tight');
   });
 
@@ -183,7 +183,7 @@ describe('buildReport — yerleşemeyenler', () => {
   it('geçerli slotu kalmamış dersi en sık sebeple bildirir', () => {
     const d = build();
     // MÇ is closed all week -> x1 cannot go anywhere.
-    for (let s = 0; s < 4; s++) d.unavailable[teacherKey('oMC', 0, s)] = 1;
+    for (let s = 0; s < 4; s++) d.unavailable[closedKey('oMC', 0, s)] = 1;
 
     const report = buildReport(d);
     expect(report.unplaceable).toHaveLength(1);
@@ -224,7 +224,7 @@ describe('buildCapacity', () => {
 
   it('kapalı saatler kapasiteden düşülüyor', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
     const row = buildCapacity(d).teachers.find((x) => x.id === 'oMC')!;
     expect(row.capacity).toBe(3);
   });

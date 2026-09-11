@@ -18,9 +18,6 @@ export function closedKey(entityId: Id, day: number, hour: number): string {
   return `${entityId}|${day}|${hour}`;
 }
 
-/** Older name for closedKey, kept because most call sites are about teachers. */
-export const teacherKey = closedKey;
-
 /** A placement or closed-hours key read back. `id` is a class, teacher or room. */
 export interface KeyParts {
   id: Id;

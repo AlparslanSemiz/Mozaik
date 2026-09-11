@@ -5,7 +5,7 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/PLAN.md 14).
 
-import { buildIndex, place, placementKey, setBlockPinned, teacherKey } from './constraints';
+import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './constraints';
 import { lessonSubject } from './subjects';
 import {
   addClass,
@@ -99,7 +99,7 @@ function build(): State {
         maxPerDay: null,
       },
     ],
-    unavailable: { [teacherKey('oMC', 2, 3)]: 1 },
+    unavailable: { [closedKey('oMC', 2, 3)]: 1 },
     programs: [
       {
         ...blankProgram(),
@@ -158,8 +158,8 @@ describe('remapDays', () => {
   it('müsaitlik kayıtları da aynı şekilde taşınır', () => {
     const d = build();
     const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
-    expect(next.unavailable[teacherKey('oMC', 1, 3)]).toBe(1); // was day 2
-    expect(next.unavailable[teacherKey('oMC', 2, 3)]).toBeUndefined();
+    expect(next.unavailable[closedKey('oMC', 1, 3)]).toBe(1); // was day 2
+    expect(next.unavailable[closedKey('oMC', 2, 3)]).toBeUndefined();
   });
 
   // `sanitize` keeps a key as stored once its numbers are integers, so "03"

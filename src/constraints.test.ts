@@ -22,7 +22,6 @@ import {
   removeBlock,
   sanitize,
   setBlockPinned,
-  teacherKey,
 } from './constraints';
 import type { BlockRef } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
@@ -233,7 +232,7 @@ describe('blocker — sert kısıtlar', () => {
 
   it('öğretmenin müsait olmadığı saate yerleştirmeyi engeller', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
     const reason = why(d, 'x1', 0, 0);
     expect(reason).toContain('MÇ');
     expect(reason).toContain('müsait değil');
@@ -321,7 +320,7 @@ describe('blocker: bir günün açık saatleri', () => {
 
   it('öğretmenin kapalı ve başka sınıfta olduğu saatler dışarıda', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 0, 1)] = 1;
+    d.unavailable[closedKey('oMC', 0, 1)] = 1;
     const withPlacement = place(d, 'x2', 0, 3); // MÇ is in 511 -> hour 3 also closes
     expect(openHours(withPlacement, 'x1', 0)).toEqual([0, 2]);
   });
@@ -588,16 +587,16 @@ describe('sanitize — cascade ve taşma', () => {
 
   it('gün sayısı azalınca taşan müsaitlik kayıtları temizlenir', () => {
     const d = build();
-    d.unavailable[teacherKey('oMC', 1, 0)] = 1;
-    d.unavailable[teacherKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 1, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
     const narrow = {
       ...d,
       settings: { ...d.settings, days: [{ name: 'Pazartesi', longBreakAfter: 0 }] },
     };
 
     const s = sanitize(narrow);
-    expect(s.unavailable[teacherKey('oMC', 1, 0)]).toBeUndefined();
-    expect(s.unavailable[teacherKey('oMC', 0, 0)]).toBe(1);
+    expect(s.unavailable[closedKey('oMC', 1, 0)]).toBeUndefined();
+    expect(s.unavailable[closedKey('oMC', 0, 0)]).toBe(1);
   });
 
   it('yetim ve bozuk anahtarları atar', () => {
@@ -619,20 +618,20 @@ describe('sanitize — cascade ve taşma', () => {
 describe('blocker — sınıf ve derslik kapalı saatleri', () => {
   it('sınıf kapalıysa engeller ve sınıfın adını söyler', () => {
     const d = build();
-    d.unavailable[teacherKey('s510', 0, 2)] = 1;
+    d.unavailable[closedKey('s510', 0, 2)] = 1;
     expect(why(d, 'x1', 0, 2)).toBe('510 sınıfı Pazartesi 3 saatinde kapalı');
     expect(why(d, 'x1', 0, 1)).toBeNull();
   });
 
   it('sınıfın kapalı saati diğer sınıfları etkilemez', () => {
     const d = build();
-    d.unavailable[teacherKey('s510', 0, 2)] = 1;
+    d.unavailable[closedKey('s510', 0, 2)] = 1;
     expect(why(d, 'x2', 0, 2)).toBeNull(); // 511 is a different class
   });
 
   it('derslik kapalıysa o dersliği kullanan sınıf ders yapamaz', () => {
     const d = build();
-    d.unavailable[teacherKey('dA', 1, 0)] = 1;
+    d.unavailable[closedKey('dA', 1, 0)] = 1;
     expect(why(d, 'x1', 1, 0)).toBe('A dersliği Salı 1 saatinde kapalı');
     expect(why(d, 'x2', 1, 0)).toBe('A dersliği Salı 1 saatinde kapalı'); // shares room A
     expect(why(d, 'x3', 1, 0)).toBeNull(); // 433 is in room B
@@ -640,15 +639,15 @@ describe('blocker — sınıf ve derslik kapalı saatleri', () => {
 
   it('bloğun ORTASINA denk gelen kapalı saat de engeller', () => {
     const d = build();
-    d.unavailable[teacherKey('s433', 0, 1)] = 1;
+    d.unavailable[closedKey('s433', 0, 1)] = 1;
     expect(why(d, 'x3', 0, 0)).toBe('433 sınıfı Pazartesi 2 saatinde kapalı');
   });
 
   it('sınıf silinince onun kapalı saatleri de silinir', () => {
     const d = build();
-    d.unavailable[teacherKey('s510', 0, 0)] = 1;
+    d.unavailable[closedKey('s510', 0, 0)] = 1;
     const gone = sanitize({ ...d, classes: d.classes.filter((c) => c.id !== 's510') });
-    expect(gone.unavailable[teacherKey('s510', 0, 0)]).toBeUndefined();
+    expect(gone.unavailable[closedKey('s510', 0, 0)]).toBeUndefined();
   });
 });
 
@@ -1045,7 +1044,7 @@ describe('blockerDetail — sebebin kodu', () => {
   });
 
   it('öğretmen müsait değil / başka sınıfta', () => {
-    const away = { ...build(), unavailable: { [teacherKey('oMC', 0, 1)]: 1 as const } };
+    const away = { ...build(), unavailable: { [closedKey('oMC', 0, 1)]: 1 as const } };
     expect(code(away, 'x1', 0, 1)).toBe('teacherClosed');
 
     const elsewhere = place(build(), 'x2', 0, 1); // MÇ teaching 511

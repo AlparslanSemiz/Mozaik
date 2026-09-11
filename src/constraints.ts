@@ -5,7 +5,7 @@
 
 import { blockPlan, clampBlocks } from './blocks';
 import { t } from './i18n';
-import { cellKey, closedKey, parseKey, placementKey, teacherKey } from './keys';
+import { cellKey, closedKey, parseKey, placementKey } from './keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
@@ -25,7 +25,7 @@ import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher } from './t
 import type { View } from './toolState';
 
 // Re-exported so call sites keep importing keys from here.
-export { closedKey, placementKey, teacherKey };
+export { closedKey, placementKey };
 
 // ---------------------------------------------------------------- index
 
@@ -72,7 +72,7 @@ export function buildIndex(d: State): Index {
     const hour = Number(key.slice(sep + 1));
 
     placedHours.set(lessonId, (placedHours.get(lessonId) ?? 0) + 1);
-    teacherBusy.set(teacherKey(lesson.teacherId, day, hour), lessonId);
+    teacherBusy.set(closedKey(lesson.teacherId, day, hour), lessonId);
 
     const roomId = classById.get(lesson.classId)?.roomId;
     if (roomId != null) roomBusy.set(closedKey(roomId, day, hour), lessonId);
@@ -209,7 +209,7 @@ export function blockerDetail(
     }
 
     // 5. Is the teacher in another class at that hour
-    const busyForTeacher = ix.teacherBusy.get(teacherKey(teacher.id, day, h));
+    const busyForTeacher = ix.teacherBusy.get(closedKey(teacher.id, day, h));
     if (busyForTeacher !== undefined) {
       const other = ix.lessonById.get(busyForTeacher);
       const otherClass = other && ix.classById.get(other.classId);
@@ -692,7 +692,7 @@ function targetBlocks(
     const h = hour + i;
     const ids = [
       activePlacements(d)[placementKey(moving.classId, day, h)],
-      ix.teacherBusy.get(teacherKey(moving.teacherId, day, h)),
+      ix.teacherBusy.get(closedKey(moving.teacherId, day, h)),
     ];
     for (const id of ids) {
       if (id === undefined) continue;
@@ -1050,7 +1050,7 @@ export function occupy(
   for (let i = 0; i < block; i++) {
     const h = hour + i;
     placements[placementKey(lesson.classId, day, h)] = lesson.id;
-    ix.teacherBusy.set(teacherKey(lesson.teacherId, day, h), lesson.id);
+    ix.teacherBusy.set(closedKey(lesson.teacherId, day, h), lesson.id);
     if (roomId != null) ix.roomBusy.set(closedKey(roomId, day, h), lesson.id);
   }
   ix.placedHours.set(lesson.id, (ix.placedHours.get(lesson.id) ?? 0) + block);
@@ -1073,7 +1073,7 @@ export function vacate(
   for (let i = 0; i < block; i++) {
     const h = hour + i;
     delete placements[placementKey(lesson.classId, day, h)];
-    ix.teacherBusy.delete(teacherKey(lesson.teacherId, day, h));
+    ix.teacherBusy.delete(closedKey(lesson.teacherId, day, h));
     if (roomId != null) ix.roomBusy.delete(closedKey(roomId, day, h));
   }
   const left = (ix.placedHours.get(lesson.id) ?? 0) - block;

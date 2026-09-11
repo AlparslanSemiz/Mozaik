@@ -21,7 +21,6 @@ import {
   placedBlocks,
   placementKey,
   sanitize,
-  teacherKey,
 } from './constraints';
 import { keyOnDay, parseKey } from './keys';
 // Type-only, erased at build time: import.ts knows nothing about State, so
@@ -1235,7 +1234,7 @@ export function entityWeek(d: State, kind: InspectKind, id: Id): WeekCell[][] {
         kind === 'class'
           ? activePlacements(d)[placementKey(id, day, hour)]
           : kind === 'teacher'
-            ? ix.teacherBusy.get(teacherKey(id, day, hour))
+            ? ix.teacherBusy.get(closedKey(id, day, hour))
             : ix.roomBusy.get(closedKey(id, day, hour));
 
       const lesson = lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
