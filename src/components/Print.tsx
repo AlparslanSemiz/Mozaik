@@ -17,6 +17,7 @@
 import { useMemo } from 'react';
 import { periodGroups } from '../bell';
 import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints';
+import { parseKey } from '../keys';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
 import { paletteColor } from '../palette';
 import type { State } from '../types';
@@ -273,7 +274,8 @@ export default function Print({
     const classes = new Set<string>();
     const teachers = new Set<string>();
     for (const [key, lessonId] of Object.entries(activePlacements(state))) {
-      classes.add(key.slice(0, key.indexOf('|')));
+      const parts = parseKey(key);
+      if (parts !== null) classes.add(parts.id);
       const lesson = ix.lessonById.get(lessonId);
       if (lesson !== undefined) teachers.add(lesson.teacherId);
     }
