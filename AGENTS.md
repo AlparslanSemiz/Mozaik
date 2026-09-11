@@ -1,23 +1,25 @@
 # Codex repository instructions
 
-## Authoritative project guidance
+## Where the project guidance lives
 
-`CLAUDE.md` is this repository's single authoritative source for product
-principles, architecture, conventions, constraints, known pitfalls, commands,
-and required end-of-session work.
+The project's guidance is written in Turkish and split by topic under `docs/`.
+`CLAUDE.md` is the entry point. It describes the project in a few sentences,
+names the two files to read first in a new session, lists every document with
+one line on what it covers, and ends with the end-of-session routine.
 
-- Before analyzing, reviewing, planning, or changing this repository, read
-  `CLAUDE.md` completely. If command output is truncated, continue reading it
-  in chunks until reaching the end of the file.
-- Follow the instructions in `CLAUDE.md` as repository instructions. Read the
-  documents it links, including `docs/PLAN.md`, `docs/WORKLOG.md`, and
-  `docs/TODO.md`, whenever they are relevant to the task or required by its
-  workflow.
-- Keep shared project rules and decisions in `CLAUDE.md`; do not duplicate them
-  here. This file exists only as Codex's stable entry point to the shared
-  guidance.
-- When durable project guidance changes, update `CLAUDE.md` so Claude and Codex
-  continue to use the same source of truth.
+- Before analyzing, reviewing, planning, or changing this repository, start at
+  `CLAUDE.md` and follow its links to the documents the task touches. There is
+  no need to read every document from start to end.
+- Follow the rules in those documents as repository instructions. A rule there
+  states today's position together with its reason. `docs/DECISIONS.md` records
+  how and why positions changed, and `docs/TRAPS.md` lists known pitfalls under
+  permanent numbers that code comments cite as "pitfall N".
+- Follow the end-of-session routine at the bottom of `CLAUDE.md`.
+- Keep shared project rules in `CLAUDE.md` and `docs/`, and do not duplicate
+  them here. This file exists only as Codex's stable entry point.
+- When durable project guidance changes, update the matching document under
+  `docs/`, and `CLAUDE.md` if a document is added, renamed or removed, so that
+  Claude and Codex keep using the same source of truth.
 
 Explicit user, system, and developer instructions take precedence over this
 repository guidance.
