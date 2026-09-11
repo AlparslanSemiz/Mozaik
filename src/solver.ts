@@ -107,7 +107,8 @@ export interface Solver {
  * shape — a domain of legal start cells, an MRV count, a forward-checking
  * bound — assumes every block it is holding is the same length. So a 2+2+1
  * lesson becomes two items, one asking for two 2s and one asking for a single,
- * and at most four items cover every split there is. They share a class, so
+ * and since blocks are 3, 2 or 1 hours long (v13) at most three items cover
+ * every split there is. They share a class, so
  * `neighbours` already makes each the other's neighbour and the grid keeps
  * them apart the same way it keeps any two lessons apart.
  */
@@ -247,7 +248,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     // 5-hour lesson in 2-hour blocks; there is no remainder to throw away now
     // because the split says what the last block is.
     const owed = pendingBlocks(work, lesson);
-    for (const block of [4, 3, 2, 1]) {
+    for (const block of [3, 2, 1]) {
       const need = owed.filter((x) => x === block).length;
       if (need <= 0) continue;
       items.push({
@@ -315,7 +316,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
    * raise the number.
    *
    * In HOURS and per LESSON rather than in blocks and per item, because a
-   * 4+2+1 lesson is three items competing for the same cells and the same daily
+   * 3+2+1 lesson is three items competing for the same cells and the same daily
    * limit: capping each of them on its own would let the others between them
    * claim a day twice over.
    */
