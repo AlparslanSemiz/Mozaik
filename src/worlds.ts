@@ -34,7 +34,7 @@ import type {
   Teacher,
 } from './types';
 import { SCHEMA_VERSION } from './types';
-import { activePlacements, blankProgram, replaceActiveGrid } from './programs';
+import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './programs';
 
 // ---------------------------------------------------------------- the builder
 
@@ -141,7 +141,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     lessons,
     unavailable: spec.unavailable ?? {},
     programs: [{ ...blankProgram(), placements: spec.placements ?? {} }],
-    activeProgramId: 'program-1',
+    activeProgramId: DEFAULT_PROGRAM_ID,
   };
 }
 

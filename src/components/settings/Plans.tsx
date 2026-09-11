@@ -15,7 +15,7 @@ import { emptyState } from '../../entities';
 import { drafts as draftsOf } from '../../library';
 import { loadPlan } from '../../store';
 import type { State } from '../../types';
-import { activePlacements, blankProgram } from '../../programs';
+import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID } from '../../programs';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';
@@ -121,7 +121,7 @@ export default function Plans({ state, plans }: Props) {
             // cell locks a square for a lesson that is not there.
             plans.createPlan(
               `${active?.name ?? 'Plan'} taslağı`,
-              { ...state, programs: [blankProgram()], activeProgramId: 'program-1' },
+              { ...state, programs: [blankProgram()], activeProgramId: DEFAULT_PROGRAM_ID },
               true,
             )
           }

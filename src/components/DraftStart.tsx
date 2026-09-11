@@ -13,7 +13,7 @@
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
 import { loadPlan } from '../store';
-import { blankProgram } from '../programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../programs';
 import type { PlanControls } from './props';
 
 interface Props {
@@ -53,7 +53,7 @@ export default function DraftStart({ plans, label, notify }: Props) {
             plans.createPlan(t('{ad} kopyası', { ad: d.name }), {
               ...seed,
               programs: [blankProgram()],
-              activeProgramId: 'program-1',
+              activeProgramId: DEFAULT_PROGRAM_ID,
             });
             notify?.(t('"{ad}" taslağından yeni bir plan açıldı.', { ad: d.name }));
           }}

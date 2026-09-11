@@ -33,7 +33,7 @@ import {
   writePlanText,
 } from './library';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
-import { blankProgram } from './programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
 import type {
   ClassGroup,
   Day,
@@ -315,7 +315,7 @@ function migrateV2toV3(raw: LegacyV2): State {
         placements: asMap<string>(raw.placements),
       },
     ],
-    activeProgramId: 'program-1',
+    activeProgramId: DEFAULT_PROGRAM_ID,
   };
 }
 
@@ -541,7 +541,7 @@ export function parseState(text: string): State | null {
                 pinned: asMap<1>(g.pinned),
               },
             ],
-      activeProgramId: Number(version) >= 12 ? asText(g.activeProgramId, '') : 'program-1',
+      activeProgramId: Number(version) >= 12 ? asText(g.activeProgramId, '') : DEFAULT_PROGRAM_ID,
     };
   } else {
     return null; // an unknown (newer) version is not guessed at

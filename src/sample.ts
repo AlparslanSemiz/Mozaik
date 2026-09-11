@@ -10,7 +10,7 @@ import { closedKey } from './constraints';
 import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
 import { PALETTE_SIZE } from './palette';
 import { SCHEMA_VERSION } from './types';
-import { blankProgram } from './programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
 import {
   DEFAULT_BELL,
   DEFAULT_RULES,
@@ -229,6 +229,6 @@ export function sampleState(): State {
     lessons,
     unavailable,
     programs: [blankProgram()],
-    activeProgramId: 'program-1',
+    activeProgramId: DEFAULT_PROGRAM_ID,
   };
 }

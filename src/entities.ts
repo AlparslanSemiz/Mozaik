@@ -11,6 +11,7 @@ import {
   mapProgramGrids,
   replaceActiveGrid,
   blankProgram,
+  DEFAULT_PROGRAM_ID,
 } from './programs';
 import {
   blocker,
@@ -524,7 +525,7 @@ export function emptyState(): State {
     lessons: [],
     unavailable: {},
     programs: [blankProgram()],
-    activeProgramId: 'program-1',
+    activeProgramId: DEFAULT_PROGRAM_ID,
   };
 }
 
