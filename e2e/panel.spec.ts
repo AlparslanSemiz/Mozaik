@@ -10,7 +10,8 @@
 // too (pitfall 16 has cost this program a placed lesson once already).
 
 import { expect, test } from './kapan';
-import { openWithSample, openSetup, chooseEntity, mainList } from './helpers';
+import { openWithSample, openSetup, chooseEntity, mainList, loadWorld } from './helpers';
+import { closeWeek, makeWorld } from '../src/worlds';
 
 test.describe('48. Varlık paneli', () => {
   test('ızgarada satır başına tıklamak o öğretmenin haftasını açıyor', async ({ page }) => {
@@ -187,6 +188,38 @@ test.describe('83. Panelden ders aktarma', () => {
     await expect(
       sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox'),
     ).toBeVisible();
+  });
+
+  // The count in the toast is written inside the reducer callback. React runs
+  // that callback late (pitfall 20), so reading it right after `change()`
+  // found 0 and the sentence never said how many blocks went back.
+  test('havuza dönen blokların sayısı bildirimde yazıyor', async ({ page }) => {
+    const world = closeWeek(
+      makeWorld({
+        days: 2,
+        hours: 3,
+        teachers: [
+          { id: 'oMC', short: 'MÇ' },
+          { id: 'oAV', short: 'AV', subject: 'Fizik' },
+        ],
+        lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+        placements: { 's510|0|0': 'x1', 's510|1|0': 'x1' },
+      }),
+      'oAV',
+    );
+    await loadWorld(page, world, 'Okul');
+    await openSetup(page, 'Öğretmenler');
+    await mainList(page).getByRole('button', { name: 'MÇ bilgileri' }).click();
+
+    const pick = sheet(page).locator('.sheet-lessons tbody tr').first().getByRole('combobox');
+    await pick.selectOption('oAV');
+    // Precondition: both blocks are on the grid, and AV's week is shut.
+    await expect(page.getByRole('alertdialog').or(page.getByRole('dialog')).last()).toContainText(
+      '2 bloğu',
+    );
+    await page.getByRole('button', { name: 'Aktar' }).click();
+
+    await expect(page.locator('.toast').last()).toContainText('2 blok havuza döndü');
   });
 
   // The whole reason this is not a one-line teacherId write.

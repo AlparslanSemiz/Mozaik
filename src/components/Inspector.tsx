@@ -180,12 +180,12 @@ function Inspector({
       return;
     }
 
-    let returned = 0;
-    change((d) => {
-      const result = transferLesson(d, lessonId, teacherId);
-      returned = result.returned;
-      return result.state;
-    });
+    // The count comes from a preview on the state the reader is looking at,
+    // the way `LessonEdit` does it. A variable written inside the reducer
+    // callback is still 0 here, because React runs that callback late
+    // (pitfall 20).
+    const { returned } = transferLesson(state, lessonId, teacherId);
+    change((d) => transferLesson(d, lessonId, teacherId).state);
     toast(
       returned === 0
         ? t('{ne} dersi {kim} öğretmenine geçti.', { ne: other, kim: to.short })
