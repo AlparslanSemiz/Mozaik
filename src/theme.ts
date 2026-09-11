@@ -53,36 +53,6 @@ export function applyTheme(theme: Theme): void {
   }
 }
 
-// ------------------------------------------------------- sidebar preference
-
-/**
- * Whether the left rail is collapsed to icons. Same reasoning as the theme: a
- * property of the machine and its screen, never of the timetable, so it stays
- * out of `State` and out of the backup file.
- */
-export const SIDEBAR_KEY = 'ders-programi-kenar';
-
-/** Anything that is not exactly 'dar' means the rail is open. */
-export function normalizeSidebar(raw: unknown): boolean {
-  return raw === 'dar';
-}
-
-export function readSidebar(): boolean {
-  try {
-    return normalizeSidebar(localStorage.getItem(SIDEBAR_KEY));
-  } catch {
-    return false;
-  }
-}
-
-export function writeSidebar(collapsed: boolean): void {
-  try {
-    localStorage.setItem(SIDEBAR_KEY, collapsed ? 'dar' : 'genis');
-  } catch {
-    // A rail width that cannot be remembered is not worth an error
-  }
-}
-
 // ----------------------------------------------------------- dock preference
 
 /**

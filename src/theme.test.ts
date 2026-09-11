@@ -14,7 +14,6 @@ import {
   DOCK_H_MAX,
   DOCK_H_DEFAULT,
   DOCK_H_STEP,
-  normalizeSidebar,
   normalizeTheme,
   SCALE_MAX,
   SCALE_MIN,
@@ -36,22 +35,6 @@ describe('normalizeTheme', () => {
   it('bozuk değer açığa düşer, çökmez', () => {
     for (const junk of ['', 'DARK', 'koyu', '{}', 0, undefined, {}, []]) {
       expect(normalizeTheme(junk)).toBe('light');
-    }
-  });
-});
-
-// The rail width is stored like the theme: a property of the machine, never of
-// the timetable. Anything unrecognised must leave the rail OPEN — a collapsed
-// rail on a first run would hide the names of all six sections.
-describe('normalizeSidebar', () => {
-  it("yalnız 'dar' daraltıyor", () => {
-    expect(normalizeSidebar('dar')).toBe(true);
-    expect(normalizeSidebar('genis')).toBe(false);
-  });
-
-  it('bozuk veya eksik değer geniş bırakıyor', () => {
-    for (const junk of [null, '', 'DAR', 'true', 1, undefined, {}, []]) {
-      expect(normalizeSidebar(junk)).toBe(false);
     }
   });
 });
