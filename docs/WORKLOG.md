@@ -26,20 +26,25 @@ Son güncelleme: 2026-09-11.
 **Ne çalışıyor.** Program 2.1.1'den beri değişmedi: yedi sekme (Okul, Müsaitlik,
 Dersler, Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil,
 dört teslim yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini
-güncellemesi. 2026-09-11'de yalnız belgeler yeniden kuruldu, koda yalnız yorum,
-test adı ve sürüm betiği olarak dokunuldu.
+güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
+sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru için envanter çıkarıldı ve
+taban ölçümleri alındı, kaynak koda dokunulmadı.
 
-**Yarım olan.** [TODO.md](TODO.md)'de açık madde sayıları (2026-09-11'de sayıldı):
-§1 inceleme 5, §2 Ayarlar 10, §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1,
-§6 veri modeli 6, §7 dağıtım 9, §8 karar bekleyen 21. §0 not defterinde sekiz ham
-not duruyor ve numaralı maddelere taşınmadı. Bir kısmı (sürüklerken takılma,
-Program şeridinde renk menüsü, kart takası, Hakkında'daki yenilik noktası) 2026-09-01
-tarihli `516f963` ve kırk yedinci oturumda yapılmış görünüyor.
+**Yarım olan.** Kod refactoru Faz 1'in sonunda: envanter onaylandı, taban ölçümleri
+ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde. Faz 2 (modül modül refactor)
+kullanıcının TODO §8d'deki üç kararını bekliyor. [TODO.md](TODO.md)'de açık madde
+sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
+§3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
+§8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
+taşınmadı. Bir kısmı (sürüklerken takılma, Program şeridinde renk menüsü, kart takası,
+Hakkında'daki yenilik noktası) 2026-09-01 tarihli `516f963` ve kırk yedinci oturumda
+yapılmış görünüyor.
 
 **Bilinen kusurlar.**
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
-- 2026-09-01'deki `npm run kontrol` koşusunda 6 E2E testi düşüyordu, altısı da o turdan önce de düşüyordu: 3 havuz sıralaması (`program.spec.ts`), 2 araç şeridi (`serit.spec.ts`), 1 `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7).
+- 2026-09-11'deki `npm run test:e2e` koşusunda 555 testin 10'u düştü. Beşi 2026-09-01'den beri biliniyor: 3 havuz testi (`program.spec.ts`) ve 2 araç şeridi testi (`serit.spec.ts`). Biri kalıcı bir test kusuru (`surum.spec.ts` 107). Dördü paralel koşuda düşüp tek işçide geçiyor. `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti. Ayrım refactor girdisinde, bulgular TESTFINDINGS'te.
+- Kaynaktan okunmuş ama ekranda denenmemiş davranış kusurları: Müsaitlik ve Çıktı'da erken dönüşten sonra çağrılan kancalar, varlık panelinin ders aktarma bildirimi, çevrilmemiş "art arda" sınır cümlesi (TODO §8d).
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
@@ -60,10 +65,129 @@ tarihli `516f963` ve kırk yedinci oturumda yapılmış görünüyor.
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | `library.ts`'teki `storageReport` |
-| Birim testleri | 27 dosyada 763 test, hepsi geçti | `npm test` |
-| `dist/index.html` | 1 007 885 bayt | `npx vite build`, açılış süresi bugün ölçülmedi |
+| Birim testleri | 27 dosyada 763 test, hepsi geçti, 3,5 sn | `npm test` |
+| Ana E2E koşusu | 545/555 geçti, süit 5,0 dk | `npm run test:e2e`, düşenlerin ayrımı refactor girdisinde |
+| `dist/index.html` | 1 007 885 bayt | `npx vite build`, dökümü refactor girdisinde |
+| Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
+| Program'a geçiş, dolu ızgara | 34,8 ms medyan x1, 159,0 ms x4 | aynı betik, tıklamadan iki kareye |
 
 ---
+
+## 2026-09-11 · Kod refactoru, Faz 0 ve Faz 1: envanter, taban ölçümleri, boyut atfı
+
+**Ne yapıldı.** Kodun modül modül refactoru için bir envanter çıkarıldı ve onaylandı
+(Faz 0). Bu turda hiçbir kaynak dosyaya dokunulmadı. Envanter dosya başına satır,
+dışa aktarım, en uzun fonksiyon, import ve tuzak eşlemesini TypeScript AST ile
+saydı, ve beş liste üretti: tek sorumluluk ihlalleri, yanlış yerdeki kod, hazır
+çözüm adayları, ölçülecekler ve ölü kod. Ardından taban ölçümleri alındı ve boyut
+büyümesi bayt bayt atfedildi (Faz 1). Refactor dışı kalan doğrulanmış kusurlar TODO
+§8d'de.
+
+**Envanterin özeti.**
+
+- Çalışma zamanında import döngüsü yok. Katman sınırını yukarı doğru geçen tek çalışma zamanı importu `library.ts`'ten `desktop.ts`, `changelog.ts` ve `programColor.ts`'e, üçü de "Veriler nerede" tablosunun anahtarları ve teslim yolu tespiti için.
+- Beş bileşen fonksiyonu 600 satırı geçiyor: Program 871, Ribbon 858, App 844, Lessons 828, Print ve Teachers 622. En çok dışa aktaran modüller `entities.ts` (86) ve `theme.ts` (59).
+- Tek sorumluluk: `entities.ts` en az yedi soruyu, `constraints.ts` motorun yanında blok okuma, ızgara düzenleme, bırakma ve veri temizliğini, `store.ts` reducer, yaklaşık 430 satırlık göç, kalıcılık, dosya indirme ve kancayı taşıyor. `theme.ts` aynı oku, normalize et, yaz desenini on iki kez yazıyor, dört kardeşiyle 16 tercih.
+- Tekrar: anahtar ayrıştırma on bir yerde ve iki stratejiyle, depolama anahtarları `library.ts`'te ikinci kez düz yazılı, `safely()`, tarih damgası ve gecikmeli kayıt ikişer kez. Bileşenlerde yaklaşık 1300 ile 1500 satır kopya, en büyüğü Öğretmenler, Sınıflar ve Derslikler'in ortak liste iskeleti.
+- Hazır çözüm adayları: kullanılmayan `@radix-ui/react-tooltip`, `Math.random` yerine `crypto.getRandomValues`, önbelleğe alınmış `Intl.Collator`, tercih fabrikası ve `useSyncExternalStore`, `idb-keyval`, geliştirme tarafında ESLint'in kanca kuralı, `knip` ve Prettier. `drag.ts`, `rowDrag.ts` ve `poolSplit.ts` için paket önerileri bağlayıcı kararlar yüzünden dokunulmaz listesinde.
+- Ölü kod: hiç çağrılmayan `pendingLessons`, `readSidebar`, `writeSidebar`, `GROUP_ICONS`, `PRINT_OPTIONS_KEY`, yalnız testten çağrılan `validHours`, `blockStart`, `evict`, `deletionSummary`, `activePlan`, `nextPlanName`, ve çözücünün v13'ten beri ulaşılamayan `4` dalı.
+- Ölçülecekler: `buildRows` her değişiklikte bütün satır nesnelerini yeniden kuruyor (yeniden kullanım yok, kaynaktan okundu), yani tuzak 10'un "bir yerleştirme bir iki satır çizer" iddiası bugün geçersiz olabilir. `dropMap`'in takas yolu sürükleme başında aday hücre başına üç indeks kuruyor. Not defterindeki "Program açılışı hızlanmalı" ve "kart gezdirirken kasma" satırları bu iki maddeye denk düşüyor.
+
+**Önerilen sıra.** Önce ölçüm, sonra yaprak ve testi güçlü olanlar: geliştirme
+araçları, ölü kod, `keys.ts`'in ayrıştırıcıları, küçük ortak yardımcılar, tercihler,
+`library.ts`, `store.ts`, `entities.ts`, `feasibility.ts`, `constraints.ts`,
+bileşenlerin saf parçaları, bileşenler, hazır çözüm geçişleri, ve en son yalnız
+gerekçesi çürütülürse `drag.ts`. Taşıma ile içerik değişikliği ayrı commit'lerde.
+
+**Taban ölçümleri.** HEAD `41e5afb`, Playwright Chromium, 1920×1080, `file://`, 8
+çekirdek, 9 koşu. Betik `scratch/olc-taban.mjs`, girdi `scratch/taban-dolu.json`:
+örnek okul otomatik dizildi, 433 saatin 433'ü yerleşti, ızgarada 374 kart, havuz
+boş. `scratch/` git dışında, Faz 4 aynı betiği aynı girdiyle koşar.
+
+```
+dist/index.html           1 007 885 bayt   (npx vite build, çıkış 0)
+açılış, boş depo          hazır 105,3 ms medyan · 126,2 en kötü · DCL 62,1 · 68,5
+açılış, dolu plan         hazır 176,1 ms medyan · 192,5 en kötü · DCL 51,8 · 68,6
+Program'a geçiş, x1       ilk 34,8 ms medyan · 37,7 en kötü · sıcak 33,1 · 57,0
+Program'a geçiş, x4       ilk 159,0 ms medyan · 161,9 en kötü · sıcak 137,0 · 157,5
+npm test                  27 dosyada 763 test, hepsi geçti · 3,5 sn duvar
+npm run test:e2e          555 testte 545 geçti, 10 düştü · süit 5,0 dk · derlemeyle 300 sn duvar
+```
+
+**E2E tabanı.** Refactorun kıracağı bir testle karışmasın diye bugün düşen on test
+ayrıldı.
+
+- 2026-09-01'den beri bilinen beşi: `program.spec.ts` 1090, 1173 ve 1241 (havuzun sırası, süzgeci ve destesi) ile `serit.spec.ts` 83 ve 205. O günkü altıncı düşüş olan `kayma.spec.ts`'in macOS oluk farkı bu Linux makinesinde geçti.
+- Kalıcı bir tane: `surum.spec.ts` 107, `0df5c9d`'den beri kırmızı olan bir test kusuru. Kayıt TESTFINDINGS'te.
+- Dört işçili koşuda düşüp `--workers=1 --repeat-each=2` ile ikişer kez geçen dört tane: `dil.spec.ts` 70, `izgara.spec.ts` 360, `kurulum.spec.ts` 851 ve `renk.spec.ts` 39. Dördü de depoya yazıp yeniledikten sonra okuyor. Sebep ölçülmedi, kayıt TESTFINDINGS'te.
+
+Ölçütler şöyle tanımlı. "Hazır" `.topbar` DOM'a girip `document.fonts.ready`
+çözüldükten sonraki kare. DCL navigation entry'nin `domContentLoadedEventEnd`'i.
+Geçiş, sekme düğmesine tıklamadan iki `requestAnimationFrame` sonrasına kadar,
+hareket kapalı. "İlk" o bağlamda Program'ın hiç açılmadığı geçiş, "sıcak" Okul'a
+gidip dönmek. x4 CDP'nin `Emulation.setCPUThrottlingRate`'i. FCP boş depoda 9
+koşunun 3'ünde, dolu planda 6'sında geldi (dolu planda 156 ile 184 ms), bu yüzden
+karşılaştırmada kullanılmıyor. Önceki turların açılış sayıları başka ölçütlerle
+alındı (açılış, DCL, FCP, ilk boyama) ve bu tabloyla birebir karşılaştırılamaz.
+Sekme geçişi tablosundaki Program satırı (x1 32,6, x4 144,8 ms) aynı yönteme en
+yakın olanı.
+
+**Boyut atfı.** Soru, belgelerdeki 489 815 bayttan bugünkü 1 007 885'e büyümenin
+nereden geldiğiydi. Yöntem: aynı config singlefile'sız ve sourcemap'li derlendi
+(`scratch/vite.olc-kaynak.config.mjs`), ve JS chunk'ının baytları sourcemap
+segmentleriyle kaynak dosyaya dağıtıldı (`scratch/olc-kaynak.mjs`, `source-map-js`).
+Eski commit'ler `git archive` ile açılıp bugünkü `node_modules` ile derlendi.
+Yöntemin kendisi doğrulandı: D turunun ölçüm commit'i `d6ccfec` kendi config'iyle
+birebir 489 815 bayt verdi, `b0b83ed` 995 103 (kayıt 995 150, fark sürüm damgası).
+Bağımlılık commit'i `18a5123` 405 242 verdi, çünkü paketleri `package.json`'a ekliyor
+ama kod onları henüz import etmiyor.
+
+```
+                           d6ccfec        HEAD         fark
+JS, uygulama (src)         176 570     291 055     +114 485
+JS, dört sözlük                  0     309 104     +309 104
+JS, paketler               235 706     307 309      +71 603
+JS, eşlenmeyen                 604         944         +340
+CSS ve gömülü font          76 638      96 356      +19 718
+HTML, uyarı betiği, kalan      297       3 117       +2 820
+toplam                     489 815   1 007 885     +518 070
+```
+
+Paketlerdeki fark neredeyse bütünüyle menü ve açılır pencere katmanı: Radix 25 347'den
+66 606'ya (+41 259), popper ile gelen floating-ui 0'dan 22 545'e, lucide 4 694'ten
+11 958'e (+7 264). React ve react-dom birkaç yüz bayt oynadı. Uygulama kodundaki
++114 485 baytın yüzde 86'sı 25 dosyadan geliyor, en büyükleri Ribbon +10 762, Program
++10 454, Dersler sekmesi (yeni) +10 177, `constraints.ts` +7 977, Ayarlar'ın Veri
+bölümü +5 272, Inspector +4 824, LessonEdit (yeni) +4 522, Branşlar (yeni) +4 421.
+Kaynak dosya sayısı 43'ten 56'ya çıktı.
+
+Kaydı olmayan son parça, `b0b83ed`'den HEAD'e +12 782 bayt (`507fd00`, `516f963`,
+`0df5c9d` ve belge commit'leri): dört sözlük +4 065, `constraints.ts` +2 790, `drag.ts`
++1 883, `changelog.ts` +1 248, CSS +936, Ribbon +934, Grid +295, LessonPool +294,
+Program -202.
+
+**Sonuç.** "Kod değişmeden iki katı" olmadı: 489 815'ten sonra kırk kadar oturum ve üç
+yeni sözlük var, ve büyümenin tamamı bayt bayt atfedildi. En büyük kalem gömülü
+çeviri (309 KB, dosyanın yüzde 30,7'si), sonra uygulama kodu (+114 KB) ve menü
+paketleri (+72 KB). Derleme ayarında kazanılacak bir şey yok: minify, CSS minify ve
+yorum temizliği Vite'ın varsayılanında zaten açık. İki fikir ölçülecekler listesinde
+duruyor ve refactorun parçası değil: dört sözlükte ayrı ayrı gömülü aynı 973 Türkçe
+anahtarın fazla üç kopyası (okuma sırasında 112 065 bayt hesaplandı, derlemeyle
+ölçülmedi) ve dosyanın sıkıştırılıp `DecompressionStream` ile açılması.
+
+**Plandan sapmalar.** Plan envanterin refactor dışı kusurlarını TODO'ya ve
+TESTFINDINGS'e yazmayı söylüyordu. Yalnız TODO'ya yazıldılar, çünkü bir test
+koşusundan değil kaynak okumasından çıktılar ve TESTFINDINGS test koşularının kaydı.
+TESTFINDINGS'e ise E2E koşusunun iki bulgusu girdi.
+
+**Koşulan ve koşulmayan testler.**
+
+- Koşuldu: `npx vite build` (çıkış 0), `npm test` (763/763), `npm run test:e2e` (545/555, düşenler yukarıda), yeni beş düşüşün tek işçili tekrarı, `scratch/olc-taban.mjs`, ve boyut atfının derlemeleri (HEAD, `b0b83ed`, `d6ccfec` ve `18a5123`, dördü de çıkış 0).
+- Koşulmadı: `npm run tipler`, `npm run test:site`, `npm run cozucu`, `npm run patrol`, `npm run ekran` ve `npm run exe:test`. Bu turda kaynak koda dokunulmadı, değişen yalnız belgeler ve git dışındaki `scratch/` betikleri. Refactorun kapanışı (Faz 4) tam süiti koşar. Rust bu makinede kurulu değil.
+
+**Sıradaki iş.** Faz 2'ye geçmeden önce kullanıcının üç kararı gerekiyor (TODO §8d):
+kanca sırası ve varlık paneli düzeltmeleri önce mi, Prettier ile toplu biçim commit'i,
+yalnız testten çağrılan fonksiyonların silinmesi.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 

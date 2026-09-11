@@ -781,10 +781,58 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **Bayat kod yorumları:** `App.tsx`'in başı "six sections", `Program.tsx` havuzu
       "down the right", `App.tsx`'in marka yorumu "detailed", `Appearance.tsx`'in başı
       ölçeği "1.00 to 1.50" diye anlatıyor.
-- [ ] **Ana E2E süiti bu turda koşulmadı.** Bir sonraki arayüz işinde ya da sürümden önce
-      `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte.
+- [x] **Ana E2E süiti bu turda koşulmadı.** Bir sonraki arayüz işinde ya da sürümden önce
+      `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte. 2026-09-11'de kod refactor
+      turunun tabanı olarak koşuldu: 545/555, düşen on testin ayrımı WORKLOG'da, iki bulgu
+      TESTFINDINGS'te ve §8d'de.
 - [ ] **`npm run yayinla`'nın CHANGELOG kapısı gerçek bir sürümde denenmedi.** Kapatma
       fonksiyonu bir kopya üzerinde denendi, ilk sürümde çıktısına bakılacak.
+
+---
+### 8d · Kod refactor turunun envanterinden çıkanlar (2026-09-11)
+
+Envanter (refactorun Faz 0'ı) kaynağı okurken buldu. Bunlar davranış kusuru ya da
+belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendisi ve
+önerilen sıra WORKLOG'un 2026-09-11 tarihli refactor girdisinde.
+
+- [ ] **Kanca sırası.** `Availability.tsx` 142'de erken dönüyor, `useMemo`'yu 213 ve
+      222'de çağırıyor. `Print.tsx` 262'de dönüyor, `useMemo`'yu 290'da çağırıyor. Liste
+      boşken sekme açıksa ve Ctrl+Z ya da "Dosyadan aç" listeyi doldurursa React çökebilir.
+      Kaynaktan okundu, ekranda denenmedi. Önce kırmızıya dönen bir E2E yazılır.
+- [ ] **Varlık panelinde ders aktarma bildirimi.** `Inspector.tsx:183-189` `returned`'ı
+      `change()`'in geri çağırımında yazıp hemen ardından okuyor. `change` bir `useReducer`
+      dispatch'i, yani bildirim büyük ihtimalle hep "0 blok" yolunu seçiyor. Tuzak 20'nin
+      deseni. `LessonEdit.tsx` aynı işi önizleme çağrısıyla doğru yapıyor.
+- [ ] **Çevrilmemiş sınır cümlesi.** `constraints.ts:307`'deki "art arda en fazla N saat"
+      mesajı `t()`'den geçmiyor, beş dilde de Türkçe çıkıyor.
+- [ ] **ARCHITECTURE'ta iki yanlış cümle.** Çözücü "en çok iki iş kalemi" kurmuyor, blok boyu
+      başına bir kalem kuruyor, v13'ten beri en çok üç (`solver.ts:250`'deki `4` ölü dal).
+      `sanitize` `entities.ts`'te değil `constraints.ts`'te. Refactorun kapanışında dosya
+      haritasıyla birlikte düzeltilir.
+- [ ] **DESIGN.md 489 815 baytı bugünkü değer gibi yazıyor** (103 ve 146. satırlar). Bugün
+      1 007 885, ve aradaki farkın dökümü WORKLOG'da.
+- [ ] **Doğrulanacaklar.** Okuma sırasında bildirildi, kaynaktan tek tek açılmadı:
+      Dersler formunda Enter'ın Dağılım düğmesinde de ders eklemesi (`lessons/index.tsx:438-446`),
+      kısayol ekranının Enter'ı olduğundan başka anlatması (`ShortcutsHelp.tsx`, `Grid.tsx`),
+      Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
+      çağrısında ayrışması, `updateClass`'ın derslik değişince çakışmayı yargılamaması,
+      `teacher.subject`'in üç yerde `lessonSubject()` yerine okunması, JSX'te `t()`'den
+      geçmeyen yaklaşık 25 dize (`Print.tsx`, `Ribbon.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,
+      `Plans.tsx`, silme onaylarının `"Sil"`'i), `initialBox`'ın StrictMode altında yedek
+      zincirini iki kez döndürmesi.
+- [ ] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
+      sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
+      oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
+- [ ] **Dört E2E testi paralel koşuda düşüp tek işçide geçiyor.** `dil.spec.ts` 70,
+      `izgara.spec.ts` 360, `kurulum.spec.ts` 851, `renk.spec.ts` 39, dördü de depoya yazıp
+      yeniledikten sonra okuyor. Sebep ölçülecek, "yük" diye yazılmadan (tuzak 92).
+- [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
+      Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
+      yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,
+      `deletionSummary`, `activePlan`, `nextPlanName`) testleriyle silinsin mi. Kullanıcı
+      kararı (2026-09-11): üçüne de evet. Kanca sırası ve varlık paneli önce, her biri
+      kırmızı bir E2E ile ve ayrı commit'te. Prettier ayrı ve yalnız başına bir commit.
+      Altı fonksiyon testleriyle silinir. Commit'ler `docs/claude-md-bolme` dalına gider.
 
 ## §9. Ham notlar — senin kendi satırların
 
