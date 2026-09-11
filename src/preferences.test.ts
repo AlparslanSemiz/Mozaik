@@ -398,6 +398,68 @@ describe('görülen sürüm notu', () => {
   });
 });
 
+// The theme is the ONE preference here that does NOT follow the machine, and
+// that is a decision (2026-08-27), not an omission: the functional colours were
+// chosen and measured on the light surface, so light is where the tool is known
+// to work and dark is something somebody picks on purpose. Motion is the
+// deliberate opposite a few blocks down — a machine asking for less motion is
+// stating a need, a machine set to a dark scheme is stating a taste.
+//
+// `normalizeTheme(null)` returning 'light' does not say this. `fallback` is a
+// separate function and the factory's contract explicitly allows it to ask the
+// machine, so the two could drift apart with theme.test.ts still green. What is
+// pinned here is the preference AS READ, with a machine that says otherwise.
+describe('tema · makinenin tercihini İZLEMİYOR', () => {
+  const darkMachine = (query: string) => ({
+    matches: query === '(prefers-color-scheme: dark)',
+  });
+
+  beforeEach(() => {
+    Object.defineProperty(window, 'matchMedia', { value: darkMachine, configurable: true });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('makine koyu isterken, kayıt yokken AÇIK okunur', () => {
+    // The stub is real, or this test is about nothing.
+    expect(window.matchMedia('(prefers-color-scheme: dark)').matches).toBe(true);
+    fakeStorage();
+    expect(theme.readTheme()).toBe('light');
+  });
+
+  it('bozuk bir kayıt da makineye değil açığa düşer', () => {
+    for (const junk of ['', 'DARK', 'koyu', 'auto', 'system']) {
+      fakeStorage({ 'ders-programi-tema': junk });
+      expect(theme.readTheme(), JSON.stringify(junk)).toBe('light');
+    }
+  });
+
+  it('depo kullanılamıyorken de makineye sorulmuyor', () => {
+    brokenStorage();
+    expect(theme.readTheme()).toBe('light');
+  });
+
+  it('ama okuyucunun kendi seçimi duruyor', () => {
+    // "Ignore the machine" must not have become "ignore the reader".
+    fakeStorage({ 'ders-programi-tema': 'dark' });
+    expect(theme.readTheme()).toBe('dark');
+  });
+
+  it('hareket tercihi AYNI makinede makineyi izliyor, yani fark bilerek', () => {
+    // The contrast is the argument. If the theme ever starts following the
+    // machine, this pair stops being a pair and somebody has to say why.
+    Object.defineProperty(window, 'matchMedia', {
+      value: (q: string) => ({ matches: q === '(prefers-reduced-motion: reduce)' }),
+      configurable: true,
+    });
+    fakeStorage();
+    expect(theme.readMotion()).toBe('kapali');
+    expect(theme.readTheme()).toBe('light');
+  });
+});
+
 // Pitfall 58: a preference both the machine and the reader give. The machine
 // is a floor. With no record it is what the preference reads, it is asked
 // again on every read, and in the stylesheet its block comes after the
@@ -534,9 +596,7 @@ describe('tema önyükleme betiği · index.html theme.ts ile aynı şeyi söyl�
     for (const kayit of ['dark', 'light', '', 'DARK', 'koyu', '{}', '0', null]) {
       fakeStorage(kayit === null ? {} : { [keys.THEME_KEY]: kayit });
       const beklenen = theme.themePreference.read();
-      expect(calistir(kayit), `"${kayit}" betikte ve theme.ts'te farklı okunuyor`).toBe(
-        beklenen,
-      );
+      expect(calistir(kayit), `"${kayit}" betikte ve theme.ts'te farklı okunuyor`).toBe(beklenen);
     }
   });
 

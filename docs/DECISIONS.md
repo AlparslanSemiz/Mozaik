@@ -35,6 +35,50 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Tercih normalize'ları geniş kalıyor, boolean kabulü duruyor
+
+**Değişen.** Bir şey değişmedi, ve yazılan şey bu: `normalizeDock`,
+`normalizeRibbon` ve `normalizeAvailClock` `unknown` alıp hem depodan gelen
+dizeyi hem boolean'ı kabul etmeye devam ediyor.
+
+**Soru neydi.** Bu üç fonksiyona bugün doğrudan boolean veren bir çağıran yok.
+Kabulün tek sebebi fabrikanın yazma yolu: `preference.ts`'in `write` ve `apply`'ı
+depoya koymadan önce `normalize(value)` çağırıyor ve `value` orada `T`, yani bu
+üç tercihte boolean. Yani ya imza geniş kalacak, ya boolean fabrikanın içindeki
+tek bir dönüşüm noktasına alınıp normalize'lar daralacaktı.
+
+**Karar: geniş kalıyor.** Üç gerekçe var ve birincisi ölçüldü.
+
+Birincisi, daraltmanın bedeli sessiz. Üç fonksiyonun boolean dalı kaldırılıp
+birim süiti koşuldu: 10 iddia düştü ve hepsi aynı biçimdeydi,
+`false: expected 'acik' to be 'kapali'`. Sebebi `false !== 'kapali'` ifadesinin
+doğru olması, yani `applyRibbon(false)` şeridi kapatmak yerine depoya `'acik'`
+yazardı. Dal ölü değil, her yazımda koşuyor.
+
+İkincisi, fabrikanın yazma yolundaki normalize bir güvence ve testi var: aralık
+dışı bir sayı depoya sınırında giriyor (`scaleLike().write(9)`). O güvenceyi
+korumak `normalize`'ın `T`'yi de görmesi demek, yani geniş imza bir kaza değil
+sözleşmenin sonucu.
+
+Üçüncüsü, tuzak 44'ün dersi tam tersi yönde: orada bir tipi eleyen bir guard her
+sürüklemede varsayılanı yazmıştı. Geniş kabul kendi başına bir kusur değil,
+kayıtsız kalması kusur.
+
+**Bedeli ve kapısı.** Bedeli üç satırlık bir dal ve "bu tip nereden geliyor"
+sorusunun cevabının fabrikada olması. Kapısı `src/preferences.test.ts`'in
+sözleşme tablosu: her iki yönlü tercih için `[false, 'kapali']` ve `[true, 'acik']`
+satırları var, yani dalı kaldıran biri yeşil geçemiyor.
+
+**Yanında kapatılan bir boşluk.** Temanın makineyi izlememesi (2026-08-27) birim
+katmanında yalnız `normalizeTheme(null) === 'light'` ile ölçülüyordu, ve
+`fallback` ayrı bir fonksiyon olduğu için ikisi o test yeşilken ayrışabilirdi.
+`preferences.test.ts`'e makinesi koyu isteyen bir dünyada tercihin OKUNDUĞU
+hâlini ölçen testler eklendi, hareket tercihinin aynı makinede makineyi izlediği
+karşıtlığıyla birlikte. Üç mutasyon da kırmızı: `fallback` sistemden türesin,
+`normalizeTheme` sistemden türesin, bozuk kayıt sisteme düşsün.
+
+---
+
 ### 2026-09-12 · Şerit daralınca neyi sırayla feda edeceğini söylüyor
 
 **Değişen.** Araç şeridinin bir daralma kuralı var ve `docs/LAYOUT.md`'nin şerit
