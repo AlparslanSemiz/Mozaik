@@ -337,6 +337,38 @@ describe('veriler nerede — depo raporu', () => {
     expect(storageReport(two()).rows.find((r) => r.key === 'ders-programi-yedek-0')!.chars).toBe(0);
   });
 
+  it('satırlar bugünkü sırada, tercihler bugünkü adlarıyla', () => {
+    // Pinned before the preference keys moved into one list, so the move is
+    // measured: the order a reader scans and the name each row goes by.
+    const rows = storageReport(two()).rows;
+    expect(rows.slice(0, 6).map((r) => r.key)).toEqual([
+      BASE_KEY,
+      'ders-programi-plan-abcd',
+      LIBRARY_KEY,
+      backupKey(0),
+      backupKey(1),
+      backupKey(2),
+    ]);
+    expect(rows.slice(6).map((r) => [r.key, r.what])).toEqual([
+      ['ders-programi-tema', 'tema tercihi'],
+      ['ders-programi-dil', 'dil tercihi'],
+      ['ders-programi-kenar', 'kenar çubuğu tercihi'],
+      ['ders-programi-olcek', 'yazı büyüklüğü tercihi'],
+      ['ders-programi-yogunluk', 'ızgara yoğunluğu tercihi'],
+      ['ders-programi-program-rengi', 'program kart rengi tercihi'],
+      ['ders-programi-arayuz-yogunluk', 'arayüz yoğunluğu tercihi'],
+      ['ders-programi-havuz', 'havuz çekmecesi tercihi'],
+      ['ders-programi-havuz-boy', 'havuz çekmecesinin boyu'],
+      ['ders-programi-serit', 'araç şeridi tercihi'],
+      ['ders-programi-serit-gizle', 'şerit kaydırınca gizlensin mi'],
+      ['ders-programi-musaitlik-saat', 'müsaitlikte saat gösterimi'],
+      ['ders-programi-hareket', 'hareket (animasyon) tercihi'],
+      ['ders-programi-tanitim', 'örnek veri satırı görüldü mü'],
+      ['ders-programi-baski', 'kâğıt seçenekleri'],
+      ['ders-programi-yenilik-gorulen', 'görülen sürüm notu'],
+    ]);
+  });
+
   it('gerçekten YAZILMIŞ hiçbir anahtar listeden düşmüyor', () => {
     // The list above is kept by hand, so it falls behind by hand: -havuz-boy
     // and -serit were written for weeks before anybody noticed the panel did

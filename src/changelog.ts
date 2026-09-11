@@ -14,6 +14,9 @@
  * BEFORE `npm run yayinla` is run, not after.
  */
 
+import { preference } from './preference';
+import { CHANGELOG_SEEN_KEY } from './preferenceKeys';
+
 export interface SurumNotu {
   /** package.json's version at release, e.g. "2.1.0" — no leading "v". */
   version: string;
@@ -49,29 +52,19 @@ export const SURUM_NOTLARI: SurumNotu[] = [
   },
 ];
 
-// A raw literal rather than `${BASE_KEY}-yenilik-gorulen`: `library.ts` needs
-// this key too (for `storageReport`'s table row), and importing `BASE_KEY`
-// from there would give `library.ts` <-> `changelog.ts` a runtime cycle. The
-// same reason `theme.ts`'s `INTRO_KEY` is a literal rather than a template.
-export const CHANGELOG_SEEN_KEY = 'ders-programi-yenilik-gorulen';
+// Which release's notes this browser has seen. The key sits in
+// preferenceKeys.ts with the others, so `storageReport` lists it without
+// importing this file.
+export const changelogSeenPreference = preference<string>({
+  key: CHANGELOG_SEEN_KEY,
+  normalize: (raw) => (typeof raw === 'string' ? raw : ''),
+  // Unreadable or unwritable storage: the badge simply comes back next time.
+  fallback: () => '',
+});
 
-function readChangelogSeenVersion(): string {
-  try {
-    return localStorage.getItem(CHANGELOG_SEEN_KEY) ?? '';
-  } catch {
-    return '';
-  }
-}
-
-export function markChangelogSeen(version: string): void {
-  try {
-    localStorage.setItem(CHANGELOG_SEEN_KEY, version);
-  } catch {
-    // Nothing to do: the badge simply comes back next time.
-  }
-}
+export const markChangelogSeen = changelogSeenPreference.write;
 
 export function hasUnseenChangelog(): boolean {
   const latest = SURUM_NOTLARI[0]?.version ?? '';
-  return latest !== '' && readChangelogSeenVersion() !== latest;
+  return latest !== '' && changelogSeenPreference.read() !== latest;
 }

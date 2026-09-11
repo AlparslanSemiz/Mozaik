@@ -6,30 +6,26 @@
 import { lessonSubject, subjectKey } from './entities';
 import { PALETTE_SIZE } from './palette';
 import type { Lesson, State } from './types';
+import { preference } from './preference';
+import { PROGRAM_COLOR_KEY } from './preferenceKeys';
+
+export { PROGRAM_COLOR_KEY };
 
 export type ProgramColorMode = 'teacher' | 'class' | 'room' | 'subject';
-
-export const PROGRAM_COLOR_KEY = 'ders-programi-program-rengi';
 
 export function normalizeProgramColor(raw: unknown): ProgramColorMode {
   return raw === 'class' || raw === 'room' || raw === 'subject' ? raw : 'teacher';
 }
 
-export function readProgramColor(): ProgramColorMode {
-  try {
-    return normalizeProgramColor(localStorage.getItem(PROGRAM_COLOR_KEY));
-  } catch {
-    return 'teacher';
-  }
-}
+export const programColorPreference = preference<ProgramColorMode>({
+  key: PROGRAM_COLOR_KEY,
+  normalize: normalizeProgramColor,
+  // A visual preference that cannot be remembered must not stop scheduling.
+  fallback: () => 'teacher',
+});
 
-export function writeProgramColor(mode: ProgramColorMode): void {
-  try {
-    localStorage.setItem(PROGRAM_COLOR_KEY, normalizeProgramColor(mode));
-  } catch {
-    // A visual preference that cannot be remembered must not stop scheduling.
-  }
-}
+export const readProgramColor = programColorPreference.read;
+export const writeProgramColor = programColorPreference.write;
 
 /** Stable fallback for an imported free-text subject absent from Settings. */
 function textColor(text: string): number {

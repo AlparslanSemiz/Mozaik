@@ -1,8 +1,8 @@
 // What goes ON the printed sheet — five switches, one preference.
 //
-// NOT part of `theme.ts`, and the line is not arbitrary. That file holds nine
-// independent scalars, each written to `<html>` as an attribute BEFORE the
-// first paint because each one moves the layout (main.tsx). These five never
+// NOT part of `theme.ts`, and the line is not arbitrary. That file holds
+// independent scalars, most of them written to `<html>` BEFORE the first paint
+// because each one moves the layout (main.tsx). These five never
 // touch the shell: they are React props read at render time, and they are one
 // decision — "what does the sheet carry" — that happens to have five answers.
 // Five more keys would be five more normalizers for one question.
@@ -11,7 +11,8 @@
 // decision about one printer on one afternoon. A backup taken in a term where
 // the clock times were hidden must not hide them in the next term's school.
 
-const KEY = 'ders-programi-baski';
+import { preference } from './preference';
+import { PRINT_OPTIONS_KEY } from './preferenceKeys';
 
 /** How many timetables share one sheet of A4. */
 export type PerSheet = 1 | 2 | 4;
@@ -145,20 +146,13 @@ export function normalizePrintOptions(raw: unknown): PrintOptions {
   };
 }
 
-export function readPrintOptions(): PrintOptions {
-  try {
-    return normalizePrintOptions(localStorage.getItem(KEY));
-  } catch {
-    return { ...PRINT_DEFAULTS };
-  }
-}
+export const printOptionsPreference = preference<PrintOptions>({
+  key: PRINT_OPTIONS_KEY,
+  normalize: normalizePrintOptions,
+  // A fresh copy every time, so no caller can change the defaults themselves.
+  fallback: () => ({ ...PRINT_DEFAULTS }),
+  encode: (options) => JSON.stringify(options),
+});
 
-export function writePrintOptions(next: PrintOptions): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {
-    /* A preference that cannot be remembered is still better than none. */
-  }
-}
-
-export const PRINT_OPTIONS_KEY = KEY;
+export const readPrintOptions = printOptionsPreference.read;
+export const writePrintOptions = printOptionsPreference.write;

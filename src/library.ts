@@ -12,8 +12,7 @@
 
 import { t } from './i18n';
 import { isDesktop } from './desktop';
-import { CHANGELOG_SEEN_KEY } from './changelog';
-import { PROGRAM_COLOR_KEY } from './programColor';
+import { PREFERENCE_ROWS } from './preferenceKeys';
 import { minuteStamp } from './dateStamp';
 import { safely } from './storage';
 import type { Id } from './types';
@@ -314,90 +313,13 @@ export function storageReport(lib: Library): StorageReport {
       chars: charsAt(backupKey(i)),
     });
   }
-  rows.push({
-    key: `${BASE_KEY}-tema`,
-    what: t('tema tercihi'),
-    chars: charsAt(`${BASE_KEY}-tema`),
-  });
-  rows.push({ key: `${BASE_KEY}-dil`, what: t('dil tercihi'), chars: charsAt(`${BASE_KEY}-dil`) });
-  rows.push({
-    key: `${BASE_KEY}-kenar`,
-    what: t('kenar çubuğu tercihi'),
-    chars: charsAt(`${BASE_KEY}-kenar`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-olcek`,
-    what: t('yazı büyüklüğü tercihi'),
-    chars: charsAt(`${BASE_KEY}-olcek`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-yogunluk`,
-    what: t('ızgara yoğunluğu tercihi'),
-    chars: charsAt(`${BASE_KEY}-yogunluk`),
-  });
-  rows.push({
-    key: PROGRAM_COLOR_KEY,
-    what: t('program kart rengi tercihi'),
-    chars: charsAt(PROGRAM_COLOR_KEY),
-  });
-  rows.push({
-    key: `${BASE_KEY}-arayuz-yogunluk`,
-    what: t('arayüz yoğunluğu tercihi'),
-    chars: charsAt(`${BASE_KEY}-arayuz-yogunluk`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-havuz`,
-    what: t('havuz çekmecesi tercihi'),
-    chars: charsAt(`${BASE_KEY}-havuz`),
-  });
-  // These two arrived with the C round and the panel was never told. A report
-  // that leaves a key out is worse than no report: the one thing it is for is
-  // being trusted when somebody asks "is all of it in here?".
-  rows.push({
-    key: `${BASE_KEY}-havuz-boy`,
-    what: t('havuz çekmecesinin boyu'),
-    chars: charsAt(`${BASE_KEY}-havuz-boy`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-serit`,
-    what: t('araç şeridi tercihi'),
-    chars: charsAt(`${BASE_KEY}-serit`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-serit-gizle`,
-    what: t('şerit kaydırınca gizlensin mi'),
-    chars: charsAt(`${BASE_KEY}-serit-gizle`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-musaitlik-saat`,
-    what: t('müsaitlikte saat gösterimi'),
-    chars: charsAt(`${BASE_KEY}-musaitlik-saat`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-hareket`,
-    what: t('hareket (animasyon) tercihi'),
-    chars: charsAt(`${BASE_KEY}-hareket`),
-  });
-  rows.push({
-    key: `${BASE_KEY}-tanitim`,
-    what: t('örnek veri satırı görüldü mü'),
-    chars: charsAt(`${BASE_KEY}-tanitim`),
-  });
-  // The print options were the F round's key and this report was never told.
-  // It hid because the key is only WRITTEN when somebody changes a print
-  // option, so a fresh profile has nothing to leave out — the panel would
-  // have started lying on the first day my father touched "Sayfada ne olsun",
-  // and the one thing this table is for is being trusted.
-  rows.push({
-    key: `${BASE_KEY}-baski`,
-    what: t('kâğıt seçenekleri'),
-    chars: charsAt(`${BASE_KEY}-baski`),
-  });
-  rows.push({
-    key: CHANGELOG_SEEN_KEY,
-    what: t('görülen sürüm notu'),
-    chars: charsAt(CHANGELOG_SEEN_KEY),
-  });
+  // Every preference key, from the one list their modules take them from. A
+  // key that is written and not named here once hid for weeks, twice (the
+  // drawer's height and the strip, then the print options), and the one thing
+  // this table is for is being trusted when somebody asks "is all of it in here?".
+  for (const { key, label } of PREFERENCE_ROWS) {
+    rows.push({ key, what: t(label), chars: charsAt(key) });
+  }
 
   return { rows, totalChars: rows.reduce((sum, r) => sum + r.chars, 0) };
 }

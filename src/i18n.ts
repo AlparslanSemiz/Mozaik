@@ -1,8 +1,9 @@
 /**
  * Which language the interface speaks.
  *
- * A leaf module, like `keys.ts`, `palette.ts` and `subjects.ts`: it imports
- * nothing of ours, so anything at any level can ask it a question.
+ * Close to a leaf, like `keys.ts`, `palette.ts` and `subjects.ts`: all it imports
+ * of ours is the preference factory and the key list, both leaves themselves,
+ * so anything at any level can ask it a question.
  *
  * ---------------------------------------------------------------- the keys
  *
@@ -52,6 +53,11 @@
  * category is asked for properly; only the alternatives are two.
  */
 
+import { preference } from './preference';
+import { LANG_KEY } from './preferenceKeys';
+
+export { LANG_KEY };
+
 export type Dil = 'tr' | 'en' | 'de' | 'es' | 'fr';
 
 /** Every language this build can actually speak, in menu order. */
@@ -66,9 +72,6 @@ export const DIL_ADI: Record<Dil, string> = {
   es: 'Español',
   fr: 'Français',
 };
-
-/** Turkish on purpose: like `ders-programi`, this key is user data, not code. */
-export const LANG_KEY = 'ders-programi-dil';
 
 /**
  * The device's own answer, or English.
@@ -94,30 +97,24 @@ export function normalizeDil(raw: unknown, system: Dil): Dil {
   return DILLER.find((d) => d === raw) ?? system;
 }
 
-export function readDil(): Dil {
-  let stored: string | null = null;
-  try {
-    stored = localStorage.getItem(LANG_KEY);
-  } catch {
-    // localStorage can be unavailable; the device's own language still works
-  }
-  return normalizeDil(stored, systemDil());
-}
+export const dilPreference = preference<Dil>({
+  key: LANG_KEY,
+  normalize: (raw) => normalizeDil(raw, systemDil()),
+  // No record, or no storage at all: the device's own language still works.
+  fallback: systemDil,
+  paint: (dil, root) => {
+    // `lang` is not decoration: it is what a screen reader picks a voice from and
+    // what the browser hyphenates by. It was hard-coded to "tr" in index.html.
+    root.setAttribute('lang', dil);
+    // The pure modules read the language from HERE and nowhere else, so setting
+    // it is part of applying it. Doing this anywhere else would let the two
+    // disagree for one render — see the note on `t()` below.
+    setAktifDil(dil);
+  },
+});
 
-export function applyDil(dil: Dil): void {
-  // `lang` is not decoration: it is what a screen reader picks a voice from and
-  // what the browser hyphenates by. It was hard-coded to "tr" in index.html.
-  document.documentElement.setAttribute('lang', dil);
-  // The pure modules read the language from HERE and nowhere else, so setting
-  // it is part of applying it. Doing this anywhere else would let the two
-  // disagree for one render — see the note on `t()` below.
-  setAktifDil(dil);
-  try {
-    localStorage.setItem(LANG_KEY, dil);
-  } catch {
-    // A language that cannot be remembered is still better than no language
-  }
-}
+export const readDil = dilPreference.read;
+export const applyDil = dilPreference.apply;
 
 // ------------------------------------------------------------- dictionaries
 

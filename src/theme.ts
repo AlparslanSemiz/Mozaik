@@ -1,8 +1,10 @@
 // Machine preferences: the theme, the dock, the tool strip, the scale, the
 // density, the availability clock, how much the interface is allowed to MOVE,
 // and whether the first-run line has been seen. Independent scalars, each in
-// its own key. The layout ones are built on the factory in preference.ts,
-// which holds the contract they share. Deliberately NOT part of `State`:
+// its own key, and every key with its name in Ayarlar → Hakkında is in
+// preferenceKeys.ts. All but motion are built on the factory in
+// preference.ts, which holds the contract they share. Deliberately NOT part
+// of `State`:
 //
 // The theme is a property of the machine, not of the timetable. Putting it in
 // the saved project would mean a backup taken on a dark machine flips the theme
@@ -14,11 +16,21 @@
 // mess than leaving it to the browser.
 
 import { preference } from './preference';
+import {
+  AVAIL_CLOCK_KEY,
+  DENSITY_KEY,
+  DOCK_H_KEY,
+  DOCK_KEY,
+  INTRO_KEY,
+  MOTION_KEY,
+  RIBBON_AUTO_KEY,
+  RIBBON_KEY,
+  SCALE_KEY,
+  THEME_KEY,
+  UI_DENSITY_KEY,
+} from './preferenceKeys';
 
 export type Theme = 'light' | 'dark';
-
-/** Turkish on purpose: like `ders-programi`, this key is user data, not code. */
-export const THEME_KEY = 'ders-programi-tema';
 
 const ATTRIBUTE = 'data-theme';
 
@@ -52,7 +64,7 @@ export const applyTheme = themePreference.apply;
 
 // ----------------------------------------------------------- dock preference
 
-/**
+/*
  * Whether the pool of unplaced lessons is open beside the grid.
  *
  * The pool moved from a band across the bottom to a column down the right, and
@@ -68,8 +80,6 @@ export const applyTheme = themePreference.apply;
  * Same reasoning as the theme, the rail, the scale and the density for where it
  * lives: a property of the screen, never of the timetable.
  */
-export const DOCK_KEY = 'ders-programi-havuz';
-
 /**
  * Anything that is not exactly 'kapali' means the dock is open. A boolean is
  * the toggle's own answer and is taken as it is (pitfall 44).
@@ -99,7 +109,6 @@ export const writeDock = dockPreference.write;
  * teacher row. Applied before the first paint like the other five, or the
  * strip would draw itself and then vanish.
  */
-export const RIBBON_KEY = 'ders-programi-serit';
 const RIBBON_ATTRIBUTE = 'data-ribbon';
 
 /** Anything that is not exactly 'kapali' means the strip is open. A boolean is taken as it is. */
@@ -121,7 +130,7 @@ export const applyRibbon = ribbonPreference.apply;
 
 // ------------------------------------------- ribbon auto-hide preference
 
-/**
+/*
  * Whether the tool strip GETS OUT OF THE WAY while you read down the page.
  *
  * A separate key from `ders-programi-serit`, and the split is the same one
@@ -137,8 +146,6 @@ export const applyRibbon = ribbonPreference.apply;
  * Default ON, because that is what the program did before this key existed and
  * a preference nobody has set must not change what they already have.
  */
-export const RIBBON_AUTO_KEY = 'ders-programi-serit-gizle';
-
 /**
  * Only the exact string 'kapali' turns it off.
  *
@@ -167,7 +174,7 @@ export const applyRibbonAuto = ribbonAutoPreference.write;
 
 // ------------------------------------------------------ dock height preference
 
-/**
+/*
  * How tall the pool drawer is, in REM.
  *
  * Rem and not px because `--ui-scale` goes to 1.50: a dock fixed at 176px is
@@ -181,8 +188,6 @@ export const applyRibbonAuto = ribbonAutoPreference.write;
  * would break every reader of the current value. theme.ts is a set of
  * INDEPENDENT scalars in independent keys, and this is one.
  */
-export const DOCK_H_KEY = 'ders-programi-havuz-boy';
-
 /** Head plus one row of cards. Below this the drawer shows nothing. */
 export const DOCK_H_MIN = 6;
 /** A ceiling in rem; the REAL ceiling is the grid's, and CSS clamps it. */
@@ -223,7 +228,7 @@ export const writeDockHeight = dockHeightPreference.write;
 
 // ---------------------------------------------------------- scale preference
 
-/**
+/*
  * How big the interface is drawn: 1.0 to 1.50 in steps of 0.05. Same reasoning
  * as the theme and the rail — a property of the machine and the eyes in front
  * of it, never of the timetable, so it stays out of `State` and out of the
@@ -236,8 +241,6 @@ export const writeDockHeight = dockHeightPreference.write;
  * fixed physical size, so `--fs-p-*` is in pt and `@media print` pins the
  * scale back to 1.
  */
-export const SCALE_KEY = 'ders-programi-olcek';
-
 /* The floor was 1 and is 0.80, and the reason is a SECOND scale nobody here
    controls: Windows has its own display scaling and my father's is set large,
    so what he sees is the product of two numbers. Shrinking the root (13px)
@@ -332,8 +335,6 @@ export const applyScale = scalePreference.apply;
  */
 export type Density = 'ferah' | 'rahat' | 'sigdir';
 
-export const DENSITY_KEY = 'ders-programi-yogunluk';
-
 const DENSITY_ATTRIBUTE = 'data-density';
 
 /**
@@ -382,8 +383,6 @@ export const applyDensity = densityPreference.apply;
 // Veri (library.ts) — a preference that is written and not listed there is a
 // preference nobody can find (the note above `storageReport`).
 
-export const UI_DENSITY_KEY = 'ders-programi-arayuz-yogunluk';
-
 const UI_DENSITY_ATTRIBUTE = 'data-ui-density';
 
 /** The same three words and the same fallback: two axes, one vocabulary. */
@@ -422,8 +421,6 @@ export const applyUiDensity = uiDensityPreference.apply;
 //
 // A machine preference like all the others: its own key, never in `State`,
 // never in a backup.
-
-export const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
 
 const AVAIL_CLOCK_ATTRIBUTE = 'data-avail-clock';
 
@@ -476,8 +473,6 @@ export const applyAvailClock = availClockPreference.apply;
 // A machine preference like all the others: its own key, never in `State`.
 
 export type Motion = 'tam' | 'az' | 'kapali';
-
-export const MOTION_KEY = 'ders-programi-hareket';
 
 const MOTION_ATTRIBUTE = 'data-motion';
 
@@ -536,21 +531,17 @@ export function applyMotion(motion: Motion): void {
 // reloaded before reading it, and it would also break every test that sets a
 // preference and reloads before touching anything.
 
-export const INTRO_KEY = 'ders-programi-tanitim';
+export const introPreference = preference<boolean>({
+  key: INTRO_KEY,
+  normalize: (raw) => raw === true || raw === 'gorundu',
+  // A hint that cannot be remembered is shown again, and the harm is one line.
+  fallback: () => false,
+  encode: (seen) => (seen ? 'gorundu' : ''),
+});
 
-export function readIntroSeen(): boolean {
-  try {
-    return localStorage.getItem(INTRO_KEY) === 'gorundu';
-  } catch {
-    // A hint that cannot be remembered is shown again; the harm is one line.
-    return false;
-  }
-}
+export const readIntroSeen = introPreference.read;
 
+/** The only thing ever written: the line has been seen. */
 export function markIntroSeen(): void {
-  try {
-    localStorage.setItem(INTRO_KEY, 'gorundu');
-  } catch {
-    // Nothing to do: the line simply comes back next time.
-  }
+  introPreference.write(true);
 }

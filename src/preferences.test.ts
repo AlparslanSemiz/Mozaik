@@ -12,6 +12,10 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Preference } from './preference';
+import * as changelog from './changelog';
+import * as i18n from './i18n';
+import * as print from './printOptions';
+import * as color from './programColor';
 import * as theme from './theme';
 
 function fakeStorage(initial: Record<string, string> = {}) {
@@ -38,6 +42,8 @@ interface Case {
   ad: string;
   key: string;
   pref: Preference<any>;
+  // The program calls a one-value wrapper around write rather than write itself.
+  wraps?: boolean;
   read: () => unknown;
   // The call the program makes to change it, whichever verb that is.
   save: (value: never) => void;
@@ -192,6 +198,64 @@ const CASES: Case[] = [
     ],
     painted: attribute('data-avail-clock'),
   },
+  {
+    ad: 'dil',
+    key: 'ders-programi-dil',
+    pref: i18n.dilPreference,
+    read: i18n.readDil,
+    save: i18n.applyDil,
+    // jsdom's navigator says en-US, so the device's own answer here is English.
+    absent: 'en',
+    junk: ['', 'TR', 'el'],
+    values: [
+      ['tr', 'tr'],
+      ['de', 'de'],
+      ['fr', 'fr'],
+    ],
+    painted: attribute('lang'),
+  },
+  {
+    ad: 'kâğıt seçenekleri',
+    key: 'ders-programi-baski',
+    pref: print.printOptionsPreference,
+    read: print.readPrintOptions,
+    save: print.writePrintOptions,
+    absent: print.PRINT_DEFAULTS,
+    junk: ['', '{bozuk', '[]', '42', 'null'],
+    stored: [['{"clock":false}', { ...print.PRINT_DEFAULTS, clock: false }]],
+    values: [
+      [
+        { ...print.PRINT_DEFAULTS, stamp: true, perSheet: 4, size: 'buyuk' },
+        JSON.stringify({ ...print.PRINT_DEFAULTS, stamp: true, perSheet: 4, size: 'buyuk' }),
+      ],
+      [print.PRINT_DEFAULTS, JSON.stringify(print.PRINT_DEFAULTS)],
+    ],
+  },
+  {
+    ad: 'program kart rengi',
+    key: 'ders-programi-program-rengi',
+    pref: color.programColorPreference,
+    read: color.readProgramColor,
+    save: color.writeProgramColor,
+    absent: 'teacher',
+    junk: ['', 'ROOM', 'öğretmen'],
+    values: [
+      ['room', 'room'],
+      ['subject', 'subject'],
+      ['teacher', 'teacher'],
+    ],
+  },
+  {
+    ad: 'örnek veri satırı',
+    key: 'ders-programi-tanitim',
+    pref: theme.introPreference,
+    wraps: true,
+    read: theme.readIntroSeen,
+    save: theme.markIntroSeen,
+    absent: false,
+    junk: ['', 'evet', 'true'],
+    values: [[true, 'gorundu']],
+  },
 ];
 
 afterEach(() => {
@@ -200,6 +264,8 @@ afterEach(() => {
     if (name.startsWith('data-')) root().removeAttribute(name);
   }
   root().style.removeProperty('--ui-scale');
+  root().removeAttribute('lang');
+  i18n.setAktifDil('tr');
 });
 
 describe.each(CASES)('$ad', (c) => {
@@ -242,7 +308,7 @@ describe.each(CASES)('$ad', (c) => {
   it('programın çağırdığı ad fabrikanın kendi fonksiyonu', () => {
     expect(c.pref.key).toBe(c.key);
     expect(c.read).toBe(c.pref.read);
-    expect([c.pref.apply, c.pref.write]).toContain(c.save);
+    if (!c.wraps) expect([c.pref.apply, c.pref.write]).toContain(c.save);
   });
 
   it('normalize denetimin verdiği değeri de depodaki dizeyi de tanır', () => {
@@ -273,4 +339,41 @@ describe.each(CASES)('$ad', (c) => {
       expect(root().outerHTML).toBe(before);
     });
   }
+});
+
+describe('görülen sürüm notu', () => {
+  const latest = changelog.SURUM_NOTLARI[0]!.version;
+  const KEY = 'ders-programi-yenilik-gorulen';
+
+  it('kayıt yoksa en yeni not görülmemiş sayılır', () => {
+    fakeStorage();
+    expect(changelog.hasUnseenChangelog()).toBe(true);
+  });
+
+  it('eski bir sürümün işareti de boş kayıt da en yeni notu görülmemiş bırakır', () => {
+    for (const text of ['2.0.0', '']) {
+      fakeStorage({ [KEY]: text });
+      expect(changelog.hasUnseenChangelog(), JSON.stringify(text)).toBe(true);
+    }
+  });
+
+  it('işaret kendi anahtarına sürümü yazar ve not görülmüş sayılır', () => {
+    const values = fakeStorage();
+    changelog.markChangelogSeen(latest);
+    expect(values.get(KEY)).toBe(latest);
+    expect(changelog.hasUnseenChangelog()).toBe(false);
+  });
+
+  it('programın çağırdığı ad fabrikanın kendi fonksiyonu', () => {
+    expect(changelog.changelogSeenPreference.key).toBe(KEY);
+    expect(changelog.markChangelogSeen).toBe(changelog.changelogSeenPreference.write);
+  });
+
+  it("depo kullanılamıyorsa görülmemiş sayılır, işaret çökmez, <html>'e bir şey yazılmaz", () => {
+    brokenStorage();
+    const before = root().outerHTML;
+    expect(changelog.hasUnseenChangelog()).toBe(true);
+    expect(() => changelog.markChangelogSeen(latest)).not.toThrow();
+    expect(root().outerHTML).toBe(before);
+  });
 });
