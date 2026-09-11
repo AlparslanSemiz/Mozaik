@@ -4,13 +4,11 @@ import {
   blockCells,
   blockPinned,
   blockSpans,
-  blockStart,
   pendingBlocks,
   placedBlocks,
   blocker,
   blockerDetail,
   dropMap,
-  evict,
   evictionNotice,
   occupy,
   vacate,
@@ -25,7 +23,6 @@ import {
   sanitize,
   setBlockPinned,
   teacherKey,
-  validHours,
 } from './constraints';
 import type { BlockRef } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
@@ -309,27 +306,37 @@ describe('blocker — sert kısıtlar', () => {
   });
 });
 
-describe('validHours', () => {
-  it('sürükleme başında o günün geçerli saatlerini verir', () => {
+// Which hours of one day a lesson could go into, asked of `blocker()` hour by
+// hour. This loop used to be the exported `validHours()`. The drag reads
+// `dropMap` now, and what the loop pinned about `blocker` itself stays pinned.
+describe('blocker: bir günün açık saatleri', () => {
+  const openHours = (d: State, lessonId: string, day: number, size?: number) => {
+    const ix = buildIndex(d);
+    const out: number[] = [];
+    for (let h = 0; h < d.settings.hours.length; h++) {
+      if (blocker(d, ix, lessonId, day, h, size) === null) out.push(h);
+    }
+    return out;
+  };
+
+  it('öğretmenin kapalı ve başka sınıfta olduğu saatler dışarıda', () => {
     const d = build();
     d.unavailable[teacherKey('oMC', 0, 1)] = 1;
     const withPlacement = place(d, 'x2', 0, 3); // MÇ is in 511 -> hour 3 also closes
-    expect([...validHours(withPlacement, buildIndex(withPlacement), 'x1', 0)].sort()).toEqual([
-      0, 2,
-    ]);
+    expect(openHours(withPlacement, 'x1', 0)).toEqual([0, 2]);
   });
 
   it('bloklu ders için gün sonuna taşan saatleri dışarıda bırakır', () => {
     const d = build();
     // x6 is 2+1 and owes its double first: 4 hours, so it can start at 0, 1
-    // or 2 — never at 3.
-    expect([...validHours(d, buildIndex(d), 'x6', 0)]).toEqual([0, 1, 2]);
+    // or 2, never at 3.
+    expect(openHours(d, 'x6', 0)).toEqual([0, 1, 2]);
     // Its single fits everywhere, and asking for it is how the pool asks.
-    expect([...validHours(d, buildIndex(d), 'x6', 0, 1)]).toEqual([0, 1, 2, 3]);
+    expect(openHours(d, 'x6', 0, 1)).toEqual([0, 1, 2, 3]);
   });
 });
 
-describe('blockStart ve removeBlock', () => {
+describe('blockAt ve removeBlock', () => {
   it('blok kaldırılınca tüm saatleri temizlenir', () => {
     const d = removeBlock(place(build(), 'x4', 0, 0), 's510', 0, 0);
     expect(Object.keys(activeProgram(d).placements)).toHaveLength(0);
@@ -347,8 +354,8 @@ describe('blockStart ve removeBlock', () => {
     // all four.
     let d = place(build(), 'x3', 0, 0);
     d = place(d, 'x3', 0, 2);
-    expect(blockStart(d, 's433', 0, 2)).toBe(2);
-    expect(blockStart(d, 's433', 0, 1)).toBe(0);
+    expect(blockAt(d, 's433', 0, 2)?.hour).toBe(2);
+    expect(blockAt(d, 's433', 0, 1)?.hour).toBe(0);
 
     const after = removeBlock(d, 's433', 0, 3);
     expect(Object.keys(activeProgram(after).placements).sort()).toEqual([
@@ -376,9 +383,9 @@ describe('blockStart ve removeBlock', () => {
     ]);
   });
 
-  it('boş hücrede blockStart null döner ve removeBlock durumu değiştirmez', () => {
+  it('boş hücrede blockAt null döner ve removeBlock durumu değiştirmez', () => {
     const d = build();
-    expect(blockStart(d, 's510', 0, 0)).toBeNull();
+    expect(blockAt(d, 's510', 0, 0)).toBeNull();
     expect(removeBlock(d, 's510', 0, 0)).toBe(d);
   });
 });
@@ -876,9 +883,9 @@ describe('taşıma — kaynak blok kaldırılınca ders kendini engellemiyor', (
 
   it('blok ikinci hücresinden tutulsa da tamamı kalkıyor', () => {
     const placed = place(build(), 'x4', 0, 1); // blockSize 2 -> hours 1 and 2
-    expect(blockStart(placed, 's510', 0, 2)).toBe(1);
+    expect(blockAt(placed, 's510', 0, 2)?.hour).toBe(1);
 
-    const lifted = removeBlock(placed, 's510', 0, blockStart(placed, 's510', 0, 2)!);
+    const lifted = removeBlock(placed, 's510', 0, blockAt(placed, 's510', 0, 2)!.hour);
     expect(activeProgram(lifted).placements[placementKey('s510', 0, 1)]).toBeUndefined();
     expect(activeProgram(lifted).placements[placementKey('s510', 0, 2)]).toBeUndefined();
     expect(why(lifted, 'x4', 0, 1)).toBeNull();
@@ -1146,15 +1153,6 @@ describe('dropMap — üstüne bırakma', () => {
     dropMap(d, ix, 'x4');
     expect(JSON.stringify(activeProgram(d).placements)).toBe(before);
     expect([...ix.teacherBusy.entries()]).toEqual([...busyBefore.entries()]);
-  });
-
-  it('evict() tam olarak hedef saatleri boşaltır', () => {
-    let d = place(build(), 'x1', 0, 0);
-    d = place(d, 'x1', 0, 2);
-    const after = evict(d, 's510', 0, [0, 1]);
-    expect(activeProgram(after).placements[placementKey('s510', 0, 0)]).toBeUndefined();
-    // The one outside the target hours is untouched.
-    expect(activeProgram(after).placements[placementKey('s510', 0, 2)]).toBe('x1');
   });
 
   it('evictionNotice tekil ve çoğul', () => {

@@ -391,21 +391,6 @@ export function check(
   return verdictAfterBlocker(d, ix, lessonId, day, hour, size, detail);
 }
 
-/** Every hour a lesson can go into on one day. Computed ONCE when a drag starts. */
-export function validHours(
-  d: State,
-  ix: Index,
-  lessonId: Id,
-  day: number,
-  size?: number,
-): Set<number> {
-  const set = new Set<number>();
-  for (let h = 0; h < d.settings.hours.length; h++) {
-    if (blocker(d, ix, lessonId, day, h, size) === null) set.add(h);
-  }
-  return set;
-}
-
 // -------------------------------------------------- reading blocks off the grid
 //
 // THE CONTRACT. `placements` holds one lessonId per hour and NO block boundary
@@ -518,12 +503,6 @@ function blockSizeFor(d: State, lesson: Lesson, size?: number): number {
 }
 
 // ------------------------------------------------------------- placing
-
-/** START hour of the block containing the clicked cell. null if nothing is placed. */
-export function blockStart(d: State, classId: Id, day: number, hour: number): number | null {
-  const found = blockAt(d, classId, day, hour);
-  return found?.hour ?? null;
-}
 
 /** The whole block containing the clicked cell — where it starts and how long. */
 export function blockAt(d: State, classId: Id, day: number, hour: number): PlacedBlock | null {
@@ -980,19 +959,6 @@ export function evictionNotice(ix: Index, lessons: Lesson[]): string {
   return names.length === 1
     ? t('{ders} dersi havuza dönecek', { ders: names[0]! })
     : t('{dersler} dersleri havuza dönecek', { dersler: names.join(', ') });
-}
-
-/**
- * The eviction itself, as a state change: lift every block that is in the way,
- * then lay the new one down. Separate from `dropMap` because the map ANSWERS a
- * question and this one CHANGES something, and because the reducer has to redo
- * the lift against the state React hands it rather than the one the drag
- * started with (pitfall 20).
- */
-export function evict(d: State, classId: Id, day: number, hours: number[]): State {
-  let next = d;
-  for (const h of hours) next = removeBlock(next, classId, day, h);
-  return next;
 }
 
 export interface DropRequest {
