@@ -66,7 +66,7 @@ export const test = base.extend<{ kapan: void }>({
       // from an old or even empty localStorage when a script touched storage
       // at the very start of the current one, even only to read it. Measured
       // on 2026-09-11 with the app itself and fast reloads: no init script, 0
-      // stale starts in 400; an init script that only reads, 5 in 200. Every
+      // stale starts in 500; an init script that only reads, 5 in 200. Every
       // test that wrote a preference and reloaded could read it back stale.
       // A locale sets `navigator.language` without touching storage at all.
 
