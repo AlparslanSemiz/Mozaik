@@ -2,7 +2,7 @@
 // density, the availability clock, how much the interface is allowed to MOVE,
 // and whether the first-run line has been seen. Independent scalars, each in
 // its own key, and every key with its name in Ayarlar → Hakkında is in
-// preferenceKeys.ts. All but motion are built on the factory in
+// preferenceKeys.ts. Each is built on the factory in
 // preference.ts, which holds the contract they share. Deliberately NOT part
 // of `State`:
 //
@@ -498,24 +498,17 @@ export function normalizeMotion(raw: unknown, prefersReduced: boolean): Motion {
   return prefersReduced ? 'kapali' : 'tam';
 }
 
-export function readMotion(): Motion {
-  let stored: string | null = null;
-  try {
-    stored = localStorage.getItem(MOTION_KEY);
-  } catch {
-    // localStorage can be unavailable; the system preference still works
-  }
-  return normalizeMotion(stored, systemPrefersReducedMotion());
-}
+export const motionPreference = preference<Motion>({
+  key: MOTION_KEY,
+  normalize: (raw) => normalizeMotion(raw, systemPrefersReducedMotion()),
+  // No record, or no storage at all: the machine answers, and it is asked on
+  // every read rather than once, because what it states is a need.
+  fallback: () => normalizeMotion(null, systemPrefersReducedMotion()),
+  paint: (motion, root) => root.setAttribute(MOTION_ATTRIBUTE, motion),
+});
 
-export function applyMotion(motion: Motion): void {
-  document.documentElement.setAttribute(MOTION_ATTRIBUTE, motion);
-  try {
-    localStorage.setItem(MOTION_KEY, motion);
-  } catch {
-    // A preference that cannot be remembered is still better than no preference
-  }
-}
+export const readMotion = motionPreference.read;
+export const applyMotion = motionPreference.apply;
 
 // -------------------------------------------------- the first-run line
 //

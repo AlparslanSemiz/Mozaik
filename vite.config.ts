@@ -31,5 +31,11 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.{ts,tsx}'],
+    // Vitest hands every stylesheet over as an empty string, `?raw` included,
+    // unless it is named here. `preferences.test.ts` reads the order of the
+    // motion rules out of this one (pitfall 58), and read empty it would have
+    // passed or failed on nothing. Only main.tsx imports it, and no unit test
+    // loads main.tsx.
+    css: { include: [/src\/styles\.css/] },
   },
 });

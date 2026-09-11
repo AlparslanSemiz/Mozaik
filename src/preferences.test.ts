@@ -10,13 +10,14 @@
 // (or that it puts nothing there), and what an absent, a junk, a zero and an
 // unreadable record read as.
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Preference } from './preference';
 import * as changelog from './changelog';
 import * as i18n from './i18n';
 import * as print from './printOptions';
 import * as color from './programColor';
 import * as theme from './theme';
+import styles from './styles.css?raw';
 
 function fakeStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));
@@ -256,6 +257,23 @@ const CASES: Case[] = [
     junk: ['', 'evet', 'true'],
     values: [[true, 'gorundu']],
   },
+  {
+    ad: 'hareket',
+    key: 'ders-programi-hareket',
+    pref: theme.motionPreference,
+    read: theme.readMotion,
+    save: theme.applyMotion,
+    // jsdom has no matchMedia, so the machine here asks for nothing; the
+    // machine that does is the describe block at the end of this file.
+    absent: 'tam',
+    junk: ['', 'TAM', 'reduce', 'off'],
+    values: [
+      ['kapali', 'kapali'],
+      ['az', 'az'],
+      ['tam', 'tam'],
+    ],
+    painted: attribute('data-motion'),
+  },
 ];
 
 afterEach(() => {
@@ -375,5 +393,81 @@ describe('görülen sürüm notu', () => {
     expect(changelog.hasUnseenChangelog()).toBe(true);
     expect(() => changelog.markChangelogSeen(latest)).not.toThrow();
     expect(root().outerHTML).toBe(before);
+  });
+});
+
+// Pitfall 58: a preference both the machine and the reader give. The machine
+// is a floor. With no record it is what the preference reads, it is asked
+// again on every read, and in the stylesheet its block comes after the
+// setting's rules at equal specificity, so the cascade lets it win.
+describe('hareket · makinenin tercihi bir taban', () => {
+  let reduced = false;
+  const matchMedia = (query: string) => ({
+    matches: query === '(prefers-reduced-motion: reduce)' && reduced,
+  });
+
+  beforeEach(() => {
+    reduced = true;
+    Object.defineProperty(window, 'matchMedia', { value: matchMedia, configurable: true });
+  });
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('kayıt yoksa azaltılmış hareket isteyen makinede kapalı okunur', () => {
+    fakeStorage();
+    expect(theme.readMotion()).toBe('kapali');
+  });
+
+  it('bozuk bir kayıt da makinenin cevabına düşer', () => {
+    for (const junk of ['', 'TAM', 'reduce']) {
+      fakeStorage({ 'ders-programi-hareket': junk });
+      expect(theme.readMotion(), JSON.stringify(junk)).toBe('kapali');
+    }
+  });
+
+  it('depo kullanılamıyorsa da makinenin cevabı okunur', () => {
+    brokenStorage();
+    expect(theme.readMotion()).toBe('kapali');
+  });
+
+  it('kayıtlı bir tercih kendi değerini okur, tabanı stil sayfası tutar', () => {
+    fakeStorage({ 'ders-programi-hareket': 'tam' });
+    expect(theme.readMotion()).toBe('tam');
+  });
+
+  it('makine her okumada yeniden sorulur', () => {
+    fakeStorage();
+    reduced = false;
+    expect(theme.readMotion()).toBe('tam');
+    reduced = true;
+    expect(theme.readMotion()).toBe('kapali');
+  });
+
+  it("styles.css'te makinenin bloğu ayarın kurallarından SONRA ve aynı seçicilerle duruyor", () => {
+    // Read empty, every assertion below would be about nothing: Vitest turns a
+    // stylesheet into '' unless vite.config.ts names it.
+    expect(styles.length, 'styles.css okunamadı').toBeGreaterThan(10_000);
+    const media = styles.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(media, 'makinenin bloğu yok').toBeGreaterThan(-1);
+    let depth = 0;
+    let end = styles.indexOf('{', media);
+    do {
+      if (styles[end] === '{') depth++;
+      else if (styles[end] === '}') depth--;
+      end++;
+    } while (depth > 0 && end < styles.length);
+    const before = styles.slice(0, media);
+    const block = styles.slice(media, end);
+    const after = styles.slice(end);
+    expect(before, 'ayarın kuralları bloktan önce değil').toMatch(
+      /:root\[data-motion="(az|kapali)"\]/,
+    );
+    expect(after, 'bloktan sonra bir ayar kuralı var, o kural makineyi ezer').not.toMatch(
+      /:root\[data-motion=/,
+    );
+    expect(block).toContain(':root[data-motion="tam"]');
+    expect(block).toContain(':root[data-motion="az"]');
   });
 });
