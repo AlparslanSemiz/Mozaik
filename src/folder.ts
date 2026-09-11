@@ -29,6 +29,8 @@
 // preference and it is still not in `State` — a backup taken here must not
 // carry a path from this computer to my father's.
 
+import { dayStamp } from './dateStamp';
+
 /**
  * Three things TypeScript's DOM lib does not have yet. Declared narrowly —
  * only the members actually called below — so that the day the lib grows them
@@ -64,19 +66,13 @@ export const KEEP_DAILY = 10;
 
 const DAILY = /^ders-programi-(\d{4})-(\d{2})-(\d{2})\.json$/;
 
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
 /**
- * The backup for a given day: `ders-programi-2026-08-26.json`.
- *
- * Local date parts, not toISOString(): at 01:00 in Turkey the ISO date is
- * still yesterday, and a backup filed under the wrong day is a backup nobody
- * finds.
+ * The backup for a given day: `ders-programi-2026-08-26.json`. The date is the
+ * local one (dateStamp.ts), and `DAILY` above has to keep matching it, because
+ * the prune deletes by that pattern.
  */
 export function dailyName(now: Date): string {
-  return `ders-programi-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`;
+  return `ders-programi-${dayStamp(now)}.json`;
 }
 
 /**

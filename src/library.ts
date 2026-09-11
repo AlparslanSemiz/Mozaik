@@ -14,6 +14,7 @@ import { t } from './i18n';
 import { isDesktop } from './desktop';
 import { CHANGELOG_SEEN_KEY } from './changelog';
 import { PROGRAM_COLOR_KEY } from './programColor';
+import { minuteStamp } from './dateStamp';
 import { safely } from './storage';
 import type { Id } from './types';
 
@@ -168,20 +169,9 @@ export function uniquePlanName(lib: Library, base: string): string {
 // are the IDENTITY of my father's data, not identifiers in the code. They are
 // built from one stamp so the two kinds can never drift apart in format.
 
-function pad2(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-function stamp(now: Date): string {
-  return (
-    `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}` +
-    `-${pad2(now.getHours())}${pad2(now.getMinutes())}`
-  );
-}
-
 /** One plan: `ders-programi-2026-08-25-1830.json`. */
 export function backupFileName(now: Date): string {
-  return `${BASE_KEY}-${stamp(now)}.json`;
+  return `${BASE_KEY}-${minuteStamp(now)}.json`;
 }
 
 /**
@@ -191,7 +181,7 @@ export function backupFileName(now: Date): string {
  * tells my father which of two .json files holds the whole library.
  */
 export function bundleFileName(now: Date): string {
-  return `${BASE_KEY}-tumu-${stamp(now)}.json`;
+  return `${BASE_KEY}-tumu-${minuteStamp(now)}.json`;
 }
 
 // ------------------------------------------------------------- storage layer
