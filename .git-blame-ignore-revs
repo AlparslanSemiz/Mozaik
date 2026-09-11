@@ -1,0 +1,5 @@
+# Yalnız biçim değiştiren commit'ler. git blame bunları atlasın:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Prettier: kod dosyaları tek biçimde
+7d66ab4a7363c814e93a3779594e3306b392e535
