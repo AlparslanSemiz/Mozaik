@@ -84,8 +84,23 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
 
     // Upper case because the stylesheet says so, and read as RENDERED: the
     // screen is what the request was about.
-    const captions = await page.locator('.ribbon .ribbon-label').allInnerTexts();
-    expect(captions).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM', 'YOĞUNLUK', 'IZGARA']);
+    //
+    // The request was about the LEFT end, so that is what is pinned exactly:
+    // the captions before the spacer. The right end is read against LAYOUT.md
+    // (Renk, Yoğunluk, Izgara) rather than folded into one list, because a list
+    // of the whole strip went red on 2026-09-01 when Renk was added on the right
+    // and said nothing about the promise on the left.
+    const [left, right] = await page.locator('.ribbon').evaluate((bar) => {
+      const sides: string[][] = [[], []];
+      let side = 0;
+      for (const el of bar.querySelectorAll('.ribbon-label, .spacer')) {
+        if (el.classList.contains('spacer')) side = 1;
+        else sides[side]!.push((el as HTMLElement).innerText);
+      }
+      return sides;
+    });
+    expect(left).toEqual(['GÖRÜNÜM', 'DİZ', 'PROGRAM']);
+    expect(right).toEqual(['RENK', 'YOĞUNLUK', 'IZGARA']);
 
     // ...and the first control on it is the teacher view, before the class one
     // (the strip's own teacher-before-class rule).
