@@ -26,7 +26,6 @@ import {
   genderLabel,
   parseGender,
   reorderList,
-  deletionSummary,
   duplicateShorts,
   setSubjectShort,
   respreadColors,
@@ -471,7 +470,7 @@ describe('makeShort ve duplicateShorts', () => {
 
 // The sentence decides whether he presses Enter or Escape, so it must COUNT
 // what is lost, not guess at it.
-describe('deletionSummary', () => {
+describe('deletionQuestion', () => {
   function loaded(): State {
     let d = emptyState();
     d = addRoom(d, 'A');
@@ -496,67 +495,73 @@ describe('deletionSummary', () => {
 
   it('öğretmen: ders sayısını ve yerleşmiş saati sayar', () => {
     const d = loaded();
-    expect(deletionSummary(d, 'teacher', d.teachers[0]!.id)).toBe(
-      'MÇ (Mehmet Çelik) silinecek. 2 dersi ve programa yerleşmiş 2 saati de gidecek. ' +
-        'Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'teacher', d.teachers[0]!.id)).toEqual({
+      title: 'MÇ (Mehmet Çelik) silinecek',
+      cost: '2 dersi ve programa yerleşmiş 2 saati de gidecek.',
+    });
   });
 
   it('bağlısı yoksa kısa sorar — ama YİNE sorar', () => {
     let d = emptyState();
     d = addClass(d, '430', null);
-    expect(deletionSummary(d, 'class', d.classes[0]!.id)).toBe(
-      '430 sınıfı silinecek. Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'class', d.classes[0]!.id)).toEqual({
+      title: '430 sınıfı silinecek',
+      cost: '',
+    });
   });
 
   it('dersi var ama hiçbiri yerleşmemişse yerleşmiş saatten söz etmez', () => {
     const d = loaded();
-    expect(deletionSummary(d, 'class', d.classes[1]!.id)).toBe(
-      '511 sınıfı silinecek. 1 dersi de gidecek. Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'class', d.classes[1]!.id)).toEqual({
+      title: '511 sınıfı silinecek',
+      cost: '1 dersi de gidecek.',
+    });
   });
 
   it('derslik: hangi sınıfların dersliğinin boşalacağını ADLARIYLA söyler', () => {
     const d = loaded();
-    expect(deletionSummary(d, 'room', d.rooms[0]!.id)).toBe(
-      'A dersliği silinecek. 2 sınıfın dersliği boşalacak (510, 511) ve derslik ' +
-        'çakışması artık kontrol edilmeyecek. Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
+      title: 'A dersliği silinecek',
+      cost:
+        '2 sınıfın dersliği boşalacak (510, 511) ve derslik çakışması artık kontrol ' +
+        'edilmeyecek.',
+    });
   });
 
   it('derslik boşsa çakışma cümlesini kurmaz', () => {
     let d = emptyState();
     d = addRoom(d, 'B');
-    expect(deletionSummary(d, 'room', d.rooms[0]!.id)).toBe(
-      'B dersliği silinecek. Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'room', d.rooms[0]!.id)).toEqual({
+      title: 'B dersliği silinecek',
+      cost: '',
+    });
   });
 
   it('ders: yerleşmiş saat varsa onu, yoksa haftalık saati söyler', () => {
     const d = loaded();
-    expect(deletionSummary(d, 'lesson', d.lessons[0]!.id)).toBe(
-      '510 sınıfının MÇ dersi silinecek. Programa yerleşmiş 2 saati de kalkacak. ' +
-        'Devam edilsin mi?',
-    );
-    expect(deletionSummary(d, 'lesson', d.lessons[1]!.id)).toBe(
-      '511 sınıfının MÇ dersi silinecek (2 saat). Devam edilsin mi?',
-    );
+    expect(deletionQuestion(d, 'lesson', d.lessons[0]!.id)).toEqual({
+      title: '510 sınıfının MÇ dersi silinecek',
+      cost: 'Programa yerleşmiş 2 saati de kalkacak.',
+    });
+    expect(deletionQuestion(d, 'lesson', d.lessons[1]!.id)).toEqual({
+      title: '511 sınıfının MÇ dersi silinecek (2 saat)',
+      cost: '',
+    });
   });
 
   it('olmayan kimlikte çökmez', () => {
     const d = loaded();
     for (const kind of ['room', 'teacher', 'class', 'lesson'] as const) {
-      expect(deletionSummary(d, kind, 'yok')).toContain('Devam edilsin mi?');
+      expect(() => deletionQuestion(d, kind, 'yok')).not.toThrow();
     }
   });
 
   // The dialog wants the two halves separately: a heading and a cost line.
-  // Splitting the sentence back apart by looking for a full stop would be
-  // pitfall 22 again, so the split is made where the halves are written — and
-  // the one-string form has to stay EXACTLY what it was, or every existing
-  // assertion above is lying about what the user reads.
-  it('iki parça, birleştirilince eski cümlenin TA KENDİSİ', () => {
+  // Splitting one sentence back apart by looking for a full stop would be
+  // pitfall 22 again, so the halves are written apart and each keeps its shape.
+  // (The one-string `deletionSummary` these used to be compared against had no
+  // caller left and went with the dead-code pass.)
+  it('iki parça: başlık cümle değil, bedel tam cümle', () => {
     const d = loaded();
     for (const [kind, id] of [
       ['teacher', d.teachers[0]!.id],
@@ -568,8 +573,6 @@ describe('deletionSummary', () => {
       ['room', 'yok'],
     ] as const) {
       const q = deletionQuestion(d, kind, id);
-      const joined = `${q.title}. ${q.cost === '' ? '' : `${q.cost} `}Devam edilsin mi?`;
-      expect(joined).toBe(deletionSummary(d, kind, id));
       // A heading is a heading: no trailing stop, no question.
       expect(q.title.endsWith('.')).toBe(false);
       expect(q.title).not.toContain('Devam edilsin mi');
