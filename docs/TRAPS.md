@@ -548,6 +548,20 @@ göremezdi, çünkü Playwright Chromium'u `--hide-scrollbars` ile açar.
 kapladığını iddia etmeden önce ölçer. Program sekmesi oluktan muaf, çünkü
 `overflow: hidden` de Chromium için bir kaydırma kabı.
 
+### 110 · Bir `@container` kuralı kendi kapsayıcısını biçimlendiremez
+Şeridin daralma kuralı `.ribbon`'a `container-type: inline-size` verip
+`@container` ile adım adım yer kazanacaktı, ama ilk adım `.ribbon`'un kendi
+`gap`'iydi ve o hiçbir eşikte değişmedi: bir kapsayıcı sorgusu yalnız
+kapsayıcının torunlarına uygulanır, kapsayıcının kendisine değil. Kural yazılı,
+seçici doğru, ve hiçbir şey olmuyor. Tuzak 52 ve 63'ün ailesinden ama ikisinden
+de farklı: orada değişken o öğeye ulaşmıyordu ya da değer çoktan başka bir yerde
+hesaplanmıştı, burada kuralın yazabileceği yer kısıtlı. Çare ölçüyü kapsayıcıdan
+çocuklara taşımak: `gap` yerine `.ribbon > * + * { margin-left }`, çünkü çocuklar
+torun sayılır. `e2e/serit.spec.ts`'in feda sırası testi aralığı taşıyan öğeden
+okuyor, yani kural bir eşikte devreye girmezse kırmızıya dönüyor. Bir kutunun
+kendi ölçüsünü kendi genişliğine göre değiştirmesi gerekiyorsa o ölçü çocuklarda
+durur.
+
 ### 103 · Bir kuralın kapsamı yorumda değil seçicide yazılıdır
 `:root[data-density='sigdir'] .hour-clock { display: none }` seçicisinde
 `table.grid` yoktu ve Sığdır'da müsaitlik başlığının saatini de kapatıyordu:
@@ -612,7 +626,11 @@ jsdom duman testinin `buttonName()`'i önce `textContent`'e bakıyordu,
 Playwright spesifikasyona uyup `aria-label`'ı üstün tutuyor. Görünüm düğmesi
 simgesinin yanına metin alınca E2E "Sınıf görünümü"nü, duman testi "Sınıf"ı
 gördü. İki katmanın bir ad üstünde anlaşamaması, birinin yanılmasından
-beterdir.
+beterdir. Bir adın GÖRÜNÜRLÜĞÜ iddia ediliyorsa ölçüm hesaplanmış
+stili gören yoldan yapılır: `textContent` CSS'i hiç görmez, yani `display: none`
+bir adı erişilebilirlik ağacından silse de "adı var" diyen bir iddia yeşil kalır.
+2026-09-12'de şeridin feda sırası yazılırken tam bu oldu ve ölçüm `innerText`'e
+çevrildi.
 
 ### 74 · Bir düğmenin adı bir sekmenin adını içeriyorsa da süit kırılır
 Klasör uyarısına `Ayarlar → Veri` adında bir düğme kondu ve `name: 'Ayarlar'`
@@ -845,7 +863,7 @@ işi.
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107 |
-| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103 |
+| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
@@ -855,5 +873,6 @@ işi.
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
-grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi, ve yeni bir
-tuzak 110'dan devam eder.
+grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. 110
+kullanıldı, yeni bir tuzak 111'den devam eder. Test stratejisi dalı çakışmasın diye kendi
+numaralarını 150'den başlatıyor.
