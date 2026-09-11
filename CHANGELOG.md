@@ -16,6 +16,11 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Fixed
+
+- Availability and Print no longer crash when their list goes from empty to filled while the tab is open, for example after Ctrl+Z.
+- Handing a lesson to another teacher from the entity panel now says how many blocks went back to the pool.
+
 ## [2.1.1] - 2026-09-01
 
 ### Added

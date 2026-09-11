@@ -795,14 +795,18 @@ Envanter (refactorun Faz 0'ı) kaynağı okurken buldu. Bunlar davranış kusuru
 belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendisi ve
 önerilen sıra WORKLOG'un 2026-09-11 tarihli refactor girdisinde.
 
-- [ ] **Kanca sırası.** `Availability.tsx` 142'de erken dönüyor, `useMemo`'yu 213 ve
+- [x] **Kanca sırası.** `Availability.tsx` 142'de erken dönüyor, `useMemo`'yu 213 ve
       222'de çağırıyor. `Print.tsx` 262'de dönüyor, `useMemo`'yu 290'da çağırıyor. Liste
       boşken sekme açıksa ve Ctrl+Z ya da "Dosyadan aç" listeyi doldurursa React çökebilir.
       Kaynaktan okundu, ekranda denenmedi. Önce kırmızıya dönen bir E2E yazılır.
-- [ ] **Varlık panelinde ders aktarma bildirimi.** `Inspector.tsx:183-189` `returned`'ı
+      Düzeltildi (2026-09-11, `511b8b4`): kancalar boş ekran dönüşünün üstünde. İki yeni
+      E2E (`musaitlik.spec.ts`, `yazdir.spec.ts`) düzeltmeden önce React #310 ile kırmızıydı.
+- [x] **Varlık panelinde ders aktarma bildirimi.** `Inspector.tsx:183-189` `returned`'ı
       `change()`'in geri çağırımında yazıp hemen ardından okuyor. `change` bir `useReducer`
       dispatch'i, yani bildirim büyük ihtimalle hep "0 blok" yolunu seçiyor. Tuzak 20'nin
       deseni. `LessonEdit.tsx` aynı işi önizleme çağrısıyla doğru yapıyor.
+      Düzeltildi (2026-09-11, `492c8c2`): sayı `change()`'den önce bir önizlemeden geliyor.
+      Yeni E2E (`panel.spec.ts`) düzeltmeden önce "510 dersi AV öğretmenine geçti." okuyordu.
 - [ ] **Çevrilmemiş sınır cümlesi.** `constraints.ts:307`'deki "art arda en fazla N saat"
       mesajı `t()`'den geçmiyor, beş dilde de Türkçe çıkıyor.
 - [ ] **ARCHITECTURE'ta iki yanlış cümle.** Çözücü "en çok iki iş kalemi" kurmuyor, blok boyu

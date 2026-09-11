@@ -30,9 +30,10 @@ güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test 
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru için envanter çıkarıldı ve
 taban ölçümleri alındı, kaynak koda dokunulmadı.
 
-**Yarım olan.** Kod refactoru Faz 1'in sonunda: envanter onaylandı, taban ölçümleri
-ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde. Faz 2 (modül modül refactor)
-kullanıcının TODO §8d'deki üç kararını bekliyor. [TODO.md](TODO.md)'de açık madde
+**Yarım olan.** Kod refactoru Faz 2'nin başında: envanter onaylandı, taban ölçümleri
+ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
+alındı ve Faz 2'den önceki iki davranış düzeltmesi commit'lendi. Sıradaki adım
+geliştirme araçları ve Prettier biçim commit'i. [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
 §8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
@@ -44,7 +45,7 @@ yapılmış görünüyor.
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - 2026-09-11'deki `npm run test:e2e` koşusunda 555 testin 10'u düştü. Beşi 2026-09-01'den beri biliniyor: 3 havuz testi (`program.spec.ts`) ve 2 araç şeridi testi (`serit.spec.ts`). Biri kalıcı bir test kusuru (`surum.spec.ts` 107). Dördü paralel koşuda düşüp tek işçide geçiyor. `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti. Ayrım refactor girdisinde, bulgular TESTFINDINGS'te.
-- Kaynaktan okunmuş ama ekranda denenmemiş davranış kusurları: Müsaitlik ve Çıktı'da erken dönüşten sonra çağrılan kancalar, varlık panelinin ders aktarma bildirimi, çevrilmemiş "art arda" sınır cümlesi (TODO §8d).
+- Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
@@ -185,9 +186,23 @@ TESTFINDINGS'e ise E2E koşusunun iki bulgusu girdi.
 - Koşuldu: `npx vite build` (çıkış 0), `npm test` (763/763), `npm run test:e2e` (545/555, düşenler yukarıda), yeni beş düşüşün tek işçili tekrarı, `scratch/olc-taban.mjs`, ve boyut atfının derlemeleri (HEAD, `b0b83ed`, `d6ccfec` ve `18a5123`, dördü de çıkış 0).
 - Koşulmadı: `npm run tipler`, `npm run test:site`, `npm run cozucu`, `npm run patrol`, `npm run ekran` ve `npm run exe:test`. Bu turda kaynak koda dokunulmadı, değişen yalnız belgeler ve git dışındaki `scratch/` betikleri. Refactorun kapanışı (Faz 4) tam süiti koşar. Rust bu makinede kurulu değil.
 
-**Sıradaki iş.** Faz 2'ye geçmeden önce kullanıcının üç kararı gerekiyor (TODO §8d):
-kanca sırası ve varlık paneli düzeltmeleri önce mi, Prettier ile toplu biçim commit'i,
-yalnız testten çağrılan fonksiyonların silinmesi.
+**Kullanıcının kararları.** Üç soruya da evet (TODO §8d): kanca sırası ve varlık paneli
+düzeltmeleri Faz 2'den önce ve ayrı commit'lerle, Prettier ile yalnız başına bir biçim
+commit'i, yalnız testten çağrılan altı fonksiyon testleriyle silinecek. Commit'ler
+`docs/claude-md-bolme` dalına gidiyor.
+
+**Faz 2'den önceki iki düzeltme.** İkisi de önce kırmızıya dönen bir E2E ile yazıldı.
+
+- `511b8b4`: Müsaitlik ve Çıktı'da kancalar boş ekran dönüşünün üstüne alındı. Yeni iki test (`musaitlik.spec.ts` ve `yazdir.spec.ts`) tek kişilik bir dünyada listeyi başka sekmede boşaltıp sekmeyi boş hâliyle açar ve Ctrl+Z'ye basar. Düzeltmeden önce ikisinde de kapan sayfanın `Minified React error #310`'unu yakaladı ("Rendered more hooks than during the previous render"), yani kaynaktan okunan kusur ekranda da gerçekti.
+- `492c8c2`: varlık panelinden aktarmada havuza dönen blok sayısı `change()`'den önce bir önizlemeden okunuyor. Yeni test (`panel.spec.ts`) haftası kapalı bir öğretmene iki bloğu yerleşmiş bir ders aktarır. Düzeltmeden önce onay kutusu "2 bloğu" derken bildirim "510 dersi AV öğretmenine geçti." okuyordu.
+
+Düzeltmelerden sonra koşuldu: `npm run tipler` (çıkış 0), `npm test` (763/763), `npx vite
+build` (çıkış 0, 1 007 873 bayt, 12 bayt azaldı), ve `musaitlik.spec.ts`, `yazdir.spec.ts`
+ile `panel.spec.ts`'in tamamı (56/56). Ana E2E süitinin kalanı koşulmadı, çünkü değişiklik
+üç bileşenle sınırlı ve o üçünün spec dosyaları koşuldu.
+
+**Sıradaki iş.** Faz 2'nin ilk adımı: geliştirme araçları (ESLint'in kanca kuralı ve
+`knip`, önce yalnız rapor) ve ayrı bir Prettier biçim commit'i.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 
