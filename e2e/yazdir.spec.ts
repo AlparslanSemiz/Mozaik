@@ -11,7 +11,36 @@ import {
   chooseScale,
   revealRibbon,
   settledMotion as settled,
+  answerDialog,
+  mainList,
+  onScreen,
+  openLessons,
 } from './helpers';
+import { makeWorld } from '../src/worlds';
+
+// Hook order. "Yazdırılacak program yok" returned before a `useMemo`, so
+// lessons coming back while the tab stayed open (Ctrl+Z, "Dosyadan aç") asked
+// React for more hooks than the render before it had.
+test.describe('Çıktı: ders listesi sekme açıkken doluyor', () => {
+  test('silinen ders Ctrl+Z ile geri gelince sayfalar çiziliyor', async ({ page }) => {
+    const world = makeWorld({
+      days: 2,
+      hours: 3,
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+    });
+    await loadWorld(page, world, 'Dersler');
+    await openLessons(page, 'all');
+    await mainList(page).locator('tbody tr').first().getByRole('button', { name: 'Sil' }).click();
+    await answerDialog(page);
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
+    await expect(onScreen(page, '.empty-screen')).toContainText('Yazdırılacak program yok');
+
+    await page.keyboard.press('Control+z');
+    await expect(page.locator('.print-page').first()).toBeVisible();
+  });
+});
 
 // The request: "Çıktıda da blok dersler birlikte gözükmeli programdaki gibi
 // birleşik görünsünler." Paper drew one <td> per hour, so a two-hour block

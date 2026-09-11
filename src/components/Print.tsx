@@ -259,6 +259,26 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
   const breakClass = (longBreakAfter: number, s: number): string =>
     longBreakAfter === s + 1 ? 'p-break' : '';
 
+  // How much of the timetable the chosen pages actually carry. A page with
+  // nothing on it prints just as willingly as a full one.
+  //
+  // Both sets are built in ONE pass over the placements: asking "does this
+  // teacher have anything" per teacher would walk 1800 placements 25 times.
+  //
+  // Above the empty-screen return, like every hook here: lessons coming back
+  // while the tab stays open (Ctrl+Z, "Dosyadan aç") must not change the hook
+  // count.
+  const { busyClasses, busyTeachers } = useMemo(() => {
+    const classes = new Set<string>();
+    const teachers = new Set<string>();
+    for (const [key, lessonId] of Object.entries(activePlacements(state))) {
+      classes.add(key.slice(0, key.indexOf('|')));
+      const lesson = ix.lessonById.get(lessonId);
+      if (lesson !== undefined) teachers.add(lesson.teacherId);
+    }
+    return { busyClasses: classes, busyTeachers: teachers };
+  }, [state, ix]);
+
   if (state.lessons.length === 0) {
     return (
       <>
@@ -281,22 +301,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     : [];
   const pageCount = chosenClasses.length + chosenTeachers.length;
 
-  // How much of the timetable the chosen pages actually carry. A page with
-  // nothing on it prints just as willingly as a full one.
-  //
-  // Both sets are built in ONE pass over the placements: asking "does this
-  // teacher have anything" per teacher would walk 1800 placements 25 times.
   const placedHours = Object.keys(activePlacements(state)).length;
-  const { busyClasses, busyTeachers } = useMemo(() => {
-    const classes = new Set<string>();
-    const teachers = new Set<string>();
-    for (const [key, lessonId] of Object.entries(activePlacements(state))) {
-      classes.add(key.slice(0, key.indexOf('|')));
-      const lesson = ix.lessonById.get(lessonId);
-      if (lesson !== undefined) teachers.add(lesson.teacherId);
-    }
-    return { busyClasses: classes, busyTeachers: teachers };
-  }, [state, ix]);
 
   const emptyPages =
     chosenClasses.filter((c) => !busyClasses.has(c.id)).length +

@@ -139,6 +139,24 @@ export default function Availability({ state,
   const list = entitiesOf(state, kind);
   const selected = list.find((x) => x.id === chosen) ?? list[0];
 
+  // Every hook sits above the empty-list return: a list that fills up while
+  // the tab stays open (Ctrl+Z, "Dosyadan aç") must not change the hook count.
+  const conflicts = useMemo(
+    () => closedConflicts(state, buildIndex(state)),
+    [state],
+  );
+
+  // A column header carries one time; where the days disagree it stays empty.
+  const clocks = useMemo(
+    () =>
+      sharedPeriods(
+        state.settings.bell,
+        state.settings.hours,
+        state.settings.days,
+      ),
+    [state.settings],
+  );
+
   if (selected === undefined) {
     return (
       <>
@@ -210,24 +228,9 @@ export default function Availability({ state,
 
   const open = selected.open;
 
-  const conflicts = useMemo(
-    () => closedConflicts(state, buildIndex(state)),
-    [state],
-  );
   const mine = conflicts.filter(
     (c) => c.teacherId === entityId || c.classId === entityId,
   ).length;
-
-  // A column header carries one time; where the days disagree it stays empty.
-  const clocks = useMemo(
-    () =>
-      sharedPeriods(
-        state.settings.bell,
-        state.settings.hours,
-        state.settings.days,
-      ),
-    [state.settings],
-  );
 
   return (
     <div className="cols">

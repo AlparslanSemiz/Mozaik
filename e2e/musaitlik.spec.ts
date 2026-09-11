@@ -14,7 +14,38 @@ import {
   tokens,
   rgb,
   contrast,
+  loadWorld,
+  openSetup,
+  mainList,
+  answerDialog,
+  onScreen,
 } from "./helpers";
+import { makeWorld } from "../src/worlds";
+
+// Hook order. The empty-list screen returned before two `useMemo` calls, so a
+// list that filled up while the tab stayed open (Ctrl+Z, "Dosyadan aç") asked
+// React for more hooks than the render before it had.
+test.describe("10. Müsaitlik: liste sekme açıkken doluyor", () => {
+  test("silinen öğretmen Ctrl+Z ile geri gelince çizelge çiziliyor", async ({
+    page,
+  }) => {
+    await loadWorld(page, makeWorld({ days: 2, hours: 3 }), "Okul");
+    await openSetup(page, "Öğretmenler");
+    await mainList(page)
+      .locator("tbody tr")
+      .first()
+      .getByRole("button", { name: "Sil" })
+      .click();
+    await answerDialog(page);
+    await expect(mainList(page).locator("tbody tr")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Müsaitlik", exact: true }).click();
+    await expect(onScreen(page, ".empty-screen")).toBeVisible();
+
+    await page.keyboard.press("Control+z");
+    await expect(page.locator("table.availability:not(.heat)")).toBeVisible();
+  });
+});
 
 test.describe("10. Müsaitlik çizelgesi", () => {
   test("üst çizelgeyle haftanın darlığı aynı satır yüksekliğini kullanıyor", async ({
