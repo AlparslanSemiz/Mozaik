@@ -1,7 +1,205 @@
-# WORKLOG — Nerede olduğumuz
+# Çalışma kaydı
 
-Son güncelleme: 2026-09-01 (kırk sekizinci oturum: exe'nin penceresi +
-Sığdır'ın genişlik iadesi)
+Projenin şu anki durumu ve oturum oturum çalışma kaydı.
+
+Dosya iki kısımdan oluşuyor. En üstteki **Şu an** bloğu her oturumda üzerine
+yazılır: hangi sürüm, ne çalışıyor, ne yarım, bilinen kusurlar, güncel ölçümler.
+Altındaki **tarihli girdiler** eklenir, üzerine yazılmaz: oturum kaydı, o gün
+ölçülen değerler, plandan sapmalar, doğrulanmayı bekleyen varsayımlar, hangi
+testlerin koşulduğu ve koşulmadığı. En yeni girdi üstte durur.
+
+**Bir ölçümü silmeden önce hâlâ bir yerde kayıtlı olup olmadığına bak.** Bir
+girdideki sayı çoğu zaman bir kararın ya da bir tuzağın tek kanıtıdır.
+
+Eski girdilerde geçen "ilke N" numaralarının karşılığı
+[DECISIONS.md](DECISIONS.md)'de, "tuzak N" numaraları [TRAPS.md](TRAPS.md)'de.
+2026-09-11'den önceki girdiler bu dosya `STATUS.md` adını taşırken yazıldı.
+
+---
+
+## Şu an
+
+Son güncelleme: 2026-09-11.
+
+**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
+
+**Ne çalışıyor.** Program 2.1.1'den beri değişmedi: yedi sekme (Okul, Müsaitlik,
+Dersler, Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil,
+dört teslim yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini
+güncellemesi. 2026-09-11'de yalnız belgeler yeniden kuruldu, koda yalnız yorum,
+test adı ve sürüm betiği olarak dokunuldu.
+
+**Yarım olan.** [TODO.md](TODO.md)'de açık madde sayıları (2026-09-11'de sayıldı):
+§1 inceleme 5, §2 Ayarlar 10, §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1,
+§6 veri modeli 6, §7 dağıtım 9, §8 karar bekleyen 21. §0 not defterinde sekiz ham
+not duruyor ve numaralı maddelere taşınmadı. Bir kısmı (sürüklerken takılma,
+Program şeridinde renk menüsü, kart takası, Hakkında'daki yenilik noktası) 2026-09-01
+tarihli `516f963` ve kırk yedinci oturumda yapılmış görünüyor.
+
+**Bilinen kusurlar.**
+
+- Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
+- 2026-09-01'deki `npm run kontrol` koşusunda 6 E2E testi düşüyordu, altısı da o turdan önce de düşüyordu: 3 havuz sıralaması (`program.spec.ts`), 2 araç şeridi (`serit.spec.ts`), 1 `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7).
+- Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
+- `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
+- `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
+- Karttaki raptiye dururken görünmüyor (`opacity: 0`), 2026-08-30 tarihli kayıt ise "hep görünür, sönük" kararını kullanıcının kararı olarak yazıyor. Kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
+- Program, Kontrol ve Çıktı'nın boş ekranları dersler için Okul sekmesini gösteriyor, dersler ise Dersler sekmesinde giriliyor.
+- Eski CLAUDE.md havuz çekmecesinin boşalınca kendiliğinden kapandığını yazıyordu. 2026-09-11'de kodda bunu yapan bir yer bulunamadı (`writeDock` yalnız düğmeyle çağrılıyor), ekranda denenmedi.
+- Bayat kod yorumları: `App.tsx`'in başı "six sections" diyor (yedi var), `Program.tsx` havuzu "down the right" diye anlatıyor (altta), `App.tsx`'in marka yorumu "detailed" diyor (sade çiziliyor), `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyor (%80'den başlıyor).
+- Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
+
+**Güncel ölçümler (2026-09-11, kaynaktan sayıldı).**
+
+| Ne | Değer | Nasıl |
+|---|---|---|
+| Şema sürümü | 14 | `src/types.ts` |
+| Ana E2E süiti | 29 dosyada 555 test | `npx playwright test --list` |
+| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
+| Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
+| E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
+| Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
+| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | `library.ts`'teki `storageReport` |
+
+---
+
+## 2026-09-11 · Belgeler yeniden kuruldu
+
+**Ne yapıldı.** 2933 satırlık CLAUDE.md bir yönlendirme kapısına indi ve içeriği
+konu dosyalarına dağıldı: PRINCIPLES, ARCHITECTURE, DATA, BUILD, CONVENTIONS,
+LAYOUT, TESTPLAN, TESTFINDINGS, TRAPS ve DECISIONS yeni, DESIGN yeniden yazıldı.
+`docs/TASKS.md` `docs/TODO.md`, `docs/STATUS.md` bu dosya oldu. Kökte İngilizce bir
+`CHANGELOG.md` açıldı, `npm run yayinla` onun Unreleased bloğunu sürüm numarasına
+kapatıyor (`scripts/changelog-md.mjs`), ve `src/surum.test.ts` CHANGELOG'un en üst
+sürümünün `package.json` ile aynı olduğunu ölçüyor. Koddaki "ilke N" ve "principle N"
+atıfları ilkenin adına, "CLAUDE.md" atıfları kuralın bugünkü dosyasına çevrildi.
+AGENTS.md artık CLAUDE.md'den başlayıp bağlantıları izlemeyi söylüyor.
+
+**Plandan sapmalar.**
+
+- Onaylanan ilk plan TASKS.md ile STATUS.md'ye dokunmuyordu. Kullanıcı sonradan ikisinin yeniden adlandırılmasını ve bu dosyanın "Şu an" bloğu ile tarihli girdilere bölünmesini istedi. Eski oturum kayıtları tarihli girdiler olarak yerinde kaldı, "Şu an" bloğu en son oturumlardan ve kaynaktan derlendi.
+- Kullanıcı ekleri: DECISIONS denenip bırakılan yolları da kapsıyor, CHANGELOG.md açıldı, CONVENTIONS'a commit mesajı, hazır çözüm önceliği ve kod kalitesi kuralları girdi.
+- DESIGN.md sıfırdan yazılmayacaktı. Bayat sayıları düzeltildi, mutlak çerçevesi kaldırıldı ve CLAUDE.md'den görünüşle ilgili maddeler eklendi, "Ölçülenler" bölümlerinin içeriği korundu.
+- `scripts/font.mjs`'in geliştiriciye yazdığı bir satırdaki dosya adı da yeniden adlandırmayla güncellendi. Bir yorum ya da test adı değil, ama yeniden adlandırmanın kıracağı tek kod dizesiydi.
+- `src/worlds.ts`'teki bir dünyanın `note` alanı değişti ("ilke 6" yerine ilkenin adı), çünkü bu alan test adı olarak kullanılıyor.
+
+**Eski CLAUDE.md'de yazılı olup koddan farklı çıkanlar, belgelerde düzeltildi.**
+
+- "Arayüz metinleri i18n altyapısından geçmez, tek dil" yazıyordu. Beş dil ve dört sözlük var, anahtar Türkçe cümle.
+- Veri modeli özeti `schemaVersion: 11` diyordu ve `placements` ile `pinned`'ı State'in üst düzeyinde gösteriyordu. Şema 14, ikisi `programs[]` altında. Dosya biçimi örneği `"schemaVersion": 7` diyordu.
+- `theme.ts` için "on" ve "dokuz" skaler yazıyordu, dosya on iki anahtar tutuyor. Depolama tablosunda `-program-rengi`, `-arayuz-yogunluk`, `-musaitlik-saat` ve `-yenilik-gorulen` yoktu.
+- İkon eşiği 32 yazıyordu, kodda 20 (`507fd00`, 2026-09-01).
+- "Ekranda hücreyi daima öğretmen rengi boyar" yazıyordu, Program şeridinde dört modlu bir renk menüsü var.
+- Kontrol şeridi dört kapıyla anlatılıyordu, Danışman'la beş kapı var ve şerit bölüm seçiyor.
+- Ayarlar bölümlerine "Veri" ve "Okul" deniyordu, bugün Planlar ve yedek, Hakkında, Zil ve günler.
+- DESIGN.md ölçeğin varsayılanını 1.10, aralığını 1.00 ile 1.50 yazıyordu, kodda varsayılan 1 ve aralık 0,80 ile 1,50. `--ribbon-h` 2rem değil 2.25rem, `--fs-2xs` .6875rem değil .846rem, `--fs-3xl` 2.25rem değil 2.385rem. Havuz destesinin rozeti 2026-08-28'de kalkmıştı.
+- Vitrin kaydı "arayüzün varsayılanı hâlâ Türkçe" diyordu, kod cihazın diline bakıyor ve İngilizceye düşüyor.
+- Raptiye "hep görünür, sönük" yazıyordu, kodda dururken görünmez. Kayıt ile kod ayrışıyor, kullanıcıya sorulacak.
+- Havuzun boşalınca kendiliğinden kapandığı yazıyordu, kodda bulunamadı.
+- Sabitleme "istisnası yok" diyordu, bir dersi başka öğretmene ya da sınıfa aktarmak sabitlemelerini kaldırıyor.
+- Dolu hücreye bırakma yalnız havuza döndürme olarak anlatılıyordu, `516f963`'ten beri takas da var.
+- Çıktının sütun başlığı için iki çelişik madde vardı ("saat yalnız uyuşursa yazılır" ve "uyuşmayan sütunda ikisi de yazılır"). Kod ikincisini yapıyor.
+- `--no-bundle`'ın gerekçesi "ilke 1 kurulum sihirbazını reddediyor"du, o yasak 2026-08-30'da kalkmıştı. Otomatik dizmenin ilerlemesi "çubuk değil düz metin (yasak liste: animasyon)" diye gerekçelendiriliyordu, animasyon yasağı 2026-08-26'da kalkmıştı.
+- Test katmanı tablosu "Kontrol'ün süzgeci"ni ölçülen şeyler arasında sayıyordu, süzgeç 2026-08-28'de kalkmıştı.
+
+**Doğrulanmayı bekleyen.**
+
+- PRINCIPLES.md'deki "Şu an yapılmıyor ve sebebi" listesinde yedi gerekçe sonradan önerildi, eski kayıtta yazılı değildi. Satır sonlarında "(öneri, doğrulanmadı)" diye işaretli.
+- LAYOUT.md'nin koddan tek tek doğrulanmayan maddeleri eski CLAUDE.md'nin Arayüz bölümünden taşındı. Kaynaktan doğrulananlar: sekmeler ve sırası, yedi şeridin grupları, sağ tık menüsü, havuzun sıraları ve grupları, Dersler'in modları, Ayarlar'ın bölümleri ve Görünüm'ün içeriği, Çıktı'nın seçenekleri, raptiye, boş ekran cümleleri, geçici görünüm ve varlık paneli.
+- CHANGELOG.md'nin 1.1.0 ile 2.0.6 arası git geçmişinden ve bu dosyadan derlendi, uygulama içi notlar yalnız 2.1.0 ve 2.1.1 için var. Belirsiz kalanlar girdilerin kendisinde yazılı.
+
+### CLAUDE.md'den taşınan ölçümler
+
+Bu sayılar CLAUDE.md'de kural metinlerinin içinde duruyordu ve buraya taşındı.
+Tarihleri ölçüldükleri günün tarihi, bugün yeniden ölçülmediler.
+
+**Bağımlılık maliyetleri (2026-08-26, taban `dist/index.html` 405 242 bayt).**
+
+| Paket | Maliyet |
+|---|---|
+| `lucide-react` (12 simge) | +3,4 KB |
+| `@radix-ui/react-dialog` | +39,5 KB |
+| ve `react-toast` | +19,6 KB |
+| ve `react-dropdown-menu` | +51,0 KB |
+| ve `react-tooltip` | +8,2 KB |
+| ve `react-popover` | +5,0 KB |
+| Radix toplam (5 paket) | +123,3 KB |
+| `motion` | +127,2 KB, alınmadı |
+
+`dropdown-menu` beşinin en pahalısıydı ama popper'ı da o getiriyordu: tooltip ve
+popover onun üstüne 13 KB tuttu. `react-toast` sonradan kullanılmadı, bugünkü
+bağımlılıklarda `react-context-menu` var.
+
+**Hedef makine (2026-08-26, 1920×1080, `file://`, 7 koşu).**
+
+```
+dist/index.html    489 815 bayt   (tek dosya: JS, CSS ve gömülü font)
+açılış             73 ms medyan · 83 ms en kötü
+imleç haçı         0,391 ms / sütun değişimi  (16,7 ms karenin %2,3'ü)
+ızgara             1950 hücre, 426 kart
+```
+
+İmleç haçının daha önceki bir ölçümü 0,148 ms / sütun değişimi yazıyordu, 16,7
+ms'lik kare bütçesinin %1'inden az (tarihi yazılı değil).
+
+**Çeviri sözlükleri (2026-08-28).** Üç sözlük daha +242 242 bayt ve açılışa 0 ms,
+çünkü gömülü metin taşınıyor, ayrıştırılmıyor. O gün sözlük 786 anahtar × 4 dildi.
+
+**Yerel sunucu (2026-08-26).** Çift tıklanan dosya ile yerel sunucu arasında
+ölçülen fark 76 ms ile 82 ms. Hangi sayının hangi yola ait olduğu kayıtta yazılı
+değil.
+
+**E2E paralelliği (tarihsiz).** `fullyParallel` ve dört işçiyle süit 66 sn'den
+51 sn'ye indi.
+
+**Test sayıları, CLAUDE.md'nin son hâlinde.** 716 birim testi, 29 dosyada 500 E2E
+testi, 22 site testi, çözücü stresi 7 test ve 34,8 sn, `cargo test` 6 test. Bugün
+kaynaktan sayılanlar "Şu an" bloğunda.
+
+**Arayüz kararlarının içindeki ölçümler.**
+
+- En uzun `.hint` 438 karakterden 126 karaktere indi (2026-08-30).
+- Müsaitlik'in boyanan satırı 54,3 px, %150'de 81,4 px, ve sayfanın dikey taşması iki ölçekte 0 (2026-08-30).
+- Program şeridi %150'de 1920 px'lik kutuda 2061 px istiyordu, iki grup menüye inince 1717 px (2026-08-30).
+- Baş toplamı raylı düzende 59 + 50 + 30 = 139 px, çift barda 51 + 39 + 26 = 116 px (2026-08-25). Rayın her sekmedeki genişliği 92 px. Şerit %125 ve %150'de 39 px, yani tam bir ızgara satırı.
+- Kontrol'de şerit yokken sekmeye her girişte içerik 45 px zıplıyordu (2026-08-27).
+- Havuzun sabit yüksekliği 215 px'ti, 25 öğretmenin altısı. Boş bir tepsi 176 px tutuyordu.
+- 1920×1080 varsayımında ızgara 2616 px genişliğindeydi ve 25 satırın 19'u ekrana sığıyordu.
+- Önizleme ile kâğıt arasındaki fark önizlemede ~30 px, kâğıtta 86,93 px (2026-08-26).
+- Gün bandı ile zemin arası ΔE 2,7.
+- Müsaitlik satırı `3.875rem` yapıldı (2026-08-30).
+- `lucide-react` simge başına yaklaşık 0,3 KB tutuyor, ağaç budanıyor.
+- Sağ raydaki listelerin eski sabit tavanları 22rem ve 62vh idi (2026-08-29).
+- Geniş tablonun satırlarına verilen `opacity` Chromium'da her satırı ayrı bir raster katmanına alıyordu ve 4× CPU kısıtında ikinci kare ~75 ms'e çıkıyordu (2026-09-01).
+- Üst çubuk işareti `1.75rem`: kök 16 px iken 28 px, 14 px iken 24,5 px, 13 px iken 22,75 px, %150'de 34,125 px.
+
+### Tuzak anlatıları kısaltılırken çıkan ölçüm ayrıntıları
+
+TRAPS.md'deki anlatılar kısaltıldı. Kısalan metinden düşen sayılar, tuzak
+numarasıyla:
+
+- **33.** Gövde 16 px'e çıktığında süit 228/228 geçti, renk kutusu 44 px'ti ve tarayıcının istediği 57 px'ti.
+- **34.** `1ch` başlıkta 6,86 px, gövdede 9,15 px. `.num` bir `<input>`'ta `8ch` ve `<th>`'de `10ch`, ikisi de yaklaşık 70 px.
+- **37.** 78 sütun kenarlığının alt piksel yuvarlaması, 2 px payla 1 px kayma bırakıyordu.
+- **48.** %150'de sekme şeridi 693 px'te bitiyordu, Ayarlar sekmesi 823 px'teydi.
+- **50.** `table.availability` saatli de saatsiz de 1341,7 × 354,2 px.
+- **59.** Sekme geçişinde panel 7 px aşağıdan soluyor, erken ölçüm onu rayın 5 px altında gösteriyordu.
+- **61.** %150'de ad kutusu 232 px'ten 26 px'e inmişti, düzeltmeden sonra 283 px ve sayfanın yatay taşması 0.
+- **64.** Kırpılan satırın ekranda okunan hâli `"Derslik ve branş — Ayn…"` idi.
+- **69.** Gömülü font 23 KB'lik reçetesiz bir dosyaydı. Eksen seçenekleri `400:700` +1 060 bayt, `350:700` +7 880, `300:700` +8 600 ölçüldü, kaynak yüz 122 KB.
+- **70.** `'0'` glifinin 600 ile 700 arasındaki nokta farkı eski yüzde 0,0, yenisinde 406,5. Tarayıcıda `'Haftalık ders programı'` eski yüzde 600 ve 700 ağırlıkta aynı genişlikte, 1042.
+- **79.** Altmış adım üç yüz saniye ediyordu. Devriyede tıklama zaman aşımı 1,5 saniyeye indi.
+- **81.** Yanlış ölçüm açık temada 2,15 ile 2,78, koyu temada 6,50 ile 8,35 veriyordu. Piksel okunarak ölçülünce açık 5,53 ile 7,31, koyu 4,28 ile 5,84.
+- **83.** Hiçbir `tsc` koşusunun görmediği `e2e/` 35 dosyaydı.
+- **85.** Bir satırda 7 hücre imlecin altında değildi.
+- **92.** Çıplak `page.reload()`'dan sonra ekranı okuyan yirmi test vardı.
+- **94.** "Öğretmenler 25" düğmesi 400 ağırlıkta 128,19 px, 600'de 130,59 px. Panel 1538,5 px'ten 1528,5 px'e değişiyordu. Program'da oluk olsaydı `.grid-wrap` 1920 yerine 1910 px olurdu.
+- **99.** Geçiş sürerken okunan opaklık 0,643877.
+- **100.** %150'de geniş grup 4123 px istiyordu. 560 px'lik bir pencerede tepsinin tabanı 6rem, yani 84 px'e iniyordu. Kısa ekrandaki taban hesabı: baş 32 + başlık 24 + kart 40, 84 px'e sığmıyordu.
+- **102.** Paylaşılan hücre kuralı 2.125rem veriyordu, 14 px kökte 29,75 px. İlk çare `height: 2lh` farkı 2,16 px'ten 1,03 px'e indirdi, `visibility: hidden` ile iki yükseklik 332,03 px'te eşitlendi.
+- **103.** Kusur yerindeyken Sığdır'da tablo 332 yerine 329,9 px'ti.
+- **105.** Program sekmesinin açılışı 4× CPU kısıtında toplam 144,8 ms'ydi, öteki sekmeler 30 ile 50 ms.
+- **107.** 1920 ile 1600 arasındaki 320 px, 72 ders sütununda sütun başına 4,5 px ediyor. Satır başı daraltılırken `nowrap` olmadan baş üç satıra sarıyor ve satır 38,5 px'ten 50,6 px'e çıkıyordu.
 
 ---
 

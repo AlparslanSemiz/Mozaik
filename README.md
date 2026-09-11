@@ -117,10 +117,11 @@ print overflow and colour contrast only show up there.
 **If you changed something visible, do not say "done" before running
 `npm run test:e2e`.**
 
-Architecture, data model, constraints and known pitfalls live in
-[CLAUDE.md](CLAUDE.md) — in Turkish, along with [docs/](docs/). That is
-deliberate: it is the project's memory, and it is written in the language the
-decisions were made in.
+Principles, architecture, data model, constraints, known pitfalls and the
+decision log live in [docs/](docs/), with [CLAUDE.md](CLAUDE.md) as the index.
+They are written in Turkish, and that is deliberate: they are the project's
+memory, kept in the language the decisions were made in. The release history is
+in [CHANGELOG.md](CHANGELOG.md).
 
 ## How it is built
 
