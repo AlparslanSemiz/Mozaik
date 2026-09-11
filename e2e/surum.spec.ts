@@ -13,8 +13,9 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { open, openSettings } from './helpers';
+import { open, openSettings, reopen } from './helpers';
 import { surumBilgisi } from '../scripts/surum.mjs';
+import { SURUM_NOTLARI } from '../src/changelog';
 
 /**
  * Scoped by its HEADING, not by its text. `hasText` matches a substring and
@@ -110,10 +111,27 @@ test.describe('79. Yenilikler', () => {
 
     const panel = changelogPanel(page);
     await expect(panel).toBeVisible();
-    await expect(panel).toContainText('Klavye kısayolları için bir yardım ekranı eklendi');
 
-    // A fresh profile has exactly one release logged; nothing to archive yet.
-    await expect(panel.locator('details')).toHaveCount(0);
+    // The promise, not today's count: the NEWEST release is open on the page
+    // and every older one waits in ONE closed archive. This used to name the
+    // number of releases (0 archives) and one line from 2.1.0. The second
+    // release turned the count red, and the line kept passing from inside the
+    // closed archive, because text matching reads hidden text too (pitfall 97).
+    const [newest, ...older] = SURUM_NOTLARI;
+    for (const line of newest!.items) {
+      await expect(panel.getByText(line, { exact: true })).toBeVisible();
+    }
+
+    const archive = panel.locator('details');
+    await expect(archive).toHaveCount(older.length > 0 ? 1 : 0);
+    if (older.length > 0) {
+      await expect(archive).not.toHaveAttribute('open');
+      for (const old of older) {
+        const line = archive.getByText(old.items[0]!, { exact: true });
+        await expect(line).toHaveCount(1);
+        await expect(line).toBeHidden();
+      }
+    }
   });
 
   test('Ayarlar sekmesindeki nokta, panel açılınca kayboluyor ve kalıcı', async ({ page }) => {
@@ -127,7 +145,7 @@ test.describe('79. Yenilikler', () => {
 
     // ...and the mark is written, not merely the in-memory state: it survives
     // the reload the way the sample-data hint does (theme.ts's INTRO_KEY).
-    await page.reload();
+    await reopen(page);
     await expect(page.getByRole('button', { name: 'Okul', exact: true })).toBeVisible();
     await expect(dot).toBeHidden();
   });
