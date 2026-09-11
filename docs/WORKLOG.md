@@ -27,14 +27,15 @@ Son güncelleme: 2026-09-11.
 Dersler, Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil,
 dört teslim yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini
 güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
-sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru için envanter çıkarıldı ve
-taban ölçümleri alındı, kaynak koda dokunulmadı.
+sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
+ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
 
 **Yarım olan.** Kod refactoru Faz 2'nin başında: envanter onaylandı, taban ölçümleri
 ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
 alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'nin ilk
 adımı (ESLint, knip, Prettier ve biçim commit'i) ile ikinci adımı (ölü kod ve
 kapsülleme), üçüncü adımı (`keys.ts`) ve dördüncü adımı (küçük ortak yardımcılar) bitti.
+Adım 5'ten önce E2E tabanı temizlendi: kararsız testlerin sebebi bulundu, bilinen beş kırmızının dördü test kusuruydu ve düzeltildi.
 Sıradaki adım 5: tercihler (`theme.ts` ve dört kardeşi tek bir tercih fabrikasına). [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
@@ -46,7 +47,8 @@ yapılmış görünüyor.
 **Bilinen kusurlar.**
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
-- 2026-09-11'deki `npm run test:e2e` koşusunda 555 testin 10'u düştü. Beşi 2026-09-01'den beri biliniyor: 3 havuz testi (`program.spec.ts`) ve 2 araç şeridi testi (`serit.spec.ts`). Biri kalıcı bir test kusuru (`surum.spec.ts` 107). Dördü paralel koşuda düşüp tek işçide geçiyor. `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti. Ayrım refactor girdisinde, bulgular TESTFINDINGS'te.
+- 2026-09-11'deki taban temizliğinden sonra ana E2E süitinde 558 testin 557'si geçiyor. Düşen tek test `serit.spec.ts` 220 ve bir ürün kusurunu gösteriyor: %150'de Program şeridinin "İşlemler" düğmesi 80,7 px taşıyor, `516f963`'ün Renk grubundan (TODO §8d). Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
+- Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
@@ -62,15 +64,15 @@ yapılmış görünüyor.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 14 | `src/types.ts` |
-| Ana E2E süiti | 29 dosyada 555 test | `npx playwright test --list` |
+| Ana E2E süiti | 29 dosyada 558 test | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | `library.ts`'teki `storageReport` |
-| Birim testleri | 27 dosyada 763 test, hepsi geçti, 3,5 sn | `npm test` |
-| Ana E2E koşusu | 545/555 geçti, süit 5,0 dk | `npm run test:e2e`, düşenlerin ayrımı refactor girdisinde |
-| `dist/index.html` | 1 007 885 bayt | `npx vite build`, dökümü refactor girdisinde |
+| Birim testleri | 28 dosyada 769 test, hepsi geçti, 3,3 sn | `npm test` |
+| Ana E2E koşusu | 557/558 geçti, süit 4,9 dk | `npx playwright test`, taban temizliğinden sonra, ayrım refactor girdisinde |
+| `dist/index.html` | 1 006 799 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
 | Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 34,8 ms medyan x1, 159,0 ms x4 | aynı betik, tıklamadan iki kareye |
 
@@ -303,6 +305,33 @@ knip (kullanılmayan dışa aktarım 16), `npm run test:site` (22/22), `planlar.
 işçiyle (21/21). `dist/index.html` 1 006 799 bayt. Ana E2E'nin kalanı koşulmadı: değişiklikler
 depo yardımcılarıyla, bir tiple ve bir sabitle sınırlı, onları kullanan ekranların
 spec'leri koşuldu.
+
+**Adım 5'ten önce: taban temizliği.** Kullanıcı adım 5'ten önce üç iş istedi: kararsız
+testlerin sebebini bulmak, `surum.spec.ts` 107'yi mutasyonla kanıtlamak ya da silmek, ve
+bilinen beş kırmızıyı tek tek yazmak. Yanına iki sınıflandırma geldi: `sanitize`'ın kanonik
+olmayan anahtarı ve `exhaustive-deps` uyarıları.
+
+- `eb3fb0f` ve `ea054a1`, `kapan.ts`: yedi kararsız testin sebebi ölçüldü, yük değil test altyapısıydı. `file://` altında belgenin en başında localStorage'a dokunan bir betik (yalnız okusa bile) sonraki yenilemeyi zaman zaman bayat ya da boş bir depoyla başlatıyor, ve `kapan.ts`'in dil tohumu tam öyle bir betikti (tuzak 108). Tohum yerine dört Playwright ayarında `locale: 'tr-TR'`. Dört işçide eski tohumla dil tanı spec'inin 48 testinden 43'ü düştü, tohumsuz 720 yenilemede 0 bayat okuma. Önce düşen yedi test beşer kez koşuldu: 40/40. Ölçümlerin tamamı ve geçersiz çıkan aletler TESTFINDINGS'te.
+- `de86a25`, `surum.spec.ts` 107: sürüm sayısı yerine değişmez ölçülüyor, iki mutasyon kırmızı.
+- `d59985e`, `serit.spec.ts` 81: şeridin sol ucu tam, sağ ucu LAYOUT.md'ye göre okunuyor, mutasyon kırmızı.
+- `c6fbbe9`: cinsiyet testi yenilemeden önce kaydı bekliyor (tuzak 24), sabitleme testi `reopen` kullanıyor (tuzak 92).
+- `8359cae`, `program.spec.ts`'in üç havuz testi: `516f963`'ten beri deste tek DOM kartı, testler `.pool-card`'ı blok diye sayıyordu. Artık `data-count` ile sayılıyor, ve deste testi ilk kez bir yerleşimin kendi destesinden bir blok düşürdüğünü ölçüyor. Yedi mutasyonun yedisi kırmızı.
+- `serit.spec.ts` 220 kırmızı kalıyor ve haklı: %150'de Program şeridindeki "İşlemler" düğmesi 80,7 px taşıyor. Sebep `516f963`'ün Renk grubu, bir kopyada gizlenince test yeşil. Ürün kusuru, TODO §8d.
+- Beş kırmızının hiçbiri için kabul kaydı yok. İlk yazılı anıldıkları yer `0df5c9d`'nin WORKLOG girdisi ("bu turdan önce de düşüyordu"), sebep yazılmamış, kullanıcı onayı kayıtlı değil.
+- Sınıflandırma, TODO §8d: `sanitize`'ın kanonik olmayan anahtarı altı okuma yolundan içeri girebiliyor ve kaynağı yalnız elle düzenlenmiş metin, altı seçenek yazıldı, karar kullanıcıda. `Program.tsx`'in `drop`'undaki eksik `t` üretildi (Türkçe kurulup İngilizceye geçilince bildirim "will go back" diyor, yenileyince "went back"), ürün kusuru. Öteki üç uyarı bugün kusur üretmiyor, gerekçeleri maddede.
+
+Sonuç sayılmayanlar, ne oldukları kaybolmasın diye: `context.storageState()` `file://`
+kökenini döndürmediği için onunla alınan "tarayıcı tarafı" okumaları, tohum kalktıktan sonra
+kendi başlangıç betiği depoyu okuyan tanı spec'inin ilk koşusu, ve derlenmeyen bir
+mutasyondan sonra eski `dist` üzerinde koşan test (tuzak 84). `eb3fb0f`'nin mesajı başlangıç
+betiksiz hızlı yenilemeleri 400 diye yazıyor, doğrusu 500, yorumu `ea054a1` düzeltti. C2'de
+`en.ts`'i tırnaklı anahtar diye taramak "üretilemez" sonucunu vermişti, anahtarlar tırnaksız
+yazılı ve ekran ölçümü o sonucu çürüttü.
+
+Koşuldu: `npm test` (769/769), `npm run tipler`, Prettier, ana E2E süitinin tamamı
+(`npx playwright test`, 557/558, 4,9 dk, düşen `serit.spec.ts` 220), `npm run test:site` (22/22, ilk koşu 20/22 düştü çünkü süit koşarken `ea054a1` commit'lendi ve beklenen önbellek adı derlenmiş `sw.js`'ten ayrıştı, HEAD sabitken 22/22) ve `npm run cozucu` (7/7).
+Koşulmadı: devriye ve ekran görüntüleri. `locale` onların ayarlarına da girdi, ama ikisi de
+uzun ve değişen tek şey dil tohumunun yeri.
 
 **Sıradaki iş.** Faz 2, adım 5: tercihler. `theme.ts`'in on iki kopya oku, normalize et, yaz
 deseni ve dört kardeşi tek bir tercih fabrikasına, `storageReport` anahtarları oradan

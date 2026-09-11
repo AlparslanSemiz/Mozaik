@@ -824,28 +824,74 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       geçmeyen yaklaşık 25 dize (`Print.tsx`, `Ribbon.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,
       `Plans.tsx`, silme onaylarının `"Sil"`'i), `initialBox`'ın StrictMode altında yedek
       zincirini iki kez döndürmesi.
-- [ ] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
+- [x] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
       sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
       oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
-- [ ] **Dört E2E testi paralel koşuda düşüp tek işçide geçiyor.** `dil.spec.ts` 70,
+      Düzeltildi (2026-09-11, `de86a25`): en yeni sürümün maddelerini ve tek kapalı arşivi
+      ölçüyor, arşivi açık çizmek ve sürüm sırasını çevirmek testi kırmızıya çeviriyor.
+- [x] **Dört E2E testi paralel koşuda düşüp tek işçide geçiyor.** `dil.spec.ts` 70,
       `izgara.spec.ts` 360, `kurulum.spec.ts` 851, `renk.spec.ts` 39, dördü de depoya yazıp
       yeniledikten sonra okuyor. Sebep ölçülecek, "yük" diye yazılmadan (tuzak 92).
-- [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** `App.tsx:728`'deki
-      palet eylemlerinin memo'su üç `toggle*` fonksiyonunu bağımlılıkta saymıyor.
-      `Commands.tsx:123` kullanmadığı `ui`'ya bağlı, yani komut listesi her App çiziminde
-      yeniden kuruluyor. `Program.tsx:539` ve `useRowOrder.tsx:146` geri çağırımda `t`'yi
-      saymıyor, yani dil değişince o geri çağırımın yazdığı cümle eski dilde kalabilir.
-      Dördü de davranışı etkilediği için araç commit'ine girmedi, ilgili modülün refactor
-      adımında ölçülerek ele alınır. `App.test.tsx:16`'da kullanılmayan bir `eslint-disable`
-      yorumu var.
+      Ölçüldü ve düzeltildi (2026-09-11, `eb3fb0f`): sebep yük değil `kapan.ts`'in dil tohumuydu.
+      `file://` altında belge başında localStorage'a dokunan bir betik sonraki yenilemeyi
+      zaman zaman bayat ya da boş depoyla başlatıyor (tuzak 108). Tohum yerine
+      `locale: 'tr-TR'`. Planlar 98 ve 292 ile dil 83 dahil yedi test dört işçide beşer kez: 40/40.
+- [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
+      commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
+      2026-09-11'de sınıflandırıldı, satır numaraları bugünkü. `Program.tsx:506`, `drop`'un
+      `t`'si: kusur, üretildi, aşağıdaki ayrı madde. `useRowOrder.tsx:149`, `grip`'in `t`'si:
+      bugün kusura yol açmıyor, çünkü dil yalnız Ayarlar → Görünüm'den değişiyor ve liste
+      ekranları (Okul adımları, Dersler) o sırada sökülü, geri dönülünce kanca yeniden kuruluyor.
+      Liste açıkken dil değiştiren bir yol eklenirse tutamağın adı ve ipucu eski dilde kalır.
+      Kaynaktan okundu, ekranda denenmedi. `App.tsx:582`, palet eylemleri üç `toggle*`'ı
+      saymıyor: kusur yok, üçü yalnız `theme`, `ribbon` ve `motion`'ı okuyor ve üçü de
+      bağımlılıkta. `Commands.tsx:116`, gereksiz `ui` bağımlılığı: kusur yok, yalnız fazla
+      hesap, komut listesi `ui` her değiştiğinde yeniden kuruluyor ama içeriği ona bağlı değil.
+      `App.test.tsx:16`'da kullanılmayan bir `eslint-disable` yorumu var, o bir
+      `exhaustive-deps` uyarısı değil.
+- [ ] **Program'da bırakınca çıkan bildirim, dil yenilemesiz değişince eski dilin kelimesini
+      arıyor (2026-09-11).** `Program.tsx`'in `drop` geri çağırımı bildirimi
+      `evictionNotice(...).replace(t('dönecek'), t('döndü'))` ile kuruyor ve `useCallback`
+      bağımlılıklarında `t` yok. Program `Activity` içinde sekme değişince sökülmüyor, bu yüzden
+      Ayarlar'da dil değişince geri çağırım programdaki ilk değişikliğe kadar eski `t`'yi tutuyor.
+      Üretildi: Türkçe kurulup İngilizceye geçilince "the 510 · MÇ lesson will go back to the
+      tray", yenilendikten sonra "went back". Ürün kusuru, düzeltilmedi. Kayıt TESTFINDINGS'te.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
       `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
       sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da
       `s510|0| 7` bu yüzden depoda kalıyor, ama `placementKey(…, 7)` ile yapılan hiçbir
-      aramada bulunmuyor: ızgarada görünmez, sayaçları şaşırtır. Kod refactoru bunu
-      düzeltmedi, `remapDays` bilerek o parçayı saklandığı gibi taşıyor (`keyOnDay`).
-      Düzeltmesi bir davranış değişikliği ve bir şema sorusu: `sanitize` anahtarı
-      kanonik biçimde yeniden mi kursun, atsın mı.
+      aramada bulunmuyor. Kod refactoru bunu düzeltmedi, `remapDays` bilerek o parçayı
+      saklandığı gibi taşıyor (`keyOnDay`). Kategori: veri kaybı.
+      Nereden gelebilir: hiçbir sürüm ve hiçbir şema göçü böyle bir anahtar üretmiyor, kaynak
+      yalnız elle düzenlenmiş bir metin (tek plan dosyası, paket, ya da localStorage'daki bir
+      plan ya da yedek anahtarı). Hangi yoldan içeri girer, 2026-09-11'de kaynaktan sayıldı,
+      altısı da `parseState` üstünden `sanitize`'a varıyor ve anahtarı olduğu gibi kopyalıyor:
+      açılış (`initialBox`, `loadPlan`), plan geçişi ve plan silinince sıradakine geçiş
+      (`store.ts` 758 ve 799), taslak başlatma (`DraftStart.tsx:40`), üst çubuktan tek dosya
+      açma (`App.tsx:620`), Ayarlar → Veri'deki yedek zinciri (`listBackups`) ve paket
+      (`Data.tsx:508`, `replaceLibrary`).
+      Ne olur: sınıf ızgarası hücreyi boş, öğretmen ızgarası dolu gösterebilir, kart
+      sürüklenemez, havuz aynı bloğu yine sunar ve aynı saate ikinci bir yerleşim konabilir,
+      Kontrol ile kâğıt ayrışır, ve bir sonraki `sanitize` hayaleti sessizce silebilir.
+      Seçenekler, karar kullanıcıda: (a) `sanitize` anahtarı kanonik biçimde yeniden kurar,
+      iki anahtar aynı hücreye düşerse hangisinin kalacağı için bir kural gerekir. (b)
+      `sanitize` kanonik olmayan anahtarı atar, yani elle yazılmış yerleşim kaybolur. (c)
+      Dosya reddedilir, ama localStorage'dan açılışta reddetmek programı açılmaz yapar. (d)
+      Şema 15 ile `parseState`'te bir kerelik göç, (a) ya da (b)'nin kuralıyla. (e) Bırakılır,
+      elle düzenlemenin bedeli olarak. (f) Kontrol bu anahtarları raporlar, veriye dokunulmaz.
+- [ ] **%150'de Program şeridinde "İşlemler" düğmesi taşıyor (2026-09-11).** `serit.spec.ts`
+      220 2026-09-01'den beri kırmızı ve haklı: IZGARA grubundaki "İşlemler" şeridin sağ
+      kenarını 80,7 px aşıyor (düğme 120 px) ve şerit kaymıyor. Öteki altı şerit sığıyor.
+      Sebep `516f963`'ün eklediği Renk grubu, bir kopyada gizlenince test yeşil. Ürün kusuru,
+      tuzak 48'in sözü. Renk grubunun yeri ya da şeridin daralma kuralı için bir tasarım
+      kararı bekliyor. Kayıt TESTFINDINGS'te.
+- [ ] **Belge başında depoya dokunan bir tarayıcı eklentisi `file://`'da bayat açılış üretir
+      mi (2026-09-11).** Tuzak 108'in tetikleyicisi süitte `kapan.ts`'in başlangıç betiğiydi.
+      Üründe belge başında depoya dokunan kod yok ve uygulama başlangıç betiği olmadan 780
+      yenilemede bir kez bile bayat açılmadı. Bir eklentinin `document_start` betiği aynı yolu
+      açabilir. Başlangıç betikli 800 turda her bayat açılış 3 sn içinde düzeldi ve kalıcı kayıp
+      olmadı, ama boş görünen bir oturumda yapılan değişikliğin gerçek planın üstüne yazılıp
+      yazılmadığı ölçülmedi.
 - [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
       Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
       yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,

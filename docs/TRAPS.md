@@ -655,8 +655,8 @@ ve `Yazdır → Çıktı` sonrasında eski kelimeler yorumlarda durduğu için
 arayüz metnini yeniden adlandıran `lang/*.ts`'i elle düzeltir.
 
 ### 89 · Bir süit çevrilmemiş metni göremez
-`t('Öğretmenler')` Türkçede `'Öğretmenler'` döndürür ve süit `kapan.ts`'te
-Türkçeye sabitli. Sözlük bittiğinde 469 test yeşildi ve İngilizce ekranda on
+`t('Öğretmenler')` Türkçede `'Öğretmenler'` döndürür ve süit Playwright
+ayarlarının `locale`'iyle Türkçeye sabitli. Sözlük bittiğinde 469 test yeşildi ve İngilizce ekranda on
 dört yerde Türkçe duruyordu. Bulan iki şey oldu: İngilizce sayfanın gövdesinde
 Türkçe harf arayan bir tarama, ve en uzun dilde (Almanca) ekran görüntülerine
 bakmak.
@@ -721,7 +721,7 @@ yamanır, çünkü örneğe konan bir alan onu klonlanamaz yapardı.
 ### 68 · `addInitScript` her yüklemede koşar
 İzin testi `localStorage['__izin']`'i `prompt` yapıp sayfayı yeniliyordu, init
 betiği her yüklemede onu `granted`'a geri yazıyordu. Bir init betiği durumu
-tohumlar, dayatmaz.
+tohumlar, dayatmaz. `file://` altında depoya dokunan bir init betiğinin bedeli tuzak 108.
 
 ### 79 · Bir devriyenin maliyeti zaman aşımlarının toplamıdır
 İlk `npm run patrol` üç dakikada hiçbir sekmeye uğramadan düştü, çünkü gezinme
@@ -758,6 +758,17 @@ Raptiyenin "hover olmadan görünür" testi `getComputedStyle(...).opacity > 0.2
 raptiyeyi açıyordu, ve imleç çekilince bile geçiş sürerken okunan opaklık
 0,64'tü. Boyanmış bir değeri (opaklık, renk, dönüşüm) okuyan her ölçüm önce
 hareketin bitmesini bekler: `settledMotion()` `e2e/helpers.ts`'te.
+
+### 108 · `file://` altında belge başında depoya dokunan bir betik sonraki yenilemeyi bayat başlatır
+Süitin paralel koşuda "kararsız" yedi testi aynı şeyden düşüyordu. `kapan.ts` dili her
+testte `addInitScript` ile tohumluyordu, ve Chromium `file://` kökeninde belgenin en
+başında localStorage'a dokunulunca (yalnız okumak da yetiyor) bir sonraki belgeyi zaman
+zaman bir önceki turun deposuyla ya da boş bir depoyla başlatıyor. Beklemek çözmüyor,
+http'de olmuyor, aynı yazım 50 ms sonra yapılınca olmuyor. Dört işçide tohumlu 142 bayat
+okuma, tohumsuz 720 yenilemede 0. Çare depoya dokunmamak: dil Playwright ayarlarında
+`locale` ile sabit. `file://` üzerinde koşan bir testin başlangıç betiği localStorage'a
+dokunmaz. `context.storageState()` `file://` kökenini döndürmez, bu kökende depo sayfanın
+içinden okunur. Ölçümler TESTFINDINGS'in 2026-09-11 kaydında.
 
 ---
 
@@ -823,11 +834,11 @@ işi.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108 |
 | Ölçüm disiplini | 42, 65, 81, 101 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi, ve yeni bir
-tuzak 108'den devam eder.
+tuzak 109'dan devam eder.
