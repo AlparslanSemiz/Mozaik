@@ -1,4 +1,43 @@
-# Kurs Ders Programı — Teknik Plan
+# v0 planı, arşiv
+
+Projenin ilk teknik planı, donmuş bir tarihsel kayıt olarak.
+
+Bu dosya tarihsel bir kayıttır. Projenin ilk teknik planını, yani v0 yazılmadan
+önceki hâlini ve üstüne 2026-08-30'a kadar eklenen güncelleme notlarını taşıyor,
+ve bir daha güncellenmiyor. Bugünkü durum için [ARCHITECTURE.md](ARCHITECTURE.md),
+[DATA.md](DATA.md), [TRAPS.md](TRAPS.md) ve [PRINCIPLES.md](PRINCIPLES.md)'e
+bakılır, sıradaki sürümler ve hâlâ açık sorular için
+[ROADMAP.md](ROADMAP.md)'ye. Özgün belge aşağıda olduğu gibi duruyor, yalnız
+başlığı bir düzey indirildi, gelecekteki sürümlerin tarifi ve tuzak listesi
+çıkarıldı, ve bunların üçü de yerinde bir satırla söyleniyor.
+
+## Bugün yanlış olan ne
+
+Aşağıdaki liste 2026-09-12'de kaynaktan doğrulandı. Belgeyi okurken hangi
+cümlenin artık doğru olmadığını her paragrafta yeniden sormamak için burada
+duruyor, ve belgenin içine dokunulmadı.
+
+| Belgede yazan | Bugün doğru olan | Nereden doğrulandı |
+|---|---|---|
+| Veri modelinde tipler ve alanlar Türkçe: `Durum`, `ayar`, `derslikler`, `yerlesim`, `engel()` | Hepsi İngilizce: `State`, `settings`, `rooms`, `placements`, `blocker()` | `src/types.ts`, `src/constraints.ts` |
+| Kısıt mantığı `src/kisit.ts`'te | `src/constraints.ts`'te | dosya adı |
+| `semaSurumu: 1` | `SCHEMA_VERSION = 14`, ve on dört sürümün göç kaydı tip dosyasının içinde yazılı | `src/types.ts` |
+| `Ders.blok`, ders başına tek bir blok boyu | `Lesson.blocks`, bir liste: hangi bloğun kaç saat olduğu haftadan haftaya değil ders başına yazılıyor, ve bir blok 2 ya da 3 saat | `src/types.ts`, şema v9 ve v13 |
+| Boşluk (pencere) kuralları yok | Şema v14'te girdi: `maxGapsTeacher` ve `maxGapsClass`, yalnız Kapalı ya da Uyar | `src/types.ts`, `src/rules.ts` |
+| React dışında runtime bağımlılığı yok | Dört Radix paketi ve `lucide-react` de runtime bağımlılığı. Ölçüt değişti: gömülebiliyor ve çalışırken ağa çıkmıyorsa serbest | `package.json`, [CONVENTIONS.md](CONVENTIONS.md) |
+| Vitest yaklaşık on iki kısıt testi, bir saatlik iş | 30 dosyada 909 birim testi, artı E2E, site, çözücü stresi, Rust ve devriye katmanları | [TESTPLAN.md](TESTPLAN.md), `npm test` |
+| Beş sekme: Kurulum, Müsaitlik, Program, Kontrol, Yazdır | Yedi ekran: Okul, Müsaitlik, Dersler, Program, Kontrol, Çıktı ve Ayarlar. Altısı sekme şeridinde, Ayarlar ayrı | `src/App.tsx`, [LAYOUT.md](LAYOUT.md) |
+| Hafta 7 gün, ızgara 84 sütun | Varsayılan hafta altı gün (Salı'dan Pazar'a) ve 12 saat, yani 72 sütun, ve gün listesi ayarlanabilir | `src/names.ts`, `src/entities.ts` |
+| Ekran 1366×768 | Hedef makine 27 inçlik monitör, 1920×1080 CSS pikseli. 2026-08-25'te ölçülerek düzeltildi | [PRINCIPLES.md](PRINCIPLES.md) |
+| Yasak liste: karanlık mod, animasyon, PDF ve UI kütüphanesi, kurulum | Dördü de kalktı ve dördü de üründe var. Bugün yapılmayan işlerin listesi ve her birinin gerekçesi ayrı bir yerde | [PRINCIPLES.md](PRINCIPLES.md) |
+| On dokuz maddelik tuzak listesi | 109 numaralı tuzak, temaya göre gruplanmış, her birinin yanında onu koruyan test. Numaralar iki listede tutmuyor | [TRAPS.md](TRAPS.md) |
+| Otomatik dizme Web Worker'da koşacak | Web Worker kullanılmıyor, tek dosya derlemesinde çalışmıyor, çözücü ana iş parçacığında | [TRAPS.md](TRAPS.md) tuzak 19, `src/solver.ts` |
+| Kod GitHub'da private repo | Depo herkese açık, site GitHub Pages'ten yayınlanıyor ve exe güncellemeyi Release'ten indiriyor | GitHub API, [BUILD.md](BUILD.md) |
+| Otomatik güncelleme yok, sürüm kontrolü yok | Exe kendini güncelliyor ve site yeni sürümü haber veriyor. İlke değişmedi: ağa yalnız kullanıcı bir düğmeye basınca çıkılıyor | [BUILD.md](BUILD.md), [PRINCIPLES.md](PRINCIPLES.md) |
+
+---
+
+## Kurs Ders Programı — Teknik Plan
 
 Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı araç.
 Ölçek: ~25 öğretmen, ~20 sınıf, 8 derslik, 6 gün × 12 saat. Hepsi ayarlanabilir.
@@ -313,175 +352,19 @@ Bu ölçekte kütüphane gerekmez. Düz backtracking:
 - Başarısız olursa **hangi derste tıkandığını söyle**, sessizce başarısız olma
 - Web Worker'da çalıştır, UI donmasın
 
-### v2 — Kalite (yumuşak kısıtlar)
+### v2, v3 ve v4
 
-Sadece v1 çıktısı "çalışıyor ama çirkin" ise yapılır. Değilse yapılmaz.
-
-- Aynı branş bir grupta günde en fazla N saat
-- Hocanın boş günü tercihi
-- Hoca boşluklarını azaltma
-- Uygulama: v1 çözümünü al, N kez rastgele ikili takas dene, ceza düşüyorsa kabul et.
-  Basit hill-climbing, optimizasyon kütüphanesi gerekmez.
-
-### v3 — Dönem içi değişiklik
-
-Sadece babam "asıl derdim bu" derse. (Soru 7)
-
-- "Bu hafta Ahmet Hoca yok" → etkilenen dersleri işaretle, boş alternatif öner
-- Haftalık sapmaları ana programdan ayrı tut, ana program bozulmasın
-
-### v4 — TUVAL ve BASKI TASARIMI (2026-08-30, kullanıcı isteği)
-
-Bu sürüm aSc'yi gezdikten sonra doğdu ve gerekçesi bir eksik değil bir
-**beğeni**: *"Programda ve baskı önizleme tarafında Word gibi olması yani
-sağa sola aşağı yukarı kaydırabilme, sağ aşağıda ölçeğin olması, ayrıca
-kendimizin zoom in zoom out yapabiliyor olmamız, neredeyse her şeyi
-değiştirebiliyor olmamız, ayrıca farklı çeşitlerde baskı alabiliyor olmamız."*
-
-Tam dökümü ve aSc'deki karşılıkları [ASC.md](ASC.md) → *Karar tablosu* → 1a
-ve 1b'de. Özeti:
-
-**Tuval (Program ve Çıktı sekmeleri):**
-
-- Serbest kaydırma, yatay **ve** dikey; sürükleyerek de (orta tuş / boşluk).
-- **Sağ altta ölçek**: yüzde + kaydırıcı, ızgaraya bakarken değişiyor.
-  Bugün `--ui-scale` Ayarlar → Görünüm'de altı düğme; oradan çıkmıyor.
-- `Ctrl` + tekerlek, `Ctrl +` / `Ctrl -`, `%100'e dön`.
-- **Kartta ne yazacağı ve neye göre boyanacağı seçilebilir** — aSc'nin
-  `Görünüm → Tanımla`sı: öğretmen / sınıf / derslik / branş.
-
-**Baskı:**
-
-- Rapor **yapısı** seçilebilir: satırda ne, sütunda ne, sayfa başına ne.
-- **Tasarım katmanı**: okul logosu, künye, kenarlık, ekstra sütun. Modeli
-  aSc'den çözüldü ve uydurulmadı — yer tutucular `{Okul:Okulun Adı}` ·
-  `{Okul:Öğretim Yılı}` · `{Okul:Okul Logosu}` · `{Sınıf:Tam Adı}` ·
-  `{Sınıf:Sınıfın Dersliği}` · `{Sınıf:Sınıf Öğretmeni}` · `{Öğretmen:Tam Adı}`.
-- Düzenleme yeri **önizlemenin kendisi** (sağ tık → o parçanın ayarı), çünkü
-  önizleme 2026-08-26'dan beri kâğıdın **modeli değil kendisi**.
-
-**İki şey bu sürümde de değişmiyor, ve ikisi de ölçülmüş kısıt:**
-
-1. **`--ui-scale` kâğıda geçmez.** Ekran ölçeği bir okuma tercihi, kâğıdınki
-   ayrı bir ayar. Karışırlarsa yazıcıdan çıkan şey ekrana bakanın gözüne göre
-   değişir.
-2. **Kâğıdın fiziksel kutusu sabit**: A4 yatay, `@page { margin: 0 }`,
-   205 mm (tuzak 31). Serbest tasarım o kutunun **içinde** yaşar.
-
-**Ölçüm borcu:** ızgara 2100 hücre, satırlar `React.memo` ile sarılı
-(tuzak 10). Sürekli zoom her adımda yeniden düzen demek. `transform: scale()`
-mi `--cell-w` mi — **ölçülerek** seçilecek: ikincisi metni yeniden sarar,
-birincisi bulanıklaştırır.
+Üçünün tarifi [ROADMAP.md](ROADMAP.md)'ye taşındı, çünkü üçü de hâlâ
+gelecekteki iş. v4'ün ölçülmüş iki kısıtı ve ölçüm borcu da orada.
 
 ---
 
 ## 5. Bilinen tuzaklar
 
-Bunlar tahmin değil, bu tür araçlarda kesin çıkacak sorunlar.
-
-1. **Sürükleme sırasında DOM'u yeniden çizmek sürüklemeyi iptal eder.**
-   HTML5 drag-and-drop'ta `dragstart` içinde sürüklenen elemanı silen bir re-render
-   yaparsan tarayıcı işlemi iptal eder. **Çözüm: HTML5 DnD hiç kullanılmıyor,
-   Pointer Events kullanılıyor** — bu tuzak orada hiç oluşmuyor. `pointermove`
-   sırasında React state güncellenmiyor; hayalet kart `transform` ile doğrudan
-   DOM'dan taşınıyor, ızgara hiç yeniden çizilmiyor.
-
-2. **Geçerli hücreler sürükleme başında bir kez hesaplanır**, her `pointermove`'da
-   değil. Sürüklenen ders belli olduğu için sadece o öğretmenin satırı hedef
-   olabilir → 84 `engel()` çağrısı, bir kez, sonuç bir `Set`. Yavaş makinede
-   sürüklemeyi akıcı tutan şey bu. (Dokunmatik desteği de Pointer Events'le
-   bedava geliyor; hedef değil ama ileride gerekirse bozulmadan çalışır.)
-
-3. **Her tuş vuruşunda re-render odağı kaybettirir.** Metin kutularında `onInput`
-   değil `onBlur`/`onChange` kullan, ya da input'ları controlled yapmayıp
-   `defaultValue` + `onBlur` ile oku.
-
-4. **Silme işlemleri cascade olmalı.** Öğretmen silinince dersleri, ders silinince
-   yerleşimleri, sınıf silinince ikisi de. Yetim `dersId` kalırsa ızgara
-   `undefined` render eder ve çöker.
-
-5. **Saat/gün sayısı azalınca taşan yerleşimler silinmeli.** Yoksa görünmez
-   hayalet dersler kalır, sayaçlar tutmaz, babam güvenini kaybeder.
-
-   *4 ve 5'in tek çaresi:* `temizle()` saf fonksiyonu **her yüklemede ve her ayar
-   değişikliğinde** çağrılır. Silme mantığı bileşenlere dağıtılmaz.
-
-6. **localStorage silinebilir.** Tarayıcı geçmişi temizlenince veri gider.
-   Karşı önlem: (a) her değişiklikte otomatik kayıt, (b) son 3 durumu ayrı
-   anahtarlarda tut, (c) program tamamlandığında "yedek indir" için görünür bir
-   hatırlatma göster. Babama tek bir alışkanlık öğret: *değişiklik yaptın, yedek indir.*
-
-7. **Yazdırma her zaman hafife alınır.** `@page { size: A4 portrait }`,
-   `page-break-after: always`, `print-color-adjust: exact` (arka plan renkleri
-   varsayılan olarak basılmaz). v0'ın **sonunda değil ortasında** test et, yoksa
-   layout'u baştan yazarsın.
-
-8. **Türkçe karakterler.** Anahtarlarda asla isim kullanma, hep id. "Şükrü Hoca"
-   adı değişince tüm yerleşim bozulmasın. Türkçe karakter sadece kullanıcıya
-   görünen metinlerde.
-   *(2026-08-24 güncellemesi: tanımlayıcılar artık ASCII-Türkçe değil, doğrudan
-   İngilizce — `teacher`, `unavailable`, `classGroup`. Kural: arayüz Türkçe, kod
-   İngilizce; bkz. CLAUDE.md.)*
-
-9. **Blok render'ı.** İki slotu kaplayan ders, ikinci hücrede tekrar başlık
-   yazmamalı. `rowspan` yerine ikinci hücreye sade bir devam işareti koymak
-   daha az kırılgan (rowspan + dinamik tablo = bug fabrikası).
-
-10. **Bir dersi taşımak = kaldır + koy.** Ayrı bir "taşıma" kodu yazma.
-    Yerleşmiş kartı sürüklenebilir yaparsan `dragstart`'ta kaldır, bırakılmazsa
-    geri koy. v0'da buna hiç girme: tıkla-kaldır + yeniden sürükle yeterli.
-
-11. **Sürükleme hedefi ekran dışında olabilir.** *(E2E testinin yakaladığı gerçek hata.)*
-    25 satır × 84 sütun ekrana sığmıyor; 1920×1080'de 19 satır görünüyor, altı satır
-    katlanın altında kalıyor (ölçüldü). *(Rakamlar v0'da 1366×768 içindi: 9 satır.)*
-    Kullanıcı havuzdan bir kart alır ama bırakacağı satır ya da gün görünmüyorsa oraya
-    hiç ulaşamaz — fare basılıyken kaydırma yapamaz. Çözüm: (a) sürükleme başlarken
-    hedef satır `scrollIntoView({ block: 'center' })` ile ortaya alınır, (b) imleç
-    kenara yaklaşınca ızgara kendiliğinden kayar.
-
-12. **Otomatik kaydırma yalnızca imleç ızgaranın İÇİNDEYKEN çalışmalı.**
-    *(Yukarıdaki düzeltmenin kendi yan etkisi.)* Kart havuzu ızgaranın hemen altında.
-    "Alt kenara yakınsa aşağı kaydır" kuralını imlecin nerede olduğuna bakmadan
-    uygularsan, kullanıcı havuzdaki karta basar basmaz — daha kımıldamadan — ızgara
-    kendi kendine kaymaya başlar ve hedef satır kaçar. Kaydırmadan önce imlecin
-    kapsayıcının sınırları içinde olduğu kontrol edilir.
-
-13. **`CSS.escape` tırnak içindeki öznitelik değeri için değildir.** `id` rakamla
-    başlayabiliyor; `[data-x="${CSS.escape(id)}"]` sessizce eşleşmez. Kimliği seçiciye
-    gömmek yerine hedef satır DOM elemanı tutulur, içindeki hücrelere sayısal
-    `data-gun`/`data-saat` ile ulaşılır.
-
-14. **Gün listesi değişince yerleşim anahtarları kayar.** *(v0.6'da açılan yol.)*
-    `yerlesim`/`placements` anahtarı gün **indeksi** tutuyor. v0'da gün sayısı yalnızca
-    listenin sonundan kesilerek değiştiği için bu hiç görünmedi. Gün seçimi checkbox'a
-    dönünce **Pazartesi kaldırıldığında Salı 1'den 0'a kayar ve bütün program bir gün
-    öne kayar — hiçbir uyarı vermeden.** Bu, aracın yapabileceği en kötü hata: yanlış
-    ama inandırıcı bir program. Çözüm: `remapDays()` eski→yeni eşlemeyi **gün adından**
-    kurar, listeden çıkan günün anahtarlarını siler, kalanları yeniden yazar. Her
-    `updateSettings()` çağrısı buradan geçer. Birim testi ortadan gün silmeyi, E2E testi
-    başa gün eklemeyi doğrular.
-
-15. **`Cuma` ve `Cumartesi` ilk üç harfte aynı.** Gün başlıklarını `slice(0, 3)` ile
-    kısaltmak müsaitlik ızgarasında iki satırı birden "Cum" yapar. Kısaltmalar
-    `shortDay()` tablosundan gelir: `Pzt Sal Çar Per Cum Cmt Pzr`.
-
-16. **Izgaraya eklenen her hücre sürükleme hedefi sanılır.** *(v0.7'de öğle arası
-    ayraç sütunu eklenirken çıktı.)* `drag.ts` hedefi `closest('[data-day]')` ile
-    buluyor; ayraç sütununa `data-day` konsaydı ders öğle arasına bırakılabilirdi.
-    Görsel amaçlı eklenen hücreler bu özniteliği **taşımaz**, ve bunu bir test bağlar.
-
-17. **Tarayıcı açık temalı sayfayı kendi karartır.** *(v0.7'nin çıkış sebebi.)* Renk
-    değerlerini düzeltmek yetmez; `color-scheme` iki temada da doğru kurulmazsa
-    tarayıcı üstüne kendi algoritmasını uygular ve yeşil/sarı/kırmızı çamurlaşır.
-
-18. **Palet üstündeki mürekkep tema ile dönmemeli.** Öğretmen renkleri pastel ve iki
-    temada da aynı (kâğıda basılıyor). `color: inherit` bırakılırsa koyu temada açık
-    metin pastel zemine düşer ve hücre okunmaz olur.
-
-19. **WCAG kontrast oranı "ayırt edilebilirlik" ölçüsü DEĞİLDİR.** Koyu yeşil ile koyu
-    zeytin arasındaki oran 1,00:1 çıkar ama tonları apayrıdır. "Bu iki renk birbirinden
-    ayrılıyor mu" sorusu **CIE Lab ΔE** ile ölçülür; kontrast oranı yalnızca
-    "bu metin bu zeminde okunuyor mu" sorusuna cevaptır.
+Buradaki on dokuz maddelik liste silindi. Yerine [TRAPS.md](TRAPS.md) geçti:
+aynı tuzakların bugünkü hâlini, sonradan yaşanmış olanları ve her birini
+koruyan testi taşıyor. İki liste birbiriyle çelişiyordu ve numaraları da
+tutmuyordu, o yüzden bir kopyası arşivde bırakılmadı.
 
 ---
 
@@ -574,34 +457,5 @@ bloke etmiyor çünkü ilgili ayarlar yapılandırılabilir bırakıldı.
    *Karar:* yine de **Pointer Events** kullanılıyor — HTML5 DnD'nin tuzak 1'inden
    kurtarıyor ve dokunmatik desteği bedava geliyor.
 
-**Hâlâ açık — ama v0'ı bloke etmiyor:**
-
-3. ⬜ **Gün yapısı.** Her günün saat sayısı aynı mı?
-   *Neden bloke etmiyor:* `ayar.gunler` ve `ayar.saatler` tamamen ayarlanabilir.
-   Günler farklı uzunluktaysa, kısa günün fazla saatleri tüm öğretmenler için
-   "müsait değil" işaretlenerek çözülür — kod değişikliği gerekmez.
-
-4. ⬜ **Ara.** Sabit öğle arası var mı, blok bu arayı geçebilir mi?
-   *Karar:* `blokEngeli` alanı v0'dan çıkarıldı. Ara varsa o saat herkese kapalı
-   işaretlenir. Gerçekten gerekirse tek alan ve tek kontrolle geri eklenir.
-
-7. ⬜ **Asıl acı nerede?** Dönem başında bir kez mi kuruyor, dönem içinde sürekli
-   mi değiştiriyor? *İkincisi ise v3, v1'den önce yapılmalı.* v0 kullanıldıktan
-   sonra cevabı kendiliğinden görülecek.
-
-8. ⬜ **Çıktı kime gidiyor?** Duvara mı asılıyor, dağıtılıyor mu?
-   *Etkisi:* sadece baskı kalitesine verilecek özen. Sayfa başına bir sınıf düzeni
-   her iki durumda da doğru.
-
-10. ⬜ **Müsaitlik ne sıklıkla değişiyor?** Dönem boyunca sabit mi?
-    *Etkisi:* sabit değilse v3 (dönem içi değişiklik) öne çıkar. v0'ı etkilemiyor.
-
-**Kendime sorulacak:**
-
-11. Elimde babamın gerçek verisi var mı? aSc'den export çalışmadığına göre
-    ekran görüntüsü veya elle yazılmış bir liste lazım. **v0'ı örnek veriyle
-    değil, gerçek veriyle test et**, yoksa yanlış şeyi optimize edersin.
-
-12. Bu proje ne zaman yapılacak? Sömestr içinde başlanırsa yarım kalır ve
-    yarım kalan araç, hiç olmayandan kötüdür (babam ona güvenip aSc'yi bırakır).
-    Tatilde iki gün ayır, v0'ı bitir, sonra bırak.
+**Hâlâ açık olanlar** (3, 4, 7, 8, 10 ve kendine sorulan 11, 12)
+[ROADMAP.md](ROADMAP.md)'ye taşındı, bugünkü cevaplarıyla birlikte.

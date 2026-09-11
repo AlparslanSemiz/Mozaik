@@ -1594,8 +1594,8 @@ lazım"*.
 
 **(a) Tuval davranışı.** Kullanıcının cümlesi: *"Word gibi olması — sağa sola
 aşağı yukarı kaydırabilme, sağ aşağıda ölçeğin olması, zoom in zoom out,
-neredeyse her şeyi değiştirebiliyor olmamız."* [PLAN.md](PLAN.md)'e **v4**
-olarak yazıldı. İki ölçülmüş kısıt bu sürümde de duruyor: `--ui-scale`
+neredeyse her şeyi değiştirebiliyor olmamız."* `PLAN.md`'e **v4**
+olarak yazıldı (bugün [ROADMAP.md](ROADMAP.md)). İki ölçülmüş kısıt bu sürümde de duruyor: `--ui-scale`
 kâğıda geçmez, ve kâğıdın fiziksel kutusu sabit (tuzak 31). Bir de **ölçüm
 borcu**: 2100 hücrede sürekli zoom `transform: scale()` ile mi `--cell-w` ile
 mi yapılacak — biri metni yeniden sarar, öteki bulanıklaştırır, ve seçim
@@ -4872,7 +4872,7 @@ Bunlar birim testleriyle **bulunamazdı**; jsdom'un düzeni (layout) yok.
 
 Üçüncü olarak, `CSS.escape` ile kurulan seçicinin rakamla başlayan `id`'lerde sessizce
 eşleşmeyeceği fark edildi; kimlik seçiciye gömülmek yerine hedef satır elemanı
-tutuluyor. Üçü de [PLAN.md](PLAN.md) tuzak 11–13 olarak yazıldı.
+tutuluyor. Üçü de `PLAN.md` tuzak 11–13 olarak yazıldı (bugün [TRAPS.md](TRAPS.md), o listenin numaraları başka).
 
 ---
 

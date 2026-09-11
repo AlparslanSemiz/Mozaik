@@ -836,7 +836,7 @@ export function deleteLesson(d: State, id: Id): State {
  * Placement keys hold the day INDEX. Removing Monday from the front would shift
  * Tuesday from 1 to 0, silently moving the whole timetable one day earlier —
  * the old code never hit this because it only ever cut days off the END.
- * The mapping is therefore built from the day NAME (docs/PLAN.md pitfall 14).
+ * The mapping is therefore built from the day NAME (docs/TRAPS.md pitfall 11).
  */
 export function remapDays(d: State, nextDays: Day[]): State {
   const oldToNew = new Map<number, number>();

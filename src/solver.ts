@@ -1,7 +1,7 @@
 // Automatic timetabling. A PURE module: knows nothing about React, the DOM or
 // localStorage, and every exported function has a test (solver.test.ts).
 //
-// NO WEB WORKER, on purpose (docs/PLAN.md pitfall 19). The build is one HTML
+// NO WEB WORKER, on purpose (docs/TRAPS.md pitfall 19). The build is one HTML
 // file opened over file://: Vite emits a worker as a SEPARATE chunk, which
 // breaks the single-file promise, and the blob fallback runs from an opaque
 // origin where Chromium's behaviour is not something to bet a father's evening

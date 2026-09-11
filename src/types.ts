@@ -1,7 +1,7 @@
 // Data model. Types and constants only; no logic.
 //
 // Changing this file is expensive: placement keys, backup files and
-// localStorage content all depend on this shape. Read docs/PLAN.md section 2
+// localStorage content all depend on this shape. Read docs/DATA.md
 // before touching it.
 
 export type Id = string; // 8 random chars. NEVER a name or an array index.
@@ -132,7 +132,7 @@ export interface Lesson {
 /**
  * One weekday. The INDEX of a day in settings.days is what placement keys refer
  * to, so removing a day from the middle of the list shifts every later day —
- * see remapDays() in entities.ts (docs/PLAN.md pitfall 14).
+ * see remapDays() in entities.ts (docs/TRAPS.md pitfall 11).
  */
 export interface Day {
   name: string; // "Salı"

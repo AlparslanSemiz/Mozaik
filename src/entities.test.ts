@@ -3,7 +3,7 @@
 //
 // Placement keys hold the day INDEX. When Monday is unticked, Tuesday moves
 // from index 1 to index 0 — without remapping, every lesson would appear to
-// have been taught a day earlier and nobody would notice (docs/PLAN.md 14).
+// have been taught a day earlier and nobody would notice (docs/TRAPS.md pitfall 11).
 
 import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './constraints';
 import { lessonSubject } from './subjects';
@@ -349,7 +349,7 @@ describe('hourLabels', () => {
   });
 });
 
-// docs/PLAN.md pitfall 15: slice(0,3) turns both "Cuma" and "Cumartesi" into
+// docs/TRAPS.md pitfall 12: slice(0,3) turns both "Cuma" and "Cumartesi" into
 // "Cum" and the day rows become indistinguishable. There was no test for this.
 describe('shortDay', () => {
   it('yedi günün kısaltması benzersiz', () => {

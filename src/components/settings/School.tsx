@@ -1,7 +1,7 @@
 // Settings section: school name, which days are taught, and the bell times.
 //
 // Text boxes use defaultValue + onBlur. Updating top level state on every
-// keystroke with onChange loses focus (docs/PLAN.md pitfall 3).
+// keystroke with onChange loses focus (docs/TRAPS.md pitfall 3).
 
 import { useMemo } from 'react';
 import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../bell';

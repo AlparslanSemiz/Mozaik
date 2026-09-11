@@ -32,10 +32,11 @@ bloğunda yazılı.
 - [docs/DECISIONS.md](docs/DECISIONS.md): Duruşun ne zaman, neden ve neyden değiştiği, ve denenip bırakılan yolların tarihli kaydı.
 - [docs/WORKLOG.md](docs/WORKLOG.md): Projenin şu anki durumu ve oturum oturum çalışma kaydı.
 - [docs/TODO.md](docs/TODO.md): açık işler, karar bekleyen sorular, kullanıcının not defteri ve biten turların arşivi.
-- [docs/PLAN.md](docs/PLAN.md): projenin ilk teknik planı, v0'ın kaydı olarak duruyor.
+- [docs/ROADMAP.md](docs/ROADMAP.md): Sıradaki sürümler, her birinin çıkma şartı ve hâlâ cevabı beklenen sorular.
 - [docs/ASC.md](docs/ASC.md): rakip aSc Timetables'ın bölümleri, hangisinin alındığı, hangisinin bilerek alınmadığı ve hangisinin sırada olduğu.
 - [docs/ROBODERS.md](docs/ROBODERS.md): ikinci rakip Roboders'in incelemesi.
 - [CHANGELOG.md](CHANGELOG.md): dışarı bakan, İngilizce sürüm geçmişi.
+- [docs/plan-v0-arsiv.md](docs/plan-v0-arsiv.md): tarihsel, güncellenmiyor. Projenin ilk teknik planı, donmuş bir tarihsel kayıt olarak.
 
 ## Oturum sonu
 

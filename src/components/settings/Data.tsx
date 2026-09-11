@@ -3,7 +3,7 @@
 // "Sıfırla" lives HERE and not in the top bar any more. In the top bar it sat
 // one careless click away from "Dosyadan aç" and it deletes everything; it is
 // also the rarest button in the app. Saving and opening a file STAY up there,
-// because that is the one habit my father has to keep (docs/PLAN.md pitfall 7).
+// because that is the one habit my father has to keep (docs/TRAPS.md pitfall 7).
 //
 // Two things were added in v1.0 (task 4d). The first is the BUNDLE: the top
 // bar's file holds one plan, so since the library arrived a three-plan setup

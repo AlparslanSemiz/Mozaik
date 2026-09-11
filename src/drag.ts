@@ -1,6 +1,6 @@
 // Drag and drop: Pointer Events. HTML5 drag-and-drop is NOT used.
 //
-// Why (docs/PLAN.md pitfall 1): with HTML5 DnD a re-render during the drag
+// Why (docs/TRAPS.md pitfall 1): with HTML5 DnD a re-render during the drag
 // cancels the operation. Pointer Events do not have that trap, the movement is
 // smoother and touch support comes for free.
 //

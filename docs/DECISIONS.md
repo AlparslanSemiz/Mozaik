@@ -35,6 +35,31 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · PLAN.md ikiye ayrıldı, tuzak listesi silindi
+
+**Değişen.** `docs/PLAN.md` iki dosya oldu. Canlı kalan kısmı
+[ROADMAP.md](ROADMAP.md): yalnız gelecekteki sürümler (v2, v3, v4), her birinin
+çıkma şartı ve hâlâ cevabı beklenen sorular. Geri kalanı
+[plan-v0-arsiv.md](plan-v0-arsiv.md): donmuş bir tarihsel kayıt, bir daha
+güncellenmiyor, ve en üstünde 2026-09-12'de kaynaktan doğrulanmış bir "bugün
+yanlış olan ne" tablosu taşıyor.
+
+**Eski hâli.** Tek bir dosya hem v0'ın planını, hem beş biten sürümün tarifini,
+hem gelecekteki üç sürümü, hem de on dokuz maddelik bir tuzak listesini
+tutuyordu. Kendi güncelleme notları "v0'ın kaydı olarak duruyor" ve "gerekçeler
+geçerli, sayılar değil" diyordu, yani okuyan kişi her paragrafta bunun hâlâ
+doğru olup olmadığını sormak zorundaydı.
+
+**Gerekçe.** Bir belgenin bir işi olur. Karışık bir arşiv ne plan olarak
+güvenilir ne kayıt olarak okunur, ve yanlış olduğu bilinen bir cümle bir
+belgede durduğu sürece bir gün doğru sanılır.
+
+**Silinen.** Belgenin on dokuz maddelik tuzak listesi arşive de alınmadı, tek
+satırla [TRAPS.md](TRAPS.md)'ye yönlendirildi. Sebebi iki listenin çelişmesi ve
+numaralarının tutmaması: PLAN'ın 14'ü TRAPS'te 11, 15'i 12, 16'sı 13. Koddaki
+altı yorum PLAN'a atıf yapıyordu ve bir kısmı zaten TRAPS numarasını
+kullanıyordu, hepsi TRAPS'e çevrildi.
+
 ### 2026-09-11 · Kod refactoru: makine tercihleri tek fabrikada
 
 **Değişen.** On beş makine tercihi artık `src/preference.ts`'teki tek fabrikadan

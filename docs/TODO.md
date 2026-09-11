@@ -372,7 +372,7 @@ tıklanınca**.
 
 ## §4. Bölüm 4 — Tuval ve baskı tasarımı (aSc kova 1)
 
-Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [PLAN.md](PLAN.md) → **v4**.
+Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.md) → **v4**.
 **Sıra önemli: B4.1 ve B4.3, ötekilerin önkoşulu.**
 
 - [ ] **B4.1 ÖLÇÜM BORCU — ve turun İLK işi bu.** 2100 hücrede zoom
@@ -1168,7 +1168,7 @@ Ve hâlâ bekleyen tek büyük şey: **babanın gerçek listesi** — v0'ın ç�
 >
 > Bu oturumda **kod yazılmadı**; yazılan şey bir **araştırma hattı** ve bir
 > **karar tablosu**. Yeni sohbetin ilk okuyacağı yer [ASC.md](ASC.md) →
-> *Karar tablosu*, ikinci yer [PLAN.md](PLAN.md) → **v4**.
+> *Karar tablosu*, ikinci yer `PLAN.md` → **v4** (bugün [ROADMAP.md](ROADMAP.md)).
 >
 > **İlk üç iş, sırayla:**
 >
@@ -3265,7 +3265,7 @@ sağlamdı; kusurların hepsi görünüş ve kullanım tarafındaydı. Dal:
       ayrımı hesaplanarak ölçülüyor (WCAG + CIE Lab ΔE). `npm run ekran` iki temada
       beş ekran görüntüsü üretiyor
 - [x] **1m Belgeler**: `CLAUDE.md` (şema v4, arayüz, mimari, tuzak 13–15),
-      `docs/PLAN.md`, `docs/STATUS.md`, `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
+      `docs/PLAN.md` (bugün `docs/plan-v0-arsiv.md`), `docs/STATUS.md`, `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
 
 **Yapılmadı, bilerek:** kural sayılarına varsayılan konmadı (0 = sınır yok kaldı) —
 doğru cevabı okuldan okula değişir, yanlış varsayılan hücreleri sessizce kırmızıya
