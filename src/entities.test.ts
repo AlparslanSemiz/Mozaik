@@ -162,6 +162,18 @@ describe('remapDays', () => {
     expect(next.unavailable[teacherKey('oMC', 2, 3)]).toBeUndefined();
   });
 
+  // `sanitize` keeps a key as stored once its numbers are integers, so "03"
+  // can reach this function. Only the day may change on the way through:
+  // printing the hour again from a number would turn "03" into "3" and merge
+  // it into a different key.
+  it('taşınan anahtarın saat parçası saklandığı gibi kalır', () => {
+    const d = build();
+    d.unavailable['oMC|2|03'] = 1;
+    const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
+    expect(next.unavailable['oMC|1|03']).toBe(1);
+    expect(next.unavailable['oMC|2|03']).toBeUndefined();
+  });
+
   it('gün eklenince mevcut günler yerinde kalır, yeni gün boş gelir', () => {
     const d = build();
     const next = remapDays(d, [...d.settings.days, makeDay('Perşembe')]);

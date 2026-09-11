@@ -23,6 +23,7 @@ import {
   sanitize,
   teacherKey,
 } from './constraints';
+import { keyOnDay, parseKey } from './keys';
 // Type-only, erased at build time: import.ts knows nothing about State, so
 // there is no runtime cycle (same arrangement as rules.ts <-> constraints.ts).
 import type { ClassRow, LessonRow, TeacherRow } from './import';
@@ -853,11 +854,13 @@ export function remapDays(d: State, nextDays: Day[]): State {
     for (const key in source) {
       const value = source[key];
       if (value === undefined) continue;
-      const parts = key.split('|');
-      if (parts.length !== 3) continue;
-      const target = oldToNew.get(Number(parts[1]));
+      const parts = parseKey(key);
+      if (parts === null) continue;
+      const target = oldToNew.get(parts.day);
       if (target === undefined) continue; // the day was removed
-      out[`${parts[0]}|${target}|${parts[2]}`] = value;
+      // The day is the one part that moves. The other two are copied as stored,
+      // not printed again from numbers, so the key stays byte for byte its own.
+      out[keyOnDay(key, target)!] = value;
     }
     return out;
   };
@@ -1227,13 +1230,13 @@ export function entityWeek(d: State, kind: InspectKind, id: Id): WeekCell[][] {
   for (let day = 0; day < dayCount; day++) {
     const row: WeekCell[] = [];
     for (let hour = 0; hour < hourCount; hour++) {
-      const closed = d.unavailable[`${id}|${day}|${hour}`] === 1;
+      const closed = d.unavailable[closedKey(id, day, hour)] === 1;
       const lessonId =
         kind === 'class'
-          ? activePlacements(d)[`${id}|${day}|${hour}`]
+          ? activePlacements(d)[placementKey(id, day, hour)]
           : kind === 'teacher'
             ? ix.teacherBusy.get(teacherKey(id, day, hour))
-            : ix.roomBusy.get(`${id}|${day}|${hour}`);
+            : ix.roomBusy.get(closedKey(id, day, hour));
 
       const lesson = lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
       if (lesson === undefined) {
