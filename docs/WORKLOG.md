@@ -257,10 +257,34 @@ değişen dosyalarda `prettier --check`, `npm run test:site` (22/22, çünkü `u
 tek işçiyle iki kez 20/20 geçti. Kayıt TESTFINDINGS'te, refactor bu testleri kırmış diye
 okunmadı. `dist/index.html` 1 006 839 bayt kaldı.
 
-**Sıradaki iş.** Faz 2, adım 3: `keys.ts`. Anahtar ayrıştırıcıları eklenecek, on bir elle
-ayrıştırma ve belgelenmemiş gün ve saat anahtarı onlara çevrilecek, `teacherKey` takma adı
-`closedKey`'e indirilecek. Anahtarın biçimi saklanan veri olduğu için değişmiyor
-(tuzak 11 ve 29).
+**Faz 2, adım 3: `keys.ts`.** Anahtarın biçimi saklanan veri olduğu için değişmedi
+(tuzak 11 ve 29), değişen yalnız onu kesen ve kuran kodun yeri.
+
+- `b97041c`: `keys.ts`'e `parseKey`, `keyOnDay`, `cellKey` ve `parseCellKey` girdi, dosya ilk kez kendi testiyle. `parseKey` `sanitize`'ın kuralını izliyor: tam üç parça değilse `null`, sayıların aralığını çağıran denetliyor. İki test mutasyonla sınandı: ortadaki ayırıcı denetimi kaldırılınca dört parçalı anahtar testi, `keyOnDay` saati sayıdan basınca ham parça testi kırmızıya döndü.
+- Eşdeğerlik okunarak kuruldu, varsayılmadı. Anahtar kesen on bir yer üç stratejiyle yazılmıştı: parça sayısını denetleyen `split` (`sanitize`, `remapDays`), denetlemeyen `split` (`closedConflicts`, çözücü), baştan ya da sondan `indexOf` (`buildIndex`, `worlds.ts`, `buildCapacity`, `Print.tsx`). Farklar yalnız üç parçalı olmayan bir anahtarda çıkıyor. Uygulama durumundaki her anahtar ya `placementKey` ile kuruluyor ya `parseState`'in sonunda `sanitize`'dan geçiyor, ve `sanitize` `buildIndex`'i çağırmıyor.
+- Yolda bir kusur bulundu ve bilerek düzeltilmedi: `sanitize` anahtarı yeniden kurmuyor, sayıları tam sayıysa olduğu gibi kopyalıyor. `s510|0|07` depoda kalıyor ama hiçbir `placementKey` aramasında bulunmuyor (TODO §8d). `remapDays` o parçayı eskiden de ham taşıyordu, bu yüzden anahtarı `placementKey` ile yeniden kurmuyor, `keyOnDay` ile yalnız günü değiştiriyor. Bunu yeni bir karakterizasyon testi ölçüyor: HEAD'deki eski `entities.ts` ile yeşil, `placementKey` ile yeniden kuran bir mutasyonda kırmızı.
+- Mikro ölçüm (`scratch/bench-anahtar.ts`, dolu örnek okul) ilk sürümün gerilemesini yakaladı: `split` ile `buildIndex` 1,49 kat, `remapDays` 1,15 kat yavaşlamıştı. Kesme dizisiz yazıldı. HEAD ile sırayla koşan A/B ölçümü `buildIndex`'in hâlâ 1,10 kat yavaş olduğunu gösterdi, çünkü o döngü kimliği ve nesneyi kullanmıyor. `buildIndex` kendi kesmesine döndü ve yanına ölçümü yazan bir yorum kondu (DECISIONS).
+
+```
+milisaniye, medyan   HEAD, iki koşu      yeni, iki koşu      oran
+buildIndex           0,0925 · 0,0915     0,0941 · 0,0961     1,03
+sanitize             0,2177 · 0,2071     0,1403 · 0,1449     0,67
+closedConflicts      0,3626 · 0,3687     0,3351 · 0,3428     0,93
+dropMap              1,2522 · 1,2980     1,3087 · 1,2900     1,02
+remapDays            0,2133 · 0,2163     0,1705 · 0,1848     0,83
+```
+
+- On bir commit, dosya başına: `b97041c` keys, `d470272` constraints, `e0501be` entities (karakterizasyon testiyle), `5a26979` solver, `02b61d7` feasibility, `112fd22` Print, `c697635` worlds, `7dcc1d1` Program, `2e3c84f` Availability, `dbd8f7b` drag, `dc59df9` Check. 46 değiştirme, her birinin kendi dosyasında birebir bir kez eşleştiğini denetleyen tek bir betikle yapıldı.
+
+Koşuldu: `npm run tipler` (çıkış 0), `npm run lint` (0 hata), `prettier --check`, `npm test`
+(28 dosyada 767, dokuz yeni test), `npm run cozucu` (7/7, 38,2 sn), `izgara`, `program`,
+`musaitlik`, `yazdir`, `kontrol`, `panel` ve `otomatik` spec'leri (160/163, düşen üçü
+tabandan beri bilinen `program.spec.ts` havuz testleri). `dist/index.html` 1 007 009 bayt
+(+170, yardımcı fonksiyonların gövdesi). Ana E2E'nin kalanı koşulmadı: değişiklik anahtar
+kuran ve kesen satırlarla sınırlı, o satırları kullanan ekranların spec'leri koşuldu.
+
+**Sıradaki iş.** `teacherKey` takma adının `closedKey`'e indirilmesi (knip'in tekrar eden
+dışa aktarımı), ardından adım 4: küçük ortak yardımcılar.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 

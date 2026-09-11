@@ -838,6 +838,14 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       Dördü de davranışı etkilediği için araç commit'ine girmedi, ilgili modülün refactor
       adımında ölçülerek ele alınır. `App.test.tsx:16`'da kullanılmayan bir `eslint-disable`
       yorumu var.
+- [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
+      `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
+      sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da
+      `s510|0| 7` bu yüzden depoda kalıyor, ama `placementKey(…, 7)` ile yapılan hiçbir
+      aramada bulunmuyor: ızgarada görünmez, sayaçları şaşırtır. Kod refactoru bunu
+      düzeltmedi, `remapDays` bilerek o parçayı saklandığı gibi taşıyor (`keyOnDay`).
+      Düzeltmesi bir davranış değişikliği ve bir şema sorusu: `sanitize` anahtarı
+      kanonik biçimde yeniden mi kursun, atsın mı.
 - [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
       Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
       yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,

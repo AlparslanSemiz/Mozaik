@@ -35,6 +35,23 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-11 · Denendi: `buildIndex` anahtarı `parseKey` ile okusun
+
+**Denenen.** Kod refactorunun anahtar adımında elle yazılmış bütün anahtar kesmeleri
+`keys.ts`'teki `parseKey`'e bağlandı, `buildIndex` dahil.
+
+**Ölçülen.** Dolu örnek okulda, HEAD ile sırayla koşan A/B mikro ölçümünde `buildIndex`
+1,10 kat yavaşladı (medyan 0,093'ten 0,103 ms'ye). `split` ile yazılmış ilk sürümde
+oran 1,49'du. Aynı ölçümde `sanitize` 0,67, `remapDays` 0,83 ve `closedConflicts` 0,93
+kat sürdü, yani onlar hızlandı.
+
+**Karar.** `buildIndex` kendi kesmesine döndü, öteki yerler `parseKey`'de kaldı. O döngü
+yalnız günü ve saati kullanıyor, `parseKey` ise kimliği de kesip her yerleşim için bir
+nesne kuruyor, ve `buildIndex` sürükleme başında aday hücre başına yeniden çağrılıyor.
+Geri konunca oran 1,03. Yanındaki kod yorumu ölçümü yazıyor. "Tek ayrıştırıcı"
+temizliği yeniden düşünülürse önce bu kayıt okunur ve ölçüm tekrarlanır
+(`scratch/bench-anahtar.ts`).
+
 ### 2026-09-11 · Kod refactoru: geliştirme araçları ve tek biçim
 
 **Değişen.** Depoya ESLint, knip ve Prettier geliştirme bağımlılığı olarak girdi.
