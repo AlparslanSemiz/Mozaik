@@ -2,7 +2,7 @@
 // This is the thing aSc does not do and that hurts most at the school.
 
 import { useMemo } from 'react';
-import { buildIndex, closedConflicts } from '../constraints';
+import { buildIndex, closedConflicts, placementKey } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
 import type { Id, State } from '../types';
@@ -170,7 +170,7 @@ export default function Check({ state, view }: Props) {
                 </thead>
                 <tbody>
                   {conflicts.map((c) => (
-                    <tr key={`${c.classId}|${c.day}|${c.hour}`}>
+                    <tr key={placementKey(c.classId, c.day, c.hour)}>
                       <td>
                         <span className="badge impossible">{t('Kapalı saat')}</span>
                       </td>
