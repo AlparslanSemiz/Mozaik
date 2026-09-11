@@ -48,7 +48,7 @@ yapılmış görünüyor.
 **Bilinen kusurlar.**
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
-- 2026-09-11'deki taban temizliğinden sonra ana E2E süitinde 558 testin 557'si geçiyor. Düşen tek test `serit.spec.ts` 220 ve bir ürün kusurunu gösteriyor: %150'de Program şeridinin "İşlemler" düğmesi 80,7 px taşıyor, `516f963`'ün Renk grubundan (TODO §8d). Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
+- Şeridin taşması kapatıldı (2026-09-12): şerit artık daralınca neyi sırayla feda edeceğini söylüyor, kural LAYOUT.md'de ve ölçümler DECISIONS'ta. Ana E2E süiti bu düzeltmeden sonra tamamı geçiyor. Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
 - 4 kat yavaşlatılmış işlemcide ilk kare tercihler `<html>`'e yazılmadan boyanıyor, ve karanlık tema kayıtlıysa zemin bir kare açık başlayıp karanlığa dönüyor (18 açılışın 17'sinde, TODO §8d). x1'de olmuyor.
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.

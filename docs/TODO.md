@@ -879,12 +879,16 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       Dosya reddedilir, ama localStorage'dan açılışta reddetmek programı açılmaz yapar. (d)
       Şema 15 ile `parseState`'te bir kerelik göç, (a) ya da (b)'nin kuralıyla. (e) Bırakılır,
       elle düzenlemenin bedeli olarak. (f) Kontrol bu anahtarları raporlar, veriye dokunulmaz.
-- [ ] **%150'de Program şeridinde "İşlemler" düğmesi taşıyor (2026-09-11).** `serit.spec.ts`
+- [x] **%150'de Program şeridinde "İşlemler" düğmesi taşıyor (2026-09-11) — KAPATILDI (2026-09-12).** `serit.spec.ts`
       220 2026-09-01'den beri kırmızı ve haklı: IZGARA grubundaki "İşlemler" şeridin sağ
       kenarını 80,7 px aşıyor (düğme 120 px) ve şerit kaymıyor. Öteki altı şerit sığıyor.
       Sebep `516f963`'ün eklediği Renk grubu, bir kopyada gizlenince test yeşil. Ürün kusuru,
       tuzak 48'in sözü. Renk grubunun yeri ya da şeridin daralma kuralı için bir tasarım
       kararı bekliyor. Kayıt TESTFINDINGS'te.
+      Kapatıldı (2026-09-12): önce %100'de ölçüldü ve orada taşma yoktu, yani kusur hedef
+      kullanıcının ölçeğinde görünmüyordu, ama %125'te pay bir düğmeden dardı. Renk grubunu
+      menüye indirmek yerine şeridin daralma kuralı yazıldı (LAYOUT.md, şerit standardı 6),
+      çünkü tek bir grubu taşımak bir sonraki grupta aynı kusuru doğururdu. Karar DECISIONS'ta.
 - [ ] **Belge başında depoya dokunan bir tarayıcı eklentisi `file://`'da bayat açılış üretir
       mi (2026-09-11).** Tuzak 108'in tetikleyicisi süitte `kapan.ts`'in başlangıç betiğiydi.
       Üründe belge başında depoya dokunan kod yok ve uygulama başlangıç betiği olmadan 780

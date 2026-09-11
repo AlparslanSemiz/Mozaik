@@ -217,36 +217,199 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     });
   }
 
-  test('%150 ölçekte de yedisi aynı yükseklikte ve hiçbiri taşmıyor', async ({ page }) => {
-    // Pitfall 48: a bar whose contents do not shrink pushes them out of itself,
-    // and what spills is not hidden, it is UNCLICKABLE. 150% is the scale this
-    // tool's reader actually uses, so it is the scale the contract is measured
-    // at — the strip has more in it than it did before this round.
-    await openWithSample(page);
-    await chooseScale(page, 150);
+  // Pitfall 48: a bar whose contents do not shrink pushes them out of itself,
+  // and what spills is not hidden, it is UNCLICKABLE.
+  //
+  // Read at BOTH ends of the ladder, and that is the correction this test
+  // needed. It used to run only at 150% and say that was "the scale this
+  // tool's reader actually uses" — the reader uses 100%, and a defect that
+  // shows there is a different kind of defect from one that shows only at the
+  // far end of the range. 150% stays because it is where the strip is under
+  // the most pressure; 100% is here because it is the screen the program
+  // arrives on.
+  //
+  // Measured at a81c79a, Program strip, 1920px: at 100% the flexible space was
+  // 391.4px and nothing spilled; at 150% it was 0 and "İşlemler" sat 80.7px
+  // outside the box. At 125% it was 78.5px, less than one button.
+  for (const pct of [100, 150]) {
+    test(`%${pct} ölçekte yedisi aynı yükseklikte ve hiçbiri taşmıyor`, async ({ page }) => {
+      await openWithSample(page);
+      if (pct !== 100) await chooseScale(page, pct);
 
-    const heights: number[] = [];
-    for (const tab of TABS) {
-      await go(page, tab);
-      const bar = (await strip(page))!;
-      heights.push(bar.height);
-      expect(bar.buttonHeights, `${tab} %150'de düğme yükseklikleri ayrışıyor`).toHaveLength(1);
+      const heights: number[] = [];
+      for (const tab of TABS) {
+        await go(page, tab);
+        const bar = (await strip(page))!;
+        heights.push(bar.height);
+        expect(bar.buttonHeights, `${tab} %${pct}'de düğme yükseklikleri ayrışıyor`).toHaveLength(
+          1,
+        );
 
-      // Every control on the strip has to still be reachable by the pointer.
-      const spill = await page.evaluate(() => {
+        // Every control on the strip has to still be reachable by the pointer.
+        const spill = await page.evaluate(() => {
+          const bar = document.querySelector('.ribbon')!;
+          const box = bar.getBoundingClientRect();
+          return [...bar.querySelectorAll<HTMLElement>('.btn')].filter((b) => {
+            const r = b.getBoundingClientRect();
+            return r.right > box.right + 1 || r.left < box.left - 1;
+          }).length;
+        });
+        expect(spill, `${tab} %${pct}'de ${spill} düğme şeridin dışına taştı`).toBe(0);
+      }
+
+      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+      if (pct !== 100) await chooseScale(page, 100);
+    });
+  }
+
+  // THE ORDER THE STRIP GIVES THINGS UP, measured rather than described.
+  //
+  // The rule is in LAYOUT.md and in styles.css: the space between groups
+  // closes, then the inner captions go, then the words on the buttons go, and
+  // buttons never go. Each step buys room at a different width, so a single
+  // measurement at 1920px would pin only one of them and the other two would be
+  // wishes — the shape pitfall 48 is about in the first place.
+  //
+  // Narrow boxes and not narrow scales, because the trigger is the strip's own
+  // inline size: 150% at 1920px and 100% in a small window are the same
+  // question asked twice.
+  for (const width of [1920, 1440, 1280, 1024]) {
+    test(`%150'de ${width}px kutuda da hiçbir düğme taşmıyor`, async ({ page }) => {
+      await openWithSample(page);
+      await chooseScale(page, 150);
+      await page.setViewportSize({ width, height: 1080 });
+
+      for (const tab of TABS) {
+        await go(page, tab);
+        const m = await page.evaluate(() => {
+          const bar = document.querySelector('.ribbon')!;
+          const box = bar.getBoundingClientRect();
+          const buttons = [...bar.querySelectorAll<HTMLElement>('.btn')];
+          return {
+            spill: buttons.filter((b) => {
+              const r = b.getBoundingClientRect();
+              return r.right > box.right + 1 || r.left < box.left - 1;
+            }).length,
+            // Rule 4 of the strip contract survives every step: a button that
+            // has given up its word still answers to its name.
+            //
+            // `innerText` and NOT `textContent`, and the difference is the
+            // whole assertion: textContent never looks at CSS, so it reads a
+            // `display: none` label exactly like a visible one and this check
+            // would pass while the accessible name was gone (pitfall 56 with a
+            // free green on top). innerText reports what is actually rendered.
+            nameless: buttons.filter((b) => {
+              const label = b.getAttribute('aria-label');
+              return ((label ?? '').trim() || b.innerText.trim()) === '';
+            }).length,
+            buttons: buttons.length,
+          };
+        });
+        expect(m.buttons, `${tab}: ${width}px kutuda şeritte hiç düğme yok`).toBeGreaterThan(0);
+        expect(m.spill, `${tab}: ${width}px kutuda ${m.spill} düğme taştı`).toBe(0);
+        expect(m.nameless, `${tab}: ${width}px kutuda ${m.nameless} düğme adını kaybetti`).toBe(0);
+      }
+
+      // ...and asked the way the suite asks everywhere else, because reading
+      // the DOM and computing an accessible name are two different questions
+      // and this test is about the second one.
+      await go(page, 'Program');
+      await expect(page.getByRole('button', { name: 'Sınıf görünümü', exact: true })).toBeVisible();
+
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await chooseScale(page, 100);
+    });
+  }
+
+  // THE ORDER ITSELF, step by step.
+  //
+  // The spill tests above prove the strip fits. They do not prove it gives
+  // things up in the declared order, and two of the three steps could be
+  // deleted with every one of them still green — measured: removing step 1
+  // changed nothing anywhere. A rule nothing measures is a wish (pitfall 48 is
+  // in this repo because of exactly that), so this reads the four states the
+  // rule describes and asserts each one is the state the rule names.
+  //
+  // Widths chosen from the strip's own inline size at a81c79a: %100/1920px is
+  // 127.7em, %125/1920px is 102.2em, %150/1920px is 85.1em, and %150/1024px is
+  // below 78em.
+  const DURUMLAR = [
+    { ad: '%100, 1920px', pct: 100, width: 1920, dar: false, icBaslik: true, kelime: true },
+    { ad: '%125, 1920px', pct: 125, width: 1920, dar: true, icBaslik: true, kelime: true },
+    { ad: '%150, 1920px', pct: 150, width: 1920, dar: true, icBaslik: false, kelime: true },
+    { ad: '%150, 1024px', pct: 150, width: 1024, dar: true, icBaslik: false, kelime: false },
+  ];
+
+  for (const d of DURUMLAR) {
+    test(`feda sırası · ${d.ad}`, async ({ page }) => {
+      await openWithSample(page);
+      if (d.pct !== 100) await chooseScale(page, d.pct);
+      if (d.width !== 1920) await page.setViewportSize({ width: d.width, height: 1080 });
+      await go(page, 'Program');
+
+      const m = await page.evaluate(() => {
         const bar = document.querySelector('.ribbon')!;
-        const box = bar.getBoundingClientRect();
-        return [...bar.querySelectorAll<HTMLElement>('.btn')].filter((b) => {
-          const r = b.getBoundingClientRect();
-          return r.right > box.right + 1 || r.left < box.left - 1;
-        }).length;
+        const kids = [...bar.children] as HTMLElement[];
+        const ikinci = kids[1]!;
+        const basliklar = [...bar.querySelectorAll<HTMLElement>('.ribbon-label')];
+        const btn = bar.querySelector<HTMLElement>('.btn')!;
+        const tokenPx = (name: string) => {
+          const probe = document.createElement('div');
+          probe.style.width = `var(${name})`;
+          bar.appendChild(probe);
+          const w = probe.getBoundingClientRect().width;
+          probe.remove();
+          return w;
+        };
+        return {
+          // Step 1: the space between groups. Read off the element that
+          // carries it, not off the token, so the rule is what is measured.
+          aralik: parseFloat(getComputedStyle(ikinci).marginLeft),
+          genis: tokenPx('--space-3'),
+          dar: tokenPx('--space-2'),
+          // Step 2: the opening caption always stays, the inner ones go.
+          acilisBasligi: basliklar[0] !== undefined && basliklar[0].offsetParent !== null,
+          icBaslikSayisi: basliklar.filter((b, i) => i > 0 && b.offsetParent !== null).length,
+          // Step 3, read off the rule itself. NOT off innerText: the word is
+          // given up by collapsing the type, not by removing the node, so the
+          // text is still there to be read — which is the entire point, since
+          // that node is the button's accessible name. innerText staying
+          // non-empty here is the assertion, not the bug.
+          yaziBoyu: parseFloat(getComputedStyle(btn).fontSize),
+          metin: btn.innerText.trim(),
+          ad: (btn.getAttribute('aria-label') ?? '').trim() || btn.innerText.trim(),
+        };
       });
-      expect(spill, `${tab} %150'de ${spill} düğme şeridin dışına taştı`).toBe(0);
-    }
 
-    expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
-    await chooseScale(page, 100);
-  });
+      // Step 1 fires first and never un-fires.
+      expect(m.aralik, `${d.ad}: gruplar arası boşluk yanlış adımda`).toBeCloseTo(
+        d.dar ? m.dar : m.genis,
+        1,
+      );
+      // Step 2, and the opening caption survives every step: it is the box the
+      // whole strip contract aligns to.
+      expect(m.acilisBasligi, `${d.ad}: açılış başlığı gitti`).toBe(true);
+      if (d.icBaslik) {
+        expect(m.icBaslikSayisi, `${d.ad}: iç başlıklar erken feda edildi`).toBeGreaterThan(0);
+      } else {
+        expect(m.icBaslikSayisi, `${d.ad}: iç başlıklar hâlâ duruyor`).toBe(0);
+      }
+      // Step 3, and rule 4 of the contract underneath it: the drawing may go,
+      // the name may not (pitfall 56).
+      if (d.kelime) {
+        expect(m.yaziBoyu, `${d.ad}: düğme kelimesi erken feda edildi`).toBeGreaterThan(0);
+      } else {
+        expect(m.yaziBoyu, `${d.ad}: düğme kelimesi hâlâ çiziliyor`).toBe(0);
+      }
+      // In every state, including the one where the word is not drawn: the text
+      // node is still in the tree and the button still answers to a name.
+      expect(m.metin, `${d.ad}: düğmenin metin düğümü gitti`).not.toBe('');
+      expect(m.ad, `${d.ad}: düğme adını kaybetti`).not.toBe('');
+
+      if (d.width !== 1920) await page.setViewportSize({ width: 1920, height: 1080 });
+      if (d.pct !== 100) await chooseScale(page, 100);
+    });
+  }
 
   test('şerit katlanınca yedi sekmede de gidiyor, geri gelince duruyor', async ({ page }) => {
     await openWithSample(page);

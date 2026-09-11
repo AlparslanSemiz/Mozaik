@@ -71,6 +71,7 @@ test koruyamaz.
 3. Gruplar `<Sep/>` ile, sağa yaslanan grup `<Spacer/>` ile ayrılır.
 4. Her düğmede bir simge ve bir kelime olur. Simge tek başına ilk seferde okunmaz ve iki test katmanında ada dönüşmez (tuzak 56), kelime tek başına %150'de göze tutunacak bir şey vermez. Üç varlık türünün simgesi `KIND_ICON`'dan, gerisi `lucide-react`'ten gelir.
 5. Şeritteki her kontrol aynı yükseklikte (`--ribbon-h`). Yükseklik şeride değil kontrole verilir, çünkü sabit yükseklikli bir şerit kendine verileni ortalar ve uzun bir düğmeyi saklar.
+6. Şerit daralınca neyi sırayla feda ettiği yazılı, çünkü sığmayan bir düğme gizlenmiyor, tıklanamaz oluyor (tuzak 48). Sıra: önce gruplar arasındaki boşluk kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri gider, düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmez, çünkü hizalamanın çapası o. Kelime feda edilirken simge ve erişilebilir ad kalır: verilen şey bir çizim, bir ad değil (tuzak 56), ve bu yüzden kelime `display: none` ile değil yazı boyu sıfırlanarak gider, metin düğümü erişilebilirlik ağacında durur. Eşikler şeridin kendi genişliği, bir ölçek basamağı değil, yani dar bir pencere %100'de de aynı adımlara ulaşır. Yatay kaydırma bilerek seçilmedi: taşan düğmeyi erişilemez olmaktan çıkarıp görünmez yapardı, yani kusuru teşhis edilemez hâle getirirdi.
 
 Seçili bir seçeneği renk söyler, yazı kalınlığı değil: eşit sütunlu bir grupta
 kalınlaşan bir etiket bütün sütunları genişletir ve komşularını kaydırır

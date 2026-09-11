@@ -1170,8 +1170,12 @@ textarea {
 .ribbon {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
   flex: 0 0 auto;
+  /* An inline-size container so the strip can answer its OWN width rather than
+     a scale step: at 150% the box is 85em where at 100% it is 128em, and a
+     narrower window shrinks it the same way. What it gives up, and in what
+     order, is the block below. */
+  container: serit / inline-size;
   padding: var(--space-2) var(--space-4);
   background:
     linear-gradient(180deg,
@@ -1185,6 +1189,107 @@ textarea {
   border-bottom: 1px solid var(--hairline);
   position: relative;
   z-index: 2;
+}
+
+/* The space between groups is a MARGIN on the children and not `gap` on the
+   strip, and that is not a style preference: a `@container` rule can style a
+   container's descendants but never the container itself, so a gap written on
+   `.ribbon` is the one measurement the strip could not give back. */
+.ribbon > * + * {
+  margin-left: var(--space-3);
+}
+
+/* ---------------------------------------------------------------------------
+   WHAT THE STRIP GIVES UP, IN ORDER.
+
+   Pitfall 48's rule: a bar whose contents do not shrink pushes them out of
+   itself, and what spills is not hidden, it is UNCLICKABLE — so a bar says in
+   advance what it gives up first. The top bar has said it since that pitfall
+   was written (space, then the chip's sentence, then the document name, tabs
+   never). The strip never did, and the cost was measured on 2026-09-12 at
+   a81c79a: at 150% the Program strip's flexible space was 0 and "İşlemler"
+   sat 80.7px outside the box. At 125% it had 78.5px left, which is less than
+   one button — the next group to arrive would have broken it there too.
+
+   The order, widest step first:
+     1. the space between groups closes,
+     2. the group captions go,
+     3. the words on the buttons go, THE SYMBOL AND THE ACCESSIBLE NAME STAY,
+     4. buttons and menus never go.
+
+   Step 3 keeps `aria-label` because what is being given up is a drawing, not a
+   name: two test layers that disagree about what a control is called is worse
+   than either of them being wrong (pitfall 56), and a screen reader is not
+   short of room.
+
+   Horizontal scrolling is deliberately NOT the answer here. It would turn a
+   button that cannot be clicked into a button that cannot be SEEN, which is
+   the same defect with the diagnosis removed, and `.ribbon` carries the
+   section rule and a positioned plane (pitfall 54).
+
+   The thresholds are the strip's own inline size, so a narrow window reaches
+   them at 100% exactly as 150% reaches them at 1920px. Measured at 1920px:
+   %80 is 159.6em, %100 is 127.7em, %125 is 102.2em, %150 is 85.1em. */
+
+@container serit (max-width: 115em) {
+  .ribbon > * + * {
+    margin-left: var(--space-2);
+  }
+
+  .ribbon-group {
+    gap: var(--space-1);
+  }
+
+  .ribbon-sep {
+    margin: 0 var(--space-1);
+  }
+}
+
+@container serit (max-width: 95em) {
+  /* The captions of the INNER groups go; the opening one stays.
+
+     Not a softer version of the same step, a different one. The opening
+     caption is what the strip contract is built on: every strip opens with one,
+     it sits in a fixed box so the first button lands at the same x on all
+     seven, and the rule after it is pinned to that box. Giving it up would
+     break the shape the strip is measured against, on the one screen where the
+     strip is under pressure. The inner captions name groups whose buttons
+     already carry their own words, so they are the part that can go.
+
+     `display: none` and not `visibility`, because here the row is meant to
+     close up — the opposite of pitfall 102's availability heading, which had to
+     keep its box so the table around it would not move. */
+  .ribbon .ribbon-label:not(:first-child) {
+    display: none;
+  }
+}
+
+@container serit (max-width: 78em) {
+  /* Last resort, and the only step that touches a control.
+
+     `font-size: 0` and NOT `display: none`, and the difference is the whole
+     point of this step: a display:none label is gone from the accessibility
+     tree, so the button would lose its name and the two test layers would stop
+     agreeing about what it is called (pitfall 56). Collapsing the type leaves
+     the text node exactly where it was — the name, the role and every
+     `getByRole({ name })` in the suite still find it, and only the drawing is
+     given up. The buttons here write their label as a bare text node, so there
+     is nothing to hang a class on and nothing that needed one. */
+  .ribbon .btn {
+    font-size: 0;
+    gap: 0;
+    /* Without the word the button is a square around a symbol, and it must not
+       fall under the pointer target floor. */
+    min-width: var(--ribbon-h);
+    justify-content: center;
+  }
+
+  /* The symbol carries its own width and height attributes, so it is untouched
+     by the line above; this only keeps anything else inside from inheriting a
+     zero. */
+  .ribbon .btn > svg {
+    font-size: 1rem;
+  }
 }
 
 /* A group of controls that belong to one question, with a rule between groups

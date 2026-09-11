@@ -35,6 +35,46 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Şerit daralınca neyi sırayla feda edeceğini söylüyor
+
+**Değişen.** Araç şeridinin bir daralma kuralı var ve `docs/LAYOUT.md`'nin şerit
+standardında altıncı madde olarak yazılı: önce gruplar arasındaki boşluk
+kapanır, sonra iç grupların başlıkları gider, sonra düğmelerin kelimeleri gider,
+düğmeler ve menüler hiç gitmez. Açılış başlığı hiçbir adımda gitmiyor. Eşikler
+bir ölçek basamağı değil şeridin kendi genişliği (`@container`), yani dar bir
+pencere %100'de de aynı adımlara ulaşıyor.
+
+**Eski hâli.** Hiçbir daralma kuralı yoktu. `.ribbon-group` eşit sütunlu bir
+grid, `.ribbon`'da `flex-wrap` yok, `overflow` yok, `min-width` yok. Sığmayan
+düğme kutunun dışına çıkıyor ve tıklanamaz oluyordu.
+
+**Gerekçe.** Tuzak 48 bu kuralı zaten yazıyor ve üst çubuk onu uyguluyordu,
+şerit uygulamıyordu. Ölçüm (a81c79a, 1920 px, Program şeridi): %80'de esneyen
+pay 669,9 px, %100'de 391,4 px, %125'te 78,5 px, %150'de 0 ve "İşlemler" düğmesi
+kutunun 80,7 px dışında. Yani kusur hedef kullanıcının kullandığı ölçekte
+görünmüyor ama %125'te pay bir düğmeden dardı: kusuru doğuran şey `516f963`'ün
+eklediği Renk grubuydu ve bir sonraki grup aynı şeyi yeniden doğururdu. Tek bir
+grubu menüye indirmek o yüzden seçilmedi, bu bir kez daha kapatır ve kuralı
+yazmaz.
+
+**Kelime feda edilirken ad kalıyor.** Düğmeler yazıyı çıplak bir metin düğümü
+olarak çiziyor ve hepsinde `aria-label` yok, yani `display: none` erişilebilir
+adı da götürürdü ve iki test katmanı bir kontrolün adı üstünde anlaşamaz olurdu
+(tuzak 56). Kelime bu yüzden yazı boyu sıfırlanarak gidiyor: metin düğümü
+erişilebilirlik ağacında duruyor, yalnız çizilmiyor.
+
+**Yatay kaydırma seçilmedi.** Taşan düğmeyi erişilemez olmaktan çıkarıp görünmez
+yapardı, yani kusuru teşhis edilemez hâle getirirdi, ve `.ribbon` bölüm çizgisini
+ve konumlanmış bir düzlemi taşıyor (tuzak 54).
+
+**Sonuç ve bedeli.** %150'de Program şeridinin payı 0 ve 80,7 px taşmadan 230,8
+px paya ve sıfır taşmaya geçti, %125'te 78,5'ten 159,8 px'e. `dist/index.html`
+1 006 340'tan 1 006 755 bayta çıktı (+415). Kuralın üç adımı da, sıranın kendisi
+de, açılış başlığının korunması da ve adın feda edilmemesi de `e2e/serit.spec.ts`'te
+ölçülüyor: altı mutasyonun altısı kırmızı.
+
+---
+
 ### 2026-09-12 · Tema ilk boyamadan önce kuruluyor, `<head>`'de klasik bir betikle
 
 **Değişen.** `index.html`'in `<head>`'ine `type="module"` taşımayan bir betik
