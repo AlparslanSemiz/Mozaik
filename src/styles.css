@@ -4803,7 +4803,7 @@ table.bell-preview td {
        that ever reaches the page cannot move either. A comfort setting for a
        27" monitor must not change what fits on an A4 sheet — the 205 mm box of
        pitfall 31 and "3 classes = 3 pages" would then pass or fail depending
-       on a slider. Bigger PRINT is a separate feature, and principle 5 says it
+       on a slider. Bigger PRINT is a separate feature, and the rule against guessed features (since lifted) says it
        is not written before a term of use asks for it.
        The five @media print font-size overrides that used to sit below are
        gone with the same change: the preview and the paper now read from one
@@ -5450,7 +5450,7 @@ table.availability.heat td.closed {
 }
 
 /* A lesson left sitting on an hour that was closed afterwards. It is NOT
-   removed (principle 6), so it has to be visible instead — pitfall 16, said
+   removed (no-data-loss principle), so it has to be visible instead — pitfall 16, said
    for the second time, in the panel that is now the easiest place to see it. */
 .sheet-week td.conflict {
   outline: 2px solid var(--bad);

@@ -8,7 +8,7 @@
  *
  * THE KEY IS THE TURKISH SENTENCE. `t('Öğretmenler')`, not `t('setup.teachers')`.
  *
- * That is a deliberate choice and it follows from principle 4 as it now stands:
+ * That is a deliberate choice and it follows from the Turkish-source-language principle as it now stands:
  * Turkish is the SOURCE language, not one translation among five. Three things
  * fall out of it, and all three matter more than the tidiness of a key tree:
  *
@@ -44,7 +44,7 @@
  * Which form is picked is `Intl.PluralRules(dil).select(n) === 'one'`, not
  * `n === 1`, and the difference is real: French puts 0 in the "one" category
  * ("0 livre") and Spanish does not ("0 libros"). The rule ships with the
- * browser, so it costs zero bytes and needs no network (principle 3).
+ * browser, so it costs zero bytes and needs no network (offline principle).
  *
  * Two forms rather than CLDR's full set on purpose: every one of these five
  * languages distinguishes exactly "one" from "everything else" over the range

@@ -121,7 +121,7 @@ export interface ToolState {
    * A POSITION, so it lives here and not in `theme.ts`: it says what is being
    * looked at right now, not how this machine likes its screen. That also
    * means no new `localStorage` key, and so no new row owed to the "Veriler
-   * nerede" table (CLAUDE.md prefers exactly this trade).
+   * nerede" table (docs/ARCHITECTURE.md prefers exactly this trade).
    */
   showHeat: boolean;
   setShowHeat: (next: boolean) => void;

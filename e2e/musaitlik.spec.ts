@@ -111,7 +111,7 @@ test.describe("10. Müsaitlik çizelgesi", () => {
 // invisible: the hatch is drawn only on EMPTY cells, so the card covered the
 // closed hour and neither the grid nor Kontrol ever said a word.
 //
-// The lesson is NOT removed (principle 6). It is marked instead.
+// The lesson is NOT removed (no-data-loss principle). It is marked instead.
 
 test.describe("20. Kapalı saatte ders", () => {
   /** Lays a lesson down, then closes exactly that hour for its teacher. */

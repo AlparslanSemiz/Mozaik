@@ -30,7 +30,7 @@ describe('dailyName', () => {
     // A DATA DECISION, and the one test that says so. The program is called
     // Mozaik; the keys, the backup names and the Documents folder kept their
     // old names on purpose, because renaming them makes what my father
-    // already has invisible (CLAUDE.md, pitfall 95).
+    // already has invisible (docs/TRAPS.md, pitfall 95).
     //
     // Here it costs more than a name: `prunable` decides what to delete by
     // MATCHING this pattern, and the folder it runs in is Belgelerim, next to

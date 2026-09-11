@@ -1,5 +1,5 @@
 // Motion. The rule "prefers-reduced-motion: reduce switches ALL of it off" has
-// been written in CLAUDE.md since the animation ban was lifted, and until now
+// been written in the project guidance (today docs/DESIGN.md) since the animation ban was lifted, and until now
 // nothing measured it — the single @media block in styles.css was load-bearing
 // and unguarded. A new transition that hard-codes 180ms instead of reading
 // --dur would have shipped silently.

@@ -124,7 +124,7 @@ export async function openDesktopFolder(): Promise<FileSystemDirectoryHandle | n
 //
 // None of them runs on its own. Each one is a button in Ayarlar, and with no
 // internet the only thing that happens is that `check` rejects with a sentence
-// (principle 1: nothing changes unless it is asked for; principle 3: the
+// (double-click principle: nothing changes unless it is asked for; offline principle: the
 // program itself still fetches nothing).
 
 /** What `check_update` answers. Field names match src-tauri/src/update.rs. */

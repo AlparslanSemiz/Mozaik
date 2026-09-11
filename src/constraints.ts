@@ -666,7 +666,7 @@ export function removeBlock(d: State, classId: Id, day: number, hour: number): S
  * WHY THE VERDICT IS "warn" AND NOT "ok". A drop that costs you a lesson is not
  * the same move as a drop onto empty air, and the grid already has a colour for
  * "allowed, but look at it": yellow. No fourth colour was added — the three
- * functional colours keep meaning exactly what CLAUDE.md says they mean.
+ * functional colours keep meaning exactly what docs/DESIGN.md says they mean.
  *
  * The eviction is simulated with `vacate`/`occupy` on ONE working copy rather
  * than with `removeBlock` per cell: the latter copies a ~1800-key dictionary
@@ -1133,7 +1133,7 @@ export interface ClosedConflict {
  * covered the closed hour. blocker() never looked at it either, because it only
  * ever runs for a prospective drop.
  *
- * Nothing is deleted here, on purpose (principle 6): a wrong click on the
+ * Nothing is deleted here, on purpose (no-data-loss principle): a wrong click on the
  * availability grid must not silently cost a laid-out lesson. The caller paints
  * these cells red and Kontrol lists them; my father decides.
  */

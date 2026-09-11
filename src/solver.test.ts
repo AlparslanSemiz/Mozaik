@@ -207,7 +207,7 @@ describe('solve — yerleşmişleri koruma', () => {
     expect(Object.keys(activeProgram(result.state).placements)).not.toEqual(Object.keys(activeProgram(d).placements));
   });
 
-  it('kapalı saatte kalmış dersi silmiyor (ilke 6)', () => {
+  it('kapalı saatte kalmış dersi silmiyor (veri kaybı olmaz ilkesi)', () => {
     let d = place(build(), 'x1', 0, 0);
     d = { ...d, unavailable: { ...d.unavailable, ['oMC|0|0']: 1 } };
     const result = solve(d, { keepPlaced: true });
@@ -412,7 +412,7 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
 
     // 1. Every block is legal by the same blocker() the dragging hand is judged
     //    by. The pre-existing grid is the baseline: a lesson left sitting in an
-    //    hour that was closed AFTERWARDS is kept on purpose (principle 6), so
+    //    hour that was closed AFTERWARDS is kept on purpose (no-data-loss principle), so
     //    what is forbidden is ADDING an illegal block, not inheriting one.
     const before = illegalBlocks(world.state).map((x) => `${x.classId}|${x.day}|${x.hour}`);
     for (const bad of illegalBlocks(first.state)) {

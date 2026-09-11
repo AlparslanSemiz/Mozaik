@@ -28,7 +28,7 @@ export const LIBRARY_KEY = `${BASE_KEY}-planlar`;
  *
  * Adopting the single timetable that already exists then costs zero writes:
  * the directory is created and `ders-programi` is not touched by a single byte.
- * No copy means no half-finished copy (principle 6). It also means an older
+ * No copy means no half-finished copy (no-data-loss principle). It also means an older
  * dist/index.html still finds the timetable, and everything that reads
  * `ders-programi` — the backup chain, the E2E helpers — keeps working.
  *
@@ -219,7 +219,7 @@ export function readPlanText(id: Id): string | null {
  * Returns whether the write actually happened.
  *
  * `safely` swallows the exception, and a swallowed quota error is a SILENT
- * loss — the one kind that matters (principle 6). One plan at a time nobody
+ * loss — the one kind that matters (no-data-loss principle). One plan at a time nobody
  * could act on the answer, but importing a whole library writes plan after
  * plan, and there the panel has to be able to say which one did not fit.
  */
@@ -248,7 +248,7 @@ export type StorageKind = 'file' | 'site' | 'exe';
 /**
  * THREE answers now. The third arrived with the exe (task 4g/4h) and not
  * before: an earlier version of this comment said it would be written "then",
- * because a branch for code that does not exist is a guess (principle 5).
+ * because a branch for code that does not exist is a guess (the former rule against guessed features).
  *
  * The exe is asked about FIRST. It is served over a normal origin, so the
  * `file:`/site question would answer "site" about it and be true and useless:

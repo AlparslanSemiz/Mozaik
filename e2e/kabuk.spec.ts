@@ -165,7 +165,7 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
       //
       // 22.75px keeps the mark inside the band the icon threshold was measured
       // in (20-32px: "blurry but the columns are still told apart"), which is
-      // why it draws the SIMPLE variant — see CLAUDE.md's icon table.
+      // why it draws the SIMPLE variant — see the icon table in docs/BUILD.md.
       expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`)
         .toBeCloseTo(scale === 100 ? 22.75 : 34.125, 0);
       // Pitfall 48: a seventh thing on this row must not push the tabs out of

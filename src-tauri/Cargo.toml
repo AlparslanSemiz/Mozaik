@@ -26,7 +26,7 @@ tauri-build = { version = "2", features = [] }
 # something std::fs does in forty lines, and they would hand the page a
 # general file API when what it needs is one folder. tauri-plugin-updater is
 # missing for a harder reason: its Windows path installs a .msi or .nsis
-# bundle, and principle 1 rejects exactly that (see `--no-bundle`).
+# bundle, and the former no-installer rule rejected exactly that (see `--no-bundle` and docs/DECISIONS.md).
 tauri = { version = "2", features = [] }
 
 # The update path, and the only thing in this program that touches the network.

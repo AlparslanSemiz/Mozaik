@@ -548,7 +548,7 @@ function cokGunAzSaat(): State {
 /**
  * Three blocks already on the grid, one of them in an hour that was closed
  * afterwards. keepPlaced must leave all three exactly where they are — deleting
- * the one in the closed hour would be data loss (principle 6).
+ * the one in the closed hour would be data loss (no-data-loss principle).
  */
 function elleKonmus(): State {
   const base = makeWorld({
@@ -962,7 +962,7 @@ export const WORLDS: SolverWorld[] = [
   },
   {
     name: 'elle-konmus',
-    note: 'Elle konmuş üç blok, biri sonradan kapatılmış saatte (ilke 6).',
+    note: 'Elle konmuş üç blok, biri sonradan kapatılmış saatte (veri kaybı olmaz ilkesi).',
     state: elleKonmus(),
     want: { solved: true },
   },

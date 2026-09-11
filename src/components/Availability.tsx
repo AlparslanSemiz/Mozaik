@@ -449,7 +449,7 @@ export default function Availability({ state,
               ` ${t('{n} saat fazla, bu program dizilemez.', { n: selected.load - open })}`}
           </p>
 
-          {/* Closing an hour never removes what is already on it (principle 6),
+          {/* Closing an hour never removes what is already on it (no-data-loss principle),
               so the only honest thing to do is say that it happened. */}
           {conflicts.length > 0 && (
             <div className="warn-box">

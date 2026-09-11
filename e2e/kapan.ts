@@ -7,7 +7,7 @@
 // `invoke` said nothing to any of them. The one thing a browser tells you for
 // free was the one thing nobody read.
 //
-// It also closes principle 3 mechanically, and in more than one place. The
+// It also closes the offline principle mechanically, and in more than one place. The
 // claim "çalışma anında ağdan tek bayt çekilmez" had exactly one test
 // (temel.spec.ts) watching exactly one page load. Now every test on the
 // file:// build watches, so a stray font, a CDN script or a version check

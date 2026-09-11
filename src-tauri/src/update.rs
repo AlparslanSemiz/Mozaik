@@ -1,13 +1,13 @@
 //! The .exe checking whether a newer one exists, and replacing itself with it.
 //!
-//! WHAT THIS IS NOT. It is not an updater in the sense principle 1 forbids:
+//! WHAT THIS IS NOT. It is not an updater in the sense the double-click principle forbids:
 //! nothing here runs on its own. There is no timer, no check at startup, no
 //! background thread. Every one of the three commands below runs because
 //! somebody pressed a button in Ayarlar, and the three are separate buttons on
 //! purpose: look, download, restart. My father can stop after any of them and
 //! keep working on the version he has.
 //!
-//! WHY IT REACHES THE NETWORK AT ALL. Principle 3 is about the running
+//! WHY IT REACHES THE NETWORK AT ALL. The offline principle is about the running
 //! program: the page fetches nothing, and that is checked mechanically on the
 //! file:// build. An update path is the exception the installation script
 //! already wrote down in kurulum/kur.ps1 -- the program does not connect, an
@@ -219,7 +219,7 @@ fn yan(exe: &Path, ek: &str) -> PathBuf {
 ///
 /// A running .exe on Windows cannot be deleted, but it CAN be renamed -- that
 /// is the whole trick, and it is why this works without an installer
-/// (principle 1: the delivery is one file, not a wizard). Both renames are
+/// (double-click principle: the delivery is one file, not a wizard). Both renames are
 /// inside one directory, so each is a single atomic operation.
 ///
 /// The rollback on the second rename is the point of the function. Failing

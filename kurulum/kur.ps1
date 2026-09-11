@@ -29,7 +29,7 @@ $Adres  = 'https://github.com/AlparslanSemiz/ders-programi/releases/latest/downl
 # ve biri eski sürümü açar — o yüzden bulunursa siliniyor. Eski KLASÖR
 # silinmiyor, yalnızca söyleniyor: içinde kullanıcı verisi yok (veri
 # tarayıcının deposunda ve Belgelerim'de), ama bir klasörü sessizce silmek
-# ilke 6'nın sesiyle çelişir.
+# veri kaybı olmaz ilkesinin sesiyle çelişir.
 $EskiAd = 'Ders Programı'
 
 function Yaz { param([string]$Metin, [string]$Renk = 'Gray') Write-Host $Metin -ForegroundColor $Renk }
@@ -45,7 +45,7 @@ Yaz ''
 # ve bu, hiç güncellememekle aynı şeydir.
 #
 # İnternet YOKSA bu bir hata değil: yanındaki klasör zaten bir kurulum
-# paketidir ve o kurulur. İlke 3 programın kendisi hakkındadır — çalışan sayfa
+# paketidir ve o kurulur. Çevrimdışı ilkesi programın kendisi hakkındadır — çalışan sayfa
 # hiçbir yere bağlanmaz; bir güncelleme betiği bağlanır, çünkü işi budur.
 $Gecici = ''
 if ($Internetten) {

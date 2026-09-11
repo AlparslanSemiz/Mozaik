@@ -1,7 +1,7 @@
 // The palette is generated, so what must be tested is not "is this hex right"
 // but the two properties the generator claims: every colour carries dark ink at
 // AA, and no two colours look the same. Both are measured, never asserted by
-// eye — the same rule the e2e colour tests follow (CLAUDE.md).
+// eye — the same rule the e2e colour tests follow (docs/DESIGN.md).
 
 import { describe, expect, it } from 'vitest';
 import { PALETTE, PALETTE_SIZE, firstFreeColor, paletteColor } from './palette';

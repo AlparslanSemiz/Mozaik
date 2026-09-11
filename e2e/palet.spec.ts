@@ -105,7 +105,7 @@ test.describe('53. Durum çipi', () => {
     await expect(chip).toContainText('Sorun yok');
 
     // Close a teacher's whole week AFTER the timetable is laid out: the lesson
-    // stays (principle 6) and the chip has to be the thing that says so.
+    // stays (no-data-loss principle) and the chip has to be the thing that says so.
     const id = await page.evaluate(() => {
       const row = [...document.querySelectorAll('table.grid tbody tr')].find(
         (tr) => tr.querySelector('.card') !== null,

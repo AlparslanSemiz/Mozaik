@@ -161,7 +161,7 @@ export function defaultDays(): Day[] {
   return DEFAULT_DAY_NAMES.map(makeDay);
 }
 
-/** 0 = no limit. Nothing is guessed: my father fills these in himself (principle 5). */
+/** 0 = no limit. Nothing is guessed: my father fills these in himself (the former rule against guessed features). */
 export const DEFAULT_LIMITS: Limits = {
   maxConsecutive: 0,
   maxPerDay: 0,
@@ -618,7 +618,7 @@ export function addClass(d: State, name: string, roomId: Id | null): State {
     name: name.trim(),
     roomId,
     color: firstFreeColor(d.classes.map((x) => x.color)),
-    // Nothing is guessed: null means "use the school's number" (principle 5).
+    // Nothing is guessed: null means "use the school's number" (the former rule against guessed features).
     maxSameLessonPerDay: null,
   };
   return { ...d, classes: [...d.classes, created] };

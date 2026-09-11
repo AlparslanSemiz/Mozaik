@@ -371,7 +371,7 @@ test.describe('58. Kontrol şeridi — sayfayı SEÇİYOR', () => {
     // A hand-built school with TWO real problem rows, so the assertion cannot
     // pass by both sides being zero (pitfall 23 — the first version of this
     // test did exactly that on the healthy sample and looked green).
-    //   - a lesson left on an hour closed afterwards (principle 6 keeps it)
+    //   - a lesson left on an hour closed afterwards (the no-data-loss principle keeps it)
     //   - a lesson with more hours than the week can hold
     await loadWorld(
       page,

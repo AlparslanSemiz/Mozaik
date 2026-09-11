@@ -1,6 +1,6 @@
 //! The .exe shell — task 4g/4h.
 //!
-//! What this is NOT: a backend. Principle 2 is unchanged; there is no server,
+//! What this is NOT: a backend. The no-server principle is unchanged; there is no server,
 //! no database, no account and no API here. There is one folder and three
 //! calls that put files in it.
 //!
@@ -11,7 +11,7 @@
 //! route needs `showDirectoryPicker`, which needs a click, a permission and a
 //! handle that a cleared browser profile forgets. In the exe, the answer to
 //! "nereye kaydedilsin" is already known — Belgelerim/Ders Programı — and no
-//! habit has to be taught (principle 6).
+//! habit has to be taught (no-data-loss principle).
 //!
 //! WHERE THE RULES LIVE. Not here. The file names, the daily-backup name, the
 //! "keep the last ten" prune and the flush order are all in `src/folder.ts`

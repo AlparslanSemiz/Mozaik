@@ -232,7 +232,7 @@ function Folder({ folder }: { folder: FolderRun }) {
  * The update half only exists where it can: the site (and the local install)
  * are already served over http, so asking their own origin costs nothing new.
  * The double-clicked file and the .exe say where the newest one is and go
- * nowhere — principle 3 is checked with grep there, and a version check that
+ * nowhere — the offline principle is checked with grep there, and a version check that
  * reached the network would be the first byte this program ever fetched.
  *
  * THE HEADING IS NOT "Bu program", and that is pitfall 49 again. `hasText`
@@ -375,7 +375,7 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
  * The .exe: three buttons, and each one is a separate decision.
  *
  * Look, download, restart. Splitting them is not caution for its own sake, it
- * is principle 1: nothing about this program may change without being asked
+ * is the double-click principle: nothing about this program may change without being asked
  * for, and "asked for" has to mean the thing that actually happened. A single
  * button that fetched four megabytes and closed the window would be an update
  * wizard with one step.

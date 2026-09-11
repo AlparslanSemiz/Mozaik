@@ -43,7 +43,7 @@ const OUTPUT = join(root, 'src/fonts/IBMPlexSans-subset.woff2');
  * The step down to 350 costs eight times what the step up to 700 costs,
  * because everything below 400 needs a second set of deltas. styles.css
  * asks for 700 in five rules and for 300 in none, so the range stops at
- * 400: principle 5, do not buy a weight nothing uses.
+ * 400: the former rule against guessed features (docs/DECISIONS.md), do not buy a weight nothing uses.
  *
  * The five rules asking for 700 were silently getting 600 — a variable font
  * CLAMPS, it does not fail. Measured on the digit "0": outline delta between

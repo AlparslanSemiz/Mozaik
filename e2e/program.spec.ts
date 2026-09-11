@@ -1496,7 +1496,7 @@ test.describe("66. Dolu hücrenin üstüne bırakmak", () => {
     // The lesson moved rows: AV now has that hour and MÇ does not.
     await expect(av).toContainText("510");
     await expect(mc).toHaveText("");
-    // ...and the old one is back in the tray, not deleted (principle 6). Two
+    // ...and the old one is back in the tray, not deleted (no-data-loss principle). Two
     // cards, not one: MÇ's lesson is 2 hours of singles, so what came back is
     // its second single beneath the one that was already waiting. Only the
     // reachable top card carries text; data-count carries the deck depth.

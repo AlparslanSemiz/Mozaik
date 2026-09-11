@@ -1,6 +1,6 @@
 // Empty screens and keyboard navigation.
 //
-// "Boş ekranlar yönlendirir" is a rule in CLAUDE.md and not one of these
+// "Boş ekranlar yönlendirir" is a rule in docs/LAYOUT.md and not one of these
 // screens was tested: they are the first thing a new project shows, and the
 // only place that answers "what do I do first".
 

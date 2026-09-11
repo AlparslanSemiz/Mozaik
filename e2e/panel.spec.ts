@@ -119,7 +119,7 @@ test.describe('48. Varlık paneli', () => {
       .locator(`table.grid tbody tr:has(td[data-row="${id}"]) .row-head .inspect`)
       .click();
 
-    // The lesson is NOT removed (principle 6) — it is marked, here as well as
+    // The lesson is NOT removed (no-data-loss principle) — it is marked, here as well as
     // on the grid, because this is now the easiest place to notice it.
     const sheet = page.locator('.sheet');
     expect(await sheet.locator('.sheet-week td.conflict').count()).toBeGreaterThan(0);

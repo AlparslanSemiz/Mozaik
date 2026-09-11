@@ -1,6 +1,6 @@
 // The folder my father picks (task B4, the old 4l).
 //
-// Principle 6 says data loss is unacceptable, and until now the whole answer
+// The no-data-loss principle says data loss is unacceptable, and until now the whole answer
 // was one habit: "değişiklik yaptın, yedek indir". A habit is a real answer
 // but it is the weakest kind — it fails exactly on the day someone is tired.
 // This module is the answer that does not need him: pick a folder once, and

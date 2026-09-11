@@ -541,7 +541,7 @@ export function applyAvailClock(on: boolean): void {
 // THE SYSTEM PREFERENCE IS A FLOOR, NOT A DEFAULT. `@media (prefers-reduced-
 // motion: reduce)` is written AFTER the [data-motion] rules in styles.css, so a
 // machine asking for less motion gets none whatever this setting says. Letting
-// 'tam' override it would break the one motion contract in CLAUDE.md. What the
+// 'tam' override it would break the one motion rule in docs/DESIGN.md. What the
 // setting can do is go further than the machine asked.
 //
 // It follows the system on FIRST read, exactly like the theme: a button reading

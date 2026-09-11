@@ -4,7 +4,7 @@
 # still dist/index.html — the file my father double-clicks — and nothing here
 # builds it or touches it. What gets published is the folder produced by
 # `npm run build:site`: one HTML file plus a manifest, a service worker and
-# three icons. No backend, no database, no account, no API (principle 2).
+# three icons. No backend, no database, no account, no API (no-server principle).
 #
 # `npm run build:site` starts with `tsc --noEmit`, so a type error fails the
 # deploy. There is deliberately no separate type-check step: two places that

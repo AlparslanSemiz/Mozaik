@@ -7,7 +7,7 @@
 # kalıcı, açık ve girişsizdir, ve `releases/latest/download/<ad>` adresi
 # sürüm numarası bilmeden en yenisine gider. README'nin bağlantıları bunlar.
 #
-# İlke 2 bozulmuyor: yayınlanan şey backend değil, üç dosya.
+# Sunucusuz ilkesi bozulmuyor: yayınlanan şey backend değil, üç dosya.
 #
 # ÜÇ VARLIK, ve üçü de aynı `dist/index.html`'i taşır:
 #   Mozaik.html                  çift tıkla, tarayıcıda açılır

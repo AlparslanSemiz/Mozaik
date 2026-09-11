@@ -543,7 +543,7 @@ test.describe('29. Hata yolları', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('46. Gömülü yazı tipi', () => {
-  // Principle 3 says the tool fetches nothing. A web font is the single most
+  // The offline principle says the tool fetches nothing. A web font is the single most
   // common way that promise breaks, and it breaks SILENTLY: on this machine
   // the face is cached, so the page looks right while my father's copy falls
   // back to Segoe. So the claim is checked in the built file, not in the CSS

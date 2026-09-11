@@ -3,7 +3,7 @@
 // Why it exists: "Dosyaya kaydet" writes a single plan, and since the library
 // arrived (task 4b) that means a three-plan setup cannot be carried anywhere in
 // one piece. A backup that holds only part of the work is exactly the kind of
-// gap principle 6 is about.
+// gap the no-data-loss principle is about.
 //
 // This module follows library.ts's arrangement to the letter: it knows the
 // ENVELOPE and nothing about what a State is. It hands back raw `unknown` for

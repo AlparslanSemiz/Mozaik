@@ -30,7 +30,7 @@
 //   contrast              7.3:1 against the ink, 4.7:1 against the sub-ink
 //
 // The palette is identical in both themes and on paper, so it lives here as
-// plain hex rather than in CSS variables — see CLAUDE.md.
+// plain hex rather than in CSS variables — see docs/DESIGN.md.
 
 export const PALETTE: readonly string[] = [
   '#c3a2cd', '#9ff292', '#e99c4e', '#2ed9e5', '#f1e7c5', '#f29592',

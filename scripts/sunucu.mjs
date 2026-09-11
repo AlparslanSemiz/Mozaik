@@ -22,7 +22,7 @@
 // there is no hosts file to edit and no administrator to ask, and it treats
 // the name as trustworthy.
 //
-// It serves ONE folder, read-only, and it is still principle 2: no backend, no
+// It serves ONE folder, read-only, and it is still the no-server principle: no backend, no
 // database, no account, no session, no API. A static file handler in ~120
 // lines with zero dependencies. Its Windows twin is kurulum/sunucu.ps1 — that
 // one is what actually runs on my father's machine, because it needs no Node.

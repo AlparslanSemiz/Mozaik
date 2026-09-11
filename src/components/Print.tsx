@@ -498,7 +498,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
                             //
                             // On the screen grid a cell is painted by the
                             // teacher because that is what matches the pool
-                            // card you dragged (CLAUDE.md). On a teacher's own
+                            // card you dragged (docs/LAYOUT.md). On a teacher's own
                             // SHEET every filled cell is that same teacher, so
                             // one colour over the whole week says nothing —
                             // twelve cells of identical pastel. The class is

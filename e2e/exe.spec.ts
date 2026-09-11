@@ -236,7 +236,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
   });
 
   test('yeni sürüm varsa ÜÇ ADIM, ve hiçbiri ötekini kendiliğinden yapmıyor', async ({ page }) => {
-    // Look, download, restart. Three buttons because principle 1's promise is
+    // Look, download, restart. Three buttons because the double-click principle's promise is
     // that nothing changes without being asked for, and a single button that
     // fetched four megabytes and closed the window would be a wizard with one
     // step.

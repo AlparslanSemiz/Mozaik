@@ -5,7 +5,7 @@
  * `.github/surum-notu.md` is NOT this: the release workflow overwrites it
  * with the same static install/download text on every tag, it holds no
  * per-version history, and it never ships into `dist/` — so it cannot be
- * read at runtime either (principle 3, nothing is fetched). This file is
+ * read at runtime either (offline principle, nothing is fetched). This file is
  * the single source: bundled at build time exactly like `lang/*.ts`,
  * hand-edited once per release, read by Ayarlar → Hakkında.
  *

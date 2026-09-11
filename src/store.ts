@@ -1,7 +1,7 @@
 // State management: reducer + undo stack + localStorage + backup file.
 // No library, useReducer is enough.
 //
-// Data loss is unacceptable (docs/PLAN.md principle 6). Three layers of defence:
+// Data loss is unacceptable (docs/PRINCIPLES.md: no data loss). Three layers of defence:
 //   1. auto-save on every change (debounced)
 //   2. on every start the previous session's state is pushed down a backup chain (last 3)
 //   3. "Yedek indir" — the ONE habit my father will be taught

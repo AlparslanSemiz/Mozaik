@@ -491,7 +491,7 @@ describe("health", () => {
       blocks: [],
     });
     d = place(d, d.lessons[0]!.id, 0, 0);
-    // The hour is closed AFTERWARDS — principle 6 says the lesson stays.
+    // The hour is closed AFTERWARDS — the no-data-loss principle says the lesson stays.
     d = setAvailability(d, d.teachers[0]!.id, [{ day: 0, hour: 0 }], true);
 
     const h = health(d);

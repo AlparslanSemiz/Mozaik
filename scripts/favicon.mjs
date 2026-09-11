@@ -23,7 +23,7 @@ const uri =
 
 // The comment is deliberately three lines: an HTML comment is the one kind of
 // comment this project SHIPS — JS and CSS are minified, this is not — and the
-// reasoning belongs in CLAUDE.md, not in my father's copy of the file.
+// reasoning belongs in docs/BUILD.md, not in my father's copy of the file.
 //
 // THE SOURCE-TEMPLATE WARNING IS PART OF THIS TEMPLATE, and it was not: it had
 // been written into index.html by hand, so running this script deleted it
@@ -41,7 +41,7 @@ const html = `<!doctype html>
          simgesi HER ZAMAN küçüktür ve ayrıntılı işaret 16 px'te
          okunmuyor (ölçüldü). Ayrışmasını e2e/temel.spec.ts yakalar.
          data: URI, çünkü bu dosya kendi dışından hiçbir şey istemez
-         (ilke 3, tuzak 32). -->
+         (çevrimdışı ilkesi, tuzak 32). -->
     <link rel="icon" href="${uri}" />
   </head>
   <body>

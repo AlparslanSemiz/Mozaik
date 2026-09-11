@@ -3,7 +3,7 @@
 // It lives in App and not in Ayarlar → Veri, for the same reason useSolver
 // does (pitfall 18): a component is unmounted when the tab changes, and a
 // pending write that dies because someone glanced at Program is exactly the
-// kind of silent loss principle 6 is about.
+// kind of silent loss the no-data-loss principle is about.
 //
 // What it writes is a BUNDLE — every plan, the same bytes "Tümünü dosyaya
 // kaydet" produces. Not the open plan: a folder that holds one of three plans

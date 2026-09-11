@@ -599,7 +599,7 @@ export default function Ribbon({
 
         {/* Two buttons and no settings. What "spread over the week" or "prefer
             mornings" should mean is not knowable before a term has been laid
-            out with this (principle 5). */}
+            out with this (the former rule against guessed features). */}
         <Group label="Diz">
           {solver.running ? (
             <button className="btn danger" onClick={solver.stop}>

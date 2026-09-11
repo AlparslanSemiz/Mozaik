@@ -609,7 +609,7 @@ export default function App() {
   // How this copy can be updated, if it can. Two routes and two mechanisms:
   // a service worker on the site and the local install, three buttons in the
   // exe. The double-clicked .html has neither and says so; it cannot replace
-  // itself, and it is the build principle 3 is checked on (temel.spec.ts).
+  // itself, and it is the build the offline principle is checked on (temel.spec.ts).
   //
   // `park` goes in because the exe route ENDS by closing this window: the
   // pending autosave has to be on disk before it does (pitfall 28).
@@ -826,7 +826,7 @@ export default function App() {
             variant, because six columns at 16 px are a smear (measured).
 
             Inline rather than <img src>: dist/index.html is ONE file and
-            fetches nothing (principle 3, pitfall 32), so an <img> would need
+            fetches nothing (offline principle, pitfall 32), so an <img> would need
             a second data: URI of the same drawing and a third copy to keep in
             step. It is `aria-hidden` and NOT a button: the program's name is
             already the document title, and a control here would be a seventh
@@ -1106,7 +1106,7 @@ export default function App() {
             )}
 
             {/* A NEW BUILD IS RUNNING THE SERVICE WORKER, this page is still the
-            old one. Announced rather than applied: principle 1's promise is
+            old one. Announced rather than applied: the double-click principle's promise is
             that nothing updates itself out from under him, and a timetable
             half-dragged is exactly the moment a silent reload would land.
 

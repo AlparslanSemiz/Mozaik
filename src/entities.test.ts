@@ -1206,7 +1206,7 @@ describe('entityWeek', () => {
   });
 
   it('sonradan kapatılan saatteki ders SİLİNMİYOR, çakışma olarak işaretleniyor', () => {
-    // Pitfall 16, seen from the panel: the lesson stays (principle 6) and the
+    // Pitfall 16, seen from the panel: the lesson stays (no-data-loss principle) and the
     // panel has to be the second place that says so.
     let d = school();
     d = setAvailability(d, d.teachers[0]!.id, [{ day: 0, hour: 0 }], true);

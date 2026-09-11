@@ -1,4 +1,4 @@
-// The limit boxes. Every export of rules.ts is covered here (CLAUDE.md rule:
+// The limit boxes. Every export of rules.ts is covered here (docs/ARCHITECTURE.md rule:
 // no feature lands in a pure module without a test).
 
 import { buildIndex, place } from './constraints';

@@ -2,7 +2,7 @@
 //
 // The tool has two delivery routes now: the file my father double-clicks, and
 // a page on the web for when he is not at that computer. The second one is
-// only allowed to exist if it keeps principle 3 — works without the internet —
+// only allowed to exist if it keeps the offline principle — works without the internet —
 // which for a web page means a service worker and a copy of itself on disk.
 //
 // So the test that matters here is not "the page opens". It is: pull the plug,
@@ -184,7 +184,7 @@ test.describe('36. Site sürümü', () => {
       const bar = page.locator('.update-bar');
       await expect(bar).toBeVisible({ timeout: 10_000 });
       await expect(bar).toContainText('Yeni sürüm hazır');
-      // It ANNOUNCES, it does not act: principle 1's promise is that nothing
+      // It ANNOUNCES, it does not act: the double-click principle's promise is that nothing
       // changes out from under him, and a timetable half-dragged is exactly
       // when a silent reload would land.
       await expect(bar.getByRole('button', { name: 'Yenile' })).toBeVisible();

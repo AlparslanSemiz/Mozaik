@@ -50,7 +50,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
 
       // 1. Every block the page saved is legal by the same blocker() the drag
       //    is judged by. A lesson left in an hour that was closed afterwards is
-      //    kept ON PURPOSE (principle 6), so the baseline is what came in.
+      //    kept ON PURPOSE (no-data-loss principle), so the baseline is what came in.
       const inherited = illegalBlocks(world.state).map(key);
       for (const bad of illegalBlocks(saved)) {
         expect(inherited, `${world.name}: ${bad.reason}`).toContain(key(bad));
@@ -126,7 +126,7 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await expect(page.locator('table.grid .card')).toHaveCount(placed);
   });
 
-  test('elle konmuş bloklar yerinde kalıyor, kapalı saatteki bile (ilke 6)', async ({ page }) => {
+  test('elle konmuş bloklar yerinde kalıyor, kapalı saatteki bile (veri kaybı olmaz ilkesi)', async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'elle-konmus')!;
     await loadWorld(page, world.state);
     const before = await autoFill(page);

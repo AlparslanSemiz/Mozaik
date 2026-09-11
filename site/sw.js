@@ -1,4 +1,4 @@
-// The service worker exists for ONE reason: principle 3 says the tool works
+// The service worker exists for ONE reason: the offline principle says the tool works
 // without the internet, and a web page does not — unless it keeps its own copy.
 // After the first visit the site opens with the network unplugged, which is
 // what makes it a fair second delivery route beside the double-clicked file.
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
 
-  // Cache first, refresh behind: the target machine is slow (principle 7), so
+  // Cache first, refresh behind: the target machine is slow (target-machine principle), so
   // the copy on disk wins the race every time and the network only updates it.
   e.respondWith(
     caches.match(req, { ignoreSearch: true }).then((hit) => {

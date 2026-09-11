@@ -1,6 +1,6 @@
 // "Yeni sürüm hazır" — and nothing more than that.
 //
-// Principle 1 says no update wizard, no account, no forced update. What it did
+// The double-click principle says no update wizard, no account, no forced update. What it did
 // NOT say, and what my father needs, is that a version he already has should
 // be visible: he gives feedback, I deploy, and until today nothing on his
 // screen changed to say the fix had arrived. So this tells him, and he decides.
@@ -14,14 +14,14 @@
 //                      look, download, restart. The page still fetches nothing
 //                      itself; the network is on the far side of `invoke`.
 //   file://            nothing, and that is not an oversight. A .html file
-//                      cannot replace itself, and principle 3 is verified
+//                      cannot replace itself, and the offline principle is verified
 //                      mechanically on that build (temel.spec.ts) — a fetch
 //                      there would break the one claim this program can prove
 //                      with grep.
 //
 // The exe route NEVER runs on its own: no timer, no check at startup, no
 // background thread. With no internet the whole feature is one sentence on
-// screen and nothing else changes (principle 1, and the sentence kur.ps1
+// screen and nothing else changes (double-click principle, and the sentence kur.ps1
 // already wrote down: the program does not connect, an update does).
 //
 // The signal is `controllerchange`, not `updatefound`. sw.js calls
@@ -42,7 +42,7 @@ import { SURUM, tarihYazisi } from './version';
  * screen in the two routes that cannot fetch it (file:// and the .exe) and in
  * the README, and three copies of an address is two chances to be wrong.
  *
- * It is a STRING, never a fetch: principle 3 is verified mechanically on the
+ * It is a STRING, never a fetch: the offline principle is verified mechanically on the
  * file:// build (temel.spec.ts), and a link is not a request.
  *
  * GitHub Pages serves a repository under its NAME, so renaming the repository
