@@ -24,6 +24,7 @@ import {
   vacate,
 } from './constraints';
 import { t } from './i18n';
+import { closedKey, parseKey, placementKey } from './keys';
 import type { Index, PlacedBlock } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
@@ -196,8 +197,8 @@ function preservedPlacements(base: State, exclusions: SolverExclusions): Record<
   const lessons = new Map(base.lessons.map((lesson) => [lesson.id, lesson]));
   for (const [key, lessonId] of Object.entries(placements)) {
     const lesson = lessons.get(lessonId);
-    const day = Number(key.split('|')[1]);
-    const dayName = base.settings.days[day]?.name;
+    const parts = parseKey(key);
+    const dayName = parts === null ? undefined : base.settings.days[parts.day]?.name;
     if (
       lesson !== undefined &&
       (lessonExcluded(lesson, exclusions) || (dayName !== undefined && excludedDays.has(dayName)))
@@ -525,8 +526,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     const teacherOnDay = new Array<number>(dayCount).fill(0);
     for (let g = 0; g < dayCount; g++) {
       for (let s = 0; s < hourCount; s++) {
-        if (placements[`${item.lesson.classId}|${g}|${s}`] === item.lesson.id) classOnDay[g]!++;
-        if (ix.teacherBusy.has(`${item.lesson.teacherId}|${g}|${s}`)) teacherOnDay[g]!++;
+        if (placements[placementKey(item.lesson.classId, g, s)] === item.lesson.id)
+          classOnDay[g]!++;
+        if (ix.teacherBusy.has(closedKey(item.lesson.teacherId, g, s))) teacherOnDay[g]!++;
       }
     }
 
