@@ -10,7 +10,8 @@
 // in Node, e2e/otomatik-dunyalar.spec.ts loads the same worlds into the built
 // file:// page and audits what the real button left in localStorage.
 
-import { blockAt, blocker, buildIndex, placementKey, liftBlock } from './constraints';
+import { blockAt, blocker, buildIndex, closedKey, placementKey, liftBlock } from './constraints';
+import { parseKey } from './keys';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
@@ -148,7 +149,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
 export function closeWeek(d: State, entityId: Id): State {
   const unavailable = { ...d.unavailable };
   for (let g = 0; g < d.settings.days.length; g++) {
-    for (let s = 0; s < d.settings.hours.length; s++) unavailable[`${entityId}|${g}|${s}`] = 1;
+    for (let s = 0; s < d.settings.hours.length; s++) unavailable[closedKey(entityId, g, s)] = 1;
   }
   return { ...d, unavailable };
 }
@@ -156,7 +157,7 @@ export function closeWeek(d: State, entityId: Id): State {
 /** Closes the listed `day|hour` pairs for one entity. */
 export function closeHours(d: State, entityId: Id, cells: Array<[number, number]>): State {
   const unavailable = { ...d.unavailable };
-  for (const [g, s] of cells) unavailable[`${entityId}|${g}|${s}`] = 1;
+  for (const [g, s] of cells) unavailable[closedKey(entityId, g, s)] = 1;
   return { ...d, unavailable };
 }
 
@@ -192,15 +193,13 @@ export function blocksOf(d: State): Block[] {
   const out: Block[] = [];
   const placements = activePlacements(d);
   for (const key of Object.keys(placements)) {
-    const cut = key.lastIndexOf('|');
-    const hour = Number(key.slice(cut + 1));
-    const rest = key.slice(0, cut);
-    const classId = rest.slice(0, rest.lastIndexOf('|'));
-    const day = Number(rest.slice(rest.lastIndexOf('|') + 1));
+    const parts = parseKey(key);
+    if (parts === null) continue;
+    const { id: classId, day, hour } = parts;
 
     const found = blockAt(d, classId, day, hour);
     if (found === null) continue;
-    const mark = `${classId}|${day}|${found.hour}`;
+    const mark = placementKey(classId, day, found.hour);
     if (seen.has(mark)) continue;
     seen.add(mark);
 
