@@ -14,6 +14,7 @@ import { sharedPeriods } from '../bell';
 import { paletteColor } from '../palette';
 import { KIND_ICON } from './steps';
 import { buildIndex, closedConflicts, closedKey } from '../constraints';
+import { cellKey, parseCellKey } from '../keys';
 import type { Id, State } from '../types';
 import {
   openHours,
@@ -168,21 +169,21 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
     state.unavailable[closedKey(entityId, g, s)] !== undefined;
 
   const shownClosed = (g: number, s: number): boolean => {
-    if (pending !== null && pending.has(`${g}|${s}`)) return paintMode.current;
+    if (pending !== null && pending.has(cellKey(g, s))) return paintMode.current;
     return isClosed(g, s);
   };
 
   function startPaint(g: number, s: number) {
     paintMode.current = !isClosed(g, s); // invert the first cell, apply that to the rest
-    setPending(new Set([`${g}|${s}`]));
+    setPending(new Set([cellKey(g, s)]));
   }
 
   function continuePaint(g: number, s: number) {
     setPending((previous) => {
       if (previous === null) return null;
-      if (previous.has(`${g}|${s}`)) return previous;
+      if (previous.has(cellKey(g, s))) return previous;
       const next = new Set(previous);
-      next.add(`${g}|${s}`);
+      next.add(cellKey(g, s));
       return next;
     });
   }
@@ -192,10 +193,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
     setPending(null);
     if (set === null || set.size === 0) return;
 
-    const cells = [...set].map((k) => {
-      const [g, s] = k.split('|');
-      return { day: Number(g), hour: Number(s) };
-    });
+    const cells = [...set].map((k) => parseCellKey(k));
     change((d) => setAvailability(d, entityId, cells, paintMode.current));
   }
 
@@ -325,7 +323,7 @@ export default function Availability({ state, change, kind, chosen, setChosen, s
                       <th scope="row">{shortDay(day.name)}</th>
                       {state.settings.hours.map((_, sIdx) => {
                         const n = list.filter(
-                          (x) => state.unavailable[`${x.id}|${g}|${sIdx}`] !== undefined,
+                          (x) => state.unavailable[closedKey(x.id, g, sIdx)] !== undefined,
                         ).length;
                         return (
                           <td
