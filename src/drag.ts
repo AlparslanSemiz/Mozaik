@@ -21,6 +21,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type React from 'react';
 import type { DropVerdict } from './constraints';
 import type { BlockRef } from './constraints';
+import { cellKey } from './keys';
 import { paletteColor } from './palette';
 import type { Id } from './types';
 
@@ -34,7 +35,7 @@ export interface DragData {
    * near the end of the day (see `clampToDay`). */
   hourCount: number;
   /**
-   * `${day}|${hour}` -> verdict. `blocked === null` means droppable.
+   * `cellKey(day, hour)` -> verdict. `blocked === null` means droppable.
    *
    * A verdict also says what the drop would PUSH OUT: a cell whose only
    * problem was the class's own other lesson is droppable, and `evicts` names
@@ -285,7 +286,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
         const day = Number(cell.dataset.day);
         const hour = Number(cell.dataset.hour);
         const span = Math.max(1, Number(cell.dataset.span) || 1);
-        for (let i = 0; i < span; i++) cellAt.current.set(`${day}|${hour + i}`, cell);
+        for (let i = 0; i < span; i++) cellAt.current.set(cellKey(day, hour + i), cell);
       }
     }
 
@@ -381,7 +382,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
         raw === null
           ? null
           : { day: raw.day, hour: clampToDay(raw.hour, d.blockSize, d.hourCount) };
-      const signature = target === null ? '' : `${target.day}|${target.hour}`;
+      const signature = target === null ? '' : cellKey(target.day, target.hour);
       // If it scrolled, the cell under the cursor may have changed; look again.
       if (signature !== lastTarget.current || scrolled) {
         clearHighlight();
@@ -417,7 +418,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
             // left with span 2" only ever answered for the old pair (pitfalls
             // 60 and 85 — a position is found by what covers it, not by a
             // count).
-            const el = cellAt.current.get(`${target.day}|${hour}`) ?? null;
+            const el = cellAt.current.get(cellKey(target.day, hour)) ?? null;
             if (el == null) break;
             // A merged cell can answer for both of its hours; painting it twice
             // would also push it onto the cleanup list twice.
@@ -453,7 +454,7 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       if (
         d !== null &&
         target !== null &&
-        d.map.get(`${target.day}|${target.hour}`)?.blocked === null
+        d.map.get(cellKey(target.day, target.hour))?.blocked === null
       ) {
         drop(d, target.day, target.hour);
       }
