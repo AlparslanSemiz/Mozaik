@@ -18,20 +18,22 @@ import {
   backupKey,
   BASE_KEY,
   bundleFileName,
-  dropPlanText,
   findPlan,
   type Library,
   planKey,
-  readLibrary,
-  readPlanText,
   removePlan,
   renamePlan as renameInLibrary,
   setActive,
   setDraft,
   uniquePlanName,
+} from './library';
+import {
+  dropPlanText,
+  readLibrary,
+  readPlanText,
   writeLibrary,
   writePlanText,
-} from './library';
+} from './libraryStore';
 import { firstFreeColor, PALETTE_SIZE } from './palette';
 import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
 import type {

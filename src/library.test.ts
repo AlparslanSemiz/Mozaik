@@ -13,7 +13,6 @@ import {
   BASE_KEY,
   bundleFileName,
   defaultLibrary,
-  dropPlanText,
   drafts,
   FIRST_PLAN_ID,
   findPlan,
@@ -22,8 +21,6 @@ import {
   normalizeLibrary,
   parseLibrary,
   planKey,
-  readLibrary,
-  readPlanText,
   removePlan,
   renamePlan,
   setActive,
@@ -33,9 +30,14 @@ import {
   storageKind,
   storageReport,
   uniquePlanName,
+} from './library';
+import {
+  dropPlanText,
+  readLibrary,
+  readPlanText,
   writeLibrary,
   writePlanText,
-} from './library';
+} from './libraryStore';
 
 function memoryStorage(): Storage {
   const map = new Map<string, string>();
@@ -539,5 +541,88 @@ describe('storageAddress — hangi depo', () => {
     } finally {
       delete w.__TAURI__;
     }
+  });
+});
+
+// ------------------------------------------------------- KATMAN SINIRLARI
+//
+// Written BEFORE the module was split into model, storage and report, and
+// deliberately not about behaviour: these are the four things the split could
+// quietly break, and none of them had a test. Each one is read off the source,
+// because each one is a fact about which file may say what — a runtime
+// assertion cannot see a file boundary.
+//
+// Read through Vite rather than `node:fs` for the reason `i18n.test.ts` gives:
+// `src/` compiles without Node's globals on purpose (raw.d.ts).
+const KAYNAK = import.meta.glob('./**/*.ts', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
+/** The modules the plan library is made of, whatever they end up being called. */
+function libraryModules(): Array<[string, string]> {
+  return Object.entries(KAYNAK).filter(
+    ([path]) =>
+      /\/(library|libraryStore|storageReport)\.ts$/.test(path) && !path.includes('.test.'),
+  );
+}
+
+/** Source with comments removed: every rule below is about CODE, and the
+    comments in this project quote the very strings being searched for
+    (pitfall 87). */
+const kodu = (src: string) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+describe('katman sınırları', () => {
+  it('modüller okunabildi — boş bir okuma her iddiayı bedavaya yeşil yapardı', () => {
+    // Pitfall 109: Vitest hands back an empty string for anything it is not
+    // told to read, and every assertion below is a `not.toMatch`.
+    const mods = libraryModules();
+    expect(mods.length, 'kitaplık modülü bulunamadı').toBeGreaterThan(0);
+    for (const [path, src] of mods) {
+      expect(src.length, `${path} boş okundu`).toBeGreaterThan(500);
+    }
+  });
+
+  it('hiçbiri store.ts’i çağırmıyor — çalışma zamanı döngüsünü kıran şey bu', () => {
+    // library hands out and takes back RAW STRINGS and store.ts is the only
+    // place that parses them. The day this module learns what a State is, the
+    // two import each other and the cycle is back (ARCHITECTURE, and the same
+    // arrangement keys.ts has between constraints and rules).
+    for (const [path, src] of libraryModules()) {
+      expect(kodu(src), `${path} store.ts’i import ediyor`).not.toMatch(
+        /import[^;]*from '\.\/store'/,
+      );
+      expect(kodu(src), `${path} State tipini tanıyor`).not.toMatch(/\bState\b/);
+    }
+  });
+
+  it('rapor anahtarları TÜRETİYOR, elle yazmıyor', () => {
+    // The debt this table records is "every ders-programi* key that gets
+    // written shows up here". It stays true only while the report asks the
+    // modules that own the keys; the moment a key is typed into the report by
+    // hand, the next key nobody types is invisible — which already happened
+    // twice (the drawer height and the strip, then the print options).
+    for (const [path, src] of libraryModules()) {
+      const literals = [...kodu(src).matchAll(/'ders-programi[^']*'/g)].map((m) => m[0]);
+      const allowed = new Set(["'ders-programi'"]); // BASE_KEY itself, defined once
+      const strays = literals.filter((l) => !allowed.has(l));
+      expect(strays, `${path} anahtarı elle yazıyor: ${strays.join(', ')}`).toEqual([]);
+    }
+  });
+
+  it('bozuk girdi kuralları tek evde — bundle.ts kendi kuralını yazmıyor', () => {
+    // bundle.ts carries every plan as raw `unknown` and hands the directory to
+    // normalizeLibrary. Two homes for "what is a legal plan list" is two
+    // answers, and the file format is the one place that cannot afford that.
+    const bundle = KAYNAK['./bundle.ts'];
+    expect(bundle, 'bundle.ts okunamadı').toBeTruthy();
+    // The raw values go straight in. Anything bundle.ts checked ITSELF first
+    // would be a second answer to "what is a legal plan list", and a file
+    // format is the one place that cannot afford two.
+    expect(kodu(bundle!), 'bundle.ts dizini normalizeLibrary’ye vermiyor').toMatch(
+      /normalizeLibrary\(\{\s*activeId:\s*g\.activeId/,
+    );
   });
 });
