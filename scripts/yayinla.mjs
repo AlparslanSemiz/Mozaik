@@ -20,6 +20,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -89,6 +90,34 @@ if (changelogSurumu !== surum) {
   );
 }
 
+// The FIFTH gate: CHANGELOG.md, the history people outside the repository
+// read. This script closes its Unreleased block under the version it
+// publishes, so an empty block would publish an empty entry. Already closed
+// under this version is fine: that is a release whose bump was done by hand.
+const changelogMdYol = resolve(KOK, 'CHANGELOG.md');
+const changelogMdMetin = readFileSync(changelogMdYol, 'utf8');
+const changelogMdKapali = releasedVersions(changelogMdMetin)[0]?.version === surum;
+const unreleased = unreleasedBody(changelogMdMetin);
+if (unreleased === null) {
+  dur('CHANGELOG.md içinde "## [Unreleased]" başlığı yok.');
+}
+if (!changelogMdKapali && unreleased === '') {
+  dur(
+    'CHANGELOG.md\'nin Unreleased bloğu boş.',
+    'Bu sürümde kullanıcının göreceği ne değiştiyse Added / Changed / Fixed / Removed altına yazın, sonra yayınlayın.',
+  );
+}
+
+// Closes Unreleased under this version, once. Local date, not UTC: the release
+// is dated by the day it happened where it happened.
+function changelogKapat() {
+  if (changelogMdKapali) return;
+  const simdi = new Date();
+  const iki = (n) => String(n).padStart(2, '0');
+  const tarih = `${simdi.getFullYear()}-${iki(simdi.getMonth() + 1)}-${iki(simdi.getDate())}`;
+  writeFileSync(changelogMdYol, closeUnreleased(changelogMdMetin, surum, tarih), 'utf8');
+}
+
 // ------------------------------------------------------------------ yaz
 const yol = resolve(KOK, 'package.json');
 const metin = readFileSync(yol, 'utf8');
@@ -133,9 +162,10 @@ if (onceki === surum) {
   // ...but Cargo.toml may still be behind, because bumping package.json by
   // hand is exactly the path that leaves it behind.
   cargoSurumuYaz(surum);
+  changelogKapat();
   if (git('status', '--porcelain') !== '') {
-    console.log('  src-tauri/Cargo.toml geride kalmıştı, eşitlendi.\n');
-    git('add', 'src-tauri/Cargo.toml');
+    console.log('  src-tauri/Cargo.toml ya da CHANGELOG.md geride kalmıştı, eşitlendi.\n');
+    git('add', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
     git('commit', '-m', `Sürüm ${etiket}`);
   }
 } else {
@@ -146,9 +176,10 @@ if (onceki === surum) {
   if (yeni === metin) dur('package.json içindeki "version" satırı bulunamadı.');
   writeFileSync(yol, yeni, 'utf8');
   cargoSurumuYaz(surum);
+  changelogKapat();
 
   console.log(`\n  ${onceki} → ${surum}\n`);
-  git('add', 'package.json', 'src-tauri/Cargo.toml');
+  git('add', 'package.json', 'src-tauri/Cargo.toml', 'CHANGELOG.md');
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 
