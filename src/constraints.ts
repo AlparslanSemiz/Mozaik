@@ -5,7 +5,7 @@
 
 import { blockPlan, clampBlocks } from './blocks';
 import { t } from './i18n';
-import { closedKey, placementKey, teacherKey } from './keys';
+import { cellKey, closedKey, parseKey, placementKey, teacherKey } from './keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
@@ -61,6 +61,11 @@ export function buildIndex(d: State): Index {
     const lesson = lessonById.get(lessonId);
     if (lesson === undefined) continue; // orphan record — sanitize() deals with it
 
+    // Cut in place rather than through `parseKey`: this loop needs the day and
+    // the hour and never the class, and building the id and an object per
+    // placement made `buildIndex` 1.10x slower in an A/B run (WORKLOG
+    // 2026-09-11). The keys here went through `sanitize` or `placementKey`, so
+    // both cuts read them the same.
     const sep = key.lastIndexOf('|');
     const prevSep = key.lastIndexOf('|', sep - 1);
     const day = Number(key.slice(prevSep + 1, sep));
@@ -70,7 +75,7 @@ export function buildIndex(d: State): Index {
     teacherBusy.set(teacherKey(lesson.teacherId, day, hour), lessonId);
 
     const roomId = classById.get(lesson.classId)?.roomId;
-    if (roomId != null) roomBusy.set(`${roomId}|${day}|${hour}`, lessonId);
+    if (roomId != null) roomBusy.set(closedKey(roomId, day, hour), lessonId);
   }
 
   return {
@@ -700,7 +705,7 @@ function targetBlocks(
         ref.hour === source.hour
       )
         continue;
-      found.set(`${ref.classId}|${ref.day}|${ref.hour}`, ref);
+      found.set(placementKey(ref.classId, ref.day, ref.hour), ref);
     }
   }
   return [...found.values()];
@@ -814,7 +819,7 @@ export function dropMap(
       if (occupant.classId !== lesson.classId) continue;
       for (const block of placedBlocks(d, occupant)) {
         for (let i = 0; i < block.size; i++) {
-          occupied.set(`${block.day}|${block.hour + i}`, {
+          occupied.set(cellKey(block.day, block.hour + i), {
             lesson: occupant,
             hour: block.hour,
             size: block.size,
@@ -826,7 +831,7 @@ export function dropMap(
 
   for (let g = 0; g < dayCount; g++) {
     for (let s = 0; s < hourCount; s++) {
-      const key = `${g}|${s}`;
+      const key = cellKey(g, s);
       const detail = blockerDetail(d, ix, lessonId, g, s, size);
       const plain = verdictAfterBlocker(d, ix, lessonId, g, s, size, detail);
       if (source !== null && lesson !== undefined) {
@@ -871,7 +876,7 @@ export function dropMap(
       const heads: Array<{ lesson: Lesson; hour: number; size: number }> = [];
       const seen = new Set<string>();
       for (let i = 0; i < block && s + i < hourCount; i++) {
-        const found = occupied.get(`${g}|${s + i}`);
+        const found = occupied.get(cellKey(g, s + i));
         if (found === undefined) continue;
         const mark = `${found.lesson.id}|${found.hour}`;
         if (seen.has(mark)) continue;
@@ -1120,11 +1125,9 @@ export function closedConflicts(d: State, ix: Index): ClosedConflict[] {
     const lessonId = placements[key];
     if (lessonId === undefined) continue;
 
-    const parts = key.split('|');
-    const classId = parts[0];
-    if (classId === undefined) continue;
-    const day = Number(parts[1]);
-    const hour = Number(parts[2]);
+    const parts = parseKey(key);
+    if (parts === null) continue;
+    const { id: classId, day, hour } = parts;
 
     const lesson = ix.lessonById.get(lessonId);
     if (lesson === undefined) continue;
@@ -1254,14 +1257,14 @@ export function sanitize(d: State): State {
       const lessonId = program.placements[key];
       if (lessonId === undefined) continue;
 
-      const parts = key.split('|');
-      const classId = parts[0];
-      const day = Number(parts[1]);
-      const hour = Number(parts[2]);
+      const parts = parseKey(key);
       const lesson = lessonById.get(lessonId);
+      if (parts === null) {
+        programChanged = true;
+        continue;
+      }
+      const { id: classId, day, hour } = parts;
       if (
-        parts.length !== 3 ||
-        classId === undefined ||
         lesson === undefined ||
         lesson.classId !== classId ||
         !Number.isInteger(day) ||
@@ -1304,14 +1307,12 @@ export function sanitize(d: State): State {
   // Closed hours: deleted teacher/class/room, or overflowing day/hour
   const unavailable: Record<string, 1> = {};
   for (const key in d.unavailable) {
-    const parts = key.split('|');
-    const entityId = parts[0];
-    if (parts.length !== 3 || entityId === undefined) {
+    const parts = parseKey(key);
+    if (parts === null) {
       changed = true;
       continue;
     }
-    const day = Number(parts[1]);
-    const hour = Number(parts[2]);
+    const { id: entityId, day, hour } = parts;
 
     if (
       !(teacherIds.has(entityId) || classIds.has(entityId) || roomIds.has(entityId)) ||
