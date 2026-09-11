@@ -25,12 +25,9 @@ import {
   renamePlan,
   setActive,
   setDraft,
-  routeName,
-  storageAddress,
-  storageKind,
-  storageReport,
   uniquePlanName,
 } from './library';
+import { routeName, storageAddress, storageKind, storageReport } from './storageReport';
 import {
   dropPlanText,
   readLibrary,

@@ -19,7 +19,7 @@ import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
 import { emptyState } from '../../entities';
 import { KEEP_DAILY, MAIN_NAME } from '../../folder';
-import { routeName, storageAddress, storageKind, storageReport } from '../../library';
+import { routeName, storageAddress, storageKind, storageReport } from '../../storageReport';
 import { downloadBundle, listBackups } from '../../store';
 import type { State } from '../../types';
 import { activePlacements } from '../../programs';
