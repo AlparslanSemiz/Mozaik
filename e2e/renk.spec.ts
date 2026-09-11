@@ -64,6 +64,49 @@ test.describe('8. Tema', () => {
     });
   });
 
+  // The theme has to be on <html> BEFORE the first paint, and the module script
+  // cannot promise that: it is deferred, so on a slow machine the browser paints
+  // the light background once and flips. Measured before this test existed: at
+  // 4x CPU throttling the dark profile's first frame was rgb(207, 216, 228) in
+  // 8 of 9 opens. A classic <script> in <head> blocks parsing, so "before the
+  // first paint" stops being a race.
+  //
+  // What is pinned is the ORDER, not a millisecond: document.readyState is
+  // 'loading' only while the document is still being parsed. If the attribute
+  // is ever set from the deferred module again, readyState reads 'interactive'
+  // here and this goes red — a timing assertion would just get flaky.
+  test('tema ilk boyamadan ÖNCE yazılıyor, ertelenmiş modülden değil', async ({ page }) => {
+    // Record when data-theme first appears. The observer only READS the DOM; it
+    // never touches localStorage, which is what pitfall 108 is about.
+    await page.addInitScript(`(() => {
+      window.__temaAni = null;
+      new MutationObserver((records, obs) => {
+        const h = document.documentElement;
+        if (h !== null && h.hasAttribute('data-theme')) {
+          window.__temaAni = { hazir: document.readyState, kok: document.getElementById('root') === null };
+          obs.disconnect();
+        }
+      }).observe(document, { attributes: true, subtree: true });
+    })();`);
+
+    await open(page);
+    await page.getByRole('button', { name: 'Koyu tema' }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    await reopen(page);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+
+    const an = await page.evaluate(
+      () => (window as unknown as { __temaAni: { hazir: string; kok: boolean } | null }).__temaAni,
+    );
+    expect(an, 'data-theme hiç kurulmadı').not.toBeNull();
+    // 'loading' means the parser has not reached </body> yet, so nothing the
+    // page will show has been laid out, let alone painted.
+    expect(an!.hazir, 'tema belge ayrıştırılırken değil, sonrasında yazılıyor').toBe('loading');
+    // …and it happens in <head>: #root is written further down in <body>.
+    expect(an!.kok, 'tema <head> geçildikten sonra yazılıyor').toBe(true);
+  });
+
   // Both themes, because the light one regressed too: --ok was 4.19:1 on its own
   // background and the "x" on a closed cell was 4.20:1.
   for (const theme of ['light', 'dark'] as const) {

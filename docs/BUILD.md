@@ -125,6 +125,34 @@ sırasında kazanır ve sekmeye ayrıntılı işareti getirirdi.
 Kök `index.html` Vite'ın şablonudur, program değildir. Çift tıklanırsa ne
 olacağını kendi içinde yazıyor (tuzak 72).
 
+#### Temanın ilk boyamadan önce kurulması
+
+`index.html`'in `<head>`'inde, `type="module"` taşımayan klasik bir betik duruyor:
+`ders-programi-tema` okunur ve `<html>`'e `data-theme` yazılır. Betiğin klasik
+olması tercih değil şart, çünkü bir modül betiği spec gereği ertelenir ve belge
+ayrıştırıldıktan sonra koşar. Tek dosyada o modülün içinde bir megabaytlık
+uygulama var, yani yavaş bir makinede tarayıcı sayfayı ondan önce bir kez
+boyuyor ve karanlık tema kayıtlıyken ilk kare açık zeminle geliyordu. Ölçüm: 4
+kat yavaşlatılmış işlemcide dokuz açılışın dokuzunda, düzeltmeden sonra
+sıfırında. Klasik bir betik ayrıştırmayı bloklar, yani "ilk boyamadan önce" bir
+yarış olmaktan çıkıp bir garanti oluyor.
+
+Kapsam yalnız tema, çünkü ölçülen tek görünür fark o. Ölçek ve yoğunluk geç
+uygulandığında düzen kayması 0,0002'nin altında kalıyor ve bir renk değişimi
+gibi göze çarpmıyor.
+
+Betiğin üç dizesi (`ders-programi-tema`, `data-theme`, `dark`) `theme.ts` ile
+aynı olmak zorunda. "Aynı olsun" demek yetmiyor (tuzak 77):
+`src/preferences.test.ts` `index.html`'i okuyup betiğin gövdesini çalıştırıyor ve
+`themePreference`'ın cevabıyla karşılaştırıyor, `e2e/renk.spec.ts` de temanın
+`document.readyState === 'loading'` iken kurulduğunu ölçüyor. Betik ayrıca
+`scripts/favicon.mjs`'in şablonunda da duruyor, yoksa o betiği çalıştırmak bunu
+sessizce silerdi (tuzak 93).
+
+Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
+üretmediği ayrıca ölçüldü (tuzak 108) ve üretmiyor: sınır "belgeden önce" ile
+"belgenin `<head>`'i içinde" arasında. Ayrıntı TESTFINDINGS'te.
+
 ### Site
 
 `npm run build:site` GitHub Pages'e giden klasörü üretir, `site.yml` iş akışı her

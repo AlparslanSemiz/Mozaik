@@ -26,6 +26,28 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · scratch/olc-boya.mjs ve scratch/tani-uygulama.mjs · tema ilk boyamadan önce yazılıyor
+Bulgu: Aşağıdaki 2026-09-11 kaydının kusuru kapatıldı ve önce/sonra aynı makinede, arka planda başka bir iş koşmadan, profil başına dokuz açılışla ölçüldü. `index.html`'in `<head>`'ine `type="module"` taşımayan klasik bir betik kondu: `ders-programi-tema` okunuyor ve `data-theme` yazılıyor.
+
+| ölçüm | önce | sonra |
+|---|---|---|
+| karanlık profil, x4: ilk kare zemini son kareden farklı | 9/9 | **0/9** |
+| karanlık profil, x1: aynı | 1/9 | 0/9 |
+| karanlık profil, x4: tema boyamadan önce | 0/9 | **9/9** |
+| boş profil, x4: tema boyamadan önce | 0/9 | 9/9 |
+| karanlık profil, x4: tema yazılıyor (medyan) | 642,5 ms | 232,1 ms |
+| karanlık profilde ilk kare, zemin | `rgb(207, 216, 228)` → `rgb(1, 2, 4)` | `rgb(1, 2, 4)` → `rgb(1, 2, 4)` |
+| `dist/index.html` | 1 005 647 bayt | 1 006 340 bayt (+693) |
+
+Bu makinenin mutlak süreleri 2026-09-11 kaydındakinden yüksek (x4'te ilk boyama 388 ms, o gün 152 ms) ve onunla karşılaştırılamaz, çünkü depoda paralel bir oturum çalışıyordu. Önce ve sonra arka arkaya, aynı koşullarda alındı.
+
+Ölçüm aletinin kendisi iki kez sorgulandı. Birincisi: `olc-boya.mjs`'ye eklenen `data-theme` zamanlaması ilk hâlinde başlangıç betiğinde `document.documentElement.hasAttribute(...)` çağırıyordu, o an `documentElement` henüz yok, satır fırlatıyor ve bütün başlangıç betiğini götürüyordu. Alet o hâlde x1'de bile "tema boyamadan önce 0/9" ve "zemin `undefined`" diyordu, yani kusuru olduğundan büyük gösteriyordu. O koşu sayılmadı. Düzeltilmiş alet belgedeki tabanı birebir üretti (x1'de tema 61 ms / boyama 64 ms, x4'te tema 218,9 ms / boyama 156 ms), ve ancak ondan sonra ölçüm alındı. Aynı tuzak bu dosyanın 2026-09-11 kaydında da yaşanmış.
+
+İkincisi, tuzak 108 kapısı: ürün artık belge başında depoya dokunuyor, ve bunun `file://` altında bayat açılış üretip üretmediği varsayılmadı, ölçüldü. Yeni derlemeyle, başlangıç betiği olmadan, kalıcı profilde 200 yenileme ve gizli bağlamda 200 yenileme: bayat işaret 0, kalıcı kayıp 0, görüntü aksaklığı 0. Aletin kör olmadığı aynı koşuda bilinen tetikleyiciyle gösterildi: `addInitScript` ile kurulan tohum 200 yenilemede 9 bayat işaret ve 4 kalıcı kayıp verdi. Sonuç tuzak 108'e yazıldı: sınır "belgeden önce" ile "belgenin `<head>`'i içinde" arasında.
+Tür: ürün kusuru, kapatıldı (bilerek yapılan davranış değişikliği)
+Ne yapıldı: düzeltildi. Koruma iki katmanda ve ikisi de mutasyonla sınandı. `src/preferences.test.ts` `index.html`'i okuyup betiğin gövdesini çalıştırıyor ve `themePreference` ile karşılaştırıyor: yedi mutasyonun yedisi kırmızı (betiğin tamamı silinsin, varsayılan `dark` olsun, kayıt yoksa sisteme sorsun, yanlış anahtar, betik `module` olsun, öznitelik adı değişsin, `try/catch` kalksın). İlk yazılan hâli betiğin kuralını elle kopyalıyordu ve "varsayılan `dark` olsun" mutasyonunu kaçırdı, yani kendi transkripsiyonunu ölçüyordu; gerçeği koşturan hâliyle değiştirildi. `e2e/renk.spec.ts` temanın `document.readyState === 'loading'` iken ve `#root` daha yokken kurulduğunu ölçüyor, bir milisaniyeyi değil sırayı: betik çıkarılıp yeniden derlenince kırmızı, geri konunca yeşil.
+Kalıcı kural: TRAPS.md, tuzak 108 (sınırı keskinleştirildi)
+
 ### 2026-09-11 · npx vitest run src/preferences.test.ts · "styles.css'te makinenin bloğu ayarın kurallarından SONRA ve aynı seçicilerle duruyor"
 Bulgu: Hareket adımında yazılan test ilk koşuda, bağlamadan önce de sonra da kırmızıydı. Oysa `styles.css` değişmemişti ve aynı sözü tarayıcıda ölçen `hareket.spec.ts` "MAKİNE tercihi bir TABAN" geçiyordu. Sebep geçici bir tanı testiyle ölçüldü: Vitest'te `./styles.css?raw` de aynı dosyanın `import.meta.glob` ile ham okuması da uzunluğu 0 olan bir dize veriyor. `vite.config.ts`'e yalnız bu dosyayı kapsayan `css.include` eklenince test yeşile döndü. Makinenin bloğunu ayarın kurallarının önüne taşıyan mutasyon ve bloktan sonra bir `:root[data-motion]` kuralı ekleyen mutasyon kırmızı. Bu ayarla birim süitinin tamamı 909/909. İlk koşudaki CSS mutasyonu zaten kırmızı olan testi kırmızı bulduğu için sayılmadı.
 Tür: test kusuru (okuma aleti boş metin veriyordu)

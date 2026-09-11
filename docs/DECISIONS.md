@@ -35,6 +35,42 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Tema ilk boyamadan önce kuruluyor, `<head>`'de klasik bir betikle
+
+**Değişen.** `index.html`'in `<head>`'ine `type="module"` taşımayan bir betik
+kondu: `ders-programi-tema` okunuyor ve `<html>`'e `data-theme` yazılıyor. Aynı
+betik `scripts/favicon.mjs`'in şablonunda da duruyor (tuzak 93).
+
+**Eski hâli.** Temayı yalnız `main.tsx` yazıyordu ve yorumu "ilk boyamadan
+önce" diyordu. Derlenmiş tek dosyada o kod inline bir modül betiğinin içinde,
+yani spec gereği ertelenmiş: belge ayrıştırıldıktan sonra koşuyor.
+
+**Gerekçe.** Yorumun sözü yavaş bir makinede tutmuyordu ve bu ölçülmüştü:
+4 kat yavaşlatılmış işlemcide karanlık tema kayıtlıyken ilk kare dokuz açılışın
+dokuzunda açık zeminle geliyordu, sonra karanlığa dönüyordu. Hedef kullanıcı zor
+görüyor, ve kullanılabilirlik ilkesi kontrastı süs değil gereksinim sayıyor.
+Klasik bir betik ayrıştırmayı bloklar, yani "ilk boyamadan önce" bir yarış
+olmaktan çıkıp bir garanti oluyor: düzeltmeden sonra aynı ölçüm sıfır.
+
+**Bu bir davranış değişikliği ve bilerek yapıldı.** Refactorun "davranış
+değişmez" kuralının dışında duruyor, çünkü kapatılan şey refactorun beşinci
+adımının kendi sözüydü ("tercih ilk boyamadan önce yazılır"): sözleşme
+fabrikada tutuyordu, ihlal `main.tsx`'in derlenmiş dosyada ne zaman koştuğundaydı.
+
+**Kapsam yalnız tema.** Ölçek, yoğunluk, şerit ve müsaitlik saati `main.tsx`'te
+kaldı, çünkü ölçülen tek görünür fark renkti: ötekiler geç uygulandığında düzen
+kayması 0,0002'nin altında. Sekiz tercihin hepsini taşımak `index.html`'e sekiz
+anahtar ve sekiz normalize kuralının ikinci kopyasını koyardı.
+
+**Bedeli ve kapıları.** `dist/index.html` 693 bayt büyüdü. Üç dizenin iki yerde
+olması tuzak 77'nin şekli, o yüzden `src/preferences.test.ts` `index.html`'i
+okuyup betiğin gövdesini koşturuyor ve `themePreference`'ın cevabıyla
+karşılaştırıyor. Betiğin belge başında depoya dokunmasının tuzak 108'i
+tetikleyip tetiklemediği varsayılmadı, ölçüldü: tetiklemiyor, sınır "belgeden
+önce" ile "belgenin `<head>`'i içinde" arasında. Ölçümler TESTFINDINGS'te.
+
+---
+
 ### 2026-09-12 · PLAN.md ikiye ayrıldı, tuzak listesi silindi
 
 **Değişen.** `docs/PLAN.md` iki dosya oldu. Canlı kalan kısmı

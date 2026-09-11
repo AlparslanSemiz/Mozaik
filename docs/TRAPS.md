@@ -769,6 +769,11 @@ okuma, tohumsuz 720 yenilemede 0. Çare depoya dokunmamak: dil Playwright ayarla
 `locale` ile sabit. `file://` üzerinde koşan bir testin başlangıç betiği localStorage'a
 dokunmaz. `context.storageState()` `file://` kökenini döndürmez, bu kökende depo sayfanın
 içinden okunur. Ölçümler TESTFINDINGS'in 2026-09-11 kaydında.
+Sınırın nerede olduğu 2026-09-12'de ölçüldü ve tetikleyici belgenin **öncesi**: `<head>` içinde
+ayrıştırılırken koşan klasik bir betik depoyu okuduğu hâlde 400 yenilemede bir kez bile bayat
+açılış üretmedi, aynı koşuda `addInitScript` ile kurulan tohum 200 yenilemede 9 bayat okuma ve 4
+kalıcı kayıp verdi. Yani ürünün `<head>`'inde depo okumak bu tuzağa girmiyor, belge başına betik
+enjekte etmek giriyor.
 
 ### 109 · Vitest bir stil sayfasını `?raw` ile de boş dize olarak verir
 Hareket tercihinin tabanı (tuzak 58) `styles.css`'teki sıraya dayanıyor ve bir birim

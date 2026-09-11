@@ -17,7 +17,9 @@ import * as i18n from './i18n';
 import * as print from './printOptions';
 import * as color from './programColor';
 import * as theme from './theme';
+import * as keys from './preferenceKeys';
 import styles from './styles.css?raw';
+import indexHtml from '../index.html?raw';
 
 function fakeStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));
@@ -469,5 +471,82 @@ describe('hareket · makinenin tercihi bir taban', () => {
     );
     expect(block).toContain(':root[data-motion="tam"]');
     expect(block).toContain(':root[data-motion="az"]');
+  });
+});
+
+// The theme is the ONE preference that is applied twice: theme.ts writes it
+// from the module script, and a classic <script> in index.html's head writes it
+// again before the first paint, because the module script is deferred and a
+// slow machine paints before it runs. Two copies of a rule is exactly the shape
+// pitfall 77 is about — "one source" written in a comment is a wish until
+// something compares the files. This is that something.
+describe('tema önyükleme betiği · index.html theme.ts ile aynı şeyi söylüyor', () => {
+  // Read empty, every assertion below would be about nothing (pitfall 109).
+  const head = indexHtml.slice(0, indexHtml.indexOf('</head>'));
+
+  it('index.html okunabildi ve bir <head> taşıyor', () => {
+    expect(indexHtml.length, 'index.html okunamadı').toBeGreaterThan(1_000);
+    expect(indexHtml.indexOf('</head>'), 'index.html içinde </head> yok').toBeGreaterThan(0);
+  });
+
+  it('betik <head>te ve ERTELENMİYOR: type="module" değil', () => {
+    const betik = /<script>([\s\S]*?)<\/script>/.exec(head);
+    expect(betik, 'head içinde klasik bir <script> yok').not.toBeNull();
+    expect(betik![1], 'önyükleme betiği depoyu okumuyor').toContain('localStorage.getItem');
+    // A module script here would be deferred again and the defect would come
+    // back with nothing going red.
+    expect(head, 'headteki betik module olmuş, yine ertelenir').not.toMatch(
+      /<script[^>]+type="module"/,
+    );
+  });
+
+  it('theme.ts ile AYNI anahtarı okuyor', () => {
+    expect(head).toContain(`localStorage.getItem('${keys.THEME_KEY}')`);
+  });
+
+  it('theme.ts ile AYNI özniteliği ve AYNI iki değeri yazıyor', () => {
+    expect(head).toContain("setAttribute('data-theme'");
+    // normalizeTheme's whole rule: only the exact string 'dark' is dark, and
+    // everything else — junk, empty, absent — is light.
+    expect(head).toContain("=== 'dark' ? 'dark' : 'light'");
+    expect(theme.normalizeTheme('dark')).toBe('dark');
+    expect(theme.normalizeTheme('light')).toBe('light');
+    expect(theme.normalizeTheme(null)).toBe('light');
+  });
+
+  // The assertions above read the script; this one RUNS it. A test that only
+  // greps for a string measures my transcription of the rule, not the rule —
+  // changing the script's default from null to 'dark' passed every grep and
+  // would have shipped a program that ignores the stored preference.
+  it('betik KOŞTURULUNCA theme.ts ile aynı cevabı veriyor', () => {
+    const govde = /<script>([\s\S]*?)<\/script>/.exec(head)?.[1];
+    expect(govde, 'önyükleme betiğinin gövdesi okunamadı').toBeTruthy();
+
+    const calistir = (kayit: string | null): string | null => {
+      fakeStorage(kayit === null ? {} : { [keys.THEME_KEY]: kayit });
+      document.documentElement.removeAttribute('data-theme');
+      new Function(govde!)();
+      return document.documentElement.getAttribute('data-theme');
+    };
+
+    // Every value the stored key can hold, including the one that matters
+    // most: no record at all, which must be light and must NOT ask the machine.
+    for (const kayit of ['dark', 'light', '', 'DARK', 'koyu', '{}', '0', null]) {
+      fakeStorage(kayit === null ? {} : { [keys.THEME_KEY]: kayit });
+      const beklenen = theme.themePreference.read();
+      expect(calistir(kayit), `"${kayit}" betikte ve theme.ts'te farklı okunuyor`).toBe(
+        beklenen,
+      );
+    }
+  });
+
+  it('depo fırlatsa bile bir tema kuruyor', () => {
+    // An unthemed page draws the functional colours unstyled, and for this tool
+    // that means the drag feedback is unreadable.
+    const govde = /<script>([\s\S]*?)<\/script>/.exec(head)![1]!;
+    brokenStorage();
+    document.documentElement.removeAttribute('data-theme');
+    expect(() => new Function(govde)()).not.toThrow();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 });

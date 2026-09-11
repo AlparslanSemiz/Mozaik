@@ -20,6 +20,7 @@ release is incomplete, the entry says so.
 
 - Availability and Print no longer crash when their list goes from empty to filled while the tab is open, for example after Ctrl+Z.
 - Handing a lesson to another teacher from the entity panel now says how many blocks went back to the pool.
+- The dark theme no longer flashes a light background on the first frame while the program is opening on a slow machine.
 
 ## [2.1.1] - 2026-09-01
 

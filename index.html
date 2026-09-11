@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mozaik</title>
+    <!-- TEMA ÖNYÜKLEMESİ. Ertelenmez ve etmemeli: ayrıştırmayı bloklayan
+         bu betik olmadan karanlık tema kayıtlıyken ilk kare açık zeminle
+         boyanıyor, çünkü aşağıdaki modül belge ayrıştırmasından sonra
+         koşuyor. Üç dize theme.ts ile aynı olmak zorunda ve bunu
+         src/preferences.test.ts ölçüyor. Gerekçe docs/BUILD.md'de. -->
+    <script>
+      var t = null;
+      try {
+        t = localStorage.getItem('ders-programi-tema');
+      } catch (e) {
+        /* depo kapalı ya da dolu olabilir, tema yine de kurulur */
+      }
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    </script>
     <!-- Gömülü işaret (B3b). Kaynağı site/icon-small.svg — bir sekme
          simgesi HER ZAMAN küçüktür ve ayrıntılı işaret 16 px'te
          okunmuyor (ölçüldü). Ayrışmasını e2e/temel.spec.ts yakalar.
