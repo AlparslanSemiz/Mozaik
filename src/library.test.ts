@@ -6,7 +6,6 @@
 
 import { newId } from './entities';
 import {
-  activePlan,
   addPlan,
   backupFileName,
   BASE_KEY,
@@ -18,7 +17,6 @@ import {
   findPlan,
   LIBRARY_KEY,
   type Library,
-  nextPlanName,
   normalizeLibrary,
   parseLibrary,
   planKey,
@@ -164,11 +162,6 @@ describe('kitaplık işlemleri', () => {
     expect(setActive(two(), 'yok')).toEqual(two());
   });
 
-  it('activePlan bozuk activeId ile bile bir plan döndürüyor', () => {
-    expect(activePlan(two()).id).toBe(FIRST_PLAN_ID);
-    expect(activePlan({ activeId: 'yok', plans: two().plans }).id).toBe(FIRST_PLAN_ID);
-  });
-
   it('removePlan: son plan silinemiyor', () => {
     const one = defaultLibrary();
     expect(removePlan(one, FIRST_PLAN_ID)).toBe(one);
@@ -205,11 +198,6 @@ describe('ad çakışması', () => {
     expect(lib.plans.map((p) => p.name)).toContain('Kopya');
     expect(lib.plans.map((p) => p.name)).toContain('Kopya 2');
     expect(lib.plans.map((p) => p.name)).toContain('Kopya 3');
-  });
-
-  it('nextPlanName sıradaki numarayı öneriyor', () => {
-    expect(nextPlanName(defaultLibrary())).toBe('2. plan');
-    expect(nextPlanName(two())).toBe('3. plan');
   });
 });
 

@@ -104,10 +104,6 @@ export function findPlan(lib: Library, id: Id): PlanInfo | undefined {
   return lib.plans.find((p) => p.id === id);
 }
 
-export function activePlan(lib: Library): PlanInfo {
-  return findPlan(lib, lib.activeId) ?? lib.plans[0]!;
-}
-
 export function drafts(lib: Library): PlanInfo[] {
   return lib.plans.filter((p) => p.draft);
 }
@@ -151,11 +147,6 @@ export function uniquePlanName(lib: Library, base: string): string {
     const candidate = `${wanted} ${n}`;
     if (!taken.has(candidate.toLocaleLowerCase('tr'))) return candidate;
   }
-}
-
-/** The name a brand new plan gets offered: "2. plan", "3. plan"... */
-export function nextPlanName(lib: Library): string {
-  return uniquePlanName(lib, `${lib.plans.length + 1}. plan`);
 }
 
 // ------------------------------------------------------------- file names
