@@ -762,6 +762,30 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Brave'inde GÖRÜLMEDİ**; hâlâ doğrulanmayı bekleyen bir varsayım
 
 ---
+### 8c · Belge turunun bıraktıkları (2026-09-11)
+
+- [ ] **Karttaki raptiye dururken görünmez mi, hep görünür mü?** 2026-08-30 kaydı "hep
+      görünür, sönük" diyor ve bunu kullanıcı kararı olarak yazıyor, kod (`fb052f4`)
+      dururken görünmez yapıyor. Ayrıntı [DECISIONS.md](DECISIONS.md).
+- [ ] **PRINCIPLES.md'deki önerilen gerekçeler onaylansın mı?** "Şu an yapılmıyor" listesinde
+      yedi satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli.
+      Onaylanınca işaretler kalkar.
+- [ ] **`.github/surum-notu.md` eski site adresini gösteriyor.** `…github.io/ders-programi/`
+      404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`). Tuzak 106.
+- [ ] **`src/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
+      ve Hakkında noktası yazılmamış, `CHANGELOG.md`'de var.
+- [ ] **Boş ekranlar dersler için Okul'u gösteriyor.** Program, Kontrol ve Çıktı'nın
+      cümleleri "Okul sekmesinden dersleri girin" diyor, dersler Dersler sekmesinde giriliyor.
+- [ ] **Havuzun boşalınca kendiliğinden kapanması** eski CLAUDE.md'de yazılıydı, kodda
+      bulunamadı. Ekranda denenecek, yoksa istenip istenmediğine karar verilecek.
+- [ ] **Bayat kod yorumları:** `App.tsx`'in başı "six sections", `Program.tsx` havuzu
+      "down the right", `App.tsx`'in marka yorumu "detailed", `Appearance.tsx`'in başı
+      ölçeği "1.00 to 1.50" diye anlatıyor.
+- [ ] **Ana E2E süiti bu turda koşulmadı.** Bir sonraki arayüz işinde ya da sürümden önce
+      `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte.
+- [ ] **`npm run yayinla`'nın CHANGELOG kapısı gerçek bir sürümde denenmedi.** Kapatma
+      fonksiyonu bir kopya üzerinde denendi, ilk sürümde çıktısına bakılacak.
+
 ## §9. Ham notlar — senin kendi satırların
 
 Bütün turların kaynağı. **Hiçbir satır silinmedi**; her satırın yanında nereye

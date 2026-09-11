@@ -60,6 +60,8 @@ tarihli `516f963` ve kırk yedinci oturumda yapılmış görünüyor.
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | `library.ts`'teki `storageReport` |
+| Birim testleri | 27 dosyada 763 test, hepsi geçti | `npm test` |
+| `dist/index.html` | 1 007 885 bayt | `npx vite build`, açılış süresi bugün ölçülmedi |
 
 ---
 
@@ -73,7 +75,9 @@ LAYOUT, TESTPLAN, TESTFINDINGS, TRAPS ve DECISIONS yeni, DESIGN yeniden yazıld�
 kapatıyor (`scripts/changelog-md.mjs`), ve `src/surum.test.ts` CHANGELOG'un en üst
 sürümünün `package.json` ile aynı olduğunu ölçüyor. Koddaki "ilke N" ve "principle N"
 atıfları ilkenin adına, "CLAUDE.md" atıfları kuralın bugünkü dosyasına çevrildi.
-AGENTS.md artık CLAUDE.md'den başlayıp bağlantıları izlemeyi söylüyor.
+AGENTS.md artık CLAUDE.md'den başlayıp bağlantıları izlemeyi söylüyor. Commit'ler:
+`69114f9` yeniden adlandırma ve atıflar, `a015ab6` belgeler, `c20e9f0` CHANGELOG ve
+`yayinla` bağlantısı, `c58eda4` kod yorumları, `0661934` AGENTS.md.
 
 **Plandan sapmalar.**
 
@@ -107,6 +111,23 @@ AGENTS.md artık CLAUDE.md'den başlayıp bağlantıları izlemeyi söylüyor.
 - PRINCIPLES.md'deki "Şu an yapılmıyor ve sebebi" listesinde yedi gerekçe sonradan önerildi, eski kayıtta yazılı değildi. Satır sonlarında "(öneri, doğrulanmadı)" diye işaretli.
 - LAYOUT.md'nin koddan tek tek doğrulanmayan maddeleri eski CLAUDE.md'nin Arayüz bölümünden taşındı. Kaynaktan doğrulananlar: sekmeler ve sırası, yedi şeridin grupları, sağ tık menüsü, havuzun sıraları ve grupları, Dersler'in modları, Ayarlar'ın bölümleri ve Görünüm'ün içeriği, Çıktı'nın seçenekleri, raptiye, boş ekran cümleleri, geçici görünüm ve varlık paneli.
 - CHANGELOG.md'nin 1.1.0 ile 2.0.6 arası git geçmişinden ve bu dosyadan derlendi, uygulama içi notlar yalnız 2.1.0 ve 2.1.1 için var. Belirsiz kalanlar girdilerin kendisinde yazılı.
+
+**Koşulan ve koşulmayan testler.**
+
+- Koşuldu: `npm run tipler` (çıkış 0), `npm test` (27 dosyada 763 test, hepsi geçti, `src/surum.test.ts`'e eklenen üç CHANGELOG testi dahil), `npx vite build` (çıkış 0), ve `npx playwright test e2e/temel.spec.ts` (31/31), çünkü `index.html`'deki yorum değişti ve tuzak 77'nin uyarısını o dosya ölçüyor.
+- Koşulmadı: ana E2E süitinin geri kalanı, `npm run test:site`, `npm run cozucu`, `npm run patrol`, `npm run ekran` ve `npm run exe:test`. TESTPLAN'ın kadansına göre gerekmiyorlardı: arayüz, düzen, teslim yolları ve kısıt motoru değişmedi, koda yalnız yorum, test adı ve sürüm betiği olarak dokunuldu. Rust bu makinede kurulu değil.
+- `npm run yayinla`'nın CHANGELOG adımı gerçek bir sürümle denenmedi. `closeUnreleased()` `CHANGELOG.md`'nin bir kopyası üzerinde denendi: dolu bir Unreleased bloğu yeni sürüm başlığının altına taşındı ve üstte boş bir Unreleased kaldı.
+
+**Belge denetimleri.** CLAUDE.md, AGENTS.md, README.md, CHANGELOG.md ve `docs/` altındaki
+166 yerel bağlantının hepsi açılıyor. CLAUDE.md'deki on iki yönlendirme satırı
+dosyaların ilk cümlesiyle aynı. Yeni belgelerde kod dışında uzun çizgi, kısa tire,
+noktalı virgül ya da gereksiz büyük harf yok. Eski CLAUDE.md'den çıkarılan her kod
+parçası, tarih, birimli sayı, tuzak numarası ve dosya yolu yeni belgelerde arandı:
+bulunmayanlar silinecekler listesindeki altı tuzağın parçaları, biçim farkları
+("29px" ile "29 px") ya da bilerek düzeltilen bayat adlar. Mutlak ifadeler iki
+taramayla tek tek sınıflandırıldı: duruş anlatanlar gerekçeli hâle çevrildi,
+mekanik gerçekler ve tarihsel alıntılar kaldı. Bir test bulgusu çıkmadı,
+TESTFINDINGS.md boş.
 
 ### CLAUDE.md'den taşınan ölçümler
 
