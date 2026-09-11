@@ -548,13 +548,6 @@ export async function answerDialog(page: Page, answer: 'ok' | 'cancel' = 'ok'): 
   return said;
 }
 
-/** What the dialog is asking, without answering it. */
-export async function dialogText(page: Page): Promise<string> {
-  const dlg = page.locator('.dlg');
-  await expect(dlg).toBeVisible();
-  return (await dlg.innerText()).replace(/\s+/g, ' ').trim();
-}
-
 export function mainList(page: Page) {
   return page.locator('.cols > div table.list');
 }
