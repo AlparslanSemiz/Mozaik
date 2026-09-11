@@ -1431,5 +1431,3 @@ const ES: Sozluk = {
 };
 
 registerSozluk("es", ES);
-
-export default ES;

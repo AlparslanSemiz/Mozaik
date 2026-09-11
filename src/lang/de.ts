@@ -1432,5 +1432,3 @@ const DE: Sozluk = {
 };
 
 registerSozluk("de", DE);
-
-export default DE;

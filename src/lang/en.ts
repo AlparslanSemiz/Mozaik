@@ -1415,5 +1415,3 @@ const EN: Sozluk = {
 };
 
 registerSozluk("en", EN);
-
-export default EN;
