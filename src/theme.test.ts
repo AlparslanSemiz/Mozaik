@@ -209,9 +209,16 @@ describe('normalizeAvailClock', () => {
   });
 
   it('okunamayan her şey KAPALI', () => {
-    for (const junk of [null, undefined, '', 'kapali', 'Acik', 'ACIK', true, 1, {}, []]) {
+    for (const junk of [null, undefined, '', 'kapali', 'Acik', 'ACIK', 1, {}, []]) {
       expect(normalizeAvailClock(junk)).toBe(false);
     }
+  });
+
+  // The switch in Müsaitlik's strip hands over a boolean and storage hands over
+  // a string, and the factory normalizes both before it stores (pitfall 44).
+  it('boolean de kabul ediyor', () => {
+    expect(normalizeAvailClock(true)).toBe(true);
+    expect(normalizeAvailClock(false)).toBe(false);
   });
 });
 

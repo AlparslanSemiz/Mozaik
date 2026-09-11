@@ -1,7 +1,8 @@
-// Machine preferences: the theme, the rail, the dock, the tool strip, the
-// scale, the density, the availability clock, how much the interface is allowed
-// to MOVE, and whether the first-run line has been seen. Ten independent
-// scalars in ten keys. Deliberately NOT part of `State`:
+// Machine preferences: the theme, the dock, the tool strip, the scale, the
+// density, the availability clock, how much the interface is allowed to MOVE,
+// and whether the first-run line has been seen. Independent scalars, each in
+// its own key. The layout ones are built on the factory in preference.ts,
+// which holds the contract they share. Deliberately NOT part of `State`:
 //
 // The theme is a property of the machine, not of the timetable. Putting it in
 // the saved project would mean a backup taken on a dark machine flips the theme
@@ -12,12 +13,17 @@
 // green = droppable / yellow = warning / red = blocked. Taking control is less
 // mess than leaving it to the browser.
 
+import { preference } from './preference';
+
 export type Theme = 'light' | 'dark';
 
 /** Turkish on purpose: like `ders-programi`, this key is user data, not code. */
 export const THEME_KEY = 'ders-programi-tema';
 
 const ATTRIBUTE = 'data-theme';
+
+/** How the two-way preferences are stored and written on <html>. */
+const onOff = (on: boolean): string => (on ? 'acik' : 'kapali');
 
 /**
  * Anything that is not exactly 'dark' is light — including nothing at all.
@@ -34,24 +40,15 @@ export function normalizeTheme(raw: unknown): Theme {
   return raw === 'dark' ? 'dark' : 'light';
 }
 
-export function readTheme(): Theme {
-  let stored: string | null = null;
-  try {
-    stored = localStorage.getItem(THEME_KEY);
-  } catch {
-    // localStorage can be unavailable; light is still the right answer
-  }
-  return normalizeTheme(stored);
-}
+export const themePreference = preference<Theme>({
+  key: THEME_KEY,
+  normalize: normalizeTheme,
+  fallback: () => 'light',
+  paint: (theme, root) => root.setAttribute(ATTRIBUTE, theme),
+});
 
-export function applyTheme(theme: Theme): void {
-  document.documentElement.setAttribute(ATTRIBUTE, theme);
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-  } catch {
-    // A theme that cannot be remembered is still better than no theme
-  }
-}
+export const readTheme = themePreference.read;
+export const applyTheme = themePreference.apply;
 
 // ----------------------------------------------------------- dock preference
 
@@ -73,26 +70,24 @@ export function applyTheme(theme: Theme): void {
  */
 export const DOCK_KEY = 'ders-programi-havuz';
 
-/** Anything that is not exactly 'kapali' means the dock is open. */
+/**
+ * Anything that is not exactly 'kapali' means the dock is open. A boolean is
+ * the toggle's own answer and is taken as it is (pitfall 44).
+ */
 export function normalizeDock(raw: unknown): boolean {
+  if (typeof raw === 'boolean') return raw;
   return raw !== 'kapali';
 }
 
-export function readDock(): boolean {
-  try {
-    return normalizeDock(localStorage.getItem(DOCK_KEY));
-  } catch {
-    return true;
-  }
-}
+export const dockPreference = preference<boolean>({
+  key: DOCK_KEY,
+  normalize: normalizeDock,
+  fallback: () => true,
+  encode: onOff,
+});
 
-export function writeDock(open: boolean): void {
-  try {
-    localStorage.setItem(DOCK_KEY, open ? 'acik' : 'kapali');
-  } catch {
-    // A dock that cannot be remembered is not worth an error
-  }
-}
+export const readDock = dockPreference.read;
+export const writeDock = dockPreference.write;
 
 // -------------------------------------------------------- ribbon preference
 
@@ -107,27 +102,22 @@ export function writeDock(open: boolean): void {
 export const RIBBON_KEY = 'ders-programi-serit';
 const RIBBON_ATTRIBUTE = 'data-ribbon';
 
-/** Anything that is not exactly 'kapali' means the strip is open. */
+/** Anything that is not exactly 'kapali' means the strip is open. A boolean is taken as it is. */
 export function normalizeRibbon(raw: unknown): boolean {
+  if (typeof raw === 'boolean') return raw;
   return raw !== 'kapali';
 }
 
-export function readRibbon(): boolean {
-  try {
-    return normalizeRibbon(localStorage.getItem(RIBBON_KEY));
-  } catch {
-    return true;
-  }
-}
+export const ribbonPreference = preference<boolean>({
+  key: RIBBON_KEY,
+  normalize: normalizeRibbon,
+  fallback: () => true,
+  encode: onOff,
+  paint: (open, root) => root.setAttribute(RIBBON_ATTRIBUTE, onOff(open)),
+});
 
-export function applyRibbon(open: boolean): void {
-  document.documentElement.setAttribute(RIBBON_ATTRIBUTE, open ? 'acik' : 'kapali');
-  try {
-    localStorage.setItem(RIBBON_KEY, open ? 'acik' : 'kapali');
-  } catch {
-    // A strip that cannot be remembered is not worth an error
-  }
-}
+export const readRibbon = ribbonPreference.read;
+export const applyRibbon = ribbonPreference.apply;
 
 // ------------------------------------------- ribbon auto-hide preference
 
@@ -163,21 +153,17 @@ export function normalizeRibbonAuto(raw: unknown): boolean {
   return raw !== 'kapali';
 }
 
-export function readRibbonAuto(): boolean {
-  try {
-    return normalizeRibbonAuto(localStorage.getItem(RIBBON_AUTO_KEY));
-  } catch {
-    return true;
-  }
-}
+export const ribbonAutoPreference = preference<boolean>({
+  key: RIBBON_AUTO_KEY,
+  normalize: normalizeRibbonAuto,
+  fallback: () => true,
+  encode: onOff,
+});
 
-export function applyRibbonAuto(on: boolean): void {
-  try {
-    localStorage.setItem(RIBBON_AUTO_KEY, on ? 'acik' : 'kapali');
-  } catch {
-    // A gesture that cannot be remembered is not worth an error
-  }
-}
+export const readRibbonAuto = ribbonAutoPreference.read;
+// Stored, not painted: the attribute this gesture drives sits on `.app` and
+// belongs to ribbonScroll.ts.
+export const applyRibbonAuto = ribbonAutoPreference.write;
 
 // ------------------------------------------------------ dock height preference
 
@@ -193,7 +179,7 @@ export function applyRibbonAuto(on: boolean): void {
  * means open/closed and its contract is "anything that is not 'kapali'";
  * folding a number into it would need a second normalizer inside one parser and
  * would break every reader of the current value. theme.ts is a set of
- * INDEPENDENT scalars in independent keys — nine of them now — and this is one.
+ * INDEPENDENT scalars in independent keys, and this is one.
  */
 export const DOCK_H_KEY = 'ders-programi-havuz-boy';
 
@@ -226,21 +212,14 @@ function round(n: number): number {
   return Number((Math.round(clamped / DOCK_H_STEP) * DOCK_H_STEP).toFixed(2));
 }
 
-export function readDockHeight(): number {
-  try {
-    return normalizeDockHeight(localStorage.getItem(DOCK_H_KEY));
-  } catch {
-    return DOCK_H_DEFAULT;
-  }
-}
+export const dockHeightPreference = preference<number>({
+  key: DOCK_H_KEY,
+  normalize: normalizeDockHeight,
+  fallback: () => DOCK_H_DEFAULT,
+});
 
-export function writeDockHeight(rem: number): void {
-  try {
-    localStorage.setItem(DOCK_H_KEY, String(normalizeDockHeight(rem)));
-  } catch {
-    // A drawer height that cannot be remembered is not worth an error
-  }
-}
+export const readDockHeight = dockHeightPreference.read;
+export const writeDockHeight = dockHeightPreference.write;
 
 // ---------------------------------------------------------- scale preference
 
@@ -319,22 +298,15 @@ export function normalizeScale(raw: unknown): number {
   return Number((SCALE_MIN + steps * SCALE_STEP).toFixed(2));
 }
 
-export function readScale(): number {
-  try {
-    return normalizeScale(localStorage.getItem(SCALE_KEY));
-  } catch {
-    return SCALE_DEFAULT;
-  }
-}
+export const scalePreference = preference<number>({
+  key: SCALE_KEY,
+  normalize: normalizeScale,
+  fallback: () => SCALE_DEFAULT,
+  paint: (scale, root) => root.style.setProperty('--ui-scale', String(scale)),
+});
 
-export function applyScale(scale: number): void {
-  document.documentElement.style.setProperty('--ui-scale', String(scale));
-  try {
-    localStorage.setItem(SCALE_KEY, String(scale));
-  } catch {
-    // A scale that cannot be remembered is still better than no scale
-  }
-}
+export const readScale = scalePreference.read;
+export const applyScale = scalePreference.apply;
 
 // -------------------------------------------------------- density preference
 
@@ -381,22 +353,15 @@ export function normalizeDensity(raw: unknown): Density {
   return raw === 'sigdir' ? 'sigdir' : raw === 'ferah' ? 'ferah' : 'rahat';
 }
 
-export function readDensity(): Density {
-  try {
-    return normalizeDensity(localStorage.getItem(DENSITY_KEY));
-  } catch {
-    return 'rahat';
-  }
-}
+export const densityPreference = preference<Density>({
+  key: DENSITY_KEY,
+  normalize: normalizeDensity,
+  fallback: () => 'rahat',
+  paint: (density, root) => root.setAttribute(DENSITY_ATTRIBUTE, density),
+});
 
-export function applyDensity(density: Density): void {
-  document.documentElement.setAttribute(DENSITY_ATTRIBUTE, density);
-  try {
-    localStorage.setItem(DENSITY_KEY, density);
-  } catch {
-    // A density that cannot be remembered is still better than no density
-  }
-}
+export const readDensity = densityPreference.read;
+export const applyDensity = densityPreference.apply;
 
 // ----------------------------------------------------- interface density
 //
@@ -426,22 +391,15 @@ export function normalizeUiDensity(raw: unknown): Density {
   return normalizeDensity(raw);
 }
 
-export function readUiDensity(): Density {
-  try {
-    return normalizeUiDensity(localStorage.getItem(UI_DENSITY_KEY));
-  } catch {
-    return 'rahat';
-  }
-}
+export const uiDensityPreference = preference<Density>({
+  key: UI_DENSITY_KEY,
+  normalize: normalizeUiDensity,
+  fallback: () => 'rahat',
+  paint: (density, root) => root.setAttribute(UI_DENSITY_ATTRIBUTE, density),
+});
 
-export function applyUiDensity(density: Density): void {
-  document.documentElement.setAttribute(UI_DENSITY_ATTRIBUTE, density);
-  try {
-    localStorage.setItem(UI_DENSITY_KEY, density);
-  } catch {
-    // Same as above: an unremembered density still beats no density
-  }
-}
+export const readUiDensity = uiDensityPreference.read;
+export const applyUiDensity = uiDensityPreference.apply;
 
 // --------------------------------------------- availability clock preference
 //
@@ -469,27 +427,25 @@ export const AVAIL_CLOCK_KEY = 'ders-programi-musaitlik-saat';
 
 const AVAIL_CLOCK_ATTRIBUTE = 'data-avail-clock';
 
-/** Only the exact string 'acik' turns it on. Absent means OFF, as asked. */
+/**
+ * Only the exact string 'acik' turns it on. Absent means OFF, as asked. A
+ * boolean is the switch's own answer and is taken as it is (pitfall 44).
+ */
 export function normalizeAvailClock(raw: unknown): boolean {
+  if (typeof raw === 'boolean') return raw;
   return raw === 'acik';
 }
 
-export function readAvailClock(): boolean {
-  try {
-    return normalizeAvailClock(localStorage.getItem(AVAIL_CLOCK_KEY));
-  } catch {
-    return false;
-  }
-}
+export const availClockPreference = preference<boolean>({
+  key: AVAIL_CLOCK_KEY,
+  normalize: normalizeAvailClock,
+  fallback: () => false,
+  encode: onOff,
+  paint: (on, root) => root.setAttribute(AVAIL_CLOCK_ATTRIBUTE, onOff(on)),
+});
 
-export function applyAvailClock(on: boolean): void {
-  document.documentElement.setAttribute(AVAIL_CLOCK_ATTRIBUTE, on ? 'acik' : 'kapali');
-  try {
-    localStorage.setItem(AVAIL_CLOCK_KEY, on ? 'acik' : 'kapali');
-  } catch {
-    // A preference that cannot be remembered is still better than no preference
-  }
-}
+export const readAvailClock = availClockPreference.read;
+export const applyAvailClock = availClockPreference.apply;
 
 // --------------------------------------------------------- motion preference
 //
