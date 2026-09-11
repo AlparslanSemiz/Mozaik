@@ -13,7 +13,7 @@
  * one of their two ends.
  */
 import { useMemo } from 'react';
-import { BookOpen, DoorOpen, GraduationCap, Play, Save, Users } from 'lucide-react';
+import { DoorOpen, Play } from 'lucide-react';
 import Palette from './Palette';
 import type { Command } from './Palette';
 import { useInspect } from './Inspector';
@@ -117,11 +117,3 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
 
   return <Palette open={open} onOpenChange={setOpen} commands={commands} />;
 }
-
-/** Icons the palette uses for the three entity groups, exported for reuse. */
-export const GROUP_ICONS = {
-  teacher: <GraduationCap size={16} strokeWidth={2} />,
-  class: <Users size={16} strokeWidth={2} />,
-  lesson: <BookOpen size={16} strokeWidth={2} />,
-  save: <Save size={16} strokeWidth={2} />,
-};
