@@ -1007,9 +1007,18 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
 
     const groups = page.locator('.pool-group');
     const labels = () => page.locator('.pool-group-label').allInnerTexts();
-    const cards = page.locator('.pool-card');
-    const before = await cards.count();
+    // BLOCKS, read off the decks. Since 516f963 (2026-09-01) the tray draws one
+    // DOM card per deck and paints the depth with ::before and ::after, so
+    // `.pool-card` counts decks and the blocks behind each one are on
+    // `data-count`. This test counted `.pool-card` as blocks and went red that
+    // day, while every promise it guards still held.
+    const blocks = () =>
+      page
+        .locator('.pool-stack')
+        .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
+    const before = await blocks();
     expect(before).toBeGreaterThan(10);
+    await expect(page.locator('.pool-count strong')).toContainText(`${before} blok`);
 
     // The default is the grid's own order, one heading per row.
     const byRow = await labels();
@@ -1022,42 +1031,38 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     expect(bySubject.join(' ')).toContain('Matematik');
     expect(bySubject).not.toEqual(byRow);
 
-    // Two groups when the question is block length, and not one card lost on
+    // Two groups when the question is block length, and not one block lost on
     // the way: a re-order that dropped or duplicated a block would be the one
     // thing this tray must never do.
     await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption('size');
     await expect(groups).toHaveCount(2);
-    await expect(cards).toHaveCount(before);
+    expect(await blocks()).toBe(before);
 
-    // EVERY ORDER HAS TO HOLD THE SAME CARDS, AND EVERY CARD HAS TO BE UNDER A
+    // EVERY ORDER HAS TO HOLD THE SAME BLOCKS, AND EVERY BLOCK HAS TO BE UNDER A
     // HEADING.
     //
-    // Two things can go wrong on this path and neither shows up as an error:
-    // a re-order that loses a block (the tray just looks shorter), and a
-    // heading that disagrees with the run under it (`poolGroup` deciding one
-    // thing and `groupStacks` cutting somewhere else), which leaves cards
-    // outside any group. The counts on the headings have to add up to the
-    // cards on screen, in all five orders.
+    // Two things can go wrong on this path and neither shows up as an error: a
+    // re-order that loses a block (the tray just looks shorter), and a heading
+    // that disagrees with the run under it (`poolGroup` deciding one thing and
+    // `groupStacks` cutting somewhere else). The counts on the headings have to
+    // add up to the blocks on the tray, in all five orders.
     //
-    // The deck signature beside it is a GUARD rather than a live risk: every
-    // field a comparator can read is identical within one lesson's run of
-    // equal blocks, and `Array.sort` is stable, so today no order can split a
-    // deck. It would stop being true the moment a comparator reads `key` — and
-    // a split deck is invisible to every other assertion in this file, because
-    // they all count `.pool-card`, which does not change.
-    // Measured on the honest build: 109 distinct signatures, 109 stacks.
-    const signatures = async () =>
-      page.locator('.pool-stack').evaluateAll((els) =>
-        els.map((el) => {
-          const card = el.querySelector('.pool-card')!;
-          const top = card.querySelector('.card-top')?.textContent ?? '';
-          const bottom = card.querySelector('.card-bottom')?.textContent ?? '';
-          return `${top}|${bottom}|${card.getAttribute('data-size')}`;
-        }),
-      );
+    // A deck is one lesson at one block length, the pair `stackCards` merges
+    // on, so that pair is the signature and no order may show it twice. It is a
+    // GUARD rather than a live risk: every comparator ends on `lessonId` then
+    // `size`, and the day one stops doing that a split deck is invisible to
+    // every other assertion here.
+    const signatures = () =>
+      page
+        .locator('.pool-stack > .pool-card')
+        .evaluateAll((els) =>
+          els.map(
+            (card) => `${card.getAttribute('data-lesson')}|${card.getAttribute('data-size')}`,
+          ),
+        );
     for (const sort of ['row', 'name', 'subject', 'size', 'left']) {
       await page.getByRole('combobox', { name: 'Havuz sıralaması' }).selectOption(sort);
-      await expect(cards).toHaveCount(before);
+      expect(await blocks(), `${sort}: blok kaybolmuş ya da çoğalmış`).toBe(before);
       const decks = await signatures();
       expect(new Set(decks).size, `${sort}: aynı dersin destesi ikiye bölünmüş`).toBe(decks.length);
 
@@ -1074,22 +1079,28 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
-    const cards = page.locator('.pool-card');
-    const all = await cards.count();
+    // Blocks, not DOM cards: one card stands for a whole deck since 516f963.
+    const blocks = () =>
+      page
+        .locator('.pool-stack')
+        .evaluateAll((els) => els.reduce((n, el) => n + Number(el.getAttribute('data-count')), 0));
+    const all = await blocks();
 
     const filter = page.getByRole('combobox', { name: 'Havuz süzgeci' });
     await filter.selectOption({ index: 1 });
-    const shown = await cards.count();
+    await expect(page.locator('.pool-sub')).toContainText('süzgeç dışında');
+    const shown = await blocks();
     expect(shown).toBeGreaterThan(0);
     expect(shown).toBeLessThan(all);
 
     // A tray that quietly showed a twelfth of what is left would make the head
-    // count a lie, so the head says what it is holding back.
-    await expect(page.locator('.pool-sub')).toContainText('süzgeç dışında');
+    // count a lie, so the head says what it holds AND what it holds back, and
+    // the two add up to the whole tray. The number held back was never checked.
     await expect(page.locator('.pool-count strong')).toContainText(`${shown} blok`);
+    await expect(page.locator('.pool-sub')).toContainText(`${all - shown} blok süzgeç dışında`);
 
     await filter.selectOption('');
-    await expect(cards).toHaveCount(all);
+    await expect.poll(blocks).toBe(all);
   });
 
   test('kart ile hayalet aynı şeyi söylüyor', async ({ page }) => {
@@ -1127,46 +1138,39 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
   // altta da olsun ve alttaki stacklenenler de gözüksün."
   //
   // A lesson wanting six single hours laid six identical rectangles side by
-  // side and said `0/6` on every one of them. What this locks is the pair of
-  // facts that made it safe to draw them as a deck: the pile is one FLOW item,
-  // and a `.pool-card` still means one waiting block — to the head count, to
-  // `pendingBlocks()` and to the locators that ask how much is left. Only the
-  // reachable top card carries text; the decorative depth cards are cheap.
+  // side and said `0/6` on every one of them. Since 516f963 (2026-09-01) a deck
+  // is ONE DOM card with its depth painted by ::before and ::after, because
+  // buried duplicate cards made the Program tab paint hundreds of invisible
+  // nodes on every opening. What this locks: a deck is one lesson at one block
+  // length and carries its block count on `data-count`, the head counts blocks
+  // rather than decks, the depth shows exactly when something lies under the top
+  // card, and placing a block takes one off ITS deck.
   test('aynı dersin aynı boydaki blokları TEK deste, kartta rozet yok', async ({ page }) => {
     await openWithSample(page);
 
-    const cards = await page.locator('.pool-card').count();
-    const stacks = await page.locator('.pool-stack').count();
-    expect(cards, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
-    expect(stacks, 'hiçbir kart yığılmamış').toBeLessThan(cards);
-    await expect(page.locator('.pool-count strong')).toContainText(`${cards} blok`);
-
-    // Every card lives in exactly one pile, and a pile is one lesson at one
-    // block length — the two things that make its cards interchangeable.
     const piles = await page.locator('.pool-stack').evaluateAll((nodes) =>
       nodes.map((el) => ({
         count: Number(el.getAttribute('data-count')),
         cards: el.querySelectorAll('.pool-card').length,
-        sizes: new Set(
-          [...el.querySelectorAll('.pool-card')].map((c) => c.getAttribute('data-size')),
-        ).size,
-        tops: new Set([...el.querySelectorAll('.card-top')].map((c) => c.textContent)).size,
-        counters: el.querySelectorAll('.pool-card:not([aria-hidden]) .counter').length,
-        reachable: el.querySelectorAll('.pool-card:not([aria-hidden])').length,
-        emptyDepth: [...el.querySelectorAll('.pool-card[aria-hidden]')].every(
-          (c) => c.childElementCount === 0,
-        ),
+        identified: el.querySelectorAll('.pool-card[data-lesson][data-size]').length,
+        counters: el.querySelectorAll('.counter').length,
+        firstLayer: getComputedStyle(el, '::before').display !== 'none',
+        secondLayer: getComputedStyle(el, '::after').display !== 'none',
       })),
     );
-    expect(piles.reduce((n, p) => n + p.cards, 0)).toBe(cards);
+    const blocks = piles.reduce((n, p) => n + p.count, 0);
+    expect(piles.length, 'örnek okulda bekleyen blok yok').toBeGreaterThan(0);
+    expect(piles.length, 'hiçbir blok desteye girmemiş').toBeLessThan(blocks);
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks} blok`);
+    await expect(page.locator('.pool-card')).toHaveCount(piles.length);
+
     for (const p of piles) {
-      expect(p.cards).toBe(p.count);
-      expect(p.sizes).toBe(1);
-      expect(p.tops).toBe(1);
+      expect(p.cards).toBe(1);
+      expect(p.identified).toBe(1);
       // The counter the reader asked to keep, said once instead of six times.
       expect(p.counters).toBe(1);
-      expect(p.reachable).toBe(1);
-      expect(p.emptyDepth).toBe(true);
+      expect(p.firstLayer, `${p.count} bloklu destenin birinci katmanı`).toBe(p.count >= 2);
+      expect(p.secondLayer, `${p.count} bloklu destenin ikinci katmanı`).toBe(p.count >= 3);
     }
 
     // ...and NOTHING else is written on the cards. The corner badge that used
@@ -1175,13 +1179,39 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     // is still on `data-count`, in the card's title and in the head count.
     await expect(page.locator('.stack-badge')).toHaveCount(0);
 
-    // Placing one block takes one card off the pile rather than emptying it.
-    const deep = page.locator('.pool-stack[data-count="5"]').first();
-    const before = await deep.locator('.card-top').first().innerText();
-    await dragAndDrop(page);
+    // Placing one block takes one card off ITS deck rather than emptying it.
+    // The deck is chosen here: the old test read a five-card deck and then let
+    // `dragAndDrop` pick whatever card came first, so this half was never
+    // measured at all.
+    let dropped: { lesson: string; size: string; count: number } | null = null;
+    for (const index of piles.flatMap((p, i) => (p.count >= 2 ? [i] : [])).slice(0, 8)) {
+      const card = page.locator('.pool-stack').nth(index).locator('.pool-card');
+      const lesson = (await card.getAttribute('data-lesson'))!;
+      const size = (await card.getAttribute('data-size'))!;
+      await startDrag(page, index);
+      const cells = page.locator('tr.target-row td');
+      for (const point of await visibleCells(page, 'tr.target-row td')) {
+        await page.mouse.move(point.x, point.y, { steps: 3 });
+        await page.waitForTimeout(40); // the highlight is applied in the rAF loop
+        if ((await cells.nth(point.index).getAttribute('class'))?.includes('drop-ok') === true) {
+          await page.mouse.up();
+          dropped = { lesson, size, count: piles[index]!.count };
+          break;
+        }
+      }
+      if (dropped !== null) break;
+      await page.keyboard.press('Escape');
+      await page.mouse.up();
+    }
+    expect(dropped, 'hiçbir destenin kartı bir hücreye bırakılamadı').not.toBeNull();
     await expect(page.locator('table.grid .card')).toHaveCount(1);
-    await expect(page.locator('.pool-card')).toHaveCount(cards - 1);
-    expect(before).not.toBe('');
+    const deck = page.locator('.pool-stack', {
+      has: page.locator(
+        `.pool-card[data-lesson="${dropped!.lesson}"][data-size="${dropped!.size}"]`,
+      ),
+    });
+    await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
+    await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} blok`);
   });
 });
 
