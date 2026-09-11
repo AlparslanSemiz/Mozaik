@@ -7,6 +7,7 @@
 import { t } from './i18n';
 import { blockerDetail, buildIndex, closedConflicts, closedKey } from './constraints';
 import type { BlockCode, Index } from './constraints';
+import { parseKey } from './keys';
 import { findViolations } from './rules';
 import type { Violation } from './rules';
 import { blockPlan } from './blocks';
@@ -137,8 +138,9 @@ export function buildCapacity(d: State): Capacity {
   // classes and rooms alike, and each id only ever means one of them.
   const closedCount = new Map<Id, number>();
   for (const key in d.unavailable) {
-    const entityId = key.slice(0, key.indexOf('|'));
-    closedCount.set(entityId, (closedCount.get(entityId) ?? 0) + 1);
+    const parts = parseKey(key);
+    if (parts === null) continue;
+    closedCount.set(parts.id, (closedCount.get(parts.id) ?? 0) + 1);
   }
 
   const teachers: ReportRow[] = d.teachers.map((x) => {
