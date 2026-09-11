@@ -127,6 +127,6 @@ console.log(
     `  karakter  ${CHARSET.length}\n` +
     `  boyut     ${after} bayt` +
     (before ? `  (${delta >= 0 ? '+' : ''}${delta}, dist'te base64 ~${delta >= 0 ? '+' : ''}${Math.round((delta * 4) / 3)})` : '') +
-    `\n\nBoyut değiştiyse docs/STATUS.md'ye yaz — bağımlılık politikasının tek şartı ölçmek.`,
+    `\n\nBoyut değiştiyse docs/WORKLOG.md'ye yaz — bağımlılık politikasının tek şartı ölçmek.`,
 );
 copyFileSync(join(root, 'scripts/font-source/OFL.txt'), join(root, 'src/fonts/OFL.txt'));

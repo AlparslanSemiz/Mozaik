@@ -3,7 +3,7 @@
 # `asc-ekran.ps1` bir kare alır, `asc-tur.ps1` bilinen bir turu koşar; bu dosya
 # aradaki boşluk: TEK bir yolu, koordinatları dışarıdan verilerek gezmek.
 #
-# Why it exists: the deep inventory (TASKS R2 -- every dialog, every tab, every
+# Why it exists: the deep inventory (TODO R2 -- every dialog, every tab, every
 # right-click menu) cannot be written blind. UI Automation reports zero controls
 # for aSc, measured, so the only way to find the next click is to capture the
 # screen and LOOK at it. That is a loop between a human (or a model) and the

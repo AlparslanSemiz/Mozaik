@@ -15,12 +15,12 @@
 // the smallest pairwise dE76 in whichever theme is worse. One hue per section,
 // because a section's identity may not change when the lamp does.
 //
-// The constraints are the ones docs/STATUS.md already wrote down, not new ones:
+// The constraints are the ones docs/WORKLOG.md already wrote down, not new ones:
 //   * contrast 5.0-13.5 against its own ground (--chrome)
 //   * --on-accent on the filled tab >= 4.5   (the label has to be readable)
 //   * dE >= 36 from --ok / --warn / --bad    (never mistaken for a status)
 //
-// dE76 and not dE2000 on purpose: every number already in STATUS.md and in
+// dE76 and not dE2000 on purpose: every number already in WORKLOG.md and in
 // e2e/renk.spec.ts is dE76, and a floor that cannot be compared to the floor it
 // replaces is not a measurement.
 

@@ -1,6 +1,6 @@
 // WHAT IS ACTUALLY INSIDE THE .exe — the icon sizes and the version fields.
 //
-// This exists because a sentence in STATUS.md said "`bundle.icon`'un
+// This exists because a sentence in WORKLOG.md said "`bundle.icon`'un
 // `--no-bundle` ile ikonu gömdüğü VARSAYILDI, ölçülmedi", and the reader's
 // complaint about the taskbar icon was read as evidence for that assumption.
 // An unmeasured platform claim is pitfall 65, and the way out of pitfall 65 is

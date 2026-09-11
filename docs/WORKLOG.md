@@ -1,4 +1,4 @@
-# STATUS — Nerede olduğumuz
+# WORKLOG — Nerede olduğumuz
 
 Son güncelleme: 2026-09-01 (kırk sekizinci oturum: exe'nin penceresi +
 Sığdır'ın genişlik iadesi)
@@ -88,7 +88,7 @@ daha yeşil geçti, yani paralel yük altında bir flake; sebebi aranmadı.
 
 ## Kırk yedinci oturum — Son not defteri turu (2026-09-01)
 
-`TASKS.md` §0'daki dört ham not tamamlandı. Şema, bağımlılık ve genel API
+`TODO.md` §0'daki dört ham not tamamlandı. Şema, bağımlılık ve genel API
 değişmedi; aynı uygulama paketi kullanıldığı için düzeltme file/site/PWA/exe
 yollarının hepsine birlikte geçti.
 
@@ -135,7 +135,7 @@ gömülü kaynak doğrulaması olmaya devam ediyor.
 
 ## Kırk altıncı oturum — aSc R3+R4 + Roboders R7b (2026-08-31)
 
-Kullanıcı isteği: "aSc ve Roboders incelemelerini yapalım" — TASKS §1'in
+Kullanıcı isteği: "aSc ve Roboders incelemelerini yapalım" — TODO §1'in
 öteki her bölümün önünde duran envanter işi. Roboders'in R6'sı (canlı hesap
 turu) kullanıcının görünür pencerede giriş yapmasını istiyor; kullanıcı bu
 oturumda hazır değildi, kapsam **aSc R3+R4 + Roboders R7b**'ye daraltıldı
@@ -178,7 +178,7 @@ bir tur olmadı — her ajan kendi bölümünün sözlük satırlarını da tara
   çevirisi bizim `Yedekler` (backup) kelimemizle çakışıyor; vekil öğretmen
   alınırsa bu isim kullanılamaz.
 
-`TASKS.md` §1a'da R1–R5 ve R7b `[x]`'lendi (R1/R2 kutucukları önceki
+`TODO.md` §1a'da R1–R5 ve R7b `[x]`'lendi (R1/R2 kutucukları önceki
 oturumlarda fiilen bitmişti ama işaretlenmemişti — düzeltildi). Kalan açık:
 **R6** (Roboders canlı tur, kullanıcının müsaitliğini bekliyor), **R7/R7b
 sonrası R7** (R6'yı bekliyor), **R8/R9** (ikisinin birleşmesini bekliyor).
@@ -192,7 +192,7 @@ kod okunmadan yazılmadı.
 
 ## Kırk beşinci oturum — Kısayol yardımı · Yenilikler paneli (2026-08-31)
 
-İki bağımsız küçük özellik, kullanıcının seçtiği sırayla: TASKS §6 B6.5'in
+İki bağımsız küçük özellik, kullanıcının seçtiği sırayla: TODO §6 B6.5'in
 "kısayol listesi" maddesi, sonra §2 B2.9 ("what's new"). İkisi de şema
 değiştirmiyor — yalnız UI + bir gömülü veri dosyası + `localStorage` bayrağı.
 
@@ -202,9 +202,9 @@ CLAUDE.md'ye 64 satır ekliyor, `80a9602` v2.0.5, `f5d63eb` v2.0.6) ve local'in
 kırk ikinci/kırk üçüncü oturumları aynı iki numarayı origin'in **farklı** bir
 kırk ikinci oturumuyla ("Depo adı bir adresti" — exe güncellemesinin adres
 kırılmasını düzelten tur) paylaşıyordu. Kullanıcı kararıyla `git pull
---no-rebase` yapıldı; tek çakışma `docs/STATUS.md`'nin kendi oturum
+--no-rebase` yapıldı; tek çakışma `docs/STATUS.md`'nin (bugün `docs/WORKLOG.md`) kendi oturum
 numaralarındaydı, elle çözüldü: origin'in oturumu **kırk ikinci** kaldı,
-local'in ikisi **kırk üçüncü** ve **kırk dördüncü** oldu (`TASKS.md`'deki tek
+local'in ikisi **kırk üçüncü** ve **kırk dördüncü** oldu (`TODO.md`'deki tek
 çapraz referans da güncellendi). `package.json`/`Cargo.toml` artık gerçek
 yayınlanmış sürüm olan **2.0.6**'yı gösteriyor. Birleşmeden sonra 750/750
 birim testi yeşil — birleşme temizdi.
@@ -236,7 +236,7 @@ Ctrl+K paletinden erişim.
 
 ### 2 · "Yenilikler" — Ayarlar → Hakkında — B2.9
 
-**Plandaki varsayım yanlış çıktı, ölçülerek düzeltildi:** TASKS.md'nin B2.9
+**Plandaki varsayım yanlış çıktı, ölçülerek düzeltildi:** TODO.md'nin B2.9
 maddesi kaynağın `.github/surum-notu.md` olacağını tahmin ediyordu (tuzak 77
 gerekçesiyle). Dosyanın kendisine bakılınca bu **doğru değildi**: tek
 seferlik statik bir metin (indirme/kurulum talimatları, TR/EN), hiç
@@ -258,7 +258,7 @@ doğrulandı. Güncel sürüm açık, eskiler `<details>`/`<summary>` ile varsay
 kapalı arşivde (kullanıcının "arşiv de olabilir" satırına karşılık).
 
 **Ayarlar sekmesinde görülmemiş-yenilik noktası** eklendi (kullanıcı kararı —
-TASKS'te açıkça istenmemişti ama babanın "her güncellemede ne değiştiğini
+TODO'da açıkça istenmemişti ama babanın "her güncellemede ne değiştiğini
 soruyor" şikayetine doğrudan cevap): `App.tsx`'te bir `useState` +
 `Settings` → `Data` → `Changelog`'a kadar `onChangelogSeen` prop'uyla
 taşınan bir geri çağırım (`update`/`folder`'ın zaten kullandığı desen).
@@ -301,7 +301,7 @@ Okul sekmesinde Ayarlar'ın üstündeki nokta gözle doğrulandı, iki temada.
 
 ## Kırk dördüncü oturum — B5.6: iki sütun crosshair'i · gün sonu kaydırma (2026-08-31)
 
-Kullanıcının kendi bildirdiği hata, TASKS §5 B5.6: *"2 derslik bir blok
+Kullanıcının kendi bildirdiği hata, TODO §5 B5.6: *"2 derslik bir blok
 kesinlikle 1 ders değil 2 derstir."* Kod okunarak KÖK SEBEP ikisi için de
 bulundu — `constraints.ts`'in kısıt mantığı (`dropMap()`/`blockerDetail()`)
 hiç değişmedi, ikisi de **etkileşim katmanında** yaşıyordu.
@@ -353,7 +353,7 @@ testlerindeki tam sınıf ve koordinat iddiaları.
 
 ## Kırk üçüncü oturum — Çözücü kalitesi · Boşluk kuralları · Kontrol (2026-08-31)
 
-TASKS §5'in üç maddesi kapandı: B5.1 (Deney B), B5.2 (boşluk kuralları),
+TODO §5'in üç maddesi kapandı: B5.1 (Deney B), B5.2 (boşluk kuralları),
 B5.5 (Kontrol'ün sayfa boyu). Sıra kullanıcının kendi şartıydı: **önce ölçüm,
 sonra kod.**
 
@@ -639,7 +639,7 @@ burada çalışmaz. Dokunulmadı — ölçülmedi, ve bu turun işi değildi.
 
 ---
 
-## Kırkıncı oturum — TASKS.md yeniden dizildi (2026-08-31)
+## Kırkıncı oturum — TASKS.md (bugün TODO.md) yeniden dizildi (2026-08-31)
 
 > *"Tasks.md'yi düzene sok ve tam sırala ve kısımlara ayır … benim notlarımı
 > da düzgün şekilde task haline getir. en üstte benim her zaman yazabilmem
@@ -708,7 +708,7 @@ değil, **Program ızgarasının kendi davranışı**. *"Eğer olabiliyorsa"* bi
 
 > *"Tasklarda kalanları yapalım kısım kısım."*
 
-Önce TASKS'in en altındaki ham istek listesi **koda karşı** okundu, çünkü
+Önce TODO'nun en altındaki ham istek listesi **koda karşı** okundu, çünkü
 oradaki satırların çoğu AA · AB · AC turlarında kapanmış ve liste bunu
 söylemiyordu. Üç satır **ölçülerek** kapalı bulundu ve hiç kod yazılmadı:
 
@@ -953,10 +953,10 @@ listeden `istatistik/dashboard` · `SMS/e-posta` · `aynı planın sürüm ağac
 çıktı. CLAUDE.md bunlara göre hizalandı ve kaldırma bir **not** olarak yazıldı
 (deponun kendi *"Listeden çıkarıldı"* kalıbıyla).
 
-`STATUS.md` ve `TASKS.md`'deki eski `(ilke 5)` atıfları **düzeltilmedi** ve
+`STATUS.md` ve `TASKS.md`'deki (bugün `WORKLOG.md` ve `TODO.md`) eski `(ilke 5)` atıfları **düzeltilmedi** ve
 bu bir karar: onlar bir günlük, o gün geçerli kuralla alınmış kararları
 anlatıyorlar. Düzeltilirlerse kayıt yalan söyler. Düzeltilen yalnız **canlı**
-kural metinleri oldu (CLAUDE.md'de üç yer, ASC.md'de iki satır, TASKS'in bu
+kural metinleri oldu (CLAUDE.md'de üç yer, ASC.md'de iki satır, TODO'nun bu
 turda yazılmış bölümü).
 
 **Arayüz Türkçe.** Uluslararası derleme bunu kendi başına yapıyor:
@@ -1124,7 +1124,7 @@ klasörü, `def.xml`, ve hasat edilmiş 528 konu. Kullanıcı ders çalışıyor
 
 > *"AB oturumundan kalan taskları yap."*
 
-TASKS'in *ŞİMDİ SIRADA*'sı bu turu adıyla yazmıştı ve *"başka bir makinede
+TODO'nun *ŞİMDİ SIRADA*'sı bu turu adıyla yazmıştı ve *"başka bir makinede
 yapılacak"* diyordu. O makine bu makine. Sekiz maddenin yedisi yapıldı; AB8
 (aSc'nin ders ekleme penceresi) hâlâ **fotoğraf bekliyor** — `docs/Örnek
 Fotolar/` altına bakıldı, o pencerenin resmi yok.
@@ -1305,7 +1305,7 @@ konunca ikisi de kırmızı.
 
 ### 5 · AB5 — ikon: PLAN YANLIŞTI, ölçüm doğruyu söyledi
 
-STATUS'ün kendi kaydı *"`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü
+WORKLOG'un kendi kaydı *"`bundle.icon`'un `--no-bundle` ile ikonu gömdüğü
 **varsayıldı**, ölçülmedi"* diyordu, ve AB5 bu varsayımı şikayetin sebebi
 sayıyordu. Yeni betik `scripts/exe-ikon.mjs` PE kaynak tablosunu ayrıştırıyor
 (bağımlılık yok); yayınlanmış 2.0.0 ikilisi indirilip ölçüldü:
@@ -1985,7 +1985,7 @@ dize değil, iki aday ölçülüp büyüğü alınıyor.
 
 ### 2. Otomatik dizme — ÖLÇÜLDÜ (karar: "önce ölç, sonra karar")
 
-STATUS'ün 7. açık maddesi *"çıktı kalitesi ölçülmedi"* iki yıldır duruyordu.
+WORKLOG'un 7. açık maddesi *"çıktı kalitesi ölçülmedi"* iki yıldır duruyordu.
 Ölçüldü. Örnek okul, boş ızgaradan, `solve()` doğrudan:
 
 ```
@@ -2076,7 +2076,7 @@ E2E       485   (469 -> +16: menü, sabitleme, düzenleme penceresi)
 ```
 
 `npm run kontrol` yeşil. Paralel koşuda düşen 8 test **tek worker'la
-163/163 geçti** — TASKS'te kayıtlı "reload'dan sonra düşme" flake'i, bu turun
+163/163 geçti** — TODO'da kayıtlı "reload'dan sonra düşme" flake'i, bu turun
 işi değil.
 
 ---
@@ -2170,7 +2170,7 @@ tipler  temiz           npm run tipler
 
 ## Otuz ikinci oturum — D5 · D6 · D7 · Mozaik (2026-08-29)
 
-TASKS'in *ŞİMDİ SIRADA*'sı bir sonraki oturumun ilk işini adıyla yazmıştı:
+TODO'nun *ŞİMDİ SIRADA*'sı bir sonraki oturumun ilk işini adıyla yazmıştı:
 **D5'in sözlüğü**. Bu oturum onu ve yanındaki üç maddeyi bitirdi.
 
 ### Ne yapıldı
@@ -2258,7 +2258,7 @@ Yanlarında **iki gerçek kusur**:
 
 ### "Reload'dan sonra flake"in sebebi bulundu, ve KOD çıktı
 
-Geçen tur STATUS'e *"`dil.spec.ts` ve `hareket.spec.ts` yük altında
+Geçen tur WORKLOG'a *"`dil.spec.ts` ve `hareket.spec.ts` yük altında
 kararsız"* diye yazılmıştı ve teşhis **yük değildi**: `revealRibbon`
 yardımcısı `.main` yoksa **sessizce dönüyordu**. Boyanmamış bir sayfada
 hiçbir şey dürtülmüyor, şerit katlı kalıyor ve iddia beş saniye sonra
@@ -2323,7 +2323,7 @@ zincirinde okunan çıkış kodu **`tail`'inki**, yani iki kırmızı testin üs
 
 ## Otuz birinci oturum — Y turu: arayüzün şekli (2026-08-28)
 
-Ayrıntı [TASKS.md](TASKS.md) → *Y turu*; burada **ölçülenler**.
+Ayrıntı [TODO.md](TODO.md) → *Y turu*; burada **ölçülenler**.
 
 Bu turun ilk adımı hiç ürün kodu yazmadı. İki sayı bütün düzen kararlarını
 belirledi, ve ikisi de tahmin edilebilirdi — biri tahmin edilseydi turun
@@ -2429,7 +2429,7 @@ girdisinin sabit olduğu doğrulanır.
 
 ## Otuzuncu oturum — X turu: on iki madde (2026-08-28)
 
-Ayrıntı [TASKS.md](TASKS.md) → *X turu*; burada **ölçülenler**.
+Ayrıntı [TODO.md](TODO.md) → *X turu*; burada **ölçülenler**.
 
 ### Üç kusur, üçü de aletin körlüğünden görünmüyordu
 
@@ -2486,8 +2486,8 @@ etiketiydi, o da bir prop oldu.
 
 ## Yirmi dokuzuncu oturum — W turu: yedi madde (2026-08-27)
 
-Kullanıcının TASKS'in altına bıraktığı yedi ham not. Ayrıntı
-[TASKS.md](TASKS.md) → *W turu*; burada **ölçülenler** ve plandan sapmalar.
+Kullanıcının TODO'nun altına bıraktığı yedi ham not. Ayrıntı
+[TODO.md](TODO.md) → *W turu*; burada **ölçülenler** ve plandan sapmalar.
 
 ### İkisinin karşılığı sıfır satır kod oldu
 
@@ -2581,7 +2581,7 @@ kez koştu ve yeşil geçti.
 
 ### 0. `v1.3.0` neden hiç çıkmamıştı
 
-TASKS "tek kalan adım push" diyordu ve yanlıştı: `main` çoktan itilmişti
+TODO "tek kalan adım push" diyordu ve yanlıştı: `main` çoktan itilmişti
 (`916c5c8` = `origin/main`), gitmeyen şey **etiketin kendisiydi** — uzakta
 yalnız `v1.1.0` vardı.
 
@@ -2807,7 +2807,7 @@ npm run ekran                                  34 görüntü, BAKILDI
 
 ## Yirmi yedinci oturum — güncelleme, ikon, devriye, metinler (2026-08-27)
 
-Kullanıcının iki isteği ve TASKS'in sonunda duran beş satırı. İş **ikiye
+Kullanıcının iki isteği ve TODO'nun sonunda duran beş satırı. İş **ikiye
 bölündü** (kullanıcı kararı): bu tur v1.3.0, dil ve yeni ad v2.0.0'da.
 
 > *"Yeni sürüm oluşsun. ayrıca .exe'de de ayarlarda güncellemeye basınca
@@ -3154,7 +3154,7 @@ Son sorunun cevabı **yarı yarıya evet**ti, ve bunu ölçmek turun ilk işi ol
 | `sw.js` · `manifest.webmanifest` · `icon-192.png` · `icon.svg` | 200 · 200 · 200 · 200 |
 | `has_pages` | **true** — yani Pages AÇILMIŞ |
 | son `site` koşusu (09:33) | **success** (öncesindeki 4'ü başarısızdı) |
-| `docs/STATUS.md`'nin Pages tablosu | **BAYAT**: hâlâ "`has_pages: false`, 4 koşu 4 hata" diyordu |
+| `docs/STATUS.md`'nin (bugün `docs/WORKLOG.md`) Pages tablosu | **BAYAT**: hâlâ "`has_pages: false`, 4 koşu 4 hata" diyordu |
 | `/releases` · `git tag -l` | **ikisi de boş** — hiç sürüm çıkmamış |
 | README'deki üç indirme bağlantısı | **404** |
 | README'de site adresi | **hiç yazılı değil** |
@@ -3727,7 +3727,7 @@ işaret hiç feda edilmiyor, sığıyor. Örnek okul yüklüyken (tuzak 41), iki
 
 ## Yirmi birinci oturum — Y turu (2026-08-26)
 
-Kullanıcının aynı mesajda verdiği **üç liste kusuru**, `docs/TASKS.md`'ye elle
+Kullanıcının aynı mesajda verdiği **üç liste kusuru**, `docs/TASKS.md`'ye (bugün `docs/TODO.md`) elle
 eklediği **on bir madde**, ve onaylanan kurulum planının **logo** parçası.
 Kurulum turunun geri kalanı kullanıcı kararıyla **park edildi** ("şimdi bu
 listeye geç").
@@ -3830,7 +3830,7 @@ soru, birden çok cevap" diye tasarlanmıştı.
 
 Yerel kurulum turunun beş maddesi (`dersprogrami.localhost` sunucusu, Windows
 kurulum betikleri, favicon, "nereye kaydedilsin", ilke 2'nin belgeye yazılması)
-`docs/TASKS.md` → **PARK EDİLEN** bölümünde, kararlarıyla birlikte duruyor.
+`docs/TODO.md` → **PARK EDİLEN** bölümünde, kararlarıyla birlikte duruyor.
 Logo yapıldı: üç aday çizildi, 16/32/64/192 px'te iki zeminde render edildi,
 kullanıcı **A — Şerit**'i seçti. Adaylar `site/logo-adaylari/` altında duruyor.
 
@@ -4160,7 +4160,7 @@ sekme ↔ işlevsel    52,5  / 49,9  ΔE  (sözleşme >32)
 ## Şu anki sürüm hedefi
 
 **v0 → v0.9** — elle dizme + yapılabilirlik kontrolü + okul düzeni ve kurallar +
-iki arayüz turu + **otomatik dizme**. TASKS'ta v1 olarak duran otomatik doldurma
+iki arayüz turu + **otomatik dizme**. TODO'da v1 olarak duran otomatik doldurma
 bu turda geldi; kullanıcı istedi.
 
 - **v0 çıkma şartı:** babam gerçek verisiyle bir haftalık programı baştan sona dizip
@@ -4202,7 +4202,7 @@ bu turda geldi; kullanıcı istedi.
 | **C turu: araç şeridi (ribbon), altı sekme** | ✅ ölçüldü, E2E bekliyor |
 | **C turu: boş alanlar gerçek veriyle doldu** | ✅ ölçüldü, E2E bekliyor |
 | Karar turu (sorular cevaplandı) | ✅ |
-| Belgeler (CLAUDE.md, PLAN, STATUS, TASKS) | ✅ |
+| Belgeler (CLAUDE.md, PLAN, STATUS, TASKS, bugünkü adlarıyla WORKLOG ve TODO) | ✅ |
 | İskele (Vite + React + TS + Vitest + singlefile) | ✅ |
 | Çekirdek: `types.ts` + `constraints.ts` | ✅ 26 test |
 | `store.ts` (reducer, geri al, kayıt, yedek, v1 göçü) | ✅ 5 test |
@@ -4285,7 +4285,7 @@ görüntü — test değil, **kanıt**) ve 7 gerçek ölçekli çözücü testi
 (`npm run cozucu`, ~36 sn). İkincisi bu oturumda bir gerileme **yakaladı**:
 `kontrol`'ün dışında kalan bir süit, ancak elle koşulduğunda konuşur.
 
-Ayrıntı: [TASKS.md](TASKS.md)
+Ayrıntı: [TODO.md](TODO.md)
 
 ---
 
@@ -4509,7 +4509,7 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 | **"Veriler nerede" ölçülür** *(v1.0 ✅)* | Panel gerçek anahtarları ve gerçek boyutları (UTF-16 kod birimi) yazar; E2E sayfanın gerçek anahtarlarıyla karşılaştırır. Ortam bugün iki değer: `file` / `site`. `exe` dalı 4h'de gelir. |
 | **exe ⇄ site aynı veri** *(v1.0, karar)* | **Ortak bir `.json` dosyası.** exe otomatik yazar; site Dosya Sistemi Erişimi API'siyle aynı dosyaya yazar, olmayan yerde "Dosyaya kaydet"e düşer. Sunucu ve bulut senkron **yok**. |
 | **Yayın** *(v1.0, karar)* | **GitHub Pages** (statik). Depo `ders-programi` olarak yeniden adlandırılacak. İlke 2'nin "deploy, domain yok" kısmı bilerek değişiyor; backend/veritabanı hâlâ yok. |
-| Oturum sonu | Her oturumda TASKS + STATUS güncellenir (CLAUDE.md "Çalışırken"). |
+| Oturum sonu | Her oturumda TASKS + STATUS (bugün TODO + WORKLOG) güncellenir (CLAUDE.md "Çalışırken"). |
 
 ---
 
@@ -4572,7 +4572,7 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
 - **E2E süiti bu turda hiç koşulmadı** — kullanıcı kararı. 415 birim testi ve
   `npx tsc --noEmit` her adımda yeşil, derleme yapılıyor, ve her ekran gerçek
   tarayıcıda ölçülüp gözle bakıldı; ama 265 E2E testinin kaçının kırmızı olduğu
-  **bilinmiyor**. En az dördünün iddiası bilerek değişti (bkz. TASKS → C10).
+  **bilinmiyor**. En az dördünün iddiası bilerek değişti (bkz. TODO → C10).
   Bu, tuzak 23'ün tam olarak uyardığı durumun tersidir: burada yeşil bir süit
   yok, **koşulmamış** bir süit var, ve ikisi aynı şey değil.
 - **Görsel referanslar (24 PNG) artık yalan.** Kabuğun tamamı değişti;
@@ -4633,7 +4633,7 @@ Bu sayı ilk yazımda **çok daha kötüydü** (57718 düğümde 26 blok); sebeb
    diyaloğunda **kenar boşluğu elle değiştirilirse** tarayıcı CSS'in yerine kendi
    değerini kullanır ve üst/alt bilgi geri gelebilir. Karşı önlem yazıldı: Yazdır
    panelindeki ipucu artık "görürseniz **üstbilgi ve altbilgi** kutusunun işaretini
-   kaldırın" diyor. **Fiziksel çıktıya hâlâ bakılmadı** (bkz. TASKS → gerçek veri).
+   kaldırın" diyor. **Fiziksel çıktıya hâlâ bakılmadı** (bkz. TODO → gerçek veri).
 
 10. **PWA babanın Windows'unda kurulabiliyor mu?** Manifest, simgeler ve service
     worker Chromium'da doğrulandı (çevrimdışı açılış dahil), ama "Uygulama olarak
@@ -4802,7 +4802,7 @@ miras aldı. `gorsel.config.ts`'teki `maxDiffPixelRatio` gerekçesi 1366×768 pi
 sayısına dayanıyordu; oran doğru kalıyor (bir ızgara satırı ~62 000 px, eşik
 ~20 700 px) ama yorum yenilendi.
 
-**`STATUS.md` ve `TASKS.md`'deki 1366×768 rakamlarına dokunulmadı**: onlar oturum
+**`STATUS.md` ve `TASKS.md`'deki (bugün `WORKLOG.md` ve `TODO.md`) 1366×768 rakamlarına dokunulmadı**: onlar oturum
 kaydı, o gün doğruydular. Düzeltilen yalnız güncel iddialar (`CLAUDE.md`,
 `docs/PLAN.md`, ve `styles.css`/`App.tsx`/`drag.ts` yorumları). Sol kenar
 çubuğunun gerekçesi de **silinmedi, dürüstleştirildi**: dikey yarısı ("768px'te
@@ -5106,8 +5106,8 @@ için kalkmıştı) · kâğıt (A4 fiziksel).
 ### Bu oturumun kendi dürüstlük şartı
 
 **Hiçbir şey tarayıcıda doğrulanmadı, çünkü kod değişmedi.** `src/` altında tek
-satır dokunulmadı; değişenler `CLAUDE.md`, `docs/DESIGN.md`, `docs/TASKS.md`,
-`docs/STATUS.md` ve iki config dosyası. Test süiti çalıştırılmadı — çalıştırmak
+satır dokunulmadı; değişenler `CLAUDE.md`, `docs/DESIGN.md`, `docs/TASKS.md` (bugün `docs/TODO.md`),
+`docs/STATUS.md` (bugün `docs/WORKLOG.md`) ve iki config dosyası. Test süiti çalıştırılmadı — çalıştırmak
 bu değişiklikler hakkında hiçbir şey söylemezdi.
 
 **B turu (yeniden tasarım) HENÜZ PLANLANMADI.** Tasarım dilinin açılması,
@@ -5660,7 +5660,7 @@ Referanslar `--update-snapshots=all` ile yenilendi (tuzak 25).
 ## Sekizinci oturum (2026-08-25) — çözücünün çöküşü kapandı
 
 Yedinci oturumun bıraktığı iş commit edildi (7a·7b·7c), sonra kullanıcının
-TASKS sonuna yazdığı altı satır v1.0 turuna dönüştü ve turun ilk maddesi
+TODO sonuna yazdığı altı satır v1.0 turuna dönüştü ve turun ilk maddesi
 yapıldı. Dal: `v1.0-teslim`.
 
 ### Teşhis: iki ayrı şey vardı, biri belgelerde yanlış yazılıydı
@@ -5668,7 +5668,7 @@ yapıldı. Dal: `v1.0-teslim`.
 `gercek-olcek-kurali` dünyasında **99 dersin 32'si 2 saatlik blok**, ve 2
 saatlik bir blok "aynı ders günde en fazla 1 saat" kuralını **hiçbir hücrede**
 sağlayamaz (`constraints.ts` `lessonDayCount + block` sayıyor). Yani o dersler
-gerçekten imkânsız — STATUS'te *"veri imkânsız değil, arama tıkanıyor"*
+gerçekten imkânsız — WORKLOG'da *"veri imkânsız değil, arama tıkanıyor"*
 yazıyordu, yarısı yanlıştı.
 
 Asıl kusur yine de çözücüdeydi ve iz sürülerek bulundu. Aramaya bir kanca
@@ -5830,7 +5830,7 @@ denemede hiç denemiyor.
 
 ## v0.9 — bu oturumda ne yapıldı ve neden
 
-Kullanıcının [TASKS.md](TASKS.md) sonuna yazdığı dört madde:
+Kullanıcının [TODO.md](TODO.md) sonuna yazdığı dört madde:
 
 1. **"UI düzenlenmesi ve modernleştirilmesi lazım. Her sectionda sağ taraf bomboş."**
    Ölçülen sebep: `styles.css`'te container yoktu, genişliği sınırlayan tek şey
@@ -5842,7 +5842,7 @@ Kullanıcının [TASKS.md](TASKS.md) sonuna yazdığı dört madde:
    (`.cols`) geldi ve sağ sütuna **zaten var olan ama bir sekme ötede duran** bilgi
    kondu.
 2. **"Otomatik kurulum önemli."** → Kullanıcıya soruldu, cevap: **programı otomatik
-   dizme**. TASKS'ta v1 olarak duruyordu.
+   dizme**. TODO'da v1 olarak duruyordu.
 3. **"Programda üzerine tıklanınca silinmesin, sürüklenerek taşınabilsin. Sağ tık
    silsin."**
 4. **"E2E her şeyi test edecek şekilde yapalım."** → Kullanıcıya soruldu, cevap:
@@ -5871,7 +5871,7 @@ kırpabiliyordu; renk ve derslik açılır listelerinin erişilebilir adı yoktu
 
 ### Web Worker neden kullanılmadı
 
-TASKS.md "Web Worker" diyordu. İki bağımsız sebeple bırakıldı: Vite worker'ı **ayrı
+TODO.md "Web Worker" diyordu. İki bağımsız sebeple bırakıldı: Vite worker'ı **ayrı
 bir chunk** olarak üretir ve `vite-plugin-singlefile` onu gömmez (tek dosya iddiası
 düşer); kalan `blob:` yolu `file://`'in opaque origin'inden çalışır ve Chromium'da
 güvenilmez, üstelik kaynak string olacağı için `tsc` hiç görmez. Yerine ana iş
@@ -5932,7 +5932,7 @@ birleşmemişti — ikisi de bekliyor). 10 commit, her biri `npm run kontrol` ye
 
 ### Bu oturumda ne yapıldı
 
-v0.8 turunun tamamı (2a–2l). Ayrıntı ve gerekçeler: [TASKS.md](TASKS.md) → BİTENLER 14.
+v0.8 turunun tamamı (2a–2l). Ayrıntı ve gerekçeler: [TODO.md](TODO.md) → BİTENLER 14.
 
 | Eklenen | Nerede |
 |---|---|
@@ -5964,7 +5964,7 @@ Dal: **`v0.7-arayuz-turu`** (`main`'e birleştirilmedi). 13 commit, her biri
 ### Bu oturumda ne yapıldı
 
 v0.7 arayüz turunun tamamı (1a–1m). Ayrıntı ve gerekçeler:
-[TASKS.md](TASKS.md) → BİTENLER 13.
+[TODO.md](TODO.md) → BİTENLER 13.
 
 | Eklenen | Nerede |
 |---|---|
@@ -6022,7 +6022,7 @@ sormuyor), **branş adı hücreye sığmıyor** (`Matematik` 34px'e girmiyor —
 tablosu gerekiyor, şema v3 → v4), **baskı sütunları eşit değil** (`table-layout` yok,
 dolu hücre sütunu genişletiyor) ve **görünüm düğmesi nerede olduğunu söylemiyor**.
 
-Tümü ve karar gerekçeleri: [TASKS.md](TASKS.md) → BİTENLER 13 (1a–1m). **Hepsi yapıldı.**
+Tümü ve karar gerekçeleri: [TODO.md](TODO.md) → BİTENLER 13 (1a–1m). **Hepsi yapıldı.**
 
 ---
 
@@ -6059,4 +6059,4 @@ sonra dünyaların çoğu bütçesini doldurmuyor, ama biri (kasten imkânsız o
 hâlâ 15 saniye harcıyor — o yüzden ayrı komutta duruyor.
 
 `npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra
-[TASKS.md](TASKS.md) içindeki **"ŞİMDİ SIRADA"** bölümünden devam edilir.
+[TODO.md](TODO.md) içindeki **"ŞİMDİ SIRADA"** bölümünden devam edilir.

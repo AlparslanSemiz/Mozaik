@@ -7,7 +7,7 @@ dist-kurulum/
 test-results/
 playwright-report/
 
-# Throwaway measurement scripts. Nothing here ships; see docs/STATUS.md for
+# Throwaway measurement scripts. Nothing here ships; see docs/WORKLOG.md for
 # what the measurements said.
 scratch/
 

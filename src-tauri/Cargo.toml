@@ -33,7 +33,7 @@ tauri = { version = "2", features = [] }
 #
 # reqwest is NOT new: `tauri` already depends on it and it is already in
 # Cargo.lock. What was missing is a TLS backend -- neither rustls nor
-# native-tls was enabled -- so the cost measured in STATUS.md is the TLS stack,
+# native-tls was enabled -- so the cost measured in WORKLOG.md is the TLS stack,
 # not the client.
 #
 # `native-tls` rather than `rustls`, and the reason is the delivery target: on

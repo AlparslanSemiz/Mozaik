@@ -85,7 +85,7 @@ $KISITLAMALAR = @{ x = 1548; y = 695 }
 $ILK_SATIR = @{ x = 1088; y = 704 }
 
 
-# Deep inventory (TASKS R2). Every path below was found the only way aSc
+# Deep inventory (TODO R2). Every path below was found the only way aSc
 # allows: capture the screen, LOOK at it, and measure the next click off the
 # image. UI Automation reports zero controls here, so there is nothing to
 # query and nothing to click by name.

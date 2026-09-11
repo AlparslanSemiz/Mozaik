@@ -1,9 +1,9 @@
-# TASKS — Yapılacaklar
+# TODO — Yapılacaklar
 
 İşaretler: `[ ]` bekliyor · `[~]` devam ediyor · `[x]` bitti ·
 `[→]` arşivde duran ama **canlı hâli yukarıda** olan madde (numarası yazılı)
 
-Yeni bir bilgisayarda başlıyorsan önce [STATUS.md](STATUS.md) sonundaki
+Yeni bir bilgisayarda başlıyorsan önce [WORKLOG.md](WORKLOG.md) sonundaki
 **"Başka bir bilgisayarda devam etmek için"** bölümünü uygula.
 
 **Bu dosya nasıl okunur:** üstte **açık işler**, altta **arşiv**. Arşiv
@@ -304,7 +304,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       değiştirmemeli (tuzak 96'nın ailesi).
 
 **Çıkma şartı:** `npm run kontrol` yeşil · beş bölümün iki temada görüntüsü
-alınmış · ölçümler [STATUS.md](STATUS.md)'ye yazılmış.
+alınmış · ölçümler [WORKLOG.md](WORKLOG.md)'ye yazılmış.
 
 ### Yanında gidecek tek küçük madde — Ayarlar dışı
 
@@ -332,7 +332,7 @@ tıklanınca**.
       **Ölçüm borcu:** `html2canvas` gibi bir bağımlılık mı, `<canvas>`'a elle
       çizim mi, `SVG → blob` mü. Üçü de `dist/index.html`'e gömülebilir olmak
       zorunda ve seçim **ölçülerek** yapılır (bağımlılık politikası,
-      2026-08-26: eklendikten sonra dosya boyutu ve açılış süresi STATUS'e
+      2026-08-26: eklendikten sonra dosya boyutu ve açılış süresi WORKLOG'a
       yazılır).
 - [ ] **B3.2 Ayrı ayrı birden fazla PDF.** Şu an tek yazdırma işi çıkıyor;
       istenen her sınıf/öğretmen için **ayrı dosya**. Tarayıcı yolunda
@@ -668,7 +668,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ("Sunucu yok") tam karşısında ve yasak listedeki **"bulut
       senkronizasyonu"** maddesiyle birebir çakışıyor. Yasak liste "bunlar
       bu projeye ASLA girmeyecek" diyor; bu satır o cümleyle duruyor.
-      **İlerlemeden önce gereken, bir TASKS.md maddesi değil bir CLAUDE.md
+      **İlerlemeden önce gereken, bir TODO.md maddesi değil bir CLAUDE.md
       kararı**: ilke 2'nin 2026-08-30'daki "KURULUM YASAĞI KALKTI" ve
       "PAYLAŞMA YASAK DEĞİL" örneklerindeki gibi açıkça **kullanıcı
       kararıyla** gevşetilmesi, ve yasak listeden "bulut senkronizasyonu"nun
@@ -890,7 +890,7 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 > atıfları, sonradan kaldırılmış yasaklar ve o gün doğru olan ölçümler
 > **olduğu gibi** duruyor.
 >
-> Ölçülen sayılar [STATUS.md](STATUS.md)'de oturum oturum; buradaki maddeler
+> Ölçülen sayılar [WORKLOG.md](WORKLOG.md)'de oturum oturum; buradaki maddeler
 > oraya işaret ediyor.
 
 **Arşiv haritası — YENİDEN ESKİYE:**
@@ -948,7 +948,7 @@ Saat açma kapama çalışmıyor müsaitlikte.                            -> [x]
 
 > Kullanıcı *"tasklarda kalanları yapalım kısım kısım"* dedi ve kapsam
 > **Bölüm 1** seçildi. Beşi de kapandı; ölçümler
-> [STATUS.md](STATUS.md) → *Otuz dokuzuncu oturum*.
+> [WORKLOG.md](WORKLOG.md) → *Otuz dokuzuncu oturum*.
 
 - [x] **B1.1 Müsaitlikte "Saatler" düğmesi ölüydü.**
       `:root[data-density='sigdir'] .hour-clock` seçicisinde `table.grid`
@@ -1052,7 +1052,7 @@ Ve hâlâ bekleyen tek büyük şey: **babanın gerçek listesi** — v0'ın ç�
 
 aSc bu makinede kurulu çıktı (`C:\TimeTables`), emülatör gerekmedi. Üç kaynak
 da yeniden üretilebilir; karar haritası [ASC.md](ASC.md), ölçümler
-[STATUS.md](STATUS.md) → *Otuz sekizinci oturum*.
+[WORKLOG.md](WORKLOG.md) → *Otuz sekizinci oturum*.
 
 - [x] `scripts/asc-sozluk.mjs` → **2940 arayüz metni**, EN ↔ TR (%98 Türkçe)
 - [x] `scripts/asc-yardim.mjs` → **528 yardım konusu**, 19 bölüm, 0 hata
@@ -1073,7 +1073,7 @@ depoda olmayan bir şeye bağlılar (aSc kurulumu, ağ).
 ### AB turu — Z planından devreden maddeler — **BİTTİ ✅** (2026-08-30)
 
 Sekiz maddenin **yedisi** yapıldı. AB8 hâlâ fotoğraf bekliyor. Ölçümlerin
-hepsi [STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
+hepsi [WORKLOG.md](WORKLOG.md) → *Otuz yedinci oturum*.
 
 > **BU TURUN EN PAHALI BULGUSU BİR KOD DEĞİL: İKİ MADDENİN PLANI YANLIŞTI.**
 > AB5 "ikon exe'ye gömülmüyor olabilir" diyordu, AB6 "VERSIONINFO yok"
@@ -1193,7 +1193,7 @@ Bu iki madde plana "yapılacak" diye yazılmıştı; ölçüldüler ve **plan ya
 Yedisi de yapıldı; **AB8 otuz sekizinci oturumda kapandı** (aSc'nin ekleme
 pencereleri artık `docs/asc/ekran/` altında). Maddelerin tamamı ve gerekçeleri
 bu dosyanın altındaki *AB turu* bölümünde, ölçümler
-[STATUS.md](STATUS.md) → *Otuz yedinci oturum*.
+[WORKLOG.md](WORKLOG.md) → *Otuz yedinci oturum*.
 
 - [x] **AB1** Hareket ve Dil sola · Ayarlar şeridinin boş sağ ucu doldu
 - [x] **AB2** İnfolar kısaldı: en uzunu **438 → 126** karakter · 4 sözlük elle
@@ -1217,7 +1217,7 @@ bu dosyanın altındaki *AB turu* bölümünde, ölçümler
 ### AC turu — kullanıcının altı satırı — **BİTTİ ✅** (2026-08-30)
 
 Tur bir **düzeltme turu**ydu: altı madde de çalışma ağacındaki bitmemiş turun
-üstüne geldi. Ölçümlerin hepsi [STATUS.md](STATUS.md) → *Otuz altıncı oturum*.
+üstüne geldi. Ölçümlerin hepsi [WORKLOG.md](WORKLOG.md) → *Otuz altıncı oturum*.
 
 - [x] **AC1 Ekleme bloğu kısaldı, simetri kalarak.** Kullanıcı kararı: yalnız
       kutu. `18.5rem → 13rem`, açıklama rayı `5.5 → 3.25rem`. Ölçüldü:
@@ -1297,7 +1297,7 @@ Tur bir **düzeltme turu**ydu: altı madde de çalışma ağacındaki bitmemiş 
 > yapılmıştı. Tauri WebView2'ye profil olarak `%LOCALAPPDATA%\<identifier>`
 > veriyor, yani o dize bir ad değil **adres** — babanın bütün planlarının
 > durduğu yol. Ölçüldü, geri alındı, `src/surum.test.ts` çiviledi
-> (bkz. [STATUS.md](STATUS.md) → *Otuz üçüncü oturum*, ve tuzak 95).
+> (bkz. [WORKLOG.md](WORKLOG.md) → *Otuz üçüncü oturum*, ve tuzak 95).
 >
 > - [ ] **`npm run yayinla -- 2.0.1`.** Kod hazır ve `npm run kontrol` yeşil
 >       olmalı. Bu sürümün taşıdığı şeyler: doğru kimlik, şeridin
@@ -1315,7 +1315,7 @@ Tur bir **düzeltme turu**ydu: altı madde de çalışma ağacındaki bitmemiş 
 > içinde kayıyor, hatalar en üstte, sınıfın kendi günlük sınırı (**şema v11**),
 > kısaltma varsayılanı sütun başlığı. `npm run kontrol` yeşil —
 > 698 birim · 490 E2E · 22 site · 7 çözücü. Ayrıntı aşağıda, ölçümler
-> [STATUS.md](STATUS.md) → *Otuz dördüncü* ve *Otuz beşinci oturum*.
+> [WORKLOG.md](WORKLOG.md) → *Otuz dördüncü* ve *Otuz beşinci oturum*.
 >
 > **Kayma turu BİTTİ (2026-08-29).** *"Alt bardaki seçenekler arasında
 > geçerken bazen kayıyor"* — iki bağımsız sebep, ikisi de ölçüldü, ikisi de
@@ -1408,7 +1408,7 @@ Tur bir **düzeltme turu**ydu: altı madde de çalışma ağacındaki bitmemiş 
 ### AA turu — beş satır — **BİTTİ ✅** (2026-08-29)
 
 Kullanıcının yazdığı beş satır. **Şema v10 → v11'e çıktı.** Ayrıntı ve
-ölçülen her sayı [STATUS.md](STATUS.md) → *Otuz dördüncü oturum*.
+ölçülen her sayı [WORKLOG.md](WORKLOG.md) → *Otuz dördüncü oturum*.
 
 > Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın. → AA1
 > Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir ama en fazla tam ekranın uzunluğu kadar olsun ondan fazla uzun olmasın eğer liste çok uzunsa işte kaydırma o özetin içinde olsun. → AA2
@@ -1478,7 +1478,7 @@ aynıydı ve sayfa üç ekran sürüyordu, liste tabloları panellerinin yarıs�
 kaplıyordu, ve sağdaki blok her ekranda başka bir x'te başlıyordu.
 
 **Adım 1 hiç ürün kodu yazmadı: ölçtü.** İki sayı bu turun bütün düzen
-kararlarını belirledi ve ikisi de [STATUS.md](STATUS.md)'de duruyor.
+kararlarını belirledi ve ikisi de [WORKLOG.md](WORKLOG.md)'de duruyor.
 
 - [x] **Y1 Sekme adları.** `Kurulum → Okul` (ilke 1 "kurulum yok" diyor ve ilk
       sekmenin adı Kurulum'du; üstelik artık branşları da tutuyor),
@@ -1684,7 +1684,7 @@ Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
       döndürüyor. İngilizce ekranın gövdesi tarandı ve Almanca ekran
       görüntülerine **bakıldı**; on dört yerde Türkçe duruyordu, ikisi gerçek
       kusurdu (listelerde çoğul yoktu; kısaltma ipucu yanlış varsayılanı
-      okuyordu). Ayrıntı [STATUS.md](STATUS.md) → *Otuz ikinci oturum*.
+      okuyordu). Ayrıntı [WORKLOG.md](WORKLOG.md) → *Otuz ikinci oturum*.
 - [x] **D6 DE · ES · FR — BİTTİ (2026-08-29).** Aynı 814 anahtar, dört sözlük.
       `systemDil()`'in geri düşme dili Türkçeden **İngilizceye** çevrildi.
       Sözlüğün beş denetçisi de **mutasyonla** sınandı (ölü anahtar · yuva
@@ -1702,7 +1702,7 @@ Kullanıcının kalan iki maddesinden birincisi. Karar: **altyapı + TR + EN
 
 ### W turu — yedi madde — **BİTTİ ✅** (2026-08-27)
 
-Kullanıcının TASKS'in en altına yazdığı yedi satır. **Şema DEĞİŞMEDİ** (v8
+Kullanıcının TODO'nun en altına yazdığı yedi satır. **Şema DEĞİŞMEDİ** (v8
 kaldı) ve **hiçbir depolama anahtarı açılmadı** — yedi maddenin hiçbiri
 program verisine dokunmadı.
 
@@ -1933,9 +1933,9 @@ Dört karar soruldu ve cevaplandı: hareket **üç basamak** · koyulaştırma
 
 ### V turu — dokuz madde — **BİTTİ ✅** (2026-08-27)
 
-Kullanıcının TASKS'in en altına yazdığı dokuz satır. **Şema v7 → v8'e çıktı.**
+Kullanıcının TODO'nun en altına yazdığı dokuz satır. **Şema v7 → v8'e çıktı.**
 
-- [x] **V0 `v1.3.0` yayınlandı.** TASKS "tek kalan adım push" diyordu ve
+- [x] **V0 `v1.3.0` yayınlandı.** TODO "tek kalan adım push" diyordu ve
       yanlıştı: `main` çoktan itilmişti, gitmeyen şey **etiketti**. Sebep
       `yayinla.mjs` içinde bir kusurdu — bir `replace` çağrısının hiçbir şeyi
       değiştirmemesini "satır bulunamadı" diye okuyordu, ki bu tam da o
@@ -1982,7 +1982,7 @@ Kullanıcının TASKS'in en altına yazdığı dokuz satır. **Şema v7 → v8'e
 > **Z turu bitti (2026-08-27): ders dağılımı, açık tema, örnek verinin yeri,
 > branşlarda sıralama.** Kullanıcının dört maddesinin dördü de yapıldı ve
 > **şema v6 → v7'ye çıktı** — `Lesson.blockSize` yerine `Lesson.pairs`.
-> Ayrıntı ve **ölçülen her sayı** [STATUS.md](STATUS.md) → *Yirmi altıncı
+> Ayrıntı ve **ölçülen her sayı** [WORKLOG.md](WORKLOG.md) → *Yirmi altıncı
 > oturum*.
 >
 > - [x] **Ders dağılımı.** Haftalık saat girilir, sonra `1+1+1` / `2+1` gibi
@@ -2015,10 +2015,10 @@ Kullanıcının TASKS'in en altına yazdığı dokuz satır. **Şema v7 → v8'e
 
 > **B turu bitti (2026-08-26).** Beş maddenin beşi de yapıldı, artı kalan
 > tasklardan **4f**. Dal: `v1.1-kurulum`. Ayrıntı ve **ölçülen her sayı**
-> [STATUS.md](STATUS.md) → *Yirmi ikinci oturum*.
+> [WORKLOG.md](WORKLOG.md) → *Yirmi ikinci oturum*.
 
 > **G turu bitti (2026-08-27): kalan üçlü + `.exe`.** Ayrıntı
-> [STATUS.md](STATUS.md) → *Yirmi üçüncü oturum*.
+> [WORKLOG.md](WORKLOG.md) → *Yirmi üçüncü oturum*.
 >
 > Kalan üç kod maddesinin üçü de kapandı: **fontun ağırlık ekseni**
 > (asıl engel eksen değil reçetenin yokluğuydu — `npm run font` yazıldı,
@@ -2242,7 +2242,7 @@ güvenli bağlam değildir" dedim, Chromium'da değil — orada da güvenli bağ
 `showDirectoryPicker` da var. Eksik olan bir **köken** (OPFS `SecurityError`,
 service worker `TypeError`, `origin` makinedeki her yerel sayfayla ortak).
 Yerel sunucu klasör özelliğinin tek evi değil, **daha iyi** evi. Ayrıntı:
-[STATUS.md](STATUS.md) → *Turun gerekçesini düzeltmek zorunda kaldım*.
+[WORKLOG.md](WORKLOG.md) → *Turun gerekçesini düzeltmek zorunda kaldım*.
 
 - [x] **B1 Yerel sunucu.** `scripts/sunucu.mjs` (Node) + `kurulum/sunucu.ps1`
       (Windows ikizi, babanın makinesinde **asıl koşacak** olan — Node
@@ -2557,13 +2557,13 @@ adlandırılacak** (kullanıcı yapacak).
 - [x] **4a Çözücü kurallar sıkılaşınca çökmüyor.** Turun önüne alındı: babanız
       kural kutularına bir sayı girdiği gün otomatik dizme çalışmaz hâle
       geliyordu. 3/359 blok → **241/359, 241 düğüm, 43 ms**. Ayrıntı:
-      [STATUS.md](STATUS.md) → *Sekizinci oturum*
+      [WORKLOG.md](WORKLOG.md) → *Sekizinci oturum*
 - [x] **4b Plan kitaplığı** — yapıldı. `src/library.ts` (yaprak modül: `State`'i
       bilmez, ham string alıp verir). **Devralma tek bayt kopyalamıyor**:
       `planKey('1') === 'ders-programi'`, yani mevcut program yerinde kalıyor ve
       `ders-programi` okuyan yedek zinciri + E2E yardımcıları değişmedi.
       Üst çubukta seçici, Ayarlar → Veri'de yönetim, geçişte geri-al sıfırlanıyor.
-      Ayrıntı: [STATUS.md](STATUS.md) → *Dokuzuncu oturum*
+      Ayrıntı: [WORKLOG.md](WORKLOG.md) → *Dokuzuncu oturum*
 - [x] **4c Taslaklar** — yapıldı. Taslak = `PlanInfo.draft` bayrağı, ayrı varlık
       değil. "Taslak olarak kaydet" yerleşimleri atarak kopyalıyor; yeni plan
       üç yoldan açılıyor (Boş · Bu planın kopyası · Taslaktan); Kurulum'un boş
@@ -2575,7 +2575,7 @@ adlandırılacak** (kullanıcı yapacak).
       (v1–v5) aynen okunuyor; üst çubuğa paket verilirse **reddedilip yol
       gösteriliyor** — bir paketi açmak bütün kitaplığın yerine geçmek demek.
       Yeni depolama anahtarı yok, şema değişmedi. Ayrıntı:
-      [STATUS.md](STATUS.md) → *Onuncu oturum*
+      [WORKLOG.md](WORKLOG.md) → *Onuncu oturum*
 - [x] **4e Site derlemesi + PWA** — yapıldı. `npm run build:site` →
       `dist-site/` (364 KB: tek dosya + manifest + `sw.js` + simgeler).
       `dist/index.html`'e tek bayt dokunulmadı ve **dokunulamaz**:
@@ -2585,7 +2585,7 @@ adlandırılacak** (kullanıcı yapacak).
       `transformIndexHtml` eklentisiyle ekleniyor. Ölçülen: fiş çekilince site
       yine açılıyor, çevrimdışı girilen veri yeniden yüklemeden sonra duruyor;
       SW kaydı silinince aynı yükleme `ERR_INTERNET_DISCONNECTED` ile düşüyor
-      (yani test boş değil). Ayrıntı: [STATUS.md](STATUS.md) → *On birinci oturum*
+      (yani test boş değil). Ayrıntı: [WORKLOG.md](WORKLOG.md) → *On birinci oturum*
 - [x] **4f GitHub Pages yayını — YAPILDI (2026-08-26).**
       `.github/workflows/site.yml`: `npm ci` → `build:site` →
       `upload-pages-artifact` → `deploy-pages`. Ayrı bir tip adımı yok
@@ -2821,13 +2821,13 @@ yeniden açmayı seçti.** Karar `CLAUDE.md` → *"Tasarım dili yeniden AÇILDI
 - [x] **Budama bitti — 7 → 3, kalan ~2.249 tok/oturum.** Kalanlar:
       `example-skills` (12 skill) · `document-skills` (4 skill) ·
       `typescript-lsp` (~0 tok). Kaldırılanlar ve gerekçeleri
-      [STATUS.md](STATUS.md) → *On beşinci oturum*; hepsi `claude plugin
+      [WORKLOG.md](WORKLOG.md) → *On beşinci oturum*; hepsi `claude plugin
       details`in verdiği **ölçülen** maliyetle karara bağlandı,
       `discernment-nudge` ise skill dosyası okunarak (kendi "when not to"
       listesi bu projeyi dışlıyor + kapanış satırı İngilizce sabit)
 
 - [x] **B turu — yeniden tasarım. YAPILDI (2026-08-25).** Ayrıntı:
-      [STATUS.md](STATUS.md) → *On altıncı oturum*. Kullanıcının dört kararı:
+      [WORKLOG.md](WORKLOG.md) → *On altıncı oturum*. Kullanıcının dört kararı:
       kapsam **C** (düzen de değişti), yazı tipi **IBM Plex Sans**, ölçek
       varsayılanı %100 kaldı / tavan **%150**, UX maddelerinden yalnız **renk
       seçici**. Yapılanlar: üç düzlem token seti · gömülü değişken font ·
@@ -2872,15 +2872,15 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       **bedava yeşil**di; ölçüldü ve üç iddiadaki yalan sayı düzeltildi
       (`visibleRows 9→18`, `scrollLeft 1200` → sona kaydırma + `room > 200`).
       Hiçbir test silinmedi: 1920×1080'de 6 satır hâlâ katlanın altında.
-      `STATUS.md`/`TASKS.md`'deki tarihsel rakamlara dokunulmadı.
-      Ayrıntı: [STATUS.md](STATUS.md) → *On ikinci oturum*
+      `STATUS.md`/`TASKS.md`'deki (bugün `WORKLOG.md` ve `TODO.md`) tarihsel rakamlara dokunulmadı.
+      Ayrıntı: [WORKLOG.md](WORKLOG.md) → *On ikinci oturum*
 - [x] **Y0 Yüzey ve çizgi ayrımı.** Yeni token seti + `--hairline` / `--line`
       ayrımı: kabuk çizgisi 10 kuralda kıl çizgiye indi, veri çizgisi 5 yerde
       kaldı, `table.list/stat`'ın `th`+`td` ortak kuralı ikiye bölündü. Girdiler
       kenarlık yerine **gömük yüzey** (`--paper-sunk`). `.panel.inset`
       kenarlıksız. Gövde `--fs-base`, ızgara `--lh-tight`.
       **Verilen setten üç sapma** (korunan `--shadow`, koyu/baskı bloklarına iki
-      token, `--muted` AA düzeltmesi) — gerekçeleri STATUS'te
+      token, `--muted` AA düzeltmesi) — gerekçeleri WORKLOG'da
 - [x] **A1 Tipografi merdiveni.** 44 ham px `font-size` → **0** (kalan tek px
       merdivenin çapası, `:root`). `--space-*`/`--cell-*`/`--rail-w` rem'e,
       radius 19 bildirimden 2 değere (`3/6px` — CLAUDE.md'nin yazdığı değerler;
@@ -2889,7 +2889,7 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       Izgara `--ui-scale`'e bağlandı (A5 silindiği için ikinci eksen yok);
       **baskı bağlanmadı** — kâğıt kendi merdivenini aldı (`--fs-p-*`, pt).
       Ölçülen: ızgara %100'de 2616 px, yani rem'e geçiş **piksel kaymasi
-      üretmedi**. Ayrıntı: [STATUS.md](STATUS.md) → *On üçüncü oturum*
+      üretmedi**. Ayrıntı: [WORKLOG.md](WORKLOG.md) → *On üçüncü oturum*
 - [x] **A2 `ch` birimi + inline genişliklerin kaldırılması.** 29 tane
       `style={{ width: N }}` → **0**, ve CSS'teki son iki ham px genişlik
       (`.num` 70, `.text-sm` 90) de `ch`'ye geçti. Altı basamaklı **sütun
@@ -2900,7 +2900,7 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       `e2e/sutun.spec.ts`: kaynakta inline genişlik kalmadığı, altı basamağın da
       ölçekle **tam 1.25** büyüdüğü ve dokuz ekranda hiçbir metnin kırpılmadığı.
       Eski px değerleri geri konup **kırmızıya döndürüldü** (6 test).
-      Ayrıntı: [STATUS.md](STATUS.md) → *On dördüncü oturum*
+      Ayrıntı: [WORKLOG.md](WORKLOG.md) → *On dördüncü oturum*
 - [x] **A5 GERİ GELDİ + A2b birlikte yapıldı** (kullanıcı kararı: "önce A5'i
       geri getir"). Ayarlar → Görünüm'e ikinci bir ayar: **Rahat / Sığdır**.
       Sığdır tam olarak **bir** şeyi düşürüyor ve hangisi olduğu **ölçülerek**
@@ -2943,7 +2943,7 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
       boyut; ölçüldü (%100 ve %125'te punto birebir eşit, PDF 3 ↔ 3 sayfa)
 - [x] **A5 ızgara anlamsal zoom** — bir kez silinip **geri getirildi**
       (2026-08-25). Yukarıdaki maddede yapıldı. Numara aynı kaldı çünkü aynı
-      özellik: STATUS ve commit mesajlarındaki "A5 silindi" atıfları o günün
+      özellik: STATUS (bugün WORKLOG) ve commit mesajlarındaki "A5 silindi" atıfları o günün
       kaydı olarak duruyor, yanıltıcı değil.
 
 
@@ -2954,7 +2954,7 @@ Sayı 22 değil **24**: A1'de `12-ayarlar-gorunum` sahnesi eklendi.
 #### 0. Belgeler ✅
 
 - [x] `Claude.md` (yanlışlıkla konmuş boş Access veritabanı) silindi
-- [x] `CLAUDE.md` · `docs/STATUS.md` · `docs/TASKS.md`
+- [x] `CLAUDE.md` · `docs/STATUS.md` · `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
 - [x] `docs/PLAN.md` kararlara göre güncellendi; tuzak 11–13 eklendi
 
 #### 1. İskele ✅
@@ -3121,7 +3121,7 @@ sağlamdı; kusurların hepsi görünüş ve kullanım tarafındaydı. Dal:
       ayrımı hesaplanarak ölçülüyor (WCAG + CIE Lab ΔE). `npm run ekran` iki temada
       beş ekran görüntüsü üretiyor
 - [x] **1m Belgeler**: `CLAUDE.md` (şema v4, arayüz, mimari, tuzak 13–15),
-      `docs/PLAN.md`, `docs/STATUS.md`, `docs/TASKS.md`
+      `docs/PLAN.md`, `docs/STATUS.md`, `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
 
 **Yapılmadı, bilerek:** kural sayılarına varsayılan konmadı (0 = sınır yok kaldı) —
 doğru cevabı okuldan okula değişir, yanlış varsayılan hücreleri sessizce kırmızıya
@@ -3164,7 +3164,7 @@ madde başına bir commit, her commit `npm run kontrol` yeşilken.
 - [x] **2k Testler**: 177 → **219 birim**, 51 → **87 E2E**. Her madde için en az bir
       gerçek-tarayıcı iddiası; renk ayrımı, ayraç genişliği ve yazı boyu **ölçülüyor**
 - [x] **2l Belgeler**: `CLAUDE.md` (altı sekme, `palette.ts`, şema v5, tuzak 16–18),
-      `docs/STATUS.md`, `docs/TASKS.md`
+      `docs/STATUS.md`, `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
 
 **Yapılmadı, bilerek:** kapalı saatteki dersleri toplu kaldıran düğme konmadı —
 kullanıcı "kaldırma, kırmızı işaretle" dedi; kararı baba veriyor (2026-08-25 kararı).
@@ -3173,7 +3173,7 @@ kullanıcı "kaldırma, kırmızı işaretle" dedi; kararı baba veriyor (2026-0
 
 #### 15. v0.9 — otomatik dizme, sol kenar çubuğu, sağ tık, tam E2E ✅ — 2026-08-25
 
-Kullanıcının TASKS sonuna yazdığı dört madde. Dal: `v0.9-otomatik-dizme`,
+Kullanıcının TODO sonuna yazdığı dört madde. Dal: `v0.9-otomatik-dizme`,
 madde başına bir commit, her commit `npm run kontrol` yeşilken.
 
 - [x] **3a E2E tek dosyadan yedi dosyaya.** `e2e/app.spec.ts` 2151 satırdı; ortak
@@ -3214,7 +3214,7 @@ madde başına bir commit, her commit `npm run kontrol` yeşilken.
       listesi. Ayrı komut (`npm run gorsel`), `kontrol`'e bağlı değil — gerekçe
       sistem fontu. Testin kendisi test edildi: 92px → 120px, 20'den 18'i kırmızı
 - [x] **3j Belgeler**: `CLAUDE.md` (tuzak 19–22, kenar çubuğu, `solver.ts`, test
-      tablosuna beşinci satır), `docs/STATUS.md`, `docs/TASKS.md`
+      tablosuna beşinci satır), `docs/STATUS.md`, `docs/TASKS.md` (bugün `docs/WORKLOG.md` ve `docs/TODO.md`)
 
 **Yapılmadı, bilerek:**
 - **Çözücüye ayar konmadı** — iki düğme, kutucuk yok. "Sabaha yay", "günleri dengele"

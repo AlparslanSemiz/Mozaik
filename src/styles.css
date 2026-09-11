@@ -3636,7 +3636,7 @@ table.stat tbody tr:hover {
      getirdik ama çok uzun olmuş kısalt", 2026-08-30) - 18.5rem to 13rem, and
      the description rail 5.5rem to 3.25rem.
 
-     What this CANNOT shorten is written down in STATUS: the two screens whose
+     What this CANNOT shorten is written down in WORKLOG: the two screens whose
      paragraph is longer than the rail (Öğretmenler, Dersler) are boxed by
      their own text and give back only the padding. The next lever there is the
      sentence, not the geometry. */
@@ -4334,7 +4334,7 @@ table.availability td {
    3.875rem = 54.25px at the default scale, asked for by name ("müsaitlik
    programlarının satırlarını uzat", 2026-08-30) and MEASURED before it was
    written: the numbers for both scales, both day counts and the clock on and
-   off are in STATUS. The comment here used to say "48px" while the rule said
+   off are in WORKLOG. The comment here used to say "48px" while the rule said
    3rem, i.e. 42px - a sentence nobody re-read after the root became 14px. It
    says the arithmetic now.
 

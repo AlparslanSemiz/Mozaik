@@ -178,7 +178,7 @@ test.describe('4. Yazdırma', () => {
 //
 // The browser's header and footer cannot be measured from here — they are
 // drawn by the print system, not by the page — so they are proved with a real
-// PDF instead (docs/STATUS.md, and scratchpad/baski-kanit.mjs). What CAN be
+// PDF instead (docs/WORKLOG.md, and scratchpad/baski-kanit.mjs). What CAN be
 // measured is what makes them impossible: an @page with no margin box, and a
 // page box that pads and centres the timetable itself.
 

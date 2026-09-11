@@ -6,7 +6,7 @@ Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı 
 > **Güncelleme (2026-08-24).** Bu belgenin çerçevesi ve ilkeleri aynen geçerli.
 > Soru turu ve babamın gerçek aSc ekranının fotoğrafı (`docs/Örnek Fotolar/Yaklaşık
 > ders planı ölçeği.png`) sonrası bölüm 2, 3, 4 ve 6 düzeltildi — düzeltmeler yerinde
-> işlendi, verilen kararların tam listesi `docs/STATUS.md` içindeki karar tablosunda.
+> işlendi, verilen kararların tam listesi `docs/WORKLOG.md` içindeki karar tablosunda.
 >
 > **Güncelleme (2026-08-26).** Bu belgedeki **tasarım** ifadeleri (yasak listesi,
 > renk, font, animasyon, karanlık mod) **bağlayıcı değildir** — hepsi kaldırıldı.
@@ -16,7 +16,7 @@ Hedef: babamın kursunda haftalık ders programını dizmek için kullanacağı 
 > **Güncelleme (2026-08-24, v0.6).** Hafta artık **6 gün (Salı–Pazar)**; aşağıdaki
 > "7 gün × 12 saat / 84 sütun" sayıları v0 tasarımının yazıldığı günden kalma. Gerekçeler
 > geçerli, sayılar değil — güncel şema ve kısıt listesi [../CLAUDE.md](../CLAUDE.md)
-> içinde, ne değiştiği [STATUS.md](STATUS.md) oturum kaydında.
+> içinde, ne değiştiği [WORKLOG.md](WORKLOG.md) oturum kaydında.
 
 Bu bir aSc klonu **değil**. Ondan daha iyi yapmak. aSc'nin yaptığı işin kursla ilgili olan %50'sini yapıp
 o %50'yi aSc'den iyi yapmak hedefi.
@@ -75,7 +75,7 @@ küçük bir yüzeyde ekstra araç.
 > `engel()`→`blocker()`, `indeksle()`→`buildIndex()`, `temizle()`→`sanitize()`,
 > `semaSurumu` 1→`schemaVersion` 2). **Gerekçeler geçerli, adlar değil** — güncel
 > adlar için [../CLAUDE.md](../CLAUDE.md), geçişin ayrıntısı için
-> [STATUS.md](STATUS.md).
+> [WORKLOG.md](WORKLOG.md).
 
 ## 2. Veri modeli
 
@@ -244,7 +244,7 @@ ve renkler hâlâ işlevini görüyor.* → **sağlandı** (renkler burada ölç
 babanın makinesinde henüz görülmedi).
 
 localhost'ta gerçek gözle ilk deneme sonrası çıktı. Ayrıntılı madde listesi
-[TASKS.md](TASKS.md) → BİTENLER 13. Şema **v3 → v4** (branş kısaltmaları).
+[TODO.md](TODO.md) → BİTENLER 13. Şema **v3 → v4** (branş kısaltmaları).
 
 - **Koyu tema + düğme.** Asıl bulgu: uygulama koyu görünüyor ama koyu teması yok —
   tarayıcı açık temalı sayfayı zorla karartıyor ve yeşil/sarı/kırmızı işlevsel renkleri

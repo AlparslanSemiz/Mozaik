@@ -1,5 +1,5 @@
 /**
- * Every release's own line — TASKS.md §2 B2.9, "babam her güncelleme
+ * Every release's own line — TODO.md §2 B2.9, "babam her güncelleme
  * alındığında neyin değiştiğini soruyor ben de pek hatırlamıyorum."
  *
  * `.github/surum-notu.md` is NOT this: the release workflow overwrites it

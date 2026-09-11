@@ -1,5 +1,5 @@
 /**
- * Every real keyboard shortcut, in one screen — TASKS.md §6 B6.5.
+ * Every real keyboard shortcut, in one screen — TODO.md §6 B6.5.
  *
  * A hand-written table, not one derived from the actual listeners: those live
  * in five separate files (App.tsx, store.ts, drag.ts, rowDrag.ts, poolSplit.ts,

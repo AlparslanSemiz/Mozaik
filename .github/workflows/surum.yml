@@ -162,7 +162,7 @@ jobs:
           Copy-Item $exe "teslim/Mozaik.exe"
 
       # WHAT IS ACTUALLY IN THE BINARY, and this step exists because a sentence
-      # in STATUS.md said it was ASSUMED. `bundle.icon` is supposed to embed
+      # in WORKLOG.md said it was ASSUMED. `bundle.icon` is supposed to embed
       # kurulum/icon.ico even under `--no-bundle`, and my father's "the taskbar
       # icon looks like 9x9 pixels" was read as evidence that it does not. It
       # does — measured on the published 2.0.0 binary: nine RT_ICON entries,

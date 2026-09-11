@@ -150,7 +150,7 @@ describe('illegalBlocks — denetçinin kendisi', () => {
 });
 
 // The same argument one floor up: `gridQuality` returning zeroes would make the
-// Deney B measurement — and every solver-quality number written into STATUS —
+// Deney B measurement — and every solver-quality number written into WORKLOG —
 // agree with whatever was hoped for. So it is shown a grid whose gaps can be
 // counted on paper before it is trusted to count a school's.
 describe('gridQuality — kalite ölçerin kendisi', () => {

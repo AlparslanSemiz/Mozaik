@@ -288,7 +288,7 @@ function Build({ update }: { update: UpdateRun }) {
 }
 
 /**
- * "Yenilikler" (2026-08-31, TASKS §2 B2.9).
+ * "Yenilikler" (2026-08-31, TODO §2 B2.9).
  *
  * A SIBLING of `Build`, not a section inside it: `Build`'s own heading
  * ('Sürüm ve güncelleme') is scoped by four E2E specs and its doc comment

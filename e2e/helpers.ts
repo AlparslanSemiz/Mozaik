@@ -25,7 +25,7 @@ export const FILE = pathToFileURL(resolve('dist/index.html')).href;
  * nothing is painted until the embedded face resolves, so a click issued right
  * after `reload()` can land before the first paint — under four parallel
  * workers that window is wide enough to lose, which is exactly the shape of
- * the "flake after a reload" recorded in STATUS for `dil` and `hareket`. It
+ * the "flake after a reload" recorded in WORKLOG for `dil` and `hareket`. It
  * got wider when the four dictionaries were embedded (+242 KB).
  *
  * It waits for `.topbar` and `.main` rather than for a tab NAME: the same
@@ -159,7 +159,7 @@ export async function revealRibbon(page: Page) {
   // this helper used to answer "no `.main` yet" by returning silently — so on a
   // page that had not finished painting, nothing was nudged, the strip stayed
   // folded, and the assertion below timed out five seconds later. That is the
-  // "flake after a reload" STATUS recorded against `revealRibbon`, and it was
+  // "flake after a reload" WORKLOG recorded against `revealRibbon`, and it was
   // never load SENSITIVITY: it was a helper with a silent no-op in it.
   await expect(page.locator('.main')).toBeVisible();
   await page.evaluate(() => {

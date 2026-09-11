@@ -2,7 +2,7 @@
 // 15-second solver budget, and the daily loop must stay fast on a slow machine.
 // Run it with `npm run cozucu`.
 //
-// What it is for: docs/STATUS.md carried an open question for months — "what
+// What it is for: docs/WORKLOG.md carried an open question for months — "what
 // does the solver do when the data is hard?" — because the sample school goes
 // through in a straight line (359 blocks, 359 nodes, no backtracking at all).
 // These worlds are the answer, and the numbers they print are meant to be read,
@@ -107,7 +107,7 @@ test.describe('39. Otomatik dizme — gerçek ölçekte stres', () => {
 
   test('çözücünün kendi sayıları — ölçüm, iddia değil', async () => {
     // Playwright's worker is Node, so the pure solver can be run here without a
-    // browser. These are the numbers that go into docs/STATUS.md.
+    // browser. These are the numbers that go into docs/WORKLOG.md.
     for (const world of HEAVY_WORLDS) {
       const r = solve(world.state, { budgetMs: APP_BUDGET_MS });
       console.log(

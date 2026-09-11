@@ -22,7 +22,7 @@ export default defineConfig({
     '**/klasor.spec.ts',
   ],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
-  // gecerli oldugu olculdu (bkz. docs/STATUS.md).
+  // gecerli oldugu olculdu (bkz. docs/WORKLOG.md).
   fullyParallel: true,
   workers: 4,
   reporter: [['list']],

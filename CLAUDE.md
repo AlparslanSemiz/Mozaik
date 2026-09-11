@@ -4,7 +4,7 @@ Babamın dershanesinde haftalık ders programını dizmek için kullanacağı ar
 aSc Timetables'ın yerini alacak. aSc'nin yaptığı işin bu kursla ilgili %50'sini
 yapıp o %50'yi aSc'den iyi yapmak hedefi.
 
-Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/STATUS.md](docs/STATUS.md) · Görevler: [docs/TASKS.md](docs/TASKS.md)
+Ayrıntılı çerçeve: [docs/PLAN.md](docs/PLAN.md) · Durum: [docs/WORKLOG.md](docs/WORKLOG.md) · Görevler: [docs/TODO.md](docs/TODO.md)
 
 **Rakip ne yapıyor:** [docs/ASC.md](docs/ASC.md) — aSc'nin 19 bölümü, hangisi
 alındı, hangisi bilerek alınmadı, hangisi sırada. Hedef %50'ye çıktığından beri
@@ -125,7 +125,7 @@ Her özellik kararında bu listeye dönülür. Listeyle çelişen özellik yazı
 > üretir). Bir özelliği artık "baba istemedi" diye reddetmiyoruz; "ilke 1–3'ü
 > bozuyor" ya da "ölçülmedi" diye reddediyoruz.
 >
-> `docs/STATUS.md` ve `docs/TASKS.md`'deki eski `(ilke 5)` atıfları **olduğu
+> `docs/STATUS.md` ve `docs/TASKS.md`'deki (bugün `docs/WORKLOG.md` ve `docs/TODO.md`) eski `(ilke 5)` atıfları **olduğu
 > gibi bırakıldı**: onlar bir günlük, o gün geçerli olan kuralla alınmış
 > kararları anlatıyorlar ve geriye dönük düzeltilirlerse kayıt yalan söyler.
 
@@ -247,7 +247,7 @@ position-anchor                var        popover konumlama
 **Bağımlılık kuralı (2026-08-26):** bir paket `dist/index.html`'e gömülebiliyor
 ve çalışma anında ağa çıkmıyorsa serbest. Sabit bir KB tavanı yok; şart
 **ölçmek** — eklendikten sonra dosya boyutu ve `file://` ilk boyama süresi
-`docs/STATUS.md`'ye yazılır. `devDependencies` zaten serbestti.
+`docs/WORKLOG.md`'ye yazılır. `devDependencies` zaten serbestti.
 
 Ölçülen maliyetler (2026-08-26, taban 405 242 bayt):
 
@@ -1666,7 +1666,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
 69. **Bir yapı ürününün REÇETESİ yoksa, içindeki her karar donar.**
     `src/fonts/IBMPlexSans-subset.woff2` aylarca 23 KB'lik bir **eser**di:
     kimse nasıl üretildiğini bilmiyordu, o yüzden ağırlık ekseninin 400–600'de
-    kırpılı olması TASKS'te *"fontTools kurulu değil"* gerekçesiyle bir madde
+    kırpılı olması TODO'da *"fontTools kurulu değil"* gerekçesiyle bir madde
     olarak duruyordu. Gerekçe doğruydu ve yeterliydi — yeniden üretilemeyen
     bir dosyada değiştirilemeyen bir karar vardır. `scripts/font.mjs`
     yazıldıktan sonra aynı iş **dört dakika** sürdü, ve yanında beklenmedik
@@ -2020,7 +2020,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
     `revealRibbon` `.main` bulamazsa `return` ediyordu; boyanmamış bir sayfada
     hiçbir şey dürtülmüyor, şerit katlı kalıyor ve iddia beş saniye sonra
     düşüyordu. Bu tam bir tur boyunca **"yük altında kararsız"** diye
-    STATUS'e yazıldı — yani bir kod kusuru bir ortam özelliği sanıldı, ve
+    WORKLOG'a yazıldı — yani bir kod kusuru bir ortam özelliği sanıldı, ve
     teşhis yanlış olduğu için kimse koda bakmadı. Bir test yardımcısı bir
     önkoşulu bulamıyorsa **fırlatır**; sessizce dönmek, ölçmediği şeyi
     ölçüyormuş gibi göstermenin en ucuz yoludur (tuzak 23'ün ailesi).
@@ -2179,7 +2179,7 @@ seviye belirler (`gapRuleActive()`, `ruleActive()`'in ayrı bir ikizi).
      harcandı. Şikayet her seferinde aynıydı (*"küçük/bulanık görünüyor"*), ve
      her seferinde plan bir sebep adlandırdı: önce "`.ico`'da boy eksik", sonra
      "eşik yanlış yerde", sonunda "`bundle.icon` `--no-bundle` ile ikonu
-     gömmüyor olabilir". Sonuncusu STATUS'e *"varsayıldı, ölçülmedi"* diye
+     gömmüyor olabilir". Sonuncusu WORKLOG'a *"varsayıldı, ölçülmedi"* diye
      yazılmıştı ve bir turun **iş listesine** dönüşmüştü: iş akışına ölçüm
      eklemek, tutmuyorsa Win32 kaynağını elle yazmak.
      Yayınlanmış ikiliye bakmak **on dakika** sürdü ve iddiayı çürüttü: dokuz
@@ -2414,7 +2414,7 @@ Radix, ikon ve animasyon kütüphaneleri bu gerekçeyle reddedilmişti. Artık:
 > çıkmıyorsa serbesttir.** `devDependencies` zaten serbestti.
 
 Tek şart **ölçmek**: paket eklendikten sonra `dist/index.html` boyutu ve
-`file://` üzerinden açılış süresi [docs/STATUS.md](docs/STATUS.md)'ye yazılır.
+`file://` üzerinden açılış süresi [docs/WORKLOG.md](docs/WORKLOG.md)'ye yazılır.
 Sabit bir KB tavanı yok — 420 KB sınırı da bir tasarım kısıtıydı ve kalktı.
 Yerine geçen soru: *babanın makinesinde açılış hâlâ hızlı mı?*
 
@@ -2923,11 +2923,11 @@ adını taşıyamaz.
 
 Bu bir istek değil, iş akışının parçası. Oturum bitmeden:
 
-1. **`docs/TASKS.md`** — biten maddeler `[x]` işaretlenir, yeni çıkan işler eklenir,
+1. **`docs/TODO.md`** — biten maddeler `[x]` işaretlenir, yeni çıkan işler eklenir,
    "ŞİMDİ SIRADA" bölümü bir sonraki oturumun ilk işini gösterecek şekilde yenilenir.
-2. **`docs/STATUS.md`** — durum tablosu, ölçülen değerler, plandan sapmalar,
+2. **`docs/WORKLOG.md`** — durum tablosu, ölçülen değerler, plandan sapmalar,
    doğrulanmayı bekleyen varsayımlar ve bilinen hatalar güncellenir. Tarih değişir.
 3. **`CLAUDE.md`** — sadece *kalıcı* bir kural, karar veya tuzak ortaya çıktıysa.
-   Günlük ilerleme buraya yazılmaz, o STATUS'ün işi.
+   Günlük ilerleme buraya yazılmaz, o WORKLOG'un işi.
 4. **Dürüstlük şartı:** test edilmemiş bir şey "bitti" işaretlenmez. Kod yazıldı ama
-   tarayıcıda doğrulanmadıysa STATUS'te bu açıkça yazar.
+   tarayıcıda doğrulanmadıysa WORKLOG'da bu açıkça yazar.

@@ -82,7 +82,7 @@ describe('systemDil', () => {
     }
   });
 
-  // The decision recorded in TASKS and taken now that all five dictionaries
+  // The decision recorded in TODO and taken now that all five dictionaries
   // are complete: a reader whose device speaks none of them is better served
   // by the one the most people have a second chance with.
   it('konuşamadığı dilde İNGİLİZCEYE düşüyor', () => {

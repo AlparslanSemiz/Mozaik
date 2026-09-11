@@ -21,7 +21,7 @@
 // PROTOTYPE, which leaves the instance cloneable.
 //
 // The native dialog itself is still tried by hand; that is written down in
-// docs/STATUS.md rather than implied here.
+// docs/WORKLOG.md rather than implied here.
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';

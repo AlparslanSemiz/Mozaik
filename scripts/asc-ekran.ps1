@@ -3,7 +3,7 @@
 # The third source next to asc-sozluk.mjs and asc-yardim.mjs: the program
 # itself. The string table says what aSc calls a thing and the help says what
 # it does, but neither shows the SHAPE of a screen -- which is the one thing
-# docs/Örnek Fotolar exists for, and the thing TASKS item AB8 is waiting on.
+# docs/Örnek Fotolar exists for, and the thing TODO item AB8 is waiting on.
 #
 # Deliberately not a UI robot. Driving a Win32 menu tree blind is a project of
 # its own and a fragile one; this does the half a script does well -- launch a

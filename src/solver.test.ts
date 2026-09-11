@@ -379,7 +379,7 @@ describe('solve — gerçek ölçek', () => {
       expect(placed).toBeLessThanOrEqual(lesson.weeklyHours);
     }
 
-    // Not an assertion, a measurement: this number goes into docs/STATUS.md.
+    // Not an assertion, a measurement: this number goes into docs/WORKLOG.md.
     console.log(
       `[ölçüm] solver: ${result.placedBlocks}/${result.totalBlocks} blok, ` +
         `${result.nodes} düğüm, ${Math.round(result.elapsedMs)} ms, faz=${result.phase}, ` +

@@ -1,4 +1,4 @@
-// Step: the teachers. Every teacher has exactly ONE subject (docs/STATUS.md);
+// Step: the teachers. Every teacher has exactly ONE subject (docs/WORKLOG.md);
 // the three limit boxes are per-teacher exceptions to the school-wide rules.
 
 import { useMemo, useState } from "react";
