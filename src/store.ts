@@ -45,6 +45,7 @@ import type {
   Teacher,
 } from './types';
 import { SCHEMA_VERSION } from './types';
+import { safely } from './storage';
 
 // The storage key lives in library.ts now: it is the key of plan "1", and which
 // key belongs to which plan is that module's job. It is still USER DATA and
@@ -558,14 +559,6 @@ export function parseState(text: string): State | null {
 }
 
 // ------------------------------------------------------------ persistence
-
-function safely<T>(job: () => T): T | null {
-  try {
-    return job();
-  } catch {
-    return null; // localStorage disabled, quota full, private tab...
-  }
-}
 
 /**
  * Can localStorage really be written to?

@@ -14,6 +14,7 @@ import { t } from './i18n';
 import { isDesktop } from './desktop';
 import { CHANGELOG_SEEN_KEY } from './changelog';
 import { PROGRAM_COLOR_KEY } from './programColor';
+import { safely } from './storage';
 import type { Id } from './types';
 
 /**
@@ -183,16 +184,7 @@ export function bundleFileName(now: Date): string {
 
 // ------------------------------------------------------------- storage layer
 //
-// Raw strings only. Same `safely` guard as store.ts: localStorage can be
-// disabled, full, or absent under file:// in a locked-down browser.
-
-function safely<T>(job: () => T): T | null {
-  try {
-    return job();
-  } catch {
-    return null;
-  }
-}
+// Raw strings only, behind the one `safely` guard (storage.ts).
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);
