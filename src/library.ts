@@ -55,6 +55,18 @@ export function planKey(id: Id): string {
   return id === FIRST_PLAN_ID ? BASE_KEY : `${BASE_KEY}-plan-${id}`;
 }
 
+/**
+ * How many session backups are kept, newest first. `store.ts` rotates the chain
+ * and the "Veriler nerede" table lists it, so the number lives here, beside the
+ * key it counts.
+ */
+export const BACKUP_COUNT = 3;
+
+/** The i-th session backup: `ders-programi-yedek-0` is the previous session. */
+export function backupKey(i: number): string {
+  return `${BASE_KEY}-yedek-${i}`;
+}
+
 export function defaultLibrary(): Library {
   return {
     activeId: FIRST_PLAN_ID,
@@ -305,11 +317,11 @@ export function storageReport(lib: Library): StorageReport {
   }));
 
   rows.push({ key: LIBRARY_KEY, what: t('plan listesi'), chars: charsAt(LIBRARY_KEY) });
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < BACKUP_COUNT; i++) {
     rows.push({
-      key: `${BASE_KEY}-yedek-${i}`,
+      key: backupKey(i),
       what: i === 0 ? t('bir önceki oturum') : t('{n} oturum önce', { n: i + 1 }),
-      chars: charsAt(`${BASE_KEY}-yedek-${i}`),
+      chars: charsAt(backupKey(i)),
     });
   }
   rows.push({

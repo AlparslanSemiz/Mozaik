@@ -7,7 +7,9 @@
 import { newId } from './entities';
 import {
   addPlan,
+  BACKUP_COUNT,
   backupFileName,
+  backupKey,
   BASE_KEY,
   bundleFileName,
   defaultLibrary,
@@ -85,6 +87,22 @@ describe('planKey', () => {
       expect(id).not.toBe(FIRST_PLAN_ID);
       expect(planKey(id)).not.toBe(BASE_KEY);
     }
+  });
+});
+
+// The backup chain is user data like the plan keys. The count is read from
+// BACKUP_COUNT rather than named, so a longer chain cannot leave this green.
+describe('backupKey', () => {
+  it('oturum yedeklerinin anahtarı tarihsel biçimde', () => {
+    expect(backupKey(0)).toBe('ders-programi-yedek-0');
+    expect(backupKey(BACKUP_COUNT - 1)).toBe(`ders-programi-yedek-${BACKUP_COUNT - 1}`);
+  });
+
+  it('"Veriler nerede" zincirin her halkasını tam bir kez listeliyor', () => {
+    const listed = storageReport(two())
+      .rows.map((r) => r.key)
+      .filter((key) => key.startsWith('ders-programi-yedek-'));
+    expect(listed).toEqual(Array.from({ length: BACKUP_COUNT }, (_, i) => backupKey(i)));
   });
 });
 

@@ -13,7 +13,9 @@ import { sanitize } from './constraints';
 import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
 import {
   addPlan,
+  BACKUP_COUNT,
   backupFileName,
+  backupKey,
   BASE_KEY,
   bundleFileName,
   dropPlanText,
@@ -51,7 +53,6 @@ import { safely } from './storage';
 // key belongs to which plan is that module's job. It is still USER DATA and
 // still Turkish — renaming it would orphan every saved timetable.
 const KEY = BASE_KEY;
-const BACKUP_COUNT = 3;
 const HISTORY_LIMIT = 30;
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
 
@@ -609,11 +610,11 @@ export function loadPlan(id: Id): State | null {
 function rotateBackups(key: string): void {
   safely(() => {
     for (let i = BACKUP_COUNT - 1; i > 0; i--) {
-      const previous = localStorage.getItem(`${KEY}-yedek-${i - 1}`);
-      if (previous !== null) localStorage.setItem(`${KEY}-yedek-${i}`, previous);
+      const previous = localStorage.getItem(backupKey(i - 1));
+      if (previous !== null) localStorage.setItem(backupKey(i), previous);
     }
     const current = localStorage.getItem(key);
-    if (current !== null) localStorage.setItem(`${KEY}-yedek-0`, current);
+    if (current !== null) localStorage.setItem(backupKey(0), current);
   });
 }
 
@@ -621,7 +622,7 @@ function rotateBackups(key: string): void {
 export function listBackups(): Array<{ index: number; state: State }> {
   const list: Array<{ index: number; state: State }> = [];
   for (let i = 0; i < BACKUP_COUNT; i++) {
-    const text = safely(() => localStorage.getItem(`${KEY}-yedek-${i}`));
+    const text = safely(() => localStorage.getItem(backupKey(i)));
     if (text == null) continue;
     const state = parseState(text);
     if (state !== null) list.push({ index: i, state });
