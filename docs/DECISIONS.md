@@ -35,6 +35,57 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-11 · Kod refactoru: makine tercihleri tek fabrikada
+
+**Değişen.** On beş makine tercihi artık `src/preference.ts`'teki tek fabrikadan
+kuruluyor: tema, dil, yazı büyüklüğü, ızgara ve arayüz yoğunluğu, havuz çekmecesi ve
+boyu, araç şeridi ve kendiliğinden gizlenmesi, müsaitlikte saat, hareket, örnek veri
+satırı, kâğıt seçenekleri, program kart rengi ve görülen sürüm notu. Anahtarları ve
+"Veriler nerede" tablosundaki adları `src/preferenceKeys.ts`'te tek listede duruyor,
+`storageReport` satırlarını oradan okuyor. Programın çağırdığı adlar (`readTheme`,
+`applyScale`, `writeDock` ve öteki) değişmedi, fabrika nesnelerinin kendi
+fonksiyonları.
+
+**Eski hâli.** Her tercih kendi try/catch'li okumasını ve yazmasını taşıyordu. Kopyalar
+bir değerin saklanmadan önce normalize edilip edilmediğinde (havuz boyu ediyordu, ölçek
+etmiyordu) ve bir boolean'ı tanıyıp tanımadığında (şeridin gizlenmesi tanıyordu,
+müsaitlik saati tanımıyordu) ayrışmıştı. Anahtar dizeleri `library.ts`'te bir kez daha
+yazılıydı, ve ikisi için `library.ts` `changelog.ts` ile `programColor.ts`'i import
+ediyordu.
+
+**Sözleşme.** Kullanıcının koyduğu değişmezler fabrikanın kendi testinde
+(`preference.test.ts`), her tercihin bugünkü davranışı da bağlamadan önce
+`preferences.test.ts`'te sabitlendi. `apply` değeri `<html>`'e depodan önce ve aynı
+çağrıda yazar, depo çalışmasa da. Kayıt yoksa yedek sorulur, `normalize`'dan geçmeden
+ve her okumada yeniden. Kayıtlı `"0"` ve `""` yokluk sayılmaz. `normalize` denetimin
+tipini de depodaki dizeyi de kabul eder ve `write` değeri ondan geçirerek saklar. Bu
+yüzden `normalizeDock`, `normalizeRibbon` ve `normalizeAvailClock` boolean da kabul
+ediyor, ve bugün onlara boolean veren bir çağıran yoktu. Hareket için makine bir taban:
+yedek makineden türetilir, ve `styles.css`'te `prefers-reduced-motion` bloğu ayarın
+kurallarından sonra durur. İkisi de testte (tuzak 58).
+
+**"Kayıt yoksa sistemden türetilir" değişmezinin sınırı.** Fabrika yedeği okuma anında
+sorar, yani bir tercih makineye bakabilir, ve hareket ile dil bakıyor. Tema bakmıyor,
+kayıt yoksa açık: işlev renkleri (yeşil bırakılabilir, sarı uyarı, kırmızı engel) açık
+zeminde seçilip ölçüldü, ve makinenin karanlık ayarı bir ihtiyaç değil bir zevk
+(`theme.ts`'teki gerekçe). Bu adım o duruşu değiştirmedi, çünkü turun kuralı davranışın
+değişmemesi. Temanın da sistemi izlemesi istenirse ayrı bir karar olur.
+
+**Ölçülen.** `dist/index.html` 1 006 799 bayttan 1 005 630 bayta indi. Playwright
+Chromium, `file://`, profil başına dokuz açılış, önce ve sonra aynı betikle
+(`scratch/olc-boya.mjs`). x1'de ilk boyama 52 ms, öznitelikler 48 ile 49 ms, içerikli
+ilk boyama 92 ile 96 ms, düzen zıplaması tek kayma ve 0,0001 ile 0,0002, ve 18
+açılışın 18'inde tercihler ilk boyamadan önce `<html>`'de, iki ölçümde de. x4'te farklar
+gürültü içinde ve iki yöne dağılıyor: ilk boyama 144 ile 164 ms, öznitelikler 208 ile
+226 ms. Aynı ölçüm fabrikadan önce var olan bir kusuru gösterdi: 4 kat yavaş işlemcide
+ilk kare tercihlerden önce boyanıyor ve karanlık temada zemin açık başlıyor (TODO §8d).
+Fabrika bu kusuru ne yarattı ne kapattı.
+
+**Kapsamın dışında kalan.** Envanterin önerdiği `useSyncExternalStore` bağlantısı
+yapılmadı: App ve bileşenler tercihleri bugünkü gibi `useState` ile tutuyor, bu adımın
+sorusu depodaki kopyalardı. `applyRibbonAuto` adında "apply" olduğu hâlde yalnız
+saklıyor, çağıranlar değişmesin diye adıyla kaldı.
+
 ### 2026-09-11 · Denendi: `buildIndex` anahtarı `parseKey` ile okusun
 
 **Denenen.** Kod refactorunun anahtar adımında elle yazılmış bütün anahtar kesmeleri

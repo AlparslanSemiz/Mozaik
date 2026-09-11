@@ -770,6 +770,16 @@ okuma, tohumsuz 720 yenilemede 0. Çare depoya dokunmamak: dil Playwright ayarla
 dokunmaz. `context.storageState()` `file://` kökenini döndürmez, bu kökende depo sayfanın
 içinden okunur. Ölçümler TESTFINDINGS'in 2026-09-11 kaydında.
 
+### 109 · Vitest bir stil sayfasını `?raw` ile de boş dize olarak verir
+Hareket tercihinin tabanı (tuzak 58) `styles.css`'teki sıraya dayanıyor ve bir birim
+testi o sırayı kaynaktan okuyacaktı. `import styles from './styles.css?raw'` de
+`import.meta.glob(..., { query: '?raw' })` de uzunluğu 0 olan bir dize verdi, çünkü
+Vitest `test.css.include`'da adı geçmeyen her CSS dosyasını boşaltıyor, ham okuma
+dahil. Test ilk koşuda kırmızıydı, ama iddiası yalnız bir `not.toMatch` olsaydı
+bedavaya yeşil geçerdi. Çare `vite.config.ts`'te `css: { include: [/src\/styles\.css/] }`
+ve testin başında okunan metnin boyunu soran bir koruma. Okunan bir kaynağı
+yargılayan her test önce okumanın boş olmadığını sorar.
+
 ---
 
 ## Ölçüm disiplini
@@ -834,11 +844,11 @@ işi.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109 |
 | Ölçüm disiplini | 42, 65, 81, 101 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi, ve yeni bir
-tuzak 109'dan devam eder.
+tuzak 110'dan devam eder.

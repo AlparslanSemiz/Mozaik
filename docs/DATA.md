@@ -132,7 +132,7 @@ bulunduğu yeri söylüyor, ve kimliği değişen bir veri silinmiş sayılır.
 
 | Kimlik | Nerede | Değişirse |
 |---|---|---|
-| `ders-programi*` localStorage anahtarları | `library.ts`, `theme.ts` ve öteki tercih modülleri | kayıtlı planlar ve tercihler programda görünmez olur |
+| `ders-programi*` localStorage anahtarları | `library.ts` (planlar), `preferenceKeys.ts` (tercihler) | kayıtlı planlar ve tercihler programda görünmez olur |
 | `ders-programi-YYYY-AA-GG-SSDD.json`, `ders-programi-tumu-…`, `ders-programi-YYYY-AA-GG.json` | `library.ts`, `folder.ts` | budama kalıbı eski günlük yedekleri tanımaz ve birikirler |
 | `Belgelerim\Ders Programı` | `lib.rs`'in `FOLDER`'ı, `desktop.ts`'in `EXE_FOLDER`'ı | exe eski yedeklerini bulamaz |
 | `com.dersprogrami.arac` | `tauri.conf.json`'ın `identifier`'ı | WebView2 profili, yani exe'nin localStorage'ı başka bir klasöre gider ve program boş açılır (tuzak 95) |
@@ -167,9 +167,10 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 
 Bu listenin tamamı Ayarlar → Hakkında'daki "Veriler nerede" tablosunda görünür, ve
-satırları `library.ts`'teki `storageReport` üretir. `e2e/planlar.spec.ts` sayfanın
-gerçekten yazdığı her `ders-programi*` anahtarını o tabloda arar. Yeni bir
-localStorage anahtarı açan `storageReport`'a satırını da yazar, çünkü tablonun işi
+satırları `library.ts`'teki `storageReport` üretir, tercihlerinkini
+`preferenceKeys.ts`'teki listeden. `e2e/planlar.spec.ts` sayfanın gerçekten yazdığı
+her `ders-programi*` anahtarını o tabloda arar. Yeni bir tercih anahtarı
+`preferenceKeys.ts`'e tablodaki adıyla birlikte girer, çünkü tablonun işi
 "hepsi burada mı" sorusunda güvenilmek: `ders-programi-baski` haftalarca eksikti,
 çünkü ancak biri bir baskı ayarına dokununca yazılıyor.
 
@@ -193,6 +194,15 @@ bir çekmece, içindeki kartlar büyümüşken görsel olarak küçülür. Ayrı
 duruyor, çünkü `ders-programi-havuz`'un anlamı "`kapali` değilse açık" ve içine bir
 sayı katmak ayrıştırıcısına ikinci bir dal sokardı. `theme.ts` bağımsız tercihleri
 bağımsız anahtarlarda tutuyor.
+
+Her tercih `preference.ts`'teki fabrikayla kurulur ve üç sözü tutar. `apply` değeri
+`<html>`'e depodan önce ve aynı çağrıda yazar, depo çalışmasa da. Kayıt yoksa ya da
+depo okunamıyorsa yedek sorulur, okuma anında ve `normalize`'dan geçmeden, ama
+kayıtlı `"0"` ya da `""` yokluk sayılmaz. `normalize` denetimin verdiği tipi de
+depodaki dizeyi de kabul eder ve `write` değeri ondan geçirerek saklar. Yedeğin
+makineye bakıp bakmaması tercihin kendi kararı: hareket ve dil bakar, tema bakmaz
+ve kayıt yoksa açıktır (`theme.ts`'teki gerekçe). Sözleşme `src/preference.test.ts`'te,
+her tercihin davranışı `src/preferences.test.ts`'te.
 
 Hareket tercihi bir makine tercihi ve makinenin kendi tercihinin gerisine geçmez:
 işletim sistemi "hareketi azalt" diyorsa seçim ne olursa olsun hareket kapalı, ve

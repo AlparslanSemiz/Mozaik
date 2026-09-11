@@ -48,7 +48,8 @@ yaprakta durur.
 | `types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
 | `keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
 | `palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
-| `i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi |
+| `i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
+| `preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
 | `names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
 | `subjects.ts` | bir şeyin hangi branştan olduğu |
 | `blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
@@ -69,7 +70,7 @@ yaprakta durur.
 | `programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `library.ts` | plan kitaplığı: anahtarlar, plan üstverisi, dosya adları, "Veriler nerede" raporu (`storageReport`) |
+| `library.ts` | plan kitaplığı: anahtarlar, plan üstverisi, dosya adları, "Veriler nerede" raporu (`storageReport`, tercih satırları `preferenceKeys.ts`'ten) |
 | `bundle.ts` | bütün planları tek dosyada taşıyan zarf |
 | `sample.ts` | babanın ölçeğine yakın örnek okul |
 
@@ -78,7 +79,8 @@ yaprakta durur.
 | Dosya | Görevi |
 |---|---|
 | `store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
-| `theme.ts` | makine tercihleri: tema, kenar, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı |
+| `preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
+| `theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
 | `toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
 | `programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
@@ -188,8 +190,9 @@ dışında duruyor:
 - kullanıcının seçtiği klasörün tutamağı (IndexedDB), çünkü başka bir makinede o yol yok
 
 Bir bilgi "pozisyon mu, tercih mi" diye sorulur: pozisyonsa `toolState.ts`'e gider
-ve yeni bir depolama anahtarı açmaz, tercihse bir localStorage anahtarı alır ve
-"Veriler nerede" tablosunda satırı yazılır ([DATA.md](DATA.md)).
+ve yeni bir depolama anahtarı açmaz, tercihse bir localStorage anahtarı alır,
+anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve tercih
+`preference.ts` fabrikasıyla kurulur ([DATA.md](DATA.md)).
 
 ### Import döngüleri nasıl önleniyor
 
@@ -198,7 +201,7 @@ ve yeni bir depolama anahtarı açmaz, tercihse bir localStorage anahtarı alır
 - **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
 - **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
 - **State bilinmez, ham metin taşınır.** `library.ts` `store.ts`'i çağırmaz ve State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `store.ts` yapar. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder.
-- **Anahtar düz yazılır.** `changelog.ts`'in `CHANGELOG_SEEN_KEY`'i ve `theme.ts`'in `INTRO_KEY`'i `BASE_KEY`'den türetilmez, düz yazılır, çünkü `library.ts`'ten import etmek bir döngü kurardı.
+- **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `library.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 
 `Commands.tsx` `App`'te değil ayrı bir dosyada, çünkü komutların yarısı
 `useInspect()` çağırıyor ve o kanca yalnız `InspectorProvider`'ın içinde çalışıyor,

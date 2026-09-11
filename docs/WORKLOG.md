@@ -36,7 +36,8 @@ alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'ni
 adımı (ESLint, knip, Prettier ve biçim commit'i) ile ikinci adımı (ölü kod ve
 kapsülleme), üçüncü adımı (`keys.ts`) ve dördüncü adımı (küçük ortak yardımcılar) bitti.
 Adım 5'ten önce E2E tabanı temizlendi: kararsız testlerin sebebi bulundu, bilinen beş kırmızının dördü test kusuruydu ve düzeltildi.
-Sıradaki adım 5: tercihler (`theme.ts` ve dört kardeşi tek bir tercih fabrikasına). [TODO.md](TODO.md)'de açık madde
+Beşinci adım da bitti: on beş makine tercihi tek bir fabrikada, anahtarları tek listede.
+Sıradaki adım 6: `library.ts`'in saf model, depolama ve "Veriler nerede" raporu olarak bölünmesi. [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
 §8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
@@ -48,6 +49,7 @@ yapılmış görünüyor.
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - 2026-09-11'deki taban temizliğinden sonra ana E2E süitinde 558 testin 557'si geçiyor. Düşen tek test `serit.spec.ts` 220 ve bir ürün kusurunu gösteriyor: %150'de Program şeridinin "İşlemler" düğmesi 80,7 px taşıyor, `516f963`'ün Renk grubundan (TODO §8d). Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
+- 4 kat yavaşlatılmış işlemcide ilk kare tercihler `<html>`'e yazılmadan boyanıyor, ve karanlık tema kayıtlıysa zemin bir kare açık başlayıp karanlığa dönüyor (18 açılışın 17'sinde, TODO §8d). x1'de olmuyor.
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
@@ -69,10 +71,10 @@ yapılmış görünüyor.
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
-| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | `library.ts`'teki `storageReport` |
-| Birim testleri | 28 dosyada 769 test, hepsi geçti, 3,3 sn | `npm test` |
-| Ana E2E koşusu | 557/558 geçti, süit 4,9 dk | `npx playwright test`, taban temizliğinden sonra, ayrım refactor girdisinde |
-| `dist/index.html` | 1 006 799 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
+| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `preferenceKeys.ts`'te, tablo `library.ts`'teki `storageReport` |
+| Birim testleri | 30 dosyada 909 test, hepsi geçti, 3,6 sn | `npm test` |
+| Ana E2E koşusu | 557/558 geçti, süit 5,0 dk | `npx playwright test`, adım 5'ten sonra, düşen `serit.spec.ts` 220 |
+| `dist/index.html` | 1 005 630 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
 | Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 34,8 ms medyan x1, 159,0 ms x4 | aynı betik, tıklamadan iki kareye |
 
@@ -333,11 +335,55 @@ Koşuldu: `npm test` (769/769), `npm run tipler`, Prettier, ana E2E süitinin ta
 Koşulmadı: devriye ve ekran görüntüleri. `locale` onların ayarlarına da girdi, ama ikisi de
 uzun ve değişen tek şey dil tohumunun yeri.
 
-**Sıradaki iş.** Faz 2, adım 5: tercihler. `theme.ts`'in on iki kopya oku, normalize et, yaz
-deseni ve dört kardeşi tek bir tercih fabrikasına, `storageReport` anahtarları oradan
-okuyacak ve `library.ts`'in tesisata uzanan iki importu kalkacak. Tercihlerin ilk
-boyamadan önce `<html>`'e yazılması (`main.tsx`) ve hareket tercihinin makinenin
-tercihinin gerisine geçmemesi (tuzak 58) korunmalı.
+**Faz 2, adım 5: tercihler.** Dört commit, ve her birinde sıra aynı: önce bugünkü
+davranışı programın çağırdığı adlar üzerinden sabitleyen test yazıldı ve yeşil koştu,
+sonra fabrikanın sözleşmesi kırmızı görüldü, sonra bağlandı, sonra mutasyonla sınandı.
+
+- `855b279`, `preference.ts`: on beş tercihin ortak şekli tek yerde. Sözleşme `preference.test.ts`'te ve kullanıcının koyduğu üç değişmez bu. `apply` değeri `<html>`'e depodan önce ve aynı çağrıda yazar, depo çalışmasa da. Kayıt yoksa yedek sorulur, `normalize`'dan geçmeden ve her okumada yeniden. Kayıtlı `"0"` ve `""` yokluk sayılmaz. `normalize` denetimin verdiği tipi de depodaki dizeyi de kabul eder, `write` ondan geçirerek saklar. Test fabrikadan önce koşuldu ve kırmızıydı, dört mutasyonun dördü kırmızı. İlk koşuda mutasyonlardan biri kaçtı, çünkü örnek tercihlerde `normalize` yokluğa yedekle aynı cevabı veriyordu, ikisini ayıran test eklendi.
+- `4add369`, `theme.ts`: tema, havuz ve boyu, şerit ve kendiliğinden gizlenmesi, ölçek, iki yoğunluk, müsaitlikte saat. `preferences.test.ts` dokuz tercihin anahtarını, sakladığı dizeyi, `<html>`'e yazdığını ve yok, bozuk, sıfır ya da okunamayan kaydın ne okunduğunu bağlamadan önce 54 testte sabitledi, sözleşme bölümü 18 testte kırmızıydı. Beş mutasyonun beşi kırmızı.
+- `3bfc91f`: dil, kâğıt seçenekleri, program kart rengi, görülen sürüm notu ve örnek veri satırı. Anahtarlar ve "Veriler nerede" tablosundaki adları yeni bir yaprakta (`preferenceKeys.ts`), `storageReport` satırlarını oradan okuyor ve `library.ts`'in `changelog.ts` ile `programColor.ts`'e uzanan iki importu kalktı. Tablonun satır sırası ve Türkçe adları `library.test.ts`'te sabitlendi. Beş mutasyonun beşi kırmızı.
+- `a383d79`, hareket, en son: yedek makineden türetiliyor ve makine her okumada yeniden soruluyor. Bölümün son testi `styles.css`'te `prefers-reduced-motion` bloğunun `[data-motion]` kurallarından sonra ve aynı seçicilerle durduğunu kaynaktan okuyor (tuzak 58). Beş mutasyonun beşi kırmızı.
+
+Davranış değişmedi, iki yerde sözleşme gereği genişledi ve ikisinin de bugün çağıranı
+yok: `normalizeDock`, `normalizeRibbon` ve `normalizeAvailClock` artık boolean da kabul
+ediyor (fabrika `write`'ta normalize ettiği için, tuzak 44), ve `applyScale` değeri
+saklamadan önce normalize ediyor. Kararın kendisi, temanın niçin sistemden
+türetilmediği ve kapsam dışı kalanlar DECISIONS'ta.
+
+İki bulgu çıktı. Biri alette: Vitest bir stil sayfasını `?raw` ile de boş dize olarak
+veriyor, yani CSS sırasını okuyan test ilk koşuda boş metne bakıyordu (tuzak 109,
+`vite.config.ts`'e yalnız `styles.css`'i kapsayan `css.include` girdi). Öteki üründe ve
+fabrikadan önce de vardı: 4 kat yavaşlatılmış işlemcide ilk kare tercihler `<html>`'e
+yazılmadan boyanıyor, ve karanlık temada zemin açık başlayıp karanlığa dönüyor (TODO
+§8d, ölçümü TESTFINDINGS'te).
+
+**Adım 5'in ölçümleri.** `scratch/olc-boya.mjs`, Playwright Chromium, `file://`,
+1920×1080, profil başına dokuz açılış, önce ve sonra.
+
+| Profil | İlk boyama | Öznitelikler yazıldı | Boyamadan önce | İçerikli ilk boyama | Düzen zıplaması |
+|---|---|---|---|---|---|
+| boş, x1 | 52 → 52 ms | 49,0 → 48,7 ms | 9/9 → 9/9 | 96 → 96 ms | 0,0002 → 0,0002 |
+| tercihli, x1 | 52 → 52 ms | 48,3 → 48,9 ms | 9/9 → 9/9 | 92 → 96 ms | 0,0001 → 0,0001 |
+| boş, x4 | 156 → 144 ms | 212,8 → 208,4 ms | 0/9 → 1/9 | 352 → 344 ms | 0,0002 → 0,0002 |
+| tercihli, x4 | 152 → 164 ms | 213,3 → 226,4 ms | 1/9 → 0/9 | 344 → 356 ms | 0,0001 → 0,0001 |
+
+x1'de fark yok. x4'teki farklar dokuz koşunun gürültüsü içinde ve iki yöne dağılıyor.
+Düzen zıplaması her profilde tek bir kayma ve değişmedi. Karanlık temalı profilde ilk
+karenin zemini x4'te önce 9'da 8, sonra 9'da 9 açık çıktı, yani parlama duruyor.
+
+**Koşuldu.** Her commit'te `npm test` (son hâli 909/909, 30 dosya), `npm run tipler`,
+`npx eslint src` (uyarılar turdan önceki aynı beş) ve Prettier. knip'in kullanılmayan
+dışa aktarımı 16'dan 4'e indi. E2E adım adım: `gorunum`, `hareket`, `renk` ve `serit`
+(84/85, düşen `serit.spec.ts` 220), sonra `dil`, `planlar`, `surum`, `yazdir`,
+`baski-secenek`, `kurulum`, `renk`, `exe` ve `temel` (222/222), sonra `hareket` ile
+`gorunum` (41/41). Kapanışta ana süitin tamamı: 558 testin 557'si geçti, 5,0 dk, düşen yine `serit.spec.ts` 220 ve o bir ürün kusuru. `dist/index.html` 1 006 799
+bayttan 1 005 630 bayta indi.
+
+**Sıradaki iş.** Faz 2, adım 6: `library.ts`. Beş iş taşıyor ve saf model, depolama ve
+"Veriler nerede" raporu olarak bölünecek. Ham string sözleşmesi korunacak (`library.ts`
+State'in ne olduğunu bilmez), tuzak 29'daki tarihsel `ders-programi` anahtarı ve tuzak
+30'daki iki dosya türünün ayrımı da. Doğrulaması `library.test.ts`, `planlar.spec.ts` ve
+`npm run test:site`.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 

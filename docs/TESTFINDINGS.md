@@ -26,6 +26,18 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-11 · npx vitest run src/preferences.test.ts · "styles.css'te makinenin bloğu ayarın kurallarından SONRA ve aynı seçicilerle duruyor"
+Bulgu: Hareket adımında yazılan test ilk koşuda, bağlamadan önce de sonra da kırmızıydı. Oysa `styles.css` değişmemişti ve aynı sözü tarayıcıda ölçen `hareket.spec.ts` "MAKİNE tercihi bir TABAN" geçiyordu. Sebep geçici bir tanı testiyle ölçüldü: Vitest'te `./styles.css?raw` de aynı dosyanın `import.meta.glob` ile ham okuması da uzunluğu 0 olan bir dize veriyor. `vite.config.ts`'e yalnız bu dosyayı kapsayan `css.include` eklenince test yeşile döndü. Makinenin bloğunu ayarın kurallarının önüne taşıyan mutasyon ve bloktan sonra bir `:root[data-motion]` kuralı ekleyen mutasyon kırmızı. Bu ayarla birim süitinin tamamı 909/909. İlk koşudaki CSS mutasyonu zaten kırmızı olan testi kırmızı bulduğu için sayılmadı.
+Tür: test kusuru (okuma aleti boş metin veriyordu)
+Ne yapıldı: düzeltildi, hareket commit'inde. Test okunan metnin boyunu da soruyor.
+Kalıcı kural: TRAPS.md, tuzak 109
+
+### 2026-09-11 · scratch/olc-boya.mjs · yavaş işlemcide ilk kare tercihlerden önce boyanıyor, karanlık temada açık zemin
+Bulgu: Adım 5'ten önceki ölçüm, Playwright Chromium, 1920×1080, `file://`, profil başına dokuz açılış. Tercihler depoya belge başında değil ayrı bir sayfadan yazıldı (tuzak 108). x1 CPU'da `main.tsx` tercihleri ilk boyamadan önce `<html>`'e yazıyor: öznitelik 48 ms, ilk boyama 52 ms, 18 açılışın 18'inde. CDP ile 4 kat yavaşlatılınca ilk boyama 152 ile 156 ms, öznitelikler 213 ms, yani 18 açılışın 17'sinde sayfa tercihler yazılmadan bir kez boyanıyor. Karanlık tema kayıtlı profilde ilk karenin `body` zemini 9 açılışın 8'inde açık (`rgb(207, 216, 228)`) ve sonra karanlık (`rgb(1, 2, 4)`). Boş profilde zemin değişmiyor. İçerikli ilk boyama x4'te 344 ms, yani görünen şey içeriksiz bir zemin karesi. Düzen zıplaması her profilde tek bir kayma, 0,0001 ile 0,0002. Ölçü aletinin bir ara hâli başlangıç betiğinde fırlatıyordu (`document.documentElement` o anda yoktu) ve o koşu sayılmadı. rAF'la alınan ilk ölçü de boyamayı değil kareyi ölçüyordu, bu yüzden `first-paint` girdisi ve özniteliğin kurulduğu an eklendi.
+Tür: ürün kusuru. `main.tsx`'in "Before the first paint, otherwise the page flashes light and then flips" sözü yavaş işlemcide tutmuyor.
+Ne yapıldı: TODO §8d maddesi, düzeltilmedi. Tercih fabrikası değeri çağrıldığı anda yazıyor, ihlal `main.tsx`'in derlenmiş dosyada ne zaman koştuğunda, ve düzeltmesi bir davranış değişikliği.
+Kalıcı kural: yok
+
 ### 2026-09-11 · npm run test:site · site.spec.ts 61 "cache adı SÜRÜMÜ taşıyor" ve 137 "YENİ SÜRÜM GELİNCE ŞERİT ÇIKIYOR"
 Bulgu: İki test ilk koşuda düştü, 20/22. Site derlemesi HEAD `8359cae` iken yapıldı, süit koşarken `ea054a1` commit'lendi. Test beklenen önbellek adını koşu anındaki HEAD'den hesaplıyor: `2.1.1-ea054a1` bekledi, sunulan `sw.js` `2.1.1-8359cae` taşıyordu. İkinci test sürümü o beklenen adı değiştirerek taklit ediyor, ad dosyada olmadığı için hiçbir şey değişmedi ve şerit çıkmadı. HEAD sabit tutularak yeniden koşuldu: 22/22.
 Tür: ne ürün ne test kusuru, süreç hatası

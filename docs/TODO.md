@@ -892,6 +892,12 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       açabilir. Başlangıç betikli 800 turda her bayat açılış 3 sn içinde düzeldi ve kalıcı kayıp
       olmadı, ama boş görünen bir oturumda yapılan değişikliğin gerçek planın üstüne yazılıp
       yazılmadığı ölçülmedi.
+- [ ] **Yavaş işlemcide ilk kare tercihlerden önce boyanıyor (2026-09-11).** `main.tsx`
+      tercihleri `<html>`'e modül betiğinin başında yazıyor. 4 kat yavaşlatılmış Chromium'da
+      ilk boyama (yaklaşık 150 ms) bu yazımdan (yaklaşık 213 ms) önce geliyor, 18 açılışın
+      17'sinde. Karanlık tema kayıtlıysa ilk kare 9 açılışın 8'inde açık zeminle boyanıp
+      karanlığa dönüyor. x1'de olmuyor. Kapatmak bir davranış değişikliği, örneğin tercihleri
+      modülden önce koşan küçük bir betikle yazmak, ve karar bekliyor. Kayıt TESTFINDINGS'te.
 - [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
       Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
       yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,
