@@ -34,8 +34,8 @@ taban ölçümleri alındı, kaynak koda dokunulmadı.
 ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
 alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'nin ilk
 adımı (ESLint, knip, Prettier ve biçim commit'i) ile ikinci adımı (ölü kod ve
-kapsülleme) bitti. Sıradaki adım `keys.ts`: anahtar ayrıştırıcıları ve on bir elle
-ayrıştırmanın onlara çevrilmesi. [TODO.md](TODO.md)'de açık madde
+kapsülleme), üçüncü adımı (`keys.ts`) ve dördüncü adımı (küçük ortak yardımcılar) bitti.
+Sıradaki adım 5: tercihler (`theme.ts` ve dört kardeşi tek bir tercih fabrikasına). [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
 §8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
@@ -283,8 +283,32 @@ tabandan beri bilinen `program.spec.ts` havuz testleri). `dist/index.html` 1 007
 (+170, yardımcı fonksiyonların gövdesi). Ana E2E'nin kalanı koşulmadı: değişiklik anahtar
 kuran ve kesen satırlarla sınırlı, o satırları kullanan ekranların spec'leri koşuldu.
 
-**Sıradaki iş.** `teacherKey` takma adının `closedKey`'e indirilmesi (knip'in tekrar eden
-dışa aktarımı), ardından adım 4: küçük ortak yardımcılar.
+`586eae6`: `teacherKey` takma adı kalktı. `closedKey`'in kendisiydi ve iki ad okuyana iki
+ayrı anahtar varmış gibi görünüyordu (kapalı saatler öğretmen, sınıf ve derslik için tek
+sözlük). Yedi dosyada 31 çağrı yeri, doğrulamalı betikle. `npm run tipler`, lint,
+`npm test` (767/767) yeşil, knip'in tekrar eden dışa aktarımı gitti, `dist/index.html`
+1 006 997 bayt.
+
+**Faz 2, adım 4: küçük ortak yardımcılar.** Beş iş, beş commit. `store.ts` ve `library.ts`
+üç işte birden geçtiği için işler sırayla yapıldı: düzenle, doğrula, commit, sonraki.
+
+- `7624639`, `storage.ts`: `store.ts` ile `library.ts`'teki birebir aynı iki `safely()` hiçbir şey import etmeyen bir yaprağa taşındı. Bu adımda `planlar.spec.ts` dört işçide 98 ve 292'yi düşürdü. İkisi tek işçide hem bu derlemede hem değişiklikten önceki HEAD'in derlemesinde 6/6 geçti, kayıt TESTFINDINGS'te.
+- `c356510`, `types.ts`: `View` tipi saf katmana indi. `constraints.ts` ile `programMask.ts` onu tesisat katmanındaki `toolState.ts`'ten alıyordu. `toolState.ts` onu yeniden dışa aktarıyor. Saf modüllerde `toolState.ts` importu (tip dahil) artık yok.
+- `d41fedc`, `library.ts`: `BACKUP_COUNT` ve `backupKey(i)` tek yerde. `store.ts` zinciri 3 ile döndürüyor, "Veriler nerede" tablosu `i < 3` ile listeliyordu. İki yeni test sayıyı sabitten okuyor, tablo döngüsü bir eksiğe çekilince kırmızıya döndü.
+- `26d8b58`, `programs.ts`: yedi `'program-1'` düz yazımı `DEFAULT_PROGRAM_ID`'ye bağlandı. İki göç de dahil. İlk düşünce göçleri düz bırakmaktı, ama göçün kurduğu program kimliğini zaten sabitten alan `blankProgram()`'dan geliyor, sabit değişirse düz yazılı açık program kimliği onunla ayrışırdı.
+- `5d4fae8`, `dateStamp.ts`: dosya adındaki yerel tarih tek yerde (`dayStamp`, `minuteStamp`). Biçim değişmedi, `library.test.ts` ile `folder.test.ts`'in dokuz biçim iddiası ve `folder.ts`'in budama kalıbı aynı adları eşliyor.
+
+Koşuldu: her commit'ten önce `npm run tipler`, `npm run lint` ve `npm test` (son hâli 769/769),
+knip (kullanılmayan dışa aktarım 16), `npm run test:site` (22/22), `planlar.spec.ts` tek
+işçiyle (21/21). `dist/index.html` 1 006 799 bayt. Ana E2E'nin kalanı koşulmadı: değişiklikler
+depo yardımcılarıyla, bir tiple ve bir sabitle sınırlı, onları kullanan ekranların
+spec'leri koşuldu.
+
+**Sıradaki iş.** Faz 2, adım 5: tercihler. `theme.ts`'in on iki kopya oku, normalize et, yaz
+deseni ve dört kardeşi tek bir tercih fabrikasına, `storageReport` anahtarları oradan
+okuyacak ve `library.ts`'in tesisata uzanan iki importu kalkacak. Tercihlerin ilk
+boyamadan önce `<html>`'e yazılması (`main.tsx`) ve hareket tercihinin makinenin
+tercihinin gerisine geçmemesi (tuzak 58) korunmalı.
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 
