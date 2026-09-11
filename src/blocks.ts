@@ -22,8 +22,6 @@ export const MAX_BLOCK = 3;
 /** The block lengths a lesson may name, biggest first. Singles are implied. */
 export const BLOCK_SIZES = [3, 2] as const;
 
-export type BlockSize = (typeof BLOCK_SIZES)[number];
-
 /**
  * The only place that decides which blocks a week can hold.
  *
