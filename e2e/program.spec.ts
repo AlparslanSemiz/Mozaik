@@ -15,6 +15,7 @@ import {
   hover,
   settledMotion,
   openGridMenu,
+  reopen,
 } from './helpers';
 
 test.describe('2. Sürükle-bırak', () => {
@@ -1890,7 +1891,7 @@ test.describe('86. Sabitleme', () => {
       })
       .toContain('pinned');
 
-    await page.reload();
+    await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid .card.pinned')).toHaveCount(1);
   });

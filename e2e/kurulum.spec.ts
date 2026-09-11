@@ -15,6 +15,8 @@ import {
   mainList,
   answerDialog,
   chooseScale,
+  savedText,
+  savedState,
 } from './helpers';
 
 test.describe('5. Kurulum ve yedek', () => {
@@ -719,7 +721,11 @@ test.describe('63. Öğretmende cinsiyet', () => {
     const first = row(page, 0).locator('select').nth(1);
     await expect(first).toHaveValue('e');
 
+    // The choice reaches storage through the 400 ms autosave, not at the
+    // click (pitfall 24): wait for the saved plan to change before reloading.
+    const previous = await savedText(page);
     await first.selectOption('k');
+    await savedState(page, previous);
     await reopen(page);
     await openSetup(page, 'Öğretmenler');
     await expect(row(page, 0).locator('select').nth(1)).toHaveValue('k');
