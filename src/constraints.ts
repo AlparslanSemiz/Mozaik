@@ -21,8 +21,7 @@ import {
   runLength,
   teacherDayCount,
 } from './rules';
-import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher } from './types';
-import type { View } from './toolState';
+import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher, View } from './types';
 
 // Re-exported so call sites keep importing keys from here.
 export { closedKey, placementKey };

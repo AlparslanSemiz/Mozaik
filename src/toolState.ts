@@ -24,11 +24,11 @@
 // Both are transient gestures, not positions.
 
 import { useState } from 'react';
-import type { Id } from './types';
+import type { Id, View } from './types';
 
 export type Tab = 'setup' | 'availability' | 'lessons' | 'program' | 'check' | 'print' | 'settings';
-/** Program: which axis the grid rows are. */
-export type View = 'teacher' | 'class';
+/** Program: which axis the grid rows are. Defined in types.ts, see there. */
+export type { View };
 /** Müsaitlik: whose closed hours are being edited. */
 export type Kind = 'teacher' | 'class' | 'room';
 /**
