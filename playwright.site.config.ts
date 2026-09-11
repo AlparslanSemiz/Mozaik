@@ -23,6 +23,9 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
+    // Turkish locators; why this is a locale and not a stored seed is in
+    // playwright.config.ts.
+    locale: 'tr-TR',
     baseURL: 'http://localhost:4173/',
     viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',

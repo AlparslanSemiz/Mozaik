@@ -23,6 +23,9 @@ export default defineConfig({
   reporter: [['list']],
   outputDir: './test-results/patrol',
   use: {
+    // Turkish locators; why this is a locale and not a stored seed is in
+    // playwright.config.ts.
+    locale: 'tr-TR',
     // HICBIR TIKLAMA SINIRSIZ BEKLEYEMEZ, ve bu ayarin varsayilani sinirsiz.
     // Modal bir <dialog> arkasindaki her sey `inert` oluyor, yani sekmeye
     // tiklamak "eylenebilir" olmayi hic beklemiyor: ilk turda bir tab tiklamasi

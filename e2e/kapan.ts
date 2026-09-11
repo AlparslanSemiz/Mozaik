@@ -53,29 +53,22 @@ export const test = base.extend<{ kapan: void }>({
       const kapan: Kapan = { beklenen: [], hatalar: [], istekler: [] };
       kapanlar.set(page, kapan);
 
-      // THE LANGUAGE, pinned before anything loads.
+      // THE LANGUAGE is pinned by `locale: 'tr-TR'` in the Playwright configs,
+      // and deliberately NOT here.
       //
-      // Every locator in this suite is a Turkish sentence, and since the
-      // language round the interface follows `navigator.language` when nothing
-      // is stored. On a machine set to English that moves roughly five hundred
-      // locators at once, and it looks like five hundred separate bugs.
+      // Every locator in this suite is a Turkish sentence, and the interface
+      // follows `navigator.language` when nothing is stored. On a machine set
+      // to English that would move roughly five hundred locators at once.
       //
-      // Here rather than in `helpers.open()` for the same reason the error trap
-      // is here: `auto: true` cannot be forgotten, and three of these spec
-      // files navigate with `page.goto('/')` against the local server without
-      // going through any helper at all.
-      //
-      // It SEEDS rather than dictates (pitfall 68): a test that deliberately
-      // chooses another language and reloads keeps its choice.
-      await page.addInitScript(() => {
-        try {
-          if (localStorage.getItem('ders-programi-dil') === null) {
-            localStorage.setItem('ders-programi-dil', 'tr');
-          }
-        } catch {
-          // A language that cannot be stored still defaults sensibly.
-        }
-      });
+      // This fixture used to seed `ders-programi-dil` from `addInitScript`,
+      // and that seed was the "flaky under load" of the suite (pitfall 108).
+      // On file://, Chromium now and then starts the NEXT document (a reload)
+      // from an old or even empty localStorage when a script touched storage
+      // at the very start of the current one, even only to read it. Measured
+      // on 2026-09-11 with the app itself and fast reloads: no init script, 0
+      // stale starts in 400; an init script that only reads, 5 in 200. Every
+      // test that wrote a preference and reloaded could read it back stale.
+      // A locale sets `navigator.language` without touching storage at all.
 
       page.on('console', (m) => {
         if (m.type() === 'error') kapan.hatalar.push(`console.error: ${m.text()}`);

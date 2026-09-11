@@ -12,6 +12,9 @@ export default defineConfig({
   timeout: 180_000,
   reporter: [['list']],
   use: {
+    // Turkish locators; why this is a locale and not a stored seed is in
+    // playwright.config.ts.
+    locale: 'tr-TR',
     viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },

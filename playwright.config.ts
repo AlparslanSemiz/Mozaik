@@ -27,6 +27,11 @@ export default defineConfig({
   workers: 4,
   reporter: [['list']],
   use: {
+    // The suite's locators are Turkish sentences, and with nothing stored the
+    // interface follows `navigator.language`. Pinned here rather than seeded
+    // into localStorage by an init script, because on file:// that seed made
+    // reloads start from a stale store (e2e/kapan.ts).
+    locale: 'tr-TR',
     // Babanin 27 inclik ekrani (1920x1080 CSS pikseli). Sigma ve yatay
     // kaydirma bu boyutta test edilmeli.
     viewport: { width: 1920, height: 1080 },
