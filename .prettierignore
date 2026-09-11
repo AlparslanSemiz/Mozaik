@@ -1,0 +1,13 @@
+dist/
+dist-site/
+dist-kurulum/
+scratch/
+src-tauri/
+test-results/
+playwright-report/
+package-lock.json
+docs/
+*.md
+site/
+kurulum/
+src/lang/
