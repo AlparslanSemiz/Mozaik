@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "Mutasyon testi. Yalniz saf cekirdek mutasyona ugrar: butun depoyu olcmek pahali ve bilesenlerin olculdugu yer E2E. Ne olctugu ve ne zaman kostugu docs/TESTPLAN.md'de.",
+  "ignorePatterns": [
+    ".venv",
+    "dist",
+    "dist-site",
+    "dist-kurulum",
+    "test-results",
+    "src-tauri",
+    "docs",
+    "scratch",
+    "e2e",
+    "site",
+    "kurulum",
+    ".playwright-mcp",
+    ".github",
+    "*.zip",
+    "*.png",
+    "*.ico"
+  ],
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vite.config.ts"
+  },
+  "coverageAnalysis": "perTest",
+  "mutate": [
+    "src/constraints.ts",
+    "src/rules.ts",
+    "src/blocks.ts",
+    "src/store.ts",
+    "src/library.ts",
+    "src/feasibility.ts",
+    "src/entities.ts"
+  ],
+  "reporters": [
+    "progress",
+    "clear-text",
+    "json"
+  ],
+  "jsonReporter": {
+    "fileName": "test-results/mutasyon/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "test-results/mutasyon/mutation.html"
+  },
+  "clearTextReporter": {
+    "maxTestsToLog": 1
+  },
+  "concurrency": 4,
+  "timeoutMS": 20000,
+  "timeoutFactor": 2.5,
+  "tempDirName": "test-results/mutasyon/tmp",
+  "cleanTempDir": true,
+  "disableTypeChecks": true,
+  "_comment_solver": "src/solver.ts bu listede YOK ve bu bir bulgu, bir tercih degil. Stryker'in enstrumantasyonu solver.ts:530-531'deki `classOnDay[g]!++` bicimini ayristiramiyor (UpdateExpression + TSNonNullExpression) ve butun kosuyu dusuruyor. Iki satir `classOnDay[g] = classOnDay[g]! + 1` olarak yazilirsa cozulur, ama o uretim kodunda bir degisiklik ve bu paketin isi degil. TODO 8f, TESTFINDINGS 2026-09-12."
+}

@@ -1,0 +1,87 @@
+{
+  "semaSurumu": 1,
+  "ayar": {
+    "gunler": [
+      "Salı",
+      "Çarşamba"
+    ],
+    "saatler": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  },
+  "derslikler": [
+    {
+      "id": "rA",
+      "ad": "A"
+    }
+  ],
+  "ogretmenler": [
+    {
+      "id": "tMC",
+      "ad": "Mehmet Çelik",
+      "kisaltma": "MÇ",
+      "brans": "Matematik",
+      "renk": 3
+    },
+    {
+      "id": "tAV",
+      "ad": "Ayşe Vural",
+      "kisaltma": "AV",
+      "brans": "Edebiyat",
+      "renk": 7
+    }
+  ],
+  "siniflar": [
+    {
+      "id": "c510",
+      "ad": "510",
+      "derslikId": "rA"
+    },
+    {
+      "id": "c511",
+      "ad": "511",
+      "derslikId": null
+    }
+  ],
+  "dersler": [
+    {
+      "id": "l1",
+      "sinifId": "c510",
+      "ogretmenId": "tMC",
+      "haftalikSaat": 5,
+      "blok": 2
+    },
+    {
+      "id": "l2",
+      "sinifId": "c510",
+      "ogretmenId": "tMC",
+      "haftalikSaat": 3,
+      "blok": 2
+    },
+    {
+      "id": "l3",
+      "sinifId": "c511",
+      "ogretmenId": "tAV",
+      "haftalikSaat": 2,
+      "blok": 1
+    }
+  ],
+  "musaitDegil": {
+    "tAV|1|0": 1,
+    "c511|0|5": 1,
+    "rA|1|5": 1
+  },
+  "yerlesim": {
+    "c510|0|0": "l1",
+    "c510|0|1": "l1",
+    "c510|1|2": "l2",
+    "c510|1|3": "l2",
+    "c510|1|4": "l2",
+    "c511|0|2": "l3"
+  }
+}

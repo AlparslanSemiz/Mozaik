@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 2,
+  "settings": {
+    "days": [
+      "Salı",
+      "Çarşamba"
+    ],
+    "hours": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  },
+  "rooms": [
+    {
+      "id": "rA",
+      "name": "A"
+    }
+  ],
+  "teachers": [
+    {
+      "id": "tMC",
+      "name": "Mehmet Çelik",
+      "short": "MÇ",
+      "subject": "Matematik",
+      "color": 3
+    },
+    {
+      "id": "tAV",
+      "name": "Ayşe Vural",
+      "short": "AV",
+      "subject": "Edebiyat",
+      "color": 7
+    }
+  ],
+  "classes": [
+    {
+      "id": "c510",
+      "name": "510",
+      "roomId": "rA"
+    },
+    {
+      "id": "c511",
+      "name": "511",
+      "roomId": null
+    }
+  ],
+  "lessons": [
+    {
+      "id": "l1",
+      "classId": "c510",
+      "teacherId": "tMC",
+      "weeklyHours": 5,
+      "blockSize": 2
+    },
+    {
+      "id": "l2",
+      "classId": "c510",
+      "teacherId": "tMC",
+      "weeklyHours": 3,
+      "blockSize": 2
+    },
+    {
+      "id": "l3",
+      "classId": "c511",
+      "teacherId": "tAV",
+      "weeklyHours": 2,
+      "blockSize": 1
+    }
+  ],
+  "unavailable": {
+    "tAV|1|0": 1,
+    "c511|0|5": 1,
+    "rA|1|5": 1
+  },
+  "placements": {
+    "c510|0|0": "l1",
+    "c510|0|1": "l1",
+    "c510|1|2": "l2",
+    "c510|1|3": "l2",
+    "c510|1|4": "l2",
+    "c511|0|2": "l3"
+  }
+}

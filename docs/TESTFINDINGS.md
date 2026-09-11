@@ -26,6 +26,59 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · npm run mutasyon · ilk tam mutasyon koşusu, saf çekirdek
+Bulgu: `a81c79a` artı bu turun test paketi, `../Mozaik-test` worktree'sinde, dört işçi, 30 dakika. 3987 mutant, 2816 öldü, 769 hayatta, 402 kapsamsız, 49 zaman aşımı. Skor (öldürülen / kapsanan) toplamda 78,5. Dosya başına: `store.ts` 63,7 · `constraints.ts` 76,6 · `feasibility.ts` 79,9 · `rules.ts` 80,9 · `entities.ts` 83,1 · `library.ts` 91,3 · `blocks.ts` 93,8. Tam tablo WORKLOG'un 2026-09-12 girdisinde.
+
+Kapsam: `solver.ts` dışarıda (araç sınırı, ayrı kayıt) ve mutantları öldürmek için yalnız birim süiti koşuyor, E2E koşmuyor. Yalnız Playwright'ın ölçtüğü bir satır burada "kapsamsız" okunur ve bu "test edilmemiş" demek değildir. Zaman aşımları öldürülmüş sayılıyor ve koşu sırasında yük ortalaması 12'ye çıktı, yani bir kısmı sahte olabilir: üst sınır 49/2816, yüzde 1,7.
+
+Hayatta kalanlar üçe ayrıldı, çünkü hepsini bir eksik saymak listeyi kullanılamaz yapar. Mekanik desen sayımı: `?.` yerine `.` 48, `??` yerine `&&` 14, `if (x === undefined)` kapısı yerine `false` 63, `StringLiteral` 86, geri kalan 558. İlk üç desen (125 mutant) ölçülmeyen davranış değil: `sanitize()` geçmiş bir durumda o dallar hiç çalışmıyor, yani ya gereksiz kod dalı ya anlamsız mutant. En yoğun yer `constraints.ts`, 37 ölü kapı.
+
+İki dosyaya ayrıca bakıldı. `store.ts`'in 163 kapsamsız mutantı neredeyse bütünüyle `useStore()` kancasında ve tarayıcı tarafında (`park`, `createPlan`, `switchPlan`, `deletePlan`, `replaceLibrary`, `download`, `rotateBackups`, `isTextInput`, `storageWorks`), yani kapsam artefaktı. 200 hayatta kalanın 130'u ayrıştırma ve göç yarısında ve hepsi tek cümleye çıkıyor: bu turda yazılan örnek dosya testi ızgarayı ve adları doğruluyor, **dersin şeklini ve ayarları doğrulamıyor**. Yaşayan mutantlar `readLessons`'ın sürüm sınırlarında (353, 360, 363, 368, 379), `readDays`'te (388, 390), zil saatlerinde (466-473), öğretmenin sınır kutularında (511-513), program zarfında (530-532, 544) ve v1/v2 göçünde (243-310).
+
+`library.ts` en yüksek skoru aldı ve yine de üç net boşluk verdi: `renamePlan`, `setDraft` ve `removePlan`'ın üçünde de `p.id === id ? … : p` koşulu `true` yapılınca hiçbir test kırmızıya dönmüyor, yani yalnız adı geçen planın değiştiği hiçbir yerde doğrulanmıyor; `parseLibrary`'nin çöp kapıları (nesne olmayan üst düzey, boş `plans`, var olmayan plana işaret eden `activeId`); ve `removePlan`'ın olmayan kimlikle çağrılması ile `uniquePlanName`'in boşluk kırpması. Bir mutant gerçekten eşdeğer: 92. satırdaki dizi mutantını bir alt satırdaki tip kapısı zaten eliyor.
+Sınıflandırmanın okuyarak yapılamayacağı da aynı koşuda ölçüldü. `constraints.ts:820`'deki `i < block.size` yerine `i <= block.size` mutantı okuyunca bariz bir gerçek boşluk gibi duruyor, çünkü `dropMap`'in doluluk haritasına bloğun bittiği hücrenin bir sonrasını da yazıyor, ve önce TODO'ya "iki gerçek boşluktan biri, ciddi" diye yazıldı. Sonra kurulabilen bir dünyada denendi (tek gün, dört saat, iki saatlik bir blok ve tek saatlik bir ders): `dropMap`'in çıktısı dört hücrenin dördünde de temiz kodla birebir aynı, ve mutasyonla birim süitinin tamamı yeşil. Yani ya eşdeğer bir mutant ya da farkı gösteren durum bulunamadı. İddia geri alındı. Bir mutantın "gerçek boşluk" olduğu okunarak değil ölçülerek söylenir, ve bu turda okuyarak verilen karar bir kez yanlış çıktı.
+Tür: bulgu değil, ölçüm. İçinden çıkan üç iş TODO §8f'de.
+Ne yapıldı: sonuçlar yazıldı, kod değiştirilmedi. Sıradaki iş paketinin girdisi bu koşu.
+Kalıcı kural: yok
+
+### 2026-09-12 · npx playwright test e2e/erisim.spec.ts · ilk erişilebilirlik taraması, on bir ekran
+Bulgu: axe-core ile ilk tarama, renk kontrastı kuralı kapalı (onu `renk.spec.ts` zaten WCAG oranı ve CIE Lab ΔE ile ölçüyor). Altı ayrı kural ihlali, hiçbiri gözle görünmüyor: `region` on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı, araç şeridi (`.ribbon`) hiçbir bölgenin içinde değil. `label` kritik seviyede, Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu; kutular tablo satırının içinde ve başlıkları sütun başlığından okunuyor, yani gören için etiketli, ekran okuyucu için etiketsiz. `label-title-only` Dersler'de 6 kutu. `empty-table-header` Program'da 6, Okul'da 2, Müsaitlik'te 2, Dersler'de 2, Ayarlar'ın iki bölümünde 1'er; çoğu bilerek boş (tutamak sütunu, ızgaranın köşesi). `heading-order` Program'da ve Çıktı'da 1'er, `h3` bir `h2` olmadan. `scrollable-region-focusable` ciddi seviyede, Program'da havuz (`.pool-list`) ve Ayarlar → Hakkında'da yan panel fareyle kaydırılıyor ama klavyeyle odaklanamıyor.
+
+İlk koşu Ayarlar'ın "Veriler" bölümünü 30 sn'de bulamayıp zaman aşımına uğradı, çünkü bölümün adı `Planlar ve yedek`. Test kusuru, düzeltildi. İkinci kusur aynı koşuda: sert `expect` ilk kırmızıda testi durduruyordu, yani on bir ekranın dördü hiç taranmamıştı. `expect.soft`'a çevrildi ve kalan yedi ekran ancak o zaman görüldü.
+
+Testin kendisi iki yönde de mutasyonla sınandı. Kontrol ekranına etiketsiz bir `<input>` konup yeniden derlenince kırmızı ("Kontrol: label 1 düğümde, listede 0"), kaldırılınca yeşil. Tabana olmayan bir kayıt (`Kontrol: label 4`) yazılınca da kırmızı ("listede 4 yazıyor ama ekranda 0"), yani düzeltilen bir ihlal listede unutulamıyor.
+Tür: ürün kusuru (altı madde), artı iki test kusuru (yanlış bölüm adı, erken duran iddia)
+Ne yapıldı: düzeltilmedi, listelendi. Altı madde TODO §8e'de, her biri bir karar bekliyor çünkü bir kısmı bilerek olabilir (boş başlık hücrelerinin çoğunun gerçekten bir başlığı yok). Test sıfır değil bir taban tutuyor ve yeni bir ihlale kırmızıya dönüyor.
+Kalıcı kural: yok
+
+### 2026-09-12 · npx vitest run src/sentences.test.tsx · satır içi anlık görüntülerin ilk yazımı
+Bulgu: Üç anlık görüntü yazıldı ve üçü de yazılmadan önce tahmin edilen değerden farklı çıktı, yani üçü de bir şey söyledi. Ret cümlelerinde saat adı `1. saatinde` değil `1 saatinde`, ve `roomClosed` "A dersliği ... kapalı" değil "510 sınıfının dersliği (A) ... kapalı" diyor. "Veriler nerede" tablosu 21 satır: bir plan, plan listesi, üç oturum yedeği ve on altı tercih anahtarı, yani WORKLOG'un "20 satır, planların kendi anahtarları hariç" sayısıyla birebir. Kontrol raporunun yerleşemeyen dersi çevrilmemiş sınır cümlesini olduğu gibi taşıyor ("MÇ art arda 1 saatten fazla girmemeli"), yani TODO §8d'deki o madde artık bir anlık görüntüde de yazılı ve düzeltilince orada da görünecek.
+
+`jsdom` ortamında baskı sayfası ilk koşuda çizilmedi: `scrollFade.ts`'in `ResizeObserver`'ı yok. `App.test.tsx`'in stubu aynen alındı, gerekçesi de aynı (eksiklik jsdom'un, ürünün değil).
+
+Üçü de mutasyonla sınandı. `preferenceKeys.ts`'ten hareket tercihi satırı çıkarılınca depo tablosu kırmızı. `teacherBusy` cümlesi "Çakışma var"a çevrilince ret cümleleri kırmızı, yani "her zaman somut" kuralı artık bir testin konusu. `Print.tsx`'te `p-title-main` sınıfı yeniden adlandırılınca kâğıt iskeleti kırmızı. Üçünde de dosya kopyadan geri yüklendi ve yeşil koşu tekrarlandı.
+Tür: bulgu değil, ölçüm. Tek ürün kusuru zaten bilinen çevrilmemiş cümle.
+Ne yapıldı: üç anlık görüntü kaydedildi. Kapsamı bilerek dar: yalnız tamlığın kendisi bir özellik olduğunda kullanılıyor.
+Kalıcı kural: yok
+
+### 2026-09-12 · npx vitest run src/invariants.test.ts · özellik bazlı testlerin ilk koşusu ve ne gördükleri
+Bulgu: On dört değişmez yazıldı, fast-check ile. İlk koşuda ikisi kırmızıydı ve ikisi de **testin** kusuruydu: yardımcı, `remapDays`'in döndürdüğü durumun anahtarlarını **eski** gün listesiyle okuyordu. `remapDays` anahtarları yeniden yazıyor ve `settings.days`'i çağıranına (`updateSettings`) bırakıyor, yani iki liste ayrı. Yardımcı gün listesini parametre olarak alacak şekilde düzeltildi, ve düzeltmenin kendisi dosyada yazılı.
+
+Testlerin ne gördüğü ölçüldü, yedi mutasyonla. Kırmızıya dönenler: `remapDays` hiç taşımazsa iki test, `vacate`'in sayacı bir fazla bırakırsa bir test, `clampBlocks` sığmayan bir bloğu tutarsa bir test, `firstFreeColor` en az yerine en çok kullanılanı verirse iki test. Hayatta kalanlar ve sebepleri: `blocker()`'daki öğretmen çakışması denetimi tamamen kaldırılınca on dördü de yeşil kaldı, çünkü `illegalBlocks` aynı fonksiyonu çağırıyor ve denetçi mutasyonla birlikte körleşiyor (tuzak 23, ve `worlds.test.ts` denetçiyi bu yüzden ayrıca sınıyor). Çözücünün iki yasallık kapısından yalnız biri bozulunca da yeşil kaldı, çünkü öteki hâlâ reddediyor; **ikisi birden** bozulunca üç değişmez kırmızıya döndü. Tek başına bir kapıyı bozan mutasyonun gerçekten etkisiz olduğu ayrıca ölçüldü: iki dersi tek öğretmene veren küçük bir dünyada temiz kodla da mutasyonla da çıktı birebir aynı.
+Tür: iki test kusuru (ilk yazımda), artı testlerin görme sınırının ölçülmesi
+Ne yapıldı: düzeltildi ve dosyaya yazıldı. Görme sınırı `invariants.test.ts`'in kendi yorumunda ve TESTPLAN'da duruyor, çünkü "çözücü kurallara uyuyor" cümlesinin neyi kanıtlamadığı o cümleyi okuyan kişinin bilmesi gereken şey.
+Kalıcı kural: yok
+
+### 2026-09-12 · npx stryker run · aracın kendisi iki kez durdu, ikisi de ölçüldü
+Bulgu: İlk koşu daha başlarken düştü: Stryker bütün projeyi bir kum havuzuna kopyalıyor (12 044 dosya) ve `.venv/lib64` bir sembolik bağ olduğu için `EISDIR` verdi. `ignorePatterns` ile `.venv`, `dist*`, `docs`, `e2e`, `src-tauri`, `scratch` ve ikili dosyalar dışarıda bırakıldı.
+
+İkinci koşu enstrümantasyonda düştü: `Property argument of UpdateExpression expected node to be of a type ["Identifier","MemberExpression"] but instead got "TSNonNullExpression"`. Kaynağı `solver.ts:530-531`'deki `classOnDay[g]!++`, yani `!` ile yazılmış bir artırma. `!` gerekli, çünkü `noUncheckedIndexedAccess` açık. Çözümü ölçüldü: iki satır `classOnDay[g] = classOnDay[g]! + 1` olarak yazılınca enstrümantasyon geçiyor, davranış birebir aynı kalıyor (`solver.test.ts`'in tamamı ve tipler temiz, `a81c79a` üstünde ölçüldü). Ama bu üretim kodunda bir değişiklik ve bir test paketinin işi değil, o yüzden **geri alındı**: `solver.ts` mutasyon listesinden çıkarıldı ve iki satırlık düzeltme TODO §8f'de bir madde oldu. Yani bugün çözücü mutasyonla ölçülmüyor, ve sebebi bir araç sınırı, kodun bir kusuru değil.
+
+Üçüncü koşu 4376 mutantın 3193'ünde takıldı ve yirmi dakika ilerlemedi: altı işçiden biri kalmıştı ve ana süreç %0,4 CPU'daydı. O sırada aynı makinede E2E ve birim süitleri koşuyordu, yük ortalaması 9,6 idi. Koşu öldürülüp `concurrency` 4'e indirildi ve makinede başka bir şey koşmadan yeniden başlatıldı. Sebep ölçülmedi, yani "yük" burada bir teşhis değil bir gözlem (tuzak 92).
+Tür: araç kusuru, artı bir süreç hatası
+Ne yapıldı: üçü de aşıldı. Yapılandırma `stryker.config.json`'da ve her satırın gerekçesi yanında. Kural: mutasyon koşarken makinede başka bir süit koşturulmuyor.
+Kalıcı kural: yok
+
 ### 2026-09-12 · scratch/olc-boya.mjs ve scratch/tani-uygulama.mjs · tema ilk boyamadan önce yazılıyor
 Bulgu: Aşağıdaki 2026-09-11 kaydının kusuru kapatıldı ve önce/sonra aynı makinede, arka planda başka bir iş koşmadan, profil başına dokuz açılışla ölçüldü. `index.html`'in `<head>`'ine `type="module"` taşımayan klasik bir betik kondu: `ders-programi-tema` okunuyor ve `data-theme` yazılıyor.
 

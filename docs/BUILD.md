@@ -22,7 +22,9 @@ Bir paket `dist/index.html`'e gömülebiliyor ve çalışma anında ağa çıkm�
 alınabilir. Sabit bir boyut tavanı yok, şart ölçmek: paket eklendikten sonra
 `dist/index.html`'in boyutu ve `file://` üzerinden açılış süresi
 [WORKLOG.md](WORKLOG.md)'ye yazılır. `devDependencies` bu kuralın dışında,
-serbest. Çalışma anında bayt indiren bir paket alınmıyor, çünkü çevrimdışı
+serbest: test araçları (`fast-check`, `@axe-core/playwright`,
+`@stryker-mutator/*`) derlemeye girmiyor, o yüzden onlar için ölçülecek bir
+boyut da yok. Çalışma anında bayt indiren bir paket alınmıyor, çünkü çevrimdışı
 ilkesini bozar.
 
 Varsayılan tercih hazır bir çözüm kullanmak ([CONVENTIONS.md](CONVENTIONS.md)).
@@ -47,6 +49,7 @@ npm run kontrol      # tipler, birim, derleme, E2E, site ve çözücü stresi bi
 npm run ekran        # iki temada ekran görüntüleri, test-results/ekran/ altına
 npm run cozucu       # gerçek ölçekli çözücü stresi
 npm run patrol       # devriye: her ekranı gezer, tohumlu rastgele gezinme
+npm run mutasyon     # Stryker: saf çekirdekte testlerin ne ölçtüğünü ölçer, yavaş
 npm run sunucu       # yerel sunucu: http://dersprogrami.localhost:7654
 npm run paket        # dist-kurulum/: babaya giden Windows klasörü
 npm run font         # src/fonts/*.woff2'yi yeniden üretir (Python ve fontTools ister)

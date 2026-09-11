@@ -25,7 +25,7 @@ duruyor, ve belgenin içine dokunulmadı.
 | `Ders.blok`, ders başına tek bir blok boyu | `Lesson.blocks`, bir liste: hangi bloğun kaç saat olduğu haftadan haftaya değil ders başına yazılıyor, ve bir blok 2 ya da 3 saat | `src/types.ts`, şema v9 ve v13 |
 | Boşluk (pencere) kuralları yok | Şema v14'te girdi: `maxGapsTeacher` ve `maxGapsClass`, yalnız Kapalı ya da Uyar | `src/types.ts`, `src/rules.ts` |
 | React dışında runtime bağımlılığı yok | Dört Radix paketi ve `lucide-react` de runtime bağımlılığı. Ölçüt değişti: gömülebiliyor ve çalışırken ağa çıkmıyorsa serbest | `package.json`, [CONVENTIONS.md](CONVENTIONS.md) |
-| Vitest yaklaşık on iki kısıt testi, bir saatlik iş | 30 dosyada 909 birim testi, artı E2E, site, çözücü stresi, Rust ve devriye katmanları | [TESTPLAN.md](TESTPLAN.md), `npm test` |
+| Vitest yaklaşık on iki kısıt testi, bir saatlik iş | Onlarca dosyada binin altında birim testi, artı E2E, site, çözücü stresi, Rust, devriye, mutasyon ve erişilebilirlik katmanları. Güncel sayı için süiti koş, sayılar belgede tutulmuyor | [TESTPLAN.md](TESTPLAN.md), `npm test` |
 | Beş sekme: Kurulum, Müsaitlik, Program, Kontrol, Yazdır | Yedi ekran: Okul, Müsaitlik, Dersler, Program, Kontrol, Çıktı ve Ayarlar. Altısı sekme şeridinde, Ayarlar ayrı | `src/App.tsx`, [LAYOUT.md](LAYOUT.md) |
 | Hafta 7 gün, ızgara 84 sütun | Varsayılan hafta altı gün (Salı'dan Pazar'a) ve 12 saat, yani 72 sütun, ve gün listesi ayarlanabilir | `src/names.ts`, `src/entities.ts` |
 | Ekran 1366×768 | Hedef makine 27 inçlik monitör, 1920×1080 CSS pikseli. 2026-08-25'te ölçülerek düzeltildi | [PRINCIPLES.md](PRINCIPLES.md) |

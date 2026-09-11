@@ -78,6 +78,208 @@ yapılmış görünüyor.
 | Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 34,8 ms medyan x1, 159,0 ms x4 | aynı betik, tıklamadan iki kareye |
 
+**İki ağaç var (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı bir
+worktree'de ve `test/strateji` dalında yürüyor, refactor işi burada. Sebep: `dist/` git
+dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağacın aynı şeyi
+derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
+durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
+birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · Test stratejisi: mutasyon, şema örnekleri, değişmezler, erişim taraması, anlık görüntüler
+
+**Ne yapıldı.** Süitin katman dağılımı iyiydi ama neredeyse tamamı örnek bazlıydı: bir
+girdi, bir beklenen çıktı. Bu depodaki en pahalı iki kusur örneklerin arasından geçen
+türdendi (tuzak 11 bütün bir programı bir gün öne kaydırmıştı, tuzak 97 yayınlanmış her
+yedeği okunamaz yapmıştı) ve ikisi de kimsenin sorduğu bir sorunun yanlış cevabı
+değildi. Beş yeni katman eklendi, her biri kendi mutasyonuyla sınandı, ve hepsinin
+satırı [TESTPLAN.md](TESTPLAN.md)'ye kadansıyla yazıldı. Ürün davranışına dokunulmadı.
+
+**Mutasyon (B1), önce ölçüldü.** Stryker kuruldu (`npm run mutasyon`) ve saf çekirdeğe
+koşuldu. Amacı kodu değil **testlerin ne ölçtüğünü** ölçmek: bir kuralı bozup hiçbir
+testin kırmızıya dönmediği yerleri saymak.
+
+**Skorun kapsamı, çünkü kapsamı yazılmayan bir skor tuzak 23'ün başka bir kılığıdır.**
+Ölçülen: `constraints.ts`, `rules.ts`, `blocks.ts`, `store.ts`, `library.ts`,
+`feasibility.ts`, `entities.ts`. Ölçülmeyen: `solver.ts` (araç sınırı, yukarıda) ve
+bileşenlerin tamamı. Mutantları öldürmek için **yalnız birim süiti** koşuyor, E2E
+koşmuyor, yani yalnız Playwright'ın ölçtüğü bir satır burada "kapsamsız" okunur, bu
+"test edilmemiş" demek değildir. Skor öldürülen / (toplam eksi kapsamsız).
+Koşu: `a81c79a` artı bu turun commit'lenmemiş test paketi, `../Mozaik-test`
+worktree'sinde, dört işçi, 30 dakika.
+
+| dosya | mutant | öldü | hayatta | kapsamsız | zaman aşımı | skor |
+|---|---|---|---|---|---|---|
+| `store.ts` | 714 | 351 | 200 | 163 | 2 | 63,7 |
+| `constraints.ts` | 1173 | 837 | 255 | 81 | 25 | 76,6 |
+| `feasibility.ts` | 346 | 270 | 68 | 8 | 3 | 79,9 |
+| `rules.ts` | 239 | 191 | 45 | 3 | 5 | 80,9 |
+| `entities.ts` | 1167 | 850 | 173 | 144 | 8 | 83,1 |
+| `library.ts` | 267 | 241 | 23 | 3 | 4 | 91,3 |
+| `blocks.ts` | 81 | 76 | 5 | 0 | 2 | 93,8 |
+| toplam | 3987 | 2816 | 769 | 402 | 49 | **78,5** |
+
+Zaman aşımları öldürülmüş sayılıyor ve koşu sırasında yük ortalaması 12'ye çıktı, yani
+bir kısmı sahte olabilir ve skoru bir miktar yukarı çeker. 2816 ölünün 49'u, yani üst
+sınır yüzde 1,7.
+
+**Hayatta kalanlar üçe ayrıldı**, çünkü hepsini bir eksik gibi saymak listeyi
+kullanılamaz yapar: araç eşdeğer mutant üretir. Desenler mekanik olarak sayıldı:
+
+| desen | sayı | ne demek |
+|---|---|---|
+| `?.` yerine `.` | 48 | geçerli bir durumda erişilemeyen savunma |
+| `??` yerine `&&` | 14 | hiç kullanılmayan yedek değer |
+| `if (x === undefined) …` yerine `false` | 63 | `sanitize()` sonrası ölü kapı |
+| `StringLiteral` | 86 | bir kısmı çevrilmemiş cümle, bir kısmı karşılaştırma |
+| geri kalan | 558 | tek tek okunacak |
+
+İlk üç desen, yani 125 mutant, **ölçülmeyen davranış değil**: `sanitize()` geçmiş bir
+durumda o dallar çalışmıyor. Bunlar ya gereksiz kod dalı (silinebilir) ya anlamsız
+mutant (davranış gerçekten değişmiyor). Hangisi olduğu dal başına bir karar ve
+`constraints.ts`'te yoğunlaşıyor (37 ölü kapı). Kalan 558'in tek tek sınıflandırılması
+yapılmadı, TODO §8f'de bir madde.
+
+Sınıflandırmanın okuyarak yapılamayacağı ölçülerek görüldü, ve bu turun kendi hatasıyla.
+`constraints.ts:820`'deki `i < block.size` yerine `i <= block.size` mutantı okuyunca
+bariz bir boşluk gibi duruyor ve önce "gerçek boşluk, ciddi" diye yazıldı. Sonra
+kurulabilen bir dünyada denendi: `dropMap`'in çıktısı dört hücrenin dördünde de temiz
+kodla birebir aynı, ve mutasyonla birim süitinin tamamı yeşil. İddia geri alındı. Bir
+mutantın hangi kategoride olduğu okunarak söylenmiyor.
+
+**`store.ts`, en düşük skor ve sebebi iki ayrı şey.** 163 kapsamsız mutantın neredeyse
+tamamı `useStore()` kancasında ve tarayıcı tarafında: `park`, `createPlan`,
+`switchPlan`, `deletePlan`, `replaceLibrary`, `download()`, `rotateBackups()`,
+`isTextInput()`, `storageWorks()`. Bunları E2E ölçüyor ve mutasyon koşucusu E2E
+koşmuyor, yani bu bir kapsam artefaktı, bir boşluk değil.
+
+200 hayatta kalanın **130'u ayrıştırma ve göç yarısında** (satır 610'un altında), ve
+nerede oldukları bu turun ikinci iş paketini doğrudan tarif ediyor. Hepsi tek bir
+cümleye çıkıyor: **örnek dosya testi ızgarayı ve adları doğruluyor, dersin şeklini ve
+ayarları doğrulamıyor.** Yaşayan mutantlar tam orada:
+
+- `readLessons`: `version >= 9` sınırı (353), v13'ün dört saatlik bloğu üçe çevirmesi (360), v7/v8'in `pairs` okuması (363), v6 ve öncesinin `blockSize` okuması (368), v8'in `second` bayrağı (379).
+- `readDays` (388 ve 390), ve gün listesi boşsa varsayılana düşme (292, 556).
+- Zil saatleri (466 ile 473 arası) ve öğretmenin kendi sınır kutuları (511 ile 513 arası).
+- Program zarfı: `program.id` ve `program.name` (530 ile 532), `activeProgramId` (544).
+- v1 ve v2 göçünün kendisi (243 ile 310 arası).
+
+Yani sıradaki adım "hangi sürümden başlanacak" değil, "hangi iddia eklenecek": her
+sürümün dosyası zaten var, eksik olan iddialar. Mutantların işaret ettiği sürümler
+v2 (gün listesi), v6 ve öncesi (`blockSize`), v7 ile v8 (`pairs`), v9 (sınırın kendisi)
+ve v12'den v13'e (dört saatlik blok).
+
+**`library.ts`, en yüksek skor ve buna rağmen üç net boşluk.** Plan anahtarları
+(`planKey`, `backupKey`) ve depo raporu iyi ölçülmüş. Ölçülmeyen üç davranış:
+`renamePlan`, `setDraft` ve `removePlan`'ın üçünde de `p.id === id ? … : p` koşulu
+`true`'ya çevrilince hiçbir test kırmızıya dönmüyor, yani **yalnız adı geçen planın
+değiştiği hiçbir yerde doğrulanmıyor** (132, 136, 148). İkincisi `parseLibrary`'nin çöp
+kapıları: nesne olmayan bir üst düzey, boş bir `plans` dizisi, var olmayan bir plana
+işaret eden `activeId` (87, 93, 100, 103). Üçüncüsü `removePlan`'ın olmayan bir kimlikle
+çağrılması (147) ve `uniquePlanName`'in boşlukları kırpması (157). Kalan beşi
+tarayıcıya bakıyor (`location.protocol`, `origin`, `pathname`) ve birim ortamında
+erişilemiyor, biri de gerçekten eşdeğer: 92. satırdaki dizi mutantını bir alt satırdaki
+tip kapısı zaten eliyor.
+
+**Şema örnekleri (B3).** Tuzak 97'nin dersi yarım uygulanmıştı: `store.test.ts` sürüm
+başına bir `describe` tutuyor ama o liste elle uzatılıyor, yani yeni bir sürüm bloğu
+yazılmadan çıkarılabilir ve süit yeşil kalır. `version === 8` tam olarak böyle unutuldu.
+Şimdi `src/fixtures/v1.json` ile `v14.json` arası on dört dosya var ve
+`src/fixtures.test.ts` sürümleri `SCHEMA_VERSION`'dan türetiyor: sabiti
+artırıp örnek dosyayı yazmamak `v15.json yok` diye kırmızıya dönüyor.
+
+Dosyalar **uydurma** ve bu betiğin başında yazılı. Gerçek yedek aranmadan uydurulmadı:
+`git log --all --diff-filter=A` ile ağaçtaki her `.json` tarandı, depoda hiç kullanıcı
+yedeği durmamış. Reçete `scripts/sema-ornek.mjs`: bugünkü şekilden başlayıp her sürümü
+bir adım geri alıyor, ve her adımın yanında o sürümün neyi değiştirdiği yazılı.
+Tarihlendirilemeyen tek alan `Lesson.maxPerDay`, hangi sürümde geldiği hiçbir kayıtta
+yok, betik bunu da söylüyor. Üç mutasyon: `version === 8` okuyucudan çıkarılınca v8
+kırmızı, `SCHEMA_VERSION` 15'e çekilince yedi test kırmızı, v12 öncesi ızgarayı
+programlara taşıyan satır boşaltılınca v3'ten v11'e dokuz test kırmızı.
+
+**Değişmezler (B2).** `src/invariants.test.ts`, fast-check ile. Ölçtükleri:
+çözücünün bıraktığı her ızgaranın denetimden geçmesi ve hiçbir dersin borcundan fazla
+yerleşmemesi, `occupy` ardından `vacate`'in sözlüğü ve indeksin üç haritasını birebir
+geri vermesi, yazıp okumanın sabit nokta olması, `remapDays`'in iki yönü, `clampBlocks`
+toplamı ve alt küme olması, `placedBlocks`'un belirlenimciliği ve ızgarayla toplam
+tutması, `firstFreeColor`'ın en az kullanılanı vermesi.
+
+Kullanıcının önerdiği yedi değişmezden biri **yanlıştı** ve ölçerken çıktı:
+"`firstFreeColor` hiçbir zaman kullanılan bir indeksi vermez" 36 rengin hepsi
+kullanıldığında tutmuyor, çünkü o zaman boş indeks yok ve cevap vermemek yeni
+öğretmeni renksiz bırakırdı. Fonksiyonun gerçekten söz verdiği şey daha zayıf ve her
+zaman doğru: en az kullanılan indeks. İkisi de ayrı testler olarak yazıldı.
+
+Testlerin ne **göremediği** de ölçüldü, ve TESTPLAN'a yazıldı. `blocker()`'ın içindeki
+bir mutasyonu göremiyorlar, çünkü denetçi (`illegalBlocks`) aynı fonksiyonu çağırıyor
+ve onunla birlikte körleşiyor (tuzak 23). Çözücünün kuraldan sapması görünüyor ama
+çözücü yasallığı iki kez denetlediği için ancak iki kapı birden bozulunca: o zaman üç
+değişmez kırmızıya dönüyor. Tek kapının gerçekten etkisiz olduğu ayrıca küçük bir
+dünyada gösterildi, temiz kodla ve mutasyonla çıktı birebir aynı çıktı.
+
+**Erişilebilirlik taraması (B4).** `e2e/erisim.spec.ts`, `@axe-core/playwright`, on bir
+ekran. Renk kontrastı kuralı kapalı, çünkü `renk.spec.ts` onu zaten WCAG oranı **ve**
+CIE Lab ΔE ile ölçüyor ve ΔE'yi genel bir tarayıcı sormaz. Altı ihlal bulundu, hiçbiri
+düzeltilmedi: bir kısmı bilerek olabilir ve karar kullanıcıda. Liste ve etkileri TODO
+§8e'de, ölçümün kendisi TESTFINDINGS'te. Test sıfır değil bir **taban** tutuyor, yani
+bugünküler yazılı ve yeni bir ihlal kırmızıya dönüyor: yazıldığı gün kırmızı olan bir
+tarama okuruna onu görmezden gelmeyi öğretir.
+
+**Anlık görüntüler (B5).** Görsel regresyon bilerek silinmişti ve geri gelmedi: silinen
+şey bir resimdi, bu metin. `src/sentences.test.tsx`, `toMatchInlineSnapshot` ile üç
+şey: `blocker()`'ın söyleyebileceği bütün ret cümleleri, "Veriler nerede" tablosunun
+her satırı, ve basılan bir A4 sayfasının kutu iskeleti. Üçü de tamlığın kendisi bir
+özellik olduğu için seçildi, yani tek bir iddianın söyleyemeyeceği şey.
+
+Üçü de yazılmadan önce tahmin edilen değerden farklı çıktı: saat adı `1. saatinde`
+değil `1 saatinde`, `roomClosed` "510 sınıfının dersliği (A) ... kapalı" diyor, tablo
+21 satır (bir plan, plan listesi, üç oturum yedeği, on altı tercih). Kontrol raporunun
+anlık görüntüsü çevrilmemiş sınır cümlesini de olduğu gibi taşıyor, yani TODO §8d'deki
+o madde artık iki yerde birden yazılı.
+
+**Süiti inceltme, yapılmadı.** 558 E2E çok mu sorusu duruyor ama cevabı refactor
+bitmeden aranmayacak, çünkü ağın kendisi refactorun güvencesi. Planı TODO §8f'de bir
+Faz 4 maddesi olarak yazıldı: önce süre, sonra en pahalı yüzde onun mutasyonu, sonra
+katmanlar arası örtüşme, ve silme ölçütü üç maddeli. Yavaş olmak tek başına silme
+gerekçesi değil.
+
+**Ağaç ayrıldı.** Bu tur boyunca aynı dizinde paralel bir refactor oturumu da
+çalışıyordu, yani iki yazar tek bir `dist/` ve tek bir `node_modules` paylaşıyordu.
+`dist/` git dışında olduğu için biri derlerken öteki test koşarsa yanlış dosya ölçülür,
+ve o gün bir ölçüm aleti zaten bu yüzden yalan söylemişti. Kullanıcı kararı: test işi
+`../Mozaik-test` içinde ayrı bir worktree'ye ve `test/strateji` dalına taşındı,
+`docs/claude-md-bolme`'den doğdu ve oraya geri akacak, ters yön yok. Dosya sahipliği
+keskin: üretim kodu refactor oturumunun, `*.test.ts` ile `e2e/` ve test
+yapılandırmaları bu tarafın, `TODO.md` `WORKLOG.md` `DECISIONS.md` `TRAPS.md` ortak ve
+yalnız ekleme yapılıyor.
+
+İki ağacın aynı şeyi derlediği **ölçülerek** doğrulandı, iddia edilmedi: `a81c79a`'da
+ikisinin `dist/index.html`'i de 1 006 323 bayt ve sha256'ları birebir aynı
+(`7c9d00de…`). Bu karşılaştırma için ana ağaçta bir kez `vite build` koşuldu, sonrası
+için oraya dokunulmadı.
+
+**Geri alınan tek üretim kodu değişikliği.** Stryker'in enstrümantasyonu
+`solver.ts:530-531`'deki `classOnDay[g]!++` biçimini ayrıştıramıyor ve bütün koşuyu
+düşürüyor. Çare ölçüldü ve çalıştı (iki satır `classOnDay[g] = classOnDay[g]! + 1`,
+davranış birebir aynı), ama bu üretim kodunda bir değişiklik ve bir test paketinin işi
+değil. Geri alındı, `solver.ts` mutasyon listesinden çıktı, ve iki satırlık düzeltme
+TODO §8f'de refactor tarafına bir madde oldu. Bir araç sınırı bir kod kusuru değildir.
+
+**Yeni devDependency'ler.** `@stryker-mutator/core` ve `@stryker-mutator/vitest-runner`
+10.0.0, `fast-check` 4.10.0, `@axe-core/playwright` 4.13.0. Dördü de yalnız test
+tarafında, `dist/index.html`'e girmiyorlar, o yüzden ölçülecek bir boyut yok
+([BUILD.md](BUILD.md)).
+
+**Koşulan ve koşulmayan testler.**
+
+- Koşuldu: `npm run tipler` (çıkış 0), `npx vitest run` (tamamı yeşil), `npx vite build` (çıkış 0, iki ağaçta da aynı sha256), `npm run mutasyon` (tam koşu, yukarıdaki tablo), `npm run knip` (yeni dosyalardan bir şey çıkmadı), `npm run lint` (yeni uyarı yok), `npx playwright test e2e/erisim.spec.ts`, ve yeni dosyaların kendi mutasyon sınamaları (on beş mutasyon, her biri geri alındı ve yeşil koşu tekrarlandı).
+- Koşulmadı: ana E2E süitinin tamamı, `npm run test:site`, `npm run cozucu`, `npm run patrol`, `npm run ekran`, `npm run exe:test`. Sebep: bu turda üretim koduna dokunulmadı, eklenen tek E2E dosyası ayrıca koşuldu, ve tam süit aynı makinede mutasyon koşusuyla yarışırdı. Dal `docs/claude-md-bolme`'ye birleşmeden önce tam süit koşulacak. Rust bu makinede kurulu değil.
+
+**Sıradaki iş.** Örnek dosya testinin iddialarını dersin şekline ve ayarlara genişletmek
+(yukarıdaki `store.ts` listesi), `library.ts`'in üç boşluğunu kapatmak, ve kalan 558
+mutantı tek tek sınıflandırmak. Üçü de TODO §8f'de.
+
 ---
 
 ## 2026-09-11 · Kod refactoru, Faz 0 ve Faz 1: envanter, taban ölçümleri, boyut atfı

@@ -12,6 +12,8 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Site, sunucu, klasör | `npm run test:site` | teslim yollarına dokunulduysa: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
+| Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
+| Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, Rust bu depoda kurulu değil |
 
@@ -35,6 +37,9 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Katman | Nerede | Kısaca ne yakalar |
 |---|---|---|
 | Birim | `src/*.test.ts` | saf mantığın doğruluğu |
+| Değişmez | `src/invariants.test.ts` | her girdide doğru kalması gereken cümleler, girdileri kütüphane üretir |
+| Şema örnekleri | `src/fixtures.test.ts`, `src/fixtures/` | her şema sürümünden bir dosyanın hâlâ açılması |
+| Cümle ve iskelet | `src/sentences.test.tsx` | bir listenin tamamı: depo tablosu, ret cümleleri, kâğıdın kutuları |
 | Duman | `src/App.test.tsx` (jsdom) | bileşenler çiziliyor mu, sekmeler çöküyor mu |
 | E2E | `e2e/*.spec.ts`, ana config, `file://` | davranış, erişilebilirlik, kâğıt, çevrimdışı |
 | Dil | `src/i18n.test.ts` ve `e2e/dil.spec.ts` | sözlüğün kendisi ve dil makinesi |
@@ -44,6 +49,8 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
 | Devriye | `e2e/patrol.spec.ts` | iddiasız gezinmede çıkan şikayetler |
+| Erişilebilirlik | `e2e/erisim.spec.ts` | eksik etiket, yanlış rol, atlanan başlık düzeyi, klavyesiz kaydırma |
+| Mutasyon | `stryker.config.json` | testlerin kendisi: hangi kural bozulunca hiçbir şey kırmızıya dönmüyor |
 | Görüntü | `e2e/ekran.spec.ts` | test değil, bakılacak kanıt |
 
 ### Birim
@@ -61,6 +68,113 @@ exe penceresi ve güncelleme adresleri (`surum.test.ts`).
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts` ve `blocks.ts`'in her dışa aktarılan fonksiyonunun testi
 var ([ARCHITECTURE.md](ARCHITECTURE.md)).
+
+### Değişmez (özellik bazlı)
+
+`src/invariants.test.ts`, fast-check ile. Örnek bazlı bir test "bu girdi bu
+çıktıyı verir" der ve bir gerekçesi olan kural için doğru biçimdir. Bir değişmez
+"girdi ne olursa olsun bu doğru kalır" der ve örneklerin arasından geçen kusur
+için doğru biçimdir. Bu depodaki en pahalı iki kusur ikinci türdendi (tuzak 11 ve
+97) ve ikisi de kimsenin sorduğu bir sorunun yanlış cevabı değildi.
+
+Ölçtükleri: çözücünün bıraktığı her ızgaranın `illegalBlocks` denetiminden
+geçmesi ve hiçbir dersin borcundan fazla yerleşmemesi, `occupy` ardından
+`vacate`'in hem sözlüğü hem indeksin üç haritasını birebir geri vermesi, bir
+durumun yazılıp okunmasının sabit nokta olması, `remapDays`'in hangi gün
+silinirse silinsin kalanı kendi gününde bırakması ve başa gün eklerken hiçbir
+şeyi kaydırmaması, `clampBlocks`'un toplamının haftayı geçmemesi ve çıktısının
+girdinin bir alt kümesi olması, `placedBlocks`'un aynı ızgarayı iki kez aynı
+okuması ve okuduğu saatlerin ızgaradaki hücre sayısına eşit olması,
+`firstFreeColor`'ın en az kullanılan indeksi vermesi.
+
+Dünyalar bilerek küçük (en çok 3 gün, 4 saat, 2 öğretmen): çözücü her üretilen
+durumda gerçekten arama yapıyor, ve 25 öğretmen gerektiren bir karşı örnek karşı
+örnek değil bir performans testidir.
+
+Ne gördüğü ölçüldü. Çözücünün yasallığını kendi denetçisiyle sormak, denetçinin
+`blocker()`'ı çağırması yüzünden `blocker()`'ın içindeki bir mutasyonu göremez
+(tuzak 23). Çözücünün kuraldan sapması görünüyor, ama çözücü yasallığı iki kez
+denetlediği için ancak ikisi birden bozulunca: tek başına biri bozulduğunda öteki
+hâlâ reddediyor.
+
+### Şema örnekleri
+
+`src/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v14.json` arası. Tuzak
+97'nin mekanik yarısı. `store.test.ts` zaten sürüm başına bir `describe` tutuyor,
+ama o liste elle uzatılıyor: yeni bir sürüm bloğu yazılmadan çıkarılabilir ve süit
+yeşil kalır, ki `version === 8` tam olarak böyle unutuldu ve yayınlanmış v2.0.0'ın
+yazdığı her yedek okunamaz oldu.
+
+Buradaki döngü sürümleri `SCHEMA_VERSION`'dan türetiyor, yani sabiti artırıp
+örnek dosyayı yazmamak adıyla kırmızıya döner. Dosyaların reçetesi
+`scripts/sema-ornek.mjs` ve dosyalar **uydurma**: depoda hiç gerçek kullanıcı
+yedeği durmadı ve git geçmişinden de çıkmadı, o yüzden her dosya o sürümün
+okuyucusu ile yazıcısının anlaştığı şekle göre yazıldı. Betiğin başı bunu ve
+tarihlendirilemeyen tek alanı yazıyor.
+
+### Cümle ve iskelet (satır içi anlık görüntü)
+
+`src/sentences.test.tsx`, `toMatchInlineSnapshot` ile. Görsel regresyon bilerek
+silinmişti ve geri gelmedi: silinen şey bir resimdi, bu metin. Bir resim farkı
+kimsenin okuyamadığı 24 PNG ve her şeyi sessizce kabul eden bir yeniden
+temellendirme demek, bir metin farkı bakıp evet ya da hayır denilen bir cümle.
+Beklenen değer ayrı bir `.snap` klasöründe değil testin içinde duruyor, yani
+değişikliği gözden geçirmekle kodu gözden geçirmek aynı iş.
+
+Yalnız **tamlığın** kendisi bir özellik olduğunda kullanılıyor, çünkü tek bir
+iddianın söyleyemeyeceği şey odur: "Veriler nerede" tablosunun her satırı (bir
+anahtar yazılıp listeye konmamışken iki kez haftalarca saklandı), `blocker()`'ın
+söyleyebileceği ret cümlelerinin hepsi bir arada (kural "her zaman somut", ve bu
+kümenin özelliği), Kontrol raporunun cümleleri, ve basılan bir A4 sayfasının
+kutu iskeleti.
+
+### Erişilebilirlik taraması
+
+`e2e/erisim.spec.ts`, `@axe-core/playwright` ile, on bir ekranda: yedi sekmenin
+altısı, Ayarlar'ın beş bölümü ve boş proje. Renk kontrastı kuralı **kapalı**,
+çünkü `renk.spec.ts` onu zaten elle ve daha iyi ölçüyor (WCAG oranı artı CIE Lab
+ΔE, ve ΔE'yi bir tarayıcı sormaz).
+
+Yakaladığı şey gözle görülmeyen: etiketi olmayan bir kontrol, elemanıyla çelişen
+bir rol, atlanan bir başlık düzeyi, klavyeyle ulaşılamayan bir kaydırma kutusu.
+Hiçbiri tek bir pikseli değiştirmiyor, yani ne ekran görüntüsü ne insan gözü
+görür.
+
+Sıfır değil bir **taban** tutuyor. İlk koşu gerçek ihlaller buldu ve bir kısmı
+bilerek olabilir; her biri okunup karar verilene kadar dosya bilineni yazıyor ve
+**yeni** olana kırmızıya dönüyor. Yazıldığı gün kırmızı olan bir tarama okuruna
+onu görmezden gelmeyi öğretir. Taban bir izin değil tarihli bir borç, ve
+maddeleri [TODO.md](TODO.md) §8e'de.
+
+### Mutasyon
+
+`npm run mutasyon` (Stryker, `stryker.config.json`). Testleri değil kodu değil,
+**testlerin ne ölçtüğünü** ölçer: kaynaktaki bir kuralı bozar ve hiçbir testin
+kırmızıya dönmediği yerleri sayar.
+
+Hayatta kalan bir mutant üç şeyden biridir ve listelenirken üçe ayrılır:
+**ölçülmeyen davranış** (bir test eksik), **gereksiz kod dalı** (kod hiçbir şey
+yapmıyor ve silinebilir), ya da **anlamsız mutant** (değişiklik davranışı gerçekten
+değiştirmiyor, örneğin bir sayacın artışı ya da bir sıralama anahtarının önceliği).
+Üçüncüsü ayrılmazsa liste kullanılamaz olur, çünkü araç eşdeğer mutant üretir ve
+hepsini bir eksik gibi raporlar.
+
+Yalnız saf çekirdek mutasyona uğruyor (`constraints.ts`, `rules.ts`, `blocks.ts`,
+`store.ts`, `feasibility.ts`, `entities.ts`): bütün depoyu ölçmek pahalı ve
+bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor. `solver.ts`
+listede **yok** ve bu bir bulgu: aracın enstrümantasyonu oradaki bir artırma
+biçimini ayrıştıramıyor ve bütün koşuyu düşürüyor. Çaresi iki satırlık bir üretim
+kodu değişikliği, yani bu katmanın işi değil (TODO §8f).
+
+**Skorun kapsamı her seferinde yazılır.** Kapsamı belirsiz bir mutasyon skoru yüksek
+bir sayıyla güven verir ve neyi ölçtüğünü söylemez, ki bu tuzak 23'ün başka bir
+kılığıdır. Bir skor yazıldığı yerde hangi dosyaları kapsadığı, hangi süitin
+koşturulduğu ve hangi commit'te ölçüldüğü ile birlikte yazılır. Sonuçlar
+[TESTFINDINGS.md](TESTFINDINGS.md)'de tarihiyle duruyor.
+
+Bu, bu depoda yıllardır elle yapılan sınamanın otomatik hâli: bir testin bir şey
+ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanıyor.
+Elle yapılan iddia başına bir mutasyon, bu ise dosya başına binlerce.
 
 ### E2E
 

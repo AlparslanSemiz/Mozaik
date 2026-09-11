@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 4,
+  "settings": {
+    "schoolName": "Birey Kurs",
+    "days": [
+      {
+        "name": "Salı",
+        "longBreakAfter": 5
+      },
+      {
+        "name": "Çarşamba",
+        "longBreakAfter": 5
+      }
+    ],
+    "hours": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "bell": {
+      "start": "09:00",
+      "lessonMinutes": 40,
+      "breakMinutes": 10,
+      "longBreakMinutes": 30
+    },
+    "limits": {
+      "maxConsecutive": 3,
+      "maxPerDay": 5,
+      "minPerDay": 0,
+      "maxSameLessonPerDay": 2
+    },
+    "rules": {
+      "maxConsecutive": "block",
+      "maxPerDay": "block",
+      "minPerDay": "warn",
+      "maxSameLessonPerDay": "block"
+    },
+    "subjectShorts": {
+      "Edebiyat": "Edb"
+    }
+  },
+  "rooms": [
+    {
+      "id": "rA",
+      "name": "A"
+    }
+  ],
+  "teachers": [
+    {
+      "id": "tMC",
+      "name": "Mehmet Çelik",
+      "short": "MÇ",
+      "subject": "Matematik",
+      "color": 3,
+      "limits": {
+        "maxConsecutive": 2,
+        "maxPerDay": null,
+        "minPerDay": null
+      }
+    },
+    {
+      "id": "tAV",
+      "name": "Ayşe Vural",
+      "short": "AV",
+      "subject": "Edebiyat",
+      "color": 7,
+      "limits": {
+        "maxConsecutive": null,
+        "maxPerDay": null,
+        "minPerDay": null
+      }
+    }
+  ],
+  "classes": [
+    {
+      "id": "c510",
+      "name": "510",
+      "roomId": "rA"
+    },
+    {
+      "id": "c511",
+      "name": "511",
+      "roomId": null
+    }
+  ],
+  "lessons": [
+    {
+      "id": "l1",
+      "classId": "c510",
+      "teacherId": "tMC",
+      "weeklyHours": 5,
+      "maxPerDay": null,
+      "blockSize": 2
+    },
+    {
+      "id": "l2",
+      "classId": "c510",
+      "teacherId": "tMC",
+      "weeklyHours": 3,
+      "maxPerDay": 1,
+      "blockSize": 2
+    },
+    {
+      "id": "l3",
+      "classId": "c511",
+      "teacherId": "tAV",
+      "weeklyHours": 2,
+      "maxPerDay": null,
+      "blockSize": 1
+    }
+  ],
+  "unavailable": {
+    "tAV|1|0": 1,
+    "c511|0|5": 1,
+    "rA|1|5": 1
+  },
+  "placements": {
+    "c510|0|0": "l1",
+    "c510|0|1": "l1",
+    "c510|1|2": "l2",
+    "c510|1|3": "l2",
+    "c510|1|4": "l2",
+    "c511|0|2": "l3"
+  }
+}

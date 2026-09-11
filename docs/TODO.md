@@ -51,7 +51,7 @@ kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirm
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | 6 madde, 5 bitti (B5.1·B5.2·B5.4·B5.5·B5.6) |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | 6 madde |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | 7 madde |
-| **§8** | **Karar bekleyenler** — sende, babada, ve babanın gerçek verisi | 6 + 4 + 11 |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, erişilebilirlik ve test sırası | 6 + 4 + 11, artı §8e 6 ve §8f 3 |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
 
@@ -914,6 +914,102 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       kararı (2026-09-11): üçüne de evet. Kanca sırası ve varlık paneli önce, her biri
       kırmızı bir E2E ile ve ayrı commit'te. Prettier ayrı ve yalnız başına bir commit.
       Altı fonksiyon testleriyle silinir. Commit'ler `docs/claude-md-bolme` dalına gider.
+
+### 8e · Erişilebilirlik taramasının bıraktıkları (2026-09-12)
+
+`e2e/erisim.spec.ts` on bir ekranı axe-core ile taradı ve bulduklarını düzeltmeden
+listeledi, çünkü bir kısmı bilerek olabilir. Her madde bir karar bekliyor, ve
+karar verilip düzeltilince testteki `BILINEN` tablosundan da çıkar. Renk kontrastı
+bu taramanın dışında, onu `renk.spec.ts` zaten daha iyi ölçüyor.
+
+- [ ] **`region` · on bir ekranın on birinde, her seferinde tek düğüm ve hep aynısı: `.ribbon`.**
+      Araç şeridi `<main>`, `<nav>` ve `<header>`'ın dışında duruyor, yani ekran
+      okuyucunun bölge listesinde bir yeri yok. Tek bir karar on bir satırı birden
+      kapatıyor: şeridi bir `<header>` ya da `role="toolbar"` taşıyan bir bölgeye
+      almak. Etkisi: şerit klavyeyle zaten geziliyor, eksik olan "burası ne" cevabı.
+- [ ] **`label` · Okul'da 8, Dersler'de 6, Ayarlar → Kurallar'da 6 giriş kutusu.**
+      Kritik seviye. Kutular tablo satırlarının içinde ve başlıkları sütun
+      başlığından okunuyor, yani gören bir kullanıcı için etiketli, ekran okuyucu
+      için etiketsiz. Muhtemel çare `aria-label` ya da `aria-labelledby` ile sütun
+      başlığına bağlamak. Ölçülmeden yazılmaz: bu kadar çok kutuya etiket eklemek
+      `metin.spec.ts`'in taradığı metni de değiştirebilir.
+- [ ] **`label-title-only` · Dersler'de 6 kutu.** Etiketi yalnız `title`'da. Ciddi
+      seviye ve yukarıdaki maddenin akrabası: `title` bir ad üretir ama yalnız fare
+      için görünür.
+- [ ] **`empty-table-header` · Program 6, Okul 2, Müsaitlik 2, Dersler 2, Ayarlar'da 2.**
+      Küçük seviye. Boş başlık hücreleri: tutamak sütunu (`.grip-col`), ızgaranın
+      köşesi ve gün bandının ayraçları. Bunların çoğu **bilerek boş**, çünkü bir
+      başlıkları yok. Karar: `scope` kaldırmak mı, `aria-hidden` mı, yoksa gerçekten
+      bir ad vermek mi.
+- [ ] **`heading-order` · Program'da 1, Çıktı'da 1.** Kart panelinin ve baskı
+      sayfasının başlığı `h3`, ondan önce gelen bir `h2` yok. Baskı sayfasında
+      `h3`'ün bir gerekçesi olabilir (kâğıtta punto), ama düzey ile punto ayrı şeyler.
+- [ ] **`scrollable-region-focusable` · Program'da havuz (`.pool-list`), Ayarlar → Hakkında'da yan panel.**
+      Ciddi seviye. Fareyle kaydırılan ama klavyeyle odaklanamayan bir kutu, yani
+      içeriğinin bir kısmına klavyeyle hiç ulaşılamıyor. Çare `tabindex="0"`, ve
+      havuzda bunun sürükleme ile etkileşimi ölçülmeden dokunulmaz (tuzak 13).
+
+### 8f · Test stratejisinden sıraya konanlar (2026-09-12)
+
+Test turunun beşi yapıldı (mutasyon, şema örnekleri, değişmezler, erişilebilirlik
+taraması, satır içi anlık görüntüler). Bu ikisi düşük öncelikli ve bilerek
+ertelendi.
+
+- [ ] **Performans bütçesi: ölçüm var, kapı yok.** `dist/index.html` boyutu ve açılış
+      süresi her turda ölçülüp WORKLOG'a yazılıyor ama hiçbir eşik aşıldığında kırmızıya
+      dönmüyor, yani bir sürüm iki kat yavaşlayarak çıkabilir. Eşiğin kendisi ölçülerek
+      seçilir, ve bugünkü değerin biraz üstüne konur: bugünkü değere yapışan bir bütçe her
+      commit'te kırmızıya döner ve kapatılır.
+- [ ] **Fuzz: `import.ts` bozuk girdiyle.** Bozuk CSV, bozuk JSON, yarım UTF-8, çok
+      büyük dosya. Excel'den yapıştırma ilk kurulumun ana yolu ve oraya gelen şey
+      kullanıcının panosu, yani beklenen biçimde olmak zorunda değil. `store.ts`'in
+      `parseState`'i zaten bozuk girdiye `null` diyor ve testleri var; ölçülmemiş olan
+      `import.ts`.
+- [ ] **Örnek dosya testi dersin şeklini ve ayarları da doğrulasın.** Mutasyon koşusu
+      (2026-09-12) `store.ts`'in ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
+      hepsi tek cümleye çıkıyor: test ızgarayı ve adları doğruluyor, dersin şeklini ve
+      ayarları doğrulamıyor. Eklenecek iddialar ve onları isteyen satırlar:
+      `readLessons`'ın sürüm sınırları (`version >= 9`, v13'ün dörtten üçe çevirmesi,
+      v7/v8'in `pairs`'i, v6 ve öncesinin `blockSize`'ı, v8'in `second` bayrağı),
+      `readDays`, gün listesi boşken varsayılana düşme, zil saatleri, öğretmenin sınır
+      kutuları, program zarfının kimliği ve adı, ve v1/v2 göçü. Sürüm dosyaları zaten
+      var, eksik olan iddia.
+- [ ] **`library.ts`'in üç boşluğu.** Aynı koşudan: (a) `renamePlan`, `setDraft` ve
+      `removePlan`'ın üçünde de "yalnız adı geçen plan değişir" hiçbir yerde
+      doğrulanmıyor, üçünde de koşulu `true` yapmak süiti yeşil bırakıyor; (b)
+      `parseLibrary`'nin çöp kapıları: nesne olmayan bir üst düzey, boş bir `plans`
+      dizisi, var olmayan bir plana işaret eden `activeId`; (c) `removePlan`'ın olmayan
+      bir kimlikle çağrılması ve `uniquePlanName`'in boşluk kırpması.
+- [ ] **Kalan 558 mutantı tek tek sınıflandır.** 769 hayatta kalanın 125'i mekanik
+      desenle ayrıldı (erişilemeyen savunma, kullanılmayan yedek, `sanitize` sonrası ölü
+      kapı) ve 86'sı `StringLiteral`. Geri kalan 558 okunmadı. Her biri ya ölçülmeyen bir
+      davranış, ya silinebilecek bir kod dalı, ya da anlamsız bir mutant, ve ayrılmadan
+      liste bir iş listesi değil. En yoğun yer `constraints.ts` (179) ve `store.ts` (161).
+      Sınıflandırmanın okuyarak yapılamayacağı ölçülerek görüldü. `constraints.ts:820`
+      (`i < block.size` yerine `i <= block.size`) okuyunca bariz bir gerçek boşluk gibi
+      duruyor: `dropMap`'in doluluk haritasına bloğun bittiği hücrenin bir sonrasını da
+      yazıyor. Kurulabilen bir dünyada denendi (tek gün, dört saat, iki saatlik bir blok
+      ve tek saatlik bir ders) ve `dropMap`'in çıktısı dört hücrenin dördünde de birebir
+      aynı çıktı, birim süiti de mutasyonla yeşil kaldı. Yani ya eşdeğer bir mutant ya da
+      farkı gösteren durum bulunamadı. Her mutant için bu kadar iş var, ve okuyarak
+      verilen bir karar bu turda bir kez zaten yanlış çıktı.
+- [ ] **`solver.ts` mutasyonla ölçülemiyor, iki satır yüzünden.** Stryker'in
+      enstrümantasyonu `solver.ts:530-531`'deki `classOnDay[g]!++` biçimini
+      ayrıştıramıyor (`UpdateExpression` içinde `TSNonNullExpression`) ve bütün koşuyu
+      düşürüyor, o yüzden dosya `stryker.config.json`'daki listede yok. Çare ölçüldü ve
+      denendi: iki satır `classOnDay[g] = classOnDay[g]! + 1` olarak yazılınca
+      enstrümantasyon geçiyor, davranış birebir aynı, `solver.test.ts` 93/93 ve tipler
+      temiz. `!` gerekli, `noUncheckedIndexedAccess` açık. Bu bir üretim kodu
+      değişikliği, yani refactor tarafının işi; yapıldığı gün `solver.ts` listeye geri
+      konur. Ölçüm TESTFINDINGS'te, 2026-09-12.
+- [ ] **Süiti inceltme, Faz 4'te.** "E2E süiti çok mu büyük" sorusu duruyor ama cevabı refactor
+      bitmeden aranmayacak, çünkü ağın kendisi refactorun güvencesi. Sıra: önce dosya ve
+      test başına süre ölçülür, sonra en pahalı yüzde on mutasyonla sınanır, sonra
+      katmanlar arası örtüşme bulunur. Bir test ancak üç şeyden biri doğruysa silinir:
+      hiçbir şey ölçmüyorsa, başkasının ölçtüğünü tekrar ölçüyorsa, ya da ölçtüğü davranış
+      artık yoksa. **Yavaş olmak tek başına silme gerekçesi değil**; silmeden önce
+      hızlandırma denenir (paylaşılan derleme, işçi sayısı, kendi tarayıcısını açan
+      dosyaların azaltılması).
 
 ## §9. Ham notlar — senin kendi satırların
 
