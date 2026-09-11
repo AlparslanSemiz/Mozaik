@@ -1,7 +1,7 @@
 import type { Id, ProgramVariant, State } from './types';
 
 export const DEFAULT_PROGRAM_ID = 'program-1';
-export const DEFAULT_PROGRAM_NAME = 'Program 1';
+const DEFAULT_PROGRAM_NAME = 'Program 1';
 
 export function blankProgram(
   id: Id = DEFAULT_PROGRAM_ID,
@@ -22,10 +22,7 @@ export function activeProgram(d: State): ProgramVariant {
 export const activePlacements = (d: State): Record<string, Id> => activeProgram(d).placements;
 export const activePinned = (d: State): Record<string, 1> => activeProgram(d).pinned;
 
-export function updateActiveProgram(
-  d: State,
-  update: (program: ProgramVariant) => ProgramVariant,
-): State {
+function updateActiveProgram(d: State, update: (program: ProgramVariant) => ProgramVariant): State {
   const current = activeProgram(d);
   const next = update(current);
   if (next === current) return d;

@@ -36,7 +36,7 @@ export const LIBRARY_KEY = `${BASE_KEY}-planlar`;
  * with no `1` in it (entities.ts). `library.test.ts` pins that down.
  */
 export const FIRST_PLAN_ID = '1';
-export const FIRST_PLAN_NAME = '1. plan';
+const FIRST_PLAN_NAME = '1. plan';
 
 /** A draft is not a separate kind of thing — it is a plan with a flag. */
 export interface PlanInfo {

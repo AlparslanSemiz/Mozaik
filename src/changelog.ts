@@ -55,7 +55,7 @@ export const SURUM_NOTLARI: SurumNotu[] = [
 // same reason `theme.ts`'s `INTRO_KEY` is a literal rather than a template.
 export const CHANGELOG_SEEN_KEY = 'ders-programi-yenilik-gorulen';
 
-export function readChangelogSeenVersion(): string {
+function readChangelogSeenVersion(): string {
   try {
     return localStorage.getItem(CHANGELOG_SEEN_KEY) ?? '';
   } catch {

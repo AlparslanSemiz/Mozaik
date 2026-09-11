@@ -34,7 +34,7 @@ export function formatClock(minutes: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-export const MINUTE_STEP = 5;
+const MINUTE_STEP = 5;
 
 /** "09:00" -> { hour: 9, minute: 0 }. Unreadable input lands on 00:00, never NaN. */
 export function clockParts(text: string): { hour: number; minute: number } {

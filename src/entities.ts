@@ -85,7 +85,7 @@ export function makeShort(name: string): string {
  */
 // The KEYS stay Turkish (they are what a paste is matched against and what a
 // chip is grouped by); `genderLabel` translates on the way out.
-export const GENDER_LABEL: Record<Gender, string> = {
+const GENDER_LABEL: Record<Gender, string> = {
   '': 'Belirtilmemiş',
   k: 'Kadın',
   e: 'Erkek',
@@ -102,7 +102,7 @@ export const GENDER_LABEL: Record<Gender, string> = {
  * `width: 100%` table are already over-subscribed there. A dash under a
  * heading that says "Cinsiyet" says the same thing in one character.
  */
-export const GENDER_CELL: Record<Gender, string> = {
+const GENDER_CELL: Record<Gender, string> = {
   '': '–',
   k: 'Kadın',
   e: 'Erkek',
@@ -147,7 +147,7 @@ export const DEFAULT_BELL: Bell = {
 const WEEKEND = new Set(['Cumartesi', 'Pazar']);
 
 /** On weekdays the long break falls after the 5th lesson, at the weekend after the 6th. */
-export function defaultLongBreak(dayName: string): number {
+function defaultLongBreak(dayName: string): number {
   return WEEKEND.has(dayName) ? 6 : 5;
 }
 
@@ -194,15 +194,7 @@ export { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects };
 // The week and the subject vocabulary moved DOWN to `names.ts`, so that
 // `constraints.ts` — which sits below this file — can draw a day name in the
 // interface language. Re-exported so no call site had to learn a second path.
-export {
-  DEFAULT_DAY_NAMES,
-  DEFAULT_SUBJECT_SHORTS,
-  WEEK,
-  builtInShort,
-  dayLabel,
-  shortDay,
-  subjectLabel,
-};
+export { DEFAULT_SUBJECT_SHORTS, WEEK, builtInShort, dayLabel, shortDay, subjectLabel };
 
 /** Override -> built-in table -> first three letters. */
 export function subjectShort(settings: Settings, subject: string): string {
@@ -503,7 +495,7 @@ export function hourNames(n: number): string[] {
   return Array.from({ length: n }, (_, i) => String(i + 1));
 }
 
-export function defaultSettings(): Settings {
+function defaultSettings(): Settings {
   return {
     schoolName: '',
     days: defaultDays(),
@@ -961,7 +953,7 @@ export function roomName(d: State, roomId: Id | null): string {
   return d.rooms.find((x) => x.id === roomId)?.name ?? '';
 }
 
-export function allCells(d: State): Array<{ day: number; hour: number }> {
+function allCells(d: State): Array<{ day: number; hour: number }> {
   const list: Array<{ day: number; hour: number }> = [];
   for (let g = 0; g < d.settings.days.length; g++) {
     for (let s = 0; s < d.settings.hours.length; s++) list.push({ day: g, hour: s });

@@ -34,7 +34,7 @@ export interface StepDef {
 }
 
 /** A door with its handle: the room itself, not the class inside it. */
-export const roomIcon = (
+const roomIcon = (
   <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">
     <path
       d="M4.4 1.8h11.2v16.4H4.4Z"
@@ -116,7 +116,7 @@ export const classIcon = (
  * tag is what Ayarlar already used for this list; moving the list must not
  * fork the drawing.
  */
-export const subjectIcon = <Tags size={18} strokeWidth={2} aria-hidden="true" focusable="false" />;
+const subjectIcon = <Tags size={18} strokeWidth={2} aria-hidden="true" focusable="false" />;
 
 export const KIND_ICON: Record<Kind, React.ReactElement> = {
   teacher: teacherIcon,

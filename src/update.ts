@@ -124,7 +124,7 @@ function registration(): Promise<ServiceWorkerRegistration | undefined> {
  * try/catch because some browsers make the getter itself throw outside a
  * secure context, and this runs during the first render.
  */
-export function updateSupported(): boolean {
+function updateSupported(): boolean {
   try {
     return (
       typeof navigator !== 'undefined' &&
@@ -144,7 +144,7 @@ export function updateSupported(): boolean {
  * worker as well, the answer that matters is the one that can actually replace
  * the program.
  */
-export function updateKind(): UpdateKind {
+function updateKind(): UpdateKind {
   if (isDesktop()) return 'exe';
   return updateSupported() ? 'sw' : 'yok';
 }

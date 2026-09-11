@@ -726,7 +726,7 @@ export interface SwapResult {
 }
 
 /** Re-validates and applies a reciprocal move against the state handed to it. */
-export function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapResult | null {
+function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapResult | null {
   if (!sameBlock(d, source) || !sameBlock(d, target)) return null;
   if (
     blockPinned(d, source.classId, source.day, source.hour) ||

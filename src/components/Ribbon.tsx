@@ -154,7 +154,7 @@ const ICON = { size: 18, 'aria-hidden': true, focusable: false } as const;
  * them by, and WCAG's Label in Name is satisfied by the visible word being
  * contained in it ("Öğretmen" inside "Öğretmen görünümü").
  */
-export const VIEWS: Array<{ id: View; label: string; short: string; icon: React.ReactElement }> = [
+const VIEWS: Array<{ id: View; label: string; short: string; icon: React.ReactElement }> = [
   { id: 'teacher', label: 'Öğretmen görünümü', short: 'Öğretmen', icon: teacherIcon },
   { id: 'class', label: 'Sınıf görünümü', short: 'Sınıf', icon: classIcon },
 ];
