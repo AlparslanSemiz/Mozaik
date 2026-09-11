@@ -159,7 +159,6 @@ export const VIEWS: Array<{ id: View; label: string; short: string; icon: React.
   { id: 'class', label: 'Sınıf görünümü', short: 'Sınıf', icon: classIcon },
 ];
 
-
 const KINDS: Array<{ id: Kind; label: string }> = [
   { id: 'teacher', label: 'Öğretmen' },
   { id: 'class', label: 'Sınıf' },
@@ -181,7 +180,6 @@ const PROGRAM_COLORS: Array<{ id: ProgramColorMode; label: string }> = [
   { id: 'subject', label: 'Branşa göre' },
 ];
 
-
 /** The two grounds, named rather than toggled — the same list Ayarlar →
     Görünüm draws, because a strip and a panel showing the same two buttons may
     not disagree about what they are called. */
@@ -198,7 +196,12 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
     icon: <Maximize2 {...ICON} />,
     why: 'Hücre en büyük, kartın alt satırı tam boyda',
   },
-  { id: 'rahat', label: 'Rahat', icon: <Rows3 {...ICON} />, why: 'Hücre geniş, ders saatleri görünür' },
+  {
+    id: 'rahat',
+    label: 'Rahat',
+    icon: <Rows3 {...ICON} />,
+    why: 'Hücre geniş, ders saatleri görünür',
+  },
   {
     id: 'sigdir',
     label: 'Sığdır',
@@ -214,7 +217,12 @@ const DENSITIES: Array<{ id: Density; label: string; icon: React.ReactElement; w
  * as it is in Müsaitlik and in the entity sheet — and only the third needs one
  * of its own, because "the whole list" is not one of the three kinds.
  */
-const LESSON_MODES: Array<{ id: LessonMode; label: string; icon: React.ReactElement; why: string }> = [
+const LESSON_MODES: Array<{
+  id: LessonMode;
+  label: string;
+  icon: React.ReactElement;
+  why: string;
+}> = [
   {
     id: 'teacher',
     label: 'Öğretmenden',
@@ -402,7 +410,8 @@ export default function Ribbon({
 
         <Group label="Toplam">
           <span className="ribbon-value">
-            {state.lessons.length} ders · {state.lessons.reduce((n, l) => n + l.weeklyHours, 0)} saat
+            {state.lessons.length} ders · {state.lessons.reduce((n, l) => n + l.weeklyHours, 0)}{' '}
+            saat
           </span>
         </Group>
       </div>
@@ -416,7 +425,12 @@ export default function Ribbon({
       ui.kind === 'teacher' ? state.teachers : ui.kind === 'class' ? state.classes : state.rooms;
     const selected = list.find((x) => x.id === ui.chosen) ?? list[0];
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Müsaitlik araçları')}>
+      <div
+        className="ribbon"
+        data-section={ui.tab}
+        role="toolbar"
+        aria-label={t('Müsaitlik araçları')}
+      >
         <Group label="Kim">
           {KINDS.map((k) => (
             <button
@@ -449,10 +463,7 @@ export default function Ribbon({
             ) : (
               <>
                 {selected.color !== undefined && (
-                  <span
-                    className="row-dot"
-                    style={{ background: paletteColor(selected.color) }}
-                  />
+                  <span className="row-dot" style={{ background: paletteColor(selected.color) }} />
                 )}
                 {selected.name}
               </>
@@ -500,7 +511,9 @@ export default function Ribbon({
     const excludedTeachers = new Set(exclusions.teacherIds);
     const excludedClasses = new Set(exclusions.classIds);
     const pending = state.lessons
-      .filter((lesson) => !excludedTeachers.has(lesson.teacherId) && !excludedClasses.has(lesson.classId))
+      .filter(
+        (lesson) => !excludedTeachers.has(lesson.teacherId) && !excludedClasses.has(lesson.classId),
+      )
       .reduce((sum, lesson) => sum + pendingBlocks(state, lesson).length, 0);
     // What the two destructive buttons are ABOUT: the hours that would go.
     // Pinned hours are not among them — nothing takes a pinned block down but
@@ -513,7 +526,8 @@ export default function Ribbon({
     const currentProgram = activeProgram(state);
     const masked = maskCount(programMask);
     const allPinCells = pinScopeCells(state, { kind: 'all' });
-    const allPinned = allPinCells.length > 0 && allPinCells.every((key) => pinned[key] !== undefined);
+    const allPinned =
+      allPinCells.length > 0 && allPinCells.every((key) => pinned[key] !== undefined);
 
     const askProgramName = async (initial: string, exceptId?: string) => {
       const name = await prompt({
@@ -527,7 +541,8 @@ export default function Ribbon({
       const clean = validProgramName(state.programs, name, exceptId);
       if (clean !== null) return clean;
       await alert({
-        title: name.trim() === '' ? t('Program adı boş olamaz') : t('Bu program adı zaten kullanılıyor'),
+        title:
+          name.trim() === '' ? t('Program adı boş olamaz') : t('Bu program adı zaten kullanılıyor'),
         tone: 'warn',
       });
       return null;
@@ -537,12 +552,14 @@ export default function Ribbon({
       const name = await askProgramName(nextProgramName(state.programs));
       if (name === null) return;
       const source = activeProgram(state);
-      manageProgram((d) => addProgram(d, {
-        id: newId(),
-        name,
-        placements: { ...source.placements },
-        pinned: { ...source.pinned },
-      }));
+      manageProgram((d) =>
+        addProgram(d, {
+          id: newId(),
+          name,
+          placements: { ...source.placements },
+          pinned: { ...source.pinned },
+        }),
+      );
     };
 
     const createBlank = async () => {
@@ -558,19 +575,27 @@ export default function Ribbon({
 
     const deleteCurrent = async () => {
       if (state.programs.length <= 1) return;
-      if (!(await confirm({
-        title: t('{ad} programı silinecek', { ad: currentProgram.name }),
-        body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
-          n: Object.keys(currentProgram.placements).length,
-          s: Object.keys(currentProgram.pinned).length,
-        }),
-        confirmLabel: t('Programı sil'),
-        danger: true,
-      }))) return;
+      if (
+        !(await confirm({
+          title: t('{ad} programı silinecek', { ad: currentProgram.name }),
+          body: t('{n} yerleşmiş saat ve {s} sabitleme silinecek. Ortak okul verileri kalır.', {
+            n: Object.keys(currentProgram.placements).length,
+            s: Object.keys(currentProgram.pinned).length,
+          }),
+          confirmLabel: t('Programı sil'),
+          danger: true,
+        }))
+      )
+        return;
       manageProgram((d) => removeProgram(d, currentProgram.id));
     };
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Program araçları')}>
+      <div
+        className="ribbon"
+        data-section={ui.tab}
+        role="toolbar"
+        aria-label={t('Program araçları')}
+      >
         {/* Two positions, not one toggle: a single button saying "switch to the
             class view" tells you what the next click does, never where you are.
 
@@ -603,7 +628,9 @@ export default function Ribbon({
         <Group label="Diz">
           {solver.running ? (
             <button className="btn danger" onClick={solver.stop}>
-              <Square {...ICON} />{t('Durdur')}</button>
+              <Square {...ICON} />
+              {t('Durdur')}
+            </button>
           ) : (
             <>
               <button
@@ -642,7 +669,9 @@ export default function Ribbon({
                   }
                 }}
               >
-                <RotateCcw {...ICON} />{t('Baştan diz')}</button>
+                <RotateCcw {...ICON} />
+                {t('Baştan diz')}
+              </button>
             </>
           )}
         </Group>
@@ -666,11 +695,7 @@ export default function Ribbon({
         <Group label="Program">
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button
-                className="btn"
-                disabled={solver.running}
-                title={t('Program seç ve yönet')}
-              >
+              <button className="btn" disabled={solver.running} title={t('Program seç ve yönet')}>
                 <Library {...ICON} />
                 <span className="ribbon-ellipsis">{currentProgram.name}</span>
               </button>
@@ -700,13 +725,16 @@ export default function Ribbon({
                 </DropdownMenu.RadioGroup>
                 <DropdownMenu.Separator className="menu-sep" />
                 <DropdownMenu.Item className="menu-item" onSelect={() => void copyCurrent()}>
-                  <Copy size={15} aria-hidden="true" />{t('Kopyasını kaydet')}
+                  <Copy size={15} aria-hidden="true" />
+                  {t('Kopyasını kaydet')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item className="menu-item" onSelect={() => void createBlank()}>
-                  <Plus size={15} aria-hidden="true" />{t('Boş program oluştur')}
+                  <Plus size={15} aria-hidden="true" />
+                  {t('Boş program oluştur')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Item className="menu-item" onSelect={() => void renameCurrent()}>
-                  <Pencil size={15} aria-hidden="true" />{t('Yeniden adlandır')}
+                  <Pencil size={15} aria-hidden="true" />
+                  {t('Yeniden adlandır')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="menu-sep" />
                 <DropdownMenu.Item
@@ -714,7 +742,8 @@ export default function Ribbon({
                   disabled={state.programs.length <= 1}
                   onSelect={() => void deleteCurrent()}
                 >
-                  <Trash2 size={15} aria-hidden="true" />{t('Programı sil')}
+                  <Trash2 size={15} aria-hidden="true" />
+                  {t('Programı sil')}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
@@ -742,11 +771,7 @@ export default function Ribbon({
                   onValueChange={(value) => setProgramColor(value as ProgramColorMode)}
                 >
                   {PROGRAM_COLORS.map((option) => (
-                    <DropdownMenu.RadioItem
-                      key={option.id}
-                      className="menu-item"
-                      value={option.id}
-                    >
+                    <DropdownMenu.RadioItem key={option.id} className="menu-item" value={option.id}>
                       <span className="menu-mark" aria-hidden="true">
                         <DropdownMenu.ItemIndicator>
                           <Check size={15} strokeWidth={2.4} />
@@ -812,7 +837,8 @@ export default function Ribbon({
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button className="btn" disabled={solver.running} title={t('Izgara işlemleri')}>
-                <Layers {...ICON} />{t('İşlemler')}
+                <Layers {...ICON} />
+                {t('İşlemler')}
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
@@ -822,12 +848,12 @@ export default function Ribbon({
                   disabled={Object.keys(placements).length === 0}
                   onSelect={() => change((d) => togglePinScope(d, { kind: 'all' }))}
                 >
-                  {allPinned
-                    ? <PinOff size={15} aria-hidden="true" />
-                    : <Pin size={15} aria-hidden="true" />}
-                  {allPinned
-                    ? t('Tüm sabitlemeleri kaldır')
-                    : t('Tüm programı sabitle')}
+                  {allPinned ? (
+                    <PinOff size={15} aria-hidden="true" />
+                  ) : (
+                    <Pin size={15} aria-hidden="true" />
+                  )}
+                  {allPinned ? t('Tüm sabitlemeleri kaldır') : t('Tüm programı sabitle')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="menu-sep" />
                 {/* WHAT IS PUT ASIDE, and the count is the reason the label is
@@ -838,20 +864,35 @@ export default function Ribbon({
                   {t('Geçici görünüm ({n})', { n: masked })}
                 </DropdownMenu.Label>
                 {Object.entries(programMask.teachers).map(([id, mode]) => (
-                  <DropdownMenu.Item key={`t-${id}`} className="menu-item" onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}>
+                  <DropdownMenu.Item
+                    key={`t-${id}`}
+                    className="menu-item"
+                    onSelect={() => setProgramMask((m) => setRowMask(m, 'teacher', id))}
+                  >
                     <Eye size={15} aria-hidden="true" />
-                    {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                    {state.teachers.find((teacher) => teacher.id === id)?.name ?? id} ·{' '}
+                    {mode === 'ghost' ? t('soluk') : t('gizli')}
                   </DropdownMenu.Item>
                 ))}
                 {Object.entries(programMask.classes).map(([id, mode]) => (
-                  <DropdownMenu.Item key={`c-${id}`} className="menu-item" onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}>
+                  <DropdownMenu.Item
+                    key={`c-${id}`}
+                    className="menu-item"
+                    onSelect={() => setProgramMask((m) => setRowMask(m, 'class', id))}
+                  >
                     <Eye size={15} aria-hidden="true" />
-                    {state.classes.find((group) => group.id === id)?.name ?? id} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                    {state.classes.find((group) => group.id === id)?.name ?? id} ·{' '}
+                    {mode === 'ghost' ? t('soluk') : t('gizli')}
                   </DropdownMenu.Item>
                 ))}
                 {Object.entries(programMask.days).map(([name, mode]) => (
-                  <DropdownMenu.Item key={`d-${name}`} className="menu-item" onSelect={() => setProgramMask((m) => setDayMask(m, name))}>
-                    <Eye size={15} aria-hidden="true" />{name} · {mode === 'ghost' ? t('soluk') : t('gizli')}
+                  <DropdownMenu.Item
+                    key={`d-${name}`}
+                    className="menu-item"
+                    onSelect={() => setProgramMask((m) => setDayMask(m, name))}
+                  >
+                    <Eye size={15} aria-hidden="true" />
+                    {name} · {mode === 'ghost' ? t('soluk') : t('gizli')}
                   </DropdownMenu.Item>
                 ))}
                 <DropdownMenu.Item
@@ -859,7 +900,8 @@ export default function Ribbon({
                   disabled={masked === 0}
                   onSelect={() => setProgramMask(() => ({ teachers: {}, classes: {}, days: {} }))}
                 >
-                  <Eye size={15} aria-hidden="true" />{t('Tümünü geri yükle')}
+                  <Eye size={15} aria-hidden="true" />
+                  {t('Tümünü geri yükle')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator className="menu-sep" />
                 <DropdownMenu.Item
@@ -898,7 +940,8 @@ export default function Ribbon({
                     }
                   }}
                 >
-                  <Eraser size={15} aria-hidden="true" />{t('Programı boşalt')}
+                  <Eraser size={15} aria-hidden="true" />
+                  {t('Programı boşalt')}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
@@ -962,7 +1005,12 @@ export default function Ribbon({
       },
     ];
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Kontrol araçları')}>
+      <div
+        className="ribbon"
+        data-section={ui.tab}
+        role="toolbar"
+        aria-label={t('Kontrol araçları')}
+      >
         <Group label={t('Göster')}>
           {views.map((v) => (
             <button
@@ -999,7 +1047,12 @@ export default function Ribbon({
 
   if (ui.tab === 'print') {
     return (
-      <div className="ribbon" data-section={ui.tab} role="toolbar" aria-label={t('Yazdırma araçları')}>
+      <div
+        className="ribbon"
+        data-section={ui.tab}
+        role="toolbar"
+        aria-label={t('Yazdırma araçları')}
+      >
         {/* The two kinds of sheet are drawn with the same two symbols they carry
             in Kurulum, Müsaitlik and the entity panel — one drawing per thing. */}
         <Group label="İçerik">
@@ -1024,7 +1077,9 @@ export default function Ribbon({
             aria-pressed={ui.scope === 'both'}
             onClick={() => ui.setScope('both')}
           >
-            <Layers {...ICON} />{t('İkisi de')}</button>
+            <Layers {...ICON} />
+            {t('İkisi de')}
+          </button>
         </Group>
         <Sep />
         <Group label="Renk">
@@ -1034,7 +1089,9 @@ export default function Ribbon({
             title={t('Öğretmen renkleri kâğıda basılır')}
             onClick={() => ui.setColored(!ui.colored)}
           >
-            <PaletteIcon {...ICON} />{t('Renkli bas')}</button>
+            <PaletteIcon {...ICON} />
+            {t('Renkli bas')}
+          </button>
         </Group>
         {/* "Yazdır (N sayfa)" is NOT here: the N comes from the tick lists in
             the panel, and a button that says how many pages belongs next to the
@@ -1109,10 +1166,14 @@ export default function Ribbon({
       ) : ui.section === 'rules' ? (
         <Group label="Seviye">
           <span className="ribbon-value">
-            <span className={`badge ${rules.filter((r) => r === 'block').length > 0 ? 'impossible' : 'ok'}`}>
+            <span
+              className={`badge ${rules.filter((r) => r === 'block').length > 0 ? 'impossible' : 'ok'}`}
+            >
               {t('{n} engelle', { n: rules.filter((r) => r === 'block').length })}
             </span>
-            <span className={`badge ${rules.filter((r) => r === 'warn').length > 0 ? 'tight' : 'ok'}`}>
+            <span
+              className={`badge ${rules.filter((r) => r === 'warn').length > 0 ? 'tight' : 'ok'}`}
+            >
               {t('{n} uyar', { n: rules.filter((r) => r === 'warn').length })}
             </span>
             <span className="badge ok">

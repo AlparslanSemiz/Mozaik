@@ -80,7 +80,9 @@ describe('prunable', () => {
       'ders-programi-2026-8-1.json', // iki basamaksız — bizim yazdığımız değil
     ];
     expect(prunable([...yabanci, ...gunler(20)])).toHaveLength(10);
-    expect(prunable([...yabanci, ...gunler(20)]).every((n) => n.startsWith('ders-programi-2026-08-'))).toBe(true);
+    expect(
+      prunable([...yabanci, ...gunler(20)]).every((n) => n.startsWith('ders-programi-2026-08-')),
+    ).toBe(true);
     expect(prunable(yabanci)).toEqual([]);
   });
 

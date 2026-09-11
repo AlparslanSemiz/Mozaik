@@ -14,7 +14,15 @@
  * a "Geri al" that quietly reverses the wrong change is worse than no button.
  * So: an `aria-live` region, a list, and CSS.
  */
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactNode } from 'react';
 import { Check, CircleAlert, Info, X } from 'lucide-react';
 import { useT } from './T';
@@ -59,7 +67,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (text, tone = 'ok') => {
       const id = next.current++;
       setItems((list) => [...list, { id, text, tone }]);
-      timers.current.set(id, window.setTimeout(() => drop(id), LIFETIME));
+      timers.current.set(
+        id,
+        window.setTimeout(() => drop(id), LIFETIME),
+      );
     },
     [drop],
   );
@@ -94,11 +105,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               )}
             </span>
             <span className="toast-text">{toast.text}</span>
-            <button
-              className="toast-close"
-              aria-label={t('Kapat')}
-              onClick={() => drop(toast.id)}
-            >
+            <button className="toast-close" aria-label={t('Kapat')} onClick={() => drop(toast.id)}>
               <X size={14} strokeWidth={2.4} />
             </button>
           </div>

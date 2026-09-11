@@ -93,7 +93,9 @@ export default function ColorPick({ value, owner, onChange }: Props) {
             {t('Renk kimliktir: ızgaradaki satırı havuzdaki kartıyla eşleştiren şey budur.')}
           </p>
           <div className="form-row nowrap">
-            <button type="button" className="btn" onClick={() => setOpen(false)}>{t('Vazgeç')}</button>
+            <button type="button" className="btn" onClick={() => setOpen(false)}>
+              {t('Vazgeç')}
+            </button>
           </div>
         </dialog>
       )}

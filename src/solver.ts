@@ -336,7 +336,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       let onDay = 0;
       // Earliest-start packing, biggest first — the same order the split itself
       // is written in, and the one that leaves the singles the easy job.
-      for (let h = 0; h < hourCount; ) {
+      for (let h = 0; h < hourCount;) {
         const cell = day * hourCount + h;
         let took = 0;
         for (const item of order) {
@@ -537,7 +537,13 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     const warn = new Map<number, number>();
     if (preferNoWarning) {
       for (const cell of out) {
-        const verdict = check(work, ix, item.lesson.id, Math.floor(cell / hourCount), cell % hourCount);
+        const verdict = check(
+          work,
+          ix,
+          item.lesson.id,
+          Math.floor(cell / hourCount),
+          cell % hourCount,
+        );
         warn.set(cell, verdict.warning === null ? 0 : 1);
       }
     }
@@ -668,7 +674,8 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   function report(phase: SolverPhase): SolverResult {
     const best = bestPlacements;
     const basePlacements = activePlacements(base);
-    const changed = Object.keys(best).length !== Object.keys(basePlacements).length ||
+    const changed =
+      Object.keys(best).length !== Object.keys(basePlacements).length ||
       Object.keys(best).some((k) => basePlacements[k] !== best[k]);
     const state: State = changed ? replaceActiveGrid(base, { placements: best }) : base;
 

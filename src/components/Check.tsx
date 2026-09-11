@@ -65,8 +65,7 @@ export default function Check({ state, view }: Props) {
   const doneLessons = state.lessons.filter(
     (l) => (ix.placedHours.get(l.id) ?? 0) >= l.weeklyHours,
   ).length;
-  const capacity =
-    state.classes.length * state.settings.days.length * state.settings.hours.length;
+  const capacity = state.classes.length * state.settings.days.length * state.settings.hours.length;
   const fillPercent = capacity === 0 ? 0 : Math.round((placed / capacity) * 100);
   const freeSlots = Math.max(0, capacity - placed);
 
@@ -154,89 +153,88 @@ export default function Check({ state, view }: Props) {
         )}
       </div>
 
-
       {view === 'problems' && (
         <>
-        {conflicts.length > 0 && (
-          <div className="panel kontrol-sorun">
-            <h2>{t('Kapalı saatte ders ({n})', { n: conflicts.length })}</h2>
-            <p className="hint">
-              <T k="Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi." />
-            </p>
-            <table className="list">
-              <thead>
-                <tr>
-                  <th className="w-col-lg">{t('Durum')}</th>
-                  <th>{t('Açıklama')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {conflicts.map((c) => (
-                  <tr key={`${c.classId}|${c.day}|${c.hour}`}>
-                    <td>
-                      <span className="badge impossible">{t('Kapalı saat')}</span>
-                    </td>
-                    <td>{c.reason}</td>
+          {conflicts.length > 0 && (
+            <div className="panel kontrol-sorun">
+              <h2>{t('Kapalı saatte ders ({n})', { n: conflicts.length })}</h2>
+              <p className="hint">
+                <T k="Bu dersler konduktan **sonra** o saatler kapatıldı; hiçbiri silinmedi." />
+              </p>
+              <table className="list">
+                <thead>
+                  <tr>
+                    <th className="w-col-lg">{t('Durum')}</th>
+                    <th>{t('Açıklama')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {conflicts.map((c) => (
+                    <tr key={`${c.classId}|${c.day}|${c.hour}`}>
+                      <td>
+                        <span className="badge impossible">{t('Kapalı saat')}</span>
+                      </td>
+                      <td>{c.reason}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {report.violations.length > 0 && (
-          <div className="panel kontrol-sorun">
-            <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
-            <p className="hint">
-              <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
-            </p>
-            <table className="list">
-              <thead>
-                <tr>
-                  <th className="w-col-lg">{t('Durum')}</th>
-                  <th>{t('Açıklama')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.violations.map((v) => (
-                  <tr key={v.key}>
-                    <td>
-                      <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
-                        {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
-                      </span>
-                    </td>
-                    <td>{v.message}</td>
+          {report.violations.length > 0 && (
+            <div className="panel kontrol-sorun">
+              <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
+              <p className="hint">
+                <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
+              </p>
+              <table className="list">
+                <thead>
+                  <tr>
+                    <th className="w-col-lg">{t('Durum')}</th>
+                    <th>{t('Açıklama')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {report.violations.map((v) => (
+                    <tr key={v.key}>
+                      <td>
+                        <span className={`badge ${v.level === 'block' ? 'impossible' : 'tight'}`}>
+                          {v.level === 'block' ? t('Kural dışı') : t('Uyarı')}
+                        </span>
+                      </td>
+                      <td>{v.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-        {report.unplaceable.length > 0 && (
-          <div className="panel kontrol-sorun">
-            <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
-            <p className="hint">
-              {t('Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.')}
-            </p>
-            <table className="list">
-              <thead>
-                <tr>
-                  <th className="w-col-2xl">{t('Ders')}</th>
-                  <th>{t('Sebep')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.unplaceable.map((u) => (
-                  <tr key={u.lessonId}>
-                    <td>{u.name}</td>
-                    <td>{u.message}</td>
+          {report.unplaceable.length > 0 && (
+            <div className="panel kontrol-sorun">
+              <h2>{t('Yerleşemeyen dersler ({n})', { n: report.unplaceable.length })}</h2>
+              <p className="hint">
+                {t('Bu derslerin yerleşmemiş saatleri var ama koyulacak boş hücre kalmamış.')}
+              </p>
+              <table className="list">
+                <thead>
+                  <tr>
+                    <th className="w-col-2xl">{t('Ders')}</th>
+                    <th>{t('Sebep')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {report.unplaceable.map((u) => (
+                    <tr key={u.lessonId}>
+                      <td>{u.name}</td>
+                      <td>{u.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {!report.hasProblem && conflicts.length === 0 && (
             <div className="panel">
@@ -309,7 +307,9 @@ export default function Check({ state, view }: Props) {
           rows={report.classes}
           empty={t('Henüz sınıf yok.')}
           colorOf={(id) => state.classes.find((c) => c.id === id)?.color ?? null}
-          description={t('Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı.')}
+          description={t(
+            'Sınıfa yüklenen toplam ders saati, sınıfın AÇIK olduğu saatlere sığmalı.',
+          )}
         />
       )}
       {view === 'rooms' && (

@@ -84,9 +84,7 @@ test.describe('47. Izgara enstrümanı', () => {
     await expect(page.locator('table.grid')).toBeVisible();
 
     const grounds = await page.evaluate(() => {
-      const plain = document.querySelector(
-        'table.grid tbody td[data-day="0"]:not(.unavailable)',
-      );
+      const plain = document.querySelector('table.grid tbody td[data-day="0"]:not(.unavailable)');
       const banded = document.querySelector('table.grid tbody td.band:not(.unavailable)');
       return {
         plain: plain === null ? '' : getComputedStyle(plain).backgroundColor,
@@ -112,10 +110,7 @@ test.describe('47. Izgara enstrümanı', () => {
     // no longer asserted, but it must never be mistaken for "droppable",
     // "warning" or "blocked".
     for (const key of ['--ok-bg', '--warn-bg', '--bad-bg'] as const) {
-      expect(
-        deltaE(grounds.banded, t[key]!),
-        `bant ${key} ile karışıyor`,
-      ).toBeGreaterThan(10);
+      expect(deltaE(grounds.banded, t[key]!), `bant ${key} ile karışıyor`).toBeGreaterThan(10);
     }
 
     // A CEILING, added 2026-08-27 and red the day before it was written.
@@ -200,18 +195,14 @@ test.describe('47. Izgara enstrümanı', () => {
     expect(deltaE(head, t['--accent-bg']!)).toBeLessThan(2);
   });
 
-  test('imleç haçı 2 saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor', async ({
-    page,
-  }) => {
+  test('imleç haçı 2 saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor', async ({ page }) => {
     // "2 derslik bir blok kesinlikle 1 ders değil 2 derstir" — hovering a
     // two-hour block used to light only the column it STARTS at.
     await loadWorld(page, COLSPAN_WORLD);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid')).toBeVisible();
 
-    const block = page.locator(
-      'table.grid tbody td[data-day="0"][data-hour="0"][data-span="2"]',
-    );
+    const block = page.locator('table.grid tbody td[data-day="0"][data-hour="0"][data-span="2"]');
     await expect(block).toBeVisible();
     await block.hover();
 
@@ -396,37 +387,44 @@ test.describe('68. Satır başı ve gün sınırı', () => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
 
-    const m = await page.locator('table.grid tbody th.row-head').first().evaluate((th) => {
-      // What the column would have to be for the widest thing it can hold.
-      // TWO candidates, and the probe used to name only the first of them:
-      // the second line is a SUBJECT SHORT now, so "Sosyal Bilgiler" is a
-      // string this cell can no longer be asked to draw. What it can be asked
-      // to draw is a pair of shorts in the teacher view and a room in the
-      // class view, and which of those is wider is a question for the font.
-      // Asked of the browser, not guessed (pitfall 34).
-      const measure = (text: string) => {
-        const probe = th.cloneNode(true) as HTMLElement;
-        probe.style.cssText = 'position:absolute;visibility:hidden;width:max-content;min-width:0';
-        const sub = probe.querySelector('.secondary') as HTMLElement;
-        sub.textContent = text;
-        sub.style.overflow = 'visible';
-        sub.style.textOverflow = 'clip';
-        th.parentElement!.appendChild(probe);
-        const width = probe.getBoundingClientRect().width;
-        probe.remove();
-        return width;
-      };
-      const need = Math.max(measure('İnk · Sos'), measure('G dersliği'));
-      return { have: th.getBoundingClientRect().width, need };
-    });
+    const m = await page
+      .locator('table.grid tbody th.row-head')
+      .first()
+      .evaluate((th) => {
+        // What the column would have to be for the widest thing it can hold.
+        // TWO candidates, and the probe used to name only the first of them:
+        // the second line is a SUBJECT SHORT now, so "Sosyal Bilgiler" is a
+        // string this cell can no longer be asked to draw. What it can be asked
+        // to draw is a pair of shorts in the teacher view and a room in the
+        // class view, and which of those is wider is a question for the font.
+        // Asked of the browser, not guessed (pitfall 34).
+        const measure = (text: string) => {
+          const probe = th.cloneNode(true) as HTMLElement;
+          probe.style.cssText = 'position:absolute;visibility:hidden;width:max-content;min-width:0';
+          const sub = probe.querySelector('.secondary') as HTMLElement;
+          sub.textContent = text;
+          sub.style.overflow = 'visible';
+          sub.style.textOverflow = 'clip';
+          th.parentElement!.appendChild(probe);
+          const width = probe.getBoundingClientRect().width;
+          probe.remove();
+          return width;
+        };
+        const need = Math.max(measure('İnk · Sos'), measure('G dersliği'));
+        return { have: th.getBoundingClientRect().width, need };
+      });
 
     // Wide enough for the longest subject...
-    expect(m.have, `satır başı ${Math.round(m.have)} < gereken ${Math.round(m.need)}`)
-      .toBeGreaterThanOrEqual(m.need);
+    expect(
+      m.have,
+      `satır başı ${Math.round(m.have)} < gereken ${Math.round(m.need)}`,
+    ).toBeGreaterThanOrEqual(m.need);
     // ...and not half again as wide, which is what 8.25rem was. Every pixel
     // here is a pixel the 72 lesson columns do not get.
-    expect(m.have, `satır başı ${Math.round(m.have)}px, gereken ${Math.round(m.need)}px`)
-      .toBeLessThan(m.need * 1.2);
+    expect(
+      m.have,
+      `satır başı ${Math.round(m.have)}px, gereken ${Math.round(m.need)}px`,
+    ).toBeLessThan(m.need * 1.2);
   });
 
   test('gün sınırı ızgaradaki EN KALIN çizgi', async ({ page }) => {
@@ -462,8 +460,10 @@ test.describe('68. Satır başı ve gün sınırı', () => {
       const seen = await tokens(page, ['--day-edge', '--line-dark', '--paper']);
       const near = deltaE(seen['--line-dark']!, seen['--paper']!);
       const far = deltaE(seen['--day-edge']!, seen['--paper']!);
-      expect(far, `${theme}: gün sınırı ΔE ${far.toFixed(1)}, --line-dark ΔE ${near.toFixed(1)}`)
-        .toBeGreaterThan(near);
+      expect(
+        far,
+        `${theme}: gün sınırı ΔE ${far.toFixed(1)}, --line-dark ΔE ${near.toFixed(1)}`,
+      ).toBeGreaterThan(near);
     }
   });
 });

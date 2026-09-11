@@ -23,9 +23,7 @@
 import { expect, test } from './kapan';
 import { openWithSample } from './helpers';
 
-const SEKMELER = [
-  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
-];
+const SEKMELER = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
 const ADIMLAR = ['Derslikler', 'Branşlar', 'Öğretmenler', 'Sınıflar'];
 // Dersler is a tab now, and its three modes draw three different screens.
 const DERS_MODLARI = ['Sınıftan', 'Öğretmenden', 'Genel'];
@@ -72,7 +70,6 @@ test.describe('80. Ekranda okunan metin', () => {
     const tekil = [...new Set(bulunan)];
     expect(tekil, `uzun çizgi taşıyan ${tekil.length} satır:\n${tekil.join('\n')}`).toEqual([]);
   });
-
 
   // 2026-08-30: "çok fazla info var ve çok uzunlar her yerde, infoları
   // olabildiğince anlaşılır kısa ve öz yap."

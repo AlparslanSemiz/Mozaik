@@ -57,9 +57,36 @@ function build(): State {
       { id: 'dB', name: 'B' },
     ],
     teachers: [
-      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oMB', name: 'Murat Bey', short: 'MB', subject: 'Kimya', subject2: '', gender: '', color: 2, limits: { ...NO_TEACHER_LIMITS } },
+      {
+        id: 'oMC',
+        name: 'Mehmet Çelik',
+        short: 'MÇ',
+        subject: 'Matematik',
+        subject2: '',
+        gender: '',
+        color: 0,
+        limits: { ...NO_TEACHER_LIMITS },
+      },
+      {
+        id: 'oAV',
+        name: 'Ayşe Var',
+        short: 'AV',
+        subject: 'Fizik',
+        subject2: '',
+        gender: '',
+        color: 1,
+        limits: { ...NO_TEACHER_LIMITS },
+      },
+      {
+        id: 'oMB',
+        name: 'Murat Bey',
+        short: 'MB',
+        subject: 'Kimya',
+        subject2: '',
+        gender: '',
+        color: 2,
+        limits: { ...NO_TEACHER_LIMITS },
+      },
     ],
     classes: [
       { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
@@ -67,12 +94,60 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2, maxSameLessonPerDay: null },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oAV', weeklyHours: 4, blocks: [2, 2], second: false, maxPerDay: null },
-      { id: 'x4', classId: 's510', teacherId: 'oAV', weeklyHours: 2, blocks: [2], second: false, maxPerDay: null },
-      { id: 'x5', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
-      { id: 'x6', classId: 's433', teacherId: 'oMB', weeklyHours: 3, blocks: [2], second: false, maxPerDay: null },
+      {
+        id: 'x1',
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: 4,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x2',
+        classId: 's511',
+        teacherId: 'oMC',
+        weeklyHours: 2,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x3',
+        classId: 's433',
+        teacherId: 'oAV',
+        weeklyHours: 4,
+        blocks: [2, 2],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x4',
+        classId: 's510',
+        teacherId: 'oAV',
+        weeklyHours: 2,
+        blocks: [2],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x5',
+        classId: 's511',
+        teacherId: 'oAV',
+        weeklyHours: 2,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x6',
+        classId: 's433',
+        teacherId: 'oMB',
+        weeklyHours: 3,
+        blocks: [2],
+        second: false,
+        maxPerDay: null,
+      },
     ],
     unavailable: {},
     programs: [blankProgram()],
@@ -92,24 +167,27 @@ function withLesson(
   const d = build();
   const placements: Record<string, string> = {};
   for (const [day, hour] of cells) placements[placementKey('s510', day, hour)] = spec.id;
-  return replaceActiveGrid({
-    ...d,
-    // Six hours a day rather than the four the shared fixture uses: a run has
-    // to be long enough to hold a 3 and a 2 back to back, or the case cannot be
-    // asked at all.
-    settings: { ...d.settings, hours: ['1', '2', '3', '4', '5', '6'] },
-    lessons: [
-      {
-        id: spec.id,
-        classId: 's510',
-        teacherId: 'oMC',
-        weeklyHours: spec.weeklyHours,
-        blocks: spec.blocks,
-        second: false,
-        maxPerDay: null,
-      },
-    ],
-  }, { placements });
+  return replaceActiveGrid(
+    {
+      ...d,
+      // Six hours a day rather than the four the shared fixture uses: a run has
+      // to be long enough to hold a 3 and a 2 back to back, or the case cannot be
+      // asked at all.
+      settings: { ...d.settings, hours: ['1', '2', '3', '4', '5', '6'] },
+      lessons: [
+        {
+          id: spec.id,
+          classId: 's510',
+          teacherId: 'oMC',
+          weeklyHours: spec.weeklyHours,
+          blocks: spec.blocks,
+          second: false,
+          maxPerDay: null,
+        },
+      ],
+    },
+    { placements },
+  );
 }
 
 function lessonById(d: State, id: string) {
@@ -117,13 +195,7 @@ function lessonById(d: State, id: string) {
 }
 
 /** Shortcut for blocker(): rebuilds the index every time. */
-function why(
-  d: State,
-  lessonId: string,
-  day: number,
-  hour: number,
-  size?: number,
-): string | null {
+function why(d: State, lessonId: string, day: number, hour: number, size?: number): string | null {
   return blocker(d, buildIndex(d), lessonId, day, hour, size);
 }
 
@@ -242,9 +314,9 @@ describe('validHours', () => {
     const d = build();
     d.unavailable[teacherKey('oMC', 0, 1)] = 1;
     const withPlacement = place(d, 'x2', 0, 3); // MÇ is in 511 -> hour 3 also closes
-    expect(
-      [...validHours(withPlacement, buildIndex(withPlacement), 'x1', 0)].sort(),
-    ).toEqual([0, 2]);
+    expect([...validHours(withPlacement, buildIndex(withPlacement), 'x1', 0)].sort()).toEqual([
+      0, 2,
+    ]);
   });
 
   it('bloklu ders için gün sonuna taşan saatleri dışarıda bırakır', () => {
@@ -368,13 +440,22 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
   // was no way to tell that apart from "twos first". These are the cases that
   // can tell.
   it('koşu içinde EN BÜYÜK blok önce alınıyor', () => {
-    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+    ]);
     expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 1]);
   });
 
   it('3+2 tek koşuda 3 sonra 2 okunuyor', () => {
     const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
-      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ]);
     expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 2]);
   });
@@ -382,8 +463,11 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
   // A three cannot fit a run of two, so the run takes the biggest that DOES.
   it('koşuya sığmayan boy atlanıyor, sığan alınıyor', () => {
     const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
-      [0, 0], [0, 1], // a run of 2
-      [1, 0], [1, 1], [1, 2], // a run of 3
+      [0, 0],
+      [0, 1], // a run of 2
+      [1, 0],
+      [1, 1],
+      [1, 2], // a run of 3
     ]);
     expect(placedBlocks(d, lessonById(d, 'y1'))).toEqual([
       { day: 0, hour: 0, size: 2 },
@@ -393,20 +477,32 @@ describe('placedBlocks ve pendingBlocks — ızgaradaki bloklar', () => {
 
   it('bütçe bitince kalan hücreler tek saat', () => {
     const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3] }, [
-      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ]);
     expect(placedBlocks(d, lessonById(d, 'y1')).map((b) => b.size)).toEqual([3, 1, 1]);
   });
 
   it('karışık boylu ders kalanını doğru söylüyor', () => {
-    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [[1, 0], [1, 1]]);
+    const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
+      [1, 0],
+      [1, 1],
+    ]);
     expect(pendingBlocks(d, lessonById(d, 'y1'))).toEqual([3]);
   });
 });
 
 describe('blockSpans — bir tek kaynak', () => {
   it('yalnız blok BAŞLARINI, boylarıyla veriyor', () => {
-    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [[0, 0], [0, 1], [0, 2], [0, 3]]);
+    const d = withLesson({ id: 'y1', weeklyHours: 4, blocks: [3] }, [
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+    ]);
     const spans = blockSpans(d);
     expect(spans.get(placementKey('s510', 0, 0))).toBe(3);
     expect(spans.get(placementKey('s510', 0, 1))).toBeUndefined();
@@ -419,7 +515,11 @@ describe('blockSpans — bir tek kaynak', () => {
   // never disagree about where one block ends (pitfall 75).
   it('placedBlocks ile birebir aynı sınırları veriyor', () => {
     const d = withLesson({ id: 'y1', weeklyHours: 5, blocks: [3, 2] }, [
-      [0, 0], [0, 1], [0, 2], [0, 3], [0, 4],
+      [0, 0],
+      [0, 1],
+      [0, 2],
+      [0, 3],
+      [0, 4],
     ]);
     const spans = blockSpans(d);
     for (const b of placedBlocks(d, lessonById(d, 'y1'))) {
@@ -570,7 +670,12 @@ describe('blocker — art arda en fazla N saat', () => {
 
   it('öğretmenin kendi kutusu okul varsayılanını ezer', () => {
     let d = withRule(build(), 'maxConsecutive', 2, 'block');
-    d = { ...d, teachers: d.teachers.map((t) => (t.id === 'oMC' ? { ...t, limits: { ...t.limits, maxConsecutive: 3 } } : t)) };
+    d = {
+      ...d,
+      teachers: d.teachers.map((t) =>
+        t.id === 'oMC' ? { ...t, limits: { ...t.limits, maxConsecutive: 3 } } : t,
+      ),
+    };
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 1);
     expect(why(d, 'x1', 0, 2)).toBeNull(); // MÇ may do 3, the school default says 2
@@ -589,7 +694,9 @@ describe('blocker — günde en fazla N saat', () => {
     let d = withRule(build(), 'maxPerDay', 2, 'block');
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 2);
-    expect(why(d, 'x1', 0, 3)).toBe('MÇ Pazartesi günü en fazla 2 saat girmeli, burada 3 saat olur');
+    expect(why(d, 'x1', 0, 3)).toBe(
+      'MÇ Pazartesi günü en fazla 2 saat girmeli, burada 3 saat olur',
+    );
     expect(why(d, 'x1', 1, 0)).toBeNull(); // the next day is a fresh budget
   });
 });
@@ -615,7 +722,10 @@ describe('blocker — bir ders günde en fazla N saat', () => {
   // number on the class, and every lesson that class has obeys it.
   it('sınıfın kutusu okul varsayılanını ezer', () => {
     let d = withRule(build(), 'maxSameLessonPerDay', 4, 'block');
-    d = { ...d, classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)) };
+    d = {
+      ...d,
+      classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)),
+    };
     d = place(d, 'x1', 0, 0);
     expect(why(d, 'x1', 0, 2)).toBe(
       '510 sınıfı Pazartesi günü MÇ dersinden en fazla 1 saat görmeli, burada 2 saat olur',
@@ -624,7 +734,10 @@ describe('blocker — bir ders günde en fazla N saat', () => {
 
   it('dersin kutusu SINIFIN kutusunu da ezer', () => {
     let d = withRule(build(), 'maxSameLessonPerDay', 4, 'block');
-    d = { ...d, classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)) };
+    d = {
+      ...d,
+      classes: d.classes.map((c) => (c.id === 's510' ? { ...c, maxSameLessonPerDay: 1 } : c)),
+    };
     d = { ...d, lessons: d.lessons.map((x) => (x.id === 'x1' ? { ...x, maxPerDay: 3 } : x)) };
     d = place(d, 'x1', 0, 0);
     expect(why(d, 'x1', 0, 2)).toBeNull();
@@ -956,7 +1069,6 @@ describe('blockerDetail — sebebin kodu', () => {
   });
 });
 
-
 // THE DROP MAP, and the one refusal a drop may overrule.
 //
 // Asked for on 2026-08-26: "farklı bir kart başka bir kartın üzerine gelirse o
@@ -1001,7 +1113,10 @@ describe('dropMap — üstüne bırakma', () => {
   });
 
   it('kapalı saat tahliyeyle açılmaz', () => {
-    const closed: State = { ...place(build(), 'x1', 0, 0), unavailable: { ['oAV|0|0']: 1 as const } };
+    const closed: State = {
+      ...place(build(), 'x1', 0, 0),
+      unavailable: { ['oAV|0|0']: 1 as const },
+    };
     const v = at(closed, 'x4', 0, 0);
     expect(v.blocked).not.toBeNull();
     expect(v.evicts).toEqual([]);
@@ -1062,8 +1177,9 @@ describe('yerleşmiş blokların atomik takası', () => {
   ): BlockRef => ({ lessonId, classId, day, hour, size });
 
   function swapAt(d: State, source: BlockRef, day: number, hour: number) {
-    const verdict = dropMap(d, buildIndex(d), source.lessonId, source.size, source)
-      .get(`${day}|${hour}`)!;
+    const verdict = dropMap(d, buildIndex(d), source.lessonId, source.size, source).get(
+      `${day}|${hour}`,
+    )!;
     return {
       verdict,
       state: applyDrop(d, {

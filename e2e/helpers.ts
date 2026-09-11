@@ -86,9 +86,7 @@ export async function openWithSample(page: Page) {
   // "something was written", and the empty state is something.
   // Tests that capture a baseline right after this helper were reading that
   // empty state and then comparing it against the sample.
-  await expect
-    .poll(async () => await savedText(page), { timeout: 5_000 })
-    .toContain('Örnek Kurs');
+  await expect.poll(async () => await savedText(page), { timeout: 5_000 }).toContain('Örnek Kurs');
 }
 
 /**
@@ -179,10 +177,7 @@ export async function openSettings(page: Page, section: string) {
   await page.getByRole('button', { name: 'Ayarlar' }).click();
   await revealRibbon(page);
   // Sections are plain `.btn`s in the strip; they never had step numbers.
-  await page
-    .locator('.ribbon .btn', { hasText: section })
-    .first()
-    .click();
+  await page.locator('.ribbon .btn', { hasText: section }).first().click();
   // THE FIRST GROUP, not the whole strip. Since 2026-08-30 the right-hand end
   // of Ayarlar → Görünüm carries the theme, and a pressed button there made
   // `.ribbon .btn[aria-pressed="true"]` two elements — a strict-mode violation
@@ -288,7 +283,6 @@ export async function dragAndDrop(page: Page): Promise<{ day: string; hour: stri
   }
   throw new Error('Hiçbir hücre geçerli görünmedi — sürükleme vurgusu çalışmıyor.');
 }
-
 
 /**
  * A hand-built world loaded through the real "Yedek yükle" dialog: 2 days x 4
@@ -881,7 +875,10 @@ export async function settledMotion(page: Page): Promise<void> {
   await page.evaluate(async () => {
     await Promise.race([
       Promise.allSettled(
-        document.getAnimations().filter((a) => a.playState === 'running').map((a) => a.finished),
+        document
+          .getAnimations()
+          .filter((a) => a.playState === 'running')
+          .map((a) => a.finished),
       ),
       new Promise((r) => setTimeout(r, 2_000)),
     ]);

@@ -91,7 +91,9 @@ export default function School({ state, change }: PanelProps) {
                 className="grow"
                 defaultValue={state.settings.schoolName}
                 placeholder={t('örn. Semiz Kurs')}
-                onBlur={(e) => change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))}
+                onBlur={(e) =>
+                  change((d) => updateSettings(d, { schoolName: e.target.value.trim() }))
+                }
               />
             </Field>
           </div>
@@ -208,7 +210,9 @@ export default function School({ state, change }: PanelProps) {
                 max={120}
                 defaultValue={state.settings.bell.lessonMinutes}
                 className="num"
-                onBlur={(e) => change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))}
+                onBlur={(e) =>
+                  change((d) => updateBell(d, { lessonMinutes: Number(e.target.value) }))
+                }
               />
             </Field>
             <Field label={t('Teneffüs (dk)')}>
@@ -218,7 +222,9 @@ export default function School({ state, change }: PanelProps) {
                 max={60}
                 defaultValue={state.settings.bell.breakMinutes}
                 className="num"
-                onBlur={(e) => change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))}
+                onBlur={(e) =>
+                  change((d) => updateBell(d, { breakMinutes: Number(e.target.value) }))
+                }
               />
             </Field>
             <Field label={t('Öğle arası (dk)')}>
@@ -315,7 +321,6 @@ export default function School({ state, change }: PanelProps) {
                 </tbody>
               </table>
             </div>
-
           )}
         </div>
       </aside>

@@ -9,7 +9,8 @@
 // instead of a comment.
 
 import { expect, test } from './kapan';
-import { reopen,
+import {
+  reopen,
   openSetup,
   revealRibbon,
   chooseDensity,
@@ -23,7 +24,6 @@ import { reopen,
   answerDialog,
   openGridMenu,
 } from './helpers';
-
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
 async function gridMetrics(page: import('@playwright/test').Page) {
@@ -541,7 +541,9 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       if (target.scale !== 100) await chooseScale(page, target.scale);
       await page.getByRole('button', { name: 'Program', exact: true }).click();
       await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
+        timeout: 30_000,
+      });
 
       await chooseDensity(page, 'Sığdır');
       const fit = await gridMetrics(page);
@@ -595,7 +597,9 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
       await page.getByRole('button', { name: 'Program', exact: true }).click();
       await page.getByRole('button', { name: view }).click();
       await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
+        timeout: 30_000,
+      });
       await expect(page.locator('table.grid .card').first()).toBeVisible();
 
       // Rahat first, so the row height below is compared against something
@@ -608,10 +612,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
 
       expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
       expect(fit.clipped, `${fit.clipped}/${roomy.cards} kartın yazısı kırpıldı`).toBe(0);
-      expect(
-        fit.headsClipped,
-        `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`,
-      ).toBe(0);
+      expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(0);
       expect(fit.cornerClipped, 'köşedeki eksen adı kırpıldı').toBe(false);
       // Width was the subject; height was not allowed to be the payment. The
       // first draft of this fix narrowed the head without `nowrap` and the row
@@ -623,7 +624,7 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     });
   }
 
-  test("Sığdır maximize edilmemiş 1600px kutuda da haftayı sığdırıyor", async ({ page }) => {
+  test('Sığdır maximize edilmemiş 1600px kutuda da haftayı sığdırıyor', async ({ page }) => {
     await page.setViewportSize({ width: 1600, height: 968 });
     await openWithSample(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -649,7 +650,9 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     await chooseDensity(page, 'Sığdır');
     await page.waitForTimeout(700);
     expect(await savedText(page)).toBe(before);
-    expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe('sigdir');
+    expect(await page.evaluate(() => localStorage.getItem('ders-programi-yogunluk'))).toBe(
+      'sigdir',
+    );
 
     await reopen(page);
     await page.getByRole('button', { name: 'Program', exact: true }).click();
@@ -772,9 +775,9 @@ test.describe('50. Müsaitlikte saat gösterimi', () => {
 
     const saved = await page.evaluate(() => localStorage.getItem('ders-programi'));
     expect(saved!.includes('musaitlik-saat')).toBe(false);
-    expect(
-      await page.evaluate(() => localStorage.getItem('ders-programi-musaitlik-saat')),
-    ).toBe('acik');
+    expect(await page.evaluate(() => localStorage.getItem('ders-programi-musaitlik-saat'))).toBe(
+      'acik',
+    );
   });
 
   test('Ayarlar → Hakkında bu anahtarı da sayıyor', async ({ page }) => {
@@ -847,9 +850,7 @@ test.describe('51. Program: programı boşalt', () => {
 // seeing. So the claim here is the one that is true — each step shows strictly
 // more than the one before it, and none of them shrinks the type.
 test.describe('81. Yoğunluk listelerde de', () => {
-  test('üç basamak listede gerçekten farklı, ve hiçbiri yazıyı küçültmüyor', async ({
-    page,
-  }) => {
+  test('üç basamak listede gerçekten farklı, ve hiçbiri yazıyı küçültmüyor', async ({ page }) => {
     await openWithSample(page);
 
     const measure = async () => {
@@ -896,7 +897,11 @@ test.describe('81. Yoğunluk listelerde de', () => {
     expect(sigdir.visible).toBeGreaterThanOrEqual(rahat.visible + 5);
 
     // The floor that must survive all of it. What comes out of a row is AIR.
-    for (const [name, m] of [['ferah', ferah], ['rahat', rahat], ['sigdir', sigdir]] as const) {
+    for (const [name, m] of [
+      ['ferah', ferah],
+      ['rahat', rahat],
+      ['sigdir', sigdir],
+    ] as const) {
       expect(m.smallest, `${name}: ${m.smallest}px`).toBeGreaterThanOrEqual(12);
     }
 
@@ -908,9 +913,9 @@ test.describe('81. Yoğunluk listelerde de', () => {
     expect(
       await page.evaluate(() => document.documentElement.getAttribute('data-ui-density')),
     ).toBe('sigdir');
-    expect(
-      await page.evaluate(() => localStorage.getItem('ders-programi-arayuz-yogunluk')),
-    ).toBe('sigdir');
+    expect(await page.evaluate(() => localStorage.getItem('ders-programi-arayuz-yogunluk'))).toBe(
+      'sigdir',
+    );
   });
 
   test('ızgara ekseni arayüz eksenini kıpırdatmıyor — ters yönde de', async ({ page }) => {

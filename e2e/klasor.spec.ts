@@ -160,7 +160,12 @@ test.describe('74. Nereye kaydedilsin', () => {
       { length: 10 },
       (_, i) => `ders-programi-2020-01-${String(i + 1).padStart(2, '0')}.json`,
     );
-    const yabanci = ['vergi-2019.pdf', 'Yeni Microsoft Word Belgesi.docx', 'ders-programi.json', 'notlar.txt'];
+    const yabanci = [
+      'vergi-2019.pdf',
+      'Yeni Microsoft Word Belgesi.docx',
+      'ders-programi.json',
+      'notlar.txt',
+    ];
     await seed(page, [...bizim, ...yabanci]);
 
     await openData(page);

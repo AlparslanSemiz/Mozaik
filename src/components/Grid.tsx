@@ -4,18 +4,18 @@
 // redraws 1-2 rows, not the whole table. During a drag nothing re-renders at
 // all (see drag.ts).
 
-import { memo, useEffect, useMemo, useRef } from "react";
-import * as ContextMenu from "@radix-ui/react-context-menu";
-import { Pin } from "lucide-react";
-import { useInspect } from "./Inspector";
-import type React from "react";
-import { dayLabel } from "../names";
-import { dayPeriods } from "../bell";
-import { attachGridChrome } from "../gridChrome";
-import { paletteColor } from "../palette";
-import type { Settings, Id } from "../types";
-import type { MaskMode } from "../programMask";
-import { useT } from "./T";
+import { memo, useEffect, useMemo, useRef } from 'react';
+import * as ContextMenu from '@radix-ui/react-context-menu';
+import { Pin } from 'lucide-react';
+import { useInspect } from './Inspector';
+import type React from 'react';
+import { dayLabel } from '../names';
+import { dayPeriods } from '../bell';
+import { attachGridChrome } from '../gridChrome';
+import { paletteColor } from '../palette';
+import type { Settings, Id } from '../types';
+import type { MaskMode } from '../programMask';
+import { useT } from './T';
 
 export interface GridCell {
   lessonId: Id;
@@ -39,7 +39,7 @@ export interface GridCell {
 export interface GridRow {
   id: string;
   /** Which list the row's id belongs to — the inspector needs to know. */
-  kind: "teacher" | "class";
+  kind: 'teacher' | 'class';
   name: string;
   secondary: string;
   /** Palette index of the row's OWN entity: the teacher, or the class. */
@@ -52,10 +52,10 @@ export interface GridRow {
 }
 
 export type GridMenuTarget =
-  | { kind: "card"; rowId: Id; day: number; hour: number }
-  | { kind: "row"; rowId: Id }
-  | { kind: "day"; day: number }
-  | { kind: "column"; day: number; hour: number };
+  | { kind: 'card'; rowId: Id; day: number; hour: number }
+  | { kind: 'row'; rowId: Id }
+  | { kind: 'day'; day: number }
+  | { kind: 'column'; day: number; hour: number };
 
 interface RowProps {
   row: GridRow;
@@ -68,12 +68,7 @@ interface RowProps {
   /** Delete on a focused card, or the menu's own item: back to the pool. */
   onCellRemove: (rowId: string, day: number, hour: number) => void;
   /** Left button down on a placed card: start moving the block. */
-  onCellMoveStart: (
-    e: React.PointerEvent,
-    rowId: string,
-    day: number,
-    hour: number,
-  ) => void;
+  onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
   /**
    * The pin ON the card. It has to be stable (`useCallback`) or every row of
    * 84 cells redraws on each render and the memo above stops meaning anything.
@@ -99,7 +94,7 @@ const Row = memo(function Row({
   const t = useT();
   const cells = [];
   for (const [visibleDay, g] of dayIndices.entries()) {
-    const dayMasked = dayModes[settings.days[g]?.name ?? ""] === "ghost";
+    const dayMasked = dayModes[settings.days[g]?.name ?? ''] === 'ghost';
     for (let s = 0; s < hourCount; s++) {
       // The lunch break is its own narrow column. It carries NO data-day /
       // data-hour: drag.ts finds its target with closest('[data-day]') and
@@ -109,22 +104,17 @@ const Row = memo(function Row({
       // the stylesheet because the headings need the same band and they must
       // NOT carry data-day — drag.ts finds its target with
       // closest('[data-day]') and a heading would answer (pitfall 13).
-      const band = visibleDay % 2 === 1 ? " band" : "";
+      const band = visibleDay % 2 === 1 ? ' band' : '';
 
       if (breakAt[g] === s) {
         cells.push(
-          <td
-            key={`break-${g}`}
-            className={`break-col${band}`}
-            title={t("Öğle arası")}
-          />,
+          <td key={`break-${g}`} className={`break-col${band}`} title={t('Öğle arası')} />,
         );
       }
       const i = g * hourCount + s;
       const cell = row.cells[i] ?? null;
       const closed = row.closed[i] === true;
-      const cellMasked =
-        row.mask !== undefined || dayMasked || cell?.mask !== undefined;
+      const cellMasked = row.mask !== undefined || dayMasked || cell?.mask !== undefined;
       // A LATER hour of a block, i.e. the cell whose neighbour to the left said
       // it continues. A day boundary resets it: `continues` never crosses one.
       const previous = s === 0 ? null : (row.cells[i - 1] ?? null);
@@ -164,17 +154,17 @@ const Row = memo(function Row({
       const spans = span > 1;
 
       const className = [
-        s === 0 ? "day-first" : "",
-        spans ? "block-wide" : "",
-        !spans && cell !== null && cell.continues ? "block-cont" : "",
-        inBlock ? "block-in" : "",
-        cell === null && closed ? "unavailable" : "",
+        s === 0 ? 'day-first' : '',
+        spans ? 'block-wide' : '',
+        !spans && cell !== null && cell.continues ? 'block-cont' : '',
+        inBlock ? 'block-in' : '',
+        cell === null && closed ? 'unavailable' : '',
         band.trim(),
-        dayMasked ? "masked-scope" : "",
-        cell?.mask !== undefined ? "masked-scope" : "",
+        dayMasked ? 'masked-scope' : '',
+        cell?.mask !== undefined ? 'masked-scope' : '',
       ]
         .filter(Boolean)
-        .join(" ");
+        .join(' ');
 
       cells.push(
         <td
@@ -195,11 +185,7 @@ const Row = memo(function Row({
           data-span={spans ? span : undefined}
           colSpan={spans ? span : undefined}
           className={className}
-          title={
-            cell !== null && cell.conflict === null
-              ? `${cell.top} ${cell.bottom}`
-              : undefined
-          }
+          title={cell !== null && cell.conflict === null ? `${cell.top} ${cell.bottom}` : undefined}
         >
           {cell !== null ? (
             // A left click used to REMOVE the block, which made moving a lesson
@@ -217,56 +203,49 @@ const Row = memo(function Row({
             <button
               type="button"
               className={
-                (cell.conflict === null ? "card" : "card conflict") +
-                (cell.pinned ? " pinned" : "")
+                (cell.conflict === null ? 'card' : 'card conflict') + (cell.pinned ? ' pinned' : '')
               }
               style={{ background: paletteColor(cell.color) }}
               draggable={false}
               disabled={cellMasked}
               onPointerDown={(e) => {
-                if (!cell.pinned && !cellMasked)
-                  onCellMoveStart(e, row.id, g, s);
+                if (!cell.pinned && !cellMasked) onCellMoveStart(e, row.id, g, s);
               }}
               onClick={(e) => {
                 if (e.detail === 0) onCellRemove(row.id, g, s);
               }}
               onKeyDown={(e) => {
-                if (e.key === "Delete" || e.key === "Backspace") {
+                if (e.key === 'Delete' || e.key === 'Backspace') {
                   e.preventDefault();
                   onCellRemove(row.id, g, s);
                 }
               }}
               aria-label={
                 cell.pinned
-                  ? t("{ust} {alt}, sabitlenmiş", {
+                  ? t('{ust} {alt}, sabitlenmiş', {
                       ust: cell.top,
                       alt: cell.bottom,
                     })
-                  : t("{ust} {alt}, kaldırmak için Delete", {
+                  : t('{ust} {alt}, kaldırmak için Delete', {
                       ust: cell.top,
                       alt: cell.bottom,
                     })
               }
               title={
                 cell.pinned
-                  ? t("Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz")
+                  ? t('Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz')
                   : cell.conflict === null
-                    ? t("Sürükleyerek taşıyın · sağ tık: seçenekler")
-                    : t(
-                        "{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın",
-                        {
-                          sorun: cell.conflict,
-                        },
-                      )
+                    ? t('Sürükleyerek taşıyın · sağ tık: seçenekler')
+                    : t('{sorun}. Sürükleyerek taşıyın, sağ tıkla seçenekleri açın', {
+                        sorun: cell.conflict,
+                      })
               }
             >
               <span className="card-top">{cell.top}</span>
-              {cell.bottom !== "" && (
-                <span className="card-bottom">{cell.bottom}</span>
-              )}
+              {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
             </button>
           ) : closed ? (
-            "×"
+            '×'
           ) : null}
           {/* THE PIN IS A CONTROL NOW, and a SIBLING of the card.
               ("Program kısmında kartların üzerinde sabitleye basınca dersi
@@ -299,19 +278,17 @@ const Row = memo(function Row({
               onClick={() => onCellPin(row.id, g, s)}
               aria-label={
                 cell.pinned
-                  ? t("{ust} {alt}: sabitlemeyi kaldır", {
+                  ? t('{ust} {alt}: sabitlemeyi kaldır', {
                       ust: cell.top,
                       alt: cell.bottom,
                     })
-                  : t("{ust} {alt}: buraya sabitle", {
+                  : t('{ust} {alt}: buraya sabitle', {
                       ust: cell.top,
                       alt: cell.bottom,
                     })
               }
               title={
-                cell.pinned
-                  ? t("Sabitlenmiş. Kaldırmak için tıklayın")
-                  : t("Dersi buraya sabitle")
+                cell.pinned ? t('Sabitlenmiş. Kaldırmak için tıklayın') : t('Dersi buraya sabitle')
               }
             >
               <Pin aria-hidden="true" />
@@ -323,25 +300,19 @@ const Row = memo(function Row({
   }
 
   return (
-    <tr
-      data-row-id={row.id}
-      className={row.mask === "ghost" ? "masked-scope" : undefined}
-    >
+    <tr data-row-id={row.id} className={row.mask === 'ghost' ? 'masked-scope' : undefined}>
       <th className="row-head" scope="row" data-menu-row={row.id}>
         {/* The row's own colour. In the teacher view it repeats the colour of
             the cards in that row, which is what makes a pool card findable; in
             the class view it is the only place a class colour appears at all. */}
-        <span
-          className="row-dot"
-          style={{ background: paletteColor(row.color) }}
-        />
+        <span className="row-dot" style={{ background: paletteColor(row.color) }} />
         {/* The row head IS the entity, so it is what opens its sheet: from the
             grid, "what does MÇ's whole week look like" used to mean reading a
             row 78 columns long by eye. */}
         <button
           className="inspect"
           onClick={() => inspect(row.kind, row.id)}
-          title={t("{ad}: bilgileri ve haftalık programı", { ad: row.name })}
+          title={t('{ad}: bilgileri ve haftalık programı', { ad: row.name })}
         >
           {row.name}
         </button>
@@ -359,12 +330,7 @@ interface Props {
   dayModes: Record<string, MaskMode>;
   firstColumnTitle: string;
   onCellRemove: (rowId: string, day: number, hour: number) => void;
-  onCellMoveStart: (
-    e: React.PointerEvent,
-    rowId: string,
-    day: number,
-    hour: number,
-  ) => void;
+  onCellMoveStart: (e: React.PointerEvent, rowId: string, day: number, hour: number) => void;
   onCellPin: (rowId: string, day: number, hour: number) => void;
   /**
    * A right click landed on a placed card: which one. Called BEFORE the menu
@@ -407,10 +373,7 @@ function GridInner({
       settings.days.map((day) => ({
         periods: dayPeriods(settings.bell, settings.hours, day.longBreakAfter),
         // The break is drawn on the LEFT edge of the period that follows it.
-        breakAt:
-          day.longBreakAfter > 0 && day.longBreakAfter < hourCount
-            ? day.longBreakAfter
-            : -1,
+        breakAt: day.longBreakAfter > 0 && day.longBreakAfter < hourCount ? day.longBreakAfter : -1,
       })),
     [settings.days, settings.bell, settings.hours, hourCount],
   );
@@ -430,9 +393,8 @@ function GridInner({
   // Pazartesi. The design rule bans a MEASUREMENT written in the JSX; these are
   // how many columns there are, which is data the stylesheet cannot know.
   const columns = {
-    "--lesson-cols": dayCount * hourCount,
-    "--break-cols": dayIndices.filter((day) => (breakAt[day] ?? -1) >= 0)
-      .length,
+    '--lesson-cols': dayCount * hourCount,
+    '--break-cols': dayIndices.filter((day) => (breakAt[day] ?? -1) >= 0).length,
   } as React.CSSProperties;
 
   /**
@@ -453,35 +415,34 @@ function GridInner({
     // Through the CELL and not through `.card`, because the card is no longer
     // the only thing in it: a right click that landed on the pin used to find
     // no `.card` above it, fall through every other branch and open nothing.
-    const td = element.closest?.("td[data-row]") as
-      HTMLElement | null | undefined;
-    const card = td?.querySelector(".card") ?? null;
+    const td = element.closest?.('td[data-row]') as HTMLElement | null | undefined;
+    const card = td?.querySelector('.card') ?? null;
     if (card != null && td != null) {
       onMenu({
-        kind: "card",
-        rowId: td.dataset.row ?? "",
+        kind: 'card',
+        rowId: td.dataset.row ?? '',
         day: Number(td.dataset.day),
         hour: Number(td.dataset.hour),
       });
       return;
     }
-    const row = element.closest?.("[data-menu-row]") as HTMLElement | null;
+    const row = element.closest?.('[data-menu-row]') as HTMLElement | null;
     if (row !== null) {
-      onMenu({ kind: "row", rowId: row.dataset.menuRow ?? "" });
+      onMenu({ kind: 'row', rowId: row.dataset.menuRow ?? '' });
       return;
     }
-    const hour = element.closest?.("[data-menu-hour]") as HTMLElement | null;
+    const hour = element.closest?.('[data-menu-hour]') as HTMLElement | null;
     if (hour !== null) {
       onMenu({
-        kind: "column",
+        kind: 'column',
         day: Number(hour.dataset.menuDay),
         hour: Number(hour.dataset.menuHour),
       });
       return;
     }
-    const day = element.closest?.("[data-menu-day]") as HTMLElement | null;
+    const day = element.closest?.('[data-menu-day]') as HTMLElement | null;
     if (day !== null) {
-      onMenu({ kind: "day", day: Number(day.dataset.menuDay) });
+      onMenu({ kind: 'day', day: Number(day.dataset.menuDay) });
       return;
     }
     e.preventDefault();
@@ -491,10 +452,7 @@ function GridInner({
     <div className="grid-wrap" ref={wrapRef}>
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <table
-            className="grid"
-            style={columns}
-          >
+          <table className="grid" style={columns}>
             {/* Explicit columns make `table-layout: fixed` an actual contract.
                 In Sığdır the table owns exactly the container width; card text
                 may ellipsize, but it cannot impose a min-content floor. */}
@@ -521,7 +479,7 @@ function GridInner({
                       key={g}
                       data-menu-day={g}
                       colSpan={hourCount + ((breakAt[g] ?? -1) >= 0 ? 1 : 0)}
-                      className={`${visibleDay % 2 === 1 ? "day-head band" : "day-head"}${dayModes[day.name] === "ghost" ? " masked-scope" : ""}`}
+                      className={`${visibleDay % 2 === 1 ? 'day-head band' : 'day-head'}${dayModes[day.name] === 'ghost' ? ' masked-scope' : ''}`}
                     >
                       {dayLabel(day.name)}
                     </th>
@@ -535,12 +493,8 @@ function GridInner({
                       ? [
                           <th
                             key={`break-${g}`}
-                            className={
-                              visibleDay % 2 === 1
-                                ? "break-col band"
-                                : "break-col"
-                            }
-                            title={t("Öğle arası")}
+                            className={visibleDay % 2 === 1 ? 'break-col band' : 'break-col'}
+                            title={t('Öğle arası')}
                           />,
                         ]
                       : []),
@@ -556,25 +510,21 @@ function GridInner({
                       data-menu-hour={s}
                       className={
                         [
-                          s === 0 ? "day-first" : "",
-                          visibleDay % 2 === 1 ? "band" : "",
-                          dayModes[settings.days[g]?.name ?? ""] === "ghost"
-                            ? "masked-scope"
-                            : "",
+                          s === 0 ? 'day-first' : '',
+                          visibleDay % 2 === 1 ? 'band' : '',
+                          dayModes[settings.days[g]?.name ?? ''] === 'ghost' ? 'masked-scope' : '',
                         ]
                           .filter(Boolean)
-                          .join(" ") || undefined
+                          .join(' ') || undefined
                       }
                       title={
                         clocks[g] === undefined
                           ? undefined
-                          : `${clocks[g]?.periods[s]?.start ?? ""}–${clocks[g]?.periods[s]?.end ?? ""}`
+                          : `${clocks[g]?.periods[s]?.start ?? ''}–${clocks[g]?.periods[s]?.end ?? ''}`
                       }
                     >
                       {hour}
-                      <span className="hour-clock">
-                        {clocks[g]?.periods[s]?.start ?? ""}
-                      </span>
+                      <span className="hour-clock">{clocks[g]?.periods[s]?.start ?? ''}</span>
                     </th>,
                   ]),
                 )}

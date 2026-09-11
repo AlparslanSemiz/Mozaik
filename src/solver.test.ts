@@ -35,8 +35,26 @@ function build(): State {
       { id: 'dB', name: 'B' },
     ],
     teachers: [
-      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '', color: 0, limits: { ...NO_TEACHER_LIMITS } },
-      { id: 'oAV', name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '', color: 1, limits: { ...NO_TEACHER_LIMITS } },
+      {
+        id: 'oMC',
+        name: 'Mehmet Çelik',
+        short: 'MÇ',
+        subject: 'Matematik',
+        subject2: '',
+        gender: '',
+        color: 0,
+        limits: { ...NO_TEACHER_LIMITS },
+      },
+      {
+        id: 'oAV',
+        name: 'Ayşe Var',
+        short: 'AV',
+        subject: 'Fizik',
+        subject2: '',
+        gender: '',
+        color: 1,
+        limits: { ...NO_TEACHER_LIMITS },
+      },
     ],
     classes: [
       { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
@@ -44,9 +62,33 @@ function build(): State {
       { id: 's433', name: '433', roomId: 'dB', color: 2, maxSameLessonPerDay: null },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blocks: [], second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oAV', weeklyHours: 2, blocks: [], second: false, maxPerDay: null },
-      { id: 'x3', classId: 's433', teacherId: 'oMC', weeklyHours: 2, blocks: [2], second: false, maxPerDay: null },
+      {
+        id: 'x1',
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: 3,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x2',
+        classId: 's511',
+        teacherId: 'oAV',
+        weeklyHours: 2,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x3',
+        classId: 's433',
+        teacherId: 'oMC',
+        weeklyHours: 2,
+        blocks: [2],
+        second: false,
+        maxPerDay: null,
+      },
     ],
     unavailable: {},
     programs: [blankProgram()],
@@ -54,7 +96,12 @@ function build(): State {
   };
 }
 
-function withRule(d: State, name: keyof State['settings']['limits'], limit: number, level: RuleLevel): State {
+function withRule(
+  d: State,
+  name: keyof State['settings']['limits'],
+  limit: number,
+  level: RuleLevel,
+): State {
   return {
     ...d,
     settings: {
@@ -95,7 +142,9 @@ describe('solve — küçük dünya', () => {
   it('aynı girdi aynı çıktıyı veriyor — rastgelelik yok', () => {
     const a = solve(build());
     const b = solve(build());
-    expect(Object.keys(activeProgram(a.state).placements).sort()).toEqual(Object.keys(activeProgram(b.state).placements).sort());
+    expect(Object.keys(activeProgram(a.state).placements).sort()).toEqual(
+      Object.keys(activeProgram(b.state).placements).sort(),
+    );
     expect(activeProgram(a.state).placements).toEqual(activeProgram(b.state).placements);
   });
 
@@ -116,8 +165,12 @@ describe('solve — küçük dünya', () => {
     const result = solve(build());
     const block = blocksOf(result.state).find((b) => b.lessonId === 'x3')!;
     expect(block.hour + 2).toBeLessThanOrEqual(4);
-    expect(activeProgram(result.state).placements[placementKey('s433', block.day, block.hour)]).toBe('x3');
-    expect(activeProgram(result.state).placements[placementKey('s433', block.day, block.hour + 1)]).toBe('x3');
+    expect(
+      activeProgram(result.state).placements[placementKey('s433', block.day, block.hour)],
+    ).toBe('x3');
+    expect(
+      activeProgram(result.state).placements[placementKey('s433', block.day, block.hour + 1)],
+    ).toBe('x3');
   });
 
   it('dersi haftaya yayıyor, tek güne yığmıyor', () => {
@@ -129,7 +182,15 @@ describe('solve — küçük dünya', () => {
       teachers: [build().teachers[0]!],
       classes: [build().classes[0]!],
       lessons: [
-        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3, blocks: [], second: false, maxPerDay: null },
+        {
+          id: 'x1',
+          classId: 's510',
+          teacherId: 'oMC',
+          weeklyHours: 3,
+          blocks: [],
+          second: false,
+          maxPerDay: null,
+        },
       ],
       settings: {
         ...build().settings,
@@ -204,7 +265,9 @@ describe('solve — yerleşmişleri koruma', () => {
     const result = solve(d, { keepPlaced: false });
     // Not an assertion about where it lands, only that the pin is what saved
     // the cell in the test above and not some accident of the search order.
-    expect(Object.keys(activeProgram(result.state).placements)).not.toEqual(Object.keys(activeProgram(d).placements));
+    expect(Object.keys(activeProgram(result.state).placements)).not.toEqual(
+      Object.keys(activeProgram(d).placements),
+    );
   });
 
   it('kapalı saatte kalmış dersi silmiyor (veri kaybı olmaz ilkesi)', () => {
@@ -220,7 +283,8 @@ describe('solve — tıkanma', () => {
     let d = build();
     // AV cannot come at all: x2 has nowhere to go.
     for (let g = 0; g < 2; g++) {
-      for (let h = 0; h < 4; h++) d = { ...d, unavailable: { ...d.unavailable, [`oAV|${g}|${h}`]: 1 } };
+      for (let h = 0; h < 4; h++)
+        d = { ...d, unavailable: { ...d.unavailable, [`oAV|${g}|${h}`]: 1 } };
     }
 
     const result = solve(d);
@@ -388,7 +452,6 @@ describe('solve — gerçek ölçek', () => {
   }, 30_000);
 });
 
-
 // ---------------------------------------------------------------------------
 // The world matrix.
 //
@@ -433,7 +496,9 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
 
     // 4. Every hand-placed block is exactly where it was left.
     for (const [key, lessonId] of Object.entries(activeProgram(world.state).placements)) {
-      expect(activeProgram(first.state).placements[key], `${world.name}: ${key} kaydı`).toBe(lessonId);
+      expect(activeProgram(first.state).placements[key], `${world.name}: ${key} kaydı`).toBe(
+        lessonId,
+      );
     }
   });
 

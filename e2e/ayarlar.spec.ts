@@ -45,9 +45,7 @@ test.describe('6. Gün ve ders saatleri', () => {
       `tr[class] td[data-row="${placed.row}"][data-day="${day + 1}"][data-hour="${hour}"] .card`,
     );
     await expect(moved).toHaveCount(1);
-    await expect(
-      page.locator(`td[data-row="${placed.row}"][data-day="0"] .card`),
-    ).toHaveCount(0);
+    await expect(page.locator(`td[data-row="${placed.row}"][data-day="0"] .card`)).toHaveCount(0);
   });
 
   test('zil saatleri ızgarada ve önizlemede görünüyor, ayar değişince ikisi de değişiyor', async ({
@@ -94,11 +92,7 @@ test.describe('6. Gün ve ders saatleri', () => {
  */
 async function makeColourGap(page: Page) {
   await openSetup(page, 'Öğretmenler');
-  await page
-    .locator('table.list tbody tr')
-    .nth(1)
-    .getByRole('button', { name: 'Sil' })
-    .click();
+  await page.locator('table.list tbody tr').nth(1).getByRole('button', { name: 'Sil' }).click();
   await answerDialog(page);
   await expect(page.locator('.cols aside')).toContainText('Renkler');
 }
@@ -142,7 +136,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     expect(steps.join(' ')).not.toContain('Dersler');
   });
 
-  test('Ayarlar\'dan değişen zil saati ızgaraya geçiyor', async ({ page }) => {
+  test("Ayarlar'dan değişen zil saati ızgaraya geçiyor", async ({ page }) => {
     await openWithSample(page);
     const firstHour = page.locator('table.grid thead .hour-clock').first();
     await expect(firstHour).toHaveText('09:00');
@@ -157,7 +151,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     await expect(page.locator('table.grid thead .hour-clock').nth(1)).toHaveText('09:55');
   });
 
-  test('Ayarlar\'dan değişen kural sürüklemeyi hemen etkiliyor', async ({ page }) => {
+  test("Ayarlar'dan değişen kural sürüklemeyi hemen etkiliyor", async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Kurallar');
     await page
@@ -175,9 +169,7 @@ test.describe('15. Ayarlar sekmesi', () => {
     await page.keyboard.press('Escape');
   });
 
-  test('renkleri yeniden dağıt düğmesi programı bozmadan renkleri düzeltiyor', async ({
-    page,
-  }) => {
+  test('renkleri yeniden dağıt düğmesi programı bozmadan renkleri düzeltiyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);
     const placed = await page.locator('table.grid .card').count();
@@ -228,7 +220,20 @@ test.describe('17. Başlangıç saati', () => {
     expect(hours.join(' ')).not.toContain('PM');
 
     const minutes = await minute.locator('option').allInnerTexts();
-    expect(minutes).toEqual(['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55']);
+    expect(minutes).toEqual([
+      '00',
+      '05',
+      '10',
+      '15',
+      '20',
+      '25',
+      '30',
+      '35',
+      '40',
+      '45',
+      '50',
+      '55',
+    ]);
   });
 
   test('seçilen saat ızgaraya ve zil önizlemesine geçiyor', async ({ page }) => {
@@ -243,14 +248,15 @@ test.describe('17. Başlangıç saati', () => {
     await expect(page.locator('table.grid thead .hour-clock').first()).toHaveText('14:35');
   });
 
-  test('boş bırakılıp 00:00\'a düşme tuzağı kalmadı', async ({ page }) => {
+  test("boş bırakılıp 00:00'a düşme tuzağı kalmadı", async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Zil ve günler');
     // There is no empty option to choose, in either dropdown.
     for (const label of ['Başlangıç saati', 'Başlangıç dakikası']) {
-      const values = await page.getByLabel(label).locator('option').evaluateAll((list) =>
-        list.map((el) => (el as HTMLOptionElement).value),
-      );
+      const values = await page
+        .getByLabel(label)
+        .locator('option')
+        .evaluateAll((list) => list.map((el) => (el as HTMLOptionElement).value));
       expect(values).not.toContain('');
     }
     await expect(page.locator('table.bell-preview')).toContainText('09:00–09:40');
@@ -263,10 +269,7 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
 
     await page.getByRole('button', { name: 'Müsaitlik' }).click();
     await page.getByRole('button', { name: 'Sınıf', exact: true }).click();
-    await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute(
-      'data-id',
-      's510',
-    );
+    await expect(page.locator('.entity[aria-current="true"]')).toHaveAttribute('data-id', 's510');
     // row = 1st day, column = 1st hour (the axis was turned in v0.7)
     await page.locator('table.availability tbody tr').first().locator('td').first().click();
     await page.mouse.up();
@@ -343,9 +346,9 @@ test.describe('7. Sınıf müsaitliği ve kurallar', () => {
     // What was allowed through is listed in Kontrol.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('heading', { name: /Kural ihlalleri/ })).toBeVisible();
-    await expect(
-      page.locator('.panel', { hasText: 'Kural ihlalleri' }),
-    ).toContainText('MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.');
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
+      'MÇ Salı günü art arda 2 saat ders veriyor, en fazla 1 saat isteniyor.',
+    );
   });
 });
 
@@ -419,7 +422,11 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     await count.blur();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    const perDay = await page.locator('table.grid thead tr').nth(1).locator('th:not(.break-col)').count();
+    const perDay = await page
+      .locator('table.grid thead tr')
+      .nth(1)
+      .locator('th:not(.break-col)')
+      .count();
     expect(perDay).toBe(14 * 6);
   });
 
@@ -530,13 +537,12 @@ test.describe('33. Ayarlar — kurallar', () => {
     // A gap rule can never block a drop (v14, same reason as minPerDay) — the
     // grid the world arrived with is untouched, no drag needed.
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await page.locator('.ribbon').getByRole('button', { name: /^Sorunlar/ }).click();
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
-      'MÇ',
-    );
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
-      'boşlukta',
-    );
+    await page
+      .locator('.ribbon')
+      .getByRole('button', { name: /^Sorunlar/ })
+      .click();
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('MÇ');
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('boşlukta');
   });
 
   test('sağ sütun ihlalleri canlı sayıyor', async ({ page }) => {

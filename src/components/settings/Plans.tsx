@@ -105,14 +105,14 @@ export default function Plans({ state, plans }: Props) {
       </p>
       <div className="form-row">
         <button className="btn" onClick={() => plans.createPlan('Boş plan', emptyState())}>
-          {t(
-            'Boş plan',
-          )}
+          {t('Boş plan')}
         </button>
         <button
           className="btn"
           onClick={() => plans.createPlan(`${active?.name ?? 'Plan'} kopyası`, state)}
-        >{t('Bu planın kopyası')}</button>
+        >
+          {t('Bu planın kopyası')}
+        </button>
         <button
           className="btn"
           title={t('Öğretmenler, sınıflar ve dersler kalır; dizilmiş program boşalır')}
@@ -125,7 +125,9 @@ export default function Plans({ state, plans }: Props) {
               true,
             )
           }
-        >{t('Taslak olarak kaydet')}</button>
+        >
+          {t('Taslak olarak kaydet')}
+        </button>
       </div>
 
       <table className="list">
@@ -183,7 +185,9 @@ export default function Plans({ state, plans }: Props) {
                     className="btn"
                     disabled={plan.id === planId}
                     onClick={() => plans.switchPlan(plan.id)}
-                  >{t('Bu plana geç')}</button>
+                  >
+                    {t('Bu plana geç')}
+                  </button>
                   <button
                     className="btn danger"
                     disabled={library.plans.length <= 1}
@@ -193,7 +197,9 @@ export default function Plans({ state, plans }: Props) {
                         : t('Bu planı tamamen siler')
                     }
                     onClick={() => remove(plan.id, plan.name)}
-                  >{t('Sil')}</button>
+                  >
+                    {t('Sil')}
+                  </button>
                 </div>
               </td>
             </tr>

@@ -107,15 +107,21 @@ export default function Setup({ state, change, plans, step }: Props) {
                 onClick={async () => {
                   if (await loadSample(state, change)) setIntroSeen(true);
                 }}
-              >{t('Örnek veriyle doldur')}</button>
+              >
+                {t('Örnek veriyle doldur')}
+              </button>
               <button
                 className="btn quiet"
-                title={t('Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder')}
+                title={t(
+                  'Bu satır bir daha çıkmaz; örnek veri Ayarlar → Hakkında’da durmaya devam eder',
+                )}
                 onClick={() => {
                   markIntroSeen();
                   setIntroSeen(true);
                 }}
-              >{t('Bir daha gösterme')}</button>
+              >
+                {t('Bir daha gösterme')}
+              </button>
             </p>
           )}
 

@@ -50,9 +50,7 @@ test.describe('48. Varlık paneli', () => {
         return new Array<string>(Number(td.getAttribute('colspan')) || 1).fill(label);
       });
     });
-    const fromSheet = await sheet
-      .locator('.sheet-week tbody .sheet-cell-top')
-      .allInnerTexts();
+    const fromSheet = await sheet.locator('.sheet-week tbody .sheet-cell-top').allInnerTexts();
     expect(fromSheet.length).toBeGreaterThan(0);
     expect(fromSheet).toEqual(fromGrid);
 
@@ -78,9 +76,7 @@ test.describe('48. Varlık paneli', () => {
     ).not.toHaveClass(/tight/);
   });
 
-  test('derslikten açılınca hangi sınıfların paylaştığını ADLARIYLA söylüyor', async ({
-    page,
-  }) => {
+  test('derslikten açılınca hangi sınıfların paylaştığını ADLARIYLA söylüyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Derslikler');
     await mainList(page)
@@ -116,9 +112,7 @@ test.describe('48. Varlık paneli', () => {
     await page.getByRole('button', { name: 'Tümünü kapat' }).click();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await page
-      .locator(`table.grid tbody tr:has(td[data-row="${id}"]) .row-head .inspect`)
-      .click();
+    await page.locator(`table.grid tbody tr:has(td[data-row="${id}"]) .row-head .inspect`).click();
 
     // The lesson is NOT removed (no-data-loss principle) — it is marked, here as well as
     // on the grid, because this is now the easiest place to notice it.
@@ -290,7 +284,9 @@ test.describe('87. Panelden düzenleme', () => {
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
   }
 
-  test('karttan "Öğretmeni düzenle" o hocayı açıyor, kısaltma ızgarayı DEĞİŞTİRİYOR', async ({ page }) => {
+  test('karttan "Öğretmeni düzenle" o hocayı açıyor, kısaltma ızgarayı DEĞİŞTİRİYOR', async ({
+    page,
+  }) => {
     await laidOut(page);
 
     const head = page.locator('table.grid .row-head .inspect').first();
@@ -322,7 +318,9 @@ test.describe('87. Panelden düzenleme', () => {
     await expect(sheet(page).getByRole('combobox', { name: 'Derslik' })).toBeVisible();
   });
 
-  test('dersin SINIFI ders penceresinden değişiyor, ve önce ne kaybedileceği soruluyor', async ({ page }) => {
+  test('dersin SINIFI ders penceresinden değişiyor, ve önce ne kaybedileceği soruluyor', async ({
+    page,
+  }) => {
     await laidOut(page);
 
     await page.locator('table.grid .card').first().click({ button: 'right' });

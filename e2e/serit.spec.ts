@@ -26,9 +26,7 @@ import { makeWorld } from '../src/worlds';
 // to bring a strip with it, at the same height, opening with a caption, with a
 // symbol and a word on every button — otherwise arriving there moves
 // everything underneath.
-const TABS = [
-  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
-] as const;
+const TABS = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'] as const;
 
 /** What the strip IS right now, read in one round trip. */
 async function strip(page: Page) {
@@ -119,7 +117,9 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
     ).toBeLessThanOrEqual(1);
   });
 
-  test('her şerit bir başlıkla açılıyor ve her düğmede simge de kelime de var', async ({ page }) => {
+  test('her şerit bir başlıkla açılıyor ve her düğmede simge de kelime de var', async ({
+    page,
+  }) => {
     await openWithSample(page);
 
     for (const tab of TABS) {
@@ -215,10 +215,7 @@ test.describe('57. Araç şeridi — yedi sekme, tek iskelet', () => {
       await go(page, tab);
       const bar = (await strip(page))!;
       heights.push(bar.height);
-      expect(
-        bar.buttonHeights,
-        `${tab} %150'de düğme yükseklikleri ayrışıyor`,
-      ).toHaveLength(1);
+      expect(bar.buttonHeights, `${tab} %150'de düğme yükseklikleri ayrışıyor`).toHaveLength(1);
 
       // Every control on the strip has to still be reachable by the pointer.
       const spill = await page.evaluate(() => {
@@ -427,7 +424,12 @@ test.describe('60. Ayarlar şeridinin SAĞ ucu', () => {
         if (after.length === 0) return null;
         const box = bar.getBoundingClientRect();
         return {
-          text: after.map((k) => k.textContent ?? '').join(' ').split(/\s+/).join(' ').trim(),
+          text: after
+            .map((k) => k.textContent ?? '')
+            .join(' ')
+            .split(/\s+/)
+            .join(' ')
+            .trim(),
           // Past the middle of the strip: "sağ üstte" is the request itself.
           rightOfCentre: after[0]!.getBoundingClientRect().left > box.left + box.width / 2,
           spill: after.some((k) => k.getBoundingClientRect().right > box.right + 1),
@@ -501,10 +503,13 @@ test.describe('59. Şeritteki simgeler', () => {
     await openSettings(page, 'Görünüm');
 
     const inkMatches = async () =>
-      page.locator('.ribbon .btn').first().evaluate((b) => {
-        const svg = b.querySelector('svg')!;
-        return getComputedStyle(svg).color === getComputedStyle(b).color;
-      });
+      page
+        .locator('.ribbon .btn')
+        .first()
+        .evaluate((b) => {
+          const svg = b.querySelector('svg')!;
+          return getComputedStyle(svg).color === getComputedStyle(b).color;
+        });
 
     expect(await inkMatches()).toBe(true);
     await page.getByRole('button', { name: 'Koyu tema', exact: true }).click();

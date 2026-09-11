@@ -12,7 +12,11 @@ export function blankProgram(
 
 /** State is sanitized on every entrance; this fallback only keeps bad callers safe. */
 export function activeProgram(d: State): ProgramVariant {
-  return d.programs.find((program) => program.id === d.activeProgramId) ?? d.programs[0] ?? blankProgram();
+  return (
+    d.programs.find((program) => program.id === d.activeProgramId) ??
+    d.programs[0] ??
+    blankProgram()
+  );
 }
 
 export const activePlacements = (d: State): Record<string, Id> => activeProgram(d).placements;
@@ -68,11 +72,7 @@ export function validProgramName(
     : clean;
 }
 
-export function addProgram(
-  d: State,
-  program: ProgramVariant,
-  activate = true,
-): State {
+export function addProgram(d: State, program: ProgramVariant, activate = true): State {
   const name = validProgramName(d.programs, program.name);
   if (name === null || d.programs.some((item) => item.id === program.id)) return d;
   return {

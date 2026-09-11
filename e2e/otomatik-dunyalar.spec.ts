@@ -72,9 +72,7 @@ test.describe('37. Otomatik dizme — dünya dünya', () => {
         await expect(bar).toContainText('Program dizildi');
         await expect(page.locator('.pool-card')).toHaveCount(0);
         for (const lesson of world.state.lessons) {
-          expect(hoursOf(saved, lesson.id), `${world.name}: ${lesson.id}`).toBe(
-            lesson.weeklyHours,
-          );
+          expect(hoursOf(saved, lesson.id), `${world.name}: ${lesson.id}`).toBe(lesson.weeklyHours);
         }
       } else {
         await expect(bar).toContainText('yerleşemedi');
@@ -126,7 +124,9 @@ test.describe('38. Otomatik dizme — dünyalar arası davranış', () => {
     await expect(page.locator('table.grid .card')).toHaveCount(placed);
   });
 
-  test('elle konmuş bloklar yerinde kalıyor, kapalı saatteki bile (veri kaybı olmaz ilkesi)', async ({ page }) => {
+  test('elle konmuş bloklar yerinde kalıyor, kapalı saatteki bile (veri kaybı olmaz ilkesi)', async ({
+    page,
+  }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'elle-konmus')!;
     await loadWorld(page, world.state);
     const before = await autoFill(page);

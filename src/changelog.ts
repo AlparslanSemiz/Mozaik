@@ -32,7 +32,7 @@ export const SURUM_NOTLARI: SurumNotu[] = [
       'Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.',
       'Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası "4…" değil "411" okunuyor.',
       'Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.',
-      'Yazı büyüklüğü yüzde 100\'ün altındayken kart yazısı da onunla birlikte küçülüyor.',
+      "Yazı büyüklüğü yüzde 100'ün altındayken kart yazısı da onunla birlikte küçülüyor.",
     ],
   },
   {

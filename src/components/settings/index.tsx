@@ -76,7 +76,6 @@ export default function Settings({
   update,
   onChangelogSeen,
 }: Props) {
-
   return (
     <>
       {section === 'school' && <School state={state} change={change} />}

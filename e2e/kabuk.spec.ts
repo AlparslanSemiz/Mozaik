@@ -166,8 +166,10 @@ test.describe('76. Marka işareti — üst çubuğun sol ucu', () => {
       // 22.75px keeps the mark inside the band the icon threshold was measured
       // in (20-32px: "blurry but the columns are still told apart"), which is
       // why it draws the SIMPLE variant — see the icon table in docs/BUILD.md.
-      expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`)
-        .toBeCloseTo(scale === 100 ? 22.75 : 34.125, 0);
+      expect(facts.width, `%${scale}: işaret ölçeği izlemiyor`).toBeCloseTo(
+        scale === 100 ? 22.75 : 34.125,
+        0,
+      );
       // Pitfall 48: a seventh thing on this row must not push the tabs out of
       // their own box. Nothing gives way for it — it has to fit.
       expect(facts.tabOver, `%${scale}: sekmeler kutusundan taştı`).toBeLessThanOrEqual(0);
@@ -388,8 +390,10 @@ test.describe('83. Yan sütun sayfanın boyunu belirlemiyor', () => {
     expect(m.panelOver, 'bu ekranda özet hâlâ sığıyor — ölçülecek bir şey yok').toBeGreaterThan(20);
     // Two rows and their heading. A list shrunk to nothing is not a list, and
     // nothing on the screen would say it had been there.
-    expect(m.listHeight, `liste ${m.listHeight}px'e ezilmiş (taban ${m.floor})`)
-      .toBeGreaterThanOrEqual(m.floor - 1);
+    expect(
+      m.listHeight,
+      `liste ${m.listHeight}px'e ezilmiş (taban ${m.floor})`,
+    ).toBeGreaterThanOrEqual(m.floor - 1);
 
     const before = await panel.locator('h2').boundingBox();
     await panel.evaluate((el) => el.scrollTo(0, 400));

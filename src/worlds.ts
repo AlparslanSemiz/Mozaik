@@ -10,13 +10,7 @@
 // in Node, e2e/otomatik-dunyalar.spec.ts loads the same worlds into the built
 // file:// page and audits what the real button left in localStorage.
 
-import {
-  blockAt,
-  blocker,
-  buildIndex,
-  placementKey,
-  liftBlock,
-} from './constraints';
+import { blockAt, blocker, buildIndex, placementKey, liftBlock } from './constraints';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
@@ -114,9 +108,9 @@ export function makeWorld(spec: WorldSpec = {}): State {
     limits: t.limits ?? { ...NO_TEACHER_LIMITS },
   }));
 
-  const classes: ClassGroup[] = (
-    spec.classes ?? [{ id: 's510', name: '510', roomId: 'dA' }]
-  ).map((c, i) => ({ maxSameLessonPerDay: null, ...c, color: i }));
+  const classes: ClassGroup[] = (spec.classes ?? [{ id: 's510', name: '510', roomId: 'dA' }]).map(
+    (c, i) => ({ maxSameLessonPerDay: null, ...c, color: i }),
+  );
 
   const lessons: Lesson[] = (spec.lessons ?? []).map((x) => ({
     id: x.id,
@@ -608,12 +602,23 @@ function delikDesik(): State {
   // A fixed comb, not a random one: the same world every run (principle: a bug
   // found here has to be reproducible).
   const holes: Array<[Id, number, number]> = [
-    ['oMC', 0, 0], ['oMC', 2, 5], ['oMC', 4, 3],
-    ['oAV', 1, 1], ['oAV', 3, 4], ['oAV', 4, 0],
-    ['oKY', 0, 2], ['oKY', 2, 2], ['oKY', 3, 5],
-    ['oYG', 1, 3], ['oYG', 2, 0], ['oYG', 4, 4],
-    ['s510', 3, 0], ['s511', 1, 5], ['s512', 0, 4],
-    ['dA', 2, 3], ['dB', 3, 1],
+    ['oMC', 0, 0],
+    ['oMC', 2, 5],
+    ['oMC', 4, 3],
+    ['oAV', 1, 1],
+    ['oAV', 3, 4],
+    ['oAV', 4, 0],
+    ['oKY', 0, 2],
+    ['oKY', 2, 2],
+    ['oKY', 3, 5],
+    ['oYG', 1, 3],
+    ['oYG', 2, 0],
+    ['oYG', 4, 4],
+    ['s510', 3, 0],
+    ['s511', 1, 5],
+    ['s512', 0, 4],
+    ['dA', 2, 3],
+    ['dB', 3, 1],
   ];
   for (const [id, g, s] of holes) d = closeHours(d, id, [[g, s]]);
   return d;
@@ -785,9 +790,21 @@ function parcalanmisGunler(): State {
       { id: 'x6', classId: 's511', teacherId: 'oMC', weeklyHours: 6, blockSize: 1 },
     ],
   });
-  d = closeHours(d, 'oMC', [[0, 2], [1, 0], [3, 4]]);
-  d = closeHours(d, 'oAV', [[0, 4], [2, 1], [3, 0]]);
-  d = closeHours(d, 'oKY', [[1, 3], [2, 4], [3, 2]]);
+  d = closeHours(d, 'oMC', [
+    [0, 2],
+    [1, 0],
+    [3, 4],
+  ]);
+  d = closeHours(d, 'oAV', [
+    [0, 4],
+    [2, 1],
+    [3, 0],
+  ]);
+  d = closeHours(d, 'oKY', [
+    [1, 3],
+    [2, 4],
+    [3, 2],
+  ]);
   return d;
 }
 

@@ -19,7 +19,12 @@ s = s.replace(/ (role|aria-label)="[^"]*"/g, '').replace(/#ffffff/g, '#fff');
 
 const uri =
   'data:image/svg+xml,' +
-  s.replace(/"/g, "'").replace(/</g, '%3C').replace(/>/g, '%3E').replace(/#/g, '%23').replace(/ /g, '%20');
+  s
+    .replace(/"/g, "'")
+    .replace(/</g, '%3C')
+    .replace(/>/g, '%3E')
+    .replace(/#/g, '%23')
+    .replace(/ /g, '%20');
 
 // The comment is deliberately three lines: an HTML comment is the one kind of
 // comment this project SHIPS — JS and CSS are minified, this is not — and the

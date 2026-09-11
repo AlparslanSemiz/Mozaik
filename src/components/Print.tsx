@@ -59,7 +59,6 @@ export type Excluded = { classes: Set<string>; teachers: Set<string> };
 
 export const NOTHING_EXCLUDED: Excluded = { classes: new Set(), teachers: new Set() };
 
-
 /**
  * ONE SHEET OF A4 holds `per` timetables (asked for on 2026-08-26: "bir A4
  * kağıdına 4 tane program yazılabilir olsun").
@@ -129,100 +128,102 @@ export default function Print({
   );
 
   /**
- * The small line under the title: whose sheet this is. Empty parts are dropped,
- * so a school with no name does not print a stray separator.
- */
-/**
- * How many hours the ONE printed cell starting at this hour stands for.
- *
- * 0 means "do not draw it": a block to the left already covers this hour. 1 is
- * an ordinary cell. Anything more is a merged block, drawn on paper the way the
- * screen grid draws it, from the same `blockSpans()` map — so a run of hours is
- * never cut in one place on screen and another on paper.
- *
- * CUT AT THE LONG BREAK, for a reason of its own. On screen the break is a
- * column of its own and swallowing it inside a colSpan would make it a drop
- * target (pitfall 13); on paper it is a thick right edge on one cell, and a
- * colSpan straddling it would put that edge through the middle of a block. Both
- * drawings therefore end a cell at the break, which is also the honest reading:
- * there really is something between those hours.
- */
-function cellSpan(
-  spans: Map<string, number>,
-  state: State,
-  classId: string,
-  day: number,
-  hour: number,
-  longBreakAfter: number,
-): number {
-  if (classId === '') return 1;
-  const here = activePlacements(state)[placementKey(classId, day, hour)];
-  if (here === undefined) return 1;
+   * The small line under the title: whose sheet this is. Empty parts are dropped,
+   * so a school with no name does not print a stray separator.
+   */
+  /**
+   * How many hours the ONE printed cell starting at this hour stands for.
+   *
+   * 0 means "do not draw it": a block to the left already covers this hour. 1 is
+   * an ordinary cell. Anything more is a merged block, drawn on paper the way the
+   * screen grid draws it, from the same `blockSpans()` map — so a run of hours is
+   * never cut in one place on screen and another on paper.
+   *
+   * CUT AT THE LONG BREAK, for a reason of its own. On screen the break is a
+   * column of its own and swallowing it inside a colSpan would make it a drop
+   * target (pitfall 13); on paper it is a thick right edge on one cell, and a
+   * colSpan straddling it would put that edge through the middle of a block. Both
+   * drawings therefore end a cell at the break, which is also the honest reading:
+   * there really is something between those hours.
+   */
+  function cellSpan(
+    spans: Map<string, number>,
+    state: State,
+    classId: string,
+    day: number,
+    hour: number,
+    longBreakAfter: number,
+  ): number {
+    if (classId === '') return 1;
+    const here = activePlacements(state)[placementKey(classId, day, hour)];
+    if (here === undefined) return 1;
 
-  const head = spans.get(placementKey(classId, day, hour));
-  if (head === undefined) {
-    // Not a block head. It is drawn on its own only if the break cut the block
-    // just before it — otherwise the cell to its left is already covering it.
-    return longBreakAfter === hour ? blockTail(spans, state, classId, day, hour, longBreakAfter) : 0;
+    const head = spans.get(placementKey(classId, day, hour));
+    if (head === undefined) {
+      // Not a block head. It is drawn on its own only if the break cut the block
+      // just before it — otherwise the cell to its left is already covering it.
+      return longBreakAfter === hour
+        ? blockTail(spans, state, classId, day, hour, longBreakAfter)
+        : 0;
+    }
+    return clampToBreak(head, hour, longBreakAfter, state.settings.hours.length);
   }
-  return clampToBreak(head, hour, longBreakAfter, state.settings.hours.length);
-}
 
-/** The rest of a block after the long break cut it, as its own cell. */
-function blockTail(
-  spans: Map<string, number>,
-  state: State,
-  classId: string,
-  day: number,
-  hour: number,
-  longBreakAfter: number,
-): number {
-  const id = activePlacements(state)[placementKey(classId, day, hour)];
-  let start = hour;
-  while (start > 0 && spans.get(placementKey(classId, day, start)) === undefined) start--;
-  const size = spans.get(placementKey(classId, day, start)) ?? 1;
-  const left = size - (hour - start);
-  if (left <= 0 || id === undefined) return 1;
-  return clampToBreak(left, hour, longBreakAfter, state.settings.hours.length);
-}
-
-/** A width that never reaches past the long break or past the last hour. */
-function clampToBreak(
-  size: number,
-  hour: number,
-  longBreakAfter: number,
-  hourCount: number,
-): number {
-  const toBreak = longBreakAfter > hour ? longBreakAfter - hour : Infinity;
-  return Math.max(1, Math.min(size, toBreak, hourCount - hour));
-}
-
-function credits(...parts: string[]): string {
-  return parts.filter((p) => p !== '').join(' · ');
-}
-
-/**
- * [0,1,2,3] -> "Sal–Cum", [4,5] -> "Cmt–Pzr", [0,3] -> "Sal, Cum".
- *
- * Runs of consecutive days become a range, because that is what they are in
- * the rows below: the reader matches a label to a block of rows by looking
- * down the sheet rather than by reading six names.
- */
-function dayRange(days: State['settings']['days'], indices: number[]): string {
-  const short = (i: number) => shortDay(days[i]?.name ?? '');
-  const parts: string[] = [];
-  let run = 0;
-  for (let i = 1; i <= indices.length; i++) {
-    if (i < indices.length && indices[i] === indices[i - 1]! + 1) continue;
-    const from = indices[run]!;
-    const to = indices[i - 1]!;
-    parts.push(from === to ? short(from) : `${short(from)}–${short(to)}`);
-    run = i;
+  /** The rest of a block after the long break cut it, as its own cell. */
+  function blockTail(
+    spans: Map<string, number>,
+    state: State,
+    classId: string,
+    day: number,
+    hour: number,
+    longBreakAfter: number,
+  ): number {
+    const id = activePlacements(state)[placementKey(classId, day, hour)];
+    let start = hour;
+    while (start > 0 && spans.get(placementKey(classId, day, start)) === undefined) start--;
+    const size = spans.get(placementKey(classId, day, start)) ?? 1;
+    const left = size - (hour - start);
+    if (left <= 0 || id === undefined) return 1;
+    return clampToBreak(left, hour, longBreakAfter, state.settings.hours.length);
   }
-  return parts.join(', ');
-}
 
-/** The lesson-number header row, shared by both kinds of page. */
+  /** A width that never reaches past the long break or past the last hour. */
+  function clampToBreak(
+    size: number,
+    hour: number,
+    longBreakAfter: number,
+    hourCount: number,
+  ): number {
+    const toBreak = longBreakAfter > hour ? longBreakAfter - hour : Infinity;
+    return Math.max(1, Math.min(size, toBreak, hourCount - hour));
+  }
+
+  function credits(...parts: string[]): string {
+    return parts.filter((p) => p !== '').join(' · ');
+  }
+
+  /**
+   * [0,1,2,3] -> "Sal–Cum", [4,5] -> "Cmt–Pzr", [0,3] -> "Sal, Cum".
+   *
+   * Runs of consecutive days become a range, because that is what they are in
+   * the rows below: the reader matches a label to a block of rows by looking
+   * down the sheet rather than by reading six names.
+   */
+  function dayRange(days: State['settings']['days'], indices: number[]): string {
+    const short = (i: number) => shortDay(days[i]?.name ?? '');
+    const parts: string[] = [];
+    let run = 0;
+    for (let i = 1; i <= indices.length; i++) {
+      if (i < indices.length && indices[i] === indices[i - 1]! + 1) continue;
+      const from = indices[run]!;
+      const to = indices[i - 1]!;
+      parts.push(from === to ? short(from) : `${short(from)}–${short(to)}`);
+      run = i;
+    }
+    return parts.join(', ');
+  }
+
+  /** The lesson-number header row, shared by both kinds of page. */
   function head() {
     return (
       <thead>
@@ -293,9 +294,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
   const classPages = scope !== 'teachers';
   const teacherPages = scope !== 'classes';
 
-  const chosenClasses = classPages
-    ? state.classes.filter((x) => !excluded.classes.has(x.id))
-    : [];
+  const chosenClasses = classPages ? state.classes.filter((x) => !excluded.classes.has(x.id)) : [];
   const chosenTeachers = teacherPages
     ? state.teachers.filter((x) => !excluded.teachers.has(x.id))
     : [];
@@ -332,9 +331,15 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
     return (
       <div className="pick-list">
         <div className="pick-head">
-          <b>{t('{ne} ({secili}/{toplam})', { ne: t(title), secili: chosen, toplam: items.length })}</b>
-          <button className="btn" onClick={() => setAll(kind, true)}>{t('Tümü')}</button>
-          <button className="btn" onClick={() => setAll(kind, false)}>{t('Hiçbiri')}</button>
+          <b>
+            {t('{ne} ({secili}/{toplam})', { ne: t(title), secili: chosen, toplam: items.length })}
+          </b>
+          <button className="btn" onClick={() => setAll(kind, true)}>
+            {t('Tümü')}
+          </button>
+          <button className="btn" onClick={() => setAll(kind, false)}>
+            {t('Hiçbiri')}
+          </button>
         </div>
         <div className="pick-items">
           {items.map((x) => (
@@ -363,185 +368,181 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
       <div className="print-area" data-per={options.perSheet} data-size={options.size}>
         {sheets(
           [
-        ...chosenClasses.map((group) => (
-            <div className="print-page" key={group.id}>
-              <h3>
-                {/* Big line: what the sheet is. Small line: whose it is. The
+            ...chosenClasses.map((group) => (
+              <div className="print-page" key={group.id}>
+                <h3>
+                  {/* Big line: what the sheet is. Small line: whose it is. The
                     two used to be one long left-aligned string, which on paper
                     read as a caption rather than a title. */}
-                <span className="p-title-main">
-                  {colored && (
-                    <span className="p-dot" style={{ background: paletteColor(group.color) }} />
-                  )}
-                  {t('{ad} sınıfı · Haftalık ders programı', { ad: group.name })}
-                </span>
-                {(() => {
-                  const room =
-                    group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
-                  const sub = credits(
-                    options.school ? state.settings.schoolName : '',
-                    !options.credits || room === '' ? '' : t('{ad} dersliği', { ad: room }),
-                  );
-                  return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
-                })()}
-              </h3>
-              <table className="print">
-                {head()}
-                <tbody>
-                  {state.settings.days.map((day, g) => (
-                    <tr key={g}>
-                      {/* The FULL day name: a printout on a wall is read from a
+                  <span className="p-title-main">
+                    {colored && (
+                      <span className="p-dot" style={{ background: paletteColor(group.color) }} />
+                    )}
+                    {t('{ad} sınıfı · Haftalık ders programı', { ad: group.name })}
+                  </span>
+                  {(() => {
+                    const room =
+                      group.roomId == null ? '' : (ix.roomById.get(group.roomId)?.name ?? '');
+                    const sub = credits(
+                      options.school ? state.settings.schoolName : '',
+                      !options.credits || room === '' ? '' : t('{ad} dersliği', { ad: room }),
+                    );
+                    return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
+                  })()}
+                </h3>
+                <table className="print">
+                  {head()}
+                  <tbody>
+                    {state.settings.days.map((day, g) => (
+                      <tr key={g}>
+                        {/* The FULL day name: a printout on a wall is read from a
                           distance, and abbreviations belong to narrow screens. */}
-                      <th className="p-daycol">{dayLabel(day.name)}</th>
-                      {state.settings.hours.map((_, s) => {
-                        const lessonId = activePlacements(state)[placementKey(group.id, g, s)];
-                        // A block is ONE cell on paper too — "çıktıda da blok
-                        // dersler birlikte gözükmeli programdaki gibi birleşik
-                        // görünsünler". `cellSpan` returns 0 for the hours a
-                        // block to the left already covers, and they are simply
-                        // not drawn.
-                        const span = cellSpan(spans, state, group.id, g, s, day.longBreakAfter);
-                        if (span === 0) return null;
-                        const lesson =
-                          lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
-                        const teacher =
-                          lesson === undefined ? undefined : ix.teacherById.get(lesson.teacherId);
-                        // The LESSON's subject, not the teacher's first one: a
-                        // teacher who holds two is standing in this room for
-                        // exactly one of them, and the sheet on the wall has to
-                        // say which.
-                        const subject =
-                          lesson === undefined
-                            ? ''
-                            : subjectShort(state.settings, lessonSubject(state, lesson));
-                        return (
-                          <td
-                            key={s}
-                            colSpan={span > 1 ? span : undefined}
-                            className={breakClass(day.longBreakAfter, s + span - 1)}
-                            style={
-                              colored && teacher !== undefined
-                                ? { background: paletteColor(teacher.color) }
-                                : undefined
-                            }
-                          >
-                            {teacher !== undefined && (
-                              <>
-                                <span className="p-top">{subject}</span>
-                                {options.cellBottom && (
-                                  <span className="p-bottom">{teacher.short}</span>
-                                )}
-                              </>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Last child of the page box, so `justify-content: safe center`
+                        <th className="p-daycol">{dayLabel(day.name)}</th>
+                        {state.settings.hours.map((_, s) => {
+                          const lessonId = activePlacements(state)[placementKey(group.id, g, s)];
+                          // A block is ONE cell on paper too — "çıktıda da blok
+                          // dersler birlikte gözükmeli programdaki gibi birleşik
+                          // görünsünler". `cellSpan` returns 0 for the hours a
+                          // block to the left already covers, and they are simply
+                          // not drawn.
+                          const span = cellSpan(spans, state, group.id, g, s, day.longBreakAfter);
+                          if (span === 0) return null;
+                          const lesson =
+                            lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
+                          const teacher =
+                            lesson === undefined ? undefined : ix.teacherById.get(lesson.teacherId);
+                          // The LESSON's subject, not the teacher's first one: a
+                          // teacher who holds two is standing in this room for
+                          // exactly one of them, and the sheet on the wall has to
+                          // say which.
+                          const subject =
+                            lesson === undefined
+                              ? ''
+                              : subjectShort(state.settings, lessonSubject(state, lesson));
+                          return (
+                            <td
+                              key={s}
+                              colSpan={span > 1 ? span : undefined}
+                              className={breakClass(day.longBreakAfter, s + span - 1)}
+                              style={
+                                colored && teacher !== undefined
+                                  ? { background: paletteColor(teacher.color) }
+                                  : undefined
+                              }
+                            >
+                              {teacher !== undefined && (
+                                <>
+                                  <span className="p-top">{subject}</span>
+                                  {options.cellBottom && (
+                                    <span className="p-bottom">{teacher.short}</span>
+                                  )}
+                                </>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {/* Last child of the page box, so `justify-content: safe center`
                   centres the plan WITH it rather than around it. */}
-              {options.stamp && (
-                <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
-              )}
-            </div>
-          )),
+                {options.stamp && <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>}
+              </div>
+            )),
 
-        ...chosenTeachers.map((teacher) => (
-            <div className="print-page" key={teacher.id}>
-              <h3>
-                <span className="p-title-main">
-                  {colored && (
-                    <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
-                  )}
-                  {teacher.name} ({teacher.short}) · Haftalık ders programı
-                </span>
-                {(() => {
-                  const sub = credits(
-                    options.school ? state.settings.schoolName : '',
-                    // Both subjects on the teacher's own sheet: the credit line
-                    // says who this person is, and half of that is not who they
-                    // are. The CELLS on the same page still each name the one
-                    // subject that lesson is taught under.
-                    options.credits ? teacherSubjects(teacher).join(' · ') : '',
-                  );
-                  return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
-                })()}
-              </h3>
-              <table className="print">
-                {head()}
-                <tbody>
-                  {state.settings.days.map((day, g) => (
-                    <tr key={g}>
-                      <th className="p-daycol">{dayLabel(day.name)}</th>
-                      {state.settings.hours.map((_, s) => {
-                        const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
-                        const lesson =
-                          lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
-                        const group =
-                          lesson === undefined ? undefined : ix.classById.get(lesson.classId);
-                        // The boundary belongs to the CLASS's grid, exactly as
-                        // it does in the screen grid's teacher view: the block
-                        // was placed into a class's week, and this sheet is
-                        // only another way of reading it.
-                        const span = cellSpan(
-                          spans,
-                          state,
-                          group?.id ?? '',
-                          g,
-                          s,
-                          day.longBreakAfter,
-                        );
-                        if (span === 0) return null;
-                        return (
-                          <td
-                            key={s}
-                            colSpan={span > 1 ? span : undefined}
-                            className={breakClass(day.longBreakAfter, s + span - 1)}
-                            // The CLASS's colour, not the teacher's.
-                            //
-                            // On the screen grid a cell is painted by the
-                            // teacher because that is what matches the pool
-                            // card you dragged (docs/LAYOUT.md). On a teacher's own
-                            // SHEET every filled cell is that same teacher, so
-                            // one colour over the whole week says nothing —
-                            // twelve cells of identical pastel. The class is
-                            // the thing that varies, and it is the thing the
-                            // reader is looking for. The class sheet is
-                            // unchanged: there the teacher is what varies.
-                            style={
-                              colored && group !== undefined
-                                ? { background: paletteColor(group.color) }
-                                : undefined
-                            }
-                          >
-                            {group !== undefined && (
-                              <>
-                                <span className="p-top">{group.name}</span>
-                                {options.cellBottom && (
-                                  <span className="p-bottom">
-                                    {group.roomId != null
-                                      ? (ix.roomById.get(group.roomId)?.name ?? '')
-                                      : ''}
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Last child of the page box, so `justify-content: safe center`
+            ...chosenTeachers.map((teacher) => (
+              <div className="print-page" key={teacher.id}>
+                <h3>
+                  <span className="p-title-main">
+                    {colored && (
+                      <span className="p-dot" style={{ background: paletteColor(teacher.color) }} />
+                    )}
+                    {teacher.name} ({teacher.short}) · Haftalık ders programı
+                  </span>
+                  {(() => {
+                    const sub = credits(
+                      options.school ? state.settings.schoolName : '',
+                      // Both subjects on the teacher's own sheet: the credit line
+                      // says who this person is, and half of that is not who they
+                      // are. The CELLS on the same page still each name the one
+                      // subject that lesson is taught under.
+                      options.credits ? teacherSubjects(teacher).join(' · ') : '',
+                    );
+                    return sub === '' ? null : <span className="p-title-sub">{sub}</span>;
+                  })()}
+                </h3>
+                <table className="print">
+                  {head()}
+                  <tbody>
+                    {state.settings.days.map((day, g) => (
+                      <tr key={g}>
+                        <th className="p-daycol">{dayLabel(day.name)}</th>
+                        {state.settings.hours.map((_, s) => {
+                          const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
+                          const lesson =
+                            lessonId === undefined ? undefined : ix.lessonById.get(lessonId);
+                          const group =
+                            lesson === undefined ? undefined : ix.classById.get(lesson.classId);
+                          // The boundary belongs to the CLASS's grid, exactly as
+                          // it does in the screen grid's teacher view: the block
+                          // was placed into a class's week, and this sheet is
+                          // only another way of reading it.
+                          const span = cellSpan(
+                            spans,
+                            state,
+                            group?.id ?? '',
+                            g,
+                            s,
+                            day.longBreakAfter,
+                          );
+                          if (span === 0) return null;
+                          return (
+                            <td
+                              key={s}
+                              colSpan={span > 1 ? span : undefined}
+                              className={breakClass(day.longBreakAfter, s + span - 1)}
+                              // The CLASS's colour, not the teacher's.
+                              //
+                              // On the screen grid a cell is painted by the
+                              // teacher because that is what matches the pool
+                              // card you dragged (docs/LAYOUT.md). On a teacher's own
+                              // SHEET every filled cell is that same teacher, so
+                              // one colour over the whole week says nothing —
+                              // twelve cells of identical pastel. The class is
+                              // the thing that varies, and it is the thing the
+                              // reader is looking for. The class sheet is
+                              // unchanged: there the teacher is what varies.
+                              style={
+                                colored && group !== undefined
+                                  ? { background: paletteColor(group.color) }
+                                  : undefined
+                              }
+                            >
+                              {group !== undefined && (
+                                <>
+                                  <span className="p-top">{group.name}</span>
+                                  {options.cellBottom && (
+                                    <span className="p-bottom">
+                                      {group.roomId != null
+                                        ? (ix.roomById.get(group.roomId)?.name ?? '')
+                                        : ''}
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {/* Last child of the page box, so `justify-content: safe center`
                   centres the plan WITH it rather than around it. */}
-              {options.stamp && (
-                <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>
-              )}
-            </div>
-          )),
+                {options.stamp && <div className="p-stamp">{stamped} tarihinde yazdırıldı</div>}
+              </div>
+            )),
           ],
           options.perSheet,
         )}
@@ -638,9 +639,7 @@ function dayRange(days: State['settings']['days'], indices: number[]): string {
             150%, and this is a term-long decision, not a per-glance one. */}
         <div className="panel no-print">
           <h2>{t('Sayfada ne olsun')}</h2>
-          <p className="hint">
-            {t('İşareti kaldırılan şey kâğıda basılmaz.')}
-          </p>
+          <p className="hint">{t('İşareti kaldırılan şey kâğıda basılmaz.')}</p>
           <div className="form-col">
             {PRINT_OPTION_LABELS.map((x) => (
               <label key={x.id} className="pick-item">

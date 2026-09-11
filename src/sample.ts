@@ -61,26 +61,54 @@ const SUBJECTS = [
 // guess, and "Deniz" is genuinely both. That row keeps its '' on purpose — the
 // sample should contain the blank the real list will contain.
 const NAMES: Array<[string, Gender]> = [
-  ['Mehmet Çelik', 'e'], ['Ayşe Varol', 'k'], ['Murat Bilge', 'e'],
-  ['Yasemin Mutlu', 'k'], ['Kemal Yıldız', 'e'], ['Yeliz Güneş', 'k'],
-  ['Ahmet Sarı', 'e'], ['İlknur Aydın', 'k'], ['Yusuf Kara', 'e'],
-  ['Hatice Ergin', 'k'], ['Emre Doğan', 'e'], ['Deniz Erdem', ''],
-  ['Sibel Duman', 'k'], ['Rıza Yalçın', 'e'], ['Gökhan Çetin', 'e'],
-  ['Nurten Uçar', 'k'], ['Ali Öztürk', 'e'], ['Aylin Gür', 'k'],
-  ['Serkan Tunç', 'e'], ['Melek Şahin', 'k'], ['Barış Koç', 'e'],
-  ['Zeynep Ak', 'k'], ['Onur Polat', 'e'], ['Fatma Kurt', 'k'],
+  ['Mehmet Çelik', 'e'],
+  ['Ayşe Varol', 'k'],
+  ['Murat Bilge', 'e'],
+  ['Yasemin Mutlu', 'k'],
+  ['Kemal Yıldız', 'e'],
+  ['Yeliz Güneş', 'k'],
+  ['Ahmet Sarı', 'e'],
+  ['İlknur Aydın', 'k'],
+  ['Yusuf Kara', 'e'],
+  ['Hatice Ergin', 'k'],
+  ['Emre Doğan', 'e'],
+  ['Deniz Erdem', ''],
+  ['Sibel Duman', 'k'],
+  ['Rıza Yalçın', 'e'],
+  ['Gökhan Çetin', 'e'],
+  ['Nurten Uçar', 'k'],
+  ['Ali Öztürk', 'e'],
+  ['Aylin Gür', 'k'],
+  ['Serkan Tunç', 'e'],
+  ['Melek Şahin', 'k'],
+  ['Barış Koç', 'e'],
+  ['Zeynep Ak', 'k'],
+  ['Onur Polat', 'e'],
+  ['Fatma Kurt', 'k'],
   ['Cem Aslan', 'e'],
 ];
 
 /** As in the photo: class code -> fixed room letter. */
 const CLASS_ROOM: Array<[string, string]> = [
-  ['310', 'G'], ['311', 'G'],
-  ['320', 'H'], ['452', 'H'], ['453', 'H'],
-  ['410', 'A'], ['411', 'A'], ['510', 'A'], ['511', 'A'],
-  ['412', 'B'], ['413', 'B'],
-  ['450', 'C'], ['451', 'C'],
-  ['414', 'D'], ['415', 'D'], ['530', 'D'], ['531', 'D'],
-  ['430', 'E'], ['431', 'E'],
+  ['310', 'G'],
+  ['311', 'G'],
+  ['320', 'H'],
+  ['452', 'H'],
+  ['453', 'H'],
+  ['410', 'A'],
+  ['411', 'A'],
+  ['510', 'A'],
+  ['511', 'A'],
+  ['412', 'B'],
+  ['413', 'B'],
+  ['450', 'C'],
+  ['451', 'C'],
+  ['414', 'D'],
+  ['415', 'D'],
+  ['530', 'D'],
+  ['531', 'D'],
+  ['430', 'E'],
+  ['431', 'E'],
   ['432', 'F'],
 ];
 
@@ -156,8 +184,7 @@ export function sampleState(): State {
       const roll = rnd();
       const wanted = roll < 0.12 ? 3 : roll < 0.35 ? 2 : 1;
       const size = Math.min(wanted, Math.max(1, DEFAULT_LIMITS_SAMPLE.maxSameLessonPerDay));
-      const blocks =
-        size >= 2 ? Array<number>(Math.floor(weeklyHours / size)).fill(size) : [];
+      const blocks = size >= 2 ? Array<number>(Math.floor(weeklyHours / size)).fill(size) : [];
 
       lessons.push({
         id: `d${counter++}`,

@@ -126,10 +126,10 @@ function LessonSheet({
         body:
           preview.returned === 0 && preview.unpinned === 0
             ? t('Yerleşmiş saatler olduğu gibi taşınır. Ctrl+Z ile geri alınabilir.')
-            : t(
-                '{n} blok havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.',
-                { n: preview.returned, s: preview.unpinned },
-              ),
+            : t('{n} blok havuza döner, {s} sabitleme kalkar. Ctrl+Z ile geri alınabilir.', {
+                n: preview.returned,
+                s: preview.unpinned,
+              }),
         confirmLabel: t('Taşı'),
         danger: preview.returned > 0 || preview.unpinned > 0,
       }))
@@ -223,7 +223,9 @@ function LessonSheet({
                     onChange={(e) => void handClass(e.target.value)}
                   >
                     {state.classes.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </dd>

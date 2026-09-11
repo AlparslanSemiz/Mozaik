@@ -59,11 +59,7 @@ export interface FolderRun {
   forget: () => Promise<void>;
 }
 
-export function useFolder(
-  library: Library,
-  planId: Id,
-  present: State,
-): FolderRun {
+export function useFolder(library: Library, planId: Id, present: State): FolderRun {
   // The exe has the folder before the first paint, so it never passes
   // through 'yok' — and it never passes through the picker either.
   const [status, setStatus] = useState<FolderStatus>(() =>
@@ -101,9 +97,10 @@ export function useFolder(
       setStatus({
         kind: 'hata',
         name: handle.name,
-        text: err instanceof Error && err.name === 'NotAllowedError'
-          ? t('Klasöre yazma izni geri alınmış.')
-          : t('Klasöre yazılamadı. Klasör silinmiş ya da taşınmış olabilir.'),
+        text:
+          err instanceof Error && err.name === 'NotAllowedError'
+            ? t('Klasöre yazma izni geri alınmış.')
+            : t('Klasöre yazılamadı. Klasör silinmiş ya da taşınmış olabilir.'),
       });
     }
   }, []);

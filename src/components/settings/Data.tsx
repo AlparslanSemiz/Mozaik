@@ -12,30 +12,25 @@
 // "it is saved in the browser" does not tell anyone that clearing browsing
 // data destroys it.
 
-import { useEffect, useRef, useState } from "react";
-import { useDialogs } from "../Dialogs";
-import { useLoadSample } from "../useSample";
-import type React from "react";
-import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from "../../bundle";
-import { emptyState } from "../../entities";
-import { KEEP_DAILY, MAIN_NAME } from "../../folder";
-import {
-  routeName,
-  storageAddress,
-  storageKind,
-  storageReport,
-} from "../../library";
-import { downloadBundle, listBackups } from "../../store";
-import type { State } from "../../types";
-import { activePlacements } from "../../programs";
-import type { PlanControls } from "../props";
-import type { FolderRun } from "../../useFolder";
-import type { UpdateRun } from "../../update";
-import { SITE_ADRESI } from "../../update";
-import { EXE_FOLDER } from "../../desktop";
-import { surumEtiketi, tarihYazisi } from "../../version";
-import { markChangelogSeen, SURUM_NOTLARI } from "../../changelog";
-import Plans from "./Plans";
+import { useEffect, useRef, useState } from 'react';
+import { useDialogs } from '../Dialogs';
+import { useLoadSample } from '../useSample';
+import type React from 'react';
+import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../bundle';
+import { emptyState } from '../../entities';
+import { KEEP_DAILY, MAIN_NAME } from '../../folder';
+import { routeName, storageAddress, storageKind, storageReport } from '../../library';
+import { downloadBundle, listBackups } from '../../store';
+import type { State } from '../../types';
+import { activePlacements } from '../../programs';
+import type { PlanControls } from '../props';
+import type { FolderRun } from '../../useFolder';
+import type { UpdateRun } from '../../update';
+import { SITE_ADRESI } from '../../update';
+import { EXE_FOLDER } from '../../desktop';
+import { surumEtiketi, tarihYazisi } from '../../version';
+import { markChangelogSeen, SURUM_NOTLARI } from '../../changelog';
+import Plans from './Plans';
 import { T, useT } from '../T';
 
 interface Props {
@@ -59,7 +54,7 @@ interface Props {
    * `storageReport` belongs beside the folder. One file, one set of handlers,
    * two doors.
    */
-  part: "plans" | "about";
+  part: 'plans' | 'about';
 }
 
 /**
@@ -67,7 +62,7 @@ interface Props {
  * bytes against the browser's ~5 MB — not the UTF-8 length a file would have.
  */
 function size(chars: number): string {
-  if (chars === 0) return "–";
+  if (chars === 0) return '–';
   const bytes = chars * 2;
   return bytes < 1024 ? `${bytes} B` : `${Math.round(bytes / 1024)} KB`;
 }
@@ -94,7 +89,7 @@ function Folder({ folder }: { folder: FolderRun }) {
     <div className="panel">
       <h2>{t('Nereye kaydedilsin')}</h2>
 
-      {s.kind === "yok" ? (
+      {s.kind === 'yok' ? (
         <>
           <p className="hint">
             <T k="**Tarayıcınız klasöre yazmayı desteklemiyor.** Chrome ve Edge destekliyor." />
@@ -130,20 +125,18 @@ function Folder({ folder }: { folder: FolderRun }) {
 
           {!folder.fixed && (
             <div className="form-row">
-              <button
-                className="btn primary"
-                onClick={() => void folder.choose()}
-              >
-                {s.kind === "secilmedi" ? t('Klasör seç…') : t('Başka klasör seç…')}
+              <button className="btn primary" onClick={() => void folder.choose()}>
+                {s.kind === 'secilmedi' ? t('Klasör seç…') : t('Başka klasör seç…')}
               </button>
-              {s.kind === "izin-gerek" && (
-                <button
-                  className="btn primary"
-                  onClick={() => void folder.allow()}
-                >{t('İzin ver')}</button>
+              {s.kind === 'izin-gerek' && (
+                <button className="btn primary" onClick={() => void folder.allow()}>
+                  {t('İzin ver')}
+                </button>
               )}
-              {s.kind !== "secilmedi" && (
-                <button className="btn" onClick={() => void folder.forget()}>{t('Vazgeç')}</button>
+              {s.kind !== 'secilmedi' && (
+                <button className="btn" onClick={() => void folder.forget()}>
+                  {t('Vazgeç')}
+                </button>
               )}
             </div>
           )}
@@ -153,7 +146,7 @@ function Folder({ folder }: { folder: FolderRun }) {
               and until this sentence existed nothing anywhere said which of
               the files in there was the one to open, or with which button.
               Both halves are already built; what was missing was saying so. */}
-          {s.kind !== "secilmedi" && (
+          {s.kind !== 'secilmedi' && (
             <p className="hint">
               <T
                 k="{dosya} **bütün planlarınızdır**; yanındakiler onun gün gün duran hâlleri."
@@ -173,44 +166,41 @@ function Folder({ folder }: { folder: FolderRun }) {
               work has exactly one copy and a cleared browser takes it. */}
           <p
             className={
-              s.kind === "hata" ||
-              (s.kind === "secilmedi" && storageKind() === "site")
-                ? "hint bad"
-                : "hint"
+              s.kind === 'hata' || (s.kind === 'secilmedi' && storageKind() === 'site')
+                ? 'hint bad'
+                : 'hint'
             }
             role="status"
           >
-            {s.kind === "secilmedi" &&
+            {s.kind === 'secilmedi' &&
               t('Şu an yalnızca bu bilgisayarın tarayıcısında saklanıyor.')}
-            {s.kind === "izin-gerek" && (
+            {s.kind === 'izin-gerek' && (
               <T
                 k="**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin."
                 vars={{ klasor: s.name }}
               />
             )}
-            {s.kind === "bekliyor" && (
-              <T k="**{klasor}** · yazılıyor…" vars={{ klasor: s.name }} />
-            )}
-            {s.kind === "yazildi" && (
+            {s.kind === 'bekliyor' && <T k="**{klasor}** · yazılıyor…" vars={{ klasor: s.name }} />}
+            {s.kind === 'yazildi' && (
               <>
-                <b>{s.name}</b> klasörüne yazıldı, saat{" "}
-                {s.at.toLocaleTimeString("tr-TR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
+                <b>{s.name}</b> klasörüne yazıldı, saat{' '}
+                {s.at.toLocaleTimeString('tr-TR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
                 })}
-                .{" "}
+                .{' '}
                 {s.files.map((name, i) => (
                   <span key={name}>
-                    {i > 0 && " · "}
+                    {i > 0 && ' · '}
                     <code>{name}</code>
                   </span>
                 ))}
               </>
             )}
-            {s.kind === "hata" && (
+            {s.kind === 'hata' && (
               <>
-                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar
-                işiniz yalnız tarayıcıda duruyor.
+                <b>{s.name}</b>: {s.text} Klasörü yeniden seçin. O zamana kadar işiniz yalnız
+                tarayıcıda duruyor.
               </>
             )}
           </p>
@@ -262,7 +252,7 @@ function Build({ update }: { update: UpdateRun }) {
             <td>{t('Nasıl açıldı')}</td>
             <td>{routeName()}</td>
           </tr>
-          {adres !== "" && (
+          {adres !== '' && (
             <tr>
               <td>{t('Adres')}</td>
               <td>
@@ -273,11 +263,11 @@ function Build({ update }: { update: UpdateRun }) {
         </tbody>
       </table>
 
-      {update.kind === "sw" && <SiteUpdate update={update} />}
-      {update.kind === "exe" && <ExeUpdate update={update} />}
-      {update.kind === "yok" && (
+      {update.kind === 'sw' && <SiteUpdate update={update} />}
+      {update.kind === 'exe' && <ExeUpdate update={update} />}
+      {update.kind === 'yok' && (
         <p className="hint">
-          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{" "}
+          <T k="**Bu kopya kendini güncellemez** ve hiçbir yere bağlanmaz. En son sürüm şuradadır:" />{' '}
           <a href={SITE_ADRESI} target="_blank" rel="noreferrer">
             <code>{SITE_ADRESI}</code>
           </a>
@@ -336,7 +326,9 @@ function Changelog({ onSeen }: { onSeen: () => void }) {
           {older.map((old) => (
             <div key={old.version}>
               <p className="hint">
-                <b>v{old.version} · {tarihYazisi(old.date)}</b>
+                <b>
+                  v{old.version} · {tarihYazisi(old.date)}
+                </b>
               </p>
               <ul>
                 {old.items.map((line) => (
@@ -360,7 +352,9 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
         <T k="Yeni sürüm çıkınca üstte bir satır belirir; **Yenile** demedikçe hiçbir şey değişmez." />
       </p>
       <div className="form-row">
-        <button className="btn" onClick={update.check}>{t('Güncellemeleri denetle')}</button>
+        <button className="btn" onClick={update.check}>
+          {t('Güncellemeleri denetle')}
+        </button>
       </div>
       {update.ready && (
         <p className="hint" role="status">
@@ -388,7 +382,7 @@ function SiteUpdate({ update }: { update: UpdateRun }) {
 function ExeUpdate({ update }: { update: UpdateRun }) {
   const t = useT();
   const d = update.durum;
-  const mesgul = d.ad === "bakiliyor" || d.ad === "indiriliyor";
+  const mesgul = d.ad === 'bakiliyor' || d.ad === 'indiriliyor';
 
   return (
     <>
@@ -398,43 +392,45 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
 
       <div className="form-row">
         <button className="btn" onClick={update.check} disabled={mesgul}>
-          {t(
-            'Güncellemeleri denetle',
-          )}
+          {t('Güncellemeleri denetle')}
         </button>
-        {d.ad === "var" && (
-          <button className="btn primary" onClick={update.indir}>{t('Yeni sürümü indir')}</button>
+        {d.ad === 'var' && (
+          <button className="btn primary" onClick={update.indir}>
+            {t('Yeni sürümü indir')}
+          </button>
         )}
-        {d.ad === "hazir" && (
-          <button className="btn primary" onClick={update.uygula}>{t('Şimdi yeniden başlat')}</button>
+        {d.ad === 'hazir' && (
+          <button className="btn primary" onClick={update.uygula}>
+            {t('Şimdi yeniden başlat')}
+          </button>
         )}
       </div>
 
       {/* One line, always in the same place, so the answer is where the eye
           already is. `role="status"` because it changes without being read
           again (design contract 2). */}
-      {d.ad !== "bos" && (
-        <p className={`hint${d.ad === "hata" ? " bad" : ""}`} role="status">
-          {d.ad === "bakiliyor" && t('Bakılıyor…')}
-          {d.ad === "guncel" && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
-          {d.ad === "var" && (
+      {d.ad !== 'bos' && (
+        <p className={`hint${d.ad === 'hata' ? ' bad' : ''}`} role="status">
+          {d.ad === 'bakiliyor' && t('Bakılıyor…')}
+          {d.ad === 'guncel' && <b>{t('En son sürümü kullanıyorsunuz.')}</b>}
+          {d.ad === 'var' && (
             <T
               k="**v{surum} çıktı{tarih}.** İndirmek {mb} MB yer kaplar. İndirdikten sonra ne zaman geçeceğinize siz karar verirsiniz."
               vars={{
                 surum: d.surum,
-                tarih: d.tarih === "" ? "" : ` (${d.tarih})`,
+                tarih: d.tarih === '' ? '' : ` (${d.tarih})`,
                 mb: Math.round(d.boyut / 1024 / 1024),
               }}
             />
           )}
-          {d.ad === "indiriliyor" && t('Yeni sürüm iniyor…')}
-          {d.ad === "hazir" && (
+          {d.ad === 'indiriliyor' && t('Yeni sürüm iniyor…')}
+          {d.ad === 'hazir' && (
             <T
               k="**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz."
               vars={{ surum: d.surum }}
             />
           )}
-          {d.ad === "hata" && d.mesaj}
+          {d.ad === 'hata' && d.mesaj}
         </p>
       )}
     </>
@@ -505,7 +501,7 @@ export default function Data({
 
   async function openAll(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ""; // so the same file can be picked again
+    e.target.value = ''; // so the same file can be picked again
     if (file === undefined) return;
 
     const text = await file.text();
@@ -567,7 +563,9 @@ export default function Data({
       <h2>{t('Bütün planlar tek dosyada')}</h2>
       <p
         className="hint"
-        title={t('İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve oturum yedekleri girmez.')}
+        title={t(
+          'İçindekiler: her planın derslikleri, öğretmenleri, sınıfları, dersleri, dizilmiş programı, adı ve taslak işareti. Tema gibi bu bilgisayara ait tercihler ve oturum yedekleri girmez.',
+        )}
       >
         <T k="Üst çubuktaki **Dosyaya kaydet** açık planı yazar; buradaki dosya **bütün planları**." />
       </p>
@@ -579,7 +577,9 @@ export default function Data({
           className="btn"
           onClick={() => bundleInput.current?.click()}
           title={t('Bu bilgisayardaki bütün planların yerine dosyadakiler geçer')}
-        >{t('Tümünü dosyadan aç')}</button>
+        >
+          {t('Tümünü dosyadan aç')}
+        </button>
         <input
           ref={bundleInput}
           type="file"
@@ -590,7 +590,7 @@ export default function Data({
         />
       </div>
       {note !== null && (
-        <p className={note.bad ? "hint bad" : "hint"} role="status">
+        <p className={note.bad ? 'hint bad' : 'hint'} role="status">
           {note.text}
         </p>
       )}
@@ -601,44 +601,44 @@ export default function Data({
   // screen. The bundle sits under the library rather than under the folder
   // because it is the same noun: every plan, in one place.
   const planDataPanel = (
-      <div className="panel">
-        <h2>{t('Bu planın verisi')}</h2>
-  
-        {/* The sample school's home. It used to live only on the Kurulum
+    <div className="panel">
+      <h2>{t('Bu planın verisi')}</h2>
+
+      {/* The sample school's home. It used to live only on the Kurulum
             screen, where it could only ever be reached by an EMPTY project —
             so anyone who wanted to look at it again after starting their own
             work had no way back to it. Kurulum still offers it once, on a
             first run; this is where it stays. */}
-        <h3>{t('Örnek okul verisi')}</h3>
-        <p className="hint">
-          <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
-        </p>
-        <div className="form-row">
-          <button
-            className="btn"
-            title={t('Bu planın yerine hazır örnek okulu koyar')}
-            onClick={() => void loadSample(state, change)}
-          >{t('Örnek okulu yükle')}</button>
-        </div>
-  
-        <h3>{t('Sıfırla')}</h3>
-        <p className="hint">
-          <T k="**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin." />
-        </p>
-        <div className="form-row">
-          <button
-            className="btn danger"
-            onClick={reset}
-            title={t('Her şeyi siler')}
-          >{t('Her şeyi sil')}</button>
-        </div>
+      <h3>{t('Örnek okul verisi')}</h3>
+      <p className="hint">
+        <T k="Hazır bir okul: 25 öğretmen, 20 sınıf, 99 ders. **Açık olan planın yerine geçer.**" />
+      </p>
+      <div className="form-row">
+        <button
+          className="btn"
+          title={t('Bu planın yerine hazır örnek okulu koyar')}
+          onClick={() => void loadSample(state, change)}
+        >
+          {t('Örnek okulu yükle')}
+        </button>
       </div>
+
+      <h3>{t('Sıfırla')}</h3>
+      <p className="hint">
+        <T k="**Açık olan plan** tamamen silinir ve **geri alınamaz**; önce **Dosyaya kaydet** deyin." />
+      </p>
+      <div className="form-row">
+        <button className="btn danger" onClick={reset} title={t('Her şeyi siler')}>
+          {t('Her şeyi sil')}
+        </button>
+      </div>
+    </div>
   );
 
   const wherePanel = (
-      <div className="panel">
-        <h2>{t('Veriler nerede')}</h2>
-        {/* The exe changes what is TRUE here, not just the wording. On the
+    <div className="panel">
+      <h2>{t('Veriler nerede')}</h2>
+      {/* The exe changes what is TRUE here, not just the wording. On the
             three browser routes the storage below is the only copy until
             somebody saves a file, and "tarama verilerini temizle" can take
             it. In the exe the same storage exists, but a copy of everything
@@ -646,124 +646,120 @@ export default function Data({
             sentence that ends "taşınan tek şey dosyaya kaydettiğinizdir"
             would be a lie there, and it is the one sentence on this screen
             that a person acts on. */}
-        <p className="hint">
-          {storageKind() === "exe" ? (
-            <T
-              k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
-              vars={{ klasor: EXE_FOLDER }}
-            />
-          ) : (
-            <>
-              {storageKind() === "file"
-                ? t('Bu tarayıcının bu bilgisayardaki deposunda duruyor.')
-                : t('Tarayıcının bu site için ayırdığı depoda duruyor.')}{" "}
-              <T k="Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**." />
-            </>
-          )}
-        </p>
-        {/* WHICH store. "The browser's store for this site" leaves out the
+      <p className="hint">
+        {storageKind() === 'exe' ? (
+          <T
+            k="Bütün planlar Belgelerim'deki **{klasor}** klasörüne de yazılıyor; taşınacak şey o."
+            vars={{ klasor: EXE_FOLDER }}
+          />
+        ) : (
+          <>
+            {storageKind() === 'file'
+              ? t('Bu tarayıcının bu bilgisayardaki deposunda duruyor.')
+              : t('Tarayıcının bu site için ayırdığı depoda duruyor.')}{' '}
+            <T k="Başka bir tarayıcı bunu **görmez**, “tarama verilerini temizle” onu **siler**." />
+          </>
+        )}
+      </p>
+      {/* WHICH store. "The browser's store for this site" leaves out the
             one word somebody would need to act on it, and there are three
             stores on this machine that look identical on screen: the
             double-clicked file, the local install and the site. Anybody
             running two routes has two programs and no way to tell — until
             half a term is in the wrong one. The way ACROSS is named here
             because it is the same two buttons in both directions. */}
-        {storageKind() !== "exe" && (
-          <p className="hint">
-            <T
-              k="Bu depo yalnız {adres} adresine ait; öteki kopyaların depoları **ayrıdır**."
-              vars={{ adres: storageAddress() }}
-            />
-          </p>
-        )}
-        {/* The one habit, spelled out. It used to be a sentence across the
+      {storageKind() !== 'exe' && (
+        <p className="hint">
+          <T
+            k="Bu depo yalnız {adres} adresine ait; öteki kopyaların depoları **ayrıdır**."
+            vars={{ adres: storageAddress() }}
+          />
+        </p>
+      )}
+      {/* The one habit, spelled out. It used to be a sentence across the
             top bar on every screen; it belongs next to the report that says
             where the data actually lives, and the bar it left had six
             destinations to hold instead. */}
-        <p className="hint">
-          <T k="Program **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
-        </p>
-        <table className="stat">
-          <thead>
-            <tr>
-              <th>{t('Anahtar')}</th>
-              <th>{t('Ne')}</th>
-              <th className="num">{t('Yer')}</th>
+      <p className="hint">
+        <T k="Program **kendiliğinden** saklıyor; **Dosyaya kaydet** onun yanına gelir, yerine değil." />
+      </p>
+      <table className="stat">
+        <thead>
+          <tr>
+            <th>{t('Anahtar')}</th>
+            <th>{t('Ne')}</th>
+            <th className="num">{t('Yer')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {report.rows.map((row) => (
+            <tr key={row.key}>
+              <td>
+                <code>{row.key}</code>
+              </td>
+              <td>{row.what}</td>
+              <td className="num">{size(row.chars)}</td>
             </tr>
-          </thead>
-          <tbody>
-            {report.rows.map((row) => (
-              <tr key={row.key}>
-                <td>
-                  <code>{row.key}</code>
-                </td>
-                <td>{row.what}</td>
-                <td className="num">{size(row.chars)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="hint">
-          <T
-            k="Toplam **{yer}**; tarayıcının bu programa ayırdığı yer yaklaşık **5 MB**."
-            vars={{ yer: size(report.totalChars) }}
-          />
-        </p>
-        {/* A row would be a lie in the "Yer" column: the table counts
+          ))}
+        </tbody>
+      </table>
+      <p className="hint">
+        <T
+          k="Toplam **{yer}**; tarayıcının bu programa ayırdığı yer yaklaşık **5 MB**."
+          vars={{ yer: size(report.totalChars) }}
+        />
+      </p>
+      {/* A row would be a lie in the "Yer" column: the table counts
             localStorage characters, and a directory handle is not text —
             it is the one thing only structured clone can carry, which is
             why it lives in IndexedDB. Left out entirely it would be the
             one key this report does not name. */}
-        <p className="hint">
-          <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
-        </p>
-      </div>
+      <p className="hint">
+        <T k="Yukarıdakiler **localStorage**'da; seçtiğiniz klasörün tutamağı ayrıca **IndexedDB**'de." />
+      </p>
+    </div>
   );
 
   const backupsPanel = (
-      <div className="panel">
-        <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
-        <p className="hint">
-          <T k="Son üç oturumun durumu ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
-        </p>
-        {backups.length === 0 ? (
-          <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
-        ) : (
-          <table className="stat">
-            <thead>
-              <tr>
-                <th>{t('Oturum')}</th>
-                <th className="num">{t('Öğretmen')}</th>
-                <th className="num">{t('Sınıf')}</th>
-                <th className="num">{t('Ders')}</th>
-                <th className="num">{t('Yerleşmiş saat')}</th>
+    <div className="panel">
+      <h2>{t('Bu bilgisayardaki otomatik yedekler')}</h2>
+      <p className="hint">
+        <T k="Son üç oturumun durumu ayrı tutulur; **bu bilgisayara** ve açılıştaki plana aittir." />
+      </p>
+      {backups.length === 0 ? (
+        <p className="hint">{t('Henüz otomatik yedek yok, bu ilk oturum.')}</p>
+      ) : (
+        <table className="stat">
+          <thead>
+            <tr>
+              <th>{t('Oturum')}</th>
+              <th className="num">{t('Öğretmen')}</th>
+              <th className="num">{t('Sınıf')}</th>
+              <th className="num">{t('Ders')}</th>
+              <th className="num">{t('Yerleşmiş saat')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {backups.map(({ index, state: b }) => (
+              <tr key={index}>
+                <td>{index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: index + 1 })}</td>
+                <td className="num">{b.teachers.length}</td>
+                <td className="num">{b.classes.length}</td>
+                <td className="num">{b.lessons.length}</td>
+                <td className="num">{Object.keys(activePlacements(b)).length}</td>
               </tr>
-            </thead>
-            <tbody>
-              {backups.map(({ index, state: b }) => (
-                <tr key={index}>
-                  <td>
-                    {index === 0
-                      ? t('bir önceki')
-                      : t('{n} oturum önce', { n: index + 1 })}
-                  </td>
-                  <td className="num">{b.teachers.length}</td>
-                  <td className="num">{b.classes.length}</td>
-                  <td className="num">{b.lessons.length}</td>
-                  <td className="num">{Object.keys(activePlacements(b)).length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 
   // PLANLAR VE YEDEK: everything that answers "where does my work live and
   // how do I get it out". The library, the folder it is mirrored into, the
   // one-file bundle and the automatic session chain — one section, because
   // they are one question and the reader who has it asks all four.
-  if (part === "plans") {
+  if (part === 'plans') {
     return (
       <div className="cols">
         <div>

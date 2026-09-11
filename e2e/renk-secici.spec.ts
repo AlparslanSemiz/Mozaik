@@ -35,64 +35,57 @@
 // unit test cannot know is whether the token reaches the element.
 
 import { expect, test } from './kapan';
-import {
-  openSetup,
-  openWithSampleTheme,
-  contrast,
-  deltaE,
-  dragAndDrop,
-  tokens,
-} from './helpers';
+import { openSetup, openWithSampleTheme, contrast, deltaE, dragAndDrop, tokens } from './helpers';
 
 const STEPS = ['Öğretmenler', 'Sınıflar'] as const;
 
 for (const theme of ['light', 'dark'] as const) {
   test.describe(`renk seçici — ${theme}`, () => {
+    // Where palette-coloured TEXT actually lives now that the swatches carry
+    // none: the card on the grid and the card in the tray. This is pitfall 15 and
+    // 35's guard, moved rather than dropped — `.card` and `.pool-card` paint
+    // their ground from PALETTE (the same 36 in both themes) and their ink from
+    // --on-color, and the day somebody writes `color: inherit` on either of them
+    // the pale half of the palette goes unreadable in dark mode with nothing to
+    // show for it. `palette.test.ts` proves the 36 clear 4.5:1 against the token;
+    // only a real page can say whether the token reaches the element.
+    test(`kart mürekkebi palet zemininde okunuyor — ${theme}`, async ({ page }) => {
+      await openWithSampleTheme(page, theme);
+      await page.getByRole('button', { name: 'Program', exact: true }).click();
+      await expect(page.locator('table.grid')).toBeVisible();
+      // The sample school arrives UNPLACED — 367 cards in the tray, 0 on the
+      // grid — so one has to be put down before there is a grid card to measure.
+      // Measuring only the tray would leave `.card`'s own rule unguarded, and
+      // `.card` and `.pool-card` are two different rules that have to agree.
+      await dragAndDrop(page);
+      await expect(page.locator('table.grid .card').first()).toBeVisible();
 
-  // Where palette-coloured TEXT actually lives now that the swatches carry
-  // none: the card on the grid and the card in the tray. This is pitfall 15 and
-  // 35's guard, moved rather than dropped — `.card` and `.pool-card` paint
-  // their ground from PALETTE (the same 36 in both themes) and their ink from
-  // --on-color, and the day somebody writes `color: inherit` on either of them
-  // the pale half of the palette goes unreadable in dark mode with nothing to
-  // show for it. `palette.test.ts` proves the 36 clear 4.5:1 against the token;
-  // only a real page can say whether the token reaches the element.
-  test(`kart mürekkebi palet zemininde okunuyor — ${theme}`, async ({ page }) => {
-    await openWithSampleTheme(page, theme);
-    await page.getByRole('button', { name: 'Program', exact: true }).click();
-    await expect(page.locator('table.grid')).toBeVisible();
-    // The sample school arrives UNPLACED — 367 cards in the tray, 0 on the
-    // grid — so one has to be put down before there is a grid card to measure.
-    // Measuring only the tray would leave `.card`'s own rule unguarded, and
-    // `.card` and `.pool-card` are two different rules that have to agree.
-    await dragAndDrop(page);
-    await expect(page.locator('table.grid .card').first()).toBeVisible();
+      const ink = (await tokens(page, ['--on-color']))['--on-color'];
 
-    const ink = (await tokens(page, ['--on-color']))['--on-color'];
-
-    // `:not([aria-hidden])` is the TOP of each pile. Identical blocks of one
-    // lesson are drawn as a deck now, and the cards under the top one paint no
-    // words at all (transparent ink, see `.pool-stack` in styles.css) — asking
-    // whether ink nobody can see is readable would be asking nothing.
-    for (const sel of ['table.grid .card', '.pool-card:not([aria-hidden])']) {
-      const cards = page.locator(sel);
-      expect(await cards.count(), `${sel} hiç çizilmemiş`).toBeGreaterThan(0);
-      const measured = await cards.evaluateAll((nodes) =>
-        nodes.slice(0, 40).map((node) => {
-          const style = getComputedStyle(node as HTMLElement);
-          return { text: (node.textContent ?? '').trim(), ink: style.color, bg: style.backgroundColor };
-        }),
-      );
-      for (const c of measured) {
-        expect(c.text, `${sel} boş çizilmiş`).not.toBe('');
-        expect(c.ink, `${sel} "${c.text}" mürekkebi --on-color değil`).toBe(ink);
-        expect(
-          contrast(c.ink, c.bg),
-          `${sel} "${c.text}" okunmuyor`,
-        ).toBeGreaterThanOrEqual(4.5);
+      // `:not([aria-hidden])` is the TOP of each pile. Identical blocks of one
+      // lesson are drawn as a deck now, and the cards under the top one paint no
+      // words at all (transparent ink, see `.pool-stack` in styles.css) — asking
+      // whether ink nobody can see is readable would be asking nothing.
+      for (const sel of ['table.grid .card', '.pool-card:not([aria-hidden])']) {
+        const cards = page.locator(sel);
+        expect(await cards.count(), `${sel} hiç çizilmemiş`).toBeGreaterThan(0);
+        const measured = await cards.evaluateAll((nodes) =>
+          nodes.slice(0, 40).map((node) => {
+            const style = getComputedStyle(node as HTMLElement);
+            return {
+              text: (node.textContent ?? '').trim(),
+              ink: style.color,
+              bg: style.backgroundColor,
+            };
+          }),
+        );
+        for (const c of measured) {
+          expect(c.text, `${sel} boş çizilmiş`).not.toBe('');
+          expect(c.ink, `${sel} "${c.text}" mürekkebi --on-color değil`).toBe(ink);
+          expect(contrast(c.ink, c.bg), `${sel} "${c.text}" okunmuyor`).toBeGreaterThanOrEqual(4.5);
+        }
       }
-    }
-  });
+    });
     for (const step of STEPS) {
       test(`${step}: swatch üstünde YAZI YOK ama hangi renk olduğunu SÖYLÜYOR`, async ({
         page,

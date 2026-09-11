@@ -113,12 +113,7 @@ export function runLength(
 }
 
 /** The longest run the teacher ALREADY has on that day. */
-export function longestRun(
-  ix: Index,
-  teacherId: Id,
-  day: number,
-  hourCount: number,
-): number {
+export function longestRun(ix: Index, teacherId: Id, day: number, hourCount: number): number {
   let best = 0;
   let current = 0;
   for (let h = 0; h < hourCount; h++) {
@@ -128,23 +123,13 @@ export function longestRun(
   return best;
 }
 
-export function teacherDayCount(
-  ix: Index,
-  teacherId: Id,
-  day: number,
-  hourCount: number,
-): number {
+export function teacherDayCount(ix: Index, teacherId: Id, day: number, hourCount: number): number {
   let n = 0;
   for (let h = 0; h < hourCount; h++) if (busy(ix, teacherId, day, h)) n++;
   return n;
 }
 
-export function lessonDayCount(
-  d: State,
-  lesson: Lesson,
-  day: number,
-  hourCount: number,
-): number {
+export function lessonDayCount(d: State, lesson: Lesson, day: number, hourCount: number): number {
   let n = 0;
   for (let h = 0; h < hourCount; h++) {
     if (activePlacements(d)[placementKey(lesson.classId, day, h)] === lesson.id) n++;
@@ -181,27 +166,14 @@ export function gapsBetween(isBusy: (hour: number) => boolean, hourCount: number
 }
 
 /** Free hours between this teacher's first and last lesson on one day. */
-export function teacherDayGaps(
-  ix: Index,
-  teacherId: Id,
-  day: number,
-  hourCount: number,
-): number {
+export function teacherDayGaps(ix: Index, teacherId: Id, day: number, hourCount: number): number {
   return gapsBetween((h) => busy(ix, teacherId, day, h), hourCount);
 }
 
 /** Free hours between this class's first and last lesson on one day. */
-export function classDayGaps(
-  d: State,
-  classId: Id,
-  day: number,
-  hourCount: number,
-): number {
+export function classDayGaps(d: State, classId: Id, day: number, hourCount: number): number {
   const placements = activePlacements(d);
-  return gapsBetween(
-    (h) => placements[placementKey(classId, day, h)] !== undefined,
-    hourCount,
-  );
+  return gapsBetween((h) => placements[placementKey(classId, day, h)] !== undefined, hourCount);
 }
 
 // ---------------------------------------------------------------- violations

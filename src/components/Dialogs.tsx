@@ -140,7 +140,10 @@ export function DialogProvider({ children }: { children: ReactNode }) {
             {pending !== null && (
               <>
                 <div className="dlg-head">
-                  <span className={`dlg-icon${danger ? ' bad' : warn ? ' warn' : ''}`} aria-hidden="true">
+                  <span
+                    className={`dlg-icon${danger ? ' bad' : warn ? ' warn' : ''}`}
+                    aria-hidden="true"
+                  >
                     {danger ? (
                       <TriangleAlert size={20} strokeWidth={2.2} />
                     ) : warn ? (

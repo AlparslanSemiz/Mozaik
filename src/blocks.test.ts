@@ -48,7 +48,10 @@ describe('blockPlan', () => {
     for (let hours = 0; hours <= 40; hours++) {
       for (const blocks of [[], [2], [3], [3, 3], [3, 2], [2, 2, 2, 2]]) {
         const plan = blockPlan(lesson(hours, blocks));
-        expect(plan.reduce((sum, size) => sum + size, 0), `${hours} / ${blocks}`).toBe(hours);
+        expect(
+          plan.reduce((sum, size) => sum + size, 0),
+          `${hours} / ${blocks}`,
+        ).toBe(hours);
         expect(plan.every((size) => size >= 1 && size <= MAX_BLOCK)).toBe(true);
       }
     }

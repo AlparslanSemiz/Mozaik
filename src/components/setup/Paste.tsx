@@ -54,7 +54,9 @@ export default function Paste<T>({
         placeholder={t('Buraya yapıştırın...')}
       />
       <div className="form-row spaced">
-        <button className="btn" onClick={() => setResult(parse(text))}>{t('Önizle')}</button>
+        <button className="btn" onClick={() => setResult(parse(text))}>
+          {t('Önizle')}
+        </button>
         <button
           className="btn"
           onClick={() => {
@@ -62,7 +64,9 @@ export default function Paste<T>({
             setText('');
             setResult(null);
           }}
-        >{t('Vazgeç')}</button>
+        >
+          {t('Vazgeç')}
+        </button>
       </div>
 
       {result !== null && (

@@ -6,15 +6,10 @@
 // the tab changes, and a run that dies because somebody glanced at Kontrol
 // would throw away work with no explanation.
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createSolver } from "./solver";
-import type {
-  Solver,
-  SolverOptions,
-  SolverProgress,
-  SolverResult,
-} from "./solver";
-import type { State } from "./types";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createSolver } from './solver';
+import type { Solver, SolverOptions, SolverProgress, SolverResult } from './solver';
+import type { State } from './types';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:
@@ -33,9 +28,7 @@ export interface SolverRun {
   clear: () => void;
 }
 
-export function useSolver(
-  change: (apply: (d: State) => State) => void,
-): SolverRun {
+export function useSolver(change: (apply: (d: State) => State) => void): SolverRun {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState<SolverProgress | null>(null);
   const [result, setResult] = useState<SolverResult | null>(null);

@@ -98,9 +98,7 @@ test.describe('78. Sürüm ve güncelleme', () => {
 /** Scoped by heading, the same discipline `buildPanel()` documents above —
     a `.panel` beside this one is not this panel (pitfall 49/74). */
 function changelogPanel(page: Page) {
-  return page
-    .locator('.panel', { has: page.getByRole('heading', { name: 'Yenilikler' }) })
-    .last();
+  return page.locator('.panel', { has: page.getByRole('heading', { name: 'Yenilikler' }) }).last();
 }
 
 test.describe('79. Yenilikler', () => {

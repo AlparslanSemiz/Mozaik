@@ -51,7 +51,10 @@ describe('CHANGELOG.md — sürüm geçmişi package.json ile aynı yerde', () =
     for (let i = 1; i < surumler.length; i++) {
       const [a, b] = [parca(surumler[i - 1]!.version), parca(surumler[i]!.version)];
       const fark = a[0]! - b[0]! || a[1]! - b[1]! || a[2]! - b[2]!;
-      expect(fark, `${surumler[i - 1]!.version}, ${surumler[i]!.version}'den önce yazılmalı`).toBeGreaterThan(0);
+      expect(
+        fark,
+        `${surumler[i - 1]!.version}, ${surumler[i]!.version}'den önce yazılmalı`,
+      ).toBeGreaterThan(0);
       expect(surumler[i - 1]!.date >= surumler[i]!.date).toBe(true);
     }
   });

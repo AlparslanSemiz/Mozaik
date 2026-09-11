@@ -35,10 +35,7 @@ test.describe('52. Komut paleti', () => {
     await page.keyboard.press('Enter');
 
     await expect(page.locator('.palette')).toBeHidden();
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
-      'aria-label',
-      'Çıktı',
-    );
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Çıktı');
   });
 
   test('öğretmeni adıyla bulup PANELİNİ açıyor', async ({ page }) => {
@@ -120,7 +117,7 @@ test.describe('53. Durum çipi', () => {
     await expect(chip).toContainText('kapalı saatte');
   });
 
-  test('her sekmede duruyor ve Kontrol\'e götürüyor', async ({ page }) => {
+  test("her sekmede duruyor ve Kontrol'e götürüyor", async ({ page }) => {
     await openWithSample(page);
     for (const tab of ['Okul', 'Müsaitlik', 'Program', 'Çıktı', 'Ayarlar']) {
       await page.getByRole('button', { name: tab, exact: true }).click();
@@ -137,9 +134,7 @@ test.describe('53. Durum çipi', () => {
 test.describe('54. Klavye kısayolları', () => {
   test('Alt+1..7 sekmelere gidiyor', async ({ page }) => {
     await openWithSample(page);
-    const names = [
-      'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
-    ];
+    const names = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
     for (const [i, name] of names.entries()) {
       await page.keyboard.press(`Alt+${i + 1}`);
       await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', name);
@@ -170,7 +165,10 @@ test.describe('54. Klavye kısayolları', () => {
       const strip = bar.querySelector('.tabstrip')!.getBoundingClientRect();
       const tabs = [...bar.querySelectorAll('.tab')];
       const last = tabs[tabs.length - 1]!.getBoundingClientRect();
-      return { over: Math.round(last.right - strip.right), barOver: bar.scrollWidth - bar.clientWidth };
+      return {
+        over: Math.round(last.right - strip.right),
+        barOver: bar.scrollWidth - bar.clientWidth,
+      };
     });
     expect(fits.over, 'sekmeler kendi kutusundan taşıyor').toBeLessThanOrEqual(0);
     expect(fits.barOver, 'üst çubuk yatay taşıyor').toBeLessThanOrEqual(0);

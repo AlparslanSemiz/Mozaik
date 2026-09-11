@@ -1,15 +1,15 @@
-import { Activity, useCallback, useRef, useState } from "react";
-import { Keyboard, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo } from "react";
-import Commands from "./components/Commands";
-import { health } from "./feasibility";
-import { InspectorProvider } from "./components/Inspector";
-import { LessonEditProvider } from "./components/LessonEdit";
-import { useDialogs } from "./components/Dialogs";
-import { useToast } from "./components/Toasts";
-import type React from "react";
-import { bundleVersionOf, BUNDLE_VERSION } from "./bundle";
-import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from "./store";
+import { Activity, useCallback, useRef, useState } from 'react';
+import { Keyboard, Search as SearchIcon } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import Commands from './components/Commands';
+import { health } from './feasibility';
+import { InspectorProvider } from './components/Inspector';
+import { LessonEditProvider } from './components/LessonEdit';
+import { useDialogs } from './components/Dialogs';
+import { useToast } from './components/Toasts';
+import type React from 'react';
+import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
+import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from './store';
 import {
   applyMotion,
   applyRibbon,
@@ -26,37 +26,33 @@ import {
   type Density,
   type Motion,
   type Theme,
-} from "./theme";
-import { attachScrollFade } from "./scrollFade";
-import { attachRibbonScroll } from "./ribbonScroll";
-import { useSolver } from "./useSolver";
-import { useFolder } from "./useFolder";
-import { useUpdate } from "./update";
-import { APP_NAME, surumEtiketi } from "./version";
-import { useToolState } from "./toolState";
-import type { Tab } from "./toolState";
-import Setup from "./components/setup";
-import Lessons from "./components/lessons";
-import { lessonIcon } from "./components/steps";
-import Availability from "./components/Availability";
-import Program from "./components/Program";
-import { T, useT } from "./components/T";
-import Check from "./components/Check";
-import Ribbon from "./components/Ribbon";
-import Print, { NOTHING_EXCLUDED } from "./components/Print";
-import { readPrintOptions, writePrintOptions } from "./printOptions";
-import type { PrintOptions } from "./printOptions";
-import type { Excluded } from "./components/Print";
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from "./programMask";
-import type { ProgramMask } from "./programMask";
-import Settings from "./components/settings";
-import { useShortcutsHelp } from "./components/ShortcutsHelp";
-import { hasUnseenChangelog } from "./changelog";
-import {
-  readProgramColor,
-  writeProgramColor,
-  type ProgramColorMode,
-} from "./programColor";
+} from './theme';
+import { attachScrollFade } from './scrollFade';
+import { attachRibbonScroll } from './ribbonScroll';
+import { useSolver } from './useSolver';
+import { useFolder } from './useFolder';
+import { useUpdate } from './update';
+import { APP_NAME, surumEtiketi } from './version';
+import { useToolState } from './toolState';
+import type { Tab } from './toolState';
+import Setup from './components/setup';
+import Lessons from './components/lessons';
+import { lessonIcon } from './components/steps';
+import Availability from './components/Availability';
+import Program from './components/Program';
+import { T, useT } from './components/T';
+import Check from './components/Check';
+import Ribbon from './components/Ribbon';
+import Print, { NOTHING_EXCLUDED } from './components/Print';
+import { readPrintOptions, writePrintOptions } from './printOptions';
+import type { PrintOptions } from './printOptions';
+import type { Excluded } from './components/Print';
+import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './programMask';
+import type { ProgramMask } from './programMask';
+import Settings from './components/settings';
+import { useShortcutsHelp } from './components/ShortcutsHelp';
+import { hasUnseenChangelog } from './changelog';
+import { readProgramColor, writeProgramColor, type ProgramColorMode } from './programColor';
 
 /**
  * The six sections, along the TOP — on the same row as the document identity
@@ -79,51 +75,28 @@ import {
  */
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
   {
-    id: "setup",
-    label: "Okul",
+    id: 'setup',
+    label: 'Okul',
     // A clipboard: the four lists you fill in at the start of a term.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
         <path
           d="M8 4H6.5A1.5 1.5 0 0 0 5 5.5v14A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-14A1.5 1.5 0 0 0 17.5 4H16"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
         />
-        <rect
-          x="8.5"
-          y="2.5"
-          width="7"
-          height="3.4"
-          rx="1"
-          fill="currentColor"
-        />
-        <path
-          d="M8 10h8M8 13.5h8M8 17h5"
-          stroke="currentColor"
-          strokeWidth="1.6"
-        />
+        <rect x="8.5" y="2.5" width="7" height="3.4" rx="1" fill="currentColor" />
+        <path d="M8 10h8M8 13.5h8M8 17h5" stroke="currentColor" strokeWidth="1.6" />
       </svg>
     ),
   },
   {
-    id: "availability",
-    label: "Müsaitlik",
+    id: 'availability',
+    label: 'Müsaitlik',
     // A calendar with a cross in it: the hours somebody cannot come.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
         <rect
           x="3"
           y="5"
@@ -135,12 +108,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
           strokeWidth="1.8"
         />
         <path d="M3 9.5h18" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M7 3v3.5M17 3v3.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
+        <path d="M7 3v3.5M17 3v3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         <path
           d="M9.5 13l5 5M14.5 13l-5 5"
           stroke="currentColor"
@@ -151,8 +119,8 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
     ),
   },
   {
-    id: "lessons",
-    label: "Dersler",
+    id: 'lessons',
+    label: 'Dersler',
     // The open book, and the ONE copy of it: `steps.tsx` owns the drawing
     // because the three kinds beside it are owned there too, and a symbol that
     // means the same thing in two rooms has to be one drawing (pitfall 56's
@@ -160,17 +128,11 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
     icon: lessonIcon,
   },
   {
-    id: "program",
-    label: "Program",
+    id: 'program',
+    label: 'Program',
     // The grid itself, with one cell filled: a lesson sitting in its slot.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
         <rect
           x="3"
           y="4"
@@ -181,35 +143,18 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
           stroke="currentColor"
           strokeWidth="1.8"
         />
-        <path
-          d="M3 9.5h18M3 15h18M9 4v16M15 4v16"
-          stroke="currentColor"
-          strokeWidth="1.4"
-        />
+        <path d="M3 9.5h18M3 15h18M9 4v16M15 4v16" stroke="currentColor" strokeWidth="1.4" />
         <rect x="9" y="9.5" width="6" height="5.5" fill="currentColor" />
       </svg>
     ),
   },
   {
-    id: "check",
-    label: "Kontrol",
+    id: 'check',
+    label: 'Kontrol',
     // A magnifier over a tick: the tab that says WHY it cannot be built.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <circle
-          cx="10.5"
-          cy="10.5"
-          r="7"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <circle cx="10.5" cy="10.5" r="7" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path
           d="M7.4 10.6l2.4 2.6 4.3-5"
           fill="none"
@@ -218,33 +163,17 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <path
-          d="M15.6 15.6L21 21"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-        />
+        <path d="M15.6 15.6L21 21" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
       </svg>
     ),
   },
   {
-    id: "print",
-    label: "Çıktı",
+    id: 'print',
+    label: 'Çıktı',
     // A printer with paper coming out.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path
-          d="M7 3.5h10v4H7z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <path d="M7 3.5h10v4H7z" fill="none" stroke="currentColor" strokeWidth="1.8" />
         <path
           d="M4 8.5h16a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1h-2M6 16H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1"
           fill="none"
@@ -268,31 +197,18 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
   // Last, the way a settings menu sits at the end of a toolbar: it is opened
   // when the school changes, not while a timetable is being laid out.
   {
-    id: "settings",
-    label: "Ayarlar",
+    id: 'settings',
+    label: 'Ayarlar',
     // Three sliders. A cog reads as a blob at 22px; sliders keep a silhouette.
     icon: (
-      <svg
-        viewBox="0 0 24 24"
-        width="22"
-        height="22"
-        aria-hidden="true"
-        focusable="false"
-      >
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
         <path
           d="M3 7h18M3 12h18M3 17h18"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
         />
-        <circle
-          cx="8"
-          cy="7"
-          r="2.6"
-          fill="var(--paper)"
-          stroke="currentColor"
-          strokeWidth="1.8"
-        />
+        <circle cx="8" cy="7" r="2.6" fill="var(--paper)" stroke="currentColor" strokeWidth="1.8" />
         <circle
           cx="16"
           cy="12"
@@ -328,13 +244,7 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactElement }> = [
  */
 const ICON = {
   undo: (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       <path
         d="M4 9h9.5a5 5 0 0 1 0 10H8"
         fill="none"
@@ -353,13 +263,7 @@ const ICON = {
     </svg>
   ),
   redo: (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       <path
         d="M20 9h-9.5a5 5 0 0 0 0 10H16"
         fill="none"
@@ -378,21 +282,8 @@ const ICON = {
     </svg>
   ),
   sun: (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="4.2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="2" />
       <path
         d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"
         stroke="currentColor"
@@ -402,13 +293,7 @@ const ICON = {
     </svg>
   ),
   moon: (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      aria-hidden="true"
-      focusable="false"
-    >
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
       <path
         d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
         fill="none"
@@ -451,24 +336,14 @@ function BrandMark() {
 
 export default function App() {
   const t = useT();
-  const {
-    state,
-    change,
-    manageProgram,
-    undo,
-    redo,
-    loadState,
-    canUndo,
-    canRedo,
-    plans,
-    park,
-  } = useStore();
+  const { state, change, manageProgram, undo, redo, loadState, canUndo, canRedo, plans, park } =
+    useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
   // that shows them is drawn above <main>.
   // With no data, start on Setup — an empty Program screen tells him nothing.
-  const ui = useToolState(state.lessons.length > 0 ? "program" : "setup");
+  const ui = useToolState(state.lessons.length > 0 ? 'program' : 'setup');
   const { tab, setTab } = ui;
   const fileInput = useRef<HTMLInputElement>(null);
   const mainRef = useRef<HTMLElement>(null);
@@ -526,9 +401,8 @@ export default function App() {
   useEffect(() => {
     const box = mainRef.current;
     const shell = appRef.current;
-    if (shell !== null && !ribbonAuto) shell.removeAttribute("data-ribbon");
-    if (box === null || shell === null || tab === "program" || !ribbonAuto)
-      return undefined;
+    if (shell !== null && !ribbonAuto) shell.removeAttribute('data-ribbon');
+    if (box === null || shell === null || tab === 'program' || !ribbonAuto) return undefined;
     return attachRibbonScroll(box, shell);
   }, [tab, ribbonAuto]);
   // Probed once at startup; the answer does not change afterwards.
@@ -538,8 +412,7 @@ export default function App() {
   // copy exists only so Ayarlar → Görünüm can show which step is pressed.
   const [scale, setScale] = useState<number>(readScale);
   const [density, setDensity] = useState<Density>(readDensity);
-  const [programColor, setProgramColorRaw] =
-    useState<ProgramColorMode>(readProgramColor);
+  const [programColor, setProgramColorRaw] = useState<ProgramColorMode>(readProgramColor);
   const setProgramColor = useCallback((next: ProgramColorMode) => {
     writeProgramColor(next);
     setProgramColorRaw(next);
@@ -567,19 +440,15 @@ export default function App() {
   const [ribbon, setRibbon] = useState<boolean>(readRibbon);
   // Which pages the print tab will produce. Not in State: it is a decision
   // about one printout, not something a backup should carry.
-  const [printExcluded, setPrintExcluded] =
-    useState<Excluded>(NOTHING_EXCLUDED);
+  const [printExcluded, setPrintExcluded] = useState<Excluded>(NOTHING_EXCLUDED);
   // What each of those pages carries. Up here for the same reason as the tick
   // lists — Print unmounts on every tab change — but unlike them it is
   // remembered between sessions: it is set once a term, not once a printout.
-  const [printOptions, setPrintOptions] =
-    useState<PrintOptions>(readPrintOptions);
+  const [printOptions, setPrintOptions] = useState<PrintOptions>(readPrintOptions);
   // Temporary row/day visibility is a view of one PLAN, not backup data. It
   // follows alternative programs because they share the same school entities,
   // survives tab switches, and disappears with the browser session.
-  const [programMasks, setProgramMasks] = useState<Record<string, ProgramMask>>(
-    {},
-  );
+  const [programMasks, setProgramMasks] = useState<Record<string, ProgramMask>>({});
   const programMask = useMemo(
     () => cleanMask(programMasks[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
     [programMasks, plans.planId, state],
@@ -588,9 +457,7 @@ export default function App() {
     (apply: (mask: ProgramMask) => ProgramMask) => {
       setProgramMasks((all) => ({
         ...all,
-        [plans.planId]: apply(
-          cleanMask(all[plans.planId] ?? EMPTY_PROGRAM_MASK, state),
-        ),
+        [plans.planId]: apply(cleanMask(all[plans.planId] ?? EMPTY_PROGRAM_MASK, state)),
       }));
     },
     [plans.planId, state],
@@ -641,11 +508,7 @@ export default function App() {
   // modifier is what keeps a shortcut from being a trap.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        !e.altKey &&
-        e.key.toLowerCase() === "k"
-      ) {
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setPaletteOpen((open) => !open);
         return;
@@ -661,38 +524,32 @@ export default function App() {
       // '?' opens the shortcuts help. Guarded the same way Ctrl+Z is
       // (store.ts's isTextInput): it is a printable character, and without
       // the guard it would fire while typing a search or a name.
-      if (
-        e.key === "?" &&
-        !e.ctrlKey &&
-        !e.metaKey &&
-        !e.altKey &&
-        !isTextInput(e.target)
-      ) {
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey && !isTextInput(e.target)) {
         e.preventDefault();
         openShortcuts();
       }
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [goTab, openShortcuts]);
 
   const paletteActions = useMemo(
     () => [
       {
-        id: "save",
-        label: t("Dosyaya kaydet"),
-        hint: t("yedek al"),
+        id: 'save',
+        label: t('Dosyaya kaydet'),
+        hint: t('yedek al'),
         run: () => {
           downloadBackup(state);
-          notify(t("Yedek dosyaya yazıldı. İndirilenler klasörüne bakın."));
+          notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
         },
       },
       {
-        id: "auto",
-        label: t("Otomatik diz"),
-        hint: t("Program"),
+        id: 'auto',
+        label: t('Otomatik diz'),
+        hint: t('Program'),
         run: () => {
-          goTab("program");
+          goTab('program');
           solver.start(state, {
             keepPlaced: true,
             exclusions: solverExclusions(programMask),
@@ -700,28 +557,25 @@ export default function App() {
         },
       },
       {
-        id: "theme",
-        label: theme === "dark" ? t("Açık temaya geç") : t("Koyu temaya geç"),
+        id: 'theme',
+        label: theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç'),
         run: toggleTheme,
       },
       {
-        id: "ribbon",
-        label: ribbon ? t("Araç şeridini gizle") : t("Araç şeridini göster"),
+        id: 'ribbon',
+        label: ribbon ? t('Araç şeridini gizle') : t('Araç şeridini göster'),
         run: toggleRibbon,
       },
       {
-        id: "motion",
-        label:
-          motion === "kapali"
-            ? t("Animasyonları aç")
-            : t("Animasyonları kapat"),
-        hint: t("Ayarlar → Görünüm"),
+        id: 'motion',
+        label: motion === 'kapali' ? t('Animasyonları aç') : t('Animasyonları kapat'),
+        hint: t('Ayarlar → Görünüm'),
         run: toggleMotion,
       },
       {
-        id: "shortcuts",
-        label: t("Klavye kısayolları"),
-        hint: "?",
+        id: 'shortcuts',
+        label: t('Klavye kısayolları'),
+        hint: '?',
         run: openShortcuts,
       },
     ],
@@ -740,20 +594,20 @@ export default function App() {
    * this offers is the switch: off, or back to whatever full means.
    */
   function toggleMotion() {
-    const next: Motion = motion === "kapali" ? "tam" : "kapali";
+    const next: Motion = motion === 'kapali' ? 'tam' : 'kapali';
     applyMotion(next);
     setMotion(next);
   }
 
   function toggleTheme() {
-    const next: Theme = theme === "dark" ? "light" : "dark";
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
     setTheme(next);
   }
 
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    e.target.value = ""; // so the same file can be picked again
+    e.target.value = ''; // so the same file can be picked again
     if (file === undefined) return;
 
     // Read ONCE. The failure path used to call `file.text()` a second time and
@@ -773,38 +627,36 @@ export default function App() {
       await alert({
         title:
           version === BUNDLE_VERSION
-            ? t("Bu dosya bütün planları içeriyor")
+            ? t('Bu dosya bütün planları içeriyor')
             : version !== null
-              ? t("Bu dosya daha yeni bir sürümle yazılmış")
-              : t("Bu dosya okunamadı"),
-        tone: "warn",
+              ? t('Bu dosya daha yeni bir sürümle yazılmış')
+              : t('Bu dosya okunamadı'),
+        tone: 'warn',
         body:
           version === BUNDLE_VERSION
             ? t(
                 'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
               )
             : version !== null
-              ? t("Programı güncelleyin, sonra tekrar deneyin.")
-              : t(
-                  "Program tarafından indirilmiş bir .json yedek dosyası seçin.",
-                ),
+              ? t('Programı güncelleyin, sonra tekrar deneyin.')
+              : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
       });
       return;
     }
     if (
       !(await confirm({
-        title: t("Şu anki programın yerine geçecek"),
+        title: t('Şu anki programın yerine geçecek'),
         body: t(
           'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
         ),
-        confirmLabel: t("Yedeği yükle"),
+        confirmLabel: t('Yedeği yükle'),
         danger: true,
       }))
     ) {
       return;
     }
     loadState(loaded);
-    notify(t("Yedek yüklendi."));
+    notify(t('Yedek yüklendi.'));
   }
 
   return (
@@ -844,7 +696,7 @@ export default function App() {
             holding the corner the destinations wanted. */}
         {/* `dest` and not `t`: `t` is the translator now, and the map variable
             was shadowing it. */}
-        <nav className="tabstrip" aria-label={t("Bölümler")}>
+        <nav className="tabstrip" aria-label={t('Bölümler')}>
           {TABS.map((dest) => (
             <button
               key={dest.id}
@@ -868,7 +720,7 @@ export default function App() {
                   changed" is the whole message, the panel says what. Clears
                   the moment Ayarlar → Hakkında is actually opened
                   (`Changelog`'s mount effect), not on a bare tab click. */}
-              {dest.id === "settings" && changelogUnseen && (
+              {dest.id === 'settings' && changelogUnseen && (
                 <span className="tab-dot" aria-hidden="true" />
               )}
             </button>
@@ -882,15 +734,15 @@ export default function App() {
             var" would only send somebody to Kontrol to find out which. */}
         <button
           className={`health ${status.level}`}
-          onClick={() => goTab("check")}
+          onClick={() => goTab('check')}
           /* The label carries the sentence even when the bar is too narrow to
              draw it — and it is an aria-label rather than a title so the
              accessible name is this and not "Kontrol", which is also the name
              of a tab three pixels away. */
-          aria-label={t("Programın durumu: {durum}. Ayrıntı için Kontrol.", {
+          aria-label={t('Programın durumu: {durum}. Ayrıntı için Kontrol.', {
             durum: status.message,
           })}
-          title={t("{durum}. Kontrol sekmesini açar", {
+          title={t('{durum}. Kontrol sekmesini açar', {
             durum: status.message,
           })}
         >
@@ -906,9 +758,7 @@ export default function App() {
             sits at the head of the right-hand group — the things you reach for
             about this document rather than about where you are in it. */}
         <div className="topbar-doc">
-          <h1 className="app-title">
-            {state.settings.schoolName.trim() || APP_NAME}
-          </h1>
+          <h1 className="app-title">{state.settings.schoolName.trim() || APP_NAME}</h1>
 
           {/* Which timetable is open. It is shown even when there is only one:
               "hangi planı düzenliyorum" is the question this answers, and a
@@ -918,9 +768,9 @@ export default function App() {
               stay a place where no click can lose an afternoon. */}
           <select
             className="plan-picker"
-            aria-label={t("Plan")}
+            aria-label={t('Plan')}
             title={t(
-              "Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek",
+              'Planlar arasında geçiş yapar. Yeni plan, ad değiştirme ve silme: Ayarlar → Planlar ve yedek',
             )}
             value={plans.planId}
             onChange={(e) => plans.switchPlan(e.target.value)}
@@ -943,8 +793,8 @@ export default function App() {
             className="btn icon"
             onClick={undo}
             disabled={!canUndo}
-            aria-label={t("Geri al")}
-            title={t("Geri al (Ctrl+Z)")}
+            aria-label={t('Geri al')}
+            title={t('Geri al (Ctrl+Z)')}
           >
             {ICON.undo}
           </button>
@@ -952,8 +802,8 @@ export default function App() {
             className="btn icon"
             onClick={redo}
             disabled={!canRedo}
-            aria-label={t("İleri al")}
-            title={t("İleri al (Ctrl+Y)")}
+            aria-label={t('İleri al')}
+            title={t('İleri al (Ctrl+Y)')}
           >
             {ICON.redo}
           </button>
@@ -970,20 +820,20 @@ export default function App() {
           className="btn primary"
           onClick={() => {
             downloadBackup(state);
-            notify(t("Yedek dosyaya yazıldı. İndirilenler klasörüne bakın."));
+            notify(t('Yedek dosyaya yazıldı. İndirilenler klasörüne bakın.'));
           }}
           title={t(
-            "Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.",
+            'Programı bir .json dosyasına yazar. Program bu bilgisayarda kendiliğinden saklanıyor; dosya taşımak ve yedeklemek için.',
           )}
         >
-          {t("Dosyaya kaydet")}
+          {t('Dosyaya kaydet')}
         </button>
         <button
           className="btn"
           onClick={() => fileInput.current?.click()}
-          title={t("Daha önce kaydedilmiş bir .json dosyasını açar")}
+          title={t('Daha önce kaydedilmiş bir .json dosyasını açar')}
         >
-          {t("Dosyadan aç")}
+          {t('Dosyadan aç')}
         </button>
         {/* "Sıfırla" used to stand here, one careless click from "Dosyadan
             aç". It is now in Ayarlar > Veri: the rarest button in the app,
@@ -1006,8 +856,8 @@ export default function App() {
             here: once folded, the strip has no row to hold its own button. */}
         <button
           className="btn icon"
-          aria-label={t("Ara ve git")}
-          title={t("Ara ve git (Ctrl+K)")}
+          aria-label={t('Ara ve git')}
+          title={t('Ara ve git (Ctrl+K)')}
           onClick={() => setPaletteOpen(true)}
         >
           <SearchIcon size={18} strokeWidth={2} />
@@ -1015,8 +865,8 @@ export default function App() {
 
         <button
           className="btn icon"
-          aria-label={t("Klavye kısayolları")}
-          title={t("Klavye kısayolları (?)")}
+          aria-label={t('Klavye kısayolları')}
+          title={t('Klavye kısayolları (?)')}
           onClick={openShortcuts}
         >
           <Keyboard size={18} strokeWidth={2} />
@@ -1025,23 +875,17 @@ export default function App() {
         <button
           className="btn icon"
           aria-expanded={ribbon}
-          aria-label={t("Araç şeridi")}
+          aria-label={t('Araç şeridi')}
           title={
             ribbon
-              ? t("Araç şeridini gizle, ızgaraya bir satır daha kalsın")
-              : t("Araç şeridini göster")
+              ? t('Araç şeridini gizle, ızgaraya bir satır daha kalsın')
+              : t('Araç şeridini göster')
           }
           onClick={toggleRibbon}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            aria-hidden="true"
-            focusable="false"
-          >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
             <path
-              d={ribbon ? "M5 15l7-7 7 7" : "M5 9l7 7 7-7"}
+              d={ribbon ? 'M5 15l7-7 7 7' : 'M5 9l7 7 7-7'}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.2"
@@ -1053,12 +897,12 @@ export default function App() {
 
         <button
           className="btn icon"
-          aria-pressed={theme === "dark"}
-          aria-label={t("Koyu tema")}
-          title={theme === "dark" ? t("Açık temaya geç") : t("Koyu temaya geç")}
+          aria-pressed={theme === 'dark'}
+          aria-label={t('Koyu tema')}
+          title={theme === 'dark' ? t('Açık temaya geç') : t('Koyu temaya geç')}
           onClick={toggleTheme}
         >
-          {theme === "dark" ? ICON.sun : ICON.moon}
+          {theme === 'dark' ? ICON.sun : ICON.moon}
         </button>
       </header>
 
@@ -1081,9 +925,7 @@ export default function App() {
         programColor={programColor}
         setProgramColor={setProgramColor}
         changelogUnseen={changelogUnseen}
-        planName={
-          plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ""
-        }
+        planName={plans.library.plans.find((p) => p.id === plans.planId)?.name ?? ''}
       />
 
       <InspectorProvider state={state} change={change}>
@@ -1100,7 +942,7 @@ export default function App() {
           <div className="workspace">
             {!canSave && (
               <div className="save-warning">
-                ⚠{" "}
+                ⚠{' '}
                 <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın." />
               </div>
             )}
@@ -1122,10 +964,10 @@ export default function App() {
                 </span>
                 <span className="update-acts">
                   <button className="btn primary" onClick={update.reload}>
-                    {t("Yenile")}
+                    {t('Yenile')}
                   </button>
                   <button className="btn" onClick={() => setUpdateHidden(true)}>
-                    {t("Sonra")}
+                    {t('Sonra')}
                   </button>
                 </span>
               </div>
@@ -1142,11 +984,10 @@ export default function App() {
             every screen from the first minute is a strip nobody reads. It is
             said instead in Ayarlar → Veri, in red, on the routes where the
             offer is a good one. */}
-            {(folder.status.kind === "izin-gerek" ||
-              folder.status.kind === "hata") && (
+            {(folder.status.kind === 'izin-gerek' || folder.status.kind === 'hata') && (
               <div className="save-warning">
-                ⚠{" "}
-                {folder.status.kind === "izin-gerek" ? (
+                ⚠{' '}
+                {folder.status.kind === 'izin-gerek' ? (
                   <>
                     <T
                       k="**{klasor}** klasörüne yazılamıyor: tarayıcı izni sormadan devam etmiyor. İşiniz şu an yalnız bu tarayıcıda duruyor."
@@ -1163,7 +1004,7 @@ export default function App() {
                       }}
                     />
                   </>
-                )}{" "}
+                )}{' '}
                 {/* NOT "Ayarlar → Veri" (pitfall 49). getByRole name matching is
                 substring AND case-insensitive, so that label answered to the
                 Ayarlar TAB's own query and broke the folder suite's helper —
@@ -1172,11 +1013,11 @@ export default function App() {
                 <button
                   className="btn"
                   onClick={() => {
-                    goTab("settings");
-                    ui.setSection("plans");
+                    goTab('settings');
+                    ui.setSection('plans');
                   }}
                 >
-                  {t("Klasörü düzelt")}
+                  {t('Klasörü düzelt')}
                 </button>
               </div>
             )}
@@ -1196,20 +1037,15 @@ export default function App() {
             <main
               ref={mainRef}
               className={
-                tab === "program" && state.lessons.length > 0
-                  ? "main no-overflow"
-                  : "main scroll-fade"
+                tab === 'program' && state.lessons.length > 0
+                  ? 'main no-overflow'
+                  : 'main scroll-fade'
               }
             >
-              {tab === "setup" && (
-                <Setup
-                  state={state}
-                  change={change}
-                  plans={plans}
-                  step={ui.step}
-                />
+              {tab === 'setup' && (
+                <Setup state={state} change={change} plans={plans} step={ui.step} />
               )}
-              {tab === "availability" && (
+              {tab === 'availability' && (
                 <Availability
                   state={state}
                   change={change}
@@ -1219,7 +1055,7 @@ export default function App() {
                   showHeat={ui.showHeat}
                 />
               )}
-              {tab === "lessons" && (
+              {tab === 'lessons' && (
                 <Lessons
                   state={state}
                   change={change}
@@ -1228,12 +1064,9 @@ export default function App() {
                   setFocus={ui.setLessonFocus}
                 />
               )}
-              <Activity
-                mode={tab === "program" ? "visible" : "hidden"}
-                name="Program grid"
-              >
+              <Activity mode={tab === 'program' ? 'visible' : 'hidden'} name="Program grid">
                 <Program
-                  active={tab === "program"}
+                  active={tab === 'program'}
                   state={state}
                   change={change}
                   solver={solver}
@@ -1247,8 +1080,8 @@ export default function App() {
                   colorMode={programColor}
                 />
               </Activity>
-              {tab === "check" && <Check state={state} view={ui.checkView} />}
-              {tab === "print" && (
+              {tab === 'check' && <Check state={state} view={ui.checkView} />}
+              {tab === 'print' && (
                 <Print
                   state={state}
                   excluded={printExcluded}
@@ -1262,7 +1095,7 @@ export default function App() {
                   }}
                 />
               )}
-              {tab === "settings" && (
+              {tab === 'settings' && (
                 <Settings
                   state={state}
                   change={change}

@@ -1,6 +1,15 @@
 import type { Day } from './types';
 import { describe, expect, it } from 'vitest';
-import { clockParts, dayEnd, dayPeriods, formatClock, minuteOptions, parseClock, sharedPeriods, periodGroups } from './bell';
+import {
+  clockParts,
+  dayEnd,
+  dayPeriods,
+  formatClock,
+  minuteOptions,
+  parseClock,
+  sharedPeriods,
+  periodGroups,
+} from './bell';
 import { DEFAULT_BELL } from './entities';
 import { hourNames } from './entities';
 
@@ -55,7 +64,11 @@ describe('dayPeriods — the default school day', () => {
   });
 
   it('carries minutes over the hour correctly', () => {
-    const p = dayPeriods({ start: '08:35', lessonMinutes: 45, breakMinutes: 15, longBreakMinutes: 45 }, hourNames(3), 0);
+    const p = dayPeriods(
+      { start: '08:35', lessonMinutes: 45, breakMinutes: 15, longBreakMinutes: 45 },
+      hourNames(3),
+      0,
+    );
     expect(p.map((x) => `${x.start}-${x.end}`)).toEqual([
       '08:35-09:20',
       '09:35-10:20',

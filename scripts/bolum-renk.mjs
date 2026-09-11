@@ -43,21 +43,29 @@ function rgbToHex([r, g, b]) {
 
 /** D65, the space getComputedStyle reports in and the one the suite parses. */
 function rgbToLab([r, g, b]) {
-  const R = linear(r / 255), G = linear(g / 255), B = linear(b / 255);
+  const R = linear(r / 255),
+    G = linear(g / 255),
+    B = linear(b / 255);
   const x = (0.4124564 * R + 0.3575761 * G + 0.1804375 * B) / 0.95047;
-  const y = (0.2126729 * R + 0.7151522 * G + 0.0721750 * B) / 1.0;
-  const z = (0.0193339 * R + 0.1191920 * G + 0.9503041 * B) / 1.08883;
-  const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
-  const fx = f(x), fy = f(y), fz = f(z);
+  const y = (0.2126729 * R + 0.7151522 * G + 0.072175 * B) / 1.0;
+  const z = (0.0193339 * R + 0.119192 * G + 0.9503041 * B) / 1.08883;
+  const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : ((24389 / 27) * t + 16) / 116);
+  const fx = f(x),
+    fy = f(y),
+    fz = f(z);
   return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
 
 function labToRgb([L, a, bb]) {
-  const fy = (L + 16) / 116, fx = fy + a / 500, fz = fy - bb / 200;
-  const inv = (t) => (t ** 3 > 216 / 24389 ? t ** 3 : (116 * t - 16) * 27 / 24389);
-  const x = inv(fx) * 0.95047, y = inv(fy), z = inv(fz) * 1.08883;
+  const fy = (L + 16) / 116,
+    fx = fy + a / 500,
+    fz = fy - bb / 200;
+  const inv = (t) => (t ** 3 > 216 / 24389 ? t ** 3 : ((116 * t - 16) * 27) / 24389);
+  const x = inv(fx) * 0.95047,
+    y = inv(fy),
+    z = inv(fz) * 1.08883;
   const R = 3.2404542 * x - 1.5371385 * y - 0.4985314 * z;
-  const G = -0.9692660 * x + 1.8760108 * y + 0.0415560 * z;
+  const G = -0.969266 * x + 1.8760108 * y + 0.041556 * z;
   const B = 0.0556434 * x - 0.2040259 * y + 1.0572252 * z;
   return [R, G, B].map((c) => srgb(c) * 255);
 }
@@ -78,7 +86,8 @@ function lum([r, g, b]) {
 }
 
 function contrast(a, b) {
-  const x = lum(hexToRgb(a)), y = lum(hexToRgb(b));
+  const x = lum(hexToRgb(a)),
+    y = lum(hexToRgb(b));
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
@@ -86,8 +95,8 @@ function contrast(a, b) {
 
 const THEMES = {
   acik: {
-    ground: '#f3f6fb',          // --chrome
-    ink: '#ffffff',             // --on-accent on the filled tab
+    ground: '#f3f6fb', // --chrome
+    ink: '#ffffff', // --on-accent on the filled tab
     functional: ['#177431', '#8a6100', '#b0201c'],
     L: [26, 48],
   },
@@ -151,7 +160,7 @@ const HUE_GAP = 26;
  * turquoise against Ayarlar's slate, dE 20.5. The fix is not to shout: it is to
  * let the six be properly saturated so the quiet one is quiet BY CONTRAST.
  */
-const QUIET = 6;              // the last slot
+const QUIET = 6; // the last slot
 const QUIET_C_MAX = 20;
 
 /**
@@ -220,17 +229,22 @@ function pick(theme, h, L, quiet) {
   if (byL.has(L) && voice(byL.get(L)) !== null) return voice(byL.get(L));
   // Nearest legal lightness at this hue — the annealer walks L freely and a
   // dead step should cost separation, not crash the run.
-  let best = null, gap = Infinity;
+  let best = null,
+    gap = Infinity;
   for (const [k, v] of byL) {
     if (voice(v) === null) continue;
-    if (Math.abs(k - L) < gap) { gap = Math.abs(k - L); best = voice(v); }
+    if (Math.abs(k - L) < gap) {
+      gap = Math.abs(k - L);
+      best = voice(v);
+    }
   }
   return best;
 }
 
 function floorOf(slots, theme) {
-  const labs = slots.map((s, i) =>
-    pick(theme, s.h, theme === 'acik' ? s.Ll : s.Ld, i === QUIET)?.lab);
+  const labs = slots.map(
+    (s, i) => pick(theme, s.h, theme === 'acik' ? s.Ll : s.Ld, i === QUIET)?.lab,
+  );
   let worst = Infinity;
   for (let i = 0; i < labs.length; i += 1) {
     for (let j = i + 1; j < labs.length; j += 1) {
@@ -296,7 +310,8 @@ function randomSlots(rnd) {
 /** Seeded, so the recipe gives the same answer twice. */
 function mulberry(a) {
   return function () {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
     let t = Math.imul(a ^ (a >>> 15), 1 | a);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
@@ -323,7 +338,8 @@ for (let run = 0; run < TURN; run += 1) {
     }
     const s = score(next);
     if (s >= curScore || rnd() < Math.exp((s - curScore) / Math.max(temp, 0.001))) {
-      cur = next; curScore = s;
+      cur = next;
+      curScore = s;
     }
     if (champion === null || curScore > champion.score) {
       champion = { slots: cur.map((x) => ({ ...x })), score: curScore };
@@ -366,17 +382,19 @@ const others = rest.filter((x) => x !== teal);
 function permutations(xs) {
   if (xs.length <= 1) return [xs];
   return xs.flatMap((x, i) =>
-    permutations([...xs.slice(0, i), ...xs.slice(i + 1)]).map((rest) => [x, ...rest]));
+    permutations([...xs.slice(0, i), ...xs.slice(i + 1)]).map((rest) => [x, ...rest]),
+  );
 }
 
 // Kontrol may not wear the reddest of the six, and that is meaning rather than
 // distance: it is the tab that counts engel and uyarı, and a crimson strip over
 // a list of blockers says the whole screen is one. The search cannot see this —
 // dE 36 from --bad is true and beside the point.
-const badHue = 32;            // --bad, measured: 36 açık / 28 koyu
+const badHue = 32; // --bad, measured: 36 açık / 28 koyu
 const reddest = others.reduce((a, b) => (hueGap(a.h, badHue) <= hueGap(b.h, badHue) ? a : b));
 
-let order = null, bestNeighbour = -1;
+let order = null,
+  bestNeighbour = -1;
 for (const perm of permutations(others)) {
   const line = [perm[0], perm[1], perm[2], teal, perm[3], perm[4], quiet];
   if (line[4] === reddest) continue;
@@ -388,7 +406,10 @@ for (const perm of permutations(others)) {
       dE(line[i].koyu.lab, line[i + 1].koyu.lab),
     );
   }
-  if (worst > bestNeighbour) { bestNeighbour = worst; order = line; }
+  if (worst > bestNeighbour) {
+    bestNeighbour = worst;
+    order = line;
+  }
 }
 
 const floors = { acik: floorOf(champion.slots, 'acik'), koyu: floorOf(champion.slots, 'koyu') };
@@ -402,24 +423,29 @@ for (let i = 0; i < N; i += 1) {
 }
 console.log(
   `\nölçülen taban (en kötü ikili dE76, kötü olan tema): ${Math.min(floors.acik, floors.koyu).toFixed(1)}` +
-  `   ·   altı kimlik renginin en dar hue aralığı: ${minGap}°\n`,
+    `   ·   altı kimlik renginin en dar hue aralığı: ${minGap}°\n`,
 );
 console.log('bölüm        hue   AÇIK   L*  C*  kontrast   KOYU    L*  C*  kontrast');
 order.forEach((s, i) => {
   console.log(
     `${TR[i].padEnd(11)} ${String(s.h).padStart(3)}   ${s.acik.hex}  ${String(s.acik.L).padStart(2)} ` +
-    `${String(s.acik.C).padStart(3)}  ${s.acik.k.toFixed(1).padStart(5)}    ` +
-    `${s.koyu.hex}  ${String(s.koyu.L).padStart(2)} ${String(s.koyu.C).padStart(3)}  ${s.koyu.k.toFixed(1).padStart(5)}`,
+      `${String(s.acik.C).padStart(3)}  ${s.acik.k.toFixed(1).padStart(5)}    ` +
+      `${s.koyu.hex}  ${String(s.koyu.L).padStart(2)} ${String(s.koyu.C).padStart(3)}  ${s.koyu.k.toFixed(1).padStart(5)}`,
   );
 });
 
 for (const theme of ['acik', 'koyu']) {
   const labs = order.map((s) => s[theme].lab);
-  let worst = Infinity, pair = '';
-  for (let i = 0; i < N; i += 1) for (let j = i + 1; j < N; j += 1) {
-    const d = dE(labs[i], labs[j]);
-    if (d < worst) { worst = d; pair = `${TR[i]}↔${TR[j]}`; }
-  }
+  let worst = Infinity,
+    pair = '';
+  for (let i = 0; i < N; i += 1)
+    for (let j = i + 1; j < N; j += 1) {
+      const d = dE(labs[i], labs[j]);
+      if (d < worst) {
+        worst = d;
+        pair = `${TR[i]}↔${TR[j]}`;
+      }
+    }
   const fn = THEMES[theme].functional.map((h) => rgbToLab(hexToRgb(h)));
   const nearest = Math.min(...labs.flatMap((l) => fn.map((f) => dE(l, f))));
   console.log(

@@ -57,8 +57,24 @@ function build(): State {
       { id: 's511', name: '511', roomId: null, color: 1, maxSameLessonPerDay: null },
     ],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
-      { id: 'x2', classId: 's511', teacherId: 'oMC', weeklyHours: 6, blocks: [], second: false, maxPerDay: null },
+      {
+        id: 'x1',
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: 6,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'x2',
+        classId: 's511',
+        teacherId: 'oMC',
+        weeklyHours: 6,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
     ],
     unavailable: {},
     programs: [blankProgram()],
@@ -217,9 +233,7 @@ describe('findViolations — dizilmiş programdaki ihlaller', () => {
     d = place(d, 'x2', 0, 3);
     const found = findViolations(d, buildIndex(d));
     expect(found).toHaveLength(1);
-    expect(found[0]!.message).toBe(
-      'MÇ Salı günü 3 saat ders veriyor, en fazla 2 saat isteniyor.',
-    );
+    expect(found[0]!.message).toBe('MÇ Salı günü 3 saat ders veriyor, en fazla 2 saat isteniyor.');
     expect(found[0]!.level).toBe('block');
   });
 
@@ -382,9 +396,7 @@ describe('findViolations — boşluk (pencere) kuralları', () => {
     d = place(d, 'x1', 0, 0, 1);
     d = place(d, 'x1', 0, 2, 1);
     const found = findViolations(d, buildIndex(d));
-    expect(found.some((x) => x.rule === 'maxGapsTeacher' || x.rule === 'maxGapsClass')).toBe(
-      false,
-    );
+    expect(found.some((x) => x.rule === 'maxGapsTeacher' || x.rule === 'maxGapsClass')).toBe(false);
   });
 
   it('delik yoksa Uyar açık olsa da hiçbir şey raporlanmaz', () => {

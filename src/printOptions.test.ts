@@ -32,9 +32,7 @@ describe('normalizePrintOptions', () => {
       { clock: 1 },
       { stamp: null },
     ]) {
-      expect(normalizePrintOptions(junk), String(JSON.stringify(junk))).toEqual(
-        PRINT_DEFAULTS,
-      );
+      expect(normalizePrintOptions(junk), String(JSON.stringify(junk))).toEqual(PRINT_DEFAULTS);
     }
   });
 
@@ -60,8 +58,13 @@ describe('normalizePrintOptions', () => {
 
   it('gidiş-dönüş: yazılan JSON aynen geri okunuyor', () => {
     const chosen = {
-      school: false, credits: true, clock: false, stamp: true, cellBottom: false,
-      perSheet: 4 as const, size: 'kucuk' as const,
+      school: false,
+      credits: true,
+      clock: false,
+      stamp: true,
+      cellBottom: false,
+      perSheet: 4 as const,
+      size: 'kucuk' as const,
     };
     expect(normalizePrintOptions(JSON.stringify(chosen))).toEqual(chosen);
   });

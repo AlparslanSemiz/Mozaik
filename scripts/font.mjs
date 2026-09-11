@@ -58,8 +58,8 @@ const CHARSET = [
   ...range(0xa0, 0xff), //  Latin-1 supplement: nbsp, °, ½, accented Latin
   ...'ĐđĞğİıŒœŞşŠšŸŽž', // Latin Extended-A: Turkish Ğ İ ı Ş, and the rest
   //                       of what a pasted name can carry
-  ...'–—‘’“”•…‹›⁄€₺',  // punctuation and currency the interface prints
-  ...'←↑→↓−≈',           // arrows for reordering, real minus, approx in reports
+  ...'–—‘’“”•…‹›⁄€₺', // punctuation and currency the interface prints
+  ...'←↑→↓−≈', // arrows for reordering, real minus, approx in reports
 ].map((c) => (typeof c === 'number' ? c : c.codePointAt(0)));
 
 function range(a, b) {
@@ -97,27 +97,49 @@ if (!existsSync(SOURCE)) {
 const work = mkdtempSync(join(tmpdir(), 'plex-'));
 const instanced = join(work, 'instanced.ttf');
 const unicodes = join(work, 'unicodes.txt');
-writeFileSync(unicodes, CHARSET.map((c) => 'U+' + c.toString(16).toUpperCase().padStart(4, '0')).join(','));
+writeFileSync(
+  unicodes,
+  CHARSET.map((c) => 'U+' + c.toString(16).toUpperCase().padStart(4, '0')).join(','),
+);
 
 const before = existsSync(OUTPUT) ? statSync(OUTPUT).size : 0;
 
-execFileSync(python, ['-m', 'fontTools.varLib.instancer', '-q', '-o', instanced, SOURCE,
-  `wght=${WEIGHT_RANGE}`, 'wdth=100'], { stdio: 'inherit' });
+execFileSync(
+  python,
+  [
+    '-m',
+    'fontTools.varLib.instancer',
+    '-q',
+    '-o',
+    instanced,
+    SOURCE,
+    `wght=${WEIGHT_RANGE}`,
+    'wdth=100',
+  ],
+  { stdio: 'inherit' },
+);
 
-execFileSync(python, ['-m', 'fontTools.subset', instanced,
-  `--unicodes-file=${unicodes}`,
-  '--flavor=woff2',
-  `--output-file=${OUTPUT}`,
-  /* No hinting: the grid is read at 12-16px on a 1920x1080 desktop where
+execFileSync(
+  python,
+  [
+    '-m',
+    'fontTools.subset',
+    instanced,
+    `--unicodes-file=${unicodes}`,
+    '--flavor=woff2',
+    `--output-file=${OUTPUT}`,
+    /* No hinting: the grid is read at 12-16px on a 1920x1080 desktop where
      Chromium ignores TrueType instructions anyway, and they were 4 KB. */
-  '--no-hinting',
-  /* Kerning is the one layout feature this tool can see: names sit next to
+    '--no-hinting',
+    /* Kerning is the one layout feature this tool can see: names sit next to
      each other in a 9ch column. ccmp/locl keep Turkish composition right,
      mark/mkmk keep accents attached. liga is dropped on purpose — nothing
      here reads better as "fi". */
-  '--layout-features=kern,ccmp,locl,mark,mkmk',
-  '--desubroutinize',
-], { stdio: 'inherit' });
+    '--layout-features=kern,ccmp,locl,mark,mkmk',
+    '--desubroutinize',
+  ],
+  { stdio: 'inherit' },
+);
 
 const after = statSync(OUTPUT).size;
 const delta = after - before;
@@ -126,7 +148,9 @@ console.log(
     `  eksen     wght ${WEIGHT_RANGE}\n` +
     `  karakter  ${CHARSET.length}\n` +
     `  boyut     ${after} bayt` +
-    (before ? `  (${delta >= 0 ? '+' : ''}${delta}, dist'te base64 ~${delta >= 0 ? '+' : ''}${Math.round((delta * 4) / 3)})` : '') +
+    (before
+      ? `  (${delta >= 0 ? '+' : ''}${delta}, dist'te base64 ~${delta >= 0 ? '+' : ''}${Math.round((delta * 4) / 3)})`
+      : '') +
     `\n\nBoyut değiştiyse docs/WORKLOG.md'ye yaz — bağımlılık politikasının tek şartı ölçmek.`,
 );
 copyFileSync(join(root, 'scripts/font-source/OFL.txt'), join(root, 'src/fonts/OFL.txt'));

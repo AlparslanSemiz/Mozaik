@@ -9,7 +9,7 @@
 // The React side hears about it exactly once, on pointerup, so the preference
 // can be written and the component can agree with the DOM.
 
-import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from "./theme";
+import { DOCK_H_MAX, DOCK_H_MIN, DOCK_H_STEP } from './theme';
 
 /** Room the grid must keep for itself: sticky head plus about ten rows. */
 const GRID_FLOOR_REM = 26;
@@ -25,9 +25,7 @@ export interface SplitterOptions {
 
 /** One rem in CSS pixels, as the document currently resolves it. */
 function remPx(): number {
-  const size = Number.parseFloat(
-    getComputedStyle(document.documentElement).fontSize,
-  );
+  const size = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
   return Number.isFinite(size) && size > 0 ? size : 16;
 }
 
@@ -43,10 +41,7 @@ export function maxDockHeight(bodyPx: number): number {
   return Math.max(DOCK_H_MIN, Math.min(DOCK_H_MAX, available));
 }
 
-export function attachSplitter(
-  handle: HTMLElement,
-  opts: SplitterOptions,
-): () => void {
+export function attachSplitter(handle: HTMLElement, opts: SplitterOptions): () => void {
   let startY = 0;
   let startRem = 0;
   let live = 0;
@@ -62,8 +57,8 @@ export function attachSplitter(
     // screen and what comes back after a reload are the same number.
     live = Math.round(bounded / DOCK_H_STEP) * DOCK_H_STEP;
     // The ONE write of the whole gesture. React never hears about it.
-    opts.body.style.setProperty("--dock-h", `${live}rem`);
-    handle.setAttribute("aria-valuenow", String(Math.round(live * 100) / 100));
+    opts.body.style.setProperty('--dock-h', `${live}rem`);
+    handle.setAttribute('aria-valuenow', String(Math.round(live * 100) / 100));
   }
 
   function down(e: PointerEvent) {
@@ -75,7 +70,7 @@ export function attachSplitter(
     handle.setPointerCapture(e.pointerId);
     // Kills the flex-basis transition for the duration: without it the drawer
     // lags a frame behind the finger and reads as rubber.
-    opts.body.classList.add("splitting");
+    opts.body.classList.add('splitting');
     e.preventDefault();
   }
 
@@ -91,19 +86,18 @@ export function attachSplitter(
     // without ever writing the preference — the drawer moves and forgets.
     if (!dragging) return;
     dragging = false;
-    if (handle.hasPointerCapture(e.pointerId))
-      handle.releasePointerCapture(e.pointerId);
-    opts.body.classList.remove("splitting");
+    if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
+    opts.body.classList.remove('splitting');
     opts.commit(live);
   }
 
   function key(e: KeyboardEvent) {
     const step = e.shiftKey ? 2 : 0.5;
     let next: number | null = null;
-    if (e.key === "ArrowUp") next = opts.current() + step;
-    else if (e.key === "ArrowDown") next = opts.current() - step;
-    else if (e.key === "Home") next = DOCK_H_MIN;
-    else if (e.key === "End") next = ceiling();
+    if (e.key === 'ArrowUp') next = opts.current() + step;
+    else if (e.key === 'ArrowDown') next = opts.current() - step;
+    else if (e.key === 'Home') next = DOCK_H_MIN;
+    else if (e.key === 'End') next = ceiling();
     if (next === null) return;
     e.preventDefault();
     // A few events per second, so this one may go through React directly.
@@ -111,17 +105,17 @@ export function attachSplitter(
     opts.commit(live);
   }
 
-  handle.addEventListener("pointerdown", down);
-  handle.addEventListener("pointermove", move);
-  handle.addEventListener("pointerup", up);
-  handle.addEventListener("pointercancel", up);
-  handle.addEventListener("keydown", key);
+  handle.addEventListener('pointerdown', down);
+  handle.addEventListener('pointermove', move);
+  handle.addEventListener('pointerup', up);
+  handle.addEventListener('pointercancel', up);
+  handle.addEventListener('keydown', key);
 
   return () => {
-    handle.removeEventListener("pointerdown", down);
-    handle.removeEventListener("pointermove", move);
-    handle.removeEventListener("pointerup", up);
-    handle.removeEventListener("pointercancel", up);
-    handle.removeEventListener("keydown", key);
+    handle.removeEventListener('pointerdown', down);
+    handle.removeEventListener('pointermove', move);
+    handle.removeEventListener('pointerup', up);
+    handle.removeEventListener('pointercancel', up);
+    handle.removeEventListener('keydown', key);
   };
 }

@@ -70,9 +70,8 @@ const MOTIONS: Array<{ id: Motion; label: string }> = [
   { id: 'kapali', label: 'Kapalı' },
 ];
 
-const STEPS = Array.from(
-  { length: Math.round((SCALE_MAX - SCALE_MIN) / SCALE_STEP) + 1 },
-  (_, i) => Number((SCALE_MIN + i * SCALE_STEP).toFixed(2)),
+const STEPS = Array.from({ length: Math.round((SCALE_MAX - SCALE_MIN) / SCALE_STEP) + 1 }, (_, i) =>
+  Number((SCALE_MIN + i * SCALE_STEP).toFixed(2)),
 );
 
 export default function Appearance({
@@ -154,7 +153,9 @@ export default function Appearance({
         <div className="panel">
           <h2>{t('Yazı büyüklüğü')}</h2>
           <p className="hint">
-            {t('Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve ızgara hücrelerini.')}
+            {t(
+              'Bütün ekranı birlikte büyütür: yazıyı, boşlukları, düğmeleri ve ızgara hücrelerini.',
+            )}
           </p>
 
           <div className="form-row" role="group" aria-label={t('Yazı büyüklüğü')}>
@@ -210,17 +211,23 @@ export default function Appearance({
               className="btn"
               aria-pressed={density === 'ferah'}
               onClick={() => chooseDensity('ferah')}
-            >{t('Ferah')}</button>
+            >
+              {t('Ferah')}
+            </button>
             <button
               className="btn"
               aria-pressed={density === 'rahat'}
               onClick={() => chooseDensity('rahat')}
-            >{t('Rahat')}</button>
+            >
+              {t('Rahat')}
+            </button>
             <button
               className="btn"
               aria-pressed={density === 'sigdir'}
               onClick={() => chooseDensity('sigdir')}
-            >{t('Sığdır')}</button>
+            >
+              {t('Sığdır')}
+            </button>
           </div>
 
           <p className="hint">
@@ -248,17 +255,23 @@ export default function Appearance({
               className="btn"
               aria-pressed={uiDensity === 'ferah'}
               onClick={() => chooseUiDensity('ferah')}
-            >{t('Ferah')}</button>
+            >
+              {t('Ferah')}
+            </button>
             <button
               className="btn"
               aria-pressed={uiDensity === 'rahat'}
               onClick={() => chooseUiDensity('rahat')}
-            >{t('Rahat')}</button>
+            >
+              {t('Rahat')}
+            </button>
             <button
               className="btn"
               aria-pressed={uiDensity === 'sigdir'}
               onClick={() => chooseUiDensity('sigdir')}
-            >{t('Sığdır')}</button>
+            >
+              {t('Sığdır')}
+            </button>
           </div>
         </div>
 
@@ -362,31 +375,31 @@ export default function Appearance({
                that gives ground is the list, never the panel around it. The
                heading and the two sentences under it stay put. */
             <div className="stat-scroll">
-            <table className="list">
-              <thead>
-                <tr>
-                  <th>{t('Öğretmen')}</th>
-                  <th>{t('Branş')}</th>
-                  <th className="num">{t('Saat')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teachers.map((t) => (
-                  <tr key={t.id}>
-                    <td>
-                      <span
-                        className="color-dot"
-                        style={{ background: paletteColor(t.color) }}
-                        aria-hidden="true"
-                      />
-                      {t.name}
-                    </td>
-                    <td>{t.subject}</td>
-                    <td className="num">{hoursOf(t.id)}</td>
+              <table className="list">
+                <thead>
+                  <tr>
+                    <th>{t('Öğretmen')}</th>
+                    <th>{t('Branş')}</th>
+                    <th className="num">{t('Saat')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {teachers.map((t) => (
+                    <tr key={t.id}>
+                      <td>
+                        <span
+                          className="color-dot"
+                          style={{ background: paletteColor(t.color) }}
+                          aria-hidden="true"
+                        />
+                        {t.name}
+                      </td>
+                      <td>{t.subject}</td>
+                      <td className="num">{hoursOf(t.id)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
           {state.teachers.length > teachers.length && (
@@ -398,7 +411,6 @@ export default function Appearance({
             </p>
           )}
         </div>
-
       </aside>
     </div>
   );

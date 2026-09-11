@@ -201,15 +201,11 @@ function stripComments(text: string): string {
 
 describe('sözlükler kaynakla aynı şeyi konuşuyor', () => {
   const source = Object.entries(SOURCE)
-    .filter(
-      ([p]) => !p.includes('.test.') && !p.startsWith('./lang/') && !p.endsWith('worlds.ts'),
-    )
+    .filter(([p]) => !p.includes('.test.') && !p.startsWith('./lang/') && !p.endsWith('worlds.ts'))
     .map(([, text]) => stripComments(text as string))
     .join('\n');
 
-  const CEVIRILER = DILLER.filter((d) => d !== 'tr').map(
-    (d) => [d, sozlukOf(d) ?? {}] as const,
-  );
+  const CEVIRILER = DILLER.filter((d) => d !== 'tr').map((d) => [d, sozlukOf(d) ?? {}] as const);
 
   it('yorum ayıklayıcı DİZGEYİ bırakıyor, YORUMU alıyor', () => {
     // The scanner is what judges every dictionary below it, so it is judged
@@ -298,9 +294,9 @@ describe('çoğul', () => {
   it('bir cümle İKİ çoğul taşıyabilir, her biri KENDİ sayısını soruyor', () => {
     // The deletion summaries in entities.ts do exactly this: "2 lessons and 1
     // placed hour". "The first number in vars" would get the second one wrong.
-    expect(
-      translate('en', '{a} {a:lesson|lessons} and {b} {b:hour|hours}', { a: 2, b: 1 }),
-    ).toBe('2 lessons and 1 hour');
+    expect(translate('en', '{a} {a:lesson|lessons} and {b} {b:hour|hours}', { a: 2, b: 1 })).toBe(
+      '2 lessons and 1 hour',
+    );
   });
 
   it('Türkçe anahtarda çoğul YOK — sayıdan sonra ek almaz', () => {

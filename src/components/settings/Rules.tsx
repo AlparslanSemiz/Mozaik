@@ -126,9 +126,7 @@ export default function Rules({ state, change }: PanelProps) {
                       value={state.settings.rules[rule.name]}
                       aria-label={t('{kural} kuralı', { kural: t(rule.label) })}
                       onChange={(e) =>
-                        change((d) =>
-                          updateRules(d, { [rule.name]: e.target.value as RuleLevel }),
-                        )
+                        change((d) => updateRules(d, { [rule.name]: e.target.value as RuleLevel }))
                       }
                     >
                       <option value="off">{t(LEVEL_LABEL.off)}</option>
@@ -250,9 +248,7 @@ export default function Rules({ state, change }: PanelProps) {
               list scrolls and the sentence above it stays where it was. */}
           {violations.length === 0 ? (
             <div className="ok-box">
-              {t(
-                'Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.',
-              )}
+              {t('Dizilmiş program girdiğiniz sınırların hiçbirini aşmıyor.')}
             </div>
           ) : (
             <div className="stat-scroll">

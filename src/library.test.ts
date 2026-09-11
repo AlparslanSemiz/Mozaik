@@ -107,11 +107,7 @@ describe('parseLibrary — bozuk veri hiçbir zaman boş ekran üretmiyor', () =
     // because its name is junk would orphan a whole timetable.
     const lib = normalizeLibrary({
       activeId: 'abcd',
-      plans: [
-        { id: 'abcd', name: 42 },
-        { name: 'kimliksiz' },
-        { id: '', name: 'boş kimlik' },
-      ],
+      plans: [{ id: 'abcd', name: 42 }, { name: 'kimliksiz' }, { id: '', name: 'boş kimlik' }],
     });
     expect(lib.plans).toEqual([{ id: 'abcd', name: 'Adsız plan', draft: false }]);
     expect(lib.activeId).toBe('abcd');
@@ -420,9 +416,12 @@ function withLocation(fake: Partial<Location>, job: () => void) {
 
 describe('routeName — hangi kopya bu', () => {
   it('çift tıklanan dosyayı ADIYLA söylüyor', () => {
-    withLocation({ protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' }, () => {
-      expect(routeName()).toBe('Dosya (çift tıklanan .html)');
-    });
+    withLocation(
+      { protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' },
+      () => {
+        expect(routeName()).toBe('Dosya (çift tıklanan .html)');
+      },
+    );
   });
 
   it('yerel kurulumu "Site" demiyor', () => {
@@ -430,7 +429,12 @@ describe('routeName — hangi kopya bu', () => {
     // correct. But telling my father he is on a "site" would send him looking
     // for an internet address that does not exist on his machine.
     withLocation(
-      { protocol: 'http:', hostname: 'dersprogrami.localhost', origin: 'http://dersprogrami.localhost:7654', pathname: '/' },
+      {
+        protocol: 'http:',
+        hostname: 'dersprogrami.localhost',
+        origin: 'http://dersprogrami.localhost:7654',
+        pathname: '/',
+      },
       () => {
         expect(routeName()).toBe('Windows kurulumu');
         expect(storageKind()).toBe('site');
@@ -440,7 +444,12 @@ describe('routeName — hangi kopya bu', () => {
 
   it('gerçek site "Site"', () => {
     withLocation(
-      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/Mozaik/' },
+      {
+        protocol: 'https:',
+        hostname: 'alparslansemiz.github.io',
+        origin: 'https://alparslansemiz.github.io',
+        pathname: '/Mozaik/',
+      },
       () => expect(routeName()).toBe('Site'),
     );
   });
@@ -461,14 +470,20 @@ describe('routeName — hangi kopya bu', () => {
 describe('storageAddress — hangi depo', () => {
   it('adresi yol dahil veriyor', () => {
     withLocation(
-      { protocol: 'https:', hostname: 'alparslansemiz.github.io', origin: 'https://alparslansemiz.github.io', pathname: '/Mozaik/' },
+      {
+        protocol: 'https:',
+        hostname: 'alparslansemiz.github.io',
+        origin: 'https://alparslansemiz.github.io',
+        pathname: '/Mozaik/',
+      },
       () => expect(storageAddress()).toBe('https://alparslansemiz.github.io/Mozaik/'),
     );
   });
 
   it('file:// tek başına — çünkü orada makinedeki HER yerel sayfa aynı kökende', () => {
-    withLocation({ protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' }, () =>
-      expect(storageAddress()).toBe('file://'),
+    withLocation(
+      { protocol: 'file:', hostname: '', origin: 'file://', pathname: '/C:/a.html' },
+      () => expect(storageAddress()).toBe('file://'),
     );
   });
 

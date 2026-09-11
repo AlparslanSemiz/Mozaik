@@ -66,11 +66,7 @@ export function minuteOptions(minute: number): number[] {
  * `longBreakAfter` is 1-BASED: 5 means the long break falls between the 5th and
  * the 6th lesson. 0 means the day has no long break.
  */
-export function dayPeriods(
-  bell: Bell,
-  labels: string[],
-  longBreakAfter: number,
-): Period[] {
+export function dayPeriods(bell: Bell, labels: string[], longBreakAfter: number): Period[] {
   const base = parseClock(bell.start);
   const lesson = Math.max(1, Math.round(bell.lessonMinutes));
   const gap = Math.max(0, Math.round(bell.breakMinutes));
@@ -79,7 +75,8 @@ export function dayPeriods(
   const extra = longBreakAfter > 0 ? longGap - gap : 0;
 
   return labels.map((label, i) => {
-    const start = base + i * (lesson + gap) + (i >= longBreakAfter && longBreakAfter > 0 ? extra : 0);
+    const start =
+      base + i * (lesson + gap) + (i >= longBreakAfter && longBreakAfter > 0 ? extra : 0);
     return { label, start: formatClock(start), end: formatClock(start + lesson) };
   });
 }
@@ -137,11 +134,7 @@ export interface PeriodGroup {
   days: number[];
 }
 
-export function periodGroups(
-  bell: Bell,
-  labels: string[],
-  days: Day[],
-): PeriodGroup[][] {
+export function periodGroups(bell: Bell, labels: string[], days: Day[]): PeriodGroup[][] {
   if (days.length === 0) return labels.map(() => []);
 
   const perDay = days.map((day) => dayPeriods(bell, labels, day.longBreakAfter));

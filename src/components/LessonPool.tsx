@@ -19,22 +19,16 @@
 // The card list stays MOUNTED when the drawer is closed. One DOM card stands
 // for one stack; the model count in the head remains the number of blocks.
 
-import { memo, useEffect, useRef, useState } from "react";
-import type React from "react";
-import type { ReactNode } from "react";
-import * as ContextMenu from "@radix-ui/react-context-menu";
-import type { Id } from "../types";
-import { paletteColor } from "../palette";
-import {
-  DOCK_H_MIN,
-  readDock,
-  readDockHeight,
-  writeDock,
-  writeDockHeight,
-} from "../theme";
-import { attachSplitter, maxDockHeight } from "../poolSplit";
-import { useT } from "./T";
-import type { PoolSort } from "../toolState";
+import { memo, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import type { ReactNode } from 'react';
+import * as ContextMenu from '@radix-ui/react-context-menu';
+import type { Id } from '../types';
+import { paletteColor } from '../palette';
+import { DOCK_H_MIN, readDock, readDockHeight, writeDock, writeDockHeight } from '../theme';
+import { attachSplitter, maxDockHeight } from '../poolSplit';
+import { useT } from './T';
+import type { PoolSort } from '../toolState';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */
@@ -80,11 +74,11 @@ interface Props {
 
 /** The five orders, named for the question each one answers. */
 const SORTS: Array<{ id: PoolSort; label: string }> = [
-  { id: "row", label: "Izgara sırası" },
-  { id: "name", label: "Ada göre" },
-  { id: "subject", label: "Branşa göre" },
-  { id: "size", label: "Uzun bloklar önce" },
-  { id: "left", label: "En çok kalan" },
+  { id: 'row', label: 'Izgara sırası' },
+  { id: 'name', label: 'Ada göre' },
+  { id: 'subject', label: 'Branşa göre' },
+  { id: 'size', label: 'Uzun bloklar önce' },
+  { id: 'left', label: 'En çok kalan' },
 ];
 
 /** One run of cards under one heading. */
@@ -155,7 +149,7 @@ function stackCards(cards: PoolCard[]): CardStack[] {
 function groupStacks(stacks: CardStack[]): CardGroup[] {
   const groups: CardGroup[] = [];
   for (const s of stacks) {
-    const label = s.cards[0]?.group ?? "";
+    const label = s.cards[0]?.group ?? '';
     const last = groups[groups.length - 1];
     if (last !== undefined && last.label === label) {
       last.stacks.push(s);
@@ -188,7 +182,7 @@ function LessonPool({
   // one lesson's whole remainder once per card it still has out.
   const remainingHours = cards.reduce((sum, c) => sum + c.size, 0);
   const groups = groupStacks(stackCards(cards));
-  const narrowed = filter !== "" && total !== cards.length;
+  const narrowed = filter !== '' && total !== cards.length;
   // Read from storage on every mount, so the tab switch that unmounts this
   // component cannot lose either setting (pitfall 18 does not apply to a
   // preference that lives outside React).
@@ -205,13 +199,13 @@ function LessonPool({
 
   useEffect(() => {
     const el = handle.current;
-    const body = el?.closest(".program-body");
+    const body = el?.closest('.program-body');
     if (el === null || !(body instanceof HTMLElement)) return undefined;
     // `--dock-h` has exactly ONE owner, `.program-body`, written from here on
     // mount and from the splitter during a drag. Putting a copy on `.pool` as
     // an inline style made the drag invisible: the closer declaration won and
     // the DOM write went nowhere.
-    body.style.setProperty("--dock-h", `${readDockHeight()}rem`);
+    body.style.setProperty('--dock-h', `${readDockHeight()}rem`);
     setCeiling(maxDockHeight(body.getBoundingClientRect().height));
     return attachSplitter(el, {
       body,
@@ -245,8 +239,8 @@ function LessonPool({
       // Nothing left to place: the drawer keeps its head (which is now the
       // sentence saying so) and gives the height back to the grid. A 176px
       // tray of nothing is 176px that was carrying five teachers.
-      className={open && cards.length > 0 ? "pool" : "pool pool-closed"}
-      aria-label={t("Yerleşmeyi bekleyen dersler")}
+      className={open && cards.length > 0 ? 'pool' : 'pool pool-closed'}
+      aria-label={t('Yerleşmeyi bekleyen dersler')}
     >
       {/* The seam. It is a control before it is a border: 1px of ink, 9px of
           target, and reachable from the keyboard because a drag is not. */}
@@ -255,12 +249,12 @@ function LessonPool({
         className="pool-split"
         role="separator"
         aria-orientation="horizontal"
-        aria-label={t("Havuz yüksekliği")}
+        aria-label={t('Havuz yüksekliği')}
         aria-valuenow={height}
         aria-valuemin={DOCK_H_MIN}
         aria-valuemax={Math.round(ceiling * 100) / 100}
         tabIndex={open ? 0 : -1}
-        title={t("Sürükleyerek havuzun boyunu ayarlayın")}
+        title={t('Sürükleyerek havuzun boyunu ayarlayın')}
       />
 
       <div className="pool-head">
@@ -268,27 +262,17 @@ function LessonPool({
           className="btn icon pool-toggle"
           disabled={cards.length === 0}
           aria-expanded={open && cards.length > 0}
-          aria-label={t("Havuz")}
-          title={
-            open
-              ? t("Havuzu kapat: ızgara bütün yüksekliği alır")
-              : t("Havuzu aç")
-          }
+          aria-label={t('Havuz')}
+          title={open ? t('Havuzu kapat: ızgara bütün yüksekliği alır') : t('Havuzu aç')}
           onClick={toggle}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            aria-hidden="true"
-            focusable="false"
-          >
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
             {/* The drawer is at the BOTTOM, so the arrow points the way the
                 click sends it: down to close it, up to open it. It was the
                 other way round for a version and read as a state rather than
                 an action — "Programda havuzu aç tuşu ters gibi". */}
             <path
-              d={open ? "M5 9l7 7 7-7" : "M5 15l7-7 7 7"}
+              d={open ? 'M5 9l7 7 7-7' : 'M5 15l7-7 7 7'}
               fill="none"
               stroke="currentColor"
               strokeWidth="2.2"
@@ -301,25 +285,23 @@ function LessonPool({
         <span className="pool-count">
           {cards.length === 0 ? (
             <>
-              <strong>{t("Hepsi yerleşti")}</strong>
-              <span className="pool-sub">
-                {t("{n} dersin tamamı programda", { n: completed })}
-              </span>
+              <strong>{t('Hepsi yerleşti')}</strong>
+              <span className="pool-sub">{t('{n} dersin tamamı programda', { n: completed })}</span>
             </>
           ) : (
             <>
               {/* "blok" and not "ders": a 2+1 lesson leaves two cards here and
                   calling them two lessons would not add up against Kurulum. */}
-              <strong>{t("{n} blok bekliyor", { n: cards.length })}</strong>
+              <strong>{t('{n} blok bekliyor', { n: cards.length })}</strong>
               <span className="pool-sub">
                 {/* Narrowed, the head says so with the number it is hiding.
                     A tray that quietly shows a twelfth of what is left would
                     make "hepsi yerleşti" a lie one click away. */}
                 {narrowed
-                  ? t("{n} blok süzgeç dışında · sürükleyip bırakın", {
+                  ? t('{n} blok süzgeç dışında · sürükleyip bırakın', {
                       n: total - cards.length,
                     })
-                  : t("{n} saat · sürükleyip bırakın", { n: remainingHours })}
+                  : t('{n} saat · sürükleyip bırakın', { n: remainingHours })}
               </span>
             </>
           )}
@@ -328,13 +310,13 @@ function LessonPool({
         {/* HOW THE TRAY IS ARRANGED, on the tray. Two positions, not two
             preferences: they say what is being looked at right now, so they
             live in `toolState` and cost no storage (see PoolSort there). */}
-        {(cards.length > 0 || filter !== "") && (
+        {(cards.length > 0 || filter !== '') && (
           <div className="pool-tools">
             <label className="pool-pick">
-              <span>{t("Sırala")}</span>
+              <span>{t('Sırala')}</span>
               <select
                 value={sort}
-                aria-label={t("Havuz sıralaması")}
+                aria-label={t('Havuz sıralaması')}
                 onChange={(e) => setSort(e.target.value as PoolSort)}
               >
                 {SORTS.map((s) => (
@@ -348,15 +330,15 @@ function LessonPool({
                 the tray makes this a control that cannot be answered
                 differently — the same rule the lesson form's branch box
                 follows. */}
-            {(subjects.length > 1 || filter !== "") && (
+            {(subjects.length > 1 || filter !== '') && (
               <label className="pool-pick">
-                <span>{t("Branş")}</span>
+                <span>{t('Branş')}</span>
                 <select
                   value={filter}
-                  aria-label={t("Havuz süzgeci")}
+                  aria-label={t('Havuz süzgeci')}
                   onChange={(e) => setFilter(e.target.value)}
                 >
-                  <option value="">{t("Tüm branşlar")}</option>
+                  <option value="">{t('Tüm branşlar')}</option>
                   {subjects.map(([key, label]) => (
                     <option key={key} value={key}>
                       {label}
@@ -373,77 +355,77 @@ function LessonPool({
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
           <div className="pool-list">
             {groups.map((g) => (
-          <section className="pool-group" key={g.key} aria-label={g.label}>
-            {/* The heading is what the reader asked for: a break between one
+              <section className="pool-group" key={g.key} aria-label={g.label}>
+                {/* The heading is what the reader asked for: a break between one
                 row's cards and the next, rather than one more 7px gap. It also
                 makes the order VISIBLE — pick "branşa göre" and the headings
                 become branches. */}
-            <h3 className="pool-group-label">
-              {/* The dot is the ROW's colour, so it is drawn only when the
+                <h3 className="pool-group-label">
+                  {/* The dot is the ROW's colour, so it is drawn only when the
                   heading IS a row. Over "7 saat kaldı" it would be the colour
                   of whichever card happened to sort first — a mark that means
                   nothing is worse than no mark. */}
-              {(sort === "row" || sort === "name") && (
-                <span
-                  className="color-dot"
-                  style={{
-                    background: paletteColor(g.stacks[0]?.cards[0]?.color ?? 0),
-                  }}
-                />
-              )}
-              {g.label}
-              <span className="pool-group-count">{g.cards}</span>
-            </h3>
-            <div className="pool-group-cards">
-              {g.stacks.map((s) => {
-                const c = s.cards[0]!;
-                return (
-                  <div
-                    key={s.key}
-                    className="pool-stack"
-                    data-count={s.cards.length}
-                    style={
-                      {
-                        "--layers": Math.min(s.cards.length - 1, 2),
-                        "--stack-color": paletteColor(c.color),
-                      } as React.CSSProperties
-                    }
-                  >
-                    <div
-                      className={`pool-card${c.masked ? " masked-scope" : ""}`}
-                      data-size={c.size}
-                      data-lesson={c.lessonId}
-                      style={{ background: paletteColor(c.color) }}
-                      onPointerDown={
-                        c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
-                      }
-                      title={
-                        t("{ust} · {alt} {brans} · {boy} saatlik blok", {
-                          ust: c.top,
-                          alt: c.bottom,
-                          brans: c.subject,
-                          boy: c.size,
-                        }) +
-                        (s.cards.length > 1
-                          ? t(" · {n} tane bekliyor", { n: s.cards.length })
-                          : "") +
-                        t(" · dersin {yerlesen}/{toplam} saati yerleşti", {
-                          yerlesen: c.placed,
-                          toplam: c.total,
-                        })
-                      }
-                    >
-                      <span className="card-top">{c.top}</span>
-                      <span className="card-bottom">{c.bottom}</span>
-                      <span className="counter">
-                        {c.placed}/{c.total}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+                  {(sort === 'row' || sort === 'name') && (
+                    <span
+                      className="color-dot"
+                      style={{
+                        background: paletteColor(g.stacks[0]?.cards[0]?.color ?? 0),
+                      }}
+                    />
+                  )}
+                  {g.label}
+                  <span className="pool-group-count">{g.cards}</span>
+                </h3>
+                <div className="pool-group-cards">
+                  {g.stacks.map((s) => {
+                    const c = s.cards[0]!;
+                    return (
+                      <div
+                        key={s.key}
+                        className="pool-stack"
+                        data-count={s.cards.length}
+                        style={
+                          {
+                            '--layers': Math.min(s.cards.length - 1, 2),
+                            '--stack-color': paletteColor(c.color),
+                          } as React.CSSProperties
+                        }
+                      >
+                        <div
+                          className={`pool-card${c.masked ? ' masked-scope' : ''}`}
+                          data-size={c.size}
+                          data-lesson={c.lessonId}
+                          style={{ background: paletteColor(c.color) }}
+                          onPointerDown={
+                            c.masked ? undefined : (e) => onStart(e, c.lessonId, c.size)
+                          }
+                          title={
+                            t('{ust} · {alt} {brans} · {boy} saatlik blok', {
+                              ust: c.top,
+                              alt: c.bottom,
+                              brans: c.subject,
+                              boy: c.size,
+                            }) +
+                            (s.cards.length > 1
+                              ? t(' · {n} tane bekliyor', { n: s.cards.length })
+                              : '') +
+                            t(' · dersin {yerlesen}/{toplam} saati yerleşti', {
+                              yerlesen: c.placed,
+                              toplam: c.total,
+                            })
+                          }
+                        >
+                          <span className="card-top">{c.top}</span>
+                          <span className="card-bottom">{c.bottom}</span>
+                          <span className="counter">
+                            {c.placed}/{c.total}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
             ))}
           </div>
         </ContextMenu.Trigger>

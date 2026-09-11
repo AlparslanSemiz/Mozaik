@@ -82,7 +82,9 @@ function Colors({
         </div>
       ) : (
         <p className="hint">
-          {t('Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.')}
+          {t(
+            'Silmelerden sonra renkler delik bıraktı; yeniden dağıtmak yalnızca onları sıraya dizer.',
+          )}
         </p>
       )}
       <div className="form-row">
@@ -132,10 +134,10 @@ export default function Summary({
               <button
                 className="btn"
                 title={t('Gömülü tablodaki bütün branşları listeye ekler')}
-                onClick={() =>
-                  change((d) => ready.reduce((acc, name) => addSubject(acc, name), d))
-                }
-              >{t('Hepsini ekle')}</button>
+                onClick={() => change((d) => ready.reduce((acc, name) => addSubject(acc, name), d))}
+              >
+                {t('Hepsini ekle')}
+              </button>
             </div>
             <div className="stat-scroll">
               <table className="stat">
@@ -152,7 +154,9 @@ export default function Summary({
                           className="btn"
                           title={t('{ad} branşını listeye ekler', { ad: subjectLabel(name) })}
                           onClick={() => change((d) => addSubject(d, name))}
-                        >{t('Listeye ekle')}</button>
+                        >
+                          {t('Listeye ekle')}
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -230,7 +234,9 @@ export default function Summary({
     // carries that the list does not — `subjectOptions` already answers exactly
     // that. It used to be `usedSubjects`, i.e. the order the teachers happened
     // to be typed in, which is an order nobody chose and nobody can change.
-    const subjects = subjectOptions(state).filter((name) => subjectTeachers(state, name).length > 0);
+    const subjects = subjectOptions(state).filter(
+      (name) => subjectTeachers(state, name).length > 0,
+    );
     // Counted, not estimated — and the blank is counted too, because the
     // number worth seeing is how many rows are still to be filled in.
     const byGender = GENDERS.map((g) => ({
@@ -319,9 +325,7 @@ export default function Summary({
     );
   }
 
-  const noLesson = state.classes.filter(
-    (c) => !state.lessons.some((x) => x.classId === c.id),
-  );
+  const noLesson = state.classes.filter((c) => !state.lessons.some((x) => x.classId === c.id));
   const idleTeachers = state.teachers.filter(
     (x) => !state.lessons.some((l) => l.teacherId === x.id),
   );

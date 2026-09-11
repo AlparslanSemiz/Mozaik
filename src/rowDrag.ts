@@ -34,9 +34,7 @@ export function attachRowDrag(opts: RowDragOptions): () => void {
   let armed = false;
 
   const rows = (): HTMLTableRowElement[] =>
-    [...opts.body.children].filter(
-      (el): el is HTMLTableRowElement => el.tagName === 'TR',
-    );
+    [...opts.body.children].filter((el): el is HTMLTableRowElement => el.tagName === 'TR');
 
   function clearMarks() {
     for (const tr of rows()) tr.classList.remove('drop-above', 'drop-below', 'row-lifted');

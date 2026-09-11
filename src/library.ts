@@ -329,7 +329,11 @@ export function storageReport(lib: Library): StorageReport {
       chars: charsAt(`${BASE_KEY}-yedek-${i}`),
     });
   }
-  rows.push({ key: `${BASE_KEY}-tema`, what: t('tema tercihi'), chars: charsAt(`${BASE_KEY}-tema`) });
+  rows.push({
+    key: `${BASE_KEY}-tema`,
+    what: t('tema tercihi'),
+    chars: charsAt(`${BASE_KEY}-tema`),
+  });
   rows.push({ key: `${BASE_KEY}-dil`, what: t('dil tercihi'), chars: charsAt(`${BASE_KEY}-dil`) });
   rows.push({
     key: `${BASE_KEY}-kenar`,

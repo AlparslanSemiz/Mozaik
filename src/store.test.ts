@@ -17,9 +17,7 @@ function legacyV1() {
     semaSurumu: 1,
     ayar: { gunler: ['Pazartesi', 'Salı'], saatler: ['1', '2', '3', '4'] },
     derslikler: [{ id: 'dA', ad: 'A' }],
-    ogretmenler: [
-      { id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 3 },
-    ],
+    ogretmenler: [{ id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 3 }],
     siniflar: [{ id: 's510', ad: '510', derslikId: 'dA' }],
     dersler: [{ id: 'x1', sinifId: 's510', ogretmenId: 'oMC', haftalikSaat: 4, blok: 2 }],
     musaitDegil: { 'oMC|1|0': 1 } as Record<string, 1>,
@@ -33,9 +31,7 @@ function legacyV2() {
     schemaVersion: 2,
     settings: { days: ['Cuma', 'Cumartesi'], hours: ['1', '2', '3', '4'] },
     rooms: [{ id: 'dA', name: 'A' }],
-    teachers: [
-      { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 3 },
-    ],
+    teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 3 }],
     classes: [{ id: 's510', name: '510', roomId: 'dA' }],
     // Still `blockSize` — that is what a v2 file says, and reading it is the
     // point of the fixture.
@@ -73,7 +69,15 @@ describe('parseState — v1 göçü', () => {
     ]);
     expect(d.classes).toEqual([{ id: 's510', name: '510', roomId: 'dA' }]);
     expect(d.lessons).toEqual([
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [2, 2], second: false, maxPerDay: null },
+      {
+        id: 'x1',
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: 4,
+        blocks: [2, 2],
+        second: false,
+        maxPerDay: null,
+      },
     ]);
     // The ids never changed, so the keys carry over untouched.
     expect(d.unavailable).toEqual({ 'oMC|1|0': 1 });
@@ -394,10 +398,10 @@ describe('parseState — v5 → v6 göçü', () => {
 
   it('tanınmayan cinsiyet değeri de belirtilmemişe düşüyor', () => {
     const raw = v5Backup();
-    raw.teachers[0].gender = 'Kadın';   // the label, not the letter
+    raw.teachers[0].gender = 'Kadın'; // the label, not the letter
     raw.teachers[1].gender = 42;
     raw.teachers[2].gender = null;
-    raw.teachers[3].gender = 'k';       // the one legal value in the batch
+    raw.teachers[3].gender = 'k'; // the one legal value in the batch
     const d = parseState(JSON.stringify(raw))!;
     expect(d.teachers.slice(0, 3).map((t) => t.gender)).toEqual(['', '', '']);
     expect(d.teachers[3]!.gender).toBe('k');
@@ -421,9 +425,7 @@ describe('parseState — v5 → v6 göçü', () => {
   it('v7 dosyası cinsiyeti KORUYOR, ikinci geçişte de aynı', () => {
     const once = parseState(JSON.stringify(sampleState()))!;
     const twice = parseState(JSON.stringify(once))!;
-    expect(once.teachers.map((t) => t.gender)).toEqual(
-      sampleState().teachers.map((t) => t.gender),
-    );
+    expect(once.teachers.map((t) => t.gender)).toEqual(sampleState().teachers.map((t) => t.gender));
     expect(twice.teachers.map((t) => t.gender)).toEqual(once.teachers.map((t) => t.gender));
   });
 
@@ -466,11 +468,32 @@ describe('parseState — v6 → v7 göçü', () => {
   it('blockSize → blocks: [2, 2]’lik blok istenen ders ikili, 1’lik olan tek saat', () => {
     const raw = v6Backup();
     raw.lessons = [
-      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
-      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 1, maxPerDay: null },
+      {
+        id: 'a',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 5,
+        blockSize: 2,
+        maxPerDay: null,
+      },
+      {
+        id: 'b',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 5,
+        blockSize: 1,
+        maxPerDay: null,
+      },
       // Three-hour blocks came BACK with v9: a pre-v7 file gets to mean what
       // it said, because 3 is expressible again and the placements never moved.
-      { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 6, blockSize: 3, maxPerDay: null },
+      {
+        id: 'c',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 6,
+        blockSize: 3,
+        maxPerDay: null,
+      },
     ];
     activeProgram(raw).placements = {};
     const d = parseState(JSON.stringify(raw))!;
@@ -488,7 +511,14 @@ describe('parseState — v6 → v7 göçü', () => {
   it('2’lik blokla 5 saat artık 2+2+1 — hiçbir saat kaybolmuyor', () => {
     const raw = v6Backup();
     raw.lessons = [
-      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 5, blockSize: 2, maxPerDay: null },
+      {
+        id: 'a',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 5,
+        blockSize: 2,
+        maxPerDay: null,
+      },
     ];
     activeProgram(raw).placements = {};
     const lesson = parseState(JSON.stringify(raw))!.lessons[0]!;
@@ -500,9 +530,31 @@ describe('parseState — v6 → v7 göçü', () => {
     const raw = JSON.parse(JSON.stringify(sampleState()));
     activeProgram(raw).placements = {};
     raw.lessons = [
-      { id: 'a', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [2, 2, 2, 2, 2, 2, 2, 2, 2], second: false, maxPerDay: null },
-      { id: 'b', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, blocks: [-3, 9, 'x'], second: false, maxPerDay: null },
-      { id: 'c', classId: raw.classes[0].id, teacherId: raw.teachers[0].id, weeklyHours: 4, maxPerDay: null },
+      {
+        id: 'a',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 4,
+        blocks: [2, 2, 2, 2, 2, 2, 2, 2, 2],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'b',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 4,
+        blocks: [-3, 9, 'x'],
+        second: false,
+        maxPerDay: null,
+      },
+      {
+        id: 'c',
+        classId: raw.classes[0].id,
+        teacherId: raw.teachers[0].id,
+        weeklyHours: 4,
+        maxPerDay: null,
+      },
     ];
     const d = parseState(JSON.stringify(raw))!;
     expect(d.lessons.map((x) => x.blocks)).toEqual([[2, 2], [], []]);
@@ -615,9 +667,7 @@ function v8Backup() {
   raw.teachers[0].subject2 = 'Edebiyat';
   // On a lesson that teacher actually gives: `sanitize()` clears an orphan flag,
   // so pinning it to lessons[0] blindly would assert nothing on most samples.
-  const mine = raw.lessons.find(
-    (x: { teacherId: string }) => x.teacherId === raw.teachers[0].id,
-  );
+  const mine = raw.lessons.find((x: { teacherId: string }) => x.teacherId === raw.teachers[0].id);
   if (mine !== undefined) mine.second = true;
   asV7Lessons(raw);
   return raw;
@@ -636,9 +686,7 @@ describe('parseState — v8 → v9 göçü', () => {
     const raw = v8Backup();
     const d = parseState(JSON.stringify(raw))!;
     expect(d.teachers[0]!.subject2).toBe('Edebiyat');
-    const mine = raw.lessons.find(
-      (x: { teacherId: string }) => x.teacherId === raw.teachers[0].id,
-    );
+    const mine = raw.lessons.find((x: { teacherId: string }) => x.teacherId === raw.teachers[0].id);
     expect(d.lessons.find((x) => x.id === mine.id)!.second).toBe(true);
   });
 
@@ -939,7 +987,10 @@ describe('collectStates — paket için toplanan durumlar', () => {
     // The autosave is debounced by 400 ms, so the key can be behind the screen.
     // A backup that quietly drops the last edit is worse than no backup.
     savePlan(FIRST_PLAN_ID, emptyState());
-    const onScreen = { ...emptyState(), settings: { ...emptyState().settings, schoolName: 'Yeni' } };
+    const onScreen = {
+      ...emptyState(),
+      settings: { ...emptyState().settings, schoolName: 'Yeni' },
+    };
     expect(collectStates(lib, FIRST_PLAN_ID, onScreen)[FIRST_PLAN_ID]!.settings.schoolName).toBe(
       'Yeni',
     );

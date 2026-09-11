@@ -88,7 +88,11 @@ export type PrintSwitch = 'school' | 'credits' | 'clock' | 'stamp' | 'cellBottom
 /** The switches in the order the panel offers them, with what they are called. */
 export const PRINT_OPTION_LABELS: Array<{ id: PrintSwitch; label: string; hint: string }> = [
   { id: 'school', label: 'Kurs adı', hint: 'Başlığın altındaki satırda okulun adı' },
-  { id: 'credits', label: 'Derslik ve branş', hint: 'Aynı satırda dersliğin harfi ya da öğretmenin branşı' },
+  {
+    id: 'credits',
+    label: 'Derslik ve branş',
+    hint: 'Aynı satırda dersliğin harfi ya da öğretmenin branşı',
+  },
   { id: 'clock', label: 'Ders saatleri', hint: 'Sütun başlığında 08:30–09:10' },
   { id: 'cellBottom', label: 'Hücrenin alt satırı', hint: 'Öğretmen kısaltması ya da derslik' },
   { id: 'stamp', label: 'Çıktı tarihi', hint: 'Sayfanın altında yazdırılma tarihi ve saati' },

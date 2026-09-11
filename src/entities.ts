@@ -65,7 +65,6 @@ export function newId(): Id {
   return s;
 }
 
-
 /**
  * "Mehmet Çelik" -> "MÇ". Two initials, Turkish uppercase (i -> İ).
  *
@@ -205,7 +204,6 @@ export {
   shortDay,
   subjectLabel,
 };
-
 
 /** Override -> built-in table -> first three letters. */
 export function subjectShort(settings: Settings, subject: string): string {
@@ -853,15 +851,13 @@ export function remapDays(d: State, nextDays: Day[]): State {
   const used = new Set<number>();
 
   for (const [newIndex, day] of nextDays.entries()) {
-    const oldIndex = d.settings.days.findIndex(
-      (old, i) => old.name === day.name && !used.has(i),
-    );
+    const oldIndex = d.settings.days.findIndex((old, i) => old.name === day.name && !used.has(i));
     if (oldIndex === -1) continue; // a brand new day starts empty
     used.add(oldIndex);
     oldToNew.set(oldIndex, newIndex);
   }
 
-  const move = <T,>(source: Record<string, T>): Record<string, T> => {
+  const move = <T>(source: Record<string, T>): Record<string, T> => {
     const out: Record<string, T> = {};
     for (const key in source) {
       const value = source[key];
@@ -877,8 +873,7 @@ export function remapDays(d: State, nextDays: Day[]): State {
 
   // Nothing moved (a rename or a longBreakAfter change) -> keep the same object.
   const identity =
-    nextDays.length === d.settings.days.length &&
-    nextDays.every((_, i) => oldToNew.get(i) === i);
+    nextDays.length === d.settings.days.length && nextDays.every((_, i) => oldToNew.get(i) === i);
   if (identity) return d;
 
   // Pins go through the same `move` for the same reason the other two do:
@@ -1297,7 +1292,8 @@ export function entityWeek(d: State, kind: InspectKind, id: Id): WeekCell[][] {
             }
           : {
               top: group?.name ?? '?',
-              bottom: kind === 'teacher' ? roomName(d, group?.roomId ?? null) : (teacher?.short ?? ''),
+              bottom:
+                kind === 'teacher' ? roomName(d, group?.roomId ?? null) : (teacher?.short ?? ''),
               color: teacher?.color ?? null,
               closed,
               conflict: closed,
@@ -1413,7 +1409,9 @@ export function entityFacts(d: State, kind: InspectKind, id: Id): EntityFacts | 
     const c = ix.classById.get(id);
     if (c === undefined) return null;
     const lessons = d.lessons.filter((x) => x.classId === id);
-    const teachers = [...new Set(lessons.map((x) => ix.teacherById.get(x.teacherId)?.short ?? '?'))];
+    const teachers = [
+      ...new Set(lessons.map((x) => ix.teacherById.get(x.teacherId)?.short ?? '?')),
+    ];
     return {
       ...common(
         c.name,

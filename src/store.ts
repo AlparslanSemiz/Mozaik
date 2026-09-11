@@ -153,11 +153,10 @@ interface LegacyV2 {
   placements?: unknown;
 }
 
-const asArray = <T,>(x: unknown, fallback: T[]): T[] => (Array.isArray(x) ? (x as T[]) : fallback);
-const asMap = <T,>(x: unknown): Record<string, T> =>
+const asArray = <T>(x: unknown, fallback: T[]): T[] => (Array.isArray(x) ? (x as T[]) : fallback);
+const asMap = <T>(x: unknown): Record<string, T> =>
   typeof x === 'object' && x !== null ? (x as Record<string, T>) : {};
-const asText = (x: unknown, fallback: string): string =>
-  typeof x === 'string' ? x : fallback;
+const asText = (x: unknown, fallback: string): string => (typeof x === 'string' ? x : fallback);
 const asCount = (x: unknown, fallback: number): number =>
   typeof x === 'number' && Number.isFinite(x) ? Math.round(x) : fallback;
 /** A limit box: a positive number, or null meaning "use the default". */
@@ -308,10 +307,12 @@ function migrateV2toV3(raw: LegacyV2): State {
     classes: asArray<ClassGroup>(raw.classes, []),
     lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
-    programs: [{
-      ...blankProgram(),
-      placements: asMap<string>(raw.placements),
-    }],
+    programs: [
+      {
+        ...blankProgram(),
+        placements: asMap<string>(raw.placements),
+      },
+    ],
     activeProgramId: 'program-1',
   };
 }
@@ -362,10 +363,7 @@ function readLessons(raw: unknown[], version: number): Lesson[] {
     } else {
       const oldSize = Math.min(asCount(x.blockSize, 1), 4);
       const size = Math.min(oldSize, MAX_BLOCK);
-      blocks =
-        size >= 2
-          ? Array<number>(Math.floor(weeklyHours / oldSize)).fill(size)
-          : [];
+      blocks = size >= 2 ? Array<number>(Math.floor(weeklyHours / oldSize)).fill(size) : [];
     }
 
     return {
@@ -406,7 +404,8 @@ export function parseState(text: string): State | null {
   }
   if (typeof raw !== 'object' || raw === null) return null;
 
-  const version = (raw as { schemaVersion?: unknown; semaSurumu?: unknown }).schemaVersion ??
+  const version =
+    (raw as { schemaVersion?: unknown; semaSurumu?: unknown }).schemaVersion ??
     (raw as { semaSurumu?: unknown }).semaSurumu;
 
   const blank = emptyState();
@@ -463,7 +462,10 @@ export function parseState(text: string): State | null {
         hours: asArray<string>(g.settings?.hours, blank.settings.hours),
         bell: {
           start: asText(g.settings?.bell?.start, blank.settings.bell.start),
-          lessonMinutes: asCount(g.settings?.bell?.lessonMinutes, blank.settings.bell.lessonMinutes),
+          lessonMinutes: asCount(
+            g.settings?.bell?.lessonMinutes,
+            blank.settings.bell.lessonMinutes,
+          ),
           breakMinutes: asCount(g.settings?.bell?.breakMinutes, blank.settings.bell.breakMinutes),
           longBreakMinutes: asCount(
             g.settings?.bell?.longBreakMinutes,
@@ -529,14 +531,15 @@ export function parseState(text: string): State | null {
               placements: asMap<Id>(program.placements),
               pinned: asMap<1>(program.pinned),
             }))
-          : [{
-              ...blankProgram(),
-              placements: asMap<Id>(g.placements),
-              // v9 and below arrive with none, which is the right answer.
-              pinned: asMap<1>(g.pinned),
-            }],
-      activeProgramId:
-        Number(version) >= 12 ? asText(g.activeProgramId, '') : 'program-1',
+          : [
+              {
+                ...blankProgram(),
+                placements: asMap<Id>(g.placements),
+                // v9 and below arrive with none, which is the right answer.
+                pinned: asMap<1>(g.pinned),
+              },
+            ],
+      activeProgramId: Number(version) >= 12 ? asText(g.activeProgramId, '') : 'program-1',
     };
   } else {
     return null; // an unknown (newer) version is not guessed at
@@ -666,11 +669,7 @@ export function downloadBackup(d: State): void {
  * screen, and a backup that quietly drops the last edit is worse than none.
  * A plan whose key is gone is skipped rather than exported empty.
  */
-export function collectStates(
-  library: Library,
-  planId: Id,
-  present: State,
-): Record<Id, State> {
+export function collectStates(library: Library, planId: Id, present: State): Record<Id, State> {
   const out: Record<Id, State> = {};
   for (const plan of library.plans) {
     const state = plan.id === planId ? present : loadPlan(plan.id);
@@ -684,7 +683,6 @@ export function downloadBundle(library: Library, planId: Id, present: State): nu
   download(bundleFileName(new Date()), buildBundle(library, states));
   return Object.keys(states).length;
 }
-
 
 // -------------------------------------------------------------------- hook
 
@@ -801,7 +799,11 @@ export function useStore() {
       commit(next);
       dropPlanText(id);
       if (id === box.planId) {
-        dispatch({ type: 'switch', id: next.activeId, state: loadPlan(next.activeId) ?? emptyState() });
+        dispatch({
+          type: 'switch',
+          id: next.activeId,
+          state: loadPlan(next.activeId) ?? emptyState(),
+        });
       }
     },
     [library, commit, park, box.planId],
@@ -859,9 +861,7 @@ export function useStore() {
 
       const next: Library = {
         plans: bundle.library.plans.filter((p) => kept.has(p.id)),
-        activeId: kept.has(bundle.library.activeId)
-          ? bundle.library.activeId
-          : parsed[0]!.id,
+        activeId: kept.has(bundle.library.activeId) ? bundle.library.activeId : parsed[0]!.id,
       };
       commit(next);
       dispatch({

@@ -137,9 +137,7 @@ await Promise.all([worker(), worker(), worker(), worker()]);
 let written = 0;
 for (const [section, items] of bySection) {
   const name = sectionNames.get(section) ?? section;
-  const body = items
-    .map((t) => `## ${t.title}\n\n_${t.path}_\n\n${t.text}\n`)
-    .join('\n---\n\n');
+  const body = items.map((t) => `## ${t.title}\n\n_${t.path}_\n\n${t.text}\n`).join('\n---\n\n');
   const file = join(OUTDIR, `${section}-${slug(name)}.md`);
   writeFileSync(
     file,

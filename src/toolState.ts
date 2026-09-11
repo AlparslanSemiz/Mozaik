@@ -23,21 +23,14 @@
 //     contract rests on those staying out of App's render.
 // Both are transient gestures, not positions.
 
-import { useState } from "react";
-import type { Id } from "./types";
+import { useState } from 'react';
+import type { Id } from './types';
 
-export type Tab =
-  | "setup"
-  | "availability"
-  | "lessons"
-  | "program"
-  | "check"
-  | "print"
-  | "settings";
+export type Tab = 'setup' | 'availability' | 'lessons' | 'program' | 'check' | 'print' | 'settings';
 /** Program: which axis the grid rows are. */
-export type View = "teacher" | "class";
+export type View = 'teacher' | 'class';
 /** Müsaitlik: whose closed hours are being edited. */
-export type Kind = "teacher" | "class" | "room";
+export type Kind = 'teacher' | 'class' | 'room';
 /**
  * Okul: which of the four lists. Lessons left for a tab of their own.
  *
@@ -45,7 +38,7 @@ export type Kind = "teacher" | "class" | "room";
  * and a teacher picks a subject off the list, so both of those have to exist
  * before the list that names them.
  */
-export type StepId = "rooms" | "subjects" | "teachers" | "classes";
+export type StepId = 'rooms' | 'subjects' | 'teachers' | 'classes';
 /**
  * Dersler: which way round the entry runs.
  *
@@ -54,16 +47,11 @@ export type StepId = "rooms" | "subjects" | "teachers" | "classes";
  * belongs to two other lists, so there are two honest ways to walk it and one
  * way to read all of it.
  */
-export type LessonMode = "class" | "teacher" | "all";
+export type LessonMode = 'class' | 'teacher' | 'all';
 /** Ayarlar: which section. */
-export type SectionId =
-  | "school"
-  | "rules"
-  | "appearance"
-  | "plans"
-  | "about";
+export type SectionId = 'school' | 'rules' | 'appearance' | 'plans' | 'about';
 /** Yazdır: which pages the preview builds. */
-export type Scope = "classes" | "teachers" | "both";
+export type Scope = 'classes' | 'teachers' | 'both';
 
 /**
  * WHICH PART of the Kontrol report is on screen.
@@ -75,7 +63,7 @@ export type Scope = "classes" | "teachers" | "both";
  * them did nothing at all and nothing said so ("alt sekmede bir şeyler
  * seçiyoruz ama değişmiyor").
  */
-export type CheckView = "problems" | "advisor" | "teachers" | "classes" | "rooms";
+export type CheckView = 'problems' | 'advisor' | 'teachers' | 'classes' | 'rooms';
 
 /**
  * HOW THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
@@ -91,7 +79,7 @@ export type CheckView = "problems" | "advisor" | "teachers" | "classes" | "rooms
  * it says what is being looked at right now. No new localStorage key, and so
  * no new row owed to the "Veriler nerede" table.
  */
-export type PoolSort = "row" | "name" | "subject" | "size" | "left";
+export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
 export interface ToolState {
   tab: Tab;
   setTab: (next: Tab) => void;
@@ -141,28 +129,28 @@ export interface ToolState {
  */
 export function useToolState(firstTab: Tab): ToolState {
   const [tab, setTab] = useState<Tab>(firstTab);
-  const [view, setView] = useState<View>("teacher");
-  const [kind, setKind] = useState<Kind>("teacher");
-  const [chosen, setChosen] = useState<Id>("");
-  const [step, setStep] = useState<StepId>("rooms");
+  const [view, setView] = useState<View>('teacher');
+  const [kind, setKind] = useState<Kind>('teacher');
+  const [chosen, setChosen] = useState<Id>('');
+  const [step, setStep] = useState<StepId>('rooms');
   // 'class' and not 'all': the reader asked for this tab because entering a
   // single class's lessons was the slow part, and the general list is the one
   // of the three that was already there.
-  const [lessonMode, setLessonMode] = useState<LessonMode>("class");
-  const [lessonFocus, setLessonFocus] = useState<Id>("");
-  const [section, setSection] = useState<SectionId>("school");
-  const [scope, setScope] = useState<Scope>("classes");
+  const [lessonMode, setLessonMode] = useState<LessonMode>('class');
+  const [lessonFocus, setLessonFocus] = useState<Id>('');
+  const [section, setSection] = useState<SectionId>('school');
+  const [scope, setScope] = useState<Scope>('classes');
   const [colored, setColored] = useState(true);
   // 'problems' is where a reader arrives with a question, and it is also the
   // only part of the report that can be empty — an empty problems view is the
   // answer "there are none", which is worth landing on.
-  const [checkView, setCheckView] = useState<CheckView>("problems");
+  const [checkView, setCheckView] = useState<CheckView>('problems');
   // Open, because it is the half of this screen nobody would think to ask for:
   // twenty-five teachers all off on Tuesday afternoon is why the solver gets
   // stuck, and it is invisible one person at a time.
   const [showHeat, setShowHeat] = useState(true);
-  const [poolSort, setPoolSort] = useState<PoolSort>("row");
-  const [poolFilter, setPoolFilter] = useState("");
+  const [poolSort, setPoolSort] = useState<PoolSort>('row');
+  const [poolFilter, setPoolFilter] = useState('');
 
   return {
     tab,

@@ -103,12 +103,7 @@ export function InspectorProvider({
   return (
     <InspectContext.Provider value={open}>
       {children}
-      <Inspector
-        state={state}
-        change={change}
-        target={target}
-        onClose={() => setTarget(null)}
-      />
+      <Inspector state={state} change={change} target={target} onClose={() => setTarget(null)} />
     </InspectContext.Provider>
   );
 }
@@ -163,7 +158,10 @@ function Inspector({
     const to = state.teachers.find((x) => x.id === teacherId);
     if (to === undefined) return;
 
-    const placed = placedBlocks(state, state.lessons.find((x) => x.id === lessonId)!).length;
+    const placed = placedBlocks(
+      state,
+      state.lessons.find((x) => x.id === lessonId)!,
+    ).length;
     if (
       !(await confirm({
         title: t('{ne} dersi {kim} öğretmenine geçecek', { ne: other, kim: to.short }),
@@ -288,9 +286,7 @@ function Inspector({
                         aria-label={t('Branş')}
                         value={teacherOf.subject}
                         onChange={(e) =>
-                          change((d) =>
-                            updateTeacher(d, teacherOf.id, { subject: e.target.value }),
-                          )
+                          change((d) => updateTeacher(d, teacherOf.id, { subject: e.target.value }))
                         }
                       >
                         {subjects.map((x) => (
@@ -339,7 +335,9 @@ function Inspector({
                         }
                       >
                         {GENDERS.map((g) => (
-                          <option key={g} value={g}>{genderCell(g)}</option>
+                          <option key={g} value={g}>
+                            {genderCell(g)}
+                          </option>
                         ))}
                       </select>
                     </dd>
@@ -412,7 +410,9 @@ function Inspector({
                       >
                         <option value="">{t('Derslik yok')}</option>
                         {state.rooms.map((r) => (
-                          <option key={r.id} value={r.id}>{r.name}</option>
+                          <option key={r.id} value={r.id}>
+                            {r.name}
+                          </option>
                         ))}
                       </select>
                     </dd>

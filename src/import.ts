@@ -116,7 +116,6 @@ export function parseTeachers(text: string): ParseResult<TeacherRow> {
   return { accepted, errors };
 }
 
-
 // -------------------------------------------------------------------- class
 
 export interface ClassRow {
@@ -192,9 +191,7 @@ export function parseLessons(text: string): ParseResult<LessonRow> {
     }
     const blockSize = Math.max(1, Math.min(MAX_BLOCK, toNumber(cells[3], 1)));
     const blocks =
-      blockSize >= 2
-        ? Array<number>(Math.floor(weeklyHours / blockSize)).fill(blockSize)
-        : [];
+      blockSize >= 2 ? Array<number>(Math.floor(weeklyHours / blockSize)).fill(blockSize) : [];
     accepted.push({ className, teacher, weeklyHours, blocks });
   }
   return { accepted, errors };

@@ -68,19 +68,22 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
   }, []);
 
   const detach = useRef<(() => void) | null>(null);
-  const bodyRef = useCallback((node: HTMLTableSectionElement | null) => {
-    detach.current?.();
-    detach.current = null;
-    if (node === null) return;
-    detach.current = attachRowDrag({
-      body: node,
-      commit: (from, to) => {
-        const row = node.children[from];
-        const name = row?.getAttribute('data-row-name') ?? latest.current.t('Satır');
-        move(from, to, name);
-      },
-    });
-  }, [move]);
+  const bodyRef = useCallback(
+    (node: HTMLTableSectionElement | null) => {
+      detach.current?.();
+      detach.current = null;
+      if (node === null) return;
+      detach.current = attachRowDrag({
+        body: node,
+        commit: (from, to) => {
+          const row = node.children[from];
+          const name = row?.getAttribute('data-row-name') ?? latest.current.t('Satır');
+          move(from, to, name);
+        },
+      });
+    },
+    [move],
+  );
 
   // The tbody can go away with the tab (pitfall 18) without the ref callback
   // being told, so the teardown also lives here.
@@ -103,44 +106,44 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
   const grip = useCallback(
     (index: number, name: string) => (
       <>
-      {/* The number the reader SEES, not the index in the array: under a sort
+        {/* The number the reader SEES, not the index in the array: under a sort
           or a filter the third row on screen is the third row on screen, and a
           column quietly counting something else would be worse than no column.
           It is also why this is not `aria-label`ed as a position — the handle
           beside it already says the row's real place in the list. */}
-      <td className="row-no">{index + 1}</td>
-      <td className="grip-col">
-        <button
-          type="button"
-          className="row-grip"
-          disabled={locked}
-          // The position is IN the name: a handle that says only "taşı" gives
-          // no way to tell whether the last keypress did anything.
-          aria-label={t('{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok', {
-            ad: name,
-            n: index + 1,
-          })}
-          // The arrow keys were only ever in the accessible name, so a reader
-          // who can see the handle was never told about them.
-          title={
-            locked
-              ? t('Elle sıralama için süzmeyi ve sıralamayı kaldırın')
-              : t('Sürükleyerek ya da ok tuşlarıyla sırala')
-          }
-          onKeyDown={(e) => {
-            let next: number | null = null;
-            if (e.key === 'ArrowUp') next = index - 1;
-            else if (e.key === 'ArrowDown') next = index + 1;
-            else if (e.key === 'Home') next = 0;
-            else if (e.key === 'End') next = latest.current.count - 1;
-            if (next === null) return;
-            e.preventDefault();
-            move(index, next, name);
-          }}
-        >
-          <GripVertical size={16} aria-hidden="true" focusable="false" />
-        </button>
-      </td>
+        <td className="row-no">{index + 1}</td>
+        <td className="grip-col">
+          <button
+            type="button"
+            className="row-grip"
+            disabled={locked}
+            // The position is IN the name: a handle that says only "taşı" gives
+            // no way to tell whether the last keypress did anything.
+            aria-label={t('{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok', {
+              ad: name,
+              n: index + 1,
+            })}
+            // The arrow keys were only ever in the accessible name, so a reader
+            // who can see the handle was never told about them.
+            title={
+              locked
+                ? t('Elle sıralama için süzmeyi ve sıralamayı kaldırın')
+                : t('Sürükleyerek ya da ok tuşlarıyla sırala')
+            }
+            onKeyDown={(e) => {
+              let next: number | null = null;
+              if (e.key === 'ArrowUp') next = index - 1;
+              else if (e.key === 'ArrowDown') next = index + 1;
+              else if (e.key === 'Home') next = 0;
+              else if (e.key === 'End') next = latest.current.count - 1;
+              if (next === null) return;
+              e.preventDefault();
+              move(index, next, name);
+            }}
+          >
+            <GripVertical size={16} aria-hidden="true" focusable="false" />
+          </button>
+        </td>
       </>
     ),
     [locked, move],

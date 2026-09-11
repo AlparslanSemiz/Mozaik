@@ -6,15 +6,10 @@
  * feeling like one program. All of the actual work is in `src/listview.ts` —
  * this draws controls and reports what was chosen.
  */
-import {
-  ArrowDownWideNarrow,
-  ArrowUpNarrowWide,
-  Search,
-  X,
-} from "lucide-react";
-import { canReorder, facetCounts, isFiltering } from "../listview";
-import type { ListConfig, ListQuery } from "../listview";
-import { T, useT } from "./T";
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, Search, X } from 'lucide-react';
+import { canReorder, facetCounts, isFiltering } from '../listview';
+import type { ListConfig, ListQuery } from '../listview';
+import { T, useT } from './T';
 
 interface Props<T> {
   items: T[];
@@ -50,7 +45,7 @@ export default function ListTools<T>({
   shown,
   noun,
   countKey,
-  notice = "",
+  notice = '',
 }: Props<T>) {
   const t = useT();
   const filtering = isFiltering(query);
@@ -65,15 +60,15 @@ export default function ListTools<T>({
             type="text"
             className="search-box"
             value={query.text}
-            aria-label={t("{ne} ara", { ne: t(noun) })}
-            placeholder={t("Ara…")}
+            aria-label={t('{ne} ara', { ne: t(noun) })}
+            placeholder={t('Ara…')}
             onChange={(e) => setQuery({ ...query, text: e.target.value })}
           />
-          {query.text !== "" && (
+          {query.text !== '' && (
             <button
               className="search-clear"
-              aria-label={t("Aramayı temizle")}
-              onClick={() => setQuery({ ...query, text: "" })}
+              aria-label={t('Aramayı temizle')}
+              onClick={() => setQuery({ ...query, text: '' })}
             >
               <X size={14} strokeWidth={2.4} />
             </button>
@@ -81,7 +76,7 @@ export default function ListTools<T>({
         </div>
 
         <label className="field">
-          <span className="field-label">{t("Sırala")}</span>
+          <span className="field-label">{t('Sırala')}</span>
           {/* Not `.text-sm`: sort labels are full phrases and a 16ch box showed
               "Girildiği s". A select that
               hides which sort is active is a select nobody trusts. */}
@@ -90,15 +85,13 @@ export default function ListTools<T>({
             value={query.sortId}
             // Choosing a NEW sort starts in the comparator's natural direction;
             // the separate arrow is the one place that states that direction.
-            onChange={(e) =>
-              setQuery({ ...query, sortId: e.target.value, desc: false })
-            }
+            onChange={(e) => setQuery({ ...query, sortId: e.target.value, desc: false })}
           >
             {/* Entry order is a real answer and the DEFAULT one: it is the
                 order they were typed in, which is the order the reader
                 remembers them in — and, since the rows can be dragged, the
                 order they were last PUT in. */}
-            <option value="">{t("Girildiği sıra")}</option>
+            <option value="">{t('Girildiği sıra')}</option>
             {config.sorts.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
@@ -149,18 +142,18 @@ export default function ListTools<T>({
             "Sırala" and `getByLabel` matches substrings (pitfall 49). */}
         <button
           className="btn sort-dir"
-          disabled={query.sortId === ""}
+          disabled={query.sortId === ''}
           aria-label={
             query.desc
-              ? t("Azalan sıralı. Artana çevirmek için tıklayın")
-              : t("Artan sıralı. Azalana çevirmek için tıklayın")
+              ? t('Azalan sıralı. Artana çevirmek için tıklayın')
+              : t('Artan sıralı. Azalana çevirmek için tıklayın')
           }
           title={
-            query.sortId === ""
-              ? t("Önce bir sıralama seçin")
+            query.sortId === ''
+              ? t('Önce bir sıralama seçin')
               : query.desc
-                ? t("Azalan sıralı. Artana çevirmek için tıklayın")
-                : t("Artan sıralı. Azalana çevirmek için tıklayın")
+                ? t('Azalan sıralı. Artana çevirmek için tıklayın')
+                : t('Artan sıralı. Azalana çevirmek için tıklayın')
           }
           onClick={() => setQuery({ ...query, desc: !query.desc })}
         >
@@ -200,11 +193,8 @@ export default function ListTools<T>({
         </span>
 
         {filtering && (
-          <button
-            className="btn"
-            onClick={() => setQuery({ ...query, text: "", facets: {} })}
-          >
-            {t("Süzmeyi kaldır")}
+          <button className="btn" onClick={() => setQuery({ ...query, text: '', facets: {} })}>
+            {t('Süzmeyi kaldır')}
           </button>
         )}
       </div>
@@ -227,7 +217,7 @@ export default function ListTools<T>({
       {facets.map((facet) => {
         const counts = facetCounts(items, query, config, facet.id);
         if (counts.length < 2 && facet.always !== true) return null;
-        const chosen = query.facets[facet.id] ?? "";
+        const chosen = query.facets[facet.id] ?? '';
         const pick = (value: string) =>
           setQuery({
             ...query,
@@ -235,18 +225,13 @@ export default function ListTools<T>({
           });
 
         return (
-          <div
-            className="chips"
-            key={facet.id}
-            role="group"
-            aria-label={facet.label}
-          >
+          <div className="chips" key={facet.id} role="group" aria-label={facet.label}>
             {counts.map((f) => (
               <button
                 key={f.value}
                 className="chip"
                 aria-pressed={chosen === f.value}
-                onClick={() => pick(chosen === f.value ? "" : f.value)}
+                onClick={() => pick(chosen === f.value ? '' : f.value)}
               >
                 {f.value}
                 <span className="chip-count">{f.count}</span>

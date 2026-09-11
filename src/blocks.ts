@@ -116,10 +116,7 @@ export function patternOptions(weeklyHours: number): BlockPatternOption[] {
   for (let threes = Math.floor(hours / 3); threes >= 0; threes--) {
     const afterThrees = hours - threes * 3;
     for (let twos = Math.floor(afterThrees / 2); twos >= 0; twos--) {
-      const blocks = [
-        ...Array<number>(threes).fill(3),
-        ...Array<number>(twos).fill(2),
-      ];
+      const blocks = [...Array<number>(threes).fill(3), ...Array<number>(twos).fill(2)];
       const plan = blockPlan({ weeklyHours: hours, blocks });
       options.push({ blocks, plan, label: patternLabel(plan) });
     }

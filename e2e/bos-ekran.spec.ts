@@ -18,10 +18,7 @@ import {
 test.describe('35. Boş ekranlar yönlendiriyor', () => {
   test('veri yokken Kurulum sekmesiyle açılıyor', async ({ page }) => {
     await open(page);
-    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute(
-      'aria-label',
-      'Okul',
-    );
+    await expect(page.locator('.tab[aria-current="true"]')).toHaveAttribute('aria-label', 'Okul');
     await expect(page.locator('.panel', { hasText: 'Başlarken' })).toContainText('derslikler');
   });
 

@@ -8,13 +8,13 @@
 // The three kinds share ONE grid and one dictionary: ids are unique across
 // teachers, classes and rooms, so only the entity list at the top changes.
 
-import { useMemo, useRef, useState } from "react";
-import type React from "react";
-import { sharedPeriods } from "../bell";
-import { paletteColor } from "../palette";
-import { KIND_ICON } from "./steps";
-import { buildIndex, closedConflicts, closedKey } from "../constraints";
-import type { Id, State } from "../types";
+import { useMemo, useRef, useState } from 'react';
+import type React from 'react';
+import { sharedPeriods } from '../bell';
+import { paletteColor } from '../palette';
+import { KIND_ICON } from './steps';
+import { buildIndex, closedConflicts, closedKey } from '../constraints';
+import type { Id, State } from '../types';
 import {
   openHours,
   dayLabel,
@@ -24,11 +24,11 @@ import {
   subjectShort,
   teacherSubjects,
   weeklyLoad,
-} from "../entities";
+} from '../entities';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../i18n';
-import type { Kind } from "../toolState";
+import type { Kind } from '../toolState';
 import { T } from './T';
 
 interface Props {
@@ -62,7 +62,7 @@ interface Entity {
 }
 
 function entitiesOf(d: State, kind: Kind): Entity[] {
-  if (kind === "teacher") {
+  if (kind === 'teacher') {
     return d.teachers.map((x) => ({
       id: x.id,
       // The subject SHORT, and both of them. Short because this line is read
@@ -79,18 +79,18 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
       // three clauses on one rule. The code still shows, because the code is
       // what the grid row is labelled with.
       full: `${x.name} (${x.short})`,
-      load: weeklyLoad(d, "teacher", x.id),
+      load: weeklyLoad(d, 'teacher', x.id),
       open: openHours(d, x.id),
       color: x.color,
     }));
   }
-  if (kind === "class") {
+  if (kind === 'class') {
     return d.classes.map((c) => ({
       id: c.id,
       label: c.name,
       short: t('{ad} sınıfı', { ad: c.name }),
       full: t('{ad} sınıfı', { ad: c.name }),
-      load: weeklyLoad(d, "class", c.id),
+      load: weeklyLoad(d, 'class', c.id),
       open: openHours(d, c.id),
       color: c.color,
     }));
@@ -100,7 +100,7 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
     label: r.name,
     short: t('{ad} dersliği', { ad: r.name }),
     full: t('{ad} dersliği', { ad: r.name }),
-    load: weeklyLoad(d, "room", r.id),
+    load: weeklyLoad(d, 'room', r.id),
     open: openHours(d, r.id),
     color: -1,
   }));
@@ -108,29 +108,24 @@ function entitiesOf(d: State, kind: Kind): Entity[] {
 
 /** "kaç ÖĞRETMEN kapalı" — the word changes with the kind being edited. */
 const KIND_WORD: Record<Kind, string> = {
-  teacher: "öğretmen",
-  class: "sınıf",
-  room: "derslik",
+  teacher: 'öğretmen',
+  class: 'sınıf',
+  room: 'derslik',
 };
 
 const EMPTY_TEXT: Record<Kind, string> = {
-  teacher: "öğretmen",
-  class: "sınıf",
-  room: "derslik",
+  teacher: 'öğretmen',
+  class: 'sınıf',
+  room: 'derslik',
 };
 
 const HINT: Record<Kind, string> = {
-  teacher: "Öğretmenin gelemeyeceği saatlere tıklayın.",
-  class:
-    "Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.",
-  room: "Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.",
+  teacher: 'Öğretmenin gelemeyeceği saatlere tıklayın.',
+  class: 'Sınıfın ders yapamayacağı saatlere tıklayın. O saatlere hiçbir ders konamaz.',
+  room: 'Dersliğin kapalı olduğu saatlere tıklayın. O dersliği kullanan sınıflar o saatte ders yapamaz.',
 };
 
-export default function Availability({ state,
-  change,
-  kind,
-  chosen,
-  setChosen, showHeat }: Props) {
+export default function Availability({ state, change, kind, chosen, setChosen, showHeat }: Props) {
   // Nothing is applied until the drag ends: painting 40 cells must not create
   // 40 separate undo steps.
   const [pending, setPending] = useState<Set<string> | null>(null);
@@ -141,19 +136,11 @@ export default function Availability({ state,
 
   // Every hook sits above the empty-list return: a list that fills up while
   // the tab stays open (Ctrl+Z, "Dosyadan aç") must not change the hook count.
-  const conflicts = useMemo(
-    () => closedConflicts(state, buildIndex(state)),
-    [state],
-  );
+  const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
 
   // A column header carries one time; where the days disagree it stays empty.
   const clocks = useMemo(
-    () =>
-      sharedPeriods(
-        state.settings.bell,
-        state.settings.hours,
-        state.settings.days,
-      ),
+    () => sharedPeriods(state.settings.bell, state.settings.hours, state.settings.days),
     [state.settings],
   );
 
@@ -206,7 +193,7 @@ export default function Availability({ state,
     if (set === null || set.size === 0) return;
 
     const cells = [...set].map((k) => {
-      const [g, s] = k.split("|");
+      const [g, s] = k.split('|');
       return { day: Number(g), hour: Number(s) };
     });
     change((d) => setAvailability(d, entityId, cells, paintMode.current));
@@ -228,9 +215,7 @@ export default function Availability({ state,
 
   const open = selected.open;
 
-  const mine = conflicts.filter(
-    (c) => c.teacherId === entityId || c.classId === entityId,
-  ).length;
+  const mine = conflicts.filter((c) => c.teacherId === entityId || c.classId === entityId).length;
 
   return (
     <div className="cols">
@@ -252,11 +237,7 @@ export default function Availability({ state,
           </p>
 
           <div className="scroll-x">
-            <table
-              className="availability"
-              onPointerUp={endPaint}
-              onPointerLeave={endPaint}
-            >
+            <table className="availability" onPointerUp={endPaint} onPointerLeave={endPaint}>
               <thead>
                 <tr>
                   <th className="corner-head" />
@@ -267,9 +248,7 @@ export default function Availability({ state,
                       title={t('Haftanın bu saatini değiştir')}
                     >
                       {hour}
-                      <span className="hour-clock">
-                        {clocks[s]?.start ?? ""}
-                      </span>
+                      <span className="hour-clock">{clocks[s]?.start ?? ''}</span>
                     </th>
                   ))}
                 </tr>
@@ -287,13 +266,13 @@ export default function Availability({ state,
                       <td
                         key={s}
                         className={[
-                          shownClosed(g, s) ? "closed" : "",
+                          shownClosed(g, s) ? 'closed' : '',
                           // The break sits at a different lesson on each row, so it
                           // cannot be a column: it is a thick edge on THIS cell.
-                          day.longBreakAfter === s + 1 ? "break-after" : "",
+                          day.longBreakAfter === s + 1 ? 'break-after' : '',
                         ]
                           .filter(Boolean)
-                          .join(" ")}
+                          .join(' ')}
                         onPointerDown={(e) => {
                           e.preventDefault();
                           startPaint(g, s);
@@ -302,7 +281,7 @@ export default function Availability({ state,
                           if (pending !== null) continuePaint(g, s);
                         }}
                       >
-                        {shownClosed(g, s) ? "×" : ""}
+                        {shownClosed(g, s) ? '×' : ''}
                       </td>
                     ))}
                   </tr>
@@ -322,69 +301,66 @@ export default function Availability({ state,
             is a lot of screen, and somebody who is only editing one person's
             hours does not need the school-wide reading under it. */}
         {showHeat && (
-        <div className="panel">
-          <h2>{t('Haftanın darlığı')}</h2>
-          <p className="hint">
-            <T
-              k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
-              vars={{ ne: t(KIND_WORD[kind]) }}
-            />
-          </p>
-          <div className="scroll-x">
-            <table className="availability heat">
-              <thead>
-                <tr>
-                  <th className="corner-head" />
-                  {state.settings.hours.map((h, i) => (
-                    <th key={i}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {state.settings.days.map((day, g) => (
-                  <tr key={g}>
-                    <th scope="row">{shortDay(day.name)}</th>
-                    {state.settings.hours.map((_, sIdx) => {
-                      const n = list.filter(
-                        (x) =>
-                          state.unavailable[`${x.id}|${g}|${sIdx}`] !==
-                          undefined,
-                      ).length;
-                      return (
-                        <td
-                          key={sIdx}
-                          className={n === 0 ? "" : "closed"}
-                          // The GROUND carries the count, not the ink: an
-                          // opacity on the cell takes the number down with the
-                          // background and makes the darkest hour the hardest
-                          // to read — exactly backwards.
-                          style={
-                            n === 0
-                              ? undefined
-                              : ({
-                                  "--heat": (
-                                    0.2 +
-                                    (0.8 * n) / Math.max(1, list.length)
-                                  ).toFixed(2),
-                                } as React.CSSProperties)
-                          }
-                          title={t('{gun} {ders}. ders: {kapali} / {toplam} kapalı', {
-                            gun: dayLabel(day.name),
-                            ders: sIdx + 1,
-                            kapali: n,
-                            toplam: list.length,
-                          })}
-                        >
-                          {n === 0 ? "" : n}
-                        </td>
-                      );
-                    })}
+          <div className="panel">
+            <h2>{t('Haftanın darlığı')}</h2>
+            <p className="hint">
+              <T
+                k="Koyu bir sütun, o saatte **kaç {ne} kapalı** olduğunu söyler: dizerken genellikle orada tıkanılır."
+                vars={{ ne: t(KIND_WORD[kind]) }}
+              />
+            </p>
+            <div className="scroll-x">
+              <table className="availability heat">
+                <thead>
+                  <tr>
+                    <th className="corner-head" />
+                    {state.settings.hours.map((h, i) => (
+                      <th key={i}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {state.settings.days.map((day, g) => (
+                    <tr key={g}>
+                      <th scope="row">{shortDay(day.name)}</th>
+                      {state.settings.hours.map((_, sIdx) => {
+                        const n = list.filter(
+                          (x) => state.unavailable[`${x.id}|${g}|${sIdx}`] !== undefined,
+                        ).length;
+                        return (
+                          <td
+                            key={sIdx}
+                            className={n === 0 ? '' : 'closed'}
+                            // The GROUND carries the count, not the ink: an
+                            // opacity on the cell takes the number down with the
+                            // background and makes the darkest hour the hardest
+                            // to read — exactly backwards.
+                            style={
+                              n === 0
+                                ? undefined
+                                : ({
+                                    '--heat': (0.2 + (0.8 * n) / Math.max(1, list.length)).toFixed(
+                                      2,
+                                    ),
+                                  } as React.CSSProperties)
+                            }
+                            title={t('{gun} {ders}. ders: {kapali} / {toplam} kapalı', {
+                              gun: dayLabel(day.name),
+                              ders: sIdx + 1,
+                              kapali: n,
+                              toplam: list.length,
+                            })}
+                          >
+                            {n === 0 ? '' : n}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
         )}
       </div>
 
@@ -418,32 +394,27 @@ export default function Availability({ state,
                   {KIND_ICON[kind]}
                 </span>
                 {x.color >= 0 && (
-                  <span
-                    className="row-dot"
-                    style={{ background: paletteColor(x.color) }}
-                  />
+                  <span className="row-dot" style={{ background: paletteColor(x.color) }} />
                 )}
                 <span className="entity-name">{x.label}</span>
                 <span className="entity-count">
                   {x.open}/{x.load}
-                  {x.open < x.load && " ⚠"}
+                  {x.open < x.load && ' ⚠'}
                 </span>
               </button>
             ))}
           </div>
 
           <div className="form-row spaced">
-            <button
-              className="btn"
-              onClick={() => change((d) => setWholeWeek(d, entityId, false))}
-            >{t('Tümünü aç')}</button>
-            <button
-              className="btn"
-              onClick={() => change((d) => setWholeWeek(d, entityId, true))}
-            >{t('Tümünü kapat')}</button>
+            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, false))}>
+              {t('Tümünü aç')}
+            </button>
+            <button className="btn" onClick={() => change((d) => setWholeWeek(d, entityId, true))}>
+              {t('Tümünü kapat')}
+            </button>
           </div>
 
-          <p className={open < selected.load ? "error-box" : "hint"}>
+          <p className={open < selected.load ? 'error-box' : 'hint'}>
             <T
               k="**{kim}**: {acik} saat açık, {yuk} saat ders yüklenmiş."
               vars={{ kim: selected.short, acik: open, yuk: selected.load }}

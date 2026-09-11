@@ -46,7 +46,9 @@ describe('geçici program kapsamı', () => {
     const placements = activeProgram(result.state).placements;
     expect(placements['s1|0|0']).toBe('x1');
     expect(placements['s2|1|2']).toBe('x2');
-    expect(Object.keys(placements).some((key) => key.startsWith('s1|') && key !== 's1|0|0')).toBe(false);
+    expect(Object.keys(placements).some((key) => key.startsWith('s1|') && key !== 's1|0|0')).toBe(
+      false,
+    );
     expect(result.stuck.some((item) => item.lessonId === 'x1')).toBe(false);
     expect(result.excludedBlocks).toBeGreaterThan(0);
   });
@@ -55,6 +57,8 @@ describe('geçici program kapsamı', () => {
     const d = world();
     const mask = setDayMask(EMPTY_PROGRAM_MASK, d.settings.days[0]!.name, 'ghost');
     const result = solve(d, { exclusions: solverExclusions(mask) });
-    expect(Object.keys(activeProgram(result.state).placements).every((key) => key.split('|')[1] !== '0')).toBe(true);
+    expect(
+      Object.keys(activeProgram(result.state).placements).every((key) => key.split('|')[1] !== '0'),
+    ).toBe(true);
   });
 });

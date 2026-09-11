@@ -51,7 +51,10 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     // newest ten" rather than by the name pattern would delete his work, and
     // it would do it silently — folder.ts's rule, measured here through the
     // exe's own listing.
-    const older = Array.from({ length: 12 }, (_, i) => `ders-programi-2026-08-${String(i + 1).padStart(2, '0')}.json`);
+    const older = Array.from(
+      { length: 12 },
+      (_, i) => `ders-programi-2026-08-${String(i + 1).padStart(2, '0')}.json`,
+    );
     const disk = fakeDisk([...older, 'vergi-beyanı.json', 'ders-programi-2026-08-26-1430.json']);
     const dir = desktopFolder(disk.invoke, 'Ders Programı');
 
@@ -72,7 +75,10 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     // Seeded past the keep limit on purpose: with nothing to prune the
     // delete path never runs and this test would pass while blind to it.
     const disk = fakeDisk(
-      Array.from({ length: 12 }, (_, i) => `ders-programi-2020-01-${String(i + 1).padStart(2, '0')}.json`),
+      Array.from(
+        { length: 12 },
+        (_, i) => `ders-programi-2020-01-${String(i + 1).padStart(2, '0')}.json`,
+      ),
     );
     await saveInto(desktopFolder(disk.invoke, 'X'), '{}', new Date(2026, 7, 27), true);
 

@@ -45,9 +45,7 @@ describe('parseTeachers', () => {
   });
 
   it('dördüncü sütun cinsiyeti okuyor', () => {
-    const { accepted } = parseTeachers(
-      'Ayşe Varol\tAV\tFizik\tK\nMurat Bilge\tMB\tKimya\tErkek',
-    );
+    const { accepted } = parseTeachers('Ayşe Varol\tAV\tFizik\tK\nMurat Bilge\tMB\tKimya\tErkek');
     expect(accepted.map((x) => x.gender)).toEqual(['k', 'e']);
   });
 

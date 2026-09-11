@@ -135,10 +135,13 @@ test.describe('62. Sayfada ne olsun', () => {
     await page.locator('.pick-item').first().locator('input').check();
 
     await page.emulateMedia({ media: 'print' });
-    const overflow = await page.locator('.print-page').first().evaluate((el) => ({
-      y: el.scrollHeight - el.clientHeight,
-      x: el.scrollWidth - el.clientWidth,
-    }));
+    const overflow = await page
+      .locator('.print-page')
+      .first()
+      .evaluate((el) => ({
+        y: el.scrollHeight - el.clientHeight,
+        x: el.scrollWidth - el.clientWidth,
+      }));
     expect(overflow.y).toBeLessThanOrEqual(1);
     expect(overflow.x).toBeLessThanOrEqual(1);
 

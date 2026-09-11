@@ -87,9 +87,7 @@ async function fakeExe(page: Page, senaryo: Senaryo = { cevap: 'guncel' }) {
 
 /** Which commands the page has sent, in order. */
 function calls(page: Page): Promise<string[]> {
-  return page.evaluate(
-    () => (window as unknown as { __disk: { calls: string[] } }).__disk.calls,
-  );
+  return page.evaluate(() => (window as unknown as { __disk: { calls: string[] } }).__disk.calls);
 }
 
 function disk(page: Page): Promise<Record<string, string>> {
@@ -130,7 +128,10 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
 
     const written = await disk(page);
     const names = Object.keys(written);
-    expect(names.filter((n) => DAILY.test(n)), `yazılanlar: ${names.join(', ')}`).toHaveLength(1);
+    expect(
+      names.filter((n) => DAILY.test(n)),
+      `yazılanlar: ${names.join(', ')}`,
+    ).toHaveLength(1);
 
     // The bytes are the bundle, not the open plan — a folder holding one of
     // three plans is the kind of backup that is wrong where nobody looks.
@@ -161,7 +162,9 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await open(page);
     await openFolder(page);
 
-    const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }) });
+    const panel = page.locator('.panel', {
+      has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }),
+    });
     await expect(panel.getByRole('button', { name: /Klasör seç/ })).toHaveCount(0);
     await expect(panel.getByRole('button', { name: 'İzin ver' })).toHaveCount(0);
     await expect(panel.getByRole('button', { name: 'Vazgeç' })).toHaveCount(0);
@@ -181,7 +184,9 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await open(page);
     await openAbout(page);
 
-    const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Veriler nerede' }) });
+    const panel = page.locator('.panel', {
+      has: page.getByRole('heading', { name: 'Veriler nerede' }),
+    });
     await expect(panel.getByText(/klasörüne de yazılıyor/)).toBeVisible();
     await expect(panel.getByText(/tarama verilerini temizle/)).toHaveCount(0);
   });
@@ -194,11 +199,15 @@ test.describe('76. Exe yolu — hiç sorulmadan Belgelerim’e', () => {
     await open(page);
     await openFolder(page);
 
-    const panel = page.locator('.panel', { has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }) });
+    const panel = page.locator('.panel', {
+      has: page.getByRole('heading', { name: 'Nereye kaydedilsin' }),
+    });
     await expect(panel.getByRole('button', { name: /Klasör seç/ })).toHaveCount(1);
 
     await openAbout(page);
-    const where = page.locator('.panel', { has: page.getByRole('heading', { name: 'Veriler nerede' }) });
+    const where = page.locator('.panel', {
+      has: page.getByRole('heading', { name: 'Veriler nerede' }),
+    });
     await expect(where.getByText(/tarama verilerini temizle/)).toBeVisible();
   });
 });
@@ -217,8 +226,9 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     await fakeExe(page, { cevap: 'var', version: '9.9.9', date: '2026-09-02', boyut: 4_000_000 });
     await open(page);
     await openAbout(page);
-    await expect(surumPaneli(page).getByRole('button', { name: 'Güncellemeleri denetle' }))
-      .toBeVisible();
+    await expect(
+      surumPaneli(page).getByRole('button', { name: 'Güncellemeleri denetle' }),
+    ).toBeVisible();
 
     // The panel has been on screen; the disk has been written to several
     // times by now. `check_update` is still not among the calls.
@@ -265,7 +275,8 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
   test('İNTERNET YOKSA tek sonuç bir cümle, program çalışmaya devam ediyor', async ({ page }) => {
     await fakeExe(page, {
       cevap: 'hata',
-      mesaj: 'İnternete bağlanılamadı. Program çalışmaya devam ediyor, sonra tekrar deneyebilirsiniz.',
+      mesaj:
+        'İnternete bağlanılamadı. Program çalışmaya devam ediyor, sonra tekrar deneyebilirsiniz.',
     });
     await open(page);
     await openAbout(page);

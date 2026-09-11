@@ -161,7 +161,9 @@ export function writeHandle(handle: FileSystemDirectoryHandle): Promise<void> {
 }
 
 export function dropHandle(): Promise<void> {
-  return withStore('readwrite', (s) => s.delete(KEY) as IDBRequest<undefined>).then(() => undefined);
+  return withStore('readwrite', (s) => s.delete(KEY) as IDBRequest<undefined>).then(
+    () => undefined,
+  );
 }
 
 // ------------------------------------------------------------ permission

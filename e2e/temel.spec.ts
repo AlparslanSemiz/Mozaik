@@ -5,7 +5,8 @@ import { beklenenHata, expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import { reopen,
+import {
+  reopen,
   FILE,
   FIXTURE,
   open,
@@ -54,9 +55,10 @@ test.describe('5. Yedek ve şema göçü', () => {
     // the top bar; C9 moved it to Ayarlar → Hakkında, beside the report that says
     // where the data actually IS, and left a short version on the save
     // button's own tooltip — which is where somebody about to click it looks.
-    await expect(
-      page.getByRole('button', { name: 'Dosyaya kaydet', exact: true }),
-    ).toHaveAttribute('title', /kendiliğinden saklanıyor/);
+    await expect(page.getByRole('button', { name: 'Dosyaya kaydet', exact: true })).toHaveAttribute(
+      'title',
+      /kendiliğinden saklanıyor/,
+    );
 
     // In HAKKINDA, which is where "Veriler nerede" is — the comment above
     // already said so, and the assertion had been reading Planlar ve yedek,
@@ -91,9 +93,7 @@ test.describe('5. Yedek ve şema göçü', () => {
       semaSurumu: 1,
       ayar: { gunler: ['Pazartesi', 'Salı'], saatler: ['1', '2', '3', '4'] },
       derslikler: [{ id: 'dA', ad: 'A' }],
-      ogretmenler: [
-        { id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 0 },
-      ],
+      ogretmenler: [{ id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 0 }],
       siniflar: [{ id: 's510', ad: '510', derslikId: 'dA' }],
       dersler: [{ id: 'x1', sinifId: 's510', ogretmenId: 'oMC', haftalikSaat: 2, blok: 2 }],
       musaitDegil: { 'oMC|1|0': 1 },
@@ -143,13 +143,9 @@ test.describe('5. Yedek ve şema göçü', () => {
       schemaVersion: 2,
       settings: { days: ['Cuma', 'Cumartesi'], hours: ['1', '2', '3', '4'] },
       rooms: [{ id: 'dA', name: 'A' }],
-      teachers: [
-        { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 0 },
-      ],
+      teachers: [{ id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', color: 0 }],
       classes: [{ id: 's510', name: '510', roomId: 'dA' }],
-      lessons: [
-        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
-      ],
+      lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 }],
       unavailable: { 'oMC|1|0': 1 },
       placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
     };
@@ -518,7 +514,14 @@ test.describe('29. Hata yolları', () => {
       };
       Object.defineProperty(window, 'localStorage', {
         configurable: true,
-        value: { getItem: blow, setItem: blow, removeItem: blow, clear: blow, key: blow, length: 0 },
+        value: {
+          getItem: blow,
+          setItem: blow,
+          removeItem: blow,
+          clear: blow,
+          key: blow,
+          length: 0,
+        },
       });
       // With storage gone the language preference cannot be read either, so
       // the app falls back to `navigator.language` — which is en-US here. That
@@ -614,7 +617,9 @@ test.describe('46. Gömülü yazı tipi', () => {
 
     const seen = `400=${width.w400} 600=${width.w600} 700=${width.w700}`;
     expect(width.w600, seen).toBeGreaterThan(width.w400);
-    expect(width.w700, `700 ile 600 aynı genişlikte — eksen kırpılı: ${seen}`).toBeGreaterThan(width.w600);
+    expect(width.w700, `700 ile 600 aynı genişlikte — eksen kırpılı: ${seen}`).toBeGreaterThan(
+      width.w600,
+    );
   });
 
   test('rakamlar tablo hizalı — ızgara sayılardan ibaret', async ({ page }) => {

@@ -90,18 +90,28 @@ function build(): State {
     ],
     classes: [{ id: 's510', name: '510', roomId: null, color: 0, maxSameLessonPerDay: null }],
     lessons: [
-      { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 4, blocks: [], second: false, maxPerDay: null },
+      {
+        id: 'x1',
+        classId: 's510',
+        teacherId: 'oMC',
+        weeklyHours: 4,
+        blocks: [],
+        second: false,
+        maxPerDay: null,
+      },
     ],
     unavailable: { [teacherKey('oMC', 2, 3)]: 1 },
-    programs: [{
-      ...blankProgram(),
-      placements: {
-        [placementKey('s510', 0, 0)]: 'x1', // Pazartesi
-        [placementKey('s510', 1, 1)]: 'x1', // Salı
-        [placementKey('s510', 2, 2)]: 'x1', // Çarşamba
+    programs: [
+      {
+        ...blankProgram(),
+        placements: {
+          [placementKey('s510', 0, 0)]: 'x1', // Pazartesi
+          [placementKey('s510', 1, 1)]: 'x1', // Salı
+          [placementKey('s510', 2, 2)]: 'x1', // Çarşamba
+        },
+        pinned: { [placementKey('s510', 1, 1)]: 1 },
       },
-      pinned: { [placementKey('s510', 1, 1)]: 1 },
-    }],
+    ],
     activeProgramId: 'program-1',
   };
 }
@@ -229,7 +239,13 @@ describe('varsayılan hafta', () => {
 function school(): State {
   let d = emptyState();
   d = addRoom(d, 'A');
-  d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+  d = addTeacher(d, {
+    name: 'Mehmet Çelik',
+    short: 'MÇ',
+    subject: 'Matematik',
+    subject2: '',
+    gender: '',
+  });
   d = addClass(d, '510', d.rooms[0]!.id);
   return d;
 }
@@ -258,7 +274,8 @@ describe('addLessonsFromRows', () => {
   const row = (teacher: string) => ({
     className: '510',
     teacher,
-    weeklyHours: 4, blocks: [2, 2],
+    weeklyHours: 4,
+    blocks: [2, 2],
   });
 
   it('öğretmeni kısaltmadan da tam addan da bulur', () => {
@@ -344,8 +361,20 @@ describe('shortDay', () => {
 describe('makeShort ve duplicateShorts', () => {
   it('boş kısaltma addan üretilir, dolu olan olduğu gibi kalır', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'İsmail Şahin', short: 'İSM', subject: 'Fizik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: '',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'İsmail Şahin',
+      short: 'İSM',
+      subject: 'Fizik',
+      subject2: '',
+      gender: '',
+    });
     expect(d.teachers[0]!.short).toBe('MÇ');
     expect(d.teachers[1]!.short).toBe('İSM');
   });
@@ -365,9 +394,27 @@ describe('makeShort ve duplicateShorts', () => {
   // 25 kişilik gerçek listede bu KESİN çıkar ve ızgarada iki satır ayırt edilemez.
   it('çakışan kısaltmaları adlarıyla birlikte bildirir', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Ahmet Sarı', short: '', subject: 'Tarih', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'Ayşe Solmaz', short: '', subject: 'Kimya', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: '', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Ahmet Sarı',
+      short: '',
+      subject: 'Tarih',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Ayşe Solmaz',
+      short: '',
+      subject: 'Kimya',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: '',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     expect(d.teachers.map((t) => t.short)).toEqual(['AS', 'AS', 'MÇ']);
     expect(duplicateShorts(d.teachers)).toEqual([
       { short: 'AS', names: ['Ahmet Sarı', 'Ayşe Solmaz'] },
@@ -377,10 +424,46 @@ describe('makeShort ve duplicateShorts', () => {
   it('büyük/küçük harf farkı çakışmayı gizlemez, boş kısaltma sayılmaz', () => {
     expect(
       duplicateShorts([
-        { id: '1', name: 'A', short: 'mç', subject: '', subject2: '', gender: '', color: 0, limits: NO_TEACHER_LIMITS },
-        { id: '2', name: 'B', short: 'MÇ', subject: '', subject2: '', gender: '', color: 1, limits: NO_TEACHER_LIMITS },
-        { id: '3', name: 'C', short: '', subject: '', subject2: '', gender: '', color: 2, limits: NO_TEACHER_LIMITS },
-        { id: '4', name: 'D', short: '', subject: '', subject2: '', gender: '', color: 3, limits: NO_TEACHER_LIMITS },
+        {
+          id: '1',
+          name: 'A',
+          short: 'mç',
+          subject: '',
+          subject2: '',
+          gender: '',
+          color: 0,
+          limits: NO_TEACHER_LIMITS,
+        },
+        {
+          id: '2',
+          name: 'B',
+          short: 'MÇ',
+          subject: '',
+          subject2: '',
+          gender: '',
+          color: 1,
+          limits: NO_TEACHER_LIMITS,
+        },
+        {
+          id: '3',
+          name: 'C',
+          short: '',
+          subject: '',
+          subject2: '',
+          gender: '',
+          color: 2,
+          limits: NO_TEACHER_LIMITS,
+        },
+        {
+          id: '4',
+          name: 'D',
+          short: '',
+          subject: '',
+          subject2: '',
+          gender: '',
+          color: 3,
+          limits: NO_TEACHER_LIMITS,
+        },
       ]),
     ).toEqual([{ short: 'MÇ', names: ['A', 'B'] }]);
   });
@@ -393,7 +476,13 @@ describe('deletionSummary', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     d = addClass(d, '510', room);
     d = addClass(d, '511', room);
     const teacher = d.teachers[0]!.id;
@@ -504,8 +593,20 @@ describe('transferLesson', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     d = addRoom(d, 'B');
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Matematik', subject2: 'Fizik', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Ayşe Var',
+      short: 'AV',
+      subject: 'Matematik',
+      subject2: 'Fizik',
+      gender: '',
+    });
     d = addClass(d, '510', d.rooms[0]!.id);
     d = addClass(d, '511', d.rooms[1]!.id);
     return d;
@@ -556,11 +657,15 @@ describe('transferLesson', () => {
 
     // Not one hour of the moved lesson is left on the grid...
     const moved = d.lessons[0]!.id;
-    expect(Object.values(activeProgram(state).placements).filter((x) => x === moved)).toHaveLength(0);
+    expect(Object.values(activeProgram(state).placements).filter((x) => x === moved)).toHaveLength(
+      0,
+    );
     // ...and the receiving teacher is in exactly one place at a time.
     const ix = buildIndex(state);
     for (let h = 0; h < 2; h++) {
-      const at = Object.entries(activeProgram(state).placements).filter(([key]) => key.endsWith(`|0|${h}`));
+      const at = Object.entries(activeProgram(state).placements).filter(([key]) =>
+        key.endsWith(`|0|${h}`),
+      );
       const holders = at.map(([, id]) => state.lessons.find((x) => x.id === id)!.teacherId);
       expect(new Set(holders).size).toBe(holders.length);
     }
@@ -580,8 +685,12 @@ describe('transferLesson', () => {
 
     const { state, returned } = transferLesson(d, d.lessons[0]!.id, d.teachers[1]!.id);
     expect(returned).toBe(0);
-    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 0, 0)]).toBe(d.lessons[0]!.id);
-    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 1, 0)]).toBe(d.lessons[0]!.id);
+    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 0, 0)]).toBe(
+      d.lessons[0]!.id,
+    );
+    expect(activeProgram(state).placements[placementKey(d.classes[0]!.id, 1, 0)]).toBe(
+      d.lessons[0]!.id,
+    );
   });
 
   // `second` points at one of the OLD teacher's two fields. Carried over
@@ -637,7 +746,13 @@ describe('moveLessonToClass', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     d = addRoom(d, 'B');
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     d = addClass(d, '510', d.rooms[0]!.id);
     d = addClass(d, '511', d.rooms[1]!.id);
     return d;
@@ -683,7 +798,13 @@ describe('moveLessonToClass', () => {
 
   it('yeni sınıfın DOLU saati havuza dönüyor', () => {
     let d = school();
-    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Ayşe Var',
+      short: 'AV',
+      subject: 'Fizik',
+      subject2: '',
+      gender: '',
+    });
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
@@ -707,7 +828,9 @@ describe('moveLessonToClass', () => {
     // 511 is busy at both hours, so both blocks go back to the tray rather
     // than overwriting somebody else's lesson.
     expect(returned).toBe(2);
-    expect(Object.values(activeProgram(state).placements).filter((x) => x === moving)).toHaveLength(0);
+    expect(Object.values(activeProgram(state).placements).filter((x) => x === moving)).toHaveLength(
+      0,
+    );
   });
 
   // A pin is `classId|day|hour`. Left behind it would point at a square that
@@ -740,8 +863,20 @@ describe('renameSubject', () => {
     d = addSubject(d, 'Matematik');
     d = addSubject(d, 'Fizik');
     d = addSubject(d, 'Edebiyat');
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: 'Fizik', gender: '' });
-    d = addTeacher(d, { name: 'Ayşe Var', short: 'AV', subject: 'Fizik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: 'Fizik',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Ayşe Var',
+      short: 'AV',
+      subject: 'Fizik',
+      subject2: '',
+      gender: '',
+    });
     return d;
   }
 
@@ -839,7 +974,13 @@ describe('renameSubject', () => {
   it('yalnız bir öğretmende duran "listede olmayan" ada da çevirmiyor', () => {
     let d = emptyState();
     d = addSubject(d, 'Uzay');
-    d = addTeacher(d, { name: 'A B', short: 'AB', subject: 'Kayıp Branş', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'A B',
+      short: 'AB',
+      subject: 'Kayıp Branş',
+      subject2: '',
+      gender: '',
+    });
     expect(renameSubject(d, 'Uzay', 'Kayıp Branş')).toBe(d);
   });
 
@@ -902,7 +1043,6 @@ describe('setSubjectShort', () => {
     expect(d.settings.subjectShorts).toEqual({});
     expect(subjectShort(d.settings, 'Kimya')).toBe('Kim');
   });
-
 
   // Two different facts that used to be one. `defaultSubjects()` is the
   // BUILT-IN table — what a pre-v5 backup falls back to, and what the Branşlar
@@ -1017,7 +1157,13 @@ describe('branş listesi', () => {
 
   it('silinen branş listeden çıkıyor ama öğretmenin branşına dokunulmuyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     d = deleteSubject(d, 'Matematik');
     expect(d.settings.subjects).not.toContain('Matematik');
     expect(d.teachers[0]!.subject).toBe('Matematik'); // NEVER a side effect
@@ -1025,16 +1171,40 @@ describe('branş listesi', () => {
 
   it('subjectTeachers kimin kullandığını söylüyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'Ayşe Yıldız', short: 'AY', subject: 'matematik', subject2: '', gender: '' });
-    d = addTeacher(d, { name: 'Sema Kaya', short: 'SK', subject: 'Fizik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Ayşe Yıldız',
+      short: 'AY',
+      subject: 'matematik',
+      subject2: '',
+      gender: '',
+    });
+    d = addTeacher(d, {
+      name: 'Sema Kaya',
+      short: 'SK',
+      subject: 'Fizik',
+      subject2: '',
+      gender: '',
+    });
     expect(subjectTeachers(d, 'Matematik').map((t) => t.short)).toEqual(['MÇ', 'AY']);
     expect(subjectTeachers(d, 'Kimya')).toEqual([]);
   });
 
   it('listede olmayan bir branşı taşıyan öğretmen açılır listede yine görünüyor', () => {
     let d = emptyState();
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Robotik',
+      subject2: '',
+      gender: '',
+    });
     expect(d.settings.subjects).not.toContain('Robotik');
     // otherwise the dropdown could not show his current subject and would
     // silently change it on the first render
@@ -1044,8 +1214,13 @@ describe('branş listesi', () => {
 
 describe('subjectRank ve teacherRank', () => {
   const teacher = (subject: string, subject2 = '') => ({
-    id: 't', name: 'Ad Soyad', short: 'AS', subject, subject2,
-    gender: '' as const, color: 0,
+    id: 't',
+    name: 'Ad Soyad',
+    short: 'AS',
+    subject,
+    subject2,
+    gender: '' as const,
+    color: 0,
     limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
   });
 
@@ -1067,7 +1242,13 @@ describe('subjectRank ve teacherRank', () => {
   it('listede olmayan branş listenin ARDINDAN geliyor', () => {
     let d = emptyState();
     d = { ...d, settings: { ...d.settings, subjects: ['Matematik'] } };
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Robotik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Robotik',
+      subject2: '',
+      gender: '',
+    });
     const rank = subjectRank(d);
     expect(rank.get('matematik')).toBe(0);
     expect(rank.get('robotik')).toBe(1);
@@ -1124,7 +1305,15 @@ describe('openHours', () => {
   });
 
   it('her kapatılan saat bir düşürür ve yalnız o varlığı etkiler', () => {
-    const d = setAvailability(build(), 'oMC', [{ day: 0, hour: 0 }, { day: 1, hour: 3 }], true);
+    const d = setAvailability(
+      build(),
+      'oMC',
+      [
+        { day: 0, hour: 0 },
+        { day: 1, hour: 3 },
+      ],
+      true,
+    );
     expect(openHours(d, 'oMC')).toBe(9);
     expect(openHours(d, 's510')).toBe(12); // the class was never touched
   });
@@ -1151,7 +1340,13 @@ describe('entityWeek', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     d = addClass(d, '510', room);
     const teacher = d.teachers[0]!.id;
     const group = d.classes[0]!.id;
@@ -1227,13 +1422,20 @@ describe('entityFacts', () => {
     let d = emptyState();
     d = addRoom(d, 'A');
     const room = d.rooms[0]!.id;
-    d = addTeacher(d, { name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', subject2: '', gender: '' });
+    d = addTeacher(d, {
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      subject2: '',
+      gender: '',
+    });
     d = addClass(d, '510', room);
     d = addClass(d, '511', room);
     d = addLesson(d, {
       classId: d.classes[0]!.id,
       teacherId: d.teachers[0]!.id,
-      weeklyHours: 4, blocks: [2, 2],
+      weeklyHours: 4,
+      blocks: [2, 2],
     });
     return place(d, d.lessons[0]!.id, 0, 0);
   }
@@ -1347,7 +1549,13 @@ describe('reorderList', () => {
 
   it('sınır dışı indis hiçbir şey yapmıyor, çökmüyor', () => {
     const d = named();
-    for (const [from, to] of [[-1, 1], [9, 1], [1, -1], [1, 9], [0, 4]] as const) {
+    for (const [from, to] of [
+      [-1, 1],
+      [9, 1],
+      [1, -1],
+      [1, 9],
+      [0, 4],
+    ] as const) {
       expect(reorderList(d, 'rooms', from, to), `${from}->${to}`).toBe(d);
     }
   });

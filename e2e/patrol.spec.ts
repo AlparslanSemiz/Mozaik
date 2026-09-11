@@ -101,13 +101,13 @@ async function diyalogKapat(page: Page): Promise<boolean> {
   // this wants.
   const iptal = page.locator('.dlg-actions .btn').first();
   if ((await iptal.count()) > 0) await iptal.click({ timeout: TIK }).catch(() => undefined);
-  await expect(acik).toHaveCount(0, { timeout: 2000 }).catch(() => undefined);
+  await expect(acik)
+    .toHaveCount(0, { timeout: 2000 })
+    .catch(() => undefined);
   return true;
 }
 
-const SEKMELER = [
-  'Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar',
-];
+const SEKMELER = ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar'];
 
 test.describe('Devriye', () => {
   test('sistematik tur — her sekme, her adım, her bölüm, her şerit düğmesi', async ({ page }) => {
@@ -146,7 +146,11 @@ test.describe('Devriye', () => {
       for (let i = 0; i < sayi && Date.now() < bitis; i++) {
         const btn = page.locator('.ribbon button').nth(i);
         if ((await btn.count()) === 0) break;
-        const ad = ((await btn.getAttribute('aria-label')) ?? (await btn.textContent()) ?? '').trim();
+        const ad = (
+          (await btn.getAttribute('aria-label')) ??
+          (await btn.textContent()) ??
+          ''
+        ).trim();
         if (!(await btn.isVisible()) || !(await btn.isEnabled())) continue;
         // The two that end the tour rather than continue it.
         if (/Sıfırla|dosyadan aç/i.test(ad)) continue;

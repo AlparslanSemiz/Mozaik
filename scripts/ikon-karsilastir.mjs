@@ -22,7 +22,10 @@ const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');
 
 const browser = await chromium.launch();
 const cells = [];
-for (const [ad, svg] of [['ayrıntılı', detay], ['sade', sade]]) {
+for (const [ad, svg] of [
+  ['ayrıntılı', detay],
+  ['sade', sade],
+]) {
   for (const size of SIZES) {
     const page = await browser.newPage({ viewport: { width: size, height: size } });
     await page.setContent(

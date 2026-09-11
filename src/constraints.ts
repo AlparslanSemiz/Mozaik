@@ -459,7 +459,7 @@ export function placedBlocks(d: State, lesson: Lesson): PlacedBlock[] {
       ) {
         end++;
       }
-      for (let cur = h; cur < end; ) {
+      for (let cur = h; cur < end;) {
         const room = end - cur;
         const at = left.findIndex((b) => b <= room);
         const size = at === -1 ? 1 : left[at]!;
@@ -526,12 +526,7 @@ export function blockStart(d: State, classId: Id, day: number, hour: number): nu
 }
 
 /** The whole block containing the clicked cell — where it starts and how long. */
-export function blockAt(
-  d: State,
-  classId: Id,
-  day: number,
-  hour: number,
-): PlacedBlock | null {
+export function blockAt(d: State, classId: Id, day: number, hour: number): PlacedBlock | null {
   const lessonId = activePlacements(d)[placementKey(classId, day, hour)];
   if (lessonId === undefined) return null;
   const lesson = d.lessons.find((x) => x.id === lessonId);
@@ -547,13 +542,7 @@ export function blockAt(
  * Writes the lesson onto the grid. Returns a new State, no mutation.
  * PRECONDITION: the caller called `blocker()` first and got null.
  */
-export function place(
-  d: State,
-  lessonId: Id,
-  day: number,
-  hour: number,
-  size?: number,
-): State {
+export function place(d: State, lessonId: Id, day: number, hour: number, size?: number): State {
   const lesson = d.lessons.find((x) => x.id === lessonId);
   if (lesson === undefined) return d;
 
@@ -686,9 +675,7 @@ export interface BlockRef extends PlacedBlock {
 }
 
 export type DropAction =
-  | { kind: 'place' }
-  | { kind: 'evict'; blocks: BlockRef[] }
-  | { kind: 'swap'; target: BlockRef };
+  { kind: 'place' } | { kind: 'evict'; blocks: BlockRef[] } | { kind: 'swap'; target: BlockRef };
 
 function sameBlock(d: State, ref: BlockRef): boolean {
   if (activePlacements(d)[placementKey(ref.classId, ref.day, ref.hour)] !== ref.lessonId) {
@@ -732,7 +719,8 @@ function targetBlocks(
         ref.classId === source.classId &&
         ref.day === source.day &&
         ref.hour === source.hour
-      ) continue;
+      )
+        continue;
       found.set(`${ref.classId}|${ref.day}|${ref.hour}`, ref);
     }
   }
@@ -764,7 +752,8 @@ export function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapRe
   if (
     blockPinned(d, source.classId, source.day, source.hour) ||
     blockPinned(d, target.classId, target.day, target.hour)
-  ) return null;
+  )
+    return null;
 
   const sourceLesson = d.lessons.find((x) => x.id === source.lessonId);
   const targetLesson = d.lessons.find((x) => x.id === target.lessonId);
@@ -773,11 +762,25 @@ export function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapRe
   let work = liftBlock(d, source.classId, source.day, source.hour);
   work = liftBlock(work, target.classId, target.day, target.hour);
 
-  const first = check(work, buildIndex(work), source.lessonId, target.day, target.hour, source.size);
+  const first = check(
+    work,
+    buildIndex(work),
+    source.lessonId,
+    target.day,
+    target.hour,
+    source.size,
+  );
   if (first.blocked !== null) return null;
   work = place(work, source.lessonId, target.day, target.hour, source.size);
 
-  const second = check(work, buildIndex(work), target.lessonId, source.day, source.hour, target.size);
+  const second = check(
+    work,
+    buildIndex(work),
+    target.lessonId,
+    source.day,
+    source.hour,
+    target.size,
+  );
   if (second.blocked !== null) return null;
   work = place(work, target.lessonId, source.day, source.hour, target.size);
 
@@ -947,7 +950,12 @@ export function dropMap(
       }));
       map.set(key, {
         blocked: null,
-        warning: after.warning ?? evictionNotice(ix, heads.map((h) => h.lesson)),
+        warning:
+          after.warning ??
+          evictionNotice(
+            ix,
+            heads.map((h) => h.lesson),
+          ),
         evicts: heads.map((h) => h.lesson.id),
         action: { kind: 'evict', blocks: evicted },
       });
@@ -1010,7 +1018,8 @@ export function applyDrop(d: State, request: DropRequest): State {
   let next = d;
   if (request.source !== null) {
     if (!sameBlock(next, request.source)) return d;
-    if (blockPinned(next, request.source.classId, request.source.day, request.source.hour)) return d;
+    if (blockPinned(next, request.source.classId, request.source.day, request.source.hour))
+      return d;
     next = liftBlock(next, request.source.classId, request.source.day, request.source.hour);
   }
 
@@ -1243,9 +1252,8 @@ export function sanitize(d: State): State {
   // program that happened not to be open when the edit was made.
   const seenIds = new Set<Id>();
   const seenNames = new Set<string>();
-  const sourcePrograms = Array.isArray(d.programs) && d.programs.length > 0
-    ? d.programs
-    : [blankProgram()];
+  const sourcePrograms =
+    Array.isArray(d.programs) && d.programs.length > 0 ? d.programs : [blankProgram()];
   if (sourcePrograms !== d.programs) changed = true;
 
   const programs = sourcePrograms.map((program, index) => {

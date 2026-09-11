@@ -7,7 +7,8 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { readFile } from 'node:fs/promises';
-import { reopen,
+import {
+  reopen,
   dragAndDrop,
   openSettings,
   openSetup,
@@ -268,9 +269,7 @@ test.describe('41. Taslaklar', () => {
     await expect(page.locator('table.list tbody tr').nth(1).getByRole('checkbox')).toBeChecked();
   });
 
-  test('Kurulum’un boş ekranı taslakları gösteriyor ve ondan plan başlatıyor', async ({
-    page,
-  }) => {
+  test('Kurulum’un boş ekranı taslakları gösteriyor ve ondan plan başlatıyor', async ({ page }) => {
     await openWithSample(page);
     await openPlans(page);
     await page.getByRole('button', { name: 'Taslak olarak kaydet' }).click();
@@ -377,7 +376,9 @@ test.describe('42. Bütün planlar tek dosyada', () => {
     // was unique until the section grew a second panel with a live line in
     // it ("Nereye kaydedilsin"), and then this query stopped naming one thing.
     await expect(
-      page.locator('.panel', { hasText: 'Bütün planlar tek dosyada' }).locator('.hint[role="status"]'),
+      page
+        .locator('.panel', { hasText: 'Bütün planlar tek dosyada' })
+        .locator('.hint[role="status"]'),
     ).toHaveText('2 plan açıldı.');
     await expect(picker(page).locator('option')).toHaveCount(2);
 

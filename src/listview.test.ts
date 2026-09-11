@@ -29,7 +29,14 @@ const CFG: ListConfig<Row> = {
   haystack: (x) => `${x.name} ${x.subject}`,
   sorts: [
     { id: 'ad', label: 'Ada göre', cmp: (a, b) => compareTr(a.name, b.name) },
-    { id: 'yuk', label: 'Yüke göre', cmp: byNumberThen((x) => x.load, (x) => x.name) },
+    {
+      id: 'yuk',
+      label: 'Yüke göre',
+      cmp: byNumberThen(
+        (x) => x.load,
+        (x) => x.name,
+      ),
+    },
   ],
   facets: [
     { id: 'brans', label: 'Branş', of: (x) => x.subject },
@@ -143,11 +150,12 @@ describe('facetCounts', () => {
   // choosing "Matematik" would leave every other chip reading 0 and the row
   // of chips would stop being a way back.
   it('bir grup seçiliyken ÖTEKİ grupların sayısı durmaya devam ediyor', () => {
-    expect(facetCounts(ROWS, { ...EMPTY_QUERY, facets: { brans: 'Matematik' } }, CFG, 'brans'))
-      .toEqual([
-        { value: 'Fizik', count: 1 },
-        { value: 'Matematik', count: 2 },
-      ]);
+    expect(
+      facetCounts(ROWS, { ...EMPTY_QUERY, facets: { brans: 'Matematik' } }, CFG, 'brans'),
+    ).toEqual([
+      { value: 'Fizik', count: 1 },
+      { value: 'Matematik', count: 2 },
+    ]);
   });
 
   // The other half of the same rule, and the one plurality introduced: a chip

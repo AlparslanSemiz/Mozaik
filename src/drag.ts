@@ -16,13 +16,13 @@
 // reach it. So (a) the target row is scrolled into view when the drag starts,
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
-import { t } from "./i18n";
-import { useCallback, useEffect, useRef } from "react";
-import type React from "react";
-import type { DropVerdict } from "./constraints";
-import type { BlockRef } from "./constraints";
-import { paletteColor } from "./palette";
-import type { Id } from "./types";
+import { t } from './i18n';
+import { useCallback, useEffect, useRef } from 'react';
+import type React from 'react';
+import type { DropVerdict } from './constraints';
+import type { BlockRef } from './constraints';
+import { paletteColor } from './palette';
+import type { Id } from './types';
 
 export interface DragData {
   lessonId: Id;
@@ -53,7 +53,7 @@ export interface DragData {
 /** What the bar above the grid says, and how loudly. */
 interface Reason {
   text: string;
-  level: "ok" | "warn" | "blocked";
+  level: 'ok' | 'warn' | 'blocked';
 }
 
 export interface GhostContent {
@@ -68,13 +68,13 @@ export interface GhostContent {
 // both would have been the cheap way and it breaks a real assertion: the suite
 // counts `td.drop-ok` to check that a two-hour block lights exactly two cells,
 // and a 78-column preview would have made that 40 (pitfall 53).
-const HL_OK = "drop-ok";
-const HL_WARN = "drop-warn";
-const HL_BLOCKED = "drop-blocked";
+const HL_OK = 'drop-ok';
+const HL_WARN = 'drop-warn';
+const HL_BLOCKED = 'drop-blocked';
 
-const PV_OK = "can-ok";
-const PV_WARN = "can-warn";
-const PV_NO = "can-no";
+const PV_OK = 'can-ok';
+const PV_WARN = 'can-warn';
+const PV_NO = 'can-no';
 
 /**
  * A block keeps its full length. "2 derslik bir blok kesinlikle 1 ders değil
@@ -94,14 +94,12 @@ const EDGE = 56;
 /** Scroll amount per frame (px). Kept low so the user stays in control. */
 const STEP = 14;
 
-export function useDrag(
-  drop: (data: DragData, day: number, hour: number) => void,
-) {
+export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
   const data = useRef<DragData | null>(null);
   const ghost = useRef<HTMLDivElement | null>(null);
   const highlighted = useRef<HTMLElement[]>([]);
   const previewed = useRef<HTMLElement[]>([]);
-  const lastTarget = useRef<string>("");
+  const lastTarget = useRef<string>('');
   const pos = useRef({ x: 0, y: 0 });
   const loop = useRef(0);
   const dragTable = useRef<HTMLTableElement | null>(null);
@@ -117,17 +115,15 @@ export function useDrag(
   } | null>(null);
 
   const clearHighlight = useCallback(() => {
-    for (const el of highlighted.current)
-      el.classList.remove(HL_OK, HL_WARN, HL_BLOCKED);
+    for (const el of highlighted.current) el.classList.remove(HL_OK, HL_WARN, HL_BLOCKED);
     highlighted.current = [];
-    lastTarget.current = "";
+    lastTarget.current = '';
   }, []);
 
   // React will NOT undo these for us: they are deliberately painted directly
   // so a drag does not redraw the memoised grid.
   const clearPreview = useCallback(() => {
-    for (const el of previewed.current)
-      el.classList.remove(PV_OK, PV_WARN, PV_NO);
+    for (const el of previewed.current) el.classList.remove(PV_OK, PV_WARN, PV_NO);
     previewed.current = [];
   }, []);
 
@@ -138,8 +134,8 @@ export function useDrag(
     detach.current = () => undefined;
     clearHighlight();
     clearPreview();
-    targetRow.current?.classList.remove("target-row");
-    dragTable.current?.classList.remove("dragging");
+    targetRow.current?.classList.remove('target-row');
+    dragTable.current?.classList.remove('dragging');
     targetRow.current = null;
     dragTable.current = null;
     cellAt.current.clear();
@@ -150,7 +146,7 @@ export function useDrag(
     data.current = null;
     if (savedBar.current !== null) {
       savedBar.current.element.className = savedBar.current.className;
-      const text = savedBar.current.element.querySelector<HTMLElement>(":scope > span");
+      const text = savedBar.current.element.querySelector<HTMLElement>(':scope > span');
       if (text !== null) text.textContent = savedBar.current.text;
       savedBar.current = null;
     }
@@ -158,71 +154,68 @@ export function useDrag(
 
   const paintReason = (reason: Reason | null) => {
     const bar = savedBar.current?.element ?? null;
-    const text = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
+    const text = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
     if (bar === null || text === null) return;
     bar.className =
       reason === null
-        ? "reason-bar ok"
-        : reason.level === "warn"
-          ? "reason-bar warn"
-          : "reason-bar bad";
-    text.textContent = reason?.text ?? t("Buraya bırakılabilir.");
+        ? 'reason-bar ok'
+        : reason.level === 'warn'
+          ? 'reason-bar warn'
+          : 'reason-bar bad';
+    text.textContent = reason?.text ?? t('Buraya bırakılabilir.');
   };
 
-  const start = useCallback(
-    (e: React.PointerEvent, d: DragData, content: GhostContent) => {
-      if (e.button !== 0) return;
-      e.preventDefault();
+  const start = useCallback((e: React.PointerEvent, d: DragData, content: GhostContent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
 
-      data.current = d;
-      pos.current = { x: e.clientX, y: e.clientY };
+    data.current = d;
+    pos.current = { x: e.clientX, y: e.clientY };
 
-      const el = document.createElement("div");
-      el.className = "ghost";
-      el.style.background = paletteColor(content.color);
-      // AS WIDE AS WHAT IT WILL COVER. The ghost was one cell wide whatever the
-      // block was, while the highlight below it ran `blockSize` cells to the
-      // RIGHT — so on a double the card sat half a cell left of the pair it was
-      // about to fill, and the card lifted off the tray (twice as wide there,
-      // `[data-size='2']`) shrank in the hand. The offset does not change: the
-      // ghost's LEFT edge stays half a cell left of the pointer, which is the
-      // left edge of the target cell.
-      el.style.setProperty("--ghost-span", String(Math.max(1, d.blockSize)));
-      const top = document.createElement("span");
-      top.className = "card-top";
-      top.textContent = content.top;
-      const bottom = document.createElement("span");
-      bottom.className = "card-bottom";
-      bottom.textContent = content.bottom;
-      el.append(top, bottom);
-      el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      document.body.appendChild(el);
-      ghost.current = el;
+    const el = document.createElement('div');
+    el.className = 'ghost';
+    el.style.background = paletteColor(content.color);
+    // AS WIDE AS WHAT IT WILL COVER. The ghost was one cell wide whatever the
+    // block was, while the highlight below it ran `blockSize` cells to the
+    // RIGHT — so on a double the card sat half a cell left of the pair it was
+    // about to fill, and the card lifted off the tray (twice as wide there,
+    // `[data-size='2']`) shrank in the hand. The offset does not change: the
+    // ghost's LEFT edge stays half a cell left of the pointer, which is the
+    // left edge of the target cell.
+    el.style.setProperty('--ghost-span', String(Math.max(1, d.blockSize)));
+    const top = document.createElement('span');
+    top.className = 'card-top';
+    top.textContent = content.top;
+    const bottom = document.createElement('span');
+    bottom.className = 'card-bottom';
+    bottom.textContent = content.bottom;
+    el.append(top, bottom);
+    el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    document.body.appendChild(el);
+    ghost.current = el;
 
-      // Every answer is imperative. Red/yellow targets used to call setState
-      // here and redraw Program while the pointer crossed the row.
-      const bar = document.querySelector<HTMLElement>(".reason-bar");
-      const barText = bar?.querySelector<HTMLElement>(":scope > span") ?? null;
-      if (bar !== null && barText !== null) {
-        savedBar.current = {
-          element: bar,
-          className: bar.className,
-          text: barText.textContent ?? "",
-        };
-        bar.className = "reason-bar ok";
-        barText.textContent = t("Buraya bırakılabilir.");
-      }
+    // Every answer is imperative. Red/yellow targets used to call setState
+    // here and redraw Program while the pointer crossed the row.
+    const bar = document.querySelector<HTMLElement>('.reason-bar');
+    const barText = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
+    if (bar !== null && barText !== null) {
+      savedBar.current = {
+        element: bar,
+        className: bar.className,
+        text: barText.textContent ?? '',
+      };
+      bar.className = 'reason-bar ok';
+      barText.textContent = t('Buraya bırakılabilir.');
+    }
 
-      activate.current(d);
-    },
-    [],
-  );
+    activate.current(d);
+  }, []);
 
   activate.current = (dragging: DragData) => {
-    const wrap = document.querySelector<HTMLElement>(".grid-wrap");
-    const table = wrap?.querySelector<HTMLTableElement>("table.grid") ?? null;
+    const wrap = document.querySelector<HTMLElement>('.grid-wrap');
+    const table = wrap?.querySelector<HTMLTableElement>('table.grid') ?? null;
     const row =
-      [...(table?.querySelectorAll<HTMLTableRowElement>("tbody tr") ?? [])].find(
+      [...(table?.querySelectorAll<HTMLTableRowElement>('tbody tr') ?? [])].find(
         (candidate) => candidate.dataset.rowId === dragging.rowId,
       ) ?? null;
 
@@ -244,15 +237,15 @@ export function useDrag(
       const wrapBox = wrap.getBoundingClientRect();
       const rowBox = row.getBoundingClientRect();
       const headingBottom =
-        table?.querySelector("thead")?.getBoundingClientRect().bottom ?? wrapBox.top;
+        table?.querySelector('thead')?.getBoundingClientRect().bottom ?? wrapBox.top;
       const visibleTop = Math.max(wrapBox.top, headingBottom);
       if (rowBox.top < visibleTop || rowBox.bottom > wrapBox.bottom) {
-        row.scrollIntoView({ block: "center", inline: "nearest" });
+        row.scrollIntoView({ block: 'center', inline: 'nearest' });
       }
     }
 
-    table?.classList.add("dragging");
-    row?.classList.add("target-row");
+    table?.classList.add('dragging');
+    row?.classList.add('target-row');
 
     // Two flat overlays dim the visible rows above and below the target. CSS
     // opacity on every non-target row made Chromium raster ~24 wide layers at
@@ -262,7 +255,7 @@ export function useDrag(
       const wrapBox = wrap.getBoundingClientRect();
       const rowBox = row.getBoundingClientRect();
       const headingBottom =
-        table?.querySelector("thead")?.getBoundingClientRect().bottom ?? wrapBox.top;
+        table?.querySelector('thead')?.getBoundingClientRect().bottom ?? wrapBox.top;
       const top = Math.max(wrapBox.top, headingBottom);
       const splitTop = Math.max(top, Math.min(rowBox.top, wrapBox.bottom));
       const splitBottom = Math.max(top, Math.min(rowBox.bottom, wrapBox.bottom));
@@ -277,9 +270,9 @@ export function useDrag(
       below!.style.height = `${Math.max(0, wrapBox.bottom - splitBottom)}px`;
     };
     if (wrap !== null && row !== null) {
-      shades.current = [document.createElement("div"), document.createElement("div")];
+      shades.current = [document.createElement('div'), document.createElement('div')];
       for (const shade of shades.current) {
-        shade.className = "drag-shade";
+        shade.className = 'drag-shade';
         document.body.appendChild(shade);
       }
       positionShades();
@@ -288,7 +281,7 @@ export function useDrag(
     // A merged block has one <td> for several hours. Build the containment
     // lookup once, so highlighting never scans/query-selects the row again.
     if (row !== null) {
-      for (const cell of row.querySelectorAll<HTMLElement>("td[data-day][data-hour]")) {
+      for (const cell of row.querySelectorAll<HTMLElement>('td[data-day][data-hour]')) {
         const day = Number(cell.dataset.day);
         const hour = Number(cell.dataset.hour);
         const span = Math.max(1, Number(cell.dataset.span) || 1);
@@ -318,12 +311,10 @@ export function useDrag(
     // than one hour, which painted it red even where dropping there actually
     // succeeds (the block lands a bit earlier and still covers that hour).
     if (row !== null) {
-      for (const cell of row.querySelectorAll<HTMLElement>(
-        "td[data-day]",
-      )) {
-        const rawHour = Number(cell.dataset["hour"]);
+      for (const cell of row.querySelectorAll<HTMLElement>('td[data-day]')) {
+        const rawHour = Number(cell.dataset['hour']);
         const hour = clampToDay(rawHour, dragging.blockSize, dragging.hourCount);
-        const verdict = dragging.map.get(`${cell.dataset["day"]}|${hour}`);
+        const verdict = dragging.map.get(`${cell.dataset['day']}|${hour}`);
         const cls =
           verdict === undefined || verdict.blocked !== null
             ? PV_NO
@@ -336,21 +327,14 @@ export function useDrag(
     }
 
     /** The grid cell under the cursor. The ghost MUST be pointer-events: none. */
-    const findTarget = (
-      x: number,
-      y: number,
-    ): { day: number; hour: number } | null => {
-      const el = document
-        .elementFromPoint(x, y)
-        ?.closest<HTMLElement>("[data-day]");
+    const findTarget = (x: number, y: number): { day: number; hour: number } | null => {
+      const el = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-day]');
       // Compare the element, not the id as a selector: ids can start with a
       // digit and escaping them in CSS is a chore.
-      if (el == null || el.closest("tr") !== row) return null;
-      const day = Number(el.dataset["day"]);
-      const hour = Number(el.dataset["hour"]);
-      return Number.isInteger(day) && Number.isInteger(hour)
-        ? { day, hour }
-        : null;
+      if (el == null || el.closest('tr') !== row) return null;
+      const day = Number(el.dataset['day']);
+      const hour = Number(el.dataset['hour']);
+      return Number.isInteger(day) && Number.isInteger(hour) ? { day, hour } : null;
     };
 
     /** Scrolls the grid if the cursor is near an edge. Returns true if it scrolled. */
@@ -397,7 +381,7 @@ export function useDrag(
         raw === null
           ? null
           : { day: raw.day, hour: clampToDay(raw.hour, d.blockSize, d.hourCount) };
-      const signature = target === null ? "" : `${target.day}|${target.hour}`;
+      const signature = target === null ? '' : `${target.day}|${target.hour}`;
       // If it scrolled, the cell under the cursor may have changed; look again.
       if (signature !== lastTarget.current || scrolled) {
         clearHighlight();
@@ -407,23 +391,19 @@ export function useDrag(
           paintReason(null);
         } else {
           const verdict = d.map.get(signature);
-          const blocked =
-            verdict === undefined
-              ? t("Bu hücreye bırakılamaz")
-              : verdict.blocked;
+          const blocked = verdict === undefined ? t('Bu hücreye bırakılamaz') : verdict.blocked;
           const warning = verdict?.warning ?? null;
 
           paintReason(
             blocked !== null
-              ? { text: blocked, level: "blocked" }
+              ? { text: blocked, level: 'blocked' }
               : warning !== null
-                ? { text: warning, level: "warn" }
+                ? { text: warning, level: 'warn' }
                 : null,
           );
 
           // Paint every cell the block will cover.
-          const cls =
-            blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
+          const cls = blocked !== null ? HL_BLOCKED : warning !== null ? HL_WARN : HL_OK;
           for (let i = 0; i < d.blockSize; i++) {
             const hour = target.hour + i;
             // Two ways an hour can be on screen: as its own cell, or swallowed
@@ -481,18 +461,18 @@ export function useDrag(
     };
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") finish();
+      if (e.key === 'Escape') finish();
     };
 
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", finish);
-    window.addEventListener("keydown", onKey);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', finish);
+    window.addEventListener('keydown', onKey);
     detach.current = () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", finish);
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', finish);
+      window.removeEventListener('keydown', onKey);
     };
   };
 

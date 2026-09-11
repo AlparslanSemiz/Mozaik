@@ -20,15 +20,7 @@ import { t } from './i18n';
 import { subjectKey } from './subjects';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */
-export const WEEK = [
-  'Pazartesi',
-  'Salı',
-  'Çarşamba',
-  'Perşembe',
-  'Cuma',
-  'Cumartesi',
-  'Pazar',
-];
+export const WEEK = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 
 /** Monday is NOT taught at this school; the week runs Tuesday to Sunday. */
 export const DEFAULT_DAY_NAMES = WEEK.slice(1);

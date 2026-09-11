@@ -68,7 +68,12 @@ function resources(buf) {
       const dataField = buf.readUInt32LE(at + 4);
       const entryId = (nameField & 0x80000000) === 0 ? nameField : -1;
       if ((dataField & 0x80000000) !== 0) {
-        walk(dataField & 0x7fffffff, depth + 1, depth === 0 ? entryId : type, depth === 1 ? entryId : id);
+        walk(
+          dataField & 0x7fffffff,
+          depth + 1,
+          depth === 0 ? entryId : type,
+          depth === 1 ? entryId : id,
+        );
         continue;
       }
       const entry = base + dataField;
@@ -115,9 +120,18 @@ function versionInfo(bytes) {
   // The blob stores key then value, and the keys are a known set — so pairing
   // is a lookup rather than a guess about ordering.
   const KEYS = [
-    'CompanyName', 'FileDescription', 'FileVersion', 'InternalName',
-    'LegalCopyright', 'OriginalFilename', 'ProductName', 'ProductVersion',
-    'Comments', 'LegalTrademarks', 'PrivateBuild', 'SpecialBuild',
+    'CompanyName',
+    'FileDescription',
+    'FileVersion',
+    'InternalName',
+    'LegalCopyright',
+    'OriginalFilename',
+    'ProductName',
+    'ProductVersion',
+    'Comments',
+    'LegalTrademarks',
+    'PrivateBuild',
+    'SpecialBuild',
   ];
   const fields = {};
   for (let i = 0; i < runs.length; i += 1) {

@@ -22,12 +22,7 @@ export function rowMask(mask: ProgramMask, view: View, id: Id): MaskMode | undef
   return view === 'teacher' ? mask.teachers[id] : mask.classes[id];
 }
 
-export function setRowMask(
-  mask: ProgramMask,
-  view: View,
-  id: Id,
-  mode?: MaskMode,
-): ProgramMask {
+export function setRowMask(mask: ProgramMask, view: View, id: Id, mode?: MaskMode): ProgramMask {
   const key = view === 'teacher' ? 'teachers' : 'classes';
   const next = { ...mask[key] };
   if (mode === undefined) delete next[id];
@@ -50,13 +45,19 @@ export function cleanMask(mask: ProgramMask, state: State): ProgramMask {
     Object.entries(mask.classes).filter(([id]) => state.classes.some((item) => item.id === id)),
   );
   const days = Object.fromEntries(
-    Object.entries(mask.days).filter(([name]) => state.settings.days.some((day) => day.name === name)),
+    Object.entries(mask.days).filter(([name]) =>
+      state.settings.days.some((day) => day.name === name),
+    ),
   );
   return { teachers, classes, days } as ProgramMask;
 }
 
 export function maskCount(mask: ProgramMask): number {
-  return Object.keys(mask.teachers).length + Object.keys(mask.classes).length + Object.keys(mask.days).length;
+  return (
+    Object.keys(mask.teachers).length +
+    Object.keys(mask.classes).length +
+    Object.keys(mask.days).length
+  );
 }
 
 export function solverExclusions(mask: ProgramMask): SolverExclusions {
@@ -71,5 +72,7 @@ export function lessonExcluded(
   lesson: { teacherId: Id; classId: Id },
   exclusions: SolverExclusions,
 ): boolean {
-  return exclusions.teacherIds.includes(lesson.teacherId) || exclusions.classIds.includes(lesson.classId);
+  return (
+    exclusions.teacherIds.includes(lesson.teacherId) || exclusions.classIds.includes(lesson.classId)
+  );
 }

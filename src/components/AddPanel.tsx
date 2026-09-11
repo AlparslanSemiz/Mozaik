@@ -23,7 +23,9 @@ export default function AddPanel({ title, description, more, action, notice, chi
         {action}
       </div>
       <div className="add-panel-description">
-        <p className="hint" title={more}>{description}</p>
+        <p className="hint" title={more}>
+          {description}
+        </p>
       </div>
       {notice !== undefined && <div className="add-panel-notice">{notice}</div>}
       <div className="add-panel-body">{children}</div>

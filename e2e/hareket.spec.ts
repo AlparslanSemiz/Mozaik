@@ -14,7 +14,15 @@
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { reopen, chooseMotion, open, openSettings, openWithSample, savedText, settledText } from './helpers';
+import {
+  reopen,
+  chooseMotion,
+  open,
+  openSettings,
+  openWithSample,
+  savedText,
+  settledText,
+} from './helpers';
 
 /** The four levers, straight off the root element. */
 const levers = (page: Page) =>
@@ -81,9 +89,9 @@ test.describe('14. Hareket', () => {
     // app that cannot move at all.
     const moving = await page.evaluate(async () => {
       const strip = [...document.querySelectorAll('.tab')];
-      strip.find((b) => (b.textContent ?? '').includes('Ayarlar'))?.dispatchEvent(
-        new MouseEvent('click', { bubbles: true }),
-      );
+      strip
+        .find((b) => (b.textContent ?? '').includes('Ayarlar'))
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await new Promise((r) => requestAnimationFrame(r));
       return document.getAnimations().some((a) => a.playState === 'running');
     });
@@ -181,9 +189,9 @@ test.describe('14. Hareket', () => {
     // is animating at all on a tab change, exactly like the 'tam' test above.
     const moving = await page.evaluate(async () => {
       const strip = [...document.querySelectorAll('.tab')];
-      strip.find((b) => (b.textContent ?? '').includes('Program'))?.dispatchEvent(
-        new MouseEvent('click', { bubbles: true }),
-      );
+      strip
+        .find((b) => (b.textContent ?? '').includes('Program'))
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await new Promise((r) => requestAnimationFrame(r));
       return document.getAnimations().some((a) => a.playState === 'running');
     });
@@ -292,7 +300,9 @@ test.describe('14. Hareket', () => {
     // (section 83) the page is as long as the list, and 200px was already the
     // bottom of it: the test would have started asserting that a fade at the
     // foot of the box is missing, which is true and not what it is here for.
-    await main.evaluate((el) => el.scrollTo(0, Math.round((el.scrollHeight - el.clientHeight) / 2)));
+    await main.evaluate((el) =>
+      el.scrollTo(0, Math.round((el.scrollHeight - el.clientHeight) / 2)),
+    );
     await expect(main).toHaveClass(/faded-top/);
     await expect(main).toHaveClass(/faded-bot/);
 

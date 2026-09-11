@@ -11,7 +11,16 @@
 // long line is exactly the kind of first impression this folder cannot have.
 //
 //   npm run paket
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const OUT = resolve('dist-kurulum');
@@ -60,6 +69,8 @@ for (const name of readdirSync(OUT).sort()) {
   const path = join(OUT, name);
   const info = statSync(path);
   const size = info.isDirectory() ? total(path) : info.size;
-  console.log(`  ${(info.isDirectory() ? name + '/' : name).padEnd(16)} ${String(size).padStart(8)} bayt`);
+  console.log(
+    `  ${(info.isDirectory() ? name + '/' : name).padEnd(16)} ${String(size).padStart(8)} bayt`,
+  );
 }
 console.log(`  ${'TOPLAM'.padEnd(16)} ${String(total(OUT)).padStart(8)} bayt`);

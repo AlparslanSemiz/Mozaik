@@ -13,14 +13,7 @@
  * one of their two ends.
  */
 import { useMemo } from 'react';
-import {
-  BookOpen,
-  DoorOpen,
-  GraduationCap,
-  Play,
-  Save,
-  Users,
-} from 'lucide-react';
+import { BookOpen, DoorOpen, GraduationCap, Play, Save, Users } from 'lucide-react';
 import Palette from './Palette';
 import type { Command } from './Palette';
 import { useInspect } from './Inspector';

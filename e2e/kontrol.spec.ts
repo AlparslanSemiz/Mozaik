@@ -78,7 +78,10 @@ test.describe('26. Kontrol — kapasite', () => {
 
   test('sınıfa haftasından fazla ders yüklenince İmkânsız', async ({ page }) => {
     await load(page, {
-      teachers: [{ id: 'oMC', short: 'MÇ' }, { id: 'oAV', short: 'AV', subject: 'Fizik' }],
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV', subject: 'Fizik' },
+      ],
       lessons: [
         { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 3 },
         { id: 'x2', classId: 's510', teacherId: 'oAV', weeklyHours: 3 },
@@ -95,7 +98,10 @@ test.describe('26. Kontrol — kapasite', () => {
   test('dersliği paylaşan sınıfların TOPLAMI da sayılıyor', async ({ page }) => {
     // Two classes, one room, 4 hours in the week, 3 + 3 hours of lessons.
     await load(page, {
-      teachers: [{ id: 'oMC', short: 'MÇ' }, { id: 'oAV', short: 'AV', subject: 'Fizik' }],
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV', subject: 'Fizik' },
+      ],
       classes: [
         { id: 's510', name: '510', roomId: 'dA' },
         { id: 's511', name: '511', roomId: 'dA' },
@@ -162,9 +168,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 1 }],
       placements: { 's510|0|0': 'x1', 's510|0|2': 'x1' },
     });
-    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText(
-      'Salı günü',
-    );
+    await expect(page.locator('.panel', { hasText: 'Kural ihlalleri' })).toContainText('Salı günü');
   });
 
   test('günde en az kuralı yalnız burada yakalanıyor ve Uyarı olarak', async ({ page }) => {
@@ -206,7 +210,7 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
 });
 
 test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
-  test('haftadan çok gün isteyen dersi Danışman\'da listeler, engel saymaz', async ({ page }) => {
+  test("haftadan çok gün isteyen dersi Danışman'da listeler, engel saymaz", async ({ page }) => {
     // 1-day world (load()'s default): a 2-hour lesson needs 2 separate days.
     await load(page, {
       lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
@@ -215,7 +219,10 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
     // Advice does not touch "Sorunlar" — it stays "Sorun görünmüyor".
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
 
-    await page.locator('.ribbon').getByRole('button', { name: /^Danışman/ }).click();
+    await page
+      .locator('.ribbon')
+      .getByRole('button', { name: /^Danışman/ })
+      .click();
     const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
     await expect(panel).toContainText('yalnızca 1 gün var');
     await expect(panel).toContainText('en az bir günde iki kez görülecek');
@@ -225,7 +232,7 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
     await expect(panel.locator('.badge.tight').first()).toBeVisible();
   });
 
-  test('açık günü yetmeyen öğretmeni Danışman\'da listeler', async ({ page }) => {
+  test("açık günü yetmeyen öğretmeni Danışman'da listeler", async ({ page }) => {
     // makeWorld's default world is 1 day; this needs 2, so the teacher has one
     // day left open after day 0 is closed entirely — the 2-block lesson needs 2.
     const world = makeWorld({
@@ -237,13 +244,16 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
     await loadWorld(page, world, 'Kontrol');
 
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
-    await page.locator('.ribbon').getByRole('button', { name: /^Danışman/ }).click();
+    await page
+      .locator('.ribbon')
+      .getByRole('button', { name: /^Danışman/ })
+      .click();
     const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
     await expect(panel).toContainText('MÇ yalnızca 1 günde müsait');
     await expect(panel).toContainText('bir güne iki kez düşebilir');
   });
 
-  test('hiç tekli saat bırakmayan çok bloklu dersi Danışman\'da listeler', async ({ page }) => {
+  test("hiç tekli saat bırakmayan çok bloklu dersi Danışman'da listeler", async ({ page }) => {
     const world = makeWorld({
       days: 2,
       hours: 4,
@@ -252,7 +262,10 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
     await loadWorld(page, world, 'Kontrol');
 
     await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
-    await page.locator('.ribbon').getByRole('button', { name: /^Danışman/ }).click();
+    await page
+      .locator('.ribbon')
+      .getByRole('button', { name: /^Danışman/ })
+      .click();
     const panel = page.locator('.panel', { hasText: 'Danışman uyarıları' });
     await expect(panel).toContainText('2 ayrı bloğa bölünmüş');
     await expect(panel).toContainText('çözücünün deneyebileceği tek şekil bu');
@@ -266,7 +279,6 @@ test.describe('89. Kontrol — Danışman uyarıları (B5.4)', () => {
       page.locator('.ribbon').getByRole('button', { name: /^Danışman \(\d+\)$/ }),
     ).toBeVisible();
   });
-
 });
 
 // ---------------------------------------------------------------------------
@@ -307,7 +319,10 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
       // other three do not — a prefix match covers both without risking a
       // collision with another button (pitfall 49): this locator is already
       // scoped to the Kontrol strip alone.
-      await page.locator('.ribbon').getByRole('button', { name: new RegExp('^' + view) }).click();
+      await page
+        .locator('.ribbon')
+        .getByRole('button', { name: new RegExp('^' + view) })
+        .click();
       await settledMotion(page);
       const m = await box(page);
       rows.push({ view, ...m });
@@ -319,7 +334,9 @@ test.describe('88. Kontrol — sayfa boyu (B5.5)', () => {
         `${label} · ${view}: yatay ${m.horizontal}px taşıyor`,
       ).toBeLessThanOrEqual(1);
     }
-    console.log(`[ölçüm] ${label}: ${rows.map((r) => `${r.view}=${r.vertical}↕/${r.horizontal}↔`).join(' · ')}`);
+    console.log(
+      `[ölçüm] ${label}: ${rows.map((r) => `${r.view}=${r.vertical}↕/${r.horizontal}↔`).join(' · ')}`,
+    );
     return rows;
   }
 

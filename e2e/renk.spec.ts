@@ -2,7 +2,20 @@
 // with real getComputedStyle values, WCAG contrast and CIE Lab ΔE.
 
 import { expect, test } from './kapan';
-import { reopen, answerDialog, open, openWithSample, openSetup, openSettings, dragAndDrop, rgb, relativeLuminance, contrast, deltaE, tokens } from './helpers';
+import {
+  reopen,
+  answerDialog,
+  open,
+  openWithSample,
+  openSetup,
+  openSettings,
+  dragAndDrop,
+  rgb,
+  relativeLuminance,
+  contrast,
+  deltaE,
+  tokens,
+} from './helpers';
 
 // 8. Theme
 //
@@ -119,7 +132,6 @@ test.describe('8. Tema', () => {
         contrast(t['--muted']!, t['--closed']!),
         'kapalı saatteki soluk yazı — ızgaranın en küçük puntosu',
       ).toBeGreaterThanOrEqual(5);
-
     });
   }
 
@@ -214,10 +226,9 @@ test.describe('8. Tema', () => {
         expect(deltaE(t[drop]!, t['--paper']!), `${drop} vs --paper`).toBeGreaterThan(28);
         // ...and louder than the resting colour it replaced, which is the
         // whole reason the extra token exists.
-        expect(
-          deltaE(t[drop]!, t['--paper']!),
-          `${drop} louder than ${resting}`,
-        ).toBeGreaterThan(deltaE(t[resting]!, t['--paper']!));
+        expect(deltaE(t[drop]!, t['--paper']!), `${drop} louder than ${resting}`).toBeGreaterThan(
+          deltaE(t[resting]!, t['--paper']!),
+        );
         // The 3px outline is the second half of the signal, and it has to
         // survive on the ground it is drawn on. WCAG 1.4.11 asks 3:1 of a
         // non-text indicator; measured here 4.1 light / 5.0 dark.
@@ -571,8 +582,10 @@ test.describe('19. Simgeler, ayraç ve çarpı', () => {
     // next time the root moves.
     expect(style.beside, 'gövde puntosu ölçülemedi').toBeGreaterThan(0);
     expect(style.size).toBeGreaterThanOrEqual(style.beside);
-    expect(style.size, `çarpı ${style.size}px — 11px "kirlilik" eşiğine geri dönmüş`)
-      .toBeGreaterThan(13);
+    expect(
+      style.size,
+      `çarpı ${style.size}px — 11px "kirlilik" eşiğine geri dönmüş`,
+    ).toBeGreaterThan(13);
 
     // Bigger must not mean fainter: the hatch sits on --closed.
     const t = await tokens(page, ['--closed']);
@@ -639,7 +652,9 @@ test.describe('11. Görsel cila', () => {
       page
         .getByRole('button', { name: 'Her şeyi sil' })
         .evaluate((el) => getComputedStyle(el).color),
-      page.getByRole('button', { name: 'Dosyadan aç', exact: true }).evaluate((el) => getComputedStyle(el).color),
+      page
+        .getByRole('button', { name: 'Dosyadan aç', exact: true })
+        .evaluate((el) => getComputedStyle(el).color),
     ]);
     // Not identical to a plain button until the pointer is already on it
     expect(danger).not.toBe(plain);

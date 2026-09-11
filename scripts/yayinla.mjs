@@ -79,7 +79,7 @@ const changelogYol = resolve(KOK, 'src', 'changelog.ts');
 const changelogMetin = readFileSync(changelogYol, 'utf8');
 const changelogEslesme = /SURUM_NOTLARI[\s\S]*?version:\s*'([^']+)'/.exec(changelogMetin);
 if (changelogEslesme === null) {
-  dur('src/changelog.ts içinde SURUM_NOTLARI\'nin ilk sürümü bulunamadı.');
+  dur("src/changelog.ts içinde SURUM_NOTLARI'nin ilk sürümü bulunamadı.");
 }
 const changelogSurumu = changelogEslesme[1];
 if (changelogSurumu !== surum) {
@@ -103,7 +103,7 @@ if (unreleased === null) {
 }
 if (!changelogMdKapali && unreleased === '') {
   dur(
-    'CHANGELOG.md\'nin Unreleased bloğu boş.',
+    "CHANGELOG.md'nin Unreleased bloğu boş.",
     'Bu sürümde kullanıcının göreceği ne değiştiyse Added / Changed / Fixed / Removed altına yazın, sonra yayınlayın.',
   );
 }

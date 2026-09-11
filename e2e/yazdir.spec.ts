@@ -49,11 +49,15 @@ test.describe('Çıktı: ders listesi sekme açıkken doluyor', () => {
 test.describe('81. Kâğıtta blok birleşmesi', () => {
   /** Every printed row, as the widths its cells claim. */
   const rowSpans = (page: Page) =>
-    page.locator('.print-page').first().locator('table.print tbody tr').evaluateAll((rows) =>
-      rows.map((tr) =>
-        [...tr.querySelectorAll('td')].map((td) => (td as HTMLTableCellElement).colSpan),
-      ),
-    );
+    page
+      .locator('.print-page')
+      .first()
+      .locator('table.print tbody tr')
+      .evaluateAll((rows) =>
+        rows.map((tr) =>
+          [...tr.querySelectorAll('td')].map((td) => (td as HTMLTableCellElement).colSpan),
+        ),
+      );
 
   test('blok kâğıtta TEK hücre — ve satır hâlâ tam hafta', async ({ page }) => {
     await openWithSample(page);
@@ -65,7 +69,10 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
     const spans = await rowSpans(page);
 
     // At least one cell really is wider than an hour...
-    expect(spans.flat().some((n) => n > 1), 'kâğıtta hiç birleşmiş hücre yok').toBe(true);
+    expect(
+      spans.flat().some((n) => n > 1),
+      'kâğıtta hiç birleşmiş hücre yok',
+    ).toBe(true);
 
     // ...and no row lost or gained an hour doing it. This is the half that a
     // colSpan gets wrong: `table-layout: fixed` will happily draw a short row,
@@ -97,16 +104,19 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
       return (state.settings?.days ?? []).map((d) => d.longBreakAfter ?? 0);
     });
     expect(breaks.length).toBeGreaterThan(0);
-    expect(breaks.some((b) => b > 0), 'örnek okulda öğle arası yok').toBe(true);
+    expect(
+      breaks.some((b) => b > 0),
+      'örnek okulda öğle arası yok',
+    ).toBe(true);
 
     // EVERY sheet, not the first one: whether a block happens to straddle the
     // break depends on which class it is, and a scan of one page was green
     // against a build that had the cut removed altogether.
-    const straddling = await page.locator('.print-page').evaluateAll((sheets, breakAt: number[]) => {
+    const straddling = await page
+      .locator('.print-page')
+      .evaluateAll((sheets, breakAt: number[]) => {
         const bad: string[] = [];
-        const rows = sheets.flatMap((sheet) => [
-          ...sheet.querySelectorAll('table.print tbody tr'),
-        ]);
+        const rows = sheets.flatMap((sheet) => [...sheet.querySelectorAll('table.print tbody tr')]);
         rows.forEach((tr, i) => {
           const day = i % breakAt.length;
           const stop = breakAt[day] ?? 0;
@@ -128,7 +138,6 @@ test.describe('81. Kâğıtta blok birleşmesi', () => {
 
     expect(straddling).toEqual([]);
   });
-
 });
 
 test.describe('4. Yazdırma', () => {
@@ -183,15 +192,21 @@ test.describe('4. Yazdırma', () => {
     await expect(table.locator('tbody tr').first().locator('td')).toHaveCount(12);
 
     // Equal columns: a filled cell used to widen its own column
-    const widths = await table.locator('tbody tr').first().locator('td').evaluateAll((cells) =>
-      cells.map((c) => c.getBoundingClientRect().width),
-    );
+    const widths = await table
+      .locator('tbody tr')
+      .first()
+      .locator('td')
+      .evaluateAll((cells) => cells.map((c) => c.getBoundingClientRect().width));
     expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1);
 
     // The long break marks each row at its own lesson
-    const marks = await table.locator('tbody tr').evaluateAll((rows) =>
-      rows.map((r) => [...r.querySelectorAll('td')].findIndex((c) => c.classList.contains('p-break'))),
-    );
+    const marks = await table
+      .locator('tbody tr')
+      .evaluateAll((rows) =>
+        rows.map((r) =>
+          [...r.querySelectorAll('td')].findIndex((c) => c.classList.contains('p-break')),
+        ),
+      );
     expect(marks).toEqual([4, 4, 4, 4, 5, 5]);
 
     await page.emulateMedia({ media: 'screen' });
@@ -269,12 +284,15 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await page.emulateMedia({ media: 'print' });
 
-    const gaps = await page.locator('.print-page').first().evaluate((el) => {
-      const page_ = el.getBoundingClientRect();
-      const title = el.querySelector('h3')!.getBoundingClientRect();
-      const table = el.querySelector('table.print')!.getBoundingClientRect();
-      return { above: title.top - page_.top, below: page_.bottom - table.bottom };
-    });
+    const gaps = await page
+      .locator('.print-page')
+      .first()
+      .evaluate((el) => {
+        const page_ = el.getBoundingClientRect();
+        const title = el.querySelector('h3')!.getBoundingClientRect();
+        const table = el.querySelector('table.print')!.getBoundingClientRect();
+        return { above: title.top - page_.top, below: page_.bottom - table.bottom };
+      });
     // Within 2mm (~7.6px). Before this change the gap below was ~5cm.
     expect(Math.abs(gaps.above - gaps.below)).toBeLessThanOrEqual(8);
     expect(gaps.above).toBeGreaterThan(20);
@@ -571,14 +589,26 @@ const PAPER_WORLD = {
     hours: ['1', '2', '3', '4'],
     bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
     limits: { maxConsecutive: 0, maxPerDay: 0, minPerDay: 0, maxSameLessonPerDay: 0 },
-    rules: { maxConsecutive: 'block', maxPerDay: 'block', minPerDay: 'warn', maxSameLessonPerDay: 'block' },
+    rules: {
+      maxConsecutive: 'block',
+      maxPerDay: 'block',
+      minPerDay: 'warn',
+      maxSameLessonPerDay: 'block',
+    },
     subjects: ['Matematik'],
     subjectShorts: {},
   },
   rooms: [{ id: 'dA', name: 'A' }],
   teachers: [
-    { id: 'oMC', name: 'Mehmet Çelik', short: 'MÇ', subject: 'Matematik', gender: '', color: 0,
-      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null } },
+    {
+      id: 'oMC',
+      name: 'Mehmet Çelik',
+      short: 'MÇ',
+      subject: 'Matematik',
+      gender: '',
+      color: 0,
+      limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
+    },
   ],
   classes: [
     { id: 's510', name: '510', roomId: 'dA', color: 3 },
@@ -724,11 +754,14 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     for (const per of ['1', '2', '4']) {
       await choose(page, per);
-      const m = await page.locator('.print-sheet').first().evaluate((el) => {
-        const r = el.getBoundingClientRect();
-        const plans = el.querySelectorAll('.print-page').length;
-        return { w: r.width, h: r.height, plans };
-      });
+      const m = await page
+        .locator('.print-sheet')
+        .first()
+        .evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const plans = el.querySelectorAll('.print-page').length;
+          return { w: r.width, h: r.height, plans };
+        });
       expect(m.w, `per=${per} genişlik`).toBeCloseTo(1122.5, 0);
       expect(m.h, `per=${per} yükseklik`).toBeCloseTo(774.8, 0);
       expect(m.plans, `per=${per} kâğıttaki program`).toBe(Number(per));
@@ -759,25 +792,29 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
       await choose(page, per);
       for (const size of ['Küçük', 'Normal', 'Büyük']) {
         await choose(page, size);
-        const m = await page.locator('.print-page').first().evaluate((el) => {
-          const cs = getComputedStyle(el);
-          const box = el.getBoundingClientRect();
-          const top = box.top + parseFloat(cs.paddingTop);
-          const bottom = box.bottom - parseFloat(cs.paddingBottom);
-          let lo = Infinity;
-          let hi = -Infinity;
-          for (const kid of el.children) {
-            const r = kid.getBoundingClientRect();
-            lo = Math.min(lo, r.top);
-            hi = Math.max(hi, r.bottom);
-          }
-          return {
-            over: Math.round(Math.max(0, top - lo) + Math.max(0, hi - bottom)),
-            avail: Math.round(bottom - top),
-            used: Math.round(hi - lo),
-          };
-        });
-        if (m.over > 1) spill[`per=${per} ${size}`] = `${m.over}px (yer ${m.avail}, gereken ${m.used})`;
+        const m = await page
+          .locator('.print-page')
+          .first()
+          .evaluate((el) => {
+            const cs = getComputedStyle(el);
+            const box = el.getBoundingClientRect();
+            const top = box.top + parseFloat(cs.paddingTop);
+            const bottom = box.bottom - parseFloat(cs.paddingBottom);
+            let lo = Infinity;
+            let hi = -Infinity;
+            for (const kid of el.children) {
+              const r = kid.getBoundingClientRect();
+              lo = Math.min(lo, r.top);
+              hi = Math.max(hi, r.bottom);
+            }
+            return {
+              over: Math.round(Math.max(0, top - lo) + Math.max(0, hi - bottom)),
+              avail: Math.round(bottom - top),
+              used: Math.round(hi - lo),
+            };
+          });
+        if (m.over > 1)
+          spill[`per=${per} ${size}`] = `${m.over}px (yer ${m.avail}, gereken ${m.used})`;
       }
     }
     expect(spill, `kâğıttan taşan birleşimler: ${JSON.stringify(spill)}`).toEqual({});
@@ -852,7 +889,10 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     await choose(page, '4');
     const read = () =>
-      page.locator('.p-title-main').first().evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
+      page
+        .locator('.p-title-main')
+        .first()
+        .evaluate((el) => Number.parseFloat(getComputedStyle(el).fontSize));
     await choose(page, 'Küçük');
     const small = await read();
     await choose(page, 'Büyük');
@@ -907,7 +947,9 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
           [...el.querySelectorAll('thead th')].slice(1).map((t) => t.getBoundingClientRect().width),
         );
       const spread = Math.max(...w) - Math.min(...w);
-      expect(spread, `per=${per}: sütunlar ${spread.toFixed(2)}px ayrışıyor`).toBeLessThanOrEqual(1);
+      expect(spread, `per=${per}: sütunlar ${spread.toFixed(2)}px ayrışıyor`).toBeLessThanOrEqual(
+        1,
+      );
     }
   });
 
@@ -936,7 +978,7 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
       expect(count, `per=${per}: PDF ${count} sayfa, beklenen ${sheets}`).toBe(sheets);
     }
   });
-});// 84. Çıktının sağ rayı — ÜÇ kaydırıcı BİRE indi.
+}); // 84. Çıktının sağ rayı — ÜÇ kaydırıcı BİRE indi.
 //
 // "Çıktıdaki sağ blokların da aşağı yukarı gitme özelliği babam için biraz zor
 //  o sebeple ya yatay şekilde ya sağa sola ya da biraz daha geniş şekilde
@@ -1009,4 +1051,3 @@ test.describe('84. Çıktının sağ rayı', () => {
     });
   }
 });
-

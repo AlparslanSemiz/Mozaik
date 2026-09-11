@@ -231,9 +231,7 @@ describe('uygulama açılıyor', () => {
           { id: 'oMC', ad: 'Mehmet Çelik', kisaltma: 'MÇ', brans: 'Matematik', renk: 0 },
         ],
         siniflar: [{ id: 's510', ad: '510', derslikId: 'dA' }],
-        dersler: [
-          { id: 'x1', sinifId: 's510', ogretmenId: 'oMC', haftalikSaat: 2, blok: 1 },
-        ],
+        dersler: [{ id: 'x1', sinifId: 's510', ogretmenId: 'oMC', haftalikSaat: 2, blok: 1 }],
         musaitDegil: {},
         yerlesim: { 's510|0|0': 'x1' },
       }),

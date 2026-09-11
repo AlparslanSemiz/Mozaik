@@ -127,7 +127,19 @@ describe('normalizeDensity', () => {
   // fell through to "sigdir" would hide the bell times on his screen with no
   // visible cause and no obvious way back.
   it('okunamayan her şey rahat ızgaradır', () => {
-    for (const junk of [null, undefined, '', 'rahat', 'Sığdır', 'SIGDIR', 'Ferah', {}, 1, [], true]) {
+    for (const junk of [
+      null,
+      undefined,
+      '',
+      'rahat',
+      'Sığdır',
+      'SIGDIR',
+      'Ferah',
+      {},
+      1,
+      [],
+      true,
+    ]) {
       expect(normalizeDensity(junk)).toBe('rahat');
     }
   });

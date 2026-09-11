@@ -99,9 +99,7 @@ export default function Palette({ open, onOpenChange, commands }: Props) {
 
   // Keeps the highlighted row on screen while the arrows walk past the fold.
   useEffect(() => {
-    listRef.current
-      ?.querySelector('[data-active="true"]')
-      ?.scrollIntoView({ block: 'nearest' });
+    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [index, shown]);
 
   let lastGroup = '';

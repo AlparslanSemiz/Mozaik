@@ -14,7 +14,14 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { mainList, openSetup, openLessons, openWithSample, savedState, settledText } from './helpers';
+import {
+  mainList,
+  openSetup,
+  openLessons,
+  openWithSample,
+  savedState,
+  settledText,
+} from './helpers';
 
 const rows = (page: Page) => mainList(page).locator('tbody tr');
 const grips = (page: Page) => mainList(page).locator('tbody .row-grip');
@@ -157,7 +164,10 @@ test.describe('61. Elle sıralama', () => {
     await expect(grips(page).first()).toBeEnabled();
 
     // ...and so does a chip.
-    await page.getByRole('button', { name: /^Matematik/ }).first().click();
+    await page
+      .getByRole('button', { name: /^Matematik/ })
+      .first()
+      .click();
     await expect(grips(page).first()).toBeDisabled();
   });
 
@@ -230,9 +240,7 @@ test.describe('61. Elle sıralama', () => {
 
   // Branşlar has its own reader: the name cell is plain text, not a box, so
   // `names()` above finds nothing here.
-  test('branşlar taşınıyor ve Öğretmenler’deki açılır liste O SIRAYA geçiyor', async ({
-    page,
-  }) => {
+  test('branşlar taşınıyor ve Öğretmenler’deki açılır liste O SIRAYA geçiyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Branşlar');
 
@@ -245,9 +253,11 @@ test.describe('61. Elle sıralama', () => {
     // passed the wrong thing. The attribute is what the drag itself uses to
     // announce a row, so it cannot drift away from the row it names.
     const subjects = async () =>
-      (await listedRows.evaluateAll((rows) =>
-        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
-      )).map((x) => x.trim());
+      (
+        await listedRows.evaluateAll((rows) =>
+          rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+        )
+      ).map((x) => x.trim());
 
     const before = await subjects();
     expect(before.length).toBeGreaterThan(3);
@@ -291,9 +301,11 @@ test.describe('61. Elle sıralama', () => {
     await openSetup(page, 'Branşlar');
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
     const subjects = async () =>
-      (await listedRows.evaluateAll((rows) =>
-        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
-      )).map((x) => x.trim());
+      (
+        await listedRows.evaluateAll((rows) =>
+          rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+        )
+      ).map((x) => x.trim());
 
     // Take a subject that is LATE in the alphabet and put it first. If the sort
     // were still alphabetical the teachers holding it would stay at the bottom.
@@ -330,7 +342,10 @@ test.describe('61. Elle sıralama', () => {
       );
     const ranks = rowSubjects.map((x) => order.indexOf(x)).filter((n) => n >= 0);
     expect(ranks.length).toBeGreaterThan(3);
-    expect([...ranks].sort((a, b) => a - b), rowSubjects.join(' | ')).toEqual(ranks);
+    expect(
+      [...ranks].sort((a, b) => a - b),
+      rowSubjects.join(' | '),
+    ).toEqual(ranks);
     // The proof it is not the alphabet: the moved subject is now first, and it
     // is not the alphabetically first one.
     expect(rowSubjects.filter(Boolean)[0]).toBe(order[0]);
@@ -342,9 +357,11 @@ test.describe('61. Elle sıralama', () => {
     const listedRows = mainList(page).locator('tbody').first().locator('tr');
     // `data-row-name`, not a column position — see the test above.
     const names = async () =>
-      (await listedRows.evaluateAll((rows) =>
-        rows.map((r) => r.getAttribute('data-row-name') ?? ''),
-      )).map((x) => x.trim());
+      (
+        await listedRows.evaluateAll((rows) =>
+          rows.map((r) => r.getAttribute('data-row-name') ?? ''),
+        )
+      ).map((x) => x.trim());
     const first = (await names())[0]!;
 
     await grips(page).first().focus();
@@ -359,8 +376,7 @@ test.describe('61. Elle sıralama', () => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');
 
-    const rowHead = () =>
-      page.locator('table.grid tbody tr th').first().innerText();
+    const rowHead = () => page.locator('table.grid tbody tr th').first().innerText();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     expect((await rowHead()).trim()).toContain('MÇ');
