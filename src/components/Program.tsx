@@ -29,6 +29,7 @@ import {
 } from '../constraints';
 import type { BlockRef, PinScope } from '../constraints';
 import type { Index } from '../constraints';
+import { cellKey, parseCellKey } from '../keys';
 import { useToast } from './Toasts';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
@@ -475,7 +476,7 @@ function Program({
       // Read out of the map BEFORE change(): React runs a reducer callback
       // late, and reading a ref or a closure variable inside one is how the
       // solver's whole result once went missing (pitfall 20).
-      const verdict = data.map.get(`${day}|${hour}`);
+      const verdict = data.map.get(cellKey(day, hour));
       const pushedOut = verdict?.evicts ?? [];
       const lesson = ix.lessonById.get(data.lessonId);
       const told =
@@ -816,7 +817,7 @@ function Program({
       // ("occupied by this class's own lesson") now costs an eviction to say.
       const map = dropMap(state, ix, lessonId, size, sourceRef);
       for (const [key, verdict] of map) {
-        const day = Number(key.split('|')[0]);
+        const { day } = parseCellKey(key);
         const dayName = state.settings.days[day]?.name;
         if (dayName !== undefined && mask.days[dayName] !== undefined) {
           map.set(key, {
