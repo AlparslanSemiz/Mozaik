@@ -33,7 +33,9 @@ taban ölçümleri alındı, kaynak koda dokunulmadı.
 **Yarım olan.** Kod refactoru Faz 2'nin başında: envanter onaylandı, taban ölçümleri
 ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
 alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'nin ilk
-adımı (ESLint, knip, Prettier ve biçim commit'i) bitti. Sıradaki adım ölü kod. [TODO.md](TODO.md)'de açık madde
+adımı (ESLint, knip, Prettier ve biçim commit'i) ile ikinci adımı (ölü kod ve
+kapsülleme) bitti. Sıradaki adım `keys.ts`: anahtar ayrıştırıcıları ve on bir elle
+ayrıştırmanın onlara çevrilmesi. [TODO.md](TODO.md)'de açık madde
 sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
 §3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
 §8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
@@ -217,9 +219,48 @@ düşen ikisi `serit.spec.ts`'in bugünkü tabanda da düşen testleri). Ana E2E
 koşulmadı: `src`'deki tek anlam dışı fark iki bileşendeki metin düğümü bölünmesi ve o iki
 bileşenin ekranlarını ölçen spec'ler koşuldu, `e2e` ve `scripts` AST'de birebir aynı.
 
-**Sıradaki iş.** Faz 2, adım 2: ölü kod. Kullanılmayan `@radix-ui/react-tooltip`, hiç
-çağrılmayan dışa aktarımlar, testleriyle birlikte yalnız testten çağrılan altı fonksiyon,
-ve çözücünün `4` dalı. Dosya başına bir commit.
+**Faz 2, adım 2: ölü kod.** Dosya başına bir commit, her birinden önce TRAPS'e bakıldı:
+silinen fonksiyonların hiçbiri tuzakların dayandığı fonksiyonlardan (`blocker`,
+`placedBlocks`, `removeBlock`, `liftBlock`, `remapDays`, `planKey`, `newId`) değil.
+
+- `e4b845c`: `@radix-ui/react-tooltip` kaldırıldı. Kilit dosyasından yalnız o ve ona bağlı `react-visually-hidden` gitti, `dist/index.html` boyutu değişmedi.
+- `09191e9`, `entities.ts`: hiç çağrılmayan `pendingLessons` ve yalnız testten çağrılan `deletionSummary`. `deletionSummary`'nin testleri silinmedi. Aslında üretimdeki `deletionQuestion`'ın cümlelerini ölçüyorlardı, aynı cümleleri başlık ve bedel olarak `deletionQuestion`'dan bekleyecek biçimde çevrildiler.
+- `7b72c4f`, `constraints.ts`: `validHours`, `blockStart` ve `evict`. `validHours`'un testleri de silinmedi: gün sonuna taşan bloğun reddini başka hiçbir test ölçmüyordu, aynı döngü test dosyasında `blocker()`'a soruluyor. `blockStart` iddiaları `blockAt(...)?.hour`'a döndü (`blockStart` zaten buydu). `evict`'in testi gitti, blok kaldırmayı `removeBlock`'un testleri ölçüyor.
+- `4566369`, `theme.ts`: ray kalktığından beri çağrılmayan kenar çubuğu tercihi (`readSidebar`, `writeSidebar`, `SIDEBAR_KEY`, `normalizeSidebar` ve testi). `ders-programi-kenar`'ın "Veriler nerede" satırı kaldı, eski kurulumlarda anahtar duruyor olabilir.
+- `c6a132d`, `Commands.tsx`: hiç import edilmeyen `GROUP_ICONS` ve yalnız onun kullandığı dört simge importu.
+- `e7986bc`, `solver.ts`: v13'ten beri ulaşılamayan dört saatlik iş kalemi dalı ve dört kalemden söz eden iki yorum.
+- `6155620`, `library.ts`: yalnız testten çağrılan `activePlan` ve `nextPlanName`.
+
+Koşuldu: `npm run tipler` (çıkış 0), `npm test` (758/758, beş test silindi, dönüştürülenlerin
+sayısı değişmedi), `npm run lint` (0 hata), değişen dosyalarda `prettier --check`,
+`npm run cozucu` (7/7, 36,9 sn). `dist/index.html` 1 007 879'dan 1 006 839 bayta indi
+(-1 040). knip'in kullanılmayan dışa aktarım sayısı 44'ten 39'a indi. Ana E2E süiti
+koşulmadı: silinen kodu uygulamada çağıran yoktu (tipler bunu derleme hatasıyla söylerdi),
+ve çözücüdeki değişikliği stres süiti ölçtü.
+
+**Faz 2, adım 2'nin ikinci yarısı: kalan ölü kod ve kapsülleme.**
+
+- `52840e1`: dört sözlüğün kullanılmayan `export default` satırı. Sözlükler kendini `registerSozluk` ile kaydediyor ve yalnız yan etki için import ediliyor. `dist/index.html` boyutu değişmedi, yani yan etkili import budanmadı.
+- `562a09e`: hiçbir spec'in çağırmadığı E2E yardımcısı `dialogText`.
+- `3acea1b`: `blocks.ts`'te tanımından başka hiçbir yerde geçmeyen `BlockSize` tipi.
+- `2db6dc9`: yalnız tanımlandığı dosyada kullanılan on altı değer dışa aktarımı daraltıldı ve kimsenin okumadığı iki yeniden dışa aktarım (`entities.ts`'in `DEFAULT_DAY_NAMES`'i, `desktop.ts`'in `WriteResult`'ı) kalktı. On yedi değiştirmenin on altısı tek bir betikle yapıldı. Betik önce her değiştirmenin kendi dosyasında birebir bir kez eşleştiğini denetledi ve ancak hepsi eşleşince yazdı. `theme.ts`'in anahtarları ve `normalize*` fonksiyonları, `PRINT_OPTIONS_KEY` ve `DEFAULT_PROGRAM_ID` bilerek kaldı, çünkü adım 4 ve 5 onları import edecek. Bir fonksiyonun parametresini ya da dönüşünü adlandıran tipler dışa aktarılmış kalıyor, bunlar o fonksiyonun sözleşmesi. knip'e tipler için `ignoreExportsUsedInFile` verildi.
+
+knip'in kullanılmayan dışa aktarım sayısı 39'dan 17'ye, kullanılmayan tip sayısı 17'den
+0'a indi. Kalan 17'nin hepsi yukarıda bilerek bırakılanlar, artı `closedKey` ile
+`teacherKey` tekrarı (adım 3).
+
+Koşuldu: `npm run tipler` (çıkış 0), `npm run lint` (0 hata), `npm test` (758/758),
+değişen dosyalarda `prettier --check`, `npm run test:site` (22/22, çünkü `update.ts` ve
+`desktop.ts` teslim yolu dosyaları), `exe.spec.ts` ve `surum.spec.ts` (16/17, düşen
+`surum.spec.ts` 107 tabandan beri bilinen). `dil.spec.ts` dört işçide 8/10 geçti: düşen
+70 ve 83, ikisi de dili depoya yazıp yeniledikten sonra "tr" okuyor. Aynı `dist` üzerinde
+tek işçiyle iki kez 20/20 geçti. Kayıt TESTFINDINGS'te, refactor bu testleri kırmış diye
+okunmadı. `dist/index.html` 1 006 839 bayt kaldı.
+
+**Sıradaki iş.** Faz 2, adım 3: `keys.ts`. Anahtar ayrıştırıcıları eklenecek, on bir elle
+ayrıştırma ve belgelenmemiş gün ve saat anahtarı onlara çevrilecek, `teacherKey` takma adı
+`closedKey`'e indirilecek. Anahtarın biçimi saklanan veri olduğu için değişmiyor
+(tuzak 11 ve 29).
 
 ## 2026-09-11 · Belgeler yeniden kuruldu
 
