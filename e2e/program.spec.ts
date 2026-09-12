@@ -13,6 +13,7 @@ import {
   dragAndDrop,
   loadWorld,
   hover,
+  tokens,
   settledMotion,
   openGridMenu,
   reopen,
@@ -477,6 +478,72 @@ test.describe('2. Sürükle-bırak', () => {
 
     await page.mouse.up();
     await expect(page.locator('table.grid .card')).toHaveCount(0);
+  });
+
+  // THE SENTENCE IS WRITTEN AT MOST TEN TIMES A SECOND, AND THE LAST ONE
+  // ALWAYS LANDS.
+  //
+  // "bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok
+  // kasma oluyor" — measured per pointer move (2026-09-12): writing this one
+  // sentence relaid out the whole document, 5.37 ms at a time, once per target
+  // cell, and it alone accounted for the dropped frames. `drag.ts` now paces
+  // the bar at `REASON_GAP`.
+  //
+  // What that risks is the LAST write, not the fast ones: the hand stops on a
+  // cell whose sentence arrived inside the closed window, and if the trailing
+  // write is ever dropped the bar quietly describes the cell BEFORE the one
+  // under the cursor — a wrong answer that looks like a right one. This test
+  // is about that and nothing else, so it reads both sentences off the screen
+  // rather than writing them down: what the sample puts in the pool first is
+  // not this test's business.
+  test('hızlı geçilen hücrelerden sonra çubuk SON hücrenin cümlesini yazıyor', async ({ page }) => {
+    await openWithSample(page);
+    await startDrag(page);
+
+    const bar = page.locator('.reason-bar > span').first();
+    const points = await visibleCells(page, 'tr.target-row td');
+    expect(points.length, 'hedef satırda görünür hücre yok').toBeGreaterThan(6);
+
+    /** Hovers slowly (the unthrottled path) and returns what the bar then says. */
+    const slowly = async (point: { x: number; y: number }) => {
+      await page.mouse.move(point.x, point.y, { steps: 3 });
+      await page.waitForTimeout(250); // longer than REASON_GAP: no window is open
+      return (await bar.textContent()) ?? '';
+    };
+
+    // Two cells whose ANSWERS differ. Which cells those are depends on the
+    // sample's teacher, so they are found rather than assumed.
+    let a: { x: number; y: number } | null = null;
+    let b: { x: number; y: number } | null = null;
+    let textA = '';
+    let textB = '';
+    for (const point of points) {
+      const said = await slowly(point);
+      if (a === null) {
+        a = point;
+        textA = said;
+      } else if (said !== textA) {
+        b = point;
+        textB = said;
+        break;
+      }
+    }
+    expect(b, 'satırdaki bütün hücreler aynı cümleyi veriyor').not.toBeNull();
+
+    // Now the fast crossing: every move inside one window, ending on B.
+    await page.mouse.move(a!.x, a!.y, { steps: 3 });
+    await expect(bar).toHaveText(textA);
+    for (const point of points) await page.mouse.move(point.x, point.y);
+    await page.mouse.move(b!.x, b!.y);
+    await expect(bar, 'son hücrenin cümlesi hiç yazılmadı').toHaveText(textB);
+
+    // ...and the other way round, so the test cannot pass on a bar that simply
+    // ends up saying the more common of the two sentences.
+    for (const point of [...points].reverse()) await page.mouse.move(point.x, point.y);
+    await page.mouse.move(a!.x, a!.y);
+    await expect(bar, 'ters yönde son cümle yazılmadı').toHaveText(textA);
+
+    await page.mouse.up();
   });
 });
 
@@ -1382,6 +1449,81 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await expect(page.locator('.reason-bar')).toContainText('MÇ');
     await page.mouse.up();
   });
+
+  // THE VERDICT IS DRAWN ON THE CARD THAT IS HIDING IT.
+  //
+  // "o kartların arkasından ... o kartın oraya gelip gelemeyeceğini bilmek
+  // lazım, yani kırmızı mı turuncu mu falan." Measured 2026-09-12: the cell's
+  // own paint IS the verdict, and on a filled cell 83.7% of it is under the
+  // card, which carries a palette colour a few points away from the warning
+  // background. So the same answer is drawn again as an inset ring on the card.
+  //
+  // The assertion is the COLOUR and not merely "some shadow": a ring that
+  // painted the wrong verdict would be worse than no ring, because it would
+  // answer confidently. And it must be gone when no drag is happening — the
+  // grid at rest says what the week IS, not what a card would do to it.
+  for (const { ad, sabitle, hukum, renk } of [
+    { ad: 'takas edilebilir', sabitle: false, hukum: 'can-warn', renk: '--warn' },
+    { ad: 'engelli', sabitle: true, hukum: 'can-no', renk: '--bad' },
+  ]) {
+    test(`sürüklerken ${ad} dolu hücrenin kartı da hükmü taşıyor`, async ({ page }) => {
+      await loadWorld(page, EVICT_WORLD);
+      // BOTH verdicts, from one world and one pin.
+      //
+      // A filled cell on your OWN row is a warning by default: the engine
+      // offers to send the occupant back to the pool, whatever class it
+      // belongs to (measured — a second class does not make it a refusal).
+      // The one thing that turns the same cell into a refusal is the pin:
+      // "eviction is the one refusal a drop may overrule, and a pin is the
+      // reader saying not this one" (constraints.ts). Without this second
+      // case a ring that painted every verdict the same colour passed.
+      if (sabitle) {
+        const card = page.locator('table.grid .card').first();
+        await card.click({ button: 'right' });
+        await page.locator('.menu').getByRole('menuitem', { name: 'Dersi buraya sabitle' }).click();
+        await expect(card).toHaveClass(/pinned/);
+      }
+      // MÇ's own row already holds MÇ's other hour, so the filled cell is ON the
+      // target row — the case the complaint is about, a card you drag ACROSS.
+      await grabCard(page, 'MÇ');
+
+      const filled = page.locator('tr.target-row td:has(.card)').first();
+      await expect(filled).toHaveCount(1);
+      await expect(filled, 'dolu hücrenin hükmü beklenen değil').toHaveClass(new RegExp(hukum));
+      const wanted = renk;
+
+      const card = filled.locator('.card');
+      const shadow = await card.evaluate((el) => getComputedStyle(el).boxShadow);
+      const palette = await tokens(page, ['--bad', '--warn', '--ok']);
+      expect(shadow, 'kartta halka yok').not.toBe('none');
+      expect(shadow, `halka ${wanted} rengini taşımıyor`).toContain(palette[wanted]!);
+      // ...and not the other two, so a single hardcoded colour cannot pass this.
+      for (const other of ['--bad', '--warn', '--ok'].filter((n) => n !== wanted)) {
+        expect(shadow, `halka ${other} rengini de taşıyor`).not.toContain(palette[other]!);
+      }
+
+      // Named by its own coordinates before the drag ends: `tr.target-row` is a
+      // class the drag itself puts on, so a locator written through it resolves
+      // to nothing the moment the hand lets go — and an assertion that polls a
+      // locator matching zero elements times out instead of failing honestly.
+      const at = {
+        row: await filled.getAttribute('data-row'),
+        day: await filled.getAttribute('data-day'),
+        hour: await filled.getAttribute('data-hour'),
+      };
+      const resting = page.locator(
+        `td[data-row="${at.row}"][data-day="${at.day}"][data-hour="${at.hour}"] .card`,
+      );
+
+      await page.mouse.up();
+      await expect(page.locator('tr.target-row')).toHaveCount(0);
+      await expect(resting).toHaveCount(1);
+      expect(
+        await resting.evaluate((el) => getComputedStyle(el).boxShadow),
+        'sürükleme bittiği hâlde halka duruyor',
+      ).toBe('none');
+    });
+  }
 
   test('bırakınca eski ders havuza döner, yeni ders yerini alır', async ({ page }) => {
     await loadWorld(page, EVICT_WORLD);

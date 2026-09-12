@@ -2588,6 +2588,41 @@ table.grid tbody td.can-ok:not(.unavailable) { background-color: var(--can-ok-bg
 table.grid tbody td.can-warn:not(.unavailable) { background-color: var(--can-warn-bg); }
 table.grid tbody td.can-no:not(.unavailable) { background-color: var(--can-no-bg); }
 
+/* THE SAME ANSWER, ON THE CARD THAT IS HIDING IT.
+   "o kartların arkasından ya da başka bir şekilde o kartın oraya gelip
+    gelemeyeceğini bilmek lazım, yani kırmızı mı turuncu mu falan."
+
+   The rules above paint the CELL, and on a filled cell nobody sees that paint:
+   the card is `width/height: 100%` with its own opaque colour and covers 83.7%
+   of a 32x39 cell, leaving a 1.5px frame (measured 2026-09-12, TESTFINDINGS).
+   Worse, the card's own palette colour is within a few points of the warning
+   background — `rgb(241, 231, 197)` against `rgb(253, 238, 201)` — so a filled
+   BLOCKED cell and an empty SWAPPABLE one read as the same cream square. That
+   is pitfall 84's family: everything measured says the verdict is there, and
+   the screen says it is not.
+
+   So the verdict is drawn a second time, on the card itself, as an inset ring
+   in the same three colours the grid already uses. `box-shadow` and not
+   `outline`: an outline here would fight the focus ring, and an inset shadow
+   follows the card's own radius. No JS and no extra DOM: the `can-*` class is
+   already on the `<td>` from the drag's one-pass preview, so this costs a
+   paint on the ~20 filled cells of the target row and nothing per frame.
+
+   `can-ok` is listed for completeness and is close to unreachable: a filled
+   cell's verdict is a swap or an eviction (both warnings) or a refusal — two
+   sweeps counted 67 blocked and 4 warned filled cells and no droppable one. */
+table.grid.dragging tbody td.can-ok > .card {
+  box-shadow: inset 0 0 0 2px var(--ok);
+}
+
+table.grid.dragging tbody td.can-warn > .card {
+  box-shadow: inset 0 0 0 2px var(--warn);
+}
+
+table.grid.dragging tbody td.can-no > .card {
+  box-shadow: inset 0 0 0 2px var(--bad);
+}
+
 /* Drag highlight — added straight through classList, not React state. */
 td.drop-ok {
   outline: 3px solid var(--ok);

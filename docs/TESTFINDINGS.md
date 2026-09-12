@@ -26,6 +26,80 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · scratch/kasma-zaman.mjs + kasma-iz.mjs · B4.7'nin çaresi, önce ve sonra
+Bulgu: Kullanıcının seçtiği çare uygulandı — gerekçe çubuğu en çok 100 ms'de bir yazılıyor
+(`REASON_GAP`, `src/platform/drag.ts`), ve renk ile cümle **birlikte** yazılıyor: sınıf yazması
+bedava olduğu hâlde erken geçirilirse çubuk yeşile döner ama hâlâ kırmızı cümleyi okur.
+
+Aynı ağaçta (`bf28899` + yama), aynı betikle, üçer koşu:
+
+| | Düşen kare | fps | Layout | Paint |
+|---|---|---|---|---|
+| önce | %9,5 · %10,4 · %14,1 | 52–55 | 543 ms / 107 | 2010 ms |
+| sonra | %1,1 · %1,1 · %1,1 | 59,4 | 216 ms / 42 | 1826 ms |
+
+Kenar kaydırmasında düşen kare %12–13'ten %0–0,8'e indi. Kalan 42 yerleşim, kısma penceresinin
+açtığı yazmalar: saniyede on, ve beklenen sayı bu.
+
+Çarenin asıl riski hızlı kareler değil **son** kare: el, penceresi kapalıyken girilen bir
+hücrede duruyorsa ve kuyruktaki yazma düşerse çubuk bir önceki hücreyi anlatır — yanlış cevabı
+doğru gibi gösterir. `e2e/program.spec.ts`'e o sözleşmeyi ölçen bir test yazıldı (hücreler hızla
+geçilir, son hücrenin cümlesi beklenir, iki yönde de). İki cümleyi ekrandan okuyor, yazmıyor.
+Mutasyonla sınandı: kuyruk yazması iptal edilince kırmızı ("son hücrenin cümlesi hiç yazılmadı"),
+geri konunca yeşil.
+Tür: ürün kusuru, düzeltildi
+Ne yapıldı: TODO B4.7 kapandı. `npm run kontrol` koşuldu, sonucu WORKLOG'un bugünkü girdisinde.
+Kalıcı kural: TRAPS'e yazılacak aday — bir metin düğümünü değiştirmek 6704 nesnelik belgede tam
+yerleşim tetikliyor, ve `contain: layout` ile `flex: 1 1 0` bunu durdurmuyor; duran şey yazma sıklığı.
+
+### 2026-09-12 · scratch/b48-ab.mjs · B4.8'in bedeli, ve ölçümün kendi süitimle bozulması
+Bulgu: Kart halkası (`table.grid.dragging tbody td.can-* > .card`) uygulandı ve bedeli ölçüldü.
+İlk ölçüm **%60–72 düşen kare** dedi, en kötü kare 233 ms — yani çare, çözdüğü sorundan beter
+görünüyordu. Ama aynı koşunun iz toplamları halkasız hâlle neredeyse birebir aynıydı (Paint 2008
+ile 1826, Layout 215 ile 216, RunTask 4728 ile 4653). Çelişki ölçüm aletinde değil ortamdaydı:
+o üç koşu, arka planda başlattığım **tam E2E süitiyle** aynı pencereye denk geldi.
+
+Dönüşümlü A/B ile yeniden ölçüldü (aynı pencerede sırayla derle-ölç, üç tur):
+
+| | 1 | 2 | 3 |
+|---|---|---|---|
+| halka VAR | %0,7 | %1,9 | %0,0 |
+| halka YOK | %1,5 | %0,4 | %0,4 |
+
+Yani halkanın ölçülebilir bir bedeli yok, ve olmaması bekleniyordu: `can-*` sınıfı `<td>`'de
+zaten var, kural JS'siz, ve boyanan şey hedef satırın ~20 dolu hücresi. Kendi süitim yüzünden
+bir çareyi neredeyse yanlış yere gömüyordum.
+
+Ders, ve öteki oturuma söylediğimin aynısını kendime: **ölçüm penceresi açıkken hiçbir çok
+çekirdekli iş koşmamalı, kendi başlattığın arka plan süiti dahil.** Aynı derleme, aynı betik,
+yüklü pencerede %60–72, sessiz pencerede %0–1,9 veriyor. Tek yönlü koşu makinenin o anki yüküyle
+karışır; A/B dönüşümlü koşulur.
+Tür: ölçüm kusuru (benim), artı bir ürün değişikliğinin doğrulanması
+Ne yapıldı: TODO B4.8 kapandı. Halka iki hükümde de (`can-warn` ve `can-no`) mutasyonla sınandı:
+kurallar kaldırılınca kırmızı, `can-no` uyarı rengiyle boyanınca kırmızı.
+Kalıcı kural: TRAPS adayı — kendi arka plan işin de ölçüm penceresini bozar.
+
+### 2026-09-12 · scratch/kasma-zaman.mjs + kasma-iz.mjs · `store.ts` bölünmesinden SONRA taban
+Bulgu: B4.7'nin tabanı bölme öncesi bir derlemede alınmıştı; sonraki "önce/sonra"nın iki yakası
+aynı ağaçtan olsun diye `bf28899` üstünde yeniden ölçüldü. **Sürükleme yolu değişmemiş.** İzin
+toplamları bölme öncesiyle yüzde üçün içinde: Layout 543 ms / 107 (önce 558 / 108), Paint
+2010 ms (2025), Layerize 943 ms (959), HitTest 720 ms (713), rAF geri çağrısı 484 ms (474).
+Sebep de aynı yerde duruyor, yani bölme `platform/drag.ts`'in kare bütçesine dokunmadı.
+
+Asıl bulgu ölçümün kendisinde: **düşen kare yüzdesi paylaşılan makinede güvenilir bir ölçüt
+değil.** Beş koşu %9,5 · %10,4 · %14,1 · %28,2 · %33,0 verdi, oysa aynı beş koşunun iz
+toplamları birbirinin yüzde üçü içinde. Fark makinenin yükü: öteki oturum aynı anda tip farkında
+ESLint koşturuyordu. Bölme öncesi sessiz pencerede aynı ölçüt %9,6–15 bandındaydı.
+
+Sonuç, ve bir sonraki turun protokolü bu: **önce/sonra karşılaştırmasının birincil ölçütü iz
+toplamı (Layout ms ve adedi), doğrulayıcısı düşen kare.** B4.7'nin iki adayından "metni kısmak"
+(%1,5–3,4) gürültü bandının hâlâ altında ve ayırt edilebilir, ama "metin kutusunu akıştan
+çıkarmak" (%3,8–7,4) yalnız yüzdeye bakılırsa gürültüye karışabilir; onun kararı iz toplamıyla
+verilmeli (o deneyde Layout 557 → 121 ms idi, yani iz ayrımı net).
+Tür: bulgu değil, ölçüm — artı bir ölçüt seçimi
+Ne yapıldı: kod değişmedi. B4.7'nin tabanı tazelendi, ölçüt protokolü yazıldı.
+Kalıcı kural: yok
+
 ### 2026-09-12 · scratch/kasma-*.mjs · sürükleme sırasında kare süresi, dolu ızgarada
 Bulgu: Kullanıcının ikinci kez yazdığı satır ("bir kartı kırmızı sarı veya yeşil blokların
 üzerinden gezdirirken çok kasma oluyor") ilk kez **hareket başına** ölçüldü. 2026-09-01'de

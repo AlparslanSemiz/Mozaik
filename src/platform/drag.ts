@@ -95,6 +95,37 @@ const EDGE = 56;
 /** Scroll amount per frame (px). Kept low so the user stays in control. */
 const STEP = 14;
 
+/**
+ * THE REASON BAR IS REWRITTEN AT MOST THIS OFTEN (ms), AND THAT IS A FRAME
+ * BUDGET DECISION, NOT A TASTE ONE.
+ *
+ * "bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma
+ * oluyor" — the complaint came twice. The first round (2026-09-01) measured the
+ * START of a drag and made it three times faster, which was true and was not
+ * the cause. Measured per POINTER MOVE instead (2026-09-12, sample school,
+ * auto-filled grid, 4x CPU, full trace):
+ *
+ *   dropped frames ..... 9.6-15%        main thread ~100% busy
+ *   Layout ............. 5.37 ms x 108   partialLayout: false, 6704 objects
+ *   Paint .............. 5.24 ms x 387   full viewport
+ *
+ * Every one of those 108 layouts is THIS bar. Writing the sentence replaces a
+ * text node inside a `nowrap` + `ellipsis` flex item, the box can then change
+ * width, and Blink relays out from `#document` — a full document layout for one
+ * short sentence, once per target cell. Removing the write took dropped frames
+ * from 12% to 0%; the className write next to it costs nothing and was cleared
+ * by the same experiment. Two cheap CSS answers were tried BEFORE this one and
+ * both measured no better than baseline (`contain: layout` on the bar,
+ * `flex: 1 1 0` on the span) — the layout root stayed at the document.
+ *
+ * So the fix is the rate, not the mechanism: 100 ms holds dropped frames at
+ * 1.5-3.4% and Layout at 194 ms / 38 against 558 ms / 108. Nobody reads a
+ * sentence sixty times a second — the CELL under the cursor answers instantly
+ * (its outline is painted the same frame), and the bar is the slower, wordier
+ * half of the same answer. Measurements in docs/TESTFINDINGS.md, 2026-09-12.
+ */
+const REASON_GAP = 100;
+
 export function useDrag(drop: (data: DragData, day: number, hour: number) => void) {
   const data = useRef<DragData | null>(null);
   const ghost = useRef<HTMLDivElement | null>(null);
@@ -114,6 +145,17 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     className: string;
     text: string;
   } | null>(null);
+  /**
+   * The throttle's whole state. `pending` is what the bar WOULD say if it were
+   * free to say it, and it is kept as a pair: the colour and the sentence are
+   * one answer, so letting the class through early would leave the bar green
+   * while it still reads a red sentence.
+   */
+  const barPace = useRef<{
+    last: number;
+    timer: ReturnType<typeof setTimeout> | null;
+    pending: { className: string; text: string } | null;
+  }>({ last: 0, timer: null, pending: null });
 
   const clearHighlight = useCallback(() => {
     for (const el of highlighted.current) el.classList.remove(HL_OK, HL_WARN, HL_BLOCKED);
@@ -145,6 +187,11 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     ghost.current?.remove();
     ghost.current = null;
     data.current = null;
+    // A pending sentence must not land on a bar that has already gone back to
+    // what the screen owns. The timer outlives the drag otherwise, and what it
+    // would write is a verdict about a card nobody is holding any more.
+    if (barPace.current.timer !== null) clearTimeout(barPace.current.timer);
+    barPace.current = { last: 0, timer: null, pending: null };
     if (savedBar.current !== null) {
       savedBar.current.element.className = savedBar.current.className;
       const text = savedBar.current.element.querySelector<HTMLElement>(':scope > span');
@@ -157,13 +204,50 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
     const bar = savedBar.current?.element ?? null;
     const text = bar?.querySelector<HTMLElement>(':scope > span') ?? null;
     if (bar === null || text === null) return;
-    bar.className =
-      reason === null
-        ? 'reason-bar ok'
-        : reason.level === 'warn'
-          ? 'reason-bar warn'
-          : 'reason-bar bad';
-    text.textContent = reason?.text ?? t('Buraya bırakılabilir.');
+
+    const wanted = {
+      className:
+        reason === null
+          ? 'reason-bar ok'
+          : reason.level === 'warn'
+            ? 'reason-bar warn'
+            : 'reason-bar bad',
+      text: reason?.text ?? t('Buraya bırakılabilir.'),
+    };
+
+    const write = (say: { className: string; text: string }) => {
+      // Writing the same sentence again is not free — `textContent` replaces
+      // the text node whatever it held — and a sweep across a row of the same
+      // teacher's blocks asks for the same sentence many times over.
+      if (bar.className !== say.className) bar.className = say.className;
+      if (text.textContent !== say.text) text.textContent = say.text;
+      barPace.current.last = performance.now();
+      barPace.current.pending = null;
+    };
+
+    const since = performance.now() - barPace.current.last;
+    if (since >= REASON_GAP) {
+      if (barPace.current.timer !== null) {
+        clearTimeout(barPace.current.timer);
+        barPace.current.timer = null;
+      }
+      write(wanted);
+      return;
+    }
+
+    // Too soon: remember the newest answer and make sure it lands. THE TRAILING
+    // WRITE IS THE POINT — without it the hand stops on a cell whose sentence
+    // was never written, and the bar quietly describes the cell BEFORE it.
+    barPace.current.pending = wanted;
+    if (barPace.current.timer === null) {
+      barPace.current.timer = setTimeout(() => {
+        barPace.current.timer = null;
+        const say = barPace.current.pending;
+        // `finish()` clears both the timer and the pending answer, so this only
+        // ever runs while a drag is still holding the bar.
+        if (say !== null && savedBar.current !== null) write(say);
+      }, REASON_GAP - since);
+    }
   };
 
   const start = useCallback((e: React.PointerEvent, d: DragData, content: GhostContent) => {
