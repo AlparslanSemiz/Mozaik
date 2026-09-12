@@ -1067,17 +1067,16 @@ ertelendi.
       kitaplığı işlemleri) ve `platform/useStore.ts` (kutu, otomatik kayıt, kısayol).
       İlk ikisi katman düzeltmesi: ikisi de saftı ve `platform/`'da duruyordu.
       Bölmeden önce `src/storeContract.test.ts` yazıldı, beş değişmezin hepsi orada.
-- [ ] **Araçların kalanı: C3 demet analizi, C4 size-limit, C5 tip farkında ESLint
-      kuralları, C6 kapsam ölçümü, C7 bağımlılık güncelleme bildirimi.** Sıra en
-      sonda. C6 test oturumuyla kesişiyor, kurmadan önce onlara sorulacak.
-- [x] **Yapılandırma dosyalarındaki yolları tutan kapı yazıldı (2026-09-12).** Klasör
-      turunda dört tanesi elle bulundu ve ikisi sessizce bozulurdu: mutasyon listesi
-      ölçmeyi bırakırdı, sürüm betiği "not bulunamadı" derdi. `src/docs.test.ts`'e A8
-      olarak eklendi: ignore dosyaları, JSON yapılandırmaları, kök config'leri,
-      `package.json`'ın komut satırları, `scripts/*.mjs`'in `resolve()` ile kurduğu
-      yollar ve `index.html`. On beş kaynağın her birine bilerek olmayan bir yol
-      konarak sınandı. Kapsam dışında kalan tek sınıf: bir betiğin içinde çıplak
-      duran, klasörsüz ve uzantısız bir ad.
+- [x] **Araçların kalanı kuruldu (2026-09-12), biri hariç.** C3 demet analizi
+      (`rollup-plugin-visualizer`, bayrak arkasında, sayıları minify öncesi ve bu
+      sınır yazılı), C4 `size-limit` (iki eşik, `kontrol`'ün içinde, mutasyonla
+      sınandı), C5 tip farkında ESLint (dört kural, `strictTypeChecked`'ın 1228
+      bulgusu sınıf sınıf okunarak seçildi, lint artık `kontrol`'ün parçası),
+      C7 Dependabot artı `pr.yml` (bir PR'ın üstünden süiti geçiren ilk iş akışı).
+- [ ] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
+      komut mu olsun yoksa mutasyonun yanında mı dursun, ve `kontrol`'e girsin mi.
+      Ölçüm turunun görüşü ayrı komut yönünde (kapsam bir kapı değil bir harita),
+      karar kullanıcıda. Kurulmadan önce cevap beklenecek.
 
 ## §9. Ham notlar — senin kendi satırların
 

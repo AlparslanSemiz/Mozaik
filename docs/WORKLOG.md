@@ -84,6 +84,62 @@ birleşiyor, ters yön yok.
 
 ---
 
+## 2026-09-12 · Araç turu: dört araç kuruldu, iki kural ve bir kural kümesi okunup bırakıldı
+
+**C5, tip farkında ESLint.** Tahmin yüz ile dört yüz arası bulguydu, ölçüm 1228
+(6,6 saniye). Şaşma kendi başına bir bulgu: bir kural kümesi adına bakılarak
+alınırsa gelen şey bir gürültü duvarı. Bulgular sayılmadı, sınıf sınıf okundu ve
+başta dört kural ayakta kaldı, sonra ikisi daraldı. Düşenlerin sebepleri
+`eslint.config.js`'in başında tek tek yazılı.
+
+En beklenmedik sonuç `no-unnecessary-condition`: turun en çok umduğu kural,
+çünkü mutasyon koşusu "bu dal hiç çalışmıyor" diye işaretlenmiş mutantlar
+bulmuştu. Yirmi yedi bulgusunun hiçbiri o değil — ikisi bir kapanışın içinde
+değiştirilen `let` bayrağı (TypeScript'in daraltamadığı bir şey), gerisi DOM'un
+etrafındaki bilerek konmuş korumalar.
+
+İkinci sürpriz `--fix`'ten geldi: `no-unnecessary-type-assertion`'ın otomatik
+düzeltmesi dört yerde derlemeyi kırdı, çünkü `element.closest?.(...) as
+HTMLElement | null` biçiminde kural ile `tsc` çelişiyor. Çare susturma değil,
+aynı şeyi denetlenebilir yazmak oldu: `element.closest<HTMLElement>(...)`.
+
+Lint bugün sıfır hata veriyor ve `kontrol`'e girdi. Girmesi sıfıra inmesini
+bekledi.
+
+**C3, demet analizi.** `rollup-plugin-visualizer`, bayrak arkasında, ve analiz
+açıkken `dist`in sha256'sı değişmiyor (ölçüldü). Tahmin, elle çıkarılan dökümü
+tekrar edeceğiydi; etmedi ve sebebi araç: sayıları minify öncesi, toplamı 1,8 MB.
+Pay olarak okununca yine de bir şey söylüyor — en büyük tek paket react-dom, bizim
+tarafımızın en büyük bloğu dört sözlük — ama teslim dosyasındaki gerçek baytlar
+için sourcemap yöntemi hâlâ tek dürüst yol.
+
+**C4, size-limit.** İki eşik (ham ve brotli), ikisinde de yaklaşık on üç
+kilobayt pay, `kontrol`'ün içinde, koşusu bir saniyenin biraz üstünde. Mutasyonla
+sınandı: yirmi kilobaytlık bir yorum ham eşiği kırmızıya döndürdü, brotli eşiğini
+döndürmedi — ikisinin ayrı durmasının sebebi bu. Açılış süresi eşiğe bağlanmadı ve
+sebebi ölçüm: paylaşımlı makinede süre ölçümleri koşudan koşuya iki katına
+çıkabiliyor.
+
+**C7, bağımlılık bildirimi.** Dependabot (haftalık, küçük sürümler tek PR'da) ve
+`pr.yml`. İkincisi olmadan birincisinin yarısı eksikti: bugüne kadar hiçbir iş
+akışı pull request'te koşmuyordu, yani açılan PR'ın yanında hiçbir cevap
+olmayacaktı. İki dosya da ancak GitHub'da koşunca doğrulanır; yerelde yalnız
+YAML'ın ayrıştığı ve komutların var olduğu doğrulandı.
+
+**C6 kurulmadı**, test oturumunun cevabını bekliyor: ayrı komut mu, `kontrol`'ün
+parçası mı.
+
+**Ölçüm penceresi diye bir şey var ve bu turda öğrenildi.** Ölçüm turu, kendi
+kasma sayılarının bu turda %9,5 ile %33 arasında savrulduğunu bildirdi; sebebi
+benim aynı anda koşan tip farkında lint turumdu. "Derleme gerektirmiyor" demek
+"ölçümü bozmuyor" demek değil. Bundan sonra ölçüm penceresi açıkken çok
+çekirdekli hiçbir iş koşturulmuyor.
+
+**Koşulan testler:** her adımda `tipler`, birim süiti, `sinir`, `lint`; araçların
+kendi koşuları; ve arayüz dosyalarına dokunulduğu için tam E2E.
+
+---
+
 ## 2026-09-12 · `store.ts` altıya bölündü, ve iki parçası saf katmana indi
 
 **Önce sözleşme (`f661980`).** Dosya beş soruyu birden cevaplıyordu ve
