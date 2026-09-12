@@ -9,7 +9,8 @@ import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
-import { storageWorks, useStore, downloadBackup, isTextInput } from '../platform/store';
+import { useStore, downloadBackup, isTextInput } from '../platform/store';
+import { storageWorks } from '../platform/planStore';
 import { parseState } from '../pure/parseState';
 import {
   applyMotion,

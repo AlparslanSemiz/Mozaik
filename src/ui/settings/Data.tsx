@@ -19,8 +19,14 @@ import type React from 'react';
 import { BUNDLE_VERSION, bundleVersionOf, parseBundle } from '../../pure/bundle';
 import { emptyState } from '../../pure/entities';
 import { KEEP_DAILY, MAIN_NAME } from '../../platform/folder';
-import { routeName, storageAddress, storageKind, storageReport } from '../../platform/storageReport';
-import { downloadBundle, listBackups } from '../../platform/store';
+import {
+  routeName,
+  storageAddress,
+  storageKind,
+  storageReport,
+} from '../../platform/storageReport';
+import { downloadBundle } from '../../platform/store';
+import { listBackups } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
 import { activePlacements } from '../../pure/programs';
 import type { PlanControls } from '../props';

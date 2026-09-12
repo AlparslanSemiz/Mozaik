@@ -13,7 +13,7 @@ import { useMemo } from 'react';
 import { useDialogs } from '../Dialogs';
 import { emptyState } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/library';
-import { loadPlan } from '../../platform/store';
+import { loadPlan } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
 import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/programs';
 import type { PlanControls } from '../props';

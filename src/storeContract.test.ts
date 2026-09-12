@@ -27,12 +27,9 @@ import {
   downloadBackup,
   downloadBundle,
   isTextInput,
-  listBackups,
-  loadPlan,
-  savePlan,
-  storageWorks,
   useStore,
 } from './platform/store';
+import { listBackups, loadPlan, savePlan, storageWorks } from './platform/planStore';
 import { parseState } from './pure/parseState';
 import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
