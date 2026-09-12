@@ -167,6 +167,14 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 
 ### Site
 
+Depoda üç iş akışı var. `site.yml` GitHub Pages'e yayınlar, `surum.yml` üç
+teslim dosyasını üretir, ve `pr.yml` bir pull request'in üstünden süiti geçirir
+(tipler, sınır, lint, birim, derleme ve tam E2E, ucuzdan pahalıya sıralı).
+Üçüncüsü 2026-09-12'de `.github/dependabot.yml` ile birlikte geldi: haftalık bir
+bağımlılık PR'ı açılıyorsa "bu güncelleme bir şey kırdı mı" sorusunu makinenin
+cevaplaması gerekiyor. Dependabot otomatik güncelleme yapmıyor, yalnız PR açıyor;
+birleştirme kararı insanda.
+
 `npm run build:site` GitHub Pages'e giden klasörü üretir, `site.yml` iş akışı her
 `main` itmesinde yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
 bağlantısız da açılır, ve bu `site.spec.ts`'te ölçülüyor. Service worker'ın

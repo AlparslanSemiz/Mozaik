@@ -1,0 +1,35 @@
+# Bağımlılık güncellemesi: otomatik BİLDİRİM, otomatik güncelleme değil.
+#
+# Uzun ömürlü bir proje ve tek bakımcısı var, yani "bir gün oturup bakarım"
+# demek "bakmam" demek. Dependabot haftada bir bakar, bir PR açar, `pr.yml`
+# süiti koşturur ve karar insana kalır. Renovate yerine bu seçildi: GitHub'ın
+# kendi içinde, kurulacak bir uygulama yok, ve istenen şey zaten bir bildirim.
+#
+# Gruplama bilerek geniş: on dokuz geliştirme bağımlılığı için haftada on dokuz
+# PR, bakılmayan on dokuz PR demektir. Küçük sürümler tek PR'da gelir, ana
+# sürümler ayrı, çünkü ana sürüm okunarak alınır.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      kucuk-surumler:
+        patterns: ['*']
+        update-types: [minor, patch]
+    commit-message:
+      prefix: 'Bağımlılık'
+    labels: ['bağımlılık']
+
+  # İş akışlarının kendi eylemleri de bağımlılık: `actions/checkout@v4` bir gün
+  # eskir ve bunu kimse fark etmez.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'İş akışı'
+    labels: ['bağımlılık']

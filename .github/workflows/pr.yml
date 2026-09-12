@@ -1,0 +1,73 @@
+# Bir pull request'in üstünden geçen süit.
+#
+# Dependabot'la birlikte geldi ve onsuz yarısı eksik kalırdı: haftalık bir
+# bağımlılık PR'ı açılıyorsa, "bu güncelleme bir şey kırdı mı" sorusunu makinenin
+# cevaplaması gerekiyor. Tek bakımcılı bir projede insanın bakacağı şey cevap,
+# soru değil.
+#
+# Ne koşuyor: tipler, katman sınırı, lint, birim süiti, derleme, ve E2E'nin
+# TAMAMI. E2E pahalı (beş dakika civarı) ama bir bağımlılık güncellemesinin
+# kıracağı şey tam olarak orası: React, Radix ve Vite bu programın gördüğü
+# yüzeyin kendisi, ve birim testleri tarayıcıyı hiç açmıyor.
+#
+# `npm run kontrol` yerine adımlar tek tek yazılı, çünkü kırılan adımın adı
+# Actions arayüzünde görünsün isteniyor; `kontrol` tek bir kırmızı satır olurdu.
+# Sıralama da ucuzdan pahalıya: tip hatası varsa Playwright hiç kurulmuyor.
+name: pr
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Aynı dalın eski koşusu, yenisi gelince atılır.
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tipler
+        run: npm run tipler
+
+      - name: Katman sınırı
+        run: npm run sinir
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Birim testleri
+        run: npm test
+
+      - name: Derleme
+        run: npm run build
+
+      - name: Playwright tarayıcısı
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E
+        run: npx playwright test
+
+      # Düşen bir E2E koşusunun okunacak tek şeyi izidir.
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-raporu
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
