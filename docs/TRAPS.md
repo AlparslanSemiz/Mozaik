@@ -258,6 +258,9 @@ kaldıramayınca onu kendisiyle çakışıyor diye raporladı. Çare adları ay�
 satır sıralama) React durumuna yazmaz, DOM'a doğrudan dokunur ve React'e yalnız
 sonucu bildirir. Uzun yaşayan durum sekme değişince sökülen bileşende değil
 `App`'te tutulur. Bir jestin hedefi, eşitlikte ne olacağı yazılarak seçilir.
+Ve bu yolun ölçümünde CSS'in söylediği ile tarayıcının yaptığı aynı şey değildir:
+bir kapsama kuralı da bir katman ipucu da, adı ne söylerse söylesin, ancak önce
+ve sonra ölçülerek alınır (tuzak 105 ile 117).
 
 ### 1 · Sürüklerken yeniden çizim sürüklemeyi bozar
 HTML5 drag-and-drop ile sürükleme sırasındaki bir re-render sürüklemeyi
@@ -341,8 +344,26 @@ kapsadığı sütundan yakılır. Başlığa `data-day` konmadı (tuzak 13).
 Program sekmesi açılırken `gridChrome.ts`'in `scrolled()`'ü profilin en pahalı
 satırıydı. Ertelenince tıklamadan boyamaya geçen süre kıpırdamadı, çünkü o
 düzen boyamanın zaten yapacağı düzendi. Pahalı görünen bir satır kaldırılıp
-toplam yeniden ölçülür, kaldırılan iş çoğu zaman başka bir yere taşınır.
+toplam yeniden ölçülür, kaldırılan iş çoğu zaman başka bir yere taşınır. Tuzak
+117 bunun kardeşi ve öteki yönü: orada pahalı görünen satır gerçekten pahaydı,
+ama işe yarayacağı sanılan çare yaramadı.
 Ölçümler ve geri alınma [DECISIONS.md](DECISIONS.md)'de.
+
+### 117 · Bir metin düğümünü değiştirmek belgenin tamamını yeniden yerleştirebilir
+Sürüklerken gerekçe çubuğunun cümlesini yazmak, 6704 nesnelik bir belgede kökü
+`#document` olan tam bir yerleşim tetikliyordu: hedef hücre her değiştiğinde bir
+kez, 5,37 ms, yanında 5,24 ms tam görüntü alanı boyaması. Sebep `textContent`'in
+kendisi değil durduğu yer — metin `nowrap` ve `ellipsis` taşıyan bir flex
+öğesinin içinde, içerik değişince kutusu da değişebiliyor, ve Blink kökten
+başlıyor.
+
+Asıl tuzak çarede: iki tane "doğru görünen" CSS çaresi ölçülüp çürütüldü.
+`contain: layout` çubuğa konunca düşen kare %21,7–24,3 oldu, yani tabandan
+KÖTÜ; metin kutusuna `flex: 1 1 0; min-width: 0` tabanla aynı kaldı. İkisi de
+yerleşim kökünü belgeden almadı. İşe yarayan şey mekanizmayı değil SIKLIĞI
+değiştirmek oldu (`REASON_GAP = 100`, `88fffc2`): düşen kare %9,5–14,1'den
+%1,1'e, Layout 543 ms / 107'den 216 ms / 42'ye indi. Bir yerleşim maliyeti
+görülünce önce yazmanın ne sıklıkta olduğu sorulur, sonra CSS'e bakılır.
 
 ---
 
@@ -467,22 +488,6 @@ yani iki eksenli bir ızgara iki eksende ölçülür. Karşı önlem: pencere
 ve köşedeki eksen adını ölçer, `src/surum.test.ts` pencere ayarını çiviliyor.
 
 ---
-
-### 117 · Bir metin düğümünü değiştirmek belgenin tamamını yeniden yerleştirebilir
-Sürüklerken gerekçe çubuğunun cümlesini yazmak, 6704 nesnelik bir belgede kökü
-`#document` olan tam bir yerleşim tetikliyordu: hedef hücre her değiştiğinde bir
-kez, 5,37 ms, yanında 5,24 ms tam görüntü alanı boyaması. Sebep `textContent`'in
-kendisi değil durduğu yer — metin `nowrap` ve `ellipsis` taşıyan bir flex
-öğesinin içinde, içerik değişince kutusu da değişebiliyor, ve Blink kökten
-başlıyor.
-
-Asıl tuzak çarede: iki tane "doğru görünen" CSS çaresi ölçülüp çürütüldü.
-`contain: layout` çubuğa konunca düşen kare %21,7–24,3 oldu, yani tabandan
-KÖTÜ; metin kutusuna `flex: 1 1 0; min-width: 0` tabanla aynı kaldı. İkisi de
-yerleşim kökünü belgeden almadı. İşe yarayan şey mekanizmayı değil SIKLIĞI
-değiştirmek oldu (`REASON_GAP = 100`, `88fffc2`): düşen kare %9,5–14,1'den
-%1,1'e, Layout 543 ms / 107'den 216 ms / 42'ye indi. Bir yerleşim maliyeti
-görülünce önce yazmanın ne sıklıkta olduğu sorulur, sonra CSS'e bakılır.
 
 ## CSS kapsamı, özgüllük ve custom property
 
@@ -934,9 +939,11 @@ yeşil bir ağaç derlenebilir bir ağaç demek değil.
 Ölçüm turu kart halkasının bedelini ölçerken kendi E2E süitini arka planda
 koşturuyordu ve düşen kareyi %60–72 gördü; aynı yama, aynı derleme, sessiz
 pencerede %0–1,9 verdi. Aynı gün ikinci kez yaşandı: bir oturumun tip farkında
-lint koşusu öteki oturumun kasma sayılarını iki katına çıkardı. Kural "başkası
-ölçerken bekle" değil, **koşan her şey sayılır** — kendi başlattığın arka plan
-işi dahil. İkinci yarısı ölçütte: tek yönlü bir koşu makinenin o anki yüküyle
+lint koşusu öteki oturumun kasma sayılarını iki katına çıkardı. Kural "başkası ölçerken bekle" değil, **koşan her
+şey sayılır** — kendi başlattığın arka plan işi dahil, ve asıl tehlike orada:
+başkasının yükünü fark edersin, kendininkini fark etmezsin. Ölçtüğün sayı senin
+olmayan bir yük taşır ve bunu hiçbir şey söylemez. Sessizce düşen bir ölçüm
+kırmızıya dönen bir testten beterdir, çünkü kendini bildirmez. İkinci yarısı ölçütte: tek yönlü bir koşu makinenin o anki yüküyle
 karışır, A/B dönüşümlü koşulur, ve iz toplamı düşen kareden kararlıdır.
 
 ---
@@ -948,8 +955,8 @@ karışır, A/B dönüşümlü koşulur, ve iz toplamı düşen kareden kararlı
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105 |
-| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 117 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117 |
+| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
