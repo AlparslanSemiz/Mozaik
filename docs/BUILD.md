@@ -41,6 +41,7 @@ npm run lint         # ESLint, şimdilik yalnız React'in kanca kuralları
 npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
 npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü ve katman sınırı
 npm run analiz       # demetin içindekiler, test-results/demet/analiz.html (ölçüsü minify öncesi)
+npm run boyut        # size-limit: dist/index.html'in ham ve brotli boyu, eşiği aşarsa kırmızı
 npm run grafik       # aynı grafiği mermaid olarak yazar, dosyaya değil ekrana
 npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç)
 npm test             # Vitest birim testleri
@@ -48,7 +49,7 @@ npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler
 npm run test:e2e     # derler, sonra ana E2E süitini file:// üstünde koşar
 npm run test:site    # site, yerel sunucu ve klasör testleri, http üstünde
-npm run kontrol      # tipler, sınır, lint, birim, derleme, E2E, site ve çözücü stresi birlikte
+npm run kontrol      # tipler, sınır, lint, birim, derleme, boyut, E2E, site ve çözücü stresi birlikte
 npm run ekran        # iki temada ekran görüntüleri, test-results/ekran/ altına
 npm run cozucu       # gerçek ölçekli çözücü stresi
 npm run patrol       # devriye: her ekranı gezer, tohumlu rastgele gezinme
@@ -69,6 +70,12 @@ Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 farkında dört kural açıldı, bulguları kapatıldı ve komut sıfır hatayla
 koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kırmızı
 başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
+
+`boyut` da `kontrol`'ün parçası ve derlemeden hemen sonra koşuyor: eşik
+`.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
+tıklanan dosyanın ham boyu ile siteden inen brotli hâli. **Eşik değişirse
+gerekçesi WORKLOG'a yazılır**, çünkü sessizce yükseltilen bir eşik hiç olmayan
+bir eşiktir. Bugün ikisinde de on üç kilobayt kadar pay var (`8ef234c`).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

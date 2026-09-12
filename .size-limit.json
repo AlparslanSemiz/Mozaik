@@ -1,0 +1,16 @@
+[
+  {
+    "name": "dist/index.html — cift tiklanan dosya",
+    "path": "dist/index.html",
+    "limit": "1020000 B",
+    "gzip": false,
+    "brotli": false
+  },
+  {
+    "name": "dist/index.html — siteden inen hali (brotli)",
+    "path": "dist/index.html",
+    "limit": "260000 B",
+    "gzip": false,
+    "brotli": true
+  }
+]
