@@ -6,7 +6,7 @@ Kodun, commit'lerin, yorumların, arayüz metninin ve belgelerin nasıl yazıld�
 
 Tanımlayıcılar, tipler ve dosya adları İngilizce: `teacher`, `classGroup`,
 `unavailable`, `placements`, `constraints.ts`, `blocker()`,
-`components/Availability.tsx`. İkisi karışınca bir dosyayı okuyan kişi neyin
+`ui/Availability.tsx`. İkisi karışınca bir dosyayı okuyan kişi neyin
 kod neyin ekran olduğunu ayırt edemiyor.
 
 Kullanıcıya görünen her metin doğru Türkçe karakterlerle Türkçe yazılır:

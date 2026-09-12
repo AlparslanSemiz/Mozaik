@@ -65,7 +65,7 @@ const html = `<!doctype html>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/src/ui/main.tsx"></script>
     <!--
       KAYNAK ŞABLONU UYARISI. Bu dosya programın kendisi değil: Vite'ın
       şablonu. Çift tıklanınca yukarıdaki modül \`file://\` altında CORS'a

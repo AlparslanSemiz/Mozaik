@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import Root from './Root';
-import { applyDil, readDil } from './leaf/i18n';
+import { applyDil, readDil } from '../leaf/i18n';
 import {
   applyAvailClock,
   applyDensity,
@@ -17,8 +17,8 @@ import {
   readScale,
   readTheme,
   readUiDensity,
-} from './platform/theme';
-import './styles.css';
+} from '../platform/theme';
+import '../styles.css';
 
 // Before the first paint, otherwise the page flashes light and then flips.
 applyTheme(readTheme());

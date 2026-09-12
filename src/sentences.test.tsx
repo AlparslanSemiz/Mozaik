@@ -25,7 +25,7 @@ import { blocker, buildIndex, place } from './pure/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import { defaultLibrary } from './pure/library';
 import { storageReport } from './platform/storageReport';
-import AppRoot from './Root';
+import AppRoot from './ui/Root';
 import { buildReport } from './pure/feasibility';
 import { sampleState } from './pure/sample';
 import { SCHEMA_VERSION, type State } from './leaf/types';

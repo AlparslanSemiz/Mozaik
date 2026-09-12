@@ -170,7 +170,7 @@ const ES: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**No se puede escribir** en la carpeta **{klasor}**. {sebep} Ahora mismo su trabajo solo está en este navegador.",
 
-  // src/components/Availability.tsx
+  // src/ui/Availability.tsx
   "{ad} sınıfı": "clase {ad}",
   "{ad} dersliği": "aula {ad}",
   "Müsait olmayan saatler": "Horas no disponibles",
@@ -197,13 +197,13 @@ const ES: Sozluk = {
   "**Kapattığınız saatlerde yerleşmiş {n} ders var{kimde}.** Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle, **Kontrol** sekmesinde tek tek listeleniyor.":
     "**{n} {n:clase colocada está|clases colocadas están} en horas que ha cerrado{kimde}.** No se ha borrado ninguna. Están marcadas en rojo en la pestaña **Horario** y listadas una a una en **Revisión**.",
 
-  // src/components/CapacityRows.tsx
+  // src/ui/CapacityRows.tsx
   Ad: "Nombre",
   Açık: "Abierto",
   Yük: "Carga",
   Durum: "Estado",
 
-  // src/components/Check.tsx
+  // src/ui/Check.tsx
   "Kontrol edilecek bir şey yok.": "Todavía no hay nada que revisar.",
   İmkânsız: "Imposible",
   "Programın durumu": "Estado del horario",
@@ -245,16 +245,16 @@ const ES: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "El asesor no tiene nada que decir.",
   Öneri: "Nota",
 
-  // src/components/ColorPick.tsx
+  // src/ui/ColorPick.tsx
   Vazgeç: "Cancelar",
 
-  // src/components/Commands.tsx
+  // src/ui/Commands.tsx
   Git: "Ir a",
   Yap: "Hacer",
   "derslik yok": "sin aula",
   "{n} sınıf": "{n} {n:clase|clases}",
 
-  // src/components/DraftStart.tsx
+  // src/ui/DraftStart.tsx
   "Bu taslağın verisi bulunamadı":
     "No se han encontrado los datos de este borrador",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
@@ -263,7 +263,7 @@ const ES: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     'Se ha abierto un plan nuevo desde el borrador "{ad}".',
 
-  // src/components/Grid.tsx
+  // src/ui/Grid.tsx
   "Öğle arası": "Descanso del mediodía",
   "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, pulse Supr para quitar",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
@@ -274,7 +274,7 @@ const ES: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Fijada. Clic derecho para soltarla",
 
-  // src/components/Program.tsx — the grid's own menu
+  // src/ui/Program.tsx — the grid's own menu
   "Havuza kaldır": "Enviar a la bandeja",
   sabitlenmiş: "fijada",
   "Dersi düzenle": "Editar la clase",
@@ -285,24 +285,24 @@ const ES: Sozluk = {
   "Ders sabitlendi.": "Clase fijada.",
   "Sabitleme kaldırıldı.": "Clase soltada.",
 
-  // src/components/LessonEdit.tsx
+  // src/ui/LessonEdit.tsx
   "Günde en fazla": "Máximo por día",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Si cambia el reparto, esta clase sale del horario, también los bloques fijados",
 
-  // src/components/Ribbon.tsx — what the two destructive questions promise
+  // src/ui/Ribbon.tsx — what the two destructive questions promise
   "Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.":
     "Las {n} horas fijadas se quedan; el resto se organiza desde cero. Ctrl+Z lo deshace.",
   "Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.":
     "Las {n} horas fijadas se quedan. Las clases, los profesores y las horas cerradas no cambian. Ctrl+Z lo deshace.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: datos y horario semanal",
 
-  // src/components/Inspector.tsx
+  // src/ui/Inspector.tsx
   Kapat: "Cerrar",
   "Haftalık programı": "Horario semanal",
   "Kayıt bulunamadı": "No se ha encontrado el registro",
 
-  // src/components/LessonPool.tsx
+  // src/ui/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Clases pendientes de colocar",
   "Havuz yüksekliği": "Altura de la bandeja",
   "Sürükleyerek havuzun boyunu ayarlayın":
@@ -322,7 +322,7 @@ const ES: Sozluk = {
   " · dersin {yerlesen}/{toplam} saati yerleşti":
     " · {yerlesen} de las {toplam} horas de la clase colocadas",
 
-  // src/components/ListTools.tsx
+  // src/ui/ListTools.tsx
   "{ne} ara": "Buscar {ne}",
   "Ara…": "Buscar…",
   "Aramayı temizle": "Borrar la búsqueda",
@@ -334,7 +334,7 @@ const ES: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "Para ordenar las filas a mano, ponga **Ordenar** en «Orden de entrada» y quite el filtro.",
 
-  // src/components/Palette.tsx
+  // src/ui/Palette.tsx
   "Komut paleti": "Paleta de comandos",
   "Ara veya komut yaz": "Buscar o escribir un comando",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":
@@ -343,7 +343,7 @@ const ES: Sozluk = {
   Sonuçlar: "Resultados",
   "Eşleşen bir şey yok.": "No hay coincidencias.",
 
-  // src/components/Print.tsx
+  // src/ui/Print.tsx
   Gün: "Día",
   "Yazdırılacak program yok.": "No hay horario que imprimir.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",
@@ -371,7 +371,7 @@ const ES: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** de las páginas seleccionadas están completamente vacías. Los horarios de esas clases aún no se han montado. Puede montarlos en la pestaña **Horario**.",
 
-  // src/components/Program.tsx
+  // src/ui/Program.tsx
   "Buraya bırakılabilir.": "Se puede soltar aquí.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Colocando automáticamente… {yerlesen}/{toplam} bloques · {sure} s",
@@ -400,7 +400,7 @@ const ES: Sozluk = {
   "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
     "Introduzca primero las aulas, profesores y clases en la pestaña **Escuela** y añada después las horas semanales de cada clase. Luego marque en la pestaña **Disponibilidad** las horas en que los profesores no pueden venir.",
 
-  // src/components/Ribbon.tsx
+  // src/ui/Ribbon.tsx
   "Okul listeleri": "Listas de la escuela",
   "Ders girişi araçları": "Herramientas de entrada de clases",
   "Liste boş": "La lista está vacía",
@@ -434,7 +434,7 @@ const ES: Sozluk = {
   "Renkli bas": "Imprimir en color",
   "Ayar bölümleri": "Secciones de ajustes",
 
-  // src/components/lessons/index.tsx
+  // src/ui/lessons/index.tsx
   "Yeni ders": "Nueva clase lectiva",
   Branş: "Asignatura",
   "Sınıfa göre": "Por clase",
@@ -491,7 +491,7 @@ const ES: Sozluk = {
   "Henüz {ne} yok. **Okul** sekmesinden ekleyin.":
     "Todavía no hay {ne}. Añada una en la pestaña **Escuela**.",
 
-  // src/components/settings/Appearance.tsx
+  // src/ui/settings/Appearance.tsx
   Tema: "Tema",
   "Yazı büyüklüğü": "Tamaño del texto",
   Yoğunluk: "Densidad",
@@ -519,7 +519,7 @@ const ES: Sozluk = {
   "**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz.":
     "**Desactivado.** Nada se desliza y nada se atenúa.",
 
-  // src/components/settings/Data.tsx
+  // src/ui/settings/Data.tsx
   "Nereye kaydedilsin": "Dónde se guarda",
   "Klasör seç…": "Elegir carpeta…",
   "Başka klasör seç…": "Elegir otra carpeta…",
@@ -613,7 +613,7 @@ const ES: Sozluk = {
   "**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz.":
     "**v{surum} se ha descargado.** Al reiniciar se abre la versión nueva. Su trabajo está guardado; no se pierde nada.",
 
-  // src/components/settings/Plans.tsx
+  // src/ui/settings/Plans.tsx
   "Bu işlem geri alınamaz.": "Esto no se puede deshacer.",
   "{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.":
     "Se borrarán {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:clase|clases}, {ders} {ders:asignatura|asignaturas} y {saat} {saat:hora colocada|horas colocadas}. Esto no se puede deshacer.",
@@ -641,7 +641,7 @@ const ES: Sozluk = {
   "Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır; ** dizilmiş program boş gelir**. Taslağın kendisi değişmez.":
     "Se copia la configuración del borrador (aulas, profesores, clases, asignaturas); **el horario montado viene vacío**. El borrador en sí no cambia.",
 
-  // src/components/settings/Rules.tsx
+  // src/ui/settings/Rules.tsx
   Kurallar: "Reglas",
   Kural: "Regla",
   "Ne yapsın": "Qué hacer",
@@ -657,7 +657,7 @@ const ES: Sozluk = {
     "El horario montado no supera ninguno de los límites que ha fijado.",
   "Kendi sınırı olan sınıflar ({n})": "Clases con límite propio ({n})",
 
-  // src/components/settings/School.tsx
+  // src/ui/settings/School.tsx
   "Zil ve günler": "Timbre y días",
   "Okul adı (yazdırılan sayfaların başlığında görünür)":
     "Nombre de la escuela (aparece en el encabezado de las páginas impresas)",
@@ -684,7 +684,7 @@ const ES: Sozluk = {
   "Şu an **{gun} gün × {saat} saat** = {yer} slot.":
     "Ahora mismo **{gun} días × {saat} horas** = {yer} huecos.",
 
-  // src/components/setup/Classes.tsx
+  // src/ui/setup/Classes.tsx
   Derslik: "Aula",
   "Ada göre": "Por nombre",
   "Dersliğe göre": "Por aula",
@@ -706,7 +706,7 @@ const ES: Sozluk = {
   yok: "ninguno",
   "Bilgileri ve haftalık programı": "Datos y horario semanal",
 
-  // src/components/setup/Paste.tsx
+  // src/ui/setup/Paste.tsx
   "Buraya yapıştırın...": "Pegue aquí...",
   Önizle: "Vista previa",
   "Okunabilir satır bulunamadı.": "No se ha encontrado ninguna fila legible.",
@@ -715,7 +715,7 @@ const ES: Sozluk = {
   "**{n} satır okundu.** Aşağıdakiler eklenecek:":
     "**{n} {n:fila leída|filas leídas}.** Se añadirá lo siguiente:",
 
-  // src/components/setup/Rooms.tsx
+  // src/ui/setup/Rooms.tsx
   "Sınıf sayısına göre": "Por número de clases",
   "Derslikler ({n})": "Aulas ({n})",
   "Yeni derslik": "Nueva aula",
@@ -725,7 +725,7 @@ const ES: Sozluk = {
   "Bu aramaya uyan derslik yok.": "Ningún aula coincide con esta búsqueda.",
   "Sınıf sayısı": "Número de clases",
 
-  // src/components/setup/Subjects.tsx
+  // src/ui/setup/Subjects.tsx
   "Bir öğretmende var ama listede yok": "Un profesor lo tiene pero la lista no",
   "· listede değil": "· no está en la lista",
   "{ad} kısaltması": "abreviatura de {ad}",
@@ -747,7 +747,7 @@ const ES: Sozluk = {
   "Bu branş listede zaten var.": "Esta asignatura ya está en la lista.",
   Kısaltma: "Abreviatura",
 
-  // src/components/setup/Summary.tsx
+  // src/ui/setup/Summary.tsx
   Renkler: "Colores",
   "Öğretmen renklerini yeniden dağıt ({n})":
     "Redistribuir los colores de los profesores ({n})",
@@ -784,7 +784,7 @@ const ES: Sozluk = {
   "**{n} sınıfın hiç dersi yok** ({hangileri}).":
     "**{n} {n:clase no tiene|clases no tienen} ninguna asignatura** ({hangileri}).",
 
-  // src/components/setup/Teachers.tsx
+  // src/ui/setup/Teachers.tsx
   Cinsiyet: "Sexo",
   "Branşa göre": "Por asignatura",
   "Açık saate göre": "Por horas abiertas",
@@ -824,7 +824,7 @@ const ES: Sozluk = {
   "**Aynı kısaltma birden çok öğretmende:** ızgarada iki satır ayırt edilemez.":
     "**La misma abreviatura en más de un profesor:** dos filas de la cuadrícula no se distinguen.",
 
-  // src/components/setup/index.tsx
+  // src/ui/setup/index.tsx
   Başlarken: "Para empezar",
   "Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.":
     "Si quiere ver qué hace la herramienta, puede cargar una escuela ya preparada.",
@@ -836,14 +836,14 @@ const ES: Sozluk = {
   "Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez.":
     "La configuración de los planes marcados como **borrador** está lista. Al elegir uno se abre **un plan nuevo**: se copian aulas, profesores, clases y asignaturas, y el horario montado viene vacío. El borrador en sí no cambia.",
 
-  // src/components/useRowOrder.tsx
+  // src/ui/useRowOrder.tsx
   Sıra: "Orden",
   "{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok":
     "{ad}, posición {n}, flechas arriba y abajo para mover",
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "Para ordenar a mano, quite el filtro y la ordenación",
 
-  // src/components/useSample.ts
+  // src/ui/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "Se {ogretmen:borrará|borrarán} {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:clase|clases} y {ders} {ders:asignatura|asignaturas}.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":

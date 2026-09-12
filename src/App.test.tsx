@@ -8,7 +8,7 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import AppRoot from './Root';
+import AppRoot from './ui/Root';
 import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/sample';
 
