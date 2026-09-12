@@ -438,7 +438,7 @@ B4.8 — üç CSS kuralı: sürükleme sürerken hedef satırdaki her kart, hüc
 olarak taşıyor. JS yok, DOM yazması yok, `can-*` sınıfı `<td>`'de zaten var. İki hükümde de
 (`can-warn`, `can-no`) mutasyonla sınandı; `can-no`yu uyarı rengiyle boyamak testi kırmızıya
 döndürüyor. Halkanın ölçülebilir bedeli yok (dönüşümlü A/B: var %0,0–1,9, yok %0,4–1,5).
-Bırakılan soru **B4.9**: hedef hücre kendi satırında boşken başka bir satırdaki kartı havuza
+Bırakılan soru **B4.9** (bugün B4.12): hedef hücre kendi satırında boşken başka bir satırdaki kartı havuza
 gönderen bırakmalarda gidecek kart işaretlenmiyor, ve orada `can-*` sınıfı olmadığı için bu
 bedava bir CSS kuralı değil.
 

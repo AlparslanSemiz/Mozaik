@@ -414,6 +414,15 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       `{Öğretmen:Tam Adı}`. Düzenleme yeri **önizlemenin kendisi**.
 - [ ] **B4.5 Farklı baskı çeşitleri** — rapor yapısı seçilebilsin: satırda ne,
       sütunda ne, sayfa başına ne.
+- [ ] **B4.6 Program ızgarasında sınıfın altındaki "derslik yok" ibaresi
+      kalksın.** Senin satırın: *"program tarafında sınıf tarafında
+      dersliği yok ibaresi kalkması lazım."* Kaynak `Program.tsx:321-327`:
+      `roomLetter(...) === "" ? t("derslik yok") : t("{ad} dersliği", ...)`
+      — sınıf görünümünde satır başlığının ikinci satırı. Derslik
+      atanmamış her sınıfta bu metin tekrar ediyor; kaldırılınca o satırın
+      **boş mu kalacağı yoksa kutunun tamamen mi küçüleceği** sorusu var
+      (tuzak 82: bir metni kaldırmadan önce o metnin ne taşıdığı sorulur —
+      burada bir satır yüksekliği).
 - [x] **B4.7 Sürüklerken kasma — BİTTİ (2026-09-12).** Çare: gerekçe çubuğu en çok
       100 ms'de bir yazılıyor (`REASON_GAP`). Düşen kare %9,5–14,1'den **%1,1**'e, Layout
       543 ms / 107'den 216 ms / 42'ye indi; kenar kaydırmasında %12–13'ten %0–0,8'e.
@@ -459,25 +468,6 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       Ölçüm ve ekran görüntüleri [TESTFINDINGS.md](TESTFINDINGS.md)'de.
       **Kullanıcı kararı (2026-09-12): kartın kendisi işaretlensin.** Renklerin anlamı
       (Y2 kararı) değişmedi, değişen nerede boyandıkları.
-- [ ] **B4.9 Başka bir SATIRDAKİ tahliye kurbanı hiçbir yerde görünmüyor.** B4.8'in
-      halkası hedef satırın dolu hücrelerini işaretliyor, yani "üstüne geldiğin kart".
-      Ama bir bırakma, hedef hücre kendi satırında BOŞ olduğu hâlde başka bir satırdaki
-      kartı havuza gönderebiliyor (sınıf o saatte başka bir öğretmende). O durumda
-      gerekçe çubuğu kimin gideceğini adıyla söylüyor (`e2e/program.spec.ts`, "havuza
-      dönecek") ama ekranda gidecek kartın kendisi işaretlenmiyor. Kullanıcının cümlesi
-      ("başka bir kartın üzerine gelip koyma") üstüne gelinen kartı anlatıyor, yani bu
-      ayrı bir soru: gidecek kart da işaretlensin mi, yoksa cümle yeter mi. Karar
-      verilmeden yazılmaz; yazılırsa maliyeti ölçülür (hedef satır dışındaki hücrelerde
-      `can-*` sınıfı yok, yani bu bedava bir CSS kuralı DEĞİL).
-- [ ] **B4.6 Program ızgarasında sınıfın altındaki "derslik yok" ibaresi
-      kalksın.** Senin satırın: *"program tarafında sınıf tarafında
-      dersliği yok ibaresi kalkması lazım."* Kaynak `Program.tsx:321-327`:
-      `roomLetter(...) === "" ? t("derslik yok") : t("{ad} dersliği", ...)`
-      — sınıf görünümünde satır başlığının ikinci satırı. Derslik
-      atanmamış her sınıfta bu metin tekrar ediyor; kaldırılınca o satırın
-      **boş mu kalacağı yoksa kutunun tamamen mi küçüleceği** sorusu var
-      (tuzak 82: bir metni kaldırmadan önce o metnin ne taşıdığı sorulur —
-      burada bir satır yüksekliği).
 - [ ] **B4.9 Program sekmesinin açılışı hızlansın, ve bu şikayetin İKİNCİ gelişi.**
       Senin satırın: *"Program kısmının açılışı daha hızlanmalı."* Aynı cümle bir
       kez B1.4 olarak ölçülüp kapanmıştı (§10'daki arşivde) ve o kayıt bu turun
@@ -524,6 +514,16 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       kontrolün görünüp görünmediği hiç ölçülmedi. İlk iş babanın ekranında ve
       exe'de görüntü almak, çünkü ölçülen her şey "oradayım" derken ekran
       "değilim" diyorsa haklı olan ekrandır (tuzak 84).
+- [ ] **B4.12 Başka bir SATIRDAKİ tahliye kurbanı hiçbir yerde görünmüyor.** B4.8'in
+      halkası hedef satırın dolu hücrelerini işaretliyor, yani "üstüne geldiğin kart".
+      Ama bir bırakma, hedef hücre kendi satırında BOŞ olduğu hâlde başka bir satırdaki
+      kartı havuza gönderebiliyor (sınıf o saatte başka bir öğretmende). O durumda
+      gerekçe çubuğu kimin gideceğini adıyla söylüyor (`e2e/program.spec.ts`, "havuza
+      dönecek") ama ekranda gidecek kartın kendisi işaretlenmiyor. Kullanıcının cümlesi
+      ("başka bir kartın üzerine gelip koyma") üstüne gelinen kartı anlatıyor, yani bu
+      ayrı bir soru: gidecek kart da işaretlensin mi, yoksa cümle yeter mi. Karar
+      verilmeden yazılmaz; yazılırsa maliyeti ölçülür (hedef satır dışındaki hücrelerde
+      `can-*` sınıfı yok, yani bu bedava bir CSS kuralı DEĞİL).
 
 ---
 
@@ -698,7 +698,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ölçülmedi**: job log'u admin hakkı istiyor (403). Kullanıcı log'a bakıp
       etiketi yeniden koştursun — düzeltmenin babanın kopyasına ulaşması bu
       yayına bağlı.
-- [x] **B7.13 `e2e/exe.spec.ts`'in `Mozaik-tumu.json` beklentisi geri alındı**
+- [x] **B7.15 `e2e/exe.spec.ts`'in `Mozaik-tumu.json` beklentisi geri alındı**
       (2026-08-31, kullanıcı kararı: *ad `ders-programi-*` kalsın*). `658c019`
       yalnız testi değiştirmişti; kod haklıydı. Ad artık bir **birim testinde
       çivili** (`folder.test.ts`) — mutasyonla sınandı, çünkü tersi hiçbir
@@ -771,7 +771,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       dünyada blok düşmedi.
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
 - [ ] **Yedek dosya adı `ders-programi-*` mı kalsın, `Mozaik-*` mi olsun?**
-      (B7.13.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
+      (B7.15.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
       tanımaz: birikirler, ve eski ana dosya klasörde öksüz kalır.
 - [ ] **Web yığını ile uygulama yığını ayrılsın mı?** Senin satırın:
       *"Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey
@@ -1150,6 +1150,15 @@ ertelendi.
       artık yoksa. **Yavaş olmak tek başına silme gerekçesi değil**; silmeden önce
       hızlandırma denenir (paylaşılan derleme, işçi sayısı, kendi tarayıcısını açan
       dosyaların azaltılması).
+- [ ] **On birinci belge kapısı adayı: TODO'nun canlı bölümünde aynı numara iki maddede.**
+      2026-09-12'de tarandı ve iki çakışma bulundu, ikisi de canlı bölümde: `B4.9` hem
+      tahliye kurbanına hem Program açılışına, `B7.13` hem yedek dosya adına hem exe
+      penceresine verilmişti. İkisi de numarayı daha çok atıfı olan tarafa bırakarak
+      çözüldü (tahliye kurbanı `B4.12`, yedek dosya adı `B7.15`). Kapı kurulmadı,
+      çünkü iki örnek bir kapıyı hak edecek yoğunluk değil ve bir kapının bedeli
+      koşu süresi. Kurulursa şekli belli: arşiv sınırının (`## §10`) üstünde kalan
+      `**B<n>.<m>` başlıklarını toplar ve aynı numaranın iki kez geçtiği yeri söyler.
+      Üçüncü bir çakışma çıkarsa bu madde kapıya dönüşür.
 
 ### 8i · Klasör turundan çıkanlar (2026-09-12)
 
