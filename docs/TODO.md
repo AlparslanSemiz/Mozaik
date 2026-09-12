@@ -986,12 +986,21 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       Yeni E2E (`panel.spec.ts`) düzeltmeden önce "510 dersi AV öğretmenine geçti." okuyordu.
 - [ ] **Çevrilmemiş sınır cümlesi.** `constraints.ts:307`'deki "art arda en fazla N saat"
       mesajı `t()`'den geçmiyor, beş dilde de Türkçe çıkıyor.
-- [ ] **ARCHITECTURE'ta iki yanlış cümle.** Çözücü "en çok iki iş kalemi" kurmuyor, blok boyu
-      başına bir kalem kuruyor, v13'ten beri en çok üç (`solver.ts:250`'deki `4` ölü dal).
-      `sanitize` `entities.ts`'te değil `constraints.ts`'te. Refactorun kapanışında dosya
-      haritasıyla birlikte düzeltilir.
-- [ ] **DESIGN.md 489 815 baytı bugünkü değer gibi yazıyor** (103 ve 146. satırlar). Bugün
-      1 007 885, ve aradaki farkın dökümü WORKLOG'da.
+- [x] **ARCHITECTURE'ta iki yanlış cümle — DÜZELTİLDİ (2026-09-12).** Çözücü "en çok iki iş
+      kalemi" kurmuyor, blok boyu başına bir kalem kuruyor ve en çok üç, çünkü `solver.ts`
+      `[3, 2, 1]` üstünde dönüyor. Bu maddenin kendi atfı da bayattı: dosya bugün
+      `src/pure/solver.ts` ve söz edilen `4` ölü dalı bugünkü kaynakta yok.
+      `sanitize` `pure/constraints.ts`'te, `entities.ts` onu yalnız içe aktarıyor; dosya
+      haritasının iki satırı da düzeldi. Haritanın kendisi zaten doğruydu (96 ada 96 dosya,
+      `store.ts` bölünmesi işlenmiş, A2 kapısı tutuyor), yanlış olan yalnız bu iki cümleydi.
+- [x] **DESIGN.md 489 815 baytı bugünkü değer gibi yazıyor — DÜZELTİLDİ (2026-09-12).**
+      Tarihli ölçüm blokları geriye dönük düzeltilmedi, çünkü onlar o günün kaydı; düzelen şey
+      onları bugünkü değer gibi okutan iki yer. Blokların başı artık bugünkü sayının nerede
+      durduğunu söylüyor, ve "490 KB'lik tek dosya açılıyor" cümlesi geçmiş zamana çekildi.
+      Ayrıca aynı turda iki bayat satır daha bulundu ve düzeltildi: [LAYOUT.md](LAYOUT.md) ile
+      [DESIGN.md](DESIGN.md) hâlâ "`.pool-card` bekleyen bir blok demek" diyordu, oysa
+      2026-09-01'den beri bir deste demek. İkisi de belge kapılarından geçen türden: cümle
+      yanlış, adı geçen şey var.
 - [ ] **Doğrulanacaklar.** Okuma sırasında bildirildi, kaynaktan tek tek açılmadı:
       Dersler formunda Enter'ın Dağılım düğmesinde de ders eklemesi (`lessons/index.tsx:438-446`),
       kısayol ekranının Enter'ı olduğundan başka anlatması (`ShortcutsHelp.tsx`, `Grid.tsx`),

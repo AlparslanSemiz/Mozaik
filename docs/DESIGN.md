@@ -97,7 +97,9 @@ sayısı (tuzak 39).
 ## Ölçülenler (2026-08-26)
 
 Bunlar birer tarih, kural değil (tuzak 42). Dokunulan mekanizma değişince yeniden
-ölçülür.
+ölçülür, ve bugünkü değerler [WORKLOG.md](WORKLOG.md)'nin "Şu an" bloğunda durur.
+Buradaki sayılar 2026-08-26'nın sayıları; dosya o gün 489 815 bayttı ve bugün bir
+megabaytın üstünde.
 
 ```
 dist/index.html            489 815 bayt   (tek dosya, gömülü font, JS ve CSS)
@@ -143,8 +145,9 @@ aday (`#ff386a`) `--bad` gibi okunacak kadar sıcaktı. Turkuaz istendi ve zaten
 Program'ın rengi.
 
 **Hedef makine ilkesi (o günkü numarasıyla ilke 7) o gün bir varsayım olmaktan
-çıktı.** "Hedef makine yavaş" deniyordu ve hiç ölçülmemişti: 490 KB'lik tek dosya
-`file://` üzerinden 73 ms'de açılıyor.
+çıktı.** "Hedef makine yavaş" deniyordu ve hiç ölçülmemişti: o günün 490 KB'lik
+tek dosyası `file://` üzerinden 73 ms'de açılıyordu. Dosya o günden beri büyüdü
+ve açılış da; iki sayı da yeniden ölçüldü ve WORKLOG'da duruyor.
 
 ---
 
@@ -239,7 +242,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.can-ok` `.can-warn` `.can-no` | hedef satırın tamamı, sürükleme başında bir kez (`drag.ts`) |
 | `.drop-ok` `.drop-warn` `.drop-blocked` | imlecin altındaki blok, zayıf katmanı ezer |
 | `.pool` `.pool-split` `.pool-card` … | havuz çekmecesi, boyu sürüklenir |
-| `.pool-stack` | aynı dersin aynı boydaki blokları tek bir deste. En çok iki katman görünür, sayı kartın `title`'ında ve `data-count`'ta. `.pool-card` sayısı değişmez, çünkü deste bir düzen, bir gruplama değil |
+| `.pool-stack` | aynı dersin aynı boydaki blokları tek bir deste, ve DOM'da deste başına tek kart. Derinliği `::before` ile `::after` boyuyor, en çok iki katman görünür, blok sayısı `data-count`'ta ve kartın `title`'ında. Yani `.pool-card` sayısı deste sayısıdır |
 | `.pool-card[data-size]` | kartın kaç saat olduğu yazıyla ve genişlikle. Bir ders birden çok kart bırakır (`2+1` bir ikili ve bir tekli), ve hangisinin sürüklendiği kaç hücrenin yanacağını belirler |
 | `.inspect` | bir adı varlık paneline bağlayan bağlantı |
 

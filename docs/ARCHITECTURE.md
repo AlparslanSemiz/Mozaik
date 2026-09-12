@@ -75,12 +75,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock` |
+| `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
 | `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
 | `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`) |
 | `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
-| `pure/entities.ts` | ekleme, güncelleme, silme, `sanitize`, `remapDays` |
+| `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays` |
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `pure/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
@@ -277,11 +277,13 @@ fonksiyonun kendisine. Kendine ait iki şeyi var, ikisi de aramayla ilgili: her
 dersin arama başlamadan hesaplanan tavanı, ve ızgara uzun süre iyileşmezse bir
 dersten vazgeçip o ana kadarki en iyi ızgaradan devam etmek (tuzak 26).
 
-Bir ders en çok iki iş kalemine ayrılır, biri uzun blokları biri tek saatleri
-ister, çünkü aramanın sayaçları (aday hücre kümesi, MRV, ileri kontrol) elindeki
-blokların eşit boylu olduğunu varsayıyor. İki kalem aynı sınıfı paylaştığı için
-`neighbours` onları birbirinin komşusu yapar. Yeniden başlatmada ne kadarının dizildiği donmuş
-ızgaradan `placedBlocks()` ile boyuna göre sayılır, `placedHours`'tan türetilmez, çünkü iki kalem tek bir sayıyı paylaşamaz.
+Bir ders blok boyu başına bir iş kalemine ayrılır, yani en çok üçe (`solver.ts`
+`[3, 2, 1]` üstünde dönüyor), çünkü aramanın sayaçları (aday hücre kümesi, MRV,
+ileri kontrol) elindeki blokların eşit boylu olduğunu varsayıyor. Kalemler aynı
+sınıfı paylaştığı için `neighbours` onları birbirinin komşusu yapar. Yeniden
+başlatmada ne kadarının dizildiği donmuş ızgaradan `placedBlocks()` ile boyuna
+göre sayılır, `placedHours`'tan türetilmez, çünkü bir dersin kalemleri tek bir
+sayıyı paylaşamaz.
 
 `place()` her çağrıda sözlüğü kopyaladığı için aramanın iç döngüsüne pahalı. Onun
 yerine `constraints.ts`'teki `occupy` ve `vacate` kullanılır, `place()` ile
