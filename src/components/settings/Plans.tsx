@@ -11,11 +11,11 @@
 
 import { useMemo } from 'react';
 import { useDialogs } from '../Dialogs';
-import { emptyState } from '../../entities';
-import { drafts as draftsOf } from '../../library';
+import { emptyState } from '../../pure/entities';
+import { drafts as draftsOf } from '../../pure/library';
 import { loadPlan } from '../../store';
 import type { State } from '../../leaf/types';
-import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID } from '../../programs';
+import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/programs';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';

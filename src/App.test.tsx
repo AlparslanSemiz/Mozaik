@@ -10,7 +10,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import AppRoot from './Root';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './sample';
+import { sampleState } from './pure/sample';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -265,4 +265,4 @@ describe('uygulama açılıyor', () => {
     expect(topbar.textContent).toContain('Dosyaya kaydet');
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from './pure/programs';

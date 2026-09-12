@@ -19,7 +19,7 @@
 // which keys were written and requires each one in the report, and it also
 // reads this file and fails if a key is written out by hand.
 
-import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from './library';
+import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from './pure/library';
 import { isDesktop } from './desktop';
 import { t } from './leaf/i18n';
 import { PREFERENCE_ROWS } from './leaf/preferenceKeys';

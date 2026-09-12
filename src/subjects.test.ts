@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { hasTwoSubjects, lessonSubject, subjectKey, teacherSubjects } from './leaf/subjects';
-import { emptyState } from './entities';
+import { emptyState } from './pure/entities';
 import type { Lesson, State, Teacher } from './leaf/types';
 
 const teacher = (subject: string, subject2: string): Teacher => ({

@@ -13,7 +13,7 @@
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/worlds';
-import { activePlacements } from '../src/programs';
+import { activePlacements } from '../src/pure/programs';
 import { loadWorld, savedState, settledText } from './helpers';
 
 /** Runs it and waits for the verdict line. */

@@ -13,7 +13,7 @@
 // (ARCHITECTURE, the same arrangement keys.ts has between constraints and
 // rules). Every call goes through the one `safely` guard in storage.ts.
 
-import { LIBRARY_KEY, parseLibrary, planKey, type Library } from './library';
+import { LIBRARY_KEY, parseLibrary, planKey, type Library } from './pure/library';
 import { safely } from './leaf/storage';
 import { type Id } from './leaf/types';
 

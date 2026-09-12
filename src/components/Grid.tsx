@@ -10,11 +10,11 @@ import { Pin } from 'lucide-react';
 import { useInspect } from './Inspector';
 import type React from 'react';
 import { dayLabel } from '../leaf/names';
-import { dayPeriods } from '../bell';
+import { dayPeriods } from '../pure/bell';
 import { attachGridChrome } from '../gridChrome';
 import { paletteColor } from '../leaf/palette';
 import type { Settings, Id } from '../leaf/types';
-import type { MaskMode } from '../programMask';
+import type { MaskMode } from '../pure/programMask';
 import { useT } from './T';
 
 export interface GridCell {

@@ -10,7 +10,7 @@
 // in Node, e2e/otomatik-dunyalar.spec.ts loads the same worlds into the built
 // file:// page and audits what the real button left in localStorage.
 
-import { blockAt, blocker, buildIndex, closedKey, placementKey, liftBlock } from './constraints';
+import { blockAt, blocker, buildIndex, closedKey, placementKey, liftBlock } from './pure/constraints';
 import { parseKey } from './leaf/keys';
 import {
   DEFAULT_BELL,
@@ -18,9 +18,9 @@ import {
   DEFAULT_RULES,
   NO_TEACHER_LIMITS,
   hourNames,
-} from './entities';
-import { classDayGaps, teacherDayCount, teacherDayGaps } from './rules';
-import { sampleState } from './sample';
+} from './pure/entities';
+import { classDayGaps, teacherDayCount, teacherDayGaps } from './pure/rules';
+import { sampleState } from './pure/sample';
 import type {
   ClassGroup,
   Day,
@@ -34,7 +34,7 @@ import type {
   Teacher,
 } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
-import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './programs';
+import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './pure/programs';
 
 // ---------------------------------------------------------------- the builder
 

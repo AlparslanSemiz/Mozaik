@@ -21,13 +21,13 @@
 
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { blocker, buildIndex, place } from './constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
-import { defaultLibrary } from './library';
+import { blocker, buildIndex, place } from './pure/constraints';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import { defaultLibrary } from './pure/library';
 import { storageReport } from './storageReport';
 import AppRoot from './Root';
-import { buildReport } from './feasibility';
-import { sampleState } from './sample';
+import { buildReport } from './pure/feasibility';
+import { sampleState } from './pure/sample';
 import { SCHEMA_VERSION, type State } from './leaf/types';
 
 // jsdom has no ResizeObserver and `scrollFade.ts` uses one. Stubbed exactly as

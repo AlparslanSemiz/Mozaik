@@ -1,5 +1,5 @@
-import type { Bundle } from '../bundle';
-import type { Library } from '../library';
+import type { Bundle } from '../pure/bundle';
+import type { Library } from '../pure/library';
 import type { Id, State } from '../leaf/types';
 
 /**

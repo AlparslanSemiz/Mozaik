@@ -5,7 +5,7 @@
 // from index 1 to index 0 — without remapping, every lesson would appear to
 // have been taught a day earlier and nobody would notice (docs/TRAPS.md pitfall 11).
 
-import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './constraints';
+import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './pure/constraints';
 import { lessonSubject } from './leaf/subjects';
 import {
   addClass,
@@ -57,7 +57,7 @@ import {
   setAvailability,
   setWholeWeek,
   updateSettings,
-} from './entities';
+} from './pure/entities';
 import type { Day, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 
@@ -1631,4 +1631,4 @@ describe('reorderList', () => {
     expect(moved.teachers).toEqual([d.teachers[1], d.teachers[0]]);
   });
 });
-import { activeProgram, blankProgram } from './programs';
+import { activeProgram, blankProgram } from './pure/programs';

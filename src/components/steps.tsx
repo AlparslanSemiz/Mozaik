@@ -22,7 +22,7 @@
 
 import { Tags } from 'lucide-react';
 
-import { subjectOptions } from '../entities';
+import { subjectOptions } from '../pure/entities';
 import type { State } from '../leaf/types';
 import type { Kind, StepId } from '../toolState';
 

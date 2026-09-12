@@ -28,7 +28,7 @@
 import { useState } from 'react';
 import { useDialogs } from '../Dialogs';
 import { useRowOrder } from '../useRowOrder';
-import { EMPTY_QUERY } from '../../listview';
+import { EMPTY_QUERY } from '../../pure/listview';
 import {
   addSubject,
   deleteSubject,
@@ -39,7 +39,7 @@ import {
   setSubjectShort,
   subjectShort,
   subjectTeachers,
-} from '../../entities';
+} from '../../pure/entities';
 import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
 import type { Settings } from '../../leaf/types';

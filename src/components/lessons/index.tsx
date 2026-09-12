@@ -22,12 +22,12 @@ import { useEffect, useMemo, useState } from 'react';
 import ListTools from '../ListTools';
 import { blockPlan, clampBlocks, patternLabel } from '../../leaf/blocks';
 import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
-import type { ListConfig, ListQuery } from '../../listview';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
+import type { ListConfig, ListQuery } from '../../pure/listview';
 import type { Id, Lesson, State } from '../../leaf/types';
 import type { LessonMode } from '../../toolState';
 import { useDialogs } from '../Dialogs';
-import { parseLessons } from '../../import';
+import { parseLessons } from '../../pure/import';
 import { paletteColor } from '../../leaf/palette';
 import {
   addLesson,
@@ -44,7 +44,7 @@ import {
   teacherSubjects,
   updateLesson,
   weeklyLoad,
-} from '../../entities';
+} from '../../pure/entities';
 import { KIND_ICON } from '../steps';
 import LimitBox from '../LimitBox';
 import BlockCounts, { blockCeiling } from '../BlockCounts';

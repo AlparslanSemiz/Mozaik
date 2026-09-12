@@ -4,8 +4,8 @@
 // pinned one by one — especially the ones about broken input, because a file
 // that has been e-mailed around is exactly the file that arrives damaged.
 
-import { BUNDLE_VERSION, buildBundle, bundleVersionOf, parseBundle } from './bundle';
-import { FIRST_PLAN_ID, type Library } from './library';
+import { BUNDLE_VERSION, buildBundle, bundleVersionOf, parseBundle } from './pure/bundle';
+import { FIRST_PLAN_ID, type Library } from './pure/library';
 
 const two = (): Library => ({
   activeId: 'abcd',

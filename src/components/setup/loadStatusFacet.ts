@@ -1,6 +1,6 @@
-import type { ReportRow, LoadStatus } from '../../feasibility';
-import { loadStatus } from '../../feasibility';
-import type { Facet } from '../../listview';
+import type { ReportRow, LoadStatus } from '../../pure/feasibility';
+import { loadStatus } from '../../pure/feasibility';
+import type { Facet } from '../../pure/listview';
 import type { Id } from '../../leaf/types';
 import type { Translate } from '../T';
 

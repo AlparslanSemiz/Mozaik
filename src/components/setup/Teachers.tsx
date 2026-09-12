@@ -4,14 +4,14 @@
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
 import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
-import type { ListConfig, ListQuery } from '../../listview';
-import { openHours } from '../../entities';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
+import type { ListConfig, ListQuery } from '../../pure/listview';
+import { openHours } from '../../pure/entities';
 import type { Gender, Id, Teacher } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
-import { parseTeachers } from '../../import';
+import { parseTeachers } from '../../pure/import';
 import ColorPick from '../ColorPick';
 import {
   addSubject,
@@ -33,13 +33,13 @@ import {
   teacherSubjects,
   updateTeacher,
   weeklyLoad,
-} from '../../entities';
+} from '../../pure/entities';
 import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
 import AddPanel from '../AddPanel';
-import { buildCapacity } from '../../feasibility';
+import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 
 /** Sentinel option value: picking it opens a box instead of setting a subject. */

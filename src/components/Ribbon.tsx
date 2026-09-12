@@ -84,7 +84,7 @@ import {
   TriangleAlert,
   Trash2,
 } from 'lucide-react';
-import { health } from '../feasibility';
+import { health } from '../pure/feasibility';
 import type { State } from '../leaf/types';
 import type { SolverRun } from '../useSolver';
 import type { Density, Theme } from '../theme';
@@ -103,11 +103,11 @@ import {
   replaceActiveGrid,
   switchProgram,
   validProgramName,
-} from '../programs';
-import { newId } from '../entities';
-import { maskCount, setDayMask, setRowMask, solverExclusions } from '../programMask';
-import type { ProgramMask } from '../programMask';
-import { pendingBlocks, pinScopeCells, togglePinScope } from '../constraints';
+} from '../pure/programs';
+import { newId } from '../pure/entities';
+import { maskCount, setDayMask, setRowMask, solverExclusions } from '../pure/programMask';
+import type { ProgramMask } from '../pure/programMask';
+import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
 import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';

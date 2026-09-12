@@ -4,20 +4,20 @@
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
 import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
-import type { ListConfig, ListQuery } from '../../listview';
-import { roomClasses, weeklyLoad } from '../../entities';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
+import type { ListConfig, ListQuery } from '../../pure/listview';
+import { roomClasses, weeklyLoad } from '../../pure/entities';
 import type { Room } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
-import { parseRooms } from '../../import';
-import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../entities';
+import { parseRooms } from '../../pure/import';
+import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { useT } from '../T';
 import AddPanel from '../AddPanel';
-import { buildCapacity } from '../../feasibility';
+import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 
 export default function Rooms({ state, change }: PanelProps) {

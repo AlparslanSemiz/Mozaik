@@ -40,7 +40,7 @@ import {
   teacherSubjects,
   transferLesson,
   updateLesson,
-} from '../entities';
+} from '../pure/entities';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type { Id, State } from '../leaf/types';

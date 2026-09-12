@@ -3,11 +3,11 @@
 // SAME engine the user's own dragging is judged by".
 
 import { describe, expect, it } from 'vitest';
-import { buildIndex, placementKey, place, setBlockPinned } from './constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
-import { findViolations } from './rules';
-import { sampleState } from './sample';
-import { createSolver, solve } from './solver';
+import { buildIndex, placementKey, place, setBlockPinned } from './pure/constraints';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import { findViolations } from './pure/rules';
+import { sampleState } from './pure/sample';
+import { createSolver, solve } from './pure/solver';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';
@@ -542,4 +542,4 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     });
   }
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from './programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from './pure/programs';

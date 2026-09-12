@@ -13,7 +13,7 @@
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
 import { loadPlan } from '../store';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/programs';
 import type { PlanControls } from './props';
 
 interface Props {

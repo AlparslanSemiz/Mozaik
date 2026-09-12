@@ -11,7 +11,7 @@
 
 import { t } from './leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { buildBundle } from './bundle';
+import { buildBundle } from './pure/bundle';
 import { isDesktop, openDesktopFolder } from './desktop';
 import {
   askPermission,
@@ -24,7 +24,7 @@ import {
   saveInto,
   writeHandle,
 } from './folder';
-import type { Library } from './library';
+import type { Library } from './pure/library';
 import { collectStates } from './store';
 import type { Id, State } from './leaf/types';
 

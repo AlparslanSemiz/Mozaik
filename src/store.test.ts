@@ -5,10 +5,10 @@
 // plain string days). BOTH must still open, and the timetable inside them must
 // come out exactly as it went in.
 
-import { defaultSubjects } from './entities';
+import { defaultSubjects } from './pure/entities';
 import { parseState } from './store';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './sample';
+import { sampleState } from './pure/sample';
 import { SCHEMA_VERSION } from './leaf/types';
 
 /** A backup downloaded BEFORE the rename: v1 shape with Turkish field names. */
@@ -883,9 +883,9 @@ describe('parseState — v10 → v11 göçü', () => {
 // `reduce` is pure, so the rule that matters most — undo must never carry one
 // plan's move into another plan's file — can be pinned without mounting React.
 
-import { BASE_KEY, FIRST_PLAN_ID, planKey } from './library';
+import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/library';
 import { collectStates, loadPlan, reduce, savePlan } from './store';
-import { emptyState } from './entities';
+import { emptyState } from './pure/entities';
 import type { State } from './leaf/types';
 
 function memoryStorage(): Storage {
@@ -1023,4 +1023,4 @@ describe('savePlan kota hatasını bildiriyor', () => {
     expect(savePlan('abcd', emptyState())).toBe(false);
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from './pure/programs';

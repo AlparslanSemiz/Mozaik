@@ -2,13 +2,13 @@ import { Activity, useCallback, useRef, useState } from 'react';
 import { Keyboard, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import Commands from './components/Commands';
-import { health } from './feasibility';
+import { health } from './pure/feasibility';
 import { InspectorProvider } from './components/Inspector';
 import { LessonEditProvider } from './components/LessonEdit';
 import { useDialogs } from './components/Dialogs';
 import { useToast } from './components/Toasts';
 import type React from 'react';
-import { bundleVersionOf, BUNDLE_VERSION } from './bundle';
+import { bundleVersionOf, BUNDLE_VERSION } from './pure/bundle';
 import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from './store';
 import {
   applyMotion,
@@ -47,8 +47,8 @@ import Print, { NOTHING_EXCLUDED } from './components/Print';
 import { readPrintOptions, writePrintOptions } from './printOptions';
 import type { PrintOptions } from './printOptions';
 import type { Excluded } from './components/Print';
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './programMask';
-import type { ProgramMask } from './programMask';
+import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './pure/programMask';
+import type { ProgramMask } from './pure/programMask';
 import Settings from './components/settings';
 import { useShortcutsHelp } from './components/ShortcutsHelp';
 import { hasUnseenChangelog } from './changelog';

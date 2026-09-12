@@ -4,7 +4,7 @@
 // illegal before it is trusted to judge one that should not be.
 
 import { describe, expect, it } from 'vitest';
-import { placementKey } from './constraints';
+import { placementKey } from './pure/constraints';
 import { parseState } from './store';
 import {
   closeHours,
@@ -281,4 +281,4 @@ describe('closeWeek / closeHours', () => {
     expect(Object.keys(d.unavailable)).toHaveLength(2);
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from './pure/programs';

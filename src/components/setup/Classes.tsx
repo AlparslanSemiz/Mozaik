@@ -4,14 +4,14 @@
 import { useMemo, useState } from 'react';
 import ListTools from '../ListTools';
 import { useRowOrder } from '../useRowOrder';
-import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
-import type { ListConfig, ListQuery } from '../../listview';
-import { roomName } from '../../entities';
+import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
+import type { ListConfig, ListQuery } from '../../pure/listview';
+import { roomName } from '../../pure/entities';
 import type { ClassGroup } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
-import { parseClasses } from '../../import';
+import { parseClasses } from '../../pure/import';
 import ColorPick from '../ColorPick';
 import {
   addClass,
@@ -20,13 +20,13 @@ import {
   deletionQuestion,
   updateClass,
   weeklyLoad,
-} from '../../entities';
+} from '../../pure/entities';
 import LimitBox from '../LimitBox';
 import Paste from './Paste';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
 import AddPanel from '../AddPanel';
-import { buildCapacity } from '../../feasibility';
+import { buildCapacity } from '../../pure/feasibility';
 import { loadStatusFacet } from './loadStatusFacet';
 
 export default function Classes({ state, change }: PanelProps) {

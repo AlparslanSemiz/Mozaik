@@ -5,7 +5,7 @@ import {
   makeShort,
   parseTeachers,
   parseClasses,
-} from './import';
+} from './pure/import';
 
 describe('splitGrid', () => {
   it('Excel sekmeli yapıştırmayı ayırır ve boş satırları atar', () => {

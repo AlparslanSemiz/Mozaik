@@ -1203,7 +1203,7 @@ değil — geç başlangıç / erken bitiş). Denetçinin kendisi test edildi (t
 
 ### 2. Deney B — DÖRT ağır dünyanın hepsinde önce/sonra
 
-[src/solver.ts](../src/solver.ts)'teki `order()`'a **beşinci** bir anahtar
+[src/pure/solver.ts](../src/pure/solver.ts)'teki `order()`'a **beşinci** bir anahtar
 girdi: sınıfın o gün zaten dolu olan saatine yaslanan hücre önce dener.
 Yayma kuralları (1. ve 2. anahtar) dokunulmadan kaldı — Deney A tam da onlara
 dokunduğu için reddedilmişti (tuzak 21). MEASURED, `npm run cozucu`'nun

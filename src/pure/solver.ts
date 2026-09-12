@@ -23,13 +23,13 @@ import {
   placedBlocks as blocksOnGrid,
   vacate,
 } from './constraints';
-import { t } from './leaf/i18n';
-import { closedKey, parseKey, placementKey } from './leaf/keys';
+import { t } from '../leaf/i18n';
+import { closedKey, parseKey, placementKey } from '../leaf/keys';
 import type { Index, PlacedBlock } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import { activePinned, activePlacements, replaceActiveGrid } from './programs';
-import type { Id, Lesson, State } from './leaf/types';
+import type { Id, Lesson, State } from '../leaf/types';
 import { lessonExcluded } from './programMask';
 import type { SolverExclusions } from './programMask';
 

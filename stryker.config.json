@@ -26,13 +26,13 @@
   },
   "coverageAnalysis": "perTest",
   "mutate": [
-    "src/constraints.ts",
-    "src/rules.ts",
+    "src/pure/constraints.ts",
+    "src/pure/rules.ts",
     "src/leaf/blocks.ts",
     "src/store.ts",
-    "src/library.ts",
-    "src/feasibility.ts",
-    "src/entities.ts"
+    "src/pure/library.ts",
+    "src/pure/feasibility.ts",
+    "src/pure/entities.ts"
   ],
   "reporters": [
     "progress",
@@ -54,5 +54,5 @@
   "tempDirName": "test-results/mutasyon/tmp",
   "cleanTempDir": true,
   "disableTypeChecks": true,
-  "_comment_solver": "src/solver.ts bu listede YOK ve bu bir bulgu, bir tercih degil. Stryker'in enstrumantasyonu solver.ts:530-531'deki `classOnDay[g]!++` bicimini ayristiramiyor (UpdateExpression + TSNonNullExpression) ve butun kosuyu dusuruyor. Iki satir `classOnDay[g] = classOnDay[g]! + 1` olarak yazilirsa cozulur, ama o uretim kodunda bir degisiklik ve bu paketin isi degil. TODO 8f, TESTFINDINGS 2026-09-12."
+  "_comment_solver": "src/pure/solver.ts bu listede YOK ve bu bir bulgu, bir tercih degil. Stryker'in enstrumantasyonu solver.ts:530-531'deki `classOnDay[g]!++` bicimini ayristiramiyor (UpdateExpression + TSNonNullExpression) ve butun kosuyu dusuruyor. Iki satir `classOnDay[g] = classOnDay[g]! + 1` olarak yazilirsa cozulur, ama o uretim kodunda bir degisiklik ve bu paketin isi degil. TODO 8f, TESTFINDINGS 2026-09-12."
 }

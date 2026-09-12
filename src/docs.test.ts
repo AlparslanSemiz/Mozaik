@@ -32,7 +32,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { SCHEMA_VERSION } from './leaf/types';
-import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './library';
+import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './pure/library';
 import { PREFERENCE_ROWS } from './leaf/preferenceKeys';
 
 // ------------------------------------------------------------------ reading

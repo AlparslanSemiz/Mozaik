@@ -9,9 +9,9 @@ import {
   parseClock,
   sharedPeriods,
   periodGroups,
-} from './bell';
-import { DEFAULT_BELL } from './entities';
-import { hourNames } from './entities';
+} from './pure/bell';
+import { DEFAULT_BELL } from './pure/entities';
+import { hourNames } from './pure/entities';
 
 const LABELS = hourNames(12);
 

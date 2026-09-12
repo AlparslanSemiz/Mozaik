@@ -21,11 +21,11 @@
 
 import fc from 'fast-check';
 import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
-import { buildIndex, occupy, placedBlocks, vacate } from './constraints';
-import { remapDays } from './entities';
+import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints';
+import { remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
-import { activeProgram } from './programs';
-import { solve } from './solver';
+import { activeProgram } from './pure/programs';
+import { solve } from './pure/solver';
 import { parseState } from './store';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
 import type { Day, Id, State } from './leaf/types';

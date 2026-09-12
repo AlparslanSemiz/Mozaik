@@ -29,7 +29,7 @@ import {
   t,
   translate,
 } from './leaf/i18n';
-import { dayLabel, shortDay, subjectLabel, subjectShort } from './entities';
+import { dayLabel, shortDay, subjectLabel, subjectShort } from './pure/entities';
 import type { Settings } from './leaf/types';
 import './leaf/lang/en';
 import './leaf/lang/de';

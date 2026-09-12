@@ -60,19 +60,19 @@ yaprakta durur.
 
 | Dosya | Görevi |
 |---|---|
-| `constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock` |
-| `rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
-| `feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`) |
-| `bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
-| `import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
-| `entities.ts` | ekleme, güncelleme, silme, `sanitize`, `remapDays` |
-| `solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
-| `programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
-| `programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
-| `listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
-| `bundle.ts` | bütün planları tek dosyada taşıyan zarf |
-| `sample.ts` | babanın ölçeğine yakın örnek okul |
+| `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock` |
+| `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
+| `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`) |
+| `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
+| `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
+| `pure/entities.ts` | ekleme, güncelleme, silme, `sanitize`, `remapDays` |
+| `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
+| `pure/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
+| `pure/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
+| `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
+| `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
+| `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
+| `pure/sample.ts` | babanın ölçeğine yakın örnek okul |
 
 ### Durum, tercih ve depolama
 

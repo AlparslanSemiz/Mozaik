@@ -2,11 +2,11 @@
 // This is the thing aSc does not do and that hurts most at the school.
 
 import { useMemo } from 'react';
-import { buildIndex, closedConflicts, placementKey } from '../constraints';
-import { buildReport } from '../feasibility';
-import type { ReportRow } from '../feasibility';
+import { buildIndex, closedConflicts, placementKey } from '../pure/constraints';
+import { buildReport } from '../pure/feasibility';
+import type { ReportRow } from '../pure/feasibility';
 import type { Id, State } from '../leaf/types';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../pure/programs';
 import type { CheckView } from '../toolState';
 import CapacityRows from './CapacityRows';
 import { T, useT } from './T';

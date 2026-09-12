@@ -22,9 +22,9 @@ import {
   removeBlock,
   sanitize,
   setBlockPinned,
-} from './constraints';
-import type { BlockRef } from './constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
+} from './pure/constraints';
+import type { BlockRef } from './pure/constraints';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 
@@ -1346,4 +1346,4 @@ describe('sabitleme', () => {
     expect(activeProgram(shrunk).pinned).toEqual({});
   });
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from './programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from './pure/programs';

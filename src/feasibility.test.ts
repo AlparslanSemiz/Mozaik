@@ -7,8 +7,8 @@ import {
   commonestBlock,
   health,
   loadStatus,
-} from './feasibility';
-import { place } from './constraints';
+} from './pure/feasibility';
+import { place } from './pure/constraints';
 import {
   addClass,
   addLesson,
@@ -17,10 +17,10 @@ import {
   emptyState,
   setAvailability,
   setWholeWeek,
-} from './entities';
-import { buildIndex } from './constraints';
-import { closedKey } from './constraints';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
+} from './pure/entities';
+import { buildIndex } from './pure/constraints';
+import { closedKey } from './pure/constraints';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import type { State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 
@@ -567,4 +567,4 @@ describe('health', () => {
     expect(h.warnings).toBeLessThan(10);
   });
 });
-import { activeProgram, blankProgram } from './programs';
+import { activeProgram, blankProgram } from './pure/programs';

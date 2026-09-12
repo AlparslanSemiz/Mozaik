@@ -15,13 +15,13 @@
 // Printing the 84-column main table is still impossible and still not attempted.
 
 import { useMemo } from 'react';
-import { periodGroups } from '../bell';
-import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints';
+import { periodGroups } from '../pure/bell';
+import { blockSpans, buildIndex, closedKey, placementKey } from '../pure/constraints';
 import { parseKey } from '../leaf/keys';
-import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
+import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../pure/entities';
 import { paletteColor } from '../leaf/palette';
 import type { State } from '../leaf/types';
-import { activePlacements } from '../programs';
+import { activePlacements } from '../pure/programs';
 import type { Scope } from '../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';
 import type { PrintOptions } from '../printOptions';

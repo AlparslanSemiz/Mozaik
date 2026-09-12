@@ -274,7 +274,7 @@ listesi [DATA.md](DATA.md)'de.
 3. Soru sorulacaksa `useDialogs()`, `window.confirm` kullanılmıyor.
 4. Bir şey olduğunu söylemek için `useToast()`.
 5. Bir varlık adı yazılıyorsa `.inspect` ve `useInspect()`, panel onunla gelir.
-6. Uzun bir liste çiziliyorsa `ListTools` ve `src/listview.ts`.
+6. Uzun bir liste çiziliyorsa `ListTools` ve `src/pure/listview.ts`.
 7. Izgaraya hücre eklendiyse: `data-day` ve `data-hour` taşıyor mu, taşımalı mı?
 8. Hareket eden bir sayı yazıldıysa: dört mesafe tokeninden biri mi (`--slide`, `--sweep`, `--press`, `--pop`)? Değilse kapatılamaz (tuzak 57).
 9. [TESTPLAN.md](TESTPLAN.md)'deki kadansa göre E2E ve `npm run ekran`: çıktıyı göster, iddia etme.

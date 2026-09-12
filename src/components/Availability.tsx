@@ -10,10 +10,10 @@
 
 import { useMemo, useRef, useState } from 'react';
 import type React from 'react';
-import { sharedPeriods } from '../bell';
+import { sharedPeriods } from '../pure/bell';
 import { paletteColor } from '../leaf/palette';
 import { KIND_ICON } from './steps';
-import { buildIndex, closedConflicts, closedKey } from '../constraints';
+import { buildIndex, closedConflicts, closedKey } from '../pure/constraints';
 import { cellKey, parseCellKey } from '../leaf/keys';
 import type { Id, State } from '../leaf/types';
 import {
@@ -25,7 +25,7 @@ import {
   subjectShort,
   teacherSubjects,
   weeklyLoad,
-} from '../entities';
+} from '../pure/entities';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../leaf/i18n';

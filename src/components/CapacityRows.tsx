@@ -14,7 +14,7 @@
 // Özet already.
 
 import { paletteColor } from '../leaf/palette';
-import type { ReportRow } from '../feasibility';
+import type { ReportRow } from '../pure/feasibility';
 import type { Id } from '../leaf/types';
 import { useT } from './T';
 

@@ -1,9 +1,9 @@
 // The limit boxes. Every export of rules.ts is covered here (docs/ARCHITECTURE.md rule:
 // no feature lands in a pure module without a test).
 
-import { buildIndex, place } from './constraints';
-import { blankProgram } from './programs';
-import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
+import { buildIndex, place } from './pure/constraints';
+import { blankProgram } from './pure/programs';
+import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import {
   classDayGaps,
   findViolations,
@@ -18,7 +18,7 @@ import {
   runLength,
   teacherDayCount,
   teacherDayGaps,
-} from './rules';
+} from './pure/rules';
 import type { State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 

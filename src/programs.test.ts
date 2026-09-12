@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { deleteLesson, remapDays } from './entities';
-import { place, setBlockPinned, togglePinScope } from './constraints';
+import { deleteLesson, remapDays } from './pure/entities';
+import { place, setBlockPinned, togglePinScope } from './pure/constraints';
 import { parseState } from './store';
 import {
   activeProgram,
@@ -10,7 +10,7 @@ import {
   removeProgram,
   renameProgram,
   switchProgram,
-} from './programs';
+} from './pure/programs';
 import { makeWorld } from './worlds';
 
 function world() {

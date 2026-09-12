@@ -4,7 +4,7 @@
 // A wrong answer here does not throw — it opens the wrong plan, or an empty
 // one, and the work of an afternoon looks deleted. So every branch is pinned.
 
-import { newId } from './entities';
+import { newId } from './pure/entities';
 import {
   addPlan,
   BACKUP_COUNT,
@@ -26,7 +26,7 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from './library';
+} from './pure/library';
 import { routeName, storageAddress, storageKind, storageReport } from './storageReport';
 import {
   dropPlanText,
@@ -557,6 +557,13 @@ const KAYNAK = import.meta.glob('./**/*.ts', {
   eager: true,
 }) as Record<string, string>;
 
+/** One module by its file name, wherever in `src/` it now lives: the layer
+    folders moved these files once and a hard-coded `./library.ts` would go
+    undefined rather than red, which reads as a passing `not.toMatch`. */
+function modul(ad: string): string | undefined {
+  return KAYNAK[Object.keys(KAYNAK).find((p) => p.endsWith('/' + ad)) ?? ''];
+}
+
 /** The modules the plan library is made of, whatever they end up being called. */
 function libraryModules(): Array<[string, string]> {
   return Object.entries(KAYNAK).filter(
@@ -599,7 +606,7 @@ describe('katman sınırları', () => {
     // The whole point of splitting storage out: the model can be reasoned
     // about, and tested, without a browser. One getItem back in here and that
     // is gone again, and nothing else would say so.
-    const model = KAYNAK['./library.ts'];
+    const model = modul('library.ts');
     expect(model, 'library.ts okunamadı').toBeTruthy();
     expect(kodu(model!), 'library.ts localStorage’a dokunuyor').not.toMatch(/localStorage/);
   });
@@ -608,7 +615,7 @@ describe('katman sınırları', () => {
     // Storage and the report both read the model; the model reads neither. The
     // day it does, the three files are one file again with extra steps, and
     // the cycle this split exists to prevent is back in a new shape.
-    const model = KAYNAK['./library.ts'];
+    const model = modul('library.ts');
     expect(kodu(model!), 'library.ts libraryStore’u çağırıyor').not.toMatch(
       /from '\.\/libraryStore'/,
     );
@@ -635,7 +642,7 @@ describe('katman sınırları', () => {
     // bundle.ts carries every plan as raw `unknown` and hands the directory to
     // normalizeLibrary. Two homes for "what is a legal plan list" is two
     // answers, and the file format is the one place that cannot afford that.
-    const bundle = KAYNAK['./bundle.ts'];
+    const bundle = modul('bundle.ts');
     expect(bundle, 'bundle.ts okunamadı').toBeTruthy();
     // The raw values go straight in. Anything bundle.ts checked ITSELF first
     // would be a second answer to "what is a legal plan list", and a file

@@ -19,7 +19,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseState } from './store';
-import { activeProgram } from './programs';
+import { activeProgram } from './pure/programs';
 import { SCHEMA_VERSION } from './leaf/types';
 
 const DIR = join(import.meta.dirname, 'fixtures');

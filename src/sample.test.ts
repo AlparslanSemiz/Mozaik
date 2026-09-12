@@ -5,10 +5,10 @@
 //   2. Is the real drop-map cost small enough not to stutter
 //      on my father's slow machine?
 
-import { blocker, buildIndex, dropMap, sanitize, place } from './constraints';
-import { buildReport } from './feasibility';
+import { blocker, buildIndex, dropMap, sanitize, place } from './pure/constraints';
+import { buildReport } from './pure/feasibility';
 import { blockPlan } from './leaf/blocks';
-import { sampleState } from './sample';
+import { sampleState } from './pure/sample';
 import type { State } from './leaf/types';
 
 /** Greedy fill: puts every lesson in the first valid slot. NOT a solver, just a test. */
@@ -138,4 +138,4 @@ describe('gerçek ölçekte doldurma', () => {
     expect(denseMs, `dolu program medyanı ${denseMs.toFixed(2)} ms`).toBeLessThan(50);
   });
 });
-import { activeProgram } from './programs';
+import { activeProgram } from './pure/programs';

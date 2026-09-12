@@ -8,9 +8,9 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
-import { type Bundle, buildBundle } from './bundle';
-import { sanitize } from './constraints';
-import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
+import { type Bundle, buildBundle } from './pure/bundle';
+import { sanitize } from './pure/constraints';
+import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './pure/entities';
 import {
   addPlan,
   BACKUP_COUNT,
@@ -26,7 +26,7 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from './library';
+} from './pure/library';
 import {
   dropPlanText,
   readLibrary,
@@ -35,7 +35,7 @@ import {
   writePlanText,
 } from './libraryStore';
 import { firstFreeColor, PALETTE_SIZE } from './leaf/palette';
-import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from './pure/programs';
 import type {
   ClassGroup,
   Day,

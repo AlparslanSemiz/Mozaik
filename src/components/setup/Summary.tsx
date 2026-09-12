@@ -11,7 +11,7 @@
 // without paying for buildReport's 99 x 72 blocker() calls (pitfall 3).
 
 import { useMemo } from 'react';
-import { buildCapacity } from '../../feasibility';
+import { buildCapacity } from '../../pure/feasibility';
 import CapacityRows from '../CapacityRows';
 import {
   DEFAULT_SUBJECT_SHORTS,
@@ -24,7 +24,7 @@ import {
   subjectOptions,
   subjectTeachers,
   subjectLabel,
-} from '../../entities';
+} from '../../pure/entities';
 import type { StepId } from '../../toolState';
 
 /**

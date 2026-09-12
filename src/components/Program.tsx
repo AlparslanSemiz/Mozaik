@@ -26,9 +26,9 @@ import {
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
-} from '../constraints';
-import type { BlockRef, PinScope } from '../constraints';
-import type { Index } from '../constraints';
+} from '../pure/constraints';
+import type { BlockRef, PinScope } from '../pure/constraints';
+import type { Index } from '../pure/constraints';
 import { cellKey, parseCellKey } from '../leaf/keys';
 import { useToast } from './Toasts';
 import { useInspect } from './Inspector';
@@ -40,15 +40,15 @@ import {
   subjectLabel,
   subjectShort,
   teacherSubjects,
-} from '../entities';
-import { compareTr } from '../listview';
+} from '../pure/entities';
+import { compareTr } from '../pure/listview';
 import { useDrag } from '../drag';
 import type { DragData } from '../drag';
 import type { SolverRun } from '../useSolver';
 import type { State, Id } from '../leaf/types';
-import { activePinned, activePlacements } from '../programs';
-import { rowMask, setDayMask, setRowMask } from '../programMask';
-import type { ProgramMask } from '../programMask';
+import { activePinned, activePlacements } from '../pure/programs';
+import { rowMask, setDayMask, setRowMask } from '../pure/programMask';
+import type { ProgramMask } from '../pure/programMask';
 import type { PoolSort, View } from '../toolState';
 import { KIND_ICON } from './steps';
 import Grid from './Grid';
