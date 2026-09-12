@@ -22,13 +22,6 @@ bitince §10'a taşınır.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
-Program kısmının açılışı daha hızlanmalı.
-Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak.
-Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa.
-Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok.
-Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem.
-Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre.
-
 
 
 
@@ -46,7 +39,7 @@ Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre on
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | hepsi açık |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti, çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -300,6 +293,16 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       altındaki kural/veri hâlâ uygulanıyor mu, yoksa görünmeyen bir kural
       sessizce `Kapalı`ya mı düşüyor — bir görünüm tercihi verinin kendisini
       değiştirmemeli (tuzak 96'nın ailesi).
+- [ ] **B2.11 Yenilik noktası Ayarlar sekmesinde var, Hakkında bölümünde yok.**
+      Senin satırın: *"Yenilik olduğu vakit ayarların üzerinde nokta var ama
+      hakkında kısmında yok."* Doğru, ve kaynağı kodda görülüyor: `App.tsx`
+      noktayı yalnız sekmeye çiziyor (`dest.id === 'settings'` koşulu,
+      `.tab-dot`) ve nokta ancak Hakkında açılınca siliniyor (`Data.tsx`'in
+      `markChangelogSeen` çağrısı). Yani sekmeye tıklayan kişi beş bölümle
+      karşılaşıyor ve hangisinde yenilik olduğunu söyleyen hiçbir şey yok, işaret
+      yolun yarısında kayboluyor. Aynı `changelogUnseen` işareti Ayarlar
+      kabuğundaki bölüm düğmesine de taşınır. Ek bir durum gerekmiyor, çünkü
+      işaret zaten bölüm açılınca temizleniyor, yani açılmadan önce çizilebilir.
 
 **Çıkma şartı:** `npm run kontrol` yeşil · beş bölümün iki temada görüntüsü
 alınmış · ölçümler [WORKLOG.md](WORKLOG.md)'ye yazılmış.
@@ -473,6 +476,52 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       **boş mu kalacağı yoksa kutunun tamamen mi küçüleceği** sorusu var
       (tuzak 82: bir metni kaldırmadan önce o metnin ne taşıdığı sorulur —
       burada bir satır yüksekliği).
+- [ ] **B4.9 Program sekmesinin açılışı hızlansın, ve bu şikayetin İKİNCİ gelişi.**
+      Senin satırın: *"Program kısmının açılışı daha hızlanmalı."* Aynı cümle bir
+      kez B1.4 olarak ölçülüp kapanmıştı (§10'daki arşivde) ve o kayıt bu turun
+      başlangıç noktası. Şikayet gerçek ve iki kez ölçüldü: Program 32,6 ms (x1),
+      144,8 (x4) ve 302 (x8) iken öteki sekmeler 6 ile 50 ms arasıydı, bugünkü
+      ölçüm ise 34,8 ms (x1) ve 159,0 (x4) diyor ([WORKLOG.md](WORKLOG.md)). O tur
+      bir teoriyi de çürüttü: `gridChrome.ts`'in profildeki en pahalı satırı
+      ertelendi ve toplam kıpırdamadı (105 ile 104,5 ms), çünkü o düzen boyamanın
+      zaten yapacağı düzendi (tuzak 105). Geriye adlandırılmış tek bir maliyet
+      kaldı, 1950 hücrenin boyanması. Bu yüzden turun ilk işi aynı yerden yeniden
+      profil almak DEĞİL, o maliyete girmek, ve seçenekler ölçülmeden yazılmaz.
+      İkinci ölçülmemiş şey hedef makine: bütün sayılar geliştirme makinesinde
+      alındı ([PRINCIPLES.md](PRINCIPLES.md), "Hedef makine"). Aynı desen B4.7'de
+      de yaşandı, birinci tur yanlış yeri ölçtü ve şikayet ikinci kez geldi, yani
+      bu maddenin üçüncü kez gelmemesi ölçümün doğru yere bakmasına bağlı.
+- [ ] **B4.10 "Programı boşalt" zaten kırmızı, görünen ağırlığı ölçülmedi.**
+      Senin satırın: *"Program kısmında sağ üstteki işlemlerde programı boşalt
+      kırmızı olmalı ya da işte önemli bir işlem."* Ölçüldü ve renk yerinde:
+      `Ribbon.tsx`'te Izgara grubundaki İşlemler menüsünün son maddesi
+      `menu-item danger` sınıfını taşıyor, o sınıf `styles.css`'te dinlenirken
+      bile `--bad` mürekkebi veriyor, ve üstünde bir ayraç duruyor. İki şey
+      görünmesini engelleyebiliyor: ızgara boşken madde `disabled` ve `--muted`
+      griye düşüyor, ve cümlenin ikinci yarısı ("ya da işte önemli bir işlem")
+      rengin tek başına yetmediğini söylüyor. Soru "kırmızı olsun mu" değil
+      "kırmızı yetiyor mu", ve cevabı ekran görüntüsüyle verilir, iddiayla değil.
+      Renk dışındaki seçenekler bir tasarım kararı: maddeyi menünün dışına almak,
+      onayı ağırlaştırmak (bugün zaten `danger` diyalog kullanılıyor), ya da kaç
+      saatin gideceğini maddenin kendisinde söylemek (bugün yalnız onay
+      başlığında var). Menüden çıkarılıp şeride konursa iki kural birden
+      bağlayıcı: yıkıcı düğmenin adı bir sekmenin adını içeremez (tuzak 49) ve
+      şeridin daralınca neyi sırayla feda edeceği yazılıdır
+      ([LAYOUT.md](LAYOUT.md), tuzak 110).
+- [ ] **B4.11 Kartların renk ölçütü var ama bulunamıyor.**
+      Senin satırın: *"Program kısmında renkleri ayarlama olmalı sınıfa göre
+      öğretmene göre ona göre buna göre."* Özellik zaten var ve istenen dördü de
+      var: `Ribbon.tsx`'in Renk grubunda bir menü, `Öğretmene göre`,
+      `Sınıfa göre`, `Dersliğe göre` ve `Branşa göre`, seçili olan düğmenin
+      üstünde yazıyor ve tercih `programColor.ts` ile makineye kaydediliyor. Yani
+      bu bir özellik isteği değil bir bulunabilirlik bulgusu, ve iki ölçülmemiş
+      sebep var. Birincisi kontrol şeridin SAĞ ucunda duruyor ve şeridin daralınca
+      neyi sırayla feda ettiği yazılı (tuzak 110, [LAYOUT.md](LAYOUT.md)).
+      İkincisi exe penceresi 1600 mantıksal piksel ve deponun bütün düzen
+      ölçümleri 1920'de yapıldı (tuzak 107), yani kullanıcının baktığı kutuda bu
+      kontrolün görünüp görünmediği hiç ölçülmedi. İlk iş babanın ekranında ve
+      exe'de görüntü almak, çünkü ölçülen her şey "oradayım" derken ekran
+      "değilim" diyorsa haklı olan ekrandır (tuzak 84).
 
 ---
 
@@ -567,6 +616,20 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       `e2e/program.spec.ts` ("89. Gün sonunda blok geriye kaydırılır") —
       ikisi de `loadWorld()` ile kurulmuş belirli bir dünyada, tahmine değil
       ölçüme dayanıyor.
+- [ ] **B5.7 Öğretmenin kendi dersleri arasında takas.**
+      Senin satırın: *"Öğretmenin kendi dersleri arasında değişim muhtemel olmalı
+      eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa."* Takas motoru zaten
+      var ve genel: `constraints.ts`'teki `swapBlocks()` iki bloğu da kaldırıp
+      ikisini de `check()`'ten geçiriyor, yani aynı öğretmenin iki dersi iki ayrı
+      sınıfta olsa bile mekanik olarak takas edilebiliyor, ve "sınıfsal bir
+      sıkıntı" varsa zaten reddediliyor, yani senin koşulun kodda duruyor. Eksik
+      olan mekanizma değil, takasın NE ZAMAN teklif edildiği: `dropMap()` takası
+      yalnız aday tam bir tane olduğunda öneriyor, yani bırakılan hücre birden çok
+      bloğa değiyorsa (iki saatlik bir blok iki tek saatlik dersin üstüne) takas
+      hiç teklif edilmiyor ve ekranda "olmuyor" görünüyor. İlk iş senin kastettiğin
+      durumu üretip ölçmek, çünkü bir şikayetten yazılmış plan bir sebep
+      adlandırırsa o sebep ilk ölçülecek şeydir (tuzak 101). Ölçülmeden "özellik
+      yok" diye yazılmayacak.
 
 ---
 
@@ -708,6 +771,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **Yedek dosya adı `ders-programi-*` mı kalsın, `Mozaik-*` mi olsun?**
       (B7.13.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
       tanımaz: birikirler, ve eski ana dosya klasörde öksüz kalır.
+- [ ] **Web yığını ile uygulama yığını ayrılsın mı?** Senin satırın:
+      *"Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey
+      ama gerekiyorsa yapılacak."* Koşullu bir satır ve koşulu B4.9: açılışın
+      gerçek maliyeti ölçülmeden bu karar verilemez. Bugün dört teslim yolu aynı
+      `dist/index.html`'i taşıyor ve ayrım o birliği bozar
+      ([PRINCIPLES.md](PRINCIPLES.md), "Çift tıkla çalışır"). Sıra: önce B4.9'un
+      ölçümü, sonra ayrımın kazancının ölçülmesi, sonra bu karar.
 - [ ] **Excel mi, `.csv` mi?** (B3.3 — `.xlsx` bir zip, `.csv` düz metin;
       ikisi çok farklı iş.)
 - [ ] **Çıktı ekranları için örnek fotoğraf.** Senin satırın: *"Benden çıktılar
@@ -1128,6 +1198,12 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Eğer hata varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir... son 2 saate konulabilmeli. | **B5.6** |
 | Ayarlarda her sectionun görüntüsü değişebiliyor olsun... Önizleme şeklinde görelim onları. | **B2.10** |
 | Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor. | **B4.7** — İKİNCİ kez geliyor (§9b'de 2026-09-01'de kapanmış), sebebi 2026-09-12'de ölçüldü |
+| Program kısmının açılışı daha hızlanmalı. | **B4.9** — İKİNCİ kez geliyor, B1.4 olarak bir kez ölçülmüştü |
+| Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak. | **§8a** — koşullu, koşulu B4.9 |
+| Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa. | **B5.7** — takas motoru var, teklif edilme koşulu ölçülecek |
+| Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok. | **B2.11** — doğru, kaynağı kodda görüldü |
+| Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem. | **B4.10** — zaten kırmızı, görünen ağırlığı ölçülecek |
+| Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre. | **B4.11** — özellik var, bulunabilirlik bulgusu |
 | kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya... yani kırmızı mı turuncu mu falan. | **B4.8** — performans değil görünürlük, 2026-09-12'de ölçüldü |
 
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
