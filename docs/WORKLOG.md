@@ -30,26 +30,21 @@ güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test 
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
 
-**Yarım olan.** Kod refactoru Faz 2'nin başında: envanter onaylandı, taban ölçümleri
-ve boyut atfı bu dosyanın 2026-09-11 refactor girdisinde, kullanıcının üç kararı
-alındı, Faz 2'den önceki iki davranış düzeltmesi commit'lendi, ve Faz 2'nin ilk
-adımı (ESLint, knip, Prettier ve biçim commit'i) ile ikinci adımı (ölü kod ve
-kapsülleme), üçüncü adımı (`keys.ts`) ve dördüncü adımı (küçük ortak yardımcılar) bitti.
-Adım 5'ten önce E2E tabanı temizlendi: kararsız testlerin sebebi bulundu, bilinen beş kırmızının dördü test kusuruydu ve düzeltildi.
-Beşinci adım da bitti: on beş makine tercihi tek bir fabrikada, anahtarları tek listede.
-Sıradaki adım 6: `library.ts`'in saf model, depolama ve "Veriler nerede" raporu olarak bölünmesi. [TODO.md](TODO.md)'de açık madde
-sayıları (2026-09-11'de, refactor turundan önce sayıldı): §1 inceleme 5, §2 Ayarlar 10,
-§3 Çıktı 7, §4 tuval ve baskı 7, §5 kısıt motoru 1, §6 veri modeli 6, §7 dağıtım 9,
-§8 karar bekleyen 21. §0 not defterinde sekiz ham not duruyor ve numaralı maddelere
-taşınmadı. Bir kısmı (sürüklerken takılma, Program şeridinde renk menüsü, kart takası,
-Hakkında'daki yenilik noktası) 2026-09-01 tarihli `516f963` ve kırk yedinci oturumda
-yapılmış görünüyor.
+**Yarım olan.** Kod refactoru sürüyor. Bitenler: envanter, taban ölçümleri,
+araçlar (ESLint, knip, Prettier), ölü kod, `keys.ts`, ortak yardımcılar, tercih
+fabrikası, `library.ts`'in üçe bölünmesi, üç davranış borcunun kapanması, belge
+kapıları (`src/docs.test.ts`), ve 2026-09-12'de `src/`'nin dört katman
+klasörüne bölünmesi (`leaf` · `pure` · `platform` · `ui`) ile sınırın
+dependency-cruiser'a bağlanması. Sıradaki iş `store.ts`'in bölünmesi, parçaları
+doğrudan yeni yapıya inecek (TODO §8i). Ondan sonra araçların kalanı: demet
+analizi, size-limit, tip farkında ESLint kuralları, kapsam ölçümü ve bağımlılık
+güncelleme bildirimi.
 
 **Bilinen kusurlar.**
 
 - Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - Şeridin taşması kapatıldı (2026-09-12): şerit artık daralınca neyi sırayla feda edeceğini söylüyor, kural LAYOUT.md'de ve ölçümler DECISIONS'ta. Ana E2E süiti bu düzeltmeden sonra tamamı geçiyor. Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
-- 4 kat yavaşlatılmış işlemcide ilk kare tercihler `<html>`'e yazılmadan boyanıyor, ve karanlık tema kayıtlıysa zemin bir kare açık başlayıp karanlığa dönüyor (18 açılışın 17'sinde, TODO §8d). x1'de olmuyor.
+- 4 kat yavaşlatılmış işlemcide ilk kare hâlâ ölçek ve yoğunluk yazılmadan boyanıyor, ama karanlık temanın açık ilk karesi kapatıldı (`a81c79a`, `<head>`'de klasik betik). Kalan kaymalar görünür bir fark üretmiyor (TODO §8d).
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
@@ -67,14 +62,14 @@ yapılmış görünüyor.
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 14 | `src/types.ts` |
+| Şema sürümü | 14 | `src/leaf/types.ts` |
 | Ana E2E süiti | 29 dosyada 558 test | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
-| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `preferenceKeys.ts`'te, tablo `library.ts`'teki `storageReport` |
-| Birim testleri | 30 dosyada 909 test, hepsi geçti, 3,6 sn | `npm test` |
+| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
+| Birim testleri | 34 dosyada 1000 test, hepsi geçti (`797135f`) | `npm test` |
 | Ana E2E koşusu | 557/558 geçti, süit 5,0 dk | `npx playwright test`, adım 5'ten sonra, düşen `serit.spec.ts` 220 |
 | `dist/index.html` | 1 005 630 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
 | Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
@@ -86,6 +81,95 @@ dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağac�
 derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
 durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
 birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · `src/` dört katman klasörüne bölündü, sınır artık mekanik
+
+**Kullanıcının üç kararı alındı ve üçü de uygulandı.** Klasör adları
+`leaf` · `pure` · `platform` · `ui` (üçüncüsü `state` değil, çünkü klasör
+durumun yanında makineyi de barındırıyor), `dom/` ile `hooks/` alt klasörleri
+açılmadı (aralarında yasaklanacak bir şey yok), ve belge kapıları sahipliğe
+göre daralmıyor.
+
+**Ölçüm bir belge cümlesini çürüttü.** ARCHITECTURE'ın "doğrudan DOM'a yazan
+modüller" başlığı altındaki desen "React bilmezler" diye okunuyordu, ama
+`drag.ts` React'i import ediyor çünkü `useDrag` bir kanca. Gerçek kural tuzak
+1'inki: `pointermove` sırasında React durumuna yazılmaz. Cümle o hâle geldi
+(`4a95592`). Aynı tur ikinci bir cümleyi de çürüttü: "yapraklar başka bir modülü
+çalışma zamanında import etmez" yanlıştı, doğrusu "bir yaprak yalnız yaprak
+import eder" ve bugün onu ölçen bir kural var.
+
+**Kapıların kapsamı genişledi (`6cb9d59`).** Tuzak atıfları `src/`, `e2e/` ve
+`scripts/` dışında da yaşıyor: patrol yapılandırması, `vite.config.ts` ve
+`index.html` üç ayrı atıf taşıyor ve hiçbiri taranmıyordu. Kapsam artık kök
+yapılandırmalarını, Rust'ı, kurulum betiklerini, servis işçisini, iş
+akışlarını ve `docs/**/*.md`'yi içeriyor. Sahiplik kapsamı daraltmıyor:
+patrol yapılandırması test oturumunun dosyası. Üç köşe mutasyonla sınandı.
+Kapının kendi gövdesindeki iki çıkarılmış numara da düzeltildi (`bdce79d`) —
+kapı kendini göremiyor (tuzak 112), muafiyeti boşaltılmış bir kopyayla ölçüldü.
+
+**Tam kapsam denendi ve ölçülüp bırakıldı.** `DATED_RECORD` muafiyeti
+boşaltılınca A1 seksen beş, A3 iki yüz yetmiş yedi, A6 on dört satır bildirdi.
+Tek tek okundu: bir tanesi gerçek bayatlıktı (`scratch/olc-boya.mjs` klasörsüz
+yazılmış), gerisi tarihli kayıtların o günkü dünyası — `docs/TASKS.md`,
+`docs/PLAN.md`, silinmiş spec dosyaları, aSc'nin kendi klasörleri. Gerçek olan
+düzeltildi (`694a48a`), muafiyet belgenin türüne göre kaldı, sahibine göre değil.
+
+**C1 ve C2: dependency-cruiser (`2a83380`, kurallar `5eb5bb1`).** ESLint'in
+`import/no-restricted-paths` kuralına karşı seçildi, gerekçe DECISIONS'ta.
+Kurmadan önceki tahmin: çalışma zamanında sıfır döngü, tip grafiğinde
+`constraints ↔ rules` ve `entities ↔ import`, birkaç öksüz modül. Ölçüm: ilk
+ikisi tam olarak öyle, öksüz modül olarak yalnızca `components/props.ts` çıktı
+ve o bir yanlış pozitif (yalnız `import type` ile çağrılan bir tip modülü),
+kural kaldırıldı. `import type` deseni ilk kez ölçülüyor: yapılandırma yalnız
+çalışma zamanı grafiğine bakıyor, `rules.ts`'in `Index` importu düz importa
+çevrilince kapı kırmızıya dönüyor. Koşusu saniyenin biraz üstünde, `kontrol`'ün
+parçası.
+
+**Taşıma dört commit, her biri yalnız yol (`95e51e6`, `7cbc7c7`, `4da0921`,
+`3912e7c`).** Her taşımadan sonra `tipler`, birim süiti, `sinir` ve derleme.
+`dist/index.html`'in sha256'sı dördünde de değişmedi — ama ölçümün kendisi bir
+tuzak çıkardı (tuzak 113): `__SURUM__` kısa commit özetini demete basıyor, yani
+sha yalnız aynı HEAD üstünde karşılaştırılabilir. İkinci taşımada bir an
+"taşımadan fazlası oldu" diye okundu, değişiklikler zulaya alınıp aynı ağaç
+yeniden derlenince iki sha aynı çıktı.
+
+**Kapılar taşıma turunda çalıştı ve elle bulunamayacak şeyleri buldu:** her
+taşımada bayat belge satırları (yollar ve dosya haritası), toplamda ARCHITECTURE
+haritasının tamamı artı BUILD, CONVENTIONS, DATA, DESIGN, TRAPS ve WORKLOG'daki
+tekil satırlar. Kapıların **görmediği** dört yer elle bulundu ve hepsi çalışma
+zamanı yolu: `.prettierignore`, `stryker.config.json`'ın mutasyon listesi,
+`scripts/yayinla.mjs`'in okuduğu `changelog.ts` yolu, ve `index.html` ile
+`scripts/favicon.mjs`'teki `/src/main.tsx`. Bunlardan ikisi sessizce bozulurdu:
+mutasyon listesi ölçmeyi bırakırdı, sürüm betiği "not bulunamadı" derdi. TODO
+§8i'ye bir madde olarak yazıldı.
+
+**Testler `src/` kökünde kaldı ve sebebi ölçüldü:** üçü ağacı
+`import.meta.glob('./**/*')` ile tarıyor, bir alt klasöre inselerdi taradıkları
+şey sessizce daralırdı. `library.test.ts`'in katman testi zaten bu ailedendi:
+üç iddia `KAYNAK['./library.ts']` diye elle yazılmış bir anahtar kullanıyordu ve
+dosya `pure/`'a inince `undefined` döndü. Anahtar artık dosya adının sonundan
+bulunuyor, onarımın hâlâ ölçtüğü mutasyonla gösterildi.
+
+**Katman kuralları yeşil doğdu.** Dört kural, beş mutasyonla sınandı. Beşinci
+bir kural yazıldı ve ölçülüp çıkarıldı: "yaprak ile saf mantık React import
+etmez" kuralı `entities.ts` → `react/jsx-runtime` diye bir hayalet bildirdi,
+sebebi ayrıştırıcının generic ok fonksiyonunu JSX sanması. İki satırlık bir
+dosyayla kanıtlandı.
+
+**Öteki oturuma haber:** bu tur onların üç dosyasına dokundu ve üçü de yol ya da
+yorum düzeltmesi, davranış değil. `docs/TESTFINDINGS.md` (bir betik adı),
+`stryker.config.json` (mutasyon listesindeki yedi yol), `src/library.test.ts`
+(modülü adından bulan üç satır). Ayrıca bütün test dosyalarının import satırları
+yeni klasörlere göre yeniden yazıldı. Birleşmede bu dosyalar buradaki hâline
+göre çözülmeli.
+
+**Koşulan testler:** `npm run tipler`, birim süitinin tamamı (her taşımadan
+sonra), `npm run sinir`, `npm run lint`, `vite build` ve sha256 karşılaştırması.
+`npx playwright test` bu turun sonunda koşuldu ve tek düşen test tarihe bağlı bilinen kırmızı (`e2e/exe.spec.ts` 248, TODO §8d): `/2 Eylül 2026/` deseni bugünkü `12 Eylül 2026` damgasında iki öğe buluyor, taşımayla ilgisi yok. **Koşulmadı:** `npm run
+test:site`, `npm run cozucu`, `npm run patrol`, `npm run ekran`, `npm run
+mutasyon`, `npm run exe:test` (Rust bu makinede yok).
 
 ---
 

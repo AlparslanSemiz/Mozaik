@@ -1058,6 +1058,26 @@ ertelendi.
       hızlandırma denenir (paylaşılan derleme, işçi sayısı, kendi tarayıcısını açan
       dosyaların azaltılması).
 
+### 8i · Klasör turundan çıkanlar (2026-09-12)
+
+- [ ] **`store.ts` bölünecek, parçaları doğrudan yeni yapıya inecek.** Turun asıl
+      hedefi ve envanterin en büyük bölmesi: reducer, geri al yığını, gecikmeli
+      otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi bir arada.
+      Bölmeden önce okunacak değişmezler: `parseState`'in kabul listesi bir sayı
+      adlandırmaz (tuzak 97), `readLessons` her tarihsel biçimi tek yerde çevirir,
+      `remapDays` eşlemeyi isimden kurar (tuzak 11), plan geçişinde `park()` bekleyen
+      kaydı eşzamanlı boşaltır (tuzak 28), `planKey('1')` tarihsel anahtarı korur
+      (tuzak 29). Tuzak numarası taşıyan yorumlar bölünen parçayla birlikte gider.
+- [ ] **Araçların kalanı: C3 demet analizi, C4 size-limit, C5 tip farkında ESLint
+      kuralları, C6 kapsam ölçümü, C7 bağımlılık güncelleme bildirimi.** Sıra en
+      sonda. C6 test oturumuyla kesişiyor, kurmadan önce onlara sorulacak.
+- [ ] **Yapılandırma dosyalarındaki yolları tutan bir kapı yok.** Klasör turunda üç
+      tanesi elle bulundu ve üçü de sessizce bozulurdu: `.prettierignore`'daki
+      `src/lang/`, `stryker.config.json`'ın mutasyon listesi, ve
+      `scripts/yayinla.mjs`'in diskten okuduğu `src/changelog.ts`. Belge kapısı yalnız
+      belgelere bakıyor. Bir yol dizesini çalışma zamanında kullanan her yapılandırma
+      için aynı deseni kurmak mümkün, ama önce kaç tane olduğu sayılmalı.
+
 ## §9. Ham notlar — senin kendi satırların
 
 Bütün turların kaynağı. **Hiçbir satır silinmedi**; her satırın yanında nereye
