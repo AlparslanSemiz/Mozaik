@@ -89,7 +89,27 @@ async function ayaktaMi(page: Page, nerede: string) {
  * Escape rather than a button: both kinds close on it, and it is the answer
  * that changes the least.
  */
+/**
+ * Dismisses whatever is floating: a menu first, then a dialog.
+ *
+ * The menu half was missing and the systematic tour died on it the first time
+ * this suite was ever run (2026-09-12). A ribbon menu is modal, so its overlay
+ * eats the next click: the tour opened the plan menu, then tried to click the
+ * Kontrol tab and waited 2500ms for a button the overlay was covering. A user
+ * sees the menu close and clicks again; a tour with one click per control does
+ * not get a second one.
+ */
+async function menuKapat(page: Page): Promise<void> {
+  const menu = page.locator('[role="menu"], [data-radix-popper-content-wrapper]');
+  if ((await menu.count()) === 0) return;
+  await page.keyboard.press('Escape');
+  await expect(menu)
+    .toHaveCount(0, { timeout: 2000 })
+    .catch(() => undefined);
+}
+
 async function diyalogKapat(page: Page): Promise<boolean> {
+  await menuKapat(page);
   const acik = page.locator('dialog[open], .dlg-overlay, .dlg');
   if ((await acik.count()) === 0) return false;
 

@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · npm run patrol · devriye ilk kez koşuldu ve ilk koşusunda düştü
+Bulgu: "sistematik tur — her sekme, her adım, her bölüm, her şerit düğmesi" 2500 ms'lik bir
+tıklama zaman aşımıyla düşüyor: `Kontrol` sekmesinin düğmesi tıklanamıyor. Ekran görüntüsüne
+bakıldı (tuzak 82) ve sebep göründü: şeridin "Program 1" menüsü açık kalmış, menü modal, ve
+örtüsü sekme tıklamasını yutuyor. `diyalogKapat` diyalogları kapatıyordu ama menüleri değil.
+Sahiplik ölçüldü, iddia edilmedi: aynı düşüş bu turun değişikliklerinden önceki ağaçta
+(`c8c126d`, ayrı dizine açılıp orada derlendi) birebir aynı testte, aynı süreyle var. Yani bu
+turun açtığı bir şey değil, **devriye hiç koşulmadığı için hiç görülmemiş** bir kusur.
+Ürün kusuru değil: bir kullanıcı menüyü kapanırken görür ve ikinci kez tıklar. Turun bir kontrol
+başına bir tıklaması var, ikincisi yok.
+Tür: test kusuru (turun kendi eksiği)
+Ne yapıldı: düzeltildi. `menuKapat` eklendi, Escape ile. Devriye 4/4, ve süresi 2,4 dakikadan
+41,3 saniyeye indi, çünkü artık zaman aşımlarını beklemiyor.
+Kalıcı kural: yok
+
 ### 2026-09-12 · npm run kontrol · havuz çaresinin açtığı gerileme, ve iki yanlış daraltma
 Bulgu: Havuz çaresinden sonra `e2e/program.spec.ts` "kart ile hayalet aynı şeyi söylüyor"
 kararsızlaştı. Sebep tahmin edilmedi, ölçüldü: aynı test değişiklikten önceki ağaçta (`c8c126d`,
