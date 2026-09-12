@@ -268,6 +268,40 @@ Tür: ürün kusuru (boyama sırası / görünürlük), performans değil
 Ne yapıldı: düzeltilmedi, ölçüldü. İş maddesi TODO §4 B4.8, çare kullanıcı kararı bekliyor.
 Kalıcı kural: yok — tuzak 84 zaten bu aileyi anlatıyor.
 
+### 2026-09-12 · npx stryker run --mutate src/store.ts · şema örneklerine iddia eklendikten sonra
+Bulgu: Örnek dosya testi ızgarayı ve adları doğruluyordu, dersin şeklini ve ayarları doğrulamıyordu, ve mutasyon koşusu bunu ayrıştırma yarısındaki hayatta kalanlarla söylüyordu. Bu turda her sürüm dosyası için dersin şekli (haftalık saat, bloklar, `second`, `maxPerDay`), ayarlar (okul adı, günlerin uzun arası, zil, sınırlar, kural seviyeleri, branş listesi ve kısaltmalar), öğretmenin kutuları, sınıfın kutusu, renkler ve program zarfı iddiaya döndü, ve yanına bir alanı çıkarılmış dosyaları okuyan bir bölüm eklendi.
+
+Skor, aynı makinede aynı yapılandırmayla, yalnız `src/store.ts` mutasyona sokularak ölçüldü. Kapsam: dört işçi, yalnız birim süiti (E2E koşmuyor), `solver.ts` hâlâ dışarıda. Önce 63,7 · sonra 71,6. Hayatta kalan 200'den 157'ye, kapsamsız 163'ten 162'ye indi, koşu 4 dakika 52 saniye sürdü. Dosyanın bölgelerine göre okununca artışın nereden geldiği görünüyor: ayrıştırma yarısı (233-566) 77,8'den 88,9'a ve hayatta kalanı 58'den 29'a, ayrıştırma yardımcıları (150-232) 66,7'den 77,3'e ve 44'ten 30'a. Dokunulmayan iki bölge kıpırdamadı (reducer 67,4, tarayıcı yarısı 27,0), yani artış yazılan teste atfedilebiliyor.
+
+Örnek dosyaların kendisi de değişti, ve sebebi ölçülebilirlik. `sema-ornek.mjs`'in yazdığı zil saatleri programın varsayılan zilinin birebir aynısıydı, kural seviyelerinin dördü varsayılanla aynıydı, Çarşamba'nın uzun arası `makeDay`'in kendi tahminiyle aynıydı ve program zarfının adı `blankProgram()`'ın verdiği adla aynıydı. Bir alanın dosyadaki değeri varsayılanla aynıysa o alanı okuyan bir okuyucu ile yedeğe düşen bir okuyucu aynı sonucu verir, yani o alanı ölçen her iddia bedava yeşildir. Dört değer de varsayılandan uzaklaştırıldı ve gerekçesi betiğin içinde duruyor.
+
+Yeni iddiaların ölçtüğü on beş kusurla sınandı, üretim kodu kopyadan geri alınarak: zil saatlerini dosyadan okumamak, kural seviyesini okumamak, okul sınırlarını okumamak, günün uzun arasını okumamak, ikinci branş bayrağını hep kapalı vermek, v9 sınırını bir kaydırmak, v13 sınırını kaldırmak, cinsiyeti hep belirtilmemiş vermek, öğretmenin sınır kutularını hep boş vermek, program zarfının adını okumamak, branş kısaltmalarını okumamak, okul adını okumamak, v5 öncesinin gömülü branş listesine düşmemesi, sınıfın günlük kutusunu okumamak ve v1 gün adlarını okumamak. On beşi de kırmızıya döndü, biri bile bedava yeşil geçmedi.
+Tür: bulgu değil, ölçüm. İçinden çıkan iki ürün kusuru aşağıdaki kayıtta.
+Ne yapıldı: `src/fixtures.test.ts` ve `src/fixtures/*` yazıldı, üretim kodu değişmedi. TODO §8f'nin örnek dosya maddesi kapandı.
+Kalıcı kural: yok, ama örnek dosyaların değerlerinin varsayılandan uzak durması betiğin içinde bir yorum olarak yazılı.
+
+### 2026-09-12 · npx vitest run src/fixtures.test.ts · v1 ve v2 yolu sınıfları normalize etmeden geçiriyor
+Bulgu: Yeni iddialar yazılırken iki sürüm dosyası kırmızıya döndü ve ikisi de testin değil ürünün kusuruydu. `migrateV2toV3` sınıfları çıplak bir `asArray` ile alıyor, yani v3 ve sonrasının aynı liste üstünde koşturduğu iki normalleştiriciden geçmiyorlar.
+
+Biri `asBox`: sınıfın günlük kutusu `null` yerine `undefined` geliyor. Kuralı okuyan her yer `??` ile geçtiği için ikisini ayırt etmiyor, ama `Rules.tsx:75` `!== null` diye soruyor, yani bir v1 ya da v2 yedeği açılınca Ayarlar → Kurallar'daki "kendi sınırı olan sınıflar" tablosu bütün sınıfları listeliyor, her birinin sayı hücresi boş.
+
+Öteki `spreadColors`: hiçbir sınıf renk almıyor ve `paletteColor` hepsini paletin ilk rengiyle boyuyor, v1 ve v2 dosyalarının iki sınıfı için de `#c3a2cd` ölçüldü. Aynı renksizliği taşıyan v3 ve v4 dosyaları 0 ve 1 alıyor, yani kusur dosyanın şeklinde değil o yolda. Renk bu programda bir kimlik ([DATA.md](DATA.md)) ve tekrarlanan bir renk havuz kartının tek bir satırı göstermesini bozan şey.
+
+İkisi de bir sonraki kayıtta kendiliğinden iyileşiyor, çünkü JSON gidiş dönüşü `undefined`'ı düşürüyor ve yeniden okuma bugünkü yoldan geçiyor. Yani etkisi yedeğin açıldığı oturumla sınırlı.
+Tür: ürün kusuru, iki yarısı tek sebep
+Ne yapıldı: düzeltilmedi, çünkü üretim kodu. TODO §8g'de madde açıldı. Test süiti yeşil kalsın diye bugünkü davranış `BİLİNEN KUSUR` adlı tek bir vakada çivilendi, ve o vaka düzeltme yapıldığı gün adıyla kırmızıya döner, erişilebilirlik tabanının çalıştığı gibi.
+Kalıcı kural: yok
+
+### 2026-09-12 · npx stryker run --mutate src/store.ts · kalan hayatta kalanların altısı denendi
+Bulgu: Ayrıştırma yarısında kalan 29 mutantın altısı, yazarken "bunu neden öldüremiyorum" diye bakılanlardı, ve okunarak değil denenerek sınıflandırıldılar (2026-09-12'nin `constraints.ts:820` dersi). Her biri için onu ayırt edebilecek girdi kuruldu (on dört örnek dosya, artı gün listesi boşaltılmış, artı program zarfı çıkarılmış hâlleri) ve temiz kodun çıktısıyla mutantın çıktısı karşılaştırıldı.
+
+Altısında da çıktı birebir aynı çıktı: `programs` dizisinin `[]` yedeği ve `activeProgramId`'nin sürüm kapısı (ikisini de `sanitize()` zaten onarıyor, boş bir kimlik `program-1` ve boş bir ad `Program 1` oluyor), `migrateV2toV3`'ün boş gün listesi kapısı ile `readDays`'in yedeği ile `parseState`'in son gün kapısı (üçü birbirini maskeliyor, biri bozulunca öteki ikisi hâlâ düzeltiyor), ve `pairs` tavanının `weeklyHours / 2`'si (çıktıyı `clampBlocks` yeniden kırptığı için fark görünmüyor).
+
+Üç kapının birbirini maskelemesi `invariants.test.ts`'in çözücüde ölçtüğü desenin aynısı: aynı şeyi söyleyen iki kapıdan yalnız biri bozulunca öteki hâlâ reddediyor. Bu bir test boşluğu değil, kodun kendi fazlalığı.
+Tür: bulgu değil, sınıflandırma. Altısı da anlamsız mutant, ölçülmeyen davranış değil.
+Ne yapıldı: kayda geçti. Genel sınıflandırma işi TODO §8f'de duruyor, bu altı onun içinden düşer.
+Kalıcı kural: yok
+
 ### 2026-09-12 · npm run mutasyon · ilk tam mutasyon koşusu, saf çekirdek
 Bulgu: `a81c79a` artı bu turun test paketi, `../Mozaik-test` worktree'sinde, dört işçi, 30 dakika. 3987 mutant, 2816 öldü, 769 hayatta, 402 kapsamsız, 49 zaman aşımı. Skor (öldürülen / kapsanan) toplamda 78,5. Dosya başına: `store.ts` 63,7 · `constraints.ts` 76,6 · `feasibility.ts` 79,9 · `rules.ts` 80,9 · `entities.ts` 83,1 · `library.ts` 91,3 · `blocks.ts` 93,8. Tam tablo WORKLOG'un 2026-09-12 girdisinde.
 

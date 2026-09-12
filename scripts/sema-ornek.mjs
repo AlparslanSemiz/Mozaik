@@ -43,27 +43,34 @@ function v14() {
     schemaVersion: 14,
     settings: {
       schoolName: 'Birey Kurs',
+      // NOT A SINGLE VALUE HERE IS THE PROGRAM'S DEFAULT, and that is the
+      // point. A fixture field that happens to equal what `emptyState()`
+      // ships cannot tell a reader that READ it from a reader that fell back,
+      // so every assertion standing on such a field is free green. Çarşamba's
+      // long break is 4 rather than the weekday default 5 for the same
+      // reason: a v1/v2 file stores day NAMES, and the two paths are only
+      // distinguishable while the stored number differs from `makeDay`'s.
       days: [
         { name: 'Salı', longBreakAfter: 5 },
-        { name: 'Çarşamba', longBreakAfter: 5 },
+        { name: 'Çarşamba', longBreakAfter: 4 },
       ],
       hours: ['1', '2', '3', '4', '5', '6'],
-      bell: { start: '09:00', lessonMinutes: 40, breakMinutes: 10, longBreakMinutes: 30 },
+      bell: { start: '08:30', lessonMinutes: 45, breakMinutes: 5, longBreakMinutes: 40 },
       limits: {
         maxConsecutive: 3,
         maxPerDay: 5,
-        minPerDay: 0,
+        minPerDay: 1,
         maxSameLessonPerDay: 2,
         maxGapsTeacher: 1,
-        maxGapsClass: 0,
+        maxGapsClass: 2,
       },
       rules: {
-        maxConsecutive: 'block',
-        maxPerDay: 'block',
-        minPerDay: 'warn',
-        maxSameLessonPerDay: 'block',
+        maxConsecutive: 'warn',
+        maxPerDay: 'off',
+        minPerDay: 'off',
+        maxSameLessonPerDay: 'warn',
         maxGapsTeacher: 'warn',
-        maxGapsClass: 'off',
+        maxGapsClass: 'warn',
       },
       subjects: ['Matematik', 'Fizik', 'Edebiyat'],
       subjectShorts: { Edebiyat: 'Edb' },
@@ -128,7 +135,9 @@ function v14() {
     programs: [
       {
         id: 'p1',
-        name: 'Program 1',
+        // Not "Program 1": that is the name `blankProgram()` gives the
+        // envelope a pre-v12 file gets, so the two would be indistinguishable.
+        name: 'A programı',
         placements: {
           'c510|0|0': 'l1',
           'c510|0|1': 'l1',

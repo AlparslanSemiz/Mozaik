@@ -1157,8 +1157,14 @@ ertelendi.
       kullanıcının panosu, yani beklenen biçimde olmak zorunda değil. `parseState.ts`
       bozuk girdiye zaten bozuk girdiye `null` diyor ve testleri var; ölçülmemiş olan
       `import.ts`.
-- [ ] **Örnek dosya testi dersin şeklini ve ayarları da doğrulasın.** Mutasyon koşusu
-      (2026-09-12) o gün store.ts adını taşıyan dosyanın (bugün `parseState.ts`) ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
+- [x] **Örnek dosya testi dersin şeklini ve ayarları da doğrulasın.** (2026-09-12'de
+      yapıldı. Her sürüm dosyası için dersin şekli, ayarlar, öğretmenin ve sınıfın
+      kutuları, renkler ve program zarfı iddiaya döndü, yanına bir alanı çıkarılmış
+      dosyaları okuyan bir bölüm eklendi, ve örnek dosyaların varsayılanla çakışan
+      değerleri ölçülebilir olsun diye değiştirildi. o gün `store.ts` adını taşıyan dosyanın (bugün `parseState.ts`) mutasyon skoru 63,7'den
+      71,6'ya çıktı, ayrıştırma yarısı 77,8'den 88,9'a. Ölçüm TESTFINDINGS'te.
+      Çıkardığı iki ürün kusuru §8g'de.) Mutasyon koşusu
+      (2026-09-12) aynı dosyanın ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
       hepsi tek cümleye çıkıyor: test ızgarayı ve adları doğruluyor, dersin şeklini ve
       ayarları doğrulamıyor. Eklenecek iddialar ve onları isteyen satırlar:
       `readLessons`'ın sürüm sınırları (`version >= 9`, v13'ün dörtten üçe çevirmesi,
@@ -1231,6 +1237,27 @@ ertelendi.
       komut mu olsun yoksa mutasyonun yanında mı dursun, ve `kontrol`'e girsin mi.
       Ölçüm turunun görüşü ayrı komut yönünde (kapsam bir kapı değil bir harita),
       karar kullanıcıda. Kurulmadan önce cevap beklenecek.
+
+### 8g · Şema göçünden çıkan ürün kusurları (2026-09-12)
+
+Örnek dosya testine dersin şekli ve ayarlar iddiası eklenirken çıktılar. İkisi de
+üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/fixtures.test.ts`'te
+`BİLİNEN KUSUR` adlı vakada bugünkü hâliyle çivili: düzeltildiği gün o vaka adıyla
+kırmızıya döner ve silinir.
+
+- [ ] **v1 ve v2 yolu sınıfları normalize etmeden geçiriyor.** `pure/parseState.ts`'teki
+      `migrateV2toV3` sınıfları çıplak bir `asArray` ile alıyor, yani v3 ve
+      sonrasının aynı liste üstünde koşturduğu `asBox` ile `spreadColors`'tan
+      geçmiyorlar. Sonucu iki tane. Sınıfın günlük kutusu `null` yerine `undefined`
+      geliyor ve Ayarlar → Kurallar'ın `!== null` soran süzgeci (`Rules.tsx:75`) bir
+      v1 ya da v2 yedeği açılınca bütün sınıfları "kendi sınırı olan sınıflar"
+      tablosunda sayı hücresi boş olarak listeliyor. Ve hiçbir sınıf renk almıyor,
+      hepsi paletin ilk rengiyle boyanıyor (iki dosyanın iki sınıfı için de
+      `#c3a2cd` ölçüldü), oysa aynı renksizliği taşıyan v3 ve v4 dosyaları 0 ve 1
+      alıyor. Renk bu programda bir kimlik ([DATA.md](DATA.md)). Etkisi yedeğin
+      açıldığı oturumla sınırlı, çünkü ilk kayıttan sonra dosya bugünkü yoldan
+      okunuyor. Çaresi muhtemelen tek satır: o iki listeyi ana yolun geçtiği
+      okuyuculardan geçirmek. Ölçüm TESTFINDINGS'te, 2026-09-12.
 
 ## §9. Ham notlar — senin kendi satırların
 

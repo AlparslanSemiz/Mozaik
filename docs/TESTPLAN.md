@@ -112,6 +112,15 @@ yedeği durmadı ve git geçmişinden de çıkmadı, o yüzden her dosya o sür�
 okuyucusu ile yazıcısının anlaştığı şekle göre yazıldı. Betiğin başı bunu ve
 tarihlendirilemeyen tek alanı yazıyor.
 
+Her dosya açıldığını değil **ne anlama geldiğini** de söylüyor: dersin şekli
+(haftalık saat, bloklar, ikinci branş bayrağı, günlük kutu), ayarların tamamı,
+öğretmenin ve sınıfın kutuları, renkler ve program zarfı. Dosya başına bir de
+eksik alan bölümü var, çünkü bir alandan eski olan her dosya tam olarak o
+dosyadır ve orada olmaması gereken tek şey bir istisna. Örnek dosyalardaki
+hiçbir değer programın varsayılanı değil, ve bu bir tercih değil bir koşul:
+dosyadaki değer varsayılanla aynıysa, o alanı okuyan okuyucu ile yedeğe düşen
+okuyucu aynı cevabı verir ve o alanı ölçen iddia bedava yeşildir.
+
 ### Cümle ve iskelet (satır içi anlık görüntü)
 
 `src/sentences.test.tsx`, `toMatchInlineSnapshot` ile. Görsel regresyon bilerek
