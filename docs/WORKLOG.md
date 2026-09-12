@@ -69,7 +69,7 @@ güncelleme bildirimi.
 | E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
 | Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 34 dosyada 1000 test, hepsi geçti (`797135f`) | `npm test` |
+| Birim testleri | 34 dosyada 1000 test, hepsi geçti (`090e664`) | `npm test` |
 | Ana E2E koşusu | 557/558 geçti, süit 5,0 dk | `npx playwright test`, adım 5'ten sonra, düşen `serit.spec.ts` 220 |
 | `dist/index.html` | 1 005 630 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
 | Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
@@ -116,7 +116,7 @@ yazılmış), gerisi tarihli kayıtların o günkü dünyası — `docs/TASKS.md
 `docs/PLAN.md`, silinmiş spec dosyaları, aSc'nin kendi klasörleri. Gerçek olan
 düzeltildi (`694a48a`), muafiyet belgenin türüne göre kaldı, sahibine göre değil.
 
-**C1 ve C2: dependency-cruiser (`2a83380`, kurallar `5eb5bb1`).** ESLint'in
+**C1 ve C2: dependency-cruiser (`2a83380`, kurallar `718c7f4`).** ESLint'in
 `import/no-restricted-paths` kuralına karşı seçildi, gerekçe DECISIONS'ta.
 Kurmadan önceki tahmin: çalışma zamanında sıfır döngü, tip grafiğinde
 `constraints ↔ rules` ve `entities ↔ import`, birkaç öksüz modül. Ölçüm: ilk
@@ -127,8 +127,8 @@ kural kaldırıldı. `import type` deseni ilk kez ölçülüyor: yapılandırma 
 çevrilince kapı kırmızıya dönüyor. Koşusu saniyenin biraz üstünde, `kontrol`'ün
 parçası.
 
-**Taşıma dört commit, her biri yalnız yol (`95e51e6`, `7cbc7c7`, `4da0921`,
-`3912e7c`).** Her taşımadan sonra `tipler`, birim süiti, `sinir` ve derleme.
+**Taşıma dört commit, her biri yalnız yol (`95e51e6`, `7cbc7c7`, `cf11854`,
+`3b92cd7`).** Her taşımadan sonra `tipler`, birim süiti, `sinir` ve derleme.
 `dist/index.html`'in sha256'sı dördünde de değişmedi — ama ölçümün kendisi bir
 tuzak çıkardı (tuzak 113): `__SURUM__` kısa commit özetini demete basıyor, yani
 sha yalnız aynı HEAD üstünde karşılaştırılabilir. İkinci taşımada bir an

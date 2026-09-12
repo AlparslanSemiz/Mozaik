@@ -17,3 +17,6 @@ scratch/
 # Tauri (.exe) derleme çıktısı
 src-tauri/target/
 src-tauri/gen/
+
+# aSc ekran görüntülerinin arşivi, elle üretiliyor ve depoya girmez
+docs/asc/**/*.zip
