@@ -40,6 +40,7 @@ npm run tipler       # tsc iki kez: src (tsconfig.json) ve src dışı (tsconfig
 npm run lint         # ESLint, şimdilik yalnız React'in kanca kuralları
 npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
 npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü ve katman sınırı
+npm run analiz       # demetin içindekiler, test-results/demet/analiz.html (ölçüsü minify öncesi)
 npm run grafik       # aynı grafiği mermaid olarak yazar, dosyaya değil ekrana
 npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç)
 npm test             # Vitest birim testleri
