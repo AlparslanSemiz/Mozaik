@@ -595,6 +595,28 @@ describe('katman sınırları', () => {
     }
   });
 
+  it('saf model depoya dokunmuyor', () => {
+    // The whole point of splitting storage out: the model can be reasoned
+    // about, and tested, without a browser. One getItem back in here and that
+    // is gone again, and nothing else would say so.
+    const model = KAYNAK['./library.ts'];
+    expect(model, 'library.ts okunamadı').toBeTruthy();
+    expect(kodu(model!), 'library.ts localStorage’a dokunuyor').not.toMatch(/localStorage/);
+  });
+
+  it('bağımlılık tek yönlü — model kendi üstündekileri çağırmıyor', () => {
+    // Storage and the report both read the model; the model reads neither. The
+    // day it does, the three files are one file again with extra steps, and
+    // the cycle this split exists to prevent is back in a new shape.
+    const model = KAYNAK['./library.ts'];
+    expect(kodu(model!), 'library.ts libraryStore’u çağırıyor').not.toMatch(
+      /from '\.\/libraryStore'/,
+    );
+    expect(kodu(model!), 'library.ts storageReport’u çağırıyor').not.toMatch(
+      /from '\.\/storageReport'/,
+    );
+  });
+
   it('rapor anahtarları TÜRETİYOR, elle yazmıyor', () => {
     // The debt this table records is "every ders-programi* key that gets
     // written shows up here". It stays true only while the report asks the

@@ -282,6 +282,53 @@ mutantı tek tek sınıflandırmak. Üçü de TODO §8f'de.
 
 ---
 
+## 2026-09-12 · Kod refactoru, Faz 2'nin altıncı adımı: `library.ts` üçe bölündü
+
+**Ne yapıldı.** Adım 6. `library.ts` saf model, depo katmanı ve "Veriler nerede"
+raporu olarak üçe ayrıldı. Önce bölmenin kırabileceği katman sınırları teste
+bağlandı ve yeşil koşturuldu, sonra iki saf taşıma yapıldı, sonra bölmenin
+şartnamesi olan iki test eklendi. Üç commit: `f8c2abd`, `9bbf1d5` ve bu.
+
+Dosya 325 satırdan 181 + 51 + 123'e gitti. `library.ts`'in `desktop.ts`,
+`preferenceKeys.ts` ve `storage.ts` importları düştü: saf model artık yalnız
+`i18n`, `dateStamp` ve `types`'a bakıyor ve `localStorage` kelimesi hiç geçmiyor.
+
+**Taşımanın saf olduğunun iki kanıtı.** Her iki taşımada da gövde yorum dışı
+birebir aynı çıktı (`diff` ile karşılaştırıldı) ve `library.ts`'ten yalnızca
+silme çıktı. `dist/index.html` bölmeden önce ve sonra aynı: 1 006 755 bayt.
+
+**Ölçüm: Ayarlar → Veri'nin açılma süresi, 30 planlı kitaplık, 50 rapor satırı.**
+Ölçülebilir fark yok, ve saf bir taşımadan beklenen de bu.
+
+```
+                        medyan     en iyi   en kötü
+34418b5 (bölünmemiş)    113,8 ms    73,5     128,2
+bölünmüş                118,7 ms    90,1     149,6
+34418b5, tekrar         113,3 ms    89,3     120,2
+bölünmüş, tekrar        104,3 ms    88,4     119,8
+```
+
+Dört koşu da aynı makinede, arka arkaya, tek işçiyle, on beşer tur alındı. İlk
+alınan "bölünmemiş 379,3 ms" ölçümü sayılmadı: yayılımı 286 ile 504 ms
+arasındaydı ve arka planda başka bir iş koşuyordu. Bir saf taşımanın süreyi üçte
+bire indirmesi mümkün olmadığı için ölçüm aleti değil ölçümün koşulu sorgulandı
+ve iki durum da baştan, yan yana alındı.
+
+**Borç bağı.** `storageReport` bir borç kaydı: yazılan her `ders-programi*`
+anahtarı Ayarlar tablosunda görünmek zorunda. Bölme bu bağı kopartmadı ve
+kopartmaması bir tercih değil bir yapı: rapor hiçbir anahtarı elle yazmıyor,
+plan ve yedek anahtarlarını `library.ts`'ten, tercih anahtarlarını
+`preferenceKeys.ts`'ten türetiyor. Yeni bir depolama anahtarı açıldığında
+güncellenecek dosya hâlâ tek ve hâlâ aynı: anahtar `preferenceKeys.ts`'e
+yazılır, rapor onu kendiliğinden alır. İki test birden ölçüyor, biri deponun
+kendisine hangi anahtarların yazıldığını sorup her birini raporda arıyor, öteki
+rapor dosyasını okuyup elle yazılmış bir anahtar bulursa düşüyor.
+
+**Testler.** Birim her commit'te, `planlar.spec.ts` ve `ayarlar.spec.ts` bölmeden
+sonra (52 geçti), paket gidiş dönüşü `bundle.test.ts` ile, ve tam E2E adımın
+sonunda. Katman sınırlarının dördü ve şartnamenin dördü mutasyonla sınandı,
+sekizinin sekizi kırmızı.
+
 ## 2026-09-11 · Kod refactoru, Faz 0 ve Faz 1: envanter, taban ölçümleri, boyut atfı
 
 **Ne yapıldı.** Kodun modül modül refactoru için bir envanter çıkarıldı ve onaylandı

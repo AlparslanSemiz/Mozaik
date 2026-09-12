@@ -12,8 +12,8 @@ yapraklar          types · keys · palette · i18n · names · subjects · bloc
 saf mantık         constraints · rules · feasibility · bell · import · entities · solver
                    programs · programMask · listview · library · bundle · sample
    |
-durum ve tesisat   store · theme · toolState · printOptions · programColor · changelog
-                   folder · desktop · update
+durum ve tesisat   store · libraryStore · storageReport · theme · toolState · printOptions
+                   programColor · changelog · folder · desktop · update
                    drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
                    useSolver · useFolder
    |
@@ -70,7 +70,7 @@ yaprakta durur.
 | `programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
-| `library.ts` | plan kitaplığı: anahtarlar, plan üstverisi, dosya adları, "Veriler nerede" raporu (`storageReport`, tercih satırları `preferenceKeys.ts`'ten) |
+| `library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `bundle.ts` | bütün planları tek dosyada taşıyan zarf |
 | `sample.ts` | babanın ölçeğine yakın örnek okul |
 
@@ -79,6 +79,8 @@ yaprakta durur.
 | Dosya | Görevi |
 |---|---|
 | `store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
+| `libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
+| `storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
 | `theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
 | `toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
@@ -200,8 +202,8 @@ anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve ter
 
 - **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
 - **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
-- **State bilinmez, ham metin taşınır.** `library.ts` `store.ts`'i çağırmaz ve State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `store.ts` yapar. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder.
-- **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `library.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
+- **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` `store.ts`'i çağırmaz ve State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `store.ts` yapar. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
+- **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `storageReport.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 
 `Commands.tsx` `App`'te değil ayrı bir dosyada, çünkü komutların yarısı
 `useInspect()` çağırıyor ve o kanca yalnız `InspectorProvider`'ın içinde çalışıyor,
