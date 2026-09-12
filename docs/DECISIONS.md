@@ -35,6 +35,75 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Sürüklerken kasmanın çaresi: sıklık, ve elenen dört aday
+
+**Karar (kullanıcı).** Gerekçe çubuğunun cümlesi en çok 100 ms'de bir yazılır
+(`REASON_GAP`, `platform/drag.ts`, `88fffc2`). Şikayet ikinci kez gelmişti ve
+sebebi ikinci turda bulundu: `textContent` yazmak 6704 nesnelik belgede tam
+yerleşim tetikliyor, hedef hücre her değiştiğinde bir kez.
+
+**Ölçüm.** Aynı ağaçta, üçer koşu: düşen kare %9,5–14,1'den %1,1'e, Layout
+543 ms / 107'den 216 ms / 42'ye. Kenar kaydırmasında %12–13'ten %0–0,8'e.
+
+**Denenip elenen dört aday, sayılarıyla:**
+
+- `contain: layout` çubuğa — %21,7 · %22,8 · %24,3, yani **tabandan kötü**.
+- `flex: 1 1 0; min-width: 0` metin kutusuna — %13,1 · %12,7 · %12,2, tabanla
+  aynı. İkisi de yerleşim kökünü belgeden almadı.
+- Hayalet karta kendi katmanı (`will-change: transform`) — %14,2 · %13,5 ·
+  %14,6, tabandan farksız, Paint da kıpırdamadı.
+- Metin kutusunu akıştan çıkarmak (mutlak konum) — %3,8 · %7,4 · %4,9, yani
+  gerçekten işe yarıyordu ve seçilmedi: çubuğun düzenini değiştiriyor, ve
+  kısma aynı sonucu düzene dokunmadan veriyor.
+
+**Çarenin içindeki ikinci karar:** renk ile cümle **birlikte** yazılır. Sınıf
+yazması bedava ve erken geçirilebilirdi, ama o zaman çubuk yeşile döner ve hâlâ
+kırmızı cümleyi okur. Bir hüküm iki parçaya bölünmez.
+
+**Riski ve nasıl kapatıldığı:** tehlike hızlı kareler değil kuyruktaki son
+yazma — el, penceresi kapalıyken girilen bir hücrede durursa çubuk bir önceki
+hücreyi anlatır. `e2e/program.spec.ts` o sözleşmeyi ölçüyor ve kuyruk yazması
+iptal edilerek kırmızıya döndürüldü. Kalıcı kural TRAPS'te, tuzak 117.
+
+### 2026-09-12 · Dolu hücrenin hükmü kartın üstünde: `box-shadow`, `outline` değil
+
+**Karar (kullanıcı).** Sürükleme sürerken hedef satırdaki her kart, hücresinin
+hükmünü iç halka olarak taşır (`styles.css`, `table.grid.dragging tbody td.can-*
+> .card`). Sebep ölçüldü: kart hücrenin zeminini %83,7 örtüyor ve kartın kendi
+paleti uyarı renginin birkaç puan yakınında, yani dolu ve engelli bir hücre ile
+boş ve takas edilebilir bir hücre ekranda aynı krem kareyi gösteriyordu.
+
+**`box-shadow: inset`, `outline` değil.** Bir `outline` odak halkasıyla
+çakışırdı ve kartın kendi köşe yarıçapını izlemezdi. Ek DOM ve JS yok, çünkü
+`can-*` sınıfı sürüklemenin tek geçişli önizlemesinden `<td>`'de zaten duruyor.
+
+**Bedeli ölçüldü ve sıfır çıktı**, ama ilk ölçüm %60–72 düşen kare demişti ve
+çare az kalsın yanlış yere gömülüyordu: o koşular ölçümü alan oturumun kendi
+arka plan süitiyle aynı pencereye denk gelmişti. Dönüşümlü A/B ile sessiz
+pencerede halka var %0,7 · %1,9 · %0,0, halka yok %1,5 · %0,4 · %0,4. Kalıcı
+kural TRAPS'te, tuzak 118.
+
+`can-ok` kuralı tamlık için yazıldı ve neredeyse ulaşılamaz: dolu bir hücrenin
+hükmü ya takas ya tahliye (ikisi de uyarı) ya da ret. İki tarama 67 engelli ve
+4 uyarılı dolu hücre saydı, bırakılabilir bir tane bile yok.
+
+### 2026-09-12 · Önce/sonra ölçütü: birincil iz toplamı, doğrulayıcı düşen kare
+
+**Değişen.** Sürükleme ölçümlerinde birincil ölçüt artık iz toplamı (Layout
+milisaniyesi ve adedi), düşen kare yüzdesi doğrulayıcı.
+
+**Sebebi ölçüm.** Paylaşılan bir makinede beş koşu %9,5 · %10,4 · %14,1 · %28,2
+· %33,0 verdi, oysa aynı beş koşunun iz toplamları birbirinin yüzde üçü
+içindeydi. Yüzde, makinenin o anki yükünü taşıyor; iz toplamı taşımıyor.
+
+**Sonucu bir karar için görünür:** B4.7'nin iki adayından kısma (%1,5–3,4)
+gürültü bandının altında kalıyor ve yüzdeyle bile ayırt edilebiliyordu, ama
+akıştan çıkarma (%3,8–7,4) yalnız yüzdeye bakılsa gürültüye karışırdı; onun
+ayrımı izde nettir (Layout 557 → 121 ms). Yani ölçüt seçimi bir adayın
+elenmesini değiştirebilirdi.
+
+---
+
 ### 2026-09-12 · `preference.ts` yaprak, ve zincir depoya inmiyor (ölçüldü)
 
 Klasör kararından sonra sorulan soru: katman grafiğinde sıfır ihlal kalması
