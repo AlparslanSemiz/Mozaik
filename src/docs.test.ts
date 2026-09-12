@@ -420,6 +420,67 @@ function fileMapRows(): Array<{ line: number; file: string; says: string }> {
   return out;
 }
 
+/**
+ * The layer diagram at the head of ARCHITECTURE.md, row by row. Read from
+ * `DOCS` rather than through `prose()` on purpose: the diagram lives in a
+ * fenced block and `prose()` throws fences away, which is half of why nothing
+ * saw it go stale. The other half is that the names in it carry no extension,
+ * so the path gate does not recognise them as paths either. A document can be
+ * wrong in a place where two gates are both looking somewhere else.
+ */
+function layerRows(): Array<{ folder: string; line: number; names: string[] }> {
+  const out: Array<{ folder: string; line: number; names: string[] }> = [];
+  const split = (text: string) =>
+    text
+      .split('·')
+      .map((name) => name.trim())
+      .filter((name) => name !== '');
+  let open = -1;
+  (DOCS['docs/ARCHITECTURE.md'] ?? '').split('\n').forEach((text, i) => {
+    const head = /^(src\/[a-z]+)\/\s+(\S.*)$/.exec(text);
+    if (head !== null) {
+      out.push({ folder: head[1] ?? '', line: i + 1, names: split(head[2] ?? '') });
+      open = out.length - 1;
+      return;
+    }
+    const row = out[open];
+    const tail = /^\s+(\S.*)$/.exec(text);
+    // `   |` is the arrow between two layers, not a wrapped list of names.
+    if (row !== undefined && tail !== null && (tail[1] ?? '').trim() !== '|') {
+      row.names.push(...split(tail[1] ?? ''));
+      return;
+    }
+    open = -1;
+  });
+  return out;
+}
+
+/** What a layer folder actually holds, in the diagram's own vocabulary. */
+function modulesIn(folder: string): Set<string> {
+  const out = new Set<string>();
+  for (const file of FILES) {
+    if (!file.startsWith(folder + '/')) continue;
+    const rest = file.slice(folder.length + 1);
+    const slash = rest.indexOf('/');
+    // A folder inside a layer is one entry: the diagram writes `lang/*`.
+    if (slash !== -1) {
+      out.add(rest.slice(0, slash) + '/*');
+      continue;
+    }
+    // A declaration file is not a module and a test is not product code.
+    if (!/\.tsx?$/.test(rest) || rest.endsWith('.d.ts') || rest.includes('.test.')) continue;
+    out.add(rest.replace(/\.tsx?$/, ''));
+  }
+  return out;
+}
+
+/**
+ * `src/ui` is out of scope and the diagram says why itself: its row ends with
+ * "ve bütün bileşenler", so it is a sentence rather than a list. The three
+ * below claim to be complete.
+ */
+const LISTED_LAYERS = ['src/leaf', 'src/pure', 'src/platform'];
+
 describe('A2 · dosya haritasının adları kaynakta var', () => {
   // A renamed function turns the map into a lie without touching it, and the
   // map is the first thing anybody reads to find where something lives.
@@ -455,6 +516,39 @@ describe('A2 · dosya haritasının adları kaynakta var', () => {
     expect(fileMapRows().length, 'dosya haritası okunamadı').toBeGreaterThan(40);
     expect(checked, 'hiç tanımlayıcı taranmadı').toBeGreaterThan(20);
     expect(stale, `${checked} tanımlayıcı tarandı`).toEqual([]);
+  });
+
+  it('katman şeması üç klasörün içeriğini sayıyor', () => {
+    // Measured escape, not a supposition: at `39404a1` thirteen gates were
+    // green while this diagram still said `store` and listed neither
+    // `parseState` nor `undo` — the split had moved them eighty lines below,
+    // in the file map, and the map was right. Both directions are asked here,
+    // because the drift was in the one a spot check misses: what the folder
+    // holds and the diagram does not mention.
+    const wrong: string[] = [];
+    let checked = 0;
+    const rows = new Map(layerRows().map((row) => [row.folder, row]));
+    for (const folder of LISTED_LAYERS) {
+      const row = rows.get(folder);
+      if (row === undefined) {
+        wrong.push(`docs/ARCHITECTURE.md  ${folder}/ şemada yok`);
+        continue;
+      }
+      const onDisk = modulesIn(folder);
+      for (const name of row.names) {
+        checked++;
+        if (!onDisk.has(name)) {
+          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} diskte yok`);
+        }
+      }
+      for (const name of onDisk) {
+        if (!row.names.includes(name)) {
+          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} şemada yok`);
+        }
+      }
+    }
+    expect(checked, 'katman şeması okunamadı').toBeGreaterThan(40);
+    expect(wrong, `${checked} modül adı tarandı`).toEqual([]);
   });
 });
 
