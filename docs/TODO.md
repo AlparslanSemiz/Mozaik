@@ -889,6 +889,14 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       kullanıcının ölçeğinde görünmüyordu, ama %125'te pay bir düğmeden dardı. Renk grubunu
       menüye indirmek yerine şeridin daralma kuralı yazıldı (LAYOUT.md, şerit standardı 6),
       çünkü tek bir grubu taşımak bir sonraki grupta aynı kusuru doğururdu. Karar DECISIONS'ta.
+- [ ] **`e2e/exe.spec.ts` 248 bugün kırmızıya döndü, sebebi TARİH (2026-09-12).** Test
+      `/2 Eylül 2026/` arıyor ve derleme damgası bugün `12 Eylül 2026` diyor, yani dize
+      aranan deseni İÇERİYOR ve Playwright iki öğe bulup strict mode ihlali veriyor.
+      Bir tarihi çapasız bir regex ile aramanın bedeli: test 2 Eylül'den 11 Eylül'e kadar
+      yeşildi ve ayın 12'sinde kendiliğinden düştü, her ayın 12'sinden 19'una kadar yine
+      düşecek. Refactorun kırmadığı ölçüldü: aynı test bölmeden önceki `34418b5`
+      derlemesinde de birebir aynı şekilde düşüyor. Test kusuru, dosya test stratejisi
+      dalının sahipliğinde.
 - [ ] **Belge başında depoya dokunan bir tarayıcı eklentisi `file://`'da bayat açılış üretir
       mi (2026-09-11).** Tuzak 108'in tetikleyicisi süitte `kapan.ts`'in başlangıç betiğiydi.
       Üründe belge başında depoya dokunan kod yok ve uygulama başlangıç betiği olmadan 780
