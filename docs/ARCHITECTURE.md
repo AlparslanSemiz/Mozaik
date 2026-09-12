@@ -78,36 +78,36 @@ yaprakta durur.
 
 | Dosya | Görevi |
 |---|---|
-| `store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
-| `libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
-| `storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
+| `platform/store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
+| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
+| `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
-| `theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
-| `toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
-| `printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
-| `programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
-| `changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
-| `folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
-| `desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
-| `update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
+| `platform/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
+| `platform/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
+| `platform/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
+| `platform/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
+| `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
+| `platform/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
+| `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |
+| `platform/update.ts` | bu kopyanın nasıl güncellendiği (`sw`, `exe`, `yok`) ve sitenin adresi (`SITE_ADRESI`) |
 
 ### Doğrudan DOM'a yazan modüller
 
 | Dosya | Görevi |
 |---|---|
-| `drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
-| `gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
-| `poolSplit.ts` | havuz çekmecesinin boy tutamağı |
-| `rowDrag.ts` | liste satırını sürükleyerek sıralama |
-| `scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
-| `ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
+| `platform/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
+| `platform/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
+| `platform/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
+| `platform/rowDrag.ts` | liste satırını sürükleyerek sıralama |
+| `platform/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
+| `platform/ribbonScroll.ts` | şeridin okurken çekilip yukarı bakınca geri gelmesi |
 
 ### React köprüleri ve kabuk
 
 | Dosya | Görevi |
 |---|---|
-| `useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer |
-| `useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
+| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer |
+| `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar |
 | `Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
 | `App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |

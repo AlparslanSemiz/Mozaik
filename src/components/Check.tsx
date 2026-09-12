@@ -7,7 +7,7 @@ import { buildReport } from '../pure/feasibility';
 import type { ReportRow } from '../pure/feasibility';
 import type { Id, State } from '../leaf/types';
 import { activePlacements } from '../pure/programs';
-import type { CheckView } from '../toolState';
+import type { CheckView } from '../platform/toolState';
 import CapacityRows from './CapacityRows';
 import { T, useT } from './T';
 

@@ -26,7 +26,7 @@ import { remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
 import { activeProgram } from './pure/programs';
 import { solve } from './pure/solver';
-import { parseState } from './store';
+import { parseState } from './platform/store';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
 import type { Day, Id, State } from './leaf/types';
 

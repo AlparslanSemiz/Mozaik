@@ -29,7 +29,7 @@
     "src/pure/constraints.ts",
     "src/pure/rules.ts",
     "src/leaf/blocks.ts",
-    "src/store.ts",
+    "src/platform/store.ts",
     "src/pure/library.ts",
     "src/pure/feasibility.ts",
     "src/pure/entities.ts"

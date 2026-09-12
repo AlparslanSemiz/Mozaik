@@ -7,8 +7,8 @@
 // `saveInto`, and the adapter is merely what it is handed.
 
 import { describe, expect, it } from 'vitest';
-import { desktopFolder } from './desktop';
-import { MAIN_NAME, dailyName, saveInto } from './folder';
+import { desktopFolder } from './platform/desktop';
+import { MAIN_NAME, dailyName, saveInto } from './platform/folder';
 
 /** An in-memory stand-in for src-tauri/src/lib.rs. */
 function fakeDisk(seed: string[] = []) {

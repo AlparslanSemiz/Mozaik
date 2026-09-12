@@ -11,7 +11,7 @@ import { useInspect } from './Inspector';
 import type React from 'react';
 import { dayLabel } from '../leaf/names';
 import { dayPeriods } from '../pure/bell';
-import { attachGridChrome } from '../gridChrome';
+import { attachGridChrome } from '../platform/gridChrome';
 import { paletteColor } from '../leaf/palette';
 import type { Settings, Id } from '../leaf/types';
 import type { MaskMode } from '../pure/programMask';

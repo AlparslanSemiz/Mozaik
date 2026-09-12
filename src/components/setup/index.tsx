@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { Info } from 'lucide-react';
 import { useToast } from '../Toasts';
 import { useLoadSample } from '../useSample';
-import { markIntroSeen, readIntroSeen } from '../../theme';
+import { markIntroSeen, readIntroSeen } from '../../platform/theme';
 
 import Rooms from './Rooms';
 import Teachers from './Teachers';
@@ -26,7 +26,7 @@ import Subjects from './Subjects';
 import Summary from './Summary';
 import { drafts as draftsOf } from '../../pure/library';
 import type { PanelProps, PlanControls } from '../props';
-import type { StepId } from '../../toolState';
+import type { StepId } from '../../platform/toolState';
 import { STEPS } from '../steps';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';

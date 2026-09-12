@@ -21,7 +21,7 @@ import { useT } from './T';
 import { subjectLabel } from '../pure/entities';
 import { paletteColor } from '../leaf/palette';
 import type { State } from '../leaf/types';
-import type { Tab, ToolState } from '../toolState';
+import type { Tab, ToolState } from '../platform/toolState';
 
 interface Section {
   id: Tab;

@@ -6,7 +6,7 @@ import {
   programColorIndex,
   readProgramColor,
   writeProgramColor,
-} from './programColor';
+} from './platform/programColor';
 
 describe('Program renk ölçütü', () => {
   afterEach(() => vi.unstubAllGlobals());

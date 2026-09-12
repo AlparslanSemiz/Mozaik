@@ -25,10 +25,10 @@ import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import type { Id } from '../leaf/types';
 import { paletteColor } from '../leaf/palette';
-import { DOCK_H_MIN, readDock, readDockHeight, writeDock, writeDockHeight } from '../theme';
-import { attachSplitter, maxDockHeight } from '../poolSplit';
+import { DOCK_H_MIN, readDock, readDockHeight, writeDock, writeDockHeight } from '../platform/theme';
+import { attachSplitter, maxDockHeight } from '../platform/poolSplit';
 import { useT } from './T';
-import type { PoolSort } from '../toolState';
+import type { PoolSort } from '../platform/toolState';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */

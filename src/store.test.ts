@@ -6,7 +6,7 @@
 // come out exactly as it went in.
 
 import { defaultSubjects } from './pure/entities';
-import { parseState } from './store';
+import { parseState } from './platform/store';
 import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/sample';
 import { SCHEMA_VERSION } from './leaf/types';
@@ -884,7 +884,7 @@ describe('parseState — v10 → v11 göçü', () => {
 // plan's move into another plan's file — can be pinned without mounting React.
 
 import { BASE_KEY, FIRST_PLAN_ID, planKey } from './pure/library';
-import { collectStates, loadPlan, reduce, savePlan } from './store';
+import { collectStates, loadPlan, reduce, savePlan } from './platform/store';
 import { emptyState } from './pure/entities';
 import type { State } from './leaf/types';
 

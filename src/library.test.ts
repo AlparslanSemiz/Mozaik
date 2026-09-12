@@ -27,14 +27,14 @@ import {
   setDraft,
   uniquePlanName,
 } from './pure/library';
-import { routeName, storageAddress, storageKind, storageReport } from './storageReport';
+import { routeName, storageAddress, storageKind, storageReport } from './platform/storageReport';
 import {
   dropPlanText,
   readLibrary,
   readPlanText,
   writeLibrary,
   writePlanText,
-} from './libraryStore';
+} from './platform/libraryStore';
 
 function memoryStorage(): Storage {
   const map = new Map<string, string>();
