@@ -846,6 +846,20 @@ kendisini araması boş dönebilir.
 
 ---
 
+### 120 · Yanlış yere düşen bir mutasyon yeşil cevap verir, ve o cevap kanıt sanılır
+Bu depoda bir testin gerçekten ölçtüğü mutasyonla kanıtlanıyor, yani kanıtın
+kendisi de yanılabilir. `e2e/exe.spec.ts`'in tarih iddiası sınanırken tohumdaki
+`date: '2026-09-02'` dizesi değiştirildi ve test yeşil kaldı, yani iddia bedava
+yeşil göründü. Değildi: o dize dosyada iki kez geçiyor ve değiştirilen ilki,
+başka bir testin tohumuydu. Sınanan testin tohumuna hiç dokunulmamıştı. Doğru
+satır hedeflenince iki mutasyon da kırmızıya döndü. Ders şu: **bir mutasyonun
+yeşil kalması ancak mutasyonun ölçülen yere düştüğü gösterilebiliyorsa bir şey
+söyler.** Ucuz iki koruma var ve ikisi de bu turda işe yaradı: değiştirilen
+dizenin dosyada kaç kez geçtiğini saymak (bir kez geçmiyorsa hedef belirsizdir),
+ve mutasyonun kırmızıya döndürmesi BEKLENEN bir eşini birlikte koşturmak. İkincisi
+kalibrasyondur: hiçbir mutasyonun kırmızıya dönmediği bir turda kanıtlanan şey
+testin zayıflığı değil, mutasyonun hiç uygulanmamış olmasıdır.
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -975,12 +989,12 @@ kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek 
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 119, yeni bir tuzak 120'den devam eder. Test stratejisi
+büyük kullanılan numara 120, yeni bir tuzak 121'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

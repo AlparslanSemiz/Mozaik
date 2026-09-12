@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · npx playwright test e2e/exe.spec.ts · 248, tarihe bağlı kırmızının kapanışı
+Bulgu: Test `/2 Eylül 2026/` arıyordu ve koşan derlemenin kendi damgası (`v2.1.1 · 12 Eylül
+2026`) da deseni içeriyor, yani Playwright iki öğe buluyor ve strict mode ihlali veriyor. Her
+ayın 12'sinden 19'una kadar kırmızı, ve `kontrol` zinciri `&&` ile bağlı olduğu için site ve
+çözücü süitleri o günlerde hiç koşmuyor.
+Çare deseni çapalamak değil tarihi SÜRÜME bağlamak oldu, çünkü çapa damgayı dışarıda tutar ama
+tarihin duyurulan sürüme ait olduğunu söylemez. İki iddia tek cümleye indi.
+Ve bir ölçüm kusuru, benim: kanıt için tohumdaki tarihi değiştirdim ve test yeşil kaldı, yani
+iddia bir an bedava yeşil göründü. Değildi. O dize dosyada iki kez geçiyor ve değiştirdiğim ilki
+başka bir testin tohumuydu, sınadığım testin tohumuna hiç dokunmamıştım. Doğru satır hedeflenince
+iki mutasyon da kırmızıya döndü: tarih bir gün ileri alındığında, ve tarih hiç verilmediğinde.
+Tür: test kusuru
+Ne yapıldı: düzeltildi. `e2e/exe.spec.ts` 10/10.
+Kalıcı kural: TRAPS.md, tuzak 120
+
 ### 2026-09-12 · scratch/havuz-olc.mjs · havuzda alttaki kartlara ulaşılamıyor, sebebi
 Bulgu: Kullanıcının satırı ("havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam")
 üç ihtimalle açılmıştı ve üçü de ölçülüp düştü. Ölçüm üç dünyada, iki kutuda (1920x1080 ve

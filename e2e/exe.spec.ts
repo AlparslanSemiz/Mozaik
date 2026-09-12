@@ -256,8 +256,7 @@ test.describe('78. Exe yolu — kendini güncellemek', () => {
     const panel = surumPaneli(page);
 
     await panel.getByRole('button', { name: 'Güncellemeleri denetle' }).click();
-    await expect(panel.getByText(/v1\.9\.0 çıktı/)).toBeVisible();
-    await expect(panel.getByText(/2 Eylül 2026/)).toBeVisible();
+    await expect(panel.getByText(/v1\.9\.0 çıktı \(2 Eylül 2026\)/)).toBeVisible();
     // Looking does not download.
     expect(await calls(page)).not.toContain('download_update');
 

@@ -1081,6 +1081,12 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       12'sinden 19'una kadar tutacak. İkincisi, dosyanın sahibi olan oturum kapandı,
       yani "onların işi" diye beklemek bir sahip beklemek değil artık. Çare bir satır
       (deseni çapalamak), karar sahiplikte.
+      **KAPANDI (2026-09-12), kullanıcı kararıyla.** Çare deseni çapalamak değil, tarihi
+      SÜRÜME bağlamak oldu: iki ayrı iddia (`/v1\.9\.0 çıktı/` ve `/2 Eylül 2026/`) tek bir
+      cümleye indi, `/v1\.9\.0 çıktı \(2 Eylül 2026\)/`. Hem damgadan bağımsız hem de daha
+      çok şey ölçüyor, çünkü artık tarihin duyurulan sürüme ait olduğunu da söylüyor.
+      İki mutasyonla sınandı, ikisi de kırmızı: tohumdaki tarih bir gün ileri alındığında ve
+      tarih hiç verilmediğinde. `e2e/exe.spec.ts` 10/10.
 - [ ] **Belge başında depoya dokunan bir tarayıcı eklentisi `file://`'da bayat açılış üretir
       mi (2026-09-11).** Tuzak 108'in tetikleyicisi süitte `kapan.ts`'in başlangıç betiğiydi.
       Üründe belge başında depoya dokunan kod yok ve uygulama başlangıç betiği olmadan 780
