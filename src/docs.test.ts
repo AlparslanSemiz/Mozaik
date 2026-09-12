@@ -40,7 +40,7 @@ import { PREFERENCE_ROWS } from './preferenceKeys';
 /** Every document, keyed by its repository path. */
 const DOCS: Record<string, string> = Object.fromEntries(
   Object.entries(
-    import.meta.glob(['../docs/*.md', '../*.md'], {
+    import.meta.glob(['../docs/**/*.md', '../*.md'], {
       query: '?raw',
       import: 'default',
       eager: true,
@@ -48,14 +48,38 @@ const DOCS: Record<string, string> = Object.fromEntries(
   ).map(([key, text]) => [key.replace(/^\.\.\//, ''), text as string]),
 );
 
-/** Every source file whose comments can cite a trap. */
+/**
+ * Every source file whose comments can cite a trap. Not only `src/`: the
+ * citation is a comment, and comments live in the build files, the Rust, the
+ * installer, the service worker and the workflows too. Ownership does not
+ * narrow this — the test session's Playwright and Stryker configuration
+ * carries citations like everything else, and a gate that stopped at the door
+ * of somebody else's file would be an exemption with a different name.
+ *
+ * The lock files are left out because they cannot hold a comment, and reading
+ * a megabyte of JSON to look for one is pitfall 111's cost for nothing.
+ */
 const SOURCE: Record<string, string> = Object.fromEntries(
   Object.entries(
-    import.meta.glob(['./**/*.{ts,tsx,css}', '../e2e/**/*.ts', '../scripts/*.mjs'], {
-      query: '?raw',
-      import: 'default',
-      eager: true,
-    }),
+    import.meta.glob(
+      [
+        './**/*.{ts,tsx,css}',
+        '../e2e/**/*.ts',
+        '../scripts/**/*.mjs',
+        '../*.{ts,js,mjs}',
+        '../index.html',
+        '../src-tauri/**/*.rs',
+        '../src-tauri/*.toml',
+        '../kurulum/**/*.{ps1,cmd,txt}',
+        '../site/**/*.{js,svg,webmanifest}',
+        '../.github/workflows/*.yml',
+      ],
+      {
+        query: '?raw',
+        import: 'default',
+        eager: true,
+      },
+    ),
   ).map(([key, text]) => [key.replace(/^\.\//, 'src/').replace(/^\.\.\//, ''), text as string]),
 );
 
@@ -166,6 +190,28 @@ describe('okuma', () => {
       expect(text.length, `${name} boş okundu`).toBeGreaterThan(0);
     }
     expect(SOURCE['src/styles.css']?.length ?? 0).toBeGreaterThan(1000);
+  });
+
+  // The scope claim, made mechanical. Every one of these was outside the
+  // globs until this test named it, and three of them carry trap citations
+  // today: the patrol configuration, `vite.config.ts` and `index.html`. A
+  // glob that quietly stops matching is a gate that quietly stops measuring.
+  it('kapsam kaynağın her köşesine uzanıyor', () => {
+    for (const name of [
+      'index.html',
+      'vite.config.ts',
+      'playwright.patrol.config.ts',
+      'src-tauri/src/lib.rs',
+      'src-tauri/Cargo.toml',
+      'kurulum/kur.ps1',
+      'site/sw.js',
+      '.github/workflows/surum.yml',
+      'scripts/yayinla.mjs',
+      'e2e/kapan.ts',
+    ]) {
+      expect(SOURCE[name], `${name} taranmıyor`).toBeDefined();
+    }
+    expect(DOCS['docs/asc/ekran-envanteri.md'], 'docs/asc okunmuyor').toBeDefined();
   });
 });
 
