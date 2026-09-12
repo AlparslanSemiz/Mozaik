@@ -7,18 +7,25 @@ Kodun katmanları, her dosyanın görevi ve katmanlar arasındaki sınırlar.
 Kod üç katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 
 ```
-yapraklar          types · keys · palette · i18n · names · subjects · blocks · version
+src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
+                   names · subjects · blocks · version · dateStamp · storage
    |
-saf mantık         constraints · rules · feasibility · bell · import · entities · solver
+src/pure/          constraints · rules · feasibility · bell · import · entities · solver
                    programs · programMask · listview · library · bundle · sample
    |
-durum ve tesisat   store · libraryStore · storageReport · theme · toolState · printOptions
+src/platform/      store · libraryStore · storageReport · theme · toolState · printOptions
                    programColor · changelog · folder · desktop · update
                    drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
                    useSolver · useFolder
    |
-bileşenler         App · components/*
+src/ui/            main · Root · App · ve bütün bileşenler
 ```
+
+Klasör adları katmanların kendisi, yeni bir taksonomi değil: bir katman ihlali
+bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kökünde yalnız
+üç şey kalıyor: test dosyaları, `styles.css` ve `worlds.ts`. Testlerin kökte
+kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
+bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
 **Saf mantık** React, DOM ve localStorage bilmez. Her dışa aktarılan fonksiyonu
 tarayıcı olmadan test edilebilir, ve sürükleme, çözücü ve Kontrol aynı
@@ -108,44 +115,44 @@ yaprakta durur.
 |---|---|
 | `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer |
 | `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
-| `main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar |
-| `Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
-| `App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
+| `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar |
+| `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
+| `ui/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
 
 ### Bileşenler
 
 | Dosya | Görevi |
 |---|---|
-| `components/Ribbon.tsx` | sekmeye göre araç şeridi, iş mantığı yok |
-| `components/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
-| `components/Toasts.tsx` | olan biteni söyleyen kısa satır |
-| `components/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
-| `components/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
-| `components/Palette.tsx` | Ctrl+K kutusu |
-| `components/Commands.tsx` | paletin komut listesi |
-| `components/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
-| `components/T.tsx` | `useT()` ve `<T>` |
-| `components/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `Paste`, `Summary`, `loadStatusFacet` |
-| `components/lessons/index.tsx` | Dersler |
-| `components/Availability.tsx` | Müsaitlik |
-| `components/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |
-| `components/Grid.tsx` | ana ızgara, satır başına memo |
-| `components/LessonPool.tsx` | havuz |
-| `components/Check.tsx` | Kontrol |
-| `components/Print.tsx` | Çıktı ve kâğıt |
-| `components/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
-| `components/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
-| `components/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
-| `components/CapacityRows.tsx` | kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor |
-| `components/ColorPick.tsx` | renk seçme diyaloğu |
-| `components/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
-| `components/Field.tsx` | etiketli kontrol |
-| `components/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
-| `components/ListTools.tsx` | listelerin üstündeki ara, sırala ve süz şeridi |
-| `components/useRowOrder.tsx` | listelerin ortak elle sıralama kancası |
-| `components/useSample.ts` | örnek okulu yükleme sorusu |
-| `components/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
-| `components/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
+| `ui/Ribbon.tsx` | sekmeye göre araç şeridi, iş mantığı yok |
+| `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
+| `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
+| `ui/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
+| `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
+| `ui/Palette.tsx` | Ctrl+K kutusu |
+| `ui/Commands.tsx` | paletin komut listesi |
+| `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
+| `ui/T.tsx` | `useT()` ve `<T>` |
+| `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `Paste`, `Summary`, `loadStatusFacet` |
+| `ui/lessons/index.tsx` | Dersler |
+| `ui/Availability.tsx` | Müsaitlik |
+| `ui/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |
+| `ui/Grid.tsx` | ana ızgara, satır başına memo |
+| `ui/LessonPool.tsx` | havuz |
+| `ui/Check.tsx` | Kontrol |
+| `ui/Print.tsx` | Çıktı ve kâğıt |
+| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
+| `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
+| `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
+| `ui/CapacityRows.tsx` | kapasite tablosu, Özet ve Kontrol aynı çizimi kullanıyor |
+| `ui/ColorPick.tsx` | renk seçme diyaloğu |
+| `ui/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
+| `ui/Field.tsx` | etiketli kontrol |
+| `ui/LimitBox.tsx` | boşken bir üst katmanın sayısını gösteren sınır kutusu |
+| `ui/ListTools.tsx` | listelerin üstündeki ara, sırala ve süz şeridi |
+| `ui/useRowOrder.tsx` | listelerin ortak elle sıralama kancası |
+| `ui/useSample.ts` | örnek okulu yükleme sorusu |
+| `ui/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
+| `ui/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
 
 ### Yalnız testler için
 

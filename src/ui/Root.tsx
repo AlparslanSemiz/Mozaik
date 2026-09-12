@@ -11,14 +11,14 @@
  * two callers share a definition rather than to teach the test a workaround.
  */
 import App from './App';
-import { DialogProvider } from './components/Dialogs';
-import { LangProvider } from './components/T';
-import { ShortcutsHelpProvider } from './components/ShortcutsHelp';
-import { ToastProvider } from './components/Toasts';
-import './leaf/lang/en';
-import './leaf/lang/de';
-import './leaf/lang/es';
-import './leaf/lang/fr';
+import { DialogProvider } from './Dialogs';
+import { LangProvider } from './T';
+import { ShortcutsHelpProvider } from './ShortcutsHelp';
+import { ToastProvider } from './Toasts';
+import '../leaf/lang/en';
+import '../leaf/lang/de';
+import '../leaf/lang/es';
+import '../leaf/lang/fr';
 
 export default function Root() {
   // The language is OUTERMOST: every provider below it puts words on the

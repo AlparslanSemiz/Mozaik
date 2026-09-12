@@ -170,7 +170,7 @@ const EN: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**Cannot write** to the **{klasor}** folder. {sebep} Right now your work is only in this browser.",
 
-  // src/components/Availability.tsx
+  // src/ui/Availability.tsx
   "{ad} sınıfı": "class {ad}",
   "{ad} dersliği": "room {ad}",
   "Müsait olmayan saatler": "Unavailable hours",
@@ -197,13 +197,13 @@ const EN: Sozluk = {
   "**Kapattığınız saatlerde yerleşmiş {n} ders var{kimde}.** Hiçbiri silinmedi. **Program** sekmesinde kırmızı çerçeveyle, **Kontrol** sekmesinde tek tek listeleniyor.":
     "**{n} placed {n:lesson sits|lessons sit} in hours you have closed{kimde}.** None was deleted. They are outlined in red in the **Timetable** tab and listed one by one in **Check**.",
 
-  // src/components/CapacityRows.tsx
+  // src/ui/CapacityRows.tsx
   Ad: "Name",
   Açık: "Open",
   Yük: "Load",
   Durum: "Status",
 
-  // src/components/Check.tsx
+  // src/ui/Check.tsx
   "Kontrol edilecek bir şey yok.": "There is nothing to check yet.",
   İmkânsız: "Impossible",
   "Programın durumu": "Timetable status",
@@ -245,16 +245,16 @@ const EN: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "The advisor has nothing to say.",
   Öneri: "Note",
 
-  // src/components/ColorPick.tsx
+  // src/ui/ColorPick.tsx
   Vazgeç: "Cancel",
 
-  // src/components/Commands.tsx
+  // src/ui/Commands.tsx
   Git: "Go to",
   Yap: "Do",
   "derslik yok": "no room",
   "{n} sınıf": "{n} {n:class|classes}",
 
-  // src/components/DraftStart.tsx
+  // src/ui/DraftStart.tsx
   "Bu taslağın verisi bulunamadı": "This draft's data could not be found",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
     'It is in the plan list but its own key is empty. The "Where the data is" table in Settings → About shows how many bytes each key holds.',
@@ -262,7 +262,7 @@ const EN: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     'A new plan was opened from the "{ad}" draft.',
 
-  // src/components/Grid.tsx
+  // src/ui/Grid.tsx
   "Öğle arası": "Lunch break",
   "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, press Delete to remove",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
@@ -273,7 +273,7 @@ const EN: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Pinned. Right-click to unpin",
 
-  // src/components/Program.tsx — the grid's own menu
+  // src/ui/Program.tsx — the grid's own menu
   "Havuza kaldır": "Send to tray",
   sabitlenmiş: "pinned",
   "Dersi düzenle": "Edit lesson",
@@ -284,24 +284,24 @@ const EN: Sozluk = {
   "Ders sabitlendi.": "Lesson pinned.",
   "Sabitleme kaldırıldı.": "Lesson unpinned.",
 
-  // src/components/LessonEdit.tsx
+  // src/ui/LessonEdit.tsx
   "Günde en fazla": "Most per day",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Changing the split clears this lesson from the timetable, pinned blocks included",
 
-  // src/components/Ribbon.tsx — what the two destructive questions promise
+  // src/ui/Ribbon.tsx — what the two destructive questions promise
   "Sabitlenen {n} saat yerinde kalır, gerisi sıfırdan dizilir. Ctrl+Z ile geri alınabilir.":
     "The {n} pinned hours stay where they are; the rest is laid out from scratch. Ctrl+Z undoes it.",
   "Sabitlenen {n} saat yerinde kalır. Dersler, öğretmenler ve müsaitlikler olduğu gibi kalır. Ctrl+Z ile geri alınabilir.":
     "The {n} pinned hours stay where they are. Lessons, teachers and time off are untouched. Ctrl+Z undoes it.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: details and weekly timetable",
 
-  // src/components/Inspector.tsx
+  // src/ui/Inspector.tsx
   Kapat: "Close",
   "Haftalık programı": "Weekly timetable",
   "Kayıt bulunamadı": "No record found",
 
-  // src/components/LessonPool.tsx
+  // src/ui/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Lessons waiting to be placed",
   "Havuz yüksekliği": "Tray height",
   "Sürükleyerek havuzun boyunu ayarlayın": "Drag to set the tray's height",
@@ -320,7 +320,7 @@ const EN: Sozluk = {
   " · dersin {yerlesen}/{toplam} saati yerleşti":
     " · {yerlesen} of the lesson's {toplam} hours placed",
 
-  // src/components/ListTools.tsx
+  // src/ui/ListTools.tsx
   "{ne} ara": "Search {ne}",
   "Ara…": "Search…",
   "Aramayı temizle": "Clear the search",
@@ -332,7 +332,7 @@ const EN: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "To reorder rows by hand, set **Sort** to «Order entered» and clear the filter.",
 
-  // src/components/Palette.tsx
+  // src/ui/Palette.tsx
   "Komut paleti": "Command palette",
   "Ara veya komut yaz": "Search or type a command",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":
@@ -341,7 +341,7 @@ const EN: Sozluk = {
   Sonuçlar: "Results",
   "Eşleşen bir şey yok.": "Nothing matches.",
 
-  // src/components/Print.tsx
+  // src/ui/Print.tsx
   Gün: "Day",
   "Yazdırılacak program yok.": "There is no timetable to print.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",
@@ -369,7 +369,7 @@ const EN: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** of the selected pages are completely empty. Those classes' timetables have not been laid out yet. You can lay them out in the **Timetable** tab.",
 
-  // src/components/Program.tsx
+  // src/ui/Program.tsx
   "Buraya bırakılabilir.": "It can be dropped here.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Filling automatically… {yerlesen}/{toplam} blocks · {sure} s",
@@ -397,7 +397,7 @@ const EN: Sozluk = {
   "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
     "First enter the rooms, teachers and classes in the **School** tab, then add each class's weekly hours. After that, mark the hours teachers cannot come in the **Availability** tab.",
 
-  // src/components/Ribbon.tsx
+  // src/ui/Ribbon.tsx
   "Okul listeleri": "School lists",
   "Ders girişi araçları": "Lesson entry tools",
   "Liste boş": "The list is empty",
@@ -432,7 +432,7 @@ const EN: Sozluk = {
   "Renkli bas": "Print in colour",
   "Ayar bölümleri": "Settings sections",
 
-  // src/components/lessons/index.tsx
+  // src/ui/lessons/index.tsx
   "Yeni ders": "New lesson",
   Branş: "Subject",
   "Sınıfa göre": "By class",
@@ -484,7 +484,7 @@ const EN: Sozluk = {
   "Henüz {ne} yok. **Okul** sekmesinden ekleyin.":
     "No {ne} yet. Add one in the **School** tab.",
 
-  // src/components/settings/Appearance.tsx
+  // src/ui/settings/Appearance.tsx
   Tema: "Theme",
   "Yazı büyüklüğü": "Text size",
   Yoğunluk: "Density",
@@ -513,7 +513,7 @@ const EN: Sozluk = {
   "**Kapalı.** Hiçbir şey kaymaz, hiçbir şey solmaz.":
     "**Off.** Nothing slides and nothing fades.",
 
-  // src/components/settings/Data.tsx
+  // src/ui/settings/Data.tsx
   "Nereye kaydedilsin": "Where it is saved",
   "Klasör seç…": "Choose a folder…",
   "Başka klasör seç…": "Choose another folder…",
@@ -606,7 +606,7 @@ const EN: Sozluk = {
   "**v{surum} indi.** Yeniden başlatınca yeni sürüm açılır. Programınız kayıtlı, hiçbir şey kaybolmaz.":
     "**v{surum} has downloaded.** Restarting opens the new version. Your work is saved; nothing is lost.",
 
-  // src/components/settings/Plans.tsx
+  // src/ui/settings/Plans.tsx
   "Bu işlem geri alınamaz.": "This cannot be undone.",
   "{ogretmen} öğretmen, {sinif} sınıf, {ders} ders ve yerleşmiş {saat} saat silinecek. Bu işlem geri alınamaz.":
     "{ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes}, {ders} {ders:lesson|lessons} and {saat} placed {saat:hour|hours} will be deleted. This cannot be undone.",
@@ -634,7 +634,7 @@ const EN: Sozluk = {
   "Taslağın kurulumu (derslikler, öğretmenler, sınıflar, dersler) kopyalanır; ** dizilmiş program boş gelir**. Taslağın kendisi değişmez.":
     "The draft's setup (rooms, teachers, classes, lessons) is copied; **the laid-out timetable comes empty**. The draft itself does not change.",
 
-  // src/components/settings/Rules.tsx
+  // src/ui/settings/Rules.tsx
   Kurallar: "Rules",
   Kural: "Rule",
   "Ne yapsın": "What to do",
@@ -650,7 +650,7 @@ const EN: Sozluk = {
     "The timetable as laid out does not go past any of the limits you set.",
   "Kendi sınırı olan sınıflar ({n})": "Classes with their own limit ({n})",
 
-  // src/components/settings/School.tsx
+  // src/ui/settings/School.tsx
   "Zil ve günler": "Bell and days",
   "Okul adı (yazdırılan sayfaların başlığında görünür)":
     "School name (appears in the heading of printed pages)",
@@ -677,7 +677,7 @@ const EN: Sozluk = {
   "Şu an **{gun} gün × {saat} saat** = {yer} slot.":
     "Right now **{gun} days × {saat} hours** = {yer} slots.",
 
-  // src/components/setup/Classes.tsx
+  // src/ui/setup/Classes.tsx
   Derslik: "Room",
   "Ada göre": "By name",
   "Dersliğe göre": "By room",
@@ -699,7 +699,7 @@ const EN: Sozluk = {
   yok: "none",
   "Bilgileri ve haftalık programı": "Details and weekly timetable",
 
-  // src/components/setup/Paste.tsx
+  // src/ui/setup/Paste.tsx
   "Buraya yapıştırın...": "Paste here...",
   Önizle: "Preview",
   "Okunabilir satır bulunamadı.": "No readable row was found.",
@@ -708,7 +708,7 @@ const EN: Sozluk = {
   "**{n} satır okundu.** Aşağıdakiler eklenecek:":
     "**{n} {n:row|rows} read.** The following will be added:",
 
-  // src/components/setup/Rooms.tsx
+  // src/ui/setup/Rooms.tsx
   "Sınıf sayısına göre": "By number of classes",
   "Derslikler ({n})": "Rooms ({n})",
   "Yeni derslik": "New room",
@@ -718,7 +718,7 @@ const EN: Sozluk = {
   "Bu aramaya uyan derslik yok.": "No room matches this search.",
   "Sınıf sayısı": "Number of classes",
 
-  // src/components/setup/Subjects.tsx
+  // src/ui/setup/Subjects.tsx
   "Bir öğretmende var ama listede yok":
     "A teacher has it but the list does not",
   "· listede değil": "· not in the list",
@@ -741,7 +741,7 @@ const EN: Sozluk = {
   "Bu branş listede zaten var.": "This subject is already in the list.",
   Kısaltma: "Short form",
 
-  // src/components/setup/Summary.tsx
+  // src/ui/setup/Summary.tsx
   Renkler: "Colours",
   "Öğretmen renklerini yeniden dağıt ({n})":
     "Redistribute teacher colours ({n})",
@@ -777,7 +777,7 @@ const EN: Sozluk = {
   "**{n} sınıfın hiç dersi yok** ({hangileri}).":
     "**{n} {n:class has|classes have} no lessons at all** ({hangileri}).",
 
-  // src/components/setup/Teachers.tsx
+  // src/ui/setup/Teachers.tsx
   Cinsiyet: "Gender",
   "Branşa göre": "By subject",
   "Açık saate göre": "By open hours",
@@ -815,7 +815,7 @@ const EN: Sozluk = {
   "**Aynı kısaltma birden çok öğretmende:** ızgarada iki satır ayırt edilemez.":
     "**The same short form is on more than one teacher:** two rows in the grid cannot be told apart.",
 
-  // src/components/setup/index.tsx
+  // src/ui/setup/index.tsx
   Başlarken: "Getting started",
   "Aracın ne yaptığını görmek isterseniz hazır bir okul yükleyebilirsiniz.":
     "If you would like to see what the tool does, you can load a ready-made school.",
@@ -827,14 +827,14 @@ const EN: Sozluk = {
   "Daha önce **taslak** olarak işaretlediğiniz planların kurulumu hazır duruyor. Seçtiğinizden **yeni bir plan** açılır: derslikler, öğretmenler, sınıflar ve dersler kopyalanır, dizilmiş program boş gelir. Taslağın kendisi değişmez.":
     "The setup of the plans you marked as **drafts** is ready and waiting. Choosing one opens **a new plan**: rooms, teachers, classes and lessons are copied and the laid-out timetable comes empty. The draft itself does not change.",
 
-  // src/components/useRowOrder.tsx
+  // src/ui/useRowOrder.tsx
   Sıra: "Order",
   "{ad}, {n}. sıra, taşımak için yukarı ve aşağı ok":
     "{ad}, position {n}, up and down arrows to move",
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "To reorder by hand, clear the filter and the sort",
 
-  // src/components/useSample.ts
+  // src/ui/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes} and {ders} {ders:lesson|lessons} will be deleted.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":

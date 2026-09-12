@@ -286,7 +286,7 @@ function resolves(token: string): boolean {
   if (FILES.has(clean) || DIRS.has(clean) || DIRS.has(clean + '/')) return true;
   if (!clean.includes('/')) return BY_BASENAME.has(clean);
   // A document may name a file by the part of its path that identifies it:
-  // `setup/Teachers.tsx` for `src/components/setup/Teachers.tsx`.
+  // `setup/Teachers.tsx` for `src/ui/setup/Teachers.tsx`.
   const tail = '/' + clean.replace(/\/$/, '');
   return [...FILES].some((f) => f.endsWith(tail)) || [...DIRS].some((d) => d.endsWith(tail + '/'));
 }

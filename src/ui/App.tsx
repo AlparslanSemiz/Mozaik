@@ -1,15 +1,15 @@
 import { Activity, useCallback, useRef, useState } from 'react';
 import { Keyboard, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import Commands from './components/Commands';
-import { health } from './pure/feasibility';
-import { InspectorProvider } from './components/Inspector';
-import { LessonEditProvider } from './components/LessonEdit';
-import { useDialogs } from './components/Dialogs';
-import { useToast } from './components/Toasts';
+import Commands from './Commands';
+import { health } from '../pure/feasibility';
+import { InspectorProvider } from './Inspector';
+import { LessonEditProvider } from './LessonEdit';
+import { useDialogs } from './Dialogs';
+import { useToast } from './Toasts';
 import type React from 'react';
-import { bundleVersionOf, BUNDLE_VERSION } from './pure/bundle';
-import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from './platform/store';
+import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
+import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from '../platform/store';
 import {
   applyMotion,
   applyRibbon,
@@ -26,33 +26,33 @@ import {
   type Density,
   type Motion,
   type Theme,
-} from './platform/theme';
-import { attachScrollFade } from './platform/scrollFade';
-import { attachRibbonScroll } from './platform/ribbonScroll';
-import { useSolver } from './platform/useSolver';
-import { useFolder } from './platform/useFolder';
-import { useUpdate } from './platform/update';
-import { APP_NAME, surumEtiketi } from './leaf/version';
-import { useToolState } from './platform/toolState';
-import type { Tab } from './platform/toolState';
-import Setup from './components/setup';
-import Lessons from './components/lessons';
-import { lessonIcon } from './components/steps';
-import Availability from './components/Availability';
-import Program from './components/Program';
-import { T, useT } from './components/T';
-import Check from './components/Check';
-import Ribbon from './components/Ribbon';
-import Print, { NOTHING_EXCLUDED } from './components/Print';
-import { readPrintOptions, writePrintOptions } from './platform/printOptions';
-import type { PrintOptions } from './platform/printOptions';
-import type { Excluded } from './components/Print';
-import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './pure/programMask';
-import type { ProgramMask } from './pure/programMask';
-import Settings from './components/settings';
-import { useShortcutsHelp } from './components/ShortcutsHelp';
-import { hasUnseenChangelog } from './platform/changelog';
-import { readProgramColor, writeProgramColor, type ProgramColorMode } from './platform/programColor';
+} from '../platform/theme';
+import { attachScrollFade } from '../platform/scrollFade';
+import { attachRibbonScroll } from '../platform/ribbonScroll';
+import { useSolver } from '../platform/useSolver';
+import { useFolder } from '../platform/useFolder';
+import { useUpdate } from '../platform/update';
+import { APP_NAME, surumEtiketi } from '../leaf/version';
+import { useToolState } from '../platform/toolState';
+import type { Tab } from '../platform/toolState';
+import Setup from './setup';
+import Lessons from './lessons';
+import { lessonIcon } from './steps';
+import Availability from './Availability';
+import Program from './Program';
+import { T, useT } from './T';
+import Check from './Check';
+import Ribbon from './Ribbon';
+import Print, { NOTHING_EXCLUDED } from './Print';
+import { readPrintOptions, writePrintOptions } from '../platform/printOptions';
+import type { PrintOptions } from '../platform/printOptions';
+import type { Excluded } from './Print';
+import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from '../pure/programMask';
+import type { ProgramMask } from '../pure/programMask';
+import Settings from './settings';
+import { useShortcutsHelp } from './ShortcutsHelp';
+import { hasUnseenChangelog } from '../platform/changelog';
+import { readProgramColor, writeProgramColor, type ProgramColorMode } from '../platform/programColor';
 
 /**
  * The six sections, along the TOP — on the same row as the document identity
