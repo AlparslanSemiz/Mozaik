@@ -35,10 +35,10 @@ araçlar (ESLint, knip, Prettier), ölü kod, `keys.ts`, ortak yardımcılar, te
 fabrikası, `library.ts`'in üçe bölünmesi, üç davranış borcunun kapanması, belge
 kapıları (`src/docs.test.ts`), ve 2026-09-12'de `src/`'nin dört katman
 klasörüne bölünmesi (`leaf` · `pure` · `platform` · `ui`) ile sınırın
-dependency-cruiser'a bağlanması. Sıradaki iş `store.ts`'in bölünmesi, parçaları
-doğrudan yeni yapıya inecek (TODO §8i). Ondan sonra araçların kalanı: demet
+dependency-cruiser'a bağlanması, yapılandırma yollarının kapısı (A8), ve
+`store.ts`'in altı modüle bölünmesi. Sıradaki iş araçların kalanı: demet
 analizi, size-limit, tip farkında ESLint kuralları, kapsam ölçümü ve bağımlılık
-güncelleme bildirimi.
+güncelleme bildirimi (TODO §8i).
 
 **Bilinen kusurlar.**
 
@@ -81,6 +81,77 @@ dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağac�
 derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
 durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
 birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · `store.ts` altıya bölündü, ve iki parçası saf katmana indi
+
+**Önce sözleşme (`f661980`).** Dosya beş soruyu birden cevaplıyordu ve
+`useStore`'un hiç birim testi yoktu, yalnız tarayıcı süiti görüyordu. Bölmeden
+önce `src/storeContract.test.ts` yazıldı: geri al yığınının kuralları, kabul
+listesi bir küme olarak (bir sayı adlandırmadan, tuzak 97), planın deposu, diske
+inen dosya, metin kutusu koruması ve kancanın altı değişmezi. Yeşil koştu, sonra
+bölme başladı.
+
+**Altı modül, altı commit, hepsi yalnız yol ve gövde taşıma.**
+
+| Modül | Ne cevaplıyor | Satır |
+|---|---|---|
+| `pure/parseState.ts` | Bu metin hangi State demek, bugünkü şemaya göçürülmüş hâliyle | 464 |
+| `pure/undo.ts` | Bir kutu ve bir eylem verildiğinde sonraki kutu ne | 83 |
+| `platform/planStore.ts` | Planın metni nereye yazılır, yedek zinciri neyi tutar | 92 |
+| `platform/download.ts` | Bir dosya kullanıcının diskine nasıl iner | 64 |
+| `platform/usePlans.ts` | Plan kitaplığı işlemleri | 191 |
+| `platform/useStore.ts` | Kutu, gecikmeli kayıt, `park`, geri al kısayolu | 156 |
+
+İlk ikisi katman düzeltmesi: ikisi de saftı ve `platform/`'da duruyordu, çünkü
+kancanın yanında doğmuşlardı. Artık `pure/` altındalar ve `katman-saf` kuralı
+onları ölçüyor.
+
+**`usePlans` ayrı bir modül olunca kural imzaya çıktı.** "Her geçişten önce
+`park()`" iki yüz satırlık bir fonksiyonun içindeki alışkanlıktı, şimdi `park`
+bir parametre: kancayı kuran şey ona bir boşaltma yolu vermeden bu işlemleri
+kuramıyor (tuzak 28). Dikişin iki yanında birer yorum var ve ikisi de aynı
+tuzağa bakıyor.
+
+**Bir iddia ölçülünce küçüldü.** Eski yorum `replaceLibrary`'deki
+`discardPendingSave()`'in veri kaybını engellediğini söylüyordu. Üç mutasyon
+denendi (çağrıyı kaldır, effect temizliğini kaldır, ikisini birden) ve üçünde de
+eski plan dirilmedi. Sebep ölçüldü: bekleyen yazmayı iptal eden şey otomatik
+kayıt effect'inin ilk satırı, kutu her değiştiğinde önceki tutamağı temizliyor.
+Çağrı niyetin ifadesi olarak duruyor ve iki yorum da artık gerçekten neyin
+koruduğunu yazıyor. Ölçüm sonuçsuz kaldığı için yeşil bir test yazılmadı.
+
+**Ölçüm.** Bölme, taşımanın aksine çıktının baytlarını değiştiriyor (tuzak 114):
+ilk bölmede aynı HEAD üstünde iki derleme alındı, uzunluk birebir aynı ve fark
+tek bir dokuz kilobaytlık bölgedeydi, yani demetleyici modülleri yeni sıraya
+göre yazıyor. Bölmenin toplam maliyeti dikişin tutkalı kadar: `dist/index.html`
+1 006 755 bayttan 1 006 874 bayta çıktı (`f661980` → `9b9824d`, yüz on dokuz
+bayt). Süreler değişmedi: `file://` üstünde dolu planla açılış 179 → 180 ms
+medyan, Ayarlar → Planlar ve yedek panelinin açılması 34,2 → 30,6 ms medyan
+(dokuz koşu, ikisi de koşu içi yayılımın altında). Ölçüm betiği
+`scratch/olc-veri.mjs`.
+
+**Kapılar bölme boyunca üç kez kırmızıya döndü ve üçü de gerçek bayatlıktı:**
+dosya haritasının `store.ts` satırı, dört kural belgesindeki `store.ts` atıfları,
+ve A8'in yakaladığı `stryker.config.json` — mutasyon listesi bölünen dosyayı
+gösteriyordu, yani liste sessizce hiçbir şey ölçmez hâle gelecekti. Liste
+`pure/parseState.ts` ile `pure/undo.ts` oldu.
+
+**knip bu turda sıfır bulgu veriyor**, yani bölme gereksiz dışa aktarım
+üretmedi. Geçici yeniden dışa aktarım hiç bırakılmadı: her çağıran doğrudan yeni
+eve bağlandı.
+
+**Koşulan testler.** Her commit'te `npm run tipler`, birim süiti, `npm run sinir`
+ve `npm run lint`. Bölme bitince `e2e/planlar.spec.ts`, `e2e/ayarlar.spec.ts` ve
+`e2e/klasor.spec.ts` birlikte (zarf gidiş dönüşü dahil, hepsi geçti), sonra tam
+`npx playwright test`: taban ne söylüyorsa aynısı, tek düşen test tarihe bağlı
+bilinen kırmızı (`e2e/exe.spec.ts` 248). `npm run knip` sıfır bulgu.
+**Koşulmadı:** `npm run test:site`, `cozucu`, `patrol`, `ekran`, `mutasyon`,
+`exe:test` (Rust bu makinede yok).
+
+**Öteki oturuma:** `SAVE_DELAY` ve otomatik kayıt zamanlayıcısı aynı davranışla
+`platform/useStore.ts`'e taşındı, süre değişmedi.
 
 ---
 
