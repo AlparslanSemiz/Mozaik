@@ -35,6 +35,49 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Klasörler katmanların adını taşıyor: `leaf` · `pure` · `platform` · `ui`
+
+**Değişen.** `src/` düz bir klasördü ve ARCHITECTURE.md'nin tarif ettiği üç
+katman dosya sisteminde hiç görünmüyordu. Bir katman ihlali ancak biri fark
+ederse görünüyordu. Klasörler artık o katmanların karşılığı.
+
+**Ölçüt tekti:** bir katman ihlali bir klasör sınırını geçen import olarak
+görünsün. Adlar yeni bir taksonomi değil, ARCHITECTURE'ın kendi dört
+başlığının İngilizcesi: yapraklar, saf mantık, durum ve tesisat, bileşenler.
+
+**`state` değil `platform`.** Üçüncü katman iki şey barındırıyor: durum
+(`store`, `toolState`) ve makinenin kendisi (`folder`, `desktop`, `update`,
+`version` tarafı, baskı seçenekleri). `state/` o klasörün yarısını anlatırdı.
+
+**Bir klasör adının işi, yanlış bir importu yanlış göstermek.** `pure/`
+içindeki bir `import { useState } from 'react'` satırı kendini ele veriyor;
+`logic/` ya da `domain/` bunu yapmıyor, çünkü ikisi de yan etki hakkında bir
+şey söylemiyor. Ad bu yüzden seçildi.
+
+**Denendi ve bırakıldı: `dom/` ile `hooks/` alt klasörleri.** Bir sınır,
+yasakladığı bir şey varsa sınırdır, ve bu ikisinin arasında yasaklanacak bir
+şey yok: aynı katmandalar, aynı şeyleri import edebiliyorlar, aralarındaki bir
+import ihlal değil. Üstelik ayrım temiz de değil — `drag.ts` doğrudan DOM'a
+yazan grupta duruyor ama bir kanca, yani React'i import ediyor. Temiz olmayan
+bir ayrımı klasöre çevirmek onu kalıcılaştırmaktan başka bir şey yapmaz.
+
+**Sınırı ölçen araç aynı kararla seçildi (`2a83380`):** dependency-cruiser,
+ESLint'in `import/no-restricted-paths` kuralına karşı. Kural dosya dosya bakar
+ve döngüyü hiç görmez; dependency-cruiser grafiği kurar, döngü ile katmanı tek
+yapılandırmada tarif eder ve grafiği çizdirebilir. Sınırın adı ile sınırı ölçen
+şey ayrı verilirse birbirini tutmayabilir, o yüzden birlikte verildi.
+
+### 2026-09-12 · Biome bakıldı, kurulmadı
+
+ESLint ile Prettier'ın ikisinin de yerine geçebilir ve çok daha hızlı. Bu turda
+kurulmadı, çünkü ikisi de bu depoya yeni girdi ve göç maliyeti bugünkü
+kazançtan büyük: kurallar, yapılandırma ve biçim commit'i yeniden yazılırdı.
+Hızın bugün bir sorun olduğu ölçülmedi. Karar yeniden bakılabilir, tetikleyici
+şu olur: biçim ya da lint adımı `kontrol`'de fark edilir bir yer tutmaya
+başlarsa.
+
+---
+
 ### 2026-09-12 · Hedef ölçek %150 değil %100
 
 **Değişen.** Belgelerde ve kod yorumlarında dolaşan "hedef kullanıcı %125 ya da
