@@ -26,6 +26,122 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · scratch/kasma-*.mjs · sürükleme sırasında kare süresi, dolu ızgarada
+Bulgu: Kullanıcının ikinci kez yazdığı satır ("bir kartı kırmızı sarı veya yeşil blokların
+üzerinden gezdirirken çok kasma oluyor") ilk kez **hareket başına** ölçüldü. 2026-09-01'de
+ölçülen şey sürüklemenin BAŞLANGICIYDI (pointerdown → ikinci rAF, 125 ms → 46,2 ms); o sayı
+doğru ama şikayetin sebebi değilmiş (tuzak 101).
+
+Kurulum: örnek okul, otomatik dizilmiş ızgara (371 yerleşik kart, 3'ü havuzda; hedef satırda
+72 hücrenin 20'si dolu), `dist/index.html` `file://` üzerinden, Chromium (başsız), belge
+6704 yerleşim nesnesi. Havuzdan bir kart alınıp hedef satır boyunca yatay taranıyor: 558
+`Input.dispatchMouseEvent` ~125 Hz'de, cevabı beklenmeden (bekleyince fare sayfanın hızına
+düşüyor ve ölçüm kendi konusunu gizliyor). Sayfaya birleştirmeden sonra 226 hareket ulaştı.
+Geçilen renkler sayıldı, üçü de var: kırmızı-boş 91, kırmızı-dolu 67, sarı-boş 27, sarı-dolu 4,
+yeşil-boş 34.
+
+Kare süreleri (rAF damgaları arası; "düşen" = 25 ms'den uzun kare):
+
+| Koşul | Düşen kare | fps | Medyan | p90 | En kötü |
+|---|---|---|---|---|---|
+| x1, 1920×1080 | %0 | 60,0 | 16,7 ms | 16,7 | 16,8 |
+| x1, 1600×1000 (exe kutusu) | %0 | 60,0 | 16,7 ms | 16,7 | 16,8 |
+| x4, 1920×1080 | %9,6 · %12,2 · %15,0 | 52–55 | 16,7 ms | 33,3 | 33,4 |
+| x4, 1600×1000 | %14,3 · %24,4 · %31,6 | 45–53 | 16,7 ms | 33,3 | 50,1 |
+| x4, kenar kaydırması sürerken | %9,6–%17,5 | 52 | 16,7 ms | 33,3 | 33,4 |
+| x4, **sürükleme yok** (imleç haçı) | %0 | 60,0 | 16,7 ms | 16,7 | 16,8 |
+
+Yani x1'de kasma yok, x4'te her sekizinci ila onuncu kare düşüyor ve hiçbir kare iki kareden
+uzun sürmüyor: donma değil, titreme. Küçük kutu (exe boyu) daha iyi değil, eşleşmiş koşularda
+biraz daha kötü. Gürültü ±3 puan, bu yüzden her rakam üç koşunun üçü de yazıldı.
+
+Profil tahminle değil tarayıcının kendi olay kaydıyla alındı (CDP Tracing), çünkü şüphelilerin
+çoğu JS değil. x4, 4,6 saniyelik tarama, ana iş parçacığı neredeyse dolu (RunTask 4970 ms):
+
+| İş | Toplam | Adet | Medyan |
+|---|---|---|---|
+| Paint | 2025 ms | 387 | 5,24 ms |
+| Layerize | 959 ms | 232 | 4,06 ms |
+| HitTest | 713 ms | 581 | 1,27 ms |
+| Layout | 575 ms | 108 | 5,37 ms |
+| rAF geri çağrısı | 474 ms | 233 | 2,03 ms |
+| UpdateLayoutTree (stil) | 154 ms | 588 | 0,09 ms |
+
+`Layout` olaylarının hepsi `partialLayout: false`, kökü `#document` ve 6704 nesne: **tam belge
+yerleşimi**, kare başına değil hedef hücre her değiştiğinde (108 kez, 226 harekette). Sebebi
+`drag.ts`'in `paintReason`'ı: gerekçe çubuğunun `textContent`'i. Tek tek sınandı —
+
+| Deney | Düşen kare (3 koşu) | Layout | Paint |
+|---|---|---|---|
+| taban | %9,6 · %12,2 · %15,0 | 558 ms / 108 | 2025 ms |
+| `paintReason` hiç çalışmıyor | %0 · %1,8 · %0 | 1,3 ms / 1 | 940 ms |
+| yalnız `className` yazılıyor (metin yok) | %2,2 · %0,7 · %4,5 | 0,2 ms / 1 | 2155 ms |
+| yalnız metin yazılıyor (`className` yok) | %4,9 · %7,4 · %6,2 | 602 ms / 107 | 1416 ms |
+
+Sınıf yazması bedava, metin yazması pahalı. Metin bir `<span>`'in içinde, `white-space: nowrap`
+ve `text-overflow: ellipsis` ile, ve o span bir flex öğesi: içeriği değişince kutusu da
+değişiyor, ve Blink yerleşimi belgenin kökünden başlatıyor. Bunun 5,37 ms'sine 5,24 ms'lik tam
+görüntü alanı boyaması eşlik ediyor (Paint'in yarısı bu satırdan geliyor).
+
+Planın öteki üç şüphelisi ölçüldü ve **üçü de düştü** (tuzak 105):
+- `gridChrome.ts`'in imleç haçı sürükleme sırasında zaten kapalı (`table.dragging` kapısı), ve
+  sürüklemesiz gezinmede x4'te tek kare düşmüyor. Kayıtlı 0,148 ms/sütun bugün x4'te ~1,26 ms,
+  yani x1 karşılığı ~0,3 ms: aynı mertebede ve kare bütçesinin çok altında.
+- Sınıf değişimleri: 226 harekette **104** düğüm, hareket başına medyan **0**, en kötü **2**.
+  Stil yeniden hesabının medyanı 0,09 ms. Boyanan düğüm sayısı sorun değil.
+- `elementFromPoint` + `closest('[data-day]')`: 233 çağrı, 277 ms, çağrı başına 1,19 ms (x4),
+  yani x1'de ~0,3 ms. Tarayıcının kendi olay isabet testi bunun üstüne 425 ms daha koyuyor
+  (340 kez, 1,25 ms) — ikisi toplam sürenin %15'i, ama tek başına kare düşürmüyor.
+- Hayalet karta `will-change: transform` (kendi katmanına alma) denendi: %14,2 · %13,5 · %14,6,
+  yani tabandan **farksız**, Paint da kıpırdamadı. Pahalı görünen satır boşa çalışmıyormuş.
+
+İki aday çare ölçüldü, ikisi de kodun kendisinde değil yazmanın şeklinde:
+
+| Aday | Düşen kare (3 koşu) | Layout |
+|---|---|---|
+| gerekçe metni en çok 100 ms'de bir yazılıyor | %1,5 · %2,2 · %3,4 | 194 ms / 38 |
+| metin kutusu mutlak konumlanıyor (dört kenarı bağlı) | %3,8 · %7,4 · %4,9 | 121 ms / 108 |
+| `contain: layout` (çubuğa) | %21,7 · %22,8 · %24,3 | 551 ms / 105 |
+| `flex: 1 1 0; min-width: 0` (metin kutusuna) | %13,1 · %12,7 · %12,2 | 557 ms / 109 |
+
+Son ikisi işe yaramadı ve yazılmadan önce ölçüldükleri için yazılmadılar da.
+Tür: ürün kusuru (bir tane, ve 2026-09-01'de ölçülmemiş yerde)
+Ne yapıldı: kod değiştirilmedi, ölçüm yazıldı. İş maddesi TODO §4 B4.7, çare kullanıcı kararı bekliyor.
+Kalıcı kural: henüz yok — çare seçilince TRAPS'e "bir metin düğümünü değiştirmek 6704 nesnelik
+belgede tam yerleşim tetikler" olarak yazılacak.
+
+### 2026-09-12 · scratch/kasma-gorunurluk.mjs · dolu hücrenin hükmü ekranda görünüyor mu
+Bulgu: Kullanıcının aynı gün yazdığı ikinci satır ("o kartın oraya gelip gelemeyeceğini bilmek
+lazım, yani kırmızı mı turuncu mu falan") bir performans değil bir **görünürlük** sorunu, ve
+ölçülünce tuzak 84'ün ailesinden çıktı: hesaplanan değer doğru, ekranda görünen başka.
+
+Dolu bir hücrenin üstüne kart getirildiğinde `<td>`'nin hesaplanmış zemini hükmün ta kendisi —
+takas için sarı `rgb(251, 224, 154)`, engel için kırmızı `rgb(247, 188, 183)`. Ama o zeminin
+üstünde hücrenin kendi kartı duruyor: kart `width/height: 100%` ve kendi palet rengiyle opak,
+32×39 px'lik hücrenin **29×36'sını, yani %83,7'sini** örtüyor. Geriye hükümden görünen şey her
+kenarda **1,5 px'lik bir çerçeve**. İmlecin altındaki hücrede ayrıca 3 px'lik dış çizgi var
+(`outline`, karttan sonra boyandığı için görünüyor) — ama yalnız imlecin durduğu hücrede.
+`elementsFromPoint` yığını da bunu söylüyor: `SPAN.card-bottom` → `BUTTON.card` → `TD.can-warn`.
+
+Üstelik iki dolu hücrenin kartı aynı renkte olabiliyor (ölçümde ikisi de `rgb(241, 231, 197)`),
+yani sarı hücre ile kırmızı hücre karta bakarak ayırt edilemiyor. Kendi hayalet kartı da
+hücrenin %61,1'ini örtüyor, yani boş hücrede bile hükmün bir kısmı imlecin altında kalıyor.
+
+Sayı olarak: otomatik dizilmiş bir programda hedef satırın 72 hücresinin 20'si dolu, ve
+kullanıcının sorduğu soru ("bu kart buraya gelebilir mi") tam da o dolu hücrelerde soruluyor.
+
+Dört kat büyütülmüş görüntüler iki şeyi daha gösterdi (`scratch/cizgi-*.png`, `gor-*.png`).
+Birincisi, **imlecin durduğu hücrede hüküm görünüyor**: 3 px'lik dış çizgi kartın üstünde
+boyanıyor (CSS boyama sırası), ve hayalet kart ondan dar olduğu için çerçeve hayaletin de
+altından kalmıyor. Yani sorun imlecin olduğu yer değil, **imlecin daha gitmediği yerler** —
+satırı bir bakışta okumak. İkincisi, oradaki zayıf önizleme dolu hücrede yalnız 1,5 px'lik bir
+çizgi olarak kalıyor ve **kartın kendi rengi uyarı renginin neredeyse aynısı**: kart
+`rgb(241, 231, 197)`, `--can-warn-bg` `rgb(253, 238, 201)`. Yan yana duran "dolu ve engelli"
+hücre ile "boş ve takas edilebilir" hücre ekranda aynı krem rengi gösteriyor.
+Tür: ürün kusuru (boyama sırası / görünürlük), performans değil
+Ne yapıldı: düzeltilmedi, ölçüldü. İş maddesi TODO §4 B4.8, çare kullanıcı kararı bekliyor.
+Kalıcı kural: yok — tuzak 84 zaten bu aileyi anlatıyor.
+
 ### 2026-09-12 · npm run mutasyon · ilk tam mutasyon koşusu, saf çekirdek
 Bulgu: `a81c79a` artı bu turun test paketi, `../Mozaik-test` worktree'sinde, dört işçi, 30 dakika. 3987 mutant, 2816 öldü, 769 hayatta, 402 kapsamsız, 49 zaman aşımı. Skor (öldürülen / kapsanan) toplamda 78,5. Dosya başına: `store.ts` 63,7 · `constraints.ts` 76,6 · `feasibility.ts` 79,9 · `rules.ts` 80,9 · `entities.ts` 83,1 · `library.ts` 91,3 · `blocks.ts` 93,8. Tam tablo WORKLOG'un 2026-09-12 girdisinde.
 

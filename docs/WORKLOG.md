@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-11.
+Son güncelleme: 2026-09-12.
 
 **Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
@@ -53,6 +53,8 @@ yapılmış görünüyor.
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
+- Kart sürüklenirken 4 kat yavaşlatılmış işlemcide her sekizinci ila onuncu kare düşüyor (2026-09-12'de ölçüldü, x1'de olmuyor). Sebebi tek satır: gerekçe çubuğunun metnini yazmak 6704 nesnelik belgede tam yerleşim tetikliyor. Çare seçenekleri ölçüldü, karar kullanıcıda (TODO B4.7).
+- Dolu bir hücrenin hükmü (takas sarı, engel kırmızı) o hücrenin kartının altında kalıyor: kart zeminin %83,7'sini örtüyor, geriye 1,5 px'lik çerçeve kalıyor (2026-09-12'de ölçüldü, TODO B4.8).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
 - Karttaki raptiye dururken görünmüyor (`opacity: 0`), 2026-08-30 tarihli kayıt ise "hep görünür, sönük" kararını kullanıcının kararı olarak yazıyor. Kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
@@ -84,6 +86,51 @@ dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağac�
 derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
 durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
 birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · Sürüklerken kasmanın ölçümü, ve belge tazeliğinin ritüele girmesi
+
+Kullanıcının iki işi: CLAUDE.md'nin oturum sonu ritüeline belge kapılarının kuralı, ve
+not defterindeki iki yeni satırın **ölçülmesi** (madde açmadan önce).
+
+**Belge tazeliği ritüele girdi.** CLAUDE.md'nin "Oturum sonu" listesine iki satır: bir
+belge kapısı (`src/docs.test.ts`) kırmızıysa bayatlayan belgedir, kapı susturulmaz —
+kapının kendisi yanlışsa mutasyonla kanıtlanır; ve bir kod değişikliği bir belge cümlesini
+yanlış hâle getiriyorsa cümle **aynı commit'te** düzeltilir. İkincisinin sebebi yazılı:
+bölme turunda bulunan on yedi bayat maddenin hepsi "sonra düzeltirim" ile birikti.
+TODO.md'nin kendi hijyeni de düzeldi: iki kez kullanılan `§8c`'nin ikincisi `§8h` oldu
+(`§8g` `test/strateji` dalında şema göçü için açık), ve içindekiler tablosundaki madde
+sayıları niteliksel ifadeye çevrildi — iki oturum çalışırken o sayılar her turda
+bayatlıyordu, §4 altı diyordu yedi vardı, §7 yedi diyordu dokuz vardı.
+
+**Sürüklerken kasma: sebep bulundu, ve ölçülen şey plandakinin hiçbiri değildi.** Şikayet
+ikinci kez geliyor; 2026-09-01'de sürüklemenin BAŞLANGICI ölçülmüş ve kapatılmıştı
+(125 → 46,2 ms). Bu tur hareket başına ölçtü. x1'de tek kare düşmüyor, x4'te %9,6–15
+düşüyor, en kötü kare iki kareden uzun değil; exe kutusunda (1600×1000) biraz daha kötü.
+Sebep `drag.ts`'in gerekçe çubuğuna yazdığı metin: hedef hücre her değiştiğinde 6704
+nesnelik belgede tam yerleşim (5,37 ms) ve tam görüntü alanı boyaması (5,24 ms). Yazmayı
+kaldırınca düşen kare %12'den %0'a iniyor. Planın üç şüphelisi de ölçülüp düştü: imleç
+haçı sürüklerken zaten kapalı, sınıf değişimi hareket başına medyan 0 düğüm, hayalet karta
+kendi katmanını vermek toplamı kıpırdatmadı (tuzak 105). İkinci satır ("kırmızı mı turuncu
+mu") bir görünürlük sorunu çıktı: hüküm doğru hesaplanıyor, kartın altında kalıyor (%83,7).
+Bütün sayılar ve iki aday çarenin ölçümü [TESTFINDINGS.md](TESTFINDINGS.md)'de, işler
+TODO B4.7 ve B4.8'de, kod değiştirilmedi.
+
+**Ölçüm aleti:** `scratch/kasma-ortak.mjs` (örnek okul + otomatik dizme + üç boş hücre,
+tuzak 41), `kasma-zaman.mjs` (kare süreleri), `kasma-iz.mjs` (CDP Tracing, iş dağılımı),
+`kasma-sayim.mjs` (hareket başına sınıf değişimi, geçilen renkler), `kasma-gorunurluk.mjs`
+(örtme oranı ve ekran görüntüleri), `ablasyon.mjs` (yama → derleme → ölçüm → geri alma).
+İki şey öğrenildi: `await page.mouse.move` her hareket için sayfadan cevap bekliyor, yani
+sayfa yavaşlayınca fare de yavaşlıyor ve ölçüm kendi konusunu gizliyor — olaylar node
+saatine göre, cevabı beklenmeden gönderilmeli. Ve tek koşu yeterli değil: aynı yapıda
+%9,6 ile %31,6 arasında koşular var, o yüzden her rakam üç koşunun üçüyle yazıldı.
+
+**Koşulan testler:** yok. Bu tur ölçüm turu, üründe tek satır değişmedi. `dist/` bu ağaçta
+on iki kez yeniden derlendi (ablasyon deneyleri) — aynı ağaçta çalışan öteki oturumun
+ölçümleri o pencerede yalan söylemiş olabilir, ve bu oturumun geç koşularındaki gürültü de
+muhtemelen aynı sebepten. Ablasyon betiği bütün `src/`'yi geri almıyor, yalnız kendi
+dokunduğu dosyayı yedekleyip geri koyuyor.
 
 ---
 

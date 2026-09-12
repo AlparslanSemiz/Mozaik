@@ -24,14 +24,12 @@ bitince §10'a taşınır.
 
 Program kısmının açılışı daha hızlanmalı.
 Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak.
-Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor.
 Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa.
 Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok.
 Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem.
 Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre.
 
 
-kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya işte o kartların arkasından ya da başka bir şekilde de o kartın oraya gelip gelemyeceğini bilmek lazım yani kırmızı mı turuncu mu falan.
 
 
 
@@ -45,13 +43,13 @@ kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirm
 |---|---|---|
 | **§0** | **Not defteri** — senin ham satırların | ✍️ boş, senin |
 | **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
-| **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | 10 + 1 madde |
-| **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | 7 madde |
-| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | 6 madde |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | 6 madde, 5 bitti (B5.1·B5.2·B5.4·B5.5·B5.6) |
-| **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | 6 madde |
-| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | 7 madde |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, erişilebilirlik ve test sırası | 6 + 4 + 11, artı §8e 6 ve §8f 3 |
+| **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
+| **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
+| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | hepsi açık |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık |
+| **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
+| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti, çoğu açık |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
 
@@ -411,6 +409,47 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       `{Öğretmen:Tam Adı}`. Düzenleme yeri **önizlemenin kendisi**.
 - [ ] **B4.5 Farklı baskı çeşitleri** — rapor yapısı seçilebilsin: satırda ne,
       sütunda ne, sayfa başına ne.
+- [ ] **B4.7 Sürüklerken kasma — SEBEBİ ÖLÇÜLDÜ, çare kullanıcı kararı bekliyor.**
+      Senin satırın: *"Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden
+      gezdirirken çok kasma oluyor."* **İkinci kez geliyor**: §9b'deki aynı şikayet
+      2026-09-01'de sürüklemenin BAŞLANGICI ölçülerek kapatılmıştı (125 ms → 46,2 ms).
+      O ölçüm yanlış değildi, ölçtüğü şey şikayetin sebebi değildi (tuzak 101).
+      Bugün hareket başına ölçüldü, tam kayıt [TESTFINDINGS.md](TESTFINDINGS.md)'de:
+      x1'de tek kare düşmüyor, **x4'te her sekizinci ila onuncu kare düşüyor** (%9,6–15,
+      1600×1000 exe kutusunda biraz daha kötü), hiçbir kare iki kareden uzun sürmüyor.
+      **Sebep tek satır:** `drag.ts`'in `paintReason`'ı hedef hücre her değiştiğinde
+      gerekçe çubuğunun `textContent`'ini yazıyor, ve o yazma 6704 nesnelik belgede
+      **tam yerleşim** tetikliyor (5,37 ms) artı tam görüntü alanı boyaması (5,24 ms).
+      Yazmayı kaldırınca düşen kare %12'den %0'a iniyor. Sınıf yazması bedava, pahalı
+      olan metin. Planın öteki üç şüphelisi ölçülüp düştü: imleç haçı sürüklerken zaten
+      kapalı, sınıf değişimi hareket başına medyan 0 düğüm, hayalet karta kendi katmanını
+      vermek toplamı hiç kıpırdatmadı (tuzak 105).
+      **Karar senin, iki aday ölçüldü:** (a) metin en çok 100 ms'de bir yazılsın — düşen
+      kare %1,5–3,4, ama çubuğun cümlesi imleçten bir tık geride kalır; (b) metin kutusu
+      akıştan çıksın (mutlak konum) — %3,8–7,4, cümle anında yazılır ama çubuğun düzeni
+      değişir. Denenip **elenen** iki ucuz yol da kayıtta: `contain: layout` ve metin
+      kutusuna `flex: 1 1 0`, ikisi de yerleşimi durdurmadı.
+- [ ] **B4.8 Dolu hücrenin hükmü kartın altında kalıyor — ölçüldü, çare kararı bekliyor.**
+      Senin satırın: *"kartları kaydırırken başka bir kartın üzerine gelip koyma yani
+      değiştirme var ya, o kartların arkasından ya da başka bir şekilde o kartın oraya
+      gelip gelemeyeceğini bilmek lazım, yani kırmızı mı turuncu mu falan."*
+      Bu bir performans değil **görünürlük** sorunu ve tuzak 84'ün ailesinden: `dropMap`
+      hükmü doğru hesaplıyor, `<td>` doğru renge boyanıyor (takas sarı, engel kırmızı),
+      ama hücrenin kendi kartı o zeminin **%83,7'sini** örtüyor — 32×39 px'lik hücrede
+      geriye her kenarda 1,5 px'lik bir çerçeve kalıyor. Kendi hayalet kartın da %61,1'ini
+      örtüyor. Üstelik iki kartın rengi aynı olabildiği için sarı hücre ile kırmızı hücre
+      karta bakarak ayırt edilemiyor. Otomatik dizilmiş bir programda hedef satırın 72
+      hücresinin 20'si dolu, yani soru tam da bu hücrelerde soruluyor.
+      **İmlecin durduğu hücrede hüküm görünüyor** (3 px'lik dış çizgi kartın üstünde
+      boyanıyor); görünmeyen şey imlecin daha gitmediği hücreler, yani satırı bir
+      bakışta okumak. Üstelik kartın kendi rengi uyarı renginin neredeyse aynısı
+      (`rgb(241, 231, 197)` ile `rgb(253, 238, 201)`), yani "dolu ve engelli" hücre ile
+      "boş ve takas edilebilir" hücre ekranda aynı krem rengi gösteriyor.
+      Ölçüm ve ekran görüntüleri [TESTFINDINGS.md](TESTFINDINGS.md)'de.
+      **Çare seçenekleri henüz ölçülmedi**, ve seçim bir tasarım kararı: kartın kendisini
+      hükme göre işaretlemek (kenarlık ya da köşe rozeti) · kartı sürükleme boyunca
+      saydamlaştırmak · hücrenin çerçevesini kalınlaştırmak · takas edilecek kartı ayrıca
+      göstermek. Renklerin anlamı (Y2 kararı) değişmiyor, değişecek olan nerede boyandığı.
 - [ ] **B4.6 Program ızgarasında sınıfın altındaki "derslik yok" ibaresi
       kalksın.** Senin satırın: *"program tarafında sınıf tarafında
       dersliği yok ibaresi kalkması lazım."* Kaynak `Program.tsx:321-327`:
@@ -762,7 +801,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Brave'inde GÖRÜLMEDİ**; hâlâ doğrulanmayı bekleyen bir varsayım
 
 ---
-### 8c · Belge turunun bıraktıkları (2026-09-11)
+### 8h · Belge turunun bıraktıkları (2026-09-11)
 
 - [ ] **Karttaki raptiye dururken görünmez mi, hep görünür mü?** 2026-08-30 kaydı "hep
       görünür, sönük" diyor ve bunu kullanıcı kararı olarak yazıyor, kod (`fb052f4`)
@@ -1054,6 +1093,8 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Ayrıca hakkında kısmında what's new gibi olmalı. babam her güncelleme alındığında neyin değiştiğini soruyor... | **B2.9** |
 | Eğer hata varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir... son 2 saate konulabilmeli. | **B5.6** |
 | Ayarlarda her sectionun görüntüsü değişebiliyor olsun... Önizleme şeklinde görelim onları. | **B2.10** |
+| Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor. | **B4.7** — İKİNCİ kez geliyor (§9b'de 2026-09-01'de kapanmış), sebebi 2026-09-12'de ölçüldü |
+| kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya... yani kırmızı mı turuncu mu falan. | **B4.8** — performans değil görünürlük, 2026-09-12'de ölçüldü |
 
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
