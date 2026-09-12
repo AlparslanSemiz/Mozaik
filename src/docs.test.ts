@@ -499,7 +499,7 @@ function removedTraps(): Set<number> {
   return new Set((line?.[1] ?? '').match(/\d+/g)?.map(Number) ?? []);
 }
 
-/** `tuzak 11`, `pitfall 58`, `tuzak 4 ve 5`, `tuzak 21 ve 105`, `Pitfall 43/44`. */
+/** `tuzak 11`, `pitfall 58`, `tuzak 4 ve 5`, `tuzak 21 ve 105`, `Pitfall 108/109`. */
 const CITATION = /(?:tuzak|pitfall)\s+(\d+(?:\s*(?:ve|,|and|ile|·|\/)\s*\d+)*)/gi;
 
 /**
