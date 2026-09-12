@@ -6,7 +6,7 @@
 // come out exactly as it went in.
 
 import { defaultSubjects } from './pure/entities';
-import { parseState } from './platform/store';
+import { parseState } from './pure/parseState';
 import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/sample';
 import { SCHEMA_VERSION } from './leaf/types';

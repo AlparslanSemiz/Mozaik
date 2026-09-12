@@ -9,7 +9,8 @@ import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
-import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from '../platform/store';
+import { storageWorks, useStore, downloadBackup, isTextInput } from '../platform/store';
+import { parseState } from '../pure/parseState';
 import {
   applyMotion,
   applyRibbon,
@@ -52,7 +53,11 @@ import type { ProgramMask } from '../pure/programMask';
 import Settings from './settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../platform/changelog';
-import { readProgramColor, writeProgramColor, type ProgramColorMode } from '../platform/programColor';
+import {
+  readProgramColor,
+  writeProgramColor,
+  type ProgramColorMode,
+} from '../platform/programColor';
 
 /**
  * The six sections, along the TOP — on the same row as the document identity

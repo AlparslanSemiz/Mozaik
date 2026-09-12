@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { deleteLesson, remapDays } from './pure/entities';
 import { place, setBlockPinned, togglePinScope } from './pure/constraints';
-import { parseState } from './platform/store';
+import { parseState } from './pure/parseState';
 import {
   activeProgram,
   addProgram,
