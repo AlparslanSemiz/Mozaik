@@ -35,10 +35,12 @@ araçlar (ESLint, knip, Prettier), ölü kod, `keys.ts`, ortak yardımcılar, te
 fabrikası, `library.ts`'in üçe bölünmesi, üç davranış borcunun kapanması, belge
 kapıları (`src/docs.test.ts`), ve 2026-09-12'de `src/`'nin dört katman
 klasörüne bölünmesi (`leaf` · `pure` · `platform` · `ui`) ile sınırın
-dependency-cruiser'a bağlanması, yapılandırma yollarının kapısı (A8), ve
-`store.ts`'in altı modüle bölünmesi. Sıradaki iş araçların kalanı: demet
-analizi, size-limit, tip farkında ESLint kuralları, kapsam ölçümü ve bağımlılık
-güncelleme bildirimi (TODO §8i).
+dependency-cruiser'a bağlanması, `store.ts`'in altı modüle bölünmesi, ve yedi
+aracın tamamı (ESLint'in tip farkında kuralları, knip, Prettier,
+dependency-cruiser, demet analizi, size-limit, kapsam, Dependabot ile PR
+süiti). Belge kapısı sayısı ona çıktı. Refactorun açık kalan tek işi yok;
+sıradaki iş kullanıcının not defterinden geliyor, ve en üsttekisi ürünün
+kendisi: babasının verisinde program oluşmuyor (§0).
 
 **Bilinen kusurlar.**
 
@@ -81,6 +83,42 @@ dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağac�
 derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
 durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
 birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · Faz 4 kapanışı: tam koşu, dört kapı, ve kapanan bir oturumun devri
+
+**Tam `npm run kontrol` koşuldu ve zincir bilinen tarih testinde durdu.** Ondan
+öncesi yeşil: tipler, sınır, lint (0 hata), birim süiti, derleme, boyut (ham
+1,01 MB / 1,02 MB eşik, brotli 247,5 kB / 260 kB). E2E 574/575, düşen tek test
+`e2e/exe.spec.ts` 248 ve sebebi tarih — `/2 Eylül 2026/` deseni bugünkü
+`12 Eylül 2026` damgasını da yakalıyor, TODO'da kayıtlı, refactorun kırmadığı
+daha önce ölçülmüştü. Zincir `&&` ile bağlı olduğu için site ve çözücü süitleri
+o noktada hiç koşmadı; ikisi ayrıca koşuldu ve ikisi de geçti (site 22 test,
+çözücü stresi 7 test).
+
+**Bunun bir sonucu var ve yazılmalı:** o test her ayın 12'sinden 19'una kadar
+kırmızı, yani `kontrol` sekiz gün boyunca sonuna kadar koşamıyor. Dosya test
+stratejisi dalının sahipliğinde ve o oturum artık yok. Bir satırlık çaresi
+belli (deseni çapalamak), ama sahipliği açık bir soru.
+
+**Dört kapı eklendi, dördü de ölçülmüş bir kaçaktan doğdu.** A2'ye katman
+şeması (kaçak `39404a1`'de ölçüldü, yedi sapma), A9 mutasyon listesi (yanlış
+olan bir yol değil bir kümeydi), A8'e betik yorumlarındaki yollar, ve A10
+tuzak dizini ile fiziksel yerleşim. Sonuncusu yazıldığı gün iki kez iş gördü:
+önce 117'yi yanlış gruba yazdığımda, sonra bir taşıma bir `##` başlığını
+yanında sürükleyip üç tuzağı sessizce başka gruba düşürdüğünde.
+
+**Kapanan oturumun işi devralındı.** Ölçüm oturumu B4.7 ile B4.8'in çaresini
+yazdı, kendi tam koşusunu yaptı ve commit almadan kapandı. Kod okundu, testleri
+koşuldu, `88fffc2`'de kayda geçti. Sonra kullanıcının isteğiyle o oturumun
+bıraktığı HER ŞEY tarandı — yedi dosya ve bütün TESTFINDINGS girdileri — ve
+kalıcı yeri olmayan üç karar bulunup DECISIONS'a yazıldı, iki kalıcı kural da
+TRAPS'e (117, 118). Kaybolan şey kod değil, kodun neden öyle olduğuydu.
+
+**Koşulan testler:** `npm run kontrol` (tarih testinde durdu), `npm run
+test:site` ve çözücü stresi ayrıca, `npm run kapsam` bir kez. Koşulmadı:
+`patrol`, `ekran`, `mutasyon`, `exe:test`.
 
 ---
 

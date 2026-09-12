@@ -21,8 +21,10 @@ bitince §10'a taşınır.
 > (Ham notlar) geçer — hiçbir satır silinmez.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
+Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz.
 
 
+Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam ve bu sebeple ilk üsttekini saçma bir yere koyuyor. Sonra alttakini alıp ardından saçma konulanın yerini düzeltiyor.
 
 
 
@@ -1020,6 +1022,13 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       düşecek. Refactorun kırmadığı ölçüldü: aynı test bölmeden önceki `34418b5`
       derlemesinde de birebir aynı şekilde düşüyor. Test kusuru, dosya test stratejisi
       dalının sahipliğinde.
+      **2026-09-12 akşamı iki şey değişti.** Birincisi, bu test `npm run kontrol`'ü
+      sonuna kadar koşmaktan alıkoyuyor: zincir `&&` ile bağlı, E2E orada duruyor ve
+      site ile çözücü süitleri hiç koşmuyor (o gün ikisi elle koşuldu, ikisi de geçti).
+      Yani kusur bir testi değil bir kapı zincirini kırmızı tutuyor, ve her ayın
+      12'sinden 19'una kadar tutacak. İkincisi, dosyanın sahibi olan oturum kapandı,
+      yani "onların işi" diye beklemek bir sahip beklemek değil artık. Çare bir satır
+      (deseni çapalamak), karar sahiplikte.
 - [ ] **Belge başında depoya dokunan bir tarayıcı eklentisi `file://`'da bayat açılış üretir
       mi (2026-09-11).** Tuzak 108'in tetikleyicisi süitte `kapan.ts`'in başlangıç betiğiydi.
       Üründe belge başında depoya dokunan kod yok ve uygulama başlangıç betiği olmadan 780
