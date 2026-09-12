@@ -674,8 +674,8 @@ arayüz metnini yeniden adlandıran `lang/*.ts`'i elle düzeltir.
 
 ### 89 · Bir süit çevrilmemiş metni göremez
 `t('Öğretmenler')` Türkçede `'Öğretmenler'` döndürür ve süit Playwright
-ayarlarının `locale`'iyle Türkçeye sabitli. Sözlük bittiğinde 469 test yeşildi ve İngilizce ekranda on
-dört yerde Türkçe duruyordu. Bulan iki şey oldu: İngilizce sayfanın gövdesinde
+ayarlarının `locale`'iyle Türkçeye sabitli. Sözlük bittiğinde süitin tamamı
+yeşildi ve İngilizce ekranda on dört yerde Türkçe duruyordu. Bulan iki şey oldu: İngilizce sayfanın gövdesinde
 Türkçe harf arayan bir tarama, ve en uzun dilde (Almanca) ekran görüntülerine
 bakmak.
 
@@ -803,6 +803,26 @@ bedavaya yeşil geçerdi. Çare `vite.config.ts`'te `css: { include: [/src\/styl
 ve testin başında okunan metnin boyunu soran bir koruma. Okunan bir kaynağı
 yargılayan her test önce okumanın boş olmadığını sorar.
 
+### 111 · Joker uzantılı bir `?raw` glob'u ağaçtaki her ikiliyi belleğe gömer
+Belge kapısı deponun dosya listesini `import.meta.glob` ile çıkaracaktı ve ilk
+hâli `eager: true` ile `../src/**/*` diyordu. Vitest tek bir test koşmadan V8'in
+yığın sınırında düştü, çünkü eager biçim eşleşen her dosyayı kaynağın içine
+satır içi gömüyor ve bu ağaçta gömülü bir woff2, bir `.ico` ve bir klasör dolusu
+ekran görüntüsü var. Çare biçimi değiştirmek: bir dosyanın var olup olmadığını
+soran kapının içeriğe ihtiyacı yok, ve tembel glob'un anahtarları o sorunun tam
+cevabı. `raw.d.ts` iki biçimi ayrı ayrı bildiriyor ve tembel olanın yanında
+sebebi yazılı. Bir glob'un maliyeti eşleşen dosya sayısı değil, eşleşenlerin
+toplam boyudur.
+
+### 112 · `import.meta.glob` kendi dosyasını hiç görmez
+`docs.test.ts`'in yol kapısı diskteki dosyaları bu glob'la çıkarıyor ve
+CLAUDE.md'nin `src/docs.test.ts` diyen satırını bayat saydı: Vite glob'a çağıran
+dosyanın kendisini koymuyor, yani kapı kendi adına kördü ve o satırı sonsuza
+kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/drag.ts` ve
+`src/surum.test.ts` geliyor, `src/docs.test.ts` gelmiyor. Çare listeye kendi
+adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
+kendisini araması boş dönebilir.
+
 ---
 
 ## Ölçüm disiplini
@@ -867,12 +887,12 @@ işi.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
 | Ölçüm disiplini | 42, 65, 81, 101 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
-grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. 110
-kullanıldı, yeni bir tuzak 111'den devam eder. Test stratejisi dalı çakışmasın diye kendi
-numaralarını 150'den başlatıyor.
+grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
+büyük kullanılan numara 112, yeni bir tuzak 113'ten devam eder. Test stratejisi
+dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
