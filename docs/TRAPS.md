@@ -468,6 +468,22 @@ ve köşedeki eksen adını ölçer, `src/surum.test.ts` pencere ayarını çivi
 
 ---
 
+### 117 · Bir metin düğümünü değiştirmek belgenin tamamını yeniden yerleştirebilir
+Sürüklerken gerekçe çubuğunun cümlesini yazmak, 6704 nesnelik bir belgede kökü
+`#document` olan tam bir yerleşim tetikliyordu: hedef hücre her değiştiğinde bir
+kez, 5,37 ms, yanında 5,24 ms tam görüntü alanı boyaması. Sebep `textContent`'in
+kendisi değil durduğu yer — metin `nowrap` ve `ellipsis` taşıyan bir flex
+öğesinin içinde, içerik değişince kutusu da değişebiliyor, ve Blink kökten
+başlıyor.
+
+Asıl tuzak çarede: iki tane "doğru görünen" CSS çaresi ölçülüp çürütüldü.
+`contain: layout` çubuğa konunca düşen kare %21,7–24,3 oldu, yani tabandan
+KÖTÜ; metin kutusuna `flex: 1 1 0; min-width: 0` tabanla aynı kaldı. İkisi de
+yerleşim kökünü belgeden almadı. İşe yarayan şey mekanizmayı değil SIKLIĞI
+değiştirmek oldu (`REASON_GAP = 100`, `88fffc2`): düşen kare %9,5–14,1'den
+%1,1'e, Layout 543 ms / 107'den 216 ms / 42'ye indi. Bir yerleşim maliyeti
+görülünce önce yazmanın ne sıklıkta olduğu sorulur, sonra CSS'e bakılır.
+
 ## CSS kapsamı, özgüllük ve custom property
 
 **Kural.** Bir CSS değeri yazmak onun uygulandığı anlamına gelmez: daha güçlü bir
@@ -913,6 +929,16 @@ kırardı. Çare aynı şeyi denetlenebilir yazmak oldu: `closest<HTMLElement>(.
 Tip argümanı iddianın söylediğini söyler ve onu derleyici denetler, oysa bir `as`
 denetlenmez. Bir `--fix` koşusundan sonra `npm run tipler` koşulur, çünkü lint'i
 yeşil bir ağaç derlenebilir bir ağaç demek değil.
+
+### 118 · Kendi başlattığın arka plan işi de ölçüm penceresini bozar
+Ölçüm turu kart halkasının bedelini ölçerken kendi E2E süitini arka planda
+koşturuyordu ve düşen kareyi %60–72 gördü; aynı yama, aynı derleme, sessiz
+pencerede %0–1,9 verdi. Aynı gün ikinci kez yaşandı: bir oturumun tip farkında
+lint koşusu öteki oturumun kasma sayılarını iki katına çıkardı. Kural "başkası
+ölçerken bekle" değil, **koşan her şey sayılır** — kendi başlattığın arka plan
+işi dahil. İkinci yarısı ölçütte: tek yönlü bir koşu makinenin o anki yüküyle
+karışır, A/B dönüşümlü koşulur, ve iz toplamı düşen kareden kararlıdır.
+
 ---
 
 ## Dizin
@@ -923,17 +949,17 @@ yeşil bir ağaç derlenebilir bir ağaç demek değil.
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105 |
-| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107 |
+| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 117 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 116, yeni bir tuzak 117'den devam eder. Test stratejisi
+büyük kullanılan numara 118, yeni bir tuzak 119'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

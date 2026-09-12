@@ -49,8 +49,7 @@ Mutasyonla sınandı: kuyruk yazması iptal edilince kırmızı ("son hücrenin 
 geri konunca yeşil.
 Tür: ürün kusuru, düzeltildi
 Ne yapıldı: TODO B4.7 kapandı. `npm run kontrol` koşuldu, sonucu WORKLOG'un bugünkü girdisinde.
-Kalıcı kural: TRAPS'e yazılacak aday — bir metin düğümünü değiştirmek 6704 nesnelik belgede tam
-yerleşim tetikliyor, ve `contain: layout` ile `flex: 1 1 0` bunu durdurmuyor; duran şey yazma sıklığı.
+Kalıcı kural: TRAPS.md, tuzak 117
 
 ### 2026-09-12 · scratch/b48-ab.mjs · B4.8'in bedeli, ve ölçümün kendi süitimle bozulması
 Bulgu: Kart halkası (`table.grid.dragging tbody td.can-* > .card`) uygulandı ve bedeli ölçüldü.
@@ -77,7 +76,7 @@ karışır; A/B dönüşümlü koşulur.
 Tür: ölçüm kusuru (benim), artı bir ürün değişikliğinin doğrulanması
 Ne yapıldı: TODO B4.8 kapandı. Halka iki hükümde de (`can-warn` ve `can-no`) mutasyonla sınandı:
 kurallar kaldırılınca kırmızı, `can-no` uyarı rengiyle boyanınca kırmızı.
-Kalıcı kural: TRAPS adayı — kendi arka plan işin de ölçüm penceresini bozar.
+Kalıcı kural: TRAPS.md, tuzak 118
 
 ### 2026-09-12 · scratch/kasma-zaman.mjs + kasma-iz.mjs · `store.ts` bölünmesinden SONRA taban
 Bulgu: B4.7'nin tabanı bölme öncesi bir derlemede alınmıştı; sonraki "önce/sonra"nın iki yakası
