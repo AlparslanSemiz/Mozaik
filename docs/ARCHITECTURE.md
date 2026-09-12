@@ -95,7 +95,7 @@ yaprakta durur.
 
 | Dosya | Görevi |
 |---|---|
-| `drag.ts` | sürükle bırak, Pointer Events ile |
+| `drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
 | `gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
 | `poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `rowDrag.ts` | liste satırını sürükleyerek sıralama |
@@ -219,6 +219,15 @@ sürüklemeyi koparıyor (tuzak 1), ve iki bin hücrelik bir ızgarayı her kare
 yeniden çizmek imleci takılır hâle getiriyor. Sürüklemenin hedef satırı, bırakma
 önizlemesi ve hayaleti de React prop'u değil, `drag.ts`'in doğrudan yönettiği
 DOM.
+
+Kural React'i tanımamak değil, hareket sırasında React'e yazmamak, ve dördü tam
+bu noktada ikiye ayrılıyor: `gridChrome.ts`, `poolSplit.ts` ve `rowDrag.ts` bir
+HTML elemanı alıp sökme fonksiyonu döndürür ve React'i hiç import etmez,
+`drag.ts` ise bir kanca olduğu için `useCallback`, `useEffect` ve `useRef` alır.
+Bu bir ihlal değil, `useDrag`'in bir bileşenin içinden çağrılmasının bedeli:
+sürükleme boyunca yazdığı tek şey yine DOM. Sınır o yüzden "React import
+edilmesin" diye ölçülemez, "`pointermove` sırasında durum güncellenmesin" diye
+ölçülür.
 
 ### Uzun ömürlü durum `App`'te
 
