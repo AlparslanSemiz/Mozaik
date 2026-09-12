@@ -26,6 +26,59 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · scratch/havuz-olc.mjs · havuzda alttaki kartlara ulaşılamıyor, sebebi
+Bulgu: Kullanıcının satırı ("havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam")
+üç ihtimalle açılmıştı ve üçü de ölçülüp düştü. Ölçüm üç dünyada, iki kutuda (1920x1080 ve
+exe'nin 1600x1000'i), beş sıralamada ve iki temada koşuldu; girdi kullanıcının koyduğu gerçek
+veri (`babamın.json`, şema 14, 18 öğretmen, 20 sınıf, 146 ders, 348 haftalık saat).
+(a) Deste bir gruplama değil: anahtarı `lessonId` artı `size` ve kartın öteki bütün alanları bu
+ikisinden türüyor, yani bir destedeki kartlar birbirinin aynısı. Belge doğru.
+(b) Deste ne bölünüyor ne biniyor: beş sıralamanın beşinde de deste sayısı birebir aynı (babanın
+verisinde 205, örnek okulda 114), ve destelerin kutu kesişimi altı birleşimin altısında da sıfır.
+(c) Babanın verisinde ortada karıştıracak deste yok: 211 blok 205 desteye düşüyor, 199'u tek
+bloklu, 6'sı iki bloklu, üç bloklu HİÇ yok, yani `::before`/`::after` katmanları onun ekranında
+neredeyse hiç çizilmiyor.
+Sebep dördüncü bir şey: tepsi 1600x1000'de 94,5 px görünüyor ve içinde 922 px var. 205 kartın
+19'u tam görünüyor, 4'ü kırpılıyor, 182'si katlamanın altında, ve 18 öğretmen grubunun yalnız
+biri sığıyor. Tepsi kaydığını hiçbir şekilde söylemiyor: kaydırma çubuğunun kapladığı genişlik
+0 px ve ekran görüntüsünde çubuk yok, yani "211 blok bekliyor" yazan bir başlık 19 kart çizen bir
+tepsinin üstünde duruyor. Tekerlek kaydırıyor (scrollTop 0 -> 300), kart klavyeyle erişilemiyor
+(`tabIndex` -1, `role` yok, `focus()` tutmuyor), ve sürüklerken tepsi kendiliğinden kaymıyor.
+Örnek okul bunu gizliyordu: orada 76 kart altta kalıyor, sekiz grup sığıyor ve desteler gerçekten
+katmanlı çiziliyor, yani ölçüm yalnız örnek veride yapılsaydı yanlış şeyi ölçerdi.
+Tür: ürün kusuru
+Ne yapıldı: düzeltildi. Ölçüm kullanıcıya gösterildi ve çareyi kullanıcı seçti. Sonrası aşağıda.
+Kalıcı kural: TRAPS.md, tuzak 119
+
+### 2026-09-12 · npx playwright test e2e/program.spec.ts · havuzun çaresi, önce ve sonra
+Bulgu: İki çare, ikisi de kullanıcı kararı. Izgaranın kullanmadığı yer havuza geçiyor, ve tepsi
+altında kart kaldığını söylüyor. Babanın verisinde, program boşaltılmış, tam görünen kart:
+
+| Kutu | Önce | Sonra | Tepsi | Izgara kaydırıyor mu |
+|---|---|---|---|---|
+| 1600x1000 (exe) | 19 | 38 | 94,5 px -> 169,3 px | hayır, hayır |
+| 1920x1080 | 23 | 69 | 94,5 px -> 237,5 px | hayır, hayır |
+
+Alınan yer ölçülmüş boş yerdi: tablo 678,5 px, kabı 754,1 px, aradaki 75,6 px'te hiçbir şey
+çizilmiyordu, ve çareden sonra o fark 0,9 px'e indi. Izgara iki kutuda da kaydırmaya başlamadı.
+Koruma iki yönde de tutuyor: babanın dosyası açıldığı gibi yüklendiğinde (11 kart, taşma yok)
+tepsi hiç büyümüyor, ve örnek okulda ızgarada boş yer olmadığı için de büyümüyor.
+Elenen yol ölçüldü: `.grid-wrap`'i içeriğine sabitleyip artanı `.pool`'a `flex-grow` ile vermek
+aynı 38 kartı veriyor ama tutamağı iki yönde de ÖLDÜRÜYOR (60 px yukarı ve 60 px aşağı sürükleme
+havuzun boyunu hiç değiştirmiyor), çünkü büyüyen bir öğenin boyu tabanından bağımsız hâle geliyor.
+Tutamak bugünkü hâlinde zaten çalışıyordu ve çareden sonra da çalışıyor.
+Tür: ürün kusuru
+Ne yapıldı: düzeltildi. `dockHeightForRoom` (`platform/poolSplit.ts`) artı `.pool-list`'e
+uygulamanın zaten kullandığı `attachScrollFade`. Testler: `src/poolSplit.test.ts` 7 birim testi,
+`e2e/program.spec.ts` "havuz ızgaranın kullanmadığı yere açılıyor" üç dünyada.
+Beş mutasyonun beşi de kırmızı: oda sınırı kaldırıldı, içerik sınırı kaldırıldı, tepsiden
+`scroll-fade` alındı, solma hiç bağlanmadı, solma boyu sıfırlandı. Her mutasyondan sonra dosyalar
+kopyadan geri yüklendi ve sha256 ile karşılaştırıldı.
+Ve bir test kusuru, benim: ilk yazdığım solma iddiası `faded-bot` SINIFINI okuyordu, o sınıfı
+JS yazıyor ve tepsiden `scroll-fade` alınınca da yazmaya devam ediyor, yani iddia bedava yeşildi
+ve mutasyon onu yakaladı. İddia çözülmüş `--fade-bot` ile maskenin kendisine taşındı.
+Kalıcı kural: yok
+
 ### 2026-09-12 · scratch/kasma-zaman.mjs + kasma-iz.mjs · B4.7'nin çaresi, önce ve sonra
 Bulgu: Kullanıcının seçtiği çare uygulandı — gerekçe çubuğu en çok 100 ms'de bir yazılıyor
 (`REASON_GAP`, `src/platform/drag.ts`), ve renk ile cümle **birlikte** yazılıyor: sınıf yazması

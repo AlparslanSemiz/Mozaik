@@ -18,6 +18,10 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- The waiting-lessons tray now opens into the room the timetable is not using,
+  and fades at its bottom edge when there are more cards below it. On a real
+  school in the desktop window that is 38 cards in view instead of 19, with
+  nothing taken from the grid.
 - While a card is being dragged, every card in the target row shows the cell's own verdict as a coloured ring, so a filled cell no longer hides whether the card could go there.
 
 ### Fixed

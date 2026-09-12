@@ -35,6 +35,42 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · Havuz ızgaranın kullanmadığı yere açılıyor, ve tepsi kaydığını söylüyor
+
+**Değişen.** Havuz tepsisi artık ızgaranın kullanmadığı boşluğa açılıyor
+(`dockHeightForRoom`, `platform/poolSplit.ts`), ve taşan bir tepsi altında kart
+kaldığını uygulamanın zaten kullandığı solmayla söylüyor (`.pool-list`'e
+`attachScrollFade`). Kullanıcı kararı, ölçüm gösterildikten sonra.
+
+**Eski hâli.** Tepsi kaydırılabilirdi ama kaydığını söylemiyordu: kaydırma
+çubuğunun kapladığı genişlik 0 px ve ekranda çubuk görünmüyor. Babanın verisinde,
+onun baktığı 1600x1000'lik exe kutusunda, 205 kartın 19'u görünüyor ve 182'si
+katlamanın altında kalıyordu, 18 öğretmen grubunun yalnız biri sığıyordu. Aynı
+ekranda ızgaranın kabı kendi tablosundan 75,6 px uzundu ve o şeritte hiçbir şey
+çizilmiyordu.
+
+**Gerekçe.** Alınan yer kimsenin kullanmadığı yerdi ve ölçüldü: çareden sonra
+ızgaranın boş şeridi 0,9 px'e indi ve ızgara iki kutuda da kaydırmaya başlamadı.
+Görünen kart 19'dan 38'e, 1920'de 23'ten 69'a çıktı. Kural dört yerden sınırlı,
+ve her sınır ölçülmüş bir durumu karşılıyor: odadan fazlasını almaz, tepsinin
+göstereceğinden fazla açılmaz (on bir kart elliyi alacak tepsi açmasın), tavanı
+geçmez, ve kullanıcının kaydettiği boydan küçülmez. Kaydedilen tercih **yeniden
+yazılmıyor**, çünkü bugünün okuluna göre büyüyen bir çekmece yarının sayısı
+olmamalı. Tutamağa dokunulduğu an kural susuyor ve sayı kullanıcınındır.
+
+**Denendi ve bırakıldı: `.grid-wrap`'i içeriğine sabitleyip artanı `.pool`'a
+`flex-grow` ile vermek.** Aynı 38 kartı veriyor, ama tutamağı iki yönde de
+öldürüyor: 60 px yukarı ve 60 px aşağı sürükleme havuzun boyunu hiç
+değiştirmiyor (ölçüldü, üç koşu). Sebebi mekanik, büyüyen bir flex öğesinin boyu
+tabanından bağımsız hâle geliyor, yani `--dock-h` yazılıyor ama ekranda bir
+karşılığı olmuyor. Bir kontrolü yer kazanmak için feda etmek bir çare değil.
+
+**Rozet geri gelmedi.** 2026-08-28'de kullanıcı isteğiyle kaldırılmıştı ve bu
+tur onu geri getirmeyi düşündü, çünkü ilk teori destenin kaç kart taşıdığının
+görünmemesiydi. Ölçüm teoriyi düşürdü: babanın verisinde üç bloklu deste hiç
+yok, en kalabalığı iki, yani rozetin söyleyeceği şey onun ekranında zaten yok.
+Kaldırma kararı yerinde duruyor.
+
 ### 2026-09-12 · Sürüklerken kasmanın çaresi: sıklık, ve elenen dört aday
 
 **Karar (kullanıcı).** Gerekçe çubuğunun cümlesi en çok 100 ms'de bir yazılır

@@ -946,6 +946,20 @@ olmayan bir yük taşır ve bunu hiçbir şey söylemez. Sessizce düşen bir ö
 kırmızıya dönen bir testten beterdir, çünkü kendini bildirmez. İkinci yarısı ölçütte: tek yönlü bir koşu makinenin o anki yüküyle
 karışır, A/B dönüşümlü koşulur, ve iz toplamı düşen kareden kararlıdır.
 
+### 119 · Örnek okul kullanıcının şeklini taşımıyor, ve bir şikayet onun üstünde ölçülemez
+Kullanıcının babası havuzda alttaki kartlara ulaşamadığını söyledi ve şikayet
+örnek okulda ölçülecekti. Gerçek veri gelince ikisinin aynı şeyi göstermediği
+görüldü: örnek okulda 367 blok 114 desteye düşüyor, desteler bir ile sekiz blok
+arasında ve katmanlı çiziliyor; babanın okulunda 211 blok 205 desteye düşüyor,
+199'u tek bloklu ve üç bloklu deste hiç yok. Yani şikayetin konusu sanılan şey
+onun ekranında neredeyse hiç oluşmuyor. Aynı fark tepside de var: örnek okulda
+76 kart katlamanın altında kalıyor ve sekiz öğretmen grubu sığıyor, babanın
+verisinde 182 kart altta kalıyor ve tek bir grup sığıyor. Örnek veri bir duman
+testidir, bir ölçüm zemini değil: onu üreten şey bir dağılım varsayımı, ve
+kullanıcının şikayeti tam da o varsayımın tutmadığı yerden geliyor. **Bir
+kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek veri yoksa
+ölçümün adı "örnek okulda şunu gördüm" olur, "sebep bu" olmaz.
+
 ---
 
 ## Dizin
@@ -962,11 +976,11 @@ karışır, A/B dönüşümlü koşulur, ve iz toplamı düşen kareden kararlı
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 118, yeni bir tuzak 119'dan devam eder. Test stratejisi
+büyük kullanılan numara 119, yeni bir tuzak 120'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

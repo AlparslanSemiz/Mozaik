@@ -23,9 +23,11 @@ bitince §10'a taşınır.
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz.
 
+Stacklensin ve stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler aynı şeyler tamamen aynıları stacklensin.
 
-Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam ve bu sebeple ilk üsttekini saçma bir yere koyuyor. Sonra alttakini alıp ardından saçma konulanın yerini düzeltiyor.
+babamda programa koyduğumuzda derslerin ... yazmasının sebebi babamın sınıflarının isimleri çok uzun. 410G SAY gibi. 410 sınıfı G dersliği SAY türü. buna uygun data scheması çıkaralım. ama ayrıca babam yine de kullanmaz ise. ... olmasın sınıfın ilk başı gözüksün. 410 gibi ya da 410G gibi yani.
 
+Ayrıca havuzda tek ders ile çift ders bloklarının arasındaki oran bir bölü iki gibi değil bu düzelsin anlaşılmıyor hangisi hangisi diye.
 
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
@@ -514,6 +516,25 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       kontrolün görünüp görünmediği hiç ölçülmedi. İlk iş babanın ekranında ve
       exe'de görüntü almak, çünkü ölçülen her şey "oradayım" derken ekran
       "değilim" diyorsa haklı olan ekrandır (tuzak 84).
+- [x] **B4.13 Havuzda alttaki kartlara ulaşılamıyor — BİTTİ (2026-09-12).** Çare iki
+      parça, ikisi de kullanıcı kararı: havuz ızgaranın kullanmadığı yere açılıyor, ve taşan
+      tepsi altında kart kaldığını söylüyor. Babanın kutusunda (1600x1000, program boşaltılmış)
+      görünen kart **19'dan 38'e**, 1920'de 23'ten 69'a çıktı; alınan yer ölçülmüş boş yerdi
+      (tablo 678,5 px, kabı 754,1 px) ve ızgara iki kutuda da kaydırmaya başlamadı.
+      Aşağısı sebebin kaydı.
+      Senin satırın: *"Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor
+      babam ve bu sebeple ilk üsttekini saçma bir yere koyuyor. Sonra alttakini alıp ardından
+      saçma konulanın yerini düzeltiyor."*
+      Açılırken üç ihtimal yazılmıştı ve **üçü de ölçülüp düştü**: deste bir gruplama değil
+      (anahtarı `lessonId` artı `size`, kartlar birbirinin aynısı), beş sıralamanın beşinde de
+      deste sayısı aynı ve destelerin kutuları hiç binmiyor, ve babanın verisinde karıştıracak
+      deste zaten yok (211 blok 205 desteye düşüyor, 199'u tek bloklu, üç bloklu hiç yok).
+      **Sebep dördüncü bir şeydi:** tepsi 94,5 px görünüyor ve içinde 922 px var, 182 kart
+      katlamanın altında kalıyor, 18 öğretmen grubunun biri sığıyor, ve tepsi kaydığını
+      söylemiyor (kaydırma çubuğunun kapladığı genişlik 0 px). Ölçüm, elenen yol ve beş
+      mutasyon [TESTFINDINGS.md](TESTFINDINGS.md)'de, karar [DECISIONS.md](DECISIONS.md)'de.
+      **Örnek okul bunu gizliyordu** ve o kalıcı bir kurala dönüştü (tuzak 119).
+      Rozet geri gelmedi: ölçüm onu isteyen teoriyi düşürdü.
 - [ ] **B4.12 Başka bir SATIRDAKİ tahliye kurbanı hiçbir yerde görünmüyor.** B4.8'in
       halkası hedef satırın dolu hücrelerini işaretliyor, yani "üstüne geldiğin kart".
       Ama bir bırakma, hedef hücre kendi satırında BOŞ olduğu hâlde başka bir satırdaki
@@ -1227,6 +1248,7 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
 ```
+Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam... -> [x] B4.13, 2026-09-12, sebep tepsinin boyu, deste değil
 Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms
 aynı şey daha da az olsa da uygulamada da oluyor. uygulamada daha çok koyulabilir yerlerin üzerine gelince hesaplama olunca oluyor. -> [x] 2026-09-01, dropMap + boya yolu
 uygulamanın logosunun aşağıda nasıl gözüktüğünün fotosonu attım onun düzelmesi lazım. ayrıntılı logo kullanılmalı. -> [x] 2026-09-01, yalnız 16 sade; 20+ ayrıntılı

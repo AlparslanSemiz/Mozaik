@@ -26,7 +26,8 @@ import * as ContextMenu from '@radix-ui/react-context-menu';
 import type { Id } from '../leaf/types';
 import { paletteColor } from '../leaf/palette';
 import { DOCK_H_MIN, readDock, readDockHeight, writeDock, writeDockHeight } from '../platform/theme';
-import { attachSplitter, maxDockHeight } from '../platform/poolSplit';
+import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../platform/poolSplit';
+import { attachScrollFade } from '../platform/scrollFade';
 import { useT } from './T';
 import type { PoolSort } from '../platform/toolState';
 
@@ -189,6 +190,7 @@ function LessonPool({
   const [open, setOpen] = useState<boolean>(readDock);
   const [height, setHeight] = useState<number>(readDockHeight);
   const handle = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLDivElement>(null);
   const [ceiling, setCeiling] = useState<number>(DOCK_H_MIN);
 
   // `height` is read once per gesture, not per frame, so the splitter needs a
@@ -199,23 +201,86 @@ function LessonPool({
 
   useEffect(() => {
     const el = handle.current;
-    const body = el?.closest('.program-body');
-    if (el === null || !(body instanceof HTMLElement)) return undefined;
+    const host = el?.closest('.program-body');
+    if (el === null || !(host instanceof HTMLElement)) return undefined;
+    const body: HTMLElement = host;
     // `--dock-h` has exactly ONE owner, `.program-body`, written from here on
     // mount and from the splitter during a drag. Putting a copy on `.pool` as
     // an inline style made the drag invisible: the closer declaration won and
     // the DOM write went nowhere.
+    // THE DRAWER OPENS INTO THE ROOM THE GRID IS NOT USING.
+    //
+    // Measured on the real school: the scroll box stood 75.6px taller than its
+    // own table and drew nothing in the strip, while the tray showed 19 of its
+    // 205 cards. Everything here is read rather than assumed, because the room
+    // is a property of THIS school at THIS scale and density: three teachers
+    // leave a lot, forty leave none, and `dockHeightForRoom` then returns the
+    // stored height untouched.
+    //
+    // Re-measured whenever the table changes shape, because the grid can grow
+    // under a drawer that has already opened (a view switch, a density, a new
+    // teacher) and a drawer holding room the grid now needs is the bug this
+    // fixes, upside down. It stops the moment the user touches the handle:
+    // after that the number is theirs, and a rule that kept overruling it would
+    // make the handle feel broken.
+    const userSet = { current: false };
+    function fit() {
+      if (userSet.current || body.classList.contains('splitting')) return;
+      const wrap = body.querySelector('.grid-wrap');
+      const table = wrap?.querySelector('table.grid') ?? null;
+      const pool = body.querySelector('.pool');
+      const tray = list.current;
+      if (wrap === null || table === null || pool === null || tray === null) return;
+      const opened = dockHeightForRoom({
+        storedRem: readDockHeight(),
+        roomPx:
+          wrap.getBoundingClientRect().height -
+          table.getBoundingClientRect().height +
+          pool.getBoundingClientRect().height,
+        currentRem: latest.current,
+        overflowPx: tray.scrollHeight - tray.clientHeight,
+        bodyPx: body.getBoundingClientRect().height,
+      });
+      if (opened === latest.current) return;
+      body.style.setProperty('--dock-h', `${opened}rem`);
+      setHeight(opened);
+    }
+
     body.style.setProperty('--dock-h', `${readDockHeight()}rem`);
     setCeiling(maxDockHeight(body.getBoundingClientRect().height));
-    return attachSplitter(el, {
+    fit();
+    const watcher = new ResizeObserver(fit);
+    watcher.observe(body);
+    const table = body.querySelector('table.grid');
+    if (table !== null) watcher.observe(table);
+
+    const detach = attachSplitter(el, {
       body,
       current: () => latest.current,
       commit: (rem) => {
+        userSet.current = true;
         writeDockHeight(rem);
         setHeight(rem);
       },
     });
+    return () => {
+      watcher.disconnect();
+      detach();
+    };
   }, []);
+
+  // THE TRAY SAYS IT SCROLLS. It holds 922px of cards in 94.5px on the real
+  // school, and nothing on screen said so: the scrollbar takes zero layout
+  // width and never showed, so "211 blok bekliyor" sat over a tray drawing 19
+  // of them. The fade is the one every other long list in the app already
+  // uses; the ghost is appended to `body`, so the mask cannot clip a drag.
+  // Re-attached when the run of cards changes, because the observer inside
+  // reads the box's first child ONCE and React swaps it (the same reason
+  // App.tsx re-attaches on a tab change).
+  useEffect(() => {
+    const box = list.current;
+    return box === null ? undefined : attachScrollFade(box);
+  }, [groups.length, cards.length]);
 
   function toggle() {
     const next = !open;
@@ -353,7 +418,7 @@ function LessonPool({
 
       <ContextMenu.Root open={menuOpen} onOpenChange={onMenuOpenChange}>
         <ContextMenu.Trigger asChild onContextMenu={openMenu}>
-          <div className="pool-list">
+          <div className="pool-list scroll-fade" ref={list}>
             {groups.map((g) => (
               <section className="pool-group" key={g.key} aria-label={g.label}>
                 {/* The heading is what the reader asked for: a break between one

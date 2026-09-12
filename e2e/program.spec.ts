@@ -18,6 +18,7 @@ import {
   openGridMenu,
   reopen,
 } from './helpers';
+import { makeWorld } from '../src/worlds';
 
 test.describe('2. Sürükle-bırak', () => {
   // "kartların üzerine hover edince biraz daha yukarı çıkmaları güzel fakat
@@ -1279,6 +1280,117 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
     });
     await expect(deck).toHaveAttribute('data-count', String(dropped!.count - 1));
     await expect(page.locator('.pool-count strong')).toContainText(`${blocks - 1} blok`);
+  });
+
+  // THE TRAY OPENS INTO THE ROOM THE GRID IS NOT USING, AND SAYS WHEN THERE IS
+  // MORE UNDER IT.
+  //
+  // Measured on the real school (2026-09-12): eighteen teacher rows left the
+  // grid's scroll box 75.6px taller than its own table with nothing drawn in
+  // the strip, while the tray showed 19 of its 205 cards and the other 182 sat
+  // under the fold with nothing on screen saying so -- the scrollbar takes zero
+  // layout width and never appeared, so "211 blok bekliyor" stood over a tray
+  // drawing 19 of them.
+  //
+  // Two worlds, because the behaviour has two halves and one world can only
+  // show one of them: a SHORT grid leaves slack, a TALL one leaves none, and
+  // the same tray full of the same 72 cards must come out differently. Nothing
+  // absolute is asserted -- the viewport, the scale and the row height all move
+  // the pixels, and what is being measured is the difference between the two.
+  const trayWorld = (teachers: number, classes: number) =>
+    makeWorld({
+      days: 5,
+      hours: 8,
+      teachers: Array.from({ length: teachers }, (_, i) => ({ id: `o${i}`, short: `T${i}` })),
+      classes: Array.from({ length: classes }, (_, i) => ({
+        id: `s${i}`,
+        name: `S${i}`,
+        roomId: null,
+      })),
+      lessons: Array.from({ length: teachers }, (_, t) =>
+        Array.from({ length: classes }, (_, c) => ({
+          id: `d${t}-${c}`,
+          classId: `s${c}`,
+          teacherId: `o${t}`,
+          weeklyHours: 1,
+        })),
+      ).flat(),
+    });
+
+  /** Loads a world, waits for the grid to BE there, and reads the tray. */
+  async function trayShape(page: Page, world: unknown) {
+    await loadWorld(page, world);
+    await expect(page.locator('table.grid')).toBeVisible();
+    await expect(page.locator('.pool-card').first()).toBeVisible();
+    await settledMotion(page);
+    return page.evaluate(() => {
+      const list = document.querySelector('.pool-list');
+      const wrap = document.querySelector('.grid-wrap');
+      if (list === null || wrap === null) throw new Error('havuz ya da ızgara yok');
+      // The RESOLVED fade, not the bookkeeping class. `faded-bot` is written by
+      // the scroll watcher whether or not the box is wearing `.scroll-fade`, so
+      // a test that reads the class passes with the fade taken off the tray --
+      // measured, it did (tuzak 109's family: a check whose subject is gone).
+      // What a reader sees is the mask and the length that drives it.
+      const paint = getComputedStyle(list);
+      return {
+        tepsi: Math.round(list.clientHeight),
+        tasiyor: list.scrollHeight > list.clientHeight + 1,
+        solmaAlt: paint.getPropertyValue('--fade-bot').trim(),
+        maske: paint.maskImage,
+        kart: document.querySelectorAll('.pool-card').length,
+        izgaraKaydiriyor: wrap.scrollHeight > wrap.clientHeight + 1,
+      };
+    });
+  }
+
+  test('havuz ızgaranın kullanmadığı yere açılıyor ve altında kart kaldığını söylüyor', async ({
+    page,
+  }) => {
+    // A · THREE teacher rows and 180 cards. The table cannot fill its box, so
+    // the drawer opens into the strip nobody was drawing in.
+    const bosluklu = await trayShape(page, trayWorld(3, 60));
+    expect(bosluklu.kart, 'kurulan dünya 180 kart bırakmalı').toBe(180);
+    expect(bosluklu.tasiyor, 'tepsi hâlâ taşmalı, yoksa solma ölçülemez').toBe(true);
+    // And it took room the grid was NOT using: every row is still there without
+    // scrolling. This is the half that would make the fix a theft rather than a
+    // gift, so it is asserted rather than assumed.
+    expect(bosluklu.izgaraKaydiriyor, 'ızgara kaydırmaya başlamamalı').toBe(false);
+
+    // B · TWENTY-FOUR teacher rows and about the same number of cards. The
+    // table now overruns its box, there is no slack, and the drawer must stay
+    // exactly where the preference put it. Same tray, same cards, different
+    // answer, and the difference is the whole feature.
+    const boslukssuz = await trayShape(page, trayWorld(24, 8));
+    expect(boslukssuz.kart).toBe(192);
+    expect(
+      bosluklu.tepsi,
+      `boşluklu ızgarada tepsi ${bosluklu.tepsi}px, boşluksuzda ${boslukssuz.tepsi}px`,
+    ).toBeGreaterThan(boslukssuz.tepsi);
+
+    // C · Slack, but nothing to show. One card does not open a tray for fifty,
+    // however much room the grid is leaving: this pins the second bound, and
+    // without it the drawer would eat the page on every small school.
+    const azKart = await trayShape(page, trayWorld(1, 1));
+    expect(azKart.kart).toBe(1);
+    expect(azKart.tasiyor, 'tek kart taşmamalı').toBe(false);
+    expect(azKart.tepsi, 'gösterecek bir şey yokken tepsi büyümemeli').toBe(boslukssuz.tepsi);
+
+    // THE TRAY SAYS WHEN THERE IS MORE UNDER IT, and only then. The fade is the
+    // whole of the cue: the scrollbar takes zero layout width and never shows,
+    // so a tray drawing a fifth of its cards looked exactly like a full one.
+    for (const [ad, m] of [
+      ['boşluklu', bosluklu],
+      ['boşluksuz', boslukssuz],
+    ] as const) {
+      expect(m.maske, `${ad} tepside maske`).not.toBe('none');
+      expect(Number.parseFloat(m.solmaAlt), `${ad} tepside alt solma`).toBeGreaterThan(0);
+    }
+    expect(azKart.maske, 'solma kuralı yerinde kalmalı').not.toBe('none');
+    expect(
+      Number.parseFloat(azKart.solmaAlt),
+      'altında bir şey yokken solma çizilmemeli',
+    ).toBe(0);
   });
 });
 

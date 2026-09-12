@@ -41,6 +41,56 @@ export function maxDockHeight(bodyPx: number): number {
   return Math.max(DOCK_H_MIN, Math.min(DOCK_H_MAX, available));
 }
 
+/** What the drawer needs to know to size itself against the grid. */
+export interface DockRoom {
+  /** The preference as stored. The drawer never opens SMALLER than this. */
+  storedRem: number;
+  /**
+   * Every pixel the grid does not need: the scroll box, minus the table's own
+   * natural height, plus whatever the drawer is already holding. Written that
+   * way on purpose -- it does not depend on the drawer's current height, so
+   * measuring again after the drawer has grown gives the same answer.
+   */
+  roomPx: number;
+  /** The drawer's height right now, in rem. */
+  currentRem: number;
+  /** What the tray still cannot show at that height. */
+  overflowPx: number;
+  /** The box the ceiling is measured in. */
+  bodyPx: number;
+}
+
+/**
+ * The height the drawer OPENS at, in rem, given the room the grid is not using.
+ *
+ * Measured on the real school (2026-09-12): eighteen teacher rows left the
+ * grid's scroll box 75.6px taller than its own table with nothing drawn in that
+ * strip, while the tray showed 19 of its 205 cards and the other 182 sat under
+ * the fold. The strip is the grid's, but the grid is not using it, and it goes
+ * straight back the moment the table needs it: `roomPx` is then small and the
+ * stored height stands.
+ *
+ * Bounded four ways, and each bound is a case that was measured rather than
+ * imagined. Never past the room (or the drawer takes rows off the grid). Never
+ * past what the tray has to show, `currentRem + overflowPx` (or one waiting
+ * card opens a tray for fifty). Never past the ceiling. And never BELOW the
+ * stored preference, which is also why the caller must not write the result
+ * back: a drawer that grew to fit today's school must not become the number the
+ * user is stuck with tomorrow.
+ *
+ * Both bounds are invariant under the drawer's own height, so this can be
+ * measured again whenever the grid changes shape and it will not walk.
+ */
+export function dockHeightForRoom(r: DockRoom): number {
+  const rem = remPx();
+  const wanted = Math.min(r.roomPx / rem, r.currentRem + Math.max(0, r.overflowPx) / rem);
+  const opened = Math.max(r.storedRem, wanted);
+  const bounded = Math.max(DOCK_H_MIN, Math.min(maxDockHeight(r.bodyPx), opened));
+  // The same step the preference is stored at, so what is drawn and what a
+  // later drag starts from are the same number.
+  return Math.round(bounded / DOCK_H_STEP) * DOCK_H_STEP;
+}
+
 export function attachSplitter(handle: HTMLElement, opts: SplitterOptions): () => void {
   let startY = 0;
   let startRem = 0;
