@@ -116,12 +116,12 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
 
   const renamePlan = useCallback(
     (id: Id, name: string) => commit(renameInLibrary(library, id, name)),
-    [library, commit, discardPendingSave, openPlan],
+    [library, commit],
   );
 
   const markDraft = useCallback(
     (id: Id, draft: boolean) => commit(setDraft(library, id, draft)),
-    [library, commit, discardPendingSave, openPlan],
+    [library, commit],
   );
 
   /**
