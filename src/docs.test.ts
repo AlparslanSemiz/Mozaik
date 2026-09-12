@@ -1063,8 +1063,13 @@ function configResolves(from: string, token: string): boolean {
   // Only an explicitly relative token is read from the file's own folder. A
   // bare `docs/asc` inside a script is joined onto the repository root by the
   // script itself, and reading it from `scripts/` would invent `scripts/docs`.
+  // `./x` and `../x` are read from the file's own folder. A DOTFILE is not
+  // relative — `.github/workflows/surum.yml` in a script's comment means the
+  // repository's, and the first version of this line sent it looking for
+  // `scripts/.github/...`. Found by the comment extractor the day it landed.
+  const relative = (t: string) => t.startsWith('./') || t.startsWith('../');
   const here = (t: string) =>
-    t.startsWith('.') ? resolveFrom(from, t) : t.replace(/^\.\//, '').replace(/^\//, '');
+    relative(t) ? resolveFrom(from, t) : t.replace(/^\.\//, '').replace(/^\//, '');
   const prefix = globPrefix(token);
   if (prefix !== null) {
     const dir = here(prefix).replace(/\/$/, '');
@@ -1079,6 +1084,38 @@ function configResolves(from: string, token: string): boolean {
   );
 }
 
+/**
+ * Paths written in a `//` comment inside a script. A script's head comment is
+ * where it says which files it reads and writes, and those sentences go stale
+ * exactly like a document's: `sema-ornek.mjs` still named `src/types.ts` and
+ * `src/store.ts` after both had moved.
+ *
+ * `scripts/` only, and that limit is measured rather than shy: the comments
+ * under `src/` are English prose with `a/b` shapes all through them (`try/catch`,
+ * `Teacher/ClassGroup`), and opening this to them brings back the twenty two
+ * false positives the first A8 run produced.
+ */
+function commentPaths(name: string, text: string): Array<{ line: number; token: string }> {
+  const out: Array<{ line: number; token: string }> = [];
+  if (!name.startsWith('scripts/')) return out;
+  text.split('\n').forEach((raw, i) => {
+    const at = raw.indexOf('//');
+    if (at === -1) return;
+    for (const word of raw.slice(at + 2).split(/[\s,;]+/)) {
+      // A path at the end of a sentence carries its full stop; one inside
+      // brackets or backticks carries those.
+      // Turkish glues its suffixes on with an apostrophe, and a file name in a
+      // Turkish sentence arrives as `site/icon-small.svg'den`.
+      const token = word
+        .replace(/^[(['"`]+/, '')
+        .replace(/['’][a-zçğıöşü]+$/i, '')
+        .replace(/[)\]'"`.:]+$/, '');
+      if (token.includes('/')) out.push({ line: i + 1, token });
+    }
+  });
+  return out;
+}
+
 describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
   // A1's sibling, and the reason it exists is four holes the move round found
   // BY HAND: `.prettierignore`'s `src/lang/`, the mutation list in
@@ -1089,7 +1126,10 @@ describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
     const stale: string[] = [];
     let checked = 0;
     for (const [name, text] of Object.entries(CONFIG)) {
-      const loose = configPaths(name, text).map((x) => ({ ...x, keyed: false }));
+      const loose = [...configPaths(name, text), ...commentPaths(name, text)].map((x) => ({
+        ...x,
+        keyed: false,
+      }));
       // A `resolve()` argument and a value under a path key are both paths by
       // construction, so a bare folder name counts there.
       const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({
