@@ -589,14 +589,24 @@ describe('katman sınırları', () => {
     }
   });
 
-  it('hiçbiri store.ts’i çağırmıyor — çalışma zamanı döngüsünü kıran şey bu', () => {
-    // library hands out and takes back RAW STRINGS and store.ts is the only
-    // place that parses them. The day this module learns what a State is, the
-    // two import each other and the cycle is back (ARCHITECTURE, and the same
-    // arrangement keys.ts has between constraints and rules).
+  it('hiçbiri ayrıştırıcıyı ya da plan deposunu çağırmıyor — döngüyü kıran şey bu', () => {
+    // library hands out and takes back RAW STRINGS and somebody else parses
+    // them. The day this module learns what a State is, the two import each
+    // other and the cycle is back (ARCHITECTURE, and the same arrangement
+    // keys.ts has between constraints and rules).
+    //
+    // The names moved on 2026-09-12 and this assertion moved with them. Its
+    // first form looked for `from './store'`, and after `store.ts` was split
+    // no such import could exist anywhere — the assertion was matching nothing
+    // and passing for free (pitfall 109, from the other side: a `not.toMatch`
+    // whose pattern is dead is green for the wrong reason). Today's targets
+    // are the parser and the plan storage.
     for (const [path, src] of libraryModules()) {
-      expect(kodu(src), `${path} store.ts’i import ediyor`).not.toMatch(
-        /import[^;]*from '\.\/store'/,
+      expect(kodu(src), `${path} ayrıştırıcıyı import ediyor`).not.toMatch(
+        /import[^;]*from '[^']*parseState'/,
+      );
+      expect(kodu(src), `${path} plan deposunu import ediyor`).not.toMatch(
+        /import[^;]*from '[^']*planStore'/,
       );
       expect(kodu(src), `${path} State tipini tanıyor`).not.toMatch(/\bState\b/);
     }

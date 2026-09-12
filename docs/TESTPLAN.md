@@ -159,8 +159,9 @@ değiştirmiyor, örneğin bir sayacın artışı ya da bir sıralama anahtarın
 Üçüncüsü ayrılmazsa liste kullanılamaz olur, çünkü araç eşdeğer mutant üretir ve
 hepsini bir eksik gibi raporlar.
 
-Yalnız saf çekirdek mutasyona uğruyor (`constraints.ts`, `rules.ts`, `blocks.ts`,
-`useStore.ts`, `feasibility.ts`, `entities.ts`): bütün depoyu ölçmek pahalı ve
+Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints.ts`, `pure/rules.ts`,
+`leaf/blocks.ts`, `pure/parseState.ts`, `pure/undo.ts`, `pure/library.ts`,
+`pure/feasibility.ts`, `pure/entities.ts`): bütün depoyu ölçmek pahalı ve
 bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor. `solver.ts`
 listede **yok** ve bu bir bulgu: aracın enstrümantasyonu oradaki bir artırma
 biçimini ayrıştıramıyor ve bütün koşuyu düşürüyor. Çaresi iki satırlık bir üretim
