@@ -46,9 +46,13 @@ Yollar `src/`'ye göre. Test dosyaları (`*.test.ts`) ve dört çeviri sözlüğ
 
 ### Yapraklar
 
-Uygulamanın başka bir modülünü çalışma zamanında import etmezler ya da yalnız
-`import type` alırlar. İki modülün ortak ihtiyacı, ikisinin de altında bir
-yaprakta durur.
+Bir yaprak yalnız yaprak import eder, ve çoğu hiçbir şey import etmez. Cümlenin
+eski hâli "başka bir modülü çalışma zamanında import etmezler" diyordu ve
+ölçülünce yanlıştı: `names.ts` ile `version.ts` `i18n.ts`'i, `i18n.ts`
+`preference.ts`'i, `preference.ts` de `storage.ts`'i çağırıyor. Bunların hepsi
+katmanın içinde ve hiçbiri ihlal değil. İki modülün ortak ihtiyacı, ikisinin de
+altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
+`katman-yaprak`.
 
 | Dosya | Görevi |
 |---|---|
@@ -61,6 +65,9 @@ yaprakta durur.
 | `leaf/subjects.ts` | bir şeyin hangi branştan olduğu |
 | `leaf/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
 | `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
+| `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
+| `leaf/dateStamp.ts` | dosya adındaki tarih, yerel saatle (`dayStamp`, `minuteStamp`) |
+| `leaf/storage.ts` | localStorage'ın etrafındaki tek koruma (`safely`): okunamayan okuma yokluk, yazılamayan yazma düşer |
 | `leaf/raw.d.ts` | Vite'ın `?raw` importunun tip bildirimi |
 
 ### Saf mantık
@@ -88,7 +95,6 @@ yaprakta durur.
 | `platform/store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
 | `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
-| `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
 | `platform/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
 | `platform/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `platform/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
@@ -203,9 +209,24 @@ ve yeni bir depolama anahtarı açmaz, tercihse bir localStorage anahtarı alır
 anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve tercih
 `preference.ts` fabrikasıyla kurulur ([DATA.md](DATA.md)).
 
+### Sınırı ne ölçüyor
+
+Katman sınırı ile döngü yasağı `.dependency-cruiser.cjs`'te yazılı ve
+`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Dört kural var: yaprak yalnız
+yaprak import eder, saf mantık yaprakların dışına çıkmaz, tesisat bir bileşen
+çağırmaz, `worlds.ts` üründen import edilmez. Grafik `npm run grafik` ile
+mermaid olarak yazdırılabilir.
+
+Bu bölümdeki cümlelerin geri kalanı hâlâ düzyazı, ve düzyazı olanların hangisi
+olduğu bilerek yazılı: sürükleme sırasında React durumuna yazılmaması, uzun
+ömürlü durumun `App`'te yaşaması ve çözücünün kısıt mantığını yeniden yazmaması
+bir import grafiğinde görünmez, onları kendi testleri ölçüyor.
+
 ### Import döngüleri nasıl önleniyor
 
-Çalışma zamanında döngü yok, ve bunu dört desen sağlıyor.
+Çalışma zamanında döngü yok, ve bunu dört desen sağlıyor. Döngünün kendisi artık
+ölçülüyor: `sinir` yalnız çalışma zamanı grafiğine bakıyor, yani bir `import
+type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya döner.
 
 - **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
 - **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
