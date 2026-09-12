@@ -39,13 +39,15 @@ npm run dev          # geliştirme sunucusu
 npm run tipler       # tsc iki kez: src (tsconfig.json) ve src dışı (tsconfig.tools.json)
 npm run lint         # ESLint, şimdilik yalnız React'in kanca kuralları
 npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
+npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü ve katman sınırı
+npm run grafik       # aynı grafiği mermaid olarak yazar, dosyaya değil ekrana
 npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç)
 npm test             # Vitest birim testleri
 npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler
 npm run test:e2e     # derler, sonra ana E2E süitini file:// üstünde koşar
 npm run test:site    # site, yerel sunucu ve klasör testleri, http üstünde
-npm run kontrol      # tipler, birim, derleme, E2E, site ve çözücü stresi birlikte
+npm run kontrol      # tipler, sınır, birim, derleme, E2E, site ve çözücü stresi birlikte
 npm run ekran        # iki temada ekran görüntüleri, test-results/ekran/ altına
 npm run cozucu       # gerçek ölçekli çözücü stresi
 npm run patrol       # devriye: her ekranı gezer, tohumlu rastgele gezinme
@@ -63,7 +65,12 @@ Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 
 `lint`, `knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
 `kontrol`'ün parçası değiller: knip bugün bilinen ölü kodu raporladığı için sıfırdan
-farklı çıkar, ve bir kapı kırmızı başlarsa kapı olmaktan çıkar. Biçim değişikliği
+farklı çıkar, ve bir kapı kırmızı başlarsa kapı olmaktan çıkar.
+
+`sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
+üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
+silindiği için grafikte yok, ve bu bilerek — döngüyü kıran üç desenden biri tam
+olarak o. Kural ile grafiğin yapılandırması `.dependency-cruiser.cjs`'te. Biçim değişikliği
 yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
 atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
