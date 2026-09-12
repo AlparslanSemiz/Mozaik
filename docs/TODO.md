@@ -23,12 +23,6 @@ bitince §10'a taşınır.
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz.
 
-Stacklensin ve stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler aynı şeyler tamamen aynıları stacklensin.
-
-babamda programa koyduğumuzda derslerin ... yazmasının sebebi babamın sınıflarının isimleri çok uzun. 410G SAY gibi. 410 sınıfı G dersliği SAY türü. buna uygun data scheması çıkaralım. ama ayrıca babam yine de kullanmaz ise. ... olmasın sınıfın ilk başı gözüksün. 410 gibi ya da 410G gibi yani.
-
-Ayrıca havuzda tek ders ile çift ders bloklarının arasındaki oran bir bölü iki gibi değil bu düzelsin anlaşılmıyor hangisi hangisi diye.
-
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -535,6 +529,43 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       mutasyon [TESTFINDINGS.md](TESTFINDINGS.md)'de, karar [DECISIONS.md](DECISIONS.md)'de.
       **Örnek okul bunu gizliyordu** ve o kalıcı bir kurala dönüştü (tuzak 119).
       Rozet geri gelmedi: ölçüm onu isteyen teoriyi düşürdü.
+- [ ] **B4.14 Havuzda desteleme açılıp kapanabilsin.** Senin satırın: *"Stacklensin ve
+      stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler aynı şeyler tamamen
+      aynıları stacklensin."* Cümlenin ikinci yarısı **zaten doğru** ve 2026-09-12'de
+      ölçüldü: deste anahtarı yalnız `lessonId` artı `size`, ve kartın öteki bütün alanları
+      bu ikisinden türüyor, yani bir destedeki kartlar tanımı gereği birbirinin aynısı.
+      Yani istenen tek şey **anahtar**: desteleme kapatılabilsin. Kapatıldığında `.pool-card`
+      sayısı destede kaç blok varsa o kadar olur, ve bu bir sözleşme değişikliği: bugün bir
+      `.pool-card` bir deste demek ve sekiz e2e dosyası bunu sayıyor, `data-count`'ların
+      toplamı da bekleyen blok sayısı. Kapatmanın bedeli ölçülmeden yazılmaz, çünkü deste
+      `516f963`'te tam bu yüzden kuruldu: örnek okulda 367 kart yerine 114 kart çiziliyor ve
+      gerekçesi Program sekmesinin açılış boyaması. Tercihin nereye yazılacağı da soru
+      (`toolState` mi makine tercihi mi), B2.10'un sorduğu soruların aynısı.
+- [ ] **B4.15 Uzun sınıf adları Sığdır'da "..." oluyor — ÖLÇÜLDÜ, kusur gerçek.** Senin
+      satırın: *"babamda programa koyduğumuzda derslerin ... yazmasının sebebi babamın
+      sınıflarının isimleri çok uzun. 410G SAY gibi... ... olmasın sınıfın ilk başı gözüksün.
+      410 gibi ya da 410G gibi yani."* 2026-09-12'de babanın kendi verisinde ölçüldü,
+      1600x1000'de, üç yoğunlukta: Ferah ve Rahat'ta **hiç kırpılma yok** (hücre 37,4 ve 35
+      px), Sığdır'da **200 kartın 195'i kırpılıyor** (hücre 21,1 px, kart metni 55 ile 61 px
+      istiyor, `text-overflow: ellipsis`). Yani "..." yoğunluğa bağlı ve Sığdır'da neredeyse
+      her kartta. Kusurun kaynağı adın kendisi: babanın `classes[].name` alanı `410A SAY`
+      biçiminde ve üç ayrı bilgi taşıyor (kod, derslik, tür), ikisi zaten modelde var
+      (`ClassGroup.name`, `roomId`) ve üçüncüsü yok. **B4.3b'nin ta kendisi**, ve o madde
+      şema sorusunu soruyor. Bu madde onun ekrandaki yarısı: ad bölününce kartta ne yazacağı,
+      ve bölünmese bile kırpmanın sondan değil **baştan** okunur kalması. İkisi ayrı iş:
+      şema B4.3b'de, kartın metni burada.
+- [ ] **B4.16 Havuzda tek ve çift bloğun genişlik oranı 1'e 2 değil — ÖLÇÜLDÜ.** Senin
+      satırın: *"havuzda tek ders ile çift ders bloklarının arasındaki oran bir bölü iki gibi
+      değil bu düzelsin anlaşılmıyor hangisi hangisi diye."* Doğru, ve sebebi ölçüldü
+      (2026-09-12, 1600x1000). Örnek okulda oran **tam 1'e 2**: tek 42,25 px, çift 84,5 px.
+      Babanın verisinde değil: tek saatlik kartlar **59 ile 70 px arasında**, çift saatlik
+      kartlar 84,5 px, yani oran 1,22. Sebep tam da B4.15'inki: `310G SAY` gibi bir ad tek
+      saatlik kartı nominal 42,25 px'in ötesine geriyor, çift saatlik kartın sabit genişliği
+      ise zaten metinden geniş olduğu için kıpırdamıyor. Yani genişlik babanın okulunda
+      süreyi artık anlatmıyor. [LAYOUT.md](LAYOUT.md) "kart kaç saat olduğunu hem yazıyla hem
+      genişliğiyle söyler" diyor ve bu cümle onun verisinde tutmuyor. Çare yazılmadan önce
+      seçenek ölçülür: adı kısaltmak (B4.15), kartı içeriğinden değil süreden boyamak, ya da
+      süreyi genişlikten başka bir şeyle söylemek. Üçü de B4.15 ile birlikte kararlaştırılır.
 - [ ] **B4.12 Başka bir SATIRDAKİ tahliye kurbanı hiçbir yerde görünmüyor.** B4.8'in
       halkası hedef satırın dolu hücrelerini işaretliyor, yani "üstüne geldiğin kart".
       Ama bir bırakma, hedef hücre kendi satırında BOŞ olduğu hâlde başka bir satırdaki
@@ -1240,6 +1271,9 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Program kısmının açılışı daha hızlanmalı. | **B4.9** — İKİNCİ kez geliyor, B1.4 olarak bir kez ölçülmüştü |
 | Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak. | **§8a** — koşullu, koşulu B4.9 |
 | Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa. | **B5.7** — takas motoru var, teklif edilme koşulu ölçülecek |
+| Stacklensin ve stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler... | **B4.14** — ikinci yarısı zaten doğru, istenen anahtar |
+| babamda programa koyduğumuzda derslerin ... yazmasının sebebi sınıf isimleri çok uzun. | **B4.15** — ölçüldü: yalnız Sığdır'da, 200 kartın 195'i |
+| havuzda tek ders ile çift ders bloklarının arasındaki oran bir bölü iki gibi değil | **B4.16** — ölçüldü: örnek okulda 1'e 2, babanınkinde 1,22 |
 | Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok. | **B2.11** — doğru, kaynağı kodda görüldü |
 | Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem. | **B4.10** — zaten kırmızı, görünen ağırlığı ölçülecek |
 | Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre. | **B4.11** — özellik var, bulunabilirlik bulgusu |
