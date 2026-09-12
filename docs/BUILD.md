@@ -47,7 +47,7 @@ npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler
 npm run test:e2e     # derler, sonra ana E2E süitini file:// üstünde koşar
 npm run test:site    # site, yerel sunucu ve klasör testleri, http üstünde
-npm run kontrol      # tipler, sınır, birim, derleme, E2E, site ve çözücü stresi birlikte
+npm run kontrol      # tipler, sınır, lint, birim, derleme, E2E, site ve çözücü stresi birlikte
 npm run ekran        # iki temada ekran görüntüleri, test-results/ekran/ altına
 npm run cozucu       # gerçek ölçekli çözücü stresi
 npm run patrol       # devriye: her ekranı gezer, tohumlu rastgele gezinme
@@ -63,9 +63,11 @@ npm run yayinla -- 1.2.0   # sürüm çıkarır
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
 Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 
-`lint`, `knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
-`kontrol`'ün parçası değiller: knip bugün bilinen ölü kodu raporladığı için sıfırdan
-farklı çıkar, ve bir kapı kırmızı başlarsa kapı olmaktan çıkar.
+`knip` ve `bicim` geliştirme araçları, `dist/index.html`'e girmezler ve
+`kontrol`'ün parçası değiller. `lint` 2026-09-12'de `kontrol`'e girdi: tip
+farkında dört kural açıldı, bulguları kapatıldı ve komut sıfır hatayla
+koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kırmızı
+başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
