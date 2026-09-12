@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 import { visualizer } from 'rollup-plugin-visualizer';
+import type { PluginOption } from 'vite';
 import { surumBilgisi } from './scripts/surum.mjs';
 
 // The size report, and it is OFF unless asked for (`npm run analiz`). A plugin
@@ -33,6 +34,11 @@ export default defineConfig({
     viteSingleFile(),
     ...(ANALIZ
       ? [
+          // The cast is the one kind that earns its place: the plugin ships
+          // its own copy of rollup's types and Vite ships another, and under
+          // `exactOptionalPropertyTypes` the two disagree about whether an
+          // output directory can be undefined. Nothing about OUR types is
+          // being silenced — `tsc` reported it, which is how it was found.
           visualizer({
             filename: 'test-results/demet/analiz.html',
             template: 'treemap',
@@ -42,7 +48,7 @@ export default defineConfig({
             // double-clicks, so the report is built from the emitted chunk
             // rather than from the module graph.
             emitFile: false,
-          }),
+          }) as PluginOption,
         ]
       : []),
   ],
