@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Mutasyon testi. Yalniz saf cekirdek mutasyona ugrar: butun depoyu olcmek pahali ve bilesenlerin olculdugu yer E2E. Ne olctugu ve ne zaman kostugu docs/TESTPLAN.md'de.",
+  "_comment": "Mutasyon testi. Kosucunun config'i vite.mutasyon.config.ts, cunku belge kapilari kum havuzunda kosamaz ve kosmasinin anlami da yok; gerekcesi o dosyanin basinda. Yalniz saf cekirdek mutasyona ugrar: butun depoyu olcmek pahali ve bilesenlerin olculdugu yer E2E. Ne olctugu ve ne zaman kostugu docs/TESTPLAN.md'de.",
   "ignorePatterns": [
     ".venv",
     "dist",
@@ -22,7 +22,7 @@
   "packageManager": "npm",
   "testRunner": "vitest",
   "vitest": {
-    "configFile": "vite.config.ts"
+    "configFile": "vite.mutasyon.config.ts"
   },
   "coverageAnalysis": "perTest",
   "mutate": [

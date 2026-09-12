@@ -15,7 +15,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
-| Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, Rust bu depoda kurulu değil |
+| Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
@@ -157,7 +157,8 @@ maddeleri [TODO.md](TODO.md) §8e'de.
 
 ### Mutasyon
 
-`npm run mutasyon` (Stryker, `stryker.config.json`). Testleri değil kodu değil,
+`npm run mutasyon` (Stryker, `stryker.config.json`, koşucunun yapılandırması
+`vite.mutasyon.config.ts`). Testleri değil kodu değil,
 **testlerin ne ölçtüğünü** ölçer: kaynaktaki bir kuralı bozar ve hiçbir testin
 kırmızıya dönmediği yerleri sayar.
 
@@ -167,6 +168,19 @@ yapmıyor ve silinebilir), ya da **anlamsız mutant** (değişiklik davranışı
 değiştirmiyor, örneğin bir sayacın artışı ya da bir sıralama anahtarının önceliği).
 Üçüncüsü ayrılmazsa liste kullanılamaz olur, çünkü araç eşdeğer mutant üretir ve
 hepsini bir eksik gibi raporlar.
+
+Koşu `src/docs.test.ts`'i dışarıda bırakır ve bu bir muafiyet değil. Belge
+kapıları gerçek deponun diskini ölçüyor (her yol, her tanımlayıcı, her bağlantı),
+Stryker'ın kum havuzu ise budanmış bir kopya: `dist`, `scratch`, `test-results`
+ve bütün görüntüler orada yok. Kapı o kopyada kırmızıya döndüğünde bulduğu şey
+bayat bir belge değil eksik bir klasör olur, ve kuru koşu düştüğü için mutasyon
+hiç başlamaz. Üstelik bir belge kapısı bir mutantı zaten öldüremez: ölçtüğü şey
+kodun davranışı değil, belgenin kodla aynı şeyi söyleyip söylemediği. Kapılar
+`npm test` ve `npm run kontrol` içinde her koşuda çalışıyor; buradan çıkan tek
+şey, hiçbir mutantı öldüremeyecek bir testin bütün koşuyu durdurma yetkisi.
+Ayrım ölçüldü ve iki yapılandırma yan yana koşturuldu: aradaki fark tam olarak o
+bir dosya, ne bir test eksik ne bir test fazla. Sayılar WORKLOG'un o günkü
+girdisinde.
 
 Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints.ts`, `pure/rules.ts`,
 `leaf/blocks.ts`, `pure/parseState.ts`, `pure/undo.ts`, `pure/library.ts`,

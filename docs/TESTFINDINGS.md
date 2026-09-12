@@ -26,6 +26,39 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · npm run mutasyon · koşu üç kez başlamadan durdu, sebebi kum havuzu
+Bulgu: Mutasyon koşusu kuru koşuda üç kez arka arkaya düştü ve üçünde de düşen şey belge
+kapılarıydı. Sebep bir bayat belge değil, kum havuzunun kendisi: Stryker deponun budanmış bir
+kopyasında koşuyor ve `stryker.config.json`'ın `ignorePatterns`'ı `docs`, `src-tauri`, `e2e`,
+`site`, `kurulum` ve `.github`'ı dışarıda bırakıyor. Kapılar ise hepsini okuyor.
+Üç deneme, üçü de ölçüldü: (1) `docs` dışarıdayken "her belge ve kaynak dolu okunuyor" düşüyor,
+on kural belgesi yerine üç tane bulunuyor. (2) `docs`'un yalnız görüntüleri dışlanınca kapı
+ilerliyor ve bu kez `src-tauri/src/lib.rs taranmıyor` diyor. (3) O klasörler de içeri alınınca
+A1 altı yol çözemiyor, çünkü `dist`, `scratch` ve `test-results` hâlâ dışarıda ve belgeler onlara
+atıf yapıyor. Yani kum havuzunu kapılara uydurma yolu, deponun tamamını kopyalamaya çıkıyor.
+Doğru ayrım başka ve bir muafiyet değil: bir belge kapısı bir mutantı zaten öldüremez, ölçtüğü
+şey kodun davranışı değil belgenin kodla aynı şeyi söyleyip söylemediği. Koşuya katkısı sıfır,
+durdurma yetkisi tam.
+Tür: ortam kusuru (araç ile kapının kapsamı çelişiyor)
+Ne yapıldı: mutasyon koşusuna kendi vitest yapılandırması verildi (`vite.mutasyon.config.ts`),
+tek farkı `src/docs.test.ts`'i dışarıda bırakması. Ayrım ölçüldü: temel yapılandırma 36 dosyada
+1207 test, mutasyonunki 35 dosyada 1190 test, yani fark tam olarak o bir dosya. Kapılar
+`npm test` ve `npm run kontrol` içinde her koşuda çalışmaya devam ediyor.
+Kalıcı kural: yok
+
+### 2026-09-12 · npm run exe:test · Rust testleri ilk kez koşuldu, ve önce derlenmedi
+Bulgu: Komut derlemeden düştü, ama sebebi kod değildi: Tauri'nin derleme betiği eklenti izinlerini
+`/home/alp/GitHub/AscLike/src-tauri/target/...` altından okumaya çalışıyordu. O yol deponun ESKİ
+adresi; depo 2026-08-31'de Mozaik oldu ve `src-tauri/target` o günden kalma mutlak yollar taşıyor.
+Yani önbellek, deponun taşınmasıyla zehirlenmiş.
+`cargo clean` 9763 dosya ve 8,9 GiB sildi, sonra derleme geçti ve **24 Rust testinin 24'ü**
+koştu. WORKLOG'un kaynaktan saydığı sayı da 24.
+Bunun ikinci bir sonucu var: `TESTPLAN.md` "Rust bu depoda kurulu değil" diyordu ve bu makinede
+`cargo 1.98.0` kurulu. Cümle ölçülmeden düzeltilmedi, önce komut koşturuldu.
+Tür: ortam kusuru (kod değil)
+Ne yapıldı: `cargo clean` ile açıldı, TESTPLAN'ın kadans satırı düzeltildi.
+Kalıcı kural: yok
+
 ### 2026-09-12 · scratch/olc-taban.mjs · Faz 1'in tabanı dört noktada tekrarlandı
 Bulgu: Faz 1'in kaydı "Faz 4 aynı betiği aynı girdiyle koşar" diyor. Koşuldu: aynı betik, aynı
 girdi (`scratch/taban-dolu.json`), dokuz koşu, ve aynı ölçüt tanımları. Dört nokta, çünkü araya
