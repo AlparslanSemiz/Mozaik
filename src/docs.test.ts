@@ -781,7 +781,8 @@ function configPaths(name: string, text: string): Array<{ line: number; token: s
   if (name.endsWith('.html')) {
     // `/src/ui/main.tsx` is root relative to Vite, not to the disk.
     lines.forEach((raw, i) => {
-      for (const m of raw.matchAll(/(?:src|href)="([^"]+)"/g)) push(i + 1, (m[1] ?? '').replace(/^\//, ''));
+      for (const m of raw.matchAll(/(?:src|href)="([^"]+)"/g))
+        push(i + 1, (m[1] ?? '').replace(/^\//, ''));
     });
     return out;
   }
@@ -837,7 +838,9 @@ const PATH_KEYS = new Set([
 function keyedPaths(name: string, text: string): Array<{ line: number; token: string }> {
   const out: Array<{ line: number; token: string }> = [];
   const lineOf = (value: string) => {
-    const at = text.split('\n').findIndex((l) => l.includes(`"${value}"`) || l.includes(`'${value}'`));
+    const at = text
+      .split('\n')
+      .findIndex((l) => l.includes(`"${value}"`) || l.includes(`'${value}'`));
     return at === -1 ? 1 : at + 1;
   };
   if (name.endsWith('.json')) {
@@ -995,7 +998,10 @@ describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
       const loose = configPaths(name, text).map((x) => ({ ...x, keyed: false }));
       // A `resolve()` argument and a value under a path key are both paths by
       // construction, so a bare folder name counts there.
-      const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({ ...x, keyed: true }));
+      const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({
+        ...x,
+        keyed: true,
+      }));
       for (const { line, token: raw, keyed: isKeyed } of [...loose, ...keyed]) {
         const token = unregex(raw);
         if (token === null || !configPathShaped(token, isKeyed)) continue;
@@ -1006,5 +1012,63 @@ describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
     expect(Object.keys(CONFIG).length, 'yapılandırma okunamadı').toBeGreaterThan(10);
     expect(checked, 'hiç yol taranmadı, tarayıcı bozuk').toBeGreaterThan(50);
     expect(stale, `${checked} yapılandırma yolu tarandı`).toEqual([]);
+  });
+});
+
+// ------------------------------------------- A9 · the mutation list, as a set
+
+/**
+ * The files Stryker actually mutates, read from its own configuration rather
+ * than from a list typed here.
+ */
+function mutatedFiles(): Set<string> {
+  const text = CONFIG['stryker.config.json'] ?? '';
+  expect(text.length, 'stryker.config.json okunamadı').toBeGreaterThan(100);
+  const config = JSON.parse(text.replace(/^\s*\/\/.*$/gm, '')) as { mutate?: string[] };
+  const list = new Set((config.mutate ?? []).map((f) => f.replace(/^src\//, '')));
+  expect(list.size, 'mutate listesi boş okundu').toBeGreaterThan(3);
+  return list;
+}
+
+/** The names TESTPLAN.md's sentence about the mutation list puts in backticks. */
+function documentedMutants(): { line: number; names: Set<string> } {
+  const body = DOCS['docs/TESTPLAN.md'] ?? '';
+  const lines = body.split('\n');
+  const at = lines.findIndex((l) => l.includes('mutasyona uğruyor'));
+  expect(at, 'TESTPLAN.md mutasyon cümlesi bulunamadı').toBeGreaterThan(0);
+  // The sentence wraps over as many lines as the list needs; it ends at the
+  // closing parenthesis.
+  let text = '';
+  for (let i = at; i < lines.length; i++) {
+    text += (lines[i] ?? '') + '\n';
+    if ((lines[i] ?? '').includes(')')) break;
+  }
+  const names = new Set([...text.matchAll(/`([^`]+\.tsx?)`/g)].map((m) => m[1] ?? ''));
+  return { line: at + 1, names };
+}
+
+describe('A9 · TESTPLAN’in mutasyon listesi stryker’ın listesi', () => {
+  // A1 and A8 both looked straight at this line and said nothing, because what
+  // was wrong with it was not a path: it named `useStore.ts`, which exists on
+  // disk and is not mutated, and left out three files that are. A name can be
+  // real and still be in the wrong sentence, and the only way to see that is to
+  // compare the two lists AS SETS — the same shape as A5, which does it for the
+  // storage keys.
+  it('cümledeki adlar ile yapılandırmanın mutate dizisi aynı küme', () => {
+    const real = mutatedFiles();
+    const { line, names } = documentedMutants();
+    const missing = [...real].filter((f) => !names.has(f));
+    const extra = [...names].filter((f) => !real.has(f));
+    expect(missing, `docs/TESTPLAN.md:${line} mutasyona uğrayıp cümlede olmayan`).toEqual([]);
+    expect(extra, `docs/TESTPLAN.md:${line} cümlede olup mutasyona uğramayan`).toEqual([]);
+  });
+
+  it('listedeki her dosya diskte var', () => {
+    // The other half, and the one the test session asked about: a path in the
+    // list that no longer resolves means the file is silently not measured.
+    // A8 covers the same ground through the configuration; this states it in
+    // the mutation list's own words, with its own message.
+    const gone = [...mutatedFiles()].filter((f) => !FILES.has('src/' + f));
+    expect(gone, 'stryker.config.json mutasyon listesinde olmayan dosya').toEqual([]);
   });
 });
