@@ -120,6 +120,33 @@ Bunlar **karar değil**, R8'e girecek adaylar.
 | Çok kullanıcı / yetki | **yasak liste** (kullanıcı hesapları) | |
 | Bulut / mobil | **ilke 1–3** | Alınmaz |
 
+## Roboders'in KENDİ ÇIKTISI, babanın gerçek verisiyle (2026-09-12)
+
+Kullanıcı `docs/RoboDers/Roboders - Print class Weekly Timetable.pdf` dosyasını
+koydu: Roboders'in babanın kendi okulu için ürettiği baskı, 12.09.2026 17:23
+damgalı. Bu şimdiye kadarki en değerli rakip kaydı, çünkü ilk kez aynı girdi
+üstünde iki programın çıktısı karşılaştırılabiliyor.
+
+Dosyadan okunanlar, hepsi doğrudan görülerek:
+
+- **On sekiz sayfa, A4 yatay.** Günde üç sayfa, altı gün. Başlığı `BRY YKS` ve
+  `Teacher Wall Poster`, yani satırlar öğretmen sütunlar saat.
+- **Öğretmen kısaltmaları babanın Mozaik dosyasındakilerle birebir aynı**
+  (`AS AV AÖ DE İA KY RY SD HE AG MÇ MB NU GÇ ED` ve ötekiler), yani iki
+  programa aynı veri girilmiş.
+- **Hücrede üç şey var:** saat aralığı (`16:50 - 18:20`), branş, ve sınıf artı
+  derslik birleşik (`310G`, `414D`). Birleşik yazım babanın kâğıttaki
+  alışkanlığıyla aynı, ve bizde `B4.15` ile `B4.3b`'nin konusu.
+- **Bloklar birleşmiş hücre olarak çiziliyor**, en uzunu üç saat
+  (`16:50 - 19:10 İngilizce 450C`).
+- **Üreticisi `Skia/PDF m152`,** yani Roboders'in baskısı da bir tarayıcı
+  baskısı. Bizimkiyle aynı yol, farklı tasarım.
+
+Üç yere bakıyor. `R7`'nin rapor ailesi satırları artık bir ekran görmüş sayılır.
+`B4.4` ile Bölüm 3 için karşılaştırılacak gerçek bir kâğıt var. Ve en önemlisi
+§0'ın en üstteki işine: bu çıktı, babanın verisinin **çözülebilir** olduğunun
+kanıtı, yani bizim çözücümüzün onu dizememesi bir kapasite sorunu değil.
+
 ## ⛔ R6 GÜVENLİK SÖZLEŞMESİ — SALT OKUNUR, İSTİSNASIZ
 
 > **Hesaptaki veri babanın GERÇEK verisi ve ASLA değiştirilmeyecek.**
