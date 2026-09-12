@@ -832,6 +832,15 @@ yeni commit çıktının baytlarını değiştiriyor. Ölçüm HEAD sabitken tek
 (değişiklikler zulaya alındı, aynı ağaç yeniden derlendi): iki sha aynı çıktı.
 Bir çıktı karşılaştırması yalnız aynı HEAD üstünde anlamlıdır.
 
+### 114 · Bir dosyayı bölmek çıktının baytlarını değiştirir, taşımak değiştirmez
+Taşıma turunun ölçütü "sha256 değişmesin"di ve dört taşımada tuttu. Bölmede
+tutmadı ve tutmaması doğru: demetleyici modülleri yeni sıraya göre yazıyor ve
+kısa adları yeniden dağıtıyor, yani aynı davranış başka baytlar üretiyor. İlk
+bölmede iki derleme aynı HEAD üstünde alınıp karşılaştırıldı, uzunluk birebir
+aynı ve fark tek bir dokuz kilobaytlık bölgedeydi. Bir bölmenin ölçütü sha256
+değil, çıktının BOYU ile süitin kendisi. Boy da değişebilir: altı modüllük
+bölme dikişin tutkalı kadar büyüdü (`583eae6`, yüz on dokuz bayt).
+
 ---
 
 ## Ölçüm disiplini
@@ -897,11 +906,11 @@ işi.
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 113, yeni bir tuzak 114'ten devam eder. Test stratejisi
+büyük kullanılan numara 114, yeni bir tuzak 115'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
