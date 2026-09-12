@@ -529,6 +529,11 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       mutasyon [TESTFINDINGS.md](TESTFINDINGS.md)'de, karar [DECISIONS.md](DECISIONS.md)'de.
       **Örnek okul bunu gizliyordu** ve o kalıcı bir kurala dönüştü (tuzak 119).
       Rozet geri gelmedi: ölçüm onu isteyen teoriyi düşürdü.
+      **Çare bir gerileme açtı ve kapatıldı (aynı gün).** İlk yazımda açılış boyu ızgaranın
+      tablosuna bağlı bir `ResizeObserver` ile yeniden ölçülüyordu ve o gözlemci kartları
+      imlecin altından kaydırıyordu. Ölçüldü: değişiklikten önceki ağaçta altı koşuda altı
+      geçiş, sonrasında üç düşüş. Tetik ızgaranın şeklinden havuzun kendi içeriğine taşındı,
+      ölçüm boyamadan önceye (`useLayoutEffect`) alındı, ve kalıcı kural tuzak 121 oldu.
 - [ ] **B4.14 Havuzda desteleme açılıp kapanabilsin.** Senin satırın: *"Stacklensin ve
       stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler aynı şeyler tamamen
       aynıları stacklensin."* Cümlenin ikinci yarısı **zaten doğru** ve 2026-09-12'de

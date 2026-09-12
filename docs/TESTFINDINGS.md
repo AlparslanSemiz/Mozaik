@@ -26,6 +26,32 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · npm run kontrol · havuz çaresinin açtığı gerileme, ve iki yanlış daraltma
+Bulgu: Havuz çaresinden sonra `e2e/program.spec.ts` "kart ile hayalet aynı şeyi söylüyor"
+kararsızlaştı. Sebep tahmin edilmedi, ölçüldü: aynı test değişiklikten önceki ağaçta (`c8c126d`,
+`git archive` ile ayrı bir dizine açılıp orada derlendi) **altı koşuda altı kez geçiyor**,
+sonrasında **altı koşuda üç kez düşüyor**. Yani bir kararsızlık değil, benim açtığım bir
+gerileme.
+Mekanizma: havuzun açılış boyunu ızgaranın tablosuna bağlı bir `ResizeObserver` ile yeniden
+ölçüyordum. Sınıf görünümüne geçmek tablonun boyunu değiştiriyor, gözlemci ateşliyor, ve tepsi
+bir kartın kutusu okunduktan sonra ama düğmeye basılmadan önce yeniden boyutlanıyor. Sürükleme
+o boşluğa kayan başka bir kartla başlıyor, ya da hiç başlamıyor (düşüşlerin süresi 30 sn, yani
+zaman aşımı).
+İlk daraltma yetmedi ve o da ölçüldü: "tepsi yalnız büyüsün, hiç küçülmesin" kuralıyla sekiz
+koşuda dört düşüş sürdü, çünkü zararlı olan yeniden boyutlandırma zaten bir büyümeydi.
+İkinci daraltma tuttu: tetik ızgaranın şekli değil **havuzun içeriği** (`cards.length`), ve ölçüm
+bir `useLayoutEffect`'te, yani boyamadan önce. Sekiz koşuda sekiz geçiş. Ayrım şu: ızgaranın
+şekil değiştirdiği an kullanıcının eli zaten tepsinin üstünde olabilir, bir dünyanın yüklendiği
+ya da programın boşaltıldığı an olamaz.
+Bu sırada ikinci bir kusur daha çıktı: bağlanma etkisi `--dock-h`'yi düzen etkisinden SONRA
+yazıyor ve büyümüş değeri eziyordu, yani tepsi hiç büyümüyordu (ölçüm 95 px'e karşı 95 px).
+Yazma tek yere toplandı.
+Asıl senaryo ayrıca ölçüldü, babanın verisiyle: dosya açılınca havuzda 11 kart ve tepsi 95 px,
+program boşaltılınca 201 kart ve tepsi 166 px, 47 kart görünüyor, solma yanıyor.
+Tür: ürün kusuru (benim açtığım)
+Ne yapıldı: düzeltildi. Beş süit koşuldu, 207/207.
+Kalıcı kural: TRAPS.md, tuzak 121
+
 ### 2026-09-12 · npx playwright test e2e/exe.spec.ts · 248, tarihe bağlı kırmızının kapanışı
 Bulgu: Test `/2 Eylül 2026/` arıyordu ve koşan derlemenin kendi damgası (`v2.1.1 · 12 Eylül
 2026`) da deseni içeriyor, yani Playwright iki öğe buluyor ve strict mode ihlali veriyor. Her

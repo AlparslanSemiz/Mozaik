@@ -489,6 +489,21 @@ ve köşedeki eksen adını ölçer, `src/surum.test.ts` pencere ayarını çivi
 
 ---
 
+### 121 · Bir kutuyu kendiliğinden yeniden boyutlandırmak, içindekini imlecin altından kaydırır
+Havuz tepsisi ızgaranın kullanmadığı yere açılsın diye bir `ResizeObserver`
+ızgaranın tablosunu izliyordu. Sınıf görünümüne geçmek tablonun boyunu
+değiştiriyor, gözlemci ateşliyor, tepsi yeniden boyutlanıyor, ve o an bir kartın
+kutusu okunmuş ama düğmeye henüz basılmamışsa sürükleme o boşluğa kayan başka
+bir kartla başlıyor. Ölçüldü: değişiklikten önceki ağaçta altı koşuda altı geçiş,
+sonrasında altı koşuda üç düşüş. "Yalnız büyüsün" daraltması işe yaramadı, çünkü
+zararlı olan hareket zaten bir büyümeydi. Ayrım boyutlandırmanın yönünde değil
+**tetiğinde**: bir kutu, kullanıcının elinin o an üstünde olabileceği bir şey
+değiştiği için yeniden boyutlanmamalı. Havuzun tetiği ızgaranın şekli olmaktan
+çıkıp kendi içeriği oldu (bir dünya yüklenmesi, programın boşaltılması) ve ölçüm
+`useLayoutEffect`'e taşındı, yani boyamadan önceye. İkinci yarısı yazma sırasında:
+`useLayoutEffect` `useEffect`'ten önce koşar, o yüzden aynı özelliği ikisinden de
+yazmak sessizce birini eziyor.
+
 ## CSS kapsamı, özgüllük ve custom property
 
 **Kural.** Bir CSS değeri yazmak onun uygulandığı anlamına gelmez: daha güçlü bir
@@ -984,7 +999,7 @@ kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek 
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117 |
-| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107 |
+| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
@@ -996,5 +1011,5 @@ kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek 
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 120, yeni bir tuzak 121'den devam eder. Test stratejisi
+büyük kullanılan numara 121, yeni bir tuzak 122'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
