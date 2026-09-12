@@ -29,12 +29,12 @@ import {
   isTextInput,
   listBackups,
   loadPlan,
-  reduce,
   savePlan,
   storageWorks,
   useStore,
 } from './platform/store';
 import { parseState } from './pure/parseState';
+import { reduce } from './pure/undo';
 import { emptyState } from './pure/entities';
 import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './pure/library';
 import { SCHEMA_VERSION, type Id, type State } from './leaf/types';

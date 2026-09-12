@@ -8,8 +8,9 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Bundle, buildBundle } from '../pure/bundle';
-import { sanitize } from '../pure/constraints';
 import { parseState } from '../pure/parseState';
+import { type Box, reduce } from '../pure/undo';
+import { sanitize } from '../pure/constraints';
 import { emptyState, newId } from '../pure/entities';
 import {
   addPlan,
@@ -41,77 +42,7 @@ import { safely } from '../leaf/storage';
 // key belongs to which plan is that module's job. It is still USER DATA and
 // still Turkish — renaming it would orphan every saved timetable.
 const KEY = BASE_KEY;
-const HISTORY_LIMIT = 30;
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
-
-// ------------------------------------------------------------------ reducer
-
-interface Box {
-  present: State;
-  past: State[];
-  future: State[];
-  /** Which plan `present` belongs to. Kept HERE so that a switch changes the
-      timetable and its key in one step: an auto-save that saw them disagree for
-      even one render would write one plan's work into another plan's key. */
-  planId: Id;
-}
-
-type Action =
-  | { type: 'change'; apply: (d: State) => State }
-  | { type: 'program-change'; apply: (d: State) => State }
-  | { type: 'undo' }
-  | { type: 'redo' }
-  | { type: 'load'; state: State }
-  | { type: 'switch'; id: Id; state: State };
-
-/** Exported so the undo/redo rules can be tested without mounting React. */
-export function reduce(box: Box, action: Action): Box {
-  switch (action.type) {
-    case 'change': {
-      const next = action.apply(box.present);
-      if (next === box.present) return box; // no real change -> do not pollute history
-      return {
-        ...box,
-        present: next,
-        past: [...box.past, box.present].slice(-HISTORY_LIMIT),
-        future: [],
-      };
-    }
-    // A program boundary is also an undo boundary: an action created while
-    // looking at one alternative must never be replayed into another.
-    case 'program-change': {
-      const next = sanitize(action.apply(box.present));
-      if (next === box.present) return box;
-      return { ...box, present: next, past: [], future: [] };
-    }
-    case 'undo': {
-      const previous = box.past[box.past.length - 1];
-      if (previous === undefined) return box;
-      return {
-        ...box,
-        present: previous,
-        past: box.past.slice(0, -1),
-        future: [box.present, ...box.future],
-      };
-    }
-    case 'redo': {
-      const next = box.future[0];
-      if (next === undefined) return box;
-      return {
-        ...box,
-        present: next,
-        past: [...box.past, box.present],
-        future: box.future.slice(1),
-      };
-    }
-    case 'load':
-      return { ...box, present: sanitize(action.state), past: [], future: [] };
-    // Switching plans clears the history on purpose: "undo" across a plan
-    // boundary would put one plan's grid into another plan's file.
-    case 'switch':
-      return { present: sanitize(action.state), past: [], future: [], planId: action.id };
-  }
-}
 
 // ------------------------------------------------------------ persistence
 
