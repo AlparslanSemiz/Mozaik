@@ -823,6 +823,15 @@ kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/drag
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.
 
+### 113 · `dist/index.html`'in sha256'sı commit değişince kendiliğinden değişir
+Taşıma turunun kuralı "taşımak çıktıyı değiştirmemeli" ve ölçüsü çıktının
+sha256'sı. İkinci taşımadan sonra sha başka çıktı ve bir an "taşımadan fazlası
+oldu" diye okundu. Sebep taşıma değildi: `scripts/surum.mjs` `git rev-parse
+--short HEAD`'i `__SURUM__`'ün içine basıyor ve o dize demete giriyor, yani her
+yeni commit çıktının baytlarını değiştiriyor. Ölçüm HEAD sabitken tekrarlandı
+(değişiklikler zulaya alındı, aynı ağaç yeniden derlendi): iki sha aynı çıktı.
+Bir çıktı karşılaştırması yalnız aynı HEAD üstünde anlamlıdır.
+
 ---
 
 ## Ölçüm disiplini
@@ -888,11 +897,11 @@ işi.
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
-| Ölçüm disiplini | 42, 65, 81, 101 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 112, yeni bir tuzak 113'ten devam eder. Test stratejisi
+büyük kullanılan numara 113, yeni bir tuzak 114'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
