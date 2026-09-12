@@ -71,7 +71,7 @@ describe('normalizePrintOptions', () => {
 
   // The two that are not switches. `Number('')` and `Number(null)` are both 0
   // and 0 is not a legal sheet count, so membership is the guard rather than
-  // `Number.isFinite` (pitfall 43) — and a value from a FUTURE version must
+  // `Number.isFinite` — and a value from a FUTURE version must
   // fall back rather than reach the layout.
   it('sayfa başına program: yalnız 1, 2 ve 4 geçiyor', () => {
     expect(normalizePrintOptions({ perSheet: 2 }).perSheet).toBe(2);

@@ -170,7 +170,7 @@ export default function Summary({
             not a paragraph nobody trimmed. The ceiling in metin.spec.ts skips
             these, and marking them is what keeps the ceiling honest. The
             comment is OUTSIDE the condition: between `{cond && (` and the
-            element it is an object literal, not a comment (pitfall 62). */}
+            element it is an object literal, not a comment. */}
         {unused.length > 0 && (
           <p className="hint data-hint">
             {t('Hiçbir öğretmende kullanılmayan {n} branş var: {hangileri}. Silinebilirler.', {

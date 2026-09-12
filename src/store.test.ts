@@ -871,7 +871,7 @@ describe('parseState — v10 → v11 göçü', () => {
     raw.classes[2].maxSameLessonPerDay = 'iki';
     const d = parseState(JSON.stringify(raw))!;
     expect(d.classes[0]!.maxSameLessonPerDay).toBe(2);
-    // 0 is not "no limit" in a box; it is "nothing typed here" (pitfall 43).
+    // 0 is not "no limit" in a box; it is "nothing typed here".
     expect(d.classes[1]!.maxSameLessonPerDay).toBeNull();
     expect(d.classes[2]!.maxSameLessonPerDay).toBeNull();
   });

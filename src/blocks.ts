@@ -29,8 +29,8 @@ export const BLOCK_SIZES = [3, 2] as const;
  * tail is cut while the sum would outrun the hours. Cutting from the TAIL keeps
  * the big blocks a reader asked for: dropping an hour from 4+2 leaves 4, not 2.
  *
- * `Number('')` and `Number(null)` are both 0 and 0 is a legal count elsewhere
- * (pitfall 43), so a caller reading storage has to tell "missing" from "none"
+ * `Number('')` and `Number(null)` are both 0 and 0 is a legal count
+ * elsewhere, so a caller reading storage has to tell "missing" from "none"
  * before it gets this far — this one only cleans a list it is given.
  */
 export function clampBlocks(weeklyHours: number, blocks: readonly number[]): number[] {

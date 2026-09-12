@@ -126,7 +126,7 @@ export function normalizePrintOptions(raw: unknown): PrintOptions {
     typeof record[id] === 'boolean' ? (record[id] as boolean) : PRINT_DEFAULTS[id];
 
   // `Number('')` and `Number(null)` are 0, and 0 is not in the list — so the
-  // membership test is the guard, not `Number.isFinite` (pitfall 43).
+  // membership test is the guard, not `Number.isFinite`.
   const per = PER_SHEET_VALUES.includes(record.perSheet as PerSheet)
     ? (record.perSheet as PerSheet)
     : PRINT_DEFAULTS.perSheet;

@@ -73,7 +73,7 @@ describe('normalizeScale', () => {
   it('okunamayan her şey VARSAYILAN olur, taban değil', () => {
     // "Tercih yok" ile "biri depoya saçma bir şey yazmış" aynı cevabı verir ve
     // o cevap tabana değil varsayılana oturur — ikisi ancak varsayılan tabana
-    // eşitken aynı görünüyordu (tuzak 43'ün akrabası).
+    // eşitken aynı görünüyordu.
     for (const junk of [null, undefined, '', 'büyük', {}, NaN, [], true]) {
       expect(normalizeScale(junk)).toBe(SCALE_DEFAULT);
     }
@@ -178,7 +178,7 @@ describe('normalizeRibbonAuto', () => {
   // already existed before it had a key, so a reader who has never opened the
   // setting must keep what they have. That makes "absent" mean ON, which is
   // the case worth pinning — `null` must not fall through the same door as
-  // `'kapali'` (pitfall 43: "not stored" and "stored as off" are two facts).
+  // `'kapali'`: "not stored" and "stored as off" are two facts.
   it('kaydı olmayan makinede AÇIK', () => {
     expect(normalizeRibbonAuto(null)).toBe(true);
     expect(normalizeRibbonAuto(undefined)).toBe(true);
@@ -193,7 +193,7 @@ describe('normalizeRibbonAuto', () => {
 
   // Called from two directions — a string out of localStorage and a boolean
   // out of the settings button — so it has to be tried with BOTH types
-  // (pitfall 44: a guard written for one caller silently rejects the other).
+  // a guard written for one caller silently rejects the other.
   it('boolean de kabul ediyor', () => {
     expect(normalizeRibbonAuto(true)).toBe(true);
     expect(normalizeRibbonAuto(false)).toBe(false);
@@ -215,7 +215,7 @@ describe('normalizeAvailClock', () => {
   });
 
   // The switch in Müsaitlik's strip hands over a boolean and storage hands over
-  // a string, and the factory normalizes both before it stores (pitfall 44).
+  // a string, and the factory normalizes both before it stores.
   it('boolean de kabul ediyor', () => {
     expect(normalizeAvailClock(true)).toBe(true);
     expect(normalizeAvailClock(false)).toBe(false);
@@ -237,7 +237,7 @@ describe('normalizeMotion', () => {
   });
 
   it('bozuk değer sistem tercihine düşer, çökmez', () => {
-    // Pitfall 43/44: `Number('')` is 0 and `null` is a value too. This
+    // `Number('')` is 0 and `null` is a value too. This
     // normalizer is string-only, but the junk list is the same one every other
     // reader in this file is tested against.
     for (const junk of ['', 'TAM', 'KAPALI', 'off', 'reduce', '{}', 0, 1, undefined, {}, []]) {

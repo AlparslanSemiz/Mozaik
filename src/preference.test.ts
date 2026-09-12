@@ -9,12 +9,12 @@
 //   - A value that moves the layout is written onto <html> first and in the
 //     same call, and a storage that fails cannot stop it. That is what lets
 //     main.tsx paint every preference before the first frame.
-//   - NO record is not a record of zero (pitfall 43). An absent record asks
+//   - NO record is not a record of zero. An absent record asks
 //     `fallback`, and asks at read time, because the machine may be the one
 //     answering (pitfall 58). A stored "0" or "" is a record and `normalize`
 //     decides what it means.
 //   - `normalize` takes what its caller holds: the string storage hands back
-//     and the value a control passes in (pitfall 44).
+//     and the value a control passes in.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { preference } from './preference';

@@ -15,10 +15,10 @@
 //      that follows the machine asks the machine (motion, pitfall 58, and the
 //      language), and it is asked on every read rather than once at import. A
 //      record that exists, even "" or "0", goes to `normalize`: absent and
-//      zero are different answers (pitfall 43).
+//      zero are different answers.
 //   3. `normalize` accepts what its caller holds, the string storage returns
 //      and the typed value a control passes, and `write` runs it before
-//      storing (pitfall 44).
+//      storing.
 //
 // A leaf like storage.ts: it knows nothing about React or the timetable.
 

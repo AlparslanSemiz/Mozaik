@@ -82,7 +82,7 @@ export const applyTheme = themePreference.apply;
  */
 /**
  * Anything that is not exactly 'kapali' means the dock is open. A boolean is
- * the toggle's own answer and is taken as it is (pitfall 44).
+ * the toggle's own answer and is taken as it is.
  */
 export function normalizeDock(raw: unknown): boolean {
   if (typeof raw === 'boolean') return raw;
@@ -157,9 +157,9 @@ export const applyRibbon = ribbonPreference.apply;
  *
  * A boolean is accepted too, because this normalizer is called from two
  * directions — the store on read, and the settings button on write — and a
- * guard that only knows the string type silently rejects the other one
- * (pitfall 44). "Absent" is not "off": `null` falls to the default here rather
- * than through `Number('')`'s door (pitfall 43).
+ * guard that only knows the string type silently rejects the other one.
+ * "Absent" is not "off": `null` falls to the default here rather than through
+ * `Number('')`'s door.
  */
 export function normalizeRibbonAuto(raw: unknown): boolean {
   if (typeof raw === 'boolean') return raw;
@@ -289,10 +289,10 @@ export const SCALE_DEFAULT = 1;
  * Anything out of range or off-step becomes the nearest legal value; anything
  * unreadable becomes the DEFAULT, not the floor.
  *
- * The two used to be one branch and that hid a bug in plain sight (the same
- * shape as pitfall 43): "no preference stored" and "somebody typed nonsense
- * into localStorage" are different answers, and collapsing them is only
- * invisible while the default happens to equal the floor.
+ * The two used to be one branch and that hid a bug in plain sight: "no
+ * preference stored" and "somebody typed nonsense into localStorage" are
+ * different answers, and collapsing them is only invisible while the default
+ * happens to equal the floor.
  */
 export function normalizeScale(raw: unknown): number {
   const value = typeof raw === 'string' ? Number(raw) : typeof raw === 'number' ? raw : NaN;
@@ -433,7 +433,7 @@ const AVAIL_CLOCK_ATTRIBUTE = 'data-avail-clock';
 
 /**
  * Only the exact string 'acik' turns it on. Absent means OFF, as asked. A
- * boolean is the switch's own answer and is taken as it is (pitfall 44).
+ * boolean is the switch's own answer and is taken as it is.
  */
 export function normalizeAvailClock(raw: unknown): boolean {
   if (typeof raw === 'boolean') return raw;

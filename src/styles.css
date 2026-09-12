@@ -4212,7 +4212,7 @@ table.sheet-lessons select.transfer-pick {
   display: flex;
   flex-direction: column;
   /* The 18rem FLOOR is gone. A floor above the ceiling is a ceiling that can
-     be exceeded (the shape of pitfall 43), and on a short window that is
+     be exceeded, and on a short window that is
      exactly what it did: the rail grew past the screen it was measured
      against. What is left is the one sentence the rail promises — never
      longer than the box being scrolled. */

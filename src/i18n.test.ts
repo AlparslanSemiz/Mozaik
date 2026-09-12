@@ -41,7 +41,7 @@ describe('normalizeDil', () => {
     for (const d of DILLER) expect(normalizeDil(d, 'tr')).toBe(d);
   });
 
-  // The same shape as pitfall 43: "nothing stored" and "somebody typed junk
+  // "Nothing stored" and "somebody typed junk
   // into localStorage" are different questions, and both of them mean "ask the
   // device" rather than "pick a language for them".
   it('tanımadığı her şey CİHAZIN diline düşüyor — boş, null ve saçma dahil', () => {
