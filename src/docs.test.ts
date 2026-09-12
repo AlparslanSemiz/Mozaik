@@ -84,6 +84,39 @@ const SOURCE: Record<string, string> = Object.fromEntries(
 );
 
 /**
+ * The configuration, read the same way. A path lives in two kinds of place in
+ * this repository and only one of them had a gate: the documents describe
+ * paths, and the configuration USES them. The move round found four of the
+ * second kind by hand and two of them would have failed silently — the
+ * mutation list would have stopped measuring, and the release script would
+ * have said "note not found".
+ *
+ * Named one by one rather than globbed, because the two lock files are a
+ * megabyte of strings that cannot be a path this repository owns.
+ */
+const CONFIG: Record<string, string> = Object.fromEntries(
+  Object.entries(
+    import.meta.glob(
+      [
+        '../.prettierignore',
+        '../.gitignore',
+        '../knip.json',
+        '../stryker.config.json',
+        '../package.json',
+        '../tsconfig.json',
+        '../tsconfig.tools.json',
+        '../src-tauri/tauri.conf.json',
+        '../*.config.{ts,js,cjs,mjs}',
+        '../.dependency-cruiser.cjs',
+        '../scripts/**/*.mjs',
+        '../index.html',
+      ],
+      { query: '?raw', import: 'default', eager: true },
+    ),
+  ).map(([key, text]) => [key.replace(/^\.\.\//, ''), text as string]),
+);
+
+/**
  * Which files are on disk. Lazy on purpose: the keys are the answer and the
  * contents are not, and asking for the contents of a wildcard extension kills
  * the run (pitfall 111, and `raw.d.ts` says it next to the declaration).
@@ -150,6 +183,33 @@ const RULE_DOCS = Object.keys(DOCS)
   .filter((d) => !DATED_RECORD.has(d))
   .sort();
 
+/**
+ * TODO.md is both kinds of document at once, which the split by file could
+ * not see: `§10` down is an archive of finished rounds, and a `- [x]` item
+ * anywhere is a record of what was done, but an OPEN item is a claim about
+ * today — somebody is going to act on it, and a path in it will be looked up.
+ *
+ * So the open items are read as a rule document. Measured before it was
+ * written: the move round left five stale paths in there and the file gate saw
+ * none of them.
+ */
+function openTodoLines(): ReadonlySet<number> {
+  const live = new Set<number>();
+  let open = false;
+  const body = DOCS['docs/TODO.md'] ?? '';
+  const lines = body.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? '';
+    if (/^## §10/.test(line)) break;
+    const item = /^\s*- \[( |x)\] /.exec(line);
+    if (item !== null) open = item[1] === ' ';
+    else if (/^#{1,6}\s/.test(line)) open = false;
+    if (open) live.add(i + 1);
+  }
+  expect(live.size, 'TODO.md’de açık madde bulunamadı').toBeGreaterThan(100);
+  return live;
+}
+
 /** `[lineNumber, text]` for every line outside a fenced code block. */
 function prose(text: string): Array<[number, string]> {
   const out: Array<[number, string]> = [];
@@ -212,6 +272,27 @@ describe('okuma', () => {
       expect(SOURCE[name], `${name} taranmıyor`).toBeDefined();
     }
     expect(DOCS['docs/asc/ekran-envanteri.md'], 'docs/asc okunmuyor').toBeDefined();
+    // The same claim for A8: a configuration file that stops being read is a
+    // configuration file that stops being checked.
+    for (const name of [
+      '.prettierignore',
+      '.gitignore',
+      'knip.json',
+      'stryker.config.json',
+      'package.json',
+      'tsconfig.json',
+      'tsconfig.tools.json',
+      'src-tauri/tauri.conf.json',
+      'vite.config.ts',
+      'vite.site.config.ts',
+      'playwright.config.ts',
+      'eslint.config.js',
+      '.dependency-cruiser.cjs',
+      'index.html',
+      'scripts/yayinla.mjs',
+    ]) {
+      expect(CONFIG[name], `${name} taranmıyor`).toBeDefined();
+    }
   });
 });
 
@@ -298,8 +379,11 @@ describe('A1 · belgelerde geçen her yol diskte var', () => {
   it('kural belgelerindeki yollar çözülüyor', () => {
     const stale: string[] = [];
     let checked = 0;
-    for (const doc of RULE_DOCS) {
+    const openTodo = openTodoLines();
+    for (const doc of [...RULE_DOCS, 'docs/TODO.md']) {
+      const onlyOpen = doc === 'docs/TODO.md';
       for (const { line, token } of ticked(doc)) {
+        if (onlyOpen && !openTodo.has(line)) continue;
         if (!pathShaped(token)) continue;
         checked++;
         if (!resolves(token)) stale.push(`${doc}:${line}  ${token}`);
@@ -663,5 +747,264 @@ describe('A7 · her belge bağlantısı çözülüyor', () => {
     }
     expect(checked, 'hiç bağlantı taranmadı').toBeGreaterThan(100);
     expect(broken, `${checked} bağlantı tarandı`).toEqual([]);
+  });
+});
+
+// ------------------------------------------------- A8 · the runtime path
+
+/**
+ * A path a configuration file names, wherever the shape of that file puts it:
+ * a line in an ignore file, a string in JSON, a string literal in a config or
+ * a script, an attribute in the HTML. One extractor per shape rather than one
+ * clever regex, because an ignore file's line IS the path while a script's
+ * path is quoted inside a sentence of code.
+ */
+function configPaths(name: string, text: string): Array<{ line: number; token: string }> {
+  const out: Array<{ line: number; token: string }> = [];
+  const push = (line: number, token: string) => out.push({ line, token });
+  const lines = text.split('\n');
+  if (name.endsWith('ignore')) {
+    // `.gitignore`'s plain lines are the one place in the repository whose JOB
+    // is naming things that are not here (`src-tauri/target/`, `.venv/`), so
+    // only its negations claim that something exists. `.prettierignore` is the
+    // other way round: it names folders it must skip while formatting, and
+    // `src/lang/` sitting there after the move is the bug this gate is for.
+    const onlyNegated = name === '.gitignore';
+    lines.forEach((raw, i) => {
+      const line = raw.trim();
+      if (line === '' || line.startsWith('#')) return;
+      if (onlyNegated && !line.startsWith('!')) return;
+      push(i + 1, line.replace(/^!/, ''));
+    });
+    return out;
+  }
+  if (name.endsWith('.html')) {
+    // `/src/ui/main.tsx` is root relative to Vite, not to the disk.
+    lines.forEach((raw, i) => {
+      for (const m of raw.matchAll(/(?:src|href)="([^"]+)"/g)) push(i + 1, (m[1] ?? '').replace(/^\//, ''));
+    });
+    return out;
+  }
+  // JSON and source alike: every quoted string. A `.json` has nothing else in
+  // it, and a config or a script keeps its paths in quotes too. `package.json`
+  // is the exception in shape: its values are whole command lines, so a path
+  // in there is a word inside a sentence (`node scripts/yayinla.mjs`).
+  const words = name === 'package.json';
+  lines.forEach((raw, i) => {
+    for (const m of raw.matchAll(/'([^'\n]*)'|"([^"\n]*)"/g)) {
+      const value = m[1] ?? m[2] ?? '';
+      if (words) for (const word of value.split(/\s+/)) push(i + 1, word.replace(/^\\"|\\"$/g, ''));
+      else push(i + 1, value);
+    }
+  });
+  return out;
+}
+
+/**
+ * Keys whose value is a path by definition, wherever they appear. Needed
+ * because a bare folder name (`"include": ["e2e"]`, `publicDir: 'site'`) is
+ * indistinguishable from a word until you know which key it sits under, and
+ * those two are exactly the shape that breaks silently: a `publicDir` that
+ * points nowhere copies nothing.
+ *
+ * An inclusion list, not an exemption list. `ignorePatterns` is deliberately
+ * absent: naming what is not there is what it is for.
+ */
+const PATH_KEYS = new Set([
+  'include',
+  'exclude',
+  'files',
+  'extends',
+  'mutate',
+  'entry',
+  'project',
+  'publicDir',
+  'outDir',
+  'rootDir',
+  'testDir',
+  'snapshotDir',
+  'outputDir',
+  'configFile',
+  'fileName',
+  'tsConfig',
+  'frontendDist',
+  'icon',
+  'globalSetup',
+  'setupFiles',
+]);
+
+/** Every string sitting under a path key, however deep, with its line. */
+function keyedPaths(name: string, text: string): Array<{ line: number; token: string }> {
+  const out: Array<{ line: number; token: string }> = [];
+  const lineOf = (value: string) => {
+    const at = text.split('\n').findIndex((l) => l.includes(`"${value}"`) || l.includes(`'${value}'`));
+    return at === -1 ? 1 : at + 1;
+  };
+  if (name.endsWith('.json')) {
+    let data: unknown;
+    try {
+      // tsconfig carries `//` comments, which JSON.parse will not take.
+      data = JSON.parse(text.replace(/^\s*\/\/.*$/gm, '')) as unknown;
+    } catch {
+      expect.fail(`${name} ayrıştırılamadı`);
+    }
+    const walk = (node: unknown, keyed: boolean): void => {
+      if (typeof node === 'string') {
+        if (keyed) out.push({ line: lineOf(node), token: node });
+        return;
+      }
+      if (Array.isArray(node)) {
+        for (const item of node) walk(item, keyed);
+        return;
+      }
+      if (node !== null && typeof node === 'object') {
+        for (const [key, value] of Object.entries(node)) walk(value, PATH_KEYS.has(key));
+      }
+    };
+    walk(data, false);
+    return out;
+  }
+  text.split('\n').forEach((raw, i) => {
+    for (const m of raw.matchAll(/(\w+)\s*:\s*['"]([^'"\n]+)['"]/g)) {
+      if (PATH_KEYS.has(m[1] ?? '')) out.push({ line: i + 1, token: m[2] ?? '' });
+    }
+  });
+  return out;
+}
+
+/** The part of a glob before its first wildcard, cut back to a folder. */
+function globPrefix(token: string): string | null {
+  const cut = token.search(/[*?[\]{}]/);
+  if (cut === -1) return null;
+  const head = token.slice(0, cut);
+  const slash = head.lastIndexOf('/');
+  return slash === -1 ? '' : head.slice(0, slash + 1);
+}
+
+/**
+ * The top level names this repository actually has, DERIVED rather than
+ * typed: it is what tells a path of ours (`src/leaf/lang/`) apart from a
+ * package specifier (`eslint/config`), a media type (`image/png`) and an
+ * ESLint rule name (`react-hooks/rules-of-hooks`), all of which are shaped
+ * exactly like a path and none of which is one.
+ */
+const REPO_TOP: ReadonlySet<string> = new Set(
+  [...FILES, ...DIRS].map((entry) => entry.split('/')[0] ?? '').filter((seg) => seg !== ''),
+);
+
+/**
+ * A dependency-cruiser rule writes its paths as regular expressions, and a
+ * stale folder there is exactly the failure this gate is for. Anchors and an
+ * escaped dot are stripped; anything with a group or a class is left alone,
+ * because it is a pattern rather than a path.
+ */
+function unregex(token: string): string | null {
+  if (/[()|+\\]/.test(token.replace(/\\\./g, '.'))) return null;
+  return token.replace(/\\\./g, '.').replace(/^\^/, '').replace(/\$$/, '');
+}
+
+/** `resolve(KOK, 'src', 'platform', 'changelog.ts')` -> `src/platform/changelog.ts`. */
+function joinedPaths(text: string): Array<{ line: number; token: string }> {
+  const out: Array<{ line: number; token: string }> = [];
+  text.split('\n').forEach((raw, i) => {
+    // Not `.join(',')`: an array's join is not the path module's.
+    for (const m of raw.matchAll(/(?<![.\w])(?:resolve|join)\(([^)]*)\)/g)) {
+      const args = (m[1] ?? '').trim();
+      const parts = [...args.matchAll(/'([^']*)'/g)].map((q) => q[1] ?? '');
+      if (parts.length === 0) continue;
+      // `resolve('kurulum')` starts at the repository root. `join(work, 'x')`
+      // starts wherever `work` is, so one quoted tail after an identifier says
+      // nothing: `font.mjs` joins `unicodes.txt` onto a temp directory.
+      if (!args.startsWith("'") && parts.length < 2) continue;
+      out.push({ line: i + 1, token: parts.join('/') });
+    }
+  });
+  return out;
+}
+
+/**
+ * Whether a configuration string is claiming to be a path of OURS. The test
+ * is its first segment: a name this repository has at its top level. That
+ * rule was measured rather than guessed — the first run reported twenty two
+ * lines, all false, and every class of them (`eslint/config`, `image/png`,
+ * `vitest/globals`, `.venv/bin/python3`, a bare `unicodes.txt` joined onto a
+ * temp directory) fails exactly this test.
+ */
+function configPathShaped(input: string, keyed = false): boolean {
+  let token = input;
+  if (token === '' || /[\s<>$|`]/.test(token)) return false;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(token)) return false;
+  if (/^[@~]/.test(token)) return false;
+  // A leading slash means the server's or the bundler's root, never the disk:
+  // `favicon.mjs` writes `<script src="/src/ui/main.tsx">` into its template.
+  token = token.replace(/^\//, '');
+  if (token === '' || !/[A-Za-z0-9]/.test(token)) return false;
+  // `../dist` in `src-tauri/tauri.conf.json` is a real claim and it is
+  // resolved from that file. Only a `..` INSIDE a name is prose (`Demo1..4`).
+  if (token.replace(/^(\.\.\/)+/, '').includes('..')) return false;
+  const explicit = token.startsWith('./');
+  const clean = token.replace(/^\.\//, '');
+  // `./e2e` says repository relative in so many words: no package specifier is
+  // written that way, so it is checked whatever its first segment is.
+  if (explicit && clean !== '') return true;
+  // A glob is always a path: no package specifier, media type or rule name is
+  // written with a `*`. So its folder is checked even when the folder itself
+  // is the thing that is wrong, which is how a renamed top level directory in
+  // `knip.json` gets caught.
+  const prefix = globPrefix(clean);
+  if (prefix !== null) return prefix !== '';
+  if (keyed) return true;
+  const first = clean.split('/')[0] ?? '';
+  return REPO_TOP.has(first);
+}
+
+/** Does this configuration string point at something that is there? */
+function configResolves(from: string, token: string): boolean {
+  // `../dist` in `src-tauri/tauri.conf.json` is the repository's `dist`, and
+  // `./e2e` in a root config is the repository's `e2e`. Resolved from the file
+  // that wrote it, the way the tool reading it does.
+  // Only an explicitly relative token is read from the file's own folder. A
+  // bare `docs/asc` inside a script is joined onto the repository root by the
+  // script itself, and reading it from `scripts/` would invent `scripts/docs`.
+  const here = (t: string) =>
+    t.startsWith('.') ? resolveFrom(from, t) : t.replace(/^\.\//, '').replace(/^\//, '');
+  const prefix = globPrefix(token);
+  if (prefix !== null) {
+    const dir = here(prefix).replace(/\/$/, '');
+    return dir === '' || DIRS.has(dir + '/') || GENERATED_DIR.test(dir + '/');
+  }
+  const clean = here(token).replace(/\/$/, '');
+  if (resolves(clean)) return true;
+  // A module specifier leaves the extension off: `./playwright.config` is
+  // `playwright.config.ts` on disk, and the bundler is the one who knows.
+  return ['.ts', '.tsx', '.js', '.mjs', '.cjs', '/index.ts', '/index.tsx'].some((ext) =>
+    resolves(clean + ext),
+  );
+}
+
+describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
+  // A1's sibling, and the reason it exists is four holes the move round found
+  // BY HAND: `.prettierignore`'s `src/lang/`, the mutation list in
+  // `stryker.config.json`, the `src/changelog.ts` that `yayinla.mjs` reads off
+  // the disk, and `/src/main.tsx` in the HTML. Two of those stay green while
+  // doing nothing, which is the worst kind of configuration (pitfall 23).
+  it('yapılandırma ve betiklerdeki yollar çözülüyor', () => {
+    const stale: string[] = [];
+    let checked = 0;
+    for (const [name, text] of Object.entries(CONFIG)) {
+      const loose = configPaths(name, text).map((x) => ({ ...x, keyed: false }));
+      // A `resolve()` argument and a value under a path key are both paths by
+      // construction, so a bare folder name counts there.
+      const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({ ...x, keyed: true }));
+      for (const { line, token: raw, keyed: isKeyed } of [...loose, ...keyed]) {
+        const token = unregex(raw);
+        if (token === null || !configPathShaped(token, isKeyed)) continue;
+        checked++;
+        if (!configResolves(name, token)) stale.push(`${name}:${line}  ${raw}`);
+      }
+    }
+    expect(Object.keys(CONFIG).length, 'yapılandırma okunamadı').toBeGreaterThan(10);
+    expect(checked, 'hiç yol taranmadı, tarayıcı bozuk').toBeGreaterThan(50);
+    expect(stale, `${checked} yapılandırma yolu tarandı`).toEqual([]);
   });
 });

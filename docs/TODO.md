@@ -168,7 +168,7 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       `--headless` olmadan kurulu, yani **görünür bir pencere** açıp odağı
       alıyor — kullanıcı meşgulken koşturulamaz, zamanlaması sorulacak;
       (b) oturumu **kullanıcı kendi açar**, şifre sohbete yazılmaz.
-      Çıktı `docs/roboders/ekran/`.
+      Çıktı `docs/asc/ekran/` deseninde, Roboders'in kendi klasörüne.
       **Turun eksiksiz olması aSc'dekinden önemli:** orada 528 yardım konusu
       dosya olarak elimizdeydi, burada geri dönüp bakılacak bir döküm **yok**.
 - [ ] **R7 Özellik envanteri çıkarılsın** → [ROBODERS.md](ROBODERS.md)
@@ -417,7 +417,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       Bugün hareket başına ölçüldü, tam kayıt [TESTFINDINGS.md](TESTFINDINGS.md)'de:
       x1'de tek kare düşmüyor, **x4'te her sekizinci ila onuncu kare düşüyor** (%9,6–15,
       1600×1000 exe kutusunda biraz daha kötü), hiçbir kare iki kareden uzun sürmüyor.
-      **Sebep tek satır:** `drag.ts`'in `paintReason`'ı hedef hücre her değiştiğinde
+      **Sebep tek satır:** `src/platform/drag.ts`'in `paintReason`'ı hedef hücre her değiştiğinde
       gerekçe çubuğunun `textContent`'ini yazıyor, ve o yazma 6704 nesnelik belgede
       **tam yerleşim** tetikliyor (5,37 ms) artı tam görüntü alanı boyaması (5,24 ms).
       Yazmayı kaldırınca düşen kare %12'den %0'a iniyor. Sınıf yazması bedava, pahalı
@@ -579,7 +579,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       listesi~~ · iki programı karşılaştırma · ders ızgarası toplu giriş.**
       (aSc kova 4; altısı da küçük ve birbirinden bağımsız — bir "boş vakit"
       turu.) **Kısayol listesi bitti (2026-08-31, kırk beşinci oturum):**
-      `src/components/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
+      `src/ui/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
       paleti, dört dilde çeviri, `e2e/palet.spec.ts` 54. Kalan beşi açık.
 - [ ] **B6.6 Kapanırken kaydedilmemiş değişiklik uyarısı — muhtemelen
       GEREKMİYOR.** Her değişiklik 400 ms gecikmeyle kaydediliyor ve sekme
@@ -811,7 +811,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Onaylanınca işaretler kalkar.
 - [ ] **`.github/surum-notu.md` eski site adresini gösteriyor.** `…github.io/ders-programi/`
       404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`). Tuzak 106.
-- [ ] **`src/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
+- [ ] **`src/platform/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
       ve Hakkında noktası yazılmamış, `CHANGELOG.md`'de var.
 - [ ] **Boş ekranlar dersler için Okul'u gösteriyor.** Program, Kontrol ve Çıktı'nın
       cümleleri "Okul sekmesinden dersleri girin" diyor, dersler Dersler sekmesinde giriliyor.
@@ -1071,12 +1071,14 @@ ertelendi.
 - [ ] **Araçların kalanı: C3 demet analizi, C4 size-limit, C5 tip farkında ESLint
       kuralları, C6 kapsam ölçümü, C7 bağımlılık güncelleme bildirimi.** Sıra en
       sonda. C6 test oturumuyla kesişiyor, kurmadan önce onlara sorulacak.
-- [ ] **Yapılandırma dosyalarındaki yolları tutan bir kapı yok.** Klasör turunda üç
-      tanesi elle bulundu ve üçü de sessizce bozulurdu: `.prettierignore`'daki
-      `src/lang/`, `stryker.config.json`'ın mutasyon listesi, ve
-      `scripts/yayinla.mjs`'in diskten okuduğu `src/changelog.ts`. Belge kapısı yalnız
-      belgelere bakıyor. Bir yol dizesini çalışma zamanında kullanan her yapılandırma
-      için aynı deseni kurmak mümkün, ama önce kaç tane olduğu sayılmalı.
+- [x] **Yapılandırma dosyalarındaki yolları tutan kapı yazıldı (2026-09-12).** Klasör
+      turunda dört tanesi elle bulundu ve ikisi sessizce bozulurdu: mutasyon listesi
+      ölçmeyi bırakırdı, sürüm betiği "not bulunamadı" derdi. `src/docs.test.ts`'e A8
+      olarak eklendi: ignore dosyaları, JSON yapılandırmaları, kök config'leri,
+      `package.json`'ın komut satırları, `scripts/*.mjs`'in `resolve()` ile kurduğu
+      yollar ve `index.html`. On beş kaynağın her birine bilerek olmayan bir yol
+      konarak sınandı. Kapsam dışında kalan tek sınıf: bir betiğin içinde çıplak
+      duran, klasörsüz ve uzantısız bir ad.
 
 ## §9. Ham notlar — senin kendi satırların
 
