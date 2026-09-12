@@ -12,11 +12,12 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
    |
 src/pure/          constraints · rules · feasibility · bell · import · entities · solver
                    programs · programMask · listview · library · bundle · sample
+                   parseState · undo
    |
-src/platform/      store · libraryStore · storageReport · theme · toolState · printOptions
-                   programColor · changelog · folder · desktop · update
+src/platform/      planStore · libraryStore · storageReport · theme · toolState · printOptions
+                   programColor · changelog · folder · desktop · update · download
                    drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useSolver · useFolder
+                   useStore · usePlans · useSolver · useFolder
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```

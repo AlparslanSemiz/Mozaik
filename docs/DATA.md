@@ -167,7 +167,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
 
 Bu listenin tamamı Ayarlar → Hakkında'daki "Veriler nerede" tablosunda görünür, ve
-satırları `library.ts`'teki `storageReport` üretir, tercihlerinkini
+satırları `storageReport.ts` üretir, tercihlerinkini
 `preferenceKeys.ts`'teki listeden. `e2e/planlar.spec.ts` sayfanın gerçekten yazdığı
 her `ders-programi*` anahtarını o tabloda arar. Yeni bir tercih anahtarı
 `preferenceKeys.ts`'e tablodaki adıyla birlikte girer, çünkü tablonun işi
