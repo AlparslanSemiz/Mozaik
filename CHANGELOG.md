@@ -16,8 +16,13 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Changed
+
+- While a card is being dragged, every card in the target row shows the cell's own verdict as a coloured ring, so a filled cell no longer hides whether the card could go there.
+
 ### Fixed
 
+- Dragging a card across a full week no longer stutters: the reason bar above the grid is rewritten at most ten times a second instead of once per cell.
 - Availability and Print no longer crash when their list goes from empty to filled while the tab is open, for example after Ctrl+Z.
 - Handing a lesson to another teacher from the entity panel now says how many blocks went back to the pool.
 - The dark theme no longer flashes a light background on the first frame while the program is opening on a slow machine.

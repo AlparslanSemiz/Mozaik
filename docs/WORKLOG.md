@@ -84,6 +84,55 @@ birleşiyor, ters yön yok.
 
 ---
 
+## 2026-09-12 · Üç kapı daha, kapsam ölçümü, ve aynı ağaçta üç oturum
+
+**Aynı worktree'de üç oturum çalıştı ve ikisine aynı brifing verilmişti.** Bu
+ağaçta refactor oturumu (bu girdi), ölçüm oturumu (B4.7 ve B4.8'in çaresi) ve
+bir üçüncü oturum vardı; üçüncüsünün brifingi kelimesi kelimesine bunun aynısı,
+yani iki oturuma aynı dal ve aynı sahiplik verilmiş. `../Mozaik-test` ise on
+dört saattir sessiz. Kullanıcı üçüncü oturumu ayrı bir worktree'ye ve yalnız
+belge işine yolladı. Zarar olmadı, çünkü üçü de yollarını tek tek ekledi,
+kimse `git add -A` kullanmadı ve ölçüm pencereleri konuşularak açıldı.
+
+**Üç kapı eklendi ve üçü de ölçülmüş bir kaçağı kapatıyor.**
+
+A2'ye katman şeması kapısı. Kaçak varsayılmadı, `39404a1`'in ağacında ölçüldü:
+on üç kapı yeşilken şema yedi yerde diskle çelişiyordu. Sebebi iki körlüğün
+çarpımı — şema fenced bir blokta (`prose()` fenced'i atıyor) ve içindeki adlar
+uzantısız (`pathShaped()` uzantısız adı yol saymıyor). Kapı iki yönlü, çünkü
+sapma "klasörde var, şemada yok" yönündeydi.
+
+A9, mutasyon listesi. Yeni bir bayatlama sınıfı: yanlış olan şey bir yol değil
+bir küme. `TESTPLAN.md`'nin cümlesi diskte gerçekten var olan ama mutasyona hiç
+uğramayan bir dosyayı sayıyordu, ve hem A1 hem A8 sessiz kaldı çünkü ikisi de
+adın var olup olmadığına bakıyor. Kapı iki listeyi küme olarak karşılaştırıyor,
+şekli A5'ten.
+
+A8 betiklerin `//` yorumlarındaki yolları da tarıyor, yalnız `scripts/` altında
+(sınır ölçülmüş: `src/` yorumları İngilizce düzyazı ve yol şekilli ifadelerle
+dolu). Genişletme ilk koşuda A8'in kendi kusurunu buldu: `.github/...` bir
+nokta-dosya, göreli değil, ve kapı onu `scripts/.github/...` diye arıyordu.
+
+**Bugün kapıların yakaladığı iki bayat şey de kendi bıraktığım kusurlardı:**
+`library.test.ts`'in katman iddiası bölmeden sonra hiçbir şeyle eşleşmiyordu
+(bir `not.toMatch`'in deseni ölünce test sonsuza kadar geçer, tuzak 109'un öteki
+yüzü ve bugün ikinci örneği), ve `TESTPLAN`'ın mutasyon cümlesini bölmenin belge
+turunda yanlış yazmışım.
+
+**C6 kuruldu.** Kapsam ayrı komut, eşiksiz, mutasyonun kümesiyle aynı dosyalar
+artı `solver.ts`. Tahmin %80-95'ti, ölçüm %95,95, ve asıl bilgi farkta:
+`rules.ts` kapsam 100 / mutasyon 80,9, `feasibility.ts` 99,6 / 79,9,
+`constraints.ts` 95,3 / 76,6. Yirmi puana yakın fark, "koşuluyor ama
+ölçülmüyor" demek ve test oturumu için bir iş listesi.
+
+**Koşulan testler:** `tipler`, `sinir`, `lint`, birim süiti ve belge kapıları
+her adımda; `npm run kapsam` bir kez. Ölçüm oturumu kendi turunda tam
+`kontrol` koştu ve tek düşen yine tarihe bağlı bilinen kırmızı. Bu girdinin
+kapıları ve C6, o koşudan sonra eklendi, yani tam E2E onların üstünde
+koşmadı — sıradaki turun ilk işi.
+
+---
+
 ## 2026-09-12 · Araç turu: dört araç kuruldu, iki kural ve bir kural kümesi okunup bırakıldı
 
 **C5, tip farkında ESLint.** Tahmin yüz ile dört yüz arası bulguydu, ölçüm 1228
@@ -337,7 +386,37 @@ sayfa yavaşlayınca fare de yavaşlıyor ve ölçüm kendi konusunu gizliyor �
 saatine göre, cevabı beklenmeden gönderilmeli. Ve tek koşu yeterli değil: aynı yapıda
 %9,6 ile %31,6 arasında koşular var, o yüzden her rakam üç koşunun üçüyle yazıldı.
 
-**Koşulan testler:** yok. Bu tur ölçüm turu, üründe tek satır değişmedi. `dist/` bu ağaçta
+**Sonra: iki çare yazıldı, ikisi de kullanıcı kararıyla.** Kullanıcı B4.7 için "metni kısmak",
+B4.8 için "kartın kendisi işaretlensin" dedi (2026-09-12).
+
+B4.7 — `src/platform/drag.ts`'e `REASON_GAP = 100`: gerekçe çubuğu en çok 100 ms'de bir
+yazılıyor, renk ve cümle **birlikte** (sınıf yazması bedava ama erken geçirilirse çubuk yeşile
+dönüp kırmızı cümleyi okur). Aynı ağaçta üçer koşu: düşen kare %9,5–14,1 → **%1,1**, Layout
+543 ms / 107 → 216 ms / 42, kenar kaydırmasında %12–13 → %0–0,8. Çarenin riski hızlı kareler
+değil kuyruktaki **son** yazma; `e2e/program.spec.ts`'e onu ölçen bir test yazıldı ve kuyruk
+yazması iptal edilerek kırmızıya döndürüldü.
+
+B4.8 — üç CSS kuralı: sürükleme sürerken hedef satırdaki her kart, hücresinin hükmünü iç halka
+olarak taşıyor. JS yok, DOM yazması yok, `can-*` sınıfı `<td>`'de zaten var. İki hükümde de
+(`can-warn`, `can-no`) mutasyonla sınandı; `can-no`yu uyarı rengiyle boyamak testi kırmızıya
+döndürüyor. Halkanın ölçülebilir bedeli yok (dönüşümlü A/B: var %0,0–1,9, yok %0,4–1,5).
+Bırakılan soru **B4.9**: hedef hücre kendi satırında boşken başka bir satırdaki kartı havuza
+gönderen bırakmalarda gidecek kart işaretlenmiyor, ve orada `can-*` sınıfı olmadığı için bu
+bedava bir CSS kuralı değil.
+
+**Ve bir ölçüm kusuru, benim:** kart halkasının bedeli ilk ölçümde %60–72 düşen kare dedi, ama
+iz toplamları halkasız hâlle aynıydı. Sebep arka planda kendi başlattığım tam E2E süitiydi.
+Dönüşümlü A/B ile sessiz pencerede bedel sıfır çıktı. Öteki oturuma söylediğim kuralın eksik
+yarısı buymuş: ölçüm penceresinde **kendi** arka plan işin de sayılır.
+
+**Koşulan testler:** `npm run kontrol`, çıkış kodu 1 — tipler, sınır, lint (0 hata, 4 eski
+uyarı), birim **1029/1029**, derleme, boyut (ham 1,01 MB / 1,02 MB sınır, brotli 247,4 kB /
+260 kB), E2E **574/575**. Tek düşen `e2e/exe.spec.ts:248` ve sebebi TARİH: test `/2 Eylül 2026/`
+arıyor, damga `12 Eylül 2026` diyor, iki öğe eşleşiyor. TODO §8d'de kayıtlı, bu turdan önce de
+düşüyordu, B4.7/B4.8 ile ilgisi yok. Site ve çözücü süitleri `kontrol` o adımdan önce durduğu
+için koşmadı.
+
+**Ölçüm turunun kendi notu:** `dist/` bu ağaçta
 on iki kez yeniden derlendi (ablasyon deneyleri) — aynı ağaçta çalışan öteki oturumun
 ölçümleri o pencerede yalan söylemiş olabilir, ve bu oturumun geç koşularındaki gürültü de
 muhtemelen aynı sebepten. Ablasyon betiği bütün `src/`'yi geri almıyor, yalnız kendi

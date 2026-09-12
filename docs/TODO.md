@@ -409,7 +409,11 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       `{Öğretmen:Tam Adı}`. Düzenleme yeri **önizlemenin kendisi**.
 - [ ] **B4.5 Farklı baskı çeşitleri** — rapor yapısı seçilebilsin: satırda ne,
       sütunda ne, sayfa başına ne.
-- [ ] **B4.7 Sürüklerken kasma — SEBEBİ ÖLÇÜLDÜ, çare kullanıcı kararı bekliyor.**
+- [x] **B4.7 Sürüklerken kasma — BİTTİ (2026-09-12).** Çare: gerekçe çubuğu en çok
+      100 ms'de bir yazılıyor (`REASON_GAP`). Düşen kare %9,5–14,1'den **%1,1**'e, Layout
+      543 ms / 107'den 216 ms / 42'ye indi; kenar kaydırmasında %12–13'ten %0–0,8'e.
+      Kuyruktaki son yazmanın düşmemesi `e2e/program.spec.ts`'te bir testle ölçülüyor ve
+      test mutasyonla sınandı. Aşağısı sebebin kaydı.
       Senin satırın: *"Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden
       gezdirirken çok kasma oluyor."* **İkinci kez geliyor**: §9b'deki aynı şikayet
       2026-09-01'de sürüklemenin BAŞLANGICI ölçülerek kapatılmıştı (125 ms → 46,2 ms).
@@ -424,12 +428,14 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       olan metin. Planın öteki üç şüphelisi ölçülüp düştü: imleç haçı sürüklerken zaten
       kapalı, sınıf değişimi hareket başına medyan 0 düğüm, hayalet karta kendi katmanını
       vermek toplamı hiç kıpırdatmadı (tuzak 105).
-      **Karar senin, iki aday ölçüldü:** (a) metin en çok 100 ms'de bir yazılsın — düşen
-      kare %1,5–3,4, ama çubuğun cümlesi imleçten bir tık geride kalır; (b) metin kutusu
-      akıştan çıksın (mutlak konum) — %3,8–7,4, cümle anında yazılır ama çubuğun düzeni
-      değişir. Denenip **elenen** iki ucuz yol da kayıtta: `contain: layout` ve metin
-      kutusuna `flex: 1 1 0`, ikisi de yerleşimi durdurmadı.
-- [ ] **B4.8 Dolu hücrenin hükmü kartın altında kalıyor — ölçüldü, çare kararı bekliyor.**
+      **Kullanıcı kararı (2026-09-12): metni kısmak.** Öteki aday (metin kutusunu akıştan
+      çıkarmak, %3,8–7,4) ve elenen iki ucuz yol (`contain: layout`, metin kutusuna
+      `flex: 1 1 0` — ikisi de yerleşimi durdurmadı) kayıtta duruyor.
+- [x] **B4.8 Dolu hücrenin hükmü kartın altında kalıyor — BİTTİ (2026-09-12).** Çare:
+      sürükleme sürerken kartın kendisi hükmün rengiyle bir iç halka taşıyor (üç CSS
+      kuralı, JS yok). Bedeli dönüşümlü A/B ile ölçüldü ve ölçülebilir bir bedeli yok
+      (halka var %0,0–1,9, halka yok %0,4–1,5). İki hükümde de mutasyonla sınandı.
+      Aşağısı ölçümün kaydı.
       Senin satırın: *"kartları kaydırırken başka bir kartın üzerine gelip koyma yani
       değiştirme var ya, o kartların arkasından ya da başka bir şekilde o kartın oraya
       gelip gelemeyeceğini bilmek lazım, yani kırmızı mı turuncu mu falan."*
@@ -446,10 +452,18 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       (`rgb(241, 231, 197)` ile `rgb(253, 238, 201)`), yani "dolu ve engelli" hücre ile
       "boş ve takas edilebilir" hücre ekranda aynı krem rengi gösteriyor.
       Ölçüm ve ekran görüntüleri [TESTFINDINGS.md](TESTFINDINGS.md)'de.
-      **Çare seçenekleri henüz ölçülmedi**, ve seçim bir tasarım kararı: kartın kendisini
-      hükme göre işaretlemek (kenarlık ya da köşe rozeti) · kartı sürükleme boyunca
-      saydamlaştırmak · hücrenin çerçevesini kalınlaştırmak · takas edilecek kartı ayrıca
-      göstermek. Renklerin anlamı (Y2 kararı) değişmiyor, değişecek olan nerede boyandığı.
+      **Kullanıcı kararı (2026-09-12): kartın kendisi işaretlensin.** Renklerin anlamı
+      (Y2 kararı) değişmedi, değişen nerede boyandıkları.
+- [ ] **B4.9 Başka bir SATIRDAKİ tahliye kurbanı hiçbir yerde görünmüyor.** B4.8'in
+      halkası hedef satırın dolu hücrelerini işaretliyor, yani "üstüne geldiğin kart".
+      Ama bir bırakma, hedef hücre kendi satırında BOŞ olduğu hâlde başka bir satırdaki
+      kartı havuza gönderebiliyor (sınıf o saatte başka bir öğretmende). O durumda
+      gerekçe çubuğu kimin gideceğini adıyla söylüyor (`e2e/program.spec.ts`, "havuza
+      dönecek") ama ekranda gidecek kartın kendisi işaretlenmiyor. Kullanıcının cümlesi
+      ("başka bir kartın üzerine gelip koyma") üstüne gelinen kartı anlatıyor, yani bu
+      ayrı bir soru: gidecek kart da işaretlensin mi, yoksa cümle yeter mi. Karar
+      verilmeden yazılmaz; yazılırsa maliyeti ölçülür (hedef satır dışındaki hücrelerde
+      `can-*` sınıfı yok, yani bu bedava bir CSS kuralı DEĞİL).
 - [ ] **B4.6 Program ızgarasında sınıfın altındaki "derslik yok" ibaresi
       kalksın.** Senin satırın: *"program tarafında sınıf tarafında
       dersliği yok ibaresi kalkması lazım."* Kaynak `Program.tsx:321-327`:
