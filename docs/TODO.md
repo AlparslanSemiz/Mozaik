@@ -1191,15 +1191,16 @@ ertelendi.
       aynı çıktı, birim süiti de mutasyonla yeşil kaldı. Yani ya eşdeğer bir mutant ya da
       farkı gösteren durum bulunamadı. Her mutant için bu kadar iş var, ve okuyarak
       verilen bir karar bu turda bir kez zaten yanlış çıktı.
-- [ ] **`solver.ts` mutasyonla ölçülemiyor, iki satır yüzünden.** Stryker'in
-      enstrümantasyonu `solver.ts:530-531`'deki `classOnDay[g]!++` biçimini
-      ayrıştıramıyor (`UpdateExpression` içinde `TSNonNullExpression`) ve bütün koşuyu
-      düşürüyor, o yüzden dosya `stryker.config.json`'daki listede yok. Çare ölçüldü ve
-      denendi: iki satır `classOnDay[g] = classOnDay[g]! + 1` olarak yazılınca
-      enstrümantasyon geçiyor, davranış birebir aynı, `solver.test.ts` 93/93 ve tipler
-      temiz. `!` gerekli, `noUncheckedIndexedAccess` açık. Bu bir üretim kodu
-      değişikliği, yani refactor tarafının işi; yapıldığı gün `solver.ts` listeye geri
-      konur. Ölçüm TESTFINDINGS'te, 2026-09-12.
+- [x] **`solver.ts` mutasyonla ölçülemiyor, iki satır yüzünden — BİTTİ (2026-09-12).**
+      `src/pure/solver.ts:530-531` `classOnDay[g] = classOnDay[g]! + 1` biçiminde yazıldı
+      (`!` kaldı, `noUncheckedIndexedAccess` açık), dosya `stryker.config.json`'ın listesine
+      girdi, `_comment_solver` kalktı ve [TESTPLAN.md](TESTPLAN.md)'in mutasyon listesi aynı
+      commit'te güncellendi, çünkü A9 kapısı iki listeyi küme olarak karşılaştırıyor.
+      Davranış birebir aynı: `solver.test.ts` 93/93, ve çözücü stresi 7/7 ile kalite sayıları
+      kayıtlı değerlerin aynısı (`gercek-olcek-sikisik` sınıf deliği 273).
+      Aşağısı sebebin kaydı. Stryker'in enstrümantasyonu `classOnDay[g]!++` biçimini
+      ayrıştıramıyordu (`UpdateExpression` içinde `TSNonNullExpression`) ve bütün koşuyu
+      düşürüyordu, o yüzden çözücü hiç ölçülmemişti. Ölçüm TESTFINDINGS'te, 2026-09-12.
 - [ ] **Süiti inceltme, Faz 4'te.** "E2E süiti çok mu büyük" sorusu duruyor ama cevabı refactor
       bitmeden aranmayacak, çünkü ağın kendisi refactorun güvencesi. Sıra: önce dosya ve
       test başına süre ölçülür, sonra en pahalı yüzde on mutasyonla sınanır, sonra

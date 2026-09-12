@@ -170,11 +170,13 @@ hepsini bir eksik gibi raporlar.
 
 Yalnız saf çekirdek mutasyona uğruyor (`pure/constraints.ts`, `pure/rules.ts`,
 `leaf/blocks.ts`, `pure/parseState.ts`, `pure/undo.ts`, `pure/library.ts`,
-`pure/feasibility.ts`, `pure/entities.ts`): bütün depoyu ölçmek pahalı ve
-bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor. `solver.ts`
-listede **yok** ve bu bir bulgu: aracın enstrümantasyonu oradaki bir artırma
-biçimini ayrıştıramıyor ve bütün koşuyu düşürüyor. Çaresi iki satırlık bir üretim
-kodu değişikliği, yani bu katmanın işi değil (TODO §8f).
+`pure/feasibility.ts`, `pure/entities.ts`, `pure/solver.ts`): bütün depoyu ölçmek
+pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor.
+`solver.ts` 2026-09-12'de listeye girdi. Ondan önce yoktu ve sebebi bir tercih
+değil bir arızaydı: aracın enstrümantasyonu `classOnDay[g]!++` biçimini
+ayrıştıramıyor ve bütün koşuyu düşürüyordu. İki satır `classOnDay[g] =
+classOnDay[g]! + 1` olarak yazılınca geçti, davranış birebir aynı kaldı ve
+`solver.test.ts` 93/93 durdu.
 
 **Skorun kapsamı her seferinde yazılır.** Kapsamı belirsiz bir mutasyon skoru yüksek
 bir sayıyla güven verir ve neyi ölçtüğünü söylemez, ki bu tuzak 23'ün başka bir

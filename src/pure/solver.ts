@@ -527,8 +527,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     for (let g = 0; g < dayCount; g++) {
       for (let s = 0; s < hourCount; s++) {
         if (placements[placementKey(item.lesson.classId, g, s)] === item.lesson.id)
-          classOnDay[g]!++;
-        if (ix.teacherBusy.has(closedKey(item.lesson.teacherId, g, s))) teacherOnDay[g]!++;
+          classOnDay[g] = classOnDay[g]! + 1;
+        if (ix.teacherBusy.has(closedKey(item.lesson.teacherId, g, s)))
+          teacherOnDay[g] = teacherOnDay[g]! + 1;
       }
     }
 
