@@ -890,6 +890,30 @@ sebep (24 px'te altı çubuğun araları 0,56 cihaz pikseli) ancak iki teori kal
 göründü. Ölçüm bir kapıya dönüştü: `scripts/exe-ikon.mjs`, `surum.yml`'in `exe`
 işi.
 
+### 115 · Bir kural kümesi adına bakılarak alınırsa gelen şey bir gürültü duvarıdır
+Tip farkında ESLint kurulurken `strictTypeChecked`'ın kaç bulgu vereceği yüz ile
+dört yüz arasında tahmin edildi, ölçüm 1228 çıktı. Şaşmanın kendisi bir bulgu: bir
+kural kümesinin adı neyi ölçtüğünü söylemez, ve sayılmadan açılan bir küme bir kapı
+değil bir gürültü duvarı kurar. Bulgular sayılmadı, sınıf sınıf okundu, dört kural
+ayakta kaldı ve düşenlerin sebebi `eslint.config.js`'in başında tek tek yazılı. En
+çok umulan kuralın hiçbir işe yaramadığı da ancak okununca görüldü:
+`no-unnecessary-condition` mutasyon koşusunun "bu dal hiç çalışmıyor" dediği
+mutantları bulacaktı, yirmi yedi bulgusunun hiçbiri o değildi, ikisi kuralın yanlış
+pozitifi ve gerisi DOM'un etrafına bilerek konmuş korumaydı, yani kuralı açmak o
+korumaları silmek olurdu. Bir aracın neyi bulacağı ölçülür, adından okunmaz. Ölçüm
+WORKLOG'un 2026-09-12 tarihli araç turu girdisinde.
+
+### 116 · Bir aracın otomatik düzeltmesi bir öneridir, derleyici hakemdir
+`no-unnecessary-type-assertion`'ın `--fix`'i dört yerde derlemeyi kırdı ve kırdığı
+her yerde haklı olan derleyiciydi: `element.closest?.(...) as HTMLElement | null`
+biçiminde kural ile `tsc` çelişiyor, kural iddiayı gereksiz sayıyor ve derleyici
+onsuz tipi daraltamıyor. İki kolay çıkışın ikisi de yanlıştı, kuralı susturmak
+iddiayı denetimsiz bırakırdı ve düzeltmeyi olduğu gibi kabul etmek derlemeyi
+kırardı. Çare aynı şeyi denetlenebilir yazmak oldu: `closest<HTMLElement>(...)`.
+Tip argümanı iddianın söylediğini söyler ve onu derleyici denetler, oysa bir `as`
+denetlenmez. Bir `--fix` koşusundan sonra `npm run tipler` koşulur, çünkü lint'i
+yeşil bir ağaç derlenebilir bir ağaç demek değil.
+
 ---
 
 ## Dizin
@@ -906,11 +930,11 @@ işi.
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 114, yeni bir tuzak 115'ten devam eder. Test stratejisi
+büyük kullanılan numara 116, yeni bir tuzak 117'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
