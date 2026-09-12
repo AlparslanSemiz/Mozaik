@@ -420,6 +420,67 @@ function fileMapRows(): Array<{ line: number; file: string; says: string }> {
   return out;
 }
 
+/**
+ * The layer diagram at the head of ARCHITECTURE.md, row by row. Read from
+ * `DOCS` rather than through `prose()` on purpose: the diagram lives in a
+ * fenced block and `prose()` throws fences away, which is half of why nothing
+ * saw it go stale. The other half is that the names in it carry no extension,
+ * so the path gate does not recognise them as paths either. A document can be
+ * wrong in a place where two gates are both looking somewhere else.
+ */
+function layerRows(): Array<{ folder: string; line: number; names: string[] }> {
+  const out: Array<{ folder: string; line: number; names: string[] }> = [];
+  const split = (text: string) =>
+    text
+      .split('·')
+      .map((name) => name.trim())
+      .filter((name) => name !== '');
+  let open = -1;
+  (DOCS['docs/ARCHITECTURE.md'] ?? '').split('\n').forEach((text, i) => {
+    const head = /^(src\/[a-z]+)\/\s+(\S.*)$/.exec(text);
+    if (head !== null) {
+      out.push({ folder: head[1] ?? '', line: i + 1, names: split(head[2] ?? '') });
+      open = out.length - 1;
+      return;
+    }
+    const row = out[open];
+    const tail = /^\s+(\S.*)$/.exec(text);
+    // `   |` is the arrow between two layers, not a wrapped list of names.
+    if (row !== undefined && tail !== null && (tail[1] ?? '').trim() !== '|') {
+      row.names.push(...split(tail[1] ?? ''));
+      return;
+    }
+    open = -1;
+  });
+  return out;
+}
+
+/** What a layer folder actually holds, in the diagram's own vocabulary. */
+function modulesIn(folder: string): Set<string> {
+  const out = new Set<string>();
+  for (const file of FILES) {
+    if (!file.startsWith(folder + '/')) continue;
+    const rest = file.slice(folder.length + 1);
+    const slash = rest.indexOf('/');
+    // A folder inside a layer is one entry: the diagram writes `lang/*`.
+    if (slash !== -1) {
+      out.add(rest.slice(0, slash) + '/*');
+      continue;
+    }
+    // A declaration file is not a module and a test is not product code.
+    if (!/\.tsx?$/.test(rest) || rest.endsWith('.d.ts') || rest.includes('.test.')) continue;
+    out.add(rest.replace(/\.tsx?$/, ''));
+  }
+  return out;
+}
+
+/**
+ * `src/ui` is out of scope and the diagram says why itself: its row ends with
+ * "ve bütün bileşenler", so it is a sentence rather than a list. The three
+ * below claim to be complete.
+ */
+const LISTED_LAYERS = ['src/leaf', 'src/pure', 'src/platform'];
+
 describe('A2 · dosya haritasının adları kaynakta var', () => {
   // A renamed function turns the map into a lie without touching it, and the
   // map is the first thing anybody reads to find where something lives.
@@ -455,6 +516,39 @@ describe('A2 · dosya haritasının adları kaynakta var', () => {
     expect(fileMapRows().length, 'dosya haritası okunamadı').toBeGreaterThan(40);
     expect(checked, 'hiç tanımlayıcı taranmadı').toBeGreaterThan(20);
     expect(stale, `${checked} tanımlayıcı tarandı`).toEqual([]);
+  });
+
+  it('katman şeması üç klasörün içeriğini sayıyor', () => {
+    // Measured escape, not a supposition: at `39404a1` thirteen gates were
+    // green while this diagram still said `store` and listed neither
+    // `parseState` nor `undo` — the split had moved them eighty lines below,
+    // in the file map, and the map was right. Both directions are asked here,
+    // because the drift was in the one a spot check misses: what the folder
+    // holds and the diagram does not mention.
+    const wrong: string[] = [];
+    let checked = 0;
+    const rows = new Map(layerRows().map((row) => [row.folder, row]));
+    for (const folder of LISTED_LAYERS) {
+      const row = rows.get(folder);
+      if (row === undefined) {
+        wrong.push(`docs/ARCHITECTURE.md  ${folder}/ şemada yok`);
+        continue;
+      }
+      const onDisk = modulesIn(folder);
+      for (const name of row.names) {
+        checked++;
+        if (!onDisk.has(name)) {
+          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} diskte yok`);
+        }
+      }
+      for (const name of onDisk) {
+        if (!row.names.includes(name)) {
+          wrong.push(`docs/ARCHITECTURE.md:${row.line}  ${folder}/${name} şemada yok`);
+        }
+      }
+    }
+    expect(checked, 'katman şeması okunamadı').toBeGreaterThan(40);
+    expect(wrong, `${checked} modül adı tarandı`).toEqual([]);
   });
 });
 
@@ -781,7 +875,8 @@ function configPaths(name: string, text: string): Array<{ line: number; token: s
   if (name.endsWith('.html')) {
     // `/src/ui/main.tsx` is root relative to Vite, not to the disk.
     lines.forEach((raw, i) => {
-      for (const m of raw.matchAll(/(?:src|href)="([^"]+)"/g)) push(i + 1, (m[1] ?? '').replace(/^\//, ''));
+      for (const m of raw.matchAll(/(?:src|href)="([^"]+)"/g))
+        push(i + 1, (m[1] ?? '').replace(/^\//, ''));
     });
     return out;
   }
@@ -837,7 +932,9 @@ const PATH_KEYS = new Set([
 function keyedPaths(name: string, text: string): Array<{ line: number; token: string }> {
   const out: Array<{ line: number; token: string }> = [];
   const lineOf = (value: string) => {
-    const at = text.split('\n').findIndex((l) => l.includes(`"${value}"`) || l.includes(`'${value}'`));
+    const at = text
+      .split('\n')
+      .findIndex((l) => l.includes(`"${value}"`) || l.includes(`'${value}'`));
     return at === -1 ? 1 : at + 1;
   };
   if (name.endsWith('.json')) {
@@ -966,8 +1063,13 @@ function configResolves(from: string, token: string): boolean {
   // Only an explicitly relative token is read from the file's own folder. A
   // bare `docs/asc` inside a script is joined onto the repository root by the
   // script itself, and reading it from `scripts/` would invent `scripts/docs`.
+  // `./x` and `../x` are read from the file's own folder. A DOTFILE is not
+  // relative — `.github/workflows/surum.yml` in a script's comment means the
+  // repository's, and the first version of this line sent it looking for
+  // `scripts/.github/...`. Found by the comment extractor the day it landed.
+  const relative = (t: string) => t.startsWith('./') || t.startsWith('../');
   const here = (t: string) =>
-    t.startsWith('.') ? resolveFrom(from, t) : t.replace(/^\.\//, '').replace(/^\//, '');
+    relative(t) ? resolveFrom(from, t) : t.replace(/^\.\//, '').replace(/^\//, '');
   const prefix = globPrefix(token);
   if (prefix !== null) {
     const dir = here(prefix).replace(/\/$/, '');
@@ -982,6 +1084,38 @@ function configResolves(from: string, token: string): boolean {
   );
 }
 
+/**
+ * Paths written in a `//` comment inside a script. A script's head comment is
+ * where it says which files it reads and writes, and those sentences go stale
+ * exactly like a document's: `sema-ornek.mjs` still named `src/types.ts` and
+ * `src/store.ts` after both had moved.
+ *
+ * `scripts/` only, and that limit is measured rather than shy: the comments
+ * under `src/` are English prose with `a/b` shapes all through them (`try/catch`,
+ * `Teacher/ClassGroup`), and opening this to them brings back the twenty two
+ * false positives the first A8 run produced.
+ */
+function commentPaths(name: string, text: string): Array<{ line: number; token: string }> {
+  const out: Array<{ line: number; token: string }> = [];
+  if (!name.startsWith('scripts/')) return out;
+  text.split('\n').forEach((raw, i) => {
+    const at = raw.indexOf('//');
+    if (at === -1) return;
+    for (const word of raw.slice(at + 2).split(/[\s,;]+/)) {
+      // A path at the end of a sentence carries its full stop; one inside
+      // brackets or backticks carries those.
+      // Turkish glues its suffixes on with an apostrophe, and a file name in a
+      // Turkish sentence arrives as `site/icon-small.svg'den`.
+      const token = word
+        .replace(/^[(['"`]+/, '')
+        .replace(/['’][a-zçğıöşü]+$/i, '')
+        .replace(/[)\]'"`.:]+$/, '');
+      if (token.includes('/')) out.push({ line: i + 1, token });
+    }
+  });
+  return out;
+}
+
 describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
   // A1's sibling, and the reason it exists is four holes the move round found
   // BY HAND: `.prettierignore`'s `src/lang/`, the mutation list in
@@ -992,10 +1126,16 @@ describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
     const stale: string[] = [];
     let checked = 0;
     for (const [name, text] of Object.entries(CONFIG)) {
-      const loose = configPaths(name, text).map((x) => ({ ...x, keyed: false }));
+      const loose = [...configPaths(name, text), ...commentPaths(name, text)].map((x) => ({
+        ...x,
+        keyed: false,
+      }));
       // A `resolve()` argument and a value under a path key are both paths by
       // construction, so a bare folder name counts there.
-      const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({ ...x, keyed: true }));
+      const keyed = [...keyedPaths(name, text), ...joinedPaths(text)].map((x) => ({
+        ...x,
+        keyed: true,
+      }));
       for (const { line, token: raw, keyed: isKeyed } of [...loose, ...keyed]) {
         const token = unregex(raw);
         if (token === null || !configPathShaped(token, isKeyed)) continue;
@@ -1006,5 +1146,63 @@ describe('A8 · yapılandırmanın gösterdiği her yol diskte var', () => {
     expect(Object.keys(CONFIG).length, 'yapılandırma okunamadı').toBeGreaterThan(10);
     expect(checked, 'hiç yol taranmadı, tarayıcı bozuk').toBeGreaterThan(50);
     expect(stale, `${checked} yapılandırma yolu tarandı`).toEqual([]);
+  });
+});
+
+// ------------------------------------------- A9 · the mutation list, as a set
+
+/**
+ * The files Stryker actually mutates, read from its own configuration rather
+ * than from a list typed here.
+ */
+function mutatedFiles(): Set<string> {
+  const text = CONFIG['stryker.config.json'] ?? '';
+  expect(text.length, 'stryker.config.json okunamadı').toBeGreaterThan(100);
+  const config = JSON.parse(text.replace(/^\s*\/\/.*$/gm, '')) as { mutate?: string[] };
+  const list = new Set((config.mutate ?? []).map((f) => f.replace(/^src\//, '')));
+  expect(list.size, 'mutate listesi boş okundu').toBeGreaterThan(3);
+  return list;
+}
+
+/** The names TESTPLAN.md's sentence about the mutation list puts in backticks. */
+function documentedMutants(): { line: number; names: Set<string> } {
+  const body = DOCS['docs/TESTPLAN.md'] ?? '';
+  const lines = body.split('\n');
+  const at = lines.findIndex((l) => l.includes('mutasyona uğruyor'));
+  expect(at, 'TESTPLAN.md mutasyon cümlesi bulunamadı').toBeGreaterThan(0);
+  // The sentence wraps over as many lines as the list needs; it ends at the
+  // closing parenthesis.
+  let text = '';
+  for (let i = at; i < lines.length; i++) {
+    text += (lines[i] ?? '') + '\n';
+    if ((lines[i] ?? '').includes(')')) break;
+  }
+  const names = new Set([...text.matchAll(/`([^`]+\.tsx?)`/g)].map((m) => m[1] ?? ''));
+  return { line: at + 1, names };
+}
+
+describe('A9 · TESTPLAN’in mutasyon listesi stryker’ın listesi', () => {
+  // A1 and A8 both looked straight at this line and said nothing, because what
+  // was wrong with it was not a path: it named `useStore.ts`, which exists on
+  // disk and is not mutated, and left out three files that are. A name can be
+  // real and still be in the wrong sentence, and the only way to see that is to
+  // compare the two lists AS SETS — the same shape as A5, which does it for the
+  // storage keys.
+  it('cümledeki adlar ile yapılandırmanın mutate dizisi aynı küme', () => {
+    const real = mutatedFiles();
+    const { line, names } = documentedMutants();
+    const missing = [...real].filter((f) => !names.has(f));
+    const extra = [...names].filter((f) => !real.has(f));
+    expect(missing, `docs/TESTPLAN.md:${line} mutasyona uğrayıp cümlede olmayan`).toEqual([]);
+    expect(extra, `docs/TESTPLAN.md:${line} cümlede olup mutasyona uğramayan`).toEqual([]);
+  });
+
+  it('listedeki her dosya diskte var', () => {
+    // The other half, and the one the test session asked about: a path in the
+    // list that no longer resolves means the file is silently not measured.
+    // A8 covers the same ground through the configuration; this states it in
+    // the mutation list's own words, with its own message.
+    const gone = [...mutatedFiles()].filter((f) => !FILES.has('src/' + f));
+    expect(gone, 'stryker.config.json mutasyon listesinde olmayan dosya').toEqual([]);
   });
 });

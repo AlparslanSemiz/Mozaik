@@ -77,5 +77,29 @@ export default defineConfig({
     // passed or failed on nothing. Only main.tsx imports it, and no unit test
     // loads main.tsx.
     css: { include: [/src\/styles\.css/] },
+    // Coverage is a MAP, not a gate: `npm run kapsam`, never `kontrol`. There
+    // is no threshold on purpose — a percentage with nothing behind it invites
+    // tests written to raise it, and the measure of a test in this repository
+    // is mutation (TESTPLAN). The two answer different halves of one question:
+    // coverage says "this line never ran", mutation says "it ran and nothing
+    // measured it", and they are only comparable over the same set of files —
+    // hence the list below is the pure core, the same one `stryker.config.json`
+    // mutates.
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: 'test-results/kapsam',
+      reporter: ['text', 'html'],
+      include: [
+        'src/pure/constraints.ts',
+        'src/pure/rules.ts',
+        'src/leaf/blocks.ts',
+        'src/pure/parseState.ts',
+        'src/pure/undo.ts',
+        'src/pure/library.ts',
+        'src/pure/feasibility.ts',
+        'src/pure/entities.ts',
+        'src/pure/solver.ts',
+      ],
+    },
   },
 });
