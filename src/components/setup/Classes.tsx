@@ -7,7 +7,7 @@ import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
 import { roomName } from '../../entities';
-import type { ClassGroup } from '../../types';
+import type { ClassGroup } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
 import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';

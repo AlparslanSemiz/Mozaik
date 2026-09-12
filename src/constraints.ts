@@ -3,15 +3,15 @@
 //
 // Rule: business logic lives here, never inside components.
 
-import { blockPlan, clampBlocks } from './blocks';
-import { t } from './i18n';
-import { cellKey, closedKey, parseKey, placementKey } from './keys';
+import { blockPlan, clampBlocks } from './leaf/blocks';
+import { t } from './leaf/i18n';
+import { cellKey, closedKey, parseKey, placementKey } from './leaf/keys';
 // A leaf BELOW this file, on purpose: these sentences name a day and a subject,
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
-import { dayLabel, subjectLabel } from './names';
+import { dayLabel, subjectLabel } from './leaf/names';
 import { activePinned, activePlacements, blankProgram, replaceActiveGrid } from './programs';
-import { hasTwoSubjects } from './subjects';
+import { hasTwoSubjects } from './leaf/subjects';
 import {
   lessonDayCount,
   lessonLimit,
@@ -21,7 +21,7 @@ import {
   runLength,
   teacherDayCount,
 } from './rules';
-import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher, View } from './types';
+import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher, View } from './leaf/types';
 
 // Re-exported so call sites keep importing keys from here.
 export { closedKey, placementKey };

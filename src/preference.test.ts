@@ -17,7 +17,7 @@
 //     and the value a control passes in.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { preference } from './preference';
+import { preference } from './leaf/preference';
 
 function fakeStorage(initial: Record<string, string> = {}) {
   const values = new Map(Object.entries(initial));

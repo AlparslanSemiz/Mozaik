@@ -2,7 +2,7 @@
 
 Kaydedilen verinin şekli, şema göçü, depolama anahtarları, dosya biçimleri ve kısıt kuralları.
 
-Tam hâli `src/types.ts`'te. Değiştirmek pahalı: yerleşim anahtarları, yedek
+Tam hâli `src/leaf/types.ts`'te. Değiştirmek pahalı: yerleşim anahtarları, yedek
 dosyaları ve localStorage içeriği bu şekle bağlı, o yüzden değiştirmeden önce
 düşünülür.
 

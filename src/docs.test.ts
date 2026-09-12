@@ -31,9 +31,9 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { SCHEMA_VERSION } from './types';
+import { SCHEMA_VERSION } from './leaf/types';
 import { BACKUP_COUNT, backupKey, BASE_KEY, LIBRARY_KEY, planKey } from './library';
-import { PREFERENCE_ROWS } from './preferenceKeys';
+import { PREFERENCE_ROWS } from './leaf/preferenceKeys';
 
 // ------------------------------------------------------------------ reading
 
@@ -585,7 +585,7 @@ describe('A6 · her tuzak atfı TRAPS.md’de karşılığını buluyor', () => 
         }
       });
     }
-    expect(SOURCE['src/raw.d.ts'], 'raw.d.ts taranmıyor').toBeDefined();
+    expect(SOURCE['src/leaf/raw.d.ts'], 'raw.d.ts taranmıyor').toBeDefined();
     expect(total, 'hiç atıf bulunamadı, tarayıcı bozuk').toBeGreaterThan(500);
     expect(bad, `${total} atıf tarandı`).toEqual([]);
   });

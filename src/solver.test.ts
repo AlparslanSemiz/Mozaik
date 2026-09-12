@@ -8,8 +8,8 @@ import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from '
 import { findViolations } from './rules';
 import { sampleState } from './sample';
 import { createSolver, solve } from './solver';
-import type { RuleLevel, State } from './types';
-import { SCHEMA_VERSION } from './types';
+import type { RuleLevel, State } from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
 import { blocksOf, hoursOf, illegalBlocks, SMALL_WORLDS } from './worlds';
 
 // 2 days x 4 hours = 8 cells per class.

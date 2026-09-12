@@ -127,7 +127,7 @@ Arayüz beş dil konuşur: `tr`, `en`, `de`, `es`, `fr`. İlk açılışta
 `t('setup.teachers')` değil. Üç şeyi koruyor: JSX Türkçe okunur kalır, yüzlerce
 isim uydurulmaz, ve hiçbir isim temsil ettiği cümleden sapamaz.
 
-**Dört sözlük var:** `src/lang/en.ts`, `de.ts`, `es.ts`, `fr.ts`. Türkçenin
+**Dört sözlük var:** `src/leaf/lang/en.ts`, `de.ts`, `es.ts`, `fr.ts`. Türkçenin
 sözlüğü yok, çünkü her girdisi `'X': 'X'` olurdu, yani yüzlerce kez kaynak dili
 sessizce bozma şansı. Eksik bir çeviri doğru Türkçeye düşer: bitmemiş bir
 sözlüğün arıza biçimi "bu satır hâlâ Türkçe"dir, ekranda `setup.teachers.title` gibi bir anahtar adı değil.
@@ -179,7 +179,7 @@ indirirken gördüğü sayfa. `kurulum/OKU.txt` baştan sona Türkçe.
 ## Programın adı
 
 Program Mozaik. Beş dilde de aynı kelime (Mozaik · Mosaic · Mosaik · Mosaico ·
-Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/version.ts`'teki
+Mosaïque) ve ekrandaki şeyi tarif ediyor. Tek kaynağı `src/leaf/version.ts`'teki
 `APP_NAME`, çünkü ad dört yerden ekrana çıkıyor: pencere başlığı, belge başlığı,
 okul adı girilmemişken `<h1>` ve manifest. Veriyi taşıyan adlar eski adla kaldı,
 listesi [DATA.md](DATA.md)'de.

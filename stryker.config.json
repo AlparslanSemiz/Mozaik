@@ -28,7 +28,7 @@
   "mutate": [
     "src/constraints.ts",
     "src/rules.ts",
-    "src/blocks.ts",
+    "src/leaf/blocks.ts",
     "src/store.ts",
     "src/library.ts",
     "src/feasibility.ts",

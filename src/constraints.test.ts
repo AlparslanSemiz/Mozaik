@@ -25,8 +25,8 @@ import {
 } from './constraints';
 import type { BlockRef } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
-import type { RuleLevel, State } from './types';
-import { SCHEMA_VERSION } from './types';
+import type { RuleLevel, State } from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
 
 // A small, readable world: 2 days x 4 hours.
 //   room A: class 510, class 511      (shared room)

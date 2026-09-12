@@ -20,15 +20,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import ListTools from '../ListTools';
-import { blockPlan, clampBlocks, patternLabel } from '../../blocks';
+import { blockPlan, clampBlocks, patternLabel } from '../../leaf/blocks';
 import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../listview';
 import type { ListConfig, ListQuery } from '../../listview';
-import type { Id, Lesson, State } from '../../types';
+import type { Id, Lesson, State } from '../../leaf/types';
 import type { LessonMode } from '../../toolState';
 import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../import';
-import { paletteColor } from '../../palette';
+import { paletteColor } from '../../leaf/palette';
 import {
   addLesson,
   addLessonsFromRows,

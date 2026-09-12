@@ -29,7 +29,7 @@
 // preference and it is still not in `State` — a backup taken here must not
 // carry a path from this computer to my father's.
 
-import { dayStamp } from './dateStamp';
+import { dayStamp } from './leaf/dateStamp';
 
 /**
  * Three things TypeScript's DOM lib does not have yet. Declared narrowly —

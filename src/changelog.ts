@@ -14,8 +14,8 @@
  * BEFORE `npm run yayinla` is run, not after.
  */
 
-import { preference } from './preference';
-import { CHANGELOG_SEEN_KEY } from './preferenceKeys';
+import { preference } from './leaf/preference';
+import { CHANGELOG_SEEN_KEY } from './leaf/preferenceKeys';
 
 export interface SurumNotu {
   /** package.json's version at release, e.g. "2.1.0" — no leading "v". */

@@ -1,4 +1,4 @@
-import type { Id, ProgramVariant, State } from './types';
+import type { Id, ProgramVariant, State } from './leaf/types';
 
 export const DEFAULT_PROGRAM_ID = 'program-1';
 const DEFAULT_PROGRAM_NAME = 'Program 1';

@@ -6,7 +6,7 @@
 // have been taught a day earlier and nobody would notice (docs/TRAPS.md pitfall 11).
 
 import { buildIndex, closedKey, place, placementKey, setBlockPinned } from './constraints';
-import { lessonSubject } from './subjects';
+import { lessonSubject } from './leaf/subjects';
 import {
   addClass,
   addSubject,
@@ -58,8 +58,8 @@ import {
   setWholeWeek,
   updateSettings,
 } from './entities';
-import type { Day, State } from './types';
-import { SCHEMA_VERSION } from './types';
+import type { Day, State } from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
 
 function build(): State {
   return {

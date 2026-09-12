@@ -9,7 +9,7 @@
 // kaydet" produces. Not the open plan: a folder that holds one of three plans
 // is a backup that is wrong in the way nobody checks.
 
-import { t } from './i18n';
+import { t } from './leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { buildBundle } from './bundle';
 import { isDesktop, openDesktopFolder } from './desktop';
@@ -26,7 +26,7 @@ import {
 } from './folder';
 import type { Library } from './library';
 import { collectStates } from './store';
-import type { Id, State } from './types';
+import type { Id, State } from './leaf/types';
 
 /**
  * Two seconds, not the store's 400 ms.

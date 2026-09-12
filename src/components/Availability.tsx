@@ -11,11 +11,11 @@
 import { useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import { sharedPeriods } from '../bell';
-import { paletteColor } from '../palette';
+import { paletteColor } from '../leaf/palette';
 import { KIND_ICON } from './steps';
 import { buildIndex, closedConflicts, closedKey } from '../constraints';
-import { cellKey, parseCellKey } from '../keys';
-import type { Id, State } from '../types';
+import { cellKey, parseCellKey } from '../leaf/keys';
+import type { Id, State } from '../leaf/types';
 import {
   openHours,
   dayLabel,
@@ -28,7 +28,7 @@ import {
 } from '../entities';
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
-import { t } from '../i18n';
+import { t } from '../leaf/i18n';
 import type { Kind } from '../toolState';
 import { T } from './T';
 

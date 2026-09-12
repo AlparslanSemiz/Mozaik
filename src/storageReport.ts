@@ -21,9 +21,9 @@
 
 import { BACKUP_COUNT, backupKey, LIBRARY_KEY, planKey, type Library } from './library';
 import { isDesktop } from './desktop';
-import { t } from './i18n';
-import { PREFERENCE_ROWS } from './preferenceKeys';
-import { safely } from './storage';
+import { t } from './leaf/i18n';
+import { PREFERENCE_ROWS } from './leaf/preferenceKeys';
+import { safely } from './leaf/storage';
 
 export type StorageKind = 'file' | 'site' | 'exe';
 

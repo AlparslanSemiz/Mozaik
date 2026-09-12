@@ -7,9 +7,9 @@
 
 import { blocker, buildIndex, dropMap, sanitize, place } from './constraints';
 import { buildReport } from './feasibility';
-import { blockPlan } from './blocks';
+import { blockPlan } from './leaf/blocks';
 import { sampleState } from './sample';
-import type { State } from './types';
+import type { State } from './leaf/types';
 
 /** Greedy fill: puts every lesson in the first valid slot. NOT a solver, just a test. */
 function greedyFill(start: State): { state: State; placed: number; total: number } {

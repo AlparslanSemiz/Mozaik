@@ -32,7 +32,7 @@ import { attachRibbonScroll } from './ribbonScroll';
 import { useSolver } from './useSolver';
 import { useFolder } from './useFolder';
 import { useUpdate } from './update';
-import { APP_NAME, surumEtiketi } from './version';
+import { APP_NAME, surumEtiketi } from './leaf/version';
 import { useToolState } from './toolState';
 import type { Tab } from './toolState';
 import Setup from './components/setup';

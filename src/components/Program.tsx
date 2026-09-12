@@ -29,7 +29,7 @@ import {
 } from '../constraints';
 import type { BlockRef, PinScope } from '../constraints';
 import type { Index } from '../constraints';
-import { cellKey, parseCellKey } from '../keys';
+import { cellKey, parseCellKey } from '../leaf/keys';
 import { useToast } from './Toasts';
 import { useInspect } from './Inspector';
 import { useLessonEdit } from './LessonEdit';
@@ -45,7 +45,7 @@ import { compareTr } from '../listview';
 import { useDrag } from '../drag';
 import type { DragData } from '../drag';
 import type { SolverRun } from '../useSolver';
-import type { State, Id } from '../types';
+import type { State, Id } from '../leaf/types';
 import { activePinned, activePlacements } from '../programs';
 import { rowMask, setDayMask, setRowMask } from '../programMask';
 import type { ProgramMask } from '../programMask';

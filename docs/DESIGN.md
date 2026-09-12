@@ -72,7 +72,7 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 
 ## Renk
 
-- **Renk bir kimlik, süs değil.** Her öğretmenin ve her sınıfın kendi rengi var, ve `firstFreeColor` kullanılmayan en küçük indeksi veriyor. Palet 36 renk ve `src/palette.ts`'te düz hex olarak duruyor: iki temada ve kâğıtta aynı olan tek renk kümesi olduğu için bir CSS değişkeni hiçbir şey kazandırmıyordu. Renkler elle seçilmedi, arandı: kontrast ve CIE Lab ayrımı kısıtları altında en uzak nokta yöntemiyle, ve `palette.test.ts` bunu her koşuda yeniden ölçer.
+- **Renk bir kimlik, süs değil.** Her öğretmenin ve her sınıfın kendi rengi var, ve `firstFreeColor` kullanılmayan en küçük indeksi veriyor. Palet 36 renk ve `src/leaf/palette.ts`'te düz hex olarak duruyor: iki temada ve kâğıtta aynı olan tek renk kümesi olduğu için bir CSS değişkeni hiçbir şey kazandırmıyordu. Renkler elle seçilmedi, arandı: kontrast ve CIE Lab ayrımı kısıtları altında en uzak nokta yöntemiyle, ve `palette.test.ts` bunu her koşuda yeniden ölçer.
 - **Palet üstündeki mürekkep temayla dönmez** (`--on-color`), çünkü `color: inherit` koyu temada açık metni pastel zemine düşürür (tuzak 15 ve 35).
 - **Hücreyi hangi renk boyar.** Program ızgarasında öntanımlı olarak öğretmen rengi, şeritteki Renk menüsünden sınıf, derslik ya da branş rengi. Kâğıtta öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar ([LAYOUT.md](LAYOUT.md)).
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.

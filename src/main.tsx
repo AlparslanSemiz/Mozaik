@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import Root from './Root';
-import { applyDil, readDil } from './i18n';
+import { applyDil, readDil } from './leaf/i18n';
 import {
   applyAvailClock,
   applyDensity,

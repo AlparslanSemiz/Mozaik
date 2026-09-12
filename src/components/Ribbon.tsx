@@ -85,12 +85,12 @@ import {
   Trash2,
 } from 'lucide-react';
 import { health } from '../feasibility';
-import type { State } from '../types';
+import type { State } from '../leaf/types';
 import type { SolverRun } from '../useSolver';
 import type { Density, Theme } from '../theme';
 import { applyDensity, applyTheme } from '../theme';
-import { surumEtiketi } from '../version';
-import { paletteColor } from '../palette';
+import { surumEtiketi } from '../leaf/version';
+import { paletteColor } from '../leaf/palette';
 import {
   activePinned,
   activePlacements,

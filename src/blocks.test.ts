@@ -6,8 +6,8 @@ import {
   clampBlocks,
   patternLabel,
   patternOptions,
-} from './blocks';
-import type { Lesson } from './types';
+} from './leaf/blocks';
+import type { Lesson } from './leaf/types';
 
 const lesson = (weeklyHours: number, blocks: number[]): Lesson => ({
   id: 'x1',

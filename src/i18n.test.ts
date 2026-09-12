@@ -28,13 +28,13 @@ import {
   systemDil,
   t,
   translate,
-} from './i18n';
+} from './leaf/i18n';
 import { dayLabel, shortDay, subjectLabel, subjectShort } from './entities';
-import type { Settings } from './types';
-import './lang/en';
-import './lang/de';
-import './lang/es';
-import './lang/fr';
+import type { Settings } from './leaf/types';
+import './leaf/lang/en';
+import './leaf/lang/de';
+import './leaf/lang/es';
+import './leaf/lang/fr';
 
 describe('normalizeDil', () => {
   it('bildiği dili aynen alıyor', () => {

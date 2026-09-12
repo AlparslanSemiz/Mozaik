@@ -7,9 +7,9 @@
 
 import { defaultSubjects } from './entities';
 import { parseState } from './store';
-import { blockPlan } from './blocks';
+import { blockPlan } from './leaf/blocks';
 import { sampleState } from './sample';
-import { SCHEMA_VERSION } from './types';
+import { SCHEMA_VERSION } from './leaf/types';
 
 /** A backup downloaded BEFORE the rename: v1 shape with Turkish field names. */
 function legacyV1() {
@@ -886,7 +886,7 @@ describe('parseState — v10 → v11 göçü', () => {
 import { BASE_KEY, FIRST_PLAN_ID, planKey } from './library';
 import { collectStates, loadPlan, reduce, savePlan } from './store';
 import { emptyState } from './entities';
-import type { State } from './types';
+import type { State } from './leaf/types';
 
 function memoryStorage(): Storage {
   const map = new Map<string, string>();

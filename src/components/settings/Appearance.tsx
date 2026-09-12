@@ -33,10 +33,10 @@ import {
   SCALE_STEP,
 } from '../../theme';
 import type { Density, Motion, Theme } from '../../theme';
-import { DILLER, DIL_ADI } from '../../i18n';
+import { DILLER, DIL_ADI } from '../../leaf/i18n';
 import { T, useLang } from '../T';
-import type { State } from '../../types';
-import { paletteColor } from '../../palette';
+import type { State } from '../../leaf/types';
+import { paletteColor } from '../../leaf/palette';
 
 interface Props {
   /** The real school, so the preview shows the reader's own names. */

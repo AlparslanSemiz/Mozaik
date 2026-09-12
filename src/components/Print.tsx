@@ -17,10 +17,10 @@
 import { useMemo } from 'react';
 import { periodGroups } from '../bell';
 import { blockSpans, buildIndex, closedKey, placementKey } from '../constraints';
-import { parseKey } from '../keys';
+import { parseKey } from '../leaf/keys';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../entities';
-import { paletteColor } from '../palette';
-import type { State } from '../types';
+import { paletteColor } from '../leaf/palette';
+import type { State } from '../leaf/types';
 import { activePlacements } from '../programs';
 import type { Scope } from '../toolState';
 import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../printOptions';

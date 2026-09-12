@@ -10,9 +10,9 @@
 // that parses them. That is what keeps store.ts <-> library.ts free of a runtime
 // cycle, the same arrangement `keys.ts` has for constraints <-> rules.
 
-import { t } from './i18n';
-import { minuteStamp } from './dateStamp';
-import type { Id } from './types';
+import { t } from './leaf/i18n';
+import { minuteStamp } from './leaf/dateStamp';
+import type { Id } from './leaf/types';
 
 /**
  * The storage key and the backup file name are USER DATA, not identifiers:

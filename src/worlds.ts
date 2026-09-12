@@ -11,7 +11,7 @@
 // file:// page and audits what the real button left in localStorage.
 
 import { blockAt, blocker, buildIndex, closedKey, placementKey, liftBlock } from './constraints';
-import { parseKey } from './keys';
+import { parseKey } from './leaf/keys';
 import {
   DEFAULT_BELL,
   DEFAULT_LIMITS,
@@ -32,8 +32,8 @@ import type {
   Rules,
   State,
   Teacher,
-} from './types';
-import { SCHEMA_VERSION } from './types';
+} from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
 import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './programs';
 
 // ---------------------------------------------------------------- the builder

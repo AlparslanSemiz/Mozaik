@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createSolver } from './solver';
 import type { Solver, SolverOptions, SolverProgress, SolverResult } from './solver';
-import type { State } from './types';
+import type { State } from './leaf/types';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:

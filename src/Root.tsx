@@ -15,10 +15,10 @@ import { DialogProvider } from './components/Dialogs';
 import { LangProvider } from './components/T';
 import { ShortcutsHelpProvider } from './components/ShortcutsHelp';
 import { ToastProvider } from './components/Toasts';
-import './lang/en';
-import './lang/de';
-import './lang/es';
-import './lang/fr';
+import './leaf/lang/en';
+import './leaf/lang/de';
+import './leaf/lang/es';
+import './leaf/lang/fr';
 
 export default function Root() {
   // The language is OUTERMOST: every provider below it puts words on the

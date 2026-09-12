@@ -14,8 +14,8 @@
 // rules). Every call goes through the one `safely` guard in storage.ts.
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from './library';
-import { safely } from './storage';
-import { type Id } from './types';
+import { safely } from './leaf/storage';
+import { type Id } from './leaf/types';
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);

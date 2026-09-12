@@ -19,7 +19,7 @@ import type { ListKind } from '../entities';
 import { canReorder } from '../listview';
 import type { ListQuery } from '../listview';
 import { attachRowDrag, clampIndex } from '../rowDrag';
-import type { State } from '../types';
+import type { State } from '../leaf/types';
 import { useT } from './T';
 
 interface Options {

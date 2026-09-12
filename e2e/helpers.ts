@@ -11,7 +11,7 @@
 import { expect, type Page } from '@playwright/test';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
-import type { State } from '../src/types';
+import type { State } from '../src/leaf/types';
 
 export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 

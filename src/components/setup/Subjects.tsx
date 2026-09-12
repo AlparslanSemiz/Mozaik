@@ -42,7 +42,7 @@ import {
 } from '../../entities';
 import type { ReactElement } from 'react';
 import type { PanelProps } from '../props';
-import type { Settings } from '../../types';
+import type { Settings } from '../../leaf/types';
 import { T, useT } from '../T';
 import AddPanel from '../AddPanel';
 

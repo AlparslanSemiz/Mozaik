@@ -15,7 +15,7 @@ import {
   makeWorld,
   WORLDS,
 } from './worlds';
-import type { State } from './types';
+import type { State } from './leaf/types';
 
 /** Two classes, one teacher, four hours. */
 function pair(): State {

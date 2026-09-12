@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { buildIndex, closedConflicts, placementKey } from '../constraints';
 import { buildReport } from '../feasibility';
 import type { ReportRow } from '../feasibility';
-import type { Id, State } from '../types';
+import type { Id, State } from '../leaf/types';
 import { activePlacements } from '../programs';
 import type { CheckView } from '../toolState';
 import CapacityRows from './CapacityRows';

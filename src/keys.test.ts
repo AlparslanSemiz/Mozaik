@@ -3,7 +3,7 @@
 // exactly three `|`-separated parts, or the key is not a key.
 
 import { describe, expect, it } from 'vitest';
-import { cellKey, closedKey, keyOnDay, parseCellKey, parseKey, placementKey } from './keys';
+import { cellKey, closedKey, keyOnDay, parseCellKey, parseKey, placementKey } from './leaf/keys';
 
 describe('placementKey ve closedKey', () => {
   it('biçim yedek dosyasındakiyle aynı', () => {

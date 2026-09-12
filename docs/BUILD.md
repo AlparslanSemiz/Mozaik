@@ -260,7 +260,7 @@ Numaranın tek kaynağı `package.json`, ve `scripts/surum.mjs` onu okur.
 `tauri.conf.json` numarayı kopyalamaz, `"../package.json"` yolunu gösterir.
 `Cargo.toml`'daki numarayı `yayinla.mjs` yazar, çünkü cargo başka bir dosyadan
 numara okumuyor. İki Vite config `define: { __SURUM__ }` ile numarayı derlemeye
-basar ve `src/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
+basar ve `src/leaf/version.ts` onu okur (tanımsızsa `0.0.0-dev`'e düşer, yoksa `tsc`
 ve Vitest modül yüklenirken çöker). Aynı damga `dist-site/sw.js`'in önbellek
 adına girer. Ayarlar → Hakkında hangi sürüm olduğunu gösterir. Bu bir derleme
 bayrağı değil, dört teslim yoluna basılan aynı damga.

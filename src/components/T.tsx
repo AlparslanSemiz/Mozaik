@@ -16,8 +16,8 @@
  */
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { applyDil, readDil, setAktifDil, translate } from '../i18n';
-import type { Dil, Vars } from '../i18n';
+import { applyDil, readDil, setAktifDil, translate } from '../leaf/i18n';
+import type { Dil, Vars } from '../leaf/i18n';
 
 /** What every caller of `useT()` gets, and what a helper below a component
  *  takes as an argument when it needs to write a sentence. */

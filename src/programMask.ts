@@ -1,4 +1,4 @@
-import type { Id, State, View } from './types';
+import type { Id, State, View } from './leaf/types';
 
 export type MaskMode = 'ghost' | 'hidden';
 

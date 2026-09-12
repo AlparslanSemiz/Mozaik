@@ -48,9 +48,9 @@ import { placedBlocks } from '../constraints';
 import { useDialogs } from './Dialogs';
 import { useToast } from './Toasts';
 import type { InspectKind } from '../entities';
-import { paletteColor } from '../palette';
+import { paletteColor } from '../leaf/palette';
 import { KIND_ICON } from './steps';
-import type { Gender, State } from '../types';
+import type { Gender, State } from '../leaf/types';
 import { T, useT } from './T';
 
 interface Target {

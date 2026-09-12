@@ -21,8 +21,8 @@ import {
 import { buildIndex } from './constraints';
 import { closedKey } from './constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './entities';
-import type { State } from './types';
-import { SCHEMA_VERSION } from './types';
+import type { State } from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
 
 // 1 day x 4 hours = 4 slots. Small numbers keep the arithmetic verifiable by hand.
 function build(): State {

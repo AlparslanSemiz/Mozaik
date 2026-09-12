@@ -7,9 +7,9 @@
 // so a bug found here can be reproduced.
 
 import { closedKey } from './constraints';
-import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './types';
-import { PALETTE_SIZE } from './palette';
-import { SCHEMA_VERSION } from './types';
+import type { Gender, Lesson, Room, State, Teacher, ClassGroup } from './leaf/types';
+import { PALETTE_SIZE } from './leaf/palette';
+import { SCHEMA_VERSION } from './leaf/types';
 import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
 import {
   DEFAULT_BELL,

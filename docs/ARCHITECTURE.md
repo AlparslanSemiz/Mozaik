@@ -45,16 +45,16 @@ yaprakta durur.
 
 | Dosya | Görevi |
 |---|---|
-| `types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
-| `keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
-| `palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
-| `i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
-| `preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
-| `names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
-| `subjects.ts` | bir şeyin hangi branştan olduğu |
-| `blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
-| `version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
-| `raw.d.ts` | Vite'ın `?raw` importunun tip bildirimi |
+| `leaf/types.ts` | veri modeli: tipler ve `SCHEMA_VERSION`, mantık yok |
+| `leaf/keys.ts` | sözlük anahtarları, `constraints.ts` ile `rules.ts` birbirini import etmesin diye |
+| `leaf/palette.ts` | kimlik paleti ve kullanılmayan en küçük rengi veren `firstFreeColor` |
+| `leaf/i18n.ts` | aktif dil, çıplak `t()`, çoğul seçimi. Uygulamadan yalnız tercih fabrikasını ve `preferenceKeys.ts`'i import eder, ikisi de altındaki yapraklar |
+| `leaf/preferenceKeys.ts` | her makine tercihinin localStorage anahtarı ve "Veriler nerede" tablosundaki adı, tablonun sırasıyla |
+| `leaf/names.ts` | programın kendi koyduğu gün ve branş adlarının ekranda nasıl okunduğu |
+| `leaf/subjects.ts` | bir şeyin hangi branştan olduğu |
+| `leaf/blocks.ts` | bir dersin haftasının bloklara nasıl bölündüğü, `clampBlocks` |
+| `leaf/version.ts` | hangi derleme (`__SURUM__`) ve programın adı (`APP_NAME`) |
+| `leaf/raw.d.ts` | Vite'ın `?raw` importunun tip bildirimi |
 
 ### Saf mantık
 
@@ -81,7 +81,7 @@ yaprakta durur.
 | `store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
 | `libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
 | `storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
-| `preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
+| `leaf/preference.ts` | makine tercihleri fabrikası: oku, normalize et, sakla, `<html>`'e yaz. Sözleşmesi: `apply` `<html>`'e depodan önce yazar, kayıt yoksa yedek okuma anında sorulur, `normalize` iki tipi de kabul eder |
 | `theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
 | `toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
 | `printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |

@@ -7,7 +7,7 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { MAX_BLOCK, clampBlocks } from './blocks';
+import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
 import { type Bundle, buildBundle } from './bundle';
 import { sanitize } from './constraints';
 import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './entities';
@@ -34,7 +34,7 @@ import {
   writeLibrary,
   writePlanText,
 } from './libraryStore';
-import { firstFreeColor, PALETTE_SIZE } from './palette';
+import { firstFreeColor, PALETTE_SIZE } from './leaf/palette';
 import { blankProgram, DEFAULT_PROGRAM_ID } from './programs';
 import type {
   ClassGroup,
@@ -47,9 +47,9 @@ import type {
   RuleLevel,
   State,
   Teacher,
-} from './types';
-import { SCHEMA_VERSION } from './types';
-import { safely } from './storage';
+} from './leaf/types';
+import { SCHEMA_VERSION } from './leaf/types';
+import { safely } from './leaf/storage';
 
 // The storage key lives in library.ts now: it is the key of plan "1", and which
 // key belongs to which plan is that module's job. It is still USER DATA and

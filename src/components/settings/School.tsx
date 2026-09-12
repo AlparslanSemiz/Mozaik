@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../bell';
-import type { Day } from '../../types';
+import type { Day } from '../../leaf/types';
 import { WEEK, dayLabel, hourLabels, makeDay, updateBell, updateSettings } from '../../entities';
 import Field from '../Field';
 import type { PanelProps } from '../props';
