@@ -1,10 +1,20 @@
-// State management: reducer + undo stack + localStorage + backup file.
-// No library, useReducer is enough.
+// The box, and the React wiring that drives it. No state library: a reducer
+// and two effects are the whole of it.
 //
-// Data loss is unacceptable (docs/PRINCIPLES.md: no data loss). Three layers of defence:
-//   1. auto-save on every change (debounced)
-//   2. on every start the previous session's state is pushed down a backup chain (last 3)
-//   3. "Yedek indir" — the ONE habit my father will be taught
+// What used to be one file is now six, and this one owns the parts that only
+// make sense inside a component: the reducer's box (`pure/undo.ts`), the
+// debounced autosave and the timer behind it, and Ctrl+Z. The plan library
+// operations are next door in `usePlans.ts` and are handed the two things they
+// need from the timer's owner — see the comments around `park` below.
+//
+// Where the rest went: `pure/parseState.ts` reads a saved file,
+// `platform/planStore.ts` is where a plan lives in this browser,
+// `platform/download.ts` hands a file to the browser.
+//
+// Data loss is unacceptable (docs/PRINCIPLES.md: no data loss) and the three
+// defences are still three, now spread across three files: the debounced
+// auto-save is here, the session backup chain is `planStore.ts`, and "Yedek
+// indir" — the ONE habit my father will be taught — is `download.ts`.
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { type Box, reduce } from '../pure/undo';
