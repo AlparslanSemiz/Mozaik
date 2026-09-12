@@ -16,7 +16,17 @@ declare module '*?raw' {
 // above. Only the shape this project actually calls is declared.
 interface ImportMeta {
   glob(
-    pattern: string,
+    pattern: string | string[],
     options: { query: string; import: string; eager: true },
   ): Record<string, unknown>;
+
+  // The same reader asked for NAMES ONLY. `docs.test.ts` needs to know which
+  // files are on disk so it can tell a stale path in a document from a real
+  // one, and a lazy glob answers that with its keys without loading a byte.
+  //
+  // It has to be lazy. The eager form over a wildcard extension inlines every
+  // file it matches, and this tree carries a woff2, an .ico and a folder of
+  // screenshots: the run died on a V8 heap limit before a single test started
+  // (pitfall 111).
+  glob(pattern: string | string[]): Record<string, () => Promise<unknown>>;
 }

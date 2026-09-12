@@ -47,3 +47,5 @@ bloğunda yazılı.
 - Bir duruş değiştiyse ya da bir yol denenip bırakıldıysa DECISIONS.md'ye tarihiyle yazılır.
 - Kullanıcıya görünen bir değişiklik olduysa CHANGELOG'un Unreleased bloğuna satır eklenir.
 - Test edilmemiş bir şey bitti işaretlenmez.
+- Bir belge kapısı (`src/docs.test.ts`) kırmızıysa bayatlayan belgedir, kapı değil. Kapı susturulmaz, atlanmaz, gevşetilmez; belgedeki cümle düzeltilir. Kapının kendisi yanlış ölçüyorsa bu iddia edilmez, mutasyonla kanıtlanır: kapıyı geçen bozuk bir belge gösterilir, sonra kapı değişir.
+- Bir kod değişikliği bir belge cümlesini yanlış hâle getiriyorsa o cümle **aynı commit'te** düzeltilir. Sonraki commit'e bırakılan belge düzeltmesi yapılmaz; bölme turunda bulunan on yedi bayat maddenin hepsi "sonra düzeltirim" ile birikti.
