@@ -118,9 +118,9 @@ Bütün sayılar ve iki aday çarenin ölçümü [TESTFINDINGS.md](TESTFINDINGS.
 TODO B4.7 ve B4.8'de, kod değiştirilmedi.
 
 **Ölçüm aleti:** `scratch/kasma-ortak.mjs` (örnek okul + otomatik dizme + üç boş hücre,
-tuzak 41), `kasma-zaman.mjs` (kare süreleri), `kasma-iz.mjs` (CDP Tracing, iş dağılımı),
-`kasma-sayim.mjs` (hareket başına sınıf değişimi, geçilen renkler), `kasma-gorunurluk.mjs`
-(örtme oranı ve ekran görüntüleri), `ablasyon.mjs` (yama → derleme → ölçüm → geri alma).
+tuzak 41), `scratch/kasma-zaman.mjs` (kare süreleri), `scratch/kasma-iz.mjs` (CDP Tracing, iş dağılımı),
+`scratch/kasma-sayim.mjs` (hareket başına sınıf değişimi, geçilen renkler), `scratch/kasma-gorunurluk.mjs`
+(örtme oranı ve ekran görüntüleri), `scratch/ablasyon.mjs` (yama → derleme → ölçüm → geri alma).
 İki şey öğrenildi: `await page.mouse.move` her hareket için sayfadan cevap bekliyor, yani
 sayfa yavaşlayınca fare de yavaşlıyor ve ölçüm kendi konusunu gizliyor — olaylar node
 saatine göre, cevabı beklenmeden gönderilmeli. Ve tek koşu yeterli değil: aynı yapıda
