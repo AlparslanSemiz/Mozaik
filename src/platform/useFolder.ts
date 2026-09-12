@@ -25,7 +25,7 @@ import {
   writeHandle,
 } from './folder';
 import type { Library } from '../pure/library';
-import { collectStates } from './store';
+import { collectStates } from './download';
 import type { Id, State } from '../leaf/types';
 
 /**

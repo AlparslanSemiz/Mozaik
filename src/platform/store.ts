@@ -7,7 +7,7 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { type Bundle, buildBundle } from '../pure/bundle';
+import type { Bundle } from '../pure/bundle';
 import { type Box, reduce } from '../pure/undo';
 import { parseState } from '../pure/parseState';
 import { loadPlan, rotateBackups, savePlan } from './planStore';
@@ -15,8 +15,6 @@ import { sanitize } from '../pure/constraints';
 import { emptyState, newId } from '../pure/entities';
 import {
   addPlan,
-  backupFileName,
-  bundleFileName,
   findPlan,
   type Library,
   planKey,
@@ -30,54 +28,6 @@ import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
 import type { Id, State } from '../leaf/types';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
-
-// ------------------------------------------------------------------- files
-
-/** Hands the browser a file to save. Both file kinds go through here. */
-function download(name: string, text: string): void {
-  const blob = new Blob([text], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-export function downloadBackup(d: State): void {
-  download(backupFileName(new Date()), JSON.stringify(d));
-}
-
-// ------------------------------------------------------------- the bundle
-//
-// One file holding EVERY plan. The single-plan file is unchanged and still
-// what the top bar writes; this is the one that moves a whole setup between
-// two computers — and, once the .exe and the site exist, between those two.
-
-/**
- * The state of every plan in the library.
- *
- * The OPEN plan comes from memory, not from its key: the autosave is debounced
- * by 400 ms, so the key can be a few hundred milliseconds behind what is on
- * screen, and a backup that quietly drops the last edit is worse than none.
- * A plan whose key is gone is skipped rather than exported empty.
- */
-export function collectStates(library: Library, planId: Id, present: State): Record<Id, State> {
-  const out: Record<Id, State> = {};
-  for (const plan of library.plans) {
-    const state = plan.id === planId ? present : loadPlan(plan.id);
-    if (state !== null) out[plan.id] = state;
-  }
-  return out;
-}
-
-export function downloadBundle(library: Library, planId: Id, present: State): number {
-  const states = collectStates(library, planId, present);
-  download(bundleFileName(new Date()), buildBundle(library, states));
-  return Object.keys(states).length;
-}
 
 // -------------------------------------------------------------------- hook
 

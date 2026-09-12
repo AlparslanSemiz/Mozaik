@@ -25,7 +25,7 @@ import {
   storageKind,
   storageReport,
 } from '../../platform/storageReport';
-import { downloadBundle } from '../../platform/store';
+import { downloadBundle } from '../../platform/download';
 import { listBackups } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
 import { activePlacements } from '../../pure/programs';
