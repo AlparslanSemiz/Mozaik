@@ -163,7 +163,7 @@ function migrateV1(raw: LegacyV1): LegacyV2 {
       teacherId: x.ogretmenId,
       weeklyHours: x.haftalikSaat,
       blockSize: x.blok,
-    })) as LegacyV2['lessons'],
+    })),
     unavailable: raw.musaitDegil,
     placements: raw.yerlesim,
   };
@@ -205,7 +205,7 @@ function migrateV2toV3(raw: LegacyV2): State {
         // Neither of these can be in a v1/v2 file, and neither is guessed: a
         // gender is not read off a name, and a second subject nobody wrote down
         // is a subject nobody teaches.
-        gender: '' as Gender,
+        gender: '',
         subject2: '',
         limits: { ...NO_TEACHER_LIMITS },
       }),
@@ -318,9 +318,9 @@ export function parseState(text: string): State | null {
   let candidate: State;
 
   if (version === 1) {
-    candidate = migrateV2toV3(migrateV1(raw as LegacyV1));
+    candidate = migrateV2toV3(migrateV1(raw));
   } else if (version === 2) {
-    candidate = migrateV2toV3(raw as LegacyV2);
+    candidate = migrateV2toV3(raw);
   } else if (
     version === 3 ||
     version === 4 ||

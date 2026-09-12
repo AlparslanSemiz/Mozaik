@@ -123,7 +123,7 @@ export function normalizePrintOptions(raw: unknown): PrintOptions {
   }
 
   const read = (id: PrintSwitch): boolean =>
-    typeof record[id] === 'boolean' ? (record[id] as boolean) : PRINT_DEFAULTS[id];
+    typeof record[id] === 'boolean' ? record[id] : PRINT_DEFAULTS[id];
 
   // `Number('')` and `Number(null)` are 0, and 0 is not in the list — so the
   // membership test is the guard, not `Number.isFinite`.

@@ -225,7 +225,7 @@ function LessonPool({
 
   function openMenu(e: React.MouseEvent) {
     const element = e.target as Element;
-    const card = element.closest?.('.pool-card[data-lesson]') as HTMLElement | null;
+    const card = element.closest<HTMLElement>('.pool-card[data-lesson]');
     const lessonId = card?.dataset.lesson;
     if (lessonId === undefined) {
       e.preventDefault();

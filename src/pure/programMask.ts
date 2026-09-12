@@ -48,7 +48,7 @@ export function cleanMask(mask: ProgramMask, state: State): ProgramMask {
       state.settings.days.some((day) => day.name === name),
     ),
   );
-  return { teachers, classes, days } as ProgramMask;
+  return { teachers, classes, days };
 }
 
 export function maskCount(mask: ProgramMask): number {

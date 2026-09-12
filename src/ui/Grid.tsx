@@ -426,12 +426,12 @@ function GridInner({
       });
       return;
     }
-    const row = element.closest?.('[data-menu-row]') as HTMLElement | null;
+    const row = element.closest<HTMLElement>('[data-menu-row]');
     if (row !== null) {
       onMenu({ kind: 'row', rowId: row.dataset.menuRow ?? '' });
       return;
     }
-    const hour = element.closest?.('[data-menu-hour]') as HTMLElement | null;
+    const hour = element.closest<HTMLElement>('[data-menu-hour]');
     if (hour !== null) {
       onMenu({
         kind: 'column',
@@ -440,7 +440,7 @@ function GridInner({
       });
       return;
     }
-    const day = element.closest?.('[data-menu-day]') as HTMLElement | null;
+    const day = element.closest<HTMLElement>('[data-menu-day]');
     if (day !== null) {
       onMenu({ kind: 'day', day: Number(day.dataset.menuDay) });
       return;

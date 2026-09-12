@@ -145,7 +145,7 @@ export function attachRowDrag(opts: RowDragOptions): () => void {
     const tr = grip.closest('tr');
     if (tr === null || tr.parentElement !== opts.body) return;
 
-    source = tr as HTMLTableRowElement;
+    source = tr;
     from = rows().indexOf(source);
     to = from;
     startY = e.clientY;

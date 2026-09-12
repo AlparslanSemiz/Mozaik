@@ -10,7 +10,14 @@
 // in Node, e2e/otomatik-dunyalar.spec.ts loads the same worlds into the built
 // file:// page and audits what the real button left in localStorage.
 
-import { blockAt, blocker, buildIndex, closedKey, placementKey, liftBlock } from './pure/constraints';
+import {
+  blockAt,
+  blocker,
+  buildIndex,
+  closedKey,
+  placementKey,
+  liftBlock,
+} from './pure/constraints';
 import { parseKey } from './leaf/keys';
 import {
   DEFAULT_BELL,
@@ -24,7 +31,6 @@ import { sampleState } from './pure/sample';
 import type {
   ClassGroup,
   Day,
-  Gender,
   Id,
   Lesson,
   Limits,
@@ -34,7 +40,12 @@ import type {
   Teacher,
 } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
-import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID, replaceActiveGrid } from './pure/programs';
+import {
+  activePlacements,
+  blankProgram,
+  DEFAULT_PROGRAM_ID,
+  replaceActiveGrid,
+} from './pure/programs';
 
 // ---------------------------------------------------------------- the builder
 
@@ -104,7 +115,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     // A synthetic world has no opinion about either of these, and the solver
     // never asks: it places blocks, and a block's subject is a label.
     subject2: '',
-    gender: '' as Gender,
+    gender: '',
     color: i,
     limits: t.limits ?? { ...NO_TEACHER_LIMITS },
   }));

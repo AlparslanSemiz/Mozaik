@@ -144,7 +144,7 @@ function withStore<T>(
 /** The folder chosen on this machine, or null. NEVER throws. */
 export function readHandle(): Promise<FileSystemDirectoryHandle | null> {
   return withStore<unknown>('readonly', (s) => s.get(KEY) as IDBRequest<unknown>).then((raw) =>
-    raw !== null && typeof raw === 'object' && 'getFileHandle' in (raw as object)
+    raw !== null && typeof raw === 'object' && 'getFileHandle' in raw
       ? (raw as FileSystemDirectoryHandle)
       : null,
   );
@@ -157,9 +157,7 @@ export function writeHandle(handle: FileSystemDirectoryHandle): Promise<void> {
 }
 
 export function dropHandle(): Promise<void> {
-  return withStore('readwrite', (s) => s.delete(KEY) as IDBRequest<undefined>).then(
-    () => undefined,
-  );
+  return withStore('readwrite', (s) => s.delete(KEY)).then(() => undefined);
 }
 
 // ------------------------------------------------------------ permission
@@ -193,11 +191,11 @@ export async function pickFolder(): Promise<FileSystemDirectoryHandle | null> {
   try {
     // `id` makes the browser reopen where it was last time; `startIn` only
     // decides the FIRST time, and Belgelerim is where this belongs.
-    return (await window.showDirectoryPicker!({
+    return await window.showDirectoryPicker!({
       mode: 'readwrite',
       startIn: 'documents',
       id: 'ders-programi',
-    })) as FileSystemDirectoryHandle;
+    });
   } catch {
     return null; // the picker was dismissed — not an error, an answer
   }

@@ -57,7 +57,7 @@ function memoryStorage(): Storage {
       writes.push(`set ${k}`);
       map.set(k, String(v));
     },
-  } as Storage;
+  };
 }
 
 let container: HTMLDivElement;
@@ -195,7 +195,7 @@ describe('sözleşme · planın deposu', () => {
   });
 
   it('depo yazamıyorsa yazma false dönüyor ve çökmüyor', () => {
-    const broken = { ...memoryStorage() } as Storage;
+    const broken = { ...memoryStorage() };
     Object.defineProperty(globalThis, 'localStorage', {
       value: {
         ...broken,
@@ -444,7 +444,7 @@ describe('sözleşme · React kancası', () => {
     act(() => {
       result = store.plans.replaceLibrary({
         library: { plans: [{ id: 'x', name: 'Bozuk', draft: false }], activeId: 'x' },
-        states: { x: 'bu bir State değil' as unknown as State },
+        states: { x: 'bu bir State değil' },
       });
     });
     expect(result).toEqual({ ok: 0, failed: 1 });
@@ -461,7 +461,7 @@ describe('sözleşme · React kancası', () => {
     act(() => {
       store.plans.replaceLibrary({
         library: { plans: [{ id: 'y', name: 'Gelen', draft: false }], activeId: 'y' },
-        states: { y: named('Gelen') as unknown as State },
+        states: { y: named('Gelen') },
       });
     });
     expect(store.plans.library.plans.map((p) => p.id)).toEqual(['y']);

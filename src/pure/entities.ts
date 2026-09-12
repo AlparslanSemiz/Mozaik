@@ -489,7 +489,7 @@ export function reorderList(d: State, kind: ListKind, from: number, to: number):
   // Every key in those maps is built from ids, never from a position.
   return kind === 'subjects'
     ? { ...d, settings: { ...d.settings, subjects: next as string[] } }
-    : ({ ...d, [kind]: next } as State);
+    : { ...d, [kind]: next };
 }
 
 export function hourNames(n: number): string[] {

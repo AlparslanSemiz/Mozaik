@@ -47,7 +47,7 @@ function memoryStorage(): Storage {
     key: (i: number) => [...map.keys()][i] ?? null,
     removeItem: (k: string) => void map.delete(k),
     setItem: (k: string, v: string) => void map.set(k, String(v)),
-  } as Storage;
+  };
 }
 
 beforeEach(() => {

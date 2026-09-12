@@ -13,7 +13,6 @@ import { blockPlan } from './leaf/blocks';
 import { sampleState } from './pure/sample';
 
 declare global {
-  // eslint-disable-next-line no-var
   var IS_REACT_ACT_ENVIRONMENT: boolean;
 }
 
@@ -48,7 +47,7 @@ function memoryStorage(): Storage {
     key: (i: number) => [...map.keys()][i] ?? null,
     removeItem: (k: string) => void map.delete(k),
     setItem: (k: string, v: string) => void map.set(k, String(v)),
-  } as Storage;
+  };
 }
 
 beforeEach(() => {
