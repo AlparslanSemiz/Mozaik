@@ -823,24 +823,6 @@ kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/plat
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.
 
-### 113 · `dist/index.html`'in sha256'sı commit değişince kendiliğinden değişir
-Taşıma turunun kuralı "taşımak çıktıyı değiştirmemeli" ve ölçüsü çıktının
-sha256'sı. İkinci taşımadan sonra sha başka çıktı ve bir an "taşımadan fazlası
-oldu" diye okundu. Sebep taşıma değildi: `scripts/surum.mjs` `git rev-parse
---short HEAD`'i `__SURUM__`'ün içine basıyor ve o dize demete giriyor, yani her
-yeni commit çıktının baytlarını değiştiriyor. Ölçüm HEAD sabitken tekrarlandı
-(değişiklikler zulaya alındı, aynı ağaç yeniden derlendi): iki sha aynı çıktı.
-Bir çıktı karşılaştırması yalnız aynı HEAD üstünde anlamlıdır.
-
-### 114 · Bir dosyayı bölmek çıktının baytlarını değiştirir, taşımak değiştirmez
-Taşıma turunun ölçütü "sha256 değişmesin"di ve dört taşımada tuttu. Bölmede
-tutmadı ve tutmaması doğru: demetleyici modülleri yeni sıraya göre yazıyor ve
-kısa adları yeniden dağıtıyor, yani aynı davranış başka baytlar üretiyor. İlk
-bölmede iki derleme aynı HEAD üstünde alınıp karşılaştırıldı, uzunluk birebir
-aynı ve fark tek bir dokuz kilobaytlık bölgedeydi. Bir bölmenin ölçütü sha256
-değil, çıktının BOYU ile süitin kendisi. Boy da değişebilir: altı modüllük
-bölme dikişin tutkalı kadar büyüdü (`583eae6`, yüz on dokuz bayt).
-
 ---
 
 ## Ölçüm disiplini
@@ -890,6 +872,24 @@ sebep (24 px'te altı çubuğun araları 0,56 cihaz pikseli) ancak iki teori kal
 göründü. Ölçüm bir kapıya dönüştü: `scripts/exe-ikon.mjs`, `surum.yml`'in `exe`
 işi.
 
+### 113 · `dist/index.html`'in sha256'sı commit değişince kendiliğinden değişir
+Taşıma turunun kuralı "taşımak çıktıyı değiştirmemeli" ve ölçüsü çıktının
+sha256'sı. İkinci taşımadan sonra sha başka çıktı ve bir an "taşımadan fazlası
+oldu" diye okundu. Sebep taşıma değildi: `scripts/surum.mjs` `git rev-parse
+--short HEAD`'i `__SURUM__`'ün içine basıyor ve o dize demete giriyor, yani her
+yeni commit çıktının baytlarını değiştiriyor. Ölçüm HEAD sabitken tekrarlandı
+(değişiklikler zulaya alındı, aynı ağaç yeniden derlendi): iki sha aynı çıktı.
+Bir çıktı karşılaştırması yalnız aynı HEAD üstünde anlamlıdır.
+
+### 114 · Bir dosyayı bölmek çıktının baytlarını değiştirir, taşımak değiştirmez
+Taşıma turunun ölçütü "sha256 değişmesin"di ve dört taşımada tuttu. Bölmede
+tutmadı ve tutmaması doğru: demetleyici modülleri yeni sıraya göre yazıyor ve
+kısa adları yeniden dağıtıyor, yani aynı davranış başka baytlar üretiyor. İlk
+bölmede iki derleme aynı HEAD üstünde alınıp karşılaştırıldı, uzunluk birebir
+aynı ve fark tek bir dokuz kilobaytlık bölgedeydi. Bir bölmenin ölçütü sha256
+değil, çıktının BOYU ile süitin kendisi. Boy da değişebilir: altı modüllük
+bölme dikişin tutkalı kadar büyüdü (`583eae6`, yüz on dokuz bayt).
+
 ### 115 · Bir kural kümesi adına bakılarak alınırsa gelen şey bir gürültü duvarıdır
 Tip farkında ESLint kurulurken `strictTypeChecked`'ın kaç bulgu vereceği yüz ile
 dört yüz arasında tahmin edildi, ölçüm 1228 çıktı. Şaşmanın kendisi bir bulgu: bir
@@ -913,7 +913,6 @@ kırardı. Çare aynı şeyi denetlenebilir yazmak oldu: `closest<HTMLElement>(.
 Tip argümanı iddianın söylediğini söyler ve onu derleyici denetler, oysa bir `as`
 denetlenmez. Bir `--fix` koşusundan sonra `npm run tipler` koşulur, çünkü lint'i
 yeşil bir ağaç derlenebilir bir ağaç demek değil.
-
 ---
 
 ## Dizin

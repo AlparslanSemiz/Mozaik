@@ -1206,3 +1206,60 @@ describe('A9 · TESTPLAN’in mutasyon listesi stryker’ın listesi', () => {
     expect(gone, 'stryker.config.json mutasyon listesinde olmayan dosya').toEqual([]);
   });
 });
+
+// ------------------------------------ A10 · the trap index and the trap itself
+
+/** Every trap, with the `##` group it physically sits under. */
+function trapSections(): Map<number, string> {
+  const out = new Map<number, string>();
+  let group = '';
+  for (const line of TRAPS().split('\n')) {
+    const head = /^## (.+)$/.exec(line);
+    if (head !== null) {
+      group = (head[1] ?? '').trim();
+      continue;
+    }
+    const trap = /^### (\d+) ·/.exec(line);
+    if (trap !== null) out.set(Number(trap[1]), group);
+  }
+  return out;
+}
+
+/** The index table at the foot: `| group | 1, 2, 3 |`. */
+function trapIndex(): Map<number, string> {
+  const out = new Map<number, string>();
+  const table = /## Dizin([\s\S]*)$/.exec(TRAPS());
+  expect(table, 'TRAPS.md’de dizin yok').not.toBeNull();
+  for (const line of (table?.[1] ?? '').split('\n')) {
+    const row = /^\|\s*([^|]+?)\s*\|\s*([\d ,]+)\s*\|$/.exec(line);
+    if (row === null) continue;
+    for (const n of (row[2] ?? '').match(/\d+/g) ?? []) out.set(Number(n), (row[1] ?? '').trim());
+  }
+  return out;
+}
+
+describe('A10 · her tuzak dizinin söylediği grubun altında duruyor', () => {
+  // Found by the other refactor session and true twice over: traps 113 and 114
+  // were written at the END of "Test hijyeni" while the index counted them
+  // under "Ölçüm disiplini". Both readings are used — somebody scanning the
+  // file reads the heading above the trap, somebody looking a theme up reads
+  // the table — and nothing compared them. The index is not decoration: it is
+  // how a trap is found by subject rather than by number.
+  it('fiziksel yerleşim ile dizin satırı aynı grubu söylüyor', () => {
+    const placed = trapSections();
+    const listed = trapIndex();
+    expect(placed.size, 'tuzak başlıkları okunamadı').toBeGreaterThan(80);
+    expect(listed.size, 'dizin okunamadı').toBeGreaterThan(80);
+
+    const wrong: string[] = [];
+    for (const [n, group] of placed) {
+      const row = listed.get(n);
+      if (row === undefined) wrong.push(`tuzak ${n} dizinde yok (yeri: ${group})`);
+      else if (row !== group) wrong.push(`tuzak ${n} ${group} altında, dizin ${row} diyor`);
+    }
+    for (const n of listed.keys()) {
+      if (!placed.has(n)) wrong.push(`tuzak ${n} dizinde var, dosyada yok`);
+    }
+    expect(wrong, 'TRAPS.md dizini ile yerleşimi ayrışıyor').toEqual([]);
+  });
+});
