@@ -60,6 +60,7 @@ yapılmış görünüyor.
 - Eski CLAUDE.md havuz çekmecesinin boşalınca kendiliğinden kapandığını yazıyordu. 2026-09-11'de kodda bunu yapan bir yer bulunamadı (`writeDock` yalnız düğmeyle çağrılıyor), ekranda denenmedi.
 - Bayat kod yorumları: `App.tsx`'in başı "six sections" diyor (yedi var), `Program.tsx` havuzu "down the right" diye anlatıyor (altta), `App.tsx`'in marka yorumu "detailed" diyor (sade çiziliyor), `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyor (%80'den başlıyor).
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
+- Bir v1 ya da v2 yedeği açılınca sınıflar normalleştiricilerden geçmiyor: günlük kutuları `null` yerine `undefined` geliyor ve Ayarlar → Kurallar hepsini "kendi sınırı olan sınıflar" diye listeliyor, ve hiçbiri renk almadığı için hepsi paletin ilk rengiyle boyanıyor. İlk kayıttan sonra kendiliğinden geçiyor. 2026-09-12'de test tarafında ölçüldü (TODO §8g).
 
 **Güncel ölçümler (2026-09-11, kaynaktan sayıldı).**
 
@@ -84,6 +85,74 @@ dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağac�
 derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
 durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
 birleşiyor, ters yön yok.
+
+---
+
+## 2026-09-12 · Test stratejisi, ikinci paket: şema örneklerinin iddiaları
+
+**Ne yapıldı.** Bir önceki paketin mutasyon koşusu bir cümle bırakmıştı: örnek dosya
+testi ızgarayı ve adları doğruluyor, dersin şeklini ve ayarları doğrulamıyor. Bu turun
+işi o cümleyi kapatmaktı. Her sürüm dosyası artık kendi haftasının ne anlama geldiğini
+de söylüyor (haftalık saat, bloklar, ikinci branş bayrağı, dersin günlük kutusu), artı
+ayarların tamamını (okul adı, günlerin uzun arası, zil, sınırlar, kural seviyeleri,
+branş listesi ve kısaltmalar), öğretmenin kutularını, sınıfın kutusunu, renkleri ve
+program zarfını. Yanına ikinci bir bölüm geldi: aynı dosyalar bir alanı çıkarılmış
+hâlde okunuyor, çünkü bir alandan eski olan her dosya tam olarak o dosya, ve orada
+olmaması gereken tek şey bir istisna. Üretim koduna dokunulmadı.
+
+**Örnek dosyaların kendisi de değişti, ve sebebi ölçülebilirlik.** `sema-ornek.mjs`'in
+yazdığı zil saatleri programın varsayılan zilinin birebir aynısıydı, kural
+seviyelerinin dördü varsayılanla aynıydı, Çarşamba'nın uzun arası `makeDay`'in kendi
+tahminiyle aynıydı ve program zarfının adı `blankProgram()`'ın verdiği addı. Bir alanın
+dosyadaki değeri varsayılanla aynıysa, o alanı gerçekten okuyan bir okuyucu ile yedeğe
+düşen bir okuyucu aynı cevabı verir, yani o alanı ölçen her iddia bedava yeşildir.
+Dördü de varsayılandan uzaklaştırıldı, gerekçesi betiğin içinde bir yorum olarak duruyor,
+ve on dört dosya yeniden üretildi.
+
+**Ölçüm.** `npx stryker run --mutate src/store.ts`, aynı makinede, aynı yapılandırmayla,
+dört işçi, yalnız birim süiti, `solver.ts` hâlâ dışarıda. Skor önce 63,7 sonra 71,6.
+Hayatta kalan 200'den 157'ye indi, kapsamsız 163'ten 162'ye, koşu 4 dakika 52 saniye
+sürdü. Dosyanın bölgelerine göre okununca artışın nereden geldiği görünüyor:
+
+| Bölge | Önce | Sonra | Hayatta kalan |
+|---|---|---|---|
+| ayrıştırma yarısı (233-566) | 77,8 | 88,9 | 58 → 29 |
+| ayrıştırma yardımcıları (150-232) | 66,7 | 77,3 | 44 → 30 |
+| reducer (60-125) | 67,4 | 67,4 | 14 → 14 |
+| tarayıcı yarısı (567-950) | 27,0 | 27,0 | 84 → 84 |
+
+Dokunulmayan iki bölgenin kıpırdamaması ölçümün kendisinin denetimi: artış yazılan
+teste atfedilebiliyor. Tarayıcı yarısının düşüklüğü kapsam artefaktı, bir önceki
+paketin kaydında yazılı.
+
+**Yeni iddialar on beş kusurla sınandı**, üretim kodu her seferinde kopyadan geri
+alınarak: zil saatlerini, kural seviyelerini, okul sınırlarını, günün uzun arasını,
+cinsiyeti, öğretmenin sınır kutularını, branş kısaltmalarını, okul adını, sınıfın
+günlük kutusunu, program zarfının adını ve v1 gün adlarını dosyadan okumamak, ikinci
+branş bayrağını hep kapalı vermek, v9 ile v13 sürüm sınırlarını kaydırmak, ve v5
+öncesinin gömülü branş listesine düşmemesi. On beşi de kırmızıya döndü.
+
+**İki ürün kusuru çıktı, düzeltilmedi.** `migrateV2toV3` sınıfları çıplak bir `asArray`
+ile alıyor, yani v3 ve sonrasının aynı liste üstünde koşturduğu `asBox` ile
+`spreadColors`'tan geçmiyorlar. Sınıfın günlük kutusu `null` yerine `undefined` geliyor
+ve Ayarlar → Kurallar'ın süzgeci bir v1 ya da v2 yedeği açılınca bütün sınıfları "kendi
+sınırı olan sınıflar" diye listeliyor, ve hiçbir sınıf renk almadığı için hepsi paletin
+ilk rengiyle boyanıyor. İkisi de ilk kayıttan sonra kendiliğinden iyileşiyor. Üretim
+kodu olduğu için madde olarak bırakıldı (TODO §8g) ve bugünkü davranış `BİLİNEN KUSUR`
+adlı tek bir vakada çivilendi, ki düzeltildiği gün o vaka adıyla kırmızıya dönsün.
+
+**Kalan hayatta kalanların altısı denendi, okunmadı.** Ayrıştırma yarısında kalan 29
+mutantın altısı için onları ayırt edebilecek girdi kuruldu ve temiz kodun çıktısıyla
+karşılaştırıldı: altısında da çıktı birebir aynı. `sanitize()` boş bir program kimliğini
+ve adını zaten onarıyor, gün listesinin üç ayrı kapısı birbirini maskeliyor, ve `pairs`
+tavanını `clampBlocks` yeniden kırpıyor. Üç kapının birbirini maskelemesi
+`invariants.test.ts`'in çözücüde ölçtüğü desenin aynısı.
+
+**Koşulan testler.** `npm test` (tamamı yeşil), `npm run tipler` (temiz),
+`npx stryker run --mutate src/store.ts`. **Koşulmayanlar ve sebepleri.** E2E, site ve
+çözücü stresi koşulmadı: bu turda değişen tek üretim dışı şey örnek dosyalar ve onları
+okuyan birim testi, ve hiçbiri tarayıcıya çıkmıyor. Mutasyon koşarken makinede başka
+bir süit koşturulmadı, ki bir önceki paketin bulgusu buydu.
 
 ---
 

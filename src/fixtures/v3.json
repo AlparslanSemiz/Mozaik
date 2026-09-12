@@ -9,7 +9,7 @@
       },
       {
         "name": "Çarşamba",
-        "longBreakAfter": 5
+        "longBreakAfter": 4
       }
     ],
     "hours": [
@@ -21,22 +21,22 @@
       "6"
     ],
     "bell": {
-      "start": "09:00",
-      "lessonMinutes": 40,
-      "breakMinutes": 10,
-      "longBreakMinutes": 30
+      "start": "08:30",
+      "lessonMinutes": 45,
+      "breakMinutes": 5,
+      "longBreakMinutes": 40
     },
     "limits": {
       "maxConsecutive": 3,
       "maxPerDay": 5,
-      "minPerDay": 0,
+      "minPerDay": 1,
       "maxSameLessonPerDay": 2
     },
     "rules": {
-      "maxConsecutive": "block",
-      "maxPerDay": "block",
-      "minPerDay": "warn",
-      "maxSameLessonPerDay": "block"
+      "maxConsecutive": "warn",
+      "maxPerDay": "off",
+      "minPerDay": "off",
+      "maxSameLessonPerDay": "warn"
     }
   },
   "rooms": [
