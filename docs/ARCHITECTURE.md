@@ -94,7 +94,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/store.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt, `park`, geri al kısayolu, `isTextInput` |
+| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt, `park`, geri al kısayolu, `isTextInput` |
 | `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
@@ -188,7 +188,7 @@ Kontrol'ün sayıları `feasibility.ts`'ten gelir. Havuzun hesabı `App`'e
 
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
-testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `store.ts`'teki
+testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
 şey (tuzak 11).
@@ -235,7 +235,7 @@ type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya dön
 
 - **Ortak ihtiyaç aşağıda durur.** `keys.ts` anahtar üretir ki `constraints.ts` ile `rules.ts` birbirini çağırmasın, `constraints.ts` onları yeniden dışa aktarır ve çağrı yerleri değişmez. `subjects.ts`, `blocks.ts` ve `names.ts` aynı sebeple yaprak: `entities.ts` zaten `constraints.ts`'i çağırıyor, ikisinin ihtiyacı ikisinin de altında durmalı.
 - **Yalnız tip alınır.** `rules.ts` `constraints.ts`'ten yalnız `Index` tipini, `entities.ts` `import.ts`'ten yalnız satır tiplerini `import type` ile alır, derlemede silinir. `import.ts` `makeShort`'u `entities.ts`'ten alıp yeniden dışa aktarır, kısaltmanın tek evi var.
-- **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` `store.ts`'i çağırmaz ve State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `store.ts` yapar. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
+- **State bilinmez, ham metin taşınır.** `library.ts` ve `libraryStore.ts` State'in ne olduğunu bilmez: ham string alıp verir, ayrıştırmayı `parseState.ts` yapar ve depo tarafını `planStore.ts` sürer. `bundle.ts` de öyle, içindeki her planı ham `unknown` olarak verir ve bozuk girdi kurallarını `normalizeLibrary()`'ye devreder. Üçü de `library.test.ts`'in katman sınırları bölümünde ölçülüyor, çünkü bir dosyanın neyi söyleyebileceği çalışma zamanında görünmez.
 - **Anahtarlar bir yaprakta.** Tercih anahtarları ve tablodaki adları `preferenceKeys.ts`'te düz yazılı, `BASE_KEY`'den türetilmez. `storageReport.ts` onları sahipleri olan `changelog.ts` ya da `programColor.ts`'i import etmeden listeler, sahipler de anahtarı aynı yapraktan alır.
 
 `Commands.tsx` `App`'te değil ayrı bir dosyada, çünkü komutların yarısı

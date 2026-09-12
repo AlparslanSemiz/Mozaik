@@ -102,7 +102,7 @@ listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları
 Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
-eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `store.ts`'teki
+eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
 `SCHEMA_VERSION`'a değil o listeye bakıyor, ve v14 çıkarılırken `version === 13` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).

@@ -22,7 +22,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
 
-import { isTextInput, useStore } from './platform/store';
+import { isTextInput, useStore } from './platform/useStore';
 import { collectStates, downloadBackup, downloadBundle } from './platform/download';
 import { listBackups, loadPlan, savePlan, storageWorks } from './platform/planStore';
 import { parseState } from './pure/parseState';

@@ -81,7 +81,7 @@ ayrıldı, biri Türkçe kaldı, öteki çevrildi, ve `setSubjectShort` ikisini 
 kabul eder ki kullanıcı ekranda gördüğünü geri yazınca kayıt silinsin.
 
 ### 97 · Bir sayıyı adlandıran göç testi bir sonraki sürümde geride kalan sayıyı göremez
-`store.ts`'teki kabul listesinin yorumu tam bu kusuru anlatıyordu ve yine de
+`parseState.ts`'teki kabul listesinin yorumu (o gün dosyanın adı store.ts idi) tam bu kusuru anlatıyordu ve yine de
 şema 8'den 9'a çıkarken (`5fc0316`) `version === 8` listeye yazılmadı ve okuma `return null`'a düştü: yayınlanmış v2.0.0'ın
 yazdığı her yedek okunamaz oldu. v6 ve v7 için testler vardı, ama her biri sabit
 bir sayı adlandırdığı için sonsuza kadar yeşil geçerdi. Yazılan test sayı

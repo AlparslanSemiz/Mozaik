@@ -160,7 +160,7 @@ değiştirmiyor, örneğin bir sayacın artışı ya da bir sıralama anahtarın
 hepsini bir eksik gibi raporlar.
 
 Yalnız saf çekirdek mutasyona uğruyor (`constraints.ts`, `rules.ts`, `blocks.ts`,
-`store.ts`, `feasibility.ts`, `entities.ts`): bütün depoyu ölçmek pahalı ve
+`useStore.ts`, `feasibility.ts`, `entities.ts`): bütün depoyu ölçmek pahalı ve
 bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koşmuyor. `solver.ts`
 listede **yok** ve bu bir bulgu: aracın enstrümantasyonu oradaki bir artırma
 biçimini ayrıştıramıyor ve bütün koşuyu düşürüyor. Çaresi iki satırlık bir üretim

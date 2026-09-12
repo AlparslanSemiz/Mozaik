@@ -29,7 +29,8 @@
     "src/pure/constraints.ts",
     "src/pure/rules.ts",
     "src/leaf/blocks.ts",
-    "src/platform/store.ts",
+    "src/pure/parseState.ts",
+    "src/pure/undo.ts",
     "src/pure/library.ts",
     "src/pure/feasibility.ts",
     "src/pure/entities.ts"

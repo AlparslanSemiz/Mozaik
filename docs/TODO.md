@@ -414,7 +414,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       gezdirirken çok kasma oluyor."* **İkinci kez geliyor**: §9b'deki aynı şikayet
       2026-09-01'de sürüklemenin BAŞLANGICI ölçülerek kapatılmıştı (125 ms → 46,2 ms).
       O ölçüm yanlış değildi, ölçtüğü şey şikayetin sebebi değildi (tuzak 101).
-      Bugün hareket başına ölçüldü, tam kayıt [TESTFINDINGS.md](TESTFINDINGS.md)'de:
+      2026-09-12'de hareket başına ölçüldü, tam kayıt [TESTFINDINGS.md](TESTFINDINGS.md)'de:
       x1'de tek kare düşmüyor, **x4'te her sekizinci ila onuncu kare düşüyor** (%9,6–15,
       1600×1000 exe kutusunda biraz daha kötü), hiçbir kare iki kareden uzun sürmüyor.
       **Sebep tek satır:** `src/platform/drag.ts`'in `paintReason`'ı hedef hücre her değiştiğinde
@@ -906,7 +906,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       plan ya da yedek anahtarı). Hangi yoldan içeri girer, 2026-09-11'de kaynaktan sayıldı,
       altısı da `parseState` üstünden `sanitize`'a varıyor ve anahtarı olduğu gibi kopyalıyor:
       açılış (`initialBox`, `loadPlan`), plan geçişi ve plan silinince sıradakine geçiş
-      (`store.ts` 758 ve 799), taslak başlatma (`DraftStart.tsx:40`), üst çubuktan tek dosya
+      (`usePlans.ts`), taslak başlatma (`DraftStart.tsx:40`), üst çubuktan tek dosya
       açma (`App.tsx:620`), Ayarlar → Veri'deki yedek zinciri (`listBackups`) ve paket
       (`Data.tsx:508`, `replaceLibrary`).
       Ne olur: sınıf ızgarası hücreyi boş, öğretmen ızgarası dolu gösterebilir, kart
@@ -1009,11 +1009,11 @@ ertelendi.
       commit'te kırmızıya döner ve kapatılır.
 - [ ] **Fuzz: `import.ts` bozuk girdiyle.** Bozuk CSV, bozuk JSON, yarım UTF-8, çok
       büyük dosya. Excel'den yapıştırma ilk kurulumun ana yolu ve oraya gelen şey
-      kullanıcının panosu, yani beklenen biçimde olmak zorunda değil. `store.ts`'in
-      `parseState`'i zaten bozuk girdiye `null` diyor ve testleri var; ölçülmemiş olan
+      kullanıcının panosu, yani beklenen biçimde olmak zorunda değil. `parseState.ts`
+      bozuk girdiye zaten bozuk girdiye `null` diyor ve testleri var; ölçülmemiş olan
       `import.ts`.
 - [ ] **Örnek dosya testi dersin şeklini ve ayarları da doğrulasın.** Mutasyon koşusu
-      (2026-09-12) `store.ts`'in ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
+      (2026-09-12) o gün store.ts adını taşıyan dosyanın (bugün `parseState.ts`) ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
       hepsi tek cümleye çıkıyor: test ızgarayı ve adları doğruluyor, dersin şeklini ve
       ayarları doğrulamıyor. Eklenecek iddialar ve onları isteyen satırlar:
       `readLessons`'ın sürüm sınırları (`version >= 9`, v13'ün dörtten üçe çevirmesi,
@@ -1031,7 +1031,7 @@ ertelendi.
       desenle ayrıldı (erişilemeyen savunma, kullanılmayan yedek, `sanitize` sonrası ölü
       kapı) ve 86'sı `StringLiteral`. Geri kalan 558 okunmadı. Her biri ya ölçülmeyen bir
       davranış, ya silinebilecek bir kod dalı, ya da anlamsız bir mutant, ve ayrılmadan
-      liste bir iş listesi değil. En yoğun yer `constraints.ts` (179) ve `store.ts` (161).
+      liste bir iş listesi değil. En yoğun yer `constraints.ts` (179) ve o gün store.ts adını taşıyan dosya (161, bugün bölündü).
       Sınıflandırmanın okuyarak yapılamayacağı ölçülerek görüldü. `constraints.ts:820`
       (`i < block.size` yerine `i <= block.size`) okuyunca bariz bir gerçek boşluk gibi
       duruyor: `dropMap`'in doluluk haritasına bloğun bittiği hücrenin bir sonrasını da
@@ -1060,14 +1060,13 @@ ertelendi.
 
 ### 8i · Klasör turundan çıkanlar (2026-09-12)
 
-- [ ] **`store.ts` bölünecek, parçaları doğrudan yeni yapıya inecek.** Turun asıl
-      hedefi ve envanterin en büyük bölmesi: reducer, geri al yığını, gecikmeli
-      otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi bir arada.
-      Bölmeden önce okunacak değişmezler: `parseState`'in kabul listesi bir sayı
-      adlandırmaz (tuzak 97), `readLessons` her tarihsel biçimi tek yerde çevirir,
-      `remapDays` eşlemeyi isimden kurar (tuzak 11), plan geçişinde `park()` bekleyen
-      kaydı eşzamanlı boşaltır (tuzak 28), `planKey('1')` tarihsel anahtarı korur
-      (tuzak 29). Tuzak numarası taşıyan yorumlar bölünen parçayla birlikte gider.
+- [x] **`store.ts` bölündü (2026-09-12), parçaları doğrudan yeni yapıya indi.**
+      Altı modül: `pure/parseState.ts` (kaydedilmiş dosyanın okuyucusu ve göçler),
+      `pure/undo.ts` (geri al yığını), `platform/planStore.ts` (planın deposu ve yedek
+      zinciri), `platform/download.ts` (diske inen dosya), `platform/usePlans.ts` (plan
+      kitaplığı işlemleri) ve `platform/useStore.ts` (kutu, otomatik kayıt, kısayol).
+      İlk ikisi katman düzeltmesi: ikisi de saftı ve `platform/`'da duruyordu.
+      Bölmeden önce `src/storeContract.test.ts` yazıldı, beş değişmezin hepsi orada.
 - [ ] **Araçların kalanı: C3 demet analizi, C4 size-limit, C5 tip farkında ESLint
       kuralları, C6 kapsam ölçümü, C7 bağımlılık güncelleme bildirimi.** Sıra en
       sonda. C6 test oturumuyla kesişiyor, kurmadan önce onlara sorulacak.
