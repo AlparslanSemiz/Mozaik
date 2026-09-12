@@ -298,7 +298,9 @@ describe('cümle · basılan sayfanın iskeleti', () => {
     const cikti = [...container.querySelectorAll('button')].find((b) =>
       (b.getAttribute('aria-label') ?? b.textContent ?? '').includes('Çıktı'),
     );
-    act(() => cikti?.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    act(() => {
+      cikti?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
 
     const sheet = container.querySelector('.print-sheet');
     expect(sheet, 'Çıktı ekranında .print-sheet yok').not.toBeNull();
