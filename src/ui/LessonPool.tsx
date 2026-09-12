@@ -19,7 +19,7 @@
 // The card list stays MOUNTED when the drawer is closed. One DOM card stands
 // for one stack; the model count in the head remains the number of blocks.
 
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
@@ -199,62 +199,72 @@ function LessonPool({
   const latest = useRef(height);
   latest.current = height;
 
+  // The user's own number, once they have touched the handle. After that the
+  // fit below stays quiet: a rule that kept overruling a dragged handle would
+  // make the handle feel broken.
+  const userSet = useRef(false);
+
+  /**
+   * THE DRAWER OPENS INTO THE ROOM THE GRID IS NOT USING.
+   *
+   * Measured on the real school: the grid's scroll box stood 75.6px taller than
+   * its own table and drew nothing in that strip, while the tray showed 19 of
+   * its 205 cards and the other 182 sat under the fold. Everything is read
+   * rather than assumed, because the room is a property of THIS school at THIS
+   * scale and density: three teachers leave a lot, forty leave none, and
+   * `dockHeightForRoom` then returns the stored height untouched.
+   */
+  function fit() {
+    const el = handle.current;
+    const body = el?.closest('.program-body');
+    const tray = list.current;
+    if (!(body instanceof HTMLElement) || tray === null) return;
+    if (userSet.current || body.classList.contains('splitting')) return;
+    // `--dock-h` has exactly ONE owner, `.program-body`, and exactly two
+    // writers: this function and the splitter during a drag. Putting a copy on
+    // `.pool` as an inline style made the drag invisible, because the closer
+    // declaration won and the DOM write went nowhere. The stored height is
+    // written first so that a tray which cannot be measured still opens at the
+    // number the user left it on.
+    body.style.setProperty('--dock-h', `${latest.current}rem`);
+    const wrap = body.querySelector('.grid-wrap');
+    const table = wrap?.querySelector('table.grid') ?? null;
+    const pool = body.querySelector('.pool');
+    if (wrap === null || table === null || pool === null) return;
+    const opened = dockHeightForRoom({
+      storedRem: readDockHeight(),
+      roomPx:
+        wrap.getBoundingClientRect().height -
+        table.getBoundingClientRect().height +
+        pool.getBoundingClientRect().height,
+      currentRem: latest.current,
+      overflowPx: tray.scrollHeight - tray.clientHeight,
+      bodyPx: body.getBoundingClientRect().height,
+    });
+    body.style.setProperty('--dock-h', `${opened}rem`);
+    if (opened !== latest.current) setHeight(opened);
+  }
+
+  // WHAT MAY MOVE THE DRAWER, and what may not. This runs when the tray's run
+  // of cards changes length, which is a world being loaded or the timetable
+  // being emptied, and it runs BEFORE paint so nothing is seen to jump.
+  //
+  // It deliberately does NOT watch the grid. A ResizeObserver on the table was
+  // tried and measured: switching to the class view changes the table's height,
+  // the drawer resized between a card's box being read and the button going
+  // down, and the drag then started on whatever card had slid into that spot.
+  // Eight runs, four failures, and zero before the observer existed. The grid
+  // changing shape is exactly the case where a user's hand is already on the
+  // tray; a world being loaded is not.
+  useLayoutEffect(fit, [cards.length]);
+
   useEffect(() => {
     const el = handle.current;
     const host = el?.closest('.program-body');
     if (el === null || !(host instanceof HTMLElement)) return undefined;
     const body: HTMLElement = host;
-    // `--dock-h` has exactly ONE owner, `.program-body`, written from here on
-    // mount and from the splitter during a drag. Putting a copy on `.pool` as
-    // an inline style made the drag invisible: the closer declaration won and
-    // the DOM write went nowhere.
-    // THE DRAWER OPENS INTO THE ROOM THE GRID IS NOT USING.
-    //
-    // Measured on the real school: the scroll box stood 75.6px taller than its
-    // own table and drew nothing in the strip, while the tray showed 19 of its
-    // 205 cards. Everything here is read rather than assumed, because the room
-    // is a property of THIS school at THIS scale and density: three teachers
-    // leave a lot, forty leave none, and `dockHeightForRoom` then returns the
-    // stored height untouched.
-    //
-    // Re-measured whenever the table changes shape, because the grid can grow
-    // under a drawer that has already opened (a view switch, a density, a new
-    // teacher) and a drawer holding room the grid now needs is the bug this
-    // fixes, upside down. It stops the moment the user touches the handle:
-    // after that the number is theirs, and a rule that kept overruling it would
-    // make the handle feel broken.
-    const userSet = { current: false };
-    function fit() {
-      if (userSet.current || body.classList.contains('splitting')) return;
-      const wrap = body.querySelector('.grid-wrap');
-      const table = wrap?.querySelector('table.grid') ?? null;
-      const pool = body.querySelector('.pool');
-      const tray = list.current;
-      if (wrap === null || table === null || pool === null || tray === null) return;
-      const opened = dockHeightForRoom({
-        storedRem: readDockHeight(),
-        roomPx:
-          wrap.getBoundingClientRect().height -
-          table.getBoundingClientRect().height +
-          pool.getBoundingClientRect().height,
-        currentRem: latest.current,
-        overflowPx: tray.scrollHeight - tray.clientHeight,
-        bodyPx: body.getBoundingClientRect().height,
-      });
-      if (opened === latest.current) return;
-      body.style.setProperty('--dock-h', `${opened}rem`);
-      setHeight(opened);
-    }
-
-    body.style.setProperty('--dock-h', `${readDockHeight()}rem`);
     setCeiling(maxDockHeight(body.getBoundingClientRect().height));
-    fit();
-    const watcher = new ResizeObserver(fit);
-    watcher.observe(body);
-    const table = body.querySelector('table.grid');
-    if (table !== null) watcher.observe(table);
-
-    const detach = attachSplitter(el, {
+    return attachSplitter(el, {
       body,
       current: () => latest.current,
       commit: (rem) => {
@@ -263,10 +273,6 @@ function LessonPool({
         setHeight(rem);
       },
     });
-    return () => {
-      watcher.disconnect();
-      detach();
-    };
   }, []);
 
   // THE TRAY SAYS IT SCROLLS. It holds 922px of cards in 94.5px on the real

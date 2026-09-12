@@ -56,7 +56,7 @@ describe('dockHeightForRoom', () => {
 
   it('does not walk when measured again after it has grown', () => {
     // Both bounds are written to be independent of the drawer's own height, so
-    // the ResizeObserver that re-measures cannot creep. Here the tray is what
+    // re-measuring after a world is loaded cannot creep. Here the tray is what
     // binds: 4rem still to show grows the drawer from 11 to 15, which eats all
     // 4rem of that overflow, and measuring again must still say 15.
     const first = at(20 * REM, 4 * REM);
