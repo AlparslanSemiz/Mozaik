@@ -6,25 +6,13 @@
 //   2. on every start the previous session's state is pushed down a backup chain (last 3)
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import type { Bundle } from '../pure/bundle';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { type Box, reduce } from '../pure/undo';
-import { parseState } from '../pure/parseState';
 import { loadPlan, rotateBackups, savePlan } from './planStore';
-import { sanitize } from '../pure/constraints';
-import { emptyState, newId } from '../pure/entities';
-import {
-  addPlan,
-  findPlan,
-  type Library,
-  planKey,
-  removePlan,
-  renamePlan as renameInLibrary,
-  setActive,
-  setDraft,
-  uniquePlanName,
-} from '../pure/library';
-import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
+import { usePlans } from './usePlans';
+import { emptyState } from '../pure/entities';
+import { planKey } from '../pure/library';
+import { readLibrary, writeLibrary } from './libraryStore';
 import type { Id, State } from '../leaf/types';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
@@ -57,7 +45,6 @@ export function isTextInput(target: EventTarget | null): boolean {
 
 export function useStore() {
   const [box, dispatch] = useReducer(reduce, undefined, initialBox);
-  const [library, setLibrary] = useState<Library>(readLibrary);
 
   const change = useCallback((apply: (d: State) => State) => {
     dispatch({ type: 'change', apply });
@@ -97,127 +84,28 @@ export function useStore() {
     savePlan(box.planId, box.present);
   }, [box.planId, box.present]);
 
-  const commit = useCallback((next: Library) => {
-    writeLibrary(next);
-    setLibrary(next);
+  // Cancels the pending write WITHOUT performing it. The only caller is the
+  // bundle import in `usePlans.ts`, and the two are opposites that look alike:
+  // park writes then cancels (pitfall 28), this one only cancels (pitfall 27
+  // mirrored). The comment at the head of `usePlans.ts` says the same thing
+  // from the other side.
+  //
+  // Measured while splitting the file, because the old comment claimed more
+  // than it could show: taking this call away does NOT resurrect the outgoing
+  // plan, and neither does taking away the effect's cleanup. What actually
+  // cancels the pending write is the FIRST LINE of the autosave effect below —
+  // it clears the previous handle every time the box changes. This call is
+  // what makes the intent survive a rewrite of that effect, not what enforces
+  // it today.
+  const discardPendingSave = useCallback(() => {
+    window.clearTimeout(timer.current);
   }, []);
 
-  const switchPlan = useCallback(
-    (id: Id) => {
-      if (id === box.planId || findPlan(library, id) === undefined) return;
-      park();
-      dispatch({ type: 'switch', id, state: loadPlan(id) ?? emptyState() });
-      commit(setActive(library, id));
-    },
-    [box.planId, park, commit, library],
-  );
+  const openPlan = useCallback((id: Id, state: State) => {
+    dispatch({ type: 'switch', id, state });
+  }, []);
 
-  /**
-   * Creates a plan from `seed` and opens it.
-   *
-   * One primitive, four buttons: an empty school, a copy of this plan, a copy
-   * with the grid emptied (a draft), or a copy of a draft. The plan's DATA is
-   * written before the directory entry, so a failed write can never leave the
-   * directory pointing at a key with nothing in it.
-   */
-  const createPlan = useCallback(
-    (name: string, seed: State, draft = false): Id => {
-      park();
-      const id = newId();
-      const clean = sanitize(seed);
-      savePlan(id, clean);
-      commit(setActive(addPlan(library, { id, name: uniquePlanName(library, name), draft }), id));
-      dispatch({ type: 'switch', id, state: clean });
-      return id;
-    },
-    [park, commit, library],
-  );
-
-  const deletePlan = useCallback(
-    (id: Id) => {
-      const next = removePlan(library, id);
-      if (next === library) return; // the last plan, or an id nobody knows
-      // Flush FIRST even when the victim is the open plan: park() also cancels
-      // the pending write, which is what stops a timer from resurrecting the
-      // key one beat after it was dropped.
-      park();
-      commit(next);
-      dropPlanText(id);
-      if (id === box.planId) {
-        dispatch({
-          type: 'switch',
-          id: next.activeId,
-          state: loadPlan(next.activeId) ?? emptyState(),
-        });
-      }
-    },
-    [library, commit, park, box.planId],
-  );
-
-  const renamePlan = useCallback(
-    (id: Id, name: string) => commit(renameInLibrary(library, id, name)),
-    [library, commit],
-  );
-
-  const markDraft = useCallback(
-    (id: Id, draft: boolean) => commit(setDraft(library, id, draft)),
-    [library, commit],
-  );
-
-  /**
-   * Replaces the WHOLE library with the contents of a bundle file.
-   *
-   * The order of the steps below is the safety argument, not housekeeping:
-   *
-   *  1. cancel the pending autosave. `park()` is deliberately NOT used here —
-   *     park WRITES the outgoing plan, and its key is about to be overwritten.
-   *     But leaving the timer alive is pitfall 27 in a mirror: 400 ms later the
-   *     old state would land in the newly imported library's key.
-   *  2. parse everything BEFORE touching storage. If not one plan can be read,
-   *     nothing at all changes: a half-finished import is two truths.
-   *  3. write the data, counting what did not fit (quota).
-   *  4. drop the keys of plans the incoming library does not have.
-   *  5. write the directory LAST, once its data is really in place — the same
-   *     rule createPlan already follows.
-   */
-  const replaceLibrary = useCallback(
-    (bundle: Bundle): { ok: number; failed: number } => {
-      window.clearTimeout(timer.current);
-
-      const parsed: Array<{ id: Id; state: State }> = [];
-      for (const plan of bundle.library.plans) {
-        const raw = bundle.states[plan.id];
-        const state = raw === undefined ? null : parseState(JSON.stringify(raw));
-        if (state !== null) parsed.push({ id: plan.id, state });
-      }
-      if (parsed.length === 0) return { ok: 0, failed: bundle.library.plans.length };
-
-      const kept = new Set(parsed.map((x) => x.id));
-      let failed = bundle.library.plans.length - parsed.length;
-      let ok = 0;
-      for (const { id, state } of parsed) {
-        if (savePlan(id, state)) ok++;
-        else failed++;
-      }
-
-      for (const plan of library.plans) {
-        if (!kept.has(plan.id)) dropPlanText(plan.id);
-      }
-
-      const next: Library = {
-        plans: bundle.library.plans.filter((p) => kept.has(p.id)),
-        activeId: kept.has(bundle.library.activeId) ? bundle.library.activeId : parsed[0]!.id,
-      };
-      commit(next);
-      dispatch({
-        type: 'switch',
-        id: next.activeId,
-        state: parsed.find((x) => x.id === next.activeId)?.state ?? parsed[0]!.state,
-      });
-      return { ok, failed };
-    },
-    [library, commit],
-  );
+  const plans = usePlans({ planId: box.planId, park, discardPendingSave, openPlan });
 
   // Ctrl+Z / Ctrl+Y — dropping a card in the wrong place happens constantly,
   // so this is a basic function, not a nicety.
@@ -253,15 +141,6 @@ export function useStore() {
     park,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
-    plans: {
-      library,
-      planId: box.planId,
-      switchPlan,
-      createPlan,
-      deletePlan,
-      renamePlan,
-      markDraft,
-      replaceLibrary,
-    },
+    plans,
   };
 }

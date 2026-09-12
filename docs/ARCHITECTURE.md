@@ -87,12 +87,17 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
 | `pure/sample.ts` | babanın ölçeğine yakın örnek okul |
+| `pure/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState` |
+| `pure/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
 
 ### Durum, tercih ve depolama
 
 | Dosya | Görevi |
 |---|---|
-| `platform/store.ts` | reducer, geri al yığını, gecikmeli otomatik kayıt, oturum yedekleri, `parseState` ve göç, plan geçişi |
+| `platform/store.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt, `park`, geri al kısayolu, `isTextInput` |
+| `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
+| `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, oturum yedek zinciri (`rotateBackups`, `listBackups`) |
+| `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
 | `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
