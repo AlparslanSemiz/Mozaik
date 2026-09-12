@@ -30,6 +30,16 @@
 //   no-implied-eval (2)                  `preferences.test.ts` builds a function
 //                                        out of index.html's inline script on
 //                                        purpose — that IS the measurement.
+//   no-unnecessary-type-conversion (11)  turned on, read, turned off again.
+//                                        Every hit is a real no-op (`String(v)`
+//                                        on a string, `Number(version)` on a
+//                                        number) and not one of them can hide
+//                                        anything: unlike a cast, a redundant
+//                                        conversion keeps no promise about a
+//                                        type. Four of the eleven are storage
+//                                        stubs mirroring what the browser does
+//                                        to a value on the way in, which is the
+//                                        point of the stub.
 //
 // The prediction before the run was one to four hundred findings. It was 1228,
 // and the gap is itself the finding: a wall of noise is what happens when a
@@ -68,13 +78,23 @@ export default defineConfig([
       // async handler passed where a void return is expected is the same thing
       // wearing JSX.
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
+      // `attributes: false` and the reason is the fourteen sites it reported:
+      // every one is an async `onClick`/`onChange` whose body awaits a dialog.
+      // React drops the returned promise, so the rule is right in principle,
+      // but the alternative at each site is `() => { void (async () => …)(); }`
+      // — noise at fourteen call sites to describe a rejection that cannot
+      // happen (`confirm` and `alert` here resolve, they do not reject). What
+      // the rule still guards is the half that IS a bug: a promise used as a
+      // condition, spread, or passed where a synchronous value is read.
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
 
-      // Casts and conversions the types already guarantee. No false positive is
-      // possible by construction: the rule fires only when the assertion cannot
-      // change the type.
+      // A cast the types already guarantee. It is not only clutter: a cast
+      // keeps compiling after the type under it changes, so an unnecessary one
+      // is a place where the compiler has been asked not to look.
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-      '@typescript-eslint/no-unnecessary-type-conversion': 'error',
     },
   },
 ]);
