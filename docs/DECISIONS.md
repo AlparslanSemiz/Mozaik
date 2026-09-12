@@ -35,6 +35,33 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-12 · `preference.ts` yaprak, ve zincir depoya inmiyor (ölçüldü)
+
+Klasör kararından sonra sorulan soru: katman grafiğinde sıfır ihlal kalması
+kısmen `preference.ts`'in yaprak sayılmasından geliyor, ve o dosya
+`localStorage`'a dokunan bir yol taşıyor. `i18n.ts` onu çağırdığına göre saf
+mantık katmanı dolaylı olarak depoya bağlanmış olabilir mi?
+
+Ölçüldü, olmuyor. `i18n.ts`'in çağırdığı şey fabrikanın kendisi
+(`preference(...)`), ve o çağrı yalnız kapanış kuruyor: depoya inen yollar
+dönen nesnenin `read`, `write` ve `apply`'ı. Saf katmandaki yedi modülün
+`i18n`'den aldığı tek ad `t`, ve `t` modül düzeyindeki bir değişkeni okuyor,
+depoyu değil. Dinamik olarak da ölçüldü: kaydedici bir `localStorage` kurulup
+yedi saf modül yüklendi ve `t()` çağrıldı, dokunuş sayısı sıfır. Aletin kör
+olmadığı aynı koşuda gösterildi, `readDil()` bir dokunuş üretiyor.
+
+Yani taksonomi veriye uydurulmadı: `preference.ts` yalnız `storage.ts`'i
+import eden, State'i ve React'i bilmeyen bir modül, ve ARCHITECTURE'ın düzyazısı
+onu zaten yaprak diye anıyordu.
+
+Kalan risk yazılı olsun: kural modül düzeyinde, dışa aktarım düzeyinde değil.
+Bir gün saf bir modül `readDil`'i import ederse `katman-yaprak` bunu görmez.
+Görülmesi istenirse yol açık: dil tercihini `platform/`'a taşıyan küçük bir
+bölme, bugün yalnız iki üretim dosyasına dokunur (`ui/T.tsx`, `ui/main.tsx`).
+Bugün yapılmadı, çünkü ölçülen bir sorun yok.
+
+---
+
 ### 2026-09-12 · Klasörler katmanların adını taşıyor: `leaf` · `pure` · `platform` · `ui`
 
 **Değişen.** `src/` düz bir klasördü ve ARCHITECTURE.md'nin tarif ettiği üç
