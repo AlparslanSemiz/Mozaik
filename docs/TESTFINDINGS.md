@@ -26,6 +26,34 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-12 · scratch/olc-taban.mjs · Faz 1'in tabanı dört noktada tekrarlandı
+Bulgu: Faz 1'in kaydı "Faz 4 aynı betiği aynı girdiyle koşar" diyor. Koşuldu: aynı betik, aynı
+girdi (`scratch/taban-dolu.json`), dokuz koşu, ve aynı ölçüt tanımları. Dört nokta, çünkü araya
+bir dal birleşmesi girdi ve katkısı ayrılabilsin.
+
+| Ne | Faz 1 · `41e5afb` | test öncesi · `da32ee2` | oturum başı · `43d0ba9` | Faz 4 · HEAD |
+|---|---|---|---|---|
+| `dist/index.html` | 1 007 878 | 1 006 748 | 1 007 719 | 1 008 754 |
+| açılış, boş depo | 122,5 | 95,0 | 120,9 | 103,4 |
+| açılış, dolu plan | 167,5 | 173,9 | 164,8 | 166,4 |
+| Program'a geçiş x1 | 35,2 | 35,0 | 35,1 | 36,9 |
+| Program'a geçiş x4 | 157,6 | 160,1 | 162,4 | 165,2 |
+
+Her commit `git archive` ile AYRI bir dizine açıldı ve orada derlendi; `dist/` paylaşılsaydı ölçüm
+yalan söylerdi. sha256 karşılaştırılmadı, çünkü sürüm damgası her commit'te baytları değiştirir
+(tuzak 113) ve bir çıktı karşılaştırması yalnız aynı HEAD üstünde anlamlıdır.
+Yöntemin kendi doğrulaması: `41e5afb` bugün 1 007 878 bayt verdi, Faz 1'in kaydı 1 007 885 diyor.
+Yedi baytlık fark yöntemin kendisinden: `git archive` `.git`'i taşımıyor, yani sürüm betiği kısa
+sha'yı bulamıyor. Aynı ağaç, aynı derleme, yedi bayt.
+Okuma: gerileme yok. `dist` bütün oturum boyunca 876 bayt büyüdü (havuz çaresi artı birleşme).
+Program'a geçişte x1'in EN İYİ değeri değişmedi (34,6'ya karşı 34,5), x4'ün en iyi değeri ise
+156,6'dan 160,8'e çıktı, yani yaklaşık 4 ms'lik küçük ama gerçek bir bedel var ve kaynağı belli:
+havuzun açılış boyu her bağlanmada bir kez ızgaranın geometrisini okuyor. Açılış süreleri
+gürültülü ve bir yön göstermiyor (boş depoda en iyi 93,2'ye karşı 96,8).
+Tür: ölçüm, kusur değil
+Ne yapıldı: kayda geçti.
+Kalıcı kural: yok
+
 ### 2026-09-12 · npm run patrol · devriye ilk kez koşuldu ve ilk koşusunda düştü
 Bulgu: "sistematik tur — her sekme, her adım, her bölüm, her şerit düğmesi" 2500 ms'lik bir
 tıklama zaman aşımıyla düşüyor: `Kontrol` sekmesinin düğmesi tıklanamıyor. Ekran görüntüsüne
