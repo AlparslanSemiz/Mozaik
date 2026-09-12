@@ -252,7 +252,7 @@ README'nin indirme bağlantıları bunlar.
 Varlık adları yalnız ASCII, çünkü URL'de kodlanıyorlar. Release sayfasının
 gövdesi `.github/surum-notu.md`, sürüm sürüm değişiklik geçmişi kökteki
 [CHANGELOG.md](../CHANGELOG.md), uygulamanın içindeki Yenilikler paneli ise
-`src/changelog.ts`.
+`src/platform/changelog.ts`.
 
 ## Sürüm numarası
 
@@ -272,7 +272,7 @@ yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (t
 ve `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu.
 
 `npm run yayinla -- X.Y.Z` bir sürümü tek komutta çıkarır. Önce kapılar: çalışma
-ağacı temiz, dal `main`, etiket daha önce atılmamış, `src/changelog.ts`'in en
+ağacı temiz, dal `main`, etiket daha önce atılmamış, `src/platform/changelog.ts`'in en
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
 Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
 bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
@@ -310,7 +310,7 @@ Yayınlanmış exe'nin içine gerçekten hangi boyların gömüldüğünü
 ## Güncelleme
 
 Program kendini üç ayrı yoldan günceller, ve üçünde de kullanıcı istemeden hiçbir
-şey değişmez. Kararın hangi yolda nasıl işlediği `src/update.ts`'te.
+şey değişmez. Kararın hangi yolda nasıl işlediği `src/platform/update.ts`'te.
 
 **`sw`: site ve yerel kurulum.** Yeni bir service worker devraldığında
 (`controllerchange`) açık duran sayfada bir şerit çıkar ve yeni sürümün hazır

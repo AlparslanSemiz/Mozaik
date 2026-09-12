@@ -24,7 +24,7 @@
 // Both are transient gestures, not positions.
 
 import { useState } from 'react';
-import type { Id, View } from './leaf/types';
+import type { Id, View } from '../leaf/types';
 
 export type Tab = 'setup' | 'availability' | 'lessons' | 'program' | 'check' | 'print' | 'settings';
 /** Program: which axis the grid rows are. Defined in types.ts, see there. */

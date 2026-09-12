@@ -25,7 +25,7 @@ import {
   subjectTeachers,
   subjectLabel,
 } from '../../pure/entities';
-import type { StepId } from '../../toolState';
+import type { StepId } from '../../platform/toolState';
 
 /**
  * The four Okul steps, plus the one screen outside Okul that reads this panel:

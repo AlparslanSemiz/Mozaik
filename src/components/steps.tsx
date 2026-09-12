@@ -24,7 +24,7 @@ import { Tags } from 'lucide-react';
 
 import { subjectOptions } from '../pure/entities';
 import type { State } from '../leaf/types';
-import type { Kind, StepId } from '../toolState';
+import type { Kind, StepId } from '../platform/toolState';
 
 export interface StepDef {
   id: StepId;

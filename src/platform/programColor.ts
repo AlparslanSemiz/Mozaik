@@ -3,11 +3,11 @@
 // This is a MACHINE preference, never timetable data: opening a backup on a
 // different computer must not change how that computer likes to read cards.
 
-import { lessonSubject, subjectKey } from './pure/entities';
-import { PALETTE_SIZE } from './leaf/palette';
-import type { Lesson, State } from './leaf/types';
-import { preference } from './leaf/preference';
-import { PROGRAM_COLOR_KEY } from './leaf/preferenceKeys';
+import { lessonSubject, subjectKey } from '../pure/entities';
+import { PALETTE_SIZE } from '../leaf/palette';
+import type { Lesson, State } from '../leaf/types';
+import { preference } from '../leaf/preference';
+import { PROGRAM_COLOR_KEY } from '../leaf/preferenceKeys';
 
 export { PROGRAM_COLOR_KEY };
 

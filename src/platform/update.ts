@@ -31,11 +31,11 @@
 // registration, when there was no controller, and announcing "new version" to
 // somebody who just opened the site for the first time is a lie.
 
-import { t } from './leaf/i18n';
+import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { desktopApply, desktopCheck, desktopDownload, isDesktop } from './desktop';
-import { SURUM, tarihYazisi } from './leaf/version';
+import { SURUM, tarihYazisi } from '../leaf/version';
 
 /**
  * Where the newest build always is. Written down ONCE, because it appears on

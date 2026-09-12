@@ -7,10 +7,10 @@
 //   3. "Yedek indir" — the ONE habit my father will be taught
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
-import { type Bundle, buildBundle } from './pure/bundle';
-import { sanitize } from './pure/constraints';
-import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from './pure/entities';
+import { MAX_BLOCK, clampBlocks } from '../leaf/blocks';
+import { type Bundle, buildBundle } from '../pure/bundle';
+import { sanitize } from '../pure/constraints';
+import { defaultSubjects, emptyState, makeDay, newId, NO_TEACHER_LIMITS } from '../pure/entities';
 import {
   addPlan,
   BACKUP_COUNT,
@@ -26,7 +26,7 @@ import {
   setActive,
   setDraft,
   uniquePlanName,
-} from './pure/library';
+} from '../pure/library';
 import {
   dropPlanText,
   readLibrary,
@@ -34,8 +34,8 @@ import {
   writeLibrary,
   writePlanText,
 } from './libraryStore';
-import { firstFreeColor, PALETTE_SIZE } from './leaf/palette';
-import { blankProgram, DEFAULT_PROGRAM_ID } from './pure/programs';
+import { firstFreeColor, PALETTE_SIZE } from '../leaf/palette';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/programs';
 import type {
   ClassGroup,
   Day,
@@ -47,9 +47,9 @@ import type {
   RuleLevel,
   State,
   Teacher,
-} from './leaf/types';
-import { SCHEMA_VERSION } from './leaf/types';
-import { safely } from './leaf/storage';
+} from '../leaf/types';
+import { SCHEMA_VERSION } from '../leaf/types';
+import { safely } from '../leaf/storage';
 
 // The storage key lives in library.ts now: it is the key of plan "1", and which
 // key belongs to which plan is that module's job. It is still USER DATA and

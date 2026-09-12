@@ -16,14 +16,14 @@
 // reach it. So (a) the target row is scrolled into view when the drag starts,
 // (b) the grid scrolls by itself when the cursor nears an edge.
 
-import { t } from './leaf/i18n';
+import { t } from '../leaf/i18n';
 import { useCallback, useEffect, useRef } from 'react';
 import type React from 'react';
-import type { DropVerdict } from './pure/constraints';
-import type { BlockRef } from './pure/constraints';
-import { cellKey } from './leaf/keys';
-import { paletteColor } from './leaf/palette';
-import type { Id } from './leaf/types';
+import type { DropVerdict } from '../pure/constraints';
+import type { BlockRef } from '../pure/constraints';
+import { cellKey } from '../leaf/keys';
+import { paletteColor } from '../leaf/palette';
+import type { Id } from '../leaf/types';
 
 export interface DragData {
   lessonId: Id;

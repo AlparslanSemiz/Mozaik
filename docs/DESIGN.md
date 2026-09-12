@@ -269,7 +269,7 @@ listesi [DATA.md](DATA.md)'de.
 
 ## Yeni ekran kurarken
 
-1. **Sekmenin araçları şeride mi?** "Şu an neye bakıyorum" ve "tek tıkla ne yaparım" şeride, liste, sayaç ve açıklama panele. Aracın durumu şeride çıkıyorsa `src/toolState.ts`'e taşınır (tuzak 18). Şeridin beş maddelik standardı [LAYOUT.md](LAYOUT.md)'de ve `e2e/serit.spec.ts` beşini de ölçer. Üç varlık türünün simgesi `KIND_ICON`'dan gelir.
+1. **Sekmenin araçları şeride mi?** "Şu an neye bakıyorum" ve "tek tıkla ne yaparım" şeride, liste, sayaç ve açıklama panele. Aracın durumu şeride çıkıyorsa `src/platform/toolState.ts`'e taşınır (tuzak 18). Şeridin beş maddelik standardı [LAYOUT.md](LAYOUT.md)'de ve `e2e/serit.spec.ts` beşini de ölçer. Üç varlık türünün simgesi `KIND_ICON`'dan gelir.
 2. Yüzey `.panel`, düzen `.cols` ya da akan `.panel-grid`.
 3. Soru sorulacaksa `useDialogs()`, `window.confirm` kullanılmıyor.
 4. Bir şey olduğunu söylemek için `useToast()`.

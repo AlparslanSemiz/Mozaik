@@ -18,7 +18,7 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parseState } from './store';
+import { parseState } from './platform/store';
 import { activeProgram } from './pure/programs';
 import { SCHEMA_VERSION } from './leaf/types';
 

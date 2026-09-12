@@ -42,14 +42,14 @@ import {
   teacherSubjects,
 } from '../pure/entities';
 import { compareTr } from '../pure/listview';
-import { useDrag } from '../drag';
-import type { DragData } from '../drag';
-import type { SolverRun } from '../useSolver';
+import { useDrag } from '../platform/drag';
+import type { DragData } from '../platform/drag';
+import type { SolverRun } from '../platform/useSolver';
 import type { State, Id } from '../leaf/types';
 import { activePinned, activePlacements } from '../pure/programs';
 import { rowMask, setDayMask, setRowMask } from '../pure/programMask';
 import type { ProgramMask } from '../pure/programMask';
-import type { PoolSort, View } from '../toolState';
+import type { PoolSort, View } from '../platform/toolState';
 import { KIND_ICON } from './steps';
 import Grid from './Grid';
 import type { GridCell, GridMenuTarget, GridRow } from './Grid';
@@ -57,8 +57,8 @@ import LessonPool from './LessonPool';
 import type { PoolCard } from './LessonPool';
 import { T, useT } from './T';
 import type { Translate } from './T';
-import { programColorIndex } from '../programColor';
-import type { ProgramColorMode } from '../programColor';
+import { programColorIndex } from '../platform/programColor';
+import type { ProgramColorMode } from '../platform/programColor';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */

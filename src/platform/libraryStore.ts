@@ -13,9 +13,9 @@
 // (ARCHITECTURE, the same arrangement keys.ts has between constraints and
 // rules). Every call goes through the one `safely` guard in storage.ts.
 
-import { LIBRARY_KEY, parseLibrary, planKey, type Library } from './pure/library';
-import { safely } from './leaf/storage';
-import { type Id } from './leaf/types';
+import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../pure/library';
+import { safely } from '../leaf/storage';
+import { type Id } from '../leaf/types';
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);

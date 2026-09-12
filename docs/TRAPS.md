@@ -818,7 +818,7 @@ toplam boyudur.
 `docs.test.ts`'in yol kapısı diskteki dosyaları bu glob'la çıkarıyor ve
 CLAUDE.md'nin `src/docs.test.ts` diyen satırını bayat saydı: Vite glob'a çağıran
 dosyanın kendisini koymuyor, yani kapı kendi adına kördü ve o satırı sonsuza
-kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/drag.ts` ve
+kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/platform/drag.ts` ve
 `src/surum.test.ts` geliyor, `src/docs.test.ts` gelmiyor. Çare listeye kendi
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.

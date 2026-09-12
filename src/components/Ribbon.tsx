@@ -86,9 +86,9 @@ import {
 } from 'lucide-react';
 import { health } from '../pure/feasibility';
 import type { State } from '../leaf/types';
-import type { SolverRun } from '../useSolver';
-import type { Density, Theme } from '../theme';
-import { applyDensity, applyTheme } from '../theme';
+import type { SolverRun } from '../platform/useSolver';
+import type { Density, Theme } from '../platform/theme';
+import { applyDensity, applyTheme } from '../platform/theme';
 import { surumEtiketi } from '../leaf/version';
 import { paletteColor } from '../leaf/palette';
 import {
@@ -108,10 +108,10 @@ import { newId } from '../pure/entities';
 import { maskCount, setDayMask, setRowMask, solverExclusions } from '../pure/programMask';
 import type { ProgramMask } from '../pure/programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
-import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../toolState';
+import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../platform/toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useT } from './T';
-import type { ProgramColorMode } from '../programColor';
+import type { ProgramColorMode } from '../platform/programColor';
 
 interface Props {
   ui: ToolState;

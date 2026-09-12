@@ -9,7 +9,7 @@ import { useDialogs } from './components/Dialogs';
 import { useToast } from './components/Toasts';
 import type React from 'react';
 import { bundleVersionOf, BUNDLE_VERSION } from './pure/bundle';
-import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from './store';
+import { storageWorks, useStore, downloadBackup, parseState, isTextInput } from './platform/store';
 import {
   applyMotion,
   applyRibbon,
@@ -26,15 +26,15 @@ import {
   type Density,
   type Motion,
   type Theme,
-} from './theme';
-import { attachScrollFade } from './scrollFade';
-import { attachRibbonScroll } from './ribbonScroll';
-import { useSolver } from './useSolver';
-import { useFolder } from './useFolder';
-import { useUpdate } from './update';
+} from './platform/theme';
+import { attachScrollFade } from './platform/scrollFade';
+import { attachRibbonScroll } from './platform/ribbonScroll';
+import { useSolver } from './platform/useSolver';
+import { useFolder } from './platform/useFolder';
+import { useUpdate } from './platform/update';
 import { APP_NAME, surumEtiketi } from './leaf/version';
-import { useToolState } from './toolState';
-import type { Tab } from './toolState';
+import { useToolState } from './platform/toolState';
+import type { Tab } from './platform/toolState';
 import Setup from './components/setup';
 import Lessons from './components/lessons';
 import { lessonIcon } from './components/steps';
@@ -44,15 +44,15 @@ import { T, useT } from './components/T';
 import Check from './components/Check';
 import Ribbon from './components/Ribbon';
 import Print, { NOTHING_EXCLUDED } from './components/Print';
-import { readPrintOptions, writePrintOptions } from './printOptions';
-import type { PrintOptions } from './printOptions';
+import { readPrintOptions, writePrintOptions } from './platform/printOptions';
+import type { PrintOptions } from './platform/printOptions';
 import type { Excluded } from './components/Print';
 import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from './pure/programMask';
 import type { ProgramMask } from './pure/programMask';
 import Settings from './components/settings';
 import { useShortcutsHelp } from './components/ShortcutsHelp';
-import { hasUnseenChangelog } from './changelog';
-import { readProgramColor, writeProgramColor, type ProgramColorMode } from './programColor';
+import { hasUnseenChangelog } from './platform/changelog';
+import { readProgramColor, writeProgramColor, type ProgramColorMode } from './platform/programColor';
 
 /**
  * The six sections, along the TOP — on the same row as the document identity

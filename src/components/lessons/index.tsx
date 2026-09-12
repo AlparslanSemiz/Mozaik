@@ -25,7 +25,7 @@ import { useRowOrder } from '../useRowOrder';
 import { applyList, byNumberThen, compareTr, EMPTY_QUERY } from '../../pure/listview';
 import type { ListConfig, ListQuery } from '../../pure/listview';
 import type { Id, Lesson, State } from '../../leaf/types';
-import type { LessonMode } from '../../toolState';
+import type { LessonMode } from '../../platform/toolState';
 import { useDialogs } from '../Dialogs';
 import { parseLessons } from '../../pure/import';
 import { paletteColor } from '../../leaf/palette';

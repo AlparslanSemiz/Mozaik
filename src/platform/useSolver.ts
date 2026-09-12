@@ -7,9 +7,9 @@
 // would throw away work with no explanation.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createSolver } from './pure/solver';
-import type { Solver, SolverOptions, SolverProgress, SolverResult } from './pure/solver';
-import type { State } from './leaf/types';
+import { createSolver } from '../pure/solver';
+import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../pure/solver';
+import type { State } from '../leaf/types';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:
