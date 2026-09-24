@@ -310,6 +310,14 @@ kullanır. Denetçinin kendisi `worlds.test.ts`'te bilerek bozuk ızgaralarla s�
 ve her dünya testi kaydedilen yerleşim sayısının girişten büyük olduğunu ayrıca
 iddia eder (tuzak 23).
 
+Sahte olmayan tek veri `src/fixtures/tam-dolu-kurs.json`: babanın planı,
+öğretmen adları "Öğretmen N" yapılmış ve ızgarası boşaltılmış. Şema örneklerinin
+yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
+dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
+dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
+125). Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
+silinir.
+
 ## Ölçüm yöntemleri
 
 - **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini `getComputedStyle` ile okur, WCAG kontrast oranını ve CIE Lab ΔE farkını hesaplar. ΔE gerekiyor, çünkü WCAG parlaklık oranı farklı tonlardaki iki koyu rengi eşit sayar. Modern renk sözdizimi sayıya çevrilmeden önce sRGB'ye getirilir (tuzak 81).

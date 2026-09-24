@@ -26,6 +26,40 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-24 · npm run cozucu · otomatik-stres.spec.ts, `parcalanmis-gunler`
+Bulgu: Onarım aşaması girince dünya 24/24 dizildi ve test "yerleşemedi" cümlesini
+beklediği için düştü. Dünya OR-Tools CP-SAT ile ayrıca çözüldü: 0,01 saniyede bir hafta
+var. Yani kırmızı olan çözücü değil, `solved: false` beklentisiydi.
+Tür: test kusuru (beklenti, o günkü çözücünün sınırını dünyanın özelliği diye yazmıştı)
+Ne yapıldı: beklenti `solved: true` oldu, gerekçesi yanında yazılı.
+Kalıcı kural: TRAPS.md, tuzak 124
+
+### 2026-09-24 · npx vitest run · solver.test.ts, "arama gerçekten geri sarıyor"
+Bulgu: `erken-saat-tuzagi` (9 blok) ve `derin-geri-sarma` (12 blok) artık düğüm sayısı
+blok sayısına eşit çözülüyor, eskiden 201 ve 8 362 düğüm. Sebep pay denetimi: iki dünyada
+da sınıf tam dolu ve yanlış ilk hücre ilk adımda eleniyor. Test geri sarmanın koştuğunu
+kanıtlamak için yazılmıştı, yani o iki dünya artık o kanıtı veremiyor.
+Tür: test kusuru değil, ölçtüğü şey değişti
+Ne yapıldı: iki dünyadan `backtracks` kalktı ve notları ölçümü söylüyor. Geri sarmayı hâlâ
+`kural-baskisi` (14 düğüm, 12 blok), `derslik-darbogazi` ve ağır `parcalanmis-gunler`
+kanıtlıyor.
+Kalıcı kural: TRAPS.md, tuzak 122
+
+### 2026-09-24 · npx vitest run · invariants.test.ts, sekiz özellik zaman aşımına düştü
+Bulgu: Onarımın ilk durma sınırı sabit 100 000 hamleydi. Çözümü olmayan küçük rastgele
+dünyalarda her koşu o kadar hamleyi harcadı ve fast-check'in 120–150 koşusu 5 saniyelik
+test sınırını aştı.
+Tür: ürün kusuru (imkânsız bir haftada da boşuna bekleten bir sınır)
+Ne yapıldı: sınır blok sayısıyla ölçekleniyor (blok başına 500). Süit 1207/1207.
+Kalıcı kural: yok, DECISIONS.md'nin 2026-09-24 kaydında
+
+### 2026-09-24 · npx playwright test · bütün E2E, tarayıcı yok
+Bulgu: `browserType.launch: Executable doesn't exist … chromium_headless_shell-1234`.
+Playwright 1.62.1'e çıkmış, tarayıcısı kurulmamıştı. Hiçbir test koşmadan düşüyor.
+Tür: ortam kusuru
+Ne yapıldı: `npx playwright install chromium`.
+Kalıcı kural: yok
+
 ### 2026-09-12 · npm run mutasyon · koşu üç kez başlamadan durdu, sebebi kum havuzu
 Bulgu: Mutasyon koşusu kuru koşuda üç kez arka arkaya düştü ve üçünde de düşen şey belge
 kapılarıydı. Sebep bir bayat belge değil, kum havuzunun kendisi: Stryker deponun budanmış bir

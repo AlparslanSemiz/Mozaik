@@ -671,7 +671,10 @@ function tekOgretmenCokSinif(): State {
  *
  * It exists because nothing else in this file made the solver back up: with the
  * sample data it went 359 blocks in 359 nodes, so the whole backtracking half
- * of solver.ts had never actually run.
+ * of solver.ts had never actually run. Since 2026-09-24 it no longer backs up
+ * either: the class is exactly full, and the slack check in solver.ts sees the
+ * wrong first cell leave a square nobody can reach — 9 nodes. `kural-baskisi`
+ * and `derslik-darbogazi` are what still make the search back up.
  */
 function erkenSaatTuzagi(days: number, hours: number, single: number, pair: number): State {
   let d = makeWorld({
@@ -1013,15 +1016,15 @@ export const WORLDS: SolverWorld[] = [
   },
   {
     name: 'erken-saat-tuzagi',
-    note: 'Açgözlü sıra yanlış hücreyi seçiyor; çözüm var, arama geri sarmak zorunda.',
+    note: 'Açgözlü sıra yanlış hücreyi seçiyor; boşluk payı bunu ilk adımda yakalıyor.',
     state: erkenSaatTuzagi(3, 4, 6, 6),
-    want: { solved: true, backtracks: true },
+    want: { solved: true },
   },
   {
     name: 'derin-geri-sarma',
-    note: 'Aynı tuzak dört günde: binlerce düğüm, ama yine tam çözüm.',
+    note: 'Aynı tuzak dört günde: eskiden 8 362 düğüm, boşluk payıyla 12.',
     state: erkenSaatTuzagi(4, 4, 8, 8),
-    want: { solved: true, backtracks: true },
+    want: { solved: true },
   },
   {
     name: 'kural-baskisi',
@@ -1066,7 +1069,10 @@ export const WORLDS: SolverWorld[] = [
     note: 'İki sınıf son kareye kadar dolu, her öğretmenin haftasında üç delik.',
     heavy: true,
     state: parcalanmisGunler(),
-    want: { solved: false, backtracks: true },
+    // Solvable: OR-Tools CP-SAT finds a week in 0.01 s (2026-09-24). Until the
+    // repair phase this said `solved: false`, which recorded what the search
+    // could reach rather than what the world holds.
+    want: { solved: true, backtracks: true },
   },
   {
     name: 'gercek-olcek-imkansiz',

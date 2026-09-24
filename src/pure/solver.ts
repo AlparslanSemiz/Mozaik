@@ -25,7 +25,7 @@ import {
 } from './constraints';
 import { t } from '../leaf/i18n';
 import { closedKey, parseKey, placementKey } from '../leaf/keys';
-import type { Index, PlacedBlock } from './constraints';
+import type { Index } from './constraints';
 import { commonestBlock, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import { activePinned, activePlacements, replaceActiveGrid } from './programs';
@@ -50,10 +50,40 @@ const DEFAULTS: SolverOptions = {
 
 /**
  * How many nodes may pass without the grid getting any better before the search
- * gives up on one lesson (see `sinceGain`). A node count, not a stopwatch: the
- * same input has to produce the same timetable on any machine.
+ * stops building and starts repairing (see `sinceGain`). A node count, not a
+ * stopwatch: the same input has to produce the same timetable on any machine.
  */
-const STALL_LIMIT = 20_000;
+const STALL_LIMIT = 2_000;
+
+/**
+ * How many repair moves a block stays where it was just put before it may be
+ * pushed out again for free, and how many moves a block may not go back to the
+ * cell it was just pushed out of. Without both the repair walks in a circle:
+ * A pushes B out, B pushes A out, and the grid never gets better.
+ */
+const TABU_TENURE = 12;
+
+/**
+ * How many repair moves PER BLOCK may pass without the grid getting better
+ * before the repair gives up. It cannot prove a week impossible, so without a
+ * limit an impossible week spends the whole budget. MEASURED on the school's
+ * data with the hours Roboders had open, 16 seeds: all solved, the longest
+ * fruitless stretch 17 983 moves for 211 blocks, i.e. 85 per block. Per block
+ * because a small impossible world must give up in milliseconds, not in the
+ * seconds a whole school is allowed.
+ */
+const REPAIR_STALL_PER_BLOCK = 500;
+
+/** A small seeded generator: the same input has to give the same timetable. */
+function rng(seed: number): () => number {
+  let x = seed >>> 0 || 1;
+  return () => {
+    x ^= x << 13;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    return (x >>> 0) / 4_294_967_296;
+  };
+}
 
 export type SolverPhase = 'solved' | 'stuck' | 'cancelled';
 
@@ -134,9 +164,8 @@ interface Item {
   /** Item indices sharing this lesson's teacher, class or room. */
   neighbours: number[];
   /**
-   * Given up on. One lesson with nowhere to go must not cost the other 98:
-   * the whole point of the "stuck" report is that it is read off a grid that
-   * IS otherwise laid out.
+   * Nothing left to search for: the week cannot hold even one of its blocks
+   * (see the ceiling below). The search leaves it alone.
    */
   abandoned: boolean;
 }
@@ -234,6 +263,10 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     : preservedPlacements(base, opts.exclusions);
   const work: State = replaceActiveGrid(base, { placements });
   let ix: Index = buildIndex(work);
+  // What this run was handed and must not move: kept blocks, pinned cells and
+  // everything on an excluded row or day. The repair below may push out only
+  // what the search itself put down.
+  const fixedAtStart = new Set(Object.keys(placements));
 
   const wideWindow = rulesBite(base);
   const preferNoWarning = warningsPossible(base);
@@ -395,15 +428,8 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   const stack: Frame[] = [];
 
   let placedBlocks = 0;
-  /**
-   * Blocks still considered reachable: every block of a live lesson, and of a
-   * lesson given up on only the ones already on the grid.
-   */
-  let placeableBlocks = 0;
-  function countPlaceable(): void {
-    placeableBlocks = items.reduce((sum, x) => sum + (x.abandoned ? x.done : x.need), 0);
-  }
-  countPlaceable();
+  /** Blocks the week can hold at all: every item's `need`, after the ceiling. */
+  const placeableBlocks = items.reduce((sum, x) => sum + x.need, 0);
   let nodes = 0;
   let elapsedMs = 0;
   let finished: SolverResult | null = null;
@@ -415,13 +441,6 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   let bestPlacements: Record<string, Id> = { ...placements };
 
   /**
-   * The lesson that most recently ran out of room. When the search exhausts,
-   * THIS is the one to give up on — not whichever lesson sits at the bottom of
-   * the stack, which is merely the one MRV opened with.
-   */
-  let culprit = -1;
-
-  /**
    * Nodes spent since the grid last got better.
    *
    * Chronological backtracking can spend any number of them re-proving the same
@@ -429,9 +448,11 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
    * whole budget. MEASURED longest fruitless stretch: 17 nodes in
    * `kural-baskisi`, 171 in `erken-saat-tuzagi`, 8 059 in `derin-geri-sarma` —
    * all three still solve completely. The worlds that never finish spend
-   * 91 551, 317 395 and 2 890 411. The limit below sits between the two groups
-   * with room to spare; past it, one lesson is given up on and the search
-   * carries on from the best grid instead of chasing the same wall.
+   * 91 551, 317 395 and 2 890 411. Past STALL_LIMIT the search hands the best
+   * grid to the repair below instead of chasing the same wall. It used to give
+   * up on one lesson and search again at 20 000; the repair finishes what the
+   * backtracking cannot, so there is no reason to let it chase the wall for
+   * long (the school's data: first stall at 0.3 s instead of 4.5 s).
    */
   let sinceGain = 0;
 
@@ -461,10 +482,97 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       }
 
       // Forward checking: each remaining block needs a start cell of its own.
-      if (other.size < other.need - other.done) {
-        culprit = n;
+      if (other.size < other.need - other.done) return false;
+      touched.add(other.lesson.classId);
+    }
+    touched.add(item.lesson.classId);
+    for (const classId of touched) {
+      if (!coverable(classId)) {
+        touched.clear();
         return false;
       }
+    }
+    touched.clear();
+    return true;
+  }
+
+  // ---- slack ----------------------------------------------------------------
+  //
+  // A class whose open hours equal its lesson hours has no free hour to spare:
+  // every open cell MUST end up taught. Forward checking above only asks "does
+  // each block still have somewhere to start", and on such a class that is far
+  // too weak — the search can leave a cell nobody can reach any more and only
+  // find out a hundred assignments later. MEASURED on the school's own data,
+  // where all twenty classes are exactly full.
+  //
+  // So after each assignment the classes it touched are asked the stronger
+  // question: how many empty open cells can no live block cover any more? More
+  // of them than the class has hours to spare is a dead end, now.
+
+  const touched = new Set<Id>();
+  const classItems = new Map<Id, number[]>();
+  items.forEach((item, i) => {
+    const list = classItems.get(item.lesson.classId);
+    if (list === undefined) classItems.set(item.lesson.classId, [i]);
+    else list.push(i);
+  });
+  const classOpen = new Map<Id, number[]>();
+  for (const group of base.classes) {
+    const open: number[] = [];
+    for (let cell = 0; cell < cellCount; cell++) {
+      const day = Math.floor(cell / hourCount);
+      const hour = cell % hourCount;
+      if (isExcludedDay(day)) continue;
+      if (base.unavailable[closedKey(group.id, day, hour)] !== undefined) continue;
+      if (
+        group.roomId != null &&
+        base.unavailable[closedKey(group.roomId, day, hour)] !== undefined
+      ) {
+        continue;
+      }
+      open.push(cell);
+    }
+    classOpen.set(group.id, open);
+  }
+
+  function coverable(classId: Id): boolean {
+    const list = classItems.get(classId);
+    const open = classOpen.get(classId);
+    if (list === undefined || open === undefined) return true;
+    let owed = 0;
+    for (const i of list) {
+      const item = items[i]!;
+      if (!item.abandoned) owed += (item.need - item.done) * item.block;
+    }
+    let empty = 0;
+    for (const cell of open) {
+      if (
+        placements[placementKey(classId, Math.floor(cell / hourCount), cell % hourCount)] ===
+        undefined
+      ) {
+        empty++;
+      }
+    }
+    const slack = empty - owed;
+    // More owed than open: the class was over-full before the search began, and
+    // the ceiling and the repair are what deal with that.
+    if (slack < 0) return true;
+
+    let lost = 0;
+    for (const cell of open) {
+      const day = Math.floor(cell / hourCount);
+      const hour = cell % hourCount;
+      if (placements[placementKey(classId, day, hour)] !== undefined) continue;
+      let reached = false;
+      for (const i of list) {
+        const item = items[i]!;
+        if (item.abandoned || item.done >= item.need) continue;
+        for (let s = Math.max(0, hour - item.block + 1); s <= hour && !reached; s++) {
+          if (item.domain[day * hourCount + s] === 1) reached = true;
+        }
+        if (reached) break;
+      }
+      if (!reached && ++lost > slack) return false;
     }
     return true;
   }
@@ -615,64 +723,286 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     undoTrail(frame.trailMark);
   }
 
+  // ---- repair ----------------------------------------------------------------
+  //
+  // The backtracking above is complete only in theory. On a week where every
+  // class is exactly full — open hours equal to lesson hours, which is how the
+  // school's own data is shaped — it used to give up on a dozen lessons and stop
+  // with most of the budget unspent. MEASURED on that data with the hours
+  // Roboders had open (2026-09-24): 206 of 211 blocks before this section, 211
+  // with it.
+  //
+  // So when the search is stuck and time is left, it stops building and starts
+  // REPAIRING (iterative forward search): take a block that has no place, put it
+  // in the cell where it pushes out the fewest blocks, and queue those blocks in
+  // its stead. The walk is guided by two short memories (TABU_TENURE) so it does
+  // not undo itself, and the best grid seen is what gets returned — so the
+  // repair can never hand back less than the search found.
+
+  /** One block the repair may move: which item, and where it starts. */
+  interface Rec {
+    item: number;
+    day: number;
+    hour: number;
+    /** The repair move that put it here. */
+    since: number;
+  }
+
+  let repairing = false;
+  let moves = 0;
+  const random = rng(base.lessons.length * 7919 + cellCount);
+  /** One entry per block still without a place: the item it belongs to. */
+  const queue: number[] = [];
+  /** Class cell -> the movable block that covers it. Fixed cells are absent. */
+  const owner = new Map<string, Rec>();
+  /** `${item}|${cell}` -> the move until which that block may not return there. */
+  const tabu = new Map<string, number>();
+  /** item -> how often it has been the homeless block picked for a move. */
+  const weight = items.map(() => 1);
+
+  function claim(rec: Rec): void {
+    const item = items[rec.item]!;
+    occupy(placements, ix, item.lesson, item.roomId, rec.day, rec.hour, item.block);
+    for (let i = 0; i < item.block; i++) {
+      owner.set(placementKey(item.lesson.classId, rec.day, rec.hour + i), rec);
+    }
+    item.done++;
+    placedBlocks++;
+  }
+
+  function release(rec: Rec): void {
+    const item = items[rec.item]!;
+    vacate(placements, ix, item.lesson, item.roomId, rec.day, rec.hour, item.block);
+    for (let i = 0; i < item.block; i++) {
+      owner.delete(placementKey(item.lesson.classId, rec.day, rec.hour + i));
+    }
+    item.done--;
+    placedBlocks--;
+  }
+
+  /** The movable block on a class cell a lesson occupies, or null if it is fixed. */
+  function movableAt(lessonId: Id, day: number, hour: number): Rec | null {
+    const lesson = ix.lessonById.get(lessonId);
+    if (lesson === undefined) return null;
+    return owner.get(placementKey(lesson.classId, day, hour)) ?? null;
+  }
+
   /**
-   * Gives up on ONE lesson and carries on FROM THE BEST GRID FOUND SO FAR.
-   *
-   * Starting over from the base grid instead is what turned one impossible
-   * lesson into an empty timetable: reaching an empty stack means every
-   * assignment has just been rolled back, so the next attempt began at zero and
-   * had to re-earn everything — 99 lessons, 99 full searches, and the budget
-   * gone. Freezing the best grid makes progress monotone: what was placed stays
-   * placed, and only the lessons still missing are searched for again.
-   *
-   * Completeness is traded away knowingly. This is a 15-second heuristic whose
-   * product is "a grid that is laid out, plus an honest list of what would not
-   * fit" — never a proof that no perfect timetable exists.
-   *
-   * Returns false when nothing reachable is left to search for.
+   * Switches from building to repairing, starting from the best grid.
+   * False when nothing reachable is missing, i.e. there is nothing to repair.
    */
-  function reseed(fallback: number): boolean {
-    const live = (i: number): boolean => {
-      const item = items[i];
-      return item !== undefined && !item.abandoned && item.done < item.need;
-    };
-    const dead = live(culprit)
-      ? culprit
-      : live(fallback)
-        ? fallback
-        : items.findIndex((_, i) => live(i));
-    if (dead < 0) return false;
-
-    items[dead]!.abandoned = true;
-    culprit = -1;
-    sinceGain = 0;
-
-    // The best grid becomes the new floor. `placements` is mutated in place
-    // because `work` shares the object with blocker() and occupy()/vacate().
+  function startRepair(): boolean {
     for (const key of Object.keys(placements)) delete placements[key];
     Object.assign(placements, bestPlacements);
     ix = buildIndex(work);
-
     trail.length = 0;
     stack.length = 0;
+    owner.clear();
+    queue.length = 0;
+    sinceGain = 0;
 
-    // `done` is COUNTED off the frozen grid, not divided out of the hours: two
-    // items share one lesson's hour count, so the hours cannot say which of
-    // them put a block down. `blocksOnGrid()` reads the same blocks the grid
-    // and the pool read (see the contract in constraints.ts).
-    const downNow = new Map<Id, PlacedBlock[]>();
-    for (const item of items) {
-      let down = downNow.get(item.lesson.id);
-      if (down === undefined) {
-        down = blocksOnGrid(work, item.lesson);
-        downNow.set(item.lesson.id, down);
+    // Which blocks on the grid did this run put down? Read with the same
+    // contract as everywhere else, and a block that touches a cell the run was
+    // handed stays where it is.
+    for (const [lessonId, list] of itemsByLesson) {
+      const lesson = ix.lessonById.get(lessonId);
+      if (lesson === undefined) continue;
+      for (const item of list) item.done = 0;
+      for (const b of blocksOnGrid(work, lesson)) {
+        let fixed = false;
+        for (let i = 0; i < b.size; i++) {
+          if (fixedAtStart.has(placementKey(lesson.classId, b.day, b.hour + i))) fixed = true;
+        }
+        const at = items.findIndex((x) => x.lesson.id === lessonId && x.block === b.size);
+        if (fixed || at < 0) continue;
+        const rec: Rec = { item: at, day: b.day, hour: b.hour, since: 0 };
+        items[at]!.done++;
+        for (let i = 0; i < b.size; i++) {
+          owner.set(placementKey(lesson.classId, b.day, b.hour + i), rec);
+        }
       }
-      item.done = down.filter((x) => x.size === item.block).length - item.doneAtStart;
-      if (!item.abandoned) fillDomain(item);
     }
     placedBlocks = items.reduce((sum, x) => sum + x.done, 0);
-    countPlaceable();
-    return placeableBlocks > placedBlocks;
+
+    // What is queued is what the lesson still OWES, read off the grid by the
+    // same contract, and never past the ceiling. Counting the movable blocks
+    // alone is not enough: a new block beside a kept one of the same lesson can
+    // be read as one longer block, which is then "fixed", and its hours would
+    // be queued a second time. A guard, not a fix: 5 000 random worlds never
+    // produced that reading (invariants.test.ts, 2026-09-24).
+    for (const [lessonId, list] of itemsByLesson) {
+      const lesson = ix.lessonById.get(lessonId);
+      if (lesson === undefined) continue;
+      const owed = pendingBlocks(work, lesson);
+      for (const item of list) {
+        const missing = owed.filter((x) => x === item.block).length;
+        const index = items.indexOf(item);
+        for (let n = 0; n < Math.min(missing, item.need - item.done); n++) queue.push(index);
+      }
+    }
+    if (queue.length === 0) return false;
+    repairing = true;
+    return true;
+  }
+
+  /** Per-lesson and per-teacher daily limits that BLOCK, resolved once. 0 = none. */
+  const sameLimit = new Map<Id, number>();
+  for (const lesson of base.lessons) {
+    const limit = lessonLimit(base, lesson);
+    const bites = ruleLevel(base, 'maxSameLessonPerDay') === 'block';
+    sameLimit.set(lesson.id, bites && ruleActive(base, 'maxSameLessonPerDay', limit) ? limit : 0);
+  }
+  const dayLimit = new Map<Id, number>();
+  for (const teacher of base.teachers) {
+    const limit = limitFor(base, teacher, 'maxPerDay');
+    const bites = ruleLevel(base, 'maxPerDay') === 'block';
+    dayLimit.set(teacher.id, bites && ruleActive(base, 'maxPerDay', limit) ? limit : 0);
+  }
+
+  /**
+   * What has to move out of the way for `item` to start at `cell`, or null
+   * when something fixed is in the way.
+   *
+   * Not only the blocks sitting on the same hours. A daily limit is filled by
+   * blocks elsewhere in the day — the lesson's own other block, the teacher's
+   * other classes — and on a week this tight skipping every cell a limit
+   * touches leaves the walk nowhere to go. So those blocks are candidates to
+   * move too, the biggest first because one move is cheaper than two.
+   */
+  function evictions(item: Item, cell: number): Set<Rec> | null {
+    const { lesson, block, roomId } = item;
+    const day = Math.floor(cell / hourCount);
+    const hour = cell % hourCount;
+    if (hour + block > hourCount || isExcludedDay(day)) return null;
+
+    const out = new Set<Rec>();
+    for (let i = 0; i < block; i++) {
+      const h = hour + i;
+      if (
+        base.unavailable[closedKey(lesson.classId, day, h)] !== undefined ||
+        base.unavailable[closedKey(lesson.teacherId, day, h)] !== undefined ||
+        (roomId != null && base.unavailable[closedKey(roomId, day, h)] !== undefined)
+      ) {
+        return null;
+      }
+      const busy = [
+        placements[placementKey(lesson.classId, day, h)],
+        ix.teacherBusy.get(closedKey(lesson.teacherId, day, h)),
+        roomId == null ? undefined : ix.roomBusy.get(closedKey(roomId, day, h)),
+      ];
+      for (const other of busy) {
+        if (other === undefined) continue;
+        const rec = movableAt(other, day, h);
+        if (rec === null) return null;
+        out.add(rec);
+      }
+    }
+
+    /** Hours on this day that `belongs` claims and that are not already moving. */
+    const trim = (
+      limit: number,
+      cells: (h: number) => Id | undefined,
+      belongs: (id: Id) => boolean,
+    ) => {
+      if (limit <= 0) return true;
+      let count = 0;
+      const movable: Rec[] = [];
+      for (let h = 0; h < hourCount; h++) {
+        const id = cells(h);
+        if (id === undefined || !belongs(id)) continue;
+        const rec = movableAt(id, day, h);
+        if (rec !== null && out.has(rec)) continue;
+        count++;
+        if (rec !== null && rec.hour === h) movable.push(rec);
+      }
+      movable.sort((a, b) => items[b.item]!.block - items[a.item]!.block);
+      for (const rec of movable) {
+        if (count + block <= limit) break;
+        out.add(rec);
+        count -= items[rec.item]!.block;
+      }
+      return count + block <= limit;
+    };
+
+    const ok =
+      trim(
+        sameLimit.get(lesson.id) ?? 0,
+        (h) => placements[placementKey(lesson.classId, day, h)],
+        (id) => id === lesson.id,
+      ) &&
+      trim(
+        dayLimit.get(lesson.teacherId) ?? 0,
+        (h) => ix.teacherBusy.get(closedKey(lesson.teacherId, day, h)),
+        () => true,
+      );
+    return ok ? out : null;
+  }
+
+  /** One repair move: one homeless block finds a place, and whatever it displaces queues up. */
+  function repairMove(): void {
+    moves++;
+    const at = Math.floor(random() * queue.length);
+    const index = queue[at]!;
+    const item = items[index]!;
+    // Breakout: a block that keeps coming back homeless gets heavier, so the
+    // walk learns to push something else out of its way instead.
+    weight[index]!++;
+
+    let best: Set<Rec> | null = null;
+    let bestCell = -1;
+    let bestCost = Infinity;
+    let ties = 0;
+    let anyRoom = false;
+
+    for (let cell = 0; cell < cellCount; cell++) {
+      const out = evictions(item, cell);
+      if (out === null) continue;
+      anyRoom = true;
+      if (out.size > 0 && (tabu.get(`${index}|${cell}`) ?? 0) > moves) continue;
+      let cost = 0;
+      for (const rec of out) {
+        cost += weight[rec.item]! * (moves - rec.since < TABU_TENURE ? 4 : 1);
+      }
+      if (cost < bestCost) {
+        bestCost = cost;
+        best = out;
+        bestCell = cell;
+        ties = 1;
+      } else if (cost === bestCost && random() * ++ties < 1) {
+        best = out;
+        bestCell = cell;
+      }
+    }
+
+    if (best === null) {
+      // Nowhere at all, even with every movable block out of the way: this
+      // block cannot be placed and the report will say why. If it was only
+      // tabu, another block gets the next move.
+      if (!anyRoom) {
+        queue[at] = queue[queue.length - 1]!;
+        queue.pop();
+      }
+      return;
+    }
+
+    const day = Math.floor(bestCell / hourCount);
+    const hour = bestCell % hourCount;
+    for (const rec of best) release(rec);
+    // The same blocker() the drag uses has the last word. A limit this file does
+    // not count for itself (art arda) can still say no, and then nothing moves.
+    if (blocker(work, ix, item.lesson.id, day, hour, item.block) !== null) {
+      for (const rec of best) claim(rec);
+      return;
+    }
+
+    queue[at] = queue[queue.length - 1]!;
+    queue.pop();
+    for (const rec of best) {
+      tabu.set(`${rec.item}|${rec.day * hourCount + rec.hour}`, moves + TABU_TENURE);
+      queue.push(rec.item);
+    }
+    claim({ item: index, day, hour, since: moves });
+    remember();
   }
 
   function report(phase: SolverPhase): SolverResult {
@@ -751,6 +1081,16 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       };
 
       for (;;) {
+        if (repairing) {
+          if (queue.length === 0) return stop('solved');
+          if (performance.now() - t0 >= sliceMs) return stop(null);
+          if (elapsedMs + (performance.now() - t0) >= opts.budgetMs) return stop('stuck');
+          nodes++;
+          if (++sinceGain > REPAIR_STALL_PER_BLOCK * totalBlocks) return stop('stuck');
+          repairMove();
+          continue;
+        }
+
         if (placedBlocks === placeableBlocks) {
           remember();
           return stop(placedBlocks === totalBlocks ? 'solved' : 'stuck');
@@ -762,7 +1102,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
         nodes++;
         sinceGain++;
         if (sinceGain > STALL_LIMIT) {
-          if (!reseed(stack[stack.length - 1]?.item ?? -1)) return stop('stuck');
+          if (!startRepair()) return stop('stuck');
           continue;
         }
 
@@ -803,17 +1143,11 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
           stack.pop();
           remember();
           if (stack.length === 0) {
-            // Nothing left to back up into: the whole tree is exhausted. Give
-            // up on ONE lesson, not on the timetable — the others still deserve
-            // their places, and the report is only useful next to a grid that
-            // is otherwise full.
-            if (!reseed(frame.item)) return stop('stuck');
+            // Nothing left to back up into: the whole tree is exhausted, and
+            // the repair takes over from the best grid it reached.
+            if (!startRepair()) return stop('stuck');
             continue;
           }
-          // A frame that failed INSIDE a real context is a better suspect than
-          // the root one; the root's own failure must not overwrite it, which
-          // is why this sits after the empty-stack branch.
-          culprit = frame.item;
           retract(stack[stack.length - 1]!);
         }
       }

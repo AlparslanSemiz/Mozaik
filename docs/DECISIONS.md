@@ -35,6 +35,52 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-24 · Çözücü takılınca vazgeçmiyor, onarıyor
+
+**Değişen.** `solver.ts`'in ikinci katmanı. Geri sarmalı arama `STALL_LIMIT`
+düğüm boyunca iyileşmezse ya da ağacı tükenirse en iyi ızgara bir onarım
+aşamasına geçiyor (yinelemeli ileri arama): yersiz bir blok, en az blok iten
+hücreye konur ve itilenler sıraya girer. Yanında iki yeni parça var. Tam dolu bir
+sınıfın boş kalamayacak hücrelerini soran pay denetimi (`coverable`), ve sık
+yersiz kalan bloğu ağırlaştıran bir sayaç. `STALL_LIMIT` 20 000'den 2 000'e indi.
+Onarım da iyileşmeden blok başına 500 hamle geçerse duruyor.
+
+**Eski hâli.** Takılınca bir ders "vazgeçildi" diye işaretlenir, en iyi ızgara
+tabana dondurulur ve kalan dersler yeniden aranırdı (`reseed`, tuzak 26). Kaldırıldı:
+onarım vazgeçilen dersi de sıraya alıyor, yani vazgeçmenin artık bir işi yok.
+
+**Gerekçe, ölçülmüş.** Kullanıcının not defteri: "Roboders'te program oluşuyor,
+bizde oluşmuyor". Babanın verisinin anonimleştirilmiş kopyasında
+(`src/fixtures/tam-dolu-kurs.json`), Roboders'in açık saatleriyle eski çözücü
+2,7 saniyede 206/211'de takılıyordu, yenisi 0,5–1,5 saniyede 211/211 diziyor (16
+tohumla ölçüldü, depodaki tohum tek). Veri olduğu gibi ise bir program yok, onu
+tam çözücü kanıtlıyor. Yeni çözücü orada 199 yerine 203 blok koyuyor ve bütçenin
+tamamını değil 6 saniyeyi harcıyor. Örnek okul değişmedi (367/367, 367 düğüm).
+
+**Denendi ve bırakıldı:**
+
+- Onarım tek başına, ağırlıksız: sekiz tohumun dördünde son blok için döngüye
+  girdi ve 15 saniyede bitmedi. Ağırlıkla sekizde sekiz.
+- Onarımı 20 000 düğümlük ilk takılmada başlatmak: ilk takılma 4,5. saniyede
+  geliyordu. 2 000'de 0,3. saniyede geliyor, ve sonuç değişmiyor.
+- Kural dolduran blokları (aynı ders günde en fazla 2, öğretmenin günlük sınırı)
+  itebilen onarım, pay denetimi ve ağırlık olmadan: 207'den 205'e düştü, yani tek
+  başına işe yaramadı. Kodda kaldı, çünkü babanın verisinde iki kural da
+  bağlayıcı, ama ağırlıkla birlikte onsuz hâli ayrıca ölçülmedi.
+- Onarımın kendi durma sınırını sabit 100 000 hamle koymak: çözümü olmayan küçük
+  rastgele dünyalarda her koşu saniyeler sürdü ve `invariants.test.ts` zaman
+  aşımına düştü. Sınır blok sayısıyla ölçekleniyor.
+
+**Bedeli.** Ağır dünyaların hepsinde daha çok blok yerleşiyor (`gercek-olcek-imkansiz`
+229'dan 474'e), ama `gercek-olcek-sikisik`'te eski çözücü 3,7 saniyede 413'te
+duruyordu, yenisi 15 saniyenin tamamında 420'ye çıkıyor. Hâlâ ilerleyen bir
+onarım durmuyor. Bu turda böyle bırakıldı ve kullanıcıya henüz sorulmadı; bugünkü
+çaresi "Durdur", ki o ana kadarki en iyi ızgarayı veriyor.
+
+**Açık kalan.** Yalnız dört öğretmen saatinin açıldığı, çözümü çok az olan
+kopyası 30 saniyede de dizilmiyor (208–209/211). Gerçek bir kullanıcının o sınırda
+durması beklenmiyor, ama ölçüldü ve yazılı.
+
 ### 2026-09-12 · Havuz ızgaranın kullanmadığı yere açılıyor, ve tepsi kaydığını söylüyor
 
 **Değişen.** Havuz tepsisi artık ızgaranın kullanmadığı boşluğa açılıyor

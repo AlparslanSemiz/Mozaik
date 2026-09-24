@@ -2,9 +2,12 @@
 // what is tested is not "did it produce output" but "is the output legal by the
 // SAME engine the user's own dragging is judged by".
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { buildIndex, placementKey, place, setBlockPinned } from './pure/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
+import { parseState } from './pure/parseState';
 import { findViolations } from './pure/rules';
 import { sampleState } from './pure/sample';
 import { createSolver, solve } from './pure/solver';
@@ -426,6 +429,67 @@ describe('createSolver — dilimleme ve iptal', () => {
     expect(p.nodes).toBeGreaterThan(0);
     expect(p.elapsedMs).toBeGreaterThan(0);
   });
+});
+
+// ---------------------------------------------------------------------------
+// A real course, names taken out.
+//
+// `fixtures/tam-dolu-kurs.json` is the school's own plan with every teacher
+// renamed to "Öğretmen N": twenty classes, 146 lessons, and every class EXACTLY
+// full — open hours equal lesson hours, in windows of three to six hours. The
+// report that started this: "Roboders builds this week and we do not".
+//
+// Measured 2026-09-24. As the file stands no timetable exists at all — an exact
+// solver (OR-Tools CP-SAT) proves it in 0.1 s — so the right answer there is an
+// honest stuck list. With the hours Roboders's printout shows open (Ö6 and Ö15
+// on Saturday, Ö1 on Sunday's first two hours and up to 9 hours that day) one
+// does exist, and before the repair phase this solver stopped at 206 of 211.
+
+function kurs(): State {
+  const raw = readFileSync(join(import.meta.dirname, 'fixtures', 'tam-dolu-kurs.json'), 'utf8');
+  const state = parseState(raw);
+  if (state === null) throw new Error('tam-dolu-kurs.json okunamadı');
+  return state;
+}
+
+function teacherId(d: State, short: string): string {
+  const found = d.teachers.find((x) => x.short === short);
+  if (found === undefined) throw new Error(short);
+  return found.id;
+}
+
+describe('solve — tam dolu bir kurs', () => {
+  it('Roboders’teki saatlerle haftanın tamamını diziyor', () => {
+    const d = kurs();
+    const unavailable = { ...d.unavailable };
+    for (const short of ['Ö6', 'Ö15']) {
+      for (let h = 0; h < 12; h++) delete unavailable[`${teacherId(d, short)}|4|${h}`];
+    }
+    for (const h of [0, 1]) delete unavailable[`${teacherId(d, 'Ö1')}|5|${h}`];
+    const teachers = d.teachers.map((x) =>
+      x.short === 'Ö1' ? { ...x, limits: { ...x.limits, maxPerDay: 9 } } : x,
+    );
+
+    const result = solve({ ...d, unavailable, teachers }, { keepPlaced: false });
+
+    expect(result.stuck).toEqual([]);
+    expect(result.phase).toBe('solved');
+    expect(result.placedBlocks).toBe(211);
+    expectLegal(result.state);
+    expect(
+      findViolations(result.state, buildIndex(result.state)).filter((v) => v.level === 'block'),
+    ).toEqual([]);
+  }, 30_000);
+
+  it('olduğu gibi kurulamıyor: bütçeyi bitirmeden duruyor ve eksiği sayıyor', () => {
+    const result = solve(kurs(), { keepPlaced: false });
+
+    expect(result.phase).toBe('stuck');
+    expect(result.stuck.length).toBeGreaterThan(0);
+    expect(result.elapsedMs).toBeLessThan(15_000);
+    expectLegal(result.state);
+    expect(blocksOf(result.state).length).toBe(result.placedBlocks);
+  }, 30_000);
 });
 
 describe('solve — gerçek ölçek', () => {

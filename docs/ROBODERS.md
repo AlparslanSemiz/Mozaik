@@ -131,9 +131,10 @@ Dosyadan okunanlar, hepsi doğrudan görülerek:
 
 - **On sekiz sayfa, A4 yatay.** Günde üç sayfa, altı gün. Başlığı `BRY YKS` ve
   `Teacher Wall Poster`, yani satırlar öğretmen sütunlar saat.
-- **Öğretmen kısaltmaları babanın Mozaik dosyasındakilerle birebir aynı**
-  (`AS AV AÖ DE İA KY RY SD HE AG MÇ MB NU GÇ ED` ve ötekiler), yani iki
-  programa aynı veri girilmiş.
+- **Öğretmen kısaltmalarının on beşi babanın Mozaik dosyasındakilerle aynı**
+  (`AS AV AÖ DE İA KY RY SD HE AG MÇ MB NU GÇ ED`). Üçü başka adla duruyor: Mozaik'teki
+  `YM`, `YK` ve `YG` burada `NB`, `NÇ` ve `Mehme`. 2026-09-12'de bundan "iki programa
+  aynı veri girilmiş" diye çıkarılmıştı; 2026-09-24'te ölçülünce tutmadı (aşağıda).
 - **Hücrede üç şey var:** saat aralığı (`16:50 - 18:20`), branş, ve sınıf artı
   derslik birleşik (`310G`, `414D`). Birleşik yazım babanın kâğıttaki
   alışkanlığıyla aynı, ve bizde `B4.15` ile `B4.3b`'nin konusu.
@@ -144,8 +145,30 @@ Dosyadan okunanlar, hepsi doğrudan görülerek:
 
 Üç yere bakıyor. `R7`'nin rapor ailesi satırları artık bir ekran görmüş sayılır.
 `B4.4` ile Bölüm 3 için karşılaştırılacak gerçek bir kâğıt var. Ve en önemlisi
-§0'ın en üstteki işine: bu çıktı, babanın verisinin **çözülebilir** olduğunun
-kanıtı, yani bizim çözücümüzün onu dizememesi bir kapasite sorunu değil.
+§0'ın en üstteki işine, ama o gün yazıldığı gibi değil: bu çıktı Roboders'teki
+verinin çözülebilir olduğunun kanıtı, Mozaik'teki verinin değil.
+
+### Hücre hücre karşılaştırma (2026-09-24)
+
+Baskı `pdftotext -bbox-layout` ile ayrıştırıldı: 217 blok, her biri öğretmen, gün,
+saat aralığı ve sınıfıyla. Saat aralıkları Mozaik'in zil düzeniyle ders saatine
+çevrildi ve babanın Mozaik planına konup bizim kısıt motorumuzla denetlendi.
+
+- **Sınıfların kapalı saatleri birebir tutuyor.** Hiçbir blok bir sınıfın kapalı
+  saatinde değil, yani gün eşlemesi ve sınıf pencereleri iki programda aynı.
+- **Öğretmen müsaitliği tutmuyor.** 21 hücrede Roboders, Mozaik'te kapalı olan bir
+  öğretmen saatine ders koymuş: KY Cumartesi 9 saat, GÇ Cumartesi 10 saat, AS Pazar
+  1. ve 2. saat.
+- **Bir kural tutmuyor.** AS Pazar günü 9 saat giriyor, Mozaik'te günlük sınırı 8.
+- **Ders listesi küçük farklarla ayrışıyor.** Roboders'te bir sınıf fazla (`210Z`,
+  AS, MB ve DE'den beş blok). 413B ve 414D'de MÇ ile MB'nin saatleri yer
+  değiştirmiş (3↔2), 415D'nin geometrisini KY yerine `Mehme` veriyor.
+
+Mozaik'teki veri olduğu gibi **kurulamıyor**: OR-Tools CP-SAT 0,1 saniyede
+kanıtlıyor. Kurallar sabit kalırsa dört öğretmen saatini açmak yetiyor, ayrıntı ve
+babaya giden soru [TODO.md](TODO.md) B5.8 ve §8b'de. Roboders'teki açık saatlerle
+aynı veriyi Mozaik'in çözücüsü 2026-09-24'ten beri yaklaşık bir saniyede diziyor
+(tuzak 122 ve 125).
 
 ## ⛔ R6 GÜVENLİK SÖZLEŞMESİ — SALT OKUNUR, İSTİSNASIZ
 

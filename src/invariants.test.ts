@@ -24,7 +24,7 @@ import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
 import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints';
 import { remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
-import { activeProgram } from './pure/programs';
+import { activeProgram, replaceActiveGrid } from './pure/programs';
 import { solve } from './pure/solver';
 import { parseState } from './pure/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
@@ -125,6 +125,35 @@ describe('değişmez · çözücünün bıraktığı ızgara kurallara uyar', ()
         }
       }),
       { numRuns: 120 },
+    );
+  });
+
+  it('elde kalan yarım bloklarla yeniden dizince de borcundan fazla yerleştirmiyor', () => {
+    // A grid with random HOURS taken off it, not whole blocks: a double loses
+    // one of its hours and a single is left sitting next to an empty one, and
+    // the solver then fills in around what is left. Nothing else here hands it
+    // a half-kept lesson. What it does NOT catch, measured (2026-09-24): the
+    // repair's cap on what it queues (`pendingBlocks` in `startRepair`) can be
+    // taken out and this stays green — and so did 5 000 wider random worlds.
+    // The cap guards a reading of the grid no generated world has produced.
+    fc.assert(
+      fc.property(solvedWorld, fc.array(fc.nat(), { maxLength: 6 }), (d, drops) => {
+        const placements = { ...activeProgram(d).placements };
+        const keys = Object.keys(placements);
+        for (const pick of drops) {
+          if (keys.length === 0) break;
+          delete placements[keys.splice(pick % keys.length, 1)[0]!];
+        }
+        const out = solve(replaceActiveGrid(d, { placements })).state;
+        const hours = new Map<Id, number>();
+        for (const id of Object.values(activeProgram(out).placements)) {
+          hours.set(id, (hours.get(id) ?? 0) + 1);
+        }
+        for (const lesson of out.lessons) {
+          expect(hours.get(lesson.id) ?? 0).toBeLessThanOrEqual(lesson.weeklyHours);
+        }
+      }),
+      { numRuns: 150 },
     );
   });
 });

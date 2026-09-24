@@ -21,8 +21,6 @@ bitince §10'a taşınır.
 > (Ham notlar) geçer — hiçbir satır silinmez.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
-Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz.
-
 
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
@@ -37,7 +35,7 @@ Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboder
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | hepsi açık |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3, B5.7 ve B5.9 açık, B5.8'in veri yarısı babada |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti, çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -689,6 +687,39 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       durumu üretip ölçmek, çünkü bir şikayetten yazılmış plan bir sebep
       adlandırırsa o sebep ilk ölçülecek şeydir (tuzak 101). Ölçülmeden "özellik
       yok" diye yazılmayacak.
+- [~] **B5.8 Babanın verisinde program oluşmuyor, Roboders'te oluşuyor —
+      ÇÖZÜCÜ YARISI BİTTİ (2026-09-24), VERİ YARISI BABADA.** Senin satırın: *"Her
+      şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı
+      dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program
+      oluşurken bizde oluşmuyor."* Ölçülen üç şey:
+      **(1) Veri aynı değil.** Roboders'in çıktısı (`docs/RoboDers/`) ayrıştırılıp
+      bizim veriyle hücre hücre karşılaştırıldı. Roboders 21 hücrede bizde kapalı
+      olan öğretmen saatine ders koymuş: KY ve GÇ Cumartesi (bizde ikisi de
+      Cumartesi kapalı), AS Pazar 1–2. saat. AS orada Pazar günü 9 saat giriyor,
+      bizde sınırı 8. Orada bir sınıf fazla (210Z), 413B ve 414D'de MÇ ile MB'nin
+      saatleri yer değiştirmiş, 415D'nin geometrisini başka bir öğretmen veriyor.
+      **(2) Bizim veride program yok.** Bu çözücünün zayıflığı değil, kanıtlandı:
+      tam bir çözücü (OR-Tools CP-SAT) 0,1 saniyede "imkânsız" diyor. Kurallar
+      olduğu gibi kalırsa **dört öğretmen saatini açmak yetiyor**: HE Cumartesi 3.
+      saat, KY Cumartesi 11–12, AV Cumartesi 1. saat. Müsaitlik olduğu gibi kalırsa
+      en az 9 saatlik kural ihlali gerekiyor.
+      **(3) Çözücü de zayıftı, güçlendirildi.** Roboders'in açık saatleriyle aynı
+      veride eski çözücü 206/211'de takılıyordu, yenisi yaklaşık bir saniyede
+      211/211 diziyor (tuzak 122, [DECISIONS.md](DECISIONS.md)). Veri olduğu gibi
+      ise 199 yerine 203 blok koyup 6 saniyede duruyor.
+      **Kalan, babada:** hangisi doğru, Mozaik'teki müsaitlik mi Roboders'teki mi?
+      Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te açılınca program
+      çıkıyor. Soru §8b'de.
+- [ ] **B5.9 Kurulamayan haftada "şunu açarsan kurulur" demek.** B5.8'den doğdu.
+      Bugün kurulamayan haftanın sebep cümlesi işe yaramıyor: babanın verisinde
+      "410A SAY sınıfı Salı 1 saatinde kapalı" yazıyor, çünkü en sık engel sayılıyor
+      ve tam dolu bir sınıfta en sık engel sınıfın kendi kapalı saati. Oysa cevap
+      ölçülebiliyor: B5.8'deki dört saat bir en küçük düzeltme. Önerilen: çözücü
+      takılınca kapalı öğretmen saatlerini bir bedelle açık sayan bir onarım koşusu,
+      ve sonuç "HE Cumartesi 3. saat, KY Cumartesi 11–12 ve AV Cumartesi 1. saat
+      açılırsa hafta kuruluyor" gibi bir cümle. Tahmin değil, bulduğu programı
+      gösterebilir. aSc'de bunun karşılığı yok (kova kaydı yazılmadı). Karar sende:
+      yapılsın mı, ve kural gevşetme de önerilsin mi.
 
 ---
 
@@ -874,6 +905,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Sorular: sınıfın günü içinde boşluk (pencere) kalıyor mu, öğretmen okula
       gereksiz gün geliyor mu, günler dengeli mi. Cevaba göre §5 şekillenir.
 - [ ] **"Bu programı kullanır mıydın?"** — asıl soru hâlâ bu.
+- [ ] **Müsaitlik hangisinde doğru, Mozaik'te mi Roboders'te mi?** (B5.8, 2026-09-24)
+      Roboders KY ile GÇ'yi Cumartesi, AS'yi Pazar sabahı derse koyuyor, Mozaik'te o
+      saatler kapalı. Mozaik'teki doğruysa hafta o hâliyle kurulamıyor (kanıtlı), en
+      küçük çare HE Cumartesi 3, KY Cumartesi 11–12 ve AV Cumartesi 1. saati açmak.
+      Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te düzeltilince program
+      yaklaşık bir saniyede çıkıyor.
 
 ### 8c · Babanın gerçek verisi — **v0'ın çıkma şartı**
 
@@ -1326,6 +1363,7 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 | Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem. | **B4.10** — zaten kırmızı, görünen ağırlığı ölçülecek |
 | Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre. | **B4.11** — özellik var, bulunabilirlik bulgusu |
 | kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya... yani kırmızı mı turuncu mu falan. | **B4.8** — performans değil görünürlük, 2026-09-12'de ölçüldü |
+| Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz. | **B5.8** — çözücü güçlendi; veri aynı değil ve bizimki kanıtlı imkânsız, soru §8b'de · **B5.9** doğdu |
 
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 

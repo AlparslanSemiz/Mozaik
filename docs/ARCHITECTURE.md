@@ -273,9 +273,15 @@ durduğu için onu gösteren durum da orada olmalı.
 ### Çözücü kısıt mantığını yeniden yazmaz
 
 `solver.ts` her yasallık sorusunu `blocker()`'a sorar, yani sürüklemeyi yargılayan
-fonksiyonun kendisine. Kendine ait iki şeyi var, ikisi de aramayla ilgili: her
-dersin arama başlamadan hesaplanan tavanı, ve ızgara uzun süre iyileşmezse bir
-dersten vazgeçip o ana kadarki en iyi ızgaradan devam etmek (tuzak 26).
+fonksiyonun kendisine. Kendine ait olanların hepsi aramayla ilgili: her dersin
+arama başlamadan hesaplanan tavanı (tuzak 26), tam dolu bir sınıfın boş kalamayacak
+hücrelerini soran pay denetimi (`coverable`, tuzak 122), ve iki aşama. Önce
+geri sarmalı bir arama kurar. Izgara `STALL_LIMIT` kadar düğüm iyileşmezse ya da
+ağaç tükenirse en iyi ızgara bir onarım aşamasına geçer: yersiz bir blok en az
+blok iten hücreye konur, itilenler sıraya girer. Onarımın itmek için saydığı
+günlük sınırlar (aynı ders günde, öğretmen günde) kendi hesabı, ama son söz yine
+`blocker()`'da: onun hayır dediği bir hamle yapılmaz. Onarım rastgeleliği tohumlu
+bir üreteçten alır, yani aynı girdi aynı programı verir.
 
 Bir ders blok boyu başına bir iş kalemine ayrılır, yani en çok üçe (`solver.ts`
 `[3, 2, 1]` üstünde dönüyor), çünkü aramanın sayaçları (aday hücre kümesi, MRV,

@@ -219,6 +219,9 @@ saniyede 2 ya da 3 blok. Çare iki katmanlı. Her dersin tavanı arama başlamad
 hesaplanır (`ceilingHours`), ve ızgara `STALL_LIMIT` kadar düğüm boyunca
 iyileşmezse bir dersten vazgeçilip o ana kadarki en iyi ızgara tabana
 dondurulur. Sıfırdan başlamak her vazgeçişte bütün emeği geri sarardı.
+2026-09-24'ten beri ikinci katman vazgeçmek değil onarmak: en iyi ızgara
+onarım aşamasına geçer ve orada hiçbir dersten vazgeçilmez (tuzak 122,
+kayıt [DECISIONS.md](DECISIONS.md)'de). Tavan yerinde duruyor.
 
 ### 27 · Yerleşemeyen dersin sebebi dersin kendi blokları yüzünden yanlış çıkabilir
 Kısmen sığan bir ders izin verilen günleri kendi bloklarıyla doldurur, `blocker()`
@@ -249,6 +252,19 @@ Sabitleme kilidi `removeBlock`'a kondu, çünkü dört yol (sağ tık, menü, De
 kaldırıp `blocker()`'a geri konup konamayacağını soruyordu ve kilitli bloğu
 kaldıramayınca onu kendisiyle çakışıyor diye raporladı. Çare adları ayırmak:
 `liftBlock()` mekanik ve kapısız, `removeBlock()` kapı artı `liftBlock`.
+
+### 122 · Her blokta bir yer kalması, her saatte bir blok kalması demek değildir
+Babanın verisinde yirmi sınıfın yirmisi de tam dolu: açık saat ders saatine
+eşit, pencereler üç ile altı saatlik. İleri kontrol yalnız "her bloğun hâlâ bir
+başlangıç hücresi var mı" diye soruyordu, ve arama kimsenin artık dolduramayacağı
+bir açık hücre bıraktığını yüz atama sonra öğreniyordu: 211 bloğun 199'u. Çare
+iki parça. Her atamadan sonra dokunulan sınıfa ters soru sorulur (`coverable`):
+hiçbir canlı bloğun ulaşamadığı boş açık hücre sayısı sınıfın payını aşıyorsa
+dal hemen kesilir. `derin-geri-sarma` 8 362 düğümden 12'ye indi. İkincisi,
+backtracking takılınca bir onarım aşaması devralır: yersiz bir blok en az blok
+iten hücreye konur, itilenler sıraya girer, sık yersiz kalan blok ağırlaşır.
+Roboders'in açık saatleriyle aynı veri 0,5–1,5 saniyede 211/211 (16 tohum),
+önce 206'da takılıyordu. `src/solver.test.ts` → "tam dolu bir kurs".
 
 ---
 
@@ -859,6 +875,15 @@ kadar kırmızı tutardı. Ölçüldü, varsayılmadı: aynı glob'dan `src/plat
 adını eklemek, ve sebebini yanına yazmak. Bir dosyanın kendi ürettiği listede
 kendisini araması boş dönebilir.
 
+### 124 · "Çözülemez" beklentisi dünyanın değil çözücünün o günkü sınırını yazabilir
+`parcalanmis-gunler` dünyası `solved: false` bekliyordu. Onarım aşaması onu
+24/24 çözünce stres süiti kırmızıya döndü, ve kırmızı olan çözücü değil
+beklentiydi: OR-Tools CP-SAT aynı dünyada 0,01 saniyede bir hafta buluyor.
+Beklenti, o gün aramanın ulaşabildiğini dünyanın özelliği diye kaydetmişti ve
+her iyileşmeyi hata gibi gösterecekti. Bir dünyanın çözülemez olduğu tam bir
+çözücüyle kanıtlanmadan yazılmaz. Kanıt betiği depoda değil, yöntemi WORKLOG'un
+2026-09-24 girdisinde.
+
 ---
 
 ### 120 · Yanlış yere düşen bir mutasyon yeşil cevap verir, ve o cevap kanıt sanılır
@@ -989,6 +1014,16 @@ kullanıcının şikayeti tam da o varsayımın tutmadığı yerden geliyor. **B
 kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek veri yoksa
 ölçümün adı "örnek okulda şunu gördüm" olur, "sebep bu" olmaz.
 
+### 125 · "Aynı veriyi girdim" bir karşılaştırmanın önkoşulu değil, ölçülecek bir iddiası
+Şikayet "babam Roboders'e aynı dersleri, hocaları ve müsaitlikleri girdi, orada
+program çıkıyor, bizde çıkmıyor" idi. Roboders'in basılı çıktısı ayrıştırılıp
+bizim veriyle hücre hücre karşılaştırıldı: 21 hücrede bizde kapalı olan bir
+öğretmen saatine ders konmuş (iki öğretmen Cumartesi, biri Pazar sabahı), bir
+öğretmen bizim sınırımızın üstünde 9 saat giriyor, ve orada bir sınıf fazla.
+Bizim veride program hiç yok, CP-SAT 0,1 saniyede kanıtlıyor. Çözücüyü
+suçlamadan önce iki girdinin aynı olduğu ölçülür, yoksa bir veri farkı aylarca
+bir algoritma işi gibi kovalanır.
+
 ---
 
 ## Dizin
@@ -997,19 +1032,19 @@ kullanıcı şikayeti kullanıcının kendi verisinde ölçülür**, ve gerçek 
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
-| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98 |
+| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 121, yeni bir tuzak 122'den devam eder. Test stratejisi
+büyük kullanılan numara 125, yeni bir tuzak 126'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

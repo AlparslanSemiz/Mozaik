@@ -87,6 +87,97 @@ birleşiyor, ters yön yok.
 
 ---
 
+## 2026-09-24 · "Roboders'te çıkıyor, bizde çıkmıyor": veri aynı değil, ve çözücü de zayıftı
+
+**Not defterinin iki satırı işlendi.** İkisi de TODO'da numaralandı (B5.8, B4.17), ham
+hâlleri §9'da.
+
+**Önce iddia ölçüldü (tuzak 125).** Roboders'in baskısı (`docs/RoboDers/`)
+`pdftotext -bbox-layout` ile 217 bloğa ayrıştırıldı, saat aralıkları Mozaik'in zil
+düzeniyle ders saatine çevrildi, ve babanın Mozaik planına konup `blocker()` ile
+denetlendi. Sınıf pencereleri birebir tutuyor, öğretmen müsaitliği tutmuyor: 21
+hücrede Roboders Mozaik'te kapalı bir öğretmen saatine ders koymuş (KY Cumartesi 9,
+GÇ Cumartesi 10, AS Pazar 2). AS orada Pazar 9 saat giriyor, bizde sınırı 8. Bir
+sınıf fazla, iki sınıfta iki öğretmenin saatleri yer değiştirmiş.
+
+**Sonra bizim verinin kurulup kurulamadığı kanıtlandı.** Depo dışında, scratchpad'e
+bir sanal ortam kuruldu ve OR-Tools CP-SAT 9.15 ile aynı kısıtlar (sınıf, öğretmen,
+derslik çakışması; kapalı saatler; Engelle seviyesindeki "aynı ders günde en fazla"
+ve öğretmenin günlük sınırı) yazıldı. Sonuç: **INFEASIBLE, 0,1 s.** İki kural
+birlikte gevşeyince çözüm var, biri gevşeyince yok. En küçük düzeltmeler de aynı
+modelle ölçüldü: kurallar sabitken dört öğretmen saati (HE Cumartesi 3, KY
+Cumartesi 11–12, AV Cumartesi 1), müsaitlik sabitken en az 9 saatlik kural ihlali.
+Model depoya girmedi, çünkü uygulamanın bir parçası değil ve Python ister.
+
+**Çözücü de zayıftı.** Roboders'in açık saatleri Mozaik verisine uygulanınca (KY ve
+GÇ Cumartesi açık, AS Pazar 1–2 açık ve günde 9) eski çözücü 2,7 saniyede 206/211'de
+takılıyordu. Üç değişiklik, üçü de ölçülerek girdi:
+
+1. **Pay denetimi** (`coverable`). Yirmi sınıfın yirmisi tam dolu. Her atamadan sonra
+   dokunulan sınıflarda hiçbir canlı bloğun ulaşamadığı boş açık hücre sayılır, sınıfın
+   payını aşarsa dal kesilir. Kurucu arama tek başına 202'den 205'e çıktı.
+   `derin-geri-sarma` 8 362 düğümden 12'ye, `erken-saat-tuzagi` 201'den 9'a indi.
+2. **Onarım aşaması** (yinelemeli ileri arama). Arama takılınca en iyi ızgaradan
+   devam: yersiz blok en az blok iten hücreye, itilenler sıraya, 12 hamlelik tabu.
+   Günlük sınırları dolduran bloklar da itilebiliyor.
+3. **Ağırlık.** Her seçilişinde yersiz bloğun ağırlığı artıyor, itme bedeli ağırlıkla
+   çarpılıyor. Ağırlıksız sekiz tohumun dördü 15 saniyede bitmedi, ağırlıkla sekizde
+   sekiz.
+
+Onarımı ilk takılmada başlatmak (`STALL_LIMIT` 20 000 → 2 000) süreyi 5–11 saniyeden
+0,5–1,5 saniyeye indirdi (16 tohum, dördü paralel koşarken). Eski "dersten vazgeç"
+yolu (`reseed`) kalktı. Kayıt DECISIONS'ta.
+
+**Onarım imkânsızı kanıtlayamaz, o yüzden bir durma sınırı var.** İlk hâli sabit
+100 000 hamleydi ve `invariants.test.ts`'in sekiz özelliği zaman aşımına düştü:
+çözümü olmayan küçük rastgele dünyalar her koşuda o kadar hamle harcıyordu. Sınır
+blok başına 500 oldu. Ölçüm: 16 başarılı koşuda iyileşmesiz en uzun seri 17 983
+hamle, 211 blok için blok başına 85.
+
+**Ölçülen sonuç, depodaki tek tohumla.** Anonim kopya (`src/fixtures/tam-dolu-kurs.json`,
+öğretmen adları "Öğretmen N", ızgara boş): Roboders'in saatleriyle 211/211, 0,7 s.
+Olduğu gibi 203/211 (eskisi 199), 6 saniyede duruyor (eskisi 4,3 s'de 199'da). Örnek
+okul değişmedi, 367/367 ve 367 düğüm. Açık kalan: yalnız dört saatin açıldığı, çözümü
+çok az olan kopya 30 saniyede de dizilmiyor (208–209/211).
+
+**Stres süitinin kırmızısı bir beklentiydi (tuzak 124).** `parcalanmis-gunler`
+`solved: false` bekliyordu, yeni çözücü 24/24 dizdi. CP-SAT dünyanın çözülebilir
+olduğunu 0,01 saniyede gösterdi, beklenti düzeltildi.
+
+**Ortam:** Playwright 1.62.1'in tarayıcısı kurulu değildi, `npx playwright install
+chromium` ile kuruldu. `src-tauri/Cargo.lock` oturum başında zaten değişmişti, bu
+turun işi değil ve commit'e girmedi.
+
+**Ağır dünyalar, eski ve yeni çözücü aynı makinede (15 s bütçe):**
+
+| Dünya | Eski | Yeni |
+|---|---|---|
+| `gercek-olcek-sikisik` | 413/429, 3,7 s | 420/429, 15 s |
+| `gercek-olcek-kurali` | 253/367 | 253/367 (tavan, onarıma girmiyor) |
+| `parcalanmis-gunler` | 22/24 | 24/24, 0,04 s |
+| `gercek-olcek-imkansiz` | 229/713 | 474/713 |
+
+Bedeli ilk satırda: sıkışık dünyada eski çözücü 3,7 saniyede duruyordu, yenisi hâlâ
+ilerlediği için bütçenin tamamını kullanıyor. Babanın elinde bu, "Durdur"a basılmazsa
+15 saniyelik bir bekleyiş demek.
+
+**Onarımın kuyruğuna bir sınır daha konuldu, ve bir hata düzelttiği iddia edilmiyor.**
+Onarım hangi blokların kendisinin olduğunu ızgarayı okuyarak çıkarıyor, ve teoride
+tutulan bir tek saatin yanındaki yeni blok birleşik okunup iki kez borç sayılabilir.
+Kuyruk artık `pendingBlocks` ile sınırlı. Senaryo kurulamadı: el yapımı bir dünya
+bitişikliği hiç üretmedi ("haftaya yay" öbür güne koyuyor), ve sınır kaldırılmış
+mutant 5 000 rastgele dünyada da yeşil kaldı. Yeni özellik testi
+(`invariants.test.ts`, yarım bloklarla yeniden dizmek) bunu yorumunda söylüyor.
+
+**Koşulan testler:** `npm run kontrol` baştan sona yeşil (tipler, sınır, lint 0 hata,
+birim 1207/1207, derleme, boyut ham 1,01 MB ve brotli 248,7 kB, E2E 577/577, site
+22/22, çözücü stresi 7/7). Kuyruk sınırı ondan sonra girdi; sonrasında yeniden koşulan:
+birim 1208/1208, belge kapıları 17/17, `otomatik`, `otomatik-dunyalar` ve `program`
+E2E'leri 107/107, çözücü stresi 7/7, knip temiz. Koşulmadı: `patrol`, `ekran`,
+`mutasyon`, `exe:test`, `kapsam`.
+
+---
+
 ## 2026-09-12 · Faz 4 kapanışı: tam koşu, dört kapı, ve kapanan bir oturumun devri
 
 **Tam `npm run kontrol` koşuldu ve zincir bilinen tarih testinde durdu.** Ondan
