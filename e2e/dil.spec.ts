@@ -103,6 +103,20 @@ test.describe('82. Dil', () => {
   // this sentence and reads the language from `i18n.ts`'s module state. If
   // `applyDil` ever stopped setting it, the interface would change language
   // and every one of these would stay Turkish.
+  test('dil yenilemesiz değişince üst çubuğun durum hapı da yeni dilde', async ({ page }) => {
+    // The pill's sentence comes from a PURE module (`health`) and was memoised
+    // on the timetable alone, so after a live switch it kept the old language
+    // until the next edit: "Sorun yok" beside "Save to file" (2026-09-24, seen
+    // in the Linux exe first, the same in every browser).
+    await openWithSample(page);
+    await openSettings(page, 'Görünüm');
+    await page.getByRole('button', { name: 'English', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    const live = await page.locator('.health-text').first().innerText();
+    await reopen(page);
+    await expect(page.locator('.health-text').first()).toHaveText(live);
+  });
+
   test('SAF modüllerin cümleleri de çevriliyor — kapasite raporu', async ({ page }) => {
     await openWithSample(page);
     await chooseLang(page, 'en');

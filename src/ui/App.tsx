@@ -43,7 +43,7 @@ import Lessons from './lessons';
 import { lessonIcon } from './steps';
 import Availability from './Availability';
 import Program from './Program';
-import { T, useT } from './T';
+import { T, useLang, useT } from './T';
 import Check from './Check';
 import Ribbon from './Ribbon';
 import Print, { NOTHING_EXCLUDED } from './Print';
@@ -506,7 +506,14 @@ export default function App() {
   // One line that says whether the timetable is in trouble, on screen in every
   // tab. Kontrol could always answer this and that was the problem: it is a
   // destination, so asking "am I still all right?" meant leaving the grid.
-  const status = useMemo(() => health(state), [state]);
+  // `dil` although `health` does not take it: its sentences are translated
+  // inside, so after a live language switch the memo would keep the old words
+  // until the next edit (e2e/dil.spec.ts).
+  const { dil } = useLang();
+  const status = useMemo(() => {
+    void dil;
+    return health(state);
+  }, [state, dil]);
 
   // Ctrl/⌘+K opens the palette; Alt+1..7 go to a section.
   //

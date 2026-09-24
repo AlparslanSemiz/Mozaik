@@ -108,9 +108,16 @@ import { newId } from '../pure/entities';
 import { maskCount, setDayMask, setRowMask, solverExclusions } from '../pure/programMask';
 import type { ProgramMask } from '../pure/programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
-import type { Kind, LessonMode, SectionId, ToolState, View, CheckView } from '../platform/toolState';
+import type {
+  Kind,
+  LessonMode,
+  SectionId,
+  ToolState,
+  View,
+  CheckView,
+} from '../platform/toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
-import { useT } from './T';
+import { useLang, useT } from './T';
 import type { ProgramColorMode } from '../platform/programColor';
 
 interface Props {
@@ -305,7 +312,14 @@ export default function Ribbon({
 }: Props) {
   const t = useT();
   const { confirm, prompt, alert } = useDialogs();
-  const status = useMemo(() => health(state), [state]);
+  // `dil` although `health` does not take it: its sentences are translated
+  // inside, so after a live language switch the memo would keep the old words
+  // until the next edit (e2e/dil.spec.ts).
+  const { dil } = useLang();
+  const status = useMemo(() => {
+    void dil;
+    return health(state);
+  }, [state, dil]);
 
   // Folded: the row is GONE, all of it. A folded strip that keeps 27px to hold
   // its own chevron gives back a third of what it costs, and folding is worth
