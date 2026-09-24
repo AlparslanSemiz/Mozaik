@@ -238,6 +238,18 @@ function preservedPlacements(base: State, exclusions: SolverExclusions): Record<
   return out;
 }
 
+/**
+ * The cells a run may not move: with `keepPlaced` everything already on the
+ * grid, otherwise only the pinned cells and the excluded rows and days.
+ */
+export function fixedCells(
+  base: State,
+  keepPlaced: boolean,
+  exclusions: SolverExclusions,
+): Record<string, Id> {
+  return keepPlaced ? { ...activePlacements(base) } : preservedPlacements(base, exclusions);
+}
+
 export function createSolver(base: State, options?: Partial<SolverOptions>): Solver {
   const opts: SolverOptions = { ...DEFAULTS, ...options };
   const excludedDays = new Set(opts.exclusions.dayNames);
@@ -258,9 +270,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // so `placedHours`, `placedBlocks` and `pendingBlocks` below all count the
   // pinned blocks as already down, and `retract()` only ever vacates a cell
   // this search itself filled.
-  const placements: Record<string, Id> = opts.keepPlaced
-    ? { ...activePlacements(base) }
-    : preservedPlacements(base, opts.exclusions);
+  const placements: Record<string, Id> = fixedCells(base, opts.keepPlaced, opts.exclusions);
   const work: State = replaceActiveGrid(base, { placements });
   let ix: Index = buildIndex(work);
   // What this run was handed and must not move: kept blocks, pinned cells and

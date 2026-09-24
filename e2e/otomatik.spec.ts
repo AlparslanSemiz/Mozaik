@@ -6,8 +6,19 @@
 // says afterwards is a sentence a person can act on.
 
 import { type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { expect, test } from './kapan';
-import { answerDialog, chooseEntity, openSettings, openWithSample, placedHours } from './helpers';
+import {
+  answerDialog,
+  chooseEntity,
+  loadWorld,
+  openSettings,
+  openWithSample,
+  placedHours,
+  savedState,
+  settledText,
+} from './helpers';
+import type { State } from '../src/leaf/types';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page) {
@@ -155,5 +166,56 @@ test.describe('22. Otomatik dizme', () => {
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+  });
+
+  // TODO B5.9, on the father's week (anonymised): it cannot be built as it
+  // stands, and the program says what would have to change, with the week it
+  // found, and puts it in with one click that one Ctrl+Z takes back.
+  test('kurulamayan haftada neyin değişmesi gerektiğini söylüyor ve uyguluyor', async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
+    await loadWorld(page, kurs);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+
+    // The bar still says what happened; the panel says what to do about it.
+    const bar = page.locator('.reason-bar.bad');
+    await expect(bar).toContainText('yerleşemedi', { timeout: 60_000 });
+    await expect(bar).not.toContainText('sınıfı Salı 1 saatinde kapalı');
+    const panel = page.locator('.panel.suggestions');
+    await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
+    await expect(panel).toContainText('4 öğretmen saatini açın', { timeout: 150_000 });
+    await expect(panel).toContainText('6 sınırı yükseltin', { timeout: 150_000 });
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 150_000 });
+
+    const details = panel.getByRole('button', { name: 'Ayrıntı', exact: true }).first();
+    await details.click();
+    await expect(panel.getByRole('button', { name: 'Ayrıntıyı gizle' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    await expect(panel).toContainText('Cumartesi');
+
+    const before = await settledText(page);
+    const was = JSON.parse(before) as State;
+    await panel.getByRole('button', { name: 'Saatleri aç ve programı yerleştir' }).click();
+    await expect(page.locator('.reason-bar.ok')).toContainText('Öneri uygulandı');
+    await expect(page.locator('.pool-card')).toHaveCount(0);
+
+    const after = await savedState(page, before);
+    const opened = Object.keys(was.unavailable).filter((k) => after.unavailable[k] === undefined);
+    expect(opened).toHaveLength(4);
+    const teachers = new Set(was.teachers.map((x) => x.id));
+    for (const key of opened) expect(teachers.has(key.split('|')[0]!)).toBe(true);
+    const hours = was.lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
+    expect(await placedHours(page)).toBe(hours);
+
+    // One step back: the four hours closed again and the stuck week on the grid.
+    const applied = await settledText(page);
+    await page.keyboard.press('Control+z');
+    const undone = await savedState(page, applied);
+    expect(undone.unavailable).toEqual(was.unavailable);
+    expect(undone.programs).toEqual(was.programs);
   });
 });

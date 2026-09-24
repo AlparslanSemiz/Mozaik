@@ -54,6 +54,7 @@ import { KIND_ICON } from './steps';
 import Grid from './Grid';
 import type { GridCell, GridMenuTarget, GridRow } from './Grid';
 import LessonPool from './LessonPool';
+import Suggestions from './Suggestions';
 import type { PoolCard } from './LessonPool';
 import { T, useT } from './T';
 import type { Translate } from './T';
@@ -102,6 +103,13 @@ function describeBar(solver: SolverRun, view: View, t: Translate): { text: strin
           ? t(' · {n} blok geçici kapsam dışında', { n: p.excludedBlocks })
           : ''),
       level: 'busy',
+    };
+  }
+
+  if (solver.applied !== null) {
+    return {
+      text: t('Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.'),
+      level: 'ok',
     };
   }
 
@@ -923,9 +931,9 @@ function Program({
         aria-live="polite"
       >
         <span>{barText}</span>
-        {solver.result !== null && !solver.running && (
+        {(solver.result !== null || solver.applied !== null) && !solver.running && (
           <span className="bar-actions">
-            {solver.result.stuck.length > 0 && (
+            {solver.result !== null && solver.result.stuck.length > 0 && (
               <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
             )}
             <button className="btn" onClick={solver.clear}>
@@ -934,6 +942,15 @@ function Program({
           </span>
         )}
       </div>
+
+      {solver.advice !== null && (
+        <Suggestions
+          advice={solver.advice}
+          state={state}
+          onApply={solver.apply}
+          onClose={solver.clear}
+        />
+      )}
 
       {/* The instrument and the pool, side by side. The pool used to sit under
           the grid and cost it 215px of height; down the right it takes width

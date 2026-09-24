@@ -1012,6 +1012,62 @@ const ES: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "se piden {istenen} horas a la semana; las horas abiertas y las reglas permiten como máximo {olabilen}",
+  "Nasıl kurulacağı aranıyor… {sure} sn":
+    "Buscando cómo montar la semana… {sure} s",
+  "Sınıfların saatlerine dokunmadan bir yol bulunamadı.":
+    "No se encontró ningún camino que deje las horas de las clases como están.",
+  "{liste} ve {son}":
+    "{liste} y {son}",
+  "{kim} {gun} {saatler}. saat":
+    "{kim} el {gun}, hora {saatler}",
+  "{ders}: aynı gün en fazla {eski} yerine {yeni} saat":
+    "{ders}: como máximo {yeni} horas en un día en lugar de {eski}",
+  "{kim}: günde en fazla {eski} yerine {yeni} saat":
+    "{kim}: como máximo {yeni} horas al día en lugar de {eski}",
+  "{kim}: art arda en fazla {eski} yerine {yeni} saat":
+    "{kim}: como máximo {yeni} horas seguidas en lugar de {eski}",
+  "{ders}: {eski} yerine {yeni}":
+    "{ders}: {yeni} en lugar de {eski}",
+  "{ders}: haftada {eski} yerine {yeni} saat":
+    "{ders}: {yeni} horas a la semana en lugar de {eski}",
+  "{n} öğretmen saatini açın":
+    "Abrir {n} {n:hora|horas} de profesor",
+  "{n} sınırı yükseltin":
+    "Subir {n} {n:límite|límites}",
+  "{n} dersin blok şeklini değiştirin":
+    "Cambiar la forma de bloque de {n} {n:asignatura|asignaturas}",
+  "Haftalık saati {n} saat azaltın":
+    "Reducir las horas semanales en {n}",
+  "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
+    "El horario ha cambiado entretanto. Pulse Colocar automáticamente para volver a ver una sugerencia.",
+  "Hafta değişiklik gerekmeden kuruluyor":
+    "La semana se puede montar sin ningún cambio",
+  "Otomatik dizme bu haftayı bulamadı; ikinci arama buldu ve denetledi.":
+    "La colocación automática no encontró esta semana; la segunda búsqueda la encontró y la comprobó.",
+  "Programı yerleştir":
+    "Colocar el horario",
+  "Kurulması için":
+    "Para montar la semana",
+  "Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.":
+    "Cada camino basta por sí solo; las horas de las clases nunca se tocan.",
+  "Başka yollar aranıyor…":
+    "Buscando otros caminos…",
+  "Saatleri aç ve programı yerleştir":
+    "Abrir las horas y colocar el horario",
+  "Değiştir ve programı yerleştir":
+    "Cambiar y colocar el horario",
+  "Ayrıntıyı gizle":
+    "Ocultar detalles",
+  "Ayrıntı":
+    "Detalles",
+  "Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.":
+    "Con este cambio cabe toda la semana; el horario se encontró y se comprobó.",
+  "Bundan küçük bir değişiklik yetmiyor.":
+    "Ningún cambio menor basta.",
+  "Bulduğumuz en küçük değişiklik bu.":
+    "Es el cambio más pequeño que encontramos.",
+  "Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.":
+    "Se aplicó la sugerencia y se colocó el horario. Puede deshacerlo con Ctrl+Z.",
   "{sinif} sınıfında boş açık saat kalmadı":
     "la clase {sinif} no tiene ninguna hora abierta libre",
   "Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor":

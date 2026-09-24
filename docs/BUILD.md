@@ -77,7 +77,10 @@ başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini be
 `.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
 tıklanan dosyanın ham boyu ile siteden inen brotli hâli. **Eşik değişirse
 gerekçesi WORKLOG'a yazılır**, çünkü sessizce yükseltilen bir eşik hiç olmayan
-bir eşiktir. Bugün ikisinde de on üç kilobayt kadar pay var (`8ef234c`).
+bir eşiktir. İlk eşiklerde ikisinde de on üç kilobayt kadar pay vardı (`8ef234c`).
+Kurulamayan haftaya öneri (TODO B5.9) dosyayı otuz sekiz kilobayt büyüttü ve
+iki eşik yine on üç kilobayt kadar pay bırakacak yere çekildi; gerekçesi
+WORKLOG'un 2026-09-24 girdisinde.
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

@@ -627,7 +627,7 @@ export default function Ribbon({
             mornings" should mean is not knowable before a term has been laid
             out with this (the former rule against guessed features). */}
         <Group label="Diz">
-          {solver.running ? (
+          {solver.running || solver.advice?.searching === true ? (
             <button className="btn danger" onClick={solver.stop}>
               <Square {...ICON} />
               {t('Durdur')}

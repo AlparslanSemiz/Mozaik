@@ -937,6 +937,19 @@ ve mutasyonun kırmızıya döndürmesi BEKLENEN bir eşini birlikte koşturmak.
 kalibrasyondur: hiçbir mutasyonun kırmızıya dönmediği bir turda kanıtlanan şey
 testin zayıflığı değil, mutasyonun hiç uygulanmamış olmasıdır.
 
+### 129 · Bir güvenceyi sınayan dünya, onun ikinci yolunu da kapatmalı
+Öneri aramasının SAT modelinden "sınıfın kapalı saatinde başlayamaz" satırı
+kaldırıldı ve yeni test yeşil kaldı. Mutasyon doğru yere düşmüştü (tuzak 120'nin
+iki koruması da uygulandı), ama test dünyasındaki sınıf tam doluydu. Tam dolu bir
+sınıfta model "her açık saat dolar" cümlesini de kuruyor, ve o cümle kapalı saati
+ikinci bir yoldan dışarıda bırakıyordu. Dünyaya bir boş saat eklenince aynı
+mutasyon kırmızıya döndü. Ders şu: **bir kuralın testi, o kuralın tek başına
+tuttuğu bir dünyada kurulur.** Sonucu başka bir kısıtın da zorladığı bir dünyada
+test kuralı değil ikisinin birleşimini ölçer. İki yolun ikisini de kapatan
+mutasyon (model ve denetçi birlikte) ilk dünyada da kırmızıydı. Asıl yakalanması
+gereken, yalnız birini kapatan mutasyon. Test `src/relax.test.ts`'te,
+"sınıfın kapalı saati en ucuz çare olsa da önerilmiyor".
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1076,12 +1089,12 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 128, yeni bir tuzak 129'dan devam eder. Test stratejisi
+büyük kullanılan numara 129, yeni bir tuzak 130'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

@@ -1819,6 +1819,53 @@ table.list tbody tr {
   padding: var(--space-1) var(--space-3);
 }
 
+/* What to change so a stuck week can be built (TODO B5.9), under the bar and
+   over the grid. One line per way, the details folded: the grid below is what
+   the suggestion is about, and it has to stay in view. */
+.panel.suggestions {
+  flex: 0 0 auto;
+  margin: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  max-height: 45vh;
+  overflow: auto;
+}
+
+.suggestion-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.panel.suggestions h2 {
+  margin: 0;
+}
+
+.suggestion-close {
+  margin-left: auto;
+}
+
+.suggestion-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-left: 1.5em;
+}
+
+.suggestion-title {
+  font-weight: 600;
+  min-width: 16em;
+}
+
+.suggestion-detail {
+  margin: var(--space-2) 0 var(--space-2);
+}
+
+.suggestion-detail ul {
+  margin: 0 0 var(--space-2);
+  padding-left: 1.2em;
+}
+
 /* -------------------------------------------------------------------- grid */
 
 .grid-wrap {

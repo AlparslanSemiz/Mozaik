@@ -11,8 +11,8 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
                    names · subjects · blocks · version · dateStamp · storage
    |
 src/pure/          constraints · rules · feasibility · bell · import · entities · solver
-                   programs · programMask · listview · library · bundle · sample
-                   parseState · undo
+                   relax · sat · programs · programMask · listview · library · bundle
+                   sample · parseState · undo
    |
 src/platform/      planStore · libraryStore · storageReport · theme · toolState · printOptions
                    programColor · changelog · folder · desktop · update · download
@@ -77,11 +77,13 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `pure/constraints.ts` | kısıt motoru: `blocker`, `blockerDetail`, `check`, `dropMap`, `placedBlocks`, `occupy` ve `vacate`, `closedConflicts`, `removeBlock` ve `liftBlock`, `sanitize` |
 | `pure/rules.ts` | ayarlanabilir kurallar: katmanlı sınırın çözümü (`lessonLimit`), boşluk sayımı (`gapsBetween`), `findViolations` |
-| `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`) |
+| `pure/feasibility.ts` | programın neden dizilemediği: kapasite raporu, sağlık özeti, Danışman (`buildAdvice`), takılan dersin sebebi (`holeReason`) |
 | `pure/bell.ts` | zil saatleri ve bir ders numarasının günlere göre saat grupları (`periodGroups`) |
 | `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
 | `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays` |
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
+| `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, blok şekli ya da haftalık saat değişirse kurulur (`createRelaxer`, `verifySuggestion`) |
+| `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `pure/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
@@ -125,7 +127,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer |
+| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını da aynı yolla |
 | `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar |
 | `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
@@ -148,6 +150,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/lessons/index.tsx` | Dersler |
 | `ui/Availability.tsx` | Müsaitlik |
 | `ui/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |
+| `ui/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
 | `ui/Grid.tsx` | ana ızgara, satır başına memo |
 | `ui/LessonPool.tsx` | havuz |
 | `ui/Check.tsx` | Kontrol |
@@ -188,7 +191,7 @@ Kontrol'ün sayıları `feasibility.ts`'ten gelir. Havuzun hesabı `App`'e
 ### Hangi dosyaların testi var
 
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
+`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
@@ -298,6 +301,24 @@ yerine `constraints.ts`'teki `occupy` ve `vacate` kullanılır, `place()` ile
 
 Çözücü ana iş parçacığında dilim dilim koşar, Web Worker bu projede çalışmıyor
 (tuzak 19).
+
+### Öneri araması kısıtları ikinci kez yazar, ama son söz yine `blocker()`'da
+
+Yukarıdaki kuralın tek bilinçli istisnası `relax.ts`. Kurulamayan bir haftada neyin
+en az değişmesi gerektiği sorusu bir yerel aramayla cevaplanamadı (babanın verisinde
+12 saat buldu, en küçüğü 4), bu yüzden hafta bir SAT formülü olarak yeniden
+yazılıyor (`sat.ts`): blok başına başlangıç değişkenleri, sınıf, öğretmen ve
+derslik saati başına "en fazla bir", günlük sınırlar için sayaçlar. Bu, kısıtların
+ikinci bir yazımı ve ikisi ayrışabilir. Karşılığı şu: hiçbir öneri gösterilmeden
+önce `verifySuggestion` onun haftasını değişmiş verinin üstünde `blocker()`'a
+(her blok kaldırılıp yeniden sorulur) ve `rules.ts`'e sorar, ve ikisinden biri
+itiraz ederse öneri atılır. Formül yanlışsa sonuç "öneri yok" olur, yanlış bir öneri
+olmaz. Sınıfın ve dersliğin kapalı saati için bir `Relaxation` türü yok, yani hiçbir
+öneri onları açamaz.
+
+Arama da çözücü gibi dilimlenir ve sayarak durur: aile başına bir çatışma bütçesi
+(`FAMILY_CONFLICTS`), saat yalnız genel bir tavan. Aynı veri her makinede aynı
+öneriyi verir.
 
 ### Exe bir adaptör takar
 

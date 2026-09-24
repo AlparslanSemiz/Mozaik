@@ -23,6 +23,7 @@ release is incomplete, the entry says so.
   school in the desktop window that is 38 cards in view instead of 19, with
   nothing taken from the grid.
 - While a card is being dragged, every card in the target row shows the cell's own verdict as a coloured ring, so a filled cell no longer hides whether the card could go there.
+- When a week cannot be laid out, a panel under the result line now says what would have to change for it to fit, one way per line: which closed teacher hours to open, which daily limits to raise, which lessons to split into single hours, or, as a last resort, which weekly hours to cut. A class's own closed hours are never suggested. Each way comes with the week it was found with, checked against the rules, and one button puts the change and the week in at once, as a single undo step. If the week can in fact be built and automatic arrangement just missed it, the panel says so and places it.
 - Automatic arrangement no longer gives up on a lesson when it gets stuck. It keeps repairing the best timetable it found, moving the fewest lessons out of the way each time. On a real school where every class's open hours exactly match its lessons, it now lays out the whole week in about a second, where before it stopped with five lessons missing.
 - When a week truly cannot be laid out, automatic arrangement now stops on its own once it is no longer getting anywhere, instead of always running for the full 15 seconds.
 

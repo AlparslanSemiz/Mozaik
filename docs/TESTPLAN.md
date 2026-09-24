@@ -68,8 +68,10 @@ Haftanın bloklara bölünüşü ve ızgaradan geri okunuşu. Sürüm numarası,
 exe penceresi ve güncelleme adresleri (`surum.test.ts`).
 
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts` ve `blocks.ts`'in her dışa aktarılan fonksiyonunun testi
-var ([ARCHITECTURE.md](ARCHITECTURE.md)).
+`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
+fonksiyonunun testi var ([ARCHITECTURE.md](ARCHITECTURE.md)). `sat.test.ts` SAT
+çözücüyü bin küçük rastgele formülde bütün atamaları deneyen bir kaba kuvvetle
+karşılaştırır: ikili ve uzun cümleler, sonradan eklenen cümleler ve varsayımlar.
 
 ### Değişmez (özellik bazlı)
 
@@ -87,7 +89,10 @@ silinirse silinsin kalanı kendi gününde bırakması ve başa gün eklerken hi
 şeyi kaydırmaması, `clampBlocks`'un toplamının haftayı geçmemesi ve çıktısının
 girdinin bir alt kümesi olması, `placedBlocks`'un aynı ızgarayı iki kez aynı
 okuması ve okuduğu saatlerin ızgaradaki hücre sayısına eşit olması,
-`firstFreeColor`'ın en az kullanılan indeksi vermesi.
+`firstFreeColor`'ın en az kullanılan indeksi vermesi, ve kurulamayan bir haftaya
+verilen her önerinin denetimden geçmesi ve hiçbir sınıf ya da derslik saati
+açmaması (kapalı saatli rastgele dünyalar; kaç önerinin denetlendiği sayılır, sıfır
+bedava yeşil olurdu).
 
 Dünyalar bilerek küçük (en çok 3 gün, 4 saat, 2 öğretmen): çözücü her üretilen
 durumda gerçekten arama yapıyor, ve 25 öğretmen gerektiren bir karşı örnek karşı
@@ -338,7 +343,11 @@ Sahte olmayan tek veri `src/fixtures/tam-dolu-kurs.json`: babanın planı,
 yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
 dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
-125). Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
+125). `relax.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
+değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6
+sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. İkisi birlikte
+yaklaşık 45 saniye sürer, süitin en yavaş birim testi. `e2e/otomatik.spec.ts` aynı
+haftayı tarayıcıda panelden uygular ve tek Ctrl+Z ile geri alır. Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
 silinir.
 
 ## Ölçüm yöntemleri

@@ -28,6 +28,9 @@ import { activeProgram, replaceActiveGrid } from './pure/programs';
 import { solve } from './pure/solver';
 import { parseState } from './pure/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
+import { applySuggestion, suggest, verifySuggestion } from './pure/relax';
+import { activePlacements } from './pure/programs';
+import { closedKey } from './leaf/keys';
 import type { Day, Id, State } from './leaf/types';
 
 // ------------------------------------------------------------------ üreteçler
@@ -159,6 +162,69 @@ describe('değişmez · çözücünün bıraktığı ızgara kurallara uyar', ()
 });
 
 // ------------------------------------------------------------------ occupy ve vacate
+
+// ------------------------------------------------------------------ öneri
+
+/**
+ * A world with closed hours, for the class and the teachers alike, and now and
+ * then "aynı ders günde en fazla 1" at Engelle: the shapes a week gets stuck on.
+ */
+const closedWorld = fc
+  .tuple(
+    world,
+    fc.array(fc.tuple(fc.nat(), fc.nat({ max: 2 }), fc.nat({ max: 3 })), { maxLength: 6 }),
+    fc.boolean(),
+  )
+  .map(([d, closures, rule]) => {
+    const ids = [...d.classes.map((x) => x.id), ...d.teachers.map((x) => x.id)];
+    const unavailable = { ...d.unavailable };
+    for (const [who, day, hour] of closures) {
+      if (day >= d.settings.days.length || hour >= d.settings.hours.length) continue;
+      unavailable[closedKey(ids[who % ids.length]!, day, hour)] = 1;
+    }
+    const settings = rule
+      ? {
+          ...d.settings,
+          limits: { ...d.settings.limits, maxSameLessonPerDay: 1 },
+          rules: { ...d.settings.rules, maxSameLessonPerDay: 'block' as const },
+        }
+      : d.settings;
+    return { ...d, unavailable, settings };
+  });
+
+describe('değişmez · kurulamayan haftaya öneri sınıf ya da derslik saati açmaz', () => {
+  // TODO B5.9. Whatever the week: a suggestion names no class and no room, the
+  // data it hands back still has every one of their closed hours, and the week
+  // it carries is legal and whole for that data.
+  it('her öneri denetimden geçiyor ve yalnız öğretmen saatine, kurala, bloğa, saate dokunuyor', () => {
+    let offered = 0;
+    fc.assert(
+      fc.property(closedWorld, (d) => {
+        const stuck = solve(d);
+        if (stuck.phase === 'solved') return;
+        const { suggestions } = suggest(d, activePlacements(stuck.state), { budgetMs: 60_000 });
+        const walls = new Set([...d.classes.map((x) => x.id), ...d.rooms.map((x) => x.id)]);
+        offered += suggestions.length;
+        for (const s of suggestions) {
+          expect(verifySuggestion(d, s)).toEqual([]);
+          for (const c of s.changes) {
+            if (c.kind === 'teacherHour') expect(walls.has(c.teacherId)).toBe(false);
+          }
+          const applied = applySuggestion(d, s);
+          for (const key of Object.keys(d.unavailable)) {
+            if (walls.has(key.split('|')[0]!)) expect(applied.unavailable[key]).toBe(1);
+          }
+          expect(illegalBlocks(applied)).toEqual([]);
+        }
+      }),
+      { numRuns: 60 },
+    );
+    // Not a free green: the generator has to produce stuck weeks that get
+    // suggestions at all, or the loop above audited nothing.
+    console.log(`[ölçüm] 60 dünyada ${offered} öneri denetlendi`);
+    expect(offered).toBeGreaterThan(10);
+  }, 60_000);
+});
 
 describe('değişmez · occupy sonra vacate başlangıç durumunu verir', () => {
   it('her dünyada, her hücrede, her blok boyunda', () => {

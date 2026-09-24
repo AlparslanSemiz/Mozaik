@@ -199,6 +199,19 @@ duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yaz
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
 geri al adımı. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
 
+Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
+altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9):
+neyin değişmesi gerektiği. Arama kendiliğinden başlar, sürerken panel "Nasıl
+kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Bulunan her yol
+tek satırdır: numara, ne yapılacağı ("4 öğretmen saatini açın", "6 sınırı
+yükseltin"), onu yapan düğme ve `Ayrıntı`. Ayrıntı açılınca saatler ve sınırlar
+madde madde, ve önerinin denetlendiği ya da bulunan en küçük olduğu cümlesi
+görünür. Yollar aile aile gelir, her biri tek başına yeter, ve sınıfların saati
+hiçbir yolda yoktur. Hafta aslında kurulabiliyorsa (çözücü bulamadı, ikinci arama
+buldu) panel tek satırla bunu söyler. Bir yolu uygulamak veriyi ve haftayı birlikte
+yerleştirir ve tek geri al adımıdır. Program o arada değiştiyse düğme kapanır.
+Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
+
 ### Geçici görünüm
 
 Bir öğretmen ya da sınıf satırını veya bir günü, bu oturum ve bu plan için

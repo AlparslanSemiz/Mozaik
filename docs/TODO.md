@@ -35,7 +35,7 @@ bitince §10'a taşınır.
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3, B5.7 ve B5.9 açık, B5.8'in veri yarısı babada |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16 ve B7.17 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -719,22 +719,28 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       **Kalan, babada:** hangisi doğru, Mozaik'teki müsaitlik mi Roboders'teki mi?
       Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te açılınca program
       çıkıyor. Soru §8b'de.
-- [ ] **B5.9 Kurulamayan haftada "şunu açarsan kurulur" demek.** B5.8'den doğdu.
-      Bugün kurulamayan haftanın sebep cümlesi işe yaramıyor: babanın verisinde
-      "410A SAY sınıfı Salı 1 saatinde kapalı" yazıyor, çünkü en sık engel sayılıyor
-      ve tam dolu bir sınıfta en sık engel sınıfın kendi kapalı saati. Oysa cevap
-      ölçülebiliyor: B5.8'deki dört saat bir en küçük düzeltme. Önerilen: çözücü
-      takılınca kapalı öğretmen saatlerini bir bedelle açık sayan bir onarım koşusu,
-      ve sonuç "HE Cumartesi 3. saat, KY Cumartesi 11–12 ve AV Cumartesi 1. saat
-      açılırsa hafta kuruluyor" gibi bir cümle. Tahmin değil, bulduğu programı
-      gösterebilir. aSc'de bunun karşılığı yok (kova kaydı yazılmadı). Karar sende:
-      yapılsın mı, ve kural gevşetme de önerilsin mi.
-      **Sebep cümlesi düzeldi (2026-09-24).** `holeReason` (`feasibility.ts`) yalnız
-      sınıfın boş ve açık kalan saatlerini soruyor, yani cevap bir öğretmen, bir
-      derslik, bir kural ya da blok şekli oluyor; sınıfın kendi kapalı saati hiç
-      çıkmıyor. Bir boşluğa tek başına sığan ders için "sınıfın öbür eksik
-      dersleriyle birlikte sığmıyor" deniyor.
-
+- [x] **B5.9 Kurulamayan haftada "şunu açarsan kurulur" demek — YAPILDI
+      (2026-09-24).** B5.8'den doğdu.
+      - **Ne yapıyor:** otomatik dizme takılınca program kendiliğinden ikinci bir
+        arama yapıyor. Sonuç satırının altındaki panelde neyin değişmesi
+        gerektiğini söylüyor, yol yol. Yollar dört aileden gelir: kapalı öğretmen
+        saati, günlük sınır, blok şekli, haftalık saat. Sınıfın saati hiçbir
+        yolda yok. Her yol bulunduğu haftayla gelir ve tek tıkla (tek geri alma
+        adımı) uygulanır.
+      - **Kararların:** panel satırın altında, arama kendiliğinden, yollar ayrı,
+        dört aile, sıkı biçim (tek satır ve `Ayrıntı`).
+      - **Motor:** planın dediği gibi onarımın genişletilmesi değil, kendi SAT
+        çözücümüz (`sat.ts`), çünkü yerel arama 12 saat buluyordu ve en küçüğü 4.
+        Kayıt [DECISIONS.md](DECISIONS.md)'de.
+      - **Babanın verisinde ölçülen:** "HE Cumartesi 12, KY Cumartesi 1–2, AV
+        Cumartesi 5 açılırsa kuruluyor" (4 saat), ya da 6 sınır (üç ders için
+        aynı gün 2 yerine 3, üç öğretmen için günde 10 yerine 12). İkisi de
+        CP-SAT'ın en küçüğüyle aynı boyutta, ama tarayıcıda "azı yok" kanıtlanamıyor,
+        o yüzden panel "bulduğumuz en küçük" diyor.
+      - **Sebep cümlesi de düzeldi** (`holeReason`): sınıfın kendi kapalı saati
+        artık hiç çıkmıyor.
+      - **Açık kalan:** babanın makinesinde süre (bu makinede ilk öneri yaklaşık
+        34 saniyede); blok şekli ailesi bu veride bütçesinde cevap veremiyor.
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)
@@ -947,7 +953,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **Müsaitlik hangisinde doğru, Mozaik'te mi Roboders'te mi?** (B5.8, 2026-09-24)
       Roboders KY ile GÇ'yi Cumartesi, AS'yi Pazar sabahı derse koyuyor, Mozaik'te o
       saatler kapalı. Mozaik'teki doğruysa hafta o hâliyle kurulamıyor (kanıtlı), en
-      küçük çare HE Cumartesi 3, KY Cumartesi 11–12 ve AV Cumartesi 1. saati açmak.
+      küçük çare dört öğretmen saati, hepsi Cumartesi: HE, KY (iki saat) ve AV. Hangi
+      saatler olduğu tek değil. CP-SAT bir keresinde HE 3, KY 11–12 ve AV 1'i buldu,
+      program (B5.9) HE 12, KY 1–2 ve AV 5'i öneriyor. Yalnız Cumartesi açılınca
+      kuruluyor, başka hiçbir gün tek başına yetmiyor.
       Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te düzeltilince program
       yaklaşık bir saniyede çıkıyor.
 

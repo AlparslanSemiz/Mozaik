@@ -35,6 +35,84 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-24 · Kurulamayan haftaya öneri, ve onu bir SAT çözücü buluyor
+
+**Değişen.** Otomatik dizme takılınca program kendiliğinden ikinci bir arama
+yapıyor: hangi değişiklikle hafta kurulur (TODO B5.9). Öneri dört aileden gelir:
+kapalı öğretmen saati, günlük sınır (dersin, öğretmenin günlük ve art arda), blok
+şekli, ve son çare olarak haftalık saat. Sınıfın ve dersliğin kapalı saati hiçbir
+ailede yok. Her öneri bulunduğu haftayla gelir. `verifySuggestion` o haftayı
+değişmiş verinin üstünde `blocker()`'a ve `rules.ts`'e sorar, geçmeyen öneri
+gösterilmez. Arama `pure/relax.ts`'te, kullandığı SAT çözücü `pure/sat.ts`'te.
+Takılan dersin sebep cümlesi de değişti (`holeReason`): artık yalnız sınıfın boş
+saatlerini soruyor, sınıfın kendi kapalı saatini hiç göstermiyor.
+
+**Kullanıcının kararları.**
+- Öneri sonuç satırının altında, ızgaranın üstünde bir panelde duruyor.
+- Arama kendiliğinden başlıyor.
+- Yollar karışık tek bir liste değil, ayrı ayrı sunuluyor.
+- Dört aile de öneriliyor.
+- Bu turda plandan iki sapma oldu:
+  - Motor, planın dediği gibi onarımın genişletilmesiyle değil kendi SAT
+    çözücümüzle yazıldı (ölçüm aşağıda).
+  - Panel ilk gösterimden sonra sıkılaştı: her yol tek satır, ayrıntısı
+    `Ayrıntı` ile açılıyor.
+- Öneri, ailesi bitince gösteriliyor. Kullanıcı "babam için hangisi kolaysa"
+  dedi, ve okurken yerinde değişen satırlar az gören biri için en zor olanı.
+
+**Gerekçe, ölçülmüş.** Babanın verisinde (adsız kopya `src/fixtures/tam-dolu-kurs.json`),
+depo dışındaki OR-Tools CP-SAT'a göre en küçük çareler şunlar: 4 öğretmen saati,
+ya da 9 saatlik ihlal eden 6 sınır değişikliği. Blok şekliyle kurulmuyor. Her ders
+en az bir saat kalırsa saat azaltarak da kurulmuyor. Ölçülen yollar:
+
+| Yol | Öğretmen saati | Not |
+|---|---|---|
+| Onarımı bedelle genişletmek, sonra birer birer silmek | 12 | kural ailesi öneri çıkaramadı |
+| Aynısı, büyük komşuluk küçültmesiyle | 14 | |
+| MiniSat'ın JavaScript derlemesi | "0 ile olmaz" 0,44 s | 64 MB bellek sınırına çarptı |
+| Kendi SAT çözücümüz | 4 | 6 sınır ve 9 saat; toplam yaklaşık 31 s |
+
+Kendi çözücü, bulduğu boyutlarda CP-SAT'ın en küçükleriyle birebir aynı. Aynı
+çözücü, yerel aramanın bulamadığı ama var olan bir haftayı da buluyor. Dört saat
+açıkken çözücü 208/211'de kalıyor. Öneri araması "değişiklik gerekmiyor" diyor
+ve haftayı yaklaşık 6 saniyede kanıtlıyor.
+
+**Denendi ve bırakıldı:**
+- Onarım aşamasına bir bedel (kapalı öğretmen saati, sınır aşımı) ve silme süzgeci
+  eklemek. Silme süzgeci her değişikliği tek tek geri alıp haftanın onsuz onarılıp
+  onarılamadığını soruyordu. Sonuç 16 saatten 12'ye indi. Kurallar kapalıyken bile
+  onarım 210/211'de kaldı. Bedelin ağırlığı 10'a çıkınca hiç açmayıp takıldı.
+- Çekirdek güdümlü alt sınır (OLL). İlk çekirdek 93 literal çıktı, ve sonraki soru
+  bütçede bitmedi.
+- Sınıf başına alt sınır. Her sınıfı tek başına çözüp en küçüklerini toplamak
+  geçerli bir alt sınır verirdi. Babanın verisinde her sınıf tek başına 0 çıktı:
+  çelişki sınıfların öğretmen paylaşmasında.
+- Aile bütçesini milisaniye vermek. Sonuç makineye göre değişirdi. Bütçe artık
+  çatışma sayısı (`FAMILY_CONFLICTS`), saat yalnız genel bir tavan.
+- Bedel sayacını ilk haftanın bedeliyle (175) kurmak. Formül büyüdü ve her soru
+  yavaşladı. Sayaç 8'den başlayıp gerekirse ikiye katlanıyor.
+
+**"En az" denmiyor.** Aşağı doğru arama "bundan azı yok"u kanıtlayınca öneri
+`proven` işaretlenir ve panel "Bundan küçük bir değişiklik yetmiyor" der. Babanın
+verisinde bu kanıt çatışma bütçesinde bitmiyor, ve panel "Bulduğumuz en küçük
+değişiklik bu" diyor. Sebep ölçüldü: "3 saatle olmaz" bir eşleştirme, yani güvercin
+yuvası kanıtı, ve çözümleme tabanlı bir SAT çözücü onu üstel sürede kanıtlar. CP-SAT
+doğrusal gevşetmesiyle görüyor.
+
+**Bedeli.**
+- `dist/index.html` 37 885 bayt büyüdü (1 017 106'dan 1 054 991'e).
+- Brotli'li hâli 258,9 kB, sınırın 1,1 kB altında.
+- Babanın verisinde ilk önerinin görünmesi Otomatik diz'e basıştan yaklaşık 34 s
+  sonra, aramanın bitmesi 56 s sonra (tarayıcıda, bu makinede).
+- Kısıtlar artık iki yerde yazılı: `blocker()`'da ve SAT formülünde. Ayrışırlarsa
+  sonuç yanlış bir öneri değil "öneri yok" olur, çünkü denetçi `blocker()`.
+  Kural ARCHITECTURE.md'de.
+
+**Açık kalan.**
+- Blok şekli ailesi babanın verisinde bütçesinde cevap veremiyor. CP-SAT
+  "olmaz"ı 0,6 s'de veriyor.
+- Babanın makinesinde süre ölçülmedi.
+
 ### 2026-09-24 · Linux ikilisi, ve gerçek exe WebDriver ile sürülüyor
 
 **Karar (kullanıcı).** Bir Linux exe'si derleniyor, ama yalnız geliştirme ve test

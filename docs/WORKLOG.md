@@ -55,7 +55,7 @@ kurulamayan haftada "şunu açarsan kurulur" diyecek B5.9'un kararı.
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
-- Kurulamayan bir haftada otomatik dizme neyin değişmesi gerektiğini henüz söylemiyor (TODO B5.9). Sebep cümlesi 2026-09-24'te düzeldi: artık sınıfın boş kalan saatlerini soruyor (`holeReason`), babanın verisinde "410A SAY sınıfı Salı 1 saatinde kapalı" yerine "Ö6 Cumartesi 2 saatinde müsait değil" gibi bir öğretmen ve saat adlandırıyor.
+- Kurulamayan haftadaki öneri (B5.9) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor. Boyut CP-SAT'ın en küçüğüyle aynı. Babanın makinesinde süre ölçülmedi; bu makinede ilk öneri Otomatik diz'den yaklaşık 34 saniye sonra geliyor.
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
 - Karttaki raptiye dururken görünmüyor (`opacity: 0`), 2026-08-30 tarihli kayıt ise "hep görünür, sönük" kararını kullanıcının kararı olarak yazıyor. Kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
@@ -79,14 +79,15 @@ kurulamayan haftada "şunu açarsan kurulur" diyecek B5.9'un kararı.
 | Gerçek exe süiti | 5 test, hepsi geçti, 9–11 s | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 319 608 bayt, release derlemesi 1 dk 40 sn | `npm run exe:linux` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 36 dosyada 1208 test, hepsi geçti (2026-09-24) | `npm test` |
-| Ana E2E koşusu | 577/577 geçti, süit 5,4 dk (2026-09-24) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 013 416 bayt (2026-09-24) | `npx vite build` |
+| Birim testleri | 38 dosyada 1231 test, hepsi geçti (2026-09-24) | `npm test` |
+| Ana E2E koşusu | 578/578 geçti, süit 5,7 dk (2026-09-24) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 054 991 bayt, brotli 259,2 kB (2026-09-24) | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
+| Öneri, babanın verisi | 4 öğretmen saati ya da 6 sınır (9 saat); ikisi de CP-SAT'ın en küçüğü, kanıtsız; yaklaşık 31 s | `src/relax.test.ts` |
 
 **Tek ağaç kaldı (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı
 bir worktree'de ve `test/strateji` dalında yürümüştü; sebebi `dist/`'in git dışında
@@ -94,6 +95,92 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-24 · Kurulamayan haftada "şunu değiştirirsen kurulur" (B5.9)
+
+**Önce önceki oturumun işi commit'lendi**, kullanıcının istediği gibi üç konuya
+bölünerek: çözücü (B5.8), şerit (tuzak 123), Linux exe ve sürücü (B7.16, B7.17).
+Karışık belgeler hunk hunk ayrıldı, her ara commit'in ağacı `git archive` ile
+açılıp belge kapıları orada koşuldu. `src-tauri/Cargo.lock` yine dışarıda.
+
+**Yeniden ölçüm (depo dışı, CP-SAT 9.15).** `babamınki.json` 2026-09-12'den beri
+değişmedi. Sonuçlar:
+- Veri hâlâ kurulamıyor: INFEASIBLE, 0,12 s.
+- Kurallar sabitken en az 4 öğretmen saati açılmalı. En iyi çözüm tek değil: bu
+  koşuda KY Cumartesi 11–12 ve AV Cumartesi 4 ve 12 çıktı.
+- Müsaitlik sabitken en az 9 saatlik ihlal gerekiyor, 6 ayrı sınır değişikliğiyle:
+  üç ders 2 yerine 3, üç öğretmen günde 10 yerine 12.
+- Blok şekliyle kurulmuyor. Bütün dersler 1+1+1 olsa da olmuyor.
+- Haftalık saat azaltarak her ders en az bir saat kalırsa kurulmuyor. CP-SAT'ın
+  4 saatlik çaresi bir dersi bütünüyle düşürüyor.
+- Sınıflandırma:
+  - Yalnız Cumartesi açılınca kuruluyor, başka hiçbir gün tek başına yetmiyor.
+  - Tek başına yeten tek öğretmen KY, 6 saatle.
+  - İki kural ailesi ayrı ayrı yetmiyor, ikisi birlikte gerekiyor.
+- Adsız fikstür aynı yapıda: kimlikler ve kapalı saatler birebir, sayılar da aynı.
+
+**Sebep cümlesi (`eb0601d`).** `holeReason` yalnız sınıfın boş ve açık kalan
+saatlerini soruyor. Fikstürde sekiz takılan dersin hiçbiri artık sınıfı
+göstermiyor.
+
+**Öneri motoru: önce yerel arama, sonra SAT.**
+- Onarımı bedelle genişletip silme süzgeciyle küçültmek 12 öğretmen saati buldu.
+  Büyük komşulukla küçültmek 14. Kural ailesi hiç öneri çıkaramadı.
+- MiniSat'ın JavaScript derlemesiyle (scratchpad'de) "0 ile olmaz" 0,44 s sürdü.
+- Kullanıcıya soruldu, kendi SAT çözücümüz seçildi (`sat.ts`, bağımlılıksız CDCL).
+- Ölçülerek giren adımlar:
+  - Tam dolu sınıfın her açık saati dolsun diye pay cümleleri. Bunlar olmadan
+    arama 6'da kalıyordu, onlarla 4'ü buluyor.
+  - İkili cümle listeleri, engelleyici literal ve literal başına değer tablosu:
+    saniyede yaklaşık 2 500 çatışmadan 3 400 ile 8 000'e çıktı.
+  - Küçük başlayıp ikiye katlanan bedel sayacı.
+  - Milisaniye yerine çatışma sayısıyla aile bütçesi (`FAMILY_CONFLICTS`), çünkü
+    aynı veri her makinede aynı öneriyi vermeli.
+- Denenip bırakılanlar DECISIONS'ta: çekirdek güdümlü alt sınır (OLL) ve sınıf
+  başına alt sınır. İkincisi babanın verisinde her sınıfta 0 çıktı.
+
+**Ölçülen sonuç, babanın verisinde.**
+- Öğretmen saati: "HE Cumartesi 12, KY Cumartesi 1–2, AV Cumartesi 5", 4 saat.
+- Kural: 6 sınır, 9 saat.
+- İkisi de CP-SAT'ın en küçüğüyle aynı boyutta. "Azı yok" kanıtı bütçede
+  bitmiyor, çünkü bir güvercin yuvası kanıtı bu. Panel "bulduğumuz en küçük"
+  diyor.
+- Toplam yaklaşık 31 s (node). Tarayıcıda ilk önerinin görünmesi yaklaşık 34 s,
+  aramanın bitmesi 56 s.
+- Dört saat açıkken çözücü 208/211'de kalıyor, öneri araması "değişiklik
+  gerekmiyor" diyor ve haftayı yaklaşık 6 s'de kanıtlıyor.
+
+**Arayüz.**
+- Kullanıcının kararları: panel sonuç satırının altında, arama kendiliğinden,
+  yollar ayrı, dört aile.
+- İlk ekran görüntüsünden sonra "daha sıkı" istendi: her yol tek satır, ayrıntısı
+  `Ayrıntı` ile açılıyor.
+- Öneri ailesi bitince gösteriliyor. Kullanıcı "babam için hangisi kolaysa" dedi,
+  ve yerinde değişen satırlar okumayı zorlaştırır.
+- Sonuç satırı ne olduğunu (sebep cümlesi) söylemeye devam ediyor, panel ne
+  yapılacağını. İlk hâlinde satır arama durumunu gösteriyordu. Bu hem sebep
+  cümlesini siliyordu hem de "yerleşemedi"yi bekleyen testleri kırıyordu.
+
+**Mutasyon (tuzak 129).**
+- Modelden "sınıfın kapalı saatinde başlayamaz" satırı kaldırıldı ve ilk test
+  dünyası yeşil kaldı. Sebep: sınıf tam doluydu, ve pay cümleleri kapalı saati
+  ikinci yoldan yasaklıyordu.
+- Bir boş saat eklenince aynı mutasyon kırmızıya döndü, geri alınınca yeşil.
+
+**Boyut eşiği yükseldi, gerekçesi burada (BUILD.md'nin kuralı).** Özellik
+`dist/index.html`'i 37 885 bayt büyüttü: SAT çözücü, öneri motoru, panel ve dört
+dilde otuz bir cümle. Ham eşik ilk koşuda 35 kB aşıldı. Kısaltmanın bir yolu
+yoktu. İki eşik de yine yaklaşık 13 kB pay bırakacak yere çekildi: ham
+1 020 000'den 1 068 000'e, brotli 260 000'den 272 000'e.
+
+**Koşulan testler.**
+- `npm run kontrol` baştan sona yeşil: tipler, sınır, lint 0 hata, birim
+  1231/1231, derleme, boyut, E2E 578/578, site 22/22, çözücü stresi 7/7.
+- Önceden ayrıca: `sat.test.ts` 7/7 (bin rastgele formül kaba kuvvetle),
+  `relax.test.ts` 11/11, özellik testi (60 dünyada 38 öneri denetlendi), knip temiz.
+- Koşulmadı: `patrol`, `ekran`, `mutasyon`, `exe:test`, `kapsam`.
 
 ---
 

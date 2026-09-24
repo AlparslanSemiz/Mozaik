@@ -998,6 +998,62 @@ const EN: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} hours a week are asked for; the open hours and the rules allow at most {olabilen}",
+  "Nasıl kurulacağı aranıyor… {sure} sn":
+    "Looking for how the week can be built… {sure} s",
+  "Sınıfların saatlerine dokunmadan bir yol bulunamadı.":
+    "No way was found that leaves the classes' hours as they are.",
+  "{liste} ve {son}":
+    "{liste} and {son}",
+  "{kim} {gun} {saatler}. saat":
+    "{kim} {gun}, period {saatler}",
+  "{ders}: aynı gün en fazla {eski} yerine {yeni} saat":
+    "{ders}: at most {yeni} hours on one day instead of {eski}",
+  "{kim}: günde en fazla {eski} yerine {yeni} saat":
+    "{kim}: at most {yeni} hours a day instead of {eski}",
+  "{kim}: art arda en fazla {eski} yerine {yeni} saat":
+    "{kim}: at most {yeni} hours in a row instead of {eski}",
+  "{ders}: {eski} yerine {yeni}":
+    "{ders}: {yeni} instead of {eski}",
+  "{ders}: haftada {eski} yerine {yeni} saat":
+    "{ders}: {yeni} hours a week instead of {eski}",
+  "{n} öğretmen saatini açın":
+    "Open {n} teacher {n:hour|hours}",
+  "{n} sınırı yükseltin":
+    "Raise {n} {n:limit|limits}",
+  "{n} dersin blok şeklini değiştirin":
+    "Change the block shape of {n} {n:lesson|lessons}",
+  "Haftalık saati {n} saat azaltın":
+    "Cut the weekly hours by {n}",
+  "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
+    "The timetable has changed since. Press Fill automatically to see a suggestion again.",
+  "Hafta değişiklik gerekmeden kuruluyor":
+    "The week can be built without any change",
+  "Otomatik dizme bu haftayı bulamadı; ikinci arama buldu ve denetledi.":
+    "Filling automatically did not find this week; the second search found it and checked it.",
+  "Programı yerleştir":
+    "Place the timetable",
+  "Kurulması için":
+    "To build the week",
+  "Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.":
+    "Each way is enough on its own; the classes' hours are never touched.",
+  "Başka yollar aranıyor…":
+    "Looking for other ways…",
+  "Saatleri aç ve programı yerleştir":
+    "Open the hours and place the timetable",
+  "Değiştir ve programı yerleştir":
+    "Change and place the timetable",
+  "Ayrıntıyı gizle":
+    "Hide details",
+  "Ayrıntı":
+    "Details",
+  "Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.":
+    "With this change the whole week fits; the timetable was found and checked.",
+  "Bundan küçük bir değişiklik yetmiyor.":
+    "No smaller change is enough.",
+  "Bulduğumuz en küçük değişiklik bu.":
+    "This is the smallest change we found.",
+  "Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.":
+    "The suggestion was applied and the timetable placed. You can undo it with Ctrl+Z.",
   "{sinif} sınıfında boş açık saat kalmadı":
     "class {sinif} has no open hour left empty",
   "Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor":
