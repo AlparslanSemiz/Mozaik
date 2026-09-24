@@ -998,6 +998,14 @@ const EN: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} hours a week are asked for; the open hours and the rules allow at most {olabilen}",
+  "{sinif} sınıfında boş açık saat kalmadı":
+    "class {sinif} has no open hour left empty",
+  "Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor":
+    "the hours left empty do not fit this lesson's {boy}-hour block",
+  "Tek başına {gun} {saat} saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor":
+    "on its own it fits {gun} at period {saat}, but not together with the class's other missing lessons",
+  "{gun} {saat} saatine sığıyor, arama oraya varmadan durdu":
+    "it fits {gun} at period {saat}; the search stopped before it got there",
 
   // src/update.ts
   "Güncelleme denetlenemedi.": "The update could not be checked.",

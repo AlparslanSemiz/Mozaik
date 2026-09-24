@@ -6,6 +6,7 @@ import {
   capacityLevel,
   commonestBlock,
   health,
+  holeReason,
   loadStatus,
 } from './pure/feasibility';
 import { place } from './pure/constraints';
@@ -255,6 +256,60 @@ describe('commonestBlock', () => {
     expect(commonestBlock(d, ix, 'x1', true).anyValid).toBe(
       commonestBlock(d, ix, 'x1', false).anyValid,
     );
+  });
+});
+
+// The father's week said "410A SAY sınıfı Salı 1 saatinde kapalı" for every
+// stuck lesson (TODO B5.9): in a class whose open hours match its lessons, the
+// class's own closed hours win commonestBlock's vote. holeReason asks only the
+// hours the class still has empty.
+describe('holeReason', () => {
+  it('sınıfın kapalı saati değil, boş saati kapatan öğretmen', () => {
+    const d = build();
+    d.unavailable['s510|0|0'] = 1;
+    d.unavailable['s510|0|1'] = 1;
+    d.unavailable['oMC|0|2'] = 1;
+    d.unavailable['oMC|0|3'] = 1;
+    const ix = buildIndex(d);
+
+    expect(commonestBlock(d, ix, 'x1').reason).toContain('510 sınıfı');
+    expect(holeReason(d, ix, 'x1')).toBe('MÇ Pazartesi 3 saatinde müsait değil');
+  });
+
+  it('boş saatler bloğa uymuyorsa şekli söylüyor', () => {
+    const d = build();
+    d.lessons[0] = { ...d.lessons[0]!, blocks: [2] };
+    d.unavailable['s510|0|1'] = 1;
+    d.unavailable['s510|0|3'] = 1;
+
+    expect(holeReason(d, buildIndex(d), 'x1')).toBe(
+      'Boş kalan saatler bu dersin 2 saatlik bloğuna uymuyor',
+    );
+  });
+
+  it('tek başına sığan ders, sınıfın öbür eksik dersini de sayıyor', () => {
+    const d = build();
+    const other = { ...d.teachers[0]!, id: 'oAV', name: 'Ali Veli', short: 'AV' };
+    d.teachers.push(other);
+    d.lessons[0] = { ...d.lessons[0]!, weeklyHours: 1 };
+    d.lessons.push({ ...d.lessons[0], id: 'x2', teacherId: 'oAV' });
+    for (const h of [0, 1, 2]) d.unavailable[`s510|0|${h}`] = 1;
+    const ix = buildIndex(d);
+
+    expect(holeReason(d, ix, 'x1')).toBe(
+      'Tek başına Pazartesi 4 saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor',
+    );
+    d.lessons.pop();
+    expect(holeReason(d, buildIndex(d), 'x1')).toBe(
+      'Pazartesi 4 saatine sığıyor, arama oraya varmadan durdu',
+    );
+  });
+
+  it('boş açık saati kalmayan sınıf', () => {
+    const d = build();
+    for (let h = 0; h < 4; h++) d.unavailable[`s510|0|${h}`] = 1;
+
+    expect(holeReason(d, buildIndex(d), 'x1')).toBe('510 sınıfında boş açık saat kalmadı');
   });
 });
 

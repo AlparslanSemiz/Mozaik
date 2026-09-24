@@ -26,7 +26,7 @@ import {
 import { t } from '../leaf/i18n';
 import { closedKey, parseKey, placementKey } from '../leaf/keys';
 import type { Index } from './constraints';
-import { commonestBlock, lessonName } from './feasibility';
+import { commonestBlock, holeReason, lessonName } from './feasibility';
 import { lessonLimit, limitFor, ruleActive, ruleLevel } from './rules';
 import { activePinned, activePlacements, replaceActiveGrid } from './programs';
 import type { Id, Lesson, State } from '../leaf/types';
@@ -1045,7 +1045,8 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
               'haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor',
               { istenen: lesson.weeklyHours, olabilen: fits },
             )
-          : commonestBlock(state, finalIx, lesson.id).reason,
+          : (holeReason(state, finalIx, lesson.id, isExcludedDay) ??
+            commonestBlock(state, finalIx, lesson.id).reason),
       });
     }
     stuck.sort((a, b) => b.missing - a.missing || a.name.localeCompare(b.name, 'tr'));

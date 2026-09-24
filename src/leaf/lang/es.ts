@@ -1012,6 +1012,14 @@ const ES: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "se piden {istenen} horas a la semana; las horas abiertas y las reglas permiten como máximo {olabilen}",
+  "{sinif} sınıfında boş açık saat kalmadı":
+    "la clase {sinif} no tiene ninguna hora abierta libre",
+  "Boş kalan saatler bu dersin {boy} saatlik bloğuna uymuyor":
+    "las horas que quedan libres no encajan con el bloque de {boy} horas de esta asignatura",
+  "Tek başına {gun} {saat} saatine sığıyor, sınıfın öbür eksik dersleriyle birlikte sığmıyor":
+    "por sí sola cabe el {gun} a la hora {saat}, pero no junto con las demás asignaturas pendientes de la clase",
+  "{gun} {saat} saatine sığıyor, arama oraya varmadan durdu":
+    "cabe el {gun} a la hora {saat}; la búsqueda se detuvo antes de llegar ahí",
 
   // src/update.ts
   "Güncelleme denetlenemedi.": "No se ha podido comprobar la actualización.",

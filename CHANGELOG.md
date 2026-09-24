@@ -28,6 +28,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- When automatic arrangement gets stuck, the reason it gives now names what blocks the lesson in the hours its class still has free: a teacher, a room, a rule or the block's length. Before, a class whose open hours exactly matched its lessons always got the class's own closed hour as the reason.
 - Dragging a card across a full week no longer stutters: the reason bar above the grid is rewritten at most ten times a second instead of once per cell.
 - Scrolling the grid while holding a card now moves the highlighted row with it. Before, the undimmed strip stayed where it was on the screen while the rows scrolled away underneath.
 - Availability and Print no longer crash when their list goes from empty to filled while the tab is open, for example after Ctrl+Z.

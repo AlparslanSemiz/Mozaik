@@ -489,6 +489,19 @@ describe('solve — tam dolu bir kurs', () => {
     expect(result.elapsedMs).toBeLessThan(15_000);
     expectLegal(result.state);
     expect(blocksOf(result.state).length).toBe(result.placedBlocks);
+
+    // Every class here is exactly full, so the class's own closed hours used to
+    // win the vote and every stuck lesson read "410A SAY sınıfı Salı 1 saatinde
+    // kapalı" (TODO B5.9). The reason now comes from the hours the class still
+    // has empty, and what blocks those is never the class itself.
+    console.log(
+      `[ölçüm] sebepler: ${result.stuck.map((x) => `${x.name}: ${x.reason}`).join(' | ')}`,
+    );
+    for (const x of result.stuck) {
+      expect(x.reason).not.toMatch(
+        /sınıfı .* kapalı|sınıfının .* dersi var|günün dışında|güne sığmıyor/,
+      );
+    }
   }, 30_000);
 });
 

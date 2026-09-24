@@ -729,6 +729,11 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       açılırsa hafta kuruluyor" gibi bir cümle. Tahmin değil, bulduğu programı
       gösterebilir. aSc'de bunun karşılığı yok (kova kaydı yazılmadı). Karar sende:
       yapılsın mı, ve kural gevşetme de önerilsin mi.
+      **Sebep cümlesi düzeldi (2026-09-24).** `holeReason` (`feasibility.ts`) yalnız
+      sınıfın boş ve açık kalan saatlerini soruyor, yani cevap bir öğretmen, bir
+      derslik, bir kural ya da blok şekli oluyor; sınıfın kendi kapalı saati hiç
+      çıkmıyor. Bir boşluğa tek başına sığan ders için "sınıfın öbür eksik
+      dersleriyle birlikte sığmıyor" deniyor.
 
 ---
 
