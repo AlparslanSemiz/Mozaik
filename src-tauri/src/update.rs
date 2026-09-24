@@ -68,6 +68,21 @@ const MANIFEST_URL: &str =
 const YENI: &str = "yeni";
 const ESKI: &str = "eski";
 
+/// Only the Windows build may replace itself.
+///
+/// The manifest names ONE download, `Mozaik.exe`, and `verify()` asks whether
+/// the bytes are a Windows program -- which they are. A Linux build (made on
+/// the development machine to drive the real window, never shipped) would pass
+/// that check, rename the Windows program over its own ELF file and leave
+/// nothing that starts. The check is on the platform, not on the file.
+pub fn self_update_here() -> Result<(), String> {
+    if cfg!(windows) {
+        Ok(())
+    } else {
+        Err("Kendini güncelleme yalnız Windows'taki Mozaik.exe'de var.".to_string())
+    }
+}
+
 /// What the workflow publishes next to the three delivery files.
 ///
 /// Turkish `boyut` beside English field names is deliberate and matches the
@@ -311,6 +326,7 @@ pub async fn check_update(current: String) -> Result<Cevap, String> {
 /// until `apply_update`, which is a second button.
 #[tauri::command]
 pub async fn download_update(url: String, boyut: u64) -> Result<u64, String> {
+    self_update_here()?;
     safe_url(&url)?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
 
@@ -337,6 +353,7 @@ pub async fn download_update(url: String, boyut: u64) -> Result<u64, String> {
 
 #[tauri::command]
 pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
+    self_update_here()?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
     swap(&exe)?;
     std::process::Command::new(&exe)
@@ -502,6 +519,11 @@ mod tests {
         assert!(verify(b"<!doctype html>", 15).is_err());
         // Truncated: right shape, wrong length.
         assert!(verify(b"MZ", 4).is_err());
+    }
+
+    #[test]
+    fn only_the_windows_build_replaces_itself() {
+        assert_eq!(self_update_here().is_ok(), cfg!(windows));
     }
 
     // ------------------------------------------------------------- the swap

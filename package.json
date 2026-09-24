@@ -32,6 +32,8 @@
     "font": "node scripts/font.mjs",
     "exe": "npm run build && cargo build --manifest-path src-tauri/Cargo.toml --release",
     "exe:test": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "exe:linux": "npm run exe && node scripts/exe-linux.mjs",
+    "exe:e2e": "npm run exe:linux && playwright test --config playwright.gercek-exe.config.ts",
     "yayinla": "node scripts/yayinla.mjs"
   },
   "dependencies": {

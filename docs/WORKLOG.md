@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-12.
+Son güncelleme: 2026-09-24.
 
 **Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
@@ -30,17 +30,22 @@ güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test 
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
 
-**Yarım olan.** Kod refactoru sürüyor. Bitenler: envanter, taban ölçümleri,
-araçlar (ESLint, knip, Prettier), ölü kod, `keys.ts`, ortak yardımcılar, tercih
-fabrikası, `library.ts`'in üçe bölünmesi, üç davranış borcunun kapanması, belge
-kapıları (`src/docs.test.ts`), ve 2026-09-12'de `src/`'nin dört katman
+**Yarım olan.** Kod refactoru **kapandı** (2026-09-12, Faz 4). Bitenler:
+envanter, taban ölçümleri, araçlar (ESLint, knip, Prettier), ölü kod, `keys.ts`,
+ortak yardımcılar, tercih fabrikası, `library.ts`'in üçe bölünmesi, üç davranış
+borcunun kapanması, belge kapıları (`src/docs.test.ts`), `src/`'nin dört katman
 klasörüne bölünmesi (`leaf` · `pure` · `platform` · `ui`) ile sınırın
 dependency-cruiser'a bağlanması, `store.ts`'in altı modüle bölünmesi, ve yedi
-aracın tamamı (ESLint'in tip farkında kuralları, knip, Prettier,
-dependency-cruiser, demet analizi, size-limit, kapsam, Dependabot ile PR
-süiti). Belge kapısı sayısı ona çıktı. Refactorun açık kalan tek işi yok;
-sıradaki iş kullanıcının not defterinden geliyor, ve en üsttekisi ürünün
-kendisi: babasının verisinde program oluşmuyor (§0).
+aracın tamamı. Belge kapısı sayısı on. Faz 4'te ayrıca: çözücü ilk kez mutasyona
+girdi, `test/strateji` dalı birleşti, yedi bayat belge satırı düzeldi, koşulmamış
+dört katmanın dördü de koşuldu, ve Faz 1'in tabanı dört noktada tekrarlandı.
+2026-09-24'te not defterinin iki satırı kapandı. Babanın verisinde program
+oluşmamasının sebebi ölçüldü: Mozaik'teki veri Roboders'tekiyle aynı değil ve o
+hâliyle kurulamıyor (kanıtlı), çözücü de zayıftı ve güçlendi (TODO B5.8). Kalan
+soru babada: müsaitlik hangisinde doğru (§8b). Aynı gün bir Linux ikilisi ve onu
+süren bir araç kuruldu (B7.16, B7.17): gerçek exe artık bu makinede açılıp
+görülebiliyor ve `npm run exe:e2e` ile sınanıyor. Sıradaki iş babanın cevabı, ve
+kurulamayan haftada "şunu açarsan kurulur" diyecek B5.9'un kararı.
 
 **Bilinen kusurlar.**
 
@@ -50,40 +55,100 @@ kendisi: babasının verisinde program oluşmuyor (§0).
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
-- Kart sürüklenirken 4 kat yavaşlatılmış işlemcide her sekizinci ila onuncu kare düşüyor (2026-09-12'de ölçüldü, x1'de olmuyor). Sebebi tek satır: gerekçe çubuğunun metnini yazmak 6704 nesnelik belgede tam yerleşim tetikliyor. Çare seçenekleri ölçüldü, karar kullanıcıda (TODO B4.7).
-- Dolu bir hücrenin hükmü (takas sarı, engel kırmızı) o hücrenin kartının altında kalıyor: kart zeminin %83,7'sini örtüyor, geriye 1,5 px'lik çerçeve kalıyor (2026-09-12'de ölçüldü, TODO B4.8).
+- Kurulamayan bir haftada otomatik dizmenin sebep cümlesi işe yaramıyor: babanın verisinde "410A SAY sınıfı Salı 1 saatinde kapalı" yazıyor, çünkü en sık engel sayılıyor ve tam dolu bir sınıfta o, sınıfın kendi kapalı saati. Neyin açılması gerektiği ölçülebiliyor (TODO B5.9, 2026-09-24).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
 - Karttaki raptiye dururken görünmüyor (`opacity: 0`), 2026-08-30 tarihli kayıt ise "hep görünür, sönük" kararını kullanıcının kararı olarak yazıyor. Kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
 - Program, Kontrol ve Çıktı'nın boş ekranları dersler için Okul sekmesini gösteriyor, dersler ise Dersler sekmesinde giriliyor.
 - Eski CLAUDE.md havuz çekmecesinin boşalınca kendiliğinden kapandığını yazıyordu. 2026-09-11'de kodda bunu yapan bir yer bulunamadı (`writeDock` yalnız düğmeyle çağrılıyor), ekranda denenmedi.
 - Bayat kod yorumları: `App.tsx`'in başı "six sections" diyor (yedi var), `Program.tsx` havuzu "down the right" diye anlatıyor (altta), `App.tsx`'in marka yorumu "detailed" diyor (sade çiziliyor), `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyor (%80'den başlıyor).
+- `npm run kontrol` 2026-09-12'de baştan sona yeşil koştu, sekiz gün sonra ilk kez: tarihe bağlı kırmızı kapandı (TODO §8d). Koşulmamış dört katmanın dördü de koşuldu ve üçü birer kusur çıkardı, üçü de bu turdan eski. Devriyenin açık menüsü düzeltildi; `src-tauri/target` deponun eski adresini taşıdığı için `exe:test` derlenmiyordu ve `cargo clean` ile açıldı; mutasyon kum havuzu belge kapılarıyla çelişiyordu ve koşuya kendi yapılandırması verildi.
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
 - Bir v1 ya da v2 yedeği açılınca sınıflar normalleştiricilerden geçmiyor: günlük kutuları `null` yerine `undefined` geliyor ve Ayarlar → Kurallar hepsini "kendi sınırı olan sınıflar" diye listeliyor, ve hiçbiri renk almadığı için hepsi paletin ilk rengiyle boyanıyor. İlk kayıttan sonra kendiliğinden geçiyor. 2026-09-12'de test tarafında ölçüldü (TODO §8g).
 
-**Güncel ölçümler (2026-09-11, kaynaktan sayıldı).**
+**Güncel ölçümler (2026-09-12, kaynaktan sayıldı; çözücü satırları 2026-09-24).**
 
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 14 | `src/leaf/types.ts` |
-| Ana E2E süiti | 29 dosyada 558 test | `npx playwright test --list` |
+| Ana E2E süiti | 30 dosyada 577 test (2026-09-24) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 35 | `e2e/*.spec.ts` |
-| Rust testleri | 24 | `src-tauri/src` içindeki `#[test]` |
+| E2E spec dosyası, toplam | 36 | `e2e/*.spec.ts` |
+| Rust testleri | 25, hepsi geçti (2026-09-24) | `npm run exe:test` |
+| Gerçek exe süiti | 5 test, hepsi geçti, 9–11 s | `npm run exe:e2e`, Linux ikilisine karşı |
+| Linux ikilisi | 4 319 608 bayt, release derlemesi 1 dk 40 sn | `npm run exe:linux` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 34 dosyada 1000 test, hepsi geçti (`090e664`) | `npm test` |
-| Ana E2E koşusu | 557/558 geçti, süit 5,0 dk | `npx playwright test`, adım 5'ten sonra, düşen `serit.spec.ts` 220 |
-| `dist/index.html` | 1 005 630 bayt | `npx vite build`, Faz 1'deki 1 007 885'in dökümü refactor girdisinde |
-| Açılış, `file://` | hazır 105,3 ms medyan boş depoda, 176,1 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
-| Program'a geçiş, dolu ızgara | 34,8 ms medyan x1, 159,0 ms x4 | aynı betik, tıklamadan iki kareye |
+| Birim testleri | 36 dosyada 1208 test, hepsi geçti (2026-09-24) | `npm test` |
+| Ana E2E koşusu | 577/577 geçti, süit 5,4 dk (2026-09-24) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 013 416 bayt (2026-09-24) | `npx vite build` |
+| Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
+| Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
+| Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
+| Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
+| Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 
-**İki ağaç var (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı bir
-worktree'de ve `test/strateji` dalında yürüyor, refactor işi burada. Sebep: `dist/` git
-dışında ve iki oturum onu paylaşınca ölçüm yalan söylüyor. İki ağacın aynı şeyi
-derlediği `a81c79a`'da sha256 ile doğrulandı. Bu blok refactor tarafının, test tarafının
-durumu aşağıdaki 2026-09-12 girdisinde. Dal bitince `docs/claude-md-bolme`'ye geri
-birleşiyor, ters yön yok.
+**Tek ağaç kaldı (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı
+bir worktree'de ve `test/strateji` dalında yürümüştü; sebebi `dist/`'in git dışında
+olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 4'te
+`docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
+ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
+ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-24 · Linux ikilisi, ve gerçek exe'yi süren araç
+
+**Not defterinin iki satırı (B7.16, B7.17).** Önce kullanıcıya iki soru soruldu.
+Linux sürümü kimin için: yalnız geliştirme ve test. Araç nasıl olsun: etkileşimli
+sürücü, otomatik süit, ve "exe'ye girip her şeyi istediğin gibi kontrol edebil".
+
+**Makinede ölçülenler.** WebKitGTK 4.1 geliştirme paketleri ve `/usr/bin/WebKitWebDriver`
+kuruluydu. `tauri-driver` `cargo install` ile geldi. `npm run exe` zaten
+bir Linux ikilisi üretiyor: 4 319 608 bayt, 1 dk 40 sn. Düz `cargo build` `dist/`'i
+gömüyor, pencere `tauri://localhost`'u gösterdi. Otomasyon uygulamaya kod eklemeden
+açılıyor: `tauri-runtime-wry` 2.11.4 `TAURI_WEBVIEW_AUTOMATION`'ı okuyor.
+
+**Bir tehlike bulundu ve kapatıldı (tuzak 126).** Linux kopyası "güncelle"de
+Windows exe'sini indirip kendi üstüne yazardı. `self_update_here()` indirmeyi ve
+takası Windows dışında reddediyor. `cargo test`'e bir test, gerçek exe süitine bir
+test eklendi. Mutasyon: ret kaldırılınca gerçek exe GitHub'dan 3 766 272 baytlık
+Windows programını indirdi ve test kırmızıya döndü. Geri alınan derlemenin
+sha256'sı öncekiyle aynı.
+
+**Girdi beklendiği gibi çalışmadı (tuzak 127).** Sayfa, betik, ekran görüntüsü
+ve pencere boyutu WebDriver'la çalıştı. Tıklama, Actions API ve metin gönderme
+çalışmadı. Denenenler:
+- `GDK_BACKEND=x11`: aynı sonuç.
+- WebKit'in kendi MiniBrowser'ı: aynı sonuç, yani sorun sistemin WebKitGTK'sında.
+
+Girdi sayfanın içinde olay olarak üretiliyor. Sürüklemenin ilk denemesi iki şey
+öğretti:
+- `pointerdown` hücreye değil, noktanın altındaki en içteki öğeye (karta)
+  gitmeli.
+- Ben 1. saati seçmiştim ve o hücre yasal değildi. Yeşil boyanan bir hücreye
+  sürükleyince kart taşındı, Ctrl+Z geri aldı.
+
+Bir tuzak da kapandı (tuzak 128). İlk tıklama `el.click()` idi. O `detail: 0`
+taşır, ızgara onu klavye sayar ve kartı havuza gönderirdi.
+
+**Veri güvenliği ölçüldü.** Her koşu `test-results/…/ev` altında sahte bir HOME'da
+açıldı. Gerçek `~/Documents/Ders Programı/`'nın listesi koşudan önce ve sonra
+karşılaştırıldı, fark yok. `kapat`tan sonra `tauri-driver`, `WebKitWebDriver` ve
+program süreçlerinden hiçbiri kalmadı.
+
+**Belge kapısı A8.** Yeni betiklerdeki `dist-exe/Mozaik` ve
+`src-tauri/target/release/ders-programi`'yi bulamadı. İkisi derleme çıktısı, ve
+kapının `GENERATED_DIR` tanımına eklendi. Mutasyonla sınandı: `src-taur/...` diye
+bir yazım hatası hâlâ kırmızı. Sınırı da yazılı: çıktı klasörünün İÇİNDEKİ bir
+hata artık görülmez. Sahte ev yolu (`.config/user-dirs.dirs`) kapıya takılıyordu.
+Değişkeniyle yazıldı, kapı değişmedi.
+
+**Koşulan testler:** `cargo test` 25/25, `npm run exe:e2e`'nin süiti 5/5
+(önce XWayland'da, sonra Wayland'da), belge kapıları 17/17, `tsc` iki proje,
+knip temiz, lint 0 hata. Ana E2E listesi 577 test ve yeni dosyayı içermiyor.
+Koşulmadı: `npm run kontrol`'ün tamamı. Bu turda `src/`'de yalnız `docs.test.ts`
+değişti, ve onun kapıları koşuldu.
 
 ---
 

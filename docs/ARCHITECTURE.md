@@ -310,3 +310,8 @@ adaptörün üstünde koşturur.
 
 `isDesktop()` bir derleme bayrağı değil özellik tespiti, çünkü dört teslim yolu
 aynı `dist/index.html`'i taşıyor ([BUILD.md](BUILD.md)).
+
+Aynı kaynak bu makinede bir Linux ikilisine de derleniyor, yalnız geliştirme ve
+test için. Tek fark güncellemede: `update.rs`'in `self_update_here()`'ı indirmeyi
+ve takası Windows dışında reddeder, çünkü manifestin gösterdiği tek dosya Windows
+exe'si (tuzak 126).

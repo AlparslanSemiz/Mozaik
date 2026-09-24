@@ -37,7 +37,7 @@ bitince §10'a taşınır.
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3, B5.7 ve B5.9 açık, B5.8'in veri yarısı babada |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
-| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti, çoğu açık |
+| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16 ve B7.17 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
@@ -851,6 +851,31 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Artık bir dağıtım işi değil, envanterin **önkoşulu**.
 - [→] **B7.9 Roboders incelensin** → **§1b** (R5 · R6 · R7). Senin
       *"her şeyden önce"* satırın onu bir maddelik iş olmaktan çıkardı.
+- [x] **B7.16 Linux exe'si — YAPILDI (2026-09-24).** Senin satırın: *"Linux exesi de
+      oluşturalım."* `npm run exe:linux` → `dist-exe/Mozaik` (4,3 MB, release derlemesi
+      1 dk 40 sn). Kararın: yalnız geliştirme ve test için, dağıtılmıyor. Bu yüzden
+      kendini güncellemiyor: `update.rs`'in `self_update_here()`'ı Windows dışında
+      indirmeyi ve takası reddediyor. Ölçülen bir tehlikeydi: ret yokken Linux kopyası
+      GitHub'dan Windows exe'sini indirip kendi üstüne yazacaktı (tuzak 126).
+      `cargo test` 25/25.
+- [x] **B7.17 Gerçek exe'yi süren araç — YAPILDI (2026-09-24).** Senin satırın:
+      *"Ardından bu exeyi açan playwright gibi iş yapan araç kuralım ki sen exe
+      üzerinden görebil her şeyi."*
+      - **Sürücü:** `scripts/exe-surucu.mjs`. Programı açar, ekran görüntüsü alır,
+        ekrandaki her denetimi `@N` referansıyla döker, tıklar, yazar, tuşlar,
+        sürükler, pencereyi boyutlar ve sayfada betik çalıştırır. Rust komutlarına
+        da `__TAURI__` üstünden ulaşır.
+      - **Nasıl çalışıyor:** Playwright WebKitGTK penceresini süremiyor, yerine
+        `tauri-driver` ve WebDriver. İstemci bağımlılıksız (`scripts/webdriver.mjs`).
+      - **Güvenlik:** her koşu sahte bir ev dizininde. Gerçek
+        `~/Documents/Ders Programı/` önce ve sonra karşılaştırıldı, değişmedi.
+      - **Süit:** `npm run exe:e2e` → `e2e/gercek-exe.spec.ts`, 5/5.
+      - **Bilinen sınır (tuzak 127):** bu makinenin WebKitGTK'sı WebDriver'ın fare ve
+        klavye benzetimini desteklemiyor. Girdi sayfanın içinde olay olarak
+        üretiliyor, yani gerçek fareye verilen cevap ölçülmüyor.
+      - **Kalan, isteğe bağlı:** pencere şimdilik masaüstünde açılıyor. Başsız
+        koşu için `sudo dnf install xorg-x11-server-Xvfb`; sürücü `xvfb-run`'ı
+        görünce kendiliğinden kullanıyor.
 
 ---
 
@@ -1377,6 +1402,8 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
 ```
+Linux exesi de oluşturalım.                                       -> [x] B7.16, 2026-09-24, yalnız geliştirme ve test için
+Ardından bu exeyi açan playwright gibi iş yapan araç kuralım ki sen exe üzerinden görebil her şeyi. -> [x] B7.17, 2026-09-24, tauri-driver + WebDriver
 elimizde bir kart varken yukarı aşağı yapıldığında gölgelenmeyen açık kalan şerit de bizim ekran ile birlikte devam ediyor. onun gösterdiği yerde sabit kalması gerekir. -> [x] B4.17, 2026-09-24, gölgeler tekerleği duymuyordu
 Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam... -> [x] B4.13, 2026-09-12, sebep tepsinin boyu, deste değil
 Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms

@@ -13,7 +13,10 @@ export default defineConfig({
   // something that does not exist under file:// — a service worker (site), a
   // secure context (sunucu), the File System Access API (klasor). They run
   // under playwright.site.config.ts (npm run test:site), over http.
+  // And gercek-exe opens the real Linux program, which needs a Rust build
+  // first (npm run exe:e2e, playwright.gercek-exe.config.ts).
   testIgnore: [
+    '**/gercek-exe.spec.ts',
     '**/ekran.spec.ts',
     '**/patrol.spec.ts',
     '**/otomatik-stres.spec.ts',

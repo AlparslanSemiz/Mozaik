@@ -190,6 +190,16 @@ birbirine karşı okur. Pages'in yönlendirmesi yok, aynı yeniden adlandırma
 `SITE_ADRESI`'ni 404 yaptı ve adres `…github.io/Mozaik/` oldu. Bir riski doğru
 adlandıran bir belge cümlesi teste dönüşene kadar yalnız riskin tarihini yazar.
 
+### 126 · Bir biçim denetimi platform denetimi değildir
+`update.rs`'in `verify()`'ı indirilenin Windows programı olduğunu `MZ` ile soruyor.
+Bu makinede derlenen Linux ikilisi "güncelle"ye basınca manifestin tek dosyasını,
+Windows `Mozaik.exe`'sini indirir, denetimden geçirir ve kendi ELF dosyasının
+üstüne yazardı. Geriye açılacak bir program kalmazdı. Denetim indirilenin ne
+olduğunu soruyor, ama bu kopyanın onu çalıştırabilip çalıştıramayacağını
+sormuyor. Çare `self_update_here()`: indirme ve takas Windows dışında hiç
+başlamıyor. Mutasyonla sınandı: ret kaldırılınca gerçek exe 3 766 272 baytlık
+Windows programını GitHub'dan indirdi, `e2e/gercek-exe.spec.ts` kırmızıya döndü.
+
 ---
 
 ## Çözücü ve kısıt motoru
@@ -894,6 +904,23 @@ her iyileşmeyi hata gibi gösterecekti. Bir dünyanın çözülemez olduğu tam
 çözücüyle kanıtlanmadan yazılmaz. Kanıt betiği depoda değil, yöntemi WORKLOG'un
 2026-09-24 girdisinde.
 
+### 127 · Bu makinenin WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor
+Gerçek exe `tauri-driver` ile açıldı; sayfa, betik, ekran görüntüsü ve pencere
+çalıştı. Ama her tıklama, tuş ve işaretçi eylemi `unsupported operation` döndü.
+XWayland'a geçmek (`GDK_BACKEND=x11`) değiştirmedi. WebKit'in kendi MiniBrowser'ı
+da aynı cevabı verdi, yani sorun Tauri'de değil sistemin WebKitGTK'sında (2.52.5,
+Fedora 44). Çare girdiyi sayfanın içinde olay olarak üretmek
+(`scripts/webdriver.mjs`). Bedeli yazılı: bu süit gerçek bir fareye verilen
+cevabı değil, gerçek programın sayfasını, köprüsünü ve diskini ölçer. WebKitGTK
+güncellenince önce yerel girdi yeniden denenir.
+
+### 128 · `el.click()` ızgarada klavye sayılır ve kartı havuza gönderir
+Programmatik bir `click()` `detail: 0` taşır. `Grid.tsx` kartın tıklamasında
+`detail === 0`'ı Enter ya da Space diye okur ve kartı havuza geri gönderir, çünkü
+klavyeden kaldırma yolu o. Sürücünün ilk hâli tıklamayı böyle üretiyordu, yani
+"karta tıkla" bir kartı ızgaradan silecekti. Sürücünün tıklaması
+`new MouseEvent('click', { detail: 1 })`, bir farenin göndereceği gibi.
+
 ---
 
 ### 120 · Yanlış yere düşen bir mutasyon yeşil cevap verir, ve o cevap kanıt sanılır
@@ -1041,7 +1068,7 @@ bir algoritma işi gibi kovalanır.
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
@@ -1049,12 +1076,12 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 125, yeni bir tuzak 126'dan devam eder. Test stratejisi
+büyük kullanılan numara 128, yeni bir tuzak 129'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

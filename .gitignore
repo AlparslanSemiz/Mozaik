@@ -17,6 +17,8 @@ scratch/
 # Tauri (.exe) derleme çıktısı
 src-tauri/target/
 src-tauri/gen/
+# Linux ikilisi, yalnız geliştirme ve test için (npm run exe:linux)
+dist-exe/
 
 # aSc ekran görüntülerinin arşivi, elle üretiliyor ve depoya girmez
 docs/asc/**/*.zip

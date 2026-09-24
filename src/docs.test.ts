@@ -312,9 +312,11 @@ const FILE_EXT =
     binary named on its own is almost always an output rather than a path. */
 const BARE_EXT = /\.(ts|tsx|js|mjs|cjs|json|md|css|rs|toml|yml|yaml|ps1|cmd|txt|html)$/;
 
-/** Produced by a build, so absent from a clean checkout. */
+/** Produced by a build, so absent from a clean checkout. `dist-exe` and
+    `src-tauri/target` joined the list with `npm run exe:linux` (2026-09-24):
+    the Linux binary cargo writes and the copy the script puts beside it. */
 const GENERATED_DIR =
-  /^(dist|dist-site|dist-kurulum|test-results|playwright-report|node_modules|scratch)\//;
+  /^(dist|dist-site|dist-kurulum|dist-exe|src-tauri\/target|test-results|playwright-report|node_modules|scratch)\//;
 
 /**
  * Produced by the release workflow rather than held in the repository. The

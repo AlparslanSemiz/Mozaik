@@ -35,6 +35,34 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-24 · Linux ikilisi, ve gerçek exe WebDriver ile sürülüyor
+
+**Karar (kullanıcı).** Bir Linux exe'si derleniyor, ama yalnız geliştirme ve test
+için: yayınlanmıyor, Release'e girmiyor ve kendini güncellemiyor. Seçenekler
+soruldu ve "dağıtılacak da" seçilmedi. O yol bildirim şemasını, iş akışını ve
+güncelleme yolunu büyütürdü.
+
+**Yöntem.** Gerçek pencere `tauri-driver` ile sistemin `WebKitWebDriver`'ı
+üstünden, WebDriver protokolüyle sürülüyor. Playwright elenmedi, olamıyor:
+yalnız kendi getirdiği tarayıcıları sürüyor, WebKitGTK webview'ı onlardan biri
+değil. Otomasyon için uygulamaya kod eklenmedi. `tauri-runtime-wry`
+`TAURI_WEBVIEW_AUTOMATION=true`'yu okuyor, `tauri-driver` onu kendisi koyuyor.
+
+**İstemci bağımlılıksız.** WebDriver JSON-HTTP, ve gereken yirmi uç `fetch` ile
+yazıldı (`scripts/webdriver.mjs`). WebdriverIO ya da selenium-webdriver bir
+devDependency ve onlarca alt paket getirirdi. Playwright koşucu olarak kaldı,
+çünkü süitin geri kalanı onu konuşuyor.
+
+**Denendi ve bırakıldı: WebDriver'ın kendi girdisi.** Öğe tıklaması, Actions API
+ve metin gönderme bu makinede `unsupported operation` ya da `invalid argument`
+döndü. `GDK_BACKEND=x11` ile XWayland'da da, WebKit'in MiniBrowser'ıyla da aynı
+sonuç çıktı. Girdi sayfanın içinde üretiliyor (tuzak 127), ve XWayland'a
+geçmek hiçbir şey kazandırmadığı için program Wayland'da açılıyor.
+
+**Sahte ev dizini varsayılan.** Program `HOME` ve XDG dizinleri bir test
+klasörüne yönlenmiş hâlde açılıyor. Gerçek Belgeler klasörü bu makinede babanın
+planını tutuyor, ve bir test onu ezmemeli.
+
 ### 2026-09-24 · Çözücü takılınca vazgeçmiyor, onarıyor
 
 **Değişen.** `solver.ts`'in ikinci katmanı. Geri sarmalı arama `STALL_LIMIT`

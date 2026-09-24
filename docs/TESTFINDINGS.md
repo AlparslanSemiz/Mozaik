@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-24 · scripts/exe-surucu.mjs · gerçek exe'de tıklama, tuş ve işaretçi eylemi
+Bulgu: WebDriver'ın öğe tıklaması, Actions API ve metin gönderme `unsupported operation`
+ya da `invalid argument` döndü. Tekrarlandı: Wayland'da, `GDK_BACKEND=x11` ile XWayland'da,
+ve WebKit'in kendi MiniBrowser'ıyla. Sayfa, betik, ekran görüntüsü ve pencere çalışıyor.
+Tür: ortam kusuru (sistemin WebKitGTK'sı, 2.52.5)
+Ne yapıldı: girdi sayfanın içinde olay olarak üretiliyor; süitin neyi ölçmediği TESTPLAN'da.
+Kalıcı kural: TRAPS.md, tuzak 127
+
+### 2026-09-24 · npx vitest run src/docs.test.ts · A8, yeni betiklerdeki derleme çıktısı yolları
+Bulgu: `dist-exe/Mozaik` ve `src-tauri/target/release/ders-programi` "diskte yok" diye
+kırmızı. İkisi de temiz bir kopyada olmayan derleme çıktısı.
+Tür: test kusuru (kapının tanımında iki çıktı klasörü eksikti)
+Ne yapıldı: `GENERATED_DIR`'a eklendiler. Mutasyon: `src-taur/...` yazım hatası hâlâ kırmızı.
+Kalıcı kural: yok
+
 ### 2026-09-24 · npm run cozucu · otomatik-stres.spec.ts, `parcalanmis-gunler`
 Bulgu: Onarım aşaması girince dünya 24/24 dizildi ve test "yerleşemedi" cümlesini
 beklediği için düştü. Dünya OR-Tools CP-SAT ile ayrıca çözüldü: 0,01 saniyede bir hafta

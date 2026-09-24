@@ -25,6 +25,7 @@
     "playwright.config.ts",
     "playwright.cozucu.config.ts",
     "playwright.ekran.config.ts",
+    "playwright.gercek-exe.config.ts",
     "playwright.patrol.config.ts",
     "playwright.site.config.ts"
   ]

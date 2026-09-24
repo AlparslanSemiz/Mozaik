@@ -16,6 +16,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
+| Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
@@ -46,6 +47,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
+| Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
 | Devriye | `e2e/patrol.spec.ts` | iddiasız gezinmede çıkan şikayetler |
@@ -260,6 +262,27 @@ köprü yokken aynı dosyanın bir tarayıcı sayfası olarak kalması. Güncell
 hiçbir şey sorulmadan ağa çıkılmaması (panel çizilmiş olsa bile `check_update`
 çağrılmaz), üç cevabın üç ayrı cümle yazması, indirmenin yeniden başlatmaması,
 internet yokken programın çalışmaya devam etmesi.
+
+### Gerçek exe
+
+`npm run exe:e2e` Linux ikilisini derler ve `e2e/gercek-exe.spec.ts`'i ona karşı
+koşar. Playwright burada yalnız koşucu, tarayıcı açmaz: her test programı
+`tauri-driver` ile açar ve WebDriver üstünden sürer (`scripts/webdriver.mjs`).
+Yukarıdaki taklidin arkasında duran şeyi ölçer: pencerenin açıldığı ve Rust
+köprüsünün orada olduğu, `data_dir_path`'in gerçek yeri söylediği, otomatik
+kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, ve Linux
+kopyasının kendini güncellemeyi reddettiği. Sonuncusu mutasyonla sınandı: ret
+kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve test kırmızıya döndü.
+
+İki kural: her test kendi sahte ev dizininde açılır, çünkü programın yazdığı
+Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Ve tıklama, tuş
+ve sürükleme sayfanın içinde olay olarak üretilir, çünkü bu makinenin
+WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor (tuzak 127). Yani bu
+süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek programın
+sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
+
+Windows'taki `Mozaik.exe`'yi (WebView2) ölçmez, o hâlâ babanın makinesinde
+görülmeyi bekliyor.
 
 ### Rust
 

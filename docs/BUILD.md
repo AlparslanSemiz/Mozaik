@@ -59,6 +59,8 @@ npm run paket        # dist-kurulum/: babaya giden Windows klasörü
 npm run font         # src/fonts/*.woff2'yi yeniden üretir (Python ve fontTools ister)
 npm run exe          # Tauri ikilisi (Rust ister)
 npm run exe:test     # cargo test (Rust ister)
+npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve test)
+npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
 npm run yayinla -- 1.2.0   # sürüm çıkarır
 ```
 
@@ -84,10 +86,12 @@ olarak o. Kural ile grafiğin yapılandırması `.dependency-cruiser.cjs`'te. Bi
 yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
 atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
-`font`, `exe` ve `exe:test` `kontrol`'ün parçası değil, çünkü bu depoda olmayan
-bir araç zinciri istiyorlar (Python ile fontTools, Rust) ve `kontrol` her
-makinede koşabilmeli. Rust'ı gerçekten derleyen tek yer
-`.github/workflows/surum.yml`, `cargo test` de orada koşuyor. `patrol` de
+`font`, `exe`, `exe:test`, `exe:linux` ve `exe:e2e` `kontrol`'ün parçası değil,
+çünkü bu depoda olmayan bir araç zinciri istiyorlar (Python ile fontTools, Rust,
+WebKitGTK ve `tauri-driver`) ve `kontrol` her makinede koşabilmeli. Yayınlanan
+Windows exe'sini derleyen ve `cargo test`'i her sürümde koşan yer
+`.github/workflows/surum.yml`. Linux ikilisi yalnız geliştirme makinesinde,
+elle derleniyor. `patrol` de
 `kontrol`'ün dışında, çünkü bir şey iddia etmiyor, geziyor, ve kırıldığında
 okunacak şey bir iz: kendi config'inde video ve trace açık.
 
@@ -237,6 +241,16 @@ bir seçenek olarak tartışılabilir ([DECISIONS.md](DECISIONS.md)).
 Çapraz derleme yok: geliştirme makinesi Linux, hedef Windows, ve exe
 `windows-latest` üstünde doğuyor (`surum.yml`).
 
+**Linux ikilisi** (`npm run exe:linux`) aynı kaynağın bu makinede derlenmiş
+hâli, `dist-exe/Mozaik`. Yalnız geliştirme ve test için var: yayınlanmıyor ve
+kendini güncellemiyor (aşağıda). İşi gerçek pencereyi sürmek: `scripts/exe-surucu.mjs`
+onu açar, ekran görüntüsü alır, tıklar, yazar, sürükler ve sayfada betik çalıştırır,
+`e2e/gercek-exe.spec.ts` de aynı yoldan beş şeyi sınar. Sürücü `tauri-driver`
+(`cargo install tauri-driver --locked`) ile sistemin `WebKitWebDriver`'ı üstünden
+çalışır. Program her koşuda sahte bir ev dizininde açılır, gerçek Belgeler
+klasörüne dokunmaz. Neden Playwright değil ve girdinin neden sayfanın içinde
+üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
+
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere
 1600 mantıksal piksellik bir kutuda kaldığında sayfa 1920 değil 1600 CSS
 pikselde koşuyordu (tuzak 107), ve Windows %150'de çalışma alanı 672 mantıksal
@@ -343,7 +357,10 @@ cümle olur ve program çalışmaya devam eder. `src-tauri/src/update.rs` indiri
 dosyanın `MZ` ile başladığını ve boyutunun tuttuğunu doğrular, adresin yalnız bu
 deponun Release öneklerinden gelmesine izin verir, takası çalışan programın kendi
 dosya adı üstünden yapar (`current_exe()` ile `.yeni` ve `.eski`), ve takas
-yarıda kalırsa eski programı yerine geri koyar. Babanın makinesindeki
+yarıda kalırsa eski programı yerine geri koyar. İndirme ve takas yalnız
+Windows'ta yapılır (`self_update_here`), çünkü manifestin gösterdiği tek dosya
+Windows exe'si ve `MZ` denetimi platformu değil biçimi soruyor: Linux ikilisi onu
+kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 `Ders-Programi.exe` bu yüzden `Mozaik.exe`'yi indirir ve kendi adıyla yerine
 koyar: dosya adı eski kalır, içindeki program yenidir.
 
