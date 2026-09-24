@@ -88,12 +88,16 @@ export default function Suggestions({
     return (
       <section className="panel suggestions" aria-labelledby="suggestions-title">
         <div className="suggestion-row">
-          <h2 id="suggestions-title">{t('Hafta değişiklik gerekmeden kuruluyor')}</h2>
+          <h2 id="suggestions-title">
+            {as.relaid
+              ? t('Hafta baştan dizilince değişiklik gerekmeden kuruluyor')
+              : t('Hafta değişiklik gerekmeden kuruluyor')}
+          </h2>
           <span className="hint inline">
             {t('Otomatik dizme bu haftayı bulamadı; ikinci arama buldu ve denetledi.')}
           </span>
           <button ref={first} className="btn primary" disabled={stale} onClick={() => onApply(as)}>
-            {t('Programı yerleştir')}
+            {as.relaid ? t('Programı baştan yerleştir') : t('Programı yerleştir')}
           </button>
           <button className="btn" onClick={onClose}>
             {t('Kapat')}
@@ -114,6 +118,13 @@ export default function Suggestions({
         <span className="hint inline">
           {t('Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.')}
         </span>
+        {suggestions.some((x) => x.relaid) && (
+          <span className="hint inline">
+            {t(
+              'Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.',
+            )}
+          </span>
+        )}
         {searching && <span className="hint inline">{t('Başka yollar aranıyor…')}</span>}
         <button className="btn suggestion-close" onClick={onClose}>
           {t('Kapat')}
@@ -134,8 +145,12 @@ export default function Suggestions({
                   onClick={() => onApply(s)}
                 >
                   {s.family === 'teacherHours'
-                    ? t('Saatleri aç ve programı yerleştir')
-                    : t('Değiştir ve programı yerleştir')}
+                    ? s.relaid
+                      ? t('Saatleri aç ve programı baştan yerleştir')
+                      : t('Saatleri aç ve programı yerleştir')
+                    : s.relaid
+                      ? t('Değiştir ve programı baştan yerleştir')
+                      : t('Değiştir ve programı yerleştir')}
                 </button>
                 <button
                   className="btn"

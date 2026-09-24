@@ -275,12 +275,21 @@ koşar. Playwright burada yalnız koşucu, tarayıcı açmaz: her test programı
 `tauri-driver` ile açar ve WebDriver üstünden sürer (`scripts/webdriver.mjs`).
 Yukarıdaki taklidin arkasında duran şeyi ölçer: pencerenin açıldığı ve Rust
 köprüsünün orada olduğu, `data_dir_path`'in gerçek yeri söylediği, otomatik
-kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, ve Linux
-kopyasının kendini güncellemeyi reddettiği. Sonuncusu mutasyonla sınandı: ret
-kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve test kırmızıya döndü.
+kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, Linux
+kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
+sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
+yazdığı (tuzak 132) ve "Dosyadan aç"ın bir yedeği okuduğu. Güncelleme reddi
+mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
+test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
+
+Ölçmedikleri: GTK'nın dosya seçme penceresi (WebDriver oturumunda açılmaz, tuzak
+133; otomasyonsuz açılışta açıldığı elle görüldü) ve yazdırmanın kâğıda ya da
+PDF'e dökümü (Yazdır'ın GTK penceresini açtığı elle görüldü).
 
 İki kural: her test kendi sahte ev dizininde açılır, çünkü programın yazdığı
-Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Ve tıklama, tuş
+Belgeler klasörü bu makinede babanın gerçek verisini tutuyor. Sahte ev gerçek
+evin programa değen her klasörünü kurar, yoksa eksik bir klasör ürün kusuru gibi
+görünür (tuzak 132). Ve tıklama, tuş
 ve sürükleme sayfanın içinde olay olarak üretilir, çünkü bu makinenin
 WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor (tuzak 127). Yani bu
 süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek programın

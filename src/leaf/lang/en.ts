@@ -998,6 +998,16 @@ const EN: Sozluk = {
   // src/solver.ts
   "haftada {istenen} saat isteniyor, açık saatler ve kurallar en fazla {olabilen} saat veriyor":
     "{istenen} hours a week are asked for; the open hours and the rules allow at most {olabilen}",
+  "Hafta baştan dizilince değişiklik gerekmeden kuruluyor":
+    "Laid out afresh, the week can be built without any change",
+  "Programı baştan yerleştir":
+    "Place the timetable afresh",
+  "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
+    "There is no way with the placed lessons kept where they are; these ways lay them out again, and pinned ones stay put.",
+  "Saatleri aç ve programı baştan yerleştir":
+    "Open the hours and place the timetable afresh",
+  "Değiştir ve programı baştan yerleştir":
+    "Change and place the timetable afresh",
   "Nasıl kurulacağı aranıyor… {sure} sn":
     "Looking for how the week can be built… {sure} s",
   "Sınıfların saatlerine dokunmadan bir yol bulunamadı.":
@@ -1389,6 +1399,8 @@ const EN: Sozluk = {
     "These lessons still have hours to place, but no empty cell is left for them.",
   "Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz.":
     "This copy can update itself, but connects nowhere **until you press the button**.",
+  "Bu kopya geliştirme ve test için; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler.":
+    "This copy is for development and testing; it does not update itself. Checking only tells you whether there is a new version.",
   "Bu sayılar **bütün okul** için; **0** yazmak “sınır yok” demektir.":
     "These numbers are for the **whole school**; **0** means “no limit”.",
   "Bu tarayıcının bu bilgisayardaki deposunda duruyor.":

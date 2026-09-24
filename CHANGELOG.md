@@ -23,12 +23,13 @@ release is incomplete, the entry says so.
   school in the desktop window that is 38 cards in view instead of 19, with
   nothing taken from the grid.
 - While a card is being dragged, every card in the target row shows the cell's own verdict as a coloured ring, so a filled cell no longer hides whether the card could go there.
-- When a week cannot be laid out, a panel under the result line now says what would have to change for it to fit, one way per line: which closed teacher hours to open, which daily limits to raise, which lessons to split into single hours, or, as a last resort, which weekly hours to cut. A class's own closed hours are never suggested. Each way comes with the week it was found with, checked against the rules, and one button puts the change and the week in at once, as a single undo step. If the week can in fact be built and automatic arrangement just missed it, the panel says so and places it.
+- When a week cannot be laid out, a panel under the result line now says what would have to change for it to fit, one way per line: which closed teacher hours to open, which daily limits to raise, which lessons to split into single hours, or, as a last resort, which weekly hours to cut. A class's own closed hours are never suggested. Each way comes with the week it was found with, checked against the rules, and one button puts the change and the week in at once, as a single undo step. If the week can in fact be built and automatic arrangement just missed it, the panel says so and places it. When no way exists with the placed lessons kept where they are, the search goes on laying them out again, pinned lessons excepted, and the panel says so.
 - Automatic arrangement no longer gives up on a lesson when it gets stuck. It keeps repairing the best timetable it found, moving the fewest lessons out of the way each time. On a real school where every class's open hours exactly match its lessons, it now lays out the whole week in about a second, where before it stopped with five lessons missing.
 - When a week truly cannot be laid out, automatic arrangement now stops on its own once it is no longer getting anywhere, instead of always running for the full 15 seconds.
 
 ### Fixed
 
+- Switching the language no longer leaves the status pill in the top bar in the old language until the next edit.
 - When automatic arrangement gets stuck, the reason it gives now names what blocks the lesson in the hours its class still has free: a teacher, a room, a rule or the block's length. Before, a class whose open hours exactly matched its lessons always got the class's own closed hour as the reason.
 - Dragging a card across a full week no longer stutters: the reason bar above the grid is rewritten at most ten times a second instead of once per cell.
 - Scrolling the grid while holding a card now moves the highlighted row with it. Before, the undimmed strip stayed where it was on the screen while the rows scrolled away underneath.

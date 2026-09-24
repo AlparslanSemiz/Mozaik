@@ -211,6 +211,11 @@ hiçbir yolda yoktur. Hafta aslında kurulabiliyorsa (çözücü bulamadı, ikin
 buldu) panel tek satırla bunu söyler. Bir yolu uygulamak veriyi ve haftayı birlikte
 yerleştirir ve tek geri al adımıdır. Program o arada değiştiyse düğme kapanır.
 Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
+`Otomatik diz` dizili dersleri yerinde tutar. Öyle bir yol yoksa arama
+kendiliğinden sabitlenenler dışındaki dersleri de yeniden dizerek sürer. Panel bunu
+bir cümleyle söyler, ve düğme "…programı baştan yerleştir" olur. Babanın dosyası
+tam bu durumda: 330 saat dizili, ve boş kalanlar 2 saatlik bloklara uymayacak kadar
+parçalı.
 
 ### Geçici görünüm
 

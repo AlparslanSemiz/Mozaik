@@ -23,10 +23,15 @@ Son güncelleme: 2026-09-24.
 
 **Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
-**Ne çalışıyor.** Program 2.1.1'den beri değişmedi: yedi sekme (Okul, Müsaitlik,
-Dersler, Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil,
-dört teslim yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini
-güncellemesi. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
+**Ne çalışıyor.** 2.1.1'deki her şey: yedi sekme (Okul, Müsaitlik, Dersler,
+Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil, dört teslim
+yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini güncellemesi.
+Yayınlanmamış olarak üstüne:
+- Onarım aşamalı çözücü (B5.8).
+- Kurulamayan haftada neyin değişmesi gerektiğini söyleyen öneri paneli (B5.9).
+  Babanın kendi dosyasında `Otomatik diz`'e basınca "HE, KY ve AV'nin dört Cumartesi
+  saati" gibi bir yol ve onun haftası geliyor.
+- Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18). 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
 
@@ -44,8 +49,10 @@ oluşmamasının sebebi ölçüldü: Mozaik'teki veri Roboders'tekiyle aynı de�
 hâliyle kurulamıyor (kanıtlı), çözücü de zayıftı ve güçlendi (TODO B5.8). Kalan
 soru babada: müsaitlik hangisinde doğru (§8b). Aynı gün bir Linux ikilisi ve onu
 süren bir araç kuruldu (B7.16, B7.17): gerçek exe artık bu makinede açılıp
-görülebiliyor ve `npm run exe:e2e` ile sınanıyor. Sıradaki iş babanın cevabı, ve
-kurulamayan haftada "şunu açarsan kurulur" diyecek B5.9'un kararı.
+görülebiliyor ve `npm run exe:e2e` ile sınanıyor. Aynı gün B5.9 bitti, ve Linux
+exe'si babanın dosyasıyla baştan sona gezildi (B7.18). Sıradaki iş babanın cevabı
+(§8b), ve öneri panelinin babanın kendi makinesinde (Windows, WebView2) ne kadar
+sürdüğünün ölçülmesi.
 
 **Bilinen kusurlar.**
 
@@ -75,13 +82,13 @@ kurulamayan haftada "şunu açarsan kurulur" diyecek B5.9'un kararı.
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 36 | `e2e/*.spec.ts` |
-| Rust testleri | 25, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 5 test, hepsi geçti, 9–11 s | `npm run exe:e2e`, Linux ikilisine karşı |
-| Linux ikilisi | 4 319 608 bayt, release derlemesi 1 dk 40 sn | `npm run exe:linux` |
+| Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
+| Gerçek exe süiti | 9 test, hepsi geçti, yaklaşık 22 s (2026-09-24) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Linux ikilisi | 4 332 232 bayt, release derlemesi yaklaşık 40 s (artımlı) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 38 dosyada 1231 test, hepsi geçti (2026-09-24) | `npm test` |
-| Ana E2E koşusu | 578/578 geçti, süit 5,7 dk (2026-09-24) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 054 991 bayt, brotli 259,2 kB (2026-09-24) | `npx vite build`, `npm run boyut` |
+| Birim testleri | 38 dosyada 1232 test, hepsi geçti (2026-09-24) | `npm test` |
+| Ana E2E koşusu | 579/579 geçti, süit 5,7 dk (2026-09-24) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | yaklaşık 1,06 MB, brotli 259,8 kB (2026-09-24) | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -95,6 +102,82 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-24 · Linux exe'si babanın dosyasıyla gezildi (B7.18)
+
+**Yöntem.**
+- Sürücüyle (`scripts/exe-surucu.mjs`) yedi sekme ve her özellik gezildi, her
+  ekrandan görüntü alındı ve bakıldı.
+- Kullanıcı tur ortasında "babamın verisini kullan, en önemlisi o" dedi.
+  `babamınki.json` sahte eve "Tümünü dosyadan aç" ile yüklendi.
+- Gerçek `~/Documents/Ders Programı/` koşudan önce ve sonra sha256 ile
+  karşılaştırıldı.
+- İki gözlem kullanıcının gözüyle yapıldı: yazdırma penceresi ve dosya seçici.
+
+**Ortam.** WebKitGTK 2.52.5, Wayland, `devicePixelRatio` 2. Pencere büyütülmüş
+açılıyor: 1920×1121, ekran 1920×1200. Gömülü IBM Plex yüklü, yazı tipi açılışta en
+geç 0,6 s'de hazır.
+
+**Çalışanlar.**
+- Otomatik dizme: örnek okul 367 blok, 0,1 s.
+- Havuzdan ızgaraya sürükleme (hücre `drop-ok`), sabitleme (düzeltmeden sonra).
+- Geri alma ve yineleme.
+- Ctrl+K paleti, `?` kısayol ekranı, koyu tema, %140, İngilizce.
+- Plan kopyası, alternatif program ("Program 2").
+- Yedek klasörü: sahte evin Belgeler'ine bütün planlar ve günlük yedek.
+- Hakkında ve güncelleme denetimi ("En son sürümü kullanıyorsunuz").
+- Kaydet (İndirilenler'e) ve aç (okuma yolu).
+- Yazdır: GTK yazdırma penceresi açılıyor, kullanıcı gördü.
+- Kapatıp açınca veri yerinde.
+- Babanın dosyasında `Otomatik diz`:
+  - panel "4 öğretmen saatini açın" (KY Cumartesi 3–4, YK Cumartesi 9, AV Cumartesi
+    12) ve "6 sınırı yükseltin" diyor;
+  - ilk öneri 25 s, arama 35 s;
+  - uygulayınca havuz boş ve "Sorun yok", Ctrl+Z babanın özgün hâlini geri getiriyor.
+- `Baştan diz` ile ilk öneri 51 s. Chromium'da 34 s, yani WebKitGTK belirgin şekilde
+  yavaş.
+
+**Bulunanlar ve yapılanlar** (ayrıntı TESTFINDINGS'ta):
+- **Babanın dosyasında `Otomatik diz` yol bulamıyordu.** 330 saat dizili, boş saatler
+  parçalı. Kullanıcının kararıyla arama o durumda dersleri yeniden dizerek sürüyor
+  (`relaid`), panel bunu söylüyor. Birim testi var.
+- **Sabitleme sayfa sürecini çökertiyordu:** Mesa `iris`, WebKitGTK DMA-BUF (tuzak
+  130). Linux ikilisi `WEBKIT_DISABLE_DMABUF_RENDERER`'ı kendisi koyuyor, yalnız
+  Linux'ta derleniyor. Test önce kırmızıydı.
+- **Hakkında, Linux kopyası için "kendini güncelleyebilir" diyordu.** Rust'a
+  `self_update_supported` komutu eklendi.
+- **Dil değişince üst çubuğun hapı eski dilde kalıyordu.** Her teslim yolunda aynıydı,
+  düzeltildi.
+- **Araç kusurları:**
+  - "Dosyaya kaydet" dosyayı deponun köküne yazdı. Sahte evde İndirilenler yoktu
+    (tuzak 132).
+  - Bir Playwright koşusu sürücünün oturumunu ve sahte evini sildi. Sürücü
+    `scratch/`'a taşındı (tuzak 131).
+  - Çökmüş bir oturumun temizliği süreçleri öldürmüyordu.
+  - `exe-linux.mjs` çalışan bir ikilinin üstüne kopyalayamıyordu.
+  - Gerçek exe süitinde bir yarış vardı.
+- **Kusur olmayanlar:**
+  - Dosya seçici WebDriver oturumunda açılmıyor, düz açılışta açılıyor (tuzak 133).
+  - İlk soğuk açılışın ilk görüntüsü harfsizdi, tekrarlanmadı.
+
+**Windows'a dokunulmadı.** Rust'taki yeni satır `cfg(target_os = "linux")` altında.
+`self_update_supported` Windows'ta `true` döner. Sayfa, cevap vermeyen bir köprüde
+eski cümleyi gösteriyor. WebView2 burada sınanamadı.
+
+**Gerçek klasör:** koşudan önce ve sonra aynı. Dört dosya, sha256'ları ve
+tarihleri birebir aynı (`diff` boş).
+
+**Koşulan testler:** `npm run kontrol` baştan sona yeşil (birim 1232/1232, E2E
+579/579, site 22/22, çözücü stresi 7/7, boyut içinde), `npm run exe:test` 26/26,
+gerçek exe süiti 9/9 (yarış düzeltildikten sonra üç koşu arka arkaya). Koşulmadı:
+`patrol`, `ekran`, `mutasyon`, `kapsam`.
+
+**Açık kalan:**
+- Takas exe'de denenmedi.
+- PDF dökümü elle alınmadı.
+- Babanın makinesinde süre ölçülmedi.
 
 ---
 

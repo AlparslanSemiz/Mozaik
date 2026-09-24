@@ -33,7 +33,7 @@ import type { PlanControls } from '../props';
 import type { FolderRun } from '../../platform/useFolder';
 import type { UpdateRun } from '../../platform/update';
 import { SITE_ADRESI } from '../../platform/update';
-import { EXE_FOLDER } from '../../platform/desktop';
+import { EXE_FOLDER, desktopSelfUpdates } from '../../platform/desktop';
 import { surumEtiketi, tarihYazisi } from '../../leaf/version';
 import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
 import Plans from './Plans';
@@ -389,18 +389,34 @@ function ExeUpdate({ update }: { update: UpdateRun }) {
   const t = useT();
   const d = update.durum;
   const mesgul = d.ad === 'bakiliyor' || d.ad === 'indiriliyor';
+  // Asked of the program itself: the Linux build says no, and promising it
+  // here would end in a refusal after the download button (tuzak 126).
+  const [kendini, setKendini] = useState(true);
+  useEffect(() => {
+    let canli = true;
+    void desktopSelfUpdates().then((evet) => {
+      if (canli) setKendini(evet);
+    });
+    return () => {
+      canli = false;
+    };
+  }, []);
 
   return (
     <>
       <p className="hint">
-        <T k="Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
+        {kendini ? (
+          <T k="Bu kopya kendini güncelleyebilir ama **düğmeye basmadıkça** hiçbir yere bağlanmaz." />
+        ) : (
+          <T k="Bu kopya geliştirme ve test için; kendini güncellemez. Denetlemek yalnız yeni sürümün olup olmadığını söyler." />
+        )}
       </p>
 
       <div className="form-row">
         <button className="btn" onClick={update.check} disabled={mesgul}>
           {t('Güncellemeleri denetle')}
         </button>
-        {d.ad === 'var' && (
+        {d.ad === 'var' && kendini && (
           <button className="btn primary" onClick={update.indir}>
             {t('Yeni sürümü indir')}
           </button>

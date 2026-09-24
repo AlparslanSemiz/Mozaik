@@ -155,7 +155,26 @@ fn data_dir_path(app: tauri::AppHandle) -> Result<String, String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+/// Linux only: draw without WebKitGTK's DMA-BUF renderer, unless the shell
+/// already says otherwise.
+///
+/// On this development machine (Fedora 44, Intel GPU, Mesa 26.2 `iris`) the
+/// page process aborted inside the GPU driver every time a pinned card was
+/// drawn, and the window went blank (tuzak 130). Without that renderer WebKit
+/// shares pixels through memory instead, and the same click draws. Windows is
+/// untouched: the father's Mozaik.exe is WebView2, and this is not compiled in.
+#[cfg(target_os = "linux")]
+fn linux_renderer() {
+    if std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_none() {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
+}
+
 pub fn run() {
+    // Before any webview exists, and while this is still the only thread.
+    #[cfg(target_os = "linux")]
+    linux_renderer();
+
     // The version this replaced, if we are the replacement. Here rather than
     // right after the swap, because right after the swap that file is still
     // the process doing the asking.
@@ -170,11 +189,31 @@ pub fn run() {
             remove_file,
             data_dir_path,
             update::check_update,
+            update::self_update_supported,
             update::download_update,
             update::apply_update
         ])
         .run(tauri::generate_context!())
         .expect("Mozaik başlatılamadı");
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod linux_tests {
+    use super::linux_renderer;
+
+    // One test, not two: both touch the process environment, and tests run on
+    // threads of one process.
+    #[test]
+    fn linux_renderer_sets_the_variable_and_respects_the_shell() {
+        std::env::remove_var("WEBKIT_DISABLE_DMABUF_RENDERER");
+        linux_renderer();
+        assert_eq!(std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(), Ok("1"));
+
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "0");
+        linux_renderer();
+        assert_eq!(std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").as_deref(), Ok("0"));
+        std::env::remove_var("WEBKIT_DISABLE_DMABUF_RENDERER");
+    }
 }
 
 #[cfg(test)]

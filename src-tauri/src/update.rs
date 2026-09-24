@@ -83,6 +83,13 @@ pub fn self_update_here() -> Result<(), String> {
     }
 }
 
+/// Whether this copy can replace itself, for the About panel to say the right
+/// thing: the Linux build would otherwise promise an update it then refuses.
+#[tauri::command]
+pub fn self_update_supported() -> bool {
+    self_update_here().is_ok()
+}
+
 /// What the workflow publishes next to the three delivery files.
 ///
 /// Turkish `boyut` beside English field names is deliberate and matches the

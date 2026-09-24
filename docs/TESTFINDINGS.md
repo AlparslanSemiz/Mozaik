@@ -26,6 +26,92 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-24 · gerçek exe turu, babanın dosyası · Otomatik diz yol bulamıyor
+Bulgu: `babamınki.json` exe'de "Tümünü dosyadan aç" ile açıldı (330 saat dizili, 12 blok
+havuzda). `Otomatik diz` 0/12 yerleştirdi, öneri araması 4 saniyede "bir yol bulunamadı"
+dedi. Sebep: dizili dersler yerinde tutuluyor, ve boş saatler 2 saatlik bloklara uymayacak
+kadar parçalı. `Baştan diz` ile aynı veride 4 öğretmen saati ya da 6 sınır önerildi.
+Tür: ürün kusuru (ürünün en önemli yolu, babanın kendi dosyasında)
+Ne yapıldı: kullanıcının kararıyla arama o durumda dersleri yeniden dizerek sürüyor
+(`relaid`). Exe'de ilk öneri 25 s, arama 35 s; uygulayınca "Sorun yok", Ctrl+Z geri alıyor.
+Kalıcı kural: DECISIONS.md, 2026-09-24 öneri kaydının eki
+
+### 2026-09-24 · gerçek exe turu · bir dersi sabitlemek sayfa sürecini çökertiyor
+Bulgu: "Dersi buraya sabitle" iki denemenin ikisinde de WebDriver'da "session deleted
+because of page crash" verdi. `coredumpctl`'e göre `WebKitWebProcess`, Mesa `iris`
+içinde `_iris_batch_flush` sırasında `abort` etti. `WEBKIT_DISABLE_DMABUF_RENDERER=1` ile
+çökme olmadı.
+Tür: ortam kusuru (bu makinenin grafik sürücüsü ve WebKitGTK), Linux ikilisinde düzeltildi
+Ne yapıldı: `lib.rs` değişkeni yalnız Linux'ta, dışarıdan verilmemişse koyuyor. Yeni gerçek
+exe testi düzeltmesiz ikiliye karşı kırmızı, düzeltmeyle yeşil. `cargo test`'e bir test.
+Kalıcı kural: TRAPS.md, tuzak 130
+
+### 2026-09-24 · gerçek exe turu · "Dosyaya kaydet" dosyayı deponun köküne yazdı
+Bulgu: Sayfa "İndirilenler klasörüne bakın" dedi, dosya çalışma dizinine düştü. Sahte evin
+`user-dirs.dirs`'i İndirilenler'i tanımlamıyordu.
+Tür: test kusuru (kum havuzu), ürün gerçek bir masaüstünde doğru
+Ne yapıldı: sahte ev `Downloads`'u kuruyor, sürücü sahte evde başlıyor; gerçek exe testi.
+Kalıcı kural: TRAPS.md, tuzak 132
+
+### 2026-09-24 · npx playwright test · sürücünün açık oturumu ve sahte evi silindi
+Bulgu: Tur ortasındaki bir Playwright koşusu `test-results/`'u boşalttı, sürücünün kaydı ve
+yüklenen veri gitti, program sahipsiz kaldı. Sonraki derleme `ETXTBSY` ile düştü; çökmüş
+bir oturumun temizliği de süreçleri öldürmeden hata fırlatıyordu.
+Tür: test kusuru (araç)
+Ne yapıldı: sürücü `scratch/exe-surucu/`'da; temizlik hatayı yutup süreçleri her durumda
+öldürüyor; `exe-linux.mjs` eski ikiliyi kopyalamadan önce siliyor.
+Kalıcı kural: TRAPS.md, tuzak 131
+
+### 2026-09-24 · npm run exe:e2e · "hiç sorulmadan diske yazıyor" üç koşunun birinde düştü
+Bulgu: Günlük yedek dosyası paketten birkaç milisaniye sonra yazılıyor, test onu bir kez
+sayıyordu. Süite yeni testler eklenince zamanlama kaydı.
+Tür: test kusuru (yarış)
+Ne yapıldı: sayım yoklamaya çevrildi; üç ardışık koşuda 8/8, sonra 9/9.
+Kalıcı kural: yok
+
+### 2026-09-24 · gerçek exe turu · dil değişince üst çubuğun hapı eski dilde kalıyor
+Bulgu: İngilizceye geçince sekmeler çevrildi, "Sorun yok" hapı Türkçe kaldı. Hapın cümlesi
+saf katmanda üretiliyor ve yalnız veriye göre önbelleğe alınıyordu. Her teslim yolunda aynı.
+Tür: ürün kusuru
+Ne yapıldı: `App.tsx` ve `Ribbon.tsx` önbelleği dile de bağlandı; `e2e/dil.spec.ts`'e test
+(düzeltmeden önce kırmızıydı).
+Kalıcı kural: yok
+
+### 2026-09-24 · gerçek exe turu · Hakkında Linux kopyası için "kendini güncelleyebilir" diyor
+Bulgu: Linux kopyası güncellemeyi reddediyor (tuzak 126), sayfa ise güncelleyebileceğini
+söylüyordu.
+Tür: ürün kusuru (yalnız Linux ikilisi)
+Ne yapıldı: Rust'a `self_update_supported` komutu; sayfa ona soruyor, bilmeyen köprüde
+(eski exe, test taklidi) eski cümle kalıyor. Gerçek exe testi.
+Kalıcı kural: yok
+
+### 2026-09-24 · gerçek exe turu · "Dosyadan aç" dosya seçiciyi açmıyor
+Bulgu: Sürücüyle açılan exe'de hem sayfa içi hem gerçek fare tıklamasıyla seçici açılmadı.
+Sürücüsüz açılışta açıldı (kullanıcı gördü).
+Tür: araç sınırı (WebDriver oturumu seçiciyi yakalıyor)
+Ne yapıldı: okuma yolu sayfa içinden dosya verilerek sınanıyor.
+Kalıcı kural: TRAPS.md, tuzak 133
+
+### 2026-09-24 · gerçek exe turu · ilk açılışta harfsiz ekran
+Bulgu: Makinedeki ilk (soğuk) açılışın ilk ekran görüntüsünde simgeler vardı, yazı yoktu.
+Sonraki üç açılışta yazı tipi en geç 0,6 s'de hazırdı ve hemen alınan görüntüde yazı vardı.
+Tür: tekrarlanmadı
+Ne yapıldı: kayda geçti.
+Kalıcı kural: yok
+
+### 2026-09-24 · npx vitest run · relax.test.ts, sınıf kapalı saati mutasyonu yaşadı
+Bulgu: Modelden sınıfın kapalı saat denetimi kaldırıldı, test yeşil kaldı: dünyadaki sınıf
+tam doluydu ve pay cümleleri kapalı saati ikinci yoldan yasaklıyordu.
+Tür: test kusuru
+Ne yapıldı: dünyaya bir boş saat eklendi, aynı mutasyon kırmızıya döndü.
+Kalıcı kural: TRAPS.md, tuzak 129
+
+### 2026-09-24 · npm run kontrol · boyut, ham eşik 35 kB aşıldı
+Bulgu: B5.9 dosyayı 37 885 bayt büyüttü, zincir boyutta durdu ve E2E koşmadı.
+Tür: ürün büyümesi
+Ne yapıldı: iki eşik yine 13 kB pay bırakacak yere çekildi, gerekçesi WORKLOG'da.
+Kalıcı kural: BUILD.md'nin eşik kuralı
+
 ### 2026-09-24 · scripts/exe-surucu.mjs · gerçek exe'de tıklama, tuş ve işaretçi eylemi
 Bulgu: WebDriver'ın öğe tıklaması, Actions API ve metin gönderme `unsupported operation`
 ya da `invalid argument` döndü. Tekrarlandı: Wayland'da, `GDK_BACKEND=x11` ile XWayland'da,

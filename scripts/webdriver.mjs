@@ -30,13 +30,22 @@ export function varsayilanIkili() {
  * A fresh HOME with a Documents folder the program can find. `document_dir()`
  * reads user-dirs.dirs; without it there is no Documents folder at all and the
  * save path fails, which is not what the real machine does.
+ *
+ * And a Downloads folder, for the same reason. "Dosyaya kaydet" hands WebKitGTK
+ * a file to download, and with no download folder named it wrote the file into
+ * the program's working directory -- the repository -- while the page said to
+ * look in Downloads (2026-09-24). Every real desktop names one.
  */
 export function evHazirla(ev, { koru = false } = {}) {
   if (!koru) rmSync(ev, { recursive: true, force: true });
   const ayar = join(ev, '.config');
   mkdirSync(join(ev, 'Documents'), { recursive: true });
+  mkdirSync(join(ev, 'Downloads'), { recursive: true });
   mkdirSync(ayar, { recursive: true });
-  writeFileSync(join(ayar, 'user-dirs.dirs'), 'XDG_DOCUMENTS_DIR="$HOME/Documents"\n');
+  writeFileSync(
+    join(ayar, 'user-dirs.dirs'),
+    'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\n',
+  );
   const yerel = join(ev, '.local');
   return {
     HOME: ev,
@@ -75,6 +84,9 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
   const cikti = gunluk === undefined ? 'ignore' : openSync(gunluk, 'a');
   const surec = spawn(komut, argumanlar, {
     env,
+    // In the sandbox too: whatever the program writes relative to where it
+    // stands lands there, never in the repository.
+    cwd: ev,
     detached: true,
     stdio: ['ignore', cikti, cikti],
   });

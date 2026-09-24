@@ -11,7 +11,7 @@ import {
 import type { RelaxFamily, Suggestion } from './pure/relax';
 import { solve } from './pure/solver';
 import { parseState } from './pure/parseState';
-import { activePlacements } from './pure/programs';
+import { activePlacements, replaceActiveGrid } from './pure/programs';
 import { buildIndex } from './pure/constraints';
 import { findViolations } from './pure/rules';
 import { parseKey } from './leaf/keys';
@@ -159,6 +159,39 @@ describe('öneri — küçük dünyalar', () => {
     for (const s of found.values()) expectHonest(d, s);
   });
 
+  it('dizili dersler yerinde kalırken yol yoksa, sabitlenenler dışında yeniden diziyor', () => {
+    // The father's file in miniature: two single hours laid out at 2 and 4, so
+    // the 2-hour block has no two empty hours side by side, and no change of
+    // any family moves a placed lesson. The second pass keeps only the pin.
+    const world = makeWorld({
+      days: 1,
+      hours: 4,
+      lessons: [
+        { id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'x2', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
+        { id: 'x3', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+      ],
+    });
+    const d = replaceActiveGrid(world, {
+      placements: { 's510|0|1': 'x1', 's510|0|3': 'x3' },
+      pinned: { 's510|0|1': 1 },
+    });
+    const stuck = solve(d, { keepPlaced: true });
+    expect(stuck.phase).toBe('stuck');
+
+    const [s, ...rest] = suggest(d, activePlacements(stuck.state), {
+      keepPlaced: true,
+      families: ['teacherHours'],
+    }).suggestions;
+    expect(rest).toEqual([]);
+    expect(s?.relaid).toBe(true);
+    expect(s?.changes).toEqual([]);
+    expect(s?.placements['s510|0|1']).toBe('x1');
+    expect(verifySuggestion(d, s!, { keepPlaced: false })).toEqual([]);
+    // Not against the kept grid: it moved x3.
+    expect(verifySuggestion(d, s!, { keepPlaced: true })).not.toEqual([]);
+  });
+
   it('aynı girdi aynı öneriyi veriyor', () => {
     const d = world('imkansiz-ders-yaninda');
     expect(stuckAndSuggest(d)).toEqual(stuckAndSuggest(d));
@@ -251,6 +284,7 @@ describe('öneri — veri ve denetçi', () => {
       placements: {},
       size: 3,
       proven: false,
+      relaid: false,
     });
     expect(lines).toHaveLength(1);
     expect(lines[0]).toMatch(/^AV .+ 1–2 ve 4\. saat$/);

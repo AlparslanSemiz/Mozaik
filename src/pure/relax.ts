@@ -69,6 +69,11 @@ export interface Suggestion {
   size: number;
   /** No smaller change of this family exists (the formula said so). */
   proven: boolean;
+  /**
+   * The run kept what was on the grid, no way was found that way, and this one
+   * lays the unpinned lessons out again: applying it replaces them.
+   */
+  relaid: boolean;
 }
 
 export interface RelaxOptions {
@@ -736,7 +741,8 @@ export function createRelaxer(
   options?: Partial<RelaxOptions>,
 ): Relaxer {
   const opts: RelaxOptions = { ...DEFAULTS, ...options };
-  const frame = frameOf(base, opts);
+  let frame = frameOf(base, opts);
+  let relaid = false;
   const lessonsById = new Map(base.lessons.map((x) => [x.id, x]));
 
   let elapsedMs = 0;
@@ -890,15 +896,31 @@ export function createRelaxer(
       placements: grid,
       size: sizeOf(which, changes, grid),
       proven,
+      relaid,
     };
-    if (verifySuggestion(base, s, opts).length === 0) suggestions.push(s);
+    const checked = { ...opts, keepPlaced: opts.keepPlaced && !relaid };
+    if (verifySuggestion(base, s, checked).length === 0) suggestions.push(s);
   }
 
-  function* all(): Generator<void, void> {
+  function* pass(): Generator<void, void> {
     for (const which of opts.families) {
       yield* familySearch(which);
       // A week that needs no change at all is the answer to every family.
       if (suggestions.some((s) => s.changes.length === 0)) return;
+    }
+  }
+
+  function* all(): Generator<void, void> {
+    yield* pass();
+    // The run kept what was already laid out, and on the father's own file
+    // that is exactly what left no way: 330 hours in place, the empty ones in
+    // pieces a 2-hour block cannot use, and no change of any family moves a
+    // placed block. So the search goes on with only the pins kept, and says so
+    // (the user's decision, 2026-09-24).
+    if (suggestions.length === 0 && opts.keepPlaced) {
+      relaid = true;
+      frame = frameOf(base, { ...opts, keepPlaced: false });
+      yield* pass();
     }
   }
 

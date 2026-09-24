@@ -154,6 +154,19 @@ export function desktopDownload(url: string, boyut: number): Promise<number> {
   return bridge()<number>('download_update', { url, boyut });
 }
 
+/**
+ * Whether this copy can replace itself. Only the Windows exe can; the Linux
+ * build (development and testing) cannot (update.rs, `self_update_here`). A
+ * bridge that does not know the command -- an older exe, the test double in
+ * e2e/exe.spec.ts -- counts as yes, which is what every copy said before.
+ */
+export function desktopSelfUpdates(): Promise<boolean> {
+  return bridge()<boolean>('self_update_supported').then(
+    (answer) => answer !== false,
+    () => true,
+  );
+}
+
 /** Puts the downloaded program in place and restarts onto it. */
 export function desktopApply(): Promise<void> {
   return bridge()<void>('apply_update');

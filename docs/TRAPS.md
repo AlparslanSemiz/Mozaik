@@ -202,6 +202,18 @@ Windows programını GitHub'dan indirdi, `e2e/gercek-exe.spec.ts` kırmızıya d
 
 ---
 
+
+### 130 · Bu makinede WebKitGTK'nın DMA-BUF çizimi Intel sürücüsünün içinde çöküyor
+Linux ikilisinde bir dersi sabitlemek her seferinde pencereyi boşalttı. WebDriver
+"session deleted because of page crash" dedi, `coredumpctl` sayfa sürecinin
+(`WebKitWebProcess`) Mesa'nın `iris` sürücüsünde `_iris_batch_flush` içinde
+`abort` ettiğini gösterdi (Fedora 44, Mesa 26.2.3, WebKitGTK 2.52.5). Kod
+programın değil. `WEBKIT_DISABLE_DMABUF_RENDERER=1` ile aynı tıklama çiziliyor.
+Linux ikilisi bu değişkeni kendisi koyuyor (`lib.rs`, `linux_renderer`, yalnız
+`target_os = "linux"` için derleniyor), ve kabuk başka bir değer verdiyse ona
+dokunmuyor. Windows'taki Mozaik.exe WebView2 ile çizer ve bu satır onda yok.
+`e2e/gercek-exe.spec.ts` değişkeni sürücünün ortamından siliyor, yani ölçtüğü şey
+kabuk değil ikilinin kendisi. Düzeltme olmadan kırmızı, düzeltmeyle yeşil.
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -950,6 +962,37 @@ mutasyon (model ve denetçi birlikte) ilk dünyada da kırmızıydı. Asıl yaka
 gereken, yalnız birini kapatan mutasyon. Test `src/relax.test.ts`'te,
 "sınıfın kapalı saati en ucuz çare olsa da önerilmiyor".
 
+### 131 · Playwright her koşuda `test-results/`'u boşaltır, içinde yaşayan bir oturumla birlikte
+Gerçek exe'nin sürücüsü açık oturumun kaydını ve sahte ev dizinini
+`test-results/exe-surucu/` altında tutuyordu. Tur ortasında koşulan bir Playwright
+süiti klasörü boşalttı, ve kayıtla birlikte o güne kadarki veri de gitti. Program ise
+sahipsiz çalışmaya devam etti, portu ve ikiliyi tuttu, ve bir sonraki derleme
+`ETXTBSY` ile düştü. Sürücünün yeri artık `scratch/exe-surucu/`, git'in de koşucuların
+da dokunmadığı bir klasör. Aynı turda iki kapanış da sağlamlaştı. Çökmüş bir
+sayfanın oturumunu kapatmak hata fırlatıyordu ve süreç grubunu öldüren satıra
+hiç gelinmiyordu; artık hata yutuluyor ve süreçler her durumda öldürülüyor.
+`exe-linux.mjs` de kopyalamadan önce eski ikiliyi siliyor.
+
+### 132 · Sahte ev gerçek evin eksik bir kopyasıysa, program eksiği gerçek sanar
+Sahte evin `user-dirs.dirs` dosyası yalnız `XDG_DOCUMENTS_DIR`'ı söylüyordu.
+"Dosyaya kaydet" WebKitGTK'ya bir indirme verdi, WebKitGTK İndirilenler klasörü
+bulamadı ve dosyayı programın çalışma dizinine yazdı, yani deponun köküne. Sayfa
+bu sırada "İndirilenler klasörüne bakın" diyordu. Gerçek bir masaüstünde
+İndirilenler tanımlı, yani kusur ürünün değil sahte evin. Sahte ev artık
+`Downloads`'u da kuruyor, sürücü sahte evin içinde başlıyor, ve bir test dosyanın
+`Downloads`'a düştüğünü, depoya düşmediğini ölçüyor. Kural: bir kum havuzu ürünün
+dokunduğu her klasörü gerçek makinedeki gibi kurar. Bir eksik ürünün hatası gibi
+görünür.
+
+### 133 · WebDriver oturumunda GTK'nın dosya seçicisi açılmaz, ve bu ürün kusuru değildir
+Gerçek exe turunda "Dosyadan aç"a hem sayfa içinden hem kullanıcının kendi
+faresiyle basıldı ve hiçbir pencere açılmadı. Aynı ikili sürücüsüz, düz bir
+program gibi açılınca aynı tıklama GTK'nın dosya seçme penceresini açtı. WebDriver
+ile açılan bir WebKitGTK oturumu dosya seçiciyi otomasyona verir, çünkü WebDriver
+dosya yüklemeyi o yoldan yapar. Ders şu: sürücüyle görülen bir "açılmıyor", önce
+sürücüsüz bir açılışta denenir. Süit dosyayı girdiye sayfanın içinden veriyor ve
+okuma yolunu ölçüyor; seçici penceresinin kendisini ölçmüyor.
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1081,7 +1124,7 @@ bir algoritma işi gibi kovalanır.
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
@@ -1089,12 +1132,12 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 129, yeni bir tuzak 130'dan devam eder. Test stratejisi
+büyük kullanılan numara 133, yeni bir tuzak 134'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

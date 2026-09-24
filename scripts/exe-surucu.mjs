@@ -15,9 +15,9 @@
 //   node scripts/exe-surucu.mjs durum | kapat
 //
 // Each call is its own process, so `ac` leaves the driver running and writes
-// where it is to test-results/exe-surucu/oturum.json; every later call reads
+// where it is to scratch/exe-surucu/oturum.json; every later call reads
 // it back. `kapat` ends the session and the driver. The program runs with a
-// sandbox HOME (test-results/exe-surucu/ev) unless `--ev` says otherwise, so
+// sandbox HOME (scratch/exe-surucu/ev) unless `--ev` says otherwise, so
 // the real Documents/Ders Programı is never written to. Why WebDriver and not
 // Playwright, and why the sandbox: scripts/webdriver.mjs.
 
@@ -26,7 +26,10 @@ import { join, resolve } from 'node:path';
 import { Oturum, suruculuBaslat, varsayilanIkili } from './webdriver.mjs';
 
 const KOK = resolve(import.meta.dirname, '..');
-const DIZIN = join(KOK, 'test-results', 'exe-surucu');
+// Not under test-results: every Playwright run empties that folder, and it
+// took the open session's record and the sandbox with it while the program
+// went on running (2026-09-24). scratch/ is ignored by git and by the runners.
+const DIZIN = join(KOK, 'scratch', 'exe-surucu');
 const KAYIT = join(DIZIN, 'oturum.json');
 
 function dur(mesaj) {
@@ -185,7 +188,9 @@ switch (komut) {
       break;
     }
     const { kayit, oturum } = kayitli();
-    await oturum.kapat();
+    // After a page crash the session is gone and closing it throws; the
+    // processes still have to go.
+    await oturum.kapat().catch((e) => console.error(`oturum kapanmadı: ${e.message}`));
     surucuyuOldur(kayit.pid);
     rmSync(KAYIT, { force: true });
     console.log('kapandı');

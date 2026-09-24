@@ -37,7 +37,7 @@ bitince §10'a taşınır.
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
-| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16 ve B7.17 dahil), çoğu açık |
+| **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
@@ -884,6 +884,31 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - **Bilinen sınır (tuzak 127):** bu makinenin WebKitGTK'sı WebDriver'ın fare ve
         klavye benzetimini desteklemiyor. Girdi sayfanın içinde olay olarak
         üretiliyor, yani gerçek fareye verilen cevap ölçülmüyor.
+- [x] **B7.18 Linux exe'sinin turu, babanın dosyasıyla — YAPILDI (2026-09-24).**
+      Yedi sekme ve her özellik exe'de gezildi, asıl kısmı babanın kendi planıyla
+      (sahte eve yüklendi, gerçek klasör değişmedi). Çalışanlar:
+      - otomatik dizme ve öneri paneli (babanın dosyasında `Otomatik diz` ilk
+        öneriyi 25 s'de veriyor, uygulayınca "Sorun yok", Ctrl+Z geri alıyor);
+      - havuzdan sürükleme, sabitleme, geri alma ve yineleme;
+      - Ctrl+K, `?`, tema, ölçek ve dil;
+      - planlar, alternatif program ve yedek klasörü;
+      - Hakkında ve güncelleme denetimi;
+      - kaydet ve aç, yazdırma (GTK penceresi açılıyor);
+      - kapatıp açınca verinin kalması.
+
+      Düzeltilenler:
+      - sabitleme çökmesi (tuzak 130);
+      - Hakkında'nın Linux cümlesi;
+      - dil hapı;
+      - `Otomatik diz`'in dizili derslerle yol bulamaması (yeniden dizme,
+        B5.9'un eki);
+      - dört araç kusuru (tuzak 131, 132 ve gerçek exe süitindeki yarış).
+
+      Bulgular [TESTFINDINGS.md](TESTFINDINGS.md)'de, süit 9/9.
+      - **Açık:** takas exe'de denenmedi (tarayıcı süiti ölçüyor); yazdırmanın PDF
+        dökümü ve dosya seçici elle görüldü, süit ölçmüyor (tuzak 133); öneri
+        araması WebKitGTK'da Chromium'dan yavaş (Baştan diz'de ilk öneri 51 s'ye
+        34 s).
       - **Kalan, isteğe bağlı:** pencere şimdilik masaüstünde açılıyor. Başsız
         koşu için `sudo dnf install xorg-x11-server-Xvfb`; sürücü `xvfb-run`'ı
         görünce kendiliğinden kullanıyor.

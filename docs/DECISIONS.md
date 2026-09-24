@@ -108,6 +108,15 @@ doğrusal gevşetmesiyle görüyor.
   sonuç yanlış bir öneri değil "öneri yok" olur, çünkü denetçi `blocker()`.
   Kural ARCHITECTURE.md'de.
 
+**Eki, aynı gün: dizili dersleri yerinde tutarak yol yoksa yeniden dizmek
+(kullanıcının kararı).** Exe turunda babanın kendi dosyası açıldı: 330 saat dizili,
+12 blok havuzda. `Otomatik diz` dizili dersleri yerinde tutar, ve öyle hiçbir
+ailede yol yok: boş saatler 2 saatlik bloklara uymayacak kadar parçalı, ve hiçbir
+değişiklik yerleşmiş bir dersi oynatmıyor. Panel "bir yol bulunamadı" diyordu.
+Kullanıcıya soruldu; arama artık o durumda sabitlenenler dışındakileri de yeniden
+dizerek sürüyor (`relaid`), panel bunu söylüyor, düğme "baştan yerleştir" diyor.
+Babanın dosyasında `Otomatik diz`: ilk öneri 25 s, arama 35 s (exe, WebKitGTK).
+
 **Açık kalan.**
 - Blok şekli ailesi babanın verisinde bütçesinde cevap veremiyor. CP-SAT
   "olmaz"ı 0,6 s'de veriyor.

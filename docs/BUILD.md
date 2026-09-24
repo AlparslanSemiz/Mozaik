@@ -248,10 +248,14 @@ bir seçenek olarak tartışılabilir ([DECISIONS.md](DECISIONS.md)).
 hâli, `dist-exe/Mozaik`. Yalnız geliştirme ve test için var: yayınlanmıyor ve
 kendini güncellemiyor (aşağıda). İşi gerçek pencereyi sürmek: `scripts/exe-surucu.mjs`
 onu açar, ekran görüntüsü alır, tıklar, yazar, sürükler ve sayfada betik çalıştırır,
-`e2e/gercek-exe.spec.ts` de aynı yoldan beş şeyi sınar. Sürücü `tauri-driver`
+`e2e/gercek-exe.spec.ts` de aynı yoldan dokuz şeyi sınar. Sürücü `tauri-driver`
 (`cargo install tauri-driver --locked`) ile sistemin `WebKitWebDriver`'ı üstünden
-çalışır. Program her koşuda sahte bir ev dizininde açılır, gerçek Belgeler
-klasörüne dokunmaz. Neden Playwright değil ve girdinin neden sayfanın içinde
+çalışır. Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
+ile), gerçek klasörlere dokunmaz. Sürücünün oturum kaydı ve sahte evi
+`scratch/exe-surucu/`'da durur, `test-results/`'da değil: her Playwright koşusu o
+klasörü boşaltır (tuzak 131). Linux ikilisi WebKitGTK'nın DMA-BUF çizimini kendisi
+kapatır, bu makinenin Intel sürücüsü onunla çöküyordu (tuzak 130); Windows'a
+derlenmez. Neden Playwright değil ve girdinin neden sayfanın içinde
 üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
 
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere

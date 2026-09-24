@@ -5,7 +5,7 @@
 // does not replace itself -- `self_update_here()` in src-tauri/src/update.rs
 // refuses, because the only download the manifest names is the Windows exe.
 
-import { chmodSync, copyFileSync, mkdirSync, readFileSync, statSync } from 'node:fs';
+import { chmodSync, copyFileSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 
@@ -19,6 +19,9 @@ const kaynak = join(KOK, 'src-tauri', 'target', 'release', 'ders-programi');
 const hedef = join(KOK, 'dist-exe', 'Mozaik');
 
 mkdirSync(join(KOK, 'dist-exe'), { recursive: true });
+// Removed first: copying over a program that is still running fails with
+// ETXTBSY, while unlinking it is allowed and leaves the running copy alone.
+rmSync(hedef, { force: true });
 copyFileSync(kaynak, hedef);
 chmodSync(hedef, 0o755);
 
