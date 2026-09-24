@@ -144,6 +144,11 @@ okul değişmedi, 367/367 ve 367 düğüm. Açık kalan: yalnız dört saatin a�
 `solved: false` bekliyordu, yeni çözücü 24/24 dizdi. CP-SAT dünyanın çözülebilir
 olduğunu 0,01 saniyede gösterdi, beklenti düzeltildi.
 
+**İkinci satır: şerit (tuzak 123).** Sürüklerken hedef satırın üstünü ve altını
+karartan iki `fixed` düzlem yalnız kenar kaydırmasından sonra yeniden konuyordu.
+Artık her kaydırmada ve pencere boyu değişince. Test önce yazıldı ve kırmızıydı
+(60 px), düzeltmeyle yeşil, düzeltme geri alınınca yine kırmızı (49 px).
+
 **Ortam:** Playwright 1.62.1'in tarayıcısı kurulu değildi, `npx playwright install
 chromium` ile kuruldu. `src-tauri/Cargo.lock` oturum başında zaten değişmişti, bu
 turun işi değil ve commit'e girmedi.

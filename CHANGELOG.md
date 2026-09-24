@@ -29,6 +29,7 @@ release is incomplete, the entry says so.
 ### Fixed
 
 - Dragging a card across a full week no longer stutters: the reason bar above the grid is rewritten at most ten times a second instead of once per cell.
+- Scrolling the grid while holding a card now moves the highlighted row with it. Before, the undimmed strip stayed where it was on the screen while the rows scrolled away underneath.
 - Availability and Print no longer crash when their list goes from empty to filled while the tab is open, for example after Ctrl+Z.
 - Handing a lesson to another teacher from the entity panel now says how many blocks went back to the pool.
 - The dark theme no longer flashes a light background on the first frame while the program is opening on a slow machine.

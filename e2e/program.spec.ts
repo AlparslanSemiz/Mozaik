@@ -209,6 +209,43 @@ test.describe('2. Sürükle-bırak', () => {
     await page.mouse.up();
   });
 
+  test('elde kart varken ızgara kayarsa gölgesiz şerit hedef satırla birlikte kayıyor', async ({
+    page,
+  }) => {
+    // The notebook line (2026-09-24): scroll up or down with a card in the hand
+    // and the open strip stayed where the screen had it, not where the row
+    // went. The shades were only re-placed by the edge scroll, never by a wheel.
+    await openWithSample(page);
+    await startDrag(page);
+    await page.locator('.grid-wrap').evaluate((el) => {
+      el.scrollTop += 60;
+    });
+    // One frame for the scroll event, one for the paint.
+    await page.evaluate(
+      () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+    );
+
+    const gap = await page.evaluate(() => {
+      const [above, below] = [...document.querySelectorAll<HTMLElement>('.drag-shade')];
+      const row = document.querySelector('tr.target-row')!.getBoundingClientRect();
+      // The strip is clipped where the grid is: under the sticky day heading
+      // and at the grid's own edges.
+      const heading = document.querySelector('table.grid thead')!.getBoundingClientRect();
+      const wrap = document.querySelector('.grid-wrap')!.getBoundingClientRect();
+      return {
+        openTop: above!.getBoundingClientRect().bottom,
+        openBottom: below!.getBoundingClientRect().top,
+        rowTop: Math.max(row.top, heading.bottom, wrap.top),
+        rowBottom: Math.min(row.bottom, wrap.bottom),
+      };
+    });
+    expect(Math.abs(gap.openTop - gap.rowTop)).toBeLessThanOrEqual(1);
+    expect(Math.abs(gap.openBottom - gap.rowBottom)).toBeLessThanOrEqual(1);
+
+    await page.keyboard.press('Escape');
+    await page.mouse.up();
+  });
+
   test('sürükleme yalnız hedef satırın sınıfını değiştiriyor', async ({ page }) => {
     await openWithSample(page);
     await page.evaluate(() => {
@@ -1387,10 +1424,7 @@ test.describe('18. Havuz görünümü takip ediyor', () => {
       expect(Number.parseFloat(m.solmaAlt), `${ad} tepside alt solma`).toBeGreaterThan(0);
     }
     expect(azKart.maske, 'solma kuralı yerinde kalmalı').not.toBe('none');
-    expect(
-      Number.parseFloat(azKart.solmaAlt),
-      'altında bir şey yokken solma çizilmemeli',
-    ).toBe(0);
+    expect(Number.parseFloat(azKart.solmaAlt), 'altında bir şey yokken solma çizilmemeli').toBe(0);
   });
 });
 

@@ -549,15 +549,30 @@ export function useDrag(drop: (data: DragData, day: number, hour: number) => voi
       if (e.key === 'Escape') finish();
     };
 
+    // ANY scroll, not only the edge scroll above. The shades are `fixed` and
+    // placed in viewport pixels, so a wheel turned with a card in the hand
+    // moved the row and left the open strip where the screen had it. Capture
+    // on the window hears the grid's own scroll as well as the page's; the cell
+    // under the cursor changes with it, so the frame looks again.
+    const onScroll = () => {
+      positionShades();
+      lastTarget.current = '';
+      scheduleFrame();
+    };
+
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointercancel', finish);
     window.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    window.addEventListener('resize', onScroll);
     detach.current = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', finish);
       window.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      window.removeEventListener('resize', onScroll);
     };
   };
 

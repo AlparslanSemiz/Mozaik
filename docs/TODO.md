@@ -34,7 +34,7 @@ bitince §10'a taşınır.
 | **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
-| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | hepsi açık |
+| **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3, B5.7 ve B5.9 açık, B5.8'in veri yarısı babada |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti, çoğu açık |
@@ -579,6 +579,15 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       ayrı bir soru: gidecek kart da işaretlensin mi, yoksa cümle yeter mi. Karar
       verilmeden yazılmaz; yazılırsa maliyeti ölçülür (hedef satır dışındaki hücrelerde
       `can-*` sınıfı yok, yani bu bedava bir CSS kuralı DEĞİL).
+- [x] **B4.17 Elde kart varken ızgara kayınca gölgesiz şerit ekranda kalıyordu —
+      DÜZELTİLDİ (2026-09-24).** Senin satırın: *"elimizde bir kart varken yukarı aşağı
+      yapıldığında gölgelenmeyen açık kalan şerit de bizim ekran ile birlikte devam
+      ediyor. onun gösterdiği yerde sabit kalması gerekir."* Sebep: hedef satırın üstünü
+      ve altını karartan iki düzlem ekran pikseliyle konuyordu ve yalnız kenara
+      yaklaşınca yapılan otomatik kaydırmadan sonra yeniden konuyordu, tekerleği hiç
+      duymuyordu. Şimdi her kaydırmada ve pencere boyu değişince yeniden konuyor
+      (`platform/drag.ts`). Test: `e2e/program.spec.ts` → "gölgesiz şerit hedef satırla
+      birlikte kayıyor", düzeltme geri alınınca 60 px sapıyor. Tuzak 123.
 
 ---
 
@@ -1368,6 +1377,7 @@ kapandı — o yüzden nerede kapandığı da yazılı.
 ### 9b · Kapanmış satırlar — ve nerede kapandıkları
 
 ```
+elimizde bir kart varken yukarı aşağı yapıldığında gölgelenmeyen açık kalan şerit de bizim ekran ile birlikte devam ediyor. onun gösterdiği yerde sabit kalması gerekir. -> [x] B4.17, 2026-09-24, gölgeler tekerleği duymuyordu
 Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam... -> [x] B4.13, 2026-09-12, sebep tepsinin boyu, deste değil
 Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms
 aynı şey daha da az olsa da uygulamada da oluyor. uygulamada daha çok koyulabilir yerlerin üzerine gelince hesaplama olunca oluyor. -> [x] 2026-09-01, dropMap + boya yolu

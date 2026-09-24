@@ -381,6 +381,16 @@ değiştirmek oldu (`REASON_GAP = 100`, `88fffc2`): düşen kare %9,5–14,1'den
 %1,1'e, Layout 543 ms / 107'den 216 ms / 42'ye indi. Bir yerleşim maliyeti
 görülünce önce yazmanın ne sıklıkta olduğu sorulur, sonra CSS'e bakılır.
 
+### 123 · `fixed` bir katman yalnız kodun kendi yaptığı kaydırmayı izlerse ekrana çakılı kalır
+Sürüklerken hedef satırın üstünü ve altını karartan iki düzlem görüntü alanı
+pikseliyle konuyor ve yalnız kenar kaydırmasından sonra yeniden konuyordu. Elde
+kart varken tekerlek döndürülünce satır içerikle kaydı, gölgesiz şerit ekranın
+gösterdiği yerde kaldı (kullanıcının not defteri, 2026-09-24). Çare kaydırmayı
+kimin yaptığını sormamak: `window`'a `capture` ile bağlanan bir `scroll`
+dinleyicisi ızgaranın kendi kaydırmasını da duyar. `e2e/program.spec.ts` →
+"gölgesiz şerit hedef satırla birlikte kayıyor", düzeltme geri alınınca 60 px
+sapıyor.
+
 ---
 
 ## Düzen ölçümü ve hangi kutuya bakıldığı
@@ -1033,7 +1043,7 @@ bir algoritma işi gibi kovalanır.
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
