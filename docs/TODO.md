@@ -1152,9 +1152,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 ---
 ### 8h · Belge turunun bıraktıkları (2026-09-11)
 
-- [ ] **Karttaki raptiye dururken görünmez mi, hep görünür mü?** 2026-08-30 kaydı "hep
-      görünür, sönük" diyor ve bunu kullanıcı kararı olarak yazıyor, kod (`fb052f4`)
-      dururken görünmez yapıyor. Ayrıntı [DECISIONS.md](DECISIONS.md).
+- [x] **Karttaki raptiye dururken görünmez mi, hep görünür mü? — KARAR (2026-09-25):
+      dururken görünmez.** 2026-08-30 kaydı "hep görünür, sönük" diyordu, kod (`fb052f4`)
+      dururken görünmez yapıyor. Kullanıcı kodu seçti, kod değişmedi. Ayrıntı
+      [DECISIONS.md](DECISIONS.md).
 - [ ] **PRINCIPLES.md'deki önerilen gerekçeler onaylansın mı?** "Şu an yapılmıyor" listesinde
       yedi satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli.
       Onaylanınca işaretler kalkar.
@@ -1169,8 +1170,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       sekmesinde giriliyor. Cümleler kullanıcıya taslak olarak gösterildi ve onaylandı: Program
       sekme sırasıyla Okul, Müsaitlik ve Dersler diyor, Kontrol Okul ve Dersler, Çıktı Dersler.
       `bos-ekran.spec.ts`'in üç iddiası düzeltmeden önce kırmızıydı.
-- [ ] **Havuzun boşalınca kendiliğinden kapanması** eski CLAUDE.md'de yazılıydı, kodda
-      bulunamadı. Ekranda denenecek, yoksa istenip istenmediğine karar verilecek.
+- [x] **Havuzun boşalınca kendiliğinden kapanması — VAR, ÖLÇÜLDÜ (2026-09-25).** Eski
+      CLAUDE.md'de yazılıydı, 2026-09-11'de kodda bulunamamıştı, çünkü tercihe yazılmıyor:
+      `LessonPool.tsx` kart yokken çekmeceyi çizimde kapatıyor. Chromium'da ölçüldü, kart
+      gelince kendiliğinden açılıyor, elle kapatılmışsa kapalı kalıyor. Kod değişmedi.
+      Ayrıntı [DECISIONS.md](DECISIONS.md) ve [LAYOUT.md](LAYOUT.md).
 - [x] **Bayat kod yorumları — DÜZELTİLDİ (2026-09-25):** `App.tsx`'in başı "six sections",
       `Program.tsx` havuzu "down the right", `App.tsx`'in marka yorumu "detailed",
       `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyordu. Aynı turda `App.tsx`'te

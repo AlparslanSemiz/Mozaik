@@ -151,7 +151,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 ### Havuz
 
-- **Havuz ızgaranın altında bir çekmece.** Boyu kenarından (`role="separator"`) sürüklenir ve bırakılan boy hatırlanır, çekmece açılıp kapatılabilir. Altta, çünkü sağda üç kart genişliğinde bir sütun bekleyen dersleri kaydırılan bir listeye çeviriyordu, altta ise görülen bir tepsi.
+- **Havuz ızgaranın altında bir çekmece.** Boyu kenarından (`role="separator"`) sürüklenir ve bırakılan boy hatırlanır, çekmece açılıp kapatılabilir. Bekleyen kart kalmayınca çekmece yalnız başlığını bırakıp kapanır ve düğmesi kapanır, kart gelince kendiliğinden açılır; elle kapatılmışsa kapalı kalır. Bu kapanma tercihe yazılmaz. Altta, çünkü sağda üç kart genişliğinde bir sütun bekleyen dersleri kaydırılan bir listeye çeviriyordu, altta ise görülen bir tepsi.
 - **Ders başına değil blok başına kart.** `2+1` bir ders bir ikili ve bir tekli bırakır, ve kart kaç saat olduğunu hem yazıyla hem genişliğiyle (`[data-size='2']` iki katı) söyler. Aynı dersin aynı boydaki blokları tek bir deste, en çok iki katman görünür. Kaç tane olduğu kartın `title`'ında, `data-count`'ta ve tepsinin başındaki "N blok bekliyor"da.
 - **`.pool-card` bir DESTE demek, bir blok değil.** 2026-09-01'den beri havuz deste başına tek kart çiziyor: derinliği `.pool-stack`'in `::before` ve `::after`'ı boyuyor ve blok sayısı `data-count`'ta duruyor. Bekleyen blok sayısı `data-count`'ların toplamı, "N blok bekliyor" oradan geliyor, ve `pendingBlocks()`'un aynası o toplam. Sebebi ölçüldü: örnek okulda 367 blok DOM'da 114 karta iniyor ve gömülü kartların boyanması Program sekmesinin açılışına giriyordu. Havuz testleri `data-count` toplamını sayar; `.pool-card`'ı blok sanan üç test aynı gün düzeltildi. Yan faydası duruyor: haftalık saati elle aşmak mümkün değil, destede blok bitince sürüklenecek bir şey kalmıyor.
 - **Başlıklı gruplar**, ve başlık sıralamadan türer: ızgara sırasında ve ada göre satırın adı ve renk noktası, branşa göre branş, uzun bloklar önce "N saatlik bloklar", en çok kalan "N saat kaldı". Her başlık kart sayısını taşır ve kartların yanında durur, üstünde değil (tuzak 100).
@@ -186,7 +186,7 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 ### Sabitleme
 
 - Kartın köşesinde bir raptiye düğmesi var. Kartın kardeşi, çocuğu değil, çünkü kart bir `<button>` ve düğme içinde düğme geçersiz HTML, ve konumlanma bağlamı hücre. Bu yüzden sağ tık menüsü (`openMenu`) hedefini karttan değil hücreden bulur.
-- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, bu ayrılık kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
+- Raptiye dururken görünmez, hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür. 2026-08-30 tarihli kayıt "hep görünür, sönük" diyordu, 2026-09-25'te kullanıcı "dururken görünmez"i seçti ([DECISIONS.md](DECISIONS.md)).
 - Sabitli olduğunu bir renk değil bir simge söyler, çünkü ızgaranın renkleri zaten bırakılabilir, uyarı, engel ve kapalı demek.
 - Sabitlenmiş kart sürüklenmez ve Delete'e cevap vermez, "Havuza kaldır" kapalıdır, `Baştan diz` ve `Programı boşalt` onu yerinde bırakır. Kuralları DATA.md'de.
 

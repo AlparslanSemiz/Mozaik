@@ -35,6 +35,29 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-25 · Raptiye dururken görünmez, ve havuz çekmecesi boşken kendini kapatıyor
+
+**Raptiye.** 2026-08-30 kaydı raptiyenin "hep görünür, sönük" olduğunu kullanıcı
+kararı olarak yazıyordu, aynı gün `fb052f4` onu dururken görünmez yaptı (aşağıdaki
+2026-08-30 girdisi). Kullanıcıya soruldu, cevap: **dururken görünmez**, kod doğru.
+Raptiye hücrenin üstüne gelince, klavye odağında ve kart sabitliyken görünür.
+"Hover'da beliren kontrol bulunmaz" kaygısı iki yoldan karşılanıyor: sabitli kartta
+raptiye hep görünür, ve aynı iş sağ tık menüsünde de var.
+
+**Havuz çekmecesi.** 2026-08-25 kaydı havuzun boşalınca kendiliğinden kapandığını
+yazıyordu, ve 2026-09-11'de "kodda bulunamadı" denmişti. Arama tercih yazan yere
+bakmıştı (`writeDock`, yalnız düğme çağırıyor). Kapanma çizimde:
+`LessonPool.tsx` kart yokken `pool-closed` çiziyor, düğmeyi kapatıyor ve tercihe
+dokunmuyor. Chromium'da ölçüldü (v15 örnek dosyası, 2 bekleyen kart):
+- açık çekmece 143 px;
+- otomatik dizme hepsini koyunca 49 px, düğme kapalı, tercih yazılmadı;
+- Ctrl+Z kartları geri getirince çekmece kendiliğinden 143 px'e açıldı;
+- elle kapatılmış çekmece boşalıp yeniden dolunca kapalı kaldı (tercih "kapali").
+
+Yani eski kayıt doğruydu, bulunamayan şey onu yapan satırdı. Kart sayısı süzgeçten
+sonra sayılıyor, yani süzgeç sıfıra inerse de çekmece kapanır. Bu kaynaktan okundu,
+ekranda üretilmedi, çünkü süzgecin branşları bekleyen kartlardan geliyor.
+
 ### 2026-09-25 · Cevap defteri: "en az" müsaitlikte, cevaplar planın verisi, karma yollar ve önizleme
 
 **Değişen (TODO B5.11).** Öneri panelinde her yolun `Sorular`'ı var. Orada sorular
@@ -999,7 +1022,8 @@ sönük (`opacity: .38`)" olduğunu ve bunun kullanıcı kararı olduğunu yazı
 gerekçesi: hover'da beliren bir kontrol bu programın okuyucusunun bir daha
 bulamadığı kontroldür. Aynı gün `fb052f4` raptiyeyi dururken görünmez yaptı
 (`opacity: 0`, hücrenin üstüne gelince, odakta ya da sabitliyken görünür). Bu
-değişikliğin gerekçesi kayıtlı değil, kullanıcıya sorulacak.
+değişikliğin gerekçesi kayıtlı değildi. 2026-09-25'te kullanıcıya soruldu, karar
+"dururken görünmez" (yukarıdaki 2026-09-25 girdisi).
 
 ### 2026-08-30 · Denendi: tek saatlik sabitlemeyi alt menüye almak
 
@@ -1301,7 +1325,8 @@ beri tarihsel.
 **Değişen.** Havuz ızgaranın altında ve boyu sürüklenebilir, bırakılan boy
 hatırlanıyor. O günkü kayıt havuzun boşalınca kendiliğinden kapandığını da
 yazıyordu (gerekçesi: boş bir tepsi yeri hiçbir şey için tutar), 2026-09-11'de
-kodda bunu yapan bir yer bulunamadı. **Eski hâli.** Bir sürüm havuz sağda durdu
+kodda bunu yapan bir yer bulunamadı. 2026-09-25'te bulundu ve ekranda ölçüldü:
+kapanma tercihte değil çizimde (yukarıdaki 2026-09-25 girdisi). **Eski hâli.** Bir sürüm havuz sağda durdu
 (tarihi kayıtlı değil). Sağın savı "ızgara yatayda zaten taşıyor"du ve doğruydu, ama
 havuzu üç kart genişliğinde bir sütuna çeviriyordu: 99 bekleyen ders görülen bir
 tepsi değil kaydırılan bir liste oluyordu. Altı daha önce imkânsız kılan şey
