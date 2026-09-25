@@ -319,7 +319,11 @@ function limitBreaches(
     if (run > maxRun) {
       out.push({
         name: 'maxConsecutive',
-        message: `${teacher.short} art arda ${maxRun} saatten fazla girmemeli, burada ${run} saat olur`,
+        message: t('{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur', {
+          kim: teacher.short,
+          sinir: maxRun,
+          olan: run,
+        }),
       });
     }
   }

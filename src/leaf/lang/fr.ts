@@ -889,6 +889,8 @@ const FR: Sozluk = {
   "başka sınıf": "une autre classe",
   "{derslik} dersliği {gun} {saat} saatinde kapalı":
     "la salle {derslik} est fermée le {gun} à l’heure {saat}",
+  "{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur":
+    "{kim} peut faire au plus {sinir} heures d’affilée ; ici cela ferait {olan}",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} peut faire au plus {sinir} heures le {gun} ; ici cela ferait {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":

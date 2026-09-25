@@ -1195,8 +1195,10 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       deseni. `LessonEdit.tsx` aynı işi önizleme çağrısıyla doğru yapıyor.
       Düzeltildi (2026-09-11, `492c8c2`): sayı `change()`'den önce bir önizlemeden geliyor.
       Yeni E2E (`panel.spec.ts`) düzeltmeden önce "510 dersi AV öğretmenine geçti." okuyordu.
-- [ ] **Çevrilmemiş sınır cümlesi.** `constraints.ts:307`'deki "art arda en fazla N saat"
-      mesajı `t()`'den geçmiyor, beş dilde de Türkçe çıkıyor.
+- [x] **Çevrilmemiş sınır cümlesi — DÜZELTİLDİ (2026-09-26).** `constraints.ts`'teki "art
+      arda en fazla N saat" mesajı `t()`'den geçmiyordu, beş dilde de Türkçe çıkıyordu. Artık
+      komşu kuralın deseniyle çevriliyor. Yeni birim testi (`constraints.test.ts`, "cümle
+      arayüzün dilinde çıkıyor") düzeltmeden önce İngilizcede Türkçe cümleyi okuyordu.
 - [x] **ARCHITECTURE'ta iki yanlış cümle — DÜZELTİLDİ (2026-09-12).** Çözücü "en çok iki iş
       kalemi" kurmuyor, blok boyu başına bir kalem kuruyor ve en çok üç, çünkü `solver.ts`
       `[3, 2, 1]` üstünde dönüyor. Bu maddenin kendi atfı da bayattı: dosya bugün

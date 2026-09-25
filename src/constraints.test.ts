@@ -27,6 +27,8 @@ import type { BlockRef } from './pure/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
+import { aktifDil, setAktifDil } from './leaf/i18n';
+import './leaf/lang/en';
 
 // A small, readable world: 2 days x 4 hours.
 //   room A: class 510, class 511      (shared room)
@@ -666,6 +668,22 @@ describe('blocker — art arda en fazla N saat', () => {
     d = place(d, 'x1', 0, 0);
     d = place(d, 'x2', 0, 1);
     expect(why(d, 'x1', 0, 2)).toBe('MÇ art arda 2 saatten fazla girmemeli, burada 3 saat olur');
+  });
+
+  it('cümle arayüzün dilinde çıkıyor', () => {
+    // It was a template literal for months, so the reason bar and Kontrol said
+    // it in Turkish in all five languages while its neighbour rule was
+    // translated (TODO §8d).
+    const geriAl = aktifDil();
+    setAktifDil('en');
+    try {
+      let d = withRule(build(), 'maxConsecutive', 2, 'block');
+      d = place(d, 'x1', 0, 0);
+      d = place(d, 'x2', 0, 1);
+      expect(why(d, 'x1', 0, 2)).toBe('MÇ may teach at most 2 hours in a row; this would make 3');
+    } finally {
+      setAktifDil(geriAl);
+    }
   });
 
   it('BLOK, sağındaki dolu saatle birleşerek sınırı aşabilir', () => {
