@@ -35,7 +35,7 @@ bitince §10'a taşınır.
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9 ve B5.10 bitti |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -777,6 +777,46 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
         - "Azı yok" kanıtı hâlâ yok (LP 0,39 veriyor).
         - `Olmaz` sonrası kalite düşüyor (KY'nin Cumartesisi olmadan 8 saat,
           CP-SAT 5).
+      - **2026-09-25 ikinci tur (B5.11):** ret sonrası kalite kapandı (5 saat),
+        sınır yolu exe'de 6 sınır buluyor, karma yol eklendi, "azı yok" bilerek
+        bırakıldı. WebView2 ölçümü babada (§8b).
+- [x] **B5.11 Babanın planını esnetmesi: cevap defteri, önizleme, karma yol —
+      YAPILDI (2026-09-25).** B5.10'dan doğdu. Kullanıcının isteği: baba öneriyi
+      okuyup öğretmenlerine soracak, bazılarına "olmaz" diyecek, sonra
+      uygulayacak.
+      - **Ölçülen (plan aşaması, CP-SAT):**
+        - Bugünkü öneri babanın dizili 199 bloğunun 140–149'unu oynatıyor.
+        - En az saatte 48–62 blok, 8 saatte 25 blok yetiyor.
+        - Kullanıcı bunu bedel yapmadı: "en az" müsaitlikte en az demek, dersin
+          yeri ve saati serbest.
+      - **Kararların (DECISIONS 2026-09-25):**
+        - cevap defteri, her soruda `Olur` ve dört türlü `Olmaz`;
+        - cevaplar planın verisi (şema v15);
+        - ızgarada önizleme;
+        - karma yol iki satır;
+        - saf el değişimi en çok üç ders;
+        - "azı yok" kanıtı bırakıldı;
+        - Hakkında'da ve yedek dosyasında aramanın ölçümü.
+      - **Yapılan:**
+        - Olmaz'ın dört türü (`teacherHours`, `teacherDay`, `teacherCap`,
+          `teacher`) ve Olur (`accepted`).
+        - Cevaplar `State.answers`'ta, v15 göçüyle.
+        - Ret sonrası arama kendi eski haftasından ve geniş komşulukla.
+        - Karma yollar (`handFew`, `handHours`).
+        - Önizleme ve cevap defteri (`Suggestions.tsx`).
+        - Soruları kopyala ve yazdır.
+        - Ölçüm kaydı (`relaxLog.ts`).
+      - **Ölçülen, babanın dosyası, Linux exe:**
+        - ilk öneri 6 s'de, arama 47–50 s'de bitiyor;
+        - KY Cumartesi Olmaz: en az saat 5 (önce 8), CP-SAT'ın en iyisi;
+        - Olur, önizleme, uygula, 348/348 saat ve "Sorun yok", Ctrl+Z;
+        - Hakkında: "6 iş parçacığında".
+      - **Açık kalan:**
+        - Fikstürde (boş ızgara) ret sonrası 6, CP-SAT 5.
+        - Karma yolun "3 ders ve 2 saat"i bulunamıyor.
+        - Arama önceki turdan 15 s uzun, ret sonrası 64 s.
+        - Babanın makinesinde ölçüm (§8b).
+        - Yazdırma penceresinin exe'deki PDF'i kullanıcının gözüyle alınacak.
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)
@@ -1028,6 +1068,18 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - AS'nin Pazar sabahı hiçbir durumda gerekmiyor.
       - Programın paneli bu yolların hepsini babanın cümlesiyle gösteriyor; hangisinin
         doğru olduğunu yine baba söyleyecek.
+      - 2026-09-25 akşam: baba cevabını artık programın içinde verebilir (B5.11). KY'nin
+        sorusuna "Olur" ya da "Olmaz" der, program kalanı arar, cevaplar dosyada kalır.
+- [ ] **Babanın makinesinde öneri araması ölçülsün (B5.10, B5.11).** Bu makinede
+      WebView2 yok. Babaya gidecek adımlar şunlar:
+      1. Mozaik.exe'yi yeni sürümle açmak.
+      2. Program'da `Otomatik diz`'e basıp panelin "aranıyor" demesinin bitmesini
+         beklemek.
+      3. Ayarlar → Hakkında'daki "Öneri araması" satırının fotoğrafını göndermek.
+      4. Ya da Ayarlar → Planlar ve yedek → "Tümünü dosyaya kaydet" ile inen
+         dosyayı göndermek: dosyanın `olcum` alanı son yirmi aramayı taşıyor
+         (worker sayısı, ilk öneri, bitiş, çekirdek, tarayıcı).
+      "Tek iş parçacığında (yavaş yol)" yazıyorsa worker açılmamış demek (tuzak 136).
 
 ### 8c · Babanın gerçek verisi — **v0'ın çıkma şartı**
 

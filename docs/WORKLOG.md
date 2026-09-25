@@ -30,8 +30,13 @@ Yayınlanmamış olarak üstüne:
 - Onarım aşamalı çözücü (B5.8).
 - Kurulamayan haftada neyin değişmesi gerektiğini söyleyen öneri paneli (B5.9, B5.10).
   Birden çok yol gösteriyor, her biri babanın cümlesiyle: "KY Cumartesi 3–4.
-  saatlere de gelebilirse hafta kuruluyor." `Olmaz` bir değişikliği çıkarıp yeniden
-  arıyor. Arama worker'larda koşuyor.
+  saatlere de gelebilirse hafta kuruluyor." Arama worker'larda koşuyor.
+- Panelin cevap defteri (B5.11):
+  - Öğretmen öğretmen sorular, her birinde `Olur` ve dört türlü `Olmaz`.
+  - Cevaplar planın verisi, şema v15.
+  - Ret sonrası arama CP-SAT'ın en iyisine ulaşıyor.
+  - Karma iki yol ve ızgarada önizleme.
+  - Hakkında'da ve yedek dosyasında aramanın bu makinedeki ölçümü.
 - Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18). 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
@@ -54,9 +59,11 @@ görülebiliyor ve `npm run exe:e2e` ile sınanıyor. Aynı gün B5.9 bitti, ve 
 exe'si babanın dosyasıyla baştan sona gezildi (B7.18). 2026-09-25'te öneri paneli
 yollara, babanın cümlelerine, `Olmaz`'a ve worker'lara geçti (B5.10). Babanın
 dosyası Linux exe'sinde baştan sona oturuyor: ilk öneri 5,6 s, uygulayınca 211/211
-ve "Sorun yok", Ctrl+Z geri alıyor. Sıradaki iş babanın cevabı (§8b, artık KY'nin
-Cumartesisine daraldı), ve öneri panelinin babanın kendi makinesinde (Windows,
-WebView2) worker'larıyla ölçülmesi.
+ve "Sorun yok", Ctrl+Z geri alıyor. Aynı akşam panel bir cevap defterine döndü (B5.11): baba
+öğretmenlere soruyor, "Olur" ya da "Olmaz" giriyor, program kalanı arıyor, cevaplar
+plan dosyasında kalıyor. Sıradaki iş babanın cevabı (§8b, KY'nin Cumartesisi) ve
+babanın makinesinde ölçüm: Hakkında'daki satır ya da yedek dosyasındaki `olcum`
+alanı (TODO §8b'deki adımlar).
 
 **Bilinen kusurlar.**
 
@@ -66,7 +73,7 @@ WebView2) worker'larıyla ölçülmesi.
 - Program'da bırakınca çıkan "havuza döndü" bildirimi, dil yenilemesiz değişince programdaki ilk değişikliğe kadar eski dilin kelimesini arıyor ve İngilizcede "will go back" diye kalıyor (TODO §8d, üretildi).
 - Çevrilmemiş "art arda" sınır cümlesi (`constraints.ts:307`), ve okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
-- Kurulamayan haftadaki öneri (B5.9, B5.10) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor. Üç öğretmen saati yolunda boyut CP-SAT'ın en küçüğüyle aynı. Sınır yolu 6 yerine 7 sınır buluyor. Ders–öğretmen eşleşmesi bu veride hiç bulunmuyor. `Olmaz`'dan sonraki yollar CP-SAT'ın en iyisinin gerisinde kalabiliyor (KY'nin Cumartesisi reddedilince en az saat 8, en iyisi 5). Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi; worker açılmazsa arama eskisi gibi ana iş parçacığında koşar ve yavaştır.
+- Kurulamayan haftadaki öneri (B5.9–B5.11) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor; kanıt bilerek bırakıldı. Üç öğretmen saati yolunda boyut CP-SAT'ın en küçüğüyle aynı, sınır yolu da artık 6 sınır. `Olmaz`'dan sonra babanın dosyasında en az saat 5 (CP-SAT'ın en iyisi), ama adsız fikstürün boş ızgarasında 6. Karma yol "1 ders ve 3 saat"i buluyor, CP-SAT'ın "3 ders ve 2 saat"ini bulamıyor. Arama önceki turdan uzun: babanın dosyasında Linux exe'sinde 50 s, bir cevaptan sonra 40–60 s (ilk öneri yine 6 s). Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi; ölçüm artık Hakkında'da ve yedek dosyasında (TODO §8b).
 - `.github/surum-notu.md` hâlâ eski site adresini (`…github.io/ders-programi/`) gösteriyor, o adres 404 veriyor (tuzak 106). 2026-09-11'de belgeler yazılırken görüldü, düzeltilmedi.
 - `src/changelog.ts`'in 2.1.1 notları eksik: `516f963`'teki renk menüsü, kart takası ve Hakkında noktası yazılı değil. `CHANGELOG.md` onları diff'ten okuyarak yazıyor.
 - Karttaki raptiye dururken görünmüyor (`opacity: 0`), 2026-08-30 tarihli kayıt ise "hep görünür, sönük" kararını kullanıcının kararı olarak yazıyor. Kullanıcıya sorulacak ([DECISIONS.md](DECISIONS.md)).
@@ -81,25 +88,25 @@ WebView2) worker'larıyla ölçülmesi.
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 14 | `src/leaf/types.ts` |
+| Şema sürümü | 15 (2026-09-25) | `src/leaf/types.ts` |
 | Ana E2E süiti | 30 dosyada 577 test (2026-09-24) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 36 | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 10 test, hepsi geçti, 1,1 dk (2026-09-25) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Gerçek exe süiti | 10 test, hepsi geçti, 1,3 dk (2026-09-25, B5.11) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 332 232 bayt, release derlemesi yaklaşık 40 s (artımlı) | `npm run exe:linux` |
-| Sabit depolama anahtarı | 20 satır, planların kendi anahtarları hariç | 16'sı `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 38 dosyada 1237 test, hepsi geçti (2026-09-25) | `npm test` |
-| Ana E2E koşusu | 579/579 geçti, süit 6,5 dk (2026-09-25) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 079 384 bayt, brotli 264,7 kB (2026-09-25) | `npx vite build`, `npm run boyut` |
+| Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
+| Birim testleri | 38 dosyada 1281 test, hepsi geçti (2026-09-25, B5.11) | `npm test` |
+| Ana E2E koşusu | 579/579 geçti, süit 7,0 dk (2026-09-25, B5.11) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 111 503 bayt, brotli 271,1 kB (2026-09-25, B5.11) | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
 | Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
-| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 7 sınır ve 9 saat; kanıtsız | `src/relax.test.ts`, gerçek exe |
-| Öneri süresi, babanın dosyası | ilk öneri 5,6 s, arama 33 s (Linux exe, 6 worker); Chromium'da 5,4 s ve 31 s | sürücü ve tanı testi, 2026-09-25 |
+| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
+| Öneri süresi, babanın dosyası | ilk öneri 6,1 s, arama 50 s, bir Olmaz'dan sonra 60 s, bir Olur'dan sonra 39 s (Linux exe, 6 worker); Chromium'da 4,5 s ve 41–45 s | sürücü, 2026-09-25 B5.11 |
 
 **Tek ağaç kaldı (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı
 bir worktree'de ve `test/strateji` dalında yürümüştü; sebebi `dist/`'in git dışında
@@ -107,6 +114,112 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-25 (akşam) · Babanın planını esnetmesi: cevap defteri, önizleme, karma yol (B5.11)
+
+**Başlangıç.** `git status`'ta yalnız `src-tauri/Cargo.lock`, bilerek dışarıda.
+Gerçek klasörün sha256'ları alındı, tur boyunca üç kez karşılaştırıldı, hep aynı.
+Plan kullanıcıyla üç soru turunda kuruldu. İlk turda kullanıcı ölçütü düzeltti:
+"en az" müsaitlikte en az değişiklik, dersin yeri ve saati serbest, dersin başka
+öğretmene geçmesi müsaitlikten iyi.
+
+**Ölçüm önce (CP-SAT 9.15, önceki oturumun venv'i, scratchpad `olc/`).**
+- Bugünkü öneri babanın dizili 199 bloğunun 140–149'unu oynatıyor.
+- En az oynayan blok, açılan saat bütçesine göre: 4 saatle 48–62, 5 saatle 41,
+  8 saatle 25, sınırsız 10 (25 saat açarak). Kullanıcı bedel yapmadı.
+- KY Cumartesi reddedilince en az saat yolu 8 buluyordu, CP-SAT 5
+  (KY Perşembe 11–12, ED Cumartesi 11, AV Cumartesi 4 ve 9). En az öğretmende
+  CP-SAT 2 öğretmen ve 5 saat.
+
+**Motor (`relax.ts`).**
+- Ret sonrası arama yolun kendi eski haftasından, 5–6 günlük komşulukla ve
+  doğrudan yeniden dizerek başlıyor. 8'den 5'e indi, 61 s'den 18 s'ye (tek yol,
+  node). Ölçüm tablosu DECISIONS'ta. İkisini ayrı ayrı kaldıran mutasyon testi
+  kırmızıya çeviriyor.
+- Olmaz'ın dört türü (`teacherHours`, `teacherDay`, `teacherCap`, `teacher`) ve
+  Olur (`accepted`). Her birinin testi, kuralın tek başına tuttuğu bir dünyada
+  (tuzak 129). Dördü de mutasyonla sınandı: kuralı kaldıran mutasyon kendi testini
+  kırmızıya çeviriyor.
+- Karma yollar (`handFew`, `handHours`). "En az bir ders" bir varsayım
+  (tuzak 137). Karma yollar en az saat yoluyla aynı hatta çalışıyor ve bütçeleri
+  60 000 çatışma. Saf el değişimi yolu en çok üç ders ile sınırlı.
+- Sınır yolu bu turda node'da da exe'de de 6 sınır buluyor, kod değişmeden. "Zaten
+  geldiği gün" dört koşunun dördünde bedel 7.
+
+**Veri: şema v15.** `State.answers` ekrandaki `Olur` ve `Olmaz`'ın karşılığı. Örnek
+dosya reçetesine (`scripts/sema-ornek.mjs`) v15 basamağı eklendi. v1–v14 bayt bayt
+aynı kaldı. Okunamayan bir cevap tek başına düşüyor. `sanitize` silinen öğretmenin
+cevabını düşürüyor, `remapDays` cevabın gününü kaydırıyor. Yeni fikstür
+`tam-dolu-kurs-dizili.json`: adsız fikstür, babanın 330 saatiyle. Yalnız yerleşimler
+eklendi, kimlikten kimliğe.
+
+**Arayüz.** Taslak, babanın dosyasıyla Chromium'da ekran görüntüsü olarak
+kullanıcıya gösterildi. Kullanıcı üç karar daha verdi:
+- açılan saatin işareti güçlü, yer değişenin işareti sade;
+- el değişimi en çok üç ders;
+- cevaptan sonraki süre yeterli.
+Yapılanlar:
+- Panelde `Sorular` (cevap defteri), `Izgarada göster` (önizleme çubuğu, Şu anki ↔
+  Önerilen, ilk açılan saate kaydırma, havuz da önerilen haftadan) ve
+  "Cevaplarınız" satırı.
+- Soruları kopyala ve yazdır. Soru kâğıdı kendi başına basılıyor: Chromium'da
+  `page.pdf` ile alındı ve bakıldı.
+- Kırk dört yeni cümle dört dile girdi, üç ölü anahtar çıktı.
+
+**Tarayıcıda bulunan iki kusur.**
+- "Daha kötü" süzgeci iki yolu panelden düşürüyordu (tuzak 138).
+- Önizlemede açılan saatler ekranın dışında kalıyordu ve havuz eski haftayı
+  gösteriyordu. İkisi de düzeldi.
+
+**Ölçüm kaydı (`relaxLog.ts`).** Babanın Windows makinesi buradan ölçülemediği
+için her arama bir satır bırakıyor. Hakkında en yenisini gösteriyor ("6 iş
+parçacığında · ilk öneri 5 sn · arama 39 sn"). Her paket dosyası son yirmisini
+`olcum` alanında taşıyor. Yeni makine anahtarı: `ders-programi-oneri-olcum`.
+Babaya gidecek adımlar TODO §8b'de.
+
+**Ölçülen, babanın dosyası, gerçek Linux exe (sürücü, sahte ev).**
+- İlk öneri 6,1 s'de, arama 50 s'de bitiyor. Önceki turda 33 s; farkın sebebi
+  karma yollar.
+- KY Cumartesi Olmaz: arama 60 s, en az saat 5 (KY Perşembe 11–12, YK Cumartesi
+  11, AV Cumartesi 6 ve 12).
+- AV'ye Olur: arama 39 s, satırlar "Olur dediklerinize ek olarak…".
+- Önizleme: 4 açılan saat işaretli, 157 ders yer değiştiriyor.
+- Uygulayınca 348/348 saat, 146/146 ders, "Sorun yok". Ctrl+Z geri alıyor.
+- Takas: iki ders yer değiştirdi, Ctrl+Z geri aldı.
+- Hakkında'daki satır "6 iş parçacığında".
+- Sahte evdeki kopya tur bitince silindi. Gerçek klasör baştan sona aynı.
+
+**Boyut eşiği yükseldi, gerekçesi burada (BUILD.md'nin kuralı).** Ham boyut
+1 079 384'ten 1 111 503 bayta çıktı, yani 32 kB. İçinde:
+- dört dile giren kırk dört cümle;
+- cevap defteri ve önizleme;
+- karma yollar ve ret sonrası arama;
+- ölçüm kaydı.
+Brotli 271,1 kB, eşiğin 0,9 kB altına geldi. İki eşik de yaklaşık 12,5 kB pay
+bırakacak yere çekildi: ham 1 092 000'den 1 124 000'e, brotli 272 000'den 284 000'e.
+
+**Koşulan testler.**
+- `npm run kontrol` baştan sona yeşil:
+  - tipler, sınır ve lint (0 hata, eski 4 uyarı);
+  - birim 1281/1281;
+  - derleme ve boyut;
+  - E2E 579/579 (7,0 dk);
+  - site 22/22 ve çözücü stresi 7/7.
+- İlk `kontrol` koşusu kırmızıydı: "derslik darboğazı" testi 5 s varsayılan sınırı
+  5,2 s ile aştı. Test tek başına 2,6 s sürüyor (önce 2,2). Teste 30 s sınır
+  verildi, ikinci koşu yeşil (TESTFINDINGS).
+- `npm run exe:e2e` 10/10. Yeni adımları önizleme, Olur ve Hakkında satırı; 51,8 s.
+- `knip` temiz.
+- Koşulmadı: `exe:test` (Rust değişmedi), `patrol`, `ekran`, `mutasyon`, `kapsam`.
+
+**Açık kalan.**
+- Babanın makinesinde ölçüm (§8b).
+- Exe'deki GTK yazdırma penceresinden PDF, kullanıcının gözüyle.
+- Fikstürün boş ızgarasında ret sonrası 6 (CP-SAT 5).
+- Karma yolun "3 ders ve 2 saat"i.
+- Aramanın süresi.
 
 ---
 

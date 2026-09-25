@@ -26,6 +26,68 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-25 · CP-SAT ve node, babanın dosyası · Öneri babanın programını baştan diziyor
+Bulgu: Babanın dosyasında 199 blok dizili, ve dizili dersler yerinde kalırken hiçbir
+yolda hafta yok. Arama o yüzden yeniden diziyor, ve her yol 199 bloğun 140–149'unu
+oynatıyor (146 dersin 112–120'si). CP-SAT'a göre açılan saat bütçesine göre en az
+oynayan blok şöyle:
+- 4 saatle 48–62;
+- 5 saatle 41;
+- 8 saatle 25;
+- 12 saatle 15;
+- sınırsız saatle 10, ama 25 saat açarak.
+Tekrarlandı: dört yolun dördünde.
+Tür: ürün davranışı, kusur değil (kullanıcı: "en az" müsaitlikte, dersin yeri serbest)
+Ne yapıldı: bedel eklenmedi. Oynayan ders yalnız önizlemede sayılıyor (TODO B5.11,
+DECISIONS 2026-09-25).
+Kalıcı kural: yok
+
+### 2026-09-25 · node ve Linux exe, babanın dosyası · "Olmaz"dan sonra en az saat 8, en iyisi 5
+Bulgu: KY'nin Cumartesisi reddedilince en az saat yolu 8 saat buluyordu, CP-SAT 5.
+Tekrarlandı: node'da ve exe'de. Sebep iki parça:
+- ret sonrası arama takılan haftadan başlıyordu;
+- komşuluklar 2–4 günle sınırlıydı.
+Tür: ürün kusuru (arama zayıflığı)
+Ne yapıldı: düzeltildi. Arama yolun kendi eski haftasından, 5–6 günlük komşulukla
+başlıyor. Babanın dosyasında 5 saat, adsız dizili fikstürde test
+(`relax.test.ts`, mutasyonla sınandı). Fikstürün boş ızgarasında 6'da kalıyor, açık.
+Kalıcı kural: yok
+
+### 2026-09-25 · Chromium, babanın dosyası · Panelden iki yol düştü
+Bulgu: Karma yollar için yazılan "daha kötü" süzgeci bütün yolları karşılaştırıyordu.
+Panelde "zaten geldiği gün" ve "en az öğretmen" satırları yoktu. Birim testleri yeşildi,
+tarayıcıda satırlar sayılınca görüldü.
+Tür: ürün kusuru
+Ne yapıldı: düzeltildi, ve bir birim testi eklendi.
+Kalıcı kural: TRAPS.md, tuzak 138
+
+### 2026-09-25 · node, babanın dosyası · Karma yol ipucunu kaybediyordu
+Bulgu: "En az bir ders el değiştirsin" katı bir cümleydi ve ipucu haftasını reddetti.
+İlk hafta 312 saat açtı, sonuç 1 ders ve 7 saat oldu. CP-SAT'ın en iyisi 1 ders ve 3
+saat.
+Tür: ürün kusuru
+Ne yapıldı: kural bir varsayım oldu, sonuç 1 ders ve 3 saat.
+Kalıcı kural: TRAPS.md, tuzak 137
+
+### 2026-09-25 · npm run kontrol · relax.test.ts, "derslik darboğazı"
+Bulgu: Test, Vitest'in 5 s varsayılan sınırını 5,2 s ile aştı. Tek başına 2,6 s
+sürüyor. Karma yollar gelmeden önce 2,2 s'ydi, çünkü her dünyada iki yol daha
+aranıyor. Bütün süitte işlemci paylaşılınca süre iki katına çıkıyor. İkinci
+`kontrol` koşusunda geçti.
+Tür: test kusuru (yük altında zaman sınırı)
+Ne yapıldı: teste ölçülen süreyle birlikte 30 s sınır verildi, yorum testin içinde.
+Kalıcı kural: yok
+
+### 2026-09-25 · vitest (bütün süit) · Değişmez testi bir koşuda 61 s sürüp düştü
+Bulgu: `invariants.test.ts`'in öneri testi bütün süitte bir kez 61,7 s sürdü, 60 s
+sınırına takıldı. Tek başına 0,9 s, sonraki bütün süit koşusunda 11 s. Aynı anda
+koşan ağır testler, `relax.test.ts`'in yeni 28 s'lik testi dahil, işlemciyi
+paylaşıyor.
+Tür: test kusuru (yük altında zaman sınırı), kararsız
+Ne yapıldı: izleniyor. Sonraki iki `npm run kontrol` koşusunda 9,5 s sürdü ve geçti.
+Tekrarlanırsa sınır ya da dünya sayısı ölçülerek değişecek.
+Kalıcı kural: yok
+
 ### 2026-09-25 · CP-SAT, babanın dosyası · Roboders'le iki fark daha, ve KY olmadan hafta yok
 Bulgu: Roboders'in haftası bizim ders kimlikleriyle yeniden karşılaştırıldı. Daha önce
 bilinmeyen üç şey çıktı:

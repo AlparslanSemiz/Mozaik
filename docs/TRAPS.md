@@ -318,6 +318,27 @@ ister); onlar için yalnız süzgeç düzeltmesi geçerli. Kural: **bir literali
 sayısı bir karar veriyorsa (durmak, kanıtlamak, süzmek), literal tanımı iki
 yönlü olmalı.**
 
+### 137 · Bir ipucu varsayım olarak sorulursa, katı bir cümle onu hiç sorulmadan reddeder
+Karma yollar (TODO B5.11) "en az bir ders el değiştirsin" diye bir cümleyle
+kuruldu. Yeni bir formül önce ipucu haftasını varsayım olarak sorar (tuzak 134'ün
+ikinci yarısı), ve o haftada hiçbir ders el değiştirmemişti: cümle varsayımı
+ilk adımda reddetti, arama sıfırdan başladı ve ilk haftası 312 saat açtı. Sonuç
+1 ders ve 7 saat oldu, CP-SAT'ın en iyisi 1 ders ve 3 saat. Kural bir seçici
+literalin arkasına alındı (`needHand`): ipucu haftası önce kuruluyor, sonra kural
+o haftanın yakınında isteniyor, ve sonuç 1 ders ve 3 saat. Tavan ("en çok üç
+ders") da aynı yoldan varsayım. Kural: **ipucuyla başlayan bir formülde, ipucunun
+çiğnediği bir kural cümle değil varsayım olur.**
+
+### 138 · Bir satır süzgeci, hangi satırları karşılaştırdığını adıyla söylemezse hepsini karşılaştırır
+Panel iki karma yoldan ötekinden iki sayıda da kötü olanı göstermiyor
+(`outdone`). İlk hâli yolun ailesine bakmıyordu, ve yalnız öğretmen saati açan iki
+yol da "0 ders, 6 saat" ve "0 ders, 4 saat" diye karşılaştırıldı: en az öğretmen
+yolu (KY'nin 6 saati) panelden düştü. Birim testleri görmedi, çünkü süzgeç panelin
+içinde; babanın dosyasıyla tarayıcıda satırlar sayılınca görüldü. Süzgeç artık
+yalnız iki karma yolu karşılaştırıyor ve bir test bunu soruyor. Kural: **bir satırı
+eleyen kural, eleyebileceği satırları adıyla sayar**, ve tarayıcıda gerçek veriyle
+satırlar sayılmadan panel bitmiş sayılmaz.
+
 ## Sürükleme, saf DOM ve React sınırı
 
 **Kural.** Yüksek frekanslı bir etkileşim (sürükleme, imleç haçı, boy tutamağı,
@@ -1170,7 +1191,7 @@ bir algoritma işi gibi kovalanır.
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
-| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135 |
+| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
@@ -1184,5 +1205,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 136, yeni bir tuzak 137'den devam eder. Test stratejisi
+büyük kullanılan numara 138, yeni bir tuzak 139'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

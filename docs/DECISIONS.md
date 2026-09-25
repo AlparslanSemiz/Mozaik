@@ -35,6 +35,81 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-25 · Cevap defteri: "en az" müsaitlikte, cevaplar planın verisi, karma yollar ve önizleme
+
+**Değişen (TODO B5.11).** Öneri panelinde her yolun `Sorular`'ı var. Orada sorular
+öğretmen öğretmen sıralı, her birinde `Olur` ve `Olmaz`. `Olmaz`'ın dört türü var:
+yalnız bu saatler, bütün gün, en fazla N saat, öğretmene hiç dokunma. `Olur`
+değişikliği bedelsiz kabul eder, arama kalanı arar. Cevaplar planın verisi (şema
+v15). `Izgarada göster` yolun haftasını ızgarada işaretli çizer. İki karma yol
+eklendi: dersi aynı branştan başka öğretmene verip daha az saat.
+
+**Kullanıcının kararları.**
+- **"En az", müsaitlikte en az değişiklik demek.** Derslerin saati ve yeri
+  serbest, bir dersin başka öğretmene geçmesi de müsaitliğe dokunmaktan iyi.
+  Plan aşamasında ölçülen şey başka bir yöne bakıyordu. Bugünkü öneri babanın
+  dizili 199 bloğunun 140–149'unu oynatıyor, CP-SAT'a göre en az saatte 48–62 blok
+  yetiyor. "Az oynatarak diz" o yüzden önerildi, ama bedel olarak eklenmedi.
+  Oynayan ders yalnız önizlemede sayılıyor ve işaretleniyor.
+- **Cevaplar plan verisi, oturumun değil.** Öğretmenlere sormak günler sürüyor.
+  Ayrı bir makine anahtarı ve oturum da seçenekti. Kullanıcı en pahalısını,
+  şemayı seçti: cevaplar plan kopyasıyla, geri alla ve dosyayla birlikte taşınıyor.
+- **Önizleme ızgarada, "Program 2"de değil.** Program alternatifleri yalnız
+  ızgarayı ayırıyor, müsaitlik plan genelinde. Bir öneriyi Program 2'ye uygulamak
+  Program 1'in öğretmen saatlerini de açardı. Kopya plana uygulamak da bu turda yok.
+- **Karma yol iki satır:** az ders (önce el değiştiren ders, sonra saat) ve az
+  saat (en çok üç ders el değiştirerek). CP-SAT'ta bu veride 1 ders ve 3 saat, 3
+  ders ve 2 saat, hiç el değişimi olmadan 4 saat.
+- **Saf el değişimi yolu en çok üç dersse gösteriliyor.** Cevap verilince yol bu
+  veride ilk kez bulundu, ama 9 ve 15 dersi el değiştirerek.
+- **İşaretler:** açılan saat güçlü, yer değişen sade. Güçlü demek kalın çizgi,
+  tarama ve "+". Sade demek ince kesik çizgi. Önerilen haftada ~140 blok yer
+  değiştiriyor, ikisi aynı güçte olunca dört açılan saat görünmüyordu.
+- **Her cevaptan sonra arama yeniden koşuyor**, 40–60 s. Kullanıcı "yeterli"
+  dedi. Toplu cevap ve yalnız etkilenen yolları aramak da seçenekti.
+- **"Bundan azı yok" kanıtı bırakıldı.** LP 0,39, kanıt güvercin yuvası türünden
+  (aşağıdaki 2026-09-25 girdisi). Panel "bulduğumuz en küçük" demeye devam ediyor.
+
+**Arama, ölçülerek.** Ret sonrası en az saat yolu babanın dosyasında 8 saatte
+kalıyordu, CP-SAT'ın en iyisi 5. Ölçülen adımlar:
+
+| Deneme | Sonuç | Süre |
+|---|---|---|
+| önceki (takılan haftadan) | 8 | 61 s |
+| doğrudan yeniden dizerek (`startRelaid`) | 8 | 10,7 s |
+| yolun kendi eski haftasından | 6 | 20 s |
+| komşuluk 5–6 güne kadar, tek başına | 6 | 16,6 s |
+| kendi eski haftası ve 5–6 günlük komşuluk | **5** | 18 s |
+| bütçe 300 000 çatışma | 5 | 120 s |
+| bütçe 150 000, komşuluk 2–4 | 6 | 41 s |
+
+Girenler üç şey: kendi eski haftası, geniş komşuluk ve `startRelaid`. İkisinden
+birini kaldıran mutasyon testi kırmızıya çeviriyor. Fikstürde (boş ızgara) aynı
+ret 6'da kalıyor, CP-SAT 5. Bütçeyi büyütmek bunu değiştirmedi, açık kalıyor.
+
+**Karma yolların ölçümü.**
+- İlk hâli: "en az bir ders el değiştirsin" katı bir cümleydi ve ipucu haftasını
+  reddetti (tuzak 137). Sonuç 1 ders ve 7 saat.
+- Varsayım olunca: 1 ders ve 3 saat, CP-SAT'la aynı.
+- Az saat yolu ayrı hatta 2 ders ve 7 saate düştü. Az ders yolunun haftasından
+  başlayınca 1 ders ve 3 saat. Bu yüzden ikisi en az saat yoluyla aynı worker
+  hattında, sırayla.
+- O hat en yavaş hat oldu (63 s, ötekiler en çok 45 s). Karma yolların bütçesi
+  150 000'den 60 000 çatışmaya indi: aynı boyutlar, 8–10 s daha kısa.
+- CP-SAT'ın "3 ders ve 2 saat"i bulunamadı.
+
+**Denendi ve bırakıldı.**
+- Karma yolları en az öğretmen hattına taşımak (13 s'de biten hat): az ders yolu 1 ders
+  ve 6 saate düştü.
+- Karma yolları iki ayrı hatta koşmak: az saat yolu 2 ders ve 7 saat.
+- Ret sonrası geniş bütçe (300 000 çatışma): 5 saat ama 120 s.
+
+**Bedeli.**
+- `dist/index.html` 1 079 384 bayttan 1 111 510 bayta çıktı (32 kB).
+- Arama babanın dosyasında Linux exe'sinde 47–50 s'de bitiyor. Önceki turda 33 s.
+  Sebep karma yollar. İlk öneri yine 5–6 s.
+- Ret sonrası arama 64 s. Önceki turda 38 s.
+
 ### 2026-09-25 · Öneri tek bir "en küçük" değil, babanın seçeceği yollar; arama worker'da
 
 **Değişen.** Kurulamayan haftada panel artık aynı değişiklik türünün farklı
