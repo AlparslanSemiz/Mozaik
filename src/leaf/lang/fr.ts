@@ -229,8 +229,8 @@ const FR: Sozluk = {
   Derslikler: "Salles",
   "Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.":
     "Le TOTAL des heures des classes qui partagent une salle doit aussi tenir dans la semaine. C’est le goulot d’étranglement le plus souvent oublié.",
-  "**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
-    "Revenez ici une fois les enseignants, les classes et les cours saisis dans l’onglet **École**. Cette page dit à l’avance si l’emploi du temps peut être construit.",
+  "Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
+    "Revenez ici une fois les enseignants et les classes saisis dans l’onglet **École** et les cours dans l’onglet **Cours**. Cette page dit à l’avance si l’emploi du temps peut être construit.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Rien ne semble poser problème.** Les disponibilités ainsi que les capacités des classes et des salles couvrent les heures attribuées. L’emploi du temps peut être construit.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
@@ -366,8 +366,8 @@ const FR: Sozluk = {
   Sayfa: "Pages",
   "A4 yatay": "A4 paysage",
   Renk: "Couleur",
-  "Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin.":
-    "Saisissez d’abord les cours dans l’onglet **École**, puis placez-les dans l’onglet **Emploi du temps**.",
+  "Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin.":
+    "Saisissez d’abord les cours dans l’onglet **Cours**, puis placez-les dans l’onglet **Emploi du temps**.",
   "**{n}** kâğıt": "**{n}** {n:feuille|feuilles}",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** des pages sélectionnées sont entièrement vides. Les emplois du temps de ces enseignants n’ont pas encore été construits. Vous pouvez le faire dans l’onglet **Emploi du temps**.",
@@ -397,8 +397,8 @@ const FR: Sozluk = {
   Tamam: "OK",
   Öğretmen: "Enseignant",
   Sınıf: "Classe",
-  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
-    "Saisissez d’abord les salles, les enseignants et les classes dans l’onglet **École**, puis ajoutez les heures hebdomadaires de chaque classe. Marquez ensuite dans l’onglet **Disponibilité** les heures où les enseignants ne peuvent pas venir.",
+  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
+    "Saisissez d’abord les salles, les enseignants et les classes dans l’onglet **École**, marquez dans l’onglet **Disponibilité** les heures où les enseignants ne peuvent pas venir, puis ajoutez les heures hebdomadaires de chaque classe dans l’onglet **Cours**.",
 
   // src/ui/Ribbon.tsx
   "Okul listeleri": "Listes de l’école",

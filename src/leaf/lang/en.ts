@@ -229,8 +229,8 @@ const EN: Sozluk = {
   Derslikler: "Rooms",
   "Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.":
     "The TOTAL hours of the classes sharing one room must also fit into the week. This is the bottleneck most often missed.",
-  "**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
-    "Come back here once you have entered teachers, classes and lessons in the **School** tab. This page tells you in advance whether the timetable can be laid out at all.",
+  "Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
+    "Come back here once you have entered teachers and classes in the **School** tab and lessons in the **Lessons** tab. This page tells you in advance whether the timetable can be laid out at all.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Nothing looks wrong.** Teacher availability and class and room capacity cover the hours loaded. The timetable can be laid out.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
@@ -361,8 +361,8 @@ const EN: Sozluk = {
   Sayfa: "Pages",
   "A4 yatay": "A4 landscape",
   Renk: "Colour",
-  "Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin.":
-    "First enter the lessons in the **School** tab, then lay them out in the **Timetable** tab.",
+  "Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin.":
+    "First enter the lessons in the **Lessons** tab, then lay them out in the **Timetable** tab.",
   "**{n}** kâğıt": "**{n}** {n:sheet|sheets}",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** of the selected pages are completely empty. Those teachers' timetables have not been laid out yet. You can lay them out in the **Timetable** tab.",
@@ -392,8 +392,8 @@ const EN: Sozluk = {
   Tamam: "OK",
   Öğretmen: "Teacher",
   Sınıf: "Class",
-  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
-    "First enter the rooms, teachers and classes in the **School** tab, then add each class's weekly hours. After that, mark the hours teachers cannot come in the **Availability** tab.",
+  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
+    "First enter the rooms, teachers and classes in the **School** tab, mark the hours teachers cannot come in the **Availability** tab, then add each class's weekly hours in the **Lessons** tab.",
 
   // src/ui/Ribbon.tsx
   "Okul listeleri": "School lists",

@@ -287,7 +287,7 @@ export default function Print({
       <>
         <div className="empty-screen">
           <strong>{t('Yazdırılacak program yok.')}</strong>
-          <T k="Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin." />
+          <T k="Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin." />
         </div>
       </>
     );

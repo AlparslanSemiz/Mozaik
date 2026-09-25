@@ -74,7 +74,7 @@ export default function Check({ state, view }: Props) {
       <>
         <div className="empty-screen">
           <strong>{t('Kontrol edilecek bir şey yok.')}</strong>
-          <T k="**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
+          <T k="Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler." />
         </div>
       </>
     );

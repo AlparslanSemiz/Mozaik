@@ -1162,8 +1162,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`). Tuzak 106.
 - [ ] **`src/platform/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
       ve Hakkında noktası yazılmamış, `CHANGELOG.md`'de var.
-- [ ] **Boş ekranlar dersler için Okul'u gösteriyor.** Program, Kontrol ve Çıktı'nın
-      cümleleri "Okul sekmesinden dersleri girin" diyor, dersler Dersler sekmesinde giriliyor.
+- [x] **Boş ekranlar dersler için Okul'u gösteriyor — DÜZELTİLDİ (2026-09-25).** Program,
+      Kontrol ve Çıktı'nın cümleleri "Okul sekmesinden dersleri girin" diyordu, dersler Dersler
+      sekmesinde giriliyor. Cümleler kullanıcıya taslak olarak gösterildi ve onaylandı: Program
+      sekme sırasıyla Okul, Müsaitlik ve Dersler diyor, Kontrol Okul ve Dersler, Çıktı Dersler.
+      `bos-ekran.spec.ts`'in üç iddiası düzeltmeden önce kırmızıydı.
 - [ ] **Havuzun boşalınca kendiliğinden kapanması** eski CLAUDE.md'de yazılıydı, kodda
       bulunamadı. Ekranda denenecek, yoksa istenip istenmediğine karar verilecek.
 - [ ] **Bayat kod yorumları:** `App.tsx`'in başı "six sections", `Program.tsx` havuzu

@@ -230,8 +230,8 @@ const DE: Sozluk = {
   Derslikler: "Räume",
   "Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.":
     "Auch die GESAMTSTUNDEN der Klassen, die sich einen Raum teilen, müssen in die Woche passen. Dieser Engpass wird am häufigsten übersehen.",
-  "**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
-    "Kommen Sie hierher zurück, sobald Sie im Reiter **Schule** Lehrkräfte, Klassen und Fächer eingetragen haben. Diese Seite sagt im Voraus, ob sich der Plan überhaupt legen lässt.",
+  "Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
+    "Kommen Sie hierher zurück, sobald Sie im Reiter **Schule** Lehrkräfte und Klassen und im Reiter **Fächer** die Fächer eingetragen haben. Diese Seite sagt im Voraus, ob sich der Plan überhaupt legen lässt.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Es sieht alles in Ordnung aus.** Verfügbarkeiten sowie Klassen- und Raumkapazitäten decken die zugewiesenen Stunden. Der Plan lässt sich legen.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
@@ -365,8 +365,8 @@ const DE: Sozluk = {
   Sayfa: "Seiten",
   "A4 yatay": "A4 quer",
   Renk: "Farbe",
-  "Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin.":
-    "Tragen Sie zuerst im Reiter **Schule** die Fächer ein und legen Sie sie dann im Reiter **Stundenplan**.",
+  "Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin.":
+    "Tragen Sie zuerst im Reiter **Fächer** die Fächer ein und legen Sie sie dann im Reiter **Stundenplan**.",
   "**{n}** kâğıt": "**{n}** {n:Blatt|Blätter}",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** der gewählten Seiten sind völlig leer. Die Pläne dieser Lehrkräfte wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
@@ -397,8 +397,8 @@ const DE: Sozluk = {
   Tamam: "OK",
   Öğretmen: "Lehrkraft",
   Sınıf: "Klasse",
-  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
-    "Tragen Sie zuerst im Reiter **Schule** Räume, Lehrkräfte und Klassen ein und fügen Sie dann für jede Klasse die Wochenstunden hinzu. Markieren Sie danach im Reiter **Verfügbarkeit** die Stunden, zu denen Lehrkräfte nicht können.",
+  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
+    "Tragen Sie zuerst im Reiter **Schule** Räume, Lehrkräfte und Klassen ein, markieren Sie im Reiter **Verfügbarkeit** die Stunden, zu denen Lehrkräfte nicht können, und fügen Sie dann im Reiter **Fächer** für jede Klasse die Wochenstunden hinzu.",
 
   // src/ui/Ribbon.tsx
   "Okul listeleri": "Schullisten",

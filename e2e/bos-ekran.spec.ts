@@ -96,6 +96,9 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     await expect(screen).toContainText('Henüz dizilecek ders yok');
     await expect(screen).toContainText('Okul');
     await expect(screen).toContainText('Müsaitlik');
+    // Lessons are entered in Dersler, not Okul. All three empty screens named
+    // only Okul until 2026-09-25.
+    await expect(screen).toContainText('Dersler sekmesinde');
     // Not clipped: the empty screen must never live inside the grid's
     // overflow:hidden shell.
     await expect(page.locator('main.main.no-overflow')).toHaveCount(0);
@@ -107,6 +110,13 @@ test.describe('35. Boş ekranlar yönlendiriyor', () => {
     // `onScreen`, not a bare locator: the Program tab is mounted-but-hidden and
     // carries an empty state of its own ("Henüz dizilecek ders yok").
     await expect(onScreen(page, '.empty-screen')).toBeVisible();
+    await expect(onScreen(page, '.empty-screen')).toContainText('Önce Dersler sekmesinden');
+  });
+
+  test('Kontrol: dersin hangi sekmede girildiğini söylüyor', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+    await expect(onScreen(page, '.empty-screen')).toContainText('dersleri Dersler');
   });
 
   test('Müsaitlik: üç türün üçü de ne eksik olduğunu söylüyor', async ({ page }) => {

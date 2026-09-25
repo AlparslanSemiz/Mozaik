@@ -229,8 +229,8 @@ const ES: Sozluk = {
   Derslikler: "Aulas",
   "Aynı dersliği paylaşan sınıfların TOPLAM ders saati de haftaya sığmalı. En çok gözden kaçan darboğaz burasıdır.":
     "El TOTAL de horas de las clases que comparten un aula también debe caber en la semana. Es el cuello de botella que más se pasa por alto.",
-  "**Okul** sekmesinden öğretmenleri, sınıfları ve dersleri girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
-    "Vuelva aquí cuando haya introducido profesores, clases y asignaturas en la pestaña **Escuela**. Esta página dice de antemano si el horario puede montarse.",
+  "Öğretmenleri ve sınıfları **Okul**, dersleri **Dersler** sekmesinden girdikten sonra buraya dönün. Bu sayfa programın dizilip dizilemeyeceğini önceden söyler.":
+    "Vuelva aquí cuando haya introducido profesores y clases en la pestaña **Escuela** y asignaturas en la pestaña **Clases**. Esta página dice de antemano si el horario puede montarse.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**No se ve ningún problema.** La disponibilidad y la capacidad de clases y aulas cubren las horas asignadas. El horario puede montarse.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
@@ -363,8 +363,8 @@ const ES: Sozluk = {
   Sayfa: "Páginas",
   "A4 yatay": "A4 apaisado",
   Renk: "Color",
-  "Önce **Okul** sekmesinden dersleri girip **Program** sekmesinde dizin.":
-    "Introduzca primero las clases en la pestaña **Escuela** y móntelas en la pestaña **Horario**.",
+  "Önce **Dersler** sekmesinden dersleri girip **Program** sekmesinde dizin.":
+    "Introduzca primero las clases en la pestaña **Clases** y móntelas en la pestaña **Horario**.",
   "**{n}** kâğıt": "**{n}** {n:hoja|hojas}",
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O öğretmenlerin programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** de las páginas seleccionadas están completamente vacías. Los horarios de esos profesores aún no se han montado. Puede montarlos en la pestaña **Horario**.",
@@ -395,8 +395,8 @@ const ES: Sozluk = {
   Tamam: "Aceptar",
   Öğretmen: "Profesor",
   Sınıf: "Clase",
-  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, sonra her sınıfa haftalık ders saatlerini ekleyin. Ardından **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin.":
-    "Introduzca primero las aulas, profesores y clases en la pestaña **Escuela** y añada después las horas semanales de cada clase. Luego marque en la pestaña **Disponibilidad** las horas en que los profesores no pueden venir.",
+  "Önce **Okul** sekmesinden derslikleri, öğretmenleri ve sınıfları girin, **Müsaitlik** sekmesinde öğretmenlerin gelemediği saatleri işaretleyin, sonra **Dersler** sekmesinde her sınıfa haftalık ders saatlerini ekleyin.":
+    "Introduzca primero las aulas, profesores y clases en la pestaña **Escuela**, marque en la pestaña **Disponibilidad** las horas en que los profesores no pueden venir y añada después en la pestaña **Clases** las horas semanales de cada clase.",
 
   // src/ui/Ribbon.tsx
   "Okul listeleri": "Listas de la escuela",
