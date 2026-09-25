@@ -29,6 +29,7 @@ import type {
   Suggestion,
 } from '../pure/relax';
 import type { Id, State } from '../leaf/types';
+import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */
 export interface RelaxJob {
@@ -103,6 +104,15 @@ const DEFAULT_FAMILIES: RelaxFamily[] = TRACKS.flat();
  * way whichever thread it runs on: `step` every frame until it returns a result.
  */
 export function startRelax(
+  base: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+): Relaxer {
+  // Every search leaves a line in this machine's log (relaxLog.ts).
+  return recorded(startOn(base, hint, options));
+}
+
+function startOn(
   base: State,
   hint: Readonly<Record<string, Id>>,
   options: Partial<RelaxOptions>,

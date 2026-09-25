@@ -308,6 +308,15 @@ test.describe('Gerçek exe (Linux)', () => {
 
     await exe.oturum.tus('Control+z');
     await expect.poll(ust, { timeout: 10_000 }).toContain('havuzda');
+
+    // The search left its line in Hakkında (relaxLog.ts): with workers.
+    await exe.oturum.tikla('metin:Ayarlar');
+    await exe.oturum.tikla('metin:Hakkında');
+    await expect
+      .poll(() => exe.oturum.js<string>(`return document.querySelector('main').innerText;`), {
+        timeout: 5_000,
+      })
+      .toMatch(/\d+ iş parçacığında · ilk öneri \d+ sn · arama \d+ sn/);
   });
 
   test('"Dosyadan aç" bir yedeği okuyor', async ({ exe }) => {

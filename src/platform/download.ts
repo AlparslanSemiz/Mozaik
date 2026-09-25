@@ -15,6 +15,7 @@
 import { buildBundle } from '../pure/bundle';
 import { backupFileName, bundleFileName, type Library } from '../pure/library';
 import { loadPlan } from './planStore';
+import { searchLog } from './relaxLog';
 import type { Id, State } from '../leaf/types';
 
 /** Hands the browser a file to save. Both file kinds go through here. */
@@ -59,6 +60,6 @@ export function collectStates(library: Library, planId: Id, present: State): Rec
 
 export function downloadBundle(library: Library, planId: Id, present: State): number {
   const states = collectStates(library, planId, present);
-  download(bundleFileName(new Date()), buildBundle(library, states));
+  download(bundleFileName(new Date()), buildBundle(library, states, searchLog()));
   return Object.keys(states).length;
 }

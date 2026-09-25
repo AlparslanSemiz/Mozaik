@@ -1176,6 +1176,16 @@ const EN: Sozluk = {
     "{ust} {alt}, in a teacher hour being opened",
   "{ust} {alt}, yeri değişiyor":
     "{ust} {alt}, moves",
+  "Öneri araması":
+    "Suggestion search",
+  "Bu bilgisayarda henüz aranmadı":
+    "Not run on this computer yet",
+  "{n} iş parçacığında · ilk öneri {ilk} sn · arama {sure} sn":
+    "On {n} {n:thread|threads} · first suggestion {ilk} s · search {sure} s",
+  "Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn":
+    "On one thread (the slow way) · first suggestion {ilk} s · search {sure} s",
+  "öneri aramasının ölçümleri":
+    "measurements of the suggestion search",
   "Kurulması için":
     "To build the week",
   "Ayrıntı":

@@ -18,6 +18,7 @@ src/platform/      planStore · libraryStore · storageReport · theme · toolSt
                    programColor · changelog · folder · desktop · update · download
                    drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
                    useStore · usePlans · useSolver · useFolder · relaxPool · relaxWorker
+                   relaxLog
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -129,6 +130,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını başlatır ve "Bu olmaz" ile yeniden başlatır |
 | `platform/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
+| `platform/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
 | `platform/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
 | `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |

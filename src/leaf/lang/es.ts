@@ -1190,6 +1190,16 @@ const ES: Sozluk = {
     "{ust} {alt}, en una hora de docente que se abre",
   "{ust} {alt}, yeri değişiyor":
     "{ust} {alt}, cambia de lugar",
+  "Öneri araması":
+    "Búsqueda de propuestas",
+  "Bu bilgisayarda henüz aranmadı":
+    "Aún no se ha ejecutado en este equipo",
+  "{n} iş parçacığında · ilk öneri {ilk} sn · arama {sure} sn":
+    "En {n} {n:hilo|hilos} · primera propuesta {ilk} s · búsqueda {sure} s",
+  "Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn":
+    "En un solo hilo (la vía lenta) · primera propuesta {ilk} s · búsqueda {sure} s",
+  "öneri aramasının ölçümleri":
+    "mediciones de la búsqueda de propuestas",
   "Kurulması için":
     "Para montar la semana",
   "Ayrıntı":

@@ -44,6 +44,20 @@ describe('buildBundle → parseBundle gidiş-dönüş', () => {
     expect(raw.plans).toHaveLength(1);
   });
 
+  it('öneri ölçümleri zarfta ayrı bir alan, okuyucu onu planlara katmıyor', () => {
+    // TODO B5.11: the father's machine measures its own search, and the file
+    // he sends carries it. No plan reads it, and the envelope version stays.
+    const olcum = [{ at: '2026-09-25T10:00:00.000Z', workers: 6, doneMs: 33_000 }];
+    const text = buildBundle(two(), { [FIRST_PLAN_ID]: fakeState('bir') }, olcum);
+    expect((JSON.parse(text) as { olcum: unknown }).olcum).toEqual(olcum);
+    expect(bundleVersionOf(text)).toBe(BUNDLE_VERSION);
+    const bundle = parseBundle(text)!;
+    expect(bundle.states[FIRST_PLAN_ID]).toEqual(fakeState('bir'));
+    expect(Object.keys(bundle)).toEqual(['library', 'states']);
+    // None measured, no field.
+    expect(buildBundle(two(), { [FIRST_PLAN_ID]: fakeState('bir') })).not.toContain('olcum');
+  });
+
   it('verisi olmayan plan dosyaya hiç girmiyor', () => {
     const bundle = parseBundle(buildBundle(two(), { abcd: fakeState('iki') }))!;
     expect(bundle.library.plans.map((p) => p.id)).toEqual(['abcd']);

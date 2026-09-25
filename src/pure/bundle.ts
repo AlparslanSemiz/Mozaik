@@ -37,11 +37,22 @@ interface RawEntry {
   state?: unknown;
 }
 
-export function buildBundle(lib: Library, states: Record<Id, unknown>): string {
+/**
+ * `olcum`: how the suggestion search ran on this machine (relaxPool.ts), so
+ * a file the father sends says it too (TODO B5.11: his Windows machine could
+ * not be measured from here). Not part of any plan, and `parseBundle` does not
+ * read it: an envelope field an older copy ignores, so BUNDLE_VERSION stays.
+ */
+export function buildBundle(
+  lib: Library,
+  states: Record<Id, unknown>,
+  olcum: readonly unknown[] = [],
+): string {
   return JSON.stringify({
     bundleVersion: BUNDLE_VERSION,
     savedAt: new Date().toISOString(),
     activeId: lib.activeId,
+    ...(olcum.length > 0 ? { olcum } : {}),
     // Only plans whose state we actually have. A directory row pointing at
     // nothing is worse than a missing row: it invites deleting the wrong one.
     plans: lib.plans

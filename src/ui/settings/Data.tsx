@@ -38,6 +38,8 @@ import { surumEtiketi, tarihYazisi } from '../../leaf/version';
 import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
 import Plans from './Plans';
 import { T, useT } from '../T';
+import type { Translate } from '../T';
+import { searchLog } from '../../platform/relaxLog';
 
 interface Props {
   state: State;
@@ -239,6 +241,26 @@ function Folder({ folder }: { folder: FolderRun }) {
  * "Veriler nerede", "Nereye kaydedilsin" or "Bütün planlar tek dosyada": those
  * three are the locators four E2E specs hang on.
  */
+/**
+ * The newest suggestion search on this machine, in a line the father can
+ * photograph (TODO B5.11): whether the workers opened, and how long it took.
+ * The whole log goes into every bundle file (relaxLog.ts).
+ */
+function searchLine(t: Translate): string {
+  const log = searchLog();
+  const last = log[log.length - 1];
+  if (last === undefined) return t('Bu bilgisayarda henüz aranmadı');
+  const sure = Math.round(last.doneMs / 1000);
+  const ilk = last.firstMs === null ? '—' : String(Math.round(last.firstMs / 1000));
+  return last.workers > 0
+    ? t('{n} iş parçacığında · ilk öneri {ilk} sn · arama {sure} sn', {
+        n: last.workers,
+        ilk,
+        sure,
+      })
+    : t('Tek iş parçacığında (yavaş yol) · ilk öneri {ilk} sn · arama {sure} sn', { ilk, sure });
+}
+
 function Build({ update }: { update: UpdateRun }) {
   const t = useT();
   const adres = storageAddress();
@@ -257,6 +279,10 @@ function Build({ update }: { update: UpdateRun }) {
           <tr>
             <td>{t('Nasıl açıldı')}</td>
             <td>{routeName()}</td>
+          </tr>
+          <tr>
+            <td>{t('Öneri araması')}</td>
+            <td>{searchLine(t)}</td>
           </tr>
           {adres !== '' && (
             <tr>

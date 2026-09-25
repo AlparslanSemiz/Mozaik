@@ -242,6 +242,7 @@ describe('cümle · "Veriler nerede" tablosu', () => {
         "ders-programi-tanitim · örnek veri satırı görüldü mü",
         "ders-programi-baski · kâğıt seçenekleri",
         "ders-programi-yenilik-gorulen · görülen sürüm notu",
+        "ders-programi-oneri-olcum · öneri aramasının ölçümleri",
       ]
     `);
   });

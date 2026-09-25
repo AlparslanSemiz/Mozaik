@@ -174,6 +174,7 @@ dosya adının `Mozaik-*` olup olmayacağı TODO §8'de açık bir soru.
 | `ders-programi-tanitim` | örnek veri teklifi görüldü mü |
 | `ders-programi-baski` | kâğıt seçenekleri, tek bir JSON kaydı |
 | `ders-programi-yenilik-gorulen` | görülen sürüm notu |
+| `ders-programi-oneri-olcum` | bu makinedeki son 20 öneri aramasının ölçümü (`relaxLog.ts`) |
 
 Bu listenin tamamı Ayarlar → Hakkında'daki "Veriler nerede" tablosunda görünür, ve
 satırları `storageReport.ts` üretir, tercihlerinkini
@@ -232,7 +233,11 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
 Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki
 her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.
-`bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil. İki
+`bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil.
+Zarfta isteğe bağlı bir `olcum` alanı da olabilir. O, bu makinedeki öneri
+aramalarının ölçümü (`ders-programi-oneri-olcum`), ve babanın gönderdiği dosyanın
+aramanın onun makinesinde nasıl koştuğunu söylemesi için orada (TODO B5.11).
+`parseBundle` onu okumaz, bu yüzden `bundleVersion` artmadı. İki
 biçimin birbirine karışmaması için üç önlem birlikte var (tuzak 30).
 
 Seçilen klasöre bütün planlar yazılır ve her gün için ayrı bir yedek bırakılır

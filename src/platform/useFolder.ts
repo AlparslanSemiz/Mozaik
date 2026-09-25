@@ -26,6 +26,7 @@ import {
 } from './folder';
 import type { Library } from '../pure/library';
 import { collectStates } from './download';
+import { searchLog } from './relaxLog';
 import type { Id, State } from '../leaf/types';
 
 /**
@@ -79,7 +80,7 @@ export function useFolder(library: Library, planId: Id, present: State): FolderR
 
   const write = useCallback(async (handle: FileSystemDirectoryHandle) => {
     const { library: lib, planId: id, present: now } = latest.current;
-    const text = buildBundle(lib, collectStates(lib, id, now));
+    const text = buildBundle(lib, collectStates(lib, id, now), searchLog());
     const when = new Date();
     // Listing the directory is real I/O; only do it when the day turned over,
     // which is also the only moment a prune can have anything to do.
