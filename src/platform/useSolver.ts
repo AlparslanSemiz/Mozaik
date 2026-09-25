@@ -265,7 +265,14 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       if (current === null || advice === null) return;
       dropSearch();
       kept.current = advice.suggestions.filter((s) => !refused.some((r) => uses(s, r)));
-      relaxer.current = startRelax(current.from, current.hint, { ...current.options, refused });
+      // Each way starts again from the week it found, and a run that had to
+      // lay the week out again does not first try once more with it kept.
+      relaxer.current = startRelax(current.from, current.hint, {
+        ...current.options,
+        refused,
+        previous: advice.suggestions,
+        startRelaid: advice.suggestions.some((s) => s.relaid),
+      });
       setAdvice({
         ...advice,
         searching: true,

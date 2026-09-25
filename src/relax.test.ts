@@ -284,6 +284,60 @@ describe('öneri — tam dolu bir kurs', () => {
   }, 120_000);
 });
 
+// The father's own file, anonymised the same way and with his 330 hours laid
+// out (`tam-dolu-kurs-dizili.json`): the week a keeping run cannot finish, so
+// every way lays it out again. The case "Olmaz" is said in.
+function dizili(): State {
+  const raw = readFileSync(
+    join(import.meta.dirname, 'fixtures', 'tam-dolu-kurs-dizili.json'),
+    'utf8',
+  );
+  const state = parseState(raw);
+  if (state === null) throw new Error('tam-dolu-kurs-dizili.json okunamadı');
+  return state;
+}
+
+/** One search in slices, as the app runs it (see stuckAndSuggestSliced). */
+async function sliced(d: State, hint: Record<string, string>, options: Partial<RelaxOptions>) {
+  const relaxer = createRelaxer(d, hint, { budgetMs: 600_000, ...options });
+  for (;;) {
+    const result = relaxer.step(200);
+    if (result !== null) return result.suggestions;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+}
+
+describe('öneri — babanın dizili haftası ve "Olmaz"', () => {
+  it("KY Cumartesi gelemezse en az saat 5, CP-SAT'ın en iyisi", async () => {
+    // MEASURED (2026-09-25): refusing Ö6's (KY's) Saturday, the fewest-hours
+    // way found 8 when it started over from the stuck week, 5 from its own
+    // earlier week with the wider neighbourhoods. CP-SAT's best is 5.
+    const d = dizili();
+    const hint = activePlacements(d);
+    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
+    expect(first).toHaveLength(1);
+    expect(first[0]!.relaid).toBe(true);
+    expect(first[0]!.size).toBe(4);
+
+    const ky = d.teachers.find((x) => x.short === 'Ö6')!.id;
+    const again = await sliced(d, hint, {
+      keepPlaced: true,
+      families: ['teacherHours'],
+      refused: [{ kind: 'teacherDay', teacherId: ky, day: 4 }],
+      previous: first,
+      startRelaid: true,
+    });
+    expect(again).toHaveLength(1);
+    const s = again[0]!;
+    expect(s.relaid).toBe(true);
+    expect(
+      s.changes.some((c) => c.kind === 'teacherHour' && c.teacherId === ky && c.day === 4),
+    ).toBe(false);
+    expect(s.size).toBe(5);
+    expect(verifySuggestion(d, s, { keepPlaced: false })).toEqual([]);
+  }, 240_000);
+});
+
 describe('öneri — yollar, cümleler ve "bu olmaz"', () => {
   it('reddedilen gün hiçbir yolda yok; iki gün de reddedilince saat açan yol kalmıyor', () => {
     const d = world('ogretmen-hafta-kapali');

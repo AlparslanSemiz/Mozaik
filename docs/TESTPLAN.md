@@ -347,8 +347,13 @@ kullanır. Denetçinin kendisi `worlds.test.ts`'te bilerek bozuk ızgaralarla s�
 ve her dünya testi kaydedilen yerleşim sayısının girişten büyük olduğunu ayrıca
 iddia eder (tuzak 23).
 
-Sahte olmayan tek veri `src/fixtures/tam-dolu-kurs.json`: babanın planı,
-öğretmen adları "Öğretmen N" yapılmış ve ızgarası boşaltılmış. Şema örneklerinin
+Sahte olmayan veri iki dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
+öğretmen adları "Öğretmen N" yapılmış ve ızgarası boşaltılmış.
+`src/fixtures/tam-dolu-kurs-dizili.json` aynı dosya, babanın kendi dizdiği 330
+saatle: yalnız yerleşimler eklendi, ve onlar kimlikten kimliğe, ad taşımıyor
+(2026-09-25). Dizili dersler yerinde kalırken yol olmayan, yani her yolun yeniden
+dizdiği hafta bu; `relax.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
+Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
 yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
 dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,

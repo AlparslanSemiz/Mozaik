@@ -145,6 +145,23 @@ export interface RelaxOptions {
   /** Which ways to look for, in the order they are looked for. */
   families: RelaxFamily[];
   refused: Refusal[];
+  /**
+   * What the search before this one found, when this one runs again after an
+   * answer ("Olmaz"). Each way starts from its own earlier week, the refused
+   * hours falling out of it on their own (they are no longer a start any
+   * block may take), and the neighbourhoods grow to five and six days. MEASURED
+   * on the father's file (2026-09-25): refusing KY's Saturday, the fewest-hours
+   * way found 8 hours in 61 s starting from the stuck week; from its own
+   * earlier week 6, with the wider neighbourhoods too 5 in 18 s, which is
+   * CP-SAT's best. Either alone stayed at 6.
+   */
+  previous: Suggestion[];
+  /**
+   * Skip the pass that keeps the laid-out lessons where they are and go
+   * straight to laying them out again: the search before this one found no way
+   * with them kept, and a refusal cannot make one appear.
+   */
+  startRelaid: boolean;
 }
 
 /**
@@ -169,6 +186,8 @@ const DEFAULTS: RelaxOptions = {
   budgetMs: 120_000,
   families: SEARCH_ORDER,
   refused: [],
+  previous: [],
+  startRelaid: false,
 };
 
 /**
@@ -208,6 +227,9 @@ const NEIGHBOURHOOD_CONFLICTS = 1_000;
 
 /** How many days a neighbourhood frees, tried in this order. */
 const NEIGHBOURHOOD_SIZES = [2, 3, 4];
+
+/** The same after an answer, when the search starts from its own earlier week (see `previous`). */
+const WIDE_NEIGHBOURHOOD_SIZES = [2, 3, 4, 5, 6];
 
 /** Once no neighbourhood helps, how long the whole week is asked before giving up. */
 const WHOLE_WEEK_CONFLICTS = 60_000;
@@ -1219,7 +1241,8 @@ export function createRelaxer(
       // A new formula starts from the best week any way has found so far:
       // most of it stands under this way's changes too.
       const latest = suggestions[suggestions.length - 1];
-      model = buildModel(base, frame, kind, opts, latest?.placements ?? hint);
+      const own = opts.previous.find((x) => x.family === which && x.relaid === relaid);
+      model = buildModel(base, frame, kind, opts, own?.placements ?? latest?.placements ?? hint);
       models.set(kind, model);
       yield;
     } else {
@@ -1346,12 +1369,14 @@ export function createRelaxer(
       };
       /** The neighbourhoods of one kind, each a test of which blocks go free. */
       const rounds: Array<() => Array<(slot: Slot, day: number) => boolean>> = [
-        ...NEIGHBOURHOOD_SIZES.map((size) => () => {
-          const hot = hotDays();
-          return subsets(openDays, size)
-            .filter((days) => hot === null || days.some((d) => hot.has(d)))
-            .map((days) => (_slot: Slot, day: number) => days.includes(day));
-        }),
+        ...(opts.previous.length > 0 ? WIDE_NEIGHBOURHOOD_SIZES : NEIGHBOURHOOD_SIZES).map(
+          (size) => () => {
+            const hot = hotDays();
+            return subsets(openDays, size)
+              .filter((days) => hot === null || days.some((d) => hot.has(d)))
+              .map((days) => (_slot: Slot, day: number) => days.includes(day));
+          },
+        ),
         () => {
           if (!wide) return [];
           const hot = hotClasses();
@@ -1490,6 +1515,12 @@ export function createRelaxer(
   }
 
   function* all(): Generator<void, void> {
+    if (opts.startRelaid && opts.keepPlaced) {
+      relaid = true;
+      frame = frameOf(base, { ...opts, keepPlaced: false });
+      yield* pass();
+      return;
+    }
     yield* pass();
     // The run kept what was already laid out, and on the father's own file
     // that is exactly what left no way: 330 hours in place, the empty ones in
