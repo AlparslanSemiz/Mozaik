@@ -225,6 +225,56 @@ test.describe('Gerçek exe (Linux)', () => {
     ).not.toContain('kendini güncelleyebilir');
   });
 
+  test("kurulamayan haftada yol öneriyor, worker'larda arıyor, uyguluyor ve Ctrl+Z geri alıyor", async ({
+    exe,
+  }) => {
+    // TODO B5.10: the father's week (anonymised) in the real WebKitGTK. The
+    // search runs on the page's own script as workers (relaxPool.ts), which
+    // the browser suite measures in Chromium and this measures here.
+    test.setTimeout(300_000);
+    const metin = readFileSync(join(KOK, 'src', 'fixtures', 'tam-dolu-kurs.json'), 'utf8');
+    await exe.oturum.js(
+      `const f = new File([${JSON.stringify(metin)}], 'yedek.json', { type: 'application/json' });
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      const girdi = document.querySelector('input[type=file]');
+      girdi.files = dt.files;
+      girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
+    );
+    await exe.oturum.bekle('.dlg');
+    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await exe.oturum.tikla('metin:Program');
+    await exe.oturum.tikla('metin:Otomatik diz');
+
+    const satirlar = () =>
+      exe.oturum.js<string[]>(
+        `return [...document.querySelectorAll('.suggestion-list li[data-family] .suggestion-title')].map((x) => x.innerText);`,
+      );
+    await expect
+      .poll(async () => (await satirlar()).join('\n'), { timeout: 240_000, intervals: [2_000] })
+      .toContain('de gelebilirse hafta kuruluyor');
+    expect(
+      Number(
+        await exe.oturum.js<string>(`return document.documentElement.dataset.oneriIsci ?? '';`),
+      ),
+    ).toBeGreaterThan(0);
+
+    const ust = () => exe.oturum.js<string>(`return document.querySelector('.topbar').innerText;`);
+    expect(await ust()).toContain('havuzda');
+    await exe.oturum.tikla('.suggestion-list li[data-family] .btn.primary');
+    await expect
+      .poll(
+        () =>
+          exe.oturum.js<string>(`return document.querySelector('.reason-bar')?.innerText ?? '';`),
+        { timeout: 10_000 },
+      )
+      .toContain('Öneri uygulandı');
+    await expect.poll(ust, { timeout: 10_000 }).not.toContain('havuzda');
+
+    await exe.oturum.tus('Control+z');
+    await expect.poll(ust, { timeout: 10_000 }).toContain('havuzda');
+  });
+
   test('"Dosyadan aç" bir yedeği okuyor', async ({ exe }) => {
     // The GTK file chooser does not open inside a WebDriver session (the
     // automation takes it; tuzak 133), so the file is handed to the input the

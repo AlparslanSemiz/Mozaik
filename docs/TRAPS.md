@@ -290,6 +290,34 @@ Roboders'in açık saatleriyle aynı veri 0,5–1,5 saniyede 211/211 (16 tohum),
 
 ---
 
+### 134 · Geri sarmak deneme yönünü yazar, ve elle konan yön bir sonraki soruda silinir
+Öneri aramasında bir yolun, bir öncekinin bulduğu haftadan başlaması isteniyordu:
+son modelin değerleri her değişkenin deneme yönü (phase) yapıldı. Sonuç daha kötü
+çıktı, en az saat yolu 6 yerine 36 saatte kaldı. Sebep `sat.ts`'in `start()`'ı:
+yeni soruya başlamadan `cancelUntil(0)` ile geri sarıyor, ve geri sarmak izdeki
+her değeri deneme yönü olarak kaydediyor (MiniSat'ın phase saving'i). Elle konan
+yönler, bir önceki yarım kalmış aramanın değerleriyle eziliyordu.
+`phaseFromModel()` artık önce geri sarıyor, sonra yazıyor. İkinci bir yarısı da
+var: yalnız ders değişkenlerine yön vermek yetmiyor, çünkü onların yanındaki
+bayraklar ("öğretmen bu saatte dolu") da karar veriliyor ve varsayılan yönleri
+haftayı bozuyor. Yeni bir formül o yüzden eski haftayı kısa bir bütçeyle varsayım
+olarak da soruyor (`HINT_CONFLICTS`). Ölçüm WORKLOG'da, 2026-09-25.
+
+### 135 · Tek yönlü tanımlanmış bir bedel literali, gerekmeden de doğru olabilir
+Öneri aramasının yardımcı literalleri ("yan yana olmayan açılmış saat", "yeni
+gün", "sorulan öğretmen", sınır adımı) önce yalnız bir yönde yazılmıştı: sebebi
+varken doğru olmaya zorlanıyorlardı, ama sebep yokken de doğru olabiliyorlardı.
+Bedeli en aza indiren arama bunları zamanla sıfırlar, yani sonuç doğru kaldı. Ama
+değişiklik gerektirmeyen bir haftada model birkaçını rastgele doğru bıraktı, ve
+komşuluk süzgeci "bedelin olduğu günü" aradığı için hiçbir gün bulamadı ve her
+komşuluğu eledi. Bedel sıfıra inemedi ve "bundan azı yok" hiç gelmedi. Test
+(`relax.test.ts`, "kurulabilen ama çözücünün dizemediği hafta") kırmızıydı. Üç
+literalin tanımı artık iki yönlü, ve bedelin hiçbir güne bağlanamadığı durumda
+süzgeç kalkıyor. Sınır adımları hâlâ tek yönlü (iki yönü totalizer'ın öbür yönünü
+ister); onlar için yalnız süzgeç düzeltmesi geçerli. Kural: **bir literalin
+sayısı bir karar veriyorsa (durmak, kanıtlamak, süzmek), literal tanımı iki
+yönlü olmalı.**
+
 ## Sürükleme, saf DOM ve React sınırı
 
 **Kural.** Yüksek frekanslı bir etkileşim (sürükleme, imleç haçı, boy tutamağı,
@@ -330,13 +358,30 @@ Yeni bir hücre eklerken ilk soru bu.
 "dışarıda bırakılanlar" olarak tutulur, yoksa sonradan eklenen sınıf sessizce
 basılmaz. Otomatik dizme koşusu da aynı sebeple `App`'te (`useSolver`).
 
-### 19 · Web Worker bu projede çalışmıyor
+### 19 · Ayrı bir parça olarak derlenen Web Worker tek dosyaya girmez
 Vite worker'ı ayrı bir chunk olarak üretir ve `vite-plugin-singlefile` onu
-gömmez. Kalan `blob:` worker'ı `file://`'in opak kökeninden çalışır ve
-Chromium'da güvenilmez, kaynağı da string olacağı için `tsc` onu görmez. Çözücü
-ana iş parçacığında `requestAnimationFrame` ile dilim dilim koşar. `setTimeout(0)`
-değil, çünkü iç içe beş çağrıdan sonra 4 ms'e kelepçelenir ve boyama garantisi
-vermez.
+gömmez. `?worker&inline` onu base64 olarak gömerdi, ama paylaştığı kod ikinci kez
+girer. Çözücü ana iş parçacığında `requestAnimationFrame` ile dilim dilim koşar.
+`setTimeout(0)` değil, çünkü iç içe beş çağrıdan sonra 4 ms'e kelepçelenir ve
+boyama garantisi vermez. 2026-08-25'teki "`blob:` worker `file://`'in opak
+kökeninde Chromium'da güvenilmez" iddiası ölçülmemişti, 2026-09-25'te ölçüldü ve
+tutmadı: bkz. tuzak 136. Öneri araması bugün worker'da koşuyor.
+
+### 136 · Tek dosyanın worker'ı sayfanın kendi betiğidir
+Öneri araması (`relax.ts`) worker'a taşınırken ayrı bir parça gömmek dosyayı
+büyütürdü (tuzak 19). Ölçülen yol: derlenmiş sayfanın tek satır içi betiğinde
+`import` ya da `export` yok, yani aynı metin `blob:` adresinden klasik bir worker
+olarak da koşar. Chromium'da `file://`'dan 5/5 ve Linux exe'sinin WebKitGTK'sında
+(`tauri://localhost`) çalıştı, dört worker gerçekten paralel. Önkoşul: betiğin
+üstündeki hiçbir modül yüklenirken belgeye dokunmamalı. Bu da ölçüldü; paket bir
+worker'da açıldı ve ilk `document is not defined` `main.tsx`'in gövdesindeydi.
+`main.tsx` belge yoksa `serveRelax()`'ı başlatıyor. İki tuzak kalıyor. Bir modülün
+tepesine konan tek bir `document` ya da `window` erişimi worker'ı açılışta
+düşürür; `relaxPool.ts` bunu beş saniyelik "hazırım" beklemesiyle yakalayıp
+ana iş parçacığına döner, yani kusur sessizce yavaşlığa dönüşür. Bunu gerçek exe
+süiti `data-oneri-isci`'yi okuyarak ölçüyor. İkincisi, modül worker'ın hatası
+iletisiz gelir (`message: undefined`); tanı için klasik worker ve bir `error`
+dinleyicisi kullanılır. WebView2'de ölçülmedi.
 
 ### 20 · React reducer geri çağırımını geç çalıştırır
 `change((d) => ...)` içine bir `ref` okuması koyup fonksiyondan sonra `ref`'i
@@ -1125,8 +1170,8 @@ bir algoritma işi gibi kovalanır.
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
-| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123 |
+| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
@@ -1139,5 +1184,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 133, yeni bir tuzak 134'ten devam eder. Test stratejisi
+büyük kullanılan numara 136, yeni bir tuzak 137'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

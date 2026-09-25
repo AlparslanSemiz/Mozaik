@@ -1024,10 +1024,6 @@ const FR: Sozluk = {
     "Replacer l’emploi du temps de zéro",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
     "Aucune voie ne garde les cours placés où ils sont ; ces voies les replacent, et les cours épinglés restent en place.",
-  "Saatleri aç ve programı baştan yerleştir":
-    "Ouvrir les heures et replacer l’emploi du temps",
-  "Değiştir ve programı baştan yerleştir":
-    "Modifier et replacer l’emploi du temps",
   "Nasıl kurulacağı aranıyor… {sure} sn":
     "Recherche de la façon de construire la semaine… {sure} s",
   "Sınıfların saatlerine dokunmadan bir yol bulunamadı.":
@@ -1046,14 +1042,6 @@ const FR: Sozluk = {
     "{ders} : {yeni} au lieu de {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders} : {yeni} heures par semaine au lieu de {eski}",
-  "{n} öğretmen saatini açın":
-    "Ouvrir {n} {n:heure|heures} d’enseignant",
-  "{n} sınırı yükseltin":
-    "Relever {n} {n:limite|limites}",
-  "{n} dersin blok şeklini değiştirin":
-    "Changer la forme de bloc de {n} {n:cours|cours}",
-  "Haftalık saati {n} saat azaltın":
-    "Réduire les heures hebdomadaires de {n}",
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
     "L’emploi du temps a changé entre-temps. Appuyez sur Placer automatiquement pour revoir une suggestion.",
   "Hafta değişiklik gerekmeden kuruluyor":
@@ -1062,16 +1050,76 @@ const FR: Sozluk = {
     "Le placement automatique n’a pas trouvé cette semaine ; la seconde recherche l’a trouvée et vérifiée.",
   "Programı yerleştir":
     "Placer l’emploi du temps",
+  "{ders}: {yeni} versin":
+    "{ders} : enseigné par {yeni}",
+  "{kim} {gun} {saatler}. saate":
+    "{kim} le {gun} à l'heure {saatler}",
+  "{kim} {gun} {saatler}. saatlere":
+    "{kim} le {gun} aux heures {saatler}",
+  "{saatler} de gelebilirse":
+    "{saatler} peut aussi venir",
+  "{ders} aynı gün {yeni} saat olabilirse":
+    "{ders} peut avoir {yeni} heures le même jour",
+  "{kim} {gun} {yeni} saat girebilirse":
+    "{kim} peut enseigner {yeni} heures le {gun}",
+  "{kim} bir günde {yeni} saat girebilirse":
+    "{kim} peut enseigner {yeni} heures dans une journée",
+  "{kim} art arda {yeni} saat girebilirse":
+    "{kim} peut enseigner {yeni} heures d'affilée",
+  "{ders} dersini {yeni} verebilirse":
+    "{yeni} peut enseigner {ders}",
+  "{ders} {yeni} olabilirse":
+    "{ders} peut être {yeni}",
+  "{ders} haftada {yeni} saat olabilirse":
+    "{ders} peut avoir {yeni} heures par semaine",
+  "{kosullar} hafta kuruluyor.":
+    "La semaine peut être construite si {kosullar}.",
+  "{kim} {gun}":
+    "{kim} le {gun}",
+  "{kim}: günlük sınır":
+    "{kim} : limite journalière",
+  "{kim}: art arda sınırı":
+    "{kim} : limite d'heures d'affilée",
+  "{ders}: aynı gün sınırı":
+    "{ders} : limite le même jour",
+  "{ders}: blok şekli":
+    "{ders} : forme des blocs",
+  "{ders}: haftalık saat":
+    "{ders} : heures hebdomadaires",
+  "Öğretmenin zaten geldiği güne saat":
+    "Des heures un jour où l'enseignant vient déjà",
+  "En az saat, yan yana":
+    "Le moins d'heures, côte à côte",
+  "En az öğretmen":
+    "Le moins d'enseignants",
+  "Saat ve sınır birlikte":
+    "Heures et limites ensemble",
+  "Yalnız sınırlar":
+    "Limites seulement",
+  "Dersi başka öğretmene vermek":
+    "Confier le cours à un autre enseignant",
+  "Blok şekli":
+    "Forme des blocs",
+  "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
+    "Choisissez une voie ; chacune suffit seule, et les heures des classes ne sont jamais touchées.",
+  "{yol}: aranıyor…":
+    "{yol} : recherche…",
+  "Uygula":
+    "Appliquer",
+  "Uygula, baştan diz":
+    "Appliquer et replacer",
+  "Bu olmaz: {ne}":
+    "Impossible : {ne}",
+  "Olmaz":
+    "Impossible",
+  "Olmaz dedikleriniz:":
+    "Écarté :",
+  "Geri al: {ne}":
+    "Annuler : {ne}",
+  "(daha iyisi aranıyor)":
+    "(recherche d'une meilleure)",
   "Kurulması için":
     "Pour construire la semaine",
-  "Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.":
-    "Chaque voie suffit à elle seule ; les heures des classes ne sont jamais touchées.",
-  "Başka yollar aranıyor…":
-    "Recherche d’autres voies…",
-  "Saatleri aç ve programı yerleştir":
-    "Ouvrir les heures et placer l’emploi du temps",
-  "Değiştir ve programı yerleştir":
-    "Modifier et placer l’emploi du temps",
   "Ayrıntıyı gizle":
     "Masquer le détail",
   "Ayrıntı":

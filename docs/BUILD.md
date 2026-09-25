@@ -80,7 +80,10 @@ gerekçesi WORKLOG'a yazılır**, çünkü sessizce yükseltilen bir eşik hiç 
 bir eşiktir. İlk eşiklerde ikisinde de on üç kilobayt kadar pay vardı (`8ef234c`).
 Kurulamayan haftaya öneri (TODO B5.9) dosyayı otuz sekiz kilobayt büyüttü ve
 iki eşik yine on üç kilobayt kadar pay bırakacak yere çekildi; gerekçesi
-WORKLOG'un 2026-09-24 girdisinde.
+WORKLOG'un 2026-09-24 girdisinde. Önerinin yolları ve worker'ı (B5.10) ham
+boyu on üç kilobayt daha büyüttü, çoğu dört dile giren otuz beş cümle; ham eşik
+yine on üç kilobayt kadar pay bırakacak yere çekildi, brotli eşiği aşılmadığı
+için yerinde (WORKLOG, 2026-09-25).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

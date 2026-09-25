@@ -26,6 +26,60 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-25 · CP-SAT, babanın dosyası · Roboders'le iki fark daha, ve KY olmadan hafta yok
+Bulgu: Roboders'in haftası bizim ders kimlikleriyle yeniden karşılaştırıldı. Daha önce
+bilinmeyen üç şey çıktı:
+- 415D Geometri'yi Roboders'te YG veriyor, bizde KY.
+- Üç dersin blok şekli farklı: 411A KY ve 412B SD bizde 2, orada 1+1; 412B MÇ bizde 1+1,
+  orada 2.
+- Roboders 210Z için AS'yi Cumartesi 1–2'de derse koyuyor; kapalı hücre 21 değil 23.
+
+Bunlar eklenince Roboders'in tam hâli bizim modelde de kuruluyor (0,73 s). Sekiz farkın 864
+birleşimi tarandı (548 kuruluyor):
+- Yeten en küçük kümeler: KY Cumartesi tek başına; ya da GÇ Cumartesi ile birlikte 415D
+  Geometri'nin YG'de olması ya da Roboders'in blok şekilleri.
+- Hiçbir birleşimde gerekmeyenler: AS Pazar 1–2 ve 413B/414D'de yer değiştirmiş saatler.
+  AS'nin günde 9 saati yalnız 210Z Roboders'teki yerine konunca gerekiyor.
+- KY'ye dokunmadan hafta kurulmuyor (kanıtlı, 0,1 s).
+- KY'nin Cumartesisi olmazsa en az 5 saat gerekiyor, KY Perşembe 10–11 ile.
+- Hiçbir öğretmene Cumartesi açılmazsa hafta kurulmuyor.
+
+En küçük çare 4 saat, iki öğretmenle de oluyor (AV ve KY); eski kayıtlar "üç öğretmen"
+diyordu. Model ve betikler scratchpad'de, depo dışında.
+Tür: veri bulgusu (babaya soru), ürün kusuru değil
+Ne yapıldı: TODO §8b'deki soru bu bulgularla güncellendi.
+Kalıcı kural: yok (tuzak 125'in uygulaması)
+
+### 2026-09-25 · npm run kontrol · Vitest "Timeout calling onTaskUpdate"
+Bulgu: bütün birim testleri geçti (1237/1237), ama zincir bir işlenmemiş hatayla 1 döndü.
+Babanın fikstürü testinde `suggest()` yaklaşık 50 s boyunca olay döngüsüne hiç dönmüyordu;
+Vitest'in işçisi kendi koşucusuna cevap veremedi. Dosya tek başına koşunca geçiyordu.
+Tür: test kusuru
+Ne yapıldı: uzun iki test aramayı 200 ms'lik dilimlerle sürüyor ve aralarda olay döngüsüne
+dönüyor (`stuckAndSuggestSliced`). Tam süit ondan sonra hatasız.
+Kalıcı kural: yok
+
+### 2026-09-25 · vite-node tezgâhı, fikstür · öneri yollarının yörüngesi
+Bulgu: SAT tabanlı öneri araması başlangıç noktasına çok duyarlı.
+- Bir yolun bir önceki yolun haftasından başlaması önce kötüleştirdi (36 saat): deneme
+  yönleri geri sarmada eziliyordu (tuzak 134).
+- Tek yönlü bedel literalleri "değişiklik gerekmeden kuruluyor" haftasının kanıtını
+  engelledi (tuzak 135).
+- Durma sınırı, komşuluk bütçesi ve arama sırası her değiştiğinde en az saat yolu 4 ile 6
+  arasında oynadı. Değerler ölçülerek seçildi.
+Tür: ürün kusuru (ikisi düzeltildi), ayar
+Ne yapıldı: düzeltildi, ayarlar DECISIONS 2026-09-25'te. Sınır yolu 6 yerine 7 sınır
+buluyor (9 saat aynı); bilerek kabul edildi.
+Kalıcı kural: TRAPS.md, tuzak 134 ve 135
+
+### 2026-09-25 · tsc -p tsconfig.tools.json · sözlükte yinelenen anahtar
+Bulgu: dört sözlüğe eklenen "Haftalık saat" zaten vardı; `tsc -p tsconfig.json` yakalamadı,
+araçların `tsc`'si yakaladı. Varlık denetimi tek tırnakla aranmıştı, sözlükler çift tırnak
+kullanıyor.
+Tür: benim hatam, kapı yakaladı
+Ne yapıldı: ikinci kayıt silindi.
+Kalıcı kural: yok
+
 ### 2026-09-24 · gerçek exe turu, babanın dosyası · Otomatik diz yol bulamıyor
 Bulgu: `babamınki.json` exe'de "Tümünü dosyadan aç" ile açıldı (330 saat dizili, 12 blok
 havuzda). `Otomatik diz` 0/12 yerleştirdi, öneri araması 4 saniyede "bir yol bulunamadı"

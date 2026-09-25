@@ -17,7 +17,7 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
 src/platform/      planStore · libraryStore · storageReport · theme · toolState · printOptions
                    programColor · changelog · folder · desktop · update · download
                    drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useStore · usePlans · useSolver · useFolder
+                   useStore · usePlans · useSolver · useFolder · relaxPool · relaxWorker
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -82,7 +82,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/import.ts` | Excel'den yapıştırılan satırların ayrıştırıcısı |
 | `pure/entities.ts` | ekleme, güncelleme, silme, `remapDays` |
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
-| `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, blok şekli ya da haftalık saat değişirse kurulur (`createRelaxer`, `verifySuggestion`) |
+| `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`) |
 | `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
 | `pure/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `pure/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
@@ -127,9 +127,11 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını da aynı yolla |
+| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını başlatır ve "Bu olmaz" ile yeniden başlatır |
+| `platform/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
+| `platform/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
 | `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
-| `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar |
+| `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
 | `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |
 | `ui/App.tsx` | kabuk: sekmeler, üst çubuk, uzun ömürlü durum, klavye kısayolları |
 
@@ -299,8 +301,10 @@ yerine `constraints.ts`'teki `occupy` ve `vacate` kullanılır, `place()` ile
 `buildIndex()` ikilisinin yerinde çalışan hâli. İkisinin sapmadığı
 `constraints.test.ts`'te sabitleniyor.
 
-Çözücü ana iş parçacığında dilim dilim koşar, Web Worker bu projede çalışmıyor
-(tuzak 19).
+Çözücü ana iş parçacığında dilim dilim koşar. Ayrı bir parça (chunk) olarak
+derlenen bir worker tek dosyaya girmiyor (tuzak 19). Öneri araması ise worker'da
+koşuyor, çünkü onun worker'ı ayrı bir parça değil, sayfanın kendi betiği:
+aşağıda.
 
 ### Öneri araması kısıtları ikinci kez yazar, ama son söz yine `blocker()`'da
 
@@ -316,9 +320,20 @@ itiraz ederse öneri atılır. Formül yanlışsa sonuç "öneri yok" olur, yanl
 olmaz. Sınıfın ve dersliğin kapalı saati için bir `Relaxation` türü yok, yani hiçbir
 öneri onları açamaz.
 
-Arama da çözücü gibi dilimlenir ve sayarak durur: aile başına bir çatışma bütçesi
+Arama da çözücü gibi dilimlenir ve sayarak durur: yol başına bir çatışma bütçesi
 (`FAMILY_CONFLICTS`), saat yalnız genel bir tavan. Aynı veri her makinede aynı
-öneriyi verir.
+öneriyi verir. Daha ucuz bir hafta önce en iyi haftanın yakınında aranır: iki,
+üç ya da dört gün ve iki sınıfın bütün haftası serbest, gerisi yerinde. Bir tur
+boyunca hiçbir komşuluk iyileştirmezse bütün hafta sorulur. Bulunan hafta ilk tur
+bitince gösterilir, arama sürerken satır yerinde güncellenir.
+
+Yollar ayrı worker'larda koşar (`relaxPool.ts`). Derlenmiş sayfanın tek satır içi
+betiğinde `import` ya da `export` yok (ölçüldü), yani aynı metin klasik bir
+worker olarak da koşar. `main.tsx` belge yoksa arayüzü değil `serveRelax()`'ı
+başlatır, ve üstündeki modüllerin hiçbiri yüklenirken belgeye dokunmuyor
+(ölçüldü: worker'daki ilk hata `main.tsx`'in gövdesindeydi). Dosyaya bir bayt
+eklenmiyor. Satır içi betik yoksa (geliştirme sunucusu), Worker yoksa, ya da
+worker beş saniyede cevap vermezse arama eskisi gibi ana iş parçacığında koşar.
 
 ### Exe bir adaptör takar
 

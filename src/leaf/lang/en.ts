@@ -1004,10 +1004,6 @@ const EN: Sozluk = {
     "Place the timetable afresh",
   "Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.":
     "There is no way with the placed lessons kept where they are; these ways lay them out again, and pinned ones stay put.",
-  "Saatleri aç ve programı baştan yerleştir":
-    "Open the hours and place the timetable afresh",
-  "Değiştir ve programı baştan yerleştir":
-    "Change and place the timetable afresh",
   "Nasıl kurulacağı aranıyor… {sure} sn":
     "Looking for how the week can be built… {sure} s",
   "Sınıfların saatlerine dokunmadan bir yol bulunamadı.":
@@ -1026,14 +1022,6 @@ const EN: Sozluk = {
     "{ders}: {yeni} instead of {eski}",
   "{ders}: haftada {eski} yerine {yeni} saat":
     "{ders}: {yeni} hours a week instead of {eski}",
-  "{n} öğretmen saatini açın":
-    "Open {n} teacher {n:hour|hours}",
-  "{n} sınırı yükseltin":
-    "Raise {n} {n:limit|limits}",
-  "{n} dersin blok şeklini değiştirin":
-    "Change the block shape of {n} {n:lesson|lessons}",
-  "Haftalık saati {n} saat azaltın":
-    "Cut the weekly hours by {n}",
   "Program o arada değişti. Öneriyi yeniden görmek için Otomatik diz’e basın.":
     "The timetable has changed since. Press Fill automatically to see a suggestion again.",
   "Hafta değişiklik gerekmeden kuruluyor":
@@ -1042,16 +1030,76 @@ const EN: Sozluk = {
     "Filling automatically did not find this week; the second search found it and checked it.",
   "Programı yerleştir":
     "Place the timetable",
+  "{ders}: {yeni} versin":
+    "{ders}: taught by {yeni}",
+  "{kim} {gun} {saatler}. saate":
+    "{kim} on {gun} at period {saatler}",
+  "{kim} {gun} {saatler}. saatlere":
+    "{kim} on {gun} at periods {saatler}",
+  "{saatler} de gelebilirse":
+    "{saatler} can also come",
+  "{ders} aynı gün {yeni} saat olabilirse":
+    "{ders} can have {yeni} hours on one day",
+  "{kim} {gun} {yeni} saat girebilirse":
+    "{kim} can teach {yeni} hours on {gun}",
+  "{kim} bir günde {yeni} saat girebilirse":
+    "{kim} can teach {yeni} hours in a day",
+  "{kim} art arda {yeni} saat girebilirse":
+    "{kim} can teach {yeni} hours in a row",
+  "{ders} dersini {yeni} verebilirse":
+    "{yeni} can teach {ders}",
+  "{ders} {yeni} olabilirse":
+    "{ders} can be {yeni}",
+  "{ders} haftada {yeni} saat olabilirse":
+    "{ders} can be {yeni} hours a week",
+  "{kosullar} hafta kuruluyor.":
+    "The week can be built if {kosullar}.",
+  "{kim} {gun}":
+    "{kim} on {gun}",
+  "{kim}: günlük sınır":
+    "{kim}: daily limit",
+  "{kim}: art arda sınırı":
+    "{kim}: in-a-row limit",
+  "{ders}: aynı gün sınırı":
+    "{ders}: same-day limit",
+  "{ders}: blok şekli":
+    "{ders}: block shape",
+  "{ders}: haftalık saat":
+    "{ders}: weekly hours",
+  "Öğretmenin zaten geldiği güne saat":
+    "Hours on a day the teacher already comes",
+  "En az saat, yan yana":
+    "Fewest hours, side by side",
+  "En az öğretmen":
+    "Fewest teachers",
+  "Saat ve sınır birlikte":
+    "Hours and limits together",
+  "Yalnız sınırlar":
+    "Limits only",
+  "Dersi başka öğretmene vermek":
+    "Giving a lesson to another teacher",
+  "Blok şekli":
+    "Block shape",
+  "Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.":
+    "Pick one way; each is enough on its own, and the classes' hours are never touched.",
+  "{yol}: aranıyor…":
+    "{yol}: looking…",
+  "Uygula":
+    "Apply",
+  "Uygula, baştan diz":
+    "Apply, lay out afresh",
+  "Bu olmaz: {ne}":
+    "Not possible: {ne}",
+  "Olmaz":
+    "Not possible",
+  "Olmaz dedikleriniz:":
+    "Ruled out:",
+  "Geri al: {ne}":
+    "Take back: {ne}",
+  "(daha iyisi aranıyor)":
+    "(looking for a better one)",
   "Kurulması için":
     "To build the week",
-  "Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.":
-    "Each way is enough on its own; the classes' hours are never touched.",
-  "Başka yollar aranıyor…":
-    "Looking for other ways…",
-  "Saatleri aç ve programı yerleştir":
-    "Open the hours and place the timetable",
-  "Değiştir ve programı yerleştir":
-    "Change and place the timetable",
   "Ayrıntıyı gizle":
     "Hide details",
   "Ayrıntı":

@@ -35,6 +35,68 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-25 · Öneri tek bir "en küçük" değil, babanın seçeceği yollar; arama worker'da
+
+**Değişen.** Kurulamayan haftada panel artık aynı değişiklik türünün farklı
+"ucuz" tanımlarını da ayrı yollar olarak gösteriyor (TODO B5.10). Öğretmen
+saatinde üç yol var: zaten geldiği güne saat, en az saat (yan yana), en az
+öğretmen. Bunlara iki yol eklendi: saat ve sınır birlikte, ve dersi aynı
+branştan başka bir öğretmene vermek. Sınır, blok şekli ve haftalık saat eskisi
+gibi duruyor. Her yol babanın cümlesiyle yazılıyor: "KY Cumartesi 3–4. saatlere
+de gelebilirse hafta kuruluyor." Bir değişikliğe `Olmaz` denebiliyor, ve arama o
+değişiklik olmadan yeniden koşuyor. Arama worker'larda, yol başına bir hat.
+
+**Eski hâli.** Aile başına tek bir öneri vardı: en az sayıda değişiklik. Hangi
+4 saatin önerileceği aramanın rastlantısıydı (bu veride 10 ayrı 4 saatlik çare
+görüldü). Arama ana iş parçacığında sırayla koşuyordu, ilk öneri 25–51 s'de
+geliyordu.
+
+**Kullanıcının kararları.**
+- "En mantıklı" tek bir ölçüt olarak seçilmedi: "hepsi olsun, babam seçsin,
+  benim en başta dediklerim en üstte". Panelin sırası kullanıcının listesi.
+- Karışık yol (saat ve sınır) ve ders–öğretmen eşleşmesi ayrı yollar olarak
+  istendi. Eşleşme bu veride bulunamasa da kalıyor, "bulursa gösterir".
+- Worker, ana iş parçacığına dönen bir yedekle.
+- Panel kompakt: satırda cümle, `Uygula` ve `Ayrıntı`; `Olmaz` Ayrıntı'nın içinde.
+
+**Worker kararı geri alındı.** 2026-08-25'te "ayrı parça tek dosyaya girmez,
+`blob:` worker `file://`'da güvenilmez" diye bırakılmıştı (aşağıda). İlk yarısı
+hâlâ doğru. İkinci yarısı ölçülmemişti ve ölçülünce tutmadı: `blob:` worker
+Chromium'da `file://`'dan 5/5, Linux exe'sinde 4 paralel çalıştı. Parça sorunu da
+worker'ı sayfanın kendi betiği yaparak aşıldı (tuzak 136), dosyaya bayt eklenmedi.
+Çözücünün kendisi ana iş parçacığında kalıyor.
+
+**Arama.** Bir yolun bedeli ağırlıklı ve iki aşamalı:
+- zaten geldiği gün: saat + gelinmeyen gün başına 2;
+- en az saat: önce saat, sonra yan yana olmayan saat;
+- en az öğretmen: önce öğretmen, sonra saat.
+
+Daha ucuz hafta önce en iyi haftanın yakınında aranıyor: 2, 3 ya da 4 gün, ya da
+iki sınıfın bütün haftası serbest. Bir tur boş geçince bütün hafta soruluyor.
+Babanın verisinde CP-SAT'ın en iyilerine ulaşılıyor: 4 saat, KY'nin 6 saati,
+bedeli 7 olan "zaten geldiği gün".
+
+**Denendi ve bırakıldı.**
+- **"Azı yok"u LP ya da eşleştirmeyle kanıtlamak.** Aynı modelin LP gevşetmesi
+  babanın verisinde 0,39 veriyor, yani en fazla "en az 1". Kanıt güvercin yuvası
+  türünden. CP-SAT onu 8 iş parçacığı, kesme düzlemleri ve öğrenilmiş cümlelerle
+  5 s'de veriyor.
+- **Durma sınırını 20 000 çatışmaya indirmek.** Süre 78 s'den 25 s'ye indi ama
+  kalite dağıldı: en az saat 6, sınır 26.
+- **Komşuluk başına 300 çatışma.** 85 s'de bitiyor ama en az saat 5'te kalıyor.
+  1 000'de kaldı.
+- **Erken göstermek için aramanın sırasını değiştirmek.** Kalite düştü (en az saat
+  5, en az öğretmen ilk hâlinde 4 öğretmen). Yerine arama hiç değişmeden ilk
+  komşuluk turunun sonunda anlık bir kopya gösteriliyor.
+- **Saf ders–öğretmen eşleşmesi.** Tarayıcıdaki çözücü bu veride 100 000
+  çatışmada hiç hafta bulamadı. CP-SAT'ta en iyi bulunan 8 ders (alt sınır 3),
+  bir el değiştirmeyle 3 saati kanıtlamak 64 s sürdü. Açılan saatlerle
+  ağırlıklandırılmış karma bedel (W = 2, 4) yüzlerce saat açan anlamsız haftalar
+  verdi.
+- **Sınır yolunun sayısı.** Komşuluk araması 9 saatlik aşımı buluyor ama 6 yerine
+  7 sınırla (eski, bütün hafta araması 6 buluyordu). Bu kayıp, önerinin
+  hızlanmasının bedeli olarak kabul edildi.
+
 ### 2026-09-24 · Kurulamayan haftaya öneri, ve onu bir SAT çözücü buluyor
 
 **Değişen.** Otomatik dizme takılınca program kendiliğinden ikinci bir arama

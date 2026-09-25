@@ -200,20 +200,31 @@ sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. B�
 geri al adımı. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
 
 Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
-altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9):
-neyin değişmesi gerektiği. Arama kendiliğinden başlar, sürerken panel "Nasıl
-kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Bulunan her yol
-tek satırdır: numara, ne yapılacağı ("4 öğretmen saatini açın", "6 sınırı
-yükseltin"), onu yapan düğme ve `Ayrıntı`. Ayrıntı açılınca saatler ve sınırlar
-madde madde, ve önerinin denetlendiği ya da bulunan en küçük olduğu cümlesi
-görünür. Yollar aile aile gelir, her biri tek başına yeter, ve sınıfların saati
+altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9,
+B5.10): hafta hangi yollarla kurulur. Arama kendiliğinden başlar, sürerken panel
+"Nasıl kurulacağı aranıyor…" der ve şeritteki `Durdur` onu da durdurur. Bir yol
+seçilmez, hepsi gösterilir ve seçen babadır. Yolların yeri sabittir, sırası
+kullanıcının kendi listesi: öğretmenin zaten geldiği güne saat, en az saat (yan
+yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi başka
+öğretmene vermek, blok şekli, haftalık saat. Aranan yol satırını "…: aranıyor…"
+diye tutar, bulunan onun yerine oturur; bir şey bulamayan yolun satırı kalkar.
+Bulunan her yol tek satırdır: babanın bir öğretmene söyleyeceği cümle ("KY
+Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Uygula` ve `Ayrıntı`.
+Bir yol ilk bulduğunu hemen gösterir ve arama sürerken daha iyisini bulursa satır
+yerinde değişir; o sürece satırın yanında "(daha iyisi aranıyor)" yazar. Aynı
+öğretmenlerden aynı günlerde aynı sayıda saat isteyen iki yol tek satırdır, çünkü
+babanın soracağı soru aynıdır. `Ayrıntı` açılınca yolun adı, değişiklikler madde
+madde ve her birinin yanında `Olmaz` görünür. `Olmaz` o değişikliği ("KY
+Cumartesi", bir öğretmenin saatleri gün gün reddedilir) bütün yollardan çıkarır
+ve aramayı onsuz yeniden başlatır; reddedilenler panelin altında "Olmaz
+dedikleriniz:" satırında durur, her biri tıklanınca geri alınır. Sınıfların saati
 hiçbir yolda yoktur. Hafta aslında kurulabiliyorsa (çözücü bulamadı, ikinci arama
-buldu) panel tek satırla bunu söyler. Bir yolu uygulamak veriyi ve haftayı birlikte
-yerleştirir ve tek geri al adımıdır. Program o arada değiştiyse düğme kapanır.
-Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
+buldu) panel tek satırla bunu söyler. Bir yolu uygulamak veriyi ve haftayı
+birlikte yerleştirir ve tek geri al adımıdır. Program o arada değiştiyse düğme
+kapanır. Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
 `Otomatik diz` dizili dersleri yerinde tutar. Öyle bir yol yoksa arama
 kendiliğinden sabitlenenler dışındaki dersleri de yeniden dizerek sürer. Panel bunu
-bir cümleyle söyler, ve düğme "…programı baştan yerleştir" olur. Babanın dosyası
+bir cümleyle söyler, ve düğme "Uygula, baştan diz" olur. Babanın dosyası
 tam bu durumda: 330 saat dizili, ve boş kalanlar 2 saatlik bloklara uymayacak kadar
 parçalı.
 

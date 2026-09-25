@@ -10,8 +10,10 @@
 // single HTML and brought its own 64 MB memory ceiling; this is the same
 // algorithm family, written against plain arrays.
 //
-// It runs on the main thread in slices like the timetable solver (TRAPS 19):
-// `run(deadline)` returns 'paused' and the next call carries on where it was.
+// It runs in slices like the timetable solver: `run(deadline)` returns 'paused'
+// and the next call carries on where it was. The suggestion search runs it in
+// workers (platform/relaxPool.ts, TRAPS 136), and on the main thread when those
+// cannot start.
 //
 // What it is: MiniSat's shape. Two watched literals, first-UIP learning with
 // local minimisation, VSIDS with phase saving, Luby restarts, learnt clauses
@@ -144,6 +146,18 @@ export class Sat {
   /** Which way the search tries a variable first. */
   setPhase(v: number, value: boolean): void {
     this.phase[v] = value ? 1 : -1;
+  }
+
+  /**
+   * Every variable of the last model found tries its value there first: the
+   * next question starts from that answer, not from wherever the last failed
+   * one left off. Variables made since keep their own phase.
+   */
+  phaseFromModel(): void {
+    // Back to level 0 first: going back saves the trail's values as phases,
+    // and would write over these at the next start().
+    if (this.ok) this.cancelUntil(0);
+    for (let v = 0; v < this.model.length; v++) this.phase[v] = this.model[v] === 1 ? 1 : -1;
   }
 
   /** The value in the last model found. */

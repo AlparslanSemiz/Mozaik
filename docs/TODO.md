@@ -35,7 +35,7 @@ bitince §10'a taşınır.
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9 bitti |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9 ve B5.10 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -741,6 +741,42 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
         artık hiç çıkmıyor.
       - **Açık kalan:** babanın makinesinde süre (bu makinede ilk öneri yaklaşık
         34 saniyede); blok şekli ailesi bu veride bütçesinde cevap veremiyor.
+        Süre ve yollar B5.10'da.
+- [x] **B5.10 Babanın verisi Mozaik'te de otursun: yollar, cümleler, "olmaz" ve
+      hız — YAPILDI (2026-09-25).** B5.9'un dört eksiğinden doğdu (en az yerine en
+      mantıklı, karışık çare, "azı yok" kanıtı, süre).
+      - **Yeniden ölçüm (CP-SAT, depo dışı):**
+        - Roboders'le iki fark daha çıktı: 415D Geometri'yi orada YG veriyor, ve
+          üç dersin blok şekli farklı.
+        - KY'ye dokunmadan hafta kurulmuyor.
+        - En küçük çare iki öğretmenle de 4 saat.
+        - Ayrıntısı TESTFINDINGS'te.
+      - **Kararların:**
+        - tek ölçüt yok, bütün yollar sırayla gösterilir ve seçen baba;
+        - karışık yol ve ders–öğretmen eşleşmesi ayrı yollar;
+        - worker, ana iş parçacığı yedeğiyle;
+        - kompakt panel, `Olmaz` Ayrıntı'da.
+      - **Yapılan:**
+        - Yollar, her biri babanın cümlesiyle ("KY Cumartesi 3–4. saatlere de
+          gelebilirse hafta kuruluyor."): zaten geldiği güne saat, en az saat
+          (yan yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar,
+          dersi başka öğretmene vermek, blok şekli, haftalık saat.
+        - `Olmaz` bir değişikliği bütün yollardan çıkarıp yeniden arıyor, geri
+          alınabiliyor.
+        - Komşulukta arama.
+        - Yollar ayrı worker'larda (sayfanın kendi betiği, tuzak 136).
+      - **Ölçülen, babanın dosyası, Linux exe:**
+        - ilk öneri 5,6 s'de (önceki turda 25 s), arama 33 s'de bitiyor;
+        - en az saat 4, en az öğretmen 6 (KY), zaten geldiği gün bedel 7; üçü
+          de CP-SAT'ın en iyisi;
+        - uygulayınca 211/211 ve "Sorun yok", Ctrl+Z geri alıyor.
+      - **Açık kalan:**
+        - Babanın Windows makinesinde (WebView2) worker ve süre ölçülmedi.
+        - Ders–öğretmen eşleşmesi bu veride bulunamıyor.
+        - Sınır yolu 6 yerine 7 sınır buluyor.
+        - "Azı yok" kanıtı hâlâ yok (LP 0,39 veriyor).
+        - `Olmaz` sonrası kalite düşüyor (KY'nin Cumartesisi olmadan 8 saat,
+          CP-SAT 5).
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)
@@ -984,6 +1020,14 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kuruluyor, başka hiçbir gün tek başına yetmiyor.
       Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te düzeltilince program
       yaklaşık bir saniyede çıkıyor.
+      **2026-09-25'te ölçülen, soruyu daraltan:**
+      - Asıl soru KY: KY'ye dokunmadan hafta hiç kurulmuyor. KY Cumartesi gelebiliyorsa
+        tek başına yetiyor. Gelemiyorsa en az 5 saat gerekiyor, KY Perşembe 10–11 ile.
+      - İkinci yol GÇ: GÇ Cumartesi gelebiliyorsa, 415D Geometri'yi YG verirse (Roboders'te
+        öyle) ya da üç dersin blok şekli Roboders'teki gibiyse de kuruluyor.
+      - AS'nin Pazar sabahı hiçbir durumda gerekmiyor.
+      - Programın paneli bu yolların hepsini babanın cümlesiyle gösteriyor; hangisinin
+        doğru olduğunu yine baba söyleyecek.
 
 ### 8c · Babanın gerçek verisi — **v0'ın çıkma şartı**
 

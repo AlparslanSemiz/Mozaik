@@ -168,13 +168,12 @@ test.describe('22. Otomatik dizme', () => {
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
   });
 
-  // TODO B5.9, on the father's week (anonymised): it cannot be built as it
-  // stands, and the program says what would have to change, with the week it
-  // found, and puts it in with one click that one Ctrl+Z takes back.
-  test('kurulamayan haftada neyin değişmesi gerektiğini söylüyor ve uyguluyor', async ({
-    page,
-  }) => {
-    test.setTimeout(240_000);
+  // TODO B5.9 and B5.10, on the father's week (anonymised): it cannot be built
+  // as it stands, and the program offers the ways it can be, each a sentence
+  // the father could say to a teacher; "Olmaz" on a change looks again without
+  // it; one of them goes in with one click that one Ctrl+Z takes back.
+  test('kurulamayan haftada yolları söylüyor, "olmaz"ı dinliyor ve uyguluyor', async ({ page }) => {
+    test.setTimeout(420_000);
     const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
     await loadWorld(page, kurs);
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
@@ -185,33 +184,47 @@ test.describe('22. Otomatik dizme', () => {
     await expect(bar).not.toContainText('sınıfı Salı 1 saatinde kapalı');
     const panel = page.locator('.panel.suggestions');
     await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
-    await expect(panel).toContainText('4 öğretmen saatini açın', { timeout: 150_000 });
-    await expect(panel).toContainText('6 sınırı yükseltin', { timeout: 150_000 });
-    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 150_000 });
+    const fewest = panel.locator('li[data-family="teacherHours"]');
+    await expect(fewest).toContainText('de gelebilirse hafta kuruluyor', { timeout: 150_000 });
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
+    // The rules way is there too, in its own words.
+    await expect(panel.locator('li[data-family="rules"]')).toContainText('olabilirse');
 
-    const details = panel.getByRole('button', { name: 'Ayrıntı', exact: true }).first();
-    await details.click();
-    await expect(panel.getByRole('button', { name: 'Ayrıntıyı gizle' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
+    // "Olmaz" on the first teacher-day of the fewest-hours way: the search runs
+    // again, the refusal is listed, and no way comes back with that day.
+    await fewest.getByRole('button', { name: 'Ayrıntı', exact: true }).click();
+    const refused = (await fewest.locator('.suggestion-part span').first().innerText()).replace(
+      / \d.*$/,
+      '',
     );
-    await expect(panel).toContainText('Cumartesi');
+    await fewest
+      .getByRole('button', { name: /^Bu olmaz:/ })
+      .first()
+      .click();
+    await expect(panel).toContainText('Olmaz dedikleriniz:');
+    await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
+    for (const row of await panel.locator('li[data-family] .suggestion-title').allInnerTexts()) {
+      expect(row).not.toContain(`${refused} `);
+    }
 
+    const way = panel.locator('li[data-family="teacherHours"]');
+    await expect(way).toContainText('de gelebilirse');
     const before = await settledText(page);
     const was = JSON.parse(before) as State;
-    await panel.getByRole('button', { name: 'Saatleri aç ve programı yerleştir' }).click();
+    await way.getByRole('button', { name: /^Uygula/ }).click();
     await expect(page.locator('.reason-bar.ok')).toContainText('Öneri uygulandı');
     await expect(page.locator('.pool-card')).toHaveCount(0);
 
     const after = await savedState(page, before);
     const opened = Object.keys(was.unavailable).filter((k) => after.unavailable[k] === undefined);
-    expect(opened).toHaveLength(4);
+    expect(opened.length).toBeGreaterThanOrEqual(4);
     const teachers = new Set(was.teachers.map((x) => x.id));
     for (const key of opened) expect(teachers.has(key.split('|')[0]!)).toBe(true);
     const hours = was.lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
     expect(await placedHours(page)).toBe(hours);
 
-    // One step back: the four hours closed again and the stuck week on the grid.
+    // One step back: the hours closed again and the stuck week on the grid.
     const applied = await settledText(page);
     await page.keyboard.press('Control+z');
     const undone = await savedState(page, applied);

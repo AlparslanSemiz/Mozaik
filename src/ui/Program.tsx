@@ -948,6 +948,8 @@ function Program({
           advice={solver.advice}
           state={state}
           onApply={solver.apply}
+          onRefuse={solver.refuse}
+          onUnrefuse={solver.unrefuse}
           onClose={solver.clear}
         />
       )}

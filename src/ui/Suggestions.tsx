@@ -1,30 +1,49 @@
 // The panel under the reason bar when a week cannot be built as it stands
-// (TODO B5.9): what to change so it can, one numbered way per family, each with
-// the week it was found with. LAYOUT.md "Otomatik dizme".
+// (TODO B5.9, B5.10): the ways it can be, the father's to choose from, each one
+// a sentence he could say to his teachers and the week it was found with.
+// LAYOUT.md "Otomatik dizme".
 //
 // It sits between the bar and the grid rather than in a dialog: the father
 // reads the suggestion with the timetable still in view, and it stays open while
-// the search goes on to the next family.
+// the search goes on to the next way.
+//
+// The ways keep their places (FAMILY_ORDER, the user's own list first): one
+// still being looked for holds its row with "aranıyor…", so a way found later
+// fills its row instead of pushing the others down.
 
 import { useEffect, useRef, useState } from 'react';
 import type { Advice } from '../platform/useSolver';
-import { suggestionLines } from '../pure/relax';
-import type { Suggestion } from '../pure/relax';
+import {
+  FAMILY_ORDER,
+  refusalText,
+  sameChanges,
+  suggestionParts,
+  suggestionSentence,
+} from '../pure/relax';
+import type { Refusal, RelaxFamily, Suggestion } from '../pure/relax';
 import type { State } from '../leaf/types';
 import { useT } from './T';
 import type { Translate } from './T';
 
-function title(t: Translate, s: Suggestion): string {
-  const n = s.changes.length;
-  switch (s.family) {
+/** What each way asks for, in a few words: the row's name while it is looked for. */
+function wayName(t: Translate, family: RelaxFamily): string {
+  switch (family) {
+    case 'teacherDays':
+      return t('Öğretmenin zaten geldiği güne saat');
     case 'teacherHours':
-      return t('{n} öğretmen saatini açın', { n });
+      return t('En az saat, yan yana');
+    case 'fewTeachers':
+      return t('En az öğretmen');
+    case 'mixed':
+      return t('Saat ve sınır birlikte');
     case 'rules':
-      return t('{n} sınırı yükseltin', { n });
+      return t('Yalnız sınırlar');
+    case 'reassign':
+      return t('Dersi başka öğretmene vermek');
     case 'blockShape':
-      return t('{n} dersin blok şeklini değiştirin', { n });
+      return t('Blok şekli');
     case 'weeklyHours':
-      return t('Haftalık saati {n} saat azaltın', { n: s.size });
+      return t('Haftalık saat');
   }
 }
 
@@ -32,17 +51,21 @@ export default function Suggestions({
   advice,
   state,
   onApply,
+  onRefuse,
+  onUnrefuse,
   onClose,
 }: {
   advice: Advice;
   state: State;
   onApply: (s: Suggestion) => void;
+  onRefuse: (r: Refusal) => void;
+  onUnrefuse: (r: Refusal) => void;
   onClose: () => void;
 }) {
   const t = useT();
   const first = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
-  const { suggestions, searching } = advice;
+  const [open, setOpen] = useState<ReadonlySet<RelaxFamily>>(new Set());
+  const { suggestions, searching, progress, refused } = advice;
   // A suggestion is for the timetable it was made from. Once that has changed
   // (an undo, a drop) it would paste an old week over the new one.
   const stale = state !== advice.forState;
@@ -54,29 +77,6 @@ export default function Suggestions({
   useEffect(() => {
     if (settled) first.current?.focus();
   }, [settled]);
-
-  // The bar keeps saying what happened (which lesson, and why); this panel is
-  // what to do about it, so while nothing is found yet it says it is looking,
-  // and when nothing was found it says that too rather than vanishing.
-  if (suggestions.length === 0) {
-    return (
-      <section className="panel suggestions" aria-labelledby="suggestions-title">
-        <div className="suggestion-row">
-          <h2 id="suggestions-title">{t('Kurulması için')}</h2>
-          <span className="hint inline">
-            {searching
-              ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
-                  sure: Math.round((advice.progress?.elapsedMs ?? 0) / 1000),
-                })
-              : t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')}
-          </span>
-          <button className="btn suggestion-close" onClick={onClose}>
-            {t('Kapat')}
-          </button>
-        </div>
-      </section>
-    );
-  }
 
   const staleNote = stale && (
     <p className="hint">
@@ -108,15 +108,33 @@ export default function Suggestions({
     );
   }
 
-  // One line per way: what to do, the button that does it, and the details
-  // folded away. The grid below is what the reader is looking at; the lines of
-  // hours and limits are one click further for whoever wants them.
+  // One row per way, in the fixed order; two ways that ask for the same thing
+  // are one row, in the first one's place.
+  const rows: Array<{ family: RelaxFamily; found: Suggestion | null }> = [];
+  const finished = new Set(progress?.finished ?? []);
+  for (const family of FAMILY_ORDER) {
+    const found = suggestions.find((s) => s.family === family) ?? null;
+    if (found !== null) {
+      if (rows.some((r) => r.found !== null && sameChanges(r.found, found))) continue;
+      rows.push({ family, found });
+    } else if (searching && !finished.has(family)) {
+      rows.push({ family, found: null });
+    }
+  }
+  const firstFound = rows.find((r) => r.found !== null)?.family;
+
   return (
     <section className="panel suggestions" aria-labelledby="suggestions-title">
       <div className="suggestion-row">
         <h2 id="suggestions-title">{t('Kurulması için')}</h2>
         <span className="hint inline">
-          {t('Her yol tek başına yetiyor; sınıfların saatlerine dokunulmaz.')}
+          {searching && suggestions.length === 0
+            ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
+                sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
+              })
+            : rows.length === 0
+              ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
+              : t('Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.')}
         </span>
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">
@@ -125,70 +143,107 @@ export default function Suggestions({
             )}
           </span>
         )}
-        {searching && <span className="hint inline">{t('Başka yollar aranıyor…')}</span>}
         <button className="btn suggestion-close" onClick={onClose}>
           {t('Kapat')}
         </button>
       </div>
-      <ol className="suggestion-list">
-        {suggestions.map((s, i) => {
-          const shown = open.has(s.family);
-          const detailId = `suggestion-${s.family}`;
-          return (
-            <li key={s.family}>
-              <div className="suggestion-row">
-                <span className="suggestion-title">{title(t, s)}</span>
-                <button
-                  ref={i === 0 ? first : undefined}
-                  className="btn primary"
-                  disabled={stale}
-                  onClick={() => onApply(s)}
-                >
-                  {s.family === 'teacherHours'
-                    ? s.relaid
-                      ? t('Saatleri aç ve programı baştan yerleştir')
-                      : t('Saatleri aç ve programı yerleştir')
-                    : s.relaid
-                      ? t('Değiştir ve programı baştan yerleştir')
-                      : t('Değiştir ve programı yerleştir')}
-                </button>
-                <button
-                  className="btn"
-                  aria-expanded={shown}
-                  aria-controls={detailId}
-                  onClick={() =>
-                    setOpen((prev) => {
-                      const next = new Set(prev);
-                      if (shown) next.delete(s.family);
-                      else next.add(s.family);
-                      return next;
-                    })
-                  }
-                >
-                  {shown ? t('Ayrıntıyı gizle') : t('Ayrıntı')}
-                </button>
-              </div>
-              {shown && (
-                <div id={detailId} className="suggestion-detail">
-                  <ul>
-                    {suggestionLines(state, s).map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                  <p className="hint">
-                    {t(
-                      'Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.',
-                    )}{' '}
-                    {s.proven
-                      ? t('Bundan küçük bir değişiklik yetmiyor.')
-                      : t('Bulduğumuz en küçük değişiklik bu.')}
-                  </p>
+      {rows.length > 0 && (
+        <ol className="suggestion-list">
+          {rows.map(({ family, found }) => {
+            if (found === null) {
+              return (
+                <li key={family} className="suggestion-pending" data-family={family}>
+                  <span className="hint inline">
+                    {t('{yol}: aranıyor…', { yol: wayName(t, family) })}
+                  </span>
+                </li>
+              );
+            }
+            const shown = open.has(family);
+            const detailId = `suggestion-${family}`;
+            return (
+              <li key={family} data-family={family}>
+                <div className="suggestion-row">
+                  <span className="suggestion-title">
+                    {suggestionSentence(state, found)}
+                    {searching && !finished.has(family) && (
+                      <span className="hint inline"> {t('(daha iyisi aranıyor)')}</span>
+                    )}
+                  </span>
+                  <button
+                    ref={family === firstFound ? first : undefined}
+                    className="btn primary"
+                    disabled={stale}
+                    onClick={() => onApply(found)}
+                  >
+                    {found.relaid ? t('Uygula, baştan diz') : t('Uygula')}
+                  </button>
+                  <button
+                    className="btn"
+                    aria-expanded={shown}
+                    aria-controls={detailId}
+                    onClick={() =>
+                      setOpen((prev) => {
+                        const next = new Set(prev);
+                        if (shown) next.delete(family);
+                        else next.add(family);
+                        return next;
+                      })
+                    }
+                  >
+                    {shown ? t('Ayrıntıyı gizle') : t('Ayrıntı')}
+                  </button>
                 </div>
-              )}
-            </li>
-          );
-        })}
-      </ol>
+                {shown && (
+                  <div id={detailId} className="suggestion-detail">
+                    <p className="hint">{wayName(t, family)}</p>
+                    <ul>
+                      {suggestionParts(state, found).map((part) => (
+                        <li key={part.text} className="suggestion-part">
+                          <span>{part.text}</span>
+                          <button
+                            className="btn"
+                            aria-label={t('Bu olmaz: {ne}', { ne: part.text })}
+                            onClick={() => onRefuse(part.refusal)}
+                          >
+                            {t('Olmaz')}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="hint">
+                      {t(
+                        'Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.',
+                      )}{' '}
+                      {found.proven
+                        ? t('Bundan küçük bir değişiklik yetmiyor.')
+                        : t('Bulduğumuz en küçük değişiklik bu.')}
+                    </p>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+      {refused.length > 0 && (
+        <p className="suggestion-refused">
+          <span className="hint inline">{t('Olmaz dedikleriniz:')}</span>
+          {refused.map((r) => {
+            const text = refusalText(state, r);
+            return (
+              <button
+                key={JSON.stringify(r)}
+                className="chip"
+                aria-label={t('Geri al: {ne}', { ne: text })}
+                onClick={() => onUnrefuse(r)}
+              >
+                {text} ×
+              </button>
+            );
+          })}
+        </p>
+      )}
       {staleNote}
     </section>
   );
