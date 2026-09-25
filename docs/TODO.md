@@ -1158,8 +1158,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **PRINCIPLES.md'deki önerilen gerekçeler onaylansın mı?** "Şu an yapılmıyor" listesinde
       yedi satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli.
       Onaylanınca işaretler kalkar.
-- [ ] **`.github/surum-notu.md` eski site adresini gösteriyor.** `…github.io/ders-programi/`
-      404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`). Tuzak 106.
+- [x] **`.github/surum-notu.md` eski site adresini gösteriyor — DÜZELTİLDİ (2026-09-25).**
+      `…github.io/ders-programi/` 404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`).
+      Tuzak 106. `surum.test.ts`'e dosyadaki ve `yayinla.mjs`'teki her site adresini
+      `SITE_ADRESI`'ne karşı okuyan bir kapı girdi, düzeltmeden önce kırmızıydı.
 - [ ] **`src/platform/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
       ve Hakkında noktası yazılmamış, `CHANGELOG.md`'de var.
 - [x] **Boş ekranlar dersler için Okul'u gösteriyor — DÜZELTİLDİ (2026-09-25).** Program,

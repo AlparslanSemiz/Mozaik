@@ -24,6 +24,9 @@ import cargoToml from '../src-tauri/Cargo.toml?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import surumYml from '../.github/workflows/surum.yml?raw';
 import changelogMd from '../CHANGELOG.md?raw';
+import surumNotu from '../.github/surum-notu.md?raw';
+import yayinlaMjs from '../scripts/yayinla.mjs?raw';
+import { SITE_ADRESI } from './platform/update';
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 
@@ -184,5 +187,22 @@ describe('güncelleme adresi — manifest ile exe aynı şeyi tanıyor', () => {
     expect(m?.[1]).toBe(
       'https://github.com/AlparslanSemiz/ders-programi/releases/latest/download/Mozaik.exe',
     );
+  });
+});
+
+describe('site adresi — dışarıda yazılı her kopya SITE_ADRESI', () => {
+  // Pages publishes a repository by its NAME, so the address after the rename
+  // to Mozaik is a different page, and the old one is a plain 404 (pitfall
+  // 106). The Release page's body kept the old one for a month because no
+  // test read the file it comes from.
+  const SAYFA = /https:\/\/alparslansemiz\.github\.io\/[^\s>)'"]*/g;
+
+  it.each([
+    ['.github/surum-notu.md', surumNotu],
+    ['scripts/yayinla.mjs', yayinlaMjs],
+  ])('%s yalnız bugünkü adresi gösteriyor', (ad, metin) => {
+    const adresler = metin.match(SAYFA) ?? [];
+    expect(adresler.length, `${ad} site adresini hiç yazmıyor`).toBeGreaterThan(0);
+    for (const adres of adresler) expect(adres, ad).toBe(SITE_ADRESI);
   });
 });

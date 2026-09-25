@@ -314,7 +314,8 @@ bayrağı değil, dört teslim yoluna basılan aynı damga.
 aynı numarayı söylediğini, `tauri.conf.json`'ın yol gösterdiğini, `identifier`'ın
 değişmediğini (tuzak 95), exe penceresinin ayarlarını, `surum.yml`'in manifeste
 yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (tuzak 106),
-ve `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu.
+`CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu, ve
+`.github/surum-notu.md` ile `yayinla.mjs`'teki site adresinin `SITE_ADRESI` olduğunu.
 
 `npm run yayinla -- X.Y.Z` bir sürümü tek komutta çıkarır. Önce kapılar: çalışma
 ağacı temiz, dal `main`, etiket daha önce atılmamış, `src/platform/changelog.ts`'in en

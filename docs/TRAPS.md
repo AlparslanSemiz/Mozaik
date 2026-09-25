@@ -187,7 +187,10 @@ buluşmayan iki dosyadaydı: bir iş akışındaki kabuk satırı ve bir Rust sa
 Karşı önlem: kabul edilen önekler bir liste (`RELEASE_KOKLERI`, yalnız uzar),
 manifest eski adresi yazar (GitHub 301'liyor), `src/surum.test.ts` iki dosyayı
 birbirine karşı okur. Pages'in yönlendirmesi yok, aynı yeniden adlandırma
-`SITE_ADRESI`'ni 404 yaptı ve adres `…github.io/Mozaik/` oldu. Bir riski doğru
+`SITE_ADRESI`'ni 404 yaptı ve adres `…github.io/Mozaik/` oldu. Release sayfasının
+gövdesi (`.github/surum-notu.md`) eski adresi bir ay daha gösterdi, çünkü o dosyayı
+hiçbir test okumuyordu. 2026-09-25'ten beri `surum.test.ts` dosyadaki ve
+`yayinla.mjs`'teki her site adresini `SITE_ADRESI`'ne karşı okuyor. Bir riski doğru
 adlandıran bir belge cümlesi teste dönüşene kadar yalnız riskin tarihini yazar.
 
 ### 126 · Bir biçim denetimi platform denetimi değildir
