@@ -230,5 +230,6 @@ export function sampleState(): State {
     unavailable,
     programs: [blankProgram()],
     activeProgramId: DEFAULT_PROGRAM_ID,
+    answers: { accepted: [], refused: [] },
   };
 }

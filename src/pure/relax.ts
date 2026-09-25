@@ -29,7 +29,7 @@
 
 import { blocker, buildIndex, liftBlock, pendingBlocks, placedBlocks } from './constraints';
 import type { Index } from './constraints';
-import { setAvailability, setTeacherLimit, updateLesson } from './entities';
+import { forbids, setAvailability, setTeacherLimit, updateLesson } from './entities';
 import { lessonName } from './feasibility';
 import { activePinned, activePlacements, replaceActiveGrid } from './programs';
 import { lessonExcluded } from './programMask';
@@ -52,7 +52,7 @@ import { t } from '../leaf/i18n';
 import { closedKey, parseKey, placementKey } from '../leaf/keys';
 import { dayLabel } from '../leaf/names';
 import { lessonSubject, subjectKey, teacherSubjects } from '../leaf/subjects';
-import type { Id, Lesson, State } from '../leaf/types';
+import type { Answers, Id, Lesson, Refusal, Relaxation, State } from '../leaf/types';
 
 /**
  * One way of changing the data, and what it calls cheap. The first three open
@@ -70,6 +70,8 @@ export type RelaxFamily =
   | 'mixed'
   | 'rules'
   | 'reassign'
+  | 'handFew'
+  | 'handHours'
   | 'blockShape'
   | 'weeklyHours';
 
@@ -81,36 +83,28 @@ export const FAMILY_ORDER: readonly RelaxFamily[] = [
   'mixed',
   'rules',
   'reassign',
+  'handFew',
+  'handHours',
   'blockShape',
   'weeklyHours',
 ];
 
-/** One change to the data. There is no class or room variant, on purpose. */
-export type Relaxation =
-  | { kind: 'teacherHour'; teacherId: Id; day: number; hour: number }
-  /** `days`: where the week goes over the old limit, for the sentence. */
-  | { kind: 'lessonDayLimit'; lessonId: Id; limit: number; days?: number[] }
-  | { kind: 'teacherDayLimit'; teacherId: Id; limit: number; days?: number[] }
-  | { kind: 'teacherConsecutive'; teacherId: Id; limit: number; days?: number[] }
-  | { kind: 'lessonTeacher'; lessonId: Id; teacherId: Id }
-  | { kind: 'blockShape'; lessonId: Id; blocks: number[] }
-  /** The hours dropped, and the named blocks what is left keeps. */
-  | { kind: 'weeklyHours'; lessonId: Id; hours: number; blocks: number[] };
-
 /**
- * "Bu olmaz": a change the reader has ruled out, and the search keeps clear of
- * in every way it tries next. A teacher's hours are ruled out a DAY at a time —
- * "KY cannot come on Saturday" — because that is how a teacher answers, and
- * ruling out only the hours named would bring back the hour next to them.
+ * The hand-over ways ("karma", 2026-09-25): a lesson given to another teacher
+ * of its subject is a smaller thing to ask than a teacher's closed hour, the
+ * user said, so two ways trade the one for the other and the father sees both:
+ *   - handFew: as few lessons handed over as can be (at least one), then as
+ *     few hours as that leaves;
+ *   - handHours: as few hours as can be with at most HAND_CAP lessons handed
+ *     over, then as few of those.
+ * CP-SAT on the father's data (WORKLOG 2026-09-25): one lesson and 3 hours,
+ * three lessons and 2 hours, against 4 hours with none.
  */
-export type Refusal =
-  | { kind: 'teacherDay'; teacherId: Id; day: number }
-  | { kind: 'lessonDayLimit'; lessonId: Id }
-  | { kind: 'teacherDayLimit'; teacherId: Id }
-  | { kind: 'teacherConsecutive'; teacherId: Id }
-  | { kind: 'lessonTeacher'; lessonId: Id; teacherId: Id }
-  | { kind: 'blockShape'; lessonId: Id }
-  | { kind: 'weeklyHours'; lessonId: Id };
+const HAND_CAP = 3;
+
+// The changes and the refusals are the plan's data too (State.answers, schema
+// v15), so their types live in leaf/types.ts; they are named here as before.
+export type { Refusal, Relaxation } from '../leaf/types';
 
 export interface Suggestion {
   family: RelaxFamily;
@@ -130,6 +124,12 @@ export interface Suggestion {
    * lays the unpinned lessons out again: applying it replaces them.
    */
   relaid: boolean;
+  /**
+   * What the reader already said yes to ("Olur"): made before `changes`, at no
+   * cost to the search, and applied with them. `changes` is what is still to
+   * ask; empty means the answers so far are enough.
+   */
+  accepted: Relaxation[];
 }
 
 export interface RelaxOptions {
@@ -156,6 +156,8 @@ export interface RelaxOptions {
    * CP-SAT's best. Either alone stayed at 6.
    */
   previous: Suggestion[];
+  /** The changes the reader said yes to: the search runs on the data with them made. */
+  accepted: Relaxation[];
   /**
    * Skip the pass that keeps the laid-out lessons where they are and go
    * straight to laying them out again: the search before this one found no way
@@ -172,6 +174,9 @@ export interface RelaxOptions {
 const SEARCH_ORDER: RelaxFamily[] = [
   'fewTeachers',
   'teacherHours',
+  // Straight after the fewest-hours way, whose week they start from (relaxPool.ts).
+  'handFew',
+  'handHours',
   'teacherDays',
   'mixed',
   'rules',
@@ -188,6 +193,7 @@ const DEFAULTS: RelaxOptions = {
   refused: [],
   previous: [],
   startRelaid: false,
+  accepted: [],
 };
 
 /**
@@ -209,6 +215,12 @@ const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
   mixed: 150_000,
   rules: 150_000,
   reassign: 100_000,
+  // Less than the teacher-hour ways: they come after the fewest-hours way on
+  // its line and made it the slowest one (63 s against 45). MEASURED on the
+  // father's file (2026-09-25): the same sizes at 60 000 as at 150 000, 8 to
+  // 10 s sooner.
+  handFew: 60_000,
+  handHours: 60_000,
   blockShape: 30_000,
   weeklyHours: 30_000,
 };
@@ -324,7 +336,9 @@ export function applyRelaxations(d: State, changes: readonly Relaxation[]): Stat
  * placements when its block shape changes, so the grid has to go in last.
  */
 export function applySuggestion(d: State, s: Suggestion): State {
-  return replaceActiveGrid(applyRelaxations(d, s.changes), { placements: { ...s.placements } });
+  return replaceActiveGrid(applyRelaxations(d, [...s.accepted, ...s.changes]), {
+    placements: { ...s.placements },
+  });
 }
 
 /** The three limit rules a drop can break; the gap rules and "en az" never block one. */
@@ -344,10 +358,9 @@ export function verifySuggestion(
   const applied = applySuggestion(base, s);
 
   // 1. No class or room hour was opened, and nothing but a named teacher hour.
+  const all = [...s.accepted, ...s.changes];
   const named = new Set(
-    s.changes.flatMap((c) =>
-      c.kind === 'teacherHour' ? [closedKey(c.teacherId, c.day, c.hour)] : [],
-    ),
+    all.flatMap((c) => (c.kind === 'teacherHour' ? [closedKey(c.teacherId, c.day, c.hour)] : [])),
   );
   const teachers = new Set(base.teachers.map((x) => x.id));
   for (const key of Object.keys(base.unavailable)) {
@@ -363,7 +376,7 @@ export function verifySuggestion(
 
   // 1b. A lesson changed hands only where a change says so, and only within its subject.
   const handed = new Map(
-    s.changes.flatMap((c) => (c.kind === 'lessonTeacher' ? [[c.lessonId, c.teacherId]] : [])),
+    all.flatMap((c) => (c.kind === 'lessonTeacher' ? [[c.lessonId, c.teacherId]] : [])),
   );
   for (const lesson of applied.lessons) {
     const before = base.lessons.find((x) => x.id === lesson.id);
@@ -576,6 +589,28 @@ export function sameChanges(a: Suggestion, b: Suggestion): boolean {
   return ask(a) === ask(b);
 }
 
+/**
+ * A hand-over way no better than another on both counts, lessons handed over
+ * and hours opened: its row says nothing the other does not (the search of
+ * each is local, and "fewest lessons" can come back with more hours than
+ * "fewest hours" found with as few lessons).
+ */
+export function outdone(a: Suggestion, b: Suggestion): boolean {
+  const hand = (s: Suggestion) => s.family === 'handFew' || s.family === 'handHours';
+  if (!hand(a) || !hand(b)) return false;
+  const count = (s: Suggestion, kind: Relaxation['kind']) =>
+    s.changes.filter((c) => c.kind === kind).length;
+  const [ah, ao] = [count(a, 'lessonTeacher'), count(a, 'teacherHour')];
+  const [bh, bo] = [count(b, 'lessonTeacher'), count(b, 'teacherHour')];
+  return (
+    a.changes.length === ah + ao &&
+    b.changes.length === bh + bo &&
+    bh <= ah &&
+    bo <= ao &&
+    (bh < ah || bo < ao)
+  );
+}
+
 // ---------------------------------------------------------------- the model
 //
 // One SAT formula per kind of change. A variable per (block, start cell) the
@@ -585,7 +620,7 @@ export function sameChanges(a: Suggestion, b: Suggestion): boolean {
 // uses is a literal the costs count.
 
 /** Which formula a family asks: the three teacher-hour ways share one. */
-type ModelKind = 'teacher' | 'mixed' | 'rules' | 'reassign' | 'blockShape' | 'weeklyHours';
+type ModelKind = 'teacher' | 'mixed' | 'rules' | 'reassign' | 'hand' | 'blockShape' | 'weeklyHours';
 
 function kindOf(which: RelaxFamily): ModelKind {
   switch (which) {
@@ -593,6 +628,9 @@ function kindOf(which: RelaxFamily): ModelKind {
     case 'teacherHours':
     case 'fewTeachers':
       return 'teacher';
+    case 'handFew':
+    case 'handHours':
+      return 'hand';
     default:
       return which;
   }
@@ -633,6 +671,15 @@ interface Model {
   dropOf: Map<Lit, Slot>;
   /** The starts the hint week takes, to be asked for outright at first. */
   hinted: Lit[];
+  /**
+   * The hand-over ways: "at least one lesson handed over", as an assumption
+   * rather than a clause, so the hint week (none handed) can still be found
+   * first and the search moves from it. As a clause, the hint was refused
+   * outright and the first week opened 312 hours (MEASURED 2026-09-25).
+   */
+  needHand: Lit | null;
+  /** handHours: "at most HAND_CAP lessons handed over", an assumption for the same reason. */
+  handCap: Lit | null;
 }
 
 /** The cells no run may move, the lessons to place, and the data they sit in. */
@@ -670,7 +717,8 @@ function buildModel(
   // reassign opens teacher hours too, as a way in: its search starts from a
   // week with hours opened and trades them for lessons handed over, and only a
   // week with none left is offered (see costsOf).
-  const openTeacher = kind === 'teacher' || kind === 'mixed' || kind === 'reassign';
+  const hands = kind === 'reassign' || kind === 'hand';
+  const openTeacher = kind === 'teacher' || kind === 'mixed' || hands;
   const relaxRules = kind === 'rules' || kind === 'mixed';
   const model: Model = {
     sat,
@@ -686,23 +734,60 @@ function buildModel(
     drop: [],
     dropOf: new Map(),
     hinted: [],
+    needHand: null,
+    handCap: null,
   };
 
   // What the reader ruled out.
   const refusedDays = new Set<string>();
+  const refusedHours = new Set<string>();
+  const refusedTeachers = new Set<Id>();
+  const caps = new Map<string, number>();
   const refusedLimits = new Set<string>();
   const refusedHands = new Set<string>();
   const refusedLessons = new Set<string>();
   for (const r of opts.refused) {
-    if (r.kind === 'teacherDay') refusedDays.add(`${r.teacherId}|${r.day}`);
-    else if (r.kind === 'lessonDayLimit') refusedLimits.add(`L|${r.lessonId}`);
-    else if (r.kind === 'teacherDayLimit') refusedLimits.add(`D|${r.teacherId}`);
-    else if (r.kind === 'teacherConsecutive') refusedLimits.add(`R|${r.teacherId}`);
-    else if (r.kind === 'lessonTeacher') refusedHands.add(`${r.lessonId}|${r.teacherId}`);
-    else refusedLessons.add(`${r.kind}|${r.lessonId}`);
+    switch (r.kind) {
+      case 'teacherDay':
+        refusedDays.add(`${r.teacherId}|${r.day}`);
+        break;
+      case 'teacherHours':
+        for (const h of r.hours) refusedHours.add(closedKey(r.teacherId, r.day, h));
+        break;
+      case 'teacherCap': {
+        const key = `${r.teacherId}|${r.day}`;
+        caps.set(key, Math.min(caps.get(key) ?? r.max, r.max));
+        break;
+      }
+      case 'teacher':
+        refusedTeachers.add(r.teacherId);
+        break;
+      case 'lessonDayLimit':
+        refusedLimits.add(`L|${r.lessonId}`);
+        break;
+      case 'teacherDayLimit':
+        refusedLimits.add(`D|${r.teacherId}`);
+        break;
+      case 'teacherConsecutive':
+        refusedLimits.add(`R|${r.teacherId}`);
+        break;
+      case 'lessonTeacher':
+        refusedHands.add(`${r.lessonId}|${r.teacherId}`);
+        break;
+      default:
+        refusedLessons.add(`${r.kind}|${r.lessonId}`);
+    }
   }
-  const mayOpen = (teacherId: Id, day: number) =>
-    openTeacher && !refusedDays.has(`${teacherId}|${day}`);
+  for (const id of refusedTeachers) {
+    refusedLimits.add(`D|${id}`);
+    refusedLimits.add(`R|${id}`);
+  }
+  const mayOpen = (teacherId: Id, day: number, hour: number) =>
+    openTeacher &&
+    !refusedTeachers.has(teacherId) &&
+    !refusedDays.has(`${teacherId}|${day}`) &&
+    caps.get(`${teacherId}|${day}`) !== 0 &&
+    !refusedHours.has(closedKey(teacherId, day, hour));
 
   const cells = new Map<string, Lit[]>();
   const lessonHours = new Map<string, Lit[]>();
@@ -736,11 +821,12 @@ function buildModel(
       // Nothing of it is fixed, so what it owes is the whole lesson.
       const singles = Array<number>(lesson.weeklyHours).fill(1);
       variants.push({ variant: 'singles', teacherId: lesson.teacherId, sizes: singles, on: r });
-    } else if (kind === 'reassign' && untouched) {
+    } else if (hands && untouched && !refusedTeachers.has(lesson.teacherId)) {
       const subject = lessonSubject(base, lesson);
       const others = base.teachers.filter(
         (x) =>
           x.id !== lesson.teacherId &&
+          !refusedTeachers.has(x.id) &&
           holds(base, x.id, subject) >= 0 &&
           !refusedHands.has(`${lesson.id}|${x.id}`),
       );
@@ -797,7 +883,7 @@ function buildModel(
               ) {
                 ok = false;
               } else if (base.unavailable[closedKey(teacherId, day, h)] !== undefined) {
-                if (mayOpen(teacherId, day)) closedHere.push(closedKey(teacherId, day, h));
+                if (mayOpen(teacherId, day, h)) closedHere.push(closedKey(teacherId, day, h));
                 else ok = false;
               }
             }
@@ -1024,6 +1110,33 @@ function buildModel(
     sat.addClause(model.raise);
   }
 
+  // ---- the hand-over ways: at least one lesson handed over, or it is the
+  // teacher-hour way; and for handHours at most HAND_CAP of them.
+  if (kind === 'hand') {
+    const handed = [...model.handedTo.keys()];
+    model.needHand = pos(sat.newVar());
+    sat.addClause([not(model.needHand), ...handed]);
+    if (handed.length > HAND_CAP) {
+      const out = totalizer(sat, handed, HAND_CAP + 1);
+      if (out.length > HAND_CAP) model.handCap = not(out[HAND_CAP]!);
+    }
+  }
+
+  // ---- "at most N hours that day" (Olmaz, en fazla N saat)
+  for (const [key, max] of caps) {
+    if (max <= 0) continue;
+    const [teacherId, day] = key.split('|') as [Id, string];
+    const lits = [...model.opened]
+      .filter(([k]) => {
+        const parts = parseKey(k);
+        return parts !== null && parts.id === teacherId && parts.day === Number(day);
+      })
+      .map(([, o]) => o);
+    if (lits.length <= max) continue;
+    const out = totalizer(sat, lits, max + 1);
+    if (out.length > max) sat.addClause([not(out[max]!)]);
+  }
+
   return model;
 }
 
@@ -1046,6 +1159,10 @@ function costsOf(which: RelaxFamily, model: Model): [Lit[], Lit[]] {
       return [model.raise, model.raiseMore];
     case 'reassign':
       // First no hour opened at all, then as few lessons handed over as can be.
+      return [opened, [...model.handedTo.keys()]];
+    case 'handFew':
+      return [[...model.handedTo.keys()], opened];
+    case 'handHours':
       return [opened, [...model.handedTo.keys()]];
     case 'blockShape':
       return [[...model.reshape.values()], []];
@@ -1116,11 +1233,15 @@ function countTrue(sat: Sat, lits: readonly Lit[]): number {
 // ---------------------------------------------------------------- the search
 
 export function createRelaxer(
-  base: State,
+  given: State,
   hint: Readonly<Record<string, Id>>,
   options?: Partial<RelaxOptions>,
 ): Relaxer {
   const opts: RelaxOptions = { ...DEFAULTS, ...options };
+  // What the reader said yes to is made first and costs nothing: the search
+  // runs on that data, and every week it offers is checked against the data
+  // as it was, with the answers named among its changes.
+  const base = opts.accepted.length > 0 ? applyRelaxations(given, opts.accepted) : given;
   let frame = frameOf(base, opts);
   let relaid = false;
   const lessonsById = new Map(base.lessons.map((x) => [x.id, x]));
@@ -1172,6 +1293,8 @@ export function createRelaxer(
       case 'rules':
         return raisedLimits(base, grid);
       case 'reassign':
+      case 'handFew':
+      case 'handHours':
         // The hours off the formula, not the grid: the grid names a lesson's
         // old teacher, and a lesson handed over is taught by the new one.
         return sortChanges([
@@ -1266,7 +1389,10 @@ export function createRelaxer(
       if ((yield* ask(sat, model.hinted, sat.conflicts + HINT_CONFLICTS)) === 'sat')
         sat.phaseFromModel();
     }
-    const answer = yield* ask(sat, [], Infinity);
+    const must: Lit[] = [];
+    if (model.needHand !== null) must.push(model.needHand);
+    if (which === 'handHours' && model.handCap !== null) must.push(model.handCap);
+    const answer = yield* ask(sat, must, Infinity);
     if (answer !== 'sat') return;
 
     // Then fewer and fewer changes, until "no fewer" is proven or the search
@@ -1454,7 +1580,7 @@ export function createRelaxer(
     // few-teachers way: its first count is teachers, and its hours, the part
     // the reader asks of them, are only settled by the second.
     const early = which === 'fewTeachers' ? undefined : () => offer(which, model, best, false);
-    const first = yield* tighten(cost, [], true, early);
+    const first = yield* tighten(cost, must, true, early);
     let proven = first.done;
     if (cost2.length > 0) {
       // Among the weeks as good as the best one, the one the second cost likes
@@ -1493,11 +1619,22 @@ export function createRelaxer(
       size: sizeOf(which, changes, grid),
       proven,
       relaid,
+      accepted: opts.accepted,
     };
-    // A handed-over week that still needs an hour opened is not this way.
+    // A handed-over week that still needs an hour opened is not this way, and
+    // a hand-over way that hands nothing over is the teacher-hour way.
     if (which === 'reassign' && changes.some((c) => c.kind === 'teacherHour')) return;
+    // Nor is one that hands over more lessons than the father would ask about:
+    // the same cap as the hand-over ways (the user's decision, 2026-09-25,
+    // after it came back with 9 and 15 lessons handed over).
+    if (changes.filter((c) => c.kind === 'lessonTeacher').length > HAND_CAP) return;
+    if (
+      (which === 'handFew' || which === 'handHours') &&
+      !changes.some((c) => c.kind === 'lessonTeacher')
+    )
+      return;
     const checked = { ...opts, keepPlaced: opts.keepPlaced && !relaid };
-    if (verifySuggestion(base, s, checked).length !== 0) return;
+    if (verifySuggestion(given, s, checked).length !== 0) return;
     // A later, better week of the same way takes the earlier one's place.
     const at = suggestions.findIndex((x) => x.family === which && x.relaid === relaid);
     if (at >= 0) suggestions[at] = s;
@@ -1821,6 +1958,11 @@ export function suggestionSentence(d: State, s: Suggestion): string {
         break;
     }
   }
+  if (s.accepted.length > 0) {
+    return t('Olur dediklerinize ek olarak {kosullar} hafta kuruluyor.', {
+      kosullar: joined(clauses),
+    });
+  }
   return t('{kosullar} hafta kuruluyor.', { kosullar: joined(clauses) });
 }
 
@@ -1831,6 +1973,20 @@ export function refusalText(d: State, r: Refusal): string {
   switch (r.kind) {
     case 'teacherDay':
       return t('{kim} {gun}', { kim: who(r.teacherId), gun: dayName(d, r.day) });
+    case 'teacherHours':
+      return t('{kim} {gun} {saatler}. saat', {
+        kim: who(r.teacherId),
+        gun: dayName(d, r.day),
+        saatler: hourList(d, r.hours),
+      });
+    case 'teacherCap':
+      return t('{kim} {gun} en fazla {n} saat', {
+        kim: who(r.teacherId),
+        gun: dayName(d, r.day),
+        n: r.max,
+      });
+    case 'teacher':
+      return t('{kim}: hiçbir değişiklik', { kim: who(r.teacherId) });
     case 'teacherDayLimit':
       return t('{kim}: günlük sınır', { kim: who(r.teacherId) });
     case 'teacherConsecutive':
@@ -1847,4 +2003,254 @@ export function refusalText(d: State, r: Refusal): string {
     case 'weeklyHours':
       return t('{ders}: haftalık saat', { ders: lessonTitle(ix, r.lessonId) });
   }
+}
+
+// ------------------------------------------------------ the answer book
+//
+// "Cevap defteri" (2026-09-25): a way read as the questions the father puts to
+// each teacher, every one answered "Olur" (the change is made, at no cost to
+// the next search) or "Olmaz" in one of four strengths. The answers are the
+// plan's data (State.answers); this part only says what each question is.
+
+/** One way "Olmaz" can be meant, as the menu offers it. */
+export interface RefusalChoice {
+  label: string;
+  refusal: Refusal;
+}
+
+/** One question, to one teacher or to the father himself (`teacherId` null). */
+export interface Question {
+  teacherId: Id | null;
+  text: string;
+  /** What "Olur" makes. */
+  changes: Relaxation[];
+  choices: RefusalChoice[];
+}
+
+/** The class and the subject, the way a teacher is asked about a lesson: "411A SAY Geometri". */
+function lessonAsked(d: State, ix: Index, lessonId: Id): string {
+  const lesson = ix.lessonById.get(lessonId);
+  if (lesson === undefined) return '?';
+  const group = ix.classById.get(lesson.classId);
+  return `${group?.name ?? '?'} ${lessonSubject(d, lesson)}`.trim();
+}
+
+/** The questions a way puts, the teachers' first and in the order of their names. */
+export function suggestionQuestions(d: State, s: Suggestion): Question[] {
+  const ix = buildIndex(d);
+  const who = (id: Id) => ix.teacherById.get(id)?.short ?? '?';
+  const none = (id: Id): RefusalChoice => ({
+    label: t('{kim} için hiçbir değişiklik olmasın', { kim: who(id) }),
+    refusal: { kind: 'teacher', teacherId: id },
+  });
+  const out: Question[] = [];
+  for (const entry of teacherDays(s)) {
+    const gun = dayName(d, entry.day);
+    const changes: Relaxation[] = entry.hours.map((hour) => ({
+      kind: 'teacherHour',
+      teacherId: entry.teacherId,
+      day: entry.day,
+      hour,
+    }));
+    const choices: RefusalChoice[] = [
+      {
+        label: t('Yalnız bu saatler olmaz ({gun} {saatler}. saat)', {
+          gun,
+          saatler: hourList(d, entry.hours),
+        }),
+        refusal: { kind: 'teacherHours', ...entry, hours: [...entry.hours] },
+      },
+      {
+        label: t('{gun} hiç gelemez', { gun }),
+        refusal: { kind: 'teacherDay', teacherId: entry.teacherId, day: entry.day },
+      },
+    ];
+    // "At most N hours": every N under what was asked, so the menu is one click.
+    for (let max = 1; max < entry.hours.length; max++) {
+      choices.push({
+        label: t('{gun} en fazla {n} saat gelebilir', { gun, n: max }),
+        refusal: { kind: 'teacherCap', teacherId: entry.teacherId, day: entry.day, max },
+      });
+    }
+    choices.push(none(entry.teacherId));
+    out.push({
+      teacherId: entry.teacherId,
+      text: t(
+        entry.hours.length === 1
+          ? '{gun} {saatler}. saate gelebilir misiniz?'
+          : '{gun} {saatler}. saatlere gelebilir misiniz?',
+        { gun, saatler: hourList(d, entry.hours) },
+      ),
+      changes,
+      choices,
+    });
+  }
+  const mine: Question[] = [];
+  for (const c of s.changes) {
+    switch (c.kind) {
+      case 'teacherHour':
+        break;
+      case 'teacherDayLimit':
+        out.push({
+          teacherId: c.teacherId,
+          text: t('Bir günde {eski} yerine {yeni} saat girebilir misiniz?', {
+            eski: teacherLimit(d, c.teacherId, 'maxPerDay'),
+            yeni: c.limit,
+          }),
+          changes: [c],
+          choices: [
+            {
+              label: t('Olmaz'),
+              refusal: { kind: 'teacherDayLimit', teacherId: c.teacherId },
+            },
+            none(c.teacherId),
+          ],
+        });
+        break;
+      case 'teacherConsecutive':
+        out.push({
+          teacherId: c.teacherId,
+          text: t('Art arda {eski} yerine {yeni} saat girebilir misiniz?', {
+            eski: teacherLimit(d, c.teacherId, 'maxConsecutive'),
+            yeni: c.limit,
+          }),
+          changes: [c],
+          choices: [
+            {
+              label: t('Olmaz'),
+              refusal: { kind: 'teacherConsecutive', teacherId: c.teacherId },
+            },
+            none(c.teacherId),
+          ],
+        });
+        break;
+      case 'lessonTeacher':
+        out.push({
+          teacherId: c.teacherId,
+          text: t('{ders} dersini verebilir misiniz?', { ders: lessonAsked(d, ix, c.lessonId) }),
+          changes: [c],
+          choices: [
+            {
+              label: t('Olmaz'),
+              refusal: { kind: 'lessonTeacher', lessonId: c.lessonId, teacherId: c.teacherId },
+            },
+            none(c.teacherId),
+          ],
+        });
+        break;
+      default: {
+        // A lesson's own shape and limits: nobody to ask but the father.
+        const part = suggestionParts(d, { ...s, changes: [c] })[0];
+        if (part === undefined) break;
+        mine.push({
+          teacherId: null,
+          text: part.text,
+          changes: [c],
+          choices: [{ label: t('Olmaz'), refusal: part.refusal }],
+        });
+      }
+    }
+  }
+  const name = (q: Question) => (q.teacherId === null ? '' : who(q.teacherId));
+  return [...out.sort((a, b) => (name(a) < name(b) ? -1 : name(a) > name(b) ? 1 : 0)), ...mine];
+}
+
+/**
+ * The plan's answers as the chips under the panel's title: a teacher's hours
+ * on one day together, each chip carrying every answer it stands for, so one
+ * click takes them all back.
+ */
+export function answerParts(
+  d: State,
+  answers: Answers,
+): Array<{ text: string; yes: boolean; items: Array<Relaxation | Refusal> }> {
+  const out: Array<{ text: string; yes: boolean; items: Array<Relaxation | Refusal> }> = [];
+  const asked: Suggestion = {
+    family: 'teacherHours',
+    changes: answers.accepted,
+    placements: {},
+    size: 0,
+    proven: false,
+    relaid: false,
+    accepted: [],
+  };
+  for (const entry of teacherDays(asked)) {
+    out.push({
+      text: suggestionParts(d, {
+        ...asked,
+        changes: entry.hours.map((hour) => ({
+          kind: 'teacherHour' as const,
+          teacherId: entry.teacherId,
+          day: entry.day,
+          hour,
+        })),
+      })[0]!.text,
+      yes: true,
+      items: answers.accepted.filter(
+        (c) => c.kind === 'teacherHour' && c.teacherId === entry.teacherId && c.day === entry.day,
+      ),
+    });
+  }
+  for (const c of answers.accepted) {
+    if (c.kind === 'teacherHour') continue;
+    const part = suggestionParts(d, { ...asked, changes: [c] })[0];
+    if (part !== undefined) out.push({ text: part.text, yes: true, items: [c] });
+  }
+  for (const r of answers.refused) out.push({ text: refusalText(d, r), yes: false, items: [r] });
+  return out;
+}
+
+/** The questions as plain text, to copy or print: one line per question. */
+export function questionsText(d: State, s: Suggestion): string {
+  const ix = buildIndex(d);
+  const lines = suggestionQuestions(d, s).map((q) =>
+    q.teacherId === null
+      ? `${t('Sizin kararınız')}: ${q.text}`
+      : `${ix.teacherById.get(q.teacherId)?.short ?? '?'}: ${q.text}`,
+  );
+  return [suggestionSentence(d, s), '', ...lines].join('\n');
+}
+
+/** Does `s` make the change `r` rules out? `d` names who teaches a lesson now. */
+export function suggestionUses(d: State, s: Suggestion, r: Refusal): boolean {
+  return forbids(d, r, s.changes);
+}
+
+// ------------------------------------------------------------ the preview
+
+/**
+ * What a way changes on the grid, for the preview: the teacher hours it opens
+ * (closedKey) and the cells whose lesson is new there (placementKey), with how
+ * many laid-out blocks leave their place. Moving lessons costs the search
+ * nothing (the user's rule, 2026-09-25: "en az" is about the teachers' hours),
+ * but the father sees how much of his week it is.
+ */
+export interface SuggestionDiff {
+  opened: Set<string>;
+  moved: Set<string>;
+  movedBlocks: number;
+}
+
+export function suggestionDiff(before: State, s: Suggestion): SuggestionDiff {
+  const after = applySuggestion(before, s);
+  const opened = new Set<string>();
+  for (const key of Object.keys(before.unavailable)) {
+    if (after.unavailable[key] === undefined) opened.add(key);
+  }
+  const was = activePlacements(before);
+  const now = activePlacements(after);
+  const moved = new Set<string>();
+  for (const [key, lessonId] of Object.entries(now)) if (was[key] !== lessonId) moved.add(key);
+  let movedBlocks = 0;
+  for (const lesson of before.lessons) {
+    for (const b of placedBlocks(before, lesson)) {
+      for (let k = 0; k < b.size; k++) {
+        if (now[placementKey(lesson.classId, b.day, b.hour + k)] !== lesson.id) {
+          movedBlocks++;
+          break;
+        }
+      }
+    }
+  }
+  return { opened, moved, movedBlocks };
 }

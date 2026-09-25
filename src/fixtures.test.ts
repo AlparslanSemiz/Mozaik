@@ -359,6 +359,39 @@ describe('şema örnekleri — ayarlar', () => {
   });
 });
 
+describe('şema örnekleri — cevaplar (v15)', () => {
+  it.each(VERSIONS)('v%i dosyasının cevapları doğru geliyor', (version) => {
+    const answers = parse(version).answers;
+    // v15 brought them. A file below it has none, and none is invented.
+    if (version >= 15) {
+      expect(answers.accepted).toEqual([
+        { kind: 'teacherHour', teacherId: 'tAV', day: 1, hour: 0 },
+        { kind: 'teacherDayLimit', teacherId: 'tMC', limit: 6 },
+      ]);
+      expect(answers.refused).toEqual([
+        { kind: 'teacherDay', teacherId: 'tAV', day: 0 },
+        { kind: 'teacherCap', teacherId: 'tMC', day: 1, max: 1 },
+      ]);
+    } else {
+      expect(answers).toEqual({ accepted: [], refused: [] });
+    }
+  });
+
+  it('okunamayan bir cevap tek başına düşüyor, dosyanın geri kalanı geliyor', () => {
+    const state = edited<{ answers: { accepted: unknown[]; refused: unknown[] } }>(
+      SCHEMA_VERSION,
+      (raw) => {
+        raw.answers.accepted.push({ kind: 'teacherHour', teacherId: 'tAV', day: 'Salı' });
+        raw.answers.refused.push({ kind: 'uydurma' }, null);
+      },
+    );
+    expect(state).not.toBeNull();
+    expect(state!.answers.accepted).toHaveLength(2);
+    expect(state!.answers.refused).toHaveLength(2);
+    expect(Object.keys(activeProgram(state!).placements)).toHaveLength(6);
+  });
+});
+
 // ---------------------------------------------------- files missing a field
 
 /**

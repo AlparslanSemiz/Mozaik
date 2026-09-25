@@ -148,6 +148,7 @@ function build(): State {
     unavailable: {},
     programs: [blankProgram()],
     activeProgramId: 'program-1',
+    answers: { accepted: [], refused: [] },
   };
 }
 

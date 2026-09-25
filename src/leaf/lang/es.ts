@@ -1102,20 +1102,96 @@ const ES: Sozluk = {
     "Aplicar",
   "Uygula, baştan diz":
     "Aplicar y colocar de nuevo",
-  "Bu olmaz: {ne}":
-    "No es posible: {ne}",
   "Olmaz":
     "No es posible",
-  "Olmaz dedikleriniz:":
-    "Descartado:",
   "Geri al: {ne}":
     "Deshacer: {ne}",
   "(daha iyisi aranıyor)":
     "(buscando una mejor)",
+  "Bir dersi başka öğretmene verip daha az saat":
+    "Dar una clase a otro docente, menos horas",
+  "Birkaç dersi başka öğretmene verip en az saat":
+    "Dar algunas clases a otros docentes, las menos horas",
+  "Cevaplarınız:":
+    "Sus respuestas:",
+  "Olur":
+    "Sí",
+  "Olur: {ne}":
+    "Sí: {ne}",
+  "Olmaz: {ne}":
+    "No es posible: {ne}",
+  "Olur dedi":
+    "Dijo que sí",
+  "Olur dedikleriniz yetiyor: hafta kuruluyor":
+    "Sus síes bastan: la semana se puede montar",
+  "Olur dediklerinize ek olarak {kosullar} hafta kuruluyor.":
+    "Además de sus síes, la semana se puede montar si {kosullar}.",
+  "Uygulayınca cevaplarınız veriye yazılır ve hafta yerleşir.":
+    "Al aplicar, sus respuestas pasan a los datos y la semana se coloca.",
+  "Izgarada göster":
+    "Mostrar en la cuadrícula",
+  "Sorular":
+    "Preguntas",
+  "Soruları gizle":
+    "Ocultar preguntas",
+  "Soruları kopyala":
+    "Copiar preguntas",
+  "Soruları yazdır":
+    "Imprimir preguntas",
+  "Sorular panoya kopyalandı.":
+    "Preguntas copiadas al portapapeles.",
+  "Kopyalamak için Ctrl+C’ye basın":
+    "Pulse Ctrl+C para copiar",
+  "Siz":
+    "Usted",
+  "Sizin kararınız":
+    "Su decisión",
+  "Öğretmenlere sorulacaklar":
+    "Preguntas para los docentes",
+  "{gun} {saatler}. saate gelebilir misiniz?":
+    "¿Puede venir el {gun} en la hora {saatler}?",
+  "{gun} {saatler}. saatlere gelebilir misiniz?":
+    "¿Puede venir el {gun} en las horas {saatler}?",
+  "Bir günde {eski} yerine {yeni} saat girebilir misiniz?":
+    "¿Puede dar {yeni} horas en un día en lugar de {eski}?",
+  "Art arda {eski} yerine {yeni} saat girebilir misiniz?":
+    "¿Puede dar {yeni} horas seguidas en lugar de {eski}?",
+  "{ders} dersini verebilir misiniz?":
+    "¿Puede impartir {ders}?",
+  "Yalnız bu saatler olmaz ({gun} {saatler}. saat)":
+    "Solo estas horas no son posibles ({gun}, hora {saatler})",
+  "{gun} hiç gelemez":
+    "No puede venir el {gun} en absoluto",
+  "{gun} en fazla {n} saat gelebilir":
+    "Puede venir el {gun} como máximo {n} {n:hora|horas}",
+  "{kim} için hiçbir değişiklik olmasın":
+    "Ningún cambio para {kim}",
+  "{kim} {gun} en fazla {n} saat":
+    "{kim} el {gun}: como máximo {n} {n:hora|horas}",
+  "{kim}: hiçbir değişiklik":
+    "{kim}: ningún cambio",
+  "Önizleme":
+    "Vista previa",
+  "Önizleme: {yol}":
+    "Vista previa: {yol}",
+  "Önizlemeyi kapat":
+    "Cerrar vista previa",
+  "Hangi hafta":
+    "Qué semana",
+  "Şu anki":
+    "Actual",
+  "Önerilen":
+    "Propuesta",
+  "{n} öğretmen saati açılıyor":
+    "Se {n:abre|abren} {n} {n:hora|horas} de docente",
+  "{n} ders yer değiştiriyor":
+    "{n} {n:clase cambia|clases cambian} de lugar",
+  "{ust} {alt}, açılan öğretmen saatinde":
+    "{ust} {alt}, en una hora de docente que se abre",
+  "{ust} {alt}, yeri değişiyor":
+    "{ust} {alt}, cambia de lugar",
   "Kurulması için":
     "Para montar la semana",
-  "Ayrıntıyı gizle":
-    "Ocultar detalles",
   "Ayrıntı":
     "Detalles",
   "Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.":

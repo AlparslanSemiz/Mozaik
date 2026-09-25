@@ -209,19 +209,48 @@ yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar, dersi ba�
 öğretmene vermek, blok şekli, haftalık saat. Aranan yol satırını "…: aranıyor…"
 diye tutar, bulunan onun yerine oturur; bir şey bulamayan yolun satırı kalkar.
 Bulunan her yol tek satırdır: babanın bir öğretmene söyleyeceği cümle ("KY
-Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Uygula` ve `Ayrıntı`.
-Bir yol ilk bulduğunu hemen gösterir ve arama sürerken daha iyisini bulursa satır
-yerinde değişir; o sürece satırın yanında "(daha iyisi aranıyor)" yazar. Aynı
-öğretmenlerden aynı günlerde aynı sayıda saat isteyen iki yol tek satırdır, çünkü
-babanın soracağı soru aynıdır. `Ayrıntı` açılınca yolun adı, değişiklikler madde
-madde ve her birinin yanında `Olmaz` görünür. `Olmaz` o değişikliği ("KY
-Cumartesi", bir öğretmenin saatleri gün gün reddedilir) bütün yollardan çıkarır
-ve aramayı onsuz yeniden başlatır; reddedilenler panelin altında "Olmaz
-dedikleriniz:" satırında durur, her biri tıklanınca geri alınır. Sınıfların saati
+Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Izgarada göster`,
+`Uygula` ve `Sorular`. Bir yol ilk bulduğunu hemen gösterir ve arama sürerken
+daha iyisini bulursa satır yerinde değişir; o sürece satırın yanında "(daha iyisi
+aranıyor)" yazar. Aynı öğretmenlerden aynı günlerde aynı sayıda saat isteyen iki
+yol tek satırdır, çünkü babanın soracağı soru aynıdır. İki karma yoldan (dersi
+başka öğretmene verip daha az saat) ötekinden iki sayıda da kötü olanı
+gösterilmez.
+
+`Sorular` yolun cevap defterini açar (TODO B5.11). Öğretmen öğretmen birer soru
+vardır: "KY · Cumartesi 11–12. saatlere gelebilir misiniz?", sınır ve el
+değişimi de soru olarak, blok şekli ve haftalık saat "Siz" başlığıyla. Her
+sorunun sonunda `Olur` ve `Olmaz ▾` durur. Bir öğretmen saatinin `Olmaz`'ı dört
+türdür: yalnız bu saatler, o gün hiç, o gün en fazla N saat, öğretmene hiç
+dokunma. `Olur` değişikliği bedelsiz kabul eder, ve yollar "Olur dediklerinize ek
+olarak …" diye yalnız eksiği söyler. Olur dedikleri tek başına yetiyorsa panel
+"Olur dedikleriniz yetiyor" der. Her cevap aramayı yeniden başlatır. Cevaplar
+panelin başında "Cevaplarınız:" satırında ✓ ya da ✗ ile durur ve tıklanınca geri
+alınır. Planın verisi oldukları için (şema v15) program kapanıp açılınca da
+yerindedirler, ve Ctrl+Z bir cevabı geri alır. `Soruları kopyala` listeyi panoya
+koyar. `Soruları yazdır` onu kendi kâğıdında basar: sayfanın geri kalanı o baskıda
+yoktur.
+
+`Izgarada göster` önizlemedir. Izgara, yolun uygulanmış haftasını çizer, ve ızgaranın
+üstünde bir çubuk açılır: `Şu anki | Önerilen`, lejant ("4 öğretmen saati
+açılıyor · 162 ders yer değiştiriyor"), `Uygula` ve `Önizlemeyi kapat`.
+- Açılan saatteki ders kalın bir çizgi, tarama ve "+" ile işaretlidir.
+- Yeri değişen ders ince kesik bir çizgiyle işaretlidir.
+- Değişmeyenler soluklaşır.
+- İşaretler etiketin içinde de söylenir.
+- Görünüm ilk açılan saate kayar.
+- Havuz da önerilen haftanın havuzunu gösterir.
+- Önizlemede sürükleme, kaldırma, sabitleme ve menü kapalıdır, ve Esc önizlemeyi kapatır.
+Derslerin yer değiştirmesi aramanın bedeli değildir: "en az" müsaitlikte en az
+değişiklik demek (kullanıcının kararı, 2026-09-25). Oynayan dersin sayısı yalnız
+burada görünür.
+
+Sınıfların saati
 hiçbir yolda yoktur. Hafta aslında kurulabiliyorsa (çözücü bulamadı, ikinci arama
 buldu) panel tek satırla bunu söyler. Bir yolu uygulamak veriyi ve haftayı
-birlikte yerleştirir ve tek geri al adımıdır. Program o arada değiştiyse düğme
-kapanır. Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
+birlikte yerleştirir ve tek geri al adımıdır. Uygulanınca "Olur"lar verinin kendisi
+olduğu için cevaplardan silinir, "Olmaz"lar bir sonraki takılmaya kalır. Program o
+arada değiştiyse düğme kapanır. Bir cevap bu sayılmaz. Panel diyalog değil, çünkü okuyan öneriyi ızgaraya bakarak okur.
 `Otomatik diz` dizili dersleri yerinde tutar. Öyle bir yol yoksa arama
 kendiliğinden sabitlenenler dışındaki dersleri de yeniden dizerek sürer. Panel bunu
 bir cümleyle söyler, ve düğme "Uygula, baştan diz" olur. Babanın dosyası

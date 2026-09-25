@@ -225,13 +225,13 @@ test.describe('Gerçek exe (Linux)', () => {
     ).not.toContain('kendini güncelleyebilir');
   });
 
-  test("kurulamayan haftada yol öneriyor, worker'larda arıyor, uyguluyor ve Ctrl+Z geri alıyor", async ({
+  test("kurulamayan haftada yol öneriyor, worker'larda arıyor, önizliyor, Olur'u dinliyor, uyguluyor ve Ctrl+Z geri alıyor", async ({
     exe,
   }) => {
-    // TODO B5.10: the father's week (anonymised) in the real WebKitGTK. The
-    // search runs on the page's own script as workers (relaxPool.ts), which
-    // the browser suite measures in Chromium and this measures here.
-    test.setTimeout(300_000);
+    // TODO B5.10, B5.11: the father's week (anonymised) in the real WebKitGTK.
+    // The search runs on the page's own script as workers (relaxPool.ts),
+    // which the browser suite measures in Chromium and this measures here.
+    test.setTimeout(540_000);
     const metin = readFileSync(join(KOK, 'src', 'fixtures', 'tam-dolu-kurs.json'), 'utf8');
     await exe.oturum.js(
       `const f = new File([${JSON.stringify(metin)}], 'yedek.json', { type: 'application/json' });
@@ -259,9 +259,44 @@ test.describe('Gerçek exe (Linux)', () => {
       ),
     ).toBeGreaterThan(0);
 
+    // The preview: the way's week on the grid, its opened hours marked.
+    await exe.oturum.tikla('.suggestion-list li[data-family] .btn[aria-pressed]');
+    await exe.oturum.bekle('.preview-bar');
+    expect(
+      await exe.oturum.js<number>(
+        `return document.querySelectorAll('.program-body .card.mark-opened').length;`,
+      ),
+    ).toBeGreaterThan(0);
+    await exe.oturum.tikla('metin:Önizlemeyi kapat');
+
+    // "Olur" on the first question: the search runs again from it.
+    await exe.oturum.tikla('.suggestion-list li[data-family] .btn[aria-expanded]');
+    await exe.oturum.tikla('.question .question-answers .btn');
+    const panel = () =>
+      exe.oturum.js<string>(
+        `return document.querySelector('.panel.suggestions')?.innerText ?? '';`,
+      );
+    await expect
+      .poll(() => exe.oturum.js<number>(`return document.querySelectorAll('.chip-yes').length;`), {
+        timeout: 10_000,
+      })
+      .toBe(1);
+    await expect
+      .poll(panel, { timeout: 240_000, intervals: [2_000] })
+      .toMatch(/Olur dediklerinize ek olarak|Olur dedikleriniz yetiyor/);
+    await expect
+      .poll(
+        () =>
+          exe.oturum.js<number>(
+            `return document.querySelectorAll('.suggestion-pending, .suggestion-title .hint').length;`,
+          ),
+        { timeout: 240_000, intervals: [2_000] },
+      )
+      .toBe(0);
+
     const ust = () => exe.oturum.js<string>(`return document.querySelector('.topbar').innerText;`);
     expect(await ust()).toContain('havuzda');
-    await exe.oturum.tikla('.suggestion-list li[data-family] .btn.primary');
+    await exe.oturum.tikla('.panel.suggestions .btn.primary');
     await expect
       .poll(
         () =>

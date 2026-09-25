@@ -34,6 +34,12 @@ export interface GridCell {
   pinned: boolean;
   /** The block belongs to a temporarily excluded row in the other view. */
   mask?: MaskMode | undefined;
+  /**
+   * Only in a suggestion's preview (TODO B5.11): taught in a teacher hour the
+   * way opens (a thick line, a hatch and a "+"), or new in this cell (a thin
+   * dashed line). Both are said in the label too, never by colour alone.
+   */
+  mark?: 'opened' | 'moved' | undefined;
 }
 
 export interface GridRow {
@@ -203,7 +209,9 @@ const Row = memo(function Row({
             <button
               type="button"
               className={
-                (cell.conflict === null ? 'card' : 'card conflict') + (cell.pinned ? ' pinned' : '')
+                (cell.conflict === null ? 'card' : 'card conflict') +
+                (cell.pinned ? ' pinned' : '') +
+                (cell.mark === undefined ? '' : ` mark-${cell.mark}`)
               }
               style={{ background: paletteColor(cell.color) }}
               draggable={false}
@@ -221,15 +229,19 @@ const Row = memo(function Row({
                 }
               }}
               aria-label={
-                cell.pinned
-                  ? t('{ust} {alt}, sabitlenmiş', {
-                      ust: cell.top,
-                      alt: cell.bottom,
-                    })
-                  : t('{ust} {alt}, kaldırmak için Delete', {
-                      ust: cell.top,
-                      alt: cell.bottom,
-                    })
+                cell.mark === 'opened'
+                  ? t('{ust} {alt}, açılan öğretmen saatinde', { ust: cell.top, alt: cell.bottom })
+                  : cell.mark === 'moved'
+                    ? t('{ust} {alt}, yeri değişiyor', { ust: cell.top, alt: cell.bottom })
+                    : cell.pinned
+                      ? t('{ust} {alt}, sabitlenmiş', {
+                          ust: cell.top,
+                          alt: cell.bottom,
+                        })
+                      : t('{ust} {alt}, kaldırmak için Delete', {
+                          ust: cell.top,
+                          alt: cell.bottom,
+                        })
               }
               title={
                 cell.pinned
@@ -243,6 +255,11 @@ const Row = memo(function Row({
             >
               <span className="card-top">{cell.top}</span>
               {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
+              {cell.mark === 'opened' && (
+                <span className="card-mark" aria-hidden="true">
+                  +
+                </span>
+              )}
             </button>
           ) : closed ? (
             '×'

@@ -52,7 +52,11 @@ export type RelaxMessage =
  */
 const TRACKS: RelaxFamily[][] = [
   ['fewTeachers'],
-  ['teacherHours'],
+  // The hand-over ways start from the fewest-hours week: from the stuck week
+  // their first week opened some 300 hours and the search ended at one lesson
+  // and 7 hours, from the fewest-hours week at one lesson and 3, CP-SAT's best
+  // (MEASURED 2026-09-25 on the father's file).
+  ['teacherHours', 'handFew', 'handHours'],
   ['teacherDays'],
   ['mixed'],
   ['rules', 'blockShape', 'weeklyHours'],

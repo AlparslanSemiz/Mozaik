@@ -32,15 +32,15 @@ import { join } from 'node:path';
 const OUT = join(import.meta.dirname, '..', 'src', 'fixtures');
 
 /**
- * A small school in TODAY's shape (v14). Small on purpose: a fixture is read
+ * A small school in TODAY's shape (v15). Small on purpose: a fixture is read
  * by a person when a migration breaks. It still carries the awkward parts,
  * because those are where a migration goes wrong: a second subject, a lesson
  * taught under it, a two-hour block, a three-hour block, a lesson with no
  * block at all, a pinned cell, a closed hour, and a laid-out timetable.
  */
-function v14() {
+function v15() {
   return {
-    schemaVersion: 14,
+    schemaVersion: 15,
     settings: {
       schoolName: 'Birey Kurs',
       // NOT A SINGLE VALUE HERE IS THE PROGRAM'S DEFAULT, and that is the
@@ -150,6 +150,19 @@ function v14() {
       },
     ],
     activeProgramId: 'p1',
+    // v15: the father's answers to a suggestion. AV said yes to her closed
+    // Çarşamba 1st hour and no to Salı altogether; MÇ may take one hour more
+    // a day. Both kinds, so a reader that drops one of them is caught.
+    answers: {
+      accepted: [
+        { kind: 'teacherHour', teacherId: 'tAV', day: 1, hour: 0 },
+        { kind: 'teacherDayLimit', teacherId: 'tMC', limit: 6 },
+      ],
+      refused: [
+        { kind: 'teacherDay', teacherId: 'tAV', day: 0 },
+        { kind: 'teacherCap', teacherId: 'tMC', day: 1, max: 1 },
+      ],
+    },
   };
 }
 
@@ -167,9 +180,14 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v14 with eleven steps undone.
+ * key. The chain is applied in order, so v3 is v15 with twelve steps undone.
  */
 const DOWN = {
+  14: (raw) => {
+    // v15 brought the answers to a suggestion. Below it a file has none.
+    raw.schemaVersion = 14;
+    delete raw.answers;
+  },
   13: (raw) => {
     // v14 added the two window (gap) rules. Below it neither field exists.
     raw.schemaVersion = 13;
@@ -284,13 +302,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v14();
-writeFileSync(join(OUT, 'v14.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v15();
+writeFileSync(join(OUT, 'v15.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`14 örnek dosya yazıldı: ${OUT}`);
+console.log(`15 örnek dosya yazıldı: ${OUT}`);

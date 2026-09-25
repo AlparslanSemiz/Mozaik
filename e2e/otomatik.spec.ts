@@ -190,26 +190,51 @@ test.describe('22. Otomatik dizme', () => {
     // The rules way is there too, in its own words.
     await expect(panel.locator('li[data-family="rules"]')).toContainText('olabilirse');
 
-    // "Olmaz" on the first teacher-day of the fewest-hours way: the search runs
-    // again, the refusal is listed, and no way comes back with that day.
-    await fewest.getByRole('button', { name: 'Ayrıntı', exact: true }).click();
-    const refused = (await fewest.locator('.suggestion-part span').first().innerText()).replace(
-      / \d.*$/,
-      '',
-    );
-    await fewest
-      .getByRole('button', { name: /^Bu olmaz:/ })
-      .first()
-      .click();
-    await expect(panel).toContainText('Olmaz dedikleriniz:');
+    // "Olmaz" on the first question of the fewest-hours way, meant as "that
+    // day not at all": the search runs again, the answer is listed, and no
+    // way comes back with that day.
+    await fewest.getByRole('button', { name: 'Sorular', exact: true }).click();
+    const question = fewest.locator('.question').first();
+    const who = await question.locator('.question-who').innerText();
+    const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
+    const refused = `${who} ${day}`;
+    await question.getByRole('button', { name: /^Olmaz/ }).click();
+    await page.getByRole('menuitem', { name: `${day} hiç gelemez` }).click();
+    await expect(panel).toContainText('Cevaplarınız:');
     await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
     for (const row of await panel.locator('li[data-family] .suggestion-title').allInnerTexts()) {
       expect(row).not.toContain(`${refused} `);
     }
 
-    const way = panel.locator('li[data-family="teacherHours"]');
-    await expect(way).toContainText('de gelebilirse');
+    // The preview: the way's week on the grid, the opened hours marked, and
+    // back to the week as it is with one button (TODO B5.11).
+    await panel
+      .locator('li[data-family="teacherHours"]')
+      .getByRole('button', { name: 'Izgarada göster' })
+      .click();
+    const previewBar = page.locator('.preview-bar');
+    await expect(previewBar).toContainText('öğretmen saati açılıyor');
+    expect(await page.locator('.program-body .card.mark-opened').count()).toBeGreaterThan(0);
+    await previewBar.getByRole('button', { name: 'Şu anki' }).click();
+    await expect(page.locator('.program-body .card.mark-opened')).toHaveCount(0);
+    await previewBar.getByRole('button', { name: 'Önizlemeyi kapat' }).click();
+    await expect(previewBar).toHaveCount(0);
+
+    // "Olur" on a question: kept at no cost, and every way now says what is
+    // needed on top of it.
+    // Its questions are still open from the "Olmaz" above.
+    const asked = panel.locator('li[data-family="teacherHours"]');
+    await expect(asked.getByRole('button', { name: 'Soruları gizle' })).toBeVisible();
+    await asked.locator('.question').first().getByRole('button', { name: /^Olur/ }).click();
+    await expect(panel.locator('.chip-yes')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
+    await expect(panel).toContainText(/Olur dediklerinize ek olarak|Olur dedikleriniz yetiyor/);
+
+    const way = panel
+      .locator('li[data-family]')
+      .filter({ has: page.getByRole('button', { name: /^Uygula/ }) })
+      .first();
     const before = await settledText(page);
     const was = JSON.parse(before) as State;
     await way.getByRole('button', { name: /^Uygula/ }).click();
@@ -223,6 +248,9 @@ test.describe('22. Otomatik dizme', () => {
     for (const key of opened) expect(teachers.has(key.split('|')[0]!)).toBe(true);
     const hours = was.lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
     expect(await placedHours(page)).toBe(hours);
+    // What was said yes to is now the data itself; the no stays for next time.
+    expect(after.answers.accepted).toEqual([]);
+    expect(after.answers.refused).toEqual(was.answers.refused);
 
     // One step back: the hours closed again and the stuck week on the grid.
     const applied = await settledText(page);

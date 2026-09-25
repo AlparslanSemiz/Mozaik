@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 14
+  schemaVersion: 15
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -19,6 +19,7 @@ State {
   unavailable: Record<`${entityId}|${day}|${hour}`, 1>   // öğretmen, sınıf ve derslik
   programs: ProgramVariant[]                           // aynı okulun program alternatifleri
   activeProgramId: Id                                  // ekranda, Kontrol'de ve kâğıtta olan
+  answers: { accepted: Relaxation[]; refused: Refusal[] }   // öneriye verilen cevaplar
 }
 ProgramVariant {
   id, name
@@ -54,6 +55,13 @@ Alanların anlamı:
 - `ClassGroup.roomId` sınıfın sabit dersliği. `null` ise derslik çakışması denetlenmez.
 - `ClassGroup.maxSameLessonPerDay` ve `Lesson.maxPerDay` günlük sınırın katmanları, `null` bir üstteki katmanı kullan demek.
 - `Lesson.blocks` birden uzun blokların listesi, büyükten küçüğe. Her eleman 2 ya da 3, toplamı `weeklyHours`'u geçmez, kalanı tek saat: 9 saat ve `[3, 2]` 3+2+1+1+1+1 demek. Karar veren tek yer `blocks.ts`'teki `clampBlocks`.
+- `answers`, babanın öneri paneline verdiği cevaplar (TODO B5.11):
+  - `accepted`: "Olur" dediği değişiklikler. Sonraki arama onları yapılmış sayar ve bedel saymaz.
+  - `refused`: "Olmaz" dedikleri. Her arama onlardan uzak durur. Bir öğretmen saatine dört türde denebilir: yalnız bu saatler, bütün gün, günde en fazla N saat, öğretmene hiç dokunma.
+  - Planın verisi, çünkü öğretmenlere sormak günler sürüyor ve program kapanınca cevaplar gitmemeli (kullanıcının kararı, 2026-09-25).
+  - Yeni bir cevap onunla çelişen eskisini geri alır (`answerYes`, `answerNo`).
+  - Bir öneri uygulanınca "Olur"lar verinin kendisi olduğu için silinir, "Olmaz"lar kalır.
+  - Silinen bir öğretmenin, dersin ya da günün cevabı `sanitize()` ile düşer. Gün listesi değişince `remapDays()` cevabı da kaydırır.
 - `Lesson.second` dersin öğretmenin ikinci branşından mı verildiği. Öğretmenin ikinci branşı silinince `sanitize()` onu `false` yapar, yoksa ders kimsenin vermediği bir branşı iddia ederdi.
 
 ### Varsayılanlar
@@ -87,8 +95,9 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v12 | yerleşim ve sabitlemeler adlı program alternatiflerine taşındı |
 | v13 | dört saatlik blok kaldırıldı, eski her 4 bir 3 ve örtük bir tek saat oldu |
 | v14 | `Limits.maxGapsTeacher` ve `maxGapsClass`: boşluk kuralı, eksik alan 0 ve `off` |
+| v15 | `answers`: öneriye verilen Olur ve Olmaz cevapları; eksik alan boş, okunamayan tek bir cevap tek başına düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v14'e her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v15'e her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -104,7 +113,7 @@ Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v14 çıkarılırken `version === 13` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v15 çıkarılırken `version === 14` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri
@@ -215,7 +224,7 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 ## Dosya biçimleri
 
 ```
-{ "schemaVersion": 14, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 15, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 

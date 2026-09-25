@@ -14,11 +14,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createSolver } from '../pure/solver';
 import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../pure/solver';
-import { applySuggestion } from '../pure/relax';
-import type { Refusal, RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../pure/relax';
+import { applySuggestion, suggestionUses } from '../pure/relax';
+import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../pure/relax';
 import { activePlacements } from '../pure/programs';
 import { startRelax } from './relaxPool';
-import type { Id, State } from '../leaf/types';
+import type { Answers, Id, State } from '../leaf/types';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:
@@ -37,8 +37,33 @@ export interface Advice {
   searching: boolean;
   progress: RelaxProgress | null;
   suggestions: Suggestion[];
-  /** What the reader said cannot be ("Bu olmaz"): every search since keeps clear of it. */
-  refused: Refusal[];
+  /**
+   * The answers the search ran with (the plan's own, State.answers): when the
+   * plan's change, by a click or an undo, the search runs again.
+   */
+  answers: Answers;
+}
+
+/**
+ * The same timetable and data, whatever the answers: an answer is a note for
+ * the next search, not a change to the week a suggestion was made for.
+ */
+export function samePlan(a: State, b: State): boolean {
+  if (a === b) return true;
+  return (
+    a.settings === b.settings &&
+    a.rooms === b.rooms &&
+    a.teachers === b.teachers &&
+    a.classes === b.classes &&
+    a.lessons === b.lessons &&
+    a.unavailable === b.unavailable &&
+    a.programs === b.programs &&
+    a.activeProgramId === b.activeProgramId
+  );
+}
+
+function sameAnswers(a: Answers, b: Answers): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 /** The search a stuck run started, kept so a refusal can run it again. */
@@ -46,28 +71,6 @@ interface RelaxJob {
   from: State;
   hint: Record<string, Id>;
   options: Partial<RelaxOptions>;
-}
-
-/** Does `s` make the change `r` rules out? */
-function uses(s: Suggestion, r: Refusal): boolean {
-  return s.changes.some((c) => {
-    switch (r.kind) {
-      case 'teacherDay':
-        return c.kind === 'teacherHour' && c.teacherId === r.teacherId && c.day === r.day;
-      case 'teacherDayLimit':
-      case 'teacherConsecutive':
-        return c.kind === r.kind && c.teacherId === r.teacherId;
-      case 'lessonTeacher':
-        return c.kind === r.kind && c.lessonId === r.lessonId && c.teacherId === r.teacherId;
-      default:
-        return c.kind === r.kind && c.lessonId === r.lessonId;
-    }
-  });
-}
-
-/** Two refusals of the same thing. */
-export function sameRefusal(a: Refusal, b: Refusal): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 /** The ways found so far, a new find replacing the old one of its way. */
@@ -87,10 +90,8 @@ export interface SolverRun {
   /** Stops the run, or the suggestion search after it. */
   stop: () => void;
   apply: (s: Suggestion) => void;
-  /** "Bu olmaz": rules a change out and looks again without it. */
-  refuse: (r: Refusal) => void;
-  /** Takes a refusal back and looks again. */
-  unrefuse: (r: Refusal) => void;
+  /** The plan's answers changed (an answer, or an undo): looks again under them. */
+  reconsider: (answers: Answers) => void;
   /** Dismisses the result line and the suggestions. */
   clear: () => void;
 }
@@ -141,13 +142,17 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
           },
         };
         kept.current = [];
-        relaxer.current = startRelax(from, job.current.hint, job.current.options);
+        relaxer.current = startRelax(from, job.current.hint, {
+          ...job.current.options,
+          accepted: from.answers.accepted,
+          refused: from.answers.refused,
+        });
         setAdvice({
           forState: done.state,
           searching: true,
           progress: relaxer.current.progress(),
           suggestions: [],
-          refused: [],
+          answers: from.answers,
         });
       }
       if (done.state === from) return; // nothing was placed
@@ -249,7 +254,13 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       if (forState === undefined) return;
       // The same guard as `finish`: a suggestion describes the timetable it was
       // made for, and pasting it over a different one would undo that edit.
-      change((d) => (d === forState ? applySuggestion(d, s) : d));
+      // What was said yes to is now the data itself; the noes stay for the
+      // next stuck run.
+      change((d) =>
+        samePlan(d, forState)
+          ? { ...applySuggestion(d, s), answers: { accepted: [], refused: d.answers.refused } }
+          : d,
+      );
       dropSearch();
       setAdvice(null);
       setResult(null);
@@ -258,18 +269,31 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
     [advice, change],
   );
 
-  /** Looks again under `refused`, keeping the ways that do not need any of it. */
-  const research = useCallback(
-    (refused: Refusal[]) => {
+  /**
+   * Looks again under the plan's answers, keeping the ways found before that
+   * need nothing refused. Each way starts again from the week it found, and a
+   * run that had to lay the week out again does not first try once more with
+   * it kept.
+   */
+  const reconsider = useCallback(
+    (answers: Answers) => {
       const current = job.current;
-      if (current === null || advice === null) return;
+      if (current === null || advice === null || sameAnswers(answers, advice.answers)) return;
       dropSearch();
-      kept.current = advice.suggestions.filter((s) => !refused.some((r) => uses(s, r)));
-      // Each way starts again from the week it found, and a run that had to
-      // lay the week out again does not first try once more with it kept.
+      const accepting = !sameAnswers(
+        { accepted: answers.accepted, refused: [] },
+        { accepted: advice.answers.accepted, refused: [] },
+      );
+      // A new yes changes what every way costs, so nothing found before stands.
+      kept.current = accepting
+        ? []
+        : advice.suggestions.filter(
+            (s) => !answers.refused.some((r) => suggestionUses(current.from, s, r)),
+          );
       relaxer.current = startRelax(current.from, current.hint, {
         ...current.options,
-        refused,
+        accepted: answers.accepted,
+        refused: answers.refused,
         previous: advice.suggestions,
         startRelaid: advice.suggestions.some((s) => s.relaid),
       });
@@ -278,26 +302,10 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
         searching: true,
         progress: relaxer.current.progress(),
         suggestions: kept.current,
-        refused,
+        answers,
       });
     },
     [advice],
-  );
-
-  const refuse = useCallback(
-    (r: Refusal) => {
-      if (advice === null || advice.refused.some((x) => sameRefusal(x, r))) return;
-      research([...advice.refused, r]);
-    },
-    [advice, research],
-  );
-
-  const unrefuse = useCallback(
-    (r: Refusal) => {
-      if (advice === null) return;
-      research(advice.refused.filter((x) => !sameRefusal(x, r)));
-    },
-    [advice, research],
   );
 
   const clear = useCallback(() => {
@@ -319,10 +327,9 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       start,
       stop,
       apply,
-      refuse,
-      unrefuse,
+      reconsider,
       clear,
     }),
-    [running, progress, result, advice, applied, start, stop, apply, refuse, unrefuse, clear],
+    [running, progress, result, advice, applied, start, stop, apply, reconsider, clear],
   );
 }

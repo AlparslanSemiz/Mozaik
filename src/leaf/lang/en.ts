@@ -1088,20 +1088,96 @@ const EN: Sozluk = {
     "Apply",
   "Uygula, baştan diz":
     "Apply, lay out afresh",
-  "Bu olmaz: {ne}":
-    "Not possible: {ne}",
   "Olmaz":
     "Not possible",
-  "Olmaz dedikleriniz:":
-    "Ruled out:",
   "Geri al: {ne}":
     "Take back: {ne}",
   "(daha iyisi aranıyor)":
     "(looking for a better one)",
+  "Bir dersi başka öğretmene verip daha az saat":
+    "Give one lesson to another teacher, fewer hours",
+  "Birkaç dersi başka öğretmene verip en az saat":
+    "Give a few lessons to other teachers, fewest hours",
+  "Cevaplarınız:":
+    "Your answers:",
+  "Olur":
+    "Yes",
+  "Olur: {ne}":
+    "Yes: {ne}",
+  "Olmaz: {ne}":
+    "Not possible: {ne}",
+  "Olur dedi":
+    "Said yes",
+  "Olur dedikleriniz yetiyor: hafta kuruluyor":
+    "Your yeses are enough: the week can be built",
+  "Olur dediklerinize ek olarak {kosullar} hafta kuruluyor.":
+    "On top of your yeses, the week can be built if {kosullar}.",
+  "Uygulayınca cevaplarınız veriye yazılır ve hafta yerleşir.":
+    "Applying writes your answers into the data and lays the week out.",
+  "Izgarada göster":
+    "Show on the grid",
+  "Sorular":
+    "Questions",
+  "Soruları gizle":
+    "Hide questions",
+  "Soruları kopyala":
+    "Copy questions",
+  "Soruları yazdır":
+    "Print questions",
+  "Sorular panoya kopyalandı.":
+    "Questions copied to the clipboard.",
+  "Kopyalamak için Ctrl+C’ye basın":
+    "Press Ctrl+C to copy",
+  "Siz":
+    "You",
+  "Sizin kararınız":
+    "Your decision",
+  "Öğretmenlere sorulacaklar":
+    "Questions for the teachers",
+  "{gun} {saatler}. saate gelebilir misiniz?":
+    "Can you come on {gun} at period {saatler}?",
+  "{gun} {saatler}. saatlere gelebilir misiniz?":
+    "Can you come on {gun} at periods {saatler}?",
+  "Bir günde {eski} yerine {yeni} saat girebilir misiniz?":
+    "Can you teach {yeni} hours in a day instead of {eski}?",
+  "Art arda {eski} yerine {yeni} saat girebilir misiniz?":
+    "Can you teach {yeni} hours in a row instead of {eski}?",
+  "{ders} dersini verebilir misiniz?":
+    "Can you teach {ders}?",
+  "Yalnız bu saatler olmaz ({gun} {saatler}. saat)":
+    "Only these hours are not possible ({gun}, period {saatler})",
+  "{gun} hiç gelemez":
+    "Cannot come on {gun} at all",
+  "{gun} en fazla {n} saat gelebilir":
+    "Can come on {gun} for at most {n} {n:hour|hours}",
+  "{kim} için hiçbir değişiklik olmasın":
+    "No change at all for {kim}",
+  "{kim} {gun} en fazla {n} saat":
+    "{kim} on {gun}: at most {n} {n:hour|hours}",
+  "{kim}: hiçbir değişiklik":
+    "{kim}: no change at all",
+  "Önizleme":
+    "Preview",
+  "Önizleme: {yol}":
+    "Preview: {yol}",
+  "Önizlemeyi kapat":
+    "Close preview",
+  "Hangi hafta":
+    "Which week",
+  "Şu anki":
+    "Current",
+  "Önerilen":
+    "Suggested",
+  "{n} öğretmen saati açılıyor":
+    "{n} teacher {n:hour opens|hours open}",
+  "{n} ders yer değiştiriyor":
+    "{n} {n:lesson moves|lessons move}",
+  "{ust} {alt}, açılan öğretmen saatinde":
+    "{ust} {alt}, in a teacher hour being opened",
+  "{ust} {alt}, yeri değişiyor":
+    "{ust} {alt}, moves",
   "Kurulması için":
     "To build the week",
-  "Ayrıntıyı gizle":
-    "Hide details",
   "Ayrıntı":
     "Details",
   "Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.":

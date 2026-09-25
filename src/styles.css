@@ -1874,6 +1874,172 @@ table.list tbody tr {
   margin-bottom: var(--space-1);
 }
 
+/* A way's questions (TODO B5.11, "cevap defteri"): one line per question, the
+   teacher's short name first because that is who the father rings, and the
+   two answers at the end of the line where the eye finishes reading it. */
+.question-list {
+  list-style: none;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+
+.question {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.question-who {
+  min-width: 3em;
+}
+
+.question-answers {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.suggestion-list > li.previewed {
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-left: var(--space-2);
+}
+
+/* The answers so far: a yes and a no must read apart without colour, so each
+   chip starts with its mark (✓ / ✗) and the colour only repeats it. */
+.chip.chip-yes {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.chip.chip-no {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+/* THE PREVIEW (TODO B5.11): a way's week on the grid before it is applied.
+   What does not change steps back so what does stands out; the two marks are
+   a line and a sign each, never a colour alone (the grid's rule, Grid.tsx). */
+.preview-bar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 var(--space-4) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--warn-bg);
+  border-radius: var(--r-md);
+}
+
+.segmented {
+  display: inline-flex;
+}
+
+.segmented > .btn:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.segmented > .btn:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.segmented > .btn[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.preview-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.mark-key {
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin-left: var(--space-3);
+  border-radius: var(--r-xs);
+  background: var(--paper);
+}
+
+.program-body.previewing .card:not(.mark-opened):not(.mark-moved) {
+  opacity: 0.35;
+}
+
+/* The hour to ask a teacher about is the loud one: a thick line, a hatch over
+   the card's own colour and a "+" (the user's choice, 2026-09-25). A lesson
+   that only moves is a thin dashed line and no sign: on the father's week
+   some 140 of 199 blocks move, and marking them as loudly buried the four
+   hours that matter. */
+.card.mark-opened,
+.mark-key.mark-opened {
+  outline: 4px solid var(--warn);
+  outline-offset: -4px;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 5px,
+    color-mix(in srgb, var(--warn) 35%, transparent) 5px 8px
+  );
+}
+
+.card.mark-moved,
+.mark-key.mark-moved {
+  outline: 1px dashed var(--text);
+  outline-offset: -2px;
+}
+
+.card-mark {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* The questions on paper: only in print, and only while that print is the
+   questions' (`html.print-questions`, set by Suggestions.tsx for one print). */
+.question-print {
+  display: none;
+}
+
+@media print {
+  html.print-questions #root {
+    display: none !important;
+  }
+
+  html.print-questions .question-print {
+    display: block;
+    padding: 12mm;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .question-print table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .question-print th,
+  .question-print td {
+    border: 1px solid #444;
+    padding: 3mm;
+    text-align: left;
+  }
+
+  .question-print-box {
+    white-space: nowrap;
+    width: 20mm;
+  }
+}
+
 .suggestion-refused {
   display: flex;
   flex-wrap: wrap;

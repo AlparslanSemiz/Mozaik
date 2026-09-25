@@ -24,6 +24,8 @@ import type {
   Id,
   Lesson,
   ProgramVariant,
+  Refusal,
+  Relaxation,
   Room,
   RuleLevel,
   State,
@@ -68,6 +70,68 @@ const asCount = (x: unknown, fallback: number): number =>
 /** A limit box: a positive number, or null meaning "use the default". */
 const asBox = (x: unknown): number | null =>
   typeof x === 'number' && Number.isFinite(x) && x > 0 ? Math.round(x) : null;
+
+/**
+ * v15: the answers to a suggestion. Each entry is checked field by field and
+ * one that does not read is dropped alone, not the whole file: an answer is
+ * a note for the next search, and losing one costs a question asked again.
+ * Whether its teacher, lesson or day still exist is `sanitize`'s question.
+ */
+function readAnswers(x: unknown): { accepted: Relaxation[]; refused: Refusal[] } {
+  const box = asMap<unknown>(x);
+  const id = (v: unknown) => typeof v === 'string' && v !== '';
+  const n = (v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+  const list = (v: unknown) => Array.isArray(v) && v.length > 0 && v.every(n);
+  const change = (v: unknown): v is Relaxation => {
+    const c = asMap<unknown>(v);
+    switch (c['kind']) {
+      case 'teacherHour':
+        return id(c['teacherId']) && n(c['day']) && n(c['hour']);
+      case 'lessonDayLimit':
+        return id(c['lessonId']) && n(c['limit']);
+      case 'teacherDayLimit':
+      case 'teacherConsecutive':
+        return id(c['teacherId']) && n(c['limit']);
+      case 'lessonTeacher':
+        return id(c['lessonId']) && id(c['teacherId']);
+      case 'blockShape':
+        return id(c['lessonId']) && Array.isArray(c['blocks']) && c['blocks'].every(n);
+      case 'weeklyHours':
+        return (
+          id(c['lessonId']) && n(c['hours']) && Array.isArray(c['blocks']) && c['blocks'].every(n)
+        );
+      default:
+        return false;
+    }
+  };
+  const refusal = (v: unknown): v is Refusal => {
+    const r = asMap<unknown>(v);
+    switch (r['kind']) {
+      case 'teacherDay':
+        return id(r['teacherId']) && n(r['day']);
+      case 'teacherHours':
+        return id(r['teacherId']) && n(r['day']) && list(r['hours']);
+      case 'teacherCap':
+        return id(r['teacherId']) && n(r['day']) && n(r['max']);
+      case 'teacher':
+      case 'teacherDayLimit':
+      case 'teacherConsecutive':
+        return id(r['teacherId']);
+      case 'lessonTeacher':
+        return id(r['lessonId']) && id(r['teacherId']);
+      case 'lessonDayLimit':
+      case 'blockShape':
+      case 'weeklyHours':
+        return id(r['lessonId']);
+      default:
+        return false;
+    }
+  };
+  return {
+    accepted: asArray<unknown>(box['accepted'], []).filter(change),
+    refused: asArray<unknown>(box['refused'], []).filter(refusal),
+  };
+}
 
 function asLevel(x: unknown, fallback: RuleLevel): RuleLevel {
   return x === 'off' || x === 'warn' || x === 'block' ? x : fallback;
@@ -220,6 +284,7 @@ function migrateV2toV3(raw: LegacyV2): State {
       },
     ],
     activeProgramId: DEFAULT_PROGRAM_ID,
+    answers: { accepted: [], refused: [] },
   };
 }
 
@@ -333,6 +398,7 @@ export function parseState(text: string): State | null {
     version === 11 ||
     version === 12 ||
     version === 13 ||
+    version === 14 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -446,6 +512,8 @@ export function parseState(text: string): State | null {
               },
             ],
       activeProgramId: Number(version) >= 12 ? asText(g.activeProgramId, '') : DEFAULT_PROGRAM_ID,
+      // v15. Every file below it predates the answers, and none is right.
+      answers: readAnswers((raw as { answers?: unknown }).answers),
     };
   } else {
     return null; // an unknown (newer) version is not guessed at

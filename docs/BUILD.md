@@ -83,7 +83,10 @@ iki eşik yine on üç kilobayt kadar pay bırakacak yere çekildi; gerekçesi
 WORKLOG'un 2026-09-24 girdisinde. Önerinin yolları ve worker'ı (B5.10) ham
 boyu on üç kilobayt daha büyüttü, çoğu dört dile giren otuz beş cümle; ham eşik
 yine on üç kilobayt kadar pay bırakacak yere çekildi, brotli eşiği aşılmadığı
-için yerinde (WORKLOG, 2026-09-25).
+için yerinde (WORKLOG, 2026-09-25). Cevap defteri, önizleme ve karma yollar (B5.11)
+ham boyu otuz iki kilobayt büyüttü, brotli hâlini eşiğin 0,7 kB altına getirdi;
+iki eşik de on iki buçuk kilobayt kadar pay bırakacak yere çekildi, ham 1 124 000,
+brotli 284 000 (WORKLOG, aynı gün, ikinci girdi).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

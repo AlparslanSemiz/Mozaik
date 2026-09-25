@@ -21,7 +21,18 @@ import {
   runLength,
   teacherDayCount,
 } from './rules';
-import type { ClassGroup, Lesson, Room, RuleName, State, Id, Teacher, View } from '../leaf/types';
+import type {
+  ClassGroup,
+  Id,
+  Lesson,
+  Refusal,
+  Relaxation,
+  Room,
+  RuleName,
+  State,
+  Teacher,
+  View,
+} from '../leaf/types';
 
 // Re-exported so call sites keep importing keys from here.
 export { closedKey, placementKey };
@@ -1328,8 +1339,39 @@ export function sanitize(d: State): State {
     unavailable[key] = 1;
   }
 
+  // The answers (schema v15) name teachers, lessons, days and hours like the
+  // grid does, and are cleaned the same way: one whose teacher or lesson was
+  // deleted, or whose day or hour is gone, is dropped (pitfalls 4 and 5).
+  const lessonIds = new Set(lessons.map((x) => x.id));
+  const inWeek = (day: number, hour?: number) =>
+    Number.isInteger(day) &&
+    day >= 0 &&
+    day < dayCount &&
+    (hour === undefined || (Number.isInteger(hour) && hour >= 0 && hour < hourCount));
+  const given = d.answers ?? { accepted: [], refused: [] };
+  const answerOk = (x: Relaxation | Refusal): boolean => {
+    if ('teacherId' in x && !teacherIds.has(x.teacherId)) return false;
+    if ('lessonId' in x && !lessonIds.has(x.lessonId)) return false;
+    if ('hour' in x && !inWeek(x.day, x.hour)) return false;
+    if ('hours' in x && x.kind === 'teacherHours' && !x.hours.every((h) => inWeek(x.day, h)))
+      return false;
+    if ('day' in x && !inWeek(x.day)) return false;
+    return true;
+  };
+  const accepted = given.accepted.filter(answerOk);
+  const refused = given.refused.filter(answerOk);
+  let answers = given;
+  if (
+    d.answers === undefined ||
+    accepted.length !== given.accepted.length ||
+    refused.length !== given.refused.length
+  ) {
+    answers = { accepted, refused };
+    changed = true;
+  }
+
   if (!changed) return d;
-  return { ...d, classes, lessons, unavailable, programs, activeProgramId };
+  return { ...d, classes, lessons, unavailable, programs, activeProgramId, answers };
 }
 
 export type PinScope =

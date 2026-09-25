@@ -153,6 +153,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     unavailable: spec.unavailable ?? {},
     programs: [{ ...blankProgram(), placements: spec.placements ?? {} }],
     activeProgramId: DEFAULT_PROGRAM_ID,
+    answers: { accepted: [], refused: [] },
   };
 }
 

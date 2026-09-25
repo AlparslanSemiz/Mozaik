@@ -57,6 +57,9 @@ import {
   setAvailability,
   setWholeWeek,
   updateSettings,
+  answerNo,
+  answerYes,
+  dropAnswer,
 } from './pure/entities';
 import type { Day, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
@@ -112,6 +115,7 @@ function build(): State {
       },
     ],
     activeProgramId: 'program-1',
+    answers: { accepted: [], refused: [] },
   };
 }
 
@@ -1632,3 +1636,55 @@ describe('reorderList', () => {
   });
 });
 import { activeProgram, blankProgram } from './pure/programs';
+
+// TODO B5.11: the father's answers to a suggestion are the plan's data (schema
+// v15). They name teachers, lessons and days like the grid does, so they move
+// and go with them, and a new answer takes back an old one it contradicts.
+describe('cevaplar', () => {
+  const hour = (day: number, h: number) => ({
+    kind: 'teacherHour' as const,
+    teacherId: 'oMC',
+    day,
+    hour: h,
+  });
+
+  it("Olur, aynı şeye verilmiş Olmaz'ı geri alıyor; Olmaz da Olur'u", () => {
+    const d = answerNo(build(), { kind: 'teacherDay', teacherId: 'oMC', day: 1 });
+    expect(d.answers.refused).toHaveLength(1);
+    const yes = answerYes(d, [hour(1, 2)]);
+    expect(yes.answers.accepted).toEqual([hour(1, 2)]);
+    expect(yes.answers.refused).toEqual([]);
+    const no = answerNo(yes, { kind: 'teacherHours', teacherId: 'oMC', day: 1, hours: [2] });
+    expect(no.answers.accepted).toEqual([]);
+    expect(no.answers.refused).toHaveLength(1);
+  });
+
+  it("en fazla N saat, fazlası olan Olur'ları kesiyor, sığanları bırakıyor", () => {
+    const d = answerYes(build(), [hour(0, 0), hour(0, 1), hour(0, 2)]);
+    const capped = answerNo(d, { kind: 'teacherCap', teacherId: 'oMC', day: 0, max: 2 });
+    expect(capped.answers.accepted).toEqual([hour(0, 0), hour(0, 1)]);
+  });
+
+  it('tek bir cevap geri alınabiliyor', () => {
+    const d = answerYes(build(), [hour(0, 0), hour(0, 1)]);
+    expect(dropAnswer(d, hour(0, 0)).answers.accepted).toEqual([hour(0, 1)]);
+    expect(dropAnswer(d, hour(2, 3))).toBe(d);
+  });
+
+  it('gün listesi değişince cevap da kayıyor, silinen günün cevabı gidiyor', () => {
+    const d = answerNo(answerYes(build(), [hour(1, 2), hour(0, 1)]), {
+      kind: 'teacherDay',
+      teacherId: 'oMC',
+      day: 2,
+    });
+    const next = remapDays(d, without(d.settings.days, 'Pazartesi'));
+    expect(next.answers.accepted).toEqual([hour(0, 2)]);
+    expect(next.answers.refused).toEqual([{ kind: 'teacherDay', teacherId: 'oMC', day: 1 }]);
+  });
+
+  it('silinen öğretmenin cevabı düşüyor', () => {
+    const d = answerYes(build(), [hour(0, 0)]);
+    const gone = deleteTeacher(d, 'oMC');
+    expect(gone.answers.accepted).toEqual([]);
+  });
+});

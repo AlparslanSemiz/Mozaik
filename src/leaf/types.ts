@@ -197,6 +197,51 @@ export interface Settings {
   subjectShorts: Record<string, string>;
 }
 
+/** One change to the data. There is no class or room variant, on purpose. */
+export type Relaxation =
+  | { kind: 'teacherHour'; teacherId: Id; day: number; hour: number }
+  /** `days`: where the week goes over the old limit, for the sentence. */
+  | { kind: 'lessonDayLimit'; lessonId: Id; limit: number; days?: number[] }
+  | { kind: 'teacherDayLimit'; teacherId: Id; limit: number; days?: number[] }
+  | { kind: 'teacherConsecutive'; teacherId: Id; limit: number; days?: number[] }
+  | { kind: 'lessonTeacher'; lessonId: Id; teacherId: Id }
+  | { kind: 'blockShape'; lessonId: Id; blocks: number[] }
+  /** The hours dropped, and the named blocks what is left keeps. */
+  | { kind: 'weeklyHours'; lessonId: Id; hours: number; blocks: number[] };
+
+/**
+ * "Bu olmaz": a change the reader has ruled out, and the search keeps clear of
+ * in every way it tries next. A teacher's hours are ruled out a DAY at a time —
+ * "KY cannot come on Saturday" — because that is how a teacher answers, and
+ * ruling out only the hours named would bring back the hour next to them.
+ */
+export type Refusal =
+  | { kind: 'teacherDay'; teacherId: Id; day: number }
+  /** Only these hours of the day: the hours beside them may still be asked. */
+  | { kind: 'teacherHours'; teacherId: Id; day: number; hours: number[] }
+  /** At most `max` of the teacher's closed hours on that day ("en fazla 2 saat"). */
+  | { kind: 'teacherCap'; teacherId: Id; day: number; max: number }
+  /** Nothing of this teacher: no closed hour, no limit, no lesson given or taken. */
+  | { kind: 'teacher'; teacherId: Id }
+  | { kind: 'lessonDayLimit'; lessonId: Id }
+  | { kind: 'teacherDayLimit'; teacherId: Id }
+  | { kind: 'teacherConsecutive'; teacherId: Id }
+  | { kind: 'lessonTeacher'; lessonId: Id; teacherId: Id }
+  | { kind: 'blockShape'; lessonId: Id }
+  | { kind: 'weeklyHours'; lessonId: Id };
+
+/**
+ * The father's answers to the suggestion panel ("cevap defteri", schema v15):
+ * the changes he said yes to, made before the next search at no cost to it,
+ * and the ones he said no to, which every search keeps clear of. They are the
+ * plan's data because asking the teachers takes days (the user's decision,
+ * 2026-09-25): closing the program must not lose them.
+ */
+export interface Answers {
+  accepted: Relaxation[];
+  refused: Refusal[];
+}
+
 export interface State {
   schemaVersion: typeof SCHEMA_VERSION;
   settings: Settings;
@@ -214,6 +259,7 @@ export interface State {
   programs: ProgramVariant[];
   /** The grid shown, checked, printed and edited right now. */
   activeProgramId: Id;
+  answers: Answers;
 }
 
 /** One alternative timetable inside a plan. */
@@ -252,5 +298,7 @@ export type View = 'teacher' | 'class';
  *      Uyar" only. Like minPerDay it cannot block a drop while placing (every
  *      hour of a day is a gap violation until the day is full), so it only
  *      ever shows up in findViolations().
+ * v15: State.answers — what the father said yes and no to in the suggestion
+ *      panel. A file below it has none.
  */
-export const SCHEMA_VERSION = 14;
+export const SCHEMA_VERSION = 15;

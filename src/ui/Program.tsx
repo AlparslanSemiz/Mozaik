@@ -44,7 +44,10 @@ import {
 import { compareTr } from '../pure/listview';
 import { useDrag } from '../platform/drag';
 import type { DragData } from '../platform/drag';
+import { samePlan } from '../platform/useSolver';
 import type { SolverRun } from '../platform/useSolver';
+import { applySuggestion, suggestionDiff } from '../pure/relax';
+import type { SuggestionDiff } from '../pure/relax';
 import type { State, Id } from '../leaf/types';
 import { activePinned, activePlacements } from '../pure/programs';
 import { rowMask, setDayMask, setRowMask } from '../pure/programMask';
@@ -54,7 +57,8 @@ import { KIND_ICON } from './steps';
 import Grid from './Grid';
 import type { GridCell, GridMenuTarget, GridRow } from './Grid';
 import LessonPool from './LessonPool';
-import Suggestions from './Suggestions';
+import Suggestions, { wayName } from './Suggestions';
+import type { Preview } from './Suggestions';
 import type { PoolCard } from './LessonPool';
 import { T, useT } from './T';
 import type { Translate } from './T';
@@ -320,6 +324,35 @@ function buildRows(
 }
 
 /**
+ * The preview's marks (TODO B5.11): on the week a way would make, the teacher
+ * hours it opens and the cells whose lesson is new there. Opened wins where a
+ * cell is both, because that is the question the father has to ask.
+ */
+function markPreview(rows: GridRow[], d: State, diff: SuggestionDiff, view: View): GridRow[] {
+  const ix = buildIndex(d);
+  const hourCount = d.settings.hours.length;
+  return rows.map((row) => ({
+    ...row,
+    cells: row.cells.map((cell, i) => {
+      if (cell === null) return cell;
+      const day = Math.floor(i / hourCount);
+      const hour = i % hourCount;
+      const lesson = ix.lessonById.get(cell.lessonId);
+      const teacherId = view === 'teacher' ? row.id : lesson?.teacherId;
+      const classId = view === 'class' ? row.id : lesson?.classId;
+      if (teacherId !== undefined && diff.opened.has(closedKey(teacherId, day, hour)))
+        return { ...cell, mark: 'opened' as const };
+      if (classId !== undefined && diff.moved.has(placementKey(classId, day, hour)))
+        return { ...cell, mark: 'moved' as const };
+      return cell;
+    }),
+  }));
+}
+
+/** What a cell in the preview does when touched: nothing, it is not the timetable. */
+const still = () => {};
+
+/**
  * The pool follows the VIEW, and used to not: in the class view the cards still
  * read class-on-top, teacher-below and were still sorted by teacher, so the
  * cards belonging to one visible row were scattered across the whole pool —
@@ -519,17 +552,78 @@ function Program({
   // `t` is IN the deps and not an import, so a language switch rebuilds the
   // rows. A module-level translator would read the new language only the next
   // time `state` happened to change.
-  const rows = useMemo(
-    () => buildRows(state, ix, view, mask, colorMode, t),
-    [state, ix, view, mask, colorMode, t],
+  // THE PREVIEW (TODO B5.11): a way's week drawn on the grid, marked, before
+  // anything is applied. Nothing in it can be dragged or removed.
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const advice = solver.advice;
+  const stale = advice !== null && !samePlan(state, advice.forState);
+  const previewed =
+    preview === null || advice === null
+      ? null
+      : (advice.suggestions.find((s) => s.family === preview.family) ?? null);
+  useEffect(() => {
+    if (preview !== null && (previewed === null || stale)) setPreview(null);
+  }, [preview, previewed, stale]);
+  const diff = useMemo(
+    () => (previewed === null ? null : suggestionDiff(state, previewed)),
+    [state, previewed],
   );
+  const shown = useMemo(
+    () =>
+      previewed !== null && preview?.show === 'after' ? applySuggestion(state, previewed) : null,
+    [state, previewed, preview?.show],
+  );
+  const rows = useMemo(
+    () =>
+      shown !== null && diff !== null
+        ? markPreview(
+            buildRows(shown, buildIndex(shown), view, mask, colorMode, t),
+            shown,
+            diff,
+            view,
+          )
+        : buildRows(state, ix, view, mask, colorMode, t),
+    [shown, diff, state, ix, view, mask, colorMode, t],
+  );
+  // The first opened hour into view: on the father's week they sit on
+  // Saturday, off the right edge of a 1920 px screen, and the preview is for
+  // seeing exactly those.
+  useEffect(() => {
+    if (shown === null) return;
+    const frame = requestAnimationFrame(() =>
+      document
+        .querySelector('.program-body .card.mark-opened')
+        ?.scrollIntoView({ block: 'nearest', inline: 'center' }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [shown]);
+  useEffect(() => {
+    if (preview === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPreview(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [preview]);
+
+  // The plan's answers are the search's: an answer, or an undo that takes one
+  // back, runs it again (useSolver checks whether anything changed).
+  const { reconsider } = solver;
+  useEffect(() => {
+    if (advice !== null) reconsider(state.answers);
+  }, [state.answers, advice, reconsider]);
   const {
     cards,
     completed,
     total: poolTotal,
   } = useMemo(
-    () => buildPool(state, ix, view, mask, poolSort, poolFilter, colorMode, t),
-    [state, ix, view, mask, poolSort, poolFilter, colorMode, t],
+    // In the preview the tray is the suggested week's too: what it leaves
+    // waiting, which for a way that builds the week is nothing.
+    () =>
+      shown === null
+        ? buildPool(state, ix, view, mask, poolSort, poolFilter, colorMode, t)
+        : buildPool(shown, buildIndex(shown), view, mask, poolSort, poolFilter, colorMode, t),
+    [shown, state, ix, view, mask, poolSort, poolFilter, colorMode, t],
   );
   /**
    * The branches with something still waiting — the only ones worth offering.
@@ -943,31 +1037,67 @@ function Program({
         )}
       </div>
 
-      {solver.advice !== null && (
+      {advice !== null && (
         <Suggestions
-          advice={solver.advice}
+          advice={advice}
           state={state}
+          stale={stale}
+          preview={preview}
+          onPreview={setPreview}
           onApply={solver.apply}
-          onRefuse={solver.refuse}
-          onUnrefuse={solver.unrefuse}
+          onAnswer={change}
           onClose={solver.clear}
         />
+      )}
+
+      {previewed !== null && preview !== null && diff !== null && (
+        <div className="preview-bar" role="region" aria-label={t('Önizleme')}>
+          <b>{t('Önizleme: {yol}', { yol: wayName(t, previewed.family) })}</b>
+          <span className="segmented" role="group" aria-label={t('Hangi hafta')}>
+            <button
+              className="btn"
+              aria-pressed={preview.show === 'before'}
+              onClick={() => setPreview({ ...preview, show: 'before' })}
+            >
+              {t('Şu anki')}
+            </button>
+            <button
+              className="btn"
+              aria-pressed={preview.show === 'after'}
+              onClick={() => setPreview({ ...preview, show: 'after' })}
+            >
+              {t('Önerilen')}
+            </button>
+          </span>
+          <span className="preview-legend">
+            <span className="mark-key mark-opened" aria-hidden="true" />
+            {t('{n} öğretmen saati açılıyor', { n: diff.opened.size })}
+            <span className="mark-key mark-moved" aria-hidden="true" />
+            {t('{n} ders yer değiştiriyor', { n: diff.movedBlocks })}
+          </span>
+          <button className="btn primary" disabled={stale} onClick={() => solver.apply(previewed)}>
+            {previewed.relaid ? t('Uygula, baştan diz') : t('Uygula')}
+          </button>
+          <button className="btn" onClick={() => setPreview(null)}>
+            {t('Önizlemeyi kapat')}
+          </button>
+        </div>
       )}
 
       {/* The instrument and the pool, side by side. The pool used to sit under
           the grid and cost it 215px of height; down the right it takes width
           from a table that was already scrolling. */}
-      <div className="program-body">
+      <div className={shown === null ? 'program-body' : 'program-body previewing'}>
         <Grid
           settings={state.settings}
           rows={rows}
           dayIndices={dayIndices}
           dayModes={mask.days}
           firstColumnTitle={view === 'teacher' ? t('Öğretmen') : t('Sınıf')}
-          onCellRemove={cellRemove}
-          onCellMoveStart={cellMoveStart}
-          onCellPin={pinCell}
-          onMenu={setMenuTarget}
+          onCellRemove={shown === null ? cellRemove : still}
+          onCellMoveStart={shown === null ? cellMoveStart : still}
+          onCellPin={shown === null ? pinCell : still}
+          onMenu={shown === null ? setMenuTarget : still}
           menuOpen={active && menuOpen}
           onMenuOpenChange={setMenuOpen}
           menu={
