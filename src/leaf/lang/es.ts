@@ -388,8 +388,6 @@ const ES: Sozluk = {
     "{yerlesen} de {toplam} bloques colocados.",
   "{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.":
     "{bas} {ders}: no se pudieron colocar {saat} horas. {sebep}{digerleri}.",
-  dönecek: "volverá",
-  döndü: "ha vuelto",
   "Henüz dizilecek ders yok.": "Todavía no hay clases que montar.",
   "Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.":
     "Cuando vuelva aquí las clases estarán esperando como tarjetas en la bandeja de abajo.",
@@ -890,6 +888,9 @@ const ES: Sozluk = {
   "{ders} dersi havuza dönecek": "la clase {ders} volverá a la bandeja",
   "{dersler} dersleri havuza dönecek":
     "las clases {dersler} volverán a la bandeja",
+  "{ders} dersi havuza döndü": "la clase {ders} ha vuelto a la bandeja",
+  "{dersler} dersleri havuza döndü":
+    "las clases {dersler} han vuelto a la bandeja",
   "{gun} {saat} saatinde": "el {gun} a la hora {saat}",
   "{kim} {ne_zaman} müsait değil": "{kim} no está disponible {ne_zaman}",
   "{sinif} sınıfı {ne_zaman} kapalı":

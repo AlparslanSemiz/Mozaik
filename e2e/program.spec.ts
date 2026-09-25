@@ -1702,6 +1702,27 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     await expect(page.locator('.toast').last()).toContainText('510 · MÇ dersi havuza döndü');
   });
 
+  test('dil yenilemesiz değişince bırakma bildirimi yeni dilde ve geçmiş zamanda', async ({
+    page,
+  }) => {
+    // Two faults in one sentence (TODO §8d). The drop callback held the `t` of
+    // the language the Program tab was mounted in, and the past tense was the
+    // future one with "dönecek" swapped for "döndü", which French never had.
+    await loadWorld(page, EVICT_WORLD);
+    await openSettings(page, 'Görünüm');
+    await page.getByRole('button', { name: 'Français', exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'fr');
+    await page.getByRole('button', { name: 'Emploi du temps', exact: true }).click();
+
+    await grabCard(page, 'AV');
+    await hover(page, 0, 0);
+    await page.mouse.up();
+
+    await expect(page.locator('.toast').last()).toHaveText(
+      /le cours 510 · MÇ est retourné dans le bac/,
+    );
+  });
+
   test('bütün hamle TEK geri-al adımı', async ({ page }) => {
     await loadWorld(page, EVICT_WORLD);
     await grabCard(page, 'AV');

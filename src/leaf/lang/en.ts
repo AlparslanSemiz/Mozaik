@@ -385,8 +385,6 @@ const EN: Sozluk = {
   "{yerlesen}/{toplam} blok yerleşti.": "{yerlesen} of {toplam} blocks placed.",
   "{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.":
     "{bas} {ders}: {saat} hours could not be placed. {sebep}{digerleri}.",
-  dönecek: "will go back",
-  döndü: "went back",
   "Henüz dizilecek ders yok.": "There are no lessons to lay out yet.",
   "Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.":
     "When you come back here the lessons will be waiting as cards in the tray below.",
@@ -879,6 +877,9 @@ const EN: Sozluk = {
   "{ders} dersi havuza dönecek": "the {ders} lesson will go back to the tray",
   "{dersler} dersleri havuza dönecek":
     "the {dersler} lessons will go back to the tray",
+  "{ders} dersi havuza döndü": "the {ders} lesson went back to the tray",
+  "{dersler} dersleri havuza döndü":
+    "the {dersler} lessons went back to the tray",
   "{gun} {saat} saatinde": "on {gun} at period {saat}",
   "{kim} {ne_zaman} müsait değil": "{kim} is not available {ne_zaman}",
   "{sinif} sınıfı {ne_zaman} kapalı": "class {sinif} is closed {ne_zaman}",

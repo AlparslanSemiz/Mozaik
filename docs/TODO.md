@@ -1195,7 +1195,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       deseni. `LessonEdit.tsx` aynı işi önizleme çağrısıyla doğru yapıyor.
       Düzeltildi (2026-09-11, `492c8c2`): sayı `change()`'den önce bir önizlemeden geliyor.
       Yeni E2E (`panel.spec.ts`) düzeltmeden önce "510 dersi AV öğretmenine geçti." okuyordu.
-- [x] **Çevrilmemiş sınır cümlesi — DÜZELTİLDİ (2026-09-26).** `constraints.ts`'teki "art
+- [x] **Çevrilmemiş sınır cümlesi — DÜZELTİLDİ (2026-09-25).** `constraints.ts`'teki "art
       arda en fazla N saat" mesajı `t()`'den geçmiyordu, beş dilde de Türkçe çıkıyordu. Artık
       komşu kuralın deseniyle çevriliyor. Yeni birim testi (`constraints.test.ts`, "cümle
       arayüzün dilinde çıkıyor") düzeltmeden önce İngilizcede Türkçe cümleyi okuyordu.
@@ -1237,8 +1237,9 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       `locale: 'tr-TR'`. Planlar 98 ve 292 ile dil 83 dahil yedi test dört işçide beşer kez: 40/40.
 - [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
-      2026-09-11'de sınıflandırıldı, satır numaraları bugünkü. `Program.tsx:506`, `drop`'un
-      `t`'si: kusur, üretildi, aşağıdaki ayrı madde. `useRowOrder.tsx:149`, `grip`'in `t`'si:
+      2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
+      `t`'si: kusur, üretildi, aşağıdaki ayrı madde; 2026-09-25'te düzeldi, geri çağırım artık
+      `t` kullanmıyor. `useRowOrder.tsx:149`, `grip`'in `t`'si:
       bugün kusura yol açmıyor, çünkü dil yalnız Ayarlar → Görünüm'den değişiyor ve liste
       ekranları (Okul adımları, Dersler) o sırada sökülü, geri dönülünce kanca yeniden kuruluyor.
       Liste açıkken dil değiştiren bir yol eklenirse tutamağın adı ve ipucu eski dilde kalır.
@@ -1248,13 +1249,19 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       hesap, komut listesi `ui` her değiştiğinde yeniden kuruluyor ama içeriği ona bağlı değil.
       `App.test.tsx:16`'da kullanılmayan bir `eslint-disable` yorumu var, o bir
       `exhaustive-deps` uyarısı değil.
-- [ ] **Program'da bırakınca çıkan bildirim, dil yenilemesiz değişince eski dilin kelimesini
-      arıyor (2026-09-11).** `Program.tsx`'in `drop` geri çağırımı bildirimi
+- [x] **Program'da bırakınca çıkan bildirim, dil yenilemesiz değişince eski dilin kelimesini
+      arıyor (2026-09-11) — DÜZELTİLDİ (2026-09-25).** `Program.tsx`'in `drop` geri çağırımı bildirimi
       `evictionNotice(...).replace(t('dönecek'), t('döndü'))` ile kuruyor ve `useCallback`
       bağımlılıklarında `t` yok. Program `Activity` içinde sekme değişince sökülmüyor, bu yüzden
       Ayarlar'da dil değişince geri çağırım programdaki ilk değişikliğe kadar eski `t`'yi tutuyor.
       Üretildi: Türkçe kurulup İngilizceye geçilince "the 510 · MÇ lesson will go back to the
-      tray", yenilendikten sonra "went back". Ürün kusuru, düzeltilmedi. Kayıt TESTFINDINGS'te.
+      tray", yenilendikten sonra "went back". Kayıt TESTFINDINGS'te.
+      2026-09-25'te ölçülünce kusur daha genişti: `.replace` yenilemeden sonra da Fransızcada
+      hiç tutmuyordu ("retournera"), Almanca çoğulda cümleyi değiştirmiyordu, İspanyolca
+      çoğulda "ha vuelton" yazıyordu. Geçmiş zaman artık kendi anahtarı
+      (`evictionNotice(…, true)`), ve geri çağırım `t`'yi hiç kullanmıyor. Yeni E2E
+      (`program.spec.ts`, "dil yenilemesiz değişince bırakma bildirimi…") düzeltmeden önce
+      "retournera" okuyordu.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
       `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
       sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da

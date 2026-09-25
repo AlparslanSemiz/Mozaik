@@ -26,6 +26,17 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-25 · vite-node ve npx playwright test · "Havuza döndü" bildirimi dört dilin ikisinde
+Bulgu: bırakınca çıkan bildirim gelecek zaman cümlesinden `.replace(t('dönecek'),
+t('döndü'))` ile kuruluyordu. Beş dilde ölçüldü: Türkçe ve İngilizce doğru; Almanca
+çoğul "gehen zurück" diye gelecekte kalıyor; İspanyolca çoğul "ha vuelton"; Fransızca
+iki biçimde de "retournera" ve "retourneront". Dil yenilemesiz değişince eski dilin
+kelimesini araması (2026-09-11 kaydı) bunun üstüne geliyordu.
+Tür: ürün kusuru
+Ne yapıldı: düzeltildi. Geçmiş zaman kendi anahtarı, bir birim testi dört dili soruyor,
+bir E2E yenilemesiz Fransızcaya geçip bırakıyor ve eski kaynakla kırmızı.
+Kalıcı kural: yok
+
 ### 2026-09-25 · CP-SAT ve node, babanın dosyası · Öneri babanın programını baştan diziyor
 Bulgu: Babanın dosyasında 199 blok dizili, ve dizili dersler yerinde kalırken hiçbir
 yolda hafta yok. Arama o yüzden yeniden diziyor, ve her yol 199 bloğun 140–149'unu

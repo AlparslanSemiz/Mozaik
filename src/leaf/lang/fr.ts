@@ -390,8 +390,6 @@ const FR: Sozluk = {
   "{yerlesen}/{toplam} blok yerleşti.": "{yerlesen} blocs sur {toplam} placés.",
   "{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.":
     "{bas} {ders} : {saat} heures n’ont pas pu être placées. {sebep}{digerleri}.",
-  dönecek: "reviendra",
-  döndü: "est revenu",
   "Henüz dizilecek ders yok.": "Il n’y a pas encore de cours à placer.",
   "Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.":
     "À votre retour, les cours attendront sous forme de cartes dans le bac en bas.",
@@ -898,6 +896,9 @@ const FR: Sozluk = {
   "{ders} dersi havuza dönecek": "le cours {ders} retournera dans le bac",
   "{dersler} dersleri havuza dönecek":
     "les cours {dersler} retourneront dans le bac",
+  "{ders} dersi havuza döndü": "le cours {ders} est retourné dans le bac",
+  "{dersler} dersleri havuza döndü":
+    "les cours {dersler} sont retournés dans le bac",
   "{gun} {saat} saatinde": "le {gun} à l’heure {saat}",
   "{kim} {ne_zaman} müsait değil": "{kim} n’est pas disponible {ne_zaman}",
   "{sinif} sınıfı {ne_zaman} kapalı": "la classe {sinif} est fermée {ne_zaman}",

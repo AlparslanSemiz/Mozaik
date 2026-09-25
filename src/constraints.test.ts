@@ -29,6 +29,9 @@ import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
 import { aktifDil, setAktifDil } from './leaf/i18n';
 import './leaf/lang/en';
+import './leaf/lang/de';
+import './leaf/lang/es';
+import './leaf/lang/fr';
 
 // A small, readable world: 2 days x 4 hours.
 //   room A: class 510, class 511      (shared room)
@@ -1180,6 +1183,37 @@ describe('dropMap — üstüne bırakma', () => {
     const x2 = ix.lessonById.get('x2')!;
     expect(evictionNotice(ix, [x1])).toBe('510 · MÇ dersi havuza dönecek');
     expect(evictionNotice(ix, [x1, x2])).toContain('dersleri');
+    expect(evictionNotice(ix, [x1], true)).toBe('510 · MÇ dersi havuza döndü');
+  });
+
+  it('evictionNotice geçmiş zamanı her dilde kendi cümlesiyle söylüyor', () => {
+    // The toast after a drop used to be the future sentence with "dönecek"
+    // replaced by "döndü". That left French and the German plural in the
+    // future and turned the Spanish plural into "ha vuelton" (TODO §8d).
+    const d = build();
+    const ix = buildIndex(d);
+    const x1 = ix.lessonById.get('x1')!;
+    const x2 = ix.lessonById.get('x2')!;
+    const geriAl = aktifDil();
+    try {
+      for (const [dil, one, many] of [
+        ['en', 'the 510 · MÇ lesson went back to the tray', 'lessons went back to the tray'],
+        [
+          'de',
+          'das Fach 510 · MÇ ist zurück ins Ablagefach gegangen',
+          'sind zurück ins Ablagefach gegangen',
+        ],
+        ['es', 'la clase 510 · MÇ ha vuelto a la bandeja', 'han vuelto a la bandeja'],
+        ['fr', 'le cours 510 · MÇ est retourné dans le bac', 'sont retournés dans le bac'],
+      ] as const) {
+        setAktifDil(dil);
+        expect(evictionNotice(ix, [x1], true)).toBe(one);
+        expect(evictionNotice(ix, [x1, x2], true)).toContain(many);
+        expect(evictionNotice(ix, [x1, x2], true)).not.toBe(evictionNotice(ix, [x1, x2]));
+      }
+    } finally {
+      setAktifDil(geriAl);
+    }
   });
 });
 

@@ -528,7 +528,8 @@ function Program({
             : evictionNotice(
                 ix,
                 pushedOut.map((id) => ix.lessonById.get(id)).filter((x) => x !== undefined),
-              ).replace(t('dönecek'), t('döndü'));
+                true,
+              );
 
       change((d) => {
         if (verdict === undefined) return d;

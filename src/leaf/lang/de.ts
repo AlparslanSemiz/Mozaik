@@ -390,8 +390,6 @@ const DE: Sozluk = {
     "{yerlesen} von {toplam} Blöcken gelegt.",
   "{bas} {ders}: {saat} saat yerleşemedi. {sebep}{digerleri}.":
     "{bas} {ders}: {saat} Stunden konnten nicht gelegt werden. {sebep}{digerleri}.",
-  dönecek: "geht zurück",
-  döndü: "ging zurück",
   "Henüz dizilecek ders yok.": "Es gibt noch keine Fächer zu legen.",
   "Buraya döndüğünüzde dersler alttaki havuzda kartlar hâlinde bekliyor olacak.":
     "Wenn Sie hierher zurückkehren, warten die Fächer als Karten im Ablagefach darunter.",
@@ -892,6 +890,9 @@ const DE: Sozluk = {
   "{ders} dersi havuza dönecek": "das Fach {ders} geht zurück ins Ablagefach",
   "{dersler} dersleri havuza dönecek":
     "die Fächer {dersler} gehen zurück ins Ablagefach",
+  "{ders} dersi havuza döndü": "das Fach {ders} ist zurück ins Ablagefach gegangen",
+  "{dersler} dersleri havuza döndü":
+    "die Fächer {dersler} sind zurück ins Ablagefach gegangen",
   "{gun} {saat} saatinde": "am {gun} in der {saat}. Stunde",
   "{kim} {ne_zaman} müsait değil": "{kim} ist {ne_zaman} nicht verfügbar",
   "{sinif} sınıfı {ne_zaman} kapalı":

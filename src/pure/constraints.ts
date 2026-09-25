@@ -968,15 +968,27 @@ function roomOf(ix: Index, lesson: Lesson): Id | null {
   return ix.classById.get(lesson.classId)?.roomId ?? null;
 }
 
-/** What the reader is about to lose, named. */
-export function evictionNotice(ix: Index, lessons: Lesson[]): string {
+/**
+ * What the reader is about to lose, named — or, with `done`, what they lost.
+ *
+ * The past tense is its own sentence. It used to be the future one with
+ * "dönecek" swapped for "döndü", which only works in Turkish and English: the
+ * French sentence has no "reviendra" to swap, the German plural no "geht
+ * zurück", and the Spanish plural became "ha vuelton".
+ */
+export function evictionNotice(ix: Index, lessons: Lesson[], done = false): string {
   const names = lessons.map((x) => {
     const group = ix.classById.get(x.classId)?.name ?? '?';
     const teacher = ix.teacherById.get(x.teacherId)?.short ?? '?';
     return `${group} · ${teacher}`;
   });
-  return names.length === 1
-    ? t('{ders} dersi havuza dönecek', { ders: names[0]! })
+  if (names.length === 1) {
+    return done
+      ? t('{ders} dersi havuza döndü', { ders: names[0]! })
+      : t('{ders} dersi havuza dönecek', { ders: names[0]! });
+  }
+  return done
+    ? t('{dersler} dersleri havuza döndü', { dersler: names.join(', ') })
     : t('{dersler} dersleri havuza dönecek', { dersler: names.join(', ') });
 }
 
