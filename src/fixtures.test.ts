@@ -530,41 +530,30 @@ describe('şema örnekleri — eksik ve bozuk alanlar', () => {
   });
 
   /**
-   * A pinned defect, not an approved behaviour. Both halves are one cause:
-   * `migrateV2toV3` builds its classes with a bare `asArray`, so the two
-   * normalizers the v3+ path runs over the same list never touch a v1 or v2
-   * file. Measured on 2026-09-12.
+   * `migrateV2toV3` used to build its classes with a bare `asArray`, so the two
+   * normalizers the v3+ path runs over the same list never touched a v1 or v2
+   * file (measured 2026-09-12, TODO 8g, fixed 2026-09-25). This case stood
+   * here as "BİLİNEN KUSUR" pinning the defect, and went red by name when the
+   * fix landed.
    *
-   * No `asBox`, so the class's daily box arrives as `undefined` instead of
-   * `null`. Every rule reading it goes through `??` and cannot tell the two
-   * apart, but `Rules.tsx` asks `!== null`, so opening such a backup lists
-   * EVERY class under "kendi sınırı olan sınıflar" with an empty number
-   * beside it.
-   *
-   * No `spreadColors`, so no class gets a colour, and `paletteColor` paints
-   * all of them with the first entry: measured `#c3a2cd` for both classes of
-   * the v1 and v2 files. A v3 or v4 file carries no class colour either and
-   * comes out 0 and 1, which is what says this is the path and not the shape.
-   * A colour is an identity here (DATA.md) and a repeated one is what makes a
-   * pool card stop pointing at one row.
-   *
-   * Both halves heal on the next save, because a JSON round trip drops an
-   * undefined and the reread goes down the v14 path.
-   *
-   * The fix belongs to the production side (TODO 8g), and this case exists so
-   * it cannot be made quietly: the day that path normalizes, this test goes
-   * red BY NAME and is deleted, the way a cleared accessibility baseline is.
+   * Without `asBox` the class's daily box arrived as `undefined`, and
+   * `Rules.tsx` asks `!== null`, so every class of such a backup was listed
+   * under "kendi sınırı olan sınıflar" with an empty number. Without
+   * `spreadColors` no class had a colour and `paletteColor` painted all of
+   * them with the first entry (`#c3a2cd`). A v3 or v4 file carrying no class
+   * colour comes out 0 and 1, and so must these.
    */
-  it('BİLİNEN KUSUR: v1/v2 yolu sınıfları normalize etmeden geçiriyor', () => {
+  it('v1/v2 yolu sınıfları v3 ve sonrası gibi normalize ediyor', () => {
     for (const version of [1, 2]) {
-      for (const group of parse(version).classes) {
-        expect(group.maxSameLessonPerDay, `v${version} ${group.name} kutusu`).toBeUndefined();
-        expect(group.color, `v${version} ${group.name} rengi`).toBeUndefined();
+      const classes = parse(version).classes;
+      for (const group of classes) {
+        expect(group.maxSameLessonPerDay, `v${version} ${group.name} kutusu`).toBeNull();
       }
+      expect(
+        classes.map((g) => g.color),
+        `v${version} renkleri`,
+      ).toEqual([0, 1]);
     }
-    // The same files' TEACHER boxes and colours do come back right, which is
-    // what says this is one forgotten list rather than a decision about the
-    // old path as a whole.
     expect(parse(1).teachers[0]!.limits.maxConsecutive).toBeNull();
     expect(parse(1).teachers.map((t) => t.color)).toEqual([3, 7]);
   });

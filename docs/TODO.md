@@ -1483,10 +1483,10 @@ ertelendi.
 
 Örnek dosya testine dersin şekli ve ayarlar iddiası eklenirken çıktılar. İkisi de
 üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/fixtures.test.ts`'te
-`BİLİNEN KUSUR` adlı vakada bugünkü hâliyle çivili: düzeltildiği gün o vaka adıyla
-kırmızıya döner ve silinir.
+`BİLİNEN KUSUR` adlı vakada çiviliydi. 2026-09-25'te düzeldi, vaka adıyla kırmızıya döndü
+ve yerini doğru davranışı soran bir teste bıraktı.
 
-- [ ] **v1 ve v2 yolu sınıfları normalize etmeden geçiriyor.** `pure/parseState.ts`'teki
+- [x] **v1 ve v2 yolu sınıfları normalize etmeden geçiriyor — DÜZELTİLDİ (2026-09-25).** `pure/parseState.ts`'teki
       `migrateV2toV3` sınıfları çıplak bir `asArray` ile alıyor, yani v3 ve
       sonrasının aynı liste üstünde koşturduğu `asBox` ile `spreadColors`'tan
       geçmiyorlar. Sonucu iki tane. Sınıfın günlük kutusu `null` yerine `undefined`
@@ -1499,6 +1499,10 @@ kırmızıya döner ve silinir.
       açıldığı oturumla sınırlı, çünkü ilk kayıttan sonra dosya bugünkü yoldan
       okunuyor. Çaresi muhtemelen tek satır: o iki listeyi ana yolun geçtiği
       okuyuculardan geçirmek. Ölçüm TESTFINDINGS'te, 2026-09-12.
+      Düzeltme tek satır oldu: `migrateV2toV3` sınıfları v3 ve sonrasının `asBox` ve
+      `spreadColors`'undan geçiriyor. "BİLİNEN KUSUR" vakası adıyla kırmızıya döndü ve doğru
+      davranışı soran bir teste çevrildi, eski kaynakla kırmızı. v1 ve v2 örnek dosyası
+      Chromium'da açıldı: iki sınıf iki renk, "Günde aynı ders" boş, Kurallar listesi boş.
 
 ## §9. Ham notlar — senin kendi satırların
 

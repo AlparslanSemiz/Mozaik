@@ -274,7 +274,15 @@ function migrateV2toV3(raw: LegacyV2): State {
         limits: { ...NO_TEACHER_LIMITS },
       }),
     ),
-    classes: asArray<ClassGroup>(raw.classes, []),
+    // The same two readers the v3+ path runs over this list. A bare `asArray`
+    // here once left the class box `undefined` and every class uncoloured
+    // (TODO §8g).
+    classes: spreadColors(
+      asArray<ClassGroup>(raw.classes, []).map((c) => ({
+        ...c,
+        maxSameLessonPerDay: asBox(c.maxSameLessonPerDay),
+      })),
+    ),
     lessons: readLessons(asArray<unknown>(raw.lessons, []), 2),
     unavailable: asMap<1>(raw.unavailable),
     programs: [

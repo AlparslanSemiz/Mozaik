@@ -79,7 +79,6 @@ alanı (TODO §8b'deki adımlar).
 - Eski CLAUDE.md havuz çekmecesinin boşalınca kendiliğinden kapandığını yazıyordu. 2026-09-11'de kodda bunu yapan bir yer bulunamadı (`writeDock` yalnız düğmeyle çağrılıyor), ekranda denenmedi.
 - `npm run kontrol` 2026-09-12'de baştan sona yeşil koştu, sekiz gün sonra ilk kez: tarihe bağlı kırmızı kapandı (TODO §8d). Koşulmamış dört katmanın dördü de koşuldu ve üçü birer kusur çıkardı, üçü de bu turdan eski. Devriyenin açık menüsü düzeltildi; `src-tauri/target` deponun eski adresini taşıdığı için `exe:test` derlenmiyordu ve `cargo clean` ile açıldı; mutasyon kum havuzu belge kapılarıyla çelişiyordu ve koşuya kendi yapılandırması verildi.
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
-- Bir v1 ya da v2 yedeği açılınca sınıflar normalleştiricilerden geçmiyor: günlük kutuları `null` yerine `undefined` geliyor ve Ayarlar → Kurallar hepsini "kendi sınırı olan sınıflar" diye listeliyor, ve hiçbiri renk almadığı için hepsi paletin ilk rengiyle boyanıyor. İlk kayıttan sonra kendiliğinden geçiyor. 2026-09-12'de test tarafında ölçüldü (TODO §8g).
 
 **Güncel ölçümler (2026-09-12, kaynaktan sayıldı; çözücü satırları 2026-09-24).**
 
