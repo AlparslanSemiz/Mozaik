@@ -6,7 +6,7 @@ follow [Semantic Versioning](https://semver.org/).
 
 A release is cut with `npm run yayinla -- X.Y.Z`, which closes the Unreleased
 block under the new version and today's date. The in-app "What's new" panel
-reads `src/changelog.ts`, and each GitHub Release page uses
+reads `src/platform/changelog.ts`, and each GitHub Release page uses
 `.github/surum-notu.md`.
 
 Version 1.1.0 was the first published release. Earlier milestones (v0.6 to v1.0)

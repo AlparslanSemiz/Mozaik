@@ -522,7 +522,7 @@ const EN: Sozluk = {
   Sürüm: "Version",
   Yenilikler: "What's new",
   "Eski sürümler": "Older versions",
-  // src/changelog.ts — release-note bullets, translated like any other UI copy
+  // src/platform/changelog.ts — release-note bullets, translated like any other UI copy
   "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
     "Class and teacher gap rules, planning analysis, and Advisor notes were added.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':

@@ -262,7 +262,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       **`.github/surum-notu.md` kaynak DEĞİL çıktı** — ölçüldü: tek seferlik
       statik metin (indirme/kurulum talimatları), birikimli değil, ve
       `dist/`'e hiç girmiyor, yani `file://` altında zaten okunamaz (ilke 3).
-      Gerçek kaynak `src/changelog.ts` — `lang/*.ts` deseninde gömülü, elle
+      Gerçek kaynak `src/platform/changelog.ts` — `lang/*.ts` deseninde gömülü, elle
       düzenlenen tek bir veri dosyası. `Data.tsx`'e `Build`'in **yanına**
       ayrı bir panel eklendi (içine değil — `Build`'in başlığı dört E2E
       dosyasının locator'ı, tuzak 49/74). Güncel sürüm açık, eskiler
@@ -1169,9 +1169,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `bos-ekran.spec.ts`'in üç iddiası düzeltmeden önce kırmızıydı.
 - [ ] **Havuzun boşalınca kendiliğinden kapanması** eski CLAUDE.md'de yazılıydı, kodda
       bulunamadı. Ekranda denenecek, yoksa istenip istenmediğine karar verilecek.
-- [ ] **Bayat kod yorumları:** `App.tsx`'in başı "six sections", `Program.tsx` havuzu
-      "down the right", `App.tsx`'in marka yorumu "detailed", `Appearance.tsx`'in başı
-      ölçeği "1.00 to 1.50" diye anlatıyor.
+- [x] **Bayat kod yorumları — DÜZELTİLDİ (2026-09-25):** `App.tsx`'in başı "six sections",
+      `Program.tsx` havuzu "down the right", `App.tsx`'in marka yorumu "detailed",
+      `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyordu. Aynı turda `App.tsx`'te
+      iki "six" daha, `changelog.ts`'in `surum-notu.md` için "overwrites" demesi (iş akışı
+      dosyayı okuyor) ve dört sözlükle `CHANGELOG.md`'deki `src/changelog.ts` yolu düzeldi.
 - [x] **Ana E2E süiti bu turda koşulmadı.** Bir sonraki arayüz işinde ya da sürümden önce
       `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte. 2026-09-11'de kod refactor
       turunun tabanı olarak koşuldu: 545/555, düşen on testin ayrımı WORKLOG'da, iki bulgu

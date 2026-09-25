@@ -62,7 +62,7 @@ import {
 } from '../platform/programColor';
 
 /**
- * The six sections, along the TOP — on the same row as the document identity
+ * The seven sections, along the TOP — on the same row as the document identity
  * and the file buttons.
  *
  * They spent two versions in a left rail, on the argument that a horizontal
@@ -687,9 +687,9 @@ export default function App() {
           They share a row because none of them needs a row of its own, and
           three separate strips would have cost the grid a teacher. */}
       <header className="topbar" data-section={tab}>
-        {/* Zone zero: WHAT THIS IS. The detailed mark, at the one place on
-            screen with room for it — the tab's favicon is the simplified
-            variant, because six columns at 16 px are a smear (measured).
+        {/* Zone zero: WHAT THIS IS. The simple mark, the same drawing as the
+            tab's favicon: at 1.75rem the detailed one's six columns are a
+            smear too (measured, see Brand below).
 
             Inline rather than <img src>: dist/index.html is ONE file and
             fetches nothing (offline principle, pitfall 32), so an <img> would need
@@ -829,7 +829,7 @@ export default function App() {
             The sentence that used to explain it ("saklanıyor... kaydetmek
             taşımak için") moved to Ayarlar > Veri, next to the report that
             says where the data actually is: it was 400px of teaching on a row
-            that now has six destinations to hold. */}
+            that now has seven destinations to hold. */}
         <button
           className="btn primary"
           onClick={() => {
@@ -1036,7 +1036,7 @@ export default function App() {
               </div>
             )}
 
-            {/* The scroll container lives HERE, not in the six tab components: they
+            {/* The scroll container lives HERE, not in the seven tab components: they
             all used to render their own `.main` and one of them had to opt out
             of scrolling (the grid scrolls inside itself).
 

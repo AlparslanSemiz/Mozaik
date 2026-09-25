@@ -7,8 +7,9 @@
 // migration. It lives in localStorage next to the theme and the rail
 // (`theme.ts`), which is where every other machine preference already is.
 //
-// BUTTONS, NOT A SLIDER. The scale has ELEVEN legal values (1.00 to 1.50 in
-// steps of 0.05 — it said six here while the ceiling was 1.25), so a slider
+// BUTTONS, NOT A SLIDER. The scale has FIFTEEN legal values (0.80 to 1.50 in
+// steps of 0.05, `STEPS` below — it said six here while the ceiling was 1.25,
+// and eleven while the floor was still 1.00), so a slider
 // would invent a continuum that does not exist and then hide which rung it
 // landed on. The buttons reuse the `aria-pressed` state the tool already has
 // four of (`.btn[aria-pressed="true"]`), so there is no new control to learn

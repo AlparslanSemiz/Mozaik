@@ -2,8 +2,8 @@
  * Every release's own line — TODO.md §2 B2.9, "babam her güncelleme
  * alındığında neyin değiştiğini soruyor ben de pek hatırlamıyorum."
  *
- * `.github/surum-notu.md` is NOT this: the release workflow overwrites it
- * with the same static install/download text on every tag, it holds no
+ * `.github/surum-notu.md` is NOT this: the release workflow reads it as the
+ * same static install/download text for every tag's page, it holds no
  * per-version history, and it never ships into `dist/` — so it cannot be
  * read at runtime either (offline principle, nothing is fetched). This file is
  * the single source: bundled at build time exactly like `lang/*.ts`,

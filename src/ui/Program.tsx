@@ -1085,9 +1085,9 @@ function Program({
         </div>
       )}
 
-      {/* The instrument and the pool, side by side. The pool used to sit under
-          the grid and cost it 215px of height; down the right it takes width
-          from a table that was already scrolling. */}
+      {/* The instrument, and the pool under it in a drawer. The pool spent a
+          while down the right; it came back under the grid once it could
+          open into the room the timetable does not use and be closed. */}
       <div className={shown === null ? 'program-body' : 'program-body previewing'}>
         <Grid
           settings={state.settings}
