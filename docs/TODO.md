@@ -1616,9 +1616,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: metin. "Daha yeni bir sürümle yazılmış" dalı yalnız paket dosyasında
       çalışıyor (`src/ui/App.tsx`), `e2e/temel.spec.ts` bugünkü cümleyi bekliyor. DENETIM E6.
       Kapandı 2026-09-27, 36cf42f. Test: temel.spec.ts 29 "bilinmeyen (ileri) şema sürümü tahmin edilmiyor" (yeni cümleye çekildi), fixtures.test.ts "daha yeni sürümün dosyası okunamadı değil yeni sayılıyor".
-- [ ] **DK12 Kimya'nın kısaltması dört dilde "kim?" diye çevrilmiş.**
+- [x] **DK12 Kimya'nın kısaltması dört dilde "kim?" diye çevrilmiş.**
       Şiddet: metin. `src/leaf/lang/*.ts`'te `Kim` anahtarı "Who", "Wer", "Quién", "Qui".
       Müsaitlik şeridindeki "Kim" ile Kimya'nın kısaltması tek anahtara düşüyor. DENETIM X2.
+      Kapandı 2026-09-27, a77b751. Test: i18n.test.ts "bir kısaltma aynı yazılan bir cümleye düşmüyor: Kimya Who değil" ve "her yerleşik kısaltmanın dört dilde de karşılığı var".
 - [ ] **DK13 Dersler şeridinin toplamı çevrilmiyor.**
       Şiddet: metin. İngilizcede "TOTAL 99 ders · 433 saat". §8d'deki "`t()`'den geçmeyen
       JSX metinleri" şüphesinin üretilmiş bir örneği. DENETIM X2.

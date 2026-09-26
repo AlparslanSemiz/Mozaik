@@ -1632,6 +1632,7 @@ taşan düğme yok. Gün adları, şerit başlıkları, menüler ve gerekçe sat
   Sebep sözlüğün yapısında: Türkçe metin anahtar olduğu için Müsaitlik şeridindeki "Kim"
   (kim?) ile Kimya'nın kısaltması "Kim" tek anahtara düşüyor ve biri ötekinin çevirisini
   alıyor. Görüntü: `scratch/denetim/dil/en-4.png`.
+  **Düzeldi (2026-09-27, a77b751).**
 - **DK13 · Dersler şeridinin toplamı çevrilmiyor.** Şiddet: metin. Adımlar: dil English
   ya da Deutsch, Dersler. Beklenen: "99 lessons · 433 hours". Olan: "TOTAL 99 ders · 433
   saat", Almancada "SUMME 99 ders · 433 saat". TODO §8d'deki "`t()`'den geçmeyen JSX
