@@ -95,6 +95,32 @@ test.describe('10. Müsaitlik çizelgesi', () => {
     await expect(table.locator('tbody td.closed')).toHaveCount(6); // one per day
   });
 
+  // DK6: the header with no clock had one line where the others had two, and
+  // vertical centring dropped its number about 7px below its neighbours. The
+  // number's own text is measured (a Range), not the cell (pitfall 140).
+  test('saati boş kalan sütunun numarası ötekilerle aynı hizada', async ({ page }) => {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Müsaitlik' }).click();
+    const table = page.locator('table.availability:not(.heat)');
+    await expect(table.locator('thead th').nth(6)).not.toContainText(':');
+    const tops = () =>
+      table.locator('thead th:not(.corner-head)').evaluateAll((ths) =>
+        ths.map((th) => {
+          const range = document.createRange();
+          range.selectNodeContents(th.firstChild!);
+          return range.getBoundingClientRect().top;
+        }),
+      );
+    // Both states of the strip's "Saatler": the clock hidden, and shown.
+    for (const state of ['kapalı', 'açık']) {
+      if (state === 'açık') await page.getByRole('button', { name: 'Saatler' }).click();
+      const measured = await tops();
+      for (const [i, top] of measured.entries()) {
+        expect(Math.abs(top - measured[0]!), `${state}, ${i + 1}. sütun`).toBeLessThanOrEqual(0.5);
+      }
+    }
+  });
+
   test('öğle arası her satırda kendi yerinde işaretli', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Müsaitlik' }).click();

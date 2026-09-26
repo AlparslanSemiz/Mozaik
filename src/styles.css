@@ -6120,6 +6120,15 @@ input.search-box:focus-visible {
   visibility: hidden;
 }
 
+/* The same reserved line for a column whose days disagree about the clock
+   (the one after a lunch break that moves). Its span is EMPTY, and an empty
+   block makes no line box: that heading had one line where its neighbours had
+   two, and centring dropped its number about 7px (DENETIM DK6). A no-break
+   space makes the line without making a time. */
+table.availability thead .hour-clock:empty::before {
+  content: '\00a0';
+}
+
 /* ------------------------------------------------------------- health chip
    Is the timetable in trouble — on screen in every tab.
    The functional channel, used exactly as it is meant to be: green nothing to
