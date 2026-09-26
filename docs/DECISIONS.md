@@ -35,6 +35,20 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-27 · Ders adları ders sayısını belirlemiyor
+
+**Eski hâli.** `hourLabels(count, names)` bir ad listesi verildiğinde onu olduğu gibi
+döndürüyordu, yani ad sayısı günlük ders sayısıydı. "Ders adları"na dört ad yazmak günü
+dört derse indirip 433 yerleşmiş saatin 245'ini sorusuz kaldırıyordu, "Günlük ders sayısı"
+kutusu da 12 demeye devam ediyordu (DENETIM DK9).
+
+**Şimdi.** Kullanıcının kararıyla sayıyı yalnız "Günlük ders sayısı" belirler. Ad
+listesi baştan saatlere dağılır, adı olmayan saat numarasını alır, fazla ad kullanılmaz
+(`extraNames()`, kutunun altında bir satır). Sayı kutusu değişince de adlar korunur,
+eskiden numaraya sıfırlanıyordu. Ad yazmak artık hiçbir dersi ızgaradan indiremez, bu
+yüzden bu yolun DK8'deki gibi bir sorusu yok. Test: `ayarlar.spec.ts` 32'nin iki vakası ve
+`entities.test.ts`'in `hourLabels` vakası.
+
 ### 2026-09-27 · Gün ya da saat kaldırmak önce kaybı sorar, dersler yerinde bırakılmaz
 
 **Eski hâli.** Ayarlar → Zil ve günler'de dersleri dizili bir günün işaretini kaldırmak

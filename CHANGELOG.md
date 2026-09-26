@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Typing fewer lesson names than there are lessons no longer shortens the day. The number of lessons comes from its own box alone: a lesson without a name keeps its number, and names beyond the count are left out, with a line under the box saying so. It used to cut the day down to the names given and take the lessons after them off the timetable.
 - Unticking a teaching day or lowering the number of lessons a day no longer takes placed lessons off the timetable without a word. A question comes first and counts what will go back to the tray, pinned hours included; Cancel leaves everything as it was. Ctrl+Z now also works right after clicking a checkbox, where it used to do nothing.
 - Enter or Space on a focused card in the timetable now opens its menu, as the keyboard shortcuts screen says. It used to send the lesson back to the tray without a word. Delete still removes it.
 - In the Lessons form, Enter on the split button now opens its list and Enter on a split picks it. It used to add the lesson, with the split it had before.

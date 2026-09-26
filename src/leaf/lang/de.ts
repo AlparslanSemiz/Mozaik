@@ -714,8 +714,10 @@ const DE: Sozluk = {
   "Ders (dk)": "Stunde (Min.)",
   "Teneffüs (dk)": "Pause (Min.)",
   "Öğle arası (dk)": "Mittagspause (Min.)",
-  "Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)":
-    "Stundennamen (durch Komma getrennt; leer bedeutet 1, 2, 3…)",
+  "Ders adları (virgülle; boş kalan saat numarasını alır)":
+    "Stundennamen (durch Kommas getrennt; eine Stunde ohne Namen behält ihre Nummer)",
+  "{n} ad ders sayısından fazlaydı ve kullanılmadı.":
+    "{n} {n:Name war|Namen waren} mehr als die Anzahl der Stunden und {n:wurde|wurden} nicht verwendet.",
   "Bunların {n} saati sabitli, sabitlemeleri de kalkacak.":
     "{n} davon {n:ist|sind} fixiert, auch die {n:Fixierung verschwindet|Fixierungen verschwinden}.",
   "Öteki programlarda da {n} saat kalkacak.":

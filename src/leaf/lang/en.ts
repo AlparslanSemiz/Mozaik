@@ -705,8 +705,10 @@ const EN: Sozluk = {
   "Ders (dk)": "Lesson (min)",
   "Teneffüs (dk)": "Break (min)",
   "Öğle arası (dk)": "Lunch break (min)",
-  "Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)":
-    "Period names (comma separated; left empty they are 1, 2, 3…)",
+  "Ders adları (virgülle; boş kalan saat numarasını alır)":
+    "Lesson names (comma separated; a lesson without one keeps its number)",
+  "{n} ad ders sayısından fazlaydı ve kullanılmadı.":
+    "{n} {n:name was|names were} more than the number of lessons and {n:was|were} not used.",
   "Bunların {n} saati sabitli, sabitlemeleri de kalkacak.":
     "{n} of them {n:is|are} pinned, and the {n:pin goes|pins go} too.",
   "Öteki programlarda da {n} saat kalkacak.":

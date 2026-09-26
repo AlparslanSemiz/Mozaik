@@ -3,13 +3,14 @@
 // Text boxes use defaultValue + onBlur. Updating top level state on every
 // keystroke with onChange loses focus (docs/TRAPS.md pitfall 3).
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../pure/bell';
 import type { Day } from '../../leaf/types';
 import type { State } from '../../leaf/types';
 import {
   WEEK,
   dayLabel,
+  extraNames,
   hourLabels,
   makeDay,
   settingsLoss,
@@ -49,6 +50,8 @@ const sameList = (a: string[], b: string[]) =>
 export default function School({ state, change }: PanelProps) {
   const t = useT();
   const { confirm } = useDialogs();
+  // Names typed past the lesson count on the last blur, said under the box.
+  const [extra, setExtra] = useState(0);
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
@@ -77,9 +80,10 @@ export default function School({ state, change }: PanelProps) {
     return confirm({ title, body: body.join(' '), confirmLabel, danger: true });
   }
 
-  /** `box` is put back by hand on "no": it is uncontrolled (defaultValue). */
-  async function setHours(count: number, names: string | undefined, box: HTMLInputElement) {
-    const hours = hourLabels(count, names);
+  /** `box` is put back by hand on "no": it is uncontrolled (defaultValue).
+      The names already given are kept, only the count changes. */
+  async function setCount(count: number, box: HTMLInputElement) {
+    const hours = hourLabels(count, state.settings.hours.join(','));
     // An unchanged blur is not an edit, and must not leave an undo step behind.
     if (sameList(hours, state.settings.hours)) return;
     const loss = settingsLoss(state, { hours });
@@ -93,10 +97,23 @@ export default function School({ state, change }: PanelProps) {
       t('Ders sayısını düşür'),
     );
     if (!ok) {
-      box.value = box.type === 'number' ? String(hourCount) : state.settings.hours.join(', ');
+      box.value = String(hourCount);
       return;
     }
-    change((d) => updateSettings(d, { hours: hourLabels(count, names) }));
+    change((d) => updateSettings(d, { hours }));
+  }
+
+  /**
+   * Names only name: the count stays, so nothing can leave the grid this way
+   * (DENETIM DK9). The box is rewritten with the day as it now reads, numbers
+   * included, so what was kept and what was dropped is on screen.
+   */
+  function setNames(text: string, box: HTMLInputElement) {
+    const hours = hourLabels(hourCount, text);
+    setExtra(extraNames(hourCount, text));
+    box.value = hours.join(', ');
+    if (sameList(hours, state.settings.hours)) return;
+    change((d) => updateSettings(d, { hours }));
   }
 
   async function toggleDay(name: string, on: boolean) {
@@ -238,6 +255,7 @@ export default function School({ state, change }: PanelProps) {
                 type="number"
                 min={1}
                 max={16}
+                key={hourCount}
                 defaultValue={hourCount}
                 className="num"
                 onBlur={(e) => {
@@ -247,7 +265,7 @@ export default function School({ state, change }: PanelProps) {
                     box.value = String(hourCount);
                     return;
                   }
-                  void setHours(Number(box.value), undefined, box);
+                  void setCount(Number(box.value), box);
                 }}
               />
             </Field>
@@ -324,16 +342,24 @@ export default function School({ state, change }: PanelProps) {
           </div>
 
           <div className="form-row spaced">
-            <Field label={t('Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)')} wide>
+            <Field label={t('Ders adları (virgülle; boş kalan saat numarasını alır)')} wide>
               <input
+                // Rebuilt when the stored names change (an undo, say), since
+                // an uncontrolled box does not follow its defaultValue.
+                key={state.settings.hours.join('|')}
                 type="text"
                 className="grow"
                 defaultValue={state.settings.hours.join(', ')}
-                onBlur={(e) => void setHours(hourCount, e.target.value, e.currentTarget)}
+                onBlur={(e) => setNames(e.target.value, e.currentTarget)}
                 placeholder="1, 2, 3, ..."
               />
             </Field>
           </div>
+          {extra > 0 && (
+            <p className="hint">
+              {t('{n} ad ders sayısından fazlaydı ve kullanılmadı.', { n: extra })}
+            </p>
+          )}
         </div>
       </div>
 

@@ -387,7 +387,28 @@ describe('hourLabels', () => {
   });
 
   it('virgüllü liste verilirse onu kullanır, boşlukları temizler', () => {
-    expect(hourLabels(2, ' Sabah , Öğle ,, Akşam ')).toEqual(['Sabah', 'Öğle', 'Akşam']);
+    expect(hourLabels(3, ' Sabah , Öğle ,, Akşam ')).toEqual(['Sabah', 'Öğle', 'Akşam']);
+  });
+
+  // DK9: the names list used to BE the count, so four names made a four-lesson
+  // day and took every lesson after the fourth off the grid. The count is the
+  // count box's alone now; a name only names.
+  it('ad sayısı ders sayısını belirlemez: eksik ad numarasını alır, fazlası kullanılmaz', () => {
+    expect(hourLabels(12, 'Etüt, 1, 2, 3')).toEqual([
+      'Etüt',
+      '1',
+      '2',
+      '3',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+    ]);
+    expect(hourLabels(2, 'Sabah, Öğle, Akşam')).toEqual(['Sabah', 'Öğle']);
   });
 
   it('liste tamamen boşsa sayıya düşer', () => {

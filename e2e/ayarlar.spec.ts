@@ -469,6 +469,37 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     expect(await placedHours(page)).toBe(before);
   });
 
+  // DK9: four names used to make a four-lesson day, taking 245 of 433 placed
+  // hours off the grid without a word while the count box still said 12.
+  test('ders adlarına az ad yazmak günü kısaltmıyor, hiçbir dersi indirmiyor', async ({ page }) => {
+    const before = await laidOutSample(page);
+    await openSettings(page, 'Zil ve günler');
+    const names = page.getByLabel(/Ders adları/);
+    await names.fill('Etüt, 1, 2, 3');
+    await names.blur();
+    await expect(page.locator('.dlg')).toHaveCount(0);
+    await expect(page.getByLabel('Günlük ders sayısı')).toHaveValue('12');
+    // The box shows what the day is now called, hour by hour.
+    await expect(names).toHaveValue('Etüt, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    expect(await placedHours(page)).toBe(before);
+    await expect(page.locator('table.grid thead tr').nth(1)).toContainText('Etüt');
+  });
+
+  test('ders sayısından fazla ad yazılınca fazlası kullanılmıyor ve bu söyleniyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    await openSettings(page, 'Zil ve günler');
+    const names = page.getByLabel(/Ders adları/);
+    await names.fill('1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14');
+    await names.blur();
+    await expect(names).toHaveValue('1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12');
+    await expect(page.getByText('2 ad ders sayısından fazlaydı ve kullanılmadı.')).toBeVisible();
+    await expect(page.getByLabel('Günlük ders sayısı')).toHaveValue('12');
+  });
+
   test('gün eklenince ızgaraya bir sütun grubu ekleniyor', async ({ page }) => {
     await openWithSample(page);
     await openSettings(page, 'Zil ve günler');
