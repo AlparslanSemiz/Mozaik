@@ -2560,7 +2560,11 @@ table.grid thead tr:nth-child(2) th {
   text-overflow: ellipsis;
 }
 
-.corner {
+/* `table.grid thead th.corner`, not `.corner`: the head cells' own rule
+   (`table.grid thead th`, z-index 2) is more specific, so a bare `.corner`
+   lost its 4 and the hour headers slid over it on a sideways scroll (DENETIM
+   DK3). The z-index only works if the selector reaches it. */
+table.grid thead th.corner {
   position: sticky;
   left: 0;
   top: 0;

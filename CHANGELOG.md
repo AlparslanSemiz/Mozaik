@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Scrolling the timetable sideways no longer slides the hour headers over the top-left corner cell. Forty pixels were enough to cut "TEACHER" down to its first letters.
 - The total in the Lessons strip is now translated. It read "99 ders · 433 saat" in every language.
 - Chemistry's short form no longer reads "Who" in English ("Wer" in German, "Quién" in Spanish, "Qui" in French). Its Turkish short was also the word for "who" in the Availability strip, and the two shared one translation. Built-in subject and day shorts now come from a table of their own: Chemistry is "Chm", "Che", "Quí" and "Chi".
 - Opening a plan file written by a newer version of the program now says so and asks for an update, instead of calling the file unreadable.

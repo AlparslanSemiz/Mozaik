@@ -1030,6 +1030,35 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     expect(after.x).toBeGreaterThanOrEqual(0); // still on screen
   });
 
+  // DK3: the corner cell sat UNDER the hour headers once the grid was
+  // scrolled sideways — its z-index lost to `table.grid thead th` on
+  // specificity, 40px was enough to read "ÖĞRE". What is painted on top is
+  // asked of the page itself, not of the corner's box (pitfall 84).
+  test('yatay kaydırınca köşe hücresi saat başlıklarının üstünde kalıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.locator('.grid-wrap').evaluate((el) => {
+      el.scrollLeft = 40;
+    });
+    await page.waitForTimeout(120);
+    const corner = page.locator('table.grid thead th.corner');
+    const box = (await corner.boundingBox())!;
+    // Every point of the corner's right half, where the headers slide under.
+    const onTop = await page.evaluate(
+      ({ x, y, w, h }) => {
+        const misses: string[] = [];
+        for (let fx = 0.55; fx < 1; fx += 0.1) {
+          for (let fy = 0.2; fy < 1; fy += 0.3) {
+            const el = document.elementFromPoint(x + w * fx, y + h * fy);
+            if (el?.closest('th.corner') === null) misses.push(el?.className ?? '?');
+          }
+        }
+        return misses;
+      },
+      { x: box.x, y: box.y, w: box.width, h: box.height },
+    );
+    expect(onTop).toEqual([]);
+  });
+
   test('sınıf görünümüne geçilir ve sürükleme orada da çalışır', async ({ page }) => {
     await openWithSample(page);
     await page.getByRole('button', { name: 'Sınıf görünümü' }).click();

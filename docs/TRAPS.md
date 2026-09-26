@@ -777,6 +777,15 @@ yanındaki yorum kapsamı doğru anlatıyordu. `gorunum.spec.ts` 50 varsayılan
 yoğunlukta koştuğu için göremedi. Bir ayar birden çok modda yaşıyorsa onu ölçen
 test kusurun yaşayabileceği modda koşar.
 
+### 142 · Çıplak bir sınıfın `z-index`'i etiketli bir tablo kuralına yenilir
+Program ızgarasının köşe hücresi `.corner { z-index: 4 }` taşıyordu, ama bir `thead`
+hücresi olduğu için `table.grid thead th { z-index: 2 }` onu ezdi: (0,1,3), (0,1,0)'dan
+güçlü. Hesaplanan değer 2'ydi, başlıklarla eşitti, ve DOM sırasında sonra gelen saat
+başlıkları yatay kaydırmada köşenin üstüne boyandı; 40 px "ÖĞRE" okutmaya yetti (DENETIM
+DK3). Kural yazılıydı, uygulanmıyordu. Çare seçicinin kendisi: `table.grid thead th.corner`.
+Onu `program.spec.ts`'teki test ölçer, kutuya değil `elementFromPoint`'e sorarak (tuzak
+84).
+
 ---
 
 ## Yazdırma ve kâğıt
@@ -1252,7 +1261,7 @@ bir algoritma işi gibi kovalanır.
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140 |
-| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
+| CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90 |
@@ -1263,5 +1272,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 141, yeni bir tuzak 142'den devam eder. Test stratejisi
+büyük kullanılan numara 142, yeni bir tuzak 143'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
