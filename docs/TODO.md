@@ -1228,7 +1228,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       (2026-09-26, v2.2.0).** Unreleased bloğu `## [2.2.0] - 2026-09-26` altına kapandı,
       boş bir Unreleased başlığı kaldı. Push HTTPS kimlik bilgisi olmadığı için düştü ve
       betik hatayı ham bir bayt dizisi olarak bastı; push SSH adresiyle yapıldı
-      (TESTFINDINGS 2026-09-26).
+      (TESTFINDINGS 2026-09-26). Hata mesajı aynı gün düzeldi (`scripts/git-komut.mjs`):
+      düşen komut bir cümleyle, git'in cevabı düz metinle bildiriliyor.
 
 ---
 ### 8d · Kod refactor turunun envanterinden çıkanlar (2026-09-11)

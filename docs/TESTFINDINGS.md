@@ -50,8 +50,11 @@ Bulgu: kapılar geçti, sürüm commit'i ve annotated `v2.2.0` etiketi yerelde o
 yok.
 Tür: ortam, ve betiğin hata mesajı
 Ne yapıldı: push `git@github.com:AlparslanSemiz/Mozaik.git` adresiyle, uzak ayara
-dokunmadan yapıldı; etiket uzakta doğrulandı. Betiğin hata mesajı düzeltilmedi (TODO'ya
-yazılmadı, küçük).
+dokunmadan yapıldı; etiket uzakta doğrulandı. Betiğin hata mesajı aynı gün düzeldi:
+`scripts/git-komut.mjs` düşen komutu bir cümleyle ve git'in cevabını düz metin olarak
+bildiriyor, push'un kendi cümlesi var. `src/gitKomut.test.ts` eski fonksiyona karşı
+kırmızıydı. Atılabilir bir klonda (etiketi silinmiş, `origin`'i var olmayan bir yol)
+`yayinla.mjs 2.2.0` önce bayt dizisini, sonra cümleyi bastı.
 Kalıcı kural: yok
 
 ### 2026-09-26 · npm run kontrol · preferences.test.ts, styles.css'in hareket bloğu

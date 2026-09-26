@@ -141,6 +141,7 @@ scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-so
 scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
+scripts/git-komut.mjs        yayinla'nın git komutu: düşeni bir cümleyle ve git'in kendi satırıyla bildirir
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 ```
 

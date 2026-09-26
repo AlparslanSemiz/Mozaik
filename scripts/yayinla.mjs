@@ -16,18 +16,25 @@
 // Refuses on a dirty tree, on a non-main branch, and on a tag that exists.
 // Every one of those has a right answer that is not "guess".
 
-import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
+import { git as gitKomut } from './git-komut.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+// A command that fails stops the release with a sentence, never a stack.
 function git(...args) {
-  return execFileSync('git', args, { cwd: KOK, stdio: ['ignore', 'pipe', 'pipe'] })
-    .toString()
-    .trim();
+  try {
+    return gitKomut(KOK, ...args);
+  } catch (e) {
+    dur(e.message.split('\n')[0], ...girintili(e.gitCevabi));
+  }
+}
+
+function girintili(metin) {
+  return metin === '' ? [] : ["git'in cevabı:", ...metin.split('\n').map((x) => `  ${x}`)];
 }
 
 function dur(mesaj, ...cozum) {
@@ -191,7 +198,21 @@ if (onceki === surum) {
 git('tag', '-a', etiket, '-m', `Sürüm ${etiket}`);
 
 // One push, both refs: two pushes is two chances to do half of it.
-git('push', '--follow-tags', 'origin', 'main');
+//
+// Its failure gets its own words, because by now the commit and the tag
+// exist and only this step is missing: 2.2.0's push fell over on HTTPS with
+// no credentials, and what the script printed was a byte dump.
+try {
+  gitKomut(KOK, 'push', '--follow-tags', 'origin', 'main');
+} catch (e) {
+  dur(
+    `Push olmadı: sürüm commit'i ve ${etiket} etiketi yerelde duruyor, uzağa gitmedi.`,
+    ...girintili(e.gitCevabi),
+    '',
+    'Sebebi giderip (ör. kimlik bilgisi) aynı komutu elle verin:',
+    'git push --follow-tags origin main',
+  );
+}
 
 // ...and then LOOK. The whole point of this script is the step that is easy to
 // forget, so believing a push rather than checking it would give the failure
