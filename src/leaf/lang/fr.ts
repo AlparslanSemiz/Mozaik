@@ -23,6 +23,7 @@ const FR: Sozluk = {
   "program kart rengi tercihi": "préférence de couleur des cartes du planning",
   "{bir} ile {iki} yer değiştirecek": "{bir} et {iki} vont échanger leurs places",
   "{bir} ile {iki} yer değiştirdi": "{bir} et {iki} ont échangé leurs places",
+  "{ad} ({n} blok)": "{ad} ({n} {n:bloc|blocs})",
   // -------------------------------------------- the week and the subjects
   //
   // DATA drawn, never data stored: `settings.days[].name` and

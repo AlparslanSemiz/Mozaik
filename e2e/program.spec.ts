@@ -1723,6 +1723,58 @@ test.describe('66. Dolu hücrenin üstüne bırakmak', () => {
     );
   });
 
+  test('2 saatlik blok öğretmenin öteki sınıftaki iki tek saatiyle yer değiştirir (B5.7)', async ({
+    page,
+  }) => {
+    // Teacher view: MÇ's row carries 510's 2-hour block at 1–2 and 511's two
+    // singles at 3 and 4. Dropping the block on hour 3 used to find two
+    // blocks in the way and offer nothing.
+    await loadWorld(
+      page,
+      makeWorld({
+        days: 1,
+        hours: 6,
+        teachers: [{ id: 'oMC', short: 'MÇ' }],
+        classes: [
+          { id: 's510', name: '510', roomId: 'dA' },
+          { id: 's511', name: '511', roomId: 'dB' },
+        ],
+        rooms: [
+          { id: 'dA', name: 'A' },
+          { id: 'dB', name: 'B' },
+        ],
+        lessons: [
+          { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
+          { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 2 },
+        ],
+        placements: { 's510|0|0': 'a', 's510|0|1': 'a', 's511|0|2': 'b', 's511|0|3': 'b' },
+      }),
+    );
+    const cell = (h: number) => page.locator(`td[data-row="oMC"][data-day="0"][data-hour="${h}"]`);
+    await expect(cell(0)).toContainText('510');
+    await expect(cell(2)).toContainText('511');
+
+    const box = (await cell(0).locator('.card').boundingBox())!;
+    await page.mouse.move(box.x + box.width / 4, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect(page.locator('.ghost')).toHaveCount(1);
+    await page.waitForTimeout(150);
+    await hover(page, 0, 2);
+    await expect(page.locator('.reason-bar')).toContainText(
+      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirecek',
+    );
+    await page.mouse.up();
+
+    await expect(page.locator('.toast').last()).toContainText(
+      '510 · MÇ ile 511 · MÇ (2 blok) yer değiştirdi',
+    );
+    // The 2-hour block is one cell two columns wide.
+    await expect(cell(2)).toContainText('510');
+    await expect(cell(2)).toHaveAttribute('data-span', '2');
+    await expect(cell(0)).toContainText('511');
+    await expect(cell(1)).toContainText('511');
+  });
+
   test('bütün hamle TEK geri-al adımı', async ({ page }) => {
     await loadWorld(page, EVICT_WORLD);
     await grabCard(page, 'AV');

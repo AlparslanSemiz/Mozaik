@@ -27,6 +27,8 @@ import type { BlockRef } from './pure/constraints';
 import { DEFAULT_BELL, DEFAULT_LIMITS, DEFAULT_RULES, NO_TEACHER_LIMITS } from './pure/entities';
 import type { RuleLevel, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
+import { makeWorld } from './worlds';
+import type { WorldSpec } from './worlds';
 import { aktifDil, setAktifDil } from './leaf/i18n';
 import './leaf/lang/en';
 import './leaf/lang/de';
@@ -1287,6 +1289,82 @@ describe('yerleşmiş blokların atomik takası', () => {
 
     expect(result.verdict.action.kind).not.toBe('swap');
     expect(result.state).toBe(d);
+  });
+
+  // TODO B5.7: a block dropped on several blocks that fill its hours exactly.
+  // Two classes in two rooms, so the room never decides it.
+  function twoClasses(
+    lessons: NonNullable<WorldSpec['lessons']>,
+    placements: Record<string, string>,
+  ) {
+    return makeWorld({
+      days: 1,
+      hours: 6,
+      teachers: [
+        { id: 'oMC', short: 'MÇ' },
+        { id: 'oAV', short: 'AV', subject: 'Fizik' },
+      ],
+      classes: [
+        { id: 's510', name: '510', roomId: 'dA' },
+        { id: 's511', name: '511', roomId: 'dB' },
+      ],
+      rooms: [
+        { id: 'dA', name: 'A' },
+        { id: 'dB', name: 'B' },
+      ],
+      lessons,
+      placements,
+    });
+  }
+
+  it('2 saatlik blok öğretmenin öteki sınıftaki iki tek saatiyle yer değiştirir', () => {
+    const d = twoClasses(
+      [
+        { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
+        { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 2 },
+      ],
+      { 's510|0|0': 'a', 's510|0|1': 'a', 's511|0|2': 'b', 's511|0|3': 'b' },
+    );
+    const result = swapAt(d, ref('a', 's510', 0, 0, 2), 0, 2);
+
+    expect(result.verdict.action.kind).toBe('swap');
+    expect(result.verdict.warning).toBe('510 · MÇ ile 511 · MÇ (2 blok) yer değiştirecek');
+    const after = activeProgram(result.state).placements;
+    expect(after[placementKey('s510', 0, 2)]).toBe('a');
+    expect(after[placementKey('s510', 0, 3)]).toBe('a');
+    expect(after[placementKey('s511', 0, 0)]).toBe('b');
+    expect(after[placementKey('s511', 0, 1)]).toBe('b');
+    expect(after[placementKey('s510', 0, 0)]).toBeUndefined();
+    expect(after[placementKey('s511', 0, 2)]).toBeUndefined();
+  });
+
+  it('bırakılan saatleri dolduran bloklar sınıfın dersi ile öğretmenin başka dersiyse takas yok', () => {
+    // 510 has AV at hour 3 and MÇ is with 511 there: moving MÇ's 510 lesson in
+    // would need 510's hour too. Two blocks at one hour do not fill one hour.
+    const d = twoClasses(
+      [
+        { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 1 },
+        { id: 'c', classId: 's510', teacherId: 'oAV', weeklyHours: 1 },
+      ],
+      { 's510|0|0': 'a', 's511|0|2': 'b', 's510|0|2': 'c' },
+    );
+    expect(swapAt(d, ref('a', 's510', 0, 0, 1), 0, 2).verdict.action.kind).not.toBe('swap');
+  });
+
+  it('hedeflerden biri sabitse çoklu takas yok', () => {
+    let d = twoClasses(
+      [
+        { id: 'a', classId: 's510', teacherId: 'oMC', weeklyHours: 2, blockSize: 2 },
+        { id: 'b', classId: 's511', teacherId: 'oMC', weeklyHours: 2 },
+      ],
+      { 's510|0|0': 'a', 's510|0|1': 'a', 's511|0|2': 'b', 's511|0|3': 'b' },
+    );
+    d = setBlockPinned(d, 's511', 0, 3, true);
+    const before = activeProgram(d).placements;
+    const result = swapAt(d, ref('a', 's510', 0, 0, 2), 0, 2);
+    expect(result.verdict.action.kind).not.toBe('swap');
+    expect(activeProgram(result.state).placements).toEqual(before);
   });
 
   it('harita çıkarıldıktan sonra hedef değişmişse güncel veriye dokunmaz', () => {

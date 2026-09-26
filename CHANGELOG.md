@@ -32,8 +32,14 @@ release is incomplete, the entry says so.
 - Automatic arrangement no longer gives up on a lesson when it gets stuck. It keeps repairing the best timetable it found, moving the fewest lessons out of the way each time. On a real school where every class's open hours exactly match its lessons, it now lays out the whole week in about a second, where before it stopped with five lessons missing.
 - When a week truly cannot be laid out, automatic arrangement now stops on its own once it is no longer getting anywhere, instead of always running for the full 15 seconds.
 
+- Dropping a block on several blocks that fill exactly the hours it lands on now offers to swap them: a teacher's 2-hour block in one class and their two single hours in another trade places in one step, the singles going to the block's old hours in the same order.
+
 ### Fixed
 
+- The notice after a drop now reads in the past tense in every language, and in the new language right after the language is switched. French and the German and Spanish plurals used to keep the future tense or come out garbled.
+- The consecutive-hours limit sentence ("at most N hours in a row") is now translated; it was Turkish in all five languages.
+- The empty Timetable, Check and Print screens now point to the Lessons tab for entering lessons, not the School tab.
+- Opening a very old (version 1 or 2) backup no longer lists every class as having its own daily limit or paints all classes the same colour.
 - Switching the language no longer leaves the status pill in the top bar in the old language until the next edit.
 - When automatic arrangement gets stuck, the reason it gives now names what blocks the lesson in the hours its class still has free: a teacher, a room, a rule or the block's length. Before, a class whose open hours exactly matched its lessons always got the class's own closed hour as the reason.
 - Dragging a card across a full week no longer stutters: the reason bar above the grid is rewritten at most ten times a second instead of once per cell.

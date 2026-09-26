@@ -673,7 +673,7 @@ export interface BlockRef extends PlacedBlock {
 }
 
 export type DropAction =
-  { kind: 'place' } | { kind: 'evict'; blocks: BlockRef[] } | { kind: 'swap'; target: BlockRef };
+  { kind: 'place' } | { kind: 'evict'; blocks: BlockRef[] } | { kind: 'swap'; targets: BlockRef[] };
 
 function sameBlock(d: State, ref: BlockRef): boolean {
   if (activePlacements(d)[placementKey(ref.classId, ref.day, ref.hour)] !== ref.lessonId) {
@@ -732,10 +732,21 @@ function blockName(ix: Index, ref: BlockRef): string {
   return `${group} · ${teacher}`;
 }
 
-export function swapDoneNotice(ix: Index, source: BlockRef, target: BlockRef): string {
+/**
+ * The other side of a swap, named: one block, or several of one lesson
+ * counted, or several lessons listed.
+ */
+function targetsName(ix: Index, targets: BlockRef[]): string {
+  const names = [...new Set(targets.map((x) => blockName(ix, x)))];
+  if (names.length === 1 && targets.length > 1)
+    return t('{ad} ({n} blok)', { ad: names[0]!, n: targets.length });
+  return names.join(', ');
+}
+
+export function swapDoneNotice(ix: Index, source: BlockRef, targets: BlockRef[]): string {
   return t('{bir} ile {iki} yer değiştirdi', {
     bir: blockName(ix, source),
-    iki: blockName(ix, target),
+    iki: targetsName(ix, targets),
   });
 }
 
@@ -744,50 +755,73 @@ export interface SwapResult {
   warning: string;
 }
 
-/** Re-validates and applies a reciprocal move against the state handed to it. */
-function swapBlocks(d: State, source: BlockRef, target: BlockRef): SwapResult | null {
-  if (!sameBlock(d, source) || !sameBlock(d, target)) return null;
+/**
+ * Re-validates and applies a reciprocal move against the state handed to it.
+ *
+ * One target: the two blocks trade starts, each keeping its length. Several
+ * (TODO B5.7, the user's decision 2026-09-26): they must fill the hours the
+ * dragged block is dropped on exactly, one day, no gap and no overlap, and
+ * they go to its old hours in the same order. A 2-hour block dropped on a
+ * teacher's two singles in another class used to find two blocks in the way
+ * and offer nothing.
+ */
+function swapBlocks(d: State, source: BlockRef, targets: BlockRef[]): SwapResult | null {
+  if (targets.length === 0) return null;
+  if (!sameBlock(d, source) || targets.some((x) => !sameBlock(d, x))) return null;
   if (
     blockPinned(d, source.classId, source.day, source.hour) ||
-    blockPinned(d, target.classId, target.day, target.hour)
+    targets.some((x) => blockPinned(d, x.classId, x.day, x.hour))
   )
     return null;
+  if (!d.lessons.some((x) => x.id === source.lessonId)) return null;
+  if (targets.some((x) => !d.lessons.some((y) => y.id === x.lessonId))) return null;
 
-  const sourceLesson = d.lessons.find((x) => x.id === source.lessonId);
-  const targetLesson = d.lessons.find((x) => x.id === target.lessonId);
-  if (sourceLesson === undefined || targetLesson === undefined) return null;
+  const ordered = [...targets].sort((a, b) => a.hour - b.hour);
+  const first = ordered[0]!;
+  // Where each target goes: its own start and the source's when alone, and
+  // for several, the same offset inside the source's old hours.
+  const moves = ordered.map((x) => ({
+    ref: x,
+    hour: ordered.length === 1 ? source.hour : source.hour + (x.hour - first.hour),
+  }));
+  if (ordered.length > 1) {
+    let next = first.hour;
+    for (const x of ordered) {
+      if (x.day !== first.day || x.hour !== next) return null;
+      next += x.size;
+    }
+    if (next - first.hour !== source.size) return null;
+  }
 
   let work = liftBlock(d, source.classId, source.day, source.hour);
-  work = liftBlock(work, target.classId, target.day, target.hour);
+  for (const x of ordered) work = liftBlock(work, x.classId, x.day, x.hour);
 
-  const first = check(
+  const verdicts: Verdict[] = [];
+  const firstCheck = check(
     work,
     buildIndex(work),
     source.lessonId,
-    target.day,
-    target.hour,
+    first.day,
+    first.hour,
     source.size,
   );
-  if (first.blocked !== null) return null;
-  work = place(work, source.lessonId, target.day, target.hour, source.size);
+  if (firstCheck.blocked !== null) return null;
+  verdicts.push(firstCheck);
+  work = place(work, source.lessonId, first.day, first.hour, source.size);
 
-  const second = check(
-    work,
-    buildIndex(work),
-    target.lessonId,
-    source.day,
-    source.hour,
-    target.size,
-  );
-  if (second.blocked !== null) return null;
-  work = place(work, target.lessonId, source.day, source.hour, target.size);
+  for (const { ref, hour } of moves) {
+    const verdict = check(work, buildIndex(work), ref.lessonId, source.day, hour, ref.size);
+    if (verdict.blocked !== null) return null;
+    verdicts.push(verdict);
+    work = place(work, ref.lessonId, source.day, hour, ref.size);
+  }
 
   const ix = buildIndex(d);
   const notice = t('{bir} ile {iki} yer değiştirecek', {
     bir: blockName(ix, source),
-    iki: blockName(ix, target),
+    iki: targetsName(ix, ordered),
   });
-  const ruleWarning = first.warning ?? second.warning;
+  const ruleWarning = verdicts.find((v) => v.warning !== null)?.warning ?? null;
   return { state: work, warning: ruleWarning === null ? notice : `${notice} · ${ruleWarning}` };
 }
 
@@ -858,18 +892,15 @@ export function dropMap(
           s,
           blockSizeFor(d, lesson, size),
         );
-        if (candidates.length === 1) {
-          const target = candidates[0]!;
-          const swap = swapBlocks(original, source, target);
-          if (swap !== null) {
-            map.set(key, {
-              blocked: null,
-              warning: swap.warning,
-              evicts: [],
-              action: { kind: 'swap', target },
-            });
-            continue;
-          }
+        const swap = swapBlocks(original, source, candidates);
+        if (swap !== null) {
+          map.set(key, {
+            blocked: null,
+            warning: swap.warning,
+            evicts: [],
+            action: { kind: 'swap', targets: candidates },
+          });
+          continue;
         }
       }
       if (plain.blocked === null || lesson === undefined) {
@@ -1009,7 +1040,7 @@ export interface DropRequest {
 export function applyDrop(d: State, request: DropRequest): State {
   if (request.action.kind === 'swap') {
     if (request.source === null) return d;
-    return swapBlocks(d, request.source, request.action.target)?.state ?? d;
+    return swapBlocks(d, request.source, request.action.targets)?.state ?? d;
   }
 
   let next = d;

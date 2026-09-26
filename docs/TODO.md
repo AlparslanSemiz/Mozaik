@@ -35,7 +35,7 @@ bitince §10'a taşınır.
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
-| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 ve B5.7 açık, B5.8'in veri yarısı babada, B5.9, B5.10 ve B5.11 bitti |
+| **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
@@ -682,7 +682,17 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       `e2e/program.spec.ts` ("89. Gün sonunda blok geriye kaydırılır") —
       ikisi de `loadWorld()` ile kurulmuş belirli bir dünyada, tahmine değil
       ölçüme dayanıyor.
-- [ ] **B5.7 Öğretmenin kendi dersleri arasında takas.**
+- [x] **B5.7 Öğretmenin kendi dersleri arasında takas — ÖLÇÜLDÜ VE YAPILDI (2026-09-26).**
+      `dropMap` altı durumda ölçüldü. Öğretmenin iki sınıftaki kendi dersi (sınıflar boşken),
+      iki saatlik blok iki saatliğin üstüne, aynı sınıfta iki dersin takası: üçü de zaten
+      teklif ediliyordu. Sınıf doluyken reddediliyordu, ki doğrusu bu. Eksik tek durum,
+      TODO'nun tahmin ettiği gibi, bir bloğun birden çok bloğun üstüne bırakılmasıydı: iki
+      saatlik blok öğretmenin öteki sınıftaki iki tek saatinin üstünde "iki aday" bulup hiçbir
+      şey teklif etmiyordu. Kural kullanıcıya taslak olarak gösterildi ve onaylandı: hedefler
+      bırakılan saatleri tam dolduruyorsa hepsi aynı sırayla kartın eski saatlerine geçer.
+      Birim testleri (üçü, biri eski kodla kırmızı) ve bir E2E (`program.spec.ts`, "B5.7"),
+      Chromium'da ekran görüntüsüyle görüldü. Kural [DATA.md](DATA.md)'de.
+      Eski satırlar:
       Senin satırın: *"Öğretmenin kendi dersleri arasında değişim muhtemel olmalı
       eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa."* Takas motoru zaten
       var ve genel: `constraints.ts`'teki `swapBlocks()` iki bloğu da kaldırıp

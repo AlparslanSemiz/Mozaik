@@ -313,7 +313,7 @@ da döndürür (yukarıdakiler, `missing` ve `rule`). Sebepleri sayan her yer
 Bu bir çizim kararı değil, kısıt motorunun cevabı, ve `check()`'in üstüne iki şey
 ekler.
 
-- **Takas.** Izgarada duran bir kart, altında tek bir hedef blok bulunan bir hücreye bırakılıyorsa ve iki hamle de yasalsa (`swapBlocks`), iki kart yer değiştirir.
+- **Takas.** Izgarada duran bir kart, altında tek bir hedef blok bulunan bir hücreye bırakılıyorsa ve iki hamle de yasalsa (`swapBlocks`), iki kart yer değiştirir. Hedef birden çok bloksa takas ancak o bloklar bırakılan saatleri tam dolduruyorsa (aynı gün, boşluksuz, üst üste binmeden, toplam boy aynı) ve hepsi aynı sırayla kartın eski saatlerine yasal olarak geçebiliyorsa teklif edilir: iki saatlik bir blok, öğretmenin başka sınıftaki iki tek saatiyle yer değiştirebilir (TODO B5.7). Sınıfın kendi dersi ile öğretmenin başka sınıftaki dersi aynı saatteyse bu bir takas değil, hücre reddedilir.
 - **Havuza döndürme.** Takas yoksa tek bir ret geçersiz kılınabilir: hücrede sınıfın kendi başka dersi varsa o ders havuza döner. Öteki retler başkasıyla ilgili (öğretmen başka sınıfta, derslik dolu, saat kapalı) ve önündeki bloğu havuza atmak onların hiçbirini doğru yapmaz. Oradaki blok sabitlenmişse hücre reddedilir ve sebep cümlesi sabitlemeyi söyler. Havuza döndürdükten sonra da reddedilen bir hücrenin cümlesi o asıl sebep olur, "sınıf dolu" değil. İzin verilen hücre yeşil değil sarı, çünkü izin var ama bir şey kaybediliyor. Bütün hamle tek geri al adımı ve kaybedilen ders bildirimde adıyla yazılır.
 
 Geçici görünümle kapsam dışına alınmış bir güne bırakılamaz.

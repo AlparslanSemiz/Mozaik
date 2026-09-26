@@ -522,7 +522,7 @@ function Program({
       const lesson = ix.lessonById.get(data.lessonId);
       const told =
         verdict?.action.kind === 'swap' && data.source !== null
-          ? swapDoneNotice(ix, data.source, verdict.action.target)
+          ? swapDoneNotice(ix, data.source, verdict.action.targets)
           : pushedOut.length === 0 || lesson === undefined
             ? ''
             : evictionNotice(
