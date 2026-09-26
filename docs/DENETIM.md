@@ -1638,6 +1638,7 @@ taşan düğme yok. Gün adları, şerit başlıkları, menüler ve gerekçe sat
   saat", Almancada "SUMME 99 ders · 433 saat". TODO §8d'deki "`t()`'den geçmeyen JSX
   metinleri" şüphesinin (Ribbon.tsx) üretilmiş bir örneği. Görüntü:
   `scratch/denetim/dil/en-dersler-serit.png`.
+  **Düzeldi (2026-09-27, c9c66e5).**
 
 **Şöyle olsa daha iyi.** **Ö44.** Aynı Türkçe metnin iki anlamı olduğunda sözlük bir bağlam
 eki alsın (ör. "Kim|kısaltma"), ve bir test her dildeki branş kısaltmalarının branş

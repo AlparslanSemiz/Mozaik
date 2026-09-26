@@ -1620,9 +1620,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: metin. `src/leaf/lang/*.ts`'te `Kim` anahtarı "Who", "Wer", "Quién", "Qui".
       Müsaitlik şeridindeki "Kim" ile Kimya'nın kısaltması tek anahtara düşüyor. DENETIM X2.
       Kapandı 2026-09-27, a77b751. Test: i18n.test.ts "bir kısaltma aynı yazılan bir cümleye düşmüyor: Kimya Who değil" ve "her yerleşik kısaltmanın dört dilde de karşılığı var".
-- [ ] **DK13 Dersler şeridinin toplamı çevrilmiyor.**
+- [x] **DK13 Dersler şeridinin toplamı çevrilmiyor.**
       Şiddet: metin. İngilizcede "TOTAL 99 ders · 433 saat". §8d'deki "`t()`'den geçmeyen
       JSX metinleri" şüphesinin üretilmiş bir örneği. DENETIM X2.
+      Kapandı 2026-09-27, c9c66e5. Test: dil.spec.ts 82 "Dersler şeridinin toplamı çevriliyor".
 - [ ] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
       Şiddet: görsel. 40 px kaydırmak yetiyor, "ÖĞRE" okunuyor. DENETIM P11.
 - [ ] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
