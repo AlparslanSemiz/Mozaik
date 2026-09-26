@@ -25,6 +25,7 @@ import type {
   Lesson,
   ProgramVariant,
   Refusal,
+  Relation,
   Relaxation,
   Room,
   RuleLevel,
@@ -131,6 +132,23 @@ function readAnswers(x: unknown): { accepted: Relaxation[]; refused: Refusal[] }
     accepted: asArray<unknown>(box['accepted'], []).filter(change),
     refused: asArray<unknown>(box['refused'], []).filter(refusal),
   };
+}
+
+/**
+ * v16: the relations between lessons. As with the answers, an entry that does
+ * not read is dropped alone. Whether both lessons still exist, and whether a
+ * pair is repeated, is `sanitize`'s question.
+ */
+function readRelations(x: unknown): Relation[] {
+  const id = (v: unknown): v is string => typeof v === 'string' && v !== '';
+  return asArray<unknown>(x, []).flatMap((v) => {
+    const r = asMap<unknown>(v);
+    const pair = r['lessonIds'];
+    if (r['kind'] !== 'notSameDay' || !id(r['id']) || !Array.isArray(pair)) return [];
+    const [a, b] = pair as unknown[];
+    if (pair.length !== 2 || !id(a) || !id(b)) return [];
+    return [{ id: r['id'], kind: 'notSameDay' as const, lessonIds: [a, b] as [Id, Id] }];
+  });
 }
 
 function asLevel(x: unknown, fallback: RuleLevel): RuleLevel {
@@ -293,6 +311,7 @@ function migrateV2toV3(raw: LegacyV2): State {
     ],
     activeProgramId: DEFAULT_PROGRAM_ID,
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }
 
@@ -407,6 +426,7 @@ export function parseState(text: string): State | null {
     version === 12 ||
     version === 13 ||
     version === 14 ||
+    version === 15 ||
     version === SCHEMA_VERSION
   ) {
     // v3..v11 go through ONE reader: most of them only ADD fields — a v3 file
@@ -522,6 +542,7 @@ export function parseState(text: string): State | null {
       activeProgramId: Number(version) >= 12 ? asText(g.activeProgramId, '') : DEFAULT_PROGRAM_ID,
       // v15. Every file below it predates the answers, and none is right.
       answers: readAnswers((raw as { answers?: unknown }).answers),
+      relations: readRelations((raw as { relations?: unknown }).relations),
     };
   } else {
     return null; // an unknown (newer) version is not guessed at

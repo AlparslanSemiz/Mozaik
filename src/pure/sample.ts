@@ -231,5 +231,6 @@ export function sampleState(): State {
     programs: [blankProgram()],
     activeProgramId: DEFAULT_PROGRAM_ID,
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }

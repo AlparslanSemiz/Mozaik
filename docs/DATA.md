@@ -10,7 +10,7 @@ düşünülür.
 
 ```ts
 State {
-  schemaVersion: 15
+  schemaVersion: 16
   settings: Settings
   rooms: Room[]
   teachers: Teacher[]
@@ -20,6 +20,7 @@ State {
   programs: ProgramVariant[]                           // aynı okulun program alternatifleri
   activeProgramId: Id                                  // ekranda, Kontrol'de ve kâğıtta olan
   answers: { accepted: Relaxation[]; refused: Refusal[] }   // öneriye verilen cevaplar
+  relations: Relation[]   // iki ders arasındaki kural: aynı gün olmasın
 }
 ProgramVariant {
   id, name
@@ -62,6 +63,11 @@ Alanların anlamı:
   - Yeni bir cevap onunla çelişen eskisini geri alır (`answerYes`, `answerNo`).
   - Bir öneri uygulanınca "Olur"lar verinin kendisi olduğu için silinir, "Olmaz"lar kalır.
   - Silinen bir öğretmenin, dersin ya da günün cevabı `sanitize()` ile düşer. Gün listesi değişince `remapDays()` cevabı da kaydırır.
+- `relations`, iki ders arasındaki kurallar (aSc'nin Planlama İlişkileri, TODO B5.3). Bugün tek tür var, `notSameDay`: iki ders aynı güne konmaz.
+  - İki yönlü: ilişki iki uçtan da okunur (`notSameDayOf`), aynı çift bir kez söylenir (`addNotSameDay`).
+  - Sert bir kural: çözücü ve öneri araması onu hiç çiğnemez, onu çiğneyecek bir bırakma reddedilir. Dersler yerleştirildikten sonra eklenen ve çiğnenen bir ilişki Kontrol'de ihlal olarak listelenir, dersler yerinden oynatılmaz.
+  - Öneri araması onu esnetilebilir bir yol saymaz.
+  - Silinen bir dersin (sınıfıyla ya da öğretmeniyle birlikte silinenin de) ilişkisi `sanitize()` ile düşer, iki ucu aynı ders olan ya da tekrarlanan bir çift de.
 - `Lesson.second` dersin öğretmenin ikinci branşından mı verildiği. Öğretmenin ikinci branşı silinince `sanitize()` onu `false` yapar, yoksa ders kimsenin vermediği bir branşı iddia ederdi.
 
 ### Varsayılanlar
@@ -96,8 +102,9 @@ istemeyen bir okul yeni uyarılarla uyanmamalı. Branş listesi boş başlar.
 | v13 | dört saatlik blok kaldırıldı, eski her 4 bir 3 ve örtük bir tek saat oldu |
 | v14 | `Limits.maxGapsTeacher` ve `maxGapsClass`: boşluk kuralı, eksik alan 0 ve `off` |
 | v15 | `answers`: öneriye verilen Olur ve Olmaz cevapları; eksik alan boş, okunamayan tek bir cevap tek başına düşer |
+| v16 | `relations`: iki dersin aynı güne konmaması; eksik alan boş, okunamayan tek bir ilişki tek başına düşer |
 
-`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v15'e her sürüm tek bir
+`parseState` v1'i v2'ye, v2'yi v3'e taşır. v3'ten v16'ya her sürüm tek bir
 okuyucudan geçer, ve `readLessons()` her tarihsel ders biçimini tek yerde çevirir:
 v1'den v6'ya `blockSize`, v7 ve v8'de ikili blok sayısı `pairs`, v9'dan v12'ye
 doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
@@ -113,7 +120,7 @@ Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
 **Şema değişince** sürüm artırılır, göç kodu yazılır, ve hem birim hem E2E testi
 eklenir, çünkü açılamayan eski bir yedek kaybolmuş veri demek. `parseState.ts`'teki
 kabul listesine bir önceki sürümün numarası elle eklenir: `parseState`
-`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v15 çıkarılırken `version === 14` bu yolla eklendi. Bu adımı ölçen test bir sayı
+`SCHEMA_VERSION`'a değil o listeye bakıyor, ve v16 çıkarılırken `version === 15` bu yolla eklendi. Bu adımı ölçen test bir sayı
 adlandırmıyor, `SCHEMA_VERSION - 1`'in okunabildiğini soruyor (tuzak 97).
 
 ## Planlar ve program alternatifleri
@@ -225,7 +232,7 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 ## Dosya biçimleri
 
 ```
-{ "schemaVersion": 15, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
+{ "schemaVersion": 16, ... }   tek plan    ders-programi-YYYY-AA-GG-SSDD.json
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 

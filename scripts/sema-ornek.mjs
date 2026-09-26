@@ -38,9 +38,9 @@ const OUT = join(import.meta.dirname, '..', 'src', 'fixtures');
  * taught under it, a two-hour block, a three-hour block, a lesson with no
  * block at all, a pinned cell, a closed hour, and a laid-out timetable.
  */
-function v15() {
+function v16() {
   return {
-    schemaVersion: 15,
+    schemaVersion: 16,
     settings: {
       schoolName: 'Birey Kurs',
       // NOT A SINGLE VALUE HERE IS THE PROGRAM'S DEFAULT, and that is the
@@ -163,6 +163,9 @@ function v15() {
         { kind: 'teacherCap', teacherId: 'tMC', day: 1, max: 1 },
       ],
     },
+    // v16: two lessons that may not share a day. l2 (Çarşamba) and l3 (Salı)
+    // keep it; l1 and l3 are both on Salı and would break it.
+    relations: [{ id: 'r1', kind: 'notSameDay', lessonIds: ['l2', 'l3'] }],
   };
 }
 
@@ -180,9 +183,14 @@ function flatten(raw) {
 /**
  * One step down per entry, newest first. Each function receives the file as
  * the version ABOVE it wrote it and edits it into the version named by the
- * key. The chain is applied in order, so v3 is v15 with twelve steps undone.
+ * key. The chain is applied in order, so v3 is v16 with thirteen steps undone.
  */
 const DOWN = {
+  15: (raw) => {
+    // v16 brought the relations between lessons. Below it a file has none.
+    raw.schemaVersion = 15;
+    delete raw.relations;
+  },
   14: (raw) => {
     // v15 brought the answers to a suggestion. Below it a file has none.
     raw.schemaVersion = 14;
@@ -302,13 +310,13 @@ const DOWN = {
 
 mkdirSync(OUT, { recursive: true });
 
-let raw = v15();
-writeFileSync(join(OUT, 'v15.json'), JSON.stringify(raw, null, 2) + '\n');
+let raw = v16();
+writeFileSync(join(OUT, 'v16.json'), JSON.stringify(raw, null, 2) + '\n');
 
-for (const version of [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
+for (const version of [15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]) {
   raw = clone(raw);
   DOWN[version](raw);
   writeFileSync(join(OUT, `v${version}.json`), JSON.stringify(raw, null, 2) + '\n');
 }
 
-console.log(`15 örnek dosya yazıldı: ${OUT}`);
+console.log(`16 örnek dosya yazıldı: ${OUT}`);

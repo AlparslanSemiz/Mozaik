@@ -1417,8 +1417,32 @@ export function sanitize(d: State): State {
     changed = true;
   }
 
+  // A relation lives only while both of its lessons do, and one pair is
+  // said once: a lesson deleted, directly or with its class or teacher, takes
+  // its relations with it.
+  const givenRelations = d.relations ?? [];
+  const seenPairs = new Set<string>();
+  const relations = givenRelations.filter((r) => {
+    const [a, b] = r.lessonIds;
+    if (a === b || !lessonIds.has(a) || !lessonIds.has(b)) return false;
+    const pair = `${r.kind}|${[a, b].sort().join('|')}`;
+    if (seenPairs.has(pair)) return false;
+    seenPairs.add(pair);
+    return true;
+  });
+  if (d.relations === undefined || relations.length !== givenRelations.length) changed = true;
+
   if (!changed) return d;
-  return { ...d, classes, lessons, unavailable, programs, activeProgramId, answers };
+  return {
+    ...d,
+    classes,
+    lessons,
+    unavailable,
+    programs,
+    activeProgramId,
+    answers,
+    relations: relations.length === givenRelations.length ? givenRelations : relations,
+  };
 }
 
 export type PinScope =

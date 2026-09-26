@@ -126,6 +126,7 @@ function world(): State {
     programs: [{ id: '1', name: 'Program 1', placements: {}, pinned: {} }],
     activeProgramId: '1',
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }
 

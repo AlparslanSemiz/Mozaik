@@ -60,6 +60,11 @@ import {
   answerNo,
   answerYes,
   dropAnswer,
+  addNotSameDay,
+  deleteClass,
+  deleteLesson,
+  notSameDayOf,
+  removeRelation,
 } from './pure/entities';
 import type { Day, State } from './leaf/types';
 import { SCHEMA_VERSION } from './leaf/types';
@@ -116,6 +121,7 @@ function build(): State {
     ],
     activeProgramId: 'program-1',
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }
 
@@ -1686,5 +1692,39 @@ describe('cevaplar', () => {
     const d = answerYes(build(), [hour(0, 0)]);
     const gone = deleteTeacher(d, 'oMC');
     expect(gone.answers.accepted).toEqual([]);
+  });
+});
+
+describe('ilişkiler — aynı gün olmasın', () => {
+  /** build() with a second lesson in the same class, x2. */
+  function two(): State {
+    const d = addLesson(build(), { classId: 's510', teacherId: 'oMC', weeklyHours: 2, blocks: [] });
+    const x2 = d.lessons.find((x) => x.id !== 'x1')!.id;
+    return { ...d, lessons: d.lessons.map((x) => (x.id === x2 ? { ...x, id: 'x2' } : x)) };
+  }
+
+  it('ilişki iki yönlü okunuyor ve bir kez söyleniyor', () => {
+    const d = addNotSameDay(two(), 'x1', 'x2');
+    expect(d.relations).toHaveLength(1);
+    expect(notSameDayOf(d, 'x1').map((x) => x.lessonId)).toEqual(['x2']);
+    expect(notSameDayOf(d, 'x2').map((x) => x.lessonId)).toEqual(['x1']);
+    // Said again from either end, or naming one lesson twice: nothing new.
+    expect(addNotSameDay(d, 'x2', 'x1')).toBe(d);
+    expect(addNotSameDay(d, 'x1', 'x1')).toBe(d);
+    expect(addNotSameDay(d, 'x1', 'yok')).toBe(d);
+  });
+
+  it('ilişki geri alınabiliyor', () => {
+    const d = addNotSameDay(two(), 'x1', 'x2');
+    const out = removeRelation(d, d.relations[0]!.id);
+    expect(out.relations).toEqual([]);
+    expect(removeRelation(out, 'yok')).toBe(out);
+  });
+
+  it('silinen dersin, sınıfın ya da öğretmenin ilişkisi düşüyor', () => {
+    const d = addNotSameDay(two(), 'x1', 'x2');
+    expect(deleteLesson(d, 'x2').relations).toEqual([]);
+    expect(deleteClass(d, 's510').relations).toEqual([]);
+    expect(deleteTeacher(d, 'oMC').relations).toEqual([]);
   });
 });

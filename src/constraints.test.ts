@@ -156,6 +156,7 @@ function build(): State {
     programs: [blankProgram()],
     activeProgramId: 'program-1',
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }
 

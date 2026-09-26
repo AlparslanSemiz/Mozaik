@@ -154,6 +154,7 @@ export function makeWorld(spec: WorldSpec = {}): State {
     programs: [{ ...blankProgram(), placements: spec.placements ?? {} }],
     activeProgramId: DEFAULT_PROGRAM_ID,
     answers: { accepted: [], refused: [] },
+    relations: [],
   };
 }
 

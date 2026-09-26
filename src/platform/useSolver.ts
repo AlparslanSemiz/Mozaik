@@ -58,7 +58,9 @@ export function samePlan(a: State, b: State): boolean {
     a.lessons === b.lessons &&
     a.unavailable === b.unavailable &&
     a.programs === b.programs &&
-    a.activeProgramId === b.activeProgramId
+    a.activeProgramId === b.activeProgramId &&
+    // A relation changes which weeks are legal, like a closed hour does.
+    a.relations === b.relations
   );
 }
 

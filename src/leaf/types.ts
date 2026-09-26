@@ -242,6 +242,19 @@ export interface Answers {
   refused: Refusal[];
 }
 
+/**
+ * A rule between two lessons (aSc's "Planlama İlişkileri", TODO B5.3, schema
+ * v16). One kind so far: the two are never placed on the same day. It goes
+ * both ways, and it is a hard rule: the solver and the suggestion search keep
+ * it, a drop that breaks it is refused, and one broken anyway (the relation
+ * added after the lessons were placed) is listed in Kontrol, never undone.
+ */
+export interface Relation {
+  id: Id;
+  kind: 'notSameDay';
+  lessonIds: [Id, Id];
+}
+
 export interface State {
   schemaVersion: typeof SCHEMA_VERSION;
   settings: Settings;
@@ -260,6 +273,7 @@ export interface State {
   /** The grid shown, checked, printed and edited right now. */
   activeProgramId: Id;
   answers: Answers;
+  relations: Relation[];
 }
 
 /** One alternative timetable inside a plan. */
@@ -300,5 +314,7 @@ export type View = 'teacher' | 'class';
  *      ever shows up in findViolations().
  * v15: State.answers — what the father said yes and no to in the suggestion
  *      panel. A file below it has none.
+ * v16: State.relations — two lessons that may not share a day. A file below
+ *      it has none.
  */
-export const SCHEMA_VERSION = 15;
+export const SCHEMA_VERSION = 16;

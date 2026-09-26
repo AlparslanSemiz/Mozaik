@@ -317,14 +317,11 @@ describe('şema örnekleri — ayarlar', () => {
     expect(c510!.roomId).toBe('rA');
     expect(c511!.roomId).toBeNull();
     // v11 gave the class its own "same lesson per day" box. Below it there is
-    // no box, and "no box" means "use the school's number". Asked with `==`
-    // rather than `toBeNull` because the v1/v2 path answers `undefined` here,
-    // which is the same sentence to every rule that reads it and a different
-    // one to the screen that lists it: the known divergence is pinned by name
-    // in its own case below.
+    // no box, and "no box" means "use the school's number": null, on every
+    // path (the v1/v2 path answered `undefined` until 2026-09-25, TODO 8g).
     if (version >= 11) expect(c510!.maxSameLessonPerDay).toBe(2);
-    else expect(c510!.maxSameLessonPerDay == null).toBe(true);
-    expect(c511!.maxSameLessonPerDay == null).toBe(true);
+    else expect(c510!.maxSameLessonPerDay).toBeNull();
+    expect(c511!.maxSameLessonPerDay).toBeNull();
 
     // A colour is an identity, not decoration: two rows sharing one is what
     // makes a pool card stop pointing at a single teacher. Written as the
@@ -334,9 +331,9 @@ describe('şema örnekleri — ayarlar', () => {
     const teacherColors = state.teachers.map((t) => t.color);
     const classColors = state.classes.map((c) => c.color);
     expect(new Set(teacherColors).size).toBe(teacherColors.length);
-    // v3 and up only: the v1/v2 path hands out no colour at all, which is the
-    // known defect pinned by name below.
-    if (version >= 3) expect(new Set(classColors).size).toBe(classColors.length);
+    // Every version: the v1/v2 path handed out no colour at all until
+    // 2026-09-25 (TODO 8g).
+    expect(new Set(classColors).size).toBe(classColors.length);
     // Where the file DOES carry them they come back untouched, so "spread the
     // colours" can never quietly renumber a file that was already fine.
     expect(teacherColors).toEqual([3, 7]);
@@ -388,6 +385,34 @@ describe('şema örnekleri — cevaplar (v15)', () => {
     expect(state).not.toBeNull();
     expect(state!.answers.accepted).toHaveLength(2);
     expect(state!.answers.refused).toHaveLength(2);
+    expect(Object.keys(activeProgram(state!).placements)).toHaveLength(6);
+  });
+});
+
+describe('şema örnekleri — ilişkiler (v16)', () => {
+  it.each(VERSIONS)('v%i dosyasının ilişkileri doğru geliyor', (version) => {
+    const relations = parse(version).relations;
+    // v16 brought them. A file below it has none, and none is invented.
+    if (version >= 16) {
+      expect(relations).toEqual([{ id: 'r1', kind: 'notSameDay', lessonIds: ['l2', 'l3'] }]);
+    } else {
+      expect(relations).toEqual([]);
+    }
+  });
+
+  it('okunamayan, yarım ya da tekrarlanan ilişki tek başına düşüyor', () => {
+    const state = edited<{ relations: unknown[] }>(SCHEMA_VERSION, (raw) => {
+      raw.relations.push(
+        { id: 'r2', kind: 'uydurma', lessonIds: ['l1', 'l2'] },
+        { id: 'r3', kind: 'notSameDay', lessonIds: ['l1'] },
+        { id: 'r4', kind: 'notSameDay', lessonIds: ['l1', 'l1'] },
+        { id: 'r5', kind: 'notSameDay', lessonIds: ['l3', 'l2'] },
+        { id: 'r6', kind: 'notSameDay', lessonIds: ['l1', 'yok'] },
+        null,
+      );
+    });
+    expect(state).not.toBeNull();
+    expect(state!.relations.map((r) => r.id)).toEqual(['r1']);
     expect(Object.keys(activeProgram(state!).placements)).toHaveLength(6);
   });
 });

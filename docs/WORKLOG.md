@@ -81,7 +81,7 @@ alanı (TODO §8b'deki adımlar).
 
 | Ne | Değer | Nasıl |
 |---|---|---|
-| Şema sürümü | 15 (2026-09-25) | `src/leaf/types.ts` |
+| Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
 | Ana E2E süiti | 30 dosyada 577 test (2026-09-24) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
