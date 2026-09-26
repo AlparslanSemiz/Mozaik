@@ -868,6 +868,33 @@ test.describe('3. Izgara — taşıma ve kaldırma', () => {
     await expect(cards).toHaveCount(before);
   });
 
+  // Enter and Space on a focused card open its menu, as the shortcuts screen
+  // has always said. They used to send the lesson back to the pool, with no
+  // word on the bar: a keyboard click (`detail === 0`) was read as the remove
+  // path (TODO §8d, 2026-09-26; the user chose the menu).
+  for (const key of ['Enter', 'Space']) {
+    test(`odaklı kartta ${key} menüyü açıyor, dersi kaldırmıyor`, async ({ page }) => {
+      await openWithSample(page);
+      await dragAndDrop(page);
+
+      const cards = page.locator('table.grid .card');
+      const before = await cards.count();
+      expect(before).toBeGreaterThan(0);
+
+      await cards.first().focus();
+      await page.keyboard.press(key);
+      const menu = page.getByRole('menu');
+      await expect(menu, `${key} menüyü açmadı`).toBeVisible();
+      await expect(menu.getByRole('menuitem', { name: 'Havuza kaldır' })).toBeVisible();
+      await expect(cards).toHaveCount(before);
+
+      // The menu's own first item is still one Enter away from removing it.
+      await page.keyboard.press('Escape');
+      await expect(menu).toHaveCount(0);
+      await expect(cards).toHaveCount(before);
+    });
+  }
+
   test('yerleşmiş ders sürüklenerek taşınıyor; havuz sayacı değişmiyor', async ({ page }) => {
     await openWithSample(page);
     await dragAndDrop(page);

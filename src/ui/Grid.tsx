@@ -219,8 +219,9 @@ const Row = memo(function Row({
             //   left button + drag  -> move it
             //   right click         -> a menu (remove · edit · pin)
             //   Delete / Backspace  -> back to the pool, from the keyboard
+            //   Enter / Space       -> the same menu, from the keyboard
             // `e.detail === 0` is how a keyboard-generated click is told from a
-            // real one, which keeps Enter and Space working on a focused card.
+            // real one.
             //
             // A PINNED card starts no drag at all. The refusal is also in
             // `removeBlock`, so nothing gets through by another road; stopping
@@ -239,8 +240,22 @@ const Row = memo(function Row({
               onPointerDown={(e) => {
                 if (!cell.pinned && !cellMasked) onCellMoveStart(e, row.id, g, s);
               }}
+              // A keyboard click (Enter, Space) opens the card's menu, as the
+              // shortcuts screen says; it used to send the lesson back to the
+              // pool without a word (TODO §8d, 2026-09-26, the user's choice).
+              // The menu is opened the way Shift+F10 opens it: a `contextmenu`
+              // at the card, which the table's one trigger reads (openMenu).
               onClick={(e) => {
-                if (e.detail === 0) onCellRemove(row.id, g, s);
+                if (e.detail !== 0) return;
+                const box = e.currentTarget.getBoundingClientRect();
+                e.currentTarget.dispatchEvent(
+                  new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: box.left + box.width / 2,
+                    clientY: box.top + box.height / 2,
+                  }),
+                );
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Delete' || e.key === 'Backspace') {

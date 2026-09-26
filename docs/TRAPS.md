@@ -1046,10 +1046,11 @@ Fedora 44). Çare girdiyi sayfanın içinde olay olarak üretmek
 cevabı değil, gerçek programın sayfasını, köprüsünü ve diskini ölçer. WebKitGTK
 güncellenince önce yerel girdi yeniden denenir.
 
-### 128 · `el.click()` ızgarada klavye sayılır ve kartı havuza gönderir
+### 128 · `el.click()` ızgarada klavye sayılır
 Programmatik bir `click()` `detail: 0` taşır. `Grid.tsx` kartın tıklamasında
-`detail === 0`'ı Enter ya da Space diye okur ve kartı havuza geri gönderir, çünkü
-klavyeden kaldırma yolu o. Sürücünün ilk hâli tıklamayı böyle üretiyordu, yani
+`detail === 0`'ı Enter ya da Space diye okur. 2026-09-26'dan beri bu kartın menüsünü
+açıyor, o tarihe kadar kartı havuza geri gönderiyordu, çünkü
+klavyeden kaldırma yolu oydu. Sürücünün ilk hâli tıklamayı böyle üretiyordu, yani
 "karta tıkla" bir kartı ızgaradan silecekti. Sürücünün tıklaması
 `new MouseEvent('click', { detail: 1 })`, bir farenin göndereceği gibi.
 

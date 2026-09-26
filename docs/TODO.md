@@ -1273,9 +1273,10 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       İlki 2026-09-26'da üretildi ve düzeldi: Dersler formunda Enter Dağılım düğmesinde
       listeyi açmıyor, dersi ekliyordu; listedeki seçenekte de öyle (liste bir portal'da ve
       React olayları portal üstünden satıra kabarıyor). Satırın Enter'ı artık düğmelere
-      karışmıyor, `dersler.spec.ts`'in yeni testi düzeltmeden önce kırmızıydı. Kalanlar:
-      kısayol ekranının Enter'ı olduğundan başka anlatması (`ShortcutsHelp.tsx`, `Grid.tsx`),
-      Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
+      karışmıyor, `dersler.spec.ts`'in yeni testi düzeltmeden önce kırmızıydı. İkincisi de
+      üretildi: ızgarada odaklı kartta Enter ve Space, kısayol ekranının dediği gibi menüyü
+      açmak yerine dersi sessizce havuza gönderiyordu. Kullanıcı menüyü seçti, düzeldi
+      (`program.spec.ts`, iki yeni test kırmızıydı). Kalanlar: Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
       çağrısında ayrışması, `updateClass`'ın derslik değişince çakışmayı yargılamaması,
       `teacher.subject`'in üç yerde `lessonSubject()` yerine okunması, JSX'te `t()`'den
       geçmeyen yaklaşık 25 dize (`Print.tsx`, `Ribbon.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,

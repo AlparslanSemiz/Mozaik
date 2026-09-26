@@ -160,7 +160,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 ### Sürükleme ve bırakma
 
-- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır, odaklı kartta Enter ve Space çalışsın diye. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
+- Sol düğmeyle sürüklemek taşır, sağ tık menü açar, Delete havuza gönderir. Klavyeden gelen bir tıklama `e.detail === 0` ile ayrılır: odaklı kartta Enter ve Space kartın sağ tık menüsünü açar, kısayol ekranının dediği gibi. 2026-09-26'ya kadar dersi sessizce havuza gönderiyorlardı. Sürükleme haritası kaynak bloğu kaldırılmış bir durum üstünde hesaplanır, yoksa ders kendi kendini engeller.
 - Sürüklerken hedef satırın tamamı zayıf bir katmanla, imlecin altındaki blok güçlü bir katmanla boyanır: yeşil bırakılabilir, sarı uyarı ya da bir şey kaybedilecek, kırmızı engel. Hedefin dışındaki görünür alan iki düz gölgeleme düzlemiyle karartılır. Reddin sebebi sabit yükseklikli bir satırda yazılır (`.reason-bar`).
 - Başka bir kartın üstüne bırakmak takas edebilir, sınıfın kendi dersinin üstüne bırakmak onu havuza döndürebilir. Kuralları [DATA.md](DATA.md)'de.
 - Hedef ekran dışındaysa ızgara kenara gelince kayar.

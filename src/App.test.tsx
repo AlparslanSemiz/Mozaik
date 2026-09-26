@@ -170,7 +170,11 @@ describe('uygulama açılıyor', () => {
     expect(button('Öğretmen görünümü')).toBeTruthy();
   });
 
-  it('yerleşmiş derse tıklayınca kalkar ve geri al onu geri getirir', () => {
+  // The remove path from the keyboard is Delete. A keyboard click (Enter,
+  // Space: a click with `detail` 0, which is what this file's `click` sends)
+  // used to remove too, and this test was written against that; since
+  // 2026-09-26 it opens the card's menu (e2e/program.spec.ts).
+  it('yerleşmiş derste Delete onu kaldırır ve geri al onu geri getirir', () => {
     // Start from a state with one lesson placed by hand.
     const d = sampleState();
     const lesson = d.lessons[0]!;
@@ -192,7 +196,9 @@ describe('uygulama açılıyor', () => {
     const cards = () => container.querySelectorAll('table.grid .card');
     expect(cards()).toHaveLength(span);
 
-    click(cards()[0]!);
+    act(() => {
+      cards()[0]!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+    });
     expect(cards()).toHaveLength(0); // the whole block went
 
     click(button('Geri al'));
