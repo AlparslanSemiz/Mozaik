@@ -1588,10 +1588,11 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       yerleşimle yükleniyor, geri al kapalı. Onay sorusu dosyanın içeriğini söylemiyor.
       DENETIM E6.
       Kapandı 2026-09-27, 536528f. Test: temel.spec.ts 29 "öğretmeni ve dersi olmayan dosya eksik diye reddediliyor" ve "yükleme sorusu dosyayı açık planla yan yana sayıyor", fixtures.test.ts "Dosyadan aç kapısı" vakaları.
-- [ ] **DK1 Sınıf ve derslik panelinde Ad kutusuna tıklayıp çıkmak adı değiştiriyor.**
+- [x] **DK1 Sınıf ve derslik panelinde Ad kutusuna tıklayıp çıkmak adı değiştiriyor.**
       Şiddet: yanlış sonuç. Kutunun `defaultValue`'su başlık için biçimlenmiş ad ("320
       sınıfı", "A dersliği") ve `rename()` blur'da değişikliğe bakmadan yazıyor
       (`src/ui/Inspector.tsx`). Her açıp çıkışta bir "sınıfı" daha ekleniyor. DENETIM P1.
+      Kapandı 2026-09-27, 46011b2. Test: panel.spec.ts 87 "sınıfın Ad kutusuna girip çıkmak adı değiştirmiyor" ve "dersliğin Ad kutusuna girip çıkmak adı değiştirmiyor".
 - [ ] **DK5 Durdurulan öneri araması "yol bulunamadı" diye bitmiş gibi sunuluyor.**
       Şiddet: yanlış sonuç. Fikstürde arama iki saniyedeyken Durdur: "Sınıfların saatlerine
       dokunmadan bir yol bulunamadı." Sürdürülünce altı yol buluyor. Durdurulmuş bir

@@ -248,6 +248,7 @@ panelin Ad kutusuna tıklanıp çıkıldı. Görüntüler: `scratch/denetim/prog
   `defaultValue`'su başlık için biçimlenmiş ad (`{ad} sınıfı`, `src/ui/Inspector.tsx`),
   ve `rename()` blur'da değişip değişmediğine bakmadan yazıyor. Görüntü:
   `scratch/denetim/program/sinif-adi-bozuldu-1920.png`.
+  **Düzeldi (2026-09-27, 46011b2).**
 
 **Şöyle olsa daha iyi.**
 - **Ö1.** Saat başlığında saat Rahat'ta da Ferah'taki gibi arayla yazılsın, ya da Rahat
