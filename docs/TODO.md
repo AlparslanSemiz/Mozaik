@@ -38,7 +38,7 @@ bitince §10'a taşınır.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik ve test sırası | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası ve denetimin bulguları (§8j) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
 
@@ -1285,6 +1285,9 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       geçmeyen yaklaşık 25 dize (`Print.tsx`, `Ribbon.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,
       `Plans.tsx`, silme onaylarının `"Sil"`'i), `initialBox`'ın StrictMode altında yedek
       zincirini iki kez döndürmesi.
+      2026-09-26 denetiminde `t()` maddesinin üç örneği üretildi: Dersler şeridinin
+      toplamı ("99 ders · 433 saat", §8j DK13), plan seçicinin "(taslak)" eki ve kâğıdın
+      çıktı tarihi (ikisi keşifte kaynaktan okundu, ekranda yalnız ilki görüldü).
 - [x] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
       sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
       oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
@@ -1560,6 +1563,61 @@ ve yerini doğru davranışı soran bir teste bıraktı.
       `spreadColors`'undan geçiriyor. "BİLİNEN KUSUR" vakası adıyla kırmızıya döndü ve doğru
       davranışı soran bir teste çevrildi, eski kaynakla kırmızı. v1 ve v2 örnek dosyası
       Chromium'da açıldı: iki sınıf iki renk, "Günde aynı ders" boş, Kurallar listesi boş.
+
+### 8j · Denetimin bulguları (2026-09-26)
+
+Elle denetimin ürettiği kusurlar. Her birinin tekrar üreten adımları, beklenen ve olan,
+ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı bölümde.
+Kullanım kolaylığı sorunları ve öneriler orada, burada yalnız kusurlar. Veri kaybı
+sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
+
+- [ ] **DK8 Bir günü kaldırmak ya da günlük ders sayısını düşürmek dizili ve sabitli dersleri sorusuz siliyor.**
+      Şiddet: veri kaybı (koşullu). Örnek okulda Pazar'ın işareti kalkınca 65 saat,
+      65'i sabitli, havuza döndü. Günü geri işaretlemek getirmiyor. Ctrl+Z odak onay
+      kutusundayken çalışmıyor (`isTextInput()` her INPUT'u yazı kutusu sayıyor), yalnız
+      üst çubuktaki Geri al düğmesi kurtarıyor. DATA.md'nin "Bilinen tek istisna"
+      cümlesiyle ve PRINCIPLES "Veri kaybı olmaz" ile çelişiyor. DENETIM A1.
+- [ ] **DK9 "Ders adları"na az ad yazmak günü kısaltıp dersleri siliyor.**
+      Şiddet: veri kaybı (koşullu). Dört ad yazınca 433 yerleşimden 245'i ve 36 sabitleme
+      sorusuz kalktı, "Günlük ders sayısı" kutusu 12 göstermeye devam etti. DENETIM A1.
+- [ ] **DK11 Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
+      Şiddet: veri kaybı (onaydan sonra). `teachers` ve `lessons` alanları silinmiş bir
+      plan dosyası Dosyadan aç ile "Yedeği yükle"den sonra 0 öğretmen, 0 ders ve 0
+      yerleşimle yükleniyor, geri al kapalı. Onay sorusu dosyanın içeriğini söylemiyor.
+      DENETIM E6.
+- [ ] **DK1 Sınıf ve derslik panelinde Ad kutusuna tıklayıp çıkmak adı değiştiriyor.**
+      Şiddet: yanlış sonuç. Kutunun `defaultValue`'su başlık için biçimlenmiş ad ("320
+      sınıfı", "A dersliği") ve `rename()` blur'da değişikliğe bakmadan yazıyor
+      (`src/ui/Inspector.tsx`). Her açıp çıkışta bir "sınıfı" daha ekleniyor. DENETIM P1.
+- [ ] **DK5 Durdurulan öneri araması "yol bulunamadı" diye bitmiş gibi sunuluyor.**
+      Şiddet: yanlış sonuç. Fikstürde arama iki saniyedeyken Durdur: "Sınıfların saatlerine
+      dokunmadan bir yol bulunamadı." Sürdürülünce altı yol buluyor. Durdurulmuş bir
+      aramanın inceltilmemiş yolu da sıradan bir yol gibi kalıyor. DENETIM P12, P13.
+- [ ] **DK7 Kontrol'ün hükmü ve Durum'u kapalı saatteki dersleri görmüyor.**
+      Şiddet: yanlış sonuç. Dokuz ders kapalı saatteyken hüküm "Sorun görünmüyor …
+      Program dizilebilir.", şerit "0 engel, 0 uyarı", aynı anda "Sorunlar (9)" ve kırmızı
+      çip. DENETIM K1.
+- [ ] **DK4 Geri almadan sonra gerekçe satırı olmayan bir başarıyı söylüyor.**
+      Şiddet: metin. Öneriyi uygula, Ctrl+Z: satır yeşil "Öneri uygulandı ve program
+      yerleştirildi" diyor, çip "7 ders sığmıyor". Exe'de de üretildi. Aynı aile: Okul'da
+      geri alınan bir sıralamanın cümlesi. DENETIM P12, O7, T4.
+- [ ] **DK2 Olmayan bir takasın gerekçesi takas ortağını gösteriyor, asıl engeli değil.**
+      Şiddet: metin. MÇ'nin 310'u 431'in üstüne: "MÇ Çarşamba 10 saatinde 431 sınıfında",
+      oysa engel 431'in dersliğinin o saatte dolu olması. DENETIM P6.
+- [ ] **DK10 Daha yeni sürümün plan dosyası "okunamadı" diye reddediliyor.**
+      Şiddet: metin. "Daha yeni bir sürümle yazılmış" dalı yalnız paket dosyasında
+      çalışıyor (`src/ui/App.tsx`), `e2e/temel.spec.ts` bugünkü cümleyi bekliyor. DENETIM E6.
+- [ ] **DK12 Kimya'nın kısaltması dört dilde "kim?" diye çevrilmiş.**
+      Şiddet: metin. `src/leaf/lang/*.ts`'te `Kim` anahtarı "Who", "Wer", "Quién", "Qui".
+      Müsaitlik şeridindeki "Kim" ile Kimya'nın kısaltması tek anahtara düşüyor. DENETIM X2.
+- [ ] **DK13 Dersler şeridinin toplamı çevrilmiyor.**
+      Şiddet: metin. İngilizcede "TOTAL 99 ders · 433 saat". §8d'deki "`t()`'den geçmeyen
+      JSX metinleri" şüphesinin üretilmiş bir örneği. DENETIM X2.
+- [ ] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
+      Şiddet: görsel. 40 px kaydırmak yetiyor, "ÖĞRE" okunuyor. DENETIM P11.
+- [ ] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
+      Şiddet: görsel. Öğle arası günden güne değişince 6. sütunun saat kutusu boş kalıyor
+      ve numara yaklaşık 7 px aşağı iniyor. DENETIM M3.
 
 ## §9. Ham notlar — senin kendi satırların
 
