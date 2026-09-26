@@ -467,6 +467,10 @@ const EN: Sozluk = {
   "Önce onları ekleyip tekrar deneyin.": "Add them first, then try again.",
   "Bu aramaya uyan ders yok.": "No lesson matches this search.",
   "Bu ders bir günde en fazla kaç saat": "Most hours of this lesson in one day",
+  "Aynı gün olmasın": "Not on the same day",
+  "Aynı gün olmasın: ders ekle": "Not on the same day: add a lesson",
+  "Ders ekle…": "Add a lesson…",
+  "Kaldır: {ne}": "Remove: {ne}",
   "Günde ↑": "Per day ↑",
   "{sinif} · {kim} dersinin branşı": "Subject of the {sinif} · {kim} lesson",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar":
@@ -873,6 +877,12 @@ const EN: Sozluk = {
     "room {derslik} is closed on {gun} at period {saat}",
   "{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur":
     "{kim} may teach at most {sinir} hours in a row; this would make {olan}",
+  "{ders} {gun} günü var, bu dersle aynı güne konmamalı":
+    "{ders} is on {gun}; this lesson must not go on the same day",
+  "{bir} ile {iki} {gun} günü ikisi de var, aynı gün olmamalı.":
+    "{bir} and {iki} are both on {gun}; they must not share a day.",
+  "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
+    "When two lessons that must not share a day are on the same day, the **Not on the same day** row on the lesson's sheet shows them.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} may teach at most {sinir} hours on {gun}; this would make {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":

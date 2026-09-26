@@ -475,6 +475,10 @@ const DE: Sozluk = {
   "Bu aramaya uyan ders yok.": "Kein Fach passt zu dieser Suche.",
   "Bu ders bir günde en fazla kaç saat":
     "Höchstzahl der Stunden dieses Fachs an einem Tag",
+  "Aynı gün olmasın": "Nicht am selben Tag",
+  "Aynı gün olmasın: ders ekle": "Nicht am selben Tag: Fach hinzufügen",
+  "Ders ekle…": "Fach hinzufügen…",
+  "Kaldır: {ne}": "Entfernen: {ne}",
   "Günde ↑": "Pro Tag ↑",
   "{sinif} · {kim} dersinin branşı": "Fach der Stunde {sinif} · {kim}",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar":
@@ -886,6 +890,12 @@ const DE: Sozluk = {
     "Raum {derslik} ist am {gun} in der {saat}. Stunde geschlossen",
   "{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur":
     "{kim} darf höchstens {sinir} Stunden am Stück unterrichten; hier wären es {olan}",
+  "{ders} {gun} günü var, bu dersle aynı güne konmamalı":
+    "{ders} liegt am {gun}; dieses Fach darf nicht auf denselben Tag",
+  "{bir} ile {iki} {gun} günü ikisi de var, aynı gün olmamalı.":
+    "{bir} und {iki} liegen beide am {gun}; sie dürfen nicht auf denselben Tag.",
+  "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
+    "Liegen zwei Fächer, die nicht auf denselben Tag dürfen, am selben Tag, zeigt die Zeile **Nicht am selben Tag** auf der Seite des Fachs sie an.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} darf am {gun} höchstens {sinir} Stunden unterrichten; hier wären es {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":

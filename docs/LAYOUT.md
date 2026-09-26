@@ -134,7 +134,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 
 - **Üç mod:** Öğretmenden, Sınıftan (varsayılan), Genel. Odaklanmış bir modda form o ekseni sormaz: Sınıftan'da sınıf, Öğretmenden'de öğretmen seçimi yok, odak sağdaki listeden (`Hangi sınıf`, `Hangi öğretmen`) gelir ve şerit hangisinin açık olduğunu söyler. Öğretmenden modunda branş seçimi yalnız öğretmenin iki branşı varsa çıkar. Genel'in sağ sütunu Özet. Mod ve odak hiçbir yerde saklanmaz.
 - **Haftalık saat girilir, dağılım seçilir** (aSc'nin `Lessons/week` ve yanındaki liste ikilisi). Seçenekler saatten türer ve 3, 2 ve 1 saatlik blokların her birleşimini sayar: 3 saat için `3`, `2+1`, `1+1+1`, 5 saat için `3+2`, `3+1+1`, `2+2+1`, `2+1+1+1` ve `5×1`. Günlük sert bir sınırı çiğneyen seçenek kilitli ve sebebiyle gösterilir. Saat düşünce seçim kırpılır, ve dağılım değişince o dersin yerleşimleri kalkar, çünkü yerleşmiş blokların boyu artık yanlış.
-- **Bir ders ızgaradan ayrılmadan da düzenlenir** (`LessonEdit`): sınıf, öğretmen, branş, haftalık saat, dağılım, günde en fazla. Başka bir öğretmene ya da sınıfa taşınınca artık sığmayan bloklar havuza döner.
+- **Bir ders ızgaradan ayrılmadan da düzenlenir** (`LessonEdit`): sınıf, öğretmen, branş, haftalık saat, dağılım, günde en fazla, aynı gün olmasın. Başka bir öğretmene ya da sınıfa taşınınca artık sığmayan bloklar havuza döner. "Aynı gün olmasın" satırında her ilişkili ders bir çip (× geri alır) ve bir liste var: öteki dersler sınıf sınıf gruplanmış, seçilen ilişki eklenir. İlişki iki yönlü, öteki dersin sayfasında da görünür (TODO B5.3).
 
 ## Program
 

@@ -33,9 +33,12 @@ import BlockCounts, { blockCeiling } from './BlockCounts';
 import LimitBox from './LimitBox';
 import { paletteColor } from '../leaf/palette';
 import {
+  addNotSameDay,
   hasTwoSubjects,
   lessonSubject,
   moveLessonToClass,
+  notSameDayOf,
+  removeRelation,
   subjectLabel,
   teacherSubjects,
   transferLesson,
@@ -316,6 +319,11 @@ function LessonSheet({
                     onSet={(v) => change((d) => updateLesson(d, lesson.id, { maxPerDay: v }))}
                   />
                 </dd>
+
+                <dt>{t('Aynı gün olmasın')}</dt>
+                <dd className="relation-edit">
+                  <NotSameDay state={state} lessonId={lesson.id} change={change} />
+                </dd>
               </dl>
 
               <p className="hint">
@@ -333,5 +341,75 @@ function LessonSheet({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+/** "YM Matematik2": a lesson named inside its class's group. */
+function lessonLabel(state: State, lessonId: Id): string {
+  const lesson = state.lessons.find((x) => x.id === lessonId);
+  if (lesson === undefined) return '?';
+  const teacher = state.teachers.find((x) => x.id === lesson.teacherId)?.short ?? '?';
+  return `${teacher} ${subjectLabel(lessonSubject(state, lesson))}`;
+}
+
+/**
+ * The lessons this one may not share a day with (TODO B5.3): one chip each,
+ * × takes it back, and a list of the other lessons, grouped by class, adds
+ * one. The relation goes both ways, so the other lesson's sheet shows it too.
+ */
+function NotSameDay({
+  state,
+  lessonId,
+  change,
+}: {
+  state: State;
+  lessonId: Id;
+  change: (apply: (d: State) => State) => void;
+}) {
+  const t = useT();
+  const related = notSameDayOf(state, lessonId);
+  const taken = new Set([lessonId, ...related.map((x) => x.lessonId)]);
+  const className = (id: Id) =>
+    state.classes.find((c) => c.id === state.lessons.find((x) => x.id === id)?.classId)?.name ??
+    '?';
+  return (
+    <>
+      {related.map((x) => {
+        const name = `${className(x.lessonId)} · ${lessonLabel(state, x.lessonId)}`;
+        return (
+          <button
+            key={x.relationId}
+            className="chip"
+            aria-label={t('Kaldır: {ne}', { ne: name })}
+            onClick={() => change((d) => removeRelation(d, x.relationId))}
+          >
+            {name} ×
+          </button>
+        );
+      })}
+      <select
+        value=""
+        aria-label={t('Aynı gün olmasın: ders ekle')}
+        onChange={(e) => {
+          const other = e.target.value;
+          if (other !== '') change((d) => addNotSameDay(d, lessonId, other));
+        }}
+      >
+        <option value="">{t('Ders ekle…')}</option>
+        {state.classes.map((c) => {
+          const lessons = state.lessons.filter((x) => x.classId === c.id && !taken.has(x.id));
+          if (lessons.length === 0) return null;
+          return (
+            <optgroup key={c.id} label={c.name}>
+              {lessons.map((x) => (
+                <option key={x.id} value={x.id}>
+                  {lessonLabel(state, x.id)}
+                </option>
+              ))}
+            </optgroup>
+          );
+        })}
+      </select>
+    </>
   );
 }

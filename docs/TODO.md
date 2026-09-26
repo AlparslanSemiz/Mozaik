@@ -616,9 +616,25 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       (`rules.ts`'teki `gapsBetween()`) ve `gridQuality()` ile aynı cümleyi
       paylaşıyor. Öğretmene özel kutu **yok** bu turda — okul geneli tek
       katman.
-- [ ] **B5.3 Kısıt motorunun kalan genişlemesi:** kartlar arası ilişki · sınıf
-      için günlük min/max · ardışıklık · "belirli ders belirli konumda" ·
-      öğretmen günde en fazla N sınıf.
+- [~] **B5.3 Kısıt motorunun kalan genişlemesi — ÖLÇÜLDÜ, İLK DİLİM YAPILDI
+      (2026-09-26).** Beş alt madde ölçüldü (ASC.md, ROBODERS.md, babanın fotoğrafları,
+      adsız fikstür, kod). Hiçbirinde babanın kullandığına dair kanıt yok. Sıra ve
+      gerekçe:
+      - **(a) Kartlar arası ilişki:** aSc'de "Planlama İlişkileri", `u57`'de 97 yardım konusu,
+        ASC.md kova 1'de alınmasına karar verilmiş, babanın aSc şeridinde düğmesi görünüyor
+        (kullandığı ekran yok). **İlk dilim yapıldı:** "aynı gün olmasın" (`notSameDay`,
+        şema v16). Kullanıcı arayüz taslağını onayladı. Kalan türler (art arda olsun/olmasın,
+        önce/sonra, aynı gün aynı saat…) ölçülmedi.
+      - **(d) Belirli ders belirli konumda:** aSc'de bir ilişki türü ("ilk saatte başlasın ya
+        da son saatte bitsin"), babada kanıt yok. (a)'nın türü olarak eklenebilir.
+      - **(b) Sınıfa günlük en az/en çok:** öğretmen sınırının sınıf karşılığı, ucuz. Babanın
+        verisinde anlamsız: her sınıf tam dolu, pencereler kapalı saatlerle zaten sabit.
+      - **(c) Ardışıklık:** öğretmen için zaten var (kural, Kontrol, çözücü, öneri). Sınıf için
+        babada anlamsız (pencereler 3–6 saat). Dersler arası "art arda olsun/olmasın" (a)'nın
+        parçası.
+      - **(e) Öğretmen günde en çok N sınıf:** ASC.md'de yok. Babanın aSc çıktısında MÇ bir
+        günde 6 ayrı sınıfa giriyor, kanıt tersine. En sonda.
+      Ayrıntı WORKLOG 2026-09-26'da. Babaya soru §8b'de.
 - [x] **B5.4 Kontrol'e Danışman uyarıları — YAPILDI (2026-08-31).** aSc kova 1
       (`docs/asc/yardim/u60-verification.md`, beş madde). Üç madde **yeni
       kod** oldu: `feasibility.ts`'teki `buildAdvice()` — haftadan çok gün
@@ -1080,6 +1096,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
         doğru olduğunu yine baba söyleyecek.
       - 2026-09-25 akşam: baba cevabını artık programın içinde verebilir (B5.11). KY'nin
         sorusuna "Olur" ya da "Olmaz" der, program kalanı arar, cevaplar dosyada kalır.
+- [ ] **aSc'de hangi kısıtları kullanıyorsun? (B5.3, 2026-09-26)** Özellikle "Planlama
+      İlişkileri": iki dersin aynı gün olmaması, art arda olması ya da olmaması, bir dersin
+      günün ilk ya da son saatinde olması. Mozaik'te "aynı gün olmasın" artık var (dersin
+      sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
+      görülmedi; cevap B5.3'ün sıradaki dilimini seçer.
 - [ ] **Babanın makinesinde öneri araması ölçülsün (B5.10, B5.11).** Bu makinede
       WebView2 yok. Babaya gidecek adımlar şunlar:
       1. Mozaik.exe'yi yeni sürümle açmak.

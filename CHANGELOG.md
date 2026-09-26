@@ -16,6 +16,11 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Added
+
+- Two lessons can be kept off the same day: on a lesson's sheet, "Not on the same day" lists the lessons it may not share a day with and adds one from a list grouped by class. Dragging, automatic arrangement and the suggestions all keep the rule, a drop onto the related lesson's day says why it is refused, and a relation added after both lessons were placed shows in Check as a broken rule, with nothing moved.
+- Dropping a block on several blocks that fill exactly the hours it lands on now offers to swap them: a teacher's 2-hour block in one class and their two single hours in another trade places in one step, the singles going to the block's old hours in the same order.
+
 ### Changed
 
 - The waiting-lessons tray now opens into the room the timetable is not using,
@@ -32,7 +37,6 @@ release is incomplete, the entry says so.
 - Automatic arrangement no longer gives up on a lesson when it gets stuck. It keeps repairing the best timetable it found, moving the fewest lessons out of the way each time. On a real school where every class's open hours exactly match its lessons, it now lays out the whole week in about a second, where before it stopped with five lessons missing.
 - When a week truly cannot be laid out, automatic arrangement now stops on its own once it is no longer getting anywhere, instead of always running for the full 15 seconds.
 
-- Dropping a block on several blocks that fill exactly the hours it lands on now offers to swap them: a teacher's 2-hour block in one class and their two single hours in another trade places in one step, the singles going to the block's old hours in the same order.
 
 ### Fixed
 

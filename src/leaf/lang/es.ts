@@ -474,6 +474,10 @@ const ES: Sozluk = {
   "Bu aramaya uyan ders yok.": "Ninguna clase coincide con esta búsqueda.",
   "Bu ders bir günde en fazla kaç saat":
     "Máximo de horas de esta clase en un día",
+  "Aynı gün olmasın": "No el mismo día",
+  "Aynı gün olmasın: ders ekle": "No el mismo día: añadir una clase",
+  "Ders ekle…": "Añadir una clase…",
+  "Kaldır: {ne}": "Quitar: {ne}",
   "Günde ↑": "Al día ↑",
   "{sinif} · {kim} dersinin branşı": "Asignatura de la clase {sinif} · {kim}",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar":
@@ -884,6 +888,12 @@ const ES: Sozluk = {
     "el aula {derslik} está cerrada el {gun} a la hora {saat}",
   "{kim} art arda {sinir} saatten fazla girmemeli, burada {olan} saat olur":
     "{kim} puede dar como máximo {sinir} horas seguidas; aquí serían {olan}",
+  "{ders} {gun} günü var, bu dersle aynı güne konmamalı":
+    "{ders} está el {gun}; esta clase no debe ir el mismo día",
+  "{bir} ile {iki} {gun} günü ikisi de var, aynı gün olmamalı.":
+    "{bir} y {iki} están ambas el {gun}; no deben coincidir en el mismo día.",
+  "Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir.":
+    "Si dos clases que no deben coincidir en el mismo día están el mismo día, la fila **No el mismo día** de la ficha de la clase las muestra.",
   "{kim} {gun} günü en fazla {sinir} saat girmeli, burada {olan} saat olur":
     "{kim} puede dar como máximo {sinir} horas el {gun}; aquí serían {olan}",
   "{sinif} sınıfı {gun} günü {kim} dersinden en fazla {sinir} saat görmeli, burada {olan} saat olur":
