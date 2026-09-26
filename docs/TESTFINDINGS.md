@@ -26,6 +26,23 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · elle denetim (Playwright, exe sürücüsü) · docs/DENETIM.md
+Bulgu: Özellik özellik elle denetimde on üç ürün kusuru üretildi, hepsi en az bir kez
+yeniden üretildi, ekran görüntüleri `scratch/denetim/`'de. Üçü veri kaybı sınıfında: bir
+günü kaldırmak ya da günlük ders sayısını düşürmek dizili ve sabitli dersleri sorusuz
+siliyor (DK8), ders adlarını kısaltmak da (DK9), ve öğretmeni ile dersi olmayan bir dosya
+geçerli sayılıyor (DK11). Üçü yanlış sonuç: sınıf panelinin Ad kutusu adı değiştiriyor
+(DK1), durdurulan arama "yol bulunamadı" diyor (DK5), Kontrol'ün hükmü kapalı saatteki
+dersleri görmüyor (DK7). Yedisi metin ya da görsel. Chromium 1920 ve 1536 DPR 1,25,
+ölçek %80, %100, %150, iki tema, Türkçe, İngilizce, Almanca, ve gerçek Linux exe.
+Tür: ürün kusuru (on üçü de)
+Ne yapıldı: bu turda kod değişmedi. On üçü TODO §8j'de numaralı madde, ayrıntısı
+DENETIM.md'de. Denetçinin kendi sayacı Sığdır'da kesik kart için 0 dedi, ekran bilinen
+kusuru gösteriyordu: sayaç ekranla yan yana okunmadan kullanılmadı (tuzak 140).
+DK10'un bugünkü cümlesini `e2e/temel.spec.ts` bekliyor; kusur düzelirse o test de değişir.
+Kalıcı kural: yok (Türkçe anahtarlı sözlükte eş yazılı iki anlamın bir anahtara düşmesi,
+DK12, düzeltme turunda TRAPS'a aday)
+
 ### 2026-09-26 · npm run kontrol · beş E2E aynı dakikada 30 s'lik zaman aşımına düştü
 Bulgu: E2E aşaması 591/596. Düşenler: `planlar.spec.ts` 292 ve 324 (`page.reload`), ve
 `program.spec.ts` 1238, 1255 ve 1280 (`mouse.move`). Hepsi yan yana numaralı ve aynı
