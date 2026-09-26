@@ -67,7 +67,12 @@ describe('parseState — v1 göçü', () => {
         limits: { maxConsecutive: null, maxPerDay: null, minPerDay: null },
       },
     ]);
-    expect(d.classes).toEqual([{ id: 's510', name: '510', roomId: 'dA' }]);
+    // The class goes through the same readers as a v3+ file's: a colour of
+    // its own and "the school's number" for its daily box (TODO 8g). This line
+    // used to expect neither, pinning the defect without saying so.
+    expect(d.classes).toEqual([
+      { id: 's510', name: '510', roomId: 'dA', color: 0, maxSameLessonPerDay: null },
+    ]);
     expect(d.lessons).toEqual([
       {
         id: 'x1',
