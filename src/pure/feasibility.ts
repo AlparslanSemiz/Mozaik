@@ -74,7 +74,14 @@ export interface Report extends Capacity {
   violations: Violation[];
   /** aSc's "Advisor" — data that will not BLOCK a build but is worth a look. */
   advice: Advice[];
-  /** Something blocks the build: a lesson with no place, a broken rule at Engelle, an İmkânsız row. */
+  /** Lessons sitting on an hour that was closed after they were placed (pitfall 16). */
+  stranded: number;
+  /**
+   * Something blocks the build: a lesson with no place, a broken rule at
+   * Engelle, an İmkânsız row, or a lesson on a closed hour. The last one was
+   * left out, and the verdict said "Sorun görünmüyor … Program dizilebilir."
+   * beside a red chip (DENETIM DK7).
+   */
   hasProblem: boolean;
   /**
    * A row is Sıkışık, and nothing blocks. Not a problem: the father's classes
@@ -462,11 +469,15 @@ export function buildReport(d: State): Report {
   const advice = buildAdvice(d, ix);
 
   const rows = [...teachers, ...classes, ...rooms];
+  const stranded = closedConflicts(d, ix).length;
   const hasProblem =
-    unplaceable.length > 0 || violations.length > 0 || rows.some((x) => x.level === 'impossible');
+    stranded > 0 ||
+    unplaceable.length > 0 ||
+    violations.length > 0 ||
+    rows.some((x) => x.level === 'impossible');
   const tight = !hasProblem && rows.some((x) => x.level === 'tight');
 
-  return { teachers, classes, rooms, unplaceable, violations, advice, hasProblem, tight };
+  return { teachers, classes, rooms, unplaceable, violations, advice, stranded, hasProblem, tight };
 }
 
 // ------------------------------------------------------------------ health
@@ -492,6 +503,13 @@ export interface Health {
   pending: number;
   /** Lessons sitting on an hour that was closed afterwards (pitfall 16). */
   stranded: number;
+  /**
+   * Everything that makes the week impossible as it stands: rules broken at
+   * Engelle, lessons on a closed hour, lessons with nowhere left to go. The
+   * strip's "engel" count; it used to be `blocked` alone and said "0 engel"
+   * beside a red chip (DENETIM DK7).
+   */
+  hard: number;
   /**
    * ROWS in Kontrol's three problem panels — closed hours, rule breaches and
    * lessons with nowhere left to go.
@@ -540,7 +558,7 @@ export function health(d: State): Health {
     pending += Math.max(0, lesson.weeklyHours - (ix.placedHours.get(lesson.id) ?? 0));
   }
 
-  const stranded = closedConflicts(d, ix).length;
+  const stranded = report.stranded;
 
   const level: Level =
     blocked > 0 || stranded > 0 || report.unplaceable.length > 0
@@ -569,6 +587,7 @@ export function health(d: State): Health {
     warnings,
     pending,
     stranded,
+    hard: blocked + stranded + report.unplaceable.length,
     problems: stranded + report.violations.length + report.unplaceable.length,
     advice: report.advice.length,
     level,

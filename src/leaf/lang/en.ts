@@ -248,6 +248,8 @@ const EN: Sozluk = {
     "**There are things worth looking at.** In the lists below, rows marked",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "stop the timetable from being laid out. Resolve those first.",
+  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
+    "**{n} {n:lesson sits|lessons sit} on a closed hour.** The hours were closed after the lessons were placed; see the list below and move them.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
     "The remaining **{n}** hours are waiting in the tray. You can place them with **Fill automatically** in the **Timetable** tab.",
   "Danışman uyarıları ({n})": "Advisor notes ({n})",

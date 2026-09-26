@@ -57,6 +57,11 @@ export default function Check({ state, view }: Props) {
   const t = useT();
   const report = useMemo(() => buildReport(state), [state]);
   const conflicts = useMemo(() => closedConflicts(state, buildIndex(state)), [state]);
+  // What blocks besides a lesson on a closed hour: those rows carry İmkânsız.
+  const otherProblem =
+    report.unplaceable.length > 0 ||
+    report.violations.length > 0 ||
+    [...report.teachers, ...report.classes, ...report.rooms].some((x) => x.level === 'impossible');
 
   // Where the week stands, from the same numbers the pool and the grid use.
   const placed = Object.keys(activePlacements(state)).length;
@@ -89,7 +94,7 @@ export default function Check({ state, view }: Props) {
     <div className="check-page">
       {!report.hasProblem ? (
         <div className="panel">
-          <div className={conflicts.length > 0 ? 'warn-box' : 'ok-box'}>
+          <div className="ok-box">
             {report.tight ? (
               <T k="**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
             ) : (
@@ -100,9 +105,24 @@ export default function Check({ state, view }: Props) {
       ) : (
         <div className="panel">
           <div className="warn-box">
-            <T k="**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde" />{' '}
-            <span className="badge impossible">{t('İmkânsız')}</span>{' '}
-            <T k="yazan satırlar programın dizilmesini engeller. Önce onları çözün." />
+            {/* A lesson on a closed hour is its own sentence: nothing is
+                İmkânsız about it, it was placed and then its hour was taken
+                away, and it is moved rather than solved (DENETIM DK7). */}
+            {conflicts.length > 0 && (
+              <div>
+                <T
+                  k="**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın."
+                  vars={{ n: conflicts.length }}
+                />
+              </div>
+            )}
+            {otherProblem && (
+              <div>
+                <T k="**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde" />{' '}
+                <span className="badge impossible">{t('İmkânsız')}</span>{' '}
+                <T k="yazan satırlar programın dizilmesini engeller. Önce onları çözün." />
+              </div>
+            )}
           </div>
         </div>
       )}

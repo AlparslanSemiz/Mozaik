@@ -248,6 +248,8 @@ const ES: Sozluk = {
     "**Hay puntos a los que prestar atención.** En las listas siguientes, las filas marcadas",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "impiden montar el horario. Resuélvalas primero.",
+  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
+    "**{n} {n:clase queda|clases quedan} en una hora cerrada.** Esas horas se cerraron después de colocar las clases; mire la lista de abajo y muévalas.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
     "Las **{n}** horas restantes esperan en la bandeja. Puede colocarlas con **Colocar automáticamente** en la pestaña **Horario**.",
   "Danışman uyarıları ({n})": "Notas del asesor ({n})",

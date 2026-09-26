@@ -249,6 +249,8 @@ const DE: Sozluk = {
     "**Es gibt Punkte, die Aufmerksamkeit brauchen.** In den Listen unten verhindern Zeilen mit",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
     "das Legen des Plans. Lösen Sie diese zuerst.",
+  "**{n} ders kapalı saatte kaldı.** O saatler ders konduktan sonra kapatıldı; aşağıdaki listeden bakıp taşıyın.":
+    "**{n} {n:Stunde liegt|Stunden liegen} auf einer gesperrten Zeit.** Die Zeiten wurden gesperrt, nachdem die Stunden gelegt waren; sehen Sie in der Liste unten nach und verschieben Sie sie.",
   "Kalan **{n}** saat havuzda bekliyor. **Program** sekmesindeki **Otomatik diz** ile yerleştirebilirsiniz.":
     "Die restlichen **{n}** Stunden warten im Ablagefach. Sie können sie mit **Automatisch legen** im Reiter **Stundenplan** platzieren.",
   "Danışman uyarıları ({n})": "Berater-Hinweise ({n})",

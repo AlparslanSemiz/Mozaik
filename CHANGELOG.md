@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Check no longer says "No problems in sight" and "0 blocking" while lessons sit on hours that were closed after they were placed. Its verdict now says how many lessons are on a closed hour, and the blocking count in the strip counts them, as the status chip in the top bar already did.
 - Stopping the search for ways to build a stuck week no longer reads as if the search had ended with nothing found. The panel says the search was stopped, keeps the ways found so far and marks those not yet made smaller, and a "Continue the search" button starts it again. A stopped search also no longer hands back a way's first, larger week when it had already found a smaller one.
 - In the side panel of a class or a room, clicking into the Name box and leaving it no longer renames it. The box held the panel's heading ("320 sınıfı", "A dersliği"), and leaving it wrote that back as the name, one more word each time. It now holds the name itself, and leaving a box unchanged no longer adds an undo step.
 - Open from file refuses a plan file whose list of teachers, classes, lessons or rooms is missing altogether, as in a file cut short or edited by hand. Such a file used to load as an empty plan and replace the open one. The question before loading now also counts what is in the file beside what is open now.

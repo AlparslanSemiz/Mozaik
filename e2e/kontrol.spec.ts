@@ -227,6 +227,13 @@ test.describe('27. Kontrol — yerleşemeyenler ve kural ihlalleri', () => {
     const panel = page.locator('.panel', { hasText: 'Kapalı saatte ders' });
     await expect(panel).toContainText('MÇ Salı 1 saatinde müsait değil');
     await expect(panel).toContainText('hiçbiri silinmedi');
+    // DK7: the verdict and the strip said "Sorun görünmüyor" and "0 engel"
+    // while the chip was red and this panel counted the lesson.
+    await expect(page.locator('.check-page')).not.toContainText('Sorun görünmüyor');
+    await expect(page.locator('.check-page .warn-box').first()).toContainText(
+      '1 ders kapalı saatte kaldı',
+    );
+    await expect(page.locator('.ribbon')).toContainText('1 engel');
   });
 });
 

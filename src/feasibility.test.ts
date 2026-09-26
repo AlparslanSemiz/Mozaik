@@ -563,6 +563,11 @@ describe('health', () => {
     expect(h.message).toContain('1 ders kapalı saatte');
     // ...and the strip's own number counts the ROW, once.
     expect(h.problems).toBe(1);
+    // DK7: Kontrol's verdict and its "engel" count did not see it at all —
+    // "Sorun görünmüyor … Program dizilebilir." beside a red chip.
+    expect(h.hard).toBe(1);
+    expect(buildReport(d).hasProblem).toBe(true);
+    expect(buildReport(d).stranded).toBe(1);
   });
 
   // What Kontrol's "Sorunlar (N)" button counts: rows in the three problem

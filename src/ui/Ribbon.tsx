@@ -1051,8 +1051,8 @@ export default function Ribbon({
             what. It is a READING — no button, nothing to press. */}
         <Group label="Durum">
           <span className="ribbon-value">
-            <span className={`badge ${status.blocked > 0 ? 'impossible' : 'ok'}`}>
-              {t('{n} engel', { n: status.blocked })}
+            <span className={`badge ${status.hard > 0 ? 'impossible' : 'ok'}`}>
+              {t('{n} engel', { n: status.hard })}
             </span>
             <span className={`badge ${status.warnings > 0 ? 'tight' : 'ok'}`}>
               {t('{n} uyarı', { n: status.warnings })}
