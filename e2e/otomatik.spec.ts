@@ -168,6 +168,29 @@ test.describe('22. Otomatik dizme', () => {
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
   });
 
+  // DK5: Durdur during the suggestion search used to leave "Sınıfların
+  // saatlerine dokunmadan bir yol bulunamadı." — a finished search's sentence,
+  // although an unstopped one finds six ways. A stop says it was a stop, keeps
+  // what was found, and offers to go on.
+  test('durdurulan öneri araması durdurulduğunu söylüyor ve sürdürülebiliyor', async ({ page }) => {
+    test.setTimeout(120_000);
+    const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
+    await loadWorld(page, kurs);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    const panel = page.locator('.panel.suggestions');
+    await expect(panel).toContainText('Nasıl kurulacağı aranıyor', { timeout: 60_000 });
+
+    await page.getByRole('button', { name: 'Durdur' }).click();
+    await expect(panel).toContainText('Arama durduruldu');
+    await expect(panel).not.toContainText('bulunamadı');
+
+    await panel.getByRole('button', { name: 'Aramayı sürdür' }).click();
+    await expect(page.getByRole('button', { name: 'Durdur' })).toBeVisible();
+    await expect(panel).not.toContainText('Arama durduruldu');
+    await page.getByRole('button', { name: 'Durdur' }).click();
+    await expect(panel).toContainText('Arama durduruldu');
+  });
+
   // TODO B5.9 and B5.10, on the father's week (anonymised): it cannot be built
   // as it stands, and the program offers the ways it can be, each a sentence
   // the father could say to a teacher; "Olmaz" on a change looks again without

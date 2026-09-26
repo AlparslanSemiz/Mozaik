@@ -1190,6 +1190,16 @@ const FR: Sozluk = {
     "Annuler : {ne}",
   "(daha iyisi aranıyor)":
     "(recherche d'une meilleure)",
+  "(inceltilmedi)":
+    "(non affinée)",
+  "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":
+    "La recherche a été arrêtée ; aucune solution n’avait encore été trouvée.",
+  "Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.":
+    "La recherche a été arrêtée. Les solutions trouvées fonctionnent, mais il en existe peut-être de plus petites.",
+  "Aramayı sürdür":
+    "Reprendre la recherche",
+  "Arama durdurulduğu için daha küçük bir değişiklik de olabilir.":
+    "La recherche a été arrêtée, un changement plus petit est donc possible.",
   "Bir dersi başka öğretmene verip daha az saat":
     "Confier un cours à un autre enseignant, moins d'heures",
   "Birkaç dersi başka öğretmene verip en az saat":

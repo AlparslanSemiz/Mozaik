@@ -1184,6 +1184,16 @@ const ES: Sozluk = {
     "Deshacer: {ne}",
   "(daha iyisi aranıyor)":
     "(buscando una mejor)",
+  "(inceltilmedi)":
+    "(sin afinar)",
+  "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":
+    "La búsqueda se detuvo; hasta entonces no se había encontrado ningún camino.",
+  "Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.":
+    "La búsqueda se detuvo. Los caminos encontrados sirven, pero puede haber otros más pequeños.",
+  "Aramayı sürdür":
+    "Seguir buscando",
+  "Arama durdurulduğu için daha küçük bir değişiklik de olabilir.":
+    "La búsqueda se detuvo, así que puede haber un cambio más pequeño.",
   "Bir dersi başka öğretmene verip daha az saat":
     "Dar una clase a otro docente, menos horas",
   "Birkaç dersi başka öğretmene verip en az saat":

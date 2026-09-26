@@ -1170,6 +1170,16 @@ const EN: Sozluk = {
     "Take back: {ne}",
   "(daha iyisi aranıyor)":
     "(looking for a better one)",
+  "(inceltilmedi)":
+    "(not refined)",
+  "Arama durduruldu; o ana kadar bir yol bulunmamıştı.":
+    "The search was stopped; no way had been found by then.",
+  "Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.":
+    "The search was stopped. The ways found work, but smaller ones may exist.",
+  "Aramayı sürdür":
+    "Continue the search",
+  "Arama durdurulduğu için daha küçük bir değişiklik de olabilir.":
+    "The search was stopped, so a smaller change may exist.",
   "Bir dersi başka öğretmene verip daha az saat":
     "Give one lesson to another teacher, fewer hours",
   "Birkaç dersi başka öğretmene verip en az saat":

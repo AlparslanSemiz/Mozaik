@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Stopping the search for ways to build a stuck week no longer reads as if the search had ended with nothing found. The panel says the search was stopped, keeps the ways found so far and marks those not yet made smaller, and a "Continue the search" button starts it again. A stopped search also no longer hands back a way's first, larger week when it had already found a smaller one.
 - In the side panel of a class or a room, clicking into the Name box and leaving it no longer renames it. The box held the panel's heading ("320 sınıfı", "A dersliği"), and leaving it wrote that back as the name, one more word each time. It now holds the name itself, and leaving a box unchanged no longer adds an undo step.
 - Open from file refuses a plan file whose list of teachers, classes, lessons or rooms is missing altogether, as in a file cut short or edited by hand. Such a file used to load as an empty plan and replace the open one. The question before loading now also counts what is in the file beside what is open now.
 - Typing fewer lesson names than there are lessons no longer shortens the day. The number of lessons comes from its own box alone: a lesson without a name keeps its number, and names beyond the count are left out, with a line under the box saying so. It used to cut the day down to the names given and take the lessons after them off the timetable.

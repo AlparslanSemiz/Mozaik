@@ -1047,6 +1047,7 @@ function Program({
           onPreview={setPreview}
           onApply={solver.apply}
           onAnswer={change}
+          onResume={solver.resume}
           onClose={solver.clear}
         />
       )}

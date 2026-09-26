@@ -35,6 +35,12 @@ export interface Advice {
    */
   forState: State;
   searching: boolean;
+  /**
+   * The reader pressed Durdur before the search was over. What was found
+   * stands, but it is not the search's answer: the panel says so and offers
+   * to go on (DENETIM DK5), rather than read like a search that ended.
+   */
+  stopped: boolean;
   progress: RelaxProgress | null;
   suggestions: Suggestion[];
   /**
@@ -94,6 +100,8 @@ export interface SolverRun {
   apply: (s: Suggestion) => void;
   /** The plan's answers changed (an answer, or an undo): looks again under them. */
   reconsider: (answers: Answers) => void;
+  /** Starts a stopped suggestion search again, keeping what it had found. */
+  resume: () => void;
   /** Dismisses the result line and the suggestions. */
   clear: () => void;
 }
@@ -152,6 +160,7 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
         setAdvice({
           forState: done.state,
           searching: true,
+          stopped: false,
           progress: relaxer.current.progress(),
           suggestions: [],
           answers: from.answers,
@@ -207,16 +216,16 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
         return;
       }
       const progress = active.progress();
-      // A new list only when a suggestion arrived, so the panel under the bar
+      // A new list only when a suggestion arrived or a way found a better week
+      // (it takes the earlier one's place), so the panel under the bar
       // re-renders for news and not for every frame of the clock.
       setAdvice((a) => {
         if (a === null) return a;
         const suggestions = merge(kept.current, progress.suggestions);
-        return {
-          ...a,
-          progress,
-          suggestions: suggestions.length === a.suggestions.length ? a.suggestions : suggestions,
-        };
+        const same =
+          suggestions.length === a.suggestions.length &&
+          suggestions.every((s, i) => s === a.suggestions[i]);
+        return { ...a, progress, suggestions: same ? a.suggestions : suggestions };
       });
       frame = requestAnimationFrame(tick);
     };
@@ -247,8 +256,36 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
     relaxer.current = null;
     const done = search.cancel();
     const suggestions = merge(kept.current, done.suggestions);
-    setAdvice((a) => a && { ...a, searching: false, progress: null, suggestions });
+    // The progress stays: which ways were over before the stop is what tells
+    // a finished way's week from one that was still being made smaller.
+    setAdvice((a) => a && { ...a, searching: false, stopped: true, suggestions });
   }, [finish]);
+
+  /**
+   * Goes on after a stop: the same search under the same answers, started
+   * again with the weeks it had found as its first guesses, which it keeps
+   * until it finds better. Not from where it stood — a search cannot be
+   * paused mid-question, and the worker holding it is gone.
+   */
+  const resume = useCallback(() => {
+    const current = job.current;
+    if (current === null || advice === null || !advice.stopped) return;
+    dropSearch();
+    kept.current = advice.suggestions;
+    relaxer.current = startRelax(current.from, current.hint, {
+      ...current.options,
+      accepted: advice.answers.accepted,
+      refused: advice.answers.refused,
+      previous: advice.suggestions,
+      startRelaid: advice.suggestions.some((s) => s.relaid),
+    });
+    setAdvice({
+      ...advice,
+      searching: true,
+      stopped: false,
+      progress: relaxer.current.progress(),
+    });
+  }, [advice]);
 
   const apply = useCallback(
     (s: Suggestion) => {
@@ -302,6 +339,7 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       setAdvice({
         ...advice,
         searching: true,
+        stopped: false,
         progress: relaxer.current.progress(),
         suggestions: kept.current,
         answers,
@@ -330,8 +368,9 @@ export function useSolver(change: (apply: (d: State) => State) => void): SolverR
       stop,
       apply,
       reconsider,
+      resume,
       clear,
     }),
-    [running, progress, result, advice, applied, start, stop, apply, reconsider, clear],
+    [running, progress, result, advice, applied, start, stop, apply, reconsider, resume, clear],
   );
 }

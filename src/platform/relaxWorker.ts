@@ -5,6 +5,7 @@
 // page can terminate the worker at any moment, which is how it is stopped.
 
 import { createRelaxer } from '../pure/relax';
+import type { Suggestion } from '../pure/relax';
 import type { RelaxJob, RelaxMessage } from './relaxPool';
 
 /** A worker's slice: long, because only a message queue waits on it. */
@@ -23,7 +24,7 @@ export function serveRelax(): void {
   scope.onmessage = (e) => {
     const { base, hint, options } = e.data;
     const relaxer = createRelaxer(base, hint, options);
-    let found = 0;
+    let sent: Suggestion[] = [];
     let finished = 0;
     for (;;) {
       const result = relaxer.step(SLICE_MS);
@@ -32,9 +33,15 @@ export function serveRelax(): void {
         return;
       }
       const progress = relaxer.progress();
-      // News only: a suggestion found or a way over.
-      if (progress.suggestions.length !== found || progress.finished.length !== finished) {
-        found = progress.suggestions.length;
+      // News only: a suggestion found, a better week for a way (it takes the
+      // earlier one's place, so the count does not move), or a way over.
+      // Counting alone left the page on a way's FIRST week, and a stopped
+      // search offered that one (DENETIM DK5, P13).
+      const news =
+        progress.suggestions.length !== sent.length ||
+        progress.suggestions.some((s, i) => s !== sent[i]);
+      if (news || progress.finished.length !== finished) {
+        sent = progress.suggestions;
         finished = progress.finished.length;
         scope.postMessage({ type: 'progress', progress });
       }

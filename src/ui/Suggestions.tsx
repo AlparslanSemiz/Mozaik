@@ -118,11 +118,14 @@ function Refuse({ q, onAnswer }: { q: Question; onAnswer: (next: (d: State) => S
 function AnswerBook({
   found,
   state,
+  unfinished,
   onAnswer,
   onPrint,
 }: {
   found: Suggestion;
   state: State;
+  /** The search was stopped before this way was over. */
+  unfinished: boolean;
   onAnswer: (next: (d: State) => State) => void;
   onPrint: (s: Suggestion) => void;
 }) {
@@ -190,7 +193,9 @@ function AnswerBook({
           {t('Bu değişiklikle haftanın tamamı yerleşiyor; program bulundu ve denetlendi.')}{' '}
           {found.proven
             ? t('Bundan küçük bir değişiklik yetmiyor.')
-            : t('Bulduğumuz en küçük değişiklik bu.')}
+            : unfinished
+              ? t('Arama durdurulduğu için daha küçük bir değişiklik de olabilir.')
+              : t('Bulduğumuz en küçük değişiklik bu.')}
         </span>
       </div>
     </div>
@@ -237,6 +242,7 @@ export default function Suggestions({
   onPreview,
   onApply,
   onAnswer,
+  onResume,
   onClose,
 }: {
   advice: Advice;
@@ -248,13 +254,15 @@ export default function Suggestions({
   onApply: (s: Suggestion) => void;
   /** Writes an answer into the plan; the search runs again from there. */
   onAnswer: (next: (d: State) => State) => void;
+  /** Starts a stopped search again. */
+  onResume: () => void;
   onClose: () => void;
 }) {
   const t = useT();
   const first = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState<ReadonlySet<RelaxFamily>>(new Set());
   const [printing, setPrinting] = useState<Suggestion | null>(null);
-  const { suggestions, searching, progress } = advice;
+  const { suggestions, searching, stopped, progress } = advice;
   const as = suggestions.find((s) => s.changes.length === 0);
 
   // Focus goes to the first way once the search is over: sooner, and it would
@@ -370,9 +378,15 @@ export default function Suggestions({
             ? t('Nasıl kurulacağı aranıyor… {sure} sn', {
                 sure: Math.round((progress?.elapsedMs ?? 0) / 1000),
               })
-            : rows.length === 0
-              ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
-              : t('Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.')}
+            : stopped
+              ? rows.length === 0
+                ? t('Arama durduruldu; o ana kadar bir yol bulunmamıştı.')
+                : t('Arama durduruldu. Bulunan yollar geçerli, ama daha küçükleri olabilir.')
+              : rows.length === 0
+                ? t('Sınıfların saatlerine dokunmadan bir yol bulunamadı.')
+                : t(
+                    'Bir yol seçin; her biri tek başına yetiyor, sınıfların saatlerine dokunulmaz.',
+                  )}
         </span>
         {suggestions.some((x) => x.relaid) && (
           <span className="hint inline">
@@ -380,6 +394,11 @@ export default function Suggestions({
               'Dizili dersler yerinde kalırken bir yol yok; bu yollar dersleri yeniden diziyor, sabitlenenler yerinde kalır.',
             )}
           </span>
+        )}
+        {stopped && (
+          <button className="btn" onClick={onResume}>
+            {t('Aramayı sürdür')}
+          </button>
         )}
         <button className="btn suggestion-close" onClick={onClose}>
           {t('Kapat')}
@@ -408,6 +427,9 @@ export default function Suggestions({
                     {suggestionSentence(state, found)}
                     {searching && !finished.has(family) && (
                       <span className="hint inline"> {t('(daha iyisi aranıyor)')}</span>
+                    )}
+                    {stopped && !finished.has(family) && (
+                      <span className="hint inline"> {t('(inceltilmedi)')}</span>
                     )}
                   </span>
                   <button
@@ -447,6 +469,7 @@ export default function Suggestions({
                     <AnswerBook
                       found={found}
                       state={state}
+                      unfinished={stopped && !finished.has(family)}
                       onAnswer={onAnswer}
                       onPrint={setPrinting}
                     />

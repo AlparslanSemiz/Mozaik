@@ -212,7 +212,10 @@ Bulunan her yol tek satırdır: babanın bir öğretmene söyleyeceği cümle ("
 Cumartesi 3–4. saatlere de gelebilirse hafta kuruluyor."), `Izgarada göster`,
 `Uygula` ve `Sorular`. Bir yol ilk bulduğunu hemen gösterir ve arama sürerken
 daha iyisini bulursa satır yerinde değişir; o sürece satırın yanında "(daha iyisi
-aranıyor)" yazar. Aynı öğretmenlerden aynı günlerde aynı sayıda saat isteyen iki
+aranıyor)" yazar. Arama `Durdur` ile kesilirse panel bitmiş bir arama gibi
+konuşmaz: "Arama durduruldu" der, o ana kadar bulunan yollar kalır ve bitmemiş
+yolun satırında "(inceltilmedi)" yazar, yanında `Aramayı sürdür` durur. Sürdürmek
+aramayı aynı cevaplarla baştan başlatır, bulunan haftalar ilk tahmini olur. Aynı öğretmenlerden aynı günlerde aynı sayıda saat isteyen iki
 yol tek satırdır, çünkü babanın soracağı soru aynıdır. İki karma yoldan (dersi
 başka öğretmene verip daha az saat) ötekinden iki sayıda da kötü olanı
 gösterilmez.
