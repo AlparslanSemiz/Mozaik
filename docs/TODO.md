@@ -1627,9 +1627,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 - [x] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
       Şiddet: görsel. 40 px kaydırmak yetiyor, "ÖĞRE" okunuyor. DENETIM P11.
       Kapandı 2026-09-27, 011af8d. Test: program.spec.ts 3 "yatay kaydırınca köşe hücresi saat başlıklarının üstünde kalıyor".
-- [ ] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
+- [x] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
       Şiddet: görsel. Öğle arası günden güne değişince 6. sütunun saat kutusu boş kalıyor
       ve numara yaklaşık 7 px aşağı iniyor. DENETIM M3.
+      Kapandı 2026-09-27, 4f072ad. Test: musaitlik.spec.ts 10 "saati boş kalan sütunun numarası ötekilerle aynı hizada" (Saatler kapalı ve açık).
 
 ## §9. Ham notlar — senin kendi satırların
 

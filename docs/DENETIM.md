@@ -1072,6 +1072,7 @@ fazla, bu program dizilemez"). Ctrl+Z hepsini geri getirdi.
   boş, çünkü 6. dersin başlangıcı günden güne değişiyor. Program ızgarası ve kâğıt bu
   durumda saati günlere göre yazıyor (LAYOUT, Çıktı). Görüntüler:
   `scratch/denetim/musaitlik/saatler-acik-baslik.png`, `scratch/denetim/musaitlik/baslik-6-yakin-x3.png`.
+  **Düzeldi (2026-09-27, 4f072ad).**
 
 **Şöyle olsa daha iyi.** **Ö34.** Tümünü kapat bir onayla sorsun ve iki düğme tablonun
 başlığına taşınsın ("Bu haftanın tamamı: aç, kapat") (denetçinin önerisi).
