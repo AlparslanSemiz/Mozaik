@@ -26,6 +26,24 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · npx vitest run (üç kez) · solver.test.ts, "olduğu gibi kurulamıyor" ve makinenin güç profili
+Bulgu: test üç tam koşunun üçünde ve tek başına da düştü: `elapsedMs` 15 000,1–15 000,5,
+beklenen `< 15 000`. Oturum başındaki kodda (a3404f7) da aynı şekilde düşüyor, yani bu
+turun değişikliği değil. Makine düşük güç profilindeydi (`platform_profile` low-power,
+tuned powersave, en yüksek frekans 2,2 GHz). "Derslik darboğazı" testi tek başına dün
+2,6 s, bugün 6,4 s sürüyor. Çözücünün onarımı hamle SAYISIYLA vazgeçiyor
+(211 blok × 500), ve bu profilde o hamleler 15 s'lik bütçeyi dolduruyor. Dün süit
+yükü altında 9,8 s'ydi.
+Aynı ayrım değişmez testinde de ölçüldü: `invariants.test.ts`'in öneri testi üç koşuda
+0,9 s sürdü, 60 s sınırına hiç yaklaşmadı (2026-09-25 kaydı tekrarlanmadı).
+Tür: test kusuru (makinenin hızına bağlı sınır)
+Ne yapıldı: test bütçeyi 600 s veriyor ve aynı iddiayı soruyor: bütçeden önce, durma
+kuralıyla duruyor. Bu profilde 15,4 s. Aynı gün 6f742e6 ile `store.test.ts`'in v1 göç
+testi düzeldi: 4630166'nın düzelttiği kusuru farkında olmadan çiviliyordu.
+Açık kalan: yavaş bir makinede uygulamanın kendi 15 s'lik bütçesi de dolabilir,
+yani CHANGELOG'daki "15 saniyenin sonuna kadar koşmuyor" cümlesi makinenin hızına bağlı.
+Kalıcı kural: yok
+
 ### 2026-09-25 · vite-node ve npx playwright test · "Havuza döndü" bildirimi dört dilin ikisinde
 Bulgu: bırakınca çıkan bildirim gelecek zaman cümlesinden `.replace(t('dönecek'),
 t('döndü'))` ile kuruluyordu. Beş dilde ölçüldü: Türkçe ve İngilizce doğru; Almanca

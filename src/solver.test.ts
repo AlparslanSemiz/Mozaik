@@ -483,11 +483,18 @@ describe('solve — tam dolu bir kurs', () => {
   }, 30_000);
 
   it('olduğu gibi kurulamıyor: bütçeyi bitirmeden duruyor ve eksiği sayıyor', () => {
-    const result = solve(kurs(), { keepPlaced: false });
+    // The repair gives up after so many fruitless MOVES (REPAIR_STALL_PER_BLOCK),
+    // not after so many seconds, so the budget here is far above anything the
+    // moves take: the claim is that the stall rule stops it, on any machine.
+    // With the default 15 s it failed on this machine in its low-power profile
+    // (2026-09-26): the same moves took the whole 15 s, 9.8 s the day before.
+    const budgetMs = 600_000;
+    const result = solve(kurs(), { keepPlaced: false, budgetMs });
+    console.log(`[ölçüm] tam dolu kurs, olduğu gibi: ${Math.round(result.elapsedMs)} ms`);
 
     expect(result.phase).toBe('stuck');
     expect(result.stuck.length).toBeGreaterThan(0);
-    expect(result.elapsedMs).toBeLessThan(15_000);
+    expect(result.elapsedMs).toBeLessThan(budgetMs);
     expectLegal(result.state);
     expect(blocksOf(result.state).length).toBe(result.placedBlocks);
 
@@ -503,7 +510,7 @@ describe('solve — tam dolu bir kurs', () => {
         /sınıfı .* kapalı|sınıfının .* dersi var|günün dışında|güne sığmıyor/,
       );
     }
-  }, 30_000);
+  }, 120_000);
 });
 
 describe('solve — gerçek ölçek', () => {
