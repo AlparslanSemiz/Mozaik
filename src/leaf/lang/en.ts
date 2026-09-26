@@ -530,6 +530,38 @@ const EN: Sozluk = {
   Yenilikler: "What's new",
   "Eski sürümler": "Older versions",
   // src/platform/changelog.ts — release-note bullets, translated like any other UI copy
+  "Hafta kurulamayınca program neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.":
+    "When a week cannot be laid out, the program says what would have to change, way by way; each way is applied with one click and undone with Ctrl+Z.",
+  "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
+    "The suggestion panel lists the questions to ask each teacher, each with Yes and Not possible; the answers are saved with the plan.",
+  "Izgarada göster, önerilen haftayı uygulamadan önce ızgarada işaretli gösteriyor.":
+    "Show on the grid marks the suggested week on the timetable before it is applied.",
+  "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi haftayı onararak devam ediyor.":
+    "Automatic arrangement no longer gives up when it gets stuck; it keeps repairing the best week it found.",
+  "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
+    "A \"Not on the same day\" row on the lesson's sheet: two lessons are never put on the same day.",
+  "Bir blok, bırakıldığı saatleri dolduran derslerle yer değiştirebiliyor.":
+    "A block can swap places with the lessons that fill the hours it is dropped on.",
+  "Ayarlar → Hakkında, öneri aramasının bu bilgisayarda ne kadar sürdüğünü gösteriyor.":
+    "Settings → About shows how long the suggestion search takes on this computer.",
+  "Kontrol, program tamamken sıkışık satırlar için artık \"Dikkat\" demiyor.":
+    "Check no longer says \"points to watch\" for tight rows when the timetable is complete.",
+  "Dil değişince bildirimler yeni dilde; boş ekranlar dersler için Dersler sekmesini gösteriyor.":
+    "Notices follow a language change; the empty screens point to the Lessons tab for lessons.",
+  "Program şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.":
+    "A Colour menu in the timetable ribbon colours cards by teacher, class, room or subject.",
+  "Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.":
+    "Dropping a card on another card swaps the two when both moves are allowed.",
+  "Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.":
+    "A dot on the About button in the Settings ribbon while there are unread release notes.",
+  "Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.":
+    "The program window now opens filling the screen, not in a small box.",
+  "Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası \"4…\" değil \"411\" okunuyor.":
+    "In Fit density card text is no longer cut off: the class number reads \"411\", not \"4…\".",
+  "Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.":
+    "Fit gives the space it saves on row headers and day separators to the lesson columns.",
+  "Yazı büyüklüğü yüzde 100'ün altındayken kart yazısı da onunla birlikte küçülüyor.":
+    "When text size is below 100 percent, card text shrinks with it.",
   "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
     "Class and teacher gap rules, planning analysis, and Advisor notes were added.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':

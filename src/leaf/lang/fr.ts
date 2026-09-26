@@ -538,6 +538,38 @@ const FR: Sozluk = {
   Yenilikler: "Nouveautés",
   "Eski sürümler": "Versions précédentes",
   // src/platform/changelog.ts — release-note bullets, translated like any other UI copy
+  "Hafta kurulamayınca program neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.":
+    "Quand une semaine ne peut pas être construite, le programme dit ce qui devrait changer, voie par voie ; chaque voie s’applique d’un clic et s’annule avec Ctrl+Z.",
+  "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
+    "Le panneau des suggestions liste les questions à poser à chaque enseignant, chacune avec Oui et Pas possible ; les réponses sont enregistrées avec le plan.",
+  "Izgarada göster, önerilen haftayı uygulamadan önce ızgarada işaretli gösteriyor.":
+    "Afficher sur la grille marque la semaine suggérée sur l’emploi du temps avant de l’appliquer.",
+  "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi haftayı onararak devam ediyor.":
+    "Le placement automatique n’abandonne plus quand il bloque : il continue de réparer la meilleure semaine trouvée.",
+  "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
+    "Une ligne « Pas le même jour » sur la fiche du cours : deux cours ne tombent jamais le même jour.",
+  "Bir blok, bırakıldığı saatleri dolduran derslerle yer değiştirebiliyor.":
+    "Un bloc peut échanger sa place avec les cours qui remplissent les heures où on le dépose.",
+  "Ayarlar → Hakkında, öneri aramasının bu bilgisayarda ne kadar sürdüğünü gösteriyor.":
+    "Réglages → À propos indique combien de temps prend la recherche de suggestions sur cet ordinateur.",
+  "Kontrol, program tamamken sıkışık satırlar için artık \"Dikkat\" demiyor.":
+    "Contrôle ne dit plus « points à surveiller » pour des lignes serrées quand l’emploi du temps est complet.",
+  "Dil değişince bildirimler yeni dilde; boş ekranlar dersler için Dersler sekmesini gösteriyor.":
+    "Les avis suivent le changement de langue ; les écrans vides renvoient à l’onglet Cours pour les cours.",
+  "Program şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.":
+    "Un menu Couleur dans le ruban de l’emploi du temps colore les cartes par enseignant, classe, salle ou matière.",
+  "Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.":
+    "Déposer une carte sur une autre échange les deux quand les deux déplacements sont permis.",
+  "Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.":
+    "Un point sur le bouton À propos du ruban Réglages tant qu’il reste des notes de version non lues.",
+  "Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.":
+    "La fenêtre du programme s’ouvre maintenant en plein écran, pas dans une petite boîte.",
+  "Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası \"4…\" değil \"411\" okunuyor.":
+    "En densité Ajuster, le texte des cartes n’est plus coupé : le numéro de classe se lit « 411 », pas « 4… ».",
+  "Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.":
+    "Ajuster donne aux colonnes des cours la place qu’il gagne sur les en-têtes de ligne et les séparateurs de jour.",
+  "Yazı büyüklüğü yüzde 100'ün altındayken kart yazısı da onunla birlikte küçülüyor.":
+    "Quand la taille du texte est sous 100 pour cent, le texte des cartes diminue avec elle.",
   "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
     "Les règles de trous pour les classes et les enseignants, l’analyse de planification et les remarques du conseiller ont été ajoutées.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':

@@ -71,8 +71,8 @@ release is incomplete, the entry says so.
 - The app window opens filling the screen, not in a small box.
 - In Fit density, card text is no longer cut off: the class number reads "411", not "4…".
 
-The three Added items come from the commit itself; the in-app notes for 2.1.1 do
-not mention them.
+The three Added items come from the commit itself; the in-app notes for 2.1.1
+gained them on 2026-09-26, before 2.2.0.
 
 ## [2.1.0] - 2026-09-01
 

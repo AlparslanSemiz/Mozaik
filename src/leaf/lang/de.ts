@@ -537,6 +537,38 @@ const DE: Sozluk = {
   Yenilikler: "Neuigkeiten",
   "Eski sürümler": "Ältere Versionen",
   // src/platform/changelog.ts — release-note bullets, translated like any other UI copy
+  "Hafta kurulamayınca program neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.":
+    "Lässt sich eine Woche nicht legen, sagt das Programm Weg für Weg, was sich ändern müsste; jeder Weg wird mit einem Klick angewendet und mit Strg+Z zurückgenommen.",
+  "Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.":
+    "Der Vorschlagsbereich listet die Fragen an die Lehrkräfte, jede mit Ja und Geht nicht; die Antworten werden mit dem Plan gespeichert.",
+  "Izgarada göster, önerilen haftayı uygulamadan önce ızgarada işaretli gösteriyor.":
+    "Im Raster zeigen markiert die vorgeschlagene Woche im Stundenplan, bevor sie angewendet wird.",
+  "Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi haftayı onararak devam ediyor.":
+    "Automatisch legen gibt nicht mehr auf, wenn es hängen bleibt, sondern repariert die beste gefundene Woche weiter.",
+  "Dersin sayfasında \"Aynı gün olmasın\" satırı: iki ders aynı güne konmuyor.":
+    "Eine Zeile \"Nicht am selben Tag\" auf der Seite des Fachs: zwei Fächer kommen nie auf denselben Tag.",
+  "Bir blok, bırakıldığı saatleri dolduran derslerle yer değiştirebiliyor.":
+    "Ein Block kann mit den Fächern tauschen, die die Stunden füllen, auf die er fallen gelassen wird.",
+  "Ayarlar → Hakkında, öneri aramasının bu bilgisayarda ne kadar sürdüğünü gösteriyor.":
+    "Einstellungen → Über zeigt, wie lange die Vorschlagssuche auf diesem Rechner dauert.",
+  "Kontrol, program tamamken sıkışık satırlar için artık \"Dikkat\" demiyor.":
+    "Prüfung sagt bei engen Zeilen nicht mehr \"Achtung\", wenn der Plan vollständig ist.",
+  "Dil değişince bildirimler yeni dilde; boş ekranlar dersler için Dersler sekmesini gösteriyor.":
+    "Meldungen folgen einem Sprachwechsel; die leeren Seiten verweisen für Fächer auf den Reiter Fächer.",
+  "Program şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.":
+    "Ein Farbmenü im Stundenplan-Band färbt Karten nach Lehrkraft, Klasse, Raum oder Fach.",
+  "Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.":
+    "Eine Karte auf eine andere Karte fallen zu lassen tauscht beide, wenn beide Züge erlaubt sind.",
+  "Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.":
+    "Ein Punkt auf der Schaltfläche Über im Einstellungen-Band, solange ungelesene Versionshinweise da sind.",
+  "Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.":
+    "Das Programmfenster öffnet sich jetzt bildschirmfüllend, nicht in einem kleinen Kasten.",
+  "Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası \"4…\" değil \"411\" okunuyor.":
+    "In der Dichte Einpassen wird der Kartentext nicht mehr abgeschnitten: die Klassennummer lautet \"411\", nicht \"4…\".",
+  "Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.":
+    "Einpassen gibt den Platz, den es bei Zeilenköpfen und Tagestrennern spart, an die Fachspalten.",
+  "Yazı büyüklüğü yüzde 100'ün altındayken kart yazısı da onunla birlikte küçülüyor.":
+    "Ist die Schriftgröße unter 100 Prozent, wird auch der Kartentext kleiner.",
   "Sınıf ve öğretmen boşluk kuralları, planlama analizi ve Danışman uyarıları eklendi.":
     "Regeln für Lücken bei Klassen und Lehrkräften, die Planungsanalyse und Berater-Hinweise wurden hinzugefügt.",
   'Klavye kısayolları için bir yardım ekranı eklendi (üst çubuk, Ctrl+K veya "?" tuşu).':

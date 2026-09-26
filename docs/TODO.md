@@ -1194,8 +1194,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `…github.io/ders-programi/` 404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`).
       Tuzak 106. `surum.test.ts`'e dosyadaki ve `yayinla.mjs`'teki her site adresini
       `SITE_ADRESI`'ne karşı okuyan bir kapı girdi, düzeltmeden önce kırmızıydı.
-- [ ] **`src/platform/changelog.ts`'in 2.1.1 notları eksik.** `516f963`'teki renk menüsü, kart takası
-      ve Hakkında noktası yazılmamış, `CHANGELOG.md`'de var.
+- [x] **`src/platform/changelog.ts`'in 2.1.1 notları eksik — DÜZELTİLDİ (2026-09-26).** `516f963`'teki
+      renk menüsü, kart takası ve Hakkında noktası yazılmamıştı, `CHANGELOG.md`'de vardı. Üçü eklendi,
+      ve 2.1.1'in hiç çevrilmemiş dört satırı da dört dile girdi.
 - [x] **Boş ekranlar dersler için Okul'u gösteriyor — DÜZELTİLDİ (2026-09-25).** Program,
       Kontrol ve Çıktı'nın cümleleri "Okul sekmesinden dersleri girin" diyordu, dersler Dersler
       sekmesinde giriliyor. Cümleler kullanıcıya taslak olarak gösterildi ve onaylandı: Program

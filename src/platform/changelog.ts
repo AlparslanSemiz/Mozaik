@@ -29,9 +29,27 @@ export interface SurumNotu {
 /** Newest release first — every other history list in this app reads that way. */
 export const SURUM_NOTLARI: SurumNotu[] = [
   {
+    version: '2.2.0',
+    date: '2026-09-26',
+    items: [
+      'Hafta kurulamayınca program neyin değişmesi gerektiğini yol yol söylüyor, her yol tek tıkla uygulanıyor ve Ctrl+Z ile geri alınıyor.',
+      'Öneri panelinde öğretmenlere sorulacak sorular var, her birinde Olur ve Olmaz; cevaplar planla birlikte saklanıyor.',
+      'Izgarada göster, önerilen haftayı uygulamadan önce ızgarada işaretli gösteriyor.',
+      'Otomatik diz takılınca vazgeçmiyor, bulduğu en iyi haftayı onararak devam ediyor.',
+      'Dersin sayfasında "Aynı gün olmasın" satırı: iki ders aynı güne konmuyor.',
+      'Bir blok, bırakıldığı saatleri dolduran derslerle yer değiştirebiliyor.',
+      'Ayarlar → Hakkında, öneri aramasının bu bilgisayarda ne kadar sürdüğünü gösteriyor.',
+      'Kontrol, program tamamken sıkışık satırlar için artık "Dikkat" demiyor.',
+      'Dil değişince bildirimler yeni dilde; boş ekranlar dersler için Dersler sekmesini gösteriyor.',
+    ],
+  },
+  {
     version: '2.1.1',
     date: '2026-09-01',
     items: [
+      'Program şeridinde Renk menüsü: kartlar öğretmene, sınıfa, dersliğe ya da branşa göre boyanıyor.',
+      'Bir kart başka bir kartın üstüne bırakılınca, iki hamle de uygunsa ikisi yer değiştiriyor.',
+      'Okunmamış sürüm notu varken Ayarlar şeridindeki Hakkında düğmesinde bir nokta çıkıyor.',
       'Program penceresi artık ekranı kaplayarak açılıyor, küçük bir kutuda değil.',
       'Sığdır yoğunluğunda kart yazıları kırpılmıyor: sınıf numarası "4…" değil "411" okunuyor.',
       'Sığdır, satır başından ve gün ayraçlarından kazandığı yeri ders sütunlarına veriyor.',
