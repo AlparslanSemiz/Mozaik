@@ -6,39 +6,113 @@
 import { useMemo } from 'react';
 import { clockParts, dayPeriods, formatClock, minuteOptions } from '../../pure/bell';
 import type { Day } from '../../leaf/types';
-import { WEEK, dayLabel, hourLabels, makeDay, updateBell, updateSettings } from '../../pure/entities';
+import type { State } from '../../leaf/types';
+import {
+  WEEK,
+  dayLabel,
+  hourLabels,
+  makeDay,
+  settingsLoss,
+  updateBell,
+  updateSettings,
+} from '../../pure/entities';
+import type { SettingsLoss } from '../../pure/entities';
+import { useDialogs } from '../Dialogs';
 import Field from '../Field';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
 
+/**
+ * The week with one weekday added or removed, in calendar order, or null when
+ * nothing would be left. Placement keys hold the day INDEX, so updateSettings
+ * -> remapDays rewrites them by name; without that, unticking Monday would
+ * shift the whole timetable a day earlier.
+ */
+function toggledDays(d: State, name: string, on: boolean) {
+  const kept = new Map(d.settings.days.map((x) => [x.name, x]));
+  if (on) kept.set(name, kept.get(name) ?? makeDay(name));
+  else kept.delete(name);
+  if (kept.size === 0) return null; // a week with no days is not a week
+
+  const inWeek = WEEK.flatMap((n) => {
+    const day = kept.get(n);
+    return day === undefined ? [] : [day];
+  });
+  // Days with names we do not know (from an imported backup) keep their order.
+  const custom = d.settings.days.filter((x) => !WEEK.includes(x.name) && kept.has(x.name));
+  return [...inWeek, ...custom];
+}
+
+const sameList = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((x, i) => x === b[i]);
+
 export default function School({ state, change }: PanelProps) {
   const t = useT();
+  const { confirm } = useDialogs();
   const dayCount = state.settings.days.length;
   const hourCount = state.settings.hours.length;
 
-  function setHours(count: number, names?: string) {
+  /**
+   * A day or an hour that goes takes its placed and pinned lessons with it
+   * (the grid has nowhere to show them, pitfall 5). That used to happen without
+   * a word (DENETIM DK8); now the question counts first. False = keep things.
+   */
+  async function acceptLoss(
+    loss: SettingsLoss,
+    title: string,
+    where: string,
+    confirmLabel: string,
+  ): Promise<boolean> {
+    if (loss.placed === 0 && loss.pinned === 0 && loss.elsewhere === 0) return true;
+    const body = [
+      loss.placed > 0 ? where : '',
+      loss.pinned > 0
+        ? t('Bunların {n} saati sabitli, sabitlemeleri de kalkacak.', { n: loss.pinned })
+        : '',
+      loss.elsewhere > 0
+        ? t('Öteki programlarda da {n} saat kalkacak.', { n: loss.elsewhere })
+        : '',
+      t('Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.'),
+    ].filter((x) => x !== '');
+    return confirm({ title, body: body.join(' '), confirmLabel, danger: true });
+  }
+
+  /** `box` is put back by hand on "no": it is uncontrolled (defaultValue). */
+  async function setHours(count: number, names: string | undefined, box: HTMLInputElement) {
+    const hours = hourLabels(count, names);
+    // An unchanged blur is not an edit, and must not leave an undo step behind.
+    if (sameList(hours, state.settings.hours)) return;
+    const loss = settingsLoss(state, { hours });
+    const ok = await acceptLoss(
+      loss,
+      t('Günlük ders sayısı {n} olacak', { n: hours.length }),
+      t('{saat}. dersten sonraki saatlerde yerleşmiş {n} saat var.', {
+        saat: hours.length,
+        n: loss.placed,
+      }),
+      t('Ders sayısını düşür'),
+    );
+    if (!ok) {
+      box.value = box.type === 'number' ? String(hourCount) : state.settings.hours.join(', ');
+      return;
+    }
     change((d) => updateSettings(d, { hours: hourLabels(count, names) }));
   }
 
-  /**
-   * Adds or removes one weekday, keeping calendar order. Placement keys hold
-   * the day INDEX, so updateSettings -> remapDays rewrites them by name; without
-   * that, unticking Monday would shift the whole timetable a day earlier.
-   */
-  function toggleDay(name: string, on: boolean) {
+  async function toggleDay(name: string, on: boolean) {
+    const days = toggledDays(state, name, on);
+    if (days === null) return;
+    const loss = settingsLoss(state, { days });
+    const ok = await acceptLoss(
+      loss,
+      t('{gun} ders günlerinden çıkacak', { gun: dayLabel(name) }),
+      t('{gun} günü yerleşmiş {n} saat var.', { gun: dayLabel(name), n: loss.placed }),
+      t('{gun} gününü çıkar', { gun: dayLabel(name) }),
+    );
+    if (!ok) return;
     change((d) => {
-      const kept = new Map(d.settings.days.map((x) => [x.name, x]));
-      if (on) kept.set(name, kept.get(name) ?? makeDay(name));
-      else kept.delete(name);
-      if (kept.size === 0) return d; // a week with no days is not a week
-
-      const inWeek = WEEK.flatMap((n) => {
-        const day = kept.get(n);
-        return day === undefined ? [] : [day];
-      });
-      // Days with names we do not know (from an imported backup) keep their order.
-      const custom = d.settings.days.filter((x) => !WEEK.includes(x.name) && kept.has(x.name));
-      return updateSettings(d, { days: [...inWeek, ...custom] });
+      const next = toggledDays(d, name, on);
+      return next === null ? d : updateSettings(d, { days: next });
     });
   }
 
@@ -116,7 +190,7 @@ export default function School({ state, change }: PanelProps) {
                         type="checkbox"
                         aria-label={name}
                         checked={day !== undefined}
-                        onChange={(e) => toggleDay(name, e.target.checked)}
+                        onChange={(e) => void toggleDay(name, e.target.checked)}
                       />
                     </td>
                     <td>{dayLabel(name)}</td>
@@ -166,7 +240,15 @@ export default function School({ state, change }: PanelProps) {
                 max={16}
                 defaultValue={hourCount}
                 className="num"
-                onBlur={(e) => setHours(Number(e.target.value))}
+                onBlur={(e) => {
+                  const box = e.currentTarget;
+                  // An emptied box is not a count of zero (Number('') is 0).
+                  if (box.value.trim() === '') {
+                    box.value = String(hourCount);
+                    return;
+                  }
+                  void setHours(Number(box.value), undefined, box);
+                }}
               />
             </Field>
             {/* Two dropdowns, not <input type="time">. That input renders AM/PM
@@ -247,7 +329,7 @@ export default function School({ state, change }: PanelProps) {
                 type="text"
                 className="grow"
                 defaultValue={state.settings.hours.join(', ')}
-                onBlur={(e) => setHours(hourCount, e.target.value)}
+                onBlur={(e) => void setHours(hourCount, e.target.value, e.currentTarget)}
                 placeholder="1, 2, 3, ..."
               />
             </Field>

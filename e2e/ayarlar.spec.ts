@@ -14,6 +14,7 @@ import {
   hover,
   mainList,
   loadWorld,
+  placedHours,
 } from './helpers';
 import { makeWorld } from '../src/worlds';
 
@@ -385,11 +386,16 @@ test.describe('32. Ayarlar — okul ve günler', () => {
     // Çarşamba is the second teaching day: removing it re-indexes everything
     // after it.
     const row = page.locator('table.list tr', { hasText: 'Çarşamba' });
-    await row.locator('input[type=checkbox]').uncheck();
+    // click, not uncheck: when the lesson sits on Çarşamba a question comes
+    // first and the box stays ticked until it is answered (DK8).
+    await row.locator('input[type=checkbox]').click();
+    if (dayName === 'Çarşamba') expect(await answerDialog(page)).toContain('1 saat');
+    await expect(row.locator('input[type=checkbox]')).not.toBeChecked();
 
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     if (dayName === 'Çarşamba') {
-      // Its own day went, so the lesson went with it. That is the honest result.
+      // Its own day went, so the lesson went with it — after a question that
+      // said so, and the answer was yes.
       await expect(page.locator('table.grid .card')).toHaveCount(0);
     } else {
       const cell = page.locator('table.grid td:has(.card)').first();
@@ -399,6 +405,68 @@ test.describe('32. Ayarlar — okul ve günler', () => {
         .textContent();
       expect(nowDay).toBe(dayName);
     }
+  });
+
+  // DK8: unticking a day or lowering the lesson count used to take placed and
+  // pinned lessons off the grid without a word, and Ctrl+Z did nothing while
+  // the focus sat on the checkbox. Now the question counts first.
+  async function laidOutSample(page: Page) {
+    await openWithSample(page);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
+    const before = await placedHours(page);
+    expect(before, 'örnek okul dizilemedi').toBeGreaterThan(0);
+    return before;
+  }
+
+  test('dizili günü kaldırmak önce kaybı soruyor, Vazgeç hiçbir şeyi değiştirmiyor', async ({
+    page,
+  }) => {
+    const before = await laidOutSample(page);
+    await openSettings(page, 'Zil ve günler');
+    const box = page.getByLabel('Salı', { exact: true });
+    await box.click();
+    const said = await answerDialog(page, 'cancel');
+    expect(said).toMatch(/Salı günü yerleşmiş \d+ saat var/);
+    expect(said).toContain('havuza dönecek');
+    await expect(box).toBeChecked();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    expect(await placedHours(page)).toBe(before);
+  });
+
+  test('onaylanınca dersler iniyor ve odak onay kutusundayken Ctrl+Z geri getiriyor', async ({
+    page,
+  }) => {
+    const before = await laidOutSample(page);
+    await openSettings(page, 'Zil ve günler');
+    const box = page.getByLabel('Salı', { exact: true });
+    await box.click();
+    await answerDialog(page);
+    await expect(box).not.toBeChecked();
+
+    await box.focus();
+    await page.keyboard.press('Control+z');
+    await expect(box).toBeChecked();
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    expect(await placedHours(page)).toBe(before);
+  });
+
+  test('günlük ders sayısını düşürmek de önce kaybı soruyor', async ({ page }) => {
+    const before = await laidOutSample(page);
+    await openSettings(page, 'Zil ve günler');
+    const count = page.getByLabel('Günlük ders sayısı');
+    await count.fill('10');
+    await count.blur();
+    const said = await answerDialog(page, 'cancel');
+    expect(said).toMatch(/10\. dersten sonraki saatlerde yerleşmiş \d+ saat var/);
+    // The box is not React's to reset (defaultValue), so it is put back by hand.
+    await expect(count).toHaveValue('12');
+
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    expect(await placedHours(page)).toBe(before);
   });
 
   test('gün eklenince ızgaraya bir sütun grubu ekleniyor', async ({ page }) => {

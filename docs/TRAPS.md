@@ -26,7 +26,10 @@ de gider. Yetim bir `lessonId` kalırsa ızgara çöker. Çaresi `sanitize()`
 (tuzak 6).
 
 ### 5 · Gün ya da saat sayısı azalınca taşan yerleşimler silinir
-Silinmezse görünmez hayalet dersler kalır ve sayaçlar tutmaz.
+Silinmezse görünmez hayalet dersler kalır ve sayaçlar tutmaz. Silme sorusuz
+olmaz: Zil ve günler önce `settingsLoss()` ile kalkacak yerleşmiş ve sabitli saati
+sayıp sorar. 2026-09-27'ye kadar sormuyordu, ve odak onay kutusunda kaldığı için
+Ctrl+Z de çalışmıyordu (DENETIM DK8, `ayarlar.spec.ts` 32).
 
 ### 6 · `sanitize()` her yüklemede ve her ayar değişikliğinde çağrılır
 Tuzak 4 ve 5'in çaresi bu.

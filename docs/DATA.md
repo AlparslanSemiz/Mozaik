@@ -259,7 +259,7 @@ yazar.
 
 - **Branş öğretmenin alanı, ve iki tane olabilir.** "Türkçe ve Edebiyat" bir hiyerarşiyle anlatılamadığı için alt branş değil çift branş seçildi. Dersin hangi branştan verildiği bir bayrak (`Lesson.second`), branşın adı değil: ad ikinci bir gerçek olur ve öğretmenin branşı düzeltilince sessizce saparak kalırdı. `Teacher.subject` bir kimlik değil bir ad, yeniden adlandırmak ucuz kalsın diye.
 - **Derslik sınıfın sabit alanı.** Yerleştirirken oda seçilmez, ama iki sınıf aynı dersliği paylaşıyorsa çakışma denetlenir.
-- **`placements` düz bir sözlük, dizi değil.** Gün ya da saat sayısı değişince taşan anahtarlar silinir (tuzak 5).
+- **`placements` düz bir sözlük, dizi değil.** Gün ya da saat sayısı değişince taşan anahtarlar silinir (tuzak 5). Ayarlar'da bu değişiklik önce kaç yerleşmiş ve sabitli saatin kalkacağını sayan bir soru sorar.
 - **Blok ayrı bir varlık değil, ve ızgara blok sınırı saklamaz.** Ardışık anahtarlara aynı `lessonId` yazılır. Bir dersin blokları eşit boylu olmayabildiği için (`2+1`) bir koşu birden çok türlü okunabilir, ve hangisi olduğuna tek bir fonksiyon karar verir: `constraints.ts`'teki `placedBlocks()` gün ve saat sırasıyla gezer, her koşuda önce uzun blokları alır, kalanı tek saat sayar. Izgara, havuz, sağ tık ve denetçi aynı fonksiyondan okur (tuzak 75).
 - **Haftalık saatin şekli bir liste.** `blocks` birden uzun blokların boylarını, `weeklyHours` toplamı söyler, ve liste toplamı geçemediği için ikisi çelişemez. Tek sayı olan `pairs` yalnız "şu kadar ikili" diyebiliyordu, ondan önceki `blockSize` ise "her blok bu boyda" diyebiliyordu ve `2+1`'i söyleyemiyordu.
 - **Anahtarlarda isim yok, hep kimlik.** Bir ad değişince yerleşim bozulmasın.
@@ -337,9 +337,11 @@ Geçici görünümle kapsam dışına alınmış bir güne bırakılamaz.
 Sabitlenmiş bir blok yalnız sabitleme kaldırılınca iner. Bu kilidi taşıyan
 yollar: `removeBlock` (sağ tık, menü, Delete), `dropMap` (üstüne bırakma ve takas),
 sürüklemenin başlangıcı, `solver.ts` (`keepPlaced: false` sabitlenmiş hücreleri
-tohum olarak alır), ve şeritteki `Baştan diz` ile `Programı boşalt`. Bilinen tek
-istisna, bir dersi başka bir öğretmene ya da sınıfa aktarmak: o dersin
-sabitlemeleri kalkar. Kilit `pinned`'da, hücreye bağlı ve derse değil, çünkü bir
+tohum olarak alır), ve şeritteki `Baştan diz` ile `Programı boşalt`. Bilinen iki
+istisna var. Bir dersi başka bir öğretmene ya da sınıfa aktarmak o dersin
+sabitlemelerini kaldırır. Ayarlar → Zil ve günler'de bir günü ya da saati kaldırmak
+o gün ya da saatteki sabitlemeleri de kaldırır, ama önce sabitli saatleri ayrıca
+sayan bir soru sorar (`settingsLoss()`). Kilit `pinned`'da, hücreye bağlı ve derse değil, çünkü bir
 ders birden çok blok hâlinde iner ve kilitlenen şey bir kare.
 
 Denetçi `illegalBlocks()` kapısız `liftBlock()`'u kullanır, çünkü "bu blok buraya

@@ -44,13 +44,29 @@ function initialBox(): Box {
   };
 }
 
+/** Input types that hold no typed text, so they have no undo of their own. */
+const NOT_TEXT = new Set([
+  'checkbox',
+  'radio',
+  'range',
+  'color',
+  'file',
+  'button',
+  'submit',
+  'reset',
+  'image',
+]);
+
 /** While typing in a text box let the browser handle Ctrl+Z, do not grab it.
+    Only a box that takes typing counts: a checkbox keeps the focus after it is
+    clicked, and when every INPUT counted, Ctrl+Z right after unticking a day
+    did nothing at all (DENETIM DK8).
     Exported: App.tsx's own global shortcuts (the '?' help key) need the same
     guard, and a second copy of a four-line rule is still a second copy. */
 export function isTextInput(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
-  const tag = target.tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable;
+  if (target instanceof HTMLInputElement) return !NOT_TEXT.has(target.type);
+  return target.tagName === 'TEXTAREA' || target.isContentEditable === true;
 }
 
 export function useStore() {

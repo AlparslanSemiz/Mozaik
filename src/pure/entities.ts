@@ -8,6 +8,7 @@ import { clampBlocks } from '../leaf/blocks';
 import {
   activePinned,
   activePlacements,
+  activeProgram,
   mapProgramGrids,
   replaceActiveGrid,
   blankProgram,
@@ -909,6 +910,41 @@ export function remapDays(d: State, nextDays: Day[]): State {
 export function updateSettings(d: State, next: Partial<Settings>): State {
   const withKeys = next.days === undefined ? d : remapDays(d, next.days);
   return sanitize({ ...withKeys, settings: { ...d.settings, ...next } });
+}
+
+/**
+ * What a settings write would take off the grid: placed hours and pins on the
+ * program on screen, and placed hours on the other alternatives (remapDays and
+ * sanitize rewrite every one of them). Unticking a day or lowering the number
+ * of lessons a day used to do this without a word (DENETIM DK8); the question
+ * that now comes first counts with this.
+ *
+ * Measured as the difference the write itself makes, not re-derived from the
+ * day and hour ranges, so the number in the question cannot disagree with what
+ * pressing its button then does.
+ */
+export interface SettingsLoss {
+  placed: number;
+  pinned: number;
+  elsewhere: number;
+}
+
+export function settingsLoss(d: State, next: Partial<Settings>): SettingsLoss {
+  const after = updateSettings(d, next);
+  const size = (x: Record<string, unknown>) => Object.keys(x).length;
+  const before = activeProgram(d);
+  const now = activeProgram(after);
+  let elsewhere = 0;
+  for (const program of d.programs) {
+    if (program.id === before.id) continue;
+    const kept = after.programs.find((x) => x.id === program.id);
+    elsewhere += size(program.placements) - (kept === undefined ? 0 : size(kept.placements));
+  }
+  return {
+    placed: size(before.placements) - size(now.placements),
+    pinned: size(before.pinned) - size(now.pinned),
+    elsewhere,
+  };
 }
 
 export function updateBell(d: State, next: Partial<Bell>): State {

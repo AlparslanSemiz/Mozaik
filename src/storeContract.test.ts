@@ -335,6 +335,23 @@ describe('sözleşme · metin kutusu koruması', () => {
     expect(isTextInput(div)).toBe(false);
     expect(isTextInput(null)).toBe(false);
   });
+
+  // DK8: after unticking a day the focus stays on the checkbox, and a Ctrl+Z
+  // that the guard swallowed there was the only undo that did not work.
+  it('onay kutusu ve seçim düğmesi yazı kutusu değil, sayı kutusu yazı kutusu', () => {
+    const kind = (type: string) => {
+      const x = document.createElement('input');
+      x.type = type;
+      return x;
+    };
+    for (const type of ['checkbox', 'radio', 'range', 'color', 'file', 'button', 'submit']) {
+      expect(isTextInput(kind(type)), type).toBe(false);
+    }
+    for (const type of ['text', 'search', 'number', 'email', 'url', 'tel', 'password']) {
+      expect(isTextInput(kind(type)), type).toBe(true);
+    }
+    expect(isTextInput(document.createElement('select'))).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------- the hook

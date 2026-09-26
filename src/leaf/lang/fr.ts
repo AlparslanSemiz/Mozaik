@@ -718,6 +718,24 @@ const FR: Sozluk = {
   "Öğle arası (dk)": "Pause déjeuner (min)",
   "Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)":
     "Noms des heures (séparés par des virgules ; vide donne 1, 2, 3…)",
+  "Bunların {n} saati sabitli, sabitlemeleri de kalkacak.":
+    "{n} {n:est épinglée|sont épinglées}, et l’épingle disparaîtra aussi.",
+  "Öteki programlarda da {n} saat kalkacak.":
+    "{n} {n:heure disparaîtra|heures disparaîtront} aussi des autres emplois du temps.",
+  "Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.":
+    "Ces cours retourneront dans le bac. Annuler les ramène.",
+  "Günlük ders sayısı {n} olacak":
+    "La journée aura {n} {n:cours|cours}",
+  "{saat}. dersten sonraki saatlerde yerleşmiş {n} saat var.":
+    "{n} {n:heure est placée|heures sont placées} après le cours {saat}.",
+  "Ders sayısını düşür":
+    "Réduire le nombre",
+  "{gun} ders günlerinden çıkacak":
+    "{gun} ne sera plus un jour de cours",
+  "{gun} günü yerleşmiş {n} saat var.":
+    "{n} {n:heure est placée|heures sont placées} le {gun}.",
+  "{gun} gününü çıkar":
+    "Retirer le {gun}",
   "Zil saatleri": "Horaires de sonnerie",
   Ara: "Pause",
   "Öğle arası, {dk} dk": "Pause déjeuner, {dk} min",

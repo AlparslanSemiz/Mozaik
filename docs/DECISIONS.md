@@ -35,6 +35,28 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-27 · Gün ya da saat kaldırmak önce kaybı sorar, dersler yerinde bırakılmaz
+
+**Eski hâli.** Ayarlar → Zil ve günler'de dersleri dizili bir günün işaretini kaldırmak
+ya da günlük ders sayısını düşürmek, o gün ya da saatteki yerleşmiş ve sabitli dersleri
+sorusuz havuza indiriyordu (DENETIM DK8: örnek okulda Pazar'la 65 saat, 65'i sabitli).
+Odak onay kutusunda kaldığı için Ctrl+Z de çalışmıyordu.
+
+**Seçenekler.** (a) Önce kaybı sayan bir soru. (b) Dersler Müsaitlik'teki kapalı
+saatteki dersler gibi yerinde kalıp işaretlenir. (c) İkisi. Kullanıcı (a)'yı seçti,
+sabitli dersler aynı soruda ayrıca sayılıyor.
+
+**Neden (b) değil.** Kapalı saat ızgarada durmaya devam eden bir sütundur, kaldırılan
+gün ise değildir: dersin çizilecek yeri kalmıyor. (b) günü silmek yerine "kapalı gün"
+olarak tutmayı gerektirirdi, bu da `sanitize()`'ın aralık dışı yerleşimi silme kuralını
+(tuzak 5), çözücüyü, kâğıdı ve sayaçları değiştirirdi.
+
+**Şimdi.** `settingsLoss()` yazmanın kendisinin yaratacağı farkı sayar (etkin programda
+yerleşmiş ve sabitli saat, öteki programlarda yerleşmiş saat). Soru `School.tsx`'te,
+Vazgeç kutuyu eski değerine döndürür. `isTextInput()` artık yalnız yazı alan kutuları
+sayıyor, yani onay kutusundayken Ctrl+Z geri alıyor. Test: `ayarlar.spec.ts` 32'nin
+üç vakası ve `storeContract.test.ts`'in onay kutusu vakası.
+
 ### 2026-09-26 · Sürüklerken kasma: Sığdır'ın sütunu `cqw`'den değil ölçülen genişlikten, çubuk kendi içinde
 
 **Şikâyet.** Kart, konulabilen hücrelerin satırında gezdirilirken güçlü bir işlemcide

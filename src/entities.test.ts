@@ -57,6 +57,7 @@ import {
   setAvailability,
   setWholeWeek,
   updateSettings,
+  settingsLoss,
   answerNo,
   answerYes,
   dropAnswer,
@@ -227,6 +228,42 @@ describe('updateSettings', () => {
     expect(next.settings.schoolName).toBe('Semiz Kurs');
     expect(next.settings.hours).toEqual(['1', '2', '3', '4']);
     expect(next.settings.days).toEqual(d.settings.days);
+  });
+});
+
+// DK8: a settings change that drops placed or pinned hours asks first, and the
+// question counts. The count is the difference the write would make, so it can
+// never disagree with what the write then does.
+describe('settingsLoss', () => {
+  it('silinecek günün yerleşmiş ve sabitli saatlerini sayar', () => {
+    const d = build();
+    expect(settingsLoss(d, { days: without(d.settings.days, 'Salı') })).toEqual({
+      placed: 1,
+      pinned: 1,
+      elsewhere: 0,
+    });
+  });
+
+  it('saat sayısı düşünce taşan saatleri sayar', () => {
+    const d = build();
+    expect(settingsLoss(d, { hours: ['1', '2'] })).toEqual({ placed: 1, pinned: 0, elsewhere: 0 });
+  });
+
+  it('hiçbir şey kalkmıyorsa sıfır', () => {
+    const d = build();
+    expect(settingsLoss(d, { days: [...d.settings.days, makeDay('Perşembe')] })).toEqual({
+      placed: 0,
+      pinned: 0,
+      elsewhere: 0,
+    });
+  });
+
+  // remapDays rewrites every alternative, not only the one on screen.
+  it('öteki programlarda kalkan saatleri ayrıca sayar', () => {
+    const d = build();
+    const other = { ...activeProgram(d), id: 'p2', name: 'Program 2', pinned: {} };
+    const two = { ...d, programs: [...d.programs, other] };
+    expect(settingsLoss(two, { days: without(d.settings.days, 'Salı') }).elsewhere).toBe(1);
   });
 });
 

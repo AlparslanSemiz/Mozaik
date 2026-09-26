@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Unticking a teaching day or lowering the number of lessons a day no longer takes placed lessons off the timetable without a word. A question comes first and counts what will go back to the tray, pinned hours included; Cancel leaves everything as it was. Ctrl+Z now also works right after clicking a checkbox, where it used to do nothing.
 - Enter or Space on a focused card in the timetable now opens its menu, as the keyboard shortcuts screen says. It used to send the lesson back to the tray without a word. Delete still removes it.
 - In the Lessons form, Enter on the split button now opens its list and Enter on a split picks it. It used to add the lesson, with the split it had before.
 - Dragging a card along its row no longer stutters in the Fit density. On a full week, 23% of frames were dropped even on a fast machine, and nearly all of them on a slow one. Now none are, and the column widths are exactly what they were. The Linux build also stuttered in both densities, and it is smooth now too.

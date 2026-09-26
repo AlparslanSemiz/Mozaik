@@ -707,6 +707,24 @@ const EN: Sozluk = {
   "Öğle arası (dk)": "Lunch break (min)",
   "Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)":
     "Period names (comma separated; left empty they are 1, 2, 3…)",
+  "Bunların {n} saati sabitli, sabitlemeleri de kalkacak.":
+    "{n} of them {n:is|are} pinned, and the {n:pin goes|pins go} too.",
+  "Öteki programlarda da {n} saat kalkacak.":
+    "{n} {n:hour|hours} will also go from the other timetables.",
+  "Bu dersler havuza dönecek. Geri al ile geri getirebilirsiniz.":
+    "These lessons will go back to the tray. Undo brings them back.",
+  "Günlük ders sayısı {n} olacak":
+    "The day will have {n} {n:lesson|lessons}",
+  "{saat}. dersten sonraki saatlerde yerleşmiş {n} saat var.":
+    "{n} {n:hour is|hours are} placed after lesson {saat}.",
+  "Ders sayısını düşür":
+    "Lower the count",
+  "{gun} ders günlerinden çıkacak":
+    "{gun} will no longer be a teaching day",
+  "{gun} günü yerleşmiş {n} saat var.":
+    "{n} {n:hour is|hours are} placed on {gun}.",
+  "{gun} gününü çıkar":
+    "Remove {gun}",
   "Zil saatleri": "Bell times",
   Ara: "Break",
   "Öğle arası, {dk} dk": "Lunch break, {dk} min",
