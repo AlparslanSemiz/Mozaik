@@ -930,9 +930,9 @@ function buildModel(
             // the question was answered and the search stayed near the hint
             // week, and that was worse: after refusing KY's Saturday the
             // fewest-hours way found 7 instead of 5 (CP-SAT's best), the
-            // hand-over ways one lesson and 5 hours instead of 4 and 3, and
-            // the whole search took 100 s instead of 60 (DECISIONS). So this
-            // stays as it is, and the sentence says what it does.
+            // hand-over ways one lesson and 5 hours instead of 4 and 3, in
+            // about the same time (DECISIONS). So this stays as it is, and the
+            // sentence says what it does.
             if (
               variant === 'as-is' &&
               hint[placementKey(lesson.classId, day, hour)] === lesson.id
@@ -1415,8 +1415,8 @@ export function createRelaxer(
     // for the hint week outright, briefly. It was written so because a phase
     // alone was thought not enough (TRAPS 134), but the question is refused at
     // once on every formula, since `hinted` names more than one start per
-    // block (buildModel), and a version that answered it searched worse and
-    // slower (MEASURED 2026-09-26, DECISIONS). The refused question is kept:
+    // block (buildModel), and a version that answered it searched worse
+    // (MEASURED 2026-09-26, DECISIONS). The refused question is kept:
     // the week the search finds today is found after it.
     stage = 'solving';
     if (fresh && model.hinted.length > 0) {

@@ -58,7 +58,8 @@ Cumartesi 6 ve 12). Önce farkın nereden geldiği ölçüldü:
 | olağan turlardan sonra 4 ve 5 günlük tırmanma turu, 4 000 çatışma | 5 | 67 s, erken hafta 40 s'de |
 | aynı tur erken gösterimden sonra | 6 | 62 s |
 
-Hiçbiri hem 5'i hem bugünkü süreyi ve erken haftayı tutmadı. Sonuç yörüngeye çok
+Bu tablonun bütün satırları makine düşük güç profilindeyken alındı. Hiçbiri hem 5'i
+hem bugünkü süreyi ve erken haftayı tutmadı. Sonuç yörüngeye çok
 duyarlı: aynı tur yerini değiştirince 5 de 6 da buluyor. Babanın dosyasında ret
 sonrası 5 zaten bulunuyor. Açık kalıyor.
 
@@ -82,15 +83,18 @@ babanın dosyasında, ikişer koşu:
 
 | | Bugün | Ipucu tutunca |
 |---|---|---|
-| ilk arama | 57,6 s | 96,5 · 104,7 s |
+| ilk arama | 98,4 s | 96,5 · 104,7 s |
 | karma az ders / az saat | 1 ders 4 saat / 1 ders 3 saat | 1 ders 5 saat / 1 ders 5 saat |
 | karma saat ve sınır | 6 | 5 |
-| ret sonrası süre | 63,5 · 64,3 s | 101,6 · 100,8 s |
+| ret sonrası süre | 114,9 s | 101,6 · 100,8 s |
 | ret sonrası en az saat | 5 | 7 |
 | ret sonrası en az öğretmen | 6 | 7 |
 
-Yalnız karma saat ve sınır iyileşti, gerisi kötüleşti ve süre neredeyse iki katına
-çıktı. Kod olduğu gibi kaldı, yorumları yaptığı şeyi söylüyor.
+Süreler makinenin düşük güç profilinde alındı, iki sütun da aynı profilde (TESTFINDINGS
+2026-09-26). Bu tablonun ilk hâli "bugün"ü normal profilde alınmış 57,6 ve 64 s ile
+karşılaştırıyordu, ve "süre iki katına çıktı" diyordu. Aynı profilde süre aşağı
+yukarı aynı. Yalnız karma saat ve sınır iyileşti, gerisi kötüleşti. Kod olduğu gibi
+kaldı, yorumları yaptığı şeyi söylüyor.
 
 ### 2026-09-26 · Öneri araması: eşleşme yolu boşa aramıyor, karma yollar kendi hattında
 
@@ -128,8 +132,10 @@ koşuda bütün yolların sonucu aynı.
 | aynı, Olmaz'dan sonra | 59,6 · 57,2 s | | 50,6 · 51,1 s |
 | aynı, Olur'dan sonra | 37,5 s | | 33,1 · 32,5 s |
 
-Exe'de üçüncü bir çift makine yükteyken koşuldu, ikisi birden yavaşladı ve C yine
-öndeydi (87,3'e karşı 67,0 s). Kalite, babanın dosyası ve iki fikstürde yol yol
+Exe'de üçüncü bir çift makine yavaşken koşuldu, ikisi birden yavaşladı ve C yine
+öndeydi (87,3'e karşı 67,0 s). Sonradan anlaşıldı ki makine o sırada düşük güç
+profiline geçmişti (TESTFINDINGS 2026-09-26). Tablodaki öteki ölçümler ondan önce
+alındı, A, B ve C her seferinde art arda koşuldu. Kalite, babanın dosyası ve iki fikstürde yol yol
 aynı:
 - zaten geldiği gün bedel 7;
 - en az saat 4;

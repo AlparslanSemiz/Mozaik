@@ -355,8 +355,8 @@ Sebebi: ipucu bir dersin haftadaki her saatini bir BAŞLANGIÇ sayıyor, yani ik
 saatlik bir bloğu iki yerden, 1+1'lik bir dersin tekini iki yerden başlatmak
 istiyor (babanın dosyasında 211 blok için 455 başlangıç). Sonucu iyileştiren şey
 sorunun yanında konan deneme yönleriydi. Blok başına tek başlangıç soran bir
-sürüm soruyu tutturdu, ve arama kötüleşti. Ret sonrası en az saat 5 yerine 7
-oldu, süre 60 s yerine 100 s (DECISIONS 2026-09-26). Kod olduğu gibi kaldı,
+sürüm soruyu tutturdu, ve arama kötüleşti: ret sonrası en az saat 5 yerine 7
+oldu (DECISIONS 2026-09-26). Kod olduğu gibi kaldı,
 yorumları yaptığı şeyi söylüyor. Kural: **bir adımın işe yaradığı, o adımın
 kendi dönüşü (burada `sat` mı `unsat` mı) bir kez basılıp okunmadan yazılmaz.**
 
