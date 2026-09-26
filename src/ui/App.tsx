@@ -12,7 +12,8 @@ import { bundleVersionOf, BUNDLE_VERSION } from '../pure/bundle';
 import { useStore, isTextInput } from '../platform/useStore';
 import { downloadBackup } from '../platform/download';
 import { storageWorks } from '../platform/planStore';
-import { parseState } from '../pure/parseState';
+import { readPlanFile } from '../pure/parseState';
+import { planSummary } from '../pure/entities';
 import {
   applyMotion,
   applyRibbon,
@@ -631,8 +632,18 @@ export default function App() {
     // about speed. The thing that actually costs a reader time on this path is
     // the confirmation dialog, and that one is deliberate.)
     const text = await file.text();
-    const loaded = parseState(text);
-    if (loaded === null) {
+    const read = readPlanFile(text);
+    if ('problem' in read && read.problem === 'eksik') {
+      await alert({
+        title: t('Bu dosya eksik'),
+        tone: 'warn',
+        body: t(
+          'Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.',
+        ),
+      });
+      return;
+    }
+    if ('problem' in read) {
       // Three different files can land here and each deserves its own sentence.
       // A BUNDLE is refused rather than opened: it holds every plan, so opening
       // one means replacing the whole library — and the top bar stays the place
@@ -657,11 +668,38 @@ export default function App() {
       });
       return;
     }
+    // Both plans counted side by side (DENETIM Ö43): a file that is empty, or
+    // not the one meant, is seen before it replaces anything.
+    const inFile = planSummary(read.state);
+    const now = planSummary(state);
+    const counts = (c: typeof now) => ({
+      ogretmen: c.teachers,
+      sinif: c.classes,
+      ders: c.lessons,
+      saat: c.placed,
+    });
     if (
       !(await confirm({
         title: t('Şu anki programın yerine geçecek'),
-        body: t(
-          'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+        body: (
+          <>
+            <p>
+              {t(
+                'Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.',
+                counts(inFile),
+              )}
+              <br />
+              {t(
+                'Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.',
+                counts(now),
+              )}
+            </p>
+            <p>
+              {t(
+                'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.',
+              )}
+            </p>
+          </>
         ),
         confirmLabel: t('Yedeği yükle'),
         danger: true,
@@ -669,7 +707,7 @@ export default function App() {
     ) {
       return;
     }
-    loadState(loaded);
+    loadState(read.state);
     notify(t('Yedek yüklendi.'));
   }
 

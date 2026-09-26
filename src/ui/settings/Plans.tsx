@@ -11,11 +11,11 @@
 
 import { useMemo } from 'react';
 import { useDialogs } from '../Dialogs';
-import { emptyState } from '../../pure/entities';
+import { emptyState, planSummary } from '../../pure/entities';
 import { drafts as draftsOf } from '../../pure/library';
 import { loadPlan } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
-import { activePlacements, blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../../pure/programs';
 import type { PlanControls } from '../props';
 import DraftStart from '../DraftStart';
 import { T, useT } from '../T';
@@ -23,16 +23,6 @@ import { T, useT } from '../T';
 interface Props {
   state: State;
   plans: PlanControls;
-}
-
-/** What is inside a plan, for the table. Cheap enough: it is read on demand. */
-function summary(state: State) {
-  return {
-    teachers: state.teachers.length,
-    classes: state.classes.length,
-    lessons: state.lessons.length,
-    placed: Object.keys(activePlacements(state)).length,
-  };
 }
 
 export default function Plans({ state, plans }: Props) {
@@ -51,7 +41,7 @@ export default function Plans({ state, plans }: Props) {
         const stored = plan.id === planId ? state : loadPlan(plan.id);
         return {
           plan,
-          counts: summary(stored ?? emptyState()),
+          counts: planSummary(stored ?? emptyState()),
           missing: stored === null,
         };
       }),

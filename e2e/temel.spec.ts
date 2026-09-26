@@ -473,6 +473,42 @@ test.describe('29. Hata yolları', () => {
     expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
   });
 
+  // DK11: a file with no teachers and no lessons at all used to be taken as a
+  // valid plan and, one "Yedeği yükle" later, empty the open one.
+  test('öğretmeni ve dersi olmayan dosya eksik diye reddediliyor, plan değişmiyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const before = await page.locator('table.grid tbody tr').count();
+    const { teachers: _t, lessons: _l, ...cut } = FIXTURE;
+
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'eksik.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(cut)),
+    });
+
+    const said = await answerDialog(page);
+    expect(said).toContain('Bu dosya eksik');
+    expect(said).not.toContain('Yedeği yükle');
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  // Ö43: the question counts the file beside the open plan, so an empty or
+  // wrong file is seen before it replaces anything.
+  test('yükleme sorusu dosyayı açık planla yan yana sayıyor', async ({ page }) => {
+    await openWithSample(page);
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'ders-programi-2026-08-25-1200.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(FIXTURE)),
+    });
+    const said = await answerDialog(page, 'cancel');
+    expect(said).toContain('Dosyada: 1 öğretmen, 1 sınıf, 1 ders, yerleşmiş 0 saat.');
+    expect(said).toContain('Şu an: 25 öğretmen, 20 sınıf, 99 ders, yerleşmiş 0 saat.');
+  });
+
   test('yükleme onayı reddedilince hiçbir şey değişmiyor', async ({ page }) => {
     await openWithSample(page);
     const before = await page.locator('table.grid tbody tr').count();

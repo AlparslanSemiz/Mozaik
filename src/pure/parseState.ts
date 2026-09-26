@@ -559,3 +559,28 @@ export function parseState(text: string): State | null {
     },
   });
 }
+
+/** What "Dosyadan aç" makes of a file: a plan, or why it is not one. */
+export type PlanFile = { state: State } | { problem: 'okunamadi' | 'eksik' };
+
+/** The four lists every plan file the program ever wrote carries (v1 in Turkish). */
+const LISTS = ['rooms', 'teachers', 'classes', 'lessons'];
+const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
+
+/**
+ * The top bar's reader, stricter than `parseState` underneath it. A file with
+ * no teachers or no lessons field AT ALL was cut short or edited by hand, and
+ * `parseState` - which also reads localStorage and the session backups, where
+ * tolerance is the point - fills it in with empty lists. Loaded from the top
+ * bar that empties the open plan after one "Yedeği yükle" (DENETIM DK11), so
+ * here it is refused. An empty list is not a missing one: a school with no
+ * lessons yet is a real plan.
+ */
+export function readPlanFile(text: string): PlanFile {
+  const state = parseState(text);
+  if (state === null) return { problem: 'okunamadi' };
+  const raw = JSON.parse(text) as Record<string, unknown>;
+  const lists = (raw.schemaVersion ?? raw.semaSurumu) === 1 ? LISTS_V1 : LISTS;
+  if (lists.some((field) => !Array.isArray(raw[field]))) return { problem: 'eksik' };
+  return { state };
+}

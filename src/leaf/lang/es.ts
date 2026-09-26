@@ -116,6 +116,14 @@ const ES: Sozluk = {
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
     'El plan en pantalla se sustituye por el del archivo y se borra el historial de deshacer. Si puede cambiar de opinión, elija antes "Guardar en archivo".',
   "Yedeği yükle": "Cargar la copia",
+  "Bu dosya eksik":
+    "Este archivo está incompleto",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.":
+    "Al archivo le falta la lista de profesores, grupos, clases o aulas; puede que esté cortado o editado a mano. Elija una copia .json descargada por el programa.",
+  "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "En el archivo: {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:grupo|grupos}, {ders} {ders:clase|clases}, {saat} {saat:hora colocada|horas colocadas}.",
+  "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "Ahora: {ogretmen} {ogretmen:profesor|profesores}, {sinif} {sinif:grupo|grupos}, {ders} {ders:clase|clases}, {saat} {saat:hora colocada|horas colocadas}.",
   "Yedek yüklendi.": "Copia cargada.",
   Bölümler: "Secciones",
   "Programın durumu: {durum}. Ayrıntı için Kontrol.":

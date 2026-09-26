@@ -32,7 +32,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { defaultSubjects, emptyState } from './pure/entities';
-import { parseState } from './pure/parseState';
+import { parseState, readPlanFile } from './pure/parseState';
 import { activeProgram } from './pure/programs';
 import { SCHEMA_VERSION, type State } from './leaf/types';
 
@@ -105,6 +105,34 @@ describe('şema örnekleri', () => {
     for (const version of VERSIONS) {
       expect(() => read(version), `v${version}.json yok`).not.toThrow();
     }
+  });
+
+  // DK11: "Dosyadan aç" is stricter than the reader underneath it. A file with
+  // no teachers or no lessons field at all is cut or hand-edited, and loading
+  // it used to empty the plan after one "Yedeği yükle". Every file the program
+  // ever wrote carries all four lists, so every example must still pass.
+  it.each(VERSIONS)('v%i dosyası Dosyadan aç kapısından geçiyor', (version) => {
+    expect(readPlanFile(read(version))).toMatchObject({ state: { schemaVersion: SCHEMA_VERSION } });
+  });
+
+  it.each(['teachers', 'lessons', 'classes', 'rooms'])(
+    '%s alanı olmayan dosya eksik sayılıyor, boş liste sayılmıyor',
+    (field) => {
+      const raw = JSON.parse(read(SCHEMA_VERSION)) as Record<string, unknown>;
+      expect(readPlanFile(JSON.stringify({ ...raw, [field]: [] }))).toHaveProperty('state');
+      delete raw[field];
+      expect(readPlanFile(JSON.stringify(raw))).toEqual({ problem: 'eksik' });
+    },
+  );
+
+  it('v1 dosyasında Türkçe alan adları aranıyor', () => {
+    const raw = JSON.parse(read(1)) as Record<string, unknown>;
+    delete raw.ogretmenler;
+    expect(readPlanFile(JSON.stringify(raw))).toEqual({ problem: 'eksik' });
+  });
+
+  it('JSON olmayan dosya okunamıyor', () => {
+    expect(readPlanFile('{ bu json değil')).toEqual({ problem: 'okunamadi' });
   });
 
   it('okunamayan bir sürüm numarası hâlâ null veriyor', () => {

@@ -236,7 +236,11 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 { "bundleVersion": 1, ... }    her plan    ders-programi-tumu-YYYY-AA-GG-SSDD.json
 ```
 
-Üst çubuk tek planı yazar ve okur. Paket Ayarlar → Planlar ve yedek'te duruyor,
+Üst çubuk tek planı yazar ve okur. Okurken `parseState`'ten sıkı olan `readPlanFile()`'dan
+geçer: öğretmen, sınıf, ders ya da derslik listesinin alanı hiç yoksa (v1'de Türkçe adlarıyla)
+dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. `parseState` localStorage'ı ve
+oturum yedeklerini de okuduğu için hoşgörülü kalır. Yükleme sorusu dosyayı açık planla yan
+yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). Paket Ayarlar → Planlar ve yedek'te duruyor,
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
 Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki
 her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.

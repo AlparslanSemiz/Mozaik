@@ -117,6 +117,14 @@ const EN: Sozluk = {
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
     'The plan on screen is replaced by the one in the file and the undo history is cleared. If you might change your mind, choose "Save to file" first.',
   "Yedeği yükle": "Load the backup",
+  "Bu dosya eksik":
+    "This file is incomplete",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.":
+    "The file has no list of teachers, classes, lessons or rooms; it may have been cut short or edited by hand. Choose a .json backup the program downloaded.",
+  "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "In the file: {ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes}, {ders} {ders:lesson|lessons}, {saat} {saat:hour|hours} placed.",
+  "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "Now: {ogretmen} {ogretmen:teacher|teachers}, {sinif} {sinif:class|classes}, {ders} {ders:lesson|lessons}, {saat} {saat:hour|hours} placed.",
   "Yedek yüklendi.": "Backup loaded.",
   Bölümler: "Sections",
   "Programın durumu: {durum}. Ayrıntı için Kontrol.":

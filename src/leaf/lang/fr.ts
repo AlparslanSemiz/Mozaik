@@ -116,6 +116,14 @@ const FR: Sozluk = {
   'Ekrandaki plan dosyadakiyle değiştirilecek ve geri alma geçmişi sıfırlanacak. Vazgeçme ihtimaliniz varsa önce "Dosyaya kaydet" deyin.':
     "Le plan à l’écran est remplacé par celui du fichier et l’historique d’annulation est effacé. Si vous risquez de changer d’avis, choisissez d’abord « Enregistrer dans un fichier ».",
   "Yedeği yükle": "Charger la sauvegarde",
+  "Bu dosya eksik":
+    "Ce fichier est incomplet",
+  "Dosyada öğretmen, sınıf, ders ya da derslik listesi yok; kesilmiş ya da elle düzenlenmiş olabilir. Program tarafından indirilmiş bir .json yedek dosyası seçin.":
+    "Il manque au fichier la liste des enseignants, classes, cours ou salles ; il a peut-être été tronqué ou modifié à la main. Choisissez une sauvegarde .json téléchargée par le programme.",
+  "Dosyada: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "Dans le fichier : {ogretmen} {ogretmen:enseignant|enseignants}, {sinif} {sinif:classe|classes}, {ders} {ders:cours|cours}, {saat} {saat:heure placée|heures placées}.",
+  "Şu an: {ogretmen} öğretmen, {sinif} sınıf, {ders} ders, yerleşmiş {saat} saat.":
+    "Maintenant : {ogretmen} {ogretmen:enseignant|enseignants}, {sinif} {sinif:classe|classes}, {ders} {ders:cours|cours}, {saat} {saat:heure placée|heures placées}.",
   "Yedek yüklendi.": "Sauvegarde chargée.",
   Bölümler: "Sections",
   "Programın durumu: {durum}. Ayrıntı için Kontrol.":

@@ -91,7 +91,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
 | `pure/sample.ts` | babanın ölçeğine yakın örnek okul |
-| `pure/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState` |
+| `pure/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
 | `pure/undo.ts` | geri al yığını: `Box`, `Action`, `reduce` ve geçmişin tavanı |
 
 ### Durum, tercih ve depolama

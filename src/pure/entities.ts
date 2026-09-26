@@ -1182,6 +1182,17 @@ export type EntityKind = 'room' | 'teacher' | 'class' | 'lesson';
  * `deletionSummary` below rebuilds the old string from these two, unchanged,
  * so nothing that reads it has to care.
  */
+/** What is inside a plan: the plan table counts it, and so does the question
+    before a file replaces the open plan. */
+export function planSummary(d: State) {
+  return {
+    teachers: d.teachers.length,
+    classes: d.classes.length,
+    lessons: d.lessons.length,
+    placed: Object.keys(activePlacements(d)).length,
+  };
+}
+
 export interface DeletionQuestion {
   /** "MÇ (Mehmet Çelik) silinecek" — no full stop, no question mark. */
   title: string;

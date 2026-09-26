@@ -304,7 +304,7 @@ okuyanlarla aynı.
 ## Diyaloglar, bildirimler ve boş ekranlar
 
 - **Her soru** `useDialogs()` üstünden sorulur (`confirm`, `alert`), `window.confirm` ve `window.alert` kullanılmıyor. Geri alınamaz uyarılar `role="alertdialog"`.
-- **Silmeden önce onay sorulur**, ve cümle ne kaybedileceğini sayar: "A dersliği silinecek. 4 sınıfın dersliği boşalacak (410, 411, 510, 511)…"
+- **Silmeden önce onay sorulur**, ve cümle ne kaybedileceğini sayar: "A dersliği silinecek. 4 sınıfın dersliği boşalacak (410, 411, 510, 511)…" Dosyadan aç'ın sorusu da dosyayı açık planla yan yana sayar: "Dosyada: 18 öğretmen, 20 sınıf, 146 ders, yerleşmiş 330 saat. Şu an: …"
 - **Olan biteni** kısa bir bildirim satırı söyler (`useToast()`), ve bir hamlede ne kaybedildiyse adıyla yazar.
 - **Boş ekranlar yönlendirir:** "Henüz ders yok" değil, nereden başlanacağı. Program, Kontrol ve Çıktı'nın boş ekranları listeler için Okul'u, dersler için Dersler sekmesini gösteriyor. Sekme adları kalın yazılıyor ama tıklanmıyor ([DENETIM.md](DENETIM.md), P19).
 - **Ctrl+K komut paleti** her yere gider, her şeyi bulur, sık yapılan işleri yapar. `?` tuşu klavye kısayolları ekranını açar.
