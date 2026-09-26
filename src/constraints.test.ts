@@ -1292,6 +1292,20 @@ describe('yerleşmiş blokların atomik takası', () => {
     expect(result.state).toBe(d);
   });
 
+  // DK2: the refusal named the swap PARTNER ("MÇ … 511 sınıfında"), which is
+  // exactly the block the swap would have moved out of the way. What stops the
+  // swap is that the partner cannot take the dragged block's old hour.
+  it('reddedilen takasın cümlesi asıl engeli söylüyor, takas ortağını değil', () => {
+    let d = place(build(), 'x1', 0, 0, 1);
+    d = place(d, 'x2', 0, 1, 1);
+    d = { ...d, unavailable: { [closedKey('s511', 0, 0)]: 1 } };
+    const { verdict } = swapAt(d, ref('x1', 's510', 0, 0, 1), 0, 1);
+
+    expect(verdict.blocked).toContain('Takas olmaz');
+    expect(verdict.blocked).toContain('kapalı');
+    expect(verdict.blocked).not.toContain('511 sınıfında');
+  });
+
   // TODO B5.7: a block dropped on several blocks that fill its hours exactly.
   // Two classes in two rooms, so the room never decides it.
   function twoClasses(

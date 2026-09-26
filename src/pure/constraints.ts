@@ -784,6 +784,15 @@ export interface SwapResult {
 }
 
 /**
+ * A swap that was tried and is not legal, with the sentence that says why.
+ * Only the two checks that move a block say this: the rest (a pin, a shape
+ * that does not fill the hours) are not a swap at all.
+ */
+interface SwapRefusal {
+  refused: string;
+}
+
+/**
  * Re-validates and applies a reciprocal move against the state handed to it.
  *
  * One target: the two blocks trade starts, each keeping its length. Several
@@ -793,7 +802,11 @@ export interface SwapResult {
  * teacher's two singles in another class used to find two blocks in the way
  * and offer nothing.
  */
-function swapBlocks(d: State, source: BlockRef, targets: BlockRef[]): SwapResult | null {
+function swapBlocks(
+  d: State,
+  source: BlockRef,
+  targets: BlockRef[],
+): SwapResult | SwapRefusal | null {
   if (targets.length === 0) return null;
   if (!sameBlock(d, source) || targets.some((x) => !sameBlock(d, x))) return null;
   if (
@@ -833,18 +846,27 @@ function swapBlocks(d: State, source: BlockRef, targets: BlockRef[]): SwapResult
     first.hour,
     source.size,
   );
-  if (firstCheck.blocked !== null) return null;
+  const ix = buildIndex(d);
+  if (firstCheck.blocked !== null) {
+    return { refused: t('Takas olmaz: {sebep}', { sebep: firstCheck.blocked }) };
+  }
   verdicts.push(firstCheck);
   work = place(work, source.lessonId, first.day, first.hour, source.size);
 
   for (const { ref, hour } of moves) {
     const verdict = check(work, buildIndex(work), ref.lessonId, source.day, hour, ref.size);
-    if (verdict.blocked !== null) return null;
+    if (verdict.blocked !== null) {
+      return {
+        refused: t('Takas olmaz, {ne} eski yerine geçemiyor: {sebep}', {
+          ne: blockName(ix, ref),
+          sebep: verdict.blocked,
+        }),
+      };
+    }
     verdicts.push(verdict);
     work = place(work, ref.lessonId, source.day, hour, ref.size);
   }
 
-  const ix = buildIndex(d);
   const notice = t('{bir} ile {iki} yer değiştirecek', {
     bir: blockName(ix, source),
     iki: targetsName(ix, ordered),
@@ -921,7 +943,22 @@ export function dropMap(
           blockSizeFor(d, lesson, size),
         );
         const swap = swapBlocks(original, source, candidates);
-        if (swap !== null) {
+        // The swap was tried and refused, and the plain verdict names the
+        // very block the swap would have moved (the teacher is in that class
+        // then). That sentence points at the partner; the swap's own says what
+        // actually stops it (DENETIM DK2). A class's own lesson in the way
+        // keeps its sentence: the cell may still send that lesson to the pool.
+        if (swap !== null && 'refused' in swap) {
+          if (detail?.code === 'teacherBusy') {
+            map.set(key, {
+              blocked: swap.refused,
+              warning: null,
+              evicts: [],
+              action: { kind: 'place' },
+            });
+            continue;
+          }
+        } else if (swap !== null) {
           map.set(key, {
             blocked: null,
             warning: swap.warning,
@@ -1068,7 +1105,8 @@ export interface DropRequest {
 export function applyDrop(d: State, request: DropRequest): State {
   if (request.action.kind === 'swap') {
     if (request.source === null) return d;
-    return swapBlocks(d, request.source, request.action.targets)?.state ?? d;
+    const swap = swapBlocks(d, request.source, request.action.targets);
+    return swap === null || 'refused' in swap ? d : swap.state;
   }
 
   let next = d;

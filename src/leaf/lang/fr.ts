@@ -22,6 +22,10 @@ const FR: Sozluk = {
   "Kartların renk ölçütü": "Critère de couleur des cartes",
   "program kart rengi tercihi": "préférence de couleur des cartes du planning",
   "{bir} ile {iki} yer değiştirecek": "{bir} et {iki} vont échanger leurs places",
+  "Takas olmaz: {sebep}":
+    "Pas d’échange : {sebep}",
+  "Takas olmaz, {ne} eski yerine geçemiyor: {sebep}":
+    "Pas d’échange, {ne} ne peut pas prendre l’ancienne place : {sebep}",
   "{bir} ile {iki} yer değiştirdi": "{bir} et {iki} ont échangé leurs places",
   "{ad} ({n} blok)": "{ad} ({n} {n:bloc|blocs})",
   // -------------------------------------------- the week and the subjects
