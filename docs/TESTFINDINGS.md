@@ -26,6 +26,30 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · npm run kontrol · beş E2E aynı dakikada 30 s'lik zaman aşımına düştü
+Bulgu: E2E aşaması 591/596. Düşenler: `planlar.spec.ts` 292 ve 324 (`page.reload`), ve
+`program.spec.ts` 1238, 1255 ve 1280 (`mouse.move`). Hepsi yan yana numaralı ve aynı
+dakikada, 31–38 s sürüp düştü. Tek başlarına beşi birden 4,9 s'de geçti. E2E'nin tamamı
+hemen yeniden koşuldu: 596/596, 7,0 dk. Makine `performance` profilindeydi. Arkada
+koşan bir iş yoktu (`ps`: yalnız boştaki TypeScript sunucuları, exe ve sürücü kapalı).
+Tür: kararsız, sebebi bulunmadı
+Ne yapıldı: yeniden koşuldu, kod değişmedi. Bir daha görülürse, o dakikada ne olduğunu
+anlamak için süitin zaman çizelgesi (`--reporter=json`'daki başlangıç zamanları) alınır.
+Kalıcı kural: yok
+
+### 2026-09-26 · npx playwright test · §8d'nin iki doğrulanacağı: Dağılım'da Enter, kartta Enter
+Bulgu: iki kusur Playwright'ta üretildi.
+- Dersler formunda Dağılım düğmesinde Enter listeyi açmıyor, dersi ekliyordu. Listedeki
+  "2+1"de de dersi eski dağılımla ekliyordu. Liste bir portal'da, ve React olayları
+  portal üstünden form satırının `onKeyDown`'ına kabarıyor.
+- Izgarada odaklı kartta Enter ve Space dersi sessizce havuza gönderiyordu (374 → 373
+  kart, çubukta tek kelime yok). Kısayol ekranı "sağ tık menüsünü aç" diyordu.
+Tür: ürün kusuru
+Ne yapıldı: ikisi de düzeldi, üç yeni test düzeltmeden önce kırmızıydı. İkincisinde
+davranışı kullanıcı seçti (menü). `App.test.tsx`'in bir testi eski davranışı çiviliyordu,
+Delete yoluna çekildi.
+Kalıcı kural: yok
+
 ### 2026-09-26 · Playwright ve gerçek Linux exe, adsız tam hafta · Sığdır'da kırpılma sayacı ekranla ayrışıyor
 Bulgu: iki kat. (1) `gorunum.spec.ts`'in Sığdır testleri yalnız örnek okulu ve yalnız
 kartın üst satırını ölçüyordu. Babanın şeklindeki veride (adsız dizili fikstür) 1920'de

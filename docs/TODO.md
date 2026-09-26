@@ -840,7 +840,9 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       - **Açık kalan:**
         - Fikstürde (boş ızgara) ret sonrası 6, CP-SAT 5. **2026-09-26 ölçüldü, açık:**
           5'lik hafta 4 günlük bir komşulukta var ama 1 000 çatışmada bulunmuyor, dört
-          çare denendi (DECISIONS 2026-09-26).
+          çare denendi (DECISIONS 2026-09-26). Aynı gün akşam beşincisi denendi: bütçesi
+          yetmeyen komşuluğu artan bütçeyle yeniden sormak. Tek hatta 5'i buldu, yedi hat
+          paralelken bulmadı ve aramayı %24 uzattı; bırakıldı (DECISIONS 2026-09-26 akşam).
         - Karma yolun "3 ders ve 2 saat"i bulunamıyor. **2026-09-26 ölçüldü, açık:**
           2 saat 2 dersle ve 1 saat 3 dersle haftalar var, arama kendi başına ulaşmıyor.
         - Arama önceki turdan 15 s uzun, ret sonrası 64 s. **2026-09-26 kısaldı:**
@@ -1109,8 +1111,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
       görülmedi; cevap B5.3'ün sıradaki dilimini seçer.
 - [ ] **Babanın makinesinde öneri araması ölçülsün (B5.10, B5.11).** Bu makinede
-      WebView2 yok. Ölçüm kaydı 2.2.0'da, 2.2.0 2026-09-26'da yayınlandı. Babaya gidecek
-      adımlar şunlar:
+      WebView2 yok. Ölçüm kaydı 2.2.0'da, 2.2.0 2026-09-26'da yayınlandı. 2026-09-26
+      akşamı babadan yeni dosya gelmemişti (gerçek klasörde en yenisi 2026-09-12, `olcum`
+      alanı yok), ölçüm atlandı. Babaya gidecek adımlar şunlar:
       1. Mozaik.exe'yi yeni sürümle (2.2.0) açmak.
       2. Program'da `Otomatik diz`'e basıp panelin "aranıyor" demesinin bitmesini
          beklemek.

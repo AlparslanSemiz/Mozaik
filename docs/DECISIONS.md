@@ -178,6 +178,47 @@ dilimini seçti: iki ders arasında "aynı gün olmasın". Kararları:
 daha sorulacak. `src-tauri/Cargo.lock`'un bayat sürüm satırı (2.0.3) yayından önce
 ayrı bir commit'le düzelecek.
 
+### 2026-09-26 (akşam) · Denendi ve bırakıldı: bütçesi yetmeyen komşuluğu artan bütçeyle yeniden sormak
+
+**Soru.** Fikstürün boş ızgarasında Ö6'nın Cumartesisi reddedilince motor 6 buluyor,
+CP-SAT 5. Aşağıdaki dört deneme bütün 4 günlük komşuluklara aynı büyük bütçeyi
+veriyordu. Denenmeyen şey, komşuluk sorusunun iki cevabını ayırmaktı. `unsat`, o
+komşulukta daha ucuz hafta olmadığının kanıtı. `budget` ise bilinmiyor demek. Bugün
+ikisi aynı muamele görüyor.
+
+**Ölçüm** (izli bir kopyada, `performance` profilinde, tek hat: `teacherHours`, ret ve
+önceki hafta ile). 785 komşuluk sorusu soruldu. 4 günlüklerin 42'si `unsat`, 2'si
+`sat`, 27'si `budget`. 5 günlüklerin 5'i `unsat`, 13'ü `budget`. Sınıf çiftlerinin 456'sı
+`unsat`.
+
+**Deneme.** Bir sınırda turlar bitince, o sınırda bütçesi yetmeyen komşuluklar bir kez
+daha soruldu, bütçe ESC katı. Yalnız bir cevaptan sonra (`previous` doluyken) açıldı.
+
+| ESC | Tek hat, `teacherHours` | Hattın süresi |
+|---|---|---|
+| 0 (bugün) | 6 | 17,0 s |
+| 3 · 4 · 5 · 6 | 5 · 5 · 5 · 5 | 27,6 · 26,4 · 32,1 · 29,9 s |
+| 8 · 10 | 6 · 6 | 22,3 · 32,6 s |
+
+Yedi hat paralel koşunca (fikstür, ret, ikişer koşu, A bugün, B ESC 4):
+
+| | A | B |
+|---|---|---|
+| arama | 72,9 · 76,3 s | 91,1 · 92,7 s |
+| en az saat | 6 | 6 |
+| en az öğretmen · zaten geldiği gün | 7 · 7 | 6 · 6 |
+| karma az saat | 6 | 4 |
+| öteki yollar | aynı | aynı |
+
+Bu koşunun `PREV`'i önceki koşunun çıktısıydı ve `teacherHours`'u taşımıyordu, yani
+uygulamanın gerçek "önceki" listesiyle birebir aynı değil.
+
+**Neden bırakıldı.** Hedef, yani çekirdekler paylaşılırken ret sonrası en az saatin
+5 olması, tutmadı. Arama da %24 uzadı. Üç yol iyileşti, ama kural "süre aynı ya da daha
+kısa" diyor. Tek hatta ESC'nin dar bir aralıkta tutması (3–6 evet, 8 ve 10 hayır) bu
+aramanın yörüngeye duyarlılığını bir kez daha gösteriyor (aşağıdaki girdi). Kod
+değişmedi. Açık kalan: ret sonrası en az saat fikstürde 6.
+
 ### 2026-09-26 · Denendi ve bırakıldı: fikstürde ret sonrası 5, karma yolun 2 saati, tutan ipucu
 
 Üç açık iş ölçüldü, üçü de motor değişmeden kapandı.

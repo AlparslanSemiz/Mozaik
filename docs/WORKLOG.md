@@ -19,29 +19,24 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-26.
+Son güncelleme: 2026-09-26 (akşam).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Release sayfası artık kendi yeniliklerini taşıyor (`scripts/surum-notu.mjs`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
-**Ne çalışıyor.** 2.1.1'deki her şey: yedi sekme (Okul, Müsaitlik, Dersler,
-Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil, dört teslim
-yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini güncellemesi.
-Yayınlanmamış olarak üstüne:
-- Onarım aşamalı çözücü (B5.8).
-- Kurulamayan haftada neyin değişmesi gerektiğini söyleyen öneri paneli (B5.9, B5.10).
-  Birden çok yol gösteriyor, her biri babanın cümlesiyle: "KY Cumartesi 3–4.
-  saatlere de gelebilirse hafta kuruluyor." Arama worker'larda koşuyor.
-- Panelin cevap defteri (B5.11):
-  - Öğretmen öğretmen sorular, her birinde `Olur` ve dört türlü `Olmaz`.
-  - Cevaplar planın verisi, şema v15.
-  - Ret sonrası arama CP-SAT'ın en iyisine ulaşıyor.
-  - Karma iki yol ve ızgarada önizleme.
-  - Hakkında'da ve yedek dosyasında aramanın bu makinedeki ölçümü.
-- İki ders arasında "aynı gün olmasın" ilişkisi (B5.3'ün ilk dilimi, şema v16): dersin
-  sayfasında düzenleniyor. Sürükleme, otomatik dizme ve öneri onu çiğnemiyor, sonradan
-  çiğnenen ilişki Kontrol'de ihlal.
-- Bir blok, bırakıldığı saatleri dolduran birden çok blokla yer değiştirebiliyor (B5.7).
-- Öneri araması 4–9 s daha kısa: eşleşme yolu boşa aramıyor, karma yollar kendi hattında.
+**Ne çalışıyor.** 2.2.0'daki her şey: yedi sekme (Okul, Müsaitlik, Dersler, Program,
+Kontrol, Çıktı, Ayarlar), otomatik dizme ve onarım aşamalı çözücü, kurulamayan haftada
+yol öneren panel ve cevap defteri, "aynı gün olmasın" ilişkisi, çoklu takas, beş dil,
+dört teslim yolu (tek HTML, site, Windows kurulum paketi, exe) ve exe'nin kendini
+güncellemesi. Yayınlanmamış olarak üstüne (2026-09-26 akşamı):
+- Sığdır'da kart yazısı kesilmek yerine en çok 9 px'e küçülüyor, sınıf adı ilk
+  kelimesiyle yazılıyor ("411A SAY" → "411A"), satır yüksekliği değişmiyor.
+- Sığdır'da sürüklerken kasma kalktı: sütun `100cqw` yerine ölçülen genişlikten
+  türüyor. Gerekçe çubuğu `contain: size layout` taşıyor, bu da WebKitGTK'daki kasmayı
+  kaldırdı.
+- Izgarada odaklı kartta Enter ve Space menüyü açıyor. Eskiden dersi sessizce havuza
+  gönderiyorlardı.
+- Dersler formunda Dağılım düğmesinde ve listesinde Enter ders eklemiyor.
+- `npm run yayinla`'da düşen bir git komutu bir cümleyle bildiriliyor.
 - Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18). 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
@@ -71,8 +66,10 @@ babanın makinesinde ölçüm: Hakkında'daki satır ya da yedek dosyasındaki `
 alanı (TODO §8b'deki adımlar). 2026-09-26'da B5.11'in kalanları kapandı: süre
 kısaldı (B1), fikstürdeki 6 ile karma yolun daha az saatli haftası ölçüldü ve açık
 kaldı, ipucu sorusunun hiç tutmadığı görüldü (tuzak 139), B5.7 ve B5.3'ün ilk dilimi
-yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yayını
-(kullanıcının onayıyla) ve babanın ölçümü.
+yapıldı, "Şu an"daki kusurların dokuzu kapandı. 2.2.0 aynı gün yayınlandı. Akşam
+Sığdır'ın kırpılması ve sürüklerken kasma ölçülüp kapandı, §8d'nin iki doğrulanacağı
+üretildi ve düzeldi (2026-09-26 akşam girdisi). Sıradaki iş babanın ölçümü ve cevapları
+(§8b); fikstürde ret sonrası 6 ve karma yolun daha az saatli haftaları açık.
 
 **Bilinen kusurlar.**
 
@@ -83,7 +80,7 @@ yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yay
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
 - Kurulamayan haftadaki öneri (B5.9–B5.11) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor; kanıt bilerek bırakıldı. Üç öğretmen saati yolunda boyut CP-SAT'ın en küçüğüyle aynı, sınır yolu da artık 6 sınır. `Olmaz`'dan sonra babanın dosyasında en az saat 5 (CP-SAT'ın en iyisi), ama adsız fikstürün boş ızgarasında 6: 5'lik hafta 4 günlük bir komşulukta var, 1 000 çatışmada bulunmuyor, dört çare denendi (DECISIONS 2026-09-26). Karma az saat yolu "1 ders ve 3 saat"te kalıyor; 2 saat 2 dersle, hatta 1 saat 3 dersle haftalar var, arama kendi başına ulaşmıyor. Başlangıç haftasını varsayım olarak soran adım hiçbir formülde tutmuyor, tutturulunca da arama kötüleşiyor (tuzak 139). Arama babanın dosyasında Linux exe'sinde 43–44 s, bir Olmaz'dan sonra 51 s, bir Olur'dan sonra 33 s (ilk öneri 6 s); 2026-09-26'da eşleşme yolu ve ayrı karma hat 4–9 s kısalttı, darboğaz artık tek bir hat değil çekirdeklerin paylaşımı. Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi; ölçüm artık Hakkında'da ve yedek dosyasında (TODO §8b).
 - `npm run kontrol` 2026-09-12'de baştan sona yeşil koştu, sekiz gün sonra ilk kez: tarihe bağlı kırmızı kapandı (TODO §8d). Koşulmamış dört katmanın dördü de koşuldu ve üçü birer kusur çıkardı, üçü de bu turdan eski. Devriyenin açık menüsü düzeltildi; `src-tauri/target` deponun eski adresini taşıdığı için `exe:test` derlenmiyordu ve `cargo clean` ile açıldı; mutasyon kum havuzu belge kapılarıyla çelişiyordu ve koşuya kendi yapılandırması verildi.
-- Bu makine 2026-09-26'da düşük güç profilindeydi (`platform_profile` low-power): süreler dünküden yaklaşık 2,4 kat uzun. O günün süre ölçümlerinden hangisinin hangi profilde alındığı DECISIONS'ta yazılı; çözücünün kendiliğinden durmasını soran test artık makinenin hızından bağımsız (TESTFINDINGS).
+- Bu makine 2026-09-26'nın gündüzünde düşük güç profilindeydi (`platform_profile` low-power): süreler dünküden yaklaşık 2,4 kat uzun. Akşamki ölçümlerin hepsi `performance` profilinde alındı. O günün süre ölçümlerinden hangisinin hangi profilde alındığı DECISIONS'ta yazılı; çözücünün kendiliğinden durmasını soran test artık makinenin hızından bağımsız (TESTFINDINGS).
 - Yavaş bir makinede otomatik dizmenin kendi 15 saniyelik bütçesi, onarımın vazgeçme kuralından önce dolabilir; CHANGELOG'daki "15 saniyenin sonuna kadar koşmuyor" cümlesi makinenin hızına bağlı (TESTFINDINGS 2026-09-26).
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
 
@@ -92,17 +89,17 @@ yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yay
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 31 dosyada 585 test (2026-09-26) | `npx playwright test --list` |
+| Ana E2E süiti | 31 dosyada 596 test (2026-09-26 akşam) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 10 test, hepsi geçti, 4,4 dk düşük güç profilinde (2026-09-26) | `npm run exe:e2e`, Linux ikilisine karşı |
-| Linux ikilisi | 4 351 112 bayt (2026-09-26) | `npm run exe:linux` |
+| Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Linux ikilisi | 4 351 688 bayt (2026-09-26 akşam) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 40 dosyada 1334 test, hepsi geçti (2026-09-26) | `npm test` |
-| Ana E2E koşusu | 585/585 geçti, süit 9,2 dk düşük güç profilinde (2026-09-26) | `npm run kontrol`'ün aşamaları, zincirin tamamı yeşil |
-| `dist/index.html` | 1 138 617 bayt, brotli 276,3 kB (2026-09-26); eşikler 1 151 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| Birim testleri | 42 dosyada 1340 test, hepsi geçti (2026-09-26 akşam) | `npm test` |
+| Ana E2E koşusu | 596/596 geçti, süit 6,9 dk `performance` profilinde (2026-09-26 akşam) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 141 591 bayt, brotli 277,0 kB (2026-09-26 akşam); eşikler 1 151 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -117,6 +114,117 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-26 (akşam) · Sığdır'ın kırpılması, sürüklerken kasma, yayinla'nın hatası ve iki klavye kusuru
+
+**Başlangıç.**
+- `main` ve `docs/claude-md-bolme` 58f42da'daydı, ağaç temizdi.
+- Babadan yeni dosya gelmemişti: gerçek klasörde en yenisi 2026-09-12, `olcum` alanı
+  yok. Babanın ölçümü bu tur da atlandı.
+- Gerçek klasörün sha256'sı başta alındı, exe süitinden önce ve sonda karşılaştırıldı,
+  hep aynı.
+- Güç profili oturum başında `low-power`'dı. Kullanıcı profili değiştirmeyi üstlendi,
+  bütün ölçümler `performance` profilinde alındı ve her süre ölçümünden önce okundu.
+
+**Kullanıcının kararları.**
+- Sığdır'da sığmayan satır kesilmek yerine küçülsün. Taslakta 10 px onaylandı, doğru
+  ölçütle yeniden sorulunca 9 px.
+- Sınıf adı yalnız Sığdır'da ilk kelimesiyle yazılsın, veri değişmesin (kısa ad alanı
+  değil).
+- Izgarada odaklı kartta Enter menüyü açsın (kaldırmasın).
+
+**1. Sığdır'da kırpılma.** Ölçüm Playwright'ta yapıldı: iki veri (adsız dizili fikstüre bir
+öneri uygulanmış tam hafta ve örnek okul), 1920 ve 1536 (DPR 1,25) kutuları, iki
+görünüm, ekran görüntüleri. Sebep ablasyonla ayrıldı:
+- babanın verisinde metnin uzunluğu ("411A SAY");
+- 1536'da örnek okulun 3 karakterine 1,8 px'lik açık.
+
+Beş aday taslak olarak gösterildi. Kararlar DECISIONS'ta, sayılar orada.
+- Taslağın sayıları yanlış ölçüttendi. Exe'nin ekran görüntüsü, ölçüm "12 kırpık"
+  derken ekranda 79 kart gösterdi (tuzak 140). Doğru ölçütle yeniden soruldu.
+- Sonuç: tam haftada 1920'de 204 → 2 kırpık, satır başları 24 → 0. Örnek okul 1536'da
+  315 → 0.
+- Babanın tek saatlik kartları 1536'da 9 px'te de sığmıyor (81).
+
+Satır yüksekliği değişmedi. İlk taslak satırı 38,5'ten 35 px'e indirmişti, satır kutusu
+testi bunu yakalıyor. `fit()`'in ilk hâli her commit'te 130 ms'ye mal oluyordu. Şimdi
+yalnız değişen satıra dokunuyor, ve sıradan bir commit'te fark ölçülemiyor (A/B).
+Exe'de (WebKitGTK) tam hafta 7 · 0 kırpık.
+
+**2. Sürüklerken kasma.** 2026-09-12'nin aletleri yeniden koşuldu. Örnek okulda ve
+Rahat'ta x1'de %0, x4'te %0,7–2,2 düşen kare, yani o günkü çare tutuyor. Şikâyetin şekli
+babanın tam haftasında ve Sığdır'daydı: x1'de %23, x4'te %100. Sebep izde görüldü: Sığdır'da
+yerleşimin tanesi 53 ms, Rahat'ta 1,8 ms. Ablasyonla bulundu: `100cqw`'ye bağlı sütun
+(tuzak 141). Çare, genişliği `--wrap-w` olarak yazmak. Sonuç: %23 → %0, x4'te %100 →
+%0,4. Rahat değişmedi. Sütunlar aynı genişlikte.
+
+Exe'de ayrı bir sebep çıktı. Kasma iki yoğunlukta da %16'ydı, sürüklemeden %0. Yedi aday
+sayfanın içinde tek tek kapatıldı, yalnız çubuğun metni önemliydi. `contain: size layout`
+ile exe'de %0 oldu. Chromium'da nötr kaldı, çubuğun görüntüsü piksel piksel aynı.
+
+Bilerek dışarıda bırakılan: babanın Windows exe'si WebView2, yani Chromium. WebKitGTK
+yalnız bu makinedeki geliştirme ikilisi.
+
+**3. Geçen turdan kalanlar.**
+- `yayinla.mjs`: düşen git komutu artık bir cümleyle ve git'in kendi satırıyla
+  bildiriliyor (`scripts/git-komut.mjs`). Atılabilir bir klonda push'un düştüğü yol
+  eski ve yeni betikle koşuldu. Asıl deponun uzak adresine ve git ayarına dokunulmadı.
+- Öneri araması: beşinci bir aday denendi ve bırakıldı (DECISIONS 2026-09-26 akşam).
+  Kod değişmedi, geçici izli kopya silindi.
+- B5.3: babanın cevabı bekleniyor, kod yazılmadı.
+- §8d "Doğrulanacaklar": ilk ikisi Playwright'ta üretildi ve düzeldi:
+  - Dersler'de Dağılım düğmesinde Enter;
+  - ızgarada kartta Enter ve Space.
+
+  Kalan beşi açık.
+- §8b: babanın ölçümü satırı güncellendi, sorular değişmedi.
+
+**Ölçüm aletleri** (`scratch/`, git dışı):
+- `sigdir-kirpma.mjs`, `sigdir-ablasyon.mjs`, `sigdir-aday.mjs`;
+- `kasma-dizili.mjs` (fikstür, iki senaryo, `--iz`, `--onjs`);
+- `kasma-exe.sh`, `kasma-exe-abl.sh`, `kasma-exe-govde.js` (exe'de sayfanın içinden
+  sürükleme);
+- `tam-hafta-uret.mjs` (fikstüre öneri uygulanmış tam hafta, `scratch/dizili-tam.json`).
+
+**Commit'lerde bir düzeltme.** efcd886'nın ilk hâlinde `App.test.tsx`'in bir testi
+eski "klavye tıklaması kaldırır" davranışını çiviliyordu. Commit'ten önce yalnız tipler
+ve belge kapısı koşulduğu için `kontrol` yakaladı. Test Delete yoluna çekildi, aynı
+commit'e eklendi (itilmemişti).
+
+**Koşulan testler.**
+- `npm run kontrol`:
+  - tipler, sınır ve lint (0 hata, eski 3 uyarı);
+  - birim 1340/1340;
+  - derleme ve boyut (1 141 591 bayt, brotli 277,0 kB).
+
+  E2E'nin ilk koşusu 591/596'da kaldı. Beş test aynı dakikada 30 s'lik zaman aşımına
+  düştü (`planlar.spec` 292, 324; `program.spec` 1238, 1255, 1280). Tek başlarına beşi de
+  4,9 s'de geçti. E2E'nin tamamı yeniden koşuldu: 596/596, 7,0 dk. Makinede başka iş
+  yoktu (yalnız boştaki TypeScript sunucuları). Sebebi bulunmadı, TESTFINDINGS'te.
+- Belgeler yazıldıktan sonra `kontrol` baştan sona yeniden koşuldu, zincirin tamamı yeşil:
+  birim 1340/1340, E2E 596/596 (6,9 dk), site 22/22, çözücü 7/7.
+- `npm run exe:e2e` 11/11 (53,8 s).
+- Mutasyonlar:
+  - Sığdır testleri altı mutasyonla sınandı: çare yok, satır kutusu, taban 4 ve
+    10 px, ilk kelime kuralı yok, yuvarlayan hedef.
+  - `100cqw`'ye dönüş yerleşim testini kırmızıya çeviriyor.
+  - Çubuğun çaresi olmadan exe testi 26/26 kırmızı.
+  - `git-komut` testi eski fonksiyona karşı kırmızı.
+  - Enter testleri çaresiz kodda kırmızı.
+- Koşulmadı: `exe:test` (Rust değişmedi), `patrol`, `ekran`, `mutasyon`, `kapsam`.
+
+**Sahte ev.** Babanın verisi hiç kullanılmadı, yalnız adsız fikstürler. Exe süitinin
+bıraktığı iki yedek ve uygulamanın yerel deposu yine de silindi.
+
+**Açık kalan.**
+- Fikstürde ret sonrası 6.
+- Karma yolun daha az saatli haftaları.
+- İpucu sorusu (tuzak 139).
+- 1536'da babanın tek saatlik kartları.
+- §8d'nin kalan beş doğrulanacağı.
+- Babanın ölçümü ve cevapları (§8b).
 
 ---
 
