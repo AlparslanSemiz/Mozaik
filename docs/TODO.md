@@ -1578,9 +1578,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       üst çubuktaki Geri al düğmesi kurtarıyor. DATA.md'nin "Bilinen tek istisna"
       cümlesiyle ve PRINCIPLES "Veri kaybı olmaz" ile çelişiyor. DENETIM A1.
       Kapandı 2026-09-27, dced6e4. Test: ayarlar.spec.ts 32'nin üç vakası (kaybı soruyor, Ctrl+Z geri getiriyor, günlük ders sayısı), storeContract.test.ts onay kutusu vakası, entities.test.ts settingsLoss.
-- [ ] **DK9 "Ders adları"na az ad yazmak günü kısaltıp dersleri siliyor.**
+- [x] **DK9 "Ders adları"na az ad yazmak günü kısaltıp dersleri siliyor.**
       Şiddet: veri kaybı (koşullu). Dört ad yazınca 433 yerleşimden 245'i ve 36 sabitleme
       sorusuz kalktı, "Günlük ders sayısı" kutusu 12 göstermeye devam etti. DENETIM A1.
+      Kapandı 2026-09-27, b4c6079. Test: ayarlar.spec.ts 32 "ders adlarına az ad yazmak günü kısaltmıyor" ve "fazla ad", entities.test.ts hourLabels.
 - [ ] **DK11 Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
       Şiddet: veri kaybı (onaydan sonra). `teachers` ve `lessons` alanları silinmiş bir
       plan dosyası Dosyadan aç ile "Yedeği yükle"den sonra 0 öğretmen, 0 ders ve 0

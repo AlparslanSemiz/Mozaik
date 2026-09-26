@@ -1449,6 +1449,7 @@ slot".
   245 saat havuzda" diyor. Aynı anda "Günlük ders sayısı" kutusu hâlâ 12 gösteriyor. Bu
   denemede odak kutudan çıktığı için Ctrl+Z geri aldı. Kutunun etiketi ad sayısının ders
   sayısını belirlediğini söylemiyor. Görüntü: `scratch/denetim/ayarlar/ders-adlari-dort-1920.png`.
+  **Düzeldi (2026-09-27, b4c6079).**
 
 **Şöyle olsa daha iyi.**
 - **Ö40.** Dersi dizili bir günü ya da saati kaldırmadan önce bir soru kaybı saysın ("Pazar
