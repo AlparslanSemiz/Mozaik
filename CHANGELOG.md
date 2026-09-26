@@ -17,6 +17,8 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-26
+
 ### Added
 
 - Two lessons can be kept off the same day: on a lesson's sheet, "Not on the same day" lists the lessons it may not share a day with and adds one from a list grouped by class. Dragging, automatic arrangement and the suggestions all keep the rule, a drop onto the related lesson's day says why it is refused, and a relation added after both lessons were placed shows in Check as a broken rule, with nothing moved.
