@@ -92,17 +92,17 @@ yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yay
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 30 dosyada 577 test (2026-09-24) | `npx playwright test --list` |
+| Ana E2E süiti | 31 dosyada 585 test (2026-09-26) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 36 | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 10 test, hepsi geçti, 1,3 dk (2026-09-25, B5.11) | `npm run exe:e2e`, Linux ikilisine karşı |
-| Linux ikilisi | 4 332 232 bayt, release derlemesi yaklaşık 40 s (artımlı) | `npm run exe:linux` |
+| Gerçek exe süiti | 10 test, hepsi geçti, 4,4 dk düşük güç profilinde (2026-09-26) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Linux ikilisi | 4 351 112 bayt (2026-09-26) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 38 dosyada 1281 test, hepsi geçti (2026-09-25, B5.11) | `npm test` |
-| Ana E2E koşusu | 579/579 geçti, süit 7,0 dk (2026-09-25, B5.11) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 111 503 bayt, brotli 271,1 kB (2026-09-25, B5.11) | `npx vite build`, `npm run boyut` |
+| Birim testleri | 40 dosyada 1334 test, hepsi geçti (2026-09-26) | `npm test` |
+| Ana E2E koşusu | 585/585 geçti, süit 9,2 dk düşük güç profilinde (2026-09-26) | `npm run kontrol`'ün aşamaları, zincirin tamamı yeşil |
+| `dist/index.html` | 1 138 617 bayt, brotli 276,3 kB (2026-09-26); eşikler 1 151 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -117,6 +117,129 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-26 · B5.11'in kalanları: süre, fikstür, karma yol, ipucu; B5.7, B5.3'ün ilk dilimi ve dokuz kusur
+
+Oturum 2026-09-25 akşamı başladı, gece yarısını geçti.
+
+**Başlangıç.** `git status`'ta yalnız `src-tauri/Cargo.lock` (2.0.3 → 2.1.1, depodaki
+kopya bayat). Babadan yeni dosya gelmedi: gerçek klasördeki `babamınki.json`
+2026-09-12 tarihli, `olcum` alanı yok, yani babanın ölçümü atlandı. Gerçek klasörün
+sha256'sı başta alındı, her exe ve tarayıcı koşusundan sonra karşılaştırıldı, hep
+aynı. CP-SAT için bu oturumun scratchpad'ine venv kuruldu (ortools 9.15), önceki
+oturumların betikleri oradan kullanıldı.
+
+**Kullanıcının kararları.**
+- 2.2.0 oturum sonunda çıkacak, tag'den önce bir kez daha sorulacak.
+- Cargo.lock ayrı commit'le düzelecek.
+- Raptiye dururken görünmez kalıyor.
+- B5.3: önce ölç, sonra bir alt madde; ölçümden sonra (a) ilişkinin ilk dilimi.
+- B5.7: ölç, kusursa taslak; taslak onaylandı.
+- Kontrol'ün Sıkışık cümlesi; taslak onaylandı.
+- Boş ekranların cümleleri; taslak onaylandı.
+- "Aynı gün olmasın"ın arayüzü; taslak onaylandı.
+
+**Kusurlar (her biri önce ölçüldü, kırmızı bir testle).**
+- "Art arda" cümlesi çevrildi.
+- Bırakma bildirimi: dil değişince eski dilde kalmaktan geniş çıktı, Fransızca ve
+  Almanca/İspanyolca çoğulda da bozuktu. Geçmiş zaman artık kendi anahtarı.
+- Boş ekranlar Dersler'i gösteriyor.
+- Bayat yorumlar ve `src/changelog.ts` yolu.
+- v1/v2 yedeğinde sınıflar normalleşiyor. `store.test.ts`'in v1 testi kusuru farkında
+  olmadan çiviliyordu, sonradan düzeldi (6f742e6).
+- `.github/surum-notu.md` bugünkü adreste; `surum.test.ts` dosyayı artık okuyor.
+- Raptiye kararı DECISIONS'ta.
+- Havuz çekmecesi: kodda "bulunamayan" kapanma çizimde, Chromium'da ölçüldü.
+- Kontrol: gerçek exe turunda görüldü; tam haftada Sıkışık satırlar yüzünden
+  "Dikkat" diyordu.
+
+**Motor (`relax.ts`, `relaxPool.ts`), ölçerek.** Tablolar DECISIONS 2026-09-26'da.
+- Süre: altı hatlık tezgâhta (node, hat başına bir süreç) darboğaz tek bir hat
+  değildi. Eşleşme yolu sonucu zaten atılacak bir haftayı küçültüyordu, ve karma
+  yollar en az saatin hattındaydı. İkisi düzeldi. Bütün yollar babanın dosyasında ve
+  iki fikstürde aynı sonucu verdi. Exe'de arama 46,8/48,0 s'den 44,0/42,7 s'ye, Olmaz
+  sonrası 59,6/57,2 s'den 50,6/51,1 s'ye indi.
+- Fikstürün boş ızgarası (ret sonrası 6, CP-SAT 5): 5'lik hafta 4 günlük bir
+  komşulukta var ama 1 000 çatışmada bulunmuyor. Dört çare denendi, hiçbiri hem 5'i
+  hem süreyi tutmadı. Açık.
+- Karma yolun "3 ders ve 2 saat"i: CP-SAT'ta 2 saat 2 dersle var, motor o haftadan
+  başlayınca 1 saat 3 derse iniyor, ama kendi başına ulaşmıyor. Açık.
+- İpucu sorusu hiçbir formülde tutmuyor (tuzak 139). Tutturulunca ret sonrası en az
+  saat 5 yerine 7 oldu. Kod değişmedi, yorumlar düzeldi.
+- Değişmez testi üç tam koşuda 0,9 s sürdü, 60 s sınırı tekrarlanmadı.
+
+**Makinenin güç profili.** Oturumun ortasında makine düşük güç profiline geçti
+(`platform_profile` low-power): testler 2,4 kat yavaşladı. Çözücünün "bütçeden önce
+duruyor" testi oturum başındaki kodda da düşüyordu, makinenin hızından bağımsız
+yapıldı. Bir süre karşılaştırmam iki ayrı profilde alınmış iki ölçümü
+karşılaştırıyordu; aynı profilde yeniden ölçüldü, DECISIONS düzeldi (86c1003).
+
+**B5.7.** `dropMap` altı durumda ölçüldü. Eksik tek durum "bir blok, birden çok
+bloğun üstüne" çıktı. Kural (onaylı): hedefler bırakılan saatleri tam dolduruyorsa
+hepsi kartın eski saatlerine geçer.
+
+**B5.3.** Beş alt madde ölçüldü, hiçbirinde babanın kullandığına dair kanıt yok.
+İlk dilim: "aynı gün olmasın", şema v16. Kapsamı:
+- `blocker()`'ın sekizinci kuralı;
+- çözücünün komşuluğu, penceresi ve onarımı;
+- öneri formülünde bir cümle;
+- Kontrol'de ihlal;
+- dersin sayfasında satır.
+
+İki mutasyon testleri kırmızıya çeviriyor. Babaya soru §8b'de.
+
+**Boyut eşiği yükseldi, gerekçesi burada (BUILD.md'nin kuralı).** Ham boyut
+1 111 503'ten 1 138 617 bayta çıktı (27 kB), brotli 271,1'den 276,3 kB'ye. İçinde:
+- ilişki (veri, motor, arayüz);
+- çoklu takas;
+- bekleyen hat;
+- dört dile giren yaklaşık on beş arayüz cümlesi;
+- Yenilikler panelinin dört dile çevrilen on altı satırı.
+
+İlk yükseltme (1 137 000) Yenilikler çevirilerinden önce yapılmıştı, `kontrol` 1,62 kB
+aşımı yakaladı. İki eşik on iki buçuk kilobayt pay bırakacak yere çekildi: ham
+1 151 000, brotli 289 000.
+
+**Benim hatam, kapı yakaladı.** e0d146c'de `styles.css` elle Prettier'dan geçti,
+tırnaklar değişti, `preferences.test.ts` kırmızıya döndü. Dosya eski hâline döndü
+(TESTFINDINGS).
+
+**Koşulan testler.**
+- `npm run kontrol`, zincirin tamamı yeşil:
+  - tipler, sınır ve lint (0 hata, eski 3 uyarı);
+  - birim 1334/1334;
+  - derleme ve boyut;
+  - E2E 585/585 (9,2 dk);
+  - site 22/22 ve çözücü stresi 7/7.
+
+  İlk iki koşu kırmızıydı: önce `preferences.test`, sonra boyut. İkisi de yukarıda.
+  Son koşu aşamalarına bölündü: birim ve boyut bir koşuda, E2E, site ve çözücü
+  ötekinde.
+- `npm run exe:e2e` 10/10 (4,4 dk, düşük güç profilinde).
+- Gerçek Linux exe, babanın dosyasıyla, sürücü turu: eski ve yeni motor üç çift
+  (süreler yukarıda); Olmaz, Olur, önizleme, uygula, Ctrl+Z, Hakkında satırı.
+  Uygulanan haftada Kontrol şeridinin kusuru görüldü ve düzeldi.
+- Chromium'da:
+  - boş ekranlar;
+  - v1 yedeği;
+  - havuz çekmecesi;
+  - Kontrol'ün yeşil kutusu (fikstüre öneri uygulanmış tam hafta);
+  - B5.7'nin takası;
+  - dersin sayfasındaki ilişki satırı.
+- knip temiz.
+- Koşulmadı: `exe:test` (Rust değişmedi), `patrol`, `ekran`, `mutasyon`, `kapsam`.
+
+**Sahte ev.** Babanın gerçek adlarını taşıyan iki yedek ve uygulamanın yerel deposu
+tur bitince silindi.
+
+**Açık kalan.**
+- 2.2.0'ın yayını, kullanıcının onayıyla.
+- Babanın makinesinde ölçüm (§8b).
+- Fikstürde ret sonrası 6.
+- Karma yolun daha az saatli haftaları.
+- B5.3'ün sıradaki dilimi, babanın cevabıyla.
 
 ---
 
