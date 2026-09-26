@@ -21,7 +21,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 Son güncelleme: 2026-09-26.
 
-**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. 2.2.0 hazır: Yenilikler notları yazıldı, `.github/surum-notu.md` bugünkü adreste. Kullanıcının kararıyla (2026-09-26) `docs/claude-md-bolme` yerelde `main`'e fast-forward edildi; push, etiket ve Release yok, yayın ayrı bir kararı bekliyor (`npm run yayinla -- 2.2.0`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
+**Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Release sayfası artık kendi yeniliklerini taşıyor (`scripts/surum-notu.mjs`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
 **Ne çalışıyor.** 2.1.1'deki her şey: yedi sekme (Okul, Müsaitlik, Dersler,
 Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil, dört teslim
@@ -235,8 +235,12 @@ tırnaklar değişti, `preferences.test.ts` kırmızıya döndü. Dosya eski hâ
 tur bitince silindi.
 
 **Açık kalan.**
-- 2.2.0'ın yayını. Kullanıcı yalnız birleştirmeyi seçti: `main` yerelde fast-forward
-  edildi, push, etiket ve Release yok.
+- 2.2.0 aynı gün, kullanıcının ikinci kararıyla yayınlandı. `npm run yayinla -- 2.2.0`
+  CHANGELOG'u kapattı, sürüm commit'ini ve annotated etiketi yaptı, ama push'ta düştü:
+  bu ortamda HTTPS için kimlik bilgisi yok. Push aynı depoya SSH adresiyle yapıldı.
+  İki iş akışı da geçti: Release'te beş varlık var, üç indirme bağlantısı ve site 200.
+  Release gövdesinin başında Türkçe Yenilikler var. `Cargo.lock` 2.2.0'a ayrı commit'le
+  çekildi.
 - Babanın makinesinde ölçüm (§8b).
 - Fikstürde ret sonrası 6.
 - Karma yolun daha az saatli haftaları.

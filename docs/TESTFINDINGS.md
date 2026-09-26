@@ -26,6 +26,18 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · npm run yayinla -- 2.2.0 · push HTTPS'te düştü, hata bayt dizisi olarak basıldı
+Bulgu: kapılar geçti, sürüm commit'i ve annotated `v2.2.0` etiketi yerelde oluştu, ama
+`git push --follow-tags origin main` düştü: "could not read Username for
+'https://github.com'". `origin` HTTPS, ve bu ortamda kimlik bilgisi yok (SSH anahtarı var).
+`yayinla.mjs` hatayı `execFileSync`'in ham `stderr` baytları olarak döktü, okunur bir cümle
+yok.
+Tür: ortam, ve betiğin hata mesajı
+Ne yapıldı: push `git@github.com:AlparslanSemiz/Mozaik.git` adresiyle, uzak ayara
+dokunmadan yapıldı; etiket uzakta doğrulandı. Betiğin hata mesajı düzeltilmedi (TODO'ya
+yazılmadı, küçük).
+Kalıcı kural: yok
+
 ### 2026-09-26 · npm run kontrol · preferences.test.ts, styles.css'in hareket bloğu
 Bulgu: `kontrol` birim aşamasında tek kırmızı: "makinenin bloğu ayarın kurallarından SONRA"
 testi `:root[data-motion="az"]` bulamadı. Sebep e0d146c: `.relation-edit` kuralı eklenirken

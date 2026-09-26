@@ -1109,9 +1109,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
       görülmedi; cevap B5.3'ün sıradaki dilimini seçer.
 - [ ] **Babanın makinesinde öneri araması ölçülsün (B5.10, B5.11).** Bu makinede
-      WebView2 yok. Ölçüm kaydı 2.2.0 ile babaya gidecek; 2.2.0 hazır, `main`'e yerelde
-      birleşti ama yayınlanmadı (2026-09-26, kullanıcının kararı). Babaya gidecek adımlar
-      şunlar:
+      WebView2 yok. Ölçüm kaydı 2.2.0'da, 2.2.0 2026-09-26'da yayınlandı. Babaya gidecek
+      adımlar şunlar:
       1. Mozaik.exe'yi yeni sürümle (2.2.0) açmak.
       2. Program'da `Otomatik diz`'e basıp panelin "aranıyor" demesinin bitmesini
          beklemek.
@@ -1225,8 +1224,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte. 2026-09-11'de kod refactor
       turunun tabanı olarak koşuldu: 545/555, düşen on testin ayrımı WORKLOG'da, iki bulgu
       TESTFINDINGS'te ve §8d'de.
-- [ ] **`npm run yayinla`'nın CHANGELOG kapısı gerçek bir sürümde denenmedi.** Kapatma
-      fonksiyonu bir kopya üzerinde denendi, ilk sürümde çıktısına bakılacak.
+- [x] **`npm run yayinla`'nın CHANGELOG kapısı gerçek bir sürümde denenmedi — DENENDİ
+      (2026-09-26, v2.2.0).** Unreleased bloğu `## [2.2.0] - 2026-09-26` altına kapandı,
+      boş bir Unreleased başlığı kaldı. Push HTTPS kimlik bilgisi olmadığı için düştü ve
+      betik hatayı ham bir bayt dizisi olarak bastı; push SSH adresiyle yapıldı
+      (TESTFINDINGS 2026-09-26).
 
 ---
 ### 8d · Kod refactor turunun envanterinden çıkanlar (2026-09-11)
