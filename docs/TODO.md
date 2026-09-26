@@ -1624,8 +1624,9 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: metin. İngilizcede "TOTAL 99 ders · 433 saat". §8d'deki "`t()`'den geçmeyen
       JSX metinleri" şüphesinin üretilmiş bir örneği. DENETIM X2.
       Kapandı 2026-09-27, c9c66e5. Test: dil.spec.ts 82 "Dersler şeridinin toplamı çevriliyor".
-- [ ] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
+- [x] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
       Şiddet: görsel. 40 px kaydırmak yetiyor, "ÖĞRE" okunuyor. DENETIM P11.
+      Kapandı 2026-09-27, 011af8d. Test: program.spec.ts 3 "yatay kaydırınca köşe hücresi saat başlıklarının üstünde kalıyor".
 - [ ] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
       Şiddet: görsel. Öğle arası günden güne değişince 6. sütunun saat kutusu boş kalıyor
       ve numara yaklaşık 7 px aşağı iniyor. DENETIM M3.

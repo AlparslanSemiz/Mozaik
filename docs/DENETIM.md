@@ -539,6 +539,7 @@ sonra "Çarşamba nereye gitti" diye sorması olası (öneri, doğrulanmadı).
   numaraları onun üstünde. Gövdenin satır başları doğru. Önizlemede ızgara kendiliğinden
   kaydırıldığında da görülüyor. Görüntüler: `scratch/denetim/program/kaydirma-40-sol-kenar.png`,
   `scratch/denetim/program/kaydirma-400-sol-kenar.png`.
+  **Düzeldi (2026-09-27, 011af8d).**
 
 **Şöyle olsa daha iyi.** **Ö13.** Bir şey gizliyken şeritte ya da ızgaranın köşesinde
 "2 gizli" gibi bir çip dursun ve tıklanınca İşlemler'in listesini açsın (denetçinin
