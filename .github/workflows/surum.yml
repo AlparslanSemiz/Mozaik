@@ -203,6 +203,9 @@ jobs:
           sparse-checkout: |
             .github/surum-notu.md
             package.json
+            CHANGELOG.md
+            src/platform/changelog.ts
+            scripts/surum-notu.mjs
           sparse-checkout-cone-mode: false
           path: depo
 
@@ -265,6 +268,18 @@ jobs:
           sha256sum Mozaik.html Mozaik-Windows-kurulum.zip Mozaik.exe surum.json > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
+      # WHAT IS NEW, on the Release page itself: the Turkish lines Ayarlar →
+      # Hakkında shows, the version's CHANGELOG.md section, then the install
+      # text every release shares. The page used to carry the install text
+      # alone. A version with nothing to say stops here (scripts/surum-notu.mjs).
+      - name: Build the release notes
+        env:
+          ETIKET: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -o pipefail
+          node depo/scripts/surum-notu.mjs "${ETIKET#v}" depo > notlar.md
+          cat notlar.md
+
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -277,11 +292,11 @@ jobs:
           # üçüncü parti bir action sokmak, en az istenecek yerde yabancı kod
           # çalıştırmak olurdu.
           # Notu ayrı dosyadan: bir YAML blok skalerinin içine heredoc koymak
-          # girintiyi bozuyor, ve notun kendisi düzenlenebilir kalmalı.
+          # girintiyi bozuyor. Dosyayı bir önceki adım kuruyor.
           gh release create "$ETIKET" \
             --repo "${{ github.repository }}" \
             --title "Mozaik $ETIKET" \
-            --notes-file depo/.github/surum-notu.md \
+            --notes-file notlar.md \
             teslim/Mozaik.html \
             teslim/Mozaik-Windows-kurulum.zip \
             teslim/Mozaik.exe \

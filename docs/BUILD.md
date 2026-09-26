@@ -138,6 +138,7 @@ scripts/exe-ikon.mjs         yayınlanmış bir exe'nin içindeki simge boyları
 scripts/favicon.mjs          index.html'in data: URI favicon'u, sade çizimden
 scripts/sunucu.mjs           sunucu.ps1'in Node ikizi, geliştirme ve ölçüm için
 scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-source/)
+scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
@@ -300,9 +301,12 @@ README'nin indirme bağlantıları bunlar.
 | `surum.json` | exe'nin "daha yeni bir sürüm var mı" diye okuduğu tek satırlık manifest |
 
 Varlık adları yalnız ASCII, çünkü URL'de kodlanıyorlar. Release sayfasının
-gövdesi `.github/surum-notu.md`, sürüm sürüm değişiklik geçmişi kökteki
-[CHANGELOG.md](../CHANGELOG.md), uygulamanın içindeki Yenilikler paneli ise
-`src/platform/changelog.ts`.
+gövdesini `surum.yml` etiket anında `scripts/surum-notu.mjs` ile kuruyor, üç
+parçadan: `src/platform/changelog.ts`'teki Türkçe Yenilikler satırları (uygulamanın
+içindeki panelin aynısı), [CHANGELOG.md](../CHANGELOG.md)'nin o sürüme ait bölümü,
+ve her sürümün paylaştığı kurulum ve indirme metni `.github/surum-notu.md`. İkisinden
+biri boşsa iş durur, boş bir "yenilikler" yayınlanmaz. 2.2.0'a kadar sayfa yalnız
+kurulum metnini taşıyordu (kullanıcının isteği, 2026-09-26).
 
 ## Sürüm numarası
 

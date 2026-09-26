@@ -2,12 +2,12 @@
  * Every release's own line — TODO.md §2 B2.9, "babam her güncelleme
  * alındığında neyin değiştiğini soruyor ben de pek hatırlamıyorum."
  *
- * `.github/surum-notu.md` is NOT this: the release workflow reads it as the
- * same static install/download text for every tag's page, it holds no
- * per-version history, and it never ships into `dist/` — so it cannot be
+ * `.github/surum-notu.md` is NOT this: it is the install/download text every
+ * tag's Release page shares, and it never ships into `dist/` — so it cannot be
  * read at runtime either (offline principle, nothing is fetched). This file is
  * the single source: bundled at build time exactly like `lang/*.ts`,
- * hand-edited once per release, read by Ayarlar → Hakkında.
+ * hand-edited once per release, read by Ayarlar → Hakkında, and read as text
+ * by `scripts/surum-notu.mjs`, which puts these lines on the Release page.
  *
  * `scripts/yayinla.mjs` refuses to publish unless the top entry's version
  * matches the one being released — the entry for a release is written

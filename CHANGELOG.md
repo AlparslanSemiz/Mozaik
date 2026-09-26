@@ -6,8 +6,9 @@ follow [Semantic Versioning](https://semver.org/).
 
 A release is cut with `npm run yayinla -- X.Y.Z`, which closes the Unreleased
 block under the new version and today's date. The in-app "What's new" panel
-reads `src/platform/changelog.ts`, and each GitHub Release page uses
-`.github/surum-notu.md`.
+reads `src/platform/changelog.ts`. Each GitHub Release page is built from the
+in-app lines, this file's section for the version and the install text in
+`.github/surum-notu.md` (`scripts/surum-notu.mjs`).
 
 Version 1.1.0 was the first published release. Earlier milestones (v0.6 to v1.0)
 lived on branches and were never released, so they are not listed. Version
@@ -23,6 +24,7 @@ release is incomplete, the entry says so.
 
 ### Changed
 
+- Each release page on GitHub now says what is new in that version, in Turkish and in English, above the download and install notes.
 - The waiting-lessons tray now opens into the room the timetable is not using,
   and fades at its bottom edge when there are more cards below it. On a real
   school in the desktop window that is 38 cards in view instead of 19, with
