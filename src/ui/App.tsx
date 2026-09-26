@@ -648,23 +648,26 @@ export default function App() {
       // A BUNDLE is refused rather than opened: it holds every plan, so opening
       // one means replacing the whole library — and the top bar stays the place
       // where no click can lose an afternoon.
+      // "Newer" only when it is: a plan past this program's schema, or a
+      // bundle past its envelope. An older or odd bundle version is not a
+      // reason to update (DENETIM DK10, where a newer PLAN said "okunamadı").
       const version = bundleVersionOf(text);
+      const bundle = version === BUNDLE_VERSION;
+      const newer = read.problem === 'yeni' || (version !== null && version > BUNDLE_VERSION);
       await alert({
-        title:
-          version === BUNDLE_VERSION
-            ? t('Bu dosya bütün planları içeriyor')
-            : version !== null
-              ? t('Bu dosya daha yeni bir sürümle yazılmış')
-              : t('Bu dosya okunamadı'),
+        title: bundle
+          ? t('Bu dosya bütün planları içeriyor')
+          : newer
+            ? t('Bu dosya daha yeni bir sürümle yazılmış')
+            : t('Bu dosya okunamadı'),
         tone: 'warn',
-        body:
-          version === BUNDLE_VERSION
-            ? t(
-                'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
-              )
-            : version !== null
-              ? t('Programı güncelleyin, sonra tekrar deneyin.')
-              : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
+        body: bundle
+          ? t(
+              'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.',
+            )
+          : newer
+            ? t('Programı güncelleyin, sonra tekrar deneyin.')
+            : t('Program tarafından indirilmiş bir .json yedek dosyası seçin.'),
       });
       return;
     }

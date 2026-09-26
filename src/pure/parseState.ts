@@ -561,7 +561,7 @@ export function parseState(text: string): State | null {
 }
 
 /** What "Dosyadan aç" makes of a file: a plan, or why it is not one. */
-export type PlanFile = { state: State } | { problem: 'okunamadi' | 'eksik' };
+export type PlanFile = { state: State } | { problem: 'okunamadi' | 'eksik' | 'yeni' };
 
 /** The four lists every plan file the program ever wrote carries (v1 in Turkish). */
 const LISTS = ['rooms', 'teachers', 'classes', 'lessons'];
@@ -578,9 +578,21 @@ const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
  */
 export function readPlanFile(text: string): PlanFile {
   const state = parseState(text);
-  if (state === null) return { problem: 'okunamadi' };
+  // A version past this program's is the program's own file from a newer
+  // copy, not a broken one; "okunamadı" sent the reader after a bad backup
+  // (DENETIM DK10). It is still not guessed at.
+  if (state === null) return { problem: newerVersion(text) ? 'yeni' : 'okunamadi' };
   const raw = JSON.parse(text) as Record<string, unknown>;
   const lists = (raw.schemaVersion ?? raw.semaSurumu) === 1 ? LISTS_V1 : LISTS;
   if (lists.some((field) => !Array.isArray(raw[field]))) return { problem: 'eksik' };
   return { state };
+}
+
+function newerVersion(text: string): boolean {
+  try {
+    const version = (JSON.parse(text) as { schemaVersion?: unknown } | null)?.schemaVersion;
+    return typeof version === 'number' && version > SCHEMA_VERSION;
+  } catch {
+    return false;
+  }
 }

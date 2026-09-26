@@ -470,7 +470,12 @@ test.describe('29. Hata yolları', () => {
       buffer: Buffer.from(JSON.stringify({ ...FIXTURE, schemaVersion: 99 })),
     });
 
-    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
+    // DK10: it is not guessed at, and it is not called broken either. The file
+    // is the program's own, written by a newer copy of it.
+    const said = await answerDialog(page);
+    expect(said).toContain('Bu dosya daha yeni bir sürümle yazılmış');
+    expect(said).toContain('Programı güncelleyin');
+    expect(said).not.toContain('okunamadı');
   });
 
   // DK11: a file with no teachers and no lessons at all used to be taken as a

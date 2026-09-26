@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Opening a plan file written by a newer version of the program now says so and asks for an update, instead of calling the file unreadable.
 - When a card cannot swap with the card it is dragged onto, the line under the toolbar now says what stops the swap ("No swap, 431 · MÇ cannot take the old place: 430 is in room E on Wednesday at 4"). It used to name the other card, the very one the swap would have moved.
 - After Ctrl+Z, the line under the toolbar no longer goes on saying that the timetable was laid out or that a suggestion was applied, next to a chip counting the lessons that do not fit again. The same goes for the "moved to place N" sentence above a school list after its move is undone.
 - Check no longer says "No problems in sight" and "0 blocking" while lessons sit on hours that were closed after they were placed. Its verdict now says how many lessons are on a closed hour, and the blocking count in the strip counts them, as the status chip in the top bar already did.

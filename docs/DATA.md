@@ -111,7 +111,7 @@ doğrudan `blocks`, ve v13'ten beri eski her 4 bir 3 olur. Kimlikler, gün
 indeksleri, program alternatifleri, yerleşimler ve sabitlemeler olduğu gibi
 geçer. Yalnız bir koşunun içindeki blok sınırı yeniden okunur, ve hiçbir sert
 kısıt o sınıra bakmaz (tuzak 75). Bilinmeyen, ileriki bir sürüm `null` döner,
-tahmin edilmez.
+tahmin edilmez. Üst çubuk o dosyaya "okunamadı" değil "daha yeni bir sürümle yazılmış" der (`readPlanFile()`).
 
 v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünkü
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
@@ -240,7 +240,7 @@ Dersler'in modu ve odağı, havuzun sırası ve süzgeci hiçbir yerde saklanmaz
 geçer: öğretmen, sınıf, ders ya da derslik listesinin alanı hiç yoksa (v1'de Türkçe adlarıyla)
 dosya "eksik" diye reddedilir, boş bir liste ise geçerlidir. `parseState` localStorage'ı ve
 oturum yedeklerini de okuduğu için hoşgörülü kalır. Yükleme sorusu dosyayı açık planla yan
-yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). Paket Ayarlar → Planlar ve yedek'te duruyor,
+yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). `schemaVersion`'ı bu programınkinden büyük bir dosya bozuk sayılmaz, "daha yeni bir sürümle yazılmış" diye reddedilir ve programın güncellenmesi söylenir. Paket Ayarlar → Planlar ve yedek'te duruyor,
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
 Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki
 her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.

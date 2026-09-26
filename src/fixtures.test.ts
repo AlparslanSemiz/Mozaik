@@ -131,6 +131,16 @@ describe('şema örnekleri', () => {
     expect(readPlanFile(JSON.stringify(raw))).toEqual({ problem: 'eksik' });
   });
 
+  // DK10: a newer file is the program's own, and saying it cannot be read sent
+  // the reader looking for a broken backup. Named from SCHEMA_VERSION, not as a
+  // number, so the next bump cannot leave it behind (pitfall 97).
+  it('daha yeni sürümün dosyası okunamadı değil yeni sayılıyor', () => {
+    const raw = JSON.parse(read(SCHEMA_VERSION)) as Record<string, unknown>;
+    expect(readPlanFile(JSON.stringify({ ...raw, schemaVersion: SCHEMA_VERSION + 1 }))).toEqual({
+      problem: 'yeni',
+    });
+  });
+
   it('JSON olmayan dosya okunamıyor', () => {
     expect(readPlanFile('{ bu json değil')).toEqual({ problem: 'okunamadi' });
   });
