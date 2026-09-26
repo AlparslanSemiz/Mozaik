@@ -404,6 +404,7 @@ değiştirmiyor ama bir hamle olarak sunuluyor ve geri al yığınına giriyor.
   Aynı satırda sekiz kırmızı hücrenin sekizi de bu biçimde. Durum `localStorage`'dan
   okunarak doğrulandı: ret doğru, cümle yanlış. Görüntü:
   `scratch/denetim/program/takas-uzerinde-1920.png`.
+  **Düzeldi (2026-09-27, 5ec5fc5).**
 
 **Şöyle olsa daha iyi.** **Ö7.** Aynı dersin iki bloğu arasındaki takas teklif edilmesin,
 ve kart kartın üstüne bırakılamıyorsa cümle takasın hangi yarısının neden olmadığını

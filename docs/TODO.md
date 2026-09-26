@@ -1608,9 +1608,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       yerleştirildi" diyor, çip "7 ders sığmıyor". Exe'de de üretildi. Aynı aile: Okul'da
       geri alınan bir sıralamanın cümlesi. DENETIM P12, O7, T4.
       Kapandı 2026-09-27, 98e8a56. Test: otomatik.spec.ts 22 "geri alınan önerinin başarı cümlesi kalmıyor" ve "geri alınan dizmenin cümlesi kalmıyor", sira.spec.ts 61 "geri alınan taşımanın cümlesi kalmıyor"; Linux exe'sinde sürücüyle görüldü.
-- [ ] **DK2 Olmayan bir takasın gerekçesi takas ortağını gösteriyor, asıl engeli değil.**
+- [x] **DK2 Olmayan bir takasın gerekçesi takas ortağını gösteriyor, asıl engeli değil.**
       Şiddet: metin. MÇ'nin 310'u 431'in üstüne: "MÇ Çarşamba 10 saatinde 431 sınıfında",
       oysa engel 431'in dersliğinin o saatte dolu olması. DENETIM P6.
+      Kapandı 2026-09-27, 5ec5fc5. Test: constraints.test.ts "reddedilen takasın cümlesi asıl engeli söylüyor, takas ortağını değil"; tarayıcıda denetimin adımıyla görüldü.
 - [ ] **DK10 Daha yeni sürümün plan dosyası "okunamadı" diye reddediliyor.**
       Şiddet: metin. "Daha yeni bir sürümle yazılmış" dalı yalnız paket dosyasında
       çalışıyor (`src/ui/App.tsx`), `e2e/temel.spec.ts` bugünkü cümleyi bekliyor. DENETIM E6.
