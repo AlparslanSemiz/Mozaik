@@ -26,6 +26,8 @@ interface Options {
   kind: ListKind;
   /** How many rows there are in total — a one-row list cannot be reordered. */
   count: number;
+  /** The list itself, so a sentence about a move can tell when the list moved on. */
+  items: readonly unknown[];
   /** The strip's current question. A sort or a filter locks the handles. */
   query: ListQuery;
   change: (apply: (d: State) => State) => void;
@@ -46,9 +48,18 @@ export interface RowOrder {
   grip: (index: number, name: string) => ReactElement;
 }
 
-export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
+export function useRowOrder({ kind, count, items, query, change }: Options): RowOrder {
   const t = useT();
-  const [notice, setNotice] = useState('');
+  // The sentence and the list it is about. The list is recorded on the render
+  // after the move, which is the first one that holds it. When the list
+  // changes again — Ctrl+Z, another edit — the sentence is about a list that is
+  // no longer on screen and goes quiet (DENETIM O7).
+  const [said, setSaid] = useState<{ text: string; items: readonly unknown[] | null }>({
+    text: '',
+    items: null,
+  });
+  if (said.text !== '' && said.items === null) setSaid({ text: said.text, items });
+  const notice = said.items === null || said.items === items ? said.text : '';
   const locked = !canReorder(query) || count < 2;
 
   // Read inside the gesture's callback rather than captured by it: the listeners
@@ -64,7 +75,7 @@ export function useRowOrder({ kind, count, query, change }: Options): RowOrder {
     const target = clampIndex(to, n);
     if (target === from) return;
     apply((d) => reorderList(d, k, from, target));
-    setNotice(say('{ad} {n}. sıraya taşındı.', { ad: name, n: target + 1 }));
+    setSaid({ text: say('{ad} {n}. sıraya taşındı.', { ad: name, n: target + 1 }), items: null });
   }, []);
 
   const detach = useRef<(() => void) | null>(null);

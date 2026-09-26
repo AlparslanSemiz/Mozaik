@@ -199,6 +199,7 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
     // mode the rows on screen are a subset — index 3 there is not index 3 in
     // `state.lessons`. `ListTools` already explains the lock it puts up.
     count: mode === 'all' ? state.lessons.length : 0,
+    items: state.lessons,
     query,
     change,
   });

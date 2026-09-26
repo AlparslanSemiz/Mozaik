@@ -164,6 +164,7 @@ export default function Subjects({ state, change }: PanelProps) {
   const order = useRowOrder({
     kind: 'subjects',
     count: state.settings.subjects.length,
+    items: state.settings.subjects,
     // No ListTools here: twelve to twenty rows is not a list you search, and a
     // sort would only ever lock the handles. With nothing narrowing, the visible
     // rows ARE the array — which is the whole condition `canReorder` checks.

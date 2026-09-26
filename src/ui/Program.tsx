@@ -93,7 +93,28 @@ function seconds(ms: number): string {
  * The single line under the toolbar. Returns the text and the class that
  * colours it: '' plain, 'warn' yellow, 'bad' red, 'ok' green.
  */
-function describeBar(solver: SolverRun, view: View, t: Translate): { text: string; level: string } {
+/**
+ * Whether the plan is still the one `said` was said about. The bar's lines
+ * after a run or an applied suggestion end in "Ctrl+Z ile geri alabilirsiniz",
+ * and after that Ctrl+Z they went on saying it had worked (DENETIM DK4).
+ *
+ * The plan is recorded on the render the sentence first appears in: the run
+ * and its result arrive in one batched update, so that render already holds
+ * the plan the sentence describes. Storing it during render is React's own
+ * pattern for "information from previous renders".
+ */
+function useStillSaid(said: unknown, state: State): boolean {
+  const [at, setAt] = useState<{ said: unknown; state: State } | null>(null);
+  if (said !== null && at?.said !== said) setAt({ said, state });
+  return said === null || at === null || at.said !== said || samePlan(at.state, state);
+}
+
+function describeBar(
+  solver: SolverRun,
+  view: View,
+  t: Translate,
+  current: { applied: boolean; result: boolean },
+): { text: string; level: string } {
   const p = solver.progress;
   if (solver.running && p !== null) {
     return {
@@ -110,14 +131,14 @@ function describeBar(solver: SolverRun, view: View, t: Translate): { text: strin
     };
   }
 
-  if (solver.applied !== null) {
+  if (solver.applied !== null && current.applied) {
     return {
       text: t('Öneri uygulandı ve program yerleştirildi. Ctrl+Z ile geri alabilirsiniz.'),
       level: 'ok',
     };
   }
 
-  const done = solver.result;
+  const done = current.result ? solver.result : null;
   // Idle, the bar says what the grid IS rather than sitting blank. It reserves
   // 26px whatever happens, and a sentence that explains the axis you are
   // looking at is worth more there than empty chrome. It used to live beside
@@ -656,7 +677,11 @@ function Program({
 
   // What the bar under the toolbar says. Drag first: that answers a question
   // the hand is asking right now.
-  const { text: barText, level: barLevel } = describeBar(solver, view, t);
+  const current = {
+    applied: useStillSaid(solver.applied, state),
+    result: useStillSaid(solver.result, state),
+  };
+  const { text: barText, level: barLevel } = describeBar(solver, view, t, current);
 
   /**
    * WHICH CLASS a grid cell belongs to.
@@ -1026,16 +1051,18 @@ function Program({
         aria-live="polite"
       >
         <span>{barText}</span>
-        {(solver.result !== null || solver.applied !== null) && !solver.running && (
-          <span className="bar-actions">
-            {solver.result !== null && solver.result.stuck.length > 0 && (
-              <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
-            )}
-            <button className="btn" onClick={solver.clear}>
-              {t('Tamam')}
-            </button>
-          </span>
-        )}
+        {((solver.result !== null && current.result) ||
+          (solver.applied !== null && current.applied)) &&
+          !solver.running && (
+            <span className="bar-actions">
+              {solver.result !== null && solver.result.stuck.length > 0 && (
+                <span className="hint inline">{t('Ayrıntı: Kontrol sekmesi.')}</span>
+              )}
+              <button className="btn" onClick={solver.clear}>
+                {t('Tamam')}
+              </button>
+            </span>
+          )}
       </div>
 
       {advice !== null && (

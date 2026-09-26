@@ -78,6 +78,7 @@ export default function Classes({ state, change }: PanelProps) {
   const order = useRowOrder({
     kind: 'classes',
     count: state.classes.length,
+    items: state.classes,
     query,
     change,
   });

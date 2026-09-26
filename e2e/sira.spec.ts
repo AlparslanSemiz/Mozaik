@@ -116,6 +116,20 @@ test.describe('61. Elle sıralama', () => {
     await expect(page.locator('.list-tools [role="status"]')).toHaveText(/A 2\. sıraya taşındı/);
   });
 
+  // DENETIM O7, the family of DK4: undoing the move left its sentence above a
+  // list that was back in its old order.
+  test('geri alınan taşımanın cümlesi kalmıyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+    await grips(page).first().focus();
+    await page.keyboard.press('ArrowDown');
+    const said = page.locator('.list-tools [role="status"]');
+    await expect(said).toHaveText(/A 2\. sıraya taşındı/);
+    await page.keyboard.press('Control+z');
+    expect((await names(page))[0]).toBe('A');
+    await expect(said).toHaveText('');
+  });
+
   test('yerinde bırakılan satır GERİ ALINACAK bir şey bırakmıyor', async ({ page }) => {
     await openWithSample(page);
     await openSetup(page, 'Öğretmenler');

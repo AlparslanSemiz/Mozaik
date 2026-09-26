@@ -19,6 +19,7 @@ import {
   settledText,
 } from './helpers';
 import type { State } from '../src/leaf/types';
+import { SMALL_WORLDS } from '../src/worlds';
 
 /** Runs it and waits for the verdict line. */
 async function autoFill(page: Page) {
@@ -166,6 +167,32 @@ test.describe('22. Otomatik dizme', () => {
     await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({ timeout: 30_000 });
     await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Program', exact: true })).toBeVisible();
+  });
+
+  // DK4: the bar kept saying what the last run or the last suggestion did
+  // after Ctrl+Z had taken it back — a green "Öneri uygulandı" beside a chip
+  // counting the lessons that did not fit again.
+  test('geri alınan önerinin başarı cümlesi kalmıyor', async ({ page }) => {
+    const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
+    await loadWorld(page, world.state);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    const apply = page.locator('.panel.suggestions .btn.primary').first();
+    await expect(apply).toBeVisible({ timeout: 60_000 });
+    await apply.click();
+    const bar = page.locator('.reason-bar');
+    await expect(bar).toContainText('Öneri uygulandı');
+    await page.keyboard.press('Control+z');
+    await expect(bar).not.toContainText('Öneri uygulandı');
+  });
+
+  test('geri alınan dizmenin cümlesi kalmıyor', async ({ page }) => {
+    const world = SMALL_WORLDS.find((w) => w.name === 'tek-gun')!;
+    await loadWorld(page, world.state);
+    await autoFill(page);
+    const bar = page.locator('.reason-bar');
+    await expect(bar).toContainText('Program dizildi');
+    await page.keyboard.press('Control+z');
+    await expect(bar).not.toContainText('Program dizildi');
   });
 
   // DK5: Durdur during the suggestion search used to leave "Sınıfların

@@ -130,6 +130,7 @@ export default function Teachers({ state, change }: PanelProps) {
   const order = useRowOrder({
     kind: 'teachers',
     count: state.teachers.length,
+    items: state.teachers,
     query,
     change,
   });

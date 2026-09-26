@@ -197,7 +197,10 @@ Geçici görünüm  ▸  Satırı soluklaştır · Satırı gizle · Günü solu
 henüz ölçülmedi, aSc'nin karşılığı `docs/asc/yardim/u58-timetable-generation.md`'de
 duruyor ve okunmadı. İlerleme ve sonuç `.reason-bar`'da düz metin olarak yazılır:
 sabit yükseklikli, ızgarayı kaydırmıyor, ve göz oraya zaten alışkın. Bütün koşu tek
-geri al adımı. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
+geri al adımı. Sonucun satırı ("Program dizildi…", "Öneri uygulandı…") yalnız program
+o koşunun bıraktığı hâldeyken durur: Ctrl+Z ya da başka bir değişiklikten sonra satır
+ızgaranın ne olduğunu söyleyen boş hâline döner. Okul listelerindeki "… sıraya
+taşındı." cümlesi de aynı kuralla susar. Geçici görünümle gizlenmiş ya da soluklaştırılmış satırlar dizilmez.
 
 Koşu takılırsa satır ne olduğunu söylemeye devam eder (hangi ders, neden), ve
 altında, ızgaranın üstünde bir öneri paneli açılır (`Suggestions.tsx`, TODO B5.9,

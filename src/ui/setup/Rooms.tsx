@@ -63,6 +63,7 @@ export default function Rooms({ state, change }: PanelProps) {
   const order = useRowOrder({
     kind: 'rooms',
     count: state.rooms.length,
+    items: state.rooms,
     query,
     change,
   });
