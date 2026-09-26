@@ -579,6 +579,7 @@ Görüntüler: `scratch/denetim/program/otomatik-diz-sonra-ornek-1920.png`,
   bir yol bulunamadı." Aynı fikstürde arama sürdürülünce altı yol buluyor. İki kez
   üretildi. Baba bu cümleyi okuyup haftanın sınıflara dokunmadan kurulamayacağına
   inanabilir. Görüntü: `scratch/denetim/program/durdur-sonra-tekrar-1920.png`.
+  **Düzeldi (2026-09-27, 61cb429).**
 
 Baştan diz de denendi: onay cümlesi dizilmiş saatlerin silineceğini sayıyor ve
 sabitlenenlerin kalacağını söylüyor (`scratch/denetim/program/bastan-diz-onay-1920.png`).
