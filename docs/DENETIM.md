@@ -1137,6 +1137,7 @@ küçük bir kutuda kayıyor.
   "Sorunlar (9)", altta "Kapalı saatte ders (9)" ve üst çubukta kırmızı "9 ders kapalı
   saatte". Hükmün cümlesi kapasiteyi anlatıyor, ama başlığı "Sorun görünmüyor".
   Görüntü: `scratch/denetim/kontrol/sorunlar-1920.png`.
+  **Düzeldi (2026-09-27, ed0e158).**
 
 **Şöyle olsa daha iyi.** **Ö36.** Hüküm kutusu bütün sorunları saysın ve kapasiteyle
 yerleşimi iki ayrı cümlede söylesin ("Kapasite yetiyor. 9 ders kapalı bir saatte

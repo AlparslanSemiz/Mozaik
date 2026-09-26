@@ -1598,10 +1598,11 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       dokunmadan bir yol bulunamadı." Sürdürülünce altı yol buluyor. Durdurulmuş bir
       aramanın inceltilmemiş yolu da sıradan bir yol gibi kalıyor. DENETIM P12, P13.
       Kapandı 2026-09-27, 61cb429. Test: otomatik.spec.ts 22 "durdurulan öneri araması durdurulduğunu söylüyor ve sürdürülebiliyor", relaxWorker.test.ts.
-- [ ] **DK7 Kontrol'ün hükmü ve Durum'u kapalı saatteki dersleri görmüyor.**
+- [x] **DK7 Kontrol'ün hükmü ve Durum'u kapalı saatteki dersleri görmüyor.**
       Şiddet: yanlış sonuç. Dokuz ders kapalı saatteyken hüküm "Sorun görünmüyor …
       Program dizilebilir.", şerit "0 engel, 0 uyarı", aynı anda "Sorunlar (9)" ve kırmızı
       çip. DENETIM K1.
+      Kapandı 2026-09-27, ed0e158. Test: feasibility.test.ts "kapalı saatte kalmış ders sorunu KIRMIZI yapıyor ve sayıyor" (hard, hasProblem), kontrol.spec.ts "kapalı saatte kalan ders sayılıyor ve sebebi yazıyor".
 - [ ] **DK4 Geri almadan sonra gerekçe satırı olmayan bir başarıyı söylüyor.**
       Şiddet: metin. Öneriyi uygula, Ctrl+Z: satır yeşil "Öneri uygulandı ve program
       yerleştirildi" diyor, çip "7 ders sığmıyor". Exe'de de üretildi. Aynı aile: Okul'da
