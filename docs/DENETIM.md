@@ -1594,6 +1594,7 @@ açık planın gideceğini söylüyor. Boş bir plana dosya açarken de aynı uy
   plan 0 öğretmen, 0 ders ve 0 yerleşimle yükleniyor, bildirim "Yedek yüklendi." diyor,
   geri al kapalı. Önceki plan yalnız bir dosyada ya da oturum yedeklerinde kaldıysa
   geri gelir. Kesilmiş ya da elle düzenlenmiş bir yedek bu yoldan girer.
+  **Düzeldi (2026-09-27, 536528f).**
 
 **Şöyle olsa daha iyi.** **Ö43.** Onay sorusu yüklenecek dosyayı açık planla yan yana
 saysın ("Dosyada: 0 öğretmen, 20 sınıf, 0 ders. Şu an: 25, 20, 99.") (denetçinin

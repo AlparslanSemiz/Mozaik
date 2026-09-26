@@ -1582,11 +1582,12 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: veri kaybı (koşullu). Dört ad yazınca 433 yerleşimden 245'i ve 36 sabitleme
       sorusuz kalktı, "Günlük ders sayısı" kutusu 12 göstermeye devam etti. DENETIM A1.
       Kapandı 2026-09-27, b4c6079. Test: ayarlar.spec.ts 32 "ders adlarına az ad yazmak günü kısaltmıyor" ve "fazla ad", entities.test.ts hourLabels.
-- [ ] **DK11 Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
+- [x] **DK11 Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
       Şiddet: veri kaybı (onaydan sonra). `teachers` ve `lessons` alanları silinmiş bir
       plan dosyası Dosyadan aç ile "Yedeği yükle"den sonra 0 öğretmen, 0 ders ve 0
       yerleşimle yükleniyor, geri al kapalı. Onay sorusu dosyanın içeriğini söylemiyor.
       DENETIM E6.
+      Kapandı 2026-09-27, 536528f. Test: temel.spec.ts 29 "öğretmeni ve dersi olmayan dosya eksik diye reddediliyor" ve "yükleme sorusu dosyayı açık planla yan yana sayıyor", fixtures.test.ts "Dosyadan aç kapısı" vakaları.
 - [ ] **DK1 Sınıf ve derslik panelinde Ad kutusuna tıklayıp çıkmak adı değiştiriyor.**
       Şiddet: yanlış sonuç. Kutunun `defaultValue`'su başlık için biçimlenmiş ad ("320
       sınıfı", "A dersliği") ve `rename()` blur'da değişikliğe bakmadan yazıyor
