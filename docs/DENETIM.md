@@ -1592,6 +1592,7 @@ açık planın gideceğini söylüyor. Boş bir plana dosya açarken de aynı uy
   var (`src/ui/App.tsx`) ama yalnız paket dosyasının sürümüne bakıyor. Senaryo: exe
   kendini güncelledi, baba aynı yedeği başka bir makinedeki eski kopyada açıyor ve
   dosyanın bozuk olduğunu sanıyor. `e2e/temel.spec.ts` bu cümleyi bekliyor.
+  **Düzeldi (2026-09-27, 36cf42f).**
 - **DK11 · Öğretmenleri ve dersleri olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
   Şiddet: veri kaybı (onaydan sonra). Adımlar: örnek okul dizili, `teachers` ve `lessons`
   alanları silinmiş bir plan dosyasını aç, "Yedeği yükle". Beklenen: dosya eksik diye

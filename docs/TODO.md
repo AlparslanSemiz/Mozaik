@@ -1612,9 +1612,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: metin. MÇ'nin 310'u 431'in üstüne: "MÇ Çarşamba 10 saatinde 431 sınıfında",
       oysa engel 431'in dersliğinin o saatte dolu olması. DENETIM P6.
       Kapandı 2026-09-27, 5ec5fc5. Test: constraints.test.ts "reddedilen takasın cümlesi asıl engeli söylüyor, takas ortağını değil"; tarayıcıda denetimin adımıyla görüldü.
-- [ ] **DK10 Daha yeni sürümün plan dosyası "okunamadı" diye reddediliyor.**
+- [x] **DK10 Daha yeni sürümün plan dosyası "okunamadı" diye reddediliyor.**
       Şiddet: metin. "Daha yeni bir sürümle yazılmış" dalı yalnız paket dosyasında
       çalışıyor (`src/ui/App.tsx`), `e2e/temel.spec.ts` bugünkü cümleyi bekliyor. DENETIM E6.
+      Kapandı 2026-09-27, 36cf42f. Test: temel.spec.ts 29 "bilinmeyen (ileri) şema sürümü tahmin edilmiyor" (yeni cümleye çekildi), fixtures.test.ts "daha yeni sürümün dosyası okunamadı değil yeni sayılıyor".
 - [ ] **DK12 Kimya'nın kısaltması dört dilde "kim?" diye çevrilmiş.**
       Şiddet: metin. `src/leaf/lang/*.ts`'te `Kim` anahtarı "Who", "Wer", "Quién", "Qui".
       Müsaitlik şeridindeki "Kim" ile Kimya'nın kısaltması tek anahtara düşüyor. DENETIM X2.
