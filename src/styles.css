@@ -1770,6 +1770,15 @@ table.list tbody tr {
   border-bottom: 1px solid var(--hairline);
   font-weight: 400;
   font-size: var(--fs-sm);
+  /* A drag writes this bar up to ten times a second (REASON_GAP, drag.ts),
+     and writing text lays out the whole page (pitfall 117). Its height is
+     fixed and its width is the column's, so nothing inside can size it, and
+     this says so: the write stays in the bar. In WebKitGTK every write had
+     dropped a frame, in either density — 16% of a drag, 26 of 26 writes, and
+     0 with this (2026-09-26). In Chromium it measured neutral. Not `layout`
+     alone, which on 2026-09-12 made Chromium's drag WORSE (TRAPS 117), and not
+     `strict`, whose paint clip would cut a focus ring at the bar's edge. */
+  contain: size layout;
 }
 
 .reason-bar > span:first-child {
@@ -2065,7 +2074,10 @@ table.list tbody tr {
   background: var(--paper);
   /* So the "Sığdır" density below can size a cell from the box the grid is
      actually in. `100vw` would have to guess the rail, the padding and the
-     vertical scrollbar; `100cqw` is the number itself. */
+     vertical scrollbar; the box's own width is the number itself. It is read
+     as --wrap-w (written by platform/gridFit.ts), with `100cqw` only until
+     that first write: a width resolved against a container made every page
+     layout re-lay the whole table (see Sığdır's --cell-w). */
   container-type: inline-size;
 }
 
@@ -2342,7 +2354,7 @@ table.grid thead tr:nth-child(2) th {
   --break-w: .1875rem;
   --cell-w: max(
     0px,
-    (100cqw - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
+    (var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
         var(--space-4)) /
       var(--lesson-cols)
   );

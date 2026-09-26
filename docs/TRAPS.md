@@ -502,6 +502,26 @@ sapıyor.
 
 ---
 
+### 141 · Kapsayıcıya göre çözülen bir ölçü, sayfanın her yerleşiminde tabloyu baştan yerleştirir
+Sığdır'ın sütunu `100cqw` üstünden kutudan türüyordu. Babanın adsız tam haftasında
+kart satır boyunca gezdirilince, x1'de karelerin %23'ü düşüyordu; Rahat'ta hiç.
+Yerleşim iki yoğunlukta da aynı sayıdaydı (bir taramada 47, gerekçe çubuğunun
+yazması; tuzak 117), aynı kökten (`#document`) ve aynı kirli nesne sayısıyla
+(9–10). Ama tanesi Rahat'ta 1,8 ms, Sığdır'da 53 ms. Kapsayıcıya bağlı ölçüler,
+kapsayıcı her yerleştiğinde bütün hücreler için yeniden çözülüyor. Aynı değeri px
+olarak sabitlemek bir taramanın yerleşimini 2554 ms'den 185 ms'ye indirdi.
+`container-type`'ı kaldırmak yalnız yarısını indirdi, tabloyu px yapmak ve üç noktayı
+kaldırmak hiçbir şey değiştirmedi. Çare kutunun genişliğini bir `ResizeObserver` ile
+custom property'ye yazmak (`--wrap-w`, `platform/gridFit.ts`).
+
+2026-09-12'nin ölçümü bunu göremezdi: örnek okulda ve Rahat'ta alınmıştı (tuzak 119).
+Aynı turun WebKitGTK yarısı ayrı bir sebep çıkardı. Orada kasma iki yoğunlukta da
+vardı (%16), ve yedi adayın içinde yalnız çubuğun metni önemliydi. Her yazma bir kare
+düşürüyordu, `contain: size layout` ile hiçbiri. Kural: **büyük bir tablonun içindeki
+bir ölçü `cq*` birimine ya da kapsayıcıya bağlanmaz; gereken sayı JS'le bir kez
+ölçülüp yazılır. Bir kasma şikâyeti kullanıcının verisinde ve kullanıcının
+yoğunluğunda, iki motorda ölçülür.**
+
 ## Düzen ölçümü ve hangi kutuya bakıldığı
 
 **Kural.** Bir düzen iddiası gerçek tarayıcıda, onu dolduran gerçek veriyle, ve
@@ -1226,7 +1246,7 @@ bir algoritma işi gibi kovalanır.
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
-| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136 |
+| Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
@@ -1239,5 +1259,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 140, yeni bir tuzak 141'den devam eder. Test stratejisi
+büyük kullanılan numara 141, yeni bir tuzak 142'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

@@ -345,4 +345,58 @@ test.describe('Gerçek exe (Linux)', () => {
       .toContain('havuzda');
     await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).toContain('Öğretmen 18');
   });
+
+  // Dragging a card along its row juddered here: 16% of frames dropped in
+  // either density, and none without a drag (2026-09-26). Of seven things
+  // switched off one at a time only the reason bar's text mattered — a drag
+  // writes it up to ten times a second (REASON_GAP), and in WebKitGTK every
+  // write dropped a frame, the page being redrawn from the top (pitfall 117).
+  // `contain: size layout` on the bar keeps the write inside it. Asked here
+  // without a drag, which WebDriver cannot give in this engine (pitfall 127):
+  // the bar written every sixth frame for three seconds, as a drag does.
+  test("gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor", async ({ exe }) => {
+    const metin = readFileSync(join(KOK, 'src', 'fixtures', 'tam-dolu-kurs-dizili.json'), 'utf8');
+    await exe.oturum.js(
+      `const f = new File([${JSON.stringify(metin)}], 'yedek.json', { type: 'application/json' });
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      const girdi = document.querySelector('input[type=file]');
+      girdi.files = dt.files;
+      girdi.dispatchEvent(new Event('change', { bubbles: true }));`,
+    );
+    await exe.oturum.bekle('.dlg');
+    await exe.oturum.tikla('.dlg-actions .btn:last-child');
+    await exe.oturum.tikla('metin:Ayarlar');
+    await exe.oturum.tikla('metin:Görünüm');
+    await exe.oturum.js(
+      `const g = [...document.querySelectorAll('[role=group]')].find((x) => x.getAttribute('aria-label') === 'Izgara yoğunluğu');
+      [...g.querySelectorAll('button')].find((x) => x.textContent.trim() === 'Sığdır').click();`,
+    );
+    await exe.oturum.tikla('metin:Program');
+    const olcum = await exe.oturum.js<{ yazma: number; dusen: number; kare: number }>(
+      `await new Promise((r) => setTimeout(r, 1000));
+      const bar = document.querySelector('.reason-bar span');
+      const kareler = [];
+      let i = 0, yazma = 0;
+      const t0 = performance.now();
+      await new Promise((bitti) => {
+        const f = (t) => {
+          kareler.push(t);
+          if (i % 6 === 0) { bar.textContent = 'ölçüm ' + i; yazma++; }
+          i++;
+          if (t - t0 < 3000) requestAnimationFrame(f); else bitti();
+        };
+        requestAnimationFrame(f);
+      });
+      let dusen = 0;
+      for (let j = 1; j < kareler.length; j++) if (kareler[j] - kareler[j - 1] > 25) dusen++;
+      return { yazma, dusen, kare: kareler.length };`,
+    );
+    expect(olcum.yazma, 'çubuğa yeterince yazılmadı, iddia bedava geçerdi').toBeGreaterThan(15);
+    // Before: every write dropped one (26 of 26). A third is room for a slow
+    // machine, and still nowhere near what it was.
+    expect(olcum.dusen, `${olcum.yazma} yazmada ${olcum.dusen} kare düştü`).toBeLessThan(
+      olcum.yazma / 3,
+    );
+  });
 });

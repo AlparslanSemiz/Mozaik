@@ -35,6 +35,66 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-26 · Sürüklerken kasma: Sığdır'ın sütunu `cqw`'den değil ölçülen genişlikten, çubuk kendi içinde
+
+**Şikâyet.** Kart, konulabilen hücrelerin satırında gezdirilirken güçlü bir işlemcide
+bile takılıyor.
+
+**Önce eski aletler.** 2026-09-12'nin aletleri (`scratch/kasma-*.mjs`) olduğu gibi
+koşuldu: örnek okul, Rahat, 1920. x1'de hiç kare düşmüyor, x4'te %0,7–2,2 düşüyor, yani o
+günkü çare tutuyor. Şikâyet bu veride görünmüyor (tuzak 119).
+
+**Şikâyetin kendi şekli.** Babanın adsız tam haftası kullanıldı (fikstüre bir öneri
+uygulanmış). İki senaryo ölçüldü: havuzdaki kart ve yerleşmiş kart. İki yoğunlukta,
+olaylar node saatiyle gönderildi. Rahat'ta x1'de %0 düşüyor. Sığdır'da x1'de %23,
+x4'te taramanın tamamı 18–19 kare (saniyede yaklaşık 4). Yerleşim sayısı iki
+yoğunlukta aynıydı (47), ama tanesi Rahat'ta 1,8, Sığdır'da 53 ms. Ablasyon:
+
+| Sığdır'da kapatılan | Layout toplamı | Düşen kare |
+|---|---|---|
+| hiçbiri | 2554 ms | %22,6 |
+| `--cell-w` aynı değerde px | 185 ms | %0 |
+| `.grid-wrap`'in `container-type`'ı | 1290 ms | %1,8 |
+| tablonun yüzde genişliği | 2524 ms | %22,2 |
+| üç nokta | 2562 ms | %22,8 |
+
+`gridFit`'ten önceki derleme de aynı kasıyordu (A/B), yani sebep bugünkü değişiklik
+değildi.
+
+**Çare 1 (görünmez).** `.grid-wrap`'in içerik genişliği `ResizeObserver` ile
+`--wrap-w` olarak yazılıyor. Sığdır'ın `--cell-w`'si `100cqw` yerine onu okuyor, `cqw`
+yalnız ilk karenin yedeği. Hücreler 25,53 ve 20,19 px, kırpılma sayıları önceki gibi.
+A/B dönüşümlü, üçer koşu, `performance` profili:
+
+| | Önce | Sonra |
+|---|---|---|
+| havuz kartı, Sığdır, x1 | %23,0–23,4 · Layout 2511–2533 ms | %0 · 168–187 ms |
+| havuz kartı, Sığdır, x4 | %100 · Layout 4416–4600 ms | %0,4 · 365–391 ms |
+| yerleşmiş kart, Sığdır, x1 · x4 | %23,3 · %94,7 | %0 · %0,7 |
+| Rahat, x4, iki senaryo | %0 | %0 |
+
+**WebKitGTK ayrı bir sebep çıkardı.** Gerçek Linux exe'sinde düşen kare iki yoğunlukta
+da %16'ydı ve Çare 1 onu değiştirmedi. Sürüklenmeden durulurken ve gezinirken %0'dı.
+Sayfanın içinde yedi aday tek tek kapatıldı: hayaletin gölgesi ve katmanı, gölgeleme
+düzlemleri, kart halkaları, hedef hücrenin çerçevesi, satırın zemini ve çubuğun
+metni. Yalnız çubuğun metni önemliydi: gizlenince %0. Her yazma bir kare düşürüyordu
+(3 s'de 26 yazma, 26 kare).
+
+**Çare 2.** `.reason-bar`'a `contain: size layout` konuldu. Exe'de iki yoğunlukta %16'dan
+%0'a indi. Chromium'da nötr çıktı (x4'te Layout ve düşen kare aynı). Seçilmeyenler:
+- `strict`: boya sınırı çubuğun kenarında bir odak halkasını keserdi.
+- Yalnız `layout`: 2026-09-12'de Chromium'u kötüleştirmişti.
+
+Çubuğun görüntüsü iki temada ve üç durumda piksel piksel aynı. Tek fark aynı derlemenin
+iki koşusu arasında da çıkan bir köşeydi.
+
+**Testler.**
+- `gorunum.spec.ts` 45b: çubuğa yazmanın yerleşimi Sığdır'da Rahat'a oranla ölçülüyor.
+  Önce 53,8'e karşı 1,1 ms, sınır 8 kat. `100cqw`'ye dönülünce kırmızı.
+- `gercek-exe.spec.ts`: çubuğa saniyede on kez yazmak kare düşürmüyor. Çaresiz ikilide
+  26/26, yani kırmızı.
+- Sürüklemenin davranış testleri (`program.spec.ts`'in takas ve tahliyesi dahil) yeşil.
+
 ### 2026-09-26 · Sığdır kesmiyor, küçültüyor: sınıf adının ilk kelimesi ve 9 px taban
 
 **Şikâyet.** Sığdır'da kart yazıları uzun olunca "…" ile kesiliyor.

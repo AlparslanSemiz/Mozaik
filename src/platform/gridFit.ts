@@ -1,4 +1,5 @@
-// Sığdır: a card line that does not fit is drawn smaller, not cut.
+// Sığdır: the week sized to the box, and a card line that does not fit drawn
+// smaller, not cut.
 //
 // Sığdır derives the column from the box (styles.css), so a card is as wide as
 // the week allows and no wider. The father's class names are "411A SAY" and
@@ -126,7 +127,19 @@ export function attachGridFit(wrap: HTMLElement): () => void {
     });
   };
 
-  const resize = new ResizeObserver(() => schedule());
+  // The box's own width, as a number the stylesheet can use (styles.css,
+  // Sığdır's --cell-w). It used to be `100cqw`, and a size resolved against
+  // the container is redone for every cell whenever the container is laid
+  // out: in Sığdır every layout of the page re-laid the whole table. A drag
+  // writes the reason bar and so lays out the page on each change of target
+  // cell, and on the father's week each of those was 53ms, not Rahat's 1.8;
+  // 22% of frames dropped at x1. The same value as a px number: 2554ms of
+  // layout in a sweep down to 185, and none dropped (2026-09-26).
+  const resize = new ResizeObserver(([entry]) => {
+    const width = entry?.contentBoxSize[0]?.inlineSize;
+    if (width !== undefined) wrap.style.setProperty('--wrap-w', `${width}px`);
+    schedule();
+  });
   resize.observe(wrap);
   // Text and rows, not attributes: a drag toggles classes on every move, and
   // the `--fit` this writes is an attribute too.

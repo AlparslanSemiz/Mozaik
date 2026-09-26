@@ -119,7 +119,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `platform/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
 | `platform/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
-| `platform/gridFit.ts` | Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
+| `platform/gridFit.ts` | ızgaranın kutusunun genişliğini `--wrap-w` olarak yazar (Sığdır'ın sütunu ondan türüyor, tuzak 141), ve Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
 | `platform/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `platform/rowDrag.ts` | liste satırını sürükleyerek sıralama |
 | `platform/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |

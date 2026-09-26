@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- Dragging a card along its row no longer stutters in the Fit density. On a full week, 23% of frames were dropped even on a fast machine, and nearly all of them on a slow one. Now none are, and the column widths are exactly what they were. The Linux build also stuttered in both densities, and it is smooth now too.
 - In the Fit density, card text no longer ends in "…" where it can be shown: a class name is written with its first word ("411A" for "411A SAY", on the card and on the class row), and a line that still does not fit is drawn smaller, down to 9px, instead of being cut. Rows keep their height, the full name is still what the card says to a screen reader, and the Comfortable and Spacious densities are unchanged. On a 1920 screen a full week with long class names went from 204 of 211 cards cut to 2; at Windows 125% the sample school went from 315 of 374 to none.
 
 ## [2.2.0] - 2026-09-26

@@ -228,7 +228,7 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 - **İşaret.** `kurulum/icon.ico`'nun dokuz boyu taşıması ve hangi boyların hangi çizimden geldiği (`temel.spec.ts` 79).
 - **Kayma.** Şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynatması (`kayma.spec.ts`). Bu dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek bir kaydırma çubuğu yok (tuzak 94).
 - **Sığdır'ın exe kutusu** (`gorunum.spec.ts` 45). 1920×1032 ve 1600×968'de haftanın sığması, ve hiçbir kart yazısının, satır başının ve köşedeki eksen adının iki eksende de kırpılmaması, satırın Rahat'takinden uzamaması, kart satırının satır kutusunun Rahat'takiyle aynı kalması (tuzak 107).
-- **Sığdır babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kırpılan kart sayısının tavanı, satır başlarının sıfırı, 9 px taban, küçültmenin tablonun boyunu değiştirmemesi, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140).
+- **Sığdır babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kırpılan kart sayısının tavanı, satır başlarının sıfırı, 9 px taban, küçültmenin tablonun boyunu değiştirmemesi, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140). Aynı grupta sürüklemenin yazdığı çubuğun yerleşimi Sığdır'da Rahat'takine oranla ölçülür (tuzak 141).
 
 ### Dil
 
@@ -279,7 +279,8 @@ köprüsünün orada olduğu, `data_dir_path`'in gerçek yeri söylediği, otoma
 kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, Linux
 kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
-yazdığı (tuzak 132) ve "Dosyadan aç"ın bir yedeği okuduğu. Güncelleme reddi
+yazdığı (tuzak 132), "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
+sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
 

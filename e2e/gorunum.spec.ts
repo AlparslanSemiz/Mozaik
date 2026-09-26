@@ -859,6 +859,46 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
     });
   }
 
+  /**
+   * Dragging a card along the target row juddered in Sığdır and not in Rahat
+   * (2026-09-26). The drag writes the reason bar, and that is a full-document
+   * layout (pitfall 117) in both densities: the same 47 of them in one sweep.
+   * In Rahat each was 1.8ms; in Sığdır 53ms, and 22% of frames dropped at x1,
+   * because the column width came from `100cqw` and a size resolved against
+   * the container is redone for every cell whenever the container is laid
+   * out. Measured by freezing that one value to the same px: 2554ms of layout
+   * down to 185, no frame dropped.
+   *
+   * Asked as a RATIO in one page, so the machine's speed (and its power
+   * profile) cancels out: the drag's own write, timed in Sığdır against Rahat.
+   * It was about 30 times; the fix brings it near 2.
+   */
+  test('Sığdır sürüklemenin yerleşimini Rahat kadar ucuz tutuyor', async ({ page }) => {
+    await loadWorld(page, dizili());
+    await expect(page.locator('table.grid .card').first()).toBeVisible();
+    const layoutMs = () =>
+      page.evaluate(async () => {
+        const bar = document.querySelector('.reason-bar span') as HTMLElement;
+        const times: number[] = [];
+        for (let i = 0; i < 25; i++) {
+          bar.textContent = `ölçüm ${i}`;
+          const start = performance.now();
+          void document.body.offsetWidth;
+          times.push(performance.now() - start);
+          await new Promise((r) => requestAnimationFrame(r));
+        }
+        return times.sort((a, b) => a - b)[12]!;
+      });
+    const roomy = await layoutMs();
+    await chooseDensity(page, 'Sığdır');
+    await page.waitForTimeout(300);
+    const fit = await layoutMs();
+    expect(
+      fit / Math.max(roomy, 0.05),
+      `Sığdır'da ${fit.toFixed(2)} ms, Rahat'ta ${roomy.toFixed(2)} ms`,
+    ).toBeLessThan(8);
+  });
+
   // The full name is not lost: it is what the card SAYS to a screen reader,
   // and every other density still draws it.
   test('kart sınıfın tam adını söylüyor, Rahat onu çiziyor', async ({ page }) => {
