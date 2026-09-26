@@ -26,6 +26,19 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · gerçek Linux exe turu, babanın dosyası · Kontrol "Dikkat" diyor, üst çubuk "Sorun yok"
+Bulgu: öneri uygulanınca hafta tamam (348/348 saat, 0 engel, 0 uyarı), üst çubuk "Sorun yok",
+ama Kontrol'ün kutusu "Dikkat edilmesi gereken noktalar var. Aşağıdaki listelerde İmkânsız
+yazan satırlar programın dizilmesini engeller" diyor, oysa İmkânsız satır yok. Sebep
+`hasProblem`: bir kapasite satırı Sıkışık olunca da doğru dönüyordu. Babanın her sınıfı tam
+dolu, yani kutu her tam haftada yanlış konuşuyordu. İki derlemede (eski ve yeni motor) aynı.
+Tür: ürün kusuru
+Ne yapıldı: düzeltildi, cümle kullanıcıya taslak olarak gösterildi ve onaylandı.
+`hasProblem` artık yalnız yerleşemeyen ders, ihlal ya da İmkânsız satırda doğru, Sıkışık ayrı
+bir bayrak (`tight`) ve yeşil kutunun kendi cümlesi. Birim testi ve E2E eski kodla kırmızı,
+fikstüre öneri uygulanmış tam haftayla Chromium'da görüldü.
+Kalıcı kural: yok
+
 ### 2026-09-26 · npx vitest run (üç kez) · solver.test.ts, "olduğu gibi kurulamıyor" ve makinenin güç profili
 Bulgu: test üç tam koşunun üçünde ve tek başına da düştü: `elapsedMs` 15 000,1–15 000,5,
 beklenen `< 15 000`. Oturum başındaki kodda (a3404f7) da aynı şekilde düşüyor, yani bu

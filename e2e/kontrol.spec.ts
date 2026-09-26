@@ -57,6 +57,27 @@ test.describe('26. Kontrol — kapasite', () => {
     await expect(page.locator('table.stat .badge.impossible')).toHaveCount(0);
   });
 
+  test('yalnız Sıkışık satır varsa yeşil kutu bunu söylüyor, "Dikkat" demiyor', async ({
+    page,
+  }) => {
+    // Every class of the father's school is exactly full. The box used to say
+    // "Dikkat edilmesi gereken noktalar var" and point at İmkânsız rows that
+    // were not there, while the top bar said "Sorun yok" (2026-09-26).
+    await loadWorld(
+      page,
+      makeWorld({
+        days: 1,
+        hours: 2,
+        lessons: [{ id: 'x1', classId: 's510', teacherId: 'oMC', weeklyHours: 2 }],
+        placements: { 's510|0|0': 'x1', 's510|0|1': 'x1' },
+      }),
+      'Kontrol',
+    );
+    await expect(page.locator('.ok-box')).toContainText('Sorun görünmüyor');
+    await expect(page.locator('.ok-box')).toContainText('Sıkışık');
+    await expect(page.locator('.warn-box')).toHaveCount(0);
+  });
+
   test('öğretmene müsait olduğundan fazla ders yüklenince İmkânsız', async ({ page }) => {
     // 4 hours in the week, 2 of them closed, 3 hours of lessons loaded.
     await load(page, {

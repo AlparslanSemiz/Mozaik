@@ -234,6 +234,8 @@ const ES: Sozluk = {
     "Vuelva aquí cuando haya introducido profesores y clases en la pestaña **Escuela** y asignaturas en la pestaña **Clases**. Esta página dice de antemano si el horario puede montarse.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**No se ve ningún problema.** La disponibilidad y la capacidad de clases y aulas cubren las horas asignadas. El horario puede montarse.",
+  "**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
+    "**No se ve ningún problema.** Algunos profesores, clases o aulas tienen tantas horas libres como asignadas, o casi (**Justo**): no sobra ninguna hora o sobran muy pocas, pero el horario puede montarse.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
     "**Hay puntos a los que prestar atención.** En las listas siguientes, las filas marcadas",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":

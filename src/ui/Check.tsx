@@ -90,7 +90,11 @@ export default function Check({ state, view }: Props) {
       {!report.hasProblem ? (
         <div className="panel">
           <div className={conflicts.length > 0 ? 'warn-box' : 'ok-box'}>
-            <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
+            {report.tight ? (
+              <T k="**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir." />
+            ) : (
+              <T k="**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir." />
+            )}
           </div>
         </div>
       ) : (

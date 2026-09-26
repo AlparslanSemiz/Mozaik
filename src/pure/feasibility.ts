@@ -74,7 +74,14 @@ export interface Report extends Capacity {
   violations: Violation[];
   /** aSc's "Advisor" — data that will not BLOCK a build but is worth a look. */
   advice: Advice[];
+  /** Something blocks the build: a lesson with no place, a broken rule at Engelle, an İmkânsız row. */
   hasProblem: boolean;
+  /**
+   * A row is Sıkışık, and nothing blocks. Not a problem: the father's classes
+   * are all exactly full, and "dikkat edilmesi gereken noktalar" over a whole
+   * week pointed at İmkânsız rows that were not there (2026-09-26).
+   */
+  tight: boolean;
 }
 
 /** "412 — AV Fizik": how a lesson is named wherever the user is told about it. */
@@ -454,12 +461,12 @@ export function buildReport(d: State): Report {
   const violations = findViolations(d, ix);
   const advice = buildAdvice(d, ix);
 
+  const rows = [...teachers, ...classes, ...rooms];
   const hasProblem =
-    unplaceable.length > 0 ||
-    violations.length > 0 ||
-    [...teachers, ...classes, ...rooms].some((x) => x.level !== 'ok');
+    unplaceable.length > 0 || violations.length > 0 || rows.some((x) => x.level === 'impossible');
+  const tight = !hasProblem && rows.some((x) => x.level === 'tight');
 
-  return { teachers, classes, rooms, unplaceable, violations, advice, hasProblem };
+  return { teachers, classes, rooms, unplaceable, violations, advice, hasProblem, tight };
 }
 
 // ------------------------------------------------------------------ health

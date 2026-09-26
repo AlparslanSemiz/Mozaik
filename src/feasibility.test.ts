@@ -126,6 +126,20 @@ describe('buildReport — öğretmen yükü', () => {
   it('bol müsaitlikte sorun görmez', () => {
     expect(buildReport(build()).teachers[0]!.level).toBe('ok');
     expect(buildReport(build()).hasProblem).toBe(false);
+    expect(buildReport(build()).tight).toBe(false);
+  });
+
+  it('yalnız sıkışık satır sorun değil, ayrıca söyleniyor', () => {
+    // The father's classes are all exactly full. Kontrol's box used to call
+    // that "dikkat edilmesi gereken noktalar" and point at İmkânsız rows that
+    // did not exist, while the top bar said "Sorun yok".
+    const d = build();
+    d.unavailable[closedKey('oMC', 0, 0)] = 1;
+    d.unavailable[closedKey('oMC', 0, 1)] = 1;
+    const report = buildReport(d);
+    expect(report.teachers[0]!.level).toBe('tight');
+    expect(report.hasProblem).toBe(false);
+    expect(report.tight).toBe(true);
   });
 });
 

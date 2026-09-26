@@ -234,6 +234,8 @@ const EN: Sozluk = {
     "Come back here once you have entered teachers and classes in the **School** tab and lessons in the **Lessons** tab. This page tells you in advance whether the timetable can be laid out at all.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Nothing looks wrong.** Teacher availability and class and room capacity cover the hours loaded. The timetable can be laid out.",
+  "**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
+    "**Nothing looks wrong.** Some teachers, classes or rooms have as many open hours as they are loaded with, or nearly (**Tight**): no hour or very few to spare there, but the timetable can be laid out.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
     "**There are things worth looking at.** In the lists below, rows marked",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":

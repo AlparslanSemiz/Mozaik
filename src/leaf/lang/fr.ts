@@ -234,6 +234,8 @@ const FR: Sozluk = {
     "Revenez ici une fois les enseignants et les classes saisis dans l’onglet **École** et les cours dans l’onglet **Cours**. Cette page dit à l’avance si l’emploi du temps peut être construit.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Rien ne semble poser problème.** Les disponibilités ainsi que les capacités des classes et des salles couvrent les heures attribuées. L’emploi du temps peut être construit.",
+  "**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
+    "**Rien ne semble poser problème.** Certains enseignants, classes ou salles ont autant d’heures libres que d’heures attribuées, ou presque (**Serré**) : aucune ou très peu d’heures de marge, mais l’emploi du temps peut être construit.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
     "**Certains points méritent votre attention.** Dans les listes ci-dessous, les lignes marquées",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":

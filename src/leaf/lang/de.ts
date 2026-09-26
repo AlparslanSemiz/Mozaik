@@ -235,6 +235,8 @@ const DE: Sozluk = {
     "Kommen Sie hierher zurück, sobald Sie im Reiter **Schule** Lehrkräfte und Klassen und im Reiter **Fächer** die Fächer eingetragen haben. Diese Seite sagt im Voraus, ob sich der Plan überhaupt legen lässt.",
   "**Sorun görünmüyor.** Öğretmen müsaitlikleri, sınıf ve derslik kapasiteleri yüklenen ders saatlerini karşılıyor. Program dizilebilir.":
     "**Es sieht alles in Ordnung aus.** Verfügbarkeiten sowie Klassen- und Raumkapazitäten decken die zugewiesenen Stunden. Der Plan lässt sich legen.",
+  "**Sorun görünmüyor.** Bazı öğretmen, sınıf ya da dersliklerin açık saati yüküne eşit ya da çok yakın (**Sıkışık**): orada boş saat kalmıyor ya da çok az kalıyor, ama program dizilebilir.":
+    "**Es sieht alles in Ordnung aus.** Einige Lehrkräfte, Klassen oder Räume haben genau oder fast so viele freie Stunden wie zugewiesene (**Eng**): dort bleibt keine oder kaum eine Stunde übrig, aber der Plan lässt sich legen.",
   "**Dikkat edilmesi gereken noktalar var.** Aşağıdaki listelerde":
     "**Es gibt Punkte, die Aufmerksamkeit brauchen.** In den Listen unten verhindern Zeilen mit",
   "yazan satırlar programın dizilmesini engeller. Önce onları çözün.":
