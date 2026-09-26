@@ -255,7 +255,10 @@ const WIDE_NEIGHBOURHOOD_SIZES = [2, 3, 4, 5, 6];
 /** Once no neighbourhood helps, how long the whole week is asked before giving up. */
 const WHOLE_WEEK_CONFLICTS = 60_000;
 
-/** How long a new formula tries the hint week as it stands. */
+/**
+ * How long a new formula tries the hint week as it stands. In practice the
+ * question is refused at once, every time: see `hinted` in buildModel.
+ */
 const HINT_CONFLICTS = 2_000;
 
 export type RelaxStage = 'building' | 'solving' | 'proving' | 'checking';
@@ -917,6 +920,19 @@ function buildModel(
               push(teacherHours, `${teacherId}|${day}|${h}`, x);
             }
             // Start the search from the stuck week: it is most of an answer.
+            //
+            // Every hour the week gives the lesson is hinted as a START, so a
+            // 2-hour block is hinted at both its hours and a 1+1 lesson's
+            // singles at both singles: more than one start per block (455 for
+            // 211 blocks on the father's file), and the question that asks
+            // them all is refused at once. What starts the search is the
+            // phase alone. MEASURED 2026-09-26: hinting one start per block,
+            // the question was answered and the search stayed near the hint
+            // week, and that was worse: after refusing KY's Saturday the
+            // fewest-hours way found 7 instead of 5 (CP-SAT's best), the
+            // hand-over ways one lesson and 5 hours instead of 4 and 3, and
+            // the whole search took 100 s instead of 60 (DECISIONS). So this
+            // stays as it is, and the sentence says what it does.
             if (
               variant === 'as-is' &&
               hint[placementKey(lesson.classId, day, hour)] === lesson.id
@@ -1396,10 +1412,12 @@ export function createRelaxer(
     familyUntil = sat.conflicts + FAMILY_CONFLICTS[which];
 
     // Any week at all under this family's changes. A new formula first asks
-    // for the hint week outright, briefly: a phase alone is not enough, since
-    // the flags beside the starts ("taught at this hour") are decided too, and
-    // their default undoes the week before it is reached. Asked as assumptions,
-    // it is found whole or refused fast, and either way the search goes on.
+    // for the hint week outright, briefly. It was written so because a phase
+    // alone was thought not enough (TRAPS 134), but the question is refused at
+    // once on every formula, since `hinted` names more than one start per
+    // block (buildModel), and a version that answered it searched worse and
+    // slower (MEASURED 2026-09-26, DECISIONS). The refused question is kept:
+    // the week the search finds today is found after it.
     stage = 'solving';
     if (fresh && model.hinted.length > 0) {
       if ((yield* ask(sat, model.hinted, sat.conflicts + HINT_CONFLICTS)) === 'sat')

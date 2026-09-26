@@ -35,6 +35,63 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-26 · Denendi ve bırakıldı: fikstürde ret sonrası 5, karma yolun 2 saati, tutan ipucu
+
+Üç açık iş ölçüldü, üçü de motor değişmeden kapandı.
+
+**Fikstürün boş ızgarası, KY'nin (Ö6) Cumartesisi reddedilince.** Motor 6 saat
+buluyor, CP-SAT'ın kanıtlı en iyisi 5 (Ö6 Perşembe 11–12, Ö11 Cuma 11, Ö3
+Cumartesi 6 ve 12). Önce farkın nereden geldiği ölçüldü:
+- CP-SAT'ın haftası motora eski hafta olarak verilince motor 5'i buluyor. Yani
+  model 5'e izin veriyor, fark aramanın erişiminde.
+- Motorun 6 saatlik haftası sabit tutulup bir bölge serbest bırakılınca CP-SAT'ın
+  en azı: 2 ya da 3 gün serbestken 6, 4 gün (Perşembe–Pazar) serbestken 5, bütün
+  hafta 5.
+
+4 günlük komşuluk zaten deneniyor, ama 1 000 çatışmada bulunamıyor. Denenenler:
+
+| Deneme | Sonuç | Süre |
+|---|---|---|
+| bugünkü | 6 | 48 s |
+| cevaptan sonra saat açılan ve reddedilen öğretmenin bütün sınıflarının haftası serbest | 6 | 48 s |
+| cevaptan sonra 4 gün ve üstü komşuluklar 4 000 ya da 10 000 çatışma | 5 | 89–94 s, erken hafta 11 saat |
+| olağan turlardan sonra 4 ve 5 günlük tırmanma turu, 4 000 çatışma | 5 | 67 s, erken hafta 40 s'de |
+| aynı tur erken gösterimden sonra | 6 | 62 s |
+
+Hiçbiri hem 5'i hem bugünkü süreyi ve erken haftayı tutmadı. Sonuç yörüngeye çok
+duyarlı: aynı tur yerini değiştirince 5 de 6 da buluyor. Babanın dosyasında ret
+sonrası 5 zaten bulunuyor. Açık kalıyor.
+
+**Karma yolun "3 ders ve 2 saat"i.** CP-SAT'ta yeniden ölçüldü:
+- En çok üç el değişimiyle en az açılan saat 180 s'de 4'ün altına inmedi (alt
+  sınır 1).
+- "Tam 2 saat açılsın" diye sorulunca kanıtlı en az 2 el değişimi: KY Cumartesi
+  11–12, 410A'da HE'nin dersini ED, 412B'de MÇ'nin dersini YM veriyor. Motorun
+  denetçisi bu haftayı kabul ediyor.
+- Motor bu haftadan başlayınca (aşağıdaki tutan ipucuyla) daha da iyisini buldu:
+  1 saat ve 3 ders (AV Cumartesi 11; 411A'da YG, 410A'da ED, 412B'de YM).
+
+Yani karma az saat yolunun gösterdiği "1 ders ve 3 saat"ten daha az saatli haftalar
+var, ama arama kendi başına onlara ulaşmıyor. Kapanmadı.
+
+**Ipucu sorusu hiç tutmuyor (tuzak 139).** Yeni bir formül başlangıç haftasını
+varsayım olarak soruyor. Soru her formülde anında reddediliyor, çünkü bir dersin her
+saati başlangıç diye soruluyor (211 blok için 455 başlangıç). Blok başına tek
+başlangıç soran ve karma yolların el değişimini de bilen bir sürüm denendi, ölçüm
+babanın dosyasında, ikişer koşu:
+
+| | Bugün | Ipucu tutunca |
+|---|---|---|
+| ilk arama | 57,6 s | 96,5 · 104,7 s |
+| karma az ders / az saat | 1 ders 4 saat / 1 ders 3 saat | 1 ders 5 saat / 1 ders 5 saat |
+| karma saat ve sınır | 6 | 5 |
+| ret sonrası süre | 63,5 · 64,3 s | 101,6 · 100,8 s |
+| ret sonrası en az saat | 5 | 7 |
+| ret sonrası en az öğretmen | 6 | 7 |
+
+Yalnız karma saat ve sınır iyileşti, gerisi kötüleşti ve süre neredeyse iki katına
+çıktı. Kod olduğu gibi kaldı, yorumları yaptığı şeyi söylüyor.
+
 ### 2026-09-26 · Öneri araması: eşleşme yolu boşa aramıyor, karma yollar kendi hattında
 
 **Değişen.** İki şey değişti:

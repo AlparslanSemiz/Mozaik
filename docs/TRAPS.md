@@ -305,6 +305,8 @@ var: yalnız ders değişkenlerine yön vermek yetmiyor, çünkü onların yanı
 bayraklar ("öğretmen bu saatte dolu") da karar veriliyor ve varsayılan yönleri
 haftayı bozuyor. Yeni bir formül o yüzden eski haftayı kısa bir bütçeyle varsayım
 olarak da soruyor (`HINT_CONFLICTS`). Ölçüm WORKLOG'da, 2026-09-25.
+**2026-09-26 düzeltmesi:** bu soru hiçbir formülde tutmuyor, anında reddediliyor
+(tuzak 139). Yukarıdaki ikinci yarının ölçtüğü şey, soru değil, yönlerdi.
 
 ### 135 · Tek yönlü tanımlanmış bir bedel literali, gerekmeden de doğru olabilir
 Öneri aramasının yardımcı literalleri ("yan yana olmayan açılmış saat", "yeni
@@ -330,7 +332,9 @@ ilk adımda reddetti, arama sıfırdan başladı ve ilk haftası 312 saat açtı
 literalin arkasına alındı (`needHand`): ipucu haftası önce kuruluyor, sonra kural
 o haftanın yakınında isteniyor, ve sonuç 1 ders ve 3 saat. Tavan ("en çok üç
 ders") da aynı yoldan varsayım. Kural: **ipucuyla başlayan bir formülde, ipucunun
-çiğnediği bir kural cümle değil varsayım olur.**
+çiğnediği bir kural cümle değil varsayım olur.** 2026-09-26'da görüldü ki ipucu
+sorusu burada da reddediliyordu (tuzak 139). Ölçülen sonuç (7 saatten 3'e) doğru,
+ama "ipucu haftası önce kuruluyor" cümlesi değil; farkı neyin yaptığı ölçülmedi.
 
 ### 138 · Bir satır süzgeci, hangi satırları karşılaştırdığını adıyla söylemezse hepsini karşılaştırır
 Panel iki karma yoldan ötekinden iki sayıda da kötü olanı göstermiyor
@@ -341,6 +345,20 @@ içinde; babanın dosyasıyla tarayıcıda satırlar sayılınca görüldü. Sü
 yalnız iki karma yolu karşılaştırıyor ve bir test bunu soruyor. Kural: **bir satırı
 eleyen kural, eleyebileceği satırları adıyla sayar**, ve tarayıcıda gerçek veriyle
 satırlar sayılmadan panel bitmiş sayılmaz.
+
+### 139 · Bir mekanizmanın çalıştığı onun sonucundan değil kendi cevabından ölçülür
+Öneri aramasında yeni bir formül başlangıç haftasını varsayım olarak soruyor
+(`HINT_CONFLICTS`, tuzak 134). İki tuzak ve bir karar bu sorunun tuttuğunu
+varsayıyordu, çünkü aramanın sonucu iyileşmişti. Sorunun kendi cevabı hiç
+okunmamıştı. 2026-09-26'da okundu: her formülde ve her seferinde `unsat`.
+Sebebi: ipucu bir dersin haftadaki her saatini bir BAŞLANGIÇ sayıyor, yani iki
+saatlik bir bloğu iki yerden, 1+1'lik bir dersin tekini iki yerden başlatmak
+istiyor (babanın dosyasında 211 blok için 455 başlangıç). Sonucu iyileştiren şey
+sorunun yanında konan deneme yönleriydi. Blok başına tek başlangıç soran bir
+sürüm soruyu tutturdu, ve arama kötüleşti. Ret sonrası en az saat 5 yerine 7
+oldu, süre 60 s yerine 100 s (DECISIONS 2026-09-26). Kod olduğu gibi kaldı,
+yorumları yaptığı şeyi söylüyor. Kural: **bir adımın işe yaradığı, o adımın
+kendi dönüşü (burada `sat` mı `unsat` mı) bir kez basılıp okunmadan yazılmaz.**
 
 ## Sürükleme, saf DOM ve React sınırı
 
@@ -1194,7 +1212,7 @@ bir algoritma işi gibi kovalanır.
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
-| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138 |
+| Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
@@ -1208,5 +1226,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 138, yeni bir tuzak 139'dan devam eder. Test stratejisi
+büyük kullanılan numara 139, yeni bir tuzak 140'tan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
