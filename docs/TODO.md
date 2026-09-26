@@ -1109,8 +1109,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
       görülmedi; cevap B5.3'ün sıradaki dilimini seçer.
 - [ ] **Babanın makinesinde öneri araması ölçülsün (B5.10, B5.11).** Bu makinede
-      WebView2 yok. Babaya gidecek adımlar şunlar:
-      1. Mozaik.exe'yi yeni sürümle açmak.
+      WebView2 yok. Ölçüm kaydı 2.2.0 ile babaya gidecek; 2.2.0 hazır, `main`'e yerelde
+      birleşti ama yayınlanmadı (2026-09-26, kullanıcının kararı). Babaya gidecek adımlar
+      şunlar:
+      1. Mozaik.exe'yi yeni sürümle (2.2.0) açmak.
       2. Program'da `Otomatik diz`'e basıp panelin "aranıyor" demesinin bitmesini
          beklemek.
       3. Ayarlar → Hakkında'daki "Öneri araması" satırının fotoğrafını göndermek.

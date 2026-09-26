@@ -21,7 +21,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 Son güncelleme: 2026-09-26.
 
-**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. 2.2.0 hazır: Yenilikler notları yazıldı, `.github/surum-notu.md` bugünkü adreste, yayın kullanıcının onayını bekliyor. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
+**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. 2.2.0 hazır: Yenilikler notları yazıldı, `.github/surum-notu.md` bugünkü adreste. Kullanıcının kararıyla (2026-09-26) `docs/claude-md-bolme` yerelde `main`'e fast-forward edildi; push, etiket ve Release yok, yayın ayrı bir kararı bekliyor (`npm run yayinla -- 2.2.0`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
 **Ne çalışıyor.** 2.1.1'deki her şey: yedi sekme (Okul, Müsaitlik, Dersler,
 Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil, dört teslim
@@ -235,7 +235,8 @@ tırnaklar değişti, `preferences.test.ts` kırmızıya döndü. Dosya eski hâ
 tur bitince silindi.
 
 **Açık kalan.**
-- 2.2.0'ın yayını, kullanıcının onayıyla.
+- 2.2.0'ın yayını. Kullanıcı yalnız birleştirmeyi seçti: `main` yerelde fast-forward
+  edildi, push, etiket ve Release yok.
 - Babanın makinesinde ölçüm (§8b).
 - Fikstürde ret sonrası 6.
 - Karma yolun daha az saatli haftaları.
