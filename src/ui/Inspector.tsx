@@ -135,11 +135,17 @@ function Inspector({
   const roomOf = target?.kind === 'room' ? state.rooms.find((x) => x.id === target.id) : undefined;
   const subjects = subjectOptions(state);
 
+  /** The name as stored. The sheet's heading is not it: "320 sınıfı" and "A
+      dersliği" are drawn around the name, and when the box held the heading,
+      leaving it wrote "320 sınıfı" back as the name (DENETIM DK1). */
+  const storedName = teacherOf?.name ?? classOf?.name ?? roomOf?.name ?? '';
+
   /** One name, three tables. Trimmed, and an empty name is refused rather than
-      written: a nameless row is unfindable everywhere else. */
+      written: a nameless row is unfindable everywhere else. Leaving the box
+      unchanged writes nothing, so it leaves no undo step behind either. */
   function rename(raw: string) {
     const name = raw.trim();
-    if (name === '') return;
+    if (name === '' || name === storedName) return;
     if (teacherOf !== undefined) change((d) => updateTeacher(d, teacherOf.id, { name }));
     else if (classOf !== undefined) change((d) => updateClass(d, classOf.id, { name }));
     else if (roomOf !== undefined) change((d) => updateRoom(d, roomOf.id, name));
@@ -256,8 +262,8 @@ function Inspector({
                     type="text"
                     className="dlg-input"
                     aria-label={t('Ad')}
-                    key={`n-${target.id}-${view.facts.name}`}
-                    defaultValue={view.facts.name}
+                    key={`n-${target.id}-${storedName}`}
+                    defaultValue={storedName}
                     onBlur={(e) => rename(e.target.value)}
                   />
                 </dd>
@@ -272,11 +278,11 @@ function Inspector({
                         aria-label={t('Kısaltma')}
                         key={`s-${teacherOf.id}-${teacherOf.short}`}
                         defaultValue={teacherOf.short}
-                        onBlur={(e) =>
-                          change((d) =>
-                            updateTeacher(d, teacherOf.id, { short: e.target.value.trim() }),
-                          )
-                        }
+                        onBlur={(e) => {
+                          const short = e.target.value.trim();
+                          if (short === teacherOf.short) return;
+                          change((d) => updateTeacher(d, teacherOf.id, { short }));
+                        }}
                       />
                     </dd>
 

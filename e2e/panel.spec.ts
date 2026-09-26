@@ -308,6 +308,35 @@ test.describe('87. Panelden düzenleme', () => {
     expect(before).not.toBe('ZZ');
   });
 
+  // DK1: the Ad box held the HEADING ("320 sınıfı", "A dersliği"), and leaving
+  // it wrote that back as the name, one more "sınıfı" every time.
+  test('sınıfın Ad kutusuna girip çıkmak adı değiştirmiyor', async ({ page }) => {
+    await laidOut(page);
+    await page.locator('table.grid .card').first().click({ button: 'right' });
+    await page.locator('.menu').getByRole('menuitem', { name: 'Sınıfı düzenle' }).click();
+    const box = sheet(page).getByRole('textbox', { name: 'Ad' });
+    const name = await box.inputValue();
+    expect(name).not.toContain('sınıfı');
+    await box.focus();
+    await page.keyboard.press('Tab');
+    await expect(box).toHaveValue(name);
+    await expect(sheet(page).locator('.sheet-title')).toHaveText(`${name} sınıfı`);
+  });
+
+  test('dersliğin Ad kutusuna girip çıkmak adı değiştirmiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openSetup(page, 'Derslikler');
+    await page.getByRole('button', { name: 'A bilgileri' }).click();
+    const box = sheet(page).getByRole('textbox', { name: 'Ad' });
+    await expect(box).toHaveValue('A');
+    await box.focus();
+    await page.keyboard.press('Tab');
+    await expect(box).toHaveValue('A');
+    await page.keyboard.press('Escape');
+    // The list's button is named after the room: still "A", not "A dersliği".
+    await expect(page.getByRole('button', { name: 'A bilgileri', exact: true })).toBeVisible();
+  });
+
   test('karttan "Sınıfı düzenle" SINIFI açıyor — ızgaranın çizilmediği eksen', async ({ page }) => {
     await laidOut(page);
     await page.locator('table.grid .card').first().click({ button: 'right' });
