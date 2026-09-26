@@ -16,6 +16,7 @@ import {
   lessonDayCount,
   lessonLimit,
   limitFor,
+  relatedName,
   ruleActive,
   ruleLevel,
   runLength,
@@ -52,6 +53,8 @@ export interface Index {
   roomById: Map<Id, Room>;
   /** lessonId -> hours already placed on the grid. Used by the counters. */
   placedHours: Map<Id, number>;
+  /** lessonId -> the lessons it may not share a day with (State.relations, both ends). */
+  notSameDay: Map<Id, Id[]>;
 }
 
 export function buildIndex(d: State): Index {
@@ -88,6 +91,14 @@ export function buildIndex(d: State): Index {
     if (roomId != null) roomBusy.set(closedKey(roomId, day, hour), lessonId);
   }
 
+  const notSameDay = new Map<Id, Id[]>();
+  for (const r of d.relations) {
+    if (r.kind !== 'notSameDay') continue;
+    const [a, b] = r.lessonIds;
+    notSameDay.set(a, [...(notSameDay.get(a) ?? []), b]);
+    notSameDay.set(b, [...(notSameDay.get(b) ?? []), a]);
+  }
+
   return {
     teacherBusy,
     roomBusy,
@@ -96,6 +107,7 @@ export function buildIndex(d: State): Index {
     teacherById,
     roomById,
     placedHours,
+    notSameDay,
   };
 }
 
@@ -115,6 +127,7 @@ export type BlockCode =
   | 'teacherBusy'
   | 'roomBusy'
   | 'roomClosed'
+  | 'relatedDay'
   | 'rule';
 
 export interface Block {
@@ -266,7 +279,22 @@ export function blockerDetail(
     }
   }
 
-  // 8-10. The configurable limits, but only where the rule is set to "Engelle".
+  // 8. Is a lesson this one may not share a day with already on that day.
+  // A relation is the reader's own rule between two lessons, so it always
+  // blocks; there is no "Uyar" for it (TODO B5.3).
+  for (const otherId of ix.notSameDay.get(lesson.id) ?? []) {
+    const other = ix.lessonById.get(otherId);
+    if (other === undefined || lessonDayCount(d, other, day, hourCount) === 0) continue;
+    return {
+      code: 'relatedDay',
+      message: t('{ders} {gun} günü var, bu dersle aynı güne konmamalı', {
+        ders: relatedName(d, ix, other),
+        gun: dayName,
+      }),
+    };
+  }
+
+  // 9-11. The configurable limits, but only where the rule is set to "Engelle".
   // At "Uyar" the very same text comes back from check() as a warning instead.
   for (const rule of limitBreaches(d, ix, lesson, group, teacher, day, hour, dayName, block)) {
     if (ruleLevel(d, rule.name) === 'block') return { code: 'rule', message: rule.message };

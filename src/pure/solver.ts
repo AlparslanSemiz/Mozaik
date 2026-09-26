@@ -278,7 +278,9 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
   // what the search itself put down.
   const fixedAtStart = new Set(Object.keys(placements));
 
-  const wideWindow = rulesBite(base);
+  // A relation between two lessons (B5.3) also reaches the whole day: placing
+  // one closes that day to the other at every hour.
+  const wideWindow = rulesBite(base) || base.relations.length > 0;
   const preferNoWarning = warningsPossible(base);
 
   // ---- the items -----------------------------------------------------------
@@ -327,7 +329,8 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
       if (
         one.lesson.teacherId === two.lesson.teacherId ||
         one.lesson.classId === two.lesson.classId ||
-        (one.roomId != null && one.roomId === two.roomId)
+        (one.roomId != null && one.roomId === two.roomId) ||
+        (ix.notSameDay.get(one.lesson.id)?.includes(two.lesson.id) ?? false)
       ) {
         one.neighbours.push(b);
       }
@@ -945,7 +948,20 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
         (h) => ix.teacherBusy.get(closedKey(lesson.teacherId, day, h)),
         () => true,
       );
-    return ok ? out : null;
+    if (!ok) return null;
+    // A lesson this one may not share a day with (B5.3): all of its blocks on
+    // this day go too, or the cell is closed if one of them may not move.
+    for (const otherId of ix.notSameDay.get(lesson.id) ?? []) {
+      const other = ix.lessonById.get(otherId);
+      if (other === undefined) continue;
+      for (let h = 0; h < hourCount; h++) {
+        if (placements[placementKey(other.classId, day, h)] !== otherId) continue;
+        const rec = movableAt(otherId, day, h);
+        if (rec === null) return null;
+        out.add(rec);
+      }
+    }
+    return out;
   }
 
   /** One repair move: one homeless block finds a place, and whatever it displaces queues up. */

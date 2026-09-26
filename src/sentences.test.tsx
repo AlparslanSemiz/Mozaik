@@ -157,6 +157,12 @@ describe('cümle · engelin sebebi', () => {
       roomClosed: reason({ ...base, unavailable: { 'rA|1|0': 1 } }, 'l1', 1, 0, 1),
       missing: reason(base, 'yok', 0, 0),
       maxConsecutive: reason(place(base, 'l3', 0, 0), 'l3', 0, 1, 1),
+      relatedDay: reason(
+        { ...dolu, relations: [{ id: 'r1', kind: 'notSameDay', lessonIds: ['l1', 'l2'] }] },
+        'l2',
+        0,
+        2,
+      ),
     };
 
     expect(cumleler).toMatchInlineSnapshot(`
@@ -166,6 +172,7 @@ describe('cümle · engelin sebebi', () => {
         "dayEnd": "2 saatlik blok güne sığmıyor",
         "maxConsecutive": "AV art arda 1 saatten fazla girmemeli, burada 2 saat olur",
         "missing": "Ders bulunamadı",
+        "relatedDay": "510 · MÇ Matematik Salı günü var, bu dersle aynı güne konmamalı",
         "roomBusy": "A dersliğinde Salı 1 saatinde 510 var",
         "roomClosed": "A dersliği Çarşamba 1 saatinde kapalı",
         "teacherBusy": "MÇ Salı 1 saatinde 510 sınıfında",

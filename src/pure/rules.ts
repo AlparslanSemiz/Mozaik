@@ -15,7 +15,8 @@
 // there is no runtime import cycle.
 
 import { t } from '../leaf/i18n';
-import { dayLabel } from '../leaf/names';
+import { dayLabel, subjectLabel } from '../leaf/names';
+import { lessonSubject } from '../leaf/subjects';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from '../leaf/keys';
 import { activePlacements } from './programs';
@@ -33,7 +34,14 @@ export interface Violation {
    * that groups violations groups on this. It is also already in `key`, but a
    * caller that split that string would be parsing a React key.
    */
-  rule: RuleName;
+  rule: RuleName | 'notSameDay';
+}
+
+/** "510 · YM Matematik2": a related lesson, named the way the lesson sheet lists it. */
+export function relatedName(d: State, ix: Index, lesson: Lesson): string {
+  const group = ix.classById.get(lesson.classId)?.name ?? '?';
+  const teacher = ix.teacherById.get(lesson.teacherId)?.short ?? '?';
+  return `${group} · ${teacher} ${subjectLabel(lessonSubject(d, lesson))}`;
 }
 
 /** The limit that actually applies: the teacher's own box, else the default. */
@@ -265,6 +273,30 @@ export function findViolations(d: State, ix: Index): Violation[] {
             sinir: limit,
           },
         ),
+      });
+    }
+  }
+
+  // Two lessons that may not share a day, both on one (TODO B5.3). The drop
+  // and the solver never do this, so it is a relation added after the lessons
+  // were placed: listed, never undone. Always a hard rule.
+  for (const r of d.relations) {
+    if (r.kind !== 'notSameDay') continue;
+    const a = ix.lessonById.get(r.lessonIds[0]);
+    const b = ix.lessonById.get(r.lessonIds[1]);
+    if (a === undefined || b === undefined) continue;
+    for (const [day, dayInfo] of d.settings.days.entries()) {
+      if (lessonDayCount(d, a, day, hourCount) === 0) continue;
+      if (lessonDayCount(d, b, day, hourCount) === 0) continue;
+      out.push({
+        key: `${r.id}|${day}|notSameDay`,
+        rule: 'notSameDay',
+        level: 'block',
+        message: t('{bir} ile {iki} {gun} günü ikisi de var, aynı gün olmamalı.', {
+          bir: relatedName(d, ix, a),
+          iki: relatedName(d, ix, b),
+          gun: dayLabel(dayInfo.name),
+        }),
       });
     }
   }

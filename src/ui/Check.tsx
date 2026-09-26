@@ -189,9 +189,18 @@ export default function Check({ state, view }: Props) {
           {report.violations.length > 0 && (
             <div className="panel kontrol-sorun">
               <h2>{t('Kural ihlalleri ({n})', { n: report.violations.length })}</h2>
-              <p className="hint">
-                <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
-              </p>
+              {/* Two sources, two sentences: the limits live in Ayarlar →
+                  Kurallar, a relation on the lesson's own sheet (B5.3). */}
+              {report.violations.some((v) => v.rule !== 'notSameDay') && (
+                <p className="hint">
+                  <T k="Program, **Ayarlar → Kurallar**'da girdiğiniz sınırları aşıyor." />
+                </p>
+              )}
+              {report.violations.some((v) => v.rule === 'notSameDay') && (
+                <p className="hint">
+                  <T k="Aynı gün olmaması istenen iki ders aynı gündeyse, dersin sayfasındaki **Aynı gün olmasın** satırı onları gösterir." />
+                </p>
+              )}
               <table className="list">
                 <thead>
                   <tr>

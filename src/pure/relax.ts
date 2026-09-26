@@ -353,8 +353,11 @@ export function applySuggestion(d: State, s: Suggestion): State {
   });
 }
 
-/** The three limit rules a drop can break; the gap rules and "en az" never block one. */
-const LIMIT_RULES = new Set(['maxPerDay', 'maxConsecutive', 'maxSameLessonPerDay']);
+/**
+ * The rules a drop can break: the three limits, and two lessons that may not
+ * share a day. The gap rules and "en az" never block one.
+ */
+const LIMIT_RULES = new Set(['maxPerDay', 'maxConsecutive', 'maxSameLessonPerDay', 'notSameDay']);
 
 /**
  * Everything wrong with a suggestion, as sentences for a test to print. [] means
@@ -1067,6 +1070,40 @@ function buildModel(
           }
         }
       }
+    }
+  }
+
+  // ---- two lessons that may not share a day (State.relations, B5.3)
+  //
+  // Hard: no way relaxes it. A day both lessons already hold in the kept grid
+  // is a breach Kontrol lists; asking the formula to undo it would make every
+  // search unsatisfiable, so that day is left alone.
+  const classOf = new Map(base.lessons.map((x) => [x.id, x.classId]));
+  const onDay = (lessonId: Id, classId: Id, day: number) => {
+    let kept = false;
+    const lits = new Set<Lit>();
+    for (let h = 0; h < hours; h++) {
+      if (fixed[placementKey(classId, day, h)] === lessonId) kept = true;
+      for (const x of lessonHours.get(`${lessonId}|${day}|${h}`) ?? []) lits.add(x);
+    }
+    return { kept, lits: [...lits] };
+  };
+  for (const r of base.relations) {
+    if (r.kind !== 'notSameDay') continue;
+    const [a, b] = r.lessonIds;
+    const classA = classOf.get(a);
+    const classB = classOf.get(b);
+    if (classA === undefined || classB === undefined) continue;
+    for (let day = 0; day < days; day++) {
+      const one = onDay(a, classA, day);
+      const two = onDay(b, classB, day);
+      if (one.kept && two.kept) continue;
+      if (one.kept || two.kept) {
+        for (const x of one.kept ? two.lits : one.lits) sat.addClause([not(x)]);
+        continue;
+      }
+      if (one.lits.length === 0 || two.lits.length === 0) continue;
+      sat.addClause([not(indicator(sat, one.lits)), not(indicator(sat, two.lits))]);
     }
   }
 

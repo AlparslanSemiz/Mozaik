@@ -286,17 +286,24 @@ bu cümle belirliyor.
 5. Öğretmen o saatte başka sınıfta mı (`teacherBusy`)
 6. Dersliği paylaşan başka bir sınıf o saatte ders yapıyor mu (`roomBusy`)
 7. Derslik o saatte kapalı mı (`roomClosed`)
+8. Aynı gün olmaması istenen bir ders o gün var mı (`relatedDay`, `State.relations`, v16). Kullanıcının iki ders arasına koyduğu kural olduğu için seviyesi yok, hep engeller.
 
 **Ayarlanabilir kısıtlar**, `settings.rules`'ta `block` ise engeller, `warn` ise
 yalnız sarı boyar (`rule`):
 
-8. Öğretmen art arda en fazla N saat
-9. Öğretmen günde en fazla N saat
-10. Bir sınıf aynı dersten günde en fazla N saat
+9. Öğretmen art arda en fazla N saat
+10. Öğretmen günde en fazla N saat
+11. Bir sınıf aynı dersten günde en fazla N saat
 
 `minPerDay` (geldiği gün en az N saat) yerleştirirken denetlenemez, çünkü günün
 ilk dersini koyarken her zaman ihlal edilir. Yalnız `findViolations()` üstünden
 Kontrol'de çıkar ve seviyesi `block` olamaz.
+
+Bir ilişki (8) dersler yerleştikten sonra eklenirse ve çiğnenirse `findViolations()`
+onu `notSameDay` kuralıyla ve `block` seviyesinde listeler; dersler yerinden
+oynatılmaz. Çözücü ve öneri araması onu hiç çiğnemez: çözücü `blocker()`'dan geçer
+ve onarım evresi ilişkili dersin o günkü bloklarını da yerinden edilecekler sayar,
+öneri aramasının formülünde iki dersin aynı günü birlikte tutması yasak.
 
 **Boşluk kuralları** (`maxGapsTeacher`, `maxGapsClass`, v14) aynı desende. Bir gün
 içinde ilk ve son dolu saat arasında kalan boş saat sayılır. Tek tanımı
@@ -310,7 +317,7 @@ kullanılır ("hiç boşluk olmasın", öteki dört kuralda ise `limit > 0` şar
 onun üstüne `warn` seviyesindekileri uyarı olarak ekler, ve ikisi aynı
 `limitBreaches()` fonksiyonunu kullandığı için mesajları ayrışamaz. `blocker()`
 `blockerDetail()`'in ince bir sarmalayıcısı: asıl fonksiyon mesajın yanında bir kod
-da döndürür (yukarıdakiler, `missing` ve `rule`). Sebepleri sayan her yer
+da döndürür (yukarıdakiler, `missing` ve `rule`; ilişkinin kodu `relatedDay`). Sebepleri sayan her yer
 (Kontrol'ün yerleşemeyen dersleri, çözücünün tıkanma cümlesi) koda göre gruplar,
 çünkü mesaj gün ve saat adı taşıyor (tuzak 22).
 

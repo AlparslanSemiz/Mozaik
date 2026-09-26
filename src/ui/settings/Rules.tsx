@@ -5,6 +5,7 @@ import type { RuleLevel, RuleName } from '../../leaf/types';
 import { buildIndex } from '../../pure/constraints';
 import { updateLimits, updateRules } from '../../pure/entities';
 import { findViolations } from '../../pure/rules';
+import type { Violation } from '../../pure/rules';
 import type { PanelProps } from '../props';
 import { paletteColor } from '../../leaf/palette';
 import { T, useT } from '../T';
@@ -75,7 +76,7 @@ export default function Rules({ state, change }: PanelProps) {
   const customClasses = state.classes.filter((c) => c.maxSameLessonPerDay !== null);
 
   const perRule = useMemo(() => {
-    const n: Partial<Record<RuleName, number>> = {};
+    const n: Partial<Record<Violation['rule'], number>> = {};
     for (const v of violations) n[v.rule] = (n[v.rule] ?? 0) + 1;
     return n;
   }, [violations]);
