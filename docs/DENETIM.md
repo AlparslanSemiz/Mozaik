@@ -1439,6 +1439,7 @@ slot".
   dersi başka bir öğretmene ya da sınıfa aktarmak" diyor, bu iki yol o listede yok.
   Program, Müsaitlik'te kapanan bir saatteki dersi yerinde tutup işaretliyor (M2), gün
   ve ders sayısında aynı ilkeyi uygulamıyor.
+  **Düzeldi (2026-09-27, dced6e4).**
 - **DK9 · "Ders adları" kutusuna günlük ders sayısından az ad yazmak günü kısaltıyor ve
   dersleri siliyor.** Şiddet: veri kaybı (koşullu, DK8 gibi). Adımlar: örnek okulu diz,
   Ayarlar → Zil ve günler, "Ders adları (virgülle; boş bırakılırsa 1, 2, 3…)" kutusuna

@@ -1571,12 +1571,13 @@ ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı b�
 Kullanım kolaylığı sorunları ve öneriler orada, burada yalnız kusurlar. Veri kaybı
 sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
-- [ ] **DK8 Bir günü kaldırmak ya da günlük ders sayısını düşürmek dizili ve sabitli dersleri sorusuz siliyor.**
+- [x] **DK8 Bir günü kaldırmak ya da günlük ders sayısını düşürmek dizili ve sabitli dersleri sorusuz siliyor.**
       Şiddet: veri kaybı (koşullu). Örnek okulda Pazar'ın işareti kalkınca 65 saat,
       65'i sabitli, havuza döndü. Günü geri işaretlemek getirmiyor. Ctrl+Z odak onay
       kutusundayken çalışmıyor (`isTextInput()` her INPUT'u yazı kutusu sayıyor), yalnız
       üst çubuktaki Geri al düğmesi kurtarıyor. DATA.md'nin "Bilinen tek istisna"
       cümlesiyle ve PRINCIPLES "Veri kaybı olmaz" ile çelişiyor. DENETIM A1.
+      Kapandı 2026-09-27, dced6e4. Test: ayarlar.spec.ts 32'nin üç vakası (kaybı soruyor, Ctrl+Z geri getiriyor, günlük ders sayısı), storeContract.test.ts onay kutusu vakası, entities.test.ts settingsLoss.
 - [ ] **DK9 "Ders adları"na az ad yazmak günü kısaltıp dersleri siliyor.**
       Şiddet: veri kaybı (koşullu). Dört ad yazınca 433 yerleşimden 245'i ve 36 sabitleme
       sorusuz kalktı, "Günlük ders sayısı" kutusu 12 göstermeye devam etti. DENETIM A1.
