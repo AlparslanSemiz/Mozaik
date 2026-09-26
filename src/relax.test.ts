@@ -343,6 +343,25 @@ describe('öneri — babanın dizili haftası ve "Olmaz"', () => {
     expect(s.size).toBe(5);
     expect(verifySuggestion(d, s, { keepPlaced: false })).toEqual([]);
   }, 240_000);
+
+  it('karma yollar kendi hatlarında en az saatin haftasıyla başlayınca 1 ders ve 3 saat', async () => {
+    // On a worker of their own the hand-over ways get the fewest-hours week
+    // as `seed` (relaxPool.ts). MEASURED (2026-09-25): from it one lesson and
+    // 3 hours, CP-SAT's best; from the stuck week alone 7 hours on the
+    // father's file.
+    const d = dizili();
+    const hint = activePlacements(d);
+    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
+    const hand = await sliced(d, hint, {
+      keepPlaced: true,
+      families: ['handFew', 'handHours'],
+      seed: first,
+    });
+    const hours = hand.find((x) => x.family === 'handHours');
+    expect(hours?.changes.filter((c) => c.kind === 'lessonTeacher')).toHaveLength(1);
+    expect(hours?.changes.filter((c) => c.kind === 'teacherHour')).toHaveLength(3);
+    expect(verifySuggestion(d, hours!, { keepPlaced: false })).toEqual([]);
+  }, 240_000);
 });
 
 describe('öneri — yollar, cümleler ve "bu olmaz"', () => {

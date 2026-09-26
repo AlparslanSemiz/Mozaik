@@ -159,6 +159,13 @@ export interface RelaxOptions {
   /** The changes the reader said yes to: the search runs on the data with them made. */
   accepted: Relaxation[];
   /**
+   * Weeks another line of the search found, for a way on this line that has
+   * no week of its own and none before it on the line to start from. The
+   * hand-over ways start from the fewest-hours week, and on a line of their
+   * own that week arrives from the line that found it (relaxPool.ts).
+   */
+  seed: Suggestion[];
+  /**
    * Skip the pass that keeps the laid-out lessons where they are and go
    * straight to laying them out again: the search before this one found no way
    * with them kept, and a refusal cannot make one appear.
@@ -194,6 +201,7 @@ const DEFAULTS: RelaxOptions = {
   previous: [],
   startRelaid: false,
   accepted: [],
+  seed: [],
 };
 
 /**
@@ -215,10 +223,11 @@ const FAMILY_CONFLICTS: Record<RelaxFamily, number> = {
   mixed: 150_000,
   rules: 150_000,
   reassign: 100_000,
-  // Less than the teacher-hour ways: they come after the fewest-hours way on
+  // Less than the teacher-hour ways: they came after the fewest-hours way on
   // its line and made it the slowest one (63 s against 45). MEASURED on the
   // father's file (2026-09-25): the same sizes at 60 000 as at 150 000, 8 to
-  // 10 s sooner.
+  // 10 s sooner. With eight cores or more they have a line of their own now
+  // and start from that way's first week (`seed`, relaxPool.ts).
   handFew: 60_000,
   handHours: 60_000,
   blockShape: 30_000,
@@ -1365,7 +1374,14 @@ export function createRelaxer(
       // most of it stands under this way's changes too.
       const latest = suggestions[suggestions.length - 1];
       const own = opts.previous.find((x) => x.family === which && x.relaid === relaid);
-      model = buildModel(base, frame, kind, opts, own?.placements ?? latest?.placements ?? hint);
+      const seeded = opts.seed.find((x) => x.relaid === relaid);
+      model = buildModel(
+        base,
+        frame,
+        kind,
+        opts,
+        own?.placements ?? latest?.placements ?? seeded?.placements ?? hint,
+      );
       models.set(kind, model);
       yield;
     } else {
@@ -1478,8 +1494,8 @@ export function createRelaxer(
       keep: Lit[],
       wide: boolean,
       early?: () => void,
-    ): Generator<void, { keep: Lit[]; done: boolean }> {
-      if (lits.length === 0) return { keep, done: true };
+    ): Generator<void, { keep: Lit[]; done: boolean; ub: number }> {
+      if (lits.length === 0) return { keep, done: true, ub: 0 };
       let ub = countTrue(sat, lits);
       // The counter is built small and grown: one that counts to the first
       // week's cost (175 teacher hours on the father's data) is a formula many
@@ -1572,7 +1588,7 @@ export function createRelaxer(
       if (ub === 0) done = true;
       // The bound the next question keeps: no worse than the best found.
       if (out.length <= ub) out = totalizer(sat, lits, ub + 1);
-      return { keep: out.length > ub ? [...keep, not(out[ub]!)] : keep, done };
+      return { keep: out.length > ub ? [...keep, not(out[ub]!)] : keep, done, ub };
     };
     // What the neighbourhoods have found is offered at once, while the search
     // goes on: on the father's data it is mostly the answer already, and the
@@ -1581,6 +1597,11 @@ export function createRelaxer(
     // the reader asks of them, are only settled by the second.
     const early = which === 'fewTeachers' ? undefined : () => offer(which, model, best, false);
     const first = yield* tighten(cost, must, true, early);
+    // The hand-over way's week must open no hour at all, and `offer` drops one
+    // that does. Searching fewer lessons handed over under a week that is
+    // dropped anyway was the whole second half of its line: on the father's
+    // file 15 of its 30 s, alone on a core (MEASURED 2026-09-25).
+    if (which === 'reassign' && first.ub > 0) return;
     let proven = first.done;
     if (cost2.length > 0) {
       // Among the weeks as good as the best one, the one the second cost likes

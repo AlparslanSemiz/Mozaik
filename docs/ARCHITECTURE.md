@@ -337,6 +337,13 @@ başlatır, ve üstündeki modüllerin hiçbiri yüklenirken belgeye dokunmuyor
 eklenmiyor. Satır içi betik yoksa (geliştirme sunucusu), Worker yoksa, ya da
 worker beş saniyede cevap vermezse arama eskisi gibi ana iş parçacığında koşar.
 
+Hatların biri bekler. Karma iki yol en az saat yolunun haftasından başlar, çünkü
+kendi başlarına başlayınca çok daha kötü bir hafta bulurlar. Yedi worker varsa
+(sekiz çekirdek) kendi hatlarında o yolun ilk haftası gelene kadar işsiz durur,
+sonra onu `seed` olarak alırlar. Daha az worker'da en az saat yolunun hattında
+onun arkasından gelirler. Bir cevaptan sonra kendi eski haftaları varsa
+beklemezler.
+
 ### Exe bir adaptör takar
 
 Exe hiçbir şeyi yeniden yazmaz. `folder.ts` dosya adlarının, günlük yedeğin ve

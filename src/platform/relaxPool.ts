@@ -44,6 +44,17 @@ export type RelaxMessage =
   | { type: 'progress'; progress: RelaxProgress }
   | { type: 'done'; result: RelaxResult };
 
+/** One worker's ways, and the way whose first week they wait for, if any. */
+export interface Track {
+  families: RelaxFamily[];
+  /**
+   * The hand-over ways start from the fewest-hours week (see `seed` in
+   * relax.ts). On a line of their own they wait for it: the worker gets its
+   * job when the line with that way sends its first week of it.
+   */
+  after?: RelaxFamily;
+}
+
 /**
  * Which ways go together on one worker, and with fewer cores the lines are
  * folded onto each other in this order. Each way finds as much alone as after
@@ -51,17 +62,19 @@ export type RelaxMessage =
  * in one line), so the three teacher-hour ways get a worker each; the ones that
  * rarely find anything share one.
  */
-const TRACKS: RelaxFamily[][] = [
-  ['fewTeachers'],
+const TRACKS: Track[] = [
+  { families: ['fewTeachers'] },
+  { families: ['teacherHours'] },
   // The hand-over ways start from the fewest-hours week: from the stuck week
   // their first week opened some 300 hours and the search ended at one lesson
   // and 7 hours, from the fewest-hours week at one lesson and 3, CP-SAT's best
-  // (MEASURED 2026-09-25 on the father's file).
-  ['teacherHours', 'handFew', 'handHours'],
-  ['teacherDays'],
-  ['mixed'],
-  ['rules', 'blockShape', 'weeklyHours'],
-  ['reassign'],
+  // (MEASURED 2026-09-25 on the father's file). They used to follow it on its
+  // line and made that line the slowest; now they wait for its first week.
+  { families: ['handFew', 'handHours'], after: 'teacherHours' },
+  { families: ['teacherDays'] },
+  { families: ['mixed'] },
+  { families: ['rules', 'blockShape', 'weeklyHours'] },
+  { families: ['reassign'] },
 ];
 
 /** How long a new worker has to say it is alive before the main thread takes over. */
@@ -85,19 +98,43 @@ function ownScript(): string | null {
   return text.length > 0 ? text : null;
 }
 
-/** The tracks for `families`, folded onto `workers` lines, in search order. */
-function lines(families: readonly RelaxFamily[], workers: number): RelaxFamily[][] {
+/**
+ * The tracks for `families`, folded onto `workers` lines, in search order.
+ *
+ * A waiting track whose way is not searched starts at once. With fewer workers
+ * than tracks, a waiting track first goes back behind the line it waits for,
+ * where it starts from that way's week as the next way on the line, and only
+ * then are the lines folded.
+ */
+export function lines(families: readonly RelaxFamily[], workers: number): Track[] {
   const wanted = new Set(families);
-  const tracks = TRACKS.map((t) => t.filter((f) => wanted.has(f))).filter((t) => t.length > 0);
+  let tracks: Track[] = TRACKS.map((t) => ({
+    families: t.families.filter((f) => wanted.has(f)),
+    ...(t.after !== undefined && wanted.has(t.after) ? { after: t.after } : {}),
+  })).filter((t) => t.families.length > 0);
   // A way the table does not name still gets searched, on a line of its own.
-  const named = new Set(TRACKS.flat());
-  for (const f of families) if (!named.has(f)) tracks.push([f]);
-  const out: RelaxFamily[][] = Array.from({ length: Math.min(workers, tracks.length) }, () => []);
-  tracks.forEach((t, i) => out[i % out.length]!.push(...t));
+  const named = new Set(TRACKS.flatMap((t) => t.families));
+  for (const f of families) if (!named.has(f)) tracks.push({ families: [f] });
+  if (tracks.length > workers) {
+    const waiting = tracks.filter((t) => t.after !== undefined);
+    tracks = tracks.filter((t) => t.after === undefined);
+    for (const w of waiting) {
+      const source = tracks.find((t) => t.families.includes(w.after!))!;
+      source.families.push(...w.families);
+    }
+  }
+  const out: Track[] = Array.from({ length: Math.min(workers, tracks.length) }, () => ({
+    families: [],
+  }));
+  tracks.forEach((t, i) => {
+    const line = out[i % out.length]!;
+    line.families.push(...t.families);
+    if (t.after !== undefined) line.after = t.after;
+  });
   return out;
 }
 
-const DEFAULT_FAMILIES: RelaxFamily[] = TRACKS.flat();
+const DEFAULT_FAMILIES: RelaxFamily[] = TRACKS.flatMap((t) => t.families);
 
 /**
  * Starts the search and hands back a Relaxer, so the caller drives it the same
@@ -139,6 +176,9 @@ function startOn(
   }
 
   const t0 = performance.now();
+  /** Which workers have said they are alive, and which have their job. */
+  const alive = plan.map(() => false);
+  const sent = plan.map(() => false);
   const progress: Array<RelaxProgress | null> = plan.map(() => null);
   const results: Array<RelaxResult | null> = plan.map(() => null);
   let ready = 0;
@@ -163,24 +203,23 @@ function startOn(
       if (m.type === 'ready') {
         ready++;
         if (ready === workers.length) mark(ready);
-        const job: RelaxJob = {
-          base,
-          hint: { ...hint },
-          options: { ...options, families: plan[i]! },
-        };
-        w.postMessage(job);
+        alive[i] = true;
       } else if (m.type === 'progress') {
         progress[i] = m.progress;
       } else {
         results[i] = m.result;
         progress[i] = null;
       }
+      release();
     };
     w.onerror = () => {
       // A worker that fails before it has started anything: the main thread
       // does it all. One that fails midway: its line is given up, the others go on.
       if (ready < workers.length && fallback === null) toMain();
-      else results[i] ??= { phase: 'done', suggestions: [], elapsedMs: 0 };
+      else {
+        results[i] ??= { phase: 'done', suggestions: [], elapsedMs: 0 };
+        release();
+      }
     };
   });
 
@@ -192,7 +231,40 @@ function startOn(
     return all;
   };
   const finishedFamilies = (): RelaxFamily[] =>
-    plan.flatMap((line, i) => (results[i] !== null ? line : (progress[i]?.finished ?? [])));
+    plan.flatMap((line, i) =>
+      results[i] !== null ? line.families : (progress[i]?.finished ?? []),
+    );
+
+  const send = (i: number, seed: Suggestion[]) => {
+    sent[i] = true;
+    const job: RelaxJob = {
+      base,
+      hint: { ...hint },
+      options: { ...options, families: plan[i]!.families, seed },
+    };
+    workers[i]!.postMessage(job);
+  };
+  /**
+   * Gives every live worker without a job its job, once it can have it: a
+   * waiting line when a week of the way it waits for has come from any line,
+   * or when every line searching that way is over without one. After an
+   * answer a waiting line starts at once if its first way has a week of its
+   * own from the search before, since that week comes first (relax.ts).
+   */
+  const release = () => {
+    plan.forEach((line, i) => {
+      if (sent[i] || !alive[i]) return;
+      const after = line.after;
+      if (after === undefined || options.previous?.some((x) => x.family === line.families[0])) {
+        send(i, []);
+        return;
+      }
+      const week = found().find((x) => x.family === after);
+      if (week !== undefined) send(i, [week]);
+      else if (plan.every((l, j) => !l.families.includes(after) || results[j] !== null))
+        send(i, []);
+    });
+  };
   const elapsed = () => performance.now() - t0;
   const settle = (phase: RelaxResult['phase']): RelaxResult => {
     clearTimeout(timer);

@@ -35,6 +35,60 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-26 · Öneri araması: eşleşme yolu boşa aramıyor, karma yollar kendi hattında
+
+**Değişen.** İki şey değişti:
+- Eşleşme yolu (`reassign`) ilk bedeli, yani açılan saati, sıfıra indiremezse
+  duruyor. Böyle bir hafta `offer()`'da zaten atılıyordu. Buna rağmen ikinci
+  bedel, el değiştiren ders sayısı, küçültülmeye devam ediyordu.
+- Karma iki yol (`handFew`, `handHours`) yedi worker varsa kendi hatlarında.
+  En az saat yolunun ilk haftasını bekliyorlar ve onu `seed` olarak alıyorlar.
+  Daha az worker'da en az saat yolunun arkasında, eskisi gibi. Bir cevaptan
+  sonra kendi eski haftaları varsa beklemiyorlar.
+
+**Önce ölçülen.** Babanın dosyasında, node'da, hat başına bir süreç ve altısı
+paralel. Arama en yavaş hatta bitiyordu:
+- en az saat, sonra karma az ders, sonra karma az saat: 56,9 s;
+- eşleşme: 54,2 s, bu veride hiçbir şey bulmadan;
+- sınır, blok şekli, haftalık saat: 48,7 s.
+
+Eşleşme hattı tek başına 13,5 s'de ilk bedeli bitiriyordu (0'a inmeden), 30,2 s'ye
+kadar ikinciyi küçültüyordu. Düzeltmeden sonra tek başına 10,9 s. Karma hat en az
+saatin haftasıyla tek başına 22 s sürüyor, yedi süreçle 47–50 s. Bu makinenin
+sekiz çekirdeğinin dördü düşük güçlü, yani sürelerin çoğu hatların çekirdek
+paylaşımı.
+
+**Ölçüm, üç düzen.** A bugünkü, B eşleşme düzeltmesi, C ikisi birlikte. Her
+koşuda bütün yolların sonucu aynı.
+
+| Veri, arama | A | B | C |
+|---|---|---|---|
+| babanın dosyası, node, üç koşunun ortancası | 65,6 s | 60,9 s | 57,6 s |
+| babanın dosyası, KY Cumartesi Olmaz, node, iki koşu | 72,9 · 77,1 s | 78,1 · 73,1 s | 63,5 · 64,3 s |
+| fikstür, boş ızgara, node | 70,4 s | | 58,6 s |
+| dizili fikstür, node | 62,2 s | | 56,1 s |
+| babanın dosyası, Linux exe, iki çift | 46,8 · 48,0 s | | 44,0 · 42,7 s |
+| aynı, Olmaz'dan sonra | 59,6 · 57,2 s | | 50,6 · 51,1 s |
+| aynı, Olur'dan sonra | 37,5 s | | 33,1 · 32,5 s |
+
+Exe'de üçüncü bir çift makine yükteyken koşuldu, ikisi birden yavaşladı ve C yine
+öndeydi (87,3'e karşı 67,0 s). Kalite, babanın dosyası ve iki fikstürde yol yol
+aynı:
+- zaten geldiği gün bedel 7;
+- en az saat 4;
+- en az öğretmen 6;
+- sınır 9 saat;
+- karma 1 ders ve 3 saat (dizili fikstürde de);
+- Olmaz'dan sonra en az saat 5.
+
+Ayrı hatta karma yollar `seed` olmadan 1 ders ve 7 saate düşüyordu. Yeni test
+(`relax.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
+onu kırmızıya çeviriyor (6 saat).
+
+**Denenmeyen ve sebebi.** Bütçeleri kısmak. 2026-09-25'te üç bütçe denemesinin
+üçü de kaliteyi bozdu (aşağıdaki iki girdi). C'de hatlar 50–64 s arasında dengeli
+bitiyor, tek bir darboğaz kalmadı.
+
 ### 2026-09-25 · Raptiye dururken görünmez, ve havuz çekmecesi boşken kendini kapatıyor
 
 **Raptiye.** 2026-08-30 kaydı raptiyenin "hep görünür, sönük" olduğunu kullanıcı
