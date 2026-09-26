@@ -86,10 +86,12 @@ yine on üç kilobayt kadar pay bırakacak yere çekildi, brotli eşiği aşılm
 için yerinde (WORKLOG, 2026-09-25). Cevap defteri, önizleme ve karma yollar (B5.11)
 ham boyu otuz iki kilobayt büyüttü, brotli hâlini eşiğin 0,7 kB altına getirdi;
 iki eşik de on iki buçuk kilobayt kadar pay bırakacak yere çekildi, ham 1 124 000,
-brotli 284 000 (WORKLOG, aynı gün, ikinci girdi). 2026-09-26 turu ham boyu on üç
-kilobayt büyüttü: iki ders arasındaki ilişki (B5.3), çoklu takas (B5.7), öneri
-aramasının bekleyen hattı ve dört dile giren yaklaşık on beş cümle. Ham eşik
-1 137 000'e çekildi, brotli eşiği aşılmadığı için yerinde (WORKLOG 2026-09-26).
+brotli 284 000 (WORKLOG, aynı gün, ikinci girdi). 2026-09-26 turu ham boyu yirmi yedi
+kilobayt büyüttü (1 111 503'ten 1 138 617 bayta): iki ders arasındaki ilişki
+(B5.3), çoklu takas (B5.7), öneri aramasının bekleyen hattı, dört dile giren
+yaklaşık on beş cümle ve Yenilikler panelinin dört dile çevrilen on altı satırı.
+İki eşik de on iki buçuk kilobayt kadar pay bırakacak yere çekildi, ham 1 151 000,
+brotli 289 000 (WORKLOG 2026-09-26).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede
