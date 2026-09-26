@@ -56,6 +56,16 @@ test.describe('82. Dil', () => {
     }
   });
 
+  // DK13: the strip's total was raw JSX, "TOTAL 99 ders · 433 saat" in
+  // English — one of the t()-less texts §8d suspected.
+  test('Dersler şeridinin toplamı çevriliyor', async ({ page }) => {
+    await openWithSample(page);
+    await chooseLang(page, 'en');
+    await page.getByRole('button', { name: 'Lessons', exact: true }).click();
+    const total = page.locator('.ribbon .ribbon-value', { hasText: 'lessons' });
+    await expect(total).toHaveText('99 lessons · 433 hours');
+  });
+
   test('Türkçe geri gelince ekran BİREBİR eskisi', async ({ page }) => {
     await open(page);
     const before = await page.locator('.topbar').innerText();

@@ -424,9 +424,13 @@ export default function Ribbon({
         <Spacer />
 
         <Group label="Toplam">
+          {/* Through t() like the heading under it: raw JSX here read "99
+              ders · 433 saat" in every language (DENETIM DK13). */}
           <span className="ribbon-value">
-            {state.lessons.length} ders · {state.lessons.reduce((n, l) => n + l.weeklyHours, 0)}{' '}
-            saat
+            {t('{ders} ders · {saat} saat', {
+              ders: state.lessons.length,
+              saat: state.lessons.reduce((n, l) => n + l.weeklyHours, 0),
+            })}
           </span>
         </Group>
       </div>

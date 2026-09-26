@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- The total in the Lessons strip is now translated. It read "99 ders · 433 saat" in every language.
 - Chemistry's short form no longer reads "Who" in English ("Wer" in German, "Quién" in Spanish, "Qui" in French). Its Turkish short was also the word for "who" in the Availability strip, and the two shared one translation. Built-in subject and day shorts now come from a table of their own: Chemistry is "Chm", "Che", "Quí" and "Chi".
 - Opening a plan file written by a newer version of the program now says so and asks for an update, instead of calling the file unreadable.
 - When a card cannot swap with the card it is dragged onto, the line under the toolbar now says what stops the swap ("No swap, 431 · MÇ cannot take the old place: 430 is in room E on Wednesday at 4"). It used to name the other card, the very one the swap would have moved.
