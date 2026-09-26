@@ -571,6 +571,7 @@ Görüntüler: `scratch/denetim/program/otomatik-diz-sonra-ornek-1920.png`,
   aynı anda çip kırmızı "7 ders sığmıyor · 14 saat havuzda" ve havuzda 8 blok var.
   Sonradan yapılan "Programı boşalt" ve onun geri alınması da satırı değiştirmedi.
   Görüntü: `scratch/denetim/program/eski-mesaj-kaliyor-1920.png`.
+  **Düzeldi (2026-09-27, 98e8a56).**
 
 - **DK5 · Durdurulan arama "yol bulunamadı" diye bitmiş gibi sunuluyor.** Şiddet:
   yanlış sonuç (panel olmayan bir sonucu söylüyor). Adımlar: fikstürü yükle, Otomatik
