@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-26 (akşam).
+Son güncelleme: 2026-09-26 (gece).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Release sayfası artık kendi yeniliklerini taşıyor (`scripts/surum-notu.mjs`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
@@ -73,6 +73,7 @@ Sığdır'ın kırpılması ve sürüklerken kasma ölçülüp kapandı, §8d'ni
 
 **Bilinen kusurlar.**
 
+- 2026-09-26 gecesinin elle denetimi on üç kusur üretti, hepsi TODO §8j'de, ayrıntısı [DENETIM.md](DENETIM.md)'de. Üçü veri kaybı sınıfında: Ayarlar → Zil ve günler'de dersleri dizili bir günü kaldırmak, günlük ders sayısını düşürmek ya da ders adlarını kısaltmak dizili ve sabitli dersleri sorusuz siliyor, Ctrl+Z odak o kutudayken çalışmıyor (DK8, DK9). Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor (DK11). Kod değişmedi.
 - Sığdır'da kart yazısı 2026-09-26'dan beri kesilmek yerine en çok 9 px'e küçülüyor ve sınıf adı ilk kelimesiyle yazılıyor. Örnek okul Windows %125'te (1536 CSS px) 315/374 kırpık karttan 0'a indi. Babanın adsız tam haftasında 1920'de 204/211'den 2'ye indi, ama %125'te 211'den 81'e: tek saatlik kartında "411A" 9 px'te de sığmıyor. Orada çıkış hâlâ ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - Şeridin taşması kapatıldı (2026-09-12): şerit artık daralınca neyi sırayla feda edeceğini söylüyor, kural LAYOUT.md'de ve ölçümler DECISIONS'ta. Ana E2E süiti bu düzeltmeden sonra tamamı geçiyor. Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
 - 4 kat yavaşlatılmış işlemcide ilk kare hâlâ ölçek ve yoğunluk yazılmadan boyanıyor, ama karanlık temanın açık ilk karesi kapatıldı (`a81c79a`, `<head>`'de klasik betik). Kalan kaymalar görünür bir fark üretmiyor (TODO §8d).
@@ -114,6 +115,69 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-26 (gece) · Özellik özellik elle denetim, rapor DENETIM.md
+
+**Başlangıç.**
+- `docs/claude-md-bolme` f25e356'daydı, ağaç temizdi. Ürün kodu bu turda değişmedi,
+  yalnız belgeler.
+- Gerçek `~/Documents/Ders Programı`'nın dört dosyasının sha256'sı başta alındı
+  (`scratch/denetim/gercek-sha-bas.txt`), exe koşusundan önce ve sonra ve oturum sonunda
+  karşılaştırıldı: dördü de aynı.
+- Güç profili bütün oturum boyunca `performance`, her süre ölçümünden önce okundu.
+  Kullanıcının kendi tarayıcısı (Brave) açıktı, denetçinin başlattığı bir arka plan işi
+  ölçüm sırasında yoktu.
+- Babanın dosyası kullanılmadı, yalnız adsız fikstürler ve türetilmiş veri setleri.
+
+**Kullanıcının kararları.** Windows kurulum paketi "denenmedi" diye işaretlenir. Exe'de
+yalnız "Güncellemeleri denetle"ye basılır, indirilmez.
+
+**Nasıl yapıldı.** `dist/index.html` ve Linux ikilisi f25e356'dan yeniden derlendi (çıkış
+kodu 0). Tarayıcı tarafı kalıcı bir Chromium sürücüsüyle (`scratch/denetim/sur.mjs`)
+fare ve klavyeyle sürüldü, her adımın ekran görüntüsüne bakıldı. Exe tarafı
+`scripts/exe-surucu.mjs` ile sahte bir evde. Veri setleri: boş, örnek okul, fikstür,
+dizili, tam hafta (`scratch/tam-hafta-uret.mjs`), uzun adlar, tek öğretmen, kurulamaz
+küçük okul, beş bozuk dosya, v1, v7, v12, v15 (`scratch/denetim/veri-uret.mjs`).
+
+**Hangi özellik nerede denendi.**
+- 1920×1080, açık, %100, Türkçe: envanterin tamamı (Program, Dersler, Okul, Müsaitlik,
+  Kontrol, Çıktı, Ayarlar, üst çubuk, dosya işlemleri).
+- 1536×816 DPR 1,25: yedi sekme ve Program'ın tam haftası (Sığdır).
+- %80 ve %150: yedi sekme, en küçük yazı, küçük hedefler ve taşma ölçüldü.
+- Koyu tema: yedi sekme.
+- İngilizce ve Almanca: yedi sekme.
+- Klavyeyle tam bir tur (Müsaitlik hariç, çünkü klavyeyle girilemiyor).
+- Site (`vite preview`), service worker, çevrimdışı yenileme, klasöre yedek (sahte
+  seçiciyle OPFS'e).
+- Gerçek Linux exe: fikstür, öneri araması, uygula, geri al, diske yazma, güncelleme
+  denetimi.
+
+**Denenmeyenler.** Windows kurulum paketi, exe'nin yazdırma penceresi, sitenin
+güncelleme çubuğu (ikinci bir sürüm yayınlanmadı), gerçek bir klasör seçici, İspanyolca
+ve Fransızca (yalnız sözlükten okundu), Sığdır'da sürükleme kasmasının ölçümü (bir önceki
+oturumda ölçülmüştü).
+
+**Ölçüm.** Öneri araması, fikstür, Chromium, `performance`, üç koşu art arda: panel 8,6,
+9,1 ve 9,1 s, ilk yol 14,0, 16,0 ve 16,1 s, aramanın sonu 45,4, 49,2 ve 50,3 s
+(tıklamadan). Exe'nin kendi ölçümü aynı fikstürde "7 iş parçacığında · ilk öneri 5 sn ·
+arama 40 sn" (aramanın başından).
+
+**Sonuç.** On üç kusur (TODO §8j), yirmi sekiz kullanım kolaylığı sorunu ve kırk sekiz
+öneri (DENETIM.md). Veri kaybı sınıfındaki üç kusur bulunduğu anda kullanıcıya söylendi.
+Denetçinin kendi sayacı Sığdır'da kesik kartları 0 saydı, ekran bilinen kusuru
+gösteriyordu (tuzak 140). LAYOUT.md'deki boş ekranlar cümlesi bayattı, düzeltildi.
+
+**Koşulan testler.** Yalnız `npx vitest run src/docs.test.ts`, her belge yazımından sonra,
+son hâlinde yeşil (17/17). Ürün kodu değişmediği için `kontrol`, E2E, exe süiti,
+mutasyon ve öteki katmanlar koşulmadı.
+
+**Sahte ev.** `scratch/exe-surucu/ev` oturum sonunda silindi (iki yedek dosyası ve
+uygulamanın deposu vardı).
+
+**Açık kalan.** §8j'nin on üç maddesi. Veri kaybı sınıfındaki üçü (DK8, DK9, DK11)
+sıradaki işin başı olmaya aday, karar kullanıcıda.
 
 ---
 
