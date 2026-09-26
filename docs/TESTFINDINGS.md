@@ -26,6 +26,17 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · npm run kontrol · preferences.test.ts, styles.css'in hareket bloğu
+Bulgu: `kontrol` birim aşamasında tek kırmızı: "makinenin bloğu ayarın kurallarından SONRA"
+testi `:root[data-motion="az"]` bulamadı. Sebep e0d146c: `.relation-edit` kuralı eklenirken
+`styles.css` elle `prettier --write`'tan geçirilmiş, Prettier dosyanın bütün çift
+tırnaklarını tek tırnağa çevirmişti (194 satır eklendi, 337 silindi). Test CSS'i metin olarak
+okuyor. Projenin biçimleyicisi (`npm run bicim`) CSS'i kapsamıyor.
+Tür: benim hatam, kapı yakaladı
+Ne yapıldı: dosya e0d146c'den önceki hâline döndü, yalnız yeni kural eklendi. BUILD.md'deki
+`bicim` satırı `styles.css`'e dokunmadığını söylüyor.
+Kalıcı kural: yok
+
 ### 2026-09-26 · gerçek Linux exe turu, babanın dosyası · Kontrol "Dikkat" diyor, üst çubuk "Sorun yok"
 Bulgu: öneri uygulanınca hafta tamam (348/348 saat, 0 engel, 0 uyarı), üst çubuk "Sorun yok",
 ama Kontrol'ün kutusu "Dikkat edilmesi gereken noktalar var. Aşağıdaki listelerde İmkânsız

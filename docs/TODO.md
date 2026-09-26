@@ -838,11 +838,18 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
         - Olur, önizleme, uygula, 348/348 saat ve "Sorun yok", Ctrl+Z;
         - Hakkında: "6 iş parçacığında".
       - **Açık kalan:**
-        - Fikstürde (boş ızgara) ret sonrası 6, CP-SAT 5.
-        - Karma yolun "3 ders ve 2 saat"i bulunamıyor.
-        - Arama önceki turdan 15 s uzun, ret sonrası 64 s.
+        - Fikstürde (boş ızgara) ret sonrası 6, CP-SAT 5. **2026-09-26 ölçüldü, açık:**
+          5'lik hafta 4 günlük bir komşulukta var ama 1 000 çatışmada bulunmuyor, dört
+          çare denendi (DECISIONS 2026-09-26).
+        - Karma yolun "3 ders ve 2 saat"i bulunamıyor. **2026-09-26 ölçüldü, açık:**
+          2 saat 2 dersle ve 1 saat 3 dersle haftalar var, arama kendi başına ulaşmıyor.
+        - Arama önceki turdan 15 s uzun, ret sonrası 64 s. **2026-09-26 kısaldı:**
+          exe'de 46,8–48,0 s'den 42,7–44,0 s'ye, ret sonrası 57–60 s'den 51 s'ye
+          (eşleşme yolu boşa aramıyor, karma yollar kendi hattında).
         - Babanın makinesinde ölçüm (§8b).
         - Yazdırma penceresinin exe'deki PDF'i kullanıcının gözüyle alınacak.
+        - Ipucu sorusu hiçbir formülde tutmuyor, tutturulunca arama kötüleşiyor
+          (tuzak 139); kod olduğu gibi kaldı.
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)

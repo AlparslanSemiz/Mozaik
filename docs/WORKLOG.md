@@ -19,9 +19,9 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-25.
+Son güncelleme: 2026-09-26.
 
-**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
+**Sürüm.** 2.1.1, 2026-09-01'de yayınlandı. 2.2.0 hazır: Yenilikler notları yazıldı, `.github/surum-notu.md` bugünkü adreste, yayın kullanıcının onayını bekliyor. Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
 **Ne çalışıyor.** 2.1.1'deki her şey: yedi sekme (Okul, Müsaitlik, Dersler,
 Program, Kontrol, Çıktı, Ayarlar), otomatik dizme ve Danışman, beş dil, dört teslim
@@ -37,6 +37,11 @@ Yayınlanmamış olarak üstüne:
   - Ret sonrası arama CP-SAT'ın en iyisine ulaşıyor.
   - Karma iki yol ve ızgarada önizleme.
   - Hakkında'da ve yedek dosyasında aramanın bu makinedeki ölçümü.
+- İki ders arasında "aynı gün olmasın" ilişkisi (B5.3'ün ilk dilimi, şema v16): dersin
+  sayfasında düzenleniyor. Sürükleme, otomatik dizme ve öneri onu çiğnemiyor, sonradan
+  çiğnenen ilişki Kontrol'de ihlal.
+- Bir blok, bırakıldığı saatleri dolduran birden çok blokla yer değiştirebiliyor (B5.7).
+- Öneri araması 4–9 s daha kısa: eşleşme yolu boşa aramıyor, karma yollar kendi hattında.
 - Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18). 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
@@ -63,7 +68,11 @@ ve "Sorun yok", Ctrl+Z geri alıyor. Aynı akşam panel bir cevap defterine dön
 öğretmenlere soruyor, "Olur" ya da "Olmaz" giriyor, program kalanı arıyor, cevaplar
 plan dosyasında kalıyor. Sıradaki iş babanın cevabı (§8b, KY'nin Cumartesisi) ve
 babanın makinesinde ölçüm: Hakkında'daki satır ya da yedek dosyasındaki `olcum`
-alanı (TODO §8b'deki adımlar).
+alanı (TODO §8b'deki adımlar). 2026-09-26'da B5.11'in kalanları kapandı: süre
+kısaldı (B1), fikstürdeki 6 ile karma yolun daha az saatli haftası ölçüldü ve açık
+kaldı, ipucu sorusunun hiç tutmadığı görüldü (tuzak 139), B5.7 ve B5.3'ün ilk dilimi
+yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yayını
+(kullanıcının onayıyla) ve babanın ölçümü.
 
 **Bilinen kusurlar.**
 
@@ -72,8 +81,10 @@ alanı (TODO §8b'deki adımlar).
 - 4 kat yavaşlatılmış işlemcide ilk kare hâlâ ölçek ve yoğunluk yazılmadan boyanıyor, ama karanlık temanın açık ilk karesi kapatıldı (`a81c79a`, `<head>`'de klasik betik). Kalan kaymalar görünür bir fark üretmiyor (TODO §8d).
 - Okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.
 - Exe penceresinin `maximized` ayarı gerçek bir Windows'ta görülmedi (TODO B7.1).
-- Kurulamayan haftadaki öneri (B5.9–B5.11) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor; kanıt bilerek bırakıldı. Üç öğretmen saati yolunda boyut CP-SAT'ın en küçüğüyle aynı, sınır yolu da artık 6 sınır. `Olmaz`'dan sonra babanın dosyasında en az saat 5 (CP-SAT'ın en iyisi), ama adsız fikstürün boş ızgarasında 6. Karma yol "1 ders ve 3 saat"i buluyor, CP-SAT'ın "3 ders ve 2 saat"ini bulamıyor. Arama babanın dosyasında Linux exe'sinde 43–44 s, bir Olmaz'dan sonra 51 s, bir Olur'dan sonra 33 s (ilk öneri 6 s); 2026-09-26'da eşleşme yolu ve ayrı karma hat 4–9 s kısalttı, darboğaz artık tek bir hat değil çekirdeklerin paylaşımı. Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi; ölçüm artık Hakkında'da ve yedek dosyasında (TODO §8b).
+- Kurulamayan haftadaki öneri (B5.9–B5.11) "bundan azı yok"u babanın verisinde kanıtlayamıyor, panel "bulduğumuz en küçük" diyor; kanıt bilerek bırakıldı. Üç öğretmen saati yolunda boyut CP-SAT'ın en küçüğüyle aynı, sınır yolu da artık 6 sınır. `Olmaz`'dan sonra babanın dosyasında en az saat 5 (CP-SAT'ın en iyisi), ama adsız fikstürün boş ızgarasında 6: 5'lik hafta 4 günlük bir komşulukta var, 1 000 çatışmada bulunmuyor, dört çare denendi (DECISIONS 2026-09-26). Karma az saat yolu "1 ders ve 3 saat"te kalıyor; 2 saat 2 dersle, hatta 1 saat 3 dersle haftalar var, arama kendi başına ulaşmıyor. Başlangıç haftasını varsayım olarak soran adım hiçbir formülde tutmuyor, tutturulunca da arama kötüleşiyor (tuzak 139). Arama babanın dosyasında Linux exe'sinde 43–44 s, bir Olmaz'dan sonra 51 s, bir Olur'dan sonra 33 s (ilk öneri 6 s); 2026-09-26'da eşleşme yolu ve ayrı karma hat 4–9 s kısalttı, darboğaz artık tek bir hat değil çekirdeklerin paylaşımı. Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi; ölçüm artık Hakkında'da ve yedek dosyasında (TODO §8b).
 - `npm run kontrol` 2026-09-12'de baştan sona yeşil koştu, sekiz gün sonra ilk kez: tarihe bağlı kırmızı kapandı (TODO §8d). Koşulmamış dört katmanın dördü de koşuldu ve üçü birer kusur çıkardı, üçü de bu turdan eski. Devriyenin açık menüsü düzeltildi; `src-tauri/target` deponun eski adresini taşıdığı için `exe:test` derlenmiyordu ve `cargo clean` ile açıldı; mutasyon kum havuzu belge kapılarıyla çelişiyordu ve koşuya kendi yapılandırması verildi.
+- Bu makine 2026-09-26'da düşük güç profilindeydi (`platform_profile` low-power): süreler dünküden yaklaşık 2,4 kat uzun. O günün süre ölçümlerinden hangisinin hangi profilde alındığı DECISIONS'ta yazılı; çözücünün kendiliğinden durmasını soran test artık makinenin hızından bağımsız (TESTFINDINGS).
+- Yavaş bir makinede otomatik dizmenin kendi 15 saniyelik bütçesi, onarımın vazgeçme kuralından önce dolabilir; CHANGELOG'daki "15 saniyenin sonuna kadar koşmuyor" cümlesi makinenin hızına bağlı (TESTFINDINGS 2026-09-26).
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
 
 **Güncel ölçümler (2026-09-12, kaynaktan sayıldı; çözücü satırları 2026-09-24).**

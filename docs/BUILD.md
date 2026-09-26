@@ -43,7 +43,7 @@ npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü 
 npm run analiz       # demetin içindekiler, test-results/demet/analiz.html (ölçüsü minify öncesi)
 npm run boyut        # size-limit: dist/index.html'in ham ve brotli boyu, eşiği aşarsa kırmızı
 npm run grafik       # aynı grafiği mermaid olarak yazar, dosyaya değil ekrana
-npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç)
+npm run bicim        # Prettier, yalnız kod dosyaları (src/lang hariç); styles.css'e dokunmaz
 npm test             # Vitest birim testleri
 npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler

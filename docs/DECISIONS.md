@@ -35,6 +35,38 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-26 · Çoklu takas, Kontrol'ün Sıkışık cümlesi ve ilk ilişki: "aynı gün olmasın"
+
+**Çoklu takas (TODO B5.7).** Takas yalnız tek hedef blokta teklif ediliyordu. Ölçüm
+eksik tek durumu gösterdi: iki saatlik bir blok öğretmenin başka sınıftaki iki tek
+saatinin üstünde. Kullanıcının onayladığı kural: hedefler bırakılan saatleri tam
+dolduruyorsa (aynı gün, boşluksuz, üst üste binmeden, toplam boy aynı) hepsi aynı
+sırayla kartın eski saatlerine geçer. Sınıfın kendi dersi ile öğretmenin başka
+sınıftaki dersi aynı saatteyse bu takas değil, hücre reddedilir. Ekrandaki işaret
+değişmedi, yalnız cümle "(2 blok)" diyor.
+
+**Kontrol'de Sıkışık.** `hasProblem` Sıkışık bir satırda da doğru dönüyordu, ve
+babanın her sınıfı tam dolu olduğu için kutu tam bir haftada da "Dikkat edilmesi
+gereken noktalar var… İmkânsız yazan satırlar" diyordu (gerçek exe turunda görüldü).
+Kullanıcı ayrı bir cümleyi seçti: yalnız Sıkışık varsa yeşil kutu "Sorun görünmüyor"
+diyor ve Sıkışık'ı adıyla anlatıyor. Onaylanan taslak "açık saati yükü kadar"
+diyordu. Sıkışık %85'ten başladığı için uygularken "yüküne eşit ya da çok yakın"
+yapıldı ve kullanıcıya söylendi.
+
+**İlk ilişki (TODO B5.3).** Beş alt madde ölçüldü, hiçbirinde babanın kullandığına
+dair kanıt yok (sıra ve gerekçe TODO B5.3'te). Kullanıcı kartlar arası ilişkinin ilk
+dilimini seçti: iki ders arasında "aynı gün olmasın". Kararları:
+- Ayrı bir varlık (`State.relations`, şema v16), dersin alanı değil, çünkü ilişki iki
+  derse ait ve aSc'nin ilişki türleri buraya eklenecek.
+- Sert kural: seviyesi yok, bir bırakmayı engelliyor, öneri araması onu esnetilebilir
+  bir yol saymıyor. Sonradan çiğnenen ilişki Kontrol'de ihlal, dersler oynatılmıyor.
+- Düzenleme dersin sayfasında (kartın sağ tık menüsü → Dersi düzenle). Dersler
+  tablosuna sütun eklenmedi, çünkü tablo zaten yana kayıyor.
+
+**Sürüm.** Kullanıcı 2.2.0'ı oturumun sonuna koydu: tag ve push'tan hemen önce bir kez
+daha sorulacak. `src-tauri/Cargo.lock`'un bayat sürüm satırı (2.0.3) yayından önce
+ayrı bir commit'le düzelecek.
+
 ### 2026-09-26 · Denendi ve bırakıldı: fikstürde ret sonrası 5, karma yolun 2 saati, tutan ipucu
 
 Üç açık iş ölçüldü, üçü de motor değişmeden kapandı.
