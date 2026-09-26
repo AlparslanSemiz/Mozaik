@@ -1269,8 +1269,11 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       [DESIGN.md](DESIGN.md) hâlâ "`.pool-card` bekleyen bir blok demek" diyordu, oysa
       2026-09-01'den beri bir deste demek. İkisi de belge kapılarından geçen türden: cümle
       yanlış, adı geçen şey var.
-- [ ] **Doğrulanacaklar.** Okuma sırasında bildirildi, kaynaktan tek tek açılmadı:
-      Dersler formunda Enter'ın Dağılım düğmesinde de ders eklemesi (`lessons/index.tsx:438-446`),
+- [ ] **Doğrulanacaklar.** Okuma sırasında bildirildi, kaynaktan tek tek açılmadı.
+      İlki 2026-09-26'da üretildi ve düzeldi: Dersler formunda Enter Dağılım düğmesinde
+      listeyi açmıyor, dersi ekliyordu; listedeki seçenekte de öyle (liste bir portal'da ve
+      React olayları portal üstünden satıra kabarıyor). Satırın Enter'ı artık düğmelere
+      karışmıyor, `dersler.spec.ts`'in yeni testi düzeltmeden önce kırmızıydı. Kalanlar:
       kısayol ekranının Enter'ı olduğundan başka anlatması (`ShortcutsHelp.tsx`, `Grid.tsx`),
       Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
       çağrısında ayrışması, `updateClass`'ın derslik değişince çakışmayı yargılamaması,

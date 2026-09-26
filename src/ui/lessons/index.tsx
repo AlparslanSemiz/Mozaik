@@ -408,11 +408,17 @@ export default function Lessons({ state, change, mode, focus, setFocus }: Props)
       >
         {/* Enter adds, the way it already does on the Derslikler step: a form
             whose five controls are all filled from the keyboard should not need
-            the mouse for the sixth. */}
+            the mouse for the sixth.
+
+            Not on a button, which has an Enter of its own: the Dağılım button
+            opens its list, a split in that list is picked, and Ekle adds by
+            its own click. The list is in a portal, and React events bubble
+            through portals, so without this Enter on "2+1" added the lesson
+            with the split it had before (TODO §8d, 2026-09-26). */}
         <div
           className="form-row"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && (e.target as Element).closest('button') === null) {
               e.preventDefault();
               add();
             }

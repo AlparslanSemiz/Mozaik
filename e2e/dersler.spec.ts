@@ -202,6 +202,39 @@ test.describe('69. Dersler sekmesi', () => {
     await expect(mainList(page).locator('tbody tr')).toHaveCount(before + 1);
   });
 
+  // ...but not on a control whose own Enter means something else. The row's
+  // Enter-adds reached the Dağılım button and its list too (the list is in a
+  // portal, and React events bubble through portals to the row): Enter on the
+  // button added the lesson instead of opening the list, and Enter on "2+1"
+  // added it with the split it had BEFORE (TODO §8d, 2026-09-26).
+  test('Dağılım düğmesinde ve listesinde Enter eklemiyor, açıyor ve seçiyor', async ({ page }) => {
+    await openWithSample(page);
+    await openLessons(page, 'class');
+
+    const teacherPick = page.locator('.form-row').getByLabel('Öğretmen', { exact: true });
+    const value = await teacherPick.locator('option').nth(1).getAttribute('value');
+    await teacherPick.selectOption(value!);
+    await page.locator('.form-row input.num').first().fill('3');
+
+    const before = await mainList(page).locator('tbody tr').count();
+    const split = page.locator('.form-row .split-pick');
+    await split.focus();
+    await page.keyboard.press('Enter');
+    const list = page.getByRole('listbox', { name: 'Dağılım' });
+    await expect(list, 'Enter listeyi açmadı').toBeVisible();
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(before);
+
+    await list.getByRole('option', { name: /2\+1/ }).focus();
+    await page.keyboard.press('Enter');
+    await expect(list).toHaveCount(0);
+    await expect(split).toHaveAccessibleName('Dağılım: 2+1');
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(before);
+
+    // And Enter in the row still adds, with the split just picked.
+    await page.locator('.form-row input.num').first().press('Enter');
+    await expect(mainList(page).locator('tbody tr')).toHaveCount(before + 1);
+  });
+
   test('mod değişince açık olan varlık sıfırlanıyor', async ({ page }) => {
     await openWithSample(page);
     await openLessons(page, 'class');
