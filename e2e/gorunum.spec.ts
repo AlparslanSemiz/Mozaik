@@ -8,8 +8,11 @@
 // @media print pins --ui-scale back to 1 — this file is what makes that a fact
 // instead of a comment.
 
+import { readFileSync } from 'node:fs';
+import type { State } from '../src/leaf/types';
 import { expect, test } from './kapan';
 import {
+  loadWorld,
   reopen,
   openSetup,
   revealRibbon,
@@ -28,6 +31,14 @@ import {
 /** What the grid actually is right now: the numbers A5 is a claim about. */
 async function gridMetrics(page: import('@playwright/test').Page) {
   return page.evaluate(() => {
+    const overflows = (el: Element) => {
+      const text = document.createRange();
+      text.selectNodeContents(el);
+      return (
+        text.getBoundingClientRect().width > el.getBoundingClientRect().width + 0.01 ||
+        el.scrollWidth - el.clientWidth > 0.5
+      );
+    };
     const wrap = document.querySelector('.grid-wrap')!;
     const cell = document.querySelector('table.grid tbody td:not(.break-col)')!;
     const clock = document.querySelector('.hour-clock');
@@ -76,16 +87,46 @@ async function gridMetrics(page: import('@playwright/test').Page) {
       // it: the child clips, the parent never overflows. Pitfall 64, in the
       // one place that was supposed to be the guard against it — measuring
       // the right screen with the wrong box answers a question nobody asked.
-      clipped: cards.filter((c) => {
-        const line = c.querySelector('.card-top');
-        return line !== null && line.scrollWidth - line.clientWidth > 0.5;
-      }).length,
+      //
+      // And BOTH lines. The bottom one is the room letter or the subject short,
+      // and on the father's week it is "Mat1" in a 24px card: counting only the
+      // top line said 1 of 211 in the class view where 26 were clipped.
+      //
+      // And by the text's own width against the line's own box, both
+      // fractional. `clientWidth` ROUNDS (a 24.53px box reads 25), so a
+      // `scrollWidth` check passed 25px of text that the browser drew as
+      // "41…" — on 67 of the father's cards (pitfall 140).
+      clipped: cards.filter((c) =>
+        [c.querySelector('.card-top'), c.querySelector('.card-bottom')].some(
+          (line) => line !== null && overflows(line),
+        ),
+      ).length,
+      // The line box of a one-hour card's two lines. Sığdır may change the
+      // size of a line; this is what it must leave alone.
+      lineBox: (() => {
+        const td = [...document.querySelectorAll('table.grid tbody td')].find(
+          (x) => (x as HTMLTableCellElement).colSpan === 1 && x.querySelector('.card-bottom'),
+        );
+        return ['.card-top', '.card-bottom'].map((sel) => {
+          const line = td?.querySelector(sel);
+          return line == null ? 0 : parseFloat(getComputedStyle(line).lineHeight);
+        });
+      })(),
+      // The smallest type any card line was drawn at. Sığdır may shrink a line
+      // that does not fit, and this is the floor that shrinking promised.
+      smallestText: Math.min(
+        ...[...document.querySelectorAll('table.grid .card-top, table.grid .card-bottom')].map(
+          (line) => parseFloat(getComputedStyle(line).fontSize),
+        ),
+      ),
       // The row head and the corner are the OTHER half of the same trade:
       // every pixel handed to a lesson column is taken from them, so a fix
       // that stops the cards clipping can start the heads clipping instead
       // and no card-only metric would say so.
-      headsClipped: [...document.querySelectorAll('table.grid tbody th')].filter((th) =>
-        [th, ...th.querySelectorAll('*')].some((e) => e.scrollWidth - e.clientWidth > 0.5),
+      headsClipped: [...document.querySelectorAll('table.grid tbody th')].filter(
+        (th) =>
+          th.scrollWidth - th.clientWidth > 0.5 ||
+          [...th.querySelectorAll('.secondary, .inspect')].some(overflows),
       ).length,
       heads: document.querySelectorAll('table.grid tbody th').length,
       cornerClipped: (() => {
@@ -96,6 +137,15 @@ async function gridMetrics(page: import('@playwright/test').Page) {
       // its fit in the one currency it was never allowed to spend.
       rowH: document.querySelector('table.grid tbody tr')!.getBoundingClientRect().height,
     };
+  });
+}
+
+/** Rahat's 0.923rem is 11.999px and Sığdır's floor 12px: same box, to a hair. */
+function expectSameLineBox(fit: number[], roomy: number[]) {
+  expect(fit.length).toBe(2);
+  fit.forEach((box, i) => {
+    expect(box, 'kart satırının satır kutusu değişti').toBeGreaterThan(0);
+    expect(box, 'kart satırının satır kutusu değişti').toBeCloseTo(roomy[i]!, 1);
   });
 }
 
@@ -566,7 +616,12 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
         };
       });
       expect(access.name.length).toBeGreaterThan(3);
-      expect(access.topSize).toBeGreaterThanOrEqual(12);
+      // 10, not 12, since 2026-09-26: in Sığdır a line that does not fit is
+      // drawn smaller rather than cut, down to 9px (the user's choice), and in
+      // a 1280 box the first card's "310" is exactly such a line. Every card is
+      // held to the floor, not only the first.
+      expect(access.topSize).toBeGreaterThanOrEqual(9);
+      expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
       expect(access.contained).toBe(true);
     });
   }
@@ -624,6 +679,12 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
         fit.rowH,
         `satır ${fit.rowH.toFixed(1)}px, Rahat'ta ${roomy.rowH.toFixed(1)}px`,
       ).toBeLessThanOrEqual(roomy.rowH + 0.5);
+      // ...nor shorter, which a ceiling cannot see: the first draft of the
+      // shrinking fix (2026-09-26) made every Sığdır row 38.5px -> 35px by
+      // giving the card lines a tighter line box. Sığdır changes the SIZE of a
+      // card line, never its line box, and the vertical layout is the user's
+      // to keep (DECISIONS 2026-09-01).
+      expectSameLineBox(fit.lineBox, roomy.lineBox);
     });
   }
 
@@ -669,6 +730,145 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
     await openSettings(page, 'Hakkında');
     const panel = page.locator('.panel', { hasText: 'Veriler nerede' });
     await expect(panel.locator('tbody code', { hasText: 'ders-programi-yogunluk' })).toHaveCount(1);
+  });
+});
+
+/**
+ * Sığdır on the father's own SHAPE of data, and in the box Windows at %125
+ * gives (2026-09-26).
+ *
+ * Everything above measures the sample school, whose class names are three
+ * digits. The father's are "411A SAY": 61px of text for a 24.5px card. On his
+ * (anonymised) week 204 of 211 cards read "41…" at 1920 and not one test saw
+ * it, and the class rows' own heads were clipped 20 of 20 ("derslik yok").
+ * At 1536 CSS px — a 1920 screen at Windows %125 — the sample school's "310"
+ * needs 21px where the card has 19.2, and 315 of 374 cards were clipped.
+ *
+ * The fix the user chose has two halves, both only in Sığdır: a card shows
+ * the class name's first word ("411A"), and a line that still does not fit is
+ * drawn smaller, down to a 9px floor, instead of being cut. Neither changes a
+ * row's height: that is asked of the line box and of the table directly.
+ *
+ * The numbers below are what is left AFTER the fix, measured, not a hope.
+ * A one-hour card is 24.5px at 1920 and 21.5 in the first hour of a day (the
+ * day edge is 3px): "411A" at 9px fits the one and not always the other. At
+ * %125 a one-hour card is 19.2px and "411A" does not fit even at 9px, so the
+ * father's one-hour cards keep their ellipsis there; %80 is still the way out.
+ * They are ceilings; the day this gets better, lower them.
+ */
+test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusunda', () => {
+  const dizili = () =>
+    JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs-dizili.json', 'utf8')) as State;
+
+  /**
+   * Shrinking a line must not change the height of anything. Asked directly:
+   * the table's body with the shrink and without it. Not "no taller than
+   * Rahat": the first draft made every row 38.5px -> 35px, and that ceiling
+   * let it through (on this data Rahat's rows are 57px, the names wrap there).
+   */
+  async function expectShrinkKeepsHeight(page: import('@playwright/test').Page) {
+    const h = await page.evaluate(() => {
+      const body = () => document.querySelector('table.grid tbody')!.getBoundingClientRect().height;
+      const lines = [...document.querySelectorAll<HTMLElement>('table.grid [style*="--fit"]')];
+      const kept = lines.map((line) => line.style.getPropertyValue('--fit'));
+      const shrunk = body();
+      for (const line of lines) line.style.removeProperty('--fit');
+      const whole = body();
+      lines.forEach((line, i) => line.style.setProperty('--fit', kept[i]!));
+      return { shrunk, whole, lines: lines.length };
+    });
+    expect(h.lines, 'küçülen satır yok, iddia bedava geçerdi').toBeGreaterThan(0);
+    expect(
+      Math.abs(h.shrunk - h.whole),
+      `küçülmüş ${h.shrunk}px, küçülmemiş ${h.whole}px`,
+    ).toBeLessThanOrEqual(0.5);
+  }
+
+  const boxes = [
+    { name: '1920', viewport: { width: 1920, height: 1080 }, dpr: 1 },
+    { name: 'Windows %125', viewport: { width: 1536, height: 816 }, dpr: 1.25 },
+  ] as const;
+
+  // Ceilings, per box and view, for the anonymised fixture ("411A SAY").
+  const DIZILI: Record<string, { cards: number; heads: number }> = {
+    '1920 · Öğretmen görünümü': { cards: 2, heads: 0 }, // before: 192 of 199
+    '1920 · Sınıf görünümü': { cards: 0, heads: 0 }, // 26, and 20 of 20 heads
+    'Windows %125 · Öğretmen görünümü': { cards: 75, heads: 0 }, // 199
+    'Windows %125 · Sınıf görünümü': { cards: 27, heads: 0 }, // 63
+  };
+  // ...and for the sample school, where only the %125 box ever clipped.
+  const ORNEK: Record<string, number> = {
+    'Öğretmen görünümü': 0, // before: 315 of 374
+    'Sınıf görünümü': 2, // 152
+  };
+
+  for (const box of boxes) {
+    test.describe(box.name, () => {
+      test.use({ viewport: box.viewport, deviceScaleFactor: box.dpr });
+
+      for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
+        test(`babanın verisinde kırpılma iniyor · ${view}`, async ({ page }) => {
+          await loadWorld(page, dizili());
+          await page.getByRole('button', { name: view }).click();
+          await expect(page.locator('table.grid .card').first()).toBeVisible();
+          const roomy = await gridMetrics(page);
+          expect(roomy.cards, 'ızgara dolu değil, iddia bedava geçerdi').toBeGreaterThan(300);
+
+          await chooseDensity(page, 'Sığdır');
+          const fit = await gridMetrics(page);
+          const ceiling = DIZILI[`${box.name} · ${view}`]!;
+
+          expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+          expect(fit.clipped, `${fit.clipped} kartın yazısı kırpıldı`).toBeLessThanOrEqual(
+            ceiling.cards,
+          );
+          expect(fit.headsClipped, `${fit.headsClipped}/${fit.heads} satır başı kırpıldı`).toBe(
+            ceiling.heads,
+          );
+          expect(fit.smallestText, 'yazı 9 px tabanının altına indi').toBeGreaterThanOrEqual(9);
+          expectSameLineBox(fit.lineBox, roomy.lineBox);
+          await expectShrinkKeepsHeight(page);
+        });
+      }
+
+      if (box.dpr !== 1) {
+        for (const view of ['Öğretmen görünümü', 'Sınıf görünümü']) {
+          test(`örnek okulda da · ${view}`, async ({ page }) => {
+            await openWithSample(page);
+            await page.getByRole('button', { name: 'Program', exact: true }).click();
+            await page.getByRole('button', { name: view }).click();
+            await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+            await expect(page.locator('.reason-bar.ok, .reason-bar.bad')).toBeVisible({
+              timeout: 30_000,
+            });
+            const roomy = await gridMetrics(page);
+            await chooseDensity(page, 'Sığdır');
+            const fit = await gridMetrics(page);
+
+            expect(fit.overflow, `${fit.overflow}px yatay kaydırma kaldı`).toBe(0);
+            expect(fit.clipped, `${fit.clipped}/374 kartın yazısı kırpıldı`).toBeLessThanOrEqual(
+              ORNEK[view]!,
+            );
+            expect(fit.smallestText).toBeGreaterThanOrEqual(9);
+            expect(fit.rowH).toBeLessThanOrEqual(roomy.rowH + 0.5);
+            expectSameLineBox(fit.lineBox, roomy.lineBox);
+            await expectShrinkKeepsHeight(page);
+          });
+        }
+      }
+    });
+  }
+
+  // The full name is not lost: it is what the card SAYS to a screen reader,
+  // and every other density still draws it.
+  test('kart sınıfın tam adını söylüyor, Rahat onu çiziyor', async ({ page }) => {
+    await loadWorld(page, dizili());
+    const card = page.locator('table.grid .card', { hasText: '411A' }).first();
+    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
+    await expect(card.locator('.card-top')).toHaveText('411A SAY');
+    await chooseDensity(page, 'Sığdır');
+    await expect(card.locator('.card-top')).toHaveJSProperty('innerText', '411A');
+    await expect(card).toHaveAttribute('aria-label', /^411A SAY /);
   });
 });
 

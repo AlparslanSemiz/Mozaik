@@ -2227,16 +2227,55 @@ table.grid thead tr:nth-child(2) th {
    Windows at %125, where the box is 1536 CSS px: measured there, dropping the
    app's own scale to %80 takes clipped cards from 315/374 to 25/374 (and the
    row from 37px to 31px, so more rows fit as well). Left at scale 1 on a
-   %125 machine the clipping stays: 72 columns of ~21.6px text plus the head
-   do not fit in 1536px, and no CSS makes them. */
+   %125 machine the columns do not hold that text: 72 columns of ~21.6px
+   text plus the head do not fit in 1536px, and no width rule makes them.
+
+   What does, since 2026-09-26, is the line giving way instead of being cut.
+   `--fit` is a ratio written by platform/gridFit.ts on a line that does not
+   fit, never below 9px at the default scale (the user's choice, Sığdır
+   only, measured in gridFit.ts). The size is multiplied, the LINE HEIGHT is not: it stays at the
+   unshrunk size, so a row full of shrunk cards is exactly as tall as it was.
+   --lh-base and not the card's own --lh-tight, because that is what these
+   lines actually get: `.card`'s `font: inherit` comes after its line-height
+   and resets it to the cell's (measured 18px at 12px). Written with
+   --lh-tight, every row went 38.5px -> 35px. Measured at 1536 with DPR 1.25
+   on the sample school: 315/374 clipped -> 0, counted the way the ellipsis
+   itself decides (pitfall 140). */
 :root[data-density='sigdir'] .card-top,
 :root[data-density='sigdir'] .card-bottom {
-  font-size: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
+  --fit-base: max(calc(12px * min(1, var(--ui-scale))), var(--fs-2xs));
+  font-size: calc(var(--fit-base) * var(--fit, 1));
+  line-height: calc(var(--fit-base) * var(--lh-base));
   width: 100%;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* The two-hour card's top line keeps its one step up (`td.block-wide`, which
+   outranks the rule above), and shrinks from THAT size. */
+:root[data-density='sigdir'] table.grid tbody td.block-wide .card-top {
+  --fit-base: var(--fs-sm);
+  font-size: calc(var(--fit-base) * var(--fit, 1));
+  line-height: calc(var(--fit-base) * var(--lh-base));
+}
+
+/* The row head's second line gives way the same way: the father's class rows
+   read "derslik yok" (59px of text in 57px) and his teachers "Mat1 · Mat2",
+   and all twenty class heads were clipped at 1920. */
+:root[data-density='sigdir'] table.grid .row-head .secondary {
+  --fit-base: var(--fs-xs);
+  font-size: calc(var(--fit-base) * var(--fit, 1));
+  line-height: calc(var(--fit-base) * var(--lh-tight));
+}
+
+/* And a class name says its first word only: "411A SAY" -> "411A", on the
+   card and on the class row's head (62px of name in a 57px head). The rest is
+   in the markup (Grid.tsx), read by the labels and drawn in the other two
+   densities. The user's choice over a short-name field (2026-09-26). */
+:root[data-density='sigdir'] table.grid .name-rest {
+  display: none;
 }
 
 /* The one pixel of air around a colour block goes too, and for the same reason

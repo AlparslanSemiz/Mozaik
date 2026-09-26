@@ -12,6 +12,7 @@ import type React from 'react';
 import { dayLabel } from '../leaf/names';
 import { dayPeriods } from '../pure/bell';
 import { attachGridChrome } from '../platform/gridChrome';
+import { attachGridFit } from '../platform/gridFit';
 import { paletteColor } from '../leaf/palette';
 import type { Settings, Id } from '../leaf/types';
 import type { MaskMode } from '../pure/programMask';
@@ -80,6 +81,25 @@ interface RowProps {
    * 84 cells redraws on each render and the memo above stops meaning anything.
    */
   onCellPin: (rowId: string, day: number, hour: number) => void;
+}
+
+/**
+ * A class name on a card or a row head: all of it, with everything after the
+ * first word in its own span, which Sığdır hides (styles.css). The father's
+ * classes are "411A SAY" — number, room letter, track — and a one-hour card
+ * in Sığdır has room for about three characters; "411A" says which class,
+ * "41…" did not. The user chose this over a new short-name field
+ * (2026-09-26): the data does not change, and the labels read the whole name.
+ */
+function ClassName({ name }: { name: string }) {
+  const space = name.indexOf(' ');
+  if (space <= 0) return name;
+  return (
+    <>
+      {name.slice(0, space)}
+      <span className="name-rest">{name.slice(space)}</span>
+    </>
+  );
 }
 
 const Row = memo(function Row({
@@ -253,7 +273,9 @@ const Row = memo(function Row({
                       })
               }
             >
-              <span className="card-top">{cell.top}</span>
+              <span className="card-top">
+                {row.kind === 'teacher' ? <ClassName name={cell.top} /> : cell.top}
+              </span>
               {cell.bottom !== '' && <span className="card-bottom">{cell.bottom}</span>}
               {cell.mark === 'opened' && (
                 <span className="card-mark" aria-hidden="true">
@@ -331,7 +353,7 @@ const Row = memo(function Row({
           onClick={() => inspect(row.kind, row.id)}
           title={t('{ad}: bilgileri ve haftalık programı', { ad: row.name })}
         >
-          {row.name}
+          {row.kind === 'class' ? <ClassName name={row.name} /> : row.name}
         </button>
         <span className="secondary">{row.secondary}</span>
       </th>
@@ -401,7 +423,13 @@ function GridInner({
   const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const wrap = wrapRef.current;
-    return wrap === null ? undefined : attachGridChrome(wrap);
+    if (wrap === null) return undefined;
+    const detachChrome = attachGridChrome(wrap);
+    const detachFit = attachGridFit(wrap);
+    return () => {
+      detachChrome();
+      detachFit();
+    };
   }, []);
 
   // Counts, not widths: the "Sığdır" density derives --cell-w from the box it

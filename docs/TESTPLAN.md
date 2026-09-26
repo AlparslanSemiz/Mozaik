@@ -227,7 +227,8 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 - **Metin.** Hiçbir ekranda uzun çizgi olmaması, ayraçların yerinde durması, ipucu satırlarının tavanı (`metin.spec.ts`).
 - **İşaret.** `kurulum/icon.ico`'nun dokuz boyu taşıması ve hangi boyların hangi çizimden geldiği (`temel.spec.ts` 79).
 - **Kayma.** Şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynatması (`kayma.spec.ts`). Bu dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek bir kaydırma çubuğu yok (tuzak 94).
-- **Sığdır'ın exe kutusu** (`gorunum.spec.ts` 45). 1920×1032 ve 1600×968'de haftanın sığması, ve hiçbir kart yazısının, satır başının ve köşedeki eksen adının iki eksende de kırpılmaması, satırın Rahat'takinden uzamaması (tuzak 107).
+- **Sığdır'ın exe kutusu** (`gorunum.spec.ts` 45). 1920×1032 ve 1600×968'de haftanın sığması, ve hiçbir kart yazısının, satır başının ve köşedeki eksen adının iki eksende de kırpılmaması, satırın Rahat'takinden uzamaması, kart satırının satır kutusunun Rahat'takiyle aynı kalması (tuzak 107).
+- **Sığdır babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kırpılan kart sayısının tavanı, satır başlarının sıfırı, 9 px taban, küçültmenin tablonun boyunu değiştirmemesi, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140).
 
 ### Dil
 

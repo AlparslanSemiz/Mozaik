@@ -35,6 +35,57 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-26 · Sığdır kesmiyor, küçültüyor: sınıf adının ilk kelimesi ve 9 px taban
+
+**Şikâyet.** Sığdır'da kart yazıları uzun olunca "…" ile kesiliyor.
+
+**Ölçüm.** Playwright'ta iki veride ölçüldü: adsız dizili fikstüre bir öneri uygulanmış
+tam hafta (348/348 saat) ve örnek okul. Kutular 1920×1080 ile Windows %125'in kutusu
+(1536×816, DPR 1,25), iki görünümde. Sebep ablasyonla ayrıldı, ve her biri ayrı:
+- Babanın verisinde sebep metnin kendisi. Sınıf adları "411A SAY", 12–13 px'te 52–61 px.
+  1920'de tek saatlik kart 24,5 px ve 12 px'te üç karakter alıyor. Yazı boyu, harf
+  aralığı, gün kenarı ve satır başı genişliği tek başlarına 204'ü en iyi 156'ya
+  indiriyordu.
+- 1536'da örnek okulun "310"u 21 px, kartın içi 19,19 px. Kart başına 1,8 px, 72 sütunda
+  yaklaşık 130 px açık var, ve hiçbir kenarlık ayarı onu kapatmıyor.
+- Satır başları: fikstürde sınıf görünümünde 20/20 ("derslik yok" 59 px, kutu 57), ve
+  sınıfın adı da (62 px).
+
+**Karar (kullanıcı, iki adımda).** Taslakta beş aday ekran görüntüleriyle gösterildi,
+kullanıcı iki yarıyı seçti. İkisi de yalnız Sığdır'da:
+- Sınıf adı ilk kelimesiyle yazılır, kartta ve satır başında. Kalanı işaretlemede
+  duruyor, yalnız Sığdır'da gizleniyor. Veri değişmedi. Aday olan "aSc'deki gibi bir
+  kısa ad alanı" (şema v17) seçilmedi.
+- Sığmayan satır kesilmek yerine küçülür (`platform/gridFit.ts`, `--fit`). Satırın
+  yüksekliği küçülmemiş boyda kalır. İlk onay 10 px tabanlaydı.
+
+**Ölçütün kendisi yanlıştı, ve karar değişti.** Taslaktaki "1920'de 12 kırpık" sayısı
+`scrollWidth > clientWidth` ile sayılmıştı. `clientWidth` en yakına yuvarlıyor (24,53 →
+25), ve 25 px'lik yazı ekranda "41…" çizilirken sayaçtan geçiyordu. Exe'nin ekran
+görüntüsü yakaladı (tuzak 140). Doğru ölçütle, yani yazının ve kutunun kesirli
+genişliğiyle, 10 px'te 71/211 kart kırpık kalıyordu, 9,5 px'te 44, 9 px'te 2. Kullanıcı
+9 px'i seçti.
+
+**Sonuç**, doğru ölçütle ve tam haftada:
+
+| | Önce | Sonra |
+|---|---|---|
+| fikstür 1920, öğretmen · sınıf | 204 · 26, satır başı 4 · 20 | 2 · 0, satır başı 0 · 0 |
+| fikstür 1536, öğretmen · sınıf | 211 · 70 | 81 · 26 |
+| örnek okul 1536, öğretmen · sınıf | 315 · 152 | 0 · 2 |
+
+Taşma her durumda 0, satır 38,5 px'te sabit. Exe'de (WebKitGTK, 1920×1121) fikstür
+7 · 0 kırpık. Kalanların hepsi ya günün ilk saatinde (gün kenarı 3 px) ya da 1536'da,
+tek saatlik kartta.
+
+**Bedeli.** İlk sürüm her React commit'inde bütün satırları silip yeniden yazıyordu:
+130 ms, üç yerleşim. Şimdi yalnız metni ya da genişliği değişen satıra dokunuyor.
+Sıradan bir Delete ve Ctrl+Z'de (10 commit, A/B üçer koşu, `performance` profili)
+Layout toplamı ve RunTask toplamı HEAD'le aynı: 3,05–3,31 s'ye karşı 3,06–3,19 s.
+
+**Kaydedilen istisna.** DESIGN.md'deki 12 px taban artık Sığdır'da, yalnız sığmayan
+satır için 9 px.
+
 ### 2026-09-26 · Çoklu takas, Kontrol'ün Sıkışık cümlesi ve ilk ilişki: "aynı gün olmasın"
 
 **Çoklu takas (TODO B5.7).** Takas yalnız tek hedef blokta teklif ediliyordu. Ölçüm

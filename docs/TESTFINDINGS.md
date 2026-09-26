@@ -26,6 +26,22 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-26 · Playwright ve gerçek Linux exe, adsız tam hafta · Sığdır'da kırpılma sayacı ekranla ayrışıyor
+Bulgu: iki kat. (1) `gorunum.spec.ts`'in Sığdır testleri yalnız örnek okulu ve yalnız
+kartın üst satırını ölçüyordu. Babanın şeklindeki veride (adsız dizili fikstür) 1920'de
+199 kartın 192'si ve 20/20 sınıf satırı başı kırpıktı, hiçbir test görmedi. (2) Çareyi
+yazarken sayaç ile çare aynı yuvarlayan ölçüte (`scrollWidth > clientWidth`) yaslandı.
+`clientWidth` en yakına yuvarladığı için 25 px'lik yazı 24,53 px'lik kutuda "sığıyor"
+sayıldı. Taslakta kullanıcıya "1920'de 12 kırpık" dendi, ekranda 79'du. Exe'nin ekran
+görüntüsü yakaladı, Chromium'un görüntüsü de aynıydı.
+Tür: test kusuru, ve benim ölçüm hatam
+Ne yapıldı: sayaç yazının ve kutunun kesirli genişliğiyle ölçüyor, alt satırı ve satır
+başının iki satırını da sayıyor. Yeni test grubu 45b fikstürde ve 1536 kutusunda ölçüyor.
+Kullanıcıya doğru sayılarla yeniden soruldu, taban 10 px'ten 9 px'e indi (DECISIONS
+2026-09-26). Mutasyonlar: çare yok, satır kutusu, taban 4 px ve 10 px, ilk kelime
+kuralı yok, ve hedefin yuvarlayan `clientWidth` olması. Altısı da kırmızı.
+Kalıcı kural: tuzak 140
+
 ### 2026-09-26 · npm run yayinla -- 2.2.0 · push HTTPS'te düştü, hata bayt dizisi olarak basıldı
 Bulgu: kapılar geçti, sürüm commit'i ve annotated `v2.2.0` etiketi yerelde oluştu, ama
 `git push --follow-tags origin main` düştü: "could not read Username for

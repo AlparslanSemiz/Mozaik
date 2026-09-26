@@ -147,7 +147,7 @@ ve sorun yoksa yerlerinde boşluk bile kalmaz.
 - **Gün bandı.** Tek indeksli günler çok hafif bir zemin alır, günleri gruplamak için.
 - **Saat başlığı** ders numarasını ve altında başlangıç saatini taşır.
 - **Öğle arası** dar bir ayraç sütunu, çünkü ızgarada ara konumu gün başına sabit. Ayraç `data-day` ve `data-hour` taşımaz (tuzak 13).
-- **Yoğunluk:** Ferah, Rahat, Sığdır. Sığdır haftanın tamamını kutuya sığdırır, ve bunu kart yazısını kırpmadan yapması ölçülür (tuzak 37 ve 107).
+- **Yoğunluk:** Ferah, Rahat, Sığdır. Sığdır haftanın tamamını kutuya sığdırır, ve bunu kart yazısını kırpmadan yapması ölçülür (tuzak 37, 107 ve 140). Sığdır'da sınıf adı ilk kelimesiyle yazılır ("411A SAY" → "411A", kartta ve satır başında; tam ad etikette ve öteki iki yoğunlukta), ve yine sığmayan bir kart satırı ya da satır başının ikinci satırı kesilmek yerine küçülür, varsayılan ölçekte en çok 9 px'e (`platform/gridFit.ts`). Küçülen yazı satırın yüksekliğini değiştirmez. Windows %125'te (1536 CSS px) babanın tek saatlik kartları 9 px'te de sığmıyor, orada çıkış hâlâ ölçeği %80'e almak.
 
 ### Havuz
 

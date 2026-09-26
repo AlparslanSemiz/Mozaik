@@ -16,7 +16,7 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
    |
 src/platform/      planStore · libraryStore · storageReport · theme · toolState · printOptions
                    programColor · changelog · folder · desktop · update · download
-                   drag · gridChrome · poolSplit · rowDrag · scrollFade · ribbonScroll
+                   drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
                    useStore · usePlans · useSolver · useFolder · relaxPool · relaxWorker
                    relaxLog
    |
@@ -119,6 +119,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `platform/drag.ts` | sürükle bırak, Pointer Events ile. Bir kanca (`useDrag`), yani listedeki tek React'li dosya |
 | `platform/gridChrome.ts` | imleç haçı ve yapışkan başlığın gölgesi |
+| `platform/gridFit.ts` | Sığdır'da sığmayan kart satırını ve satır başının ikinci satırını küçültür (`--fit`), en çok 9 px'e |
 | `platform/poolSplit.ts` | havuz çekmecesinin boy tutamağı |
 | `platform/rowDrag.ts` | liste satırını sürükleyerek sıralama |
 | `platform/scrollFade.ts` | kayan bir kutunun üstünde ya da altında içerik olduğunu söyleyen sündürme |
@@ -252,7 +253,7 @@ type` düz importa çevrilirse `tsc` yeşil kalır ama o kapı kırmızıya dön
 
 ### Doğrudan DOM'a yazma deseni
 
-`drag.ts`, `gridChrome.ts`, `poolSplit.ts` ve `rowDrag.ts` aynı deseni izler:
+`drag.ts`, `gridChrome.ts`, `gridFit.ts`, `poolSplit.ts` ve `rowDrag.ts` aynı deseni izler:
 dinleyiciler bir kez bağlanır, `pointermove` sırasında React durumuna yazılmaz,
 DOM'a ya da tek bir custom property'ye yazılır, ve React'e yalnız sonuç bildirilir.
 Sebep performans değil doğruluk: sürükleme sırasındaki bir yeniden çizim
@@ -261,8 +262,8 @@ yeniden çizmek imleci takılır hâle getiriyor. Sürüklemenin hedef satırı,
 önizlemesi ve hayaleti de React prop'u değil, `drag.ts`'in doğrudan yönettiği
 DOM.
 
-Kural React'i tanımamak değil, hareket sırasında React'e yazmamak, ve dördü tam
-bu noktada ikiye ayrılıyor: `gridChrome.ts`, `poolSplit.ts` ve `rowDrag.ts` bir
+Kural React'i tanımamak değil, hareket sırasında React'e yazmamak, ve beşi tam
+bu noktada ikiye ayrılıyor: `gridChrome.ts`, `gridFit.ts`, `poolSplit.ts` ve `rowDrag.ts` bir
 HTML elemanı alıp sökme fonksiyonu döndürür ve React'i hiç import etmez,
 `drag.ts` ise bir kanca olduğu için `useCallback`, `useEffect` ve `useRef` alır.
 Bu bir ihlal değil, `useDrag`'in bir bileşenin içinden çağrılmasının bedeli:

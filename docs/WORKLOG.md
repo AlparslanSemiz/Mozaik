@@ -76,7 +76,7 @@ yapıldı, "Şu an"daki kusurların dokuzu kapandı. Sıradaki iş 2.2.0'ın yay
 
 **Bilinen kusurlar.**
 
-- Windows %125'te yazı büyüklüğü %100'de bırakılırsa Sığdır'da kartların çoğu kırpılıyor (2026-09-01'de 315/374 ölçüldü) ve bunu düzeltecek bir CSS yok. Çıkışlar üründe var: ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
+- Sığdır'da kart yazısı 2026-09-26'dan beri kesilmek yerine en çok 9 px'e küçülüyor ve sınıf adı ilk kelimesiyle yazılıyor. Örnek okul Windows %125'te (1536 CSS px) 315/374 kırpık karttan 0'a indi. Babanın adsız tam haftasında 1920'de 204/211'den 2'ye indi, ama %125'te 211'den 81'e: tek saatlik kartında "411A" 9 px'te de sığmıyor. Orada çıkış hâlâ ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - Şeridin taşması kapatıldı (2026-09-12): şerit artık daralınca neyi sırayla feda edeceğini söylüyor, kural LAYOUT.md'de ve ölçümler DECISIONS'ta. Ana E2E süiti bu düzeltmeden sonra tamamı geçiyor. Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
 - 4 kat yavaşlatılmış işlemcide ilk kare hâlâ ölçek ve yoğunluk yazılmadan boyanıyor, ama karanlık temanın açık ilk karesi kapatıldı (`a81c79a`, `<head>`'de klasik betik). Kalan kaymalar görünür bir fark üretmiyor (TODO §8d).
 - Okuma sırasında bildirilip henüz doğrulanmamış kusurlar (TODO §8d). Müsaitlik ve Çıktı'nın kanca sırası ile varlık panelinin aktarma bildirimi 2026-09-11'de düzeltildi.

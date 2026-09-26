@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Fixed
+
+- In the Fit density, card text no longer ends in "…" where it can be shown: a class name is written with its first word ("411A" for "411A SAY", on the card and on the class row), and a line that still does not fit is drawn smaller, down to 9px, instead of being cut. Rows keep their height, the full name is still what the card says to a screen reader, and the Comfortable and Spacious densities are unchanged. On a 1920 screen a full week with long class names went from 204 of 211 cards cut to 2; at Windows 125% the sample school went from 315 of 374 to none.
+
 ## [2.2.0] - 2026-09-26
 
 ### Added

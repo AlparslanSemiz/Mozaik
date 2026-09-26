@@ -50,6 +50,11 @@ tabana kendisi cevap veriyor, bunu da çoğu zaman Windows'un kendi ölçeklemes
 zaten büyükken yapıyor. Tipografi merdiveni her kök değişiminde yeniden
 sabitlendiği için %100'de 12 px hâlâ 12 px.
 
+Tek istisna Sığdır ve kullanıcının kararı (2026-09-26): bu yoğunluğun işi haftanın
+tamamını kutuya sığdırmak, ve orada sığmayan bir kart satırı kesilmek yerine en çok
+9 px'e küçülür. Yalnız sığmayan satır küçülür, satır yüksekliği değişmez, öteki iki
+yoğunlukta taban 12 px ([LAYOUT.md](LAYOUT.md), [DECISIONS.md](DECISIONS.md)).
+
 ### Hareket
 
 Hareket bir tercih ve makinenin tercihi taban. `--dur-*` süreleri ile `--slide`,

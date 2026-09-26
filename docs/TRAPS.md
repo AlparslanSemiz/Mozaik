@@ -639,6 +639,19 @@ değiştiği için yeniden boyutlanmamalı. Havuzun tetiği ızgaranın şekli o
 `useLayoutEffect` `useEffect`'ten önce koşar, o yüzden aynı özelliği ikisinden de
 yazmak sessizce birini eziyor.
 
+### 140 · `clientWidth` yuvarlar, ve üç nokta kesirli kutuya bakar
+Sığdır'da sığmayan kart satırı küçülüyor (`platform/gridFit.ts`). Onu yazan kod da,
+ölçen test de "kırpık mı" sorusunu `scrollWidth > clientWidth` ile soruyordu. İkisi de
+tam sayı, ve `clientWidth` aşağı değil EN YAKINA yuvarlıyor: 24,53 px'lik bir kutu 25
+sayılıyor. Bu makinede glif ilerlemeleri tam piksele oturuyor, "411A" 10 px'te 25 px.
+Ölçüm "sığıyor" dedi, tarayıcı ise üç nokta çizdi. Babanın 211 kartının 79'u ekranda
+"41…" okurken sayaç 12 diyordu. Bunu exe'nin ekran görüntüsü yakaladı; aynı Chromium
+görüntüsüne bakılınca orada da aynıydı (2026-09-26). Kural: **kırpılma, yazının
+kesirli genişliği (bir `Range`'in kutusu) ile öğenin kesirli kutusu
+(`getBoundingClientRect`) karşılaştırılarak ölçülür**, ve bir sayaç en az bir kez
+ekran görüntüsüyle yan yana okunur. `gorunum.spec.ts`'in `gridMetrics()`'i artık
+böyle ölçüyor.
+
 ## CSS kapsamı, özgüllük ve custom property
 
 **Kural.** Bir CSS değeri yazmak onun uygulandığı anlamına gelmez: daha güçlü bir
@@ -1214,7 +1227,7 @@ bir algoritma işi gibi kovalanır.
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136 |
-| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121 |
+| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
@@ -1226,5 +1239,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 139, yeni bir tuzak 140'tan devam eder. Test stratejisi
+büyük kullanılan numara 140, yeni bir tuzak 141'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
