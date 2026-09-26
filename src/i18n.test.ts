@@ -29,7 +29,15 @@ import {
   t,
   translate,
 } from './leaf/i18n';
-import { dayLabel, shortDay, subjectLabel, subjectShort } from './pure/entities';
+import {
+  DEFAULT_SUBJECT_SHORTS,
+  WEEK,
+  dayLabel,
+  shortDay,
+  subjectLabel,
+  subjectShort,
+} from './pure/entities';
+import { KISALTMALAR } from './leaf/lang/kisaltmalar';
 import type { Settings } from './leaf/types';
 import './leaf/lang/en';
 import './leaf/lang/de';
@@ -356,6 +364,35 @@ describe('veri metinleri: depoda Türkçe, ekranda çevrili', () => {
     expect(shortDay('Hafta içi')).toBe('Haf');
     expect(subjectLabel('Astronomi')).toBe('Astronomi');
     expect(subjectShort(bos, 'Astronomi')).toBe('Ast');
+  });
+
+  // DK12: "Kim" is Kimya's short AND the strip's "who?", and one dictionary
+  // key cannot say both. Kimya read "Who" in English and "Wer" in German.
+  // The built-in shorts are data drawn in a column, not sentences, so they
+  // come from a table of their own and never meet a sentence's key.
+  it('bir kısaltma aynı yazılan bir cümleye düşmüyor: Kimya "Who" değil', () => {
+    const who = { en: 'Who', de: 'Wer', es: 'Quién', fr: 'Qui' } as const;
+    for (const dil of ['en', 'de', 'es', 'fr'] as const) {
+      setAktifDil(dil);
+      expect(subjectShort(bos, 'Kimya'), dil).not.toBe(who[dil]);
+      // ...and the strip's own "Kim" still means who.
+      expect(t('Kim'), dil).toBe(who[dil]);
+    }
+  });
+
+  it('her yerleşik kısaltmanın dört dilde de karşılığı var', () => {
+    setAktifDil('tr');
+    const turkish = [...Object.values(DEFAULT_SUBJECT_SHORTS), ...WEEK.map(shortDay)];
+    for (const dil of ['en', 'de', 'es', 'fr'] as const) {
+      for (const short of turkish) {
+        const own = KISALTMALAR[dil][short];
+        expect(own, `${dil} ${short}`).toBeDefined();
+        expect(own!.length, `${dil} ${short}`).toBeLessThanOrEqual(4);
+      }
+      // Nothing in the table that is not a built-in short: a stray row there
+      // is a translation nobody reads.
+      expect(Object.keys(KISALTMALAR[dil]).sort(), dil).toEqual([...turkish].sort());
+    }
   });
 
   it('Türkçede hiçbiri kıpırdamıyor', () => {

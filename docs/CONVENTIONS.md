@@ -144,6 +144,13 @@ bölmeden çizer, çünkü diller arasında değişen şey kelime sırası.
 çevrilen anahtarın içine alınır (`'{n} derslik'`), yuvaya çevrilmiş bir kelime
 konmaz, yoksa çoğullanamaz (tuzak 90).
 
+**Kısaltmalar sözlükte değil.** Yerleşik branş ve gün kısaltmaları (`Mat`, `Kim`,
+`Sal`) `t()`'den geçmez, `lang/kisaltmalar.ts`'teki dil başına tablodan okunur. Sözlükte
+anahtar Türkçe metnin kendisi, ve üç harflik bir kısaltma arayüzün söylediği bir kelimeyle
+aynı yazılabilir: Kimya'nın `Kim`'i Müsaitlik şeridinin "Kim"iyle tek anahtara düştü ve
+İngilizcede "Who" okundu (DENETIM DK12). Tablonun her satırı bir yerleşik kısaltma, ve her
+yerleşik kısaltmanın dört dilde de satırı var; ikisini `i18n.test.ts` tutar.
+
 **State'e giren metin çevrilmez.** Gün ve branş adları depoda Türkçe kalır ve
 ekranda `names.ts` üstünden çevrilir. Böylece bir yedek dosyası her makinede aynı
 şeyi anlatır ve `remapDays()` günleri hâlâ isimden eşler (tuzak 11). Bir değerin

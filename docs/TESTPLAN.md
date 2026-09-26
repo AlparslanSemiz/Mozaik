@@ -236,7 +236,8 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 kümesi, dengeli `**`, çoğulun iki biçimi ve uzun çizgi. Beşi de mutasyonla sınandı.
 Artı makine: `applyDil()`'in aktif dili kurduğu (yoksa saf modüller Türkçe kalır),
 çoğulun kategoriyi `Intl.PluralRules`'tan sorduğu, veri metinlerinin depoda Türkçe
-kaldığı. `e2e/dil.spec.ts` beş dilin beşinin de sekmeleri kendi dilinde çizdiğini,
+kaldığı. Kısaltma tablosunun (`lang/kisaltmalar.ts`) her yerleşik kısaltmayı dört dilde
+taşıdığı ve bir kısaltmanın aynı yazılan bir cümleye düşmediği (Kimya "Who" değil). `e2e/dil.spec.ts` beş dilin beşinin de sekmeleri kendi dilinde çizdiğini,
 saf modüllerin cümlelerinin de (Kontrol raporu) çevrildiğini ve Türkçenin birebir
 geri geldiğini ölçer.
 

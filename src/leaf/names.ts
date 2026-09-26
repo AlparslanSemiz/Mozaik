@@ -16,7 +16,8 @@
  * program itself wrote are translated, and anything the reader typed is handed
  * back untouched — translating that would be a guess about somebody else's word.
  */
-import { t } from './i18n';
+import { aktifDil, t } from './i18n';
+import { KISALTMALAR } from './lang/kisaltmalar';
 import { subjectKey } from './subjects';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */
@@ -92,9 +93,20 @@ export function dayLabel(name: string): string {
   return name in SHORT_DAY ? t(name) : name;
 }
 
+/**
+ * A built-in short in the interface language. From its own table, not `t()`:
+ * a short can be spelt like a word the interface says ("Kim", Kimya's, is
+ * also "who?"), and through the sentence dictionary Kimya read "Who" (DENETIM
+ * DK12). See `lang/kisaltmalar.ts`.
+ */
+function ownShort(short: string): string {
+  const dil = aktifDil();
+  return dil === 'tr' ? short : (KISALTMALAR[dil][short] ?? short);
+}
+
 export function shortDay(name: string): string {
   const known = SHORT_DAY[name];
-  return known === undefined ? name.slice(0, 3) : t(known);
+  return known === undefined ? name.slice(0, 3) : ownShort(known);
 }
 
 const DEFAULT_BY_KEY = new Map(
@@ -104,7 +116,7 @@ const DEFAULT_BY_KEY = new Map(
 /** The built-in short for a subject, translated. '' when there is none. */
 export function builtInShort(subject: string): string | undefined {
   const known = DEFAULT_BY_KEY.get(subjectKey(subject));
-  return known === undefined ? undefined : t(known);
+  return known === undefined ? undefined : ownShort(known);
 }
 
 /** The same one UNTRANSLATED — what an override is compared against. */

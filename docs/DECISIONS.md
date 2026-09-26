@@ -35,6 +35,23 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-09-27 · Kısaltmalar sözlükten değil kendi tablosundan
+
+**Eski hâli.** Yerleşik branş ve gün kısaltmaları, Türkçe kısaltmanın kendisi anahtar
+olarak `t()`'den geçiyordu. Sözlükte bir anahtar tek bir anlam taşıyabiliyor, ve Kimya'nın
+`Kim`'i Müsaitlik şeridindeki "Kim" (kim?) etiketiyle aynı anahtardı: dört dilde de Kimya
+"Who", "Wer", "Quién", "Qui" okunuyordu (DENETIM DK12). İzlenen başka adaylar vardı
+(`Tarih`, `Din`, `Fen`, gün kısaltmaları).
+
+**Seçenekler.** Sözlükte bir bağlam eki (`Kim|branş` gibi genel bir mekanizma) ya da
+kısaltmalar için ayrı bir tablo. Kullanıcı ayrı tabloyu seçti.
+
+**Şimdi.** `lang/kisaltmalar.ts` dil başına, Türkçe kısaltmayla anahtarlanmış bir tablo.
+`names.ts`'in `builtInShort()` ve `shortDay()`'i onu okur, sözlüklerin kısaltma satırları
+kalktı, "Kim" = "Who" şerit için sözlükte kaldı. Kimya artık "Chm", "Che", "Quí", "Chi".
+Bir kısaltma hiçbir cümlenin anahtarına düşemez, yani bu çakışma sınıfının tamamı kapandı.
+Test: `i18n.test.ts`'in iki vakası.
+
 ### 2026-09-27 · Ders adları ders sayısını belirlemiyor
 
 **Eski hâli.** `hourLabels(count, names)` bir ad listesi verildiğinde onu olduğu gibi

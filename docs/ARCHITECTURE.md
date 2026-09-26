@@ -43,8 +43,8 @@ görülüyorsa yanlış yerdedir ve `constraints.ts`'e taşınır.
 
 ## Dosya haritası
 
-Yollar `src/`'ye göre. Test dosyaları (`*.test.ts`) ve dört çeviri sözlüğü
-(`lang/*.ts`) listede yok.
+Yollar `src/`'ye göre. Test dosyaları (`*.test.ts`), dört çeviri sözlüğü ve
+kısaltma tablosu (`lang/*.ts`) listede yok.
 
 ### Yapraklar
 
