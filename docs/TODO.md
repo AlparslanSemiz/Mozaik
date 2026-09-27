@@ -1288,6 +1288,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       2026-09-26 denetiminde `t()` maddesinin üç örneği üretildi: Dersler şeridinin
       toplamı ("99 ders · 433 saat", §8j DK13), plan seçicinin "(taslak)" eki ve kâğıdın
       çıktı tarihi (ikisi keşifte kaynaktan okundu, ekranda yalnız ilki görüldü).
+      İlki 2026-09-27'de kapandı (DK13, `c9c66e5`); öteki ikisi ve listenin kalanı açık.
 - [x] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
       sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
       oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
@@ -1565,6 +1566,10 @@ ve yerini doğru davranışı soran bir teste bıraktı.
       Chromium'da açıldı: iki sınıf iki renk, "Günde aynı ders" boş, Kurallar listesi boş.
 
 ### 8j · Denetimin bulguları (2026-09-26)
+
+**2026-09-27: on üçü de kapandı**, her biri kendi commit'inde, kullanıcının DK8, DK9,
+DK11, DK5, DK12 ve DK6 için verdiği kararlarla (DECISIONS 2026-09-27). Kullanım
+kolaylığı sorunları (KS) ve öneriler (Ö) DENETIM.md'de açık, TODO'ya henüz taşınmadı.
 
 Elle denetimin ürettiği kusurlar. Her birinin tekrar üreten adımları, beklenen ve olan,
 ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı bölümde.

@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-09-26 (gece).
+Son güncelleme: 2026-09-27.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Release sayfası artık kendi yeniliklerini taşıyor (`scripts/surum-notu.mjs`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
 
@@ -37,7 +37,15 @@ güncellemesi. Yayınlanmamış olarak üstüne (2026-09-26 akşamı):
   gönderiyorlardı.
 - Dersler formunda Dağılım düğmesinde ve listesinde Enter ders eklemiyor.
 - `npm run yayinla`'da düşen bir git komutu bir cümleyle bildiriliyor.
-- Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18). 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
+- Yalnız geliştirme için bir Linux ikilisi ve onu süren araç (B7.16–B7.18).
+- 2026-09-27: denetimin on üç kusuru kapandı (TODO §8j). Zil ve günler'de gün ya da
+  saat kaldırmak önce kaybı sayan bir soru soruyor ve Ctrl+Z onay kutusunda da çalışıyor;
+  ders adları ders sayısını belirlemiyor; alanı eksik dosya reddediliyor ve yükleme sorusu
+  iki planı yan yana sayıyor; panelin Ad kutusu adı değiştirmiyor; durdurulan öneri araması
+  durdurulduğunu söylüyor ve sürdürülebiliyor; Kontrol kapalı saatteki dersleri görüyor;
+  geri alınan başarının cümlesi kalmıyor; takasın gerekçesi asıl engeli söylüyor; daha yeni
+  sürümün dosyası "yeni" diye reddediliyor; kısaltmalar kendi tablosundan okunuyor;
+  Dersler toplamı çevriliyor; köşe hücresi ve Müsaitlik başlığı hizalı. 2026-09-11'de belgeler yeniden kuruldu, koda yalnız yorum, test adı ve
 sürüm betiği olarak dokunuldu. Aynı gün kodun refactoru başladı (envanter, taban
 ölçümleri, Faz 2'nin dört adımı), davranış yalnız iki düzeltme commit'inde değişti.
 
@@ -69,11 +77,11 @@ kaldı, ipucu sorusunun hiç tutmadığı görüldü (tuzak 139), B5.7 ve B5.3'�
 yapıldı, "Şu an"daki kusurların dokuzu kapandı. 2.2.0 aynı gün yayınlandı. Akşam
 Sığdır'ın kırpılması ve sürüklerken kasma ölçülüp kapandı, §8d'nin iki doğrulanacağı
 üretildi ve düzeldi (2026-09-26 akşam girdisi). Sıradaki iş babanın ölçümü ve cevapları
-(§8b); fikstürde ret sonrası 6 ve karma yolun daha az saatli haftaları açık.
+(§8b); fikstürde ret sonrası 6 ve karma yolun daha az saatli haftaları açık. Aynı gece özellik özellik bir elle denetim yapıldı (DENETIM.md), 2026-09-27'de on üç kusurunun on üçü de kapandı.
 
 **Bilinen kusurlar.**
 
-- 2026-09-26 gecesinin elle denetimi on üç kusur üretti, hepsi TODO §8j'de, ayrıntısı [DENETIM.md](DENETIM.md)'de. Üçü veri kaybı sınıfında: Ayarlar → Zil ve günler'de dersleri dizili bir günü kaldırmak, günlük ders sayısını düşürmek ya da ders adlarını kısaltmak dizili ve sabitli dersleri sorusuz siliyor, Ctrl+Z odak o kutudayken çalışmıyor (DK8, DK9). Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor (DK11). Kod değişmedi.
+- 2026-09-26 gecesinin elle denetiminin on üç kusuru 2026-09-27'de kapandı (TODO §8j, her biri kendi commit'inde). Denetimin yirmi sekiz kullanım kolaylığı sorunu (KS) ve kırk sekiz önerisi (Ö) [DENETIM.md](DENETIM.md)'de açık ve TODO'ya taşınmadı.
 - Sığdır'da kart yazısı 2026-09-26'dan beri kesilmek yerine en çok 9 px'e küçülüyor ve sınıf adı ilk kelimesiyle yazılıyor. Örnek okul Windows %125'te (1536 CSS px) 315/374 kırpık karttan 0'a indi. Babanın adsız tam haftasında 1920'de 204/211'den 2'ye indi, ama %125'te 211'den 81'e: tek saatlik kartında "411A" 9 px'te de sığmıyor. Orada çıkış hâlâ ölçeği %80'e almak ya da geçici görünümden gün gizlemek.
 - Şeridin taşması kapatıldı (2026-09-12): şerit artık daralınca neyi sırayla feda edeceğini söylüyor, kural LAYOUT.md'de ve ölçümler DECISIONS'ta. Ana E2E süiti bu düzeltmeden sonra tamamı geçiyor. Paralel koşudaki kararsızlığın sebebi `kapan.ts`'in dil tohumuydu ve kalktı (tuzak 108). `kayma.spec.ts`'in macOS oluk farkı (TODO B7.7) bu Linux makinesinde geçti.
 - 4 kat yavaşlatılmış işlemcide ilk kare hâlâ ölçek ve yoğunluk yazılmadan boyanıyor, ama karanlık temanın açık ilk karesi kapatıldı (`a81c79a`, `<head>`'de klasik betik). Kalan kaymalar görünür bir fark üretmiyor (TODO §8d).
@@ -90,17 +98,17 @@ Sığdır'ın kırpılması ve sürüklerken kasma ölçülüp kapandı, §8d'ni
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 31 dosyada 596 test (2026-09-26 akşam) | `npx playwright test --list` |
+| Ana E2E süiti | 612 test (2026-09-27) | `npm run kontrol` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
-| Linux ikilisi | 4 351 688 bayt (2026-09-26 akşam) | `npm run exe:linux` |
+| Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 42 dosyada 1340 test, hepsi geçti (2026-09-26 akşam) | `npm test` |
-| Ana E2E koşusu | 596/596 geçti, süit 6,9 dk `performance` profilinde (2026-09-26 akşam) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 141 591 bayt, brotli 277,0 kB (2026-09-26 akşam); eşikler 1 151 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
+| Ana E2E koşusu | 612/612 geçti, süit 7,3 dk `performance` profilinde (2026-09-27) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -115,6 +123,66 @@ olması ve iki oturum onu paylaşınca ölçümün yalan söylemesiydi. Dal Faz 
 `docs/claude-md-bolme`'ye birleşti, kural yazıldığı gibi tek yönlü işledi. Ayrı
 ağaçta ölçüm yapma kuralı duruyor ve bu turda da uygulandı: dört noktalı taban
 ölçümünün her commit'i `git archive` ile kendi dizinine açılıp orada derlendi.
+
+---
+
+## 2026-09-27 · Denetimin on üç kusuru düzeltildi (TODO §8j)
+
+**Başlangıç.**
+- `docs/claude-md-bolme` 6c5e02a'daydı, ağaç temizdi.
+- Gerçek `~/Documents/Ders Programı`'nın dört dosyasının sha256'sı başta alındı
+  (`scratch/duzeltme/gercek-sha-bas.txt`), exe koşusundan önce ve sonra ve oturum sonunda
+  karşılaştırıldı: dördü de aynı. Exe'nin sahte evi (`scratch/exe-surucu/ev`) koşudan sonra
+  silindi. Babanın dosyası kullanılmadı.
+- Güç profili bütün oturum `performance`. Bu turda süre ölçümü yapılmadı.
+
+**Kullanıcının kararları** (planda soruldu, DECISIONS 2026-09-27):
+- DK8: kaybı sayan bir soru, dersler yerinde bırakılmaz; sabitliler aynı soruda sayılır.
+- DK9: ders adları yalnız ad, sayıyı "Günlük ders sayısı" belirler.
+- DK11: alanı eksik dosya reddedilir, ve yükleme sorusu iki planı yan yana sayar (Ö43).
+- DK5: bulunanlar "(inceltilmedi)" ile gösterilir, "Aramayı sürdür" aramayı yeniden başlatır.
+- DK12: kısaltmalar için ayrı tablo. DK6: saat yeri boş kalır, yalnız kayma düzelir.
+
+**Nasıl yapıldı.** Sırayla DK8, DK9, DK11, DK1, DK5, DK7, DK4, DK2, DK10, DK12, DK13, DK3,
+DK6. Her kusur için önce onu üreten test yazıldı ve kırmızı görüldü (birim ya da E2E,
+TESTPLAN'a göre), sonra düzeltme, sonra mutasyon: değişen dosya `scratch/duzeltme/`'ye
+kopyalandı, düzeltme geri alındı, test kırmızıya döndü, dosya kopyadan geri kondu. Her
+kusur tarayıcıda DENETIM'in adımıyla görüldü (denetimin Chromium sürücüsünün kopyası,
+`scratch/duzeltme/sur.mjs`; Playwright MCP'nin tarayıcısı bu makinede kurulu değil),
+ekran görüntüleri `scratch/duzeltme/ekran/`'da. DK4 ayrıca güncel kaynaktan derlenen Linux
+exe'sinde sürücüyle görüldü. Her kusur kendi commit'inde, yanlışlaşan belge cümlesiyle ve
+CHANGELOG satırıyla; TODO ve DENETIM işaretleri ardından kendi küçük commit'inde.
+
+**Yan bulgular.** DK5'i üreten test öneri işçisinin yerinde incelen haftayı postalamadığını
+gösterdi (P13'ün kaynağı), aynı commit'te düzeldi. DK4'te "Tamam" düğmesi de eski cümleye
+aitti. İki test bugünkü yanlışı bekliyordu (`ayarlar.spec.ts` 32, `temel.spec.ts` 29),
+yeni davranışa çekildi. Yeni tuzaklar: 142 (çıplak sınıfın z-index'i), 143 (aynı yazılan
+iki anlam tek çeviriye düşer). Kayıt TESTFINDINGS'te.
+
+**Boyut eşiği.** İlk `npm run kontrol` boyut kapısında durdu: ham 1 158 660 bayt, eşik
+1 151 000. Büyüme 17 kB: dört sözlük 10,7 kB (yaklaşık yirmi beş yeni cümle, dört dilde),
+kısaltma tablosu 2,8 kB, kalanı kod. Ham eşik önceki turlardaki gibi on iki buçuk kilobayt
+pay bırakacak yere çekildi (1 171 000), brotli 280,2 kB ile altında kaldığı için brotli
+eşiği yerinde. Gerekçe BUILD.md'de.
+
+**Koşulan testler.**
+- `npm run kontrol` baştan sona yeşil: tipler, sınır, lint (0 hata, önceden var olan 3
+  uyarı), birim 43 dosyada 1373, derleme, boyut, ana E2E 612/612 (7,3 dk), site 22/22,
+  çözücü stresi 7/7.
+- `npm run exe:linux` (4 354 504 bayt) ve DK4 için exe sürücüsüyle elle bir tur.
+
+**Koşulmayan testler.**
+- `npm run exe:e2e`: hiçbir değişiklik `src-tauri/`, `desktop.ts`, `folder.ts` ya da
+  güncellemeye dokunmadı (TESTPLAN'ın koşulu). DK4 exe'de elle görüldü.
+- `npm run mutasyon` (Stryker): her kusurun mutasyonu elle yapıldı, ama saf çekirdeğin
+  testleri değişti (`entities`, `feasibility`, `constraints`, `fixtures`, `i18n`), yani
+  TESTPLAN'a göre bir sonraki sürümden önce koşulmalı.
+- `npm run ekran`, `npm run patrol`, `npm run exe:test`: görsel ve Rust değişikliği için
+  şart değil; görsel değişiklikler (DK3, DK6) ekran görüntüsüyle bakıldı.
+
+**Sıradaki iş.** Babanın ölçümü ve cevapları (§8b) yerinde. DENETIM'in kullanım kolaylığı
+sorunları ve önerileri TODO'ya taşınmayı bekliyor; en değerlisi Ö33 (Müsaitlik klavyeyle),
+Ö6 (kenar kaydırması), Ö46 (geri al tavanı). Bir sürümden önce `npm run mutasyon`.
 
 ---
 

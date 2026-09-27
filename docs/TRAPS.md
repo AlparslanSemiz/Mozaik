@@ -899,6 +899,14 @@ bakmak.
 Listelerin sayacı `'{toplam} {ne}'` idi ve Almancada `8 Raum` yazıyordu. Sayı
 çevrilen anahtarın içine alındı (`countKey='{n} derslik'`).
 
+### 143 · Türkçe metin anahtarsa, aynı yazılan iki anlam tek çeviriye düşer
+Kimya'nın kısaltması `Kim`, Müsaitlik şeridinin "Kim" (kim?) etiketiyle aynı anahtardı.
+Sözlükte o anahtarın tek bir değeri olabildiği için Kimya dört dilde "Who", "Wer",
+"Quién", "Qui" okundu (DENETIM DK12). Kısa ve veriye yakın metinler (kısaltmalar) bu
+çakışmanın asıl adayı: `Tar`, `Din`, `Fen`, `Sal`, `Cum` da birer kelime. Çare onları
+sözlükten çıkarmak: yerleşik kısaltmalar `lang/kisaltmalar.ts`'teki kendi tablosundan
+okunur. `i18n.test.ts` Kimya'nın "Who" olmadığını ve tablonun dört dilde tam olduğunu ölçer.
+
 ---
 
 ## Test hijyeni ve bedava yeşil
@@ -1264,7 +1272,7 @@ bir algoritma işi gibi kovalanır.
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
-| Çeviri ve metin | 12, 80, 87, 89, 90 |
+| Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
@@ -1272,5 +1280,5 @@ bir algoritma işi gibi kovalanır.
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 142, yeni bir tuzak 143'ten devam eder. Test stratejisi
+büyük kullanılan numara 143, yeni bir tuzak 144'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

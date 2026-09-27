@@ -91,7 +91,12 @@ kilobayt büyüttü (1 111 503'ten 1 138 617 bayta): iki ders arasındaki ilişk
 (B5.3), çoklu takas (B5.7), öneri aramasının bekleyen hattı, dört dile giren
 yaklaşık on beş cümle ve Yenilikler panelinin dört dile çevrilen on altı satırı.
 İki eşik de on iki buçuk kilobayt kadar pay bırakacak yere çekildi, ham 1 151 000,
-brotli 289 000 (WORKLOG 2026-09-26).
+brotli 289 000 (WORKLOG 2026-09-26). Denetimin kusurlarını düzelten 2026-09-27 turu ham boyu on yedi
+kilobayt büyüttü (1 141 591'den 1 158 660 bayta): dört sözlük 10,7 kB (dört dile giren
+yaklaşık yirmi beş yeni cümle: kaybı sayan sorular, durdurulan arama, eksik ve yeni dosya,
+Kontrol'ün kapalı saat hükmü, takasın gerekçesi), yeni kısaltma tablosu 2,8 kB, kalanı kod.
+Ham eşik on iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 171 000. Brotli hâli
+280,2 kB ile eşiğin altında kaldığı için brotli eşiği yerinde (WORKLOG 2026-09-27).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

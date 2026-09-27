@@ -26,6 +26,28 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-09-27 · düzeltme turu (vitest, Playwright, exe sürücüsü, npm run kontrol) · §8j'nin on üç kusuru
+Bulgu: Denetimin on üç kusurunun her biri önce onu üreten bir testle kırmızı görüldü,
+düzeltmeden sonra yeşil, ve düzeltme geri alınınca yeniden kırmızı (mutasyon, dosyanın
+kopyasından geri konarak). Yan bulgular:
+- İki mevcut test bugünkü yanlış davranışı bekliyordu: `ayarlar.spec.ts` 32'nin "ORTADAN
+  gün" testi sorusuz silmeyi ("That is the honest result"), `temel.spec.ts` 29 ileri şema
+  için "okunamadı" cümlesini. İkisi de yeni davranışa çekildi, gevşetilmedi.
+- DK5'i üreten test ikinci bir kusur buldu (P13'ün kaynağı): öneri işçisi yalnız yol
+  sayısı değişince postalıyordu, yerinde incelen hafta sayfaya hiç gitmiyordu. Yeni
+  `relaxWorker.test.ts` sahte bir aramayla bunu ölçer.
+- DK4'ün düzeltmesi "Tamam" düğmesinin de eski cümleye ait olduğunu gösterdi: satır boş
+  hâline döndüğü hâlde düğme kalıyordu. Tarayıcıda görüldü, düzeltildi.
+- İlk `npm run kontrol` boyut kapısında durdu: `dist/index.html` 1 158 660 bayt, eşik
+  1 151 000. Büyüme ölçüldü (sözlükler 10,7 kB, kısaltma tablosu 2,8 kB, kod ~4 kB).
+- Playwright MCP'nin tarayıcısı bu makinede kurulu değildi. Tarayıcı kontrolleri
+  denetimin kalıcı Chromium sürücüsünün bir kopyasıyla yapıldı (`scratch/duzeltme/sur.mjs`).
+Tür: ürün kusuru (on üçü ve işçinin postalaması), test kusuru (yanlışı bekleyen iki test)
+Ne yapıldı: on üçü düzeltildi, her biri kendi commit'inde, TODO §8j'de commit ve test
+adıyla. Ham boyut eşiği 1 171 000'e çekildi, gerekçesi BUILD.md ve WORKLOG'da.
+Kalıcı kural: TRAPS.md, tuzak 142 (çıplak sınıfın z-index'i) ve 143 (aynı yazılan iki
+anlam tek çeviriye düşer). Tuzak 5'e "sorusuz olmaz" eklendi.
+
 ### 2026-09-26 · elle denetim (Playwright, exe sürücüsü) · docs/DENETIM.md
 Bulgu: Özellik özellik elle denetimde on üç ürün kusuru üretildi, hepsi en az bir kez
 yeniden üretildi, ekran görüntüleri `scratch/denetim/`'de. Üçü veri kaybı sınıfında: bir
