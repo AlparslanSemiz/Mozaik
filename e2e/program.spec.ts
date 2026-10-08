@@ -16,6 +16,7 @@ import {
   tokens,
   settledMotion,
   openGridMenu,
+  onScreen,
   reopen,
 } from './helpers';
 import { makeWorld } from '../src/worlds';
@@ -2387,5 +2388,44 @@ test.describe('86. Sabitleme', () => {
     await card.click({ button: 'right' });
     await page.locator('.menu').getByRole('menuitem', { name: 'Havuza kaldır' }).click();
     await expect(page.locator('table.grid .card')).toHaveCount(0);
+  });
+});
+
+test.describe('92. Program sekmesi gizlenince sökülmüyor', () => {
+  // App.tsx keeps Program inside React's <Activity>: on another tab it is
+  // hidden, not unmounted, so coming back does not rebuild some two thousand
+  // grid cells. Pitfall 18 is the other side of the same coin: a tab that IS
+  // unmounted loses whatever it held.
+  //
+  // What only Activity gives is the SAME DOM, so that is what this measures:
+  // the grid's table, remembered before the trip, is the table found after it.
+  // Three other candidates were not chosen. Scroll position also depends on
+  // how the browser treats a hidden box. An open menu is closed ON PURPOSE when
+  // the tab hides (Program.tsx). The pool's order lives in App's tool state and
+  // would survive an unmount just as well.
+  //
+  // Measured red: `<Activity …>` replaced by `{tab === 'program' && …}` in
+  // src/ui/App.tsx.
+  test('başka sekmeye gidip dönünce ızgara aynı DOM düğümü', async ({ page }) => {
+    await openWithSample(page);
+    const remembered = await page.evaluate(() => {
+      const grid = document.querySelector('table.grid');
+      (window as unknown as { izgara?: Element | null }).izgara = grid;
+      return grid !== null;
+    });
+    expect(remembered, 'ızgara bulunamadı').toBe(true);
+
+    await page.getByRole('button', { name: 'Ayarlar' }).click();
+    // Hidden, not gone: the retained tree is still in the document (pitfall 104).
+    await expect(onScreen(page, 'table.grid')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Program', exact: true }).click();
+    await expect(onScreen(page, 'table.grid')).toBeVisible();
+
+    const same = await page.evaluate(
+      () =>
+        document.querySelector('table.grid') ===
+        (window as unknown as { izgara?: Element | null }).izgara,
+    );
+    expect(same, 'Program sekmesi dönüşte yeniden kuruldu').toBe(true);
   });
 });
