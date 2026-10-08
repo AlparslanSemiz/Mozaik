@@ -5,7 +5,7 @@
 // a name that files a backup under the wrong day, and a prune that deletes a
 // file this program did not write.
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { dailyName, KEEP_DAILY, MAIN_NAME, prunable } from './platform/folder';
 
 describe('dailyName', () => {
@@ -17,9 +17,17 @@ describe('dailyName', () => {
   it('YEREL günü kullanıyor, UTC gününü değil', () => {
     // Türkiye UTC+3. Gecenin 01:00'ında ISO tarihi HÂLÂ dün, ve yanlış güne
     // dosyalanmış bir yedek kimsenin bulamadığı yedektir.
-    const gece = new Date(2026, 7, 26, 1, 0); // 26 Ağustos 01:00, yerel
-    expect(dailyName(gece)).toBe('ders-programi-2026-08-26.json');
-    expect(gece.toISOString().slice(0, 10)).not.toBe('2026-08-26'); // hatanın kendisi
+    //
+    // The zone is set here, not taken from the machine: on a UTC runner the
+    // two days are the same day and the test below has nothing to tell apart.
+    vi.stubEnv('TZ', 'Europe/Istanbul');
+    try {
+      const gece = new Date(2026, 7, 26, 1, 0); // 26 Ağustos 01:00, yerel
+      expect(dailyName(gece)).toBe('ders-programi-2026-08-26.json');
+      expect(gece.toISOString().slice(0, 10)).not.toBe('2026-08-26'); // hatanın kendisi
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('ana dosyanın adıyla çakışmıyor', () => {
