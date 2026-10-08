@@ -1134,6 +1134,26 @@ dosya yüklemeyi o yoldan yapar. Ders şu: sürücüyle görülen bir "açılmı
 sürücüsüz bir açılışta denenir. Süit dosyayı girdiye sayfanın içinden veriyor ve
 okuma yolunu ölçüyor; seçici penceresinin kendisini ölçmüyor.
 
+### 144 · Bir sayfadan çıkarken giden istek `context.route`'u atlar
+Roboders'i salt okunur gezecek korumanın ilk hâli yalnız ağ katmanıydı:
+`context.route` GET ve HEAD dışındaki her isteği durduruyordu. Yerel bir deneme
+sunucusuna karşı koşan test ilk koşuda kırmızı verdi: sayfa `pagehide` sırasında
+`keepalive` ile gönderdiği POST'u sunucuya ulaştırdı. Ölçülünce delik daha
+genişti. Başka bir sayfaya gitmek ya da bir bağlantıya tıklamak `pagehide`,
+`visibilitychange`, `onunload` ve öznitelik olarak yazılmış `onpagehide`
+dinleyicilerinin keepalive isteklerini ve `sendBeacon`'larını, bir `srcdoc`
+çerçevesininkini ve boş bir çerçevenin temiz `fetch`'ininkini sunucuya ulaştırdı.
+`page.close()` da öyle. `context.close()` ve `browser.close()` hiçbir şey
+ulaştırmadı. Bir router'ın gördüğü şey sayfanın yaşarken gönderdiği istek, ve
+sayfadan çıkış her bağlantı tıklamasında oluyor. Çare sayfanın içinde:
+`scripts/roboders/koruma.mjs`'in `sayfaKorumasi()`'nı her çerçevede sayfanın
+kendi betiklerinden önce koşan bir init betiği olarak kuruyor. Bu betik yazan
+`fetch`'i ve XHR'ı reddediyor, `sendBeacon`'ı boşa çıkarıyor ve sayfanın çıkışı
+dinlemesine izin vermiyor. Tur bir sayfayı değil tarayıcıyı kapatarak bitiyor.
+`e2e/roboders-koruma.spec.ts` üç çıkışı da sınıyor, ve init betiği kaldırılınca
+dördü kırmızıya dönüyor. Kural: bir isteği durduran bir koruma, sayfanın yaşarken
+değil giderken gönderdiğini de sunucunun sayacıyla ölçer.
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1273,12 +1293,12 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 143, yeni bir tuzak 144'ten devam eder. Test stratejisi
+büyük kullanılan numara 144, yeni bir tuzak 145'ten devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

@@ -179,9 +179,15 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       `--headless` olmadan kurulu, yani **görünür bir pencere** açıp odağı
       alıyor — kullanıcı meşgulken koşturulamaz, zamanlaması sorulacak;
       (b) oturumu **kullanıcı kendi açar**, şifre sohbete yazılmaz.
-      Çıktı `docs/asc/ekran/` deseninde, Roboders'in kendi klasörüne.
       **Turun eksiksiz olması aSc'dekinden önemli:** orada 528 yardım konusu
       dosya olarak elimizdeydi, burada geri dönüp bakılacak bir döküm **yok**.
+      **2026-10-08 · Tur 0 bitti: araçlar ve kanıtı hazır** (`scripts/roboders/`,
+      `e2e/roboders-koruma.spec.ts`, [ROBODERS.md](ROBODERS.md) "R6'nın araçları").
+      Görüntüler ve notlar `docs/` altına değil yalnız `scratch/roboders/`'e gider,
+      depo herkese açık. MCP tarayıcısı kullanılmaz. **Canlı yarı kullanıcının
+      "başla" demesini bekliyor** (tek oturum ve yeni cihaz uyarısı babayla
+      konuşulacak). İlk tur: öğretmen programının Eyotek'e ve e-postaya gönderilmesi
+      (B3.8), akış düğmeye kadar, düğmeye basılmadan.
 - [ ] **R7 Özellik envanteri çıkarılsın** → [ROBODERS.md](ROBODERS.md)
       genişletilsin, [ASC.md](ASC.md)'nin deseninde: bölümler, ekranlar,
       kısıt karşılaştırması. R6'yı bekliyor.

@@ -6,7 +6,7 @@ Asıl rakip: babanın bugün fiilen kullandığı program (kullanıcı, 2026-10-
 **Ürünün adı `Roboders`**, `Robodersi` değil — ikincisi Türkçenin belirtme
 hâli. Bu dosyanın adı da o yüzden `ROBODERS.md`.
 
-> **DURUM: R5 bitti, R6 ve R7 BAŞLAMADI.** Aşağıdakilerin tamamı ürünün
+> **DURUM: R5 bitti, R6'nın araçları hazır (Tur 0, 2026-10-08), canlı tur ve R7 BAŞLAMADI.** Aşağıdakilerin tamamı ürünün
 > **kendi tanıtım sayfasından** okundu. Programın **içi görülmedi** — ve
 > görülemez de, sebebi aşağıda. Yani bu dosya bir **özellik envanteri
 > değil**, envanterin önündeki kapının tarifi.
@@ -236,6 +236,48 @@ yer yok.
 **Bilinmeyen ve R6'dan önce sorulacak:** hesap **ücretli bir plan mı, yoksa
 sürmekte olan bir deneme mi**. İkincisiyse turun kaç günü kaldığı turun
 kapsamını belirler.
+
+## R6'nın araçları — Tur 0 (2026-10-08)
+
+Sözleşme artık kodla tutuluyor. Playwright MCP Roboders için **kullanılmaz**: bizim
+korumamızdan geçmiyor. Tur yalnız şu üç betikle yapılır, ve Roboders'e gitmeden önce
+korumanın kanıtı koşulur:
+
+```
+npx playwright test e2e/roboders-koruma.spec.ts   # koruma yerel sunucuya karşı yeşil mi
+node scripts/roboders/giris.mjs                    # kullanıcı kendisi girer, oturum saklanır
+node scripts/roboders/gez.mjs                      # korumalı, adım adım gezinti
+node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
+```
+
+- **Giriş** (`giris.mjs`) korumasız tek pencere, çünkü giriş bir POST. Betik hiçbir
+  şeye tıklamaz ve yazmaz. Şifre kullanıcının klavyesinden Roboders'in formuna gider,
+  koda, dosyaya ya da sohbete hiç uğramaz. Oturum `scratch/roboders/oturum.json`'da,
+  yalnız bu kullanıcı okuyabilir. Görülmedi: Roboders oturumu `sessionStorage`'da
+  tutuyorsa saklanan oturum ikinci pencerede açılmaz.
+- **Koruma** (`koruma.mjs`), dört katman. Sayfanın içinde, her çerçevede sayfanın
+  betiklerinden önce: yazan fetch ve XHR reddedilir, `sendBeacon` boşa çıkar, sayfa
+  çıkışını dinleyemez (tuzak 144). Ağda: yalnız GET ve HEAD çıkar, WebSocket açılmaz,
+  service worker koşmaz. Adreste: yazan bir kelime taşıyan GET de durur. Tıklamada:
+  adı yazan bir öğe, tablo hücresi, form alanı, sürüklenebilir öğe ve formu gönderen
+  düğme reddedilir. Reddedilen her şey `scratch/roboders/engellenen-<tarih>.jsonl`'a
+  yazılır: yöntem, sorgusuz adres ve sebep, isteğin gövdesi hiçbir zaman.
+- **Gezinti** (`gez.mjs`): `git`, `tikla`, `foto`, `oku`, `geri`, `kapat`. Yazan,
+  dolduran, sürükleyen ya da tuşa basan bir komut yok. Her tıklama hedefin adını
+  gösterip "e" bekler, hedef tek olmalıdır. Sayfa başına bir görüntü, döngü yok.
+  Tur bir sayfayı değil tarayıcıyı kapatarak biter.
+- **Görüntüler ve notlar** yalnız `scratch/roboders/ekran/` ve `scratch/roboders/notlar/` altında: depo
+  herkese açık ve görüntülerde babanın gerçek verisi var. Bu dosyaya yazılan notlarda
+  öğretmenler yalnız kısaltmasıyla geçer.
+- **Kanıt.** `e2e/roboders-koruma.spec.ts` yargıç olarak sunucunun sayacını kullanıyor.
+  Mutasyonla sınandı: ağ kuralı, sayfa katmanı, WebSocket yönlendirmesi, tıklama kuralı,
+  diyalog dinleyicisi ve sayfa katmanının günlüğü bozulunca kırmızı. Service worker
+  engeli tek başına bozulunca yeşil kalıyor, çünkü router service worker'ın isteğini de
+  durduruyor (ölçüldü, TESTFINDINGS 2026-10-08).
+
+**Canlı yarı bekliyor.** Tek oturum davranışı ve yeni cihaz uyarısı bilinmiyor: kullanıcı
+babayla güvenli bir saat ayarlayacak, ve tur onun "başla" demesine kadar Roboders'i
+açmıyor.
 
 ## Doğrulanmamış — R7b'de DÜŞTÜ (2026-08-31)
 

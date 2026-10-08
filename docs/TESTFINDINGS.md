@@ -26,6 +26,24 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-08 · Playwright, yerel deneme sunucusu · `e2e/roboders-koruma.spec.ts`
+Bulgu: Roboders korumasının ilk hâli yalnız `context.route` idi ve testin ilk koşusu
+kırmızı verdi: sayfadan çıkarken `keepalive` ile gönderilen bir POST sunucuya ulaştı.
+Ayrı bir ölçümle sınırı çıkarıldı: başka sayfaya gitmek, bağlantıya tıklamak ve
+`page.close()` sızdırıyor (pagehide, visibilitychange, onunload, öznitelik, srcdoc ve
+boş çerçeve yolları); `context.close()` ve `browser.close()` sızdırmıyor. Her koşuda
+tekrarlandı. Service worker ayrıca ölçüldü: korumasız bağlamda POST'u ulaşıyor, yalnız
+`context.route` ile durup günlüğe düşüyor, `serviceWorkers: 'block'` ile hiç koşmuyor.
+Tür: test kusuru değil, korumanın kusuru (ürün değil araç), ve testin bulduğu.
+Ne yapıldı: Sayfanın içinde koşan bir katman eklendi (`sayfaKorumasi()`), reddettiği
+her şeyi aynı günlüğe yazıyor. Testlere üç çıkış yolu eklendi. Mutasyon: ağ kuralı,
+sayfa katmanı, WebSocket yönlendirmesi, tıklama kuralı, diyalog dinleyicisi ve sayfa
+katmanının günlüğü bozulunca test kırmızı. İki mutant yaşadı ve sebebi ölçüldü:
+`serviceWorkers: 'block'` kalkınca route service worker'ın isteğini zaten durduruyor
+(iki katmanın her biri yetiyor), ve `confirm()`'ün İptal cevabı dinleyicisiz de geliyor
+(Playwright dinleyicisi olmayan diyaloğu kendisi kapatıyor; dinleyicinin işi günlük).
+Kalıcı kural: TRAPS.md, tuzak 144
+
 ### 2026-09-27 · düzeltme turu (vitest, Playwright, exe sürücüsü, npm run kontrol) · §8j'nin on üç kusuru
 Bulgu: Denetimin on üç kusurunun her biri önce onu üreten bir testle kırmızı görüldü,
 düzeltmeden sonra yeşil, ve düzeltme geri alınınca yeniden kırmızı (mutasyon, dosyanın

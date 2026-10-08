@@ -35,6 +35,27 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-08 · Roboders salt okunur, kodla: dört katman, ve görüntüler depoya girmez
+
+**Ne.** Roboders turu (R6) elle yapılan bir söz değil, `scripts/roboders/` altındaki
+üç betikle yapılıyor (`giris.mjs`, `koruma.mjs`, `gez.mjs`), ve koruma Roboders'e
+gidilmeden yerel bir sunucuya karşı kanıtlanıyor (`e2e/roboders-koruma.spec.ts`).
+Katmanlar: sayfanın içinde yazan fetch, XHR, beacon ve çıkış dinleyicileri; ağda
+yalnız GET ve HEAD ile WebSocket'siz bir router; adresinde yazan kelime olan GET'in
+durması; ve adından ya da yerinden yazan bir öğeye tıklamayı reddeden, her tıklamada
+soran bir gezinti. Giriş korumasız tek pencere, çünkü giriş bir POST: kullanıcı kendisi
+girer, betik hiçbir şeye dokunmaz.
+
+**Neden sayfa katmanı.** İlk tasarım yalnız router'dı ve kendi testi onu çürüttü:
+sayfadan çıkarken giden istek router'ı atlıyor (tuzak 144). **Denendi:** yalnız
+`context.route`.
+
+**Görüntüler ve notlar.** Roboders'in görüntüleri ve ham notları yalnız
+`scratch/roboders/`'te, depo herkese açık ve görüntülerde babanın gerçek verisi var
+(kullanıcının kararı). Belgelerde öğretmenler yalnız kısaltmasıyla geçer. Depodaki
+gerçek veri sorusuna karar verilene kadar depoya yeni gerçek veri (ad, fotoğraf, PDF)
+eklenmez (kullanıcı, 2026-10-08).
+
 ### 2026-10-08 · "aSc'nin yarısı" ölçüsü kalktı: her iyi özelliğin daha iyisi
 
 **Eski hâli.** 2026-08-30'dan beri hedef aSc'nin bu kursla ilgili kısmının yarısını
