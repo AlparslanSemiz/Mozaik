@@ -1,0 +1,181 @@
+# Her push'ta koşan süit, ve sitenin TEK kapısı.
+#
+# Her dala her push'ta koşar (main dahil, Dependabot'un dalları dahil); etiket
+# push'u burada koşmaz, onu surum.yml alır. Aynı dalın eski koşusu yenisi
+# gelince iptal edilir.
+#
+# Site artık push'la değil buradan yayınlanır: `site` işi yalnız main'e gelen
+# bir push'ta ve yalnız öteki dört iş yeşilse koşar. site.yml bu dosyanın aynı
+# commit'inden çağrılır (`uses: ./`), yani yayınlanan, testten geçen commit'in
+# kendisidir. Kırmızıda site olduğu gibi kalır.
+#
+# `retries` hiçbir yerde yok: bir kırmızı tekrarla gizlenmez. Düşen bir E2E
+# parçası düşen testleri bir kez daha koşar ve sonucu yalnız ÖZETE yazar
+# (tekrarda geçen "kararsız", yine düşen "kırmızı"); iş her iki durumda da
+# kırmızı kalır.
+#
+# Adımlar `npm run kontrol` gibi tek komut değil, tek tek yazılı: kırılan adımın
+# adı Actions arayüzünde görünsün. Ölçülen süreler docs/WORKLOG.md'de.
+name: ci
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Tipler
+        run: npm run tipler
+      - name: Katman sınırı
+        run: npm run sinir
+      - name: Lint
+        run: npm run lint
+      - name: Ölü kod
+        run: npm run knip
+      - name: Biçim
+        run: npx prettier --check "src/**/*.{ts,tsx}" "e2e/**/*.ts" "scripts/**/*.mjs" "*.{ts,js}"
+      - name: Birim testleri ve belge kapısı
+        run: npm test
+      - name: Derleme
+        run: npm run build
+      - name: Boyut
+        run: npm run boyut
+
+  # Ana E2E süiti, üç parça. En uzun test (süitin duvar süresinin yarısı) burada
+  # değil, kendi işinde koşuyor: dört çekirdekli bir runner'da üç başka worker'ın
+  # yanında kendi beklemeleriyle yarışırdı.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite build
+      - name: E2E ${{ matrix.parca }}/3
+        run: >-
+          npx playwright test --shard=${{ matrix.parca }}/3
+          --grep-invert "kurulamayan haftada yolları söylüyor"
+          --reporter=blob,list --trace=retain-on-failure
+      - name: Kararsız mı (yalnız özete yazar)
+        if: failure()
+        continue-on-error: true
+        run: node scripts/kararsiz.mjs
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-${{ matrix.parca }}
+          path: blob-report/
+          retention-days: 7
+
+  # Başlığıyla seçiliyor, çünkü başlığa bir etiket eklemek satırı biçimin
+  # sınırından taşırıyor. Başlık değişirse bu iş "No tests found" ile kırmızıya
+  # döner, yani test sessizce kaybolmaz.
+  e2e-uzun:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite build
+      - name: E2E, uzun test yalnız
+        run: >-
+          npx playwright test --grep "kurulamayan haftada yolları söylüyor"
+          --reporter=blob,list --trace=retain-on-failure
+      - name: Kararsız mı (yalnız özete yazar)
+        if: failure()
+        continue-on-error: true
+        run: node scripts/kararsiz.mjs
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-uzun
+          path: blob-report/
+          retention-days: 7
+
+  # `npm run kontrol`'ün öteki iki Playwright config'i: site, yerel sunucu ve
+  # klasör; ve çözücünün gerçek ölçekteki stresi.
+  e2e-ek:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Site, sunucu, klasör
+        run: npm run test:site -- --trace=retain-on-failure
+      - name: Çözücü stresi
+        run: npx playwright test --config playwright.cozucu.config.ts --trace=retain-on-failure
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-ek-iz
+          path: test-results/
+          retention-days: 7
+
+  # Kırmızıda parçaların raporu tek bir HTML'de, izleriyle.
+  rapor:
+    if: failure()
+    needs: [e2e, e2e-uzun]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          path: tum-blob
+          merge-multiple: true
+      - run: npx playwright merge-reports --reporter=html ./tum-blob
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-raporu
+          path: playwright-report/
+          retention-days: 7
+
+  site:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [denetim, e2e, e2e-uzun, e2e-ek]
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/site.yml

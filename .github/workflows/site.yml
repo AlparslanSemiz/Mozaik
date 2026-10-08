@@ -1,45 +1,37 @@
-# Task 4f: publish dist-site/ to GitHub Pages.
+# Publish dist-site/ to GitHub Pages. Called by ci.yml, never on its own.
+#
+# 2026-10-08: this used to run on every push to main, with no test in front of
+# it. It is now a reusable workflow that ci.yml calls (`uses: ./`) after its
+# four test jobs are green, and only for a push to main. GitHub runs the called
+# file from the SAME commit as the caller, so what is published is the commit
+# that passed. A red run leaves the site as it was. There is no push and no
+# manual trigger here on purpose: either would publish without the tests. To
+# republish, run ci.yml by hand on main.
 #
 # This is the SECOND delivery route, not the first. The one that matters is
 # still dist/index.html — the file my father double-clicks — and nothing here
 # builds it or touches it. What gets published is the folder produced by
 # `npm run build:site`: one HTML file plus a manifest, a service worker and
-# three icons. No backend, no database, no account, no API (no-server principle).
+# three icons.
 #
 # `npm run build:site` starts with `tsc --noEmit`, so a type error fails the
-# deploy. There is deliberately no separate type-check step: two places that
-# can disagree about whether the code compiles is one place too many.
+# deploy as well.
 #
-# ONE THING IS STILL ON THE REPOSITORY OWNER, and until it is done this
-# workflow builds fine and FAILS at the deploy step:
-#
-#     Settings -> Pages -> Source: "GitHub Actions"
-#
-# Measured 2026-08-27, run #4: `build` succeeded end to end and `deploy` came
-# back with `Failed to create deployment (status: 404) ... Ensure GitHub Pages
-# has been enabled`. So a red mark here does not mean the site is broken — it
-# means the switch has not been thrown yet.
-#
-# The other half of this note is DONE: the repository was renamed to
-# `ders-programi` (2026-08-27).
+# Pages has to be set to Settings -> Pages -> Source: "GitHub Actions", and the
+# `github-pages` environment allows `main` only (both checked 2026-10-08).
 
 name: site
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_call:
 
+# The caller grants these to the job that calls this file; a called workflow
+# can keep or lower them, never raise them. One deploy at a time comes from
+# ci.yml's own concurrency group.
 permissions:
   contents: read
   pages: write
   id-token: write
-
-# One deploy at a time. A queued run that is already out of date is thrown
-# away rather than published after the newer one.
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   build:

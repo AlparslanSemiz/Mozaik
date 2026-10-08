@@ -22,3 +22,4 @@ dist-exe/
 
 # aSc ekran görüntülerinin arşivi, elle üretiliyor ve depoya girmez
 docs/asc/**/*.zip
+blob-report/

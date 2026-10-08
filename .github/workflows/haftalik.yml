@@ -1,0 +1,84 @@
+# Haftada bir koşan, push'u beklemeyen işler: Windows'ta E2E ve mutasyon.
+#
+# ci.yml'de değil, çünkü orada main'e gelen her push aynı daldaki koşuyu iptal
+# ediyor, ve bir mutasyon koşusu bir push'tan uzun sürebilir. Burada iptal yok.
+# Bu işler siteyi kilitlemez: yayının kapısı yalnız ci.yml.
+#
+# Zamanlanmış koşu yalnız varsayılan dalda (main) olur. Elle de tetiklenir, ve
+# o zaman hangi işin koşacağı ile Windows'ta hangi tarayıcının açılacağı seçilir.
+name: haftalik
+
+on:
+  schedule:
+    - cron: '0 1 * * 1' # Pazartesi 01:00 UTC, Türkiye'de 04:00
+  workflow_dispatch:
+    inputs:
+      is:
+        description: 'Which job to run'
+        type: choice
+        options: [hepsi, windows, mutasyon]
+        default: hepsi
+      kanal:
+        description: 'Browser on Windows: Playwright Chromium or the installed Edge'
+        type: choice
+        options: [chromium, msedge]
+        default: chromium
+
+permissions:
+  contents: read
+
+concurrency:
+  group: haftalik-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Babanın ortamına en yakın test: Windows, ve elle seçilince Edge (WebView2'nin
+  # motoru). Bütün ana süit tek işte, uzun test dahil.
+  windows-e2e:
+    if: github.event_name == 'schedule' || inputs.is == 'hepsi' || inputs.is == 'windows'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      PLAYWRIGHT_KANAL: ${{ inputs.kanal == 'msedge' && 'msedge' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npx vite build
+      - name: E2E (${{ inputs.kanal || 'chromium' }})
+        run: npx playwright test --reporter=html,list --trace=retain-on-failure
+        env:
+          PLAYWRIGHT_HTML_OPEN: never
+      - name: Kararsız mı (yalnız özete yazar)
+        if: failure()
+        continue-on-error: true
+        run: node scripts/kararsiz.mjs
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-playwright-raporu
+          path: playwright-report/
+          retention-days: 7
+
+  mutasyon:
+    if: github.event_name == 'schedule' || inputs.is == 'hepsi' || inputs.is == 'mutasyon'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run mutasyon
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutasyon-raporu
+          path: test-results/mutasyon/
+          retention-days: 30

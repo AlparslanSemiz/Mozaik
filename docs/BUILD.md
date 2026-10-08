@@ -205,16 +205,21 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 
 ### Site
 
-Depoda üç iş akışı var. `site.yml` GitHub Pages'e yayınlar, `surum.yml` üç
-teslim dosyasını üretir, ve `pr.yml` bir pull request'in üstünden süiti geçirir
-(tipler, sınır, lint, birim, derleme ve tam E2E, ucuzdan pahalıya sıralı).
-Üçüncüsü 2026-09-12'de `.github/dependabot.yml` ile birlikte geldi: haftalık bir
-bağımlılık PR'ı açılıyorsa "bu güncelleme bir şey kırdı mı" sorusunu makinenin
-cevaplaması gerekiyor. Dependabot otomatik güncelleme yapmıyor, yalnız PR açıyor;
-birleştirme kararı insanda.
+Depoda dört iş akışı var (2026-10-08'den beri). `ci.yml` her dala her push'ta
+süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
+derleme ve boyut bir işte; ana E2E süiti üç parçada; en uzun E2E testi kendi
+işinde yalnız; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
+yeşilse ve push `main`'e ise `site.yml`'yi çağırır ve site yayınlanır. `site.yml`
+kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir commit'i
+yayınlayamaz. `haftalik.yml` haftada bir Windows'ta E2E'yi ve mutasyonu koşar,
+siteyi kilitlemez. `surum.yml` bir etiketle üç teslim dosyasını üretir.
 
-`npm run build:site` GitHub Pages'e giden klasörü üretir, `site.yml` iş akışı her
-`main` itmesinde yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
+Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
+açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
+yok. Dependabot otomatik güncelleme yapmıyor, birleştirme kararı insanda.
+
+`npm run build:site` GitHub Pages'e giden klasörü üretir, ve `ci.yml` onu yalnız
+yeşil bir `main` push'unda yayınlar. Sayfa ilk açılıştan sonra service worker sayesinde
 bağlantısız da açılır, ve bu `site.spec.ts`'te ölçülüyor. Service worker'ın
 önbellek adı sürüm damgasını taşır, yoksa güncelleme bir açılış geriden gelir
 (tuzak 73).

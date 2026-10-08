@@ -40,5 +40,13 @@ export default defineConfig({
     viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },
-  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
+  // PLAYWRIGHT_KANAL=msedge runs the same project in the installed Edge, the
+  // engine closest to WebView2 (.github/workflows/haftalik.yml). Unset, it is
+  // Playwright's own Chromium.
+  projects: [
+    {
+      name: 'chromium',
+      use: { browserName: 'chromium', channel: process.env.PLAYWRIGHT_KANAL || undefined },
+    },
+  ],
 });
