@@ -196,6 +196,81 @@ bağımlılık uyarısı (eskiden de vardı, kırmızı değil).
 
 ---
 
+## 2026-10-08 · Refactor analizi (delta)
+
+**Ne yapıldı.** 2026-09-11 ve 2026-09-12'deki kod refactorunun üstüne bir delta analizi.
+Repo'ya yazılmadı, ölçümler bittiğinde `git status` temizdi. Raporun tamamı ve
+betikleri `scratch/analiz-2026-10-08/` altında, git dışında: `rapor.md`, dosya haritasını
+TypeScript AST ile sayan `harita.mjs` ve çıktısı `harita.tsv`, üç yardımcı ajanın
+betikleri (`ajan-kisit/`, `ajan-ui/`, `ajan-css/`) ve her komutun ham çıktısı. Bulgular
+raporda R1 ile R20 arası, belgelerde RF1 ile RF20 arası adını taşıyor (R16, RF16
+demek), çünkü [TODO.md](TODO.md) §1 R1 ile R12 arasını rakip envanteri için kullanıyor.
+Adımlar "Refactor adım 0" ile "Refactor adım 7" arası, çünkü A1 ile A10 arası belge
+kapılarının adı ve WORKLOG'da ayrıca bir "A turu" var.
+
+**Yöntem.** Önce belgeler okundu (CLAUDE.md'nin sırası, ARCHITECTURE, CONVENTIONS,
+DECISIONS'ın refactor kayıtları, bu dosyanın 2026-09-11 ve 2026-09-12 girdileri,
+TESTPLAN ve TRAPS'in ilgili grupları). Sonra izinli komutlar koşuldu ve kod üç yönden
+okundu: kısıtların iki yazımı, bileşenler, ve `styles.css` ile yükseltme riski. Okunarak
+verilen hükümler raporda "okundu, ölçülmedi" diye işaretli. Kısıt ajanı sekiz mutasyonu
+yalnız deponun bir kopyasında denedi.
+
+**Önceki turun durumu.** 2026-09-11 envanterinin önerdiği sıradan araçlar, ölü kod,
+`keys.ts`, küçük ortak yardımcılar, tercih fabrikası, `library.ts` ve `store.ts`
+yapıldı. `entities.ts`, `feasibility.ts`, `constraints.ts`, bileşenlerin saf parçaları,
+bileşenler ve hazır çözüm geçişleri yapılmadı. Gerekçesi ne bu dosyada ne DECISIONS'ta
+yazılı, kayıt yalnız "kapandı (Faz 4)" diyor. Hazır çözüm adaylarından
+`useSyncExternalStore` bilerek dışarıda bırakılmıştı (DECISIONS 2026-09-11), öteki üçü
+(`crypto.getRandomValues`, önbellekli `Intl.Collator`, `idb-keyval`) gerekçesiz kaldı.
+
+**Özet.**
+- 2026-09-12'den bu yana `src/`'ye 10 609 satır eklendi, en büyüğü envantere hiç girmedi: `pure/relax.ts` 2 333 satır, 30 dışa aktarım, `createRelaxer` 486 satır. `relax.ts` ile `sat.ts` ne mutasyon ne kapsam listesinde, ve son mutasyon koşusu ikisi yazılmadan önceydi.
+- Kısıtların iki yazımı (`blocker()` ile `relax.ts`'in SAT kodlaması) arasındaki sapmayı hiçbir test kendi başına görmüyor. Kopyada `relax.ts`'in `maxConsecutive` kodlaması silinince hiçbir test kırmızıya dönmedi, `maxPerDay` silinince yalnız yavaş test döndü. Değişmez testindeki `offered > 10` neredeyse totoloji, çünkü `offer()` doğrulamadan geçmeyeni zaten atıyor.
+- İş mantığı bileşenlerde birikti: `ui/Program.tsx`'te yaklaşık 330 satır React'siz hesap var, ve blok genişliğinin uzun teneffüste kesilmesi `ui/Grid.tsx` ile `ui/Print.tsx`'te iki ayrı algoritmayla yazılı. ARCHITECTURE'ın iki cümlesi bunu yanlış anlatıyor (Ribbon'da "iş mantığı yok", "Otomatik diz (N)"in N'i).
+- Öğretmenin kâğıdı `Print()` bileşeninin içinde bir JSX, arayüzden bağımsız üretilemiyor. Babanın gönderme isteği (B3.8) için RF9 önkoşul.
+- Zebra satırlar için kod hazır: 32 tablonun 24'ü tek bir CSS tabanını paylaşıyor.
+
+**Ölçülenler.** `dist/index.html` 1 158 662 bayt, ham eşiğe 12,34 kB, brotli eşiğine
+8,73 kB pay. Kapsam (sessiz pencerede, satır yüzdesi): `constraints.ts` 96,75,
+`entities.ts` 93,65, `feasibility.ts` 99,71, `rules.ts` 100, `solver.ts` 99,06,
+`parseState.ts` 97,38, `library.ts` 98,85, `undo.ts` 97,77, `blocks.ts` 100. Mutasyon
+skorları 2026-09-12'nin kodundan, yani bugünkü kapsamla karşılaştırılamaz. Tip
+güvenliği: `any` 0, `as` 56 (ayrıca 13 `as const`), `!` 210, ve bütün kimlikler aynı
+`Id = string`. Liste ekranlarında Type-2 kopya 1 883 kod satırının 543'ü. `styles.css`
+6 607 satır, `--ink` tanımsız ama dört yerde okunuyor, dört sınıf grubu ölü. Ölçüm
+2026-10-08, rapor.
+
+**Koşulan komutlar.**
+
+| Komut | Çıkış | Not |
+|---|---|---|
+| `npm run tipler` | 0 | |
+| `npm run sinir` | 0 | 179 modül, ihlal yok |
+| `npm run lint` | 0 | 0 hata, 3 `exhaustive-deps` uyarısı |
+| `npm run knip` | 0 | bulgu yok |
+| `npm test` | 0 | 43 dosyada 1373, hepsi geçti, 138 s, yardımcı ajanlar koşarken |
+| `npx vite build` | 0 | |
+| `npm run boyut` | 0 | |
+| `npm run grafik` | 0 | |
+| `npm run kapsam`, birinci | 1 | üç zaman aşımı (`relax.test.ts` iki, `invariants.test.ts` bir), beş dakikalık yük ortalaması 8,9 (tuzak 118) |
+| `npm run kapsam`, ikinci | 0 | sessiz pencerede, 1373/1373, 406 s |
+
+Koşulmayanlar: `npm run test:e2e`, `test:site`, `cozucu`, `patrol`, `ekran`, `mutasyon` ve
+`exe:*`. Analizin brifingi uzun katmanları dışarıda bıraktı. Ekrana bakılmadı.
+
+**Kullanıcının kararları (2026-10-08).** Kayıt [DECISIONS.md](DECISIONS.md)'de, plan
+[TODO.md](TODO.md) §8k'de.
+- Refactor dalında davranış değişmez. Zebra satırlar, `--ink`, bozuk ilişkinin mesajı ve RF15'in `t()` dizeleri özellik işi, ayrı dallarda.
+- Sıra: adım 0 belge kaydı, adım 1 testler (RF16, RF17, RF2), adım 2 RF3 ve gecelik mutasyon tabanı, adım 3 RF18, adım 4 RF8 sonra RF9, adım 5 RF12, RF10, RF11 ve RF20, adım 6 RF1, adım 7 RF5 ve RF6.
+- Park edilenler: RF4, RF7, RF13, RF14, RF19.
+- Boyut eşiği [BUILD.md](BUILD.md)'nin kuralıyla, gerekçe bu dosyaya yazılarak yükseltilebilir.
+- Önceden bozuk bir ilişki kendiliğinden çözülmez, panel ve Kontrol bunu tek cümleyle söyler (özellik dalı).
+- `tsconfig.tsbuildinfo` git'ten çıkar, ayrı commit'te.
+- §8d'deki `sanitize` kanonik anahtar sorusu ertelendi.
+- Eyotek ve e-posta yolu babaya soruluyor, şema v17 o zamana kadar açılmaz.
+
+---
+
 ## 2026-10-08 (ikinci yarı) · Belge düzeltmeleri, depodaki gerçek veri, A1–A2 ve Roboders'in Tur 0'ı
 
 **Başlangıç.** `main` 87e3f55'teydi, ağaç temizdi. Push ve etiket yok. Roboders açılmadı.

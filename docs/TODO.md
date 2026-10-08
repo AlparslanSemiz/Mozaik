@@ -51,7 +51,7 @@ bitince §10'a taşınır.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası ve denetimin bulguları (§8j) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) ve refactor analizinin planı ile kusurları (§8k) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
 | **§10** | **ARŞİV** — biten turlar, tarih sırasıyla | kayıt |
 
@@ -1469,6 +1469,18 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       toplamı ("99 ders · 433 saat", §8j DK13), plan seçicinin "(taslak)" eki ve kâğıdın
       çıktı tarihi (ikisi keşifte kaynaktan okundu, ekranda yalnız ilki görüldü).
       İlki 2026-09-27'de kapandı (DK13, `c9c66e5`); öteki ikisi ve listenin kalanı açık.
+      **2026-10-08 refactor analizinde iki madde genişledi** (kaynaktan okundu, ekranda
+      denenmedi, rapor `scratch/analiz-2026-10-08/rapor.md`, git dışında). `t()`
+      listesinin bugünkü hâli, bir AST taramasıyla: görünür yaklaşık 24 yer, yalnız
+      erişilebilir adda 8 yer ve elle yazılmış iki `'tr-TR'` (`Print.tsx:107`, `Data.tsx`).
+      Görünür olanlar `App.tsx:835` (taslak eki), `Dialogs.tsx:196` ve `:214` (varsayılan
+      düğme adları), `Ribbon.tsx:481`, `Print.tsx:452`, `:463`, `:545` ve `:683`,
+      `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
+      `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
+      `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
+      özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
+      dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
+      `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
 - [x] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
       sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
       oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
@@ -1816,6 +1828,116 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
       Şiddet: görsel. Öğle arası günden güne değişince 6. sütunun saat kutusu boş kalıyor
       ve numara yaklaşık 7 px aşağı iniyor. DENETIM M3.
       Kapandı 2026-09-27, 4f072ad. Test: musaitlik.spec.ts 10 "saati boş kalan sütunun numarası ötekilerle aynı hizada" (Saatler kapalı ve açık).
+
+### 8k · Refactor analizinin bıraktıkları (2026-10-08)
+
+Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
+altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
+Bulgular RF1 ile RF20 arası adını taşıyor (raporda R16, burada RF16), refactor dışı
+kusurlar RK1'den başlıyor. Refactor dalında davranış değişmez, kararlar ve park
+gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
+
+**Bulgular, tek satırda.**
+
+| RF | Ne | Nerede |
+|---|---|---|
+| RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax.ts` |
+| RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/invariants.test.ts`, `src/relax.test.ts` |
+| RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
+| RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver.ts` |
+| RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities.ts` |
+| RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints.ts` |
+| RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
+| RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
+| RF9 | öğretmen ve sınıf kâğıdı `Print()`'in içinde, ayrı üretilemiyor | `src/ui/Print.tsx` |
+| RF10 | şerit tek fonksiyonda yedi sekme | `src/ui/Ribbon.tsx` |
+| RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/App.tsx` |
+| RF12 | liste ekranlarının ortak iskeleti kopya | `src/ui/setup/`, `src/ui/lessons/` |
+| RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada, birim testi yok | `src/platform/useSolver.ts` |
+| RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/types.ts` |
+| RF15 | `t()`'den geçmeyen dizeler (özellik işi, §8d) | `src/ui/` |
+| RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/relaxPool.ts` |
+| RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
+| RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
+| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities.ts`, `src/pure/listview.ts` |
+| RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/theme.ts` |
+
+**Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
+
+- [ ] **Refactor adım 0 · belge kaydı.** WORKLOG'un girdisi, bu bölüm ve DECISIONS'ın
+      kaydı. `tsconfig.tsbuildinfo` git'ten ayrı bir commit'le çıkar.
+- [ ] **Refactor adım 1 · yalnız testler (RF16, RF17, RF2'nin ilk yarısı).** RF16:
+      derlenmiş betiğin klasik bir worker olarak derlendiği (`e2e/temel.spec.ts`) ve
+      öneri aramasının Chromium'da worker'da koştuğu (`e2e/otomatik.spec.ts`). RF17:
+      `withGlobalTauri` (`src/surum.test.ts`) ve Program sekmesinin gizlenince
+      sökülmediği (`e2e/program.spec.ts`). RF2: `maxConsecutive` ile `maxPerDay`'i tek
+      başına bağlayan dünyalar (`src/relax.test.ts`) ve değişmez üretecinin ilişki ve iki
+      sınırla genişlemesi (`src/invariants.test.ts`). Üretim koduna dokunulmaz. Adım 6'nın
+      önkoşulu.
+- [ ] **Refactor adım 2 · RF3 ve gecelik mutasyon tabanı.** `relax.ts` ve `sat.ts`
+      mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
+      commit'te (A9 kapısı). Adım 1'e bağlı.
+- [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
+      `.suggestion-part`), okunmayan dört token, bayat yorum, ve belgelerin bayat
+      cümleleri: ARCHITECTURE'ın Ribbon'a "iş mantığı yok" demesi, "Otomatik diz (N)"in N'ini
+      `entities.ts`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
+      lint için "dört uyarı" demesi, DESIGN ile LAYOUT'un ölü sınıfları anlatması.
+      `--ink` burada değil, RK1.
+- [ ] **Refactor adım 4 · RF8, sonra RF9.** Önce karakterizasyon birim testleri, sonra
+      iş mantığının saf katmana taşınması. Sonra öğretmen ve sınıf kâğıdının saf modeli.
+      RF9 babanın gönderme isteğinin (B3.8) önkoşulu ve RF8'e bağlı.
+- [ ] **Refactor adım 5 · RF12, RF10, RF11, RF20.** Liste ekranlarının iskeleti, şeridin
+      sekme başına bölünmesi, tercih aynalarının React'in `useSyncExternalStore`'u ile
+      kalkması, `theme.ts`'in çift adları. RF10 RF8'e, RF20 RF11'e bağlı.
+- [ ] **Refactor adım 6 · RF2'nin kalan iki maddesi, sonra RF1.** Taşımadan önce iki ayrı
+      içerik commit'i. İlki: `offer()`'ın içinde `verifySuggestion`'ın reddettiği öneri
+      sayısı ölçülür ve `offered > 10` iddiasının yerine geçer, kodlama doğruysa 0.
+      İkincisi: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
+      `blocker()`'ınkilerle aynı küme. İkisi de bugün `relax.ts`'ten bir dışa aktarım
+      istiyor, adım 1'in üretim koduna dokunmama sözü yüzünden buraya kaldı. Ret sayısı
+      2026-10-08'de yalnız bir kopyada ölçüldü (`scratch/olc-ret-2026-10-08/`): bugünkü
+      üreteçle ve ilişki ile iki sınırı da üreten üreteçle, üç tohumda, 0. Kalibrasyon:
+      kopyada analizin M1, M2 ve M3 mutasyonları uygulanınca genişletilmiş üreteçle ret 9
+      ile 45 arası, bugünkü üreteçle 0. Sonra `relax.ts`'in modüllere taşınması. Adım 1 ve
+      2'ye bağlı.
+- [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `constraints.ts`'in yalnız
+      taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
+      Mutasyon listesinin yolları aynı commit'te.
+- [ ] **Park: RF4, RF7, RF13, RF14, RF19.** Gerekçeleri DECISIONS 2026-10-08.
+
+**Refactor dışı kusurlar.** Hiçbiri refactor dalında düzeltilmez.
+
+- [ ] **RK1 `--ink` hiçbir yerde tanımlı değil.** `src/styles.css`'in dört kuralı
+      (4196, 4213, 4242, 6407) `color: var(--ink)` okuyor, değişken ne CSS'te ne kodda
+      tanımlı, yani renk kalıtılana düşüyor. Okundu, ekranda görülmedi. Özellik dalı.
+- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `relax.ts` 1100 iki
+      ders de yerinde kalıyorsa ilişkinin o gününü atlıyor, `verifySuggestion` ise
+      ilişkisi çiğnenmiş haftayı reddediyor. İki ders sabitliyse sonuç 0 öneri, oysa bir
+      öğretmen saati açmak haftayı kuruyor (analizin kopyasında ölçüldü). Karar verildi:
+      kendiliğinden çözülmez, panel ve Kontrol tek cümleyle söyler. Özellik dalı.
+- [ ] **RK3 Kapalı saatin iki tanımı. Karar bekliyor.** Program'ın satır başı sınıfın
+      ya da dersliğinin kapalı saatini sayıyor (`Program.tsx` 307), `openHours` yalnız
+      varlığın kendi saatini (`entities.ts` 987). Sınıflar listesinin "Ders saati" sütunu
+      yükü gün ile saatin çarpımına bölüyor (`Classes.tsx` 270), Müsaitlik ise açık saati
+      gösteriyor. Hangisi doğru tanım, karar kullanıcıda. Okundu, ölçülmedi.
+- [ ] **RK4 Öğretmen değiştirme onayı iki yerde iki ayrı sayı söylüyor.** Varlık paneli
+      `placedBlocks`'tan sayıyor (`Inspector.tsx` 163), ders sayfası
+      `transferLesson().returned`'dan (`LessonEdit.tsx` 156), cümleleri de ayrı. Okundu,
+      ölçülmedi.
+- [ ] **RK5 Müsaitlik boyamasında her yeni hücre tabloyu yeniden çiziyor olabilir.**
+      `Availability.tsx` 181 sürükleme sırasında her `pointerenter`'da `setPending`
+      çağırıyor, tuzak 1'in kuralına aykırı görünüyor. Önce babanın verisinde ve iki
+      motorda ölçülür (tuzak 105, 141). Okundu, ölçülmedi.
+- [ ] **RK6 `.main`'in sekme solması büyük ihtimalle koşmuyor, ve test bunu görmüyor.**
+      `src/styles.css` 1664 ile DESIGN'ın cümlesi `<main>`'in `key={tab}` taşıdığını
+      söylüyor, `App.tsx` onu `<Activity>` için bilerek kaldırdı. `e2e/hareket.spec.ts` 84
+      koşan herhangi bir animasyonu kabul ediyor, panel girişleri de sayılıyor. Okundu,
+      ölçülmedi. Belge yarısı adım 3'te (RF18).
+- [ ] **RK7 `relax.test.ts`'in süresi yeniden ölçülsün.** [TESTPLAN.md](TESTPLAN.md)
+      "yaklaşık 45 saniye" diyor. 2026-10-08'de `npm test`'in içinde 136,8 saniye (yardımcı
+      ajanlar koşarken) ve 155,8 saniye (`performance` profili, başka bir oturum açıkken),
+      kapsam altında 402 saniye. Sessiz bir pencerede tek başına ölçülür, TESTPLAN'ın
+      cümlesi sayıyla düzelir.
 
 ## §9. Ham notlar — senin kendi satırların
 

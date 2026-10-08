@@ -75,6 +75,36 @@ Turtek'in resmî bir yolu aranacaktı.
 **Gerekçe.** Kullanıcının kararı; öncelik babanın cevabından (öğretmenler Eyotek'e
 bakıyor).
 
+### 2026-10-08 · Refactor turu: davranış değişmez, sıra ve park edilenler
+
+**Ne.** 2026-10-08'in refactor analizi ([WORKLOG.md](WORKLOG.md), aynı gün) yirmi bulgu
+çıkardı. Belgelerde RF1 ile RF20 arası adını taşıyorlar, adımlar "Refactor adım 0" ile
+"Refactor adım 7" arası. Plan ve bağımlılıklar [TODO.md](TODO.md) §8k'de. Kullanıcının
+kararları:
+
+- **Refactor dalında davranış değişmez.** Zebra satırlar, tanımsız `--ink`, önceden bozuk bir ilişkinin mesajı ve RF15'in `t()` dizeleri özellik işi, `main`'den açılan ayrı dallarda yapılır. Refactor dalındaki bir commit ekranda ya da bir yedek dosyasında hiçbir şeyi değiştirmez.
+- **Sıra.** Adım 0 belge kaydı. Adım 1 yalnız testler (RF16, RF17, RF2). Adım 2 RF3 ve gecelik mutasyon tabanı. Adım 3 RF18. Adım 4 RF8, sonra RF9. Adım 5 RF12, RF10, RF11 ve RF20. Adım 6 RF1. Adım 7 RF5 ve RF6.
+- **Boyut eşiği** [BUILD.md](BUILD.md)'nin kuralıyla yükseltilebilir, gerekçesi WORKLOG'a yazılarak.
+- **Önceden bozuk bir ilişki** (`notSameDay` ızgarada zaten çiğnenmişken) kendiliğinden çözülmez. Panel ve Kontrol bunu tek cümleyle söyler. Özellik dalının işi.
+- **`tsconfig.tsbuildinfo`** git'ten çıkar, ayrı bir commit'te.
+- **§8d'deki `sanitize` kanonik anahtar sorusu** ertelendi, ayrıca konuşulacak.
+- **Eyotek ve e-posta gönderme yolu** babaya soruluyor. Şema v17 o zamana kadar açılmaz.
+
+**Park edilenler ve gerekçeleri** (kullanıcının kararı, 2026-10-08):
+
+- **RF4, çözücünün bölünmesi.** Sıcak döngü ve ölçülmüş kararlar: `buildIndex`'in kendi anahtar kesmesi (aşağıda, 2026-09-11), `occupy` ve `vacate`'in `place()`'e eşdeğerliği, tuzak 21, 26 ve 122.
+- **RF7, çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar.** Sıcak döngüdeki yardımcılar önce A/B ölçümü istiyor (aşağıdaki `buildIndex` dersi), ve RF1, RF4 ile RF6'ya bağlı.
+- **RF13, çözücü oturumunun sınıfa çıkması.** Sınıf yaklaşımı uygun, ama RF1 bitmeden yapılmaz ve önce birim testleri yazılır.
+- **RF14, markalı kimlik tipleri.** `parseState`'e değen geniş bir diff. Yeni kodda nesne parametreyle riskin çoğu ucuza alınır.
+- **RF19, `crypto.getRandomValues` ve önbellekli `Intl.Collator`.** Zararsız ama getirisi çok küçük, acelesi yok.
+
+**Adlar.** Bulgular raporda R1 ile R20 arasıydı. [TODO.md](TODO.md) §1 R1 ile R12 arasını
+rakip envanteri için kullandığı için belgelerde RF oldular (R16, RF16 demek). Adımlar A
+diye anılmıyor, çünkü A1 ile A10 arası `src/docs.test.ts`'in belge kapılarının adı ve
+WORKLOG'da ayrıca bir "A turu" var. Refactor dışı kusurlar RK1'den başlıyor (§8k).
+
+**Gerekçe.** Kullanıcının kararı.
+
 ### 2026-10-08 · Paket ölçütü açılışa çekildi, sorma sırası önce depo ve platform
 
 **Ne.** [CONVENTIONS.md](CONVENTIONS.md) "Hazır çözüm önce" ve [BUILD.md](BUILD.md)
