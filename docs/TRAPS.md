@@ -423,8 +423,11 @@ worker'da açıldı ve ilk `document is not defined` `main.tsx`'in gövdesindeyd
 `main.tsx` belge yoksa `serveRelax()`'ı başlatıyor. İki tuzak kalıyor. Bir modülün
 tepesine konan tek bir `document` ya da `window` erişimi worker'ı açılışta
 düşürür; `relaxPool.ts` bunu beş saniyelik "hazırım" beklemesiyle yakalayıp
-ana iş parçacığına döner, yani kusur sessizce yavaşlığa dönüşür. Bunu gerçek exe
-süiti `data-oneri-isci`'yi okuyarak ölçüyor. İkincisi, modül worker'ın hatası
+ana iş parçacığına döner, yani kusur sessizce yavaşlığa dönüşür. Bunu
+`data-oneri-isci`'yi okuyan iki test ölçüyor: Chromium'da `e2e/otomatik.spec.ts`,
+WebKitGTK'da gerçek exe süiti. Derlenmiş betiğin klasik bir betik olarak
+derlendiğini ayrıca `e2e/temel.spec.ts` soruyor, çünkü bir `import.meta` da aynı
+sessiz yavaşlığı üretir. İkincisi, modül worker'ın hatası
 iletisiz gelir (`message: undefined`); tanı için klasik worker ve bir `error`
 dinleyicisi kullanılır. WebView2'de ölçülmedi.
 

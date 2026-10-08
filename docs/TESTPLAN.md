@@ -256,6 +256,7 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 - **Erişilebilirlik.** Renk kontrastı ve ayrımı, gün bandının bir durum gibi okunmaması ve iki temada aynı yükte olması, `--on-color` mürekkebi, görünür odak, dar ekranda erişilebilir adın kalması, %150'de üst çubuğun ve şeridin taşmaması.
 - **Kâğıt.** Başlık, dikey ortalama, sayfa sayısı, A4 yatay, ekran önizlemesinin süsünün kâğıda sızmaması.
 - **Çevrimdışı.** Gömülü fontun gerçekten çizildiği ve ağdan bayt çekilmediği.
+- **Öneri aramasının worker'ı** (`temel.spec.ts` 91, `otomatik.spec.ts`). Derlenmiş dosyanın satır içi modül betiği klasik bir betik olarak derleniyor (`node:vm` ile, düzenli ifadeyle değil), ve küçük bir dünyada arama bitince `data-oneri-isci` sıfırdan büyük, yani arama ana iş parçacığına düşmedi (tuzak 136).
 - **Metin.** Hiçbir ekranda uzun çizgi olmaması, ayraçların yerinde durması, ipucu satırlarının tavanı (`metin.spec.ts`).
 - **İşaret.** `kurulum/icon.ico`'nun dokuz boyu taşıması ve hangi boyların hangi çizimden geldiği (`temel.spec.ts` 79).
 - **Roboders koruması** (`roboders-koruma.spec.ts`). `scripts/roboders/koruma.mjs`'in Roboders'e gitmeden önce yerel bir sunucuya karşı kanıtı: GET dışında hiçbir istek, hiçbir WebSocket ve adresinde yazan kelime taşıyan hiçbir GET sunucuya ulaşmıyor, ve sayfadan çıkarken giden istek de ulaşmıyor (tuzak 144). Yargıç sunucunun sayacı, sayfanın kendi gördüğü değil, ve bir kontrol GET'inin ulaştığı da soruluyor. Tıklama kuralı gerçek bir DOM'da sınanıyor. Her Roboders turundan önce ayrıca koşulur.

@@ -3,6 +3,7 @@
 
 import { beklenenHata, expect, test } from './kapan';
 import { readFileSync } from 'node:fs';
+import { Script } from 'node:vm';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import {
@@ -936,5 +937,38 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
         `${size} px, ${size < 20 ? 'sade' : 'ayrıntılı'} bekleniyordu`,
       ).toBe(0);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+test.describe('91. Öneri aramasının worker’ı sayfanın kendi betiği', () => {
+  // Pitfall 136. The suggestion search runs THIS file's inline module script a
+  // second time, as a classic worker: relaxPool.ts takes its text and hands it
+  // to `new Worker(blobUrl)`. That only works while the bundle has no top-level
+  // import or export and no `import.meta`, none of which a classic script can
+  // parse. If one creeps in, nothing goes red anywhere else: every worker fails
+  // to start, the search waits five seconds and runs on the main thread, and
+  // the father simply waits longer.
+  //
+  // Asked of the engine, not of a regex: `vm.Script` compiles the text with a
+  // classic script's grammar, and a minified bundle carries the word "import"
+  // in places that are not statements. It reads dist/, so it lives in a layer
+  // that runs AFTER the build — under `npm run kontrol` the unit suite runs
+  // before `vite build` and would read the previous one.
+  //
+  // Measured red: `Object.assign(globalThis, { __u: import.meta.url });` added
+  // to src/ui/main.tsx and rebuilt. A bare `void import.meta.url;` proves
+  // nothing: the minifier drops it and dist/ never sees it (pitfall 120).
+  test('derlenmiş modül betiği klasik bir betik olarak da derleniyor', () => {
+    const html = readFileSync('dist/index.html', 'utf8');
+    const modules = [...html.matchAll(/<script type="module"[^>]*>([\s\S]*?)<\/script>/g)].map(
+      (m) => m[1] ?? '',
+    );
+    expect(modules, 'tek bir satır içi modül betiği bekleniyordu').toHaveLength(1);
+    const text = modules[0]!;
+    // Pitfall 109's guard: a judge of a source asks first whether it read one.
+    expect(text.length, 'betik boş okundu').toBeGreaterThan(100_000);
+    expect(() => new Script(text, { filename: 'dist/index.html' })).not.toThrow();
   });
 });

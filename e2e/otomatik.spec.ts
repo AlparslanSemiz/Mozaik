@@ -185,6 +185,31 @@ test.describe('22. Otomatik dizme', () => {
     await expect(bar).not.toContainText('Öneri uygulandı');
   });
 
+  // Pitfall 136, the browser's half: the suggestion search really runs on
+  // workers made from the page's own script. The main-thread fallback gives
+  // the same answers, so the only witness is `data-oneri-isci`, which
+  // relaxPool.ts writes once every worker has said it is alive, and sets to 0
+  // when the search ran here instead. Until this test only the real-exe suite
+  // read it, in WebKitGTK. A finished search means every line got its job, so
+  // every worker had answered by then.
+  //
+  // Measured red twice: `Object.assign(globalThis, { __u: import.meta.url });`
+  // in src/ui/main.tsx (every worker fails at load and the search falls back),
+  // and `ownScript()` in relaxPool.ts returning null (no worker is made at all
+  // — the static test, temel.spec.ts 91, stays green for that one).
+  test('öneri araması Chromium’da worker’larda koşuyor', async ({ page }) => {
+    const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
+    await loadWorld(page, world.state);
+    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+    await expect(page.locator('.panel.suggestions .btn.primary').first()).toBeVisible({
+      timeout: 60_000,
+    });
+    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 60_000 });
+    const workers = await page.evaluate(() => document.documentElement.dataset['oneriIsci'] ?? '');
+    expect(workers, 'arama bitti ama kaç worker olduğu yazılmadı').not.toBe('');
+    expect(Number(workers), 'arama ana iş parçacığında koştu').toBeGreaterThan(0);
+  });
+
   test('geri alınan dizmenin cümlesi kalmıyor', async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'tek-gun')!;
     await loadWorld(page, world.state);
