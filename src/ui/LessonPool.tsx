@@ -25,7 +25,13 @@ import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import type { Id } from '../leaf/types';
 import { paletteColor } from '../leaf/palette';
-import { DOCK_H_MIN, readDock, readDockHeight, writeDock, writeDockHeight } from '../platform/theme';
+import {
+  DOCK_H_MIN,
+  readDock,
+  readDockHeight,
+  writeDock,
+  writeDockHeight,
+} from '../platform/theme';
 import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../platform/poolSplit';
 import { attachScrollFade } from '../platform/scrollFade';
 import { useT } from './T';
