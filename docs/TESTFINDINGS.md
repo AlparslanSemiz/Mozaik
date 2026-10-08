@@ -26,6 +26,27 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `playwright.webkit.config.ts`, Playwright'ın kabında (v1.62.1-noble) · ana süit WebKit'te
+Bulgu: İlk WebKit koşusu 618 testin 588'i geçti, 19'u kırmızı, 11'i atlandı, 17,8 dk
+(4 worker, bu makine, kapta). Atlanan 11, A2'de Chromium'a özgü diye işaretlenenler
+(`page.pdf` ve `kayma.spec.ts`): atlama ilk kez gerçekten tetiklendi. Kırmızılar dört öbek:
+- **Chromium'a özgü bir iddia (4):** `temel.spec.ts:774` ve `:789` (`file://` altında
+  `showDirectoryPicker` ve OPFS), `exe.spec.ts:194` (aynı API'ye bağlı "Klasör seç"),
+  `temel.spec.ts:910` (16 px'te sade favicon). Testler Chromium'un davranışını ölçüyor.
+- **Sürükleme ve imleç (8):** `sira.spec.ts:51`, `:77`, `:257`, `:389`; `program.spec.ts:290`,
+  `:351`, `:537`, `:796`. Sebebi ölçülmedi: Playwright'ın WebKit'te fare olaylarını
+  üretmesi mi, `drag.ts`'in WebKit'teki davranışı mı, bilinmiyor.
+- **Ölçü ve yazı (5):** `gorunum.spec.ts:519` (Sığdır'da hücre 36,3 px, tavan 35,7),
+  `:815` (babanın verisinde 5 kart kırpıldı, tavan 2; Windows'ta da aynı test düştü),
+  `serit.spec.ts:277` üç kutuda (%150'de Program şeridinde bir düğme adını kaybediyor).
+- **Hareket (2):** `hareket.spec.ts:84` ve `:163`.
+Tür: henüz ayrılmadı; Chromium'a özgü dört iddia test sınırı, öteki 15'in ürün mü test
+mi olduğu ölçülmedi. Babanın ortamı (WebView2) Chromium, yani bunların hiçbiri onun
+ekranında görülmüş bir kusur değil.
+Ne yapıldı: hiçbiri düzeltilmedi. `npm run test:webkit` eklendi, `kontrol`'e girip
+girmeyeceği kullanıcıda. Ayırma işi TODO B7.21.
+Kalıcı kural: yok.
+
 ### 2026-10-08 · GitHub Actions `ci.yml`, ilk koşu (37845676686) · `otomatik.spec.ts:202` "durdurulan öneri araması…"
 Bulgu: İlk CI koşusunda altı işin beşi yeşil, `e2e (2)` kırmızı: bu test parçanın
 içinde, üç başka worker'ın yanında, "Nasıl kurulacağı aranıyor" cümlesini 60 s'de

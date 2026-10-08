@@ -1151,6 +1151,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `deploy-pages`, `upload-pages-artifact`, `download-artifact`); o gün silinen PR iş akışının
       saat dilimi kırmızısı yüzünden hepsi kırmızıydı. Artık `ci.yml` onları push'ta
       koşuyor; dalları yeniden koşturulup yeşilse birleştirilebilir.
+- [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
+      ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
+      diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
+      Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
+      düşük; `test:webkit`'in `kontrol`'e girip girmeyeceği kullanıcıda.
 
 ---
 

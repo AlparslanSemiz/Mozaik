@@ -54,6 +54,7 @@ npm run build        # dist/index.html, tek dosya (asıl teslim)
 npm run build:site   # dist-site/: tek dosya, manifest, sw.js ve simgeler
 npm run test:e2e     # derler, sonra ana E2E süitini file:// üstünde koşar
 npm run test:site    # site, yerel sunucu ve klasör testleri, http üstünde
+npm run test:webkit  # ana E2E süiti Playwright'ın WebKit'inde (Fedora'da kapta, TESTPLAN)
 npm run kontrol      # tipler, sınır, lint, birim, derleme, boyut, E2E, site ve çözücü stresi birlikte
 npm run ekran        # iki temada ekran görüntüleri, test-results/ekran/ altına
 npm run cozucu       # gerçek ölçekli çözücü stresi

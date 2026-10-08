@@ -13,6 +13,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
+| WebKit | `npm run test:webkit` | `kontrol`'ün parçası değil (karar kullanıcıda). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
@@ -22,6 +23,18 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
+
+**WebKit (2026-10-09'dan beri).** Playwright'ın WebKit'i resmî olarak yalnız Ubuntu ve
+Debian için derleniyor; bu Fedora makinesinde Ubuntu 24.04'ün `libicu74` ve
+`libjpeg-turbo8`'i eksik. Sisteme paket kurulmuyor, komut Playwright'ın aynı sürümlü
+kabında koşturuluyor (SELinux etiketini değiştirmemek için `label=disable`, `:Z` değil):
+
+```bash
+npx vite build
+podman run --rm --userns=keep-id --ipc=host --security-opt label=disable \
+  -e HOME=/tmp -v "$PWD":/work -w /work mcr.microsoft.com/playwright:v1.62.1-noble \
+  npx playwright test --config playwright.webkit.config.ts
+```
 
 **CI (2026-10-08'den beri).** `main`'e push edilir, CI koşarken sıradaki işe
 geçilir, sonuç `gh run view` ile okunur. `main` kırmızıysa başka işe geçmeden önce
@@ -364,7 +377,7 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 | Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
 | Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği %100 (2026-10-09, kesin). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
 | Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |
-| Safari ve WebKitGTK | hiçbiri: Playwright'ın WebKit'i bu süitte koşmuyor | Playwright'ın WebKit'i, WebKitGTK ve Safari aynı ailenin üç ayrı portu, birinin geçmesi ötekini kanıtlamaz |
+| Safari ve WebKitGTK | `npm run test:webkit` (Playwright'ın WebKit'i, 2026-10-09'dan beri; 618'in 19'u kırmızı, TESTFINDINGS) | Playwright'ın WebKit'i, WebKitGTK ve Safari aynı ailenin üç ayrı portu, birinin geçmesi ötekini kanıtlamaz |
 | Linux ikilisi (WebKitGTK) | `npm run exe:e2e`, gerçek pencere | WebDriver'ın girdi benzetimi yok, olaylar sayfanın içinde üretiliyor (tuzak 127) |
 | GTK'nın dosya seçicisi, kâğıda yazdırma | elle görüldü | WebDriver oturumunda açılmıyor (tuzak 133), kâğıt hiç ölçülmüyor |
 | macOS | hiçbir şey | `kayma.spec.ts`'in oluk farkı açık bir soru (TODO B7.7) |

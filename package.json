@@ -24,6 +24,7 @@
     "bicim": "prettier --write \"src/**/*.{ts,tsx}\" \"e2e/**/*.ts\" \"scripts/**/*.mjs\" \"*.{ts,js}\"",
     "kontrol": "npm run tipler && npm run sinir && npm run lint && vitest run && vite build && npm run boyut && playwright test && npm run test:site && playwright test --config playwright.cozucu.config.ts",
     "test:e2e": "vite build && playwright test",
+    "test:webkit": "vite build && playwright test --config playwright.webkit.config.ts",
     "test:site": "vite build && vite build --config vite.site.config.ts && playwright test --config playwright.site.config.ts",
     "ekran": "vite build && playwright test --config playwright.ekran.config.ts",
     "cozucu": "vite build && playwright test --config playwright.cozucu.config.ts",
