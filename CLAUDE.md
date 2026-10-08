@@ -42,6 +42,14 @@ bloğunda yazılı.
 - [CHANGELOG.md](CHANGELOG.md): dışarı bakan, İngilizce sürüm geçmişi.
 - [docs/plan-v0-arsiv.md](docs/plan-v0-arsiv.md): tarihsel, güncellenmiyor. Projenin ilk teknik planı, donmuş bir tarihsel kayıt olarak.
 
+## Push ve CI
+
+- İş `main`'e itilir. `ci.yml` her push'ta koşar, site yalnız yeşil bir `main`
+  push'unda yayınlanır. Push'tan sonra sıradaki işe geçilir, sonuç `gh run view` ile
+  okunur. `main` kırmızıysa başka işe geçmeden önce o düzeltilir.
+- Etiketi yalnız `npm run yayinla` atar, o da commit'in CI'ı yeşil olmadan atmaz.
+  `npm run yayinla -- --kuru` aynı beklemeyi hiçbir şeyi değiştirmeden yapar.
+
 ## Oturum sonu
 
 - TODO.md güncellenir, biten işler işaretlenir, sıradaki iş yazılır.

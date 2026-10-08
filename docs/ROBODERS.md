@@ -276,9 +276,11 @@ node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
   engeli tek başına bozulunca yeşil kalıyor, çünkü router service worker'ın isteğini de
   durduruyor (ölçüldü, TESTFINDINGS 2026-10-08).
 
-**Canlı yarı bekliyor.** Tek oturum davranışı ve yeni cihaz uyarısı bilinmiyor: kullanıcı
-babayla güvenli bir saat ayarlayacak, ve tur onun "başla" demesine kadar Roboders'i
-açmıyor.
+**Canlı yarı bekliyor.** Roboders aynı anda iki oturumda birini kapatmıyor (babanın
+gözlemi, 2026-10-08); tur ilk girişten sonra babanın oturumunun düşmediğini yine
+doğrular. Yeni cihaz uyarısı bilinmiyor. Eyotek ve e-posta akışına kullanıcı ile
+birlikte bakılacak, ve tur onun "başla" demesine kadar Roboders'i açmıyor. Babanın
+Eyotek hesabı da var; inceleme boyunca Roboders'e de Eyotek'e de yazılmaz.
 
 ## Doğrulanmamış — R7b'de DÜŞTÜ (2026-08-31)
 

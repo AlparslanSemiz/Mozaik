@@ -13,13 +13,24 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
-| Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez |
+| Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
+| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça ve en uzun test kendi işinde), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
+| Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı) ve mutasyon. Siteyi kilitlemez |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
+
+**CI (2026-10-08'den beri).** `main`'e push edilir, CI koşarken sıradaki işe
+geçilir, sonuç `gh run view` ile okunur. `main` kırmızıysa başka işe geçmeden önce
+o düzeltilir. CI'da `retries` yok: bir kırmızı tekrarla gizlenmez. Düşen bir E2E
+işi düşen testleri bir kez daha koşar (`scripts/kararsiz.mjs`) ve tekrarda geçenleri
+"kararsız", yine düşenleri "kırmızı" diye yalnız iş özetine yazar; iş her iki
+durumda da kırmızı kalır. Kararsız çıkan bir test TESTFINDINGS'e yazılır. CI'ın
+runner'ı UTC'de koşar, yani saat dilimine dayanan bir test oradan kendi dilimini
+kurar (`src/folder.test.ts`).
 
 Görsel bir değişiklikten sonra testin yeşil olması yetmez, ekran görüntüsüne de
 bakılır (`test-results/ekran/`): çıktıyı göster, iddia etme. Renk, hizalama, tablo
@@ -349,9 +360,9 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 
 | Ne | Bugün neyle sınanıyor | Neden yetmiyor |
 |---|---|---|
-| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok, ve gerçek bir Windows'ta otomatik hiçbir test koşmuyor. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
+| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `haftalik.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (2026-10-08'de eklendi, henüz koşmadı), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
 | Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
-| Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği bilinmiyor (TODO §8b), süitin geri kalanı yalnız 1920×1080'de koşuyor |
+| Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği büyük ihtimalle %100, kesin değil (TODO §8b). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
 | Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |
 | Safari ve WebKitGTK | hiçbiri: Playwright'ın WebKit'i bu süitte koşmuyor | Playwright'ın WebKit'i, WebKitGTK ve Safari aynı ailenin üç ayrı portu, birinin geçmesi ötekini kanıtlamaz |
 | Linux ikilisi (WebKitGTK) | `npm run exe:e2e`, gerçek pencere | WebDriver'ın girdi benzetimi yok, olaylar sayfanın içinde üretiliyor (tuzak 127) |

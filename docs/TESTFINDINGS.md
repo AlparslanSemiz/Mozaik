@@ -26,6 +26,37 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-08 · GitHub Actions `pr.yml` ve yerel `TZ=UTC` · `src/folder.test.ts` "YEREL günü kullanıyor"
+Bulgu: `pr.yml` 2026-09-26'dan beri dokuz koşunun dokuzunda kırmızıydı ve kimse
+görmedi. Üç koşunun günlüğü okundu, üçünde de sebep aynı test: `expected '2026-08-26'
+not to be '2026-08-26'`. Runner UTC'de; testin ikinci satırı ("ISO tarihi yerel günden
+farklı") bir ön koşul ve yalnız +1 saatten büyük bir dilimde doğru. Yerelde `TZ=UTC` ile
+tekrarlandı (1372 geçti, bu test düştü), `America/Los_Angeles`'ta da düşüyor. Ürünün
+iddiası (satır 21) UTC, İstanbul, Los Angeles ve Kiritimati'de geçiyor: `dayStamp` yerel
+gün parçalarını kullanıyor, UTC'deki bir kullanıcı için yerel gün UTC günü.
+Tür: test kusuru (ortama dayanan ön koşul). Ürün doğru.
+Ne yapıldı: test `Europe/Istanbul`'u kendisi kuruyor (`vi.stubEnv`), dört dilimde yeşil.
+Mutasyon: `dayStamp` UTC gününü yazınca UTC'de de kırmızı; eski hâli UTC'de bu
+bozukluğu göremezdi. `pr.yml` silindi, yerine her push'ta koşan `ci.yml` geldi.
+Aynı ölçümde: `prettier --check` tam kapsamda `src/ui/LessonPool.tsx`'te kırmızıydı
+(bir import satırı), ayrı bir biçim commit'iyle düzeldi. `TZ=UTC` altında ana E2E 618/618
+(458 s), `test:site` 22/22, çözücü stresi 7/7; yani E2E saat dilimine dayanmıyor.
+Kalıcı kural: yok. CI'ın UTC'de koştuğu TESTPLAN'da yazılı.
+
+### 2026-10-08 · `npm run test:e2e`, dosya başı süreler · ana süit
+Bulgu: Aynı gün ölçülen 7,5 dk → 9,4 dk farkı `roboders-koruma.spec.ts`'ten gelmiyor:
+dosya tek başına 3,1 s (6/6). Aynı gün akşam tam süit 618/618, 458 s (7,6 dk, güç
+profili `performance`, `TZ=UTC`); 9,4 dk yeniden üretilmedi, sebebi ölçülmedi.
+İş parçacığı toplamı 1793 s ve bunun 223 s'i tek bir test: `otomatik.spec.ts`
+"kurulamayan haftada yolları söylüyor…" (süre sınırı 420 s, içinde 150 s ve 200 s'lik
+beklemeler). Dört çekirdeğe kısıtlanınca (`taskset -c 0-3`) tek başına 173 s.
+Tür: ölçüm; kusur değil.
+Ne yapıldı: CI'da bu test üç parçanın dışında, kendi işinde yalnız koşuyor
+(`ci.yml`, `e2e-uzun`), süre sınırlarına dokunulmadı. Gerekçe: dört çekirdekli runner'da
+üç başka worker'ın yanında kendi beklemeleriyle yarışırdı, ve `main` kırmızıyken başka
+işe geçilmiyor.
+Kalıcı kural: yok.
+
 ### 2026-10-08 · Playwright, yerel deneme sunucusu · `e2e/roboders-koruma.spec.ts`
 Bulgu: Roboders korumasının ilk hâli yalnız `context.route` idi ve testin ilk koşusu
 kırmızı verdi: sayfadan çıkarken `keepalive` ile gönderilen bir POST sunucuya ulaştı.

@@ -185,8 +185,9 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       `e2e/roboders-koruma.spec.ts`, [ROBODERS.md](ROBODERS.md) "R6'nın araçları").
       Görüntüler ve notlar `docs/` altına değil yalnız `scratch/roboders/`'e gider,
       depo herkese açık. MCP tarayıcısı kullanılmaz. **Canlı yarı kullanıcının
-      "başla" demesini bekliyor** (tek oturum ve yeni cihaz uyarısı babayla
-      konuşulacak). İlk tur: öğretmen programının Eyotek'e ve e-postaya gönderilmesi
+      "başla" demesini bekliyor**. Baba aynı anda iki oturumda birinin kapanmadığını
+      gördü (2026-10-08); ilk girişten sonra babanın oturumunun düşmediği yine
+      doğrulanacak. Yeni cihaz uyarısı bilinmiyor. İlk tur: öğretmen programının Eyotek'e ve e-postaya gönderilmesi
       (B3.8), akış düğmeye kadar, düğmeye basılmadan.
 - [ ] **R7 Özellik envanteri çıkarılsın** → [ROBODERS.md](ROBODERS.md)
       genişletilsin, [ASC.md](ASC.md)'nin deseninde: bölümler, ekranlar,
@@ -418,6 +419,21 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
         yerde tutulursa bir makineye bağlı kalır. Karar verilmeden şemaya girmez.
       - `mailto:` bir dosyayı eke koyamıyor; ek gerekiyorsa yol exe'den geçiyor
         olabilir. Ölçülmeden yazılmaz.
+
+      **Karar bekleyen iki soru (kullanıcı, 2026-10-08).** İnceleme boyunca Roboders'e
+      de Eyotek'e de yazılmaz (R6'nın salt okunur kuralı). Babanın Eyotek hesabı var.
+      - **Eyotek'e gönderme yolu.** Hedef, Mozaik'in Eyotek'e göndermesi. Önce Turtek'in
+        resmî bir yolu aranır (API, Excel içe alma; Turtek'e soru §8b'de). Yoksa babanın
+        hesabıyla otomasyon bir seçenek olarak karar bekler, ve şartları şunlar:
+        babanın onayı; Eyotek'in kullanım şartlarının kontrolü; şifrenin Windows şifre
+        kasasında saklanması; gerçek hesaptan önce bir deneme hesabında sınanması;
+        gönderme başarısız olunca babanın bunu ekranda görmesi.
+      - **E-postayla ekli gönderme yolu.** Turtek'in cevabını beklemeden ilerleyebilir.
+        `mailto:` dosya ekleyemez, yani tek tıkla ekli gönderme için iki seçenek var:
+        (a) exe'den SMTP, şifre Windows şifre kasasında; (b) bir sunucu. İkisinde de
+        öğretmene bir e-posta alanı gerekiyor, yani şema v17 (B3.4). KVKK: adres plan
+        dosyasına girerse her yedekle taşınır; (b)'de üstelik bir sunucuya gider. Hangi
+        hizmetin kullanıldığı (§8b) (a)'nın ayarını belirler.
 
 > **Senden istenen:** çıktı ekranları için **örnek fotoğraf** — hangi çıktı
 > biçimini istediğini gösteren bir görüntü, `docs/Örnek Fotolar/` altına.
@@ -1086,6 +1102,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       - **Kalan, isteğe bağlı:** pencere şimdilik masaüstünde açılıyor. Başsız
         koşu için `sudo dnf install xorg-x11-server-Xvfb`; sürücü `xvfb-run`'ı
         görünce kendiliğinden kullanıyor.
+- [ ] **B7.19 `surum.yml`'e ikinci kat: etiketin SHA'sında CI yeşil mi (2026-10-08).**
+      `npm run yayinla` etiketi yalnız CI'ı yeşil bir commit'e atıyor (BUILD.md). Elle
+      itilen bir etiket bunu atlar; `surum.yml`'in publish işi de etiketin SHA'sındaki
+      `ci.yml` koşusunu `gh` ile sorup kırmızıda durmalı. Şimdi yapılmadı, çünkü bir
+      etiket olmadan sınanamıyor; ilk gerçek sürümle birlikte.
 
 ---
 
@@ -1150,19 +1171,30 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       1920×1080 (kullanıcı). Exe orada açılıyor (tuzak 106). 4 GB'ta öneri aramasının
       worker'ları ölçülmedi (aşağıdaki ölçüm maddesi).
 - [ ] **Babanın Windows ekran ölçeği %100 mü, %125 mi? (2026-10-08)** Ayarlar →
-      Ekran → Ölçek. %125 ise sayfa 1536 CSS pikselde koşar, Sığdır'ın bilinen
+      Ekran → Ölçek. **Cevap bekliyor:** büyük ihtimalle %100, kesin değil (baba,
+      2026-10-08). Babanın ayarı programa göre değiştirilmez: program %100'de de
+      %125'te de düzgün görünmeli, bugünkü %125 kutuları korunur. %125 ise sayfa 1536 CSS pikselde koşar, Sığdır'ın bilinen
       kırpılması orada ([WORKLOG.md](WORKLOG.md) "Bilinen kusurlar"), ve E2E'ye bir
       "%125" projesi eklenir. Bugün varsayılan pencere 1920×1080, %125 yalnız
       `e2e/gorunum.spec.ts`'te iki kutuda ölçülüyor.
-- [ ] **Babanın exe'si hangi sürüm? (2026-10-08)** Ayarlar → Hakkında'da yazıyor.
-      Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
+- [ ] **Babanın exe'si hangi sürüm? (2026-10-08)** Ayarlar → Hakkında'da yazıyor;
+      baba orada gördü, numara henüz öğrenilmedi. Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
       `ders-programi` adresinden soruyor, v2.0.3 ve sonrası `Mozaik`'ten; depo adı ya
       da görünürlüğü bir gün değişirse hangi sürümün güncellenebilir kalacağını bu
       belirler (DECISIONS 2026-10-08, depodaki gerçek veri).
-- [ ] **Baba kurulum yolunu kullanıyor mu? (2026-10-08)** `Kur.cmd` ile kurulup
-      `Guncelle.cmd` ile mi güncelleniyor, yoksa yalnız exe mi? Kurulumun PowerShell
-      betikleri hiçbir testte çalıştırılmıyor ([TESTPLAN.md](TESTPLAN.md), "Test
-      edilemeyenler").
+- [x] **Baba kurulum yolunu kullanıyor mu? — CEVAPLANDI (2026-10-08): hayır, exe
+      kullanıyor** (`Kur.cmd` değil). Kurulumun PowerShell betikleri hiçbir testte
+      çalıştırılmıyor ([TESTPLAN.md](TESTPLAN.md), "Test edilemeyenler"), ama babanın
+      yolu o değil.
+- [ ] **Öğretmenler programlarına Eyotek'ten mi bakıyor? (2026-10-08, B3.8)** Web'deki
+      öğretmen menüsünden ya da Eyotek'in mobil uygulamasından. Eyotek'e gönderme
+      bırakılırsa ne kaybedildiğini bu söyler.
+- [ ] **Eyotek'e gelen program öğretmene bir bildirim olarak gidiyor mu? (2026-10-08,
+      B3.8)** Push ya da SMS.
+- [ ] **Turtek'e soru: Eyotek'e dışarıdan (Excel vb.) ders programı yüklenebiliyor mu?
+      (2026-10-08, B3.8)** Baba soracak. Herkese açık sayfalarda böyle bir yol yok.
+- [ ] **Baba hangi e-posta hizmetini kullanıyor? (2026-10-08, B3.8)** Gmail, Outlook ya
+      da kurumsal. Exe'den gönderme yolunu (SMTP) bu belirler.
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil.
 - [ ] **Nöbet var mı?**

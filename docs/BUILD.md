@@ -66,7 +66,8 @@ npm run exe          # Tauri ikilisi (Rust ister)
 npm run exe:test     # cargo test (Rust ister)
 npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve test)
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
-npm run yayinla -- 1.2.0   # sürüm çıkarır
+npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
+npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
@@ -152,6 +153,7 @@ scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGE
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu: düşeni bir cümleyle ve git'in kendi satırıyla bildirir
+scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 ```
 
@@ -345,12 +347,21 @@ yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (t
 `npm run yayinla -- X.Y.Z` bir sürümü tek komutta çıkarır. Önce kapılar: çalışma
 ağacı temiz, dal `main`, etiket daha önce atılmamış, `src/platform/changelog.ts`'in en
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
+Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü aşağıdaki
+bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
 Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
 bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
-Etiket annotated atılır, çünkü `--follow-tags` hafif etiketleri sessizce atlar.
-`main` ve etiket tek `push` ile gider, ardından etiketin uzakta göründüğü
+Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu bulunup sonuna kadar
+beklenir. Yeşilse etiket annotated atılır, adıyla itilir ve uzakta göründüğü
 doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi görünür: site
-güncellenir, üç indirme dosyası eski kalır.
+güncellenir, üç indirme dosyası eski kalır. Kırmızıysa, koşu iptal edildiyse ya da
+hiç görünmediyse etiket atılmadan durur; site de aynı koşunun arkasında olduğu için
+güncellenmemiştir. Düzeltip itince aynı komut yeniden verilir, ve `package.json`
+zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar commit ile
+etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
+
+`npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`
+koşusunu bulur, bekler, sonucu söyler ve etiket adımında durur.
 
 ## İşaret ve ikon
 
