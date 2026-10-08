@@ -30,9 +30,11 @@ numaralarının hangi ilkeye karşılık geldiği DECISIONS.md'de yazılı.
 
 Program indirilip çift tıklanınca açılır. Kurulum bir seçenek olarak var (Windows
 kurulum paketi ve exe), ama kurulmadan çalışan bir yol hep bırakılıyor:
-`dist/index.html` çift tıklanır. Dayanağı bir gerçek: babanın makinesi eski ve
-Windows sürümü bilinmiyor, yani exe'nin dayandığı WebView2 orada olmayabilir
-([TODO.md](TODO.md) §8b). Kurulamayan bir makinede program açılmıyorsa bu ilkeden
+`dist/index.html` çift tıklanır. Dayanağı bir gerçek: babanın makinesi eski
+(aşağıda, "Hedef makine"). Exe orada açılıyor (baba Ayarlar'daki güncelleme
+düğmesine bastı, tuzak 106), ama exe WebView2'ye dayanıyor, ve WebView2 açılmadığı
+ya da kurulu olmadığı bir makinede kurulmadan açılan dosya tek yol olarak kalır.
+Kurulamayan bir makinede program açılmıyorsa bu ilkeden
 geriye bir şey kalmaz. Güncelleme de aynı çizgide durur: program yeni bir sürümün
 geldiğini söyler, kullanıcı istemeden hiçbir şey değişmez.
 
@@ -81,9 +83,12 @@ zevk değil aracın çalışma biçimi.
 
 ## Hedef makine
 
-Babanın makinesi eski ve zayıf: 4 GB RAM (muhtemelen DDR3), çok eski bir işlemci
-ve anakart (kullanıcı, 2026-10-08). Windows sürümü bilinmiyor ve öğrenilecek
-([TODO.md](TODO.md) §8b). Makinenin ne olduğu artık biliniyor, programın orada ne
+Babanın makinesi eski ve zayıf: Windows 10, 4 GB RAM (muhtemelen DDR3), çok eski
+bir işlemci ve anakart. Ekranı 27 inç, 1920×1080 (kullanıcı, 2026-10-08; Windows
+sürümü ve ekran kesin). E2E'nin varsayılan penceresi zaten bu boy
+(`playwright.config.ts`). Windows'un ekran ölçeği (%100 mü, %125 mi) bilinmiyor
+([TODO.md](TODO.md) §8b); %125'te sayfa 1536 CSS pikselde koşar ve Sığdır'ın bilinen
+kırpılması orada. Makinenin ne olduğu artık biliniyor, programın orada ne
 kadar yavaş olduğu bilinmiyor: geliştirme makinesinde açılış ve etkileşim süreleri
 ölçülüp [WORKLOG.md](WORKLOG.md)'ye yazılıyor, babanın makinesinde henüz ölçülmedi.
 Ölçülmemiş bir "yavaş" her kararı haklı çıkarabilir, ölçülmüş bir sayı yalnız
@@ -95,10 +100,12 @@ Babanın bugün kullandığı program Roboders, ve Mozaik onun yerine geçmeyi
 hedefliyor (kullanıcı, 2026-10-08). Öncelik üç kaynaktan gelir: babanın ve
 kullanıcının bugün söyledikleri, asıl rakibin incelemesi
 [ROBODERS.md](ROBODERS.md), ve aSc Timetables'ın okunabilir kaydı
-[ASC.md](ASC.md) (528 yardım konusu, 2940 arayüz metni). aSc için konan ölçü,
-yani aSc'nin bu kursla ilgili kısmının yarısını yapmak ve o yarıyı aSc'den iyi
-yapmak, duruyor. Üç kaynak da yoksa yazılan şey bir tahmindir, ve kural "bekle"
-değil "nereden geldiğini söyle".
+[ASC.md](ASC.md) (528 yardım konusu, 2940 arayüz metni). Hedef, Roboders'teki ve
+aSc'deki her iyi özelliğin daha iyisini yapmak, kopyasını değil. Bir özelliğin iyi
+sayılma şartı, babaya yeni yazı ya da soru eklemeden iş görmesi (kullanıcı,
+2026-10-08), çünkü çok yazı ve soru babanın kafasını karıştırıyor
+("Kullanılabilirlik"). Üç kaynak da yoksa yazılan şey bir tahmindir, ve kural
+"bekle" değil "nereden geldiğini söyle".
 
 Bir özellik "baba istemedi" diye reddedilmiyor. Reddetmenin iki yolu var: bu
 belgedeki bir gerçeği bozuyor olması (kurulmadan açılmak, kaybolmayan veri,

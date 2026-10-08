@@ -35,6 +35,22 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-08 · "aSc'nin yarısı" ölçüsü kalktı: her iyi özelliğin daha iyisi
+
+**Eski hâli.** 2026-08-30'dan beri hedef aSc'nin bu kursla ilgili kısmının yarısını
+yapmak ve o yarıyı aSc'den iyi yapmaktı (önce %10'du). Aynı günün "Asıl rakip
+Roboders" kaydı bu ölçünün değişmediğini yazıyordu.
+
+**Şimdi.** Kullanıcının kararı: ölçü kalktı. Hedef, Roboders'teki ve aSc'deki her
+iyi özelliğin daha iyisini yapmak, kopyasını değil. Bir özelliğin iyi sayılma şartı,
+babaya yeni yazı ya da soru eklemeden iş görmesi. Gerekçe babanın kendi cümlesi:
+çok yazı ve soru görünce kafası karışıyor (TODO §0).
+
+**Sonucu.** CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve ASC.md'nin
+"%50" cümleleri değişti. Eski kayıtlarda geçen "%50" o günün diliyle kalıyor. ASC.md'nin
+kovaları duruyor. R8'in karar tablosundaki her "alınacak" satırı artık bu şarta göre
+okunuyor: babaya kaç yazı ve soru eklediği satırın parçası.
+
 ### 2026-10-08 · Babam fikir değiştirdi; ilk dönemin tercihleri bağlayıcı değil
 
 **Eski hâli.** [PRINCIPLES.md](PRINCIPLES.md)'deki ilkeler aynı ağırlıkta duruyordu,

@@ -1,9 +1,10 @@
 # Mozaik
 
 Babamın dershanesinde haftalık ders programını dizmek için yazılan araç. Babam
-bugün Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor. Özellik
-bilgisinin ikinci kaynağı aSc Timetables: oradaki ölçü, aSc'nin bu kursla ilgili
-kısmının yarısını yapmak ve o yarıyı aSc'den iyi yapmak. Program çift tıklanan tek
+bugün Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor. Hedef,
+Roboders'teki ve ikinci kaynak aSc Timetables'taki her iyi özelliğin daha iyisini
+yapmak. Bir özellik babama yeni yazı ya da soru eklemeden iş görüyorsa iyi
+sayılır. Program çift tıklanan tek
 bir HTML dosyası, ve aynı dosya bir sitede, Windows kurulum paketinde ve bir exe'nin
 içinde de teslim ediliyor. Vite, React ve TypeScript ile yazıldı. Bugün sunucusu yok
 ve çalışırken internete ihtiyaç duymuyor. Bunu şart koşan iki ilke 2026-10-08'den

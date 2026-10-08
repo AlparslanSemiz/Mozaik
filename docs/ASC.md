@@ -11,13 +11,20 @@ ve aradaki farkın her biri için verilmiş karar.
 > satırını kaybetti. Bu yüzden kova 6'da gerekçesi yalnız bu üçü olan satırlar
 > reddedilmiş sayılmıyor, yeniden karar bekliyor ([TODO.md](TODO.md) R8). Kayıt
 > [DECISIONS.md](DECISIONS.md)'de.
+>
+> **Aynı gün "%50" ölçüsü de kalktı.** Hedef artık aSc'nin belli bir payı değil:
+> Roboders'teki ve aSc'deki her iyi özelliğin daha iyisini yapmak. Bir özellik
+> babaya yeni yazı ya da soru eklemeden iş görüyorsa iyi sayılır
+> ([PRINCIPLES.md](PRINCIPLES.md), "Özellikler nereden gelir"). Aşağıdaki "%50"
+> cümleleri 2026-08-30'un çerçevesini anlatıyor.
 
 **2026-08-30'da bu dosyanın çerçevesi İKİ KEZ değişti**, ve ikisi de kullanıcı
 kararı. Önce bir *karar kaydı*ydı; gerekçesi o gün geçerli olan 5. ilkeydi
 (*"bir dönem kullanılmadan özellik eklenmez"*). O ilke kaldırıldı ve hedef
-%10'dan **%50'ye** çıktı. Sonra aynı gün **kurulum** ve **paylaşma** yasakları
-da kalktı. Yani bu dosya artık "neyden kaçındık"ı değil **"%50 neresi"**yi
-anlatıyor, ve asıl içeriği aşağıdaki **altı kova**.
+%10'dan **%50'ye** çıktı (o ölçü de 2026-10-08'de kalktı). Sonra aynı gün
+**kurulum** ve **paylaşma** yasakları da kalktı. Yani bu dosya "neyden kaçındık"ı
+değil, aSc'deki hangi özelliğin alınıp daha iyisinin yapılacağını anlatıyor, ve
+asıl içeriği aşağıdaki **altı kova**.
 
 Geriye üç şey kaldı ve bir özelliği ancak bunlar reddedebilir:
 
@@ -144,8 +151,9 @@ Yerleştirme · Arayüz Ayarları · Yardım`.
 
 ## Karar tablosu — altı kova
 
-Kısıtlamalar 2026-08-30'da **kullanıcı tarafından kaldırıldı** ve hedef %50'ye
-çıktı, yani bu tablo artık "neyi reddettik"i değil **"%50 neresi"**yi anlatıyor.
+Kısıtlamalar 2026-08-30'da **kullanıcı tarafından kaldırıldı** ve hedef o gün
+%50'ye çıktı (2026-10-08'de bu ölçü kalktı, yukarıda). Yani bu tablo "neyi
+reddettik"i değil, neyin alınıp daha iyisinin yapılacağını anlatıyor.
 Kaynak: 528 yardım konusu + 2940 arayüz metni + 18 ekran.
 
 Kovalar:

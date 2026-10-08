@@ -1131,14 +1131,15 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8b · Babada
 
-- [ ] **Babanın makinesinde Windows sürümü öğrenilsin (2026-10-08).** Bilinen:
-      4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart (kullanıcı). Sürüm
-      exe yolunu doğrudan etkileyebilir: exe WebView2 ile çalışıyor (Tauri), ve
-      WebView2'nin Windows 7 ve 8.1 desteği bitti (Microsoft, 2023; sürüm
-      ölçülünce doğrulanacak). Eski bir Windows'ta exe açılmazsa kalan yol çift
-      tıklanan HTML, ve o da makinedeki tarayıcının sürümüne bağlı. Sorular:
-      Windows sürümü ve 32/64 bit, WebView2 kurulu mu, hangi tarayıcı ve sürümü.
-      4 GB'ta öneri aramasının worker'ları da ölçülmedi (aşağıdaki ölçüm maddesi).
+- [x] **Babanın makinesinde Windows sürümü — CEVAPLANDI (2026-10-08): Windows 10.**
+      Makine: 4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart, 27 inç ekran,
+      1920×1080 (kullanıcı). Exe orada açılıyor (tuzak 106). 4 GB'ta öneri aramasının
+      worker'ları ölçülmedi (aşağıdaki ölçüm maddesi).
+- [ ] **Babanın Windows ekran ölçeği %100 mü, %125 mi? (2026-10-08)** Ayarlar →
+      Ekran → Ölçek. %125 ise sayfa 1536 CSS pikselde koşar, Sığdır'ın bilinen
+      kırpılması orada ([WORKLOG.md](WORKLOG.md) "Bilinen kusurlar"), ve E2E'ye bir
+      "%125" projesi eklenir. Bugün varsayılan pencere 1920×1080, %125 yalnız
+      `e2e/gorunum.spec.ts`'te iki kutuda ölçülüyor.
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil.
 - [ ] **Nöbet var mı?**

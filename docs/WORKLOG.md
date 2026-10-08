@@ -33,8 +33,8 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda.
 
 **Sıradaki iş.**
-1. Babanın makinesi: Windows sürümü (exe yolunu etkileyebilir), öneri aramasının
-   ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
+1. Babanın makinesi (Windows 10, 27 inç, 1920×1080): Windows ekran ölçeği, öneri
+   aramasının ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
    KS ve Ö maddelerinin önünde.
 3. Rakip envanteri (TODO §1, R6–R9), Roboders önce. 1 ile paralel, onun ön şartı
