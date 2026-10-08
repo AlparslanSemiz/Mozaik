@@ -413,7 +413,13 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       Tauri'de), Eyotek'e doğrudan gönderme. **Açık sorular:**
       - Roboders bunu nasıl yapıyor? ([ROBODERS.md](ROBODERS.md), "Açık sorular")
       - Eyotek'in dışarıya açık bir arayüzü var mı, ve Roboders'ten başka bir
-        programa açık mı?
+        programa açık mı? **Herkese açık sayfalarda bulunamadı (Tur 1, 2026-10-08).**
+        Roboders ile Eyotek aynı şirketin (Turtek) ürünü, aktarım kardeş ürün
+        entegrasyonu; Eyotek yalnız Excel'e **dışa** aktarıyor. Ayrıntı ve kaynaklar
+        [ROBODERS.md](ROBODERS.md) "Tur 1, web yarısı"; Turtek'e soru §8b'de.
+      - aSc öğretmene e-postayı EduPage hesabı üzerinden gönderiyor, yerel bir "her
+        öğretmene kendi PDF'i" akışı belgelenmemiş; Untis'te masaüstünden HTML ya da
+        PDF ile gidiyor ([asc/ekran-envanteri.md](asc/ekran-envanteri.md) §7).
       - Öğretmen e-postaları nerede saklanacak? Kişisel veri (KVKK): plan dosyasına
         girerse her yedekle ve her paylaşılan dosyayla birlikte taşınır. Ayrı bir
         yerde tutulursa bir makineye bağlı kalır. Karar verilmeden şemaya girmez.

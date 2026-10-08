@@ -491,8 +491,26 @@ Dürüstlük şartı (CLAUDE.md): çekilmemiş ya da bakılmamış hiçbir ekran
 | `Temel Bilgiler`'in `Ülke` ve `Program Türü` sekmeleri | Açılmadı |
 | `Karşılaştırma` menüsünün **açtığı pencere** | Menü çekildi (`72`), içine girilmedi |
 | `Dizayn` → `Tasarım Yönetimi: yeni` | Yeni tasarım oluşturmak demoya yazar |
+| `E-Mail Gönder` komutunun **açtığı pencere** (2026-10-08'de eklendi) | Menü çekildi (`73`), komut tıklanmadı. Ne gönderdiği (`.roz` mu, rapor mu) ve neyle (yerel posta istemcisi mi) herkese açık hiçbir yardım sayfasında yazmıyor; öğretmene programı EduPage'in sihirbazı gönderiyor (aşağıda) |
 
 ---
+
+**Tur 1 web yarısı (2026-10-08): aSc öğretmene programı nasıl gönderiyor.** Herkese açık
+yardım sayfalarından, ham HTML'de doğrulanarak:
+
+- Gönderme bir **web** sihirbazı: program önce EduPage'e yüklenir, yönetim ekranında
+  öğretmenler seçilir, e-postaları düzeltilir, ve *"press Finish and the software will
+  send emails to teachers"* (help.edupage.org, `u338/t882`, depodaki `u338` dökümüyle
+  aynı). Postanın hangi sunucudan ve hangi biçimde (ek, bağlantı) gittiği sayfada
+  yazmıyor.
+- Yayınlama sihirbazının son adımı bir **mobil bildirim** kutusu: *"tick, if you wish to
+  send the notifications into to mobile app for all users of your edupage (with an
+  account)"*, ve *"each user (teacher, student, parent) will always see their own
+  timetable after login into edupage"* (`u373`).
+- Karşılaştırma için Untis'in masaüstü programında bir e-posta penceresi var: *"This
+  selection only shows teachers and students who have an e-mail address entered in
+  their master data"*, biçim HTML ya da PDF (webhelp.untis.at). Mozaik'in B3.8'i için
+  yerel bir örnek.
 
 ## 7a · Hiçbir belgede geçmeyen 94 görüntünün dizini (2026-10-08)
 

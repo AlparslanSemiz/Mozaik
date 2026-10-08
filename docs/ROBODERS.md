@@ -325,7 +325,44 @@ hâlâ boş. Tahmin edilmeyecek, R6'da ya da babaya sorularak cevaplanacak:
   hesabından mı? Öğretmenin e-posta adresi nerede tutuluyor: Roboders'te mi,
   Eyotek'ten mi geliyor?
 - Eyotek'in dışarıya açık bir arayüzü (API) var mı, ve Roboders'ten başka bir
-  programa açık mı?
+  programa açık mı? (Herkese açık sayfalarda bulunamadı, aşağıda.)
+
+### Tur 1, web yarısı (2026-10-08): Eyotek'in kendi sayfalarından
+
+Yalnız herkese açık sayfalar okundu, `roboders.com`'a gidilmedi. Alıntılar sayfanın ham
+HTML'inde birebir doğrulandı (yazımları sayfadaki gibi).
+
+- **Roboders ile Eyotek aynı şirketin ürünleri (Turtek Yazılım).** Eyotek'in modül
+  sayfası (`eyotek.com.tr/moduller/ders-nobet-programi`): *"Firmamıza ait olan Roboders
+  bulut ders dağıtım robotu ile tam entegre çalışır."* Haberler sayfası (`/yenilikler`,
+  "ROBODERS ENTEGRASYONU", 05.06.2025): *"yine şirketimiz tarafından üretilen Roboders
+  (Bulut Ders Dağıtım Robotu)"*. Turtek'in projeler sayfası Roboders'i aynı listede
+  sayıyor. Yani "tek tıkla Eyotek'e" bir kardeş ürün entegrasyonu; yukarıdaki "Eyotek
+  Roboders'in entegre olduğu okul yönetim sistemi" cümlesi doğru ama eksikti.
+- **Aktarım iki yönlü.** Aynı sayfa: *"Eyotek sistemde bulunan dersler, öğretmenler,
+  sınıflar ve derslikler, Roboders sisteme otomatik aktarilabilmekte, daha sonra
+  Roboders sistemde üretilen ders programı da Eyotek sisteme otomatik olarak
+  aktarilabilmektedir."* Eyotek'in kendisi dizmiyor: *"Eyotek sistem otomatik ders
+  programı yapmaz."*
+- **Öğretmen programını Eyotek'te görüyor:** *"Öğretmen Ders Programları
+  kullanıcıların sistemlerine yansıtılır. Ayrıca çıktı alınabilir."*; *"Öğrenci, veli
+  ve tüm personel otomatik olarak birer Eyotek kullanıcısıdır."*; mobil uygulamada
+  "Personel Haftalık Çalışma Planı Görüntüleme" (`/yenilikler`).
+- **Bildirim SMS ve push:** *"Gönderilen SMS iletileri kurumsal başlıklı ve
+  ücretlidir."*, *"Bildirimler ise sınırsız ve ücretsizdir."* E-posta Eyotek'in hiçbir
+  herkese açık sayfasında bir özellik olarak geçmiyor.
+- **Dışarıya açık arayüz bulunamadı.** Ana sayfa, kurumsal, ücretler, haberler ve dört
+  modül sayfasında API, webhook ya da geliştirici sayfası yok; `api.eyotek.com.tr` ve
+  `destek.eyotek.com.tr`'nin DNS kaydı yok. Ders programını dosyadan **içe** alan bir
+  yol yazmıyor; yalnız dışa: *"Sistemin veri içeren sayfalarında Excel dosyasına
+  verileri aktarabilme özelliği vardır."* Özel istek: *"sadece size özel bir çalışma
+  olacaksa özel olarak ücretlendirilir"*.
+- **R7b'nin üç satırı doğrulandı:** "bir ana öğretmen, birden çok yardımcı öğretmen"
+  ve nöbet cümleleri Eyotek'in modül sayfasında birebir duruyor.
+
+Roboders'in kendi tarafı (Yayınla fazı, Eyotek'e aktar, e-posta ekranı) hâlâ
+görülmedi; R6'nın canlı yarısını bekliyor. Babaya ve Turtek'e gidecek sorular
+[TODO.md](TODO.md) §8b'de.
 
 ## Yeniden üretmek
 
