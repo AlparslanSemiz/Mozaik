@@ -1156,6 +1156,16 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
       düşük; `test:webkit`'in `kontrol`'e girip girmeyeceği kullanıcıda.
+- [ ] **B7.22 Windows'ta Sığdır kırpıyor (2026-10-09).** `haftalik.yml`'nin ilk koşusunda
+      `gorunum.spec.ts:815` (babanın verisi, 1920, Öğretmen: 5 kart) ve `:841` (%125, örnek
+      okul: 25/374) tekrarda da kırmızı; Linux'ta yeşil. Babanın ekranı tam bu (Windows,
+      %100, 1920). Kullanıcının onayını bekliyor.
+- [ ] **B7.23 `haftalik.yml`'nin Windows işi öneri aramasının iki testini ayırsın
+      (2026-10-09).** İlk koşuda ikisi kararsızdı; `ci.yml`'deki `e2e-arama` gibi ayrı bir
+      adımda `--workers=1`. Kullanıcının onayını bekliyor.
+- [ ] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
+      `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
+      gibi `weight[index] = weight[index]! + 1`; ürün kodu, kullanıcının onayını bekliyor.
 
 ---
 

@@ -26,6 +26,26 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `haftalik.yml`'nin ilk koşusu (37851532351, elle) · Windows E2E ve mutasyon
+Bulgu (Windows, `windows-latest`, Chromium): E2E adımı 618'in 614'ü geçti, 20,3 dk; iş
+toplam 28 dk. `kararsiz.mjs` dördünü bir kez daha koştu:
+- **Kararsız (2):** `otomatik.spec.ts:202` ve `:225`, öneri aramasının iki testi; CI'da
+  `e2e-arama`'ya ayrılmalarının sebebiyle aynı (süit içinde worker yarışı). `haftalik.yml`
+  onları henüz ayırmıyor.
+- **Tekrarda da kırmızı (2), Windows'a özgü, ikisi de Sığdır:** `gorunum.spec.ts:815`
+  (babanın verisi, 1920 kutu, Öğretmen görünümü: 5 kartın yazısı kırpıldı, tavan 2) ve
+  `:841` (%125 kutu, örnek okul: 374 kartın 25'i kırpıldı, beklenen 0). Linux'ta ikisi de
+  yeşil; `:815` WebKit'te de kırmızı. Babanın ortamı Windows, %100, 1920: ilki doğrudan
+  onun ekranı.
+Bulgu (mutasyon): `npm run mutasyon` 16 s'de, başlamadan düştü: Stryker'ın enstrümantasyonu
+`src/pure/solver.ts:975`'teki `weight[index]!++` biçimini ayrıştıramıyor (2026-09-12'de
+kayıtlı aynı araç kusuru). Satır `8794c95` (2026-09-24) ile girdi, yani mutasyon o günden
+beri hiç koşamıyor ve 2.2.0 (2026-09-26) mutasyonsuz çıktı.
+Tür: Windows'un iki kırmızısı ürün kusuru adayı (yazı ölçüsü Windows'ta farklı),
+kararsızlar test kusuru, mutasyonunki araç kusuru ve bir gerileme.
+Ne yapıldı: hiçbiri düzeltilmedi, kullanıcıya getirildi (TODO B7.22, B7.23, B7.24).
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `playwright.webkit.config.ts`, Playwright'ın kabında (v1.62.1-noble) · ana süit WebKit'te
 Bulgu: İlk WebKit koşusu 618 testin 588'i geçti, 19'u kırmızı, 11'i atlandı, 17,8 dk
 (4 worker, bu makine, kapta). Atlanan 11, A2'de Chromium'a özgü diye işaretlenenler
