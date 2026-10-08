@@ -494,6 +494,133 @@ Dürüstlük şartı (CLAUDE.md): çekilmemiş ya da bakılmamış hiçbir ekran
 
 ---
 
+## 7a · Hiçbir belgede geçmeyen 94 görüntünün dizini (2026-10-08)
+
+`docs/asc/ekran/`'daki görüntülerin 94'ü bu dosyada da, başka hiçbir belgede de
+adıyla geçmiyordu (her ad belgelerde birebir arandı). Hepsine bakıldı: üç yardımcı
+ajan birer parçasını açıp gördüğünü yazdı, biri (`karsilastirma-dosya-sec`) ayrıca
+elle görüldü. **Veri:** 94'ünün 93'ü demo verisi (pencere başlığı `Demo1.roz`), biri
+belirsiz (`99-degistir-secenekler`, başlıksız beyaz ekran). Hiçbirinde gerçek bir okul
+dosyası görülmedi. Bazılarında demo öğretmenlerinin tam adı var (aSc'nin İngilizce
+örnek adları gibi). `karsilastirma-dosya-sec`'te ise turu çeken makinenin Belgeler
+klasörünün listesi ve bir yerel ağ yolu görünüyor, yani turu yapanın kişisel klasör
+adları.
+
+**§7'ye etkisi.** Ekranda görüldükleri için kapanan ya da daralanlar: 3 (Otomatik
+Planlamayı Başlat'ın penceresi ve sonucu, Tabloyu Temizle'nin iki onayı ve sonucu),
+7'nin ikisi (Dersliklere Atama'nın seçenekleri, Kart Kilitle'nin onayı; Kilit Aç
+görülmedi), 8'in dördü (Görünüm, Bul, Zaman Tablosu ve Hızlı Değişiklik Yap alt
+menüleri, artı listede olmayan Planlama Öncesi Kontrol alt menüsü), 9 (Sihirbaz'ın
+yedi adımı), 10 (Ülke ve Program Türü sekmeleri), 2 kısmen (Planlama Analizi'nin
+girişi, sürerken ve sonucu: çıktı ayrı bir rapor değil ızgaranın boyanması; analiz bir
+internet sunucusuna bağlanıyor), 5 kısmen (Seçmeli Dersler'in giriş uyarısı ve
+Öğrenciler penceresi), 11 kısmen (dosya seçimi ve tek satırlık sonuç paneli), 1
+kısmen (Danışman'ın yalnız "sorun yok" metni). Hâlâ görülmeyen: Danışman'ın uyarı
+metinleri, Planlama Öncesi Kontrol'ün sonucu, Bulut Tabanlı Planlama ve İnternet
+Hesabı, Kilit Aç, Tasarım Yönetimi: yeni.
+
+**Dosya adları her zaman içeriği söylemiyor.** Aşağıdaki "Not" sütunu bunu yazıyor:
+`temel-bilgiler-acildi`'de Ders Programı Oluştur penceresi, `tablo-temizlendi`'de
+temizlemeden önceki onay, `sihirbaz-4`'te üçüncü adım var. Birkaç dosya başka bir
+kareyle aynı ya da neredeyse aynı (`sagtik-6` ile `sagtik-5` bayt bayt aynı).
+
+| Dosya | Ne var içinde | §7 | Not |
+|---|---|---|---|
+| `71-aktar-menu` | Dosya İşlemleri → Aktar menüsü: aSc XML, Mobile, HTML, Excel'e Aktar, Aktar-Nöbet/Gözetim, PowerSchool, NRW/Bayern/Hessen, aSc 2008 ve 2012 XML, Oman XML, NYC Excel, DE Winprosa | — | yalnız menü |
+| `72-karsilastirma-menu` | Karşılaştırma menüsü: Son Kaydedilen Versiyon İle Karşılaştır (Ctrl+L), Başka Bir Dosya İle Karşılaştır | 11'e giriş | açtığı pencere yok |
+| `73-email-gonder-menu` | E-Mail Gönder menüsü: E-Mail Gönder, Sorular? Yorumlar? Bize Yazın | — | yalnız menü |
+| `82-sag-tik-kart` | Karta sağ tık: Kart Kilitle, Sil, Satırı Temizle, Derslik ▸, Dersi Güncelle, Ders Çizelgesi, Görünüm ▸, Bul ▸, Zaman Tablosu ▸, Planlama Öncesi Kontrol ▸, Hızlı Değişiklik Yap ▸ | — | alt menüler açık değil |
+| `83-yazilimi-ozellestir` | Yazılımı Özelleştir: Kullanıcı Arayüzü ve Ülkeye Özel Seçenekler; Görünüm, Varsayılan Değerler, Yazdırma, Veritabanı (ad biçimi gibi) | — | |
+| `84-gelismis-ayarlar` | Gelişmiş: Binalar, Şifre, Dersleri Taşıma, Branşı, öğle ayracını yazdırma, öğretmen ve derslik çakışma denetimi | — | Türkçe ve İngilizce etiket karışık |
+| `85-sihirbaz` | Sihirbaz 1/7: okul adı, öğretim yılı, kayıt adı, günlük ders saati, gün sayısı, hafta sonu, çok dönemli program | 9 | `sihirbaz-1` ile aynı adım |
+| `93-derslik-kisitlamalar` | Derslikler → Kısıtlamalar: en çok öğrenci sayısı, derslikte aynı anda ders sayısı | — | |
+| `94-derslik-zaman-tablosu` | Dersliğin zaman tablosu: gün × saat, Uygun · Şartlı · Uygun Olmayan, Tümüne Uygula | — | |
+| `95-sinif-ders-atama` | Sınıfın Dersleri: ders, öğretmen, sınıf, uzunluk, derslik, hafta, dönem sütunları; Yeni Ders, Güncelle, Sil, Kopyala, İlave Olarak | — | demo adları |
+| `96-ogretmen-ders-atama` | Öğretmenin Atanan Dersleri, 95 ile aynı düzen | — | demo adı |
+| `97-ogretmen-zaman-tablosu` | Öğretmenin zaman tablosu, 94'ün öğretmen hâli | — | demo adı |
+| `98-degistir` | Toplu Değiştir: Dersler, Sınıflar, Öğretmenler (Tümü ya da Seçim) ve bir işlem kutusu | — | veriyi değiştirebilen araç |
+| `99-degistir-secenekler` | Başlıksız beyaz ekranda on işlem: Derslikler, Bölüm Kapasitesi, Dönem, Hafta, Gün, Seçmeli, Atanmış Dersler, öğretmensiz yap, öğretmenin derslerini temizle, haftayı hesapla | — | veri belirsiz; 98'in kutusu olduğu ekranda yazmıyor |
+| `A0-gorunum-secici` | Görünüm seçici: Sınıflar, Öğretmenler, Derslikler, Dersler, Nöbet/Gözetim, Ders Çizelgesi, Görünümleri Tanımla, Geçerli Görünümü Güncelle | — | |
+| `A1-gorunum-ogretmenler` | Izgara öğretmen satırlarıyla, hücrede sınıf | — | |
+| `A2-gorunum-derslikler` | Izgara derslik satırlarıyla, altta seçili kartın bilgisi | — | demo adı |
+| `A3-gorunum-dersler` | Izgara ders satırlarıyla, hücrede öğretmen | — | |
+| `A4-gorunum-nobet` | A3'ün üstünde gözetim işlevi hakkında bir bilgi kutusu | — | nöbet görünümü açılmamış |
+| `A5-gorunum-ders-cizelgesi` | Ders Çizelgesi: sınıf × ders saat matrisi ve toplamlar | — | |
+| `analiz-dropdown` | Analiz menüsü: Planlama Analizi, Planlama Renkleri, Detaylı Veri Kontrolü | 2'ye giriş | |
+| `analiz-sonuc-ok` | Kartları ısı renklerine boyanmış ızgara | 2? | hangi komutun çıktısı olduğu ekranda yazmıyor |
+| `ayarlar-iptal` | Boş ızgara, bütün kartlar havuzda | — | adı içeriği söylemiyor |
+| `ayarlar-programturu-tab` | Ayarlar → Program Türü: okul hakkında Evet · Hayır · Kesinlik yok soruları | 10 | |
+| `ayarlar-programturu-scroll` | Aynı kare | 10 | kopya |
+| `ayarlar-programturu-wheel` | Program Türü'nün alt kısmı: boşluk, geç gelen öğrenci, 0. saat, ikili eğitim, 2+1 bölme | 10 | |
+| `ayarlar-programturu-wheel2` | Aynı kare | 10 | kopya |
+| `ayarlar-ulke-tab` | Ayarlar → Ülke: ülke kutusu ve harita | 10 | |
+| `danisman-bos-grid` | Danışman: "kritik sorun görmüyor", boş ızgara | 1 kısmen | uyarı metni yok |
+| `danisman-kapatildi` | Boş ızgara, pencere yok | — | adı içeriği söylemiyor |
+| `derslige-atama` | Dersliklere Atama: Yalnızca Ekle, Ekleme ve optimize et, Ders programını iyileştirin, her birinin açıklaması | 7 | sonucu yok |
+| `derslige-atama-iptal` | Dolu ızgara, diyalog yok | — | `planlama-tab2` ile aynı |
+| `design-dropdown` | Önizlemede uyarı: tasarım özet programlara uygulanamaz | — | menü değil uyarı |
+| `design-uyari-kapat` | Önizleme, Sınıfların Genel Programı, 1/12 | — | `onizleme-acildi` ile aynı |
+| `durum-simdi` | Ders Çizelgesi matrisi ve yardım düğmesi | — | |
+| `gorunum-dropdown-acik` | Görünüm açılır listesi, A0 ile aynı seçenekler | — | şerit listesi, sağ tık değil |
+| `istatistik-bos` | İstatistik: öğretmen, sınıf, kart, yerleşmemiş blok sayıları ve öğretmen tablosu | — | demo adları |
+| `istatistik-kapatildi` | Boş ızgara, Planlama Sonrası Kontrol "Hiçbir Sorun Bulunamadı" | — | `kontrol-bos-grid` ile aynı |
+| `kapat-deneme2` | Otomatik Planlama sonucu: süre, denenen çizelge, bozulan sınırlama 0, kalan kart 0 | 3 | tekrar |
+| `kapat-deneme3` | Sonuçtan sonra dolu ızgara | — | tekrar |
+| `karsilastirma-dosya-sec` | Karşılaştırma için Windows Aç penceresi, `.roz` süzgeci | 11 kısmen | turu yapanın kişisel klasör adları görünüyor |
+| `karsilastirma-dropdown` | Karşılaştırma menüsü, 72 ile aynı | — | |
+| `karsilastirma-sonuc` | Alt panelde tek satırlık karşılaştırma sonucu: Tüm Değişiklikler | 11 kısmen | hangi seçenekle alındığı görünmüyor |
+| `kart-kilitle-hayir` | Dolu ızgara, diyalog yok | — | adı içeriği söylemiyor |
+| `kart-kilitli` | Kart Kilitle'nin onayı: tüm kartlar kilitlensin mi, Evet · Hayır | 7 | toplu işlem onayı |
+| `kontrol-bos-grid` | Boş ızgara, Planlama Sonrası Kontrol "Hiçbir Sorun Bulunamadı" | — | |
+| `onizleme-acildi` | Önizleme, Sınıfların Genel Programı, 1/12 | — | |
+| `otomatik-planlama-calisiyor` | Otomatik Planlama'nın sonuç penceresi | 3 | adına rağmen bitmiş hâli |
+| `otomatik-planlama-sonuc-kapatildi` | Aynı sonuç penceresi hâlâ açık | 3 | kopya |
+| `planlama-analizi-tikla` | Planlama Analizi'nin girişi: bir dakikada en sorunlu kartları gösterir, mevcut planı değiştirir | 2 | onay |
+| `planlama-analizi-calisiyor` | Analiz sürüyor: "İnternet Sunucusuna Bağlanılıyor" | 2 | ağa çıkıyor |
+| `planlama-analizi-sonuc` | Analiz bitti: en zor kartlar kırmızı, en kolaylar gri | 2 | çıktı ızgaranın boyanması |
+| `planlama-tab` | Otomatik Planlama'nın sonuç penceresi | 3 | adı içeriği söylemiyor |
+| `planlama-tab2` | Dolu ızgara, diyalog yok | — | |
+| `sagtik-2` | Otomatik planlamadan önceki yerleşim, menü yok | — | |
+| `sagtik-3` | Sağ tık menüsünün üst düzeyi | — | alt menü yok |
+| `sagtik-4` | Aynı menü | — | tekrar |
+| `sagtik-5` | Aynı menü | — | tekrar |
+| `sagtik-6` | Aynı menü | — | `sagtik-5` ile bayt bayt aynı |
+| `sagtik-7` | Aynı menü | — | tekrar |
+| `sagtik-8` | Menü kapalı | — | |
+| `sagtik-bul-2` | Satır başı seçili, menü yok | — | alt menü görünmüyor |
+| `sagtik-bul-alt` | Başlıklar renkli, menü yok | — | alt menü görünmüyor |
+| `sagtik-bul-correct` | Sağ tık → Bul ▸: kartın sınıfı, öğretmeni, dersi | 8 | demo adı |
+| `sagtik-fresh` | Sağ tık menüsünün üst düzeyi | — | |
+| `sagtik-gorunum-alt` | Sağ tık → Görünüm ▸: sınıf, öğretmen | 8 | demo adı |
+| `sagtik-hizlidegisiklik-correct` | Sağ tık → Hızlı Değişiklik Yap ▸: Dersi Kaldır, Sadece Bu Kartı Kaldır, Derslikler Ekle ve Değiştir, iki tekliyi birleştir, çifti böl | 8 | |
+| `sagtik-hizli-degisiklik` | Izgara, menü yok | — | adı içeriği söylemiyor |
+| `sagtik-planlamaoncesi-correct` | Sağ tık → Planlama Öncesi Kontrol ▸: ders, sınıf, öğretmen | — | 4'ün sonucu değil; 8'in listesinde olmayan bir alt menü |
+| `sagtik-taze` | Sağ tık menüsünün üst düzeyi | — | |
+| `sagtik-zaman-arrow` | Satır seçili, menü yok | — | |
+| `sagtik-zamantablosu-correct` | Sağ tık → Zaman Tablosu ▸: ders, sınıf, öğretmen | 8 | demo adı |
+| `sagtik-zamantablosu-hover` | Üst düzey menü, alt menü açılmamış | — | |
+| `sagtik-zamantablosu-hover2` | Aynı | — | kopya |
+| `sagtik-zamantablosu` | Satır seçili, menü yok | — | |
+| `secmeli-dersler-ic` | Seçmeli Dersler'in girişi: öğrenci girişi gerektiği uyarısı | 5 kısmen | |
+| `secmeli-dersler-kapatildi` | Boş ızgara, pencere yok | — | |
+| `secmeli-dersler-planlama` | Öğrenciler penceresi: Grup Ekle, Ekle, Düzen, Sil, Öğrencilerin Seçenekleri, Seçmeli Dersleri Öğrencilere Atayın, Ders Seçim İstatistiği; kayıt yok | 5 | |
+| `sihirbaz-1` | Sihirbaz 1/7: genel bilgiler | 9 | |
+| `sihirbaz-2` | Sihirbaz 2/7: okul türü soruları, Evet · Hayır · Kesinlik yok | 9 | |
+| `sihirbaz-3` | Sihirbaz 3/7: Tanımlı Dersler | 9 | |
+| `sihirbaz-4` | Yine 3/7, başka bir satır seçili | 9 | adı içeriği söylemiyor |
+| `sihirbaz-4b` | Sihirbaz 4/7: Tanımlı Sınıflar ve Gruplar | 9 | asıl 4. adım |
+| `sihirbaz-5` | Sihirbaz 5/7: Tanımlı Derslikler, Otomatik Oluştur | 9 | |
+| `sihirbaz-6` | Sihirbaz 6/7: Tanımlı Öğretmenler ve Dersleri | 9 | çok sayıda demo adı |
+| `sihirbaz-7` | Sihirbaz 7/7: Diğer Verileri Al, Doğrula ve Oluştur | 9 | |
+| `sihirbaz-kapatildi` | Sihirbaz kapandıktan sonra boş ızgara | — | |
+| `siniflar-grid` | Sınıflar ızgarası, dolu | — | |
+| `su-an-baslangic` | Ders Çizelgesi matrisi | — | başka bir oturumda çekilmiş |
+| `tablo-bos` | Tabloyu Temizle'den sonra boş ızgara | 3 | |
+| `tablo-temizlendi` | Tabloyu Temizle'nin onayı: tüm kartlar kaldırılsın mı | 3 | adına rağmen öncesi |
+| `tabloyu-temizle-dialog` | Temizleme seçenekleri: kilitli kartlar kalsın ya da hepsi, yalnız derslikler | 3 | |
+| `temel-bilgiler-acildi` | Ders Programı Oluştur: Planlama Öncesi Kontrol, çalışma süresi, planlama türü, Taslak, İdeal ve Sıkı kısıt seçenekleri | 3 | adı içeriği söylemiyor |
+| `temel-bilgiler-dogru` | Ayarlar → Genel Bilgiler; Ülke ve Program Türü yalnız sekme başlığı | — | |
+
 ## 8 · Turu yeniden koşmak
 
 ```powershell
