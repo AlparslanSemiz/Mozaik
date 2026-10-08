@@ -1109,6 +1109,15 @@ ve mutasyonun kırmızıya döndürmesi BEKLENEN bir eşini birlikte koşturmak.
 kalibrasyondur: hiçbir mutasyonun kırmızıya dönmediği bir turda kanıtlanan şey
 testin zayıflığı değil, mutasyonun hiç uygulanmamış olmasıdır.
 
+2026-10-08'de iki örnek daha çıktı, ikisinde de dize doğru yerdeydi ama ölçülen şeye
+varmadı. Kaynağa eklenen `void import.meta.url;` küçültücüde silindi ve derlenmiş
+dosyayı ölçen iki E2E testi yeşil kaldı: `dist/index.html`'de `import.meta` hiç
+geçmiyordu. Çözücünün `blocker()`'a verdiği durumdan ilişkiler silindi ve değişmez
+yeşil kaldı: `blocker()` ilişkiyi durumdan değil indeksten okuyor. Üçüncü bir koruma
+bu yüzden: **mutasyonun, testin okuduğu nesnede göründüğü sorulur.** Derlenmiş dosyayı
+ölçen bir test için mutasyon `dist`'te aranır, bir fonksiyonu ölçen test için o
+fonksiyonun bilgiyi gerçekte nereden okuduğuna bakılır. Kayıtlar TESTFINDINGS'te.
+
 ### 129 · Bir güvenceyi sınayan dünya, onun ikinci yolunu da kapatmalı
 Öneri aramasının SAT modelinden "sınıfın kapalı saatinde başlayamaz" satırı
 kaldırıldı ve yeni test yeşil kaldı. Mutasyon doğru yere düşmüştü (tuzak 120'nin

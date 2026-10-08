@@ -31,7 +31,9 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda.
+**Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
+`refactor/yapi` dalında yürüyor ve davranış değiştirmiyor: adım 0 ve 1 bitti
+(2026-10-09), dal `main`'e birleşmedi ve itilmedi ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -52,6 +54,8 @@ ve 2026-10-09.
    başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
    1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
+7. Refactor adım 2: RF3 (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve
+   gecelik mutasyon tabanı, `refactor/yapi` dalında (TODO §8k).
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -93,6 +97,80 @@ ve 2026-10-09.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-09 · Refactor adım 0 ve 1: belge kaydı ve yalnız testler
+
+**Başlangıç.** Dal `refactor/yapi`, `origin/main`'den (`db40d8b`) açılmıştı, yerel
+`main` dört commit ilerideydi. Kullanıcının onayıyla dal `main`'e ileri sarıldı. Oturum
+boyunca `main` başka bir oturumdan dört kez ilerledi, her seferinde dal onun üstüne
+alındı. WORKLOG ve DECISIONS'taki iki çatışmada iki tarafın girdisi de kaldı. Push,
+etiket ve `main`'e yazma yok. Analizin raporu `scratch/analiz-2026-10-08/rapor.md`'ye
+kullanıcının isteğiyle yazıldı (git dışında).
+
+**Kullanıcının kararları.** Bulgular RF1 ile RF20 arası, kusurlar RK1'den başlıyor,
+adımlar "Refactor adım 0" ile 7 arası (A belge kapılarının adı). RF2'nin iki maddesi
+(doğrulamanın reddettiği öneri sayısı ve başlangıç alanlarının eşitliği) bugün
+`relax.ts`'ten bir dışa aktarım istediği için adım 6'nın ilk iki içerik commit'i oldu.
+Üretecin genişlemesi öneri değişmezinden başka bir değişmezi de beslerse adım 1'de
+kalacaktı, besledi ve kaldı.
+
+**Ne yapıldı, commit commit.**
+- `415be18`: belge kaydı. Analizin girdisi, TODO §8k (plan ve RK1 ile RK7 arası), §8d'nin iki maddesinin genişlemesi, DECISIONS'ın kaydı.
+- `47c3f0a`: `tsconfig.tsbuildinfo` git'ten çıktı. `eb0601d`'de bir özellik commit'iyle girmişti, hiçbir şey onu okumuyor.
+- `148013b` (RF16): `e2e/temel.spec.ts` 91, derlenmiş modül betiği `node:vm` ile klasik bir betik olarak derleniyor. `e2e/otomatik.spec.ts`, küçük bir dünyada arama bitince `data-oneri-isci` sıfırdan büyük. TRAPS 136 ve TESTPLAN aynı commit'te.
+- `648bc45` (RF17): `src/surum.test.ts`, `withGlobalTauri` açık.
+- `70c4a02` (RF17): `e2e/program.spec.ts` 92, Program sekmesinin tablosu gidip dönünce aynı DOM düğümü.
+- `735db6e` (RF2): `src/relax.test.ts`, `maxConsecutive` ve `maxPerDay`'i tek başına bağlayan iki dünya.
+- `e2c9e79` (RF2): `src/invariants.test.ts`'in üreteci iki sınırı ve bir ilişkiyi de kuruyor, dosyanın kendi 60 saniyelik zaman sınırı var.
+
+**Testler ve mutasyonları.** Her mutasyon değişen dosyanın `scratch/`'teki kopyasıyla
+yapıldı, `cmp` ile uygulandığı görüldü, E2E için yeniden derlendi ve çıkış kodu okundu,
+dosya kopyadan geri kondu, `git diff` üretim kodunu temiz gösterdi.
+
+| Test | Süre | Kırmızıya döndüren mutasyon |
+|---|---|---|
+| `temel.spec.ts` 91 | yaklaşık 0,15 s | `main.tsx`'e `Object.assign(globalThis, { __u: import.meta.url })` |
+| `otomatik.spec.ts`, worker | yaklaşık 2 s | aynısı, ve `relaxPool.ts`'te `ownScript()` `null` (yalnız bu test) |
+| `surum.test.ts`, `withGlobalTauri` | birkaç ms | bayrak `false` |
+| `program.spec.ts` 92 | yaklaşık 2,3 s | `<Activity …>` yerine `{tab === 'program' && …}` |
+| `relax.test.ts`, art arda | yaklaşık 70 ms | analizin M2'si, yalnız bu test |
+| `relax.test.ts`, günde | yaklaşık 40 ms | M3, yalnız bu test |
+| `invariants.test.ts`, üreteç | dosya aşağıda | çözücünün dört `blocker()` çağrısında indeksin `notSameDay`'i boş, ya da iki sınır 0: eski üreteçte yeşil, yenide `illegalBlocks` kırmızı |
+
+Planda önerilen `void import.meta.url;` küçültücüde silindi ve `dist`'e hiç girmedi, ilk
+çözücü mutasyonu da ilişkiyi `d.relations`'tan sildi oysa `blocker()` onu indeksten
+okuyor. İkisi de yeşil kaldı ve hiçbir şey kanıtlamadı (TESTFINDINGS, TRAPS 120).
+
+**Analizin sekiz mutasyonu, önce ve sonra.** Aynı hızlı küme: relax, relations,
+invariants, solver ve constraints testleri, iki yavaş blok hariç. Betik
+`scratch/mut-2026-10-08/sekiz.sh`, sonuç `sekiz.log`.
+
+| Mutasyon | Önce (analiz) | Sonra |
+|---|---|---|
+| M1 relax `notSameDay`'i unutur | 1 kırmızı | 1 kırmızı |
+| M2 relax `maxConsecutive`'i unutur | 0 | 1 kırmızı (yeni art arda testi) |
+| M3 relax `maxPerDay`'i unutur | 0 (yalnız yavaş test görüyordu) | 1 kırmızı (yeni günde testi) |
+| M4 relax aynı ders sınırını unutur | 1 kırmızı | 1 kırmızı |
+| M5 yalnız `blocker()`'da yeni kural | bu kümede kaydı yok, analizin ikinci koşusunda dar kümede 9 | en az 30 (çıktı 30 satırda kesildi) |
+| M6 yalnız relax'ta yeni kural | 5 kırmızı | 7 kırmızı (iki yeni test dahil) |
+| M7 relax dersliği unutur | 1 kırmızı | 1 kırmızı |
+| M8 relax sınıfın kapalı saatini unutur | 1 kırmızı | 1 kırmızı |
+
+Yeşil kalan yok.
+
+**Ölçülenler.**
+- Doğrulamanın `offer()` içinde reddettiği öneri sayısı, yalnız bir kopyada (`scratch/olc-ret-2026-10-08/`), kaynağa geçici bir sayaçla, 60 dünya ve üç tohum: bugünkü `closedWorld` ile 0, 0 ve 0 (`offer()`'a giren 96, 74 ve 41 öneri), ilişki ile iki sınırı da üreten üreteçle 0, 0 ve 0 (107, 88 ve 64). Kalibrasyon, aynı kopyada: M1'de genişletilmiş üreteçle 13, 32 ve 9 ret, M2'de 27, 20 ve 26, M3'te 35, 38 ve 45. Bugünkü üreteçle üçünde de 0.
+- `invariants.test.ts` tek başına, `performance` profilinde, analiz kopyasında: önce 6,28, 6,48 ve 6,60 s, sonra 11,43, 11,67 ve 13,93 s. Aynı dosya `low-power` profilinde 31,8 s, yarım blok özelliği 5,2 s.
+- `npm test` önce: 156,6 s, 1373 test, `performance` profilinde, başka bir oturumun node süreci açıkken (yük ortalaması 2,2). Sonra yalnız `low-power`'da ölçülebildi: 392,9 s ve `kontrol`'ün içinde 385,7 s, 1376 test. Karşılaştırılamaz. Duvar süresini iki koşuda da `relax.test.ts` belirliyor (155,8 ve 391,6 s), `invariants.test.ts` ona paralel. `performance` profilinde yeniden ölçülmedi, çünkü oturumun sonunda profil `balanced`'dı ve yük ortalaması 24'tü.
+
+**Koşulan testler.**
+- Her commit'ten önce `npm run tipler`, `sinir`, `lint` (0 hata, 3 eski uyarı), `knip` ve `npm test`, hepsi 0 ile çıktı. Belge commit'lerinde ve her rebase'ten sonra `npx vitest run src/docs.test.ts`, 17/17.
+- RF16 için `npx vite build`, `npm run boyut`, `e2e/temel.spec.ts` ve `e2e/otomatik.spec.ts`'in tamamı (49/49). RF17 için `e2e/program.spec.ts`'in tamamı (76/76).
+- `npm run kontrol` baştan sona, bu dalda ilk kez: 0 ile çıktı, 1191 s. 43 dosyada 1376 birim testi, derleme, boyut (ham eşiğe 12,34 kB, brotli eşiğine 8,71 kB pay), ana E2E 621/621 (11,0 dk), site 22/22, çözücü stresi 7/7. Profil başta `low-power`, sonda `balanced`.
+
+**Koşulmayan testler.** `npm run mutasyon` (adım 2'nin işi), `exe:e2e`, `exe:test`,
+`patrol` ve `ekran` (kapsam dışı, ürün kodu değişmedi). Ekrana bakılmadı, değişen
+yalnız testler.
 
 ## 2026-10-09 · Belgeler, haftalık koşu, B7.20 analizi, A3/A4, A6 ve Tur 0b
 

@@ -94,6 +94,38 @@ Ne yapıldı: hiçbiri düzeltilmedi. `npm run test:webkit` eklendi, `kontrol`'e
 girmeyeceği kullanıcıda. Ayırma işi TODO B7.21.
 Kalıcı kural: yok.
 
+### 2026-10-08 · npx vitest run src/invariants.test.ts, low-power profili · "elde kalan yarım bloklarla yeniden dizince…"
+Bulgu: Üreteç iki sınır ve bir ilişkiyle genişleyince dosya `low-power` profilinde
+31,8 s sürdü ve bu özellik üç koşunun üçünde 5,0 ile 5,3 s arasında Vitest'in
+varsayılan 5 s zaman sınırından düştü, sonucu yanlış değildi. `performance`
+profilinde aynı dosya 11,4 ile 13,9 s sürüyor ve özellik geçiyor. Eski üreteçte de
+analiz günü yük altında `remapDays` özelliği aynı sınırda bir kez düşmüştü.
+Tür: test kusuru (makinenin hızına bağlı bir zaman sınırı).
+Ne yapıldı: Dosya `vi.setConfig({ testTimeout: 60_000 })` ile kendi sınırını taşıyor,
+yorumu bunun bir hız iddiası değil takılan bir arama için tavan olduğunu söylüyor.
+Aynı profilde 16/16 geçti.
+Kalıcı kural: yok
+
+### 2026-10-08 · scratch kopyası, npx vitest run src/invariants.test.ts · çözücü mutasyonu ilişkiye değmedi
+Bulgu: Genişleyen üretecin çözücünün yasallığını beslediğini sınamak için çözücünün
+dört `blocker()` çağrısına `relations` boşaltılmış bir durum verildi. Eski ve yeni
+üreteçte de yeşil kaldı. Sebep: `blocker()` ilişkiyi durumdan değil indeksin
+`notSameDay` haritasından okuyor, yani mutasyon ölçülen yere hiç varmadı.
+Tür: mutasyonun kusuru, testin değil.
+Ne yapıldı: İndeksin `notSameDay`'i boşaltılınca eski üreteç yeşil, yeni üreteç
+`illegalBlocks`'ta kırmızı. İki sınırı sıfırlayan mutasyon da aynı sonucu verdi.
+Kalıcı kural: TRAPS.md, tuzak 120
+
+### 2026-10-08 · npx playwright test, temel.spec.ts 91 ve otomatik.spec.ts · `import.meta` mutasyonu dist'e girmedi
+Bulgu: Planlanan mutasyon `src/ui/main.tsx`'e `void import.meta.url;` eklemekti.
+Derleme 0 ile çıktı, iki test de yeşil kaldı, ve `dist/index.html`'de `import.meta`
+sıfır kez geçiyordu: yan etkisiz bir ifade küçültücüde siliniyor.
+Tür: mutasyonun kusuru, testin değil.
+Ne yapıldı: Yan etkili bir hâli (`Object.assign(globalThis, { __u: import.meta.url })`)
+dist'te bir kez geçti ve iki testi de kırmızıya çevirdi. Test yorumları doğru
+mutasyonu yazıyor.
+Kalıcı kural: TRAPS.md, tuzak 120
+
 ### 2026-10-08 · GitHub Actions `ci.yml`, ilk koşu (37845676686) · `otomatik.spec.ts:202` "durdurulan öneri araması…"
 Bulgu: İlk CI koşusunda altı işin beşi yeşil, `e2e (2)` kırmızı: bu test parçanın
 içinde, üç başka worker'ın yanında, "Nasıl kurulacağı aranıyor" cümlesini 60 s'de

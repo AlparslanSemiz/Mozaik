@@ -1864,9 +1864,10 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 **Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
 
-- [ ] **Refactor adım 0 · belge kaydı.** WORKLOG'un girdisi, bu bölüm ve DECISIONS'ın
+- [x] **Refactor adım 0 · belge kaydı.** WORKLOG'un girdisi, bu bölüm ve DECISIONS'ın
       kaydı. `tsconfig.tsbuildinfo` git'ten ayrı bir commit'le çıkar.
-- [ ] **Refactor adım 1 · yalnız testler (RF16, RF17, RF2'nin ilk yarısı).** RF16:
+      Bitti 2026-10-09, `415be18` ve `47c3f0a`, `refactor/yapi` dalında.
+- [x] **Refactor adım 1 · yalnız testler (RF16, RF17, RF2'nin ilk yarısı).** RF16:
       derlenmiş betiğin klasik bir worker olarak derlendiği (`e2e/temel.spec.ts`) ve
       öneri aramasının Chromium'da worker'da koştuğu (`e2e/otomatik.spec.ts`). RF17:
       `withGlobalTauri` (`src/surum.test.ts`) ve Program sekmesinin gizlenince
@@ -1874,6 +1875,9 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       başına bağlayan dünyalar (`src/relax.test.ts`) ve değişmez üretecinin ilişki ve iki
       sınırla genişlemesi (`src/invariants.test.ts`). Üretim koduna dokunulmaz. Adım 6'nın
       önkoşulu.
+      Bitti 2026-10-09, `148013b`, `648bc45`, `70c4a02`, `735db6e` ve `e2c9e79`,
+      `refactor/yapi` dalında. Her test bir mutasyonla kırmızıya döndü, analizin sekiz
+      mutasyonunun sekizi de artık kırmızı (WORKLOG 2026-10-09). `npm run kontrol` yeşil.
 - [ ] **Refactor adım 2 · RF3 ve gecelik mutasyon tabanı.** `relax.ts` ve `sat.ts`
       mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
       commit'te (A9 kapısı). Adım 1'e bağlı.
@@ -1936,8 +1940,16 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 - [ ] **RK7 `relax.test.ts`'in süresi yeniden ölçülsün.** [TESTPLAN.md](TESTPLAN.md)
       "yaklaşık 45 saniye" diyor. 2026-10-08'de `npm test`'in içinde 136,8 saniye (yardımcı
       ajanlar koşarken) ve 155,8 saniye (`performance` profili, başka bir oturum açıkken),
-      kapsam altında 402 saniye. Sessiz bir pencerede tek başına ölçülür, TESTPLAN'ın
-      cümlesi sayıyla düzelir.
+      kapsam altında 402 saniye. 2026-10-09'da `low-power` profilinde 391,6 saniye. Sessiz
+      bir pencerede ve `performance` profilinde tek başına ölçülür, TESTPLAN'ın cümlesi
+      sayıyla düzelir.
+- [ ] **RK8 Öneri aramasının worker testi CI'da paralel parçada koşuyor. Karar bekliyor.**
+      `e2e/otomatik.spec.ts`'in "öneri araması Chromium'da worker'larda koşuyor" testi
+      (2026-10-09) `ci.yml`'nin `ARAMA_TESTLERI` listesinde değil, yani dört çekirdekli
+      bir runner'da öteki Playwright worker'larıyla aynı anda koşuyor. Worker'lar beş
+      saniyede hazır olamazsa arama ana iş parçacığına düşer ve test kırmızıya döner.
+      Yerelde üç koşuda yaklaşık 2 saniyede yeşil, CI'da henüz koşmadı. Seçenekler:
+      listeye eklemek ya da ilk CI koşularını izlemek.
 
 ## §9. Ham notlar — senin kendi satırların
 
