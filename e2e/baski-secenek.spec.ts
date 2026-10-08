@@ -11,7 +11,7 @@
 
 import { expect, test } from './kapan';
 import type { Page } from '@playwright/test';
-import { reopen, dragAndDrop, openWithSample } from './helpers';
+import { reopen, dragAndDrop, openWithSample, PDF_YALNIZ_CHROMIUM } from './helpers';
 
 async function openPrint(page: Page) {
   await openWithSample(page);
@@ -125,7 +125,11 @@ test.describe('62. Sayfada ne olsun', () => {
   // The one that could quietly cost a sheet of paper per teacher. The page box
   // is a fixed 205 mm and the plan is centred in it; a stamp is a new last
   // child of that box.
-  test('ÇIKTI TARİHİ kâğıdı taşırmıyor ve fazladan sayfa üretmiyor', async ({ page }) => {
+  test('ÇIKTI TARİHİ kâğıdı taşırmıyor ve fazladan sayfa üretmiyor', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openPrint(page);
     await box(page, 'Çıktı tarihi').check();
 

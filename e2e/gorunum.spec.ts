@@ -26,6 +26,7 @@ import {
   settledText,
   answerDialog,
   openGridMenu,
+  PDF_YALNIZ_CHROMIUM,
 } from './helpers';
 
 /** What the grid actually is right now: the numbers A5 is a claim about. */
@@ -367,7 +368,11 @@ test.describe('44. Görünüm — yazı büyüklüğü', () => {
     expect(after.width).toBeLessThanOrEqual(before.width * 1.25 + slack);
   });
 
-  test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({ page }) => {
+  test('YAZDIRMA ölçekten etkilenmiyor — punto da, sayfa sayısı da', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
 

@@ -35,6 +35,13 @@ import { expect, test } from './kapan';
 import { openWithSample } from './helpers';
 
 test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } });
+// `--hide-scrollbars` is Chromium's flag, and the whole file is written against
+// the gutter it takes away. Another engine draws its scrollbars its own way and
+// nothing here has been measured there, so the file does not claim it.
+test.skip(
+  ({ browserName }) => browserName !== 'chromium',
+  "--hide-scrollbars Chromium'a özgü, öteki motorlarda ölçülmedi",
+);
 
 /** Where every control on the strip is, and how wide the page under it is.
  *

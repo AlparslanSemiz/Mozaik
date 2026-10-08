@@ -15,6 +15,14 @@ import type { State } from '../src/leaf/types';
 
 export const FILE = pathToFileURL(resolve('dist/index.html')).href;
 
+/**
+ * Why a test is skipped outside Chromium. `page.pdf()` exists in Chromium
+ * alone (Playwright's own limit), so a test that counts sheets or reads the
+ * printed page through it has nothing to run in another engine. Named once so
+ * every such skip says the same thing and a search finds all of them.
+ */
+export const PDF_YALNIZ_CHROMIUM = "page.pdf() yalnız Chromium'da var";
+
 // The language is pinned in `kapan.ts`, for every test in every config at
 // once — see the note there.
 /**

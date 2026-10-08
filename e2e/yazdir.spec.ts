@@ -15,6 +15,7 @@ import {
   mainList,
   onScreen,
   openLessons,
+  PDF_YALNIZ_CHROMIUM,
 } from './helpers';
 import { makeWorld } from '../src/worlds';
 
@@ -156,14 +157,16 @@ test.describe('4. Yazdırma', () => {
     expect(horizontalOverflow).toBeLessThanOrEqual(1);
   });
 
-  test('PDF üretilebiliyor ve boş değil', async ({ page }) => {
+  test('PDF üretilebiliyor ve boş değil', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
     expect(pdf.length).toBeGreaterThan(20_000);
   });
 
-  test('sayfa A4 YATAY basılıyor', async ({ page }) => {
+  test('sayfa A4 YATAY basılıyor', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true });
@@ -300,7 +303,8 @@ test.describe('35. Basılan sayfanın düzeni', () => {
     await page.emulateMedia({ media: 'screen' });
   });
 
-  test('3 sınıf = 3 sayfa, arada BOŞ sayfa yok', async ({ page }) => {
+  test('3 sınıf = 3 sayfa, arada BOŞ sayfa yok', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     // The page box has a fixed height now: one fractional pixel of overflow
     // plus `break-after: page` would put a blank sheet after every timetable,
     // and nothing else in the suite would notice.
@@ -404,7 +408,8 @@ test.describe('21. Yazdırmada seçim', () => {
     await expect(page.locator('.print-page').nth(1).locator('h3')).toContainText('999');
   });
 
-  test('seçim yazdırma çıktısına da yansıyor', async ({ page }) => {
+  test('seçim yazdırma çıktısına da yansıyor', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     await openWithSample(page);
     await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
     const list = page.locator('.pick-list', { hasText: 'Sınıflar' });
@@ -519,7 +524,8 @@ test.describe('60. Yazdır — önizleme kâğıda benziyor', () => {
     await page.emulateMedia({ media: 'screen' });
   });
 
-  test('büyüyen önizleme sayfa SAYISINI değiştirmedi', async ({ page }) => {
+  test('büyüyen önizleme sayfa SAYISINI değiştirmedi', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     // The guard, and the reason the two assertions above are safe to make: a
     // taller preview row that had leaked into the page box would push every
     // timetable onto a second sheet, and "3 classes = 3 pages" is the cheapest
@@ -953,7 +959,8 @@ test.describe('70. Sayfa düzeni ve kâğıttaki saat', () => {
     }
   });
 
-  test('4’lüde 4 program = 1 KÂĞIT — PDF sayarak', async ({ page }) => {
+  test('4’lüde 4 program = 1 KÂĞIT — PDF sayarak', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', PDF_YALNIZ_CHROMIUM);
     // The one assertion that goes all the way to the printer. Everything else
     // in this file measures the DOM; this counts the pages a PDF actually has,
     // which is the only place a stray `break-after` or a fractional pixel of
