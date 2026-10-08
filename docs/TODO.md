@@ -181,6 +181,8 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       (b) oturumu **kullanıcı kendi açar**, şifre sohbete yazılmaz.
       **Turun eksiksiz olması aSc'dekinden önemli:** orada 528 yardım konusu
       dosya olarak elimizdeydi, burada geri dönüp bakılacak bir döküm **yok**.
+      **2026-10-09 · Tur 0b bitti: otomatik mod** (`gez.mjs --oto`, yalnız gezinmeye
+      tıklar, gerisini listeler; mutasyonla kanıtlı, [ROBODERS.md](ROBODERS.md)).
       **2026-10-08 · Tur 0 bitti: araçlar ve kanıtı hazır** (`scripts/roboders/`,
       `e2e/roboders-koruma.spec.ts`, [ROBODERS.md](ROBODERS.md) "R6'nın araçları").
       Görüntüler ve notlar `docs/` altına değil yalnız `scratch/roboders/`'e gider,

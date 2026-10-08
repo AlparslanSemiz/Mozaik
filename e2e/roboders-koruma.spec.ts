@@ -20,6 +20,7 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { expect, test, type Page } from '@playwright/test';
+import { existsSync } from 'node:fs';
 import {
   guvenliBaglam,
   hedefBilgisi,
@@ -27,6 +28,7 @@ import {
   tiklanabilir,
   type Kayit,
 } from '../scripts/roboders/koruma.mjs';
+import { otomatikGez, otomatikKarar, type Aday } from '../scripts/roboders/otomatik.mjs';
 
 /** What reached the server: `METHOD /path`, in order, and upgrade attempts. */
 const gelen: string[] = [];
@@ -82,6 +84,42 @@ temiz.addEventListener('pagehide', () => temiz.fetch('/cikis-bos-cerceve', { met
 window.hazir = true;
 </script></body>`;
 
+// The automatic tour's test page. Every element that must NOT be clicked sends
+// `GET /tiklandi/y-...` when clicked (a GET, so the guard lets it through and
+// the server sees it); every one that must be clicked sends `/tiklandi/izin-...`
+// or navigates. The judge is again the server's list.
+const iz = (ad: string) => `onclick="fetch('/tiklandi/${ad}')"`;
+const OTO = (oteki: string) => `<!doctype html><meta charset="utf-8">
+<nav>
+  <a href="/oto/a">Raporlar</a>
+  <button role="tab" ${iz('izin-sekme')}>Haftalık</button>
+  <button aria-haspopup="menu" aria-expanded="false" ${iz('izin-menu')}
+    onmouseup="document.getElementById('menu').hidden = false; this.setAttribute('aria-expanded', 'true')">Menü ▾</button>
+  <div id="menu" role="menu" hidden>
+    <a role="menuitem" href="/oto/b">Liste</a>
+    <button role="menuitem" ${iz('y-menu-sil')}>Sil</button>
+    <button role="menuitem" ${iz('y-menu-yazdir')}>Yazdır</button>
+  </div>
+  <button ${iz('y-kaydet')}>Kaydet</button>
+  <button ${iz('y-hesapla')}>Hesapla</button>
+  <button aria-haspopup="dialog" ${iz('y-pencere')}>Öğretmen</button>
+  <a href="/oto/x" ${iz('y-kaldir')}>Programı kaldır</a>
+  <a href="/oto/sil?id=1" ${iz('y-adres')}>Ayrıntı</a>
+  <a href="/oto/yeni-pencere" target="_blank" ${iz('y-blank')}>Yardım</a>
+  <a href="/oto/dosya" download ${iz('y-indir')}>Dışa ver</a>
+  <a href="${oteki}/oto/disari" ${iz('y-disari')}>Öteki site</a>
+  <a href="javascript:void 0" ${iz('y-js')}>Betik</a>
+</nav>
+<table><tr><td><a href="/oto/hucre" ${iz('y-hucre')}>Ma 6.B</a></td></tr></table>
+<form action="/oto/form"><button ${iz('y-form')}>Bak</button></form>
+<a href="/oto/surukle" draggable="true" ${iz('y-surukle')}>Fi 7.A</a>`;
+const OTO_A = `<!doctype html><meta charset="utf-8"><a href="/oto">Ana sayfa</a>
+<script>fetch('/oto-a-yaz', { method: 'POST', body: 'x' }).catch(() => {})</script>`;
+const OTO_B = `<!doctype html><meta charset="utf-8"><p>Liste</p>`;
+const DIYALOG = `<!doctype html><meta charset="utf-8"><a href="/oto-onay">Devam</a>`;
+const ONAY = `<!doctype html><meta charset="utf-8">
+<script>confirm('Silinsin mi?')</script><a href="/oto-sonraki">Sonraki</a>`;
+
 test.beforeAll(async () => {
   sunucu = createServer((req, res) => {
     const yol = new URL(req.url ?? '/', 'http://x').pathname;
@@ -92,6 +130,11 @@ test.beforeAll(async () => {
     };
     if (yol === '/deneme') return html(SAYFA(oteki));
     if (yol === '/cikis') return html(CIKIS);
+    if (yol === '/oto') return html(OTO(oteki));
+    if (yol === '/oto/a') return html(OTO_A);
+    if (yol === '/oto/b') return html(OTO_B);
+    if (yol === '/oto-diyalog') return html(DIYALOG);
+    if (yol === '/oto-onay') return html(ONAY);
     if (yol === '/cerceve')
       return html(`<script>fetch('/cerceve-yaz', { method: 'POST', body: 'x' })</script>`);
     if (yol === '/acilir') {
@@ -279,5 +322,128 @@ test.describe('Roboders koruması', () => {
     ]) {
       expect(izinVerilir('GET', adres).izin, adres).toBe(false);
     }
+  });
+
+  test.describe('otomatik mod', () => {
+    const SITE = /^127\.0\.0\.1$/;
+
+    test('yalnız gezinmeye tıklıyor, gerisini atlayıp listeliyor', async ({ browser }, bilgi) => {
+      const context = await guvenliBaglam(browser, { gunluk: () => {} });
+      const page = await context.newPage();
+      const once = gelen.length;
+      const ekran = bilgi.outputPath('ekran');
+      const sonuc = await otomatikGez(page, `${kok}/oto`, { site: SITE, ekran, bekleMs: 100 });
+      await context.close();
+      const yeni = gelen.slice(once);
+
+      expect(
+        yeni.filter((r) => !/^(GET|HEAD) /.test(r)),
+        'yazan istek ulaştı',
+      ).toEqual([]);
+      expect(
+        yeni.filter((r) => r.startsWith('GET /tiklandi/y-')),
+        'yasak öğeye tıklandı',
+      ).toEqual([]);
+      for (const yol of ['/oto/x', '/oto/hucre', '/oto/form', '/oto/surukle', '/oto/disari']) {
+        expect(yeni, `${yol} açıldı`).not.toContain(`GET ${yol}`);
+      }
+      // The control: what is allowed was clicked, through to the server.
+      for (const r of [
+        'GET /oto/a',
+        'GET /oto/b',
+        'GET /tiklandi/izin-sekme',
+        'GET /tiklandi/izin-menu',
+      ]) {
+        expect(yeni, `${r} gelmedi`).toContain(r);
+      }
+      expect(sonuc.durdu).toBe('gezilecek yer kalmadı');
+      expect(sonuc.tiklanan.map((t) => t.ad).sort()).toEqual(
+        ['Ana sayfa', 'Haftalık', 'Liste', 'Menü ▾', 'Raporlar'].sort(),
+      );
+
+      const sebep = (ad: string) => sonuc.atlanan.find((a) => a.ad === ad)?.sebep ?? 'YOK';
+      expect(sebep('Kaydet')).toContain('kaydet');
+      expect(sebep('Sil')).toContain('sil');
+      expect(sebep('Hesapla')).toContain('izin listesinde değil');
+      expect(sebep('Yazdır')).toContain('izin listesinde değil');
+      expect(sebep('Öğretmen')).toContain('izin listesinde değil');
+      expect(sebep('Programı kaldır')).toContain('kaldir');
+      expect(sebep('Ayrıntı')).toContain('adreste');
+      expect(sebep('Yardım')).toContain('yeni pencere');
+      expect(sebep('Dışa ver')).toContain('indirir');
+      expect(sebep('Öteki site')).toContain('site dışı');
+      expect(sebep('Betik')).toContain('javascript');
+      expect(sebep('Ma 6.B')).toContain('hücre');
+      expect(sebep('Bak')).toContain('gönderen');
+      expect(sebep('Fi 7.A')).toContain('sürüklenebilir');
+
+      // Before and after every click.
+      for (let i = 1; i <= sonuc.tiklanan.length; i++) {
+        const no = String(i).padStart(3, '0');
+        expect(existsSync(`${ekran}/${no}-once.png`), `${no}-once`).toBe(true);
+        expect(existsSync(`${ekran}/${no}-sonra.png`), `${no}-sonra`).toBe(true);
+      }
+    });
+
+    test('diyalog çıkınca tur duruyor', async ({ browser }) => {
+      const context = await guvenliBaglam(browser, { gunluk: () => {} });
+      const page = await context.newPage();
+      const once = gelen.length;
+      const sonuc = await otomatikGez(page, `${kok}/oto-diyalog`, { site: SITE, bekleMs: 100 });
+      await context.close();
+      expect(sonuc.durdu).toBe('bir diyalog açıldı');
+      expect(gelen.slice(once)).not.toContain('GET /oto-sonraki');
+    });
+
+    test('tıklama sınırında duruyor', async ({ browser }) => {
+      const context = await guvenliBaglam(browser, { gunluk: () => {} });
+      const page = await context.newPage();
+      const sonuc = await otomatikGez(page, `${kok}/oto`, {
+        site: SITE,
+        tiklamaSiniri: 2,
+        bekleMs: 100,
+      });
+      await context.close();
+      expect(sonuc.durdu).toBe('tıklama sınırı (2)');
+      expect(sonuc.tiklama).toBe(2);
+    });
+
+    test('süre sınırında duruyor', async ({ browser }) => {
+      const context = await guvenliBaglam(browser, { gunluk: () => {} });
+      const page = await context.newPage();
+      const sonuc = await otomatikGez(page, `${kok}/oto`, {
+        site: SITE,
+        sureSiniriMs: 1,
+        bekleMs: 100,
+      });
+      await context.close();
+      expect(sonuc.durdu).toMatch(/^süre sınırı/);
+      expect(sonuc.tiklanan).toEqual([]);
+    });
+
+    test('gezinti alanının dışındaki bağlantı atlanıyor', () => {
+      const aday: Aday = {
+        ad: 'Muhasebe',
+        rol: 'link',
+        href: 'https://ornek.com/muhasebe/liste',
+        yeniPencere: false,
+        indirir: false,
+        acar: false,
+        acik: false,
+        hucrede: false,
+        formAlani: false,
+        suruklenebilir: false,
+        gonderir: false,
+      };
+      const sinir = { site: /ornek\.com$/, alanlar: ['/ders'], sayfa: 'https://ornek.com/' };
+      expect(otomatikKarar(aday, sinir).sebep).toContain('alanının dışında');
+      expect(otomatikKarar({ ...aday, href: 'https://ornek.com/ders/program' }, sinir).izin).toBe(
+        true,
+      );
+      expect(otomatikKarar({ ...aday, rol: 'button', href: '' }, sinir).izin).toBe(false);
+      expect(otomatikKarar({ ...aday, rol: 'button', href: '', acar: true }, sinir).tur).toBe(
+        'açılır menü',
+      );
+    });
   });
 });

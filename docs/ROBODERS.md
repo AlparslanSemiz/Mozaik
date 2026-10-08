@@ -248,6 +248,8 @@ korumanın kanıtı koşulur:
 npx playwright test e2e/roboders-koruma.spec.ts   # koruma yerel sunucuya karşı yeşil mi
 node scripts/roboders/giris.mjs                    # kullanıcı kendisi girer, oturum saklanır
 node scripts/roboders/gez.mjs                      # korumalı, adım adım gezinti
+node scripts/roboders/gez.mjs --oto --tiklama 40 --dakika 10 [--alan /yol]
+                                                   # korumalı, kendi başına (Tur 0b)
 node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
 ```
 
@@ -267,6 +269,19 @@ node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
   dolduran, sürükleyen ya da tuşa basan bir komut yok. Her tıklama hedefin adını
   gösterip "e" bekler, hedef tek olmalıdır. Sayfa başına bir görüntü, döngü yok.
   Tur bir sayfayı değil tarayıcıyı kapatarak biter.
+- **Otomatik mod** (`gez.mjs --oto`, `otomatik.mjs`, Tur 0b, 2026-10-09). Kullanıcı her
+  tıklamanın başında duramadığı için dikkat kodda. Kendiliğinden yalnız gezinme olduğu
+  gösterilebilen şeye tıklar: aynı sitede bir sayfaya giden bağlantı (yeni pencere,
+  indirme, `javascript:`, adresinde yazan kelime ve `--alan` dışı hariç), sekme, kendisi
+  böyle bir bağlantı olan menü öğesi ve menü açan düğme (`aria-haspopup` menü, liste ya
+  da ağaç; ya da `aria-expanded="false"`; pencere açan `dialog` değil). Her biri ayrıca
+  tıklama kuralından (hücre, form, sürükleme, gönderen düğme, yazan kelime, adsız)
+  geçer. Gerisine tıklanmaz ve sorulmaz: sebebiyle "atlandı" listesine girer, liste tur
+  sonunda `scratch/roboders/notlar/oto-<zaman>.md`'de. Her tıklamanın öncesi ve sonrası
+  ekran görüntüsü `scratch/roboders/ekran/oto-<zaman>/`'de. Ağ koruması aynı. Diyalog
+  çıkarsa (koruma onu "İptal"le kapatır), yeni bir pencere açılırsa, tıklama ya da süre
+  sınırına gelinirse tur durur. Görünmez (headless) koşar, odağı almaz (tuzak 145).
+  Giriş her turun başında yine elle; şifre hiçbir yerde saklanmaz.
 - **Görüntüler ve notlar** yalnız `scratch/roboders/ekran/` ve `scratch/roboders/notlar/` altında: depo
   herkese açık ve görüntülerde babanın gerçek verisi var. Bu dosyaya yazılan notlarda
   öğretmenler yalnız kısaltmasıyla geçer.
@@ -274,7 +289,13 @@ node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
   Mutasyonla sınandı: ağ kuralı, sayfa katmanı, WebSocket yönlendirmesi, tıklama kuralı,
   diyalog dinleyicisi ve sayfa katmanının günlüğü bozulunca kırmızı. Service worker
   engeli tek başına bozulunca yeşil kalıyor, çünkü router service worker'ın isteğini de
-  durduruyor (ölçüldü, TESTFINDINGS 2026-10-08).
+  durduruyor (ölçüldü, TESTFINDINGS 2026-10-08). Otomatik mod için beş test daha
+  (2026-10-09): deneme sayfasında yasak her öğe tıklanırsa sunucuya bir iz gönderiyor ve
+  hiçbir iz gelmiyor, izinli olanların izleri geliyor, GET dışında istek yok; diyalog,
+  tıklama sınırı ve süre sınırı turu durduruyor. On üç mutasyonun on üçü kırmızıya döndü
+  (her şeye izin, tıklama kuralı yok, yeni pencere, site, adres kelimesi, indirme, alan,
+  `dialog`'u menü saymak, her düğmeyi menü saymak, diyalog, tıklama sınırı, süre sınırı,
+  ekran görüntüsü).
 
 **Canlı yarı bekliyor.** Roboders aynı anda iki oturumda birini kapatmıyor (babanın
 gözlemi, 2026-10-08); tur ilk girişten sonra babanın oturumunun düşmediğini yine

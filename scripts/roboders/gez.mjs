@@ -15,12 +15,24 @@
 //   geri           browser back
 //   kapat          close (the session file stays; giris.mjs --sil deletes it)
 //
+// `--oto` walks on its own instead (otomatik.mjs says what it will and will
+// not click), headless, and stops at a ceiling:
+//
+//   node scripts/roboders/gez.mjs --oto [--tiklama 40] [--dakika 10]
+//        [--alan /yol]... [--baslangic <adres>]
+//
+// It writes screenshots before and after every click under
+// scratch/roboders/ekran/oto-<zaman>/ and the list of what it clicked and
+// skipped to scratch/roboders/notlar/oto-<zaman>.md. Login stays manual,
+// at the start of every tour (giris.mjs); no password is stored anywhere.
+//
 // Everything it writes is under scratch/roboders/, outside git: the
 // screenshots show my father's real data and the repository is public.
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
+import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
 import {
   BASLANGIC,
@@ -32,6 +44,17 @@ import {
   hedefBilgisi,
   tiklanabilir,
 } from './koruma.mjs';
+import { otomatikGez, rapor } from './otomatik.mjs';
+
+const { values: argv } = parseArgs({
+  options: {
+    oto: { type: 'boolean', default: false },
+    tiklama: { type: 'string', default: '40' },
+    dakika: { type: 'string', default: '10' },
+    alan: { type: 'string', multiple: true, default: [] },
+    baslangic: { type: 'string', default: BASLANGIC },
+  },
+});
 
 if (!existsSync(OTURUM)) {
   console.error('Oturum yok. Önce: node scripts/roboders/giris.mjs');
@@ -51,9 +74,41 @@ const gunluk = (kayit) => {
   console.log(`  ⛔ ${kayit.yontem} ${kayit.adres} — ${kayit.sebep}`);
 };
 
-const browser = await chromium.launch({ headless: false });
+// The automatic tour runs headless: nobody is watching it, and a visible window
+// takes the focus from whoever is at the machine (pitfall 145).
+const browser = await chromium.launch({ headless: argv.oto });
 const context = await guvenliBaglam(browser, { oturum: OTURUM, gunluk });
 const page = await context.newPage();
+
+if (argv.oto) {
+  const tiklamaSiniri = Number(argv.tiklama);
+  const dakika = Number(argv.dakika);
+  if (!(tiklamaSiniri > 0 && dakika > 0)) {
+    console.error('--tiklama ve --dakika birer pozitif sayı olmalı.');
+    process.exit(1);
+  }
+  const zaman = new Date().toISOString().replace(/[:.]/g, '-');
+  const baslangic = new URL(argv.baslangic);
+  if (!IZINLI_SITE.test(baslangic.hostname)) {
+    console.error(`Yalnız roboders.com: ${baslangic.hostname}`);
+    process.exit(1);
+  }
+  console.log(`Otomatik tur: en çok ${tiklamaSiniri} tıklama, ${dakika} dakika.`);
+  const sonuc = await otomatikGez(page, baslangic.href, {
+    site: IZINLI_SITE,
+    alanlar: argv.alan,
+    tiklamaSiniri,
+    sureSiniriMs: dakika * 60_000,
+    ekran: join(EKRAN, `oto-${zaman}`),
+  });
+  await browser.close();
+  const metin = rapor(sonuc, { engellenen });
+  const yol = join(NOTLAR, `oto-${zaman}.md`);
+  writeFileSync(yol, metin, { mode: 0o600 });
+  console.log(metin);
+  console.log(yol);
+  process.exit(0);
+}
 const soru = createInterface({ input: process.stdin, output: process.stdout });
 
 /** A file name a person can read: lower case letters, digits and dashes. */
