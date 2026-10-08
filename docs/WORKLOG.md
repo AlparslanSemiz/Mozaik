@@ -40,9 +40,11 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
-4. A turu sırasıyla: D (GitHub Actions, A5'i içinde taşıyor: CI, yayının CI'a
-   bağlanması), A3 ve A4 (WebKit ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u olan
-   kapta). A1 ve A2 bitti.
+4. A turu sırasıyla: A3 ve A4 (WebKit ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u
+   olan kapta). A1, A2 ve D (GitHub Actions; A5 onun içinde) bitti. `haftalik.yml`'nin
+   Windows E2E'si henüz hiç koşmadı: ilk koşusu ölçülüp push'ta koşup koşmayacağına
+   karar verilecek. Bundan sonra iş `main`'e itilir ve CI'ın sonucu `gh run view` ile
+   okunur (CLAUDE.md, "Push ve CI").
 5. Rakip envanteri (TODO §1): Tur 0 bitti. Tur 1'in aSc ve Eyotek web yarısı
    başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
    1 ile paralel, onun ön şartı değil.
@@ -73,7 +75,8 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
 | Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
-| Ana E2E koşusu | 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
+| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 7,9 ve 8,2 dk; işlerin toplamı 32,4 ve 34,1 runner dakikası, en uzun iş `e2e-arama` 425–440 s (2026-10-08) | `gh run view 37846839319`, `37848823362` |
+| Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
@@ -82,6 +85,67 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-08 (üçüncü yarı) · D: GitHub Actions, site CI'ın arkasında; Tur 1'in web yarısı
+
+**Başlangıç.** `main` e5747bb'deydi ve uzaktaydı: 22:08 ve 22:55'teki iki push'u
+kullanıcı GitHub Desktop'tan yaptı (Desktop günlüğü, reflog ve koşuların aktörü).
+Kullanıcı D2 boyunca Desktop'tan push yapmadı.
+
+**Kullanıcının kararları** (DECISIONS 2026-10-08): depodaki gerçek veri kalıyor, paket
+ölçütü açılışa çekildi. Babanın cevapları: exe kullanıyor (`Kur.cmd` değil), exe sürümü
+ve ölçek açık (büyük ihtimalle %100), Roboders iki oturumda birini kapatmıyor. B3.8'e
+iki karar bekleyen soru (Eyotek'e gönderme ve e-postayla ekli gönderme).
+
+**Ne yapıldı, commit commit.**
+- e5747bb: belgeler (gerçek veri, paket ölçütü, R11, R12, tuzak 145).
+- e0525bc: `folder.test.ts`'in yerel gün testi kendi saat dilimini kuruyor. Önce kanıtlandı
+  ki ürün doğru: dört dilimde ürünün iddiası geçiyor, düşen yalnız ortama dayanan ön
+  koşul. Mutasyon: UTC gününü yazan `dayStamp` UTC'de de kırmızı.
+- 3a4dc79: yalnız biçim, `LessonPool.tsx`.
+- 7d7f61a: `ci.yml`, `haftalik.yml`, `site.yml` `workflow_call`, `pr.yml` silindi,
+  `scripts/kararsiz.mjs`, `PLAYWRIGHT_KANAL`. actionlint temiz.
+- db13e3f: `yayinla` önce main'i iter, CI'ı bekler, yeşilse etiketi atar; `--kuru`.
+- fbb5afd: belgeler (CLAUDE.md "Push ve CI", BUILD, TESTPLAN, TESTFINDINGS, TODO, ROBODERS).
+- İlk push (e5747bb..fbb5afd): koşu 37845676686 kırmızı. `e2e (2)`'de `otomatik.spec.ts:202`
+  60 s'lik beklemeyi aştı, `kararsiz.mjs` tekrarda geçtiğini yazdı (kararsız). `site`
+  atlandı, `fbb5afd` için dağıtım yok.
+- 87ae542: öneri aramasının iki testi parçalardan çıktı, `e2e-arama` işinde sırayla.
+  Koşu 37846839319 yeşil; dağıtım SHA'sı 87ae542, ayrı bir `site` koşusu yok.
+- `npm run yayinla -- --kuru 2.2.1` 87ae542'de: koşuyu buldu, yeşil dedi, etiket adımında
+  durdu. Etiket yok.
+- 8cc0952: bilerek kırmızı bir test. `--kuru` süren koşuyu bekledi ve "yeşil değil:
+  failure" ile 1 döndü. Koşu 37847922001 bitti, `denetim` kırmızı, `site` atlandı, dağıtım
+  87ae542'de kaldı.
+- a9f4b88: revert. Koşu 37848823362 yeşil, dağıtım SHA'sı a9f4b88.
+- d4f2bfa: Tur 1'in web yarısının notları (ROBODERS, ekran-envanteri §7, B3.8).
+
+**Tur 1, web yarısı.** Roboders ile Eyotek aynı şirketin (Turtek) ürünü; Eyotek'in
+herkese açık bir arayüzü ya da içe alma yolu bulunamadı. Yardımcı bir ajan okudu,
+alıntılar sonra ham HTML'de birebir doğrulandı. Doğrulanamayan iki iddia (EduPage t900
+ve ajanın u373 özeti) yazılmadı.
+
+**Ölçümler.** E2E dışı adımlar yerelde: tipler 4,5 s, sınır 1,8 s, lint 6,2 s, knip
+1,1 s, prettier 3,7 s, derleme 5,5 s, boyut 1,4 s. `TZ=UTC`: birim 1372/1373 (düzeltmeden
+önce), E2E 618/618 458 s, `test:site` 22/22 18 s, çözücü stresi 7/7 69 s.
+`roboders-koruma.spec` tek başına 3,1 s. Uzun test dört çekirdekte tek başına 173 s.
+
+**Koşulan testler.** Belge kapısı her commit'ten önce (17/17). Birim süiti 1373/1373
+(yerel saat dilimi), `denetim`'in bütün adımları push'tan önce yerelde. `folder.test.ts`
+dört dilimde ve mutasyonla. `kararsiz.mjs` sahte bir kırmızı ve kararsız testle iki kez.
+actionlint. CI'da dört koşu (yukarıda).
+
+**Koşulmayan testler.** `haftalik.yml` (Windows E2E ve mutasyon) hiç koşmadı. Yerelde
+tam E2E D2'nin değişikliklerinden sonra koşulmadı, CI'da koştu. Exe, `ekran`, WebKit.
+
+**Açılan sayfalar.** GitHub belgeleri ve API'si, Eyotek'in, Turtek'in, EduPage'in, aSc'nin
+ve Untis'in herkese açık sayfaları (yalnız okuma). Roboders açılmadı.
+
+**Not.** CI günlükleri iki uyarı taşıyor: `actions/*@v4` Node 20'yi hedefliyor ve GitHub
+onları Node 24'e zorluyor (TODO B7.20), ve lint'te `App.tsx:597`'de bir `useMemo`
+bağımlılık uyarısı (eskiden de vardı, kırmızı değil).
 
 ---
 

@@ -1113,6 +1113,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       itilen bir etiket bunu atlar; `surum.yml`'in publish işi de etiketin SHA'sındaki
       `ci.yml` koşusunu `gh` ile sorup kırmızıda durmalı. Şimdi yapılmadı, çünkü bir
       etiket olmadan sınanamıyor; ilk gerçek sürümle birlikte.
+- [ ] **B7.20 İş akışlarındaki `actions/*@v4` Node 20'yi hedefliyor (2026-10-08).** CI
+      günlüğü: "Node.js 20 is deprecated … forced to run on Node.js 24". Dependabot'un
+      bunları güncelleyen PR'ları 2026-09-26'dan beri açık (`checkout`, `setup-node`,
+      `deploy-pages`, `upload-pages-artifact`, `download-artifact`); o gün silinen PR iş akışının
+      saat dilimi kırmızısı yüzünden hepsi kırmızıydı. Artık `ci.yml` onları push'ta
+      koşuyor; dalları yeniden koşturulup yeşilse birleştirilebilir.
 
 ---
 
