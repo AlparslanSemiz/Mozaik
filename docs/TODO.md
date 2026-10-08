@@ -22,6 +22,19 @@ bitince §10'a taşınır.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
+**2026-10-08 · Babanın yeni istekleri** (kullanıcının aktardığı; uygulamaya geçilmedi)
+
+1. **Kullanım kolaylığı: daha az yazı, daha az soru.** Çok soru ve okunacak çok yazı
+   olunca kafası karışıyor. Ekranlardaki metni ve soruları azaltmak, DENETIM'deki
+   KS ve Ö maddelerinin önüne geçiyor. (PRINCIPLES "Kullanılabilirlik"e de yazıldı.)
+2. **Öğretmen programlarını göndermek.** Roboders'te tek tıkla her öğretmenin kendi
+   programı Eyotek sistemine gidiyor. Baba ayrıca öğretmenlere e-postayla göndermek
+   istiyor. → **B3.8** (özellik, açık soruları orada). Roboders'in bunu nasıl yaptığı
+   [ROBODERS.md](ROBODERS.md)'de açık soru.
+3. **Listelerde zebra.** Art arda gelen satırlar hafif farklı renkte olsun, her
+   listede tutarlı. → [DESIGN.md](DESIGN.md)'de kural adayı. Kontrast gereksinimini
+   bozmamalı.
+
 <!-- ▲▲▲ BURAYA KADAR ▲▲▲ -->
  
 ---
@@ -30,8 +43,8 @@ bitince §10'a taşınır.
 
 | Kısım | Ne var | Durum |
 |---|---|---|
-| **§0** | **Not defteri** — senin ham satırların | ✍️ boş, senin |
-| **§1** | **HER ŞEYDEN ÖNCE** — aSc ve Roboders'in TAM incelenmesi | 🔜 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
+| **§0** | **Not defteri** — senin ham satırların | ✍️ babanın üç isteği (2026-10-08) |
+| **§1** | **Rakip envanteri** — Roboders (asıl rakip) ve aSc, §8b'den sonra | 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
@@ -48,7 +61,10 @@ bitince §10'a taşınır.
 §2  Bölüm 2 (Ayarlar tasarımı)     envanterden BAĞIMSIZ, paralel gidebilir
 
 
-§1  aSc + Roboders TAM ENVANTER   <-- HER ŞEYDEN ÖNCE
+§8b babanın makinesinde ölçüm ve geri bildirim   <-- ÖNCE BU (2026-10-08)
+        |
+        v
+§1  Roboders + aSc TAM ENVANTER
         |
         |  R9: §3 · §4 · §5 · §6 · §7'yi bu tablodan YENİDEN türet
         v
@@ -62,25 +78,34 @@ bitince §10'a taşınır.
             B4.4 baskı tasarımları ──> §3 Bölüm 3 (çıktı aileleri)
                                               |
                                         B3.4 e-posta/WhatsApp
-                                        (öğretmende tel + e-posta = ŞEMA v14)
+                                        (öğretmende tel + e-posta = YENİ ŞEMA, bugün v16)
 
-§6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (ŞEMA v14) ──> B6.3 A/B haftası
+§6  Bölüm 6 ──> B6.1 gruplar/bölünmeler (YENİ ŞEMA) ──> B6.3 A/B haftası
 ```
 
 **§2 neden §1'i beklemiyor:** Ayarlar'ın kendi düzeni bir **tasarım** kararı ve
 kaynağı senin kendi cümlen, rakip değil. Öteki her bölüm §1'den besleniyor.
 
+**§1 neden §8b'yi bekliyor (2026-10-08):** "her şeyden önce" kuralı kalktı. Önce
+babanın makinesinde ölçüm ve geri bildirim, sonra rakip envanteri. Gerekçe
+[DECISIONS.md](DECISIONS.md)'de.
+
 ---
 
-## §1. HER ŞEYDEN ÖNCE — aSc ve Roboders'in TAM incelenmesi
+## §1. Rakip envanteri — Roboders ve aSc'nin TAM incelenmesi
 
 > Senin satırın: *"her şeyden önce. tasklara ASC ve Robodersin tekrardan her
 > inciği cıncığının feature'nın incelenmesi lazım."*
 >
-> **Bu bölüm öteki her bölümün önünde**, ve sebebi CLAUDE.md'de yazılı: 5.
-> ilke (*"bir dönem kullanılmadan özellik eklenmez"*) 2026-08-30'da kaldırıldı
-> ve yerine geçen şey **rakibin gerçekten yaptığı iş** oldu. Yani §3–§7'deki
-> her madde bir yerden geliyor olmak zorunda; bu bölüm o "yer"in kendisi.
+> **2026-10-08'den beri bu bölüm "her şeyden önce" değil.** Kullanıcının
+> kararı: önce babanın makinesinde ölçüm ve geri bildirim (§8b), sonra bu
+> bölüm. Gerekçe [DECISIONS.md](DECISIONS.md)'de. Aynı gün asıl rakip Roboders
+> oldu (babanın bugün kullandığı program), aSc ikinci kaynak.
+>
+> Bölümün işi değişmedi: 5. ilke (*"bir dönem kullanılmadan özellik
+> eklenmez"*) 2026-08-30'da kaldırıldı ve yerine geçen şey **rakibin gerçekten
+> yaptığı iş** oldu (DECISIONS 2026-08-30). §3–§7'deki her madde bir yerden
+> geliyor olmak zorunda; bu bölüm o "yer"lerden biri, öteki babanın kendisi.
 > Eksik bir envanterden türetilen bir yol haritası, tuzak 101'in ta kendisidir.
 
 **Neyin eksik olduğu:** aSc tarafında bir **hat kuruldu** ama tam envanter
@@ -175,8 +200,10 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
 
 - [ ] **R8 İki envanter TEK karar tablosunda birleşsin.** Her özellik için üç
       cevaptan biri: **bizde var** · **alınacak** (hangi bölüme, hangi madde
-      numarasıyla) · **alınmayacak** (gerekçesiyle — ilke 1–3 mü, yasak liste
-      mi, ölçülmemiş mi).
+      numarasıyla) · **alınmayacak** (gerekçesiyle: PRINCIPLES'taki bir gerçeği
+      mi bozuyor, "Şu an yapılmıyor" listesinde mi, ölçülmemiş mi). 2026-10-08:
+      sunucusuz ve çevrimdışı ilkeleri kalktı, yani aSc kova 6'da gerekçesi
+      yalnız onlar olan satırlar da yeniden karar bekliyor.
 - [ ] **R9 §3–§7 bu tablodan YENİDEN türetilsin.** Bugünkü maddeler yalnız
       aSc'nin ilk turundan geliyor; tam envanter çıkınca sıra da, kapsam da
       değişebilir. Bu bölümün asıl çıktısı bir özellik değil, **öteki
@@ -219,7 +246,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
 - [ ] **B2.1 Beş bölümün ortak iskeleti kararlaştırılsın.** Şu an her bölüm
       `.cols`'un genel kuralına uyuyor. Ayarlar'a özgü bir iskelet seçilecek:
       panel genişliği, başlık hizası, etiket/alan ekseni. Karar
-      [DESIGN.md](DESIGN.md)'e **anlatılarak** yazılır, CLAUDE.md'ye
+      [DESIGN.md](DESIGN.md)'e **anlatılarak** yazılır, PRINCIPLES'a
       buyrulmaz (tasarım serbest, 2026-08-26).
 - [ ] **B2.2 Simetri ÖLÇÜLSÜN, iddia edilmesin.** Beş bölümün panel kutuları
       aynı sol kenardan başlamalı ve aynı genişlikte bitmeli; ölçüm
@@ -251,7 +278,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       macbook m1 13 inç. thinkpad 16 inç. o sebeple her şeye uygun ama en
       çok da babama uygun olsun ölçeklemeler."* `--ui-scale` merdiveni
       (%80–%150) ve `SCALE_DEFAULT=1` babanın 1920×1080'ine göre zaten
-      ölçüldü (CLAUDE.md "İlke 7"); eksik olan geri kalan üç ekranda (27"
+      ölçüldü (o günkü CLAUDE.md'nin "İlke 7"si, bugün PRINCIPLES "Hedef makine"); eksik olan geri kalan üç ekranda (27"
       2K, MacBook M1 13", ThinkPad 16") aynı ölçümün **tekrarlanması** —
       `npm run ekran` + gerçek pikselde bakmak, tahmin değil.
 - [x] **B2.9 Hakkında bölümüne "what's new" — YAPILDI (2026-08-31, kırk
@@ -320,10 +347,12 @@ alınmış · ölçümler [WORKLOG.md](WORKLOG.md)'ye yazılmış.
 > Öğretmenlerin teli ve epostanın."* · *"Çıktıda ayrı ayrı birden fazla pdf
 > oluşturma."* · *"Excele çıkartma."* · *"Görsel çıkartma"*
 
-İlke 2 bozulmuyor ve sebebi yazılı (CLAUDE.md, 2026-08-30): paylaşılan şey bir
-**dosya**, taşıyan şey işletim sisteminin kendi paylaşım yolu. Sunucu yok,
-hesap yok, yüklenen veri yok. Ağ kuralı güncellemeninkiyle aynı: **yalnız
-tıklanınca**.
+2026-08-30'da bu bölüm o günkü ilke 2'ye ("Sunucu yok") göre yazıldı: paylaşılan
+şey bir **dosya**, taşıyan şey işletim sisteminin kendi paylaşım yolu. 2026-10-08'de
+sunucusuz ve çevrimdışı ilkeleri bağlayıcı olmaktan çıktı (DECISIONS), yani bir
+servise ya da ağa çıkan gönderme yolu artık bir ilke sorunu değil, bir tasarım ve
+KVKK sorusu (B3.8). Kalan sınır: ağ isteyen bir özellik ağ yokken programın
+açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
 
 - [ ] **B3.1 Görsel (PNG) çıkarma.** Bir programın kâğıt kutusunun resmi.
       **Ölçüm borcu:** `html2canvas` gibi bir bağımlılık mı, `<canvas>`'a elle
@@ -338,14 +367,15 @@ tıklanınca**.
 - [ ] **B3.3 Excel ve HTML'e çıkarma.** aSc karar tablosunda **HTML önce**,
       Excel sonra. HTML zaten elimizdeki DOM. Excel için `.xlsx` bir zip'tir,
       `.csv` düz metin — hangisinin istendiği sorulacak (§8).
-- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme — ŞEMA v14 İSTİYOR.**
-      Öğretmene **telefon** ve **e-posta** alanı gerekiyor: `schemaVersion` 12
-      + göç kodu + `sanitize()` dalı + hem birim hem E2E testi (CLAUDE.md'nin
-      şema kuralı, tuzak 97). Gönderme yolu `mailto:` ve
+- [ ] **B3.4 E-posta ve WhatsApp'tan gönderme — YENİ BİR ŞEMA SÜRÜMÜ İSTİYOR.**
+      Öğretmene **telefon** ve **e-posta** alanı gerekiyor: `schemaVersion`
+      bugün 16, yani 17 + göç kodu + `sanitize()` dalı + hem birim hem E2E testi
+      ([DATA.md](DATA.md)'nin şema kuralı, tuzak 97). Saklamanın KVKK sorusu B3.8'de. Gönderme yolu `mailto:` ve
       `https://wa.me/<numara>?text=` — ikisi de **tıklanınca** açılır, program
       kendiliğinden hiçbir şey göndermez.
       **Not:** bu aSc'nin "Sharing"i DEĞİL (o EduPage'e yüklüyor, hesap açıyor,
-      şifre veriyor) ve o hâlâ yasak listede.
+      şifre veriyor). O 2026-10-08'de "yapılmıyor" listesinden çıktı, ama
+      istenmedi.
 - [ ] **B3.5 Özet çarşaf liste** — bütün öğretmenler tek sayfada.
       aSc kova 1, *"kesin"* işaretli.
 - [ ] **B3.6 Çıktıda simetri DOĞRULANSIN.** Senin satırın: *"Çıktıda her ama
@@ -360,6 +390,23 @@ tıklanınca**.
       zoom'u mu) ölçülerek karar verilecek — sağ panelin ne kadarının
       boşaldığı `npm run ekran` ile kanıtlanacak (tuzak 82: bir kutudan
       içerik çıkarmadan önce ne taşıdığı sorulur).
+
+- [ ] **B3.8 Öğretmen programlarını Eyotek'e ve e-postayla göndermek (babanın
+      isteği, 2026-10-08).** Roboders'te tek tıkla her öğretmenin kendi programı
+      Eyotek sistemine gidiyor; baba Mozaik'ten öğretmenlere e-postayla da göndermek
+      istiyor. 2026-10-08'den beri bir ilkeyle çatışmıyor (DECISIONS). B3.2'ye
+      (öğretmen başına ayrı PDF) ve B3.4'e (öğretmenin e-postası) dayanıyor.
+      Olası yollar, hiçbiri seçilmedi: öğretmen başına PDF ve `mailto:`
+      (programın kendisi bir şey göndermez), exe'den doğrudan posta (SMTP,
+      Tauri'de), Eyotek'e doğrudan gönderme. **Açık sorular:**
+      - Roboders bunu nasıl yapıyor? ([ROBODERS.md](ROBODERS.md), "Açık sorular")
+      - Eyotek'in dışarıya açık bir arayüzü var mı, ve Roboders'ten başka bir
+        programa açık mı?
+      - Öğretmen e-postaları nerede saklanacak? Kişisel veri (KVKK): plan dosyasına
+        girerse her yedekle ve her paylaşılan dosyayla birlikte taşınır. Ayrı bir
+        yerde tutulursa bir makineye bağlı kalır. Karar verilmeden şemaya girmez.
+      - `mailto:` bir dosyayı eke koyamıyor; ek gerekiyorsa yol exe'den geçiyor
+        olabilir. Ölçülmeden yazılmaz.
 
 > **Senden istenen:** çıktı ekranları için **örnek fotoğraf** — hangi çıktı
 > biçimini istediğini gösteren bir görüntü, `docs/Örnek Fotolar/` altına.
@@ -860,7 +907,12 @@ Bunların hepsi ya `schemaVersion`'ı artırıyor ya kısıt motorunun tamamına
 dokunuyor. **Şema her değiştiğinde: sürümü artır, göç kodunu yaz, hem birim
 hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
-- [ ] **B6.1 Gruplar / bölünmeler — ŞEMA v14.** Senin satırın: *"seçmeli ders
+> **Not, iş yok (2026-10-08) · Şube.** Dershane bugün tek yerde. İleride başka
+> yerler için gerekebilir (kullanıcı). Şimdilik bir madde açılmıyor; gerekirse
+> önce plan kitaplığının (her plan ayrı bir okul) bunu karşılayıp karşılamadığı
+> sorulur.
+
+- [ ] **B6.1 Gruplar / bölünmeler — YENİ BİR ŞEMA SÜRÜMÜ.** Senin satırın: *"seçmeli ders
       yok ama olsun."* `placements` bir hücreye **tek** ders tutuyor; bu madde
       tam olarak onu değiştiriyor, yani göç kodu, `sanitize()`, cascade ve
       **kısıt motorunun tamamı** etkileniyor. Listenin en pahalı maddesi.
@@ -1053,8 +1105,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ikisi çok farklı iş.)
 - [ ] **Çıktı ekranları için örnek fotoğraf.** Senin satırın: *"Benden çıktılar
       için ... foto iste eğer örnek fotolarda atmadıysam."* → **isteniyor**.
-- [ ] **Bulut senkronizasyonu / backend isteği — KURAL ÇELİŞKİSİ, önce
-      CLAUDE.md kararı gerekiyor.** Senin satırın: *"Sanırım cloud tabanlı
+- [ ] **Bulut senkronizasyonu / backend isteği — 2026-10-08'den beri bir kural
+      çelişkisi DEĞİL.** Sunucusuz ilkesi ve "yapılmıyor" listesindeki bulut
+      senkronizasyonu ile kullanıcı hesapları satırları o gün kalktı (DECISIONS:
+      babanın fikir değiştirmesi). Aşağıdaki sorular hâlâ açık ve bir görev
+      numarası onlar cevaplanınca açılır. Aşağısı 2026-08-31'deki kayıt, o günkü
+      kuralla: Senin satırın: *"Sanırım cloud tabanlı
       bir şey kuracağız babam öyle istedi. Bende 1gb ramli 8gb depolama
       alanlı VM var bedava... onun yanına dockerda falan küçük yer kaplayan
       bir cloud sistemi kuralım."* Netleştirmen üzerine (2026-08-31): bu
@@ -1078,6 +1134,16 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8b · Babada
 
+> **2026-10-08'den beri sıradaki iş bu bölüm**, rakip envanterinden (§1) önce.
+
+- [ ] **Babanın makinesinde Windows sürümü öğrenilsin (2026-10-08).** Bilinen:
+      4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart (kullanıcı). Sürüm
+      exe yolunu doğrudan etkileyebilir: exe WebView2 ile çalışıyor (Tauri), ve
+      WebView2'nin Windows 7 ve 8.1 desteği bitti (Microsoft, 2023; sürüm
+      ölçülünce doğrulanacak). Eski bir Windows'ta exe açılmazsa kalan yol çift
+      tıklanan HTML, ve o da makinedeki tarayıcının sürümüne bağlı. Sorular:
+      Windows sürümü ve 32/64 bit, WebView2 kurulu mu, hangi tarayıcı ve sürümü.
+      4 GB'ta öneri aramasının worker'ları da ölçülmedi (aşağıdaki ölçüm maddesi).
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil.
 - [ ] **Nöbet var mı?**
@@ -1105,7 +1171,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
         doğru olduğunu yine baba söyleyecek.
       - 2026-09-25 akşam: baba cevabını artık programın içinde verebilir (B5.11). KY'nin
         sorusuna "Olur" ya da "Olmaz" der, program kalanı arar, cevaplar dosyada kalır.
-- [ ] **aSc'de hangi kısıtları kullanıyorsun? (B5.3, 2026-09-26)** Özellikle "Planlama
+- [ ] **Roboders'te (ve eskiden aSc'de) hangi kısıtları kullanıyorsun? (B5.3, 2026-09-26; 2026-10-08'de baba bugün Roboders kullanıyor)** Özellikle "Planlama
       İlişkileri": iki dersin aynı gün olmaması, art arda olması ya da olmaması, bir dersin
       günün ilk ya da son saatinde olması. Mozaik'te "aynı gün olmasın" artık var (dersin
       sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
@@ -1178,7 +1244,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kalacak** (2026-08-24 kararı): branş kısaltmasının aksine bunun "doğru
       cevabı" okuldan okula değişir, ve yanlış bir varsayılan hücreleri
       sessizce kırmızıya boyar
-- [ ] **Bir haftalık program baştan sona dizilsin** → v0'ın çıkma şartı
+- [ ] **Baba gerçek bir haftayı Mozaik'te baştan sona kendisi dizsin** → v0'ın
+      çıkma şartı (kod tamam, şart bekliyor; ROADMAP ve DECISIONS 2026-10-08)
 - [ ] Babanın bilgisayarında hız kontrolü
 - [ ] Baskı gerçek kâğıda alınsın (E2E taşma olmadığını gösteriyor ama fiziksel
       çıktıya bakılmadı)
@@ -1199,7 +1266,8 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       dururken görünmez yapıyor. Kullanıcı kodu seçti, kod değişmedi. Ayrıntı
       [DECISIONS.md](DECISIONS.md).
 - [ ] **PRINCIPLES.md'deki önerilen gerekçeler onaylansın mı?** "Şu an yapılmıyor" listesinde
-      yedi satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli.
+      beş satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli
+      (2026-10-08'de iki "öneri" satırı, bulut ve takvim, listeden çıktı).
       Onaylanınca işaretler kalkar.
 - [x] **`.github/surum-notu.md` eski site adresini gösteriyor — DÜZELTİLDİ (2026-09-25).**
       `…github.io/ders-programi/` 404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`).

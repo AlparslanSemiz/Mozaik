@@ -20,7 +20,7 @@ Her birinin neyi koruduğu ve onu ölçen testler:
 | İşlevsel renk kanalı: yeşil bırakılabilir · sarı uyarı · kırmızı engel · gri taralı kapalı | aracın çalışma biçimi bu dört renk | `palette.test.ts`, `e2e/renk.spec.ts` |
 | Erişilebilirlik: AA kontrast, görünür odak, `aria-live`, varsayılan ölçekte 12 px taban | hedef kullanıcı zor görüyor | `e2e/renk.spec.ts`, `e2e/renk-secici.spec.ts`, `e2e/bos-ekran.spec.ts` |
 | Kâğıt: A4 yatay, `@page { margin: 0 }`, sayfa 205 mm | ekran ne olursa olsun yazıcı aynı yazıcı | `e2e/yazdir.spec.ts` |
-| Çevrimdışı: çalışma anında ağa çıkılmaz | çift tıkla çalışır, sunucusuz ve çevrimdışı ilkeleri | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
+| Açılış ağa bağlı değil: bugün çalışma anında ağa hiç çıkılmıyor | çift tıkla çalışır ilkesi, babanın makinesinde ağ olup olmadığı bilinmiyor | `e2e/temel.spec.ts`, `e2e/site.spec.ts` |
 
 ### İşlevsel renk kanalı
 
@@ -274,6 +274,20 @@ Ayarlar → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların 
 listesi [DATA.md](DATA.md)'de.
 
 ---
+
+### Kural adayı: listelerde zebra (2026-10-08)
+
+Babanın isteği ([TODO.md](TODO.md) §0): listelerde art arda gelen satırlar hafif
+farklı bir zeminde olsun, ve bu her listede aynı olsun. Henüz bir kural değil, bir
+aday. Uygulanmadı. Kural olursa şu sınırlar içinde:
+
+- Tek bir token, her listede aynı. Bir listeye özel bir ton yok.
+- Metin iki zeminde de AA kontrastı tutar ve bu iki temada ölçülür. Zebra
+  erişilebilirlik satırının gerisine geçemez.
+- İşlevsel renk kanalına (yeşil, sarı, kırmızı, gri taralı) yaklaşmaz, ve seçili,
+  üstüne gelinen ya da odaklı satır zebradan ayırt edilir.
+- Izgara bir liste değil. Program ızgarası ve Müsaitlik'in hücreleri bu adayın
+  dışında, çünkü orada zemin bir durum taşıyor.
 
 ## Yeni ekran kurarken
 

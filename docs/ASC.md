@@ -3,6 +3,15 @@
 Bu dosya projenin **özellik pusulası**: aSc'nin ne yaptığı, bizim ne yaptığımız,
 ve aradaki farkın her biri için verilmiş karar.
 
+> **2026-10-08'den beri aSc ikinci kaynak.** Babanın bugün kullandığı program
+> Roboders ve asıl rakip o ([ROBODERS.md](ROBODERS.md)). Bu dosyanın karar tablosu
+> geçerli. Ama aşağıdaki "Geriye üç şey kaldı" listesinin üçü de aynı gün bağlayıcı
+> olmaktan çıktı: sunucusuz ve çevrimdışı ilkeleri kalktı, yasak liste de
+> [PRINCIPLES.md](PRINCIPLES.md)'in "Şu an yapılmıyor" listesine dönüştü ve dört
+> satırını kaybetti. Bu yüzden kova 6'da gerekçesi yalnız bu üçü olan satırlar
+> reddedilmiş sayılmıyor, yeniden karar bekliyor ([TODO.md](TODO.md) R8). Kayıt
+> [DECISIONS.md](DECISIONS.md)'de.
+
 **2026-08-30'da bu dosyanın çerçevesi İKİ KEZ değişti**, ve ikisi de kullanıcı
 kararı. Önce bir *karar kaydı*ydı; gerekçesi o gün geçerli olan 5. ilkeydi
 (*"bir dönem kullanılmadan özellik eklenmez"*). O ilke kaldırıldı ve hedef

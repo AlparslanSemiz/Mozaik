@@ -5,10 +5,10 @@ Sıradaki sürümler, her birinin çıkma şartı ve hâlâ cevabı beklenen sor
 ## Bu belge nasıl okunur
 
 Buradaki v0'dan v4'e numaralar özellik kilometre taşları, yayınlanan sürüm
-numarası değil. Program bugün 2.1.1 ve yayın geçmişi
-[CHANGELOG.md](../CHANGELOG.md)'de. İlk beş kilometre taşı bitti, bu dosyada
-yalnız tek satırlık kayıtları duruyor, o günkü tarifleri
-[plan-v0-arsiv.md](plan-v0-arsiv.md)'de.
+numarası değil. Yayınlanan son sürüm ve yayın geçmişi
+[CHANGELOG.md](../CHANGELOG.md)'de. İlk beş kilometre taşının kodu tamam. Dördü
+bitti, v0'ın çıkma şartı ise hâlâ bekliyor. Bu dosyada yalnız tek satırlık
+kayıtları duruyor, o günkü tarifleri [plan-v0-arsiv.md](plan-v0-arsiv.md)'de.
 
 Her kilometre taşının bir çıkma şartı var ve şart sağlanmadan sonrakine
 geçilmiyor. Sıra bağlayıcı değil: bir sürümün önce yapılmasının sebebi ötekinden
@@ -16,17 +16,28 @@ ucuz ya da ötekine önkoşul olması, ve o gerekçe değişirse sıra da deği�
 Buradaki tarif bir sürümün niçinini tutar, işin kendisi [TODO.md](TODO.md)'de
 numaralı maddelere bölünür.
 
+## v0 · Elle dizme: kod tamam, çıkma şartı bekliyor
+
+Çıkma şartı: *baba gerçek bir haftayı Mozaik'te baştan sona kendisi diziyor.*
+
+Elle dizmenin kodu çoktan tamam, ama şart sağlanmadı. Babanın gerçek verisi
+fotoğraflardan ve dosyasından geldi ([TODO.md](TODO.md) §8c), ve o veriyle hafta
+ancak bir öneri uygulanınca kuruluyor (§8b'deki müsaitlik sorusu). Babanın kendisi
+bir haftayı Mozaik'te dizmedi.
+Aşağıdaki kilometre taşları bu şartı beklemeden yazıldı ve yayınlandı, yani
+"şart sağlanmadan sonrakine geçilmiyor" kuralı v0'da tutulmadı
+([DECISIONS.md](DECISIONS.md), 2026-10-08).
+
 ## Biten kilometre taşları
 
-- v0, elle dizme. Bitti.
 - v0.5, yapılabilirlik kontrolü, bugünkü Kontrol sekmesi. Bitti.
 - v0.6, zil saatleri, gün seçimi, müsaitlik ve kural kutuları. Bitti, 2026-08-24.
 - v0.7, arayüz elden geçirme, koyu tema ve adımlara bölünmüş kurulum. Bitti.
 - v1, kalanları otomatik doldur, bugünkü otomatik dizme. Bitti.
 
-Beşinin de o günkü tarifi, çıkma şartı ve gerekçeleri arşivde. İlk yayınlanan
-sürüm 1.1.0 (2026-08-27) ve ondan öncesi CHANGELOG'da tek bir girdide toplanıyor,
-çünkü bu beş kilometre taşı dallarda kaldı ve hiç yayınlanmadı.
+Dördünün ve v0'ın o günkü tarifi, çıkma şartı ve gerekçeleri arşivde. İlk
+yayınlanan sürüm 1.1.0 (2026-08-27) ve ondan öncesi CHANGELOG'da tek bir girdide
+toplanıyor, çünkü bu beş kilometre taşı dallarda kaldı ve hiç yayınlanmadı.
 
 ## v2 · Kalite ve yumuşak kısıtlar
 
@@ -53,9 +64,10 @@ cezayı düşürmek, yazılmadı. Yerine denenen yol ölçülüp bırakıldı: �
 günlere sıkıştıran Deney A deliği 274'ten 227'ye indiriyor ama programı eksik
 bırakıyor (363 blok yerine 367) ve süreyi 69 ms'den 9 856 ms'ye çıkarıyor.
 
-Geriye kalan tek iş kısıt motorunun genişlemesi (TODO §5, B5.3): kartlar arası
-ilişki, sınıf için günlük en az ve en çok, ardışıklık, belirli dersin belirli
-konumda olması, öğretmenin günde en fazla N sınıfı.
+Geriye kalan tek iş kısıt motorunun genişlemesi (TODO §5, B5.3). İlk dilimi
+girdi: iki dersin aynı güne konmaması (`relations`, şema v16). Kalanı: kartlar
+arası öteki ilişkiler, sınıf için günlük en az ve en çok, ardışıklık, belirli
+dersin belirli konumda olması, öğretmenin günde en fazla N sınıfı.
 
 ## v3 · Dönem içi değişiklik
 
@@ -148,13 +160,16 @@ yani iki cevabın ikisi de deneniyor.
 **10 · Müsaitlik ne sıklıkla değişiyor? Dönem boyunca sabit mi?** Açık. Sabit
 değilse v3 öne çıkar.
 
-**11 · Elimde babanın gerçek verisi var mı?** Açık, ve v0'ın çıkma şartı buydu.
-Kalan tek parça ders listesi, [TODO.md](TODO.md) §8c. aSc dosyasının adı biliniyor
+**11 · Elimde babanın gerçek verisi var mı?** Açık, ve v0'ın çıkma şartının
+önkoşulu: babanın bir haftayı Mozaik'te dizebilmesi için onun verisi Mozaik'te
+olmalı. Kalan tek parça ders listesi, [TODO.md](TODO.md) §8c. aSc dosyasının adı biliniyor
 (`15 EYLÜL.roz`), yani bu soru B6.2'deki içe aktarmayla tek adımda kapanabilir.
 
 **12 · Bu proje ne zaman yapılacak?** Cevabı tarihin kendisi: tatilde başlandı,
-v0'dan 2.1.1'e kadar geldi ve yarım kalmadı. Sorunun korktuğu şey, yani babanın
-yarım bir araca güvenip aSc'yi bırakması, olmadı. Kapalı.
+yayınlanan sürümlere kadar geldi ve yarım kalmadı. Sorunun korktuğu şey, yani
+babanın yarım bir araca güvenip kullandığı programı bırakması, olmadı: baba bugün
+Roboders kullanıyor (2026-10-08). Bir son tarih yok, acele de yok (kullanıcı,
+2026-10-08). Kapalı.
 
 Soru listesinde olmayan ama aynı turdan kalan bir soru daha vardı, ekran:
 2026-08-25'te ölçülerek cevaplandı, hedef makine 27 inçlik bir monitör ve

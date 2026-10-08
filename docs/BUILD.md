@@ -24,8 +24,8 @@ alınabilir. Sabit bir boyut tavanı yok, şart ölçmek: paket eklendikten sonr
 [WORKLOG.md](WORKLOG.md)'ye yazılır. `devDependencies` bu kuralın dışında,
 serbest: test araçları (`fast-check`, `@axe-core/playwright`,
 `@stryker-mutator/*`) derlemeye girmiyor, o yüzden onlar için ölçülecek bir
-boyut da yok. Çalışma anında bayt indiren bir paket alınmıyor, çünkü çevrimdışı
-ilkesini bozar.
+boyut da yok. Çalışma anında bayt indiren bir paket alınmıyor, çünkü programın
+açılışını ağa bağlar ([PRINCIPLES.md](PRINCIPLES.md), "Açılış ağa bağlı değil").
 
 Varsayılan tercih hazır bir çözüm kullanmak ([CONVENTIONS.md](CONVENTIONS.md)).
 Ölçülüp alınmayan paketlerin kaydı (`motion`, Tailwind, sürükle bırak
@@ -406,7 +406,7 @@ yapmadığı için `SITE_ADRESI` `https://alparslansemiz.github.io/Mozaik/`
 
 ## Font
 
-Font ağdan çekilmez (çevrimdışı ilkesi), `src/fonts/` altındaki `woff2` dosyası `dist/index.html`'e
+Font ağdan çekilmez (açılış ağa bağlı değil), `src/fonts/` altındaki `woff2` dosyası `dist/index.html`'e
 gömülür ve `font-display: block` ile yüklenir (tuzak 38). Yüzün reçetesi
 `scripts/font.mjs`, kaynağı `scripts/font-source/` (OFL 1.1), ve ağırlık aralığı
 kullanılan ağırlıklara göre ölçülerek seçildi (tuzak 69 ve 70). Reçete

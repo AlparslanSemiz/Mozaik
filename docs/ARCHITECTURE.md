@@ -2,9 +2,9 @@
 
 Kodun katmanları, her dosyanın görevi ve katmanlar arasındaki sınırlar.
 
-## Üç katman
+## Dört katman
 
-Kod üç katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
+Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 
 ```
 src/leaf/          types · keys · palette · i18n · lang/* · preference · preferenceKeys
@@ -28,6 +28,9 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 üç şey kalıyor: test dosyaları, `styles.css` ve `worlds.ts`. Testlerin kökte
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
+
+**Yapraklar** bütün katmanların ortak ihtiyacı: tipler, anahtarlar, dil ve tercih
+fabrikası. Yalnız başka bir yaprağı import eder, kuralı aşağıda.
 
 **Saf mantık** React, DOM ve localStorage bilmez. Her dışa aktarılan fonksiyonu
 tarayıcı olmadan test edilebilir, ve sürükleme, çözücü ve Kontrol aynı

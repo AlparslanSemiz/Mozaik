@@ -19,6 +19,106 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
+Son güncelleme: 2026-10-08.
+
+**Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
+[CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
+denetimin on üç kusuru).
+
+**Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
+ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
+program). v0'ın kodu tamam, çıkma şartı bekliyor: babanın gerçek bir haftayı
+Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08.
+
+**Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda.
+
+**Sıradaki iş.**
+1. Babanın makinesi: Windows sürümü (exe yolunu etkileyebilir), öneri aramasının
+   ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
+2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
+   KS ve Ö maddelerinin önünde.
+3. Sonra rakip envanteri (TODO §1, R6–R9), Roboders önce.
+4. Bir sürümden önce `npm run mutasyon`.
+
+**Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
+"Şu an'dan taşınan anlatı" altında.
+- DENETIM'in kullanım kolaylığı sorunları (KS) ve önerileri (Ö) açık, TODO'ya taşınmadı.
+- Sığdır'da babanın tam haftası Windows %125'te hâlâ kırpılıyor.
+- Kurulamayan haftadaki öneri "bundan azı yok"u kanıtlayamıyor. Fikstürde ret
+  sonrası 6 ve karma yolun daha az saatli haftası açık.
+- Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi. Exe penceresinin
+  `maximized` ayarı gerçek bir Windows'ta görülmedi.
+- Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
+- 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
+
+**Güncel ölçümler (her satır kendi tarihiyle).**
+
+| Ne | Değer | Nasıl |
+|---|---|---|
+| Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
+| Ana E2E süiti | 612 test (2026-09-27) | `npm run kontrol` |
+| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
+| Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
+| E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
+| Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
+| Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
+| Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
+| Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
+| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
+| Ana E2E koşusu | 612/612 geçti, süit 7,3 dk `performance` profilinde (2026-09-27) | `npm run kontrol`, zincirin tamamı yeşil |
+| `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
+| Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
+| Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
+| Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
+| Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
+| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
+| Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-08 · Belge turu: babanın fikir değiştirmesi, asıl rakip, sıra ve bayat cümleler
+
+**Başlangıç.** `main` 5473def'teydi, ağaç temizdi. Kod değişmedi, yalnız belgeler.
+
+**Kullanıcının kararları ve verdiği bilgiler** (DECISIONS 2026-10-08):
+- Baba fikir değiştirdi; ilk dönemin tercihleri bağlayıcı değil, bugün söylenen
+  kazanır. PRINCIPLES iki gruba ayrıldı, liste değiştirilmeden önce kullanıcıya
+  gösterildi ve onaylandı. Sunucusuz ve Çevrimdışı "artık geçerli değil", "Şu an
+  yapılmıyor" listesinden dört satır çıktı, Çevrimdışı'nın gerçeğe dayanan yarısı
+  "Açılış ağa bağlı değil" olarak Çift tıkla çalışır'a taşındı.
+- Asıl rakip Roboders, aSc ikinci kaynak. CLAUDE.md'nin proje tanımı düzeldi.
+- TODO §1'in "her şeyden önce" kuralı kalktı. Önce §8b, sonra rakip envanteri.
+  Gerekçeyi kullanıcı söylemedi, kayıtlardan yazıldı ve işaretlendi.
+- v0 bitmedi: kod tamam, çıkma şartı bekliyor (ROADMAP).
+- Babanın makinesi: 4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart,
+  Windows sürümü bilinmiyor (TODO §8b'de açık soru). Son tarih yok. Tek şube
+  (TODO §6'da not).
+- Babanın üç yeni isteği TODO §0'a yazıldı, uygulanmadı. Eyotek ve e-posta
+  isteği B3.8 olarak bir özellik oldu, Roboders'in nasıl yaptığı ROBODERS.md'de
+  açık soru. Zebra DESIGN.md'de kural adayı.
+
+**Düzelen bayat yerler.** ROADMAP'in sürüm cümlesi ve B5.3'ün ilk dilimi. TODO
+§1'in CLAUDE.md'ye dayanan gerekçesi. TODO'daki "ŞEMA v14" etiketleri (B3.4,
+B6.1, şema). §8a'daki bulut maddesinin eski çerçevesi. Bu dosyanın "Başka bir
+bilgisayarda devam etmek için" bölümü (eski depo adresi, eski sayılar, artık
+olmayan "ŞİMDİ SIRADA"). ARCHITECTURE'ın dört klasörlü "üç katman"ı. "Şu an"
+bloğu kısaldı. Ayrıca ASC.md'nin "Geriye üç şey kaldı" listesine ve ROBODERS.md'nin
+ilke 1–3 satırlarına, BUILD.md'nin iki "çevrimdışı ilkesi" atfına ve DESIGN.md'nin
+"Görünüşün korudukları" tablosuna yeni duruş yazıldı.
+
+**Koşulan testler.** `npx vitest run src/docs.test.ts` (belge kapıları, 17/17) ve
+bütün birim süiti `npx vitest run` (43 dosyada 1373, hepsi geçti), çünkü sürüm ve
+sürüm notu testleri de belge okuyor.
+
+**Koşulmayan testler.** Kod değişmediği için birim, E2E, derleme ve exe süitleri
+koşulmadı.
+
+### Şu an'dan taşınan anlatı (2026-09-27'deki hâli)
+
+Aşağısı "Şu an" bloğunun 2026-09-27'deki metni, değiştirilmeden. Ölçümlerin bir
+kısmının tek kaydı burası.
+
 Son güncelleme: 2026-09-27.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Release sayfası artık kendi yeniliklerini taşıyor (`scripts/surum-notu.mjs`). Sürüm geçmişi [CHANGELOG.md](../CHANGELOG.md)'de.
@@ -92,30 +192,6 @@ Sığdır'ın kırpılması ve sürüklerken kasma ölçülüp kapandı, §8d'ni
 - Bu makine 2026-09-26'nın gündüzünde düşük güç profilindeydi (`platform_profile` low-power): süreler dünküden yaklaşık 2,4 kat uzun. Akşamki ölçümlerin hepsi `performance` profilinde alındı. O günün süre ölçümlerinden hangisinin hangi profilde alındığı DECISIONS'ta yazılı; çözücünün kendiliğinden durmasını soran test artık makinenin hızından bağımsız (TESTFINDINGS).
 - Yavaş bir makinede otomatik dizmenin kendi 15 saniyelik bütçesi, onarımın vazgeçme kuralından önce dolabilir; CHANGELOG'daki "15 saniyenin sonuna kadar koşmuyor" cümlesi makinenin hızına bağlı (TESTFINDINGS 2026-09-26).
 - Bu dosyanın 2026-08-25 civarındaki eski durum bölümleri ("Ölçülen değerler", "Doğrulanmayı bekleyen varsayımlar", "Bilinen eksikler", "Bilinen hatalar") yeniden doğrulanmadı ve o günün kaydı olarak duruyor.
-
-**Güncel ölçümler (2026-09-12, kaynaktan sayıldı; çözücü satırları 2026-09-24).**
-
-| Ne | Değer | Nasıl |
-|---|---|---|
-| Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 612 test (2026-09-27) | `npm run kontrol` |
-| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
-| Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
-| Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
-| Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
-| Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
-| Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
-| Ana E2E koşusu | 612/612 geçti, süit 7,3 dk `performance` profilinde (2026-09-27) | `npm run kontrol`, zincirin tamamı yeşil |
-| `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
-| Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
-| Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
-| Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
-| Çözücü, babanın verisi olduğu gibi | 203/211 blok, yaklaşık 6 s'de duruyor; tam çözücüye göre hafta yok | aynı test |
-| Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
-| Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
-| Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 **Tek ağaç kaldı (2026-09-12).** Test stratejisi işi `../Mozaik-test` içinde ayrı
 bir worktree'de ve `test/strateji` dalında yürümüştü; sebebi `dist/`'in git dışında
@@ -8180,35 +8256,26 @@ Tümü ve karar gerekçeleri: [TODO.md](TODO.md) → BİTENLER 13 (1a–1m). **H
 
 ## Başka bir bilgisayarda devam etmek için
 
-Depo: `https://github.com/AlparslanSemiz/ders-programi.git`
+Depo: `https://github.com/AlparslanSemiz/Mozaik.git` (2026-08-31'e kadar adı
+`ders-programi`'ydi, tuzak 106).
 
 ```bash
-git clone https://github.com/AlparslanSemiz/ders-programi.git
-cd ders-programi
+git clone https://github.com/AlparslanSemiz/Mozaik.git
+cd Mozaik
 npm install
 npx playwright install chromium   # E2E testleri için, bir kez
-npm run kontrol                   # tsc + 453 birim + derleme + 318 E2E + 6 site (~3 dk)
+npm run kontrol                   # tipler, sınır, lint, birim, derleme, boyut, E2E, site, çözücü
 npm run dev                       # geliştirme sunucusu
 ```
 
-> Bu blok **2026-08-26'da eskidi**: görsel regresyon katmanı ve `npm run gorsel`
-> silindi. `kontrol`'ün dışında kalan iki süit şunlar:
->
-> ```bash
-> npm run ekran    # iki temada 17 görüntü -> test-results/ekran/ (test değil, KANIT)
-> npm run cozucu   # 7 gerçek ölçekli çözücü testi, ~36 sn
-> ```
->
-> İkincisi `kontrol`'ün parçası değil ama **gerileme yakalıyor** — 2026-08-27'de
-> yakaladı. Arayüzde bir düğmenin adı değiştiyse elle koşulur.
+`kontrol`'ün dışında kalan süitler ve ne zaman koşuldukları
+[TESTPLAN.md](TESTPLAN.md)'de: `npm run ekran` (iki temada ekran görüntüsü, test
+değil kanıt), `npm run mutasyon`, `npm run patrol`, ve exe için `npm run exe:test`
+ile `npm run exe:e2e`. Güncel test sayıları ve süreleri yukarıdaki "Şu an"
+bloğunun ölçüm tablosunda.
 
-(`--update-snapshots` tek başına yalnız **kırmızı** referansları yeniler; hepsini
-yazdırmak için `=all` gerekiyor. Bu 2026-08-25'te öğrenildi: satır yüksekliği
-değiştiği hâlde eşik farkı yuttuğu için referanslar sessizce eski kaldı.)
+`npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra "Şu an"daki
+**Sıradaki iş**'ten ve [TODO.md](TODO.md)'den devam edilir.
 
-**Çözücü stres süiti de ayrı**: `npm run cozucu` (~40 sn). Çöküş düzeldikten
-sonra dünyaların çoğu bütçesini doldurmuyor, ama biri (kasten imkânsız olan)
-hâlâ 15 saniye harcıyor — o yüzden ayrı komutta duruyor.
-
-`npm run kontrol` yeşilse ortam doğru kurulmuş demektir. Sonra
-[TODO.md](TODO.md) içindeki **"ŞİMDİ SIRADA"** bölümünden devam edilir.
+> Bu bölüm 2026-10-08'de yeniden yazıldı. Önceki hâli eski depo adresini, o günün
+> test sayılarını ve TODO'da artık olmayan bir "ŞİMDİ SIRADA" bölümünü gösteriyordu.

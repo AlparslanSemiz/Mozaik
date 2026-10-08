@@ -35,6 +35,88 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-08 · Babam fikir değiştirdi; ilk dönemin tercihleri bağlayıcı değil
+
+**Eski hâli.** [PRINCIPLES.md](PRINCIPLES.md)'deki ilkeler aynı ağırlıkta duruyordu,
+ve bir kısmı projenin başında babanın o günkü isteklerine göre yazılmıştı. Sunucusuz
+ve Çevrimdışı bir özelliği tek başına reddedebiliyordu ([ASC.md](ASC.md)'nin "Geriye
+üç şey kaldı" listesi). "Şu an yapılmıyor" listesindeki dört satırın gerekçesi de bu
+ikisiydi.
+
+**Ne değişti.** Kullanıcı, 2026-10-08: *"Babam fikir değiştirdi. Bundan sonra geçerli
+olan babamın ve benim şimdi söylediklerimiz; eski ilkeyle çatışırsa yeni söylenen
+kazanır."* İlkeler iki gruba ayrıldı. Liste değiştirilmeden önce kullanıcıya gösterildi
+ve onaylandı:
+
+- **Babanın bir tercihine dayanan, artık geçerli değil:** Sunucusuz, Çevrimdışı, ve
+  "Şu an yapılmıyor" listesinden kullanıcı hesapları, veriyi bir servise yükleyen
+  paylaşım, bulut senkronizasyonu ve takvim entegrasyonu. İki ilkenin metni
+  PRINCIPLES'ın sonunda "Artık geçerli olmayanlar" altında o günkü hâliyle duruyor.
+- **Bir gerçeği koruyan, kalıyor:** Çift tıkla çalışır (eski makine, bilinmeyen
+  Windows sürümü), Veri kaybı olmaz, Kullanılabilirlik (babanın zor görmesi), Hedef
+  makine (4 GB RAM, çok eski işlemci).
+- **İkisine de uymayan, kalıyor:** Türkçe kaynak dil (kodun kuralı), Görsel kalite
+  (kullanıcının tercihi), Nasıl çalışılır, ve listenin kalan altı satırı. "Özellikler
+  nereden gelir" yeniden yazıldı: asıl rakip Roboders (aşağıdaki kayıt), ve bir
+  özelliği reddetmenin yolu artık bir gerçeği bozmak ya da ölçülmemiş olmak.
+
+**Çevrimdışı'ndan kalan.** Babanın makinesinde internet olup olmadığı bilinmiyor, bu
+bir gerçek. Bu yüzden "Açılış ağa bağlı değil" cümlesi Çift tıkla çalışır'ın altına
+taşındı: ağ isteyen bir özellik ağ yokken kendi işini yapamaz, programı durdurmaz.
+
+**Sonucu.** Babanın Eyotek'e ve e-postaya gönderme isteği bir ilke çatışması olmaktan
+çıktı ve bir özellik oldu ([TODO.md](TODO.md) B3.8). Bulut senkronizasyonu (TODO §8a)
+artık yasak değil, ama açık soruları duruyor. aSc'nin kova 6'sında gerekçesi yalnız bu
+ilkeler olan satırlar yeniden karar bekliyor (R8). Kod bugün hâlâ sunucusuz ve
+çevrimdışı ve bunu ölçen testler yerinde. Ağ isteyen bir özellik girerse o ölçüm
+daraltılır, kaldırılmaz.
+
+### 2026-10-08 · Asıl rakip Roboders, aSc değil
+
+**Eski hâli.** CLAUDE.md projeyi "aSc Timetables'ın yerine geçiyor" diye tanımlıyordu.
+[ROBODERS.md](ROBODERS.md) kendine "ikinci rakip" diyordu.
+
+**Şimdi.** Kullanıcı, 2026-10-08: baba bugün fiilen Roboders kullanıyor, aSc'yi değil.
+Asıl rakip Roboders, ve Mozaik onun yerine geçmeyi hedefliyor. aSc'nin kaydı
+([ASC.md](ASC.md)) özellik bilgisinin ikinci kaynağı olarak kalıyor, karar tablosu
+geçerli. aSc için konan ölçü (bu kursla ilgili kısmının yarısı) değiştirilmedi.
+CLAUDE.md, PRINCIPLES'ın "Özellikler nereden gelir"i ve Kullanılabilirlik'i,
+ROBODERS.md ve ASC.md'nin başı buna göre düzeldi.
+
+**Ne değişmedi.** R6'nın güvenlik sözleşmesi, yani Roboders hesabındaki babanın
+verisine dokunulmaması, aynen duruyor.
+
+### 2026-10-08 · Rakip envanteri "her şeyden önce" değil: önce babanın makinesi ve geri bildirimi
+
+**Eski hâli.** TODO §1 (2026-08-31): aSc ve Roboders envanteri (R6–R9) öteki her
+bölümün önünde. §3–§7 o tablodan yeniden türetilecekti.
+
+**Şimdi.** Kullanıcının kararı: kural kalktı. Sıra şöyle: önce babanın makinesinde
+ölçüm ve geri bildirim (TODO §8b), sonra rakip envanteri (§1).
+
+**Gerekçe.** Kullanıcı sıranın kendisini söyledi, gerekçeyi değil. Aşağıdakiler
+kayıtlardan yazıldı:
+
+- Kural fiilen uygulanmıyordu. 2026-09-24'ten 2026-09-27'ye kadarki turlar
+  (B5.8–B5.11, elle denetim ve on üç kusuru) R6–R9 açıkken yürüdü. (kayıtlı,
+  [WORKLOG.md](WORKLOG.md))
+- Baba fikir değiştirdi (yukarıdaki kayıt). İlk dönemin tercihlerinden türeyen bir
+  sıranın bugün neye dayandığını ancak o söyleyebilir. Envanter "rakipte ne var"ı
+  söyler, "babaya ne lazım"ı söylemez. (öneri, doğrulanmadı)
+- Babanın makinesi eski ve Windows sürümü bilinmiyor. Exe'nin orada açılıp açılmadığı
+  ve öneri aramasının süresi ölçülmeden yazılan her yeni özellik, ölçülmemiş bir
+  varsayımın üstüne kurulur. (öneri, doğrulanmadı)
+
+### 2026-10-08 · v0 bitmedi: kod tamam, çıkma şartı bekliyor
+
+**Eski hâli.** [ROADMAP.md](ROADMAP.md) v0'ı "Bitti" diye sayıyordu. TODO §8c ise
+v0'ın çıkma şartını açık tutuyordu.
+
+**Şimdi.** Kullanıcının kararı: v0 bitmedi. Kodu tamam, çıkma şartı bekliyor. Şart,
+babanın gerçek bir haftayı Mozaik'te baştan sona kendisinin dizmesi. Sonraki
+kilometre taşları bu şartı beklemeden yazıldı ve yayınlandı. ROADMAP artık bunu
+söylüyor.
+
 ### 2026-09-27 · Kısaltmalar sözlükten değil kendi tablosundan
 
 **Eski hâli.** Yerleşik branş ve gün kısaltmaları, Türkçe kısaltmanın kendisi anahtar

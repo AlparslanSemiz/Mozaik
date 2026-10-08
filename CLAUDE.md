@@ -1,11 +1,13 @@
 # Mozaik
 
-Babamın dershanesinde haftalık ders programını dizmek için yazılan araç, aSc
-Timetables'ın yerine geçiyor. Hedef, aSc'nin bu kursla ilgili kısmının yarısını
-yapmak ve o yarıyı aSc'den iyi yapmak. Program çift tıklanan tek bir HTML dosyası,
-ve aynı dosya bir sitede, Windows kurulum paketinde ve bir exe'nin içinde de
-teslim ediliyor. Vite, React ve TypeScript ile yazıldı, sunucusu yok ve çalışırken
-internete ihtiyaç duymuyor.
+Babamın dershanesinde haftalık ders programını dizmek için yazılan araç. Babam
+bugün Roboders kullanıyor ve Mozaik onun yerine geçmeyi hedefliyor. Özellik
+bilgisinin ikinci kaynağı aSc Timetables: oradaki ölçü, aSc'nin bu kursla ilgili
+kısmının yarısını yapmak ve o yarıyı aSc'den iyi yapmak. Program çift tıklanan tek
+bir HTML dosyası, ve aynı dosya bir sitede, Windows kurulum paketinde ve bir exe'nin
+içinde de teslim ediliyor. Vite, React ve TypeScript ile yazıldı. Bugün sunucusu yok
+ve çalışırken internete ihtiyaç duymuyor. Bunu şart koşan iki ilke 2026-10-08'den
+beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
 
 ## Yeni bir oturuma başlarken
 
@@ -34,8 +36,8 @@ bloğunda yazılı.
 - [docs/WORKLOG.md](docs/WORKLOG.md): Projenin şu anki durumu ve oturum oturum çalışma kaydı.
 - [docs/TODO.md](docs/TODO.md): açık işler, karar bekleyen sorular, kullanıcının not defteri ve biten turların arşivi.
 - [docs/ROADMAP.md](docs/ROADMAP.md): Sıradaki sürümler, her birinin çıkma şartı ve hâlâ cevabı beklenen sorular.
-- [docs/ASC.md](docs/ASC.md): rakip aSc Timetables'ın bölümleri, hangisinin alındığı, hangisinin bilerek alınmadığı ve hangisinin sırada olduğu.
-- [docs/ROBODERS.md](docs/ROBODERS.md): ikinci rakip Roboders'in incelemesi.
+- [docs/ROBODERS.md](docs/ROBODERS.md): asıl rakip Roboders'in, yani babanın bugün kullandığı programın incelemesi.
+- [docs/ASC.md](docs/ASC.md): ikinci kaynak aSc Timetables'ın bölümleri, hangisinin alındığı, hangisinin bilerek alınmadığı ve hangisinin sırada olduğu.
 - [CHANGELOG.md](CHANGELOG.md): dışarı bakan, İngilizce sürüm geçmişi.
 - [docs/plan-v0-arsiv.md](docs/plan-v0-arsiv.md): tarihsel, güncellenmiyor. Projenin ilk teknik planı, donmuş bir tarihsel kayıt olarak.
 

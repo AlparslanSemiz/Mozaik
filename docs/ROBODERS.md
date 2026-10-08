@@ -1,6 +1,7 @@
 # Roboders — rakip incelemesi
 
-İkinci rakip. Birincisi [ASC.md](ASC.md).
+Asıl rakip: babanın bugün fiilen kullandığı program (kullanıcı, 2026-10-08).
+Özellik bilgisinin ikinci kaynağı [ASC.md](ASC.md).
 
 **Ürünün adı `Roboders`**, `Robodersi` değil — ikincisi Türkçenin belirtme
 hâli. Bu dosyanın adı da o yüzden `ROBODERS.md`.
@@ -10,7 +11,7 @@ hâli. Bu dosyanın adı da o yüzden `ROBODERS.md`.
 > görülemez de, sebebi aşağıda. Yani bu dosya bir **özellik envanteri
 > değil**, envanterin önündeki kapının tarifi.
 >
-> Son güncelleme: 2026-08-31 · Kaynak: <https://roboders.com/>
+> Son güncelleme: 2026-10-08 · Kaynak: <https://roboders.com/>
 
 ---
 
@@ -28,9 +29,12 @@ hâli. Bu dosyanın adı da o yüzden `ROBODERS.md`.
 
 **Konumlanması bizim tam tersimiz, ve bu bir gözlem, bir eleştiri değil:**
 onların ilk satırı `Kurulum Gerektirmez` + `Bulut Tabanlı Altyapı` + `Her
-Yerden ve Her Cihazdan Erişim`. Bizim 1–3. ilkelerimiz tam olarak bunun
-karşıtı: çift tıkla çalışır · sunucu yok · internet gerekmez. Yani Roboders'ten
-alınabilecek şey **mimarisi değil, özellik fikirleri**.
+Yerden ve Her Cihazdan Erişim`. Bizim o günkü 1–3. ilkelerimiz tam olarak bunun
+karşıtıydı: çift tıkla çalışır · sunucu yok · internet gerekmez. 2026-10-08'de
+sunucusuz ve çevrimdışı ilkeleri bağlayıcı olmaktan çıktı
+([PRINCIPLES.md](PRINCIPLES.md)). Kurulmadan açılan yol ise babanın eski makinesi
+yüzünden kalıyor. Yani Roboders'in mimarisinden bir parça (bir servise gönderme
+gibi) artık bir ilke yüzünden reddedilmiyor, ama yine ölçülerek alınıyor.
 
 ## Tanıtım sayfasının saydığı yetenekler
 
@@ -111,14 +115,15 @@ Bunlar **karar değil**, R8'e girecek adaylar.
 | Onlarda | Bizde | Not |
 |---|---|---|
 | Birden çok proje | **var** — plan kitaplığı | Aynı fikir |
-| Öğretmenlere e-posta ile dağıtım | **yok** → `B3.4` | Rakip de yapıyor: madde güçlendi. Onlar sunucudan, biz `mailto:`'dan |
+| Öğretmenlere e-posta ile dağıtım | **yok** → `B3.4`, `B3.8` | Rakip de yapıyor: madde güçlendi. Baba istiyor (2026-10-08). Nasıl yaptıkları açık soru, aşağıda |
 | Yazdırma | **var** | |
 | Ders · sınıf · öğretmen raporu | **var** (sınıf + öğretmen) | |
 | **Derslik programı raporu** | **YOK** | **Yeni aday.** Kâğıda "G dersliğinde bu hafta ne var" diye bakan bir sayfa bizde hiç yok |
 | **Ders bazlı rapor** | **YOK** | Ne olduğu belirsiz — ekran görülmeden yazılmaz |
-| Eyotek içe/dışa aktarma | yok, olmayacak | Ama "okul sisteminden veri çek" talebini doğruluyor → `B6.2` (aSc XML) |
-| Çok kullanıcı / yetki | **yasak liste** (kullanıcı hesapları) | |
-| Bulut / mobil | **ilke 1–3** | Alınmaz |
+| Eyotek içe/dışa aktarma | yok → `B3.8` | 2026-08-31'de "olmayacak" yazıyordu. 2026-10-08'de baba Eyotek'e gönderme istedi ve onu engelleyen ilke kalktı. İçe aktarma talebi → `B6.2` (aSc XML) |
+| Çok kullanıcı / yetki | yok | "Yapılmıyor" listesinden 2026-10-08'de çıktı, istenmedi |
+| Bulut | yok | İlke 2026-10-08'de kalktı, istenmedi (TODO §8a'daki sorular açık) |
+| Mobil | yok | [PRINCIPLES.md](PRINCIPLES.md)'in "Şu an yapılmıyor" listesinde |
 
 ## Roboders'in KENDİ ÇIKTISI, babanın gerçek verisiyle (2026-09-12)
 
@@ -258,6 +263,24 @@ bunları yine de görebilir, ama tahmin edilerek buraya yazılmayacaklar
 > **Nöbet ayrıca babaya sorulacak bir soru** (§8b) ve cevabı Eyotek'in bir
 > modülü olmasından çıkmaz — babanın okulunda nöbet varsa, o ihtiyaç
 > Roboders'in sunup sunmadığından bağımsız olarak Mozaik'e girebilir.
+
+## Açık sorular — gönderme (2026-10-08)
+
+Baba, Roboders'te tek tıkla her öğretmenin kendi programının Eyotek sistemine
+gittiğini söylüyor, ve Mozaik'ten öğretmenlere e-postayla da göndermek istiyor
+([TODO.md](TODO.md) B3.8). Bunun Roboders'te nasıl yapıldığı **görülmedi**:
+"Görülmeyen" bölümündeki `Yayınla` fazı, e-posta dağıtım ekranı ve Eyotek aktarımı
+hâlâ boş. Tahmin edilmeyecek, R6'da ya da babaya sorularak cevaplanacak:
+
+- Tek tık neyi gönderiyor? Bir dosya mı (PDF, görsel), bir bağlantı mı, Eyotek'in
+  içinde bir kayıt mı?
+- Eyotek'e giden yol Roboders'in kendi sunucusundan mı geçiyor, okulun Eyotek
+  hesabıyla mı?
+- E-posta dağıtımı Roboders'in sunucusundan mı gidiyor, kullanıcının kendi posta
+  hesabından mı? Öğretmenin e-posta adresi nerede tutuluyor: Roboders'te mi,
+  Eyotek'ten mi geliyor?
+- Eyotek'in dışarıya açık bir arayüzü (API) var mı, ve Roboders'ten başka bir
+  programa açık mı?
 
 ## Yeniden üretmek
 
