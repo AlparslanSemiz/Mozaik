@@ -4,6 +4,9 @@ dist-site/
 dist-kurulum/
 *.local
 .DS_Store
+# tsc's incremental build record. No tsconfig asks for one (no `incremental`, no
+# `composite`); it was committed by accident in eb0601d and nothing reads it.
+*.tsbuildinfo
 test-results/
 playwright-report/
 
