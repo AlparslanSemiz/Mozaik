@@ -1,4 +1,5 @@
 // `npm run yayinla -- 1.2.0`  —  one command per feedback round.
+// `npm run yayinla -- --kuru`  —  the same wait, changing nothing (below).
 //
 // This exists because the round it serves REPEATS: my father says something is
 // wrong, I fix it, and it has to reach him. That is four steps done in the
@@ -10,12 +11,25 @@
 // It does NOT build anything and does not upload anything. Two workflows do
 // that, and they are triggered by what this pushes:
 //
-//   push main   -> site.yml   -> GitHub Pages  (my father's site route)
-//   push vX.Y.Z -> surum.yml  -> Release       (the three downloadable files)
+//   push main   -> ci.yml (green) -> site.yml -> GitHub Pages  (the site route)
+//   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
-// Refuses on a dirty tree, on a non-main branch, and on a tag that exists.
-// Every one of those has a right answer that is not "guess".
+// So the order is: commit, push main ALONE, wait for that commit's ci.yml run,
+// and only when it is green tag it and push the tag (2026-10-08). The tag used
+// to go in the same push as the commit, i.e. before any test had looked at it.
+// A red run stops here with the commit pushed and no tag: the site did not
+// change either, because it sits behind the same run. Fix, push, and give the
+// same command again; package.json already at the version means "tag only".
+//
+// `--kuru` (dry run) changes nothing: it takes HEAD, which must already be
+// pushed, finds and waits for its ci.yml run, says the result, and stops where
+// the tag would be cut.
+//
+// Refuses on a dirty tree, on a non-main branch, on a tag that exists, and
+// without a logged-in `gh`. Every one of those has a right answer that is not
+// "guess".
 
+import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
@@ -44,7 +58,97 @@ function dur(mesaj, ...cozum) {
   process.exit(1);
 }
 
-const surum = process.argv[2];
+// `gh`, read as text; `miras` hands the terminal to it (the live run view).
+function gh(args, miras = false) {
+  return spawnSync('gh', args, {
+    cwd: KOK,
+    encoding: 'utf8',
+    stdio: miras ? 'inherit' : ['ignore', 'pipe', 'pipe'],
+  });
+}
+
+// Asked BEFORE anything is written: without gh the wait below cannot happen,
+// and finding that out after the version commit is pushed leaves half a release.
+function ghHazir() {
+  const r = gh(['auth', 'status']);
+  if (r.error) dur('gh bulunamadı; CI beklenemez.', 'https://cli.github.com', 'gh auth login');
+  if (r.status !== 0) dur('gh oturumu açık değil; CI beklenemez.', 'gh auth login');
+}
+
+const bekle = (ms) => new Promise((tamam) => setTimeout(tamam, ms));
+
+// The ci.yml run of exactly this commit, waited for to the end. Returns only on
+// green; anything else (red, cancelled by a newer push, never appeared) stops.
+async function ciYesilMi(sha, kirmizidaNe) {
+  const kisa = sha.slice(0, 7);
+  let kosu;
+  // A push needs a few seconds to become a run. Six minutes is generous.
+  for (let i = 0; i < 36 && kosu === undefined; i++) {
+    if (i > 0) await bekle(10_000);
+    const r = gh([
+      'run',
+      'list',
+      '--workflow',
+      'ci.yml',
+      '--commit',
+      sha,
+      '--limit',
+      '5',
+      '--json',
+      'databaseId,status,conclusion,url',
+    ]);
+    if (r.status !== 0) dur('gh run list olmadı.', ...girintili(r.stderr.trim()));
+    kosu = JSON.parse(r.stdout)[0];
+  }
+  if (kosu === undefined) {
+    dur(`${kisa} için ci.yml koşusu altı dakikada görünmedi.`, ...kirmizidaNe);
+  }
+  console.log(`\n  ${kisa} · ci.yml koşusu ${kosu.databaseId}: ${kosu.url}\n`);
+  if (kosu.status !== 'completed') {
+    gh(['run', 'watch', String(kosu.databaseId), '--compact', '--interval', '20'], true);
+  }
+  const son = gh(['run', 'view', String(kosu.databaseId), '--json', 'conclusion,url']);
+  if (son.status !== 0) dur('gh run view olmadı.', ...girintili(son.stderr.trim()));
+  const { conclusion } = JSON.parse(son.stdout);
+  if (conclusion !== 'success') {
+    dur(`${kisa}'in CI'ı yeşil değil: ${conclusion || 'bilinmiyor'}.`, ...kirmizidaNe);
+  }
+  console.log(`  ${kisa}'in CI'ı yeşil.\n`);
+}
+
+const argumanlar = process.argv.slice(2);
+const kuru = argumanlar.includes('--kuru');
+const surum = argumanlar.find((a) => a !== '--kuru');
+
+// ------------------------------------------------------------------ kuru
+if (kuru) {
+  if (surum !== undefined && !/^\d+\.\d+\.\d+$/.test(surum)) {
+    dur(
+      `"${surum}" bir sürüm numarası değil.`,
+      'npm run yayinla -- --kuru',
+      'npm run yayinla -- --kuru 1.2.0',
+    );
+  }
+  ghHazir();
+  if (git('status', '--porcelain') !== '') {
+    dur('Çalışma ağacı temiz değil.', 'git status', 'git add -A && git commit');
+  }
+  const kuruDal = git('rev-parse', '--abbrev-ref', 'HEAD');
+  if (kuruDal !== 'main') dur(`Dal "${kuruDal}", "main" değil.`, 'git switch main');
+  git('fetch', '--quiet', 'origin', 'main');
+  const bas = git('rev-parse', 'HEAD');
+  if (bas !== git('rev-parse', 'origin/main')) {
+    dur(
+      "HEAD origin/main'de değil; kuru koşu yalnız itilmiş bir commit'in CI'ını bekler.",
+      'git status -sb',
+    );
+  }
+  await ciYesilMi(bas, ['Gerçek koşu burada dururdu: etiket atılmazdı.']);
+  const ad = surum === undefined ? 'etiket' : `v${surum} etiketi`;
+  console.log(`  Kuru koşu: gerçek koşu burada ${ad} atar ve iterdi. Hiçbir şey atılmadı.\n`);
+  process.exit(0);
+}
+
 if (surum === undefined || !/^\d+\.\d+\.\d+$/.test(surum)) {
   dur(
     'Sürüm numarası gerekiyor.',
@@ -66,6 +170,8 @@ if (dal !== 'main') {
   // Release my father's site route never sees. Two different programs.
   dur(`Dal "${dal}", "main" değil.`, 'git switch main');
 }
+
+ghHazir();
 
 const etiketler = git('tag', '--list', etiket);
 if (etiketler !== '') {
@@ -190,27 +296,47 @@ if (onceki === surum) {
   git('commit', '-m', `Sürüm ${etiket}`);
 }
 
-// ANNOTATED, and that is not a style preference — it is a bug this script
-// already had once. `--follow-tags` pushes annotated tags only; a lightweight
-// one is skipped WITHOUT A WORD, exit code 0, "Everything up-to-date". The
-// first release went out with main pushed, the tag left at home, and surum.yml
-// never triggered: exactly the silent half-release this file exists to stop.
-git('tag', '-a', etiket, '-m', `Sürüm ${etiket}`);
-
-// One push, both refs: two pushes is two chances to do half of it.
+// Main ALONE first, and its CI waited for: the tag is cut only on a commit
+// the tests have passed.
 //
-// Its failure gets its own words, because by now the commit and the tag
-// exist and only this step is missing: 2.2.0's push fell over on HTTPS with
-// no credentials, and what the script printed was a byte dump.
+// Its failure gets its own words, because by now the commit exists and only
+// this step is missing: 2.2.0's push fell over on HTTPS with no credentials,
+// and what the script printed was a byte dump.
 try {
-  gitKomut(KOK, 'push', '--follow-tags', 'origin', 'main');
+  gitKomut(KOK, 'push', 'origin', 'main');
 } catch (e) {
   dur(
-    `Push olmadı: sürüm commit'i ve ${etiket} etiketi yerelde duruyor, uzağa gitmedi.`,
+    "Push olmadı: sürüm commit'i yerelde duruyor, uzağa gitmedi.",
     ...girintili(e.gitCevabi),
     '',
-    'Sebebi giderip (ör. kimlik bilgisi) aynı komutu elle verin:',
-    'git push --follow-tags origin main',
+    'Sebebi giderip (ör. kimlik bilgisi) aynı komutu yeniden verin.',
+  );
+}
+
+const sha = git('rev-parse', 'HEAD');
+await ciYesilMi(sha, [
+  `${etiket} etiketi ATILMADI. Site de güncellenmedi: yayın aynı koşunun arkasında.`,
+  'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
+  'olduğu için yalnız etiket atılır.',
+]);
+
+// ANNOTATED, and that is not a style preference — it is a bug this script
+// already had once. `--follow-tags` pushed annotated tags only; a lightweight
+// one was skipped WITHOUT A WORD, exit code 0, "Everything up-to-date". The
+// first release went out with main pushed, the tag left at home, and surum.yml
+// never triggered: exactly the silent half-release this file exists to stop.
+// The tag is now pushed by name, and an annotated one still says who and when.
+git('tag', '-a', etiket, '-m', `Sürüm ${etiket}`);
+
+try {
+  gitKomut(KOK, 'push', 'origin', etiket);
+} catch (e) {
+  dur(
+    `Push olmadı: ${etiket} etiketi yerelde duruyor, uzağa gitmedi.`,
+    ...girintili(e.gitCevabi),
+    '',
+    'Sebebi giderip elle verin:',
+    `git push origin ${etiket}`,
   );
 }
 
@@ -220,12 +346,12 @@ try {
 const uzakta = git('ls-remote', '--tags', 'origin', etiket);
 if (uzakta === '') {
   dur(
-    `${etiket} uzağa GİTMEDİ — sürüm çıkmayacak, yalnız site güncellenecek.`,
+    `${etiket} uzağa GİTMEDİ — sürüm çıkmayacak; site CI'dan sonra zaten güncellendi.`,
     `git push origin ${etiket}`,
   );
 }
 
-console.log(`  ${etiket} itildi ve uzakta görüldü. İki iş akışı da koşuyor:\n`);
+console.log(`  ${etiket} itildi ve uzakta görüldü. Site yayında, sürüm koşuyor:\n`);
 // The repository was renamed `ders-programi` -> `Mozaik` and these two lines
 // were not. The Releases one redirects; the Pages one does NOT — Pages
 // publishes a repository by its NAME, so the old address is a plain 404 and
