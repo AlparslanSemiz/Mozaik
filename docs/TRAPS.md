@@ -1154,6 +1154,17 @@ dinlemesine izin vermiyor. Tur bir sayfayı değil tarayıcıyı kapatarak bitiy
 dördü kırmızıya dönüyor. Kural: bir isteği durduran bir koruma, sayfanın yaşarken
 değil giderken gönderdiğini de sunucunun sayacıyla ölçer.
 
+### 145 · MCP tarayıcısı görünür bir pencere açar ve Roboders korumasından geçmez
+`.mcp.json`'daki iki tarayıcı sunucusu (`@playwright/mcp --browser chromium` ve
+`chrome-devtools-mcp`) `--headless` olmadan kurulu: açıldıklarında ekranda bir Chromium
+penceresi belirir, kullanıcı başka bir iş yaparken önüne çıkar. İkisi de
+`scripts/roboders/koruma.mjs`'in hiçbir katmanından geçmez: onlarla Roboders'te bir
+düğmeye basmak, bir forma yazmak ya da bir POST göndermek serbesttir, ve tuzak 144'ün
+deliği orada hiç kapanmadı. Tur 0'da yazılırken fark edildi, Roboders'e o yoldan
+gidilmedi. Kural: Roboders'e yalnız `scripts/roboders/` betikleriyle gidilir, MCP
+tarayıcısı Roboders'in adresine açılmaz. Görünür pencere açacak bir iş (R6'nın
+canlı yarısı, MCP tarayıcısı) kullanıcıya önceden söylenir.
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1293,12 +1304,12 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 144, yeni bir tuzak 145'ten devam eder. Test stratejisi
+büyük kullanılan numara 145, yeni bir tuzak 146'dan devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

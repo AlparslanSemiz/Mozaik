@@ -33,14 +33,16 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda.
 
 **Sıradaki iş.**
-1. Babanın makinesi (Windows 10, 27 inç, 1920×1080): Windows ekran ölçeği, öneri
-   aramasının ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
+1. Babanın makinesi (Windows 10, 27 inç, 1920×1080): Windows ekran ölçeği, exe'nin
+   sürümü, kurulum yolu, öneri aramasının ölçümü, KY'nin Cumartesi sorusu
+   ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
    KS ve Ö maddelerinin önünde.
-3. Depodaki gerçek veri (fotoğraflar, Roboders PDF'i, tam adlar): karar kullanıcıda,
-   o güne kadar depoya yeni gerçek veri girmez (DECISIONS 2026-10-08).
-4. A turu sırasıyla: A5 (Windows'ta E2E, elle tetiklenen iş), A3 ve A4 (WebKit
-   ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u olan kapta). A1 ve A2 bitti.
+3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
+   (DECISIONS 2026-10-08).
+4. A turu sırasıyla: D (GitHub Actions, A5'i içinde taşıyor: CI, yayının CI'a
+   bağlanması), A3 ve A4 (WebKit ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u olan
+   kapta). A1 ve A2 bitti.
 5. Rakip envanteri (TODO §1): Tur 0 bitti. Tur 1'in aSc ve Eyotek web yarısı
    başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
    1 ile paralel, onun ön şartı değil.

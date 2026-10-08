@@ -221,7 +221,8 @@ Kalan iki engel, ikisi de erişimle ilgili değil **yöntemle**:
 1. **Playwright bu depoda görünür kuruluyor.** `.mcp.json`:
    `@playwright/mcp --browser chromium`, `--headless` **yok**. Yani R6 ekranda
    bir Chromium penceresi açar ve odağı alır — kullanıcı başka bir iş
-   yaparken koşturulamaz. Bu bir zamanlama kararı.
+   yaparken koşturulamaz. Bu bir zamanlama kararı. MCP tarayıcısı Roboders
+   korumasından da geçmez, o yüzden Roboders'e hiç açılmaz (tuzak 145).
 2. **Oturum nasıl açılacak?** Şifrenin sohbete yazılmasına gerek yok ve
    yazılmamalı: pencere açıldığında kullanıcı kendi giriyor, sonra gezinme
    devralınıyor. Alternatifi, hâlihazırda açık bir oturumun kullanılması.

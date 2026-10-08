@@ -46,16 +46,21 @@ Tekerlek yeniden icat edilmez, varsayılan cevap "kullan". Bir paket, kütüphan
 framework ya da araç işi görüyorsa o alınır. Elle yazmak istisnadır ve gerekçesi
 yazılır. Bir şeyi elle yazmadan önce sırayla şu üç soru sorulur:
 
-1. Bunu yapan olgun bir paket var mı?
-2. Kullanılan framework'ün zaten bir cevabı var mı?
-3. Platform (tarayıcı, işletim sistemi) bunu bedavaya yapıyor mu?
+1. Depoda bunu zaten yapan bir şey var mı?
+2. Platformun (tarayıcı, işletim sistemi) ya da kullanılan framework'ün resmi bir
+   cevabı var mı?
+3. Bunu yapan olgun bir paket var mı?
 
-Üçü de hayırsa yazılır ve niçin hayır olduğu [DECISIONS.md](DECISIONS.md)'ye bir
-satır olarak yazılır.
+Platformun cevabı belirgin biçimde zayıfsa (eksik, hatalı ya da çok el işi
+istiyorsa) paket alınır ve gerekçesi [DECISIONS.md](DECISIONS.md)'ye yazılır.
+Üçü de hayırsa elle yazılır ve niçin hayır olduğu DECISIONS'a bir satır olarak
+yazılır.
 
-Paket almanın ölçütü tek: `dist/index.html`'e gömülebiliyor ve çalışma anında ağa
-çıkmıyorsa serbest. Sabit bir boyut tavanı yok, eklendikten sonra boyut ve
-açılış süresi ölçülüp [WORKLOG.md](WORKLOG.md)'ye yazılır ([BUILD.md](BUILD.md)).
+Paket almanın ölçütü tek: `dist/index.html`'e gömülebiliyor ve programın açılışı
+için ağa ihtiyaç duymuyorsa serbest. Gönderme ya da güncellemeyi denetleme gibi
+bir iş ağı kullanabilir ([PRINCIPLES.md](PRINCIPLES.md), "Açılış ağa bağlı
+değil"). Sabit bir boyut tavanı yok, eklendikten sonra boyut ve açılış süresi
+ölçülüp [WORKLOG.md](WORKLOG.md)'ye yazılır ([BUILD.md](BUILD.md)).
 
 Bu, elle yazılmış mevcut kodu toptan atmak demek değil. Bazılarının ölçülmüş bir
 gerekçesi var ve o gerekçe DECISIONS'ta duruyor (örneğin `drag.ts`'in Pointer

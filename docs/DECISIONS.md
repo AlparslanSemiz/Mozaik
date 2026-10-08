@@ -35,6 +35,49 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-08 · Paket ölçütü açılışa çekildi, sorma sırası önce depo ve platform
+
+**Ne.** [CONVENTIONS.md](CONVENTIONS.md) "Hazır çözüm önce" ve [BUILD.md](BUILD.md)
+"Bağımlılık kuralı": bir paket programın açılışı için ağa ihtiyaç duymuyorsa
+alınabilir, gönderme gibi işler ağı kullanabilir. Sorma sırası: önce depoda olan,
+sonra platformun ve framework'ün resmi cevabı, sonra olgun bir paket. Platformun
+çözümü belirgin biçimde zayıfsa paket alınır, gerekçesi yazılır.
+
+**Eski hâli.** Ölçüt "çalışma anında ağa çıkmıyorsa", sıra önce paket, sonra
+framework, sonra platformdu.
+
+**Gerekçe.** Çevrimdışı ilkesi aynı gün kalktı, geriye "Açılış ağa bağlı değil"
+kaldı ([PRINCIPLES.md](PRINCIPLES.md)); eski ölçüt kalkan ilkeyi koruyordu.
+Sıra kullanıcının kararı.
+
+### 2026-10-08 · Depodaki gerçek veri kalıyor
+
+**Ne.** Herkese açık depoda bugün duran gerçek veri olduğu gibi kalıyor:
+`docs/Örnek Fotolar/`, `docs/RoboDers/`'teki PDF, [TODO.md](TODO.md)'deki iki
+öğretmen adı ve kurum adı. Aşağıdaki üç seçeneğin hiçbiri uygulanmıyor. Bundan sonra
+depoya **yeni** gerçek veri eklenmez: Roboders'in görüntüleri ve ham notları yalnız
+`scratch/`'te durur. Soru kapandı, sonraki oturumlar yeniden sormaz.
+
+**Eski hâli.** Aynı gün açılan soru (aşağıdaki kayıt): karar verilene kadar yeni gerçek
+veri girmez.
+
+**Gerekçe.** Kullanıcının kararı.
+
+**Tartılan üç seçenek** (ileride gerekirse diye, ayrıntısı o günün sohbetinde):
+1. Depo private olur. Tek ayar ve geri dönüşü kolay, ama babanın exe'si güncellemeyi
+   göremez (manifest girişsiz okununca 404 döner), `Guncelle.cmd` indiremez, ve
+   ücretsiz planda Pages private depodan yayınlanmaz.
+2. Geçmiş `git filter-repo` ile temizlenir ve zorla itilir. Babanın exe'sine dokunmaz,
+   ama her SHA değişir, belgelerdeki commit atıfları boşa düşer, on iki etiketin
+   yeniden itilmesi gerekir, PR referansları eski commit'leri erişilebilir tutar
+   (GitHub Destek gerekir) ve geri dönülmez.
+3. Kaynak private olur, yayın için aynı adla ayrı bir herkese açık depo açılır.
+   v2.0.3 ve sonrası güncellenebilir kalır (v2.0.2 kalmaz), geçmiş yeniden yazılmaz,
+   ama yayın iki depoya ayrılır ve bir PAT sırrı gerekir. O günkü öneri buydu.
+
+Üçünde de ortak olan: 2026-08-27'den beri herkese açık duran bir şeyin alınmış bir
+kopyasını hiçbiri geri getirmez.
+
 ### 2026-10-08 · Roboders salt okunur, kodla: dört katman, ve görüntüler depoya girmez
 
 **Ne.** Roboders turu (R6) elle yapılan bir söz değil, `scripts/roboders/` altındaki

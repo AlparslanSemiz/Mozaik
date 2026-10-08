@@ -44,7 +44,7 @@ bitince §10'a taşınır.
 | Kısım | Ne var | Durum |
 |---|---|---|
 | **§0** | **Not defteri** — senin ham satırların | ✍️ babanın üç isteği (2026-10-08) |
-| **§1** | **Rakip envanteri** — Roboders (asıl rakip) ve aSc, §8b ile paralel | 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
+| **§1** | **Rakip envanteri** — Roboders (asıl rakip) ve aSc, §8b ile paralel | 6 açık (R6·R7·R8·R9·R11·R12), R1-R5·R7b bitti, R10 isteğe bağlı |
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
@@ -198,6 +198,11 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       (hepsi `eyotek.com.tr`'nin modül sayfaları). Ölçüldü ve doğrulandı:
       kaynakları **Eyotek**, Roboders'in kendi tanıtım sayfasında geçmiyor.
       Ayrıntı [ROBODERS.md](ROBODERS.md) → *Doğrulanmamış*.
+- [ ] **R11 `docs/Örnek Fotolar/`'ın dizini (2026-10-08).** Belgeler 33 fotoğraf
+      diyor (§8c), klasörde 61 dosya var, 29'u WhatsApp görüntüsü. Hangi fotoğrafın
+      hangi programa (aSc mi Roboders mi) ve hangi ekrana ait olduğu hiçbir yerde
+      yazmıyor. Gerçek veri depoda kalıyor (DECISIONS 2026-10-08), yani dizin bir
+      karara bağlı değil. Dizine adlar yazılmaz, yalnız kısaltmalar.
 
 ### 1c · Birleştirme ve karar
 
@@ -211,6 +216,9 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       aSc'nin ilk turundan geliyor; tam envanter çıkınca sıra da, kapsam da
       değişebilir. Bu bölümün asıl çıktısı bir özellik değil, **öteki
       bölümlerin kendisi**.
+- [ ] **R12 [DENETIM.md](DENETIM.md)'ye Roboders karşılaştırması (2026-10-08).**
+      R7'den sonra denetimin her bölümüne bir "Roboders'te" satırı: aynı iş orada
+      nasıl yapılıyor, babaya kaç yazı ve soru gösteriyor. R7'yi bekliyor.
 
 ### 1d · Diğer ilham kaynakları
 
@@ -1146,6 +1154,15 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kırpılması orada ([WORKLOG.md](WORKLOG.md) "Bilinen kusurlar"), ve E2E'ye bir
       "%125" projesi eklenir. Bugün varsayılan pencere 1920×1080, %125 yalnız
       `e2e/gorunum.spec.ts`'te iki kutuda ölçülüyor.
+- [ ] **Babanın exe'si hangi sürüm? (2026-10-08)** Ayarlar → Hakkında'da yazıyor.
+      Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
+      `ders-programi` adresinden soruyor, v2.0.3 ve sonrası `Mozaik`'ten; depo adı ya
+      da görünürlüğü bir gün değişirse hangi sürümün güncellenebilir kalacağını bu
+      belirler (DECISIONS 2026-10-08, depodaki gerçek veri).
+- [ ] **Baba kurulum yolunu kullanıyor mu? (2026-10-08)** `Kur.cmd` ile kurulup
+      `Guncelle.cmd` ile mi güncelleniyor, yoksa yalnız exe mi? Kurulumun PowerShell
+      betikleri hiçbir testte çalıştırılmıyor ([TESTPLAN.md](TESTPLAN.md), "Test
+      edilemeyenler").
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil.
 - [ ] **Nöbet var mı?**

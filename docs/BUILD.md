@@ -18,16 +18,21 @@ CSS tek bir `src/styles.css` dosyasında, CSS değişkenleriyle yazılıyor.
 
 ## Bağımlılık kuralı
 
-Bir paket `dist/index.html`'e gömülebiliyor ve çalışma anında ağa çıkmıyorsa
-alınabilir. Sabit bir boyut tavanı yok, şart ölçmek: paket eklendikten sonra
+Bir paket `dist/index.html`'e gömülebiliyor ve programın açılışı için ağa
+ihtiyaç duymuyorsa alınabilir. Gönderme ya da güncellemeyi denetleme gibi bir iş
+ağı kullanabilir, ama ağ yokken programı durdurmaz. Sabit bir boyut tavanı yok,
+şart ölçmek: paket eklendikten sonra
 `dist/index.html`'in boyutu ve `file://` üzerinden açılış süresi
 [WORKLOG.md](WORKLOG.md)'ye yazılır. `devDependencies` bu kuralın dışında,
 serbest: test araçları (`fast-check`, `@axe-core/playwright`,
 `@stryker-mutator/*`) derlemeye girmiyor, o yüzden onlar için ölçülecek bir
-boyut da yok. Çalışma anında bayt indiren bir paket alınmıyor, çünkü programın
+boyut da yok. Açılmak için bayt indiren bir paket alınmıyor, çünkü programın
 açılışını ağa bağlar ([PRINCIPLES.md](PRINCIPLES.md), "Açılış ağa bağlı değil").
 
-Varsayılan tercih hazır bir çözüm kullanmak ([CONVENTIONS.md](CONVENTIONS.md)).
+Varsayılan tercih hazır bir çözüm kullanmak, ve sorma sırası önce depoda olan,
+sonra platformun ve framework'ün resmi cevabı, sonra olgun bir paket
+([CONVENTIONS.md](CONVENTIONS.md), "Hazır çözüm önce"). Platformun çözümü
+belirgin biçimde zayıfsa paket alınır ve gerekçesi yazılır.
 Ölçülüp alınmayan paketlerin kaydı (`motion`, Tailwind, sürükle bırak
 kütüphanesi) [DECISIONS.md](DECISIONS.md)'de, paket başına ölçülen boyut
 maliyetleri WORKLOG'da.
