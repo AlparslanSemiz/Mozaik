@@ -86,26 +86,22 @@ ROBODERS.md ve ASC.md'nin başı buna göre düzeldi.
 **Ne değişmedi.** R6'nın güvenlik sözleşmesi, yani Roboders hesabındaki babanın
 verisine dokunulmaması, aynen duruyor.
 
-### 2026-10-08 · Rakip envanteri "her şeyden önce" değil: önce babanın makinesi ve geri bildirimi
+### 2026-10-08 · Rakip envanteri "her şeyden önce" değil, ve yerine bir sıra konmadı
 
 **Eski hâli.** TODO §1 (2026-08-31): aSc ve Roboders envanteri (R6–R9) öteki her
 bölümün önünde. §3–§7 o tablodan yeniden türetilecekti.
 
-**Şimdi.** Kullanıcının kararı: kural kalktı. Sıra şöyle: önce babanın makinesinde
-ölçüm ve geri bildirim (TODO §8b), sonra rakip envanteri (§1).
+**Şimdi.** Kullanıcının kararı: kural kalktı ve yerine bir sıra konmuyor. Babanın
+geri bildirimi (TODO §8b) envanterin ön şartı değil, envanterle paralel yürüyor.
 
-**Gerekçe.** Kullanıcı sıranın kendisini söyledi, gerekçeyi değil. Aşağıdakiler
-kayıtlardan yazıldı:
+**Aynı günün ilk hâli.** Bu kayıt ilk yazıldığında (6854592) "önce babanın makinesinde
+ölçüm ve geri bildirim, sonra rakip envanteri" diye bir sıra koyuyordu, ve o sırayı
+savunan iki önerilmiş gerekçe taşıyordu. Kullanıcı aynı gün düzeltti: sıra yok. O iki
+gerekçe kayıttan çıktı.
 
-- Kural fiilen uygulanmıyordu. 2026-09-24'ten 2026-09-27'ye kadarki turlar
-  (B5.8–B5.11, elle denetim ve on üç kusuru) R6–R9 açıkken yürüdü. (kayıtlı,
-  [WORKLOG.md](WORKLOG.md))
-- Baba fikir değiştirdi (yukarıdaki kayıt). İlk dönemin tercihlerinden türeyen bir
-  sıranın bugün neye dayandığını ancak o söyleyebilir. Envanter "rakipte ne var"ı
-  söyler, "babaya ne lazım"ı söylemez. (öneri, doğrulanmadı)
-- Babanın makinesi eski ve Windows sürümü bilinmiyor. Exe'nin orada açılıp açılmadığı
-  ve öneri aramasının süresi ölçülmeden yazılan her yeni özellik, ölçülmemiş bir
-  varsayımın üstüne kurulur. (öneri, doğrulanmadı)
+**Gerekçe.** Kural fiilen uygulanmıyordu: 2026-09-24'ten 2026-09-27'ye kadarki
+turlar (B5.8–B5.11, elle denetim ve on üç kusuru) R6–R9 açıkken yürüdü. (kayıtlı,
+[WORKLOG.md](WORKLOG.md))
 
 ### 2026-10-08 · v0 bitmedi: kod tamam, çıkma şartı bekliyor
 

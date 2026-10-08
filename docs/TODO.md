@@ -44,7 +44,7 @@ bitince §10'a taşınır.
 | Kısım | Ne var | Durum |
 |---|---|---|
 | **§0** | **Not defteri** — senin ham satırların | ✍️ babanın üç isteği (2026-10-08) |
-| **§1** | **Rakip envanteri** — Roboders (asıl rakip) ve aSc, §8b'den sonra | 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
+| **§1** | **Rakip envanteri** — Roboders (asıl rakip) ve aSc, §8b ile paralel | 4 açık (R6·R7·R8·R9), R1-R5·R7b bitti, R10 isteğe bağlı |
 | **§2** | **Bölüm 2 — Ayarlar'ın kendi tasarımı** | biri bitti, gerisi açık |
 | **§3** | **Bölüm 3 — Çıktı ailesi**: görsel · PDF · Excel · e-posta/WhatsApp | hepsi açık |
 | **§4** | **Bölüm 4 — Tuval ve baskı tasarımı** (aSc kova 1) | çoğu açık, B4.7 · B4.8 · B4.13 · B4.17 bitti |
@@ -61,10 +61,7 @@ bitince §10'a taşınır.
 §2  Bölüm 2 (Ayarlar tasarımı)     envanterden BAĞIMSIZ, paralel gidebilir
 
 
-§8b babanın makinesinde ölçüm ve geri bildirim   <-- ÖNCE BU (2026-10-08)
-        |
-        v
-§1  Roboders + aSc TAM ENVANTER
+§1  Roboders + aSc TAM ENVANTER     §8b babanın geri bildirimiyle PARALEL, ön şartı değil
         |
         |  R9: §3 · §4 · §5 · §6 · §7'yi bu tablodan YENİDEN türet
         v
@@ -86,9 +83,9 @@ bitince §10'a taşınır.
 **§2 neden §1'i beklemiyor:** Ayarlar'ın kendi düzeni bir **tasarım** kararı ve
 kaynağı senin kendi cümlen, rakip değil. Öteki her bölüm §1'den besleniyor.
 
-**§1 neden §8b'yi bekliyor (2026-10-08):** "her şeyden önce" kuralı kalktı. Önce
-babanın makinesinde ölçüm ve geri bildirim, sonra rakip envanteri. Gerekçe
-[DECISIONS.md](DECISIONS.md)'de.
+**§1 ile §8b (2026-10-08):** "her şeyden önce" kuralı kalktı ve yerine bir sıra
+konmadı. Babanın geri bildirimi envanterin ön şartı değil, ikisi paralel yürüyor.
+Kayıt [DECISIONS.md](DECISIONS.md)'de.
 
 ---
 
@@ -97,9 +94,9 @@ babanın makinesinde ölçüm ve geri bildirim, sonra rakip envanteri. Gerekçe
 > Senin satırın: *"her şeyden önce. tasklara ASC ve Robodersin tekrardan her
 > inciği cıncığının feature'nın incelenmesi lazım."*
 >
-> **2026-10-08'den beri bu bölüm "her şeyden önce" değil.** Kullanıcının
-> kararı: önce babanın makinesinde ölçüm ve geri bildirim (§8b), sonra bu
-> bölüm. Gerekçe [DECISIONS.md](DECISIONS.md)'de. Aynı gün asıl rakip Roboders
+> **2026-10-08'den beri bu bölüm "her şeyden önce" değil**, ve yerine bir sıra
+> konmadı: babanın geri bildirimi (§8b) bu bölümün ön şartı değil, onunla
+> paralel yürüyor. Kayıt [DECISIONS.md](DECISIONS.md)'de. Aynı gün asıl rakip Roboders
 > oldu (babanın bugün kullandığı program), aSc ikinci kaynak.
 >
 > Bölümün işi değişmedi: 5. ilke (*"bir dönem kullanılmadan özellik
@@ -1133,8 +1130,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       cevaplanmadan bir görev numarası (B7.x) açılmayacak.
 
 ### 8b · Babada
-
-> **2026-10-08'den beri sıradaki iş bu bölüm**, rakip envanterinden (§1) önce.
 
 - [ ] **Babanın makinesinde Windows sürümü öğrenilsin (2026-10-08).** Bilinen:
       4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart (kullanıcı). Sürüm

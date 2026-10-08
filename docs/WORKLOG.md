@@ -37,7 +37,8 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
    ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
    KS ve Ö maddelerinin önünde.
-3. Sonra rakip envanteri (TODO §1, R6–R9), Roboders önce.
+3. Rakip envanteri (TODO §1, R6–R9), Roboders önce. 1 ile paralel, onun ön şartı
+   değil.
 4. Bir sürümden önce `npm run mutasyon`.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -88,8 +89,9 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
   yapılmıyor" listesinden dört satır çıktı, Çevrimdışı'nın gerçeğe dayanan yarısı
   "Açılış ağa bağlı değil" olarak Çift tıkla çalışır'a taşındı.
 - Asıl rakip Roboders, aSc ikinci kaynak. CLAUDE.md'nin proje tanımı düzeldi.
-- TODO §1'in "her şeyden önce" kuralı kalktı. Önce §8b, sonra rakip envanteri.
-  Gerekçeyi kullanıcı söylemedi, kayıtlardan yazıldı ve işaretlendi.
+- TODO §1'in "her şeyden önce" kuralı kalktı. İlk yazılan "önce §8b, sonra rakip
+  envanteri" sırası (6854592) aynı gün kullanıcı tarafından düzeltildi: sıra yok,
+  babanın geri bildirimi envanterle paralel yürüyor (ayrı belge commit'i).
 - v0 bitmedi: kod tamam, çıkma şartı bekliyor (ROADMAP).
 - Babanın makinesi: 4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart,
   Windows sürümü bilinmiyor (TODO §8b'de açık soru). Son tarih yok. Tek şube
