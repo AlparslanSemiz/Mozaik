@@ -22,7 +22,7 @@
 import fc from 'fast-check';
 import { MAX_BLOCK, clampBlocks } from './leaf/blocks';
 import { buildIndex, occupy, placedBlocks, vacate } from './pure/constraints';
-import { remapDays } from './pure/entities';
+import { addNotSameDay, remapDays } from './pure/entities';
 import { PALETTE_SIZE, firstFreeColor } from './leaf/palette';
 import { activeProgram, replaceActiveGrid } from './pure/programs';
 import { solve } from './pure/solver';
@@ -32,6 +32,14 @@ import { applySuggestion, suggest, verifySuggestion } from './pure/relax';
 import { activePlacements } from './pure/programs';
 import { closedKey } from './leaf/keys';
 import type { Day, Id, State } from './leaf/types';
+
+// Every property here runs the solver on each generated world, and the default
+// 5 s per test is a speed claim about the machine. Measured 2026-10-08 with the
+// widened generator below, in this machine's low-power profile: the file took
+// about 30 s and the half-block property 5,2 s, red on the timeout alone (the
+// old generator's remapDays property had already timed out once under load).
+// This is a ceiling for a search that hangs, not a budget.
+vi.setConfig({ testTimeout: 60_000 });
 
 // ------------------------------------------------------------------ üreteçler
 
@@ -86,7 +94,41 @@ const worldSpec = fc
     };
   });
 
-const world = worldSpec.map((spec) => makeWorld(spec));
+/**
+ * The world every property starts from, and now and then with the two daily
+ * limits at Engelle and a "not on the same day" relation between two lessons.
+ *
+ * RF2 (2026-10-08). Without them the solver's legality was only ever asked in
+ * worlds where no limit and no relation bites, and two drifts went unseen:
+ * the solver handed `blocker()` an index with no relations (`notSameDay`
+ * emptied) or a state with both limits at 0, at all four of its calls. Both
+ * leave `illegalBlocks` empty on the old generator and turn it red on this one.
+ * The suggestion property below feeds on it too. Cost, measured on this
+ * machine: the file went from about 6,5 s to about 12 s alone.
+ */
+const world = fc
+  .tuple(
+    worldSpec,
+    fc.option(fc.tuple(fc.nat(), fc.nat())),
+    fc.option(fc.integer({ min: 1, max: 3 })),
+    fc.option(fc.integer({ min: 1, max: 3 })),
+  )
+  .map(([spec, pair, perDay, consecutive]) => {
+    // DEFAULT_RULES already has both limits at Engelle; a limit of 0 is "none".
+    let d = makeWorld({
+      ...spec,
+      limits: {
+        ...(perDay === null ? {} : { maxPerDay: perDay }),
+        ...(consecutive === null ? {} : { maxConsecutive: consecutive }),
+      },
+    });
+    if (pair !== null) {
+      const a = d.lessons[pair[0] % d.lessons.length]!.id;
+      const b = d.lessons[pair[1] % d.lessons.length]!.id;
+      if (a !== b) d = addNotSameDay(d, a, b);
+    }
+    return d;
+  });
 
 /** A world the solver has already filled in as far as it could. */
 const solvedWorld = world.map((d) => solve(d).state);

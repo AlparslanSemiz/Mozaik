@@ -121,13 +121,20 @@ bedava yeşil olurdu).
 
 Dünyalar bilerek küçük (en çok 3 gün, 4 saat, 2 öğretmen): çözücü her üretilen
 durumda gerçekten arama yapıyor, ve 25 öğretmen gerektiren bir karşı örnek karşı
-örnek değil bir performans testidir.
+örnek değil bir performans testidir. Üreteç ara sıra iki günlük sınırı (günde en
+fazla ve art arda en fazla) Engelle'de ve iki ders arasında bir "aynı gün olmasın"
+ilişkisi de kurar, çünkü onlarsız çözücünün yasallığı hiçbir sınırın ve ilişkinin
+bağlamadığı dünyalarda soruluyordu. Her özellik çözücüyü koşturduğu için dosyanın
+kendi zaman sınırı var, Vitest'in varsayılanı değil: yavaş bir profilde tek bir
+özellik o sınırı aşıyordu.
 
 Ne gördüğü ölçüldü. Çözücünün yasallığını kendi denetçisiyle sormak, denetçinin
 `blocker()`'ı çağırması yüzünden `blocker()`'ın içindeki bir mutasyonu göremez
 (tuzak 23). Çözücünün kuraldan sapması görünüyor, ama çözücü yasallığı iki kez
 denetlediği için ancak ikisi birden bozulunca: tek başına biri bozulduğunda öteki
-hâlâ reddediyor.
+hâlâ reddediyor. Çözücünün `blocker()`'a sorduğu dört yerin dördünde ilişkileri
+boşaltan ya da iki sınırı sıfırlayan mutasyon eski üreteçte yeşil, genişleyen
+üreteçte kırmızı (2026-10-08).
 
 ### Şema örnekleri
 
