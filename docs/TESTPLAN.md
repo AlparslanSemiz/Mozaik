@@ -341,6 +341,23 @@ perdenin inmiş olması.
 - **Beklemeler.** Depoya yazılanı okumadan önce sayfanın ne yazdığı beklenir (`settledText()`, tuzak 24 ve 51). Bir düzeni ya da boyanmış bir değeri okumadan önce hareketin bitmesi beklenir (`settledMotion()`, tuzak 59 ve 99).
 - **Kaydırma çubukları.** Playwright Chromium'u `--hide-scrollbars` ile açar, bir çubuğun yer kapladığını ölçen test kendi tarayıcısını açar (tuzak 94).
 
+## Test edilemeyenler
+
+Hangi platformun neyle sınandığı ve neden yetmediği. Yeşil bir süit bu satırların
+hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapandığı yazılır.
+
+| Ne | Bugün neyle sınanıyor | Neden yetmiyor |
+|---|---|---|
+| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok, ve gerçek bir Windows'ta otomatik hiçbir test koşmuyor. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
+| Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
+| Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği bilinmiyor (TODO §8b), süitin geri kalanı yalnız 1920×1080'de koşuyor |
+| Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |
+| Safari ve WebKitGTK | hiçbiri: Playwright'ın WebKit'i bu süitte koşmuyor | Playwright'ın WebKit'i, WebKitGTK ve Safari aynı ailenin üç ayrı portu, birinin geçmesi ötekini kanıtlamaz |
+| Linux ikilisi (WebKitGTK) | `npm run exe:e2e`, gerçek pencere | WebDriver'ın girdi benzetimi yok, olaylar sayfanın içinde üretiliyor (tuzak 127) |
+| GTK'nın dosya seçicisi, kâğıda yazdırma | elle görüldü | WebDriver oturumunda açılmıyor (tuzak 133), kâğıt hiç ölçülmüyor |
+| macOS | hiçbir şey | `kayma.spec.ts`'in oluk farkı açık bir soru (TODO B7.7) |
+| Windows kurulum yolu (`Kur.cmd`, `kurulum/kur.ps1`, `kurulum/sunucu.ps1`) | `surum.yml`'de biçim denetimi (BOM, CRLF, ASCII); `e2e/sunucu.spec.ts` sunucunun Node ikizini (`scripts/sunucu.mjs`) sınıyor | PowerShell betiklerinin kendisi hiçbir yerde çalıştırılmıyor |
+
 ## Sahte veri
 
 Sahte veri tek yerde: `src/worlds.ts`. `makeWorld()` küçük bir okul kurar,
