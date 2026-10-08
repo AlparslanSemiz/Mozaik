@@ -227,6 +227,60 @@ describe('öneri — küçük dünyalar', () => {
     expect(verifySuggestion(d, s!, { keepPlaced: true })).not.toEqual([]);
   });
 
+  // RF2 (2026-10-08): the two limits the suggestion search writes a second time
+  // into its formula, and that no fast test measured. With relax.ts's
+  // `maxConsecutive` windows taken out nothing went red; with `maxPerDay`'s, only
+  // the slow father's-week test did. Each world below is stuck by ONE rule and
+  // nothing else (pitfall 129): one day of three hours, one class, one teacher,
+  // three hours of one lesson. The same world with the rule off is laid out
+  // whole, which is what makes it the only rule binding.
+  //
+  // What a missing rule changes is the weekly-hours way: without the rule in the
+  // formula its first week needs no change at all, the checker throws that week
+  // out, and the search ends at two hours dropped and unproven instead of one.
+  // Measured red: relax.ts's `if (run > 0)` windows switched off (analysis M2)
+  // turns the first test red and leaves the second green, `if (perDay > 0)`
+  // switched off (M3) the other way round.
+  function oneRule(rule: 'maxConsecutive' | 'maxPerDay', level: 'block' | 'off'): State {
+    return makeWorld({
+      days: 1,
+      hours: 3,
+      teachers: [{ id: 'oMC', short: 'MÇ' }],
+      classes: [{ id: 's510', name: '510', roomId: null }],
+      lessons: [{ id: 'x', classId: 's510', teacherId: 'oMC', weeklyHours: 3 }],
+      limits: { [rule]: 2 },
+      rules: { [rule]: level },
+    });
+  }
+
+  it('yalnız "art arda en fazla 2" bağlıyorsa: sınırı 3 yapmak ya da bir saat azaltmak', () => {
+    expect(solve(oneRule('maxConsecutive', 'off'), { keepPlaced: false }).phase).toBe('solved');
+    const d = oneRule('maxConsecutive', 'block');
+    const found = byFamily(stuckAndSuggest(d));
+    expect(found.get('rules')?.changes).toMatchObject([
+      { kind: 'teacherConsecutive', teacherId: 'oMC', limit: 3 },
+    ]);
+    expect(found.get('weeklyHours')?.changes).toMatchObject([
+      { kind: 'weeklyHours', lessonId: 'x', hours: 2 },
+    ]);
+    expect(found.get('weeklyHours')?.proven).toBe(true);
+    for (const s of found.values()) expectHonest(d, s);
+  });
+
+  it('yalnız "günde en fazla 2" bağlıyorsa: sınırı 3 yapmak ya da bir saat azaltmak', () => {
+    expect(solve(oneRule('maxPerDay', 'off'), { keepPlaced: false }).phase).toBe('solved');
+    const d = oneRule('maxPerDay', 'block');
+    const found = byFamily(stuckAndSuggest(d));
+    expect(found.get('rules')?.changes).toMatchObject([
+      { kind: 'teacherDayLimit', teacherId: 'oMC', limit: 3 },
+    ]);
+    expect(found.get('weeklyHours')?.changes).toMatchObject([
+      { kind: 'weeklyHours', lessonId: 'x', hours: 2 },
+    ]);
+    expect(found.get('weeklyHours')?.proven).toBe(true);
+    for (const s of found.values()) expectHonest(d, s);
+  });
+
   it('aynı girdi aynı öneriyi veriyor', () => {
     const d = world('imkansiz-ders-yaninda');
     expect(stuckAndSuggest(d)).toEqual(stuckAndSuggest(d));
