@@ -362,7 +362,7 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 |---|---|---|
 | Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `haftalik.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (2026-10-08'de eklendi, henüz koşmadı), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
 | Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
-| Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği büyük ihtimalle %100, kesin değil (TODO §8b). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
+| Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği %100 (2026-10-09, kesin). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
 | Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |
 | Safari ve WebKitGTK | hiçbiri: Playwright'ın WebKit'i bu süitte koşmuyor | Playwright'ın WebKit'i, WebKitGTK ve Safari aynı ailenin üç ayrı portu, birinin geçmesi ötekini kanıtlamaz |
 | Linux ikilisi (WebKitGTK) | `npm run exe:e2e`, gerçek pencere | WebDriver'ın girdi benzetimi yok, olaylar sayfanın içinde üretiliyor (tuzak 127) |

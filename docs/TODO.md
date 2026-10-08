@@ -185,7 +185,10 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
       `e2e/roboders-koruma.spec.ts`, [ROBODERS.md](ROBODERS.md) "R6'nın araçları").
       Görüntüler ve notlar `docs/` altına değil yalnız `scratch/roboders/`'e gider,
       depo herkese açık. MCP tarayıcısı kullanılmaz. **Canlı yarı kullanıcının
-      "başla" demesini bekliyor**. Baba aynı anda iki oturumda birinin kapanmadığını
+      "başla" demesini bekliyor**. Tur 3 ve 4'e ek (2026-10-09): babanın gerçek
+      verisinde hangi kısıtların dolu olduğu, vekil ve nöbet modüllerinin kullanılıp
+      kullanılmadığı okunur (yalnız okuma); bu, §8b'deki iki sorunun yerine geçer.
+      Baba aynı anda iki oturumda birinin kapanmadığını
       gördü (2026-10-08); ilk girişten sonra babanın oturumunun düşmediği yine
       doğrulanacak. Yeni cihaz uyarısı bilinmiyor. İlk tur: öğretmen programının Eyotek'e ve e-postaya gönderilmesi
       (B3.8), akış düğmeye kadar, düğmeye basılmadan.
@@ -428,9 +431,13 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
 
       **Karar bekleyen iki soru (kullanıcı, 2026-10-08).** İnceleme boyunca Roboders'e
       de Eyotek'e de yazılmaz (R6'nın salt okunur kuralı). Babanın Eyotek hesabı var.
-      - **Eyotek'e gönderme yolu.** Hedef, Mozaik'in Eyotek'e göndermesi. Önce Turtek'in
-        resmî bir yolu aranır (API, Excel içe alma; Turtek'e soru §8b'de). Yoksa babanın
-        hesabıyla otomasyon bir seçenek olarak karar bekler, ve şartları şunlar:
+      **Sıra (2026-10-09): Eyotek önce, e-posta sonra**, çünkü öğretmenler programa
+      genelde Eyotek'ten bakıyor (§8b).
+      - **Eyotek'e gönderme yolu.** Hedef, Mozaik'in Eyotek'e göndermesi. Turtek'e
+        sorulmayacak (kullanıcı, 2026-10-09: "kendimiz çözeriz"; DECISIONS). Önce
+        Eyotek'in kendi arayüzünde bir içe aktarma ya da yükleme ekranı aranır (Eyotek
+        turu, salt okunur). Yoksa babanın hesabıyla otomasyon bir seçenek olarak karar
+        bekler, ve şartları şunlar:
         babanın onayı; Eyotek'in kullanım şartlarının kontrolü; şifrenin Windows şifre
         kasasında saklanması; gerçek hesaptan önce bir deneme hesabında sınanması;
         gönderme başarısız olunca babanın bunu ekranda görmesi.
@@ -438,8 +445,33 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
         `mailto:` dosya ekleyemez, yani tek tıkla ekli gönderme için iki seçenek var:
         (a) exe'den SMTP, şifre Windows şifre kasasında; (b) bir sunucu. İkisinde de
         öğretmene bir e-posta alanı gerekiyor, yani şema v17 (B3.4). KVKK: adres plan
-        dosyasına girerse her yedekle taşınır; (b)'de üstelik bir sunucuya gider. Hangi
-        hizmetin kullanıldığı (§8b) (a)'nın ayarını belirler.
+        dosyasına girerse her yedekle taşınır; (b)'de üstelik bir sunucuya gider.
+      - **(a) için öneri (2026-10-09, karar bekliyor).** Babanın Gmail'i var. Dershane
+        için **ayrı** bir Gmail hesabı: uygulama şifresi sızarsa yalnız o hesap etkilenir,
+        ve öğretmenler gönderende dershanenin adını görür. Uygulama şifresi Windows şifre
+        kasasında saklanır. Google'ın resmî sayfalarından (2026-10-09'da okundu):
+        - Uygulama şifresi 16 haneli bir koddur ve *"App passwords can only be used with
+          accounts that have 2-Step Verification turned on."* Yani iki adımlı doğrulama
+          şart. Yalnız güvenlik anahtarıyla iki adımlı doğrulama, Gelişmiş Koruma ya da
+          bir kurum hesabında seçenek görünmüyor
+          ([support.google.com/accounts/answer/185833](https://support.google.com/accounts/answer/185833)).
+        - *"we revoke your app passwords when you change your Google Account password"*:
+          hesap şifresi değişince Mozaik'in göndermesi durur, ve program bunu babaya
+          söylemeli (aynı sayfa).
+        - Google uygulama şifresini önermiyor: *"App passwords aren't recommended and are
+          unnecessary in most cases"*; önerdiği yol "Sign in with Google" (OAuth). Exe'de
+          OAuth'un maliyeti ölçülmedi, karar sorusunun parçası.
+        - SMTP: `smtp.gmail.com`, kimlik doğrulama gerekli, STARTTLS için 587
+          ([support.google.com/mail/answer/7104828](https://support.google.com/mail/answer/7104828)).
+          465 (SSL) bu sayfada yazmıyor: **doğrulanmadı**.
+        - Gönderme sınırı: günde 500'den fazla e-posta ya da tek e-postada 500'den fazla
+          alıcı sınırı aşar, 1–24 saat sonra yeniden gönderilebilir
+          ([support.google.com/mail/answer/22839](https://support.google.com/mail/answer/22839)).
+          Bu sınırın SMTP'den gönderilene de uygulandığı sayfada yazmıyor:
+          **doğrulanmadı**. 18 öğretmenli bir dershane için mertebe uzak.
+        - Rust tarafında hangi SMTP kitaplığının kullanılacağı, Windows şifre kasasına
+          hangi API ile yazılacağı ve uygulama şifresiyle gerçek bir gönderim:
+          **doğrulanmadı**, ölçülmedi.
 
 > **Senden istenen:** çıktı ekranları için **örnek fotoğraf** — hangi çıktı
 > biçimini istediğini gösteren bir görüntü, `docs/Örnek Fotolar/` altına.
@@ -1182,15 +1214,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Makine: 4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart, 27 inç ekran,
       1920×1080 (kullanıcı). Exe orada açılıyor (tuzak 106). 4 GB'ta öneri aramasının
       worker'ları ölçülmedi (aşağıdaki ölçüm maddesi).
-- [ ] **Babanın Windows ekran ölçeği %100 mü, %125 mi? (2026-10-08)** Ayarlar →
-      Ekran → Ölçek. **Cevap bekliyor:** büyük ihtimalle %100, kesin değil (baba,
-      2026-10-08). Babanın ayarı programa göre değiştirilmez: program %100'de de
-      %125'te de düzgün görünmeli, bugünkü %125 kutuları korunur. %125 ise sayfa 1536 CSS pikselde koşar, Sığdır'ın bilinen
-      kırpılması orada ([WORKLOG.md](WORKLOG.md) "Bilinen kusurlar"), ve E2E'ye bir
-      "%125" projesi eklenir. Bugün varsayılan pencere 1920×1080, %125 yalnız
-      `e2e/gorunum.spec.ts`'te iki kutuda ölçülüyor.
+- [x] **Babanın Windows ekran ölçeği — CEVAPLANDI (2026-10-09): %100, kesin.**
+      Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün
+      görünmeli, bugünkü %125 kutuları (`e2e/gorunum.spec.ts`) korunur. Ayrı bir
+      "%125" E2E projesi gerekmiyor.
 - [ ] **Babanın exe'si hangi sürüm? (2026-10-08)** Ayarlar → Hakkında'da yazıyor;
-      baba orada gördü, numara henüz öğrenilmedi. Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
+      son sürüm olmalı (kullanıcı, 2026-10-09; **doğrulanmadı**, numara görülmedi). Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
       `ders-programi` adresinden soruyor, v2.0.3 ve sonrası `Mozaik`'ten; depo adı ya
       da görünürlüğü bir gün değişirse hangi sürümün güncellenebilir kalacağını bu
       belirler (DECISIONS 2026-10-08, depodaki gerçek veri).
@@ -1198,23 +1227,25 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kullanıyor** (`Kur.cmd` değil). Kurulumun PowerShell betikleri hiçbir testte
       çalıştırılmıyor ([TESTPLAN.md](TESTPLAN.md), "Test edilemeyenler"), ama babanın
       yolu o değil.
-- [ ] **Öğretmenler programlarına Eyotek'ten mi bakıyor? (2026-10-08, B3.8)** Web'deki
-      öğretmen menüsünden ya da Eyotek'in mobil uygulamasından. Eyotek'e gönderme
-      bırakılırsa ne kaybedildiğini bu söyler.
+- [x] **Öğretmenler programlarına Eyotek'ten mi bakıyor? — CEVAPLANDI (2026-10-09):
+      genelde Eyotek'ten.** Bu yüzden B3.8'de Eyotek'e gönderme e-postadan önce.
 - [ ] **Eyotek'e gelen program öğretmene bir bildirim olarak gidiyor mu? (2026-10-08,
       B3.8)** Push ya da SMS.
-- [ ] **Turtek'e soru: Eyotek'e dışarıdan (Excel vb.) ders programı yüklenebiliyor mu?
-      (2026-10-08, B3.8)** Baba soracak. Herkese açık sayfalarda böyle bir yol yok.
-- [ ] **Baba hangi e-posta hizmetini kullanıyor? (2026-10-08, B3.8)** Gmail, Outlook ya
-      da kurumsal. Exe'den gönderme yolunu (SMTP) bu belirler.
+- [x] **Turtek'e soru — SORULMAYACAK (2026-10-09).** Kullanıcının kararı: "kendimiz
+      çözeriz" (DECISIONS). Yol Eyotek'in kendi arayüzünde aranır (Eyotek turu).
+- [x] **Baba hangi e-posta hizmetini kullanıyor? — CEVAPLANDI (2026-10-09): Gmail.**
+      Gönderme yolunun önerisi B3.8'de.
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
-      küçük bir özellik değil.
-- [ ] **Nöbet var mı?**
+      küçük bir özellik değil. **Babaya sorulmayacak (2026-10-09):** Roboders'teki
+      gerçek verisinde vekil modülünün kullanılıp kullanılmadığı R6'nın Tur 3 ve 4'ünde
+      okunacak (yalnız okuma).
+- [ ] **Nöbet var mı?** Aynı yolla, Tur 3 ve 4'te okunacak.
 - [ ] **Otomatik dizmenin çıktısı KULLANILIR mı?** Yasal olduğu ölçülüyor
       (21 dünyada, her blok `blocker()`'dan geçiyor); *iyi* olduğu ölçülmüyor.
       Sorular: sınıfın günü içinde boşluk (pencere) kalıyor mu, öğretmen okula
       gereksiz gün geliyor mu, günler dengeli mi. Cevaba göre §5 şekillenir.
-- [ ] **"Bu programı kullanır mıydın?"** — asıl soru hâlâ bu.
+- [x] **"Bu programı kullanır mıydın?" — CEVAPLANDI (2026-10-09):** cevabı babanın
+      gerçek bir haftayı Mozaik'te dizdikten sonraki geri bildirimi (§0).
 - [ ] **Müsaitlik hangisinde doğru, Mozaik'te mi Roboders'te mi?** (B5.8, 2026-09-24)
       Roboders KY ile GÇ'yi Cumartesi, AS'yi Pazar sabahı derse koyuyor, Mozaik'te o
       saatler kapalı. Mozaik'teki doğruysa hafta o hâliyle kurulamıyor (kanıtlı), en
@@ -1234,7 +1265,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
         doğru olduğunu yine baba söyleyecek.
       - 2026-09-25 akşam: baba cevabını artık programın içinde verebilir (B5.11). KY'nin
         sorusuna "Olur" ya da "Olmaz" der, program kalanı arar, cevaplar dosyada kalır.
-- [ ] **Roboders'te (ve eskiden aSc'de) hangi kısıtları kullanıyorsun? (B5.3, 2026-09-26; 2026-10-08'de baba bugün Roboders kullanıyor)** Özellikle "Planlama
+- [ ] **Roboders'te (ve eskiden aSc'de) hangi kısıtları kullanıyorsun? (B5.3, 2026-09-26; 2026-10-08'de baba bugün Roboders kullanıyor; 2026-10-09: babaya sorulmayacak, Roboders'teki gerçek verisinde hangi kısıtların dolu olduğu R6'nın Tur 3 ve 4'ünde okunacak)** Özellikle "Planlama
       İlişkileri": iki dersin aynı gün olmaması, art arda olması ya da olmaması, bir dersin
       günün ilk ya da son saatinde olması. Mozaik'te "aynı gün olmasın" artık var (dersin
       sayfasında). Babanın aSc şeridinde düğme görünüyor ama kullandığı bir ekran
@@ -1252,7 +1283,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
          (worker sayısı, ilk öneri, bitiş, çekirdek, tarayıcı).
       "Tek iş parçacığında (yavaş yol)" yazıyorsa worker açılmamış demek (tuzak 136).
 
-### 8c · Babanın gerçek verisi — **v0'ın çıkma şartı**
+### 8c · Babanın gerçek verisi — v0'ın çıkma şartı (sağlandı, 2026-10-09)
 
 > ### 🎯 BÜYÜK KISMI 2026-08-31'DE GELDİ — fotoğraftan
 >
@@ -1307,8 +1338,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       kalacak** (2026-08-24 kararı): branş kısaltmasının aksine bunun "doğru
       cevabı" okuldan okula değişir, ve yanlış bir varsayılan hücreleri
       sessizce kırmızıya boyar
-- [ ] **Baba gerçek bir haftayı Mozaik'te baştan sona kendisi dizsin** → v0'ın
-      çıkma şartı (kod tamam, şart bekliyor; ROADMAP ve DECISIONS 2026-10-08)
+- [x] **Baba gerçek bir haftayı Mozaik'te baştan sona kendisi dizsin — OLDU,
+      v0 BİTTİ (kullanıcı, 2026-10-09).** Geri bildirimi bu denemeden geldi (§0).
+      2026-10-08'deki "bitmedi" kaydı yanlış bilgiye dayanıyordu (DECISIONS 2026-10-09).
 - [ ] Babanın bilgisayarında hız kontrolü
 - [ ] Baskı gerçek kâğıda alınsın (E2E taşma olmadığını gösteriyor ama fiziksel
       çıktıya bakılmadı)

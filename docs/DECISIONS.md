@@ -35,6 +35,33 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · v0 bitti; dünkü "bitmedi" kaydı yanlış bilgiye dayanıyordu
+
+**Ne.** v0'ın çıkma şartı sağlandı: baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
+ve 2026-10-08'de gelen geri bildirimi (daha az yazı ve soru, Eyotek'e ve e-postayla
+gönderme, zebra) o denemeden geldi. [ROADMAP.md](ROADMAP.md) v0'ı bitti sayıyor, TODO
+§8c'deki çıkma şartı maddesi kapandı.
+
+**Eski hâli.** Aşağıdaki 2026-10-08 kaydı "v0 bitmedi, çıkma şartı bekliyor" diyordu.
+O kayıt yanlış bilgiye dayanıyordu: babanın Mozaik'te bir hafta dizdiği bilinmiyordu.
+Kayıt geriye dönük düzeltilmedi, bu kayıt onun yerine geçiyor.
+
+**Gerekçe.** Kullanıcının bilgisi.
+
+### 2026-10-09 · Turtek'e sorulmayacak; B3.8'de Eyotek e-postadan önce
+
+**Ne.** Eyotek'e dışarıdan ders programı yüklemenin yolu Turtek'e sorulmayacak:
+"kendimiz çözeriz" (kullanıcının kararı). Yol Eyotek'in kendi arayüzünde aranır
+(Eyotek turu, salt okunur), bulunamazsa babanın hesabıyla otomasyon karar bekleyen
+bir seçenek olarak kalır ([TODO.md](TODO.md) B3.8). Öğretmenler programa genelde
+Eyotek'ten baktığı için B3.8'de Eyotek'e gönderme e-postadan önce gelir.
+
+**Eski hâli.** 2026-10-08'de §8b'ye "baba Turtek'e soracak" yazılmıştı, ve önce
+Turtek'in resmî bir yolu aranacaktı.
+
+**Gerekçe.** Kullanıcının kararı; öncelik babanın cevabından (öğretmenler Eyotek'e
+bakıyor).
+
 ### 2026-10-08 · Paket ölçütü açılışa çekildi, sorma sırası önce depo ve platform
 
 **Ne.** [CONVENTIONS.md](CONVENTIONS.md) "Hazır çözüm önce" ve [BUILD.md](BUILD.md)

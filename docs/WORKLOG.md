@@ -27,15 +27,16 @@ denetimin on üç kusuru).
 
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
-program). v0'ın kodu tamam, çıkma şartı bekliyor: babanın gerçek bir haftayı
-Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08.
+program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
+geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
+ve 2026-10-09.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda.
 
 **Sıradaki iş.**
-1. Babanın makinesi (Windows 10, 27 inç, 1920×1080): Windows ekran ölçeği, exe'nin
-   sürümü, kurulum yolu, öneri aramasının ölçümü, KY'nin Cumartesi sorusu
-   ([TODO.md](TODO.md) §8b).
+1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
+   sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
+   sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez

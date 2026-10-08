@@ -6,8 +6,8 @@ Sıradaki sürümler, her birinin çıkma şartı ve hâlâ cevabı beklenen sor
 
 Buradaki v0'dan v4'e numaralar özellik kilometre taşları, yayınlanan sürüm
 numarası değil. Yayınlanan son sürüm ve yayın geçmişi
-[CHANGELOG.md](../CHANGELOG.md)'de. İlk beş kilometre taşının kodu tamam. Dördü
-bitti, v0'ın çıkma şartı ise hâlâ bekliyor. Bu dosyada yalnız tek satırlık
+[CHANGELOG.md](../CHANGELOG.md)'de. İlk beş kilometre taşı bitti, v0 dahil
+(2026-10-09). Bu dosyada yalnız tek satırlık
 kayıtları duruyor, o günkü tarifleri [plan-v0-arsiv.md](plan-v0-arsiv.md)'de.
 
 Her kilometre taşının bir çıkma şartı var ve şart sağlanmadan sonrakine
@@ -16,20 +16,16 @@ ucuz ya da ötekine önkoşul olması, ve o gerekçe değişirse sıra da deği�
 Buradaki tarif bir sürümün niçinini tutar, işin kendisi [TODO.md](TODO.md)'de
 numaralı maddelere bölünür.
 
-## v0 · Elle dizme: kod tamam, çıkma şartı bekliyor
-
-Çıkma şartı: *baba gerçek bir haftayı Mozaik'te baştan sona kendisi diziyor.*
-
-Elle dizmenin kodu çoktan tamam, ama şart sağlanmadı. Babanın gerçek verisi
-fotoğraflardan ve dosyasından geldi ([TODO.md](TODO.md) §8c), ve o veriyle hafta
-ancak bir öneri uygulanınca kuruluyor (§8b'deki müsaitlik sorusu). Babanın kendisi
-bir haftayı Mozaik'te dizmedi.
-Aşağıdaki kilometre taşları bu şartı beklemeden yazıldı ve yayınlandı, yani
-"şart sağlanmadan sonrakine geçilmiyor" kuralı v0'da tutulmadı
-([DECISIONS.md](DECISIONS.md), 2026-10-08).
-
 ## Biten kilometre taşları
 
+- v0, elle dizme. Bitti (kullanıcı, 2026-10-09). Çıkma şartı *baba gerçek bir haftayı
+  Mozaik'te baştan sona kendisi diziyor* idi, ve sağlandı: baba gerçek verisiyle bir
+  haftayı Mozaik'te dizdi, 2026-10-08'de gelen geri bildirimi (daha az yazı ve soru,
+  Eyotek'e ve e-postayla gönderme, zebra; [TODO.md](TODO.md) §0) o denemeden geldi.
+  2026-10-08'de "bitmedi" diye yazılmıştı; o kayıt yanlış bilgiye dayanıyordu
+  ([DECISIONS.md](DECISIONS.md), 2026-10-09). Sonraki kilometre taşları bu şart
+  sağlanmadan yazıldı ve yayınlandı, yani "şart sağlanmadan sonrakine geçilmiyor"
+  kuralı v0'da tutulmadı.
 - v0.5, yapılabilirlik kontrolü, bugünkü Kontrol sekmesi. Bitti.
 - v0.6, zil saatleri, gün seçimi, müsaitlik ve kural kutuları. Bitti, 2026-08-24.
 - v0.7, arayüz elden geçirme, koyu tema ve adımlara bölünmüş kurulum. Bitti.
@@ -160,9 +156,9 @@ yani iki cevabın ikisi de deneniyor.
 **10 · Müsaitlik ne sıklıkla değişiyor? Dönem boyunca sabit mi?** Açık. Sabit
 değilse v3 öne çıkar.
 
-**11 · Elimde babanın gerçek verisi var mı?** Açık, ve v0'ın çıkma şartının
-önkoşulu: babanın bir haftayı Mozaik'te dizebilmesi için onun verisi Mozaik'te
-olmalı. Kalan tek parça ders listesi, [TODO.md](TODO.md) §8c. aSc dosyasının adı biliniyor
+**11 · Elimde babanın gerçek verisi var mı?** Babanın kendisinde var: bir haftayı
+kendi verisiyle Mozaik'te dizdi (2026-10-09, v0 bitti). Geliştirmenin elinde ise
+hâlâ ders listesi eksik. Kalan tek parça ders listesi, [TODO.md](TODO.md) §8c. aSc dosyasının adı biliniyor
 (`15 EYLÜL.roz`), yani bu soru B6.2'deki içe aktarmayla tek adımda kapanabilir.
 
 **12 · Bu proje ne zaman yapılacak?** Cevabı tarihin kendisi: tatilde başlandı,
