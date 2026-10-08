@@ -141,6 +141,23 @@ describe('kimlik — verinin ADRESİ', () => {
   });
 });
 
+describe('exe köprüsü — sayfadaki window.__TAURI__', () => {
+  it('withGlobalTauri açık: köprünün tek kapısı bu bayrak', () => {
+    // platform/desktop.ts finds the exe by `window.__TAURI__.core.invoke`
+    // (`isDesktop`) and sends every Rust command through it. No @tauri-apps
+    // package is installed, so that global exists only because this flag asks
+    // Tauri to put it on the page. Read from desktop.ts, not run: with the flag
+    // off the exe would take the browser route without a word.
+    //
+    // Nothing else would notice. e2e/exe.spec.ts and library.test.ts fake the
+    // bridge by WRITING the very global the code reads, so they stay green with
+    // the flag off; only the real-exe suite, which needs a Linux build, would.
+    //
+    // Measured red: the flag set to false in src-tauri/tauri.conf.json.
+    expect(tauriConf.app.withGlobalTauri).toBe(true);
+  });
+});
+
 describe('güncelleme adresi — manifest ile exe aynı şeyi tanıyor', () => {
   // WHY THIS TEST EXISTS. The repository was renamed `ders-programi` ->
   // `Mozaik`. The prefixes `update.rs` accepts are COMPILED INTO every copy

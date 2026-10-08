@@ -89,7 +89,8 @@ dizmenin yasallığı, belirlenimciliği ve tıkanması, `occupy` ile `vacate`'i
 `place()`'e eşdeğerliği, dünya matrisi ve denetçinin kendisi. Bir varlığın kendi
 haftası ve sayılan gerçekleri, durum özeti, Türkçe katlama, sıralama ve süzme.
 Haftanın bloklara bölünüşü ve ızgaradan geri okunuşu. Sürüm numarası, Tauri kimliği,
-exe penceresi ve güncelleme adresleri (`surum.test.ts`).
+exe penceresi, exe köprüsünün `withGlobalTauri` bayrağı ve güncelleme adresleri
+(`surum.test.ts`).
 
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
 `palette.ts`, `solver.ts`, `relax.ts`, `sat.ts` ve `blocks.ts`'in her dışa aktarılan
