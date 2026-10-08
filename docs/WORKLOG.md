@@ -37,9 +37,14 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
    aramasının ölçümü, KY'nin Cumartesi sorusu ([TODO.md](TODO.md) §8b).
 2. Babanın 1 numaralı isteği: ekranlarda daha az yazı ve soru (TODO §0). DENETIM'in
    KS ve Ö maddelerinin önünde.
-3. Rakip envanteri (TODO §1, R6–R9), Roboders önce. 1 ile paralel, onun ön şartı
-   değil.
-4. Bir sürümden önce `npm run mutasyon`.
+3. Depodaki gerçek veri (fotoğraflar, Roboders PDF'i, tam adlar): karar kullanıcıda,
+   o güne kadar depoya yeni gerçek veri girmez (DECISIONS 2026-10-08).
+4. A turu sırasıyla: A5 (Windows'ta E2E, elle tetiklenen iş), A3 ve A4 (WebKit
+   ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u olan kapta). A1 ve A2 bitti.
+5. Rakip envanteri (TODO §1): Tur 0 bitti. Tur 1'in aSc ve Eyotek web yarısı
+   başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
+   1 ile paralel, onun ön şartı değil.
+6. Bir sürümden önce `npm run mutasyon`.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -57,16 +62,16 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 612 test (2026-09-27) | `npm run kontrol` |
+| Ana E2E süiti | 618 test (2026-10-08) | `npm run test:e2e` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 38 (2026-09-26) | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 39 (2026-10-08) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
 | Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
-| Ana E2E koşusu | 612/612 geçti, süit 7,3 dk `performance` profilinde (2026-09-27) | `npm run kontrol`, zincirin tamamı yeşil |
+| Ana E2E koşusu | 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
@@ -75,6 +80,53 @@ Mozaik'te baştan sona dizmesi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-08 (ikinci yarı) · Belge düzeltmeleri, depodaki gerçek veri, A1–A2 ve Roboders'in Tur 0'ı
+
+**Başlangıç.** `main` 87e3f55'teydi, ağaç temizdi. Push ve etiket yok. Roboders açılmadı.
+
+**Kullanıcının kararları ve bilgileri** (DECISIONS 2026-10-08): "aSc'nin yarısı" ölçüsü
+kalktı, hedef her iyi özelliğin babaya yeni yazı ya da soru eklemeden daha iyisi.
+Babanın Windows'u 10, ekranı 27 inç ve 1920×1080, Windows ölçeği bilinmiyor (§8b'de soru).
+Linux paketi yalnız kullanıcı için, yalnız rpm, kendini güncelleme yok, `update.rs` ve
+`surum.json`'a dokunulmaz. Roboders görüntüleri yalnız `scratch/`'te. Depodaki gerçek
+veri sorusuna karar verilene kadar depoya yeni gerçek veri girmez.
+
+**Ne yapıldı, commit commit.**
+- f4f0c7d: 0b'nin dört belge düzeltmesi.
+- c0af076: TESTPLAN'a "Test edilemeyenler" tablosu (A1).
+- db40d8b: `page.pdf` kullanan sekiz test ve `kayma.spec.ts` başka motorda atlanıyor
+  (A2). Tek proje Chromium olduğu için 612/612, hiç atlama yok. Atlamanın başka motorda
+  tetiklendiği henüz görülmedi (A3'te görülecek).
+- 6907789: aSc envanterine hiçbir belgede geçmeyen 94 görüntünün dizini. Üç yardımcı
+  ajan baktı, biri elle doğrulandı. 93'ü demo, biri belirsiz, gerçek okul dosyası yok.
+  Biri (`karsilastirma-dosya-sec`) turu yapanın kişisel klasör adlarını gösteriyor.
+- e2015cc: Roboders'in salt okunur araçları ve kanıtı (Tur 0). Testin ilk koşusu
+  korumanın kendisinde bir delik buldu: sayfadan çıkarken giden istek `context.route`'u
+  atlıyor (tuzak 144, TESTFINDINGS). Sayfanın içinde bir katman eklendi. Mutasyonla
+  sınandı; yaşayan iki mutantın sebebi ölçüldü.
+
+**C · depodaki gerçek veri.** Analiz sohbette verildi, kullanıcının kuralı gereği dosyaya
+yazılmadı. Karar kullanıcıda.
+
+**Koşulan testler.**
+- `npx vitest run`: 43 dosyada 1373, hepsi geçti (0b'den sonra).
+- `npx vitest run src/docs.test.ts`: her commit'ten önce, 17/17.
+- `npm run tipler`: temiz.
+- `npm run test:e2e`: 612/612 (7,5 dk, A2'den sonra) ve 618/618 (9,4 dk, Tur 0'dan sonra).
+  Aradaki sürenin farkı ölçülmedi.
+- `npx playwright test e2e/roboders-koruma.spec.ts`: yedi mutasyonla birlikte.
+- `npx knip`: bulgu yok. `npx prettier --check`: değişen dosyalar temiz.
+- `node --check` üç betikte. `giris.mjs --sil` ve oturumsuz `gez.mjs` koşuldu, ikisi de
+  Roboders'e gitmeden çıktı.
+
+**Koşulmayan testler.**
+- `giris.mjs` ve `gez.mjs`'in Roboders'e giden yolu: kullanıcının "başla" demesini bekliyor.
+- `npm run kontrol` bütün hâliyle: site, çözücü stresi ve boyut bu yarıda koşulmadı. Ürün
+  kodu (`src/`) değişmedi.
+- `npm run mutasyon`, `npm run exe:e2e`, `npm run ekran`: ürün kodu ve exe değişmedi.
 
 ---
 
