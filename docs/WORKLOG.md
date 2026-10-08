@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-08.
+Son güncelleme: 2026-10-09.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -41,12 +41,14 @@ ve 2026-10-09.
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
-4. A turu sırasıyla: A3 ve A4 (WebKit ölçümü, `test:webkit`), A6 (rpm, kendi HOME'u
-   olan kapta). A1, A2 ve D (GitHub Actions; A5 onun içinde) bitti. `haftalik.yml`'nin
-   Windows E2E'si henüz hiç koşmadı: ilk koşusu ölçülüp push'ta koşup koşmayacağına
-   karar verilecek. Bundan sonra iş `main`'e itilir ve CI'ın sonucu `gh run view` ile
-   okunur (CLAUDE.md, "Push ve CI").
-5. Rakip envanteri (TODO §1): Tur 0 bitti. Tur 1'in aSc ve Eyotek web yarısı
+4. A turu bitti: A1, A2, D (GitHub Actions), A3 ve A4 (`npm run test:webkit`), A6 (rpm,
+   kapta). A7 (Linux işi `surum.yml`'de) kullanıcının kararında. Kullanıcının onayını
+   bekleyen üç bulgu: Windows'ta Sığdır kırpıyor (B7.22), haftalık Windows işinde öneri
+   aramasının iki testi ayrılsın (B7.23), mutasyon 2026-09-24'ten beri koşamıyor (B7.24).
+   B7.20'nin (Dependabot) analizi sohbette, birleştirme yok. Bundan sonra iş `main`'e
+   itilir ve CI'ın sonucu `gh run view` ile okunur (CLAUDE.md, "Push ve CI").
+5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b (otomatik mod) bitti. Eyotek turunun planı
+   sohbette, onay bekliyor. Tur 1'in aSc ve Eyotek web yarısı
    başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
    1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
@@ -77,6 +79,9 @@ ve 2026-10-09.
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
 | Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 7,9 ve 8,2 dk; işlerin toplamı 32,4 ve 34,1 runner dakikası, en uzun iş `e2e-arama` 425–440 s (2026-10-08) | `gh run view 37846839319`, `37848823362` |
+| Ana E2E, Windows (`haftalik.yml`) | 614/618, E2E adımı 20,3 dk, iş 28 dk; 2 kararsız, 2 kırmızı (Sığdır) (2026-10-09) | koşu 37851532351 |
+| Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
+| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09) | `npx --yes @tauri-apps/cli@^2 build --bundles rpm` |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
@@ -86,6 +91,47 @@ ve 2026-10-09.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-09 · Belgeler, haftalık koşu, B7.20 analizi, A3/A4, A6 ve Tur 0b
+
+**Başlangıç.** `main` 428cfa7'deydi, yeşil. Git yapılandırması değişmemişti: push'lar
+komuta yazılmış tek seferlik bir SSH adresiyle yapıldı, `origin` HTTPS kaldı.
+
+**Kullanıcının kararları ve bilgileri** (DECISIONS 2026-10-09): v0 bitti, dünkü "bitmedi"
+kaydı yanlış bilgiye dayanıyordu; ölçek %100 kesin; exe son sürüm olmalı (doğrulanmadı);
+öğretmenler programa Eyotek'ten bakıyor, B3.8'de Eyotek önce; Turtek'e sorulmayacak;
+baba Gmail kullanıyor; vekil, nöbet ve kısıtlar Roboders'teki veriden okunacak.
+
+**Ne yapıldı, commit commit.**
+- 4a6dcb6: belgeler (yukarıdakiler, B3.8'in Gmail önerisi Google'ın resmî sayfalarından,
+  ölçülmeyenler "doğrulanmadı").
+- `haftalik.yml` elle tetiklendi (37851532351): Windows E2E 614/618, mutasyon başlamadan
+  düştü. Hiçbiri düzeltilmedi.
+- c45eb13 (A4): `playwright.webkit.config.ts`, `npm run test:webkit`. A3'ün ölçümü
+  Playwright'ın kabında: bu Fedora'da WebKit'in Ubuntu kitaplıkları eksik, sisteme paket
+  kurulmadı. İlk kap komutu `:Z` ile depo klasörünün SELinux etiketini değiştirdi;
+  `restorecon -RF` ile geri alındı (kalan `container_file_t` sıfır), sonrakiler
+  `label=disable` ile.
+- 995d696: haftalık koşunun bulguları (TESTFINDINGS, B7.22–B7.24).
+- A6 (commit'siz): rpm derlendi (izlenen hiçbir dosya değişmedi), kendi HOME'u olan bir
+  Fedora 44 kabında kuruldu ve açıldı; kaba yalnız rpm bağlandı. Uygulama açılışta yalnız
+  `~/.local/share/com.dersprogrami.arac`'a yazdı. Gerçek `~/Documents/Ders Programı`'nın
+  dört dosyasının sha256'sı, boyutu ve zamanı öncesi ve sonrası aynı.
+- 79aaf6d: Tur 0b, otomatik mod. Roboders'e gidilmedi.
+
+**Koşulan testler.** Belge kapısı her commit'ten önce (17/17). `surum.test.ts`,
+`surumNotu.test.ts`. Tipler, lint, knip, biçim. `roboders-koruma.spec.ts` (11/11) ve
+otomatik modun on üç mutasyonu. WebKit'te ana süit (kapta). CI: 4a6dcb6 ve 995d696 yeşil;
+`haftalik.yml` bir kez.
+
+**Koşulmayan testler.** Yerelde tam Chromium E2E (CI'da koştu). Exe süiti, `ekran`.
+Mutasyon yerelde (CI'da başlamadan düştü, sebebi B7.24).
+
+**Açılan sayfalar.** Google'ın üç yardım sayfası (uygulama şifreleri, Gmail istemci
+ayarları, gönderme sınırları), GitHub'ın Node 20 duyurusu, GitHub API'si (PR'lar,
+action'ların `action.yml` ve sürüm notları). Roboders ve Eyotek açılmadı.
 
 ---
 
