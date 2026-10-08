@@ -30,6 +30,16 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# The two E2E tests that start the suggestion search (tam-dolu-kurs). The search
+# opens its own workers, so on a four-core runner beside three other Playwright
+# workers it races its own waits: the first CI run (2026-10-08) lost the second
+# one that way, and it passed alone in 28 s. They run in `e2e-arama`, one at a
+# time, and nowhere else. Picked by title, because a tag in the title pushes the
+# line past the formatter's width; a renamed title turns `e2e-arama` red with
+# "No tests found", so a test cannot silently drop out.
+env:
+  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor'
+
 jobs:
   denetim:
     runs-on: ubuntu-latest
@@ -58,9 +68,7 @@ jobs:
       - name: Boyut
         run: npm run boyut
 
-  # Ana E2E süiti, üç parça. En uzun test (süitin duvar süresinin yarısı) burada
-  # değil, kendi işinde koşuyor: dört çekirdekli bir runner'da üç başka worker'ın
-  # yanında kendi beklemeleriyle yarışırdı.
+  # Ana E2E süiti, üç parça; öneri aramasını başlatan iki test hariç (yukarıda).
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -80,7 +88,7 @@ jobs:
       - name: E2E ${{ matrix.parca }}/3
         run: >-
           npx playwright test --shard=${{ matrix.parca }}/3
-          --grep-invert "kurulamayan haftada yolları söylüyor"
+          --grep-invert "$ARAMA_TESTLERI"
           --reporter=blob,list --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
@@ -93,10 +101,7 @@ jobs:
           path: blob-report/
           retention-days: 7
 
-  # Başlığıyla seçiliyor, çünkü başlığa bir etiket eklemek satırı biçimin
-  # sınırından taşırıyor. Başlık değişirse bu iş "No tests found" ile kırmızıya
-  # döner, yani test sessizce kaybolmaz.
-  e2e-uzun:
+  e2e-arama:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -108,9 +113,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npx vite build
-      - name: E2E, uzun test yalnız
+      - name: E2E, öneri aramasının iki testi, sırayla
         run: >-
-          npx playwright test --grep "kurulamayan haftada yolları söylüyor"
+          npx playwright test --grep "$ARAMA_TESTLERI" --workers=1
           --reporter=blob,list --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
@@ -119,7 +124,7 @@ jobs:
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: blob-uzun
+          name: blob-arama
           path: blob-report/
           retention-days: 7
 
@@ -150,7 +155,7 @@ jobs:
   # Kırmızıda parçaların raporu tek bir HTML'de, izleriyle.
   rapor:
     if: failure()
-    needs: [e2e, e2e-uzun]
+    needs: [e2e, e2e-arama]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -173,7 +178,7 @@ jobs:
 
   site:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [denetim, e2e, e2e-uzun, e2e-ek]
+    needs: [denetim, e2e, e2e-arama, e2e-ek]
     permissions:
       contents: read
       pages: write

@@ -26,6 +26,19 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-08 · GitHub Actions `ci.yml`, ilk koşu (37845676686) · `otomatik.spec.ts:202` "durdurulan öneri araması…"
+Bulgu: İlk CI koşusunda altı işin beşi yeşil, `e2e (2)` kırmızı: bu test parçanın
+içinde, üç başka worker'ın yanında, "Nasıl kurulacağı aranıyor" cümlesini 60 s'de
+göremedi. `scripts/kararsiz.mjs` aynı işte bir kez daha koştu: tek başına 28,5 s'de
+geçti, yani kararsız. Yerelde 8 çekirdekte süit içinde 24 s sürüyor. Sebep uzun
+testle aynı: öneri araması kendi worker'larını açıyor ve 4 çekirdekli runner'da
+Playwright'ın öteki worker'larıyla yarışıyor. Site işi atlandı ("skipped").
+Tür: test kusuru (yük altında kararsız), ürün değil.
+Ne yapıldı: öneri aramasını başlatan iki test (bu ve "kurulamayan haftada yolları
+söylüyor") parçalardan çıktı; `e2e-uzun` işi `e2e-arama` oldu ve ikisini `--workers=1`
+ile sırayla koşuyor. Süre sınırlarına dokunulmadı.
+Kalıcı kural: yok. Gerekçe `ci.yml`'nin `ARAMA_TESTLERI` satırının üstünde.
+
 ### 2026-10-08 · GitHub Actions `pr.yml` ve yerel `TZ=UTC` · `src/folder.test.ts` "YEREL günü kullanıyor"
 Bulgu: `pr.yml` 2026-09-26'dan beri dokuz koşunun dokuzunda kırmızıydı ve kimse
 görmedi. Üç koşunun günlüğü okundu, üçünde de sebep aynı test: `expected '2026-08-26'
