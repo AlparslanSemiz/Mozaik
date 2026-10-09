@@ -1219,15 +1219,18 @@ src/
 
 **Eski yol → yeni yol.** Paket turları bu sırayla, her biri `main`'den açılan kendi dalında
 ve `.claude/skills/paket-turu` ile. Tabloda satırı olmayan bir dosya taşınmaz, sorulur.
+Sıra değişti (2026-10-09 gece, Alp'in kararı): 4 (`platform/storage`), 5 (`platform/exe`) ve
+6 (`pure/io`), özellik oturumunun `fix/veri-kaybi` dalı (VK1, VK2) `main`'e girene kadar
+bekler, çünkü o düzeltmeler aynı dosyalara dokunuyor. Sıradaki 7 (`platform/search`).
 
 | Sıra | Paket | Eski | Yeni | Not |
 |---|---|---|---|---|
 | 1 | lang | `leaf/lang/*` | yerinde, `leaf/lang/index.ts` eklendi | bitti (3c769a0) |
 | 2 | lists | `ui/setup/{Paste,Summary}` | `ui/lists/` | bitti (0d97c82, 3f1944e) |
 | 3 | platform/prefs | `platform/{theme,printOptions,programColor,toolState}` | `platform/prefs/` | bitti (`refactor/prefs`); RF20 yapılmadı, RF11'e bağlı |
-| 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | |
-| 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | |
-| 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | |
+| 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
+| 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
+| 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
 | 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | |
 | 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | RF8, RF9 |
 | 9 | adım 5 | `ui/Ribbon.tsx`, `ui/{ListTools,useRowOrder,CapacityRows,AddPanel}` | `ui/ribbon/`, `ui/lists/` | RF10, RF12, RF11 |
@@ -1240,14 +1243,15 @@ bir paketin içine) ve `paket-ici-kok` (bir katmanın ya da `src/`'nin kökünde
 içine): dışarıdan bir pakete yalnız `index`'i üstünden girilir, testler muaf (ac45672).
 Yeni bir paket klasörü kurala kendiliğinden girer, kuralın değişmesi gerekmez.
 
-**Taşıma yöntemi.** Her paket iki commit: (1) yalnız `git mv`, import yolları ve belge
-yolları; derlenen dosyanın sha'sı, commit kimliği dışında, aynı HEAD'de commit'ten önce ve
-sonra derlenerek aynı çıkmalı (tuzak 114); (2) `index.ts` ve import'ların ona dönmesi; sha
-değişir, boyut ve worker testleri (`temel.spec.ts`, `otomatik.spec.ts`) bakılır. Biçim
-düzeltmesi ayrı commit. Derin import kuralı yeni klasörü doğduğu anda kapsıyor, yani (1)
-`sinir`'de dışarıdan gelen her runtime import için kırmızıdır; bu beklenen ve commit
-mesajında sayısıyla yazılır, dal (2)'den önce itilmez. `index` bu iki adımı birleştirmeye
-izin vermiyor: derlenen dosyayı değiştiriyor (`platform/prefs`'te +6 bayt, 2026-10-09).
+**Taşıma yöntemi.** Taşıma, `index.ts` ve import'ların ona dönmesi tek commit (2026-10-09
+gece, Alp'in kararı). Bayt aynılığı `index` eklenmeden önce çalışma ağacında ölçülür: yalnız
+`git mv` ve yolların derlemesi, aynı HEAD'de taşımadan öncekiyle (commit kimliği gömülü
+olduğu için aynı HEAD, tuzak 114); sonucu commit mesajına yazılır. Sonra `index` ve
+import'lar; derlenen dosya değişir (`platform/prefs`'te +6 bayt, modül sırası), boyut ve
+worker testleri (`temel.spec.ts`, `otomatik.spec.ts`) bakılır. Kırmızı bir ara commit
+bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız `git mv`'li hâl
+`sinir`'de kırmızıdır. Biçim düzeltmesi ayrı commit. Eski yöntem iki commit'ti;
+`platform/prefs` turu onunla yapıldı ve taşıma commit'i `sinir`'de 13 ihlalle kırmızı kaldı.
 
 **Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
 
@@ -1379,7 +1383,8 @@ bölüme yazıldı, RK13 kapandı, `platform/prefs` paketi (WORKLOG 2026-10-09,
 `refactor/prefs`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
-yeni dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/storage`. Adım 2'nin süre ölçümleri temiz koşulda
+yeni dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/search` (`relaxPool`,
+`relaxWorker`, `relaxLog`, `useSolver`); 4, 5 ve 6 `fix/veri-kaybi`'yi bekliyor. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 

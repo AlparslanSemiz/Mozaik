@@ -65,7 +65,8 @@ düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
 8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/storage`. Adım 2: RF3
+   dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/search` (storage, exe ve io
+   `fix/veri-kaybi`'yi bekliyor). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
