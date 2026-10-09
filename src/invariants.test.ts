@@ -36,9 +36,12 @@ import type { Day, Id, State } from './leaf/types';
 // Every property here runs the solver on each generated world, and the default
 // 5 s per test is a speed claim about the machine. Measured 2026-10-08 with the
 // widened generator below, in this machine's low-power profile: the file took
-// about 30 s and the half-block property 5,2 s, red on the timeout alone (the
+// 31,8 s and the half-block property 5,0 to 5,3 s in three runs, red on the
+// timeout alone (11,4 to 13,9 s for the file in the performance profile; the
 // old generator's remapDays property had already timed out once under load).
-// This is a ceiling for a search that hangs, not a budget.
+// The duration follows the power profile and whatever else runs, our own
+// background jobs included (TRAPS 118), so 60 s is about twice the slowest
+// measured file: a ceiling for a search that hangs, not a budget.
 vi.setConfig({ testTimeout: 60_000 });
 
 // ------------------------------------------------------------------ üreteçler
