@@ -17,8 +17,12 @@ function baskaPencere(key: string | null, newValue: string | null = 'yeni') {
 describe('başka pencere · yalnız bu pencerenin tuttuğundan FARKLI veri kilitliyor', () => {
   it('yedek, tercih, açık olmayan plan ve aynı değer kilitlemiyor; açık planın yeni değeri kilitliyor', () => {
     // This window holds plan "1" as '{"a":1}' and the plan list as 'liste'.
-    const held = (key: string) =>
-      key === 'ders-programi' ? '{"a":1}' : key === LIBRARY_KEY ? 'liste' : undefined;
+    const held = (key: string, value: string | null) =>
+      key === 'ders-programi'
+        ? value === '{"a":1}'
+        : key === LIBRARY_KEY
+          ? value === 'liste'
+          : undefined;
     let haber = 0;
     const birak = watchOtherWindows(held, () => (haber += 1));
 

@@ -21,7 +21,8 @@ import { type Box, reduce } from '../pure/undo';
 import { loadPlan, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../pure/entities';
-import { LIBRARY_KEY, planKey } from '../pure/library';
+import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
+import { parseState } from '../pure/parseState';
 import { readLibrary, writeLibrary } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../leaf/types';
@@ -129,7 +130,6 @@ export function useStore() {
     return () => window.removeEventListener('beforeunload', flush);
   }, [box.present, box.planId, write]);
 
-
   // --------------------------------------------------------- the plan library
   //
   // Every one of these first FLUSHES the plan being left. The debounce is 400 ms
@@ -168,15 +168,26 @@ export function useStore() {
 
   // Another window changed our data: this one stops writing, and says so.
   // What this window holds is read through a ref, so the listener is set once.
+  // Both sides go through the same reader before they are compared
+  // (otherWindow.ts says why the text alone gave false alarms).
   const held = useRef({ box, library: plans.library });
   held.current = { box, library: plans.library };
   useEffect(
     () =>
       watchOtherWindows(
-        (key) => {
+        (key, value) => {
           const now = held.current;
-          if (key === planKey(now.box.planId)) return JSON.stringify(now.box.present);
-          if (key === LIBRARY_KEY) return JSON.stringify(now.library);
+          if (key === planKey(now.box.planId)) {
+            const read = (text: string | null) =>
+              JSON.stringify(text === null ? null : parseState(text));
+            return read(value) === read(JSON.stringify(now.box.present));
+          }
+          if (key === LIBRARY_KEY) {
+            return (
+              JSON.stringify(parseLibrary(value)) ===
+              JSON.stringify(parseLibrary(JSON.stringify(now.library)))
+            );
+          }
           return undefined;
         },
         () => {

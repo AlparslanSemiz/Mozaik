@@ -28,20 +28,24 @@ export function writesClosed(): boolean {
 }
 
 /**
- * Calls `onClosed` once, the first time another window writes a value this
+ * Calls `onClosed` once, the first time another window writes data this
  * window does not hold.
  *
- * `held(key)` answers for the keys that matter, with the text this window
- * would write there: the open plan's key and the plan list. Any other key
+ * `same(key, value)` answers for the keys that matter, the open plan's key and
+ * the plan list: does `value` say what this window holds? Any other key
  * (`undefined`) does not count. A backup rotation is nobody's work, a
  * preference is not a plan, and a plan that is not open here is read fresh
- * from storage when it is opened. The VALUE is compared and not only the key:
- * a second tab on a fresh profile writes the same empty plan the first one
- * holds, and that is not a change (measured: without the comparison the first
- * tab's opening write locked the second).
+ * from storage when it is opened.
+ *
+ * The MEANING is compared, not the key and not the text. A second tab writes
+ * what it read as soon as it opens, and that is not a change. Two measured
+ * false alarms: comparing keys alone, the first tab's opening write locked the
+ * second; comparing text, the second tab's opening write locked the first in
+ * CI, because reading a saved plan fills an empty subject list with the
+ * built-in one (`parseState`) and the text grew from 957 to 1198 characters.
  */
 export function watchOtherWindows(
-  held: (key: string) => string | undefined,
+  same: (key: string, value: string | null) => boolean | undefined,
   onClosed: () => void,
 ): () => void {
   const listen = (e: StorageEvent) => {
@@ -49,10 +53,7 @@ export function watchOtherWindows(
     // No `storageArea` check: this program keeps nothing in sessionStorage,
     // so every `storage` event it can receive is about localStorage.
     // `key === null` is `localStorage.clear()` in the other window.
-    if (e.key !== null) {
-      const mine = held(e.key);
-      if (mine === undefined || mine === e.newValue) return;
-    }
+    if (e.key !== null && same(e.key, e.newValue) !== false) return;
     closed = true;
     onClosed();
   };

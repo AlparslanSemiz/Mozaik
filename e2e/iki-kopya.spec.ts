@@ -11,7 +11,7 @@
 // yüklendi." over it. Now the failure is a red strip.
 
 import { expect, test, type Page } from '@playwright/test';
-import { FILE, answerDialog, mainList, open, openSetup, savedText } from './helpers';
+import { FILE, answerDialog, mainList, open, openSetup, savedText, settledText } from './helpers';
 
 const BASKA = '.save-warning:has-text("başka bir pencerede")';
 const DOLU = '.save-warning:has-text("kaydedilemedi")';
@@ -22,15 +22,22 @@ async function ornekYukle(page: Page) {
   await expect.poll(() => savedText(page), { timeout: 5_000 }).toContain('Örnek Kurs');
 }
 
-/** Both tabs open and settled: their opening writes are behind them. */
+/**
+ * Both tabs open and settled: their opening writes are behind them.
+ *
+ * B opens AFTER A's opening write, the usual order in life and the one CI
+ * produced: B then reads A's plan through `parseState`, which fills the empty
+ * subject list, and writes back a longer text that means the same plan. That
+ * must not lock A (it did, in CI run 37976328335, when the text was compared).
+ */
 async function ikiSekme(page: Page) {
   const a = page;
   await open(a);
+  await settledText(a);
   const b = await a.context().newPage();
   await open(b);
-  // Each tab writes what it read 400 ms after opening. Those are the same
-  // bytes, so neither tab hears about the other's; past that, nothing of
-  // either is pending.
+  // B writes what it read 400 ms after opening; past that, nothing of either
+  // tab is pending.
   await a.waitForTimeout(800);
   await expect(a.locator(BASKA)).toHaveCount(0);
   await expect(b.locator(BASKA)).toHaveCount(0);
