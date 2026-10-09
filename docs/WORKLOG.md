@@ -38,8 +38,9 @@ CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okun
 tam `npm test` ve `kontrol`.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-`refactor/yapi` dalında yürüyor ve davranış değiştirmiyor: adım 0 ve 1 bitti
-(2026-10-09), dal `main`'e birleşmedi ve itilmedi ([TODO.md](TODO.md) §8k).
+davranış değiştirmiyor: adım 0 ve 1 bitti, T1 ile T2a `main`'de, `refactor/lists` dalı
+T2b'yi (`ui/lists/index.ts`) ve derin import kuralını (`paket-ici-alan`, `paket-ici-kok`)
+getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -59,8 +60,9 @@ tam `npm test` ve `kontrol`.
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
-7. Refactor adım 2: RF3 (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve
-   gecelik mutasyon tabanı, `refactor/yapi` dalında (TODO §8k).
+7. Refactor: paket turları `main`'den yeni dallarda, `.claude/skills/paket-turu` ile;
+   önce §8k'ye hedef ağaç ile eski yol → yeni yol tablosu yazılır. Adım 2: RF3 (`relax.ts`
+   ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı (TODO §8k).
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -94,7 +96,7 @@ tam `npm test` ve `kontrol`.
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 158 997 bayt, brotli 279,46 kB (2026-10-09, `refactor/lists`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -104,6 +106,47 @@ tam `npm test` ve `kontrol`.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-09 (gece) · Refactor, `refactor/lists` dalı: T2b ve derin import kuralı
+
+**Başlangıç.** Dal `main`'den (`d3178dc`) açıldı, takibi kaldırıldı. T1 (3c769a0) ve
+T2a (0d97c82) `main`'deydi. Ağaçta önceki oturumdan yarım kalan T2b vardı (6 değişmiş
+dosya, 1 yeni), Alp onu stash'ten geri koymuştu. Oturum boyunca `main` ilerlemedi.
+
+**Ne yapıldı, commit commit** (dal commit'leri konusuyla):
+- "Yapı: ui/lists/ tek giriş noktasından (T2b)": `ui/lists/index.ts` `Paste` ile
+  `Summary`'yi dışa açıyor, `lessons/index.tsx` ve `setup`'ın dört dosyası ona döndü.
+  İçerik commit'i, derlenen dosya değişiyor: 1 158 997 bayt, brotli 279,46 kB.
+- "Sınır: bir paketin içine yalnız index'inden girilir": `.dependency-cruiser.cjs`'e
+  `paket-ici-alan` (başka bir paketten) ve `paket-ici-kok` (bir katmanın ya da `src/`'nin
+  kökünden). Taslağın tanımı TODO'da değil, 2026-10-09 sabahki plan oturumunun
+  transkriptindeydi; oradan alındı, `paket-ici-kok`'un `from`'u `src/` kökünü de
+  kapsayacak kadar genişledi (`worlds.ts`). Tek desenli hâli (`(?:[^/]+/)?`)
+  dependency-cruiser "unsafe regular expression" diye reddetti, iki desenli bir dizi oldu.
+  Bugün 0 ihlal. ARCHITECTURE'ın klasör ve sınır bölümü ile BUILD'in `sinir` satırı aynı
+  commit'te.
+
+**Kural nasıl kanıtlandı.** `scripts/agir.sh scripts/mutasyon-kaniti.sh --liste … -- npm
+run sinir`, kontrol koşusu yeşil, dört satırın dördü tuttu:
+
+| Satır | Değişiklik | Beklenen | Sonuç |
+|---|---|---|---|
+| `alan-lessons-Paste` | `lessons/index.tsx` `../lists/Paste`'i doğrudan alıyor | kırmızı | kırmızı, `paket-ici-alan` |
+| `kok-names-kisaltmalar` | `leaf/names.ts` `./lang/kisaltmalar`'dan alıyor | kırmızı | kırmızı, `paket-ici-kok` |
+| `kok-Root-en` | `ui/Root.tsx` ayrıca `../leaf/lang/en`'i alıyor | kırmızı | kırmızı, `paket-ici-kok` |
+| `index-acik` | `ui/Root.tsx` `../leaf/lang/index` yazıyor | yeşil | yeşil |
+
+İlk koşuda adlar `/` taşıyordu ve üç satır test koşmadan "yesil" sayıldı (RK13, TODO §8k).
+
+**Koşulan testler.** T2b'den önce: `npm run hizli` 41 dosyada 1265/1265, `tipler`,
+`sinir`, `lint` (bilinen tek uyarı, RK12), `knip`; kilit altında `vite build`, `boyut`
+(279,46 kB, eşik 289 kB) ve `temel.spec.ts` ile `otomatik.spec.ts` 49/49. Kuraldan önce:
+`npm run hizli` 1265/1265, `docs.test.ts` 19/19, `sinir` 0 ihlal. `npm run kontrol` kilit
+altında bu girdinin commit'inin üstünde koşuldu, sonucu oturumun raporunda.
+
+**Koşulmayan testler.** Stryker ve `npm run kapsam` (kod saf katmana dokunmadı), `exe:e2e`,
+`exe:test`, `patrol`, `ekran`, süre ölçümü (`temiz-kosul.sh`: kirli, makine prizde
+değil; ölçülmedi).
 
 ## 2026-10-09 (gece) · Hız oturumu, ikinci yarı: B7.26, bölünen öneri testleri, `hizli`, CI matrisi, mutasyon betiği ve çalışma düzeni
 

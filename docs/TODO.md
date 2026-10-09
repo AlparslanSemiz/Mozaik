@@ -1258,6 +1258,13 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       açılır. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
       RF11'de gider.
 
+- [ ] **RK13 `mutasyon-kaniti.sh --liste`'de `/` taşıyan bir ad satırı koşmadan "yesil"
+      sayıyor.** Satırın çıktısı `scratch/mutasyon-kaniti/<ad>.log`'a yönleniyor; ad `/`
+      taşıyınca dosya açılamıyor, bash fonksiyonu hiç çağırmıyor ve 1 dönüyor, 1 de
+      "yesil" demek. Kırmızı beklenen satırda "TUTMUYOR" çıkıyor (güvenli yan), yeşil
+      beklenen satırda sahte bir "tutuyor" çıkar. 2026-10-09'da `refactor/lists`'te üç satır
+      böyle koştu, adlar değişince üçü kırmızı. Düzeltilmedi: dal davranış değiştirmez.
+
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
@@ -1269,10 +1276,21 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 - knip, `/tmp` altındaki geçici bir klonda kullanılmayan bir dosyayı bile bildirmedi:
   orada ölçüm aracı kalibre olmuyor, oradan çıkan "knip yeşil" bir şey kanıtlamaz.
 - `pkill -f <kelime>` o kelimeyi komut satırında taşıyan kendi kabuğunu da öldürür.
+- Bir kuralın taslağı yalnız oturumun transkriptinde kaldı: `paket-ici-alan` ile
+  `paket-ici-kok`'un adı sonraki oturumun görevinde geçiyordu, tanımı ne TODO'da ne
+  scratch'te vardı ve transkriptten bulundu. Paket turu becerisinin istediği hedef ağaç
+  ile eski yol → yeni yol tablosu da aynı durumda (2026-10-09, `refactor/lists`).
 
-**Sıradaki iş (dal).** T1 (`leaf/lang/` için bir giriş noktası), T2 (`ui/setup`'ın `Paste` ve `Summary`'si)
-ve derin import kuralı; adım 2'nin süre ölçümleri temiz koşulda (`scripts/temiz-kosul.sh`):
-`npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon koşusu, dosya başına tahmin.
+**Biten (dal).** T1 (`leaf/lang/index.ts`, 3c769a0), T2a (`Paste` ile `Summary`
+`ui/lists/`'e, 0d97c82), ve `refactor/lists`'te T2b (`ui/lists/index.ts`) ile derin import
+kuralı (`paket-ici-alan`, `paket-ici-kok`, `.dependency-cruiser.cjs`), 0 ihlalle girdi ve
+mutasyonla kanıtlandı (WORKLOG 2026-10-09, `refactor/lists`).
+
+**Sıradaki iş (dal).** Paket turları `main`'den yeni dallarda, `.claude/skills/paket-turu`
+ile. Beceri girdisini bu bölümdeki hedef ağaçtan ve eski yol → yeni yol tablosundan alıyor,
+ikisi burada henüz yok: ilk turdan önce yazılır. Adım 2'nin süre ölçümleri temiz koşulda
+(`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
+koşusu, dosya başına tahmin.
 
 ## §9. Ham notlar
 
