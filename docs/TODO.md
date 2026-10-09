@@ -1445,8 +1445,11 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       ölçüldü (programı açmayan aynı kökenli bir sayfadan okunarak). Veri kaybolmuyor: depo
       tutuyor ve bir sonraki açılış klasörü yazıyor; kaybolan, klasörün kapanış anında güncel
       olması. Exe'de aynı yol Tauri'nin eşzamansız köprüsünden geçiyor, ölçülmedi. Test
-      `klasor.spec.ts`'te "BİLİNEN KUSUR". VK2 ile aynı dosyaya dokunuyor: `fix/veri-kaybi`
-      dalına haber verildi.
+      `klasor.spec.ts`'te "BİLİNEN KUSUR". **Nerede düzeltilecek (kullanıcının kararı,
+      2026-10-09):** `fix/veri-kaybi`'de değil; o dal `main`'e birleştikten sonra `main`'den
+      açılan ayrı bir düzeltme dalında, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda
+      dokunmamalı. `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da
+      aynı kalmalı.
 - [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
