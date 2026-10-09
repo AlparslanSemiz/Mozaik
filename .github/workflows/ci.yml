@@ -30,15 +30,16 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# The two E2E tests that start the suggestion search (tam-dolu-kurs). The search
-# opens its own workers, so on a four-core runner beside three other Playwright
-# workers it races its own waits: the first CI run (2026-10-08) lost the second
-# one that way, and it passed alone in 28 s. They run in `e2e-arama`, one at a
-# time, and nowhere else. Picked by title, because a tag in the title pushes the
+# The three E2E tests that start the suggestion search (two on tam-dolu-kurs,
+# and the worker test on a small world). The search opens its own workers, so
+# on a four-core runner beside three other Playwright workers it races its own
+# waits: the first CI run (2026-10-08) lost the second one that way, and it
+# passed alone in 28 s. They run in `e2e-arama`, one at a time, and nowhere
+# else. Picked by title, because a tag in the title pushes the
 # line past the formatter's width; a renamed title turns `e2e-arama` red with
 # "No tests found", so a test cannot silently drop out.
 env:
-  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor'
+  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor|öneri araması Chromium’da worker’larda koşuyor'
 
 jobs:
   denetim:

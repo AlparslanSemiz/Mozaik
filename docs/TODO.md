@@ -1943,7 +1943,10 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       kapsam altında 402 saniye. 2026-10-09'da `low-power` profilinde 391,6 saniye. Sessiz
       bir pencerede ve `performance` profilinde tek başına ölçülür, TESTPLAN'ın cümlesi
       sayıyla düzelir.
-- [ ] **RK8 Öneri aramasının worker testi CI'da paralel parçada koşuyor. Karar bekliyor.**
+- [x] **RK8 Öneri aramasının worker testi CI'da paralel parçada koşuyor.** Kapandı
+      (2026-10-09): kullanıcının kararıyla test `ARAMA_TESTLERI` listesine girdi, `e2e-arama`
+      işinde öteki ikisiyle sırayla koşuyor. `--list` ile seçim 3, kalan 623, toplam 626.
+      CI'da henüz koşmadı (dal itilmedi).
       `e2e/otomatik.spec.ts`'in "öneri araması Chromium'da worker'larda koşuyor" testi
       (2026-10-09) `ci.yml`'nin `ARAMA_TESTLERI` listesinde değil, yani dört çekirdekli
       bir runner'da öteki Playwright worker'larıyla aynı anda koşuyor. Worker'lar beş

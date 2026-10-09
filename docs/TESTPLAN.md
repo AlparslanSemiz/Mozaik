@@ -17,7 +17,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
-| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan iki test kendi işinde sırayla), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
+| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan üç test kendi işinde sırayla), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı) ve mutasyon. Siteyi kilitlemez |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 
