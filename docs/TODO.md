@@ -1420,8 +1420,10 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 | K9 | VK1 (iki kopya), VK2 (kota) ve `useHttpsScheme`'in sabitlenmesi, düzeltmeleri ve testleriyle `fix/veri-kaybi` dalında; B1 ve B3 o dala geçti |
 | K10 | Yeni WebKit süiti eklenmez (DECISIONS); gerçek exe testleri olduğu gibi |
 
-**Bekleme işareti.** "pure", "platform", "ui": o paketin turu `main`'e birleşmeden başlamaz
-(hedef ağaç §8k'de yazılınca kesinleşir). "—": yollardan bağımsız, hemen.
+**Bekleme işareti** (K4, §8k'nin hedef ağacına ve sıra tablosuna göre, 2026-10-09 gece).
+"Bekler: sıra N" o paket turu `main`'e birleşmeden başlamaz; sıra 4, 5 ve 6 ayrıca
+`fix/veri-kaybi`'yi bekliyor. "—": yollardan bağımsız, hemen. Bir madde turdan önce
+yazıldıysa (TP4 gibi) yollarını o tur taşır.
 
 **Faz 0 · hazırlık**
 - [x] **TP1 Runner'lar ve artefakt aksiyonları sabit, Ubuntu 26.04 kanaryası** (K6). `ci.yml`,
@@ -1444,9 +1446,11 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
       okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
       kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). **Kalan:** paket yolu
-      (`parseBundle` ve arkasındaki `parseState`), TB8'in kararına bağlı.
+      (`parseBundle` ve arkasındaki `parseState`), TB8'in kararına bağlı. Dosya sıra 6'da
+      (`pure/io`) taşınır, yolları o tur değiştirir.
 - [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
-      Stryker listesine. **Bekler: platform.**
+      Stryker listesine. **Bekler: sıra 4** (`platform/storage`: `useStore`, `usePlans`,
+      `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
 
 **Faz 2 · gerçek ortam**
 - [ ] **TP6 Gerçek paket fikstürü, adsız (B6, K2).** En yeni gerçek dosya bir paket (v1,
@@ -1457,7 +1461,7 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 - [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
       `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
 - [ ] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
-      **Bekler: platform** (`desktop.ts`'in yolu).
+      **Bekler: sıra 5** (`platform/exe`: `desktop`, `update`).
 - [ ] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
       kayıtlı Release fikstürü. —
 - [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
@@ -1480,17 +1484,23 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 - [ ] **TP18 Metin bütçesi (B15).** Ekran başına kelime ve diyalog başına soru, taban;
       ilk sayılar PLAN'da (ör. boş proje 82, Program 402, babanın Program'ı 562). —
 - [ ] **TP19 Kabul (B16).** Tık ve soru sayacı, taban, K1–K15 senaryoları. —
-- [ ] **TP20 Bileşen katmanı (B17, K3).** `@vitest/browser`, girdi bileşenleri. **Bekler: ui.**
+- [ ] **TP20 Bileşen katmanı (B17, K3).** `@vitest/browser`, girdi bileşenleri. `LimitBox`,
+      `ColorPick` ve `Field` ağaçta `ui/`'nin kökünde kalıyor (sıra 12 yalnız gerekçesini
+      yazar), `AddPanel` sıra 9'da `ui/lists/`'e gidiyor. **Bekler: sıra 9** (`AddPanel`'in
+      yarısı); köktekiler —.
 
 **Faz 5 · var olanlar**
 - [ ] **TP21 Mutasyon listesi ve sınıflama (C1).** `relax.ts`, `sat.ts`, veri yolu; her
-      hayatta kalan üç sınıfta. **Bekler: pure, platform, ve `ci/mutasyon-parca` (K8).**
+      hayatta kalan üç sınıfta. **Bekler:** `ci/mutasyon-parca` (K8), sıra 10 (`relax.ts` ve
+      `sat.ts`, "pure/relax" paketi; tur stryker listesini aynı commit'te değiştiriyor), sıra 4 ve 6
+      (veri yolu ve okuyucular).
 - [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
       axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölünür. CI'da JSON
       raporu ve 30 günlük kararsız sayacı. —
 - [ ] **TP23 Erişilebilirlik tabanı (C3).** Düzeltmeler `main`'de; burada yalnız `BILINEN`'in
       küçülmesi. —
-- [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: pure.**
+- [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: sıra 10 ve 11**
+      ("pure/relax", "pure/constraints" ve "pure/entities" paketleri; liste o turlarda değişiyor).
 - [ ] **TP25 Bugünkü yazıcının paketi dondurulmuş (C5).** —
 - [ ] **TP26 Gerileme kapısı (C7).** TESTFINDINGS'te her ürün kusuru bir teste bağlı. —
 
