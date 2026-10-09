@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `haftalik.yml` 37914431289 (`main`, 290f55d) · tam mutasyon koşusu 6 saatte iptal
+Bulgu: `mutasyon` işi 09:56'dan 15:57'ye koştu ve GitHub'ın 360 dakikalık iş tavanında
+iptal oldu. Son satırı: 5 639 mutantın 3 645'i denendi (697 hayatta, 26 zaman aşımı),
+geçen ~5 sa 54 dk, Stryker'ın kalan tahmini ~20 sa. Tek koşu, tekrar edilmedi.
+Tür: test kusuru (koşu kendi altyapısına sığmıyor).
+Ne yapıldı: TODO B7.24'e yazıldı, karar kullanıcıda. Düzeltme yapılmadı.
+Kalıcı kural: yok.
+
+### 2026-10-09 · `windows.yml` 37926483350 (`main`, 5aa10d5) · `erisim.spec.ts:116`, "Program, Kontrol ve Çıktı, dolu veriyle"
+Bulgu: 30 s'lik test zaman aşımına düştü, tekrarında (`kararsiz.mjs`) 9,9 s'de geçti. Ana
+süit 627/628. d3178dc'nin Windows koşusu (37964109290) yeşil.
+Tür: test kusuru (kararsız, Windows'ta tek kez).
+Ne yapıldı: bırakıldı, tekrarlanırsa ölçülür.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `ci.yml` 37926483682 (`main`, 5aa10d5) · `invariants.test.ts`, "her öneri denetimden geçiyor", ikinci kez
 Bulgu: aynı değişmez `main`'de bir kez daha 60 s'lik tavanında düştü, dosya 86 s sürdü ve
 işçinin RPC'si yine zaman aşımına uğradı. Test 60 dünyanın 60'ını da bitirmişti (39 öneri

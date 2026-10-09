@@ -727,6 +727,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
       yakalıyor (tuzak 147). Bitti sayılması `haftalik.yml` 37914431289'un tam mutasyon
       koşusunun sonucunu bekliyor.
+      **O koşu bitmedi (TESTFINDINGS 2026-10-09):** 360 dakikalık iş tavanında iptal oldu,
+      5 639 mutantın 3 645'i denenmişti, kalan tahmin ~20 sa. Tam koşu bu işe sığmıyor;
+      seçenekler (parçalara bölmek, artımlı koşu, listeyi daraltmak, yerel koşu) kullanıcıda.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
@@ -952,7 +955,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
       dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
       `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
-- [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
+- [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
       2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
       `t`'si: kusur, üretildi, aşağıdaki ayrı madde; 2026-09-25'te düzeldi, geri çağırım artık
@@ -966,6 +969,12 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       hesap, komut listesi `ui` her değiştiğinde yeniden kuruluyor ama içeriği ona bağlı değil.
       `App.test.tsx:16`'da kullanılmayan bir `eslint-disable` yorumu var, o bir
       `exhaustive-deps` uyarısı değil.
+      **Dördü de kapandı (2026-10-09).** `Commands.tsx` ve `App.test.tsx` refactor dalında.
+      `bakim/refactor-istekleri` dalında `useRowOrder` ölçüldü: kancayı açık tutan bir
+      listede dil İngilizceye geçince tutamağın ipucu Türkçe kaldı
+      (`src/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
+      hâlâ görünmüyordu, sebep yukarıda. `App.tsx`'in üç `toggle`'ı `useCallback` oldu,
+      susturma kalktı.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
       `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
       sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da
@@ -1321,13 +1330,15 @@ düzeltmesi ayrı commit.
       yardım kopyalarında 104 ve 48 (11 dosya), `README.md`'de 10 uzun çizgi; kuralın
       bunları kapsayıp kapsamadığı karar bekliyor (kopyalar kaynak metin, README vitrin ve
       İngilizce). Düzeltilmedi.
-- [ ] **RK12 `npm run lint`'e `--max-warnings 0`.** 2026-10-09'da üç `exhaustive-deps`
+- [~] **RK12 `npm run lint`'e `--max-warnings 0`.** 2026-10-09'da üç `exhaustive-deps`
       uyarısından ikisi kapandı: `Commands.tsx`'te gereksiz `ui` bağımlılığı çıktı (değeri
       hiçbir yerde okunmuyordu), `App.tsx`'te komut listesinin bağımlılığına gerekçeli bir
       susturma kondu (üç `toggle` yalnız listedeki `theme`, `ribbon` ve `motion`'ı okuyor;
       RF11 onları kaldırınca `reportUnusedDisableDirectives` susturmayı kendisi bildirir).
       Kalan `useRowOrder.tsx`'in eksik `t`'si main'in işi. O düzelince `--max-warnings 0`
-      açılır. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
+      açılır. **Akşam, `bakim/refactor-istekleri` dalında:** `useRowOrder`'ın `t`'si
+      bağımlılıkta (testli), `App.tsx`'in susturması da kalktı (üç `toggle` `useCallback`).
+      `eslint src` 0 uyarı; bayrağı refactor oturumu açar. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
       RF11'de gider.
 
 - [ ] **RK13 `mutasyon-kaniti.sh --liste`'de `/` taşıyan bir ad satırı koşmadan "yesil"

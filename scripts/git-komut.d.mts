@@ -7,3 +7,10 @@
  * `gitCevabi` is git's own stderr as text.
  */
 export function git(kok: string, ...args: string[]): string;
+
+/**
+ * Null in the repository's main checkout on `main`, where a release may be
+ * cut; otherwise the one sentence that says why not (a linked worktree, or
+ * another branch).
+ */
+export function yayinYeriSorunu(kok: string): string | null;
