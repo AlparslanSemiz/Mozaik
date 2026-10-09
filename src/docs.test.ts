@@ -173,6 +173,7 @@ const BY_BASENAME: ReadonlySet<string> = new Set(
 const DATED_RECORD = new Set([
   'docs/WORKLOG.md',
   'docs/TODO.md',
+  'docs/TODO-ARCHIVE.md',
   'docs/DECISIONS.md',
   'docs/TESTFINDINGS.md',
   'docs/plan-v0-arsiv.md',
@@ -185,7 +186,8 @@ const RULE_DOCS = Object.keys(DOCS)
 
 /**
  * TODO.md is both kinds of document at once, which the split by file could
- * not see: `§10` down is an archive of finished rounds, and a `- [x]` item
+ * not see: `§10` down was the archive of finished rounds (since 2026-10-09 it
+ * is one line pointing at TODO-ARCHIVE.md, a dated record), and a `- [x]` item
  * anywhere is a record of what was done, but an OPEN item is a claim about
  * today — somebody is going to act on it, and a path in it will be looked up.
  *

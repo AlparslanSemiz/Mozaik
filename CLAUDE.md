@@ -38,7 +38,8 @@ bloğunda yazılı.
 - [docs/TRAPS.md](docs/TRAPS.md): Bu projede yaşanmış tuzaklar, temaya göre gruplanmış ve her grubun başında kuralıyla.
 - [docs/DECISIONS.md](docs/DECISIONS.md): Duruşun ne zaman, neden ve neyden değiştiği, ve denenip bırakılan yolların tarihli kaydı.
 - [docs/WORKLOG.md](docs/WORKLOG.md): Projenin şu anki durumu ve oturum oturum çalışma kaydı.
-- [docs/TODO.md](docs/TODO.md): açık işler, karar bekleyen sorular, kullanıcının not defteri ve biten turların arşivi.
+- [docs/TODO.md](docs/TODO.md): açık işler, karar bekleyen sorular ve kullanıcının not defteri.
+- [docs/TODO-ARCHIVE.md](docs/TODO-ARCHIVE.md): TODO.md'den taşınan biten turlar, tarih sırasıyla, o günkü hâlleriyle. Oturum başında okunmaz.
 - [docs/ROADMAP.md](docs/ROADMAP.md): Sıradaki sürümler, her birinin çıkma şartı ve hâlâ cevabı beklenen sorular.
 - [docs/ROBODERS.md](docs/ROBODERS.md): asıl rakip Roboders'in, yani babanın bugün kullandığı programın incelemesi.
 - [docs/ASC.md](docs/ASC.md): ikinci kaynak aSc Timetables'ın bölümleri, hangisinin alındığı, hangisinin bilerek alınmadığı ve hangisinin sırada olduğu.
