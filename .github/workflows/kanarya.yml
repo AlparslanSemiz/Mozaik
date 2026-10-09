@@ -1,0 +1,56 @@
+# Sıradaki runner imajının kanaryası: ci.yml'in denetimi ve ana E2E'nin bir
+# parçası, sabitlenen sürümün bir sonrakinde.
+#
+# ci.yml ve windows.yml runner'ın sürümünü sabitliyor (`ubuntu-24.04`,
+# `windows-2025`), çünkü `ubuntu-latest` 2026-10-19'dan 2026-11-19'a Ubuntu
+# 26.04'e geçiyor (runner-images #14748) ve imaj değişikliği bir push'u kod
+# değişmeden kırmızıya çevirebilir. Burası yeni imajı önceden koşar: iki hafta
+# yeşil kalırsa ci.yml'deki sürüm elle buraya çekilir ve bu dosya bir sonraki
+# imaja döner.
+#
+# Hiçbir şeyi kilitlemez: push'ta koşmaz, sitenin ve sürümün kapısında değil.
+name: kanarya
+
+on:
+  schedule:
+    - cron: '0 2 * * 2' # Salı 02:00 UTC, haftalik.yml'le çakışmasın
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kanarya-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  denetim:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run tipler
+      - run: npm test
+      - run: npm run build
+      - run: npm run boyut
+
+  # `playwright install --with-deps` yeni imajın sistem paketlerini kurabiliyor mu,
+  # ve ana süitin bir parçası orada geçiyor mu.
+  e2e:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx vite build
+      - run: npx playwright test --shard=1/3 --grep-invert @arama --reporter=list

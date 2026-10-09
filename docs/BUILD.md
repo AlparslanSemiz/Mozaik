@@ -209,7 +209,7 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 
 ### Site
 
-Depoda beş iş akışı var (2026-10-09'dan beri). `ci.yml` her dala her push'ta
+Depoda altı iş akışı var (2026-10-09'dan beri). `ci.yml` her dala her push'ta
 süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
 derleme ve boyut bir işte; ana E2E süiti üç parçada; öneri aramasını başlatan
 iki E2E testi kendi işinde, sırayla; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
@@ -218,6 +218,12 @@ kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir comm
 yayınlayamaz. `windows.yml` her `main` push'unda ana E2E süitini Windows'ta koşar; siteyi
 kilitlemez, sürümü kilitler (aşağıda, `yayinla`). `haftalik.yml` haftada bir mutasyonu
 koşar ve `windows.yml`'i çağırır. `surum.yml` bir etiketle üç teslim dosyasını üretir.
+`kanarya.yml` haftada bir `ci.yml`'in denetimini ve ana E2E'nin bir parçasını runner'ın bir
+sonraki imajında koşar ve hiçbir şeyi kilitlemez: `ci.yml`, `site.yml` ve `windows.yml`
+runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` değil, çünkü
+`ubuntu-latest` 2026-10-19'dan itibaren Ubuntu 26.04'e geçiyor. `surum.yml` ve
+`haftalik.yml`'in mutasyon işi hâlâ `-latest`'te; ilki dokunulmaz, ikincisi `ci/mutasyon-parca`
+dalında yeniden yazılıyor.
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı

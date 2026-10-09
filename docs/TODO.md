@@ -713,7 +713,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       SHA'sı `91e2ead`. Kalan Node 20 uyarısı `upload-artifact@v4`. `gh`'nin jetonunda
       `workflow` yetkisi yok, birleştirme yerelde birleştirme commit'iyle ve SSH ile
       itiliyor (PR'ın SHA'sı korunduğu için GitHub onu "merged" sayıyor).
-      `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. #6 (bölme önerisi
+      `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. **2026-10-09 akşam,
+      kullanıcının kararı (test programı K6):** Dependabot beklenmedi; `ci.yml` ve `windows.yml`'de
+      `upload-artifact@v7`, `download-artifact@v8`, runner'lar `ubuntu-24.04` ve `windows-2025`'e
+      sabit, `kanarya.yml` yeni imajı haftada bir koşuyor (`test/kapsam`). `surum.yml` hâlâ
+      `upload-artifact@v4` ve `download-artifact@v7`'de (dokunulmaz), `haftalik.yml`'in mutasyon
+      işi `upload-artifact@v4`'te (`ci/mutasyon-parca`'nın). #6 (bölme önerisi
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
 - [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
