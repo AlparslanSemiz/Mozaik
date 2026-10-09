@@ -34,14 +34,14 @@ ve 2026-10-09.
 **Çalışma düzeni (2026-10-09).** Her iş alanı kendi worktree'sinde ve dalında, `main`'de
 oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
-[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`, birleşmeden önce
-tam `npm test` ve `kontrol`. `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
+[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
+yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
 bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-davranış değiştirmiyor: adım 0 ve 1 bitti, T1 ile T2a `main`'de, `refactor/lists` dalı
-T2b'yi (`ui/lists/index.ts`) ve derin import kuralını (`paket-ici-alan`, `paket-ici-kok`)
-getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
+davranış değiştirmiyor: adım 0 ve 1 bitti, `leaf/lang` ve `ui/lists` paketleri ile derin
+import kuralı `main`'de; `refactor/prefs` dalı `platform/prefs` paketini, RK13'ün
+düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -64,9 +64,9 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 6. Bir sürümden önce `npm run mutasyon`.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
-8. Refactor: paket turları `main`'den yeni dallarda, `.claude/skills/paket-turu` ile;
-   önce §8k'ye hedef ağaç ile eski yol → yeni yol tablosu yazılır. Adım 2: RF3 (`relax.ts`
-   ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı (TODO §8k).
+8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
+   dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/storage`. Adım 2: RF3
+   (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -100,7 +100,7 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 158 997 bayt, brotli 279,46 kB (2026-10-09, `refactor/lists`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -110,6 +110,73 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-09 (gece) · Refactor, `refactor/prefs` dalı: hedef ağaç, RK13, `platform/prefs`
+
+**Başlangıç.** Dal `origin/main`'den (`bacbcfc`, `refactor/lists`'in birleştiği hâl) açıldı,
+takipsiz. Oturum ortasında `main` `b75e707`'ye ilerledi, dala merge ile alındı, çatışma
+yok. Kullanıcının oturum içindeki kararları: ağır komutlar dışarıdan `timeout` ile
+sarılmaz (`agir.sh`'in düzeltmesi özellik dalında), `haftalik.yml`'in mutasyon kısmına
+dokunulmaz, ve uzun testler arkada, birleşmeden önce yerelde `hizli` (DECISIONS).
+
+**Ne yapıldı, commit commit** (dal commit'leri konusuyla):
+- "Belgeler: refactor'ün hedef ağacı ve eski yol → yeni yol tablosu §8k'de": sabahki plan
+  oturumunun transkriptinden, Alp'in on iki adımlık sırasıyla; kural adları ve taşıma
+  yöntemi aynı yerde, transkripte kalan taslağın tuzak adayı kapandı. Becerinin "Girdi"
+  satırı bu iki başlığa işaret ediyor.
+- "Betikler: mutasyon listesi koşmayan satıra sonuç yazmıyor (RK13)".
+- "Test: Ayarlar'da olmayan bir branşın Program rengi sabit": `programColor.ts`'in 31–38.
+  satırları (serbest metinli branşın yedek rengi) hiçbir testte koşmuyordu.
+- "Taşıma: theme, printOptions, programColor ve toolState platform/prefs/'e": yalnız
+  `git mv` ve yollar. Aynı HEAD'de önce ve sonra derlenen `dist/index.html` bayt bayt aynı
+  (sha 97c2acd4…). Bu commit `sinir`'de 13 ihlalle kırmızı, bilerek (aşağıda).
+- "Yapı: platform/prefs/ tek giriş noktasından": `index.ts`, dışarıdan gelen import'lar ona,
+  dosya başına tek satır (App'te altı satır bir). Derlenen dosya +6 bayt.
+- "Belgeler: uzun testler arkada, birleşmeden önce yerelde hizli, tam doğrulama CI'da".
+
+**Plandan sapma: taşıma commit'i `sinir`'de kırmızı.** Derin import kuralı yeni klasörü
+doğduğu anda kapsıyor, yani yalnız `git mv`'li hâlde dışarıdan gelen her runtime import
+derin (13). `index`'i aynı commit'e almak ölçüldü ve olmuyor: derlenen dosyayı değiştiriyor
+(1 159 050 → 1 159 056 bayt, modül sırası), yani bayt aynılığının kanıtı kaybolurdu. Sağlamlık
+basitlikten önce geldi: iki commit, dal ikincisinden önce itilmedi. §8k'nin taşıma yöntemi
+aynı commit'te bu cümleyle düzeldi.
+
+**RK13'ün kanıtı** (betiğin kendi koşusu, geçici bir worktree'de, kilit altında, `npm run
+sinir`'e karşı; günlükler `scratch/`'te):
+
+| Satır | Beklenen | Eski betik | Yeni betik |
+|---|---|---|---|
+| `alan: lessons/Paste` (derin import) | kırmızı | koşmadı, "yesil", TUTMUYOR | koştu, kırmızı (`paket-ici-alan`) |
+| `yorum/yesil` (yalnız yorum) | yeşil | koşmadı, "yesil", sahte "tutuyor" | koştu, yeşil |
+| `kok-names` (derin import) | kırmızı | kırmızı | kırmızı (`paket-ici-kok`) |
+
+Günlük açılamayınca (eski günlükler silinip klasör yazılamaz yapıldı) yeni betik ilk satırda
+"DURDU: satırın günlüğü açılamıyor, satır koşmadı" deyip 64 ile çıktı. İlk deneme bu yolu
+sınamamıştı: günlükler vardı ve klasörün yazma izni yalnız yeni dosyayı engelliyor.
+
+**Renk testinin kanıtı** (`mutasyon-kaniti.sh --liste`, kilit altında, ikinci geçici
+worktree): FNV çarpanı değişince 35 yerine 19, adın kendisi (anahtar yerine) kullanılınca 27,
+ikisi de kırmızı.
+
+**Envanter.** Dört dosya 948 satır: `theme.ts` 547, `toolState.ts` 185, `printOptions.ts`
+158, `programColor.ts` 58. Dışarıdan import eden 17 üretim dosyası (10'u runtime, 13 import ile) ve 5 test
+dosyası. Anahtarların hepsi `leaf/preferenceKeys.ts`'te, taşınmadı. Kapsam (`npm run
+kapsam`'ın listesi bu dosyaları içermiyor; dokunan beş test dosyasıyla, liste geçersiz
+kılınarak): `printOptions` 100, `theme` 100 satır (98,75 dal), `programColor` 79,48 → yeni
+testle 100, `toolState` 0 (React kancası, E2E tutuyor). Saf paket değil, mutasyon skoru yok.
+İç temizlik: RF20 dışında aday çıkmadı; `printOptions`'taki beş `as` bilinmeyen girdinin
+korumadan sonraki daraltması, dokunulmadı. RF20 yapılmadı: App kısa adların en büyük
+çağıranı, RF11'e bağlı (TODO §8k).
+
+**Koşulan testler.** Her commit'ten önce `hizli` (son 1270/1270) ve belge kapıları (19/19);
+kod commit'lerinde `tipler`, `sinir`, `lint` (0 uyarı), `knip`, prettier,
+`preferences.test.ts` 134/134 (styles.css'in kural sırası dahil). Kilit altında: derleme,
+boyut (279,37 kB brotli) ve `temel.spec.ts` ile `otomatik.spec.ts` 49/49; RK13 ve renk
+testinin mutasyonları.
+
+**Koşulmayan testler.** Yerelde tam `npm test`, `kontrol` ve tam E2E (yeni karar: CI'da),
+Stryker, `exe:*`, `patrol`, `ekran`, süre ölçümü. Ayarlar → Görünüm ekranına bakılmadı:
+bayt aynı taşıma ve modül sırası dışında değişmeyen derleme gerek bırakmadı, tam E2E CI'da.
 
 ## 2026-10-09 (gece) · Bakım: `yayinla`'nın yeri, `useRowOrder`'ın `t`'si, App'in susturması, zebra analizi
 

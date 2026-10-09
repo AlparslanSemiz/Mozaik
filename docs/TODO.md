@@ -1224,7 +1224,7 @@ ve `.claude/skills/paket-turu` ile. Tabloda satırı olmayan bir dosya taşınma
 |---|---|---|---|---|
 | 1 | lang | `leaf/lang/*` | yerinde, `leaf/lang/index.ts` eklendi | bitti (3c769a0) |
 | 2 | lists | `ui/setup/{Paste,Summary}` | `ui/lists/` | bitti (0d97c82, 3f1944e) |
-| 3 | platform/prefs | `platform/{theme,printOptions,programColor,toolState}` | `platform/prefs/` | |
+| 3 | platform/prefs | `platform/{theme,printOptions,programColor,toolState}` | `platform/prefs/` | bitti (`refactor/prefs`); RF20 yapılmadı, RF11'e bağlı |
 | 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | |
 | 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | |
 | 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | |
@@ -1272,7 +1272,12 @@ izin vermiyor: derlenen dosyayı değiştiriyor (`platform/prefs`'te +6 bayt, 20
       RF9 babanın gönderme isteğinin (B3.8) önkoşulu ve RF8'e bağlı.
 - [ ] **Refactor adım 5 · RF12, RF10, RF11, RF20.** Liste ekranlarının iskeleti, şeridin
       sekme başına bölünmesi, tercih aynalarının React'in `useSyncExternalStore`'u ile
-      kalkması, `theme.ts`'in çift adları. RF10 RF8'e, RF20 RF11'e bağlı.
+      kalkması, `theme.ts`'in çift adları. RF10 RF8'e, RF20 RF11'e bağlı. RF20'nin
+      bağı ölçüldü (2026-10-09, `platform/prefs` turu): yön "çağıranlar tercih nesnesini
+      alır", ve kısa adların (`readTheme`, `applyRibbon`, `readScale`…) en büyük çağıranı
+      App; App'e dokunmayan yarısı (`readDock`, `writeDock`, `readDockHeight`,
+      `writeDockHeight`, `applyRibbonAuto`, `readIntroSeen`) tek başına dosyayı yarı yarıya
+      iki biçimde bırakırdı, yapılmadı.
 - [ ] **Refactor adım 6 · RF2'nin kalan maddesi, sonra RF1.** Taşımadan önce bir içerik
       commit'i: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
       `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
@@ -1344,12 +1349,15 @@ izin vermiyor: derlenen dosyayı değiştiriyor (`platform/prefs`'te +6 bayt, 20
       `eslint src` 0 uyarı; bayrağı refactor oturumu açar. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
       RF11'de gider.
 
-- [ ] **RK13 `mutasyon-kaniti.sh --liste`'de `/` taşıyan bir ad satırı koşmadan "yesil"
+- [x] **RK13 `mutasyon-kaniti.sh --liste`'de `/` taşıyan bir ad satırı koşmadan "yesil"
       sayıyor.** Satırın çıktısı `scratch/mutasyon-kaniti/<ad>.log`'a yönleniyor; ad `/`
       taşıyınca dosya açılamıyor, bash fonksiyonu hiç çağırmıyor ve 1 dönüyor, 1 de
       "yesil" demek. Kırmızı beklenen satırda "TUTMUYOR" çıkıyor (güvenli yan), yeşil
       beklenen satırda sahte bir "tutuyor" çıkar. 2026-10-09'da `refactor/lists`'te üç satır
-      böyle koştu, adlar değişince üçü kırmızı. Düzeltilmedi: dal davranış değiştirmez.
+      böyle koştu, adlar değişince üçü kırmızı.
+      Kapandı (2026-10-09, `refactor/prefs`, "Betikler: mutasyon listesi koşmayan satıra
+      sonuç yazmıyor (RK13)"): günlük `<sıra>-<ad>.log`, açılamazsa betik 64 ile duruyor,
+      kirmizi ve yesil yalnız test komutu koştuysa yazılıyor. Kanıt WORKLOG'da.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
@@ -1366,10 +1374,12 @@ izin vermiyor: derlenen dosyayı değiştiriyor (`platform/prefs`'te +6 bayt, 20
 **Biten (dal).** T1 (`leaf/lang/index.ts`, 3c769a0), T2a (`Paste` ile `Summary`
 `ui/lists/`'e, 0d97c82), T2b (`ui/lists/index.ts`, 3f1944e) ve derin import kuralı
 (`paket-ici-alan`, `paket-ici-kok`, ac45672), 0 ihlalle girdi ve mutasyonla kanıtlandı
-(WORKLOG 2026-10-09, `refactor/lists`).
+(WORKLOG 2026-10-09, `refactor/lists`). `refactor/prefs` dalında: hedef ağaç ve tablo bu
+bölüme yazıldı, RK13 kapandı, `platform/prefs` paketi (WORKLOG 2026-10-09,
+`refactor/prefs`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
-yeni dallarda, `.claude/skills/paket-turu` ile. Adım 2'nin süre ölçümleri temiz koşulda
+yeni dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/storage`. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 
