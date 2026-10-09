@@ -29,6 +29,11 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `ui/lists/`, `ui/setup/`,
+`ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+`index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
+Testler bu kuralın dışında.
+
 **Yapraklar** bütün katmanların ortak ihtiyacı: tipler, anahtarlar, dil ve tercih
 fabrikası. Yalnız başka bir yaprağı import eder, kuralı aşağıda.
 
@@ -229,11 +234,13 @@ anahtar "Veriler nerede" tablosundaki adıyla `preferenceKeys.ts`'e girer ve ter
 
 ### Sınırı ne ölçüyor
 
-Katman sınırı ile döngü yasağı `.dependency-cruiser.cjs`'te yazılı ve
-`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Dört kural var: yaprak yalnız
+Katman sınırı, paket girişi ve döngü yasağı `.dependency-cruiser.cjs`'te yazılı ve
+`npm run sinir` ile koşuyor, `kontrol`'ün içinde. Altı kural var: yaprak yalnız
 yaprak import eder, saf mantık yaprakların dışına çıkmaz, tesisat bir bileşen
-çağırmaz, `worlds.ts` üründen import edilmez. Grafik `npm run grafik` ile
-mermaid olarak yazdırılabilir.
+çağırmaz, `worlds.ts` üründen import edilmez, ve bir paketin içine dışarıdan yalnız
+`index`'i üstünden girilir. Sonuncusu iki kural: `paket-ici-alan` başka bir paketten
+gelen importu, `paket-ici-kok` bir katmanın ya da `src/`'nin kökündeki bir dosyadan
+geleni ölçüyor. Grafik `npm run grafik` ile mermaid olarak yazdırılabilir.
 
 Import grafiğinin göremediği üç kural `eslint.config.js`'te ve `npm run lint` ile koşuyor:
 saf mantık React'i ve bir bileşen kitaplığını import etmez, `document`, `window`,

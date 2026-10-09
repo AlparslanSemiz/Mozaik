@@ -44,7 +44,7 @@ npm run dev          # geliştirme sunucusu
 npm run tipler       # tsc iki kez: src (tsconfig.json) ve src dışı (tsconfig.tools.json)
 npm run lint         # ESLint: React'in kanca kuralları, tip farkında dört kural ve x!++ yasağı
 npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
-npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü ve katman sınırı
+npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü, katman sınırı ve paket girişi
 npm run analiz       # demetin içindekiler, test-results/demet/analiz.html (ölçüsü minify öncesi)
 npm run boyut        # size-limit: dist/index.html'in ham ve brotli boyu, eşiği aşarsa kırmızı
 npm run grafik       # aynı grafiği mermaid olarak yazar, dosyaya değil ekrana
