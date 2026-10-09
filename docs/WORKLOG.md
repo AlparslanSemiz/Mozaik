@@ -42,6 +42,9 @@ bir worktree'de ya da başka dalda tek cümleyle durur.
 davranış değiştirmiyor: adım 0 ve 1 bitti, `leaf/lang` ve `ui/lists` paketleri ile derin
 import kuralı `main`'de; `refactor/prefs` dalı `platform/prefs` paketini, RK13'ün
 düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
+Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti, Faz 1'in TB8'e ve paket
+turlarına bağlı olmayan kısmı bitti (`test/kapsam`); paket yolunun fuzz'u ve TB8'in testi
+TB8'in kararını, TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -64,7 +67,10 @@ düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.
 6. Bir sürümden önce `npm run mutasyon`.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
-8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
+8. Test programı (TODO §8l): TB8'in yeri ve testi, ve yavaş süitlerle `yayinla`'nın
+   ilişkisi kullanıcıda; sonra Faz 2 (yollardan bağımsız olanlar önce: TP6, TP7, TP10,
+   TP11, TP12). Runner'lar sabit, `kanarya.yml` Ubuntu 26.04'ü haftada bir koşuyor.
+9. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
    dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/search` (storage, exe ve io
    `fix/veri-kaybi`'yi bekliyor). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
@@ -79,27 +85,32 @@ düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.
   `maximized` ayarı gerçek bir Windows'ta görülmedi.
 - Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
+- Test programının bulguları (TODO §8l): iki kopya ve kota (VK1, VK2, düzeltmesi
+  `fix/veri-kaybi`'de); "Tümünü dosyadan aç" eksik planı boş plan olarak açıyor (TB8, veri
+  kaybı sınıfı, karar bekliyor); kapanan sekmenin değişikliği klasöre inmiyor (TB7);
+  `readPlanFile` bozuk dosyada istisna atıyor (TB1); eksi ve sınırsız haftalık saat kabul
+  ediliyor (TB6, TB9); `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 628 test (2026-10-09) | `npx playwright test --list` |
-| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
+| Ana E2E süiti | 632 test, 33 dosya (2026-10-09 gece, `test/kapsam`) | `npx playwright test --list` |
+| Site, sunucu, klasör | 3 dosyada 23 test (2026-10-09 gece) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 39 (2026-10-08) | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 40 (2026-10-09 gece) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 45 dosyada 1378 test, hepsi geçti (2026-10-09 gece) | `npm test` |
+| Birim testleri | 47 dosyada 1397 test (2026-10-09 gece, `test/kapsam` `main`'le birleşince); `kontrol`'de 1396, hepsi geçti | `npx vitest list`, `npm test` |
 | `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
-| Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
+| Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
-| Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
+| Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
