@@ -17,6 +17,9 @@ beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
 1. [docs/TODO.md](docs/TODO.md), sıradaki iş ve kullanıcının not defteri için.
 2. [docs/PRINCIPLES.md](docs/PRINCIPLES.md), bir kararı neyin yönlendirdiği için.
 
+Tuzaklar bir işe başlarken okunur, tamamı değil: önce [docs/TRAPS.md](docs/TRAPS.md)'nin
+başındaki grup listesi, sonra yalnız o işin grubu.
+
 Nerede kalındığı [docs/WORKLOG.md](docs/WORKLOG.md)'nin en üstündeki "Şu an"
 bloğunda yazılı.
 

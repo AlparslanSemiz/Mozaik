@@ -10,6 +10,23 @@ dört şey söyler: ne oldu, sebebi, karşı önlem, ve onu koruyan test ya da �
 
 Denenip bırakılan yolların kaydı burada değil, [DECISIONS.md](DECISIONS.md)'de.
 
+Dosya baştan sona okunmaz. Aşağıdaki listeden işin grubu seçilir ve yalnız o grup
+okunur, bir numara ise `### N ·` başlığıyla aranır.
+
+## Hangi grup ne zaman okunur
+
+- [Şema göçü ve veri kaybı](#şema-göçü-ve-veri-kaybı): şema, depolama anahtarı, yedek, göç ya da silme davranışı değişirken.
+- [Dağıtım kimlikleri, tek kaynak ve sürüm](#dağıtım-kimlikleri-tek-kaynak-ve-sürüm): bir ad, kimlik, adres, sürüm numarası ya da teslim yolu değişirken.
+- [Çözücü ve kısıt motoru](#çözücü-ve-kısıt-motoru): `blocker()`, çözücü, öneri araması ya da ret cümleleri değişirken.
+- [Sürükleme, saf DOM ve React sınırı](#sürükleme-saf-dom-ve-react-sınırı): sürükleme, ızgaranın çizimi, worker ya da sık tekrarlanan bir etkileşim değişirken.
+- [Düzen ölçümü ve hangi kutuya bakıldığı](#düzen-ölçümü-ve-hangi-kutuya-bakıldığı): bir düzenin sığdığı, hizalandığı ya da kırpılmadığı iddia edilirken.
+- [CSS kapsamı, özgüllük ve custom property](#css-kapsamı-özgüllük-ve-custom-property): yeni bir zemin, durum, değişken ya da katman eklenirken.
+- [Yazdırma ve kâğıt](#yazdırma-ve-kâğıt): basılan sayfa değişirken.
+- [Ad çakışması ve erişilebilir ad](#ad-çakışması-ve-erişilebilir-ad): bir kontrolün, bölümün ya da sekmenin adı konurken ya da E2E'de aranırken.
+- [Çeviri ve metin](#çeviri-ve-metin): ekrandaki bir metin, sözlük ya da kısaltma değişirken.
+- [Test hijyeni ve bedava yeşil](#test-hijyeni-ve-bedava-yeşil): bir test yazılırken ya da bir testin ölçtüğü mutasyonla kanıtlanırken.
+- [Ölçüm disiplini](#ölçüm-disiplini): bir süre, performans ya da platform iddiası ölçülürken ya da gerekçe diye yazılırken.
+
 ---
 
 ## Şema göçü ve veri kaybı
