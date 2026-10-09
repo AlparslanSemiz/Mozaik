@@ -1,7 +1,7 @@
 // Types for scripts/roboders/otomatik.mjs (plain .mjs for the same reason as koruma.mjs).
 
 import type { Locator, Page } from '@playwright/test';
-import type { Hedef } from './koruma.mjs';
+import type { Hedef, HedefAyari } from './koruma.mjs';
 
 export interface Aday extends Hedef {
   rol: string;
@@ -44,7 +44,7 @@ export interface OtoSonuc {
 
 export function otomatikKarar(
   aday: Aday,
-  sinir: { site: RegExp; alanlar?: string[]; sayfa: string },
+  sinir: { site: RegExp; alanlar?: string[]; sayfa: string; ayar?: HedefAyari },
 ): OtoKarar;
 export function adayBilgisi(locator: Locator): Promise<Aday>;
 export function otomatikGez(
@@ -53,6 +53,7 @@ export function otomatikGez(
   secenek: {
     site: RegExp;
     alanlar?: string[];
+    ayar?: HedefAyari;
     tiklamaSiniri?: number;
     sureSiniriMs?: number;
     ekran?: string;

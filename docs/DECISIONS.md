@@ -35,6 +35,21 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Windows E2E her main push'unda, ve etiket onu da bekliyor
+
+**Ne.** Ana E2E süiti Windows'ta her `main` push'unda koşuyor (`windows.yml`). Siteyi
+kilitlemiyor; `npm run yayinla` (ve `--kuru`) etiketi ancak o commit'in `ci.yml` ve
+`windows.yml` koşuları ikisi de yeşilse atıyor. `haftalik.yml` Windows işini artık
+`windows.yml`'i çağırarak koşuyor (kullanıcının kararı).
+
+**Eski hâli.** Windows E2E yalnız haftada bir ve elle koşuyordu (`haftalik.yml`, 2026-10-09
+sabahı), etiket yalnız `ci.yml`'i bekliyordu.
+
+**Gerekçe.** Etiket babanın exe'sine gidiyor ve babanın makinesi Windows. İlk haftalık
+koşu Linux'ta görünmeyen bir kusuru yalnız Windows'ta gösterdi (B7.22, tuzak 146). Site
+beklemiyor, çünkü site babanın asıl yolu değil ve bir Windows koşusu `ci.yml`'den iki
+kat uzun.
+
 ### 2026-10-09 · Linux şimdilik yalnız yerel, Release'te yok
 
 **Ne.** Linux paketi `npm run exe:rpm` ile, kullanıcının kendi makinesinde üretilir

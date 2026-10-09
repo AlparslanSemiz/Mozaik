@@ -22,6 +22,7 @@ import type { AddressInfo } from 'node:net';
 import { expect, test, type Page } from '@playwright/test';
 import { existsSync } from 'node:fs';
 import {
+  HEDEFLER,
   guvenliBaglam,
   hedefBilgisi,
   izinVerilir,
@@ -87,7 +88,10 @@ window.hazir = true;
 // The automatic tour's test page. Every element that must NOT be clicked sends
 // `GET /tiklandi/y-...` when clicked (a GET, so the guard lets it through and
 // the server sees it); every one that must be clicked sends `/tiklandi/izin-...`
-// or navigates. The judge is again the server's list.
+// or navigates. The judge is again the server's list. A marker must say nothing
+// the guard refuses, or the network stops it whether it was clicked or not:
+// three of them did (`y-kaydet`, `y-menu-sil`, `y-kaldir`, found 2026-10-09),
+// and 'işaretler korumadan geçiyor' below now asks.
 const iz = (ad: string) => `onclick="fetch('/tiklandi/${ad}')"`;
 const OTO = (oteki: string) => `<!doctype html><meta charset="utf-8">
 <nav>
@@ -97,13 +101,13 @@ const OTO = (oteki: string) => `<!doctype html><meta charset="utf-8">
     onmouseup="document.getElementById('menu').hidden = false; this.setAttribute('aria-expanded', 'true')">Menü ▾</button>
   <div id="menu" role="menu" hidden>
     <a role="menuitem" href="/oto/b">Liste</a>
-    <button role="menuitem" ${iz('y-menu-sil')}>Sil</button>
+    <button role="menuitem" ${iz('y-menu-1')}>Sil</button>
     <button role="menuitem" ${iz('y-menu-yazdir')}>Yazdır</button>
   </div>
-  <button ${iz('y-kaydet')}>Kaydet</button>
+  <button ${iz('y-dugme-1')}>Kaydet</button>
   <button ${iz('y-hesapla')}>Hesapla</button>
   <button aria-haspopup="dialog" ${iz('y-pencere')}>Öğretmen</button>
-  <a href="/oto/x" ${iz('y-kaldir')}>Programı kaldır</a>
+  <a href="/oto/x" ${iz('y-bag-1')}>Programı kaldır</a>
   <a href="/oto/sil?id=1" ${iz('y-adres')}>Ayrıntı</a>
   <a href="/oto/yeni-pencere" target="_blank" ${iz('y-blank')}>Yardım</a>
   <a href="/oto/dosya" download ${iz('y-indir')}>Dışa ver</a>
@@ -117,6 +121,28 @@ const OTO_A = `<!doctype html><meta charset="utf-8"><a href="/oto">Ana sayfa</a>
 <script>fetch('/oto-a-yaz', { method: 'POST', body: 'x' }).catch(() => {})</script>`;
 const OTO_B = `<!doctype html><meta charset="utf-8"><p>Liste</p>`;
 const DIYALOG = `<!doctype html><meta charset="utf-8"><a href="/oto-onay">Devam</a>`;
+
+// Eyotek's test page: the area is /ders, and what a school management system
+// writes with sits next to what a tour may read. Same judge, same convention:
+// a `y-` click must never reach the server. The markers say nothing Eyotek
+// refuses: a marker with "not" in it would be stopped by the address rule
+// whether it was clicked or not, and the assertion would pass for nothing.
+const EYO = (oteki: string) => `<!doctype html><meta charset="utf-8">
+<nav>
+  <a href="/ders/program">Haftalık program</a>
+  <a href="/ders/notlar" ${iz('y-e1')}>Not girişi</a>
+  <a href="/ders/kayitlar" ${iz('y-e2')}>Öğrenci kaydı</a>
+  <a href="/ders/OgrenciNotGir" ${iz('y-e3')}>Ayrıntı</a>
+  <a href="/muhasebe/liste" ${iz('y-e4')}>Muhasebe</a>
+  <a href="${oteki}/ders/disari" ${iz('y-e5')}>Öteki site</a>
+  <button ${iz('y-e6')}>SMS gönder</button>
+  <button ${iz('y-e7')}>Yoklama al</button>
+  <button ${iz('y-e8')}>İptal</button>
+  <button role="tab" ${iz('e-sekme')}>Öğretmenler</button>
+</nav>
+<button id="kacak" onclick="location.href = '/muhasebe/kacak'">bir betik</button>
+<script>fetch('/api/veri').then(() => { window.hazir = true; })</script>`;
+const EYO_PROGRAM = `<!doctype html><meta charset="utf-8"><p>Program</p>`;
 const ONAY = `<!doctype html><meta charset="utf-8">
 <script>confirm('Silinsin mi?')</script><a href="/oto-sonraki">Sonraki</a>`;
 
@@ -135,6 +161,8 @@ test.beforeAll(async () => {
     if (yol === '/oto/b') return html(OTO_B);
     if (yol === '/oto-diyalog') return html(DIYALOG);
     if (yol === '/oto-onay') return html(ONAY);
+    if (yol === '/ders') return html(EYO(oteki));
+    if (yol === '/ders/program') return html(EYO_PROGRAM);
     if (yol === '/cerceve')
       return html(`<script>fetch('/cerceve-yaz', { method: 'POST', body: 'x' })</script>`);
     if (yol === '/acilir') {
@@ -306,6 +334,19 @@ test.describe('Roboders koruması', () => {
     await context.close();
   });
 
+  test('işaretler korumadan geçiyor, yani "tıklanmadı" bir şey ölçüyor', () => {
+    for (const [sayfa, ayar] of [
+      [OTO(''), HEDEFLER.roboders],
+      [EYO(''), HEDEFLER.eyotek],
+    ] as const) {
+      const isaretler = [...sayfa.matchAll(/fetch\('(\/tiklandi\/[^']+)'\)/g)].map((m) => m[1]!);
+      expect(isaretler.length).toBeGreaterThan(5);
+      for (const yol of isaretler) {
+        expect(izinVerilir('GET', `http://127.0.0.1${yol}`, ayar).sebep, yol).toBe('');
+      }
+    }
+  });
+
   test('istek kuralı: yalnız GET ve HEAD, adresinde yazan kelime yoksa', () => {
     expect(izinVerilir('GET', 'https://ornek.com/raporlar?hafta=2').izin).toBe(true);
     expect(izinVerilir('HEAD', 'https://ornek.com/').izin).toBe(true);
@@ -447,3 +488,128 @@ test.describe('Roboders koruması', () => {
     });
   });
 });
+
+// The same guard, set to Eyotek (koruma.mjs, `HEDEFLER.eyotek`): its own
+// writing words and a tour that must stay inside its --alan. The site is this
+// server's; everything else is Eyotek's setting as a tour would get it.
+test.describe('Eyotek ayarı', () => {
+  const EYOTEK = { ...HEDEFLER.eyotek, site: /^127\.0\.0\.1$/ };
+  const ALAN = ['/ders'];
+
+  test('Eyotek kendi yazan kelimelerini ekliyor, Roboders onlardan etkilenmiyor', () => {
+    const eyo = (ad: string) => tiklanabilir(oge(ad), EYOTEK).izin;
+    const rob = (ad: string) => tiklanabilir(oge(ad)).izin;
+    for (const ad of ['Not girişi', 'Öğrenci kaydı', 'SMS gönder', 'Yoklama al', 'İptal']) {
+      expect(eyo(ad), `Eyotek: ${ad}`).toBe(false);
+    }
+    // The control: Roboders reads the same names the way it did before.
+    for (const ad of ['Not girişi', 'Öğrenci kaydı', 'Yoklama al', 'İptal']) {
+      expect(rob(ad), `Roboders: ${ad}`).toBe(true);
+    }
+    expect(eyo('Haftalık program')).toBe(true);
+    // The shared list still holds for Eyotek.
+    expect(eyo('Kaydet')).toBe(false);
+    // An address names its action in camelCase as often as with a dash.
+    expect(
+      izinVerilir('GET', 'https://okul.eyotek.com.tr/Ogrenci/OgrenciNotGir', EYOTEK).sebep,
+    ).toBe('adreste "not" var');
+    expect(izinVerilir('GET', 'https://okul.eyotek.com.tr/Ders/HaftalikProgram', EYOTEK).izin).toBe(
+      true,
+    );
+  });
+
+  test('alansız bir Eyotek turu başlamıyor', async ({ browser }) => {
+    const once = browser.contexts().length;
+    await expect(guvenliBaglam(browser, { gunluk: () => {}, ayar: EYOTEK })).rejects.toThrow(
+      '--alan',
+    );
+    // ...and leaves no open context behind.
+    expect(browser.contexts().length).toBe(once);
+    const context = await guvenliBaglam(browser, { gunluk: () => {} });
+    const page = await context.newPage();
+    await expect(
+      otomatikGez(page, `${kok}/ders`, { site: EYOTEK.site, ayar: EYOTEK }),
+    ).rejects.toThrow('--alan');
+    await context.close();
+  });
+
+  test('alanın dışındaki sayfa hiçbir yoldan açılmıyor, alanın içi açılıyor', async ({
+    browser,
+  }) => {
+    const gunluk: Kayit[] = [];
+    const context = await guvenliBaglam(browser, {
+      gunluk: (k) => gunluk.push(k),
+      ayar: EYOTEK,
+      alanlar: ALAN,
+    });
+    const page = await context.newPage();
+    const once = gelen.length;
+    await page.goto(`${kok}/ders`);
+    await page.waitForFunction(() => 'hazir' in window);
+    // A typed address, and (in a fresh tab, the first one is on Chromium's
+    // error page now) a script that leaves on its own.
+    await expect(page.goto(`${kok}/muhasebe/yazilan`)).rejects.toThrow();
+    const ikinci = await context.newPage();
+    await ikinci.goto(`${kok}/ders`);
+    await ikinci.locator('#kacak').click();
+    await ikinci.waitForTimeout(500);
+    await context.close();
+    const yeni = gelen.slice(once);
+
+    expect(
+      yeni.filter((r) => r.startsWith('GET /muhasebe')),
+      'alanın dışı açıldı',
+    ).toEqual([]);
+    // The controls: the area itself, and a page's own data request outside it.
+    expect(yeni).toContain('GET /ders');
+    expect(yeni).toContain('GET /api/veri');
+    expect(
+      gunluk.filter((k) => k.sebep === 'gezinti alanının dışında').map((k) => k.adres),
+    ).toEqual([`${kok}/muhasebe/yazilan`, `${kok}/muhasebe/kacak`]);
+  });
+
+  test('otomatik tur yalnız alanın içindeki gezinmeye tıklıyor', async ({ browser }) => {
+    const context = await guvenliBaglam(browser, { gunluk: () => {}, ayar: EYOTEK, alanlar: ALAN });
+    const page = await context.newPage();
+    const once = gelen.length;
+    const sonuc = await otomatikGez(page, `${kok}/ders`, {
+      site: EYOTEK.site,
+      alanlar: ALAN,
+      ayar: EYOTEK,
+      bekleMs: 100,
+    });
+    await context.close();
+    const yeni = gelen.slice(once);
+
+    expect(
+      yeni.filter((r) => r.startsWith('GET /tiklandi/y-')),
+      'yasak öğeye tıklandı',
+    ).toEqual([]);
+    for (const yol of [
+      '/ders/notlar',
+      '/ders/kayitlar',
+      '/ders/OgrenciNotGir',
+      '/muhasebe/liste',
+    ]) {
+      expect(yeni, `${yol} açıldı`).not.toContain(`GET ${yol}`);
+    }
+    expect(yeni).toContain('GET /ders/program');
+    expect(yeni).toContain('GET /tiklandi/e-sekme');
+    expect(sonuc.tiklanan.map((t) => t.ad).sort()).toEqual(['Haftalık program', 'Öğretmenler']);
+
+    const sebep = (ad: string) => sonuc.atlanan.find((a) => a.ad === ad)?.sebep ?? 'YOK';
+    expect(sebep('Not girişi')).toContain('"not"');
+    expect(sebep('Öğrenci kaydı')).toContain('"kayd"');
+    expect(sebep('Ayrıntı')).toContain('adreste "not"');
+    expect(sebep('Muhasebe')).toContain('alanının dışında');
+    expect(sebep('Öteki site')).toContain('site dışı');
+    expect(sebep('SMS gönder')).toMatch(/"(sms|gonder)"/);
+    expect(sebep('Yoklama al')).toContain('"yoklama"');
+    expect(sebep('İptal')).toContain('"iptal"');
+  });
+});
+
+/** A plain named link, for the name rules alone. */
+function oge(ad: string) {
+  return { ad, hucrede: false, formAlani: false, suruklenebilir: false, gonderir: false };
+}

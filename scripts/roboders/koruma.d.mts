@@ -3,10 +3,25 @@
 
 import type { Browser, BrowserContext, Locator } from '@playwright/test';
 
-export const BASLANGIC: string;
-export const IZINLI_SITE: RegExp;
-export const KLASOR: string;
-export const OTURUM: string;
+/** A place a tour can go (`HEDEFLER`). */
+export interface HedefAyari {
+  ad: string;
+  baslangic: string;
+  site: RegExp;
+  /** The target's own writing words, on top of the shared list. */
+  ekYazan: string[];
+  /** Whether a tour must name its --alan. */
+  alanZorunlu: boolean;
+}
+
+/** A target as `hedefSec()` hands it out: with its folder and session file. */
+export interface SecilenHedef extends HedefAyari {
+  klasor: string;
+  oturum: string;
+}
+
+export const HEDEFLER: { roboders: HedefAyari; eyotek: HedefAyari };
+export function hedefSec(ad?: string): SecilenHedef;
 
 export interface Karar {
   izin: boolean;
@@ -32,14 +47,19 @@ export interface Kayit {
 export type Gunluk = (kayit: Kayit) => void;
 
 export function katla(metin: string): string;
-export function yazanKelime(metin: string): string | null;
+export function yazanKelime(metin: string, ayar?: HedefAyari): string | null;
+export function alanda(yol: string, alanlar: string[]): boolean;
 export function kisalt(adres: string): string;
-export function izinVerilir(yontem: string, adres: string): Karar;
-export function tiklanabilir(hedef: Hedef): Karar;
+export function izinVerilir(yontem: string, adres: string, ayar?: HedefAyari): Karar;
+export function tiklanabilir(hedef: Hedef, ayar?: HedefAyari): Karar;
 export function hedefBilgisi(locator: Locator): Promise<Hedef>;
-export function gunlukYazici(dosya?: string): Gunluk;
-export function koru(context: BrowserContext, gunluk: Gunluk): Promise<void>;
+export function gunlukYazici(klasor: string, dosya?: string): Gunluk;
+export function koru(
+  context: BrowserContext,
+  gunluk: Gunluk,
+  secenek?: { ayar?: HedefAyari; alanlar?: string[] },
+): Promise<void>;
 export function guvenliBaglam(
   browser: Browser,
-  secenek: { oturum?: string; gunluk: Gunluk },
+  secenek: { oturum?: string; gunluk: Gunluk; ayar?: HedefAyari; alanlar?: string[] },
 ): Promise<BrowserContext>;

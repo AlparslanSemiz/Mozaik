@@ -47,8 +47,10 @@ bloğunda yazılı.
 - İş `main`'e itilir. `ci.yml` her push'ta koşar, site yalnız yeşil bir `main`
   push'unda yayınlanır. Push'tan sonra sıradaki işe geçilir, sonuç `gh run view` ile
   okunur. `main` kırmızıysa başka işe geçmeden önce o düzeltilir.
-- Etiketi yalnız `npm run yayinla` atar, o da commit'in CI'ı yeşil olmadan atmaz.
-  `npm run yayinla -- --kuru` aynı beklemeyi hiçbir şeyi değiştirmeden yapar.
+- `windows.yml` her `main` push'unda Windows'ta E2E koşar; siteyi kilitlemez.
+- Etiketi yalnız `npm run yayinla` atar, o da commit'in `ci.yml` ve `windows.yml`
+  koşuları yeşil olmadan atmaz. `npm run yayinla -- --kuru` aynı beklemeyi hiçbir şeyi
+  değiştirmeden yapar.
 
 ## Oturum sonu
 
