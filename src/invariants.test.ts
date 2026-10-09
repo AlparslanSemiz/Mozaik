@@ -247,7 +247,14 @@ describe('değişmez · kurulamayan haftaya öneri sınıf ya da derslik saati a
       fc.property(closedWorld, (d) => {
         const stuck = solve(d);
         if (stuck.phase === 'solved') return;
-        const { suggestions } = suggest(d, activePlacements(stuck.state), { budgetMs: 60_000 });
+        const { suggestions, rejected } = suggest(d, activePlacements(stuck.state), {
+          budgetMs: 60_000,
+        });
+        // The checks below only see what got past verifySuggestion inside the
+        // search. A rule the formula forgets builds weeks that the checker then
+        // turns down, so every suggestion left stays legal and only this count
+        // goes red (M1 to M3 of the 2026-10-08 analysis, TRAPS 129).
+        expect(rejected, 'aramanın kurduğu ama denetimin reddettiği hafta').toBe(0);
         const walls = new Set([...d.classes.map((x) => x.id), ...d.rooms.map((x) => x.id)]);
         offered += suggestions.length;
         for (const s of suggestions) {

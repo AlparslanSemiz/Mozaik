@@ -105,6 +105,11 @@ WORKLOG'da ayrıca bir "A turu" var. Refactor dışı kusurlar RK1'den başlıyo
 
 **Gerekçe.** Kullanıcının kararı.
 
+**2026-10-09.** RF2'nin ret sayısı adım 6'dan adım 2'ye, mutasyon tabanının önüne
+alındı, çünkü sayı ölçülmezken `sat.ts`'in ya da `relax.ts`'in bozuk bir kodlamasını
+`verifySuggestion` sessizce eliyor, hiçbir test kırmızıya dönmüyor ve taban skoru hem
+yanıltıcı hem RF1'den sonraki skorla karşılaştırılamaz olurdu (kullanıcının kararı).
+
 ### 2026-10-08 · Paket ölçütü açılışa çekildi, sorma sırası önce depo ve platform
 
 **Ne.** [CONVENTIONS.md](CONVENTIONS.md) "Hazır çözüm önce" ve [BUILD.md](BUILD.md)

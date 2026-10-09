@@ -1878,7 +1878,12 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       Bitti 2026-10-09, `148013b`, `648bc45`, `70c4a02`, `735db6e` ve `e2c9e79`,
       `refactor/yapi` dalında. Her test bir mutasyonla kırmızıya döndü, analizin sekiz
       mutasyonunun sekizi de artık kırmızı (WORKLOG 2026-10-09). `npm run kontrol` yeşil.
-- [ ] **Refactor adım 2 · RF3 ve gecelik mutasyon tabanı.** `relax.ts` ve `sat.ts`
+- [ ] **Refactor adım 2 · RF2'nin ret sayısı, RF3 ve gecelik mutasyon tabanı.** Önce
+      ayrı bir içerik commit'i: `RelaxResult`'ta düz bir `rejected` sayısı (aramanın
+      kurduğu ama `verifySuggestion`'ın reddettiği hafta), ve `invariants.test.ts`'in
+      öneri değişmezi her dünyada 0 bekliyor. Adım 6'dan buraya alındı (DECISIONS
+      2026-10-08, refactor kaydının 2026-10-09 notu): sayı yokken bozuk bir kodlamayı
+      denetim eliyor ve taban skoru yanıltıcı olurdu. Sonra `relax.ts` ve `sat.ts`
       mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
       commit'te (A9 kapısı). Adım 1'e bağlı.
 - [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
@@ -1893,17 +1898,11 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 - [ ] **Refactor adım 5 · RF12, RF10, RF11, RF20.** Liste ekranlarının iskeleti, şeridin
       sekme başına bölünmesi, tercih aynalarının React'in `useSyncExternalStore`'u ile
       kalkması, `theme.ts`'in çift adları. RF10 RF8'e, RF20 RF11'e bağlı.
-- [ ] **Refactor adım 6 · RF2'nin kalan iki maddesi, sonra RF1.** Taşımadan önce iki ayrı
-      içerik commit'i. İlki: `offer()`'ın içinde `verifySuggestion`'ın reddettiği öneri
-      sayısı ölçülür ve `offered > 10` iddiasının yerine geçer, kodlama doğruysa 0.
-      İkincisi: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
-      `blocker()`'ınkilerle aynı küme. İkisi de bugün `relax.ts`'ten bir dışa aktarım
-      istiyor, adım 1'in üretim koduna dokunmama sözü yüzünden buraya kaldı. Ret sayısı
-      2026-10-08'de yalnız bir kopyada ölçüldü (`scratch/olc-ret-2026-10-08/`): bugünkü
-      üreteçle ve ilişki ile iki sınırı da üreten üreteçle, üç tohumda, 0. Kalibrasyon:
-      kopyada analizin M1, M2 ve M3 mutasyonları uygulanınca genişletilmiş üreteçle ret 9
-      ile 45 arası, bugünkü üreteçle 0. Sonra `relax.ts`'in modüllere taşınması. Adım 1 ve
-      2'ye bağlı.
+- [ ] **Refactor adım 6 · RF2'nin kalan maddesi, sonra RF1.** Taşımadan önce bir içerik
+      commit'i: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
+      `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
+      öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `relax.ts`'in
+      modüllere taşınması. Adım 1 ve 2'ye bağlı.
 - [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `constraints.ts`'in yalnız
       taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
       Mutasyon listesinin yolları aynı commit'te.

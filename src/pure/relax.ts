@@ -278,6 +278,13 @@ export interface RelaxResult {
   phase: 'done' | 'cancelled';
   suggestions: Suggestion[];
   elapsedMs: number;
+  /**
+   * Weeks the search built that `verifySuggestion` then turned down. The
+   * formula and the checker state the same rules twice, so this is 0 when they
+   * agree; a rule the formula forgets is filtered here and would leave every
+   * suggestion legal, so only this count shows it (`invariants.test.ts`).
+   */
+  rejected: number;
 }
 
 export interface Relaxer {
@@ -1315,6 +1322,7 @@ export function createRelaxer(
   let stage: RelaxStage = 'building';
   let doneFamilies: RelaxFamily[] = [];
   const suggestions: Suggestion[] = [];
+  let rejected = 0;
   let finished: RelaxResult | null = null;
   let deadline = 0;
 
@@ -1710,7 +1718,10 @@ export function createRelaxer(
     )
       return;
     const checked = { ...opts, keepPlaced: opts.keepPlaced && !relaid };
-    if (verifySuggestion(given, s, checked).length !== 0) return;
+    if (verifySuggestion(given, s, checked).length !== 0) {
+      rejected++;
+      return;
+    }
     // A later, better week of the same way takes the earlier one's place.
     const at = suggestions.findIndex((x) => x.family === which && x.relaid === relaid);
     if (at >= 0) suggestions[at] = s;
@@ -1753,6 +1764,7 @@ export function createRelaxer(
     phase,
     suggestions: [...suggestions],
     elapsedMs,
+    rejected,
   });
 
   return {

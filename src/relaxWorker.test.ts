@@ -24,7 +24,12 @@ vi.mock('./pure/relax', () => ({
         return null;
       },
       progress: () => now!,
-      cancel: () => ({ phase: 'cancelled', suggestions: now?.suggestions ?? [], elapsedMs: 0 }),
+      cancel: () => ({
+        phase: 'cancelled',
+        suggestions: now?.suggestions ?? [],
+        elapsedMs: 0,
+        rejected: 0,
+      }),
     };
   },
 }));
@@ -51,6 +56,7 @@ describe('relaxWorker', () => {
       phase: 'done',
       suggestions: [better],
       elapsedMs: 0,
+      rejected: 0,
     });
 
     const posted: RelaxMessage[] = [];

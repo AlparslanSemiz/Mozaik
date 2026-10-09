@@ -217,7 +217,7 @@ function startOn(
       // does it all. One that fails midway: its line is given up, the others go on.
       if (ready < workers.length && fallback === null) toMain();
       else {
-        results[i] ??= { phase: 'done', suggestions: [], elapsedMs: 0 };
+        results[i] ??= { phase: 'done', suggestions: [], elapsedMs: 0, rejected: 0 };
         release();
       }
     };
@@ -269,7 +269,9 @@ function startOn(
   const settle = (phase: RelaxResult['phase']): RelaxResult => {
     clearTimeout(timer);
     stopAll();
-    finished = { phase, suggestions: found(), elapsedMs: elapsed() };
+    // A line stopped before its answer has not said how many it turned down.
+    const rejected = results.reduce((n, r) => n + (r?.rejected ?? 0), 0);
+    finished = { phase, suggestions: found(), elapsedMs: elapsed(), rejected };
     return finished;
   };
 
