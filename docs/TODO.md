@@ -6,8 +6,8 @@
 Yeni bir bilgisayarda başlıyorsan önce [WORKLOG.md](WORKLOG.md) sonundaki
 **"Başka bir bilgisayarda devam etmek için"** bölümünü uygula.
 
-**Bu dosya nasıl okunur:** burada **açık işler** durur, biten turlar
-[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Arşiv silinmez ve geriye dönük düzeltilmez —
+**Bu dosya nasıl okunur:** burada **açık işler** durur. Biten maddeler, ham notlar
+ve biten turlar [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Arşiv silinmez ve geriye dönük düzeltilmez —
 o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor. Yeni iş hep
 §0'dan doğar, §1–§7'de numaralanır, bitince arşive taşınır.
 
@@ -17,8 +17,8 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 
 > **Bu bölüm senin.** Aklına geleni buraya, olduğu gibi, düzeltmeden yaz.
 > Sıraya, biçime, numaraya gerek yok. Her oturumun başında buradaki satırlar
-> okunup **§1–§7'ye numaralı madde** olarak taşınır, ham hâlleri §9'a
-> (Ham notlar) geçer — hiçbir satır silinmez.
+> okunup **§1–§7'ye numaralı madde** olarak taşınır, ham hâlleri
+> [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'nin §9'una (Ham notlar) geçer — hiçbir satır silinmez.
 
 <!-- ▼▼▼ BURADAN İTİBAREN YAZ ▼▼▼ -->
 
@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
 | **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) ve refactor analizinin planı ile kusurları (§8k) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
-| **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle | kayıt |
+| **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
 **Bağımlılık zinciri — hangi bölüm hangisini bekliyor:**
@@ -112,55 +112,12 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
 
 ### 1a · aSc — ikinci ve TAM tur
 
-- [x] **R1 `scripts/asc-tur.ps1` yeniden koşturulsun. — BİTTİ (2026-08-31).**
-      UTF-8 düzeltmesi uygulandı ve **yeniden başlatmadan sonra** doğrulandı
-      (`WinSystemLocale en-US → tr-TR`, diyalog metni `Tanımlı Dersler`
-      düzgün okunuyor — `docs/asc/ekran-envanteri.md` başındaki ölçüm).
-      *(Eskiden B7.8'di.)*
-- [x] **R2 18 ekranın ÖTESİNE geçilsin. — BİTTİ (2026-08-31).**
-      `docs/asc/ekran-envanteri.md`: 79 ekran görüntüsü, altı bölüm derin
-      analiz (Görünüm/kart tanımlama · liste pencerelerinin içi · kısıt
-      ağırlıkları · çözücü ekranları · baskı ailesi · bir hücrenin baskı
-      modeli). **Kalan bilerek görülmeyenler** o dosyanın *"7 · Bu turda
-      GÖRÜLMEYEN"* bölümünde adlı adına yazılı (Danışman'ın uyarı metinleri,
-      sihirbaz adımları, sağ tık alt menüleri, vb — hepsi demo verisini
-      değiştirdiği için bilerek atlandı). Bu kalan liste küçük ve isteğe
-      bağlı bir R2b turu olarak kalabilir, R3/R4'ün önkoşulu değil.
-- [x] **R3 528 yardım konusu tek tek okunsun ve İŞARETLENSİN — BİTTİ
-      (2026-08-31).** 5 paralel ajan (data input · kısıt motoru+çözücü ·
-      baskı+kurulum+doğrulama+günlük kullanım · vekil+nöbet · kalan
-      bölümler+sanity-check), 19 dosyanın **hepsi** baştan sona okundu.
-      [ASC.md](ASC.md)'nin kova 1–6 tabloları ~30 yeni satırla genişledi;
-      Vekil öğretmen ve Nöbet için ayrıca "evet denirse ne inşa edilir"
-      spesifikasyonu yazıldı (§5a) — kova kararı hâlâ babada, ama cevap
-      gelince iş beklemeyecek. Sanity-check turu "kova 6/ilgisiz" altı
-      bölümde de iki gerçek eksik buldu (`u103`'ün dört toplu-düzenleme
-      komutu, `u104`'ün "asistanlı ders" 2026 eklentisi) — "ilgisiz" etiketi
-      tek yerde (u103) hatalı çıktı, düzeltildi.
-- [x] **R4 2940 arayüz metni bir ÖZELLİK LİSTESİNE çevrilsin — BİTTİ
-      (2026-08-31).** R3 ile birlikte yürüdü: her ajan kendi bölümüyle
-      ilgili sözlük satırlarını da taradı (dictionary konu bazlı
-      gruplanmadığı için ayrı bir tur yerine R3'e gömüldü). Yardım
-      metninde geçmeyen ama sözlükte duran birkaç satır bulundu (`Substitutes
-      → Yedekler` çakışması gibi), ayrı bir "kaçan özellik" listesi çıkmadı —
-      2940 satırın ezici çoğunluğu zaten yardım metninde açıklanan
-      özelliklerin arayüz karşılığıydı.
 
 ### 1b · Roboders — sıfırdan
 
 **Adı `Roboders`**, `Robodersi` onun belirtme hâli. Bulgular:
 [ROBODERS.md](ROBODERS.md).
 
-- [x] **R5 Roboders NE, ve nasıl erişiliyor? — ÖLÇÜLDÜ (2026-08-31).**
-      `roboders.com`: **web uygulaması**, bulut tabanlı, indirilen program yok,
-      **hesap zorunlu** (demo bile), **5 gün ücretsiz deneme** (kredi kartı
-      istemiyor), ücretli — aylık ₺1.499,99 / ₺2.999,99 / ₺4.649,99.
-      Tanıtım sayfasının saydığı yetenekler ve bizimkilerle karşılaştırması
-      [ROBODERS.md](ROBODERS.md)'de. **Tarayıcı açılmadan, yalnız web'den
-      yapıldı.**
-      **İlk gerçek bulgu:** onlarda **derslik programı raporu** var, bizde yok
-      (→ R8'e aday). Ve **öğretmenlere e-posta ile dağıtım** onlarda da var,
-      yani `B3.4` bir tahmin değil.
 
 > ### ⛔ R6 SALT OKUNUR — İSTİSNASIZ
 >
@@ -197,13 +154,6 @@ işaretlenmedi. Roboders tarafında ise **hiç başlanmadı**.
 - [ ] **R7 Özellik envanteri çıkarılsın** → [ROBODERS.md](ROBODERS.md)
       genişletilsin, [ASC.md](ASC.md)'nin deseninde: bölümler, ekranlar,
       kısıt karşılaştırması. R6'yı bekliyor.
-- [x] **R7b Aramada çıkan üç satır DOĞRULANSIN ya da DÜŞSÜN — DÜŞTÜ
-      (2026-08-31).** `nöbet`, `kulüp`, *"bir ana + birden çok yardımcı
-      öğretmen"*: `site:roboders.com` kısıtlı arama üçü için de **sıfır**
-      sonuç verdi, sınırsız aramadaki hiçbir kaynak `roboders.com` değildi
-      (hepsi `eyotek.com.tr`'nin modül sayfaları). Ölçüldü ve doğrulandı:
-      kaynakları **Eyotek**, Roboders'in kendi tanıtım sayfasında geçmiyor.
-      Ayrıntı [ROBODERS.md](ROBODERS.md) → *Doğrulanmamış*.
 - [ ] **R11 `docs/Örnek Fotolar/`'ın dizini (2026-10-08).** Belgeler 33 fotoğraf
       diyor (§8c), klasörde 61 dosya var, 29'u WhatsApp görüntüsü. Hangi fotoğrafın
       hangi programa (aSc mi Roboders mi) ve hangi ekrana ait olduğu hiçbir yerde
@@ -298,24 +248,6 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       ölçüldü (o günkü CLAUDE.md'nin "İlke 7"si, bugün PRINCIPLES "Hedef makine"); eksik olan geri kalan üç ekranda (27"
       2K, MacBook M1 13", ThinkPad 16") aynı ölçümün **tekrarlanması** —
       `npm run ekran` + gerçek pikselde bakmak, tahmin değil.
-- [x] **B2.9 Hakkında bölümüne "what's new" — YAPILDI (2026-08-31, kırk
-      beşinci oturum).** Senin satırın: *"Ayrıca hakkında kısmında what's new
-      gibi olmalı. babam her güncelleme alındığında neyin değiştiğini
-      soruyor ben de pek hatırlamıyorum. orada nelerin değiştiği nelerin
-      eklendiği yazmalı ve arşiv de olabilir."*
-      **`.github/surum-notu.md` kaynak DEĞİL çıktı** — ölçüldü: tek seferlik
-      statik metin (indirme/kurulum talimatları), birikimli değil, ve
-      `dist/`'e hiç girmiyor, yani `file://` altında zaten okunamaz (ilke 3).
-      Gerçek kaynak `src/platform/changelog.ts` — `lang/*.ts` deseninde gömülü, elle
-      düzenlenen tek bir veri dosyası. `Data.tsx`'e `Build`'in **yanına**
-      ayrı bir panel eklendi (içine değil — `Build`'in başlığı dört E2E
-      dosyasının locator'ı, tuzak 49/74). Güncel sürüm açık, eskiler
-      `<details>` ile kapalı arşivde. Ayarlar sekmesinde görülmemiş-yenilik
-      noktası (`hasUnseenChangelog()`, `ders-programi-yenilik-gorulen`),
-      panel açılınca kalıcı olarak siliniyor. `scripts/yayinla.mjs`'e
-      dördüncü bir kapı eklendi: `SURUM_NOTLARI[0].version` yayınlanan
-      sürümle eşleşmiyorsa yayın durur. `e2e/surum.spec.ts` 79, dört dilde
-      çeviri.
 - [ ] **B2.10 Her Ayarlar bölümünün kendi alan/seçenek görünürlüğü —
       KALICI, KULLANICIYA AÇIK ÖZELLİK.** Senin satırın: *"Ayarlarda her
       sectionun görüntüsü değişebiliyor olsun. Seçenekler olsun açma kapama
@@ -537,51 +469,6 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       **boş mu kalacağı yoksa kutunun tamamen mi küçüleceği** sorusu var
       (tuzak 82: bir metni kaldırmadan önce o metnin ne taşıdığı sorulur —
       burada bir satır yüksekliği).
-- [x] **B4.7 Sürüklerken kasma — BİTTİ (2026-09-12).** Çare: gerekçe çubuğu en çok
-      100 ms'de bir yazılıyor (`REASON_GAP`). Düşen kare %9,5–14,1'den **%1,1**'e, Layout
-      543 ms / 107'den 216 ms / 42'ye indi; kenar kaydırmasında %12–13'ten %0–0,8'e.
-      Kuyruktaki son yazmanın düşmemesi `e2e/program.spec.ts`'te bir testle ölçülüyor ve
-      test mutasyonla sınandı. Aşağısı sebebin kaydı.
-      Senin satırın: *"Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden
-      gezdirirken çok kasma oluyor."* **İkinci kez geliyor**: §9b'deki aynı şikayet
-      2026-09-01'de sürüklemenin BAŞLANGICI ölçülerek kapatılmıştı (125 ms → 46,2 ms).
-      O ölçüm yanlış değildi, ölçtüğü şey şikayetin sebebi değildi (tuzak 101).
-      2026-09-12'de hareket başına ölçüldü, tam kayıt [TESTFINDINGS.md](TESTFINDINGS.md)'de:
-      x1'de tek kare düşmüyor, **x4'te her sekizinci ila onuncu kare düşüyor** (%9,6–15,
-      1600×1000 exe kutusunda biraz daha kötü), hiçbir kare iki kareden uzun sürmüyor.
-      **Sebep tek satır:** `src/platform/drag.ts`'in `paintReason`'ı hedef hücre her değiştiğinde
-      gerekçe çubuğunun `textContent`'ini yazıyor, ve o yazma 6704 nesnelik belgede
-      **tam yerleşim** tetikliyor (5,37 ms) artı tam görüntü alanı boyaması (5,24 ms).
-      Yazmayı kaldırınca düşen kare %12'den %0'a iniyor. Sınıf yazması bedava, pahalı
-      olan metin. Planın öteki üç şüphelisi ölçülüp düştü: imleç haçı sürüklerken zaten
-      kapalı, sınıf değişimi hareket başına medyan 0 düğüm, hayalet karta kendi katmanını
-      vermek toplamı hiç kıpırdatmadı (tuzak 105).
-      **Kullanıcı kararı (2026-09-12): metni kısmak.** Öteki aday (metin kutusunu akıştan
-      çıkarmak, %3,8–7,4) ve elenen iki ucuz yol (`contain: layout`, metin kutusuna
-      `flex: 1 1 0` — ikisi de yerleşimi durdurmadı) kayıtta duruyor.
-- [x] **B4.8 Dolu hücrenin hükmü kartın altında kalıyor — BİTTİ (2026-09-12).** Çare:
-      sürükleme sürerken kartın kendisi hükmün rengiyle bir iç halka taşıyor (üç CSS
-      kuralı, JS yok). Bedeli dönüşümlü A/B ile ölçüldü ve ölçülebilir bir bedeli yok
-      (halka var %0,0–1,9, halka yok %0,4–1,5). İki hükümde de mutasyonla sınandı.
-      Aşağısı ölçümün kaydı.
-      Senin satırın: *"kartları kaydırırken başka bir kartın üzerine gelip koyma yani
-      değiştirme var ya, o kartların arkasından ya da başka bir şekilde o kartın oraya
-      gelip gelemeyeceğini bilmek lazım, yani kırmızı mı turuncu mu falan."*
-      Bu bir performans değil **görünürlük** sorunu ve tuzak 84'ün ailesinden: `dropMap`
-      hükmü doğru hesaplıyor, `<td>` doğru renge boyanıyor (takas sarı, engel kırmızı),
-      ama hücrenin kendi kartı o zeminin **%83,7'sini** örtüyor — 32×39 px'lik hücrede
-      geriye her kenarda 1,5 px'lik bir çerçeve kalıyor. Kendi hayalet kartın da %61,1'ini
-      örtüyor. Üstelik iki kartın rengi aynı olabildiği için sarı hücre ile kırmızı hücre
-      karta bakarak ayırt edilemiyor. Otomatik dizilmiş bir programda hedef satırın 72
-      hücresinin 20'si dolu, yani soru tam da bu hücrelerde soruluyor.
-      **İmlecin durduğu hücrede hüküm görünüyor** (3 px'lik dış çizgi kartın üstünde
-      boyanıyor); görünmeyen şey imlecin daha gitmediği hücreler, yani satırı bir
-      bakışta okumak. Üstelik kartın kendi rengi uyarı renginin neredeyse aynısı
-      (`rgb(241, 231, 197)` ile `rgb(253, 238, 201)`), yani "dolu ve engelli" hücre ile
-      "boş ve takas edilebilir" hücre ekranda aynı krem rengi gösteriyor.
-      Ölçüm ve ekran görüntüleri [TESTFINDINGS.md](TESTFINDINGS.md)'de.
-      **Kullanıcı kararı (2026-09-12): kartın kendisi işaretlensin.** Renklerin anlamı
-      (Y2 kararı) değişmedi, değişen nerede boyandıkları.
 - [ ] **B4.9 Program sekmesinin açılışı hızlansın, ve bu şikayetin İKİNCİ gelişi.**
       Senin satırın: *"Program kısmının açılışı daha hızlanmalı."* Aynı cümle bir
       kez B1.4 olarak ölçülüp kapanmıştı ([TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de) ve o kayıt bu turun
@@ -628,30 +515,6 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       kontrolün görünüp görünmediği hiç ölçülmedi. İlk iş babanın ekranında ve
       exe'de görüntü almak, çünkü ölçülen her şey "oradayım" derken ekran
       "değilim" diyorsa haklı olan ekrandır (tuzak 84).
-- [x] **B4.13 Havuzda alttaki kartlara ulaşılamıyor — BİTTİ (2026-09-12).** Çare iki
-      parça, ikisi de kullanıcı kararı: havuz ızgaranın kullanmadığı yere açılıyor, ve taşan
-      tepsi altında kart kaldığını söylüyor. Babanın kutusunda (1600x1000, program boşaltılmış)
-      görünen kart **19'dan 38'e**, 1920'de 23'ten 69'a çıktı; alınan yer ölçülmüş boş yerdi
-      (tablo 678,5 px, kabı 754,1 px) ve ızgara iki kutuda da kaydırmaya başlamadı.
-      Aşağısı sebebin kaydı.
-      Senin satırın: *"Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor
-      babam ve bu sebeple ilk üsttekini saçma bir yere koyuyor. Sonra alttakini alıp ardından
-      saçma konulanın yerini düzeltiyor."*
-      Açılırken üç ihtimal yazılmıştı ve **üçü de ölçülüp düştü**: deste bir gruplama değil
-      (anahtarı `lessonId` artı `size`, kartlar birbirinin aynısı), beş sıralamanın beşinde de
-      deste sayısı aynı ve destelerin kutuları hiç binmiyor, ve babanın verisinde karıştıracak
-      deste zaten yok (211 blok 205 desteye düşüyor, 199'u tek bloklu, üç bloklu hiç yok).
-      **Sebep dördüncü bir şeydi:** tepsi 94,5 px görünüyor ve içinde 922 px var, 182 kart
-      katlamanın altında kalıyor, 18 öğretmen grubunun biri sığıyor, ve tepsi kaydığını
-      söylemiyor (kaydırma çubuğunun kapladığı genişlik 0 px). Ölçüm, elenen yol ve beş
-      mutasyon [TESTFINDINGS.md](TESTFINDINGS.md)'de, karar [DECISIONS.md](DECISIONS.md)'de.
-      **Örnek okul bunu gizliyordu** ve o kalıcı bir kurala dönüştü (tuzak 119).
-      Rozet geri gelmedi: ölçüm onu isteyen teoriyi düşürdü.
-      **Çare bir gerileme açtı ve kapatıldı (aynı gün).** İlk yazımda açılış boyu ızgaranın
-      tablosuna bağlı bir `ResizeObserver` ile yeniden ölçülüyordu ve o gözlemci kartları
-      imlecin altından kaydırıyordu. Ölçüldü: değişiklikten önceki ağaçta altı koşuda altı
-      geçiş, sonrasında üç düşüş. Tetik ızgaranın şeklinden havuzun kendi içeriğine taşındı,
-      ölçüm boyamadan önceye (`useLayoutEffect`) alındı, ve kalıcı kural tuzak 121 oldu.
 - [ ] **B4.14 Havuzda desteleme açılıp kapanabilsin.** Senin satırın: *"Stacklensin ve
       stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler aynı şeyler tamamen
       aynıları stacklensin."* Cümlenin ikinci yarısı **zaten doğru** ve 2026-09-12'de
@@ -699,43 +562,11 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       ayrı bir soru: gidecek kart da işaretlensin mi, yoksa cümle yeter mi. Karar
       verilmeden yazılmaz; yazılırsa maliyeti ölçülür (hedef satır dışındaki hücrelerde
       `can-*` sınıfı yok, yani bu bedava bir CSS kuralı DEĞİL).
-- [x] **B4.17 Elde kart varken ızgara kayınca gölgesiz şerit ekranda kalıyordu —
-      DÜZELTİLDİ (2026-09-24).** Senin satırın: *"elimizde bir kart varken yukarı aşağı
-      yapıldığında gölgelenmeyen açık kalan şerit de bizim ekran ile birlikte devam
-      ediyor. onun gösterdiği yerde sabit kalması gerekir."* Sebep: hedef satırın üstünü
-      ve altını karartan iki düzlem ekran pikseliyle konuyordu ve yalnız kenara
-      yaklaşınca yapılan otomatik kaydırmadan sonra yeniden konuyordu, tekerleği hiç
-      duymuyordu. Şimdi her kaydırmada ve pencere boyu değişince yeniden konuyor
-      (`platform/drag.ts`). Test: `e2e/program.spec.ts` → "gölgesiz şerit hedef satırla
-      birlikte kayıyor", düzeltme geri alınınca 60 px sapıyor. Tuzak 123.
 
 ---
 
 ## §5. Bölüm 5 — Kısıt motoru, çözücü ve Kontrol
 
-- [x] **B5.1 Çözücüde Deney B uygulandı (2026-08-31, kırk üçüncü oturum).**
-      Önce **ölçüm aleti** yazıldı — `src/worlds.ts`'teki `gridQuality()` —
-      çünkü "bedeli yok" cümlesi tek bir dünyada (örnek okul) ölçülmüştü ve
-      depoda kaliteyi tekrar ölçen hiçbir şey yoktu (tuzak 42). `order()`'a
-      **beşinci** bir anahtar eklendi: sınıfın o gün dolu olan saatine yaslanan
-      hücre önce dener. Dört ağır dünyanın **hepsinde** önce/sonra alındı:
-      `gercek-olcek-sikisik` 410→**413** blok (sınıf deliği 339→273),
-      `gercek-olcek-kurali` 253=253 blok (delik 145→118), `parcalanmis-gunler`
-      22=22 (delik zaten 0), `gercek-olcek-imkansiz` 163→**217** blok. Hiçbir
-      dünyada blok düşmedi — kabul kapısı geçti. 21 dünyalık matris
-      değişmeden yeşil.
-- [x] **Deney A uygulanMAYACAK — karar verildi.** Öğretmeni günlere sıkıştırmak
-      deliği 274 → 227 indiriyor ama programı **eksik** bırakıyor (363/367) ve
-      süreyi 69 ms → **9 856 ms**'ye çıkarıyor. Tuzak 21'in ta kendisi.
-- [x] **B5.2 Boşluk (pencere) kuralları girdi (2026-08-31, şema v14).**
-      `maxGapsTeacher` · `maxGapsClass`, `minPerDay`'in deseninde: yalnız
-      **Kapalı / Uyar** (bir bırakmayı engelleyemez — gün yarı dizilmişken
-      her açık saat bir "boşluk"). **0, öteki dört kuraldan farklı olarak
-      birebir kullanılır** (`gapRuleActive()`), çünkü okuyucunun isteyeceği
-      sayı büyük ihtimalle tam 0. Delik tanımı tek yerde
-      (`rules.ts`'teki `gapsBetween()`) ve `gridQuality()` ile aynı cümleyi
-      paylaşıyor. Öğretmene özel kutu **yok** bu turda — okul geneli tek
-      katman.
 - [~] **B5.3 Kısıt motorunun kalan genişlemesi — ÖLÇÜLDÜ, İLK DİLİM YAPILDI
       (2026-09-26).** Beş alt madde ölçüldü (ASC.md, ROBODERS.md, babanın fotoğrafları,
       adsız fikstür, kod). Hiçbirinde babanın kullandığına dair kanıt yok. Sıra ve
@@ -755,93 +586,6 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       - **(e) Öğretmen günde en çok N sınıf:** ASC.md'de yok. Babanın aSc çıktısında MÇ bir
         günde 6 ayrı sınıfa giriyor, kanıt tersine. En sonda.
       Ayrıntı WORKLOG 2026-09-26'da. Babaya soru §8b'de.
-- [x] **B5.4 Kontrol'e Danışman uyarıları — YAPILDI (2026-08-31).** aSc kova 1
-      (`docs/asc/yardim/u60-verification.md`, beş madde). Üç madde **yeni
-      kod** oldu: `feasibility.ts`'teki `buildAdvice()` — haftadan çok gün
-      isteyen ders (`lessonNeedsMoreDays`), açık günü yetmeyen öğretmen
-      (`teacherManyBlockedDays`), hiç tekli saat bırakmayan çok bloklu ders
-      (`lessonManyBlocks`). **Overbooked** maddesi zaten `buildCapacity()`ta
-      vardı, yeni kod istemedi. **Bölünmüş gruba özel derslik** maddesi
-      kapsam dışı bırakıldı — `ClassGroup`'ta grup/bölünme alanı yok, **B6.1**
-      bekliyor. `Report.advice` / `Health.advice`, `hasProblem`'ı **etkilemiyor**
-      — aSc'nin kendi şeridi de Doğrulama/Danışman'ı iki ayrı düğme tutuyor.
-      Kontrol'e beşinci görünüm (`Danışman`) eklendi, panel `.stat-scroll` ile
-      **sınırlı**: örnek okulda 43 satır çıktı ve sınırsız bırakılsaydı %100'de
-      1201px taşardı — ölçülüp (`e2e/kontrol.spec.ts` 88, `e2e/serit.spec.ts`
-      58) düzeltildi. Dört dile de çevrildi. Testler: `feasibility.test.ts`
-      (17 yeni), `e2e/kontrol.spec.ts` 89 (4 yeni), `e2e/serit.spec.ts`
-      güncellendi.
-- [x] **B5.5 Kontrol ekranının kendisi — ÖLÇÜLDÜ, kusur yok (2026-08-31).**
-      Senin satırın: *"Kontrol kısmı çok saçma olmuş... Alt sekmede bir şeyler
-      seçiyoruz ama değişmiyor."* İlk yarısı zaten kapanmıştı (şerit artık
-      sayfayı seçiyor). Kalan yarı — "rapor hâlâ aşağı doğru uzuyor mu" —
-      ölçüldü (`e2e/kontrol.spec.ts` 88): %80 ve %100'de, **iki temada**,
-      dört görünümün dördü de `.main`'i **0px** taşırıyor. %150'de 141–174px
-      taşıyor ama bu Kontrol'e özgü değil — **aynı ölçekte karşılaştırıldı**:
-      Okul → Öğretmenler 1355px, Ayarlar → Kurallar 450px taşıyor. Kontrol
-      üçünün **en azı**. Kod yazılmadı; iddia ölçüldü ve doğrulandı.
-- [x] **B5.6 Bloklu ders sürüklerken/işaretlenirken "tek ders" gibi
-      davranıyordu — DÜZELTİLDİ (2026-08-31).** Senin satırın: *"Eğer hata
-      varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir. Bu
-      önemli. Programda bloklu bir şey alındığında ya da üzerine
-      gelindiğinde o blok kartının çift sütun seçili olmalı veya mesela
-      sürüklerken son ders kapalı gözüküyor kırmızı. bu böyle olmamalı son
-      saate koyuluyorsa son saat ve ondan bir önceki saate yani son 2
-      saate konulabilmeli."* Kod okunarak KÖK SEBEP ikisi için de bulundu —
-      "worlds.ts'te yeniden üret" ihtiyatı gereksiz çıktı: ikisi de
-      `constraints.ts`'in kısıt mantığında değil, **etkileşim katmanında**
-      yaşıyordu, `dropMap()`/`blockerDetail()` hiç değişmedi.
-      **(a) Görsel — `src/gridChrome.ts`.** İmleç haçı bir hücrenin
-      `data-col`'unu okuyordu ama hücrenin KENDİ `data-span`'ine hiç
-      bakmıyordu, yani 2 (ya da 3) saatlik bir bloğun üzerine gelince yalnız
-      bloğun BAŞLADIĞI sütun (+ başlığı + o sütunu solundan kapsayan başka
-      satırlar) yanıyordu — ikinci (ve varsa üçüncü) sütun hiç. `move()`
-      artık hovered hücrenin span'inden kapladığı bütün sütunları çıkarıp
-      her birini (başlık dahil, her satırda o sütunu örten hücre neyse)
-      aydınlatıyor; sabit `"2"` yerine `blocks.ts`'teki `MAX_BLOCK`'tan
-      türeyen bir döngü var (tuzak 78'in dersi: eşiği elle sabit yazma).
-      **(b) Bug — `src/drag.ts` + `src/components/Program.tsx`.**
-      `blockerDetail()` `hour`'u her zaman bloğun mutlak başlangıcı sayıyor
-      (doğru davranış — o hâlâ değişmedi), ama sürükleme imlecin bulunduğu
-      hücreyi olduğu gibi bu "başlangıç" olarak geçiriyordu. Günün son
-      saatine gelince blok oradan başlamaya çalışıp sığmıyor, kırmızı
-      oluyordu. `dropMap()` zaten HER (gün, saat) çifti için bir kayıt
-      üretiyor, yani "son N saatin başlangıcı" için doğru cevap `d.map`'te
-      hazırdı — yeni `clampToDay()` yardımcısı imlecin ham hücresini, blok
-      tam sığana kadar geriye kaydırıp o anahtarla arıyor. Üç yerde
-      kullanıldı: zayıf satır önizlemesi, güçlü vurgu + sebep çubuğu, ve
-      `onUp()`'ın kendisi — üçü de aynı "hangi hücreye bakılacak" sorusunu
-      soruyordu.
-      `constraints.ts` hiç değişmediği için `constraints.test.ts`'in
-      `dayEnd` testleri aynen yeşil kaldı. Yeni testler: `e2e/izgara.spec.ts`
-      ("imleç haçı 2 saatlik bir bloğun İKİNCİ sütununu da aydınlatıyor") ve
-      `e2e/program.spec.ts` ("89. Gün sonunda blok geriye kaydırılır") —
-      ikisi de `loadWorld()` ile kurulmuş belirli bir dünyada, tahmine değil
-      ölçüme dayanıyor.
-- [x] **B5.7 Öğretmenin kendi dersleri arasında takas — ÖLÇÜLDÜ VE YAPILDI (2026-09-26).**
-      `dropMap` altı durumda ölçüldü. Öğretmenin iki sınıftaki kendi dersi (sınıflar boşken),
-      iki saatlik blok iki saatliğin üstüne, aynı sınıfta iki dersin takası: üçü de zaten
-      teklif ediliyordu. Sınıf doluyken reddediliyordu, ki doğrusu bu. Eksik tek durum,
-      TODO'nun tahmin ettiği gibi, bir bloğun birden çok bloğun üstüne bırakılmasıydı: iki
-      saatlik blok öğretmenin öteki sınıftaki iki tek saatinin üstünde "iki aday" bulup hiçbir
-      şey teklif etmiyordu. Kural kullanıcıya taslak olarak gösterildi ve onaylandı: hedefler
-      bırakılan saatleri tam dolduruyorsa hepsi aynı sırayla kartın eski saatlerine geçer.
-      Birim testleri (üçü, biri eski kodla kırmızı) ve bir E2E (`program.spec.ts`, "B5.7"),
-      Chromium'da ekran görüntüsüyle görüldü. Kural [DATA.md](DATA.md)'de.
-      Eski satırlar:
-      Senin satırın: *"Öğretmenin kendi dersleri arasında değişim muhtemel olmalı
-      eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa."* Takas motoru zaten
-      var ve genel: `constraints.ts`'teki `swapBlocks()` iki bloğu da kaldırıp
-      ikisini de `check()`'ten geçiriyor, yani aynı öğretmenin iki dersi iki ayrı
-      sınıfta olsa bile mekanik olarak takas edilebiliyor, ve "sınıfsal bir
-      sıkıntı" varsa zaten reddediliyor, yani senin koşulun kodda duruyor. Eksik
-      olan mekanizma değil, takasın NE ZAMAN teklif edildiği: `dropMap()` takası
-      yalnız aday tam bir tane olduğunda öneriyor, yani bırakılan hücre birden çok
-      bloğa değiyorsa (iki saatlik bir blok iki tek saatlik dersin üstüne) takas
-      hiç teklif edilmiyor ve ekranda "olmuyor" görünüyor. İlk iş senin kastettiğin
-      durumu üretip ölçmek, çünkü bir şikayetten yazılmış plan bir sebep
-      adlandırırsa o sebep ilk ölçülecek şeydir (tuzak 101). Ölçülmeden "özellik
-      yok" diye yazılmayacak.
 - [~] **B5.8 Babanın verisinde program oluşmuyor, Roboders'te oluşuyor —
       ÇÖZÜCÜ YARISI BİTTİ (2026-09-24), VERİ YARISI BABADA.** Senin satırın: *"Her
       şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı
@@ -865,113 +609,6 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
       **Kalan, babada:** hangisi doğru, Mozaik'teki müsaitlik mi Roboders'teki mi?
       Roboders'teki doğruysa üç öğretmenin saatleri Mozaik'te açılınca program
       çıkıyor. Soru §8b'de.
-- [x] **B5.9 Kurulamayan haftada "şunu açarsan kurulur" demek — YAPILDI
-      (2026-09-24).** B5.8'den doğdu.
-      - **Ne yapıyor:** otomatik dizme takılınca program kendiliğinden ikinci bir
-        arama yapıyor. Sonuç satırının altındaki panelde neyin değişmesi
-        gerektiğini söylüyor, yol yol. Yollar dört aileden gelir: kapalı öğretmen
-        saati, günlük sınır, blok şekli, haftalık saat. Sınıfın saati hiçbir
-        yolda yok. Her yol bulunduğu haftayla gelir ve tek tıkla (tek geri alma
-        adımı) uygulanır.
-      - **Kararların:** panel satırın altında, arama kendiliğinden, yollar ayrı,
-        dört aile, sıkı biçim (tek satır ve `Ayrıntı`).
-      - **Motor:** planın dediği gibi onarımın genişletilmesi değil, kendi SAT
-        çözücümüz (`sat.ts`), çünkü yerel arama 12 saat buluyordu ve en küçüğü 4.
-        Kayıt [DECISIONS.md](DECISIONS.md)'de.
-      - **Babanın verisinde ölçülen:** "HE Cumartesi 12, KY Cumartesi 1–2, AV
-        Cumartesi 5 açılırsa kuruluyor" (4 saat), ya da 6 sınır (üç ders için
-        aynı gün 2 yerine 3, üç öğretmen için günde 10 yerine 12). İkisi de
-        CP-SAT'ın en küçüğüyle aynı boyutta, ama tarayıcıda "azı yok" kanıtlanamıyor,
-        o yüzden panel "bulduğumuz en küçük" diyor.
-      - **Sebep cümlesi de düzeldi** (`holeReason`): sınıfın kendi kapalı saati
-        artık hiç çıkmıyor.
-      - **Açık kalan:** babanın makinesinde süre (bu makinede ilk öneri yaklaşık
-        34 saniyede); blok şekli ailesi bu veride bütçesinde cevap veremiyor.
-        Süre ve yollar B5.10'da.
-- [x] **B5.10 Babanın verisi Mozaik'te de otursun: yollar, cümleler, "olmaz" ve
-      hız — YAPILDI (2026-09-25).** B5.9'un dört eksiğinden doğdu (en az yerine en
-      mantıklı, karışık çare, "azı yok" kanıtı, süre).
-      - **Yeniden ölçüm (CP-SAT, depo dışı):**
-        - Roboders'le iki fark daha çıktı: 415D Geometri'yi orada YG veriyor, ve
-          üç dersin blok şekli farklı.
-        - KY'ye dokunmadan hafta kurulmuyor.
-        - En küçük çare iki öğretmenle de 4 saat.
-        - Ayrıntısı TESTFINDINGS'te.
-      - **Kararların:**
-        - tek ölçüt yok, bütün yollar sırayla gösterilir ve seçen baba;
-        - karışık yol ve ders–öğretmen eşleşmesi ayrı yollar;
-        - worker, ana iş parçacığı yedeğiyle;
-        - kompakt panel, `Olmaz` Ayrıntı'da.
-      - **Yapılan:**
-        - Yollar, her biri babanın cümlesiyle ("KY Cumartesi 3–4. saatlere de
-          gelebilirse hafta kuruluyor."): zaten geldiği güne saat, en az saat
-          (yan yana), en az öğretmen, saat ve sınır birlikte, yalnız sınırlar,
-          dersi başka öğretmene vermek, blok şekli, haftalık saat.
-        - `Olmaz` bir değişikliği bütün yollardan çıkarıp yeniden arıyor, geri
-          alınabiliyor.
-        - Komşulukta arama.
-        - Yollar ayrı worker'larda (sayfanın kendi betiği, tuzak 136).
-      - **Ölçülen, babanın dosyası, Linux exe:**
-        - ilk öneri 5,6 s'de (önceki turda 25 s), arama 33 s'de bitiyor;
-        - en az saat 4, en az öğretmen 6 (KY), zaten geldiği gün bedel 7; üçü
-          de CP-SAT'ın en iyisi;
-        - uygulayınca 211/211 ve "Sorun yok", Ctrl+Z geri alıyor.
-      - **Açık kalan:**
-        - Babanın Windows makinesinde (WebView2) worker ve süre ölçülmedi.
-        - Ders–öğretmen eşleşmesi bu veride bulunamıyor.
-        - Sınır yolu 6 yerine 7 sınır buluyor.
-        - "Azı yok" kanıtı hâlâ yok (LP 0,39 veriyor).
-        - `Olmaz` sonrası kalite düşüyor (KY'nin Cumartesisi olmadan 8 saat,
-          CP-SAT 5).
-      - **2026-09-25 ikinci tur (B5.11):** ret sonrası kalite kapandı (5 saat),
-        sınır yolu exe'de 6 sınır buluyor, karma yol eklendi, "azı yok" bilerek
-        bırakıldı. WebView2 ölçümü babada (§8b).
-- [x] **B5.11 Babanın planını esnetmesi: cevap defteri, önizleme, karma yol —
-      YAPILDI (2026-09-25).** B5.10'dan doğdu. Kullanıcının isteği: baba öneriyi
-      okuyup öğretmenlerine soracak, bazılarına "olmaz" diyecek, sonra
-      uygulayacak.
-      - **Ölçülen (plan aşaması, CP-SAT):**
-        - Bugünkü öneri babanın dizili 199 bloğunun 140–149'unu oynatıyor.
-        - En az saatte 48–62 blok, 8 saatte 25 blok yetiyor.
-        - Kullanıcı bunu bedel yapmadı: "en az" müsaitlikte en az demek, dersin
-          yeri ve saati serbest.
-      - **Kararların (DECISIONS 2026-09-25):**
-        - cevap defteri, her soruda `Olur` ve dört türlü `Olmaz`;
-        - cevaplar planın verisi (şema v15);
-        - ızgarada önizleme;
-        - karma yol iki satır;
-        - saf el değişimi en çok üç ders;
-        - "azı yok" kanıtı bırakıldı;
-        - Hakkında'da ve yedek dosyasında aramanın ölçümü.
-      - **Yapılan:**
-        - Olmaz'ın dört türü (`teacherHours`, `teacherDay`, `teacherCap`,
-          `teacher`) ve Olur (`accepted`).
-        - Cevaplar `State.answers`'ta, v15 göçüyle.
-        - Ret sonrası arama kendi eski haftasından ve geniş komşulukla.
-        - Karma yollar (`handFew`, `handHours`).
-        - Önizleme ve cevap defteri (`Suggestions.tsx`).
-        - Soruları kopyala ve yazdır.
-        - Ölçüm kaydı (`relaxLog.ts`).
-      - **Ölçülen, babanın dosyası, Linux exe:**
-        - ilk öneri 6 s'de, arama 47–50 s'de bitiyor;
-        - KY Cumartesi Olmaz: en az saat 5 (önce 8), CP-SAT'ın en iyisi;
-        - Olur, önizleme, uygula, 348/348 saat ve "Sorun yok", Ctrl+Z;
-        - Hakkında: "6 iş parçacığında".
-      - **Açık kalan:**
-        - Fikstürde (boş ızgara) ret sonrası 6, CP-SAT 5. **2026-09-26 ölçüldü, açık:**
-          5'lik hafta 4 günlük bir komşulukta var ama 1 000 çatışmada bulunmuyor, dört
-          çare denendi (DECISIONS 2026-09-26). Aynı gün akşam beşincisi denendi: bütçesi
-          yetmeyen komşuluğu artan bütçeyle yeniden sormak. Tek hatta 5'i buldu, yedi hat
-          paralelken bulmadı ve aramayı %24 uzattı; bırakıldı (DECISIONS 2026-09-26 akşam).
-        - Karma yolun "3 ders ve 2 saat"i bulunamıyor. **2026-09-26 ölçüldü, açık:**
-          2 saat 2 dersle ve 1 saat 3 dersle haftalar var, arama kendi başına ulaşmıyor.
-        - Arama önceki turdan 15 s uzun, ret sonrası 64 s. **2026-09-26 kısaldı:**
-          exe'de 46,8–48,0 s'den 42,7–44,0 s'ye, ret sonrası 57–60 s'den 51 s'ye
-          (eşleşme yolu boşa aramıyor, karma yollar kendi hattında).
-        - Babanın makinesinde ölçüm (§8b).
-        - Yazdırma penceresinin exe'deki PDF'i kullanıcının gözüyle alınacak.
-        - Ipucu sorusu hiçbir formülde tutmuyor, tutturulunca arama kötüleşiyor
-          (tuzak 139); kod olduğu gibi kaldı.
 ---
 
 ## §6. Bölüm 6 — Veri modelini büyüten işler (aSc kova 2–4)
@@ -1018,20 +655,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 > *"başka bir makinede ölçülecek"* diye bekliyordu ve **artık burada
 > ölçülebilir**.
 
-- [x] **v2.0.1 yayınlandı.** `54403b6` + `v2.0.1` etiketi. Taşıdıkları:
-      v2.0.0'ın **veri kaybı düzeltmesi** (doğru `identifier`, tuzak 95),
-      AA turunun beş maddesi (şema v11), AC turunun altısı, AB turunun yedisi.
-- [x] **B7.10 Exe'nin "Güncellemeleri denetle"si onarıldı** (2026-08-31).
-      Depo `ders-programi` → `Mozaik` olunca yayınlanmış v2.0.2 manifestteki
-      yeni adresi reddetti: `Beklenmeyen adres: https://…`. `update.rs` artık
-      **iki** kök tanıyor, manifest **eski** adresi yazıyor (GitHub 301'liyor),
-      adres kapısı yalnız **indirilecek bir şey varken** çalışıyor, ve
-      `src/surum.test.ts` iki dosyanın anlaştığını her koşuda ölçüyor.
-      Bkz. tuzak 106.
-- [x] **B7.11 `SITE_ADRESI` 404'tü, düzeltildi** (2026-08-31). Pages bir depoyu
-      **adıyla** yayınlıyor: `…github.io/ders-programi/` → 404,
-      `…github.io/Mozaik/` → 200. Programın "en son sürüm şurada" dediği tek
-      adres bu.
 - [ ] **B7.12 Yeni sürüm yayınlanınca babanın v2.0.2'si DENENSİN.** Düzeltmenin
       o kopyaya ulaşan yarısı **manifest**; ikilinin içindeki önek
       değiştirilemez. Yayından sonra "Güncellemeleri denetle" yeni sürümü
@@ -1042,12 +665,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ölçülmedi**: job log'u admin hakkı istiyor (403). Kullanıcı log'a bakıp
       etiketi yeniden koştursun — düzeltmenin babanın kopyasına ulaşması bu
       yayına bağlı.
-- [x] **B7.15 `e2e/exe.spec.ts`'in `Mozaik-tumu.json` beklentisi geri alındı**
-      (2026-08-31, kullanıcı kararı: *ad `ders-programi-*` kalsın*). `658c019`
-      yalnız testi değiştirmişti; kod haklıydı. Ad artık bir **birim testinde
-      çivili** (`folder.test.ts`) — mutasyonla sınandı, çünkü tersi hiçbir
-      yerde yakalanmıyordu: adı değiştiren biri `prunable`'ın kalıbını da
-      değiştirir ve baba klasöründe iki nesil yedek yan yana kalır.
 - [ ] **B7.1 Exe babanın makinesinde bir kez denensin.** Bu makinede
       ölçülemeyen şeyler orada görülür: exe'nin kendini gerçekten
       değiştirmesi, planların yerinde kalması, **görev çubuğundaki yeni simge**
@@ -1075,79 +692,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       istediği oluk orada yok — testin **kendi koruması** bunu söylüyor.
       Regresyon değil, platform farkı. Karar: oluk yoksa `skip` mi etsin,
       yoksa yazıldığı makineye özel mi kalsın.
-- [x] **B7.13 Exe'nin penceresi ekranı KULLANIYOR, ve Sığdır dersleri
-      kırpmıyor** (2026-09-01). Senin satırın: *"Uygulama'da exe'de babamın
-      ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına
-      rağmen."* Sebep tahmin edilmedi, ölçüldü (tuzak 101) ve **iki** taneydi.
-      (a) `tauri.conf.json` `1600×1000` mantıksal px istiyor ve `maximized`
-      yoktu — deponun bütün düzen ölçümleri 1920'de yapılmışken exe 1600 CSS
-      px'te koşuyordu. Dolu ızgarada Sığdır'da: 1920'de 374 kartın 25'i,
-      **1600'de 315'i** `411` yerine `4…` yazıyor. (b) Sığdır satır başına
-      5,25rem ve altı ayraca .375rem, yani 1920'lik kutunun 97 px'ini ders
-      sütunlarına hiç vermiyordu. Yapılanlar: `"maximized": true`,
-      `minHeight` 700 → 640 (%150'de çalışma alanı 672), satır başı **5rem**,
-      ayraç **.1875rem** (artık `--break-w` tokeni, iki yerde birden), satır
-      başına `nowrap` + ellipsis ve daha dar dolgu, köşedeki eksen adı bir
-      basamak küçük, ve kart yazı tabanı `--ui-scale`'i **yalnız 1'in altında**
-      izliyor. Ölçülen: 1920×1032'de kırpılan kart **25 → 0**, iki eksende de,
-      ve satır yüksekliği ile tablo boyu **kıpırdamadan**. Bkz. tuzak 107.
-      Kalan ve kapanmayan: Windows %125'te ölçek 1,0 bırakılırsa kırpılma
-      sürüyor (72 sütun × ~21,6 px 1536 px'e girmiyor); çaresi Ayarlar →
-      Görünüm'den %80, ya da `Geçici görünüm`den gün gizlemek.
 - [→] **B7.8 `scripts/asc-tur.ps1` yeniden koşturulsun** → **R1**'e taşındı.
       Artık bir dağıtım işi değil, envanterin **önkoşulu**.
 - [→] **B7.9 Roboders incelensin** → **§1b** (R5 · R6 · R7). Senin
       *"her şeyden önce"* satırın onu bir maddelik iş olmaktan çıkardı.
-- [x] **B7.16 Linux exe'si — YAPILDI (2026-09-24).** Senin satırın: *"Linux exesi de
-      oluşturalım."* `npm run exe:linux` → `dist-exe/Mozaik` (4,3 MB, release derlemesi
-      1 dk 40 sn). Kararın: yalnız geliştirme ve test için, dağıtılmıyor. Bu yüzden
-      kendini güncellemiyor: `update.rs`'in `self_update_here()`'ı Windows dışında
-      indirmeyi ve takası reddediyor. Ölçülen bir tehlikeydi: ret yokken Linux kopyası
-      GitHub'dan Windows exe'sini indirip kendi üstüne yazacaktı (tuzak 126).
-      `cargo test` 25/25.
-- [x] **B7.17 Gerçek exe'yi süren araç — YAPILDI (2026-09-24).** Senin satırın:
-      *"Ardından bu exeyi açan playwright gibi iş yapan araç kuralım ki sen exe
-      üzerinden görebil her şeyi."*
-      - **Sürücü:** `scripts/exe-surucu.mjs`. Programı açar, ekran görüntüsü alır,
-        ekrandaki her denetimi `@N` referansıyla döker, tıklar, yazar, tuşlar,
-        sürükler, pencereyi boyutlar ve sayfada betik çalıştırır. Rust komutlarına
-        da `__TAURI__` üstünden ulaşır.
-      - **Nasıl çalışıyor:** Playwright WebKitGTK penceresini süremiyor, yerine
-        `tauri-driver` ve WebDriver. İstemci bağımlılıksız (`scripts/webdriver.mjs`).
-      - **Güvenlik:** her koşu sahte bir ev dizininde. Gerçek
-        `~/Documents/Ders Programı/` önce ve sonra karşılaştırıldı, değişmedi.
-      - **Süit:** `npm run exe:e2e` → `e2e/gercek-exe.spec.ts`, 5/5.
-      - **Bilinen sınır (tuzak 127):** bu makinenin WebKitGTK'sı WebDriver'ın fare ve
-        klavye benzetimini desteklemiyor. Girdi sayfanın içinde olay olarak
-        üretiliyor, yani gerçek fareye verilen cevap ölçülmüyor.
-- [x] **B7.18 Linux exe'sinin turu, babanın dosyasıyla — YAPILDI (2026-09-24).**
-      Yedi sekme ve her özellik exe'de gezildi, asıl kısmı babanın kendi planıyla
-      (sahte eve yüklendi, gerçek klasör değişmedi). Çalışanlar:
-      - otomatik dizme ve öneri paneli (babanın dosyasında `Otomatik diz` ilk
-        öneriyi 25 s'de veriyor, uygulayınca "Sorun yok", Ctrl+Z geri alıyor);
-      - havuzdan sürükleme, sabitleme, geri alma ve yineleme;
-      - Ctrl+K, `?`, tema, ölçek ve dil;
-      - planlar, alternatif program ve yedek klasörü;
-      - Hakkında ve güncelleme denetimi;
-      - kaydet ve aç, yazdırma (GTK penceresi açılıyor);
-      - kapatıp açınca verinin kalması.
-
-      Düzeltilenler:
-      - sabitleme çökmesi (tuzak 130);
-      - Hakkında'nın Linux cümlesi;
-      - dil hapı;
-      - `Otomatik diz`'in dizili derslerle yol bulamaması (yeniden dizme,
-        B5.9'un eki);
-      - dört araç kusuru (tuzak 131, 132 ve gerçek exe süitindeki yarış).
-
-      Bulgular [TESTFINDINGS.md](TESTFINDINGS.md)'de, süit 9/9.
-      - **Açık:** takas exe'de denenmedi (tarayıcı süiti ölçüyor); yazdırmanın PDF
-        dökümü ve dosya seçici elle görüldü, süit ölçmüyor (tuzak 133); öneri
-        araması WebKitGTK'da Chromium'dan yavaş (Baştan diz'de ilk öneri 51 s'ye
-        34 s).
-      - **Kalan, isteğe bağlı:** pencere şimdilik masaüstünde açılıyor. Başsız
-        koşu için `sudo dnf install xorg-x11-server-Xvfb`; sürücü `xvfb-run`'ı
-        görünce kendiliğinden kullanıyor.
 - [ ] **B7.19 `surum.yml`'e ikinci kat: etiketin SHA'sında CI yeşil mi (2026-10-08).**
       `npm run yayinla` etiketi yalnız CI'ı yeşil bir commit'e atıyor (BUILD.md). Elle
       itilen bir etiket bunu atlar; `surum.yml`'in publish işi de etiketin SHA'sındaki
@@ -1173,18 +721,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
       düşük. **Kullanıcının kararı (2026-10-09):** şimdilik düzeltme yok, `test:webkit`
       ne `kontrol`'e ne `haftalik.yml`'e giriyor.
-- [x] **B7.22 Windows'ta Sığdır kırpıyor (2026-10-09) — BİTTİ, Windows'ta yeşil.** `haftalik.yml`'nin ilk koşusunda
-      `gorunum.spec.ts:815` (babanın verisi, 1920, Öğretmen: 5 kart) ve `:841` (%125, örnek
-      okul: 25/374) tekrarda da kırmızı; Linux'ta yeşil. Babanın ekranı tam bu (Windows,
-      %100, 1920). Sebep ölçüldü: gün çizgisi günün ilk saatinin hücresine içeriden
-      çiziliyordu (kart 21,53 px, ötekiler 24,53), ve Windows'un glif ilerlemeleri kesirli,
-      Linux'unkiler tam piksel (tuzak 146). Sığdır'da günün ilk sütunu çizginin genişliğini
-      geri alıyor (`290f55d`); tavanlar indi. `haftalik.yml` 37914431289: 623/623.
-- [x] **B7.23 `haftalik.yml`'nin Windows işi öneri aramasının iki testini ayırsın
-      (2026-10-09).** İlk koşuda ikisi kararsızdı; `ci.yml`'deki `e2e-arama` gibi ayrı bir
-      adımda `--workers=1`. **Bitti (`290f55d`), Windows'ta iki test de yeşil.** Windows
-      işi sonra `windows.yml`'e taşındı ve her `main` push'unda koşuyor; `yayinla`
-      etiketten önce onu da bekliyor (`3cd0ecb`, DECISIONS 2026-10-09).
 - [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
       `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
       gibi `weight[index] = weight[index]! + 1`. **Düzeldi (`290f55d`)** ve arkasındaki iki
@@ -1199,8 +735,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ("Test: öneri değişmezi olay döngüsünü bırakıyor, tavanı ölçülen CI süresinden")
       arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
       ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. CI'da yeşil görülene kadar açık.
-- [x] **B7.25 Linux paketi yerel komut (A7, 2026-10-09).** `npm run exe:rpm`; `surum.yml`'e
-      Linux işi yok (DECISIONS 2026-10-09). Denendi: 1 dk 16 s, rpm 1 944 638 bayt.
 
 ---
 
@@ -1208,14 +742,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8a · Sende — kullanıcı kararı
 
-- [x] **Roboders hesabı — VAR** (2026-08-31). Kayıt engeli düştü.
 - [ ] **Roboders hesabı ücretli bir plan mı, süren bir deneme mi?** Deneme ise
       kaç gün kaldığı R6'nın kapsamını belirler.
 - [ ] **R6 ne zaman koşsun?** Görünür bir Chromium penceresi açılacak ve odağı
       alacak; oturumu sen açacaksın. Müsait olduğun bir zaman gerekiyor.
-- [x] **Çözücüde Deney B uygulansın mı? — UYGULANDI** (2026-08-31, B5.1).
-      "Uygula — önce ölç" dedin; dört ağır dünyada önce/sonra ölçüldü, hiçbir
-      dünyada blok düşmedi.
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
 - [ ] **Yedek dosya adı `ders-programi-*` mı kalsın, `Mozaik-*` mi olsun?**
       (B7.15.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
@@ -1260,31 +790,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8b · Babada
 
-- [x] **Babanın makinesinde Windows sürümü — CEVAPLANDI (2026-10-08): Windows 10.**
-      Makine: 4 GB RAM (muhtemelen DDR3), çok eski işlemci ve anakart, 27 inç ekran,
-      1920×1080 (kullanıcı). Exe orada açılıyor (tuzak 106). 4 GB'ta öneri aramasının
-      worker'ları ölçülmedi (aşağıdaki ölçüm maddesi).
-- [x] **Babanın Windows ekran ölçeği — CEVAPLANDI (2026-10-09): %100, kesin.**
-      Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün
-      görünmeli, bugünkü %125 kutuları (`e2e/gorunum.spec.ts`) korunur. Ayrı bir
-      "%125" E2E projesi gerekmiyor.
 - [ ] **Babanın exe'si hangi sürüm? (2026-10-08)** Ayarlar → Hakkında'da yazıyor;
       son sürüm olmalı (kullanıcı, 2026-10-09; **doğrulanmadı**, numara görülmedi). Bilinen son kayıt v2.0.2 (2026-08-31). v2.0.2 güncellemeyi eski
       `ders-programi` adresinden soruyor, v2.0.3 ve sonrası `Mozaik`'ten; depo adı ya
       da görünürlüğü bir gün değişirse hangi sürümün güncellenebilir kalacağını bu
       belirler (DECISIONS 2026-10-08, depodaki gerçek veri).
-- [x] **Baba kurulum yolunu kullanıyor mu? — CEVAPLANDI (2026-10-08): hayır, exe
-      kullanıyor** (`Kur.cmd` değil). Kurulumun PowerShell betikleri hiçbir testte
-      çalıştırılmıyor ([TESTPLAN.md](TESTPLAN.md), "Test edilemeyenler"), ama babanın
-      yolu o değil.
-- [x] **Öğretmenler programlarına Eyotek'ten mi bakıyor? — CEVAPLANDI (2026-10-09):
-      genelde Eyotek'ten.** Bu yüzden B3.8'de Eyotek'e gönderme e-postadan önce.
 - [ ] **Eyotek'e gelen program öğretmene bir bildirim olarak gidiyor mu? (2026-10-08,
       B3.8)** Push ya da SMS.
-- [x] **Turtek'e soru — SORULMAYACAK (2026-10-09).** Kullanıcının kararı: "kendimiz
-      çözeriz" (DECISIONS). Yol Eyotek'in kendi arayüzünde aranır (Eyotek turu).
-- [x] **Baba hangi e-posta hizmetini kullanıyor? — CEVAPLANDI (2026-10-09): Gmail.**
-      Gönderme yolunun önerisi B3.8'de.
 - [ ] **Vekil öğretmen (Substitution) var mı?** aSc'de 62 yardım konusu, yani
       küçük bir özellik değil. **Babaya sorulmayacak (2026-10-09):** Roboders'teki
       gerçek verisinde vekil modülünün kullanılıp kullanılmadığı R6'nın Tur 3 ve 4'ünde
@@ -1294,8 +806,6 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       (21 dünyada, her blok `blocker()`'dan geçiyor); *iyi* olduğu ölçülmüyor.
       Sorular: sınıfın günü içinde boşluk (pencere) kalıyor mu, öğretmen okula
       gereksiz gün geliyor mu, günler dengeli mi. Cevaba göre §5 şekillenir.
-- [x] **"Bu programı kullanır mıydın?" — CEVAPLANDI (2026-10-09):** cevabı babanın
-      gerçek bir haftayı Mozaik'te dizdikten sonraki geri bildirimi (§0).
 - [ ] **Müsaitlik hangisinde doğru, Mozaik'te mi Roboders'te mi?** (B5.8, 2026-09-24)
       Roboders KY ile GÇ'yi Cumartesi, AS'yi Pazar sabahı derse koyuyor, Mozaik'te o
       saatler kapalı. Mozaik'teki doğruysa hafta o hâliyle kurulamıyor (kanıtlı), en
@@ -1380,17 +890,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **Ders listesi**: fotoğraflarda program var ama "hangi sınıf hangi
       dersten kaç saat" tablosu yok. `B6.2` (aSc XML) bunu tek adımda getirir —
       `15 EYLÜL.roz` dosyasının kendisi istenebilir.
-- [x] **Gerçek gün ve zil düzeni — DOĞRULANDI** (yukarıdaki tablo).
-- [x] **Öğretmen/sınıf/derslik listesi — GÖRÜLDÜ** (18 · 20 · 8). Makineye
-      girilmesi ayrı iş; `B6.2` ya da yapıştırma kutusu.
 - [ ] **Öğretmen sınırları sorulsun**: art arda en fazla kaç saat, günde en
       fazla/en az kaç saat. Şu an hepsi 0 (sınır yok) ile geliyor ve **öyle
       kalacak** (2026-08-24 kararı): branş kısaltmasının aksine bunun "doğru
       cevabı" okuldan okula değişir, ve yanlış bir varsayılan hücreleri
       sessizce kırmızıya boyar
-- [x] **Baba gerçek bir haftayı Mozaik'te baştan sona kendisi dizsin — OLDU,
-      v0 BİTTİ (kullanıcı, 2026-10-09).** Geri bildirimi bu denemeden geldi (§0).
-      2026-10-08'deki "bitmedi" kaydı yanlış bilgiye dayanıyordu (DECISIONS 2026-10-09).
 - [ ] Babanın bilgisayarında hız kontrolü
 - [ ] Baskı gerçek kâğıda alınsın (E2E taşma olmadığını gösteriyor ama fiziksel
       çıktıya bakılmadı)
@@ -1406,46 +910,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 ---
 ### 8h · Belge turunun bıraktıkları (2026-09-11)
 
-- [x] **Karttaki raptiye dururken görünmez mi, hep görünür mü? — KARAR (2026-09-25):
-      dururken görünmez.** 2026-08-30 kaydı "hep görünür, sönük" diyordu, kod (`fb052f4`)
-      dururken görünmez yapıyor. Kullanıcı kodu seçti, kod değişmedi. Ayrıntı
-      [DECISIONS.md](DECISIONS.md).
 - [ ] **PRINCIPLES.md'deki önerilen gerekçeler onaylansın mı?** "Şu an yapılmıyor" listesinde
       beş satır ve "Nasıl çalışılır"da bir cümle "(öneri, doğrulanmadı)" işaretli
       (2026-10-08'de iki "öneri" satırı, bulut ve takvim, listeden çıktı).
       Onaylanınca işaretler kalkar.
-- [x] **`.github/surum-notu.md` eski site adresini gösteriyor — DÜZELTİLDİ (2026-09-25).**
-      `…github.io/ders-programi/` 404 veriyor, doğrusu `SITE_ADRESI` (`…github.io/Mozaik/`).
-      Tuzak 106. `surum.test.ts`'e dosyadaki ve `yayinla.mjs`'teki her site adresini
-      `SITE_ADRESI`'ne karşı okuyan bir kapı girdi, düzeltmeden önce kırmızıydı.
-- [x] **`src/platform/changelog.ts`'in 2.1.1 notları eksik — DÜZELTİLDİ (2026-09-26).** `516f963`'teki
-      renk menüsü, kart takası ve Hakkında noktası yazılmamıştı, `CHANGELOG.md`'de vardı. Üçü eklendi,
-      ve 2.1.1'in hiç çevrilmemiş dört satırı da dört dile girdi.
-- [x] **Boş ekranlar dersler için Okul'u gösteriyor — DÜZELTİLDİ (2026-09-25).** Program,
-      Kontrol ve Çıktı'nın cümleleri "Okul sekmesinden dersleri girin" diyordu, dersler Dersler
-      sekmesinde giriliyor. Cümleler kullanıcıya taslak olarak gösterildi ve onaylandı: Program
-      sekme sırasıyla Okul, Müsaitlik ve Dersler diyor, Kontrol Okul ve Dersler, Çıktı Dersler.
-      `bos-ekran.spec.ts`'in üç iddiası düzeltmeden önce kırmızıydı.
-- [x] **Havuzun boşalınca kendiliğinden kapanması — VAR, ÖLÇÜLDÜ (2026-09-25).** Eski
-      CLAUDE.md'de yazılıydı, 2026-09-11'de kodda bulunamamıştı, çünkü tercihe yazılmıyor:
-      `LessonPool.tsx` kart yokken çekmeceyi çizimde kapatıyor. Chromium'da ölçüldü, kart
-      gelince kendiliğinden açılıyor, elle kapatılmışsa kapalı kalıyor. Kod değişmedi.
-      Ayrıntı [DECISIONS.md](DECISIONS.md) ve [LAYOUT.md](LAYOUT.md).
-- [x] **Bayat kod yorumları — DÜZELTİLDİ (2026-09-25):** `App.tsx`'in başı "six sections",
-      `Program.tsx` havuzu "down the right", `App.tsx`'in marka yorumu "detailed",
-      `Appearance.tsx`'in başı ölçeği "1.00 to 1.50" diye anlatıyordu. Aynı turda `App.tsx`'te
-      iki "six" daha, `changelog.ts`'in `surum-notu.md` için "overwrites" demesi (iş akışı
-      dosyayı okuyor) ve dört sözlükle `CHANGELOG.md`'deki `src/changelog.ts` yolu düzeldi.
-- [x] **Ana E2E süiti bu turda koşulmadı.** Bir sonraki arayüz işinde ya da sürümden önce
-      `npm run test:e2e`, 2026-09-01'deki altı düşüşle birlikte. 2026-09-11'de kod refactor
-      turunun tabanı olarak koşuldu: 545/555, düşen on testin ayrımı WORKLOG'da, iki bulgu
-      TESTFINDINGS'te ve §8d'de.
-- [x] **`npm run yayinla`'nın CHANGELOG kapısı gerçek bir sürümde denenmedi — DENENDİ
-      (2026-09-26, v2.2.0).** Unreleased bloğu `## [2.2.0] - 2026-09-26` altına kapandı,
-      boş bir Unreleased başlığı kaldı. Push HTTPS kimlik bilgisi olmadığı için düştü ve
-      betik hatayı ham bir bayt dizisi olarak bastı; push SSH adresiyle yapıldı
-      (TESTFINDINGS 2026-09-26). Hata mesajı aynı gün düzeldi (`scripts/git-komut.mjs`):
-      düşen komut bir cümleyle, git'in cevabı düz metinle bildiriliyor.
 
 ---
 ### 8d · Kod refactor turunun envanterinden çıkanlar (2026-09-11)
@@ -1454,37 +922,6 @@ Envanter (refactorun Faz 0'ı) kaynağı okurken buldu. Bunlar davranış kusuru
 belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendisi ve
 önerilen sıra WORKLOG'un 2026-09-11 tarihli refactor girdisinde.
 
-- [x] **Kanca sırası.** `Availability.tsx` 142'de erken dönüyor, `useMemo`'yu 213 ve
-      222'de çağırıyor. `Print.tsx` 262'de dönüyor, `useMemo`'yu 290'da çağırıyor. Liste
-      boşken sekme açıksa ve Ctrl+Z ya da "Dosyadan aç" listeyi doldurursa React çökebilir.
-      Kaynaktan okundu, ekranda denenmedi. Önce kırmızıya dönen bir E2E yazılır.
-      Düzeltildi (2026-09-11, `511b8b4`): kancalar boş ekran dönüşünün üstünde. İki yeni
-      E2E (`musaitlik.spec.ts`, `yazdir.spec.ts`) düzeltmeden önce React #310 ile kırmızıydı.
-- [x] **Varlık panelinde ders aktarma bildirimi.** `Inspector.tsx:183-189` `returned`'ı
-      `change()`'in geri çağırımında yazıp hemen ardından okuyor. `change` bir `useReducer`
-      dispatch'i, yani bildirim büyük ihtimalle hep "0 blok" yolunu seçiyor. Tuzak 20'nin
-      deseni. `LessonEdit.tsx` aynı işi önizleme çağrısıyla doğru yapıyor.
-      Düzeltildi (2026-09-11, `492c8c2`): sayı `change()`'den önce bir önizlemeden geliyor.
-      Yeni E2E (`panel.spec.ts`) düzeltmeden önce "510 dersi AV öğretmenine geçti." okuyordu.
-- [x] **Çevrilmemiş sınır cümlesi — DÜZELTİLDİ (2026-09-25).** `constraints.ts`'teki "art
-      arda en fazla N saat" mesajı `t()`'den geçmiyordu, beş dilde de Türkçe çıkıyordu. Artık
-      komşu kuralın deseniyle çevriliyor. Yeni birim testi (`constraints.test.ts`, "cümle
-      arayüzün dilinde çıkıyor") düzeltmeden önce İngilizcede Türkçe cümleyi okuyordu.
-- [x] **ARCHITECTURE'ta iki yanlış cümle — DÜZELTİLDİ (2026-09-12).** Çözücü "en çok iki iş
-      kalemi" kurmuyor, blok boyu başına bir kalem kuruyor ve en çok üç, çünkü `solver.ts`
-      `[3, 2, 1]` üstünde dönüyor. Bu maddenin kendi atfı da bayattı: dosya bugün
-      `src/pure/solver.ts` ve söz edilen `4` ölü dalı bugünkü kaynakta yok.
-      `sanitize` `pure/constraints.ts`'te, `entities.ts` onu yalnız içe aktarıyor; dosya
-      haritasının iki satırı da düzeldi. Haritanın kendisi zaten doğruydu (96 ada 96 dosya,
-      `store.ts` bölünmesi işlenmiş, A2 kapısı tutuyor), yanlış olan yalnız bu iki cümleydi.
-- [x] **DESIGN.md 489 815 baytı bugünkü değer gibi yazıyor — DÜZELTİLDİ (2026-09-12).**
-      Tarihli ölçüm blokları geriye dönük düzeltilmedi, çünkü onlar o günün kaydı; düzelen şey
-      onları bugünkü değer gibi okutan iki yer. Blokların başı artık bugünkü sayının nerede
-      durduğunu söylüyor, ve "490 KB'lik tek dosya açılıyor" cümlesi geçmiş zamana çekildi.
-      Ayrıca aynı turda iki bayat satır daha bulundu ve düzeltildi: [LAYOUT.md](LAYOUT.md) ile
-      [DESIGN.md](DESIGN.md) hâlâ "`.pool-card` bekleyen bir blok demek" diyordu, oysa
-      2026-09-01'den beri bir deste demek. İkisi de belge kapılarından geçen türden: cümle
-      yanlış, adı geçen şey var.
 - [ ] **Doğrulanacaklar.** Okuma sırasında bildirildi, kaynaktan tek tek açılmadı.
       İlki 2026-09-26'da üretildi ve düzeldi: Dersler formunda Enter Dağılım düğmesinde
       listeyi açmıyor, dersi ekliyordu; listedeki seçenekte de öyle (liste bir portal'da ve
@@ -1514,18 +951,6 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
       dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
       `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
-- [x] **`e2e/surum.spec.ts` 107 2026-09-01'den beri kalıcı kırmızı.** Test "temiz profilde tek
-      sürüm notu var" diye yazılmış, `0df5c9d` 2.1.1 notunu ekleyince arşivde bir `details`
-      oluştu. Test kusuru, sayıyı değil değişmezi ölçmeli (tuzak 97). Kayıt TESTFINDINGS'te.
-      Düzeltildi (2026-09-11, `de86a25`): en yeni sürümün maddelerini ve tek kapalı arşivi
-      ölçüyor, arşivi açık çizmek ve sürüm sırasını çevirmek testi kırmızıya çeviriyor.
-- [x] **Dört E2E testi paralel koşuda düşüp tek işçide geçiyor.** `dil.spec.ts` 70,
-      `izgara.spec.ts` 360, `kurulum.spec.ts` 851, `renk.spec.ts` 39, dördü de depoya yazıp
-      yeniledikten sonra okuyor. Sebep ölçülecek, "yük" diye yazılmadan (tuzak 92).
-      Ölçüldü ve düzeltildi (2026-09-11, `eb3fb0f`): sebep yük değil `kapan.ts`'in dil tohumuydu.
-      `file://` altında belge başında localStorage'a dokunan bir betik sonraki yenilemeyi
-      zaman zaman bayat ya da boş depoyla başlatıyor (tuzak 108). Tohum yerine
-      `locale: 'tr-TR'`. Planlar 98 ve 292 ile dil 83 dahil yedi test dört işçide beşer kez: 40/40.
 - [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
       2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
@@ -1540,19 +965,6 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       hesap, komut listesi `ui` her değiştiğinde yeniden kuruluyor ama içeriği ona bağlı değil.
       `App.test.tsx:16`'da kullanılmayan bir `eslint-disable` yorumu var, o bir
       `exhaustive-deps` uyarısı değil.
-- [x] **Program'da bırakınca çıkan bildirim, dil yenilemesiz değişince eski dilin kelimesini
-      arıyor (2026-09-11) — DÜZELTİLDİ (2026-09-25).** `Program.tsx`'in `drop` geri çağırımı bildirimi
-      `evictionNotice(...).replace(t('dönecek'), t('döndü'))` ile kuruyor ve `useCallback`
-      bağımlılıklarında `t` yok. Program `Activity` içinde sekme değişince sökülmüyor, bu yüzden
-      Ayarlar'da dil değişince geri çağırım programdaki ilk değişikliğe kadar eski `t`'yi tutuyor.
-      Üretildi: Türkçe kurulup İngilizceye geçilince "the 510 · MÇ lesson will go back to the
-      tray", yenilendikten sonra "went back". Kayıt TESTFINDINGS'te.
-      2026-09-25'te ölçülünce kusur daha genişti: `.replace` yenilemeden sonra da Fransızcada
-      hiç tutmuyordu ("retournera"), Almanca çoğulda cümleyi değiştirmiyordu, İspanyolca
-      çoğulda "ha vuelton" yazıyordu. Geçmiş zaman artık kendi anahtarı
-      (`evictionNotice(…, true)`), ve geri çağırım `t`'yi hiç kullanmıyor. Yeni E2E
-      (`program.spec.ts`, "dil yenilemesiz değişince bırakma bildirimi…") düzeltmeden önce
-      "retournera" okuyordu.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
       `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
       sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da
@@ -1576,16 +988,6 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       Dosya reddedilir, ama localStorage'dan açılışta reddetmek programı açılmaz yapar. (d)
       Şema 15 ile `parseState`'te bir kerelik göç, (a) ya da (b)'nin kuralıyla. (e) Bırakılır,
       elle düzenlemenin bedeli olarak. (f) Kontrol bu anahtarları raporlar, veriye dokunulmaz.
-- [x] **%150'de Program şeridinde "İşlemler" düğmesi taşıyor (2026-09-11) — KAPATILDI (2026-09-12).** `serit.spec.ts`
-      220 2026-09-01'den beri kırmızı ve haklı: IZGARA grubundaki "İşlemler" şeridin sağ
-      kenarını 80,7 px aşıyor (düğme 120 px) ve şerit kaymıyor. Öteki altı şerit sığıyor.
-      Sebep `516f963`'ün eklediği Renk grubu, bir kopyada gizlenince test yeşil. Ürün kusuru,
-      tuzak 48'in sözü. Renk grubunun yeri ya da şeridin daralma kuralı için bir tasarım
-      kararı bekliyor. Kayıt TESTFINDINGS'te.
-      Kapatıldı (2026-09-12): önce %100'de ölçüldü ve orada taşma yoktu, yani kusur hedef
-      kullanıcının ölçeğinde görünmüyordu, ama %125'te pay bir düğmeden dardı. Renk grubunu
-      menüye indirmek yerine şeridin daralma kuralı yazıldı (LAYOUT.md, şerit standardı 6),
-      çünkü tek bir grubu taşımak bir sonraki grupta aynı kusuru doğururdu. Karar DECISIONS'ta.
 - [ ] **`e2e/exe.spec.ts` 248 bugün kırmızıya döndü, sebebi TARİH (2026-09-12).** Test
       `/2 Eylül 2026/` arıyor ve derleme damgası bugün `12 Eylül 2026` diyor, yani dize
       aranan deseni İÇERİYOR ve Playwright iki öğe bulup strict mode ihlali veriyor.
@@ -1614,24 +1016,6 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       açabilir. Başlangıç betikli 800 turda her bayat açılış 3 sn içinde düzeldi ve kalıcı kayıp
       olmadı, ama boş görünen bir oturumda yapılan değişikliğin gerçek planın üstüne yazılıp
       yazılmadığı ölçülmedi.
-- [x] **Yavaş işlemcide ilk kare tercihlerden önce boyanıyor (2026-09-11) — KAPATILDI (2026-09-12).** `main.tsx`
-      tercihleri `<html>`'e modül betiğinin başında yazıyor. 4 kat yavaşlatılmış Chromium'da
-      ilk boyama (yaklaşık 150 ms) bu yazımdan (yaklaşık 213 ms) önce geliyor, 18 açılışın
-      17'sinde. Karanlık tema kayıtlıysa ilk kare 9 açılışın 8'inde açık zeminle boyanıp
-      karanlığa dönüyor. x1'de olmuyor. Kapatmak bir davranış değişikliği, örneğin tercihleri
-      modülden önce koşan küçük bir betikle yazmak, ve karar bekliyor. Kayıt TESTFINDINGS'te.
-      Kullanıcı kararı (2026-09-12): `<head>`'e klasik bir betik, yalnız tema. Ölçüldü,
-      karanlık profilde x4'te açık ilk kare 9/9'dan 0/9'a indi, `dist` +693 bayt. Tuzak 108
-      kapısı ayrıca ölçüldü ve geçildi. Karar DECISIONS'ta, ölçümler TESTFINDINGS'te.
-      Ölçek, yoğunluk, şerit ve müsaitlik saati `main.tsx`'te kaldı, çünkü düzen kaymaları
-      0,0002'nin altında ve görünür bir fark üretmiyorlar.
-- [x] **Refactor turunda karar bekleyen üç soru.** Kanca sırası ve varlık paneli düzeltmeleri
-      Faz 2'den önce ayrı commit'lerle mi yapılsın. Prettier ile toplu bir biçim commit'i
-      yapılsın mı. Yalnız testten çağrılan fonksiyonlar (`validHours`, `blockStart`, `evict`,
-      `deletionSummary`, `activePlan`, `nextPlanName`) testleriyle silinsin mi. Kullanıcı
-      kararı (2026-09-11): üçüne de evet. Kanca sırası ve varlık paneli önce, her biri
-      kırmızı bir E2E ile ve ayrı commit'te. Prettier ayrı ve yalnız başına bir commit.
-      Altı fonksiyon testleriyle silinir. Commit'ler `docs/claude-md-bolme` dalına gider.
 
 ### 8e · Erişilebilirlik taramasının bıraktıkları (2026-09-12)
 
@@ -1683,21 +1067,6 @@ ertelendi.
       kullanıcının panosu, yani beklenen biçimde olmak zorunda değil. `parseState.ts`
       bozuk girdiye zaten bozuk girdiye `null` diyor ve testleri var; ölçülmemiş olan
       `import.ts`.
-- [x] **Örnek dosya testi dersin şeklini ve ayarları da doğrulasın.** (2026-09-12'de
-      yapıldı. Her sürüm dosyası için dersin şekli, ayarlar, öğretmenin ve sınıfın
-      kutuları, renkler ve program zarfı iddiaya döndü, yanına bir alanı çıkarılmış
-      dosyaları okuyan bir bölüm eklendi, ve örnek dosyaların varsayılanla çakışan
-      değerleri ölçülebilir olsun diye değiştirildi. o gün `store.ts` adını taşıyan dosyanın (bugün `parseState.ts`) mutasyon skoru 63,7'den
-      71,6'ya çıktı, ayrıştırma yarısı 77,8'den 88,9'a. Ölçüm TESTFINDINGS'te.
-      Çıkardığı iki ürün kusuru §8g'de.) Mutasyon koşusu
-      (2026-09-12) aynı dosyanın ayrıştırma yarısında 130 hayatta kalan mutant buldu ve
-      hepsi tek cümleye çıkıyor: test ızgarayı ve adları doğruluyor, dersin şeklini ve
-      ayarları doğrulamıyor. Eklenecek iddialar ve onları isteyen satırlar:
-      `readLessons`'ın sürüm sınırları (`version >= 9`, v13'ün dörtten üçe çevirmesi,
-      v7/v8'in `pairs`'i, v6 ve öncesinin `blockSize`'ı, v8'in `second` bayrağı),
-      `readDays`, gün listesi boşken varsayılana düşme, zil saatleri, öğretmenin sınır
-      kutuları, program zarfının kimliği ve adı, ve v1/v2 göçü. Sürüm dosyaları zaten
-      var, eksik olan iddia.
 - [ ] **`library.ts`'in üç boşluğu.** Aynı koşudan: (a) `renamePlan`, `setDraft` ve
       `removePlan`'ın üçünde de "yalnız adı geçen plan değişir" hiçbir yerde
       doğrulanmıyor, üçünde de koşulu `true` yapmak süiti yeşil bırakıyor; (b)
@@ -1717,16 +1086,6 @@ ertelendi.
       aynı çıktı, birim süiti de mutasyonla yeşil kaldı. Yani ya eşdeğer bir mutant ya da
       farkı gösteren durum bulunamadı. Her mutant için bu kadar iş var, ve okuyarak
       verilen bir karar bu turda bir kez zaten yanlış çıktı.
-- [x] **`solver.ts` mutasyonla ölçülemiyor, iki satır yüzünden — BİTTİ (2026-09-12).**
-      `src/pure/solver.ts:530-531` `classOnDay[g] = classOnDay[g]! + 1` biçiminde yazıldı
-      (`!` kaldı, `noUncheckedIndexedAccess` açık), dosya `stryker.config.json`'ın listesine
-      girdi, `_comment_solver` kalktı ve [TESTPLAN.md](TESTPLAN.md)'in mutasyon listesi aynı
-      commit'te güncellendi, çünkü A9 kapısı iki listeyi küme olarak karşılaştırıyor.
-      Davranış birebir aynı: `solver.test.ts` 93/93, ve çözücü stresi 7/7 ile kalite sayıları
-      kayıtlı değerlerin aynısı (`gercek-olcek-sikisik` sınıf deliği 273).
-      Aşağısı sebebin kaydı. Stryker'in enstrümantasyonu `classOnDay[g]!++` biçimini
-      ayrıştıramıyordu (`UpdateExpression` içinde `TSNonNullExpression`) ve bütün koşuyu
-      düşürüyordu, o yüzden çözücü hiç ölçülmemişti. Ölçüm TESTFINDINGS'te, 2026-09-12.
 - [ ] **Süiti inceltme, Faz 4'te.** "E2E süiti çok mu büyük" sorusu duruyor ama cevabı refactor
       bitmeden aranmayacak, çünkü ağın kendisi refactorun güvencesi. Sıra: önce dosya ve
       test başına süre ölçülür, sonra en pahalı yüzde on mutasyonla sınanır, sonra
@@ -1747,19 +1106,6 @@ ertelendi.
 
 ### 8i · Klasör turundan çıkanlar (2026-09-12)
 
-- [x] **`store.ts` bölündü (2026-09-12), parçaları doğrudan yeni yapıya indi.**
-      Altı modül: `pure/parseState.ts` (kaydedilmiş dosyanın okuyucusu ve göçler),
-      `pure/undo.ts` (geri al yığını), `platform/planStore.ts` (planın deposu ve yedek
-      zinciri), `platform/download.ts` (diske inen dosya), `platform/usePlans.ts` (plan
-      kitaplığı işlemleri) ve `platform/useStore.ts` (kutu, otomatik kayıt, kısayol).
-      İlk ikisi katman düzeltmesi: ikisi de saftı ve `platform/`'da duruyordu.
-      Bölmeden önce `src/storeContract.test.ts` yazıldı, beş değişmezin hepsi orada.
-- [x] **Araçların kalanı kuruldu (2026-09-12), biri hariç.** C3 demet analizi
-      (`rollup-plugin-visualizer`, bayrak arkasında, sayıları minify öncesi ve bu
-      sınır yazılı), C4 `size-limit` (iki eşik, `kontrol`'ün içinde, mutasyonla
-      sınandı), C5 tip farkında ESLint (dört kural, `strictTypeChecked`'ın 1228
-      bulgusu sınıf sınıf okunarak seçildi, lint artık `kontrol`'ün parçası),
-      C7 Dependabot artı `pr.yml` (bir PR'ın üstünden süiti geçiren ilk iş akışı).
 - [ ] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
       komut mu olsun yoksa mutasyonun yanında mı dursun, ve `kontrol`'e girsin mi.
       Ölçüm turunun görüşü ayrı komut yönünde (kapsam bir kapı değil bir harita),
@@ -1772,23 +1118,6 @@ ertelendi.
 `BİLİNEN KUSUR` adlı vakada çiviliydi. 2026-09-25'te düzeldi, vaka adıyla kırmızıya döndü
 ve yerini doğru davranışı soran bir teste bıraktı.
 
-- [x] **v1 ve v2 yolu sınıfları normalize etmeden geçiriyor — DÜZELTİLDİ (2026-09-25).** `pure/parseState.ts`'teki
-      `migrateV2toV3` sınıfları çıplak bir `asArray` ile alıyor, yani v3 ve
-      sonrasının aynı liste üstünde koşturduğu `asBox` ile `spreadColors`'tan
-      geçmiyorlar. Sonucu iki tane. Sınıfın günlük kutusu `null` yerine `undefined`
-      geliyor ve Ayarlar → Kurallar'ın `!== null` soran süzgeci (`Rules.tsx:75`) bir
-      v1 ya da v2 yedeği açılınca bütün sınıfları "kendi sınırı olan sınıflar"
-      tablosunda sayı hücresi boş olarak listeliyor. Ve hiçbir sınıf renk almıyor,
-      hepsi paletin ilk rengiyle boyanıyor (iki dosyanın iki sınıfı için de
-      `#c3a2cd` ölçüldü), oysa aynı renksizliği taşıyan v3 ve v4 dosyaları 0 ve 1
-      alıyor. Renk bu programda bir kimlik ([DATA.md](DATA.md)). Etkisi yedeğin
-      açıldığı oturumla sınırlı, çünkü ilk kayıttan sonra dosya bugünkü yoldan
-      okunuyor. Çaresi muhtemelen tek satır: o iki listeyi ana yolun geçtiği
-      okuyuculardan geçirmek. Ölçüm TESTFINDINGS'te, 2026-09-12.
-      Düzeltme tek satır oldu: `migrateV2toV3` sınıfları v3 ve sonrasının `asBox` ve
-      `spreadColors`'undan geçiriyor. "BİLİNEN KUSUR" vakası adıyla kırmızıya döndü ve doğru
-      davranışı soran bir teste çevrildi, eski kaynakla kırmızı. v1 ve v2 örnek dosyası
-      Chromium'da açıldı: iki sınıf iki renk, "Günde aynı ders" boş, Kurallar listesi boş.
 
 ### 8j · Denetimin bulguları (2026-09-26)
 
@@ -1801,66 +1130,6 @@ ve ekran görüntüsü [DENETIM.md](DENETIM.md)'de, maddenin sonunda yazılı b�
 Kullanım kolaylığı sorunları ve öneriler orada, burada yalnız kusurlar. Veri kaybı
 sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
-- [x] **DK8 Bir günü kaldırmak ya da günlük ders sayısını düşürmek dizili ve sabitli dersleri sorusuz siliyor.**
-      Şiddet: veri kaybı (koşullu). Örnek okulda Pazar'ın işareti kalkınca 65 saat,
-      65'i sabitli, havuza döndü. Günü geri işaretlemek getirmiyor. Ctrl+Z odak onay
-      kutusundayken çalışmıyor (`isTextInput()` her INPUT'u yazı kutusu sayıyor), yalnız
-      üst çubuktaki Geri al düğmesi kurtarıyor. DATA.md'nin "Bilinen tek istisna"
-      cümlesiyle ve PRINCIPLES "Veri kaybı olmaz" ile çelişiyor. DENETIM A1.
-      Kapandı 2026-09-27, dced6e4. Test: ayarlar.spec.ts 32'nin üç vakası (kaybı soruyor, Ctrl+Z geri getiriyor, günlük ders sayısı), storeContract.test.ts onay kutusu vakası, entities.test.ts settingsLoss.
-- [x] **DK9 "Ders adları"na az ad yazmak günü kısaltıp dersleri siliyor.**
-      Şiddet: veri kaybı (koşullu). Dört ad yazınca 433 yerleşimden 245'i ve 36 sabitleme
-      sorusuz kalktı, "Günlük ders sayısı" kutusu 12 göstermeye devam etti. DENETIM A1.
-      Kapandı 2026-09-27, b4c6079. Test: ayarlar.spec.ts 32 "ders adlarına az ad yazmak günü kısaltmıyor" ve "fazla ad", entities.test.ts hourLabels.
-- [x] **DK11 Öğretmeni ve dersi olmayan bir dosya geçerli sayılıp planı boşaltıyor.**
-      Şiddet: veri kaybı (onaydan sonra). `teachers` ve `lessons` alanları silinmiş bir
-      plan dosyası Dosyadan aç ile "Yedeği yükle"den sonra 0 öğretmen, 0 ders ve 0
-      yerleşimle yükleniyor, geri al kapalı. Onay sorusu dosyanın içeriğini söylemiyor.
-      DENETIM E6.
-      Kapandı 2026-09-27, 536528f. Test: temel.spec.ts 29 "öğretmeni ve dersi olmayan dosya eksik diye reddediliyor" ve "yükleme sorusu dosyayı açık planla yan yana sayıyor", fixtures.test.ts "Dosyadan aç kapısı" vakaları.
-- [x] **DK1 Sınıf ve derslik panelinde Ad kutusuna tıklayıp çıkmak adı değiştiriyor.**
-      Şiddet: yanlış sonuç. Kutunun `defaultValue`'su başlık için biçimlenmiş ad ("320
-      sınıfı", "A dersliği") ve `rename()` blur'da değişikliğe bakmadan yazıyor
-      (`src/ui/Inspector.tsx`). Her açıp çıkışta bir "sınıfı" daha ekleniyor. DENETIM P1.
-      Kapandı 2026-09-27, 46011b2. Test: panel.spec.ts 87 "sınıfın Ad kutusuna girip çıkmak adı değiştirmiyor" ve "dersliğin Ad kutusuna girip çıkmak adı değiştirmiyor".
-- [x] **DK5 Durdurulan öneri araması "yol bulunamadı" diye bitmiş gibi sunuluyor.**
-      Şiddet: yanlış sonuç. Fikstürde arama iki saniyedeyken Durdur: "Sınıfların saatlerine
-      dokunmadan bir yol bulunamadı." Sürdürülünce altı yol buluyor. Durdurulmuş bir
-      aramanın inceltilmemiş yolu da sıradan bir yol gibi kalıyor. DENETIM P12, P13.
-      Kapandı 2026-09-27, 61cb429. Test: otomatik.spec.ts 22 "durdurulan öneri araması durdurulduğunu söylüyor ve sürdürülebiliyor", relaxWorker.test.ts.
-- [x] **DK7 Kontrol'ün hükmü ve Durum'u kapalı saatteki dersleri görmüyor.**
-      Şiddet: yanlış sonuç. Dokuz ders kapalı saatteyken hüküm "Sorun görünmüyor …
-      Program dizilebilir.", şerit "0 engel, 0 uyarı", aynı anda "Sorunlar (9)" ve kırmızı
-      çip. DENETIM K1.
-      Kapandı 2026-09-27, ed0e158. Test: feasibility.test.ts "kapalı saatte kalmış ders sorunu KIRMIZI yapıyor ve sayıyor" (hard, hasProblem), kontrol.spec.ts "kapalı saatte kalan ders sayılıyor ve sebebi yazıyor".
-- [x] **DK4 Geri almadan sonra gerekçe satırı olmayan bir başarıyı söylüyor.**
-      Şiddet: metin. Öneriyi uygula, Ctrl+Z: satır yeşil "Öneri uygulandı ve program
-      yerleştirildi" diyor, çip "7 ders sığmıyor". Exe'de de üretildi. Aynı aile: Okul'da
-      geri alınan bir sıralamanın cümlesi. DENETIM P12, O7, T4.
-      Kapandı 2026-09-27, 98e8a56. Test: otomatik.spec.ts 22 "geri alınan önerinin başarı cümlesi kalmıyor" ve "geri alınan dizmenin cümlesi kalmıyor", sira.spec.ts 61 "geri alınan taşımanın cümlesi kalmıyor"; Linux exe'sinde sürücüyle görüldü.
-- [x] **DK2 Olmayan bir takasın gerekçesi takas ortağını gösteriyor, asıl engeli değil.**
-      Şiddet: metin. MÇ'nin 310'u 431'in üstüne: "MÇ Çarşamba 10 saatinde 431 sınıfında",
-      oysa engel 431'in dersliğinin o saatte dolu olması. DENETIM P6.
-      Kapandı 2026-09-27, 5ec5fc5. Test: constraints.test.ts "reddedilen takasın cümlesi asıl engeli söylüyor, takas ortağını değil"; tarayıcıda denetimin adımıyla görüldü.
-- [x] **DK10 Daha yeni sürümün plan dosyası "okunamadı" diye reddediliyor.**
-      Şiddet: metin. "Daha yeni bir sürümle yazılmış" dalı yalnız paket dosyasında
-      çalışıyor (`src/ui/App.tsx`), `e2e/temel.spec.ts` bugünkü cümleyi bekliyor. DENETIM E6.
-      Kapandı 2026-09-27, 36cf42f. Test: temel.spec.ts 29 "bilinmeyen (ileri) şema sürümü tahmin edilmiyor" (yeni cümleye çekildi), fixtures.test.ts "daha yeni sürümün dosyası okunamadı değil yeni sayılıyor".
-- [x] **DK12 Kimya'nın kısaltması dört dilde "kim?" diye çevrilmiş.**
-      Şiddet: metin. `src/leaf/lang/*.ts`'te `Kim` anahtarı "Who", "Wer", "Quién", "Qui".
-      Müsaitlik şeridindeki "Kim" ile Kimya'nın kısaltması tek anahtara düşüyor. DENETIM X2.
-      Kapandı 2026-09-27, a77b751. Test: i18n.test.ts "bir kısaltma aynı yazılan bir cümleye düşmüyor: Kimya Who değil" ve "her yerleşik kısaltmanın dört dilde de karşılığı var".
-- [x] **DK13 Dersler şeridinin toplamı çevrilmiyor.**
-      Şiddet: metin. İngilizcede "TOTAL 99 ders · 433 saat". §8d'deki "`t()`'den geçmeyen
-      JSX metinleri" şüphesinin üretilmiş bir örneği. DENETIM X2.
-      Kapandı 2026-09-27, c9c66e5. Test: dil.spec.ts 82 "Dersler şeridinin toplamı çevriliyor".
-- [x] **DK3 Yatay kaydırınca Program ızgarasının köşe hücresi saat başlıklarının altında kalıyor.**
-      Şiddet: görsel. 40 px kaydırmak yetiyor, "ÖĞRE" okunuyor. DENETIM P11.
-      Kapandı 2026-09-27, 011af8d. Test: program.spec.ts 3 "yatay kaydırınca köşe hücresi saat başlıklarının üstünde kalıyor".
-- [x] **DK6 Müsaitlik'te öğle arasından sonraki saatin başlığı saatsiz ve kaymış.**
-      Şiddet: görsel. Öğle arası günden güne değişince 6. sütunun saat kutusu boş kalıyor
-      ve numara yaklaşık 7 px aşağı iniyor. DENETIM M3.
-      Kapandı 2026-09-27, 4f072ad. Test: musaitlik.spec.ts 10 "saati boş kalan sütunun numarası ötekilerle aynı hizada" (Saatler kapalı ve açık).
 
 ### 8k · Refactor analizinin bıraktıkları (2026-10-08)
 
@@ -1897,21 +1166,6 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 **Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
 
-- [x] **Refactor adım 0 · belge kaydı.** WORKLOG'un girdisi, bu bölüm ve DECISIONS'ın
-      kaydı. `tsconfig.tsbuildinfo` git'ten ayrı bir commit'le çıkar.
-      Bitti 2026-10-09, `refactor/yapi` dalında: "Belgeler: refactor analizinin kaydı,
-      planı ve kararları" ve "tsconfig.tsbuildinfo git'ten çıktı".
-- [x] **Refactor adım 1 · yalnız testler (RF16, RF17, RF2'nin ilk yarısı).** RF16:
-      derlenmiş betiğin klasik bir worker olarak derlendiği (`e2e/temel.spec.ts`) ve
-      öneri aramasının Chromium'da worker'da koştuğu (`e2e/otomatik.spec.ts`). RF17:
-      `withGlobalTauri` (`src/surum.test.ts`) ve Program sekmesinin gizlenince
-      sökülmediği (`e2e/program.spec.ts`). RF2: `maxConsecutive` ile `maxPerDay`'i tek
-      başına bağlayan dünyalar (`src/relax.test.ts`) ve değişmez üretecinin ilişki ve iki
-      sınırla genişlemesi (`src/invariants.test.ts`). Üretim koduna dokunulmaz. Adım 6'nın
-      önkoşulu.
-      Bitti 2026-10-09, `refactor/yapi` dalında, beş "Test:" commit'iyle (RF16, iki RF17,
-      iki RF2; konuları WORKLOG'un 2026-10-09 refactor girdisinde). Her test bir mutasyonla kırmızıya döndü, analizin sekiz
-      mutasyonunun sekizi de artık kırmızı (WORKLOG 2026-10-09). `npm run kontrol` yeşil.
 - [ ] **Refactor adım 2 · RF2'nin ret sayısı, RF3 ve gecelik mutasyon tabanı.** Önce
       ayrı bir içerik commit'i: `RelaxResult`'ta düz bir `rejected` sayısı (aramanın
       kurduğu ama `verifySuggestion`'ın reddettiği hafta), ve `invariants.test.ts`'in
@@ -1978,23 +1232,6 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       kapsam altında 402 saniye. 2026-10-09'da `low-power` profilinde 391,6 saniye. Sessiz
       bir pencerede ve `performance` profilinde tek başına ölçülür, TESTPLAN'ın cümlesi
       sayıyla düzelir.
-- [x] **RK8 Öneri aramasının worker testi CI'da paralel parçada koşuyor.** Kapandı
-      (2026-10-09): kullanıcının kararıyla test `ARAMA_TESTLERI` listesine girdi, `e2e-arama`
-      işinde öteki ikisiyle sırayla koşuyor. `--list` ile seçim 3, kalan 623, toplam 626.
-      CI'da henüz koşmadı (dal itilmedi). Sonra liste kalktı: arama testleri `@arama`
-      etiketiyle seçiliyor (RK9).
-      `e2e/otomatik.spec.ts`'in "öneri araması Chromium'da worker'larda koşuyor" testi
-      (2026-10-09) `ci.yml`'nin `ARAMA_TESTLERI` listesinde değil, yani dört çekirdekli
-      bir runner'da öteki Playwright worker'larıyla aynı anda koşuyor. Worker'lar beş
-      saniyede hazır olamazsa arama ana iş parçacığına düşer ve test kırmızıya döner.
-      Yerelde üç koşuda yaklaşık 2 saniyede yeşil, CI'da henüz koşmadı. Seçenekler:
-      listeye eklemek ya da ilk CI koşularını izlemek.
-- [x] **RK9 Başlık listesi kayıyordu.** `ci.yml`'nin "a test cannot silently drop out"
-      cümlesi yanlıştı: listede başka bir başlık eşleştikçe yeniden adlandırılan bir test
-      sessizce paralel parçalara dönüyordu, ve main'den gelen `windows.yml`'in kopyasında
-      worker testinin başlığı hiç yoktu. Önce `--list` ile başlık sayan bir adım kondu,
-      sonra (kullanıcının kararı) üç teste Playwright'ın `@arama` etiketi verildi ve iki
-      liste de sayma adımı da kalktı. Kapandı 2026-10-09.
 - [ ] **RK10 Dört belgenin tarif satırı CLAUDE.md'dekiyle aynı cümle değil.** CONVENTIONS
       "Her `docs/` dosyası başlığının hemen altında tek cümlelik bir ... satırı taşır, ve
       CLAUDE.md'deki yönlendirme satırı aynı cümledir" diyor. Tutmayanlar: `ASC.md`,
@@ -2033,142 +1270,12 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 ve derin import kuralı; adım 2'nin süre ölçümleri temiz koşulda (`scripts/temiz-kosul.sh`):
 `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon koşusu, dosya başına tahmin.
 
-## §9. Ham notlar — senin kendi satırların
+## §9. Ham notlar
 
-Bütün turların kaynağı. **Hiçbir satır silinmedi**; her satırın yanında nereye
-gittiği yazıyor. Kapalı olanların çoğu kod yazılarak değil **ölçülerek**
-kapandı — o yüzden nerede kapandığı da yazılı.
-
-### 9a · Hâlâ AÇIK olan satırlar → numaralı maddeye dönüştüler
-
-| Senin satırın | Nereye gitti |
-|---|---|
-| her şeyden önce. tasklara ASC ve Robodersin tekrardan her inciği cıncığının feature'nın incelenmesi lazım. | **§1'in tamamı** (R1–R9) — her şeyin önüne alındı |
-| Program tarafı da tuval gibi word gibi olsun hareket ettirme vesaire eğer olabiliyorsa. | **B4.2** — tuval artık Program ızgarasının kendisi |
-| Ayarlar sectionunun kendine has kendi içinde simetrik olma koşuluyla designi olabilir. | **B2.1–B2.3** (§2) |
-| Arama kısmına bir şey yazınca arama bloğu genişliyor genişlemesin. | **B1.6** — dosyanın son satırıydı, hiçbir tura girmemişti |
-| Uygulama'da exe'de babamın ekranında program kısmında derslerin hepsi gözükmüyor sığdır olmasına rağmen. | **B7.13** — kapandı: pencere maximize + Sığdır'ın genişlik iadesi (tuzak 107) |
-| Ayarlar hakkında kısmında sağa sola kaydırma olmasın. | **B2.5** — önce ölçülecek |
-| Görsel çıkartma | **B3.1** |
-| Çıktıda ayrı ayrı birden fazla pdf oluşturma. | **B3.2** |
-| Excele çıkartma. | **B3.3** |
-| Çıktıda eposta ve whatsapptan atma opsiyonu. Öğretmenlerin teli ve epostanın. | **B3.4** — şema v12 |
-| Çıktıda her ama her zaman simetri çok önemli. | **B3.6** — ölçülmedi |
-| Benden çıktılar için foto iste eğer örnek fotolarda atmadıysam. | **§8a** — senden isteniyor |
-| Kontrol kısmı çok saçma olmuş. biraz daha düzgün olmalı. | **B5.5** — yarısı kapandı |
-| Program otomatik dizmeye bakmak lazım. | **B5.1** — ölçüldü, karar sende |
-| ASC ve Robodersi playwright ile inceleyip oradaki güzel featureları bize ekleyelim. | **§1** — ilk turu yetersiz bulundu, tam envanter isteniyor |
-| Babama indirdim exeyi zip virüs algılandı. .exeyi açarken de window engelledi. | AB6 azalttı; ekranın kendisi → **B7.3** |
-| Sanırım cloud tabanlı bir şey kuracağız babam öyle istedi... dockerda falan küçük yer kaplayan bir cloud sistemi kuralım. | **§8a** — kural çelişkisi (ilke 2 · yasak liste "bulut senkronizasyonu"), CLAUDE.md kararı bekliyor |
-| Kullanım kolaylığı ve kullanım tarzı bakımından ASC'den, Robodersten, Word, Paint, Excel, Powerpoint, Adobe programları gibi yerlerden ilham... | **R10** (§1d) |
-| Statik bir site olduğundan kolayca aslında ücretsiz bir şekilde internete de yükleyebiliriz, deploylayabiliriz. | zaten var — `dist-site` + GitHub Pages (**B7.2**); §8a'daki bulut maddesine not düşüldü |
-| Çıktı alanında sağdaki seçeneklerin bazıları alttaki şeride gidebilir, sağ tarafta yerden tasarruf etmiş oluruz. | **B3.7** |
-| Ayarlardaki zil ve günler okul ile alakalı bir şey olduğuından okul sekmesine... Kurallar sekmesi de aynı şekilde... | **B2.7** — §1 bitmeden karara bağlanmayacak |
-| Babamın ekranı 27 in. 1920x1080... dersliği yok ibaresi kalkması lazım... Sınıfların türü olmalı... o sebeple her şeye uygun ama en çok da babama uygun olsun ölçeklemeler. | ölçekleme → **B2.8** · "derslik yok" ibaresi → **B4.6** · sınıf türü zaten **B4.3b**'de var |
-| Ayrıca hakkında kısmında what's new gibi olmalı. babam her güncelleme alındığında neyin değiştiğini soruyor... | **B2.9** |
-| Eğer hata varsa düzelt. 2 derslik bir blok kesinlikle 1 ders değil 2 derstir... son 2 saate konulabilmeli. | **B5.6** |
-| Ayarlarda her sectionun görüntüsü değişebiliyor olsun... Önizleme şeklinde görelim onları. | **B2.10** |
-| Programda bir kartı kırmızı sarı veya yeşil blokların üzerinden gezdirirken çok kasma oluyor. | **B4.7** — İKİNCİ kez geliyor (§9b'de 2026-09-01'de kapanmış), sebebi 2026-09-12'de ölçüldü |
-| Program kısmının açılışı daha hızlanmalı. | **B4.9** — İKİNCİ kez geliyor, B1.4 olarak bir kez ölçülmüştü |
-| Gerekirse web stacki ile uygulama stacki ayrılmalı bu çok büyük bir şey ama gerekiyorsa yapılacak. | **§8a** — koşullu, koşulu B4.9 |
-| Öğretmenin kendi dersleri arasında değişim muhtemel olmalı eğer sınıfsal ya da başka bir şeysel bir sıkıntı yoksa. | **B5.7** — takas motoru var, teklif edilme koşulu ölçülecek |
-| Stacklensin ve stacklenmesin diye havuzda seçenek olsun. Sadece aynı türler... | **B4.14** — ikinci yarısı zaten doğru, istenen anahtar |
-| babamda programa koyduğumuzda derslerin ... yazmasının sebebi sınıf isimleri çok uzun. | **B4.15** — ölçüldü: yalnız Sığdır'da, 200 kartın 195'i |
-| havuzda tek ders ile çift ders bloklarının arasındaki oran bir bölü iki gibi değil | **B4.16** — ölçüldü: örnek okulda 1'e 2, babanınkinde 1,22 |
-| Yenilik olduğu vakit ayarların üzerinde nokta var ama hakkında kısmında yok. | **B2.11** — doğru, kaynağı kodda görüldü |
-| Program kısmında sağ üstteki işlemlerde programı boşalt kırmızı olmalı ya da işte önemli bir işlem. | **B4.10** — zaten kırmızı, görünen ağırlığı ölçülecek |
-| Program kısmında renkleri ayarlama olmalı sınıfa göre öğretmene göre ona göre buna göre. | **B4.11** — özellik var, bulunabilirlik bulgusu |
-| kartları kaydırırken başka bir kartın üzerine gelip koyma yani değiştirme var ya... yani kırmızı mı turuncu mu falan. | **B4.8** — performans değil görünürlük, 2026-09-12'de ölçüldü |
-| Her şeyden önce program kısmının çalışıyor olması gerek. Babam roboderste aynı dersleri aynı hocaları aynı müsaitlikleri girmesine rağmen roboderste program oluşurken bizde oluşmuyor. Bunu çözmeliyiz. | **B5.8** — çözücü güçlendi; veri aynı değil ve bizimki kanıtlı imkânsız, soru §8b'de · **B5.9** doğdu |
-
-### 9b · Kapanmış satırlar — ve nerede kapandıkları
-
-```
-Linux exesi de oluşturalım.                                       -> [x] B7.16, 2026-09-24, yalnız geliştirme ve test için
-Ardından bu exeyi açan playwright gibi iş yapan araç kuralım ki sen exe üzerinden görebil her şeyi. -> [x] B7.17, 2026-09-24, tauri-driver + WebDriver
-elimizde bir kart varken yukarı aşağı yapıldığında gölgelenmeyen açık kalan şerit de bizim ekran ile birlikte devam ediyor. onun gösterdiği yerde sabit kalması gerekir. -> [x] B4.17, 2026-09-24, gölgeler tekerleği duymuyordu
-Programda havuzdaki stacktakileri kartlardan alttakilere ulaşamıyor babam... -> [x] B4.13, 2026-09-12, sebep tepsinin boyu, deste değil
-Websitesinde programda kartları kaydırırken çok kasma oluyor.             -> [x] 2026-09-01, drag başlangıcı 125 -> 46,2 ms
-aynı şey daha da az olsa da uygulamada da oluyor. uygulamada daha çok koyulabilir yerlerin üzerine gelince hesaplama olunca oluyor. -> [x] 2026-09-01, dropMap + boya yolu
-uygulamanın logosunun aşağıda nasıl gözüktüğünün fotosonu attım onun düzelmesi lazım. ayrıntılı logo kullanılmalı. -> [x] 2026-09-01, yalnız 16 sade; 20+ ayrıntılı
-Dersler sınıftan kısmında branş seçmenin önünde branş yazıyor onu düzelt. -> [x] 2026-09-01, görünür etiket kalktı; aria-label kaldı
-Derslerin blok saatleri 2 3 ve 4 de olabilsin.                    -> [x] şema v9, Lesson.blocks
-Branş isimleri değiştirme de olsun.                               -> [x] renameSubject() (cascade'li)
-Sıralamada aşağı yukarı işareti düzgün olsun.                     -> [x] B1.2 (2026-08-31)
-Öğretmenin bilgisine girip bir sınıfı başka bir hocaya aktarma.    -> [x] AC5, transferLesson()
-Aynı şekilde öğretmenin bilgilendirmesine girip de yapılabilsin.   -> [x] AC5, Inspector düzenler oldu
-ASC derslerinde ekleme ya da değiştirme kısmına bak.               -> [x] AB8, docs/asc/ekran/
-Uygulamanın windows çubuğundaki simgesi büyük simge olsun.         -> [x] AB5, eşik 20 -> 32
-Babamın windowsu çok büyük, ölçeklendirmeyi azaltmamız lazım.      -> [x] AB4, kök 13px + %80 basamağı
-Dosyadan aç biraz sıkıntılı gibi ya da yavaş.                      -> [x] ÖLÇÜLDÜ: parseState 0,65 ms.
-                                                                        Yavaş değil; sürtünme onay diyaloğu (bilerek)
-Çıktıda blok dersler programdaki gibi birleşik görünsün.           -> [x] Print.tsx colSpan (415 · 495)
-Readmenin ingilizce olması ve githubtaki her şeyin ingilizce.       -> [x] AB7
-Ayarlarda görünüm kısmı düzenlensin, infolar çok uzun.             -> [x] AB2, en uzun .hint 438 -> 126
-Hareket ve Dil solda olmalı.                                       -> [x] AB1
-Hiçbir yerde sağdaki bloklar sağa sola hareket etmesin.            -> [x] AA2 + AB3
-Listelerde ekleme kısmı ayrı blok olsun, sadece çizgi olmasın.      -> [x] AA1
-Müsaitlikteki programların satırlarının uzunluğu artsın.            -> [x] AC2, 42 -> 54,3 px
-Ayarlardaki bölüme özgü ayarlar o bölümün şeridinde sağ üstte.      -> [x] AB1
-Çıktıdaki sağ blokların aşağı yukarı gitmesi babam için zor.        -> [x] AB3, üç kaydırıcı -> bir
-Öğretmenler listelerde branşlarda kısaltmalar.                     -> [x] otuz dördüncü oturum
-Program kısmında branşlar kısaltmalar olsun sol tarafta.            -> [x] otuz dördüncü oturum
-Programda derslere sağ tıklayınca seçenekler gelsin.                -> [x] program.spec.ts 86, yedi kalem
-Okul tarafında yeni ekleme bloğu simetrik olmalı.                   -> [x] AC1, beş ekranda eşit
-Dersler öğretmenden tarafında branş ayrıca yazıyor, gereksiz.       -> [x] ÖLÇÜLDÜ: zaten kapalıydı
-Programda satır/sütun/gün sabitleme sağ tıkla açılsın.              -> [x] AC5, "Toplu sabitle"
-Programda satır ghostlama / anlık kapatma, günler için de.          -> [x] AC5, "Geçici görünüm"
-Tüm programı sabitleme, programlar arası değiştirme.                -> [x] AC4, Izgara + kitaplık menüleri
-Program sectionu açılırken bi' yavaşlama oluyor.                    -> [x] B1.4 ÖLÇÜLDÜ, teori çürütüldü
-Listelerdeki açıklamaların hizaları da aynı olsun.                  -> [x] B1.3 ölçüldü, sapma YOK
-Müsaitlikteki alttaki programla üstteki benzer olsun.               -> [x] AC2
-Arama kısmını düzelt, en sağda saçma sapan bir çizgi var.           -> [x] B1.2, visibility: hidden
-Filtrelere başka filtreler de getir, çoktan aza ifadelerini kaldır. -> [x] loadStatusFacet (fb052f4)
-Dersi düzenlemede dersi başka bir hocaya verme de olmalı.           -> [x] AC5
-O raptiye işareti hover edildiğinde gelsin şeffaf olmasın.          -> [x] AC3 (karar: hep görünür, sönük)
-Sağ tıkta da sabitleme özelliği olsun.                              -> [x] AC5
-Derslerde öğretmene/sınıfa göre filtre olması saçma.                -> [x] ÖLÇÜLDÜ: zaten kapalıydı
-Saat açma kapama çalışmıyor müsaitlikte.                            -> [x] B1.1 (2026-08-31), tuzak 102 · 103
-```
-
-### 9c · X turu (2026-08-28) · on iki satır, on ikisi de bitti
-
-> Kurulumda Derslikler Öğretmenler ve SInıfların yanında 1 2 3'ü kaldır. → X1
-> Tüm Listeleri de olabildiğince birbiriyle simetrik ve uyumlu yap. → X2
-> Sınıflar listesinde ad niye o kadar kaymış ve ayrıca o kadar uzun. Derslikte de çok uzun. Uzun olması daha iyiyse beni ikna et ve öyle kalsın. → X2
-> Sol üstteki logonun küçüğü kullanılsın. → X3
-> İkinci barın açılıp kapanması ayarlarda bir ayar olsun. → X10
-> İkinci barın en başındaki yazıdan sonra gelen çizgi her sectionda aynı yerde olsun ve yazı ortalansın gerekirse ona uygun bir yazı seçilsin. → X4
-> Öğretmenin tek bir branşı varsa seçme tuşu açılmasın dersler sectionu öğretmenden seçeneğinde, varsa tabii ki açılsın. Başlıkta branşı da yazsın. → X5
-> Programda blok saatlerinin yeni mantığından dolayı önizleme artısı kaymış durumda. Foto örnek fotolarda. → X6
-> Programda kartların üzerinde gözüken kaç tane olduğunu gösteren rozet kalksın. → X7
-> Yazdırmada yazıları büyük yapınca yazdırma bozuluyor. Önizleme doğru olmasına rağmen. → X8
-> Öğretmenler kısmında ve yazdırma kısmında ve başka diğer yerlerde de yan bloklar çok uzun ve sırf onlardan dolayı tüm sayfanın uzunluğu artıyor buna bir çözüm bul. → X9
-> Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. Sectionları artırabilir azaltabilir düzeni değiştirebilir her şeyi yapabilirsin. → X11, sonra Y6
-
-### 9d · Y turu (2026-08-28) · on satır, onu da bitti
-
-> Branşlar kuruluma gelsin. → Y2
-> Branşlarda yanda hazır eklenebilirleri ekleyelim. → Y3
-> Kurulum müsaitlik falan işte üst taraftaki sectionların da isimleri daha güzel hale getirilebilir. → Y1
-> Kurulum öğretmenlerde kurulum durumu dersler sekmesine gidinize gerek yok. Hatta direkt onu da silebilirsin çok fazla kaydırma olmuş gereksiz. → Y4
-> Kurulum özeti ya da özet vebenziren çevrilebilir o. ya da artık ileride nasıl adlandıracaksak. → Y4
-> Öğretmenler Sınıfflar dersliklerde yazdığı gibi derslerin içinde genelin yanında da toplam dersler yazsın. → Y10
-> Kontrol tarafında hepsi sorunlar kapasite biraz fazla gereksizler gibi ya düzgün şekilde onları doldur ya da öyle gereksiz yapma. ayrıca çok aşağı doğru gidiyor daha mantıklı bir çözüm bulunabilir mi? → Y7
-> Listelerdeki satırlar en sona kadar gitsin. Böyle cücük kadar oldular güzel de gözükmüyor. → Y9
-> Listelerin yanındaki bloklar kesinlikle sağ sol oynatma olmasın adamakıllı ortalansın ve sığdırılsın. → Y8
-> Ayarların altındaki sectionları da düzenle. Cesur ve fazla değişiklik yapabilirsin. → Y6
-> Tüm sectionları cesurca her şeyi değiştirebilsirsin. → Y1–Y10'un tamamının izni
-
-### 9e · AA turu (2026-08-29) · beş satır, beşi de bitti — şema v10 → v11
-
-> Listelerde ekleme kısmı ayrı blok olsun. aynı özetin ayrı blok olduğu gibi, yani sadece çizgi olmasın. → AA1
-> Özetler içlerindeki bilgilerin uzunluklarına göre uzunlukları değişebilir ama en fazla tam ekranın uzunluğu kadar olsun ondan fazla uzun olmasın eğer liste çok uzunsa işte kaydırma o özetin içinde olsun. → AA2
-> Özetteki hatalar özetin en üstüne gelsin. Hata gidince yok olsun. → AA3
-> Sınıfların özel olarak bir günde aynı dersten kaç saat girme opsiyonu olsun. → AA4
-> Branşların kısaltma varsayılanı varsayılan ismi en üste liste katgeorisine gitsin. → AA5
+[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.
 
 ---
+
 ## §10. ARŞİV
 
 Biten turlar tarih sırasıyla [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, oturum başında okunmaz.
