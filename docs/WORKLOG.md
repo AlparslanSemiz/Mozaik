@@ -111,6 +111,52 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 
 ---
 
+## 2026-10-09 (gece) · Veri kaybı: VK1, VK2 ve `useHttpsScheme`, `fix/veri-kaybi` dalı
+
+**Başlangıç.** `main` b75e707'den. Kaynak: test oturumunun PLAN.md'si ve
+VERI-KAYBI-BULGU.md'si (`~/GitHub/Mozaik-test/scratch/test-plan/`).
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Exe: useHttpsScheme açıkça false, köken http://tauri.localhost testle kilitli". Bugünkü
+  değer ölçüldü: anahtar yoktu, kilitli tauri-utils 2.9.3'te `#[serde(default)]`, yani
+  `false`; Windows'ta ölçülmüş köken `http://tauri.localhost` (`surum.test.ts`, kimlik testi)
+  bununla aynı. Değer değişmedi. `true` ve anahtarın silinmesi iki mutasyonla kırmızı.
+- "Kayıt: bayat pencere ötekinin işini silmiyor, dolu depo ekranda söyleniyor (VK1, VK2)".
+  Yol ölçülerek seçildi: `file://`, Chromium, aynı profilde iki sayfa; `storage` olayı,
+  BroadcastChannel ve Web Locks üçü de ikinci sayfaya ulaştı (`isSecureContext` true).
+  `storage` seçildi, çünkü yalnız bir pencere veriyi gerçekten değiştirince tetikleniyor;
+  kilit, kullanılmayan ikinci sekmeyi baştan dışarıda bırakırdı. İlk hâli açık planın
+  anahtarına bakıyordu ve ölçümde yanlış alarm verdi: taze profilde ilk sekmenin açılış
+  yazımı ikinciyi kilitledi. Artık değer karşılaştırılıyor, yalnız açık plan ve plan
+  listesi sayılıyor. Kapı depo katmanında (`libraryStore.ts`), klasör yazımı da ona bakıyor.
+  Kapanan sekme yalnız bekleyen bir yazımı boşaltıyor. Dolu depo kırmızı şeritte;
+  klasöre `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`.
+- "Exe: tek kopya, ikinci açılış var olan pencereyi öne getiriyor (VK1)". Bulunan bir
+  etkileşim: `apply_update` yeni sürümü eskisi kapanmadan başlatıyor, yani tek kopya
+  kilidiyle yeni sürüm kendini ikinci kopya sayıp kapanır ve güncelleme programı kapalı
+  bırakırdı. Yeni sürüm `--guncellendi` ile ve stdin'ine bağlı bir boruyla başlıyor,
+  borunun kapanmasını (eskisinin bitmesini) en çok 20 s bekliyor. Yalnız std.
+- "Test: gerçek exe'de ikinci açılış kapanıyor, kurtarma kopyası sonraki açılıştan sağ çıkıyor".
+
+**Ölçümler.** Linux ikilisi (`target/release/ders-programi`, aynı hedef klasör): eklentisiz
+75f3ddd 4 355 032 bayt, eklentili 5 238 920 bayt, +883 888 (%20,3); Linux'ta eklenti
+D-Bus (zbus) getiriyor, Windows'ta adlandırılmış mutex, yani babanın exe'sindeki artış
+ayrı ölçülecek. Açılış süresi: kirli, ölçülmedi (`temiz-kosul.sh`: prizde değil, yük 3,35).
+
+**Kanıtlar.** E2E `iki-kopya.spec.ts` 4/4; mutasyonlar: dinleyici yok, değer
+karşılaştırması yok ve dolu depo sessiz kırmızı; koşulsuz flush ve depo kapısının kalkması
+yeşil (ikinci katmanlar, ilk katmanları ayrıca sınanıyor, depo kapısını `otherWindow.test.ts`
+ölçüyor). `exe:e2e` 13/13. Eklentisiz ikiliyle "ikinci açılış" kırmızı (ikinci kopya
+kapanmadı); kurtarma yazımı bozulmuş derlemeyle VK2 testi kırmızı. `cargo test` 28/28, devrin
+iki testi dahil.
+
+**Kapsam dışı kalan.** TB7 (test oturumunun haberi): kapanan sekmenin son değişikliği
+klasöre inmiyor, `beforeunload`'daki eşzamansız yazım bitmeden sayfa kapanıyor. Dokunulmadı.
+
+**Koşulmayan testler.** Windows (exe ve E2E), mutasyon, `ekran`.
+
+---
+
 ## 2026-10-09 (gece) · Bakım: `yayinla`'nın yeri, `useRowOrder`'ın `t`'si, App'in susturması, zebra analizi
 
 **Başlangıç.** `main` d3178dc'de, temiz. `~/GitHub/Mozaik-ozellik` worktree'si,

@@ -730,6 +730,18 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       **O koşu bitmedi (TESTFINDINGS 2026-10-09):** 360 dakikalık iş tavanında iptal oldu,
       5 639 mutantın 3 645'i denenmişti, kalan tahmin ~20 sa. Tam koşu bu işe sığmıyor;
       seçenekler (parçalara bölmek, artımlı koşu, listeyi daraltmak, yerel koşu) kullanıcıda.
+- [~] **B7.27 Veri kaybı: iki kopya (VK1) ve dolu depo (VK2), `useHttpsScheme` (2026-10-09).**
+      Test oturumunun bulguları (`test/kapsam`, PLAN.md). `fix/veri-kaybi` dalında düzeldi:
+      tarayıcıda başka pencere açık planı ya da plan listesini farklı bir değere yazınca bu
+      pencere yazmayı bırakıp söylüyor (`storage` olayı, `file://`'da üç yol ölçülerek
+      seçildi), kapanan sekme yalnız bekleyen yazımı boşaltıyor; dolu depo kırmızı şeritte,
+      klasöre oturuma özel kurtarma kopyası; exe'de tek kopya (`tauri-plugin-single-instance`),
+      güncellemenin devri boruyla; `useHttpsScheme: false` açıkça yazılı ve testli.
+      **Kalan:** Windows exe'de iki kopya ve boyut ölçülmedi (Linux ikilisi +883 888 bayt,
+      %20,3, D-Bus); açılış süresi "kirli, ölçülmedi" (prizde değil, yük 3,35); kendini
+      güncellemenin devri yalnız birim testli, gerçek bir güncellemeyle denenmedi; sonraki
+      oturum kurtarma kopyasının varlığını söylemiyor; TB7 (kapanan sekmenin son
+      değişikliği klasöre inmiyor) bu dalın dışında.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
