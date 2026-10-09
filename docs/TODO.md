@@ -1346,10 +1346,12 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 
 **Faz 1 · veri kaybı**
 - [→] B1 iki kopya, B3 kota: `fix/veri-kaybi` dalında (K9).
-- [ ] **TP3 Kapatırken bekleyen kayıt (B2).** 400 ms'lik `SAVE_DELAY` içinde kapanan sekme.
+- [x] **TP3 Kapatırken bekleyen kayıt (B2).** 400 ms'lik `SAVE_DELAY` içinde kapanan sekme.
       Ölçüldü: `beforeunload` koşarsa değişiklik kalıyor, koşmazsa (süreç öldü) kalmıyor; ikincisi
-      sözleşme. Bugün hiçbir test yok. E2E, `file://`. Exe'de pencereyi kapatmanın WebDriver
-      yolu yok (`plugin:window|close not allowed by ACL`): elle. —
+      sözleşme. `e2e/kapanis.spec.ts` (depo, yeşil) ve `klasor.spec.ts`'te klasör yarısı
+      (BİLİNEN KUSUR, TB7); ikisi de sayfanın saatini durdurup bekleyen yazımı önce doğruluyor,
+      ikisi de mutasyonla kanıtlı. Exe'de pencereyi kapatmanın WebDriver yolu yok
+      (`plugin:window|close not allowed by ACL`): exe'nin yarısı elle.
 - [ ] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
       ya ret ya tutarlı plan, asla istisna. `npm test`'te kısa, gece uzun. Kullanıcı bu fazda
       istedi, yani pure turundan önce bugünkü yollarla yazılır; tur yolları taşır.
@@ -1436,6 +1438,15 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       fuzz yoklaması, sonra elle: `weeklyHours` −5 ya da 10⁹ taşıyan bir ders olduğu gibi
       açılıyor (2,5 ise 3'e yuvarlanıyor), dosya reddedilmiyor.
       Test TP4'te "BİLİNEN KUSUR".
+- [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
+      Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
+      kapanışı `useFolder.ts`'in `beforeunload` flush'ı karşılamalı, ama flush eşzamansız bir
+      yazımı yalnız başlatıyor ve sayfa yazım inmeden gidiyor. Sitede beş denemenin beşinde
+      ölçüldü (programı açmayan aynı kökenli bir sayfadan okunarak). Veri kaybolmuyor: depo
+      tutuyor ve bir sonraki açılış klasörü yazıyor; kaybolan, klasörün kapanış anında güncel
+      olması. Exe'de aynı yol Tauri'nin eşzamansız köprüsünden geçiyor, ölçülmedi. Test
+      `klasor.spec.ts`'te "BİLİNEN KUSUR". VK2 ile aynı dosyaya dokunuyor: `fix/veri-kaybi`
+      dalına haber verilmeli.
 
 ## §9. Ham notlar
 

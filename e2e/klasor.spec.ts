@@ -259,6 +259,56 @@ test.describe('74. Nereye kaydedilsin', () => {
     await expect(line).toBeVisible();
     await expect(line).toContainText('Klasöre yazma izni geri alınmış');
   });
+
+  // BİLİNEN KUSUR (TODO §8l, TB7; test programı TP3). The folder writes two
+  // seconds after the last change, and a tab that closes inside those two
+  // seconds is meant to be covered by `useFolder.ts`'s `beforeunload` flush.
+  // It is not: the flush STARTS an asynchronous write through the file handle
+  // and the page is gone before the write lands. Measured five times out of
+  // five (2026-10-09), read from a page of the same origin that does not run
+  // the program, because the program's own next opening writes the folder
+  // again and would hide the loss. The change is not lost: the store kept it
+  // (asserted below), and the next opening carries it to the folder. What is
+  // lost is the folder being up to date when the tab closed, which is the one
+  // promise the folder makes.
+  //
+  // The clock is paused so the two-second write cannot fire first; the test
+  // asserts that the write was still pending. When the flush is fixed, the
+  // `not.toContain` below goes red by name: turn it around and drop this label.
+  test('BİLİNEN KUSUR: 2 s dolmadan kapanan sekmenin değişikliği klasöre inmiyor', async ({
+    page,
+  }) => {
+    await fakePicker(page);
+    await page.clock.install();
+    await page.goto('/');
+    await openData(page);
+    await page.getByRole('button', { name: 'Klasör seç…' }).click();
+    await expect(page.getByText(/klasörüne yazıldı/)).toBeVisible();
+
+    const now = await page.evaluate(() => Date.now());
+    await page.clock.pauseAt(now + 1);
+
+    await page.getByRole('button', { name: 'Okul', exact: true }).click();
+    await page.locator('.step', { hasText: 'Derslikler' }).click();
+    await page.getByPlaceholder('Derslik adı, örn. A').fill('Kapanış2');
+    await page.getByRole('button', { name: 'Ekle', exact: true }).click();
+    await expect(page.locator('table.list input').first()).toHaveValue('Kapanış2');
+    expect(
+      (await disk(page))['ders-programi-tumu.json'] ?? '',
+      'klasör yazımı bekliyor olmalı',
+    ).not.toContain('Kapanış2');
+
+    const context = page.context();
+    await page.close({ runBeforeUnload: true });
+
+    // Same origin, and nothing here runs the program.
+    const reader = await context.newPage();
+    await reader.goto('/manifest.webmanifest');
+    expect(await reader.evaluate(() => localStorage.getItem('ders-programi') ?? '')).toContain(
+      'Kapanış2',
+    );
+    expect((await disk(reader))['ders-programi-tumu.json'] ?? '').not.toContain('Kapanış2');
+  });
 });
 
 test.describe('74b. Desteklemeyen tarayıcıda — özellik yok ve bunu SÖYLÜYOR', () => {
