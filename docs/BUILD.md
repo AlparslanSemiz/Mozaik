@@ -287,7 +287,7 @@ bir seçenek olarak tartışılabilir ([DECISIONS.md](DECISIONS.md)).
 hâli, `dist-exe/Mozaik`. Yalnız geliştirme ve test için var: yayınlanmıyor ve
 kendini güncellemiyor (aşağıda). İşi gerçek pencereyi sürmek: `scripts/exe-surucu.mjs`
 onu açar, ekran görüntüsü alır, tıklar, yazar, sürükler ve sayfada betik çalıştırır,
-`e2e/gercek-exe.spec.ts` de aynı yoldan dokuz şeyi sınar. Sürücü `tauri-driver`
+`e2e/gercek-exe.spec.ts` de aynı yoldan programın kendisini sınar (neyi sınadığı [TESTPLAN.md](TESTPLAN.md)'de). Sürücü `tauri-driver`
 (`cargo install tauri-driver --locked`) ile sistemin `WebKitWebDriver`'ı üstünden
 çalışır. Program her koşuda sahte bir ev dizininde açılır (Belgeler ve İndirilenler
 ile), gerçek klasörlere dokunmaz. Sürücünün oturum kaydı ve sahte evi

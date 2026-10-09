@@ -1123,10 +1123,12 @@ ertelendi.
 
 ### 8i · Klasör turundan çıkanlar (2026-09-12)
 
-- [ ] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
+- [x] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
       komut mu olsun yoksa mutasyonun yanında mı dursun, ve `kontrol`'e girsin mi.
       Ölçüm turunun görüşü ayrı komut yönünde (kapsam bir kapı değil bir harita),
-      karar kullanıcıda. Kurulmadan önce cevap beklenecek.
+      karar kullanıcıda. Kurulmadan önce cevap beklenecek. **Kuruldu (2026-09-12):**
+      `npm run kapsam` ayrı komut, eşiksiz, `kontrol`'de değil; gerekçesi `vite.config.ts`'te.
+      Tabanı test programında (§8l, TP24).
 
 ### 8g · Şema göçünden çıkan ürün kusurları (2026-09-12)
 

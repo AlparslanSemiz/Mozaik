@@ -17,6 +17,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
+| Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
 | CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde, her biri ayrı bir runner'da), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
 | Windows | `.github/workflows/windows.yml` | her `main` push'unda, haftalık koşuda ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı), öneri aramasının `@arama` etiketli testleri ayrı adımda sırayla. Siteyi kilitlemez; `npm run yayinla` etiketi onun da yeşilini bekler |
@@ -81,6 +82,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Erişilebilirlik | `e2e/erisim.spec.ts` | eksik etiket, yanlış rol, atlanan başlık düzeyi, klavyesiz kaydırma |
 | Mutasyon | `stryker.config.json` | testlerin kendisi: hangi kural bozulunca hiçbir şey kırmızıya dönmüyor |
 | Görüntü | `e2e/ekran.spec.ts` | test değil, bakılacak kanıt |
+| Kapsam | `vite.config.ts`'in `coverage` listesi, mutasyonla aynı dosyalar | hiç koşmayan satır; koşup ölçülmeyeni mutasyon görür |
 
 ### Hızlı
 
@@ -351,7 +353,8 @@ köprüsünün orada olduğu, `data_dir_path`'in gerçek yeri söylediği, otoma
 kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, Linux
 kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
-yazdığı (tuzak 132), "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
+yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
+uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
 sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
@@ -446,7 +449,7 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 
 | Ne | Bugün neyle sınanıyor | Neden yetmiyor |
 |---|---|---|
-| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `haftalik.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (2026-10-08'de eklendi, henüz koşmadı), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
+| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `windows.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (her `main` push'unda ve haftalık, ilk koşusu 2026-10-09, TESTFINDINGS), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
 | Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
 | Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği %100 (2026-10-09, kesin). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
 | Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |

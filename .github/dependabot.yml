@@ -1,12 +1,12 @@
 # Bağımlılık güncellemesi: otomatik BİLDİRİM, otomatik güncelleme değil.
 #
 # Uzun ömürlü bir proje ve tek bakımcısı var, yani "bir gün oturup bakarım"
-# demek "bakmam" demek. Dependabot haftada bir bakar, bir PR açar, `pr.yml`
-# süiti koşturur ve karar insana kalır. Renovate yerine bu seçildi: GitHub'ın
+# demek "bakmam" demek. Dependabot haftada bir bakar, bir PR açar, `ci.yml`
+# PR'ın dalındaki her push'ta süiti koşturur ve karar insana kalır. Renovate yerine bu seçildi: GitHub'ın
 # kendi içinde, kurulacak bir uygulama yok, ve istenen şey zaten bir bildirim.
 #
-# Gruplama bilerek geniş: on dokuz geliştirme bağımlılığı için haftada on dokuz
-# PR, bakılmayan on dokuz PR demektir. Küçük sürümler tek PR'da gelir, ana
+# Gruplama bilerek geniş: yirmiyi aşan geliştirme bağımlılığı için haftada bir PR
+# her biri, bakılmayan bir PR yığını demektir. Küçük sürümler tek PR'da gelir, ana
 # sürümler ayrı, çünkü ana sürüm okunarak alınır.
 version: 2
 updates:

@@ -264,8 +264,9 @@ pub fn swap(exe: &Path) -> Result<(), String> {
 /// moment between the check and the rename, and that is precisely the case
 /// where the program must still be where it was.
 fn swap_files(exe: &Path, yeni: &Path, eski: &Path) -> Result<(), String> {
-    // A leftover from an earlier update. Renaming onto an existing file fails
-    // on Windows, so this has to go first.
+    // A leftover from an earlier update. Rust's rename replaces an existing
+    // file on current Windows, but not one that is still held open, and an
+    // old copy that has not quit yet holds its own file: so this goes first.
     let _ = fs::remove_file(eski);
 
     fs::rename(exe, eski).map_err(|e| format!("Eski sürüm kenara alınamadı: {e}"))?;
@@ -592,8 +593,8 @@ mod tests {
 
     #[test]
     fn a_leftover_from_last_time_does_not_block_the_swap() {
-        // Windows refuses to rename onto an existing file, so the second
-        // update in a row would fail without the remove.
+        // A leftover `.eski` must not stop the second update in a row; on
+        // Windows it can still be held open by the copy that has not quit.
         let s = Scratch::new("leftover");
         let exe = s.exe();
         fs::write(&exe, "eski program").unwrap();
