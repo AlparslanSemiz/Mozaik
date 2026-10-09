@@ -41,16 +41,15 @@ ve 2026-10-09.
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
-4. A turu bitti: A1, A2, D (GitHub Actions), A3 ve A4 (`npm run test:webkit`), A6 (rpm,
-   kapta). A7 (Linux işi `surum.yml`'de) kullanıcının kararında. Kullanıcının onayını
-   bekleyen üç bulgu: Windows'ta Sığdır kırpıyor (B7.22), haftalık Windows işinde öneri
-   aramasının iki testi ayrılsın (B7.23), mutasyon 2026-09-24'ten beri koşamıyor (B7.24).
-   B7.20'nin (Dependabot) analizi sohbette, birleştirme yok. Bundan sonra iş `main`'e
-   itilir ve CI'ın sonucu `gh run view` ile okunur (CLAUDE.md, "Push ve CI").
-5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b (otomatik mod) bitti. Eyotek turunun planı
-   sohbette, onay bekliyor. Tur 1'in aSc ve Eyotek web yarısı
-   başlayabilir, Roboders'in canlı yarısı kullanıcının "başla" demesini bekliyor.
-   1 ile paralel, onun ön şartı değil.
+4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
+   çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
+   (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
+   PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24 düzeldi, tam mutasyon koşusunun sonucu
+   bekleniyor (`haftalik.yml` 37914431289). Kullanıcının kararını bekleyen yeni bulgu:
+   öneri değişmezi CI'da kararsız ve `main`'i bir kez kırmızı yaptı (B7.26).
+5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b bitti; Eyotek turunun araçları hazır
+   (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
+   canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -69,7 +68,7 @@ ve 2026-10-09.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 618 test (2026-10-08) | `npm run test:e2e` |
+| Ana E2E süiti | 628 test (2026-10-09) | `npx playwright test --list` |
 | Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 39 (2026-10-08) | `e2e/*.spec.ts` |
@@ -77,11 +76,12 @@ ve 2026-10-09.
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-09-27) | `npm test` |
+| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-10-09) | `npm test` |
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 7,9 ve 8,2 dk; işlerin toplamı 32,4 ve 34,1 runner dakikası, en uzun iş `e2e-arama` 425–440 s (2026-10-08) | `gh run view 37846839319`, `37848823362` |
-| Ana E2E, Windows (`haftalik.yml`) | 614/618, E2E adımı 20,3 dk, iş 28 dk; 2 kararsız, 2 kırmızı (Sığdır) (2026-10-09) | koşu 37851532351 |
+| Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
-| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09) | `npx --yes @tauri-apps/cli@^2 build --bundles rpm` |
+| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
+| Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 158 660 bayt, brotli 280,2 kB (2026-09-27); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
@@ -91,6 +91,50 @@ ve 2026-10-09.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-09 (öğleden sonra) · B7.22–B7.24, Windows E2E push'ta, Dependabot, A7 ve Eyotek hazırlığı
+
+**Başlangıç.** `main` 5b93cde'deydi, yeşil. Kullanıcının onayı: 4a6dcb6, c45eb13, 79aaf6d.
+Etiket yok. Push'lar yine tek seferlik SSH adresiyle; `gh`'nin jetonunda `workflow` yetkisi
+olmadığı için iş akışı dosyası değiştiren PR'lar GitHub'dan birleştirilemedi, yerelde
+birleştirme commit'iyle ve SSH ile itildi (PR'lar "merged" göründü).
+
+**Ne yapıldı, commit commit.**
+- 290f55d: B7.22, B7.23, B7.24. Sığdır'da gün çizgisi günün ilk saatinin hücresinden 3 px
+  yiyordu; Windows'un kesirli glif ölçüsü onu görünür yaptı (tuzak 146). Windows izinin
+  210 oranı bu makinede `--font-render-hinting=none` ile birebir üretildi. Tavanlar indi.
+  Mutasyonun üç engeli (`!++`, test süresi, ilk koşu süresi), lint kuralı (tuzak 147),
+  Stryker'ın kum havuzu `scratch/`'e (tuzak 131). `haftalik.yml`'de arama testleri ayrı.
+- 7caa783: A7, `npm run exe:rpm` (DECISIONS).
+- 6d3832f, 44b4dac, 7284a88, bc2a13b, 91e2ead: Dependabot #4, #2, #5, #1, #3, her birinden
+  sonra `main` yeşil; #3'ten sonra dağıtımın SHA'sı 91e2ead (`deployments` API'si).
+- f061fa7: Eyotek hazırlığı (ROBODERS.md, "Eyotek ayarı"). Eyotek açılmadı.
+- 3cd0ecb: `windows.yml`, `yayinla`'nın Windows beklemesi (DECISIONS).
+- Bu commit: belgeler.
+
+**Plandan sapmalar.** (1) B7.24'ün arkasında iki engel daha çıktı, ikisi de yalnız
+mutasyonun yapılandırmasında düzeldi. (2) `main` 7284a88'de bir kez kırmızıydı: bütün
+birim testleri geçti, öneri değişmezinin uzun senkron bloğu vitest işçisinin RPC'sini
+zaman aşımına düşürdü. Düşen iş bir kez yeniden koşturuldu, yeşil; tavana dokunulmadı,
+B7.26 kullanıcıda. (3) Bir kuru mutasyon koşusunu benim başlattığım bir E2E düşürdü
+(tuzak 131). (4) Eyotek deneme sayfasında bedava yeşil bir işaret kusuru bulundu ve Roboders
+sayfasında da üç işarette vardı; düzeldi.
+
+**Koşulan testler.** Belge kapısı her commit'ten önce (17/17). Tipler, sınır, lint, knip,
+biçim. `npm test` (1373/1373). `gorunum.spec.ts` ve `izgara.spec.ts` (46/46); 45b iki glif
+ölçüsüyle, düzeltmeden önce ve sonra, ve tavanların mutasyonu. `roboders-koruma.spec.ts`
+(16/16) ve Eyotek ayarının on mutasyonu. Stryker kuru koşusu. `npm run exe:rpm`.
+`npm run yayinla -- --kuru` (3cd0ecb: ci ve windows yeşil, hiçbir şey atılmadı). CI: 290f55d,
+7caa783, 6d3832f, 44b4dac, 3cd0ecb, 7284a88 (ikinci denemede), bc2a13b, 91e2ead yeşil.
+Windows: 290f55d (haftalık) ve 3cd0ecb (push) yeşil.
+
+**Koşulmayan testler.** Yerelde tam Chromium E2E (CI'da koştu). Exe süiti, `ekran`,
+`test:webkit`. Tam mutasyon `haftalik.yml`'de sürüyor, sonucu bu girdiye eklenecek.
+
+**Açılan sayfalar.** GitHub (Actions koşuları ve günlükleri, PR'lar, `deployments` API'si)
+ve sitenin kendi adresi (bir HEAD isteği, 200). Roboders ve Eyotek açılmadı.
 
 ---
 

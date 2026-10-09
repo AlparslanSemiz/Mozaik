@@ -438,7 +438,13 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       - **Eyotek'e gönderme yolu.** Hedef, Mozaik'in Eyotek'e göndermesi. Turtek'e
         sorulmayacak (kullanıcı, 2026-10-09: "kendimiz çözeriz"; DECISIONS). Önce
         Eyotek'in kendi arayüzünde bir içe aktarma ya da yükleme ekranı aranır (Eyotek
-        turu, salt okunur). Yoksa babanın hesabıyla otomasyon bir seçenek olarak karar
+        turu, salt okunur). **Turun araçları hazır (2026-10-09):** `giris.mjs` ve
+        `gez.mjs` `--hedef eyotek` alıyor, Eyotek'in kendi yazan kelimeleri ve zorunlu
+        `--alan` korumada, kanıtı `roboders-koruma.spec.ts`'te ([ROBODERS.md](ROBODERS.md),
+        "Eyotek ayarı"). Eyotek açılmadı; canlı tur kullanıcının "başla" demesini
+        bekliyor. Açık: okulun Eyotek giriş adresi (başlangıç şimdilik herkese açık
+        site), ve tur sonunda atlananlar listesine birlikte bakılacak (geniş kelimeler
+        bilerek kaldı). Yoksa babanın hesabıyla otomasyon bir seçenek olarak karar
         bekler, ve şartları şunlar:
         babanın onayı; Eyotek'in kullanım şartlarının kontrolü; şifrenin Windows şifre
         kasasında saklanması; gerçek hesaptan önce bir deneme hesabında sınanması;
@@ -1147,27 +1153,50 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       itilen bir etiket bunu atlar; `surum.yml`'in publish işi de etiketin SHA'sındaki
       `ci.yml` koşusunu `gh` ile sorup kırmızıda durmalı. Şimdi yapılmadı, çünkü bir
       etiket olmadan sınanamıyor; ilk gerçek sürümle birlikte.
-- [ ] **B7.20 İş akışlarındaki `actions/*@v4` Node 20'yi hedefliyor (2026-10-08).** CI
+- [~] **B7.20 İş akışlarındaki `actions/*@v4` Node 20'yi hedefliyor (2026-10-08).** CI
       günlüğü: "Node.js 20 is deprecated … forced to run on Node.js 24". Dependabot'un
       bunları güncelleyen PR'ları 2026-09-26'dan beri açık (`checkout`, `setup-node`,
       `deploy-pages`, `upload-pages-artifact`, `download-artifact`); o gün silinen PR iş akışının
       saat dilimi kırmızısı yüzünden hepsi kırmızıydı. Artık `ci.yml` onları push'ta
       koşuyor; dalları yeniden koşturulup yeşilse birleştirilebilir.
+      **2026-10-09, kullanıcının sırası, beşi de birleşti:** #4 (checkout v7), #2
+      (setup-node v6), #5 (download-artifact v7), #1 (upload-pages-artifact v5), #3
+      (deploy-pages v5); her birinden sonra `main` yeşil, #3'ten sonra sitenin dağıtım
+      SHA'sı `91e2ead`. Kalan Node 20 uyarısı `upload-artifact@v4`. `gh`'nin jetonunda
+      `workflow` yetkisi yok, birleştirme yerelde birleştirme commit'iyle ve SSH ile
+      itiliyor (PR'ın SHA'sı korunduğu için GitHub onu "merged" sayıyor).
+      `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. #6 (bölme önerisi
+      onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
 - [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
-      düşük; `test:webkit`'in `kontrol`'e girip girmeyeceği kullanıcıda.
-- [ ] **B7.22 Windows'ta Sığdır kırpıyor (2026-10-09).** `haftalik.yml`'nin ilk koşusunda
+      düşük. **Kullanıcının kararı (2026-10-09):** şimdilik düzeltme yok, `test:webkit`
+      ne `kontrol`'e ne `haftalik.yml`'e giriyor.
+- [x] **B7.22 Windows'ta Sığdır kırpıyor (2026-10-09) — BİTTİ, Windows'ta yeşil.** `haftalik.yml`'nin ilk koşusunda
       `gorunum.spec.ts:815` (babanın verisi, 1920, Öğretmen: 5 kart) ve `:841` (%125, örnek
       okul: 25/374) tekrarda da kırmızı; Linux'ta yeşil. Babanın ekranı tam bu (Windows,
-      %100, 1920). Kullanıcının onayını bekliyor.
-- [ ] **B7.23 `haftalik.yml`'nin Windows işi öneri aramasının iki testini ayırsın
+      %100, 1920). Sebep ölçüldü: gün çizgisi günün ilk saatinin hücresine içeriden
+      çiziliyordu (kart 21,53 px, ötekiler 24,53), ve Windows'un glif ilerlemeleri kesirli,
+      Linux'unkiler tam piksel (tuzak 146). Sığdır'da günün ilk sütunu çizginin genişliğini
+      geri alıyor (`290f55d`); tavanlar indi. `haftalik.yml` 37914431289: 623/623.
+- [x] **B7.23 `haftalik.yml`'nin Windows işi öneri aramasının iki testini ayırsın
       (2026-10-09).** İlk koşuda ikisi kararsızdı; `ci.yml`'deki `e2e-arama` gibi ayrı bir
-      adımda `--workers=1`. Kullanıcının onayını bekliyor.
-- [ ] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
+      adımda `--workers=1`. **Bitti (`290f55d`), Windows'ta iki test de yeşil.** Windows
+      işi sonra `windows.yml`'e taşındı ve her `main` push'unda koşuyor; `yayinla`
+      etiketten önce onu da bekliyor (`3cd0ecb`, DECISIONS 2026-10-09).
+- [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
       `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
-      gibi `weight[index] = weight[index]! + 1`; ürün kodu, kullanıcının onayını bekliyor.
+      gibi `weight[index] = weight[index]! + 1`. **Düzeldi (`290f55d`)** ve arkasındaki iki
+      engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
+      yakalıyor (tuzak 147). Bitti sayılması `haftalik.yml` 37914431289'un tam mutasyon
+      koşusunun sonucunu bekliyor.
+- [ ] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
+      tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
+      (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
+      küçültmek; kullanıcının kararı.
+- [x] **B7.25 Linux paketi yerel komut (A7, 2026-10-09).** `npm run exe:rpm`; `surum.yml`'e
+      Linux işi yok (DECISIONS 2026-10-09). Denendi: 1 dk 16 s, rpm 1 944 638 bayt.
 
 ---
 
