@@ -720,7 +720,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `upload-artifact@v4` ve `download-artifact@v7`'de (dokunulmaz), `haftalik.yml`'in mutasyon
       işi `upload-artifact@v4`'te (`ci/mutasyon-parca`'nın). #6 (bölme önerisi
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
-- [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
+- [x] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** **Kapandı, yapılmayacak
+      (2026-10-09 akşam, DECISIONS "Yeni WebKit süiti eklenmiyor"):** Linux yolu Chromium
+      uygulama modu olacak, babanınki WebView2; `test:webkit` olduğu gibi kalır. `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik

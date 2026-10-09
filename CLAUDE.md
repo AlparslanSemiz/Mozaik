@@ -81,6 +81,25 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
 - Commit'ten önce `npm run hizli` ve dokunulan test dosyaları, tam `npm test` ve `kontrol` birleşmeden önce. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
 - Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
   (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
+- Yavaş süitler (mutasyon, uzun süre açık kalma, görsel regresyon, Windows'ta gerçek exe,
+  sürüm yükseltme) push'u, birleştirmeyi ya da sürümü beklemez: gece ya da haftalık arka
+  planda koşar, kırmızı sonucu görünür bir yere düşer. Ayrıntı [docs/TODO.md](docs/TODO.md) §8l.
+
+## Test programı
+
+2026-10-09'da başlayan test programının kuralları, gerekçesi [docs/DECISIONS.md](docs/DECISIONS.md)'de,
+planı [docs/TODO.md](docs/TODO.md) §8l'de:
+
+- Test dalı bulduğu ürün hatasını düzeltmez. Testi depodaki "BİLİNEN KUSUR" kalıbıyla
+  işaretler (test kusurlu davranışı adıyla sabitler, kusur düzelince adıyla kırmızıya
+  döner; örneği `src/fixtures.test.ts`'te), TODO'ya numaralı madde açar; düzeltme `main`'den
+  açılan ayrı bir dalda yapılır. Veri kaybı sınıfında bir hata bulunursa durulur ve hemen
+  bildirilir.
+- Dosya yollarından bağımsız işler (E2E, exe, CI) önce gelir. `pure/`, `platform/` ya da
+  `ui/` içinde taşınan modüllere dokunan birim ve mutasyon işleri, ilgili refactor paket turu
+  `main`'e birleşene kadar bekler.
+- Her faz bitince dal birleşmeye hazır olur (`kontrol` yeşil, CI yeşil) ve Alp birleştirir;
+  programın sonu beklenmez.
 
 ## Ne zaman durulur
 

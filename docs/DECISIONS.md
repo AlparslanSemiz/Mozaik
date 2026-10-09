@@ -35,6 +35,66 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Test programı başladı; yavaş süitler hiçbir şeyi beklemez
+
+**Ne.** Kullanıcının kararları (test programının analizi, `test/kapsam`):
+- Eksik test türleri eklenecek, var olan her katman ölçülebilir bir hedefe çıkacak, gereken
+  CI'da koşacak, kapatılmış testler gerekçesiyle yeniden açılacak, program bir son
+  kontrolle bitecek. Plan fazlı ve her madde ayrı commit; karara bağlanmış özeti
+  [TODO.md](TODO.md) §8l'de.
+- Test dalı bulduğu ürün hatasını düzeltmez, "BİLİNEN KUSUR" ile işaretler ve TODO'ya
+  numaralı madde açar; veri kaybı sınıfında bir hata bulunursa durulur ve bildirilir.
+  Yollardan bağımsız işler önce gelir, taşınan modüllere dokunan birim ve mutasyon işleri
+  paket turunu bekler. Her faz bitince dal birleşmeye hazırdır, programın sonu beklenmez.
+- **Yavaş süitler** (mutasyon, uzun süre açık kalma, görsel regresyon, Windows'ta gerçek exe,
+  sürüm yükseltme) push'u, birleştirmeyi ya da sürümü beklemez: gece ya da haftalık arka
+  planda koşar, kırmızı sonucu görünür bir yere düşer.
+- K kararları: görsel regresyon yalnız kapta ve sıfır eşikle geri gelir (K1, aşağıda ayrı
+  kayıt); gerçek paketin adsız fikstürü depoya girer (K2); bileşen katmanı yalnız girdi
+  bileşenleri için açılır (K3); paket turlarının hedef ağacını refactor oturumu yazar,
+  bekleyen maddeler ona göre işaretlenir (K4); runner'lar ve artefakt aksiyonları
+  2026-10-19'dan önce sabitlenir (K6); Dependabot alerts depo ayarından açılır (K7, Alp);
+  mutasyonun iş akışı `ci/mutasyon-parca` dalında kalır (K8); veri kaybı düzeltmeleri ve
+  testleri `fix/veri-kaybi` dalında (K9); yeni WebKit süiti eklenmez (K10, aşağıda).
+
+**Eski hâli.** Test türleri ihtiyaç çıktıkça eklendi; fuzz, kontrat, kabul, uzun süre,
+güvenlik ve bileşen katmanı yoktu; yavaş süitler için bir kural yoktu.
+
+**Gerekçe.** Analiz eksikleri ölçerek buldu: iki veri kaybı (iki kopya, kota; düzeltmesi
+`fix/veri-kaybi`'de), 2026-09-24'ten beri bitmeyen mutasyon (haftalık koşu 6 saat
+tavanında iptal) ve hiç olmayan fuzz, kontrat ve kabul katmanları. Yavaş süitin bir
+push'u bekletmesi, o süitin ya hiç koşmamasına ya da herkesi beklemesine dönüyor.
+
+### 2026-10-09 · Görsel regresyon geri geliyor, yalnız kapta ve sıfır eşikle
+
+**Ne.** Yedi sekme, iki tema, 1920×1080. Referans yalnız Playwright'ın sürümü sabit kabında
+(`mcr.microsoft.com/playwright:v1.62.1-noble`) üretilir ve karşılaştırılır; yerel koşu
+referans üretmez. Eşik sıfır. Referans yalnız fark görüntüsüne bakıldıktan sonra yenilenir.
+`kontrol`'ün parçası değil; yavaş süit, haftalık arka planda. Henüz yazılmadı (TODO §8l, Faz 6).
+
+**Eski hâli.** 2026-08-26'da silindi ("sistem fontuna göre çözülen referans tek makinede
+doğru, ve redesign'in her adımında kırmızı"), kullanıcı "düzen testleri gitsin" dedi;
+2026-08-27'de "geri gelmiyor" ve yerine satır içi metin anlık görüntüleri geldi.
+
+**Gerekçe, ölçülmüş.** Font gömülü, tasarım turları bitti. Aynı yedi sekme iki temada on
+kez çekildi: bu makinede de kapta da on dördün on dördü bayt bayt aynı, yani kabın içinde
+sıfır eşik kararsız değil. Bu makine ile kap arasında ekran başına 237 ile 4 055 piksel
+farklı (yalnız glif kenarları, yazı yumuşatması), tuzak 146'ya göre Windows'la daha fazla:
+referans ortamlar arasında tutmaz, kap tek kaynak. 2026-08-25'in `maxDiffPixelRatio 0.01`'i
+34 px'ten 48 px'e çıkan bir satırı kaçırmıştı; sıfır eşik onu yakalar. Metin anlık
+görüntüleri kalıyor: resim düzeni, metin tamlığı ölçer.
+
+### 2026-10-09 · Yeni WebKit süiti eklenmiyor
+
+**Ne.** WebKit için yeni bir süit ya da CI işi eklenmez; `npm run test:webkit` ve gerçek
+Linux exe süiti olduğu gibi kalır. TODO B7.21 (19 kırmızının ayrılması) bu yüzden kapanıyor.
+
+**Eski hâli.** B7.21 açıktı, ve analiz WebKit'i 19 kırmızı ayrıldıktan sonra haftalık CI'a
+almayı öneriyordu (K10).
+
+**Gerekçe.** Kullanıcının kararı: Linux yolu ileride Chromium uygulama modu olacak, babanın
+yolu WebView2 (Chromium). WebKit hiçbir teslim yolunun motoru olmayacak.
+
 ### 2026-10-09 · Denendi ve bırakıldı: öneri aramasının testlerini E2E'de ilk başlatmak
 
 **Ne.** `playwright.config.ts`'te `@arama` testlerini ayrı ve önde bir projeye almak
