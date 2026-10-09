@@ -1,10 +1,7 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   applyRelaxations,
   applySuggestion,
-  createRelaxer,
   outdone,
   sameChanges,
   suggestionQuestions,
@@ -15,7 +12,6 @@ import {
 } from './pure/relax';
 import type { RelaxFamily, RelaxOptions, Suggestion } from './pure/relax';
 import { solve } from './pure/solver';
-import { parseState } from './pure/parseState';
 import { activePlacements, replaceActiveGrid } from './pure/programs';
 import { buildIndex } from './pure/constraints';
 import { findViolations } from './pure/rules';
@@ -32,13 +28,6 @@ import type { State } from './leaf/types';
 //     data, asked of two auditors that do not share code (blocker() through
 //     illegalBlocks, and rules.ts).
 
-function kurs(): State {
-  const raw = readFileSync(join(import.meta.dirname, 'fixtures', 'tam-dolu-kurs.json'), 'utf8');
-  const state = parseState(raw);
-  if (state === null) throw new Error('tam-dolu-kurs.json okunamadı');
-  return state;
-}
-
 function world(name: string): State {
   const found = WORLDS.find((w) => w.name === name);
   if (found === undefined) throw new Error(name);
@@ -54,27 +43,6 @@ function stuckAndSuggest(d: State, families?: RelaxFamily[]) {
     budgetMs: 600_000,
     ...(families === undefined ? {} : { families }),
   }).suggestions;
-}
-
-/**
- * The same, for the father's week: the search there runs for tens of seconds,
- * and a test that never gives the event loop back leaves Vitest's worker unable
- * to answer its own runner ("Timeout calling onTaskUpdate", 2026-09-25, when
- * the whole suite ran at once). So it goes in slices, yielding between them.
- */
-async function stuckAndSuggestSliced(d: State, families: RelaxFamily[]) {
-  const stuck = solve(d, { keepPlaced: false });
-  expect(stuck.phase).toBe('stuck');
-  const relaxer = createRelaxer(d, activePlacements(stuck.state), {
-    keepPlaced: false,
-    budgetMs: 600_000,
-    families,
-  });
-  for (;;) {
-    const result = relaxer.step(200);
-    if (result !== null) return result.suggestions;
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
 }
 
 /** Every rule above, for one suggestion. */
@@ -285,137 +253,6 @@ describe('öneri — küçük dünyalar', () => {
     const d = world('imkansiz-ders-yaninda');
     expect(stuckAndSuggest(d)).toEqual(stuckAndSuggest(d));
   });
-});
-
-// The father's week (anonymised). CP-SAT, outside the repository, gives the
-// smallest changes as 4 closed teacher hours, or 6 limit overrides worth 9
-// hours, or one teacher's 6 hours (WORKLOG 2026-09-24); those are floors
-// nothing can go under. The search reaches the hours on both hour ways and the
-// 9 hours over on the rules, without proving them. The rules way's COUNT of
-// limits was one over CP-SAT's (7 for 6) on 2026-09-25 morning; the same day,
-// after the search learned to start from other weeks, it came back 6 here and
-// in the real exe. The range below still allows 7: it depends on the week the
-// way starts from, and a local search promises no more.
-describe('öneri — tam dolu bir kurs', () => {
-  it('dört öğretmen saati, bir öğretmenin altı saati ya da 9 saatlik sınır; sınıf saatine dokunmadan', async () => {
-    const d = kurs();
-    const found = byFamily(
-      await stuckAndSuggestSliced(d, ['teacherHours', 'fewTeachers', 'rules']),
-    );
-
-    const hours = found.get('teacherHours');
-    expect(hours?.size).toBe(4);
-    const one = found.get('fewTeachers');
-    expect(new Set(one?.changes.map((c) => ('teacherId' in c ? c.teacherId : '')))).toHaveProperty(
-      'size',
-      1,
-    );
-    expect(one?.size).toBe(6);
-    const rules = found.get('rules');
-    expect(rules?.size).toBe(9);
-    expect(rules?.changes.length).toBeGreaterThanOrEqual(6);
-    expect(rules?.changes.length).toBeLessThanOrEqual(7);
-    for (const s of found.values()) expectHonest(d, s);
-
-    console.log(
-      `[ölçüm] öneriler: ${[...found.values()].map((s) => `${s.family} ${s.size}${s.proven ? ' kanıtlı' : ''}: ${suggestionLines(d, s).join(', ')}`).join(' | ')}`,
-    );
-  }, 240_000);
-
-  it('kurulabilen ama çözücünün dizemediği hafta: değişiklik gerekmeden kuruluyor', async () => {
-    // Those four hours open. The week exists (it is the suggestion above), and
-    // the solver's own repair stops short of it; the second search finds it.
-    const d0 = kurs();
-    const id = (short: string) => d0.teachers.find((x) => x.short === short)!.id;
-    const unavailable = { ...d0.unavailable };
-    for (const [t, h] of [
-      ['Ö10', 11],
-      ['Ö6', 0],
-      ['Ö6', 1],
-      ['Ö3', 4],
-    ] as const) {
-      delete unavailable[`${id(t)}|4|${h}`];
-    }
-    const d = { ...d0, unavailable };
-    const found = await stuckAndSuggestSliced(d, ['teacherHours']);
-    expect(found).toHaveLength(1);
-    expect(found[0]!.changes).toEqual([]);
-    expect(found[0]!.proven).toBe(true);
-    expectHonest(d, found[0]!);
-  }, 120_000);
-});
-
-// The father's own file, anonymised the same way and with his 330 hours laid
-// out (`tam-dolu-kurs-dizili.json`): the week a keeping run cannot finish, so
-// every way lays it out again. The case "Olmaz" is said in.
-function dizili(): State {
-  const raw = readFileSync(
-    join(import.meta.dirname, 'fixtures', 'tam-dolu-kurs-dizili.json'),
-    'utf8',
-  );
-  const state = parseState(raw);
-  if (state === null) throw new Error('tam-dolu-kurs-dizili.json okunamadı');
-  return state;
-}
-
-/** One search in slices, as the app runs it (see stuckAndSuggestSliced). */
-async function sliced(d: State, hint: Record<string, string>, options: Partial<RelaxOptions>) {
-  const relaxer = createRelaxer(d, hint, { budgetMs: 600_000, ...options });
-  for (;;) {
-    const result = relaxer.step(200);
-    if (result !== null) return result.suggestions;
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
-}
-
-describe('öneri — babanın dizili haftası ve "Olmaz"', () => {
-  it("KY Cumartesi gelemezse en az saat 5, CP-SAT'ın en iyisi", async () => {
-    // MEASURED (2026-09-25): refusing Ö6's (KY's) Saturday, the fewest-hours
-    // way found 8 when it started over from the stuck week, 5 from its own
-    // earlier week with the wider neighbourhoods. CP-SAT's best is 5.
-    const d = dizili();
-    const hint = activePlacements(d);
-    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
-    expect(first).toHaveLength(1);
-    expect(first[0]!.relaid).toBe(true);
-    expect(first[0]!.size).toBe(4);
-
-    const ky = d.teachers.find((x) => x.short === 'Ö6')!.id;
-    const again = await sliced(d, hint, {
-      keepPlaced: true,
-      families: ['teacherHours'],
-      refused: [{ kind: 'teacherDay', teacherId: ky, day: 4 }],
-      previous: first,
-      startRelaid: true,
-    });
-    expect(again).toHaveLength(1);
-    const s = again[0]!;
-    expect(s.relaid).toBe(true);
-    expect(
-      s.changes.some((c) => c.kind === 'teacherHour' && c.teacherId === ky && c.day === 4),
-    ).toBe(false);
-    expect(s.size).toBe(5);
-    expect(verifySuggestion(d, s, { keepPlaced: false })).toEqual([]);
-  }, 240_000);
-
-  it('karma yollar kendi hatlarında en az saatin haftasıyla başlayınca 1 ders ve 3 saat', async () => {
-    // On a worker of their own the hand-over ways get the fewest-hours week
-    // as `seed` (relaxPool.ts). MEASURED (2026-09-25): from it one lesson and
-    // 3 hours, CP-SAT's best; from the stuck week alone 7 hours on the
-    // father's file.
-    const d = dizili();
-    const hint = activePlacements(d);
-    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
-    const hand = await sliced(d, hint, {
-      keepPlaced: true,
-      families: ['handFew', 'handHours'],
-      seed: first,
-    });
-    const hours = hand.find((x) => x.family === 'handHours');
-    expect(hours?.changes.filter((c) => c.kind === 'lessonTeacher')).toHaveLength(1);
-    expect(hours?.changes.filter((c) => c.kind === 'teacherHour')).toHaveLength(3);
-    expect(verifySuggestion(d, hours!, { keepPlaced: false })).toEqual([]);
-  }, 240_000);
 });
 
 describe('öneri — yollar, cümleler ve "bu olmaz"', () => {

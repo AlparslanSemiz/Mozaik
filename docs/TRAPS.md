@@ -336,7 +336,8 @@ Bedeli en aza indiren arama bunları zamanla sıfırlar, yani sonuç doğru kald
 değişiklik gerektirmeyen bir haftada model birkaçını rastgele doğru bıraktı, ve
 komşuluk süzgeci "bedelin olduğu günü" aradığı için hiçbir gün bulamadı ve her
 komşuluğu eledi. Bedel sıfıra inemedi ve "bundan azı yok" hiç gelmedi. Test
-(`relax.test.ts`, "kurulabilen ama çözücünün dizemediği hafta") kırmızıydı. Üç
+(`relax.test.ts`, bugün `relaxFullCourse.test.ts`, "kurulabilen ama çözücünün
+dizemediği hafta") kırmızıydı. Üç
 literalin tanımı artık iki yönlü, ve bedelin hiçbir güne bağlanamadığı durumda
 süzgeç kalkıyor. Sınır adımları hâlâ tek yönlü (iki yönü totalizer'ın öbür yönünü
 ister); onlar için yalnız süzgeç düzeltmesi geçerli. Kural: **bir literalin

@@ -422,15 +422,16 @@ Sahte olmayan veri iki dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
 `src/fixtures/tam-dolu-kurs-dizili.json` aynı dosya, babanın kendi dizdiği 330
 saatle: yalnız yerleşimler eklendi, ve onlar kimlikten kimliğe, ad taşımıyor
 (2026-09-25). Dizili dersler yerinde kalırken yol olmayan, yani her yolun yeniden
-dizdiği hafta bu; `relax.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
+dizdiği hafta bu; `relaxLaidOut.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
 Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
 yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
 dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
-125). `relax.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
+125). `relaxFullCourse.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
 değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6
-sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. İkisi birlikte
-yaklaşık 45 saniye sürer, süitin en yavaş birim testi. `e2e/otomatik.spec.ts` aynı
+sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. Bu iki dosya
+süitin en yavaş birim testlerini taşıyor ve bu yüzden `relax.test.ts`'ten ayrı: Vitest
+dosyaları paralel, bir dosyanın içindeki testleri ise sırayla koşar. `e2e/otomatik.spec.ts` aynı
 haftayı tarayıcıda panelden uygular ve tek Ctrl+Z ile geri alır. Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
 silinir.
 

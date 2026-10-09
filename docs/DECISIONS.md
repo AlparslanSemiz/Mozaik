@@ -685,7 +685,7 @@ aynı:
 - Olmaz'dan sonra en az saat 5.
 
 Ayrı hatta karma yollar `seed` olmadan 1 ders ve 7 saate düşüyordu. Yeni test
-(`relax.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
+(`relax.test.ts`, bugün `relaxLaidOut.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
 onu kırmızıya çeviriyor (6 saat).
 
 **Denenmeyen ve sebebi.** Bütçeleri kısmak. 2026-09-25'te üç bütçe denemesinin
