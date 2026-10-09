@@ -17,7 +17,7 @@
  * back untouched — translating that would be a guess about somebody else's word.
  */
 import { aktifDil, t } from './i18n';
-import { KISALTMALAR } from './lang/kisaltmalar';
+import { KISALTMALAR } from './lang';
 import { subjectKey } from './subjects';
 
 /** The week in calendar order. The checkboxes in Setup are built from this. */
