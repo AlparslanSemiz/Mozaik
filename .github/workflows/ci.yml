@@ -34,7 +34,11 @@ concurrency:
 # (e2e/otomatik.spec.ts). The search opens its own workers, so on a four-core
 # runner beside three other Playwright workers it races its own waits: the first
 # CI run (2026-10-08) lost one that way, and it passed alone in 28 s. They run in
-# `e2e-arama`, one at a time, and nowhere else. A tag and not a list of titles:
+# `e2e-arama`, one runner each, and nowhere else: `--shard` over the tagged tests
+# hands each of the three parts one test, so the longest one no longer
+# waits behind the other two and the job stops being the run's longest path
+# (2026-10-09). A fourth tagged test would share a part, still alone on its
+# runner. A tag and not a list of titles:
 # the title list drifted (a renamed title quietly moved its test back into the
 # shards, and windows.yml's copy had lost a title), while a tag does not move
 # with the title. No count step either: when nothing carries the tag,
@@ -105,6 +109,10 @@ jobs:
   e2e-arama:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        parca: [1, 2, 3]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -114,9 +122,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npx vite build
-      - name: E2E, öneri aramasının testleri, sırayla
+      - name: E2E, öneri aramasının testleri, ${{ matrix.parca }}/3
         run: >-
-          npx playwright test --grep @arama --workers=1
+          npx playwright test --grep @arama --shard=${{ matrix.parca }}/3 --workers=1
           --reporter=blob,list --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
@@ -125,7 +133,7 @@ jobs:
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: blob-arama
+          name: blob-arama-${{ matrix.parca }}
           path: blob-report/
           retention-days: 7
 
