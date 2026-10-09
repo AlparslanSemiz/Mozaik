@@ -36,7 +36,8 @@ oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu 
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
 yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
-bir worktree'de ya da başka dalda tek cümleyle durur.
+bir worktree'de ya da başka dalda tek cümleyle durur. Ağır bir komutun süre sınırı
+`scripts/agir.sh --sure <saniye>` ile verilir, dışarıdan `timeout` sarılmaz (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti, `leaf/lang` ve `ui/lists` paketleri ile derin
