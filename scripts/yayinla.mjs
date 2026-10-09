@@ -12,18 +12,22 @@
 // that, and they are triggered by what this pushes:
 //
 //   push main   -> ci.yml (green) -> site.yml -> GitHub Pages  (the site route)
+//               -> windows.yml (Windows E2E; the site does not wait for it)
 //   push vX.Y.Z -> surum.yml                  -> Release       (the three files)
 //
-// So the order is: commit, push main ALONE, wait for that commit's ci.yml run,
-// and only when it is green tag it and push the tag (2026-10-08). The tag used
-// to go in the same push as the commit, i.e. before any test had looked at it.
-// A red run stops here with the commit pushed and no tag: the site did not
-// change either, because it sits behind the same run. Fix, push, and give the
-// same command again; package.json already at the version means "tag only".
+// So the order is: commit, push main ALONE, wait for that commit's ci.yml run
+// AND its windows.yml run, and only when both are green tag it and push the
+// tag. The tag used to go in the same push as the commit, i.e. before any test
+// had looked at it (2026-10-08); the Windows run joined on 2026-10-09, because
+// the tag is what reaches my father's exe and his machine is Windows. A red
+// run stops here with the commit pushed and no tag. The site may already have
+// changed then (it waits for ci.yml alone), the exe has not. Fix, push, and
+// give the same command again; package.json already at the version means "tag
+// only".
 //
 // `--kuru` (dry run) changes nothing: it takes HEAD, which must already be
-// pushed, finds and waits for its ci.yml run, says the result, and stops where
-// the tag would be cut.
+// pushed, finds and waits for its ci.yml and windows.yml runs, says the
+// result, and stops where the tag would be cut.
 //
 // Refuses on a dirty tree, on a non-main branch, on a tag that exists, and
 // without a logged-in `gh`. Every one of those has a right answer that is not
@@ -77,9 +81,10 @@ function ghHazir() {
 
 const bekle = (ms) => new Promise((tamam) => setTimeout(tamam, ms));
 
-// The ci.yml run of exactly this commit, waited for to the end. Returns only on
-// green; anything else (red, cancelled by a newer push, never appeared) stops.
-async function ciYesilMi(sha, kirmizidaNe) {
+// The `is` run (ci.yml, windows.yml) of exactly this commit, waited for to the
+// end. Returns only on green; anything else (red, cancelled by a newer push,
+// never appeared) stops.
+async function kosuYesilMi(is, sha, kirmizidaNe) {
   const kisa = sha.slice(0, 7);
   let kosu;
   // A push needs a few seconds to become a run. Six minutes is generous.
@@ -89,7 +94,7 @@ async function ciYesilMi(sha, kirmizidaNe) {
       'run',
       'list',
       '--workflow',
-      'ci.yml',
+      is,
       '--commit',
       sha,
       '--limit',
@@ -101,9 +106,9 @@ async function ciYesilMi(sha, kirmizidaNe) {
     kosu = JSON.parse(r.stdout)[0];
   }
   if (kosu === undefined) {
-    dur(`${kisa} için ci.yml koşusu altı dakikada görünmedi.`, ...kirmizidaNe);
+    dur(`${kisa} için ${is} koşusu altı dakikada görünmedi.`, ...kirmizidaNe);
   }
-  console.log(`\n  ${kisa} · ci.yml koşusu ${kosu.databaseId}: ${kosu.url}\n`);
+  console.log(`\n  ${kisa} · ${is} koşusu ${kosu.databaseId}: ${kosu.url}\n`);
   if (kosu.status !== 'completed') {
     gh(['run', 'watch', String(kosu.databaseId), '--compact', '--interval', '20'], true);
   }
@@ -111,9 +116,16 @@ async function ciYesilMi(sha, kirmizidaNe) {
   if (son.status !== 0) dur('gh run view olmadı.', ...girintili(son.stderr.trim()));
   const { conclusion } = JSON.parse(son.stdout);
   if (conclusion !== 'success') {
-    dur(`${kisa}'in CI'ı yeşil değil: ${conclusion || 'bilinmiyor'}.`, ...kirmizidaNe);
+    dur(`${kisa}'in ${is} koşusu yeşil değil: ${conclusion || 'bilinmiyor'}.`, ...kirmizidaNe);
   }
-  console.log(`  ${kisa}'in CI'ı yeşil.\n`);
+  console.log(`  ${kisa}'in ${is} koşusu yeşil.\n`);
+}
+
+// The two runs a tag waits for. ci.yml first: it is the shorter one, and the
+// Windows run is started by the same push, so it is already under way.
+async function ciYesilMi(sha, kirmizidaNe) {
+  await kosuYesilMi('ci.yml', sha, kirmizidaNe);
+  await kosuYesilMi('windows.yml', sha, kirmizidaNe);
 }
 
 const argumanlar = process.argv.slice(2);
@@ -315,7 +327,7 @@ try {
 
 const sha = git('rev-parse', 'HEAD');
 await ciYesilMi(sha, [
-  `${etiket} etiketi ATILMADI. Site de güncellenmedi: yayın aynı koşunun arkasında.`,
+  `${etiket} etiketi ATILMADI. Site ci.yml yeşilse güncellendi, exe güncellenmedi.`,
   'Düzeltip itin ve aynı komutu yeniden verin; package.json zaten bu sürümde',
   'olduğu için yalnız etiket atılır.',
 ]);

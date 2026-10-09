@@ -209,14 +209,15 @@ Belge başında depoya dokunmanın `file://` altında bayat açılış üretip
 
 ### Site
 
-Depoda dört iş akışı var (2026-10-08'den beri). `ci.yml` her dala her push'ta
+Depoda beş iş akışı var (2026-10-09'dan beri). `ci.yml` her dala her push'ta
 süiti koşar: tipler, sınır, lint, knip, biçim, birim testleri ve belge kapısı,
 derleme ve boyut bir işte; ana E2E süiti üç parçada; öneri aramasını başlatan
 iki E2E testi kendi işinde, sırayla; site, yerel sunucu, klasör ve çözücü stresi bir işte. Hepsi
 yeşilse ve push `main`'e ise `site.yml`'yi çağırır ve site yayınlanır. `site.yml`
 kendi başına hiçbir şeyle tetiklenmez, yani site testten geçmemiş bir commit'i
-yayınlayamaz. `haftalik.yml` haftada bir Windows'ta E2E'yi ve mutasyonu koşar,
-siteyi kilitlemez. `surum.yml` bir etiketle üç teslim dosyasını üretir.
+yayınlayamaz. `windows.yml` her `main` push'unda ana E2E süitini Windows'ta koşar; siteyi
+kilitlemez, sürümü kilitler (aşağıda, `yayinla`). `haftalik.yml` haftada bir mutasyonu
+koşar ve `windows.yml`'i çağırır. `surum.yml` bir etiketle üç teslim dosyasını üretir.
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
@@ -362,17 +363,19 @@ Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü a�
 bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
 Sonra `package.json` ve `Cargo.toml` yazılır, `CHANGELOG.md`'deki `Unreleased`
 bloğu bu sürüm numarasına ve bugünün tarihine kapanır, ve üçü tek commit olur.
-Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu bulunup sonuna kadar
-beklenir. Yeşilse etiket annotated atılır, adıyla itilir ve uzakta göründüğü
-doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi görünür: site
-güncellenir, üç indirme dosyası eski kalır. Kırmızıysa, koşu iptal edildiyse ya da
-hiç görünmediyse etiket atılmadan durur; site de aynı koşunun arkasında olduğu için
-güncellenmemiştir. Düzeltip itince aynı komut yeniden verilir, ve `package.json`
-zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar commit ile
-etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
+Önce yalnız `main` itilir, ve o commit'in `ci.yml` koşusu, sonra `windows.yml` koşusu
+bulunup sonuna kadar beklenir. İkisi de yeşilse etiket annotated atılır, adıyla itilir
+ve uzakta göründüğü doğrulanır, çünkü unutulan bir etiket başarılı bir sürüm gibi
+görünür: site güncellenir, üç indirme dosyası eski kalır. Biri kırmızıysa, iptal
+edildiyse ya da hiç görünmediyse etiket atılmadan durur. Site yalnız `ci.yml`'in
+arkasında, yani bir Windows kırmızısında site güncellenmiş, exe güncellenmemiş olur.
+Windows'un beklenmesinin sebebi etiketin babanın exe'sine gitmesi ve babanın
+makinesinin Windows olması (2026-10-09). Düzeltip itince aynı komut yeniden verilir,
+ve `package.json` zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar
+commit ile etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
 
-`npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml`
-koşusunu bulur, bekler, sonucu söyler ve etiket adımında durur.
+`npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml` ve
+`windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur.
 
 ## İşaret ve ikon
 
