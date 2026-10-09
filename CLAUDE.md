@@ -62,13 +62,17 @@ bloğunda yazılı.
   ondan önce `main` dala alınır, `npm run kontrol` kilit altında koşar ve CI yeşildir.
 - Dal oturumu yalnız kendi dalını açık refspec'le iter (`git push origin <dal>`); zorla
   push ve etiket yok.
-- Ağır komutlar sırayla koşar: `flock -w 1800 ~/.mozaik-agir.lock <komut>`. Kapsam:
-  stryker, mutasyon, kontrol, kapsam, her Playwright koşusu, exe derlemeleri, podman ve
-  süre ölçümleri. Kilit `-w`'nin beklediği süre içinde alınamazsa daha fazla beklenmez, söylenir. Kilidi alan, yanındaki
+- Ağır komutlar sırayla koşar: `scripts/agir.sh <komut>`, yani
+  `flock -w 1800 ~/.mozaik-agir.lock`. Kapsam: stryker, mutasyon, kontrol, kapsam, her
+  Playwright koşusu, exe derlemeleri, podman ve süre ölçümleri. Kilit `-w`'nin beklediği
+  süre içinde alınamazsa daha fazla beklenmez, söylenir. Kilidi alan, yanındaki
   `~/.mozaik-agir.not` dosyasına oturumu, komutu ve zamanı yazar; bırakırken üzerine
   "serbest" yazar, silmez.
 - Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
-  2'nin altında. Koşul yoksa ölçülmez, "kirli, ölçülmedi" yazılır.
+  2'nin altında; `scripts/temiz-kosul.sh` bakar. Koşul yoksa ölçülmez, "kirli, ölçülmedi"
+  yazılır.
+- Elle mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır: uygulanmayan ya da dist'e
+  girmeyen bir değişiklik testi koşmadan durur, dosya her durumda geri konur.
 - Belgelere yalnız `main`'deki commit hash'i yazılır; dalın commit'leri konusuyla anılır.
   Dal oturumu TRAPS'a numara vermez, tuzak adayını TODO §8k'ye yazar.
 
