@@ -12,9 +12,10 @@ beri bağlayıcı değil ([docs/PRINCIPLES.md](docs/PRINCIPLES.md)).
 
 ## Yeni bir oturuma başlarken
 
-Önce bu iki dosya okunur:
+Önce bunlar okunur:
 
-1. [docs/TODO.md](docs/TODO.md), sıradaki iş ve kullanıcının not defteri için.
+1. [docs/TODO.md](docs/TODO.md)'nin yalnız §0'ı (not defteri) ve İÇİNDEKİLER'i, sonra
+   yalnız yapılacak işin bölümü. Dosyanın tamamı okunmaz.
 2. [docs/PRINCIPLES.md](docs/PRINCIPLES.md), bir kararı neyin yönlendirdiği için.
 
 Tuzaklar bir işe başlarken okunur, tamamı değil: önce [docs/TRAPS.md](docs/TRAPS.md)'nin
