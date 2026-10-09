@@ -157,7 +157,7 @@ export function useRowOrder({ kind, count, items, query, change }: Options): Row
         </td>
       </>
     ),
-    [locked, move],
+    [locked, move, t],
   );
 
   return { bodyRef, notice, head, grip };

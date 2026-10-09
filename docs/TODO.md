@@ -952,7 +952,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
       dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
       `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
-- [ ] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
+- [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
       2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
       `t`'si: kusur, üretildi, aşağıdaki ayrı madde; 2026-09-25'te düzeldi, geri çağırım artık
@@ -966,6 +966,12 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       hesap, komut listesi `ui` her değiştiğinde yeniden kuruluyor ama içeriği ona bağlı değil.
       `App.test.tsx:16`'da kullanılmayan bir `eslint-disable` yorumu var, o bir
       `exhaustive-deps` uyarısı değil.
+      **Dördü de kapandı (2026-10-09).** `Commands.tsx` ve `App.test.tsx` refactor dalında.
+      `bakim/refactor-istekleri` dalında `useRowOrder` ölçüldü: kancayı açık tutan bir
+      listede dil İngilizceye geçince tutamağın ipucu Türkçe kaldı
+      (`src/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
+      hâlâ görünmüyordu, sebep yukarıda. `App.tsx`'in üç `toggle`'ı `useCallback` oldu,
+      susturma kalktı.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
       `sanitize` bir yerleşim ya da kapalı saat anahtarını yeniden kurmuyor, sayıları tam
       sayıysa olduğu gibi kopyalıyor. Elle düzenlenmiş bir yedekteki `s510|0|07` ya da
@@ -1249,13 +1255,15 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       yardım kopyalarında 104 ve 48 (11 dosya), `README.md`'de 10 uzun çizgi; kuralın
       bunları kapsayıp kapsamadığı karar bekliyor (kopyalar kaynak metin, README vitrin ve
       İngilizce). Düzeltilmedi.
-- [ ] **RK12 `npm run lint`'e `--max-warnings 0`.** 2026-10-09'da üç `exhaustive-deps`
+- [~] **RK12 `npm run lint`'e `--max-warnings 0`.** 2026-10-09'da üç `exhaustive-deps`
       uyarısından ikisi kapandı: `Commands.tsx`'te gereksiz `ui` bağımlılığı çıktı (değeri
       hiçbir yerde okunmuyordu), `App.tsx`'te komut listesinin bağımlılığına gerekçeli bir
       susturma kondu (üç `toggle` yalnız listedeki `theme`, `ribbon` ve `motion`'ı okuyor;
       RF11 onları kaldırınca `reportUnusedDisableDirectives` susturmayı kendisi bildirir).
       Kalan `useRowOrder.tsx`'in eksik `t`'si main'in işi. O düzelince `--max-warnings 0`
-      açılır. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
+      açılır. **Akşam, `bakim/refactor-istekleri` dalında:** `useRowOrder`'ın `t`'si
+      bağımlılıkta (testli), `App.tsx`'in susturması da kalktı (üç `toggle` `useCallback`).
+      `eslint src` 0 uyarı; bayrağı refactor oturumu açar. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
       RF11'de gider.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):

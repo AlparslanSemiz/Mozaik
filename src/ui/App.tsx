@@ -548,6 +548,33 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey);
   }, [goTab, openShortcuts]);
 
+  // Callbacks rather than plain functions because the palette's command list
+  // is memoized on them: a function redeclared on every render would rebuild
+  // the list every render, and leaving them out of its dependencies needed a
+  // lint suppression (RK12).
+  const toggleRibbon = useCallback(() => {
+    const next = !ribbon;
+    applyRibbon(next);
+    setRibbon(next);
+  }, [ribbon]);
+
+  /**
+   * Two positions from the palette, three in Ayarlar. The middle step ('az') is
+   * a considered choice and the palette is a place you pass through, so what
+   * this offers is the switch: off, or back to whatever full means.
+   */
+  const toggleMotion = useCallback(() => {
+    const next: Motion = motion === 'kapali' ? 'tam' : 'kapali';
+    applyMotion(next);
+    setMotion(next);
+  }, [motion]);
+
+  const toggleTheme = useCallback(() => {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    setTheme(next);
+  }, [theme]);
+
   const paletteActions = useMemo(
     () => [
       {
@@ -594,32 +621,22 @@ export default function App() {
         run: openShortcuts,
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- toggleTheme, toggleRibbon and toggleMotion read only theme, ribbon and motion, listed here; RF11 takes them out
-    [state, theme, ribbon, motion, solver, goTab, notify, t, programMask, openShortcuts],
+    [
+      state,
+      theme,
+      ribbon,
+      motion,
+      solver,
+      goTab,
+      notify,
+      t,
+      programMask,
+      openShortcuts,
+      toggleTheme,
+      toggleRibbon,
+      toggleMotion,
+    ],
   );
-
-  function toggleRibbon() {
-    const next = !ribbon;
-    applyRibbon(next);
-    setRibbon(next);
-  }
-
-  /**
-   * Two positions from the palette, three in Ayarlar. The middle step ('az') is
-   * a considered choice and the palette is a place you pass through, so what
-   * this offers is the switch: off, or back to whatever full means.
-   */
-  function toggleMotion() {
-    const next: Motion = motion === 'kapali' ? 'tam' : 'kapali';
-    applyMotion(next);
-    setMotion(next);
-  }
-
-  function toggleTheme() {
-    const next: Theme = theme === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    setTheme(next);
-  }
 
   async function fileChosen(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
