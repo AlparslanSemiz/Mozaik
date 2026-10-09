@@ -48,7 +48,7 @@ function Dot({ color }: { color: number }) {
   return <span className="palette-dot" style={{ background: paletteColor(color) }} />;
 }
 
-export default function Commands({ open, setOpen, state, ui, go, sections, actions }: Props) {
+export default function Commands({ open, setOpen, state, go, sections, actions }: Props) {
   const inspect = useInspect();
   const t = useT();
 
@@ -113,7 +113,7 @@ export default function Commands({ open, setOpen, state, ui, go, sections, actio
     }
 
     return out;
-  }, [state, ui, go, sections, actions, inspect, t]);
+  }, [state, go, sections, actions, inspect, t]);
 
   return <Palette open={open} onOpenChange={setOpen} commands={commands} />;
 }

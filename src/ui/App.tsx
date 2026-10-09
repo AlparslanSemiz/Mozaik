@@ -594,6 +594,7 @@ export default function App() {
         run: openShortcuts,
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- toggleTheme, toggleRibbon and toggleMotion read only theme, ribbon and motion, listed here; RF11 takes them out
     [state, theme, ribbon, motion, solver, goTab, notify, t, programMask, openShortcuts],
   );
 

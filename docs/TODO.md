@@ -1965,6 +1965,14 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       yardım kopyalarında 104 ve 48 (11 dosya), `README.md`'de 10 uzun çizgi; kuralın
       bunları kapsayıp kapsamadığı karar bekliyor (kopyalar kaynak metin, README vitrin ve
       İngilizce). Düzeltilmedi.
+- [ ] **RK12 `npm run lint`'e `--max-warnings 0`.** 2026-10-09'da üç `exhaustive-deps`
+      uyarısından ikisi kapandı: `Commands.tsx`'te gereksiz `ui` bağımlılığı çıktı (değeri
+      hiçbir yerde okunmuyordu), `App.tsx`'te komut listesinin bağımlılığına gerekçeli bir
+      susturma kondu (üç `toggle` yalnız listedeki `theme`, `ribbon` ve `motion`'ı okuyor;
+      RF11 onları kaldırınca `reportUnusedDisableDirectives` susturmayı kendisi bildirir).
+      Kalan `useRowOrder.tsx`'in eksik `t`'si main'in işi. O düzelince `--max-warnings 0`
+      açılır. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
+      RF11'de gider.
 
 ## §9. Ham notlar — senin kendi satırların
 
