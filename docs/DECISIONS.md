@@ -35,6 +35,55 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Denendi ve bırakıldı: öneri aramasının testlerini E2E'de ilk başlatmak
+
+**Ne.** `playwright.config.ts`'te `@arama` testlerini ayrı ve önde bir projeye almak
+(B5): Playwright testleri proje sırasıyla dağıttığı için en uzun test ilk başlayacaktı.
+**Denendi, geri alındı.**
+
+**Gerekçe.** CI'da kazancı yok, ölçüldü: e2e parçaları `--grep-invert @arama` ile koşuyor
+ve `@arama` testleri aynı gün kendi işlerine bölündü (`e2e-arama` matrisi), parçaların
+listesi ve sırası değişiklikle ve değişikliksiz üçünde de aynıydı. Kazanç yalnız yerel
+`kontrol`'de olurdu, ve o ölçülmedi.
+
+### 2026-10-09 · Çalışma düzeni: her iş alanı kendi worktree'sinde, "Şu an"ı birleşen dal yazar, ne zaman durulduğu yazılı
+
+**Ne.** Kullanıcının kararları (hız oturumu, C ve E):
+- Paralel çalışan her iş alanı kendi worktree'sinde ve dalında çalışır, sayı işe göre
+  değişir. `~/GitHub/Mozaik` yalnız `main`'i tutar, orada oturum çalışmaz. Birleştirmeyi
+  Alp yapar.
+- "Şu an"ı dal yazar, `git merge main`'den sonra ve birleşmeden hemen önceki son
+  commit'inde. Tuzak numarası da o commit'te verilir.
+- Oturum yalnız CLAUDE.md'nin "Ne zaman durulur" listesindeki bir durumda durup sorar,
+  gerisinde kurala göre devam eder ve sonda tek rapor verir.
+
+**Eski hâli.** Bir oturum `main`'de çalışıyordu ve "Şu an" onundu, dal oturumları
+durumlarını TODO §8k'ye yazıyordu. "İş `main`'e itilir" kuralı vardı. Ne zaman durulacağı
+yazılı değildi.
+
+**Gerekçe.** Üç oturum aynı bloğu yazarsa çatışır. `--ff-only` birleşmede `main` dalın
+son commit'inin tam altında durduğu için o commit'in yazdığı "Şu an" çatışamaz; aynı
+sebeple tuzak numarası iki dalda aynı anda verilemez. Seçenekler şunlardı: yalnız
+birleştirmenin yazması (seçilen), her alana bir alt blok (blok büyür, her birleşme ona
+dokunur), bloğu kaldırmak (özet kaybolur). Durma listesi kullanıcının: kapsam ve veri
+riski dışındaki her soru bir turu bekletiyordu.
+
+### 2026-10-09 · TODO'nun arşivi ayrı dosyada, oturum TODO'nun yalnız haritasını okuyor
+
+**Ne.** TODO'nun §10'u, bölümlerin içindeki `[x]` maddeler ve §9'un ham notları
+[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'ye taşındı, silinmeden ve birebir. Oturum başında
+TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i, sonra işin bölümü okunur. TRAPS'ın başında grup
+listesi var, yalnız işin grubu okunur.
+
+**Eski hâli.** Oturum başında TODO'nun tamamı okunuyordu: 345 323 bayt, yaklaşık 96 bin
+token, %93'ü TODO.
+
+**Gerekçe.** Ölçüldü (WORKLOG 2026-10-09, hız oturumu): sabit okuma 32 154 bayta indi.
+WORKLOG'un eski girdileri **taşınmadı**: oturum başında okunmuyorlar ve Read'in varsayılan
+2000 satırı tamamen daha yeni girdilerde kalıyor, kazanç yalnız aramada olurdu.
+
+---
+
 ### 2026-10-09 · Refactor dalı: merge ile güncel, açık refspec'le itiliyor; union bırakıldı
 
 **Ne.** Kullanıcının kararları (refactor oturumu):
@@ -647,7 +696,7 @@ aynı:
 - Olmaz'dan sonra en az saat 5.
 
 Ayrı hatta karma yollar `seed` olmadan 1 ders ve 7 saate düşüyordu. Yeni test
-(`relax.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
+(`relax.test.ts`, bugün `relaxLaidOut.test.ts`) bunu soruyor, `seed`'i başlangıç zincirinden çıkaran mutasyon
 onu kırmızıya çeviriyor (6 saat).
 
 **Denenmeyen ve sebebi.** Bütçeleri kısmak. 2026-09-25'te üç bütçe denemesinin

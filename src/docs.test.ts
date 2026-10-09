@@ -173,6 +173,7 @@ const BY_BASENAME: ReadonlySet<string> = new Set(
 const DATED_RECORD = new Set([
   'docs/WORKLOG.md',
   'docs/TODO.md',
+  'docs/TODO-ARCHIVE.md',
   'docs/DECISIONS.md',
   'docs/TESTFINDINGS.md',
   'docs/plan-v0-arsiv.md',
@@ -185,7 +186,8 @@ const RULE_DOCS = Object.keys(DOCS)
 
 /**
  * TODO.md is both kinds of document at once, which the split by file could
- * not see: `§10` down is an archive of finished rounds, and a `- [x]` item
+ * not see: `§10` down was the archive of finished rounds (since 2026-10-09 it
+ * is one line pointing at TODO-ARCHIVE.md, a dated record), and a `- [x]` item
  * anywhere is a record of what was done, but an OPEN item is a claim about
  * today — somebody is going to act on it, and a path in it will be looked up.
  *
@@ -1263,6 +1265,20 @@ describe('A10 · her tuzak dizinin söylediği grubun altında duruyor', () => {
       if (!placed.has(n)) wrong.push(`tuzak ${n} dizinde var, dosyada yok`);
     }
     expect(wrong, 'TRAPS.md dizini ile yerleşimi ayrışıyor').toEqual([]);
+  });
+
+  // The list at the head is what a session reads instead of the whole file
+  // (CLAUDE.md), so a group missing from it is a group nobody reads. A7 skips
+  // a link to `#anchor` in the same file (measured), so the anchor is asked
+  // here too: each line's link lands on its own group's heading.
+  it('baştaki liste her grubu bir kez, dosyadaki sırayla ve kendi çapasıyla gösteriyor', () => {
+    const block = /^## Hangi grup ne zaman okunur\n([\s\S]*?)^## /m.exec(TRAPS());
+    expect(block, 'TRAPS.md’nin başında grup listesi yok').not.toBeNull();
+    const lines = [...(block?.[1] ?? '').matchAll(/^- \[([^\]]+)\]\(#([^)]+)\): \S/gm)];
+    const groups = [...new Set(trapSections().values())];
+    expect(groups.length, 'tuzak grupları okunamadı').toBeGreaterThan(5);
+    expect(lines.map((m) => m[1])).toEqual(groups);
+    expect(lines.map((m) => m[2])).toEqual(groups.map(slug));
   });
 });
 

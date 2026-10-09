@@ -10,6 +10,23 @@ dört şey söyler: ne oldu, sebebi, karşı önlem, ve onu koruyan test ya da �
 
 Denenip bırakılan yolların kaydı burada değil, [DECISIONS.md](DECISIONS.md)'de.
 
+Dosya baştan sona okunmaz. Aşağıdaki listeden işin grubu seçilir ve yalnız o grup
+okunur, bir numara ise `### N ·` başlığıyla aranır.
+
+## Hangi grup ne zaman okunur
+
+- [Şema göçü ve veri kaybı](#şema-göçü-ve-veri-kaybı): şema, depolama anahtarı, yedek, göç ya da silme davranışı değişirken.
+- [Dağıtım kimlikleri, tek kaynak ve sürüm](#dağıtım-kimlikleri-tek-kaynak-ve-sürüm): bir ad, kimlik, adres, sürüm numarası ya da teslim yolu değişirken.
+- [Çözücü ve kısıt motoru](#çözücü-ve-kısıt-motoru): `blocker()`, çözücü, öneri araması ya da ret cümleleri değişirken.
+- [Sürükleme, saf DOM ve React sınırı](#sürükleme-saf-dom-ve-react-sınırı): sürükleme, ızgaranın çizimi, worker ya da sık tekrarlanan bir etkileşim değişirken.
+- [Düzen ölçümü ve hangi kutuya bakıldığı](#düzen-ölçümü-ve-hangi-kutuya-bakıldığı): bir düzenin sığdığı, hizalandığı ya da kırpılmadığı iddia edilirken.
+- [CSS kapsamı, özgüllük ve custom property](#css-kapsamı-özgüllük-ve-custom-property): yeni bir zemin, durum, değişken ya da katman eklenirken.
+- [Yazdırma ve kâğıt](#yazdırma-ve-kâğıt): basılan sayfa değişirken.
+- [Ad çakışması ve erişilebilir ad](#ad-çakışması-ve-erişilebilir-ad): bir kontrolün, bölümün ya da sekmenin adı konurken ya da E2E'de aranırken.
+- [Çeviri ve metin](#çeviri-ve-metin): ekrandaki bir metin, sözlük ya da kısaltma değişirken.
+- [Test hijyeni ve bedava yeşil](#test-hijyeni-ve-bedava-yeşil): bir test yazılırken ya da bir testin ölçtüğü mutasyonla kanıtlanırken.
+- [Ölçüm disiplini](#ölçüm-disiplini): bir süre, performans ya da platform iddiası ölçülürken ya da gerekçe diye yazılırken.
+
 ---
 
 ## Şema göçü ve veri kaybı
@@ -319,7 +336,8 @@ Bedeli en aza indiren arama bunları zamanla sıfırlar, yani sonuç doğru kald
 değişiklik gerektirmeyen bir haftada model birkaçını rastgele doğru bıraktı, ve
 komşuluk süzgeci "bedelin olduğu günü" aradığı için hiçbir gün bulamadı ve her
 komşuluğu eledi. Bedel sıfıra inemedi ve "bundan azı yok" hiç gelmedi. Test
-(`relax.test.ts`, "kurulabilen ama çözücünün dizemediği hafta") kırmızıydı. Üç
+(`relax.test.ts`, bugün `relaxFullCourse.test.ts`, "kurulabilen ama çözücünün
+dizemediği hafta") kırmızıydı. Üç
 literalin tanımı artık iki yönlü, ve bedelin hiçbir güne bağlanamadığı durumda
 süzgeç kalkıyor. Sınır adımları hâlâ tek yönlü (iki yönü totalizer'ın öbür yönünü
 ister); onlar için yalnız süzgeç düzeltmesi geçerli. Kural: **bir literalin
@@ -1211,6 +1229,25 @@ dakikayı aşan ilk koşu. Her biri ancak öncekisi kalkınca göründü. Kural:
 satır geri konunca lint kırmızı). `x! += 1` serbest, Babel onu kabul ediyor. Bir aracın
 koşamaması bir bulgudur: bir mutasyon koşusunun "düştü" sonucu "hiç koşmadı" diye okunur.
 
+### 148 · Bir kapının atladığı şey, kapıya yeni bir şey yaslanınca ilk sorulur
+TRAPS'ın başına çapalı bir grup listesi kondu ve çapaların bağlantı kapısı A7'de
+denetlendiği varsayıldı. Bir çapayı bozan mutasyon A7'den yeşil geçti: A7 aynı dosyadaki
+`#çapa` bağlantılarını hiç okumuyor (`href.startsWith('#')` atlanıyor). Kapı kendi işinde
+doğruydu, varsayım yanlıştı. Çare listenin kendi iddiası oldu (A10, her satır kendi
+grubunun çapasını gösteriyor), ve üç mutasyonla kırmızı. Kural: **yeni bir şeyi var olan
+bir kapıya emanet etmeden önce o kapının onu gerçekten okuduğu bir mutasyonla gösterilir.**
+
+### 149 · Bir mutasyon kanıtında "kırmızı", testin koştuğu demek değil
+Aynı gün iki kez sekiz mutasyonun sekizi de "kırmızı" çıktı ve hiçbiri bir şey
+kanıtlamıyordu. Birincisinde toplu sarmalayıcı kendi argümanlarını test komutu diye
+geçirdi, her koşu 127 ile döndü. İkincisinde kesilen bir oturumdan sonra iki test dosyası
+boş kalmıştı, vitest her koşuda "test bulunamadı" ile düştü; tip, lint ve biçim boş
+dosyayı temiz saymıştı. İkisinde de sıfırdan farklı çıkış kodu "test bu değişikliği
+görüyor" diye okundu. Çare `scripts/mutasyon-kaniti.sh`'de: test önce değişmemiş kodda
+koşar ve yeşil olmalıdır, ve 126, 127 ya da sinyal alan bir koşu kırmızı sayılmaz. İkisi
+betiğin kendi koşularıyla gösterildi. Kural: **her mutasyon bu betikle yapılır, kendi
+sarmalayıcısıyla değil** (CLAUDE.md).
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1350,12 +1387,13 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 147, yeni bir tuzak 148'den devam eder. Test stratejisi
-dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.
+büyük kullanılan numara 149, yeni bir tuzak 150'den devam eder. Test stratejisi
+dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
+sırayla çakışabilir.

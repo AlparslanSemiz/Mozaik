@@ -31,6 +31,12 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
+**Çalışma düzeni (2026-10-09).** Her iş alanı kendi worktree'sinde ve dalında, `main`'de
+oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
+CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
+[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`, birleşmeden önce
+tam `npm test` ve `kontrol`.
+
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 `refactor/yapi` dalında yürüyor ve davranış değiştirmiyor: adım 0 ve 1 bitti
 (2026-10-09), dal `main`'e birleşmedi ve itilmedi ([TODO.md](TODO.md) §8k).
@@ -47,8 +53,8 @@ ve 2026-10-09.
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
    PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24 düzeldi, tam mutasyon koşusunun sonucu
-   bekleniyor (`haftalik.yml` 37914431289). Kullanıcının kararını bekleyen yeni bulgu:
-   öneri değişmezi CI'da kararsız ve `main`'i bir kez kırmızı yaptı (B7.26).
+   bekleniyor (`haftalik.yml` 37914431289). B7.26 (öneri değişmezinin CI'da kararsızlığı)
+   kapandı, testi zayıflatmadan (WORKLOG 2026-10-09 gece).
 5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b bitti; Eyotek turunun araçları hazır
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
@@ -80,8 +86,9 @@ ve 2026-10-09.
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-10-09) | `npm test` |
-| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 7,9 ve 8,2 dk; işlerin toplamı 32,4 ve 34,1 runner dakikası, en uzun iş `e2e-arama` 425–440 s (2026-10-08) | `gh run view 37846839319`, `37848823362` |
+| Birim testleri | 45 dosyada 1378 test, hepsi geçti (2026-10-09 gece) | `npm test` |
+| `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
+| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
 | Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
@@ -95,6 +102,134 @@ ve 2026-10-09.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-09 (gece) · Hız oturumu, ikinci yarı: B7.26, bölünen öneri testleri, `hizli`, CI matrisi, mutasyon betiği ve çalışma düzeni
+
+**Başlangıç.** Kullanıcının kararları (aynı gün): B7.26 önce, sonra onaylanan B2, B3, B5,
+D1, D2, D3, D5, C ve E. `main` 5aa10d5'te kaldı, `git merge main` boş geçti. Makine
+bütün oturum pildeydi (AC=0, profil `performance`); süreler CI'dan alındı, yerelde yalnız
+`hizli` ölçüldü.
+
+**Ne yapıldı, commit commit** (dalın commit'leri, konularıyla).
+- "Test: öneri değişmezi olay döngüsünü bırakıyor, tavanı ölçülen CI süresinden" (B7.26).
+  Kuyruk ölçüldü: aynı üreteçten 600 dünya, dünya başına medyan 5,5 ms, en ağırı 11,5 s,
+  en ağır on dünya toplamın %60'ı; `solve` en çok 287 ms. Bölmek seçilmedi (TESTFINDINGS).
+  M1, M2, M3 kırmızı; CI'da iki koşuda yeşil, `invariants.test.ts` 36,8 ve 36,2 s.
+- "CI: öneri aramasının testleri birer runner'da" (D3). `--shard` üç etiketli testi birer
+  birer dağıtıyor (`--list` ile). Sonra `e2e-arama` parçaları 48 s, 101 s ve 383 s; kritik
+  yol `e2e (2)`, duvar 6,4–6,6 dk (önce 6,6–14,7 dk, medyan 7,4).
+- "TODO'nun biten maddeleri ve ham notları arşive taşındı" (D2): 85 madde ve §9, birebir.
+  "oturum başında TODO'nun yalnız §0'ı, İÇİNDEKİLER'i ve işin bölümü okunuyor" (D1).
+  "uzun komutlar arka planda" (D5). "çalışma düzeni, ne zaman durulduğu ve rapor biçimi"
+  (C, E1–E3). "paket turu skill'i" (E4).
+- "babanın verisiyle koşan dört öneri testi kendi dosyalarında" (B3a, yalnız taşıma) ve
+  "dizili haftanın ilk araması bir kez, her test kendi kopyasıyla" (B3b).
+- "npm run hizli, commit'ten önceki döngü" (B2).
+- "mutasyon kanıtı önce değişmemiş kodu koşuyor, koşmayan testi kırmızı saymıyor".
+- B5 denendi, geri alındı (DECISIONS).
+
+**Ölçümler.**
+
+| Ne | Önce | Sonra |
+|---|---|---|
+| Oturum başı sabit okuma | 345 323 bayt (~96 bin token) | 32 154 bayt (~8,9 bin token), üstüne işin bölümü |
+| TODO.md | 321 015 bayt | 93 681 bayt |
+| CI `relax.test.ts` | 234–317 s (dört koşu) | 7,3 s; `relaxFullCourse` 131 s, `relaxLaidOut` 109 s yan yana |
+| CI vitest toplamı, birim adımı | 236–319 s, 237–320 s | 144,6 s, 146 s (37957196115, tek koşu) |
+| CI `denetim` işi | 4 dk 52 s – 6 dk 32 s | 3 dk 29 s |
+| `npm run hizli`, yerel | yoktu | 5,9 / 6,8 / 8,4 s; 41 dosya, pilde, `performance`, yük 1,0–1,8 |
+
+Bilinen mutasyonlar (`scratch/hiz-2026-10-09/m18-*.txt`): ağır testler bölmeden önce ve
+sonra aynı, M3–M8 kırmızı (M7'de dört testin üçü), M1 ve M2 yeşil; `relax.test.ts` ile
+değişmez birlikte M1–M8'in sekizinde kırmızı; `npm run hizli` M1–M8'in sekizinde kırmızı.
+
+AC kıyası alınamadı: pil yarısı alındı (`tipler` 5,0–5,5 s, `solver.test.ts` 9,2–9,6 s),
+makine prize takılmadı. `temiz-kosul.sh`'nin AC şartı olduğu gibi kaldı.
+
+**Plandan sapmalar.** (1) Kesilen bir oturumdan sonra iki yeni test dosyası boş kalmıştı;
+tip, lint ve biçim denetimi boş dosyayı temiz saydı, mutasyon betiğinin kontrol koşusu
+yakaladı. Dosyalar HEAD'den yeniden üretildi ve satır satır karşılaştırıldı. (2) İlk toplu
+mutasyon koşusu geçersizdi: sarmalayıcım kendi argümanlarını test komutu diye geçirdi,
+"kırmızı"ların hepsi çıkış 127'ydi. Kalıcı çözüm `mutasyon-kaniti.sh`'de. (3) Arka planda
+mutasyon sürerken bir kez `git stash` koşuldu; o an yalnız kontrol koşuyordu, zarar yok.
+Kural CLAUDE.md'de.
+
+**Tuzak adayları.** Bir mutasyon kanıtında "kırmızı" testin koştuğu demek değil (127, boş
+dosya). Bir kapının atladığı şey kapıya yaslanılan yeni kullanımda sorulur (A7 ve sayfa içi
+çapa). İkisi bu dalın son commit'inde numaralanıyor.
+
+**Koşulan testler.** Belge kapısı her commit'ten önce. `relax*.test.ts`, `invariants`,
+`hizli` (üç kez). Mutasyon kanıtları yukarıda, betiğin altı davranışı ve iki listesi.
+`kontrol` oturum sonunda ("Şu an"). CI: 37929711747, 37930611648, 37957196115 yeşil.
+**Koşulmayanlar.** `ekran`, `test:webkit`, exe süiti, Stryker.
+
+---
+
+## 2026-10-09 (akşam) · Hız oturumu, `hiz/belge-test` dalı: belge ağırlığı ölçüldü, TRAPS'a grup listesi, TODO'nun arşivi ayrı dosyada
+
+**Başlangıç.** Dal `main`'in 5aa10d5'inden açıldı, öteki iki oturum durdurulmuştu. Bu
+dalda uygulamanın davranışı değişmiyor, yalnız belgeler ve belge kapısı değişti. "Şu an"
+bloğuna dokunulmadı.
+
+**Ne yapıldı, commit commit** (dalın commit'leri, konularıyla).
+- "Belgeler: TRAPS'ın başında grup listesi, CLAUDE.md yalnız ilgili grubu okutuyor".
+  Dosyanın başında grup başına tek satır: hangi işte hangi grubun okunacağı, çapalı
+  bağlantıyla. Numaralar tekrarlanmadı, alttaki dizin onları tutuyor. A10'a bir iddia
+  eklendi: liste her grubu dosyadaki sırayla ve kendi çapasıyla gösteriyor. Üç mutasyonla
+  kırmızı (`scripts/mutasyon-kaniti.sh`): bir satırı silmek, bir çapayı bozmak, iki satırın
+  yerini değiştirmek.
+- "Belgeler: TODO'nun §10 arşivi docs/TODO-ARCHIVE.md'ye taşındı". Silme yok: üst kısım ve
+  arşiv gövdesi eskisiyle karakter karakter karşılaştırıldı, ikisi de aynı. §10 tek satıra
+  indi. Yeni dosya `DATED_RECORD`'da; o satır silinince A1, A3 ve A6 kırmızı (mutasyonla
+  görüldü). Adı CONVENTIONS'ın "dosya adları İngilizce" kuralından.
+
+**Ölçümler.** Token tokenizer'la ölçülmedi: bayt ÷ 3,6 ile tahmin, önceki 96 bin
+tahminiyle aynı oran (betik `scratch/hiz-2026-10-09/okuma.sh`).
+
+| Oturum başında okunan | Önce | Sonra |
+|---|---|---|
+| CLAUDE.md | 6 919 bayt | 7 196 bayt |
+| docs/TODO.md | 321 015 bayt | 171 332 bayt |
+| docs/PRINCIPLES.md | 10 612 bayt | 10 612 bayt |
+| WORKLOG'un "Şu an" bloğu | 6 777 bayt | 6 777 bayt |
+| TRAPS'ın başı ve grup listesi | okunmuyordu | 2 403 bayt |
+| Toplam | 345 323 bayt, ~96 bin token | 198 320 bayt, ~55 bin token |
+
+- WORKLOG arşivi (A4): bir aydan eski girdiler (2026-09-09'dan önce, "Kırk sekizinci
+  oturum"dan aşağısı) 326 606 bayt, dosyanın 518 112 baytının %63'ü. Oturum başında
+  okunmuyor, ve Read'in varsayılan 2000 satırı (131 462 bayt) tamamen daha yeni girdilerde
+  kalıyor. Kazanç yalnız aramada: `Sığdır` 47 eşleşmenin 29'u, `blocker` 24'ün 14'ü eski
+  kısımda, `relax` 27'nin hiçbiri. Taşınmadı, öneri taşımamak.
+- Kalan TODO'nun içi: kapanmış `[x]` maddeler 64 066 bayt (%37), §9 ham notlar 14 843 bayt,
+  §8 tek başına 68 987 bayt.
+- CI (`ci.yml`, son 10 koşu): duvar 6,6–14,7 dk, medyan 7,4 dk; işlerin toplamı 28,8–33,7
+  runner dakikası. Kritik yol `e2e-arama` (medyan 416 s), onu `e2e (2)` 382 s ve `denetim`
+  312 s izliyor. Ana E2E'nin CI raporunda (koşu 37924071123) 631 testin toplamı 3 588 s,
+  tek bir test 336,8 s: `otomatik.spec.ts`, "kurulamayan haftada yolları söylüyor".
+  Windows (`windows.yml`, iki koşu) 21,5 ve 25,9 dk, tek iş.
+
+**Ölçülmeyenler.** B1 (dosya başına birim test süreleri), `hizli`'nin süresi, vitest
+havuzu, yerel komutların süreleri ve E2E'nin test başı kurulum maliyeti: kirli, ölçülmedi.
+Makine bütün oturum prizde değildi (`scripts/temiz-kosul.sh`, AC=0, pil %27'ye indi),
+profil `performance`'tı.
+
+**Plandan sapmalar.** (1) `hiz/belge-test` uzakta ikinci commit'te duruyordu, oysa oturum
+`git push` koşmadı; reflog "update by push" diyor, hook yok. Kimin ittiği bilinmiyor,
+Alp'e soruldu. Dal o commit'te CI'ı tetikledi. (2) `main` 5aa10d5'te kırmızı: `denetim`'de
+`invariants.test.ts`'in öneri değişmezi 60 s tavanında düştü ve vitest işçisinin RPC'si
+zaman aşımına uğradı, yani B7.26'nın ikinci görülüşü. Kapsam dışı, dokunulmadı.
+
+**Tuzak adayı.** A7 aynı dosyadaki bir `#çapa` bağlantısını hiç denetlemiyor
+(`href.startsWith('#')` atlanıyor). Bir mutasyonla görüldü: TRAPS'ın grup listesinde
+bozulan çapa A7'den yeşil geçti. Bir kapının neyi atladığı, kapıya güvenilen yeni bir
+kullanımda ilk sorulacak şey (tuzak 120'nin yanında).
+
+**Koşulan testler.** Belge kapısı her commit'ten önce (19/19, A10'un yeni iddiasıyla).
+Dört mutasyon kanıtı. **Koşulmayan testler.** `npm test`'in tamamı, `kontrol`, E2E: bu
+turda yalnız belge ve belge kapısı değişti, ve oturum sonu adımları onaydan sonraya
+kaldı.
 
 ---
 

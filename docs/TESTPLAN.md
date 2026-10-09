@@ -7,7 +7,8 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Katman | Komut | Ne zaman |
 |---|---|---|
 | Tipler | `npm run tipler` | her değişiklikten sonra |
-| Birim ve duman | `npm test` | her değişiklikten sonra |
+| Hızlı | `npm run hizli` | her commit'ten önce, dokunulan test dosyalarıyla birlikte |
+| Birim ve duman | `npm test` | birleşmeden önce, ve `hizli`'nin dışarıda bıraktığı dört dosyaya ya da onların ölçtüğü çözücüye ve öneri aramasına dokunulduysa |
 | E2E | `npm run test:e2e` | arayüzü, düzeni, sürüklemeyi, baskıyı ya da ekrandaki metni değiştiren bir iş yapıldıysa, ve sürüm çıkarmadan önce |
 | Site, sunucu, klasör | `npm run test:site` | teslim yollarına dokunulduysa: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
@@ -17,7 +18,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
-| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde sırayla), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
+| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde, her biri ayrı bir runner'da), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
 | Windows | `.github/workflows/windows.yml` | her `main` push'unda, haftalık koşuda ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı), öneri aramasının `@arama` etiketli testleri ayrı adımda sırayla. Siteyi kilitlemez; `npm run yayinla` etiketi onun da yeşilini bekler |
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: mutasyon, ve `windows.yml`'i çağırır. Siteyi kilitlemez |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
@@ -79,6 +80,25 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Erişilebilirlik | `e2e/erisim.spec.ts` | eksik etiket, yanlış rol, atlanan başlık düzeyi, klavyesiz kaydırma |
 | Mutasyon | `stryker.config.json` | testlerin kendisi: hangi kural bozulunca hiçbir şey kırmızıya dönmüyor |
 | Görüntü | `e2e/ekran.spec.ts` | test değil, bakılacak kanıt |
+
+### Hızlı
+
+`npm run hizli`, birim süitinin dört yavaş dosyası dışarıda: `relaxFullCourse.test.ts`,
+`relaxLaidOut.test.ts`, `invariants.test.ts` ve `solver.test.ts`. Seçim CI'ın dosya
+sürelerinden: bu dördü birim işinin süresinin neredeyse tamamı, geri kalan her dosya
+birkaç saniyenin altında. Belge kapısı içeride.
+
+Gördüğü: öneri aramasının küçük dünyalardaki bütün iddiaları (`relax.test.ts`, RF2'nin
+iki sınır testi dahil), kısıt motoru, şema göçü, depo, belgeler. Öneri aramasının bilinen
+sekiz mutasyonunun (refactor analizinin M1–M8'i) sekizi de onda kırmızı (WORKLOG
+2026-10-09, hız oturumu).
+
+Görmediği: babanın verisi (önerinin CP-SAT'ın en iyisine ulaşması, dizili haftada
+"Olmaz", çözücünün tam dolu kursu), çözücünün gerçek ölçekteki davranışı, ve fast-check
+değişmezlerinin hepsi (çözücünün yasallığı, `occupy` ile `vacate`, `parseState`'in sabit
+noktası, `remapDays`, `clampBlocks`, `placedBlocks`, palet, kurulamayan haftaya öneri).
+Bu yüzden tam `npm test` birleşmeden önce koşar, ve bu dosyaların ölçtüğü koda dokunan
+bir iş onları commit'ten önce de koşar.
 
 ### Birim
 
@@ -422,21 +442,23 @@ Sahte olmayan veri iki dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
 `src/fixtures/tam-dolu-kurs-dizili.json` aynı dosya, babanın kendi dizdiği 330
 saatle: yalnız yerleşimler eklendi, ve onlar kimlikten kimliğe, ad taşımıyor
 (2026-09-25). Dizili dersler yerinde kalırken yol olmayan, yani her yolun yeniden
-dizdiği hafta bu; `relax.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
+dizdiği hafta bu; `relaxLaidOut.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
 Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
 yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
 dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
-125). `relax.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
+125). `relaxFullCourse.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
 değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6
-sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. İkisi birlikte
-yaklaşık 45 saniye sürer, süitin en yavaş birim testi. `e2e/otomatik.spec.ts` aynı
+sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. Bu iki dosya
+süitin en yavaş birim testlerini taşıyor ve bu yüzden `relax.test.ts`'ten ayrı: Vitest
+dosyaları paralel, bir dosyanın içindeki testleri ise sırayla koşar. İki "dizili" testi
+aynı ilk aramadan başlar, arama bir kez yapılır ve her test kendi kopyasını okur. `e2e/otomatik.spec.ts` aynı
 haftayı tarayıcıda panelden uygular ve tek Ctrl+Z ile geri alır. Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
 silinir.
 
 ## Ölçüm yöntemleri
 
 - **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini `getComputedStyle` ile okur, WCAG kontrast oranını ve CIE Lab ΔE farkını hesaplar. ΔE gerekiyor, çünkü WCAG parlaklık oranı farklı tonlardaki iki koyu rengi eşit sayar. Modern renk sözdizimi sayıya çevrilmeden önce sRGB'ye getirilir (tuzak 81).
-- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır.
+- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
 - **Derleme çıkış kodu.** Testten önce derleme susturuluyorsa çıkış kodu okunur, yoksa testler bir önceki `dist/`'i ölçer.
 - **Kâğıt.** Yazdırma iddiaları PDF üretilip okunarak doğrulanır (MediaBox, üst ve alt bilgi), ve kâğıdı ölçen test pencereyi de kâğıdın boyuna getirir (tuzak 31 ve 86).

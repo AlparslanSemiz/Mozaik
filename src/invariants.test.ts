@@ -28,7 +28,7 @@ import { activeProgram, replaceActiveGrid } from './pure/programs';
 import { solve } from './pure/solver';
 import { parseState } from './pure/parseState';
 import { illegalBlocks, makeWorld, type WorldSpec } from './worlds';
-import { applySuggestion, suggest, verifySuggestion } from './pure/relax';
+import { applySuggestion, createRelaxer, verifySuggestion, type RelaxOptions } from './pure/relax';
 import { activePlacements } from './pure/programs';
 import { closedKey } from './leaf/keys';
 import type { Day, Id, State } from './leaf/types';
@@ -237,17 +237,37 @@ const closedWorld = fc
     return { ...d, unavailable, settings };
   });
 
+/**
+ * `suggest()` as it runs, the same 50 ms slices, with the event loop let in
+ * between them. Sixty searches in one synchronous block kept the worker from
+ * answering its own runner and the run went red on vitest's RPC timeout with
+ * every test green (TESTFINDINGS 2026-10-09, TODO B7.26); the app drives the
+ * search the same way, a slice at a time.
+ */
+async function suggestYielding(
+  d: State,
+  hint: Readonly<Record<string, Id>>,
+  options: Partial<RelaxOptions>,
+) {
+  const relaxer = createRelaxer(d, hint, options);
+  for (;;) {
+    const result = relaxer.step(50);
+    if (result !== null) return result;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+}
+
 describe('değişmez · kurulamayan haftaya öneri sınıf ya da derslik saati açmaz', () => {
   // TODO B5.9. Whatever the week: a suggestion names no class and no room, the
   // data it hands back still has every one of their closed hours, and the week
   // it carries is legal and whole for that data.
-  it('her öneri denetimden geçiyor ve yalnız öğretmen saatine, kurala, bloğa, saate dokunuyor', () => {
+  it('her öneri denetimden geçiyor ve yalnız öğretmen saatine, kurala, bloğa, saate dokunuyor', async () => {
     let offered = 0;
-    fc.assert(
-      fc.property(closedWorld, (d) => {
+    await fc.assert(
+      fc.asyncProperty(closedWorld, async (d) => {
         const stuck = solve(d);
         if (stuck.phase === 'solved') return;
-        const { suggestions, rejected } = suggest(d, activePlacements(stuck.state), {
+        const { suggestions, rejected } = await suggestYielding(d, activePlacements(stuck.state), {
           budgetMs: 60_000,
         });
         // The checks below only see what got past verifySuggestion inside the
@@ -275,7 +295,12 @@ describe('değişmez · kurulamayan haftaya öneri sınıf ya da derslik saati a
     // suggestions at all, or the loop above audited nothing.
     console.log(`[ölçüm] 60 dünyada ${offered} öneri denetlendi`);
     expect(offered).toBeGreaterThan(10);
-  }, 60_000);
+    // Twice the slowest file CI has measured (86 s, ci 37926483682, the run
+    // that went red at 60 s), on the same rule as the file's ceiling above.
+    // The time is in the worlds drawn more than in the runner: over 600 of
+    // them the median took 6 ms and the heaviest 4 to 11 s, the ten heaviest
+    // carrying half the total (WORKLOG 2026-10-09, hız oturumu).
+  }, 180_000);
 });
 
 describe('değişmez · occupy sonra vacate başlangıç durumunu verir', () => {

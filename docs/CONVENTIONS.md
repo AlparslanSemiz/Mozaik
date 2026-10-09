@@ -208,4 +208,4 @@ listesi [DATA.md](DATA.md)'de.
 - **Mutlak ifade yerine gerekçe.** Bir duruş "bu asla yapılmaz" diye değil "bu şu an yapılmıyor, çünkü şunu koruyor" diye yazılır. Kodun ya da platformun mekanik bir gerçeği ve tarihsel bir alıntı olduğu gibi kalır.
 - **Kaynağı belli olmayan gerekçe işaretlenir.** Eski kayıtta yazılı olan (kayıtlı), sonradan önerilen (öneri, doğrulanmadı).
 - **Sayılar kaynaktan doğrulanır, belgeden kopyalanmaz.** Tarihli ölçümler WORKLOG'un girdilerinde durur, kural belgelerinde değil.
-- **Tarihli kayıtlar geriye dönük düzeltilmez.** WORKLOG girdileri, DECISIONS ve TODO'nun arşivi o günü anlatır. Bir ad sonradan değiştiyse eski ad kalır ve yanına parantez içinde bugünkü ad eklenir.
+- **Tarihli kayıtlar geriye dönük düzeltilmez.** WORKLOG girdileri, DECISIONS ve TODO'nun arşivi ([TODO-ARCHIVE.md](TODO-ARCHIVE.md)) o günü anlatır. Bir ad sonradan değiştiyse eski ad kalır ve yanına parantez içinde bugünkü ad eklenir.
