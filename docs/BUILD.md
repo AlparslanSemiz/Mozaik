@@ -67,6 +67,7 @@ npm run exe          # Tauri ikilisi (Rust ister)
 npm run exe:test     # cargo test (Rust ister)
 npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve test)
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
+npm run exe:rpm      # Linux rpm paketi, yalnız yerel (Tauri CLI 2.12.1'i npx ile indirir)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
 ```
@@ -112,7 +113,7 @@ olarak o. Kural ile grafiğin yapılandırması `.dependency-cruiser.cjs`'te. Bi
 yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
 atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
-`font`, `exe`, `exe:test`, `exe:linux` ve `exe:e2e` `kontrol`'ün parçası değil,
+`font`, `exe`, `exe:test`, `exe:linux`, `exe:e2e` ve `exe:rpm` `kontrol`'ün parçası değil,
 çünkü bu depoda olmayan bir araç zinciri istiyorlar (Python ile fontTools, Rust,
 WebKitGTK ve `tauri-driver`) ve `kontrol` her makinede koşabilmeli. Yayınlanan
 Windows exe'sini derleyen ve `cargo test`'i her sürümde koşan yer
@@ -288,6 +289,15 @@ klasörü boşaltır (tuzak 131). Linux ikilisi WebKitGTK'nın DMA-BUF çizimini
 kapatır, bu makinenin Intel sürücüsü onunla çöküyordu (tuzak 130); Windows'a
 derlenmez. Neden Playwright değil ve girdinin neden sayfanın içinde
 üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
+
+**Linux paketi** (`npm run exe:rpm`) aynı ikilinin rpm'i,
+`src-tauri/target/release/bundle/rpm/` altına. Yalnız kullanıcının kendi Fedora'sı
+için ve yalnız yerel: `surum.yml`'de Linux işi yok, Release'e girmiyor, kendini
+güncellemiyor. Sebebi babanın sürüm yoluna dokunmamak: o yol bugün tek bir Windows
+işi, ve ona eklenen her iş babanın exe'sini bekleten ya da düşüren bir adım daha
+olurdu (DECISIONS 2026-10-09). Paketin boyu, derleme süresi ve bir Fedora kabında
+kurulup açılması A6'da ölçüldü (WORKLOG'un 2026-10-09 girdileri). Tauri CLI bağımlılık
+değil, `npx` ile tam sürümüyle çağrılıyor: `npm ci`'a ve CI'a yük olmasın.
 
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere
 1600 mantıksal piksellik bir kutuda kaldığında sayfa 1920 değil 1600 CSS

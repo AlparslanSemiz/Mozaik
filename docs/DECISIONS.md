@@ -35,6 +35,19 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Linux şimdilik yalnız yerel, Release'te yok
+
+**Ne.** Linux paketi `npm run exe:rpm` ile, kullanıcının kendi makinesinde üretilir
+([BUILD.md](BUILD.md), Exe). `surum.yml`'e Linux işi eklenmedi; rpm bir Release
+varlığı değil (kullanıcının kararı, A7).
+
+**Eski hâli.** A6 rpm'i elle, `npx @tauri-apps/cli build --bundles rpm` ile üretmişti;
+A7 olarak `surum.yml`'e bir Linux işi eklenmesi kullanıcının kararını bekliyordu.
+
+**Gerekçe.** Babanın sürüm yoluna dokunmamak. `surum.yml` babanın exe'sini üreten tek
+yol, ve ona eklenen her iş o exe'yi bekleten ya da düşüren bir adım daha olurdu.
+Linux'u bugün yalnız kullanıcı kullanıyor.
+
 ### 2026-10-09 · v0 bitti; dünkü "bitmedi" kaydı yanlış bilgiye dayanıyordu
 
 **Ne.** v0'ın çıkma şartı sağlandı: baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
