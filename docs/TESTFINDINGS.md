@@ -26,6 +26,22 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `ci.yml` 37926483682 (`main`, 5aa10d5) · `invariants.test.ts`, "her öneri denetimden geçiyor", ikinci kez
+Bulgu: aynı değişmez `main`'de bir kez daha 60 s'lik tavanında düştü, dosya 86 s sürdü ve
+işçinin RPC'si yine zaman aşımına uğradı. Test 60 dünyanın 60'ını da bitirmişti (39 öneri
+denetlendi). Son 14 CI koşusunda dosya 10–42 s, kırmızıda 86 s. Süre runner kadar çekilen
+dünyalara bağlı: aynı üreteçten 600 dünya, bu makinede iki koşu, dünya başına medyan 5,5 ve
+5,9 ms, en ağır dünya 11,5 ve 4,4 s, en ağır on dünya toplamın %60'ı ve %47'si; `solve` en
+çok 287 ms, ağır kısım öneri araması (`scratch/hiz-2026-10-09/olc-oneri.ts`, kirli koşul,
+yalnız dağılım). 20 dünyalık dilimlerde öneri sayısı 5 ile 31 arasında.
+Tür: test kusuru (kararsız).
+Ne yapıldı: düzeltildi, `hiz/belge-test` dalında. Arama `suggest()`'in kendi 50 ms'lik
+dilimleriyle ve aralarda olay döngüsüne dönerek koşuyor (`fc.asyncProperty`), tavan
+ölçülen en yavaş CI dosyasının iki katı (180 s). Bölmek seçilmedi: ağır dünya hangi
+dilime düşerse düşsün o dilimi uzatır, ve dilim başına öneri eşiği 5'e kadar inen sayılarla
+kararsız olurdu. `numRuns` 60. M1, M2, M3 kırmızı (`scripts/mutasyon-kaniti.sh`).
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `ci.yml` 37917310002 (Dependabot #5'in dalı, `384cc5c`) · `invariants.test.ts`, "her öneri denetimden geçiyor"
 Bulgu: `denetim` işinde bu değişmez 60 s'lik tavanını aştı, dosya 74 s sürdü ve vitest'in
 kendi RPC'si de zaman aşımına düştü ("Timeout calling onTaskUpdate"). Düşen iş yeniden

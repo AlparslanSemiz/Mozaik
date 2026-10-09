@@ -1195,6 +1195,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
       küçültmek; kullanıcının kararı.
+      Karar (2026-10-09): test zayıflamaz, `numRuns` 60 kalır. `hiz/belge-test` dalında
+      ("Test: öneri değişmezi olay döngüsünü bırakıyor, tavanı ölçülen CI süresinden")
+      arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
+      ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. CI'da yeşil görülene kadar açık.
 - [x] **B7.25 Linux paketi yerel komut (A7, 2026-10-09).** `npm run exe:rpm`; `surum.yml`'e
       Linux işi yok (DECISIONS 2026-10-09). Denendi: 1 dk 16 s, rpm 1 944 638 bayt.
 
