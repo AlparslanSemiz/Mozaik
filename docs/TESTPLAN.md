@@ -7,7 +7,8 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Katman | Komut | Ne zaman |
 |---|---|---|
 | Tipler | `npm run tipler` | her değişiklikten sonra |
-| Birim ve duman | `npm test` | her değişiklikten sonra |
+| Hızlı | `npm run hizli` | her commit'ten önce, dokunulan test dosyalarıyla birlikte |
+| Birim ve duman | `npm test` | birleşmeden önce, ve `hizli`'nin dışarıda bıraktığı dört dosyaya ya da onların ölçtüğü çözücüye ve öneri aramasına dokunulduysa |
 | E2E | `npm run test:e2e` | arayüzü, düzeni, sürüklemeyi, baskıyı ya da ekrandaki metni değiştiren bir iş yapıldıysa, ve sürüm çıkarmadan önce |
 | Site, sunucu, klasör | `npm run test:site` | teslim yollarına dokunulduysa: `site/`, `kurulum/`, `vite.site.config.ts`, `folder.ts`, `update.ts`, `desktop.ts` |
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
@@ -79,6 +80,25 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Erişilebilirlik | `e2e/erisim.spec.ts` | eksik etiket, yanlış rol, atlanan başlık düzeyi, klavyesiz kaydırma |
 | Mutasyon | `stryker.config.json` | testlerin kendisi: hangi kural bozulunca hiçbir şey kırmızıya dönmüyor |
 | Görüntü | `e2e/ekran.spec.ts` | test değil, bakılacak kanıt |
+
+### Hızlı
+
+`npm run hizli`, birim süitinin dört yavaş dosyası dışarıda: `relaxFullCourse.test.ts`,
+`relaxLaidOut.test.ts`, `invariants.test.ts` ve `solver.test.ts`. Seçim CI'ın dosya
+sürelerinden: bu dördü birim işinin süresinin neredeyse tamamı, geri kalan her dosya
+birkaç saniyenin altında. Belge kapısı içeride.
+
+Gördüğü: öneri aramasının küçük dünyalardaki bütün iddiaları (`relax.test.ts`, RF2'nin
+iki sınır testi dahil), kısıt motoru, şema göçü, depo, belgeler. Öneri aramasının bilinen
+sekiz mutasyonunun (refactor analizinin M1–M8'i) sekizi de onda kırmızı (WORKLOG
+2026-10-09, hız oturumu).
+
+Görmediği: babanın verisi (önerinin CP-SAT'ın en iyisine ulaşması, dizili haftada
+"Olmaz", çözücünün tam dolu kursu), çözücünün gerçek ölçekteki davranışı, ve fast-check
+değişmezlerinin hepsi (çözücünün yasallığı, `occupy` ile `vacate`, `parseState`'in sabit
+noktası, `remapDays`, `clampBlocks`, `placedBlocks`, palet, kurulamayan haftaya öneri).
+Bu yüzden tam `npm test` birleşmeden önce koşar, ve bu dosyaların ölçtüğü koda dokunan
+bir iş onları commit'ten önce de koşar.
 
 ### Birim
 

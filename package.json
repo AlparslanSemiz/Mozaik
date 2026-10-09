@@ -12,6 +12,7 @@
     "sunucu": "vite build --config vite.site.config.ts && node scripts/sunucu.mjs",
     "paket": "npm run build:site && node scripts/paket.mjs",
     "test": "vitest run",
+    "hizli": "vitest run --exclude src/relaxFullCourse.test.ts --exclude src/relaxLaidOut.test.ts --exclude src/invariants.test.ts --exclude src/solver.test.ts",
     "test:izle": "vitest",
     "tipler": "tsc --noEmit && tsc --noEmit -p tsconfig.tools.json",
     "lint": "eslint src",
