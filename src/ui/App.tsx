@@ -41,7 +41,7 @@ import {
 } from '../platform/prefs';
 import { attachScrollFade } from '../platform/scrollFade';
 import { attachRibbonScroll } from '../platform/ribbonScroll';
-import { useSolver } from '../platform/useSolver';
+import { useSolver } from '../platform/search';
 import { useFolder } from '../platform/useFolder';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';

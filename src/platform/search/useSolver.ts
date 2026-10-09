@@ -12,13 +12,13 @@
 // would throw away work with no explanation.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createSolver } from '../pure/solver';
-import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../pure/solver';
-import { applySuggestion, suggestionUses } from '../pure/relax';
-import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../pure/relax';
-import { activePlacements } from '../pure/programs';
+import { createSolver } from '../../pure/solver';
+import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../../pure/solver';
+import { applySuggestion, suggestionUses } from '../../pure/relax';
+import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../../pure/relax';
+import { activePlacements } from '../../pure/programs';
 import { startRelax } from './relaxPool';
-import type { Answers, Id, State } from '../leaf/types';
+import type { Answers, Id, State } from '../../leaf/types';
 
 /**
  * One slice per animation frame. `requestAnimationFrame`, not `setTimeout(0)`:

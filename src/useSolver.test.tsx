@@ -23,11 +23,11 @@ import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/rel
 import type { Solver, SolverProgress, SolverResult } from './pure/solver';
 import { activePlacements } from './pure/programs';
 import { sampleState } from './pure/sample';
-import { startRelax } from './platform/relaxPool';
+import { startRelax } from './platform/search/relaxPool';
 import { createSolver } from './pure/solver';
-import { samePlan, useSolver, type SolverRun } from './platform/useSolver';
+import { samePlan, useSolver, type SolverRun } from './platform/search/useSolver';
 
-vi.mock('./platform/relaxPool', () => ({ startRelax: vi.fn() }));
+vi.mock('./platform/search/relaxPool', () => ({ startRelax: vi.fn() }));
 vi.mock('./pure/solver', () => ({ createSolver: vi.fn() }));
 vi.mock('./pure/relax', () => ({
   applySuggestion: (d: State) => ({ ...d, settings: { ...d.settings } }),

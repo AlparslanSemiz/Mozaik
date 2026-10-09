@@ -7,12 +7,12 @@
 //
 // A machine preference, not the plan's data: it is about this computer.
 
-import { preference } from '../leaf/preference';
-import { RELAX_LOG_KEY } from '../leaf/preferenceKeys';
-import { safely } from '../leaf/storage';
-import { SURUM } from '../leaf/version';
-import type { Relaxer } from '../pure/relax';
-import { isDesktop } from './desktop';
+import { preference } from '../../leaf/preference';
+import { RELAX_LOG_KEY } from '../../leaf/preferenceKeys';
+import { safely } from '../../leaf/storage';
+import { SURUM } from '../../leaf/version';
+import type { Relaxer } from '../../pure/relax';
+import { isDesktop } from '../desktop';
 
 export interface SearchRecord {
   /** When it ended, ISO. */

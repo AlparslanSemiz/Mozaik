@@ -1,9 +1,9 @@
-// Which ways go on which worker (platform/relaxPool.ts). The pool itself needs
+// Which ways go on which worker (platform/search/relaxPool.ts). The pool itself needs
 // a browser and is measured by the real-exe suite; the plan is pure.
 
 import { describe, expect, it } from 'vitest';
 
-import { lines } from './platform/relaxPool';
+import { lines } from './platform/search/relaxPool';
 import type { RelaxFamily } from './pure/relax';
 
 /** Every way, in the order of relaxPool's table. */
