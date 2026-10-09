@@ -36,6 +36,24 @@ describe('Program renk ölçütü', () => {
     );
   });
 
+  it("Ayarlar'da olmayan bir branş, adından türeyen sabit bir renk alır", () => {
+    const state = sampleState();
+    const lesson = state.lessons[0]!;
+    const withSubject = (subject: string) => ({
+      ...state,
+      teachers: state.teachers.map((t) =>
+        t.id === lesson.teacherId ? { ...t, subject, subject2: '' } : t,
+      ),
+    });
+
+    const color = programColorIndex(withSubject('Satranç'), lesson, 'subject');
+    // The number itself is the claim: a colour that moved between versions
+    // would repaint every imported subject's cards.
+    expect(color).toBe(35);
+    expect(programColorIndex(withSubject('  SATRANÇ '), lesson, 'subject')).toBe(color);
+    expect(programColorIndex(withSubject('Origami'), lesson, 'subject')).not.toBe(color);
+  });
+
   it('cihaz tercihini yazar ve geri okur', () => {
     const values = new Map<string, string>();
     vi.stubGlobal('localStorage', {
