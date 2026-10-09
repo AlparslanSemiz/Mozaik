@@ -68,8 +68,18 @@ function kos(komut: string, args: string[], env: NodeJS.ProcessEnv, girdi?: stri
   c.stdout.on('data', (b: Buffer) => (cikti += String(b)));
   c.stderr.on('data', (b: Buffer) => (hata += String(b)));
   c.stdin.end(girdi ?? '');
+  // `exit`, not `close`: an orphan that inherited the pipes keeps them open,
+  // and waiting for them would turn the failure this file is about into a
+  // test timeout that names nothing. The output gets a moment to drain.
   return new Promise<Sonuc & { cikti: string }>((tamam) =>
-    c.on('close', (kod) => tamam({ kod, hata, cikti })),
+    c.on('exit', (kod) => {
+      const bitir = () => tamam({ kod, hata, cikti });
+      const sure = setTimeout(bitir, 200);
+      c.on('close', () => {
+        clearTimeout(sure);
+        bitir();
+      });
+    }),
   );
 }
 
