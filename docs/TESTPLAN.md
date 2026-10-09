@@ -459,6 +459,6 @@ silinir.
 ## Ölçüm yöntemleri
 
 - **Renk ve kontrast iddia edilmez, ölçülür.** E2E tema değişkenlerini `getComputedStyle` ile okur, WCAG kontrast oranını ve CIE Lab ΔE farkını hesaplar. ΔE gerekiyor, çünkü WCAG parlaklık oranı farklı tonlardaki iki koyu rengi eşit sayar. Modern renk sözdizimi sayıya çevrilmeden önce sRGB'ye getirilir (tuzak 81).
-- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır.
+- **Mutasyonla sınama.** Bir testin bir şey ölçtüğü, kural bilerek bozulup testin kırmızıya döndüğü görülerek doğrulanır. Mutasyondan önce dosya bir kopyaya alınır ve geri alma o kopyadan yapılır. Kanıt `scripts/mutasyon-kaniti.sh` ile: test önce değişmemiş kodda yeşil olmalı, ve komutu hiç koşmayan bir test kırmızı sayılmaz.
 - **Derleme çıkış kodu.** Testten önce derleme susturuluyorsa çıkış kodu okunur, yoksa testler bir önceki `dist/`'i ölçer.
 - **Kâğıt.** Yazdırma iddiaları PDF üretilip okunarak doğrulanır (MediaBox, üst ve alt bilgi), ve kâğıdı ölçen test pencereyi de kâğıdın boyuna getirir (tuzak 31 ve 86).

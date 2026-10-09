@@ -75,7 +75,8 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
 - Uzun komutlar (`kontrol`, E2E, mutasyon, CI'ı izlemek) arka planda koşulur ve bitiş bildirimi beklenir, `sleep` ve `tail` ile yoklanmaz.
 - Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
   2'nin altında, `scripts/temiz-kosul.sh` bakar. Koşul yoksa "kirli, ölçülmedi" yazılır.
-- Elle mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır.
+- Elle ya da toplu her mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır (toplu: `--liste`), kendi betiğini yazmak yok: kontrol koşusu ve koşmayan testin ayrımı orada.
+- Arka planda bir mutasyon sürerken ağaca dokunulmaz, `git stash` dahil.
 - Commit'ten önce `npm run hizli` ve dokunulan test dosyaları, tam `npm test` ve `kontrol` birleşmeden önce. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
 - Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
   (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
