@@ -26,6 +26,21 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `npx playwright test e2e/roboders-koruma.spec.ts`, bu makine · otomatik modun deneme sayfası
+Bulgu: Eyotek ayarı yazılırken ölçüldü: deneme sayfasının "tıklanırsa sunucuya iz
+gönderir" işaretlerinden üçü (`/tiklandi/y-kaydet`, `y-menu-sil`, `y-kaldir`) korumanın
+kendi yazan kelimelerini taşıyor, yani tıklansalar da ağ onları keserdi ve "yasak öğeye
+tıklanmadı" iddiası o üçü için bir şey ölçmüyordu. Aynı test her öğenin "atlandı"
+sebebini ayrıca sorduğu için açık tamamen boş değildi. Eyotek'in sayfasında ilk yazılan
+işaretlerin hepsi (`y-e-not` gibi) aynı kusuru taşıyordu ve bir Eyotek testi bu yüzden
+yanlış sebeple kırmızıydı (`izin-e-sekme`'deki "izin").
+Tür: test kusuru (bedava yeşil).
+Ne yapıldı: işaretler nötr adlar aldı, ve iki deneme sayfasındaki her işaretin kendi
+ayarıyla korumadan geçtiğini soran bir test eklendi. Eyotek ayarının on mutasyonu kırmızı
+(ROBODERS.md, "Eyotek ayarı").
+Kalıcı kural: yok; TRAPS'in "Test hijyeni" kuralının (yargıcın kendisi test edilir,
+tuzak 23) bir örneği.
+
 ### 2026-10-09 · `npx stryker run --dryRunOnly` ve `gorunum.spec.ts` 45b, bu makine · B7.24 ve B7.22'nin yerel ölçümü
 Bulgu (mutasyon, B7.24): `weight[index]!++` `weight[index] = weight[index]! + 1` olunca
 enstrümantasyon geçti (5639 mutant), ama arkasında iki engel daha vardı, ikisi de aynı

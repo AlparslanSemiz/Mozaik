@@ -251,6 +251,11 @@ node scripts/roboders/gez.mjs                      # korumalı, adım adım gezi
 node scripts/roboders/gez.mjs --oto --tiklama 40 --dakika 10 [--alan /yol]
                                                    # korumalı, kendi başına (Tur 0b)
 node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
+
+# Eyotek: aynı betikler --hedef eyotek ile, ve --alan zorunlu
+node scripts/roboders/giris.mjs --hedef eyotek
+node scripts/roboders/gez.mjs --hedef eyotek --alan /yol [--oto ...]
+node scripts/roboders/giris.mjs --hedef eyotek --sil
 ```
 
 - **Giriş** (`giris.mjs`) korumasız tek pencere, çünkü giriş bir POST. Betik hiçbir
@@ -296,6 +301,32 @@ node scripts/roboders/giris.mjs --sil              # tur bitince oturum silinir
   (her şeye izin, tıklama kuralı yok, yeni pencere, site, adres kelimesi, indirme, alan,
   `dialog`'u menü saymak, her düğmeyi menü saymak, diyalog, tıklama sınırı, süre sınırı,
   ekran görüntüsü).
+- **Eyotek ayarı** (2026-10-09, Eyotek turunun hazırlığı; Eyotek açılmadı). Aynı üç
+  betik `--hedef eyotek` ile Eyotek'e ayarlanır (`koruma.mjs`, `HEDEFLER`); oturum,
+  günlük, görüntü ve notlar `scratch/eyotek/` altında. Ayar yalnız ekler, hiçbir kuralı
+  gevşetmez. (1) Eyotek'in kendi yazan kelimeleri ortak listenin üstüne: not, kayıt
+  (*kaydı* için `kayd`), SMS, mesaj, bildirim, duyuru, yoklama, devamsızlık, ödeme,
+  tahsil, tahakkuk, fatura, borç, taksit, makbuz, iade, iptal, satış, sınav, puan,
+  karne, onay, ata, görev, izin (*izni* için `izn`), çıkış, oturum, şifre, WhatsApp.
+  Geniş tutuldu (kullanıcının kararı): zararsız okumaları da durdurur, ne durduğu tur
+  sonunda atlananlar listesinden okunur. (2) `--alan` zorunlu: Eyotek turu alansız
+  başlamaz, ve alan ağda da tutulur, alanın dışına giden ana çerçeve gezintisi (yazılan
+  adres, bağlantı, betik) hiç açılmaz; sayfanın kendi veri istekleri yalnız öteki
+  kurallarla yargılanır. El turunda `git` ve `tikla` da alanı sorar. (3) Adresteki
+  camelCase birleşme bir kelime başı sayılır (`OgrenciNotGir`), bu Roboders için de
+  geçerli ve yalnız sıkılaştırıyor. Bilinmeyen: Eyotek'te okulun giriş adresi.
+  Başlangıç herkese açık site (`www.eyotek.com.tr`), giriş elle yapılır; uygulama
+  başka bir alan adındaysa `HEDEFLER.eyotek.site` tek satırla değişir.
+  Kanıt aynı dosyada, yerel sunucuya karşı, beş test: Eyotek'in kelimeleri ve
+  Roboders'in onlardan etkilenmediği, alansız turun başlamadığı (ve açık bağlam
+  bırakmadığı), alanın dışının yazılan adresle de betikle de açılmadığı ama alanın
+  içinin ve sayfanın veri isteğinin açıldığı, otomatik turun yalnız alanın içindeki
+  gezinmeye tıkladığı. On mutasyonun onu kırmızı (iki kelime, Eyotek listesinin yok
+  sayılması, camelCase, ağdaki alan, üst çerçeve, iki "alan zorunlu" kapısı, otomatik
+  kararın listesi ve alanı). Hazırlıkta bulunan bir test kusuru: deneme sayfasındaki
+  üç işaret (`y-kaydet`, `y-menu-sil`, `y-kaldir`) korumanın kendi kelimelerini
+  taşıyordu, yani ağ onları tıklansa da keserdi; nötr adlar aldılar ve her işaretin
+  korumadan geçtiğini soran bir test eklendi.
 
 **Canlı yarı bekliyor.** Roboders aynı anda iki oturumda birini kapatmıyor (babanın
 gözlemi, 2026-10-08); tur ilk girişten sonra babanın oturumunun düşmediğini yine

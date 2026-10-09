@@ -1,4 +1,5 @@
-// `node scripts/roboders/gez.mjs`: walk Roboders one step at a time, guarded.
+// `node scripts/roboders/gez.mjs [--hedef eyotek]`: walk Roboders (or Eyotek)
+// one step at a time, guarded.
 //
 // The tour's only way in. It opens a context through `guvenliBaglam()`, so the
 // guard is on before the first request, and then waits for one command at a
@@ -7,11 +8,11 @@
 // its target and waits for "e" first, and `tiklanabilir()` refuses some targets
 // before the question is even asked.
 //
-//   git <adres>    go to an address on roboders.com
+//   git <adres>    go to an address on the target's site (and inside --alan)
 //   tikla <ad>     click the ONE visible link, button, tab or menu item with
 //                  this name (asks first)
-//   foto <ad>      screenshot  -> scratch/roboders/ekran/<ad>.png
-//   oku <ad>       the page's accessibility tree -> scratch/roboders/notlar/<ad>.yml
+//   foto <ad>      screenshot  -> scratch/<hedef>/ekran/<ad>.png
+//   oku <ad>       the page's accessibility tree -> scratch/<hedef>/notlar/<ad>.yml
 //   geri           browser back
 //   kapat          close (the session file stays; giris.mjs --sil deletes it)
 //
@@ -19,14 +20,17 @@
 // not click), headless, and stops at a ceiling:
 //
 //   node scripts/roboders/gez.mjs --oto [--tiklama 40] [--dakika 10]
-//        [--alan /yol]... [--baslangic <adres>]
+//        [--alan /yol]... [--baslangic <adres>] [--hedef roboders|eyotek]
 //
 // It writes screenshots before and after every click under
-// scratch/roboders/ekran/oto-<zaman>/ and the list of what it clicked and
-// skipped to scratch/roboders/notlar/oto-<zaman>.md. Login stays manual,
+// scratch/<hedef>/ekran/oto-<zaman>/ and the list of what it clicked and
+// skipped to scratch/<hedef>/notlar/oto-<zaman>.md. Login stays manual,
 // at the start of every tour (giris.mjs); no password is stored anywhere.
 //
-// Everything it writes is under scratch/roboders/, outside git: the
+// `--alan` holds in both modes, and Eyotek will not start without one: no page
+// outside it is opened, whatever opens it (koruma.mjs, `koru()`).
+//
+// Everything it writes is under scratch/<hedef>/, outside git: the
 // screenshots show my father's real data and the repository is public.
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -34,17 +38,8 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
-import {
-  BASLANGIC,
-  IZINLI_SITE,
-  KLASOR,
-  OTURUM,
-  guvenliBaglam,
-  gunlukYazici,
-  hedefBilgisi,
-  tiklanabilir,
-} from './koruma.mjs';
-import { otomatikGez, rapor } from './otomatik.mjs';
+import { alanda, guvenliBaglam, gunlukYazici, hedefSec, tiklanabilir } from './koruma.mjs';
+import { adayBilgisi, otomatikGez, otomatikKarar, rapor } from './otomatik.mjs';
 
 const { values: argv } = parseArgs({
   options: {
@@ -52,22 +47,41 @@ const { values: argv } = parseArgs({
     tiklama: { type: 'string', default: '40' },
     dakika: { type: 'string', default: '10' },
     alan: { type: 'string', multiple: true, default: [] },
-    baslangic: { type: 'string', default: BASLANGIC },
+    baslangic: { type: 'string' },
+    hedef: { type: 'string', default: 'roboders' },
   },
 });
 
-if (!existsSync(OTURUM)) {
-  console.error('Oturum yok. Önce: node scripts/roboders/giris.mjs');
+let hedef;
+try {
+  hedef = hedefSec(argv.hedef);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
+const alanlar = argv.alan;
+if (alanlar.some((a) => !a.startsWith('/'))) {
+  console.error('--alan bir yol: / ile başlar (ör. --alan /DersProgrami).');
+  process.exit(1);
+}
+if (hedef.alanZorunlu && alanlar.length === 0) {
+  console.error(`${hedef.ad} turu bir --alan ister: hangi bölümün gezileceği söylenmeli.`);
+  process.exit(1);
+}
+const BASLANGIC = argv.baslangic ?? hedef.baslangic;
+
+if (!existsSync(hedef.oturum)) {
+  console.error(`Oturum yok. Önce: node scripts/roboders/giris.mjs --hedef ${hedef.ad}`);
   process.exit(1);
 }
 
-const EKRAN = join(KLASOR, 'ekran');
-const NOTLAR = join(KLASOR, 'notlar');
+const EKRAN = join(hedef.klasor, 'ekran');
+const NOTLAR = join(hedef.klasor, 'notlar');
 mkdirSync(EKRAN, { recursive: true, mode: 0o700 });
 mkdirSync(NOTLAR, { recursive: true, mode: 0o700 });
 
 let engellenen = 0;
-const yaz = gunlukYazici();
+const yaz = gunlukYazici(hedef.klasor);
 const gunluk = (kayit) => {
   engellenen++;
   yaz(kayit);
@@ -77,7 +91,12 @@ const gunluk = (kayit) => {
 // The automatic tour runs headless: nobody is watching it, and a visible window
 // takes the focus from whoever is at the machine (pitfall 145).
 const browser = await chromium.launch({ headless: argv.oto });
-const context = await guvenliBaglam(browser, { oturum: OTURUM, gunluk });
+const context = await guvenliBaglam(browser, {
+  oturum: hedef.oturum,
+  gunluk,
+  ayar: hedef,
+  alanlar,
+});
 const page = await context.newPage();
 
 if (argv.oto) {
@@ -88,15 +107,16 @@ if (argv.oto) {
     process.exit(1);
   }
   const zaman = new Date().toISOString().replace(/[:.]/g, '-');
-  const baslangic = new URL(argv.baslangic);
-  if (!IZINLI_SITE.test(baslangic.hostname)) {
-    console.error(`Yalnız roboders.com: ${baslangic.hostname}`);
+  const baslangic = new URL(BASLANGIC);
+  if (!hedef.site.test(baslangic.hostname)) {
+    console.error(`Yalnız ${hedef.ad}: ${baslangic.hostname}`);
     process.exit(1);
   }
   console.log(`Otomatik tur: en çok ${tiklamaSiniri} tıklama, ${dakika} dakika.`);
   const sonuc = await otomatikGez(page, baslangic.href, {
-    site: IZINLI_SITE,
-    alanlar: argv.alan,
+    site: hedef.site,
+    alanlar,
+    ayar: hedef,
     tiklamaSiniri,
     sureSiniriMs: dakika * 60_000,
     ekran: join(EKRAN, `oto-${zaman}`),
@@ -119,8 +139,9 @@ function dosyaAdi(ad) {
 }
 
 async function git(adres) {
-  const u = new URL(adres ?? BASLANGIC);
-  if (!IZINLI_SITE.test(u.hostname)) throw new Error(`Yalnız roboders.com: ${u.hostname}`);
+  const u = new URL(adres || BASLANGIC);
+  if (!hedef.site.test(u.hostname)) throw new Error(`Yalnız ${hedef.ad}: ${u.hostname}`);
+  if (!alanda(u.pathname, alanlar)) throw new Error(`Gezinti alanının dışında: ${u.pathname}`);
   await page.goto(u.href);
 }
 
@@ -136,16 +157,23 @@ async function tikla(ad) {
   if (adaylar.length !== 1) {
     throw new Error(`"${ad}" adında görünen ${adaylar.length} hedef var, tam bir tane olmalı.`);
   }
-  const hedef = adaylar[0];
-  const bilgi = await hedefBilgisi(hedef);
-  const karar = tiklanabilir(bilgi);
+  const oge = adaylar[0];
+  const bilgi = await adayBilgisi(oge);
+  const karar = tiklanabilir(bilgi, hedef);
   if (!karar.izin) throw new Error(`Tıklanmaz: ${karar.sebep}.`);
+  // A link is also asked what the automatic tour asks of it (site, address,
+  // area). The network would stop a page outside the area anyway; this says
+  // so before the click instead of after it.
+  if (bilgi.href !== '') {
+    const yol = otomatikKarar(bilgi, { site: hedef.site, alanlar, ayar: hedef, sayfa: page.url() });
+    if (!yol.izin) throw new Error(`Tıklanmaz: ${yol.sebep}.`);
+  }
   const cevap = await soru.question(`  Tıklanacak: "${bilgi.ad}". Emin misin? (e/h) `);
   if (cevap.trim().toLocaleLowerCase('tr') !== 'e') {
     console.log('  Tıklanmadı.');
     return;
   }
-  await hedef.click();
+  await oge.click();
 }
 
 async function foto(ad) {
@@ -185,5 +213,5 @@ for (;;) {
 soru.close();
 await browser.close();
 console.log(
-  `${engellenen} istek engellendi. Oturumu silmek için: node scripts/roboders/giris.mjs --sil`,
+  `${engellenen} istek engellendi. Oturumu silmek için: node scripts/roboders/giris.mjs --hedef ${hedef.ad} --sil`,
 );

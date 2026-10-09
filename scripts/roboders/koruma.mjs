@@ -21,9 +21,16 @@
 //      if the network would have stopped it: `tiklanabilir()` refuses by name,
 //      and refuses table cells, form fields and draggable things outright.
 //
-// Every refusal is written to a log in scratch/roboders/, which is outside git:
+// Every refusal is written to a log in scratch/<hedef>/, which is outside git:
 // method, address without its query string, and why. Never a request body,
 // because a body may carry a person's name.
+//
+// TWO TARGETS, one guard (`HEDEFLER`, chosen with `--hedef`). Eyotek is the
+// school's management system: the father's account there opens students,
+// parents, payments and paid SMS, so it adds its own writing words to the list
+// below, and a tour of it must name the area it walks (`--alan`), which the
+// network layer then holds for every page the tab opens. Nothing here is
+// relaxed for either target; a target only adds.
 //
 // Proven before any tour, against a local server, by e2e/roboders-koruma.spec.ts.
 
@@ -32,15 +39,87 @@ import { join, resolve } from 'node:path';
 
 const KOK = resolve(import.meta.dirname, '..', '..');
 
-/** Where a tour starts. The only Roboders fact in this repository. */
-export const BASLANGIC = 'https://roboders.com/';
+/**
+ * Eyotek's own writing words, on top of the shared list. A school management
+ * system writes in more ways than a timetable does: a grade, an enrolment, a
+ * payment, an attendance mark, a message that costs money. Wide on purpose
+ * (the user's choice, 2026-10-09): "not" and "kayit" stop a lot of harmless
+ * reading too, and what they stopped is read from the skipped list after the
+ * tour, not guessed at before it.
+ */
+const EYOTEK_YAZAN = [
+  'not',
+  'kayit',
+  // Turkish turns the t of "kayıt" into a d before a vowel ("öğrenci kaydı"),
+  // and drops the i of "izin" ("izni"): the stems are listed as they are bent.
+  'kayd',
+  'sms',
+  'mesaj',
+  'bildirim',
+  'duyuru',
+  'yoklama',
+  'devamsizlik',
+  'odeme',
+  'tahsil',
+  'tahakkuk',
+  'fatura',
+  'borc',
+  'taksit',
+  'makbuz',
+  'iade',
+  'iptal',
+  'satis',
+  'sinav',
+  'puan',
+  'karne',
+  'onay',
+  'ata',
+  'gorev',
+  'izin',
+  'izn',
+  'cikis',
+  'oturum',
+  'sifre',
+  'whatsapp',
+];
 
-/** Hosts a tour may navigate to. */
-export const IZINLI_SITE = /(^|\.)roboders\.com$/;
+/**
+ * The two places a tour can go. `baslangic` is where the tour opens, `site`
+ * the hosts it may navigate to, `ekYazan` the target's own writing words, and
+ * `alanZorunlu` whether a tour must name its `--alan`. Eyotek's address is the
+ * public site: where the school's own login lives is not known yet, and the
+ * user opens it by hand in giris.mjs.
+ */
+export const HEDEFLER = {
+  roboders: {
+    ad: 'roboders',
+    baslangic: 'https://roboders.com/',
+    site: /(^|\.)roboders\.com$/,
+    ekYazan: [],
+    alanZorunlu: false,
+  },
+  eyotek: {
+    ad: 'eyotek',
+    baslangic: 'https://www.eyotek.com.tr/',
+    site: /(^|\.)eyotek\.com\.tr$/,
+    ekYazan: EYOTEK_YAZAN,
+    alanZorunlu: true,
+  },
+};
 
-/** Everything a tour writes, outside git: session, logs, screenshots, notes. */
-export const KLASOR = join(KOK, 'scratch', 'roboders');
-export const OTURUM = join(KLASOR, 'oturum.json');
+/**
+ * The target named on the command line, with where its tour writes: session,
+ * logs, screenshots and notes, under scratch/<ad>/, outside git. Each target
+ * has its own folder and so its own session file.
+ */
+export function hedefSec(ad = 'roboders') {
+  const hedef = HEDEFLER[ad];
+  if (hedef === undefined) {
+    throw new Error(`Bilinmeyen hedef "${ad}": ${Object.keys(HEDEFLER).join(', ')}`);
+  }
+  const klasor = join(KOK, 'scratch', hedef.ad);
+  return { ...hedef, klasor, oturum: join(klasor, 'oturum.json') };
+}
 
 /** The only methods that leave the machine. */
 const IZINLI_YONTEM = new Set(['GET', 'HEAD']);
@@ -59,9 +138,9 @@ export function katla(metin) {
 }
 
 /**
- * Words that write, as a button name or inside an address. A short word must
- * start a word (`sil`, but not the `sil` inside `basili`); a long one may sit
- * anywhere (`delete` inside `teacherdelete`).
+ * Words that write, as a button name or inside an address, for every target.
+ * A short word must start a word (`sil`, but not the `sil` inside `basili`); a
+ * long one may sit anywhere (`delete` inside `teacherdelete`).
  */
 const YAZAN = [
   'kaydet',
@@ -123,12 +202,30 @@ const YAZAN = [
 function kelimeKalibi(kelime) {
   return kelime.length >= 6 ? kelime : `(?:^|[^\\p{L}\\p{N}])${kelime}`;
 }
-const YAZAN_KALIP = new RegExp(`(?:${YAZAN.map(kelimeKalibi).join('|')})`, 'u');
+const kalip = (kelimeler) => new RegExp(`(?:${kelimeler.map(kelimeKalibi).join('|')})`, 'u');
+const KALIPLAR = new Map(
+  Object.values(HEDEFLER).map((h) => [h.ad, kalip([...YAZAN, ...h.ekYazan])]),
+);
 
-/** Whether a folded text carries a writing word, and which one. */
-export function yazanKelime(metin) {
-  const m = YAZAN_KALIP.exec(katla(metin));
+/**
+ * Whether a text carries one of the target's writing words, and which one.
+ * A camelCase join counts as a word start, so `OgrenciNotGir` is read as
+ * "ogrenci not gir": an address names its action that way more often than
+ * with a dash.
+ */
+export function yazanKelime(metin, ayar = HEDEFLER.roboders) {
+  const ayrik = String(metin).replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2');
+  const m = KALIPLAR.get(ayar.ad).exec(katla(ayrik));
   return m === null ? null : m[0].replace(/^[^\p{L}\p{N}]/u, '');
+}
+
+/**
+ * Is this path inside the tour's areas? No areas means the whole site. A plain
+ * prefix, the way the user writes it: `/DersProgrami` covers
+ * `/DersProgrami.aspx` and `/DersProgrami/Ogretmen` alike.
+ */
+export function alanda(yol, alanlar) {
+  return alanlar.length === 0 || alanlar.some((a) => yol.startsWith(a));
 }
 
 /** The part of an address a log may keep: origin and path, no query. */
@@ -142,7 +239,7 @@ export function kisalt(adres) {
 }
 
 /** May this request leave the machine? `{ izin, sebep }`, sebep in Turkish. */
-export function izinVerilir(yontem, adres) {
+export function izinVerilir(yontem, adres, ayar = HEDEFLER.roboders) {
   const y = String(yontem).toUpperCase();
   if (!IZINLI_YONTEM.has(y)) return { izin: false, sebep: `${y} gönderilmez` };
   let yol = String(adres);
@@ -152,7 +249,7 @@ export function izinVerilir(yontem, adres) {
   } catch {
     // An address that does not parse is judged as the text it is.
   }
-  const kelime = yazanKelime(yol);
+  const kelime = yazanKelime(yol, ayar);
   if (kelime !== null) return { izin: false, sebep: `adreste "${kelime}" var` };
   return { izin: true, sebep: '' };
 }
@@ -162,12 +259,12 @@ export function izinVerilir(yontem, adres) {
  * A table cell, a form field, a draggable thing or a submit button is refused
  * whatever it is called; anything else is refused if its name writes.
  */
-export function tiklanabilir(hedef) {
+export function tiklanabilir(hedef, ayar = HEDEFLER.roboders) {
   if (hedef.hucrede) return { izin: false, sebep: 'bir tablo hücresi' };
   if (hedef.formAlani) return { izin: false, sebep: 'bir form alanı' };
   if (hedef.suruklenebilir) return { izin: false, sebep: 'sürüklenebilir bir öğe' };
   if (hedef.gonderir) return { izin: false, sebep: 'formu gönderen bir düğme' };
-  const kelime = yazanKelime(hedef.ad);
+  const kelime = yazanKelime(hedef.ad, ayar);
   if (kelime !== null) return { izin: false, sebep: `adında "${kelime}" var` };
   if (katla(hedef.ad).trim() === '') return { izin: false, sebep: 'adı yok, ne olduğu bilinmiyor' };
   return { izin: true, sebep: '' };
@@ -201,9 +298,10 @@ export async function hedefBilgisi(locator) {
   });
 }
 
-/** A log writer: one JSON line per refusal, in KLASOR. */
+/** A log writer: one JSON line per refusal, in the target's folder. */
 export function gunlukYazici(
-  dosya = join(KLASOR, `engellenen-${new Date().toISOString().slice(0, 10)}.jsonl`),
+  klasor,
+  dosya = join(klasor, `engellenen-${new Date().toISOString().slice(0, 10)}.jsonl`),
 ) {
   mkdirSync(resolve(dosya, '..'), { recursive: true, mode: 0o700 });
   return (kayit) => {
@@ -295,8 +393,16 @@ function sayfaKorumasi() {
  * every native dialog (`confirm` answers "İptal"). Returns nothing: after this
  * the context is guarded for its whole life. A tour ends by closing the
  * browser, never a page: closing a page is one of the measured holes.
+ *
+ * `alanlar`: a page outside them is not opened at all, by any route (a typed
+ * address, a link, a redirect, a script): the router aborts the top frame's
+ * document request. Requests a page makes for its own data are judged by the
+ * rules above alone, because the area is about where the tour LOOKS.
  */
-export async function koru(context, gunluk) {
+export async function koru(context, gunluk, { ayar = HEDEFLER.roboders, alanlar = [] } = {}) {
+  if (ayar.alanZorunlu && alanlar.length === 0) {
+    throw new Error(`${ayar.ad} turu bir --alan ister: hangi bölümün gezileceği söylenmeli.`);
+  }
   // Before the init script, so the binding is there when the page first calls it.
   await context.exposeBinding('__saltOkunur', (_kaynak, k) =>
     gunluk({
@@ -309,7 +415,15 @@ export async function koru(context, gunluk) {
   await context.addInitScript(sayfaKorumasi);
   await context.route('**/*', async (route) => {
     const istek = route.request();
-    const karar = izinVerilir(istek.method(), istek.url());
+    let karar = izinVerilir(istek.method(), istek.url(), ayar);
+    if (
+      karar.izin &&
+      istek.isNavigationRequest() &&
+      !alanda(new URL(istek.url()).pathname, alanlar) &&
+      ustCercevede(istek)
+    ) {
+      karar = { izin: false, sebep: 'gezinti alanının dışında' };
+    }
     if (karar.izin) return route.continue();
     gunluk({
       yontem: istek.method(),
@@ -344,8 +458,21 @@ export async function koru(context, gunluk) {
   context.on('page', diyalog);
 }
 
+/**
+ * Is this navigation the tab's own page, not a frame inside it? Playwright
+ * cannot say for the first request of a new window (its frame does not exist
+ * yet), and a new window is a page too, so not knowing counts as yes.
+ */
+function ustCercevede(istek) {
+  try {
+    return istek.frame().parentFrame() === null;
+  } catch {
+    return true;
+  }
+}
+
 /** A guarded context: service workers and downloads off, then `koru()`. */
-export async function guvenliBaglam(browser, { oturum, gunluk }) {
+export async function guvenliBaglam(browser, { oturum, gunluk, ayar, alanlar }) {
   const context = await browser.newContext({
     serviceWorkers: 'block',
     acceptDownloads: false,
@@ -353,6 +480,11 @@ export async function guvenliBaglam(browser, { oturum, gunluk }) {
     viewport: { width: 1920, height: 1080 },
     locale: 'tr-TR',
   });
-  await koru(context, gunluk);
+  try {
+    await koru(context, gunluk, { ayar, alanlar });
+  } catch (e) {
+    await context.close();
+    throw e;
+  }
   return context;
 }

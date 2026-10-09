@@ -26,7 +26,7 @@
 
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { izinVerilir, katla, tiklanabilir } from './koruma.mjs';
+import { HEDEFLER, alanda, izinVerilir, katla, tiklanabilir } from './koruma.mjs';
 
 /** Everything on a page that could be clicked, so that what is skipped is seen too. */
 const ADAY_SECICI = [
@@ -48,8 +48,8 @@ const ACILIR = new Set(['true', 'menu', 'listbox', 'tree']);
  * May the automatic tour click this? Pure: takes what `adayBilgisi()` read and
  * the tour's limits. `{ izin, sebep, tur }`, tur being what kind of move it is.
  */
-export function otomatikKarar(aday, { site, alanlar = [], sayfa }) {
-  const temel = tiklanabilir(aday);
+export function otomatikKarar(aday, { site, alanlar = [], sayfa, ayar = HEDEFLER.roboders }) {
+  const temel = tiklanabilir(aday, ayar);
   if (!temel.izin) return { izin: false, sebep: temel.sebep, tur: '' };
 
   const baglanti = aday.rol === 'link' || (aday.rol === 'menuitem' && aday.href !== '');
@@ -66,9 +66,9 @@ export function otomatikKarar(aday, { site, alanlar = [], sayfa }) {
     if (!site.test(u.hostname)) return { izin: false, sebep: 'site dışı', tur: '' };
     if (aday.indirir) return { izin: false, sebep: 'dosya indirir', tur: '' };
     if (aday.yeniPencere) return { izin: false, sebep: 'yeni pencere açar', tur: '' };
-    const adres = izinVerilir('GET', u.href);
+    const adres = izinVerilir('GET', u.href, ayar);
     if (!adres.izin) return { izin: false, sebep: adres.sebep, tur: '' };
-    if (alanlar.length > 0 && !alanlar.some((a) => u.pathname.startsWith(a)))
+    if (!alanda(u.pathname, alanlar))
       return { izin: false, sebep: 'gezinti alanının dışında', tur: '' };
     return { izin: true, sebep: '', tur: 'bağlantı' };
   }
@@ -164,18 +164,23 @@ const anahtar = (url, b, tur) => {
  * Walks from `baslangic` on a page whose context `koru()` already guards.
  * Returns what it clicked, what it skipped and why it stopped.
  *
- * secenek: { site: RegExp, alanlar?: string[], tiklamaSiniri?: number,
- *            sureSiniriMs?: number, ekran?: string (folder), bekleMs?: number }
+ * secenek: { site: RegExp, alanlar?: string[], ayar?: hedef (koruma.mjs),
+ *            tiklamaSiniri?: number, sureSiniriMs?: number, ekran?: string
+ *            (folder), bekleMs?: number }
  */
 export async function otomatikGez(page, baslangic, secenek) {
   const {
     site,
     alanlar = [],
+    ayar = HEDEFLER.roboders,
     tiklamaSiniri = 40,
     sureSiniriMs = 10 * 60_000,
     ekran,
     bekleMs = 500,
   } = secenek;
+  if (ayar.alanZorunlu && alanlar.length === 0) {
+    throw new Error(`${ayar.ad} turu bir --alan ister: hangi bölümün gezileceği söylenmeli.`);
+  }
   const bitis = Date.now() + sureSiniriMs;
   const context = page.context();
   const tiklanan = [];
@@ -230,7 +235,7 @@ export async function otomatikGez(page, baslangic, secenek) {
     const gorulen = await adaylar(page);
     for (const { sira, bilgi } of gorulen) {
       if (sinirda()) break;
-      const karar = otomatikKarar(bilgi, { site, alanlar, sayfa: page.url() });
+      const karar = otomatikKarar(bilgi, { site, alanlar, ayar, sayfa: page.url() });
       if (!karar.izin) {
         const k = `${katla(bilgi.ad)}|${bilgi.rol}|${karar.sebep}`;
         if (!atlanan.has(k))
