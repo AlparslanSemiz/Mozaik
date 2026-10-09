@@ -304,6 +304,12 @@ sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taş
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
 değişmemişken çıkmaması. İkisi de mutasyonla denendi.
 
+Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
+CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
+kullanılmaz, ve `e2e/siteIdentity.ts` testlerden önce sunulan `index.html`'i bu klasörün
+`dist-site/index.html`'iyle bayt bayt karşılaştırır. İkisi de olmadan iki worktree'nin
+site süiti aynı porttaki tek sunucuyu, yani birinin derlemesini test edebiliyordu.
+
 ### Exe
 
 `e2e/exe.spec.ts` (`file://`) Tauri köprüsünü sayfada taklit eder, yani bir postane:

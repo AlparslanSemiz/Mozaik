@@ -15,6 +15,13 @@
 // System Access API (klasor).
 
 import { defineConfig } from '@playwright/test';
+import { sitePort } from './e2e/sitePort';
+
+// The port is this folder's, never shared, and the server is never reused:
+// why, and the check that the answer is this folder's build, in sitePort.ts
+// and siteIdentity.ts.
+const port = sitePort();
+const url = `http://localhost:${port}/`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -22,18 +29,19 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],
+  globalSetup: './e2e/siteIdentity.ts',
   use: {
     // Turkish locators; why this is a locale and not a stored seed is in
     // playwright.config.ts.
     locale: 'tr-TR',
-    baseURL: 'http://localhost:4173/',
+    baseURL: url,
     viewport: { width: 1920, height: 1080 },
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: 'npx vite preview --config vite.site.config.ts --port 4173 --strictPort',
-    url: 'http://localhost:4173/',
-    reuseExistingServer: true,
+    command: `npx vite preview --config vite.site.config.ts --port ${port} --strictPort`,
+    url,
+    reuseExistingServer: false,
     timeout: 60_000,
   },
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],

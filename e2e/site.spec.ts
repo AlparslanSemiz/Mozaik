@@ -49,13 +49,13 @@ test.describe('36. Site sürümü', () => {
     }
   });
 
-  test('service worker kaydoluyor', async ({ page }) => {
+  test('service worker kaydoluyor', async ({ page, baseURL }) => {
     await page.goto('/');
     const scope = await page.evaluate(async () => {
       const reg = await navigator.serviceWorker.ready;
       return reg.scope;
     });
-    expect(scope).toContain('localhost:4173');
+    expect(scope).toBe(baseURL);
   });
 
   test('cache adı SÜRÜMÜ taşıyor — yoksa güncelleme bir açılış geriden gelir', async ({
