@@ -35,9 +35,11 @@ concurrency:
 # on a four-core runner beside three other Playwright workers it races its own
 # waits: the first CI run (2026-10-08) lost the second one that way, and it
 # passed alone in 28 s. They run in `e2e-arama`, one at a time, and nowhere
-# else. Picked by title, because a tag in the title pushes the
-# line past the formatter's width; a renamed title turns `e2e-arama` red with
-# "No tests found", so a test cannot silently drop out.
+# else. Picked by title, because a tag in the title pushes the line past the
+# formatter's width. A title that stops matching does not fail `--grep` while
+# another still matches, and `--grep-invert` then runs that test in the shards,
+# so `e2e-arama` first counts with `--list`: the tests the list picks must equal
+# its titles, or the job is red before anything runs.
 env:
   ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor|öneri araması Chromium’da worker’larda koşuyor'
 
@@ -112,9 +114,15 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Listedeki her başlık tek bir test seçiyor
+        run: |
+          baslik=$(awk -F'|' '{ print NF }' <<< "$ARAMA_TESTLERI")
+          secilen=$(npx playwright test --grep "$ARAMA_TESTLERI" --list | sed -n 's/^Total: \([0-9]*\) tests\{0,1\} in .*/\1/p')
+          echo "ARAMA_TESTLERI: $baslik başlık, --list $secilen test seçiyor"
+          [ "$secilen" = "$baslik" ]
       - run: npx playwright install --with-deps chromium
       - run: npx vite build
-      - name: E2E, öneri aramasının iki testi, sırayla
+      - name: E2E, öneri aramasının testleri, sırayla
         run: >-
           npx playwright test --grep "$ARAMA_TESTLERI" --workers=1
           --reporter=blob,list --trace=retain-on-failure
