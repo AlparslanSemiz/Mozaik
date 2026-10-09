@@ -155,7 +155,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/ShortcutsHelp.tsx` | klavye kısayolları ekranı |
 | `ui/T.tsx` | `useT()` ve `<T>` |
 | `ui/setup/` | Okul: `index.tsx` kabuk, `Rooms`, `Subjects`, `Teachers`, `Classes`, `loadStatusFacet` |
-| `ui/lists/` | liste ekranlarının ortak parçaları: `Paste` (yapıştırarak ekleme), `Summary` (Özet) |
+| `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `Paste` (yapıştırarak ekleme), `Summary` (Özet) |
 | `ui/lessons/index.tsx` | Dersler |
 | `ui/Availability.tsx` | Müsaitlik |
 | `ui/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |

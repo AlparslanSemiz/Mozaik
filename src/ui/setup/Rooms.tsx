@@ -13,7 +13,7 @@ import { useInspect } from '../Inspector';
 import { useDialogs } from '../Dialogs';
 import { parseRooms } from '../../pure/import';
 import { addRoom, deletionQuestion, deleteRoom, updateRoom } from '../../pure/entities';
-import Paste from '../lists/Paste';
+import { Paste } from '../lists';
 import type { PanelProps } from '../props';
 import { useT } from '../T';
 import AddPanel from '../AddPanel';
