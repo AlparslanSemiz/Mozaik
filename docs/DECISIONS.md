@@ -95,6 +95,20 @@ almayı öneriyordu (K10).
 **Gerekçe.** Kullanıcının kararı: Linux yolu ileride Chromium uygulama modu olacak, babanın
 yolu WebView2 (Chromium). WebKit hiçbir teslim yolunun motoru olmayacak.
 
+### 2026-10-09 · Uzun testler arkada, birleşmeden önce yerelde `hizli`, tam doğrulama CI'da
+
+**Ne.** Kullanıcının kararı (gece): uzun testler (mutasyon, Windows E2E, WebKit) hiçbir
+şeyi bekletmez, arkada koşar. Bir dal `main`'e birleşmeden önce yerelde tam `kontrol`
+gerekmez: yerelde `npm run hizli`, tam doğrulama dalın CI'ında.
+
+**Eski hâli.** Birleşmeden önce `git merge main`, sonra kilit altında `scripts/agir.sh npm
+run kontrol` yeşil, sonra dalın CI'ı yeşil (aynı günün "Çalışma düzeni" kaydı ve
+CLAUDE.md).
+
+**Gerekçe.** Kilit tekti ve `kontrol` 15 dakika tutuyordu: aynı akşam bir dalın beş
+saniyelik mutasyon kanıtı başka oturumların `kontrol`'ü ve ölçümleri arkasında yarım saat
+bekledi. CI aynı süiti zaten koşuyor ve birleşme onun yeşilini istiyor.
+
 ### 2026-10-09 · Denendi ve bırakıldı: öneri aramasının testlerini E2E'de ilk başlatmak
 
 **Ne.** `playwright.config.ts`'te `@arama` testlerini ayrı ve önde bir projeye almak

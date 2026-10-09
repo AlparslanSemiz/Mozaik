@@ -87,8 +87,19 @@ import {
 import { health } from '../pure/feasibility';
 import type { State } from '../leaf/types';
 import type { SolverRun } from '../platform/useSolver';
-import type { Density, Theme } from '../platform/theme';
-import { applyDensity, applyTheme } from '../platform/theme';
+import {
+  applyDensity,
+  applyTheme,
+  type Density,
+  type Theme,
+  type Kind,
+  type LessonMode,
+  type SectionId,
+  type ToolState,
+  type View,
+  type CheckView,
+  type ProgramColorMode,
+} from '../platform/prefs';
 import { surumEtiketi } from '../leaf/version';
 import { paletteColor } from '../leaf/palette';
 import {
@@ -108,17 +119,8 @@ import { newId } from '../pure/entities';
 import { maskCount, setDayMask, setRowMask, solverExclusions } from '../pure/programMask';
 import type { ProgramMask } from '../pure/programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
-import type {
-  Kind,
-  LessonMode,
-  SectionId,
-  ToolState,
-  View,
-  CheckView,
-} from '../platform/toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useLang, useT } from './T';
-import type { ProgramColorMode } from '../platform/programColor';
 
 interface Props {
   ui: ToolState;
