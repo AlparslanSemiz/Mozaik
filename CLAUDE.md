@@ -65,7 +65,8 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
 - "Şu an"ı dal, `git merge main`'den sonra ve birleşmeden hemen önce son commit'inde kendi
   işiyle günceller. `--ff-only` araya başka bir şeyin girmesine izin vermediği için çatışma
   çıkmaz. Ara durumlar tarihli WORKLOG girdisine yazılır. Tuzak numarası da o commit'te
-  verilir, öncesinde aday girdiye yazılır.
+  verilir, öncesinde aday girdiye yazılır. Önce birleşen numarayı alır, numara vermiş bir dal
+  birleşirken kendi numaralarını kaydırır.
 - Belgelere yalnız `main`'deki commit hash'i yazılır, dalın commit'leri konusuyla anılır.
 - Taşıma ile içerik değişikliği ayrı commit'lerdedir, biçim düzeltmesi de ayrı commit'tedir.
 - Ağır komutlar sırayla koşar: `scripts/agir.sh <komut>`, yani
