@@ -32,7 +32,15 @@
 # A list line is tab-separated: name, file, expected (kirmizi, yesil or -) and
 # the perl expression. Blank lines and lines starting with # are skipped. Each
 # line prints one row of a table; with an expectation the row also says
-# whether it held.
+# whether it held. A row's output goes to scratch/mutasyon-kaniti/<NN>-<name>.log,
+# NN its place in the list and every character of the name outside
+# [A-Za-z0-9._-] written as _.
+#
+# A row is kirmizi or yesil only if its test command actually ran. Until
+# 2026-10-09 the result was read from the exit code alone: a name with a / in
+# it made the log redirect fail, bash never called the mutation, returned 1 of
+# its own, and 1 is "yesil" — a row expecting green came out "tutuyor" without
+# a test having run (TODO §8k, RK13).
 #
 # Exit codes: 0 red as expected (a list: every row ran, and held where it had
 # an expectation) · 1 still green, the test does not see this change (a list:
@@ -166,6 +174,7 @@ bir_mutasyon() {
   echo "== test: $*"
   "$@"
   test_rc=$?
+  test_kostu=1
 
   geri_koy
   trap - EXIT INT TERM
@@ -206,6 +215,7 @@ fi
 # ---------------------------------------------------------------- the list
 tablo=()
 genel=0
+satir=0
 tab=$'\t'
 while IFS="$tab" read -r ad m_dosya beklenen m_ifade || [ -n "${ad:-}" ]; do
   case $ad in '' | '#'*) continue ;; esac
@@ -213,8 +223,17 @@ while IFS="$tab" read -r ad m_dosya beklenen m_ifade || [ -n "${ad:-}" ]; do
     echo "liste satırı eksik: $ad" >&2
     exit 64
   fi
-  bir_mutasyon "$m_dosya" "$m_ifade" "$@" >"scratch/mutasyon-kaniti/$ad.log" 2>&1
+  satir=$((satir + 1))
+  gunluk="scratch/mutasyon-kaniti/$(printf '%02d' "$satir")-$(printf '%s' "$ad" | tr -c 'A-Za-z0-9._-' '_').log"
+  if ! : >"$gunluk"; then
+    echo "DURDU: satırın günlüğü açılamıyor ($gunluk), satır koşmadı." >&2
+    exit 64
+  fi
+  test_kostu=0
+  bir_mutasyon "$m_dosya" "$m_ifade" "$@" >>"$gunluk" 2>&1
   rc=$?
+  # Red and green are claims about a test, so without one there is neither.
+  if { [ "$rc" = 0 ] || [ "$rc" = 1 ]; } && [ "$test_kostu" != 1 ]; then rc=7; fi
   case $rc in
     0) sonuc=kirmizi ;;
     1) sonuc=yesil ;;
@@ -241,5 +260,5 @@ done <"$liste"
 
 printf '%-10s %-28s %-9s %-14s %s\n' ad dosya beklenen sonuç
 printf '%s\n' "${tablo[@]}"
-echo "(her satırın çıktısı scratch/mutasyon-kaniti/<ad>.log)"
+echo "(her satırın çıktısı scratch/mutasyon-kaniti/<sıra>-<ad>.log)"
 exit "$genel"

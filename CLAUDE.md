@@ -60,8 +60,9 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
   etiket ve `main`'e push yok. `ci.yml` her push'ta koşar, sonucu beklenmez, `gh run view`
   ile okunur. Dalın CI'ı kırmızıysa başka işe geçmeden o düzeltilir.
 - Dal `main`'e Alp'in onayıyla ve `--ff-only` ile birleşir: önce `git merge main`, sonra
-  `scripts/agir.sh npm run kontrol` yeşil, dalın CI'ı yeşil. Site yalnız yeşil bir `main`
-  push'unda yayınlanır, `windows.yml` her `main` push'unda Windows'ta E2E koşar.
+  yerelde `npm run hizli` yeşil, dalın CI'ı yeşil; tam doğrulama CI'da, yerelde `kontrol`
+  şart değil. Site yalnız yeşil bir `main` push'unda yayınlanır, `windows.yml` her `main`
+  push'unda Windows'ta E2E koşar.
 - "Şu an"ı dal, `git merge main`'den sonra ve birleşmeden hemen önce son commit'inde kendi
   işiyle günceller. `--ff-only` araya başka bir şeyin girmesine izin vermediği için çatışma
   çıkmaz. Ara durumlar tarihli WORKLOG girdisine yazılır. Tuzak numarası da o commit'te
@@ -80,7 +81,7 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
   2'nin altında, `scripts/temiz-kosul.sh` bakar. Koşul yoksa "kirli, ölçülmedi" yazılır.
 - Elle ya da toplu her mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır (toplu: `--liste`), kendi betiğini yazmak yok: kontrol koşusu ve koşmayan testin ayrımı orada.
 - Arka planda bir mutasyon sürerken ağaca dokunulmaz, `git stash` dahil.
-- Commit'ten önce `npm run hizli` ve dokunulan test dosyaları, tam `npm test` ve `kontrol` birleşmeden önce. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
+- Commit'ten önce `npm run hizli` ve dokunulan test dosyaları. Uzun testler (mutasyon, Windows E2E, WebKit) hiçbir şeyi bekletmez, arkada koşar. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
 - Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
   (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
 
