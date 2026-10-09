@@ -52,6 +52,26 @@ bloğunda yazılı.
   koşuları yeşil olmadan atmaz. `npm run yayinla -- --kuru` aynı beklemeyi hiçbir şeyi
   değiştirmeden yapar.
 
+## Paralel oturumlar
+
+- `main`'de başka bir oturum çalışabilir. WORKLOG'un "Şu an" bloğu main'deki oturumundur:
+  bir dal oturumu durumunu TODO §8k'ye ve tarihli girdilere yazar, oturum sonu listesinin
+  "Şu an" maddesini uygulamaz.
+- Her commit'ten ve her ölçümden önce `main`'e bakılır. İlerlediyse dala `git merge main`
+  ile alınır, rebase yapılmaz. Dal `main`'e Alp'in onayıyla ve `--ff-only` ile birleşir;
+  ondan önce `main` dala alınır, `npm run kontrol` kilit altında koşar ve CI yeşildir.
+- Dal oturumu yalnız kendi dalını açık refspec'le iter (`git push origin <dal>`); zorla
+  push ve etiket yok.
+- Ağır komutlar sırayla koşar: `flock -w 1800 ~/.mozaik-agir.lock <komut>`. Kapsam:
+  stryker, mutasyon, kontrol, kapsam, her Playwright koşusu, exe derlemeleri, podman ve
+  süre ölçümleri. Kilit `-w`'nin beklediği süre içinde alınamazsa daha fazla beklenmez, söylenir. Kilidi alan, yanındaki
+  `~/.mozaik-agir.not` dosyasına oturumu, komutu ve zamanı yazar; bırakırken üzerine
+  "serbest" yazar, silmez.
+- Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
+  2'nin altında. Koşul yoksa ölçülmez, "kirli, ölçülmedi" yazılır.
+- Belgelere yalnız `main`'deki commit hash'i yazılır; dalın commit'leri konusuyla anılır.
+  Dal oturumu TRAPS'a numara vermez, tuzak adayını TODO §8k'ye yazar.
+
 ## Oturum sonu
 
 - TODO.md güncellenir, biten işler işaretlenir, sıradaki iş yazılır.
