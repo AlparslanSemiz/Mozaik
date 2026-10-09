@@ -31,6 +31,12 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
+**Çalışma düzeni (2026-10-09).** Her iş alanı kendi worktree'sinde ve dalında, `main`'de
+oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
+CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
+[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`, birleşmeden önce
+tam `npm test` ve `kontrol`.
+
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 `refactor/yapi` dalında yürüyor ve davranış değiştirmiyor: adım 0 ve 1 bitti
 (2026-10-09), dal `main`'e birleşmedi ve itilmedi ([TODO.md](TODO.md) §8k).
@@ -47,8 +53,8 @@ ve 2026-10-09.
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
    PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24 düzeldi, tam mutasyon koşusunun sonucu
-   bekleniyor (`haftalik.yml` 37914431289). Kullanıcının kararını bekleyen yeni bulgu:
-   öneri değişmezi CI'da kararsız ve `main`'i bir kez kırmızı yaptı (B7.26).
+   bekleniyor (`haftalik.yml` 37914431289). B7.26 (öneri değişmezinin CI'da kararsızlığı)
+   kapandı, testi zayıflatmadan (WORKLOG 2026-10-09 gece).
 5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b bitti; Eyotek turunun araçları hazır
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
@@ -80,8 +86,9 @@ ve 2026-10-09.
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 43 dosyada 1373 test, hepsi geçti (2026-10-09) | `npm test` |
-| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 7,9 ve 8,2 dk; işlerin toplamı 32,4 ve 34,1 runner dakikası, en uzun iş `e2e-arama` 425–440 s (2026-10-08) | `gh run view 37846839319`, `37848823362` |
+| Birim testleri | 45 dosyada 1378 test, hepsi geçti (2026-10-09 gece) | `npm test` |
+| `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
+| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
 | Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
