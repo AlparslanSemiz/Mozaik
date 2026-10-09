@@ -29,16 +29,16 @@
 // pushed, finds and waits for its ci.yml and windows.yml runs, says the
 // result, and stops where the tag would be cut.
 //
-// Refuses on a dirty tree, on a non-main branch, on a tag that exists, and
-// without a logged-in `gh`. Every one of those has a right answer that is not
-// "guess".
+// Refuses outside the main checkout or off `main`, on a dirty tree, on a tag
+// that exists, and without a logged-in `gh`. Every one of those has a right
+// answer that is not "guess".
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { closeUnreleased, releasedVersions, unreleasedBody } from './changelog-md.mjs';
-import { git as gitKomut } from './git-komut.mjs';
+import { git as gitKomut, yayinYeriSorunu } from './git-komut.mjs';
 
 const KOK = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -128,6 +128,18 @@ async function ciYesilMi(sha, kirmizidaNe) {
   await kosuYesilMi('windows.yml', sha, kirmizidaNe);
 }
 
+// The first gate, before the arguments are even read: a release run from a
+// branch or a worktree stops with one sentence, whatever else it was given.
+// Pages publishes from main, so a release cut anywhere else would ship a
+// Release my father's site route never sees. Two different programs.
+let yerSorunu;
+try {
+  yerSorunu = yayinYeriSorunu(KOK);
+} catch (e) {
+  dur(e.message.split('\n')[0], ...girintili(e.gitCevabi));
+}
+if (yerSorunu !== null) dur(yerSorunu);
+
 const argumanlar = process.argv.slice(2);
 const kuru = argumanlar.includes('--kuru');
 const surum = argumanlar.find((a) => a !== '--kuru');
@@ -145,8 +157,6 @@ if (kuru) {
   if (git('status', '--porcelain') !== '') {
     dur('Çalışma ağacı temiz değil.', 'git status', 'git add -A && git commit');
   }
-  const kuruDal = git('rev-parse', '--abbrev-ref', 'HEAD');
-  if (kuruDal !== 'main') dur(`Dal "${kuruDal}", "main" değil.`, 'git switch main');
   git('fetch', '--quiet', 'origin', 'main');
   const bas = git('rev-parse', 'HEAD');
   if (bas !== git('rev-parse', 'origin/main')) {
@@ -174,13 +184,6 @@ const etiket = `v${surum}`;
 // ---------------------------------------------------------------- kapılar
 if (git('status', '--porcelain') !== '') {
   dur('Çalışma ağacı temiz değil.', 'git status', 'git add -A && git commit');
-}
-
-const dal = git('rev-parse', '--abbrev-ref', 'HEAD');
-if (dal !== 'main') {
-  // Pages publishes from main, so a release cut anywhere else would ship a
-  // Release my father's site route never sees. Two different programs.
-  dur(`Dal "${dal}", "main" değil.`, 'git switch main');
 }
 
 ghHazir();

@@ -154,7 +154,7 @@ scripts/font.mjs             gömülü yüzün reçetesi (kaynak scripts/font-so
 scripts/surum-notu.mjs       bir sürümün Release sayfası: Yenilikler, CHANGELOG bölümü, kurulum
 scripts/surum.mjs            sürüm numarasını okur (define ve service worker damgası)
 scripts/yayinla.mjs          bir sürümün adımları, tek komutta
-scripts/git-komut.mjs        yayinla'nın git komutu: düşeni bir cümleyle ve git'in kendi satırıyla bildirir
+scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
 ```
@@ -356,8 +356,8 @@ yazdığı adres ile `update.rs`'in kabul ettiği öneklerin anlaştığını (t
 `CHANGELOG.md`'nin en üst sürümünün `package.json` ile aynı olduğunu, ve
 `.github/surum-notu.md` ile `yayinla.mjs`'teki site adresinin `SITE_ADRESI` olduğunu.
 
-`npm run yayinla -- X.Y.Z` bir sürümü tek komutta çıkarır. Önce kapılar: çalışma
-ağacı temiz, dal `main`, etiket daha önce atılmamış, `src/platform/changelog.ts`'in en
+`npm run yayinla -- X.Y.Z` bir sürümü tek komutta çıkarır. Önce kapılar: komut ana
+klasörde (bir worktree değil) ve `main`'de, çalışma ağacı temiz, etiket daha önce atılmamış, `src/platform/changelog.ts`'in en
 üstteki girdisi bu sürüm, ve `CHANGELOG.md`'nin `Unreleased` bloğu boş değil.
 Kapılara 2026-10-08'de beşincisi eklendi: oturumu açık bir `gh`, çünkü aşağıdaki
 bekleme onsuz yapılamaz ve bu, hiçbir şey yazılmadan önce sorulur.
@@ -373,6 +373,11 @@ Windows'un beklenmesinin sebebi etiketin babanın exe'sine gitmesi ve babanın
 makinesinin Windows olması (2026-10-09). Düzeltip itince aynı komut yeniden verilir,
 ve `package.json` zaten o sürümde olduğu için yalnız etiket atılır. 2026-10-08'e kadar
 commit ile etiket tek push'la gidiyordu, yani etiket testten önce atılıyordu.
+
+Yer kapısı 2026-10-09'da geldi, argümanlardan bile önce ve `--kuru`'da da: o günden beri
+her iş kendi dalında ve worktree'sinde, ve başka yerden çıkan bir sürüm sitenin
+yayınlamadığı bir commit'i etiketlerdi. Git `main`'i iki yerde açtırmıyor, ama bir
+worktree `main`'in commit'inde ayrık durabilir.
 
 `npm run yayinla -- --kuru` hiçbir şeyi değiştirmez: itilmiş `HEAD`'in `ci.yml` ve
 `windows.yml` koşularını bulur, bekler, sonucu söyler ve etiket adımında durur.
