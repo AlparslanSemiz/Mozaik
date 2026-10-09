@@ -727,14 +727,15 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
       yakalıyor (tuzak 147). Bitti sayılması `haftalik.yml` 37914431289'un tam mutasyon
       koşusunun sonucunu bekliyor.
-- [ ] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
+- [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
       küçültmek; kullanıcının kararı.
       Karar (2026-10-09): test zayıflamaz, `numRuns` 60 kalır. `hiz/belge-test` dalında
       ("Test: öneri değişmezi olay döngüsünü bırakıyor, tavanı ölçülen CI süresinden")
       arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
-      ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. CI'da yeşil görülene kadar açık.
+      ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. Kapandı: dalın iki CI koşusunda yeşil
+      (37929711747, 37930611648), RPC zaman aşımı yok.
 
 ---
 
@@ -1226,12 +1227,15 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       söylüyor, `App.tsx` onu `<Activity>` için bilerek kaldırdı. `e2e/hareket.spec.ts` 84
       koşan herhangi bir animasyonu kabul ediyor, panel girişleri de sayılıyor. Okundu,
       ölçülmedi. Belge yarısı adım 3'te (RF18).
-- [ ] **RK7 `relax.test.ts`'in süresi yeniden ölçülsün.** [TESTPLAN.md](TESTPLAN.md)
+- [x] **RK7 `relax.test.ts`'in süresi yeniden ölçülsün.** [TESTPLAN.md](TESTPLAN.md)
       "yaklaşık 45 saniye" diyor. 2026-10-08'de `npm test`'in içinde 136,8 saniye (yardımcı
       ajanlar koşarken) ve 155,8 saniye (`performance` profili, başka bir oturum açıkken),
       kapsam altında 402 saniye. 2026-10-09'da `low-power` profilinde 391,6 saniye. Sessiz
       bir pencerede ve `performance` profilinde tek başına ölçülür, TESTPLAN'ın cümlesi
       sayıyla düzelir.
+      Kapandı (2026-10-09, hız oturumu): dört gerçek veri testi iki dosyaya ayrıldı. CI'da
+      `relax.test.ts` 234–317 s'den 7,3 s'ye, iki yeni dosya 131 ve 109 s yan yana, birim
+      adımı 237–320 s'den 146 s'ye (WORKLOG). TESTPLAN'ın cümlesi sayısız düzeldi.
 - [ ] **RK10 Dört belgenin tarif satırı CLAUDE.md'dekiyle aynı cümle değil.** CONVENTIONS
       "Her `docs/` dosyası başlığının hemen altında tek cümlelik bir ... satırı taşır, ve
       CLAUDE.md'deki yönlendirme satırı aynı cümledir" diyor. Tutmayanlar: `ASC.md`,

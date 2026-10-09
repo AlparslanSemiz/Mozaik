@@ -35,6 +35,17 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Denendi ve bırakıldı: öneri aramasının testlerini E2E'de ilk başlatmak
+
+**Ne.** `playwright.config.ts`'te `@arama` testlerini ayrı ve önde bir projeye almak
+(B5): Playwright testleri proje sırasıyla dağıttığı için en uzun test ilk başlayacaktı.
+**Denendi, geri alındı.**
+
+**Gerekçe.** CI'da kazancı yok, ölçüldü: e2e parçaları `--grep-invert @arama` ile koşuyor
+ve `@arama` testleri aynı gün kendi işlerine bölündü (`e2e-arama` matrisi), parçaların
+listesi ve sırası değişiklikle ve değişikliksiz üçünde de aynıydı. Kazanç yalnız yerel
+`kontrol`'de olurdu, ve o ölçülmedi.
+
 ### 2026-10-09 · Çalışma düzeni: her iş alanı kendi worktree'sinde, "Şu an"ı birleşen dal yazar, ne zaman durulduğu yazılı
 
 **Ne.** Kullanıcının kararları (hız oturumu, C ve E):

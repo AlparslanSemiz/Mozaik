@@ -98,6 +98,68 @@ ve 2026-10-09.
 
 ---
 
+## 2026-10-09 (gece) · Hız oturumu, ikinci yarı: B7.26, bölünen öneri testleri, `hizli`, CI matrisi, mutasyon betiği ve çalışma düzeni
+
+**Başlangıç.** Kullanıcının kararları (aynı gün): B7.26 önce, sonra onaylanan B2, B3, B5,
+D1, D2, D3, D5, C ve E. `main` 5aa10d5'te kaldı, `git merge main` boş geçti. Makine
+bütün oturum pildeydi (AC=0, profil `performance`); süreler CI'dan alındı, yerelde yalnız
+`hizli` ölçüldü.
+
+**Ne yapıldı, commit commit** (dalın commit'leri, konularıyla).
+- "Test: öneri değişmezi olay döngüsünü bırakıyor, tavanı ölçülen CI süresinden" (B7.26).
+  Kuyruk ölçüldü: aynı üreteçten 600 dünya, dünya başına medyan 5,5 ms, en ağırı 11,5 s,
+  en ağır on dünya toplamın %60'ı; `solve` en çok 287 ms. Bölmek seçilmedi (TESTFINDINGS).
+  M1, M2, M3 kırmızı; CI'da iki koşuda yeşil, `invariants.test.ts` 36,8 ve 36,2 s.
+- "CI: öneri aramasının testleri birer runner'da" (D3). `--shard` üç etiketli testi birer
+  birer dağıtıyor (`--list` ile). Sonra `e2e-arama` parçaları 48 s, 101 s ve 383 s; kritik
+  yol `e2e (2)`, duvar 6,4–6,6 dk (önce 6,6–14,7 dk, medyan 7,4).
+- "TODO'nun biten maddeleri ve ham notları arşive taşındı" (D2): 85 madde ve §9, birebir.
+  "oturum başında TODO'nun yalnız §0'ı, İÇİNDEKİLER'i ve işin bölümü okunuyor" (D1).
+  "uzun komutlar arka planda" (D5). "çalışma düzeni, ne zaman durulduğu ve rapor biçimi"
+  (C, E1–E3). "paket turu skill'i" (E4).
+- "babanın verisiyle koşan dört öneri testi kendi dosyalarında" (B3a, yalnız taşıma) ve
+  "dizili haftanın ilk araması bir kez, her test kendi kopyasıyla" (B3b).
+- "npm run hizli, commit'ten önceki döngü" (B2).
+- "mutasyon kanıtı önce değişmemiş kodu koşuyor, koşmayan testi kırmızı saymıyor".
+- B5 denendi, geri alındı (DECISIONS).
+
+**Ölçümler.**
+
+| Ne | Önce | Sonra |
+|---|---|---|
+| Oturum başı sabit okuma | 345 323 bayt (~96 bin token) | 32 154 bayt (~8,9 bin token), üstüne işin bölümü |
+| TODO.md | 321 015 bayt | 93 681 bayt |
+| CI `relax.test.ts` | 234–317 s (dört koşu) | 7,3 s; `relaxFullCourse` 131 s, `relaxLaidOut` 109 s yan yana |
+| CI vitest toplamı, birim adımı | 236–319 s, 237–320 s | 144,6 s, 146 s (37957196115, tek koşu) |
+| CI `denetim` işi | 4 dk 52 s – 6 dk 32 s | 3 dk 29 s |
+| `npm run hizli`, yerel | yoktu | 5,9 / 6,8 / 8,4 s; 41 dosya, pilde, `performance`, yük 1,0–1,8 |
+
+Bilinen mutasyonlar (`scratch/hiz-2026-10-09/m18-*.txt`): ağır testler bölmeden önce ve
+sonra aynı, M3–M8 kırmızı (M7'de dört testin üçü), M1 ve M2 yeşil; `relax.test.ts` ile
+değişmez birlikte M1–M8'in sekizinde kırmızı; `npm run hizli` M1–M8'in sekizinde kırmızı.
+
+AC kıyası alınamadı: pil yarısı alındı (`tipler` 5,0–5,5 s, `solver.test.ts` 9,2–9,6 s),
+makine prize takılmadı. `temiz-kosul.sh`'nin AC şartı olduğu gibi kaldı.
+
+**Plandan sapmalar.** (1) Kesilen bir oturumdan sonra iki yeni test dosyası boş kalmıştı;
+tip, lint ve biçim denetimi boş dosyayı temiz saydı, mutasyon betiğinin kontrol koşusu
+yakaladı. Dosyalar HEAD'den yeniden üretildi ve satır satır karşılaştırıldı. (2) İlk toplu
+mutasyon koşusu geçersizdi: sarmalayıcım kendi argümanlarını test komutu diye geçirdi,
+"kırmızı"ların hepsi çıkış 127'ydi. Kalıcı çözüm `mutasyon-kaniti.sh`'de. (3) Arka planda
+mutasyon sürerken bir kez `git stash` koşuldu; o an yalnız kontrol koşuyordu, zarar yok.
+Kural CLAUDE.md'de.
+
+**Tuzak adayları.** Bir mutasyon kanıtında "kırmızı" testin koştuğu demek değil (127, boş
+dosya). Bir kapının atladığı şey kapıya yaslanılan yeni kullanımda sorulur (A7 ve sayfa içi
+çapa). İkisi bu dalın son commit'inde numaralanıyor.
+
+**Koşulan testler.** Belge kapısı her commit'ten önce. `relax*.test.ts`, `invariants`,
+`hizli` (üç kez). Mutasyon kanıtları yukarıda, betiğin altı davranışı ve iki listesi.
+`kontrol` oturum sonunda ("Şu an"). CI: 37929711747, 37930611648, 37957196115 yeşil.
+**Koşulmayanlar.** `ekran`, `test:webkit`, exe süiti, Stryker.
+
+---
+
 ## 2026-10-09 (akşam) · Hız oturumu, `hiz/belge-test` dalı: belge ağırlığı ölçüldü, TRAPS'a grup listesi, TODO'nun arşivi ayrı dosyada
 
 **Başlangıç.** Dal `main`'in 5aa10d5'inden açıldı, öteki iki oturum durdurulmuştu. Bu
