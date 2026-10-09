@@ -727,6 +727,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
       yakalıyor (tuzak 147). Bitti sayılması `haftalik.yml` 37914431289'un tam mutasyon
       koşusunun sonucunu bekliyor.
+      **O koşu bitmedi (TESTFINDINGS 2026-10-09):** 360 dakikalık iş tavanında iptal oldu,
+      5 639 mutantın 3 645'i denenmişti, kalan tahmin ~20 sa. Tam koşu bu işe sığmıyor;
+      seçenekler (parçalara bölmek, artımlı koşu, listeyi daraltmak, yerel koşu) kullanıcıda.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı

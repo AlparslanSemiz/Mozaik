@@ -35,7 +35,8 @@ ve 2026-10-09.
 oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`, birleşmeden önce
-tam `npm test` ve `kontrol`.
+tam `npm test` ve `kontrol`. `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
+bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 `refactor/yapi` dalında yürüyor ve davranış değiştirmiyor: adım 0 ve 1 bitti
@@ -52,14 +53,17 @@ tam `npm test` ve `kontrol`.
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
-   PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24 düzeldi, tam mutasyon koşusunun sonucu
-   bekleniyor (`haftalik.yml` 37914431289). B7.26 (öneri değişmezinin CI'da kararsızlığı)
+   PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
+   koşusu (`haftalik.yml` 37914431289) 360 dakikalık iş tavanında iptal oldu, kalan tahmin
+   ~20 sa; nasıl koşacağı kullanıcıda (TODO B7.24). B7.26 (öneri değişmezinin CI'da kararsızlığı)
    kapandı, testi zayıflatmadan (WORKLOG 2026-10-09 gece).
 5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b bitti; Eyotek turunun araçları hazır
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
-7. Refactor adım 2: RF3 (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve
+7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
+   tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
+8. Refactor adım 2: RF3 (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve
    gecelik mutasyon tabanı, `refactor/yapi` dalında (TODO §8k).
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -102,6 +106,53 @@ tam `npm test` ve `kontrol`.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-09 (gece) · Bakım: `yayinla`'nın yeri, `useRowOrder`'ın `t`'si, App'in susturması, zebra analizi
+
+**Başlangıç.** `main` d3178dc'de, temiz. `~/GitHub/Mozaik-ozellik` worktree'si,
+`bakim/refactor-istekleri` dalı. Önceki oturumun işleri: B7.22, B7.23, A7, Dependabot
+ve Eyotek hazırlığı bitmiş; B7.24'ün tam mutasyon koşusu 6 saatte iptal olmuş
+(TESTFINDINGS).
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Betikler: yayinla yalnız ana klasörde ve main'de koşuyor, worktree'de bir cümleyle
+  duruyor". Yer kapısı `git-komut.mjs`'te (`--git-dir` ile `--git-common-dir` ayrıysa
+  worktree), argümanlardan önce ve `--kuru`'da da. Geçici bir depoda üç test: ana klasör
+  ve `main`, başka dal, iki worktree (dalda ve `main`'in commit'inde ayrık). Dört mutasyon
+  kırmızı: worktree sınaması yok, dal sınaması yok, ortak dizin yerine `--git-dir`, ve
+  `yayinla.mjs`'in kapıyı çağırmaması (worktree'de `--kuru` koşturularak).
+- "Kanca: liste tutamağı dil değişince yeni dilde, palet listesi susturmasız". Önce
+  ölçüldü: kancayı açık tutan bir listede dil İngilizceye geçince tutamağın ipucu Türkçe
+  kaldı (`src/rowOrder.test.tsx`). Ekranda bugün görünmüyor (dil yalnız Ayarlar'da
+  değişiyor, listeler o sırada sökülü). `t`'yi çıkaran mutasyon kırmızı. App'in üç
+  `toggle`'ı `useCallback`, susturma kalktı; birinin bağımlılığını boşaltan mutasyonu
+  `eslint --max-warnings 0` yakaladı. `eslint src` 0 uyarı.
+- Yapılmayanlar, çünkü önceden yapılmışlar: TODO §10'un arşivi (523c487,
+  `TODO-ARCHIVE.md`, `DATED_RECORD`'da ve haritada), TRAPS'ın başında grup başına tek satır
+  (7c2a15e, A10'un ikinci testi; başlık A10'un ifadesiyle çakışmıyor, çünkü grup adı yalnız
+  altında `### N ·` olan başlıktan toplanıyor), `@arama` (refactor dalı, `ci.yml` ve
+  `windows.yml`; `haftalik.yml` `windows.yml`'i çağırıyor). B7.22 için dal açılmadı:
+  bitmiş (290f55d, `scratch/b7-22/`) ve d3178dc'nin Windows koşusu yeşil.
+
+**Zebra analizi** (kod yok, `ozellik/zebra`'da commit yok). 1920×1080, örnek okul, iki
+tema, 17 ekran. Satır zemini bugün her listede kağıt. Satır zemininde duran metin yalnız
+`--text` ve `--muted`. Giriş alanları ve seçiciler `--paper-sunk` zeminli, "Sil" ve panel
+düğmeleri kağıt zeminli, `.split-pick` tarayıcının varsayılan gri zemininde (koyuda
+#6b6b6b, metin 4,53). Ayrıntı ve öneri oturumun raporunda.
+
+**Koşulan testler.** `npm run hizli` her commit'ten önce (1268, sonra 1269), tam `npm test`
+(1382/1382), `tipler`, `eslint src`, belge kapısı (19/19), `gitKomut.test.ts` ve
+`rowOrder.test.tsx`, altı mutasyon (`scripts/mutasyon-kaniti.sh`). Dalın CI'ı 37965654805
+yeşil. Zebra ölçümü Playwright kütüphanesiyle, kilit altında.
+
+**Koşulmayan testler.** `kontrol` (birleşmeden önce, bu girdiden sonra koşuyor), Windows,
+mutasyon.
+
+**Tuzak adayı.** `timeout N scripts/agir.sh <komut>` yalnız `agir.sh`'i öldürür: kilit
+bırakılır, komut yetim kalır ve sıradaki ağır komutla yan yana koşar (test oturumunun
+haberi, 2026-10-09 19:34).
 
 ---
 
