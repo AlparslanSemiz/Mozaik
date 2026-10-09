@@ -1352,9 +1352,14 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       (BİLİNEN KUSUR, TB7); ikisi de sayfanın saatini durdurup bekleyen yazımı önce doğruluyor,
       ikisi de mutasyonla kanıtlı. Exe'de pencereyi kapatmanın WebDriver yolu yok
       (`plugin:window|close not allowed by ACL`): exe'nin yarısı elle.
-- [ ] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
+- [~] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
       ya ret ya tutarlı plan, asla istisna. `npm test`'te kısa, gece uzun. Kullanıcı bu fazda
       istedi, yani pure turundan önce bugünkü yollarla yazılır; tur yolları taşır.
+      **Yapıldı (`src/fuzz.test.ts`):** "Dosyadan aç" üç kaynakta (bozulan dosya ya ret ya
+      bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
+      okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
+      kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). **Kalan:** paket yolu
+      (`parseBundle` ve arkasındaki `parseState`), TB8'in kararına bağlı.
 - [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
       Stryker listesine. **Bekler: platform.**
 
@@ -1438,6 +1443,13 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       fuzz yoklaması, sonra elle: `weeklyHours` −5 ya da 10⁹ taşıyan bir ders olduğu gibi
       açılıyor (2,5 ise 3'e yuvarlanıyor), dosya reddedilmiyor.
       Test TP4'te "BİLİNEN KUSUR".
+- [ ] **TB9 Yapıştırılan haftalık saatin üst sınırı yok (2026-10-09).** `parseLessons` saati
+      yalnız pozitif ve tam sayıya çeviriyor; blok listesini ondan kuruyor
+      (`Array(saat / blok)`). 100 000 saat kabul ediliyor, 10 milyonda beş milyonluk bir dizi
+      (22,7 ms, kirli). Fuzz bunu kendiliğinden buldu: üreteç onaltılık ve üslü yazımlarla
+      (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
+      çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
+      yapıştırma tarafındaki eşi.
 - [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
       Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
       kapanışı `useFolder.ts`'in `beforeunload` flush'ı karşılamalı, ama flush eşzamansız bir

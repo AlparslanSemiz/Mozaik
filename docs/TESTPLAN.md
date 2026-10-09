@@ -67,6 +67,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 |---|---|---|
 | Birim | `src/*.test.ts` | saf mantığın doğruluğu |
 | Değişmez | `src/invariants.test.ts` | her girdide doğru kalması gereken cümleler, girdileri kütüphane üretir |
+| Fuzz | `src/fuzz.test.ts` | bozuk dosyada ve yapıştırmada yarım plan ya da istisna |
 | Şema örnekleri | `src/fixtures.test.ts`, `src/fixtures/` | her şema sürümünden bir dosyanın hâlâ açılması |
 | Cümle ve iskelet | `src/sentences.test.tsx` | bir listenin tamamı: depo tablosu, ret cümleleri, kâğıdın kutuları |
 | Duman | `src/App.test.tsx` (jsdom) | bileşenler çiziliyor mu, sekmeler çöküyor mu |
@@ -159,6 +160,28 @@ denetlediği için ancak ikisi birden bozulunca: tek başına biri bozulduğunda
 hâlâ reddediyor. Çözücünün `blocker()`'a sorduğu dört yerin dördünde ilişkileri
 boşaltan ya da iki sınırı sıfırlayan mutasyon eski üreteçte yeşil, genişleyen
 üreteçte kırmızı (2026-10-08).
+
+### Fuzz
+
+`src/fuzz.test.ts`, fast-check ile. Dışarıdan gelen metni okuyanlara kimsenin bilerek
+yazmadığı dosyalar: şema örnekleri ve adsız dizili fikstür, alanları silinerek ya da her
+türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapıştırma tarafına
+Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
+kuralı: bir dosya ya reddedilir ya bütün bir plan olarak açılır, asla yarım plan.
+
+Ölçtükleri: açılan her planda her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
+var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa dosya açılmıyor;
+kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
+tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
+yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
+süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
+bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
+yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+
+Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
+TB8 karar bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
+varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 
 ### Şema örnekleri
 
@@ -418,7 +441,7 @@ haftalık arka planda koşar (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
-| Fuzz | TP4 | dosya okuyucularının bozuk girdide istisna atması ya da yarım plan kabul etmesi | `npm test`'te kısa, gece uzun |
+| Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in kararını bekliyor) | `npm test` |
 | Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
 | Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |
