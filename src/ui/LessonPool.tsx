@@ -31,11 +31,11 @@ import {
   readDockHeight,
   writeDock,
   writeDockHeight,
-} from '../platform/prefs/theme';
+  type PoolSort,
+} from '../platform/prefs';
 import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../platform/poolSplit';
 import { attachScrollFade } from '../platform/scrollFade';
 import { useT } from './T';
-import type { PoolSort } from '../platform/prefs/toolState';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */

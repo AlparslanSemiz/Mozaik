@@ -27,18 +27,24 @@ import {
   readScale,
   readTheme,
   readUiDensity,
+  useToolState,
+  readPrintOptions,
+  writePrintOptions,
+  readProgramColor,
+  writeProgramColor,
   type Density,
   type Motion,
   type Theme,
-} from '../platform/prefs/theme';
+  type Tab,
+  type PrintOptions,
+  type ProgramColorMode,
+} from '../platform/prefs';
 import { attachScrollFade } from '../platform/scrollFade';
 import { attachRibbonScroll } from '../platform/ribbonScroll';
 import { useSolver } from '../platform/useSolver';
 import { useFolder } from '../platform/useFolder';
 import { useUpdate } from '../platform/update';
 import { APP_NAME, surumEtiketi } from '../leaf/version';
-import { useToolState } from '../platform/prefs/toolState';
-import type { Tab } from '../platform/prefs/toolState';
 import Setup from './setup';
 import Lessons from './lessons';
 import { lessonIcon } from './steps';
@@ -48,19 +54,12 @@ import { T, useLang, useT } from './T';
 import Check from './Check';
 import Ribbon from './Ribbon';
 import Print, { NOTHING_EXCLUDED } from './Print';
-import { readPrintOptions, writePrintOptions } from '../platform/prefs/printOptions';
-import type { PrintOptions } from '../platform/prefs/printOptions';
 import type { Excluded } from './Print';
 import { cleanMask, EMPTY_PROGRAM_MASK, solverExclusions } from '../pure/programMask';
 import type { ProgramMask } from '../pure/programMask';
 import Settings from './settings';
 import { useShortcutsHelp } from './ShortcutsHelp';
 import { hasUnseenChangelog } from '../platform/changelog';
-import {
-  readProgramColor,
-  writeProgramColor,
-  type ProgramColorMode,
-} from '../platform/prefs/programColor';
 
 /**
  * The seven sections, along the TOP — on the same row as the document identity

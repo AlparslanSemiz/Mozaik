@@ -29,7 +29,7 @@ import {
 // The module-level `entitiesOf` cannot hold a hook, so it uses the pure
 // translator — the same one `constraints.ts` writes its sentences with.
 import { t } from '../leaf/i18n';
-import type { Kind } from '../platform/prefs/toolState';
+import type { Kind } from '../platform/prefs';
 import { T } from './T';
 
 interface Props {
