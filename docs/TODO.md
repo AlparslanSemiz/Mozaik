@@ -1952,6 +1952,19 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       saniyede hazır olamazsa arama ana iş parçacığına düşer ve test kırmızıya döner.
       Yerelde üç koşuda yaklaşık 2 saniyede yeşil, CI'da henüz koşmadı. Seçenekler:
       listeye eklemek ya da ilk CI koşularını izlemek.
+- [ ] **RK10 Dört belgenin tarif satırı CLAUDE.md'dekiyle aynı cümle değil.** CONVENTIONS
+      "Her `docs/` dosyası başlığının hemen altında tek cümlelik bir ... satırı taşır, ve
+      CLAUDE.md'deki yönlendirme satırı aynı cümledir" diyor. Tutmayanlar: `ASC.md`,
+      `ROBODERS.md`, `TODO.md`, `plan-v0-arsiv.md` (2026-10-09, iki ayrı sayımda aynı
+      dört dosya). Düzeltilmedi. Düzelince bir belge kapısı yeşil doğabilir.
+- [ ] **RK11 Kural belgelerinde 182 çizgi.** CONVENTIONS "Uzun çizgi ve kısa tire
+      kullanılmıyor" diyor. `docs/*.md`'nin kural belgelerinde, kod blokları ve ters tırnak
+      dışında, 153 uzun çizgi ve 29 kısa tire (2026-10-09): `ASC.md` 118 ve 5, `ROBODERS.md`
+      28 ve 2, `DENETIM.md` 0 ve 13, `TRAPS.md` 2 ve 6, `LAYOUT.md` 0 ve 2, `PRINCIPLES.md`
+      2 ve 0, `BUILD.md` 2 ve 0, `ARCHITECTURE.md` 1 ve 1. Ayrıca `docs/asc/` altındaki aSc
+      yardım kopyalarında 104 ve 48 (11 dosya), `README.md`'de 10 uzun çizgi; kuralın
+      bunları kapsayıp kapsamadığı karar bekliyor (kopyalar kaynak metin, README vitrin ve
+      İngilizce). Düzeltilmedi.
 
 ## §9. Ham notlar — senin kendi satırların
 

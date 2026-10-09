@@ -1265,3 +1265,26 @@ describe('A10 · her tuzak dizinin söylediği grubun altında duruyor', () => {
     expect(wrong, 'TRAPS.md dizini ile yerleşimi ayrışıyor').toEqual([]);
   });
 });
+
+// ------------------------------------------- A11 · the second entry point
+
+describe('A11 · AGENTS.md yalnız CLAUDE.md’yi gösteriyor', () => {
+  // Codex reads AGENTS.md, Claude Code reads CLAUDE.md. AGENTS.md used to
+  // describe CLAUDE.md in its own words, and two files that describe the same
+  // project drift apart; a file that only points at the other cannot. So it is
+  // one sentence with a link, in English (CONVENTIONS, "Vitrin İngilizce"),
+  // and long enough for the reading gate above, which wants over a hundred
+  // characters from every document.
+  it('ikinci giriş dosyası CLAUDE.md’ye bağlanan tek bir cümle', () => {
+    const agents = DOCS['AGENTS.md'];
+    expect(agents, 'AGENTS.md okunmuyor').toBeDefined();
+    const lines = (agents ?? '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l !== '');
+    expect(lines, 'AGENTS.md tek satır olmalı').toHaveLength(1);
+    expect(lines[0] ?? '', 'satır CLAUDE.md’ye bağlanmıyor').toMatch(/\]\(\.?\/?CLAUDE\.md\)/);
+    expect((lines[0] ?? '').length).toBeGreaterThan(100);
+    expect(DOCS['CLAUDE.md']?.length ?? 0, 'CLAUDE.md boş okundu').toBeGreaterThan(1000);
+  });
+});
