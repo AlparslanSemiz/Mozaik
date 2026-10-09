@@ -1165,6 +1165,78 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities.ts`, `src/pure/listview.ts` |
 | RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/theme.ts` |
 
+**Hedef ağaç.** 2026-10-09 sabahki plan oturumunun önerisi, Alp onayladı; oturumun
+transkriptinden buraya alındı (2026-10-09 gece). İlke: önce katman, sonra alan. İki ya da daha
+fazla dosyası olan bir alan bir klasör (paket) olur, tek giriş noktası `index.ts`'idir. Tek
+dosyalık bir modül katman kökünde kalır. Testler `src/` kökünde kalır ve derin import
+kuralından muaftır.
+
+```
+src/
+  leaf/                 düz kalır (küçük, ortak sözcük); her dosya kendi paketi
+    lang/               index.ts: dört sözlük ve kisaltmalar (bitti)
+  pure/
+    relax/              RF1 (adım 6). index: createRelaxer, suggest, verifySuggestion,
+                        applySuggestion, applyRelaxations, suggestion* cümleleri, tipler;
+                        iç: model, search, verify, sentences, diff, ve sat.ts
+                        (Sat'ı yalnız relax kullanıyor, dışarı kapanır)
+    constraints/        RF6 (adım 7). index: blocker, buildIndex, occupy, vacate,
+                        placedBlocks, dropMap, sanitize…; iç: engine (dokunulmaz,
+                        yalnız git mv), grid, drop, sanitize
+    entities/           RF5 (adım 7). index: bugünkü dışa aktarımlar; iç: ids (newId),
+                        teachers, classes, lessons, availability
+    program/            adım 4: programs, programMask, YENİ programView (RF8)
+    paper/              adım 4: YENİ öğretmen ve sınıf kâğıdı modeli (RF9)
+    io/                 parseState, bundle, library, import, sample
+    kökte kalır:        solver (RF4 park), rules, feasibility, listview, undo, bell
+  platform/
+    prefs/              theme, printOptions, programColor, toolState
+    storage/            libraryStore, planStore, storageReport, useStore, usePlans,
+                        download, folder, useFolder
+    exe/                desktop, update
+    search/             relaxPool, relaxWorker, relaxLog, useSolver
+    kökte kalır:        changelog (yayinla.mjs ve surum.yml onu yoluyla okuyor); drag,
+                        rowDrag, gridChrome, gridFit, scrollFade, ribbonScroll, poolSplit
+  ui/
+    ribbon/             RF10 (adım 5): sekme başına bir dosya
+    lists/              Paste, Summary (bitti); RF12 (adım 5): YENİ ListScreen,
+                        ListTools, useRowOrder, CapacityRows, AddPanel
+    program/            adım 4: Program, Grid, LessonPool, Inspector, Suggestions, Check, steps
+    print/              adım 4: Print (RF9)
+    setup/ settings/ lessons/   bugünkü gibi
+    kökte kalır:        main.tsx (index.html ve favicon.mjs onu yoluyla anıyor), App,
+                        Root, T.tsx, props, küçük ortak parçalar
+```
+
+**Eski yol → yeni yol.** Paket turları bu sırayla, her biri `main`'den açılan kendi dalında
+ve `.claude/skills/paket-turu` ile. Tabloda satırı olmayan bir dosya taşınmaz, sorulur.
+
+| Sıra | Paket | Eski | Yeni | Not |
+|---|---|---|---|---|
+| 1 | lang | `leaf/lang/*` | yerinde, `leaf/lang/index.ts` eklendi | bitti (3c769a0) |
+| 2 | lists | `ui/setup/{Paste,Summary}` | `ui/lists/` | bitti (0d97c82, 3f1944e) |
+| 3 | platform/prefs | `platform/{theme,printOptions,programColor,toolState}` | `platform/prefs/` | |
+| 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | |
+| 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | |
+| 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | |
+| 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | |
+| 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | RF8, RF9 |
+| 9 | adım 5 | `ui/Ribbon.tsx`, `ui/{ListTools,useRowOrder,CapacityRows,AddPanel}` | `ui/ribbon/`, `ui/lists/` | RF10, RF12, RF11 |
+| 10 | pure/relax | `pure/{relax,sat}.ts` | `pure/relax/` | RF1, mutasyon tabanından sonra; stryker, kapsam ve TESTPLAN aynı commit'te |
+| 11 | constraints ve entities | `pure/{constraints,entities}.ts` | `pure/constraints/`, `pure/entities/` | RF6, RF5; aynı liste kuralı |
+| 12 | kökte kalanlar | ağaçta "kökte kalır" yazanlar | yerinde | son tur: her birinin kökte kalmasının sebebi yazılı mı |
+
+**Derin import kuralı.** `.dependency-cruiser.cjs`'te `paket-ici-alan` (bir paketten başka
+bir paketin içine) ve `paket-ici-kok` (bir katmanın ya da `src/`'nin kökünden bir paketin
+içine): dışarıdan bir pakete yalnız `index`'i üstünden girilir, testler muaf (ac45672).
+Yeni bir paket klasörü kurala kendiliğinden girer, kuralın değişmesi gerekmez.
+
+**Taşıma yöntemi.** Her paket iki commit: (1) yalnız `git mv`, import yolları ve belge
+yolları; derlenen dosyanın sha'sı, commit kimliği dışında, aynı HEAD'de commit'ten önce ve
+sonra derlenerek aynı çıkmalı (tuzak 114); (2) `index.ts` ve import'ların ona dönmesi; sha
+değişir, boyut ve worker testleri (`temel.spec.ts`, `otomatik.spec.ts`) bakılır. Biçim
+düzeltmesi ayrı commit.
+
 **Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
 
 - [ ] **Refactor adım 2 · RF2'nin ret sayısı, RF3 ve gecelik mutasyon tabanı.** Önce
@@ -1276,19 +1348,14 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 - knip, `/tmp` altındaki geçici bir klonda kullanılmayan bir dosyayı bile bildirmedi:
   orada ölçüm aracı kalibre olmuyor, oradan çıkan "knip yeşil" bir şey kanıtlamaz.
 - `pkill -f <kelime>` o kelimeyi komut satırında taşıyan kendi kabuğunu da öldürür.
-- Bir kuralın taslağı yalnız oturumun transkriptinde kaldı: `paket-ici-alan` ile
-  `paket-ici-kok`'un adı sonraki oturumun görevinde geçiyordu, tanımı ne TODO'da ne
-  scratch'te vardı ve transkriptten bulundu. Paket turu becerisinin istediği hedef ağaç
-  ile eski yol → yeni yol tablosu da aynı durumda (2026-10-09, `refactor/lists`).
 
 **Biten (dal).** T1 (`leaf/lang/index.ts`, 3c769a0), T2a (`Paste` ile `Summary`
-`ui/lists/`'e, 0d97c82), ve `refactor/lists`'te T2b (`ui/lists/index.ts`) ile derin import
-kuralı (`paket-ici-alan`, `paket-ici-kok`, `.dependency-cruiser.cjs`), 0 ihlalle girdi ve
-mutasyonla kanıtlandı (WORKLOG 2026-10-09, `refactor/lists`).
+`ui/lists/`'e, 0d97c82), T2b (`ui/lists/index.ts`, 3f1944e) ve derin import kuralı
+(`paket-ici-alan`, `paket-ici-kok`, ac45672), 0 ihlalle girdi ve mutasyonla kanıtlandı
+(WORKLOG 2026-10-09, `refactor/lists`).
 
-**Sıradaki iş (dal).** Paket turları `main`'den yeni dallarda, `.claude/skills/paket-turu`
-ile. Beceri girdisini bu bölümdeki hedef ağaçtan ve eski yol → yeni yol tablosundan alıyor,
-ikisi burada henüz yok: ilk turdan önce yazılır. Adım 2'nin süre ölçümleri temiz koşulda
+**Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
+yeni dallarda, `.claude/skills/paket-turu` ile. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 
