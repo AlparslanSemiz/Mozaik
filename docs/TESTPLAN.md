@@ -17,8 +17,8 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
-| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan üç test kendi işinde sırayla, ve o iş listenin seçtiği test sayısı başlık sayısına eşit değilse hiçbir şey koşmadan kırmızı), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
-| Windows | `.github/workflows/windows.yml` | her `main` push'unda, haftalık koşuda ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı), öneri aramasının iki testi ayrı adımda sırayla. Siteyi kilitlemez; `npm run yayinla` etiketi onun da yeşilini bekler |
+| CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde sırayla), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
+| Windows | `.github/workflows/windows.yml` | her `main` push'unda, haftalık koşuda ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı), öneri aramasının `@arama` etiketli testleri ayrı adımda sırayla. Siteyi kilitlemez; `npm run yayinla` etiketi onun da yeşilini bekler |
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: mutasyon, ve `windows.yml`'i çağırır. Siteyi kilitlemez |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 

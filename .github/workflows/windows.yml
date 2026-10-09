@@ -35,9 +35,8 @@ on:
 permissions:
   contents: read
 
-# ci.yml'deki listenin aynısı; neden ayrı koştukları orada yazılı.
-env:
-  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor'
+# Öneri aramasının testleri `@arama` etiketiyle seçiliyor, ci.yml'deki gibi;
+# neden ayrı koştukları orada yazılı.
 
 concurrency:
   group: windows-${{ github.workflow }}-${{ github.ref }}
@@ -63,7 +62,7 @@ jobs:
         id: ana
         shell: bash
         run: >-
-          npx playwright test --grep-invert "$ARAMA_TESTLERI"
+          npx playwright test --grep-invert @arama
           --reporter=blob,list --trace=retain-on-failure
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/ana.zip
@@ -73,12 +72,12 @@ jobs:
         if: ${{ failure() && steps.ana.outcome == 'failure' }}
         continue-on-error: true
         run: node scripts/kararsiz.mjs
-      - name: E2E, öneri aramasının iki testi, sırayla
+      - name: E2E, öneri aramasının testleri, sırayla
         id: arama
         if: ${{ !cancelled() }}
         shell: bash
         run: >-
-          npx playwright test --grep "$ARAMA_TESTLERI" --workers=1
+          npx playwright test --grep @arama --workers=1
           --reporter=blob,list --trace=retain-on-failure
         env:
           PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/arama.zip

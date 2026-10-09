@@ -30,18 +30,16 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# The three E2E tests that start the suggestion search (two on tam-dolu-kurs,
-# and the worker test on a small world). The search opens its own workers, so
-# on a four-core runner beside three other Playwright workers it races its own
-# waits: the first CI run (2026-10-08) lost the second one that way, and it
-# passed alone in 28 s. They run in `e2e-arama`, one at a time, and nowhere
-# else. Picked by title, because a tag in the title pushes the line past the
-# formatter's width. A title that stops matching does not fail `--grep` while
-# another still matches, and `--grep-invert` then runs that test in the shards,
-# so `e2e-arama` first counts with `--list`: the tests the list picks must equal
-# its titles, or the job is red before anything runs.
-env:
-  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor|öneri araması Chromium’da worker’larda koşuyor'
+# The E2E tests that start the suggestion search carry the `@arama` tag
+# (e2e/otomatik.spec.ts). The search opens its own workers, so on a four-core
+# runner beside three other Playwright workers it races its own waits: the first
+# CI run (2026-10-08) lost one that way, and it passed alone in 28 s. They run in
+# `e2e-arama`, one at a time, and nowhere else. A tag and not a list of titles:
+# the title list drifted (a renamed title quietly moved its test back into the
+# shards, and windows.yml's copy had lost a title), while a tag does not move
+# with the title. No count step either: when nothing carries the tag,
+# `--grep @arama` already fails with "No tests found", and taking a tag off a
+# test is an edit in a diff, not a drift.
 
 jobs:
   denetim:
@@ -91,7 +89,7 @@ jobs:
       - name: E2E ${{ matrix.parca }}/3
         run: >-
           npx playwright test --shard=${{ matrix.parca }}/3
-          --grep-invert "$ARAMA_TESTLERI"
+          --grep-invert @arama
           --reporter=blob,list --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()
@@ -114,17 +112,11 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - name: Listedeki her başlık tek bir test seçiyor
-        run: |
-          baslik=$(awk -F'|' '{ print NF }' <<< "$ARAMA_TESTLERI")
-          secilen=$(npx playwright test --grep "$ARAMA_TESTLERI" --list | sed -n 's/^Total: \([0-9]*\) tests\{0,1\} in .*/\1/p')
-          echo "ARAMA_TESTLERI: $baslik başlık, --list $secilen test seçiyor"
-          [ "$secilen" = "$baslik" ]
       - run: npx playwright install --with-deps chromium
       - run: npx vite build
       - name: E2E, öneri aramasının testleri, sırayla
         run: >-
-          npx playwright test --grep "$ARAMA_TESTLERI" --workers=1
+          npx playwright test --grep @arama --workers=1
           --reporter=blob,list --trace=retain-on-failure
       - name: Kararsız mı (yalnız özete yazar)
         if: failure()

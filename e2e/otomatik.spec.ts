@@ -197,7 +197,7 @@ test.describe('22. Otomatik dizme', () => {
   // in src/ui/main.tsx (every worker fails at load and the search falls back),
   // and `ownScript()` in relaxPool.ts returning null (no worker is made at all
   // — the static test, temel.spec.ts 91, stays green for that one).
-  test('öneri araması Chromium’da worker’larda koşuyor', async ({ page }) => {
+  test('öneri araması Chromium’da worker’larda koşuyor', { tag: '@arama' }, async ({ page }) => {
     const world = SMALL_WORLDS.find((w) => w.name === 'ogretmen-hafta-kapali')!;
     await loadWorld(page, world.state);
     await page.getByRole('button', { name: /^Otomatik diz/ }).click();
@@ -224,114 +224,128 @@ test.describe('22. Otomatik dizme', () => {
   // saatlerine dokunmadan bir yol bulunamadı." — a finished search's sentence,
   // although an unstopped one finds six ways. A stop says it was a stop, keeps
   // what was found, and offers to go on.
-  test('durdurulan öneri araması durdurulduğunu söylüyor ve sürdürülebiliyor', async ({ page }) => {
-    test.setTimeout(120_000);
-    const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
-    await loadWorld(page, kurs);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
-    const panel = page.locator('.panel.suggestions');
-    await expect(panel).toContainText('Nasıl kurulacağı aranıyor', { timeout: 60_000 });
+  test(
+    'durdurulan öneri araması durdurulduğunu söylüyor ve sürdürülebiliyor',
+    { tag: '@arama' },
+    async ({ page }) => {
+      test.setTimeout(120_000);
+      const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
+      await loadWorld(page, kurs);
+      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+      const panel = page.locator('.panel.suggestions');
+      await expect(panel).toContainText('Nasıl kurulacağı aranıyor', { timeout: 60_000 });
 
-    await page.getByRole('button', { name: 'Durdur' }).click();
-    await expect(panel).toContainText('Arama durduruldu');
-    await expect(panel).not.toContainText('bulunamadı');
+      await page.getByRole('button', { name: 'Durdur' }).click();
+      await expect(panel).toContainText('Arama durduruldu');
+      await expect(panel).not.toContainText('bulunamadı');
 
-    await panel.getByRole('button', { name: 'Aramayı sürdür' }).click();
-    await expect(page.getByRole('button', { name: 'Durdur' })).toBeVisible();
-    await expect(panel).not.toContainText('Arama durduruldu');
-    await page.getByRole('button', { name: 'Durdur' }).click();
-    await expect(panel).toContainText('Arama durduruldu');
-  });
+      await panel.getByRole('button', { name: 'Aramayı sürdür' }).click();
+      await expect(page.getByRole('button', { name: 'Durdur' })).toBeVisible();
+      await expect(panel).not.toContainText('Arama durduruldu');
+      await page.getByRole('button', { name: 'Durdur' }).click();
+      await expect(panel).toContainText('Arama durduruldu');
+    },
+  );
 
   // TODO B5.9 and B5.10, on the father's week (anonymised): it cannot be built
   // as it stands, and the program offers the ways it can be, each a sentence
   // the father could say to a teacher; "Olmaz" on a change looks again without
   // it; one of them goes in with one click that one Ctrl+Z takes back.
-  test('kurulamayan haftada yolları söylüyor, "olmaz"ı dinliyor ve uyguluyor', async ({ page }) => {
-    test.setTimeout(420_000);
-    const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
-    await loadWorld(page, kurs);
-    await page.getByRole('button', { name: /^Otomatik diz/ }).click();
+  test(
+    'kurulamayan haftada yolları söylüyor, "olmaz"ı dinliyor ve uyguluyor',
+    { tag: '@arama' },
+    async ({ page }) => {
+      test.setTimeout(420_000);
+      const kurs = JSON.parse(readFileSync('src/fixtures/tam-dolu-kurs.json', 'utf8')) as State;
+      await loadWorld(page, kurs);
+      await page.getByRole('button', { name: /^Otomatik diz/ }).click();
 
-    // The bar still says what happened; the panel says what to do about it.
-    const bar = page.locator('.reason-bar.bad');
-    await expect(bar).toContainText('yerleşemedi', { timeout: 60_000 });
-    await expect(bar).not.toContainText('sınıfı Salı 1 saatinde kapalı');
-    const panel = page.locator('.panel.suggestions');
-    await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
-    const fewest = panel.locator('li[data-family="teacherHours"]');
-    await expect(fewest).toContainText('de gelebilirse hafta kuruluyor', { timeout: 150_000 });
-    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
-    // The rules way is there too, in its own words.
-    await expect(panel.locator('li[data-family="rules"]')).toContainText('olabilirse');
+      // The bar still says what happened; the panel says what to do about it.
+      const bar = page.locator('.reason-bar.bad');
+      await expect(bar).toContainText('yerleşemedi', { timeout: 60_000 });
+      await expect(bar).not.toContainText('sınıfı Salı 1 saatinde kapalı');
+      const panel = page.locator('.panel.suggestions');
+      await expect(panel).toContainText('Nasıl kurulacağı aranıyor');
+      const fewest = panel.locator('li[data-family="teacherHours"]');
+      await expect(fewest).toContainText('de gelebilirse hafta kuruluyor', { timeout: 150_000 });
+      await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {
+        timeout: 200_000,
+      });
+      // The rules way is there too, in its own words.
+      await expect(panel.locator('li[data-family="rules"]')).toContainText('olabilirse');
 
-    // "Olmaz" on the first question of the fewest-hours way, meant as "that
-    // day not at all": the search runs again, the answer is listed, and no
-    // way comes back with that day.
-    await fewest.getByRole('button', { name: 'Sorular', exact: true }).click();
-    const question = fewest.locator('.question').first();
-    const who = await question.locator('.question-who').innerText();
-    const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
-    const refused = `${who} ${day}`;
-    await question.getByRole('button', { name: /^Olmaz/ }).click();
-    await page.getByRole('menuitem', { name: `${day} hiç gelemez` }).click();
-    await expect(panel).toContainText('Cevaplarınız:');
-    await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
-    for (const row of await panel.locator('li[data-family] .suggestion-title').allInnerTexts()) {
-      expect(row).not.toContain(`${refused} `);
-    }
+      // "Olmaz" on the first question of the fewest-hours way, meant as "that
+      // day not at all": the search runs again, the answer is listed, and no
+      // way comes back with that day.
+      await fewest.getByRole('button', { name: 'Sorular', exact: true }).click();
+      const question = fewest.locator('.question').first();
+      const who = await question.locator('.question-who').innerText();
+      const day = (await question.locator('.question-text').innerText()).split(' ')[0]!;
+      const refused = `${who} ${day}`;
+      await question.getByRole('button', { name: /^Olmaz/ }).click();
+      await page.getByRole('menuitem', { name: `${day} hiç gelemez` }).click();
+      await expect(panel).toContainText('Cevaplarınız:');
+      await expect(panel.getByRole('button', { name: `Geri al: ${refused}` })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {
+        timeout: 200_000,
+      });
+      for (const row of await panel.locator('li[data-family] .suggestion-title').allInnerTexts()) {
+        expect(row).not.toContain(`${refused} `);
+      }
 
-    // The preview: the way's week on the grid, the opened hours marked, and
-    // back to the week as it is with one button (TODO B5.11).
-    await panel
-      .locator('li[data-family="teacherHours"]')
-      .getByRole('button', { name: 'Izgarada göster' })
-      .click();
-    const previewBar = page.locator('.preview-bar');
-    await expect(previewBar).toContainText('öğretmen saati açılıyor');
-    expect(await page.locator('.program-body .card.mark-opened').count()).toBeGreaterThan(0);
-    await previewBar.getByRole('button', { name: 'Şu anki' }).click();
-    await expect(page.locator('.program-body .card.mark-opened')).toHaveCount(0);
-    await previewBar.getByRole('button', { name: 'Önizlemeyi kapat' }).click();
-    await expect(previewBar).toHaveCount(0);
+      // The preview: the way's week on the grid, the opened hours marked, and
+      // back to the week as it is with one button (TODO B5.11).
+      await panel
+        .locator('li[data-family="teacherHours"]')
+        .getByRole('button', { name: 'Izgarada göster' })
+        .click();
+      const previewBar = page.locator('.preview-bar');
+      await expect(previewBar).toContainText('öğretmen saati açılıyor');
+      expect(await page.locator('.program-body .card.mark-opened').count()).toBeGreaterThan(0);
+      await previewBar.getByRole('button', { name: 'Şu anki' }).click();
+      await expect(page.locator('.program-body .card.mark-opened')).toHaveCount(0);
+      await previewBar.getByRole('button', { name: 'Önizlemeyi kapat' }).click();
+      await expect(previewBar).toHaveCount(0);
 
-    // "Olur" on a question: kept at no cost, and every way now says what is
-    // needed on top of it.
-    // Its questions are still open from the "Olmaz" above.
-    const asked = panel.locator('li[data-family="teacherHours"]');
-    await expect(asked.getByRole('button', { name: 'Soruları gizle' })).toBeVisible();
-    await asked.locator('.question').first().getByRole('button', { name: /^Olur/ }).click();
-    await expect(panel.locator('.chip-yes')).toHaveCount(1);
-    await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, { timeout: 200_000 });
-    await expect(panel).toContainText(/Olur dediklerinize ek olarak|Olur dedikleriniz yetiyor/);
+      // "Olur" on a question: kept at no cost, and every way now says what is
+      // needed on top of it.
+      // Its questions are still open from the "Olmaz" above.
+      const asked = panel.locator('li[data-family="teacherHours"]');
+      await expect(asked.getByRole('button', { name: 'Soruları gizle' })).toBeVisible();
+      await asked.locator('.question').first().getByRole('button', { name: /^Olur/ }).click();
+      await expect(panel.locator('.chip-yes')).toHaveCount(1);
+      await expect(page.getByRole('button', { name: 'Durdur' })).toHaveCount(0, {
+        timeout: 200_000,
+      });
+      await expect(panel).toContainText(/Olur dediklerinize ek olarak|Olur dedikleriniz yetiyor/);
 
-    const way = panel
-      .locator('li[data-family]')
-      .filter({ has: page.getByRole('button', { name: /^Uygula/ }) })
-      .first();
-    const before = await settledText(page);
-    const was = JSON.parse(before) as State;
-    await way.getByRole('button', { name: /^Uygula/ }).click();
-    await expect(page.locator('.reason-bar.ok')).toContainText('Öneri uygulandı');
-    await expect(page.locator('.pool-card')).toHaveCount(0);
+      const way = panel
+        .locator('li[data-family]')
+        .filter({ has: page.getByRole('button', { name: /^Uygula/ }) })
+        .first();
+      const before = await settledText(page);
+      const was = JSON.parse(before) as State;
+      await way.getByRole('button', { name: /^Uygula/ }).click();
+      await expect(page.locator('.reason-bar.ok')).toContainText('Öneri uygulandı');
+      await expect(page.locator('.pool-card')).toHaveCount(0);
 
-    const after = await savedState(page, before);
-    const opened = Object.keys(was.unavailable).filter((k) => after.unavailable[k] === undefined);
-    expect(opened.length).toBeGreaterThanOrEqual(4);
-    const teachers = new Set(was.teachers.map((x) => x.id));
-    for (const key of opened) expect(teachers.has(key.split('|')[0]!)).toBe(true);
-    const hours = was.lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
-    expect(await placedHours(page)).toBe(hours);
-    // What was said yes to is now the data itself; the no stays for next time.
-    expect(after.answers.accepted).toEqual([]);
-    expect(after.answers.refused).toEqual(was.answers.refused);
+      const after = await savedState(page, before);
+      const opened = Object.keys(was.unavailable).filter((k) => after.unavailable[k] === undefined);
+      expect(opened.length).toBeGreaterThanOrEqual(4);
+      const teachers = new Set(was.teachers.map((x) => x.id));
+      for (const key of opened) expect(teachers.has(key.split('|')[0]!)).toBe(true);
+      const hours = was.lessons.reduce((sum, x) => sum + x.weeklyHours, 0);
+      expect(await placedHours(page)).toBe(hours);
+      // What was said yes to is now the data itself; the no stays for next time.
+      expect(after.answers.accepted).toEqual([]);
+      expect(after.answers.refused).toEqual(was.answers.refused);
 
-    // One step back: the hours closed again and the stuck week on the grid.
-    const applied = await settledText(page);
-    await page.keyboard.press('Control+z');
-    const undone = await savedState(page, applied);
-    expect(undone.unavailable).toEqual(was.unavailable);
-    expect(undone.programs).toEqual(was.programs);
-  });
+      // One step back: the hours closed again and the stuck week on the grid.
+      const applied = await settledText(page);
+      await page.keyboard.press('Control+z');
+      const undone = await savedState(page, applied);
+      expect(undone.unavailable).toEqual(was.unavailable);
+      expect(undone.programs).toEqual(was.programs);
+    },
+  );
 });
