@@ -23,7 +23,7 @@ import Rooms from './Rooms';
 import Teachers from './Teachers';
 import Classes from './Classes';
 import Subjects from './Subjects';
-import Summary from './Summary';
+import Summary from '../lists/Summary';
 import { drafts as draftsOf } from '../../pure/library';
 import type { PanelProps, PlanControls } from '../props';
 import type { StepId } from '../../platform/toolState';

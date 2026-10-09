@@ -521,7 +521,7 @@ export async function tokens(page: Page, names: string[]): Promise<Record<string
  * The editable list on the left of a Kurulum step.
  *
  * Scoped on purpose. The C round put a SECOND `table.list` in the right-hand
- * column (Özet, `setup/Summary.tsx`), so a bare
+ * column (Özet, `lists/Summary.tsx`), so a bare
  * `table.list tbody tr` counts both and every count in the suite came out four
  * rows high. One definition here rather than the same `.cols > div` prefix
  * written out in nine places.

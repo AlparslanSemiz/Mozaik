@@ -35,7 +35,7 @@ import {
   weeklyLoad,
 } from '../../pure/entities';
 import LimitBox from '../LimitBox';
-import Paste from './Paste';
+import Paste from '../lists/Paste';
 import type { PanelProps } from '../props';
 import { T, useT } from '../T';
 import AddPanel from '../AddPanel';

@@ -20,7 +20,7 @@
 // Branş dropdown offers on the Öğretmenler step.
 //
 // The panel is the LEFT column only. What used to be its own `<aside>` — the
-// built-in subjects still on offer — is now a branch of `setup/Summary.tsx`,
+// built-in subjects still on offer — is now a branch of `lists/Summary.tsx`,
 // because this file is rendered INSIDE `setup/index.tsx`'s `.cols` and a
 // second one nested in it would give the screen two asides and two "the list
 // on this screen" answers (`e2e/helpers.ts` mainList()).
