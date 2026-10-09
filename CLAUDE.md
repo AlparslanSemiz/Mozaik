@@ -73,6 +73,7 @@ bloğunda yazılı.
   süre içinde alınamazsa daha fazla beklenmez, söylenir. Kilidi alan, yanındaki
   `~/.mozaik-agir.not` dosyasına oturumu, komutu ve zamanı yazar; bırakırken üzerine
   "serbest" yazar, silmez.
+- Uzun komutlar (`kontrol`, E2E, mutasyon, CI'ı izlemek) arka planda koşulur ve bitiş bildirimi beklenir, `sleep` ve `tail` ile yoklanmaz.
 - Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
   2'nin altında; `scripts/temiz-kosul.sh` bakar. Koşul yoksa ölçülmez, "kirli, ölçülmedi"
   yazılır.
