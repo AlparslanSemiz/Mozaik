@@ -29,7 +29,10 @@ test.describe('93. Kapanırken bekleyen kayıt', () => {
     await expect.poll(async () => (await savedText(page)).length).toBeGreaterThan(0);
 
     const now = await page.evaluate(() => Date.now());
-    await page.clock.pauseAt(now + 1);
+    // A second ahead, not a millisecond: on a slow runner more than one
+    // passes between reading the time and pausing, and pausing in the past
+    // throws (CI, 2026-10-09). Nothing is due in that second.
+    await page.clock.pauseAt(now + 1_000);
 
     await page.getByRole('button', { name: 'Okul', exact: true }).click();
     await page.locator('.step', { hasText: 'Derslikler' }).click();
