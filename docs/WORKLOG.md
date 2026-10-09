@@ -98,6 +98,55 @@ ve 2026-10-09.
 
 ---
 
+## 2026-10-09 · Refactor: ret sayacı, paralel oturumlar, betikler, port, `@arama`, lint kuralları
+
+**Başlangıç.** Dal main'in üstündeydi. Bu oturumda yöntem değişti: önce iki kez rebase,
+sonra kullanıcının kararıyla `git merge main` (bir çatışma, TESTPLAN'ın CI, Windows ve
+Haftalık satırları; iki taraf da kaldı). Push yalnız `git push origin refactor/yapi`.
+
+**Ne yapıldı, commit commit** (dal commit'leri konusuyla):
+- "CI: öneri aramasının worker testi e2e-arama'da sırayla (RK8)" ve "CI: e2e-arama
+  listenin seçtiği testleri başlıklarıyla sayıyor (RK9)": sonra "@arama" ile değişti.
+- "Yorum: invariants.test.ts'in 60 s sınırının ölçüsü ve tuzak 118".
+- "Test: öneri aramasının reddettiği hafta sayılıyor, değişmez 0 bekliyor (RF2)":
+  `RelaxResult.rejected`, değişmez her dünyada 0 bekliyor. M1, M2 ve M3 yeni iddiayla
+  kırmızı (14, 6 ve 6 hafta reddedildi), eski değişmezle yeşil. `rejected` hiçbir yere
+  yazılmıyor (relaxLog ve yedeğin `olcum` alanı alan alan kuruluyor).
+- "CLAUDE.md: Paralel oturumlar" (20 satır), sonra betikleri anan 4 satır daha.
+- "Betikler: agir.sh, temiz-kosul.sh ve mutasyon-kaniti.sh". Kanıt betiği dünkü M2 ile
+  kırmızı (0), uymayan ifadeyle 2, M2'yi görmeyen testle 1, kirli dosyayla 3; tuzak
+  120'nin iki örneğinden `void import.meta.url` dist'e girmediği için test koşmadan 2,
+  yan etkili hâli kırmızı. Hiçbir workflow, npm betiği ya da Windows yolu çağırmıyor.
+- "Site süiti: port klasörün, sunucu yeniden kullanılmaz, sunulan sayfa doğrulanır (D9)":
+  main'in `dist-site`'ını bu klasörün portunda sunan bir sunucuyla süit "already used"
+  ile kırmızı; yeniden kullanma açılınca kimlik denetimi kırmızı. Yabancı sunucu olmadan
+  22/22.
+- "CI: öneri araması testleri @arama etiketiyle seçiliyor, başlık listeleri kalktı":
+  `--list` ile etiket eski üç başlıkla aynı üç testi seçiyor; `windows.yml`'in eksik
+  başlığı böylece kapandı.
+- "AGENTS.md CLAUDE.md'ye işaret eden tek cümle, ve A11 kapısı (D3)": üç mutasyon kırmızı.
+- "Lint: Commands'ın gereksiz ui bağımlılığı çıktı, App'in komut listesine gerekçeli
+  susturma (D6)": üretim kodunda Commands.tsx'te iki satır (bağımlılık ve açılım, tsc
+  ikincisini istedi) ve App.tsx'te bir susturma satırı.
+- "Lint: saf katman, depo ve Math.random kuralları makinede (D8)": her kural kopyada tek
+  satırla kırmızı; "yalnız tip alınır" zaten `no-circular` ile zorlanıyor.
+
+**Ölçülenler (analiz, git dışında, geçici klonda).**
+- `leaf` ve `pure` için katman barrel'ı: tip ve döngü temiz, ham +6 bayt, brotli −45 bayt,
+  sha değişiyor (dosyanın yaklaşık 810 kB'ı yeniden sıralanıyor), worker testleri 3/3.
+- Derin import kuralının taslağı bugün 7 üretim ihlali buluyor (Root'tan dört sözlük,
+  `names.ts`'ten `kisaltmalar.ts`, `lessons`'tan `setup/Paste` ve `setup/Summary`).
+- `npm audit --omit=dev` 0. Tam liste 14 paket, hepsi geliştirme aracında.
+
+**Koşulan testler.** Her commit'ten önce belge kapısı (18/18 A11'den sonra), `tipler`;
+kod commit'lerinde `lint`, `knip`, `npm test` (1376/1376). Kilit altında: derleme ve
+boyut, `otomatik.spec.ts` ile `temel.spec.ts` (49/49), `npm run test:site` (22/22).
+`npm run kontrol` kilit altında, son kod commit'inin üstünde: 0 ile çıktı. 43 dosyada 1377 birim testi, derleme ve boyut, ana E2E 631/631, site 22/22, çözücü stresi 7/7. Süre 876 s, kirli koşulda (prizde değil, profil `balanced`), ölçüm değil.
+
+**Koşulmayan testler.** Stryker ve `npm run kapsam` (adım 2, temiz koşul bekliyor),
+`exe:e2e`, `exe:test`, `patrol`, `ekran`. Süre ölçümü yok: makine prizde değildi, profil
+`balanced`, yük 2'nin üstündeydi.
+
 ## 2026-10-09 · Refactor adım 0 ve 1: belge kaydı ve yalnız testler
 
 **Başlangıç.** Dal `refactor/yapi`, `origin/main`'den (`db40d8b`) açılmıştı, yerel
@@ -115,13 +164,13 @@ adımlar "Refactor adım 0" ile 7 arası (A belge kapılarının adı). RF2'nin 
 kalacaktı, besledi ve kaldı.
 
 **Ne yapıldı, commit commit.**
-- `415be18`: belge kaydı. Analizin girdisi, TODO §8k (plan ve RK1 ile RK7 arası), §8d'nin iki maddesinin genişlemesi, DECISIONS'ın kaydı.
-- `47c3f0a`: `tsconfig.tsbuildinfo` git'ten çıktı. `eb0601d`'de bir özellik commit'iyle girmişti, hiçbir şey onu okumuyor.
-- `148013b` (RF16): `e2e/temel.spec.ts` 91, derlenmiş modül betiği `node:vm` ile klasik bir betik olarak derleniyor. `e2e/otomatik.spec.ts`, küçük bir dünyada arama bitince `data-oneri-isci` sıfırdan büyük. TRAPS 136 ve TESTPLAN aynı commit'te.
-- `648bc45` (RF17): `src/surum.test.ts`, `withGlobalTauri` açık.
-- `70c4a02` (RF17): `e2e/program.spec.ts` 92, Program sekmesinin tablosu gidip dönünce aynı DOM düğümü.
-- `735db6e` (RF2): `src/relax.test.ts`, `maxConsecutive` ve `maxPerDay`'i tek başına bağlayan iki dünya.
-- `e2c9e79` (RF2): `src/invariants.test.ts`'in üreteci iki sınırı ve bir ilişkiyi de kuruyor, dosyanın kendi 60 saniyelik zaman sınırı var.
+- "Belgeler: refactor analizinin kaydı, planı ve kararları": belge kaydı. Analizin girdisi, TODO §8k (plan ve RK1 ile RK7 arası), §8d'nin iki maddesinin genişlemesi, DECISIONS'ın kaydı.
+- "tsconfig.tsbuildinfo git'ten çıktı". `eb0601d`'de bir özellik commit'iyle girmişti, hiçbir şey onu okumuyor.
+- "Test: öneri aramasının worker'ı Chromium'da da ölçülüyor" (RF16): `e2e/temel.spec.ts` 91, derlenmiş modül betiği `node:vm` ile klasik bir betik olarak derleniyor. `e2e/otomatik.spec.ts`, küçük bir dünyada arama bitince `data-oneri-isci` sıfırdan büyük. TRAPS 136 ve TESTPLAN aynı commit'te.
+- "Test: exe köprüsü withGlobalTauri bayrağına dayanıyor" (RF17): `src/surum.test.ts`, `withGlobalTauri` açık.
+- "Test: Program sekmesi gizlenince sökülmüyor" (RF17): `e2e/program.spec.ts` 92, Program sekmesinin tablosu gidip dönünce aynı DOM düğümü.
+- "Test: maxConsecutive ve maxPerDay'i tek başına bağlayan dünyalar" (RF2): `src/relax.test.ts`, `maxConsecutive` ve `maxPerDay`'i tek başına bağlayan iki dünya.
+- "Test: değişmezlerin üreteci iki sınırı ve bir ilişkiyi de kuruyor" (RF2): `src/invariants.test.ts`'in üreteci iki sınırı ve bir ilişkiyi de kuruyor, dosyanın kendi 60 saniyelik zaman sınırı var.
 
 **Testler ve mutasyonları.** Her mutasyon değişen dosyanın `scratch/`'teki kopyasıyla
 yapıldı, `cmp` ile uygulandığı görüldü, E2E için yeniden derlendi ve çıkış kodu okundu,

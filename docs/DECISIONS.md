@@ -35,6 +35,23 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-09 · Refactor dalı: merge ile güncel, açık refspec'le itiliyor; union bırakıldı
+
+**Ne.** Kullanıcının kararları (refactor oturumu):
+- Dal `main`'i `git merge main` ile alır, rebase yapmaz. Dal artık itiliyor ve rebase
+  zorla push ister, hash'leri de değiştirir. Belgelere yine yalnız `main`'in hash'i yazılır.
+  `main`'e birleşme `--ff-only`.
+- Dal oturumu yalnız `git push origin refactor/yapi` ile iter; zorla push ve etiket yok.
+- Kurallar CLAUDE.md'nin "Paralel oturumlar" bölümünde, çünkü her oturum onu kendiliğinden
+  okuyor.
+
+**Denendi ve bırakıldı: `.gitattributes`'ta `merge=union`** (WORKLOG ve TESTFINDINGS
+için). Geçici bir klonda iki dal aynı yere girdi ekleyince çatışma kalktı, ama iki tarafın
+aynı satırları teke indi ve bir girdi satır kaybetti; aynı satırın iki düzenlemesi de
+çelişkili olarak yan yana kaldı. Elle çözülen çatışma daha ucuz ve kayıpsız.
+
+**Gerekçe.** Kullanıcının kararı.
+
 ### 2026-10-09 · Windows E2E her main push'unda, ve etiket onu da bekliyor
 
 **Ne.** Ana E2E süiti Windows'ta her `main` push'unda koşuyor (`windows.yml`). Siteyi

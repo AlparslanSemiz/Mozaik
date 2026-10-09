@@ -26,6 +26,24 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `playwright.site.config.ts` · site süiti başka bir klasörün sunucusunu test edebiliyordu
+Bulgu: Port her klasörde 4173'tü ve `reuseExistingServer: true` idi. Portta başka bir
+worktree'nin `vite preview`'ı açıksa Playwright kendi komutunu hiç koşmadan ona bağlanıyor
+ve hiçbir test sunulan sayfanın bu klasörün olduğuna bakmıyordu.
+Tür: test kusuru.
+Ne yapıldı: düzeltildi. Port klasörün (`e2e/sitePort.ts`), sunucu yeniden kullanılmıyor,
+`e2e/siteIdentity.ts` sunulan `index.html`'i yereldekiyle bayt bayt karşılaştırıyor.
+İki yönde mutasyonla sınandı (WORKLOG, 2026-10-09 refactor girdisi).
+Kalıcı kural: yok
+
+### 2026-10-09 · `ci.yml` ve `windows.yml` · öneri araması testlerinin başlık listesi kaymıştı
+Bulgu: `windows.yml`'in `ARAMA_TESTLERI` kopyasında worker testinin başlığı yoktu, yani
+o test Windows'ta paralel adımda koşuyordu. `ci.yml`'de de yeniden adlandırılan bir başlık
+testi sessizce paralel parçalara geri itiyordu (yorum bunun tersini söylüyordu).
+Tür: test kusuru.
+Ne yapıldı: düzeltildi. Testler `@arama` etiketiyle seçiliyor, iki liste kalktı (TODO RK9).
+Kalıcı kural: yok
+
 ### 2026-10-09 · `npx playwright test e2e/roboders-koruma.spec.ts`, bu makine · otomatik modun deneme sayfası
 Bulgu: Eyotek ayarı yazılırken ölçüldü: deneme sayfasının "tıklanırsa sunucuya iz
 gönderir" işaretlerinden üçü (`/tiklandi/y-kaydet`, `y-menu-sil`, `y-kaldir`) korumanın

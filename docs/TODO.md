@@ -1866,7 +1866,8 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 - [x] **Refactor adım 0 · belge kaydı.** WORKLOG'un girdisi, bu bölüm ve DECISIONS'ın
       kaydı. `tsconfig.tsbuildinfo` git'ten ayrı bir commit'le çıkar.
-      Bitti 2026-10-09, `415be18` ve `47c3f0a`, `refactor/yapi` dalında.
+      Bitti 2026-10-09, `refactor/yapi` dalında: "Belgeler: refactor analizinin kaydı,
+      planı ve kararları" ve "tsconfig.tsbuildinfo git'ten çıktı".
 - [x] **Refactor adım 1 · yalnız testler (RF16, RF17, RF2'nin ilk yarısı).** RF16:
       derlenmiş betiğin klasik bir worker olarak derlendiği (`e2e/temel.spec.ts`) ve
       öneri aramasının Chromium'da worker'da koştuğu (`e2e/otomatik.spec.ts`). RF17:
@@ -1875,15 +1876,17 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       başına bağlayan dünyalar (`src/relax.test.ts`) ve değişmez üretecinin ilişki ve iki
       sınırla genişlemesi (`src/invariants.test.ts`). Üretim koduna dokunulmaz. Adım 6'nın
       önkoşulu.
-      Bitti 2026-10-09, `148013b`, `648bc45`, `70c4a02`, `735db6e` ve `e2c9e79`,
-      `refactor/yapi` dalında. Her test bir mutasyonla kırmızıya döndü, analizin sekiz
+      Bitti 2026-10-09, `refactor/yapi` dalında, beş "Test:" commit'iyle (RF16, iki RF17,
+      iki RF2; konuları WORKLOG'un 2026-10-09 refactor girdisinde). Her test bir mutasyonla kırmızıya döndü, analizin sekiz
       mutasyonunun sekizi de artık kırmızı (WORKLOG 2026-10-09). `npm run kontrol` yeşil.
 - [ ] **Refactor adım 2 · RF2'nin ret sayısı, RF3 ve gecelik mutasyon tabanı.** Önce
       ayrı bir içerik commit'i: `RelaxResult`'ta düz bir `rejected` sayısı (aramanın
       kurduğu ama `verifySuggestion`'ın reddettiği hafta), ve `invariants.test.ts`'in
       öneri değişmezi her dünyada 0 bekliyor. Adım 6'dan buraya alındı (DECISIONS
       2026-10-08, refactor kaydının 2026-10-09 notu): sayı yokken bozuk bir kodlamayı
-      denetim eliyor ve taban skoru yanıltıcı olurdu. Sonra `relax.ts` ve `sat.ts`
+      denetim eliyor ve taban skoru yanıltıcı olurdu. Bu yarısı bitti (2026-10-09, "Test:
+      öneri aramasının reddettiği hafta sayılıyor, değişmez 0 bekliyor"): analizin M1, M2 ve
+      M3'ü yeni iddiayla kırmızı. Sonra `relax.ts` ve `sat.ts`
       mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
       commit'te (A9 kapısı). Adım 1'e bağlı.
 - [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
@@ -1945,13 +1948,20 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 - [x] **RK8 Öneri aramasının worker testi CI'da paralel parçada koşuyor.** Kapandı
       (2026-10-09): kullanıcının kararıyla test `ARAMA_TESTLERI` listesine girdi, `e2e-arama`
       işinde öteki ikisiyle sırayla koşuyor. `--list` ile seçim 3, kalan 623, toplam 626.
-      CI'da henüz koşmadı (dal itilmedi).
+      CI'da henüz koşmadı (dal itilmedi). Sonra liste kalktı: arama testleri `@arama`
+      etiketiyle seçiliyor (RK9).
       `e2e/otomatik.spec.ts`'in "öneri araması Chromium'da worker'larda koşuyor" testi
       (2026-10-09) `ci.yml`'nin `ARAMA_TESTLERI` listesinde değil, yani dört çekirdekli
       bir runner'da öteki Playwright worker'larıyla aynı anda koşuyor. Worker'lar beş
       saniyede hazır olamazsa arama ana iş parçacığına düşer ve test kırmızıya döner.
       Yerelde üç koşuda yaklaşık 2 saniyede yeşil, CI'da henüz koşmadı. Seçenekler:
       listeye eklemek ya da ilk CI koşularını izlemek.
+- [x] **RK9 Başlık listesi kayıyordu.** `ci.yml`'nin "a test cannot silently drop out"
+      cümlesi yanlıştı: listede başka bir başlık eşleştikçe yeniden adlandırılan bir test
+      sessizce paralel parçalara dönüyordu, ve main'den gelen `windows.yml`'in kopyasında
+      worker testinin başlığı hiç yoktu. Önce `--list` ile başlık sayan bir adım kondu,
+      sonra (kullanıcının kararı) üç teste Playwright'ın `@arama` etiketi verildi ve iki
+      liste de sayma adımı da kalktı. Kapandı 2026-10-09.
 - [ ] **RK10 Dört belgenin tarif satırı CLAUDE.md'dekiyle aynı cümle değil.** CONVENTIONS
       "Her `docs/` dosyası başlığının hemen altında tek cümlelik bir ... satırı taşır, ve
       CLAUDE.md'deki yönlendirme satırı aynı cümledir" diyor. Tutmayanlar: `ASC.md`,
@@ -1973,6 +1983,22 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
       Kalan `useRowOrder.tsx`'in eksik `t`'si main'in işi. O düzelince `--max-warnings 0`
       açılır. `Commands`'ın `Props`'unda `ui` hâlâ duruyor ve App onu geçiriyor; ölü prop
       RF11'de gider.
+
+**Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
+- Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
+  commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
+  HEAD'de, commit'ten önce derlenerek ölçülür (tuzak 114'ün yanında).
+- `merge=union` çatışmayı kaldırıyor ama iki tarafın aynı olan satırlarını (boş satır,
+  "Kalıcı kural: yok") teke indiriyor, yani bir oturumun girdisi satır kaybediyor; aynı
+  satırın iki ayrı düzenlemesini de çelişkili hâlde yan yana bırakıyor. Geçici bir
+  klonda ölçüldü, kullanılmadı.
+- knip, `/tmp` altındaki geçici bir klonda kullanılmayan bir dosyayı bile bildirmedi:
+  orada ölçüm aracı kalibre olmuyor, oradan çıkan "knip yeşil" bir şey kanıtlamaz.
+- `pkill -f <kelime>` o kelimeyi komut satırında taşıyan kendi kabuğunu da öldürür.
+
+**Sıradaki iş (dal).** T1 (`leaf/lang/` için bir giriş noktası), T2 (`ui/setup`'ın `Paste` ve `Summary`'si)
+ve derin import kuralı; adım 2'nin süre ölçümleri temiz koşulda (`scripts/temiz-kosul.sh`):
+`npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon koşusu, dosya başına tahmin.
 
 ## §9. Ham notlar — senin kendi satırların
 
