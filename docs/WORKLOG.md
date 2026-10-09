@@ -79,6 +79,10 @@ düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.
   `maximized` ayarı gerçek bir Windows'ta görülmedi.
 - Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
+- Veri kaybı VK1 ve VK2 düzeldi (TODO B7.27): iki sekmede bayat olan yazmayı bırakıyor,
+  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
+  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7 (kapanan sekmenin son
+  değişikliği klasöre inmiyor) açık.
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
