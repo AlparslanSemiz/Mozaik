@@ -190,6 +190,7 @@ hareket      --dur-fast 110ms · --dur 180ms · --dur-slow 280ms   (süre)
 odak         --focus-ring (iki halka: kâğıt boşluğu ve accent)
 sütun        --w-col-xs 8ch … --w-col-2xl 32ch
 geometri     --cell-w/-h · --rowhead-w · --dock-w · --break-w   (rem)
+             --day-rule-w 3px   (gün çizgisi; Sığdır o sütuna geri verir)
 ölçek        --ui-scale, varsayılan 1, 0,80 ile 1,50 arası, 0,05 adım
 ```
 

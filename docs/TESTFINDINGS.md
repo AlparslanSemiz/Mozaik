@@ -26,6 +26,33 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `npx stryker run --dryRunOnly` ve `gorunum.spec.ts` 45b, bu makine · B7.24 ve B7.22'nin yerel ölçümü
+Bulgu (mutasyon, B7.24): `weight[index]!++` `weight[index] = weight[index]! + 1` olunca
+enstrümantasyon geçti (5639 mutant), ama arkasında iki engel daha vardı, ikisi de aynı
+commit'ten (`8794c95`). (1) `invariants.test.ts`'in "elde kalan yarım bloklarla" testi
+`npm test`'te 1,2 s, enstrümante ilk koşuda vitest'in 5 s'lik tavanını aştı (4 dk 32 s'de
+düştü). (2) O tavan 30 s olunca ilk koşu Stryker'ın varsayılan 5 dakikalık tavanını aştı.
+Tavan 20 dakika olunca ilk koşu geçti: 1208 test, 5 dk 53 s. Ayrıca kuru koşulardan biri
+benim başlattığım bir E2E yüzünden `ENOENT (chdir)` ile düştü: Playwright `test-results/`'u
+boşalttı, kum havuzu oradaydı (tuzak 131). Tekrarı önleyen kontrol için iki aday ölçüldü:
+ESLint'in `no-restricted-syntax` kuralı `npm run lint`'e ölçülebilir süre eklemiyor (üç
+koşuda kurallı 6,84–7,14 s, kuralsız 6,68–7,24 s), Stryker'ın kuru koşusu 5 dk 57 s. Lint
+seçildi ve mutasyonla kanıtlandı: satır geri konunca `solver.ts:975` kırmızı.
+Bulgu (Sığdır, B7.22): Windows koşusunun (37851532351) `:815` izinin son DOM anlık
+görüntüsünden `gridFit.ts`'in yazdığı 210 `--fit` oranı okundu. Bu makinede Chromium
+`--font-render-hinting=none` ile koşunca 210'u birebir aynı çıktı, ve iki test Windows'un
+sayılarıyla kırmızıya döndü (5 kart; 25/374). Hinting açıkken yazı genişlikleri tam piksel
+(9 px'te "410A" 21,00), kapalıyken kesirli (22,38). Kırpılan beşinin de kutusu 21,53 px,
+ötekilerinki 24,53: günün ilk saatinin hücresi 3 px'lik gün çizgisini kendi içine çiziyor.
+Düzeltmeden sonra iki glif ölçüsünde de 1920 Öğretmen 0, 1920 Sınıf 0, %125 Öğretmen 75,
+%125 Sınıf 24, örnek okul 0 ve 0. Tavanlar 2→0, 27→24 ve 2→0 indi; düzeltme kaldırılınca
+Linux ölçüsünde üç test kırmızı (2, 27, 2/374).
+Tür: mutasyonunki araç kusuru ve test yapılandırması; Sığdır'ınki ürün kusuru (düzen),
+Linux'un hinting'i yüzünden yalnız Windows'ta görünen.
+Ne yapıldı: düzeltildi (TODO B7.24, B7.22). Windows'ta ve tam mutasyon koşusunda
+doğrulanması `haftalik.yml`'in elle tetiklenen koşusunda.
+Kalıcı kural: TRAPS.md, tuzak 146 ve 147; 131'e Stryker'ın kum havuzu eklendi.
+
 ### 2026-10-09 · `haftalik.yml`'nin ilk koşusu (37851532351, elle) · Windows E2E ve mutasyon
 Bulgu (Windows, `windows-latest`, Chromium): E2E adımı 618'in 614'ü geçti, 20,3 dk; iş
 toplam 28 dk. `kararsiz.mjs` dördünü bir kez daha koştu:

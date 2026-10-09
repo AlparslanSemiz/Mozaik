@@ -675,6 +675,22 @@ kesirli genişliği (bir `Range`'in kutusu) ile öğenin kesirli kutusu
 ekran görüntüsüyle yan yana okunur. `gorunum.spec.ts`'in `gridMetrics()`'i artık
 böyle ölçüyor.
 
+### 146 · Linux'un hinting'i glif genişliğini tam piksele yuvarlar, Windows yuvarlamaz
+Sığdır'da babanın tam haftası Linux CI'da yeşil, Windows'ta kırmızıydı: 1920'de 5 kart
+"41…" okuyordu, tavan 2 (`haftalik.yml`'in ilk koşusu). Sebep iki şeyin üst üste
+gelmesiydi. Birincisi düzen: günü ayıran 3 px'lik çizgi o günün ilk saatinin hücresinin
+**içine** çiziliyordu, yani o sütunun kartı 21,53 px, ötekiler 24,53. İkincisi yazı:
+Linux'ta hinting glif ilerlemelerini tam piksele yuvarlıyor, Windows'ta (DirectWrite)
+ilerlemeler kesirli. "410A" 9 px'te burada 21,00 px ve 21,53'e sığıyor, Windows'ta
+22,38 ve sığmıyor. Windows'un kendisi gerekmeden ölçüldü: Windows koşusunun izindeki
+DOM anlık görüntüsünden `gridFit.ts`'in yazdığı 210 oran okundu, ve Chromium
+`--font-render-hinting=none` ile koşunca 210'u birebir aynı çıktı, kırpılan kart sayısı
+da (5 ve 25/374). Çare düzende: Sığdır'da günün ilk sütunu çizginin genişliğini
+(`--day-rule-w`) geri alıyor. Kural: **bir yazının sığıp sığmadığı ölçülürken iki
+glif ölçüsü de denenir**, bu makinenin hinting'li ölçüsü ve `--font-render-hinting=none`;
+babanın ekranı ikincisine benziyor. Ve bir kenarlık bir kutunun içinden yer, o kutu
+öteki kardeşleriyle aynı genişlikte sanılmaz.
+
 ## CSS kapsamı, özgüllük ve custom property
 
 **Kural.** Bir CSS değeri yazmak onun uygulandığı anlamına gelmez: daha güçlü bir
@@ -1113,6 +1129,10 @@ da dokunmadığı bir klasör. Aynı turda iki kapanış da sağlamlaştı. Çö
 sayfanın oturumunu kapatmak hata fırlatıyordu ve süreç grubunu öldüren satıra
 hiç gelinmiyordu; artık hata yutuluyor ve süreçler her durumda öldürülüyor.
 `exe-linux.mjs` de kopyalamadan önce eski ikiliyi siliyor.
+Aynısı Stryker'ın kum havuzunda tekrarladı (2026-10-09): `test-results/mutasyon/tmp`
+altındaydı, kuru koşu sürerken başlatılan bir E2E onu sildi ve koşu `ENOENT (chdir)`
+ile düştü. Kum havuzu artık `scratch/mutasyon-tmp`'de; rapor `test-results/mutasyon/`'da
+kalıyor, çünkü o koşunun sonunda yazılıyor.
 
 ### 132 · Sahte ev gerçek evin eksik bir kopyasıysa, program eksiği gerçek sanar
 Sahte evin `user-dirs.dirs` dosyası yalnız `XDG_DOCUMENTS_DIR`'ı söylüyordu.
@@ -1164,6 +1184,20 @@ deliği orada hiç kapanmadı. Tur 0'da yazılırken fark edildi, Roboders'e o y
 gidilmedi. Kural: Roboders'e yalnız `scripts/roboders/` betikleriyle gidilir, MCP
 tarayıcısı Roboders'in adresine açılmaz. Görünür pencere açacak bir iş (R6'nın
 canlı yarısı, MCP tarayıcısı) kullanıcıya önceden söylenir.
+
+### 147 · Stryker `x!++`'yı ayrıştıramaz, ve mutasyon iki hafta sessizce koşmadı
+Stryker'ın enstrümantasyonu mutasyona uğrattığı her `++`/`--`'yı Babel ile yeniden
+kurar, Babel de işlenen olarak bir non-null iddiasını (`x!`) reddeder: tek bir
+`weight[index]!++` bütün koşuyu başlamadan düşürür. 2026-09-12'de `classOnDay[g]!++`
+ile bir kez görülmüştü, 2026-09-24'te (`8794c95`) `solver.ts`'e yenisi girdi ve
+mutasyon 2026-10-09'a kadar hiç koşmadı; 2.2.0 mutasyonsuz çıktı. Kimse fark etmedi,
+çünkü mutasyon yalnız elle ya da haftada bir koşuyor. Aynı commit ikinci bir engel de
+getirmişti: enstrümante kodda 5 s'yi aşan bir test, ve onun arkasında üçüncüsü, 5
+dakikayı aşan ilk koşu. Her biri ancak öncekisi kalkınca göründü. Kural: **`x!++` ve
+`x!--` yazılmaz, `x = x! + 1` yazılır**, ve bunu `eslint.config.js`'teki
+`no-restricted-syntax` kuralı CI'ın `denetim` işinde yakalıyor (mutasyonla kanıtlı:
+satır geri konunca lint kırmızı). `x! += 1` serbest, Babel onu kabul ediyor. Bir aracın
+koşamaması bir bulgudur: bir mutasyon koşusunun "düştü" sonucu "hiç koşmadı" diye okunur.
 
 ## Ölçüm disiplini
 
@@ -1299,17 +1333,17 @@ bir algoritma işi gibi kovalanır.
 | Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
-| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140 |
+| Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
 | CSS kapsamı, özgüllük ve custom property | 14, 15, 17, 35, 40, 45, 52, 53, 54, 57, 58, 94, 103, 110, 142 |
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 145, yeni bir tuzak 146'dan devam eder. Test stratejisi
+büyük kullanılan numara 147, yeni bir tuzak 148'den devam eder. Test stratejisi
 dalı çakışmasın diye kendi numaralarını 150'den başlatıyor.

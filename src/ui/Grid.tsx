@@ -455,6 +455,8 @@ function GridInner({
   const columns = {
     '--lesson-cols': dayCount * hourCount,
     '--break-cols': dayIndices.filter((day) => (breakAt[day] ?? -1) >= 0).length,
+    // One day rule per day, drawn inside that day's first hour (styles.css).
+    '--day-cols': dayCount,
   } as React.CSSProperties;
 
   /**
@@ -523,7 +525,10 @@ function GridInner({
                   ...(breakAt[g] === s
                     ? [<col key={`break-${g}`} className="grid-break-col" />]
                     : []),
-                  <col key={`${g}-${s}`} className="grid-hour-col" />,
+                  <col
+                    key={`${g}-${s}`}
+                    className={s === 0 ? 'grid-hour-col day-first-col' : 'grid-hour-col'}
+                  />,
                 ]),
               )}
             </colgroup>

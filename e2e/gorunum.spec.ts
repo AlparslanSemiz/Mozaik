@@ -755,11 +755,18 @@ test.describe('45. Görünüm — ızgara yoğunluğu (A5)', () => {
  * row's height: that is asked of the line box and of the table directly.
  *
  * The numbers below are what is left AFTER the fix, measured, not a hope.
- * A one-hour card is 24.5px at 1920 and 21.5 in the first hour of a day (the
- * day edge is 3px): "411A" at 9px fits the one and not always the other. At
- * %125 a one-hour card is 19.2px and "411A" does not fit even at 9px, so the
- * father's one-hour cards keep their ellipsis there; %80 is still the way out.
- * They are ceilings; the day this gets better, lower them.
+ * A one-hour card was 24.5px at 1920 and 21.5 in the first hour of a day,
+ * because the 3px day rule is drawn inside that cell: "411A" at 9px fitted the
+ * one and not always the other. That cost 2 cards here and 5 on Windows, whose
+ * glyph advances are fractional where this machine's hinting rounds them
+ * ("410A" at 9px: 22.38px there, 21 here). Since 2026-10-09 the first hour's
+ * column gets the rule's width back (B7.22, pitfall 146) and both are 0; the
+ * ceilings below were lowered to what was measured then, with Linux's hinting
+ * and without it (`--font-render-hinting=none`, which reproduced Windows's
+ * 210 line ratios exactly). At %125 a one-hour card is 19.2px and "411A" does
+ * not fit even at 9px, so the father's one-hour cards keep their ellipsis
+ * there; %80 is still the way out. They are ceilings; the day this gets
+ * better, lower them.
  */
 test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusunda', () => {
   const dizili = () =>
@@ -796,15 +803,15 @@ test.describe('45b. Sığdır babanın şeklindeki veride ve Windows %125 kutusu
 
   // Ceilings, per box and view, for the anonymised fixture ("411A SAY").
   const DIZILI: Record<string, { cards: number; heads: number }> = {
-    '1920 · Öğretmen görünümü': { cards: 2, heads: 0 }, // before: 192 of 199
+    '1920 · Öğretmen görünümü': { cards: 0, heads: 0 }, // before: 192 of 199, then 2 (B7.22)
     '1920 · Sınıf görünümü': { cards: 0, heads: 0 }, // 26, and 20 of 20 heads
     'Windows %125 · Öğretmen görünümü': { cards: 75, heads: 0 }, // 199
-    'Windows %125 · Sınıf görünümü': { cards: 27, heads: 0 }, // 63
+    'Windows %125 · Sınıf görünümü': { cards: 24, heads: 0 }, // 63, then 27 (B7.22)
   };
   // ...and for the sample school, where only the %125 box ever clipped.
   const ORNEK: Record<string, number> = {
     'Öğretmen görünümü': 0, // before: 315 of 374
-    'Sınıf görünümü': 2, // 152
+    'Sınıf görünümü': 0, // 152, then 2 (B7.22)
   };
 
   for (const box of boxes) {

@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Mutasyon testi. Kosucunun config'i vite.mutasyon.config.ts, cunku belge kapilari kum havuzunda kosamaz ve kosmasinin anlami da yok; gerekcesi o dosyanin basinda. Yalniz saf cekirdek mutasyona ugrar: butun depoyu olcmek pahali ve bilesenlerin olculdugu yer E2E. Ne olctugu ve ne zaman kostugu docs/TESTPLAN.md'de.",
+  "_comment": "Mutasyon testi. Kosucunun config'i vite.mutasyon.config.ts, cunku belge kapilari kum havuzunda kosamaz ve kosmasinin anlami da yok; gerekcesi o dosyanin basinda. Yalniz saf cekirdek mutasyona ugrar: butun depoyu olcmek pahali ve bilesenlerin olculdugu yer E2E. Ne olctugu ve ne zaman kostugu docs/TESTPLAN.md'de. dryRunTimeoutMinutes: enstrumante ilk kosu 2026-10-09'da varsayilan 5 dakikayi asti ve butun kosuyu dusurdu (TESTFINDINGS). tempDirName scratch/ altinda, test-results/ altinda degil: her Playwright kosusu test-results/'u bosaltir ve kum havuzunu kosunun ortasinda siler (TRAPS, tuzak 131).",
   "ignorePatterns": [
     ".venv",
     "dist",
@@ -52,8 +52,9 @@
   },
   "concurrency": 4,
   "timeoutMS": 20000,
+  "dryRunTimeoutMinutes": 20,
   "timeoutFactor": 2.5,
-  "tempDirName": "test-results/mutasyon/tmp",
+  "tempDirName": "scratch/mutasyon-tmp",
   "cleanTempDir": true,
   "disableTypeChecks": true
 }

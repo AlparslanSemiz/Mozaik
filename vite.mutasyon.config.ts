@@ -12,6 +12,12 @@
 // Bu bir muafiyet DEĞİL. Kapılar `npm test` ve `npm run kontrol` içinde her
 // koşuda çalışıyor; buradan çıkan tek şey, hiçbir mutantı öldüremeyecek bir
 // testin bütün koşuyu daha başlamadan durdurma yetkisi.
+//
+// Testin süre tavanı da burada yükseliyor, ve sebebi ölçüldü (2026-10-09):
+// enstrümante kod yavaş. `invariants.test.ts`'in "elde kalan yarım bloklarla"
+// testi `npm test`'te 1,2 s, Stryker'ın ilk koşusunda vitest'in varsayılan 5 s'lik
+// tavanını aştı ve bütün koşuyu başlamadan düşürdü. Bir mutantın kendi süre
+// sınırı ayrı (`stryker.config.json`'da `timeoutMS`); bu yalnız ilk koşu.
 import { defineConfig, mergeConfig } from 'vite';
 import taban from './vite.config';
 
@@ -20,6 +26,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       exclude: ['**/node_modules/**', '**/dist/**', 'src/docs.test.ts'],
+      testTimeout: 30_000,
     },
   }),
 );

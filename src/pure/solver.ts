@@ -972,7 +972,7 @@ export function createSolver(base: State, options?: Partial<SolverOptions>): Sol
     const item = items[index]!;
     // Breakout: a block that keeps coming back homeless gets heavier, so the
     // walk learns to push something else out of its way instead.
-    weight[index]!++;
+    weight[index] = weight[index]! + 1;
 
     let best: Set<Rec> | null = null;
     let bestCell = -1;

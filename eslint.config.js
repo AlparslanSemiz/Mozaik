@@ -95,6 +95,20 @@ export default defineConfig([
       // keeps compiling after the type under it changes, so an unnecessary one
       // is a place where the compiler has been asked not to look.
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+
+      // Not a style rule: a tool limit. Stryker's instrumenter rebuilds every
+      // `++`/`--` it mutates through Babel, and Babel refuses a non-null
+      // assertion as the operand, so one `weight[index]!++` stops the whole
+      // mutation run before it starts. It did, from 2026-09-24 until
+      // 2026-10-09, and 2.2.0 shipped without a mutation run. `x! += 1` and
+      // `x = x! + 1` are fine; only the update operators break.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'UpdateExpression > TSNonNullExpression.argument',
+          message: 'Stryker cannot instrument `x!++` / `x!--`; write `x = x! + 1` (pitfall 147).',
+        },
+      ],
     },
   },
 ]);

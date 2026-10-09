@@ -27,6 +27,10 @@ on:
 permissions:
   contents: read
 
+# ci.yml'deki listenin aynısı; neden ayrı koştukları orada yazılı.
+env:
+  ARAMA_TESTLERI: 'kurulamayan haftada yolları söylüyor|durdurulan öneri araması durdurulduğunu söylüyor'
+
 concurrency:
   group: haftalik-${{ github.ref }}
   cancel-in-progress: false
@@ -49,14 +53,41 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium
       - run: npx vite build
-      - name: E2E (${{ inputs.kanal || 'chromium' }})
-        run: npx playwright test --reporter=html,list --trace=retain-on-failure
+      # Öneri aramasının iki testi ci.yml'deki gibi ayrı ve sırayla (B7.23): ilk
+      # koşuda (2026-10-09) süit içinde ikisi de kararsızdı, sebep ci.yml'in
+      # başındaki notta. Rapor iki adımın blob'larından birleşiyor.
+      - name: E2E (${{ inputs.kanal || 'chromium' }}), öneri araması hariç
+        id: ana
+        shell: bash
+        run: >-
+          npx playwright test --grep-invert "$ARAMA_TESTLERI"
+          --reporter=blob,list --trace=retain-on-failure
         env:
-          PLAYWRIGHT_HTML_OPEN: never
-      - name: Kararsız mı (yalnız özete yazar)
-        if: failure()
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/ana.zip
+      # Her E2E adımının kendi tekrarı: sıradaki adım test-results/'u, yani
+      # kararsiz.mjs'in okuduğu .last-run.json'u siler. İzler blob'larda kalıyor.
+      - name: Kararsız mı, ana süit (yalnız özete yazar)
+        if: ${{ failure() && steps.ana.outcome == 'failure' }}
         continue-on-error: true
         run: node scripts/kararsiz.mjs
+      - name: E2E, öneri aramasının iki testi, sırayla
+        id: arama
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: >-
+          npx playwright test --grep "$ARAMA_TESTLERI" --workers=1
+          --reporter=blob,list --trace=retain-on-failure
+        env:
+          PLAYWRIGHT_BLOB_OUTPUT_FILE: blob-report/arama.zip
+      - name: Kararsız mı, öneri araması (yalnız özete yazar)
+        if: ${{ failure() && steps.arama.outcome == 'failure' }}
+        continue-on-error: true
+        run: node scripts/kararsiz.mjs
+      - name: Rapor
+        if: ${{ !cancelled() }}
+        run: npx playwright merge-reports --reporter=html ./blob-report
+        env:
+          PLAYWRIGHT_HTML_OPEN: never
       - if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:

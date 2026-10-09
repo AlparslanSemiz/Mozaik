@@ -427,6 +427,13 @@
      (pitfall 36: a derived measure is computed from what it derives from). */
   --break-w: .375rem;
 
+  /* The day rule's thickness, a token for the same reason as --break-w: the
+     rule is drawn INSIDE the first hour's cell, so Sığdır's --cell-w formula
+     hands that column the same number back. Measured on Windows (2026-10-09):
+     the father's first-hour cards were 21.53px against 24.53 everywhere else,
+     and "415D" at the 9px floor is 22.48px there (B7.22). */
+  --day-rule-w: 3px;
+
   /* The height of a control in the tool strip, and therefore of the strip.
      2.25rem = 31.5px at scale 1 on the 14px root: still over the 24px WCAG 2.2
      target size. It was 2rem against a 16px root (32px) and is written up here
@@ -2355,11 +2362,23 @@ table.grid thead tr:nth-child(2) th {
   --cell-w: max(
     0px,
     (var(--wrap-w, 100cqw) - var(--rowhead-w) - var(--break-cols) * var(--break-w) -
-        var(--space-4)) /
+        var(--day-cols) * var(--day-rule-w) - var(--space-4)) /
       var(--lesson-cols)
   );
   width: calc(100% - 1px);
   max-width: calc(100% - 1px);
+}
+
+/* The day rule is drawn inside the first hour's cell (`.day-first`), so that
+   column gets the rule's width on top of --cell-w and its card is as wide as
+   every other. Before, it was 3px narrower: 21.53px against 24.53 on the
+   father's week at 1920, and on Windows, whose glyph advances are fractional,
+   five of his first-hour cards read "41…" even at the 9px floor. Linux's
+   hinting rounds "410A" at 9px down to 21px, which is why only Windows showed
+   it (B7.22, pitfall 146). The other columns pay for it: 7 x 3px over 84 of
+   them, 0.25px each. */
+:root[data-density='sigdir'] table.grid col.grid-hour-col.day-first-col {
+  width: calc(var(--cell-w) + var(--day-rule-w));
 }
 
 /* And the narrower head has to ELLIPSISE, not wrap. Without this the row head
@@ -2505,7 +2524,7 @@ table.grid thead tr:nth-child(2) th {
    (pitfall 40), and renk.spec.ts holds it there. A line is not a state. */
 .day-head,
 .day-first {
-  border-left: 3px solid var(--day-edge) !important;
+  border-left: var(--day-rule-w) solid var(--day-edge) !important;
 }
 
 /* The lunch break gets a column of its own rather than a dashed border: a thin

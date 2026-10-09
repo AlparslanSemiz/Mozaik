@@ -221,7 +221,15 @@ pahalı ve bileşenlerin ölçüldüğü yer E2E, ki mutasyon koşucusu onu koş
 değil bir arızaydı: aracın enstrümantasyonu `classOnDay[g]!++` biçimini
 ayrıştıramıyor ve bütün koşuyu düşürüyordu. İki satır `classOnDay[g] =
 classOnDay[g]! + 1` olarak yazılınca geçti, davranış birebir aynı kaldı ve
-`solver.test.ts` 93/93 durdu.
+`solver.test.ts` 93/93 durdu. Biçim 2026-09-24'te (`8794c95`) `weight[index]!++` ile
+geri girdi ve mutasyon 2026-10-09'a kadar koşamadı; o günden beri `npm run lint`
+(`no-restricted-syntax`) `x!++`'yı ve `x!--`'yi CI'ın `denetim` işinde reddediyor (tuzak 147).
+Aynı commit'in getirdiği iki engel daha `vite.mutasyon.config.ts`'te ve
+`stryker.config.json`'da: enstrümante kod yavaş olduğu için bir testin süre tavanı ve
+ilk koşunun tavanı yükseltildi, ikisi de varsayılanı aşmıştı (ölçümler TESTFINDINGS'te,
+2026-10-09).
+Kum havuzu `scratch/mutasyon-tmp`'de, çünkü bir Playwright koşusu `test-results/`'u
+boşaltır (tuzak 131).
 
 **Skorun kapsamı her seferinde yazılır.** Kapsamı belirsiz bir mutasyon skoru yüksek
 bir sayıyla güven verir ve neyi ölçtüğünü söylemez, ki bu tuzak 23'ün başka bir

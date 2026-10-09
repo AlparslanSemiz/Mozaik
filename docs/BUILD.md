@@ -42,7 +42,7 @@ maliyetleri WORKLOG'da.
 ```bash
 npm run dev          # geliştirme sunucusu
 npm run tipler       # tsc iki kez: src (tsconfig.json) ve src dışı (tsconfig.tools.json)
-npm run lint         # ESLint, şimdilik yalnız React'in kanca kuralları
+npm run lint         # ESLint: React'in kanca kuralları, tip farkında dört kural ve x!++ yasağı
 npm run knip         # kullanılmayan dışa aktarım, dosya ve bağımlılık raporu
 npm run sinir        # dependency-cruiser: çalışma zamanı import döngüsü ve katman sınırı
 npm run analiz       # demetin içindekiler, test-results/demet/analiz.html (ölçüsü minify öncesi)
