@@ -1446,7 +1446,18 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
       tutuyor ve bir sonraki açılış klasörü yazıyor; kaybolan, klasörün kapanış anında güncel
       olması. Exe'de aynı yol Tauri'nin eşzamansız köprüsünden geçiyor, ölçülmedi. Test
       `klasor.spec.ts`'te "BİLİNEN KUSUR". VK2 ile aynı dosyaya dokunuyor: `fix/veri-kaybi`
-      dalına haber verilmeli.
+      dalına haber verildi.
+- [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
+      (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
+      da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
+      paket yolu (`usePlans.ts`'in `replaceLibrary`'si) her planı çıplak `parseState` ile
+      okuyor ve aynı planı 0 öğretmen, 0 ders, 0 yerleşimle kabul ediyor. Ölçüldü (Vitest,
+      adsız dizili fikstürden kurulan tek planlı paket; `teachers`, `lessons` ya da ikisi
+      silinince dördünde de paket kabul, tek dosya ret). Onay sorusu yalnız plan sayısını
+      söylüyor, sonra "1 plan açıldı" deniyor ve bu bilgisayardaki bütün planlar gidiyor;
+      geri alınamaz. Kalan: oturum başının yedek zinciri (yalnız o an açık olan plan) ve
+      exe'de Belgeler'in önceki günleri. Arayüzde uçtan uca koşulmadı; zincir koddan.
+      Test dalında test yazılmadı, kullanıcıya getirildi.
 
 ## §9. Ham notlar
 
