@@ -5,9 +5,9 @@
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { createRelaxer, verifySuggestion } from './pure/relax';
-import type { RelaxOptions } from './pure/relax';
+import type { RelaxOptions, Suggestion } from './pure/relax';
 import { parseState } from './pure/parseState';
 import { activePlacements } from './pure/programs';
 import type { State } from './leaf/types';
@@ -36,13 +36,23 @@ async function sliced(d: State, hint: Record<string, string>, options: Partial<R
 }
 
 describe('öneri — babanın dizili haftası ve "Olmaz"', () => {
+  // Both tests start from the same first search (fewest hours, keeping the
+  // grid), and it is the longest part of each. It runs once; every test reads
+  // its own deep copy, so neither can change what the other starts from.
+  let shared: Suggestion[] = [];
+  beforeAll(async () => {
+    const d = dizili();
+    shared = await sliced(d, activePlacements(d), { keepPlaced: true, families: ['teacherHours'] });
+  }, 240_000);
+  const firstSearch = () => structuredClone(shared);
+
   it("KY Cumartesi gelemezse en az saat 5, CP-SAT'ın en iyisi", async () => {
     // MEASURED (2026-09-25): refusing Ö6's (KY's) Saturday, the fewest-hours
     // way found 8 when it started over from the stuck week, 5 from its own
     // earlier week with the wider neighbourhoods. CP-SAT's best is 5.
     const d = dizili();
     const hint = activePlacements(d);
-    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
+    const first = firstSearch();
     expect(first).toHaveLength(1);
     expect(first[0]!.relaid).toBe(true);
     expect(first[0]!.size).toBe(4);
@@ -72,7 +82,7 @@ describe('öneri — babanın dizili haftası ve "Olmaz"', () => {
     // father's file.
     const d = dizili();
     const hint = activePlacements(d);
-    const first = await sliced(d, hint, { keepPlaced: true, families: ['teacherHours'] });
+    const first = firstSearch();
     const hand = await sliced(d, hint, {
       keepPlaced: true,
       families: ['handFew', 'handHours'],

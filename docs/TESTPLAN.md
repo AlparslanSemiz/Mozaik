@@ -431,7 +431,8 @@ dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tu
 değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6
 sınır), ve dört saat açıkken çözücünün bulamadığı hafta bulunuyor mu. Bu iki dosya
 süitin en yavaş birim testlerini taşıyor ve bu yüzden `relax.test.ts`'ten ayrı: Vitest
-dosyaları paralel, bir dosyanın içindeki testleri ise sırayla koşar. `e2e/otomatik.spec.ts` aynı
+dosyaları paralel, bir dosyanın içindeki testleri ise sırayla koşar. İki "dizili" testi
+aynı ilk aramadan başlar, arama bir kez yapılır ve her test kendi kopyasını okur. `e2e/otomatik.spec.ts` aynı
 haftayı tarayıcıda panelden uygular ve tek Ctrl+Z ile geri alır. Gerçek adların depoya girmemesi kural: dosya yenilenirse adlar yeniden
 silinir.
 
