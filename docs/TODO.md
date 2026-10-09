@@ -1412,6 +1412,31 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 
 **Yolda çıkan bulgular.** TB numaralı maddeler aşağıda (ayrı commit).
 
+- [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
+      Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde
+      `TypeError` (`reading 'trim'`, `'weeklyHours'`, `'id'`). "Dosyadan aç"ta `App.tsx`'in
+      `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
+      (sessiz ret). Aynı `parseState` açılışta depodan okurken de korumasız (`useStore.ts`'in
+      `initialBox`'ı), orada bozuk bir plan boş ekran olur (koddan, ölçülmedi). Test TP4'te
+      "BİLİNEN KUSUR" olarak çivili; düzeltme `main`'de.
+- [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
+      ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
+      denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.
+- [ ] **TB3 `npm run kapsam` `library.ts`'i yüzde 50 ölçüyor (2026-10-09).** Raporun
+      "kapsanmadı" dediği on iki fonksiyonun hepsinin geçen testi var (`library.test.ts`).
+      Ölçüm kusuru; aday sebep aynı test dosyasının `import.meta.glob('./**/*.ts', { query:
+      '?raw' })`'si. TP24'ün tabanı bundan önce çözülmeli, yoksa yanlış sayıyı dondurur.
+- [x] **TB4 `useRowOrder.tsx`'in eksik bağımlılık uyarısı (2026-10-09).** `t` `useCallback`'in
+      bağımlılıklarında yoktu (`npm run lint`'in tek uyarısı). Analiz sırasında `main`'de
+      düzeldi (b84ab3e, "Kanca: liste tutamağı dil değişince yeni dilde").
+- [→] **TB5 `useHttpsScheme` sabitlenmemiş (2026-10-09).** Exe'nin verisi
+      `http://tauri.localhost` kökeninde; ayar bir gün `true` olursa köken değişir ve veri
+      görünmez olur. `fix/veri-kaybi` dalında sabitleniyor (K9).
+- [ ] **TB6 Bir dersin haftalık saati anlamsız bir sayıyla kabul ediliyor (2026-10-09).** Aynı
+      fuzz yoklaması, sonra elle: `weeklyHours` −5 ya da 10⁹ taşıyan bir ders olduğu gibi
+      açılıyor (2,5 ise 3'e yuvarlanıyor), dosya reddedilmiyor.
+      Test TP4'te "BİLİNEN KUSUR".
+
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.
