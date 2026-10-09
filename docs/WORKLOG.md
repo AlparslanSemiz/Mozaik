@@ -111,6 +111,71 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 
 ---
 
+## 2026-10-09 (gece) · Test programı: analiz, Faz 0 ve Faz 1 (`test/kapsam`)
+
+**Başlangıç.** `~/GitHub/Mozaik-test` worktree'si, `test/kapsam` dalı, `main` d3178dc'den;
+ortada `main` b75e707'ye ilerledi, `git merge main` ileri sardı. Önce yalnız analiz: depoda
+hiçbir dosya değişmedi, ölçümler `scratch/test-plan/`'da ve sahte evde
+(`scratch/exe-surucu/ev-vk*`). Rapor `scratch/test-plan/PLAN.md` (fazlar, maddeler, K
+kararları), karara bağlanmış özeti TODO §8l'de. Gerçek `Ders Programı` klasörünün sha256'sı
+başta ve sonda aynı (dört dosya), yalnız okundu.
+
+**Analizin ölçtükleri** (makine bütün oturum pilde, yük 1,4 ile 6,8 arası: hiçbir süre
+temiz değil, süreler eşik olamaz).
+- İki veri kaybı (VK1 iki kopya, VK2 kota): analiz durdu ve sordu, "devam" dendi;
+  düzeltmeleri ve testleri `fix/veri-kaybi`'de (TESTFINDINGS).
+- `haftalik.yml`'in mutasyonu 6 saatte iptal (bakım oturumu da kaydetti), ve
+  `erisim.spec.ts:116`'nın Windows'taki kararsızlığının kök sebebi izden (TESTFINDINGS).
+- A2: `refactor/yapi`'nin CI'ında `site` ve `rapor`'un atlanması bilerek; site testleri
+  her push'ta `e2e-ek`'te koşuyor. A4: `npm ci`'ın "allowScripts" uyarısı esbuild'in
+  kurulum betiğini engellemiyor; engellense de derleme optional paketten çalışıyor.
+- D1: yedi sekme iki temada on kez: bu makinede de Playwright'ın kabında da on dördün on
+  dördü bayt bayt aynı, aralarında ekran başına 237–4 055 piksel (glif kenarları). Görsel
+  regresyon kapta ve sıfır eşikle geri geliyor (DECISIONS).
+- B8: exe yeni sürümü yalnız "Güncellemeleri denetle"ye basılınca görür (TESTPLAN'ın
+  cümlesi doğru; "etiket babanın exe'sine gider" yayın kanalı anlamında doğru).
+- B10: Brave 1.96.61'de `file://` açılıyor, depo kalıcı, font gömülü, hata ve ağ isteği yok.
+- B11: 300 sürükle ve geri al döngüsünde DOM düz, yığın ilk 50'den sonra ~3 kB/döngü.
+- B12 (vekil, kirli): öneri araması süreç ağacını 0,8–1,1 GB büyütüyor; iki çekirdek ve
+  4× yavaşlatmada bitiş 158 s, sekiz çekirdekte 50 s.
+- B14: `npm audit` 14 açık, `--omit=dev` 0.
+- B15: ekran başına görünür kelime, ör. boş proje 82, Program 402, babanın dizili
+  Program'ı 562 (tablo PLAN'da).
+- B17: Vitest browser mode `LimitBox`'ı gerçek Chromium'da 1,3 s'de koştu, TB2'yi buldu.
+
+**Ne yapıldı** (dal commit'leri konusuyla).
+- "CI: runner'lar sabit (ubuntu-24.04, windows-2025), upload-artifact v7, download-artifact
+  v8, Ubuntu 26.04 kanaryası" (K6). Dalın CI'ı yeşil (37973059448). `surum.yml` dokunulmadı,
+  `haftalik.yml`'in mutasyon işi `ci/mutasyon-parca`'nın.
+- "Belgeler: test programının kuralları ve yavaş süit kuralı CLAUDE.md'de, kararları
+  DECISIONS'ta" (üç kayıt, B7.21 kapandı).
+- "Belgeler: test programının karara bağlanmış planı TODO §8l'de".
+- "Belgeler: test programının yeni katmanları TESTPLAN'da, planlandı olarak".
+- "Belgeler: analizin bulduğu bayat cümleler" (yalnız yorum ve açıklama metni).
+- "Belgeler: analizin yan bulguları TODO §8l'de, TB1-TB6".
+- "Test: kapanırken bekleyen kayıt depoda kalıyor, klasöre inmiyor (BİLİNEN KUSUR)" (TP3,
+  TB7). Sayfanın saati durdurulup bekleyen yazım önce doğrulanıyor; iki mutasyon kırmızı.
+- "Belgeler: Tümünü dosyadan aç eksik planı boş plan olarak açıyor (TB8, veri kaybı sınıfı)".
+  Test programı burada durdu ve kullanıcıya getirdi.
+- "Belgeler: TB7 fix/veri-kaybi birleştikten sonra ayrı bir dalda düzeltilecek".
+- "Test: dosya ve yapıştırma okuyucularına fuzz, üç BİLİNEN KUSUR" (TP4, TB9). Dört mutasyon kırmızı.
+
+**Faz 1'in açık kalanları.** Paket yolunun fuzz'u ve TB8'in testi (TB8'in kararı bekleniyor),
+TP5 (platform paket turu). B1 ve B3 `fix/veri-kaybi`'ye geçti.
+
+**Koşulan testler.** `npm run hizli` her commit'ten önce (1269, sonra 1283); `kapanis.spec.ts`
+beş tekrar; site süitinde `klasor.spec.ts` üç tekrar (27); `fuzz.test.ts` varsayılan ve
+`FUZZ_RUNS=3000` ile; altı mutasyon (`scripts/mutasyon-kaniti.sh`, ikisi tek tek, dördü
+listeyle); `tipler`, `lint`, prettier. Analizde: `npm run kapsam` (yeşil, 3 dk 7 s),
+`npm run exe:linux`, ölçüm betikleri kilit altında.
+
+**Koşulmayan testler.** `cargo test` (Rust'ta yalnız yorum değişti), Windows, mutasyon,
+`test:webkit`, `ekran`, `patrol`, `exe:e2e`. `kontrol` faz sonunda.
+
+**Tuzak.** `timeout N scripts/agir.sh <komut>` bu oturumda yaşandı (kilit bırakıldı, komut
+yetim kaldı; öteki oturuma haber verildi, onun ölçümü süre ölçmediği için kirlenmedi).
+Tuzağı `bakim/agir-kilit` 150 numarasıyla alıyor; burada ikinci bir girdi yazılmadı.
+
 ## 2026-10-09 (gece) · Bakım: `yayinla`'nın yeri, `useRowOrder`'ın `t`'si, App'in susturması, zebra analizi
 
 **Başlangıç.** `main` d3178dc'de, temiz. `~/GitHub/Mozaik-ozellik` worktree'si,

@@ -26,6 +26,71 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `npx vitest run src/fuzz.test.ts`, ilk koşular · "Dosyadan aç" ve Excel yapıştırması
+Bulgu: (1) `readPlanFile` bozulan dosyaların %2–5'inde `TypeError` atıyor (`reading 'trim'`,
+`'weeklyHours'`, `'id'`; en küçüğü `lessons[0] = null`), `App.tsx`'in `fileChosen`'ı yakalamıyor.
+(2) `weeklyHours` −5 ya da 10⁹ olan ders olduğu gibi açılıyor. (3) İlk koşuda yapıştırma
+özelliği 81 s sürüp zaman aşımına düştü: üreteç `Number`'ın kabul ettiği dev bir sayıyı saat
+sütununa koydu, `parseLessons` blok listesini ondan kurdu. 100 000 saat kabul, 10 milyonda
+beş milyonluk dizi. Üçü de her koşuda aynı tohumla tekrarlanıyor. Kesik dosyaların hiçbiri
+açılmadı; dört listeden biri eksik dosya hiç açılmadı (DK11 tutuyor).
+Tür: ürün kusuru (üçü), veri kaybı değil.
+Ne yapıldı: TODO §8l TB1, TB6, TB9; testte "BİLİNEN KUSUR" diye çivili, değişmezler
+etraflarından geçiyor. Düzeltme `main`'de.
+Kalıcı kural: yok.
+
+### 2026-10-09 · Vitest yoklaması (`scratch/test-plan/dk11-paket.test.ts`) · "Tümünü dosyadan aç"
+Bulgu: adsız dizili fikstürden kurulan tek planlı pakette `teachers`, `lessons` ya da ikisi
+silinince `parseBundle` paketi alıyor ve `replaceLibrary`'nin çağırdığı `parseState` planı
+0 öğretmen, 0 ders, 0 yerleşimle döndürüyor (dört denemenin dördü). Aynı plan tek dosya
+olarak "eksik" diye reddediliyor (DK11'in düzeltmesi yalnız `readPlanFile`'da). Onay sorusu
+yalnız plan sayısını söylüyor. Arayüzde uçtan uca koşulmadı.
+Tür: ürün kusuru, veri kaybı sınıfı (onaydan sonra).
+Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi, yeri ve testi karar bekliyor.
+Kalıcı kural: yok.
+
+### 2026-10-09 · `scratch/test-plan/b2-klasor.mjs` ve `klasor.spec.ts` · kapanan sekmenin klasör yazımı
+Bulgu: klasör seçiliyken bir derslik eklenip 2 s'lik yazım gecikmesi dolmadan sekme
+`beforeunload` ile kapanınca değişiklik localStorage'a iniyor (5/5) ama klasöre inmiyor (5/5).
+İlk ölçüm yanıltıcıydı: klasörü yeniden açılan programın sayfasından okumuştu ve program
+açılışta klasörü kendisi yazıyor; ikinci ölçüm programı açmayan aynı kökenli bir sayfadan okudu.
+Tür: ürün kusuru (yedek gecikmesi; depo veriyi tutuyor).
+Ne yapıldı: TODO §8l TB7, `klasor.spec.ts`'te "BİLİNEN KUSUR"; `fix/veri-kaybi` birleştikten
+sonra ayrı bir dalda düzeltilecek.
+Kalıcı kural: yok.
+
+### 2026-10-09 · test programının analizi (Playwright kütüphanesi ve Linux exe, sahte ev) · iki kopya ve kota
+Bulgu: (1) Aynı tarayıcıda iki sekme: işi yapan sekme kapandıktan sonra bayat sekme
+kapanınca `beforeunload` eski durumu yazıyor ve iş hiçbir anahtarda kalmıyor (`file://` ve
+http). Linux exe'de bayat pencere Belgeler'deki iki dosyanın üstüne eski durumu yazdı.
+(2) Kota dolunca otomatik kayıt sessizce düşüyor, uyarı yok; exe'de tek kurtarma kopyası
+(Belgeler) bir sonraki açılışta 2 s içinde eziliyor.
+Tür: ürün kusuru, veri kaybı sınıfı.
+Ne yapıldı: analiz durdu ve sordu; düzeltmeleri ve testleri `fix/veri-kaybi` dalında (TODO §8l, K9).
+Kalıcı kural: yok.
+
+### 2026-10-09 · `windows.yml` 37926483350'nin izi · `erisim.spec.ts:116`, kök sebep
+Bulgu: aynı test 37961182643'te ikinci kez kararsız (41,2 s, tekrarda 9,8 s). İz okundu:
+düşen denemenin 31,6 s'sinin ~25 s'i axe'in kendisinde (Program `runPartial` 3,8 s +
+`finishRun` 2,0 s, Çıktı 5,2 s + 3,4 s), test Çıktı'nın taramasında 30 s'lik tavana çarpıyor.
+Yeşil Windows koşularında 19,3 / 23,2 / 29,7 s, yani tavana yaslanıyor.
+Tür: test kusuru (bütçe; ürün değil).
+Ne yapıldı: TODO §8l TP22, çare üç taramayı üç teste bölmek.
+Kalıcı kural: yok.
+
+### 2026-10-09 · `npm run kapsam` (d3178dc) · `pure/library.ts`
+Bulgu: dosya satırda %50, fonksiyonda %25 çıktı (2026-10-08'de 98,85). Raporun
+"kapsanmadı" dediği on iki fonksiyonun hepsinin geçen testi var. Tek koşu.
+Tür: test kusuru (ölçüm aracı).
+Ne yapıldı: TODO §8l TB3; aday sebep `library.test.ts`'in `?raw` glob'u, aranmadı.
+Kalıcı kural: yok.
+
+### 2026-10-09 · Vitest browser mode denemesi (deponun scratch kopyası) · `LimitBox`
+Bulgu: `max=16` taşıyan kutuya klavyeyle 40 yazılınca `onSet(40)`. Tek koşu.
+Tür: ürün kusuru, veri kaybı değil.
+Ne yapıldı: TODO §8l TB2.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `haftalik.yml` 37914431289 (`main`, 290f55d) · tam mutasyon koşusu 6 saatte iptal
 Bulgu: `mutasyon` işi 09:56'dan 15:57'ye koştu ve GitHub'ın 360 dakikalık iş tavanında
 iptal oldu. Son satırı: 5 639 mutantın 3 645'i denendi (697 hayatta, 26 zaman aşımı),
