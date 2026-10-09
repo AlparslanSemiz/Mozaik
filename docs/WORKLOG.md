@@ -98,6 +98,72 @@ ve 2026-10-09.
 
 ---
 
+## 2026-10-09 (akşam) · Hız oturumu, `hiz/belge-test` dalı: belge ağırlığı ölçüldü, TRAPS'a grup listesi, TODO'nun arşivi ayrı dosyada
+
+**Başlangıç.** Dal `main`'in 5aa10d5'inden açıldı, öteki iki oturum durdurulmuştu. Bu
+dalda uygulamanın davranışı değişmiyor, yalnız belgeler ve belge kapısı değişti. "Şu an"
+bloğuna dokunulmadı.
+
+**Ne yapıldı, commit commit** (dalın commit'leri, konularıyla).
+- "Belgeler: TRAPS'ın başında grup listesi, CLAUDE.md yalnız ilgili grubu okutuyor".
+  Dosyanın başında grup başına tek satır: hangi işte hangi grubun okunacağı, çapalı
+  bağlantıyla. Numaralar tekrarlanmadı, alttaki dizin onları tutuyor. A10'a bir iddia
+  eklendi: liste her grubu dosyadaki sırayla ve kendi çapasıyla gösteriyor. Üç mutasyonla
+  kırmızı (`scripts/mutasyon-kaniti.sh`): bir satırı silmek, bir çapayı bozmak, iki satırın
+  yerini değiştirmek.
+- "Belgeler: TODO'nun §10 arşivi docs/TODO-ARCHIVE.md'ye taşındı". Silme yok: üst kısım ve
+  arşiv gövdesi eskisiyle karakter karakter karşılaştırıldı, ikisi de aynı. §10 tek satıra
+  indi. Yeni dosya `DATED_RECORD`'da; o satır silinince A1, A3 ve A6 kırmızı (mutasyonla
+  görüldü). Adı CONVENTIONS'ın "dosya adları İngilizce" kuralından.
+
+**Ölçümler.** Token tokenizer'la ölçülmedi: bayt ÷ 3,6 ile tahmin, önceki 96 bin
+tahminiyle aynı oran (betik `scratch/hiz-2026-10-09/okuma.sh`).
+
+| Oturum başında okunan | Önce | Sonra |
+|---|---|---|
+| CLAUDE.md | 6 919 bayt | 7 196 bayt |
+| docs/TODO.md | 321 015 bayt | 171 332 bayt |
+| docs/PRINCIPLES.md | 10 612 bayt | 10 612 bayt |
+| WORKLOG'un "Şu an" bloğu | 6 777 bayt | 6 777 bayt |
+| TRAPS'ın başı ve grup listesi | okunmuyordu | 2 403 bayt |
+| Toplam | 345 323 bayt, ~96 bin token | 198 320 bayt, ~55 bin token |
+
+- WORKLOG arşivi (A4): bir aydan eski girdiler (2026-09-09'dan önce, "Kırk sekizinci
+  oturum"dan aşağısı) 326 606 bayt, dosyanın 518 112 baytının %63'ü. Oturum başında
+  okunmuyor, ve Read'in varsayılan 2000 satırı (131 462 bayt) tamamen daha yeni girdilerde
+  kalıyor. Kazanç yalnız aramada: `Sığdır` 47 eşleşmenin 29'u, `blocker` 24'ün 14'ü eski
+  kısımda, `relax` 27'nin hiçbiri. Taşınmadı, öneri taşımamak.
+- Kalan TODO'nun içi: kapanmış `[x]` maddeler 64 066 bayt (%37), §9 ham notlar 14 843 bayt,
+  §8 tek başına 68 987 bayt.
+- CI (`ci.yml`, son 10 koşu): duvar 6,6–14,7 dk, medyan 7,4 dk; işlerin toplamı 28,8–33,7
+  runner dakikası. Kritik yol `e2e-arama` (medyan 416 s), onu `e2e (2)` 382 s ve `denetim`
+  312 s izliyor. Ana E2E'nin CI raporunda (koşu 37924071123) 631 testin toplamı 3 588 s,
+  tek bir test 336,8 s: `otomatik.spec.ts`, "kurulamayan haftada yolları söylüyor".
+  Windows (`windows.yml`, iki koşu) 21,5 ve 25,9 dk, tek iş.
+
+**Ölçülmeyenler.** B1 (dosya başına birim test süreleri), `hizli`'nin süresi, vitest
+havuzu, yerel komutların süreleri ve E2E'nin test başı kurulum maliyeti: kirli, ölçülmedi.
+Makine bütün oturum prizde değildi (`scripts/temiz-kosul.sh`, AC=0, pil %27'ye indi),
+profil `performance`'tı.
+
+**Plandan sapmalar.** (1) `hiz/belge-test` uzakta ikinci commit'te duruyordu, oysa oturum
+`git push` koşmadı; reflog "update by push" diyor, hook yok. Kimin ittiği bilinmiyor,
+Alp'e soruldu. Dal o commit'te CI'ı tetikledi. (2) `main` 5aa10d5'te kırmızı: `denetim`'de
+`invariants.test.ts`'in öneri değişmezi 60 s tavanında düştü ve vitest işçisinin RPC'si
+zaman aşımına uğradı, yani B7.26'nın ikinci görülüşü. Kapsam dışı, dokunulmadı.
+
+**Tuzak adayı.** A7 aynı dosyadaki bir `#çapa` bağlantısını hiç denetlemiyor
+(`href.startsWith('#')` atlanıyor). Bir mutasyonla görüldü: TRAPS'ın grup listesinde
+bozulan çapa A7'den yeşil geçti. Bir kapının neyi atladığı, kapıya güvenilen yeni bir
+kullanımda ilk sorulacak şey (tuzak 120'nin yanında).
+
+**Koşulan testler.** Belge kapısı her commit'ten önce (19/19, A10'un yeni iddiasıyla).
+Dört mutasyon kanıtı. **Koşulmayan testler.** `npm test`'in tamamı, `kontrol`, E2E: bu
+turda yalnız belge ve belge kapısı değişti, ve oturum sonu adımları onaydan sonraya
+kaldı.
+
+---
+
 ## 2026-10-09 (öğleden sonra) · B7.22–B7.24, Windows E2E push'ta, Dependabot, A7 ve Eyotek hazırlığı
 
 **Başlangıç.** `main` 5b93cde'deydi, yeşil. Kullanıcının onayı: 4a6dcb6, c45eb13, 79aaf6d.
