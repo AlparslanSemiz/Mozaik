@@ -72,7 +72,9 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
 - Ağır komutlar sırayla koşar: `scripts/agir.sh <komut>`, yani
   `flock -w 1800 ~/.mozaik-agir.lock`. Kapsam: stryker, mutasyon, kontrol, kapsam, her
   Playwright koşusu, exe derlemeleri, podman ve süre ölçümleri. Kilit beklenen sürede
-  alınamazsa söylenir. Not `~/.mozaik-agir.not`'ta, bırakılınca "serbest" yazar.
+  alınamazsa söylenir. Not `~/.mozaik-agir.not`'ta, bırakılınca "serbest" yazar. Süre
+  sınırı `scripts/agir.sh --sure <saniye> <komut>` ile verilir, dışarıdan `timeout`
+  sarılmaz (tuzak 150).
 - Uzun komutlar (`kontrol`, E2E, mutasyon, CI'ı izlemek) arka planda koşulur ve bitiş bildirimi beklenir, `sleep` ve `tail` ile yoklanmaz.
 - Süre ölçümü temiz koşul ister: makine prizde, güç profili `performance`, 1 dakikalık yük
   2'nin altında, `scripts/temiz-kosul.sh` bakar. Koşul yoksa "kirli, ölçülmedi" yazılır.

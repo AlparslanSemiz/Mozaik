@@ -1372,6 +1372,16 @@ Bizim veride program hiç yok, CP-SAT 0,1 saniyede kanıtlıyor. Çözücüyü
 suçlamadan önce iki girdinin aynı olduğu ölçülür, yoksa bir veri farkı aylarca
 bir algoritma işi gibi kovalanır.
 
+### 150 · Kilidi tutan betiği öldürmek, kilidin koruduğu komutu öldürmez
+`timeout 600 scripts/agir.sh <komut>` süre dolunca yalnız `agir.sh`'i öldürdü: kilit
+boşaldı, komut yetim olarak koşmaya devam etti ve başka bir oturumun ölçümü onunla
+yan yana koştu (2026-10-09, test oturumunun Linux exe süreçleri ile zebra ölçümü).
+Komutun süreç grubunu öldürmek de yetmezdi, çünkü Playwright her tarayıcıyı `detached`,
+yani kendi grubunun lideri olarak başlatıyor. Çare: süre `agir.sh --sure N` ile verilir,
+dışarıdan `timeout` sarılmaz. Betik komutun bütün ağacını ortamındaki bir işaretle
+buluyor, süre dolunca, bir sinyal gelince ve komut geride bir şey bırakıp çıkınca önce
+ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` ölçüyor.
+
 ---
 
 ## Dizin
@@ -1388,12 +1398,12 @@ bir algoritma işi gibi kovalanır.
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149 |
-| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
+| Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 149, yeni bir tuzak 150'den devam eder. Test stratejisi
+büyük kullanılan numara 150, yeni bir tuzak 151'den devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.
