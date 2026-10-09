@@ -17,7 +17,7 @@ import {
   readScale,
   readTheme,
   readUiDensity,
-} from '../platform/theme';
+} from '../platform/prefs/theme';
 import { inWorker, serveRelax } from '../platform/relaxWorker';
 import '../styles.css';
 

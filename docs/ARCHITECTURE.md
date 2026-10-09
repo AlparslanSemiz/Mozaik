@@ -14,8 +14,8 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
                    relax · sat · programs · programMask · listview · library · bundle
                    sample · parseState · undo
    |
-src/platform/      planStore · libraryStore · storageReport · theme · toolState · printOptions
-                   programColor · changelog · folder · desktop · update · download
+src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
+                   desktop · update · download
                    drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
                    useStore · usePlans · useSolver · useFolder · relaxPool · relaxWorker
                    relaxLog
@@ -112,10 +112,10 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
 | `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
-| `platform/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
-| `platform/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
-| `platform/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
-| `platform/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
+| `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
+| `platform/prefs/toolState.ts` | her sekmede nerede olunduğu: görünüm, bölüm, Dersler'in modu ve odağı, havuzun sırası ve süzgeci (`poolSort`, `poolFilter`) |
+| `platform/prefs/printOptions.ts` | kâğıtta ne olsun: tek kayıt, tek anahtar |
+| `platform/prefs/programColor.ts` | Program kartlarını hangi varlığın rengi boyuyor |
 | `platform/changelog.ts` | Yenilikler panelinin sürüm notları ve görülen sürüm |
 | `platform/folder.ts` | kullanıcının seçtiği klasör: dosya adları, günlük yedek, budama |
 | `platform/desktop.ts` | exe köprüsü: Tauri komutlarını bir `FileSystemDirectoryHandle` kılığına sokar, güncelleme komutları |

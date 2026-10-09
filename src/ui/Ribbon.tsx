@@ -87,8 +87,8 @@ import {
 import { health } from '../pure/feasibility';
 import type { State } from '../leaf/types';
 import type { SolverRun } from '../platform/useSolver';
-import type { Density, Theme } from '../platform/theme';
-import { applyDensity, applyTheme } from '../platform/theme';
+import type { Density, Theme } from '../platform/prefs/theme';
+import { applyDensity, applyTheme } from '../platform/prefs/theme';
 import { surumEtiketi } from '../leaf/version';
 import { paletteColor } from '../leaf/palette';
 import {
@@ -115,10 +115,10 @@ import type {
   ToolState,
   View,
   CheckView,
-} from '../platform/toolState';
+} from '../platform/prefs/toolState';
 import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
 import { useLang, useT } from './T';
-import type { ProgramColorMode } from '../platform/programColor';
+import type { ProgramColorMode } from '../platform/prefs/programColor';
 
 interface Props {
   ui: ToolState;

@@ -1172,7 +1172,7 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
 | RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities.ts`, `src/pure/listview.ts` |
-| RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/theme.ts` |
+| RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/prefs/theme.ts` |
 
 **Hedef ağaç.** 2026-10-09 sabahki plan oturumunun önerisi, Alp onayladı; oturumun
 transkriptinden buraya alındı (2026-10-09 gece). İlke: önce katman, sonra alan. İki ya da daha
@@ -1244,7 +1244,10 @@ Yeni bir paket klasörü kurala kendiliğinden girer, kuralın değişmesi gerek
 yolları; derlenen dosyanın sha'sı, commit kimliği dışında, aynı HEAD'de commit'ten önce ve
 sonra derlenerek aynı çıkmalı (tuzak 114); (2) `index.ts` ve import'ların ona dönmesi; sha
 değişir, boyut ve worker testleri (`temel.spec.ts`, `otomatik.spec.ts`) bakılır. Biçim
-düzeltmesi ayrı commit.
+düzeltmesi ayrı commit. Derin import kuralı yeni klasörü doğduğu anda kapsıyor, yani (1)
+`sinir`'de dışarıdan gelen her runtime import için kırmızıdır; bu beklenen ve commit
+mesajında sayısıyla yazılır, dal (2)'den önce itilmez. `index` bu iki adımı birleştirmeye
+izin vermiyor: derlenen dosyayı değiştiriyor (`platform/prefs`'te +6 bayt, 2026-10-09).
 
 **Refactor planı.** Adımlar sırayla, her biri bir öncekinin testleri yeşilken.
 
