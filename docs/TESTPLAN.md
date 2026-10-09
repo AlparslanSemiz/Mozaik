@@ -403,6 +403,33 @@ kapan üstünden bütün süitte de yakalanıyor, farkı iddiasız gezinmesi (tu
 almadan önce sayfanın hareketi biter (tuzak 59), ve tek iddiası çekildiğinde
 perdenin inmiş olması.
 
+## Planlanan katmanlar
+
+Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Henüz yok: bir
+katman yazıldığı commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne
+girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
+haftalık arka planda koşar (CLAUDE.md).
+
+| Katman | TP | Ne yakalayacak | Ne zaman koşacak |
+|---|---|---|---|
+| Kapanışta bekleyen kayıt | TP3 | `SAVE_DELAY` içinde kapanan sekmenin son değişikliği | ana E2E |
+| Fuzz | TP4 | dosya okuyucularının bozuk girdide istisna atması ya da yarım plan kabul etmesi | `npm test`'te kısa, gece uzun |
+| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
+| Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
+| Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |
+| Rust, Linux | TP11 | `cargo test` her push'ta | CI |
+| Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |
+| Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |
+| Zayıf makine vekili | TP14 | öneri aramasının bellek tepesi, az çekirdekte süre; babanın makinesinin cevabı değil | yerel, temiz koşul |
+| Performans | TP15 | iş sayaçlı eşikler (ana E2E); süre eşikleri yalnız temiz koşulda | sayaçlar E2E'de, süreler elle |
+| Güvenlik | TP16, TP17 | `dist`'e giren bağımlılıkta açık; içe aktarılan adlarda betik ve HTML | CI, E2E |
+| Metin bütçesi | TP18 | ekran başına kelime ve diyalog başına soru, tabana karşı | ana E2E |
+| Kabul | TP19 | babanın işlerinde tık ve soru sayısı, tabana karşı | ana E2E |
+| Bileşen | TP20 | girdi bileşenlerinin sınır durumları, gerçek tarayıcıda | `npm test`'in yanında |
+| Kapsam tabanı | TP24 | dosya başına satır yüzdesinin düşmesi | gece |
+| Gerileme kapısı | TP26 | testi olmayan ürün kusuru kaydı | belge kapısı |
+| Görsel regresyon | TP27 | yedi sekmenin iki temadaki düzeni, kapta, sıfır eşik | yavaş, haftalık |
+
 ## E2E ortamı
 
 - **Pencere.** Varsayılan viewport 1920×1080. Exe büyütülmüş pencerede ve Windows ölçeğinde daha dar bir kutuda koşabilir, o yüzden Sığdır'ın düzeni ayrıca 1600×968'de ölçülüyor (tuzak 107).
