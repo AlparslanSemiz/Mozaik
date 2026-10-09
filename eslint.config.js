@@ -48,6 +48,11 @@ import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 
+/** Browser storage, which only its owners may touch (the overrides below). */
+const STORAGE = ['localStorage', 'sessionStorage', 'indexedDB'];
+const STORAGE_MESSAGE =
+  'Storage is read and written by its owners only: leaf/preference.ts, the stores in platform/.';
+
 export default defineConfig([
   {
     ignores: [
@@ -108,6 +113,75 @@ export default defineConfig([
           selector: 'UpdateExpression > TSNonNullExpression.argument',
           message: 'Stryker cannot instrument `x!++` / `x!--`; write `x = x! + 1` (pitfall 147).',
         },
+      ],
+
+      // Rules ARCHITECTURE states in prose, written down the day each one was
+      // green (2026-10-09), and each shown red with one offending line in a copy.
+      //
+      // Ids come from `newId()` alone (the override below). Everywhere else
+      // randomness has to be repeatable: the solver and the sample school draw
+      // from a seeded generator, so a run can be replayed.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Math',
+          property: 'random',
+          message:
+            'Only newId() in pure/entities.ts draws from Math.random; use a seeded generator.',
+        },
+      ],
+      // Storage has owners (ARCHITECTURE, "Durum, tercih ve depolama"): the
+      // preference factory, the two stores, the storage report and the folder's
+      // handle. A component or a rule that reads storage itself is a second
+      // place the data lives. Tests are exempt below.
+      'no-restricted-globals': [
+        'error',
+        ...STORAGE.map((name) => ({ name, message: STORAGE_MESSAGE })),
+      ],
+    },
+  },
+  {
+    files: ['src/pure/entities.ts'],
+    rules: { 'no-restricted-properties': 'off' },
+  },
+  {
+    files: [
+      'src/leaf/preference.ts',
+      'src/platform/folder.ts',
+      'src/platform/libraryStore.ts',
+      'src/platform/planStore.ts',
+      'src/platform/storageReport.ts',
+      'src/**/*.test.{ts,tsx}',
+    ],
+    rules: { 'no-restricted-globals': 'off' },
+  },
+  {
+    // The pure layer knows no React, no DOM and no storage (ARCHITECTURE,
+    // "Saf mantık"). dependency-cruiser cannot say it: its parser invents a
+    // React import out of a generic arrow function (.dependency-cruiser.cjs).
+    // A global is only a global here: `relax.ts`'s local `window` is not one.
+    files: ['src/pure/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              // gitignore-style: 'react' also covers 'react/jsx-runtime', and
+              // 'react-dom' covers 'react-dom/client'; both measured.
+              group: ['react', 'react-dom', '@radix-ui/*', 'lucide-react'],
+              message: 'The pure layer does not import React or a component library.',
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        ...STORAGE.map((name) => ({ name, message: STORAGE_MESSAGE })),
+        ...['document', 'window', 'navigator', 'location', 'history'].map((name) => ({
+          name,
+          message: 'The pure layer does not touch the DOM; the caller passes what it needs.',
+        })),
       ],
     },
   },

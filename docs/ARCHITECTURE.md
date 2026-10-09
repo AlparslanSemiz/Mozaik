@@ -234,6 +234,14 @@ yaprak import eder, saf mantık yaprakların dışına çıkmaz, tesisat bir bil
 çağırmaz, `worlds.ts` üründen import edilmez. Grafik `npm run grafik` ile
 mermaid olarak yazdırılabilir.
 
+Import grafiğinin göremediği üç kural `eslint.config.js`'te ve `npm run lint` ile koşuyor:
+saf mantık React'i ve bir bileşen kitaplığını import etmez, `document`, `window`,
+`navigator` ve depoya dokunmaz; tarayıcı deposuna yalnız sahipleri (`preference.ts`,
+`libraryStore.ts`, `planStore.ts`, `storageReport.ts`, `folder.ts`) dokunur; ve
+`Math.random` yalnız `entities.ts`'in `newId()`'sinde çağrılır. "Yalnız tip alınır"
+deseni ayrı bir kural istemiyor: o iki `import type` düz importa dönerse döngü
+yasağı kırmızıya dönüyor.
+
 Bu bölümdeki cümlelerin geri kalanı hâlâ düzyazı, ve düzyazı olanların hangisi
 olduğu bilerek yazılı: sürükleme sırasında React durumuna yazılmaması, uzun
 ömürlü durumun `App`'te yaşaması ve çözücünün kısıt mantığını yeniden yazmaması
