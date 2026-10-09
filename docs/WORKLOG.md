@@ -111,6 +111,36 @@ getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
 
 ---
 
+## 2026-10-09 (gece) · agir.sh'in kilit açığı, `bakim/agir-kilit` dalı
+
+**Öteki iki oturum için (refactor ve test):** "Betikler: agir.sh komutun bütün ağacını
+kapatmadan kilidi bırakmıyor (tuzak 150)": agir.sh'in zaman aşımı artık komutun bütün
+ağacını öldürüyor; dışarıdan `timeout` kullanmayın, agir.sh'in kendi süre bayrağını
+kullanın: `scripts/agir.sh --sure <saniye> <komut>`. Birleşince commit'in `main` hash'i
+buraya yazılır.
+
+**Ne yapıldı.** Ağaç, komutun ortamına konan tek seferlik bir işaretle `/proc`'tan
+bulunuyor; süreç grubu yetmiyor, çünkü Playwright tarayıcıyı `detached` başlatıyor
+(`playwright-core`, "makes child process a leader of a new process group"). Süre dolunca,
+TERM/INT/HUP gelince (dışarıdaki `timeout` bir TERM) ve komut geride bir şey bırakıp
+çıkınca önce TERM, `MOZAIK_AGIR_PAY` saniye (10) sonra KILL; not ve kilit ondan sonra.
+Komut agir.sh'in standart girdisini alıyor. Davranış değişikliği: komutun geride
+bıraktığı bir sunucu artık kilitle birlikte kapanıyor, eskiden yaşamaya devam ediyordu.
+
+**Kanıt.** `src/agir.test.ts`, kendi kilit dosyasıyla: setsid'li bir torun, TERM'i yok
+sayan bir süreç ve yavaş ölen bir ebeveyn. Yarım saniye sonra kilidi isteyen ikinci bir
+"oturum" kilidi aldığı anda 0 süreç görüyor, `--sure` ve dış `timeout` ikisinde de 124,
+geride bırakılan sunucu kapanıyor, girdi okunuyor. Yedi mutasyon kırmızı, hepsi bir
+iddiayla (kalan 1 ya da 2, beklenen 0; 124 yerine 0; boş girdi): işaret taraması yok,
+KILL yok, TERM tuzağı yok, kilit ağaçtan önce, `--sure` yok, `<&0` yok, normal çıkışta
+temizlik yok. İlk sürümde testin sonucu `close`'tan alınıyordu ve dört mutasyon zaman
+aşımıyla kırmızıydı: yetim, testin borularını açık tutuyordu. Sonuç artık `exit`'ten.
+
+**Koşulan testler.** `npm run hizli` (1273), `docs.test.ts` (19), `agir.test.ts` (4),
+yedi mutasyon. **Koşulmayan.** `kontrol`, Playwright.
+
+---
+
 ## 2026-10-09 (gece) · Bakım: `yayinla`'nın yeri, `useRowOrder`'ın `t`'si, App'in susturması, zebra analizi
 
 **Başlangıç.** `main` d3178dc'de, temiz. `~/GitHub/Mozaik-ozellik` worktree'si,
