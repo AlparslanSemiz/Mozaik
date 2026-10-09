@@ -22,9 +22,13 @@ import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from
 import { paletteColor } from '../leaf/palette';
 import type { State } from '../leaf/types';
 import { activePlacements } from '../pure/programs';
-import type { Scope } from '../platform/toolState';
-import { PER_SHEET_LABELS, PRINT_OPTION_LABELS, PRINT_SIZE_LABELS } from '../platform/printOptions';
-import type { PrintOptions } from '../platform/printOptions';
+import {
+  PER_SHEET_LABELS,
+  PRINT_OPTION_LABELS,
+  PRINT_SIZE_LABELS,
+  type Scope,
+  type PrintOptions,
+} from '../platform/prefs';
 import { T, useT } from './T';
 
 interface Props {

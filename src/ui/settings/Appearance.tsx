@@ -32,8 +32,10 @@ import {
   SCALE_MAX,
   SCALE_MIN,
   SCALE_STEP,
-} from '../../platform/theme';
-import type { Density, Motion, Theme } from '../../platform/theme';
+  type Density,
+  type Motion,
+  type Theme,
+} from '../../platform/prefs';
 import { DILLER, DIL_ADI } from '../../leaf/i18n';
 import { T, useLang } from '../T';
 import type { State } from '../../leaf/types';
