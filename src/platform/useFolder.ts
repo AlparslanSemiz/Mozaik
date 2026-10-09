@@ -21,9 +21,11 @@ import {
   permissionOf,
   pickFolder,
   readHandle,
+  rescueName,
   saveInto,
   writeHandle,
 } from './folder';
+import { writesClosed } from './otherWindow';
 import type { Library } from '../pure/library';
 import { collectStates } from './download';
 import { searchLog } from './relaxLog';
@@ -60,7 +62,12 @@ export interface FolderRun {
   forget: () => Promise<void>;
 }
 
-export function useFolder(library: Library, planId: Id, present: State): FolderRun {
+/**
+ * `rescue`: this browser's own storage refused the last save (useStore's
+ * `saveTrouble === 'dolu'`). While it does, every flush also writes the
+ * session's rescue copy (folder.ts, `rescueName`).
+ */
+export function useFolder(library: Library, planId: Id, present: State, rescue = false): FolderRun {
   // The exe has the folder before the first paint, so it never passes
   // through 'yok' — and it never passes through the picker either.
   const [status, setStatus] = useState<FolderStatus>(() =>
@@ -75,11 +82,16 @@ export function useFolder(library: Library, planId: Id, present: State): FolderR
 
   // What to write, kept in a ref so `flush` is stable and does not cancel its
   // own timer on every keystroke.
-  const latest = useRef({ library, planId, present });
-  latest.current = { library, planId, present };
+  const latest = useRef({ library, planId, present, rescue });
+  latest.current = { library, planId, present, rescue };
+  // One rescue file per session, named when it is first needed.
+  const rescueFile = useRef<string | null>(null);
 
   const write = useCallback(async (handle: FileSystemDirectoryHandle) => {
-    const { library: lib, planId: id, present: now } = latest.current;
+    // Another window changed the data: its copy is the newer one, and this
+    // window's would overwrite the folder with what it read before (VK1).
+    if (writesClosed()) return;
+    const { library: lib, planId: id, present: now, rescue: kurtar } = latest.current;
     const text = buildBundle(lib, collectStates(lib, id, now), searchLog());
     const when = new Date();
     // Listing the directory is real I/O; only do it when the day turned over,
@@ -89,7 +101,8 @@ export function useFolder(library: Library, planId: Id, present: State): FolderR
     lastDay.current = today;
 
     try {
-      const result = await saveInto(handle, text, when, prune);
+      if (kurtar && rescueFile.current === null) rescueFile.current = rescueName(when);
+      const result = await saveInto(handle, text, when, prune, kurtar ? rescueFile.current : null);
       setStatus({ kind: 'yazildi', name: handle.name, at: when, files: result.written });
     } catch (err) {
       // The folder was deleted, the disk is full, or the permission was
@@ -158,7 +171,7 @@ export function useFolder(library: Library, planId: Id, present: State): FolderR
     // `status` is deliberately not a dependency: it CHANGES on every write and
     // would re-arm the timer forever.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [present, planId, library, write]);
+  }, [present, planId, library, rescue, write]);
 
   // Pitfall 28, in this file's shape: a pending write that is cancelled by the
   // page going away is the last edit of the session, gone.
