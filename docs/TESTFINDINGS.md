@@ -26,6 +26,23 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-09 · `ci.yml` 37917310002 (Dependabot #5'in dalı, `384cc5c`) · `invariants.test.ts`, "her öneri denetimden geçiyor"
+Bulgu: `denetim` işinde bu değişmez 60 s'lik tavanını aştı, dosya 74 s sürdü ve vitest'in
+kendi RPC'si de zaman aşımına düştü ("Timeout calling onTaskUpdate"). Düşen iş yeniden
+koşunca yeşil; aynı kod `main`'de beş koşuda yeşildi ve dosya orada 10–22 s sürdü. Testin
+tavanı 60 dünyanın toplamı için (`numRuns: 60`, her birinin arama bütçesi ayrıca 60 s),
+yani pay normalde üç ila altı kat; aç kalan bir runner'da yetmedi. Aynı gün `main`'de de
+oldu (`7284a88`, ci 37920218155): 1373 testin hepsi geçti, dosya 71 s sürdü, ama işçinin
+RPC zaman aşımı koşuyu kırmızı yaptı; düşen iş yeniden koşunca yeşil. Okunan: işçinin
+RPC'si birpc'nin 60 s'lik varsayılan zaman aşımıyla kuruluyor (`node_modules/vitest`,
+`DEFAULT_TIMEOUT = 6e4`), ve 60 dünya tek bir senkron blokta koşuyor. Tahmin: blok 60 s'yi
+aşınca işçinin olay döngüsü bekleyen RPC'nin cevabını zamanında işleyemiyor; iki koşuda da
+dosya 70 s'nin üstündeydi ve hata ikisinde de aynıydı.
+Tür: test kusuru (kararsız), değişikliğin (download-artifact v7) ilgisi yok.
+Ne yapıldı: işi bir kez yeniden koşturmak; tavana dokunulmadı, kullanıcıya getirildi
+(TODO B7.26).
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `playwright.site.config.ts` · site süiti başka bir klasörün sunucusunu test edebiliyordu
 Bulgu: Port her klasörde 4173'tü ve `reuseExistingServer: true` idi. Portta başka bir
 worktree'nin `vite preview`'ı açıksa Playwright kendi komutunu hiç koşmadan ona bağlanıyor
