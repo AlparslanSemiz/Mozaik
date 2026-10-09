@@ -48,8 +48,7 @@ import {
 import { KIND_ICON } from '../steps';
 import LimitBox from '../LimitBox';
 import BlockCounts, { blockCeiling } from '../BlockCounts';
-import Paste from '../lists/Paste';
-import Summary from '../lists/Summary';
+import { Paste, Summary } from '../lists';
 import Field from '../Field';
 import { T, useT } from '../T';
 import AddPanel from '../AddPanel';

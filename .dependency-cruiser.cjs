@@ -5,7 +5,7 @@
 // only when somebody noticed it. Pitfall 77 in one line — a rule written as
 // prose is a wish until a test measures it.
 //
-// Two things are measured here today, and both are about the runtime graph
+// Three things are measured here today, all of them on the runtime graph
 // rather than the type graph. `tsPreCompilationDeps` is left off on purpose:
 // `import type` disappears at build time, and one of this repository's three
 // anti-cycle patterns IS `import type` (ARCHITECTURE.md, "Import döngüleri
@@ -30,6 +30,15 @@
 // `src/ui`, and dependency flows one way only: down. They were written AFTER
 // the move, with the folders in place, and they were green the day they were
 // written — a gate that starts red stops being a gate.
+//
+// The package rules came the same way. A folder under a layer (`leaf/lang`,
+// `ui/lists`, `ui/setup`) is a package, and from outside it you go in through
+// its `index` only. The draft was run before the move and reported seven
+// imports (Root's four dictionaries, names.ts's abbreviations, lessons
+// reaching into setup's Paste and Summary); the rules went in after T1 and T2
+// had taken all seven away. They are two because `paket-ici-alan` names the
+// importer's own package with a capture group, and a file at a layer's root
+// (or at src's root) has no package to capture.
 //
 // `no-orphans` was written, run and taken out again. It reported exactly one
 // module, `components/props.ts`, and that module is not an orphan: it holds
@@ -77,6 +86,27 @@ module.exports = {
       severity: 'error',
       from: { path: '^src/platform/', pathNot: '\\.test\\.' },
       to: { path: '^src/ui/' },
+    },
+    {
+      name: 'paket-ici-alan',
+      comment:
+        'Bir paketin, yani bir katmanın altındaki klasörün (`leaf/lang`, `ui/lists`, ' +
+        '`ui/setup`), içine başka bir paketten yalnız `index` üstünden girilir. Paketin kendi ' +
+        'dosyaları birbirini serbestçe çağırır. Paketin dışa açtığı şey böylece tek bir ' +
+        'dosyada okunur, içi o dosyaya dokunmadan değişebilir.',
+      severity: 'error',
+      from: { path: '^src/([^/]+/[^/]+)/', pathNot: '\\.test\\.' },
+      to: { path: '^src/[^/]+/[^/]+/', pathNot: ['^src/$1/', '/index\\.tsx?$'] },
+    },
+    {
+      name: 'paket-ici-kok',
+      comment:
+        'Bir katmanın kökündeki (`ui/Root.tsx`, `leaf/names.ts`) ya da `src/`\'nin kökündeki ' +
+        'bir dosya da bir paketin içine yalnız `index` üstünden girer. `paket-ici-alan`\'dan ' +
+        'ayrı, çünkü onun `from`\'u çağıranın paketini yakalıyor ve kökteki dosyanın paketi yok.',
+      severity: 'error',
+      from: { path: ['^src/[^/]+\\.tsx?$', '^src/[^/]+/[^/]+\\.tsx?$'], pathNot: '\\.test\\.' },
+      to: { path: '^src/[^/]+/[^/]+/', pathNot: '/index\\.tsx?$' },
     },
     {
       name: 'dunya-ureteci-urunde-yok',
