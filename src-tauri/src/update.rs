@@ -286,6 +286,35 @@ pub fn sweep_old(exe: &Path) {
     let _ = fs::remove_file(yan(exe, ESKI));
 }
 
+// --------------------------------------------------------- the hand-over
+
+/// The flag `apply_update` starts the new version with.
+pub const GUNCELLENDI: &str = "--guncellendi";
+
+/// How long the new version waits for the old one to go. The old one calls
+/// `app.exit(0)` right after starting it, so this is a ceiling, not a delay.
+pub const DEVIR_SURESI: Duration = Duration::from_secs(20);
+
+/// Waits until `boru` reaches its end or `sure` runs out, whichever is first.
+///
+/// WHY. Mozaik runs one copy at a time (tauri-plugin-single-instance, VK1), and
+/// `apply_update` starts the new version BEFORE the old one has exited. Left to
+/// itself the new process would find the old one still running, hand it the
+/// focus and quit, and then the old one would quit too: an update that ends
+/// with the program closed. So the old process starts the new one with a pipe
+/// on its standard input and never writes to it. The pipe ends when the old
+/// process does, whatever way it ends, and only then does the new one claim
+/// the single instance. Standard library only: no process ids, no OS calls.
+pub fn eskisi_gitsin<R: std::io::Read + Send + 'static>(mut boru: R, sure: Duration) -> bool {
+    let (tamam, bekle) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let mut cop = Vec::new();
+        let _ = boru.read_to_end(&mut cop);
+        let _ = tamam.send(());
+    });
+    bekle.recv_timeout(sure).is_ok()
+}
+
 // ------------------------------------------------------------------ the wire
 
 fn istemci(saniye: u64) -> Result<reqwest::Client, String> {
@@ -363,9 +392,14 @@ pub fn apply_update(app: tauri::AppHandle) -> Result<(), String> {
     self_update_here()?;
     let exe = std::env::current_exe().map_err(|e| format!("Program yolu bulunamadı: {e}"))?;
     swap(&exe)?;
-    std::process::Command::new(&exe)
+    // The pipe is the hand-over (`eskisi_gitsin` says why). Its writing end
+    // stays open in this process until the process ends.
+    let yeni = std::process::Command::new(&exe)
+        .arg(GUNCELLENDI)
+        .stdin(std::process::Stdio::piped())
         .spawn()
         .map_err(|e| format!("Yeni sürüm başlatılamadı: {e}"))?;
+    std::mem::forget(yeni);
     app.exit(0);
     Ok(())
 }
@@ -394,6 +428,30 @@ mod tests {
         fn drop(&mut self) {
             let _ = fs::remove_dir_all(&self.0);
         }
+    }
+
+    // ----------------------------------------------------------- hand-over
+
+    #[test]
+    fn devir_eskisi_gidince_bitiyor() {
+        // A pipe whose writer goes away after 200 ms: the old version exiting.
+        let (oku, yaz) = std::io::pipe().unwrap();
+        let baslangic = std::time::Instant::now();
+        std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(200));
+            drop(yaz);
+        });
+        assert!(eskisi_gitsin(oku, Duration::from_secs(5)));
+        let gecen = baslangic.elapsed();
+        assert!(gecen >= Duration::from_millis(150), "beklemedi: {gecen:?}");
+        assert!(gecen < Duration::from_secs(3), "fazla bekledi: {gecen:?}");
+    }
+
+    #[test]
+    fn devir_eskisi_gitmezse_sure_dolunca_bitiyor() {
+        let (oku, yaz) = std::io::pipe().unwrap();
+        assert!(!eskisi_gitsin(oku, Duration::from_millis(300)));
+        drop(yaz);
     }
 
     // ------------------------------------------------------------- comparing
