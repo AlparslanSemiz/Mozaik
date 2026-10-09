@@ -151,6 +151,12 @@ yeşil (ikinci katmanlar, ilk katmanları ayrıca sınanıyor, depo kapısını 
 kapanmadı); kurtarma yazımı bozulmuş derlemeyle VK2 testi kırmızı. `cargo test` 28/28, devrin
 iki testi dahil.
 
+**CI'ın bulduğu.** İlk itişin CI'ı (37976328335) iki VK1 testinde kırmızıydı: ikinci
+sekmenin açılış yazımı, metni farklı ama anlamı aynı bir planla ilk sekmeyi kilitledi
+(TESTFINDINGS). Kilit artık iki tarafı `parseState`/`parseLibrary`'den geçirip
+karşılaştırıyor; E2E sırayı her koşuda üretiyor. Mutasyonlar yeniden: dinleyici yok, ham
+metin karşılaştırması ve dolu depo sessiz kırmızı.
+
 **Kapsam dışı kalan.** TB7 (test oturumunun haberi): kapanan sekmenin son değişikliği
 klasöre inmiyor, `beforeunload`'daki eşzamansız yazım bitmeden sayfa kapanıyor. Dokunulmadı.
 

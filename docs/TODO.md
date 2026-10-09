@@ -741,7 +741,10 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       %20,3, D-Bus); açılış süresi "kirli, ölçülmedi" (prizde değil, yük 3,35); kendini
       güncellemenin devri yalnız birim testli, gerçek bir güncellemeyle denenmedi; sonraki
       oturum kurtarma kopyasının varlığını söylemiyor; TB7 (kapanan sekmenin son
-      değişikliği klasöre inmiyor) bu dalın dışında.
+      değişikliği klasöre inmiyor) bu dalın dışında. Yan bulgu: taze bir profilde açık plan
+      0 branş gösteriyor, aynı plan kaydedilip yeniden okununca `parseState` boş listeyi 21
+      yerleşik branşla dolduruyor (TESTFINDINGS 2026-10-09); var olan bir tutarsızlık,
+      dokunulmadı.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
