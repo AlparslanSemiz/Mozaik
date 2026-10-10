@@ -781,8 +781,12 @@ test.describe('75. file:// gerçekte ne veriyor — ÖLÇÜM, iddia değil', () 
     }));
 
     expect(facts.secure, 'file:// güvenli bağlam DEĞİL — iddia değişti').toBe(true);
+    // Brave switches the File System Access API off by default
+    // (playwright.brave.config.ts, measured 2026-10-10): there the folder
+    // panel has no picker to offer, and that is Brave's answer, not ours.
+    const brave = test.info().project.name === 'brave';
     expect(facts.picker, 'showDirectoryPicker file:// altında yok — iddia değişti').toBe(
-      'function',
+      brave ? 'undefined' : 'function',
     );
     expect(facts.idb).toBe('object');
   });

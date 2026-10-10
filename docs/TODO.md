@@ -1523,8 +1523,10 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       sekiz test, beş mutasyonla kanıtlı. Rust tarafında yeni test yok: `serde_json` doğrudan
       bağımlılık değil, alanlar `update.rs`'in metninden okunuyor.
 - [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
-- [ ] **TP12 Brave alt kümesi, yerel config (B10).** Ölçüldü: `file://` açılıyor, depo
-      kalıcı, font gömülü, hata ve ağ isteği yok. —
+- [x] **TP12 Brave alt kümesi, yerel config (B10).** Ölçüldü: `file://` açılıyor, depo
+      kalıcı, font gömülü, hata ve ağ isteği yok. — **Yapıldı (2026-10-10):**
+      `playwright.brave.config.ts`, `npm run test:brave`; `temel`, `planlar`, `erisim`, 59/59.
+      Brave'de `showDirectoryPicker` yok (TESTFINDINGS); ölçüm Brave'de onu bekliyor.
 
 **Faz 3 · zayıf makine**
 - [ ] **TP13 Uzun süre açık kalma (B11).** 2 000 sürükle + geri al döngüsü, yığın ve DOM

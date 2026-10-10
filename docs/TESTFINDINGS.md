@@ -26,6 +26,17 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `npm run test:brave` (Brave 1.96.61, temiz profil) · `file://`'da klasör API'si
+Bulgu: 59 testin 58'i geçti; `temel.spec.ts`'in "GÜVENLİ BAĞLAM ve klasör API'si file://
+altında VAR" ölçümü düştü: Brave'de `file://` güvenli bağlam ama `showDirectoryPicker`
+yok (Brave Dosya Sistemi Erişimi API'sini varsayılan olarak kapatıyor). Yani Brave'de
+"Nereye kaydedilsin"in klasör yolu yok; kalan her şey (açılış, depo, çevrimdışı, font,
+planlar, erişilebilirlik) Chromium'daki gibi. Özellik oturumu aynı şeyi B7.28'in
+analizinde ölçtü.
+Tür: bilgi (tarayıcının kararı), ürün kusuru değil.
+Ne yapıldı: ölçüm Brave projesinde Brave'in cevabını bekliyor, 59/59.
+Kalıcı kural: yok.
+
 ### 2026-10-10 · `npm run exe:e2e` (`test/gercek-ortam`, Linux) · gerçek exe süitinde yetim sürücü
 Bulgu: yük 3–4 iken "gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor" 3 s'de yalnız 6
 yazma yapabildi (eşik 15) ve 1,7 dk sürdü; fikstürün kapanışı (kırmızıda ekran görüntüsü)
