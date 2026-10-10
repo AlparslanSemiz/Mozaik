@@ -76,6 +76,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
+| Kontrat | `src/kontrat.test.ts` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma |
 | Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
@@ -369,6 +370,22 @@ hiçbir şey sorulmadan ağa çıkılmaması (panel çizilmiş olsa bile `check_
 çağrılmaz), üç cevabın üç ayrı cümle yazması, indirmenin yeniden başlatmaması,
 internet yokken programın çalışmaya devam etmesi.
 
+### Kontrat
+
+`src/kontrat.test.ts` (TP9) köprünün üç tarafını metin olarak okur ve karşılaştırır,
+çünkü her biri yalnız kendi süitinde ölçülüyor: Rust'ta `#[tauri::command]` ve
+`generate_handler!` (`lib.rs`, `update.rs`), sayfada `desktop.ts`'in `invoke` ve `bridge()`
+çağrıları, ve taklitler (`e2e/exe.spec.ts`'in `fakeExe`'si, `desktop.test.ts`'in `fakeDisk`'i).
+Ölçtükleri: kayıtlı komutlar ile sayfanın gönderdikleri aynı küme; her çağrının argüman adları
+Rust parametrelerinin `camelCase`'i ve tip argümanı Rust'ın dönüşü; `UpdateCevap` ile `Cevap`
+aynı alanlar; taklit Rust'ta olmayan bir komutu cevaplamıyor, Rust'ın almadığı bir argümanı
+okumuyor, Rust'ın tipini döndürüyor, güncelleme cevabında tam `Cevap`'ın alanları var. Taklit
+bir komutu eksik bırakabilir (`fakeExe`'de `self_update_supported` bilerek yok). Sayfa ve
+taklit TypeScript'in ayrıştırıcısıyla, Rust düzenli ifadeyle okunuyor. `desktop.ts` yoluyla
+değil adıyla bulunuyor, sıra 5'in taşıması testi değiştirmesin diye. On bir mutasyonla
+sınandı (sayfada komut adı, argüman, dönüş tipi; Rust'ta parametre, `Cevap` alanı, kayıt,
+dönüş tipi; e2e taklidinde komut, argüman, alan; birim taklidinde dönüş).
+
 ### Gerçek exe
 
 `npm run exe:e2e` Linux ikilisini derler ve `e2e/gercek-exe.spec.ts`'i ona karşı
@@ -444,7 +461,7 @@ haftalık arka planda koşar (CLAUDE.md).
 | Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
 | Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
-| Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |
+| Kontrat, güncelleme | TP10 | `surum.yml` ile `update.rs`'in ve Release'in ayrışması | `npm test` |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
 | Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |
 | Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |

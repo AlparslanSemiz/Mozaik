@@ -1473,8 +1473,10 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —
 - [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
       `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
-- [ ] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
-      **Bekler: sıra 5** (`platform/exe`: `desktop`, `update`).
+- [x] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
+      ~~Bekler: sıra 5~~ (kullanıcı 2026-10-10'da Faz 2'ye aldı): `src/kontrat.test.ts` hiçbir
+      modülü import etmiyor, `desktop.ts`'i adıyla buluyor, taşıma ona dokunmaz. 25 test, on
+      bir mutasyonla kanıtlı.
 - [ ] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
       kayıtlı Release fikstürü. —
 - [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
