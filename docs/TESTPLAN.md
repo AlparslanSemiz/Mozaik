@@ -15,7 +15,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
 | WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
-| Brave | `npm run test:brave` | elle, yerelde, Brave kurulu bir makinede: ana E2E'nin `temel`, `planlar` ve `erisim` dosyaları Brave'de (`/usr/bin/brave-browser`, başka yerdeyse `BRAVE_YOLU`). Brave yoksa koşmaz, cümleyle durur. CI'da yok: runner'larda Brave yok ve kurulumu sürümü sabitlenemeyen üçüncü taraf ikili |
+| Brave | `npm run test:brave` | elle, yerelde, Brave kurulu bir makinede: ana E2E'nin `temel`, `planlar` ve `erisim` dosyaları Brave'de (`/usr/bin/brave-browser`, başka yerdeyse `BRAVE_YOLU`). Brave yoksa atlanmaz, her test açılışta Playwright'ın "executable doesn't exist" hatasıyla düşer. CI'da yok: runner'larda Brave yok ve kurulumu sürümü sabitlenemeyen üçüncü taraf ikili |
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
 | Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |

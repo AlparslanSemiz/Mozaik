@@ -10,16 +10,14 @@
 // one there is a third-party binary from the network whose version cannot be
 // pinned. A clean profile, so a user's own Shields settings are not measured.
 //
-// No Brave, no run: it stops with a sentence rather than skipping, because a
-// suite that did not run is not a green one (TESTPLAN).
-import { existsSync } from 'node:fs';
+// No Brave, no run: every test fails on launch with Playwright's "executable
+// doesn't exist at ..." rather than skipping, because a suite that did not run
+// is not a green one (TESTPLAN). Not a check at load time: knip loads every
+// Playwright config in CI, where there is no Brave.
 import { defineConfig } from '@playwright/test';
 import base from './playwright.config';
 
 const brave = process.env.BRAVE_YOLU ?? '/usr/bin/brave-browser';
-if (!existsSync(brave)) {
-  throw new Error(`Brave bulunamadı: ${brave}. Yolunu BRAVE_YOLU ile verin.`);
-}
 
 export default defineConfig({
   ...base,
