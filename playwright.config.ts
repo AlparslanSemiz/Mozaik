@@ -12,7 +12,8 @@ export default defineConfig({
   // Three more are here for ONE reason, and it is the same reason: they test
   // something that does not exist under file:// — a service worker (site), a
   // secure context (sunucu), the File System Access API (klasor). They run
-  // under playwright.site.config.ts (npm run test:site), over http.
+  // under playwright.site.config.ts (npm run test:site), over http. So does
+  // linux-tasima, whose old copy has to be the site build at a real origin.
   // And gercek-exe opens the real Linux program, which needs a Rust build
   // first (npm run exe:e2e, playwright.gercek-exe.config.ts).
   testIgnore: [
@@ -23,6 +24,7 @@ export default defineConfig({
     '**/site.spec.ts',
     '**/sunucu.spec.ts',
     '**/klasor.spec.ts',
+    '**/linux-tasima.spec.ts',
   ],
   // Her Playwright context'inin kendi depolamasi var; file:// altinda da
   // gecerli oldugu olculdu (bkz. docs/WORKLOG.md).

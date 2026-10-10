@@ -71,7 +71,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | E2E | `e2e/*.spec.ts`, ana config, `file://` | davranış, erişilebilirlik, kâğıt, çevrimdışı |
 | Dil | `src/i18n.test.ts` ve `e2e/dil.spec.ts` | sözlüğün kendisi ve dil makinesi |
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
-| Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
+| Site, sunucu, klasör | `e2e/{site,sunucu,klasor,linux-tasima}.spec.ts` | `file://`'da olmayan her şey, http üstünde, ve siteden `file://`'a taşıma |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
 | Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
@@ -316,8 +316,11 @@ ağa çıkılmaması, güncelleme şeridinin davetsiz çıkmaması.
 
 ### Site, sunucu, klasör
 
-`npm run test:site` üç dosyayı http üstünde koşar, çünkü üçü de `file://` altında
-olmayan bir şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistemi Erişimi.
+`npm run test:site` dört dosyayı http üstünde koşar. Üçü `file://` altında olmayan bir
+şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistemi Erişimi. Dördüncüsü
+(`linux-tasima.spec.ts`) Linux uygulamasına geçişi: site kökeninde kurulan planlar
+"Tümünü dosyaya kaydet" ile çıkıp boş depolu yeni bir bağlamda, `file://`'da "Tümünü
+dosyadan aç" ile içerikleriyle aynı geri geliyor, ve yeni kopya ağa çıkmıyor (B7.28).
 Ölçtükleri: manifest ve simgeler, service worker kaydı, bağlantı kesilince açılma,
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
 sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taşıması, ve
