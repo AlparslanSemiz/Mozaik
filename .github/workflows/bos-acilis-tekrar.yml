@@ -1,0 +1,63 @@
+# GEÇİCİ, main'e birleşmez. Yenilemeden sonra boş açılış (CI 38085275289,
+# kurulum.spec.ts:716) yerelde 1 230 denemede çıkmadı; olay yalnız runner'da
+# görüldü. Aynı test, yeniden deneme yok: ubuntu-24.04'te 300, windows-latest'te
+# 100 tekrar. Düşen her denemenin izi test-results/ içinde, yapıt olarak yükleniyor.
+name: bos-acilis-tekrar
+
+on:
+  push:
+    branches: [ci/bos-acilis-tekrar]
+
+permissions:
+  contents: read
+
+jobs:
+  tekrar:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            tekrar: 300
+          - os: windows-latest
+            tekrar: 100
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+      - if: runner.os == 'Windows'
+        run: npx playwright install chromium
+      - run: npx vite build
+      - name: Tekrar (${{ matrix.tekrar }})
+        shell: bash
+        run: >-
+          npx playwright test e2e/kurulum.spec.ts -g "YENİLEMEDEN"
+          --repeat-each ${{ matrix.tekrar }} --retries 0
+          --reporter=list,json --trace=retain-on-failure
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: sonuc.json
+      - name: Sayım
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: >-
+          node -e "const r=require('./sonuc.json');let t=0,d=0;
+          const g=s=>{for(const p of s.specs||[])for(const x of p.tests)for(const y of x.results){t++;if(y.status!=='passed')d++}
+          for(const a of s.suites||[])g(a)};r.suites.forEach(g);
+          const m='${{ matrix.os }}: '+d+'/'+t+' düştü';console.log(m);
+          require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY,m+'\n')"
+      - if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: tekrar-${{ matrix.os }}
+          path: |
+            sonuc.json
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore

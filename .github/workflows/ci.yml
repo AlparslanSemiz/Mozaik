@@ -20,7 +20,8 @@ name: ci
 
 on:
   push:
-    branches: ['**']
+    # Geçici dal (main'e birleşmez): tam CI bu dalda koşmaz, yalnız bos-acilis-tekrar.yml.
+    branches-ignore: ['ci/bos-acilis-tekrar']
   workflow_dispatch:
 
 permissions:
