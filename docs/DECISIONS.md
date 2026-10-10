@@ -35,6 +35,24 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-10 · Refactor adım 4: `programView` pure'un kökünde, teneffüs kesmesi birleşmedi
+
+**Ne.** Alp'in kararı: Program ekranının hesabı (`programView.ts`) §8k'nin ağacındaki
+`pure/program/` paketine değil, `pure/`'un köküne tek dosya olarak girdi. `pure/program/`
+yalnız `programs` ile `programMask`'ı taşıyor. Ayrıca ekranın ve kâğıdın teneffüste blok
+kesmesi (iki algoritma) tek fonksiyonda birleşmedi.
+
+**Eski hâli.** Ağaç (2026-10-09 gece): `program/` = programs, programMask, YENİ programView.
+Analiz (2026-10-08, R8): ekran ve kâğıt için tek bir `cellSpans`.
+
+**Gerekçe.** `constraints.ts`, `entities.ts`, `relax.ts` ve `solver.ts` `programs`'ı paketin
+`index`'inden alıyor; `programView` de `constraints` ile `entities`'i çağırıyor. Tek `index`
+`constraints → program/index → programView → constraints` döngüsü olurdu ve `no-circular`
+bir hata. Seçenekler: `programView` kökte (seçilen, tek dosyalık modül kuralıyla da aynı),
+`programs` kökte kalır, ya da `programs` yaprağa iner. Kesme: iki algoritma aynı saatte iki
+sınıfa yazılmış bir öğretmende farklı hücre çiziyor (RK15); birleştirmek birinin davranışını
+değiştirirdi, refactor dalı davranış değiştirmez.
+
 ### 2026-10-09 · Uzun testler arkada, birleşmeden önce yerelde `hizli`, tam doğrulama CI'da
 
 **Ne.** Kullanıcının kararı (gece): uzun testler (mutasyon, Windows E2E, WebKit) hiçbir

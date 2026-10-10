@@ -26,6 +26,27 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `npx vitest run src/programScreen.test.tsx` (`refactor/program`) · "aynı saatte iki sınıfa yazılmış öğretmende kâğıt bir hücre fazla çiziyor (RK15)"
+Bulgu: ekranın ve kâğıdın teneffüste blok kesmesi el yapımı dünyada ve tam dolu kursun dizili
+haftasında aynı hücreleri çiziyor. MÇ'nin 510'daki iki saatlik bloğunun ikinci saatinde
+511'de de dersi olan dört saatlik bir günde ızgara 3 hücre çiziyor, kâğıt 4 hücre ve 5
+sütun. Kurgulanmış veride, her koşuda aynı.
+Tür: ürün kusuru (uygulamanın kendisi böyle bir hafta kurmuyor; eski yedek ya da içe
+aktarma taşıyabilir).
+Ne yapıldı: TODO §8k RK15; iki algoritma birleşmedi (DECISIONS 2026-10-10), test ikisini de
+olduğu gibi sabitliyor.
+Kalıcı kural: yok.
+
+### 2026-10-10 · `scripts/mutasyon-kaniti.sh --liste` (`refactor/program`) · `src/programView.test.ts`, havuz sırası
+Bulgu: bir dersin aynı boydaki kartlarının havuzda yan yana durduğunu söyleyen iddia hiçbir
+kuyruk bozmasıyla kırmızı olmuyor: kartlar ders ders ekleniyor ve sıralama kararlı, deste
+kartları her anahtarda eşit. Ayrıca iki iddia ilk listede ölçmüyordu (tamamlanan ders,
+öğretmen kâğıdının rengi: dünyada ilgili sayı ya da renk yoktu ya da aynıydı).
+Tür: test kusuru.
+Ne yapıldı: deste iddiası yazılmadı, sebebi testin yorumunda; öbür ikisi dünyası
+düzeltilerek kırmızıya döndü. Kaynaktaki bayat yorum düzeltildi.
+Kalıcı kural: yok (TODO §8k'de tuzak adayı).
+
 ### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
 Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da
 "başka bir pencerede" şeridi). Yerelde yeşildi, çünkü ikinci sekme ilkinin açılış

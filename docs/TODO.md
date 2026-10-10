@@ -1265,7 +1265,7 @@ ve `.claude/skills/paket-turu` ile. Tabloda satırı olmayan bir dosya taşınma
 Sıra değişti (2026-10-09 gece, Alp'in kararı): 4 (`platform/storage`), 5 (`platform/exe`) ve
 6 (`pure/io`), özellik oturumunun `fix/veri-kaybi` dalı (VK1, VK2) `main`'e girene kadar
 bekledi, çünkü o düzeltmeler aynı dosyalara dokunuyor. O dal girdi (2026-10-10); 7
-(`platform/search`) bitti, sıradaki 4.
+(`platform/search`) ve 8 (adım 4) bitti, sıradaki 4.
 
 | Sıra | Paket | Eski | Yeni | Not |
 |---|---|---|---|---|
@@ -1276,7 +1276,7 @@ bekledi, çünkü o düzeltmeler aynı dosyalara dokunuyor. O dal girdi (2026-10
 | 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | `fix/veri-kaybi` (VK1, VK2) girdi, sırada |
 | 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | `fix/veri-kaybi` (VK1, VK2) girdi, sırada |
 | 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | bitti (`refactor/search`); `relaxPool` paketin içinde |
-| 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | RF8, RF9 |
+| 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | bitti (`refactor/program`); `programView` pure'un kökünde (döngü, ağaçta), teneffüs kesmesi birleşmedi (RK15) |
 | 9 | adım 5 | `ui/Ribbon.tsx`, `ui/{ListTools,useRowOrder,CapacityRows,AddPanel}` | `ui/ribbon/`, `ui/lists/` | RF10, RF12, RF11 |
 | 10 | pure/relax | `pure/{relax,sat}.ts` | `pure/relax/` | RF1, mutasyon tabanından sonra; stryker, kapsam ve TESTPLAN aynı commit'te |
 | 11 | constraints ve entities | `pure/{constraints,entities}.ts` | `pure/constraints/`, `pure/entities/` | RF6, RF5; aynı liste kuralı |
@@ -1315,9 +1315,15 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       `entities.ts`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
       lint için "dört uyarı" demesi, DESIGN ile LAYOUT'un ölü sınıfları anlatması.
       `--ink` burada değil, RK1.
-- [ ] **Refactor adım 4 · RF8, sonra RF9.** Önce karakterizasyon birim testleri, sonra
+- [x] **Refactor adım 4 · RF8, sonra RF9.** Önce karakterizasyon birim testleri, sonra
       iş mantığının saf katmana taşınması. Sonra öğretmen ve sınıf kâğıdının saf modeli.
       RF9 babanın gönderme isteğinin (B3.8) önkoşulu ve RF8'e bağlı.
+      Bitti (2026-10-10, `refactor/program`, WORKLOG): Program'ın satırları, havuzu ve
+      araç çubuğunun satırı `pure/programView.ts`'te, kâğıt `pure/paper/`'da bir model
+      (`classSheet`, `teacherSheet`, `sheetHead`), `ui/print/Sheet.tsx` onu çiziyor. RF8'in
+      Program dışındaki maddeleri (Ribbon, Check, Summary, Suggestions'ın satır süzgeci,
+      CapacityRows) yapılmadı: bu tur Program'la sınırlıydı. Analizin `cellSpans`'i
+      yapılmadı, RK15.
 - [ ] **Refactor adım 5 · RF12, RF10, RF11, RF20.** Liste ekranlarının iskeleti, şeridin
       sekme başına bölünmesi, tercih aynalarının React'in `useSyncExternalStore`'u ile
       kalkması, `theme.ts`'in çift adları. RF10 RF8'e, RF20 RF11'e bağlı. RF20'nin
@@ -1410,8 +1416,9 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - RK14 §7'de, B7.27'nin arkasında (2026-10-10, sıra Alp'in).
 
 - [ ] **RK15 Aynı saatte iki sınıfa yazılmış bir öğretmenin kâğıdı bir hücre fazla basıyor.**
-      Izgara teneffüste bloğu öğretmenin satırında yürüyerek keser (`Grid.tsx` 162), kâğıt
-      her saatin kendi sınıfının bloğuna bakar (`Print.tsx` 150). Bir öğretmenin 510'daki iki
+      Izgara teneffüste bloğu öğretmenin satırında yürüyerek keser (`ui/program/Grid.tsx`
+      123), kâğıt her saatin kendi sınıfının bloğuna bakar (`pure/paper/cut.ts` 29; ölçüldüğü
+      gün Print bileşeninin içindeydi). Bir öğretmenin 510'daki iki
       saatlik bloğunun ikinci saatinde 511'de de dersi varsa, ızgara 511'in saatini çizmiyor,
       kâğıt onu da çiziyor ve dört saatlik bir gün beş sütun basılıyor. Uygulama böyle bir
       haftayı kendisi kurmuyor; eski bir yedek ya da içe aktarma taşıyabilir. Öbür her durumda
@@ -1430,6 +1437,16 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - knip, `/tmp` altındaki geçici bir klonda kullanılmayan bir dosyayı bile bildirmedi:
   orada ölçüm aracı kalibre olmuyor, oradan çıkan "knip yeşil" bir şey kanıtlamaz.
 - `pkill -f <kelime>` o kelimeyi komut satırında taşıyan kendi kabuğunu da öldürür.
+- `Array.prototype.sort` kararlı: eşitlikte giriş sırası kalıyor. Havuzun karşılaştırıcısına
+  "desteyi bir arada tutan kuyruk" deniyordu, oysa deste kartları her anahtarda eşit ve
+  onları kartların ders ders eklenmesi tutuyor; o iddiayı ölçen bir test hiçbir kuyruk
+  bozmasıyla kırmızı olmazdı (bedava yeşil, 2026-10-10, `refactor/program`).
+- Bir paketin `index`'i, paketi çağıran bir modülü çağıran bir dosyayı da açarsa
+  `no-circular` kırmızı olur: `constraints` → `program/index` → `programView` →
+  `constraints`. Ağaca yeni bir dosya konmadan önce onun import'ları sorulur (2026-10-10).
+- Import yolunu yeniden yazan bir betik, taşınmayan iki dosya arasındaki eşdeğer bir yolu da
+  (`../pure/constraints` → `./constraints`) sadeleştirebilir; taşıma diff'i yalnız taşınan
+  uçlara dokunmalı (2026-10-10, `parseState.ts`, iki kez).
 
 **Biten (dal).** T1 (`leaf/lang/index.ts`, 3c769a0), T2a (`Paste` ile `Summary`
 `ui/lists/`'e, 0d97c82), T2b (`ui/lists/index.ts`, 3f1944e) ve derin import kuralı
@@ -1437,11 +1454,13 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 (WORKLOG 2026-10-09, `refactor/lists`). Hedef ağaç ve tablo bu bölüme yazıldı, RK13 kapandı
 (6b282ce), `platform/prefs` paketi (185e9cc, 7334d19; WORKLOG 2026-10-09, `refactor/prefs`).
 `useSolver`'ın birim testi ve `platform/search` paketi (947a4cc, c423037; WORKLOG
-2026-10-09, `refactor/search`).
+2026-10-09, `refactor/search`). Adım 4: Program ile kâğıdın karakterizasyon testi, `pure/program`,
+`ui/program`, `pure/programView` (RF8), `pure/paper` ve `ui/print` (RF9), RK15 (WORKLOG
+2026-10-10, `refactor/program`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
-yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) bitti; `fix/veri-kaybi` girdi, sıradaki 4
-(`platform/storage`), sonra 5 ve 6. Adım 2'nin süre ölçümleri temiz koşulda
+yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) ve 8 (adım 4) bitti;
+`fix/veri-kaybi` girdi, sıradaki 4 (`platform/storage`), sonra 5 ve 6. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 

@@ -41,7 +41,9 @@ bir worktree'de ya da başka dalda tek cümleyle durur.
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
 paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi ve
-`platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
+`platform/search` paketi `main`'de; `refactor/program` dalı adım 4'ü getiriyor:
+`pure/program`, `ui/program`, `pure/programView` (RF8), `pure/paper` ile `ui/print`
+(RF9) ve RK15 ([TODO.md](TODO.md) §8k, WORKLOG 2026-10-10).
 
 **Sıradaki iş.**
 0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
@@ -71,8 +73,9 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
 8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, `fix/veri-kaybi`
-   girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). Adım 2: RF3
+   dallarda, `.claude/skills/paket-turu` ile; `platform/search` ve adım 4 bitti,
+   `fix/veri-kaybi` girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). RK15
+   (bir öğretmenin aynı saatte iki sınıfı) özellik dalının işi. Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -121,6 +124,61 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-10 · Refactor, `refactor/program` dalı: adım 4 (RF8, RF9), RK15
+
+**Başlangıç.** Dal `origin/main`'den (`135d097`, `refactor/search`'ün birleştiği hâl) açıldı,
+takipsiz; `refactor/search` yerelde silindi, origin'deki dalın silinmesini izin denetimi
+reddetti (Alp'te). `fix/veri-kaybi` o an `main`'de değildi, bu yüzden adım 4. Oturumun
+sonunda `main` ilerlemişti (VK1, VK2 girdi): `git merge main` çatışmasız, ardından `hizli`
+1311/1311.
+
+**Envanter.** Program ekranı ve kâğıt: `Program.tsx` 1430, `Print.tsx` 717, `Grid.tsx` 645,
+`Inspector.tsx` 582, `LessonPool.tsx` 534, `Suggestions.tsx` 487, `Check.tsx` 361,
+`steps.tsx` 146, `programs.ts` 108, `programMask.ts` 77 satır. Program'ın iş mantığının ve
+kâğıdın birim testi yoktu; bileşenleri yalnız `App.test` ve `sentences.test` çiziyordu.
+Kapsam (satır, o iki testle): Program %53,1, Grid %80,9, Print %72,0.
+
+**Plandan sapma.** §8k'nin ağacı `programView`'i `pure/program/`'a koyuyordu; `constraints`
+ile `entities` paketi çağırdığı ve `programView` onları çağırdığı için tek `index` döngü
+olurdu. Soruldu, Alp'in kararı: `programView` kökte (DECISIONS 2026-10-10). Teneffüste
+kesmenin iki algoritması birleşmedi, RK15.
+
+**Ne yapıldı, commit commit** (dal commit'leri konusuyla):
+- "Test: Program'ın ızgarası, havuzu, satırı ve kâğıt karakterizasyon testinde":
+  `src/programScreen.test.tsx`, jsdom, gerçek bileşenler, el yapımı dünya, satır içi anlık
+  görüntüler; iki kesmenin karşılaştırması ve RK15. 23 bozmanın 23'ü kırmızı (üçü ilk
+  listede uygulanmadı, biri önizlemenin havuzu bugünküyle aynı olduğu için ölçmüyordu;
+  ifadeler ve dünya düzeltildi). Kapsam: Program %66,9, Grid %87,5, Print %95,0.
+- "Taşıma: programs ve programMask pure/program/'a, Program ekranı ui/program/'a, iki giriş
+  noktasından". Bayt aynılığı `index`'ten önce: sha 20f22e48…, o hâlde `sinir` 34 derin
+  import; `index`'le 1 159 056'dan 1 159 050 bayta. e2e'nin iki dosyası `src`'yi yoluyla
+  çağırıyordu (tip denetimi e2e'yi görmüyor), onlar da döndü.
+- "Saf mantık: Program'ın satırları, havuzu ve araç çubuğunun satırı pure/programView'e
+  (RF8)". `colorOf` geri çağırımı, `BarRun`, `PoolSort` `leaf/types`'ta. `programView.test.ts`
+  10 bozmanın 10'u. Kapsam %99,7 (iki testle).
+- "Saf mantık: öğretmen ve sınıf kâğıdı pure/paper'da bir model, Sheet onu çiziyor (RF9)".
+  Eski ve yeni Print 576 birleşimde bayt bayt aynı HTML (geçici karşılaştırma, scratch'te;
+  tek boşluk bozulunca kırmızı). `paper.test.ts` 12 bozmanın 12'si.
+- "Taşıma: Print ve Sheet ui/print/'e, tek giriş noktasından". Taşımasız ve `index`'li
+  derleme aynı sha (daea68df…), modül sırası değişmedi.
+- "Temizlik: buildRows'ta öğretmen t adıyla çeviriyi gölgelemiyor, ders bir kez aranıyor",
+  ve havuz sırasının yorumu ölçülene göre.
+
+**Koşulan testler.** Her commit'ten önce `hizli` (son 1311/1311) ve belge kapıları
+(19/19); kod commit'lerinde `tipler`, `sinir` 0, `lint` 0, `knip`, prettier. Kilit altında:
+45 mutasyon; boyut (279,35, 279,26 ve 279,64 kB brotli); taşımada `temel` ile `otomatik`
+49/49, RF8'de `temel`, `otomatik`, `program`, `izgara` 136/136, RF9'da `yazdir`,
+`baski-secenek`, `temel`, `otomatik` 93/93. Dalın CI'ı RF8'in ucunda yeşil.
+
+**Koşulmayan testler.** Yerelde tam `npm test`, `kontrol` ve tam E2E (CI'da), Stryker
+(`programView` ve `pure/paper` mutasyon listesinde değil, karar sorusu), WebKit, `exe:*`,
+süre ölçümü. Ekran 1920×1080'de açılıp bakılmadı: Program'ın DOM'u karakterizasyon testinde,
+Çıktı'nınki 576 birleşimde bayt bayt aynı.
+
+**Bulgular.** RK15 (TODO §8k, TESTFINDINGS). Havuz sırasının "desteyi kuyruk tutar" yorumu
+ölçülene uymuyordu, düzeltildi. Üç tuzak adayı §8k'de. `src/leaf/lang/*.ts`'te
+`src/ui/setup/Paste.tsx` yorumu `ui/lists` turundan beri bayat, dokunulmadı.
 
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 
