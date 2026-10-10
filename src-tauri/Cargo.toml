@@ -20,14 +20,21 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# No plugins. `withGlobalTauri` puts `invoke` on the page and the commands
-# in lib.rs and update.rs are the whole API surface, so
+# No plugins but one (below). `withGlobalTauri` puts `invoke` on the page and the
+# commands in lib.rs and update.rs are the whole API surface, so
 # tauri-plugin-fs and tauri-plugin-dialog would be two dependencies for
 # something std::fs does in forty lines, and they would hand the page a
 # general file API when what it needs is one folder. tauri-plugin-updater is
 # missing for a harder reason: its Windows path installs a .msi or .nsis
 # bundle, and the former no-installer rule rejected exactly that (see `--no-bundle` and docs/DECISIONS.md).
 tauri = { version = "2", features = [] }
+
+# The one plugin, and the reason it beats the rule above: one copy of the
+# program at a time (VK1, 2026-10-09). Two copies each held the plan in memory
+# and the stale one wrote it over the other's work on closing. A named mutex
+# on Windows, a D-Bus name on Linux; neither is something to rewrite in forty
+# lines. It reaches the exe only, never `dist`, and gives the page nothing.
+tauri-plugin-single-instance = "2"
 
 # The update path, and the only thing in this program that touches the network.
 #
