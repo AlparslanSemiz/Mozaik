@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-09.
+Son güncelleme: 2026-10-10.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -40,12 +40,12 @@ bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
-paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/search` dalı
-`useSolver`'ın birim testini ve `platform/search` paketini getiriyor (2026-10-09,
-[TODO.md](TODO.md) §8k).
-Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti, Faz 1'in TB8'e ve paket
-turlarına bağlı olmayan kısmı bitti (`test/kapsam`); paket yolunun fuzz'u ve TB8'in testi
-TB8'in kararını, TP5 sıra 4'ü bekliyor.
+paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/search`
+`useSolver`'ın birim testini ve `platform/search` paketini getirdi (2026-10-09,
+[TODO.md](TODO.md) §8k). Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti,
+Faz 1'in TB8'e ve paket turlarına bağlı olmayan kısmı bitti; TB7 ve TB8 `fix/veri-kaybi`
+birleşir birleşmez `main`'den açılacak ikinci düzeltme dalında, TB8'in testini o dal yazar;
+paket yolunun fuzz'u TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -68,9 +68,10 @@ TB8'in kararını, TP5 sıra 4'ü bekliyor.
 6. Bir sürümden önce `npm run mutasyon`.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
-8. Test programı (TODO §8l): TB8'in yeri ve testi, ve yavaş süitlerle `yayinla`'nın
-   ilişkisi kullanıcıda; sonra Faz 2 (yollardan bağımsız olanlar önce: TP6, TP7, TP10,
-   TP11, TP12). Runner'lar sabit, `kanarya.yml` Ubuntu 26.04'ü haftada bir koşuyor.
+8. Test programı (TODO §8l): Faz 2, `main`'den yeni bir dalda, sırayla TP6 (gerçek paket
+   fikstürü), kontratlar (TP9, TP10), TP7 (Windows'ta gerçek exe), TP8 (sürüm yükseltme),
+   TP12 (Brave). `yayinla` Windows E2E'yi bekliyor, yavaş süitlerin tek istisnası
+   (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu 26.04'ü haftada bir koşuyor.
 9. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
    dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, storage, exe ve io
    `fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki adım 4 (TODO §8k). Adım 2: RF3
@@ -88,7 +89,7 @@ TB8'in kararını, TP5 sıra 4'ü bekliyor.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
 - Test programının bulguları (TODO §8l): iki kopya ve kota (VK1, VK2, düzeltmesi
   `fix/veri-kaybi`'de); "Tümünü dosyadan aç" eksik planı boş plan olarak açıyor (TB8, veri
-  kaybı sınıfı, karar bekliyor); kapanan sekmenin değişikliği klasöre inmiyor (TB7);
+  kaybı sınıfı, ikinci düzeltme dalında); kapanan sekmenin değişikliği klasöre inmiyor (TB7);
   `readPlanFile` bozuk dosyada istisna atıyor (TB1); eksi ve sınırsız haftalık saat kabul
   ediliyor (TB6, TB9); `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
@@ -123,6 +124,19 @@ TB8'in kararını, TP5 sıra 4'ü bekliyor.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-10 · Test programı: kullanıcının üç kararı (`test/kapsam`)
+
+**Ne yapıldı** (dal commit'leri konusuyla). `main` 135d097'ye ilerlemişti, `git merge main`
+ile alındı; tek çatışma bu dosyada ("Şu an" ve iki gece girdisi), iki taraf da tutuldu.
+- "Belgeler: TB7 ve TB8 ikinci düzeltme dalında, TB8'in testini o dal yazar, saat payı
+  C2'nin adayı". TODO'da TB7, TB8, TP4'ün "Kalan"ı ve TP22.
+- "Belgeler: yavaş süitlerin tek istisnası, yayinla Windows E2E'yi bekler". CLAUDE.md'nin
+  iki kuralı tek cümlede, DECISIONS'ta kayıt, TODO K5'e not.
+
+**Koşulan testler.** Her commit'ten önce `npm run hizli` (merge'den sonra 44 dosyada 1290,
+yeşil) ve belge kapıları (19/19). **Koşulmayan.** E2E ve `kontrol`: yalnız belge değişti,
+CI'da.
 
 ## 2026-10-09 (gece) · Test programı: analiz, Faz 0 ve Faz 1 (`test/kapsam`)
 
