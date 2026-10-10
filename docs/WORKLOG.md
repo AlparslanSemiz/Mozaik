@@ -45,7 +45,8 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
-0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
+0. Özellik oturumunun sırası (2026-10-10, Alp): `fix/veri-kaybi` ve `bakim/agir-kilit`
+   girdi, `ci/runner-sabitle` yayın kapısından önce girer. Sonra yayın kapısı dalı
    (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
    → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
