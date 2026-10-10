@@ -431,7 +431,8 @@ sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
 
 **Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar:
 `tauri-driver` WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver`'ın önünde, dil
-`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--lang=tr-TR` ile. Sahte ev yok, çünkü exe Belgeler'i
+oturumun yeteneklerinde (`tauri:options.args`, `--lang=tr-TR`): WebView2'nin ortam
+değişkenini msedgedriver kendisi kullanıyor. Sahte ev yok, çünkü exe Belgeler'i
 kabuğa soruyor ve WebView2 profilini `%LOCALAPPDATA%\com.dersprogrami.arac`'ta tutuyor:
 süit runner'ın gerçek klasörlerini her testten önce siliyor, ve bu yüzden GitHub'ın
 runner'ı dışında Windows'ta koşmayı reddediyor (`windowsYerleri`). Platformların

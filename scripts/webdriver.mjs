@@ -141,7 +141,7 @@ export function basizMumkun() {
  * it. Returns its pid; the caller keeps it to tear it down (`surucuyuKapat`).
  */
 export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil = 'tr_TR' }) {
-  if (WINDOWS) return windowsSurucu({ port, ev, gunluk, dil });
+  if (WINDOWS) return windowsSurucu({ port, ev, gunluk });
   // The language is pinned for the same reason the browser suites pin
   // `locale: 'tr-TR'`: with nothing stored the interface follows the device,
   // WebKitGTK reads the device from LANG, and this machine is English.
@@ -172,12 +172,15 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
 }
 
 /**
- * The same on Windows. No xvfb (a runner has a desktop session), no sandbox
- * HOME (see the top of the file), and the language through WebView2's own
- * switch, because WebView2 does not read LANG: the browser suites pin
- * `locale: 'tr-TR'` and the runner's Windows is English.
+ * The same on Windows. No xvfb (a runner has a desktop session) and no
+ * sandbox HOME (see the top of the file). The language is not set here:
+ * WebView2 does not read LANG, and its own environment variable is the one
+ * msedgedriver uses to open the debugging port, so setting it here left the
+ * driver with no page to attach to ("DevToolsActivePort file doesn't exist",
+ * the first Windows run, 2026-10-10). It goes in the session's capabilities
+ * instead (`Oturum.ac`).
  */
-function windowsSurucu({ port, ev, gunluk, dil }) {
+function windowsSurucu({ port, ev, gunluk }) {
   const surucu = process.env.MOZAIK_NATIVE_DRIVER;
   if (!surucu || !existsSync(surucu)) {
     throw new Error(`msedgedriver yok: MOZAIK_NATIVE_DRIVER=${surucu ?? ''}`);
@@ -188,10 +191,6 @@ function windowsSurucu({ port, ev, gunluk, dil }) {
     'tauri-driver',
     ['--port', String(port), '--native-port', String(port + 1), '--native-driver', surucu],
     {
-      env: {
-        ...process.env,
-        WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--lang=${dil.replace('_', '-')}`,
-      },
       cwd: ev,
       stdio: ['ignore', cikti, cikti],
       windowsHide: true,
@@ -218,6 +217,13 @@ export function surucuyuKapat(pid) {
   }
 }
 
+/**
+ * On Windows tauri-driver hands `args` to msedgedriver as WebView2's browser
+ * arguments. The browser suites pin `locale: 'tr-TR'` and the runner's
+ * Windows is English; on Linux the language comes from LANG instead.
+ */
+const WINDOWS_DILI = WINDOWS ? { args: ['--lang=tr-TR'] } : {};
+
 /** One WebDriver session. Everything is a method so a test reads like a script. */
 export class Oturum {
   constructor(port, id) {
@@ -234,7 +240,7 @@ export class Oturum {
       try {
         const cevap = await istek(port, 'POST', '/session', {
           capabilities: {
-            alwaysMatch: { 'tauri:options': { application: ikili } },
+            alwaysMatch: { 'tauri:options': { application: ikili, ...WINDOWS_DILI } },
           },
         });
         return new Oturum(port, cevap.sessionId);
