@@ -338,8 +338,19 @@ function BrandMark() {
 
 export default function App() {
   const t = useT();
-  const { state, change, manageProgram, undo, redo, loadState, canUndo, canRedo, plans, park } =
-    useStore();
+  const {
+    state,
+    change,
+    manageProgram,
+    undo,
+    redo,
+    loadState,
+    canUndo,
+    canRedo,
+    plans,
+    park,
+    saveTrouble,
+  } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
   // unmounts the components that used to own these, and because the tool strip
@@ -474,7 +485,7 @@ export default function App() {
   // showDirectoryPicker is defined and the context is secure (pitfall 65);
   // what file:// lacks is a real origin, so the permission is asked again on
   // each launch. The browsers it is missing in are Firefox and Safari.
-  const folder = useFolder(plans.library, plans.planId, state);
+  const folder = useFolder(plans.library, plans.planId, state, saveTrouble === 'dolu');
   // How this copy can be updated, if it can. Two routes and two mechanisms:
   // a service worker on the site and the local install, three buttons in the
   // exe. The double-clicked .html has neither and says so; it cannot replace
@@ -1011,6 +1022,29 @@ export default function App() {
               <div className="save-warning">
                 ⚠{' '}
                 <T k="**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın." />
+              </div>
+            )}
+
+            {/* A SAVE THAT FAILED IS SAID WHERE IT FAILED (VK2). The probe above
+            runs once at startup with one byte, and the storage can fill up
+            later; the autosave's own answer is what this reads. */}
+            {saveTrouble === 'dolu' && (
+              <div className="save-warning" role="alert">
+                ⚠{' '}
+                <T k="**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın." />
+              </div>
+            )}
+
+            {/* ANOTHER WINDOW CHANGED THIS DATA (VK1). This window has stopped
+            writing, so whatever is done here from now on is not kept; the
+            other window's work is. Reloading reads that work. */}
+            {saveTrouble === 'baska' && (
+              <div className="save-warning" role="alert">
+                ⚠{' '}
+                <T k="**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor." />{' '}
+                <button className="btn" onClick={() => window.location.reload()}>
+                  {t('Yenile')}
+                </button>
               </div>
             )}
 

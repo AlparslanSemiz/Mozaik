@@ -175,6 +175,12 @@ pub fn run() {
     #[cfg(target_os = "linux")]
     linux_renderer();
 
+    // Started by `apply_update`: wait for the old version to be gone before
+    // claiming the single instance below (`update::eskisi_gitsin` says why).
+    if std::env::args().any(|a| a == update::GUNCELLENDI) {
+        update::eskisi_gitsin(std::io::stdin(), update::DEVIR_SURESI);
+    }
+
     // The version this replaced, if we are the replacement. Here rather than
     // right after the swap, because right after the swap that file is still
     // the process doing the asking.
@@ -183,6 +189,19 @@ pub fn run() {
     }
 
     tauri::Builder::default()
+        // FIRST, before anything else is set up: one copy of the program at a
+        // time (VK1). Two copies each held the plan in memory, and the one
+        // closed last wrote its old copy over the other's work, in
+        // localStorage and in both files under Belgeler (measured by the test
+        // session, 2026-10-09). A second launch brings this window forward
+        // and exits.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(pencere) = app.get_webview_window("main") {
+                let _ = pencere.unminimize();
+                let _ = pencere.show();
+                let _ = pencere.set_focus();
+            }
+        }))
         .invoke_handler(tauri::generate_handler![
             write_file,
             list_files,

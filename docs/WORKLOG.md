@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-09.
+Son güncelleme: 2026-10-10.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -40,11 +40,16 @@ bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
-paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/search` dalı
-`useSolver`'ın birim testini ve `platform/search` paketini getiriyor (2026-10-09,
-[TODO.md](TODO.md) §8k).
+paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi ve
+`platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
+0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
+   (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
+   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
+   → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
+   uygulaması. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
+   günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
@@ -66,8 +71,8 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
 8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, storage, exe ve io
-   `fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki adım 4 (TODO §8k). Adım 2: RF3
+   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, `fix/veri-kaybi`
+   girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -80,6 +85,10 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
   `maximized` ayarı gerçek bir Windows'ta görülmedi.
 - Yavaş bir makinede otomatik dizmenin bütçesi onarımdan önce dolabilir.
 - 4 kat yavaşlatılmış işlemcide ilk kare ölçek ve yoğunluk yazılmadan boyanıyor.
+- Veri kaybı VK1 ve VK2 düzeldi (TODO B7.27): iki sekmede bayat olan yazmayı bırakıyor,
+  dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
+  süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7 (kapanan sekmenin son
+  değişikliği klasöre inmiyor) açık.
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
@@ -110,6 +119,78 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- `git merge main` (`refactor/prefs` ve `refactor/search`). İki belge çatışması, kodda yok:
+  ARCHITECTURE'ın katman şemasında satır Alp'in verdiği gibi
+  `useStore · usePlans · useFolder · search/* · otherWindow`; WORKLOG'da iki tarafın
+  2026-10-09 girdisi ayrı, ikisi de kaldı, bu dalınki üstte. Eski arama yollarına kodda
+  bayat import yok (grep).
+- "Taşıma: RK14 §8k'den §7'ye, B7.27'nin arkasına", metni değişmeden.
+- RK14'e sıra ve sebep, §8k'de işaret; birleşmeyle bayatlayan "bekler" cümleleri ve "Şu an".
+  RK14'ün yeni cümlesi okumaya dayanıyor: `Data` yalnız Ayarlar'ın Veri ve Hakkında
+  bölümünde bağlanıyor, `src/ui`'da hata sınırı yok. Ölçülmedi.
+
+**Koşulan testler.** Birleşmeden sonra `tipler` 0, `sinir` 0, `lint` 0, `hizli` 1280/1280;
+her belge commit'inden önce `hizli` ve belge kapıları 19/19.
+
+**Koşulmayan testler.** Yerelde tam `npm test`, `kontrol`, E2E (CI'da), mutasyon, Windows.
+
+---
+
+## 2026-10-09 (gece) · Veri kaybı: VK1, VK2 ve `useHttpsScheme`, `fix/veri-kaybi` dalı
+
+**Başlangıç.** `main` b75e707'den. Kaynak: test oturumunun PLAN.md'si ve
+VERI-KAYBI-BULGU.md'si (`~/GitHub/Mozaik-test/scratch/test-plan/`).
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Exe: useHttpsScheme açıkça false, köken http://tauri.localhost testle kilitli". Bugünkü
+  değer ölçüldü: anahtar yoktu, kilitli tauri-utils 2.9.3'te `#[serde(default)]`, yani
+  `false`; Windows'ta ölçülmüş köken `http://tauri.localhost` (`surum.test.ts`, kimlik testi)
+  bununla aynı. Değer değişmedi. `true` ve anahtarın silinmesi iki mutasyonla kırmızı.
+- "Kayıt: bayat pencere ötekinin işini silmiyor, dolu depo ekranda söyleniyor (VK1, VK2)".
+  Yol ölçülerek seçildi: `file://`, Chromium, aynı profilde iki sayfa; `storage` olayı,
+  BroadcastChannel ve Web Locks üçü de ikinci sayfaya ulaştı (`isSecureContext` true).
+  `storage` seçildi, çünkü yalnız bir pencere veriyi gerçekten değiştirince tetikleniyor;
+  kilit, kullanılmayan ikinci sekmeyi baştan dışarıda bırakırdı. İlk hâli açık planın
+  anahtarına bakıyordu ve ölçümde yanlış alarm verdi: taze profilde ilk sekmenin açılış
+  yazımı ikinciyi kilitledi. Artık değer karşılaştırılıyor, yalnız açık plan ve plan
+  listesi sayılıyor. Kapı depo katmanında (`libraryStore.ts`), klasör yazımı da ona bakıyor.
+  Kapanan sekme yalnız bekleyen bir yazımı boşaltıyor. Dolu depo kırmızı şeritte;
+  klasöre `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`.
+- "Exe: tek kopya, ikinci açılış var olan pencereyi öne getiriyor (VK1)". Bulunan bir
+  etkileşim: `apply_update` yeni sürümü eskisi kapanmadan başlatıyor, yani tek kopya
+  kilidiyle yeni sürüm kendini ikinci kopya sayıp kapanır ve güncelleme programı kapalı
+  bırakırdı. Yeni sürüm `--guncellendi` ile ve stdin'ine bağlı bir boruyla başlıyor,
+  borunun kapanmasını (eskisinin bitmesini) en çok 20 s bekliyor. Yalnız std.
+- "Test: gerçek exe'de ikinci açılış kapanıyor, kurtarma kopyası sonraki açılıştan sağ çıkıyor".
+
+**Ölçümler.** Linux ikilisi (`target/release/ders-programi`, aynı hedef klasör): eklentisiz
+75f3ddd 4 355 032 bayt, eklentili 5 238 920 bayt, +883 888 (%20,3); Linux'ta eklenti
+D-Bus (zbus) getiriyor, Windows'ta adlandırılmış mutex, yani babanın exe'sindeki artış
+ayrı ölçülecek. Açılış süresi: kirli, ölçülmedi (`temiz-kosul.sh`: prizde değil, yük 3,35).
+
+**Kanıtlar.** E2E `iki-kopya.spec.ts` 4/4; mutasyonlar: dinleyici yok, değer
+karşılaştırması yok ve dolu depo sessiz kırmızı; koşulsuz flush ve depo kapısının kalkması
+yeşil (ikinci katmanlar, ilk katmanları ayrıca sınanıyor, depo kapısını `otherWindow.test.ts`
+ölçüyor). `exe:e2e` 13/13. Eklentisiz ikiliyle "ikinci açılış" kırmızı (ikinci kopya
+kapanmadı); kurtarma yazımı bozulmuş derlemeyle VK2 testi kırmızı. `cargo test` 28/28, devrin
+iki testi dahil.
+
+**CI'ın bulduğu.** İlk itişin CI'ı (37976328335) iki VK1 testinde kırmızıydı: ikinci
+sekmenin açılış yazımı, metni farklı ama anlamı aynı bir planla ilk sekmeyi kilitledi
+(TESTFINDINGS). Kilit artık iki tarafı `parseState`/`parseLibrary`'den geçirip
+karşılaştırıyor; E2E sırayı her koşuda üretiyor. Mutasyonlar yeniden: dinleyici yok, ham
+metin karşılaştırması ve dolu depo sessiz kırmızı.
+
+**Kapsam dışı kalan.** TB7 (test oturumunun haberi): kapanan sekmenin son değişikliği
+klasöre inmiyor, `beforeunload`'daki eşzamansız yazım bitmeden sayfa kapanıyor. Dokunulmadı.
+
+**Koşulmayan testler.** Windows (exe ve E2E), mutasyon, `ekran`.
 
 ---
 
