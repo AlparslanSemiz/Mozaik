@@ -26,6 +26,19 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `mutasyon-kaniti.sh --liste` (`ozellik/linux`) · `src/linuxKur.test.ts`, başlatıcının profili
+Bulgu: başlatıcıya `exec`'ten önce `mkdir -p "$ev/profil"` ekleyen mutasyon yeşil kaldı
+(13 mutasyondan biri). "Chrome var" testi PATH'i yalnız sahte programlara kısıyordu;
+`mkdir` bulunamadı, betik `set -e`'siz olduğu için devam etti, profil hiç kurulmadı.
+Kısıtlı PATH, başlatıcıya sızan her dış komutu (`mkdir`, `rm`) görünmez yapıyordu.
+Tür: test kusuru (bedava yeşil).
+Ne yapıldı: düzeltildi, aynı dalda ("Test: Linux başlatıcısı sistem araçlarıyla koşuyor,
+var olan profil"): Chrome'un bulunması gereken testlerde sahteler önde, `/usr/bin:/bin`
+arkada; Chrome'un yokluğunu sınayan test yalnız sahtelerle, çünkü orada gerçek Chrome
+bulunurdu. Profil önceden varken dokunulmadığı ayrıca sınanıyor. Yeniden koşuda altı
+başlatıcı mutasyonunun altısı kırmızı.
+Kalıcı kural: TRAPS.md'ye aday, numarası birleşme commit'inde.
+
 ### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
 Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da
 "başka bir pencerede" şeridi). Yerelde yeşildi, çünkü ikinci sekme ilkinin açılış

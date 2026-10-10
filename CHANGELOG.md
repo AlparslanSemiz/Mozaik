@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Added
+
+- Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
+
 ### Fixed
 
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.

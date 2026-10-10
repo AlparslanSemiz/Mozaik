@@ -122,6 +122,58 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 
 ---
 
+## 2026-10-10 · `ozellik/linux`: Linux uygulaması Chrome'un app modunda (B7.28)
+
+**Analiz** (dosyaya yazılmadan, Alp'in onayından önce). Chrome 154 ve Brave 1.96, geçici
+profil, `--app`, ağsız için ölü vekil (`--proxy-server=http://127.0.0.1:9`), kilit altında.
+Site: ağsız ilk açılış iki tarayıcıda da `chrome-error://`, ağla ilk açılıştan sonra ağsız
+ikinci açılış service worker'dan, yüklenen örnek ekranda. `file://`: ağsız açılıyor.
+`showDirectoryPicker`: Chrome'da iki yolda `function`, seçici açıldı (söz 2,5 s bekledi);
+Brave'de iki yolda `undefined`. VK1: aynı profilde ikinci `--app` çağrısı aynı süreçte ikinci
+pencere; A örneği yükleyince B'de şerit, A'da yok, iki tarayıcıda. Alp'in verisi: Brave'in
+iki profilinde sitenin geçmişi, service worker'ı ve IndexedDB'si yok; Chrome'un Default
+profilinde kurulu Mozaik web uygulaması, service worker, `ders-programi-*` anahtarı ve
+`ders-programi-klasor` IndexedDB'si (leveldb sıkıştırılmış, anahtarların hepsi sayılamadı).
+Eski Tauri Linux verisi `~/.local/share/com.dersprogrami.arac` (2026-08-27, 11 anahtar,
+plan 1 940 karakter), dokunulmadı.
+
+**Kararlar (Alp):** `file://` ve ayrı Chrome profili, yalnız `google-chrome`, rpm bırakılır,
+"Şu an" son commit'te. DECISIONS 2026-10-10.
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Belgeler: özellik sırası ve B7.28 Linux uygulaması".
+- "Linux: kurulum betiği ve Chrome başlatıcısı, taşıma README'de": `scripts/linux-kur.sh`,
+  `scripts/linux-mozaik.sh`, `src/linuxKur.test.ts` (sahte ev dizininde gerçek betik),
+  BUILD.md "Linux uygulaması".
+- "Test: Linux başlatıcısı sistem araçlarıyla koşuyor, var olan profil; README'de doğru
+  bölüm": mutasyonun bulduğu bedava yeşil (TESTFINDINGS), ve README'nin "Ayarlar → Veri"si
+  "Planlar ve yedek" oldu (dosyaya kaydetme ve klasör orada; analiz raporunda da yanlıştı).
+- "Test: Linux'a taşıma, site kökeninden file://'a bütün planlar": `e2e/linux-tasima.spec.ts`,
+  site config'inde. İlk koşuda kırmızı: boş branş listeli plan okunurken yerleşik listeyle
+  doluyor (B7.27'nin yan bulgusu, taşımaya özgü değil); test bu tek farkı adıyla dışlıyor,
+  branşı dolu plan tam karşılaştırılıyor.
+- "Linux: exe:rpm kaldırıldı, karar DECISIONS'ta".
+- "Belgeler: B7.28'in kalanları, sitenin ortak kökeni §8a'da".
+
+**Mutasyon kanıtı** (`scripts/mutasyon-kaniti.sh --liste`, kilit altında): kurulum betiğinin
+7 mutasyonu (dal, kirli ağaç, worktree, bağ yerine kopya, profili silmek, commit kaydı,
+derleme hatasını yutmak) kırmızı; başlatıcının ilk koşusunda 5/6, profili kuran mutasyon
+yeşil kaldı, test düzeldi, yeniden koşuda 6/6 (profili silmek eklendi). Taşıma testinde
+`--derle` ile 3/3: ikinci planı düşürmek ("1 plan açıldı"), içeriği boşaltmak ("hiçbir plan
+okunamadı"), öğretmenleri boşaltmak (içerik karşılaştırması, "1. plan").
+
+**Tuzak adayı** (numarası birleşme commit'inde): kısıtlı PATH'le koşan bir kabuk testi,
+betiğe sızan dış komutları göremez; komut bulunamaz, `set -e`'siz betik devam eder, test
+yeşil kalır. Çare: sahteler önde, sistem dizinleri arkada; yokluğu sınanan program için
+yalnız sahteler.
+
+**Koşulan testler.** Her commit'ten önce `hizli` (son: 1290 geçti, 1 atlandı); `tipler` 0;
+`src/linuxKur.test.ts` 10/10 (shellcheck testi bu makinede atlanıyor, araç yok);
+`linux-tasima.spec.ts` 1/1 (`vite build`, site derlemesi, site config'i, kilit altında).
+**Koşulmayan:** `kontrol`, tam E2E, `test:site`'ın öteki üç dosyası (yerelde; CI koşuyor),
+Windows E2E, gerçek kurulum (`~/.local/share/mozaik`'e bu oturumda yazılmadı; betik `main`'i
+istiyor ve dal henüz birleşmedi).
+
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 
 **Ne yapıldı** (dal commit'leri konusuyla):
