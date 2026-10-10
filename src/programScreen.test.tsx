@@ -31,7 +31,7 @@ import type { Suggestion } from './pure/relax';
 import { PRINT_DEFAULTS, type PoolSort, type ProgramColorMode } from './platform/prefs';
 import type { State, View } from './leaf/types';
 import Program from './ui/program/Program';
-import Print, { NOTHING_EXCLUDED } from './ui/Print';
+import Print, { NOTHING_EXCLUDED } from './ui/print/Print';
 import { LangProvider } from './ui/T';
 import { DialogProvider } from './ui/Dialogs';
 import { ToastProvider } from './ui/Toasts';

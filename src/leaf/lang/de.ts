@@ -335,7 +335,7 @@ const DE: Sozluk = {
   Sonuçlar: "Ergebnisse",
   "Eşleşen bir şey yok.": "Keine Treffer.",
 
-  // src/ui/Print.tsx
+  // src/ui/print/Print.tsx
   Gün: "Tag",
   "Yazdırılacak program yok.": "Es gibt keinen Plan zum Drucken.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",

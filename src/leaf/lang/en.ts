@@ -331,7 +331,7 @@ const EN: Sozluk = {
   Sonuçlar: "Results",
   "Eşleşen bir şey yok.": "Nothing matches.",
 
-  // src/ui/Print.tsx
+  // src/ui/print/Print.tsx
   Gün: "Day",
   "Yazdırılacak program yok.": "There is no timetable to print.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",

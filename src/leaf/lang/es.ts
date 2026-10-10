@@ -333,7 +333,7 @@ const ES: Sozluk = {
   Sonuçlar: "Resultados",
   "Eşleşen bir şey yok.": "No hay coincidencias.",
 
-  // src/ui/Print.tsx
+  // src/ui/print/Print.tsx
   Gün: "Día",
   "Yazdırılacak program yok.": "No hay horario que imprimir.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",

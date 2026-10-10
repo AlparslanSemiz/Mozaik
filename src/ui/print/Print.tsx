@@ -19,21 +19,21 @@
 // them, and when the job was stamped.
 
 import { useMemo } from 'react';
-import { blockSpans, buildIndex } from '../pure/constraints';
-import { parseKey } from '../leaf/keys';
-import { paletteColor } from '../leaf/palette';
-import type { State } from '../leaf/types';
-import { activePlacements } from '../pure/program';
-import { classSheet, sheetHead, teacherSheet } from '../pure/paper';
+import { blockSpans, buildIndex } from '../../pure/constraints';
+import { parseKey } from '../../leaf/keys';
+import { paletteColor } from '../../leaf/palette';
+import type { State } from '../../leaf/types';
+import { activePlacements } from '../../pure/program';
+import { classSheet, sheetHead, teacherSheet } from '../../pure/paper';
 import {
   PER_SHEET_LABELS,
   PRINT_OPTION_LABELS,
   PRINT_SIZE_LABELS,
   type Scope,
   type PrintOptions,
-} from '../platform/prefs';
+} from '../../platform/prefs';
 import Sheet from './Sheet';
-import { T, useT } from './T';
+import { T, useT } from '../T';
 
 interface Props {
   state: State;

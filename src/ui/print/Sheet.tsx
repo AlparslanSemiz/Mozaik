@@ -2,9 +2,9 @@
 // header of lesson numbers, a row per day, and the stamp. It decides nothing
 // about what the sheet says; `Print` chooses which sheets there are.
 
-import { paletteColor } from '../leaf/palette';
-import type { Sheet as SheetModel, SheetHour } from '../pure/paper';
-import { useT } from './T';
+import { paletteColor } from '../../leaf/palette';
+import type { Sheet as SheetModel, SheetHour } from '../../pure/paper';
+import { useT } from '../T';
 
 interface Props {
   sheet: SheetModel;
