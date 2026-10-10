@@ -751,6 +751,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       okuyor. Depoda `[null]` gibi bir değer satırı düşürür. Anahtarı yalnız uygulama
       yazıyor, veri kaybı yok. Okundu, ölçülmedi (2026-10-09, `refactor/search`).
       Düzeltilmedi: dal davranış değiştirmez.
+      **Sıra (2026-10-10, Alp):** VK1 ve VK2'nin hemen arkasında, §8k'den buraya alındı.
+      Veri kaybettirmiyor ama babanın yedek ekranına ulaşmasını engelleyebilir: otomatik
+      yedeklerin listesi aynı bileşende (`Data.tsx`) ve `src/ui`'da hata sınırı yok, yani
+      okumaya göre çöküş satırda kalmaz, Veri bölümü açılınca bütün pencere boşalır.
+      Ölçülmedi.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
@@ -1242,16 +1247,17 @@ src/
 ve `.claude/skills/paket-turu` ile. Tabloda satırı olmayan bir dosya taşınmaz, sorulur.
 Sıra değişti (2026-10-09 gece, Alp'in kararı): 4 (`platform/storage`), 5 (`platform/exe`) ve
 6 (`pure/io`), özellik oturumunun `fix/veri-kaybi` dalı (VK1, VK2) `main`'e girene kadar
-bekler, çünkü o düzeltmeler aynı dosyalara dokunuyor. Sıradaki 7 (`platform/search`).
+bekledi, çünkü o düzeltmeler aynı dosyalara dokunuyor. O dal girdi (2026-10-10); 7
+(`platform/search`) bitti, sıradaki 4.
 
 | Sıra | Paket | Eski | Yeni | Not |
 |---|---|---|---|---|
 | 1 | lang | `leaf/lang/*` | yerinde, `leaf/lang/index.ts` eklendi | bitti (3c769a0) |
 | 2 | lists | `ui/setup/{Paste,Summary}` | `ui/lists/` | bitti (0d97c82, 3f1944e) |
 | 3 | platform/prefs | `platform/{theme,printOptions,programColor,toolState}` | `platform/prefs/` | bitti (`refactor/prefs`); RF20 yapılmadı, RF11'e bağlı |
-| 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
-| 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
-| 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
+| 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | `fix/veri-kaybi` (VK1, VK2) girdi, sırada |
+| 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | `fix/veri-kaybi` (VK1, VK2) girdi, sırada |
+| 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | `fix/veri-kaybi` (VK1, VK2) girdi, sırada |
 | 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | bitti (`refactor/search`); `relaxPool` paketin içinde |
 | 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | RF8, RF9 |
 | 9 | adım 5 | `ui/Ribbon.tsx`, `ui/{ListTools,useRowOrder,CapacityRows,AddPanel}` | `ui/ribbon/`, `ui/lists/` | RF10, RF12, RF11 |
@@ -1384,6 +1390,8 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       sonuç yazmıyor (RK13)"): günlük `<sıra>-<ad>.log`, açılamazsa betik 64 ile duruyor,
       kirmizi ve yesil yalnız test komutu koştuysa yazılıyor. Kanıt WORKLOG'da.
 
+- RK14 §7'de, B7.27'nin arkasında (2026-10-10, sıra Alp'in).
+
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
@@ -1401,12 +1409,12 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 (`paket-ici-alan`, `paket-ici-kok`, ac45672), 0 ihlalle girdi ve mutasyonla kanıtlandı
 (WORKLOG 2026-10-09, `refactor/lists`). Hedef ağaç ve tablo bu bölüme yazıldı, RK13 kapandı
 (6b282ce), `platform/prefs` paketi (185e9cc, 7334d19; WORKLOG 2026-10-09, `refactor/prefs`).
-`refactor/search` dalında: `useSolver`'ın birim testi ve `platform/search` paketi (WORKLOG
+`useSolver`'ın birim testi ve `platform/search` paketi (947a4cc, c423037; WORKLOG
 2026-10-09, `refactor/search`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
-yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) bitti; 4, 5 ve 6
-`fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki 8 (adım 4: `program`, `print`). Adım 2'nin süre ölçümleri temiz koşulda
+yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) bitti; `fix/veri-kaybi` girdi, sıradaki 4
+(`platform/storage`), sonra 5 ve 6. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 

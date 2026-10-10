@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-09.
+Son güncelleme: 2026-10-10.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -40,11 +40,16 @@ bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
-paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/search` dalı
-`useSolver`'ın birim testini ve `platform/search` paketini getiriyor (2026-10-09,
-[TODO.md](TODO.md) §8k).
+paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi ve
+`platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
+0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
+   (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
+   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
+   → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
+   uygulaması. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
+   günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
@@ -66,8 +71,8 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
 8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, storage, exe ve io
-   `fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki adım 4 (TODO §8k). Adım 2: RF3
+   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, `fix/veri-kaybi`
+   girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -114,6 +119,26 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- `git merge main` (`refactor/prefs` ve `refactor/search`). İki belge çatışması, kodda yok:
+  ARCHITECTURE'ın katman şemasında satır Alp'in verdiği gibi
+  `useStore · usePlans · useFolder · search/* · otherWindow`; WORKLOG'da iki tarafın
+  2026-10-09 girdisi ayrı, ikisi de kaldı, bu dalınki üstte. Eski arama yollarına kodda
+  bayat import yok (grep).
+- "Taşıma: RK14 §8k'den §7'ye, B7.27'nin arkasına", metni değişmeden.
+- RK14'e sıra ve sebep, §8k'de işaret; birleşmeyle bayatlayan "bekler" cümleleri ve "Şu an".
+  RK14'ün yeni cümlesi okumaya dayanıyor: `Data` yalnız Ayarlar'ın Veri ve Hakkında
+  bölümünde bağlanıyor, `src/ui`'da hata sınırı yok. Ölçülmedi.
+
+**Koşulan testler.** Birleşmeden sonra `tipler` 0, `sinir` 0, `lint` 0, `hizli` 1280/1280;
+her belge commit'inden önce `hizli` ve belge kapıları 19/19.
+
+**Koşulmayan testler.** Yerelde tam `npm test`, `kontrol`, E2E (CI'da), mutasyon, Windows.
 
 ---
 
