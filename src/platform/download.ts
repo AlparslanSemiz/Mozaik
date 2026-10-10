@@ -15,7 +15,7 @@
 import { buildBundle } from '../pure/bundle';
 import { backupFileName, bundleFileName, type Library } from '../pure/library';
 import { loadPlan } from './planStore';
-import { searchLog } from './relaxLog';
+import { searchLog } from './search';
 import type { Id, State } from '../leaf/types';
 
 /** Hands the browser a file to save. Both file kinds go through here. */

@@ -1180,10 +1180,10 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 | RF10 | şerit tek fonksiyonda yedi sekme | `src/ui/Ribbon.tsx` |
 | RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/App.tsx` |
 | RF12 | liste ekranlarının ortak iskeleti kopya | `src/ui/setup/`, `src/ui/lessons/` |
-| RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada, birim testi yok | `src/platform/useSolver.ts` |
+| RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada (birim testi 2026-10-09'dan beri var, `useSolver.test.tsx`) | `src/platform/search/useSolver.ts` |
 | RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/types.ts` |
 | RF15 | `t()`'den geçmeyen dizeler (özellik işi, §8d) | `src/ui/` |
-| RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/relaxPool.ts` |
+| RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
 | RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
 | RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities.ts`, `src/pure/listview.ts` |
@@ -1246,7 +1246,7 @@ bekler, çünkü o düzeltmeler aynı dosyalara dokunuyor. Sıradaki 7 (`platfor
 | 4 | platform/storage | `platform/{libraryStore,planStore,storageReport,useStore,usePlans,download,folder,useFolder}` | `platform/storage/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
 | 5 | platform/exe | `platform/{desktop,update}` | `platform/exe/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
 | 6 | pure/io | `pure/{parseState,bundle,library,import,sample}` | `pure/io/` | `fix/veri-kaybi` (VK1, VK2) `main`'e girene kadar bekler |
-| 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | |
+| 7 | platform/search | `platform/{relaxPool,relaxWorker,relaxLog,useSolver}` | `platform/search/` | bitti (`refactor/search`); `relaxPool` paketin içinde |
 | 8 | adım 4 | `pure/{programs,programMask}`, `ui/{Program,Grid,LessonPool,Inspector,Suggestions,Check,steps,Print}` | `pure/program/`, `pure/paper/`, `ui/program/`, `ui/print/` | RF8, RF9 |
 | 9 | adım 5 | `ui/Ribbon.tsx`, `ui/{ListTools,useRowOrder,CapacityRows,AddPanel}` | `ui/ribbon/`, `ui/lists/` | RF10, RF12, RF11 |
 | 10 | pure/relax | `pure/{relax,sat}.ts` | `pure/relax/` | RF1, mutasyon tabanından sonra; stryker, kapsam ve TESTPLAN aynı commit'te |
@@ -1378,6 +1378,13 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       sonuç yazmıyor (RK13)"): günlük `<sıra>-<ad>.log`, açılamazsa betik 64 ile duruyor,
       kirmizi ve yesil yalnız test komutu koştuysa yazılıyor. Kanıt WORKLOG'da.
 
+- [ ] **RK14 Bozuk bir arama günlüğü Ayarlar → Veri'nin satırını çökertebilir.**
+      `platform/search/relaxLog.ts` 41 depodan okunan diziyi eleman eleman bakmadan
+      `SearchRecord[]`'a döküyor; `ui/settings/Data.tsx` 250 son kaydın `doneMs`'ini
+      okuyor. Depoda `[null]` gibi bir değer satırı düşürür. Anahtarı yalnız uygulama
+      yazıyor, veri kaybı yok. Okundu, ölçülmedi (2026-10-09, `refactor/search`).
+      Düzeltilmedi: dal davranış değiştirmez.
+
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
@@ -1393,13 +1400,14 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 **Biten (dal).** T1 (`leaf/lang/index.ts`, 3c769a0), T2a (`Paste` ile `Summary`
 `ui/lists/`'e, 0d97c82), T2b (`ui/lists/index.ts`, 3f1944e) ve derin import kuralı
 (`paket-ici-alan`, `paket-ici-kok`, ac45672), 0 ihlalle girdi ve mutasyonla kanıtlandı
-(WORKLOG 2026-10-09, `refactor/lists`). `refactor/prefs` dalında: hedef ağaç ve tablo bu
-bölüme yazıldı, RK13 kapandı, `platform/prefs` paketi (WORKLOG 2026-10-09,
-`refactor/prefs`).
+(WORKLOG 2026-10-09, `refactor/lists`). Hedef ağaç ve tablo bu bölüme yazıldı, RK13 kapandı
+(6b282ce), `platform/prefs` paketi (185e9cc, 7334d19; WORKLOG 2026-10-09, `refactor/prefs`).
+`refactor/search` dalında: `useSolver`'ın birim testi ve `platform/search` paketi (WORKLOG
+2026-10-09, `refactor/search`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
-yeni dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/search` (`relaxPool`,
-`relaxWorker`, `relaxLog`, `useSolver`); 4, 5 ve 6 `fix/veri-kaybi`'yi bekliyor. Adım 2'nin süre ölçümleri temiz koşulda
+yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) bitti; 4, 5 ve 6
+`fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki 8 (adım 4: `program`, `print`). Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
 

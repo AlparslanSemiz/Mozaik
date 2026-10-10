@@ -28,7 +28,7 @@ import {
 import { writesClosed } from './otherWindow';
 import type { Library } from '../pure/library';
 import { collectStates } from './download';
-import { searchLog } from './relaxLog';
+import { searchLog } from './search';
 import type { Id, State } from '../leaf/types';
 
 /**

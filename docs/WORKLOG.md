@@ -39,9 +39,10 @@ yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09
 bir worktree'de ya da başka dalda tek cümleyle durur.
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-davranış değiştirmiyor: adım 0 ve 1 bitti, `leaf/lang` ve `ui/lists` paketleri ile derin
-import kuralı `main`'de; `refactor/prefs` dalı `platform/prefs` paketini, RK13'ün
-düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.md) §8k).
+davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
+paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/search` dalı
+`useSolver`'ın birim testini ve `platform/search` paketini getiriyor (2026-10-09,
+[TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
@@ -65,8 +66,8 @@ düzeltmesini ve hedef ağacın tablosunu getiriyor (2026-10-09, [TODO.md](TODO.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
 8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; sıradaki `platform/search` (storage, exe ve io
-   `fix/veri-kaybi`'yi bekliyor). Adım 2: RF3
+   dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, storage, exe ve io
+   `fix/veri-kaybi`'yi bekliyor, o girmediyse sıradaki adım 4 (TODO §8k). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
@@ -167,6 +168,53 @@ klasöre inmiyor, `beforeunload`'daki eşzamansız yazım bitmeden sayfa kapanı
 **Koşulmayan testler.** Windows (exe ve E2E), mutasyon, `ekran`.
 
 ---
+
+## 2026-10-09 (gece) · Refactor, `refactor/search` dalı: `useSolver`'ın testi, `platform/search`
+
+**Başlangıç.** Dal `origin/main`'den (`0d360ee`, `refactor/prefs`'in birleştiği hâl) açıldı,
+takipsiz; `refactor/prefs` yerelde ve origin'de silindi. Oturum boyunca `main` ilerlemedi.
+İlk tur yeni yöntemle: taşıma, `index` ve import'lar tek commit.
+
+**Envanter.** Dört dosya 833 satır: `useSolver.ts` 376, `relaxPool.ts` 305, `relaxLog.ts`
+101, `relaxWorker.ts` 51. Dışarıdan import eden 8 üretim dosyası (6 runtime import), ikisi
+beklemedeki `platform/storage`'ın (`download.ts`, `useFolder.ts`, `searchLog` için). Birim
+testi: `relaxPool.test.ts` (4) ve `relaxWorker.test.ts` (1); **`useSolver`'ın birim testi
+yoktu.** Kapsam (dokunan test dosyalarıyla, liste geçersiz kılınarak): `relaxWorker` %93,5,
+`relaxLog` %22,2, `relaxPool` %21,1 (`startRelax` birimde hiç koşmuyor, E2E tutuyor),
+`useSolver` %0. Saf paket değil, mutasyon skoru yok.
+
+**Ne yapıldı, commit commit** (dal commit'leri konusuyla):
+- "Test: useSolver'ın kararları birim testinde": `src/useSolver.test.tsx`, jsdom, çözücü ve
+  `startRelax` sahte, kareler elle. Altı test: `samePlan`; koşu haftasını yalnız başladığı
+  plana yazar; takılan koşu aramayı o plandan, takıldığı haftayla (plandakinden farklı
+  olduğu testte ayrıca doğrulanıyor), `keepPlaced` varsayılanıyla ve cevaplarla başlatır;
+  Durdur tutar ve durduğunu söyler, sürdür bulunanı ilk tahmin yapar; öneri yalnız yapıldığı
+  plana, evetler veriye, hayırlar kalır; yeni hayır onu kullananları, yeni evet hepsini
+  düşürür, aynı cevap yeniden aratmaz. `mutasyon-kaniti.sh --liste` ile 13 bozmanın 13'ü
+  kırmızı. Kapsam %0 → %93,3.
+- "Taşıma: relaxPool, relaxWorker, relaxLog ve useSolver platform/search/'e, tek giriş
+  noktasından". `index` yedi adı açıyor, `relaxPool` içeride kalıyor. Bayt aynılığı `index`
+  eklenmeden önce çalışma ağacında: aynı HEAD'de yalnız `git mv` ve yollarla `dist/index.html`
+  bayt bayt aynı (sha a8109038…), o hâlde `sinir` 6 derin import. `index`'le aynı boy
+  (1 159 056 bayt), modül sırası değişti.
+
+**`fix/veri-kaybi` ile.** `git merge-tree` bu dalın ucunu `fix/veri-kaybi`'ye karşı
+birleştirdi: kodda çatışma yok (`useFolder.ts` ve `App.tsx` iki tarafta da değişiyor, ayrı
+satırlar). Tek çatışma ARCHITECTURE'ın katman şemasında: VK `relaxLog` satırına
+`· otherWindow` ekliyor, bu dal o iki satırı `useStore · usePlans · useFolder · search/*`
+yaptı. Çözümü: `useStore · usePlans · useFolder · search/* · otherWindow`.
+
+**İç temizlik.** Aday çıkmadı. `!`'ler dizi indekslerinde, `as`'ler worker'ın `self`'inde ve
+depodan okumada; sonuncusu bir kusur adayı, RK14 (TODO §8k), düzeltilmedi. `RelaxJob` düz
+veri (plan, ipucu, seçenekler, tuzak 67), taşıma ona dokunmadı.
+
+**Koşulan testler.** Her commit'ten önce `hizli` (son 1276/1276) ve belge kapıları (19/19);
+kod commit'inde `tipler`, `sinir` 0, `lint` 0, `knip`, prettier. Kilit altında: 13 mutasyon,
+derleme, boyut (279,37 kB brotli) ve `temel.spec.ts` ile `otomatik.spec.ts` 49/49 (tuzak
+136'nın worker testleri dahil).
+
+**Koşulmayan testler.** Yerelde tam `npm test`, `kontrol` ve tam E2E (CI'da), Stryker,
+`exe:*` (gerçek exe süiti worker'ın satır içi yolunu ölçüyor, RF16; CI'da yok), süre ölçümü.
 
 ## 2026-10-09 (gece) · Refactor, `refactor/prefs` dalı: hedef ağaç, RK13, `platform/prefs`
 

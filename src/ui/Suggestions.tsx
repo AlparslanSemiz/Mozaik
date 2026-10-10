@@ -19,7 +19,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import type { Advice } from '../platform/useSolver';
+import type { Advice } from '../platform/search';
 import { answerNo, answerYes, dropAnswer } from '../pure/entities';
 import {
   FAMILY_ORDER,
