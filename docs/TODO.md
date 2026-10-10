@@ -745,6 +745,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       0 branş gösteriyor, aynı plan kaydedilip yeniden okununca `parseState` boş listeyi 21
       yerleşik branşla dolduruyor (TESTFINDINGS 2026-10-09); var olan bir tutarsızlık,
       dokunulmadı.
+- [ ] **RK14 Bozuk bir arama günlüğü Ayarlar → Veri'nin satırını çökertebilir.**
+      `platform/search/relaxLog.ts` 41 depodan okunan diziyi eleman eleman bakmadan
+      `SearchRecord[]`'a döküyor; `ui/settings/Data.tsx` 250 son kaydın `doneMs`'ini
+      okuyor. Depoda `[null]` gibi bir değer satırı düşürür. Anahtarı yalnız uygulama
+      yazıyor, veri kaybı yok. Okundu, ölçülmedi (2026-10-09, `refactor/search`).
+      Düzeltilmedi: dal davranış değiştirmez.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
@@ -1377,13 +1383,6 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       Kapandı (2026-10-09, `refactor/prefs`, "Betikler: mutasyon listesi koşmayan satıra
       sonuç yazmıyor (RK13)"): günlük `<sıra>-<ad>.log`, açılamazsa betik 64 ile duruyor,
       kirmizi ve yesil yalnız test komutu koştuysa yazılıyor. Kanıt WORKLOG'da.
-
-- [ ] **RK14 Bozuk bir arama günlüğü Ayarlar → Veri'nin satırını çökertebilir.**
-      `platform/search/relaxLog.ts` 41 depodan okunan diziyi eleman eleman bakmadan
-      `SearchRecord[]`'a döküyor; `ui/settings/Data.tsx` 250 son kaydın `doneMs`'ini
-      okuyor. Depoda `[null]` gibi bir değer satırı düşürür. Anahtarı yalnız uygulama
-      yazıyor, veri kaybı yok. Okundu, ölçülmedi (2026-10-09, `refactor/search`).
-      Düzeltilmedi: dal davranış değiştirmez.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
