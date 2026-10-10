@@ -23,8 +23,8 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import type { Id } from '../leaf/types';
-import { paletteColor } from '../leaf/palette';
+import type { Id } from '../../leaf/types';
+import { paletteColor } from '../../leaf/palette';
 import {
   DOCK_H_MIN,
   readDock,
@@ -32,10 +32,10 @@ import {
   writeDock,
   writeDockHeight,
   type PoolSort,
-} from '../platform/prefs';
-import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../platform/poolSplit';
-import { attachScrollFade } from '../platform/scrollFade';
-import { useT } from './T';
+} from '../../platform/prefs';
+import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../../platform/poolSplit';
+import { attachScrollFade } from '../../platform/scrollFade';
+import { useT } from '../T';
 
 export interface PoolCard {
   /** React identity: one lesson can put several cards on the tray. */

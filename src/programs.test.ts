@@ -10,7 +10,7 @@ import {
   removeProgram,
   renameProgram,
   switchProgram,
-} from './pure/programs';
+} from './pure/program/programs';
 import { makeWorld } from './worlds';
 
 function world() {

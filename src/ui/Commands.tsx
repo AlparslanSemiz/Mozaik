@@ -16,7 +16,7 @@ import { useMemo } from 'react';
 import { DoorOpen, Play } from 'lucide-react';
 import Palette from './Palette';
 import type { Command } from './Palette';
-import { useInspect } from './Inspector';
+import { useInspect } from './program';
 import { useT } from './T';
 import { subjectLabel } from '../pure/entities';
 import { paletteColor } from '../leaf/palette';

@@ -16,7 +16,7 @@ import { createSolver } from '../../pure/solver';
 import type { Solver, SolverOptions, SolverProgress, SolverResult } from '../../pure/solver';
 import { applySuggestion, suggestionUses } from '../../pure/relax';
 import type { RelaxOptions, RelaxProgress, Relaxer, Suggestion } from '../../pure/relax';
-import { activePlacements } from '../../pure/programs';
+import { activePlacements } from '../../pure/program';
 import { startRelax } from './relaxPool';
 import type { Answers, Id, State } from '../../leaf/types';
 

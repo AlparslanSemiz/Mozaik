@@ -245,7 +245,7 @@ panelin Ad kutusuna tıklanıp çıkıldı. Görüntüler: `scratch/denetim/prog
   "320 sınıfı sınıfı" gösterir ve her açıp çıkışta bir "sınıfı" daha eklenir. Derslikte
   aynı: Okul → Derslikler → `A bilgileri` → Ad kutusu, "A" "A dersliği" olur.
   Öğretmende olmuyor. Ctrl+Z geri alıyor. Sebep kaynakta görülüyor: kutunun
-  `defaultValue`'su başlık için biçimlenmiş ad (`{ad} sınıfı`, `src/ui/Inspector.tsx`),
+  `defaultValue`'su başlık için biçimlenmiş ad (`{ad} sınıfı`, `src/ui/program/Inspector.tsx`),
   ve `rename()` blur'da değişip değişmediğine bakmadan yazıyor. Görüntü:
   `scratch/denetim/program/sinif-adi-bozuldu-1920.png`.
   **Düzeldi (2026-09-27, 46011b2).**

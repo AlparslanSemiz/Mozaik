@@ -45,7 +45,7 @@ import {
   updateLesson,
   weeklyLoad,
 } from '../../pure/entities';
-import { KIND_ICON } from '../steps';
+import { KIND_ICON } from '../program';
 import LimitBox from '../LimitBox';
 import BlockCounts, { blockCeiling } from '../BlockCounts';
 import { Paste, Summary } from '../lists';

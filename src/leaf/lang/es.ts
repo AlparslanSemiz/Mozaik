@@ -189,7 +189,7 @@ const ES: Sozluk = {
   Yük: "Carga",
   Durum: "Estado",
 
-  // src/ui/Check.tsx
+  // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "Todavía no hay nada que revisar.",
   İmkânsız: "Imposible",
   "Programın durumu": "Estado del horario",
@@ -253,7 +253,7 @@ const ES: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     'Se ha abierto un plan nuevo desde el borrador "{ad}".',
 
-  // src/ui/Grid.tsx
+  // src/ui/program/Grid.tsx
   "Öğle arası": "Descanso del mediodía",
   "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, pulse Supr para quitar",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
@@ -264,7 +264,7 @@ const ES: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Fijada. Clic derecho para soltarla",
 
-  // src/ui/Program.tsx — the grid's own menu
+  // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Enviar a la bandeja",
   sabitlenmiş: "fijada",
   "Dersi düzenle": "Editar la clase",
@@ -287,12 +287,12 @@ const ES: Sozluk = {
     "Las {n} horas fijadas se quedan. Las clases, los profesores y las horas cerradas no cambian. Ctrl+Z lo deshace.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: datos y horario semanal",
 
-  // src/ui/Inspector.tsx
+  // src/ui/program/Inspector.tsx
   Kapat: "Cerrar",
   "Haftalık programı": "Horario semanal",
   "Kayıt bulunamadı": "No se ha encontrado el registro",
 
-  // src/ui/LessonPool.tsx
+  // src/ui/program/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Clases pendientes de colocar",
   "Havuz yüksekliği": "Altura de la bandeja",
   "Sürükleyerek havuzun boyunu ayarlayın":
@@ -361,7 +361,7 @@ const ES: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** de las páginas seleccionadas están completamente vacías. Los horarios de esas clases aún no se han montado. Puede montarlos en la pestaña **Horario**.",
 
-  // src/ui/Program.tsx
+  // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Se puede soltar aquí.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Colocando automáticamente… {yerlesen}/{toplam} bloques · {sure} s",

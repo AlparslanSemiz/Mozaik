@@ -28,7 +28,7 @@ import {
 import { downloadBundle } from '../../platform/download';
 import { listBackups } from '../../platform/planStore';
 import type { State } from '../../leaf/types';
-import { activePlacements } from '../../pure/programs';
+import { activePlacements } from '../../pure/program';
 import type { PlanControls } from '../props';
 import type { FolderRun } from '../../platform/useFolder';
 import type { UpdateRun } from '../../platform/update';

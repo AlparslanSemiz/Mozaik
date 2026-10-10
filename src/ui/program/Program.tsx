@@ -26,13 +26,13 @@ import {
   setBlockPinned,
   pinScopeCells,
   togglePinScope,
-} from '../pure/constraints';
-import type { BlockRef, PinScope } from '../pure/constraints';
-import type { Index } from '../pure/constraints';
-import { cellKey, parseCellKey } from '../leaf/keys';
-import { useToast } from './Toasts';
+} from '../../pure/constraints';
+import type { BlockRef, PinScope } from '../../pure/constraints';
+import type { Index } from '../../pure/constraints';
+import { cellKey, parseCellKey } from '../../leaf/keys';
+import { useToast } from '../Toasts';
 import { useInspect } from './Inspector';
-import { useLessonEdit } from './LessonEdit';
+import { useLessonEdit } from '../LessonEdit';
 import {
   dayLabel,
   lessonSubject,
@@ -40,23 +40,28 @@ import {
   subjectLabel,
   subjectShort,
   teacherSubjects,
-} from '../pure/entities';
-import { compareTr } from '../pure/listview';
-import { useDrag } from '../platform/drag';
-import type { DragData } from '../platform/drag';
-import { samePlan, type SolverRun } from '../platform/search';
-import { applySuggestion, suggestionDiff } from '../pure/relax';
-import type { SuggestionDiff } from '../pure/relax';
-import type { State, Id } from '../leaf/types';
-import { activePinned, activePlacements } from '../pure/programs';
-import { rowMask, setDayMask, setRowMask } from '../pure/programMask';
-import type { ProgramMask } from '../pure/programMask';
+} from '../../pure/entities';
+import { compareTr } from '../../pure/listview';
+import { useDrag } from '../../platform/drag';
+import type { DragData } from '../../platform/drag';
+import { samePlan, type SolverRun } from '../../platform/search';
+import { applySuggestion, suggestionDiff } from '../../pure/relax';
+import type { SuggestionDiff } from '../../pure/relax';
+import type { State, Id } from '../../leaf/types';
+import {
+  activePinned,
+  activePlacements,
+  rowMask,
+  setDayMask,
+  setRowMask,
+  type ProgramMask,
+} from '../../pure/program';
 import {
   programColorIndex,
   type PoolSort,
   type View,
   type ProgramColorMode,
-} from '../platform/prefs';
+} from '../../platform/prefs';
 import { KIND_ICON } from './steps';
 import Grid from './Grid';
 import type { GridCell, GridMenuTarget, GridRow } from './Grid';
@@ -64,8 +69,8 @@ import LessonPool from './LessonPool';
 import Suggestions, { wayName } from './Suggestions';
 import type { Preview } from './Suggestions';
 import type { PoolCard } from './LessonPool';
-import { T, useT } from './T';
-import type { Translate } from './T';
+import { T, useT } from '../T';
+import type { Translate } from '../T';
 
 interface Props {
   /** False while the Activity keeps this tree mounted behind another tab. */

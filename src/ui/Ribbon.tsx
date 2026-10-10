@@ -114,12 +114,15 @@ import {
   replaceActiveGrid,
   switchProgram,
   validProgramName,
-} from '../pure/programs';
+  maskCount,
+  setDayMask,
+  setRowMask,
+  solverExclusions,
+  type ProgramMask,
+} from '../pure/program';
 import { newId } from '../pure/entities';
-import { maskCount, setDayMask, setRowMask, solverExclusions } from '../pure/programMask';
-import type { ProgramMask } from '../pure/programMask';
 import { pendingBlocks, pinScopeCells, togglePinScope } from '../pure/constraints';
-import { KIND_ICON, STEPS, classIcon, teacherIcon } from './steps';
+import { KIND_ICON, STEPS, classIcon, teacherIcon } from './program';
 import { useLang, useT } from './T';
 
 interface Props {

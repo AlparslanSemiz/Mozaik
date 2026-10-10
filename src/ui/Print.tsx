@@ -21,7 +21,7 @@ import { parseKey } from '../leaf/keys';
 import { dayLabel, lessonSubject, shortDay, subjectShort, teacherSubjects } from '../pure/entities';
 import { paletteColor } from '../leaf/palette';
 import type { State } from '../leaf/types';
-import { activePlacements } from '../pure/programs';
+import { activePlacements } from '../pure/program';
 import {
   PER_SHEET_LABELS,
   PRINT_OPTION_LABELS,

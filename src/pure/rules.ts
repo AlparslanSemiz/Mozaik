@@ -19,7 +19,7 @@ import { dayLabel, subjectLabel } from '../leaf/names';
 import { lessonSubject } from '../leaf/subjects';
 import type { Index } from './constraints';
 import { closedKey, placementKey } from '../leaf/keys';
-import { activePlacements } from './programs';
+import { activePlacements } from './program';
 import type { ClassGroup, Id, Lesson, RuleLevel, RuleName, State, Teacher } from '../leaf/types';
 
 export interface Violation {

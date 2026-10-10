@@ -9,7 +9,7 @@ import type { ListConfig, ListQuery } from '../../pure/listview';
 import { roomName } from '../../pure/entities';
 import type { ClassGroup } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
-import { useInspect } from '../Inspector';
+import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
 import { parseClasses } from '../../pure/import';
 import ColorPick from '../ColorPick';

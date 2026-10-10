@@ -1492,4 +1492,4 @@ describe('sabitleme', () => {
     expect(activeProgram(shrunk).pinned).toEqual({});
   });
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from './pure/programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from './pure/program/programs';

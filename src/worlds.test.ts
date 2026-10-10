@@ -281,4 +281,4 @@ describe('closeWeek / closeHours', () => {
     expect(Object.keys(d.unavailable)).toHaveLength(2);
   });
 });
-import { activeProgram } from './pure/programs';
+import { activeProgram } from './pure/program/programs';

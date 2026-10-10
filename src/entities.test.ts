@@ -1699,7 +1699,7 @@ describe('reorderList', () => {
     expect(moved.teachers).toEqual([d.teachers[1], d.teachers[0]]);
   });
 });
-import { activeProgram, blankProgram } from './pure/programs';
+import { activeProgram, blankProgram } from './pure/program/programs';
 
 // TODO B5.11: the father's answers to a suggestion are the plan's data (schema
 // v15). They name teachers, lessons and days like the grid does, so they move

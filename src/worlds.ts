@@ -45,7 +45,7 @@ import {
   blankProgram,
   DEFAULT_PROGRAM_ID,
   replaceActiveGrid,
-} from './pure/programs';
+} from './pure/program';
 
 // ---------------------------------------------------------------- the builder
 

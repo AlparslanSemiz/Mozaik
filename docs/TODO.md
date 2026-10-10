@@ -1194,10 +1194,12 @@ src/
                         yalnız git mv), grid, drop, sanitize
     entities/           RF5 (adım 7). index: bugünkü dışa aktarımlar; iç: ids (newId),
                         teachers, classes, lessons, availability
-    program/            adım 4: programs, programMask, YENİ programView (RF8)
+    program/            adım 4: programs, programMask
     paper/              adım 4: YENİ öğretmen ve sınıf kâğıdı modeli (RF9)
     io/                 parseState, bundle, library, import, sample
-    kökte kalır:        solver (RF4 park), rules, feasibility, listview, undo, bell
+    kökte kalır:        solver (RF4 park), rules, feasibility, listview, undo, bell;
+                        YENİ programView (RF8): constraints ile entities'i çağırıyor,
+                        onlar da program/'u, tek index döngü olurdu (2026-10-10, Alp)
   platform/
     prefs/              theme, printOptions, programColor, toolState
     storage/            libraryStore, planStore, storageReport, useStore, usePlans,

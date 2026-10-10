@@ -190,7 +190,7 @@ const DE: Sozluk = {
   Yük: "Last",
   Durum: "Status",
 
-  // src/ui/Check.tsx
+  // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "Es gibt noch nichts zu prüfen.",
   İmkânsız: "Unmöglich",
   "Programın durumu": "Status des Plans",
@@ -254,7 +254,7 @@ const DE: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     "Aus dem Entwurf „{ad}“ wurde ein neuer Plan geöffnet.",
 
-  // src/ui/Grid.tsx
+  // src/ui/program/Grid.tsx
   "Öğle arası": "Mittagspause",
   "{ust} {alt}, kaldırmak için Delete":
     "{ust} {alt}, zum Entfernen Entf drücken",
@@ -266,7 +266,7 @@ const DE: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Angeheftet. Mit Rechtsklick lösen",
 
-  // src/ui/Program.tsx — the grid's own menu
+  // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Ins Ablagefach",
   sabitlenmiş: "angeheftet",
   "Dersi düzenle": "Stunde bearbeiten",
@@ -289,12 +289,12 @@ const DE: Sozluk = {
     "Die {n} angehefteten Stunden bleiben. Stunden, Lehrkräfte und Sperrzeiten bleiben unberührt. Ctrl+Z macht es rückgängig.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: Angaben und Wochenplan",
 
-  // src/ui/Inspector.tsx
+  // src/ui/program/Inspector.tsx
   Kapat: "Schließen",
   "Haftalık programı": "Wochenplan",
   "Kayıt bulunamadı": "Kein Eintrag gefunden",
 
-  // src/ui/LessonPool.tsx
+  // src/ui/program/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Fächer, die auf Platzierung warten",
   "Havuz yüksekliği": "Höhe des Ablagefachs",
   "Sürükleyerek havuzun boyunu ayarlayın":
@@ -363,7 +363,7 @@ const DE: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** der gewählten Seiten sind völlig leer. Die Pläne dieser Klassen wurden noch nicht gelegt. Sie können sie im Reiter **Stundenplan** legen.",
 
-  // src/ui/Program.tsx
+  // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "Hier kann abgelegt werden.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Wird automatisch gelegt… {yerlesen}/{toplam} Blöcke · {sure} s",

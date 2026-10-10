@@ -19,8 +19,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import type { Advice } from '../platform/search';
-import { answerNo, answerYes, dropAnswer } from '../pure/entities';
+import type { Advice } from '../../platform/search';
+import { answerNo, answerYes, dropAnswer } from '../../pure/entities';
 import {
   FAMILY_ORDER,
   answerParts,
@@ -29,12 +29,12 @@ import {
   sameChanges,
   suggestionQuestions,
   suggestionSentence,
-} from '../pure/relax';
-import type { Question, RelaxFamily, Suggestion } from '../pure/relax';
-import type { Relaxation, State } from '../leaf/types';
-import { useT } from './T';
-import type { Translate } from './T';
-import { useToast } from './Toasts';
+} from '../../pure/relax';
+import type { Question, RelaxFamily, Suggestion } from '../../pure/relax';
+import type { Relaxation, State } from '../../leaf/types';
+import { useT } from '../T';
+import type { Translate } from '../T';
+import { useToast } from '../Toasts';
 
 /** What each way asks for, in a few words: the row's name while it is looked for. */
 export function wayName(t: Translate, family: RelaxFamily): string {

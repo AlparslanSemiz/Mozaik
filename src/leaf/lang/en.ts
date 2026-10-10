@@ -189,7 +189,7 @@ const EN: Sozluk = {
   Yük: "Load",
   Durum: "Status",
 
-  // src/ui/Check.tsx
+  // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "There is nothing to check yet.",
   İmkânsız: "Impossible",
   "Programın durumu": "Timetable status",
@@ -252,7 +252,7 @@ const EN: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     'A new plan was opened from the "{ad}" draft.',
 
-  // src/ui/Grid.tsx
+  // src/ui/program/Grid.tsx
   "Öğle arası": "Lunch break",
   "{ust} {alt}, kaldırmak için Delete": "{ust} {alt}, press Delete to remove",
   "Sürükleyerek taşıyın · sağ tık: seçenekler":
@@ -263,7 +263,7 @@ const EN: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Pinned. Right-click to unpin",
 
-  // src/ui/Program.tsx — the grid's own menu
+  // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Send to tray",
   sabitlenmiş: "pinned",
   "Dersi düzenle": "Edit lesson",
@@ -286,12 +286,12 @@ const EN: Sozluk = {
     "The {n} pinned hours stay where they are. Lessons, teachers and time off are untouched. Ctrl+Z undoes it.",
   "{ad}: bilgileri ve haftalık programı": "{ad}: details and weekly timetable",
 
-  // src/ui/Inspector.tsx
+  // src/ui/program/Inspector.tsx
   Kapat: "Close",
   "Haftalık programı": "Weekly timetable",
   "Kayıt bulunamadı": "No record found",
 
-  // src/ui/LessonPool.tsx
+  // src/ui/program/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Lessons waiting to be placed",
   "Havuz yüksekliği": "Tray height",
   "Sürükleyerek havuzun boyunu ayarlayın": "Drag to set the tray's height",
@@ -359,7 +359,7 @@ const EN: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** of the selected pages are completely empty. Those classes' timetables have not been laid out yet. You can lay them out in the **Timetable** tab.",
 
-  // src/ui/Program.tsx
+  // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "It can be dropped here.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Filling automatically… {yerlesen}/{toplam} blocks · {sure} s",

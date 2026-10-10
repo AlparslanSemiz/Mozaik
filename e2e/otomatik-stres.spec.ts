@@ -12,7 +12,7 @@ import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
 import { solve } from '../src/pure/solver';
 import { HEAVY_WORLDS, gridQuality, hoursOf, illegalBlocks, qualityLine } from '../src/worlds';
-import { activePlacements } from '../src/pure/programs';
+import { activePlacements } from '../src/pure/program';
 import { loadWorld, savedState, settledText } from './helpers';
 
 /** The budget the app itself uses (solver.ts DEFAULTS). */

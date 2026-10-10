@@ -628,4 +628,4 @@ describe.each(SMALL_WORLDS)('dünya: $name', (world) => {
     });
   }
 });
-import { activeProgram, blankProgram, replaceActiveGrid } from './pure/programs';
+import { activeProgram, blankProgram, replaceActiveGrid } from './pure/program/programs';

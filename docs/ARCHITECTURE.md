@@ -11,7 +11,7 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
                    names · subjects · blocks · version · dateStamp · storage
    |
 src/pure/          constraints · rules · feasibility · bell · import · entities · solver
-                   relax · sat · programs · programMask · listview · library · bundle
+                   relax · sat · program/* · listview · library · bundle
                    sample · parseState · undo
    |
 src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
@@ -28,8 +28,8 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `platform/prefs/`,
-`platform/search/`, `ui/lists/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `platform/prefs/`,
+`platform/search/`, `ui/lists/`, `ui/program/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -92,8 +92,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/solver.ts` | otomatik dizme, kendi kısıt mantığı yok |
 | `pure/relax.ts` | kurulamayan haftaya öneri: hangi öğretmen saati, sınır, ders–öğretmen eşleşmesi, blok şekli ya da haftalık saat değişirse kurulur, ve babanın cümlesiyle söylenişi (`createRelaxer`, `verifySuggestion`, `suggestionSentence`); öğretmene sorulacak sorular (`suggestionQuestions`) ve önizlemenin farkı (`suggestionDiff`) |
 | `pure/sat.ts` | küçük bir CDCL SAT çözücü ve kodlamaları (`atMostOne`, `totalizer`); öneri araması onu kullanır |
-| `pure/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
-| `pure/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
+| `pure/program/index.ts` | program paketinin giriş noktası: aşağıdaki ikisini dışa açar |
+| `pure/program/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
+| `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
@@ -154,7 +155,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/Ribbon.tsx` | sekmeye göre araç şeridi, iş mantığı yok |
 | `ui/Dialogs.tsx` | programın sorduğu her soru: `useDialogs()` ile `confirm` ve `alert` |
 | `ui/Toasts.tsx` | olan biteni söyleyen kısa satır |
-| `ui/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
 | `ui/LessonEdit.tsx` | bir dersi ızgaradan ayrılmadan düzenler |
 | `ui/Palette.tsx` | Ctrl+K kutusu |
 | `ui/Commands.tsx` | paletin komut listesi |
@@ -164,11 +164,14 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/lists/` | liste ekranlarının ortak parçaları: `index.ts` giriş noktası, `Paste` (yapıştırarak ekleme), `Summary` (Özet) |
 | `ui/lessons/index.tsx` | Dersler |
 | `ui/Availability.tsx` | Müsaitlik |
-| `ui/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |
-| `ui/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
-| `ui/Grid.tsx` | ana ızgara, satır başına memo |
-| `ui/LessonPool.tsx` | havuz |
-| `ui/Check.tsx` | Kontrol |
+| `ui/program/index.ts` | Program paketinin giriş noktası: `Program`, `Check`, varlık paneli (`InspectorProvider`, `useInspect`) ve adım simgeleri; ızgara, havuz ve öneri paneli paketin içinde kalır |
+| `ui/program/Program.tsx` | Program: ızgara, havuz, sürükleme ve sağ tık menüsü bir arada |
+| `ui/program/Suggestions.tsx` | kurulamayan haftada sonuç satırının altındaki öneri paneli |
+| `ui/program/Grid.tsx` | ana ızgara, satır başına memo |
+| `ui/program/LessonPool.tsx` | havuz |
+| `ui/program/Check.tsx` | Kontrol |
+| `ui/program/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
+| `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
 | `ui/Print.tsx` | Çıktı ve kâğıt |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
 | `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
@@ -181,7 +184,6 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/ListTools.tsx` | listelerin üstündeki ara, sırala ve süz şeridi |
 | `ui/useRowOrder.tsx` | listelerin ortak elle sıralama kancası |
 | `ui/useSample.ts` | örnek okulu yükleme sorusu |
-| `ui/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
 | `ui/props.ts` | panellerin ortak prop'ları (`PanelProps`) |
 
 ### Yalnız testler için

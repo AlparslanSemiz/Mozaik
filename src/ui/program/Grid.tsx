@@ -9,14 +9,14 @@ import * as ContextMenu from '@radix-ui/react-context-menu';
 import { Pin } from 'lucide-react';
 import { useInspect } from './Inspector';
 import type React from 'react';
-import { dayLabel } from '../leaf/names';
-import { dayPeriods } from '../pure/bell';
-import { attachGridChrome } from '../platform/gridChrome';
-import { attachGridFit } from '../platform/gridFit';
-import { paletteColor } from '../leaf/palette';
-import type { Settings, Id } from '../leaf/types';
-import type { MaskMode } from '../pure/programMask';
-import { useT } from './T';
+import { dayLabel } from '../../leaf/names';
+import { dayPeriods } from '../../pure/bell';
+import { attachGridChrome } from '../../platform/gridChrome';
+import { attachGridFit } from '../../platform/gridFit';
+import { paletteColor } from '../../leaf/palette';
+import type { Settings, Id } from '../../leaf/types';
+import type { MaskMode } from '../../pure/program';
+import { useT } from '../T';
 
 export interface GridCell {
   lessonId: Id;
