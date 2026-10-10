@@ -717,7 +717,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
       **2026-10-10, Alp'in kararıyla elle:** `upload-artifact` v7'de (`ci/runner-sabitle`),
       Node 20 uyarısının kaynağı kalmadı; aynı dalda Linux işleri `ubuntu-latest` yerine
-      `ubuntu-24.04`'te sabit (DECISIONS 2026-10-10). Windows işleri `windows-latest`'te.
+      `ubuntu-24.04`'te sabit, geçici (B7.28; DECISIONS 2026-10-10). Windows işleri `windows-latest`'te.
 - [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
@@ -742,6 +742,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
       ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. Kapandı: dalın iki CI koşusunda yeşil
       (37929711747, 37930611648), RPC zaman aşımı yok.
+- [ ] **B7.28 Linux runner'ı `ubuntu-latest`'e dönsün (2026-10-10).** `ubuntu-24.04`
+      sabitlemesi geçici (DECISIONS 2026-10-10): `ubuntu-latest` 2026-10-19'da Ubuntu
+      26'ya geçiyor. Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca
+      `ubuntu-latest`'e dönülür; iş akışlarındaki her sabit satırın yanında bu maddeye
+      işaret eden yorum var. Doğrulama: bir dalda `ubuntu-26.04` ile `ci.yml` yeşil ve
+      `npx playwright install --with-deps` bağımlılık hatası vermiyor.
 
 ---
 

@@ -122,7 +122,9 @@ haftalik 1, windows 1). Sebep: `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiy
 Node 20 uyarısının kalan kaynağı `upload-artifact@v4`'tü (TODO B7.20). Bugün
 `ubuntu-latest` zaten 24.04, yani imaj değişmiyor. v7'nin yeniliği (`archive: false`) ve
 ESM'e geçişi bizim girdilerimize dokunmuyor; v6'nın Node 24'ü barındırılan runner'da var.
-`windows-latest` kapsam dışı, dokunulmadı.
+`windows-latest` kapsam dışı, dokunulmadı. Sabitleme geçici: her satırın yanında TODO B7.28'e
+işaret eden yorum, Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca
+`ubuntu-latest`'e dönülür.
 
 **Koşulan testler.** `hizli` ve belge kapıları; dalın `ci.yml` koşusu. `site.yml`,
 `surum.yml` ve `haftalik.yml` dalda koşmuyor: ilk `main` push'u `site.yml`'i, ilk etiket

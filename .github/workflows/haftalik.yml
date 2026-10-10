@@ -42,7 +42,7 @@ jobs:
 
   mutasyon:
     if: github.event_name == 'schedule' || inputs.is == 'hepsi' || inputs.is == 'mutasyon'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v7
