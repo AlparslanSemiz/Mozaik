@@ -122,26 +122,24 @@ export function buildRows(
 
   if (view === 'teacher') {
     return d.teachers
-      .map((t) => {
+      .map((teacher) => {
         const cells: Array<GridCell | null> = new Array(n).fill(null);
         const closed: boolean[] = new Array(n).fill(false);
 
         for (let g = 0; g < dayCount; g++) {
           for (let s = 0; s < hourCount; s++) {
             const i = g * hourCount + s;
-            closed[i] = d.unavailable[closedKey(t.id, g, s)] !== undefined;
+            closed[i] = d.unavailable[closedKey(teacher.id, g, s)] !== undefined;
 
-            const lessonId = ix.teacherBusy.get(closedKey(t.id, g, s));
+            const lessonId = ix.teacherBusy.get(closedKey(teacher.id, g, s));
             if (lessonId === undefined) continue;
-            const group = ix.classById.get(ix.lessonById.get(lessonId)?.classId ?? '');
+            const lesson = ix.lessonById.get(lessonId);
+            const group = ix.classById.get(lesson?.classId ?? '');
             cells[i] = {
               lessonId,
               top: group?.name ?? '?',
               bottom: roomLetter(ix, group?.roomId),
-              color:
-                ix.lessonById.get(lessonId) === undefined
-                  ? t.color
-                  : colorOf(d, ix.lessonById.get(lessonId)!),
+              color: lesson === undefined ? teacher.color : colorOf(d, lesson),
               conflict: conflicts.get(placementKey(group?.id ?? '', g, s)) ?? null,
               pinned: pinned[placementKey(group?.id ?? '', g, s)] !== undefined,
               mask: group === undefined ? undefined : mask.classes[group.id],
@@ -151,9 +149,9 @@ export function buildRows(
           }
         }
         return {
-          id: t.id,
+          id: teacher.id,
           kind: 'teacher' as const,
-          name: t.short,
+          name: teacher.short,
           // Both, because this line IS the teacher — the cells in the row each
           // name the one subject their own lesson is taught under.
           //
@@ -162,13 +160,13 @@ export function buildRows(
           // never showed the second one at all; the cells of the grid have read
           // the short form all along, so the row head now says what its own row
           // says. `subjectShort` is the one place that resolves it.
-          secondary: teacherSubjects(t)
+          secondary: teacherSubjects(teacher)
             .map((name) => subjectShort(d.settings, name))
             .join(' · '),
-          color: t.color,
+          color: teacher.color,
           cells,
           closed,
-          mask: mask.teachers[t.id],
+          mask: mask.teachers[teacher.id],
         };
       })
       .filter((row) => row.mask !== 'hidden');
@@ -366,12 +364,18 @@ export function buildPool(
 /**
  * The five orders, and the LAST TWO KEYS OF EVERY ONE OF THEM ARE THE SAME.
  *
- * `stackCards()` in `ui/program/LessonPool.tsx` reads consecutive runs: identical blocks of
- * one lesson are drawn as a deck because the tray hands them over already
- * neighbours. Any order that lets a lesson's own cards drift apart silently
- * turns one deck into several, and forty tests count `.pool-card` rather than
- * decks, so nothing would say so. Hence `lessonId` then `size` at the end of
- * each comparator, every time.
+ * `stackCards()` in `ui/program/LessonPool.tsx` reads consecutive runs:
+ * identical blocks of one lesson are drawn as a deck because the tray hands
+ * them over already neighbours. Any order that lets a lesson's own cards drift
+ * apart silently turns one deck into several, and forty tests count
+ * `.pool-card` rather than decks, so nothing would say so. Hence `lessonId`
+ * then `size` at the end of each comparator, every time.
+ *
+ * What the tail does and does not do, measured (2026-10-10, RF8): a deck's
+ * cards are identical, so they tie on every key, the tail included. What keeps
+ * them together is that `buildPool` pushes the cards lesson by lesson and the
+ * sort is stable. The tail fixes the order between lessons that tie on
+ * everything else, and puts a lesson's bigger block before its smaller one.
  *
  * `compareTr` and not a bare `localeCompare('tr')`: the list screens already
  * have one home for Turkish collation and this is the same question.
