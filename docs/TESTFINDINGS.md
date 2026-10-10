@@ -46,7 +46,9 @@ silinince `parseBundle` paketi alıyor ve `replaceLibrary`'nin çağırdığı `
 olarak "eksik" diye reddediliyor (DK11'in düzeltmesi yalnız `readPlanFile`'da). Onay sorusu
 yalnız plan sayısını söylüyor. Arayüzde uçtan uca koşulmadı.
 Tür: ürün kusuru, veri kaybı sınıfı (onaydan sonra).
-Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi, yeri ve testi karar bekliyor.
+Ne yapıldı: TODO §8l TB8; test programı durdu ve kullanıcıya getirdi. Kullanıcının kararı
+(2026-10-10): düzeltmesi ve testi TB7 ile birlikte, `fix/veri-kaybi` birleşir birleşmez
+`main`'den açılan ikinci düzeltme dalında.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · `scratch/test-plan/b2-klasor.mjs` ve `klasor.spec.ts` · kapanan sekmenin klasör yazımı
