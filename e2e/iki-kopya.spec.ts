@@ -179,6 +179,9 @@ test.describe('boş açılış · kayıtlı plan üzerine yazılmıyor', () => {
     await expect(page.getByText('Henüz ders girilmedi').first()).toBeVisible();
 
     // The autosave's 400 ms, then an edit: neither reaches the saved plan.
+    // Without the guard this is where the plan goes (main before the fix).
+    await page.waitForTimeout(800);
+    expect(await savedText(page)).toBe(kayitli);
     await expect(page.locator(OKUNAMADI)).toBeVisible();
     await addSubjects(page, 'Matematik');
     await page.waitForTimeout(800);
