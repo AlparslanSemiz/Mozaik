@@ -92,7 +92,27 @@ jobs:
           Invoke-WebRequest "https://msedgedriver.microsoft.com/$pv/edgedriver_win64.zip" -OutFile "$d.zip"
           Expand-Archive "$d.zip" $d -Force
           & "$d\msedgedriver.exe" --version
-          "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
+          # Ayrıntılı günlükle sarılı: tauri-driver sürücüye argüman geçiremiyor,
+          # ve bir oturum açılmadığında sebebi yalnız bu günlükte yazıyor.
+          # RUNNER_TEMP'te: Playwright koşu başında test-results/'u boşaltıyor.
+          $gunluk = Join-Path $env:RUNNER_TEMP 'msedgedriver.log'
+          Set-Content "$d\surucu.cmd" "@`"$d\msedgedriver.exe`" --verbose --log-path=`"$gunluk`" %*" -Encoding ascii
+          "MOZAIK_NATIVE_DRIVER=$d\surucu.cmd" >> $env:GITHUB_ENV
+
+      # Program sürücüsüz açılıyor mu: WebDriver'dan önce, ayrı bir soru.
+      - name: Program sürücüsüz açılıyor mu
+        shell: pwsh
+        run: |
+          $exe = @('src-tauri/target/release/Mozaik.exe', 'src-tauri/target/release/ders-programi.exe') |
+            Where-Object { Test-Path $_ } | Select-Object -First 1
+          $p = Start-Process $exe -PassThru
+          Start-Sleep -Seconds 15
+          Get-Process | Where-Object { $_.ProcessName -match 'Mozaik|ders-programi|msedgewebview2' } |
+            Format-Table ProcessName, Id, StartTime -AutoSize | Out-String | Write-Host
+          if ($p.HasExited) { Write-Host "program kapandı, çıkış kodu $($p.ExitCode)" } else { Write-Host 'program açık' }
+          Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force
+          Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
 
       - name: Gerçek exe süiti
         shell: bash
@@ -102,5 +122,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: gercek-exe-windows
-          path: test-results/
+          path: |
+            test-results/
+            ${{ runner.temp }}/msedgedriver.log
           retention-days: 7
