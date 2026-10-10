@@ -86,12 +86,12 @@ and clean. Mozaik then appears among the applications.
 **Coming from the site in Chrome?** The new copy starts empty; the plans move
 with one file:
 
-1. In the old window (the site), **Ayarlar → Veri → Tümünü dosyaya kaydet
-   (n plan)**. Note n.
-2. In the new Mozaik, **Ayarlar → Veri → Tümünü dosyadan aç**, pick that file,
-   **Hepsini değiştir**. It should say *"n plan açıldı."*
-3. Pick the folder again (Ayarlar → Veri) and set theme, scale and density by
-   hand — machine preferences are not in the file.
+1. In the old window (the site), **Ayarlar → Planlar ve yedek → Tümünü
+   dosyaya kaydet (n plan)**. Note n.
+2. In the new Mozaik, **Ayarlar → Planlar ve yedek → Tümünü dosyadan aç**,
+   pick that file, **Hepsini değiştir**. It should say *"n plan açıldı."*
+3. Pick the folder again (same section, **Klasör seç…**) and set theme, scale
+   and density by hand — machine preferences are not in the file.
 4. Keep the old copy for a week as a spare; removing it is your call.
 
 ## Where the data lives

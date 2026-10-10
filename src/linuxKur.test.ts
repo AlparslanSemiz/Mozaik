@@ -201,7 +201,7 @@ describe.skipIf(process.platform === 'win32')('Linux kurulum betiği', () => {
 });
 
 describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
-  /** A PATH holding only fakes that write their arguments down. */
+  /** Fakes that write their arguments down, every browser name among them. */
   function sahteBin(ev: string, chrome: boolean): { bin: string; kayit: string } {
     const bin = join(ev, 'bin');
     const kayit = join(ev, 'kayit');
@@ -221,8 +221,16 @@ describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
     return { bin, kayit };
   }
 
-  function baslat(ev: string, bin: string) {
-    return spawnSync('/bin/bash', [BASLAT], { env: ortam(ev, { PATH: bin }), encoding: 'utf8' });
+  /**
+   * `sistem`: the system's own tools behind the fakes. Without them a `mkdir`
+   * or an `rm` slipped into the launcher is "command not found" and passes
+   * unseen (a mutation did exactly that). With them, a real google-chrome
+   * would also be found, so the test that needs Chrome to be MISSING runs on
+   * the fakes alone.
+   */
+  function baslat(ev: string, bin: string, sistem: boolean) {
+    const PATH = sistem ? `${bin}:/usr/bin:/bin` : bin;
+    return spawnSync('/bin/bash', [BASLAT], { env: ortam(ev, { PATH }), encoding: 'utf8' });
   }
 
   function kurulu(ev: string) {
@@ -234,7 +242,7 @@ describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
     const ev = yeniEv();
     kurulu(ev);
     const { bin, kayit } = sahteBin(ev, false);
-    const r = baslat(ev, bin);
+    const r = baslat(ev, bin, false);
     expect(r.status).toBe(69);
     expect(r.stderr).toContain('Google Chrome bulunamadı');
     const cagrilar = readFileSync(kayit, 'utf8');
@@ -249,7 +257,7 @@ describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
     const ev = yeniEv();
     kurulu(ev);
     const { bin, kayit } = sahteBin(ev, true);
-    const r = baslat(ev, bin);
+    const r = baslat(ev, bin, true);
     expect(r.status, r.stderr).toBe(0);
     const satirlar = readFileSync(kayit, 'utf8').split('\n');
     expect(satirlar[0]).toBe('google-chrome');
@@ -259,10 +267,20 @@ describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
     expect(existsSync(profil(ev))).toBe(false);
   });
 
+  it('var olan profile dokunmuyor', () => {
+    const ev = yeniEv();
+    kurulu(ev);
+    mkdirSync(profil(ev), { recursive: true });
+    writeFileSync(join(profil(ev), 'isaret'), 'planlar');
+    const { bin } = sahteBin(ev, true);
+    expect(baslat(ev, bin, true).status).toBe(0);
+    expect(readFileSync(join(profil(ev), 'isaret'), 'utf8')).toBe('planlar');
+  });
+
   it('kurulmamışsa 66 ile çıkıyor ve Chrome’u açmıyor', () => {
     const ev = yeniEv();
     const { bin, kayit } = sahteBin(ev, true);
-    const r = baslat(ev, bin);
+    const r = baslat(ev, bin, true);
     expect(r.status).toBe(66);
     expect(r.stderr).toContain('kurulu değil');
     expect(readFileSync(kayit, 'utf8').split('\n')).not.toContain('google-chrome');
