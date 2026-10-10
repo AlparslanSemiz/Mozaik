@@ -771,6 +771,22 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       seçici açıldı, Brave'de iki yolda da yok. VK1: aynı profilde iki `--app` penceresi,
       A örneği yükleyince B'de "başka bir pencerede" şeridi, A'da yok (iki tarayıcı).
       Alp'in bugünkü verisi Chrome'un Default profilinde, site origin'inde; Brave'de yok.
+      **Yapılan (`ozellik/linux`):** `scripts/linux-kur.sh` (yalnız `~/GitHub/Mozaik`'in temiz
+      `main`'inden, kopya, commit kaydı, `mozaik.desktop`) ve `scripts/linux-mozaik.sh`
+      (yalnız `google-chrome`, kendi profili, profile dokunmuyor), testleri
+      `src/linuxKur.test.ts`, 13 mutasyonla kanıtlı; taşıma `e2e/linux-tasima.spec.ts`
+      (siteden `file://`'a, 3 mutasyonla kanıtlı), adımları README'de; `exe:rpm` kaldırıldı
+      (DECISIONS 2026-10-10).
+      **Kalan:**
+      - Wayland'de `--app` penceresinin app_id'si ve `mozaik.desktop`'ın `StartupWMClass`
+        eşleşmesi ölçülmedi: görev çubuğunda Mozaik'in simgesi mi, Chrome'unki mi çıkıyor,
+        pencere başlatıcıyla gruplanıyor mu. `StartupWMClass` bu yüzden yazılmadı.
+      - Klasör izninin yeniden açılışta geri gelmesi: seçilen klasöre gerçekten yazılması,
+        Chrome kapatılıp açılınca iznin tek tıklamayla geri gelmesi. Seçici diyaloğu bir
+        insan onayı istiyor; **Alp yapacak.**
+      - Alp'in kendi taşıması (README'deki dört adım) ve eski web uygulamasının bir hafta
+        sonra kaldırılması Alp'te.
+      - `shellcheck` bu makinede yok; testi yalnız CI'ın Ubuntu runner'ında koşuyor.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
@@ -792,6 +808,19 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 - [ ] **R6 ne zaman koşsun?** Görünür bir Chromium penceresi açılacak ve odağı
       alacak; oturumu sen açacaksın. Müsait olduğun bir zaman gerekiyor.
 - [ ] **`kayma.spec.ts` macOS'ta `skip` mi etsin?** (B7.7.)
+- [ ] **Sitenin kökeni GitHub Pages depolarınla ortak (2026-10-10, B7.28).** Site
+      `https://alparslansemiz.github.io/Mozaik/`'te, ve tarayıcı veriyi yola göre değil
+      kökene göre ayırıyor: o kökende Pages yayınlayan her deponun sayfası (kök
+      `AlparslanSemiz.github.io` deposu dahil, B7.2) Mozaik'in localStorage'ını ve
+      IndexedDB'sini okuyabilir, bir `localStorage.clear()` ile silebilir, ve aynı adlı bir
+      anahtar çakışır. Bugün o kökende başka hangi sayfanın yayınlandığı sayılmadı. Risk,
+      planlarını sitede tutan biri için; babanın exe'si ve Alp'in Linux kopyası sitede değil.
+      Olası çözümler: (a) Mozaik'e kendi alan adı (CNAME): kendi kökeni olur; (b) siteyi
+      ayrı bir hesabın ya da kuruluşun kök Pages sitesine (`<ad>.github.io`) almak: aynı
+      etki, alan adı yok; (c) olduğu gibi bırakıp başka depoda Pages açmamak. (a) ve (b)
+      adresi değiştirir: `SITE_ADRESI` ve tuzak 106, ve eski kökendeki veri ancak "Tümünü
+      dosyaya kaydet" ile taşınır (B7.28'in yolu). Öneri: önce hangi depoların Pages
+      yayınladığını saymak, sonra karar.
 - [ ] **Yedek dosya adı `ders-programi-*` mı kalsın, `Mozaik-*` mi olsun?**
       (B7.15.) Ad değişirse `folder.ts`'in budama kalıbı eski dosyaları
       tanımaz: birikirler, ve eski ana dosya klasörde öksüz kalır.
