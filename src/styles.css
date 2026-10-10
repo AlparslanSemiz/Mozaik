@@ -105,6 +105,10 @@
      instead of 78 columns. Far below the 14 that separates two functional
      colours, or it would read as a state (pitfall 40). */
   --band:        #f8fafd;
+  /* Every second row of a list (table.list, table.stat): the reader asked for
+     rows one after another on slightly different grounds, the same in every
+     list. Light borrows the input recess rather than adding a twelfth grey. */
+  --zebra:       var(--paper-sunk);
 
   /* Three rules, three jobs: --hairline shell, --line control edge and table
      head, --line-dark the loudest there is (day separator, row head). */
@@ -529,6 +533,9 @@
   --paper: #16191e;
   --paper-sunk: #0b0e12;
   --band: #1a1e23;
+  /* Not --paper-sunk: in this theme the recess is darker than the paper.
+     The zebra row is one step LIGHTER than it instead. */
+  --zebra: #1d2127;
 
   --hairline: #242930;
   --line: #39404a;
@@ -4021,9 +4028,55 @@ table.list td > .form-row {
   justify-content: flex-end;
 }
 
+/* ZEBRA. Every second row on --zebra, in every list and every stat table.
+   It sits ABOVE the hover rule on purpose: both are (0,2,3), so source order
+   is the whole tie-break, and the row under the pointer has to win on a
+   zebra row as on any other. `renk.spec.ts` 93 hovers an even row for that.
+   A grid is not a list: table.grid and table.availability keep their ground,
+   because there it carries a state. */
+table.list tbody tr:nth-child(even),
+table.stat tbody tr:nth-child(even) {
+  background: var(--zebra);
+}
+
 table.list tbody tr:hover,
 table.stat tbody tr:hover {
   background: var(--bg);
+}
+
+/* A field in a list row gives up its recess. In the light theme --zebra IS
+   --paper-sunk, so on every second row a sunk box would vanish into the row
+   it sits in. It goes to paper, and with the recess gone its edge is its only
+   boundary, which is the button's case: --line, not --hairline. The split
+   picker is a bare <button> and was on the browser's own grey (4.53 for its
+   text in the dark theme); in a list it is a field like its neighbours. */
+table.list td input[type='text'],
+table.list td input[type='number'],
+table.list td select,
+table.list td .split-pick,
+table.stat td input[type='text'],
+table.stat td input[type='number'],
+table.stat td select {
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+table.list td .split-pick {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+
+/* The base hover lifts --hairline to --line; these already stand at --line,
+   so the step that says "you can write here" moves one up with them. */
+table.list td input[type='text']:hover:not(:disabled),
+table.list td input[type='number']:hover:not(:disabled),
+table.list td select:hover:not(:disabled),
+table.list td .split-pick:hover,
+table.stat td input[type='text']:hover:not(:disabled),
+table.stat td input[type='number']:hover:not(:disabled),
+table.stat td select:hover:not(:disabled) {
+  border-color: var(--line-dark);
 }
 
 /* The identity mark beside a name. It was written three times over — in the
@@ -5284,6 +5337,7 @@ table.bell-preview td {
     --hairline: #c9ced6;
     --chrome: #ffffff;
     --band: #ffffff;
+    --zebra: #ffffff;
 
     /* Pinned here for the same reason as everything above, and this pair is
        not optional: the dark theme now overrides them so the PREVIEW is

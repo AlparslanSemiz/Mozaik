@@ -81,8 +81,9 @@ alınmaması ve `startViewTransition`'ın ölçülüp geri alınması
 - **Palet üstündeki mürekkep temayla dönmez** (`--on-color`), çünkü `color: inherit` koyu temada açık metni pastel zemine düşürür (tuzak 15 ve 35).
 - **Hücreyi hangi renk boyar.** Program ızgarasında öntanımlı olarak öğretmen rengi, şeritteki Renk menüsünden sınıf, derslik ya da branş rengi. Kâğıtta öğretmen sayfasını sınıf rengi, sınıf sayfasını öğretmen rengi boyar ([LAYOUT.md](LAYOUT.md)).
 - **İki tema.** Açık ve koyu, varsayılan açık ve sistemi izlemiyor, çünkü işlevsel renkler açık zeminde seçildi ve orada ölçüldü. `color-scheme` iki temada da doğru kurulur, yoksa tarayıcı kendi karartmasını uygular ve işlevsel renkler çamurlaşır (tuzak 14). Kâğıt her zaman açık paleti kullanır, çünkü o renkler kâğıda basılıyor.
-- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor.
+- **Çizgiler.** `--hairline` kabuğun çizgisi, `--line` veri okunan yerlerin ve denetim kenarının çizgisi. Girdiler kıl çizgiye inebildi, çünkü karşılığında gömük bir yüzey (`--paper-sunk`) kazandılar. Düğmenin öyle bir yüzeyi yok: zemini `--paper`, üstünde durduğu kabuk ve panel de `--paper`, yani kenarlık düğmenin tek sınırı ve `--line` kullanıyor. Listede girdi o gömük yüzeyi bırakır, çünkü zebra satırı açık temada aynı `--paper-sunk`'ta: listedeki girdi, seçici ve dağılım seçicisi kâğıt zeminli ve `--line` kenarlı, düğme gibi.
 - **Düğme durumları:** birincil, sade, tehlikeli, basılı. Tehlikeli olan beklemeden kırmızı görünür ama kenarlıkla değil mürekkeple: 25 öğretmenlik bir listede 25 kırmızı dikdörtgen, tehlike renginin sayfanın zemini hâline gelmesi demekti. Kırmızı kenarlık hover'da gelir.
+- **Listelerde zebra.** `table.list` ve `table.stat`'ın çift satırları `--zebra` zeminli: açık temada `--paper-sunk`, koyu temada kâğıttan bir adım açık kendi tonu. Her listede aynı token, bir listeye özel ton yok (babanın isteği, [TODO.md](TODO.md) §0). Kural üzerine gelme kuralıyla aynı özgüllükte ve ondan önce yazılı, yani üstüne gelinen satır zebrayı ezer. Metin iki zeminde de AA tutar, ve `e2e/renk.spec.ts` bunu, kuralın varlığını, sırasını ve tokeni iki temada ölçer. Izgara bir liste değil: program ızgarası ve Müsaitlik'in hücrelerinde zemin bir durum taşıyor ve zebra almıyor.
 - **Gün bandı** tek indeksli günlere çok hafif bir zemin verir. Bir durum gibi okunmadığı ve iki temada aynı yükte olduğu ölçülür, ve altındaki kapalı saat taramasını ezmemesi gerekir (tuzak 40).
 - **Nötr rampa türetilmiş:** tek bir ton (258), seçilen OKLCH açıklığı ve chroma'sı, çevrimdışı sRGB'ye çevrilmiş. Dosyaya hex yazılıyor, çünkü `getComputedStyle` bir `oklch()` rengini `oklch()` olarak döndürür ve süitteki ölçümler `rgb()` ayrıştırır (tuzak 81).
 
@@ -161,7 +162,7 @@ ve açılış da; iki sayı da yeniden ölçüldü ve WORKLOG'da duruyor.
 ```
 yüzey        --bg masa · --chrome kabuk · --chrome-2 ikinci kabuk
              --chrome-lit üst barın gradyan durağı · --paper kâğıt
-             --paper-sunk girdi · --band ızgara gün bandı
+             --paper-sunk girdi · --band ızgara gün bandı · --zebra liste çift satırı
 çizgi        --hairline kabuk · --line denetim kenarı · --line-dark en yüksek ses
 mürekkep     --text · --muted · --on-color (temayla dönmez) · --on-color-sub
 accent       --accent #373bdb · --accent-hover · --accent-bg · --on-accent
@@ -221,7 +222,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | `.field` `.field-label` `.form-row` (+`.nowrap`) | etiketli kontrol · bir satırda duranlar |
 | `.num` `.text-sm` `.clock-pick` `.sort-pick` | boyutlanmış girdiler |
 | `.color-pick` + `dialog.color-dialog` `.swatches` `.swatch` | renk seçici ve 36 renklik diyaloğu |
-| `table.list` + `th.num` `td.num` | veri tablosu |
+| `table.list` + `th.num` `td.num` | veri tablosu, çift satırı `--zebra` (`table.stat` da) |
 | `.chip` `.chip-count` `.chips` | grup süzgeci, sayısı üstünde yazan |
 | `.search` `.search-box` `.search-clear` | arama kutusu |
 | `.list-tools` `.list-count` | listenin üstündeki şerit |
@@ -256,7 +257,7 @@ Süre bir token olduğu hâlde mesafe uzun süre değildi, 2026-08-27'de o da ol
 | Sınıf | İş |
 |---|---|
 | `.step` `.step-count` `.step-icon` | Okul'un liste adımları |
-| `.split-pick` | Dersler'deki dağılım seçicisi. Kendi genişliği yok (`width: auto`), çünkü etiketleri saatle büyüyor ve sabit bir genişlik %150'de kırpıyordu. Sınıf `<select>`'in kendi üstünde, yoksa `table.list td > select { width: 100% }` onu yener (tuzak 34) |
+| `.split-pick` | Dersler'deki dağılım seçicisi, açılır listesi olan bir düğme. Etiketleri saatle büyüdüğü için sabit bir genişliği yok, yalnız alt sınırı. Listede yanındaki girdiler gibi kâğıt zeminli ve `--line` kenarlı; form satırında ve varlık panelinde tarayıcının düğmesi |
 | `.intro-line` · `.btn.quiet` | Okul'daki ilk kullanım teklifi ve onu kapatan sessiz düğme. Teklifin yanındaki eşit ağırlıkta ikinci bir düğme, bir kapatmayı bir karara çevirirdi |
 | `.entity-list` `.entity` `.entity-icon` | müsaitlikte varlık seçimi. Simge `steps.tsx`'in `KIND_ICON`'undan |
 | `table.availability` (+`.heat`) | boyanan çizelge ve haftanın darlığı ısı tablosu |
@@ -275,20 +276,6 @@ Ayarlar → Hakkında'daki "Veriler nerede" tablosunda sayılır. Anahtarların 
 listesi [DATA.md](DATA.md)'de.
 
 ---
-
-### Kural adayı: listelerde zebra (2026-10-08)
-
-Babanın isteği ([TODO.md](TODO.md) §0): listelerde art arda gelen satırlar hafif
-farklı bir zeminde olsun, ve bu her listede aynı olsun. Henüz bir kural değil, bir
-aday. Uygulanmadı. Kural olursa şu sınırlar içinde:
-
-- Tek bir token, her listede aynı. Bir listeye özel bir ton yok.
-- Metin iki zeminde de AA kontrastı tutar ve bu iki temada ölçülür. Zebra
-  erişilebilirlik satırının gerisine geçemez.
-- İşlevsel renk kanalına (yeşil, sarı, kırmızı, gri taralı) yaklaşmaz, ve seçili,
-  üstüne gelinen ya da odaklı satır zebradan ayırt edilir.
-- Izgara bir liste değil. Program ızgarası ve Müsaitlik'in hücreleri bu adayın
-  dışında, çünkü orada zemin bir durum taşıyor.
 
 ## Yeni ekran kurarken
 
