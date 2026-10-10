@@ -295,6 +295,25 @@ export interface ProgramVariant {
 export type View = 'teacher' | 'class';
 
 /**
+ * HOW THE TRAY IS ARRANGED. "kartlar havuzdayken ayrım daha bir güzel ve hoş
+ * olsun, hatta neye göre filtrelensin sıralansın ayarı bile olabilir."
+ *
+ * `row` is what the tray has always done and stays the default: the cards run
+ * the same way down as the grid rows they are aimed at, so a row's cards stand
+ * together under the row you are looking at. The other four answer questions
+ * the tray could not be asked before — "what is left of Matematik", "which are
+ * the long blocks", "who is furthest from finished".
+ *
+ * A POSITION and not a preference, so it is held with the other positions in
+ * `toolState.ts` rather than in `theme.ts`: it says what is being looked at
+ * right now. No new localStorage key, and so no new row owed to the "Veriler
+ * nerede" table. DEFINED here for the reason `View` is: the tray's order is
+ * worked out in `pure/programView.ts`, and a pure module does not import the
+ * plumbing layer, not even for a type.
+ */
+export type PoolSort = 'row' | 'name' | 'subject' | 'size' | 'left';
+
+/**
  * Present from day one so old backups can be migrated.
  * v1: Turkish field names (durum/ayar/ogretmenler...). v2: English field names.
  * v3: Day objects, bell times, limits and rules.

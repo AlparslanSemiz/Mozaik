@@ -16,47 +16,8 @@ import { attachGridFit } from '../../platform/gridFit';
 import { paletteColor } from '../../leaf/palette';
 import type { Settings, Id } from '../../leaf/types';
 import type { MaskMode } from '../../pure/program';
+import type { GridRow } from '../../pure/programView';
 import { useT } from '../T';
-
-export interface GridCell {
-  lessonId: Id;
-  top: string; // class name ("510") or teacher short form
-  bottom: string; // room letter ("A") or subject
-  color: number;
-  /** Does the block continue into the next hour — then no separator is drawn. */
-  continues: boolean;
-  /** The hour has since been closed for this teacher, class or room. */
-  conflict: string | null;
-  /**
-   * The reader has locked this block in place: it survives "Baştan diz", it
-   * cannot be dragged, removed or dropped on. Drawn with a mark and not only
-   * with a colour — colour alone never carries state here.
-   */
-  pinned: boolean;
-  /** The block belongs to a temporarily excluded row in the other view. */
-  mask?: MaskMode | undefined;
-  /**
-   * Only in a suggestion's preview (TODO B5.11): taught in a teacher hour the
-   * way opens (a thick line, a hatch and a "+"), or new in this cell (a thin
-   * dashed line). Both are said in the label too, never by colour alone.
-   */
-  mark?: 'opened' | 'moved' | undefined;
-}
-
-export interface GridRow {
-  id: string;
-  /** Which list the row's id belongs to — the inspector needs to know. */
-  kind: 'teacher' | 'class';
-  name: string;
-  secondary: string;
-  /** Palette index of the row's OWN entity: the teacher, or the class. */
-  color: number;
-  /** Length = days x hours. Index = day * hourCount + hour. */
-  cells: Array<GridCell | null>;
-  /** Hours the teacher cannot come. Always false in the class view. */
-  closed: boolean[];
-  mask?: MaskMode | undefined;
-}
 
 export type GridMenuTarget =
   | { kind: 'card'; rowId: Id; day: number; hour: number }
