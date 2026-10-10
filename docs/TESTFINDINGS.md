@@ -26,6 +26,15 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `npm run ekran` (`ozellik/zebra`, zebra commit'inden sonra) · `light-5-suruklerken`
+Bulgu: zebra değişikliğinden sonra sürükleme sahnesinde 9 piksel farklı, hepsi havuzdaki
+sürüklenen kartın 57×58'lik kutusunun kenarında, en çok 17/255 kanal farkı. İki "önce"
+koşusu arasında bu sahne birebir aynıydı, iki "sonra" koşusunda da fark aynı, yani kararlı.
+Değişen kuralların hiçbiri bu öğeye ulaşmıyor.
+Tür: ölçüm notu (kenar yumuşatması, görünür değişiklik değil).
+Ne yapıldı: incelendi, düzeltme yok.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
 Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da
 "başka bir pencerede" şeridi). Yerelde yeşildi, çünkü ikinci sekme ilkinin açılış
