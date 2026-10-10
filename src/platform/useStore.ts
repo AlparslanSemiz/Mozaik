@@ -16,16 +16,25 @@
 // auto-save is here, the session backup chain is `planStore.ts`, and "Yedek
 // indir" — the ONE habit my father will be taught — is `download.ts`.
 
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../pure/undo';
 import { loadPlan, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../pure/entities';
-import { planKey } from '../pure/library';
+import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
+import { parseState } from '../pure/parseState';
 import { readLibrary, writeLibrary } from './libraryStore';
+import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../leaf/types';
 
 const SAVE_DELAY = 400; // ms — do not write on every drag frame
+
+/**
+ * Why the last save did not land, for the strip at the top. `dolu`: the write
+ * itself failed, which in practice is the storage quota (VK2). `baska`: another
+ * window changed this data, and this one has stopped writing (VK1).
+ */
+export type SaveTrouble = 'dolu' | 'baska' | null;
 
 // -------------------------------------------------------------------- hook
 
@@ -82,22 +91,44 @@ export function useStore() {
   const redo = useCallback(() => dispatch({ type: 'redo' }), []);
   const loadState = useCallback((state: State) => dispatch({ type: 'load', state }), []);
 
+  // Every save goes through here, so the answer reaches the screen. It used to
+  // be dropped: with the storage full the autosave failed and the page said
+  // "Örnek veri yüklendi." over it (VK2, measured by the test session).
+  const [trouble, setTrouble] = useState<SaveTrouble>(null);
+  const write = useCallback((id: Id, d: State) => {
+    if (writesClosed()) return;
+    const landed = savePlan(id, d);
+    setTrouble(landed ? null : 'dolu');
+  }, []);
+
   // Auto-save — debounced, otherwise we write JSON on every drag frame. The
   // state and the key it goes to come from the SAME box, so a pending write can
   // never land in the wrong plan.
   const timer = useRef<number | undefined>(undefined);
+  // Whether a write is still waiting for the timer: the only thing a closing
+  // tab has to flush.
+  const pending = useRef(false);
   useEffect(() => {
     window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => savePlan(box.planId, box.present), SAVE_DELAY);
+    pending.current = true;
+    timer.current = window.setTimeout(() => {
+      pending.current = false;
+      write(box.planId, box.present);
+    }, SAVE_DELAY);
     return () => window.clearTimeout(timer.current);
-  }, [box.present, box.planId]);
+  }, [box.present, box.planId, write]);
 
-  // Flush the pending save when the tab closes.
+  // Flush the pending save when the tab closes, and ONLY a pending one. It
+  // used to write unconditionally, so a tab left open in the background wrote
+  // the plan it had read an hour ago over everything another tab did since
+  // (VK1). Nothing waiting means nothing of this tab's is unsaved.
   useEffect(() => {
-    const flush = () => savePlan(box.planId, box.present);
+    const flush = () => {
+      if (pending.current) write(box.planId, box.present);
+    };
     window.addEventListener('beforeunload', flush);
     return () => window.removeEventListener('beforeunload', flush);
-  }, [box.present, box.planId]);
+  }, [box.present, box.planId, write]);
 
   // --------------------------------------------------------- the plan library
   //
@@ -107,8 +138,9 @@ export function useStore() {
   // which is the only kind of data loss that matters.
   const park = useCallback(() => {
     window.clearTimeout(timer.current);
-    savePlan(box.planId, box.present);
-  }, [box.planId, box.present]);
+    pending.current = false;
+    write(box.planId, box.present);
+  }, [box.planId, box.present, write]);
 
   // Cancels the pending write WITHOUT performing it. The only caller is the
   // bundle import in `usePlans.ts`, and the two are opposites that look alike:
@@ -125,6 +157,7 @@ export function useStore() {
   // it today.
   const discardPendingSave = useCallback(() => {
     window.clearTimeout(timer.current);
+    pending.current = false;
   }, []);
 
   const openPlan = useCallback((id: Id, state: State) => {
@@ -132,6 +165,39 @@ export function useStore() {
   }, []);
 
   const plans = usePlans({ planId: box.planId, park, discardPendingSave, openPlan });
+
+  // Another window changed our data: this one stops writing, and says so.
+  // What this window holds is read through a ref, so the listener is set once.
+  // Both sides go through the same reader before they are compared
+  // (otherWindow.ts says why the text alone gave false alarms).
+  const held = useRef({ box, library: plans.library });
+  held.current = { box, library: plans.library };
+  useEffect(
+    () =>
+      watchOtherWindows(
+        (key, value) => {
+          const now = held.current;
+          if (key === planKey(now.box.planId)) {
+            const read = (text: string | null) =>
+              JSON.stringify(text === null ? null : parseState(text));
+            return read(value) === read(JSON.stringify(now.box.present));
+          }
+          if (key === LIBRARY_KEY) {
+            return (
+              JSON.stringify(parseLibrary(value)) ===
+              JSON.stringify(parseLibrary(JSON.stringify(now.library)))
+            );
+          }
+          return undefined;
+        },
+        () => {
+          window.clearTimeout(timer.current);
+          pending.current = false;
+          setTrouble('baska');
+        },
+      ),
+    [],
+  );
 
   // Ctrl+Z / Ctrl+Y — dropping a card in the wrong place happens constantly,
   // so this is a basic function, not a nicety.
@@ -165,6 +231,8 @@ export function useStore() {
     // tab, and the 400 ms debounce is exactly long enough to eat the edit
     // somebody made right before pressing the button (pitfall 28).
     park,
+    /** Null while saves land; otherwise why they do not (the strip at the top). */
+    saveTrouble: trouble,
     canUndo: box.past.length > 0,
     canRedo: box.future.length > 0,
     plans,

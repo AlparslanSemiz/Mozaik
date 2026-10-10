@@ -93,6 +93,18 @@ Tür: ürün kusuru, veri kaybı değil.
 Ne yapıldı: TODO §8l TB2.
 Kalıcı kural: yok.
 
+### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
+Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da
+"başka bir pencerede" şeridi). Yerelde yeşildi, çünkü ikinci sekme ilkinin açılış
+yazımından önce açılıyordu. CI'da sonra açıldı, planı `parseState` ile okudu ve geri yazdı;
+okumak boş branş listesini 21 yerleşik branşla dolduruyor, metin 957'den 1198 karaktere
+çıkıyor. Kilit metni karşılaştırıyordu. Sıra yerelde zorlanınca kırmızı tekrarlandı.
+Tür: ürün kusuru (yeni kodda, yanlış alarm).
+Ne yapıldı: düzeltildi, aynı dalda; iki taraf aynı okuyucudan geçip karşılaştırılıyor,
+E2E ikinci sekmeyi her koşuda ilkinin yazımından sonra açıyor. Boş listenin doldurulması
+TODO B7.27'de not.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `haftalik.yml` 37914431289 (`main`, 290f55d) · tam mutasyon koşusu 6 saatte iptal
 Bulgu: `mutasyon` işi 09:56'dan 15:57'ye koştu ve GitHub'ın 360 dakikalık iş tavanında
 iptal oldu. Son satırı: 5 639 mutantın 3 645'i denendi (697 hayatta, 26 zaman aşımı),

@@ -12,16 +12,21 @@
 // what keeps store.ts and the plan library free of a runtime cycle
 // (ARCHITECTURE, the same arrangement keys.ts has between constraints and
 // rules). Every call goes through the one `safely` guard in storage.ts.
+//
+// And every WRITE goes through `writesClosed()` first: once another window has
+// changed our data, this one writes nothing more (otherWindow.ts, VK1).
 
 import { LIBRARY_KEY, parseLibrary, planKey, type Library } from '../pure/library';
 import { safely } from '../leaf/storage';
 import { type Id } from '../leaf/types';
+import { writesClosed } from './otherWindow';
 
 export function readLibrary(): Library {
   return parseLibrary(safely(() => localStorage.getItem(LIBRARY_KEY)) ?? null);
 }
 
 export function writeLibrary(lib: Library): void {
+  if (writesClosed()) return;
   safely(() => localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib)));
 }
 
@@ -38,6 +43,7 @@ export function readPlanText(id: Id): string | null {
  * plan, and there the panel has to be able to say which one did not fit.
  */
 export function writePlanText(id: Id, text: string): boolean {
+  if (writesClosed()) return false;
   return (
     safely(() => {
       localStorage.setItem(planKey(id), text);
@@ -47,5 +53,6 @@ export function writePlanText(id: Id, text: string): boolean {
 }
 
 export function dropPlanText(id: Id): void {
+  if (writesClosed()) return;
   safely(() => localStorage.removeItem(planKey(id)));
 }

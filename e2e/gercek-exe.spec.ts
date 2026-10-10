@@ -7,10 +7,11 @@
 // Every test starts its own program in its own sandbox HOME, so the real
 // Documents/Ders Programı on this machine is never written to.
 
+import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test as base } from '@playwright/test';
-import { Oturum, suruculuBaslat, varsayilanIkili } from '../scripts/webdriver.mjs';
+import { Oturum, evHazirla, suruculuBaslat, varsayilanIkili } from '../scripts/webdriver.mjs';
 
 const KOK = resolve(import.meta.dirname, '..');
 
@@ -398,5 +399,72 @@ test.describe('Gerçek exe (Linux)', () => {
     expect(olcum.dusen, `${olcum.yazma} yazmada ${olcum.dusen} kare düştü`).toBeLessThan(
       olcum.yazma / 3,
     );
+  });
+  test('ikinci açılış yeni pencere açmıyor, açık olan program yerinde kalıyor (VK1)', async ({
+    exe,
+  }) => {
+    // Two copies each held the plan in memory, and the one closed last wrote
+    // its old copy over the other's work, in localStorage and in both files
+    // under Documents (the test session, exe-vk1b.mjs, 2026-10-09). The second
+    // launch now hands the focus to the first and exits.
+    const ikinci = spawn(varsayilanIkili(), [], {
+      env: { ...process.env, ...evHazirla(exe.ev, { koru: true }), LANG: 'tr_TR.UTF-8' },
+      cwd: exe.ev,
+      stdio: 'ignore',
+    });
+    const kod = await new Promise<number | null | 'sürüyor'>((tamam) => {
+      const sure = setTimeout(() => tamam('sürüyor'), 15_000);
+      ikinci.on('exit', (k) => {
+        clearTimeout(sure);
+        tamam(k);
+      });
+    });
+    if (kod === 'sürüyor') ikinci.kill('SIGKILL');
+    expect(kod, 'ikinci kopya kapanmadı: ikinci bir pencere açık').toBe(0);
+    // ...and the first one is still the program, answering.
+    expect(await exe.oturum.js('return document.querySelectorAll("h1").length > 0;')).toBe(true);
+  });
+
+  test('depo doluyken kurtarma kopyası yazılıyor ve sonraki açılış onu ezmiyor (VK2)', async ({
+    exe,
+  }) => {
+    await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toBe('');
+    const dolgu = await exe.oturum.js(`
+      let n = 0;
+      for (const boy of [512 * 1024, 64 * 1024, 4 * 1024, 256]) {
+        const parca = 'x'.repeat(boy);
+        for (;;) {
+          try { localStorage.setItem('zz-dolgu-' + n, parca); n += 1; } catch { break; }
+        }
+      }
+      return n;`);
+    expect(dolgu).toBeGreaterThan(0);
+
+    await exe.oturum.tikla('metin:Örnek veriyle doldur');
+    await exe.oturum.bekle('[role="dialog"]');
+    await exe.oturum.tikla('metin:Yükle');
+    await exe.oturum.bekle('.save-warning', 10_000);
+    expect(await exe.oturum.metin('.save-warning')).toContain('kaydedilemedi');
+
+    const kurtarma = () =>
+      readdirSync(exe.klasor).filter((n) => n.startsWith('ders-programi-kurtarma-'));
+    await expect.poll(() => kurtarma().length, { timeout: 15_000 }).toBe(1);
+    const ad = kurtarma()[0]!;
+    const yol = join(exe.klasor, ad);
+    await expect.poll(() => readFileSync(yol, 'utf8'), { timeout: 10_000 }).toContain('Örnek Kurs');
+
+    // The next start, from the storage that never took the sample.
+    await exe.oturum.kapat();
+    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
+    try {
+      await yeni.bekle('h1', 20_000);
+      // The live file is rewritten from the old state: the very case the
+      // rescue copy is for. Then the rescue copy is untouched.
+      await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toContain('Örnek Kurs');
+      expect(readFileSync(yol, 'utf8')).toContain('Örnek Kurs');
+      expect(kurtarma()).toEqual([ad]);
+    } finally {
+      await yeni.kapat().catch(() => undefined);
+    }
   });
 });

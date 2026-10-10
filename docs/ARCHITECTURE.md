@@ -17,7 +17,7 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
 src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
                    desktop · update · download
                    drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useStore · usePlans · useFolder · search/*
+                   useStore · usePlans · useFolder · search/* · otherWindow
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -105,11 +105,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt, `park`, geri al kısayolu, `isTextInput` |
+| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
-| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
+| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz |
+| `platform/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
 | `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |

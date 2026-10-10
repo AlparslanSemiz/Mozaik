@@ -110,6 +110,23 @@ describe('kimlik — verinin ADRESİ', () => {
     expect(tauriConf.identifier).toBe('com.dersprogrami.arac');
   });
 
+  it('useHttpsScheme açıkça false: köken http://tauri.localhost kalıyor', () => {
+    // The identifier's twin. The identifier is the FOLDER localStorage sits
+    // in; this is the ORIGIN it is filed under inside that folder. `true`
+    // turns `http://tauri.localhost` into `https://tauri.localhost` on
+    // Windows, a different origin, and every plan is again on the disk and
+    // invisible. Tauri's own comment on the field says the same.
+    //
+    // It was not written down until 2026-10-09: the key was absent and the
+    // value was serde's default, `false` (tauri-utils 2.9.3, config.rs,
+    // `#[serde(default)] pub use_https_scheme: bool`), which is what the
+    // measured `http://tauri.localhost` above shows. A default is a value
+    // somebody else can change in an upgrade; a line in this file is not.
+    const windows = tauriConf.app.windows as Array<Record<string, unknown>>;
+    expect(windows.length).toBe(1);
+    expect(windows[0]?.['useHttpsScheme']).toBe(false);
+  });
+
   it('ekrandaki ad Mozaik — kimlik onunla birlikte kıpırdamıyor', () => {
     // The guard that keeps the test above from being read as "the rename was
     // reverted". It was not: the name is Mozaik everywhere a person sees one.
