@@ -1446,8 +1446,9 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
       okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
       kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). **Kalan:** paket yolu
-      (`parseBundle` ve arkasındaki `parseState`), TB8'in kararına bağlı. Dosya sıra 6'da
-      (`pure/io`) taşınır, yolları o tur değiştirir.
+      (`parseBundle` ve arkasındaki `parseState`). **Bekler: TB8'in düzeltmesi ve sıra 6**
+      (kullanıcının kararı, 2026-10-10); TB8'in kendi testini düzelten dal yazar. Dosya sıra
+      6'da (`pure/io`) taşınır, yolları o tur değiştirir.
 - [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
       Stryker listesine. **Bekler: sıra 4** (`platform/storage`: `useStore`, `usePlans`,
       `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
@@ -1497,6 +1498,12 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
 - [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
       axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölünür. CI'da JSON
       raporu ve 30 günlük kararsız sayacı. —
+      **Kök neden adayı (2026-10-10, kullanıcının isteği):** `kapanis.spec.ts` ve
+      `klasor.spec.ts`'in saati `now + 1_000`'de durdurması ("Test: saatin durduğu an bir
+      saniye ileride"). Pay ölçülmedi, bir CI düşüşünden seçildi: zamanı okumakla durdurmak
+      arasında bir saniyeden fazla geçen bir runner aynı hatayı (`Cannot fast-forward to the
+      past`) yeniden verir, ve o saniyeye bir gün bir zamanlayıcı düşerse (`SAVE_DELAY`
+      400 ms, klasör 2 s) test sessizce başka bir şeyi ölçer.
 - [ ] **TP23 Erişilebilirlik tabanı (C3).** Düzeltmeler `main`'de; burada yalnız `BILINEN`'in
       küçülmesi. —
 - [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: sıra 10 ve 11**
@@ -1553,10 +1560,10 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       tutuyor ve bir sonraki açılış klasörü yazıyor; kaybolan, klasörün kapanış anında güncel
       olması. Exe'de aynı yol Tauri'nin eşzamansız köprüsünden geçiyor, ölçülmedi. Test
       `klasor.spec.ts`'te "BİLİNEN KUSUR". **Nerede düzeltilecek (kullanıcının kararı,
-      2026-10-09):** `fix/veri-kaybi`'de değil; o dal `main`'e birleştikten sonra `main`'den
-      açılan ayrı bir düzeltme dalında, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda
-      dokunmamalı. `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da
-      aynı kalmalı.
+      2026-10-09, 2026-10-10'da TB8 eklendi):** `fix/veri-kaybi`'de değil; TB8 ile birlikte
+      ikinci bir düzeltme dalında. O dal `fix/veri-kaybi` `main`'e birleşir birleşmez
+      `main`'den açılır, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda dokunmamalı.
+      `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da aynı kalmalı.
 - [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
@@ -1567,7 +1574,10 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       söylüyor, sonra "1 plan açıldı" deniyor ve bu bilgisayardaki bütün planlar gidiyor;
       geri alınamaz. Kalan: oturum başının yedek zinciri (yalnız o an açık olan plan) ve
       exe'de Belgeler'in önceki günleri. Arayüzde uçtan uca koşulmadı; zincir koddan.
-      Test dalında test yazılmadı, kullanıcıya getirildi.
+      **Nerede düzeltilecek (kullanıcının kararı, 2026-10-10):** `fix/veri-kaybi`'de değil;
+      TB7 ile birlikte ikinci düzeltme dalında, `fix/veri-kaybi` `main`'e birleşir birleşmez
+      `main`'den açılan. **Testini o dal yazar**, test dalı yazmaz. TP4'ün paket yolu fuzz'u
+      bu düzeltmeyi ve sıra 6'yı bekler.
 
 ## §9. Ham notlar
 
