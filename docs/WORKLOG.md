@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-10.
+Son güncelleme: 2026-10-11.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -44,11 +44,16 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
-0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
-   (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
+0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
+   uygulaması ∥ zebra → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
+   Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
-   → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
-   uygulaması. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
+   → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
+   oturumunda. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
+   `scripts/linux-kur.sh` `~/GitHub/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
+   kendi profili, yalnız Chrome; rpm bırakıldı. Kalan Alp'te: kurulum ve README'deki
+   taşıma, klasör izninin yeniden açılışta geri gelmesi; Wayland'de görev çubuğu simgesi
+   ölçülmedi. Düzeltmelerde RK14 (bozuk arama
    günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
@@ -96,7 +101,7 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
 | Ana E2E süiti | 628 test (2026-10-09) | `npx playwright test --list` |
-| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
+| Site, sunucu, klasör, Linux taşıması | 4 dosyada 23 test (2026-10-11) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 39 (2026-10-08) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
@@ -162,7 +167,7 @@ yeşil kaldı, test düzeldi, yeniden koşuda 6/6 (profili silmek eklendi). Taş
 `--derle` ile 3/3: ikinci planı düşürmek ("1 plan açıldı"), içeriği boşaltmak ("hiçbir plan
 okunamadı"), öğretmenleri boşaltmak (içerik karşılaştırması, "1. plan").
 
-**Tuzak adayı** (numarası birleşme commit'inde): kısıtlı PATH'le koşan bir kabuk testi,
+**Tuzak 150** (numarası birleşme commit'inde verildi): kısıtlı PATH'le koşan bir kabuk testi,
 betiğe sızan dış komutları göremez; komut bulunamaz, `set -e`'siz betik devam eder, test
 yeşil kalır. Çare: sahteler önde, sistem dizinleri arkada; yokluğu sınanan program için
 yalnız sahteler.

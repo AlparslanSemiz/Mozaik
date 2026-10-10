@@ -1248,6 +1248,16 @@ koşar ve yeşil olmalıdır, ve 126, 127 ya da sinyal alan bir koşu kırmızı
 betiğin kendi koşularıyla gösterildi. Kural: **her mutasyon bu betikle yapılır, kendi
 sarmalayıcısıyla değil** (CLAUDE.md).
 
+### 150 · Kısıtlı PATH'le koşan bir kabuk testi, betiğe sızan dış komutu göremez
+Linux başlatıcısının testi PATH'i yalnız sahte programlara kısıyordu, gerçek Chrome
+bulunmasın diye. Başlatıcıya `mkdir -p "$ev/profil"` ekleyen mutasyon yeşil kaldı: `mkdir`
+o PATH'te yok, `set -e`'siz betik "command not found"dan sonra devam etti, profil hiç
+kurulmadı ve "profile dokunmuyor" iddiası bedava geçti. Aynı körlük her `rm` için de
+geçerliydi. Çare `src/linuxKur.test.ts`'te: sahteler önde, `/usr/bin:/bin` arkada, ve
+yalnız bir programın YOKLUĞUNU sınayan test sahtelerle tek başına koşar. Mutasyonla
+gösterildi (TESTFINDINGS 2026-10-10). Kural: **bir kabuk testinin PATH'i, betiğin
+yapmaması gereken şeyi yapabileceği kadar geniştir.**
+
 ## Ölçüm disiplini
 
 **Kural.** Bir platform ya da performans iddiası ölçülerek yazılır, hele bir turun
@@ -1387,13 +1397,13 @@ bir algoritma işi gibi kovalanır.
 | Yazdırma ve kâğıt | 8, 31, 63, 86 |
 | Ad çakışması ve erişilebilir ad | 49, 56, 74, 104 |
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
-| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149 |
+| Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 150 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 149, yeni bir tuzak 150'den devam eder. Test stratejisi
+büyük kullanılan numara 150, yeni bir tuzak 151'den devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

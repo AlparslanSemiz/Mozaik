@@ -37,7 +37,7 @@ var olan profil"): Chrome'un bulunması gereken testlerde sahteler önde, `/usr/
 arkada; Chrome'un yokluğunu sınayan test yalnız sahtelerle, çünkü orada gerçek Chrome
 bulunurdu. Profil önceden varken dokunulmadığı ayrıca sınanıyor. Yeniden koşuda altı
 başlatıcı mutasyonunun altısı kırmızı.
-Kalıcı kural: TRAPS.md'ye aday, numarası birleşme commit'inde.
+Kalıcı kural: TRAPS.md, tuzak 150.
 
 ### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
 Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da

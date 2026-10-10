@@ -224,7 +224,7 @@ describe.skipIf(process.platform === 'win32')('Linux başlatıcısı', () => {
   /**
    * `sistem`: the system's own tools behind the fakes. Without them a `mkdir`
    * or an `rm` slipped into the launcher is "command not found" and passes
-   * unseen (a mutation did exactly that). With them, a real google-chrome
+   * unseen (a mutation did exactly that, pitfall 150). With them, a real google-chrome
    * would also be found, so the test that needs Chrome to be MISSING runs on
    * the fakes alone.
    */
