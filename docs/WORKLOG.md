@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-09.
+Son güncelleme: 2026-10-10.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -55,7 +55,8 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
-   PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
+   PR'ı birleşti, `upload-artifact` elle v7'de, Linux işleri `ubuntu-24.04`'te sabit
+   (2026-10-10); #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
    koşusu (`haftalik.yml` 37914431289) 360 dakikalık iş tavanında iptal oldu, kalan tahmin
    ~20 sa; nasıl koşacağı kullanıcıda (TODO B7.24). B7.26 (öneri değişmezinin CI'da kararsızlığı)
    kapandı, testi zayıflatmadan (WORKLOG 2026-10-09 gece).
@@ -110,6 +111,22 @@ paketleri, derin import kuralı ve hedef ağacın tablosu `main`'de; `refactor/s
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-10 · `ci/runner-sabitle`: Linux runner'ı sabit, `upload-artifact` v7
+
+**Ne yapıldı.** Beş iş akışında bütün `runs-on: ubuntu-latest` → `ubuntu-24.04` (ci 5,
+site 2, surum 2, haftalik 1), bütün `actions/upload-artifact@v4` → `@v7` (ci 4, surum 2,
+haftalik 1, windows 1). Sebep: `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiyor, ve
+Node 20 uyarısının kalan kaynağı `upload-artifact@v4`'tü (TODO B7.20). Bugün
+`ubuntu-latest` zaten 24.04, yani imaj değişmiyor. v7'nin yeniliği (`archive: false`) ve
+ESM'e geçişi bizim girdilerimize dokunmuyor; v6'nın Node 24'ü barındırılan runner'da var.
+`windows-latest` kapsam dışı, dokunulmadı.
+
+**Koşulan testler.** `hizli` ve belge kapıları; dalın `ci.yml` koşusu. `site.yml`,
+`surum.yml` ve `haftalik.yml` dalda koşmuyor: ilk `main` push'u `site.yml`'i, ilk etiket
+`surum.yml`'i, ilk hafta sonu `haftalik.yml`'i sınar. `windows.yml` ilk `main` push'unda.
 
 ---
 

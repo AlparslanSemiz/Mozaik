@@ -54,7 +54,7 @@ permissions:
 jobs:
   # ------------------------------------------------------------ 1 · package
   package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -100,7 +100,7 @@ jobs:
           (cd dist-kurulum && zip -qr "../teslim/Mozaik-Windows-kurulum.zip" .)
           ls -l teslim
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: package
           path: teslim/*
@@ -174,7 +174,7 @@ jobs:
       # in a build instead of turning up in a complaint six months later.
       - name: Are the icon and the version info REALLY embedded
         run: node scripts/exe-ikon.mjs teslim/Mozaik.exe --karsilastir kurulum/icon.ico
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: exe
           path: teslim/*
@@ -183,7 +183,7 @@ jobs:
   # ------------------------------------------------------------- 3 · publish
   publish:
     needs: [package, exe]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
       - uses: actions/download-artifact@v7

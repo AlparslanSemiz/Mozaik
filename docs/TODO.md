@@ -715,6 +715,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       itiliyor (PR'ın SHA'sı korunduğu için GitHub onu "merged" sayıyor).
       `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. #6 (bölme önerisi
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
+      **2026-10-10, Alp'in kararıyla elle:** `upload-artifact` v7'de (`ci/runner-sabitle`),
+      Node 20 uyarısının kaynağı kalmadı; aynı dalda Linux işleri `ubuntu-latest` yerine
+      `ubuntu-24.04`'te sabit (DECISIONS 2026-10-10). Windows işleri `windows-latest`'te.
 - [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.

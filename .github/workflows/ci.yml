@@ -47,7 +47,7 @@ concurrency:
 
 jobs:
   denetim:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -75,7 +75,7 @@ jobs:
 
   # Ana E2E süiti, üç parça; öneri aramasını başlatan iki test hariç (yukarıda).
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -100,14 +100,14 @@ jobs:
         continue-on-error: true
         run: node scripts/kararsiz.mjs
       - if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blob-${{ matrix.parca }}
           path: blob-report/
           retention-days: 7
 
   e2e-arama:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -131,7 +131,7 @@ jobs:
         continue-on-error: true
         run: node scripts/kararsiz.mjs
       - if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: blob-arama-${{ matrix.parca }}
           path: blob-report/
@@ -140,7 +140,7 @@ jobs:
   # `npm run kontrol`'ün öteki iki Playwright config'i: site, yerel sunucu ve
   # klasör; ve çözücünün gerçek ölçekteki stresi.
   e2e-ek:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -155,7 +155,7 @@ jobs:
       - name: Çözücü stresi
         run: npx playwright test --config playwright.cozucu.config.ts --trace=retain-on-failure
       - if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-ek-iz
           path: test-results/
@@ -165,7 +165,7 @@ jobs:
   rapor:
     if: failure()
     needs: [e2e, e2e-arama]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -179,7 +179,7 @@ jobs:
           path: tum-blob
           merge-multiple: true
       - run: npx playwright merge-reports --reporter=html ./tum-blob
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: playwright-raporu
           path: playwright-report/
