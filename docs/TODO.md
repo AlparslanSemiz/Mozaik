@@ -88,6 +88,11 @@ kaynağı senin kendi cümlen, rakip değil. Öteki her bölüm §1'den besleniy
 konmadı. Babanın geri bildirimi envanterin ön şartı değil, ikisi paralel yürüyor.
 Kayıt [DECISIONS.md](DECISIONS.md)'de.
 
+**Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ∥ zebra →
+sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
+(önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
+Mutasyon parçaları (B7.24) test oturumunda.
+
 ---
 
 ## §1. Rakip envanteri — Roboders ve aSc'nin TAM incelenmesi
@@ -757,6 +762,16 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       yedeklerin listesi aynı bileşende (`Data.tsx`) ve `src/ui`'da hata sınırı yok, yani
       okumaya göre çöküş satırda kalmaz, Veri bölümü açılınca bütün pencere boşalır.
       Ölçülmedi.
+- [~] **B7.28 Linux uygulaması: Chrome'un app modunda `dist/index.html` (2026-10-10).**
+      Tauri'nin WebKitGTK sürümü kasıyor (B7.21'de 19 WebKit kırmızısı). Kararlar (Alp):
+      `file://` ve ayrı bir Chrome profili (`~/.local/share/mozaik/profil`), yalnız
+      `google-chrome`, Chrome yoksa söyleyip çıkmak, rpm bırakılır, Linux ikilisi test aracı
+      olarak kalır. Analizin ölçümleri (Chrome 154, Brave 1.96, geçici profil, `--app`):
+      sitenin ağsız ilk açılışı iki tarayıcıda da hata sayfası, ikinci açılışı service
+      worker'dan; `file://` ağsız açılıyor. `showDirectoryPicker` Chrome'da iki yolda var ve
+      seçici açıldı, Brave'de iki yolda da yok. VK1: aynı profilde iki `--app` penceresi,
+      A örneği yükleyince B'de "başka bir pencerede" şeridi, A'da yok (iki tarayıcı).
+      Alp'in bugünkü verisi Chrome'un Default profilinde, site origin'inde; Brave'de yok.
 - [x] **B7.26 `invariants.test.ts`'in öneri değişmezi CI'da kararsız (2026-10-09).** 60 s'lik
       tavan 60 dünyanın toplamı; `main`'de 10–22 s, aç kalan bir runner'da 74 s
       (TESTFINDINGS). Seçenekler: tavanı yükseltmek, `numRuns`'ı düşürmek ya da dünyayı
