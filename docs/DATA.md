@@ -259,6 +259,13 @@ dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. 
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
 
+Bu tarayıcının kendi deposu kaydı reddederken (kota, VK2) her klasör yazımı oturuma özel
+bir kurtarma kopyası da bırakır: `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.json`, aynı
+paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski durumla yeniden
+yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
+uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
+değiştirdiyse bu pencere klasöre de yazmaz (VK1).
+
 ## Neden böyle
 
 - **Branş öğretmenin alanı, ve iki tane olabilir.** "Türkçe ve Edebiyat" bir hiyerarşiyle anlatılamadığı için alt branş değil çift branş seçildi. Dersin hangi branştan verildiği bir bayrak (`Lesson.second`), branşın adı değil: ad ikinci bir gerçek olur ve öğretmenin branşı düzeltilince sessizce saparak kalırdı. `Teacher.subject` bir kimlik değil bir ad, yeniden adlandırmak ucuz kalsın diye.
