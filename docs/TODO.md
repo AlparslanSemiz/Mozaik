@@ -1462,8 +1462,12 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
 
 **Faz 2 · gerçek ortam**
-- [ ] **TP6 Gerçek paket fikstürü, adsız (B6, K2).** En yeni gerçek dosya bir paket (v1,
+- [x] **TP6 Gerçek paket fikstürü, adsız (B6, K2).** En yeni gerçek dosya bir paket (v1,
       içinde v14 plan, 330 yerleşim); `fixtures.test.ts`'e bir `describe`. —
+      **Yapıldı (2026-10-10):** `src/fixtures/gercek-paket-v1.json`, `scripts/adsiz-paket.mjs`
+      (adlar `tam-dolu-kurs.json`'dan kimlikten kimliğe; o dosyada olmayan dize yazılmıyor).
+      "gerçek paket, adsız" bloğunda beş test, dört mutasyonla kanıtlı. Commit'ten önce gerçek
+      ad araması: commit'in diff'inde 0 eşleşme (komut ve liste `scratch/test-plan/b6/`).
 - [ ] **TP7 Windows'ta gerçek exe (B7).** `webdriver.mjs`'e Windows (ikili yolu,
       `--native-driver`, `taskkill`, dil, runner koruması), spec'te platform dalları,
       yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —

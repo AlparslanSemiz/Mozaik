@@ -185,7 +185,7 @@ varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte
 
 ### Şema örnekleri
 
-`src/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v14.json` arası. Tuzak
+`src/fixtures.test.ts` ve `src/fixtures/v1.json` ile `v16.json` arası. Tuzak
 97'nin mekanik yarısı. `store.test.ts` zaten sürüm başına bir `describe` tutuyor,
 ama o liste elle uzatılıyor: yeni bir sürüm bloğu yazılmadan çıkarılabilir ve süit
 yeşil kalır, ki `version === 8` tam olarak böyle unutuldu ve yayınlanmış v2.0.0'ın
@@ -493,15 +493,23 @@ kullanır. Denetçinin kendisi `worlds.test.ts`'te bilerek bozuk ızgaralarla s�
 ve her dünya testi kaydedilen yerleşim sayısının girişten büyük olduğunu ayrıca
 iddia eder (tuzak 23).
 
-Sahte olmayan veri iki dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
+Sahte olmayan veri üç dosya. `src/fixtures/tam-dolu-kurs.json` babanın planı,
 öğretmen adları "Öğretmen N" yapılmış ve ızgarası boşaltılmış.
 `src/fixtures/tam-dolu-kurs-dizili.json` aynı dosya, babanın kendi dizdiği 330
 saatle: yalnız yerleşimler eklendi, ve onlar kimlikten kimliğe, ad taşımıyor
 (2026-09-25). Dizili dersler yerinde kalırken yol olmayan, yani her yolun yeniden
 dizdiği hafta bu; `relaxLaidOut.test.ts` onda "Olmaz"dan sonraki kaliteyi soruyor (KY'nin
 Cumartesisi reddedilince en az saat 5, CP-SAT'ın en iyisi). Şema örneklerinin
-yanında duruyor ama onlardan değil, `fixtures.test.ts` yalnız sürüm numaralı
-dosyaları (`v1.json` ile `v14.json` arası) okuyor. `solver.test.ts` onu iki soruyla kullanır: olduğu gibi kurulamadığını
+yanında duruyor ama onlardan değil, `fixtures.test.ts`'in şema döngüsü yalnız sürüm
+numaralı dosyaları (`v1.json` ile `v16.json` arası) okuyor. Üçüncüsü
+`src/fixtures/gercek-paket-v1.json`: aynı okulun en yeni gerçek "Tümünü kaydet" paketi
+(2026-09-04; paket v1, içinde v14 plan), adları `scripts/adsiz-paket.mjs` ile
+`tam-dolu-kurs.json`'dan, kimlikten kimliğe (TP6, K2). Betik o dosyada olmayan tek bir
+dizeyi bile yazmıyor, bilmediği bir kimlikte duruyor; commit'ten önce gerçek adlar
+klasördeki dosyalardan kurulan listeyle arandı, listesi `scratch/`'te. Zarfın kendisini
+ölçen tek dosya bu: `fixtures.test.ts`'in "gerçek paket, adsız" bloğu `parseBundle` ile
+açıyor, plan bugünkü sürüme göçüyor, okul kayıpsız ve 330 saat dizili dosyayla hücre
+hücre aynı. `solver.test.ts` dizili olmayanı iki soruyla kullanır: olduğu gibi kurulamadığını
 dürüstçe söylemesi, ve Roboders'in açık saatleriyle tamamını dizmesi (tuzak 122,
 125). `relaxFullCourse.test.ts` üçüncü soruyu sorar: kurulamayan haftaya önerilen
 değişikliklerin boyutu CP-SAT'ın ölçtüğü en küçükle aynı mı (4 öğretmen saati, 6
