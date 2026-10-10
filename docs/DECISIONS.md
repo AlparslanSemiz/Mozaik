@@ -35,6 +35,20 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-10 · Yavaş süitlerin tek istisnası: `yayinla` Windows E2E'yi bekler
+
+**Ne.** Kullanıcının kararı: uzun testler ve yavaş süitler push'u ve birleştirmeyi
+beklemez; `npm run yayinla` ise Windows E2E'yi bekler. Bu, "uzun testler hiçbir şeyi
+bekletmez" kuralının tek istisnası. CLAUDE.md'de iki kural tek cümlede birleşti.
+
+**Eski hâli.** CLAUDE.md'de iki cümle çelişiyordu: "uzun testler (Windows E2E dahil)
+hiçbir şeyi bekletmez" ve "yavaş süitler sürümü beklemez" bir yanda, "etiket `windows.yml`
+yeşil olmadan atılmaz" (aşağıda, "Windows E2E her main push'unda, ve etiket onu da
+bekliyor") öbür yanda.
+
+**Gerekçe.** Etiket babanın exe'sine ulaşıyor, Windows onun gerçek ortamı. Push ve
+birleştirme babaya ulaşmıyor, onlar beklemez.
+
 ### 2026-10-09 · Test programı başladı; yavaş süitler hiçbir şeyi beklemez
 
 **Ne.** Kullanıcının kararları (test programının analizi, `test/kapsam`):

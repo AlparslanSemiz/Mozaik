@@ -1421,7 +1421,7 @@ girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
 | K2 | Gerçek paketin adsız fikstürü depoya girer, `tam-dolu-kurs.json`'un yöntemiyle (öğretmen baş harfleri; e-posta ve serbest metin yok); commit'ten önce dosyada gerçek ad aranır, komut ve sonuç rapora |
 | K3 | Bileşen katmanı (Vitest browser mode) yalnız girdi bileşenleri için açılır |
 | K4 | Paket turlarının hedef ağacını refactor oturumu yazar; aşağıda "bekler" diyen maddeler ona göre işaretli |
-| K5 | Yavaş süitler (mutasyon, uzun süre, görsel, Windows'ta gerçek exe, sürüm yükseltme) push'u, birleştirmeyi ve sürümü beklemez; gece ya da haftalık, kırmızısı görünür bir yere düşer (CLAUDE.md) |
+| K5 | Yavaş süitler (mutasyon, uzun süre, görsel, Windows'ta gerçek exe, sürüm yükseltme) push'u, birleştirmeyi ve sürümü beklemez; gece ya da haftalık, kırmızısı görünür bir yere düşer (CLAUDE.md). Tek istisna (2026-10-10): `yayinla` Windows E2E'yi bekler (DECISIONS) |
 | K6 | Runner'lar ve artefakt aksiyonları sabit, 2026-10-19'dan önce (yapıldı) |
 | K7 | Dependabot alerts ve güvenlik güncellemeleri: ayarı Alp açar |
 | K8 | Mutasyonun iş akışı `ci/mutasyon-parca` dalında; C1 o dal birleşince ölçülür |

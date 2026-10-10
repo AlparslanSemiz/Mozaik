@@ -80,10 +80,11 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
 - Elle ya da toplu her mutasyon kanıtı `scripts/mutasyon-kaniti.sh` ile yapılır (toplu: `--liste`), kendi betiğini yazmak yok: kontrol koşusu ve koşmayan testin ayrımı orada.
 - Arka planda bir mutasyon sürerken ağaca dokunulmaz, `git stash` dahil.
 - Commit'ten önce `npm run hizli` ve dokunulan test dosyaları. `hizli`'nin neyi görmediği [docs/TESTPLAN.md](docs/TESTPLAN.md)'de.
-- Uzun testler (mutasyon, Windows E2E, WebKit) hiçbir şeyi bekletmez, arkada koşar. Test
-  programının yavaş süitleri de (uzun süre açık kalma, görsel regresyon, Windows'ta gerçek
-  exe, sürüm yükseltme) push'u, birleştirmeyi ya da sürümü beklemez: gece ya da haftalık
-  koşar, kırmızı sonucu görünür bir yere düşer. Ayrıntı [docs/TODO.md](docs/TODO.md) §8l.
+- Uzun testler ve test programının yavaş süitleri (mutasyon, Windows E2E, WebKit, uzun süre
+  açık kalma, görsel regresyon, Windows'ta gerçek exe, sürüm yükseltme) push'u ve
+  birleştirmeyi beklemez, arkada, gece ya da haftalık koşar ve kırmızı sonucu görünür bir
+  yere düşer; tek istisna `npm run yayinla`'nın Windows E2E'yi beklemesi, çünkü etiket
+  babanın exe'sine ulaşıyor ve Windows onun gerçek ortamı. Ayrıntı [docs/TODO.md](docs/TODO.md) §8l.
 - Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
   (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
 
