@@ -24,6 +24,9 @@
 // `self_update_supported` on purpose (desktop.ts counts an unknown command as
 // yes), and `fakeDisk` only knows the folder.
 //
+// The update's manifest is the second contract, at the bottom of the file
+// (TP10).
+//
 // `desktop.ts` is found by NAME, not by path. It moves to `platform/exe` in a
 // later package round (TODO §8k), and a contract test that broke on the move
 // would be the one thing that round has to touch for no reason.
@@ -31,9 +34,15 @@
 import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
+import { createHash } from 'node:crypto';
+
 import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
+import surumYml from '../.github/workflows/surum.yml?raw';
+import kayitliSurum from './fixtures/release-v2.2.0/surum.json?raw';
+import kayitliToplam from './fixtures/release-v2.2.0/SHA256SUMS.txt?raw';
+import kayitliRelease from './fixtures/release-v2.2.0/release.json';
 
 /** The one file the glob found. Vite wants the pattern literal, hence two globs. */
 function only(name: string, all: Record<string, unknown>): string {
@@ -291,4 +300,86 @@ describe.each([
       }
     },
   );
+});
+
+// ------------------------------------------------------------- the update
+
+// THE SECOND CONTRACT (TP10, B9b): what `surum.yml` publishes and what every
+// copy already on a machine reads. `update.rs` deserialises `surum.json` into
+// `Manifest` and then downloads `exe` and checks it is `boyut` bytes; a key
+// renamed on one side, or a size that is not the exe's, breaks an update in a
+// copy nobody can rebuild any more. Judged against a RECORDED release (v2.2.0,
+// the files as published, plus its asset list from `gh release view`), so the
+// test needs no network. `surum.test.ts` already pins the address prefixes.
+describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyayı anlatıyor', () => {
+  const MANIFEST = rustFields('Manifest', updateRs);
+  const manifest = JSON.parse(kayitliSurum) as Record<string, unknown>;
+  const assets = new Map(kayitliRelease.assets.map((a) => [a.name, a.size]));
+
+  /** The object literal `surum.yml` hands to JSON.stringify. */
+  function writerKeys(): string[] {
+    const body = /JSON\.stringify\(\{([^}]*)\}/.exec(surumYml)?.[1] ?? '';
+    return [...body.matchAll(/^\s*(\w+):/gm)].map((m) => m[1]!);
+  }
+
+  /** The files after `gh release create`, i.e. what a Release carries. */
+  function publishedFiles(): string[] {
+    const block = surumYml.slice(surumYml.indexOf('gh release create'));
+    return [...block.matchAll(/teslim\/(\S+)/g)].map((m) => m[1]!);
+  }
+
+  it('Manifest dört alan okuyor, surum.yml dördünü yazıyor', () => {
+    expect(MANIFEST.length).toBe(4);
+    expect([...writerKeys()].sort()).toEqual([...MANIFEST].sort());
+  });
+
+  it('kayıtlı surum.json tam Manifest’in alanlarını, Rust’ın tipleriyle taşıyor', () => {
+    expect(Object.keys(manifest).sort()).toEqual([...MANIFEST].sort());
+    expect(manifest.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(manifest.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(typeof manifest.exe).toBe('string');
+    expect(Number.isSafeInteger(manifest.boyut) && (manifest.boyut as number) > 0).toBe(true);
+  });
+
+  it('kayıtlı dosya surum.yml’in biçiminde: iki boşluk girinti, sonda satır sonu', () => {
+    expect(kayitliSurum).toBe(JSON.stringify(manifest, null, 2) + '\n');
+    expect(surumYml).toContain("}, null, 2) + '\\n');");
+  });
+
+  it('surum.yml boyutu adresin gösterdiği dosyadan ölçüyor', () => {
+    const measured = /boyut=\$\(stat -c%s teslim\/(\S+)\)/.exec(surumYml)?.[1];
+    const address = /^\s*adres="[^"]*\/([^/"]+)"/m.exec(surumYml)?.[1];
+    expect(measured).toBeDefined();
+    expect(measured).toBe(address);
+  });
+
+  it('sürüm etiketin numarası, boyut Release’teki exe’nin boyutu', () => {
+    expect(`v${String(manifest.version)}`).toBe(kayitliRelease.tagName);
+    expect(manifest.boyut).toBe(assets.get('Mozaik.exe'));
+    expect(kayitliRelease.isDraft || kayitliRelease.isPrerelease).toBe(false);
+  });
+
+  it('exe adresi Release’teki bir dosyayı gösteriyor', () => {
+    const exe = String(manifest.exe);
+    const name = exe.slice(exe.lastIndexOf('/') + 1);
+    expect(exe).toMatch(/\/releases\/latest\/download\/[^/]+$/);
+    expect([...assets.keys()]).toContain(name);
+  });
+
+  it('Release’in dosyaları surum.yml’in yayınladıkları', () => {
+    expect([...assets.keys()].sort()).toEqual([...publishedFiles()].sort());
+  });
+
+  it('SHA256SUMS kendisi dışında her dosyayı sayıyor, surum.json’ın özeti tutuyor', () => {
+    const lines = kayitliToplam
+      .trim()
+      .split('\n')
+      .map((line) => line.split(/\s+/));
+    const listed = new Map(lines.map(([hash, name]) => [name!, hash!]));
+    expect([...listed.keys()].sort()).toEqual(
+      [...assets.keys()].filter((n) => n !== 'SHA256SUMS.txt').sort(),
+    );
+    // The recorded manifest is the published one, byte for byte.
+    expect(createHash('sha256').update(kayitliSurum).digest('hex')).toBe(listed.get('surum.json'));
+  });
 });

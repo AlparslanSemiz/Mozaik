@@ -1477,8 +1477,11 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       ~~Bekler: sıra 5~~ (kullanıcı 2026-10-10'da Faz 2'ye aldı): `src/kontrat.test.ts` hiçbir
       modülü import etmiyor, `desktop.ts`'i adıyla buluyor, taşıma ona dokunmaz. 25 test, on
       bir mutasyonla kanıtlı.
-- [ ] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
-      kayıtlı Release fikstürü. —
+- [x] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
+      kayıtlı Release fikstürü. — **Yapıldı (2026-10-10):** `src/kontrat.test.ts`'in ikinci
+      yarısı, `src/fixtures/release-v2.2.0/` (v2.2.0'ın dosyaları bayt bayt ve varlık listesi);
+      sekiz test, beş mutasyonla kanıtlı. Rust tarafında yeni test yok: `serde_json` doğrudan
+      bağımlılık değil, alanlar `update.rs`'in metninden okunuyor.
 - [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
 - [ ] **TP12 Brave alt kümesi, yerel config (B10).** Ölçüldü: `file://` açılıyor, depo
       kalıcı, font gömülü, hata ve ağ isteği yok. —

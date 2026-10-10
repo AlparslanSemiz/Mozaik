@@ -76,7 +76,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Sürüm | `e2e/surum.spec.ts` | sürümün ve kopyanın ekranda söylenmesi |
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
-| Kontrat | `src/kontrat.test.ts` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma |
+| Kontrat | `src/kontrat.test.ts`, `src/fixtures/release-v2.2.0/` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma; `surum.yml`, Release ve `update.rs` arasındaki sapma |
 | Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
@@ -386,6 +386,18 @@ değil adıyla bulunuyor, sıra 5'in taşıması testi değiştirmesin diye. On 
 sınandı (sayfada komut adı, argüman, dönüş tipi; Rust'ta parametre, `Cevap` alanı, kayıt,
 dönüş tipi; e2e taklidinde komut, argüman, alan; birim taklidinde dönüş).
 
+İkinci yarısı güncelleme (TP10): `surum.yml`'in yayınladığı ile dağıtılmış her kopyanın
+okuduğu. Ağsız, kayıtlı bir Release'e karşı: `src/fixtures/release-v2.2.0/` v2.2.0'ın
+yayınlanan `surum.json`'u ve `SHA256SUMS.txt`'si bayt bayt, ve `gh release view`'ın varlık
+listesi (2026-10-10). Ölçtükleri: `surum.yml`'in yazdığı anahtarlar `update.rs`'in
+`Manifest`'i; kayıtlı dosya o alanları Rust'ın tipleriyle ve yazarın biçiminde taşıyor;
+sürüm etiketin numarası, `boyut` Release'teki exe'nin boyutu ve `surum.yml` onu adresin
+gösterdiği dosyadan ölçüyor; adres Release'teki bir dosya; Release'in dosyaları
+`gh release create`'in listesi; `SHA256SUMS` kendisi dışında hepsini sayıyor ve kayıtlı
+`surum.json`'ın özeti tutuyor. Beş mutasyonla sınandı (yazarın anahtarı, `Manifest`'in alanı,
+yayın listesi, girinti, ölçülen dosya). Yeni bir sürüm çıkınca kayıt eskir ama yanlış olmaz:
+sözleşme değişirse yeni sürümün dosyaları kaydedilir.
+
 ### Gerçek exe
 
 `npm run exe:e2e` Linux ikilisini derler ve `e2e/gercek-exe.spec.ts`'i ona karşı
@@ -461,7 +473,6 @@ haftalık arka planda koşar (CLAUDE.md).
 | Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
 | Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
-| Kontrat, güncelleme | TP10 | `surum.yml` ile `update.rs`'in ve Release'in ayrışması | `npm test` |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
 | Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |
 | Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |

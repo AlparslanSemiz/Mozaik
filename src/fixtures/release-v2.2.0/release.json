@@ -1,0 +1,28 @@
+{
+  "assets": [
+    {
+      "name": "Mozaik-Windows-kurulum.zip",
+      "size": 413976
+    },
+    {
+      "name": "Mozaik.exe",
+      "size": 3799040
+    },
+    {
+      "name": "Mozaik.html",
+      "size": 1138617
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 325
+    },
+    {
+      "name": "surum.json",
+      "size": 165
+    }
+  ],
+  "isDraft": false,
+  "isPrerelease": false,
+  "name": "Mozaik v2.2.0",
+  "tagName": "v2.2.0"
+}
