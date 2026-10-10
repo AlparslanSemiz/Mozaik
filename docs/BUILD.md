@@ -70,6 +70,7 @@ npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
 npm run exe:rpm      # Linux rpm paketi, yalnız yerel (Tauri CLI 2.12.1'i npx ile indirir)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
+scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaik'in main'inden kurar ya da günceller
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
@@ -157,6 +158,8 @@ scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
+scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop
+scripts/linux-mozaik.sh      Linux başlatıcısı: Chrome'un app modu, Mozaik'in kendi profili
 ```
 
 ### Tek dosya
@@ -313,6 +316,35 @@ yayınlanmış ikilide ölçüldü (tuzak 101).
 
 Exe'nin dosya sistemi köprüsü bir adaptör, ayrıntısı [ARCHITECTURE.md](ARCHITECTURE.md)'de.
 
+### Linux uygulaması
+
+Kullanıcının Linux'ta her gün açtığı Mozaik, `dist/index.html`'in bir kopyası ve
+Google Chrome'un app modu ([TODO.md](TODO.md) B7.28). Beşinci bir derleme değil:
+açılan dosya babanın çift tıkladığı dosyanın kendisi, ve dört yoldan hiçbiri
+değişmedi.
+
+`scripts/linux-kur.sh` yalnız `~/GitHub/Mozaik`'ten derler, ve o klasör `main`'de değilse,
+`git status`'u temiz değilse ya da bir worktree ise reddeder: bir worktree'nin `dist/`'i
+o oturumun dalıdır. Derlenen dosyayı `~/.local/share/mozaik/app/` altına kopyalar (bağ
+değil), yanına hangi commit'ten kurulduğunu (`~/.local/share/mozaik/app/kaynak.txt`) ve başlatıcıyı yazar, ve
+`~/.local/share/applications/mozaik.desktop`'u kurar. Güncellemek betiği yeniden
+çalıştırmaktır; açık bir pencere eski sürümle çalışmaya devam eder, sonraki açılış
+yenisini açar.
+
+`scripts/linux-mozaik.sh` (kurulunca `app/mozaik`) Chrome'u
+`--user-data-dir=~/.local/share/mozaik/profil` ve `--app=file://…/index.html` ile açar.
+Planlar o profilin `file://` deposunda durur, Chrome'un geçmişini temizlemek onlara
+dokunmaz. Başlatıcı yalnız `google-chrome`'u kullanır: Chrome yoksa bunu bildirimle
+söyler ve çıkar, başka bir tarayıcıya düşmez, çünkü orada boş bir depo açılır ve boş
+bir program "verim gitti" diye okunur. Profil klasörünü ne kurulum ne başlatıcı kurar
+ya da siler; onu Chrome ilk açılışta kurar. İkisinin testi `src/linuxKur.test.ts`,
+sahte bir ev dizininde.
+
+Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfası veriyor,
+`showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
+ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
+siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
+
 ## Release varlıkları
 
 Üç teslim dosyasının tek kaynağı `.github/workflows/surum.yml`, ve bir `vX.Y.Z`
@@ -434,7 +466,8 @@ kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 koyar: dosya adı eski kalır, içindeki program yenidir.
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
-sürümün nerede olduğunu (`SITE_ADRESI`) gösterir.
+sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:
+güncellemesi `scripts/linux-kur.sh`'yi yeniden çalıştırmak.
 
 **Adresler.** `update.rs`'in `RELEASE_KOKLERI`'si iki önek tanır, depo
 `ders-programi` ve `Mozaik` adıyla. Liste yalnız uzar, çünkü dağıtılmış bir

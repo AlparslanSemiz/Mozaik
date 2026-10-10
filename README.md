@@ -68,6 +68,32 @@ what is around it.
    `Documents\Ders Programı` on its own, without being asked, and it can
    update itself — but only when you press the button.
 
+### Linux
+
+Not a fifth route: the same `dist/index.html`, opened in Google Chrome's app
+mode with a Chrome profile of its own (`~/.local/share/mozaik/profil`), so
+clearing Chrome's history does not touch the plans. Only Chrome: if it is not
+installed the launcher says so and stops, because any other browser would
+open an empty store.
+
+```sh
+~/GitHub/Mozaik/scripts/linux-kur.sh   # install, and again for every update
+```
+
+It builds from `~/GitHub/Mozaik` and refuses unless that checkout is on `main`
+and clean. Mozaik then appears among the applications.
+
+**Coming from the site in Chrome?** The new copy starts empty; the plans move
+with one file:
+
+1. In the old window (the site), **Ayarlar → Veri → Tümünü dosyaya kaydet
+   (n plan)**. Note n.
+2. In the new Mozaik, **Ayarlar → Veri → Tümünü dosyadan aç**, pick that file,
+   **Hepsini değiştir**. It should say *"n plan açıldı."*
+3. Pick the folder again (Ayarlar → Veri) and set theme, scale and density by
+   hand — machine preferences are not in the file.
+4. Keep the old copy for a week as a spare; removing it is your call.
+
 ## Where the data lives
 
 In your browser's storage, on that computer. It is **not** in the cloud and
