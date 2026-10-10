@@ -42,5 +42,5 @@ taşınmaz, sorulur.
 
 ## Bitti
 
-Paket kendi klasöründe, giriş noktası var, derin import kuralı onu kapsıyor, `kontrol` ve CI
+Paket kendi klasöründe, giriş noktası var, derin import kuralı onu kapsıyor, `hizli` ve CI
 yeşil, rapor verildi.

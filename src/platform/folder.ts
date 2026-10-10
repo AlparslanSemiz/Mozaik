@@ -76,6 +76,23 @@ export function dailyName(now: Date): string {
 }
 
 /**
+ * The rescue copy of one session: `ders-programi-kurtarma-2026-10-09-201455.json`.
+ *
+ * Written only while this browser's own storage refuses the save (VK2), and
+ * the reason it has a name of its own: the live file and today's backup are
+ * rewritten by the NEXT session from what the storage still holds, which is
+ * the state from before the refusal. Measured in the exe by the test session:
+ * the new work was in both files and the next start wrote the old state over
+ * both within two seconds. This name is never reused and `DAILY` does not
+ * match it, so neither the next session nor the prune can touch it.
+ */
+export function rescueName(now: Date): string {
+  const iki = (n: number) => String(n).padStart(2, '0');
+  const saat = `${iki(now.getHours())}${iki(now.getMinutes())}${iki(now.getSeconds())}`;
+  return `ders-programi-kurtarma-${dayStamp(now)}-${saat}.json`;
+}
+
+/**
  * Which daily backups to delete, oldest first.
  *
  * Only names this program wrote are ever considered. The folder my father
@@ -237,12 +254,17 @@ export async function saveInto(
   text: string,
   now: Date,
   prune: boolean,
+  rescue: string | null = null,
 ): Promise<WriteResult> {
   const daily = dailyName(now);
   await writeText(dir, MAIN_NAME, text);
   await writeText(dir, daily, text);
+  if (rescue !== null) await writeText(dir, rescue, text);
 
-  const result: WriteResult = { written: [MAIN_NAME, daily], pruned: [] };
+  const result: WriteResult = {
+    written: rescue === null ? [MAIN_NAME, daily] : [MAIN_NAME, daily, rescue],
+    pruned: [],
+  };
   if (!prune) return result;
 
   const names: string[] = [];

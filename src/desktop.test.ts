@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { desktopFolder } from './platform/desktop';
-import { MAIN_NAME, dailyName, saveInto } from './platform/folder';
+import { MAIN_NAME, dailyName, rescueName, saveInto } from './platform/folder';
 
 /** An in-memory stand-in for src-tauri/src/lib.rs. */
 function fakeDisk(seed: string[] = []) {
@@ -69,6 +69,30 @@ describe('exe klasörü — folder.ts’in kuralları TEK evde kalıyor', () => 
     expect(disk.files.has('vergi-beyanı.json'), 'babanın kendi dosyası silindi').toBe(true);
     // The top bar's own hourly backup does not match the daily pattern either.
     expect(disk.files.has('ders-programi-2026-08-26-1430.json')).toBe(true);
+  });
+
+  it('kurtarma kopyası yazılıyor, sonraki oturum ve budama ona dokunmuyor (VK2)', async () => {
+    // Session one: the browser's storage refuses the save, so the folder is
+    // the only place the work is. Session two starts from the older storage
+    // and writes the live file and today's copy over it, measured by the test
+    // session in the exe; the rescue copy has to be out of that path.
+    const once = Array.from(
+      { length: 12 },
+      (_, i) => `ders-programi-2026-08-${String(i + 1).padStart(2, '0')}.json`,
+    );
+    const disk = fakeDisk(once);
+    const dir = desktopFolder(disk.invoke, 'Ders Programı');
+    const ilk = new Date(2026, 7, 27, 14, 30, 5);
+    const kurtarma = rescueName(ilk);
+    expect(kurtarma).toBe('ders-programi-kurtarma-2026-08-27-143005.json');
+
+    const yazilan = await saveInto(dir, 'yeni iş', ilk, false, kurtarma);
+    expect(yazilan.written).toEqual([MAIN_NAME, dailyName(ilk), kurtarma]);
+
+    // The next session, an hour later, with the old state and a prune.
+    await saveInto(dir, 'eski durum', new Date(2026, 7, 27, 15, 30), true);
+    expect(disk.files.get(MAIN_NAME)).toBe('eski durum');
+    expect(disk.files.get(kurtarma)).toBe('yeni iş');
   });
 
   it('adaptör saveInto’nun çağırdığı DÖRT üyeden fazlasını uydurmuyor', async () => {

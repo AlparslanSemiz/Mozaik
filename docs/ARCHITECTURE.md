@@ -17,8 +17,7 @@ src/pure/          constraints · rules · feasibility · bell · import · enti
 src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
                    desktop · update · download
                    drag · gridChrome · gridFit · poolSplit · rowDrag · scrollFade · ribbonScroll
-                   useStore · usePlans · useSolver · useFolder · relaxPool · relaxWorker
-                   relaxLog
+                   useStore · usePlans · useFolder · search/* · otherWindow
    |
 src/ui/            main · Root · App · ve bütün bileşenler
 ```
@@ -29,8 +28,8 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `platform/prefs/`, `ui/lists/`,
-`ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `platform/prefs/`,
+`platform/search/`, `ui/lists/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
 
@@ -106,11 +105,12 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt, `park`, geri al kısayolu, `isTextInput` |
+| `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
 | `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
-| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir |
+| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz |
+| `platform/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
 | `platform/prefs/theme.ts` | makine tercihleri: tema, havuz ve boyu, şerit ve kaydırınca gizlenmesi, ölçek, iki yoğunluk, müsaitlik saati, hareket, tanıtım satırı, hepsi `preference.ts` fabrikasından |
@@ -138,10 +138,11 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 
 | Dosya | Görevi |
 |---|---|
-| `platform/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını başlatır ve "Bu olmaz" ile yeniden başlatır |
-| `platform/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
-| `platform/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
-| `platform/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
+| `platform/search/index.ts` | çözücü ve öneri araması paketinin giriş noktası: `useSolver`, `samePlan`, worker'ın girişi (`inWorker`, `serveRelax`) ve `searchLog`; `relaxPool` paketin içinde kalır |
+| `platform/search/useSolver.ts` | çözücüyü `requestAnimationFrame` dilimleriyle sürer, takılan koşudan sonra öneri aramasını başlatır ve "Bu olmaz" ile yeniden başlatır |
+| `platform/search/relaxPool.ts` | öneri aramasını worker'lara dağıtır, her yol bir hatta; worker kurulamazsa aynı aramayı ana iş parçacığında dilim dilim koşar |
+| `platform/search/relaxLog.ts` | her öneri aramasının bu makinedeki ölçümü (worker sayısı, ilk öneri, bitiş); son yirmisi saklanır, Hakkında en yenisini gösterir, yedek dosyası hepsini taşır (`searchLog`, `recorded`) |
+| `platform/search/relaxWorker.ts` | sayfanın kendi betiği belgesiz koşunca (`main.tsx`) bir aramayı alır ve bulduklarını gönderir |
 | `platform/useFolder.ts` | `folder.ts`'i sürer ve bütün planları yazar |
 | `ui/main.tsx` | ilk boyamadan önce tercihleri ve dili `<html>`'e yazar, ağacı bağlar; worker olarak koşarken bunların yerine öneri aramasını dinler |
 | `ui/Root.tsx` | provider yığını, `main.tsx` ile `App.test.tsx` aynı ağacı çizsin diye |

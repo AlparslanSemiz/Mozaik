@@ -18,10 +18,10 @@ import {
   readTheme,
   readUiDensity,
 } from '../platform/prefs';
-import { inWorker, serveRelax } from '../platform/relaxWorker';
+import { inWorker, serveRelax } from '../platform/search';
 import '../styles.css';
 
-// The same script also runs as the suggestion search's worker (platform/
+// The same script also runs as the suggestion search's worker (platform/search/
 // relaxPool.ts). There it has no document: it answers messages and draws nothing.
 if (inWorker()) serveRelax();
 else boot();

@@ -19,6 +19,8 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
+- When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.
 - In Availability, the heading of the lesson after a lunch break that moves from day to day no longer sits lower than its neighbours. It has no single clock time to show, and without one its number dropped about 7px.
 - Scrolling the timetable sideways no longer slides the hour headers over the top-left corner cell. Forty pixels were enough to cut "TEACHER" down to its first letters.
 - The total in the Lessons strip is now translated. It read "99 ders · 433 saat" in every language.

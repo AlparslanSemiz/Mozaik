@@ -4,8 +4,8 @@
 // The search runs in long slices here, since there is no frame to keep: the
 // page can terminate the worker at any moment, which is how it is stopped.
 
-import { createRelaxer } from '../pure/relax';
-import type { Suggestion } from '../pure/relax';
+import { createRelaxer } from '../../pure/relax';
+import type { Suggestion } from '../../pure/relax';
 import type { RelaxJob, RelaxMessage } from './relaxPool';
 
 /** A worker's slice: long, because only a message queue waits on it. */

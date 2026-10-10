@@ -147,6 +147,10 @@ const FR: Sozluk = {
   Yenile: "Recharger",
   Sonra: "Plus tard",
   "Klasörü düzelt": "Réparer le dossier",
+  "**Son değişiklik bu bilgisayara kaydedilemedi:** depolama alanı dolu. İşinizi kaybetmemek için **Dosyaya kaydet** düğmesine basın.":
+    "**La dernière modification n’a pas pu être enregistrée sur cet ordinateur :** le stockage est plein. Pour ne pas perdre votre travail, cliquez sur **Enregistrer dans un fichier**.",
+  "**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor.":
+    "**Ce plan a été modifié dans une autre fenêtre.** Cette fenêtre n’enregistre plus.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**L’enregistrement automatique ne fonctionne pas sur cet ordinateur.** Tout ce que vous faites est perdu à la fermeture du programme. Appuyez souvent sur **Enregistrer dans un fichier** et faites toujours une sauvegarde avant d’éteindre l’ordinateur.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
