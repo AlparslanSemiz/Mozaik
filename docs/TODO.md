@@ -1370,6 +1370,16 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       yazıyor, veri kaybı yok. Okundu, ölçülmedi (2026-10-09, `refactor/search`).
       Düzeltilmedi: dal davranış değiştirmez.
 
+- [ ] **RK15 Aynı saatte iki sınıfa yazılmış bir öğretmenin kâğıdı bir hücre fazla basıyor.**
+      Izgara teneffüste bloğu öğretmenin satırında yürüyerek keser (`Grid.tsx` 162), kâğıt
+      her saatin kendi sınıfının bloğuna bakar (`Print.tsx` 150). Bir öğretmenin 510'daki iki
+      saatlik bloğunun ikinci saatinde 511'de de dersi varsa, ızgara 511'in saatini çizmiyor,
+      kâğıt onu da çiziyor ve dört saatlik bir gün beş sütun basılıyor. Uygulama böyle bir
+      haftayı kendisi kurmuyor; eski bir yedek ya da içe aktarma taşıyabilir. Öbür her durumda
+      ikisi aynı hücreleri çiziyor: el yapımı dünyada ve tam dolu kursun dizili haftasında
+      ölçüldü (`src/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
+      algoritma birleşmedi. Düzeltilmedi: dal davranış değiştirmez.
+
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
