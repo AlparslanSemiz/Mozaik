@@ -46,7 +46,7 @@ yapılmaz" (TODO B7.20, 2026-10-09).
 **Neden.** `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiyor: imaj, bir yayın kapısı
 ve mutasyon parçaları sürerken kendiliğinden değişirse CI'ın kırmızısının kodda mı imajda
 mı olduğu ayrılamaz. Ubuntu 26'ya geçiş ayrı ve ölçümlü bir iş olur. Sabitleme geçici: Ubuntu 26'da
-Playwright/WebKit bağımlılıkları doğrulanınca `ubuntu-latest`'e dönülür (TODO B7.28). `upload-artifact@v4`
+Playwright/WebKit bağımlılıkları doğrulanınca `ubuntu-latest`'e dönülür (TODO B7.29). `upload-artifact@v4`
 Node 20 uyarısının son kaynağıydı.
 
 ---

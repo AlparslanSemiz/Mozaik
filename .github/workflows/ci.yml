@@ -47,7 +47,7 @@ concurrency:
 
 jobs:
   denetim:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -75,7 +75,7 @@ jobs:
 
   # Ana E2E süiti, üç parça; öneri aramasını başlatan iki test hariç (yukarıda).
   e2e:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -107,7 +107,7 @@ jobs:
           retention-days: 7
 
   e2e-arama:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -140,7 +140,7 @@ jobs:
   # `npm run kontrol`'ün öteki iki Playwright config'i: site, yerel sunucu ve
   # klasör; ve çözücünün gerçek ölçekteki stresi.
   e2e-ek:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -165,7 +165,7 @@ jobs:
   rapor:
     if: failure()
     needs: [e2e, e2e-arama]
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6

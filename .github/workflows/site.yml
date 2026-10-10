@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@v7
 
@@ -66,7 +66,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

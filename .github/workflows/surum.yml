@@ -54,7 +54,7 @@ permissions:
 jobs:
   # ------------------------------------------------------------ 1 · package
   package:
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -183,7 +183,7 @@ jobs:
   # ------------------------------------------------------------- 3 · publish
   publish:
     needs: [package, exe]
-    runs-on: ubuntu-24.04 # geçici (TODO B7.28): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
+    runs-on: ubuntu-24.04 # geçici (TODO B7.29): Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca ubuntu-latest'e dön
     if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
     steps:
       - uses: actions/download-artifact@v7

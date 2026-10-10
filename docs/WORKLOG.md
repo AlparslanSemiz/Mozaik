@@ -131,7 +131,7 @@ haftalik 1, windows 1). Sebep: `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiy
 Node 20 uyarısının kalan kaynağı `upload-artifact@v4`'tü (TODO B7.20). Bugün
 `ubuntu-latest` zaten 24.04, yani imaj değişmiyor. v7'nin yeniliği (`archive: false`) ve
 ESM'e geçişi bizim girdilerimize dokunmuyor; v6'nın Node 24'ü barındırılan runner'da var.
-`windows-latest` kapsam dışı, dokunulmadı. Sabitleme geçici: her satırın yanında TODO B7.28'e
+`windows-latest` kapsam dışı, dokunulmadı. Sabitleme geçici: her satırın yanında TODO B7.29'a
 işaret eden yorum, Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca
 `ubuntu-latest`'e dönülür.
 
