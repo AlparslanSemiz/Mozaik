@@ -23,6 +23,7 @@
     "e2e",
     "vite.site.config.ts",
     "playwright.config.ts",
+    "playwright.brave.config.ts",
     "playwright.cozucu.config.ts",
     "playwright.ekran.config.ts",
     "playwright.gercek-exe.config.ts",
