@@ -49,6 +49,12 @@ bekliyor") öbür yanda.
 **Gerekçe.** Etiket babanın exe'sine ulaşıyor, Windows onun gerçek ortamı. Push ve
 birleştirme babaya ulaşmıyor, onlar beklemez.
 
+**Aynı gün, TP7.** Gerçek exe'nin Windows süiti (`exe-windows.yml`) ayrı bir iş akışı:
+haftada bir ve exe'ye dokunan bir `main` push'unda koşar, push'u beklemez. `yayinla` onu
+da bekliyor, istisnanın içinde: sürüm commit'i `package.json`'u ve `Cargo.toml`'u
+değiştirdiği için süzgeç onu tetikliyor, tetiklemediği yerde (yalnız etiket, `--kuru`)
+`yayinla` iş akışını elle başlatıyor. `surum.yml`'e dokunulmadı.
+
 ### 2026-10-09 · Test programı başladı; yavaş süitler hiçbir şeyi beklemez
 
 **Ne.** Kullanıcının kararları (test programının analizi, `test/kapsam`):

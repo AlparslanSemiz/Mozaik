@@ -1490,9 +1490,12 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       (adlar `tam-dolu-kurs.json`'dan kimlikten kimliğe; o dosyada olmayan dize yazılmıyor).
       "gerçek paket, adsız" bloğunda beş test, dört mutasyonla kanıtlı. Commit'ten önce gerçek
       ad araması: commit'in diff'inde 0 eşleşme (komut ve liste `scratch/test-plan/b6/`).
-- [ ] **TP7 Windows'ta gerçek exe (B7).** `webdriver.mjs`'e Windows (ikili yolu,
+- [~] **TP7 Windows'ta gerçek exe (B7).** `webdriver.mjs`'e Windows (ikili yolu,
       `--native-driver`, `taskkill`, dil, runner koruması), spec'te platform dalları,
       yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —
+      **Yazıldı (2026-10-10):** `exe-windows.yml`, `yayinla` onu da bekliyor (DECISIONS
+      2026-10-10). Linux'ta süit değişmeden yeşil (13 geçti, Windows'a ait 1 atlandı).
+      Windows'ta yeşil görülmeden bitti sayılmaz.
 - [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
       `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
 - [x] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
@@ -1534,6 +1537,11 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       hayatta kalan üç sınıfta. **Bekler:** `ci/mutasyon-parca` (K8), sıra 10 (`relax.ts` ve
       `sat.ts`, "pure/relax" paketi; tur stryker listesini aynı commit'te değiştiriyor), sıra 4 ve 6
       (veri yolu ve okuyucular).
+- [ ] **TB10 Gerçek exe süitinde kırmızı bir test sürücüyü yetim bırakabiliyor (2026-10-10).**
+      Kapanışı takılan bir test `tauri-driver`'ı 4444'te bırakıyor, sonraki her test
+      "Maximum number of active sessions" ile düşüyor (TESTFINDINGS). Süiti başlatmadan önce
+      port'u tutan sürücüyü görmek ya da fikstürün kapanışına süre koymak adaylar; ürün kusuru
+      değil.
 - [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
       axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölünür. CI'da JSON
       raporu ve 30 günlük kararsız sayacı. —
@@ -1542,7 +1550,8 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       saniye ileride"). Pay ölçülmedi, bir CI düşüşünden seçildi: zamanı okumakla durdurmak
       arasında bir saniyeden fazla geçen bir runner aynı hatayı (`Cannot fast-forward to the
       past`) yeniden verir, ve o saniyeye bir gün bir zamanlayıcı düşerse (`SAVE_DELAY`
-      400 ms, klasör 2 s) test sessizce başka bir şeyi ölçer.
+      400 ms, klasör 2 s) test sessizce başka bir şeyi ölçer. **İkinci aday (2026-10-10):**
+      gerçek exe süitinde kare ölçümünün yüke bağlılığı ve ardından yetim kalan sürücü (TB10).
 - [ ] **TP23 Erişilebilirlik tabanı (C3).** Düzeltmeler `main`'de; burada yalnız `BILINEN`'in
       küçülmesi. —
 - [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: sıra 10 ve 11**

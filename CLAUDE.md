@@ -85,8 +85,8 @@ Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-
   birleştirmeyi beklemez, arkada, gece ya da haftalık koşar ve kırmızı sonucu görünür bir
   yere düşer; tek istisna `npm run yayinla`'nın Windows E2E'yi beklemesi, çünkü etiket
   babanın exe'sine ulaşıyor ve Windows onun gerçek ortamı. Ayrıntı [docs/TODO.md](docs/TODO.md) §8l.
-- Etiketi yalnız `npm run yayinla` atar, `ci.yml` ve `windows.yml` yeşil olmadan atmaz
-  (`-- --kuru` hiçbir şeyi değiştirmeden bakar).
+- Etiketi yalnız `npm run yayinla` atar, `ci.yml`, `windows.yml` ve `exe-windows.yml` yeşil
+  olmadan atmaz (`-- --kuru` depoda hiçbir şeyi değiştirmeden bakar).
 
 ## Test programı
 

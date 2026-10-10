@@ -1,4 +1,4 @@
-// The REAL program, on Linux: the binary `npm run exe:linux` builds, opened by
+// The REAL program: the binary `npm run exe:linux` builds, opened by
 // tauri-driver and driven over WebDriver (scripts/webdriver.mjs says why not
 // Playwright, and why input is made inside the page). e2e/exe.spec.ts tests
 // the same page against a fake `__TAURI__`; this file is what that fake stands
@@ -6,14 +6,32 @@
 //
 // Every test starts its own program in its own sandbox HOME, so the real
 // Documents/Ders Programı on this machine is never written to.
+//
+// AND ON WINDOWS (TP7, `.github/workflows/exe-windows.yml`): the same tests
+// against Mozaik.exe in WebView2, which is my father's program. There the
+// folders are the runner's real ones, emptied before each test, and the suite
+// refuses to run off a GitHub runner (`windowsYerleri`). Where the two
+// platforms answer differently the test says which answer it expects and why.
 
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { expect, test as base } from '@playwright/test';
-import { Oturum, evHazirla, suruculuBaslat, varsayilanIkili } from '../scripts/webdriver.mjs';
+import {
+  Oturum,
+  WINDOWS,
+  evHazirla,
+  surucuyuKapat,
+  suruculuBaslat,
+  varsayilanIkili,
+  windowsTemizle,
+  windowsYerleri,
+} from '../scripts/webdriver.mjs';
 
 const KOK = resolve(import.meta.dirname, '..');
+
+/** WebView2's first start on a fresh runner is slower than WebKitGTK's here. */
+const ACILIS_MS = WINDOWS ? 60_000 : 20_000;
 
 // The program sets this itself on Linux (tuzak 130). Taken out of what the
 // driver inherits, so a test measures the binary and not the shell it ran in.
@@ -21,10 +39,12 @@ delete process.env.WEBKIT_DISABLE_DMABUF_RENDERER;
 
 interface Exe {
   oturum: Oturum;
-  /** The sandbox's Documents/Ders Programı. */
+  /** Documents/Ders Programı: the sandbox's on Linux, the runner's on Windows. */
   klasor: string;
-  /** The sandbox HOME itself. */
+  /** The sandbox HOME itself (on Windows only the driver's working folder). */
   ev: string;
+  /** Where a download lands. */
+  indirilenler: string;
 }
 
 const test = base.extend<{ exe: Exe }>({
@@ -38,12 +58,19 @@ const test = base.extend<{ exe: Exe }>({
       `ev-${testInfo.workerIndex}-${testInfo.testId}`,
     );
     const port = 4444;
+    const yerler = WINDOWS ? windowsYerleri() : undefined;
+    if (yerler !== undefined) windowsTemizle(yerler);
     const { pid } = suruculuBaslat({ port, ev, gunluk: testInfo.outputPath('surucu.log') });
     let oturum: Oturum | undefined;
     try {
-      oturum = await Oturum.ac({ port, ikili });
-      await oturum.bekle('h1', 20_000);
-      await use({ oturum, klasor: join(ev, 'Documents', 'Ders Programı'), ev });
+      oturum = await Oturum.ac({ port, ikili, bekleMs: ACILIS_MS });
+      await oturum.bekle('h1', ACILIS_MS);
+      await use({
+        oturum,
+        klasor: yerler?.klasor ?? join(ev, 'Documents', 'Ders Programı'),
+        ev,
+        indirilenler: yerler?.indirilenler ?? join(ev, 'Downloads'),
+      });
     } finally {
       if (oturum !== undefined && testInfo.status !== testInfo.expectedStatus) {
         await testInfo.attach('ekran', { body: await oturum.goruntu(), contentType: 'image/png' });
@@ -53,11 +80,7 @@ const test = base.extend<{ exe: Exe }>({
       // program lives on, holds the port and the binary (ETXTBSY on the next
       // build), and the next test fails for the wrong reason.
       await oturum?.kapat().catch(() => undefined);
-      try {
-        process.kill(-pid, 'SIGTERM');
-      } catch {
-        // Already gone.
-      }
+      surucuyuKapat(pid);
     }
   },
 });
@@ -68,7 +91,7 @@ function tumu(klasor: string): string {
   return existsSync(dosya) ? readFileSync(dosya, 'utf8') : '';
 }
 
-test.describe('Gerçek exe (Linux)', () => {
+test.describe(`Gerçek exe (${WINDOWS ? 'Windows' : 'Linux'})`, () => {
   test('açılıyor: pencere, yedi sekme ve Rust köprüsü', async ({ exe }) => {
     const sayfa = await exe.oturum.js<{
       baslik: string;
@@ -84,7 +107,9 @@ test.describe('Gerçek exe (Linux)', () => {
       };`,
     );
     expect(sayfa.baslik).toBe('Mozaik');
-    expect(sayfa.adres).toMatch(/^tauri:\/\/localhost/);
+    // Windows serves the page from http://tauri.localhost: that origin is
+    // where localStorage, i.e. every plan, lives (`useHttpsScheme: false`).
+    expect(sayfa.adres).toMatch(WINDOWS ? /^http:\/\/tauri\.localhost\// : /^tauri:\/\/localhost/);
     expect(sayfa.kopru).toBe(true);
     for (const ad of ['Okul', 'Müsaitlik', 'Dersler', 'Program', 'Kontrol', 'Çıktı', 'Ayarlar']) {
       expect(sayfa.sekmeler).toContain(ad);
@@ -139,6 +164,7 @@ test.describe('Gerçek exe (Linux)', () => {
   });
 
   test('Linux’taki kopya kendini güncellemiyor', async ({ exe }) => {
+    test.skip(WINDOWS, "Windows'taki kopya güncelleyebilir; onun kapısı bir sonraki test");
     // The download the manifest names is the WINDOWS exe; a Linux build that
     // swapped it over itself would not start again. The refusal must come
     // before any network, so the answer is immediate even offline.
@@ -154,6 +180,26 @@ test.describe('Gerçek exe (Linux)', () => {
       }`,
     );
     expect(cevap).toContain('yalnız Windows');
+  });
+
+  test('Windows’taki kopya yalnız kendi Release’inden indiriyor', async ({ exe }) => {
+    test.skip(!WINDOWS, 'Linux kopyası hiç indirmiyor, bir önceki test');
+    // The Windows exe DOES download, so the real Release address would fetch
+    // a real program. A foreign address has to be refused before the network:
+    // `safe_url` is the gate that keeps a bug in the page from fetching
+    // anything else.
+    const cevap = await exe.oturum.js<string>(
+      `try {
+        await window.__TAURI__.core.invoke('download_update', {
+          url: 'https://example.com/releases/latest/download/Mozaik.exe',
+          boyut: 1,
+        });
+        return 'indirdi';
+      } catch (e) {
+        return String(e);
+      }`,
+    );
+    expect(cevap).toContain('Beklenmeyen adres');
   });
 
   test('bir dersi sabitlemek sayfayı çökertmiyor', async ({ exe }) => {
@@ -201,7 +247,7 @@ test.describe('Gerçek exe (Linux)', () => {
     // named it wrote into the working directory, the repository (tuzak 132).
     const once = Date.now();
     await exe.oturum.tikla('metin:Dosyaya kaydet');
-    const indirilen = join(exe.ev, 'Downloads');
+    const indirilen = exe.indirilenler;
     await expect
       .poll(() => readdirSync(indirilen).filter((n) => n.endsWith('.json')), { timeout: 10_000 })
       .toHaveLength(1);
@@ -211,19 +257,25 @@ test.describe('Gerçek exe (Linux)', () => {
     expect(kokte).toEqual([]);
   });
 
-  test('Hakkında, Linux kopyasının kendini güncellemediğini söylüyor', async ({ exe }) => {
+  test('Hakkında, kopyanın kendini güncelleyip güncellemediğini doğru söylüyor', async ({
+    exe,
+  }) => {
     // The page asks the program (self_update_supported) rather than guessing
     // from the platform: the fake bridge in e2e/exe.spec.ts runs on Linux too.
+    // Linux says no, Windows says yes.
+    const [var_, yok] = WINDOWS
+      ? ['kendini güncelleyebilir', 'kendini güncellemez']
+      : ['kendini güncellemez', 'kendini güncelleyebilir'];
     await exe.oturum.tikla('metin:Ayarlar');
     await exe.oturum.tikla('metin:Hakkında');
     await expect
       .poll(() => exe.oturum.js<string>(`return document.querySelector('main').innerText;`), {
         timeout: 5_000,
       })
-      .toContain('kendini güncellemez');
+      .toContain(var_);
     expect(
       await exe.oturum.js<string>(`return document.querySelector('main').innerText;`),
-    ).not.toContain('kendini güncelleyebilir');
+    ).not.toContain(yok);
   });
 
   test("kurulamayan haftada yol öneriyor, worker'larda arıyor, önizliyor, Olur'u dinliyor, uyguluyor ve Ctrl+Z geri alıyor", async ({
@@ -356,6 +408,9 @@ test.describe('Gerçek exe (Linux)', () => {
   // without a drag, which WebDriver cannot give in this engine (pitfall 127):
   // the bar written every sixth frame for three seconds, as a drag does.
   test("gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor", async ({ exe }) => {
+    // WebKitGTK's pitfall, and a frame count on a runner without a GPU would
+    // measure the runner.
+    test.skip(WINDOWS, "WebKitGTK'nin kusuru (tuzak 117); GPU'suz runner'da kare ölçümü anlamsız");
     const metin = readFileSync(join(KOK, 'src', 'fixtures', 'tam-dolu-kurs-dizili.json'), 'utf8');
     await exe.oturum.js(
       `const f = new File([${JSON.stringify(metin)}], 'yedek.json', { type: 'application/json' });
@@ -455,9 +510,9 @@ test.describe('Gerçek exe (Linux)', () => {
 
     // The next start, from the storage that never took the sample.
     await exe.oturum.kapat();
-    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili() });
+    const yeni = await Oturum.ac({ port: 4444, ikili: varsayilanIkili(), bekleMs: ACILIS_MS });
     try {
-      await yeni.bekle('h1', 20_000);
+      await yeni.bekle('h1', ACILIS_MS);
       // The live file is rewritten from the old state: the very case the
       // rescue copy is for. Then the rescue copy is untouched.
       await expect.poll(() => tumu(exe.klasor), { timeout: 15_000 }).not.toContain('Örnek Kurs');

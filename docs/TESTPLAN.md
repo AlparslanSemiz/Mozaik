@@ -24,6 +24,7 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: mutasyon, ve `windows.yml`'i çağırır. Siteyi kilitlemez |
 | Kanarya | `.github/workflows/kanarya.yml` | Salı 02:00 UTC ve elle: denetim ve ana E2E'nin bir parçası runner'ın bir sonraki imajında (bugün `ubuntu-26.04`). Hiçbir şeyi kilitlemez; iki hafta yeşil kalınca `ci.yml`'in sabit sürümü ona çekilir |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
+| Gerçek exe, Windows | `.github/workflows/exe-windows.yml` | Pazartesi 01:30 UTC, exe'ye dokunan bir `main` push'unda (sürüm commit'i dahil) ve elle: aynı süit `Mozaik.exe`'ye karşı, WebView2'de. Yavaş süit, push'u ve birleştirmeyi beklemez; `npm run yayinla` etiketten önce onun da yeşilini bekler |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
 komutta koşar ve bir sürümden önce kullanılır.
@@ -77,7 +78,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Site, sunucu, klasör | `e2e/{site,sunucu,klasor}.spec.ts` | `file://`'da olmayan her şey, http üstünde |
 | Exe | `e2e/exe.spec.ts` | Tauri köprüsünün sayfa tarafı |
 | Kontrat | `src/kontrat.test.ts`, `src/fixtures/release-v2.2.0/` | Rust komutları, `desktop.ts` ve köprünün iki taklidi arasındaki sapma; `surum.yml`, Release ve `update.rs` arasındaki sapma |
-| Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin kendisi: pencere, Rust komutları, gerçek disk |
+| Gerçek exe | `e2e/gercek-exe.spec.ts`, `playwright.gercek-exe.config.ts` | Linux ikilisinin ve Windows'ta `Mozaik.exe`'nin kendisi: pencere, Rust komutları, gerçek disk |
 | Rust | `src-tauri/src/{lib,update}.rs` | exe'nin dosya ve güncelleme işleri |
 | Hata kapanı | `e2e/kapan.ts` | bütün E2E süitinde sayfanın kendi şikayeti |
 | Devriye | `e2e/patrol.spec.ts` | iddiasız gezinmede çıkan şikayetler |
@@ -427,8 +428,17 @@ WebKitGTK'sı WebDriver'ın girdi benzetimini desteklemiyor (tuzak 127). Yani bu
 süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek programın
 sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
 
-Windows'taki `Mozaik.exe`'yi (WebView2) ölçmez, o hâlâ babanın makinesinde
-görülmeyi bekliyor.
+**Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar:
+`tauri-driver` WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver`'ın önünde, dil
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--lang=tr-TR` ile. Sahte ev yok, çünkü exe Belgeler'i
+kabuğa soruyor ve WebView2 profilini `%LOCALAPPDATA%\com.dersprogrami.arac`'ta tutuyor:
+süit runner'ın gerçek klasörlerini her testten önce siliyor, ve bu yüzden GitHub'ın
+runner'ı dışında Windows'ta koşmayı reddediyor (`windowsYerleri`). Platformların
+cevabı ayrıldığı yerde test hangisini beklediğini söylüyor: sayfa `http://tauri.localhost`'ta,
+Hakkında "kendini güncelleyebilir" diyor, Linux'un güncelleme reddi yerine Windows'ta
+`safe_url`'in yabancı adresi ağdan önce reddetmesi soruluyor, ve kare ölçümü (tuzak 117,
+WebKitGTK'nin kusuru) yalnız Linux'ta. Babanın makinesinin kendisi değil: runner Windows
+Server 2025, ekran ve GPU'su yok.
 
 ### Rust
 
@@ -465,13 +475,12 @@ perdenin inmiş olması.
 
 Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Henüz yok: bir
 katman yazıldığı commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne
-girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
-haftalık arka planda koşar (CLAUDE.md).
+girer. "Yavaş" diye işaretli olanlar push'u ve birleştirmeyi beklemez, gece ya da haftalık
+arka planda koşar; tek istisna `yayinla`'nın Windows koşularını beklemesi (CLAUDE.md).
 
 | Katman | TP | Ne yakalayacak | Ne zaman koşacak |
 |---|---|---|---|
 | Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
-| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
 | Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
 | Rust, Linux | TP11 | `cargo test` her push'ta | CI |
 | Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |

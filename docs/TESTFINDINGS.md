@@ -26,6 +26,16 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `npm run exe:e2e` (`test/gercek-ortam`, Linux) · gerçek exe süitinde yetim sürücü
+Bulgu: yük 3–4 iken "gerekçe çubuğuna yazmak Sığdır'da kare düşürmüyor" 3 s'de yalnız 6
+yazma yapabildi (eşik 15) ve 1,7 dk sürdü; fikstürün kapanışı (kırmızıda ekran görüntüsü)
+takıldı, `tauri-driver` öldürülmeden kaldı ve 4444'ü tuttu. Sonraki iki test (VK1, VK2)
+"Maximum number of active sessions" ile düştü, yeniden koşu da üçünü birden düşürdü. Yetim
+süreçler kapatılınca üçü 14 s'de yeşil (yük 1,4). Kapanış yolu `main`'dekiyle aynı.
+Tür: test kusuru (araç), kararsızlık adayı.
+Ne yapıldı: TODO §8l TB10; TP22'nin (C2) kök neden listesine.
+Kalıcı kural: yok.
+
 ### 2026-10-09 · `npx vitest run src/fuzz.test.ts`, ilk koşular · "Dosyadan aç" ve Excel yapıştırması
 Bulgu: (1) `readPlanFile` bozulan dosyaların %2–5'inde `TypeError` atıyor (`reading 'trim'`,
 `'weeklyHours'`, `'id'`; en küçüğü `lessons[0] = null`), `App.tsx`'in `fileChosen`'ı yakalamıyor.

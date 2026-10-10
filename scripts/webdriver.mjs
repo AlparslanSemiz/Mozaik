@@ -13,17 +13,93 @@
 // this machine that folder holds my father's real plan. Every run gets its own
 // HOME and XDG directories, so neither that folder nor WebKit's real
 // localStorage is ever touched by a test.
+//
+// ON WINDOWS (TP7) there is no sandbox: the exe asks the shell for Documents
+// (SHGetKnownFolderPath, HOME and USERPROFILE do not move it) and WebView2
+// keeps its profile under %LOCALAPPDATA%. So the suite uses the real folders
+// and empties them before every test, and for that reason it refuses to run
+// anywhere but a GitHub-hosted runner, a throwaway machine (`windowsYerleri`).
+// The driver behind tauri-driver is msedgedriver, whose version has to match
+// the installed WebView2 Runtime; the workflow fetches it and names it in
+// MOZAIK_NATIVE_DRIVER.
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, openSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const KOK = resolve(import.meta.dirname, '..');
 
-/** The binary `npm run exe:linux` leaves behind, else the raw cargo output. */
+export const WINDOWS = process.platform === 'win32';
+
+/**
+ * The binary to drive: MOZAIK_IKILI if set, else what `npm run exe:linux`
+ * leaves behind, else the raw cargo output. On Windows Tauri names it after
+ * `productName` or, when that rename is skipped, after the cargo package
+ * (surum.yml looks for both for the same reason).
+ */
 export function varsayilanIkili() {
+  if (process.env.MOZAIK_IKILI) return resolve(process.env.MOZAIK_IKILI);
+  const cikti = join(KOK, 'src-tauri', 'target', 'release');
+  if (WINDOWS) {
+    const adaylar = ['Mozaik.exe', 'ders-programi.exe'].map((ad) => join(cikti, ad));
+    return adaylar.find((yol) => existsSync(yol)) ?? adaylar[0];
+  }
   const kopya = join(KOK, 'dist-exe', 'Mozaik');
-  return existsSync(kopya) ? kopya : join(KOK, 'src-tauri', 'target', 'release', 'ders-programi');
+  return existsSync(kopya) ? kopya : join(cikti, 'ders-programi');
+}
+
+/** One answer from PowerShell, for the folders Windows names per user. */
+function powershell(komut) {
+  const r = spawnSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', komut], {
+    encoding: 'utf8',
+  });
+  const cevap = (r.stdout ?? '').trim();
+  if (r.status !== 0 || cevap === '') throw new Error(`PowerShell cevap vermedi: ${komut}`);
+  return cevap;
+}
+
+/**
+ * Where the Windows exe really writes: the folder under Documents, WebView2's
+ * profile (the identifier is the PATH localStorage sits under, lib.rs), and
+ * Downloads.
+ *
+ * REFUSES OFF A GITHUB-HOSTED RUNNER. `windowsTemizle` deletes the first two,
+ * and on any real Windows machine -- my father's above all -- they hold the
+ * timetables. A runner is a fresh virtual machine thrown away after the job.
+ */
+export function windowsYerleri() {
+  if (process.env.GITHUB_ACTIONS !== 'true' || process.env.RUNNER_ENVIRONMENT !== 'github-hosted') {
+    throw new Error(
+      "Gerçek exe süiti Windows'ta yalnız GitHub'ın runner'ında koşar: Belgeler'deki " +
+        "'Ders Programı' klasörünü ve programın profilini her testte siliyor.",
+    );
+  }
+  const yerel = process.env.LOCALAPPDATA;
+  if (!yerel) throw new Error('LOCALAPPDATA yok');
+  return {
+    klasor: join(powershell("[Environment]::GetFolderPath('MyDocuments')"), 'Ders Programı'),
+    profil: join(yerel, 'com.dersprogrami.arac'),
+    indirilenler: powershell(
+      "(New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path",
+    ),
+  };
+}
+
+/**
+ * Empties what the last test left: the folder, the profile (so the next start
+ * is a first start, as the sandbox HOME is on Linux), and the program's own
+ * files in Downloads. Retried, because WebView2's processes can hold the
+ * profile for a moment after the program is killed.
+ */
+export function windowsTemizle({ klasor, profil, indirilenler }) {
+  const tekrar = { recursive: true, force: true, maxRetries: 20, retryDelay: 250 };
+  rmSync(klasor, tekrar);
+  rmSync(profil, tekrar);
+  if (existsSync(indirilenler)) {
+    for (const ad of readdirSync(indirilenler)) {
+      if (/^ders-programi.*\.json$/.test(ad)) rmSync(join(indirilenler, ad), tekrar);
+    }
+  }
 }
 
 /**
@@ -62,9 +138,10 @@ export function basizMumkun() {
 
 /**
  * Starts tauri-driver detached, so it outlives the shell command that started
- * it. Returns its pid; the caller keeps it to tear it down.
+ * it. Returns its pid; the caller keeps it to tear it down (`surucuyuKapat`).
  */
 export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil = 'tr_TR' }) {
+  if (WINDOWS) return windowsSurucu({ port, ev, gunluk, dil });
   // The language is pinned for the same reason the browser suites pin
   // `locale: 'tr-TR'`: with nothing stored the interface follows the device,
   // WebKitGTK reads the device from LANG, and this machine is English.
@@ -92,6 +169,53 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
   });
   surec.unref();
   return { pid: surec.pid, basiz };
+}
+
+/**
+ * The same on Windows. No xvfb (a runner has a desktop session), no sandbox
+ * HOME (see the top of the file), and the language through WebView2's own
+ * switch, because WebView2 does not read LANG: the browser suites pin
+ * `locale: 'tr-TR'` and the runner's Windows is English.
+ */
+function windowsSurucu({ port, ev, gunluk, dil }) {
+  const surucu = process.env.MOZAIK_NATIVE_DRIVER;
+  if (!surucu || !existsSync(surucu)) {
+    throw new Error(`msedgedriver yok: MOZAIK_NATIVE_DRIVER=${surucu ?? ''}`);
+  }
+  mkdirSync(ev, { recursive: true });
+  const cikti = gunluk === undefined ? 'ignore' : openSync(gunluk, 'a');
+  const surec = spawn(
+    'tauri-driver',
+    ['--port', String(port), '--native-port', String(port + 1), '--native-driver', surucu],
+    {
+      env: {
+        ...process.env,
+        WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--lang=${dil.replace('_', '-')}`,
+      },
+      cwd: ev,
+      stdio: ['ignore', cikti, cikti],
+      windowsHide: true,
+    },
+  );
+  surec.unref();
+  return { pid: surec.pid, basiz: false };
+}
+
+/**
+ * Tears the driver down with everything it started: on Linux the process
+ * group, on Windows the process tree (tauri-driver, msedgedriver, the exe and
+ * its WebView2 processes). Gone already is fine.
+ */
+export function surucuyuKapat(pid) {
+  if (WINDOWS) {
+    spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
+    return;
+  }
+  try {
+    process.kill(-pid, 'SIGTERM');
+  } catch {
+    // Already gone.
+  }
 }
 
 /** One WebDriver session. Everything is a method so a test reads like a script. */

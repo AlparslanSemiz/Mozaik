@@ -2,7 +2,16 @@
 // script stays plain .mjs so `node` runs it, and e2e/gercek-exe.spec.ts is
 // type-checked.
 
+export const WINDOWS: boolean;
 export function varsayilanIkili(): string;
+export interface WindowsYerleri {
+  klasor: string;
+  profil: string;
+  indirilenler: string;
+}
+export function windowsYerleri(): WindowsYerleri;
+export function windowsTemizle(yerler: WindowsYerleri): void;
+export function surucuyuKapat(pid: number): void;
 export function evHazirla(ev: string, secenek?: { koru?: boolean }): Record<string, string>;
 export function basizMumkun(): boolean;
 export function suruculuBaslat(secenek: {

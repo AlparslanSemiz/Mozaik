@@ -1,0 +1,106 @@
+# Gerçek exe, Windows'ta (TP7): babanın programının kendisi. Mozaik.exe derlenir,
+# WebView2'de açılır ve e2e/gercek-exe.spec.ts ona karşı koşar (Linux'ta aynı süit
+# WebKitGTK'ye karşı, `npm run exe:e2e`). windows.yml tarayıcıda ana süiti koşar;
+# bu dosya köprüyü, Rust komutlarını, gerçek Belgeler'i ve WebView2'nin kendisini.
+#
+# YAVAŞ SÜİT: push'u ve birleştirmeyi beklemez (CLAUDE.md). Haftada bir koşar, ve
+# exe'ye dokunan bir main push'unda. Tek istisna yayın: `npm run yayinla` etiketten
+# önce bu koşunun da yeşilini bekler, çünkü etiket babanın exe'sine ulaşıyor
+# (DECISIONS 2026-10-10). Sürüm commit'i package.json'u ve Cargo.toml'u
+# değiştirdiği için aşağıdaki süzgeç onu her sürümde tetikler; tetiklemediği
+# yerde (yalnız etiket, `--kuru`) yayinla bu iş akışını elle başlatır.
+#
+# Runner'da sahte ev yok: exe Belgeler'i kabuğa soruyor ve WebView2 profilini
+# %LOCALAPPDATA%'da tutuyor. Süit gerçek klasörleri her testten önce siliyor, ve
+# bu yüzden GitHub'ın runner'ı dışında Windows'ta koşmayı reddediyor
+# (scripts/webdriver.mjs, `windowsYerleri`).
+name: exe-windows
+
+on:
+  schedule:
+    - cron: '30 1 * * 1' # Pazartesi 01:30 UTC, haftalik.yml'den yarım saat sonra
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src-tauri/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'src/platform/**/desktop.ts'
+      - 'src/platform/**/update.ts'
+      - 'e2e/gercek-exe.spec.ts'
+      - 'scripts/webdriver.mjs'
+      - 'playwright.gercek-exe.config.ts'
+      - '.github/workflows/exe-windows.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exe-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gercek-exe:
+    runs-on: windows-2025
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          # tauri-driver, cargo install'la geliyor; her koşuda derlenmesin.
+          cache-bin: true
+
+      - run: npm ci
+      - run: npm run build
+      # surum.yml'in derlediği gibi. CLI sabit, exe:rpm'deki sürüm.
+      - run: npx --yes @tauri-apps/cli@2.12.1 build --no-bundle
+      - run: cargo install tauri-driver@2.0.6 --locked
+
+      # WebView2 Runtime'ın sürümü, ve ona eşleşen msedgedriver: Microsoft ikisinin
+      # aynı sürüm olmasını istiyor. Runtime runner imajının listesinde yazmıyor;
+      # yoksa kurulur, kurulamazsa adım yüksek sesle düşer.
+      - name: WebView2 Runtime ve eşleşen msedgedriver
+        shell: pwsh
+        run: |
+          $anahtarlar = @(
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          )
+          function Surum {
+            $anahtarlar | ForEach-Object { (Get-ItemProperty $_ -ErrorAction SilentlyContinue).pv } |
+              Where-Object { $_ -and $_ -ne '0.0.0.0' } | Select-Object -First 1
+          }
+          $pv = Surum
+          if (-not $pv) {
+            Write-Host 'WebView2 Runtime kurulu değil, kuruluyor'
+            $kur = Join-Path $env:RUNNER_TEMP 'webview2-kur.exe'
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $kur
+            Start-Process $kur -ArgumentList '/silent', '/install' -Wait
+            $pv = Surum
+          }
+          if (-not $pv) { throw 'WebView2 Runtime yok' }
+          Write-Host "WebView2 Runtime $pv"
+          $d = Join-Path $env:RUNNER_TEMP 'edgedriver'
+          Invoke-WebRequest "https://msedgedriver.microsoft.com/$pv/edgedriver_win64.zip" -OutFile "$d.zip"
+          Expand-Archive "$d.zip" $d -Force
+          & "$d\msedgedriver.exe" --version
+          "MOZAIK_NATIVE_DRIVER=$d\msedgedriver.exe" >> $env:GITHUB_ENV
+
+      - name: Gerçek exe süiti
+        shell: bash
+        run: npx playwright test --config playwright.gercek-exe.config.ts --reporter=list
+
+      - if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: gercek-exe-windows
+          path: test-results/
+          retention-days: 7
