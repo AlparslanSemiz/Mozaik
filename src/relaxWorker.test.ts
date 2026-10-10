@@ -8,7 +8,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RelaxProgress, RelaxResult, Suggestion } from './pure/relax';
-import type { RelaxMessage } from './platform/relaxPool';
+import type { RelaxMessage } from './platform/search/relaxPool';
 
 const script: Array<RelaxProgress | RelaxResult> = [];
 
@@ -65,7 +65,7 @@ describe('relaxWorker', () => {
       onmessage: ((e: unknown) => void) | null;
     } = { postMessage: (m) => posted.push(m), onmessage: null };
     vi.stubGlobal('self', scope);
-    const { serveRelax } = await import('./platform/relaxWorker');
+    const { serveRelax } = await import('./platform/search/relaxWorker');
     serveRelax();
     scope.onmessage!({ data: { base: {}, hint: {}, options: {} } });
 

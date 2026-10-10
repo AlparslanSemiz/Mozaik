@@ -44,8 +44,7 @@ import {
 import { compareTr } from '../pure/listview';
 import { useDrag } from '../platform/drag';
 import type { DragData } from '../platform/drag';
-import { samePlan } from '../platform/useSolver';
-import type { SolverRun } from '../platform/useSolver';
+import { samePlan, type SolverRun } from '../platform/search';
 import { applySuggestion, suggestionDiff } from '../pure/relax';
 import type { SuggestionDiff } from '../pure/relax';
 import type { State, Id } from '../leaf/types';

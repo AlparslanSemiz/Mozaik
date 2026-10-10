@@ -19,7 +19,7 @@
 // no Worker, or no answer from one within READY_MS, and the same relaxer runs
 // here in slices. WebView2 on Windows could not be measured from this machine.
 
-import { createRelaxer } from '../pure/relax';
+import { createRelaxer } from '../../pure/relax';
 import type {
   RelaxFamily,
   RelaxOptions,
@@ -27,8 +27,8 @@ import type {
   RelaxResult,
   Relaxer,
   Suggestion,
-} from '../pure/relax';
-import type { Id, State } from '../leaf/types';
+} from '../../pure/relax';
+import type { Id, State } from '../../leaf/types';
 import { recorded } from './relaxLog';
 
 /** What the page sends a worker: one search. */

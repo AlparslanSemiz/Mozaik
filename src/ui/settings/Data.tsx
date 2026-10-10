@@ -39,7 +39,7 @@ import { markChangelogSeen, SURUM_NOTLARI } from '../../platform/changelog';
 import Plans from './Plans';
 import { T, useT } from '../T';
 import type { Translate } from '../T';
-import { searchLog } from '../../platform/relaxLog';
+import { searchLog } from '../../platform/search';
 
 interface Props {
   state: State;

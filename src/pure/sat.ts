@@ -12,7 +12,7 @@
 //
 // It runs in slices like the timetable solver: `run(deadline)` returns 'paused'
 // and the next call carries on where it was. The suggestion search runs it in
-// workers (platform/relaxPool.ts, TRAPS 136), and on the main thread when those
+// workers (platform/search/relaxPool.ts, TRAPS 136), and on the main thread when those
 // cannot start.
 //
 // What it is: MiniSat's shape. Two watched literals, first-UIP learning with

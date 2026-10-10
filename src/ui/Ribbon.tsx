@@ -86,7 +86,7 @@ import {
 } from 'lucide-react';
 import { health } from '../pure/feasibility';
 import type { State } from '../leaf/types';
-import type { SolverRun } from '../platform/useSolver';
+import type { SolverRun } from '../platform/search';
 import {
   applyDensity,
   applyTheme,
