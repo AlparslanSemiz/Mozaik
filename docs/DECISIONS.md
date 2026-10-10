@@ -35,6 +35,30 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-10 · Linux'ta günlük kopya Chrome'un app modunda, yalnız Chrome; rpm bırakıldı
+
+**Ne.** Kullanıcının Linux'taki Mozaik'i, `scripts/linux-kur.sh`'nin `~/GitHub/Mozaik`'in
+temiz `main`'inden derleyip `~/.local/share/mozaik/app/`'e kopyaladığı `dist/index.html`.
+`scripts/linux-mozaik.sh` onu yalnız `google-chrome` ile, kendi profilinde
+(`~/.local/share/mozaik/profil`) ve `--app=file://…` ile açar; Chrome yoksa bunu bildirimle
+söyler ve çıkar. `npm run exe:rpm` kaldırıldı. Linux ikilisi (`exe:linux`, `exe:e2e`)
+Windows exe'sinin Rust yarısını bu makinede sınayan test aracı olarak kalıyor
+([BUILD.md](BUILD.md), "Linux uygulaması").
+
+**Eski hâli.** Linux paketi Tauri'nin rpm'iydi, yalnız yerel (2026-10-09). Kullanıcı
+pratikte siteyi Chrome'a kurulu bir web uygulaması olarak kullanıyordu.
+
+**Gerekçe.** Tauri'nin Linux penceresi WebKitGTK, ve kasıyor; ana süitin WebKit koşusunda
+19 kırmızı var (TODO B7.21). Babanın motoru Chromium (WebView2). Ölçülenler (TODO B7.28):
+sitenin app modu ağsız ilk açılışta hata sayfası veriyor, `file://` vermiyor;
+`showDirectoryPicker` Chrome'da var, Brave'de yok; VK1 iki `--app` penceresinde doğru.
+Ayrı profil, Chrome'un geçmişini temizlemenin planlara dokunmaması için. Kopya (bağ
+değil), çünkü bir bağ herhangi bir dalın sonraki derlemesini izlerdi.
+
+**Önerilip bırakılan: Chromium ya da Brave'e düşmek.** Başka bir tarayıcı başka bir depo
+açar; boş bir program "verim gitti" diye okunur (kullanıcının kararı). Brave'de klasör de
+yok.
+
 ### 2026-10-09 · Uzun testler arkada, birleşmeden önce yerelde `hizli`, tam doğrulama CI'da
 
 **Ne.** Kullanıcının kararı (gece): uzun testler (mutasyon, Windows E2E, WebKit) hiçbir

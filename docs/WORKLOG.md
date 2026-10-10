@@ -57,7 +57,7 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
-4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
+4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel; rpm 2026-10-10'da bırakıldı, B7.28). B7.22 (Sığdır'ın gün
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
    PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
@@ -108,7 +108,7 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
 | Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
-| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
+| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
