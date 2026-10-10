@@ -151,6 +151,8 @@ const EN: Sozluk = {
     "**The last change could not be saved on this computer:** the storage is full. To keep your work, press **Save to file**.",
   "**Bu plan başka bir pencerede değiştirildi.** Bu pencere artık kaydetmiyor.":
     "**This plan was changed in another window.** This window no longer saves.",
+  "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
+    "**The saved plan could not be read at startup.** Nothing was written over it.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Automatic saving does not work on this computer.** Everything you do is lost when the program closes. Press **Save to file** often while you work, and always take a backup before shutting the computer down.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":

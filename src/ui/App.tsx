@@ -1053,6 +1053,19 @@ export default function App() {
               </div>
             )}
 
+            {/* THE PLAN READ EMPTY AT STARTUP, AND ITS KEY IS FULL. Under file://
+            a reloaded page has once started from an empty storage (TRAPS 108);
+            this window has written nothing over the saved plan, and a reload
+            reads it. */}
+            {saveTrouble === 'okunamadi' && (
+              <div className="save-warning" role="alert">
+                ⚠ <T k="**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı." />{' '}
+                <button className="btn" onClick={() => window.location.reload()}>
+                  {t('Yenile')}
+                </button>
+              </div>
+            )}
+
             {/* A NEW BUILD IS RUNNING THE SERVICE WORKER, this page is still the
             old one. Announced rather than applied: the double-click principle's promise is
             that nothing updates itself out from under him, and a timetable

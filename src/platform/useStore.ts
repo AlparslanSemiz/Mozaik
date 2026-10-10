@@ -18,12 +18,12 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../pure/undo';
-import { loadPlan, rotateBackups, savePlan } from './planStore';
+import { loadPlanAtStart, rotateBackups, savePlan } from './planStore';
 import { usePlans } from './usePlans';
 import { emptyState } from '../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
 import { parseState } from '../pure/parseState';
-import { readLibrary, writeLibrary } from './libraryStore';
+import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
 import { watchOtherWindows, writesClosed } from './otherWindow';
 import type { Id, State } from '../leaf/types';
 
@@ -32,9 +32,11 @@ const SAVE_DELAY = 400; // ms — do not write on every drag frame
 /**
  * Why the last save did not land, for the strip at the top. `dolu`: the write
  * itself failed, which in practice is the storage quota (VK2). `baska`: another
- * window changed this data, and this one has stopped writing (VK1).
+ * window changed this data, and this one has stopped writing (VK1). `okunamadi`:
+ * the plan read empty at startup and its key holds a plan now, so nothing is
+ * written over it (libraryStore.ts, `mayWritePlan`).
  */
-export type SaveTrouble = 'dolu' | 'baska' | null;
+export type SaveTrouble = 'dolu' | 'baska' | 'okunamadi' | null;
 
 // -------------------------------------------------------------------- hook
 
@@ -46,7 +48,7 @@ function initialBox(): Box {
   writeLibrary(library);
   rotateBackups(planKey(library.activeId));
   return {
-    present: loadPlan(library.activeId) ?? emptyState(),
+    present: loadPlanAtStart(library.activeId) ?? emptyState(),
     past: [],
     future: [],
     planId: library.activeId,
@@ -98,7 +100,7 @@ export function useStore() {
   const write = useCallback((id: Id, d: State) => {
     if (writesClosed()) return;
     const landed = savePlan(id, d);
-    setTrouble(landed ? null : 'dolu');
+    setTrouble(landed ? null : writeRefused() ? 'okunamadi' : 'dolu');
   }, []);
 
   // Auto-save — debounced, otherwise we write JSON on every drag frame. The

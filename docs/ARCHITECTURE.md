@@ -107,9 +107,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 |---|---|
 | `platform/useStore.ts` | kutuyu süren kanca: `useStore`, gecikmeli otomatik kayıt ve sonucu (`saveTrouble`), `park`, geri al kısayolu, `isTextInput` |
 | `platform/usePlans.ts` | plan kitaplığı işlemleri: `switchPlan`, `createPlan`, `deletePlan`, `renamePlan`, `markDraft`, `replaceLibrary`. Her biri ayrılan planı önce yazar, ve `park` bir parametre olduğu için bu kural imzada duruyor |
-| `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, oturum yedek zinciri (`rotateBackups`, `listBackups`) |
+| `platform/planStore.ts` | planın deposu: `storageWorks`, `savePlan`, `loadPlan`, açılıştaki okuma (`loadPlanAtStart`), oturum yedek zinciri (`rotateBackups`, `listBackups`) |
 | `platform/download.ts` | diske inen dosya: `downloadBackup`, `downloadBundle` ve zarfa girecek durumları toplayan `collectStates` |
-| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz |
+| `platform/libraryStore.ts` | plan kitaplığının localStorage tarafı, ham string alıp verir; başka pencere veriyi değiştirdiyse yazmaz; açılışta boş okunan plan şimdi doluysa üstüne yazmaz (`mayWritePlan`, `writeRefused`) |
 | `platform/otherWindow.ts` | başka bir pencere açık planı ya da plan listesini farklı bir değere yazınca bu pencerenin yazımlarını kapatır (`watchOtherWindows`, `writesClosed`, VK1) |
 | `platform/storageReport.ts` | "Veriler nerede": hangi kopya, hangi depo, ve her anahtar boyutuyla. Anahtarları `library.ts` ile `preferenceKeys.ts`'ten TÜRETİR |
 | `platform/prefs/index.ts` | tercihler paketinin giriş noktası: aşağıdaki dördünü dışa açar |
