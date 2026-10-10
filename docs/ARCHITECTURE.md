@@ -11,7 +11,7 @@ src/leaf/          types · keys · palette · i18n · lang/* · preference · p
                    names · subjects · blocks · version · dateStamp · storage
    |
 src/pure/          constraints · rules · feasibility · bell · import · entities · solver
-                   relax · sat · program/* · programView · listview · library · bundle
+                   relax · sat · program/* · programView · paper/* · listview · library · bundle
                    sample · parseState · undo
    |
 src/platform/      planStore · libraryStore · storageReport · prefs/* · changelog · folder
@@ -28,7 +28,7 @@ bir klasör sınırını geçen import olarak görünsün diye. `src/`'nin kök�
 kalmasının sebebi ölçüldü — üçü ağacı `import.meta.glob('./**/*')` ile tarıyor ve
 bir alt klasöre inseler taradıkları şey sessizce daralırdı.
 
-Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `platform/prefs/`,
+Bir katmanın altındaki klasör bir paket: bugün `leaf/lang/`, `pure/program/`, `pure/paper/`, `platform/prefs/`,
 `platform/search/`, `ui/lists/`, `ui/program/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -96,6 +96,9 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/program/programs.ts` | bir planın içindeki program alternatifleri ve açık olanı |
 | `pure/program/programMask.ts` | geçici görünüm: soluklaştırılan ya da gizlenen satır ve günler, çözücünün dışarıda bıraktıkları |
 | `pure/programView.ts` | Program ekranının çizdiği şeyin hesabı: ızgaranın satırları (`buildRows`) ve önizlemenin işaretleri (`markPreview`), havuzun kartları, sırası ve başlıkları (`buildPool`), bekleyen branşlar, görünen günler, hücrenin sınıfı (`classOfCell`) ve araç çubuğunun altındaki satır (`describeBar`). `program/`'da değil: `constraints.ts` ile `entities.ts`'i çağırıyor, onlar da `program/`'u |
+| `pure/paper/index.ts` | kâğıt paketinin giriş noktası: sayfa modeli (`classSheet`, `teacherSheet`, `sheetHead`) ve tipleri; kesme paketin içinde kalır |
+| `pure/paper/sheet.ts` | bir sınıfın ya da öğretmenin basılan haftası veri olarak: başlık, alt satır, saat başlığı ve teneffüste kesilmiş hücreler. Bir öğretmenin sayfası tek başına üretilebilir (B3.8) |
+| `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
 | `pure/bundle.ts` | bütün planları tek dosyada taşıyan zarf |
@@ -173,7 +176,8 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/program/Check.tsx` | Kontrol |
 | `ui/program/Inspector.tsx` | varlık paneli: bir öğretmen, sınıf ya da dersliğin haftası ve düzenlenmesi |
 | `ui/program/steps.tsx` | Okul'un dört listesinin tek tanımı ve varlık simgeleri (`KIND_ICON`) |
-| `ui/Print.tsx` | Çıktı ve kâğıt |
+| `ui/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
+| `ui/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
 | `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
 | `ui/AddPanel.tsx` | ekleme bloğunun başlığı ve tek cümlelik açıklaması |
 | `ui/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
@@ -211,7 +215,7 @@ kimliği (tuzak 10). Havuzun hesabı da bu yüzden `App`'e çıkarılmaz.
 ### Hangi dosyaların testi var
 
 `constraints.ts`, `feasibility.ts`, `import.ts`, `rules.ts`, `bell.ts`,
-`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
+`palette.ts`, `solver.ts`, `relax.ts`, `sat.ts`, `programView.ts`, `paper/sheet.ts` ve `blocks.ts` içindeki her dışa aktarılan fonksiyonun
 testi var, ve bu dosyalara özellik testiyle birlikte eklenir. `parseState.ts`'teki
 `parseState` ve `entities.ts`'teki `remapDays` de test ediliyor: ilkinden her yedek
 dosyası geçer, ikincisi gün listesi değişince programın kaymasını engelleyen tek
