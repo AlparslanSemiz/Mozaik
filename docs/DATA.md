@@ -264,7 +264,8 @@ bir kurtarma kopyası da bırakır: `ders-programi-kurtarma-YYYY-AA-GG-SSDDss.js
 paket. Canlı dosya ile günün yedeği bir sonraki açılışta depodaki eski durumla yeniden
 yazılıyor, kurtarma kopyası ise hiçbir oturumda yeniden kullanılmaz ve budama kalıbına
 uymaz, yani kendiliğinden silinmez. Başka bir pencere açık planı ya da plan listesini
-değiştirdiyse bu pencere klasöre de yazmaz (VK1).
+değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan açık planın anahtarı
+şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30).
 
 ## Neden böyle
 

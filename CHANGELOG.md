@@ -19,6 +19,7 @@ release is incomplete, the entry says so.
 
 ### Fixed
 
+- A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.
 - With the program open in two browser tabs, closing the tab that had not been used no longer wipes out the work done in the other one. A tab that sees another tab change the open plan now stops saving and says so in a red strip, with a Reload button; a closing tab saves only an edit that is still waiting to be saved.
 - When this computer's storage is full, a change that cannot be saved is now said in a red strip at the top, instead of "Sample data loaded." over a save that never happened. In the desktop program, the folder under Documents also gets a rescue copy for that session, which the next start does not overwrite.
 - In Availability, the heading of the lesson after a lunch break that moves from day to day no longer sits lower than its neighbours. It has no single clock time to show, and without one its number dropped about 7px.

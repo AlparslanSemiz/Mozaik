@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-10.
+Son güncelleme: 2026-10-17.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -50,6 +50,8 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
    → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
    uygulaması. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
    günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
+   **`fix/bos-acilis` (TODO B7.30) yayın kapısının ön şartı:** açılışta boş okunan plan,
+   anahtarı doluysa üstüne yazılmıyor.
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
@@ -89,6 +91,9 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
   dolu depo kırmızı şeritte, exe tek kopya. Windows exe'de iki kopya ve boyut, açılış
   süresi ve gerçek bir güncellemenin devri ölçülmedi. TB7 (kapanan sekmenin son
   değişikliği klasöre inmiyor) açık.
+- Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
+  açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
+  üretilemedi; açılıştaki plan listesi yazımı ve klasör kapısının testi açık.
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
@@ -119,6 +124,39 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-10 ile 2026-10-11 · Boş açılış: ölçüm ve `fix/bos-acilis`
+
+**Bulgu.** `bakim/agir-kilit`'in CI'ı (38085275289) `kurulum.spec.ts:716`'da kırmızı:
+yenilemeden sonra plan bütünüyle boş. Ayrıntı ve sayılar TESTFINDINGS 2026-10-10'da.
+
+**Ölçüm** (Alp'in kuralları: karışık sıra A,B,A,B, sayıyla, ≤1/80 "kararsız"). Bu makinede
+`main` ile 135d097 (fix/veri-kaybi öncesi) gerçek testte 0/80, 0/300 ve 2 çekirdekte 0/150;
+yenileme gecikmeli prob (0, 50, 130, 400 ms) 0/160. Yük 1,4–16,4. Runner'da geçici
+`ci/bos-acilis-tekrar` dalı (koşu 38090027520): ubuntu-24.04 0/300, windows-latest 0/100;
+dal silindi. Sonuç kararsız, bisect'in dayanağı yok (iki uç da iyi).
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Kayıt: açılışta boş okunan plan, anahtarı şimdi doluysa üstüne yazılmıyor".
+  `libraryStore.ts`'te `readPlanTextAtStart`, `mayWritePlan`, `writeRefused`; plan yazımı,
+  silme ve klasör yazımı kapıdan geçiyor; `useStore`'da `okunamadi`, App'te şerit, dört
+  sözlükte çeviri. Anahtarlar ve şema değişmedi.
+- "Test: boş açılışta önce kayıtlı planın yerinde olduğu ölçülüyor". E2E'de hata
+  enjeksiyonu `?bos-acilis` ile açılan sayfada, ilk çizime kadar `ders-programi`'yi boş
+  okutuyor; depoya dokunmuyor (tuzak 108).
+
+**Kanıtlar.** Birim `emptyStart.test.ts` 5/5; E2E `iki-kopya.spec.ts` 6/6 (VK testleri
+dahil). Mutasyon (`mutasyon-kaniti.sh --liste`): birim 6/6 kırmızı (koruma yok yazımda ve
+silmede, işaret hiç ya da hep kurulur, işaret kalkmaz, yeniden okuma yok); E2E derlemeyle
+4/4 kırmızı (koruma yok, işaret yok, işaret kalkmaz, şerit yok), klasör kapısı yeşil (testi
+yok). Koruma kaldırılınca E2E planı boş planla değişmiş buluyor. Birim mutasyonu kilitsiz
+koştu (kural: kilit altında); E2E mutasyonu kilit altında.
+
+**Koşulan testler.** `tipler`, `lint`, `sinir` 0; `hizli`; belge kapıları.
+
+**Koşulmayan testler.** Yerelde tam E2E (CI'da), Windows, WebKit, Stryker.
 
 ---
 

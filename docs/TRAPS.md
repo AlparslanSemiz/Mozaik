@@ -1053,6 +1053,11 @@ ayrıştırılırken koşan klasik bir betik depoyu okuduğu hâlde 400 yenileme
 açılış üretmedi, aynı koşuda `addInitScript` ile kurulan tohum 200 yenilemede 9 bayat okuma ve 4
 kalıcı kayıp verdi. Yani ürünün `<head>`'inde depo okumak bu tuzağa girmiyor, belge başına betik
 enjekte etmek giriyor.
+2026-10-10'da init betiği olmadan da bir kez görüldü (CI 38085275289, `kurulum.spec.ts:716`;
+yenileme son yazımdan ~130 ms sonra): tetikleyici yalnız enjekte betik değil. Bu makinede 1 230
+denemede, runner'da 400 denemede yeniden üretilemedi; sıklığı CI'da ~1/76 koşu. Ürün artık
+açılışta boş okunan planı, anahtarı doluysa üstüne yazmıyor (TODO B7.30). Testte hata
+enjeksiyonu yalnız okuma yolunu sarar (`Storage.prototype.getItem`), depoya dokunmaz.
 
 ### 109 · Vitest bir stil sayfasını `?raw` ile de boş dize olarak verir
 Hareket tercihinin tabanı (tuzak 58) `styles.css`'teki sıraya dayanıyor ve bir birim
