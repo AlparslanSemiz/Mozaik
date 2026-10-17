@@ -430,9 +430,10 @@ süit bir pencerenin gerçek fareye nasıl cevap verdiğini değil, gerçek prog
 sayfasının, köprüsünün ve diskinin çalıştığını ölçer.
 
 **Windows'ta (TP7).** Aynı süit `exe-windows.yml`'de `Mozaik.exe`'ye karşı koşar:
-`tauri-driver` WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver`'ın önünde, dil
-oturumun yeteneklerinde (`tauri:options.args`, `--lang=tr-TR`): WebView2'nin ortam
-değişkenini msedgedriver kendisi kullanıyor. Sahte ev yok, çünkü exe Belgeler'i
+`tauri-driver` WebView2 Runtime'ın sürümüyle eşleşen `msedgedriver`'ın önünde. **Henüz
+yeşil değil (2026-10-10):** oturum açılmıyor, msedgedriver WebView2'nin hata ayıklama
+portunu bulamıyor ("DevToolsActivePort file doesn't exist"); dil de sabitlenemedi
+(TESTFINDINGS, TODO TP7). Sahte ev yok, çünkü exe Belgeler'i
 kabuğa soruyor ve WebView2 profilini `%LOCALAPPDATA%\com.dersprogrami.arac`'ta tutuyor:
 süit runner'ın gerçek klasörlerini her testten önce siliyor, ve bu yüzden GitHub'ın
 runner'ı dışında Windows'ta koşmayı reddediyor (`windowsYerleri`). Platformların

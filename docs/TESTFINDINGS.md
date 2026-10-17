@@ -26,6 +26,25 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `exe-windows.yml`, ilk dört koşu (`test/gercek-ortam`) · Windows'ta gerçek exe
+Bulgu: derleme, `tauri-driver` 2.0.6, WebView2 Runtime (runner'da yoktu, kuruldu,
+153.0.4234.48) ve aynı sürüm `msedgedriver` tamam; program sürücüsüz açılıyor (15 s sonra
+`ders-programi.exe` ve altı `msedgewebview2` süreci; Tauri ikiliyi `Mozaik.exe` diye
+adlandırmadı, `surum.yml`'in bildiği durum). Sürücüyle her oturum 60 s'de "DevToolsActivePort
+file doesn't exist" ile düşüyor (on dört testin on dördü, üç koşu). msedgedriver'ın
+ayrıntılı günlüğü: WebView2'nin argümanlarını (`--remote-debugging-port=0` dahil)
+`WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` ile kendisi veriyor, `tauri:options.args`'ı programın
+komut satırına koyuyor (dil oradan WebView2'ye ulaşmıyor). Oturum denemesinden sonra
+`%LOCALAPPDATA%`, `%TEMP%` ve `RUNNER_TEMP` altında hiçbir `DevToolsActivePort` yok ve
+Tauri'nin profili (`com.dersprogrami.arac`) oluşmamış: WebView2 sürücünün geçici profilini
+kullanıyor ama portu açmıyor. Aday sebepler (ölçülmedi): release derlemede WebView2'nin
+DevTools'u kapalı (Tauri'nin `devtools` özelliği), ya da Tauri'nin kendi
+`AdditionalBrowserArguments`'ı sürücünün ortam değişkenini geçersiz kılıyor.
+Tür: test altyapısı; planın varsayımı (runner'da tauri-driver release exe'yi sürer) çürüdü.
+Ne yapıldı: durdu, kullanıcıya getirildi (TODO TP7). Dil için ortam değişkeni ve
+`tauri:options.args` denendi, ikisi de bırakıldı.
+Kalıcı kural: yok.
+
 ### 2026-10-10 · `npm run test:brave` (Brave 1.96.61, temiz profil) · `file://`'da klasör API'si
 Bulgu: 59 testin 58'i geçti; `temel.spec.ts`'in "GÜVENLİ BAĞLAM ve klasör API'si file://
 altında VAR" ölçümü düştü: Brave'de `file://` güvenli bağlam ama `showDirectoryPicker`

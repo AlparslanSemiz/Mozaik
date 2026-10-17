@@ -177,8 +177,10 @@ export function suruculuBaslat({ port = 4444, ev, gorunur = false, gunluk, dil =
  * WebView2 does not read LANG, and its own environment variable is the one
  * msedgedriver uses to open the debugging port, so setting it here left the
  * driver with no page to attach to ("DevToolsActivePort file doesn't exist",
- * the first Windows run, 2026-10-10). It goes in the session's capabilities
- * instead (`Oturum.ac`).
+ * the first Windows run, 2026-10-10). Nor does it go through
+ * `tauri:options.args`: msedgedriver puts those on the PROGRAM's command line,
+ * not WebView2's (its log, the third run). On Windows the language is still
+ * unpinned, and the runner's Windows is English (TODO TP7).
  */
 function windowsSurucu({ port, ev, gunluk }) {
   const surucu = process.env.MOZAIK_NATIVE_DRIVER;
@@ -217,13 +219,6 @@ export function surucuyuKapat(pid) {
   }
 }
 
-/**
- * On Windows tauri-driver hands `args` to msedgedriver as WebView2's browser
- * arguments. The browser suites pin `locale: 'tr-TR'` and the runner's
- * Windows is English; on Linux the language comes from LANG instead.
- */
-const WINDOWS_DILI = WINDOWS ? { args: ['--lang=tr-TR'] } : {};
-
 /** One WebDriver session. Everything is a method so a test reads like a script. */
 export class Oturum {
   constructor(port, id) {
@@ -240,7 +235,7 @@ export class Oturum {
       try {
         const cevap = await istek(port, 'POST', '/session', {
           capabilities: {
-            alwaysMatch: { 'tauri:options': { application: ikili, ...WINDOWS_DILI } },
+            alwaysMatch: { 'tauri:options': { application: ikili } },
           },
         });
         return new Oturum(port, cevap.sessionId);

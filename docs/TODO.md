@@ -1510,7 +1510,10 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —
       **Yazıldı (2026-10-10):** `exe-windows.yml`, `yayinla` onu da bekliyor (DECISIONS
       2026-10-10). Linux'ta süit değişmeden yeşil (13 geçti, Windows'a ait 1 atlandı).
-      Windows'ta yeşil görülmeden bitti sayılmaz.
+      **Windows'ta kırmızı, durdu:** oturum açılmıyor ("DevToolsActivePort file doesn't
+      exist"), dil sabitlenemedi (TESTFINDINGS 2026-10-10). Dal bu hâliyle birleşmemeli:
+      `yayinla` kırmızı bir `exe-windows`'u bekler ve etiket hiç atılmaz. Geçici tetik
+      (`branches: [main, test/gercek-ortam]`) birleşmeden önce kalkar.
 - [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
       `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
 - [x] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
