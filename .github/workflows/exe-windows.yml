@@ -114,7 +114,16 @@ jobs:
           Get-Process msedgewebview2 -ErrorAction SilentlyContinue | Stop-Process -Force
           Remove-Item -Recurse -Force "$env:LOCALAPPDATA\com.dersprogrami.arac" -ErrorAction SilentlyContinue
 
+      # GEÇİCİ TEŞHİS: oturum açılınca DevToolsActivePort nereye yazılıyor.
+      - name: Teşhis, DevToolsActivePort nerede
+        shell: bash
+        continue-on-error: true
+        run: |
+          npx playwright test --config playwright.gercek-exe.config.ts -g "açılıyor: pencere" --reporter=list || true
+          pwsh -NoProfile -Command 'foreach ($k in @($env:LOCALAPPDATA, $env:TEMP, $env:RUNNER_TEMP)) { Get-ChildItem -Path $k -Recurse -Force -Filter DevToolsActivePort -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "DOSYA $($_.FullName) $($_.LastWriteTime)"; Get-Content $_.FullName | Write-Host } }; Get-ChildItem "$env:LOCALAPPDATA\com.dersprogrami.arac" -Recurse -Depth 2 -ErrorAction SilentlyContinue | Select-Object -First 30 | ForEach-Object { Write-Host "PROFIL $($_.FullName)" }'
+
       - name: Gerçek exe süiti
+        if: false # GEÇİCİ TEŞHİS
         shell: bash
         run: npx playwright test --config playwright.gercek-exe.config.ts --reporter=list
 
