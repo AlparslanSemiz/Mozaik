@@ -8,8 +8,9 @@
        No text, no gradients, no shadows. The lesson colours are the picture's
        own; the blue is palette.ts's #65b6ec, which it already matched.
 
-       Sized for 32 px, the taskbar at 100 %: there the lessons are 3 px wide
-       with 1 px between, and every horizontal edge is on a whole pixel. The
+       Sized for 32 px, the smallest size that uses this drawing: there the
+       lessons are 3 px wide with 1 px between, and every horizontal edge is
+       on a whole pixel. The
        five columns are centred on the page, which puts their sides half a
        pixel off at 32; moving them off centre would show at large sizes.
 

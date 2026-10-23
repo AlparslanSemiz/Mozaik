@@ -2,8 +2,9 @@
   <title>Mozaik</title>
   <!-- THE SAME MARK, FOR SMALL SIZES. Not a second logo: the calendar page of
        site/icon.svg drawn with what survives at 16 px. No hooks, three lessons
-       instead of five (the yellow, the tall coral and the blue), the page as
-       large as the corners allow.
+       instead of five (the purple, the tall coral and the blue), the page as
+       large as the corners allow. Purple rather than the yellow of the large
+       mark: on the white page yellow is 1.6:1 and fades at 16 px, purple 2.9:1.
 
        Why it exists: site/icon.svg was rendered at 16, 20, 24, 32 and 48 and
        LOOKED AT (scripts/ikon-karsilastir.mjs). At small sizes its hooks and
@@ -18,7 +19,7 @@
   <rect width="1024" height="1024" rx="180" fill="#2e3ba8"/>
   <rect x="128" y="128" width="768" height="768" rx="64" fill="#ffffff"/>
   <!-- Three lessons: high, tall, low. -->
-  <rect x="256" y="256" width="128" height="256" rx="32" fill="#fcc23d"/>
+  <rect x="256" y="256" width="128" height="256" rx="32" fill="#c576f3"/>
   <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454"/>
   <rect x="640" y="512" width="128" height="256" rx="32" fill="#65b6ec"/>
 </svg>

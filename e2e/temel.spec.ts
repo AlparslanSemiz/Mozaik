@@ -883,14 +883,10 @@ test.describe('79. Görev çubuğundaki işaret — .ico hangi boyları taşıyo
   // Both were decided by looking (scripts/ikon-karsilastir.mjs renders both
   // drawings at 16/20/24/32/40/48 on light and dark).
   //
-  // 2026-09-01: the supplied taskbar screenshot showed that the old
-  // three-column simplified mark read as the wrong logo at 20/24 px, so only
-  // 16 stayed simplified. 2026-10-23: the calendar mark replaced it, and its
-  // simplified variant is the same page in the same colours; its hooks and
-  // five columns are a blur at 24, so 16, 20 and 24 are simplified and 32 up
-  // is detailed. The
-  // release still verifies that the .exe embeds this file byte-for-byte
-  // (`scripts/exe-ikon.mjs`).
+  // The rule today: 16, 20 and 24 are simplified, 32 and up detailed. The
+  // detailed mark's hooks and five columns are a blur at 24, and 24 is what
+  // the taskbar shows at 100 %. The release still verifies that the .exe
+  // embeds this file byte-for-byte (`scripts/exe-ikon.mjs`).
   //
   // This test exists because that decision lived NOWHERE. `scripts/ikon.mjs`
   // has a constant; the committed .ico is what actually ships, and the two

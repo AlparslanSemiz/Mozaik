@@ -438,8 +438,9 @@ Windows'un isteyebileceği dokuz boyu taşır: 16, 20, 24, 32, 40, 48, 64, 128 v
 | PWA 192 ve 512 PNG | ayrıntılı | yer var |
 | Üst çubuk (`.brand-mark`) | sade | `1.75rem`, kök 13 px iken 22,75 px |
 
-Eşik beş kez taşındı. Dördü bir şikayetten çıktı, beşincisi işaretin yeniden
-çizilmesinden. Geçmişi [DECISIONS.md](DECISIONS.md)'de, dersleri tuzak 78 ve 101'de.
+Windows %100 ölçekte görev çubuğunda 24 px'i gösteriyor, yani orada sade çizim
+görünüyor. Kuralın gerekçesi [DECISIONS.md](DECISIONS.md)'de (2026-10-23), dersleri
+tuzak 78 ve 101'de.
 
 Çizim üç yerde duruyor: svg dosyaları, `index.html`'in `data:` URI'si ve
 `App.tsx`'teki satır içi SVG. Ayrışmaları `temel.spec.ts` 72 (URI ile

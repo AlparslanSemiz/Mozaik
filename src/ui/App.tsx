@@ -331,7 +331,7 @@ function BrandMark() {
     <svg viewBox="0 0 1024 1024" className="brand-mark">
       <rect width="1024" height="1024" rx="180" fill="#2e3ba8" />
       <rect x="128" y="128" width="768" height="768" rx="64" fill="#fff" />
-      <rect x="256" y="256" width="128" height="256" rx="32" fill="#fcc23d" />
+      <rect x="256" y="256" width="128" height="256" rx="32" fill="#c576f3" />
       <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454" />
       <rect x="640" y="512" width="128" height="256" rx="32" fill="#65b6ec" />
     </svg>
