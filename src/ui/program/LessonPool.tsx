@@ -23,8 +23,8 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type React from 'react';
 import type { ReactNode } from 'react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
-import type { Id } from '../leaf/types';
-import { paletteColor } from '../leaf/palette';
+import type { Id } from '../../leaf/types';
+import { paletteColor } from '../../leaf/palette';
 import {
   DOCK_H_MIN,
   readDock,
@@ -32,33 +32,11 @@ import {
   writeDock,
   writeDockHeight,
   type PoolSort,
-} from '../platform/prefs';
-import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../platform/poolSplit';
-import { attachScrollFade } from '../platform/scrollFade';
-import { useT } from './T';
-
-export interface PoolCard {
-  /** React identity: one lesson can put several cards on the tray. */
-  key: string;
-  lessonId: Id;
-  /** How many hours THIS card covers when it lands: 1, 2 or 3. */
-  size: number;
-  /** What the cell will read: the class, or the teacher — whichever the view is not. */
-  top: string;
-  /** The row this card is aimed at, as printed on the card. */
-  bottom: string;
-  /** That row's POSITION in the grid. What the cards are sorted by, so the
-      tray runs the same way down as the rows the cards belong to. */
-  row: number;
-  subject: string;
-  color: number;
-  placed: number;
-  total: number;
-  masked?: boolean;
-  /** The heading this card stands under. Derived from the chosen order in
-      `buildPool`, so the tray SHOWS what the setting did. */
-  group: string;
-}
+} from '../../platform/prefs';
+import { attachSplitter, dockHeightForRoom, maxDockHeight } from '../../platform/poolSplit';
+import { attachScrollFade } from '../../platform/scrollFade';
+import type { PoolCard } from '../../pure/programView';
+import { useT } from '../T';
 
 interface Props {
   cards: PoolCard[];

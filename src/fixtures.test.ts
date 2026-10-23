@@ -33,7 +33,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { defaultSubjects, emptyState } from './pure/entities';
 import { parseState, readPlanFile } from './pure/parseState';
-import { activeProgram } from './pure/programs';
+import { activeProgram } from './pure/program/programs';
 import { SCHEMA_VERSION, type State } from './leaf/types';
 
 const DIR = join(import.meta.dirname, 'fixtures');

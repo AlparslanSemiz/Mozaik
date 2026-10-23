@@ -16,7 +16,7 @@ import { MAX_BLOCK, clampBlocks } from '../leaf/blocks';
 import { sanitize } from '../pure/constraints';
 import { defaultSubjects, emptyState, makeDay, NO_TEACHER_LIMITS } from '../pure/entities';
 import { firstFreeColor, PALETTE_SIZE } from '../leaf/palette';
-import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/programs';
+import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/program';
 import type {
   ClassGroup,
   Day,

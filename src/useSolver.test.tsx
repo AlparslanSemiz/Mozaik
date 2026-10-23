@@ -21,7 +21,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Answers, State } from './leaf/types';
 import type { RelaxProgress, RelaxResult, Relaxer, Suggestion } from './pure/relax';
 import type { Solver, SolverProgress, SolverResult } from './pure/solver';
-import { activePlacements } from './pure/programs';
+import { activePlacements } from './pure/program/programs';
 import { sampleState } from './pure/sample';
 import { startRelax } from './platform/search/relaxPool';
 import { createSolver } from './pure/solver';

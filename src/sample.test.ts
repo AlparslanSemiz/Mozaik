@@ -138,4 +138,4 @@ describe('gerçek ölçekte doldurma', () => {
     expect(denseMs, `dolu program medyanı ${denseMs.toFixed(2)} ms`).toBeLessThan(50);
   });
 });
-import { activeProgram } from './pure/programs';
+import { activeProgram } from './pure/program/programs';

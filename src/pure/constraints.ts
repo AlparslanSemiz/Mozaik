@@ -10,7 +10,7 @@ import { cellKey, closedKey, parseKey, placementKey } from '../leaf/keys';
 // and both have to reach the screen in the interface language. `entities.ts`
 // already imports this file, so the vocabulary lives under both of them.
 import { dayLabel, subjectLabel } from '../leaf/names';
-import { activePinned, activePlacements, blankProgram, replaceActiveGrid } from './programs';
+import { activePinned, activePlacements, blankProgram, replaceActiveGrid } from './program';
 import { hasTwoSubjects } from '../leaf/subjects';
 import {
   lessonDayCount,

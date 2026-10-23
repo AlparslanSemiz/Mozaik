@@ -195,7 +195,7 @@ const FR: Sozluk = {
   Yük: "Charge",
   Durum: "État",
 
-  // src/ui/Check.tsx
+  // src/ui/program/Check.tsx
   "Kontrol edilecek bir şey yok.": "Il n’y a encore rien à contrôler.",
   İmkânsız: "Impossible",
   "Programın durumu": "État de l’emploi du temps",
@@ -259,7 +259,7 @@ const FR: Sozluk = {
   '"{ad}" taslağından yeni bir plan açıldı.':
     "Un nouveau plan a été ouvert à partir du brouillon « {ad} ».",
 
-  // src/ui/Grid.tsx
+  // src/ui/program/Grid.tsx
   "Öğle arası": "Pause déjeuner",
   "{ust} {alt}, kaldırmak için Delete":
     "{ust} {alt}, appuyez sur Suppr pour retirer",
@@ -271,7 +271,7 @@ const FR: Sozluk = {
   "Sabitlenmiş. Sağ tıkla sabitlemeyi kaldırabilirsiniz":
     "Épinglé. Clic droit pour le détacher",
 
-  // src/ui/Program.tsx — the grid's own menu
+  // src/ui/program/Program.tsx — the grid's own menu
   "Havuza kaldır": "Renvoyer au bac",
   sabitlenmiş: "épinglé",
   "Dersi düzenle": "Modifier le cours",
@@ -295,12 +295,12 @@ const FR: Sozluk = {
   "{ad}: bilgileri ve haftalık programı":
     "{ad} : informations et emploi du temps hebdomadaire",
 
-  // src/ui/Inspector.tsx
+  // src/ui/program/Inspector.tsx
   Kapat: "Fermer",
   "Haftalık programı": "Emploi du temps hebdomadaire",
   "Kayıt bulunamadı": "Aucun enregistrement trouvé",
 
-  // src/ui/LessonPool.tsx
+  // src/ui/program/LessonPool.tsx
   "Yerleşmeyi bekleyen dersler": "Cours en attente de placement",
   "Havuz yüksekliği": "Hauteur du bac",
   "Sürükleyerek havuzun boyunu ayarlayın":
@@ -341,7 +341,7 @@ const FR: Sozluk = {
   Sonuçlar: "Résultats",
   "Eşleşen bir şey yok.": "Aucune correspondance.",
 
-  // src/ui/Print.tsx
+  // src/ui/print/Print.tsx
   Gün: "Jour",
   "Yazdırılacak program yok.": "Il n’y a pas d’emploi du temps à imprimer.",
   "{ne} ({secili}/{toplam})": "{ne} ({secili}/{toplam})",
@@ -370,7 +370,7 @@ const FR: Sozluk = {
   "Seçilen sayfaların **{n}** tanesi tamamen boş. O sınıfların programı henüz dizilmemiş. **Program** sekmesinden dizebilirsiniz.":
     "**{n}** des pages sélectionnées sont entièrement vides. Les emplois du temps de ces classes n’ont pas encore été construits. Vous pouvez le faire dans l’onglet **Emploi du temps**.",
 
-  // src/ui/Program.tsx
+  // src/ui/program/Program.tsx
   "Buraya bırakılabilir.": "On peut le déposer ici.",
   "Otomatik diziliyor… {yerlesen}/{toplam} blok · {sure} sn":
     "Placement automatique… {yerlesen}/{toplam} blocs · {sure} s",

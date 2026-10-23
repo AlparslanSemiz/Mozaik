@@ -270,4 +270,4 @@ describe('uygulama açılıyor', () => {
     expect(topbar.textContent).toContain('Dosyaya kaydet');
   });
 });
-import { activeProgram } from './pure/programs';
+import { activeProgram } from './pure/program/programs';

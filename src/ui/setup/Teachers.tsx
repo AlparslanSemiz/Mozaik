@@ -9,7 +9,7 @@ import type { ListConfig, ListQuery } from '../../pure/listview';
 import { openHours } from '../../pure/entities';
 import type { Gender, Id, Teacher } from '../../leaf/types';
 import { PanelRight } from 'lucide-react';
-import { useInspect } from '../Inspector';
+import { useInspect } from '../program';
 import { useDialogs } from '../Dialogs';
 import { parseTeachers } from '../../pure/import';
 import ColorPick from '../ColorPick';
