@@ -158,6 +158,35 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 ---
 
+## 2026-10-23 · Yeni işaret: asıl ikon (`ozellik/asil-ikon`)
+
+**Ne.** Kullanıcının seçtiği `asıl_ikon.jpeg` (2048 px) ölçüldü ve elle temiz SVG
+olarak çizildi, raster kopyalanmadı: `site/icon.svg` 1024'lük viewBox'ta indigo zemin
+(köşe 180, resimde ölçülen), beyaz sayfa, iki ayna kanca, beş ders; `site/icon-small.svg`
+kancasız sayfa ve üç ders. Ondan üretilenler: `index.html`'in favicon URI'si
+(`favicon.mjs`), `site/icon-192.png` ve `icon-512.png` (`simge.mjs`; manifest'in
+`maskable` girdisi de 512'yi gösteriyor), `kurulum/icon.ico` (`ikon.mjs`; Tauri
+`bundle.icon` ile exe'ye, `linux-kur.sh` ile Linux'a da bu dosyalar gidiyor), `App.tsx`'teki
+üst çubuk işareti. `src-tauri/icons` yok ve `tauri icon` kullanılmıyor, `tauri.conf.json`
+dokunulmadı. Eşik 20'den 32'ye, gerekçesi DECISIONS'ta. Aynı gün önce çizilen dört
+sütunlu takvim (`ozellik/ikon`) kullanıcının isteğiyle bırakıldı, o dal birleşmeyecek.
+
+**Bakılan.** `scripts/ikon-karsilastir.mjs` iki çizimi 16-48 px'te açık ve koyu zeminde
+çizdi: ayrıntılı çizimin kancaları ve sütun aralıkları 16 ve 20'de leke, 24'te bulanık,
+32'de okunuyor. Resim ile SVG 512 px'te yan yana karşılaştırıldı. Önizleme
+`scratch/ikon-onizleme.png` (.ico'nun kendi girdileri, 16/24/32/48/256, açık ve koyu görev
+çubuğu), sekme `scratch/ikon-sekme-1920.png` ve `scratch/ikon-sekme-yakin.png` (gerçek
+Chrome penceresi 1920×1080; ekran 2x, yani sekme simgesi 32 fiziksel pikselde çizildi).
+
+**Ölçülen.** `dist/index.html` 1 164 737 → 1 164 918 bayt (+181), `dist-site/` toplam
+1 187 237 → 1 184 474 bayt (−2 763), `kurulum/icon.ico` 14 859 → 13 006 bayt.
+
+**Koşulan.** `npm run hizli` yeşil (51 dosya, 1344 geçti, 1 atlandı), `eslint
+src/ui/App.tsx` ve dokunulan dosyalarda `prettier --check` temiz, `npm run build` ve
+`build:site` 0, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `agir.sh` altında 7/7
+yeşil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta gerçek exe ve görev çubuğu: yeni
+sade çizimin 20/24 px'te görev çubuğunda doğru logo gibi okunduğu Windows'ta görülmedi.
+
 ## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
 
 **Önce güvenlik.** Klasörler elle `~/GitHub/Mozaikler/`'e taşınmıştı ve yedi worktree
