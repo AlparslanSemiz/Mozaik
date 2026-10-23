@@ -864,7 +864,11 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
 
 ### 8a · Sende — kullanıcı kararı
 
-- [ ] **CLAUDE.md "Paralel oturumlar": tek checkout'a mı dönülsün? (2026-10-23, Ruflo.)**
+- [x] **CLAUDE.md "Paralel oturumlar": tek checkout'a mı dönülsün? (2026-10-23, Ruflo.)**
+      **Karar (Alp, 2026-10-23):** insanlar tek checkout'ta, dallarda; Ruflo'nun yazan
+      ajanları `~/GitHub/Mozaikler/.ruflo/` altında geçici worktree'lerde, iş bitince
+      birleşip kaldırılıyor (DECISIONS 2026-10-23, CLAUDE.md "Paralel oturumlar"). Sorunun
+      o günkü hâli:
       Ruflo görevi bölümün "tek checkout, dallarda çalış, worktree yok" demesini istedi.
       Aynı gün verilen karar iki sürekli worktree (DECISIONS 2026-10-23), bugün on bir
       worktree açık, ve Ruflo'nun kendi kuralı "yazan her ajana kendi worktree'si". Bölüm

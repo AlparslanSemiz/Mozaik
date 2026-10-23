@@ -49,13 +49,15 @@ bloğunda yazılı.
 
 ## Paralel oturumlar
 
-Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-10-09, worktree'lerin yeri 2026-10-23):
+Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-10-09, çalışma yeri 2026-10-23):
 
-- Sürekli iki worktree var, ikisi de `~/GitHub/Mozaikler/` altında: `Mozaik` yalnız
-  `main`'i tutar, orada oturum çalışmaz; `Mozaik-refactor` refactor turlarının, her tur
-  `main`'den açılan yeni bir dalda. Paralel çalışan başka bir iş alanı (özellik, düzeltme,
-  belge-test-araç ya da başka bir şey) kendi worktree'sini ve dalını onların yanında
-  `~/GitHub/Mozaikler/Mozaik-<iş>` olarak açar, iş birleşince worktree kaldırılır.
+- Tek checkout, `~/GitHub/Mozaikler/Mozaik`. İnsanların oturumları orada, `main`'den açılan
+  dallarda çalışır; sürekli worktree yok. Checkout aynı anda tek dalda durduğu için orada
+  aynı anda tek oturum yazar.
+- Ruflo'nun yazan her ajanı geçici bir worktree alır, `~/GitHub/Mozaikler/.ruflo/<iş>`
+  altında (`git worktree add ~/GitHub/Mozaikler/.ruflo/<iş> -b <dal> <onu açan dal>`).
+  Ajanın işi bitince dalı onu açan dala birleşir ve worktree kaldırılır
+  (`git worktree remove`).
 - Dal kısa ömürlü, iş `main`'den açılan bir dalda yürür. Her commit'ten ve her ölçümden
   önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yapılmaz.
 - Push SSH ile ve açık refspec'le, yalnız kendi dalı: `git push origin <dal>`. Zorla push,
@@ -161,8 +163,10 @@ kancaları `.claude/` altında, ayarları [.claude/settings.json](.claude/settin
 
 **Bu dosyanın kuralları Ruflo'nunkilerden önce gelir.** Ruflo'nun şablonundan alınanlar:
 
-- Bir worktree'de tek yazar. Yazan her ajan kendi worktree'sinde ve kendi dosya
-  kapsamında çalışır, araştıran ajanlar paralel okur ve bulduğunu sahibine bildirir.
+- Bir worktree'de tek yazar. Yazan her ajan kendi geçici worktree'sinde
+  (`~/GitHub/Mozaikler/.ruflo/<iş>`, "Paralel oturumlar") ve kendi dosya kapsamında
+  çalışır; işi bitince dalı birleşir ve worktree kaldırılır. Araştıran ajanlar paralel
+  okur ve bulduğunu sahibine bildirir.
 - `package.json`'a, `package-lock.json`'a ve paylaşılan yapılandırmaya yalnız işin
   sahibi dokunur, çakışan değişiklikleri o birleştirir.
 - Bir alt ajan araç, ağ, sır, eşzamanlılık ya da devretme derinliği ekleyemez, yalnız

@@ -31,10 +31,10 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Çalışma düzeni (2026-10-09, yer 2026-10-23).** Sürekli iki worktree, ikisi de
-`~/GitHub/Mozaikler/`'de: `Mozaik` (`main`, oturum yok) ve `Mozaik-refactor` (refactor
-turları); başka bir iş alanı kendi worktree'sini ve dalını onların yanında açar ve iş
-birleşince kaldırır, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
+**Çalışma düzeni (2026-10-09, yer 2026-10-23).** Tek checkout, `~/GitHub/Mozaikler/Mozaik`:
+insanların oturumları orada, `main`'den açılan dallarda; Ruflo'nun yazan ajanları
+`~/GitHub/Mozaikler/.ruflo/` altında geçici worktree'lerde, iş bitince birleşip kalkıyor.
+"Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
 yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
@@ -106,8 +106,10 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
    (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
 11. Ruflo (`ruflo/kurulum`, 2026-10-23, TODO B7.33): ilk etkileşimli oturumda `claude-flow`
-   MCP sunucusu onaylanır, bayraklı bekçi denemesini Alp kendi terminalinde koşar;
-   "Paralel oturumlar"ın tek checkout'a dönüp dönmeyeceği kullanıcıda (TODO §8a).
+   MCP sunucusu onaylanır, bayraklı bekçi denemesini Alp kendi terminalinde koşar. Dal
+   `main`'e ancak Alp "deny testi temiz" yazınca, öbürleri gibi birleşir. 2026-10-23
+   gecesi açık kalan worktree'ler (`Mozaik-ikon`, `Mozaik-surec`, `Mozaik-tb8`) kendi
+   oturumlarının işi bitince kapanır.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -263,6 +265,17 @@ bağımlılık saydı, `kontrol` `knip`'i koşmadığı için yerelde görünmed
   `~/.claude.json.ruflo-oncesi` `~/.claude.json`'a geri kopyalanır (o andan sonraki oturum
   günlükleri gider); `rm -rf ~/.claude-flow ~/.npm/_npx/f782fc3c6f24847f`; açık bir daemon
   `npx -y ruflo@3.60.1 daemon status --all` ile bulunur ve `daemon stop` ile durur.
+
+**Ek, aynı gece (Alp'in eki).** Çalışma yeri değişti: tek checkout, Ruflo'nun yazan
+ajanlarına `~/GitHub/Mozaikler/.ruflo/` altında geçici worktree (DECISIONS 2026-10-23);
+eski "iki sürekli worktree" kaydı DECISIONS'tan silindi, birleştirmenin olguları aşağıdaki
+"Birleştirme" girdisinde duruyor. Dal "deny testi temiz" yazılana kadar `main`'e girmez.
+Ana klasörde 23:07'de bilinmeyen bir `npm install` `package-lock.json`'un yalnız "version"
+alanını 2.1.1'den 2.2.0'a çekmişti; fark yalnız o olduğu için atıldı (`git checkout`).
+`ANTHROPIC_API_KEY` bu oturumun kabuğunda boş, kabuk rc dosyalarında, `~/.claude`'un
+ayarlarında ve projenin ayarlarında da yok: Ruflo'nun işçileri Claude Code'un oturum
+girişini kullandı, API hesabına yazılmadı. Kendi worktree'si (`Mozaik-ruflo`) kapandı, dal
+yerelde ve origin'de duruyor.
 
 ## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
 
