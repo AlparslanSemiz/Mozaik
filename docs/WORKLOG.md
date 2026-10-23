@@ -248,7 +248,10 @@ güncelleme ve ilk açılış kapamaları, `git tag *` ve `yayinla *` kuralları
 env'i. `scripts/agir.sh npm run kontrol` çıkış 0: vitest 56 dosya, 1472 test; Playwright
 640, site 24, çözücü 7; size-limit sınırın altında (1.16 MB ve 280.49 kB brotli), ve
 `main`'e karşı pakete giren hiçbir dosya değişmedi (`src`'de yalnız `src/ruflo.test.ts`,
-`package.json`, kilit dosyası ve `.size-limit.json` aynı). **Koşulmayan:** Windows E2E, WebKit, mutasyonun tamamı, bayraklı bekçi denemesi.
+`package.json`, kilit dosyası ve `.size-limit.json` aynı). Dalın ilk CI'ı (`ci.yml` 40024718904)
+`denetim`'de kırmızıydı: `knip` Ruflo'nun `.claude/helpers`'ındaki üç paketi listede olmayan
+bağımlılık saydı, `kontrol` `knip`'i koşmadığı için yerelde görünmedi; `knip.json`'un
+`ignore`'una `.claude/**` girdi, ve `src/ruflo.test.ts` prettier'dan geçirildi. **Koşulmayan:** Windows E2E, WebKit, mutasyonun tamamı, bayraklı bekçi denemesi.
 
 **Geri alma.**
 - Birleşmeden önce: `git worktree remove ~/GitHub/Mozaikler/Mozaik-ruflo` (gerekirse

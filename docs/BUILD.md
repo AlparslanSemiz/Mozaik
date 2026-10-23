@@ -82,7 +82,9 @@ koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kır
 başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
 `knip.json`'un `ignoreBinaries`'i testlerin çağırdığı üç sistem aracı: `src/linuxKur.test.ts`'in
 `desktop-file-validate`'i ve `shellcheck`'i (test onlar yoksa o adımı atlıyor) ve
-`src/agir.test.ts`'in `pgrep`'i. Bir paket değiller.
+`src/agir.test.ts`'in `pgrep`'i. Bir paket değiller. `ignore`'u `.claude/**`: Ruflo'nun
+kanca yardımcıları bu deponun kodu değil, bağımlılıklarını npx önbelleğinden alıyorlar
+(CLAUDE.md, "Ruflo").
 
 `boyut` da `kontrol`'ün parçası ve derlemeden hemen sonra koşuyor: eşik
 `.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
