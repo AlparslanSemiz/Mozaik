@@ -1,0 +1,8 @@
+{
+  "daemon": {
+    "autostart": false
+  },
+  "funnel": {
+    "enabled": false
+  }
+}
