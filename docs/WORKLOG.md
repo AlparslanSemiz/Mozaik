@@ -36,7 +36,8 @@ oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu 
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
 yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
-bir worktree'de ya da başka dalda tek cümleyle durur.
+bir worktree'de ya da başka dalda tek cümleyle durur. Ağır bir komutun süre sınırı
+`scripts/agir.sh --sure <saniye>` ile verilir, dışarıdan `timeout` sarılmaz (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
@@ -44,7 +45,8 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
 
 **Sıradaki iş.**
-0. Özellik oturumunun sırası (2026-10-10, Alp): `bakim/agir-kilit` → yayın kapısı dalı
+0. Özellik oturumunun sırası (2026-10-10, Alp): `fix/veri-kaybi` ve `bakim/agir-kilit`
+   girdi, `ci/runner-sabitle` yayın kapısından önce girer. Sonra yayın kapısı dalı
    (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
    → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
@@ -177,6 +179,36 @@ koştu (kural: kilit altında); E2E mutasyonu kilit altında.
 her belge commit'inden önce `hizli` ve belge kapıları 19/19.
 
 **Koşulmayan testler.** Yerelde tam `npm test`, `kontrol`, E2E (CI'da), mutasyon, Windows.
+
+---
+
+## 2026-10-09 (gece) · agir.sh'in kilit açığı, `bakim/agir-kilit` dalı
+
+**Öteki iki oturum için (refactor ve test):** "Betikler: agir.sh komutun bütün ağacını
+kapatmadan kilidi bırakmıyor (tuzak 150)": agir.sh'in zaman aşımı artık komutun bütün
+ağacını öldürüyor; dışarıdan `timeout` kullanmayın, agir.sh'in kendi süre bayrağını
+kullanın: `scripts/agir.sh --sure <saniye> <komut>`. Birleşince commit'in `main` hash'i
+buraya yazılır.
+
+**Ne yapıldı.** Ağaç, komutun ortamına konan tek seferlik bir işaretle `/proc`'tan
+bulunuyor; süreç grubu yetmiyor, çünkü Playwright tarayıcıyı `detached` başlatıyor
+(`playwright-core`, "makes child process a leader of a new process group"). Süre dolunca,
+TERM/INT/HUP gelince (dışarıdaki `timeout` bir TERM) ve komut geride bir şey bırakıp
+çıkınca önce TERM, `MOZAIK_AGIR_PAY` saniye (10) sonra KILL; not ve kilit ondan sonra.
+Komut agir.sh'in standart girdisini alıyor. Davranış değişikliği: komutun geride
+bıraktığı bir sunucu artık kilitle birlikte kapanıyor, eskiden yaşamaya devam ediyordu.
+
+**Kanıt.** `src/agir.test.ts`, kendi kilit dosyasıyla: setsid'li bir torun, TERM'i yok
+sayan bir süreç ve yavaş ölen bir ebeveyn. Yarım saniye sonra kilidi isteyen ikinci bir
+"oturum" kilidi aldığı anda 0 süreç görüyor, `--sure` ve dış `timeout` ikisinde de 124,
+geride bırakılan sunucu kapanıyor, girdi okunuyor. Yedi mutasyon kırmızı, hepsi bir
+iddiayla (kalan 1 ya da 2, beklenen 0; 124 yerine 0; boş girdi): işaret taraması yok,
+KILL yok, TERM tuzağı yok, kilit ağaçtan önce, `--sure` yok, `<&0` yok, normal çıkışta
+temizlik yok. İlk sürümde testin sonucu `close`'tan alınıyordu ve dört mutasyon zaman
+aşımıyla kırmızıydı: yetim, testin borularını açık tutuyordu. Sonuç artık `exit`'ten.
+
+**Koşulan testler.** `npm run hizli` (1273), `docs.test.ts` (19), `agir.test.ts` (4),
+yedi mutasyon. **Koşulmayan.** `kontrol`, Playwright.
 
 ---
 
