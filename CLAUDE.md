@@ -145,3 +145,45 @@ Uzun tablolar `scratch/`'te bir rapor dosyasına yazılır, mesaj ona işaret ed
 - Test edilmemiş bir şey bitti işaretlenmez.
 - Bir belge kapısı (`src/docs.test.ts`) kırmızıysa bayatlayan belgedir, kapı değil. Kapı susturulmaz, atlanmaz, gevşetilmez; belgedeki cümle düzeltilir. Kapının kendisi yanlış ölçüyorsa bu iddia edilmez, mutasyonla kanıtlanır: kapıyı geçen bozuk bir belge gösterilir, sonra kapı değişir.
 - Bir kod değişikliği bir belge cümlesini yanlış hâle getiriyorsa o cümle **aynı commit'te** düzeltilir. Sonraki commit'e bırakılan belge düzeltmesi yapılmaz; bölme turunda bulunan on yedi bayat maddenin hepsi "sonra düzeltirim" ile birikti.
+
+## Ruflo
+
+Ruflo (eski adı claude-flow) bir geliştirme aracı: ajanlar, sürü, bellek ve kancalar.
+Yalnız bu depoda kurulu ve sürüme sabit; global kurulum yok, Ruflo'nun kendi becerileri
+`npm install -g` dese de. Her komut `npx -y ruflo@3.60.1 <komut>` ile koşar. MCP
+sunucusu [.mcp.json](.mcp.json)'da `claude-flow` adıyla, ajanları, komutları, becerileri ve
+kancaları `.claude/` altında, ayarları [.claude/settings.json](.claude/settings.json)'da ve
+[claude-flow.config.json](claude-flow.config.json)'da. Çalışma verisi (`.swarm`,
+`.hive-mind` ve `.claude-flow` klasörlerinin verisi) depoya girmez. `package.json`'a ve
+`dist`'e hiçbir şey girmez. Gerekçe [docs/DECISIONS.md](docs/DECISIONS.md)'de, 2026-10-23.
+
+**Bu dosyanın kuralları Ruflo'nunkilerden önce gelir.** Ruflo'nun şablonundan alınanlar:
+
+- Bir worktree'de tek yazar. Yazan her ajan kendi worktree'sinde ve kendi dosya
+  kapsamında çalışır, araştıran ajanlar paralel okur ve bulduğunu sahibine bildirir.
+- `package.json`'a, `package-lock.json`'a ve paylaşılan yapılandırmaya yalnız işin
+  sahibi dokunur, çakışan değişiklikleri o birleştirir.
+- Bir alt ajan araç, ağ, sır, eşzamanlılık ya da devretme derinliği ekleyemez, yalnız
+  bırakabilir.
+- Ajanlar adlandırılır ve `SendMessage` ile haberleşir, birbirini yoklamaz.
+- Testin, ölçümün ve kanıtın sonucu bir commit'e bağlanır.
+- Sır ve `.env` commit'lenmez.
+
+Şablonun şu satırları burada geçmez: "belge dosyası yaratma" ve "köke dosya yazma"
+(oturum sonu belgeleri ve `scratch/` geçerli), dosya başına satır sınırı, "`npm run build
+&& npm test`" (yerine `npm run hizli`, tam doğrulama CI'da), sürünün kendi ajan tavanı
+(bu makinenin RAM sınırı ve `scripts/agir.sh` kilidi geçerli: ağır komutlar sürü ne
+büyüklükte olursa olsun sırayla koşar) ve `Co-Authored-By` hakkındaki satır (bu depo
+commit atfını kendi kuralıyla yapar).
+
+**Yayın bekçisi.** `.claude/settings.json`'daki deny kuralları `npm run yayinla`'yı,
+`git tag`'i, etiket itmeyi, `gh release create`'i ve Ruflo'nun komut koşan
+`terminal_execute` aracını Claude'a kapatır. Ruflo'nun açtığı ajanlar da bu kurala
+bağlı. Kural gevşetilmez; [src/ruflo.test.ts](src/ruflo.test.ts) onu ve aşağıdaki
+kapamaları korur.
+
+**Kapalı tutulanlar.** Daemon kendiliğinden başlamaz, otomatik güncelleme, funnel
+(uzaktan mesaj ve olay) ve ilk açılışın kullanıcı ayarına yazması kapalı. Daemon
+gerekirse elle ve geçici açılır (`daemon start`, iş bitince `daemon stop`); işçileri
+başsız Claude oturumu açar ve jeton harcar. `ruflo init --force` ya da `init upgrade
+--settings` bu ayarların üstüne yazabilir; o zaman `src/ruflo.test.ts` kırmızıya döner.
