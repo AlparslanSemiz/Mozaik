@@ -80,6 +80,9 @@ Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 farkında dört kural açıldı, bulguları kapatıldı ve komut sıfır hatayla
 koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kırmızı
 başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
+`knip.json`'un `ignoreBinaries`'i `src/linuxKur.test.ts`'in çağırdığı iki sistem aracı
+(`desktop-file-validate`, `shellcheck`): bir paket değiller, ve test onlar yoksa o adımı
+atlıyor.
 
 `boyut` da `kontrol`'ün parçası ve derlemeden hemen sonra koşuyor: eşik
 `.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
