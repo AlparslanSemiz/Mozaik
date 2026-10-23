@@ -97,8 +97,8 @@ dalda gerileme testiyle.
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
    silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7 Windows'ta
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
-   duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
-   yalnız bir etiketle ya da elle derlemeyle sınanır.
+   duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
+   (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -127,7 +127,7 @@ dalda gerileme testiyle.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
+| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
@@ -193,6 +193,23 @@ dokunulmadı. `yayinla` temiz ağaç istediği için etiketten önce Alp'in kara
 **Koşulan.** `npm run hizli` her commit'ten önce (çıkış 0), `npx vitest run src/docs.test.ts`,
 `tsc --noEmit`, `eslint`, `knip`, `prettier --check`, `scripts/mutasyon-kaniti.sh` (kırmızı,
 beklenen), dalın CI'ı. **Koşulmayan.** `npm test`, E2E, `kontrol` yerelde (politika: CI'da).
+
+
+## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
+
+Birleştirmenin `main` push'unda `ci.yml` (site dahil) yeşil, `windows.yml` iki testte
+kırmızıydı; ikisi de birleştirmeden önce de vardı (TESTFINDINGS 2026-10-23). Dal commit'i
+"Test: Windows E2E'nin iki kırmızısı, kayıt uyarısı kendi şeridinde, erişilebilirlik
+taraması ekran başına": `temel.spec.ts`'in locator'ı kendi cümlesine daraltıldı (arkadaki
+ürün kusuru TODO B7.31), `erisim.spec.ts`'in üç ekranlı testi üçe bölündü (TP22).
+Aynı akşam `surum.yml` elle, yayınlamadan koşturuldu (40019649665): `package`
+(`ubuntu-24.04`) ve `exe` yeşil, artefaktlar `upload-artifact@v7` ile indi, `publish`
+atlandı; 2026-10-10'daki değişikliği etiketsiz sınanmış oldu.
+
+**Koşulan testler.** İki spec yerelde kilit altında (7/7); `canSave` şeridini kaldıran
+mutasyon `--derle` ile kırmızı; `hizli`. **Koşulmayan.** Windows'ta yerelde (CI'da koşar).
+
+---
 
 ## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
 

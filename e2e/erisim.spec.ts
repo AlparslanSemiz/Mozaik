@@ -113,18 +113,22 @@ function karsilastir(ekran: string, bulgular: Bulgu[]) {
 test.describe('90. Erişilebilirlik taraması', () => {
   // Data first: an empty screen has almost no controls on it, and the rows,
   // the grid and the pool are where the defects would be.
-  test('Program, Kontrol ve Çıktı, dolu veriyle', async ({ page }) => {
+  // One screen per test (TODO TP22): on Windows the three scans together took
+  // ~25 s of the 30 s budget, Çıktı the heaviest, and the test fell over the
+  // ceiling now and then.
+  test('Program, dolu veriyle', async ({ page }) => {
     await openWithSample(page);
     karsilastir('Program', await tara(page));
-
-    await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
-    await expect(page.locator('.main')).toBeVisible();
-    karsilastir('Kontrol', await tara(page));
-
-    await page.getByRole('button', { name: 'Çıktı', exact: true }).click();
-    await expect(page.locator('.main')).toBeVisible();
-    karsilastir('Çıktı', await tara(page));
   });
+
+  for (const sekme of ['Kontrol', 'Çıktı']) {
+    test(`${sekme}, dolu veriyle`, async ({ page }) => {
+      await openWithSample(page);
+      await page.getByRole('button', { name: sekme, exact: true }).click();
+      await expect(page.locator('.main')).toBeVisible();
+      karsilastir(sekme, await tara(page));
+    });
+  }
 
   test('Okul, Müsaitlik ve Dersler, dolu veriyle', async ({ page }) => {
     await openWithSample(page);

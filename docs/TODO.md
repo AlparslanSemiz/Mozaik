@@ -836,6 +836,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [ ] **B7.31 Depo hiç yazılamıyorken iki şerit, biri yanlış (2026-10-23).** localStorage'ın
+      her çağrısı hata atınca "otomatik kayıt çalışmıyor" şeridinin yanında VK2'nin
+      "depolama alanı dolu" şeridi de çıkıyor: otomatik kayıt düşen her yazımı "dolu" sayıyor,
+      oysa depo dolu değil, hiç yok. Windows E2E'de görüldü (`windows.yml` 40019600257 ve
+      38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
+      Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
+      "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
 
 ---
 
