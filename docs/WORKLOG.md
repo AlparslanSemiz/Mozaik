@@ -50,7 +50,9 @@ Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu b
 TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir
 dalda gerileme testiyle.
 
-**Sıradaki iş.**
+**Sıradaki iş.** Önce TB8 (veri kaybı sınıfı, TODO §8l): "Tümünü dosyadan aç" eksik planı
+boş plan olarak açıyor. `tb8-eksik-plan` dalında, `~/GitHub/Mozaikler/Mozaik-tb8`'de, önce
+kırmızı gerileme testi. Sürekli worktree yalnız `Mozaik`, `Mozaik-refactor` 2026-10-23'te kalktı.
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -194,6 +196,22 @@ dokunulmadı. `yayinla` temiz ağaç istediği için etiketten önce Alp'in kara
 `tsc --noEmit`, `eslint`, `knip`, `prettier --check`, `scripts/mutasyon-kaniti.sh` (kırmızı,
 beklenen), dalın CI'ı. **Koşulmayan.** `npm test`, E2E, `kontrol` yerelde (politika: CI'da).
 
+**İkinci tur, aynı gece (gözden geçirmenin cevapları).**
+- Depo adları ve şema sürümü düz metne karşı: `src/storageNames.test.ts`. Önceden dağınıktı
+  ve eksikti (`ders-programi-planlar`, IndexedDB'nin `ders-programi-klasor`'u ve 16 sayısı
+  hiçbir testte düz metin değildi). `mutasyon-kaniti.sh`: `LIBRARY_KEY`'in adı değişince
+  kırmızı, `SCHEMA_VERSION` göçsüz 17 olunca iki test kırmızı, ağaç ikisinde de aynı.
+- CLAUDE.md'ye kısa kural: doğrulanmamış iş bitti işaretlenmez, "yazıldı, doğrulanmadı".
+- `package-lock.json` bu dalda `npm install --package-lock-only` ile 2.2.0, tek commit. Kök
+  sebep `yayinla.mjs`'in kilit dosyasını yazmaması (TODO B7.32). Ana klasördeki değişikliği
+  Alp geri alıyor.
+- `Mozaik-refactor` worktree'si kaldırıldı (`git worktree remove`, `--force`'suz). O sırada
+  `refactor/storage` dalındaydı: 23:24'te `origin/main`'den açılmış, commit'i yok, origin'de
+  yok, ağaç temiz, klasörde süreç yok. `scratch/`'i (52 MB, `analiz-2026-10-08` dahil)
+  `~/GitHub/Mozaikler/arsiv/Mozaik-refactor/scratch`'teki kopyayla karşılaştırıldı, fark
+  yalnız iki `node_modules`. Yerel `refactor/storage` dalı duruyor.
+- `main` (be3ff75, `fix/windows-e2e`) alındı; TODO'daki çatışmada bu dalın hâli kaldı,
+  `main`'in TP22 cümlesi arşivdeki kopyaya işlendi.
 
 ## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
 
