@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-17.
+Son güncelleme: 2026-10-23.
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -31,8 +31,10 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Çalışma düzeni (2026-10-09).** Her iş alanı kendi worktree'sinde ve dalında, `main`'de
-oturum yok, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
+**Çalışma düzeni (2026-10-09, yer 2026-10-23).** Sürekli iki worktree, ikisi de
+`~/GitHub/Mozaikler/`'de: `Mozaik` (`main`, oturum yok) ve `Mozaik-refactor` (refactor
+turları); başka bir iş alanı kendi worktree'sini ve dalını onların yanında açar ve iş
+birleşince kaldırır, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
 CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
 yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
@@ -51,7 +53,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
-   uygulaması ∥ zebra → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
+   uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
    → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
@@ -61,8 +63,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    taşıma, klasör izninin yeniden açılışta geri gelmesi; Wayland'de görev çubuğu simgesi
    ölçülmedi. Düzeltmelerde RK14 (bozuk arama
    günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
-   **`fix/bos-acilis` (TODO B7.30) yayın kapısının ön şartı:** açılışta boş okunan plan,
-   anahtarı doluysa üstüne yazılmıyor.
+   **`fix/bos-acilis` (TODO B7.30), yayın kapısının ön şartı, `main`'de (2026-10-23):**
+   açılışta boş okunan plan, anahtarı doluysa üstüne yazılmıyor.
 1. Babanın makinesi (Windows 10, 27 inç, 1920×1080, ölçek %100, exe ile): exe'nin
    sürümü (son sürüm olmalı, doğrulanmadı), öneri aramasının ölçümü, KY'nin Cumartesi
    sorusu ([TODO.md](TODO.md) §8b).
@@ -95,6 +97,12 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    `fix/veri-kaybi` girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). RK15
    (bir öğretmenin aynı saatte iki sınıfı) özellik dalının işi. Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
+10. Birleştirme turunun açık işleri (2026-10-23, aşağıdaki girdi): 2026-10-23 yönünün
+   commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
+   silinmesi) hiçbir dalda yoktu, sonraki turda yazılır. `test/gercek-ortam` (TP7 Windows'ta
+   kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
+   duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
+   yalnız bir etiketle ya da elle derlemeyle sınanır.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -126,12 +134,12 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 40 (2026-10-09 gece) | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 47 dosyada 1397 test (2026-10-09 gece, `test/kapsam` `main`'le birleşince); `kontrol`'de 1396, hepsi geçti | `npx vitest list`, `npm test` |
+| Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
 | `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
 | Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
@@ -147,6 +155,62 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
+
+**Önce güvenlik.** Klasörler elle `~/GitHub/Mozaikler/`'e taşınmıştı ve yedi worktree
+"prunable" görünüyordu: ana klasörden `git worktree repair`, sonra hiçbiri kırık değil
+(tuzak 152). Bütün depo bir bundle'a yazıldı ve `git bundle verify` ile doğrulandı;
+`Mozaik-linux`'un işlenmemiş iki değişikliği (knip'in `ignoreBinaries`'i ve BUILD'deki
+cümlesi) `ozellik/linux`'ta "WIP: kaydedildi (birlestirme oncesi)" oldu; itilmemiş her dal
+açık refspec'le itildi; worktree'lerin `scratch/`'leri depo dışındaki bir arşive kopyalandı
+(gerçek ad taşıyabilir, depoya girmez).
+
+**Sıra ve gerekçesi.** `fix/bos-acilis` (veri kaybı sınıfı) → `bakim/agir-kilit` →
+`test/kapsam` → `ci/runner-sabitle` → `ozellik/zebra` → `ozellik/linux` →
+`refactor/program`. Her dal `main`'e karşı tek başına temizdi; çatışmalar dalların
+birbirine karşı çıktı, kodda yalnız iki yerde.
+
+**Çatışmalar ve çözümleri.**
+- `ci.yml`, `site.yml` (`test/kapsam` × `ci/runner-sabitle`): ikisi de runner'ı
+  `ubuntu-24.04`'e sabitliyordu; satırlar `ci/runner-sabitle`'nin "geçici (TODO B7.29)"
+  yorumuyla, `test/kapsam`'ın başlık yorumu, kanaryası, `windows-2025`'i ve
+  `download-artifact@v8`'i duruyor. Bayatlayan üç belge cümlesi (B7.20'nin "`surum.yml` hâlâ
+  v4'te", TP1'in "`surum.yml` dokunulmadı", BUILD'in "`surum.yml` dokunulmaz") 2026-10-10'daki
+  karara göre düzeldi.
+- `knip.json` (`bakim/agir-kilit` × `ozellik/linux`): `ignoreBinaries` üçü birden
+  (`pgrep`, `desktop-file-validate`, `shellcheck`), BUILD'in cümlesi üçü sayıyor.
+- TRAPS: iki dal da 150'yi vermişti; 150 `bakim/agir-kilit`'te kaldı, `ozellik/linux`'unki
+  151 oldu, TESTFINDINGS ve WORKLOG'daki atfıyla.
+- "Şu an": her dalın maddesi birleşik hâliyle (zebra bitti, Linux bitti, adım 4 `main`'de),
+  ölçüm tablosundaki sayılar birleşik ağaçta yeniden sayıldı.
+- WORKLOG, TESTFINDINGS, DECISIONS, CHANGELOG: iki taraf da, en yeni üstte; CHANGELOG'da
+  Added Changed'den önce.
+
+**Birleşmeden sonra.** `scripts/linux-kur.sh` `~/GitHub/Mozaik`'i arıyordu ve taşınan
+klasörde "yok" diyecekti: "Linux: linux-kur.sh ~/GitHub/Mozaikler/Mozaik'ten kurar".
+CLAUDE.md'nin "Paralel oturumlar"ı iki sürekli worktree'yi anlatıyor (DECISIONS 2026-10-23).
+
+**Birleşmeyenler.** `test/gercek-ortam` (kendi TODO'su "bu hâliyle birleşmemeli": TP7
+Windows'ta kırmızı, `yayinla` onu bekler ve etiket hiç atılamazdı), `klasorleme` ve üç
+Dependabot dalı. 2026-10-23 yönünün commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma
+politikası, emekli kuralların silinmesi) hiçbir dalda yoktu; belge çatışmalarında kural
+şuydu: belge yalnız bugünkü istekleri söyler, Mozaik aSc'nin ve Roboders'in yaptığı her şeyi
+daha iyi yapar, sunucu geliyor, kalan beş şey veri kaybı olmaması, eski yedeklerin açılması,
+Roboders'e ve gerçek veriye yalnız okumak için dokunulması, güncelleme testi olmadan sürüm
+olmaması, uygulamanın çevrimdışı açılıp dizmesi. Bu turun çatışmalarının hiçbiri o kurala
+dokunmadı.
+
+**Koşulan testler.** Her birleşmeden sonra kilit altında `npm run kontrol`, yedisinde 0:
+sonuncusunda 55 dosyada 1457 birim testi geçti, 1'i atlandı (`shellcheck` bu makinede yok),
+ana E2E 640/640, site 24/24, çözücü stresi 7/7. Her belge çatışmasından sonra
+`src/docs.test.ts`. Yol düzeltmesinden önce `npm run hizli`, `src/linuxKur.test.ts` ve
+`mutasyon-kaniti.sh` (betiği eski yola döndüren mutasyon kırmızı).
+
+**Koşulmayan.** Windows E2E, WebKit, Stryker, `surum.yml` (yalnız etiketle ya da elle
+derlemeyle sınanır), kanarya. Süre ölçülmedi.
 
 ---
 

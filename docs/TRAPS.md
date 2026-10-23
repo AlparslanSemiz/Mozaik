@@ -237,6 +237,19 @@ Linux ikilisi bu değişkeni kendisi koyuyor (`lib.rs`, `linux_renderer`, yalnı
 dokunmuyor. Windows'taki Mozaik.exe WebView2 ile çizer ve bu satır onda yok.
 `e2e/gercek-exe.spec.ts` değişkeni sürücünün ortamından siliyor, yani ölçtüğü şey
 kabuk değil ikilinin kendisi. Düzeltme olmadan kırmızı, düzeltmeyle yeşil.
+
+### 152 · Depo klasörünü taşımak worktree'leri ve sabit yazılmış yolları kırar
+2026-10-23'te ana klasör ve yedi worktree `~/GitHub/`'dan `~/GitHub/Mozaikler/`'e elle
+taşınmıştı. Git'in kayıtları (`.git/worktrees/*/gitdir`) eski yolu gösterdiği için
+`git worktree list` yedisini "prunable" diye işaretledi. Bir `git worktree prune` onların
+kaydını silerdi ve klasörler git'e görünmez olurdu; birinde işlenmemiş değişiklik vardı.
+`scripts/linux-kur.sh` ana klasörü `$HOME/GitHub/Mozaik` diye sabit yazıyordu ve "yok"
+deyip çıkacaktı. Karşı önlem: klasör taşınınca önce ana klasörden
+`git worktree repair <yeni yollar>`, sonra `git worktree list`'te "prunable" kalmadığına
+bakılır, `prune` koşulmaz; sabit yol `git grep 'GitHub/Mozaik'` ile aranır.
+`src/linuxKur.test.ts` betiği sahte bir evde yeni yolla koşuyor, betiği eski yola döndüren
+mutasyon kırmızı.
+
 ## Çözücü ve kısıt motoru
 
 **Kural.** Kısıt mantığının tek evi `blocker()`, ve sürükleme, çözücü ve denetçi
@@ -1404,7 +1417,7 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Grup | Tuzaklar |
 |---|---|
 | Şema göçü ve veri kaybı | 4, 5, 6, 7, 11, 16, 28, 29, 30, 91, 97 |
-| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130 |
+| Dağıtım kimlikleri, tek kaynak ve sürüm | 32, 66, 69, 72, 73, 77, 78, 93, 95, 106, 126, 130, 152 |
 | Çözücü ve kısıt motoru | 21, 22, 26, 27, 75, 76, 98, 122, 134, 135, 137, 138, 139 |
 | Sürükleme, saf DOM ve React sınırı | 1, 2, 3, 9, 10, 13, 18, 19, 20, 46, 47, 55, 60, 85, 105, 117, 123, 136, 141 |
 | Düzen ölçümü ve hangi kutuya bakıldığı | 33, 34, 36, 37, 38, 39, 41, 48, 50, 61, 64, 70, 82, 100, 102, 107, 121, 140, 146 |
@@ -1419,6 +1432,6 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 151, yeni bir tuzak 152'den devam eder. Test stratejisi
+büyük kullanılan numara 152, yeni bir tuzak 153'ten devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

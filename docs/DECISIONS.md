@@ -35,6 +35,30 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-23 · Worktree'ler toplandı: ana klasör ve tek refactor worktree'si
+
+**Ne.** Kullanıcının kararı: worktree'lerin hepsi `~/GitHub/Mozaikler/` altında, sürekli
+iki tane: `Mozaik` (yalnız `main`, oturum yok) ve `Mozaik-refactor` (refactor turları, her
+tur `main`'den yeni bir dalda). Başka bir iş alanı kendi worktree'sini onların yanında açar,
+iş birleşince kaldırılır. Birleşmeye hazır yedi dal `birlestir/2026-10-23` dalında birer birer
+birleşti, her birinden sonra `npm run kontrol` yeşil, ve `main` ona ileri sarıldı:
+`fix/bos-acilis`, `bakim/agir-kilit`, `test/kapsam`, `ci/runner-sabitle`, `ozellik/zebra`,
+`ozellik/linux`, `refactor/program`. Bu birleştirmeyi kullanıcı bu iş için bıraktı;
+"dal `main`'e Alp'in onayıyla birleşir" kuralı değişmedi.
+
+**Birleşmeyenler**, hepsi origin'de duruyor: `test/gercek-ortam` (TP7 Windows'ta kırmızı,
+kendi TODO'su "bu hâliyle birleşmemeli" diyor, çünkü `yayinla` kırmızı bir `exe-windows`'u
+bekler; atası `test/kapsam` birleşti), `klasorleme` (2026-09-05, 337 commit geride, bugünkü
+paket turlarının yerine geçen eski bir deneme) ve üç Dependabot dalı.
+
+**Eski hâli.** Dokuz worktree `~/GitHub/`'da, her iş alanı ayrı (2026-10-09). Klasörler
+`~/GitHub/Mozaikler/`'e elle taşınınca yedisinin kaydı kırıldı (tuzak 152).
+
+**Belgeler.** Çatışan günlüklerde (WORKLOG, TESTFINDINGS, DECISIONS, TRAPS, CHANGELOG) iki
+taraf da tutuldu, en yeni üstte; iki dalın aynı numarayı verdiği tuzak 150 önce birleşen
+`bakim/agir-kilit`'te kaldı, `ozellik/linux`'unki 151 oldu. 2026-10-23 yönünün kendi
+kaydı hiçbir dalda yoktu ve sonraki turun işi.
+
 ### 2026-10-10 · Linux'ta günlük kopya Chrome'un app modunda, yalnız Chrome; rpm bırakıldı
 
 **Ne.** Kullanıcının Linux'taki Mozaik'i, `scripts/linux-kur.sh`'nin `~/GitHub/Mozaik`'in

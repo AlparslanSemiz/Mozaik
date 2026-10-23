@@ -49,11 +49,13 @@ bloğunda yazılı.
 
 ## Paralel oturumlar
 
-Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-10-09):
+Kalıcı cevaplar, gerekçeleri [docs/DECISIONS.md](docs/DECISIONS.md)'de (2026-10-09, worktree'lerin yeri 2026-10-23):
 
-- Paralel çalışan her iş alanı (özellik, refactor, belge-test-araç ya da başka bir şey)
-  kendi worktree'sinde ve dalında çalışır. Sayı o anki işe göre değişir, iş bitince
-  worktree kaldırılabilir. `~/GitHub/Mozaik` yalnız `main`'i tutar, orada oturum çalışmaz.
+- Sürekli iki worktree var, ikisi de `~/GitHub/Mozaikler/` altında: `Mozaik` yalnız
+  `main`'i tutar, orada oturum çalışmaz; `Mozaik-refactor` refactor turlarının, her tur
+  `main`'den açılan yeni bir dalda. Paralel çalışan başka bir iş alanı (özellik, düzeltme,
+  belge-test-araç ya da başka bir şey) kendi worktree'sini ve dalını onların yanında
+  `~/GitHub/Mozaikler/Mozaik-<iş>` olarak açar, iş birleşince worktree kaldırılır.
 - Dal kısa ömürlü, iş `main`'den açılan bir dalda yürür. Her commit'ten ve her ölçümden
   önce `main`'e bakılır, ilerlediyse `git merge main` ile alınır, rebase yapılmaz.
 - Push SSH ile ve açık refspec'le, yalnız kendi dalı: `git push origin <dal>`. Zorla push,

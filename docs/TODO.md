@@ -88,10 +88,15 @@ kaynağı senin kendi cümlen, rakip değil. Öteki her bölüm §1'den besleniy
 konmadı. Babanın geri bildirimi envanterin ön şartı değil, ikisi paralel yürüyor.
 Kayıt [DECISIONS.md](DECISIONS.md)'de.
 
-**Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ∥ zebra →
-sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
+**Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ve zebra
+`main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
 (önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
 Mutasyon parçaları (B7.24) test oturumunda.
+
+**Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
+(DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi);
+`test/gercek-ortam`'ın TP7'si (kullanıcının kararı); `klasorleme` ve Dependabot dalları
+birleşmedi.
 
 ---
 
