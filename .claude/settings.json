@@ -130,6 +130,29 @@
       "Bash(npx @claude-flow*)",
       "Bash(npx claude-flow*)",
       "mcp__claude-flow__*"
+    ],
+    "deny": [
+      "Bash(npm run yayinla)",
+      "Bash(npm run yayinla *)",
+      "Bash(node scripts/yayinla.mjs)",
+      "Bash(node scripts/yayinla.mjs *)",
+      "Bash(git tag)",
+      "Bash(git tag *)",
+      "Bash(git -C * tag *)",
+      "Bash(git push --tags)",
+      "Bash(git push --tags *)",
+      "Bash(git push * --tags)",
+      "Bash(git push * --tags *)",
+      "Bash(git push --follow-tags *)",
+      "Bash(git push * --follow-tags)",
+      "Bash(git push * --follow-tags *)",
+      "Bash(git push origin v*)",
+      "Bash(git push origin tag *)",
+      "Bash(git push * refs/tags/*)",
+      "Bash(git push *:refs/tags/*)",
+      "Bash(gh release create *)",
+      "mcp__claude-flow__terminal_execute",
+      "mcp__ruflo__terminal_execute"
     ]
   }
 }
