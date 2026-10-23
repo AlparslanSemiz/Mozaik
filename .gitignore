@@ -26,3 +26,17 @@ dist-exe/
 # aSc ekran görüntülerinin arşivi, elle üretiliyor ve depoya girmez
 docs/asc/**/*.zip
 blob-report/
+
+# Ruflo: yerel sırlar ve çalışma verisi. Depoya yalnız yapılandırması girer,
+# veritabanları, ölçümler ve bu makinenin yollarını taşıyan dosyalar girmez.
+.env
+.env.local
+.env.*.local
+.claude-flow/*
+!.claude-flow/.gitignore
+!.claude-flow/config.yaml
+!.claude-flow/CAPABILITIES.md
+.swarm/
+ruvector.db
+.claude/proven-config.json
+.claude/.proven-config-version
