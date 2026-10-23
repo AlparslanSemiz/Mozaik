@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l), ikisi de 2026-10-23'ten beri donduruldu | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -91,12 +91,12 @@ Kayıt [DECISIONS.md](DECISIONS.md)'de.
 **Özellik oturumunun sırası (2026-10-10, Alp):** Linux uygulaması (B7.28) ve zebra
 `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği, §0: daha az yazı, daha az soru) → yayın kapısı
 (önce D) → e-posta → Roboders ve Eyotek turları (§1) → Eyotek'e gönderme (B3.8).
-Mutasyon parçaları (B7.24) test oturumunda.
+Mutasyon parçaları (B7.24) haftalık koşunun işi, özelliği beklemez.
 
 **Birleştirme turunun açık işleri (2026-10-23, WORKLOG):** 2026-10-23 yönünün belgeleri
-(DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi);
-`test/gercek-ortam`'ın TP7'si (kullanıcının kararı); `klasorleme` ve Dependabot dalları
-birleşmedi.
+(DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların silinmesi)
+`surec-sadelestirme`'de yazıldı; `test/gercek-ortam`'ın TP7'si (kullanıcının kararı);
+`klasorleme` ve Dependabot dalları birleşmedi.
 
 ---
 
@@ -1255,6 +1255,10 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
 ### 8k · Refactor analizinin bıraktıkları (2026-10-08)
 
+**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Süren tur yoktu
+(`refactor/program` `main`'de), yeni paket turu açılmıyor. RF ve RK maddeleri açık kalır,
+bir RK özellik ya da düzeltme dalında aynı kuralla (gerileme testiyle) düzeltilebilir.
+
 Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
 altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
 Bulgular RF1 ile RF20 arası adını taşıyor (raporda R16, burada RF16), refactor dışı
@@ -1539,11 +1543,28 @@ koşusu, dosya başına tahmin.
 
 Kaynak 2026-10-09'un analizi (`test/kapsam`): rapor `scratch/test-plan/PLAN.md`'de, git
 dışında, ölçümleri ve betikleri yanında; özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü
-girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
-[DECISIONS.md](DECISIONS.md)'de (2026-10-09). Maddeler TP numarasını taşıyor, yolda çıkan
-ürün ve araç bulguları TB numarasını.
+girdisinde. Maddeler TP numarasını taşıyor, yolda çıkan ürün ve araç bulguları TB numarasını.
 
-**Yolda çıkan bulgular.** TB numaralı maddeler aşağıda (ayrı commit).
+**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Programın kararları (K1–K10) ve
+fazları o günkü hâlleriyle [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Test artık riske göre
+yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek bir birikim maddesi.
+
+- [ ] **TP-B Test programının kalanı (birikim).** Bir madde ancak test politikasının şart
+      koştuğu bir yolu (şema, göç, yedeğin açılması, dizme, güncelleme ve sürüm) koruyorsa
+      alınır, ve o zaman `main`'den açılan bir dalda. Öne çıkanlar: TP7 (Windows'ta gerçek
+      exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
+      Windows güncelleme testine en yakın olanlar. TP4'ün paket yolu fuzz'u TB8'in
+      düzeltmesiyle gelir. Geri kalanlar sırasız: TP5 (veri yolunun mutasyonu), TP6 (gerçek
+      paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
+      TP13 (uzun süre açık kalma), TP14 (zayıf makine vekili), TP15 (performans), TP16 ve TP17
+      (güvenlik), TP18 (metin bütçesi), TP19 (kabul), TP20 (bileşen katmanı), TP21
+      (mutasyon listesi), TP22 (kararsızlık), TP23 (erişilebilirlik tabanı), TP24 (kapsam
+      tabanı), TP25 (yazıcının paketi), TP26 (gerileme kapısı), TP27 (görsel regresyon),
+      TP28 (son kontrol). Her birinin o günkü tanımı arşivde.
+
+**Yolda çıkan bulgular.** TB numaralı maddeler, ürün kusuru oldukları için açık kalıyor.
+2026-10-23'ten beri bir düzeltme aynı dalda ve gerileme testiyle yapılır, "BİLİNEN KUSUR"
+testi o commit'te sıradan bir teste döner.
 
 - [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
       Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde

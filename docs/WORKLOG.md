@@ -31,33 +31,32 @@ program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te d
 geri bildirimi o denemeden geldi. Kayıtlar [DECISIONS.md](DECISIONS.md)'de, 2026-10-08
 ve 2026-10-09.
 
-**Çalışma düzeni (2026-10-09, yer 2026-10-23).** Sürekli iki worktree, ikisi de
-`~/GitHub/Mozaikler/`'de: `Mozaik` (`main`, oturum yok) ve `Mozaik-refactor` (refactor
-turları); başka bir iş alanı kendi worktree'sini ve dalını onların yanında açar ve iş
-birleşince kaldırır, "Şu an"ı birleşen dalın son commit'i yazar; ne zaman durulduğu ve rapor biçimi
-CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okunur, arşiv
-[TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de. Commit'ten önce `npm run hizli`; birleşmeden önce
-yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
-bir worktree'de ya da başka dalda tek cümleyle durur. Ağır bir komutun süre sınırı
-`scripts/agir.sh --sure <saniye>` ile verilir, dışarıdan `timeout` sarılmaz (tuzak 150).
+**Çalışma düzeni (2026-10-23, süreç sadeleşti, DECISIONS).** `~/GitHub/Mozaikler/Mozaik`
+yalnız `main`'i tutar, her iş kendi dalında ve yanındaki kendi worktree'sinde, "Şu an"ı
+birleşen dalın son commit'i yazar. Durma sebepleri beş (veri kaybı riski, Roboders'e ya da
+gerçek veriye yazmak, etiket ya da sürüm, geri alınamaz dış eylem, kullanıcının parası ya da
+hesapları), gerisi raporda "Aldığım kararlar". Test riske göre ([TESTPLAN.md](TESTPLAN.md),
+"Test politikası"): commit'ten önce yalnız `npm run hizli` ve dokunulan testler, tam
+doğrulama CI'da, mutasyon haftalık. Belge kapısı yalnız yapıyı ölçüyor. Oturum sonunda şart
+olan TODO ile bu dosya. `npm run yayinla` yalnız ana klasörde ve `main`'de koşar. Ağır
+komutlar `scripts/agir.sh` ile, süre sınırı `--sure <saniye>` (tuzak 150).
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
-davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
+turları ve test programı 2026-10-23'te donduruldu. Refactor'un vardığı yer: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
 paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi,
 `platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
-Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti, Faz 1'in TB8'e ve paket
-turlarına bağlı olmayan kısmı bitti; TB7 ve TB8 ikinci düzeltme dalında, `fix/veri-kaybi`
-girdiği için artık `main`'den açılabilir, TB8'in testini o dal yazar; paket yolunun fuzz'u
-TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
+Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
+TP-B birikim maddesi. TB7 ve TB8 (veri kaybı sınıfı) açık, düzeltmesi `main`'den açılan bir
+dalda gerileme testiyle.
 
 **Sıradaki iş.**
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
-   → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
-   oturumunda. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
+   → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları
+   haftalık koşunun işi. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
    `scripts/linux-kur.sh` `~/GitHub/Mozaikler/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
    kendi profili, yalnız Chrome; rpm bırakıldı. Kalan Alp'te: kurulum ve README'deki
    taşıma, klasör izninin yeniden açılışta geri gelmesi; Wayland'de görev çubuğu simgesi
@@ -83,23 +82,20 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 5. Rakip envanteri (TODO §1): Tur 0 ve Tur 0b bitti; Eyotek turunun araçları hazır
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
-6. Bir sürümden önce `npm run mutasyon`.
+6. Mutasyon haftalık (`haftalik.yml`), sürümü beklemez (DECISIONS 2026-10-23).
 7. Zebra (babanın 3 numaralı isteği) bitti, `ozellik/zebra`: `table.list` ve `table.stat`'ın
    çift satırı `--zebra`'da, listedeki girdiler kâğıtta (DESIGN Renk, `renk.spec.ts` 93).
    Form satırındaki ve varlık panelindeki dağılım düğmesi tarayıcının grisinde kaldı,
    koyu temada 4,53 (WORKLOG 2026-10-10 gece, zebra).
-8. Test programı (TODO §8l): Faz 2, `main`'den yeni bir dalda, sırayla TP6 (gerçek paket
-   fikstürü), kontratlar (TP9, TP10), TP7 (Windows'ta gerçek exe), TP8 (sürüm yükseltme),
-   TP12 (Brave). `yayinla` Windows E2E'yi bekliyor, yavaş süitlerin tek istisnası
-   (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu 26.04'ü haftada bir koşuyor.
-9. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
-   dallarda, `.claude/skills/paket-turu` ile; `platform/search` ve adım 4 bitti,
-   `fix/veri-kaybi` girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). RK15
-   (bir öğretmenin aynı saatte iki sınıfı) özellik dalının işi. Adım 2: RF3
-   (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
+8. Test programı donduruldu (TODO §8l, TP-B): bir madde ancak test politikasının şart
+   koştuğu bir yolu koruyorsa alınır, önce TP7, TP8 ve TP10 (güncelleme yolu). `yayinla`
+   Windows E2E'yi bekliyor (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu
+   26.04'ü haftada bir koşuyor.
+9. Refactor donduruldu (TODO §8k): yeni paket turu açılmıyor. RK15 (bir öğretmenin aynı
+   saatte iki sınıfı) özellik dalının işi.
 10. Birleştirme turunun açık işleri (2026-10-23, aşağıdaki girdi): 2026-10-23 yönünün
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
-   silinmesi) hiçbir dalda yoktu, sonraki turda yazılır. `test/gercek-ortam` (TP7 Windows'ta
+   silinmesi) `surec-sadelestirme`'de yazıldı. `test/gercek-ortam` (TP7 Windows'ta
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
    yalnız bir etiketle ya da elle derlemeyle sınanır.
@@ -140,8 +136,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
 | Birim testleri | 55 dosyada 1458 test (2026-10-23, birleştirme); `kontrol`'de 1457 geçti, 1'i bu makinede atlandı (`shellcheck` yok) | `npx vitest list`, `npm test` |
-| `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
-| CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
+| `npm run hizli` | 51 dosya, 1334 test, 7,4–9,8 s, temiz koşulda (2026-10-23 gece, `surec-sadelestirme`) | `npm run hizli` |
+| CI koşusu (`ci.yml`), push başına | yeşil, 6 dk 52 sn, en uzun iş `e2e (2)` 409 s, Playwright kurulumu her işte 8–14 s (2026-10-23 gece, `--with-deps` kalktıktan sonra); öncesi `main` 4a2901c'de 14 dk 28 sn, kurulum bir işte 597 s | `gh run view 40025191968`, `40019600457` |
 | Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
@@ -157,6 +153,46 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
 
 ---
+
+## 2026-10-23 gece · Süreç sadeleşti (`surec-sadelestirme`)
+
+Kullanıcının isteği: CLAUDE.md fazla kurallı, test her işi yavaşlatıyor, özellik işi
+hızlanmalı. Kayıt DECISIONS 2026-10-23'te.
+
+**Yapılan.** CLAUDE.md 147 satırdan 80'e. Durma sebepleri beş. TESTPLAN'da "Test politikası".
+Belge kapısı yalnız yapı: A2, A3, A4, A5, A6'nın sıradaki numara testi, A9'un TESTPLAN
+cümlesi, A10 ve A11'in tek satır şartı çıktı, A7 aynı dosyadaki `#çapa`'yı da okuyor, A12
+yeni (oturumun okuduğu bölümler). §8l'nin kararları ve fazları arşive, kalanı TP-B. Refactor
+turları donduruldu, süren tur yoktu. `paket-turu` becerisi yeni kurala göre.
+
+**Kanıtlar.** A7'nin aynı dosyadaki çapayı okuduğu: TRAPS'ın grup listesinde bir çapa
+bozulunca A7 kırmızı, geri alınınca yeşil (elle, kapı commit'inden önce). Küçülen kapının
+bozuk bağlantıyı yakaladığı: `scripts/mutasyon-kaniti.sh CLAUDE.md` ile `docs/DATA.md`
+bağlantısı `docs/DATA-yok.md` yapıldı, kontrol koşusu yeşil, mutant kırmızı ("hedef yok"),
+ağaç aynı.
+
+**CI ölçümü ve kararı.** `ci.yml` mutasyon, kapsam ya da yavaş süit beklemiyor, planın
+varsayımı çürüdü. Kritik yol `playwright install --with-deps`'in apt yarısı: `main`'in
+4a2901c koşusunda (40019600457, 14 dk 28 sn) en uzun iş `e2e (3)` 811 sn, bunun 597'si o adım
+(25,9 MB, 9 dk 38 sn, 44,9 kB/s), testin kendisi 196. `birlestir/2026-10-23`'te (40015418806,
+14 dk 40 sn) aynısı iki işte, 616 ve 681 sn. `ci.yml`'den `--with-deps` kalktı, `kanarya.yml`
+tutuyor. Sonrası (dalın c5e86ab koşusu, 40025191968): yeşil, 6 dk 52 sn; kurulum adımı her
+işte 8–14 sn, en uzun iş `e2e (2)` 409 sn, `denetim` 189 sn. Tek koşu: apt aynasının
+yavaşlığı koşudan koşuya değiştiği için kazancın tamamı bu sayı değil, kurulum adımının
+kritik yoldan çıktığı kesin.
+
+**`npm run hizli`, temiz koşulda** (prizde, `performance`, yük 1,11, `agir.sh` altında, üç
+koşu dönüşümlü): öncesi (`main`, 4a2901c, 1344 test) 12,7, 9,1, 9,7 sn; sonrası (bu dal,
+1334 test) 7,4, 9,8, 9,3 sn. Fark gürültünün içinde: çıkan on bir test toplamda bir saniyenin
+altındaydı.
+
+**Not.** Ana klasör `Mozaik`'te `package-lock.json` 23:07'de değişmiş (`version` 2.1.1 →
+2.2.0, `package.json` ile eşitleniyor). Bu oturum ana klasörde `npm` koşturmadı, değişikliğe
+dokunulmadı. `yayinla` temiz ağaç istediği için etiketten önce Alp'in kararı.
+
+**Koşulan.** `npm run hizli` her commit'ten önce (çıkış 0), `npx vitest run src/docs.test.ts`,
+`tsc --noEmit`, `eslint`, `knip`, `prettier --check`, `scripts/mutasyon-kaniti.sh` (kırmızı,
+beklenen), dalın CI'ı. **Koşulmayan.** `npm test`, E2E, `kontrol` yerelde (politika: CI'da).
 
 ## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
 
