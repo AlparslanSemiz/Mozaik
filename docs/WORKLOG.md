@@ -40,6 +40,8 @@ CLAUDE.md'de. Oturum başında TODO'nun yalnız §0'ı ve İÇİNDEKİLER'i okun
 yerelde `hizli`, tam doğrulama CI'da, uzun testler arkada (DECISIONS 2026-10-09). `npm run yayinla` yalnız ana klasörde ve `main`'de koşar,
 bir worktree'de ya da başka dalda tek cümleyle durur. Ağır bir komutun süre sınırı
 `scripts/agir.sh --sure <saniye>` ile verilir, dışarıdan `timeout` sarılmaz (tuzak 150).
+Ruflo (2026-10-23) yalnız bu depoda ve `npx -y ruflo@3.60.1` ile; etiket ve yayın Claude'a ve
+Ruflo'nun ajanlarına kapalı, daemon kendiliğinden başlamaz (CLAUDE.md, "Ruflo").
 
 **Yarım olan.** Kod yarım değil. Bekleyen her şey babada ya da kullanıcıda. Refactor
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
@@ -103,6 +105,9 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
    yalnız bir etiketle ya da elle derlemeyle sınanır.
+11. Ruflo (`ruflo/kurulum`, 2026-10-23, TODO B7.31): ilk etkileşimli oturumda `claude-flow`
+   MCP sunucusu onaylanır, bayraklı bekçi denemesini Alp kendi terminalinde koşar;
+   "Paralel oturumlar"ın tek checkout'a dönüp dönmeyeceği kullanıcıda (TODO §8a).
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -240,7 +245,10 @@ beri 52 dosya, ondan önce 51). `npx vitest run src/docs.test.ts src/ruflo.test.
 (`scripts/mutasyon-kaniti.sh --liste`, `agir.sh` altında) 12/12 kırmızı: daemon, funnel,
 güncelleme ve ilk açılış kapamaları, `git tag *` ve `yayinla *` kuralları, iki adın
 `terminal_execute`'u, bekçiyi açan bir allow, milisaniye süre, `ruflo@latest` ve MCP'nin
-env'i. **Koşulmayan:** Windows E2E, WebKit, mutasyonun tamamı, bayraklı bekçi denemesi.
+env'i. `scripts/agir.sh npm run kontrol` çıkış 0: vitest 56 dosya, 1472 test; Playwright
+640, site 24, çözücü 7; size-limit sınırın altında (1.16 MB ve 280.49 kB brotli), ve
+`main`'e karşı pakete giren hiçbir dosya değişmedi (`src`'de yalnız `src/ruflo.test.ts`,
+`package.json`, kilit dosyası ve `.size-limit.json` aynı). **Koşulmayan:** Windows E2E, WebKit, mutasyonun tamamı, bayraklı bekçi denemesi.
 
 **Geri alma.**
 - Birleşmeden önce: `git worktree remove ~/GitHub/Mozaikler/Mozaik-ruflo` (gerekirse
