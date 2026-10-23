@@ -53,8 +53,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    girdi, `ci/runner-sabitle` yayın kapısından önce girer. Sonra yayın kapısı dalı
    (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
-   → mutasyon parçaları (arkada) → zebra → Roboders ve Eyotek canlı turları → Linux
-   uygulaması. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
+   → mutasyon parçaları (arkada) → zebra (bitti) → Roboders ve Eyotek canlı turları → Linux
+   uygulaması; özellik oturumunun 2026-10-10 akşamki sırası TODO'nun İÇİNDEKİLER'inde. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
    günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
    **`fix/bos-acilis` (TODO B7.30) yayın kapısının ön şartı:** açılışta boş okunan plan,
    anahtarı doluysa üstüne yazılmıyor.
@@ -77,8 +77,10 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    (`--hedef eyotek`, zorunlu `--alan`, kanıtı mutasyonla). Roboders'in ve Eyotek'in
    canlı yarısı kullanıcının "başla" demesini bekliyor. 1 ile paralel, onun ön şartı değil.
 6. Bir sürümden önce `npm run mutasyon`.
-7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
-   tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
+7. Zebra (babanın 3 numaralı isteği) bitti, `ozellik/zebra`: `table.list` ve `table.stat`'ın
+   çift satırı `--zebra`'da, listedeki girdiler kâğıtta (DESIGN Renk, `renk.spec.ts` 93).
+   Form satırındaki ve varlık panelindeki dağılım düğmesi tarayıcının grisinde kaldı,
+   koyu temada 4,53 (WORKLOG 2026-10-10 gece, zebra).
 8. Test programı (TODO §8l): Faz 2, `main`'den yeni bir dalda, sırayla TP6 (gerçek paket
    fikstürü), kontratlar (TP9, TP10), TP7 (Windows'ta gerçek exe), TP8 (sürüm yükseltme),
    TP12 (Brave). `yayinla` Windows E2E'yi bekliyor, yavaş süitlerin tek istisnası
@@ -115,8 +117,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 632 test, 33 dosya (2026-10-09 gece, `test/kapsam`) | `npx playwright test --list` |
-| Site, sunucu, klasör | 3 dosyada 23 test (2026-10-09 gece) | `--config playwright.site.config.ts --list` |
+| Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
+| Site, sunucu, klasör | 3 dosyada 23 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 40 (2026-10-09 gece) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
@@ -205,6 +207,38 @@ işaret eden yorum, Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulan
 `surum.yml`'i, ilk hafta sonu `haftalik.yml`'i sınar. `windows.yml` ilk `main` push'unda.
 
 ---
+
+## 2026-10-10 (gece) · Zebra satırlar, `ozellik/zebra` dalı
+
+**Başlangıç.** `main` 60e1b33. `ozellik/zebra` dalı `main`'in gerisindeydi ve kendi commit'i
+yoktu, ileri sarıldı. Tanım kullanıcıdan (2026-10-10): tek kural, açık temada `--paper-sunk`,
+koyuda yeni token #1d2127, listedeki girdiler kâğıt zeminli ve kenarlı.
+
+**Ne yapıldı** (dal commit'i konusuyla): "Özellik: listelerde zebra, çift satır --zebra
+zemininde, girdiler kâğıtta". `--zebra` üç yerde: açık (`var(--paper-sunk)`), koyu
+(#1d2127), baskı (#ffffff). Kural üzerine gelme kuralının hemen üstünde ve aynı özgüllükte
+(0,2,3). Listedeki metin ve sayı girdisi, `select` ve `.split-pick` kâğıt zeminli ve `--line`
+kenarlı, hover kenarı `--line-dark`; seçim (`--hairline` yerine `--line`) DESIGN'ın düğme
+gerekçesiyle aynı: gömük yüzey gidince kenar tek sınır. `.split-pick` yalnız listede değişti.
+DESIGN.md'de aday Renk'te kural oldu, token tablosu ve iki primitif satırı güncellendi.
+
+**Ölçülenler** (boyanan renklerden, açık / koyu). Zebrada `--text` 15,96 / 13,75, sıra
+numarası (`--muted`) 6,65 / 7,55. Listedeki `.split-pick` 17,47 / 14,99; form satırındaki
+(değişmedi) 15,19 / 4,53. Zebra ile kâğıt ΔE 4,64 / 3,99, zebra ile üstüne gelinen satır
+ΔE 11,15 / 12,63. `npm run ekran` önce ve sonra: 38 görüntünün 23'ü değişti, hepsi liste ya da
+stat taşıyan sahne; ızgara, Müsaitlik, Program, palet ve önizleme birebir aynı. İki "önce"
+koşusu arasındaki gürültü yalnız `light-8-cikti` (930 piksel). `light-5-suruklerken`'de
+kararlı 9 piksellik fark (TESTFINDINGS). Tablolar, görüntüler ve zebra almayan bileşenlerin
+listesi `scratch/zebra/rapor.md`'de.
+
+**Koşulan testler.** `npm run hizli` (1280/1280), `tipler`, `e2e` tsc. `renk.spec.ts` 93 iki
+temada. Beş mutasyon `scripts/mutasyon-kaniti.sh --liste` ile, beşi kırmızı: kuralı sil, sırayı
+ters çevir, koyu token kâğıt, açık token `--band`, girdinin kâğıt zeminini sil. Etkilenebilecek
+on E2E dosyası (renk, erişilebilirlik taraması, liste, kurulum, dersler, renk seçici, ayarlar,
+kontrol, görünüm, sıra) 246/246. `npm run ekran` dört kez (iki önce, iki sonra). Dalın ilk
+CI'ı 38087079147 yeşil.
+
+**Koşulmayan testler.** `kontrol` (CI'da), Windows, WebKit, `mutasyon`.
 
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 

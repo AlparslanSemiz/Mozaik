@@ -39,6 +39,14 @@ kalıcı yapıyor). Korumasız kod hata enjeksiyonuyla planı boşla değiştiri
 Ne yapıldı: `fix/bos-acilis`, TODO B7.30. D maddesiyle (0/21 branş) aynı şey değil.
 Kalıcı kural: TRAPS.md, tuzak 108'e ek.
 
+### 2026-10-10 · `npm run ekran` (`ozellik/zebra`, zebra commit'inden sonra) · `light-5-suruklerken`
+Bulgu: zebra değişikliğinden sonra sürükleme sahnesinde 9 piksel farklı, hepsi havuzdaki
+sürüklenen kartın 57×58'lik kutusunun kenarında, en çok 17/255 kanal farkı. İki "önce"
+koşusu arasında bu sahne birebir aynıydı, iki "sonra" koşusunda da fark aynı, yani kararlı.
+Değişen kuralların hiçbiri bu öğeye ulaşmıyor.
+Tür: ölçüm notu (kenar yumuşatması, görünür değişiklik değil).
+Ne yapıldı: incelendi, düzeltme yok.
+
 ### 2026-10-09 · `npx vitest run src/fuzz.test.ts`, ilk koşular · "Dosyadan aç" ve Excel yapıştırması
 Bulgu: (1) `readPlanFile` bozulan dosyaların %2–5'inde `TypeError` atıyor (`reading 'trim'`,
 `'weeklyHours'`, `'id'`; en küçüğü `lessons[0] = null`), `App.tsx`'in `fileChosen`'ı yakalamıyor.

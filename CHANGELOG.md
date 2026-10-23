@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Changed
+
+- Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.
+
 ### Fixed
 
 - A page that reads its storage as empty when it opens no longer saves that empty plan over the plan that is saved there. This was seen once, after a reload of the HTML file: the plan came up empty and would have been replaced 0.4 seconds later. Such a page now writes nothing over the saved plan and says so in a red strip, with a Reload button.

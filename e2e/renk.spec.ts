@@ -9,6 +9,8 @@ import {
   openWithSample,
   openSetup,
   openSettings,
+  openLessons,
+  mainList,
   dragAndDrop,
   rgb,
   relativeLuminance,
@@ -777,6 +779,122 @@ test.describe('80. Bölüm şeridi', () => {
           `${theme} ${section}: ${contrast(m.strip, m.under).toFixed(2)}`,
         ).toBeGreaterThanOrEqual(3.5);
       }
+    });
+  }
+});
+
+// 93. Zebra rows
+//
+// The reader asked for it in his own words: rows in a list one after another
+// on slightly different grounds, the same in every list, without losing any
+// contrast. One rule paints every second row of `table.list` and `table.stat`
+// with one token, and three things can quietly undo it, which is what this
+// measures rather than claims: the rule being gone, the hover rule losing to
+// it (both are (0,2,3), so only their ORDER decides), and the token pointing
+// at the wrong colour. Read off the painted rows, not off the stylesheet.
+test.describe('93. Listelerde zebra', () => {
+  const ground = (row: import('@playwright/test').Locator) =>
+    row.evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`${theme} temada çift satır zebrada, üstüne gelinen satır zebrayı eziyor`, async ({
+      page,
+    }) => {
+      await openWithSample(page);
+      if (theme === 'dark') await page.getByRole('button', { name: 'Koyu tema' }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+      const t = await tokens(page, [
+        '--zebra',
+        '--paper',
+        '--paper-sunk',
+        '--bg',
+        '--text',
+        '--muted',
+        '--line',
+      ]);
+
+      // The token itself. Light borrows the input recess; dark has a ground of
+      // its own, one step LIGHTER than the paper (the dark recess is darker).
+      if (theme === 'light') expect(t['--zebra']).toBe(t['--paper-sunk']);
+      else expect(t['--zebra']).toBe('rgb(29, 33, 39)');
+      expect(t['--zebra']).not.toBe(t['--paper']);
+      for (const ink of ['--text', '--muted'] as const) {
+        expect(contrast(t[ink]!, t['--zebra']!), `${ink} on --zebra`).toBeGreaterThanOrEqual(4.5);
+      }
+
+      // table.list: the first row keeps the panel's paper, the second is zebra.
+      await openSetup(page, 'Öğretmenler');
+      const rows = mainList(page).locator('tbody tr');
+      await expect(rows).toHaveCount(25);
+      expect(await ground(rows.nth(0))).toBe('rgba(0, 0, 0, 0)');
+      expect(await ground(rows.nth(1))).toBe(t['--zebra']);
+      expect(await ground(rows.nth(2))).toBe('rgba(0, 0, 0, 0)');
+
+      // The ink actually painted on a zebra row, not the token's promise.
+      const no = await rows
+        .nth(1)
+        .locator('td.row-no')
+        .evaluate((el) => getComputedStyle(el).color);
+      expect(contrast(no, t['--zebra']!), 'sıra numarası zebrada').toBeGreaterThanOrEqual(4.5);
+
+      // The fields on a zebra row stay paper, with an edge of their own: a
+      // recess the same colour as the row it sits in is not a box any more.
+      const fields = await rows
+        .nth(1)
+        .locator('input[type="text"], input[type="number"], select')
+        .evaluateAll((els) =>
+          els.map((el) => {
+            const s = getComputedStyle(el);
+            return {
+              background: s.backgroundColor,
+              style: s.borderTopStyle,
+              width: parseFloat(s.borderTopWidth),
+              edge: s.borderTopColor,
+            };
+          }),
+        );
+      expect(fields.length).toBeGreaterThan(0);
+      for (const f of fields) {
+        expect(f.background, 'girdi zebrada kâğıt zeminli').toBe(t['--paper']);
+        expect(f.style).toBe('solid');
+        expect(f.width).toBeGreaterThanOrEqual(1);
+        expect(f.edge, 'girdinin kenarı').toBe(t['--line']);
+      }
+
+      // The row under the pointer wins over the zebra, on a zebra row.
+      await rows.nth(1).locator('td.row-no').hover();
+      await expect.poll(() => ground(rows.nth(1))).toBe(t['--bg']);
+      await page.mouse.move(0, 0);
+      await expect.poll(() => ground(rows.nth(1))).toBe(t['--zebra']);
+
+      // table.stat: the same rule, the same token.
+      await page.getByRole('button', { name: 'Kontrol', exact: true }).click();
+      const stat = page
+        .locator('.panel', { has: page.getByRole('heading', { name: 'Programın durumu' }) })
+        .locator('table.stat tbody tr');
+      expect(await stat.count()).toBeGreaterThanOrEqual(2);
+      expect(await ground(stat.nth(0))).toBe('rgba(0, 0, 0, 0)');
+      expect(await ground(stat.nth(1))).toBe(t['--zebra']);
+      await stat.nth(1).hover();
+      await expect.poll(() => ground(stat.nth(1))).toBe(t['--bg']);
+      await page.mouse.move(0, 0);
+
+      // The split picker was the one control in a list on the browser's own
+      // grey (4.53 in the dark theme, by a hair). On a zebra row it is paper
+      // like the fields beside it, and its text clears AA on its own ground.
+      await openLessons(page, 'all');
+      const pick = page.locator('table.list tbody tr:nth-child(even) .split-pick').first();
+      await expect(pick).toBeVisible();
+      const p = await pick.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { ink: s.color, background: s.backgroundColor, edge: s.borderTopColor };
+      });
+      expect(p.background, 'dağılım düğmesi zebrada kâğıt zeminli').toBe(t['--paper']);
+      expect(p.edge).toBe(t['--line']);
+      expect(contrast(p.ink, p.background), 'dağılım düğmesinin yazısı').toBeGreaterThanOrEqual(
+        4.5,
+      );
     });
   }
 });
