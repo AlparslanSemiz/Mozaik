@@ -87,7 +87,9 @@ describe('yayın bekçisi: etiket ve yayın Claude’a kapalı', () => {
   });
 
   it('hiçbir izin kuralı bekçinin kapattığını açmıyor', () => {
-    const opened = settings.permissions.allow.filter((rule) => /yayinla|git tag|git push|gh release/.test(rule));
+    const opened = settings.permissions.allow.filter((rule) =>
+      /yayinla|git tag|git push|gh release/.test(rule),
+    );
     expect(opened).toEqual([]);
   });
 });
