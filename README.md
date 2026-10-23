@@ -77,10 +77,10 @@ installed the launcher says so and stops, because any other browser would
 open an empty store.
 
 ```sh
-~/GitHub/Mozaik/scripts/linux-kur.sh   # install, and again for every update
+~/GitHub/Mozaikler/Mozaik/scripts/linux-kur.sh   # install, and again for every update
 ```
 
-It builds from `~/GitHub/Mozaik` and refuses unless that checkout is on `main`
+It builds from `~/GitHub/Mozaikler/Mozaik` and refuses unless that checkout is on `main`
 and clean. Mozaik then appears among the applications.
 
 **Coming from the site in Chrome?** The new copy starts empty; the plans move

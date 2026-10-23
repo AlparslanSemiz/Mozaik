@@ -783,7 +783,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       seçici açıldı, Brave'de iki yolda da yok. VK1: aynı profilde iki `--app` penceresi,
       A örneği yükleyince B'de "başka bir pencerede" şeridi, A'da yok (iki tarayıcı).
       Alp'in bugünkü verisi Chrome'un Default profilinde, site origin'inde; Brave'de yok.
-      **Yapılan (`ozellik/linux`):** `scripts/linux-kur.sh` (yalnız `~/GitHub/Mozaik`'in temiz
+      **Yapılan (`ozellik/linux`):** `scripts/linux-kur.sh` (yalnız `~/GitHub/Mozaikler/Mozaik`'in temiz
       `main`'inden, kopya, commit kaydı, `mozaik.desktop`) ve `scripts/linux-mozaik.sh`
       (yalnız `google-chrome`, kendi profili, profile dokunmuyor), testleri
       `src/linuxKur.test.ts`, 13 mutasyonla kanıtlı; taşıma `e2e/linux-tasima.spec.ts`

@@ -1,5 +1,5 @@
 // The Linux install script and its launcher (TODO B7.28), run for real in a
-// home directory made up for each test. Nothing here touches ~/GitHub/Mozaik
+// home directory made up for each test. Nothing here touches ~/GitHub/Mozaikler/Mozaik
 // or ~/.local/share/mozaik: the scripts read $HOME, and $HOME is a temporary
 // folder holding a small git repository in the place of the real checkout.
 //
@@ -61,12 +61,12 @@ function paket(icerik: string): string {
 }
 
 /**
- * A stand-in for ~/GitHub/Mozaik: on main, clean, with the two files the
+ * A stand-in for ~/GitHub/Mozaikler/Mozaik: on main, clean, with the two files the
  * script copies from it, and a node_modules newer than the lock so that
  * `npm ci` is not run.
  */
 function depo(ev: string, icerik = '<!doctype html><title>Mozaik</title>v1'): string {
-  const d = join(ev, 'GitHub', 'Mozaik');
+  const d = join(ev, 'GitHub', 'Mozaikler', 'Mozaik');
   mkdirSync(join(d, 'scripts'), { recursive: true });
   mkdirSync(join(d, 'site'), { recursive: true });
   mkdirSync(join(d, 'node_modules'), { recursive: true });

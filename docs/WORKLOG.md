@@ -56,7 +56,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
    → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
    oturumunda. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
-   `scripts/linux-kur.sh` `~/GitHub/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
+   `scripts/linux-kur.sh` `~/GitHub/Mozaikler/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
    kendi profili, yalnız Chrome; rpm bırakıldı. Kalan Alp'te: kurulum ve README'deki
    taşıma, klasör izninin yeniden açılışta geri gelmesi; Wayland'de görev çubuğu simgesi
    ölçülmedi. Düzeltmelerde RK14 (bozuk arama
