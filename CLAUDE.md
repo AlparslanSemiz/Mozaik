@@ -77,4 +77,4 @@ Sonda tek rapor, altı ila sekiz satır: (1) bitti: commit konuları ve doğrula
 
 ## Oturum sonu
 
-Şart olan iki şey: TODO.md (biten işaretlenir, sıradaki yazılır) ve WORKLOG'un "Şu an"ı ile tarihli girdisi. CHANGELOG'un Unreleased bloğu yalnız kullanıcıya görünen bir değişiklikte. TRAPS, DECISIONS ve TESTFINDINGS yalnız gerçek bir içerik çıktıysa. Bir kod değişikliği bir belge cümlesini yanlış yapıyorsa o cümle aynı commit'te düzeltilir.
+Şart olan iki şey: TODO.md (biten işaretlenir, sıradaki yazılır) ve WORKLOG'un "Şu an"ı ile tarihli girdisi. Doğrulanmamış hiçbir şey bitti işaretlenmez, onun yerine "yazıldı, doğrulanmadı" yazılır. CHANGELOG'un Unreleased bloğu yalnız kullanıcıya görünen bir değişiklikte. TRAPS, DECISIONS ve TESTFINDINGS yalnız gerçek bir içerik çıktıysa. Bir kod değişikliği bir belge cümlesini yanlış yapıyorsa o cümle aynı commit'te düzeltilir.
