@@ -1585,16 +1585,15 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       (BİLİNEN KUSUR, TB7); ikisi de sayfanın saatini durdurup bekleyen yazımı önce doğruluyor,
       ikisi de mutasyonla kanıtlı. Exe'de pencereyi kapatmanın WebDriver yolu yok
       (`plugin:window|close not allowed by ACL`): exe'nin yarısı elle.
-- [~] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
+- [x] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
       ya ret ya tutarlı plan, asla istisna. `npm test`'te kısa, gece uzun. Kullanıcı bu fazda
       istedi, yani pure turundan önce bugünkü yollarla yazılır; tur yolları taşır.
       **Yapıldı (`src/fuzz.test.ts`):** "Dosyadan aç" üç kaynakta (bozulan dosya ya ret ya
       bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
       okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
-      kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). **Kalan:** paket yolu
-      (`parseBundle` ve arkasındaki `parseState`). **Bekler: TB8'in düzeltmesi ve sıra 6**
-      (kullanıcının kararı, 2026-10-10); TB8'in kendi testini düzelten dal yazar. Dosya sıra
-      6'da (`pure/io`) taşınır, yolları o tur değiştirir.
+      kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). Paket yolu (`readBundlePlans`)
+      TB8'in düzeltmesiyle geldi (2026-10-23, `tb8-eksik-plan`): bozuk planın yanındaki tam
+      plan hep açılıyor, dört listeden biri olmayan plan açılmıyor.
 - [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
       Stryker listesine. **Bekler: sıra 4** (`platform/storage`: `useStore`, `usePlans`,
       `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
@@ -1711,7 +1710,7 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       ikinci bir düzeltme dalında. O dal `fix/veri-kaybi` `main`'e birleşir birleşmez
       `main`'den açılır, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda dokunmamalı.
       `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da aynı kalmalı.
-- [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
+- [x] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
       (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
       da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
       paket yolu (`usePlans.ts`'in `replaceLibrary`'si) her planı çıplak `parseState` ile
@@ -1726,6 +1725,12 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       `main`'den açılan. **Testini o dal yazar**, test dalı yazmaz. TP4'ün paket yolu fuzz'u
       bu düzeltmeyi ve sıra 6'yı bekler.
 
+      **Düzeltildi (2026-10-23, `tb8-eksik-plan`):** paketteki her plan `readPlanFile`'ın
+      kuralıyla okunuyor (`readBundlePlans`); eksik, bozuk ya da istisna atan plan açılmıyor
+      ve buradaki aynı kimlikli plan kalıyor; hiçbir plan okunamıyorsa soru sorulmuyor ve
+      hiçbir şey değişmiyor; onay sorusu açılmayacak planları sayıyor. Testleri
+      `src/storeContract.test.ts` ve `e2e/planlar.spec.ts` (ikisi de önce kırmızı) ile
+      `src/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi.
 ## §9. Ham notlar
 
 [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de, §9 başlığı altında. Yeni bir ham not oraya, sonuna eklenir.

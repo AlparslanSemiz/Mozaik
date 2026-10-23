@@ -47,9 +47,8 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
 Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti, Faz 1'in TB8'e ve paket
-turlarına bağlı olmayan kısmı bitti; TB7 ve TB8 ikinci düzeltme dalında, `fix/veri-kaybi`
-girdiği için artık `main`'den açılabilir, TB8'in testini o dal yazar; paket yolunun fuzz'u
-TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
+turlarına bağlı olmayan kısmı bitti; TB8 düzeldi (2026-10-23, `tb8-eksik-plan`), paket
+yolunun fuzz'u onunla geldi; TB7 açık; TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
@@ -121,9 +120,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 - Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
   açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
   üretilemedi; açılıştaki plan listesi yazımı ve klasör kapısının testi açık.
-- Test programının bulguları (TODO §8l): "Tümünü dosyadan aç" eksik planı boş plan olarak
-  açıyor (TB8, veri kaybı sınıfı, ikinci düzeltme dalında); `readPlanFile` bozuk dosyada
-  istisna atıyor (TB1); eksi ve sınırsız haftalık saat kabul ediliyor (TB6, TB9);
+- Test programının bulguları (TODO §8l): `readPlanFile` bozuk dosyada istisna atıyor (TB1,
+  paket yolunda yakalanıyor, üst çubukta hâlâ değil); eksi ve sınırsız haftalık saat kabul ediliyor (TB6, TB9);
   `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
@@ -155,6 +153,38 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+
+---
+
+## 2026-10-23 gece · TB8: "Tümünü dosyadan aç" eksik planı açmıyor (`tb8-eksik-plan`)
+
+**Önce kırmızı.** `src/storeContract.test.ts`'e iki test (v16 fikstüründen bir liste
+silinmiş plan): eksik plan `ok: 1` ile açıldı; eksik ve tam plan yan yana `ok: 2`.
+`e2e/planlar.spec.ts`'e bir E2E: indirilen paketin öğretmen listesi silinip verilince
+"1 plan açıldı.". Gerçek veri yok, yalnız fikstür ve Playwright'ın geçici profili.
+
+**Çare.** `readBundlePlans` (`parseState.ts`): her plan `readPlanFile`'ın kuralıyla, istisna
+atan plan (TB1) okunamayan sayılıyor. `replaceLibrary` eksik ya da bozuk planı açmıyor ve
+buradaki aynı kimlikli planı silmiyor. `Data.tsx` onaydan önce okuyor: hiçbir plan
+okunamıyorsa soru yok ve hiçbir şey değişmiyor; onay ve sonuç cümlesi açılmayan planları
+sayıyor, dört sözlükte. Şema değişmedi, göç gerekmedi.
+
+**Kanıtlar.** İki testin ve E2E'nin yeşili; `fuzz.test.ts`'e paket yolu (TP4'ün kalanı).
+`mutasyon-kaniti.sh`: okuyucu çıplak `parseState`'e dönünce üç test kırmızı, buradaki planı
+koruyan koşul kalkınca bir test kırmızı, ağaç ikisinde de aynı. Eski yedekler:
+`fixtures.test.ts` 296/296, `linux-tasima.spec.ts` (site, paket gidiş-dönüşü) yeşil, `planlar.spec.ts`
+22/22. Ekran görüntüsü 1920×1080: onay sorusu ve sonuç notu `scratch/tb8-ekran/`'de,
+"1. plan" 25 öğretmeniyle yerinde kaldı. CI 40029577387 yeşil, 6 dk 56 sn.
+
+**Yorum kararı.** "Eksik plan her geçerli parçasını tutar" plan düzeyinde okundu: paketteki
+her okunabilir plan bütün parçalarıyla açılıyor; listesi eksik bir plan yarım açılmıyor,
+çünkü `sanitize` eksik öğretmen listesinde dersleri ve yerleşimleri de düşürüyor, yani
+yarım açmak dosyanın geçerli parçalarını da kaybederdi.
+
+**Koşulan.** `hizli`, `tipler`, `lint`, `knip`, `sinir`, biçim, beş birim dosyası, iki E2E
+spec'i ve ekran betiği kilit altında, iki mutasyon, CI. **Koşulmayan.** Tam E2E yerelde,
+exe (köprü değişmedi; politika: CI'da).
 
 ---
 
