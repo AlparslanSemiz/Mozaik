@@ -26,6 +26,7 @@ import {
   writeHandle,
 } from './folder';
 import { writesClosed } from './otherWindow';
+import { mayWritePlan } from './libraryStore';
 import type { Library } from '../pure/library';
 import { collectStates } from './download';
 import { searchLog } from './search';
@@ -90,8 +91,10 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
   const write = useCallback(async (handle: FileSystemDirectoryHandle) => {
     // Another window changed the data: its copy is the newer one, and this
     // window's would overwrite the folder with what it read before (VK1).
-    if (writesClosed()) return;
+    // And an open plan that read empty at startup while its key is full now
+    // would put an empty plan in today's file (libraryStore.ts, `mayWritePlan`).
     const { library: lib, planId: id, present: now, rescue: kurtar } = latest.current;
+    if (writesClosed() || !mayWritePlan(id)) return;
     const text = buildBundle(lib, collectStates(lib, id, now), searchLog());
     const when = new Date();
     // Listing the directory is real I/O; only do it when the day turned over,

@@ -26,6 +26,19 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-10 · `ci.yml` 38085275289 (`bakim/agir-kilit`, a748250; uygulama kodu `main` 60e1b33) · `kurulum.spec.ts:716`, "seçilen cinsiyet YENİLEMEDEN sonra da duruyor"
+Bulgu: yenilemeden sonra öğretmen satırı yok, plan bütünüyle boş ("1. plan", Branşlar 0).
+İzde yenilemeden önce `ders-programi` dolu (27 823 karakter, değişiklik inmiş); yenileme son
+yazımdan ~130 ms sonra. Branşlar 0, anahtarın açılışta hiç okunmadığını söylüyor (okunsaydı
+`parseState` 21 branş koyardı); `addInitScript` yoktu. Yeniden üretilemedi: bu makinede gerçek
+test karışık sırayla main 0/380, 135d097 0/380 (2 çekirdeğe kısılmış 150 dahil), yeniden
+yükleme gecikmeli prob 0/160 ve 0/160; runner'da ubuntu-24.04 0/300, windows-latest 0/100.
+CI geçmişinde 76 koşuda bir; `retries` yok.
+Tür: ürün kusuru adayı (tetikleyici tarayıcıda, sonucu üründe: boş açılışı otomatik kayıt
+kalıcı yapıyor). Korumasız kod hata enjeksiyonuyla planı boşla değiştiriyor (E2E mutasyonu).
+Ne yapıldı: `fix/bos-acilis`, TODO B7.30. D maddesiyle (0/21 branş) aynı şey değil.
+Kalıcı kural: TRAPS.md, tuzak 108'e ek.
+
 ### 2026-10-09 · `ci.yml` 37976328335 (`fix/veri-kaybi`, 2a899c9) · `iki-kopya.spec.ts`, iki sekmenin açılışı
 Bulgu: yeni VK1 kilidi CI'da ilk sekmeyi, daha örnek yüklenmeden kilitledi (iki test, A'da
 "başka bir pencerede" şeridi). Yerelde yeşildi, çünkü ikinci sekme ilkinin açılış

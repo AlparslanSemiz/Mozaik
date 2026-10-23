@@ -780,6 +780,23 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
       ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. Kapandı: dalın iki CI koşusunda yeşil
       (37929711747, 37930611648), RPC zaman aşımı yok.
+- [~] **B7.30 Boş açılış: yenilenen sayfa depoyu boş okuyup planın üstüne yazabiliyor (2026-10-10).**
+      CI 38085275289'da (`kurulum.spec.ts:716`) yenilemeden sonra plan boş açıldı: yenilemeden
+      önce `ders-programi` doluydu, açılışta hiç okunmadı (Branşlar 0, `emptyState`), ve
+      otomatik kayıt 400 ms sonra boş planı onun üstüne yazar (TESTFINDINGS 2026-10-10).
+      Yeniden üretilemedi: bu makinede 1 230 denemede, CI runner'ında ubuntu-24.04'te 0/300 ve
+      windows-latest'te 0/100 (geçici dal, silindi); geçmişte 76 koşuda bir. `fix/bos-acilis`
+      dalında (Alp'in kararı, yayın kapısının ön şartı): açılışta boş okunan plan işaretli,
+      işaretliyken her yazımdan önce anahtar yeniden okunuyor; boşsa ilk kullanım, yazılıyor
+      ve işaret kalkıyor; doluysa yazılmıyor, silinmiyor, klasöre de yazılmıyor ve kırmızı
+      şerit "Kayıtlı plan açılışta okunamadı. Üzerine yazılmadı." diyor. Birim (5), hata
+      enjeksiyonlu E2E (2) ve mutasyon kanıtı (birim 6/6, E2E 4/4 kırmızı).
+      **Kalan:** klasör kapısının testi yok (`useFolder`'ın hiç testi yok; bozması yeşil
+      kalıyor, VK1'in klasör kapısı da öyle). Açılıştaki `writeLibrary` aynı boş okumada
+      varsayılan tek planlı listeyi yazar, birden çok planı olan birinin listesi düşer (planların
+      anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
+      yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
+      üretilemedi.
 
 ---
 

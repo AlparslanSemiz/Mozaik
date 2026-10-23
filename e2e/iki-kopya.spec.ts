@@ -9,12 +9,26 @@
 //
 // VK2: with the storage full the autosave failed and the page said "Örnek veri
 // yüklendi." over it. Now the failure is a red strip.
+//
+// And an empty start: a reloaded page under file:// once read the storage empty
+// (CI 38085275289, TRAPS 108) and the autosave wrote the empty plan over the
+// saved one. Now a plan read empty at startup is read again before each write.
 
 import { expect, test, type Page } from '@playwright/test';
-import { FILE, answerDialog, mainList, open, openSetup, savedText, settledText } from './helpers';
+import {
+  FILE,
+  addSubjects,
+  answerDialog,
+  mainList,
+  open,
+  openSetup,
+  savedText,
+  settledText,
+} from './helpers';
 
 const BASKA = '.save-warning:has-text("başka bir pencerede")';
 const DOLU = '.save-warning:has-text("kaydedilemedi")';
+const OKUNAMADI = '.save-warning:has-text("açılışta okunamadı")';
 
 async function ornekYukle(page: Page) {
   await page.getByRole('button', { name: /Örnek veriyle doldur/ }).click();
@@ -137,5 +151,57 @@ test.describe('kota · kaydedilemeyen değişiklik ekranda söyleniyor (VK2)', (
     await page.keyboard.press('Control+y');
     await expect.poll(() => savedText(page), { timeout: 5_000 }).toContain('Örnek Kurs');
     await expect(page.locator(DOLU)).toHaveCount(0);
+  });
+});
+
+test.describe('boş açılış · kayıtlı plan üzerine yazılmıyor', () => {
+  test('açılış planı boş okursa ne otomatik kayıt ne düzenleme onu siliyor, yenileyince yerinde', async ({
+    page,
+  }) => {
+    await open(page);
+    await ornekYukle(page);
+    const kayitli = await savedText(page);
+
+    // The fault, injected on the READ path only: until the first paint the
+    // plan's key reads as empty, as it did in CI. Nothing here touches the
+    // storage at document start, which would be pitfall 108's own trigger.
+    await page.addInitScript(() => {
+      if (!location.search.includes('bos-acilis')) return;
+      const asil = Storage.prototype.getItem;
+      Storage.prototype.getItem = function (this: Storage, key: string) {
+        if (key === 'ders-programi' && document.querySelector('.topbar') === null) return null;
+        return asil.call(this, key);
+      };
+    });
+    await page.goto(`${FILE}?bos-acilis`);
+    await expect(page.locator('.topbar')).toBeVisible();
+    // The injection took: the page opened on an empty plan.
+    await expect(page.getByText('Henüz ders girilmedi').first()).toBeVisible();
+
+    // The autosave's 400 ms, then an edit: neither reaches the saved plan.
+    // Without the guard this is where the plan goes (main before the fix).
+    await page.waitForTimeout(800);
+    expect(await savedText(page)).toBe(kayitli);
+    await expect(page.locator(OKUNAMADI)).toBeVisible();
+    await addSubjects(page, 'Matematik');
+    await page.waitForTimeout(800);
+    expect(await savedText(page)).toBe(kayitli);
+    await expect(page.locator(OKUNAMADI)).toBeVisible();
+
+    await page.goto(FILE);
+    await expect(page.locator('.topbar')).toBeVisible();
+    expect(await savedText(page)).toBe(kayitli);
+    await expect(page.getByText('Henüz ders girilmedi')).toHaveCount(0);
+    await expect(page.locator(OKUNAMADI)).toHaveCount(0);
+  });
+
+  test('ilk kullanımda depo gerçekten boş: şerit yok, açılış yazımı da düzenleme de iniyor', async ({
+    page,
+  }) => {
+    await open(page);
+    await settledText(page);
+    await addSubjects(page, 'Matematik');
+    await expect.poll(() => savedText(page), { timeout: 5_000 }).toContain('Matematik');
+    await expect(page.locator(OKUNAMADI)).toHaveCount(0);
   });
 });
