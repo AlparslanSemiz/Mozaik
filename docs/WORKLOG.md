@@ -43,6 +43,10 @@ bir worktree'de ya da başka dalda tek cümleyle durur. Ağır bir komutun süre
 davranış değiştirmiyor: adım 0 ve 1 bitti; `leaf/lang`, `ui/lists` ve `platform/prefs`
 paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim testi ve
 `platform/search` paketi `main`'de ([TODO.md](TODO.md) §8k).
+Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 bitti, Faz 1'in TB8'e ve paket
+turlarına bağlı olmayan kısmı bitti; TB7 ve TB8 ikinci düzeltme dalında, `fix/veri-kaybi`
+girdiği için artık `main`'den açılabilir, TB8'in testini o dal yazar; paket yolunun fuzz'u
+TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
 0. Özellik oturumunun sırası (2026-10-10, Alp): `fix/veri-kaybi` ve `bakim/agir-kilit`
@@ -74,7 +78,11 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 6. Bir sürümden önce `npm run mutasyon`.
 7. Zebra (babanın 3 numaralı isteği): analizi bitti (WORKLOG 2026-10-09 gece, bakım),
    tonun ve form alanlarının kararı kullanıcıda; `ozellik/zebra` dalı açık, commit yok.
-8. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
+8. Test programı (TODO §8l): Faz 2, `main`'den yeni bir dalda, sırayla TP6 (gerçek paket
+   fikstürü), kontratlar (TP9, TP10), TP7 (Windows'ta gerçek exe), TP8 (sürüm yükseltme),
+   TP12 (Brave). `yayinla` Windows E2E'yi bekliyor, yavaş süitlerin tek istisnası
+   (DECISIONS 2026-10-10). Runner'lar sabit, `kanarya.yml` Ubuntu 26.04'ü haftada bir koşuyor.
+9. Refactor: paket turları §8k'nin "Eski yol → yeni yol" sırasıyla, `main`'den yeni
    dallarda, `.claude/skills/paket-turu` ile; `platform/search` bitti, `fix/veri-kaybi`
    girdi, sıradaki `platform/storage`, sonra exe ve io (TODO §8k). Adım 2: RF3
    (`relax.ts` ve `sat.ts` mutasyon ve kapsam listelerine) ve gecelik mutasyon tabanı.
@@ -96,27 +104,31 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 - Boş açılış (TODO B7.30): yenilenen `file://` sayfası CI'da bir kez depoyu boş okudu;
   açılışta boş okunan plan artık dolu anahtarın üstüne yazılmıyor. Tetikleyici yeniden
   üretilemedi; açılıştaki plan listesi yazımı ve klasör kapısının testi açık.
+- Test programının bulguları (TODO §8l): "Tümünü dosyadan aç" eksik planı boş plan olarak
+  açıyor (TB8, veri kaybı sınıfı, ikinci düzeltme dalında); `readPlanFile` bozuk dosyada
+  istisna atıyor (TB1); eksi ve sınırsız haftalık saat kabul ediliyor (TB6, TB9);
+  `LimitBox`'ın üst sınırı klavyeyle aşılıyor (TB2).
 
 **Güncel ölçümler (her satır kendi tarihiyle).**
 
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 628 test (2026-10-09) | `npx playwright test --list` |
-| Site, sunucu, klasör | 3 dosyada 22 test | `--config playwright.site.config.ts --list` |
+| Ana E2E süiti | 632 test, 33 dosya (2026-10-09 gece, `test/kapsam`) | `npx playwright test --list` |
+| Site, sunucu, klasör | 3 dosyada 23 test (2026-10-09 gece) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
-| E2E spec dosyası, toplam | 39 (2026-10-08) | `e2e/*.spec.ts` |
+| E2E spec dosyası, toplam | 40 (2026-10-09 gece) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
 | Gerçek exe süiti | 11 test, hepsi geçti, 53,8 s `performance` profilinde (2026-09-26 akşam) | `npm run exe:e2e`, Linux ikilisine karşı |
 | Linux ikilisi | 4 354 504 bayt (2026-09-27) | `npm run exe:linux` |
 | Sabit depolama anahtarı | 21 satır, planların kendi anahtarları hariç (2026-09-25) | 17'si `leaf/preferenceKeys.ts`'te, tablo `platform/storageReport.ts`'te |
-| Birim testleri | 45 dosyada 1378 test, hepsi geçti (2026-10-09 gece) | `npm test` |
+| Birim testleri | 47 dosyada 1397 test (2026-10-09 gece, `test/kapsam` `main`'le birleşince); `kontrol`'de 1396, hepsi geçti | `npx vitest list`, `npm test` |
 | `npm run hizli` | 41 dosya, 5,9–8,4 s, pilde ve `performance` profilinde (2026-10-09 gece) | `npm run hizli` |
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
-| Ana E2E, Windows | 623/623, kararsız yok; iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
+| Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
-| Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu sürüyor (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine |
+| Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
@@ -161,6 +173,19 @@ koştu (kural: kilit altında); E2E mutasyonu kilit altında.
 **Koşulmayan testler.** Yerelde tam E2E (CI'da), Windows, WebKit, Stryker.
 
 ---
+
+## 2026-10-10 · Test programı: kullanıcının üç kararı (`test/kapsam`)
+
+**Ne yapıldı** (dal commit'leri konusuyla). `main` 135d097'ye ilerlemişti, `git merge main`
+ile alındı; tek çatışma bu dosyada ("Şu an" ve iki gece girdisi), iki taraf da tutuldu.
+- "Belgeler: TB7 ve TB8 ikinci düzeltme dalında, TB8'in testini o dal yazar, saat payı
+  C2'nin adayı". TODO'da TB7, TB8, TP4'ün "Kalan"ı ve TP22.
+- "Belgeler: yavaş süitlerin tek istisnası, yayinla Windows E2E'yi bekler". CLAUDE.md'nin
+  iki kuralı tek cümlede, DECISIONS'ta kayıt, TODO K5'e not.
+
+**Koşulan testler.** Her commit'ten önce `npm run hizli` (merge'den sonra 44 dosyada 1290,
+yeşil) ve belge kapıları (19/19). **Koşulmayan.** E2E ve `kontrol`: yalnız belge değişti,
+CI'da.
 
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 
@@ -211,6 +236,71 @@ aşımıyla kırmızıydı: yetim, testin borularını açık tutuyordu. Sonuç 
 yedi mutasyon. **Koşulmayan.** `kontrol`, Playwright.
 
 ---
+
+## 2026-10-09 (gece) · Test programı: analiz, Faz 0 ve Faz 1 (`test/kapsam`)
+
+**Başlangıç.** `~/GitHub/Mozaik-test` worktree'si, `test/kapsam` dalı, `main` d3178dc'den;
+ortada `main` b75e707'ye ilerledi, `git merge main` ileri sardı. Önce yalnız analiz: depoda
+hiçbir dosya değişmedi, ölçümler `scratch/test-plan/`'da ve sahte evde
+(`scratch/exe-surucu/ev-vk*`). Rapor `scratch/test-plan/PLAN.md` (fazlar, maddeler, K
+kararları), karara bağlanmış özeti TODO §8l'de. Gerçek `Ders Programı` klasörünün sha256'sı
+başta ve sonda aynı (dört dosya), yalnız okundu.
+
+**Analizin ölçtükleri** (makine bütün oturum pilde, yük 1,4 ile 6,8 arası: hiçbir süre
+temiz değil, süreler eşik olamaz).
+- İki veri kaybı (VK1 iki kopya, VK2 kota): analiz durdu ve sordu, "devam" dendi;
+  düzeltmeleri ve testleri `fix/veri-kaybi`'de (TESTFINDINGS).
+- `haftalik.yml`'in mutasyonu 6 saatte iptal (bakım oturumu da kaydetti), ve
+  `erisim.spec.ts:116`'nın Windows'taki kararsızlığının kök sebebi izden (TESTFINDINGS).
+- A2: `refactor/yapi`'nin CI'ında `site` ve `rapor`'un atlanması bilerek; site testleri
+  her push'ta `e2e-ek`'te koşuyor. A4: `npm ci`'ın "allowScripts" uyarısı esbuild'in
+  kurulum betiğini engellemiyor; engellense de derleme optional paketten çalışıyor.
+- D1: yedi sekme iki temada on kez: bu makinede de Playwright'ın kabında da on dördün on
+  dördü bayt bayt aynı, aralarında ekran başına 237–4 055 piksel (glif kenarları). Görsel
+  regresyon kapta ve sıfır eşikle geri geliyor (DECISIONS).
+- B8: exe yeni sürümü yalnız "Güncellemeleri denetle"ye basılınca görür (TESTPLAN'ın
+  cümlesi doğru; "etiket babanın exe'sine gider" yayın kanalı anlamında doğru).
+- B10: Brave 1.96.61'de `file://` açılıyor, depo kalıcı, font gömülü, hata ve ağ isteği yok.
+- B11: 300 sürükle ve geri al döngüsünde DOM düz, yığın ilk 50'den sonra ~3 kB/döngü.
+- B12 (vekil, kirli): öneri araması süreç ağacını 0,8–1,1 GB büyütüyor; iki çekirdek ve
+  4× yavaşlatmada bitiş 158 s, sekiz çekirdekte 50 s.
+- B14: `npm audit` 14 açık, `--omit=dev` 0.
+- B15: ekran başına görünür kelime, ör. boş proje 82, Program 402, babanın dizili
+  Program'ı 562 (tablo PLAN'da).
+- B17: Vitest browser mode `LimitBox`'ı gerçek Chromium'da 1,3 s'de koştu, TB2'yi buldu.
+
+**Ne yapıldı** (dal commit'leri konusuyla).
+- "CI: runner'lar sabit (ubuntu-24.04, windows-2025), upload-artifact v7, download-artifact
+  v8, Ubuntu 26.04 kanaryası" (K6). Dalın CI'ı yeşil (37973059448). `surum.yml` dokunulmadı,
+  `haftalik.yml`'in mutasyon işi `ci/mutasyon-parca`'nın.
+- "Belgeler: test programının kuralları ve yavaş süit kuralı CLAUDE.md'de, kararları
+  DECISIONS'ta" (üç kayıt, B7.21 kapandı).
+- "Belgeler: test programının karara bağlanmış planı TODO §8l'de".
+- "Belgeler: test programının yeni katmanları TESTPLAN'da, planlandı olarak".
+- "Belgeler: analizin bulduğu bayat cümleler" (yalnız yorum ve açıklama metni).
+- "Belgeler: analizin yan bulguları TODO §8l'de, TB1-TB6".
+- "Test: kapanırken bekleyen kayıt depoda kalıyor, klasöre inmiyor (BİLİNEN KUSUR)" (TP3,
+  TB7). Sayfanın saati durdurulup bekleyen yazım önce doğrulanıyor; iki mutasyon kırmızı.
+- "Belgeler: Tümünü dosyadan aç eksik planı boş plan olarak açıyor (TB8, veri kaybı sınıfı)".
+  Test programı burada durdu ve kullanıcıya getirdi.
+- "Belgeler: TB7 fix/veri-kaybi birleştikten sonra ayrı bir dalda düzeltilecek".
+- "Test: dosya ve yapıştırma okuyucularına fuzz, üç BİLİNEN KUSUR" (TP4, TB9). Dört mutasyon kırmızı.
+
+**Faz 1'in açık kalanları.** Paket yolunun fuzz'u ve TB8'in testi (TB8'in kararı bekleniyor),
+TP5 (platform paket turu). B1 ve B3 `fix/veri-kaybi`'ye geçti.
+
+**Koşulan testler.** `npm run hizli` her commit'ten önce (1269, sonra 1283); `kapanis.spec.ts`
+beş tekrar; site süitinde `klasor.spec.ts` üç tekrar (27); `fuzz.test.ts` varsayılan ve
+`FUZZ_RUNS=3000` ile; altı mutasyon (`scripts/mutasyon-kaniti.sh`, ikisi tek tek, dördü
+listeyle); `tipler`, `lint`, prettier. Analizde: `npm run kapsam` (yeşil, 3 dk 7 s),
+`npm run exe:linux`, ölçüm betikleri kilit altında.
+
+**Koşulmayan testler.** `cargo test` (Rust'ta yalnız yorum değişti), Windows, mutasyon,
+`test:webkit`, `ekran`, `patrol`, `exe:e2e`. `kontrol` faz sonunda.
+
+**Tuzak.** `timeout N scripts/agir.sh <komut>` bu oturumda yaşandı (kilit bırakıldı, komut
+yetim kaldı; öteki oturuma haber verildi, onun ölçümü süre ölçmediği için kirlenmedi).
+Tuzağı `bakim/agir-kilit` 150 numarasıyla alıyor; burada ikinci bir girdi yazılmadı.
 
 ## 2026-10-09 (gece) · Veri kaybı: VK1, VK2 ve `useHttpsScheme`, `fix/veri-kaybi` dalı
 

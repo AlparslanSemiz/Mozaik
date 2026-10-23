@@ -14,13 +14,15 @@ Hangi test katmanının neyi ölçtüğü ve ne zaman koşulduğu.
 | Çözücü stresi | `npm run cozucu` | kısıt motoru (`constraints.ts`, `rules.ts`) ya da çözücü değiştiyse |
 | Devriye | `npm run patrol` | isteğe bağlı, kırık bir şey aramak için |
 | Erişilebilirlik | `npx playwright test e2e/erisim.spec.ts` | ana E2E süitinin içinde, yani her E2E koşusunda |
-| WebKit | `npm run test:webkit` | `kontrol`'ün parçası değil (karar kullanıcıda). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
+| WebKit | `npm run test:webkit` | `kontrol`'ün ve CI'ın parçası değil, ve olmayacak: Linux yolu Chromium uygulama modu olacak, babanınki WebView2 (DECISIONS 2026-10-09). Ana E2E süitini Playwright'ın WebKit'inde koşar; Chromium'a özgü testler kendini atlar. Bu Fedora makinesinde Playwright'ın kabında koşar (aşağıda, "WebKit") |
 | Mutasyon | `npm run mutasyon` | her oturumda değil. Saf çekirdeğin testleri değiştiğinde, ve bir sürümden önce bir kez. `haftalik.yml` haftada bir koşar |
 | Görüntü | `npm run ekran` | görsel bir değişiklikten sonra, bakmak için |
+| Kapsam | `npm run kapsam` | elle; bir harita, kapı değil: eşiği yok ve `kontrol`'e girmiyor (gerekçesi `vite.config.ts`'te) |
 | Exe ve Rust | `npm run exe:test`, `surum.yml` | sürüm iş akışında, ve Rust'ı olan bir makinede elle |
 | CI | `.github/workflows/ci.yml` | her dala her push'ta: tipler, sınır, lint, knip, biçim, birim ve belge kapısı, derleme, boyut, ana E2E (üç parça, ve öneri aramasını başlatan ve `@arama` etiketini taşıyan testler kendi işinde, her biri ayrı bir runner'da), site, sunucu, klasör ve çözücü stresi. Site yalnız hepsi yeşil bir `main` push'unda yayınlanır |
 | Windows | `.github/workflows/windows.yml` | her `main` push'unda, haftalık koşuda ve elle: Windows'ta ana E2E (Chromium ya da `msedge` kanalı), öneri aramasının `@arama` etiketli testleri ayrı adımda sırayla. Siteyi kilitlemez; `npm run yayinla` etiketi onun da yeşilini bekler |
 | Haftalık | `.github/workflows/haftalik.yml` | Pazartesi 01:00 UTC ve elle: mutasyon, ve `windows.yml`'i çağırır. Siteyi kilitlemez |
+| Kanarya | `.github/workflows/kanarya.yml` | Salı 02:00 UTC ve elle: denetim ve ana E2E'nin bir parçası runner'ın bir sonraki imajında (bugün `ubuntu-26.04`). Hiçbir şeyi kilitlemez; iki hafta yeşil kalınca `ci.yml`'in sabit sürümü ona çekilir |
 | Gerçek exe | `npm run exe:e2e` | `src-tauri/`, `desktop.ts`, `folder.ts` ya da güncelleme değiştiyse, ve bir sürümden önce, Linux geliştirme makinesinde |
 
 `npm run kontrol` tipleri, birimi, derlemeyi, E2E'yi, siteyi ve çözücü stresini tek
@@ -65,6 +67,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 |---|---|---|
 | Birim | `src/*.test.ts` | saf mantığın doğruluğu |
 | Değişmez | `src/invariants.test.ts` | her girdide doğru kalması gereken cümleler, girdileri kütüphane üretir |
+| Fuzz | `src/fuzz.test.ts` | bozuk dosyada ve yapıştırmada yarım plan ya da istisna |
 | Şema örnekleri | `src/fixtures.test.ts`, `src/fixtures/` | her şema sürümünden bir dosyanın hâlâ açılması |
 | Cümle ve iskelet | `src/sentences.test.tsx` | bir listenin tamamı: depo tablosu, ret cümleleri, kâğıdın kutuları |
 | Duman | `src/App.test.tsx` (jsdom) | bileşenler çiziliyor mu, sekmeler çöküyor mu |
@@ -80,6 +83,7 @@ bir şey söylemez. Bir koşudan bir bulgu çıktıysa (ürün kusuru ya da test
 | Erişilebilirlik | `e2e/erisim.spec.ts` | eksik etiket, yanlış rol, atlanan başlık düzeyi, klavyesiz kaydırma |
 | Mutasyon | `stryker.config.json` | testlerin kendisi: hangi kural bozulunca hiçbir şey kırmızıya dönmüyor |
 | Görüntü | `e2e/ekran.spec.ts` | test değil, bakılacak kanıt |
+| Kapsam | `vite.config.ts`'in `coverage` listesi, mutasyonla aynı dosyalar | hiç koşmayan satır; koşup ölçülmeyeni mutasyon görür |
 
 ### Hızlı
 
@@ -156,6 +160,28 @@ denetlediği için ancak ikisi birden bozulunca: tek başına biri bozulduğunda
 hâlâ reddediyor. Çözücünün `blocker()`'a sorduğu dört yerin dördünde ilişkileri
 boşaltan ya da iki sınırı sıfırlayan mutasyon eski üreteçte yeşil, genişleyen
 üreteçte kırmızı (2026-10-08).
+
+### Fuzz
+
+`src/fuzz.test.ts`, fast-check ile. Dışarıdan gelen metni okuyanlara kimsenin bilerek
+yazmadığı dosyalar: şema örnekleri ve adsız dizili fikstür, alanları silinerek ya da her
+türlü JSON değeriyle değiştirilerek bozulur ve her bayttan kesilir; yapıştırma tarafına
+Excel'in ve elle yazılmış bir listenin üç ayracıyla satırlar gelir. Kural DENETIM DK11'in
+kuralı: bir dosya ya reddedilir ya bütün bir plan olarak açılır, asla yarım plan.
+
+Ölçtükleri: açılan her planda her dersin sınıfı ve öğretmeni var, her yerleşimin dersi
+var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa dosya açılmıyor;
+kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
+tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
+yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
+süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
+bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
+yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+
+Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
+TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
+dosyası (program yalnız yapıştırılan metni okuyor). `FUZZ_RUNS` koşu sayısını büyütür;
+varsayılan dosyayı birkaç saniyede tutar, dizili fikstüre koşuların beşte biri düşer.
 
 ### Şema örnekleri
 
@@ -290,6 +316,7 @@ yalnız burada görünür, jsdom'un bir düzeni yok.
 - **Metin.** Hiçbir ekranda uzun çizgi olmaması, ayraçların yerinde durması, ipucu satırlarının tavanı (`metin.spec.ts`).
 - **İşaret.** `kurulum/icon.ico`'nun dokuz boyu taşıması ve hangi boyların hangi çizimden geldiği (`temel.spec.ts` 79).
 - **Roboders koruması** (`roboders-koruma.spec.ts`). `scripts/roboders/koruma.mjs`'in Roboders'e gitmeden önce yerel bir sunucuya karşı kanıtı: GET dışında hiçbir istek, hiçbir WebSocket ve adresinde yazan kelime taşıyan hiçbir GET sunucuya ulaşmıyor, ve sayfadan çıkarken giden istek de ulaşmıyor (tuzak 144). Yargıç sunucunun sayacı, sayfanın kendi gördüğü değil, ve bir kontrol GET'inin ulaştığı da soruluyor. Tıklama kuralı gerçek bir DOM'da sınanıyor. Aynı koruma Eyotek ayarıyla da sınanıyor: Eyotek'in ek yazan kelimeleri, zorunlu `--alan` ve alanın ağda tutulması. Deneme sayfalarındaki her işaretin korumadan geçtiği de soruluyor, yoksa "tıklanmadı" bedava geçerdi. Her Roboders ve Eyotek turundan önce ayrıca koşulur.
+- **Kapanırken bekleyen kayıt** (`kapanis.spec.ts` 93). 400 ms'lik erteleme dolmadan kapanan sekmenin son değişikliği depoda kalıyor, yani `beforeunload` flush'ı yazıyor. Sayfanın saati durdurulur ve testin önce erteleme yazımının beklediğini doğrulaması gerekir; saat durmadan bu yarış hızlı bir makinede flush'a hiç uğramadan geçerdi.
 - **Kayma.** Şeritte seçenek değiştirmenin ne düğmeleri ne altındaki sayfayı oynatması (`kayma.spec.ts`). Bu dosya kendi tarayıcısını açar, çünkü Playwright'ın varsayılan `--hide-scrollbars`'ı altında ölçülecek bir kaydırma çubuğu yok (tuzak 94).
 - **Sığdır'ın exe kutusu** (`gorunum.spec.ts` 45). 1920×1032 ve 1600×968'de haftanın sığması, ve hiçbir kart yazısının, satır başının ve köşedeki eksen adının iki eksende de kırpılmaması, satırın Rahat'takinden uzamaması, kart satırının satır kutusunun Rahat'takiyle aynı kalması (tuzak 107).
 - **Sığdır babanın verisinde ve Windows %125'te** (`gorunum.spec.ts` 45b). Adsız dizili fikstür 1920×1080 ve 1536×816 (DPR 1,25) kutularında, iki görünümde; örnek okul 1536'da. Kırpılan kart sayısının tavanı, satır başlarının sıfırı, 9 px taban, küçültmenin tablonun boyunu değiştirmemesi, ve kartın tam adı söylemesi. Kırpılma yazının ve kutunun kesirli genişliğiyle sayılır, `clientWidth` ile değil (tuzak 140). Aynı grupta sürüklemenin yazdığı çubuğun yerleşimi Sığdır'da Rahat'takine oranla ölçülür (tuzak 141).
@@ -322,7 +349,9 @@ olmayan bir şeyi ölçüyor: service worker, gerçek bir köken ve Dosya Sistem
 çevrimdışı girilen verinin durması, site derlemesinin `file://` derlemesine
 sızmaması. Güncellemenin kendisi de burada: önbellek adının sürümü taşıması, ve
 `sw.js` diskte değişince açık duran sayfada şeridin çıkması, hiçbir şey
-değişmemişken çıkmaması. İkisi de mutasyonla denendi.
+değişmemişken çıkmaması. İkisi de mutasyonla denendi. Klasörün kapanış yarısı bir
+BİLİNEN KUSUR'u sabitliyor (TODO TB7): 2 s'lik yazım dolmadan kapanan sekmenin
+değişikliği klasöre inmiyor, depoya iniyor.
 
 Sunucunun portu klasörün kendisinin (`e2e/sitePort.ts`): `MOZAIK_SITE_PORT` verilmişse o,
 CI'da 4173, yerelde klasörün gerçek yolundan türeyen bir port. Açık bir sunucu yeniden
@@ -350,7 +379,8 @@ köprüsünün orada olduğu, `data_dir_path`'in gerçek yeri söylediği, otoma
 kaydın gerçek bir klasöre gerçek dosya yazdığı, örnek okulun dizildiği, Linux
 kopyasının kendini güncellemeyi reddettiği ve Hakkında'da bunu söylediği, bir dersi
 sabitlemenin sayfayı çökertmediği (tuzak 130), "Dosyaya kaydet"in İndirilenler'e
-yazdığı (tuzak 132), "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
+yazdığı (tuzak 132), kurulamayan haftada öneri aramasının worker'larda koşup bir yolu
+uyguladığı ve Ctrl+Z'nin onu geri aldığı, "Dosyadan aç"ın bir yedeği okuduğu, ve Sığdır'da gerekçe çubuğuna
 sürüklemenin hızında yazmanın kare düşürmediği (tuzak 141). Güncelleme reddi
 mutasyonla sınandı: ret kaldırılınca kopya GitHub'dan Windows exe'sini indirdi ve
 test kırmızıya döndü. Sabitleme testi düzeltmesiz ikiliye karşı kırmızıydı.
@@ -402,6 +432,32 @@ kapan üstünden bütün süitte de yakalanıyor, farkı iddiasız gezinmesi (tu
 almadan önce sayfanın hareketi biter (tuzak 59), ve tek iddiası çekildiğinde
 perdenin inmiş olması.
 
+## Planlanan katmanlar
+
+Test programının (2026-10-09, [TODO.md](TODO.md) §8l) ekleyeceği katmanlar. Henüz yok: bir
+katman yazıldığı commit'te bu tablodan çıkar, yukarıdaki iki tabloya ve kendi bölümüne
+girer. "Yavaş" diye işaretli olanlar push'u, birleştirmeyi ve sürümü beklemez, gece ya da
+haftalık arka planda koşar (CLAUDE.md).
+
+| Katman | TP | Ne yakalayacak | Ne zaman koşacak |
+|---|---|---|---|
+| Fuzz, paket yolu | TP4 | "Tümünü dosyadan aç"ın bozuk pakette yarım plan kabul etmesi (TB8'in düzeltmesini ve sıra 6'yı bekliyor) | `npm test` |
+| Gerçek exe, Windows | TP7 | WebView2'de exe'nin kendisi: pencere, köprü, Belgeler | yavaş: haftalık, ve köprüye dokunan bir `main` push'u |
+| Sürüm yükseltme | TP8 | eski exe'den yenisine takasta verinin kalması | yavaş, haftalık |
+| Kontrat | TP9, TP10 | Rust komutları ile köprünün ve taklidin, `surum.yml` ile `update.rs`'in ayrışması | `npm test` |
+| Rust, Linux | TP11 | `cargo test` her push'ta | CI |
+| Brave | TP12 | Brave'de `file://` açılışı ve kalıcılık | yerel, elle |
+| Uzun süre açık kalma | TP13 | sürükle ve geri al döngüsünde büyüyen yığın ve DOM | yavaş, gece |
+| Zayıf makine vekili | TP14 | öneri aramasının bellek tepesi, az çekirdekte süre; babanın makinesinin cevabı değil | yerel, temiz koşul |
+| Performans | TP15 | iş sayaçlı eşikler (ana E2E); süre eşikleri yalnız temiz koşulda | sayaçlar E2E'de, süreler elle |
+| Güvenlik | TP16, TP17 | `dist`'e giren bağımlılıkta açık; içe aktarılan adlarda betik ve HTML | CI, E2E |
+| Metin bütçesi | TP18 | ekran başına kelime ve diyalog başına soru, tabana karşı | ana E2E |
+| Kabul | TP19 | babanın işlerinde tık ve soru sayısı, tabana karşı | ana E2E |
+| Bileşen | TP20 | girdi bileşenlerinin sınır durumları, gerçek tarayıcıda | `npm test`'in yanında |
+| Kapsam tabanı | TP24 | dosya başına satır yüzdesinin düşmesi | gece |
+| Gerileme kapısı | TP26 | testi olmayan ürün kusuru kaydı | belge kapısı |
+| Görsel regresyon | TP27 | yedi sekmenin iki temadaki düzeni, kapta, sıfır eşik | yavaş, haftalık |
+
 ## E2E ortamı
 
 - **Pencere.** Varsayılan viewport 1920×1080. Exe büyütülmüş pencerede ve Windows ölçeğinde daha dar bir kutuda koşabilir, o yüzden Sığdır'ın düzeni ayrıca 1600×968'de ölçülüyor (tuzak 107).
@@ -418,7 +474,7 @@ hiçbirini kapatmaz. Bir satır kapandığında buradan çıkar ve neyle kapand�
 
 | Ne | Bugün neyle sınanıyor | Neden yetmiyor |
 |---|---|---|
-| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `haftalik.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (2026-10-08'de eklendi, henüz koşmadı), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
+| Babanın exe'si: Windows 10, WebView2 | köprünün taklidi (`e2e/exe.spec.ts`), Rust'ın saf kısmı (`npm run exe:test`) | WebView2 Linux'ta yok. `windows.yml` ana E2E'yi Windows'ta Chromium'la ya da Edge'le koşuyor (her `main` push'unda ve haftalık, ilk koşusu 2026-10-09, TESTFINDINGS), ama exe'nin kendisini değil. Exe'nin babanın makinesinde açıldığı biliniyor (tuzak 106), davranışı görülmedi |
 | Babanın makinesi: 4 GB RAM, eski işlemci | işlemcinin 4 kat yavaşlatılması ([WORKLOG.md](WORKLOG.md)) | bellek sınırı taklit edilmiyor, ve o makinede ölçüm yok ([TODO.md](TODO.md) §8b) |
 | Windows ekran ölçeği | `e2e/gorunum.spec.ts`'te 1920 ve "Windows %125" kutuları | babanın ölçeği %100 (2026-10-09, kesin). Babanın ayarı programa göre değiştirilmez: program %100'de de %125'te de düzgün görünmeli, %125 kutuları korunur. Süitin geri kalanı yalnız 1920×1080'de koşuyor |
 | Edge, WebView2, Brave | Playwright'ın Chromium'u | aynı Blink motoru, ama sürüm, politika ve font farkı var |

@@ -51,7 +51,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) ve refactor analizinin planı ile kusurları (§8k) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -718,9 +718,16 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       SHA'sı `91e2ead`. Kalan Node 20 uyarısı `upload-artifact@v4`. `gh`'nin jetonunda
       `workflow` yetkisi yok, birleştirme yerelde birleştirme commit'iyle ve SSH ile
       itiliyor (PR'ın SHA'sı korunduğu için GitHub onu "merged" sayıyor).
-      `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. #6 (bölme önerisi
+      `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. **2026-10-09 akşam,
+      kullanıcının kararı (test programı K6):** Dependabot beklenmedi; `ci.yml` ve `windows.yml`'de
+      `upload-artifact@v7`, `download-artifact@v8`, runner'lar `ubuntu-24.04` ve `windows-2025`'e
+      sabit, `kanarya.yml` yeni imajı haftada bir koşuyor (`test/kapsam`). `surum.yml` hâlâ
+      `upload-artifact@v4` ve `download-artifact@v7`'de (dokunulmaz), `haftalik.yml`'in mutasyon
+      işi `upload-artifact@v4`'te (`ci/mutasyon-parca`'nın). #6 (bölme önerisi
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
-- [ ] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** `npm run test:webkit`'in
+- [x] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** **Kapandı, yapılmayacak
+      (2026-10-09 akşam, DECISIONS "Yeni WebKit süiti eklenmiyor"):** Linux yolu Chromium
+      uygulama modu olacak, babanınki WebView2; `test:webkit` olduğu gibi kalır. `npm run test:webkit`'in
       ilk koşusu (TESTFINDINGS): Chromium'a özgü dört iddia (A2 gibi "yalnız Chromium"
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
@@ -1174,10 +1181,12 @@ ertelendi.
 
 ### 8i · Klasör turundan çıkanlar (2026-09-12)
 
-- [ ] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
+- [x] **C6 kapsam ölçümü — test oturumunun cevabını bekliyor.** Soru: ayrı bir
       komut mu olsun yoksa mutasyonun yanında mı dursun, ve `kontrol`'e girsin mi.
       Ölçüm turunun görüşü ayrı komut yönünde (kapsam bir kapı değil bir harita),
-      karar kullanıcıda. Kurulmadan önce cevap beklenecek.
+      karar kullanıcıda. Kurulmadan önce cevap beklenecek. **Kuruldu (2026-09-12):**
+      `npm run kapsam` ayrı komut, eşiksiz, `kontrol`'de değil; gerekçesi `vite.config.ts`'te.
+      Tabanı test programında (§8l, TP24).
 
 ### 8g · Şema göçünden çıkan ürün kusurları (2026-09-12)
 
@@ -1449,6 +1458,188 @@ yeni dallarda, `.claude/skills/paket-turu` ile. 7 (`platform/search`) bitti; `fi
 (`platform/storage`), sonra 5 ve 6. Adım 2'nin süre ölçümleri temiz koşulda
 (`scripts/temiz-kosul.sh`): `npm test` üç kez, Stryker'ın kuru koşusu ve iki kalibrasyon
 koşusu, dosya başına tahmin.
+
+### 8l · Test programı (2026-10-09)
+
+Kaynak 2026-10-09'un analizi (`test/kapsam`): rapor `scratch/test-plan/PLAN.md`'de, git
+dışında, ölçümleri ve betikleri yanında; özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü
+girdisinde. Kurallar CLAUDE.md'nin "Test programı" bölümünde, kararlar
+[DECISIONS.md](DECISIONS.md)'de (2026-10-09). Maddeler TP numarasını taşıyor, yolda çıkan
+ürün ve araç bulguları TB numarasını.
+
+**Kararlar (kullanıcının, 2026-10-09 akşam).**
+
+| K | Karar |
+|---|---|
+| K1 | Görsel regresyon geri gelir, yalnız kapta ve sıfır eşikle; yerel koşu referans üretmez (DECISIONS) |
+| K2 | Gerçek paketin adsız fikstürü depoya girer, `tam-dolu-kurs.json`'un yöntemiyle (öğretmen baş harfleri; e-posta ve serbest metin yok); commit'ten önce dosyada gerçek ad aranır, komut ve sonuç rapora |
+| K3 | Bileşen katmanı (Vitest browser mode) yalnız girdi bileşenleri için açılır |
+| K4 | Paket turlarının hedef ağacını refactor oturumu yazar; aşağıda "bekler" diyen maddeler ona göre işaretli |
+| K5 | Yavaş süitler (mutasyon, uzun süre, görsel, Windows'ta gerçek exe, sürüm yükseltme) push'u, birleştirmeyi ve sürümü beklemez; gece ya da haftalık, kırmızısı görünür bir yere düşer (CLAUDE.md). Tek istisna (2026-10-10): `yayinla` Windows E2E'yi bekler (DECISIONS) |
+| K6 | Runner'lar ve artefakt aksiyonları sabit, 2026-10-19'dan önce (yapıldı) |
+| K7 | Dependabot alerts ve güvenlik güncellemeleri: ayarı Alp açar |
+| K8 | Mutasyonun iş akışı `ci/mutasyon-parca` dalında; C1 o dal birleşince ölçülür |
+| K9 | VK1 (iki kopya), VK2 (kota) ve `useHttpsScheme`'in sabitlenmesi, düzeltmeleri ve testleriyle `fix/veri-kaybi` dalında; B1 ve B3 o dala geçti |
+| K10 | Yeni WebKit süiti eklenmez (DECISIONS); gerçek exe testleri olduğu gibi |
+
+**Bekleme işareti** (K4, §8k'nin hedef ağacına ve sıra tablosuna göre, 2026-10-09 gece).
+"Bekler: sıra N" o paket turu `main`'e birleşmeden başlamaz; sıra 4, 5 ve 6 ayrıca
+`fix/veri-kaybi`'yi bekliyor. "—": yollardan bağımsız, hemen. Bir madde turdan önce
+yazıldıysa (TP4 gibi) yollarını o tur taşır.
+
+**Faz 0 · hazırlık**
+- [x] **TP1 Runner'lar ve artefakt aksiyonları sabit, Ubuntu 26.04 kanaryası** (K6). `ci.yml`,
+      `site.yml`, `windows.yml`; `kanarya.yml` yeni. `surum.yml` dokunulmadı (`ubuntu-latest`,
+      `windows-latest`, `upload-artifact@v4`, `download-artifact@v7` orada kaldı).
+- [x] **TP2 Program kuralları ve kararlar** CLAUDE.md'de ve DECISIONS'ta.
+
+**Faz 1 · veri kaybı**
+- [→] B1 iki kopya, B3 kota: `fix/veri-kaybi` dalında (K9).
+- [x] **TP3 Kapatırken bekleyen kayıt (B2).** 400 ms'lik `SAVE_DELAY` içinde kapanan sekme.
+      Ölçüldü: `beforeunload` koşarsa değişiklik kalıyor, koşmazsa (süreç öldü) kalmıyor; ikincisi
+      sözleşme. `e2e/kapanis.spec.ts` (depo, yeşil) ve `klasor.spec.ts`'te klasör yarısı
+      (BİLİNEN KUSUR, TB7); ikisi de sayfanın saatini durdurup bekleyen yazımı önce doğruluyor,
+      ikisi de mutasyonla kanıtlı. Exe'de pencereyi kapatmanın WebDriver yolu yok
+      (`plugin:window|close not allowed by ACL`): exe'nin yarısı elle.
+- [~] **TP4 Fuzz (B4).** `readPlanFile`, `parseBundle`, `import.ts`'in `parse*`'ları; değişmez:
+      ya ret ya tutarlı plan, asla istisna. `npm test`'te kısa, gece uzun. Kullanıcı bu fazda
+      istedi, yani pure turundan önce bugünkü yollarla yazılır; tur yolları taşır.
+      **Yapıldı (`src/fuzz.test.ts`):** "Dosyadan aç" üç kaynakta (bozulan dosya ya ret ya
+      bütün plan; dört listeden biri yoksa ret; kesik dosya ret) ve Excel yapıştırmasının dört
+      okuyucusu; TB1, TB6 ve TB9 "BİLİNEN KUSUR"; dört mutasyonla kanıtlı. `FUZZ_RUNS` gece
+      kipi için var, onu koşan iş akışı yok (TP13 ile birlikte). **Kalan:** paket yolu
+      (`parseBundle` ve arkasındaki `parseState`). **Bekler: TB8'in düzeltmesi ve sıra 6**
+      (kullanıcının kararı, 2026-10-10); TB8'in kendi testini düzelten dal yazar. Dosya sıra
+      6'da (`pure/io`) taşınır, yolları o tur değiştirir.
+- [ ] **TP5 Veri yolunun mutasyonu (B5).** Kancaların kararları saf fonksiyonlara, onlar
+      Stryker listesine. **Bekler: sıra 4** (`platform/storage`: `useStore`, `usePlans`,
+      `planStore`, `libraryStore`, `folder`, `useFolder`, `download`).
+
+**Faz 2 · gerçek ortam**
+- [ ] **TP6 Gerçek paket fikstürü, adsız (B6, K2).** En yeni gerçek dosya bir paket (v1,
+      içinde v14 plan, 330 yerleşim); `fixtures.test.ts`'e bir `describe`. —
+- [ ] **TP7 Windows'ta gerçek exe (B7).** `webdriver.mjs`'e Windows (ikili yolu,
+      `--native-driver`, `taskkill`, dil, runner koruması), spec'te platform dalları,
+      yeni bir "exe-windows" iş akışı (haftalık ve `paths` süzgeçli `main` push'u, yavaş süit). —
+- [ ] **TP8 Sürüm yükseltme (B8).** Runner'da gerçek exe ile yerel takas, veri kalıyor mu;
+      `surum.json` fikstürü. Yavaş süit. TP7'ye bağlı.
+- [ ] **TP9 Köprü kontratı (B9a).** Rust komutları = `desktop.ts`'in çağrıları = taklit.
+      **Bekler: sıra 5** (`platform/exe`: `desktop`, `update`).
+- [ ] **TP10 Güncelleme kontratı (B9b).** `surum.yml`'in yazdığı, `update.rs`'in okuduğu,
+      kayıtlı Release fikstürü. —
+- [ ] **TP11 Linux'ta `cargo test`, `ci.yml`'de.** —
+- [ ] **TP12 Brave alt kümesi, yerel config (B10).** Ölçüldü: `file://` açılıyor, depo
+      kalıcı, font gömülü, hata ve ağ isteği yok. —
+
+**Faz 3 · zayıf makine**
+- [ ] **TP13 Uzun süre açık kalma (B11).** 2 000 sürükle + geri al döngüsü, yığın ve DOM
+      eğimi. Yavaş süit, gece. İlk 300 döngüde DOM düz, yığın ~3 kB/döngü (ayrılamadı). —
+- [ ] **TP14 Zayıf makine vekili (B12).** Ölçüm betiği; vekil, babanın cevabı değil.
+      Kirli ilk sayılar: arama sırasında süreç ağacı +0,8–1,1 GB. Temiz koşulda tekrarlanır. —
+- [ ] **TP15 Performans (B13).** İş sayaçlı eşikler ana E2E'de; süre eşikleri ayrı config,
+      yalnız temiz koşulda, eşikler o ölçümden. Bu oturumun süreleri eşik olamaz. —
+
+**Faz 4 · güvenlik, metin, kabul**
+- [ ] **TP16 `npm audit --omit=dev` CI'da (B14a).** Bugün 0 (14 açığın hepsi geliştirme
+      aracında). K7'nin depo tarafı: `.github/dependabot.yml`'in bayat yorumu. —
+- [ ] **TP17 İçe aktarılan adlarda betik ve HTML (B14b).** Bugün `innerHTML` yok, gerileme
+      koruması. —
+- [ ] **TP18 Metin bütçesi (B15).** Ekran başına kelime ve diyalog başına soru, taban;
+      ilk sayılar PLAN'da (ör. boş proje 82, Program 402, babanın Program'ı 562). —
+- [ ] **TP19 Kabul (B16).** Tık ve soru sayacı, taban, K1–K15 senaryoları. —
+- [ ] **TP20 Bileşen katmanı (B17, K3).** `@vitest/browser`, girdi bileşenleri. `LimitBox`,
+      `ColorPick` ve `Field` ağaçta `ui/`'nin kökünde kalıyor (sıra 12 yalnız gerekçesini
+      yazar), `AddPanel` sıra 9'da `ui/lists/`'e gidiyor. **Bekler: sıra 9** (`AddPanel`'in
+      yarısı); köktekiler —.
+
+**Faz 5 · var olanlar**
+- [ ] **TP21 Mutasyon listesi ve sınıflama (C1).** `relax.ts`, `sat.ts`, veri yolu; her
+      hayatta kalan üç sınıfta. **Bekler:** `ci/mutasyon-parca` (K8), sıra 10 (`relax.ts` ve
+      `sat.ts`, "pure/relax" paketi; tur stryker listesini aynı commit'te değiştiriyor), sıra 4 ve 6
+      (veri yolu ve okuyucular).
+- [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
+      axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölünür. CI'da JSON
+      raporu ve 30 günlük kararsız sayacı. —
+      **Kök neden adayı (2026-10-10, kullanıcının isteği):** `kapanis.spec.ts` ve
+      `klasor.spec.ts`'in saati `now + 1_000`'de durdurması ("Test: saatin durduğu an bir
+      saniye ileride"). Pay ölçülmedi, bir CI düşüşünden seçildi: zamanı okumakla durdurmak
+      arasında bir saniyeden fazla geçen bir runner aynı hatayı (`Cannot fast-forward to the
+      past`) yeniden verir, ve o saniyeye bir gün bir zamanlayıcı düşerse (`SAVE_DELAY`
+      400 ms, klasör 2 s) test sessizce başka bir şeyi ölçer.
+- [ ] **TP23 Erişilebilirlik tabanı (C3).** Düzeltmeler `main`'de; burada yalnız `BILINEN`'in
+      küçülmesi. —
+- [ ] **TP24 Kapsam tabanı (C4).** Önce TB3 çözülür. Liste için **bekler: sıra 10 ve 11**
+      ("pure/relax", "pure/constraints" ve "pure/entities" paketleri; liste o turlarda değişiyor).
+- [ ] **TP25 Bugünkü yazıcının paketi dondurulmuş (C5).** —
+- [ ] **TP26 Gerileme kapısı (C7).** TESTFINDINGS'te her ürün kusuru bir teste bağlı. —
+
+**Faz 6 · görsel regresyon (K1)**
+- [ ] **TP27 Görsel regresyon, kapta.** Yedi sekme × iki tema, sıfır eşik, fark görüntüsüne
+      bakmadan yenilenemez, haftalık arka planda. —
+
+**Faz 7 · son kontrol**
+- [ ] **TP28 Son kontrol.** Her katman hedefinde ya da DECISIONS'ta tarihli "yapılmıyor";
+      CI tam doğrulama, yerelde yalnız exe ve temiz koşul ölçümleri; rapor.
+
+**Yolda çıkan bulgular.** TB numaralı maddeler aşağıda (ayrı commit).
+
+- [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
+      Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde
+      `TypeError` (`reading 'trim'`, `'weeklyHours'`, `'id'`). "Dosyadan aç"ta `App.tsx`'in
+      `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
+      (sessiz ret). Aynı `parseState` açılışta depodan okurken de korumasız (`useStore.ts`'in
+      `initialBox`'ı), orada bozuk bir plan boş ekran olur (koddan, ölçülmedi). Test TP4'te
+      "BİLİNEN KUSUR" olarak çivili; düzeltme `main`'de.
+- [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
+      ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
+      denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.
+- [ ] **TB3 `npm run kapsam` `library.ts`'i yüzde 50 ölçüyor (2026-10-09).** Raporun
+      "kapsanmadı" dediği on iki fonksiyonun hepsinin geçen testi var (`library.test.ts`).
+      Ölçüm kusuru; aday sebep aynı test dosyasının `import.meta.glob('./**/*.ts', { query:
+      '?raw' })`'si. TP24'ün tabanı bundan önce çözülmeli, yoksa yanlış sayıyı dondurur.
+- [x] **TB4 `useRowOrder.tsx`'in eksik bağımlılık uyarısı (2026-10-09).** `t` `useCallback`'in
+      bağımlılıklarında yoktu (`npm run lint`'in tek uyarısı). Analiz sırasında `main`'de
+      düzeldi (b84ab3e, "Kanca: liste tutamağı dil değişince yeni dilde").
+- [→] **TB5 `useHttpsScheme` sabitlenmemiş (2026-10-09).** Exe'nin verisi
+      `http://tauri.localhost` kökeninde; ayar bir gün `true` olursa köken değişir ve veri
+      görünmez olur. `fix/veri-kaybi` dalında sabitleniyor (K9).
+- [ ] **TB6 Bir dersin haftalık saati anlamsız bir sayıyla kabul ediliyor (2026-10-09).** Aynı
+      fuzz yoklaması, sonra elle: `weeklyHours` −5 ya da 10⁹ taşıyan bir ders olduğu gibi
+      açılıyor (2,5 ise 3'e yuvarlanıyor), dosya reddedilmiyor.
+      Test TP4'te "BİLİNEN KUSUR".
+- [ ] **TB9 Yapıştırılan haftalık saatin üst sınırı yok (2026-10-09).** `parseLessons` saati
+      yalnız pozitif ve tam sayıya çeviriyor; blok listesini ondan kuruyor
+      (`Array(saat / blok)`). 100 000 saat kabul ediliyor, 10 milyonda beş milyonluk bir dizi
+      (22,7 ms, kirli). Fuzz bunu kendiliğinden buldu: üreteç onaltılık ve üslü yazımlarla
+      (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
+      çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
+      yapıştırma tarafındaki eşi.
+- [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
+      Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
+      kapanışı `useFolder.ts`'in `beforeunload` flush'ı karşılamalı, ama flush eşzamansız bir
+      yazımı yalnız başlatıyor ve sayfa yazım inmeden gidiyor. Sitede beş denemenin beşinde
+      ölçüldü (programı açmayan aynı kökenli bir sayfadan okunarak). Veri kaybolmuyor: depo
+      tutuyor ve bir sonraki açılış klasörü yazıyor; kaybolan, klasörün kapanış anında güncel
+      olması. Exe'de aynı yol Tauri'nin eşzamansız köprüsünden geçiyor, ölçülmedi. Test
+      `klasor.spec.ts`'te "BİLİNEN KUSUR". **Nerede düzeltilecek (kullanıcının kararı,
+      2026-10-09, 2026-10-10'da TB8 eklendi):** `fix/veri-kaybi`'de değil; TB8 ile birlikte
+      ikinci bir düzeltme dalında. O dal `fix/veri-kaybi` `main`'e birleşir birleşmez
+      `main`'den açılır, çünkü ikisi de `useFolder.ts`'e dokunuyor ve aynı anda dokunmamalı.
+      `fix/veri-kaybi` kapanış flush'ına dokunmuyor, yani test o daldan sonra da aynı kalmalı.
+- [ ] **TB8 "Tümünü dosyadan aç" DK11'in deliğini taşıyor: eksik plan boş plan olarak açılıyor
+      (2026-10-09, veri kaybı sınıfı, onaydan sonra).** Tek dosya yolu (`readPlanFile`) öğretmen ya
+      da ders alanı hiç olmayan bir dosyayı "eksik" diye reddediyor (DENETIM DK11'in düzeltmesi);
+      paket yolu (`usePlans.ts`'in `replaceLibrary`'si) her planı çıplak `parseState` ile
+      okuyor ve aynı planı 0 öğretmen, 0 ders, 0 yerleşimle kabul ediyor. Ölçüldü (Vitest,
+      adsız dizili fikstürden kurulan tek planlı paket; `teachers`, `lessons` ya da ikisi
+      silinince dördünde de paket kabul, tek dosya ret). Onay sorusu yalnız plan sayısını
+      söylüyor, sonra "1 plan açıldı" deniyor ve bu bilgisayardaki bütün planlar gidiyor;
+      geri alınamaz. Kalan: oturum başının yedek zinciri (yalnız o an açık olan plan) ve
+      exe'de Belgeler'in önceki günleri. Arayüzde uçtan uca koşulmadı; zincir koddan.
+      **Nerede düzeltilecek (kullanıcının kararı, 2026-10-10):** `fix/veri-kaybi`'de değil;
+      TB7 ile birlikte ikinci düzeltme dalında, `fix/veri-kaybi` `main`'e birleşir birleşmez
+      `main`'den açılan. **Testini o dal yazar**, test dalı yazmaz. TP4'ün paket yolu fuzz'u
+      bu düzeltmeyi ve sıra 6'yı bekler.
 
 ## §9. Ham notlar
 

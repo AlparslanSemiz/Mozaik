@@ -20,7 +20,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-# No plugins but one (below). `withGlobalTauri` puts `invoke` on the page and the seven
+# No plugins but one (below). `withGlobalTauri` puts `invoke` on the page and the
 # commands in lib.rs and update.rs are the whole API surface, so
 # tauri-plugin-fs and tauri-plugin-dialog would be two dependencies for
 # something std::fs does in forty lines, and they would hand the page a
