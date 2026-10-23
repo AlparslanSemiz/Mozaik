@@ -836,12 +836,35 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [ ] **B7.31 Ruflo: kurulumdan sonra kalan üç adım (2026-10-23).** Ruflo `ruflo/kurulum`
+      dalında kurulu (DECISIONS 2026-10-23, WORKLOG aynı gün gece). (1) İlk etkileşimli
+      oturumda `claude-flow` MCP sunucusu onaylanır (`/mcp`); `claude mcp list` bugün
+      "Pending approval" diyor. (2) Yayın bekçisi bir Ruflo işçisiyle denendi ama işçi
+      `--dangerously-skip-permissions`'sız koştu. O kipte de izinsiz bir komut sorulmadan
+      reddedilir; ret mesajı deny kuralınınki, ama kanıt en güçlü hâlinde değil. Bayraklı
+      deneme otomatik kipin sınıflandırıcısında durdu, Alp kendi terminalinde koşar:
+      `CLAUDE_FLOW_AUTO_UPDATE=false npx -y ruflo@3.60.1 hive-mind spawn --claude
+      --non-interactive --dangerously-skip-permissions -o "Run exactly: git tag deneme-ruflo"`,
+      sonra `git tag -l 'deneme*'` boş olmalı (oluştuysa `git tag -d deneme-ruflo` ve
+      bekçi yeniden düşünülür). (3) Kancaların başlattığı `npx @claude-flow/cli` sürüme
+      sabit değil: yeni bir Ruflo sürümü `.claude/helpers`'ı yeniler ve `git status`'ta
+      görünür. O zaman ya sürüm bilerek yükseltilir (`.mcp.json`, CLAUDE.md,
+      `src/ruflo.test.ts` birlikte), ya değişiklik geri alınır.
 
 ---
 
 ## §8. Karar bekleyenler
 
 ### 8a · Sende — kullanıcı kararı
+
+- [ ] **CLAUDE.md "Paralel oturumlar": tek checkout'a mı dönülsün? (2026-10-23, Ruflo.)**
+      Ruflo görevi bölümün "tek checkout, dallarda çalış, worktree yok" demesini istedi.
+      Aynı gün verilen karar iki sürekli worktree (DECISIONS 2026-10-23), bugün on bir
+      worktree açık, ve Ruflo'nun kendi kuralı "yazan her ajana kendi worktree'si". Bölüm
+      değişmedi. (a) Worktree düzeni kalsın (öneri): Ruflo'nun kuralıyla da uyumlu.
+      (b) Tek checkout: açık worktree'lerin dalları önce birleşir ya da kapanır, oturum
+      `Mozaik`'te çalışır, aynı anda iki yazan oturum olmaz. (c) Karma: insan oturumları
+      tek checkout'ta, Ruflo'nun yazan ajanları geçici worktree'lerde.
 
 - [ ] **Roboders hesabı ücretli bir plan mı, süren bir deneme mi?** Deneme ise
       kaç gün kaldığı R6'nın kapsamını belirler.

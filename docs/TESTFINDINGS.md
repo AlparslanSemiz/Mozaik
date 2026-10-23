@@ -26,6 +26,15 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-23 · `ruflo hive-mind spawn --claude --non-interactive` (Ruflo 3.60.1, Linux, `ruflo/kurulum`) · yayın bekçisi
+Bulgu: Bash'teki `git tag deneme-ruflo` deny kuralıyla reddedildi (bir koşu). Kaynağı
+okurken: Ruflo'nun `terminal_execute` MCP aracı komutu `execSync`'e veriyor ve init'in
+`mcp__claude-flow__*` allow'u yüzünden soru sormadan koşuyordu, yani Bash kurallarının
+yanından geçiyordu. Deny'a eklenince ikinci koşuda işçinin listesinde yoktu.
+Tür: ne ürün ne test kusuru; geliştirme aracının varsayılanı.
+Ne yapıldı: iki sunucu adında deny, `src/ruflo.test.ts`; bayraklı deneme TODO B7.31.
+Kalıcı kural: TRAPS.md, tuzak 154.
+
 ### 2026-10-10 · `ci.yml` 38085275289 (`bakim/agir-kilit`, a748250; uygulama kodu `main` 60e1b33) · `kurulum.spec.ts:716`, "seçilen cinsiyet YENİLEMEDEN sonra da duruyor"
 Bulgu: yenilemeden sonra öğretmen satırı yok, plan bütünüyle boş ("1. plan", Branşlar 0).
 İzde yenilemeden önce `ders-programi` dolu (27 823 karakter, değişiklik inmiş); yenileme son

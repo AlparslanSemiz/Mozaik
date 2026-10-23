@@ -158,6 +158,101 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 ---
 
+## 2026-10-23 (gece) · Ruflo kurulumu, `ruflo/kurulum` dalı
+
+**Ne.** Alp'in kararıyla Ruflo 3.60.1 (`ruvnet/claude-flow`, `npx` ile, yalnız bu depoda)
+`ruflo/kurulum` dalında, `~/GitHub/Mozaikler/Mozaik-ruflo` worktree'sinde kuruldu. Ana
+klasör yalnız `main`'i tuttuğu için iş orada yapılmadı (CLAUDE.md, "Paralel oturumlar").
+Kayıt DECISIONS 2026-10-23'te.
+
+**Yedekler, her biri doğrulandı.**
+- `~/GitHub/Mozaikler/arsiv/ruflo-oncesi-2026-10-23.bundle` (`git bundle create --all`):
+  `git bundle verify` "complete history" diyor, 82 baş (72 ref ve on worktree'nin HEAD'i).
+- `ruflo-oncesi` dalı, `main` 4a2901c'de.
+- `~/.claude.ruflo-oncesi` (`cp -a`, 1,1 GB; kopyadan hemen sonra `diff -rq` boş) ve
+  `~/.claude.json.ruflo-oncesi` (`cmp` aynı).
+
+**Kurulum.** `npx -y ruflo@3.60.1 init --no-global --no-signup --no-mods
+--no-plugin-install --no-codex-detect --no-skills-sh`. Sihirbaz TTY istiyor, bayraklar
+`init --help`'ten. `--version`: `ruflo v3.60.1`. `doctor`: 24 geçti, 10 uyarı (daemon
+kapalı, `agent-browser` yok, isteğe bağlı `aidefence` ve `agentic-flow` yok, durağan
+şifreleme kapalı, Node 24'te better-sqlite3 uyarısı, MCP şeması yaklaşık 70 bin jeton,
+Cognitum ve LLM vekili yok), çıkış 0.
+
+**init'in dokunduğu, depoda.** 236 dosya, "Ruflo: init çıktısı olduğu gibi" commit'inde:
+`.claude/agents`, `.claude/commands`, `.claude/helpers` (kancaların betikleri),
+`.claude/skills` altında 21 beceri; `.claude/settings.json`'a yedi kanca türü, env
+(`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` dahil) ve üç allow kuralı; `.claude-flow/`
+(`config.yaml`, `CAPABILITIES.md`); `.gitignore`'a bir Ruflo bloğu. Çalışma verisi
+(`.swarm/`, `ruvector.db`, `.claude/proven-config.json`, `.claude-flow`'un geri kalanı,
+sonra `.hive-mind/`) yok sayılıyor; `.claude-flow/memory-package.json` bu makinenin npx
+yolunu taşıdığı için de. CLAUDE.md'ye ve `.mcp.json`'a dokunmadı, ikisi zaten vardı.
+`package.json` ve `package-lock.json` değişmedi.
+
+**init'in dokunduğu, dışarıda.** `~/.claude`'da Ruflo'nun yazdığı dosya yok. Kopyaya karşı
+`diff -rq` yalnız Claude Code'un kendi çalışma dosyalarını gösteriyor (oturum günlükleri,
+`session-env`, eklentilerin `.in_use` işaretleri, `.claude.json` yedekleri, kimlik
+tazelemesi, pazar yerlerinin `lastUpdated`'ı), bir de iki Ruflo işçisinin günlüğünü
+`projects/-home-alp-GitHub-Mozaikler-Mozaik-ruflo` altında, yani bu deponun yolunda.
+`settings.json`, `CLAUDE.md`, ajanlar, komutlar, beceriler ve `helpers` aynı.
+`~/.claude.json`: `projects` aynı, kullanıcı düzeyinde yeni MCP yok (`context7` ve
+`playwright` önceden vardı), değişen yalnız Claude Code'un üç önbellek damgası. Ruflo'nun
+dışarıya yazdığı tek şey `~/.claude-flow/update-state.json`, güncelleme denetiminin
+günlüğü, daha ilk `init --help`'te. cron, systemd kullanıcı birimleri, kabuk rc dosyaları,
+autostart, global npm ve `~/.codex` aynı. `/tmp`'de `claude mcp list` Ruflo göstermiyor.
+npx önbelleği `~/.npm/_npx/f782fc3c6f24847f`.
+
+**Kaynağı okuyunca çıkanlar ve kapamaları** (tuzak 153, 154, 155):
+- `--version` ve `daemon status` birer daemon başlattı. İkisi de saniyeler içinde
+  durduruldu, işçileri `claude` açmadı (saatlik bütçe 0/2). Kapama `claude-flow.config.json`
+  ve env; sonra env'siz `--version` ve `doctor` daemon açmadı, funnel "disabled (decided by:
+  project-config)".
+- Güncelleyici bir yama sürümünü depoda `npm install --save-exact` ile kurar, spinner
+  `~/.claude/settings.json`'a yazar, funnel uzak bir uca gider: dördü de env'de kapalı.
+  Güncelleyicinin proje dosyasında kapaması yok, CLAUDE.md terminal için ortam değişkenini
+  söylüyor ve `src/ruflo.test.ts` `package.json`'u ölçüyor.
+- Kanca süreleri milisaniyeydi, saniyeye çevrildi.
+- `terminal_execute` Bash kurallarının yanından geçiyordu, iki sunucu adında deny'da.
+- `claude mcp add-json --scope project` `.mcp.json`'un tamamını yeniden biçimledi ve son
+  satır sonunu sildi. Eski biçim geri kondu, yeni girdi CLI'ın yazdığıyla JSON olarak aynı.
+- Kancaların ayrık başlattığı `npx @claude-flow/cli` sürüme sabit değil: Ruflo yeni bir
+  sürüm çıkarınca `.claude/helpers`'ı yeniler ve bu `git status`'ta görünür (TODO B7.31).
+  `~/.claude/helpers` olmadığı için kullanıcı düzeyine yazmıyor.
+- `aidefence_*` araçları ilk kullanımda depoda `npm install @claude-flow/aidefence
+  --no-save` koşar: `package.json`'a yazmaz, `node_modules`'a yabancı bir paket koyar,
+  `npm ci` temizler.
+
+**Bekçinin denemesi, Ruflo üzerinden.** `hive-mind init`, sonra `hive-mind spawn --claude
+--non-interactive --no-auto-permissions`. İşçi `claude -p`, cwd worktree, izin kipi
+`default`. `git tag deneme-ruflo` → "Permission to use Bash with command git tag
+deneme-ruflo has been denied.", `permission_denials`'ta Bash, etiket oluşmadı (0,51 $).
+İkinci işçiye aynı komut `mcp__claude-flow__terminal_execute` ve
+`mcp__ruflo__terminal_execute` ile verildi: ikisi de işçinin araç listesinde yoktu,
+sunucular yalnız `terminal_create`, `list`, `history` ve `close`'u gösteriyordu, etiket
+oluşmadı (0,51 $). Bu denemeler yeniden başlatma istemedi, çünkü işçiler worktree'nin
+ayarlarını okuyan yeni süreçlerdi. `--dangerously-skip-permissions`'lı işçi otomatik
+kipin sınıflandırıcısında durdu ("Create Unsafe Agents") ve atlatılmadı; Alp'te (TODO
+B7.31).
+
+**Koşulan.** Her commit'ten önce `npm run hizli` yeşil (CLAUDE.md ile testin commit'inden
+beri 52 dosya, ondan önce 51). `npx vitest run src/docs.test.ts src/ruflo.test.ts` yeşil,
+`eslint src/ruflo.test.ts` ve `tsc --noEmit` temiz. Mutasyon kanıtı
+(`scripts/mutasyon-kaniti.sh --liste`, `agir.sh` altında) 12/12 kırmızı: daemon, funnel,
+güncelleme ve ilk açılış kapamaları, `git tag *` ve `yayinla *` kuralları, iki adın
+`terminal_execute`'u, bekçiyi açan bir allow, milisaniye süre, `ruflo@latest` ve MCP'nin
+env'i. **Koşulmayan:** Windows E2E, WebKit, mutasyonun tamamı, bayraklı bekçi denemesi.
+
+**Geri alma.**
+- Birleşmeden önce: `git worktree remove ~/GitHub/Mozaikler/Mozaik-ruflo` (gerekirse
+  `--force`) ve `git branch -D ruflo/kurulum`.
+- Birleştikten sonra: `main`'i `ruflo-oncesi`'ye geri almak ya da Ruflo commit'lerini
+  `git revert` etmek Alp'in kararı. Deponun o anki bütün hâli
+  `git clone ~/GitHub/Mozaikler/arsiv/ruflo-oncesi-2026-10-23.bundle` ile geri gelir.
+- Kullanıcı düzeyi: Claude Code kapalıyken `~/.claude.ruflo-oncesi` `~/.claude`'a ve
+  `~/.claude.json.ruflo-oncesi` `~/.claude.json`'a geri kopyalanır (o andan sonraki oturum
+  günlükleri gider); `rm -rf ~/.claude-flow ~/.npm/_npx/f782fc3c6f24847f`; açık bir daemon
+  `npx -y ruflo@3.60.1 daemon status --all` ile bulunur ve `daemon stop` ile durur.
+
 ## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
 
 **Önce güvenlik.** Klasörler elle `~/GitHub/Mozaikler/`'e taşınmıştı ve yedi worktree

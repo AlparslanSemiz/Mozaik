@@ -35,6 +35,40 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-23 · Ruflo benimsendi, yalnız bu depoda
+
+**Ne.** Alp'in kararı: geliştirmede Ruflo (`ruvnet/claude-flow`, npm'de `ruflo`) kullanılıyor,
+ajanlar, sürü, bellek ve kancalar için. Sürüm 3.60.1'e sabit ve yalnız `npx` ile koşar.
+Depoda duranlar: `.claude/` altındaki ajanlar, komutlar, yardımcılar ve beceriler,
+`.claude/settings.json`'daki kancalar, `.mcp.json`'daki `claude-flow` sunucusu,
+`claude-flow.config.json` ve `.claude-flow/config.yaml`; çalışma verisi depoya girmez.
+CLAUDE.md'nin kuralları Ruflo'nun şablonundan önce gelir, şablonun çelişmeyen satırları
+CLAUDE.md'nin "Ruflo" bölümüne alındı, alınmayanlar orada adıyla duruyor. Bir geliştirme
+aracı: `package.json`'a, `dist`'e ve babanın exe'sine hiçbir şey girmez.
+
+**Kapsam yalnız bu depo.** Kullanıcı düzeyinde hiçbir şey yok: global kurulum, init'in
+`~/.claude/CLAUDE.md`'ye yazdığı işaretçi (`--no-global`), mod eklentileri ve pazar yeri
+(`--no-mods`), `skills.sh` kaydı, Codex yapılandırması, Cognitum kaydı ve kendiliğinden
+başlayan daemon. Ruflo'nun kendiliğinden yaptığı dört iş kapalı: her komutun açtığı daemon,
+depoda `npm install --save-exact` koşan güncelleyici, ilk açılışta `~/.claude/settings.json`'a
+yazan spinner ve uzak bir uca mesaj ve olay gönderen funnel (tuzak 153).
+
+**Yayın bekçisi.** Etiket ve yayın Claude'a kapalı, Ruflo'nun açtığı ajanlar dahil:
+`npm run yayinla`, `git tag`, etiket itme, `gh release create` ve Ruflo'nun komut koşan
+`terminal_execute` aracı (tuzak 154). Etiketi yine yalnız `npm run yayinla` atar ve onu
+Alp koşar. Bir Ruflo işçisiyle denendi (WORKLOG 2026-10-23, gece).
+
+**Eski hâli.** Ajan katmanı yoktu: Claude Code'un kendi Agent aracı, `.mcp.json`'da üç
+sunucu, `.claude/` altında yalnız `paket-turu` becerisi.
+
+**Gerekçe.** Kullanıcının kararı, bu turda yeniden tartışılmadı. Yedekler ve geri alma
+WORKLOG'un aynı günkü girdisinde.
+
+**Açık kalan.** CLAUDE.md'nin "Paralel oturumlar" bölümü değişmedi. Görev "tek checkout,
+dallarda çalış, worktree yok" diyordu; bu, aynı günün worktree kararıyla (aşağıdaki kayıt)
+ve Ruflo'nun "yazan her ajana kendi worktree'si" kuralıyla çelişiyor. Karar kullanıcıda
+(TODO §8a).
+
 ### 2026-10-23 · Worktree'ler toplandı: ana klasör ve tek refactor worktree'si
 
 **Ne.** Kullanıcının kararı: worktree'lerin hepsi `~/GitHub/Mozaikler/` altında, sürekli

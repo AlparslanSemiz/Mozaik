@@ -150,7 +150,9 @@ Uzun tablolar `scratch/`'te bir rapor dosyasına yazılır, mesaj ona işaret ed
 
 Ruflo (eski adı claude-flow) bir geliştirme aracı: ajanlar, sürü, bellek ve kancalar.
 Yalnız bu depoda kurulu ve sürüme sabit; global kurulum yok, Ruflo'nun kendi becerileri
-`npm install -g` dese de. Her komut `npx -y ruflo@3.60.1 <komut>` ile koşar. MCP
+`npm install -g` dese de. Her komut `npx -y ruflo@3.60.1 <komut>` ile koşar; terminalden
+koşarken başına `CLAUDE_FLOW_AUTO_UPDATE=false` eklenir, çünkü güncelleyicinin tek
+kapaması bu ortam değişkeni ve Claude'un oturumu dışında yok (tuzak 153). MCP
 sunucusu [.mcp.json](.mcp.json)'da `claude-flow` adıyla, ajanları, komutları, becerileri ve
 kancaları `.claude/` altında, ayarları [.claude/settings.json](.claude/settings.json)'da ve
 [claude-flow.config.json](claude-flow.config.json)'da. Çalışma verisi (`.swarm`,
@@ -178,8 +180,8 @@ commit atfını kendi kuralıyla yapar).
 
 **Yayın bekçisi.** `.claude/settings.json`'daki deny kuralları `npm run yayinla`'yı,
 `git tag`'i, etiket itmeyi, `gh release create`'i ve Ruflo'nun komut koşan
-`terminal_execute` aracını Claude'a kapatır. Ruflo'nun açtığı ajanlar da bu kurala
-bağlı. Kural gevşetilmez; [src/ruflo.test.ts](src/ruflo.test.ts) onu ve aşağıdaki
+`terminal_execute` aracını Claude'a kapatır (tuzak 154). Ruflo'nun açtığı ajanlar da bu
+kurala bağlı. Kural gevşetilmez; [src/ruflo.test.ts](src/ruflo.test.ts) onu ve aşağıdaki
 kapamaları korur.
 
 **Kapalı tutulanlar.** Daemon kendiliğinden başlamaz, otomatik güncelleme, funnel

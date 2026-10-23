@@ -26,6 +26,7 @@ okunur, bir numara ise `### N ·` başlığıyla aranır.
 - [Çeviri ve metin](#çeviri-ve-metin): ekrandaki bir metin, sözlük ya da kısaltma değişirken.
 - [Test hijyeni ve bedava yeşil](#test-hijyeni-ve-bedava-yeşil): bir test yazılırken ya da bir testin ölçtüğü mutasyonla kanıtlanırken.
 - [Ölçüm disiplini](#ölçüm-disiplini): bir süre, performans ya da platform iddiası ölçülürken ya da gerekçe diye yazılırken.
+- [Geliştirme araçları ve ajanlar](#geliştirme-araçları-ve-ajanlar): bir geliştirme aracı, ajan katmanı, kanca ya da izin kuralı kurulurken ya da değişirken.
 
 ---
 
@@ -1410,6 +1411,41 @@ dışarıdan `timeout` sarılmaz. Betik komutun bütün ağacını ortamındaki 
 buluyor, süre dolunca, bir sinyal gelince ve komut geride bir şey bırakıp çıkınca önce
 ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` ölçüyor.
 
+## Geliştirme araçları ve ajanlar
+
+**Kural.** Bir geliştirme aracı kurulmadan önce kendi başına ne yaptığı kaynağından
+okunur: arka plan işi, güncelleme, ağ ve kullanıcı dizinine yazma. Her biri proje
+dosyasında kapatılır ve bir testle tutulur, çünkü aracın kendi `init`'i o dosyaların
+üstüne yazabilir. Bir izin kuralı yalnız adını taşıdığı aracı bağlar: aynı işi yapan
+başka bir araç, bir MCP aracı da, ayrıca kapatılır.
+
+### 153 · Ruflo'nun her komutu bir daemon açar
+`npx ruflo --version` ve `daemon status` bile arka planda bir daemon başlattı
+(2026-10-23, `ruflo/kurulum`), ve daemon'un işçileri başsız `claude` oturumu açıp jeton
+harcar. Aynı aracın kendiliğinden yaptığı üç iş daha var: güncelleyici bir yama sürümünü
+depoda `npm install --save-exact` ile kurar, yani `package.json`'a yazar; ilk açılış
+kancası `~/.claude/settings.json`'a spinner fiilleri ekler; funnel uzak bir uca mesaj ve
+olay gönderir. Sebebi: Ruflo'nun kendi kapaması `.claude/settings.json`'daki
+`claudeFlow.daemon.autoStart`, depoda bu dosya zaten vardı ve init onu birleştirirken o
+anahtarı yazmadı. Çare: [claude-flow.config.json](../claude-flow.config.json) (daemon ve
+funnel) ve [.claude/settings.json](../.claude/settings.json) ile
+[.mcp.json](../.mcp.json)'un env'i (dört kapama). Güncelleyicinin kapaması yalnız bir
+ortam değişkeni, terminalden koşan `npx ruflo` onu taşımaz (CLAUDE.md, "Ruflo").
+`src/ruflo.test.ts` kapamaları ve `package.json`'u ölçüyor, mutasyonla kanıtlı.
+
+### 154 · Bir MCP aracı Bash'in deny kurallarının yanından geçer
+Ruflo'nun `terminal_execute` aracı aldığı komutu doğrudan `execSync`'e verir, ve init
+`mcp__claude-flow__*`'i soru sormadan izinli yazdı: `Bash(git tag *)` kapalıyken
+`git tag` bu araçla koşabilirdi. Bir hive-mind işçisi aynı araçları ikinci bir sunucu
+adıyla, `ruflo` olarak da görür. Çare: iki adda da `terminal_execute` deny'da. Claude Code
+deny'daki bir aracı modelin listesinden çıkarıyor; Ruflo'nun işçisi aracı hiç görmedi
+(2026-10-23). `src/ruflo.test.ts` ölçüyor.
+
+### 155 · Claude Code kanca süresini saniye okur
+Ruflo'nun init'i kancaların `timeout`'unu milisaniye yazdı (5000, 10000, 15000). Asılı
+kalan bir pre-bash kancası her Bash çağrısını 83 dakika tutardı. Çare: saniyeye
+çevrildi; `src/ruflo.test.ts` hiçbir kancanın 60 saniyeyi geçmediğini ölçüyor.
+
 ---
 
 ## Dizin
@@ -1427,11 +1463,12 @@ ağacı kapatıyor, kilit ancak ondan sonra boşalıyor. `src/agir.test.ts` öl�
 | Çeviri ve metin | 12, 80, 87, 89, 90, 143 |
 | Test hijyeni ve bedava yeşil | 23, 24, 25, 51, 59, 67, 68, 79, 83, 84, 92, 99, 108, 109, 111, 112, 120, 124, 127, 128, 129, 131, 132, 133, 144, 145, 147, 148, 149, 151 |
 | Ölçüm disiplini | 42, 65, 81, 101, 113, 114, 115, 116, 118, 119, 125, 150 |
+| Geliştirme araçları ve ajanlar | 153, 154, 155 |
 
 **Çıkarılan numaralar: 43, 44, 62, 71, 88, 96.** Projeye özgü olmayan genel
 JavaScript, CSS ve git bilgisiydiler. Tek satırlık hatırlatmaları grup
 kurallarında duruyor: 43, 44, 62, 71 ve 96 "Test hijyeni ve bedava yeşil"
 grubunda, 88 "Düzen ölçümü" grubunda. Bu numaralar yeniden kullanılmıyor, çünkü eski kayıtlardaki bir atıf yanlış tuzağı gösterirdi. En
-büyük kullanılan numara 152, yeni bir tuzak 153'ten devam eder. Test stratejisi
+büyük kullanılan numara 155, yeni bir tuzak 156'dan devam eder. Test stratejisi
 dalı kendi numaralarını 150'den başlatmıştı, yani o dal birleşirken numaraları buradaki
 sırayla çakışabilir.

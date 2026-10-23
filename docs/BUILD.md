@@ -491,13 +491,14 @@ kullanılan ağırlıklara göre ölçülerek seçildi (tuzak 69 ve 70). Reçete
 
 ## Geliştirme araçları
 
-`.mcp.json` üç sunucu tanımlar, hiçbiri `dist/index.html`'e girmez.
+`.mcp.json` dört sunucu tanımlar, hiçbiri `dist/index.html`'e girmez.
 
 | Sunucu | Ne için |
 |---|---|
 | `playwright` | uygulamayı sürüp bakmak, E2E süitinin yerine geçmez |
 | `chrome-devtools` | konsol, ağ ve performans profili, hedef makine ilkesinin ölçüldüğü yer |
 | `context7` | React ve Vite sürüm dokümanı |
+| `claude-flow` | Ruflo: ajanlar, sürü ve bellek, yalnız bu depoda ve sürüme sabit ([CLAUDE.md](../CLAUDE.md), "Ruflo") |
 
 Tip hataları için `typescript-lsp` eklentisi kullanılıyor. Son sözü `npm run tipler`
 ve [TESTPLAN.md](TESTPLAN.md)'deki katmanlar söyler.
