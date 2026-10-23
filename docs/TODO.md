@@ -843,6 +843,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
       Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
       "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
+- [ ] **B7.32 Maskable ikon kendi dosyasında, güvenli alanıyla (2026-10-23).** Manifest'in
+      `maskable` girdisi bugün `icon-512.png`'yi gösteriyor: köşeleri saydam, ve sayfanın
+      köşeleri ortadaki %80'lik güvenli dairenin dışında, yani dairesel maskede kırpılır.
+      Yapılacak: `site/`'ta yeni bir dosya, icon-maskable-512.png (henüz yok); zemin kenardan
+      kenara (saydam köşe yok), sayfayla dersler güvenli dairenin içinde; manifest'in
+      `maskable` girdisi ona, `sw.js`'in kabuğuna da eklenir. Kullanıcı kararı: şimdi değil,
+      ayrı bir dalda.
 
 ---
 

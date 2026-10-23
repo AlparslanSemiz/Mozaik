@@ -55,7 +55,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
-   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
+   Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı;
+   bir sonraki etiketten önce exe'nin simgesi Windows görev çubuğunda %100 ve %125'te görülür)
    → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
    oturumunda. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
    `scripts/linux-kur.sh` `~/GitHub/Mozaikler/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
@@ -103,11 +104,17 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
    duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
    (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
+11. Yeni işaret `main`'de (2026-10-23, `ozellik/asil-ikon`): kullanıcının seçtiği resimden
+   elle çizilen takvim sayfası; `.ico`'da 16, 20 ve 24 sade, 32 ve üstü ayrıntılı. Exe
+   simgesi Windows görev çubuğunda yazıldı, doğrulanmadı (yayın kapısında, madde 0).
+   Maskable ikonun kendi dosyası TODO B7.32, ayrı dalda.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
 - DENETIM'in kullanım kolaylığı sorunları (KS) ve önerileri (Ö) açık, TODO'ya taşınmadı.
 - Sığdır'da babanın tam haftası Windows %125'te hâlâ kırpılıyor.
+- Yeni işaretin Windows görev çubuğundaki ve exe'deki simgesi yazıldı, doğrulanmadı:
+  %100'de 24 px'lik sade çizim görünmeli, Windows'ta görülmedi.
 - Kurulamayan haftadaki öneri "bundan azı yok"u kanıtlayamıyor. Fikstürde ret
   sonrası 6 ve karma yolun daha az saatli haftası açık.
 - Babanın makinesinde (WebView2) worker'lar ve süre ölçülmedi. Exe penceresinin
@@ -147,7 +154,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 164 918 bayt, brotli 280,5 kB (2026-10-23, `ozellik/asil-ikon`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
@@ -165,27 +172,45 @@ olarak çizildi, raster kopyalanmadı: `site/icon.svg` 1024'lük viewBox'ta indi
 (köşe 180, resimde ölçülen), beyaz sayfa, iki ayna kanca, beş ders; `site/icon-small.svg`
 kancasız sayfa ve üç ders. Ondan üretilenler: `index.html`'in favicon URI'si
 (`favicon.mjs`), `site/icon-192.png` ve `icon-512.png` (`simge.mjs`; manifest'in
-`maskable` girdisi de 512'yi gösteriyor), `kurulum/icon.ico` (`ikon.mjs`; Tauri
-`bundle.icon` ile exe'ye, `linux-kur.sh` ile Linux'a da bu dosyalar gidiyor), `App.tsx`'teki
-üst çubuk işareti. `src-tauri/icons` yok ve `tauri icon` kullanılmıyor, `tauri.conf.json`
-dokunulmadı. Eşik 20'den 32'ye, gerekçesi DECISIONS'ta. Aynı gün önce çizilen dört
-sütunlu takvim (`ozellik/ikon`) kullanıcının isteğiyle bırakıldı, o dal birleşmeyecek.
+`maskable` girdisi de 512'yi gösteriyor, kendi dosyası TODO B7.32), `kurulum/icon.ico`
+(`ikon.mjs`; Tauri `bundle.icon` ile exe'ye, `linux-kur.sh` ile Linux'a da bu dosyalar
+gidiyor), `App.tsx`'teki üst çubuk işareti. `src-tauri/icons` yok ve `tauri icon`
+kullanılmıyor, `tauri.conf.json` dokunulmadı. Aynı gün önce çizilen dört sütunlu takvim
+kullanıcının isteğiyle bırakıldı, dalı `ozellik/ikon` yerelde ve origin'de silindi.
+
+**Kullanıcının cevapları (ikinci tur).** Eşik kalıyor: 16, 20 ve 24 sade, 32 ve üstü
+ayrıntılı; Windows %100 ölçekte görev çubuğunda 24 px'i gösteriyor, yani babanın her gün
+gördüğü sade çizim. DECISIONS'ın 2026-09-01 eşik kaydı kullanıcının isteğiyle kaldırıldı,
+kural 2026-10-23 kaydında, geçmiş satırı olmadan. Büyük çizim resmin renklerinde kaldı;
+sade çizimde sarının yerine büyük çizimin moru: beyaza karşı mor `#c576f3` 2,89:1, mercan
+`#fd6454` 2,95:1, mavi `#65b6ec` 2,22:1 (mavi ~2,8'e varmıyor, kullanıcıya soruldu).
 
 **Bakılan.** `scripts/ikon-karsilastir.mjs` iki çizimi 16-48 px'te açık ve koyu zeminde
 çizdi: ayrıntılı çizimin kancaları ve sütun aralıkları 16 ve 20'de leke, 24'te bulanık,
 32'de okunuyor. Resim ile SVG 512 px'te yan yana karşılaştırıldı. Önizleme
 `scratch/ikon-onizleme.png` (.ico'nun kendi girdileri, 16/24/32/48/256, açık ve koyu görev
-çubuğu), sekme `scratch/ikon-sekme-1920.png` ve `scratch/ikon-sekme-yakin.png` (gerçek
-Chrome penceresi 1920×1080; ekran 2x, yani sekme simgesi 32 fiziksel pikselde çizildi).
+çubuğu) ve `scratch/ikon-boylar.png`, mor sade çizimle yeniden. Sekme
+`scratch/ikon-sekme-1920.png` ve `scratch/ikon-sekme-yakin.png` (gerçek Chrome penceresi
+1920×1080; ekran 2x, yani sekme simgesi 32 fiziksel pikselde çizildi). Üst çubuk işareti
+1920×1080'de, kök 13 px iken 22,75 px çiziliyor, yani 24'ün altında ve sade çizim
+(5 dikdörtgen); `scratch/ikon-ustcubuk-1920.png` ve `-3x.png`.
 
-**Ölçülen.** `dist/index.html` 1 164 737 → 1 164 918 bayt (+181), `dist-site/` toplam
-1 187 237 → 1 184 474 bayt (−2 763), `kurulum/icon.ico` 14 859 → 13 006 bayt.
+**Windows görev çubuğu ve exe ikonu: yazıldı, doğrulanmadı.** `.ico`'nun girdileri ve
+eşiği `temel.spec.ts` 79'da piksel piksel ölçülüyor, exe'ye gömülmesini `surum.yml`'de
+`exe-ikon.mjs` ölçüyor; ama simgenin görev çubuğunda nasıl göründüğü Windows'ta
+görülmedi. **Yayından önce:** bir sonraki etiketten önce exe'nin simgesi Windows görev
+çubuğunda %100 ve %125 ölçekte görülür.
 
-**Koşulan.** `npm run hizli` yeşil (51 dosya, 1344 geçti, 1 atlandı), `eslint
-src/ui/App.tsx` ve dokunulan dosyalarda `prettier --check` temiz, `npm run build` ve
-`build:site` 0, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `agir.sh` altında 7/7
-yeşil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta gerçek exe ve görev çubuğu: yeni
-sade çizimin 20/24 px'te görev çubuğunda doğru logo gibi okunduğu Windows'ta görülmedi.
+**Ölçülen.** `dist/index.html` 1 164 737 → 1 164 918 bayt (+181), brotli 280,5 kB
+(`npm run boyut`, sınır 289 kB); `dist-site/` toplam 1 187 237 → 1 184 501 bayt;
+`kurulum/icon.ico` 14 859 → 13 010 bayt.
+
+**Koşulan.** `git merge main` (`fix/windows-e2e`'nin commit'i, WORKLOG'da çatışma: iki
+girdi de kaldı), sonra `npm run hizli`, `eslint src/ui/App.tsx`, dokunulan dosyalarda
+`prettier --check`, `npm run build`, `build:site`, `boyut`, ve `temel.spec.ts` 72 ve 79 ile
+`kabuk.spec.ts` 76 `agir.sh` altında 7/7. `hizli`'nin ilk koşusunda A1 belge kapısı
+kırmızıydı: B7.32 henüz olmayan dosyayı ters tırnak içinde yol olarak anıyordu, cümle
+düzeldi. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta gerçek exe ve görev çubuğu.
 
 ## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
 
