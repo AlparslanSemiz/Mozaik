@@ -37,6 +37,7 @@ blob-report/
 !.claude-flow/config.yaml
 !.claude-flow/CAPABILITIES.md
 .swarm/
+.hive-mind/
 ruvector.db
 .claude/proven-config.json
 .claude/.proven-config-version
