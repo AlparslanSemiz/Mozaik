@@ -101,8 +101,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
    silinmesi) hiçbir dalda yoktu, sonraki turda yazılır. `test/gercek-ortam` (TP7 Windows'ta
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
-   duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
-   yalnız bir etiketle ya da elle derlemeyle sınanır.
+   duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
+   (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
 
 **Bilinen kusurlar.** Ayrıntısı ve sayıları aşağıdaki 2026-10-08 girdisinde,
 "Şu an'dan taşınan anlatı" altında.
@@ -131,7 +131,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
+| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
@@ -155,6 +155,22 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Çözücü, örnek okul | 367/367 blok, 367 düğüm | `src/solver.test.ts`, "gerçek ölçek" |
 | Öneri, babanın verisi | en az saat 4, en az öğretmen 6, zaten geldiği gün bedel 7 (üçü CP-SAT'ın en iyisi), sınır 6 sınır ve 9 saat, karma 1 ders ve 3 saat; KY Cumartesi Olmaz'dan sonra en az saat 5 (CP-SAT'ın en iyisi); kanıtsız | `src/relax.test.ts`, gerçek exe, 2026-09-25 B5.11 |
 | Öneri süresi, babanın dosyası | ilk öneri 6,0 s, arama 42,7–44,0 s, bir Olmaz'dan sonra 50,6–51,1 s, bir Olur'dan sonra 32,5–33,1 s (Linux exe, 7 worker); aynı gün eski motorla 46,8–48,0 s, 57,2–59,6 s ve 37,5 s | sürücü, 2026-09-26 |
+
+---
+
+## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
+
+Birleştirmenin `main` push'unda `ci.yml` (site dahil) yeşil, `windows.yml` iki testte
+kırmızıydı; ikisi de birleştirmeden önce de vardı (TESTFINDINGS 2026-10-23). Dal commit'i
+"Test: Windows E2E'nin iki kırmızısı, kayıt uyarısı kendi şeridinde, erişilebilirlik
+taraması ekran başına": `temel.spec.ts`'in locator'ı kendi cümlesine daraltıldı (arkadaki
+ürün kusuru TODO B7.31), `erisim.spec.ts`'in üç ekranlı testi üçe bölündü (TP22).
+Aynı akşam `surum.yml` elle, yayınlamadan koşturuldu (40019649665): `package`
+(`ubuntu-24.04`) ve `exe` yeşil, artefaktlar `upload-artifact@v7` ile indi, `publish`
+atlandı; 2026-10-10'daki değişikliği etiketsiz sınanmış oldu.
+
+**Koşulan testler.** İki spec yerelde kilit altında (7/7); `canSave` şeridini kaldıran
+mutasyon `--derle` ile kırmızı; `hizli`. **Koşulmayan.** Windows'ta yerelde (CI'da koşar).
 
 ---
 

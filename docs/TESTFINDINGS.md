@@ -26,6 +26,18 @@ Kalıcı kural: <yok | TRAPS.md, tuzak N>
 
 ## Kayıtlar
 
+### 2026-10-23 · `windows.yml` 40019600257 (`main`, 4a2901c) · `temel.spec.ts:550` ve `erisim.spec.ts:116`
+Bulgu: ana E2E 635/637, iki kırmızı. (1) "kayıt çalışmıyorsa kalıcı kırmızı uyarı":
+`.save-warning` iki elemana çözüldü, "otomatik kayıt çalışmıyor" ve VK2'nin "depolama alanı
+dolu" şeridi. Önceki `main` push'unda (38087627073, 45b8103, yalnız belge) aynı hata vardı;
+Linux'ta yerelde ve `ci.yml`'de yeşil. (2) Erişilebilirlik taramasının üç ekranlı testi
+48,8 s'de düştü, TP22'nin bilinen bütçe sorunu.
+Tür: (1) test kusuru (locator dar değil) ve arkasında bir ürün kusuru (depo yokken "dolu"
+demek), veri kaybı değil; (2) test kusuru (bütçe).
+Ne yapıldı: `fix/windows-e2e`: (1) locator kendi cümlesine daraltıldı, `canSave` şeridini
+kaldıran mutasyon kırmızı; ürün kusuru TODO B7.31. (2) test üç teste bölündü (TODO TP22).
+Kalıcı kural: yok.
+
 ### 2026-10-10 · `ci.yml` 38085275289 (`bakim/agir-kilit`, a748250; uygulama kodu `main` 60e1b33) · `kurulum.spec.ts:716`, "seçilen cinsiyet YENİLEMEDEN sonra da duruyor"
 Bulgu: yenilemeden sonra öğretmen satırı yok, plan bütünüyle boş ("1. plan", Branşlar 0).
 İzde yenilemeden önce `ders-programi` dolu (27 823 karakter, değişiklik inmiş); yenileme son
