@@ -1264,7 +1264,7 @@ dosyayı temiz saymıştı. İkisinde de sıfırdan farklı çıkış kodu "test
 görüyor" diye okundu. Çare `scripts/mutasyon-kaniti.sh`'de: test önce değişmemiş kodda
 koşar ve yeşil olmalıdır, ve 126, 127 ya da sinyal alan bir koşu kırmızı sayılmaz. İkisi
 betiğin kendi koşularıyla gösterildi. Kural: **her mutasyon bu betikle yapılır, kendi
-sarmalayıcısıyla değil** (CLAUDE.md).
+sarmalayıcısıyla değil** (TESTPLAN, "Test politikası").
 
 ### 151 · Kısıtlı PATH'le koşan bir kabuk testi, betiğe sızan dış komutu göremez
 Linux başlatıcısının testi PATH'i yalnız sahte programlara kısıyordu, gerçek Chrome
