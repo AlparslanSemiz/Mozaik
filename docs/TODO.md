@@ -836,6 +836,13 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [ ] **B7.31 Depo hiç yazılamıyorken iki şerit, biri yanlış (2026-10-23).** localStorage'ın
+      her çağrısı hata atınca "otomatik kayıt çalışmıyor" şeridinin yanında VK2'nin
+      "depolama alanı dolu" şeridi de çıkıyor: otomatik kayıt düşen her yazımı "dolu" sayıyor,
+      oysa depo dolu değil, hiç yok. Windows E2E'de görüldü (`windows.yml` 40019600257 ve
+      38087627073, `temel.spec.ts` "kayıt çalışmıyorsa"); test kendi şeridine daraltıldı.
+      Veri kaybı yok, iki şerit de "Dosyaya kaydet" diyor. Çare adayı: `canSave` yokken
+      "dolu" şeridi gösterilmez. Ürün değişikliği, ayrı bir dalda; ölçülmedi.
 
 ---
 
@@ -1635,7 +1642,8 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
       `sat.ts`, "pure/relax" paketi; tur stryker listesini aynı commit'te değiştiriyor), sıra 4 ve 6
       (veri yolu ve okuyucular).
 - [ ] **TP22 Kararsızlık (C2).** `erisim.spec.ts:116`'nın kök sebebi bulundu: Windows'ta üç
-      axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölünür. CI'da JSON
+      axe taraması 30 s bütçenin ~25 s'i, en ağırı Çıktı; test üçe bölündü (2026-10-23,
+      `fix/windows-e2e`: Program, Kontrol, Çıktı ayrı testler, her biri kendi 30 s'siyle). CI'da JSON
       raporu ve 30 günlük kararsız sayacı. —
       **Kök neden adayı (2026-10-10, kullanıcının isteği):** `kapanis.spec.ts` ve
       `klasor.spec.ts`'in saati `now + 1_000`'de durdurması ("Test: saatin durduğu an bir
