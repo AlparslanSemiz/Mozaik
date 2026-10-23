@@ -49,12 +49,16 @@ girdiği için artık `main`'den açılabilir, TB8'in testini o dal yazar; paket
 TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 
 **Sıradaki iş.**
-0. Özellik oturumunun sırası (2026-10-10, Alp): `fix/veri-kaybi` ve `bakim/agir-kilit`
-   girdi, `ci/runner-sabitle` yayın kapısından önce girer. Sonra yayın kapısı dalı
-   (Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
+0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
+   uygulaması ∥ zebra → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
+   Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
    Windows boyut ve açılış ölçümü, kurtarma kopyası bildirimi, 0/21 branş tutarsızlığı)
-   → mutasyon parçaları (arkada) → zebra (bitti) → Roboders ve Eyotek canlı turları → Linux
-   uygulaması; özellik oturumunun 2026-10-10 akşamki sırası TODO'nun İÇİNDEKİLER'inde. **O test yeşil olana kadar etiket yok.** Düzeltmelerde RK14 (bozuk arama
+   → e-posta → Roboders ve Eyotek turları → Eyotek'e gönderme. Mutasyon parçaları test
+   oturumunda. **O test yeşil olana kadar etiket yok.** Linux uygulaması (B7.28) bitti:
+   `scripts/linux-kur.sh` `~/GitHub/Mozaik`'in temiz `main`'inden kurar, Chrome'un app modu,
+   kendi profili, yalnız Chrome; rpm bırakıldı. Kalan Alp'te: kurulum ve README'deki
+   taşıma, klasör izninin yeniden açılışta geri gelmesi; Wayland'de görev çubuğu simgesi
+   ölçülmedi. Düzeltmelerde RK14 (bozuk arama
    günlüğü Ayarlar → Veri'yi çökertebilir) VK1 ve VK2'nin hemen arkasında (TODO §7).
    **`fix/bos-acilis` (TODO B7.30) yayın kapısının ön şartı:** açılışta boş okunan plan,
    anahtarı doluysa üstüne yazılmıyor.
@@ -65,7 +69,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    KS ve Ö maddelerinin önünde.
 3. Depodaki gerçek veri kalıyor, karar verildi; depoya yeni gerçek veri girmez
    (DECISIONS 2026-10-08).
-4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
+4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel; rpm 2026-10-10'da bırakıldı, B7.28). B7.22 (Sığdır'ın gün
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
    PR'ı birleşti, `upload-artifact` elle v7'de, Linux işleri `ubuntu-24.04`'te sabit
@@ -118,7 +122,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
 | Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
-| Site, sunucu, klasör | 3 dosyada 23 test (2026-10-23) | `--config playwright.site.config.ts --list` |
+| Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 40 (2026-10-09 gece) | `e2e/*.spec.ts` |
 | Rust testleri | 26, hepsi geçti (2026-09-24) | `npm run exe:test` |
@@ -130,7 +134,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | CI koşusu (`ci.yml`), push başına | yeşil, ilk başlangıçtan son bitişe 6,5 dk; işlerin toplamı 31,9 runner dakikası, en uzun iş `e2e (2)` 386 s, `e2e-arama (3)` 383 s, `denetim` 209 s (2026-10-09 gece) | `gh run view 37957196115` |
 | Ana E2E, Windows | 623/623, kararsız yok (sonraki iki `main` push'unda `erisim.spec.ts:116` kararsız, kök sebebi TESTFINDINGS'te); iş 18,5 dk, iki E2E adımı 13,8 ve 3,7 dk (`haftalik.yml`, 290f55d); push'ta ilk koşu 21,5 dk (`windows.yml`, 3cd0ecb) (2026-10-09) | koşular 37914431289, 37917969274 |
 | Ana E2E, WebKit | 588 geçti, 19 kırmızı, 11 atlandı, 17,8 dk, bu makinede Playwright'ın kabında (2026-10-09) | `npm run test:webkit`, TESTPLAN "WebKit" |
-| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm` |
+| rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
 | `dist/index.html` | 1 159 056 bayt, brotli 279,37 kB (2026-10-09, `refactor/prefs`); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
@@ -239,6 +243,59 @@ kontrol, görünüm, sıra) 246/246. `npm run ekran` dört kez (iki önce, iki s
 CI'ı 38087079147 yeşil.
 
 **Koşulmayan testler.** `kontrol` (CI'da), Windows, WebKit, `mutasyon`.
+
+## 2026-10-10 · `ozellik/linux`: Linux uygulaması Chrome'un app modunda (B7.28)
+
+**Analiz** (dosyaya yazılmadan, Alp'in onayından önce). Chrome 154 ve Brave 1.96, geçici
+profil, `--app`, ağsız için ölü vekil (`--proxy-server=http://127.0.0.1:9`), kilit altında.
+Site: ağsız ilk açılış iki tarayıcıda da `chrome-error://`, ağla ilk açılıştan sonra ağsız
+ikinci açılış service worker'dan, yüklenen örnek ekranda. `file://`: ağsız açılıyor.
+`showDirectoryPicker`: Chrome'da iki yolda `function`, seçici açıldı (söz 2,5 s bekledi);
+Brave'de iki yolda `undefined`. VK1: aynı profilde ikinci `--app` çağrısı aynı süreçte ikinci
+pencere; A örneği yükleyince B'de şerit, A'da yok, iki tarayıcıda. Alp'in verisi: Brave'in
+iki profilinde sitenin geçmişi, service worker'ı ve IndexedDB'si yok; Chrome'un Default
+profilinde kurulu Mozaik web uygulaması, service worker, `ders-programi-*` anahtarı ve
+`ders-programi-klasor` IndexedDB'si (leveldb sıkıştırılmış, anahtarların hepsi sayılamadı).
+Eski Tauri Linux verisi `~/.local/share/com.dersprogrami.arac` (2026-08-27, 11 anahtar,
+plan 1 940 karakter), dokunulmadı.
+
+**Kararlar (Alp):** `file://` ve ayrı Chrome profili, yalnız `google-chrome`, rpm bırakılır,
+"Şu an" son commit'te. DECISIONS 2026-10-10.
+
+**Ne yapıldı** (dal commit'leri konusuyla):
+- "Belgeler: özellik sırası ve B7.28 Linux uygulaması".
+- "Linux: kurulum betiği ve Chrome başlatıcısı, taşıma README'de": `scripts/linux-kur.sh`,
+  `scripts/linux-mozaik.sh`, `src/linuxKur.test.ts` (sahte ev dizininde gerçek betik),
+  BUILD.md "Linux uygulaması".
+- "Test: Linux başlatıcısı sistem araçlarıyla koşuyor, var olan profil; README'de doğru
+  bölüm": mutasyonun bulduğu bedava yeşil (TESTFINDINGS), ve README'nin "Ayarlar → Veri"si
+  "Planlar ve yedek" oldu (dosyaya kaydetme ve klasör orada; analiz raporunda da yanlıştı).
+- "Test: Linux'a taşıma, site kökeninden file://'a bütün planlar": `e2e/linux-tasima.spec.ts`,
+  site config'inde. İlk koşuda kırmızı: boş branş listeli plan okunurken yerleşik listeyle
+  doluyor (B7.27'nin yan bulgusu, taşımaya özgü değil); test bu tek farkı adıyla dışlıyor,
+  branşı dolu plan tam karşılaştırılıyor.
+- "Linux: exe:rpm kaldırıldı, karar DECISIONS'ta".
+- "Belgeler: B7.28'in kalanları, sitenin ortak kökeni §8a'da".
+
+**Mutasyon kanıtı** (`scripts/mutasyon-kaniti.sh --liste`, kilit altında): kurulum betiğinin
+7 mutasyonu (dal, kirli ağaç, worktree, bağ yerine kopya, profili silmek, commit kaydı,
+derleme hatasını yutmak) kırmızı; başlatıcının ilk koşusunda 5/6, profili kuran mutasyon
+yeşil kaldı, test düzeldi, yeniden koşuda 6/6 (profili silmek eklendi). Taşıma testinde
+`--derle` ile 3/3: ikinci planı düşürmek ("1 plan açıldı"), içeriği boşaltmak ("hiçbir plan
+okunamadı"), öğretmenleri boşaltmak (içerik karşılaştırması, "1. plan").
+
+**Tuzak 151** (numarası birleşme commit'inde verildi; dal 150 demişti, 150'yi önce birleşen
+`bakim/agir-kilit` aldı): kısıtlı PATH'le koşan bir kabuk testi,
+betiğe sızan dış komutları göremez; komut bulunamaz, `set -e`'siz betik devam eder, test
+yeşil kalır. Çare: sahteler önde, sistem dizinleri arkada; yokluğu sınanan program için
+yalnız sahteler.
+
+**Koşulan testler.** Her commit'ten önce `hizli` (son: 1290 geçti, 1 atlandı); `tipler` 0;
+`src/linuxKur.test.ts` 10/10 (shellcheck testi bu makinede atlanıyor, araç yok);
+`linux-tasima.spec.ts` 1/1 (`vite build`, site derlemesi, site config'i, kilit altında).
+**Koşulmayan:** `kontrol`, tam E2E, `test:site`'ın öteki üç dosyası (yerelde; CI koşuyor),
+Windows E2E, gerçek kurulum (`~/.local/share/mozaik`'e bu oturumda yazılmadı; betik `main`'i
+istiyor ve dal henüz birleşmedi).
 
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 

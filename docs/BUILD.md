@@ -67,9 +67,9 @@ npm run exe          # Tauri ikilisi (Rust ister)
 npm run exe:test     # cargo test (Rust ister)
 npm run exe:linux    # Linux ikilisi, dist-exe/Mozaik (yalnız geliştirme ve test)
 npm run exe:e2e      # exe:linux, sonra gerçek exe süiti (tauri-driver ister)
-npm run exe:rpm      # Linux rpm paketi, yalnız yerel (Tauri CLI 2.12.1'i npx ile indirir)
 npm run yayinla -- 1.2.0   # sürüm çıkarır: commit, push, CI'ı bekler, yeşilse etiket
 npm run yayinla -- --kuru  # aynı bekleme, hiçbir şey değiştirmeden
+scripts/linux-kur.sh       # Linux: ~/GitHub/Mozaik'in main'inden kurar ya da günceller
 ```
 
 Yeni bir bilgisayarda bir kez: `npm install && npx playwright install chromium`.
@@ -80,6 +80,9 @@ Hangi katmanın ne zaman koşulduğu [TESTPLAN.md](TESTPLAN.md)'de.
 farkında dört kural açıldı, bulguları kapatıldı ve komut sıfır hatayla
 koşuyor (dört uyarı duruyor, onlar kanca bağımlılıkları). Bir kapı kırmızı
 başlarsa kapı olmaktan çıkar, o yüzden sıraya girmesi sıfıra inmesini bekledi.
+`knip.json`'un `ignoreBinaries`'i testlerin çağırdığı üç sistem aracı: `src/linuxKur.test.ts`'in
+`desktop-file-validate`'i ve `shellcheck`'i (test onlar yoksa o adımı atlıyor) ve
+`src/agir.test.ts`'in `pgrep`'i. Bir paket değiller.
 
 `boyut` da `kontrol`'ün parçası ve derlemeden hemen sonra koşuyor: eşik
 `.size-limit.json`'da, bugünkü değerin biraz üstünde, ve iki tane — çift
@@ -113,7 +116,7 @@ olarak o. Kural ile grafiğin yapılandırması `.dependency-cruiser.cjs`'te. Bi
 yalnız başına commit'lenir ve `.git-blame-ignore-revs`'e yazılır. `git blame`'in onu
 atlaması için bir kez `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
 
-`font`, `exe`, `exe:test`, `exe:linux`, `exe:e2e` ve `exe:rpm` `kontrol`'ün parçası değil,
+`font`, `exe`, `exe:test`, `exe:linux` ve `exe:e2e` `kontrol`'ün parçası değil,
 çünkü bu depoda olmayan bir araç zinciri istiyorlar (Python ile fontTools, Rust,
 WebKitGTK ve `tauri-driver`) ve `kontrol` her makinede koşabilmeli. Yayınlanan
 Windows exe'sini derleyen ve `cargo test`'i her sürümde koşan yer
@@ -157,6 +160,8 @@ scripts/yayinla.mjs          bir sürümün adımları, tek komutta
 scripts/git-komut.mjs        yayinla'nın git komutu ve yeri: düşeni bir cümleyle bildirir, worktree'de ve başka dalda durdurur
 scripts/kararsiz.mjs         CI'da düşen E2E testlerini bir kez daha koşar, kararsızı özete yazar
 scripts/bolum-renk.mjs       bölüm renklerinin taraması
+scripts/linux-kur.sh         Linux: dist/index.html'in kopyası, başlatıcı ve mozaik.desktop
+scripts/linux-mozaik.sh      Linux başlatıcısı: Chrome'un app modu, Mozaik'in kendi profili
 ```
 
 ### Tek dosya
@@ -298,14 +303,9 @@ kapatır, bu makinenin Intel sürücüsü onunla çöküyordu (tuzak 130); Windo
 derlenmez. Neden Playwright değil ve girdinin neden sayfanın içinde
 üretildiği `scripts/webdriver.mjs`'in başında ve [DECISIONS.md](DECISIONS.md)'de.
 
-**Linux paketi** (`npm run exe:rpm`) aynı ikilinin rpm'i,
-`src-tauri/target/release/bundle/rpm/` altına. Yalnız kullanıcının kendi Fedora'sı
-için ve yalnız yerel: `surum.yml`'de Linux işi yok, Release'e girmiyor, kendini
-güncellemiyor. Sebebi babanın sürüm yoluna dokunmamak: o yol bugün tek bir Windows
-işi, ve ona eklenen her iş babanın exe'sini bekleten ya da düşüren bir adım daha
-olurdu (DECISIONS 2026-10-09). Paketin boyu, derleme süresi ve bir Fedora kabında
-kurulup açılması A6'da ölçüldü (WORKLOG'un 2026-10-09 girdileri). Tauri CLI bağımlılık
-değil, `npx` ile tam sürümüyle çağrılıyor: `npm ci`'a ve CI'a yük olmasın.
+Linux'ta Tauri'nin bir paketi yok. Kullanıcının günlük kullandığı kopya Chrome'un app
+modu (aşağıda, "Linux uygulaması"); bir rpm'i üreten `exe:rpm` bu yüzden kaldırıldı,
+Linux ikilisi ise yukarıdaki test işi için duruyor ([DECISIONS.md](DECISIONS.md)).
 
 Pencere `tauri.conf.json`'da `maximized: true` ve `minHeight: 640`. Pencere
 1600 mantıksal piksellik bir kutuda kaldığında sayfa 1920 değil 1600 CSS
@@ -319,6 +319,35 @@ sorusunun cevabı bir özet. VERSIONINFO'yu `tauri-build` zaten gömüyor, bu
 yayınlanmış ikilide ölçüldü (tuzak 101).
 
 Exe'nin dosya sistemi köprüsü bir adaptör, ayrıntısı [ARCHITECTURE.md](ARCHITECTURE.md)'de.
+
+### Linux uygulaması
+
+Kullanıcının Linux'ta her gün açtığı Mozaik, `dist/index.html`'in bir kopyası ve
+Google Chrome'un app modu ([TODO.md](TODO.md) B7.28). Beşinci bir derleme değil:
+açılan dosya babanın çift tıkladığı dosyanın kendisi, ve dört yoldan hiçbiri
+değişmedi.
+
+`scripts/linux-kur.sh` yalnız `~/GitHub/Mozaik`'ten derler, ve o klasör `main`'de değilse,
+`git status`'u temiz değilse ya da bir worktree ise reddeder: bir worktree'nin `dist/`'i
+o oturumun dalıdır. Derlenen dosyayı `~/.local/share/mozaik/app/` altına kopyalar (bağ
+değil), yanına hangi commit'ten kurulduğunu (`~/.local/share/mozaik/app/kaynak.txt`) ve başlatıcıyı yazar, ve
+`~/.local/share/applications/mozaik.desktop`'u kurar. Güncellemek betiği yeniden
+çalıştırmaktır; açık bir pencere eski sürümle çalışmaya devam eder, sonraki açılış
+yenisini açar.
+
+`scripts/linux-mozaik.sh` (kurulunca `app/mozaik`) Chrome'u
+`--user-data-dir=~/.local/share/mozaik/profil` ve `--app=file://…/index.html` ile açar.
+Planlar o profilin `file://` deposunda durur, Chrome'un geçmişini temizlemek onlara
+dokunmaz. Başlatıcı yalnız `google-chrome`'u kullanır: Chrome yoksa bunu bildirimle
+söyler ve çıkar, başka bir tarayıcıya düşmez, çünkü orada boş bir depo açılır ve boş
+bir program "verim gitti" diye okunur. Profil klasörünü ne kurulum ne başlatıcı kurar
+ya da siler; onu Chrome ilk açılışta kurar. İkisinin testi `src/linuxKur.test.ts`,
+sahte bir ev dizininde.
+
+Neden Chrome ve `file://`: sitenin app modu ağsız ilk açılışta hata sayfası veriyor,
+`showDirectoryPicker` Brave'de yok, VK1 (iki pencere) Chrome'un iki `--app` penceresinde
+ölçüldü. Ölçümler TODO B7.28'de, karar [DECISIONS.md](DECISIONS.md)'de. Daha önce Chrome'da
+siteyi kullanan biri için taşıma, [README.md](../README.md)'de.
 
 ## Release varlıkları
 
@@ -441,7 +470,8 @@ kendi üstüne yazardı (tuzak 126). Babanın makinesindeki
 koyar: dosya adı eski kalır, içindeki program yenidir.
 
 **`yok`: çift tıklanan `.html`.** Bir dosya kendini değiştiremez. Program en son
-sürümün nerede olduğunu (`SITE_ADRESI`) gösterir.
+sürümün nerede olduğunu (`SITE_ADRESI`) gösterir. Linux uygulaması da bu yolda:
+güncellemesi `scripts/linux-kur.sh`'yi yeniden çalıştırmak.
 
 **Adresler.** `update.rs`'in `RELEASE_KOKLERI`'si iki önek tanır, depo
 `ders-programi` ve `Mozaik` adıyla. Liste yalnız uzar, çünkü dağıtılmış bir

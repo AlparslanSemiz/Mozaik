@@ -17,6 +17,10 @@ release is incomplete, the entry says so.
 
 ## [Unreleased]
 
+### Added
+
+- Linux: `scripts/linux-kur.sh` installs Mozaik as an application that opens the same single file in Google Chrome's app mode, with a Chrome profile of its own, and running it again updates it. The README says how to move your plans over from the site.
+
 ### Changed
 
 - Every list and summary table now shades every second row, the same way in every list, so a row is easier to follow across the screen. The text keeps its contrast in both themes. Boxes and drop-downs inside a list keep the page's own colour with a clearer edge, so they stand out on a shaded row, and the split button in Lessons now looks like the boxes beside it.

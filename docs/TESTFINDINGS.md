@@ -47,6 +47,19 @@ Değişen kuralların hiçbiri bu öğeye ulaşmıyor.
 Tür: ölçüm notu (kenar yumuşatması, görünür değişiklik değil).
 Ne yapıldı: incelendi, düzeltme yok.
 
+### 2026-10-10 · `mutasyon-kaniti.sh --liste` (`ozellik/linux`) · `src/linuxKur.test.ts`, başlatıcının profili
+Bulgu: başlatıcıya `exec`'ten önce `mkdir -p "$ev/profil"` ekleyen mutasyon yeşil kaldı
+(13 mutasyondan biri). "Chrome var" testi PATH'i yalnız sahte programlara kısıyordu;
+`mkdir` bulunamadı, betik `set -e`'siz olduğu için devam etti, profil hiç kurulmadı.
+Kısıtlı PATH, başlatıcıya sızan her dış komutu (`mkdir`, `rm`) görünmez yapıyordu.
+Tür: test kusuru (bedava yeşil).
+Ne yapıldı: düzeltildi, aynı dalda ("Test: Linux başlatıcısı sistem araçlarıyla koşuyor,
+var olan profil"): Chrome'un bulunması gereken testlerde sahteler önde, `/usr/bin:/bin`
+arkada; Chrome'un yokluğunu sınayan test yalnız sahtelerle, çünkü orada gerçek Chrome
+bulunurdu. Profil önceden varken dokunulmadığı ayrıca sınanıyor. Yeniden koşuda altı
+başlatıcı mutasyonunun altısı kırmızı.
+Kalıcı kural: TRAPS.md, tuzak 151.
+
 ### 2026-10-09 · `npx vitest run src/fuzz.test.ts`, ilk koşular · "Dosyadan aç" ve Excel yapıştırması
 Bulgu: (1) `readPlanFile` bozulan dosyaların %2–5'inde `TypeError` atıyor (`reading 'trim'`,
 `'weeklyHours'`, `'id'`; en küçüğü `lessons[0] = null`), `App.tsx`'in `fileChosen`'ı yakalamıyor.

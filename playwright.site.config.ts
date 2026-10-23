@@ -25,7 +25,7 @@ const url = `http://localhost:${port}/`;
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: '**/{site,sunucu,klasor}.spec.ts',
+  testMatch: '**/{site,sunucu,klasor,linux-tasima}.spec.ts',
   fullyParallel: false,
   workers: 1,
   reporter: [['list']],
