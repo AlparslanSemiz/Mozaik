@@ -721,10 +721,14 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       `upload-artifact` v4 için Dependabot beklenecek, elle yapılmaz. **2026-10-09 akşam,
       kullanıcının kararı (test programı K6):** Dependabot beklenmedi; `ci.yml` ve `windows.yml`'de
       `upload-artifact@v7`, `download-artifact@v8`, runner'lar `ubuntu-24.04` ve `windows-2025`'e
-      sabit, `kanarya.yml` yeni imajı haftada bir koşuyor (`test/kapsam`). `surum.yml` hâlâ
-      `upload-artifact@v4` ve `download-artifact@v7`'de (dokunulmaz), `haftalik.yml`'in mutasyon
-      işi `upload-artifact@v4`'te (`ci/mutasyon-parca`'nın). #6 (bölme önerisi
+      sabit, `kanarya.yml` yeni imajı haftada bir koşuyor (`test/kapsam`). #6 (bölme önerisi
       onaylı, sonra), #7 (vite 8, ayrı ve ölçümlü bir iş) ve #8'e dokunulmadı.
+      **2026-10-10, Alp'in kararıyla elle:** `upload-artifact` her iş akışında v7'de
+      (`surum.yml` ve `haftalik.yml` dahil, `ci/runner-sabitle`), Node 20 uyarısının kaynağı
+      kalmadı; aynı dalda Linux işleri `surum.yml` ve `haftalik.yml`'de de `ubuntu-24.04`'te
+      sabit, geçici (B7.29; DECISIONS 2026-10-10). Windows işleri `windows.yml`'de
+      `windows-2025`'te, `surum.yml`'de `windows-latest`'te; `surum.yml`'in `download-artifact`'ı
+      v7'de.
 - [x] **B7.21 WebKit'in 19 kırmızısı ayrılsın (2026-10-09).** **Kapandı, yapılmayacak
       (2026-10-09 akşam, DECISIONS "Yeni WebKit süiti eklenmiyor"):** Linux yolu Chromium
       uygulama modu olacak, babanınki WebView2; `test:webkit` olduğu gibi kalır. `npm run test:webkit`'in
@@ -787,6 +791,12 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       arama dilimlerle koşuyor ve dilimler arasında işçiye dönüyor, tavan CI'ın en yavaş
       ölçümünün iki katı (180 s). M1, M2 ve M3 kırmızı. Kapandı: dalın iki CI koşusunda yeşil
       (37929711747, 37930611648), RPC zaman aşımı yok.
+- [ ] **B7.29 Linux runner'ı `ubuntu-latest`'e dönsün (2026-10-10).** `ubuntu-24.04`
+      sabitlemesi geçici (DECISIONS 2026-10-10): `ubuntu-latest` 2026-10-19'da Ubuntu
+      26'ya geçiyor. Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca
+      `ubuntu-latest`'e dönülür; iş akışlarındaki her sabit Linux satırının yanında bu maddeye
+      işaret eden yorum var. Doğrulama: `kanarya.yml` (TP1) `ubuntu-26.04`'te yeşil kalıyor ve
+      `npx playwright install --with-deps` bağımlılık hatası vermiyor.
 - [~] **B7.30 Boş açılış: yenilenen sayfa depoyu boş okuyup planın üstüne yazabiliyor (2026-10-10).**
       CI 38085275289'da (`kurulum.spec.ts:716`) yenilemeden sonra plan boş açıldı: yenilemeden
       önce `ders-programi` doluydu, açılışta hiç okunmadı (Branşlar 0, `emptyState`), ve
@@ -1489,8 +1499,9 @@ yazıldıysa (TP4 gibi) yollarını o tur taşır.
 
 **Faz 0 · hazırlık**
 - [x] **TP1 Runner'lar ve artefakt aksiyonları sabit, Ubuntu 26.04 kanaryası** (K6). `ci.yml`,
-      `site.yml`, `windows.yml`; `kanarya.yml` yeni. `surum.yml` dokunulmadı (`ubuntu-latest`,
-      `windows-latest`, `upload-artifact@v4`, `download-artifact@v7` orada kaldı).
+      `site.yml`, `windows.yml`; `kanarya.yml` yeni. `surum.yml` bu maddede dokunulmadı; Linux işleri ve
+      `upload-artifact@v7` 2026-10-10'da ona da geldi (B7.20, B7.29), `windows-latest` ve
+      `download-artifact@v7` orada kaldı.
 - [x] **TP2 Program kuralları ve kararlar** CLAUDE.md'de ve DECISIONS'ta.
 
 **Faz 1 · veri kaybı**

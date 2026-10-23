@@ -68,7 +68,8 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 4. A turu bitti, A7 dahil (`npm run exe:rpm`, Linux yalnız yerel). B7.22 (Sığdır'ın gün
    çizgisi) ve B7.23 Windows'ta yeşil; Windows E2E artık her `main` push'unda
    (`windows.yml`) ve `yayinla` etiketten önce onu da bekliyor. B7.20'nin beş action
-   PR'ı birleşti; #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
+   PR'ı birleşti, `upload-artifact` elle v7'de, Linux işleri `ubuntu-24.04`'te sabit
+   (2026-10-10); #6, #7, #8'e dokunulmadı. B7.24'ün kodu düzeldi, ama tam mutasyon
    koşusu (`haftalik.yml` 37914431289) 360 dakikalık iş tavanında iptal oldu, kalan tahmin
    ~20 sa; nasıl koşacağı kullanıcıda (TODO B7.24). B7.26 (öneri değişmezinin CI'da kararsızlığı)
    kapandı, testi zayıflatmadan (WORKLOG 2026-10-09 gece).
@@ -186,6 +187,24 @@ ile alındı; tek çatışma bu dosyada ("Şu an" ve iki gece girdisi), iki tara
 **Koşulan testler.** Her commit'ten önce `npm run hizli` (merge'den sonra 44 dosyada 1290,
 yeşil) ve belge kapıları (19/19). **Koşulmayan.** E2E ve `kontrol`: yalnız belge değişti,
 CI'da.
+
+## 2026-10-10 · `ci/runner-sabitle`: Linux runner'ı sabit, `upload-artifact` v7
+
+**Ne yapıldı.** Beş iş akışında bütün `runs-on: ubuntu-latest` → `ubuntu-24.04` (ci 5,
+site 2, surum 2, haftalik 1), bütün `actions/upload-artifact@v4` → `@v7` (ci 4, surum 2,
+haftalik 1, windows 1). Sebep: `ubuntu-latest` 2026-10-19'da Ubuntu 26'ya geçiyor, ve
+Node 20 uyarısının kalan kaynağı `upload-artifact@v4`'tü (TODO B7.20). Bugün
+`ubuntu-latest` zaten 24.04, yani imaj değişmiyor. v7'nin yeniliği (`archive: false`) ve
+ESM'e geçişi bizim girdilerimize dokunmuyor; v6'nın Node 24'ü barındırılan runner'da var.
+`windows-latest` kapsam dışı, dokunulmadı. Sabitleme geçici: her satırın yanında TODO B7.29'a
+işaret eden yorum, Ubuntu 26'da Playwright/WebKit bağımlılıkları doğrulanınca
+`ubuntu-latest`'e dönülür.
+
+**Koşulan testler.** `hizli` ve belge kapıları; dalın `ci.yml` koşusu. `site.yml`,
+`surum.yml` ve `haftalik.yml` dalda koşmuyor: ilk `main` push'u `site.yml`'i, ilk etiket
+`surum.yml`'i, ilk hafta sonu `haftalik.yml`'i sınar. `windows.yml` ilk `main` push'unda.
+
+---
 
 ## 2026-10-10 · `fix/veri-kaybi`'ye `main`, RK14'ün sırası
 

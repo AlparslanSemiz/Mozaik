@@ -221,9 +221,10 @@ koşar ve `windows.yml`'i çağırır. `surum.yml` bir etiketle üç teslim dosy
 `kanarya.yml` haftada bir `ci.yml`'in denetimini ve ana E2E'nin bir parçasını runner'ın bir
 sonraki imajında koşar ve hiçbir şeyi kilitlemez: `ci.yml`, `site.yml` ve `windows.yml`
 runner'ın sürümünü sabitliyor (`ubuntu-24.04`, `windows-2025`), `-latest` değil, çünkü
-`ubuntu-latest` 2026-10-19'dan itibaren Ubuntu 26.04'e geçiyor. `surum.yml` ve
-`haftalik.yml`'in mutasyon işi hâlâ `-latest`'te; ilki dokunulmaz, ikincisi `ci/mutasyon-parca`
-dalında yeniden yazılıyor.
+`ubuntu-latest` 2026-10-19'dan itibaren Ubuntu 26.04'e geçiyor. `surum.yml`'in ve
+`haftalik.yml`'in Linux işleri de `ubuntu-24.04`'te (2026-10-10, Alp'in kararı); Linux'un
+sabitlemesi geçici, kanarya yeşil kalınca `ubuntu-latest`'e dönülür (TODO B7.29).
+`surum.yml`'in Windows işi `windows-latest`'te.
 
 Dependabot (`.github/dependabot.yml`, 2026-09-12) haftalık bağımlılık PR'ları
 açar. Dalları da push olduğu için `ci.yml` onları da koşar; ayrı bir PR iş akışı
