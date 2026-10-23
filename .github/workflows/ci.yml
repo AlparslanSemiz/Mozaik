@@ -50,6 +50,14 @@ concurrency:
 # with the title. No count step either: when nothing carries the tag,
 # `--grep @arama` already fails with "No tests found", and taking a tag off a
 # test is an edit in a diff, not a drift.
+#
+# `playwright install chromium` without `--with-deps` (2026-10-23): the
+# runner image already carries Chrome and the libraries Chromium needs, and the
+# apt half of `--with-deps` was the run's longest path. On 2026-10-23 one job
+# per run spent about ten minutes there (main's run: 25.9 MB in 9 min 38 s from
+# the Azure mirror) while its tests took three to six. A missing library fails
+# the browser launch loudly, it does not pass quietly. `kanarya.yml` keeps
+# `--with-deps`, because asking the NEXT image for its packages is its job.
 
 jobs:
   denetim:
@@ -94,7 +102,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npx vite build
       - name: E2E ${{ matrix.parca }}/3
         run: >-
@@ -126,7 +134,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - run: npx vite build
       - name: E2E, öneri aramasının testleri, ${{ matrix.parca }}/3
         run: >-
@@ -155,7 +163,7 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
       - name: Site, sunucu, klasör
         run: npm run test:site -- --trace=retain-on-failure
       - name: Çözücü stresi
