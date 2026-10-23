@@ -578,7 +578,10 @@ test.describe('29. Hata yolları', () => {
     await page.goto(FILE);
     await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
-    const warning = page.locator('.save-warning');
+    // Filtered to its own sentence: with every write throwing, the autosave can
+    // fail before this looks (on Windows it does) and the "storage full" strip
+    // (VK2) appears beside it. That second strip is TODO B7.31.
+    const warning = page.locator('.save-warning').filter({ hasText: 'otomatik kayıt çalışmıyor' });
     await expect(warning).toBeVisible();
     await expect(warning).toContainText('otomatik kayıt çalışmıyor');
     await expect(warning).toContainText('Dosyaya kaydet');

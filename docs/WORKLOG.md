@@ -103,9 +103,9 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
    commit'leri (DECISIONS kaydı, CLAUDE.md'nin durma politikası, emekli kuralların
    silinmesi) hiçbir dalda yoktu, sonraki turda yazılır. `test/gercek-ortam` (TP7 Windows'ta
    kırmızı, karar kullanıcıda), `klasorleme` ve üç Dependabot dalı birleşmedi, origin'de
-   duruyor. `surum.yml`'in 2026-10-10 değişikliği (`ubuntu-24.04`, `upload-artifact@v7`)
-   yalnız bir etiketle ya da elle derlemeyle sınanır.
-11. Ruflo (`ruflo/kurulum`, 2026-10-23, TODO B7.31): ilk etkileşimli oturumda `claude-flow`
+   duruyor. `surum.yml`'in 2026-10-10 değişikliği elle, yayınlamadan sınandı (yeşil). TODO B7.31
+   (depo yokken ikinci, yanlış şerit) ürün dalını bekliyor.
+11. Ruflo (`ruflo/kurulum`, 2026-10-23, TODO B7.33): ilk etkileşimli oturumda `claude-flow`
    MCP sunucusu onaylanır, bayraklı bekçi denemesini Alp kendi terminalinde koşar;
    "Paralel oturumlar"ın tek checkout'a dönüp dönmeyeceği kullanıcıda (TODO §8a).
 
@@ -136,7 +136,7 @@ TB8'in düzeltmesini ve sıra 6'yı, TP5 sıra 4'ü bekliyor.
 | Ne | Değer | Nasıl |
 |---|---|---|
 | Şema sürümü | 16 (2026-09-26) | `src/leaf/types.ts` |
-| Ana E2E süiti | 640 test, 34 dosya (2026-10-23, birleştirme) | `npx playwright test --list` |
+| Ana E2E süiti | 642 test, 34 dosya (2026-10-23, `fix/windows-e2e`) | `npx playwright test --list` |
 | Site, sunucu, klasör, Linux taşıması | 4 dosyada 24 test (2026-10-23) | `--config playwright.site.config.ts --list` |
 | Çözücü stresi · ekran · devriye | 7 · 2 · 4 test | aynı yolla, her biri 1 dosya |
 | E2E spec dosyası, toplam | 42 (2026-10-23) | `e2e/*.spec.ts` |
@@ -221,7 +221,7 @@ npx önbelleği `~/.npm/_npx/f782fc3c6f24847f`.
 - `claude mcp add-json --scope project` `.mcp.json`'un tamamını yeniden biçimledi ve son
   satır sonunu sildi. Eski biçim geri kondu, yeni girdi CLI'ın yazdığıyla JSON olarak aynı.
 - Kancaların ayrık başlattığı `npx @claude-flow/cli` sürüme sabit değil: Ruflo yeni bir
-  sürüm çıkarınca `.claude/helpers`'ı yeniler ve bu `git status`'ta görünür (TODO B7.31).
+  sürüm çıkarınca `.claude/helpers`'ı yeniler ve bu `git status`'ta görünür (TODO B7.33).
   `~/.claude/helpers` olmadığı için kullanıcı düzeyine yazmıyor.
 - `aidefence_*` araçları ilk kullanımda depoda `npm install @claude-flow/aidefence
   --no-save` koşar: `package.json`'a yazmaz, `node_modules`'a yabancı bir paket koyar,
@@ -237,7 +237,7 @@ sunucular yalnız `terminal_create`, `list`, `history` ve `close`'u gösteriyord
 oluşmadı (0,51 $). Bu denemeler yeniden başlatma istemedi, çünkü işçiler worktree'nin
 ayarlarını okuyan yeni süreçlerdi. `--dangerously-skip-permissions`'lı işçi otomatik
 kipin sınıflandırıcısında durdu ("Create Unsafe Agents") ve atlatılmadı; Alp'te (TODO
-B7.31).
+B7.33).
 
 **Koşulan.** Her commit'ten önce `npm run hizli` yeşil (CLAUDE.md ile testin commit'inden
 beri 52 dosya, ondan önce 51). `npx vitest run src/docs.test.ts src/ruflo.test.ts` yeşil,
@@ -263,6 +263,22 @@ bağımlılık saydı, `kontrol` `knip`'i koşmadığı için yerelde görünmed
   `~/.claude.json.ruflo-oncesi` `~/.claude.json`'a geri kopyalanır (o andan sonraki oturum
   günlükleri gider); `rm -rf ~/.claude-flow ~/.npm/_npx/f782fc3c6f24847f`; açık bir daemon
   `npx -y ruflo@3.60.1 daemon status --all` ile bulunur ve `daemon stop` ile durur.
+
+## 2026-10-23 · `main`'in Windows E2E'si, `fix/windows-e2e`
+
+Birleştirmenin `main` push'unda `ci.yml` (site dahil) yeşil, `windows.yml` iki testte
+kırmızıydı; ikisi de birleştirmeden önce de vardı (TESTFINDINGS 2026-10-23). Dal commit'i
+"Test: Windows E2E'nin iki kırmızısı, kayıt uyarısı kendi şeridinde, erişilebilirlik
+taraması ekran başına": `temel.spec.ts`'in locator'ı kendi cümlesine daraltıldı (arkadaki
+ürün kusuru TODO B7.31), `erisim.spec.ts`'in üç ekranlı testi üçe bölündü (TP22).
+Aynı akşam `surum.yml` elle, yayınlamadan koşturuldu (40019649665): `package`
+(`ubuntu-24.04`) ve `exe` yeşil, artefaktlar `upload-artifact@v7` ile indi, `publish`
+atlandı; 2026-10-10'daki değişikliği etiketsiz sınanmış oldu.
+
+**Koşulan testler.** İki spec yerelde kilit altında (7/7); `canSave` şeridini kaldıran
+mutasyon `--derle` ile kırmızı; `hizli`. **Koşulmayan.** Windows'ta yerelde (CI'da koşar).
+
+---
 
 ## 2026-10-23 · Birleştirme: yedi dal `main`'de, iki worktree
 
