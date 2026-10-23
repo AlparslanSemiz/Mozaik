@@ -18,6 +18,9 @@
 // jsdom rather than node, for the same reason `App.test.tsx` says: the two
 // halves that write a file and read a keyboard need a document.
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
@@ -457,14 +460,14 @@ describe('sözleşme · React kancası', () => {
     mount();
     settle();
     const before = store.plans.library;
-    let result = { ok: -1, failed: -1 };
+    let result = { ok: -1, failed: -1, unreadable: -1 };
     act(() => {
       result = store.plans.replaceLibrary({
         library: { plans: [{ id: 'x', name: 'Bozuk', draft: false }], activeId: 'x' },
         states: { x: 'bu bir State değil' },
       });
     });
-    expect(result).toEqual({ ok: 0, failed: 1 });
+    expect(result).toEqual({ ok: 0, failed: 0, unreadable: 1 });
     expect(store.plans.library).toBe(before);
   });
 
@@ -485,6 +488,75 @@ describe('sözleşme · React kancası', () => {
     expect(store.plans.planId).toBe('y');
     expect(loadPlan(eski)).toBeNull();
     expect(store.state.settings.schoolName).toBe('Gelen');
+  });
+
+  // TB8 (2026-10-09, veri kaybı sınıfı). The single-file reader refuses a plan
+  // with a list missing altogether (DENETIM DK11); the bundle path read each
+  // plan with the tolerant `parseState`, so the same plan opened as 0 teachers,
+  // 0 lessons, 0 placements, and every plan on this computer was gone after
+  // "Hepsini değiştir". A real school (v16 fixture), with a list taken out.
+  const school = () =>
+    JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', 'v16.json'), 'utf8')) as Record<
+      string,
+      unknown
+    >;
+  const without = (...fields: string[]) => {
+    const raw = school();
+    for (const field of fields) delete raw[field];
+    return raw;
+  };
+
+  it('TB8: zarftaki eksik plan boş plan olarak açılmıyor, hiçbir şey değişmiyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    const before = store.plans.library;
+    for (const missing of [
+      ['teachers'],
+      ['lessons'],
+      ['teachers', 'lessons'],
+      ['rooms'],
+      ['classes'],
+    ]) {
+      let result = { ok: -1, failed: -1, unreadable: -1 };
+      act(() => {
+        result = store.plans.replaceLibrary({
+          library: { plans: [{ id: '1', name: 'Eksik', draft: false }], activeId: '1' },
+          states: { '1': without(...missing) },
+        });
+      });
+      expect(result, missing.join('+')).toEqual({ ok: 0, failed: 0, unreadable: 1 });
+      expect(store.plans.library).toBe(before);
+      expect(loadPlan('1')?.settings.schoolName, missing.join('+')).toBe('Burada');
+    }
+  });
+
+  it('TB8: eksik planın yanındaki tam plan açılıyor, eksiğin buradaki karşılığı kalıyor', () => {
+    mount();
+    act(() => store.change(() => named('Burada')));
+    settle();
+    let result = { ok: -1, failed: -1, unreadable: -1 };
+    act(() => {
+      result = store.plans.replaceLibrary({
+        library: {
+          plans: [
+            { id: '1', name: 'Eksik', draft: false },
+            { id: 'y', name: 'Tam', draft: false },
+          ],
+          activeId: '1',
+        },
+        states: { '1': without('teachers'), y: school() },
+      });
+    });
+    expect(result).toEqual({ ok: 1, failed: 0, unreadable: 1 });
+    // The plan the file could not read is still the one this computer had.
+    expect(store.plans.library.plans.map((p) => p.id)).toEqual(['1', 'y']);
+    expect(loadPlan('1')?.settings.schoolName).toBe('Burada');
+    // Every part of the readable plan arrived, placements included.
+    const tam = loadPlan('y');
+    expect(tam?.teachers).toHaveLength(2);
+    expect(tam?.lessons).toHaveLength(3);
+    expect(Object.keys(tam?.programs[0]?.placements ?? {})).toHaveLength(6);
   });
 
   it('Ctrl+Z geri alıyor, metin kutusundayken almıyor', () => {

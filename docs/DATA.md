@@ -243,7 +243,10 @@ oturum yedeklerini de okuduğu için hoşgörülü kalır. Yükleme sorusu dosya
 yana sayar (öğretmen, sınıf, ders, yerleşmiş saat). `schemaVersion`'ı bu programınkinden büyük bir dosya bozuk sayılmaz, "daha yeni bir sürümle yazılmış" diye reddedilir ve programın güncellenmesi söylenir. Paket Ayarlar → Planlar ve yedek'te duruyor,
 çünkü bir paketi açmak bu bilgisayardaki bütün planların yerine geçmek demek.
 Paket `bundleVersion` taşır, `schemaVersion` değil: zarf ayrı sürümlenir, içindeki
-her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer.
+her plan kendi `schemaVersion`'ıyla gelir ve aynı `parseState` göçünden geçer, ama üst
+çubuğun kuralıyla okunur (`readBundlePlans`, 2026-10-23, TODO TB8): liste alanı eksik,
+bozuk ya da daha yeni bir plan açılmaz ve buradaki aynı kimlikli plan kalır. Açılmayacak
+planları onay sorusu sayar. Hiçbir plan okunamıyorsa soru sorulmaz ve hiçbir şey değişmez.
 `bundle.ts` zarfı bilir, State'i bilmez. Paket bir depolama anahtarı değil.
 Zarfta isteğe bağlı bir `olcum` alanı da olabilir. O, bu makinedeki öneri
 aramalarının ölçümü (`ders-programi-oneri-olcum`), ve babanın gönderdiği dosyanın

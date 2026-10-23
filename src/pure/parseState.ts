@@ -33,6 +33,7 @@ import type {
   Teacher,
 } from '../leaf/types';
 import { SCHEMA_VERSION } from '../leaf/types';
+import type { Bundle } from './bundle';
 
 /** v1 shape: Turkish field names. Kept only so old backups can still be opened. */
 interface LegacyV1 {
@@ -586,6 +587,35 @@ export function readPlanFile(text: string): PlanFile {
   const lists = (raw.schemaVersion ?? raw.semaSurumu) === 1 ? LISTS_V1 : LISTS;
   if (lists.some((field) => !Array.isArray(raw[field]))) return { problem: 'eksik' };
   return { state };
+}
+
+/**
+ * What "Tümünü dosyadan aç" makes of each plan in a bundle: the top bar's rule,
+ * one plan at a time. Until 2026-10-23 the bundle path read each plan with the
+ * tolerant `parseState`, so a plan with its teacher or lesson list missing
+ * opened as an empty one and took the plan this computer had with it (TODO
+ * TB8). A plan that is missing a list, unreadable or newer is not opened; the
+ * readable ones are, every part of them, in the file's order. A plan that makes
+ * the reader throw (TB1) is an unreadable plan here, not a dead button.
+ */
+export function readBundlePlans(bundle: Bundle): {
+  plans: Array<{ id: Id; state: State }>;
+  unreadable: Id[];
+} {
+  const plans: Array<{ id: Id; state: State }> = [];
+  const unreadable: Id[] = [];
+  for (const plan of bundle.library.plans) {
+    const raw = bundle.states[plan.id];
+    let read: PlanFile | null = null;
+    try {
+      read = raw === undefined ? null : readPlanFile(JSON.stringify(raw));
+    } catch {
+      read = null;
+    }
+    if (read !== null && 'state' in read) plans.push({ id: plan.id, state: read.state });
+    else unreadable.push(plan.id);
+  }
+  return { plans, unreadable };
 }
 
 function newerVersion(text: string): boolean {

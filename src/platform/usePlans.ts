@@ -29,7 +29,7 @@
 import { useCallback, useState } from 'react';
 
 import type { Bundle } from '../pure/bundle';
-import { parseState } from '../pure/parseState';
+import { readBundlePlans } from '../pure/parseState';
 import {
   addPlan,
   findPlan,
@@ -133,27 +133,28 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
    *     park WRITES the outgoing plan, and its key is about to be overwritten.
    *     But leaving the timer alive is pitfall 27 in a mirror: 400 ms later the
    *     old state would land in the newly imported library's key.
-   *  2. parse everything BEFORE touching storage. If not one plan can be read,
-   *     nothing at all changes: a half-finished import is two truths.
+   *  2. parse everything BEFORE touching storage, with the top bar's rule
+   *     (`readBundlePlans`, TB8). If not one plan can be read, nothing at all
+   *     changes: a half-finished import is two truths. A plan the file could
+   *     not read does not take away the one here with its id: the file meant
+   *     to replace it and has nothing to replace it with.
    *  3. write the data, counting what did not fit (quota).
    *  4. drop the keys of plans the incoming library does not have.
    *  5. write the directory LAST, once its data is really in place — the same
    *     rule createPlan already follows.
    */
   const replaceLibrary = useCallback(
-    (bundle: Bundle): { ok: number; failed: number } => {
+    (bundle: Bundle): { ok: number; failed: number; unreadable: number } => {
       discardPendingSave();
 
-      const parsed: Array<{ id: Id; state: State }> = [];
-      for (const plan of bundle.library.plans) {
-        const raw = bundle.states[plan.id];
-        const state = raw === undefined ? null : parseState(JSON.stringify(raw));
-        if (state !== null) parsed.push({ id: plan.id, state });
-      }
-      if (parsed.length === 0) return { ok: 0, failed: bundle.library.plans.length };
+      const { plans: parsed, unreadable } = readBundlePlans(bundle);
+      if (parsed.length === 0) return { ok: 0, failed: 0, unreadable: unreadable.length };
 
       const kept = new Set(parsed.map((x) => x.id));
-      let failed = bundle.library.plans.length - parsed.length;
+      const stays = new Map(
+        library.plans.filter((p) => unreadable.includes(p.id)).map((p) => [p.id, p]),
+      );
+      let failed = 0;
       let ok = 0;
       for (const { id, state } of parsed) {
         if (savePlan(id, state)) ok++;
@@ -161,11 +162,15 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
       }
 
       for (const plan of library.plans) {
-        if (!kept.has(plan.id)) dropPlanText(plan.id);
+        if (!kept.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
 
       const next: Library = {
-        plans: bundle.library.plans.filter((p) => kept.has(p.id)),
+        plans: bundle.library.plans.flatMap((p) => {
+          if (kept.has(p.id)) return [p];
+          const here = stays.get(p.id);
+          return here === undefined ? [] : [here];
+        }),
         activeId: kept.has(bundle.library.activeId) ? bundle.library.activeId : parsed[0]!.id,
       };
       commit(next);
@@ -173,7 +178,7 @@ export function usePlans({ planId, park, discardPendingSave, openPlan }: PlanSea
         next.activeId,
         parsed.find((x) => x.id === next.activeId)?.state ?? parsed[0]!.state,
       );
-      return { ok, failed };
+      return { ok, failed, unreadable: unreadable.length };
     },
     [library, commit, discardPendingSave, openPlan],
   );
