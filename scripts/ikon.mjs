@@ -30,13 +30,14 @@ import { resolve } from 'node:path';
 // rendered at 16/20/24/32/40/48 on light and dark strips and looked at
 // (scripts/ikon-karsilastir.mjs, scratch/ikon-boylar.png).
 //
-// The latest explicit decision (2026-09-01) is that the Windows taskbar must
-// show the DETAILED mark even at 20/24 px; the simplified mark in the supplied
-// taskbar screenshot read as the wrong logo. Only the true 16 px small-icon
-// slot keeps the simplified source. `e2e/temel.spec.ts` pixel-compares every
-// shipped entry so this source decision and the committed .ico cannot drift.
+// The calendar mark of 2026-10-23 moved the threshold to 32. Its hooks and
+// the gaps between five columns are mush at 16 and still a blur at 24, while
+// the simplified mark is the same page in the same colours, so it does not
+// read as another logo the way the old three-column one did at 20/24
+// (2026-09-01). `e2e/temel.spec.ts` pixel-compares every shipped entry so this
+// source decision and the committed .ico cannot drift.
 const SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256];
-const SADE_ALTINDA = 20;
+const SADE_ALTINDA = 32;
 
 const detay = readFileSync(resolve('site/icon.svg'), 'utf8');
 const sade = readFileSync(resolve('site/icon-small.svg'), 'utf8');

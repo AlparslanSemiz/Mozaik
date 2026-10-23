@@ -35,6 +35,27 @@ varsayım değil" cümlesi hedef makineyi kastediyor.
 
 ---
 
+### 2026-10-23 · İşaret takvim sayfası oldu, ikon eşiği 20'den 32'ye
+
+**Değişen.** İşaret kullanıcının "asıl ikon" diye seçtiği resimden (`asıl_ikon.jpeg`)
+elle yeniden çizildi, kopyalanmadı ama ölçülerek: indigo zemin üstünde iki laciverde
+kancaya asılı beyaz bir sayfa ve beş ders sütunu (sarı, mavi, uzun mercan, mor, nane
+yeşili). Sade çizimi kancasız sayfa ve üç ders (sarı, uzun mercan, mavi).
+`kurulum/icon.ico` 16, 20 ve 24 px'te sade, 32 px ve üstünde ayrıntılı
+(`SADE_ALTINDA = 32`). Renkler resmin kendi renkleri, mavisi zaten `palette.ts`'in
+`#65b6ec`'i. **Eski hâli.** 2026-08-26'nın altı sütunlu işareti ve 2026-09-01'den
+beri eşik 20. **Gerekçe.** Çizim 16, 20, 24, 32, 40 ve 48 px'te açık ve koyu
+zeminde çizilip bakıldı (`scripts/ikon-karsilastir.mjs`): ayrıntılı çizimin kancaları
+ve beş sütunun aralıkları 16 ve 20 px'te leke, 24 px'te bulanık, 32 px'te okunuyor.
+Kullanıcının kuralı "16 ya da 24'te halkalar ya da aralıklar lekeleşirse o boylar
+sade çizimden" idi. 2026-09-01'deki itiraz, eski sade çizimin görev çubuğunda başka
+bir logo gibi okunmasıydı. Yeni sade çizim aynı sayfa ve aynı renkler, ama bu
+Windows görev çubuğunda henüz görülmedi.
+**Denendi, bırakıldı.** Aynı gün önce dört sütunlu ve halkaları beyaz çerçeveli bir
+takvim çizildi (`ozellik/ikon` dalı, birleşmedi); kullanıcı onun yerine bu resmi
+istedi. O turda ders renkleri beyaza karşı 3:1'e koyulaştırılmıştı; bu resmin renkleri
+olduğu gibi kaldı, sarı ve nane yeşili beyaza karşı 1,6:1 ve 1,8:1.
+
 ### 2026-10-23 · Worktree'ler toplandı: ana klasör ve tek refactor worktree'si
 
 **Ne.** Kullanıcının kararı: worktree'lerin hepsi `~/GitHub/Mozaikler/` altında, sürekli

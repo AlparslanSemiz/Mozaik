@@ -318,7 +318,8 @@ const ICON = {
  * is 24.5 px at 100 % — and the icon comparison this project already ran
  * (`scripts/ikon-karsilastir.mjs`) put 20-32 px in the band where the six
  * columns are "blurry but still separable", i.e. the band where it is a
- * judgement call. The reader made the call.
+ * judgement call. The reader made the call. The calendar mark of 2026-10-23
+ * kept it: at 24 px its hooks are a blur.
  *
  * The SOURCE of truth is site/icon-small.svg; e2e/kabuk.spec.ts checks this
  * draws the same rectangles, the way temel.spec.ts already does for the
@@ -327,11 +328,12 @@ const ICON = {
  */
 function BrandMark() {
   return (
-    <svg viewBox="0 0 512 512" className="brand-mark">
-      <rect width="512" height="512" rx="112" fill="#2e3ba8" />
-      <rect x="96" y="112" width="96" height="192" rx="32" fill="#65b6ec" />
-      <rect x="208" y="208" width="96" height="192" rx="32" fill="#9ff292" />
-      <rect x="320" y="128" width="96" height="160" rx="32" fill="#f3de9b" />
+    <svg viewBox="0 0 1024 1024" className="brand-mark">
+      <rect width="1024" height="1024" rx="180" fill="#2e3ba8" />
+      <rect x="128" y="128" width="768" height="768" rx="64" fill="#fff" />
+      <rect x="256" y="256" width="128" height="256" rx="32" fill="#fcc23d" />
+      <rect x="448" y="256" width="128" height="512" rx="32" fill="#fd6454" />
+      <rect x="640" y="512" width="128" height="256" rx="32" fill="#65b6ec" />
     </svg>
   );
 }
@@ -752,8 +754,8 @@ export default function App() {
           three separate strips would have cost the grid a teacher. */}
       <header className="topbar" data-section={tab}>
         {/* Zone zero: WHAT THIS IS. The simple mark, the same drawing as the
-            tab's favicon: at 1.75rem the detailed one's six columns are a
-            smear too (measured, see Brand below).
+            tab's favicon: at 1.75rem the detailed one's hooks are a blur
+            (measured, see BrandMark above).
 
             Inline rather than <img src>: dist/index.html is ONE file and
             fetches nothing (offline principle, pitfall 32), so an <img> would need

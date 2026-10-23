@@ -148,7 +148,7 @@ Yardımcı kaynaklar:
 site/                        manifest.webmanifest · sw.js · icon.svg · icon-small.svg · icon-192/512.png
 kurulum/                     Kur.cmd · Guncelle.cmd · kur.ps1 · sunucu.ps1 · OKU.txt · icon.ico
 scripts/simge.mjs            icon.svg'den 192 ve 512 PNG (Chromium ile)
-scripts/ikon.mjs             kurulum/icon.ico: 16 px sade, 20 px ve üstü ayrıntılı
+scripts/ikon.mjs             kurulum/icon.ico: 16-24 px sade, 32 px ve üstü ayrıntılı
 scripts/ikon-karsilastir.mjs eşiğin reçetesi: iki çizim, altı boy, iki zemin
 scripts/exe-ikon.mjs         yayınlanmış bir exe'nin içindeki simge boylarını okur
 scripts/favicon.mjs          index.html'in data: URI favicon'u, sade çizimden
@@ -420,22 +420,26 @@ worktree `main`'in commit'inde ayrık durabilir.
 
 ## İşaret ve ikon
 
-İşaretin iki çizimi var. `site/icon.svg` ayrıntılı çizim (sütunlar ve hayalet
-sütunlar), `site/icon-small.svg` küçük boylar için sade çizim. `scripts/ikon.mjs`
-`.ico`'ya 16 px'i sade, 20 px ve üstünü ayrıntılı çizimden yazar
-(`SADE_ALTINDA = 20`). `.ico` Windows'un isteyebileceği dokuz boyu taşır: 16, 20,
-24, 32, 40, 48, 64, 128 ve 256.
+İşaret indigo zemin üstünde iki kancaya asılı bir duvar takvimi sayfası
+(2026-10-23, kullanıcının seçtiği resimden ölçülerek elle çizildi). İki çizimi var.
+`site/icon.svg` ayrıntılı çizim (iki kanca, beş ders sütunu),
+`site/icon-small.svg` küçük boylar için sade çizim (kancasız sayfa, üç ders,
+yalnız dikdörtgen). Sadenin bütün kenarları 16 px'te tam piksele düşüyor;
+ayrıntılının yatay kenarları 32 px'te, sütunları ise sayfada ortalı olduğu için
+orada yarım piksel kayık. `scripts/ikon.mjs` `.ico`'ya 16, 20 ve 24 px'i
+sade, 32 px ve üstünü ayrıntılı çizimden yazar (`SADE_ALTINDA = 32`). `.ico`
+Windows'un isteyebileceği dokuz boyu taşır: 16, 20, 24, 32, 40, 48, 64, 128 ve 256.
 
 | Nerede | Hangi çizim | Niçin |
 |---|---|---|
 | Sekme (favicon, `index.html`) | sade | bir sekme simgesi 16 ile 32 px arasında çizilir |
-| `kurulum/icon.ico` 16 px | sade | 16 px'te ayrıntılı çizimin sütunları bir lekeye dönüyor |
-| `kurulum/icon.ico` 20 px ve üstü | ayrıntılı | 2026-09-01'de kullanıcı isteğiyle, dokuz boyun pikselleri karşılaştırılarak |
+| `kurulum/icon.ico` 16, 20 ve 24 px | sade | 16 px'te ayrıntılı çizimin kancaları ve sütun aralıkları bir lekeye dönüyor, 24 px'te hâlâ bulanık |
+| `kurulum/icon.ico` 32 px ve üstü | ayrıntılı | 32 px'te kancalar ve beş sütun ayrı okunuyor |
 | PWA 192 ve 512 PNG | ayrıntılı | yer var |
 | Üst çubuk (`.brand-mark`) | sade | `1.75rem`, kök 13 px iken 22,75 px |
 
-Eşik dört kez taşındı ve her seferinde bir şikayetten çıktı. Geçmişi
-[DECISIONS.md](DECISIONS.md)'de, dersleri tuzak 78 ve 101'de.
+Eşik beş kez taşındı. Dördü bir şikayetten çıktı, beşincisi işaretin yeniden
+çizilmesinden. Geçmişi [DECISIONS.md](DECISIONS.md)'de, dersleri tuzak 78 ve 101'de.
 
 Çizim üç yerde duruyor: svg dosyaları, `index.html`'in `data:` URI'si ve
 `App.tsx`'teki satır içi SVG. Ayrışmaları `temel.spec.ts` 72 (URI ile
