@@ -18,9 +18,8 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { type Box, reduce } from '../pure/undo';
-import { loadPlanAtStart, rotateBackups, savePlan, setAside } from './planStore';
+import { loadPlanAtStart, openable, rotateBackups, savePlan, setAside } from './planStore';
 import { usePlans } from './usePlans';
-import { emptyState } from '../pure/entities';
 import { LIBRARY_KEY, parseLibrary, planKey } from '../pure/library';
 import { parseState } from '../pure/parseState';
 import { readLibrary, writeLibrary, writeRefused } from './libraryStore';
@@ -46,12 +45,14 @@ function startup(): { box: Box; broken: string[] } {
   // timetable is already sitting in. Adoption therefore copies NOTHING.
   const library = readLibrary();
   writeLibrary(library);
-  rotateBackups(planKey(library.activeId));
-  const box = (planId: Id, present: State): Box => ({ present, past: [], future: [], planId });
+  // The session backup is of the plan that OPENS (DATA, "oturum yedekleri"),
+  // so it is rotated once that is known.
+  const box = (planId: Id, present: State): Box => {
+    rotateBackups(planKey(planId));
+    return { present, past: [], future: [], planId };
+  };
   const read = loadPlanAtStart(library.activeId);
-  if (!('broken' in read)) {
-    return { box: box(library.activeId, 'state' in read ? read.state : emptyState()), broken: [] };
-  }
+  if (!('broken' in read)) return { box: box(library.activeId, openable(read)), broken: [] };
   // The open plan's text cannot be read (TODO TB1): it used to crash the page
   // here, or open empty and be written over by the first edit. It is set
   // aside instead, and another plan is opened.
@@ -173,8 +174,15 @@ export function useStore() {
         (key, value) => {
           const now = held.current;
           if (key === planKey(now.box.planId)) {
-            const read = (text: string | null) =>
-              JSON.stringify(text === null ? null : parseState(text));
+            // Text another window wrote can be text that makes parseState
+            // throw; that is a change too, never an exception here (TB1).
+            const read = (text: string | null) => {
+              try {
+                return JSON.stringify(text === null ? null : parseState(text));
+              } catch {
+                return text;
+              }
+            };
             return read(value) === read(JSON.stringify(now.box.present));
           }
           if (key === LIBRARY_KEY) {

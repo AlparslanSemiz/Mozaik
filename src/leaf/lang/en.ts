@@ -82,8 +82,12 @@ const EN: Sozluk = {
   "Bu dosya bütün planları içeriyor": "This file holds every plan",
   "Bu dosya daha yeni bir sürümle yazılmış":
     "This file was written by a newer version",
-  "Okunamayan plan açılmadı, olduğu gibi duruyor: {adlar}.":
-    "A plan that could not be read was not opened and is kept as it is: {adlar}.",
+  "Okunamayan plan açılmadı: {adlar}.":
+    "A plan that could not be read was not opened: {adlar}.",
+  "· okunamadı": "· unreadable",
+  "Kayıtlı metni okunamadı; açılmıyor, silinmedi.":
+    "Its saved text could not be read; it is not opened and was not deleted.",
+  "Bu taslak okunamadı": "This draft could not be read",
   "Bu dosya okunamadı": "This file could not be read",
   'Tek bir planı değil, bu bilgisayardaki bütün planların yerine geçer. Ayarlar → Planlar ve yedek bölümündeki "Tümünü dosyadan aç" düğmesini kullanın.':
     'It replaces every plan on this computer, not a single one. Use the "Open all from file" button in Settings → Plans and backup.',

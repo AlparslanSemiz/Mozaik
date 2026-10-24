@@ -12,7 +12,7 @@
 
 import { useDialogs } from './Dialogs';
 import { useT } from './T';
-import { loadPlan } from '../platform/planStore';
+import { storedPlan } from '../platform/planStore';
 import { blankProgram, DEFAULT_PROGRAM_ID } from '../pure/program';
 import type { PlanControls } from './props';
 
@@ -37,7 +37,16 @@ export default function DraftStart({ plans, label, notify }: Props) {
           key={d.id}
           className="btn"
           onClick={async () => {
-            const seed = loadPlan(d.id);
+            const read = storedPlan(d.id);
+            if ('broken' in read) {
+              await alert({
+                title: t('Bu taslak okunamadı'),
+                tone: 'warn',
+                body: t('Kayıtlı metni okunamadı; açılmıyor, silinmedi.'),
+              });
+              return;
+            }
+            const seed = 'state' in read ? read.state : null;
             if (seed === null) {
               await alert({
                 title: t('Bu taslağın verisi bulunamadı'),

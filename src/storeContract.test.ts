@@ -722,6 +722,39 @@ describe('sözleşme · React kancası', () => {
     expect(localStorage.getItem(planKey('z'))).toBe(before);
   });
 
+  it('TB1: yedek zincirinde okunamayan kayıt listeyi düşürmüyor', () => {
+    localStorage.setItem(backupKey(0), throws());
+    localStorage.setItem(backupKey(1), JSON.stringify(named('Dün')));
+    expect(() => listBackups()).not.toThrow();
+    expect(listBackups().map((b) => b.state.settings.schoolName)).toEqual(['Dün']);
+  });
+
+  it('TB1: açılışta kenara konan plan yedek zincirine girmiyor, açılan plan giriyor', () => {
+    seed('1', [
+      ['1', 'Bozuk', throws()],
+      ['y', 'Tam', JSON.stringify(named('Açılan'))],
+    ]);
+    mount();
+    expect(localStorage.getItem(backupKey(0))).toBe(JSON.stringify(named('Açılan')));
+  });
+
+  it('TB1: "Tümünü dosyadan aç" kenara konan planı silmiyor', () => {
+    seed('1', [
+      ['1', 'Tam', JSON.stringify(school())],
+      ['z', 'Bozuk', throws()],
+    ]);
+    mount();
+    const before = localStorage.getItem(planKey('z'));
+    act(() => {
+      store.plans.replaceLibrary({
+        library: { plans: [{ id: 'y', name: 'Gelen', draft: false }], activeId: 'y' },
+        states: { y: school() },
+      });
+    });
+    expect(localStorage.getItem(planKey('z'))).toBe(before);
+    expect(store.plans.library.plans.map((p) => p.id)).toContain('z');
+  });
+
   it('TB1: loadPlan okunamayan metinde istisna atmıyor', () => {
     localStorage.setItem(planKey('z'), throws());
     expect(() => loadPlan('z')).not.toThrow();

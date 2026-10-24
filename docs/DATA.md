@@ -282,8 +282,11 @@ değiştirdiyse bu pencere klasöre de yazmaz (VK1). Açılışta boş okunan a�
 şimdi doluysa da yazmaz: ne depoya ne klasöre (TODO B7.30). Deposundaki metni okunamayan bir
 plan (JSON değil, ya da `parseState`'in düştüğü bir satır) açılmaz ve üstüne yazılmaz: açılışta
 açık plansa okunabilen ilk plan açılır, hiçbiri yoksa yeni boş bir plan; listeden seçilince
-seçilmez; ekranda tek satır adını söyler; dizinde ve anahtarında kalır (`setAside`,
-2026-10-24, TODO TB1). Pakete ve klasöre girmez, çünkü durumu yok.
+seçilmez; ekranda tek satır adını söyler; Planlar listesinde "okunamadı" diye görünür; dizinde
+ve anahtarında kalır (`setAside`, 2026-10-24, TODO TB1). Pakete ve klasöre girmez, çünkü durumu
+yok ("Tümünü dosyaya kaydet"in notu onu verisi bulunamayan plan sayar), ama "Tümünü dosyadan
+aç" onu silmez. Oturum yedeği açılan planın, kenara konanın değil; zincirdeki okunamayan bir
+kayıt listede atlanır.
 
 ## Neden böyle
 

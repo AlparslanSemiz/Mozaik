@@ -86,6 +86,11 @@ export function storedPlan(id: Id): StoredPlan {
   return readStored(readPlanText(id));
 }
 
+/** The state to open for a plan that is not broken: its own, or an empty one. */
+export function openable(read: { state: State } | { missing: true }): State {
+  return 'state' in read ? read.state : emptyState();
+}
+
 /** The plan's state, or null when there is none to open (missing or broken). */
 export function loadPlan(id: Id): State | null {
   const read = storedPlan(id);
@@ -157,8 +162,10 @@ export function listBackups(): Array<{ index: number; state: State }> {
   for (let i = 0; i < BACKUP_COUNT; i++) {
     const text = safely(() => localStorage.getItem(backupKey(i)));
     if (text == null) continue;
-    const state = parseState(text);
-    if (state !== null) list.push({ index: i, state });
+    // Through the same guard as a plan: a backup of text that cannot be read
+    // is skipped, never thrown out of the panel that lists them (TB1).
+    const read = readStored(text);
+    if ('state' in read) list.push({ index: i, state: read.state });
   }
   return list;
 }

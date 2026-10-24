@@ -32,9 +32,9 @@ import {
   uniquePlanName,
 } from '../pure/library';
 import { sanitize } from '../pure/constraints';
-import { emptyState, newId } from '../pure/entities';
+import { newId } from '../pure/entities';
 import { dropPlanText, readLibrary, writeLibrary } from './libraryStore';
-import { savePlan, setAside, storedPlan } from './planStore';
+import { openable, savePlan, setAside, storedPlan } from './planStore';
 import type { Id, State } from '../leaf/types';
 
 /** What the plan controls need from whoever owns the box and the autosave. */
@@ -68,7 +68,7 @@ export function usePlans({ planId, park, openPlan, onBroken }: PlanSeam) {
         return;
       }
       park();
-      openPlan(id, 'state' in read ? read.state : emptyState());
+      openPlan(id, openable(read));
       commit(setActive(library, id));
     },
     [planId, park, commit, library, openPlan, onBroken],
@@ -113,7 +113,7 @@ export function usePlans({ planId, park, openPlan, onBroken }: PlanSeam) {
           openPlan(aside.id, aside.state);
           onBroken(aside.broken);
         } else {
-          openPlan(next.activeId, 'state' in read ? read.state : emptyState());
+          openPlan(next.activeId, openable(read));
         }
       }
     },
@@ -172,7 +172,14 @@ export function usePlans({ planId, park, openPlan, onBroken }: PlanSeam) {
       const missed = new Set(
         [...unreadable, ...parsed.map((x) => x.id)].filter((id) => !written.has(id)),
       );
-      const stays = new Map(library.plans.filter((p) => missed.has(p.id)).map((p) => [p.id, p]));
+      // A plan here whose own text cannot be read stays too (TB1): it is in no
+      // bundle (it has no state), so a bundle written here and opened again
+      // would otherwise drop the one copy a later repair could work from.
+      const stays = new Map(
+        library.plans
+          .filter((p) => missed.has(p.id) || (!written.has(p.id) && 'broken' in storedPlan(p.id)))
+          .map((p) => [p.id, p]),
+      );
       for (const plan of library.plans) {
         if (!written.has(plan.id) && !stays.has(plan.id)) dropPlanText(plan.id);
       }
