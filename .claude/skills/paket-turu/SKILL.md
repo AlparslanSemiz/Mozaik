@@ -10,8 +10,8 @@ Bir paketi, davranış değişmeden yerine koyan tur. Kurallar burada tekrar edi
 katmanları [docs/TESTPLAN.md](../../../docs/TESTPLAN.md)'de, katman sınırları
 [docs/ARCHITECTURE.md](../../../docs/ARCHITECTURE.md)'de.
 
-2026-10-23'ten beri yeni refactor turu açılmıyor (DECISIONS 2026-10-23). Bu beceri yalnız
-Alp bir turu açıkça isterse kullanılır.
+Refactor turları açık (DECISIONS 2026-10-24); bir tur davranış değiştirmez ve bulduğu
+hatayı TODO §8k'ye yazar.
 
 **Girdi.** Paketin adı, ve [docs/TODO.md](../../../docs/TODO.md) §8k'deki hedef ağaç ile
 eski yol → yeni yol tablosunda o paketin satırları. Tabloda satırı olmayan bir dosya

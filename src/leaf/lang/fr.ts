@@ -153,6 +153,10 @@ const FR: Sozluk = {
     "**Ce plan a été modifié dans une autre fenêtre.** Cette fenêtre n’enregistre plus.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**Le plan enregistré n’a pas pu être lu au démarrage.** Il n’a pas été écrasé.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**Le plan enregistré a été écrit par une version plus récente.** Cette version ne peut pas l’ouvrir et ne l’écrase pas ; ce que vous faites ici n’est pas enregistré.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**Le plan enregistré n’a pas pu être lu.** Il n’a pas été écrasé ; ce que vous faites ici n’est pas enregistré. Vous pouvez ouvrir votre fichier de sauvegarde avec **Ouvrir depuis un fichier**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**L’enregistrement automatique ne fonctionne pas sur cet ordinateur.** Tout ce que vous faites est perdu à la fermeture du programme. Appuyez souvent sur **Enregistrer dans un fichier** et faites toujours une sauvegarde avant d’éteindre l’ordinateur.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -162,7 +166,7 @@ const FR: Sozluk = {
   "**{klasor}** klasörüne **yazılamıyor**. {sebep} İşiniz şu an yalnız bu tarayıcıda duruyor.":
     "**Impossible d’écrire** dans le dossier **{klasor}**. {sebep} Pour l’instant votre travail n’existe que dans ce navigateur.",
 
-  // src/ui/Availability.tsx
+  // src/ui/availability/Availability.tsx
   "{ad} sınıfı": "classe {ad}",
   "{ad} dersliği": "salle {ad}",
   "Müsait olmayan saatler": "Heures indisponibles",
@@ -241,16 +245,16 @@ const FR: Sozluk = {
   "Danışmanın söyleyecek bir şeyi yok.": "Le conseiller n’a rien à signaler.",
   Öneri: "Remarque",
 
-  // src/ui/ColorPick.tsx
+  // src/ui/common/ColorPick.tsx
   Vazgeç: "Annuler",
 
-  // src/ui/Commands.tsx
+  // src/ui/shell/Commands.tsx
   Git: "Aller à",
   Yap: "Faire",
   "derslik yok": "pas de salle",
   "{n} sınıf": "{n} {n:classe|classes}",
 
-  // src/ui/DraftStart.tsx
+  // src/ui/plans/DraftStart.tsx
   "Bu taslağın verisi bulunamadı":
     "Les données de ce brouillon sont introuvables",
   'Plan listesinde duruyor ama kendi anahtarı boş. Ayarlar → Hakkında → "Veriler nerede" tablosu hangi anahtarın kaç bayt tuttuğunu gösterir.':
@@ -282,7 +286,7 @@ const FR: Sozluk = {
   "Ders sabitlendi.": "Cours épinglé.",
   "Sabitleme kaldırıldı.": "Cours détaché.",
 
-  // src/ui/LessonEdit.tsx
+  // src/ui/program/LessonEdit.tsx
   "Günde en fazla": "Maximum par jour",
   "Dağılım değiştirilirse bu dersin programdaki yerleşimleri kalkar, sabitlenmiş olanlar da":
     "Si la répartition change, ce cours quitte l’emploi du temps, y compris les blocs épinglés",
@@ -332,7 +336,7 @@ const FR: Sozluk = {
   "Satırları elle sıralamak için **Sırala**’yı «Girildiği sıra»ya alın ve süzmeyi kaldırın.":
     "Pour réordonner les lignes à la main, réglez **Trier** sur « Ordre de saisie » et retirez le filtre.",
 
-  // src/ui/Palette.tsx
+  // src/ui/shell/Palette.tsx
   "Komut paleti": "Palette de commandes",
   "Ara veya komut yaz": "Rechercher ou saisir une commande",
   "Öğretmen, sınıf, derslik ara ya da bir komut yaz…":
@@ -642,6 +646,9 @@ const FR: Sozluk = {
   Oturum: "Session",
   "bir önceki": "la précédente",
   "{n} oturum önce": "il y a {n} {n:session|sessions}",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "écrite par une version plus récente, cette version ne peut pas l’ouvrir",
+  "okunamadı": "illisible",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "En attendant, **Enregistrer dans un fichier** dans la barre du haut est le seul recours.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":
@@ -909,7 +916,7 @@ const FR: Sozluk = {
   "Elle sıralama için süzmeyi ve sıralamayı kaldırın":
     "Pour réordonner à la main, retirez le filtre et le tri",
 
-  // src/ui/useSample.ts
+  // src/ui/plans/useSample.ts
   "{ogretmen} öğretmen, {sinif} sınıf ve {ders} ders silinecek.":
     "{ogretmen} {ogretmen:enseignant|enseignants}, {sinif} {sinif:classe|classes} et {ders} {ders:cours|cours} seront supprimés.",
   "Bu plandaki her şeyin yerine örnek veri geçecek":
