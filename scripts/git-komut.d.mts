@@ -14,3 +14,9 @@ export function git(kok: string, ...args: string[]): string;
  * another branch).
  */
 export function yayinYeriSorunu(kok: string): string | null;
+
+/**
+ * Fast-forwards `stabil` to the commit of `etiket`, on `origin` and locally,
+ * never forced. Null when done; otherwise the sentence that says why not.
+ */
+export function stabiliIlerlet(kok: string, etiket: string): string | null;

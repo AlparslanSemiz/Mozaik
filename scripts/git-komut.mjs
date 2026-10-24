@@ -44,3 +44,43 @@ export function yayinYeriSorunu(kok) {
   if (dal !== 'main') return `Sürüm yalnız main'den çıkar; bu klasör "${dal}" dalında.`;
   return null;
 }
+
+// `stabil` is the commit my father's exe runs: the last release, and only
+// ever moved forward (DECISIONS 2026-10-24). A branch, so that "what is he
+// running" is `git switch stabil` rather than a lookup of the newest tag.
+
+function atasiMi(kok, ata, torun) {
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', ata, torun], { cwd: kok, stdio: 'ignore' });
+    return true;
+  } catch (e) {
+    if (e?.status === 1) return false;
+    throw e;
+  }
+}
+
+/**
+ * Fast-forwards `stabil` to `etiket`, on the remote and here. Null when done;
+ * otherwise the sentence that says why not. Never forced: the remote refuses a
+ * push that is not a fast-forward, and the local branch moves only from the
+ * commit it was read at (`update-ref <ref> <new> <old>`).
+ */
+export function stabiliIlerlet(kok, etiket) {
+  const hedef = git(kok, 'rev-parse', `${etiket}^{commit}`);
+  let yerel = null;
+  try {
+    yerel = git(kok, 'rev-parse', '-q', '--verify', 'refs/heads/stabil');
+  } catch {
+    // No local stabil yet: created below.
+  }
+  if (yerel !== null && !atasiMi(kok, yerel, hedef)) {
+    return `Yerel stabil ${etiket}'in atası değil; ileri alınamaz, elle bakılmalı (git log stabil ${etiket}).`;
+  }
+  try {
+    git(kok, 'push', 'origin', `${hedef}:refs/heads/stabil`);
+  } catch (e) {
+    return `Uzaktaki stabil ${etiket}'e ileri alınamadı: fast-forward değil ya da push olmadı.\n${e.gitCevabi ?? ''}`.trim();
+  }
+  git(kok, 'update-ref', 'refs/heads/stabil', hedef, yerel ?? '');
+  return null;
+}
