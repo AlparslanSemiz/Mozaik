@@ -195,13 +195,27 @@ Windows'ta hiçbir oturum açamıyordu. Çare: test exe'si pencereye
 `ms:edgeOptions.debuggerAddress` ile bağlanıyor, oturum kapanınca exe süreç ağacıyla
 öldürülüyor ve port kapanana kadar bekleniyor. Sonra iki kırmızı daha: arayüz İngilizce
 (dil kaydı `tr` ve yeniden yükleme) ve runner'ın 1024×768 ekranında sekme yazıları gizli
-(iş akışında `Set-DisplayResolution` 1920×1080). Son koşu (40099384214, f98f20b) 13 geçti, 2
-platform atlaması; X ile kapanış (WM_CLOSE) 5,4 s. `tauri-driver` kurulumu, iki teşhis adımı
-ve dalın geçici push tetiği kalktı. `yayinla` zaten `exe-windows.yml`'i bekliyordu
+(iş akışında `Set-DisplayResolution` 1920×1080). İlk yeşil 40099384214 (f98f20b).
+
+**İnceleme** (taze bağlamlı alt ajan). Düzelen: fikstürün temizliği ölü oturumun ekran
+görüntüsünde düşüp exe'yi ve sürücüyü açık bırakabiliyordu; süresi dolan bir testin açtığı exe
+kimsesiz kalıyordu (her testten önce artık program, WebView2 ve msedgedriver öldürülüyor,
+`windowsTemizle` runner kapısını kendisi soruyor); `kapat` iki kez çağrılınca çıkmış bir pid'i
+öldürebiliyordu; dil yeniden yüklemesi oturum döngüsünün içindeydi ve eski sayfayı yenisinden
+ayıramıyordu; yayınlanan exe'ye port sızarsa hiçbir test görmüyordu (şimdi `kontrat.test.ts`,
+porta açılan `tauri.conf.json`'a karşı kırmızı görüldü); test exe'si yayınınkinden başka bir
+CLI ile derleniyordu; süzgeç depolama kodunu ve fikstürleri kaçırıyordu; eşzamanlılık
+`yayinla`'nın beklediği koşuyu iptal edebiliyordu (artık commit başına); bayat yorumlar.
+Ardından bir kırmızı (TESTFINDINGS, 6): oturumdan önce programın sayfası beklenir, sayfasız
+açılış bir kez yeniden. Son koşu 40101538104 (46db31f) 13 geçti, 2 platform atlaması, X ile
+kapanış 6,1 s. Bulunup bırakılan: ilk açılış İngilizce yükleniyor ve sonra yeniden yükleniyor;
+ilk planın adı sabit ("1. plan"), dile bağlı kayıt yok. `tauri-driver` kurulumu, iki teşhis
+adımı ve dalın geçici push tetiği kalktı. `yayinla` zaten `exe-windows.yml`'i bekliyordu
 (2026-10-10); BUILD'in "etiketten önce elle" adımı silindi.
 
-Koşulanlar: Linux'ta gerçek exe süiti tb7'nin ikilisine karşı 14 geçti, 1 atlandı (sürücünün
-Linux yolu değişmedi); `npm run hizli` yeşil. Koşulmayan: Windows'ta düzeltmesiz ikiliye karşı
+Koşulanlar: Linux'ta gerçek exe süiti tb7'nin ikilisine karşı, sürücünün ilk ve son hâliyle,
+iki kez 14 geçti, 1 atlandı; `npm run hizli` her commit'ten önce yeşil; `kontrat.test.ts`'in
+yeni testi porta açılan `tauri.conf.json`'a karşı kırmızı. Koşulmayan: Windows'ta düzeltmesiz ikiliye karşı
 kapanış testi (mutasyon), ve süitin babanınki gibi Türkçe bir Windows'ta koşusu.
 
 ## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
