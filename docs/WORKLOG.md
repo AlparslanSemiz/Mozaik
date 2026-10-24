@@ -270,6 +270,10 @@ başlıyor, bu dal o yazımı kaldırıyor; o testin ilk `expect.poll` satırı 
 (`storage/folder.test.ts`, `planStore.ts`, `useFolder.ts`, `useStore.ts`), ve `src/ui/App.tsx`'te
 sil/değiştir: şerit `src/ui/shell/Notices.tsx`'e taşınır.
 
+**Boyut eşiği.** Dal tek başına `dist/index.html`'i 1 170 864 bayta getiriyor (eşik 1 171 000);
+tb8 ve tb7'yle birleşik kopya 1 174 043 bayt ve `kontrol`'ün `boyut` adımında kırmızıydı
+(`npm run boyut`, "exceeded by 3.04 kB"). Ham eşik 1 186 500'e çekildi, gerekçesi BUILD.md'de.
+
 **Ölçülmedi.** Gerçek Windows exe'de hiçbiri koşulmadı; Linux'taki gerçek exe'de (`exe:e2e`)
 sonucu bu girdiyi yazarken bekleniyordu.
 
