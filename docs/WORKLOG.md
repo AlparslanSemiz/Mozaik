@@ -19,7 +19,7 @@ Eski girdilerde geçen "ilke N" numaralarının karşılığı
 
 ## Şu an
 
-Son güncelleme: 2026-10-24 (zincirin son dalı, `b7-32-kilit`).
+Son güncelleme: 2026-10-24 (zincirin son dalı, `okunabilirlik`).
 
 **Sürüm.** 2.2.0, 2026-09-26'da yayınlandı. Üstüne yayınlanmamış düzeltmeler
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
@@ -48,19 +48,21 @@ paketleri, derin import kuralı, hedef ağacın tablosu, `useSolver`'ın birim t
 `platform/search` paketi ve adım 4 `main`'de: `pure/program`, `ui/program`,
 `pure/programView` (RF8), `pure/paper` ile `ui/print` (RF9) ([TODO.md](TODO.md) §8k).
 Test programı (2026-10-09, [TODO.md](TODO.md) §8l): Faz 0 ve Faz 1'in çoğu bitti, kalanı
-TP-B birikim maddesi. 2026-10-24'te beş dal zincir olarak birleşti (aşağıdaki girdi): TB8
-düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in üst çubuk yarısı düzeldi, açılış yarısı
-açık; TB7'nin exe yarısı düzeldi (Linux'ta ölçüldü, Windows'ta etiketten önce), tarayıcı
-yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor.
+TP-B birikim maddesi. 2026-10-24'te yedi dal zincir olarak birleşti (aşağıdaki girdiler):
+TB8 düzeldi, paket yolunun fuzz'u onunla geldi; TB1'in üst çubuk yarısı düzeldi, açılış yarısı
+açık (`tb1-acilis`); TB7'nin exe yarısı düzeldi (Linux'ta ölçüldü, Windows'ta etiketten önce),
+tarayıcı yarısı veri kaybı değil, gecikme; B7.32 yazıldı, `main`'de `--kuru` bekliyor; dosya
+okumanın üç deliği (B7.34, B7.35, B7.37) ve Ayarlar'ın not boyu (B7.36) kapandı.
 
 **Sıradaki iş.** Zincir (`bitti-kontrolu` → `tb8-eksik-plan` → `tb1-dosyadan-ac` →
-`tb7-sekme-kapanis` → `b7-32-kilit`) birleşince ana klasörde `npm run yayinla -- --kuru`
-(B7.32'nin doğrulaması). Açık iki dal, zincirin üstünden: `dosya-okuma-b7` (B7.34, B7.35,
-B7.37) ve `okunabilirlik` (B7.36, zebra). Etiketten önce Windows'ta gerçek exe'de pencere
-kapanışı (BUILD, "Sürüm"; Windows süiti TP7, kullanıcının kararını bekliyor). Kodu değiştiren
-her dal "bitti"den önce bitti kontrolünü yapar (CLAUDE.md). Birleşmeyi bekleyen öteki dal:
-`ruflo/kurulum` (Alp'in deny testi); onun B7.33'ü `main`'de maskable ikonun, birleşirken
-numarasını kaydırır.
+`tb7-sekme-kapanis` → `b7-32-kilit` → `dosya-okuma-b7` → `okunabilirlik`) birleşince ana
+klasörde `npm run yayinla -- --kuru` (B7.32'nin doğrulaması). Zebra mozaik-ed'in `zebra-liste`
+dalında (kullanıcının kararı, 2026-10-24); bu oturumun zebra işi devredildi
+(`scratch/zebra-devir.md`). Açılan dallar: `tp7-windows-exe` (Windows'ta gerçek exe süiti,
+kapanış senaryosu, `yayinla`'nın etiket kapısı) ve `tb1-acilis` (açılışta bozuk plan). Kodu
+değiştiren her dal "bitti"den önce bitti kontrolünü yapar; bir TODO maddesine başlamadan önce
+worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal: `ruflo/kurulum`
+(Alp'in deny testi); onun B7.33'ü `main`'de maskable ikonun, birleşirken numarasını kaydırır.
 0. Özellik oturumunun sırası (2026-10-10, Alp; TODO, İÇİNDEKİLER'in altı): Linux
    uygulaması ve zebra `main`'de (2026-10-23) → sade ekran (babanın 1 numaralı isteği) → yayın kapısı (önce D;
    Windows'ta gerçek güncelleme testi önce: eski sürüm → yeni sürüm, tek kopya kilidiyle;
@@ -180,7 +182,7 @@ numarasını kaydırır.
 
 ---
 
-## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda (`okunabilirlik`, `okunabilirlik-zebra`)
+## 2026-10-24 akşam · Okunabilirlik: B7.36; zebra ayrı dalda, sonra devredildi (`okunabilirlik`, `okunabilirlik-zebra`)
 
 Dal `tb1-dosyadan-ac`'in ucundan (TODO'nun B7.36'sı TB8'in dalında doğdu).
 
@@ -195,6 +197,9 @@ inceleme bulguları düzeltilmiş, `renk`/`erisim`/`panel` 51/51, önce/sonra ö
 oturumunda zebrayı ona verdiğini ve bu dalın zebraya dokunmayacağını söylediğini aktardı; iki dal
 aynı bloğa ve `--muted`'a yazıyordu. Bu dal zebrayı geri aldı (yalnız B7.36 kalıyor), zebra
 işi kaybolmasın diye `okunabilirlik-zebra` dalında (95cecfd) duruyor ve birleştirmeye sunulmuyor.
+Kullanıcının kararı (aynı gün): zebra `zebra-liste`'de; `zebra-liste`'de olmayanlar
+`scratch/zebra-devir.md`'de mozaik-ed'e verildi, `okunabilirlik-zebra` alındığı teyit edilince
+silinir. CLAUDE.md'ye kural: dalı olan TODO maddesi alınmıştır.
 
 **Koşulan.** `hizli` (1347 geçti), Ayarlar betiği, zebra için yukarıdakiler. **Koşulmayan.** Tam
 E2E yerelde (CI'da).
