@@ -228,7 +228,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `ui/print/index.ts` | Çıktı paketinin giriş noktası: `Print` ve dışarıda bırakılan sayfaların şekli (`Excluded`, `NOTHING_EXCLUDED`); `Sheet` paketin içinde kalır |
 | `ui/print/Print.tsx` | Çıktı: hangi sayfalar, bir kâğıda kaçı, sayfada ne olsun ve damga; sayfanın söylediği `pure/paper`'dan |
 | `ui/print/Sheet.tsx` | basılan bir sayfayı modelinden çizer, hiçbir şeye karar vermez |
-| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında), `Plans` |
+| `ui/settings/` | Ayarlar: `index.tsx` kabuk, `School` (Zil ve günler), `Rules` (Kurallar), `Appearance` (Görünüm), `Data` (Planlar ve yedek ile Hakkında; ikisinin işleyicileri), `Folder` (klasör paneli), `About` (sürüm, güncelleme, arama ölçümü, Yenilikler), `Plans` |
 | `ui/common/BlockCounts.tsx` | dağılım seçici, iki ekranda kullanılıyor |
 | `ui/common/ColorPick.tsx` | renk seçme diyaloğu |
 | `ui/plans/DraftStart.tsx` | "Taslaktan başla", iki ekrandan açılır |
