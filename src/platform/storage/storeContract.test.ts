@@ -215,12 +215,16 @@ describe('sözleşme · planın deposu', () => {
     expect(localStorage.getItem(`${BASE_KEY}-deneme`)).toBeNull();
   });
 
-  it('yedek zinciri okunuyor, bozuk kayıt atlanıyor', () => {
+  it('yedek zinciri okunuyor, bozuk kayıt atlanmıyor, okunamadı diye listeleniyor', () => {
+    // It used to be skipped, and after A1 the skipped one was the real plan
+    // (the audit of 2026-10-24): okunamayan.test.tsx has the rest.
     localStorage.setItem(backupKey(0), JSON.stringify(named('Dün')));
     localStorage.setItem(backupKey(1), 'bozuk');
     const list = listBackups();
-    expect(list.map((b) => b.index)).toEqual([0]);
-    expect(list[0]?.state.settings.schoolName).toBe('Dün');
+    expect(list.map((b) => b.index)).toEqual([0, 1]);
+    const first = list[0];
+    expect(first !== undefined && 'state' in first && first.state.settings.schoolName).toBe('Dün');
+    expect(list[1]).toEqual({ index: 1, problem: 'okunamadi' });
     expect(BACKUP_COUNT).toBeGreaterThan(1);
   });
 });

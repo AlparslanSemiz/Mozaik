@@ -449,7 +449,7 @@ beklemezler.
 ### Exe bir adaptör takar
 
 Exe hiçbir şeyi yeniden yazmaz. `folder.ts` dosya adlarının, günlük yedeğin ve
-budamanın tek evi, `desktop.ts` üç Tauri komutunu bir `FileSystemDirectoryHandle`
+budamanın tek evi, `desktop.ts` beş Tauri komutunu bir `FileSystemDirectoryHandle`
 kılığına sokar ve `saveInto()` exe'de olduğu gibi koşar. Rust'ta yalnız tarayıcıda
 karşılığı olmayan şey var: hangi klasör, ve bir adın gerçekten bir ad olduğunu
 doğrulayan kapı (`safe_name`). `src/platform/exe/desktop.test.ts` gerçek `saveInto()`'yu

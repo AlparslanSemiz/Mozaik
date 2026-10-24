@@ -25,6 +25,11 @@ Son güncelleme: 2026-10-24.
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
 denetimin on üç kusuru).
 
+**`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
+okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
+sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
+siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
+
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
 program). v0 bitti (2026-10-09): baba gerçek verisiyle bir haftayı Mozaik'te dizdi,
@@ -357,6 +362,69 @@ build`, `build:site`, `boyut`, `temel.spec.ts` 72 ve 79 ile `kabuk.spec.ts` 76 `
 altında 7/7. `index.html` `prettier --check`'te uyarı veriyor, `main`'de de, `favicon.mjs`
 üretiyor ve `bicim`'in kapsamında değil. **Koşulmayan.** `kontrol`, bütün E2E, Windows'ta
 görev çubuğu ve exe.
+
+## 2026-10-24 · Okunamayan plan ve boş açılış: A1, A2, madde 7 (`fix/okunamayan-plan`)
+
+**Kaynak.** Denetimin ana raporu (`~/GitHub/Mozaikler/Mozaik-analiz/scratch/analiz/RAPOR.md`
+§1 A1 ve A2, §3 madde 7), `T1/RAPOR.md` ve `T2/RAPOR.md`. Görevde adı geçen `DEVIR.md` o klasörde
+yok; tekrar adımları T1'in probe'undan (`T1/probe/yeniSema.probe.test.tsx`) ve T2'nin
+betiklerinden (`T2/e2e/veri.t2.spec.ts`, `eski.t2.spec.ts`, `budama.t2.spec.ts`, `kota.mjs`)
+alındı. TODO B7.37, tuzak 153.
+
+**Yapılan.** Depo okuması üç cevap veriyor (`readStoredPlan`: yok, okundu, okunamadı/yeni;
+`parseState`'i attıran gövde de okunamayan). Okunamayan anahtar `libraryStore`'da dondurulur;
+açılış, plan geçişi, silmeden sonra açılan plan, otomatik kayıt ve `park` onun üstüne yazmaz.
+Dondurmayı "Dosyadan aç" ve "Her şeyi sil" (`loadState`), plan silme ve "Tümünü dosyadan aç"
+(`explicitly`) kaldırır; örnek okul kaldırmaz. Kırmızı şerit iki cümleyle, dört dilde.
+`usePlans.ts`'e dokunulmadı (tb8 onu yeniden yazıyor). Klasör: açılıştaki ilk yazım yalnız
+okunmuş bir plandan (`openedReadable`), iş taşımayan paket yalnız olmayan ya da boş dosyaya
+(`holdsWork`), budama yalnız iş taşıyan günlükleri sayıyor ve yalnız iş taşıyan bir yazımdan
+sonra koşuyor, okunamayan plan pakete deposundaki hâliyle giriyor (JSON değilse klasöre
+yazılmıyor), okunamayan klasör sessiz kalmıyor. Exe'ye `read_file` (lib.rs, cargo testli).
+Oturum yedeği içerik (plan) değişmediyse dönmüyor; okunamayan yedek Ayarlar → Planlar ve
+yedek'te satır olarak görünüyor.
+
+**Testler ve kanıt.** `src/platform/storage/okunamayan.test.tsx` (18), `src/platform/storage/useFolder.test.tsx` (13, `useFolder`'ın
+ilk birim testi), `e2e/okunamayan.spec.ts` (94, 8 test). Aynı testler `main`'de: birim 31'in
+26'sı kırmızı (geçen beşi kontrol, biri `main`'de zaten olan B7.30 kapısı), E2E 8/8 kırmızı;
+dalda hepsi yeşil. `e2e/exe.spec.ts` 76'nın
+ilk testi taze profilde tıklamasız yazmayı sabitliyordu, yani A2'nin kendisini; okunmuş bir
+plandan yazıyor ve boş açılışın yazmadığı ayrı bir test. `klasor.spec.ts`'in budama testi ve
+`gercek-exe.spec.ts`'in yazma testi aynı sebeple yeni kurala göre. Elle mutasyon kanıtı
+(`scripts/mutasyon-kaniti.sh`, 12 mutasyon): ilk koşuda 10 kırmızı; yeşil kalan ikisi
+(saveInto'nun boş yazıda budamaması, libraryStore'un dondurma kapısı) üst katman aynı şeyi önce
+tuttuğu için görünmüyordu, doğrudan testleri eklendi, ikisi de kırmızı.
+
+**Koşulanlar.** `npm run hizli` yeşil (1370 test, ilk kod commit'inden önce); `cargo test` 29/29;
+dokunulan E2E'ler yerelde yeşil (`okunamayan`, `exe`, `iki-kopya`, `kapanis`, `planlar`;
+`klasor` site yapılandırmasıyla 9/9); CI 40101737031 yeşil (lint, knip, biçim, birim ve belge
+kapısı, derleme, boyut, bütün E2E parçaları); ilk CI 40101100704 lint'te kırmızıydı, düzeltildi.
+Yerel `kontrol` dalda koşulmadı: kilit başka bir oturumun Stryker koşusundaydı ve CI aynı şeyi
+ölçtü. Windows E2E (`windows.yml`) yalnız `main`'de koşuyor, bu dalda koşmadı.
+
+**Birleşme.** `tb8-eksik-plan` ve `tb7-sekme-kapanis` bu dalın bir kopyasına çakışmasız
+birleşiyor ve tipler geçiyor. Anlamsal bir çakışma var: tb7'nin yeni gerçek exe testi ("X ile
+hemen kapanan pencere…") taze bir profilde klasörün kendiliğinden yazılmasını bekleyerek
+başlıyor, bu dal o yazımı kaldırıyor; o testin ilk `expect.poll` satırı birleşmede düşmeli.
+Ölçüldü: birleşik kopyada (`main` + bu dal + tb8 + tb7) `npm run kontrol` çıkış 0 (1502 birim,
+653 E2E, 24 site, 7 çözücü, boyut eşiğin altında); `npm run exe:e2e` 15 testin 13'ü geçti, ikisi
+aynı satırda kırmızıydı: tb7'nin kapanış testi ve `main`'de zaten olan VK2 kurtarma testi.
+VK2 testi bu dalda düzeltildi (aşağıda); tb7 testinin bir satırlık düzeltmesiyle ikisi de
+gerçek Linux exe'de yeşil (birleşmede uygulanacak yama: ilk `expect.poll` yerine 1,5 s bekleme).
+`refactor/moduller` ile deneme birleşmesi: dört içerik çakışması, hepsi import bloğu
+(`storage/folder.test.ts`, `planStore.ts`, `useFolder.ts`, `useStore.ts`), ve `src/ui/App.tsx`'te
+sil/değiştir: şerit `src/ui/shell/Notices.tsx`'e taşınır.
+
+**Boyut eşiği.** Dal tek başına `dist/index.html`'i 1 170 864 bayta getiriyor (eşik 1 171 000);
+tb8 ve tb7'yle birleşik kopya 1 174 043 bayt ve `kontrol`'ün `boyut` adımında kırmızıydı
+(`npm run boyut`, "exceeded by 3.04 kB"). Ham eşik 1 186 500'e çekildi, gerekçesi BUILD.md'de.
+
+**VK2'nin gerçek exe testi.** O da taze profilde klasörün kendiliğinden yazılmasını bekliyordu,
+ve depo doluyken sonraki açılışın canlı dosyayı eski (boş) durumla ezdiğini sabitliyordu. Yeni
+kuralla boş açılış iş taşıyan dosyanın üstüne yazmıyor, yani canlı dosya da örnek okulu tutuyor;
+test buna göre, kurtarma kopyasının dokunulmadığı iddiası aynen.
+
+**Ölçülmedi.** Gerçek Windows exe'de hiçbiri koşulmadı.
 
 ## 2026-10-24 · Toplama: `surec-sadelestirme` `main`'de, tek checkout kuralı
 

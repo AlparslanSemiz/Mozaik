@@ -18,6 +18,7 @@ import {
   dailyName,
   dropHandle,
   folderSupported,
+  holdsWork,
   permissionOf,
   pickFolder,
   readHandle,
@@ -26,8 +27,9 @@ import {
   writeHandle,
 } from './folder';
 import { writesClosed } from './otherWindow';
-import { mayWritePlan } from './libraryStore';
+import { frozenPlan, mayWritePlan, readPlanText } from './libraryStore';
 import { collectStates } from './download';
+import { openedReadable } from './planStore';
 import { searchLog } from '../search';
 import type { Id, State } from '../../leaf/model';
 
@@ -63,6 +65,29 @@ export interface FolderRun {
 }
 
 /**
+ * The states to bundle, with every plan this copy cannot read put back AS IT
+ * IS STORED. Left to `collectStates`, such a plan is dropped (and the open
+ * one is its empty stand-in), and the bundle that went over the live file was
+ * missing a plan the folder had (A1, A2). A newer copy's plan is still JSON and
+ * goes in verbatim, so that copy can open it again from here. Text that is not
+ * even JSON cannot go anywhere, and then nothing is written: null.
+ */
+function withUnreadable(lib: Library, states: Record<Id, State>): Record<Id, unknown> | null {
+  const out: Record<Id, unknown> = { ...states };
+  for (const plan of lib.plans) {
+    if (frozenPlan(plan.id) === null) continue;
+    try {
+      const raw: unknown = JSON.parse(readPlanText(plan.id) ?? '');
+      if (typeof raw !== 'object' || raw === null) return null;
+      out[plan.id] = raw;
+    } catch {
+      return null;
+    }
+  }
+  return out;
+}
+
+/**
  * `rescue`: this browser's own storage refused the last save (useStore's
  * `saveTrouble === 'dolu'`). While it does, every flush also writes the
  * session's rescue copy (folder.ts, `rescueName`).
@@ -94,17 +119,24 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     // would put an empty plan in today's file (libraryStore.ts, `mayWritePlan`).
     const { library: lib, planId: id, present: now, rescue: kurtar } = latest.current;
     if (writesClosed() || !mayWritePlan(id)) return;
-    const text = buildBundle(lib, collectStates(lib, id, now), searchLog());
+    const states = withUnreadable(lib, collectStates(lib, id, now));
+    if (states === null) return;
+    const text = buildBundle(lib, states, searchLog());
     const when = new Date();
     // Listing the directory is real I/O; only do it when the day turned over,
-    // which is also the only moment a prune can have anything to do.
+    // which is also the only moment a prune can have anything to do. And only
+    // after a write that holds work: saveInto prunes nothing after an empty
+    // one, and the day is not over for the prune until a full one lands (A2).
     const today = dailyName(when);
-    const prune = today !== lastDay.current;
-    lastDay.current = today;
+    const prune = today !== lastDay.current && holdsWork(text) === true;
 
     try {
       if (kurtar && rescueFile.current === null) rescueFile.current = rescueName(when);
       const result = await saveInto(handle, text, when, prune, kurtar ? rescueFile.current : null);
+      if (prune) lastDay.current = today;
+      // An empty bundle that found work in both files wrote neither: nothing
+      // was written, and the line does not say otherwise.
+      if (result.written.length === 0) return;
       setStatus({ kind: 'yazildi', name: handle.name, at: when, files: result.written });
     } catch (err) {
       // The folder was deleted, the disk is full, or the permission was
@@ -128,12 +160,18 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
     // The exe route, and it is SHORTER rather than parallel: no picker, no
     // permission, no IndexedDB. Those three exist in the browser because a
     // page has to be granted a folder; here the folder is the app's own.
+    //
+    // The first write waits for the first change unless the open plan was READ
+    // from storage. Not there, or not readable, it is an empty stand-in, and
+    // writing it before anybody touched anything is how a wiped profile used
+    // to empty Belgelerim\Ders Programı within a second (A2). The browser's
+    // granted folder below follows the same rule.
     if (isDesktop()) {
       void openDesktopFolder().then((handle) => {
         if (!alive || handle === null) return;
         dir.current = handle;
         setStatus({ kind: 'bekliyor', name: handle.name });
-        void write(handle);
+        if (openedReadable()) void write(handle);
       });
       return () => {
         alive = false;
@@ -151,7 +189,7 @@ export function useFolder(library: Library, planId: Id, present: State, rescue =
       if (!alive) return;
       if (state === 'granted') {
         setStatus({ kind: 'bekliyor', name: handle.name });
-        void write(handle);
+        if (openedReadable()) void write(handle);
       } else {
         setStatus({ kind: 'izin-gerek', name: handle.name });
       }

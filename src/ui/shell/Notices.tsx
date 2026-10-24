@@ -4,13 +4,14 @@
 
 import { surumEtiketi } from '../../leaf/app';
 import type { SectionId, Tab } from '../../platform/prefs';
-import type { FolderRun, SaveTrouble } from '../../platform/storage';
+import type { FolderRun, SaveTrouble, useStore } from '../../platform/storage';
 import type { useUpdate } from '../../platform/update';
 import { T, useT } from '../common';
 
 interface Props {
   canSave: boolean;
   saveTrouble: SaveTrouble;
+  unreadable: ReturnType<typeof useStore>['unreadable'];
   update: ReturnType<typeof useUpdate>;
   updateHidden: boolean;
   setUpdateHidden: (hidden: boolean) => void;
@@ -22,6 +23,7 @@ interface Props {
 export default function Notices({
   canSave,
   saveTrouble,
+  unreadable,
   update,
   updateHidden,
   setUpdateHidden,
@@ -71,6 +73,22 @@ export default function Notices({
           <button className="btn" onClick={() => window.location.reload()}>
             {t('Yenile')}
           </button>
+        </div>
+      )}
+
+      {/* THE SAVED PLAN IS THERE AND THIS COPY CANNOT READ IT (A1): a newer
+      copy's plan, or one cut short. The screen holds an empty stand-in
+      that is never saved over it; opening a file in its place, or
+      deleting the plan, is what lifts that (libraryStore.ts). No reload
+      button: a reload reads the same text. */}
+      {unreadable !== null && (
+        <div className="save-warning" role="alert">
+          ⚠{' '}
+          {unreadable === 'yeni' ? (
+            <T k="**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez." />
+          ) : (
+            <T k="**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz." />
+          )}
         </div>
       )}
 

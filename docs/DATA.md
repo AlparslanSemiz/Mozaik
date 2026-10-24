@@ -113,6 +113,16 @@ geçer. Yalnız bir koşunun içindeki blok sınırı yeniden okunur, ve hiçbir
 kısıt o sınıra bakmaz (tuzak 75). Bilinmeyen, ileriki bir sürüm `null` döner,
 tahmin edilmez. Üst çubuk o dosyaya "okunamadı" değil "daha yeni bir sürümle yazılmış" der (`readPlanFile()`).
 
+Bu bilgisayarın deposundaki bir plan üç cevaptan birini verir: yok, okundu, okunamadı
+(`readStoredPlan()`). Okunamayan daha yeni bir sürümün planı, yarıda kesilmiş bir metin ya da
+`parseState`'i attıran bir gövde olabilir. Okunamayan anahtar dondurulur: açılışta, plan
+geçişinde ve silmeden sonra açılan planda ekrana boş bir yer tutucu gelir, kırmızı şerit
+nedenini söyler, ve ne otomatik kayıt ne klasör o anahtarın üstüne yazar. Dondurmayı yalnız
+kullanıcının açık bir eylemi kaldırır: "Dosyadan aç" ya da "Her şeyi sil" ile o planın yerine
+bir şey koymak, planı Planlar'dan silmek, ya da "Tümünü dosyadan aç". 2026-10-24'e kadar
+okunamayan plan "yok" sayılıyordu ve 400 ms sonra boş plan üstüne yazılıyordu (denetimin A1'i,
+tuzak 153).
+
 v5'ten önceki bir yedeğin branş listesi `defaultSubjects()`'e düşer, çünkü
 listeden önce yazılmış bir dosya öğretmenlerinin taşıdığı branşları kaybetmemeli.
 Bu iki yerde yapılıyor: `parseState` ve `migrateV2toV3`.
@@ -252,10 +262,19 @@ aramanın onun makinesinde nasıl koştuğunu söylemesi için orada (TODO B5.11
 biçimin birbirine karışmaması için üç önlem birlikte var (tuzak 30).
 
 Seçilen klasöre bütün planlar yazılır ve her gün için ayrı bir yedek bırakılır
-(`ders-programi-YYYY-AA-GG.json`, son 10 gün). Yedekler ad kalıbıyla budanır,
+(`ders-programi-YYYY-AA-GG.json`, iş taşıyan son 10 gün). Yedekler ad kalıbıyla budanır,
 sayılarak değil: klasör Belgelerim ve orada babanın kendi dosyaları duruyor, "en
 yeni ondan gerisini sil" onların da üstünden geçerdi. Kalıba uymayan hiçbir dosyaya
-dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Klasöre yazamamak sessiz kalmaz:
+dokunulmuyor, üst çubuğun saatli yedeği (`…-2026-08-26-1430.json`) dahil. Budama yalnız iş
+taşıyan (bir öğretmeni, sınıfı, dersi ya da dersliği olan) günlükleri sayar, en yeni onunu ve
+onlardan yeni her günlüğü bırakır, ve yalnız o gün iş taşıyan bir yazımdan sonra koşar. İş
+taşımayan bir paket yalnız kaybedecek bir şey olmayan yere yazılır: olmayan ya da onun gibi boş
+bir dosyaya (`holdsWork()`). Açılıştaki ilk yazım, exe'de de tarayıcıda da, yalnız açık plan
+depodan okunduysa yapılır; yoksa ilk değişikliği bekler. Okunamayan bir plan pakete deposundaki
+hâliyle girer (daha yeni bir sürümünki JSON olduğu için olduğu gibi), JSON bile değilse klasöre
+hiç yazılmaz. 2026-10-24'e kadar exe boş bir depoyla açılınca boş paketi canlı dosyanın ve
+günün yedeğinin üstüne yazıyor, budama da boş günlüğü ona sayıyordu (denetimin A2'si, tuzak
+153). Klasöre yazamamak sessiz kalmaz:
 klasör silinmiş ya da izin geri alınmışsa satır kırmızı olur ve ne yapılacağını
 yazar.
 

@@ -50,6 +50,7 @@ export default function App() {
     plans,
     park,
     saveTrouble,
+    unreadable,
   } = useStore();
 
   // Where you are, in every tab at once. Up here because switching tabs
@@ -261,6 +262,7 @@ export default function App() {
             <Notices
               canSave={canSave}
               saveTrouble={saveTrouble}
+              unreadable={unreadable}
               update={update}
               updateHidden={updateHidden}
               setUpdateHidden={setUpdateHidden}

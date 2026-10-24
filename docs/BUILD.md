@@ -108,6 +108,12 @@ yaklaşık yirmi beş yeni cümle: kaybı sayan sorular, durdurulan arama, eksik
 Kontrol'ün kapalı saat hükmü, takasın gerekçesi), yeni kısaltma tablosu 2,8 kB, kalanı kod.
 Ham eşik on iki buçuk kilobayt kadar pay bırakacak yere çekildi, 1 171 000. Brotli hâli
 280,2 kB ile eşiğin altında kaldığı için brotli eşiği yerinde (WORKLOG 2026-09-27).
+`fix/okunamayan-plan` (2026-10-24, TODO B7.37) ham boyu 5 946 bayt büyüttü (1 164 918'den
+1 170 864'e; yaklaşık 3,2 kB'ı dört dile giren dört yeni cümle, kalanı kod), yani eşiğin 136
+bayt altına. Ondan önce birleşecek `tb7-sekme-kapanis` (`tb8-eksik-plan` içinde) kendisi
+3 175 bayt getiriyor, ve üçü birlikte 1 174 043 bayt, eşiğin 3 kB üstü. Ham eşik birleşik boyun
+on iki buçuk kilobayt kadar üstüne çekildi, 1 186 500; brotli hâli birlikte 282,4 kB, eşiği
+yerinde (WORKLOG 2026-10-24).
 
 `sinir` `kontrol`'ün parçası, çünkü sıfır bulguyla başlıyor ve saniyenin biraz
 üstünde koşuyor. Ölçtüğü şey çalışma zamanı grafiği: `import type` derlemede

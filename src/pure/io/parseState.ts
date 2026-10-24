@@ -598,3 +598,30 @@ function newerVersion(text: string): boolean {
     return false;
   }
 }
+
+/**
+ * What this computer's storage holds for a plan: nothing, a plan, or text this
+ * copy cannot read. The last two used to be one answer: `parseState`'s null,
+ * which the opening read and the plan switch turned into an empty plan, and
+ * the autosave wrote that over the text 400 ms later (A1, the audit of
+ * 2026-10-24). So "not there" and "there but unreadable" are kept apart here,
+ * and "unreadable" says whether it is a newer copy's plan, with the top bar's
+ * rule (`newerVersion`, DENETIM DK10).
+ *
+ * Tolerant like `parseState`, not strict like `readPlanFile`: a missing list in
+ * storage is filled in, as it always was. But a body that makes `parseState`
+ * THROW (a null row, TODO TB1) is unreadable here rather than a white page.
+ */
+export type StoredPlan = { state: State } | { problem: 'yok' | 'okunamadi' | 'yeni' };
+
+export function readStoredPlan(text: string | null): StoredPlan {
+  if (text === null) return { problem: 'yok' };
+  let state: State | null;
+  try {
+    state = parseState(text);
+  } catch {
+    state = null;
+  }
+  if (state !== null) return { state };
+  return { problem: newerVersion(text) ? 'yeni' : 'okunamadi' };
+}

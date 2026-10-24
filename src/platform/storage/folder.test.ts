@@ -6,7 +6,7 @@
 // file this program did not write.
 
 import { describe, expect, it, vi } from 'vitest';
-import { dailyName, KEEP_DAILY, MAIN_NAME, prunable } from './folder';
+import { dailyName, holdsWork, KEEP_DAILY, MAIN_NAME, prunable } from './folder';
 
 describe('dailyName', () => {
   it('ay ve gün iki basamak', () => {
@@ -100,5 +100,46 @@ describe('prunable', () => {
 
   it('keep=0 hepsini siler ama yalnız bizimkileri', () => {
     expect(prunable(['a.txt', ...gunler(3)], 0)).toEqual(gunler(3));
+  });
+});
+
+// A2 (the audit of 2026-10-24): the prune counted every daily, and an empty
+// start put an empty backup among the ten, so one full backup went each day.
+describe('prunable · yalnız dolu günlükler sayılıyor', () => {
+  const ad = (gun: number) => `ders-programi-2026-08-${String(gun).padStart(2, '0')}.json`;
+
+  it('boş günlükler ona sayılmıyor: en yeni on DOLU kalıyor', () => {
+    // 1..12 full, 13..17 empty and newer.
+    const names = Array.from({ length: 17 }, (_, i) => ad(i + 1));
+    const full = (n: string) => n < ad(13);
+    expect(prunable(names, KEEP_DAILY, full)).toEqual([ad(1), ad(2)]);
+  });
+
+  it('on dolu yoksa hiçbir şey silinmiyor', () => {
+    const names = Array.from({ length: 20 }, (_, i) => ad(i + 1));
+    expect(prunable(names, KEEP_DAILY, (n) => n === ad(20))).toEqual([]);
+  });
+
+  it('ölçüt verilmezse eskisi gibi: her günlük dolu sayılıyor', () => {
+    const names = Array.from({ length: 12 }, (_, i) => ad(i + 1));
+    expect(prunable(names)).toEqual([ad(1), ad(2)]);
+  });
+});
+
+describe('holdsWork', () => {
+  const bundle = (state: unknown) =>
+    JSON.stringify({ bundleVersion: 1, plans: [{ id: '1', name: 'x', draft: false, state }] });
+
+  it('bir öğretmen, sınıf, ders ya da derslik varsa dolu', () => {
+    for (const list of ['teachers', 'classes', 'lessons', 'rooms', 'ogretmenler']) {
+      expect(holdsWork(bundle({ [list]: [{}] })), list).toBe(true);
+    }
+  });
+
+  it('dört liste de boşsa boş, paket değilse ya da okunamıyorsa null', () => {
+    expect(holdsWork(bundle({ teachers: [], classes: [], lessons: [], rooms: [] }))).toBe(false);
+    expect(holdsWork('{"bundleVersion":1}')).toBeNull();
+    expect(holdsWork('eski')).toBeNull();
+    expect(holdsWork('null')).toBeNull();
   });
 });

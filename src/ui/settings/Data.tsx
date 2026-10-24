@@ -372,13 +372,27 @@ export default function Data({
             </tr>
           </thead>
           <tbody>
-            {backups.map(({ index, state: b }) => (
-              <tr key={index}>
-                <td>{index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: index + 1 })}</td>
-                <td className="num">{b.teachers.length}</td>
-                <td className="num">{b.classes.length}</td>
-                <td className="num">{b.lessons.length}</td>
-                <td className="num">{Object.keys(activePlacements(b)).length}</td>
+            {backups.map((b) => (
+              <tr key={b.index}>
+                <td>
+                  {b.index === 0 ? t('bir önceki') : t('{n} oturum önce', { n: b.index + 1 })}
+                </td>
+                {/* One this copy cannot read is still a backup, and after A1
+                    it was the real plan: it is named, not left out. */}
+                {'state' in b ? (
+                  <>
+                    <td className="num">{b.state.teachers.length}</td>
+                    <td className="num">{b.state.classes.length}</td>
+                    <td className="num">{b.state.lessons.length}</td>
+                    <td className="num">{Object.keys(activePlacements(b.state)).length}</td>
+                  </>
+                ) : (
+                  <td colSpan={4}>
+                    {b.problem === 'yeni'
+                      ? t('daha yeni bir sürümle yazılmış, bu sürüm açamıyor')
+                      : t('okunamadı')}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

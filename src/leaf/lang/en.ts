@@ -153,6 +153,10 @@ const EN: Sozluk = {
     "**This plan was changed in another window.** This window no longer saves.",
   "**Kayıtlı plan açılışta okunamadı.** Üzerine yazılmadı.":
     "**The saved plan could not be read at startup.** Nothing was written over it.",
+  "**Kayıtlı plan daha yeni bir sürümle yazılmış.** Bu sürüm onu açamıyor ve üzerine yazmıyor; burada yapılanlar kaydedilmez.":
+    "**The saved plan was written by a newer version.** This version cannot open it and does not write over it; what you do here is not saved.",
+  "**Kayıtlı plan okunamadı.** Üzerine yazılmadı; burada yapılanlar kaydedilmez. Yedek dosyanızı **Dosyadan aç** ile açabilirsiniz.":
+    "**The saved plan could not be read.** Nothing was written over it; what you do here is not saved. You can open your backup file with **Open from file**.",
   "**Bu bilgisayarda otomatik kayıt çalışmıyor.** Program kapanınca yaptığınız her şey kaybolur. Çalışırken sık sık **Dosyaya kaydet** düğmesine basın ve bilgisayarı kapatmadan önce mutlaka bir yedek alın.":
     "**Automatic saving does not work on this computer.** Everything you do is lost when the program closes. Press **Save to file** often while you work, and always take a backup before shutting the computer down.",
   "**Yeni sürüm hazır.** Şu an {surum} sürümünü kullanıyorsunuz; yenisi **Yenile** deyince gelir. İşiniz kaybolmaz.":
@@ -624,6 +628,9 @@ const EN: Sozluk = {
   Oturum: "Session",
   "bir önceki": "the previous one",
   "{n} oturum önce": "{n} {n:session|sessions} ago",
+  "daha yeni bir sürümle yazılmış, bu sürüm açamıyor":
+    "written by a newer version, this version cannot open it",
+  "okunamadı": "could not be read",
   "O zamana kadar üst çubuktaki **Dosyaya kaydet** tek çare.":
     "Until then, **Save to file** in the top bar is the only remedy.",
   "**{klasor}** klasörü seçilmiş, ama tarayıcı izni her açılışta yeniden soruyor. **İzin ver** deyin.":
