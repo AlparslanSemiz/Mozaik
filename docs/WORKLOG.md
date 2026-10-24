@@ -169,7 +169,7 @@ worktree ve dal adlarına bakılır (CLAUDE.md). Birleşmeyi bekleyen öteki dal
 | rpm | 1 944 582 bayt, kurulu 4 371 615 bayt, derleme 52 s; Fedora 44 kabında kurulum 38 s, açılıştan 17 s sonra RSS 142 + 162 + 58 MB (uygulama, WebKitWebProcess, WebKitNetworkProcess) (2026-10-09 sabah); `npm run exe:rpm` ile 1 944 638 bayt, 1 dk 16 s (2026-10-09 öğle) | `npm run exe:rpm`, 2026-10-10'da kaldırıldı (B7.28) |
 | Mutasyon, ilk koşu (kuru) | 1208 test, 5 dk 53 s, enstrümante 9 dosya, 5639 mutant; tam koşu 6 saatte iptal, 3 645 mutant denenmişti (2026-10-09) | `npx stryker run --dryRunOnly`, bu makine; `haftalik.yml` 37914431289 |
 | Ana E2E koşusu | 618/618, 458 s (`TZ=UTC`, güç profili `performance`, 2026-10-08 akşam); öncesinde 618/618 geçti, 9,4 dk; aynı gün Roboders testi eklenmeden önce 612/612, 7,5 dk; güç profili koşu sırasında okunmadı (2026-10-08) | `npm run test:e2e` |
-| `dist/index.html` | 1 164 918 bayt, brotli 280,63 kB (2026-10-24, `ozellik/asil-ikon`, `main` alındıktan sonra); eşikler 1 171 000 ve 289 000 | `npx vite build`, `npm run boyut` |
+| `dist/index.html` | 1 171 212 bayt, brotli 281,77 kB (2026-10-24, zincirin ucu `okunabilirlik`); eşikler 1 184 000 (aynı gün çekildi, BUILD) ve 289 000 | `npx vite build`, `npm run boyut` |
 | Açılış, `file://` | hazır 103,4 ms medyan boş depoda, 166,4 ms dolu planda | `scratch/olc-taban.mjs`, 9 koşu |
 | Program'a geçiş, dolu ızgara | 36,9 ms medyan x1, 165,2 ms x4 | aynı betik, tıklamadan iki kareye |
 | Çözücü, babanın verisi Roboders'in saatleriyle | 211/211 blok, yaklaşık 0,7 s | `src/solver.test.ts`, "tam dolu bir kurs" |
