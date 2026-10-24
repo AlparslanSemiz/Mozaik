@@ -10,7 +10,7 @@ Kod dört katmana ayrılıyor ve bağımlılık yalnız aşağı doğru akıyor.
 src/leaf/          model/* · i18n/* · lang/* · preference/* · app/*
    |
 src/pure/          constraints/* · entities/* · relax/* · feasibility/* · solver/*
-                   grid/* · program/* · paper/* · io/* · listview/* · lists/* · undo/*
+                   grid/* · program/* · paper/* · io/* · listview/* · lists/* · forms/* · undo/*
    |
 src/platform/      storage/* · prefs/* · search/* · dom/* · exe/* · changelog · update
    |
@@ -28,7 +28,7 @@ de okuyan `preferences.test.ts`).
 
 Her kaynak dosya bir katmanın altındaki bir klasörde, yani bir pakette durur (2026-10-24);
 en derin `src/<katman>/<alan>/<altalan>/`, altalan yalnız on beş dosyayı aşan bir alanda.
-Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
+Paketler bugün `leaf/model/`, `leaf/i18n/`, `leaf/lang/`, `leaf/preference/`, `leaf/app/`, `pure/constraints/`, `pure/entities/`, `pure/relax/`, `pure/feasibility/`, `pure/solver/`, `pure/grid/`, `pure/program/`, `pure/paper/`, `pure/io/`, `pure/listview/`, `pure/lists/`, `pure/forms/`, `pure/undo/`, `pure/worlds/`, `platform/prefs/`,
 `platform/search/`, `platform/storage/`, `platform/dom/`, `platform/exe/`, `ui/shell/`, `ui/common/`, `ui/availability/`, `ui/plans/`, `ui/lists/`, `ui/program/`, `ui/print/`, `ui/ribbon/`, `ui/setup/`, `ui/lessons/` ve `ui/settings/`. Paketin dışından içine yalnız `index.ts`'i (ya da
 `index.tsx`'i) üstünden girilir, paketin kendi dosyaları birbirini serbestçe çağırır.
 Testler bu kuralın dışında.
@@ -131,6 +131,7 @@ altında bir yaprakta durur. Kuralı ölçen şey `.dependency-cruiser.cjs`'teki
 | `pure/paper/cut.ts` | kâğıdın bir satırı hücrelere nerede kestiği (`cellSpan`); ızgaranın kesmesi ayrı, ayrıştıkları tek durum RK15 |
 | `pure/listview/listview.ts` | ara, sırala, süz: Türkçe katlama (`fold`), Türk alfabesi sırası (`compareTr`), elle sıralamanın açık olduğu durum (`canReorder`) |
 | `pure/lists/` | dört liste ekranının arama, süzgeç çipi ve sıralama eksenleri (`lessonListConfig`, `teacherListConfig`, `classListConfig`, `roomListConfig`) ve üçünün Kontrol'le paylaştığı yük durumu çipi (`loadStatusFacet`); ekranlar ne zaman yeniden kurulacaklarına kendileri karar verir |
+| `pure/forms/lessonForm.ts` | ders ekleme formunun kuralları: hangi branşlar ve öğretmenler sunulur, birini seçmek ötekine ne yapar (`lessonChoices`, `chooseTeacher`, `chooseSubject`), eklemeden sonra ne kalır (`afterAdd`); taslak ekranın kendi durumunda |
 | `pure/io/index.ts` | dosya paketinin giriş noktası: bir planı metne çeviren ve metinden okuyan her şey, beşinin bütün dışa aktarımları; hiçbiri depoya dokunmaz |
 | `pure/io/parseState.ts` | kaydedilmiş dosyanın okuyucusu: kabul listesi, v1'den bugüne her göç, `parseState`, ve üst çubuğun daha sıkı kapısı `readPlanFile` |
 | `pure/io/library.ts` | plan kitaplığının saf modeli: anahtarlar, plan üstverisi, bozuk dizin kuralları (`normalizeLibrary`) ve indirilen dosya adları. Depoya dokunmaz |
