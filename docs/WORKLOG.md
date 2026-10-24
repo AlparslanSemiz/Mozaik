@@ -25,10 +25,10 @@ Son güncelleme: 2026-10-24.
 [CHANGELOG.md](../CHANGELOG.md)'nin Unreleased bloğunda (Sığdır, sürükleme, klavye,
 denetimin on üç kusuru).
 
-**Açık dal (2026-10-24): `fix/okunamayan-plan`** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
-okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayından önce
-birleşmeli; bir sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları
-v17 veriyi siler.
+**`fix/okunamayan-plan` `main`'de (2026-10-24)** (TODO B7.37, denetimin A1, A2 ve madde 7'si):
+okunamayan plan ve boş açılış artık ne depoyu ne Belgelerim'i boşla eziyor. Yayınlanmadı; bir
+sonraki şema artışından (v17) önce sahada olmalı, yoksa sahadaki 2.2.0 kopyaları v17 veriyi
+siler. Gerçek Windows exe'de koşulmadı (B7.37'nin kalanı).
 
 **Duruş.** Baba fikir değiştirdi: ilk dönemin tercihleri bağlayıcı değil, sunucusuz
 ve çevrimdışı ilkeleri kalktı, asıl rakip Roboders (babanın bugün kullandığı
