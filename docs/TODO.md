@@ -329,10 +329,14 @@ açılmasını durdurmaz (PRINCIPLES, "Açılış ağa bağlı değil").
       `.csv` düz metin — hangisinin istendiği sorulacak (§8).
 - [ ] **B3.4 E-posta ve WhatsApp'tan gönderme.** **E-posta yarısı yazıldı, doğrulanmadı
       (2026-10-24, `ogretmene-eposta`):** şema v17'de `Teacher.email` (kullanıcının kararı:
-      State'te, her yedekle taşınır), Okul → Öğretmenler'de sütun, Çıktı'da öğretmen başına
-      "E-postada aç". Yol yalnız `mailto:`: program hiçbir şey göndermez, hesap ve ağ kodu
+      State'te, her yedekle taşınır), Okul → Öğretmenler'de sütun (kutu yazarken adresin
+      boyunda açılıyor), ekleme formunda kutu, Excel'den yapıştırmada altıncı sütun,
+      Çıktı'da öğretmen başına "E-postada aç". Yol yalnız `mailto:`: program hiçbir şey göndermez, hesap ve ağ kodu
       yok; exe'de kabuk (`mail.rs`), tarayıcıda düz bağlantı. Hafta düz metin, 2000
-      karakterlik `mailto:`'ya sığan en dolu biçimde (WORKLOG 2026-10-24 gece). Açık: gerçek
+      karakterlik `mailto:`'ya sığan en dolu biçimde (WORKLOG 2026-10-24 gece).
+      **2000 karakter sınırı: yazıldı, doğrulanmadı — gerçek e-posta programında ölçülmedi.**
+      Sınır ShellExecute'un ve tarayıcının ilettiği uzunluktan seçildi, bir e-posta
+      programının o uzunlukta gövdeyi kesmeden açtığı görülmedi. Açık: gerçek
       bir e-posta programında (Outlook, Windows Posta, Thunderbird) uzun gövdenin nasıl
       geldiği ölçülmedi, runner'da e-posta programı kurulamıyor; Edge'de bağlantı ölçülemedi.
       **WhatsApp yarısı açık:** öğretmene **telefon** alanı (yeni şema), `https://wa.me/<numara>?text=`,
