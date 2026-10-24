@@ -11,6 +11,13 @@ describe('öğretmenin e-postası', () => {
     expect(cleanEmail('öğretmen@örnek.com')).toBe('öğretmen@örnek.com');
   });
 
+  it('eksik vekil karakter (lone surrogate) ne adreste kalıyor ne mailto’yu düşürüyor', () => {
+    expect(cleanEmail('a\ud800@example.co')).toBe('a@example.co');
+    // A name from a damaged file: the subject is built anyway, not thrown.
+    expect(() => mailtoUrl('a@example.com', 'Ay\udc00şe', 'Sal\ud83d')).not.toThrow();
+    expect(mailtoUrl('a@example.com', 'Ay\udc00şe', '')).toContain('subject=Ay%EF%BF%BD%C5%9Fe');
+  });
+
   it('looksLikeEmail tek bir adresi kabul ediyor, liste, boşluk ve yarım adresi değil', () => {
     expect(looksLikeEmail('ali.veli@example.com')).toBe(true);
     expect(looksLikeEmail('a@b.co')).toBe(true);

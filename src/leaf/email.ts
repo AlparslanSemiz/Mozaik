@@ -11,11 +11,27 @@
  * `to` of a mail and start something else, so it never survives a load. The
  * rest is the user's own typing and is kept as typed: whether it LOOKS like an
  * address is `looksLikeEmail`'s question, asked where the button is.
+ *
+ * Half of a surrogate pair goes too: it cannot be percent-encoded at all
+ * (`encodeURIComponent` throws), and one in a damaged file took the whole
+ * Çıktı screen down with it (review, 2026-10-24).
  */
 export function cleanEmail(x: unknown): string {
   if (typeof x !== 'string') return '';
-  const printable = (c: string) => c.charCodeAt(0) > 0x1f && c.charCodeAt(0) !== 0x7f;
-  return [...x].filter(printable).join('').trim();
+  // `[...x]` walks code points, so a lone half arrives as a one-unit string.
+  const kept = (c: string) => {
+    const n = c.charCodeAt(0);
+    return n > 0x1f && n !== 0x7f && !(c.length === 1 && n >= 0xd800 && n <= 0xdfff);
+  };
+  return [...x].filter(kept).join('').trim();
+}
+
+/** Every lone half of a surrogate pair as U+FFFD, so the text can be encoded. */
+function wellFormed(s: string): string {
+  return s.replace(
+    /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/g,
+    '\ufffd',
+  );
 }
 
 /**
@@ -33,6 +49,6 @@ export function looksLikeEmail(s: string): boolean {
  * which is what the RFC asks of a body and what Outlook reads.
  */
 export function mailtoUrl(to: string, subject: string, body: string): string {
-  const enc = (s: string) => encodeURIComponent(s.replace(/\r?\n/g, '\r\n'));
-  return `mailto:${encodeURIComponent(to).replace(/%40/g, '@')}?subject=${enc(subject)}&body=${enc(body)}`;
+  const enc = (s: string) => encodeURIComponent(wellFormed(s).replace(/\r?\n/g, '\r\n'));
+  return `mailto:${enc(to).replace(/%40/g, '@')}?subject=${enc(subject)}&body=${enc(body)}`;
 }
