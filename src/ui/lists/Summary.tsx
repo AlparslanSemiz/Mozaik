@@ -7,12 +7,12 @@
 // invisible while you were creating those four classes.
 //
 // Nothing is computed here: `buildCapacity` is the cheap half of the existing
-// report (feasibility.ts), split out precisely so it can run beside a text box
+// report (pure/feasibility/), split out precisely so it can run beside a text box
 // without paying for buildReport's 99 x 72 blocker() calls (pitfall 3).
 
 import { useMemo } from 'react';
 import { buildCapacity } from '../../pure/feasibility';
-import CapacityRows from '../CapacityRows';
+import CapacityRows from './CapacityRows';
 import {
   DEFAULT_SUBJECT_SHORTS,
   addSubject,
@@ -33,12 +33,11 @@ import type { StepId } from '../../platform/prefs';
  * exactly the one the fallback branch answers ("does each class's week fit").
  */
 export type SummaryView = StepId | 'lessons';
-import type { Gender } from '../../leaf/types';
+import type { Gender, State } from '../../leaf/model';
 
 /** The three values, in the order the teacher list offers them. */
 const GENDERS: Gender[] = ['', 'k', 'e'];
-import type { State } from '../../leaf/types';
-import { T, useT } from '../T';
+import { T, useT } from '../common';
 
 /**
  * Colour repair, offered where the colours are CHOSEN.

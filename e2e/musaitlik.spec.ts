@@ -20,7 +20,7 @@ import {
   answerDialog,
   onScreen,
 } from './helpers';
-import { makeWorld } from '../src/worlds';
+import { makeWorld } from '../src/pure/worlds';
 
 // Hook order. The empty-list screen returned before two `useMemo` calls, so a
 // list that filled up while the tab stayed open (Ctrl+Z, "Dosyadan aç") asked

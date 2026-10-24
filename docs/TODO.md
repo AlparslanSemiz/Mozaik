@@ -52,7 +52,7 @@ o bir günlük, kararların o gün geçerli kuralla alındığını gösteriyor.
 | **§5** | **Bölüm 5 — Kısıt motoru, çözücü ve Kontrol** | çoğu bitti, B5.3 açık, B5.8'in veri yarısı babada, B5.7, B5.9, B5.10 ve B5.11 bitti |
 | **§6** | **Bölüm 6 — Veri modelini büyüten işler** (aSc kova 2–4) | hepsi açık |
 | **§7** | **Bölüm 7 — Dağıtım, Windows ve depo** | bir kısmı bitti (B7.16, B7.17 ve B7.18 dahil), çoğu açık |
-| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l), ikisi de 2026-10-23'ten beri donduruldu | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
+| **§8** | **Karar bekleyenler** — sende, babada, babanın gerçek verisi, belge turu, kod turu, erişilebilirlik, test sırası, denetimin bulguları (§8j) refactor analizinin planı ile kusurları (§8k) ve test programı (§8l, 2026-10-23'ten beri donduruldu) | her alt başlık açık madde taşıyor; sayı için bölüme bakılır |
 | **§9** | **Ham notlar** — bütün satırların, nereye gittikleriyle, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 | **§10** | **ARŞİV** — biten turlar, [TODO-ARCHIVE.md](TODO-ARCHIVE.md)'de | kayıt |
 
@@ -270,7 +270,7 @@ sekmelere benzemesi gerekmiyor, ve bu açık bir izin.
       B4.4'ün "düzenleme yeri önizlemenin kendisi" deseni örnek alınabilir.
       **Netleşmesi gereken üç soru, kod yazılmadan önce:** (a) hangi
       bölümler/hangi alanlar kapsamda — beşinin de mi, yoksa hangileri; (b)
-      tercih `State`'e mi girecek yoksa `theme.ts`'in dokuz bağımsız
+      tercih `State`'e mi girecek yoksa `platform/prefs/`'in dokuz bağımsız
       skaleri gibi bir MAKİNE tercihi mi (kapatılan bir alan başka bir
       bilgisayarda da kapalı mı kalmalı); (c) kapatılan bir alanın
       altındaki kural/veri hâlâ uygulanıyor mu, yoksa görünmeyen bir kural
@@ -498,7 +498,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
 - [ ] **B4.10 "Programı boşalt" zaten kırmızı, görünen ağırlığı ölçülmedi.**
       Senin satırın: *"Program kısmında sağ üstteki işlemlerde programı boşalt
       kırmızı olmalı ya da işte önemli bir işlem."* Ölçüldü ve renk yerinde:
-      `Ribbon.tsx`'te Izgara grubundaki İşlemler menüsünün son maddesi
+      `ribbon/ProgramStrip.tsx`'te Izgara grubundaki İşlemler menüsünün son maddesi
       `menu-item danger` sınıfını taşıyor, o sınıf `styles.css`'te dinlenirken
       bile `--bad` mürekkebi veriyor, ve üstünde bir ayraç duruyor. İki şey
       görünmesini engelleyebiliyor: ızgara boşken madde `disabled` ve `--muted`
@@ -515,7 +515,7 @@ Tam tablo [ASC.md](ASC.md) → *Karar tablosu*, ayrıntı [ROADMAP.md](ROADMAP.m
 - [ ] **B4.11 Kartların renk ölçütü var ama bulunamıyor.**
       Senin satırın: *"Program kısmında renkleri ayarlama olmalı sınıfa göre
       öğretmene göre ona göre buna göre."* Özellik zaten var ve istenen dördü de
-      var: `Ribbon.tsx`'in Renk grubunda bir menü, `Öğretmene göre`,
+      var: `ribbon/ProgramStrip.tsx`'in Renk grubunda bir menü, `Öğretmene göre`,
       `Sınıfa göre`, `Dersliğe göre` ve `Branşa göre`, seçili olan düğmenin
       üstünde yazıyor ve tercih `programColor.ts` ile makineye kaydediliyor. Yani
       bu bir özellik isteği değil bir bulunabilirlik bulgusu, ve iki ölçülmemiş
@@ -650,7 +650,7 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       listesi~~ · iki programı karşılaştırma · ders ızgarası toplu giriş.**
       (aSc kova 4; altısı da küçük ve birbirinden bağımsız — bir "boş vakit"
       turu.) **Kısayol listesi bitti (2026-08-31, kırk beşinci oturum):**
-      `src/ui/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
+      `src/ui/shell/ShortcutsHelp.tsx`, üst çubukta düğme + `?` tuşu + Ctrl+K
       paleti, dört dilde çeviri, `e2e/palet.spec.ts` 54. Kalan beşi açık.
 - [ ] **B6.6 Kapanırken kaydedilmemiş değişiklik uyarısı — muhtemelen
       GEREKMİYOR.** Her değişiklik 400 ms gecikmeyle kaydediliyor ve sekme
@@ -742,8 +742,9 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       diye işaretlenmeye aday), sekiz sürükleme ve imleç, beş ölçü ve yazı, iki hareket.
       Her biri için ürün mü test mi olduğu ölçülür. Babanın ortamı Chromium, yani öncelik
       düşük. **Kullanıcının kararı (2026-10-09):** şimdilik düzeltme yok, `test:webkit`
-      ne `kontrol`'e ne `haftalik.yml`'e giriyor.
-- [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver.ts:975`
+      ne `kontrol`'e ne `haftalik.yml`'e giriyor. **2026-10-24 sayımı:** `main` c41223c 18 kırmızı,
+      `refactor/moduller` 17, dalınkiler main'inkilerin alt kümesi (WORKLOG 2026-10-24 akşam).
+- [~] **B7.24 Mutasyon 2026-09-24'ten beri koşamıyor (2026-10-09).** `src/pure/solver/solver.ts:975`
       `weight[index]!++` Stryker'ı başlamadan düşürüyor (TESTFINDINGS). Çare 2026-09-12'deki
       gibi `weight[index] = weight[index]! + 1`. **Düzeldi (`290f55d`)** ve arkasındaki iki
       engel de (test ve ilk koşu süre tavanları); kuru koşu yerelde geçti, tekrarı lint
@@ -830,12 +831,36 @@ hem E2E testini ekle** — eski yedek açılmıyorsa veri kayıptır (tuzak 97).
       ve işaret kalkıyor; doluysa yazılmıyor, silinmiyor, klasöre de yazılmıyor ve kırmızı
       şerit "Kayıtlı plan açılışta okunamadı. Üzerine yazılmadı." diyor. Birim (5), hata
       enjeksiyonlu E2E (2) ve mutasyon kanıtı (birim 6/6, E2E 4/4 kırmızı).
-      **Kalan:** klasör kapısının testi yok (`useFolder`'ın hiç testi yok; bozması yeşil
-      kalıyor, VK1'in klasör kapısı da öyle). Açılıştaki `writeLibrary` aynı boş okumada
+      **Kalan:** klasör kapısının testi `src/platform/storage/useFolder.test.tsx`'te (B7.37, 2026-10-24); VK1'in
+      klasör kapısının testi hâlâ yok. Açılıştaki `writeLibrary` aynı boş okumada
       varsayılan tek planlı listeyi yazar, birden çok planı olan birinin listesi düşer (planların
       anahtarları durur); kapsam dışı, dokunulmadı. Gerçek tetikleyicide (aynı pencerenin
       yeniden okuması da bayatsa) korumanın yetip yetmediği ölçülemedi, çünkü olay yeniden
       üretilemedi.
+- [~] **B7.37 Okunamayan plan ve boş açılış: A1, A2 ve oturum yedekleri (denetim, 2026-10-24).**
+      Numarası B7.33–B7.36'dan sonra, çünkü o numaralar `tb8-eksik-plan` ve
+      `tb1-dosyadan-ac` dallarında; yeri B7.30'un yanı, çünkü aynı ailenin devamı. Denetimin
+      raporu `~/GitHub/Mozaikler/Mozaik-analiz/scratch/analiz/RAPOR.md` §1 (A1, A2) ve §3
+      madde 7. **Yapılan (`fix/okunamayan-plan`):** depo okuması üç cevap veriyor (yok,
+      okundu, okunamadı; `readStoredPlan`), okunamayan anahtar dondurulup açılışta, plan
+      geçişinde ve silmeden sonra ezilmiyor, kırmızı şerit "daha yeni bir sürümle yazılmış" ya
+      da "okunamadı" diyor; dondurmayı yalnız "Dosyadan aç", "Her şeyi sil", planı silmek ve
+      "Tümünü dosyadan aç" kaldırıyor. Klasör: açılıştaki ilk yazım yalnız okunmuş bir plandan,
+      iş taşımayan paket yalnız kaybedecek bir şey olmayan dosyaya, budama yalnız iş taşıyan
+      günlükleri sayıyor ve yalnız iş taşıyan bir yazımdan sonra koşuyor; exe'ye `read_file`
+      komutu eklendi. Oturum yedeği içerik değişmediyse dönmüyor, okunamayan yedek Ayarlar →
+      Planlar ve yedek'te satır olarak görünüyor. Denetimin tekrar adımları gerileme testi:
+      `src/platform/storage/okunamayan.test.tsx`, `src/platform/storage/useFolder.test.tsx`, `e2e/okunamayan.spec.ts` (94),
+      `main`'de kırmızı, dalda yeşil. `e2e/exe.spec.ts` 76'nın ilk testi yeni kurala göre
+      yeniden yazıldı (tuzak 153).
+      **Kalan:** gerçek Windows exe'de hiçbiri koşulmadı (yalnız sahte Tauri köprüsü ve
+      `cargo test`; Linux exe'nin `e2e/gercek-exe.spec.ts`'i iki yeni testle); okunamayan plan
+      açıkken "Dosyadan aç" sorusu ve Ayarlar'ın plan tablosu onu "0 öğretmen" diye sayıyor; okunamayan bir plan açık değilken klasör yazılmıyorsa (JSON bile
+      değilse) bunu ekranda söyleyen bir şey yok; ilk gerçek değişiklik, bir öğretmenlik bile
+      olsa, dolu ana dosyanın ve günün yedeğinin üstüne yazar (dünkü yedekler kalır).
+      **Birleşmede:** `tb7-sekme-kapanis`'in yeni gerçek exe testi ("X ile hemen kapanan
+      pencere…") taze profilde klasörün kendiliğinden yazılmasını bekleyerek başlıyor; o satır
+      1,5 s beklemeyle değişir (ölçüldü: birleşik kopyada gerçek Linux exe'de yeşil).
 - [ ] **B7.31 Depo hiç yazılamıyorken iki şerit, biri yanlış (2026-10-23).** localStorage'ın
       her çağrısı hata atınca "otomatik kayıt çalışmıyor" şeridinin yanında VK2'nin
       "depolama alanı dolu" şeridi de çıkıyor: otomatik kayıt düşen her yazımı "dolu" sayıyor,
@@ -1086,7 +1111,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       (`program.spec.ts`, iki yeni test kırmızıydı). Kalanlar: Dersler satırı ile `LessonEdit`'in günlük sınırın geri düşüşünde ve `blockCeiling`
       çağrısında ayrışması, `updateClass`'ın derslik değişince çakışmayı yargılamaması,
       `teacher.subject`'in üç yerde `lessonSubject()` yerine okunması, JSX'te `t()`'den
-      geçmeyen yaklaşık 25 dize (`Print.tsx`, `Ribbon.tsx`, `Dialogs.tsx`, `ColorPick.tsx`,
+      geçmeyen yaklaşık 25 dize (`Print.tsx`, `ui/ribbon/`, `Dialogs.tsx`, `ColorPick.tsx`,
       `Plans.tsx`, silme onaylarının `"Sil"`'i), `initialBox`'ın StrictMode altında yedek
       zincirini iki kez döndürmesi.
       2026-09-26 denetiminde `t()` maddesinin üç örneği üretildi: Dersler şeridinin
@@ -1098,13 +1123,13 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       listesinin bugünkü hâli, bir AST taramasıyla: görünür yaklaşık 24 yer, yalnız
       erişilebilir adda 8 yer ve elle yazılmış iki `'tr-TR'` (`Print.tsx:107`, `Data.tsx`).
       Görünür olanlar `App.tsx:835` (taslak eki), `Dialogs.tsx:196` ve `:214` (varsayılan
-      düğme adları), `Ribbon.tsx:481`, `Print.tsx:452`, `:463`, `:545` ve `:683`,
+      düğme adları), `ribbon/AvailabilityStrip.tsx`'in "Liste boş"u, `Print.tsx:452`, `:463`, `:545` ve `:683`,
       `ColorPick.tsx:60` ve `:78`, `lessons/index.tsx:604` ve `:818`, dört silme onayının
       `'Sil'`'i, `Palette.tsx:166`, `Data.tsx:194` ve `:210`, `Rules.tsx:152`,
       `Paste.tsx:105`, `Summary.tsx:198` ve `Plans.tsx:206`. Refactor dalında düzeltilmez,
-      özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `feasibility.ts`'in `lessonName`'i
-      dersin ikinci branş bayrağını hiç okumuyor, `constraints.ts`'in sınıf dolu cümlesi ve
-      `entities.ts`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
+      özellik işi (RF15, §8k). `teacher.subject` maddesine üç yer eklendi: `pure/feasibility/`'in `lessonName`'i
+      dersin ikinci branş bayrağını hiç okumuyor, `pure/constraints/`'in sınıf dolu cümlesi ve
+      `pure/entities/`'in `entityWeek`'i de öğretmenin ilk branşını yazıyor.
 - [x] **ESLint'in ilk raporundaki `exhaustive-deps` uyarıları (2026-09-11).** Dördü de araç
       commit'ine girmedi, çünkü bir bağımlılık listesini değiştirmek davranışı değiştirebilir.
       2026-09-11'de sınıflandırıldı, satır numaraları o günkü. `Program.tsx:506`, `drop`'un
@@ -1122,7 +1147,7 @@ belge ile kod ayrılığı, yani refactor commit'lerine girmez. Envanterin kendi
       **Dördü de kapandı (2026-10-09).** `Commands.tsx` ve `App.test.tsx` refactor dalında.
       `bakim/refactor-istekleri` dalında `useRowOrder` ölçüldü: kancayı açık tutan bir
       listede dil İngilizceye geçince tutamağın ipucu Türkçe kaldı
-      (`src/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
+      (`src/ui/lists/rowOrder.test.tsx`, düzeltmeden önce kırmızı), `t` bağımlılığa girdi. Ekranda
       hâlâ görünmüyordu, sebep yukarıda. `App.tsx`'in üç `toggle`'ı `useCallback` oldu,
       susturma kalktı.
 - [ ] **Kanonik olmayan bir anahtar `sanitize`'dan geçiyor ve görünmez kalıyor (2026-09-11).**
@@ -1237,7 +1262,7 @@ ertelendi.
       desenle ayrıldı (erişilemeyen savunma, kullanılmayan yedek, `sanitize` sonrası ölü
       kapı) ve 86'sı `StringLiteral`. Geri kalan 558 okunmadı. Her biri ya ölçülmeyen bir
       davranış, ya silinebilecek bir kod dalı, ya da anlamsız bir mutant, ve ayrılmadan
-      liste bir iş listesi değil. En yoğun yer `constraints.ts` (179) ve o gün store.ts adını taşıyan dosya (161, bugün bölündü).
+      liste bir iş listesi değil. En yoğun yer `pure/constraints/` (179) ve o gün store.ts adını taşıyan dosya (161, bugün bölündü).
       Sınıflandırmanın okuyarak yapılamayacağı ölçülerek görüldü. `constraints.ts:820`
       (`i < block.size` yerine `i <= block.size`) okuyunca bariz bir gerçek boşluk gibi
       duruyor: `dropMap`'in doluluk haritasına bloğun bittiği hücrenin bir sonrasını da
@@ -1276,7 +1301,7 @@ ertelendi.
 ### 8g · Şema göçünden çıkan ürün kusurları (2026-09-12)
 
 Örnek dosya testine dersin şekli ve ayarlar iddiası eklenirken çıktılar. İkisi de
-üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/fixtures.test.ts`'te
+üretim kodunda, yani test tarafının işi değil, ve ikisi de `src/pure/io/fixtures.test.ts`'te
 `BİLİNEN KUSUR` adlı vakada çiviliydi. 2026-09-25'te düzeldi, vaka adıyla kırmızıya döndü
 ve yerini doğru davranışı soran bir teste bıraktı.
 
@@ -1295,9 +1320,25 @@ sınıfındaki üçü denetim sırasında kullanıcıya ayrıca söylendi.
 
 ### 8k · Refactor analizinin bıraktıkları (2026-10-08)
 
-**Donduruldu (2026-10-23, [DECISIONS.md](DECISIONS.md)).** Süren tur yoktu
-(`refactor/program` `main`'de), yeni paket turu açılmıyor. RF ve RK maddeleri açık kalır,
-bir RK özellik ya da düzeltme dalında aynı kuralla (gerileme testiyle) düzeltilebilir.
+Refactor turları açık ([DECISIONS.md](DECISIONS.md), 2026-10-24): bir tur davranış
+değiştirmez, kendi dalında yürür ve bulduğu hatayı düzeltmez, buraya yazar. Bir RK özellik
+ya da düzeltme dalında gerileme testiyle düzeltilir.
+
+**2026-10-24 turu (`refactor/moduller`, kullanıcının isteğiyle; [DECISIONS.md](DECISIONS.md)
+aynı gün).** Yapılan: aşağıdaki tablonun 4, 6, 9'un taşıma yarısı, 10 ve 11'i; ek talimatla
+her kaynak dosya bir alanda (`pure/grid`, `pure/constraints`, `pure/entities`, `pure/relax`,
+`pure/feasibility`, `pure/solver`, `pure/listview`, `pure/lists`, `pure/forms`, `pure/undo`,
+`pure/worlds`, `leaf/model`, `leaf/i18n`, `leaf/preference`, `leaf/app`, `platform/storage`,
+`platform/dom`, `platform/exe`, `ui/shell`, `ui/common`, `ui/plans`, `ui/availability`,
+`ui/ribbon`), testler modüllerinin yanında, katman kökü için iki kural; RF1, RF5, RF6, RF10;
+`theme.ts`, `feasibility.ts`, App, Program, Data, Grid, Suggestions ve Inspector bölündü.
+İlerlemenin ve ölçümlerin tablosu `scratch/refactor/plan.md`'de, git dışında; özeti WORKLOG'da.
+Açık kalan: RF11, RF12, RF20 (adım 5'in kalanı), RF2'nin kalanı, RF3 ve adım 3 (RF18); RF4 park.
+Teachers, Dersler'in formu ve Program'ın sağ tık menülerinin bileşenlere bölünmesi bayt
+bütçesi yüzünden yapılmadı: `size-limit` 1 171 000, dal sonunda `dist/index.html` 1 168 018.
+Birleşmeden önceki doğrulama (WORKLOG, 2026-10-24 akşam): Windows, WebKit, site, çözücü
+stresi ve gerçek exe süitleri, iki `dist`'in literal karşılaştırması ve kısıt, fizibilite ve
+varlıkların mutasyonu main'le aynı ya da daha iyi.
 
 Kaynak 2026-10-08'in delta analizi: rapor ve betikler `scratch/analiz-2026-10-08/`
 altında, git dışında, özeti [WORKLOG.md](WORKLOG.md)'nin aynı günkü girdisinde.
@@ -1309,25 +1350,25 @@ gerekçeleri [DECISIONS.md](DECISIONS.md)'de (2026-10-08).
 
 | RF | Ne | Nerede |
 |---|---|---|
-| RF1 | `relax.ts` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax.ts` |
-| RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/invariants.test.ts`, `src/relax.test.ts` |
-| RF3 | `relax.ts` ve `sat.ts` ne mutasyon ne kapsam listesinde | `stryker.config.json`, `vite.config.ts` |
-| RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver.ts` |
-| RF5 | `entities.ts` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities.ts` |
-| RF6 | `constraints.ts` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints.ts` |
+| RF1 | `pure/relax/` dokuz soruyu cevaplıyor, modüllere taşınır | `src/pure/relax/relax.ts` |
+| RF2 | iki kısıt yazımının sapmasını ölçen test yok | `src/pure/relax/invariants.test.ts`, `src/pure/relax/relax.test.ts` |
+| RF3 | `pure/relax/` ve `sat.ts` ne mutasyon ne kapsam listesinde; ön şartı `relax.test.ts:89`'un enstrümante kodda aştığı kendi 30 s tavanı (TESTFINDINGS 2026-10-24) | `stryker.config.json`, `vite.config.ts` |
+| RF4 | `createSolver` iki algoritmayı tek closure'da taşıyor | `src/pure/solver/solver.ts` |
+| RF5 | `pure/entities/` yaklaşık on dört soruyu cevaplıyor | `src/pure/entities/` |
+| RF6 | `pure/constraints/` motorun yanında ızgara, bırakma ve `sanitize` taşıyor | `src/pure/constraints/constraints.ts` |
 | RF7 | çözücü, öneri, fizibilite ve kısıt motorunda kopya yardımcılar | dört dosya |
 | RF8 | iş mantığı bileşende (Program, Ribbon, Check, Summary, Suggestions, Grid ile Print) | `src/ui/` |
 | RF9 | öğretmen ve sınıf kâğıdı `Print()`'in içinde, ayrı üretilemiyor | `src/ui/Print.tsx` |
 | RF10 | şerit tek fonksiyonda yedi sekme | `src/ui/Ribbon.tsx` |
-| RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/App.tsx` |
+| RF11 | App'te tercih aynaları ve içinden geçen prop'lar | `src/ui/shell/App.tsx` |
 | RF12 | liste ekranlarının ortak iskeleti kopya | `src/ui/setup/`, `src/ui/lessons/` |
 | RF13 | çözücü ile öneri aramasının yaşam döngüsü kancada (birim testi 2026-10-09'dan beri var, `useSolver.test.tsx`) | `src/platform/search/useSolver.ts` |
-| RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/types.ts` |
+| RF14 | bütün kimlikler aynı `string` tipi | `src/leaf/model/types.ts` |
 | RF15 | `t()`'den geçmeyen dizeler (özellik işi, §8d) | `src/ui/` |
 | RF16 | worker'ın satır içi betik yolunu yalnız gerçek exe süiti ölçüyor | `src/platform/search/relaxPool.ts` |
-| RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/App.tsx` |
+| RF17 | `withGlobalTauri` ile `<Activity>`'nin sözleşmesini ölçen test yok | `src-tauri/tauri.conf.json`, `src/ui/shell/App.tsx` |
 | RF18 | ölü CSS, okunmayan token ve bayat belge cümleleri | `src/styles.css`, belgeler |
-| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities.ts`, `src/pure/listview.ts` |
+| RF19 | `Math.random` ile önbelleksiz `localeCompare` | `src/pure/entities/`, `src/pure/listview/listview.ts` |
 | RF20 | `theme.ts`'te her tercih iki adla dışa aktarılıyor | `src/platform/prefs/theme.ts` |
 
 **Hedef ağaç.** 2026-10-09 sabahki plan oturumunun önerisi, Alp onayladı; oturumun
@@ -1421,20 +1462,20 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       2026-10-08, refactor kaydının 2026-10-09 notu): sayı yokken bozuk bir kodlamayı
       denetim eliyor ve taban skoru yanıltıcı olurdu. Bu yarısı bitti (2026-10-09, "Test:
       öneri aramasının reddettiği hafta sayılıyor, değişmez 0 bekliyor"): analizin M1, M2 ve
-      M3'ü yeni iddiayla kırmızı. Sonra `relax.ts` ve `sat.ts`
+      M3'ü yeni iddiayla kırmızı. Sonra `pure/relax/` ve `sat.ts`
       mutasyon ve kapsam listelerine girer, [TESTPLAN.md](TESTPLAN.md)'nin listesi aynı
       commit'te (A9 kapısı). Adım 1'e bağlı.
 - [ ] **Refactor adım 3 · RF18.** Ölü sınıflar (`.btn.link`, `.panel-grid`, `.subbar`,
       `.suggestion-part`), okunmayan dört token, bayat yorum, ve belgelerin bayat
       cümleleri: ARCHITECTURE'ın Ribbon'a "iş mantığı yok" demesi, "Otomatik diz (N)"in N'ini
-      `entities.ts`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
+      `pure/entities/`'e vermesi ve çözücünün kendi denetimlerini eksik sayması, BUILD'in
       lint için "dört uyarı" demesi, DESIGN ile LAYOUT'un ölü sınıfları anlatması.
       `--ink` burada değil, RK1.
 - [x] **Refactor adım 4 · RF8, sonra RF9.** Önce karakterizasyon birim testleri, sonra
       iş mantığının saf katmana taşınması. Sonra öğretmen ve sınıf kâğıdının saf modeli.
       RF9 babanın gönderme isteğinin (B3.8) önkoşulu ve RF8'e bağlı.
       Bitti (2026-10-10, `refactor/program`, WORKLOG): Program'ın satırları, havuzu ve
-      araç çubuğunun satırı `pure/programView.ts`'te, kâğıt `pure/paper/`'da bir model
+      araç çubuğunun satırı `pure/program/programView.ts`'te, kâğıt `pure/paper/`'da bir model
       (`classSheet`, `teacherSheet`, `sheetHead`), `ui/print/Sheet.tsx` onu çiziyor. RF8'in
       Program dışındaki maddeleri (Ribbon, Check, Summary, Suggestions'ın satır süzgeci,
       CapacityRows) yapılmadı: bu tur Program'la sınırlıydı. Analizin `cellSpans`'i
@@ -1449,10 +1490,10 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       iki biçimde bırakırdı, yapılmadı.
 - [ ] **Refactor adım 6 · RF2'nin kalan maddesi, sonra RF1.** Taşımadan önce bir içerik
       commit'i: boş ızgarada her blok için SAT kodlamasının izin verdiği başlangıçlar
-      `blocker()`'ınkilerle aynı küme. Bugün `relax.ts`'ten bir dışa aktarım istiyor. RF2'nin
-      öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `relax.ts`'in
+      `blocker()`'ınkilerle aynı küme. Bugün `pure/relax/`'ten bir dışa aktarım istiyor. RF2'nin
+      öteki maddesi, ret sayısı, adım 2'ye alındı (2026-10-09). Sonra `pure/relax/`'in
       modüllere taşınması. Adım 1 ve 2'ye bağlı.
-- [ ] **Refactor adım 7 · RF5 ve RF6.** `entities.ts` ile `constraints.ts`'in yalnız
+- [ ] **Refactor adım 7 · RF5 ve RF6.** `pure/entities/` ile `pure/constraints/`'in yalnız
       taşımayla bölünmesi. `buildIndex`, `occupy` ve `vacate` yerinde ve olduğu gibi kalır.
       Mutasyon listesinin yolları aynı commit'te.
 - [ ] **Park: RF4, RF7, RF13, RF14, RF19.** Gerekçeleri DECISIONS 2026-10-08.
@@ -1462,14 +1503,14 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 - [ ] **RK1 `--ink` hiçbir yerde tanımlı değil.** `src/styles.css`'in dört kuralı
       (4196, 4213, 4242, 6407) `color: var(--ink)` okuyor, değişken ne CSS'te ne kodda
       tanımlı, yani renk kalıtılana düşüyor. Okundu, ekranda görülmedi. Özellik dalı.
-- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `relax.ts` 1100 iki
+- [ ] **RK2 Önceden bozuk bir ilişkide öneri sessizce boş dönüyor.** `pure/relax/model.ts` iki
       ders de yerinde kalıyorsa ilişkinin o gününü atlıyor, `verifySuggestion` ise
       ilişkisi çiğnenmiş haftayı reddediyor. İki ders sabitliyse sonuç 0 öneri, oysa bir
       öğretmen saati açmak haftayı kuruyor (analizin kopyasında ölçüldü). Karar verildi:
       kendiliğinden çözülmez, panel ve Kontrol tek cümleyle söyler. Özellik dalı.
 - [ ] **RK3 Kapalı saatin iki tanımı. Karar bekliyor.** Program'ın satır başı sınıfın
       ya da dersliğinin kapalı saatini sayıyor (`Program.tsx` 307), `openHours` yalnız
-      varlığın kendi saatini (`entities.ts` 987). Sınıflar listesinin "Ders saati" sütunu
+      varlığın kendi saatini (`pure/entities/availability.ts` 32). Sınıflar listesinin "Ders saati" sütunu
       yükü gün ile saatin çarpımına bölüyor (`Classes.tsx` 270), Müsaitlik ise açık saati
       gösteriyor. Hangisi doğru tanım, karar kullanıcıda. Okundu, ölçülmedi.
 - [ ] **RK4 Öğretmen değiştirme onayı iki yerde iki ayrı sayı söylüyor.** Varlık paneli
@@ -1538,10 +1579,66 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
       kâğıt onu da çiziyor ve dört saatlik bir gün beş sütun basılıyor. Uygulama böyle bir
       haftayı kendisi kurmuyor; eski bir yedek ya da içe aktarma taşıyabilir. Öbür her durumda
       ikisi aynı hücreleri çiziyor: el yapımı dünyada ve tam dolu kursun dizili haftasında
-      ölçüldü (`src/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
+      ölçüldü (`src/ui/program/programScreen.test.tsx`, 2026-10-10, `refactor/program`). Bu yüzden iki
       algoritma birleşmedi. Düzeltilmedi: dal davranış değiştirmez.
+- [ ] **RK16 `i18n.test.ts`'in ölü anahtar taraması sözlükleri de kaynak sayıyor.** Taramanın
+      süzgeci `./lang/` ile başlayan yolu dışarıda bırakıyor, ama sözlükler `leaf/lang/`'a
+      taşındığından beri hiçbir anahtar o önekle başlamıyor, yani bir anahtar yalnız kendi
+      sözlüğünde geçtiği için "kullanılıyor" sayılabilir ve ölü anahtar yeşil kalır. Okundu,
+      bir mutasyonla ölçülmedi. 2026-10-24'teki test taşıması globun kökünü `src/`'de tuttu ve
+      süzgece dokunmadı, yani durum taşımadan önceki gibi. Düzeltme ayrı bir dalın işi.
+
+**Yapılandırma ve depo düzeni (2026-10-24, `refactor/moduller`).**
+
+- [ ] **RF21 scripts/ alt klasörlere, yayın zinciri ayrı doğrulamayla.** Bugün otuzdan fazla
+      betik düz bir klasörde: yayın zinciri (`yayinla.mjs`, `surum*.mjs`, `exe-*.mjs`), aSc ve
+      Roboders araçları, ölçüm ve kurulum betikleri. Taşınırken `surum.yml`, `windows.yml`,
+      `package.json` ve belgeler yolları okuyor, ve yayın zinciri ancak gerçek bir yayın
+      provasıyla (`npm run yayinla -- --kuru`, `surum.yml` elle) doğrulanır. Refactor turunun
+      kapsamı dışında bırakıldı (kullanıcının ek talimatı).
+- [ ] **RF22 `src/fixtures/` için bir yer kararı.** Şema fikstürleri ve tam dolu kurs testlerin
+      yanına alınmadı: tek dosya demetine gömülen varlıkların ve fikstürlerin yolu riskli, ve
+      beş test onları `join(import.meta.dirname, '../../fixtures')` ile, biri kökten
+      (`src/fixtures/...`) okuyor. Karar: `src/`'nin kökünde mi kalsın, en çok okuyan
+      `pure/io/`'nun yanına mı. Refactor turunun kapsamı dışında.
+- [ ] **RF23 Kökte bilerek kalan dosyalar.** `ui/main.tsx` (`index.html` ve `favicon.mjs`
+      yolunu anıyor), `platform/changelog.ts` (yayın betikleri ve `surum.yml`),
+      `platform/update.ts` (`SITE_ADRESI`, turun sert sınırı) ve `leaf/raw.d.ts` (`docs.test.ts`'in
+      bir iddiası) katmanlarının kökünde; `katman-koku-*` kuralları ilk üçünü adıyla muaf
+      tutuyor. Taşımak kök yapılandırmaya, yayın betiklerine ya da bir test iddiasına dokunmak
+      demek; her biri ayrı bir kararla.
+
+**Birleşmeden sonraki bileşen bölmeleri (2026-10-24, kullanıcının kararı).** Her biri
+`main`'den açılan kendi dalında; dal bölmenin `dist/index.html`'e maliyetini ölçer, ve
+`size-limit` (bugün 1 171 000) ancak ölçülen kadar yükselir, gerekçesi WORKLOG'da. Davranış
+değişmez, ekran 0 piksel.
+
+- [ ] **RF24 Teachers bileşenlere.** `ui/setup/Teachers.tsx`, 560 satırlık tek dosya.
+- [ ] **RF25 Dersler'in formu bileşenlere.** Formun kuralları `pure/forms/`'ta (2026-10-24);
+      kalan, formun kendisinin `ui/lessons/index.tsx`'te (684 satır) bileşenlere bölünmesi.
+- [ ] **RF26 Program'ın sağ tık menüleri bileşenlere.** Izgaranın ve havuzun menüleri
+      `ui/program/Program.tsx`'in içinde; hesapları (`describeMenu`, `poolMenuFacts`) zaten
+      `pure/program/`'da.
+
+**Optimizasyon fırsatları** (refactor turu hiçbirini yapmadı; her biri önce ölçülür, tuzak
+105 ve 117):
+
+- [ ] **RO1 `health(state)` iki kez hesaplanıyor.** App üst çubuğun durum satırı için, şerit
+      Kontrol'ün sayıları için, her biri kendi `useMemo`'suyla aynı `state` ve `dil` üstünde.
+      Biri hesaplayıp öbürüne verebilir. Kazanç ölçülmedi.
+- [ ] **RO2 Program şeridinin sayıları her çizimde baştan.** `describeStrip` (eskiden şeridin
+      gövdesinde) her ders için `pendingBlocks`'u ve bütün programın `pinScopeCells`'ini
+      memo'suz koşuyor, şerit her `App` çiziminde yeniden çiziliyor. Babanın tam haftasında
+      ölçülür, sonra `useMemo`.
 
 **Tuzak adayları** (dal oturumu numara vermez; main'e birleşince TRAPS'a taşınabilir):
+- Bir test kaynağı DOSYA ADIYLA süzüyorsa (`i18n.test.ts`'in `endsWith('worlds.ts')`'i), o
+  dosyayı bölmek testin taradığı kümeyi sessizce değiştirir; iddia değişmeden test başka
+  şey ölçmeye başlar. Bölmeden önce kaynağı tarayan testlerin süzgeçleri okunur
+  (2026-10-24, `refactor/moduller`, `worlds.ts` bu yüzden bölünmedi).
+- `git mv`'li bir taşımanın `index` adımında taşıma aracının ürettiği `from './'` belirteci
+  çalışır ama kendi paketinin index'ini çağıran bir modülde döngü kurar; `no-circular`
+  yakalar, testteki hâli (çalışan ama okunmaz) yakalanmaz (2026-10-24).
 - Derleme commit kimliğini gömüyor (`version.ts`'in `commit` alanı). Aynı kaynaktan iki
   commit'te iki ayrı sha çıkar; bir değişikliğin sha'yı değiştirip değiştirmediği aynı
   HEAD'de, commit'ten önce derlenerek ölçülür (tuzak 114'ün yanında).
@@ -1570,7 +1667,7 @@ bırakılmaz: derin import kuralı yeni klasörü doğduğu anda kapsar, yalnız
 (6b282ce), `platform/prefs` paketi (185e9cc, 7334d19; WORKLOG 2026-10-09, `refactor/prefs`).
 `useSolver`'ın birim testi ve `platform/search` paketi (947a4cc, c423037; WORKLOG
 2026-10-09, `refactor/search`). Adım 4: Program ile kâğıdın karakterizasyon testi, `pure/program`,
-`ui/program`, `pure/programView` (RF8), `pure/paper` ve `ui/print` (RF9), RK15 (WORKLOG
+`ui/program`, `pure/program/programView` (RF8), `pure/paper` ve `ui/print` (RF9), RK15 (WORKLOG
 2026-10-10, `refactor/program`).
 
 **Sıradaki iş (dal).** Paket turları yukarıdaki "Eski yol → yeni yol" sırasıyla, `main`'den
@@ -1594,7 +1691,7 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
       alınır, ve o zaman `main`'den açılan bir dalda. Öne çıkanlar: TP7 (Windows'ta gerçek
       exe), TP8 (sürüm yükseltme) ve TP10 (güncelleme kontratı), çünkü etiketten önceki
       Windows güncelleme testine en yakın olanlar. TP4'ün paket yolu fuzz'u TB8'in
-      düzeltmesiyle geldi (`src/fuzz.test.ts`, `readBundlePlans`). Geri kalanlar sırasız:
+      düzeltmesiyle geldi (`src/pure/io/fuzz.test.ts`, `readBundlePlans`). Geri kalanlar sırasız:
       TP5 (veri yolunun mutasyonu), TP6 (gerçek paket fikstürü), TP9 (köprü kontratı), TP11 (Linux'ta `cargo test`), TP12 (Brave),
       TP13 (uzun süre açık kalma), TP14 (zayıf makine vekili), TP15 (performans), TP16 ve TP17
       (güvenlik), TP18 (metin bütçesi), TP19 (kabul), TP20 (bileşen katmanı), TP21
@@ -1635,7 +1732,7 @@ testi o commit'te sıradan bir teste döner.
       (`Array(saat / blok)`). 100 000 saat kabul ediliyor, 10 milyonda beş milyonluk bir dizi
       (22,7 ms, kirli). Fuzz bunu kendiliğinden buldu: üreteç onaltılık ve üslü yazımlarla
       (`Number`'ın kabul ettiği) dev bir sayı üretti ve koşu dakikalarca sürdü. Bir hafta en
-      çok gün × saat kadar saattir. Test `src/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
+      çok gün × saat kadar saattir. Test `src/pure/io/fuzz.test.ts`'te "BİLİNEN KUSUR". TB6'nın
       yapıştırma tarafındaki eşi.
 - [ ] **TB7 Kapanan sekmenin son değişikliği klasöre inmiyor (2026-10-09).** Klasör (sitede
       Dosya Sistemi Erişimi, exe'de Belgeler) son değişiklikten 2 s sonra yazılıyor; araya giren
@@ -1668,8 +1765,8 @@ testi o commit'te sıradan bir teste döner.
       kuralıyla okunuyor (`readBundlePlans`); eksik, bozuk ya da istisna atan plan açılmıyor
       ve buradaki aynı kimlikli plan kalıyor; hiçbir plan okunamıyorsa soru sorulmuyor ve
       hiçbir şey değişmiyor; onay sorusu açılmayacak planları sayıyor. Testleri
-      `src/storeContract.test.ts` ve `e2e/planlar.spec.ts` (ikisi de önce kırmızı) ile
-      `src/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
+      `src/platform/storage/storeContract.test.ts` ve `e2e/planlar.spec.ts` (ikisi de önce kırmızı) ile
+      `src/pure/io/fuzz.test.ts`, iki mutasyonla kanıtlı. Şema değişmedi. İnceleme (2026-10-24) iki
       delik daha buldu ve aynı dalda kapandı: `state`'i nesne olmayan girdi okunamayan sayılıyor,
       depo doluyken hiçbir plan yazılamazsa buradaki planlar silinmiyor; B7.34–B7.36 açık.
 ## §9. Ham notlar

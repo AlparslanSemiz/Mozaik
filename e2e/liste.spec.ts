@@ -4,7 +4,7 @@
 // grupça filtreleyebilelim" and "öğretmenler listesinde sıralama ... branşa
 // göre, isme göre vesaire".
 //
-// The ordering and the folding are unit-tested in `src/listview.test.ts`, so
+// The ordering and the folding are unit-tested in `src/pure/listview/listview.test.ts`, so
 // what is worth an E2E is the wiring: that the controls really drive the table
 // under them, that the count tells the truth, and that Turkish text survives
 // the round trip through a real input.

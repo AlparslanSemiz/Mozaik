@@ -2,18 +2,18 @@
 //
 // e2e/otomatik.spec.ts asks whether the BUTTON works, and asks it once, on the
 // sample data. This file asks whether the ANSWER is right, and asks it of every
-// world in src/worlds.ts: a room bottleneck, nothing but blocks, a single day,
+// world in src/pure/worlds/worlds.ts: a room bottleneck, nothing but blocks, a single day,
 // a week full of holes, a greedy first choice that turns out to be wrong.
 //
 // The audit is the point. `illegalBlocks` is imported from src/, so what judges
 // the built page's own localStorage is the very same blocker() that judges a
-// dragged card — and src/worlds.test.ts proves that auditor is not a rubber
+// dragged card — and src/pure/worlds/worlds.test.ts proves that auditor is not a rubber
 // stamp by feeding it a knowingly illegal grid.
 
 import { type Page } from '@playwright/test';
 import { expect, test } from './kapan';
-import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/worlds';
-import { activePlacements } from '../src/pure/program';
+import { hoursOf, illegalBlocks, SMALL_WORLDS } from '../src/pure/worlds';
+import { activePlacements } from '../src/pure/grid';
 import { loadWorld, savedState, settledText } from './helpers';
 
 /** Runs it and waits for the verdict line. */
