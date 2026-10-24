@@ -575,9 +575,20 @@ const LISTS_V1 = ['derslikler', 'ogretmenler', 'siniflar', 'dersler'];
  * bar that empties the open plan after one "Yedeği yükle" (DENETIM DK11), so
  * here it is refused. An empty list is not a missing one: a school with no
  * lessons yet is a real plan.
+ *
+ * It never throws. `parseState` trusts the shape of each row it is handed, and
+ * a file with a null lesson row made it throw a TypeError that the top bar did
+ * not catch (TODO TB1): nothing changed, and nobody was told. Such a file is
+ * an unreadable one. `parseState` itself is not changed here: it also reads
+ * this computer's storage at startup, and that half of TB1 is still open.
  */
 export function readPlanFile(text: string): PlanFile {
-  const state = parseState(text);
+  let state: State | null;
+  try {
+    state = parseState(text);
+  } catch {
+    return { problem: 'okunamadi' };
+  }
   // A version past this program's is the program's own file from a newer
   // copy, not a broken one; "okunamadı" sent the reader after a bad backup
   // (DENETIM DK10). It is still not guessed at.

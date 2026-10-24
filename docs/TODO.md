@@ -1584,13 +1584,18 @@ yazılıyor ([TESTPLAN.md](TESTPLAN.md), "Test politikası"), kalan fazlar tek b
 2026-10-23'ten beri bir düzeltme aynı dalda ve gerileme testiyle yapılır, "BİLİNEN KUSUR"
 testi o commit'te sıradan bir teste döner.
 
-- [ ] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
+- [~] **TB1 `readPlanFile` bozuk bir dosyada istisna atıyor, ve kimse yakalamıyor (2026-10-09).**
       Analizin fuzz yoklaması (fast-check, üç dosya × 3 000 bozulma): girdilerin %2–5'inde
       `TypeError` (`reading 'trim'`, `'weeklyHours'`, `'id'`). "Dosyadan aç"ta `App.tsx`'in
       `fileChosen`'ı onu yakalamıyor: plan değişmiyor ama kullanıcıya hiçbir şey söylenmiyor
       (sessiz ret). Aynı `parseState` açılışta depodan okurken de korumasız (`useStore.ts`'in
       `initialBox`'ı), orada bozuk bir plan boş ekran olur (koddan, ölçülmedi). Test TP4'te
       "BİLİNEN KUSUR" olarak çivili; düzeltme `main`'de.
+      **Üst çubuk yarısı düzeldi (2026-10-24, `tb1-dosyadan-ac`):** `readPlanFile` okurken
+      atılan istisnayı `{ problem: 'okunamadi' }`'ye çeviriyor, "Dosyadan aç" "Bu dosya
+      okunamadı" diyor ve açık plan değişmiyor; testleri `src/fuzz.test.ts` (fuzz artık
+      istisnanın etrafından geçmiyor) ve `e2e/temel.spec.ts` 29. **Kalan:** açılıştaki
+      `parseState` (yukarıda), ölçülmedi.
 - [ ] **TB2 `LimitBox`'ın üst sınırı klavyeyle aşılıyor (2026-10-09).** Kutu `max=16` taşıyor
       ama `onBlur` yalnız alt sınırı kırpıyor: 40 yazılınca `onSet(40)` (analizin bileşen
       denemesi, gerçek Chromium). Günde en fazla 40 saat kabul ediliyor. Veri kaybı değil.

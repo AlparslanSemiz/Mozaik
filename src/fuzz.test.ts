@@ -11,10 +11,11 @@
 // and cut at any byte. The paste side gets rows of cells joined the three ways
 // Excel and a hand-written list join them.
 //
-// Two answers are pinned as BİLİNEN KUSUR (TODO §8l): `readPlanFile` THROWS on
-// some broken files (TB1) and nobody catches it, and a lesson's weekly hours
-// are taken at any size (TB6, TB9). The properties below step around exactly
-// those two, and the pinned cases go red by name when the readers are fixed.
+// One answer is pinned as BİLİNEN KUSUR (TODO §8l): a lesson's weekly hours are
+// taken at any size (TB6, TB9). The properties below step around exactly that,
+// and the pinned cases go red by name when the readers are fixed. `readPlanFile`
+// used to THROW on some broken files (TB1); since 2026-10-24 it refuses them,
+// and the properties hold it to never throwing.
 //
 // FUZZ_RUNS raises the run count (the nightly run); the default keeps the file
 // to a few seconds. The "Tümünü dosyadan aç" reader (`parseBundle` and the
@@ -141,16 +142,9 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
       { timeout: TIMEOUT },
       () => {
         let opened = 0;
-        let threw = 0;
         fc.assert(
           fc.property(broken(root), (x) => {
-            let read;
-            try {
-              read = readPlanFile(JSON.stringify(x));
-            } catch {
-              threw++; // TB1, pinned below
-              return;
-            }
+            const read = readPlanFile(JSON.stringify(x));
             if (!('state' in read)) return;
             opened++;
             expect(wholeness(read.state)).toBeNull();
@@ -159,7 +153,7 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
         );
         // Zero opened files would be a free green: every assertion above sits
         // behind "it opened".
-        expect(opened, `${threw} istisna`).toBeGreaterThan(runs / 2);
+        expect(opened).toBeGreaterThan(runs / 2);
       },
     );
 
@@ -173,12 +167,7 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
       );
       fc.assert(
         fc.property(missing, (x) => {
-          let read;
-          try {
-            read = readPlanFile(JSON.stringify(x));
-          } catch {
-            return; // TB1
-          }
+          const read = readPlanFile(JSON.stringify(x));
           expect('state' in read, 'liste alanı eksik bir dosya plan olarak açıldı').toBe(false);
         }),
         { numRuns: runs, seed: 20261009 },
@@ -197,13 +186,13 @@ describe('fuzz · "Dosyadan aç" (readPlanFile)', () => {
     });
   }
 
-  it('BİLİNEN KUSUR (TB1): bozuk bir ders satırı readPlanFile’ı düşürüyor', () => {
+  // TB1 (2026-10-09). A null lesson row threw a TypeError out of the reader,
+  // and the top bar's "Dosyadan aç" did not catch it: the plan stayed, nobody
+  // was told. A file the reader cannot take is refused like any unreadable one.
+  it('TB1: bozuk bir ders satırı readPlanFile’ı düşürmüyor, dosya reddediliyor', () => {
     const x = load('src/fixtures/v16.json') as { lessons: unknown[] };
     x.lessons[0] = null;
-    // Fixed, this should come back as `{ problem: ... }`, or as a plan without
-    // that lesson. Until then the throw reaches App.tsx's `fileChosen`, which
-    // does not catch it: the plan stays, the user is told nothing.
-    expect(() => readPlanFile(JSON.stringify(x))).toThrow(TypeError);
+    expect(readPlanFile(JSON.stringify(x))).toEqual({ problem: 'okunamadi' });
   });
 
   it('BİLİNEN KUSUR (TB6): haftalık saati eksi olan ders olduğu gibi açılıyor', () => {

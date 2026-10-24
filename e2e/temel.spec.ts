@@ -17,6 +17,7 @@ import {
   dragAndDrop,
   mainList,
   answerDialog,
+  savedText,
 } from './helpers';
 
 test.describe('1. Kalıcılık — file:// altında', () => {
@@ -460,6 +461,26 @@ test.describe('29. Hata yolları', () => {
     expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
     await page.getByRole('button', { name: 'Program', exact: true }).click();
     await expect(page.locator('table.grid tbody tr')).toHaveCount(before);
+  });
+
+  // TB1: a file whose lesson list holds a null row threw out of the reader,
+  // and the top bar said nothing at all.
+  test('bozuk satırlı dosya okunamadı diye reddediliyor, kayıtlı plan aynı kalıyor', async ({
+    page,
+  }) => {
+    await openWithSample(page);
+    const saved = await savedText(page);
+    const broken = structuredClone(FIXTURE) as unknown as { lessons: unknown[] };
+    broken.lessons[0] = null;
+
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'bozuk-satir.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(broken)),
+    });
+
+    expect(await answerDialog(page)).toContain('Bu dosya okunamadı');
+    expect(await savedText(page)).toBe(saved);
   });
 
   test('bilinmeyen (ileri) şema sürümü tahmin edilmiyor', async ({ page }) => {

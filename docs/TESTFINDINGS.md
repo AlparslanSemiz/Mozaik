@@ -103,7 +103,8 @@ beş milyonluk dizi. Üçü de her koşuda aynı tohumla tekrarlanıyor. Kesik d
 açılmadı; dört listeden biri eksik dosya hiç açılmadı (DK11 tutuyor).
 Tür: ürün kusuru (üçü), veri kaybı değil.
 Ne yapıldı: TODO §8l TB1, TB6, TB9; testte "BİLİNEN KUSUR" diye çivili, değişmezler
-etraflarından geçiyor. Düzeltme `main`'de.
+etraflarından geçiyor. Düzeltme `main`'de. TB1'in üst çubuk yarısı düzeldi (2026-10-24,
+`tb1-dosyadan-ac`): `readPlanFile` istisnayı "okunamadı" cevabına çeviriyor.
 Kalıcı kural: yok.
 
 ### 2026-10-09 · Vitest yoklaması (`scratch/test-plan/dk11-paket.test.ts`) · "Tümünü dosyadan aç"

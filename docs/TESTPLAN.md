@@ -201,9 +201,10 @@ var, etkin program var, gün ve saat boş değil; dört listeden biri hiç yoksa
 kesik dosya açılmıyor; yapıştırmada alınan her satırın adı dolu, her dersin saati pozitif
 tam sayı ve blokları ikilik ya da üçlük ve saate sığıyor. Açılan dosya sayısı da soruluyor,
 yoksa "açılmadı" bedava yeşil olurdu. Dört mutasyonla sınandı (DK11 kapısı, `sanitize`'in
-süzgeci, boş ad, blok kırpması). Üç cevap "BİLİNEN KUSUR" diye çivili: `readPlanFile`'ın
-bozuk bir ders satırında istisna atması (TODO TB1), eksi saatli dersin açılması (TB6) ve
-yapıştırılan saatin üst sınırının olmaması (TB9); değişmezler tam bu üçünün etrafından geçer.
+süzgeci, boş ad, blok kırpması). `readPlanFile` hiçbir bozulmada istisna atmıyor (TODO TB1,
+2026-10-24'e kadar bozuk bir ders satırında atıyordu). İki cevap "BİLİNEN KUSUR" diye çivili:
+eksi saatli dersin açılması (TB6) ve yapıştırılan saatin üst sınırının olmaması (TB9);
+değişmezler tam bu ikisinin etrafından geçer.
 
 Ölçmedikleri: "Tümünü dosyadan aç"ın yolu (`parseBundle` ve arkasındaki `parseState`,
 TB8'in düzeltmesini ve sıra 6'yı bekliyor), arayüzün istisnayı göstermesi (o E2E'nin işi), ve Excel'in `.xlsx`
