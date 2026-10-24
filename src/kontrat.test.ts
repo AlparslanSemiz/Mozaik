@@ -40,6 +40,7 @@ import libRs from '../src-tauri/src/lib.rs?raw';
 import updateRs from '../src-tauri/src/update.rs?raw';
 import exeSpec from '../e2e/exe.spec.ts?raw';
 import surumYml from '../.github/workflows/surum.yml?raw';
+import tauriConf from '../src-tauri/tauri.conf.json?raw';
 import kayitliSurum from './fixtures/release-v2.2.0/surum.json?raw';
 import kayitliToplam from './fixtures/release-v2.2.0/SHA256SUMS.txt?raw';
 import kayitliRelease from './fixtures/release-v2.2.0/release.json';
@@ -381,5 +382,20 @@ describe('güncelleme kontratı — surum.yml, Release ve update.rs aynı dosyay
     );
     // The recorded manifest is the published one, byte for byte.
     expect(createHash('sha256').update(kayitliSurum).digest('hex')).toBe(listed.get('surum.json'));
+  });
+});
+
+// The Windows real-exe suite builds a TEST exe whose WebView2 opens a debugging
+// port (scripts/webdriver.mjs, `windowsTestAyari`): anyone on the machine could
+// read and drive the page, the plans included. That port must never reach my
+// father's exe, which surum.yml builds from tauri.conf.json alone.
+describe('yayınlanan exe — WebView2 hata ayıklama portu yok', () => {
+  it('tauri.conf.json tarayıcıya argüman vermiyor, surum.yml başka ayar katmıyor', () => {
+    expect(tauriConf).not.toMatch(/remote-debugging|additionalBrowserArgs/);
+    const derlemeler = surumYml
+      .split('\n')
+      .filter((satir) => /tauri-apps\/cli\S* build/.test(satir));
+    expect(derlemeler.length).toBeGreaterThan(0);
+    for (const satir of derlemeler) expect(satir).not.toMatch(/--config|-c /);
   });
 });
