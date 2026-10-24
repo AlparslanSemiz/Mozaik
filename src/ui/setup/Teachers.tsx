@@ -410,14 +410,12 @@ export default function Teachers({ state, change }: PanelProps) {
                   <th>{t('Cinsiyet')}</th>
                   {/* Where Çıktı sends the teacher's week (schema v17). Last of
                     the person's own fields, before the rule boxes. */}
-                  {/* The table is `max-content` (styles.css, .table-scroll), so
-                    the BOX's preferred size is what widens this column, not
-                    the ladder: at 125 % an input's default 20 characters
-                    pushed the table 14 px past its panel whatever the class
-                    said (kurulum.spec.ts 65, CI). `size` below sets it; a
-                    long address scrolls inside its box and reads in full
-                    there. */}
-                  <th className="w-col-sm">{t('E-posta')}</th>
+                  {/* --w-col-xs, and the box's floor 6ch (styles.css): the
+                    table is `max-content`, so a column is as wide as its
+                    floors, and one more 10ch column was the 14 px the table
+                    spilled past its panel at 125 % (kurulum.spec.ts 65, CI).
+                    A long address scrolls inside its box. */}
+                  <th className="w-col-xs">{t('E-posta')}</th>
                   <th className="num" title={t('Art arda en fazla kaç saat')}>
                     {t('Art arda')}
                   </th>
@@ -581,7 +579,6 @@ export default function Teachers({ state, change }: PanelProps) {
                         key={`e-${teacher.id}-${teacher.email}`}
                         type="text"
                         inputMode="email"
-                        size={16}
                         autoComplete="off"
                         spellCheck={false}
                         aria-label={t('{kim} e-postası', { kim: teacher.short })}

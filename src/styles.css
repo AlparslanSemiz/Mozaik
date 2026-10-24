@@ -6723,3 +6723,10 @@ body.row-dragging {
 .table-scroll table.list td > select {
   min-width: 6ch;
 }
+
+/* The teacher's address (schema v17) gets the small floor, not the name's:
+   at 125 % one more 10ch column was the 14 px the teacher table spilled past
+   its panel (kurulum.spec.ts 65). An address scrolls inside its box. */
+.table-scroll table.list td > input[type='text'][inputmode='email']:not(.num):not(.text-sm) {
+  min-width: 6ch;
+}
